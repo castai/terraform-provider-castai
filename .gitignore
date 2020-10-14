@@ -1,0 +1,14 @@
+.idea/
+
+# built binary
+terraform-provider-castai
+
+# terraform examples/
+examples/**/.terraform/
+examples/**/crash.log
+examples/**/*.tfstate
+examples/**/*.tfstate.backup
+examples/**/local.auto.tfvars
+# terraform examples/localdev is meant for local development
+examples/localdev/*
+!examples/localdev/main.tf.sample
