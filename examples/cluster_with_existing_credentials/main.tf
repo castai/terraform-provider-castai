@@ -15,15 +15,17 @@ resource "castai_cluster" "example_cluster" {
     data.castai_credentials.existing_gcp.id
   ]
 
-  nodes {
-    cloud = "gcp"
-    role = "master"
-    shape = "small"
-  }
-  nodes {
-    cloud = "gcp"
-    role = "worker"
-    shape = "small"
+  initialize_params {
+    nodes {
+      cloud = "gcp"
+      role = "master"
+      shape = "small"
+    }
+    nodes {
+      cloud = "gcp"
+      role = "worker"
+      shape = "small"
+    }
   }
 }
 

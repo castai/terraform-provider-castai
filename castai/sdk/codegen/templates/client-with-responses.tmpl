@@ -43,7 +43,7 @@ type ClientWithResponsesInterface interface {
 type Response interface {
     Status()     string
     StatusCode() int
-    BodyString() string
+    GetBody()    []byte
 }
 // TODO: </castai customization> to have common interface
 
@@ -74,11 +74,8 @@ func (r {{$opid | ucFirst}}Response) StatusCode() int {
 
 // TODO: <castai customization> to have common interface
 // Body returns body of byte array
-func (r {{$opid | ucFirst}}Response) BodyString() string {
-    if r.HTTPResponse != nil {
-        return string(r.Body)
-    }
-    return ""
+func (r {{$opid | ucFirst}}Response) GetBody() []byte {
+     return r.Body
 }
 // TODO: </castai customization> to have common interface
 {{end}}
