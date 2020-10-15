@@ -1,6 +1,5 @@
 provider "castai" {
   version = "0.0.1"
-  api_url = "https://console.dev-master.cast.ai/api/"
   api_token = var.castai_api_token
 }
 
@@ -32,21 +31,22 @@ resource "castai_cluster" "example_cluster" {
   credentials = [
     castai_credentials.example_gcp.id,
     castai_credentials.example_aws.id,
+    castai_credentials.example_azure.id,
   ]
 
   initialize_params {
     nodes {
-      cloud = "aws"
+      cloud = "gcp"
       role = "master"
       shape = "small"
     }
     nodes {
-      cloud = "aws"
+      cloud = "gcp"
       role = "worker"
       shape = "small"
     }
     nodes {
-      cloud = "gcp"
+      cloud = "aws"
       role = "worker"
       shape = "small"
     }
@@ -55,4 +55,36 @@ resource "castai_cluster" "example_cluster" {
 
 output "example_cluster_kubeconfig" {
   value = castai_cluster.example_cluster.kubeconfig
+}
+
+##############
+### kubernetes
+##############
+
+resource "local_file" "kubeconfig" {
+  sensitive_content = castai_cluster.example_cluster.kubeconfig
+  filename = "${path.module}/.kube/config"
+}
+
+provider "kubernetes" {
+  config_path = local_file.kubeconfig.filename
+}
+
+resource "kubernetes_namespace" "example_namespace" {
+  metadata {
+    name = "example"
+  }
+  depends_on = [
+    local_file.kubeconfig
+  ]
+}
+
+resource "kubernetes_secret" "example_secret" {
+  metadata {
+    name = "example-secret"
+    namespace = kubernetes_namespace.example_namespace.metadata[0].name
+  }
+  data = {
+    "value" = "example-secret-value"
+  }
 }

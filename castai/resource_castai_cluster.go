@@ -20,12 +20,13 @@ const (
 	ClusterFieldStatus      = "status"
 	ClusterFieldRegion      = "region"
 	ClusterFieldCredentials = "credentials"
-	ClusterFieldNodes       = "nodes"
 	ClusterFieldKubeconfig  = "kubeconfig"
 
-	ClusterFieldNodesCloud = "cloud"
-	ClusterFieldNodesRole  = "role"
-	ClusterFieldNodesShape = "shape"
+	ClusterFieldInitializeParams = "initialize_params"
+	ClusterFieldNodes            = "nodes"
+	ClusterFieldNodesCloud       = "cloud"
+	ClusterFieldNodesRole        = "role"
+	ClusterFieldNodesShape       = "shape"
 )
 
 func resourceCastaiCluster() *schema.Resource {
@@ -48,11 +49,6 @@ func resourceCastaiCluster() *schema.Resource {
 				Required:         true,
 				ForceNew:         true,
 			},
-			ClusterFieldStatus: {
-				Type:     schema.TypeString,
-				Optional: true,
-				Computed: true,
-			},
 			ClusterFieldRegion: {
 				Type:     schema.TypeString,
 				Required: true,
@@ -64,29 +60,44 @@ func resourceCastaiCluster() *schema.Resource {
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Required: true,
 			},
-			ClusterFieldNodes: {
+			ClusterFieldStatus: {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+			ClusterFieldInitializeParams: {
 				Type:     schema.TypeList,
-				MinItems: 1,
+				MaxItems: 1,
+				Required: true,
+				ForceNew: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						ClusterFieldNodesCloud: {
-							Type:             schema.TypeString,
-							Required:         true,
-							ValidateDiagFunc: toDiagFunc(validation.StringInSlice([]string{"aws", "gcp", "azure"}, false)), // pasneket, gal px nevaliduojam tegul eina, klaudai atsiradines
-						},
-						ClusterFieldNodesRole: {
-							Type:             schema.TypeString,
-							Required:         true,
-							ValidateDiagFunc: toDiagFunc(validation.StringInSlice([]string{"master", "worker"}, false)), // pasneket, gal sita jau validuojam, tipo nu nebus tu roliu
-						},
-						ClusterFieldNodesShape: {
-							Type:             schema.TypeString,
-							Required:         true,
-							ValidateDiagFunc: toDiagFunc(validation.StringInSlice([]string{"x-small", "small", "medium", "large", "x-large", "2x-large"}, false)), // validuot ar passint tupai?
+						ClusterFieldNodes: {
+							Type:     schema.TypeList,
+							MinItems: 1,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									ClusterFieldNodesCloud: {
+										Type:             schema.TypeString,
+										Required:         true,
+										ValidateDiagFunc: toDiagFunc(validation.StringInSlice([]string{"aws", "gcp", "azure"}, false)),
+									},
+									ClusterFieldNodesRole: {
+										Type:             schema.TypeString,
+										Required:         true,
+										ValidateDiagFunc: toDiagFunc(validation.StringInSlice([]string{"master", "worker"}, false)),
+									},
+									ClusterFieldNodesShape: {
+										Type:             schema.TypeString,
+										Required:         true,
+										ValidateDiagFunc: toDiagFunc(validation.StringInSlice([]string{"x-small", "small", "medium", "large", "x-large", "2x-large"}, false)),
+									},
+								},
+							},
+							Required: true,
 						},
 					},
 				},
-				Required: true,
 			},
 			ClusterFieldKubeconfig: {
 				Type:      schema.TypeString,
@@ -101,7 +112,7 @@ func resourceCastaiClusterCreateOrUpdate(ctx context.Context, data *schema.Resou
 	client := meta.(*ProviderConfig).api
 
 	var nodes []sdk.Node
-	for _, val := range data.Get(ClusterFieldNodes).([]interface{}) {
+	for _, val := range data.Get(ClusterFieldInitializeParams + ".0." + ClusterFieldNodes).([]interface{}) {
 		nodeData := val.(map[string]interface{})
 		nodes = append(nodes, sdk.Node{
 			Role:  sdk.NodeType(nodeData[ClusterFieldNodesRole].(string)),

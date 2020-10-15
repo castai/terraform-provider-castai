@@ -23,7 +23,7 @@ func checkResponse(response Response, err error, expectedStatus int) error {
 	}
 
 	if response.StatusCode() != expectedStatus {
-		return fmt.Errorf("expected status code %d, received: status=%d body=%s", expectedStatus, response.StatusCode(), response.BodyString())
+		return fmt.Errorf("expected status code %d, received: status=%d body=%s", expectedStatus, response.StatusCode(), string(response.GetBody()))
 	}
 
 	return nil
