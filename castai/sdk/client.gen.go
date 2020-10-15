@@ -2222,7 +2222,7 @@ type ClientWithResponsesInterface interface {
 type Response interface {
 	Status() string
 	StatusCode() int
-	BodyString() string
+	GetBody() []byte
 }
 
 // TODO: </castai customization> to have common interface
@@ -2250,11 +2250,8 @@ func (r LoginCallbackResponse) StatusCode() int {
 
 // TODO: <castai customization> to have common interface
 // Body returns body of byte array
-func (r LoginCallbackResponse) BodyString() string {
-	if r.HTTPResponse != nil {
-		return string(r.Body)
-	}
-	return ""
+func (r LoginCallbackResponse) GetBody() []byte {
+	return r.Body
 }
 
 // TODO: </castai customization> to have common interface
@@ -2282,11 +2279,8 @@ func (r LoginResponse) StatusCode() int {
 
 // TODO: <castai customization> to have common interface
 // Body returns body of byte array
-func (r LoginResponse) BodyString() string {
-	if r.HTTPResponse != nil {
-		return string(r.Body)
-	}
-	return ""
+func (r LoginResponse) GetBody() []byte {
+	return r.Body
 }
 
 // TODO: </castai customization> to have common interface
@@ -2314,11 +2308,8 @@ func (r LogoutResponse) StatusCode() int {
 
 // TODO: <castai customization> to have common interface
 // Body returns body of byte array
-func (r LogoutResponse) BodyString() string {
-	if r.HTTPResponse != nil {
-		return string(r.Body)
-	}
-	return ""
+func (r LogoutResponse) GetBody() []byte {
+	return r.Body
 }
 
 // TODO: </castai customization> to have common interface
@@ -2347,11 +2338,8 @@ func (r GetSessionResponse) StatusCode() int {
 
 // TODO: <castai customization> to have common interface
 // Body returns body of byte array
-func (r GetSessionResponse) BodyString() string {
-	if r.HTTPResponse != nil {
-		return string(r.Body)
-	}
-	return ""
+func (r GetSessionResponse) GetBody() []byte {
+	return r.Body
 }
 
 // TODO: </castai customization> to have common interface
@@ -2380,11 +2368,8 @@ func (r ListAuthTokensResponse) StatusCode() int {
 
 // TODO: <castai customization> to have common interface
 // Body returns body of byte array
-func (r ListAuthTokensResponse) BodyString() string {
-	if r.HTTPResponse != nil {
-		return string(r.Body)
-	}
-	return ""
+func (r ListAuthTokensResponse) GetBody() []byte {
+	return r.Body
 }
 
 // TODO: </castai customization> to have common interface
@@ -2413,11 +2398,8 @@ func (r CreateAuthTokenResponse) StatusCode() int {
 
 // TODO: <castai customization> to have common interface
 // Body returns body of byte array
-func (r CreateAuthTokenResponse) BodyString() string {
-	if r.HTTPResponse != nil {
-		return string(r.Body)
-	}
-	return ""
+func (r CreateAuthTokenResponse) GetBody() []byte {
+	return r.Body
 }
 
 // TODO: </castai customization> to have common interface
@@ -2445,11 +2427,8 @@ func (r DeleteAuthTokenResponse) StatusCode() int {
 
 // TODO: <castai customization> to have common interface
 // Body returns body of byte array
-func (r DeleteAuthTokenResponse) BodyString() string {
-	if r.HTTPResponse != nil {
-		return string(r.Body)
-	}
-	return ""
+func (r DeleteAuthTokenResponse) GetBody() []byte {
+	return r.Body
 }
 
 // TODO: </castai customization> to have common interface
@@ -2478,11 +2457,8 @@ func (r GetAuthTokenResponse) StatusCode() int {
 
 // TODO: <castai customization> to have common interface
 // Body returns body of byte array
-func (r GetAuthTokenResponse) BodyString() string {
-	if r.HTTPResponse != nil {
-		return string(r.Body)
-	}
-	return ""
+func (r GetAuthTokenResponse) GetBody() []byte {
+	return r.Body
 }
 
 // TODO: </castai customization> to have common interface
@@ -2511,11 +2487,8 @@ func (r ListCloudCredentialsResponse) StatusCode() int {
 
 // TODO: <castai customization> to have common interface
 // Body returns body of byte array
-func (r ListCloudCredentialsResponse) BodyString() string {
-	if r.HTTPResponse != nil {
-		return string(r.Body)
-	}
-	return ""
+func (r ListCloudCredentialsResponse) GetBody() []byte {
+	return r.Body
 }
 
 // TODO: </castai customization> to have common interface
@@ -2544,11 +2517,8 @@ func (r CreateCloudCredentialsResponse) StatusCode() int {
 
 // TODO: <castai customization> to have common interface
 // Body returns body of byte array
-func (r CreateCloudCredentialsResponse) BodyString() string {
-	if r.HTTPResponse != nil {
-		return string(r.Body)
-	}
-	return ""
+func (r CreateCloudCredentialsResponse) GetBody() []byte {
+	return r.Body
 }
 
 // TODO: </castai customization> to have common interface
@@ -2576,11 +2546,8 @@ func (r DeleteCloudCredentialsResponse) StatusCode() int {
 
 // TODO: <castai customization> to have common interface
 // Body returns body of byte array
-func (r DeleteCloudCredentialsResponse) BodyString() string {
-	if r.HTTPResponse != nil {
-		return string(r.Body)
-	}
-	return ""
+func (r DeleteCloudCredentialsResponse) GetBody() []byte {
+	return r.Body
 }
 
 // TODO: </castai customization> to have common interface
@@ -2609,11 +2576,8 @@ func (r GetCloudCredentialsResponse) StatusCode() int {
 
 // TODO: <castai customization> to have common interface
 // Body returns body of byte array
-func (r GetCloudCredentialsResponse) BodyString() string {
-	if r.HTTPResponse != nil {
-		return string(r.Body)
-	}
-	return ""
+func (r GetCloudCredentialsResponse) GetBody() []byte {
+	return r.Body
 }
 
 // TODO: </castai customization> to have common interface
@@ -2641,11 +2605,8 @@ func (r DeleteGslbResponse) StatusCode() int {
 
 // TODO: <castai customization> to have common interface
 // Body returns body of byte array
-func (r DeleteGslbResponse) BodyString() string {
-	if r.HTTPResponse != nil {
-		return string(r.Body)
-	}
-	return ""
+func (r DeleteGslbResponse) GetBody() []byte {
+	return r.Body
 }
 
 // TODO: </castai customization> to have common interface
@@ -2674,11 +2635,8 @@ func (r CreateOrUpdateGslbResponse) StatusCode() int {
 
 // TODO: <castai customization> to have common interface
 // Body returns body of byte array
-func (r CreateOrUpdateGslbResponse) BodyString() string {
-	if r.HTTPResponse != nil {
-		return string(r.Body)
-	}
-	return ""
+func (r CreateOrUpdateGslbResponse) GetBody() []byte {
+	return r.Body
 }
 
 // TODO: </castai customization> to have common interface
@@ -2707,11 +2665,8 @@ func (r ListKubernetesClustersResponse) StatusCode() int {
 
 // TODO: <castai customization> to have common interface
 // Body returns body of byte array
-func (r ListKubernetesClustersResponse) BodyString() string {
-	if r.HTTPResponse != nil {
-		return string(r.Body)
-	}
-	return ""
+func (r ListKubernetesClustersResponse) GetBody() []byte {
+	return r.Body
 }
 
 // TODO: </castai customization> to have common interface
@@ -2740,11 +2695,8 @@ func (r CreateNewClusterResponse) StatusCode() int {
 
 // TODO: <castai customization> to have common interface
 // Body returns body of byte array
-func (r CreateNewClusterResponse) BodyString() string {
-	if r.HTTPResponse != nil {
-		return string(r.Body)
-	}
-	return ""
+func (r CreateNewClusterResponse) GetBody() []byte {
+	return r.Body
 }
 
 // TODO: </castai customization> to have common interface
@@ -2772,11 +2724,8 @@ func (r DeleteClusterResponse) StatusCode() int {
 
 // TODO: <castai customization> to have common interface
 // Body returns body of byte array
-func (r DeleteClusterResponse) BodyString() string {
-	if r.HTTPResponse != nil {
-		return string(r.Body)
-	}
-	return ""
+func (r DeleteClusterResponse) GetBody() []byte {
+	return r.Body
 }
 
 // TODO: </castai customization> to have common interface
@@ -2805,11 +2754,8 @@ func (r GetClusterResponse) StatusCode() int {
 
 // TODO: <castai customization> to have common interface
 // Body returns body of byte array
-func (r GetClusterResponse) BodyString() string {
-	if r.HTTPResponse != nil {
-		return string(r.Body)
-	}
-	return ""
+func (r GetClusterResponse) GetBody() []byte {
+	return r.Body
 }
 
 // TODO: </castai customization> to have common interface
@@ -2839,11 +2785,8 @@ func (r GetClusterAddonsResponse) StatusCode() int {
 
 // TODO: <castai customization> to have common interface
 // Body returns body of byte array
-func (r GetClusterAddonsResponse) BodyString() string {
-	if r.HTTPResponse != nil {
-		return string(r.Body)
-	}
-	return ""
+func (r GetClusterAddonsResponse) GetBody() []byte {
+	return r.Body
 }
 
 // TODO: </castai customization> to have common interface
@@ -2874,11 +2817,8 @@ func (r ConfigureClusterAddonsResponse) StatusCode() int {
 
 // TODO: <castai customization> to have common interface
 // Body returns body of byte array
-func (r ConfigureClusterAddonsResponse) BodyString() string {
-	if r.HTTPResponse != nil {
-		return string(r.Body)
-	}
-	return ""
+func (r ConfigureClusterAddonsResponse) GetBody() []byte {
+	return r.Body
 }
 
 // TODO: </castai customization> to have common interface
@@ -2906,11 +2846,8 @@ func (r ArchiveClusterResponse) StatusCode() int {
 
 // TODO: <castai customization> to have common interface
 // Body returns body of byte array
-func (r ArchiveClusterResponse) BodyString() string {
-	if r.HTTPResponse != nil {
-		return string(r.Body)
-	}
-	return ""
+func (r ArchiveClusterResponse) GetBody() []byte {
+	return r.Body
 }
 
 // TODO: </castai customization> to have common interface
@@ -2939,11 +2876,8 @@ func (r GetClusterAuditLogResponse) StatusCode() int {
 
 // TODO: <castai customization> to have common interface
 // Body returns body of byte array
-func (r GetClusterAuditLogResponse) BodyString() string {
-	if r.HTTPResponse != nil {
-		return string(r.Body)
-	}
-	return ""
+func (r GetClusterAuditLogResponse) GetBody() []byte {
+	return r.Body
 }
 
 // TODO: </castai customization> to have common interface
@@ -2972,11 +2906,8 @@ func (r GetClusterFeedbackEventsResponse) StatusCode() int {
 
 // TODO: <castai customization> to have common interface
 // Body returns body of byte array
-func (r GetClusterFeedbackEventsResponse) BodyString() string {
-	if r.HTTPResponse != nil {
-		return string(r.Body)
-	}
-	return ""
+func (r GetClusterFeedbackEventsResponse) GetBody() []byte {
+	return r.Body
 }
 
 // TODO: </castai customization> to have common interface
@@ -3005,11 +2936,8 @@ func (r GetClusterHealthResponse) StatusCode() int {
 
 // TODO: <castai customization> to have common interface
 // Body returns body of byte array
-func (r GetClusterHealthResponse) BodyString() string {
-	if r.HTTPResponse != nil {
-		return string(r.Body)
-	}
-	return ""
+func (r GetClusterHealthResponse) GetBody() []byte {
+	return r.Body
 }
 
 // TODO: </castai customization> to have common interface
@@ -3037,11 +2965,8 @@ func (r GetClusterKubeconfigResponse) StatusCode() int {
 
 // TODO: <castai customization> to have common interface
 // Body returns body of byte array
-func (r GetClusterKubeconfigResponse) BodyString() string {
-	if r.HTTPResponse != nil {
-		return string(r.Body)
-	}
-	return ""
+func (r GetClusterKubeconfigResponse) GetBody() []byte {
+	return r.Body
 }
 
 // TODO: </castai customization> to have common interface
@@ -3070,11 +2995,8 @@ func (r GetClusterMetricsResponse) StatusCode() int {
 
 // TODO: <castai customization> to have common interface
 // Body returns body of byte array
-func (r GetClusterMetricsResponse) BodyString() string {
-	if r.HTTPResponse != nil {
-		return string(r.Body)
-	}
-	return ""
+func (r GetClusterMetricsResponse) GetBody() []byte {
+	return r.Body
 }
 
 // TODO: </castai customization> to have common interface
@@ -3103,11 +3025,8 @@ func (r GetClusterNodesResponse) StatusCode() int {
 
 // TODO: <castai customization> to have common interface
 // Body returns body of byte array
-func (r GetClusterNodesResponse) BodyString() string {
-	if r.HTTPResponse != nil {
-		return string(r.Body)
-	}
-	return ""
+func (r GetClusterNodesResponse) GetBody() []byte {
+	return r.Body
 }
 
 // TODO: </castai customization> to have common interface
@@ -3136,11 +3055,8 @@ func (r UpdateNodeListResponse) StatusCode() int {
 
 // TODO: <castai customization> to have common interface
 // Body returns body of byte array
-func (r UpdateNodeListResponse) BodyString() string {
-	if r.HTTPResponse != nil {
-		return string(r.Body)
-	}
-	return ""
+func (r UpdateNodeListResponse) GetBody() []byte {
+	return r.Body
 }
 
 // TODO: </castai customization> to have common interface
@@ -3169,11 +3085,8 @@ func (r PauseClusterResponse) StatusCode() int {
 
 // TODO: <castai customization> to have common interface
 // Body returns body of byte array
-func (r PauseClusterResponse) BodyString() string {
-	if r.HTTPResponse != nil {
-		return string(r.Body)
-	}
-	return ""
+func (r PauseClusterResponse) GetBody() []byte {
+	return r.Body
 }
 
 // TODO: </castai customization> to have common interface
@@ -3202,11 +3115,8 @@ func (r GetPoliciesResponse) StatusCode() int {
 
 // TODO: <castai customization> to have common interface
 // Body returns body of byte array
-func (r GetPoliciesResponse) BodyString() string {
-	if r.HTTPResponse != nil {
-		return string(r.Body)
-	}
-	return ""
+func (r GetPoliciesResponse) GetBody() []byte {
+	return r.Body
 }
 
 // TODO: </castai customization> to have common interface
@@ -3235,11 +3145,8 @@ func (r UpsertPoliciesResponse) StatusCode() int {
 
 // TODO: <castai customization> to have common interface
 // Body returns body of byte array
-func (r UpsertPoliciesResponse) BodyString() string {
-	if r.HTTPResponse != nil {
-		return string(r.Body)
-	}
-	return ""
+func (r UpsertPoliciesResponse) GetBody() []byte {
+	return r.Body
 }
 
 // TODO: </castai customization> to have common interface
@@ -3268,11 +3175,8 @@ func (r ResumeClusterResponse) StatusCode() int {
 
 // TODO: <castai customization> to have common interface
 // Body returns body of byte array
-func (r ResumeClusterResponse) BodyString() string {
-	if r.HTTPResponse != nil {
-		return string(r.Body)
-	}
-	return ""
+func (r ResumeClusterResponse) GetBody() []byte {
+	return r.Body
 }
 
 // TODO: </castai customization> to have common interface
@@ -3301,11 +3205,8 @@ func (r ListRegionsResponse) StatusCode() int {
 
 // TODO: <castai customization> to have common interface
 // Body returns body of byte array
-func (r ListRegionsResponse) BodyString() string {
-	if r.HTTPResponse != nil {
-		return string(r.Body)
-	}
-	return ""
+func (r ListRegionsResponse) GetBody() []byte {
+	return r.Body
 }
 
 // TODO: </castai customization> to have common interface
