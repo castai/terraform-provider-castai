@@ -1,4 +1,4 @@
-module github.com/terraform-providers/terraform-provider-castai
+module github.com/castai/terraform-provider-castai
 
 go 1.15
 

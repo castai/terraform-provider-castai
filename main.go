@@ -3,7 +3,7 @@ package main
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/plugin"
 
-	"github.com/terraform-providers/terraform-provider-castai/castai"
+	"github.com/castai/terraform-provider-castai/castai"
 )
 
 func main() {
