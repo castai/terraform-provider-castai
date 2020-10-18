@@ -72,6 +72,7 @@ func dataSourceCastaiCredentialsRead(ctx context.Context, data *schema.ResourceD
 	log.Printf("[INFO] found cloud credentials: %v", credentials)
 
 	data.SetId(credentials.Id)
+	data.Set("id", credentials.Id)
 	data.Set("name", credentials.Name)
 	data.Set("cloud", credentials.Cloud)
 	return nil
