@@ -1,10 +1,5 @@
-# 1. Create main.tf file in here for you local work based on this main.tf.sample file
-# 2. provide api token in the provider block
-# 3. Create your data sources and resources
-
 provider "castai" {
-  version = "0.0.1"
-  api_url = "https://console.dev-master.cast.ai/api/"
+  api_url   = "https://console.dev-master.cast.ai/api/"
   api_token = ""
 }
 
