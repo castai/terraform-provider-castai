@@ -1,7 +1,5 @@
 provider "castai" {
-  version = "0.0.1"
-  api_url = "https://console.dev-master.cast.ai/api/"
-  api_token = "<<replace-this-with-your-api-token"
+  api_token = "<<replace-this-with-your-api-token>>"
 }
 
 data "castai_credentials" "existing_gcp" {
@@ -9,7 +7,7 @@ data "castai_credentials" "existing_gcp" {
 }
 
 resource "castai_cluster" "example_cluster" {
-  name = "example-cluster"
+  name   = "example-cluster"
   region = "eu-central"
   credentials = [
     data.castai_credentials.existing_gcp.id
@@ -18,12 +16,12 @@ resource "castai_cluster" "example_cluster" {
   initialize_params {
     nodes {
       cloud = "gcp"
-      role = "master"
+      role  = "master"
       shape = "small"
     }
     nodes {
       cloud = "gcp"
-      role = "worker"
+      role  = "worker"
       shape = "small"
     }
   }
