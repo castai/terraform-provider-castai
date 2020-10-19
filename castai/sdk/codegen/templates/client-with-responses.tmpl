@@ -39,13 +39,13 @@ type ClientWithResponsesInterface interface {
 {{end}}{{/* range . $opid := .OperationId */}}
 }
 
-// TODO: <castai customization> to have common interface
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 type Response interface {
     Status()     string
     StatusCode() int
     GetBody()    []byte
 }
-// TODO: </castai customization> to have common interface
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
 {{range .}}{{$opid := .OperationId}}{{$op := .}}
 type {{$opid | ucFirst}}Response struct {
@@ -72,12 +72,12 @@ func (r {{$opid | ucFirst}}Response) StatusCode() int {
     return 0
 }
 
-// TODO: <castai customization> to have common interface
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
 func (r {{$opid | ucFirst}}Response) GetBody() []byte {
      return r.Body
 }
-// TODO: </castai customization> to have common interface
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 {{end}}
 
 {{range .}}
