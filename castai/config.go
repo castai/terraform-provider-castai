@@ -5,6 +5,9 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"time"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/logging"
 
 	"github.com/castai/terraform-provider-castai/castai/sdk"
 )
@@ -27,10 +30,20 @@ func (c *Config) configureProvider() (interface{}, error) {
 		baseURL.Path = "https://api.cast.ai/"
 	}
 
-	apiClient, err := sdk.NewClientWithResponses(c.ApiUrl, sdk.WithRequestEditorFn(func(ctx context.Context, req *http.Request) error {
+	httpClientOption := func(client *sdk.Client) error {
+		client.Client = &http.Client{
+			Transport: logging.NewTransport("CAST.AI", http.DefaultTransport),
+			Timeout:   1 * time.Minute,
+		}
+		return nil
+	}
+
+	apiTokenOption := sdk.WithRequestEditorFn(func(ctx context.Context, req *http.Request) error {
 		req.Header.Set("X-API-Key", c.ApiToken)
 		return nil
-	}))
+	})
+
+	apiClient, err := sdk.NewClientWithResponses(c.ApiUrl, httpClientOption, apiTokenOption)
 	if err != nil {
 		return nil, err
 	}
