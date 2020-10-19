@@ -75,6 +75,7 @@ func resourceCastaiCluster() *schema.Resource {
 						ClusterFieldNodes: {
 							Type:     schema.TypeList,
 							MinItems: 1,
+							Required: true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									ClusterFieldNodesCloud: {
@@ -94,7 +95,6 @@ func resourceCastaiCluster() *schema.Resource {
 									},
 								},
 							},
-							Required: true,
 						},
 					},
 				},
@@ -138,7 +138,7 @@ func resourceCastaiClusterCreateOrUpdate(ctx context.Context, data *schema.Resou
 	data.SetId(response.JSON201.Id)
 
 	log.Printf("[DEBUG] Waiting for cluster to reach `ready` status, id=%q name=%q", data.Id(), data.Get(ClusterFieldName))
-	err = resource.RetryContext(ctx, data.Timeout(schema.TimeoutCreate), waitForClusterStatusReadyFunc(ctx, client, data.Id()))
+	err = resource.RetryContext(ctx, data.Timeout(schema.TimeoutCreate), waitForClusterToReachCreatedFunc(ctx, client, data.Id()))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -163,13 +163,15 @@ func resourceCastaiClusterRead(ctx context.Context, data *schema.ResourceData, m
 	data.Set(ClusterFieldRegion, response.JSON200.Region)
 	data.Set(ClusterFieldStatus, response.JSON200.Status)
 	data.Set(ClusterFieldCredentials, response.JSON200.CloudCredentialsIDs)
-	data.Set(ClusterFieldNodes, response.JSON200.Nodes)
 
 	kubeconfig, err := client.GetClusterKubeconfigWithResponse(ctx, sdk.ClusterId(data.Id()))
-	if err != nil {
-		return diag.Errorf("fetching kubeconfig for cluster %q: %v", data.Id(), response.Status())
+	if checkErr := sdk.CheckGetResponse(kubeconfig, err); checkErr == nil {
+		data.Set(ClusterFieldKubeconfig, string(kubeconfig.Body))
+	} else {
+		log.Printf("[WARN] kubeconfig is not available for cluster %q: %v", data.Id(), checkErr)
+		data.Set(ClusterFieldKubeconfig, nil)
 	}
-	data.Set(ClusterFieldKubeconfig, string(kubeconfig.Body))
+
 	return nil
 }
 
@@ -189,43 +191,33 @@ func resourceCastaiClusterDelete(ctx context.Context, data *schema.ResourceData,
 	return nil
 }
 
-func waitForClusterStatusReadyFunc(ctx context.Context, client *sdk.ClientWithResponses, id string) resource.RetryFunc {
-	return waitForClusterToReachStatusFunc(ctx, client, id, func(cluster *sdk.KubernetesCluster) *resource.RetryError {
-		switch cluster.Status {
-		case "ready":
-			return nil
-		case "creating":
-			return resource.RetryableError(fmt.Errorf("waiting for cluster to reach ready status, id=%q name=%q status=%s", cluster.Id, cluster.Name, cluster.Status))
-		case "warning":
-			return resource.RetryableError(fmt.Errorf("waiting for cluster to reach ready status, id=%q name=%q, status=%s", cluster.Id, cluster.Name, cluster.Status))
-		default:
-			return resource.NonRetryableError(fmt.Errorf("cluster has reached unexpected status, id=%q name=%q status=%s", cluster.Id, cluster.Name, cluster.Status))
-		}
-	})
+func waitForClusterToReachCreatedFunc(ctx context.Context, client *sdk.ClientWithResponses, id string) resource.RetryFunc {
+	return waitForClusterToReachStatusFunc(ctx, client, id, "ready", []string{"creating", "warning"})
 }
 
 func waitForClusterStatusDeletedFunc(ctx context.Context, client *sdk.ClientWithResponses, id string) resource.RetryFunc {
-	return waitForClusterToReachStatusFunc(ctx, client, id, func(cluster *sdk.KubernetesCluster) *resource.RetryError {
-		switch cluster.Status {
-		case "deleted":
-			return nil
-		case "deleting":
-			return resource.RetryableError(fmt.Errorf("waiting for cluster to reach deleted status, id=%q name=%q, status=%s", cluster.Id, cluster.Name, cluster.Status))
-		case "warning":
-			return resource.RetryableError(fmt.Errorf("waiting for cluster to reach deleted status, id=%q name=%q, status=%s", cluster.Id, cluster.Name, cluster.Status))
-		default:
-			return resource.NonRetryableError(fmt.Errorf("cluster has reached unexpected status, id=%q name=%q, status=%s", cluster.Id, cluster.Name, cluster.Status))
-		}
-	})
+	return waitForClusterToReachStatusFunc(ctx, client, id, "deleted", []string{"deleting", "warning"})
 }
 
-func waitForClusterToReachStatusFunc(ctx context.Context, client *sdk.ClientWithResponses, id string, decisionFn func(cluster *sdk.KubernetesCluster) *resource.RetryError) resource.RetryFunc {
+func waitForClusterToReachStatusFunc(ctx context.Context, client *sdk.ClientWithResponses, id string, targetStatus string, retryableStatuses []string) resource.RetryFunc {
 	return func() *resource.RetryError {
 		response, err := client.GetClusterWithResponse(ctx, sdk.ClusterId(id))
 		if err != nil || response.JSON200 == nil {
 			return resource.NonRetryableError(err)
 		}
 
-		return decisionFn(response.JSON200)
+		cluster := response.JSON200
+
+		if cluster.Status == targetStatus {
+			return nil
+		}
+
+		for _, retryableStatus := range retryableStatuses {
+			if cluster.Status == retryableStatus {
+				return resource.RetryableError(fmt.Errorf("waiting for cluster to reach %q status, id=%q name=%q, status=%s", targetStatus, cluster.Id, cluster.Name, cluster.Status))
+			}
+		}
+
+		return resource.NonRetryableError(fmt.Errorf("cluster has reached unexpected status, id=%q name=%q, status=%s", cluster.Id, cluster.Name, cluster.Status))
 	}
 }

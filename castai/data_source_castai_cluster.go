@@ -66,14 +66,14 @@ func dataSourceCastaiClusterRead(ctx context.Context, data *schema.ResourceData,
 	data.Set("region", response.JSON200.Region.Name)
 	data.Set("credentials", response.JSON200.CloudCredentialsIDs)
 
-	kubeconfigResponse, err := client.GetClusterKubeconfigWithResponse(ctx, sdk.ClusterId(id))
-	if checkErr := sdk.CheckGetResponse(kubeconfigResponse, err); checkErr != nil {
-		return diag.Errorf("fetching kubeconfig for cluster %q: %v", id, checkErr)
+	kubeconfig, err := client.GetClusterKubeconfigWithResponse(ctx, sdk.ClusterId(data.Id()))
+	if checkErr := sdk.CheckGetResponse(kubeconfig, err); checkErr == nil {
+		log.Printf("[INFO] kubeconfig is available for cluster %q", id)
+		data.Set(ClusterFieldKubeconfig, string(kubeconfig.Body))
+	} else {
+		log.Printf("[WARN] kubeconfig is not available for cluster %q: %v", id, checkErr)
+		data.Set(ClusterFieldKubeconfig, nil)
 	}
-
-	log.Printf("[INFO] found cluster kubeconfig, id=%s", id)
-
-	data.Set("kubeconfig", string(kubeconfigResponse.Body))
 
 	return nil
 }
