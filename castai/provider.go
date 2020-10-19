@@ -12,7 +12,7 @@ func Provider() *schema.Provider {
 		Schema: map[string]*schema.Schema{
 			"api_url": {
 				Type:        schema.TypeString,
-				Optional:    true,
+				Required:    true,
 				DefaultFunc: schema.EnvDefaultFunc("CASTAI_API_URL", "https://api.cast.ai"),
 				Description: "CAST.AI API url.",
 			},
@@ -42,10 +42,6 @@ func Provider() *schema.Provider {
 
 func providerConfigure() schema.ConfigureContextFunc {
 	return func(ctx context.Context, data *schema.ResourceData) (interface{}, diag.Diagnostics) {
-		if data.Get("api_token").(string) == "" {
-			return nil, diag.Errorf("api_token is required")
-		}
-
 		config := Config{
 			ApiUrl:   data.Get("api_url").(string),
 			ApiToken: data.Get("api_token").(string),
