@@ -1,6 +1,6 @@
 openapi: 3.0.1
 servers:
-  - url: 'https://console.cast.api/api'
+  - url: 'https://api.cast.ai/v1'
 info:
   description: |
     cast.ai console API
