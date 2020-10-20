@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-	"net/url"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/logging"
@@ -22,10 +21,6 @@ type ProviderConfig struct {
 }
 
 func (c *Config) configureProvider() (interface{}, error) {
-	if _, err := url.Parse(c.ApiUrl); err != nil {
-		return nil, fmt.Errorf("parsing API URL: %w", err)
-	}
-
 	httpClientOption := func(client *sdk.Client) error {
 		client.Client = &http.Client{
 			Transport: logging.NewTransport("CAST.AI", http.DefaultTransport),
