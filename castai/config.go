@@ -12,8 +12,6 @@ import (
 	"github.com/castai/terraform-provider-castai/castai/sdk"
 )
 
-const DefaultAPIURL = "https://api.cast.ai/v1/"
-
 type Config struct {
 	ApiUrl   string
 	ApiToken string
@@ -24,12 +22,8 @@ type ProviderConfig struct {
 }
 
 func (c *Config) configureProvider() (interface{}, error) {
-	baseURL, err := url.Parse(c.ApiUrl)
-	if err != nil {
-		return nil, err
-	}
-	if baseURL.String() == "" {
-		baseURL.Path = DefaultAPIURL
+	if _, err := url.Parse(c.ApiUrl); err != nil {
+		return nil, fmt.Errorf("parsing API URL: %w", err)
 	}
 
 	httpClientOption := func(client *sdk.Client) error {
