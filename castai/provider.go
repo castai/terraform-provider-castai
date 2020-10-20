@@ -13,7 +13,7 @@ func Provider() *schema.Provider {
 			"api_url": {
 				Type:        schema.TypeString,
 				Required:    true,
-				DefaultFunc: schema.EnvDefaultFunc("CASTAI_API_URL", "https://api.cast.ai"),
+				DefaultFunc: schema.EnvDefaultFunc("CASTAI_API_URL", DefaultAPIURL),
 				Description: "CAST.AI API url.",
 			},
 			"api_token": {
