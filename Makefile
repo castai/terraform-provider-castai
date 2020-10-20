@@ -24,9 +24,9 @@ build:
 
 test:
 	@echo "==> Running tests"
-	go test -i $$(go list ./...) || exit 1
-	go test $$(go list ./...) -timeout=1m -parallel=4
+	go test -i ./... || exit 1
+	go test ./... -timeout=1m -parallel=4
 
 testacc:
 	@echo "==> Running acceptance tests"
-	TF_ACC=1 go test $(TEST) -v $(TESTARGS) -timeout 120m
+	TF_ACC=1 go test ./... -v -timeout 120m
