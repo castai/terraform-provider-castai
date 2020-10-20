@@ -35,23 +35,16 @@ terraform {
 }
 
 provider "castai" {
-
-}
-```
-
-To configure the provider with your personal api key, define the `api_key` in the provider.
-```
-provider "castai" {
   api_key = "<<your-castai-api-key>>"
 }
 ```
+
 Alternatively, you can pass api key via environment variable:
 ```sh
 $ CASTAI_API_TOKEN=<<your-castai-api-key>> terraform plan
 ```
 
 For more logs use the log level flag: 
-
 ```sh
 $ TF_LOG=DEBUG terraform plan
 ```
@@ -86,13 +79,13 @@ To run unit tests:
 $ make test
 ```
 
-Releasing the Provider
+Releasing the provider
 ----------------------
 
-The provider is still in early 0.x.x stage. At the moment, releases will be performed manually for tags matching `vX.Y.Z`.
+This repository contains a github action to automatically build and publish assets for release when
+tag is pushed with pattern `v*` (ie. `v0.1.0`).
 
-Once releases appear in GitHub Releases page, they will become available via the Terraform Registry.
+[Gorelaser](https://goreleaser.com/) is used to produce build artifacts matching the [layout required](https://www.terraform.io/docs/registry/providers/publishing.html#manually-preparing-a-release)
+to publish the provider in the Terraform Registry.
 
-
-
-
+Releases will appear as **drafts**. Once marked as published on the GitHub Releases page, they will become available via the Terraform Registry.
