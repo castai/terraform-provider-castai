@@ -45,7 +45,7 @@ func resourceCastaiCluster() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			ClusterFieldName: {
 				Type:             schema.TypeString,
-				ValidateDiagFunc: toDiagFunc(validation.StringIsNotWhiteSpace),
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 				Required:         true,
 				ForceNew:         true,
 			},
@@ -81,17 +81,17 @@ func resourceCastaiCluster() *schema.Resource {
 									ClusterFieldNodesCloud: {
 										Type:             schema.TypeString,
 										Required:         true,
-										ValidateDiagFunc: toDiagFunc(validation.StringInSlice([]string{"aws", "gcp", "azure"}, false)),
+										ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"aws", "gcp", "azure"}, false)),
 									},
 									ClusterFieldNodesRole: {
 										Type:             schema.TypeString,
 										Required:         true,
-										ValidateDiagFunc: toDiagFunc(validation.StringInSlice([]string{"master", "worker"}, false)),
+										ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"master", "worker"}, false)),
 									},
 									ClusterFieldNodesShape: {
 										Type:             schema.TypeString,
 										Required:         true,
-										ValidateDiagFunc: toDiagFunc(validation.StringInSlice([]string{"x-small", "small", "medium", "large", "x-large", "2x-large"}, false)),
+										ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"x-small", "small", "medium", "large", "x-large", "2x-large"}, false)),
 									},
 								},
 							},

@@ -20,13 +20,13 @@ func dataSourceCastaiCredentials() *schema.Resource {
 				Type:             schema.TypeString,
 				Optional:         true,
 				ExactlyOneOf:     []string{"id", "name"},
-				ValidateDiagFunc: toDiagFunc(validation.IsUUID),
+				ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
 			},
 			"name": {
 				Type:             schema.TypeString,
 				Optional:         true,
 				ExactlyOneOf:     []string{"id", "name"},
-				ValidateDiagFunc: toDiagFunc(validation.StringIsNotWhiteSpace),
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 			"cloud": {
 				Type:     schema.TypeString,

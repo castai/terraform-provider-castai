@@ -19,7 +19,7 @@ func dataSourceCastaiCluster() *schema.Resource {
 			"id": {
 				Type:             schema.TypeString,
 				Required:         true,
-				ValidateDiagFunc: toDiagFunc(validation.IsUUID),
+				ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
 			},
 			"name": {
 				Type:     schema.TypeString,
