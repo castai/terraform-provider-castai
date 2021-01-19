@@ -4,8 +4,22 @@
 package sdk
 
 import (
+	"encoding/json"
+	"fmt"
 	"time"
+
+	"github.com/pkg/errors"
 )
+
+// AddNodeResult defines model for AddNodeResult.
+type AddNodeResult struct {
+
+	// id of the created note
+	NodeId string `json:"nodeId"`
+
+	// id for long running operation
+	OperationId string `json:"operationId"`
+}
 
 // AddonsConfig defines model for AddonsConfig.
 type AddonsConfig struct {
@@ -22,8 +36,61 @@ type AddonsConfig struct {
 	// Grafana -- UI for Prometheus
 	Grafana *GrafanaConfig `json:"grafana,omitempty"`
 
+	// KEDA (keda.sh) an event-based k8s resources autoscaler
+	Keda *KedaConfig `json:"keda,omitempty"`
+
 	// Nginx-based ingress controller
 	NginxIngress *NginxIngressConfig `json:"nginxIngress,omitempty"`
+}
+
+// AuditEvent defines model for AuditEvent.
+type AuditEvent struct {
+	Event interface{} `json:"event"`
+
+	// type of the performed operation
+	EventType string `json:"eventType"`
+
+	// audit event id
+	Id          string         `json:"id"`
+	InitiatedBy AuditInitiator `json:"initiatedBy"`
+
+	// Event creation UTC time in RFC3339 format.
+	Time time.Time `json:"time"`
+}
+
+// AuditEventClusterCreated defines model for AuditEventClusterCreated.
+type AuditEventClusterCreated struct {
+
+	// snapshot of created cluster
+	Cluster *map[string]interface{} `json:"cluster,omitempty"`
+}
+
+// AuditEventClusterDeleted defines model for AuditEventClusterDeleted.
+type AuditEventClusterDeleted struct {
+
+	// snapshot of deleted cluster
+	Cluster *map[string]interface{} `json:"cluster,omitempty"`
+}
+
+// AuditEventList defines model for AuditEventList.
+type AuditEventList struct {
+	Items []AuditEvent `json:"items"`
+
+	// Cursor token to be used in future request cursor parameter to retrieve subsequent items from the dataset. Empty value of nextCursor field indicates that there are no further items to retrieve.
+	NextCursor string `json:"nextCursor"`
+}
+
+// AuditInitiator defines model for AuditInitiator.
+type AuditInitiator struct {
+
+	// email of the user (absent for system calls)
+	Email *string `json:"email,omitempty"`
+
+	// user or system ID.
+	Id string `json:"id"`
+
+	// user or system name.
+	Name string `json:"name"`
 }
 
 // AuditLogEvent defines model for AuditLogEvent.
@@ -45,11 +112,20 @@ type AuditLogEvent struct {
 // AuthToken defines model for AuthToken.
 type AuthToken struct {
 
+	// Indicates whether this auth token is active.
+	Active bool `json:"active"`
+
 	// Auth token creation UTC time in RFC3339 format.
 	CreatedAt time.Time `json:"createdAt"`
 
+	// Auth token deletion UTC time in RFC3339 format.
+	DeletedAt *time.Time `json:"deletedAt,omitempty"`
+
 	// Auth token ID, generated at the time of creation
 	Id string `json:"id"`
+
+	// Auth token last used UTC time in RFC3339 format.
+	LastUsedAt *time.Time `json:"lastUsedAt,omitempty"`
 
 	// Name of the token. Must be unique among other active tokens for the current user.
 	Name string `json:"name"`
@@ -57,6 +133,9 @@ type AuthToken struct {
 
 // AuthTokenCreateResponse defines model for AuthTokenCreateResponse.
 type AuthTokenCreateResponse struct {
+
+	// Indicates whether this auth token is active.
+	Active bool `json:"active"`
 
 	// Auth token creation UTC time in RFC3339 format.
 	CreatedAt time.Time `json:"createdAt"`
@@ -74,6 +153,13 @@ type AuthTokenCreateResponse struct {
 // AuthTokenList defines model for AuthTokenList.
 type AuthTokenList struct {
 	Items []AuthToken `json:"items"`
+}
+
+// AuthTokenUpdateRequest defines model for AuthTokenUpdateRequest.
+type AuthTokenUpdateRequest struct {
+
+	// Indicates whether this auth token is active.
+	Active bool `json:"active"`
 }
 
 // CastRegion defines model for CastRegion.
@@ -117,6 +203,12 @@ type CloudCredentials struct {
 	// Actual credentials data of given cloud.
 	Credentials string `json:"credentials"`
 
+	// Credential expiration UTC time in RFC3339 format.
+	ExpiresAt *time.Time `json:"expiresAt,omitempty"`
+
+	// Whether credentials are under free trial.
+	FreeTrial *bool `json:"freeTrial,omitempty"`
+
 	// Id of cloud credentials item.
 	Id string `json:"id"`
 
@@ -150,6 +242,15 @@ const (
 	CloudType_gcp   CloudType = "gcp"
 )
 
+// ClusterCostEstimate defines model for ClusterCostEstimate.
+type ClusterCostEstimate struct {
+	PerCloud *CostsPerProviderEstimate `json:"perCloud,omitempty"`
+	PerType  *CostsPerTypeEstimate     `json:"perType,omitempty"`
+
+	// Estimated Price
+	Total *EstimatedPriceAmount `json:"total,omitempty"`
+}
+
 // ClusterHealth defines model for ClusterHealth.
 type ClusterHealth struct {
 	Cilium     ClusterHealthCilium     `json:"cilium"`
@@ -180,6 +281,26 @@ type ClusterHealthNode struct {
 type ClusterHealthNodes struct {
 	Items []ClusterHealthNode `json:"items"`
 	Msg   string              `json:"msg"`
+}
+
+// ClusterLimitsCpu defines model for ClusterLimitsCpu.
+type ClusterLimitsCpu struct {
+
+	// Defines the maximum allowed amount of vCPUs in the whole cluster.
+	MaxCores int64 `json:"maxCores"`
+
+	// Defines the minimum allowed amount of vCPUs in the whole cluster.
+	MinCores int64 `json:"minCores"`
+}
+
+// ClusterLimitsPolicy defines model for ClusterLimitsPolicy.
+type ClusterLimitsPolicy struct {
+
+	// Defines the minimum and maximum amount of vCPUs for cluster's worker nodes.
+	Cpu ClusterLimitsCpu `json:"cpu"`
+
+	// Enable/disable cluster size limits policy.
+	Enabled bool `json:"enabled"`
 }
 
 // ClusterMetrics defines model for ClusterMetrics.
@@ -218,37 +339,25 @@ type ClusterRegion struct {
 	Name string `json:"name"`
 }
 
-// CpuHighWatermarkPolicy defines model for CpuHighWatermarkPolicy.
-type CpuHighWatermarkPolicy struct {
+// CostsPerProviderEstimate defines model for CostsPerProviderEstimate.
+type CostsPerProviderEstimate struct {
 
-	// Average cluster's worker CPU load in percentages.
-	AvgCpuLoadMoreThan int64 `json:"avgCpuLoadMoreThan"`
-
-	// Duration in seconds.
-	DurationSeconds int64 `json:"durationSeconds"`
+	// Break down by provider
+	Details      *[]EstimatedComponentPrice `json:"details,omitempty"`
+	TotalHourly  string                     `json:"totalHourly"`
+	TotalMonthly *string                    `json:"totalMonthly,omitempty"`
 }
 
-// CpuLowWatermarkPolicy defines model for CpuLowWatermarkPolicy.
-type CpuLowWatermarkPolicy struct {
-
-	// Average cluster's worker CPU load in percentages.
-	AvgCpuLoadLessThan int64 `json:"avgCpuLoadLessThan"`
-
-	// Duration in seconds.
-	DurationSeconds int64 `json:"durationSeconds"`
+// CostsPerTypeEstimate defines model for CostsPerTypeEstimate.
+type CostsPerTypeEstimate struct {
+	AdditionalProperties map[string]EstimatedComponentTypePrice `json:"-"`
 }
 
-// CpuWatermarkPoliciesList defines model for CpuWatermarkPoliciesList.
-type CpuWatermarkPoliciesList struct {
-
-	// Enable/disable CPU watermark policies.
-	Enabled bool `json:"enabled"`
+// CpuUtilizationPolicies defines model for CpuUtilizationPolicies.
+type CpuUtilizationPolicies struct {
 
 	// CPU high watermark policy defines the higher bound of average cluster CPU load in percentages over the duration in seconds.
-	HighCPUWatermark CpuHighWatermarkPolicy `json:"highCPUWatermark"`
-
-	// CPU low watermark policy defines the lower bound of average cluster worker nodes CPU load in percentages over the duration in seconds.
-	LowCPUWatermark CpuLowWatermarkPolicy `json:"lowCPUWatermark"`
+	ScaleUpThreshold *ScaleUpThreshold `json:"scaleUpThreshold,omitempty"`
 }
 
 // CreateCluster defines model for CreateCluster.
@@ -259,7 +368,8 @@ type CreateCluster struct {
 	CloudCredentialsIDs []string `json:"cloudCredentialsIDs"`
 
 	// Name of this infrastructure object. Needs to be unique per organization.
-	Name string `json:"name"`
+	Name    string   `json:"name"`
+	Network *Network `json:"network,omitempty"`
 
 	// Initial nodes of this cluster. Must contain final masters count.
 	Nodes []Node `json:"nodes"`
@@ -273,6 +383,13 @@ type DashboardConfig struct {
 
 	// Whether this addon is enabled
 	Enabled bool `json:"enabled"`
+}
+
+// DeleteNodeResult defines model for DeleteNodeResult.
+type DeleteNodeResult struct {
+
+	// id for long running operation
+	OperationId string `json:"operationId"`
 }
 
 // DeletedNode defines model for DeletedNode.
@@ -300,7 +417,57 @@ type ElasticLoggingConfig struct {
 
 // ErrorResponse defines model for ErrorResponse.
 type ErrorResponse struct {
-	Error string `json:"error"`
+
+	// in case the error is related to specific field, this list will contain
+	FieldViolations []FieldViolation `json:"fieldViolations"`
+	Message         string           `json:"message"`
+}
+
+// EstimatedComponentPrice defines model for EstimatedComponentPrice.
+type EstimatedComponentPrice struct {
+
+	// Price for all of the components instances. Contains dependencies breakdown
+	Dependencies *EstimatedComponentPrice `json:"dependencies,omitempty"`
+
+	// Estimated Price
+	FullPrice EstimatedPriceAmount `json:"fullPrice"`
+
+	// component's string id, e.g. "vpn", "master", "worker" and so on
+	Id string `json:"id"`
+
+	// human-readable component's name
+	Name      string `json:"name"`
+	UnitCount int    `json:"unitCount"`
+
+	// Estimated Price
+	UnitPrice EstimatedPriceAmount `json:"unitPrice"`
+}
+
+// EstimatedComponentTypePrice defines model for EstimatedComponentTypePrice.
+type EstimatedComponentTypePrice struct {
+
+	// Estimated Price
+	Price     *EstimatedPriceAmount `json:"price,omitempty"`
+	UnitCount *int                  `json:"unitCount,omitempty"`
+}
+
+// EstimatedPriceAmount defines model for EstimatedPriceAmount.
+type EstimatedPriceAmount struct {
+
+	// ISO-4217 currency code
+	CurrencyCode *string `json:"currencyCode,omitempty"`
+
+	// Price per hour (e.g. "0.1234")
+	Hourly *string `json:"hourly,omitempty"`
+
+	// Price in dollars per month (30 days, e.g. "1.234")
+	Monthly *string `json:"monthly,omitempty"`
+}
+
+// FieldViolation defines model for FieldViolation.
+type FieldViolation struct {
+	Description string `json:"description"`
+	Field       string `json:"field"`
 }
 
 // GSLBDeleteRequest defines model for GSLBDeleteRequest.
@@ -346,6 +513,26 @@ type GrafanaConfig struct {
 	Enabled bool `json:"enabled"`
 }
 
+// IngressLoadBalancer defines model for IngressLoadBalancer.
+type IngressLoadBalancer struct {
+
+	// Load balancer address.
+	Address string `json:"address"`
+
+	// Type/origin of load balancer.
+	Type string `json:"type"`
+}
+
+// IpSecConfig defines model for IpSecConfig.
+type IpSecConfig map[string]interface{}
+
+// KedaConfig defines model for KedaConfig.
+type KedaConfig struct {
+
+	// Whether this addon is enabled
+	Enabled bool `json:"enabled"`
+}
+
 // KubernetesCluster defines model for KubernetesCluster.
 type KubernetesCluster struct {
 	Addons *AddonsConfig `json:"addons,omitempty"`
@@ -357,7 +544,8 @@ type KubernetesCluster struct {
 	Id string `json:"id"`
 
 	// Name of this infrastructure object. Needs to be unique per organization.
-	Name string `json:"name"`
+	Name    string   `json:"name"`
+	Network *Network `json:"network,omitempty"`
 
 	// Cluster nodes.
 	Nodes []Node `json:"nodes"`
@@ -404,6 +592,21 @@ type KubernetesClusterList struct {
 	Items []KubernetesCluster `json:"items"`
 }
 
+// KubernetesIngressController defines model for KubernetesIngressController.
+type KubernetesIngressController struct {
+
+	// Set of load balancers forwarding requests to the ingress.
+	LoadBalancers []IngressLoadBalancer `json:"loadBalancers"`
+
+	// Available ingress controller ports.
+	Ports []int `json:"ports"`
+}
+
+// Network defines model for Network.
+type Network struct {
+	Vpn VpnConfig `json:"vpn"`
+}
+
 // NginxIngressConfig defines model for NginxIngressConfig.
 type NginxIngressConfig struct {
 
@@ -413,22 +616,46 @@ type NginxIngressConfig struct {
 
 // Node defines model for Node.
 type Node struct {
+
+	// Cloud service provider type.
 	Cloud CloudType `json:"cloud"`
 
-	// node ID autogenerated at the time of node creation
+	// Node ID autogenerated at the time of node creation.
 	Id *string `json:"id,omitempty"`
 
-	// Precise VM instance type for specific cloud. If specified, "shape" field is ignored.
+	// Precise VM instance type for specific cloud. If specified, `shape` field is ignored.
 	InstanceType string `json:"instanceType"`
 
-	// Node type
+	// Node name generated at the time of node creation.
+	Name *string `json:"name,omitempty"`
+
+	// Specifies the node type.
+	//
+	// `master` hosts the Kubernetes control plane.
+	//
+	// `worker` is used to run workloads and supports autoscaling.
 	Role NodeType `json:"role"`
 
-	// CAST AI shape defining VM template. Field is required unless "instanceType" is specified.
+	// CAST AI shape defining VM template. Field is required unless `instanceType` is specified.
 	Shape NodeShape `json:"shape"`
 
-	// Kubernetes node state
+	// Spot instance configuration.
+	SpotConfig *NodeSpotConfig `json:"spotConfig,omitempty"`
+
+	// Kubernetes node state.
 	State *NodeState `json:"state,omitempty"`
+}
+
+// NodeDownscaler defines model for NodeDownscaler.
+type NodeDownscaler struct {
+	EmptyNodes *NodeDownscalerEmptyNodes `json:"emptyNodes,omitempty"`
+}
+
+// NodeDownscalerEmptyNodes defines model for NodeDownscalerEmptyNodes.
+type NodeDownscalerEmptyNodes struct {
+
+	// Defines whether Node Downscaler should opt in for removing empty worker nodes when possible.
+	Enabled *bool `json:"enabled,omitempty"`
 }
 
 // NodeList defines model for NodeList.
@@ -449,10 +676,24 @@ const (
 	NodeShape_x_small  NodeShape = "x-small"
 )
 
+// NodeSpotConfig defines model for NodeSpotConfig.
+type NodeSpotConfig struct {
+
+	// Indicates whether the node should be spot/preemtive, suitable for fault-tolerant workloads.
+	//
+	// `true` if instance should be Spot (AWS), Preemtible (GCP), etc.
+	//
+	// `false` if the node should be stable on-demand.
+	IsSpot bool `json:"isSpot"`
+
+	// Max bid price (only applicable to AWS).
+	Price *string `json:"price,omitempty"`
+}
+
 // NodeState defines model for NodeState.
 type NodeState struct {
 
-	// Current status of a node
+	// Current status of a node.
 	Phase *string `json:"phase,omitempty"`
 }
 
@@ -471,6 +712,33 @@ type NodeUpdateOperation struct {
 	Delete *[]DeletedNode `json:"delete,omitempty"`
 }
 
+// OperationResponse defines model for OperationResponse.
+type OperationResponse struct {
+
+	// Operation creation time in RFC3339Nano format.
+	CreatedAt time.Time `json:"createdAt"`
+
+	// Indicates whether the operation is done. If 'true', the operation has finished. If 'false', the operation is still in progress.
+	Done bool `json:"done"`
+
+	// Error details for the operation. Only populated when the operation is done and has failed. If operation has completed successfully, the error will not be set.
+	Error *struct {
+
+		// Human readable caption text describing the error reason.
+		Details string `json:"details"`
+
+		// Reason is an operation specific failure code. Refer to documentation of the endpoint which generated the long-running operation about possible outcomes. Common error reasons:
+		// * `internal_error`: An unknown error occurred. Retry the operation.
+		Reason string `json:"reason"`
+	} `json:"error,omitempty"`
+
+	// Operation finishe time in RFC3339Nano format.
+	FinishedAt *time.Time `json:"finishedAt,omitempty"`
+
+	// ID of the operation.
+	Id string `json:"id"`
+}
+
 // PauseCluster defines model for PauseCluster.
 type PauseCluster struct {
 
@@ -481,31 +749,94 @@ type PauseCluster struct {
 // PoliciesConfig defines model for PoliciesConfig.
 type PoliciesConfig struct {
 
-	// Policy defining CPU high and low watermarks used by autoscaler to optimize cluster resources utilization.
-	CpuWatermarks CpuWatermarkPoliciesList `json:"cpuWatermarks"`
+	// Defines minimum and maximum amount of vCPUs for cluster's worker nodes.
+	ClusterLimits ClusterLimitsPolicy `json:"clusterLimits"`
 
-	// Enable / disable all policies.
+	// Policy defining CPU high watermarks used by autoscaler to optimize cluster resources utilization.
+	CpuUtilization CpuUtilizationPolicies `json:"cpuUtilization"`
+
+	// Enable/disable all policies
 	Enabled bool `json:"enabled"`
+
+	// Node Downscaler defines polcies for removing nodes based on the configured conditions.
+	NodeDownscaler *NodeDownscaler `json:"nodeDownscaler,omitempty"`
+
+	// Policy defining whether autoscaler can use spot instances for provisioning additional workloads.
+	SpotInstances SpotInstances `json:"spotInstances"`
 
 	// Policy defining autoscaler's behavior when unscedulable pods were detected.
 	UnschedulablePods UnschedulablePodsPolicy `json:"unschedulablePods"`
 }
 
-// UnschedulablePodsPolicy defines model for UnschedulablePodsPolicy.
-type UnschedulablePodsPolicy struct {
+// ResourceUsage defines model for ResourceUsage.
+type ResourceUsage struct {
 
-	// Duration in seconds for how long any of the pods should remain in 'Unschedulable' state to trigger upscaling action.
-	DurationSeconds int64 `json:"durationSeconds"`
+	// cpu hours used for given date.
+	Cpu int `json:"cpu"`
 
-	// Enable/disable unschedulable pods detection policy.
+	// start of usage time in RFC3339 format.
+	From string `json:"from"`
+
+	// memory (MB) hours used for given date.
+	Memory int `json:"memory"`
+
+	// end of usage time in RFC3339 format.
+	To string `json:"to"`
+}
+
+// ResourceUsageReport defines model for ResourceUsageReport.
+type ResourceUsageReport struct {
+	Dates []ResourceUsage `json:"dates"`
+
+	// reported usage has occurred after this date. RFC3339 format.
+	FromDate string `json:"fromDate"`
+
+	// reported usage has occurred before this date. RFC3339 format.
+	ToDate string `json:"toDate"`
+}
+
+// ScaleUpThreshold defines model for ScaleUpThreshold.
+type ScaleUpThreshold struct {
+
+	// Average cluster's worker CPU load in percentages.
+	AvgCpuLoadPercentageMoreThan int64 `json:"avgCpuLoadPercentageMoreThan"`
+
+	// Enable/disable Scale Up threshold
+	Enabled bool `json:"enabled"`
+
+	// Duration in seconds.
+	EvaluationPeriodSeconds int64 `json:"evaluationPeriodSeconds"`
+}
+
+// SpotInstances defines model for SpotInstances.
+type SpotInstances struct {
+
+	// Enable/disable spot instances policy.
+	Clouds []string `json:"clouds"`
+
+	// Enable/disable spot instances policy.
 	Enabled bool `json:"enabled"`
 }
 
-// UserSession defines model for UserSession.
-type UserSession struct {
+// UnschedulablePodsPolicy defines model for UnschedulablePodsPolicy.
+type UnschedulablePodsPolicy struct {
 
-	// full name of logged-in user, e.g. "John Doe". Managed by Auth0 and directly taken from login JWT claim "name".
-	Name *string `json:"name,omitempty"`
+	// Enable/disable unschedulable pods detection policy.
+	Enabled bool `json:"enabled"`
+
+	// Duration in seconds for how long any of the pods should remain in 'Unschedulable' state to trigger upscaling action.
+	EvaluationPeriodSeconds int64 `json:"evaluationPeriodSeconds"`
+}
+
+// VpnConfig defines model for VpnConfig.
+type VpnConfig struct {
+	IpSec     *IpSecConfig     `json:"ipSec,omitempty"`
+	WireGuard *WireGuardConfig `json:"wireGuard,omitempty"`
+}
+
+// WireGuardConfig defines model for WireGuardConfig.
+type WireGuardConfig struct {
+	Topology string `json:"topology"`
 }
 
 // MetricsType defines model for MetricsType.
@@ -519,9 +850,6 @@ const (
 	MetricsType_node_memory_usage  MetricsType = "node_memory_usage"
 )
 
-// Auth0returnTo defines model for auth0returnTo.
-type Auth0returnTo string
-
 // AuthTokenId defines model for authTokenId.
 type AuthTokenId string
 
@@ -531,28 +859,57 @@ type ClusterId string
 // CredentialsId defines model for credentialsId.
 type CredentialsId string
 
-// ReturnTo defines model for returnTo.
-type ReturnTo string
+// Cursor defines model for cursor.
+type Cursor string
 
-// LoginParams defines parameters for Login.
-type LoginParams struct {
+// FilterClusterId defines model for filterClusterId.
+type FilterClusterId string
 
-	// URL to redirect browser to after operation completes
-	ReturnTo *ReturnTo `json:"returnTo,omitempty"`
+// FilterFromDate defines model for filterFromDate.
+type FilterFromDate string
 
-	// optional override for URL to redirect browser from auth0 back to backend, for situations where backend is being reached via proxy
-	Auth0returnTo *Auth0returnTo `json:"auth0returnTo,omitempty"`
-}
+// FilterToDate defines model for filterToDate.
+type FilterToDate string
 
-// LogoutParams defines parameters for Logout.
-type LogoutParams struct {
+// Limit defines model for limit.
+type Limit int
 
-	// URL to redirect browser to after operation completes
-	ReturnTo *ReturnTo `json:"returnTo,omitempty"`
+// ListAuditEventsParams defines parameters for ListAuditEvents.
+type ListAuditEventsParams struct {
+
+	// A limit on the number of objects to be returned, between 1 and 500. Default is 10.
+	Limit *Limit `json:"limit,omitempty"`
+
+	// A cursor for use in pagination. This is a token that defines your place in the list. For instance, if you make a list request - you will receive nextCursor field in response metadata. Given that nextCursor field is not empty, it can be used as a cursor query parameter to get subsequent items. If nextCursor is empty - there are no more items to retrieve.
+	Cursor *Cursor `json:"cursor,omitempty"`
+
+	// Request filter parameter declaring point of time after which the results should be returned. Moment in time must be declared in RFC3339 format. https://tools.ietf.org/html/rfc3339
+	FromDate *FilterFromDate `json:"fromDate,omitempty"`
+
+	// Request filter parameter declaring point of time until which the results should be returned. Moment in time must be declared in RFC3339 format. https://tools.ietf.org/html/rfc3339
+	ToDate *FilterToDate `json:"toDate,omitempty"`
+
+	// Request filter parameter representing unique cluster ID. For instance, if you make a list request with clusterId filter parameter - returned results will represent the respective cluster. Cluster ID must be a valid UUID.
+	ClusterId *FilterClusterId `json:"clusterId,omitempty"`
 }
 
 // CreateAuthTokenJSONBody defines parameters for CreateAuthToken.
 type CreateAuthTokenJSONBody AuthToken
+
+// UpdateAuthTokenJSONBody defines parameters for UpdateAuthToken.
+type UpdateAuthTokenJSONBody AuthTokenUpdateRequest
+
+// PlanClusterPriceJSONBody defines parameters for PlanClusterPrice.
+type PlanClusterPriceJSONBody struct {
+	Addons *AddonsConfig `json:"addons,omitempty"`
+	Clouds *[]CloudType  `json:"clouds,omitempty"`
+
+	// Initial nodes of this cluster. Both masters and workers
+	Nodes *[]Node `json:"nodes,omitempty"`
+
+	// CAST AI region used by cluster.
+	Region *ClusterRegion `json:"region,omitempty"`
+}
 
 // CreateCloudCredentialsJSONBody defines parameters for CreateCloudCredentials.
 type CreateCloudCredentialsJSONBody CloudCredentials
@@ -585,6 +942,9 @@ type GetClusterMetricsParams struct {
 	MetricsType *MetricsType `json:"metricsType,omitempty"`
 }
 
+// AddClusterNodeJSONBody defines parameters for AddClusterNode.
+type AddClusterNodeJSONBody Node
+
 // UpdateNodeListJSONBody defines parameters for UpdateNodeList.
 type UpdateNodeListJSONBody NodeUpdateOperation
 
@@ -594,8 +954,27 @@ type PauseClusterJSONBody PauseCluster
 // UpsertPoliciesJSONBody defines parameters for UpsertPolicies.
 type UpsertPoliciesJSONBody PoliciesConfig
 
+// GetUsageReportParams defines parameters for GetUsageReport.
+type GetUsageReportParams struct {
+
+	// Request filter parameter representing unique cluster ID. For instance, if you make a list request with clusterId filter parameter - returned results will represent the respective cluster. Cluster ID must be a valid UUID.
+	ClusterId *FilterClusterId `json:"clusterId,omitempty"`
+
+	// Request filter parameter declaring point of time after which the results should be returned. Moment in time must be declared in RFC3339 format. https://tools.ietf.org/html/rfc3339
+	FromDate *FilterFromDate `json:"fromDate,omitempty"`
+
+	// Request filter parameter declaring point of time until which the results should be returned. Moment in time must be declared in RFC3339 format. https://tools.ietf.org/html/rfc3339
+	ToDate *FilterToDate `json:"toDate,omitempty"`
+}
+
 // CreateAuthTokenRequestBody defines body for CreateAuthToken for application/json ContentType.
 type CreateAuthTokenJSONRequestBody CreateAuthTokenJSONBody
+
+// UpdateAuthTokenRequestBody defines body for UpdateAuthToken for application/json ContentType.
+type UpdateAuthTokenJSONRequestBody UpdateAuthTokenJSONBody
+
+// PlanClusterPriceRequestBody defines body for PlanClusterPrice for application/json ContentType.
+type PlanClusterPriceJSONRequestBody PlanClusterPriceJSONBody
 
 // CreateCloudCredentialsRequestBody defines body for CreateCloudCredentials for application/json ContentType.
 type CreateCloudCredentialsJSONRequestBody CreateCloudCredentialsJSONBody
@@ -612,6 +991,9 @@ type CreateNewClusterJSONRequestBody CreateNewClusterJSONBody
 // ConfigureClusterAddonsRequestBody defines body for ConfigureClusterAddons for application/json ContentType.
 type ConfigureClusterAddonsJSONRequestBody ConfigureClusterAddonsJSONBody
 
+// AddClusterNodeRequestBody defines body for AddClusterNode for application/json ContentType.
+type AddClusterNodeJSONRequestBody AddClusterNodeJSONBody
+
 // UpdateNodeListRequestBody defines body for UpdateNodeList for application/json ContentType.
 type UpdateNodeListJSONRequestBody UpdateNodeListJSONBody
 
@@ -620,3 +1002,56 @@ type PauseClusterJSONRequestBody PauseClusterJSONBody
 
 // UpsertPoliciesRequestBody defines body for UpsertPolicies for application/json ContentType.
 type UpsertPoliciesJSONRequestBody UpsertPoliciesJSONBody
+
+// Getter for additional properties for CostsPerTypeEstimate. Returns the specified
+// element and whether it was found
+func (a CostsPerTypeEstimate) Get(fieldName string) (value EstimatedComponentTypePrice, found bool) {
+	if a.AdditionalProperties != nil {
+		value, found = a.AdditionalProperties[fieldName]
+	}
+	return
+}
+
+// Setter for additional properties for CostsPerTypeEstimate
+func (a *CostsPerTypeEstimate) Set(fieldName string, value EstimatedComponentTypePrice) {
+	if a.AdditionalProperties == nil {
+		a.AdditionalProperties = make(map[string]EstimatedComponentTypePrice)
+	}
+	a.AdditionalProperties[fieldName] = value
+}
+
+// Override default JSON handling for CostsPerTypeEstimate to handle AdditionalProperties
+func (a *CostsPerTypeEstimate) UnmarshalJSON(b []byte) error {
+	object := make(map[string]json.RawMessage)
+	err := json.Unmarshal(b, &object)
+	if err != nil {
+		return err
+	}
+
+	if len(object) != 0 {
+		a.AdditionalProperties = make(map[string]EstimatedComponentTypePrice)
+		for fieldName, fieldBuf := range object {
+			var fieldVal EstimatedComponentTypePrice
+			err := json.Unmarshal(fieldBuf, &fieldVal)
+			if err != nil {
+				return errors.Wrap(err, fmt.Sprintf("error unmarshaling field %s", fieldName))
+			}
+			a.AdditionalProperties[fieldName] = fieldVal
+		}
+	}
+	return nil
+}
+
+// Override default JSON handling for CostsPerTypeEstimate to handle AdditionalProperties
+func (a CostsPerTypeEstimate) MarshalJSON() ([]byte, error) {
+	var err error
+	object := make(map[string]json.RawMessage)
+
+	for fieldName, field := range a.AdditionalProperties {
+		object[fieldName], err = json.Marshal(field)
+		if err != nil {
+			return nil, errors.Wrap(err, fmt.Sprintf("error marshaling '%s'", fieldName))
+		}
+	}
+	return json.Marshal(object)
+}
