@@ -14,7 +14,7 @@ func Provider() *schema.Provider {
 			"api_url": {
 				Type:             schema.TypeString,
 				Required:         true,
-				ValidateDiagFunc: toDiagFunc(validation.IsURLWithHTTPS),
+				ValidateDiagFunc: validation.ToDiagFunc(validation.IsURLWithHTTPS),
 				DefaultFunc:      schema.EnvDefaultFunc("CASTAI_API_URL", "https://api.cast.ai/v1"),
 				Description:      "CAST.AI API url.",
 			},
