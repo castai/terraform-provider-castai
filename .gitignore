@@ -5,9 +5,11 @@ terraform-provider-castai
 
 # terraform examples/
 examples/**/.terraform/
+examples/**/terraform.d/
 examples/**/crash.log
 examples/**/*.tfstate
 examples/**/*.tfstate.backup
+examples/**/.terraform.lock.hcl
 examples/**/local.auto.tfvars
 examples/**/.kube/*
 # terraform examples/localdev is meant for local development

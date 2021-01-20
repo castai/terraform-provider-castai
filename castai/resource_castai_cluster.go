@@ -81,7 +81,7 @@ func resourceCastaiCluster() *schema.Resource {
 									ClusterFieldNodesCloud: {
 										Type:             schema.TypeString,
 										Required:         true,
-										ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"aws", "gcp", "azure"}, false)),
+										ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(sdk.SupportedClouds(), false)),
 									},
 									ClusterFieldNodesRole: {
 										Type:             schema.TypeString,

@@ -239,6 +239,7 @@ type CloudType string
 const (
 	CloudType_aws   CloudType = "aws"
 	CloudType_azure CloudType = "azure"
+	CloudType_do    CloudType = "do"
 	CloudType_gcp   CloudType = "gcp"
 )
 
