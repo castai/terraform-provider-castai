@@ -2,7 +2,6 @@ package castai
 
 import (
 	"context"
-	"encoding/json"
 	"log"
 	"net/http"
 
@@ -23,6 +22,8 @@ const (
 	CredentialsFieldAwsSecretAccessKey        = "secret_access_key"
 	CredentialsFieldAzure                     = "azure"
 	CredentialsFieldAzureServicePrincipalJson = "service_principal_json"
+	CredentialsFieldDo                        = "do"
+	CredentialsFieldDoToken                   = "token"
 )
 
 func resourceCastaiClusterCredentials() *schema.Resource {
@@ -48,7 +49,7 @@ func resourceCastaiClusterCredentials() *schema.Resource {
 				Sensitive:    true,
 				ForceNew:     true,
 				MaxItems:     1,
-				ExactlyOneOf: []string{CredentialsFieldGcp, CredentialsFieldAws, CredentialsFieldAzure},
+				ExactlyOneOf: sdk.SupportedClouds(),
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						CredentialsFieldGcpServiceAccountJson: {
@@ -104,6 +105,24 @@ func resourceCastaiClusterCredentials() *schema.Resource {
 					},
 				},
 			},
+			CredentialsFieldDo: {
+				Type:      schema.TypeList,
+				Optional:  true,
+				Sensitive: true,
+				ForceNew:  true,
+				MaxItems:  1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						CredentialsFieldDoToken: {
+							Type:             schema.TypeString,
+							Required:         true,
+							Sensitive:        true,
+							ForceNew:         true,
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+						},
+					},
+				},
+			},
 		},
 	}
 }
@@ -118,22 +137,29 @@ func resourceCastaiCredentialsCreate(ctx context.Context, data *schema.ResourceD
 		cloud = CredentialsFieldGcp
 		credentials = data.Get(CredentialsFieldGcp + ".0." + CredentialsFieldGcpServiceAccountJson).(string)
 	} else if _, ok := data.GetOk(CredentialsFieldAws); ok {
-		credentialsJson, err := json.Marshal(struct {
-			AccessKeyId     string `json:"accessKeyId"`
-			SecretAccessKey string `json:"secretAccessKey"`
-		}{
-			AccessKeyId:     data.Get(CredentialsFieldAws + ".0." + CredentialsFieldAwsAccessKeyId).(string),
-			SecretAccessKey: data.Get(CredentialsFieldAws + ".0." + CredentialsFieldAwsSecretAccessKey).(string),
-		})
+		accessKeyId := data.Get(CredentialsFieldAws + ".0." + CredentialsFieldAwsAccessKeyId).(string)
+		secretAccessKey := data.Get(CredentialsFieldAws + ".0." + CredentialsFieldAwsSecretAccessKey).(string)
+
+		credentialsJSON, err := sdk.ToCloudCredentialsAWS(accessKeyId, secretAccessKey)
 		if err != nil {
-			return diag.Errorf("building aws credentials json, value=%v: %v", credentials, err)
+			return diag.FromErr(err)
 		}
 
 		cloud = CredentialsFieldAws
-		credentials = string(credentialsJson)
+		credentials = credentialsJSON
 	} else if _, ok := data.GetOk(CredentialsFieldAzure); ok {
 		cloud = CredentialsFieldAzure
 		credentials = data.Get(CredentialsFieldAzure + ".0." + CredentialsFieldAzureServicePrincipalJson).(string)
+	} else if _, ok := data.GetOk(CredentialsFieldDo); ok {
+		token := data.Get(CredentialsFieldDo + ".0." + CredentialsFieldDoToken).(string)
+
+		credentialsJSON, err := sdk.ToCloudCredentialsDO(token)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+
+		cloud = CredentialsFieldDo
+		credentials = credentialsJSON
 	} else {
 		return diag.Errorf("none of supported cloud credentials were specified.")
 	}
