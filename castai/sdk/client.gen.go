@@ -88,17 +88,8 @@ func WithRequestEditorFn(fn RequestEditorFn) ClientOption {
 
 // The interface specification for the client above.
 type ClientInterface interface {
-	// LoginCallback request
-	LoginCallback(ctx context.Context) (*http.Response, error)
-
-	// Login request
-	Login(ctx context.Context, params *LoginParams) (*http.Response, error)
-
-	// Logout request
-	Logout(ctx context.Context, params *LogoutParams) (*http.Response, error)
-
-	// GetSession request
-	GetSession(ctx context.Context) (*http.Response, error)
+	// ListAuditEvents request
+	ListAuditEvents(ctx context.Context, params *ListAuditEventsParams) (*http.Response, error)
 
 	// ListAuthTokens request
 	ListAuthTokens(ctx context.Context) (*http.Response, error)
@@ -113,6 +104,16 @@ type ClientInterface interface {
 
 	// GetAuthToken request
 	GetAuthToken(ctx context.Context, authTokenId AuthTokenId) (*http.Response, error)
+
+	// UpdateAuthToken request  with any body
+	UpdateAuthTokenWithBody(ctx context.Context, authTokenId AuthTokenId, contentType string, body io.Reader) (*http.Response, error)
+
+	UpdateAuthToken(ctx context.Context, authTokenId AuthTokenId, body UpdateAuthTokenJSONRequestBody) (*http.Response, error)
+
+	// PlanClusterPrice request  with any body
+	PlanClusterPriceWithBody(ctx context.Context, contentType string, body io.Reader) (*http.Response, error)
+
+	PlanClusterPrice(ctx context.Context, body PlanClusterPriceJSONRequestBody) (*http.Response, error)
 
 	// ListCloudCredentials request
 	ListCloudCredentials(ctx context.Context) (*http.Response, error)
@@ -172,6 +173,9 @@ type ClientInterface interface {
 	// GetClusterHealth request
 	GetClusterHealth(ctx context.Context, clusterId ClusterId) (*http.Response, error)
 
+	// GetClusterIngressController request
+	GetClusterIngressController(ctx context.Context, clusterId ClusterId) (*http.Response, error)
+
 	// GetClusterKubeconfig request
 	GetClusterKubeconfig(ctx context.Context, clusterId ClusterId) (*http.Response, error)
 
@@ -180,6 +184,20 @@ type ClientInterface interface {
 
 	// GetClusterNodes request
 	GetClusterNodes(ctx context.Context, clusterId ClusterId) (*http.Response, error)
+
+	// AddClusterNode request  with any body
+	AddClusterNodeWithBody(ctx context.Context, clusterId ClusterId, contentType string, body io.Reader) (*http.Response, error)
+
+	AddClusterNode(ctx context.Context, clusterId ClusterId, body AddClusterNodeJSONRequestBody) (*http.Response, error)
+
+	// DeleteClusterNode request
+	DeleteClusterNode(ctx context.Context, clusterId ClusterId, nodeId string) (*http.Response, error)
+
+	// GetClusterNode request
+	GetClusterNode(ctx context.Context, clusterId ClusterId, nodeId string) (*http.Response, error)
+
+	// InterruptClusterNode request
+	InterruptClusterNode(ctx context.Context, clusterId ClusterId, nodeId string) (*http.Response, error)
 
 	// UpdateNodeList request  with any body
 	UpdateNodeListWithBody(ctx context.Context, clusterId ClusterId, contentType string, body io.Reader) (*http.Response, error)
@@ -202,57 +220,18 @@ type ClientInterface interface {
 	// ResumeCluster request
 	ResumeCluster(ctx context.Context, clusterId ClusterId) (*http.Response, error)
 
+	// GetOperation request
+	GetOperation(ctx context.Context, id string) (*http.Response, error)
+
 	// ListRegions request
 	ListRegions(ctx context.Context) (*http.Response, error)
+
+	// GetUsageReport request
+	GetUsageReport(ctx context.Context, params *GetUsageReportParams) (*http.Response, error)
 }
 
-func (c *Client) LoginCallback(ctx context.Context) (*http.Response, error) {
-	req, err := NewLoginCallbackRequest(c.Server)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if c.RequestEditor != nil {
-		err = c.RequestEditor(ctx, req)
-		if err != nil {
-			return nil, err
-		}
-	}
-	return c.Client.Do(req)
-}
-
-func (c *Client) Login(ctx context.Context, params *LoginParams) (*http.Response, error) {
-	req, err := NewLoginRequest(c.Server, params)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if c.RequestEditor != nil {
-		err = c.RequestEditor(ctx, req)
-		if err != nil {
-			return nil, err
-		}
-	}
-	return c.Client.Do(req)
-}
-
-func (c *Client) Logout(ctx context.Context, params *LogoutParams) (*http.Response, error) {
-	req, err := NewLogoutRequest(c.Server, params)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if c.RequestEditor != nil {
-		err = c.RequestEditor(ctx, req)
-		if err != nil {
-			return nil, err
-		}
-	}
-	return c.Client.Do(req)
-}
-
-func (c *Client) GetSession(ctx context.Context) (*http.Response, error) {
-	req, err := NewGetSessionRequest(c.Server)
+func (c *Client) ListAuditEvents(ctx context.Context, params *ListAuditEventsParams) (*http.Response, error) {
+	req, err := NewListAuditEventsRequest(c.Server, params)
 	if err != nil {
 		return nil, err
 	}
@@ -328,6 +307,66 @@ func (c *Client) DeleteAuthToken(ctx context.Context, authTokenId AuthTokenId) (
 
 func (c *Client) GetAuthToken(ctx context.Context, authTokenId AuthTokenId) (*http.Response, error) {
 	req, err := NewGetAuthTokenRequest(c.Server, authTokenId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if c.RequestEditor != nil {
+		err = c.RequestEditor(ctx, req)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) UpdateAuthTokenWithBody(ctx context.Context, authTokenId AuthTokenId, contentType string, body io.Reader) (*http.Response, error) {
+	req, err := NewUpdateAuthTokenRequestWithBody(c.Server, authTokenId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if c.RequestEditor != nil {
+		err = c.RequestEditor(ctx, req)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) UpdateAuthToken(ctx context.Context, authTokenId AuthTokenId, body UpdateAuthTokenJSONRequestBody) (*http.Response, error) {
+	req, err := NewUpdateAuthTokenRequest(c.Server, authTokenId, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if c.RequestEditor != nil {
+		err = c.RequestEditor(ctx, req)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PlanClusterPriceWithBody(ctx context.Context, contentType string, body io.Reader) (*http.Response, error) {
+	req, err := NewPlanClusterPriceRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if c.RequestEditor != nil {
+		err = c.RequestEditor(ctx, req)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PlanClusterPrice(ctx context.Context, body PlanClusterPriceJSONRequestBody) (*http.Response, error) {
+	req, err := NewPlanClusterPriceRequest(c.Server, body)
 	if err != nil {
 		return nil, err
 	}
@@ -656,6 +695,21 @@ func (c *Client) GetClusterHealth(ctx context.Context, clusterId ClusterId) (*ht
 	return c.Client.Do(req)
 }
 
+func (c *Client) GetClusterIngressController(ctx context.Context, clusterId ClusterId) (*http.Response, error) {
+	req, err := NewGetClusterIngressControllerRequest(c.Server, clusterId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if c.RequestEditor != nil {
+		err = c.RequestEditor(ctx, req)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return c.Client.Do(req)
+}
+
 func (c *Client) GetClusterKubeconfig(ctx context.Context, clusterId ClusterId) (*http.Response, error) {
 	req, err := NewGetClusterKubeconfigRequest(c.Server, clusterId)
 	if err != nil {
@@ -688,6 +742,81 @@ func (c *Client) GetClusterMetrics(ctx context.Context, clusterId ClusterId, par
 
 func (c *Client) GetClusterNodes(ctx context.Context, clusterId ClusterId) (*http.Response, error) {
 	req, err := NewGetClusterNodesRequest(c.Server, clusterId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if c.RequestEditor != nil {
+		err = c.RequestEditor(ctx, req)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) AddClusterNodeWithBody(ctx context.Context, clusterId ClusterId, contentType string, body io.Reader) (*http.Response, error) {
+	req, err := NewAddClusterNodeRequestWithBody(c.Server, clusterId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if c.RequestEditor != nil {
+		err = c.RequestEditor(ctx, req)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) AddClusterNode(ctx context.Context, clusterId ClusterId, body AddClusterNodeJSONRequestBody) (*http.Response, error) {
+	req, err := NewAddClusterNodeRequest(c.Server, clusterId, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if c.RequestEditor != nil {
+		err = c.RequestEditor(ctx, req)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) DeleteClusterNode(ctx context.Context, clusterId ClusterId, nodeId string) (*http.Response, error) {
+	req, err := NewDeleteClusterNodeRequest(c.Server, clusterId, nodeId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if c.RequestEditor != nil {
+		err = c.RequestEditor(ctx, req)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetClusterNode(ctx context.Context, clusterId ClusterId, nodeId string) (*http.Response, error) {
+	req, err := NewGetClusterNodeRequest(c.Server, clusterId, nodeId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if c.RequestEditor != nil {
+		err = c.RequestEditor(ctx, req)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) InterruptClusterNode(ctx context.Context, clusterId ClusterId, nodeId string) (*http.Response, error) {
+	req, err := NewInterruptClusterNodeRequest(c.Server, clusterId, nodeId)
 	if err != nil {
 		return nil, err
 	}
@@ -821,6 +950,21 @@ func (c *Client) ResumeCluster(ctx context.Context, clusterId ClusterId) (*http.
 	return c.Client.Do(req)
 }
 
+func (c *Client) GetOperation(ctx context.Context, id string) (*http.Response, error) {
+	req, err := NewGetOperationRequest(c.Server, id)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if c.RequestEditor != nil {
+		err = c.RequestEditor(ctx, req)
+		if err != nil {
+			return nil, err
+		}
+	}
+	return c.Client.Do(req)
+}
+
 func (c *Client) ListRegions(ctx context.Context) (*http.Response, error) {
 	req, err := NewListRegionsRequest(c.Server)
 	if err != nil {
@@ -836,35 +980,23 @@ func (c *Client) ListRegions(ctx context.Context) (*http.Response, error) {
 	return c.Client.Do(req)
 }
 
-// NewLoginCallbackRequest generates requests for LoginCallback
-func NewLoginCallbackRequest(server string) (*http.Request, error) {
-	var err error
-
-	queryUrl, err := url.Parse(server)
+func (c *Client) GetUsageReport(ctx context.Context, params *GetUsageReportParams) (*http.Response, error) {
+	req, err := NewGetUsageReportRequest(c.Server, params)
 	if err != nil {
 		return nil, err
 	}
-
-	basePath := fmt.Sprintf("/auth")
-	if basePath[0] == '/' {
-		basePath = basePath[1:]
+	req = req.WithContext(ctx)
+	if c.RequestEditor != nil {
+		err = c.RequestEditor(ctx, req)
+		if err != nil {
+			return nil, err
+		}
 	}
-
-	queryUrl, err = queryUrl.Parse(basePath)
-	if err != nil {
-		return nil, err
-	}
-
-	req, err := http.NewRequest("GET", queryUrl.String(), nil)
-	if err != nil {
-		return nil, err
-	}
-
-	return req, nil
+	return c.Client.Do(req)
 }
 
-// NewLoginRequest generates requests for Login
-func NewLoginRequest(server string, params *LoginParams) (*http.Request, error) {
+// NewListAuditEventsRequest generates requests for ListAuditEvents
+func NewListAuditEventsRequest(server string, params *ListAuditEventsParams) (*http.Request, error) {
 	var err error
 
 	queryUrl, err := url.Parse(server)
@@ -872,7 +1004,7 @@ func NewLoginRequest(server string, params *LoginParams) (*http.Request, error) 
 		return nil, err
 	}
 
-	basePath := fmt.Sprintf("/auth")
+	basePath := fmt.Sprintf("/audit")
 	if basePath[0] == '/' {
 		basePath = basePath[1:]
 	}
@@ -884,9 +1016,9 @@ func NewLoginRequest(server string, params *LoginParams) (*http.Request, error) 
 
 	queryValues := queryUrl.Query()
 
-	if params.ReturnTo != nil {
+	if params.Limit != nil {
 
-		if queryFrag, err := runtime.StyleParam("form", true, "returnTo", *params.ReturnTo); err != nil {
+		if queryFrag, err := runtime.StyleParam("form", true, "limit", *params.Limit); err != nil {
 			return nil, err
 		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
 			return nil, err
@@ -900,9 +1032,57 @@ func NewLoginRequest(server string, params *LoginParams) (*http.Request, error) 
 
 	}
 
-	if params.Auth0returnTo != nil {
+	if params.Cursor != nil {
 
-		if queryFrag, err := runtime.StyleParam("form", true, "auth0returnTo", *params.Auth0returnTo); err != nil {
+		if queryFrag, err := runtime.StyleParam("form", true, "cursor", *params.Cursor); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.FromDate != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "fromDate", *params.FromDate); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.ToDate != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "toDate", *params.ToDate); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.ClusterId != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "clusterId", *params.ClusterId); err != nil {
 			return nil, err
 		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
 			return nil, err
@@ -917,80 +1097,6 @@ func NewLoginRequest(server string, params *LoginParams) (*http.Request, error) 
 	}
 
 	queryUrl.RawQuery = queryValues.Encode()
-
-	req, err := http.NewRequest("POST", queryUrl.String(), nil)
-	if err != nil {
-		return nil, err
-	}
-
-	return req, nil
-}
-
-// NewLogoutRequest generates requests for Logout
-func NewLogoutRequest(server string, params *LogoutParams) (*http.Request, error) {
-	var err error
-
-	queryUrl, err := url.Parse(server)
-	if err != nil {
-		return nil, err
-	}
-
-	basePath := fmt.Sprintf("/auth/logout")
-	if basePath[0] == '/' {
-		basePath = basePath[1:]
-	}
-
-	queryUrl, err = queryUrl.Parse(basePath)
-	if err != nil {
-		return nil, err
-	}
-
-	queryValues := queryUrl.Query()
-
-	if params.ReturnTo != nil {
-
-		if queryFrag, err := runtime.StyleParam("form", true, "returnTo", *params.ReturnTo); err != nil {
-			return nil, err
-		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
-			return nil, err
-		} else {
-			for k, v := range parsed {
-				for _, v2 := range v {
-					queryValues.Add(k, v2)
-				}
-			}
-		}
-
-	}
-
-	queryUrl.RawQuery = queryValues.Encode()
-
-	req, err := http.NewRequest("POST", queryUrl.String(), nil)
-	if err != nil {
-		return nil, err
-	}
-
-	return req, nil
-}
-
-// NewGetSessionRequest generates requests for GetSession
-func NewGetSessionRequest(server string) (*http.Request, error) {
-	var err error
-
-	queryUrl, err := url.Parse(server)
-	if err != nil {
-		return nil, err
-	}
-
-	basePath := fmt.Sprintf("/auth/session")
-	if basePath[0] == '/' {
-		basePath = basePath[1:]
-	}
-
-	queryUrl, err = queryUrl.Parse(basePath)
-	if err != nil {
-		return nil, err
-	}
 
 	req, err := http.NewRequest("GET", queryUrl.String(), nil)
 	if err != nil {
@@ -1131,6 +1237,91 @@ func NewGetAuthTokenRequest(server string, authTokenId AuthTokenId) (*http.Reque
 		return nil, err
 	}
 
+	return req, nil
+}
+
+// NewUpdateAuthTokenRequest calls the generic UpdateAuthToken builder with application/json body
+func NewUpdateAuthTokenRequest(server string, authTokenId AuthTokenId, body UpdateAuthTokenJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewUpdateAuthTokenRequestWithBody(server, authTokenId, "application/json", bodyReader)
+}
+
+// NewUpdateAuthTokenRequestWithBody generates requests for UpdateAuthToken with any type of body
+func NewUpdateAuthTokenRequestWithBody(server string, authTokenId AuthTokenId, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParam("simple", false, "authTokenId", authTokenId)
+	if err != nil {
+		return nil, err
+	}
+
+	queryUrl, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	basePath := fmt.Sprintf("/auth/tokens/%s", pathParam0)
+	if basePath[0] == '/' {
+		basePath = basePath[1:]
+	}
+
+	queryUrl, err = queryUrl.Parse(basePath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryUrl.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+	return req, nil
+}
+
+// NewPlanClusterPriceRequest calls the generic PlanClusterPrice builder with application/json body
+func NewPlanClusterPriceRequest(server string, body PlanClusterPriceJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewPlanClusterPriceRequestWithBody(server, "application/json", bodyReader)
+}
+
+// NewPlanClusterPriceRequestWithBody generates requests for PlanClusterPrice with any type of body
+func NewPlanClusterPriceRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	queryUrl, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	basePath := fmt.Sprintf("/cluster-price-plan")
+	if basePath[0] == '/' {
+		basePath = basePath[1:]
+	}
+
+	queryUrl, err = queryUrl.Parse(basePath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryUrl.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
 	return req, nil
 }
 
@@ -1716,6 +1907,40 @@ func NewGetClusterHealthRequest(server string, clusterId ClusterId) (*http.Reque
 	return req, nil
 }
 
+// NewGetClusterIngressControllerRequest generates requests for GetClusterIngressController
+func NewGetClusterIngressControllerRequest(server string, clusterId ClusterId) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParam("simple", false, "clusterId", clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	queryUrl, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	basePath := fmt.Sprintf("/kubernetes/clusters/%s/ingress-controller", pathParam0)
+	if basePath[0] == '/' {
+		basePath = basePath[1:]
+	}
+
+	queryUrl, err = queryUrl.Parse(basePath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryUrl.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 // NewGetClusterKubeconfigRequest generates requests for GetClusterKubeconfig
 func NewGetClusterKubeconfigRequest(server string, clusterId ClusterId) (*http.Request, error) {
 	var err error
@@ -1831,6 +2056,175 @@ func NewGetClusterNodesRequest(server string, clusterId ClusterId) (*http.Reques
 	}
 
 	req, err := http.NewRequest("GET", queryUrl.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewAddClusterNodeRequest calls the generic AddClusterNode builder with application/json body
+func NewAddClusterNodeRequest(server string, clusterId ClusterId, body AddClusterNodeJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewAddClusterNodeRequestWithBody(server, clusterId, "application/json", bodyReader)
+}
+
+// NewAddClusterNodeRequestWithBody generates requests for AddClusterNode with any type of body
+func NewAddClusterNodeRequestWithBody(server string, clusterId ClusterId, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParam("simple", false, "clusterId", clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	queryUrl, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	basePath := fmt.Sprintf("/kubernetes/clusters/%s/nodes", pathParam0)
+	if basePath[0] == '/' {
+		basePath = basePath[1:]
+	}
+
+	queryUrl, err = queryUrl.Parse(basePath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryUrl.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+	return req, nil
+}
+
+// NewDeleteClusterNodeRequest generates requests for DeleteClusterNode
+func NewDeleteClusterNodeRequest(server string, clusterId ClusterId, nodeId string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParam("simple", false, "clusterId", clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParam("simple", false, "nodeId", nodeId)
+	if err != nil {
+		return nil, err
+	}
+
+	queryUrl, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	basePath := fmt.Sprintf("/kubernetes/clusters/%s/nodes/%s", pathParam0, pathParam1)
+	if basePath[0] == '/' {
+		basePath = basePath[1:]
+	}
+
+	queryUrl, err = queryUrl.Parse(basePath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("DELETE", queryUrl.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewGetClusterNodeRequest generates requests for GetClusterNode
+func NewGetClusterNodeRequest(server string, clusterId ClusterId, nodeId string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParam("simple", false, "clusterId", clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParam("simple", false, "nodeId", nodeId)
+	if err != nil {
+		return nil, err
+	}
+
+	queryUrl, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	basePath := fmt.Sprintf("/kubernetes/clusters/%s/nodes/%s", pathParam0, pathParam1)
+	if basePath[0] == '/' {
+		basePath = basePath[1:]
+	}
+
+	queryUrl, err = queryUrl.Parse(basePath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryUrl.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewInterruptClusterNodeRequest generates requests for InterruptClusterNode
+func NewInterruptClusterNodeRequest(server string, clusterId ClusterId, nodeId string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParam("simple", false, "clusterId", clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParam("simple", false, "nodeId", nodeId)
+	if err != nil {
+		return nil, err
+	}
+
+	queryUrl, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	basePath := fmt.Sprintf("/kubernetes/clusters/%s/nodes/%s/interrupt", pathParam0, pathParam1)
+	if basePath[0] == '/' {
+		basePath = basePath[1:]
+	}
+
+	queryUrl, err = queryUrl.Parse(basePath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryUrl.String(), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -2044,6 +2438,40 @@ func NewResumeClusterRequest(server string, clusterId ClusterId) (*http.Request,
 	return req, nil
 }
 
+// NewGetOperationRequest generates requests for GetOperation
+func NewGetOperationRequest(server string, id string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParam("simple", false, "id", id)
+	if err != nil {
+		return nil, err
+	}
+
+	queryUrl, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	basePath := fmt.Sprintf("/kubernetes/operations/%s", pathParam0)
+	if basePath[0] == '/' {
+		basePath = basePath[1:]
+	}
+
+	queryUrl, err = queryUrl.Parse(basePath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryUrl.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 // NewListRegionsRequest generates requests for ListRegions
 func NewListRegionsRequest(server string) (*http.Request, error) {
 	var err error
@@ -2062,6 +2490,85 @@ func NewListRegionsRequest(server string) (*http.Request, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	req, err := http.NewRequest("GET", queryUrl.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewGetUsageReportRequest generates requests for GetUsageReport
+func NewGetUsageReportRequest(server string, params *GetUsageReportParams) (*http.Request, error) {
+	var err error
+
+	queryUrl, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	basePath := fmt.Sprintf("/report/usage/daily")
+	if basePath[0] == '/' {
+		basePath = basePath[1:]
+	}
+
+	queryUrl, err = queryUrl.Parse(basePath)
+	if err != nil {
+		return nil, err
+	}
+
+	queryValues := queryUrl.Query()
+
+	if params.ClusterId != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "clusterId", *params.ClusterId); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.FromDate != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "fromDate", *params.FromDate); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.ToDate != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "toDate", *params.ToDate); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	queryUrl.RawQuery = queryValues.Encode()
 
 	req, err := http.NewRequest("GET", queryUrl.String(), nil)
 	if err != nil {
@@ -2100,17 +2607,8 @@ func WithBaseURL(baseURL string) ClientOption {
 
 // ClientWithResponsesInterface is the interface specification for the client with responses above.
 type ClientWithResponsesInterface interface {
-	// LoginCallback request
-	LoginCallbackWithResponse(ctx context.Context) (*LoginCallbackResponse, error)
-
-	// Login request
-	LoginWithResponse(ctx context.Context, params *LoginParams) (*LoginResponse, error)
-
-	// Logout request
-	LogoutWithResponse(ctx context.Context, params *LogoutParams) (*LogoutResponse, error)
-
-	// GetSession request
-	GetSessionWithResponse(ctx context.Context) (*GetSessionResponse, error)
+	// ListAuditEvents request
+	ListAuditEventsWithResponse(ctx context.Context, params *ListAuditEventsParams) (*ListAuditEventsResponse, error)
 
 	// ListAuthTokens request
 	ListAuthTokensWithResponse(ctx context.Context) (*ListAuthTokensResponse, error)
@@ -2125,6 +2623,16 @@ type ClientWithResponsesInterface interface {
 
 	// GetAuthToken request
 	GetAuthTokenWithResponse(ctx context.Context, authTokenId AuthTokenId) (*GetAuthTokenResponse, error)
+
+	// UpdateAuthToken request  with any body
+	UpdateAuthTokenWithBodyWithResponse(ctx context.Context, authTokenId AuthTokenId, contentType string, body io.Reader) (*UpdateAuthTokenResponse, error)
+
+	UpdateAuthTokenWithResponse(ctx context.Context, authTokenId AuthTokenId, body UpdateAuthTokenJSONRequestBody) (*UpdateAuthTokenResponse, error)
+
+	// PlanClusterPrice request  with any body
+	PlanClusterPriceWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*PlanClusterPriceResponse, error)
+
+	PlanClusterPriceWithResponse(ctx context.Context, body PlanClusterPriceJSONRequestBody) (*PlanClusterPriceResponse, error)
 
 	// ListCloudCredentials request
 	ListCloudCredentialsWithResponse(ctx context.Context) (*ListCloudCredentialsResponse, error)
@@ -2184,6 +2692,9 @@ type ClientWithResponsesInterface interface {
 	// GetClusterHealth request
 	GetClusterHealthWithResponse(ctx context.Context, clusterId ClusterId) (*GetClusterHealthResponse, error)
 
+	// GetClusterIngressController request
+	GetClusterIngressControllerWithResponse(ctx context.Context, clusterId ClusterId) (*GetClusterIngressControllerResponse, error)
+
 	// GetClusterKubeconfig request
 	GetClusterKubeconfigWithResponse(ctx context.Context, clusterId ClusterId) (*GetClusterKubeconfigResponse, error)
 
@@ -2192,6 +2703,20 @@ type ClientWithResponsesInterface interface {
 
 	// GetClusterNodes request
 	GetClusterNodesWithResponse(ctx context.Context, clusterId ClusterId) (*GetClusterNodesResponse, error)
+
+	// AddClusterNode request  with any body
+	AddClusterNodeWithBodyWithResponse(ctx context.Context, clusterId ClusterId, contentType string, body io.Reader) (*AddClusterNodeResponse, error)
+
+	AddClusterNodeWithResponse(ctx context.Context, clusterId ClusterId, body AddClusterNodeJSONRequestBody) (*AddClusterNodeResponse, error)
+
+	// DeleteClusterNode request
+	DeleteClusterNodeWithResponse(ctx context.Context, clusterId ClusterId, nodeId string) (*DeleteClusterNodeResponse, error)
+
+	// GetClusterNode request
+	GetClusterNodeWithResponse(ctx context.Context, clusterId ClusterId, nodeId string) (*GetClusterNodeResponse, error)
+
+	// InterruptClusterNode request
+	InterruptClusterNodeWithResponse(ctx context.Context, clusterId ClusterId, nodeId string) (*InterruptClusterNodeResponse, error)
 
 	// UpdateNodeList request  with any body
 	UpdateNodeListWithBodyWithResponse(ctx context.Context, clusterId ClusterId, contentType string, body io.Reader) (*UpdateNodeListResponse, error)
@@ -2214,26 +2739,33 @@ type ClientWithResponsesInterface interface {
 	// ResumeCluster request
 	ResumeClusterWithResponse(ctx context.Context, clusterId ClusterId) (*ResumeClusterResponse, error)
 
+	// GetOperation request
+	GetOperationWithResponse(ctx context.Context, id string) (*GetOperationResponse, error)
+
 	// ListRegions request
 	ListRegionsWithResponse(ctx context.Context) (*ListRegionsResponse, error)
+
+	// GetUsageReport request
+	GetUsageReportWithResponse(ctx context.Context, params *GetUsageReportParams) (*GetUsageReportResponse, error)
 }
 
-// TODO: <castai customization> to have common interface
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 type Response interface {
 	Status() string
 	StatusCode() int
 	GetBody() []byte
 }
 
-// TODO: </castai customization> to have common interface
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
-type LoginCallbackResponse struct {
+type ListAuditEventsResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
+	JSON200      *AuditEventList
 }
 
 // Status returns HTTPResponse.Status
-func (r LoginCallbackResponse) Status() string {
+func (r ListAuditEventsResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -2241,108 +2773,20 @@ func (r LoginCallbackResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r LoginCallbackResponse) StatusCode() int {
+func (r ListAuditEventsResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-// TODO: <castai customization> to have common interface
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
-func (r LoginCallbackResponse) GetBody() []byte {
+func (r ListAuditEventsResponse) GetBody() []byte {
 	return r.Body
 }
 
-// TODO: </castai customization> to have common interface
-
-type LoginResponse struct {
-	Body         []byte
-	HTTPResponse *http.Response
-}
-
-// Status returns HTTPResponse.Status
-func (r LoginResponse) Status() string {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.Status
-	}
-	return http.StatusText(0)
-}
-
-// StatusCode returns HTTPResponse.StatusCode
-func (r LoginResponse) StatusCode() int {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.StatusCode
-	}
-	return 0
-}
-
-// TODO: <castai customization> to have common interface
-// Body returns body of byte array
-func (r LoginResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface
-
-type LogoutResponse struct {
-	Body         []byte
-	HTTPResponse *http.Response
-}
-
-// Status returns HTTPResponse.Status
-func (r LogoutResponse) Status() string {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.Status
-	}
-	return http.StatusText(0)
-}
-
-// StatusCode returns HTTPResponse.StatusCode
-func (r LogoutResponse) StatusCode() int {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.StatusCode
-	}
-	return 0
-}
-
-// TODO: <castai customization> to have common interface
-// Body returns body of byte array
-func (r LogoutResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface
-
-type GetSessionResponse struct {
-	Body         []byte
-	HTTPResponse *http.Response
-	JSON200      *UserSession
-}
-
-// Status returns HTTPResponse.Status
-func (r GetSessionResponse) Status() string {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.Status
-	}
-	return http.StatusText(0)
-}
-
-// StatusCode returns HTTPResponse.StatusCode
-func (r GetSessionResponse) StatusCode() int {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.StatusCode
-	}
-	return 0
-}
-
-// TODO: <castai customization> to have common interface
-// Body returns body of byte array
-func (r GetSessionResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
 type ListAuthTokensResponse struct {
 	Body         []byte
@@ -2366,13 +2810,13 @@ func (r ListAuthTokensResponse) StatusCode() int {
 	return 0
 }
 
-// TODO: <castai customization> to have common interface
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
 func (r ListAuthTokensResponse) GetBody() []byte {
 	return r.Body
 }
 
-// TODO: </castai customization> to have common interface
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
 type CreateAuthTokenResponse struct {
 	Body         []byte
@@ -2396,13 +2840,13 @@ func (r CreateAuthTokenResponse) StatusCode() int {
 	return 0
 }
 
-// TODO: <castai customization> to have common interface
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
 func (r CreateAuthTokenResponse) GetBody() []byte {
 	return r.Body
 }
 
-// TODO: </castai customization> to have common interface
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
 type DeleteAuthTokenResponse struct {
 	Body         []byte
@@ -2425,13 +2869,13 @@ func (r DeleteAuthTokenResponse) StatusCode() int {
 	return 0
 }
 
-// TODO: <castai customization> to have common interface
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
 func (r DeleteAuthTokenResponse) GetBody() []byte {
 	return r.Body
 }
 
-// TODO: </castai customization> to have common interface
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
 type GetAuthTokenResponse struct {
 	Body         []byte
@@ -2455,13 +2899,73 @@ func (r GetAuthTokenResponse) StatusCode() int {
 	return 0
 }
 
-// TODO: <castai customization> to have common interface
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
 func (r GetAuthTokenResponse) GetBody() []byte {
 	return r.Body
 }
 
-// TODO: </castai customization> to have common interface
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type UpdateAuthTokenResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *AuthToken
+}
+
+// Status returns HTTPResponse.Status
+func (r UpdateAuthTokenResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r UpdateAuthTokenResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r UpdateAuthTokenResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type PlanClusterPriceResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *ClusterCostEstimate
+}
+
+// Status returns HTTPResponse.Status
+func (r PlanClusterPriceResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r PlanClusterPriceResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r PlanClusterPriceResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
 type ListCloudCredentialsResponse struct {
 	Body         []byte
@@ -2485,13 +2989,13 @@ func (r ListCloudCredentialsResponse) StatusCode() int {
 	return 0
 }
 
-// TODO: <castai customization> to have common interface
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
 func (r ListCloudCredentialsResponse) GetBody() []byte {
 	return r.Body
 }
 
-// TODO: </castai customization> to have common interface
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
 type CreateCloudCredentialsResponse struct {
 	Body         []byte
@@ -2515,13 +3019,13 @@ func (r CreateCloudCredentialsResponse) StatusCode() int {
 	return 0
 }
 
-// TODO: <castai customization> to have common interface
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
 func (r CreateCloudCredentialsResponse) GetBody() []byte {
 	return r.Body
 }
 
-// TODO: </castai customization> to have common interface
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
 type DeleteCloudCredentialsResponse struct {
 	Body         []byte
@@ -2544,13 +3048,13 @@ func (r DeleteCloudCredentialsResponse) StatusCode() int {
 	return 0
 }
 
-// TODO: <castai customization> to have common interface
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
 func (r DeleteCloudCredentialsResponse) GetBody() []byte {
 	return r.Body
 }
 
-// TODO: </castai customization> to have common interface
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
 type GetCloudCredentialsResponse struct {
 	Body         []byte
@@ -2574,13 +3078,13 @@ func (r GetCloudCredentialsResponse) StatusCode() int {
 	return 0
 }
 
-// TODO: <castai customization> to have common interface
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
 func (r GetCloudCredentialsResponse) GetBody() []byte {
 	return r.Body
 }
 
-// TODO: </castai customization> to have common interface
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
 type DeleteGslbResponse struct {
 	Body         []byte
@@ -2603,13 +3107,13 @@ func (r DeleteGslbResponse) StatusCode() int {
 	return 0
 }
 
-// TODO: <castai customization> to have common interface
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
 func (r DeleteGslbResponse) GetBody() []byte {
 	return r.Body
 }
 
-// TODO: </castai customization> to have common interface
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
 type CreateOrUpdateGslbResponse struct {
 	Body         []byte
@@ -2633,13 +3137,13 @@ func (r CreateOrUpdateGslbResponse) StatusCode() int {
 	return 0
 }
 
-// TODO: <castai customization> to have common interface
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
 func (r CreateOrUpdateGslbResponse) GetBody() []byte {
 	return r.Body
 }
 
-// TODO: </castai customization> to have common interface
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
 type ListKubernetesClustersResponse struct {
 	Body         []byte
@@ -2663,13 +3167,13 @@ func (r ListKubernetesClustersResponse) StatusCode() int {
 	return 0
 }
 
-// TODO: <castai customization> to have common interface
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
 func (r ListKubernetesClustersResponse) GetBody() []byte {
 	return r.Body
 }
 
-// TODO: </castai customization> to have common interface
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
 type CreateNewClusterResponse struct {
 	Body         []byte
@@ -2693,13 +3197,13 @@ func (r CreateNewClusterResponse) StatusCode() int {
 	return 0
 }
 
-// TODO: <castai customization> to have common interface
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
 func (r CreateNewClusterResponse) GetBody() []byte {
 	return r.Body
 }
 
-// TODO: </castai customization> to have common interface
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
 type DeleteClusterResponse struct {
 	Body         []byte
@@ -2722,13 +3226,13 @@ func (r DeleteClusterResponse) StatusCode() int {
 	return 0
 }
 
-// TODO: <castai customization> to have common interface
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
 func (r DeleteClusterResponse) GetBody() []byte {
 	return r.Body
 }
 
-// TODO: </castai customization> to have common interface
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
 type GetClusterResponse struct {
 	Body         []byte
@@ -2752,13 +3256,13 @@ func (r GetClusterResponse) StatusCode() int {
 	return 0
 }
 
-// TODO: <castai customization> to have common interface
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
 func (r GetClusterResponse) GetBody() []byte {
 	return r.Body
 }
 
-// TODO: </castai customization> to have common interface
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
 type GetClusterAddonsResponse struct {
 	Body         []byte
@@ -2783,13 +3287,13 @@ func (r GetClusterAddonsResponse) StatusCode() int {
 	return 0
 }
 
-// TODO: <castai customization> to have common interface
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
 func (r GetClusterAddonsResponse) GetBody() []byte {
 	return r.Body
 }
 
-// TODO: </castai customization> to have common interface
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
 type ConfigureClusterAddonsResponse struct {
 	Body         []byte
@@ -2815,13 +3319,13 @@ func (r ConfigureClusterAddonsResponse) StatusCode() int {
 	return 0
 }
 
-// TODO: <castai customization> to have common interface
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
 func (r ConfigureClusterAddonsResponse) GetBody() []byte {
 	return r.Body
 }
 
-// TODO: </castai customization> to have common interface
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
 type ArchiveClusterResponse struct {
 	Body         []byte
@@ -2844,13 +3348,13 @@ func (r ArchiveClusterResponse) StatusCode() int {
 	return 0
 }
 
-// TODO: <castai customization> to have common interface
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
 func (r ArchiveClusterResponse) GetBody() []byte {
 	return r.Body
 }
 
-// TODO: </castai customization> to have common interface
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
 type GetClusterAuditLogResponse struct {
 	Body         []byte
@@ -2874,13 +3378,13 @@ func (r GetClusterAuditLogResponse) StatusCode() int {
 	return 0
 }
 
-// TODO: <castai customization> to have common interface
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
 func (r GetClusterAuditLogResponse) GetBody() []byte {
 	return r.Body
 }
 
-// TODO: </castai customization> to have common interface
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
 type GetClusterFeedbackEventsResponse struct {
 	Body         []byte
@@ -2904,13 +3408,13 @@ func (r GetClusterFeedbackEventsResponse) StatusCode() int {
 	return 0
 }
 
-// TODO: <castai customization> to have common interface
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
 func (r GetClusterFeedbackEventsResponse) GetBody() []byte {
 	return r.Body
 }
 
-// TODO: </castai customization> to have common interface
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
 type GetClusterHealthResponse struct {
 	Body         []byte
@@ -2934,13 +3438,44 @@ func (r GetClusterHealthResponse) StatusCode() int {
 	return 0
 }
 
-// TODO: <castai customization> to have common interface
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
 func (r GetClusterHealthResponse) GetBody() []byte {
 	return r.Body
 }
 
-// TODO: </castai customization> to have common interface
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type GetClusterIngressControllerResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *KubernetesIngressController
+	JSON404      *ErrorResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r GetClusterIngressControllerResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetClusterIngressControllerResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r GetClusterIngressControllerResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
 type GetClusterKubeconfigResponse struct {
 	Body         []byte
@@ -2963,13 +3498,13 @@ func (r GetClusterKubeconfigResponse) StatusCode() int {
 	return 0
 }
 
-// TODO: <castai customization> to have common interface
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
 func (r GetClusterKubeconfigResponse) GetBody() []byte {
 	return r.Body
 }
 
-// TODO: </castai customization> to have common interface
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
 type GetClusterMetricsResponse struct {
 	Body         []byte
@@ -2993,13 +3528,13 @@ func (r GetClusterMetricsResponse) StatusCode() int {
 	return 0
 }
 
-// TODO: <castai customization> to have common interface
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
 func (r GetClusterMetricsResponse) GetBody() []byte {
 	return r.Body
 }
 
-// TODO: </castai customization> to have common interface
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
 type GetClusterNodesResponse struct {
 	Body         []byte
@@ -3023,13 +3558,132 @@ func (r GetClusterNodesResponse) StatusCode() int {
 	return 0
 }
 
-// TODO: <castai customization> to have common interface
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
 func (r GetClusterNodesResponse) GetBody() []byte {
 	return r.Body
 }
 
-// TODO: </castai customization> to have common interface
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type AddClusterNodeResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON201      *AddNodeResult
+}
+
+// Status returns HTTPResponse.Status
+func (r AddClusterNodeResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r AddClusterNodeResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r AddClusterNodeResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type DeleteClusterNodeResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON201      *DeleteNodeResult
+}
+
+// Status returns HTTPResponse.Status
+func (r DeleteClusterNodeResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DeleteClusterNodeResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r DeleteClusterNodeResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type GetClusterNodeResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *Node
+}
+
+// Status returns HTTPResponse.Status
+func (r GetClusterNodeResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetClusterNodeResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r GetClusterNodeResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type InterruptClusterNodeResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+}
+
+// Status returns HTTPResponse.Status
+func (r InterruptClusterNodeResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r InterruptClusterNodeResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r InterruptClusterNodeResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
 type UpdateNodeListResponse struct {
 	Body         []byte
@@ -3053,13 +3707,13 @@ func (r UpdateNodeListResponse) StatusCode() int {
 	return 0
 }
 
-// TODO: <castai customization> to have common interface
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
 func (r UpdateNodeListResponse) GetBody() []byte {
 	return r.Body
 }
 
-// TODO: </castai customization> to have common interface
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
 type PauseClusterResponse struct {
 	Body         []byte
@@ -3083,13 +3737,13 @@ func (r PauseClusterResponse) StatusCode() int {
 	return 0
 }
 
-// TODO: <castai customization> to have common interface
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
 func (r PauseClusterResponse) GetBody() []byte {
 	return r.Body
 }
 
-// TODO: </castai customization> to have common interface
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
 type GetPoliciesResponse struct {
 	Body         []byte
@@ -3113,13 +3767,13 @@ func (r GetPoliciesResponse) StatusCode() int {
 	return 0
 }
 
-// TODO: <castai customization> to have common interface
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
 func (r GetPoliciesResponse) GetBody() []byte {
 	return r.Body
 }
 
-// TODO: </castai customization> to have common interface
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
 type UpsertPoliciesResponse struct {
 	Body         []byte
@@ -3143,13 +3797,13 @@ func (r UpsertPoliciesResponse) StatusCode() int {
 	return 0
 }
 
-// TODO: <castai customization> to have common interface
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
 func (r UpsertPoliciesResponse) GetBody() []byte {
 	return r.Body
 }
 
-// TODO: </castai customization> to have common interface
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
 type ResumeClusterResponse struct {
 	Body         []byte
@@ -3173,13 +3827,43 @@ func (r ResumeClusterResponse) StatusCode() int {
 	return 0
 }
 
-// TODO: <castai customization> to have common interface
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
 func (r ResumeClusterResponse) GetBody() []byte {
 	return r.Body
 }
 
-// TODO: </castai customization> to have common interface
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type GetOperationResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *OperationResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r GetOperationResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetOperationResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r GetOperationResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
 type ListRegionsResponse struct {
 	Body         []byte
@@ -3203,48 +3887,51 @@ func (r ListRegionsResponse) StatusCode() int {
 	return 0
 }
 
-// TODO: <castai customization> to have common interface
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
 func (r ListRegionsResponse) GetBody() []byte {
 	return r.Body
 }
 
-// TODO: </castai customization> to have common interface
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
-// LoginCallbackWithResponse request returning *LoginCallbackResponse
-func (c *ClientWithResponses) LoginCallbackWithResponse(ctx context.Context) (*LoginCallbackResponse, error) {
-	rsp, err := c.LoginCallback(ctx)
-	if err != nil {
-		return nil, err
-	}
-	return ParseLoginCallbackResponse(rsp)
+type GetUsageReportResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *ResourceUsageReport
 }
 
-// LoginWithResponse request returning *LoginResponse
-func (c *ClientWithResponses) LoginWithResponse(ctx context.Context, params *LoginParams) (*LoginResponse, error) {
-	rsp, err := c.Login(ctx, params)
-	if err != nil {
-		return nil, err
+// Status returns HTTPResponse.Status
+func (r GetUsageReportResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
 	}
-	return ParseLoginResponse(rsp)
+	return http.StatusText(0)
 }
 
-// LogoutWithResponse request returning *LogoutResponse
-func (c *ClientWithResponses) LogoutWithResponse(ctx context.Context, params *LogoutParams) (*LogoutResponse, error) {
-	rsp, err := c.Logout(ctx, params)
-	if err != nil {
-		return nil, err
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetUsageReportResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
 	}
-	return ParseLogoutResponse(rsp)
+	return 0
 }
 
-// GetSessionWithResponse request returning *GetSessionResponse
-func (c *ClientWithResponses) GetSessionWithResponse(ctx context.Context) (*GetSessionResponse, error) {
-	rsp, err := c.GetSession(ctx)
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r GetUsageReportResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+// ListAuditEventsWithResponse request returning *ListAuditEventsResponse
+func (c *ClientWithResponses) ListAuditEventsWithResponse(ctx context.Context, params *ListAuditEventsParams) (*ListAuditEventsResponse, error) {
+	rsp, err := c.ListAuditEvents(ctx, params)
 	if err != nil {
 		return nil, err
 	}
-	return ParseGetSessionResponse(rsp)
+	return ParseListAuditEventsResponse(rsp)
 }
 
 // ListAuthTokensWithResponse request returning *ListAuthTokensResponse
@@ -3289,6 +3976,40 @@ func (c *ClientWithResponses) GetAuthTokenWithResponse(ctx context.Context, auth
 		return nil, err
 	}
 	return ParseGetAuthTokenResponse(rsp)
+}
+
+// UpdateAuthTokenWithBodyWithResponse request with arbitrary body returning *UpdateAuthTokenResponse
+func (c *ClientWithResponses) UpdateAuthTokenWithBodyWithResponse(ctx context.Context, authTokenId AuthTokenId, contentType string, body io.Reader) (*UpdateAuthTokenResponse, error) {
+	rsp, err := c.UpdateAuthTokenWithBody(ctx, authTokenId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseUpdateAuthTokenResponse(rsp)
+}
+
+func (c *ClientWithResponses) UpdateAuthTokenWithResponse(ctx context.Context, authTokenId AuthTokenId, body UpdateAuthTokenJSONRequestBody) (*UpdateAuthTokenResponse, error) {
+	rsp, err := c.UpdateAuthToken(ctx, authTokenId, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseUpdateAuthTokenResponse(rsp)
+}
+
+// PlanClusterPriceWithBodyWithResponse request with arbitrary body returning *PlanClusterPriceResponse
+func (c *ClientWithResponses) PlanClusterPriceWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*PlanClusterPriceResponse, error) {
+	rsp, err := c.PlanClusterPriceWithBody(ctx, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePlanClusterPriceResponse(rsp)
+}
+
+func (c *ClientWithResponses) PlanClusterPriceWithResponse(ctx context.Context, body PlanClusterPriceJSONRequestBody) (*PlanClusterPriceResponse, error) {
+	rsp, err := c.PlanClusterPrice(ctx, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePlanClusterPriceResponse(rsp)
 }
 
 // ListCloudCredentialsWithResponse request returning *ListCloudCredentialsResponse
@@ -3475,6 +4196,15 @@ func (c *ClientWithResponses) GetClusterHealthWithResponse(ctx context.Context, 
 	return ParseGetClusterHealthResponse(rsp)
 }
 
+// GetClusterIngressControllerWithResponse request returning *GetClusterIngressControllerResponse
+func (c *ClientWithResponses) GetClusterIngressControllerWithResponse(ctx context.Context, clusterId ClusterId) (*GetClusterIngressControllerResponse, error) {
+	rsp, err := c.GetClusterIngressController(ctx, clusterId)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetClusterIngressControllerResponse(rsp)
+}
+
 // GetClusterKubeconfigWithResponse request returning *GetClusterKubeconfigResponse
 func (c *ClientWithResponses) GetClusterKubeconfigWithResponse(ctx context.Context, clusterId ClusterId) (*GetClusterKubeconfigResponse, error) {
 	rsp, err := c.GetClusterKubeconfig(ctx, clusterId)
@@ -3500,6 +4230,50 @@ func (c *ClientWithResponses) GetClusterNodesWithResponse(ctx context.Context, c
 		return nil, err
 	}
 	return ParseGetClusterNodesResponse(rsp)
+}
+
+// AddClusterNodeWithBodyWithResponse request with arbitrary body returning *AddClusterNodeResponse
+func (c *ClientWithResponses) AddClusterNodeWithBodyWithResponse(ctx context.Context, clusterId ClusterId, contentType string, body io.Reader) (*AddClusterNodeResponse, error) {
+	rsp, err := c.AddClusterNodeWithBody(ctx, clusterId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseAddClusterNodeResponse(rsp)
+}
+
+func (c *ClientWithResponses) AddClusterNodeWithResponse(ctx context.Context, clusterId ClusterId, body AddClusterNodeJSONRequestBody) (*AddClusterNodeResponse, error) {
+	rsp, err := c.AddClusterNode(ctx, clusterId, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseAddClusterNodeResponse(rsp)
+}
+
+// DeleteClusterNodeWithResponse request returning *DeleteClusterNodeResponse
+func (c *ClientWithResponses) DeleteClusterNodeWithResponse(ctx context.Context, clusterId ClusterId, nodeId string) (*DeleteClusterNodeResponse, error) {
+	rsp, err := c.DeleteClusterNode(ctx, clusterId, nodeId)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDeleteClusterNodeResponse(rsp)
+}
+
+// GetClusterNodeWithResponse request returning *GetClusterNodeResponse
+func (c *ClientWithResponses) GetClusterNodeWithResponse(ctx context.Context, clusterId ClusterId, nodeId string) (*GetClusterNodeResponse, error) {
+	rsp, err := c.GetClusterNode(ctx, clusterId, nodeId)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetClusterNodeResponse(rsp)
+}
+
+// InterruptClusterNodeWithResponse request returning *InterruptClusterNodeResponse
+func (c *ClientWithResponses) InterruptClusterNodeWithResponse(ctx context.Context, clusterId ClusterId, nodeId string) (*InterruptClusterNodeResponse, error) {
+	rsp, err := c.InterruptClusterNode(ctx, clusterId, nodeId)
+	if err != nil {
+		return nil, err
+	}
+	return ParseInterruptClusterNodeResponse(rsp)
 }
 
 // UpdateNodeListWithBodyWithResponse request with arbitrary body returning *UpdateNodeListResponse
@@ -3571,6 +4345,15 @@ func (c *ClientWithResponses) ResumeClusterWithResponse(ctx context.Context, clu
 	return ParseResumeClusterResponse(rsp)
 }
 
+// GetOperationWithResponse request returning *GetOperationResponse
+func (c *ClientWithResponses) GetOperationWithResponse(ctx context.Context, id string) (*GetOperationResponse, error) {
+	rsp, err := c.GetOperation(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetOperationResponse(rsp)
+}
+
 // ListRegionsWithResponse request returning *ListRegionsResponse
 func (c *ClientWithResponses) ListRegionsWithResponse(ctx context.Context) (*ListRegionsResponse, error) {
 	rsp, err := c.ListRegions(ctx)
@@ -3580,79 +4363,31 @@ func (c *ClientWithResponses) ListRegionsWithResponse(ctx context.Context) (*Lis
 	return ParseListRegionsResponse(rsp)
 }
 
-// ParseLoginCallbackResponse parses an HTTP response from a LoginCallbackWithResponse call
-func ParseLoginCallbackResponse(rsp *http.Response) (*LoginCallbackResponse, error) {
-	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
+// GetUsageReportWithResponse request returning *GetUsageReportResponse
+func (c *ClientWithResponses) GetUsageReportWithResponse(ctx context.Context, params *GetUsageReportParams) (*GetUsageReportResponse, error) {
+	rsp, err := c.GetUsageReport(ctx, params)
 	if err != nil {
 		return nil, err
 	}
-
-	response := &LoginCallbackResponse{
-		Body:         bodyBytes,
-		HTTPResponse: rsp,
-	}
-
-	switch {
-	}
-
-	return response, nil
+	return ParseGetUsageReportResponse(rsp)
 }
 
-// ParseLoginResponse parses an HTTP response from a LoginWithResponse call
-func ParseLoginResponse(rsp *http.Response) (*LoginResponse, error) {
+// ParseListAuditEventsResponse parses an HTTP response from a ListAuditEventsWithResponse call
+func ParseListAuditEventsResponse(rsp *http.Response) (*ListAuditEventsResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
 	defer rsp.Body.Close()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &LoginResponse{
-		Body:         bodyBytes,
-		HTTPResponse: rsp,
-	}
-
-	switch {
-	}
-
-	return response, nil
-}
-
-// ParseLogoutResponse parses an HTTP response from a LogoutWithResponse call
-func ParseLogoutResponse(rsp *http.Response) (*LogoutResponse, error) {
-	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
-	if err != nil {
-		return nil, err
-	}
-
-	response := &LogoutResponse{
-		Body:         bodyBytes,
-		HTTPResponse: rsp,
-	}
-
-	switch {
-	}
-
-	return response, nil
-}
-
-// ParseGetSessionResponse parses an HTTP response from a GetSessionWithResponse call
-func ParseGetSessionResponse(rsp *http.Response) (*GetSessionResponse, error) {
-	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
-	if err != nil {
-		return nil, err
-	}
-
-	response := &GetSessionResponse{
+	response := &ListAuditEventsResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest UserSession
+		var dest AuditEventList
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -3750,6 +4485,58 @@ func ParseGetAuthTokenResponse(rsp *http.Response) (*GetAuthTokenResponse, error
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest AuthToken
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseUpdateAuthTokenResponse parses an HTTP response from a UpdateAuthTokenWithResponse call
+func ParseUpdateAuthTokenResponse(rsp *http.Response) (*UpdateAuthTokenResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &UpdateAuthTokenResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest AuthToken
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParsePlanClusterPriceResponse parses an HTTP response from a PlanClusterPriceWithResponse call
+func ParsePlanClusterPriceResponse(rsp *http.Response) (*PlanClusterPriceResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &PlanClusterPriceResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ClusterCostEstimate
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -4169,6 +4956,39 @@ func ParseGetClusterHealthResponse(rsp *http.Response) (*GetClusterHealthRespons
 	return response, nil
 }
 
+// ParseGetClusterIngressControllerResponse parses an HTTP response from a GetClusterIngressControllerWithResponse call
+func ParseGetClusterIngressControllerResponse(rsp *http.Response) (*GetClusterIngressControllerResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetClusterIngressControllerResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest KubernetesIngressController
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 404:
+		var dest ErrorResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON404 = &dest
+
+	}
+
+	return response, nil
+}
+
 // ParseGetClusterKubeconfigResponse parses an HTTP response from a GetClusterKubeconfigWithResponse call
 func ParseGetClusterKubeconfigResponse(rsp *http.Response) (*GetClusterKubeconfigResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
@@ -4235,6 +5055,103 @@ func ParseGetClusterNodesResponse(rsp *http.Response) (*GetClusterNodesResponse,
 		}
 		response.JSON200 = &dest
 
+	}
+
+	return response, nil
+}
+
+// ParseAddClusterNodeResponse parses an HTTP response from a AddClusterNodeWithResponse call
+func ParseAddClusterNodeResponse(rsp *http.Response) (*AddClusterNodeResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &AddClusterNodeResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 201:
+		var dest AddNodeResult
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON201 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDeleteClusterNodeResponse parses an HTTP response from a DeleteClusterNodeWithResponse call
+func ParseDeleteClusterNodeResponse(rsp *http.Response) (*DeleteClusterNodeResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DeleteClusterNodeResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 201:
+		var dest DeleteNodeResult
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON201 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetClusterNodeResponse parses an HTTP response from a GetClusterNodeWithResponse call
+func ParseGetClusterNodeResponse(rsp *http.Response) (*GetClusterNodeResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetClusterNodeResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest Node
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseInterruptClusterNodeResponse parses an HTTP response from a InterruptClusterNodeWithResponse call
+func ParseInterruptClusterNodeResponse(rsp *http.Response) (*InterruptClusterNodeResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &InterruptClusterNodeResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
 	}
 
 	return response, nil
@@ -4370,6 +5287,32 @@ func ParseResumeClusterResponse(rsp *http.Response) (*ResumeClusterResponse, err
 	return response, nil
 }
 
+// ParseGetOperationResponse parses an HTTP response from a GetOperationWithResponse call
+func ParseGetOperationResponse(rsp *http.Response) (*GetOperationResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetOperationResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest OperationResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
 // ParseListRegionsResponse parses an HTTP response from a ListRegionsWithResponse call
 func ParseListRegionsResponse(rsp *http.Response) (*ListRegionsResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
@@ -4390,6 +5333,35 @@ func ParseListRegionsResponse(rsp *http.Response) (*ListRegionsResponse, error) 
 			return nil, err
 		}
 		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetUsageReportResponse parses an HTTP response from a GetUsageReportWithResponse call
+func ParseGetUsageReportResponse(rsp *http.Response) (*GetUsageReportResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetUsageReportResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ResourceUsageReport
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case rsp.StatusCode == 200:
+		// Content-type (text/csv) unsupported
 
 	}
 
