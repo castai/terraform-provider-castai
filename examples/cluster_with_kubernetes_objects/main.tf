@@ -37,7 +37,7 @@ resource "castai_cluster" "example_cluster" {
     nodes {
       cloud = "gcp"
       role  = "master"
-      shape = "small"
+      shape = "medium"
     }
     nodes {
       cloud = "gcp"
