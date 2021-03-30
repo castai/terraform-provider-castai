@@ -36,7 +36,7 @@ resource "castai_cluster" "example_cluster" {
     nodes {
       cloud = "aws"
       role  = "master"
-      shape = "small"
+      shape = "medium"
     }
     nodes {
       cloud = "aws"
