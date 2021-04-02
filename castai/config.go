@@ -6,8 +6,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/logging"
-
 	"github.com/castai/terraform-provider-castai/castai/sdk"
 )
 
@@ -23,7 +21,7 @@ type ProviderConfig struct {
 func (c *Config) configureProvider() (interface{}, error) {
 	httpClientOption := func(client *sdk.Client) error {
 		client.Client = &http.Client{
-			Transport: logging.NewTransport("CAST.AI", http.DefaultTransport),
+			Transport: http.DefaultTransport,
 			Timeout:   1 * time.Minute,
 		}
 		return nil
@@ -34,16 +32,16 @@ func (c *Config) configureProvider() (interface{}, error) {
 		return nil
 	})
 
-	apiClient, err := sdk.NewClientWithResponses(c.ApiUrl, httpClientOption, apiTokenOption)
+	client, err := sdk.NewClientWithResponses(c.ApiUrl, httpClientOption, apiTokenOption)
 	if err != nil {
 		return nil, err
 	}
 
-	if checkErr := sdk.CheckGetResponse(apiClient.ListAuthTokensWithResponse(context.Background())); checkErr != nil {
+	if checkErr := sdk.CheckGetResponse(client.ListAuthTokensWithResponse(context.Background())); checkErr != nil {
 		return nil, fmt.Errorf("validating api token (by listing auth tokens): %v", checkErr)
 	}
 
 	return &ProviderConfig{
-		api: apiClient,
+		api: client,
 	}, nil
 }
