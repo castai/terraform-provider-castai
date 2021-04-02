@@ -25,6 +25,35 @@ resource "castai_cluster" "example_cluster" {
       shape = "medium"
     }
   }
+
+  autoscaler_policies {
+
+    cluster_limits {
+      cpu {
+        max_cores = 20
+        min_cores = 2
+      }
+    }
+
+    node_downscaler {
+      empty_nodes {
+        enabled = false
+      }
+    }
+
+    spot_instances {
+      clouds = ["gcp"]
+      enabled = false
+    }
+
+    unschedulable_pods {
+      enabled = false
+      headroom {
+        cpu_percentage = 10
+        memory_percentage = 10
+      }
+    }
+  }
 }
 
 output "example_cluster_kubeconfig" {

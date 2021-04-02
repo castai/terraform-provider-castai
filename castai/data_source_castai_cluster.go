@@ -43,6 +43,111 @@ func dataSourceCastaiCluster() *schema.Resource {
 				Computed: true,
 			},
 			"kubeconfig": schemaKubeconfig(),
+			PolicyFieldAutoscalerPolicies: {
+				Type:     schema.TypeList,
+				Computed: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						PolicyFieldEnabled: {
+							Type:     schema.TypeBool,
+							Computed: true,
+						},
+						PolicyFieldClusterLimits: {
+							Type:     schema.TypeList,
+							Computed: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									PolicyFieldEnabled: {
+										Type:     schema.TypeBool,
+										Computed: true,
+									},
+									PolicyFieldClusterLimitsCPU: {
+										Type:     schema.TypeList,
+										Computed: true,
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												PolicyFieldClusterLimitsCPUmax: {
+													Type:     schema.TypeInt,
+													Computed: true,
+												},
+												PolicyFieldClusterLimitsCPUmin: {
+													Type:     schema.TypeInt,
+													Computed: true,
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+						PolicyFieldNodeDownscaler: {
+							Type:     schema.TypeList,
+							Computed: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									PolicyFieldNodeDownscalerEmptyNodes: {
+										Type:     schema.TypeList,
+										Computed: true,
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												PolicyFieldEnabled: {
+													Type:     schema.TypeBool,
+													Computed: true,
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+						PolicyFieldSpotInstances: {
+							Type:     schema.TypeList,
+							Computed: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									PolicyFieldSpotInstancesClouds: {
+										Type:     schema.TypeList,
+										Computed: true,
+										Elem:     &schema.Schema{Type: schema.TypeString},
+									},
+									PolicyFieldEnabled: {
+										Type:     schema.TypeBool,
+										Computed: true,
+									},
+								},
+							},
+						},
+						PolicyFieldUnschedulablePods: {
+							Type:     schema.TypeList,
+							Computed: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									PolicyFieldEnabled: {
+										Type:     schema.TypeBool,
+										Computed: true,
+									},
+									PolicyFieldUnschedulablePodsHeadroom: {
+										Type:     schema.TypeList,
+										Computed: true,
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												PolicyFieldUnschedulablePodsHeadroomCPUp: {
+													Type:     schema.TypeInt,
+													Computed: true,
+												},
+												PolicyFieldUnschedulablePodsHeadroomRAMp: {
+													Type:     schema.TypeInt,
+													Computed: true,
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
 		},
 	}
 }
@@ -111,7 +216,61 @@ func dataSourceCastaiClusterRead(ctx context.Context, data *schema.ResourceData,
 		data.Set(ClusterFieldKubeconfig, []interface{}{})
 	}
 
+	policies, err := client.GetPoliciesWithResponse(ctx, sdk.ClusterId(data.Id()))
+	if checkErr := sdk.CheckGetResponse(policies, err); checkErr == nil {
+		log.Printf("[INFO] Autoscaling policies for cluster %q", data.Id())
+		data.Set(PolicyFieldAutoscalerPolicies, flattenAutoscalerPolicies(policies.JSON200))
+	} else {
+		log.Printf("[WARN] autoscaling policies are not available for cluster %q: %v", data.Id(), checkErr)
+	}
+
 	return nil
+}
+
+
+func flattenAutoscalerPolicies(readPol *sdk.PoliciesConfig) []map[string]interface{} {
+	return []map[string]interface{}{
+		{
+			PolicyFieldEnabled: readPol.Enabled,
+			PolicyFieldClusterLimits: []map[string]interface{}{
+				{
+					PolicyFieldEnabled: readPol.ClusterLimits.Enabled,
+					PolicyFieldClusterLimitsCPU: []map[string]interface{}{
+						{
+							PolicyFieldClusterLimitsCPUmax: readPol.ClusterLimits.Cpu.MaxCores,
+							PolicyFieldClusterLimitsCPUmin: readPol.ClusterLimits.Cpu.MinCores,
+						},
+					},
+				},
+			},
+			PolicyFieldNodeDownscaler: []map[string]interface{}{
+				{
+					PolicyFieldNodeDownscalerEmptyNodes: []map[string]interface{}{
+						{
+							PolicyFieldEnabled: readPol.NodeDownscaler.EmptyNodes.Enabled,
+						},
+					},
+				},
+			},
+			PolicyFieldSpotInstances: []map[string]interface{}{
+				{
+					PolicyFieldEnabled:             readPol.SpotInstances.Enabled,
+					PolicyFieldSpotInstancesClouds: readPol.SpotInstances.Clouds,
+				},
+			},
+			PolicyFieldUnschedulablePods: []map[string]interface{}{
+				{
+					PolicyFieldEnabled: readPol.UnschedulablePods.Enabled,
+					PolicyFieldUnschedulablePodsHeadroom: []map[string]interface{}{
+						{
+							PolicyFieldUnschedulablePodsHeadroomCPUp: readPol.UnschedulablePods.Headroom.CpuPercentage,
+							PolicyFieldUnschedulablePodsHeadroomRAMp: readPol.UnschedulablePods.Headroom.MemoryPercentage,
+						},
+					},
+				},
+			},
+		},
+	}
 }
 
 func flattenKubeConfig(rawKubeconfig string) ([]interface{}, error) {
