@@ -27,6 +27,13 @@ const (
 	ClusterFieldNodesCloud       = "cloud"
 	ClusterFieldNodesRole        = "role"
 	ClusterFieldNodesShape       = "shape"
+
+	PolicyFieldAutoscalerPolicies = "autoscaler_policies"
+	PolicyFieldClusterLimits = "cluster_limits"
+	PolicyFieldNodeDownscaler = "node_downscaler"
+	PolicyFieldSpotInstances = "spot_instances"
+	PolicyFieldUnschedulablePods = "unschedulable_pods"
+
 )
 
 func resourceCastaiCluster() *schema.Resource {
@@ -100,6 +107,128 @@ func resourceCastaiCluster() *schema.Resource {
 				},
 			},
 			ClusterFieldKubeconfig: schemaKubeconfig(),
+			PolicyFieldAutoscalerPolicies: {
+				Type:     schema.TypeList,
+				MaxItems: 1,
+				Optional: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"enabled": {
+							Type:     schema.TypeBool,
+							Optional: true,
+							Default: true,
+						},
+						PolicyFieldClusterLimits: {
+							Type:     schema.TypeList,
+							MaxItems: 1,
+							Optional: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"enabled": {
+										Type:     schema.TypeBool,
+										Optional: true,
+										Default:  true,
+									},
+									"cpu": {
+										Type:     schema.TypeList,
+										MaxItems: 1,
+										Optional: true,
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"max_cores": {
+													Type:     schema.TypeInt,
+													Optional: true,
+													Default: 21,
+												},
+												"min_cores": {
+													Type:     schema.TypeInt,
+													Optional: true,
+													Default: 2,
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+						PolicyFieldNodeDownscaler: {
+							Type:     schema.TypeList,
+							MaxItems: 1,
+							Optional: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"empty_nodes": {
+										Type:     schema.TypeList,
+										MaxItems: 1,
+										Optional: true,
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"enabled": {
+													Type:     schema.TypeBool,
+													Optional: true,
+													Default:  false,
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+						PolicyFieldSpotInstances: {
+							Type:     schema.TypeList,
+							MaxItems: 1,
+							Optional: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"clouds": {
+										Type:     schema.TypeList,
+										Optional: true,
+										Elem:     &schema.Schema{Type: schema.TypeString},
+									},
+									"enabled": {
+										Type:     schema.TypeBool,
+										Optional: true,
+										Default:  false,
+									},
+								},
+							},
+						},
+						PolicyFieldUnschedulablePods: {
+							Type:     schema.TypeList,
+							MaxItems: 1,
+							Optional: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"enabled": {
+										Type:     schema.TypeBool,
+										Optional: true,
+										Default:  false,
+									},
+									"headroom": {
+										Type:     schema.TypeList,
+										MaxItems: 1,
+										Optional: true,
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"cpu_percentage": {
+													Type:     schema.TypeInt,
+													Optional: true,
+													Default: 20,
+												},
+												"memory_percentage": {
+													Type:     schema.TypeInt,
+													Optional: true,
+													Default: 2,
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
 		},
 	}
 }
@@ -138,8 +267,16 @@ func resourceCastaiClusterCreateOrUpdate(ctx context.Context, data *schema.Resou
 	if err != nil {
 		return diag.FromErr(err)
 	}
-
 	log.Printf("[INFO] Cluster %q has reached `ready` status", data.Id())
+
+	log.Printf("[DEBUG] Cluster %q autoscaling policies update", data.Id())
+	autoscalerParams, ok := data.Get(PolicyFieldAutoscalerPolicies).([]interface{})
+	if !ok || autoscalerParams == nil || len(autoscalerParams) == 0 || autoscalerParams[0] == nil {
+		println("[DEBUG] Reading Policies `autoscaler_policies` empty parameters %v")
+		return resourceCastaiClusterRead(ctx, data, meta)
+	}
+	updatePolicies(ctx, client, response.JSON201.Id, autoscalerParams[0].(map[string]interface{}))
+
 	return resourceCastaiClusterRead(ctx, data, meta)
 }
 
@@ -221,3 +358,189 @@ func waitForClusterToReachStatusFunc(ctx context.Context, client *sdk.ClientWith
 		return resource.NonRetryableError(fmt.Errorf("cluster has reached unexpected status, id=%q name=%q, status=%s", cluster.Id, cluster.Name, cluster.Status))
 	}
 }
+
+func expandCPUlimit(params interface{}) sdk.ClusterLimitsCpu {
+	var clusterLimitsCPU sdk.ClusterLimitsCpu
+	for _, val := range params.([]interface{}) {
+		cpuData := val.(map[string]interface{})
+		clusterLimitsCPU = sdk.ClusterLimitsCpu{
+			MaxCores:  int64(cpuData["max_cores"].(int)),
+			MinCores:  int64(cpuData["min_cores"].(int)),
+		}
+	}
+	return clusterLimitsCPU
+}
+
+func expandNodeDownscaler(params interface{}) *sdk.NodeDownscalerEmptyNodes {
+	var nodeDownscalerBool sdk.NodeDownscalerEmptyNodes
+	for _, val := range params.([]interface{}) {
+		ndData := val.(map[string]interface{})
+		nodeDownscalerEnabled := ndData["enabled"].(bool)
+		nodeDownscalerBool = sdk.NodeDownscalerEmptyNodes{
+			Enabled:  &nodeDownscalerEnabled,
+		}
+	}
+	return &nodeDownscalerBool
+}
+
+func expandHeadroom(params interface{}) sdk.Headroom {
+	var headroomPercentage sdk.Headroom
+	for _, val := range params.([]interface{}) {
+		hpData := val.(map[string]interface{})
+		headroomPercentage = sdk.Headroom{
+			CpuPercentage:  	hpData["cpu_percentage"].(int),
+			MemoryPercentage:   hpData["memory_percentage"].(int),
+		}
+	}
+	return headroomPercentage
+}
+
+func updatePolicies(ctx context.Context, client *sdk.ClientWithResponses, clusterID string, pc map[string]interface{}) diag.Diagnostics {
+	var clusterLimits sdk.ClusterLimitsPolicy
+	for _, val := range pc[PolicyFieldClusterLimits].([]interface{}) {
+		limitData := val.(map[string]interface{})
+
+		clusterLimits = sdk.ClusterLimitsPolicy{
+			Enabled:  limitData["enabled"].(bool),
+			Cpu: expandCPUlimit(limitData["cpu"].(interface{})),
+		}
+	}
+	log.Printf("[DEBUG] Reading Policies `cluster_limits` parameterEnabled=%v", clusterLimits)
+
+	var nodeDownscaler sdk.NodeDownscaler
+	for _, val := range pc[PolicyFieldNodeDownscaler].([]interface{}) {
+		ndData := val.(map[string]interface{})
+		nodeDownscaler = sdk.NodeDownscaler{
+			EmptyNodes: expandNodeDownscaler(ndData["empty_nodes"].(interface{})),
+		}
+	}
+	log.Printf("[DEBUG] Reading Policies `node_downscaler` parameterEnabled=%v", &nodeDownscaler.EmptyNodes.Enabled)
+
+	var spotInstances sdk.SpotInstances
+	for _, val := range pc[PolicyFieldSpotInstances].([]interface{}) {
+		siData := val.(map[string]interface{})
+
+		spotInstances = sdk.SpotInstances{
+			Enabled:  siData["enabled"].(bool),
+			Clouds: convertStringArr(siData["clouds"].([]interface{})),
+		}
+	}
+	log.Printf("[DEBUG] Reading Policies `spot_instances` parameterEnabled=%v", spotInstances)
+
+	var unschedulablePods sdk.UnschedulablePodsPolicy
+	for _, val := range pc[PolicyFieldUnschedulablePods].([]interface{}) {
+		upData := val.(map[string]interface{})
+
+		unschedulablePods = sdk.UnschedulablePodsPolicy{
+			Enabled:  upData["enabled"].(bool),
+			Headroom: expandHeadroom(upData["headroom"].(interface{})),
+		}
+	}
+	log.Printf("[DEBUG] Reading Policies `unschedulable_pods` parameterEnabled=%v", unschedulablePods)
+
+	autoscalerConfig := sdk.UpsertPoliciesJSONRequestBody{
+		ClusterLimits:     clusterLimits,
+		Enabled:		   pc["enabled"].(bool),
+		NodeDownscaler:    &nodeDownscaler,
+		SpotInstances:     spotInstances,
+		UnschedulablePods: unschedulablePods,
+	}
+
+	resppol, err := client.UpsertPoliciesWithResponse(ctx, sdk.ClusterId(clusterID), autoscalerConfig)
+	if checkErr := sdk.CheckGetResponse(resppol, err); checkErr != nil {
+		return diag.FromErr(checkErr)
+	}
+
+	return nil
+}
+
+//
+//func expandAutoscalerPolicyConfig(configured interface{}, data *schema.ResourceData) *sdk.UpsertPoliciesJSONRequestBody {
+//	l, ok := configured.([]interface{})
+//	if !ok || l == nil || len(l) == 0 || l[0] == nil {
+//
+//		println("empty parameters")
+//		return &sdk.UpsertPoliciesJSONRequestBody{
+//			Enabled: false,
+//		}
+//	}
+//
+//	config := l[0].(map[string]interface{})
+//
+//	_ = config
+//	//if limits, ok := config["cluster_limits"]; ok {
+//	//	cluster_limits := make([]*sdk.ClusterLimitsPolicy, 0)
+//	//	if lmts, ok := limits.([]interface{}); ok {
+//	//		for _, v := range lmts {
+//	//			limit := v.(map[string]interface{})
+//	//			cluster_limits = append(cluster_limits,
+//	//				&containerBeta.ResourceLimit{
+//	//					ResourceType: limit["resource_type"].(string),
+//	//					// Here we're relying on *not* setting ForceSendFields for 0-values.
+//	//					Minimum: int64(limit["minimum"].(int)),
+//	//					Maximum: int64(limit["maximum"].(int)),
+//	//				})
+//	//		}
+//	//	}
+//	//}
+//
+//
+//	cluster_limits := sdk.ClusterLimitsPolicy{
+//		Enabled: true,
+//		Cpu: sdk.ClusterLimitsCpu{
+//			MaxCores: 10,
+//			MinCores: 2,
+//		},
+//	}
+//
+//	nodeDownscalerEnabled := true
+//
+//	down := &sdk.NodeDownscaler{
+//		EmptyNodes: &sdk.NodeDownscalerEmptyNodes{Enabled: &nodeDownscalerEnabled},
+//	}
+//
+//	spot := sdk.SpotInstances{
+//		Enabled: true,
+//		Clouds:  []string{"gcp"},
+//	}
+//
+//	up := sdk.UnschedulablePodsPolicy{
+//		Enabled: true,
+//		Headroom: sdk.Headroom{
+//			CpuPercentage:    11,
+//			MemoryPercentage: 11,
+//		},
+//	}
+//
+//	//return &containerBeta.ClusterAutoscaling{
+//	//	EnableNodeAutoprovisioning:       config["enabled"].(bool),
+//	//	ResourceLimits:                   cluster_limits,
+//	//	AutoscalingProfile:               config["autoscaling_profile"].(string),
+//	//	AutoprovisioningNodePoolDefaults: expandAutoProvisioningDefaults(config["auto_provisioning_defaults"], d),
+//	//} config["enabled"].(bool),
+//
+//policies, err := client.GetPoliciesWithResponse(ctx, sdk.ClusterId(data.Id()))
+//if checkErr := sdk.CheckGetResponse(policies, err); checkErr != nil {
+//return diag.Errorf("fetching cluster by id=%s: %v", sdk.ClusterId(data.Id()), checkErr)
+//}
+////if err := data.Set("autoscaler_enabled_master_switch", policies.JSON200.Enabled); err != nil {
+////	return diag.FromErr(err)
+////}
+//
+//data.Set("autoscaler_enabled_master_switch", policies.JSON200.Enabled)
+//data.Set("add_nodes_enabled", policies.JSON200.UnschedulablePods.Enabled)
+//data.Set("headroom_cpu_percentage", policies.JSON200.UnschedulablePods.Headroom.CpuPercentage)
+//data.Set("headroom_memory_percentage", policies.JSON200.UnschedulablePods.Headroom.MemoryPercentage)
+//data.Set("upper_limit_cpu", policies.JSON200.ClusterLimits.Cpu.MaxCores)
+//data.Set("lower_limit_cpu", policies.JSON200.ClusterLimits.Cpu.MinCores)
+//data.Set("support_spot_instances", policies.JSON200.SpotInstances.Clouds)
+//data.Set("remove_empty_nodes", policies.JSON200.NodeDownscaler.EmptyNodes.Enabled)
+
+//	return &sdk.UpsertPoliciesJSONRequestBody{
+//		ClusterLimits:     cluster_limits,
+//		Enabled:		   true,
+//		NodeDownscaler:    down,
+//		SpotInstances:     spot,
+//		UnschedulablePods: up,
+//	}
+//}
