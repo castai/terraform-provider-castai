@@ -28,5 +28,5 @@ resource "castai_cluster" "example_cluster" {
 }
 
 output "example_cluster_kubeconfig" {
-  value = castai_cluster.example_cluster.kubeconfig
+  value = castai_cluster.example_cluster.kubeconfig.0.raw_config
 }

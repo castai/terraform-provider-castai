@@ -99,11 +99,7 @@ func resourceCastaiCluster() *schema.Resource {
 					},
 				},
 			},
-			ClusterFieldKubeconfig: {
-				Type:      schema.TypeString,
-				Computed:  true,
-				Sensitive: true,
-			},
+			ClusterFieldKubeconfig: schemaKubeconfig(),
 		},
 	}
 }
@@ -166,10 +162,14 @@ func resourceCastaiClusterRead(ctx context.Context, data *schema.ResourceData, m
 
 	kubeconfig, err := client.GetClusterKubeconfigWithResponse(ctx, sdk.ClusterId(data.Id()))
 	if checkErr := sdk.CheckGetResponse(kubeconfig, err); checkErr == nil {
-		data.Set(ClusterFieldKubeconfig, string(kubeconfig.Body))
+		kubecfg, err := flattenKubeConfig(string(kubeconfig.Body))
+		if err != nil {
+			return nil
+		}
+		data.Set(ClusterFieldKubeconfig, kubecfg)
 	} else {
 		log.Printf("[WARN] kubeconfig is not available for cluster %q: %v", data.Id(), checkErr)
-		data.Set(ClusterFieldKubeconfig, nil)
+		data.Set(ClusterFieldKubeconfig, []interface{}{})
 	}
 
 	return nil
