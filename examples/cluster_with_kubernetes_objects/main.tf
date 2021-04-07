@@ -53,29 +53,24 @@ resource "castai_cluster" "example_cluster" {
 }
 
 output "example_cluster_kubeconfig" {
-  value = castai_cluster.example_cluster.kubeconfig
+  value = castai_cluster.example_cluster.kubeconfig.0.raw_config
 }
 
 ##############
 ### kubernetes
 ##############
 
-resource "local_file" "kubeconfig" {
-  sensitive_content = castai_cluster.example_cluster.kubeconfig
-  filename          = "${path.module}/.kube/config"
-}
-
 provider "kubernetes" {
-  config_path = local_file.kubeconfig.filename
+  host = castai_cluster.example_cluster.kubeconfig.0.host
+  cluster_ca_certificate = base64decode(castai_cluster.example_cluster.kubeconfig.0.cluster_ca_certificate)
+  client_key = base64decode(castai_cluster.example_cluster.kubeconfig.0.client_key)
+  client_certificate = base64decode(castai_cluster.example_cluster.kubeconfig.0.client_certificate)
 }
 
 resource "kubernetes_namespace" "example_namespace" {
   metadata {
     name = "example"
   }
-  depends_on = [
-    local_file.kubeconfig
-  ]
 }
 
 resource "kubernetes_secret" "example_secret" {

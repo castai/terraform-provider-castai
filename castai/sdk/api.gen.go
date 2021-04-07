@@ -11,6 +11,16 @@ import (
 	"github.com/pkg/errors"
 )
 
+// AddExternalClusterNode defines model for AddExternalClusterNode.
+type AddExternalClusterNode struct {
+
+	// Instance type for the new VM.
+	InstanceType *string `json:"instanceType,omitempty"`
+
+	// Spot instance configuration.
+	SpotConfig *NodeSpotConfig `json:"spotConfig,omitempty"`
+}
+
 // AddNodeResult defines model for AddNodeResult.
 type AddNodeResult struct {
 
@@ -21,26 +31,84 @@ type AddNodeResult struct {
 	OperationId string `json:"operationId"`
 }
 
+// Addon defines model for Addon.
+type Addon struct {
+
+	// Array of categories this addon falls under.
+	Categories *[]string `json:"categories,omitempty"`
+
+	// Addon's attributes from helm chart (Chart.yaml)
+	Chart *struct {
+
+		// Date when this addon was created in CAST.AI addons registry.
+		CreatedAt *time.Time `json:"createdAt,omitempty"`
+
+		// Chart description.
+		Description *string `json:"description,omitempty"`
+
+		// Array of keywords in this chart.
+		Features *[]string `json:"features,omitempty"`
+
+		// Chart home url.
+		Home *string `json:"home,omitempty"`
+
+		// Url to chart's icon.
+		Icon *string `json:"icon,omitempty"`
+
+		// Chart name.
+		Name *string `json:"name,omitempty"`
+
+		// Chart source url.
+		Sources *string `json:"sources,omitempty"`
+
+		// Array of archive urls for chart version.
+		Urls *[]string `json:"urls,omitempty"`
+
+		// Chart version.
+		Version *string `json:"version,omitempty"`
+	} `json:"chart,omitempty"`
+
+	// Array of features this addon brings.
+	Features *[]string `json:"features,omitempty"`
+
+	// Long description.
+	LongDescription *string `json:"longDescription,omitempty"`
+
+	// Name.
+	Name *string `json:"name,omitempty"`
+
+	// The repository this add-on comes from (example: official-addons).
+	Repository *string `json:"repository,omitempty"`
+
+	// Short description.
+	ShortDescription *string `json:"shortDescription,omitempty"`
+
+	// Title.
+	Title *string `json:"title,omitempty"`
+
+	// Version.
+	Version *string `json:"version,omitempty"`
+}
+
+// AddonList defines model for AddonList.
+type AddonList struct {
+	Items []Addon `json:"items"`
+}
+
 // AddonsConfig defines model for AddonsConfig.
 type AddonsConfig struct {
 
-	// Cert-Manager
-	CertManager *CertManagerConfig `json:"certManager,omitempty"`
+	// Grafana -- UI for Loki and Prometheus
+	GrafanaBundle *GrafanaBundleConfig `json:"grafanaBundle,omitempty"`
 
-	// Kubernetes dashboard
-	Dashboard *DashboardConfig `json:"dashboard,omitempty"`
-
-	// Elastic Cloud on Kubernetes + Logging setup
-	ElasticLogging *ElasticLoggingConfig `json:"elasticLogging,omitempty"`
-
-	// Grafana -- UI for Prometheus
-	Grafana *GrafanaConfig `json:"grafana,omitempty"`
+	// Nginx-based ingress controller and cert manager
+	IngressBundle *IngressBundleConfig `json:"ingressBundle,omitempty"`
 
 	// KEDA (keda.sh) an event-based k8s resources autoscaler
 	Keda *KedaConfig `json:"keda,omitempty"`
 
-	// Nginx-based ingress controller
-	NginxIngress *NginxIngressConfig `json:"nginxIngress,omitempty"`
+	// Kubernetes dashboard
+	KubernetesDashboard *KubernetesDashboardConfig `json:"kubernetesDashboard,omitempty"`
 }
 
 // AuditEvent defines model for AuditEvent.
@@ -180,13 +248,6 @@ type CastRegionList struct {
 	Items []CastRegion `json:"items"`
 }
 
-// CertManagerConfig defines model for CertManagerConfig.
-type CertManagerConfig struct {
-
-	// Whether this addon is enabled
-	Enabled bool `json:"enabled"`
-}
-
 // Cloud defines model for Cloud.
 type Cloud struct {
 
@@ -242,6 +303,22 @@ const (
 	CloudType_do    CloudType = "do"
 	CloudType_gcp   CloudType = "gcp"
 )
+
+// ClusterAddon defines model for ClusterAddon.
+type ClusterAddon struct {
+	Addon *Addon `json:"addon,omitempty"`
+
+	// URL to open addon exposed UI dashboard if supported.
+	ClusterGatewayUrl *string `json:"clusterGatewayUrl,omitempty"`
+
+	// Installed add-on status (unknown, deployed, uninstalled, superseded, failed, uninstalling, pending-install, pending-upgrade, pending-rollback)
+	Status *string `json:"status,omitempty"`
+}
+
+// ClusterAddonsList defines model for ClusterAddonsList.
+type ClusterAddonsList struct {
+	Items []ClusterAddon `json:"items"`
+}
 
 // ClusterCostEstimate defines model for ClusterCostEstimate.
 type ClusterCostEstimate struct {
@@ -354,13 +431,6 @@ type CostsPerTypeEstimate struct {
 	AdditionalProperties map[string]EstimatedComponentTypePrice `json:"-"`
 }
 
-// CpuUtilizationPolicies defines model for CpuUtilizationPolicies.
-type CpuUtilizationPolicies struct {
-
-	// CPU high watermark policy defines the higher bound of average cluster CPU load in percentages over the duration in seconds.
-	ScaleUpThreshold *ScaleUpThreshold `json:"scaleUpThreshold,omitempty"`
-}
-
 // CreateCluster defines model for CreateCluster.
 type CreateCluster struct {
 	Addons *AddonsConfig `json:"addons,omitempty"`
@@ -377,13 +447,6 @@ type CreateCluster struct {
 
 	// CAST AI region to create the cluster in.
 	Region string `json:"region"`
-}
-
-// DashboardConfig defines model for DashboardConfig.
-type DashboardConfig struct {
-
-	// Whether this addon is enabled
-	Enabled bool `json:"enabled"`
 }
 
 // DeleteNodeResult defines model for DeleteNodeResult.
@@ -404,16 +467,6 @@ type DeletedNode struct {
 
 	// node ID autogenerated at the time of node creation
 	Id string `json:"id"`
-}
-
-// ElasticLoggingConfig defines model for ElasticLoggingConfig.
-type ElasticLoggingConfig struct {
-	Config *struct {
-		HaMode *string `json:"haMode,omitempty"`
-	} `json:"config,omitempty"`
-
-	// Whether this addon is enabled
-	Enabled bool `json:"enabled"`
 }
 
 // ErrorResponse defines model for ErrorResponse.
@@ -465,6 +518,67 @@ type EstimatedPriceAmount struct {
 	Monthly *string `json:"monthly,omitempty"`
 }
 
+// ExternalCluster defines model for ExternalCluster.
+type ExternalCluster struct {
+	Eks *ExternalClusterEksConfiguration `json:"eks,omitempty"`
+
+	// Cluster ID, generated at the time of creation
+	Id string `json:"id"`
+
+	// Name of this infrastructure object. Needs to be unique per organization.
+	Name string `json:"name"`
+
+	// Organization ID to register cluster for.
+	OrganizationId *string `json:"organizationId,omitempty"`
+
+	// agent token to use when registering the cluster
+	Token *string `json:"token,omitempty"`
+}
+
+// ExternalClusterEditParams defines model for ExternalClusterEditParams.
+type ExternalClusterEditParams struct {
+
+	// ID of previously saved cloud credentials.
+	CredentialsId string `json:"credentialsId"`
+}
+
+// ExternalClusterEksConfiguration defines model for ExternalClusterEksConfiguration.
+type ExternalClusterEksConfiguration struct {
+
+	// EKS cluster name
+	ClusterName *string `json:"clusterName,omitempty"`
+
+	// EKS cluster region
+	Region *string `json:"region,omitempty"`
+}
+
+// ExternalClusterNode defines model for ExternalClusterNode.
+type ExternalClusterNode struct {
+
+	// node ID.
+	NodeId string `json:"nodeId"`
+
+	// Spot instance configuration.
+	SpotConfig *NodeSpotConfig `json:"spotConfig,omitempty"`
+}
+
+// ExternalClusterNodes defines model for ExternalClusterNodes.
+type ExternalClusterNodes struct {
+	Items []ExternalClusterNode `json:"items"`
+}
+
+// ExternalClusterRegistrationToken defines model for ExternalClusterRegistrationToken.
+type ExternalClusterRegistrationToken struct {
+
+	// Token to use when deploying monitoring agent on remote clusters.
+	Token string `json:"token"`
+}
+
+// ExternalClustersList defines model for ExternalClustersList.
+type ExternalClustersList struct {
+	Items []ExternalCluster `json:"items"`
+}
+
 // FieldViolation defines model for FieldViolation.
 type FieldViolation struct {
 	Description string `json:"description"`
@@ -507,8 +621,35 @@ type GSLBResponse struct {
 	Dns string `json:"dns"`
 }
 
-// GrafanaConfig defines model for GrafanaConfig.
-type GrafanaConfig struct {
+// GrafanaBundleConfig defines model for GrafanaBundleConfig.
+type GrafanaBundleConfig struct {
+
+	// Whether this addon is enabled
+	Enabled bool `json:"enabled"`
+}
+
+// Headroom defines model for Headroom.
+type Headroom struct {
+
+	// Defines percentage of additional CPU capacity to be added
+	CpuPercentage int `json:"cpuPercentage"`
+
+	// Defines percentage of additional memory capacity to be added
+	MemoryPercentage int `json:"memoryPercentage"`
+}
+
+// Heartbeat defines model for Heartbeat.
+type Heartbeat struct {
+
+	// Timestamp of the last heartbeat from this system
+	ReceivedAt *time.Time `json:"receivedAt,omitempty"`
+
+	// originating system name
+	System *string `json:"system,omitempty"`
+}
+
+// IngressBundleConfig defines model for IngressBundleConfig.
+type IngressBundleConfig struct {
 
 	// Whether this addon is enabled
 	Enabled bool `json:"enabled"`
@@ -522,6 +663,44 @@ type IngressLoadBalancer struct {
 
 	// Type/origin of load balancer.
 	Type string `json:"type"`
+}
+
+// InstanceType defines model for InstanceType.
+type InstanceType struct {
+
+	// Instance type creation in our system timestamp in RFC3339Nano format.
+	CreatedAt time.Time `json:"createdAt"`
+
+	// ID of the instance type object.
+	Id string `json:"id"`
+
+	// Instance type name.
+	InstanceType string `json:"instanceType"`
+
+	// The price of the instance type. Value is in $/hour.
+	Price string `json:"price"`
+
+	// Short provider name.
+	Provider string `json:"provider"`
+
+	// Number of available memory in megabytes.
+	Ram int `json:"ram"`
+
+	// Region name. This value is provider specific.
+	Region string `json:"region"`
+
+	// Instance type last update in our system timestamp in RFC3339Nano format.
+	UpdatedAt time.Time `json:"updatedAt"`
+
+	// Number of VCPU cores.
+	Vcpu int `json:"vcpu"`
+}
+
+// InstanceTypesResponse defines model for InstanceTypesResponse.
+type InstanceTypesResponse struct {
+
+	// List of instance types.
+	InstanceTypes []InstanceType `json:"instanceTypes"`
 }
 
 // IpSecConfig defines model for IpSecConfig.
@@ -541,8 +720,15 @@ type KubernetesCluster struct {
 	// Credentials ID list which determines the CSP configuration of this cluster.
 	CloudCredentialsIDs []string `json:"cloudCredentialsIDs"`
 
+	// Cluster creation UTC time in RFC3339 format.
+	CreatedAt  *time.Time                    `json:"createdAt,omitempty"`
+	Heartbeats *KubernetesCluster_Heartbeats `json:"heartbeats,omitempty"`
+
 	// Cluster ID, generated at the time of creation
 	Id string `json:"id"`
+
+	// Cluster kubernetes version.
+	KubernetesVersion *string `json:"kubernetesVersion,omitempty"`
 
 	// Name of this infrastructure object. Needs to be unique per organization.
 	Name    string   `json:"name"`
@@ -555,11 +741,19 @@ type KubernetesCluster struct {
 	PausedNotes   *string `json:"pausedNotes,omitempty"`
 	ReconcileMode string  `json:"reconcileMode"`
 
+	// Last cluster reconcile UTC time in RFC3339 format.
+	ReconciledAt *time.Time `json:"reconciledAt,omitempty"`
+
 	// CAST AI region used by cluster.
 	Region ClusterRegion `json:"region"`
 
 	// Current status of the cluster
 	Status string `json:"status"`
+}
+
+// KubernetesCluster_Heartbeats defines model for KubernetesCluster.Heartbeats.
+type KubernetesCluster_Heartbeats struct {
+	AdditionalProperties map[string]Heartbeat `json:"-"`
 }
 
 // KubernetesClusterAuditLogEventsList defines model for KubernetesClusterAuditLogEventsList.
@@ -593,6 +787,13 @@ type KubernetesClusterList struct {
 	Items []KubernetesCluster `json:"items"`
 }
 
+// KubernetesDashboardConfig defines model for KubernetesDashboardConfig.
+type KubernetesDashboardConfig struct {
+
+	// Whether this addon is enabled
+	Enabled bool `json:"enabled"`
+}
+
 // KubernetesIngressController defines model for KubernetesIngressController.
 type KubernetesIngressController struct {
 
@@ -608,18 +809,14 @@ type Network struct {
 	Vpn VpnConfig `json:"vpn"`
 }
 
-// NginxIngressConfig defines model for NginxIngressConfig.
-type NginxIngressConfig struct {
-
-	// Whether this addon is enabled
-	Enabled bool `json:"enabled"`
-}
-
 // Node defines model for Node.
 type Node struct {
 
 	// Cloud service provider type.
 	Cloud CloudType `json:"cloud"`
+
+	// Node creation UTC time in RFC3339 format.
+	CreatedAt *time.Time `json:"createdAt,omitempty"`
 
 	// Node ID autogenerated at the time of node creation.
 	Id *string `json:"id,omitempty"`
@@ -629,6 +826,9 @@ type Node struct {
 
 	// Node name generated at the time of node creation.
 	Name *string `json:"name,omitempty"`
+
+	// Kubernetes node network
+	Network *NodeNetwork `json:"network,omitempty"`
 
 	// Specifies the node type.
 	//
@@ -662,6 +862,16 @@ type NodeDownscalerEmptyNodes struct {
 // NodeList defines model for NodeList.
 type NodeList struct {
 	Items []Node `json:"items"`
+}
+
+// NodeNetwork defines model for NodeNetwork.
+type NodeNetwork struct {
+
+	// node private IP
+	PrivateIp string `json:"privateIp"`
+
+	// node public IP
+	PublicIp string `json:"publicIp"`
 }
 
 // NodeShape defines model for NodeShape.
@@ -747,19 +957,37 @@ type PauseCluster struct {
 	Notes *string `json:"notes,omitempty"`
 }
 
+// PauseSchedule defines model for PauseSchedule.
+type PauseSchedule struct {
+	Enabled bool `json:"enabled"`
+
+	// optional name for the schedule
+	Name     *string             `json:"name,omitempty"`
+	Spans    []PauseScheduleSpan `json:"spans"`
+	TimeZone string              `json:"timeZone"`
+}
+
+// PauseScheduleSpan defines model for PauseScheduleSpan.
+type PauseScheduleSpan struct {
+
+	// actual time in provided time zone when to resume the cluster
+	ActiveFrom *string `json:"activeFrom,omitempty"`
+
+	// actual time in provided time zone when to suspend the cluster
+	ActiveTo     *string `json:"activeTo,omitempty"`
+	DayOfTheWeek *string `json:"dayOfTheWeek,omitempty"`
+}
+
 // PoliciesConfig defines model for PoliciesConfig.
 type PoliciesConfig struct {
 
 	// Defines minimum and maximum amount of vCPUs for cluster's worker nodes.
 	ClusterLimits ClusterLimitsPolicy `json:"clusterLimits"`
 
-	// Policy defining CPU high watermarks used by autoscaler to optimize cluster resources utilization.
-	CpuUtilization CpuUtilizationPolicies `json:"cpuUtilization"`
-
 	// Enable/disable all policies
 	Enabled bool `json:"enabled"`
 
-	// Node Downscaler defines polcies for removing nodes based on the configured conditions.
+	// Node Downscaler defines policies for removing nodes based on the configured conditions.
 	NodeDownscaler *NodeDownscaler `json:"nodeDownscaler,omitempty"`
 
 	// Policy defining whether autoscaler can use spot instances for provisioning additional workloads.
@@ -796,19 +1024,6 @@ type ResourceUsageReport struct {
 	ToDate string `json:"toDate"`
 }
 
-// ScaleUpThreshold defines model for ScaleUpThreshold.
-type ScaleUpThreshold struct {
-
-	// Average cluster's worker CPU load in percentages.
-	AvgCpuLoadPercentageMoreThan int64 `json:"avgCpuLoadPercentageMoreThan"`
-
-	// Enable/disable Scale Up threshold
-	Enabled bool `json:"enabled"`
-
-	// Duration in seconds.
-	EvaluationPeriodSeconds int64 `json:"evaluationPeriodSeconds"`
-}
-
 // SpotInstances defines model for SpotInstances.
 type SpotInstances struct {
 
@@ -825,8 +1040,40 @@ type UnschedulablePodsPolicy struct {
 	// Enable/disable unschedulable pods detection policy.
 	Enabled bool `json:"enabled"`
 
-	// Duration in seconds for how long any of the pods should remain in 'Unschedulable' state to trigger upscaling action.
-	EvaluationPeriodSeconds int64 `json:"evaluationPeriodSeconds"`
+	// Additional headroom based on cluster's total available capacity.
+	Headroom Headroom `json:"headroom"`
+}
+
+// UpdateCluster defines model for UpdateCluster.
+type UpdateCluster struct {
+
+	// Credentials ID list which determines the CSP configuration of this cluster.
+	CloudCredentialsIDs []string `json:"cloudCredentialsIDs"`
+	Network             *Network `json:"network,omitempty"`
+}
+
+// UserProfile defines model for UserProfile.
+type UserProfile struct {
+
+	// user email
+	Email string `json:"email"`
+
+	// full name of logged-in user, e.g. "John Doe".
+	Name string `json:"name"`
+
+	// internal username. globally unique
+	Nickname string             `json:"nickname"`
+	Survey   *UserProfileSurvey `json:"survey,omitempty"`
+}
+
+// UserProfileSurvey defines model for UserProfileSurvey.
+type UserProfileSurvey struct {
+
+	// current cloud spend in USD
+	AnnualCloudBudget *int    `json:"annualCloudBudget,omitempty"`
+	CompanyName       *string `json:"companyName,omitempty"`
+	MonthlyCpuUsage   *int    `json:"monthlyCpuUsage,omitempty"`
+	Submitted         *bool   `json:"submitted,omitempty"`
 }
 
 // VpnConfig defines model for VpnConfig.
@@ -845,10 +1092,15 @@ type MetricsType string
 
 // List of MetricsType
 const (
-	MetricsType_cloud_cpu_usage    MetricsType = "cloud_cpu_usage"
-	MetricsType_cloud_memory_usage MetricsType = "cloud_memory_usage"
-	MetricsType_node_cpu_usage     MetricsType = "node_cpu_usage"
-	MetricsType_node_memory_usage  MetricsType = "node_memory_usage"
+	MetricsType_cloud_cpu_requests    MetricsType = "cloud_cpu_requests"
+	MetricsType_cloud_cpu_usage       MetricsType = "cloud_cpu_usage"
+	MetricsType_cloud_memory_requests MetricsType = "cloud_memory_requests"
+	MetricsType_cloud_memory_usage    MetricsType = "cloud_memory_usage"
+	MetricsType_cloud_pods            MetricsType = "cloud_pods"
+	MetricsType_node_cpu_requests     MetricsType = "node_cpu_requests"
+	MetricsType_node_cpu_usage        MetricsType = "node_cpu_usage"
+	MetricsType_node_memory_requests  MetricsType = "node_memory_requests"
+	MetricsType_node_memory_usage     MetricsType = "node_memory_usage"
 )
 
 // AuthTokenId defines model for authTokenId.
@@ -874,6 +1126,22 @@ type FilterToDate string
 
 // Limit defines model for limit.
 type Limit int
+
+// ListAddonsParams defines parameters for ListAddons.
+type ListAddonsParams struct {
+
+	// Addon id.
+	Ids *[]string `json:"ids,omitempty"`
+
+	// Addon name.
+	Names *[]string `json:"names,omitempty"`
+
+	// Version (example: 1.1.0) or on of keywords: [latest].
+	Versions *[]string `json:"versions,omitempty"`
+
+	// Repository type (example: 'official-addons').
+	Repositories *[]string `json:"repositories,omitempty"`
+}
 
 // ListAuditEventsParams defines parameters for ListAuditEvents.
 type ListAuditEventsParams struct {
@@ -902,8 +1170,9 @@ type UpdateAuthTokenJSONBody AuthTokenUpdateRequest
 
 // PlanClusterPriceJSONBody defines parameters for PlanClusterPrice.
 type PlanClusterPriceJSONBody struct {
-	Addons *AddonsConfig `json:"addons,omitempty"`
-	Clouds *[]CloudType  `json:"clouds,omitempty"`
+	Addons  *AddonsConfig `json:"addons,omitempty"`
+	Clouds  *[]CloudType  `json:"clouds,omitempty"`
+	Network *Network      `json:"network,omitempty"`
 
 	// Initial nodes of this cluster. Both masters and workers
 	Nodes *[]Node `json:"nodes,omitempty"`
@@ -921,6 +1190,24 @@ type DeleteGslbJSONBody GSLBDeleteRequest
 // CreateOrUpdateGslbJSONBody defines parameters for CreateOrUpdateGslb.
 type CreateOrUpdateGslbJSONBody GSLBRequest
 
+// ListInstanceTypesParams defines parameters for ListInstanceTypes.
+type ListInstanceTypesParams struct {
+
+	// Optional parameter to filter results based on the provider.
+	// You can choose multiple providers from these available: `aws`, `azure`, `do`, `gcp`.
+	Providers *[]string `json:"providers,omitempty"`
+
+	// Optional parameter to filter results based on the instance type region.
+	// Regions names are provider specific.
+	// Please consult the documentation of individual providers for possible values.
+	Regions *[]string `json:"regions,omitempty"`
+
+	// Optional paramter to filter results based on the instance type name.
+	// Instance type names are provider specific.
+	// Please consult the documentation of individual providers for possible values.
+	InstanceTypes *[]string `json:"instanceTypes,omitempty"`
+}
+
 // ListKubernetesClustersParams defines parameters for ListKubernetesClusters.
 type ListKubernetesClustersParams struct {
 
@@ -932,6 +1219,9 @@ type ListKubernetesClustersParams struct {
 
 // CreateNewClusterJSONBody defines parameters for CreateNewCluster.
 type CreateNewClusterJSONBody CreateCluster
+
+// UpdateClusterJSONBody defines parameters for UpdateCluster.
+type UpdateClusterJSONBody UpdateCluster
 
 // ConfigureClusterAddonsJSONBody defines parameters for ConfigureClusterAddons.
 type ConfigureClusterAddonsJSONBody AddonsConfig
@@ -946,14 +1236,39 @@ type GetClusterMetricsParams struct {
 // AddClusterNodeJSONBody defines parameters for AddClusterNode.
 type AddClusterNodeJSONBody Node
 
+// SetupNodeSshJSONBody defines parameters for SetupNodeSsh.
+type SetupNodeSshJSONBody struct {
+
+	// Public authorized key ed25519 for node SSH connection.
+	PublicKey string `json:"publicKey"`
+
+	// Public source IP for firewall access.
+	SourceIp string `json:"sourceIp"`
+}
+
 // UpdateNodeListJSONBody defines parameters for UpdateNodeList.
 type UpdateNodeListJSONBody NodeUpdateOperation
 
 // PauseClusterJSONBody defines parameters for PauseCluster.
 type PauseClusterJSONBody PauseCluster
 
+// SetClusterPauseScheduleJSONBody defines parameters for SetClusterPauseSchedule.
+type SetClusterPauseScheduleJSONBody PauseSchedule
+
 // UpsertPoliciesJSONBody defines parameters for UpsertPolicies.
 type UpsertPoliciesJSONBody PoliciesConfig
+
+// RegisterExternalClusterJSONBody defines parameters for RegisterExternalCluster.
+type RegisterExternalClusterJSONBody ExternalCluster
+
+// UpdateExternalClusterJSONBody defines parameters for UpdateExternalCluster.
+type UpdateExternalClusterJSONBody ExternalClusterEditParams
+
+// AddExternalClusterNodeJSONBody defines parameters for AddExternalClusterNode.
+type AddExternalClusterNodeJSONBody AddExternalClusterNode
+
+// UpdateCurrentUserProfileJSONBody defines parameters for UpdateCurrentUserProfile.
+type UpdateCurrentUserProfileJSONBody UserProfile
 
 // GetUsageReportParams defines parameters for GetUsageReport.
 type GetUsageReportParams struct {
@@ -989,11 +1304,17 @@ type CreateOrUpdateGslbJSONRequestBody CreateOrUpdateGslbJSONBody
 // CreateNewClusterRequestBody defines body for CreateNewCluster for application/json ContentType.
 type CreateNewClusterJSONRequestBody CreateNewClusterJSONBody
 
+// UpdateClusterRequestBody defines body for UpdateCluster for application/json ContentType.
+type UpdateClusterJSONRequestBody UpdateClusterJSONBody
+
 // ConfigureClusterAddonsRequestBody defines body for ConfigureClusterAddons for application/json ContentType.
 type ConfigureClusterAddonsJSONRequestBody ConfigureClusterAddonsJSONBody
 
 // AddClusterNodeRequestBody defines body for AddClusterNode for application/json ContentType.
 type AddClusterNodeJSONRequestBody AddClusterNodeJSONBody
+
+// SetupNodeSshRequestBody defines body for SetupNodeSsh for application/json ContentType.
+type SetupNodeSshJSONRequestBody SetupNodeSshJSONBody
 
 // UpdateNodeListRequestBody defines body for UpdateNodeList for application/json ContentType.
 type UpdateNodeListJSONRequestBody UpdateNodeListJSONBody
@@ -1001,8 +1322,23 @@ type UpdateNodeListJSONRequestBody UpdateNodeListJSONBody
 // PauseClusterRequestBody defines body for PauseCluster for application/json ContentType.
 type PauseClusterJSONRequestBody PauseClusterJSONBody
 
+// SetClusterPauseScheduleRequestBody defines body for SetClusterPauseSchedule for application/json ContentType.
+type SetClusterPauseScheduleJSONRequestBody SetClusterPauseScheduleJSONBody
+
 // UpsertPoliciesRequestBody defines body for UpsertPolicies for application/json ContentType.
 type UpsertPoliciesJSONRequestBody UpsertPoliciesJSONBody
+
+// RegisterExternalClusterRequestBody defines body for RegisterExternalCluster for application/json ContentType.
+type RegisterExternalClusterJSONRequestBody RegisterExternalClusterJSONBody
+
+// UpdateExternalClusterRequestBody defines body for UpdateExternalCluster for application/json ContentType.
+type UpdateExternalClusterJSONRequestBody UpdateExternalClusterJSONBody
+
+// AddExternalClusterNodeRequestBody defines body for AddExternalClusterNode for application/json ContentType.
+type AddExternalClusterNodeJSONRequestBody AddExternalClusterNodeJSONBody
+
+// UpdateCurrentUserProfileRequestBody defines body for UpdateCurrentUserProfile for application/json ContentType.
+type UpdateCurrentUserProfileJSONRequestBody UpdateCurrentUserProfileJSONBody
 
 // Getter for additional properties for CostsPerTypeEstimate. Returns the specified
 // element and whether it was found
@@ -1045,6 +1381,59 @@ func (a *CostsPerTypeEstimate) UnmarshalJSON(b []byte) error {
 
 // Override default JSON handling for CostsPerTypeEstimate to handle AdditionalProperties
 func (a CostsPerTypeEstimate) MarshalJSON() ([]byte, error) {
+	var err error
+	object := make(map[string]json.RawMessage)
+
+	for fieldName, field := range a.AdditionalProperties {
+		object[fieldName], err = json.Marshal(field)
+		if err != nil {
+			return nil, errors.Wrap(err, fmt.Sprintf("error marshaling '%s'", fieldName))
+		}
+	}
+	return json.Marshal(object)
+}
+
+// Getter for additional properties for KubernetesCluster_Heartbeats. Returns the specified
+// element and whether it was found
+func (a KubernetesCluster_Heartbeats) Get(fieldName string) (value Heartbeat, found bool) {
+	if a.AdditionalProperties != nil {
+		value, found = a.AdditionalProperties[fieldName]
+	}
+	return
+}
+
+// Setter for additional properties for KubernetesCluster_Heartbeats
+func (a *KubernetesCluster_Heartbeats) Set(fieldName string, value Heartbeat) {
+	if a.AdditionalProperties == nil {
+		a.AdditionalProperties = make(map[string]Heartbeat)
+	}
+	a.AdditionalProperties[fieldName] = value
+}
+
+// Override default JSON handling for KubernetesCluster_Heartbeats to handle AdditionalProperties
+func (a *KubernetesCluster_Heartbeats) UnmarshalJSON(b []byte) error {
+	object := make(map[string]json.RawMessage)
+	err := json.Unmarshal(b, &object)
+	if err != nil {
+		return err
+	}
+
+	if len(object) != 0 {
+		a.AdditionalProperties = make(map[string]Heartbeat)
+		for fieldName, fieldBuf := range object {
+			var fieldVal Heartbeat
+			err := json.Unmarshal(fieldBuf, &fieldVal)
+			if err != nil {
+				return errors.Wrap(err, fmt.Sprintf("error unmarshaling field %s", fieldName))
+			}
+			a.AdditionalProperties[fieldName] = fieldVal
+		}
+	}
+	return nil
+}
+
+// Override default JSON handling for KubernetesCluster_Heartbeats to handle AdditionalProperties
+func (a KubernetesCluster_Heartbeats) MarshalJSON() ([]byte, error) {
 	var err error
 	object := make(map[string]json.RawMessage)
 
