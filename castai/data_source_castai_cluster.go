@@ -103,7 +103,7 @@ func dataSourceCastaiClusterRead(ctx context.Context, data *schema.ResourceData,
 		log.Printf("[INFO] kubeconfig is available for cluster %q", id)
 		kubecfg, err := flattenKubeConfig(string(kubeconfig.Body))
 		if err != nil {
-			return nil
+			return diag.Errorf("parsing kubeconfig: %v", err)
 		}
 		data.Set(ClusterFieldKubeconfig, kubecfg)
 	} else {

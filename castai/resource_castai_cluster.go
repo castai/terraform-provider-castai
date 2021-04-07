@@ -164,7 +164,7 @@ func resourceCastaiClusterRead(ctx context.Context, data *schema.ResourceData, m
 	if checkErr := sdk.CheckGetResponse(kubeconfig, err); checkErr == nil {
 		kubecfg, err := flattenKubeConfig(string(kubeconfig.Body))
 		if err != nil {
-			return nil
+			return diag.Errorf("parsing kubeconfig: %v", err)
 		}
 		data.Set(ClusterFieldKubeconfig, kubecfg)
 	} else {
