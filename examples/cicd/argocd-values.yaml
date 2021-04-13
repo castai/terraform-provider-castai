@@ -1,0 +1,141 @@
+installCRDs: false
+
+server:
+  replicas: 1
+
+  extraArgs:
+    - --insecure
+
+  resources:
+    limits:
+      cpu: 1
+      memory: 1Gi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+  rbacConfig:
+    # policy.default is the name of the default role which Argo CD will falls back to.
+    # tl;dr; anonymous users will be admins.
+    policy.default: role:admin
+
+  config:
+    users.anonymous.enabled: "true"
+    repositories: |
+      - name: gitops-helm-charts-repo
+        sshPrivateKeySecret:
+          key: sshPrivateKey
+          name: gitlab-git-access
+        url: git@gitlab.com:your-repo/helm-charts.git
+      - type: helm
+        url: https://charts.yourdomain.com/
+        name: charts
+        usernameSecret:
+          name: charts-repo-creds
+          key: user
+        passwordSecret:
+          name: charts-repo-creds
+          key: pass
+
+  clusterAdminAccess:
+    enabled: false
+
+  ## Applications
+  ## reference: https://github.com/argoproj/argo-cd/blob/master/docs/operator-manual/
+  additionalApplications:
+   - name: dev-master
+     namespace: argo
+     project: default
+     source:
+       path: charts/argo-app-of-apps
+       repoURL: git@gitlab.com:your-repo/helm-charts.git
+       targetRevision: master
+       helm:
+         valueFiles:
+           - dev-master.yaml
+     destination:
+       server: https://kubernetes.default.svc
+       namespace: argo
+     syncPolicy:
+       automated:
+         prune: false
+         selfHeal: false
+   - name: prod-master
+     namespace: argo
+     project: default
+     source:
+       path: charts/argo-app-of-apps
+       repoURL: git@gitlab.com:your-repo/helm-charts.git
+       targetRevision: master
+       helm:
+         valueFiles:
+           - prod-master.yaml
+     destination:
+       server: https://kubernetes.default.svc
+       namespace: argo
+     syncPolicy:
+       automated:
+         prune: false
+         selfHeal: false
+
+  ## Projects
+  ## reference: https://github.com/argoproj/argo-cd/blob/master/docs/operator-manual/
+  additionalProjects:
+    - name: dev-master
+      namespace: argo
+      description: Dev environment
+      sourceRepos:
+        - git@gitlab.com:your-repo/helm-charts.git
+      destinations:
+        - namespace: '*'
+          server: https://replaced-by-terraform
+      clusterResourceWhitelist:
+        - group: '*'
+          kind: '*'
+    - name: prod-master
+      namespace: argo
+      description: Dev environment
+      sourceRepos:
+        - git@gitlab.com:your-repo/helm-charts.git
+      destinations:
+        - namespace: '*'
+            server: https://replaced-by-terraform
+      clusterResourceWhitelist:
+        - group: '*'
+          kind: '*'
+
+controller:
+  clusterAdminAccess:
+    enabled: true
+  resources:
+    limits:
+      cpu: 1
+      memory: 2Gi
+    requests:
+      cpu: 100m
+      memory: 256Mi
+
+repoServer:
+  replicas: 1
+  resources:
+    limits:
+      cpu: 1
+      memory: 1024Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+redis:
+  enabled: true
+  resources:
+    limits:
+      cpu: 500m
+      memory: 1024Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+dex:
+  enabled: false
+  serviceAccount:
+    create: false

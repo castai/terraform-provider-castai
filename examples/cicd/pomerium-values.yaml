@@ -1,0 +1,35 @@
+config:
+  rootDomain: argocd.yourdomain.com
+  # More about policies https://www.pomerium.com/reference/#allowed-domains
+  policy:
+    - from: https://argocd.yourdomain.com
+      to: http://argocd-server.argo.svc.cluster.local:80
+      allowed_domains:
+        - yourdomain.com
+
+authenticate:
+  idp:
+    provider: google
+    clientID: "" # Set by terraform.
+    clientSecret: "" # Set by terraform.
+
+ingress:
+  secretName: "tls"
+  tls:
+    hosts:
+      - argocd.yourdomain.com
+      - authenticate.argocd.yourdomain.com
+  hosts:
+    - argocd.yourdomain.com
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/backend-protocol: https
+
+resources:
+  limits:
+    cpu: 1
+    memory: 600Mi
+  requests:
+    cpu: 100m
+    memory: 300Mi

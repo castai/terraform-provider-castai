@@ -1,0 +1,52 @@
+# For all available values visit https://gitlab.com/gitlab-org/charts/gitlab-runner/blob/master/values.yaml
+
+gitlabUrl: https://gitlab.com/
+runnerRegistrationToken: "" # Set by terraform.
+concurrent: 20
+checkInterval: 10
+rbac:
+  create: true
+  clusterWideAccess: false
+
+runners:
+  config: |
+    [[runners]]
+      environment = ["FF_GITLAB_REGISTRY_HELPER_IMAGE=true"]
+
+  image: ubuntu:18.04
+  privileged: true
+  runUntagged: true
+
+  cache:
+    cacheType: "gcs"
+    cacheShared: true
+    gcsBucketName: "" # Set by terraform.
+    secretName: "" # Set by terraform.
+
+  builds:
+    cpuLimit: 2
+    memoryLimit: 4Gi
+    cpuRequests: 1
+    memoryRequests: 2Gi
+
+  tags: "docker"
+
+  name: castai-runner
+
+  services:
+    cpuRequests: 100m
+    memoryRequests: 128Mi
+
+  helpers:
+    cpuRequests: 100m
+    memoryRequests: 128Mi
+
+  pollTimeout: 1200
+
+  locked: false
+
+  nodeTolerations:
+    - key: "scheduling.cast.ai/spot"
+      operator: "Exists"
+
+
