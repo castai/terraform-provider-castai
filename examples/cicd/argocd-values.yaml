@@ -109,11 +109,11 @@ controller:
     enabled: true
   resources:
     limits:
-      cpu: 1
+      cpu: 2
       memory: 2Gi
     requests:
-      cpu: 100m
-      memory: 256Mi
+      cpu: 2
+      memory: 2Gi
 
 repoServer:
   replicas: 1
@@ -123,7 +123,7 @@ repoServer:
       memory: 1024Mi
     requests:
       cpu: 100m
-      memory: 128Mi
+      memory: 512Mi
 
 redis:
   enabled: true

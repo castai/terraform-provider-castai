@@ -24,7 +24,7 @@ runners:
     secretName: "" # Set by terraform.
 
   builds:
-    cpuLimit: 2
+    cpuLimit: 4
     memoryLimit: 4Gi
     cpuRequests: 1
     memoryRequests: 2Gi
