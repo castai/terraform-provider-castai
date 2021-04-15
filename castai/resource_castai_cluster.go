@@ -27,13 +27,28 @@ const (
 	ClusterFieldNodesCloud       = "cloud"
 	ClusterFieldNodesRole        = "role"
 	ClusterFieldNodesShape       = "shape"
+
+	PolicyFieldEnabled                       = "enabled"
+	PolicyFieldAutoscalerPolicies            = "autoscaler_policies"
+	PolicyFieldClusterLimits                 = "cluster_limits"
+	PolicyFieldClusterLimitsCPU              = "cpu"
+	PolicyFieldClusterLimitsCPUmax           = "max_cores"
+	PolicyFieldClusterLimitsCPUmin           = "min_cores"
+	PolicyFieldNodeDownscaler                = "node_downscaler"
+	PolicyFieldNodeDownscalerEmptyNodes      = "empty_nodes"
+	PolicyFieldSpotInstances                 = "spot_instances"
+	PolicyFieldSpotInstancesClouds           = "clouds"
+	PolicyFieldUnschedulablePods             = "unschedulable_pods"
+	PolicyFieldUnschedulablePodsHeadroom     = "headroom"
+	PolicyFieldUnschedulablePodsHeadroomCPUp = "cpu_percentage"
+	PolicyFieldUnschedulablePodsHeadroomRAMp = "memory_percentage"
 )
 
 func resourceCastaiCluster() *schema.Resource {
 	return &schema.Resource{
-		CreateContext: resourceCastaiClusterCreateOrUpdate,
+		CreateContext: resourceCastaiClusterCreate,
 		ReadContext:   resourceCastaiClusterRead,
-		UpdateContext: resourceCastaiClusterCreateOrUpdate,
+		UpdateContext: resourceCastaiClusterUpdate,
 		DeleteContext: resourceCastaiClusterDelete,
 
 		Timeouts: &schema.ResourceTimeout{
@@ -100,11 +115,133 @@ func resourceCastaiCluster() *schema.Resource {
 				},
 			},
 			ClusterFieldKubeconfig: schemaKubeconfig(),
+			PolicyFieldAutoscalerPolicies: {
+				Type:     schema.TypeList,
+				MaxItems: 1,
+				Optional: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						PolicyFieldEnabled: {
+							Type:     schema.TypeBool,
+							Optional: true,
+							Default:  true,
+						},
+						PolicyFieldClusterLimits: {
+							Type:     schema.TypeList,
+							MaxItems: 1,
+							Optional: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									PolicyFieldEnabled: {
+										Type:     schema.TypeBool,
+										Optional: true,
+										Default:  true,
+									},
+									PolicyFieldClusterLimitsCPU: {
+										Type:     schema.TypeList,
+										MaxItems: 1,
+										Optional: true,
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												PolicyFieldClusterLimitsCPUmax: {
+													Type:     schema.TypeInt,
+													Optional: true,
+													Default:  21,
+												},
+												PolicyFieldClusterLimitsCPUmin: {
+													Type:     schema.TypeInt,
+													Optional: true,
+													Default:  2,
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+						PolicyFieldNodeDownscaler: {
+							Type:     schema.TypeList,
+							MaxItems: 1,
+							Optional: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									PolicyFieldNodeDownscalerEmptyNodes: {
+										Type:     schema.TypeList,
+										MaxItems: 1,
+										Optional: true,
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												PolicyFieldEnabled: {
+													Type:     schema.TypeBool,
+													Optional: true,
+													Default:  false,
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+						PolicyFieldSpotInstances: {
+							Type:     schema.TypeList,
+							MaxItems: 1,
+							Optional: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									PolicyFieldSpotInstancesClouds: {
+										Type:     schema.TypeList,
+										Optional: true,
+										Elem:     &schema.Schema{Type: schema.TypeString},
+									},
+									PolicyFieldEnabled: {
+										Type:     schema.TypeBool,
+										Optional: true,
+										Default:  false,
+									},
+								},
+							},
+						},
+						PolicyFieldUnschedulablePods: {
+							Type:     schema.TypeList,
+							MaxItems: 1,
+							Optional: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									PolicyFieldEnabled: {
+										Type:     schema.TypeBool,
+										Optional: true,
+										Default:  false,
+									},
+									PolicyFieldUnschedulablePodsHeadroom: {
+										Type:     schema.TypeList,
+										MaxItems: 1,
+										Optional: true,
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												PolicyFieldUnschedulablePodsHeadroomCPUp: {
+													Type:     schema.TypeInt,
+													Optional: true,
+													Default:  20,
+												},
+												PolicyFieldUnschedulablePodsHeadroomRAMp: {
+													Type:     schema.TypeInt,
+													Optional: true,
+													Default:  2,
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
 		},
 	}
 }
 
-func resourceCastaiClusterCreateOrUpdate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceCastaiClusterCreate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*ProviderConfig).api
 
 	var nodes []sdk.Node
@@ -138,8 +275,16 @@ func resourceCastaiClusterCreateOrUpdate(ctx context.Context, data *schema.Resou
 	if err != nil {
 		return diag.FromErr(err)
 	}
-
 	log.Printf("[INFO] Cluster %q has reached `ready` status", data.Id())
+
+	log.Printf("[DEBUG] Cluster %q setting autoscaling policies", data.Id())
+	autoscalerParams, ok := data.Get(PolicyFieldAutoscalerPolicies).([]interface{})
+	if !ok || len(autoscalerParams) == 0 || autoscalerParams[0] == nil {
+		log.Printf("[DEBUG] Reading Policies `autoscaler_policies` empty parameters")
+		return resourceCastaiClusterRead(ctx, data, meta)
+	}
+	updatePolicies(ctx, client, data.Id(), autoscalerParams[0].(map[string]interface{}))
+
 	return resourceCastaiClusterRead(ctx, data, meta)
 }
 
@@ -172,7 +317,29 @@ func resourceCastaiClusterRead(ctx context.Context, data *schema.ResourceData, m
 		data.Set(ClusterFieldKubeconfig, []interface{}{})
 	}
 
+	policies, err := client.GetPoliciesWithResponse(ctx, sdk.ClusterId(data.Id()))
+	if checkErr := sdk.CheckGetResponse(policies, err); checkErr == nil {
+		log.Printf("[INFO] Autoscaling policies for cluster %q", data.Id())
+		data.Set(PolicyFieldAutoscalerPolicies, flattenAutoscalerPolicies(policies.JSON200))
+	} else {
+		log.Printf("[WARN] autoscaling policies are not available for cluster %q: %v", data.Id(), checkErr)
+	}
+
 	return nil
+}
+
+func resourceCastaiClusterUpdate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client := meta.(*ProviderConfig).api
+
+	log.Printf("[DEBUG] Cluster %q autoscaling policies update", data.Id())
+	autoscalerParams, ok := data.Get(PolicyFieldAutoscalerPolicies).([]interface{})
+	if !ok || len(autoscalerParams) == 0 || autoscalerParams[0] == nil {
+		log.Printf("[DEBUG] Reading Policies `autoscaler_policies` empty parameters")
+		return resourceCastaiClusterRead(ctx, data, meta)
+	}
+	updatePolicies(ctx, client, data.Id(), autoscalerParams[0].(map[string]interface{}))
+
+	return resourceCastaiClusterRead(ctx, data, meta)
 }
 
 func resourceCastaiClusterDelete(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -217,7 +384,84 @@ func waitForClusterToReachStatusFunc(ctx context.Context, client *sdk.ClientWith
 				return resource.RetryableError(fmt.Errorf("waiting for cluster to reach %q status, id=%q name=%q, status=%s", targetStatus, cluster.Id, cluster.Name, cluster.Status))
 			}
 		}
-
 		return resource.NonRetryableError(fmt.Errorf("cluster has reached unexpected status, id=%q name=%q, status=%s", cluster.Id, cluster.Name, cluster.Status))
 	}
+}
+
+func expandAutoscalerPolicies(pc map[string]interface{}) sdk.UpsertPoliciesJSONRequestBody {
+
+	var clusterLimits sdk.ClusterLimitsPolicy
+	for _, val := range pc[PolicyFieldClusterLimits].([]interface{}) {
+		limitData := val.(map[string]interface{})
+		for _, valn := range limitData[PolicyFieldClusterLimitsCPU].([]interface{}) {
+			cpuData := valn.(map[string]interface{})
+			clusterLimits = sdk.ClusterLimitsPolicy{
+				Enabled: limitData[PolicyFieldEnabled].(bool),
+				Cpu: sdk.ClusterLimitsCpu{
+					MaxCores: int64(cpuData[PolicyFieldClusterLimitsCPUmax].(int)),
+					MinCores: int64(cpuData[PolicyFieldClusterLimitsCPUmin].(int)),
+				},
+			}
+		}
+	}
+
+	var nodeDownscalerPolicy sdk.NodeDownscaler
+	for _, val := range pc[PolicyFieldNodeDownscaler].([]interface{}) {
+		ndData := val.(map[string]interface{})
+		for _, valn := range ndData[PolicyFieldNodeDownscalerEmptyNodes].([]interface{}) {
+			ndData := valn.(map[string]interface{})
+			nodeDownscalerEnabled := ndData[PolicyFieldEnabled].(bool)
+			nodeDownscalerPolicy = sdk.NodeDownscaler{
+				EmptyNodes: &sdk.NodeDownscalerEmptyNodes{
+					Enabled: &nodeDownscalerEnabled,
+				},
+			}
+		}
+	}
+
+	var spotInstancesPolicy sdk.SpotInstances
+	for _, val := range pc[PolicyFieldSpotInstances].([]interface{}) {
+		siData := val.(map[string]interface{})
+
+		spotInstancesPolicy = sdk.SpotInstances{
+			Enabled: siData[PolicyFieldEnabled].(bool),
+			Clouds:  convertStringArr(siData[PolicyFieldSpotInstancesClouds].([]interface{})),
+		}
+	}
+
+	var unschedulablePodsPolicy sdk.UnschedulablePodsPolicy
+	for _, val := range pc[PolicyFieldUnschedulablePods].([]interface{}) {
+		upData := val.(map[string]interface{})
+		for _, valn := range upData[PolicyFieldUnschedulablePodsHeadroom].([]interface{}) {
+			hpData := valn.(map[string]interface{})
+			unschedulablePodsPolicy = sdk.UnschedulablePodsPolicy{
+				Enabled:  upData[PolicyFieldEnabled].(bool),
+				Headroom: sdk.Headroom{
+					CpuPercentage:    hpData[PolicyFieldUnschedulablePodsHeadroomCPUp].(int),
+					MemoryPercentage: hpData[PolicyFieldUnschedulablePodsHeadroomRAMp].(int),
+				},
+			}
+		}
+	}
+
+	autoscalerConfig := sdk.UpsertPoliciesJSONRequestBody{
+		ClusterLimits:     clusterLimits,
+		Enabled:           pc[PolicyFieldEnabled].(bool),
+		NodeDownscaler:    &nodeDownscalerPolicy,
+		SpotInstances:     spotInstancesPolicy,
+		UnschedulablePods: unschedulablePodsPolicy,
+	}
+
+	log.Printf("[DEBUG] Reading autoscaler Policies #{autoscalerConfig}")
+	return autoscalerConfig
+}
+
+func updatePolicies(ctx context.Context, client *sdk.ClientWithResponses, clusterID string, policiesConfig map[string]interface{}) diag.Diagnostics {
+
+	resppol, err := client.UpsertPoliciesWithResponse(ctx, sdk.ClusterId(clusterID), expandAutoscalerPolicies(policiesConfig))
+	if checkErr := sdk.CheckGetResponse(resppol, err); checkErr != nil {
+		return diag.FromErr(checkErr)
+	}
+
+	return nil
 }

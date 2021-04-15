@@ -1,6 +1,0 @@
-provider "castai" {
-  api_url   = "https://api.dev-master.cast.ai/v1/"
-  api_token = ""
-}
-
-// add your code here for local dev / testing
