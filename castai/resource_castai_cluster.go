@@ -3,6 +3,7 @@ package castai
 import (
 	"context"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"time"
@@ -519,12 +520,18 @@ func updateCluster(ctx context.Context, client *sdk.ClientWithResponses, cluster
 	for _, cred := range creds {
 		ids = append(ids, cred.(string))
 	}
-	resp, err := client.UpdateClusterWithResponse(ctx, sdk.ClusterId(clusterID), sdk.UpdateClusterJSONRequestBody{
+	// TODO: We cannot use UpdateClusterWithResponse as api response spec is broken and returns different results.
+	resp, err := client.UpdateCluster(ctx, sdk.ClusterId(clusterID), sdk.UpdateClusterJSONRequestBody{
 		CloudCredentialsIDs: ids,
 		Network:             toClusterNetwork(vpnType),
 	})
-	if checkErr := sdk.CheckOKResponse(resp, err); checkErr != nil {
-		return diag.FromErr(checkErr)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	defer resp.Body.Close()
+	if code := resp.StatusCode; code != http.StatusOK {
+		errMsg, _ := ioutil.ReadAll(resp.Body)
+		return diag.Errorf("expected status %d, got %d, err=%s", http.StatusOK, code, string(errMsg))
 	}
 	return nil
 }
