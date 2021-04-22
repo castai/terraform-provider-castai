@@ -16,11 +16,19 @@ import (
 )
 
 const (
+	vpnTypeWireGuardCrossLocationMesh = "wireguard_cross_location_mesh"
+	vpnTypeWireGuardFullMesh          = "wireguard_full_mesh"
+	vpnTypeCloudProvider              = "cloud_provider"
+)
+
+const (
 	ClusterFieldName        = "name"
 	ClusterFieldStatus      = "status"
 	ClusterFieldRegion      = "region"
 	ClusterFieldCredentials = "credentials"
 	ClusterFieldKubeconfig  = "kubeconfig"
+
+	ClusterFieldVPNType = "vpn_type"
 
 	ClusterFieldInitializeParams = "initialize_params"
 	ClusterFieldNodes            = "nodes"
@@ -79,6 +87,12 @@ func resourceCastaiCluster() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
+			},
+			ClusterFieldVPNType: {
+				Type:             schema.TypeString,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+				Optional:         true,
+				ForceNew:         false,
 			},
 			ClusterFieldInitializeParams: {
 				Type:     schema.TypeList,
@@ -259,6 +273,7 @@ func resourceCastaiClusterCreate(ctx context.Context, data *schema.ResourceData,
 		Region:              data.Get(ClusterFieldRegion).(string),
 		CloudCredentialsIDs: convertStringArr(data.Get(ClusterFieldCredentials).(*schema.Set).List()),
 		Nodes:               nodes,
+		Network:             toClusterNetwork(data.Get(ClusterFieldVPNType).(string)),
 	}
 
 	log.Printf("[INFO] Creating new cluster: %#v", cluster)
@@ -291,19 +306,34 @@ func resourceCastaiClusterCreate(ctx context.Context, data *schema.ResourceData,
 func resourceCastaiClusterRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*ProviderConfig).api
 
-	response, err := client.GetClusterWithResponse(ctx, sdk.ClusterId(data.Id()))
+	resp, err := client.GetClusterWithResponse(ctx, sdk.ClusterId(data.Id()))
 	if err != nil {
 		return diag.FromErr(err)
-	} else if response.StatusCode() == http.StatusNotFound {
+	} else if resp.StatusCode() == http.StatusNotFound {
 		log.Printf("[WARN] Removing cluster %s from state because it no longer exists in CAST.AI", data.Id())
 		data.SetId("")
 		return nil
 	}
 
-	data.Set(ClusterFieldName, response.JSON200.Name)
-	data.Set(ClusterFieldRegion, response.JSON200.Region)
-	data.Set(ClusterFieldStatus, response.JSON200.Status)
-	data.Set(ClusterFieldCredentials, response.JSON200.CloudCredentialsIDs)
+	data.Set(ClusterFieldName, resp.JSON200.Name)
+	data.Set(ClusterFieldRegion, resp.JSON200.Region)
+	data.Set(ClusterFieldStatus, resp.JSON200.Status)
+	data.Set(ClusterFieldCredentials, resp.JSON200.CloudCredentialsIDs)
+
+	// Set vpn type from network.
+	net := resp.JSON200.Network
+	if net != nil {
+		vpnType := vpnTypeCloudProvider
+		if net.Vpn.WireGuard != nil {
+			switch net.Vpn.WireGuard.Topology {
+			case "crossLocationMesh":
+				vpnType = vpnTypeWireGuardCrossLocationMesh
+			case "fullMesh":
+				vpnType = vpnTypeWireGuardFullMesh
+			}
+		}
+		data.Set(ClusterFieldVPNType, vpnType)
+	}
 
 	kubeconfig, err := client.GetClusterKubeconfigWithResponse(ctx, sdk.ClusterId(data.Id()))
 	if checkErr := sdk.CheckGetResponse(kubeconfig, err); checkErr == nil {
@@ -331,13 +361,25 @@ func resourceCastaiClusterRead(ctx context.Context, data *schema.ResourceData, m
 func resourceCastaiClusterUpdate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*ProviderConfig).api
 
-	log.Printf("[DEBUG] Cluster %q autoscaling policies update", data.Id())
-	autoscalerParams, ok := data.Get(PolicyFieldAutoscalerPolicies).([]interface{})
-	if !ok || len(autoscalerParams) == 0 || autoscalerParams[0] == nil {
-		log.Printf("[DEBUG] Reading Policies `autoscaler_policies` empty parameters")
-		return resourceCastaiClusterRead(ctx, data, meta)
+	if data.HasChange(ClusterFieldCredentials) {
+		creds, ok := data.Get(ClusterFieldCredentials).(*schema.Set)
+		if ok {
+			log.Printf("[DEBUG] Cluster %q credentials update", data.Id())
+			if err := updateCluster(ctx, client, data.Id(), data.Get(ClusterFieldVPNType), creds.List()); err != nil {
+				return err
+			}
+		}
 	}
-	updatePolicies(ctx, client, data.Id(), autoscalerParams[0].(map[string]interface{}))
+
+	if data.HasChange(PolicyFieldAutoscalerPolicies) {
+		autoscalerParams, ok := data.Get(PolicyFieldAutoscalerPolicies).([]interface{})
+		if ok && len(autoscalerParams) > 0 {
+			log.Printf("[DEBUG] Cluster %q autoscaling policies update", data.Id())
+			if err := updatePolicies(ctx, client, data.Id(), autoscalerParams[0].(map[string]interface{})); err != nil {
+				return err
+			}
+		}
+	}
 
 	return resourceCastaiClusterRead(ctx, data, meta)
 }
@@ -389,7 +431,6 @@ func waitForClusterToReachStatusFunc(ctx context.Context, client *sdk.ClientWith
 }
 
 func expandAutoscalerPolicies(pc map[string]interface{}) sdk.UpsertPoliciesJSONRequestBody {
-
 	var clusterLimits sdk.ClusterLimitsPolicy
 	for _, val := range pc[PolicyFieldClusterLimits].([]interface{}) {
 		limitData := val.(map[string]interface{})
@@ -435,7 +476,7 @@ func expandAutoscalerPolicies(pc map[string]interface{}) sdk.UpsertPoliciesJSONR
 		for _, valn := range upData[PolicyFieldUnschedulablePodsHeadroom].([]interface{}) {
 			hpData := valn.(map[string]interface{})
 			unschedulablePodsPolicy = sdk.UnschedulablePodsPolicy{
-				Enabled:  upData[PolicyFieldEnabled].(bool),
+				Enabled: upData[PolicyFieldEnabled].(bool),
 				Headroom: sdk.Headroom{
 					CpuPercentage:    hpData[PolicyFieldUnschedulablePodsHeadroomCPUp].(int),
 					MemoryPercentage: hpData[PolicyFieldUnschedulablePodsHeadroomRAMp].(int),
@@ -454,6 +495,38 @@ func expandAutoscalerPolicies(pc map[string]interface{}) sdk.UpsertPoliciesJSONR
 
 	log.Printf("[DEBUG] Reading autoscaler Policies #{autoscalerConfig}")
 	return autoscalerConfig
+}
+
+func toClusterNetwork(vpnType interface{}) *sdk.Network {
+	defaultNetwork := &sdk.Network{Vpn: sdk.VpnConfig{IpSec: &sdk.IpSecConfig{}}}
+	vpnTypeString, ok := vpnType.(string)
+	if !ok {
+		vpnTypeString = vpnTypeCloudProvider
+	}
+	switch vpnTypeString {
+	case vpnTypeCloudProvider:
+		return defaultNetwork
+	case vpnTypeWireGuardCrossLocationMesh:
+		return &sdk.Network{Vpn: sdk.VpnConfig{WireGuard: &sdk.WireGuardConfig{Topology: "crossLocationMesh"}}}
+	case vpnTypeWireGuardFullMesh:
+		return &sdk.Network{Vpn: sdk.VpnConfig{WireGuard: &sdk.WireGuardConfig{Topology: "fullMesh"}}}
+	}
+	return defaultNetwork
+}
+
+func updateCluster(ctx context.Context, client *sdk.ClientWithResponses, clusterID string, vpnType interface{}, creds []interface{}) diag.Diagnostics {
+	ids := make([]string, 0, len(creds))
+	for _, cred := range creds {
+		ids = append(ids, cred.(string))
+	}
+	resp, err := client.UpdateClusterWithResponse(ctx, sdk.ClusterId(clusterID), sdk.UpdateClusterJSONRequestBody{
+		CloudCredentialsIDs: ids,
+		Network:             toClusterNetwork(vpnType),
+	})
+	if checkErr := sdk.CheckOKResponse(resp, err); checkErr != nil {
+		return diag.FromErr(checkErr)
+	}
+	return nil
 }
 
 func updatePolicies(ctx context.Context, client *sdk.ClientWithResponses, clusterID string, policiesConfig map[string]interface{}) diag.Diagnostics {
