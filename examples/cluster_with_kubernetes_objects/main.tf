@@ -27,6 +27,7 @@ resource "castai_credentials" "example_azure" {
 resource "castai_cluster" "example_cluster" {
   name   = "example-cluster"
   region = "eu-central"
+  vpn_type = "wireguard_cross_location_mesh"
   credentials = [
     castai_credentials.example_gcp.id,
     castai_credentials.example_aws.id,
