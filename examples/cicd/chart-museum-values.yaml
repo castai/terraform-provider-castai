@@ -1,0 +1,42 @@
+fullnameOverride: chart-museum
+# setting replica to 1 till this is resolved: https://github.com/helm/chartmuseum/issues/175
+replicaCount: 1
+image:
+  tag: v0.13.1
+env:
+  open:
+    LOG_JSON: true
+    # allow chart versions to be re-uploaded
+    ALLOW_OVERWRITE: true
+    # expose API to enable charts push into the repo
+    DISABLE_API: false
+  # Name of an existing secret to get the secret values from
+  existingSecret: chart-museum-basic-auth
+  existingSecretMappings:
+    BASIC_AUTH_USER: user
+    BASIC_AUTH_PASS: pass
+
+resources:
+  limits:
+    cpu: 1
+    memory: 512Mi
+  requests:
+    cpu: 100m
+    memory: 64Mi
+
+gcp:
+  secret:
+    enabled: true
+    name: "" # Set by terraform.
+    key: "" # Set by terraform.
+
+ingress:
+  enabled: true
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+  hosts:
+   - name: charts.yourdomain.com
+     path: /
+     tls: true
+     tlsSecret: chartmuseum
