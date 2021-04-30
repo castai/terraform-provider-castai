@@ -13,6 +13,10 @@ func CheckCreateResponse(response Response, err error) error {
 	return checkResponse(response, err, http.StatusCreated)
 }
 
+func CheckOKResponse(response Response, err error) error {
+	return checkResponse(response, err, http.StatusOK)
+}
+
 func CheckDeleteResponse(response Response, err error) error {
 	return checkResponse(response, err, http.StatusNoContent)
 }
