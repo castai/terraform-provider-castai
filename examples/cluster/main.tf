@@ -12,7 +12,7 @@ resource "castai_credentials" "example_gcp" {
 resource "castai_credentials" "example_aws" {
   name = "example-aws"
   aws {
-    access_key_id     = var.aws_access_key_id
+    access_key_id = var.aws_access_key_id
     secret_access_key = var.aws_secret_access_key
   }
 }
@@ -25,7 +25,7 @@ resource "castai_credentials" "example_azure" {
 }
 
 resource "castai_cluster" "example_cluster" {
-  name   = "example-cluster"
+  name = "example-cluster"
   region = "eu-central"
   vpn_type = "wireguard_cross_location_mesh"
   credentials = [
@@ -36,17 +36,17 @@ resource "castai_cluster" "example_cluster" {
   initialize_params {
     nodes {
       cloud = "aws"
-      role  = "master"
+      role = "master"
       shape = "medium"
     }
     nodes {
       cloud = "aws"
-      role  = "worker"
+      role = "worker"
       shape = "small"
     }
     nodes {
       cloud = "gcp"
-      role  = "worker"
+      role = "worker"
       shape = "small"
     }
   }
@@ -68,7 +68,9 @@ resource "castai_cluster" "example_cluster" {
     }
 
     spot_instances {
-      clouds = ["gcp","aws"]
+      clouds = [
+        "gcp",
+        "aws"]
       enabled = false
     }
 

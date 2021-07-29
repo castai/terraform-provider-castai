@@ -26,7 +26,8 @@ type AddExternalClusterNode struct {
 	SpotConfig *NodeSpotConfig `json:"spotConfig,omitempty"`
 
 	// Optional subnet on which to create VM. Subnet must already exist.
-	SubnetId *string `json:"subnetId,omitempty"`
+	SubnetId *string     `json:"subnetId,omitempty"`
+	Volume   *NodeVolume `json:"volume,omitempty"`
 
 	// Zone for the new VM. Must be a zone for one of the subnets in the cluster.
 	Zone *string `json:"zone,omitempty"`
@@ -443,6 +444,22 @@ type ClusterMetrics_NodeMetrics_Labels struct {
 	AdditionalProperties map[string]string `json:"-"`
 }
 
+// ClusterProblematicWorkloads defines model for ClusterProblematicWorkloads.
+type ClusterProblematicWorkloads struct {
+
+	// Cluster id
+	ClusterId string `json:"clusterId"`
+
+	// Problematic workload controllers
+	Controllers *[]ProblematicController `json:"controllers,omitempty"`
+
+	// Identifies whether cluster contains any problems
+	HasProblems bool `json:"hasProblems"`
+
+	// Problematic standalone pods
+	StandalonePods *[]ProblematicStandalonePod `json:"standalonePods,omitempty"`
+}
+
 // ClusterRegion defines model for ClusterRegion.
 type ClusterRegion struct {
 
@@ -483,6 +500,13 @@ type CreateCluster struct {
 
 	// CAST AI region to create the cluster in.
 	Region string `json:"region"`
+}
+
+// CredentialsScript defines model for CredentialsScript.
+type CredentialsScript struct {
+
+	// script to execute in terminal or cloud shell to generate credentials
+	Script *string `json:"script,omitempty"`
 }
 
 // DeleteNodeResult defines model for DeleteNodeResult.
@@ -609,20 +633,31 @@ type ExternalClusterDeleteNodeResult struct {
 type ExternalClusterEditParams struct {
 
 	// Actual cloud credentials.
-	Credentials *string `json:"credentials,omitempty"`
-
-	// ID of previously saved cloud credentials.
-	CredentialsId string `json:"credentialsId"`
+	Credentials *string                                `json:"credentials,omitempty"`
+	Eks         *UpdateExternalClusterEksConfiguration `json:"eks,omitempty"`
+	Gke         *UpdateExternalClusterGkeConfiguration `json:"gke,omitempty"`
 }
 
 // ExternalClusterEksConfiguration defines model for ExternalClusterEksConfiguration.
 type ExternalClusterEksConfiguration struct {
 
+	// AWS account ID
+	AccountId *string `json:"accountId,omitempty"`
+
 	// EKS cluster name
 	ClusterName *string `json:"clusterName,omitempty"`
 
+	// Optional instance profile arn for CAST AI managed nodes.
+	InstanceProfileArn *string `json:"instanceProfileArn,omitempty"`
+
 	// EKS cluster region
 	Region *string `json:"region,omitempty"`
+
+	// Optional security groups for CAST AI managed nodes.
+	SecurityGroups *[]string `json:"securityGroups,omitempty"`
+
+	// Optional subnets for CAST AI managed nodes. If not set subnets from EKS cluster subnetIds list are used.
+	Subnets *[]string `json:"subnets,omitempty"`
 }
 
 // ExternalClusterGkeConfiguration defines model for ExternalClusterGkeConfiguration.
@@ -630,6 +665,12 @@ type ExternalClusterGkeConfiguration struct {
 
 	// GKE cluster name
 	ClusterName *string `json:"clusterName,omitempty"`
+
+	// GKE cluster location
+	Location *string `json:"location,omitempty"`
+
+	// GCP project which owns GKE cluster
+	ProjectId *string `json:"projectId,omitempty"`
 
 	// GKE cluster region
 	Region *string `json:"region,omitempty"`
@@ -948,7 +989,7 @@ type Node struct {
 	Role NodeType `json:"role"`
 
 	// CAST AI shape defining VM template. Field is required unless `instanceType` is specified.
-	Shape NodeShape `json:"shape"`
+	Shape *NodeShape `json:"shape,omitempty"`
 
 	// Spot instance configuration.
 	SpotConfig *NodeSpotConfig `json:"spotConfig,omitempty"`
@@ -1055,6 +1096,13 @@ type NodeUpdateOperation struct {
 	Delete *[]DeletedNode `json:"delete,omitempty"`
 }
 
+// NodeVolume defines model for NodeVolume.
+type NodeVolume struct {
+
+	// Volume size in GiB.
+	Size float32 `json:"size"`
+}
+
 // OperationResponse defines model for OperationResponse.
 type OperationResponse struct {
 
@@ -1157,6 +1205,99 @@ type PoliciesConfig struct {
 	UnschedulablePods UnschedulablePodsPolicy `json:"unschedulablePods"`
 }
 
+// ProblematicController defines model for ProblematicController.
+type ProblematicController struct {
+
+	// kind of the controller
+	Kind string `json:"kind"`
+
+	// name of the controller
+	Name string `json:"name"`
+
+	// controller problems
+	Problems []string `json:"problems"`
+}
+
+// ProblematicStandalonePod defines model for ProblematicStandalonePod.
+type ProblematicStandalonePod struct {
+
+	// name of the controller
+	Name string `json:"name"`
+
+	// standalone pod problems
+	Problems []string `json:"problems"`
+}
+
+// RebalanceAddNode defines model for RebalanceAddNode.
+type RebalanceAddNode struct {
+
+	// availability zone
+	Az *string `json:"az,omitempty"`
+
+	// count of nodes of such instanceType
+	Count int `json:"count"`
+
+	// cloud service provider
+	Csp string `json:"csp"`
+
+	// vm instance type
+	InstanceType string `json:"instanceType"`
+
+	// whether node should be spot instance
+	Spot bool `json:"spot"`
+
+	// subnet id
+	SubnetId *string `json:"subnetId,omitempty"`
+}
+
+// RebalanceDeleteNode defines model for RebalanceDeleteNode.
+type RebalanceDeleteNode struct {
+
+	// id of the node targeted for deletion
+	Id string `json:"id"`
+
+	// instance type of the node
+	InstanceType string `json:"instanceType"`
+
+	// name of the node
+	Name string `json:"name"`
+
+	// whether node should be spot instance
+	Spot bool `json:"spot"`
+}
+
+// RebalancePlanResponse defines model for RebalancePlanResponse.
+type RebalancePlanResponse struct {
+
+	// nodes suggested for adding
+	AddNodes *[]RebalanceAddNode `json:"addNodes,omitempty"`
+
+	// unique cluster id
+	ClusterId *string `json:"clusterId,omitempty"`
+
+	// pricing information
+	ClusterPrice *struct {
+
+		// approximate price with plan executed
+		After *string `json:"after,omitempty"`
+
+		// price before plan
+		Before *string `json:"before,omitempty"`
+
+		// difference in price
+		Diff *string `json:"diff,omitempty"`
+	} `json:"clusterPrice,omitempty"`
+
+	// node generation date time
+	CreatedAt *string `json:"createdAt,omitempty"`
+
+	// nodes suggestions for deletion
+	DeleteNodes *[]RebalanceDeleteNode `json:"deleteNodes,omitempty"`
+
+	// unique plan indentifier
+	Id *string `json:"id,omitempty"`
+}
+
 // ResourceUsage defines model for ResourceUsage.
 type ResourceUsage struct {
 
@@ -1192,10 +1333,18 @@ type SpotInstances struct {
 
 	// Enable/disable spot instances policy.
 	Enabled bool `json:"enabled"`
+
+	// Max allowed reclaim rate when choosing spot instance type. E.g. if the value is 10%, instance types having
+	// 10% or higher reclaim rate will not be considered. Set to zero to use all instance types regardless of
+	// reclaim rate.
+	MaxReclaimRate *int `json:"maxReclaimRate,omitempty"`
 }
 
 // UnschedulablePodsPolicy defines model for UnschedulablePodsPolicy.
 type UnschedulablePodsPolicy struct {
+
+	// Defines default ratio of 1 CPU to Volume GiB when creating new nodes. If set to 25, the ration would be 1 CPU : 25 GiB, for example a node with 16 CPU would have a 400 GiB volume.
+	DiskGibToCpuRatio *int `json:"diskGibToCpuRatio,omitempty"`
 
 	// Enable/disable unschedulable pods detection policy.
 	Enabled bool `json:"enabled"`
@@ -1226,6 +1375,26 @@ type UpdateCluster struct {
 	Network             *Network `json:"network,omitempty"`
 }
 
+// UpdateExternalClusterEksConfiguration defines model for UpdateExternalClusterEksConfiguration.
+type UpdateExternalClusterEksConfiguration struct {
+
+	// Optional instance profile arn for CAST AI managed nodes.
+	InstanceProfileArn *string `json:"instanceProfileArn,omitempty"`
+
+	// Optional security groups for CAST AI managed nodes.
+	SecurityGroups *[]string `json:"securityGroups,omitempty"`
+
+	// Optional subnets for CAST AI managed nodes. If not set subnets from EKS cluster subnetIds list are used.
+	Subnets *[]string `json:"subnets,omitempty"`
+}
+
+// UpdateExternalClusterGkeConfiguration defines model for UpdateExternalClusterGkeConfiguration.
+type UpdateExternalClusterGkeConfiguration struct {
+
+	// GKE cluster location. Must be set during phase 2 registration if not provided during initial cluster registration. Ignored if already set.
+	Location *string `json:"location,omitempty"`
+}
+
 // UserProfile defines model for UserProfile.
 type UserProfile struct {
 
@@ -1248,6 +1417,21 @@ type UserProfileSurvey struct {
 	CompanyName       *string `json:"companyName,omitempty"`
 	MonthlyCpuUsage   *int    `json:"monthlyCpuUsage,omitempty"`
 	Submitted         *bool   `json:"submitted,omitempty"`
+}
+
+// ValidNodeConstraint defines model for ValidNodeConstraint.
+type ValidNodeConstraint struct {
+
+	// number of cpu cores
+	CpuCores *int `json:"cpuCores,omitempty"`
+
+	// amount of mebibytes
+	RamMib *int `json:"ramMib,omitempty"`
+}
+
+// ValidNodeConstraints defines model for ValidNodeConstraints.
+type ValidNodeConstraints struct {
+	Items *[]ValidNodeConstraint `json:"items,omitempty"`
 }
 
 // VpnConfig defines model for VpnConfig.
@@ -1324,6 +1508,9 @@ type GetAgentInstallScriptParams struct {
 
 	// GCP region of your GKE cluster.
 	GkeRegion *string `json:"gke.region,omitempty"`
+
+	// Location of your GKE cluster.
+	GkeLocation *string `json:"gke.location,omitempty"`
 
 	// GCP project id in which your GKE cluster is created.
 	GkeProjectId *string `json:"gke.projectId,omitempty"`
@@ -1509,6 +1696,11 @@ type UpdateExternalClusterParams struct {
 	XCastAiOrganizationId *HeaderOrganizationId `json:"X-CastAi-Organization-Id,omitempty"`
 }
 
+// GetCredentialsScriptParams defines parameters for GetCredentialsScript.
+type GetCredentialsScriptParams struct {
+	XCastAiOrganizationId *HeaderOrganizationId `json:"X-CastAi-Organization-Id,omitempty"`
+}
+
 // DisconnectExternalClusterJSONBody defines parameters for DisconnectExternalCluster.
 type DisconnectExternalClusterJSONBody struct {
 
@@ -1546,6 +1738,11 @@ type DeleteExternalClusterNodeParams struct {
 
 // PauseExternalClusterParams defines parameters for PauseExternalCluster.
 type PauseExternalClusterParams struct {
+	XCastAiOrganizationId *HeaderOrganizationId `json:"X-CastAi-Organization-Id,omitempty"`
+}
+
+// PrometheusReadParams defines parameters for PrometheusRead.
+type PrometheusReadParams struct {
 	XCastAiOrganizationId *HeaderOrganizationId `json:"X-CastAi-Organization-Id,omitempty"`
 }
 

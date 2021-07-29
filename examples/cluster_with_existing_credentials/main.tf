@@ -7,7 +7,7 @@ data "castai_credentials" "existing_gcp" {
 }
 
 resource "castai_cluster" "example_cluster" {
-  name   = "example-cluster"
+  name = "example-cluster"
   region = "eu-central"
   credentials = [
     data.castai_credentials.existing_gcp.id
@@ -16,12 +16,12 @@ resource "castai_cluster" "example_cluster" {
   initialize_params {
     nodes {
       cloud = "gcp"
-      role  = "master"
+      role = "master"
       shape = "medium"
     }
     nodes {
       cloud = "gcp"
-      role  = "worker"
+      role = "worker"
       shape = "medium"
     }
   }
@@ -43,7 +43,9 @@ resource "castai_cluster" "example_cluster" {
     }
 
     spot_instances {
-      clouds = ["gcp","aws"]
+      clouds = [
+        "gcp",
+        "aws"]
       enabled = false
     }
 

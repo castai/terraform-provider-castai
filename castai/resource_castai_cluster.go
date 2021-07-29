@@ -57,7 +57,6 @@ const (
 	PolicyFieldUnschedulablePodsNodeConstraintMaxRAM = "max_node_ram_gib"
 	PolicyFieldUnschedulablePodsNodeConstraintMinCPU = "min_node_cpu_cores"
 	PolicyFieldUnschedulablePodsNodeConstraintMinRAM = "min_node_ram_gib"
-
 )
 
 func resourceCastaiCluster() *schema.Resource {
@@ -313,10 +312,11 @@ func resourceCastaiClusterCreate(ctx context.Context, data *schema.ResourceData,
 	var nodes []sdk.Node
 	for _, val := range data.Get(ClusterFieldInitializeParams + ".0." + ClusterFieldNodes).([]interface{}) {
 		nodeData := val.(map[string]interface{})
+		nodeShape := sdk.NodeShape(nodeData[ClusterFieldNodesShape].(string))
 		nodes = append(nodes, sdk.Node{
 			Role:  sdk.NodeType(nodeData[ClusterFieldNodesRole].(string)),
 			Cloud: sdk.CloudType(nodeData[ClusterFieldNodesCloud].(string)),
-			Shape: sdk.NodeShape(nodeData[ClusterFieldNodesShape].(string)),
+			Shape: &nodeShape,
 		})
 	}
 
@@ -547,15 +547,15 @@ func expandAutoscalerPolicies(pc map[string]interface{}) sdk.UpsertPoliciesJSONR
 			nodeConstraintPol = sdk.NodeConstraints{
 				Enabled:     ncData[PolicyFieldEnabled].(bool),
 				MaxCpuCores: int32(ncData[PolicyFieldUnschedulablePodsNodeConstraintMaxCPU].(int)),
-				MaxRamMib:   int32(ncData[PolicyFieldUnschedulablePodsNodeConstraintMaxRAM].(int))*1024,
+				MaxRamMib:   int32(ncData[PolicyFieldUnschedulablePodsNodeConstraintMaxRAM].(int)) * 1024,
 				MinCpuCores: int32(ncData[PolicyFieldUnschedulablePodsNodeConstraintMinCPU].(int)),
-				MinRamMib:   int32(ncData[PolicyFieldUnschedulablePodsNodeConstraintMinRAM].(int))*1024,
+				MinRamMib:   int32(ncData[PolicyFieldUnschedulablePodsNodeConstraintMinRAM].(int)) * 1024,
 			}
 		}
 
 		unschedulablePodsPolicy = sdk.UnschedulablePodsPolicy{
-			Enabled: upData[PolicyFieldEnabled].(bool),
-			Headroom: headroomPol,
+			Enabled:         upData[PolicyFieldEnabled].(bool),
+			Headroom:        headroomPol,
 			NodeConstraints: &nodeConstraintPol,
 		}
 	}

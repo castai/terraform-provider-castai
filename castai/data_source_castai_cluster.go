@@ -263,7 +263,6 @@ func dataSourceCastaiClusterRead(ctx context.Context, data *schema.ResourceData,
 	return nil
 }
 
-
 func flattenAutoscalerPolicies(readPol *sdk.PoliciesConfig) []map[string]interface{} {
 	return []map[string]interface{}{
 		{
@@ -283,7 +282,7 @@ func flattenAutoscalerPolicies(readPol *sdk.PoliciesConfig) []map[string]interfa
 				{
 					PolicyFieldNodeDownscalerEmptyNodes: []map[string]interface{}{
 						{
-							PolicyFieldEnabled: readPol.NodeDownscaler.EmptyNodes.Enabled,
+							PolicyFieldEnabled:                       readPol.NodeDownscaler.EmptyNodes.Enabled,
 							PolicyFieldNodeDownscalerEmptyNodesDelay: readPol.NodeDownscaler.EmptyNodes.DelaySeconds,
 						},
 					},
@@ -300,18 +299,18 @@ func flattenAutoscalerPolicies(readPol *sdk.PoliciesConfig) []map[string]interfa
 					PolicyFieldEnabled: readPol.UnschedulablePods.Enabled,
 					PolicyFieldUnschedulablePodsHeadroom: []map[string]interface{}{
 						{
-							PolicyFieldEnabled:             readPol.UnschedulablePods.Headroom.Enabled,
+							PolicyFieldEnabled:                       readPol.UnschedulablePods.Headroom.Enabled,
 							PolicyFieldUnschedulablePodsHeadroomCPUp: readPol.UnschedulablePods.Headroom.CpuPercentage,
 							PolicyFieldUnschedulablePodsHeadroomRAMp: readPol.UnschedulablePods.Headroom.MemoryPercentage,
 						},
 					},
 					PolicyFieldUnschedulablePodsNodeConstraint: []map[string]interface{}{
 						{
-							PolicyFieldEnabled:             readPol.UnschedulablePods.NodeConstraints.Enabled,
+							PolicyFieldEnabled: readPol.UnschedulablePods.NodeConstraints.Enabled,
 							PolicyFieldUnschedulablePodsNodeConstraintMaxCPU: readPol.UnschedulablePods.NodeConstraints.MaxCpuCores,
-							PolicyFieldUnschedulablePodsNodeConstraintMaxRAM: readPol.UnschedulablePods.NodeConstraints.MaxRamMib*1024,
+							PolicyFieldUnschedulablePodsNodeConstraintMaxRAM: readPol.UnschedulablePods.NodeConstraints.MaxRamMib / 1024.0,
 							PolicyFieldUnschedulablePodsNodeConstraintMinCPU: readPol.UnschedulablePods.NodeConstraints.MinCpuCores,
-							PolicyFieldUnschedulablePodsNodeConstraintMinRAM: readPol.UnschedulablePods.NodeConstraints.MinRamMib*1024,
+							PolicyFieldUnschedulablePodsNodeConstraintMinRAM: readPol.UnschedulablePods.NodeConstraints.MinRamMib / 1024.0,
 						},
 					},
 				},
