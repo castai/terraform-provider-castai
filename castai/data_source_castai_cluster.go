@@ -94,6 +94,10 @@ func dataSourceCastaiCluster() *schema.Resource {
 													Type:     schema.TypeBool,
 													Computed: true,
 												},
+												PolicyFieldNodeDownscalerEmptyNodesDelay: {
+													Type:     schema.TypeInt,
+													Computed: true,
+												},
 											},
 										},
 									},
@@ -131,11 +135,43 @@ func dataSourceCastaiCluster() *schema.Resource {
 										Computed: true,
 										Elem: &schema.Resource{
 											Schema: map[string]*schema.Schema{
+												PolicyFieldEnabled: {
+													Type:     schema.TypeBool,
+													Computed: true,
+												},
 												PolicyFieldUnschedulablePodsHeadroomCPUp: {
 													Type:     schema.TypeInt,
 													Computed: true,
 												},
 												PolicyFieldUnschedulablePodsHeadroomRAMp: {
+													Type:     schema.TypeInt,
+													Computed: true,
+												},
+											},
+										},
+									},
+									PolicyFieldUnschedulablePodsNodeConstraint: {
+										Type:     schema.TypeList,
+										Computed: true,
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												PolicyFieldEnabled: {
+													Type:     schema.TypeBool,
+													Computed: true,
+												},
+												PolicyFieldUnschedulablePodsNodeConstraintMaxCPU: {
+													Type:     schema.TypeInt,
+													Computed: true,
+												},
+												PolicyFieldUnschedulablePodsNodeConstraintMaxRAM: {
+													Type:     schema.TypeInt,
+													Computed: true,
+												},
+												PolicyFieldUnschedulablePodsNodeConstraintMinCPU: {
+													Type:     schema.TypeInt,
+													Computed: true,
+												},
+												PolicyFieldUnschedulablePodsNodeConstraintMinRAM: {
 													Type:     schema.TypeInt,
 													Computed: true,
 												},
@@ -248,6 +284,7 @@ func flattenAutoscalerPolicies(readPol *sdk.PoliciesConfig) []map[string]interfa
 					PolicyFieldNodeDownscalerEmptyNodes: []map[string]interface{}{
 						{
 							PolicyFieldEnabled: readPol.NodeDownscaler.EmptyNodes.Enabled,
+							PolicyFieldNodeDownscalerEmptyNodesDelay: readPol.NodeDownscaler.EmptyNodes.DelaySeconds,
 						},
 					},
 				},
@@ -263,8 +300,18 @@ func flattenAutoscalerPolicies(readPol *sdk.PoliciesConfig) []map[string]interfa
 					PolicyFieldEnabled: readPol.UnschedulablePods.Enabled,
 					PolicyFieldUnschedulablePodsHeadroom: []map[string]interface{}{
 						{
+							PolicyFieldEnabled:             readPol.UnschedulablePods.Headroom.Enabled,
 							PolicyFieldUnschedulablePodsHeadroomCPUp: readPol.UnschedulablePods.Headroom.CpuPercentage,
 							PolicyFieldUnschedulablePodsHeadroomRAMp: readPol.UnschedulablePods.Headroom.MemoryPercentage,
+						},
+					},
+					PolicyFieldUnschedulablePodsNodeConstraint: []map[string]interface{}{
+						{
+							PolicyFieldEnabled:             readPol.UnschedulablePods.NodeConstraints.Enabled,
+							PolicyFieldUnschedulablePodsNodeConstraintMaxCPU: readPol.UnschedulablePods.NodeConstraints.MaxCpuCores,
+							PolicyFieldUnschedulablePodsNodeConstraintMaxRAM: readPol.UnschedulablePods.NodeConstraints.MaxRamMib*1024,
+							PolicyFieldUnschedulablePodsNodeConstraintMinCPU: readPol.UnschedulablePods.NodeConstraints.MinCpuCores,
+							PolicyFieldUnschedulablePodsNodeConstraintMinRAM: readPol.UnschedulablePods.NodeConstraints.MinRamMib*1024,
 						},
 					},
 				},

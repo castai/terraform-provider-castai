@@ -37,20 +37,27 @@ const (
 	ClusterFieldNodesRole        = "role"
 	ClusterFieldNodesShape       = "shape"
 
-	PolicyFieldEnabled                       = "enabled"
-	PolicyFieldAutoscalerPolicies            = "autoscaler_policies"
-	PolicyFieldClusterLimits                 = "cluster_limits"
-	PolicyFieldClusterLimitsCPU              = "cpu"
-	PolicyFieldClusterLimitsCPUmax           = "max_cores"
-	PolicyFieldClusterLimitsCPUmin           = "min_cores"
-	PolicyFieldNodeDownscaler                = "node_downscaler"
-	PolicyFieldNodeDownscalerEmptyNodes      = "empty_nodes"
-	PolicyFieldSpotInstances                 = "spot_instances"
-	PolicyFieldSpotInstancesClouds           = "clouds"
-	PolicyFieldUnschedulablePods             = "unschedulable_pods"
-	PolicyFieldUnschedulablePodsHeadroom     = "headroom"
-	PolicyFieldUnschedulablePodsHeadroomCPUp = "cpu_percentage"
-	PolicyFieldUnschedulablePodsHeadroomRAMp = "memory_percentage"
+	PolicyFieldEnabled                               = "enabled"
+	PolicyFieldAutoscalerPolicies                    = "autoscaler_policies"
+	PolicyFieldClusterLimits                         = "cluster_limits"
+	PolicyFieldClusterLimitsCPU                      = "cpu"
+	PolicyFieldClusterLimitsCPUmax                   = "max_cores"
+	PolicyFieldClusterLimitsCPUmin                   = "min_cores"
+	PolicyFieldNodeDownscaler                        = "node_downscaler"
+	PolicyFieldNodeDownscalerEmptyNodes              = "empty_nodes"
+	PolicyFieldNodeDownscalerEmptyNodesDelay         = "delay_seconds"
+	PolicyFieldSpotInstances                         = "spot_instances"
+	PolicyFieldSpotInstancesClouds                   = "clouds"
+	PolicyFieldUnschedulablePods                     = "unschedulable_pods"
+	PolicyFieldUnschedulablePodsHeadroom             = "headroom"
+	PolicyFieldUnschedulablePodsHeadroomCPUp         = "cpu_percentage"
+	PolicyFieldUnschedulablePodsHeadroomRAMp         = "memory_percentage"
+	PolicyFieldUnschedulablePodsNodeConstraint       = "node_constraints"
+	PolicyFieldUnschedulablePodsNodeConstraintMaxCPU = "max_node_cpu_cores"
+	PolicyFieldUnschedulablePodsNodeConstraintMaxRAM = "max_node_ram_gib"
+	PolicyFieldUnschedulablePodsNodeConstraintMinCPU = "min_node_cpu_cores"
+	PolicyFieldUnschedulablePodsNodeConstraintMinRAM = "min_node_ram_gib"
+
 )
 
 func resourceCastaiCluster() *schema.Resource {
@@ -191,6 +198,11 @@ func resourceCastaiCluster() *schema.Resource {
 													Optional: true,
 													Default:  false,
 												},
+												PolicyFieldNodeDownscalerEmptyNodesDelay: {
+													Type:     schema.TypeInt,
+													Optional: true,
+													Default:  0,
+												},
 											},
 										},
 									},
@@ -233,6 +245,11 @@ func resourceCastaiCluster() *schema.Resource {
 										Optional: true,
 										Elem: &schema.Resource{
 											Schema: map[string]*schema.Schema{
+												PolicyFieldEnabled: {
+													Type:     schema.TypeBool,
+													Optional: true,
+													Default:  false,
+												},
 												PolicyFieldUnschedulablePodsHeadroomCPUp: {
 													Type:     schema.TypeInt,
 													Optional: true,
@@ -242,6 +259,40 @@ func resourceCastaiCluster() *schema.Resource {
 													Type:     schema.TypeInt,
 													Optional: true,
 													Default:  2,
+												},
+											},
+										},
+									},
+									PolicyFieldUnschedulablePodsNodeConstraint: {
+										Type:     schema.TypeList,
+										MaxItems: 1,
+										Optional: true,
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												PolicyFieldEnabled: {
+													Type:     schema.TypeBool,
+													Optional: true,
+													Default:  false,
+												},
+												PolicyFieldUnschedulablePodsNodeConstraintMaxCPU: {
+													Type:     schema.TypeInt,
+													Optional: true,
+													Default:  32,
+												},
+												PolicyFieldUnschedulablePodsNodeConstraintMaxRAM: {
+													Type:     schema.TypeInt,
+													Optional: true,
+													Default:  262144,
+												},
+												PolicyFieldUnschedulablePodsNodeConstraintMinCPU: {
+													Type:     schema.TypeInt,
+													Optional: true,
+													Default:  2,
+												},
+												PolicyFieldUnschedulablePodsNodeConstraintMinRAM: {
+													Type:     schema.TypeInt,
+													Optional: true,
+													Default:  2048,
 												},
 											},
 										},
@@ -452,10 +503,12 @@ func expandAutoscalerPolicies(pc map[string]interface{}) sdk.UpsertPoliciesJSONR
 		ndData := val.(map[string]interface{})
 		for _, valn := range ndData[PolicyFieldNodeDownscalerEmptyNodes].([]interface{}) {
 			ndData := valn.(map[string]interface{})
+			nodeDownscalerDelay := ndData[PolicyFieldNodeDownscalerEmptyNodesDelay].(int)
 			nodeDownscalerEnabled := ndData[PolicyFieldEnabled].(bool)
 			nodeDownscalerPolicy = sdk.NodeDownscaler{
 				EmptyNodes: &sdk.NodeDownscalerEmptyNodes{
-					Enabled: &nodeDownscalerEnabled,
+					DelaySeconds: &nodeDownscalerDelay,
+					Enabled:      &nodeDownscalerEnabled,
 				},
 			}
 		}
@@ -472,17 +525,38 @@ func expandAutoscalerPolicies(pc map[string]interface{}) sdk.UpsertPoliciesJSONR
 	}
 
 	var unschedulablePodsPolicy sdk.UnschedulablePodsPolicy
+	var headroomPol sdk.Headroom
+	var nodeConstraintPol sdk.NodeConstraints
+
 	for _, val := range pc[PolicyFieldUnschedulablePods].([]interface{}) {
 		upData := val.(map[string]interface{})
 		for _, valn := range upData[PolicyFieldUnschedulablePodsHeadroom].([]interface{}) {
 			hpData := valn.(map[string]interface{})
-			unschedulablePodsPolicy = sdk.UnschedulablePodsPolicy{
-				Enabled: upData[PolicyFieldEnabled].(bool),
-				Headroom: sdk.Headroom{
-					CpuPercentage:    hpData[PolicyFieldUnschedulablePodsHeadroomCPUp].(int),
-					MemoryPercentage: hpData[PolicyFieldUnschedulablePodsHeadroomRAMp].(int),
-				},
+
+			hpEnabled := hpData[PolicyFieldEnabled].(bool)
+			headroomPol = sdk.Headroom{
+				Enabled:          &hpEnabled,
+				CpuPercentage:    hpData[PolicyFieldUnschedulablePodsHeadroomCPUp].(int),
+				MemoryPercentage: hpData[PolicyFieldUnschedulablePodsHeadroomRAMp].(int),
 			}
+		}
+
+		for _, valn := range upData[PolicyFieldUnschedulablePodsNodeConstraint].([]interface{}) {
+			ncData := valn.(map[string]interface{})
+
+			nodeConstraintPol = sdk.NodeConstraints{
+				Enabled:     ncData[PolicyFieldEnabled].(bool),
+				MaxCpuCores: int32(ncData[PolicyFieldUnschedulablePodsNodeConstraintMaxCPU].(int)),
+				MaxRamMib:   int32(ncData[PolicyFieldUnschedulablePodsNodeConstraintMaxRAM].(int))*1024,
+				MinCpuCores: int32(ncData[PolicyFieldUnschedulablePodsNodeConstraintMinCPU].(int)),
+				MinRamMib:   int32(ncData[PolicyFieldUnschedulablePodsNodeConstraintMinRAM].(int))*1024,
+			}
+		}
+
+		unschedulablePodsPolicy = sdk.UnschedulablePodsPolicy{
+			Enabled: upData[PolicyFieldEnabled].(bool),
+			Headroom: headroomPol,
+			NodeConstraints: &nodeConstraintPol,
 		}
 	}
 
@@ -499,7 +573,7 @@ func expandAutoscalerPolicies(pc map[string]interface{}) sdk.UpsertPoliciesJSONR
 }
 
 func toClusterNetwork(vpnType interface{}) *sdk.Network {
-	defaultNetwork := &sdk.Network{Vpn: sdk.VpnConfig{IpSec: &sdk.IpSecConfig{}}}
+	defaultNetwork := &sdk.Network{Vpn: &sdk.VpnConfig{IpSec: &sdk.IpSecConfig{}}}
 	vpnTypeString, ok := vpnType.(string)
 	if !ok {
 		vpnTypeString = vpnTypeCloudProvider
@@ -508,9 +582,9 @@ func toClusterNetwork(vpnType interface{}) *sdk.Network {
 	case vpnTypeCloudProvider:
 		return defaultNetwork
 	case vpnTypeWireGuardCrossLocationMesh:
-		return &sdk.Network{Vpn: sdk.VpnConfig{WireGuard: &sdk.WireGuardConfig{Topology: "crossLocationMesh"}}}
+		return &sdk.Network{Vpn: &sdk.VpnConfig{WireGuard: &sdk.WireGuardConfig{Topology: "crossLocationMesh"}}}
 	case vpnTypeWireGuardFullMesh:
-		return &sdk.Network{Vpn: sdk.VpnConfig{WireGuard: &sdk.WireGuardConfig{Topology: "fullMesh"}}}
+		return &sdk.Network{Vpn: &sdk.VpnConfig{WireGuard: &sdk.WireGuardConfig{Topology: "fullMesh"}}}
 	}
 	return defaultNetwork
 }

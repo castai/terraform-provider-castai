@@ -38,19 +38,28 @@ resource "castai_cluster" "example_cluster" {
     node_downscaler {
       empty_nodes {
         enabled = false
+        delay_seconds = 120
       }
     }
 
     spot_instances {
-      clouds = ["gcp"]
+      clouds = ["gcp","aws"]
       enabled = false
     }
 
     unschedulable_pods {
       enabled = false
       headroom {
+        enabled = false
         cpu_percentage = 10
         memory_percentage = 10
+      }
+      node_constraints {
+        enabled = true
+        max_node_cpu_cores = 32
+        max_node_ram_gib = 256
+        min_node_cpu_cores = 2
+        min_node_ram_gib = 8
       }
     }
   }
