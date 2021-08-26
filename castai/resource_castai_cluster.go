@@ -425,6 +425,9 @@ func resourceCastaiClusterUpdate(ctx context.Context, data *schema.ResourceData,
 
 	if data.HasChange(PolicyFieldAutoscalerPolicies) {
 		autoscalerParams, ok := data.Get(PolicyFieldAutoscalerPolicies).([]interface{})
+
+		fmt.Printf("update policies %#v", autoscalerParams[0].(map[string]interface{}))
+
 		if ok && len(autoscalerParams) > 0 {
 			log.Printf("[DEBUG] Cluster %q autoscaling policies update", data.Id())
 			if err := updatePolicies(ctx, client, data.Id(), autoscalerParams[0].(map[string]interface{})); err != nil {
@@ -483,6 +486,9 @@ func waitForClusterToReachStatusFunc(ctx context.Context, client *sdk.ClientWith
 }
 
 func expandAutoscalerPolicies(pc map[string]interface{}) sdk.UpsertPoliciesJSONRequestBody {
+
+	//fmt.Printf("update policies %#v", pc)
+
 	var clusterLimits sdk.ClusterLimitsPolicy
 	for _, val := range pc[PolicyFieldClusterLimits].([]interface{}) {
 		limitData := val.(map[string]interface{})

@@ -10,7 +10,7 @@ resource "helm_release" "pomerium" {
   repository = "https://helm.pomerium.io"
   chart      = "pomerium"
   version    = "16.0.2"
-  values = [file("pomerium-values.yaml")]
+  values     = [file("pomerium-values.yaml")]
 
   set {
     name  = "authenticate.idp.clientID"

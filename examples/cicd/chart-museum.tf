@@ -63,7 +63,7 @@ resource "google_service_account_key" "chart_museum_sa_key" {
 
 resource "kubernetes_secret" "gcp_chart_museum_bucket_sa" {
   metadata {
-    name = "gcp-chart-museum-bucket-sa"
+    name      = "gcp-chart-museum-bucket-sa"
     namespace = kubernetes_namespace.chart_museum.metadata[0].name
   }
   data = {
@@ -77,7 +77,7 @@ resource "helm_release" "chart_museum" {
   repository = "https://chartmuseum.github.io/charts"
   chart      = "chartmuseum"
   version    = "2.16.0"
-  values = [file("chart-museum-values.yaml")]
+  values     = [file("chart-museum-values.yaml")]
   depends_on = [
     google_storage_bucket.chart_museum,
     kubernetes_namespace.chart_museum,

@@ -7,7 +7,7 @@ data "castai_credentials" "existing_gcp" {
 }
 
 resource "castai_cluster" "example_cluster" {
-  name = "example-cluster"
+  name   = "example-cluster"
   region = "eu-central"
   credentials = [
     data.castai_credentials.existing_gcp.id
@@ -16,12 +16,12 @@ resource "castai_cluster" "example_cluster" {
   initialize_params {
     nodes {
       cloud = "gcp"
-      role = "master"
+      role  = "master"
       shape = "medium"
     }
     nodes {
       cloud = "gcp"
-      role = "worker"
+      role  = "worker"
       shape = "medium"
     }
   }
@@ -37,7 +37,7 @@ resource "castai_cluster" "example_cluster" {
 
     node_downscaler {
       empty_nodes {
-        enabled = false
+        enabled       = false
         delay_seconds = 120
       }
     }
@@ -45,23 +45,23 @@ resource "castai_cluster" "example_cluster" {
     spot_instances {
       clouds = [
         "gcp",
-        "aws"]
+      "aws"]
       enabled = false
     }
 
     unschedulable_pods {
       enabled = false
       headroom {
-        enabled = false
-        cpu_percentage = 10
+        enabled           = false
+        cpu_percentage    = 10
         memory_percentage = 10
       }
       node_constraints {
-        enabled = true
+        enabled            = true
         max_node_cpu_cores = 32
-        max_node_ram_gib = 256
+        max_node_ram_gib   = 256
         min_node_cpu_cores = 2
-        min_node_ram_gib = 8
+        min_node_ram_gib   = 8
       }
     }
   }
