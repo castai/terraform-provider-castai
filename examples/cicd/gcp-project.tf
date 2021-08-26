@@ -50,37 +50,37 @@ resource "google_service_account_key" "cicd" {
 resource "google_project_iam_member" "compute" {
   project = google_project.cicd.project_id
   role    = "roles/compute.admin"
-  member = "serviceAccount:${google_service_account.cicd.email}"
+  member  = "serviceAccount:${google_service_account.cicd.email}"
 }
 
 resource "google_project_iam_member" "service-account-user" {
   project = google_project.cicd.project_id
   role    = "roles/iam.serviceAccountUser"
-  member = "serviceAccount:${google_service_account.cicd.email}"
+  member  = "serviceAccount:${google_service_account.cicd.email}"
 }
 
 resource "google_project_iam_member" "service-account-admin" {
   project = google_project.cicd.project_id
   role    = "roles/iam.serviceAccountAdmin"
-  member = "serviceAccount:${google_service_account.cicd.email}"
+  member  = "serviceAccount:${google_service_account.cicd.email}"
 }
 
 resource "google_project_iam_member" "role-admin" {
   project = google_project.cicd.project_id
   role    = "roles/iam.roleAdmin"
-  member = "serviceAccount:${google_service_account.cicd.email}"
+  member  = "serviceAccount:${google_service_account.cicd.email}"
 }
 
 resource "google_project_iam_member" "service-account-key-admin" {
   project = google_project.cicd.project_id
   role    = "roles/iam.serviceAccountKeyAdmin"
-  member = "serviceAccount:${google_service_account.cicd.email}"
+  member  = "serviceAccount:${google_service_account.cicd.email}"
 }
 
 resource "google_project_iam_member" "project-iam-admin" {
   project = google_project.cicd.project_id
   role    = "roles/resourcemanager.projectIamAdmin"
-  member = "serviceAccount:${google_service_account.cicd.email}"
+  member  = "serviceAccount:${google_service_account.cicd.email}"
 }
 
 // null_resource could be used if you only want to apply all gcp project related resources. Eg:

@@ -25,8 +25,8 @@ resource "castai_credentials" "example_azure" {
 }
 
 resource "castai_cluster" "example_cluster" {
-  name   = "example-cluster"
-  region = "eu-central"
+  name     = "example-cluster"
+  region   = "eu-central"
   vpn_type = "wireguard_cross_location_mesh"
   credentials = [
     castai_credentials.example_gcp.id,
@@ -63,20 +63,31 @@ resource "castai_cluster" "example_cluster" {
 
     node_downscaler {
       empty_nodes {
-        enabled = false
+        enabled       = false
+        delay_seconds = 120
       }
     }
 
     spot_instances {
-      clouds = ["gcp","aws"]
+      clouds = [
+        "gcp",
+      "aws"]
       enabled = false
     }
 
     unschedulable_pods {
       enabled = false
       headroom {
-        cpu_percentage = 10
+        enabled           = false
+        cpu_percentage    = 10
         memory_percentage = 10
+      }
+      node_constraints {
+        enabled            = true
+        max_node_cpu_cores = 32
+        max_node_ram_gib   = 256
+        min_node_cpu_cores = 2
+        min_node_ram_gib   = 8
       }
     }
   }
@@ -91,10 +102,10 @@ output "example_cluster_kubeconfig" {
 ##############
 
 provider "kubernetes" {
-  host = castai_cluster.example_cluster.kubeconfig.0.host
+  host                   = castai_cluster.example_cluster.kubeconfig.0.host
   cluster_ca_certificate = base64decode(castai_cluster.example_cluster.kubeconfig.0.cluster_ca_certificate)
-  client_key = base64decode(castai_cluster.example_cluster.kubeconfig.0.client_key)
-  client_certificate = base64decode(castai_cluster.example_cluster.kubeconfig.0.client_certificate)
+  client_key             = base64decode(castai_cluster.example_cluster.kubeconfig.0.client_key)
+  client_certificate     = base64decode(castai_cluster.example_cluster.kubeconfig.0.client_certificate)
 }
 
 resource "kubernetes_namespace" "example_namespace" {

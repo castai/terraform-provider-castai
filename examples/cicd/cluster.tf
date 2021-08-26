@@ -43,7 +43,7 @@ resource "castai_cluster" "cicd" {
 
 data "kubernetes_service" "ingress" {
   metadata {
-    name = "ingress-nginx-controller"
+    name      = "ingress-nginx-controller"
     namespace = "ingress-nginx"
   }
 }

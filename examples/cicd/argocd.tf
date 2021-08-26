@@ -58,7 +58,7 @@ resource "kubernetes_secret" "cluster_dev_master" {
     }
   }
   data = {
-    name = var.argocd_dev_cluster_name,
+    name   = var.argocd_dev_cluster_name,
     server = var.argocd_dev_cluster_server,
     config = base64decode(var.argocd_dev_cluster_config)
   }
@@ -73,7 +73,7 @@ resource "kubernetes_secret" "cluster_prod_master" {
     }
   }
   data = {
-    name = var.argocd_prod_cluster_name,
+    name   = var.argocd_prod_cluster_name,
     server = var.argocd_prod_cluster_server,
     config = base64decode(var.argocd_prod_cluster_config)
   }
@@ -85,7 +85,7 @@ resource "helm_release" "argocd" {
   repository = "https://argoproj.github.io/argo-helm"
   chart      = "argo-cd"
   version    = "3.1.0"
-  values = [file("argocd-values.yaml")]
+  values     = [file("argocd-values.yaml")]
   depends_on = [
     kubernetes_secret.charts_repo_creds,
     kubernetes_secret.gitlab_git_access,
@@ -95,12 +95,12 @@ resource "helm_release" "argocd" {
   ]
 
   set {
-    name = "server.additionalProjects[0].destinations[0].server"
+    name  = "server.additionalProjects[0].destinations[0].server"
     value = var.argocd_dev_cluster_server
   }
 
   set {
-    name = "server.additionalProjects[1].destinations[0].server"
+    name  = "server.additionalProjects[1].destinations[0].server"
     value = var.argocd_prod_cluster_server
   }
 }

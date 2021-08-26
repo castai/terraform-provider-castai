@@ -39,7 +39,7 @@ func (c *Config) configureProvider() (interface{}, error) {
 		return nil, err
 	}
 
-	if checkErr := sdk.CheckGetResponse(apiClient.ListAuthTokensWithResponse(context.Background())); checkErr != nil {
+	if checkErr := sdk.CheckGetResponse(apiClient.ListAuthTokensWithResponse(context.Background(), &sdk.ListAuthTokensParams{})); checkErr != nil {
 		return nil, fmt.Errorf("validating api token (by listing auth tokens): %v", checkErr)
 	}
 

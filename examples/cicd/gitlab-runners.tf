@@ -42,7 +42,7 @@ resource "kubernetes_namespace" "gitlab" {
 
 resource "kubernetes_secret" "gcp-gitlab-cache-bucket-sa" {
   metadata {
-    name = "gcp-gitlab-cache-bucket-sa"
+    name      = "gcp-gitlab-cache-bucket-sa"
     namespace = kubernetes_namespace.gitlab.metadata[0].name
   }
   data = {
@@ -54,10 +54,10 @@ resource "kubernetes_secret" "gcp-gitlab-cache-bucket-sa" {
 resource "helm_release" "gitlab-runner" {
   name       = "gitlab-runner"
   repository = "https://charts.gitlab.io"
-  namespace = kubernetes_namespace.gitlab.metadata[0].name
+  namespace  = kubernetes_namespace.gitlab.metadata[0].name
   chart      = "gitlab-runner"
   version    = "0.27.0"
-  values = [file("gitlab-runners-values.yaml")]
+  values     = [file("gitlab-runners-values.yaml")]
   depends_on = [
     google_storage_bucket.gitlab_cache,
     kubernetes_secret.gcp-gitlab-cache-bucket-sa

@@ -54,12 +54,12 @@ variable "argocd_dev_cluster_name" {
 }
 
 variable "argocd_dev_cluster_server" {
-  default = ""
+  default     = ""
   description = "Argo CD dev cluster server address, eg: https://my-server"
 }
 
 variable "argocd_dev_cluster_config" {
-  default = ""
+  default     = ""
   description = "Argo CD dev cluster configuration"
 }
 
@@ -97,10 +97,10 @@ variable "cloudflare_zone" {
 
 variable "cloudflare_argocd_subdomain" {
   description = "Argocd subdomain name"
-  default = "argocd"
+  default     = "argocd"
 }
 
 variable "cloudflare_charts_subdomain" {
   description = "Charts museum subdomain name"
-  default = "charts"
+  default     = "charts"
 }
