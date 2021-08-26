@@ -426,7 +426,7 @@ func resourceCastaiClusterUpdate(ctx context.Context, data *schema.ResourceData,
 	if data.HasChange(PolicyFieldAutoscalerPolicies) {
 		autoscalerParams, ok := data.Get(PolicyFieldAutoscalerPolicies).([]interface{})
 
-		fmt.Printf("update policies %#v", autoscalerParams[0].(map[string]interface{}))
+		//fmt.Printf("update policies %#v", autoscalerParams[0].(map[string]interface{}))
 
 		if ok && len(autoscalerParams) > 0 {
 			log.Printf("[DEBUG] Cluster %q autoscaling policies update", data.Id())
