@@ -1,0 +1,97 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "RunInstancesTagRestriction",
+      "Effect": "Allow",
+      "Action": "ec2:RunInstances",
+      "Resource": "arn:aws:ec2:{{ .ARN }}:instance/*",
+      "Condition": {
+        "StringEquals": {
+          "aws:RequestTag/kubernetes.io/cluster/{{ .ClusterName }}": "owned"
+        }
+      }
+    },
+    {
+      "Sid": "RunInstancesVpcRestriction",
+      "Effect": "Allow",
+      "Action": "ec2:RunInstances",
+      "Resource": "arn:aws:ec2:{{ .ARN }}:subnet/*",
+      "Condition": {
+        "StringEquals": {
+          "ec2:Vpc": "arn:aws:ec2:{{ .ARN }}:vpc/{{ .VPC }}"
+        }
+      }
+    },
+    {
+      "Sid": "InstanceActionsTagRestriction",
+      "Effect": "Allow",
+      "Action": [
+        "ec2:TerminateInstances",
+        "ec2:StartInstances",
+        "ec2:StopInstances",
+        "ec2:CreateTags"
+      ],
+      "Resource": "arn:aws:ec2:{{ .ARN }}:instance/*",
+      "Condition": {
+        "StringEquals": {
+          "ec2:ResourceTag/kubernetes.io/cluster/{{ .ClusterName }}": [
+            "owned",
+            "shared"
+          ]
+        }
+      }
+    },
+    {
+      "Sid": "VpcRestrictedActions",
+      "Effect": "Allow",
+      "Action": [
+        "ec2:RevokeSecurityGroupIngress",
+        "ec2:RevokeSecurityGroupEgress",
+        "ec2:AuthorizeSecurityGroupEgress",
+        "ec2:AuthorizeSecurityGroupIngress",
+        "ec2:DeleteSecurityGroup"
+      ],
+      "Resource": "*",
+      "Condition": {
+        "StringEquals": {
+          "ec2:Vpc": "arn:aws:ec2:{{ .ARN }}:vpc/{{ .VPC }}"
+        }
+      }
+    },
+    {
+      "Sid": "AutoscalingActionsTagRestriction",
+      "Effect": "Allow",
+      "Action": [
+        "autoscaling:UpdateAutoScalingGroup",
+        "autoscaling:DeleteAutoScalingGroup",
+        "autoscaling:SuspendProcesses",
+        "autoscaling:ResumeProcesses",
+        "autoscaling:TerminateInstanceInAutoScalingGroup"
+      ],
+      "Resource": "arn:aws:autoscaling:{{ .ARN }}:autoScalingGroup:*:autoScalingGroupName/*",
+      "Condition": {
+        "StringEquals": {
+          "autoscaling:ResourceTag/kubernetes.io/cluster/{{ .ClusterName }}": [
+            "owned",
+            "shared"
+          ]
+        }
+      }
+    },
+    {
+      "Sid": "EKS",
+      "Effect": "Allow",
+      "Action": [
+        "eks:Describe*",
+        "eks:List*",
+        "eks:DeleteNodegroup",
+        "eks:UpdateNodegroupConfig"
+      ],
+      "Resource": [
+        "arn:aws:eks:{{ .ARN }}:cluster/{{ .ClusterName }}",
+        "arn:aws:eks:{{ .ARN }}:nodegroup/{{ .ClusterName }}/*/*"
+      ]
+    }
+  ]
+}
