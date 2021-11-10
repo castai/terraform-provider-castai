@@ -59,7 +59,7 @@
       "Sid": "TagSecurityGroups",
       "Effect": "Allow",
       "Action": "ec2:CreateTags",
-      "Resource": "arn:aws:ec2:*:{{ .ACCOUNT_NUMBER }}:security-group/*",
+      "Resource": "arn:aws:ec2:*:{{ .AccountNumber }}:security-group/*",
       "Condition": {
         "StringEquals": {
           "ec2:CreateAction": "CreateSecurityGroup"
@@ -71,10 +71,10 @@
       "Effect": "Allow",
       "Action": "ec2:RunInstances",
       "Resource": [
-        "arn:aws:ec2:*:{{ .ACCOUNT_NUMBER }}:network-interface/*",
-        "arn:aws:ec2:*:{{ .ACCOUNT_NUMBER }}:security-group/*",
-        "arn:aws:ec2:*:{{ .ACCOUNT_NUMBER }}:volume/*",
-        "arn:aws:ec2:*:{{ .ACCOUNT_NUMBER }}:key-pair/*",
+        "arn:aws:ec2:*:{{ .AccountNumber }}:network-interface/*",
+        "arn:aws:ec2:*:{{ .AccountNumber }}:security-group/*",
+        "arn:aws:ec2:*:{{ .AccountNumber }}:volume/*",
+        "arn:aws:ec2:*:{{ .AccountNumber }}:key-pair/*",
         "arn:aws:ec2:*::image/*"
       ]
     },
