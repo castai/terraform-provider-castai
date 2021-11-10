@@ -36,7 +36,7 @@ func GetIAMPolicy(accountNumber string) (string, error) {
 }
 
 func GetUserInlinePolicy(clusterName, arn, vpc string) (string, error) {
-	tmpl, err := template.New("json").Parse(IAMPolicy)
+	tmpl, err := template.New("json").Parse(UserInlinePolicy)
 	if err != nil {
 		return "", fmt.Errorf("parsing template: %w", err)
 	}
