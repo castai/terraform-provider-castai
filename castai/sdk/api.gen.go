@@ -16,23 +16,6 @@ const (
 	ApiKeyAuthScopes = "ApiKeyAuth.Scopes"
 )
 
-// AddExternalClusterNode defines model for AddExternalClusterNode.
-type AddExternalClusterNode struct {
-
-	// Instance type for the new VM.
-	InstanceType string `json:"instanceType"`
-
-	// Spot instance configuration.
-	SpotConfig *NodeSpotConfig `json:"spotConfig,omitempty"`
-
-	// Optional subnet on which to create VM. Subnet must already exist.
-	SubnetId *string     `json:"subnetId,omitempty"`
-	Volume   *NodeVolume `json:"volume,omitempty"`
-
-	// Zone for the new VM. Must be a zone for one of the subnets in the cluster.
-	Zone *string `json:"zone,omitempty"`
-}
-
 // AddNodeResult defines model for AddNodeResult.
 type AddNodeResult struct {
 
@@ -126,8 +109,16 @@ type AuditEvent struct {
 	Id          string         `json:"id"`
 	InitiatedBy AuditInitiator `json:"initiatedBy"`
 
+	// Event-specific key-value data.
+	Labels *AuditEvent_Labels `json:"labels,omitempty"`
+
 	// Event creation UTC time in RFC3339 format.
 	Time time.Time `json:"time"`
+}
+
+// AuditEvent_Labels defines model for AuditEvent.Labels.
+type AuditEvent_Labels struct {
+	AdditionalProperties map[string]string `json:"-"`
 }
 
 // AuditEventClusterCreated defines model for AuditEventClusterCreated.
@@ -165,22 +156,6 @@ type AuditInitiator struct {
 	Name string `json:"name"`
 }
 
-// AuditLogEvent defines model for AuditLogEvent.
-type AuditLogEvent struct {
-
-	// Event creation UTC time in RFC3339 format.
-	CreatedAt time.Time `json:"createdAt"`
-
-	// Audit Log Event ID, generated at the time of creation.
-	Id string `json:"id"`
-
-	// Metadata about the event
-	Metadata map[string]interface{} `json:"metadata"`
-
-	// Operation.
-	Operation string `json:"operation"`
-}
-
 // AuthToken defines model for AuthToken.
 type AuthToken struct {
 
@@ -189,9 +164,6 @@ type AuthToken struct {
 
 	// Auth token creation UTC time in RFC3339 format.
 	CreatedAt time.Time `json:"createdAt"`
-
-	// Default organization id of the token. Used when requests do not specify organization explicitly.
-	DefaultOrganizationId *string `json:"defaultOrganizationId,omitempty"`
 
 	// Auth token deletion UTC time in RFC3339 format.
 	DeletedAt *time.Time `json:"deletedAt,omitempty"`
@@ -204,6 +176,9 @@ type AuthToken struct {
 
 	// Name of the token. Must be unique among other active tokens for the current user.
 	Name string `json:"name"`
+
+	// Indicates whether auth token has readonly permissions.
+	Readonly bool `json:"readonly"`
 }
 
 // AuthTokenCreateResponse defines model for AuthTokenCreateResponse.
@@ -215,14 +190,14 @@ type AuthTokenCreateResponse struct {
 	// Auth token creation UTC time in RFC3339 format.
 	CreatedAt time.Time `json:"createdAt"`
 
-	// Default organization id of the token. Used when requests do not specify organization explicitly.
-	DefaultOrganizationId *string `json:"defaultOrganizationId,omitempty"`
-
 	// Auth token ID, generated at the time of creation
 	Id string `json:"id"`
 
 	// Name of the token. Must be unique among other active tokens for the current user.
 	Name string `json:"name"`
+
+	// Indicates whether auth token has readonly permissions.
+	Readonly bool `json:"readonly"`
 
 	// Generated secret for this auth token (only shown once on creation)
 	Token string `json:"token"`
@@ -238,9 +213,6 @@ type AuthTokenUpdateRequest struct {
 
 	// Indicates whether this auth token is active.
 	Active bool `json:"active"`
-
-	// Default organization id of the token. Used when requests do not specify organization explicitly.
-	DefaultOrganizationId *string `json:"defaultOrganizationId,omitempty"`
 }
 
 // CastRegion defines model for CastRegion.
@@ -340,6 +312,31 @@ type ClusterAddonsList struct {
 	List []ClusterAddon `json:"list"`
 }
 
+// ClusterCostDetails defines model for ClusterCostDetails.
+type ClusterCostDetails struct {
+
+	// Average hourly cost of the cluster
+	CostPerHour float32 `json:"costPerHour"`
+
+	// Average number of CPUs in all nodes of type Spot in the cluster
+	SpotCpu float32 `json:"spotCpu"`
+
+	// Average number of nodes of type Spot in the cluster
+	SpotNodeCount float32 `json:"spotNodeCount"`
+
+	// Average RAM (GiB) memory of all nodes of type Spot in cluster
+	SpotRamGib float32 `json:"spotRamGib"`
+
+	// Average number of CPUs in all nodes in the cluster
+	TotalCpu float32 `json:"totalCpu"`
+
+	// Average number of nodes in the cluster
+	TotalNodeCount float32 `json:"totalNodeCount"`
+
+	// Average RAM (GiB) memory of all nodes in the cluster
+	TotalRamGib float32 `json:"totalRamGib"`
+}
+
 // ClusterCostEstimate defines model for ClusterCostEstimate.
 type ClusterCostEstimate struct {
 	PerCloud *CostsPerProviderEstimate `json:"perCloud,omitempty"`
@@ -347,6 +344,29 @@ type ClusterCostEstimate struct {
 
 	// Estimated Price
 	Total *EstimatedPriceAmount `json:"total,omitempty"`
+}
+
+// ClusterCostHistoryEntry defines model for ClusterCostHistoryEntry.
+type ClusterCostHistoryEntry struct {
+
+	// Timestamp of the record
+	CreatedAt time.Time `json:"createdAt"`
+
+	// Defines average cost and resources of the cluster
+	Current ClusterCostDetails `json:"current"`
+
+	// Defines average cost and resources of the cluster
+	Optimized ClusterCostDetails `json:"optimized"`
+}
+
+// ClusterCostHistoryResponse defines model for ClusterCostHistoryResponse.
+type ClusterCostHistoryResponse struct {
+
+	// Cluster id
+	ClusterId string `json:"clusterId"`
+
+	// Cost history entries
+	Items *[]ClusterCostHistoryEntry `json:"items,omitempty"`
 }
 
 // ClusterHealth defines model for ClusterHealth.
@@ -470,6 +490,16 @@ type ClusterRegion struct {
 	Name string `json:"name"`
 }
 
+// ClusterWorkloads defines model for ClusterWorkloads.
+type ClusterWorkloads struct {
+
+	// Cluster id
+	ClusterId string `json:"clusterId"`
+
+	// Workload
+	Workloads *[]Workload `json:"workloads,omitempty"`
+}
+
 // CostsPerProviderEstimate defines model for CostsPerProviderEstimate.
 type CostsPerProviderEstimate struct {
 
@@ -496,17 +526,10 @@ type CreateCluster struct {
 	Network *Network `json:"network,omitempty"`
 
 	// Initial nodes of this cluster. Must contain final masters count.
-	Nodes []Node `json:"nodes"`
+	Nodes []NewNode `json:"nodes"`
 
 	// CAST AI region to create the cluster in.
 	Region string `json:"region"`
-}
-
-// CredentialsScript defines model for CredentialsScript.
-type CredentialsScript struct {
-
-	// script to execute in terminal or cloud shell to generate credentials
-	Script *string `json:"script,omitempty"`
 }
 
 // DeleteNodeResult defines model for DeleteNodeResult.
@@ -584,158 +607,134 @@ type EstimatedPriceAmount struct {
 	Monthly *string `json:"monthly,omitempty"`
 }
 
-// ExternalCluster defines model for ExternalCluster.
-type ExternalCluster struct {
+// EstimatedSavingsCurrentConfiguration defines model for EstimatedSavingsCurrentConfiguration.
+type EstimatedSavingsCurrentConfiguration struct {
 
-	// Cloud credentials ID.
-	CredentialsId *string                          `json:"credentialsId,omitempty"`
-	Eks           *ExternalClusterEksConfiguration `json:"eks,omitempty"`
-	Gke           *ExternalClusterGkeConfiguration `json:"gke,omitempty"`
+	// Current list of cluster nodes.
+	Nodes *[]EstimatedSavingsNode `json:"nodes,omitempty"`
 
-	// Cluster ID, generated at the time of creation; can be provided as part of onboarding request
-	Id   string                            `json:"id"`
-	Kops *ExternalClusterKopsConfiguration `json:"kops,omitempty"`
+	// Current list of cluster pods.
+	Pods *[]string `json:"pods,omitempty"`
 
-	// Name of this infrastructure object. Needs to be unique per organization.
-	Name string `json:"name"`
-
-	// Organization ID to register cluster for.
-	OrganizationId *string `json:"organizationId,omitempty"`
-
-	// Provider type.
-	ProviderType *string `json:"providerType,omitempty"`
-
-	// Current status of the cluster
-	Status *string `json:"status,omitempty"`
-
-	// agent token to use when registering the cluster
-	Token *string `json:"token,omitempty"`
+	// A map of replicated workloads.
+	ReplicatedWorkloads *EstimatedSavingsCurrentConfiguration_ReplicatedWorkloads `json:"replicatedWorkloads,omitempty"`
+	TotalPrice          *EstimatedSavingsCurrentConfigurationTotalPrice           `json:"totalPrice,omitempty"`
 }
 
-// ExternalClusterAddNodeResult defines model for ExternalClusterAddNodeResult.
-type ExternalClusterAddNodeResult struct {
-
-	// Node UUID.
-	NodeId string `json:"nodeId"`
-
-	// Node add operation ID for checking actualy operation status.
-	OperationId string `json:"operationId"`
+// EstimatedSavingsCurrentConfiguration_ReplicatedWorkloads defines model for EstimatedSavingsCurrentConfiguration.ReplicatedWorkloads.
+type EstimatedSavingsCurrentConfiguration_ReplicatedWorkloads struct {
+	AdditionalProperties map[string]EstimatedSavingsReplicatedWorkload `json:"-"`
 }
 
-// ExternalClusterDeleteNodeResult defines model for ExternalClusterDeleteNodeResult.
-type ExternalClusterDeleteNodeResult struct {
+// EstimatedSavingsCurrentConfigurationTotalPrice defines model for EstimatedSavingsCurrentConfigurationTotalPrice.
+type EstimatedSavingsCurrentConfigurationTotalPrice struct {
 
-	// Node deletion operation ID for checking actualy operation status.
-	OperationId string `json:"operationId"`
+	// Total hourly price of the node configuration in $ currency.
+	Hourly string `json:"hourly"`
+
+	// Total monthly price of the node configuration in $ currency.
+	Monthly string `json:"monthly"`
 }
 
-// ExternalClusterEditParams defines model for ExternalClusterEditParams.
-type ExternalClusterEditParams struct {
+// EstimatedSavingsNode defines model for EstimatedSavingsNode.
+type EstimatedSavingsNode struct {
 
-	// Actual cloud credentials.
-	Credentials *string                                `json:"credentials,omitempty"`
-	Eks         *UpdateExternalClusterEksConfiguration `json:"eks,omitempty"`
-	Gke         *UpdateExternalClusterGkeConfiguration `json:"gke,omitempty"`
-}
+	// Number CPU core node capacity.
+	CpuCores int `json:"cpuCores"`
 
-// ExternalClusterEksConfiguration defines model for ExternalClusterEksConfiguration.
-type ExternalClusterEksConfiguration struct {
-
-	// AWS account ID
-	AccountId *string `json:"accountId,omitempty"`
-
-	// EKS cluster name
-	ClusterName *string `json:"clusterName,omitempty"`
-
-	// Optional instance profile arn for CAST AI managed nodes.
-	InstanceProfileArn *string `json:"instanceProfileArn,omitempty"`
-
-	// EKS cluster region
-	Region *string `json:"region,omitempty"`
-
-	// Optional security groups for CAST AI managed nodes.
-	SecurityGroups *[]string `json:"securityGroups,omitempty"`
-
-	// Optional subnets for CAST AI managed nodes. If not set subnets from EKS cluster subnetIds list are used.
-	Subnets *[]string `json:"subnets,omitempty"`
-}
-
-// ExternalClusterGkeConfiguration defines model for ExternalClusterGkeConfiguration.
-type ExternalClusterGkeConfiguration struct {
-
-	// GKE cluster name
-	ClusterName *string `json:"clusterName,omitempty"`
-
-	// GKE cluster location
-	Location *string `json:"location,omitempty"`
-
-	// GCP project which owns GKE cluster
-	ProjectId *string `json:"projectId,omitempty"`
-
-	// GKE cluster region
-	Region *string `json:"region,omitempty"`
-}
-
-// ExternalClusterKopsConfiguration defines model for ExternalClusterKopsConfiguration.
-type ExternalClusterKopsConfiguration struct {
-
-	// KOPS cluster cloud provider
-	Cloud *string `json:"cloud,omitempty"`
-
-	// KOPS cluster name
-	ClusterName *string `json:"clusterName,omitempty"`
-
-	// KOPS cluster cloud provider region
-	Region *string `json:"region,omitempty"`
-
-	// KOPS cluster state storage bucket URL
-	StateStore *string `json:"stateStore,omitempty"`
-}
-
-// ExternalClusterKubeconfig defines model for ExternalClusterKubeconfig.
-type ExternalClusterKubeconfig struct {
-
-	// Base64 encoded kubeconfig.
-	Kubeconfig string `json:"kubeconfig"`
-}
-
-// ExternalClusterNode defines model for ExternalClusterNode.
-type ExternalClusterNode struct {
-
-	// cloud provider of this node.
-	Cloud string `json:"cloud"`
-
-	// node ID.
-	Id string `json:"id"`
-
-	// node instance type.
+	// Name of the node's instance type.
 	InstanceType string `json:"instanceType"`
 
-	// node name.
-	Name string `json:"name"`
+	// Hourly price of the node in $ curreny.
+	Price string `json:"price"`
 
-	// Spot instance configuration.
-	SpotConfig NodeSpotConfig `json:"spotConfig"`
+	// Number of memory node capacity in bytes.
+	RamBytes int `json:"ramBytes"`
 
-	// datacenter availability zone of the node.
-	Zone string `json:"zone"`
+	// Whether this node is a spot instance.
+	Spot bool `json:"spot"`
 }
 
-// ExternalClusterNodes defines model for ExternalClusterNodes.
-type ExternalClusterNodes struct {
-	Items []ExternalClusterNode `json:"items"`
+// EstimatedSavingsRecommendation defines model for EstimatedSavingsRecommendation.
+type EstimatedSavingsRecommendation struct {
+
+	// Details of this savings recommendation.
+	Details *struct {
+
+		// Cluster node configuration after applying the suggestions.
+		ConfigurationAfter struct {
+
+			// Recommended list of nodes.
+			Nodes *[]EstimatedSavingsNode `json:"nodes,omitempty"`
+		} `json:"configurationAfter"`
+
+		// A map of replicated workloads.
+		ReplicatedWorkloads *EstimatedSavingsRecommendation_Details_ReplicatedWorkloads `json:"replicatedWorkloads,omitempty"`
+	} `json:"details,omitempty"`
+	Hourly  *EstimatedSavingsRecommendationPrice `json:"hourly,omitempty"`
+	Monthly *EstimatedSavingsRecommendationPrice `json:"monthly,omitempty"`
+
+	// Available savings by applying this configuration.
+	SavingsPercentage *string `json:"savingsPercentage,omitempty"`
 }
 
-// ExternalClusterRegistrationToken defines model for ExternalClusterRegistrationToken.
-type ExternalClusterRegistrationToken struct {
-
-	// Token to use when deploying monitoring agent on remote clusters.
-	Token string `json:"token"`
+// EstimatedSavingsRecommendation_Details_ReplicatedWorkloads defines model for EstimatedSavingsRecommendation.Details.ReplicatedWorkloads.
+type EstimatedSavingsRecommendation_Details_ReplicatedWorkloads struct {
+	AdditionalProperties map[string]EstimatedSavingsReplicatedWorkload `json:"-"`
 }
 
-// ExternalClustersList defines model for ExternalClustersList.
-type ExternalClustersList struct {
-	Items []ExternalCluster `json:"items"`
+// EstimatedSavingsRecommendationPrice defines model for EstimatedSavingsRecommendationPrice.
+type EstimatedSavingsRecommendationPrice struct {
+
+	// Price after applying this configuration.
+	PriceAfter string `json:"priceAfter"`
+
+	// Price before applying this configuration.
+	PriceBefore string `json:"priceBefore"`
+}
+
+// EstimatedSavingsRecommendations defines model for EstimatedSavingsRecommendations.
+type EstimatedSavingsRecommendations struct {
+	Layman        *EstimatedSavingsRecommendation `json:"Layman,omitempty"`
+	SpotInstances *EstimatedSavingsRecommendation `json:"SpotInstances,omitempty"`
+}
+
+// EstimatedSavingsReplicatedWorkload defines model for EstimatedSavingsReplicatedWorkload.
+type EstimatedSavingsReplicatedWorkload struct {
+
+	// Lifecycle type of the node that hosts this workload.
+	CurrentNodeType string `json:"currentNodeType"`
+
+	// The workload controller type.
+	OwnerType string `json:"ownerType"`
+
+	// Recommended lifecycle type of the node to host this workload.
+	RecommendedNodeType string `json:"recommendedNodeType"`
+
+	// A list of replicas (pods) of this workload.
+	Replicas []string `json:"replicas"`
+}
+
+// EstimatedSavingsResponse defines model for EstimatedSavingsResponse.
+type EstimatedSavingsResponse struct {
+	CurrentConfiguration *EstimatedSavingsCurrentConfiguration `json:"currentConfiguration,omitempty"`
+
+	// Whether rebalancing is recommended. Calculated based on available savings.
+	IsRebalancingRecommended *bool `json:"isRebalancingRecommended,omitempty"`
+
+	// Timestamp of the last cluster snapshot used to calculate the report.
+	LastUpdatedAt   *time.Time                       `json:"lastUpdatedAt,omitempty"`
+	Recommendations *EstimatedSavingsRecommendations `json:"recommendations,omitempty"`
+}
+
+// ExecuteRebalancingPlanRequest defines model for ExecuteRebalancingPlanRequest.
+type ExecuteRebalancingPlanRequest struct {
+
+	// ID of the cluster that is being rebalanced.
+	ClusterId *string `json:"clusterId,omitempty"`
+
+	// ID of the rebalancing plan.
+	RebalancingPlanId *string `json:"rebalancingPlanId,omitempty"`
 }
 
 // FieldViolation defines model for FieldViolation.
@@ -826,6 +825,42 @@ type InstallAddonRequest_ValuesOverrides struct {
 	AdditionalProperties map[string]string `json:"-"`
 }
 
+// InstanceList defines model for InstanceList.
+type InstanceList struct {
+	Items *[]InstanceType `json:"items,omitempty"`
+
+	// Cursor token to be used for paging.
+	NextCursor *string `json:"nextCursor,omitempty"`
+}
+
+// InstanceType defines model for InstanceType.
+type InstanceType struct {
+
+	// CPU architecture for the instance type
+	Architecture *string `json:"architecture,omitempty"`
+
+	// Name of the instance type
+	InstanceType *string `json:"instanceType,omitempty"`
+
+	// Hourly price for the instance type
+	Price *string `json:"price,omitempty"`
+
+	// Cloud provider of the instance type
+	Provider *string `json:"provider,omitempty"`
+
+	// Memory of the instance type in MiB
+	Ram *int `json:"ram,omitempty"`
+
+	// Region where the instance type is located
+	Region *string `json:"region,omitempty"`
+
+	// Amount of vCPU's that the instance type has
+	Vcpu *int `json:"vcpu,omitempty"`
+
+	// Global zone ID where the instance type is located, if it is spot
+	Zone *string `json:"zone,omitempty"`
+}
+
 // IpSecConfig defines model for IpSecConfig.
 type IpSecConfig map[string]interface{}
 
@@ -878,11 +913,6 @@ type KubernetesCluster struct {
 // KubernetesCluster_Heartbeats defines model for KubernetesCluster.Heartbeats.
 type KubernetesCluster_Heartbeats struct {
 	AdditionalProperties map[string]Heartbeat `json:"-"`
-}
-
-// KubernetesClusterAuditLogEventsList defines model for KubernetesClusterAuditLogEventsList.
-type KubernetesClusterAuditLogEventsList struct {
-	Items []AuditLogEvent `json:"items"`
 }
 
 // KubernetesClusterFeedbackEvent defines model for KubernetesClusterFeedbackEvent.
@@ -950,36 +980,14 @@ type NewMembershipByEmail struct {
 	UserEmail string `json:"userEmail"`
 }
 
-// NewOrganizationUser defines model for NewOrganizationUser.
-type NewOrganizationUser struct {
-
-	// User role in organization
-	Role string `json:"role"`
-
-	// User ID to add to organization
-	UserId string `json:"userId"`
-}
-
-// Node defines model for Node.
-type Node struct {
+// NewNode defines model for NewNode.
+type NewNode struct {
 
 	// Cloud service provider type.
 	Cloud CloudType `json:"cloud"`
 
-	// Node creation UTC time in RFC3339 format.
-	CreatedAt *time.Time `json:"createdAt,omitempty"`
-
-	// Node ID autogenerated at the time of node creation.
-	Id *string `json:"id,omitempty"`
-
 	// Precise VM instance type for specific cloud. If specified, `shape` field is ignored.
 	InstanceType string `json:"instanceType"`
-
-	// Node name generated at the time of node creation.
-	Name *string `json:"name,omitempty"`
-
-	// Kubernetes node network
-	Network *NodeNetwork `json:"network,omitempty"`
 
 	// Specifies the node type.
 	//
@@ -993,9 +1001,96 @@ type Node struct {
 
 	// Spot instance configuration.
 	SpotConfig *NodeSpotConfig `json:"spotConfig,omitempty"`
+}
+
+// NewOrganizationUser defines model for NewOrganizationUser.
+type NewOrganizationUser struct {
+	Role OrganizationRole `json:"role"`
+
+	// User ID to add to organization
+	UserId string `json:"userId"`
+}
+
+// Node defines model for Node.
+type Node struct {
+
+	// Name of entity which initiated node creation.
+	AddedBy *string `json:"addedBy,omitempty"`
+
+	// Cloud service provider type.
+	Cloud CloudType `json:"cloud"`
+
+	// Node creation UTC time in RFC3339 format.
+	CreatedAt *time.Time `json:"createdAt,omitempty"`
+
+	// Node ID autogenerated at the time of node creation.
+	Id string `json:"id"`
+
+	// Cloud vm instance id.
+	InstanceId *string `json:"instanceId,omitempty"`
+
+	// Cloud vm instance labels.
+	InstanceLabels *Node_InstanceLabels `json:"instanceLabels,omitempty"`
+
+	// Cloud vm instance name.
+	InstanceName *string `json:"instanceName,omitempty"`
+
+	// Precise VM instance type for specific cloud.
+	InstanceType string `json:"instanceType"`
+
+	// Node kubernetes cluster join UTC time in RFC3339 format.
+	JoinedAt *time.Time `json:"joinedAt,omitempty"`
+
+	// Kubernetes node labels.
+	Labels *Node_Labels `json:"labels,omitempty"`
+
+	// Node name generated at the time of node creation.
+	Name string `json:"name"`
+
+	// Kubernetes node network
+	Network *NodeNetwork `json:"network,omitempty"`
+
+	// Node region.
+	Region *string `json:"region,omitempty"`
+
+	// Resources of kubernetes node.
+	Resources *struct {
+		CpuAllocatableMilli *int `json:"cpuAllocatableMilli,omitempty"`
+		MemAllocatableMib   *int `json:"memAllocatableMib,omitempty"`
+	} `json:"resources,omitempty"`
+
+	// Specifies the node type.
+	//
+	// `master` hosts the Kubernetes control plane.
+	//
+	// `worker` is used to run workloads and supports autoscaling.
+	Role NodeType `json:"role"`
+
+	// CAST AI shape defining VM template. Field is required unless `instanceType` is specified.
+	Shape *NodeShape `json:"shape,omitempty"`
+
+	// Spot instance configuration.
+	SpotConfig NodeSpotConfig `json:"spotConfig"`
 
 	// Kubernetes node state.
-	State *NodeState `json:"state,omitempty"`
+	State  *NodeState `json:"state,omitempty"`
+	Taints *[]Taint   `json:"taints,omitempty"`
+
+	// Indicates if workloads can be scheduled on this kubernetes node.
+	Unschedulable *bool `json:"unschedulable,omitempty"`
+
+	// Datacenter availability zone of the VM.
+	Zone string `json:"zone"`
+}
+
+// Node_InstanceLabels defines model for Node.InstanceLabels.
+type Node_InstanceLabels struct {
+	AdditionalProperties map[string]string `json:"-"`
+}
+
+// Node_Labels defines model for Node.Labels.
+type Node_Labels struct {
+	AdditionalProperties map[string]string `json:"-"`
 }
 
 // NodeConstraints defines model for NodeConstraints.
@@ -1035,6 +1130,9 @@ type NodeDownscalerEmptyNodes struct {
 // NodeList defines model for NodeList.
 type NodeList struct {
 	Items []Node `json:"items"`
+
+	// Cursor token to be used in future request cursor parameter to retrieve subsequent items from the dataset. Empty value of nextCursor field indicates that there are no further items to retrieve.
+	NextCursor string `json:"nextCursor"`
 }
 
 // NodeNetwork defines model for NodeNetwork.
@@ -1092,15 +1190,8 @@ const (
 
 // NodeUpdateOperation defines model for NodeUpdateOperation.
 type NodeUpdateOperation struct {
-	Add    *[]Node        `json:"add,omitempty"`
+	Add    *[]NewNode     `json:"add,omitempty"`
 	Delete *[]DeletedNode `json:"delete,omitempty"`
-}
-
-// NodeVolume defines model for NodeVolume.
-type NodeVolume struct {
-
-	// Volume size in GiB.
-	Size float32 `json:"size"`
 }
 
 // OperationResponse defines model for OperationResponse.
@@ -1140,12 +1231,22 @@ type Organization struct {
 	Name string `json:"name"`
 }
 
+// OrganizationRole defines model for OrganizationRole.
+type OrganizationRole string
+
+// List of OrganizationRole
+const (
+	OrganizationRole_member OrganizationRole = "member"
+	OrganizationRole_owner  OrganizationRole = "owner"
+	OrganizationRole_viewer OrganizationRole = "viewer"
+)
+
 // OrganizationUser defines model for OrganizationUser.
 type OrganizationUser struct {
 
 	// User role in organization
-	Role string                 `json:"role"`
-	User map[string]interface{} `json:"user"`
+	Role string      `json:"role"`
+	User UserProfile `json:"user"`
 }
 
 // OrganizationUsersList defines model for OrganizationUsersList.
@@ -1298,6 +1399,298 @@ type RebalancePlanResponse struct {
 	Id *string `json:"id,omitempty"`
 }
 
+// RebalancedWorkloads defines model for RebalancedWorkloads.
+type RebalancedWorkloads struct {
+
+	// Whether rebalancing is in-progress or not.
+	Active bool `json:"active"`
+
+	// Label selectors matching workloads which are being rebalanced.
+	Selectors *[]struct {
+
+		// A more advanced label query with operators. Multiple expressions are ANDed.
+		MatchExpressions *[]struct {
+
+			// Key is a label.
+			Key *string `json:"key,omitempty"`
+
+			// Operator is the key's relationship to the values.
+			Operator *string `json:"operator,omitempty"`
+
+			// Values is an array of string values. If the operator is In or NotIn, the values array must be
+			// non-empty. If the operator is Exists or DoesNotExist, the values array must be empty.
+			Values *[]string `json:"values,omitempty"`
+		} `json:"matchExpressions,omitempty"`
+
+		// Used to query resource labels.
+		MatchLabels *RebalancedWorkloads_Selectors_MatchLabels `json:"matchLabels,omitempty"`
+	} `json:"selectors,omitempty"`
+}
+
+// RebalancedWorkloads_Selectors_MatchLabels defines model for RebalancedWorkloads.Selectors.MatchLabels.
+type RebalancedWorkloads_Selectors_MatchLabels struct {
+	AdditionalProperties map[string]string `json:"-"`
+}
+
+// RebalancingAccepted defines model for RebalancingAccepted.
+type RebalancingAccepted struct {
+
+	// Rebalancing plan ID.
+	RebalancingPlanId string `json:"rebalancingPlanId"`
+}
+
+// RebalancingConfiguration defines model for RebalancingConfiguration.
+type RebalancingConfiguration struct {
+
+	// A list of node in this configuration.
+	Nodes  []RebalancingNode              `json:"nodes"`
+	Totals RebalancingConfigurationTotals `json:"totals"`
+}
+
+// RebalancingConfigurationTotals defines model for RebalancingConfigurationTotals.
+type RebalancingConfigurationTotals struct {
+
+	// Total memory capacity of this configuration in MiBs.
+	MemoryMib int `json:"memoryMib"`
+
+	// Count of pods which can be migrated. They come from replaceable nodes.
+	MigratablePods int `json:"migratablePods"`
+
+	// Total milli CPU capacity of this configuration.
+	MilliCpu int `json:"milliCpu"`
+
+	// Count of nodes in this configuration.
+	Nodes int `json:"nodes"`
+
+	// Total number of pods in this configuration.
+	Pods int `json:"pods"`
+
+	// Total hourly price of this configuration in $ currency.
+	PriceHourly string `json:"priceHourly"`
+
+	// Total monthly price of this configuration in $ currency.
+	PriceMonthly string `json:"priceMonthly"`
+
+	// Total number of problematic pods in this configuration.
+	ProblematicPods int `json:"problematicPods"`
+
+	// Count of nodes which can be replaced in this configuration.
+	ReplaceableNodes int `json:"replaceableNodes"`
+}
+
+// RebalancingConfigurations defines model for RebalancingConfigurations.
+type RebalancingConfigurations struct {
+	Blue  RebalancingConfiguration `json:"blue"`
+	Diff  RebalancingDiff          `json:"diff"`
+	Green RebalancingConfiguration `json:"green"`
+}
+
+// RebalancingCreateNodeOperationParams defines model for RebalancingCreateNodeOperationParams.
+type RebalancingCreateNodeOperationParams struct {
+
+	// The availability zone name of the created node. If empty - the AZ name will be random.
+	AzName *string `json:"azName,omitempty"`
+
+	// The cloud service provider name.
+	Csp string `json:"csp"`
+
+	// The instance type of the created node.
+	InstanceType string `json:"instanceType"`
+
+	// Whether the created node is a spot instance.
+	IsSpot bool `json:"isSpot"`
+
+	// The subnet id of the created node. if empty - the subnet id will be random based on the availability zone.
+	SubnetId *string `json:"subnetId,omitempty"`
+
+	// The volume size in GiB of the created node.
+	VolumeSizeGib int `json:"volumeSizeGib"`
+}
+
+// RebalancingDeleteNodeOperationParams defines model for RebalancingDeleteNodeOperationParams.
+type RebalancingDeleteNodeOperationParams map[string]interface{}
+
+// RebalancingDiff defines model for RebalancingDiff.
+type RebalancingDiff struct {
+
+	// Hourly price difference between blue and green node configurations in $ currency.
+	PriceHourly string `json:"priceHourly"`
+
+	// Monthly price difference between blue and green node configurations in $ currency.
+	PriceMonthly string `json:"priceMonthly"`
+
+	// Savings percentage to be had by applying the rebalancing plan.
+	SavingsPercentage string `json:"savingsPercentage"`
+}
+
+// RebalancingDrainNodeOperationParams defines model for RebalancingDrainNodeOperationParams.
+type RebalancingDrainNodeOperationParams map[string]interface{}
+
+// RebalancingNode defines model for RebalancingNode.
+type RebalancingNode struct {
+
+	// Timestamp of the node creation date.
+	CreatedAt time.Time `json:"createdAt"`
+
+	// The instance type of this node.
+	InstanceType string `json:"instanceType"`
+
+	// Whether this node is control plan node.
+	IsControlPlane bool `json:"isControlPlane"`
+
+	// Whether the node is legacy.
+	IsLegacy bool `json:"isLegacy"`
+
+	// Whether this node is a spot instance.
+	IsSpot bool `json:"isSpot"`
+
+	// The provider name which managed this node. Possible types:
+	//
+	// `CASTAI` - the node is managed by CAST AI.
+	//
+	// `EKS` - the node is managed by the AWS EKS service.
+	//
+	// `GKE` - the node is managed by the GCP GKE service.
+	//
+	// `AKS` - the node is managed by the Azure AKS service.
+	//
+	// `KOPS` - the node is managed by the cluster manager tool kOps.
+	ManagedBy string `json:"managedBy"`
+
+	// Memory capacity of this node in MiBs.
+	MemoryMib int `json:"memoryMib"`
+
+	// Milli CPU capacity of this node.
+	MilliCpu int `json:"milliCpu"`
+
+	// The name of the node.
+	Name string `json:"name"`
+
+	// The hourly price of this node in $ currency.
+	PriceHourly string `json:"priceHourly"`
+
+	// Total number of pods in this node.
+	TotalPods int `json:"totalPods"`
+
+	// Total number of problematic pods in this node.
+	TotalProblematicPods int `json:"totalProblematicPods"`
+}
+
+// RebalancingPlan defines model for RebalancingPlan.
+type RebalancingPlan struct {
+
+	// ID of the cluster that is being rebalanced.
+	ClusterId      string                    `json:"clusterId"`
+	Configurations RebalancingConfigurations `json:"configurations"`
+
+	// Timestamp of the rebalancing plan creation.
+	CreatedAt time.Time `json:"createdAt"`
+
+	// Timestamp of the rebalancing plan green nodes creation. Null if not yet created.
+	CreatedNodesAt *time.Time `json:"createdNodesAt,omitempty"`
+
+	// Timestamp of the rebalancing plan blue nodes deletion. Null if not yet deleted.
+	DeletedNodesAt *time.Time `json:"deletedNodesAt,omitempty"`
+
+	// Timestamp of the rebalancing plan blue nodes draining. Null if not yet drained.
+	DrainedNodesAt *time.Time `json:"drainedNodesAt,omitempty"`
+
+	// Timestamp of the rebalancing plan finish. Null if not yet finished.
+	FinishedAt *time.Time `json:"finishedAt,omitempty"`
+
+	// Timestamp of the rebalancing plan generation. Null if not yet generated.
+	GeneratedAt *time.Time `json:"generatedAt,omitempty"`
+
+	// `true` indicates that the rebalancing plan will be generated but not executed.
+	IsDryRun bool `json:"isDryRun"`
+
+	// Minimum count of worker nodes to be had in the rebalancing plan. Default is 3.
+	MinNodes int `json:"minNodes"`
+
+	// List of operations needed to execute this rebalancing plan.
+	Operations []RebalancingPlanOperation `json:"operations"`
+
+	// ID of the rebalancing plan.
+	RebalancingPlanId string `json:"rebalancingPlanId"`
+
+	// Status of the rebalancing plan:
+	//
+	// `generating` - the rebalancing plan is new and currently is being generated.
+	//
+	// `generated` - the rebalancing plan has been generated and can be previewed.
+	//
+	// `creating_nodes` - the rebalancing plan is being executed, green nodes are being created.
+	//
+	// `draining_nodes` - the rebalancing plan is being executed, blue nodes are being drained.
+	//
+	// `deleting_nodes` - the rebalancing plan is being executed, blue nodes are being deleted.
+	//
+	// `finished` - the rebalancing plan has finished successfully.
+	//
+	// `error` - the rebalancing plan has failed.
+	Status string `json:"status"`
+
+	// Timestamp of the rebalancing plan triggering. Null if not yet triggered.
+	TriggeredAt *time.Time `json:"triggeredAt,omitempty"`
+
+	// Timestamp of the rebalancing plan last update.
+	UpdatedAt *time.Time `json:"updatedAt,omitempty"`
+}
+
+// RebalancingPlanOperation defines model for RebalancingPlanOperation.
+type RebalancingPlanOperation struct {
+
+	// Defines the parameters used for the `create_node` operation type.
+	CreateParams *RebalancingCreateNodeOperationParams `json:"createParams,omitempty"`
+
+	// Timestamp of the operation creation.
+	CreatedAt time.Time `json:"createdAt"`
+
+	// Defines the parameters for the `delete_node` operation type.
+	DeleteParams *RebalancingDeleteNodeOperationParams `json:"deleteParams,omitempty"`
+
+	// Defines the parameters for the `drain_node` operation type.
+	DrainParams *RebalancingDrainNodeOperationParams `json:"drainParams,omitempty"`
+
+	// Error value if the operation has finished with an error.
+	Error *string `json:"error,omitempty"`
+
+	// Timestamp of the operation finish date. Only present when the operation has finished, either with an error or not.
+	FinishedAt *time.Time `json:"finishedAt,omitempty"`
+
+	// The id of the operation.
+	Id string `json:"id"`
+
+	// The id of the node this operation will be executed on.
+	NodeId *string `json:"nodeId,omitempty"`
+
+	// Type of the operation. Possible types:
+	//
+	// `create_node` - a node will be created with specific `create` `params`.
+	//
+	// `drain_node` - a node will be drained with specific `drain` `params`.
+	//
+	// `delete_node` - a node will be deleted with specific `delete` `params`.
+	Type string `json:"type"`
+}
+
+// RebalancingPlansResponse defines model for RebalancingPlansResponse.
+type RebalancingPlansResponse struct {
+
+	// List of rebalancing plans
+	Items *[]RebalancingPlan `json:"items,omitempty"`
+}
+
+// RebalancingRequest defines model for RebalancingRequest.
+type RebalancingRequest struct {
+
+	// `true` indicates that the rebalancing plan will be generated but not executed.
+	IsDryRun *bool `json:"isDryRun,omitempty"`
+
+	// The minimum count of worker nodes to be had in the rebalancing plan. Default is 3.
+	MinNodes *int `json:"minNodes,omitempty"`
+}
+
 // ResourceUsage defines model for ResourceUsage.
 type ResourceUsage struct {
 
@@ -1340,6 +1733,13 @@ type SpotInstances struct {
 	MaxReclaimRate *int `json:"maxReclaimRate,omitempty"`
 }
 
+// Taint defines model for Taint.
+type Taint struct {
+	Effect *string `json:"effect,omitempty"`
+	Key    *string `json:"key,omitempty"`
+	Value  *string `json:"value,omitempty"`
+}
+
 // UnschedulablePodsPolicy defines model for UnschedulablePodsPolicy.
 type UnschedulablePodsPolicy struct {
 
@@ -1351,6 +1751,9 @@ type UnschedulablePodsPolicy struct {
 
 	// Additional headroom based on cluster's total available capacity.
 	Headroom Headroom `json:"headroom"`
+
+	// Additional headroom based on cluster's total available capacity.
+	HeadroomSpot *Headroom `json:"headroomSpot,omitempty"`
 
 	// Defines the node constraints that will be applied when autoscaling with Unschedulable Pods policy.
 	NodeConstraints *NodeConstraints `json:"nodeConstraints,omitempty"`
@@ -1375,24 +1778,9 @@ type UpdateCluster struct {
 	Network             *Network `json:"network,omitempty"`
 }
 
-// UpdateExternalClusterEksConfiguration defines model for UpdateExternalClusterEksConfiguration.
-type UpdateExternalClusterEksConfiguration struct {
-
-	// Optional instance profile arn for CAST AI managed nodes.
-	InstanceProfileArn *string `json:"instanceProfileArn,omitempty"`
-
-	// Optional security groups for CAST AI managed nodes.
-	SecurityGroups *[]string `json:"securityGroups,omitempty"`
-
-	// Optional subnets for CAST AI managed nodes. If not set subnets from EKS cluster subnetIds list are used.
-	Subnets *[]string `json:"subnets,omitempty"`
-}
-
-// UpdateExternalClusterGkeConfiguration defines model for UpdateExternalClusterGkeConfiguration.
-type UpdateExternalClusterGkeConfiguration struct {
-
-	// GKE cluster location. Must be set during phase 2 registration if not provided during initial cluster registration. Ignored if already set.
-	Location *string `json:"location,omitempty"`
+// UpdateOrganizationUser defines model for UpdateOrganizationUser.
+type UpdateOrganizationUser struct {
+	Role OrganizationRole `json:"role"`
 }
 
 // UserProfile defines model for UserProfile.
@@ -1405,18 +1793,17 @@ type UserProfile struct {
 	Name string `json:"name"`
 
 	// internal username. globally unique
-	Nickname string             `json:"nickname"`
-	Survey   *UserProfileSurvey `json:"survey,omitempty"`
+	Nickname string `json:"nickname"`
 }
 
-// UserProfileSurvey defines model for UserProfileSurvey.
-type UserProfileSurvey struct {
+// UserProfileResponse defines model for UserProfileResponse.
+type UserProfileResponse struct {
+	// Embedded struct due to allOf(#/components/schemas/UserProfile)
+	UserProfile `yaml:",inline"`
+	// Embedded fields due to inline allOf schema
 
-	// current cloud spend in USD
-	AnnualCloudBudget *int    `json:"annualCloudBudget,omitempty"`
-	CompanyName       *string `json:"companyName,omitempty"`
-	MonthlyCpuUsage   *int    `json:"monthlyCpuUsage,omitempty"`
-	Submitted         *bool   `json:"submitted,omitempty"`
+	// Indicates user first login to the console.
+	FirstLogin *bool `json:"firstLogin,omitempty"`
 }
 
 // ValidNodeConstraint defines model for ValidNodeConstraint.
@@ -1443,6 +1830,563 @@ type VpnConfig struct {
 // WireGuardConfig defines model for WireGuardConfig.
 type WireGuardConfig struct {
 	Topology string `json:"topology"`
+}
+
+// Workload defines model for Workload.
+type Workload struct {
+
+	// Defines cost impact
+	CostImpact struct {
+
+		// Defines cost impact level (low, medium, high)
+		Level string `json:"level"`
+
+		// Defines cost impact numeric value
+		Value float32 `json:"value"`
+	} `json:"costImpact"`
+
+	// Controller pods issues
+	Issues *[]WorkloadIssue `json:"issues,omitempty"`
+
+	// Memory capacity of this controller in MiBs.
+	MemoryMib int `json:"memoryMib"`
+
+	// Milli CPU capacity of this controller.
+	MilliCpu int `json:"milliCpu"`
+
+	// Workload name (Controller or Pod name)
+	Name string `json:"name"`
+
+	// Namespace
+	Namespace string `json:"namespace"`
+
+	// Nodes which are used for this controller
+	Nodes []WorkloadNode `json:"nodes"`
+
+	// Pod replicas count
+	Replicas int `json:"replicas"`
+
+	// Resource type
+	Resource string                  `json:"resource"`
+	Status   WorkloadMigrationStatus `json:"status"`
+}
+
+// WorkloadIssue defines model for WorkloadIssue.
+type WorkloadIssue struct {
+
+	// Issue description
+	Descritption *string `json:"descritption,omitempty"`
+
+	// Issue kind
+	Kind string `json:"kind"`
+}
+
+// WorkloadMigrationStatus defines model for WorkloadMigrationStatus.
+type WorkloadMigrationStatus struct {
+
+	// Defines workload migration status
+	MigrationStatus string `json:"migrationStatus"`
+}
+
+// WorkloadNode defines model for WorkloadNode.
+type WorkloadNode struct {
+
+	// Node id
+	Id string `json:"id"`
+
+	// Node name
+	Name string `json:"name"`
+
+	// Node specifications
+	Specs struct {
+
+		// Name of the node's instance type.
+		InstanceType string `json:"instanceType"`
+
+		// Memory capacity of this node in MiBs.
+		MemoryMib int `json:"memoryMib"`
+
+		// Milli CPU capacity of this nodes.
+		MilliCpu int `json:"milliCpu"`
+	} `json:"specs"`
+	Status WorkloadMigrationStatus `json:"status"`
+
+	// Total number of pods in node
+	TotalPods int `json:"totalPods"`
+
+	// Total number of problematic pods in node
+	TotalProblematicPods int `json:"totalProblematicPods"`
+}
+
+// CastaiClusterV1beta1ListNodesResponse defines model for castai.cluster.v1beta1.ListNodesResponse.
+type CastaiClusterV1beta1ListNodesResponse struct {
+	Items      *[]CastaiClusterV1beta1Node `json:"items,omitempty"`
+	NextCursor *string                     `json:"nextCursor,omitempty"`
+}
+
+// CastaiClusterV1beta1Node defines model for castai.cluster.v1beta1.Node.
+type CastaiClusterV1beta1Node struct {
+	AddedBy *string `json:"addedBy,omitempty"`
+	Cloud   *string `json:"cloud,omitempty"`
+
+	// created_at represents timestamp of when node was created in cloud infrastructure.
+	CreatedAt *time.Time `json:"createdAt,omitempty"`
+	Id        *string    `json:"id,omitempty"`
+
+	// Will be populated only with GetNode request.
+	InstanceId *string `json:"instanceId"`
+
+	// Will be populated only with GetNode request.
+	InstanceLabels *CastaiClusterV1beta1Node_InstanceLabels `json:"instanceLabels,omitempty"`
+
+	// Will be populated only with GetNode request.
+	InstanceName *string `json:"instanceName"`
+	InstanceType *string `json:"instanceType,omitempty"`
+
+	// joined_at represents timestamp of when node has joined kubernetes cluster.
+	JoinedAt *time.Time                       `json:"joinedAt,omitempty"`
+	Labels   *CastaiClusterV1beta1Node_Labels `json:"labels,omitempty"`
+	Name     *string                          `json:"name,omitempty"`
+
+	// NodeNetwork represents node network.
+	Network   *CastaiClusterV1beta1NodeNetwork `json:"network,omitempty"`
+	Region    *string                          `json:"region,omitempty"`
+	Resources *CastaiClusterV1beta1Resources   `json:"resources,omitempty"`
+
+	// NodeType defines the role of the VM when joining the Kubernetes cluster. Default value is not allowed.
+	Role  *CastaiClusterV1beta1NodeType `json:"role,omitempty"`
+	Shape *string                       `json:"shape,omitempty"`
+
+	// NodeSpotConfig defines if node should be created as spot instance, and params for creation.
+	SpotConfig *CastaiClusterV1beta1NodeSpotConfig `json:"spotConfig,omitempty"`
+
+	// NodeState contains feedback information about progress on the node provisioning.
+	State         *CastaiClusterV1beta1NodeState `json:"state,omitempty"`
+	Taints        *[]CastaiClusterV1beta1Taint   `json:"taints,omitempty"`
+	Unschedulable *bool                          `json:"unschedulable,omitempty"`
+	Zone          *string                        `json:"zone,omitempty"`
+}
+
+// CastaiClusterV1beta1Node_InstanceLabels defines model for CastaiClusterV1beta1Node.InstanceLabels.
+type CastaiClusterV1beta1Node_InstanceLabels struct {
+	AdditionalProperties map[string]string `json:"-"`
+}
+
+// CastaiClusterV1beta1Node_Labels defines model for CastaiClusterV1beta1Node.Labels.
+type CastaiClusterV1beta1Node_Labels struct {
+	AdditionalProperties map[string]string `json:"-"`
+}
+
+// CastaiClusterV1beta1NodeNetwork defines model for castai.cluster.v1beta1.NodeNetwork.
+type CastaiClusterV1beta1NodeNetwork struct {
+	PrivateIp *string `json:"privateIp,omitempty"`
+	PublicIp  *string `json:"publicIp,omitempty"`
+}
+
+// CastaiClusterV1beta1NodeSpotConfig defines model for castai.cluster.v1beta1.NodeSpotConfig.
+type CastaiClusterV1beta1NodeSpotConfig struct {
+
+	// Whether node should be created as spot instance.
+	IsSpot *bool `json:"isSpot,omitempty"`
+
+	// Spot instance price. Applicable only for AWS nodes.
+	Price *string `json:"price,omitempty"`
+}
+
+// CastaiClusterV1beta1NodeState defines model for castai.cluster.v1beta1.NodeState.
+type CastaiClusterV1beta1NodeState struct {
+	Phase *string `json:"phase,omitempty"`
+}
+
+// CastaiClusterV1beta1NodeType defines model for castai.cluster.v1beta1.NodeType.
+type CastaiClusterV1beta1NodeType string
+
+// List of CastaiClusterV1beta1NodeType
+const (
+	CastaiClusterV1beta1NodeType_NODE_TYPE_INVALID CastaiClusterV1beta1NodeType = "NODE_TYPE_INVALID"
+	CastaiClusterV1beta1NodeType_NODE_TYPE_MASTER  CastaiClusterV1beta1NodeType = "NODE_TYPE_MASTER"
+	CastaiClusterV1beta1NodeType_NODE_TYPE_WORKER  CastaiClusterV1beta1NodeType = "NODE_TYPE_WORKER"
+	CastaiClusterV1beta1NodeType_master            CastaiClusterV1beta1NodeType = "master"
+	CastaiClusterV1beta1NodeType_worker            CastaiClusterV1beta1NodeType = "worker"
+)
+
+// CastaiClusterV1beta1Resources defines model for castai.cluster.v1beta1.Resources.
+type CastaiClusterV1beta1Resources struct {
+	CpuAllocatableMilli *int32 `json:"cpuAllocatableMilli,omitempty"`
+	MemAllocatableMib   *int32 `json:"memAllocatableMib,omitempty"`
+}
+
+// CastaiClusterV1beta1Taint defines model for castai.cluster.v1beta1.Taint.
+type CastaiClusterV1beta1Taint struct {
+	Effect *string `json:"effect,omitempty"`
+	Key    *string `json:"key,omitempty"`
+	Value  *string `json:"value,omitempty"`
+}
+
+// CastaiMetricsV1beta1CloudMetrics defines model for castai.metrics.v1beta1.CloudMetrics.
+type CastaiMetricsV1beta1CloudMetrics struct {
+	Labels                 *CastaiMetricsV1beta1CloudMetrics_Labels `json:"labels,omitempty"`
+	PodCount               *int32                                   `json:"podCount,omitempty"`
+	RequestedCPUPercentage *int32                                   `json:"requestedCPUPercentage,omitempty"`
+	RequestedMemPercentage *int32                                   `json:"requestedMemPercentage,omitempty"`
+}
+
+// CastaiMetricsV1beta1CloudMetrics_Labels defines model for CastaiMetricsV1beta1CloudMetrics.Labels.
+type CastaiMetricsV1beta1CloudMetrics_Labels struct {
+	AdditionalProperties map[string]string `json:"-"`
+}
+
+// CastaiMetricsV1beta1GetClusterMetricsResponse defines model for castai.metrics.v1beta1.GetClusterMetricsResponse.
+type CastaiMetricsV1beta1GetClusterMetricsResponse struct {
+	CloudMetrics *[]CastaiMetricsV1beta1CloudMetrics `json:"cloudMetrics,omitempty"`
+	NodeMetrics  *[]CastaiMetricsV1beta1NodeMetrics  `json:"nodeMetrics,omitempty"`
+}
+
+// CastaiMetricsV1beta1NodeMetrics defines model for castai.metrics.v1beta1.NodeMetrics.
+type CastaiMetricsV1beta1NodeMetrics struct {
+	Labels                 *CastaiMetricsV1beta1NodeMetrics_Labels `json:"labels,omitempty"`
+	RequestedCPUPercentage *int32                                  `json:"requestedCPUPercentage,omitempty"`
+	RequestedMemPercentage *int32                                  `json:"requestedMemPercentage,omitempty"`
+}
+
+// CastaiMetricsV1beta1NodeMetrics_Labels defines model for CastaiMetricsV1beta1NodeMetrics.Labels.
+type CastaiMetricsV1beta1NodeMetrics_Labels struct {
+	AdditionalProperties map[string]string `json:"-"`
+}
+
+// ExternalclusterV1AKSClusterParams defines model for externalcluster.v1.AKSClusterParams.
+type ExternalclusterV1AKSClusterParams struct {
+
+	// Node resource group of the cluster.
+	NodeResourceGroup *string `json:"nodeResourceGroup,omitempty"`
+
+	// Region of the cluster.
+	Region *string `json:"region,omitempty"`
+
+	// Azure subscription ID where cluster runs.
+	SubscriptionId *string `json:"subscriptionId,omitempty"`
+}
+
+// ExternalclusterV1AddNodeResponse defines model for externalcluster.v1.AddNodeResponse.
+type ExternalclusterV1AddNodeResponse struct {
+
+	// The ID of the node.
+	NodeId string `json:"nodeId"`
+
+	// Add node operation ID.
+	OperationId string `json:"operationId"`
+}
+
+// ExternalclusterV1Cluster defines model for externalcluster.v1.Cluster.
+type ExternalclusterV1Cluster struct {
+
+	// The date agent snapshot was last received.
+	AgentSnapshotReceivedAt *time.Time `json:"agentSnapshotReceivedAt,omitempty"`
+
+	// Agent status.
+	AgentStatus *string `json:"agentStatus,omitempty"`
+
+	// AKSClusterParams defines AKS-specific arguments.
+	Aks *ExternalclusterV1AKSClusterParams `json:"aks,omitempty"`
+
+	// User friendly unique cluster identifier.
+	ClusterNameId *string `json:"clusterNameId,omitempty"`
+
+	// The date when cluster was registered.
+	CreatedAt *time.Time `json:"createdAt,omitempty"`
+
+	// The cluster's credentials ID.
+	CredentialsId *string `json:"credentialsId,omitempty"`
+
+	// EKSClusterParams defines EKS-specific arguments.
+	Eks *ExternalclusterV1EKSClusterParams `json:"eks,omitempty"`
+
+	// GKEClusterParams defines GKE-specific arguments.
+	Gke *ExternalclusterV1GKEClusterParams `json:"gke,omitempty"`
+
+	// The cluster's ID.
+	Id *string `json:"id,omitempty"`
+
+	// KOPSClusterParams defines KOPS-specific arguments.
+	Kops *ExternalclusterV1KOPSClusterParams `json:"kops,omitempty"`
+
+	// The name of the external cluster.
+	Name *string `json:"name,omitempty"`
+
+	// The cluster's organization ID.
+	OrganizationId *string `json:"organizationId,omitempty"`
+
+	// Cluster cloud provider type.
+	ProviderType *string `json:"providerType,omitempty"`
+
+	// Shows last reconcile error if any.
+	ReconcileError *string `json:"reconcileError"`
+
+	// Region represents cluster region.
+	Region *ExternalclusterV1Region `json:"region,omitempty"`
+
+	// Current status of the cluster.
+	Status *string `json:"status,omitempty"`
+
+	// Cluster subnets.
+	Subnets *[]ExternalclusterV1Subnet `json:"subnets,omitempty"`
+
+	// Cluster zones.
+	Zones *[]ExternalclusterV1Zone `json:"zones,omitempty"`
+}
+
+// ExternalclusterV1ClusterUpdate defines model for externalcluster.v1.ClusterUpdate.
+type ExternalclusterV1ClusterUpdate struct {
+
+	// JSON encoded cluster credentials string.
+	Credentials *string `json:"credentials,omitempty"`
+
+	// UpdateEKSClusterParams defines updatable EKS cluster configuration.
+	Eks *ExternalclusterV1UpdateEKSClusterParams `json:"eks,omitempty"`
+
+	// UpdateGKEClusterParams defines updatable GKE cluster configuration.
+	Gke *ExternalclusterV1UpdateGKEClusterParams `json:"gke,omitempty"`
+}
+
+// ExternalclusterV1DeleteNodeResponse defines model for externalcluster.v1.DeleteNodeResponse.
+type ExternalclusterV1DeleteNodeResponse struct {
+
+	// Node delete operation ID.
+	OperationId *string `json:"operationId,omitempty"`
+}
+
+// ExternalclusterV1DisconnectConfig defines model for externalcluster.v1.DisconnectConfig.
+type ExternalclusterV1DisconnectConfig struct {
+
+	// Whether CAST provisioned nodes should be deleted.
+	DeleteProvisionedNodes *bool `json:"deleteProvisionedNodes,omitempty"`
+}
+
+// ExternalclusterV1DrainConfig defines model for externalcluster.v1.DrainConfig.
+type ExternalclusterV1DrainConfig struct {
+
+	// If set to true, pods will be forcefully deleted after drain timeout.
+	Force *bool `json:"force,omitempty"`
+
+	// Node drain timeout in seconds. Defaults to 600s if not set.
+	TimeoutSeconds *int32 `json:"timeoutSeconds,omitempty"`
+}
+
+// ExternalclusterV1DrainNodeResponse defines model for externalcluster.v1.DrainNodeResponse.
+type ExternalclusterV1DrainNodeResponse struct {
+
+	// Drain node operation ID.
+	OperationId string `json:"operationId"`
+}
+
+// ExternalclusterV1EKSClusterParams defines model for externalcluster.v1.EKSClusterParams.
+type ExternalclusterV1EKSClusterParams struct {
+
+	// AWS Account ID where cluster runs.
+	AccountId *string `json:"accountId,omitempty"`
+
+	// Name of the cluster.
+	ClusterName *string `json:"clusterName,omitempty"`
+
+	// Output only. Cluster's instance profile ARN used for CAST provisioned nodes.
+	InstanceProfileArn *string `json:"instanceProfileArn,omitempty"`
+
+	// Region of the cluster.
+	Region *string `json:"region,omitempty"`
+
+	// Output only. Cluster's security groups configuration.
+	SecurityGroups *[]string `json:"securityGroups,omitempty"`
+
+	// Output only. Cluster's subnets configuration.
+	Subnets *[]string `json:"subnets,omitempty"`
+}
+
+// ExternalclusterV1GKEClusterParams defines model for externalcluster.v1.GKEClusterParams.
+type ExternalclusterV1GKEClusterParams struct {
+
+	// Name of the cluster.
+	ClusterName *string `json:"clusterName,omitempty"`
+
+	// Location of the cluster.
+	Location *string `json:"location,omitempty"`
+
+	// GCP project ID where cluster runs.
+	ProjectId *string `json:"projectId,omitempty"`
+
+	// Region of the cluster.
+	Region *string `json:"region,omitempty"`
+}
+
+// ExternalclusterV1GPUConfig defines model for externalcluster.v1.GPUConfig.
+type ExternalclusterV1GPUConfig struct {
+
+	// Number of GPUs.
+	Count *int32 `json:"count,omitempty"`
+
+	// GPU type.
+	Type *string `json:"type,omitempty"`
+}
+
+// ExternalclusterV1GetCredentialsScriptResponse defines model for externalcluster.v1.GetCredentialsScriptResponse.
+type ExternalclusterV1GetCredentialsScriptResponse struct {
+	Script *string `json:"script,omitempty"`
+}
+
+// ExternalclusterV1GetKubeconfigResponse defines model for externalcluster.v1.GetKubeconfigResponse.
+type ExternalclusterV1GetKubeconfigResponse struct {
+
+	// Cluster's base64 encoded kubeconfig.
+	Kubeconfig *[]byte `json:"kubeconfig,omitempty"`
+}
+
+// ExternalclusterV1KOPSClusterParams defines model for externalcluster.v1.KOPSClusterParams.
+type ExternalclusterV1KOPSClusterParams struct {
+
+	// Cloud provider of the cluster.
+	Cloud *string `json:"cloud,omitempty"`
+
+	// Name of the cluster.
+	ClusterName *string `json:"clusterName,omitempty"`
+
+	// Region of the cluster.
+	Region *string `json:"region,omitempty"`
+
+	// KOPS state store url.
+	StateStore *string `json:"stateStore,omitempty"`
+}
+
+// ExternalclusterV1KubernetesTaint defines model for externalcluster.v1.KubernetesTaint.
+type ExternalclusterV1KubernetesTaint struct {
+	Effect string `json:"effect"`
+	Key    string `json:"key"`
+	Value  string `json:"value"`
+}
+
+// ExternalclusterV1ListClustersResponse defines model for externalcluster.v1.ListClustersResponse.
+type ExternalclusterV1ListClustersResponse struct {
+	Items *[]ExternalclusterV1Cluster `json:"items,omitempty"`
+}
+
+// ExternalclusterV1NodeConfig defines model for externalcluster.v1.NodeConfig.
+type ExternalclusterV1NodeConfig struct {
+
+	// GPUConfig describes instance GPU configuration.
+	//
+	// Required while provisioning GCP N1 instance types with GPU.
+	// Eg.: n1-standard-2 with 8 x NVIDIA Tesla K80
+	GpuConfig *ExternalclusterV1GPUConfig `json:"gpuConfig,omitempty"`
+
+	// Instance type of the node.
+	InstanceType string `json:"instanceType"`
+
+	// Node Kubernetes labels.
+	KubernetesLabels *ExternalclusterV1NodeConfig_KubernetesLabels `json:"kubernetesLabels,omitempty"`
+
+	// Node Kubernetes taints.
+	KubernetesTaints *[]ExternalclusterV1KubernetesTaint `json:"kubernetesTaints,omitempty"`
+
+	// NodeSpotConfig defines if node should be created as spot instance, and params for creation.
+	SpotConfig *CastaiClusterV1beta1NodeSpotConfig `json:"spotConfig,omitempty"`
+
+	// Node subnet ID.
+	SubnetId *string `json:"subnetId"`
+
+	// NodeVolume defines node's local root volume configuration.
+	Volume *ExternalclusterV1NodeVolume `json:"volume,omitempty"`
+
+	// Zone of the node.
+	Zone *string `json:"zone"`
+}
+
+// ExternalclusterV1NodeConfig_KubernetesLabels defines model for ExternalclusterV1NodeConfig.KubernetesLabels.
+type ExternalclusterV1NodeConfig_KubernetesLabels struct {
+	AdditionalProperties map[string]string `json:"-"`
+}
+
+// ExternalclusterV1NodeVolume defines model for externalcluster.v1.NodeVolume.
+type ExternalclusterV1NodeVolume struct {
+
+	// Volume size in GiB.
+	Size *int32 `json:"size,omitempty"`
+}
+
+// ExternalclusterV1Region defines model for externalcluster.v1.Region.
+type ExternalclusterV1Region struct {
+
+	// Display name of the region.
+	DisplayName *string `json:"displayName,omitempty"`
+
+	// Name of the region.
+	Name *string `json:"name,omitempty"`
+}
+
+// ExternalclusterV1RegisterClusterRequest defines model for externalcluster.v1.RegisterClusterRequest.
+type ExternalclusterV1RegisterClusterRequest struct {
+
+	// AKSClusterParams defines AKS-specific arguments.
+	Aks *ExternalclusterV1AKSClusterParams `json:"aks,omitempty"`
+
+	// EKSClusterParams defines EKS-specific arguments.
+	Eks *ExternalclusterV1EKSClusterParams `json:"eks,omitempty"`
+
+	// GKEClusterParams defines GKE-specific arguments.
+	Gke *ExternalclusterV1GKEClusterParams `json:"gke,omitempty"`
+
+	// The ID of the cluster.
+	Id *string `json:"id,omitempty"`
+
+	// KOPSClusterParams defines KOPS-specific arguments.
+	Kops *ExternalclusterV1KOPSClusterParams `json:"kops,omitempty"`
+
+	// The name of the cluster.
+	Name string `json:"name"`
+
+	// Organization of the cluster.
+	OrganizationId *string `json:"organizationId,omitempty"`
+}
+
+// ExternalclusterV1Subnet defines model for externalcluster.v1.Subnet.
+type ExternalclusterV1Subnet struct {
+
+	// The ID of the subnet.
+	Id *string `json:"id,omitempty"`
+
+	// Deprecated. Subnet name is not filled and should not be used.
+	Name *string `json:"name,omitempty"`
+
+	// Subnet's zone name.
+	ZoneName *string `json:"zoneName,omitempty"`
+}
+
+// ExternalclusterV1UpdateEKSClusterParams defines model for externalcluster.v1.UpdateEKSClusterParams.
+type ExternalclusterV1UpdateEKSClusterParams struct {
+
+	// Optional instance profile ARN for CAST provisioned nodes.
+	InstanceProfileArn *string `json:"instanceProfileArn,omitempty"`
+
+	// Optional security groups for CAST provisioned nodes.
+	SecurityGroups *[]string `json:"securityGroups,omitempty"`
+
+	// Optional subnets for CAST provisioned nodes.
+	// If not set, subnets from EKS cluster configuration are used.
+	Subnets *[]string `json:"subnets,omitempty"`
+}
+
+// ExternalclusterV1UpdateGKEClusterParams defines model for externalcluster.v1.UpdateGKEClusterParams.
+type ExternalclusterV1UpdateGKEClusterParams struct {
+
+	// Location of the cluster.
+	Location *string `json:"location,omitempty"`
+}
+
+// ExternalclusterV1Zone defines model for externalcluster.v1.Zone.
+type ExternalclusterV1Zone struct {
+
+	// ID of the zone.
+	Id *string `json:"id,omitempty"`
+
+	// Zone name.
+	Name *string `json:"name,omitempty"`
 }
 
 // MetricType defines model for MetricType.
@@ -1529,6 +2473,15 @@ type GetAgentInstallScriptParams struct {
 
 	// The kOps cluster state store. Only remote S3 state is supported at the moment.
 	KopsStateStore *string `json:"kops.stateStore,omitempty"`
+
+	// Azure location of your AKS cluster.
+	AksLocation *string `json:"aks.location,omitempty"`
+
+	// Azure resource group where AKS nodes are deployed.
+	AksNodeResourceGroup *string `json:"aks.nodeResourceGroup,omitempty"`
+
+	// Azure account subscription id.
+	AksSubscriptionId *string `json:"aks.subscriptionId,omitempty"`
 }
 
 // ListAuditEventsParams defines parameters for ListAuditEvents.
@@ -1548,6 +2501,12 @@ type ListAuditEventsParams struct {
 
 	// Request filter parameter representing unique cluster ID. For instance, if you make a list request with clusterId filter parameter - returned results will represent the respective cluster. Cluster ID must be a valid UUID.
 	ClusterId *FilterClusterId `json:"clusterId,omitempty"`
+
+	// List of label names to filter by. You can supply more than one label in a form of `label=A&labelValue=a&label=B&labelValue=b`.
+	Label *[]string `json:"label,omitempty"`
+
+	// Values corresponding to each label supplied as `label` parameter.
+	LabelValue *[]string `json:"labelValue,omitempty"`
 }
 
 // ListAuthTokensParams defines parameters for ListAuthTokens.
@@ -1603,6 +2562,31 @@ type DeleteGslbJSONBody GSLBDeleteRequest
 // CreateOrUpdateGslbJSONBody defines parameters for CreateOrUpdateGslb.
 type CreateOrUpdateGslbJSONBody GSLBRequest
 
+// GetInstanceTypesParams defines parameters for GetInstanceTypes.
+type GetInstanceTypesParams struct {
+
+	// Instance cloud provider name
+	Provider *string `json:"provider,omitempty"`
+
+	// Region of the instance type
+	Region *string `json:"region,omitempty"`
+
+	// Cloud service provider's zone id, if the instance is spot
+	ZoneId *string `json:"zoneId,omitempty"`
+
+	// Name of the instance type
+	InstanceType *string `json:"instanceType,omitempty"`
+
+	// Whether the required instance is spot or not. Omission of the value returns both.
+	SpotInstances *bool `json:"spotInstances,omitempty"`
+
+	// A limit on the number of instance types to be returned, between 1 and 500. Default is 30.
+	PageLimit *int `json:"page.limit,omitempty"`
+
+	// A cursor for use in Instance types pagination. This is a token that defines your place in the list. For instance, if you make a list request - you will receive nextCursor field in response metadata. Given that nextCursor field is not empty, it can be used as a cursor query parameter to get subsequent items. If nextCursor is empty - there are no more items to retrieve.
+	PageCursor *string `json:"page.cursor,omitempty"`
+}
+
 // CreateInvitationJSONBody defines parameters for CreateInvitation.
 type CreateInvitationJSONBody NewInvitations
 
@@ -1630,8 +2614,32 @@ type InstallClusterAddonJSONBody InstallAddonRequest
 // UpdateClusterAddonJSONBody defines parameters for UpdateClusterAddon.
 type UpdateClusterAddonJSONBody UpdateAddonRequest
 
+// GetCostHistoryParams defines parameters for GetCostHistory.
+type GetCostHistoryParams struct {
+
+	// Request filter parameter declaring point of time after which the results should be returned. Moment in time must be declared in RFC3339 format. https://tools.ietf.org/html/rfc3339
+	FromDate *FilterFromDate `json:"fromDate,omitempty"`
+
+	// Request filter parameter declaring point of time until which the results should be returned. Moment in time must be declared in RFC3339 format. https://tools.ietf.org/html/rfc3339
+	ToDate *FilterToDate `json:"toDate,omitempty"`
+}
+
+// GetClusterCpuUtilizationMetricsParams defines parameters for GetClusterCpuUtilizationMetrics.
+type GetClusterCpuUtilizationMetricsParams struct {
+
+	// Metrics period in hours, e.g., last 24 hours.
+	PeriodHours *string `json:"periodHours,omitempty"`
+}
+
 // ConfigureClusterAddonsJSONBody defines parameters for ConfigureClusterAddons.
 type ConfigureClusterAddonsJSONBody AddonsConfig
+
+// GetClusterMemoryUtilizationMetricsParams defines parameters for GetClusterMemoryUtilizationMetrics.
+type GetClusterMemoryUtilizationMetricsParams struct {
+
+	// Metrics period in hours, e.g., last 24 hours.
+	PeriodHours *string `json:"periodHours,omitempty"`
+}
 
 // GetClusterMetricsParams defines parameters for GetClusterMetrics.
 type GetClusterMetricsParams struct {
@@ -1640,8 +2648,19 @@ type GetClusterMetricsParams struct {
 	MetricType MetricType `json:"metricType"`
 }
 
+// GetClusterNodesParams defines parameters for GetClusterNodes.
+type GetClusterNodesParams struct {
+
+	// A limit on the number of objects to be returned, between 1 and 500. Default is 10.
+	PageLimit *int `json:"page.limit,omitempty"`
+
+	// A cursor for use in pagination. This is a token that defines your place in the list. For instance, if you make a list request - you will receive nextCursor field in response metadata. Given that nextCursor field is not empty, it can be used as a cursor query parameter to get subsequent items. If nextCursor is empty - there are no more items to retrieve.
+	PageCursor            *string               `json:"page.cursor,omitempty"`
+	XCastAiOrganizationId *HeaderOrganizationId `json:"X-CastAi-Organization-Id,omitempty"`
+}
+
 // AddClusterNodeJSONBody defines parameters for AddClusterNode.
-type AddClusterNodeJSONBody Node
+type AddClusterNodeJSONBody NewNode
 
 // SetupNodeSshJSONBody defines parameters for SetupNodeSsh.
 type SetupNodeSshJSONBody struct {
@@ -1665,99 +2684,84 @@ type SetClusterPauseScheduleJSONBody PauseSchedule
 // UpsertPoliciesJSONBody defines parameters for UpsertPolicies.
 type UpsertPoliciesJSONBody PoliciesConfig
 
-// ListExternalClustersParams defines parameters for ListExternalClusters.
-type ListExternalClustersParams struct {
+// ListRebalancingPlansParams defines parameters for ListRebalancingPlans.
+type ListRebalancingPlansParams struct {
+
+	// A limit on the number of objects to be returned, between 1 and 500. Default is 10.
+	Limit *Limit `json:"limit,omitempty"`
+
+	// A cursor for use in pagination. This is a token that defines your place in the list. For instance, if you make a list request - you will receive nextCursor field in response metadata. Given that nextCursor field is not empty, it can be used as a cursor query parameter to get subsequent items. If nextCursor is empty - there are no more items to retrieve.
+	Cursor *Cursor `json:"cursor,omitempty"`
+}
+
+// RebalanceJSONBody defines parameters for Rebalance.
+type RebalanceJSONBody RebalancingRequest
+
+// ExecuteRebalancingPlanJSONBody defines parameters for ExecuteRebalancingPlan.
+type ExecuteRebalancingPlanJSONBody ExecuteRebalancingPlanRequest
+
+// ExternalClusterAPIRegisterClusterJSONBody defines parameters for ExternalClusterAPIRegisterCluster.
+type ExternalClusterAPIRegisterClusterJSONBody ExternalclusterV1RegisterClusterRequest
+
+// PrometheusRawMetricsParams defines parameters for PrometheusRawMetrics.
+type PrometheusRawMetricsParams struct {
 	XCastAiOrganizationId *HeaderOrganizationId `json:"X-CastAi-Organization-Id,omitempty"`
 }
 
-// RegisterExternalClusterJSONBody defines parameters for RegisterExternalCluster.
-type RegisterExternalClusterJSONBody ExternalCluster
+// ExternalClusterAPIUpdateClusterJSONBody defines parameters for ExternalClusterAPIUpdateCluster.
+type ExternalClusterAPIUpdateClusterJSONBody ExternalclusterV1ClusterUpdate
 
-// RegisterExternalClusterParams defines parameters for RegisterExternalCluster.
-type RegisterExternalClusterParams struct {
-	XCastAiOrganizationId *HeaderOrganizationId `json:"X-CastAi-Organization-Id,omitempty"`
+// GetExternalClusterCpuUtilizationMetricsParams defines parameters for GetExternalClusterCpuUtilizationMetrics.
+type GetExternalClusterCpuUtilizationMetricsParams struct {
+
+	// Metrics period in hours, e.g., last 24 hours.
+	PeriodHours *string `json:"periodHours,omitempty"`
 }
 
-// DeleteExternalClusterParams defines parameters for DeleteExternalCluster.
-type DeleteExternalClusterParams struct {
-	XCastAiOrganizationId *HeaderOrganizationId `json:"X-CastAi-Organization-Id,omitempty"`
+// ExternalClusterAPIDisconnectClusterJSONBody defines parameters for ExternalClusterAPIDisconnectCluster.
+type ExternalClusterAPIDisconnectClusterJSONBody ExternalclusterV1DisconnectConfig
+
+// GetExternalClusterMemoryUtilizationMetricsParams defines parameters for GetExternalClusterMemoryUtilizationMetrics.
+type GetExternalClusterMemoryUtilizationMetricsParams struct {
+
+	// Metrics period in hours, e.g., last 24 hours.
+	PeriodHours *string `json:"periodHours,omitempty"`
 }
 
-// GetExternalClusterParams defines parameters for GetExternalCluster.
-type GetExternalClusterParams struct {
-	XCastAiOrganizationId *HeaderOrganizationId `json:"X-CastAi-Organization-Id,omitempty"`
+// ExternalClusterAPIGetMetricsParams defines parameters for ExternalClusterAPIGetMetrics.
+type ExternalClusterAPIGetMetricsParams struct {
+
+	// The type of metrics to retrieve.
+	MetricType *[]string `json:"metricType,omitempty"`
 }
 
-// UpdateExternalClusterJSONBody defines parameters for UpdateExternalCluster.
-type UpdateExternalClusterJSONBody ExternalClusterEditParams
+// ExternalClusterAPIListNodesParams defines parameters for ExternalClusterAPIListNodes.
+type ExternalClusterAPIListNodesParams struct {
+	PageLimit *string `json:"page.limit,omitempty"`
 
-// UpdateExternalClusterParams defines parameters for UpdateExternalCluster.
-type UpdateExternalClusterParams struct {
-	XCastAiOrganizationId *HeaderOrganizationId `json:"X-CastAi-Organization-Id,omitempty"`
+	// Cursor defines token indicating where to start the page.
+	// Empty value indicates to start from beginning of the dataset.
+	PageCursor *string `json:"page.cursor,omitempty"`
 }
 
-// GetCredentialsScriptParams defines parameters for GetCredentialsScript.
-type GetCredentialsScriptParams struct {
-	XCastAiOrganizationId *HeaderOrganizationId `json:"X-CastAi-Organization-Id,omitempty"`
+// ExternalClusterAPIAddNodeJSONBody defines parameters for ExternalClusterAPIAddNode.
+type ExternalClusterAPIAddNodeJSONBody ExternalclusterV1NodeConfig
+
+// ExternalClusterAPIDeleteNodeParams defines parameters for ExternalClusterAPIDeleteNode.
+type ExternalClusterAPIDeleteNodeParams struct {
+
+	// Node drain timeout in seconds. Defaults to 600s if not set.
+	DrainTimeout *string `json:"drainTimeout,omitempty"`
+
+	// If set to true, node will be deleted even if node fails to be drained gracefully.
+	ForceDelete *bool `json:"forceDelete,omitempty"`
 }
 
-// DisconnectExternalClusterJSONBody defines parameters for DisconnectExternalCluster.
-type DisconnectExternalClusterJSONBody struct {
-
-	// If true, all CAST provisioned nodes will be deleted.
-	DeleteProvisionedNodes *bool `json:"deleteProvisionedNodes,omitempty"`
-}
-
-// DisconnectExternalClusterParams defines parameters for DisconnectExternalCluster.
-type DisconnectExternalClusterParams struct {
-	XCastAiOrganizationId *HeaderOrganizationId `json:"X-CastAi-Organization-Id,omitempty"`
-}
-
-// GetExternalClusterKubeconfigParams defines parameters for GetExternalClusterKubeconfig.
-type GetExternalClusterKubeconfigParams struct {
-	XCastAiOrganizationId *HeaderOrganizationId `json:"X-CastAi-Organization-Id,omitempty"`
-}
-
-// ListExternalClusterNodesParams defines parameters for ListExternalClusterNodes.
-type ListExternalClusterNodesParams struct {
-	XCastAiOrganizationId *HeaderOrganizationId `json:"X-CastAi-Organization-Id,omitempty"`
-}
-
-// AddExternalClusterNodeJSONBody defines parameters for AddExternalClusterNode.
-type AddExternalClusterNodeJSONBody AddExternalClusterNode
-
-// AddExternalClusterNodeParams defines parameters for AddExternalClusterNode.
-type AddExternalClusterNodeParams struct {
-	XCastAiOrganizationId *HeaderOrganizationId `json:"X-CastAi-Organization-Id,omitempty"`
-}
-
-// DeleteExternalClusterNodeParams defines parameters for DeleteExternalClusterNode.
-type DeleteExternalClusterNodeParams struct {
-	XCastAiOrganizationId *HeaderOrganizationId `json:"X-CastAi-Organization-Id,omitempty"`
-}
-
-// PauseExternalClusterParams defines parameters for PauseExternalCluster.
-type PauseExternalClusterParams struct {
-	XCastAiOrganizationId *HeaderOrganizationId `json:"X-CastAi-Organization-Id,omitempty"`
-}
-
-// PrometheusReadParams defines parameters for PrometheusRead.
-type PrometheusReadParams struct {
-	XCastAiOrganizationId *HeaderOrganizationId `json:"X-CastAi-Organization-Id,omitempty"`
-}
-
-// ResumeExternalClusterParams defines parameters for ResumeExternalCluster.
-type ResumeExternalClusterParams struct {
-	XCastAiOrganizationId *HeaderOrganizationId `json:"X-CastAi-Organization-Id,omitempty"`
-}
+// ExternalClusterAPIDrainNodeJSONBody defines parameters for ExternalClusterAPIDrainNode.
+type ExternalClusterAPIDrainNodeJSONBody ExternalclusterV1DrainConfig
 
 // UpdateCurrentUserProfileJSONBody defines parameters for UpdateCurrentUserProfile.
 type UpdateCurrentUserProfileJSONBody UserProfile
-
-// GetExternalClustersTokenParams defines parameters for GetExternalClustersToken.
-type GetExternalClustersTokenParams struct {
-	XCastAiOrganizationId *HeaderOrganizationId `json:"X-CastAi-Organization-Id,omitempty"`
-}
 
 // CreateOrganizationJSONBody defines parameters for CreateOrganization.
 type CreateOrganizationJSONBody Organization
@@ -1767,6 +2771,9 @@ type UpdateOrganizationJSONBody Organization
 
 // CreateOrganizationUserJSONBody defines parameters for CreateOrganizationUser.
 type CreateOrganizationUserJSONBody NewOrganizationUser
+
+// UpdateOrganizationUserJSONBody defines parameters for UpdateOrganizationUser.
+type UpdateOrganizationUserJSONBody UpdateOrganizationUser
 
 // GetUsageReportParams defines parameters for GetUsageReport.
 type GetUsageReportParams struct {
@@ -1838,17 +2845,26 @@ type SetClusterPauseScheduleJSONRequestBody SetClusterPauseScheduleJSONBody
 // UpsertPoliciesJSONRequestBody defines body for UpsertPolicies for application/json ContentType.
 type UpsertPoliciesJSONRequestBody UpsertPoliciesJSONBody
 
-// RegisterExternalClusterJSONRequestBody defines body for RegisterExternalCluster for application/json ContentType.
-type RegisterExternalClusterJSONRequestBody RegisterExternalClusterJSONBody
+// RebalanceJSONRequestBody defines body for Rebalance for application/json ContentType.
+type RebalanceJSONRequestBody RebalanceJSONBody
 
-// UpdateExternalClusterJSONRequestBody defines body for UpdateExternalCluster for application/json ContentType.
-type UpdateExternalClusterJSONRequestBody UpdateExternalClusterJSONBody
+// ExecuteRebalancingPlanJSONRequestBody defines body for ExecuteRebalancingPlan for application/json ContentType.
+type ExecuteRebalancingPlanJSONRequestBody ExecuteRebalancingPlanJSONBody
 
-// DisconnectExternalClusterJSONRequestBody defines body for DisconnectExternalCluster for application/json ContentType.
-type DisconnectExternalClusterJSONRequestBody DisconnectExternalClusterJSONBody
+// ExternalClusterAPIRegisterClusterJSONRequestBody defines body for ExternalClusterAPIRegisterCluster for application/json ContentType.
+type ExternalClusterAPIRegisterClusterJSONRequestBody ExternalClusterAPIRegisterClusterJSONBody
 
-// AddExternalClusterNodeJSONRequestBody defines body for AddExternalClusterNode for application/json ContentType.
-type AddExternalClusterNodeJSONRequestBody AddExternalClusterNodeJSONBody
+// ExternalClusterAPIUpdateClusterJSONRequestBody defines body for ExternalClusterAPIUpdateCluster for application/json ContentType.
+type ExternalClusterAPIUpdateClusterJSONRequestBody ExternalClusterAPIUpdateClusterJSONBody
+
+// ExternalClusterAPIDisconnectClusterJSONRequestBody defines body for ExternalClusterAPIDisconnectCluster for application/json ContentType.
+type ExternalClusterAPIDisconnectClusterJSONRequestBody ExternalClusterAPIDisconnectClusterJSONBody
+
+// ExternalClusterAPIAddNodeJSONRequestBody defines body for ExternalClusterAPIAddNode for application/json ContentType.
+type ExternalClusterAPIAddNodeJSONRequestBody ExternalClusterAPIAddNodeJSONBody
+
+// ExternalClusterAPIDrainNodeJSONRequestBody defines body for ExternalClusterAPIDrainNode for application/json ContentType.
+type ExternalClusterAPIDrainNodeJSONRequestBody ExternalClusterAPIDrainNodeJSONBody
 
 // UpdateCurrentUserProfileJSONRequestBody defines body for UpdateCurrentUserProfile for application/json ContentType.
 type UpdateCurrentUserProfileJSONRequestBody UpdateCurrentUserProfileJSONBody
@@ -1861,6 +2877,62 @@ type UpdateOrganizationJSONRequestBody UpdateOrganizationJSONBody
 
 // CreateOrganizationUserJSONRequestBody defines body for CreateOrganizationUser for application/json ContentType.
 type CreateOrganizationUserJSONRequestBody CreateOrganizationUserJSONBody
+
+// UpdateOrganizationUserJSONRequestBody defines body for UpdateOrganizationUser for application/json ContentType.
+type UpdateOrganizationUserJSONRequestBody UpdateOrganizationUserJSONBody
+
+// Getter for additional properties for AuditEvent_Labels. Returns the specified
+// element and whether it was found
+func (a AuditEvent_Labels) Get(fieldName string) (value string, found bool) {
+	if a.AdditionalProperties != nil {
+		value, found = a.AdditionalProperties[fieldName]
+	}
+	return
+}
+
+// Setter for additional properties for AuditEvent_Labels
+func (a *AuditEvent_Labels) Set(fieldName string, value string) {
+	if a.AdditionalProperties == nil {
+		a.AdditionalProperties = make(map[string]string)
+	}
+	a.AdditionalProperties[fieldName] = value
+}
+
+// Override default JSON handling for AuditEvent_Labels to handle AdditionalProperties
+func (a *AuditEvent_Labels) UnmarshalJSON(b []byte) error {
+	object := make(map[string]json.RawMessage)
+	err := json.Unmarshal(b, &object)
+	if err != nil {
+		return err
+	}
+
+	if len(object) != 0 {
+		a.AdditionalProperties = make(map[string]string)
+		for fieldName, fieldBuf := range object {
+			var fieldVal string
+			err := json.Unmarshal(fieldBuf, &fieldVal)
+			if err != nil {
+				return errors.Wrap(err, fmt.Sprintf("error unmarshaling field %s", fieldName))
+			}
+			a.AdditionalProperties[fieldName] = fieldVal
+		}
+	}
+	return nil
+}
+
+// Override default JSON handling for AuditEvent_Labels to handle AdditionalProperties
+func (a AuditEvent_Labels) MarshalJSON() ([]byte, error) {
+	var err error
+	object := make(map[string]json.RawMessage)
+
+	for fieldName, field := range a.AdditionalProperties {
+		object[fieldName], err = json.Marshal(field)
+		if err != nil {
+			return nil, errors.Wrap(err, fmt.Sprintf("error marshaling '%s'", fieldName))
+		}
+	}
+	return json.Marshal(object)
+}
 
 // Getter for additional properties for ClusterMetrics_CloudMetrics_Labels. Returns the specified
 // element and whether it was found
@@ -2021,6 +3093,112 @@ func (a CostsPerTypeEstimate) MarshalJSON() ([]byte, error) {
 	return json.Marshal(object)
 }
 
+// Getter for additional properties for EstimatedSavingsCurrentConfiguration_ReplicatedWorkloads. Returns the specified
+// element and whether it was found
+func (a EstimatedSavingsCurrentConfiguration_ReplicatedWorkloads) Get(fieldName string) (value EstimatedSavingsReplicatedWorkload, found bool) {
+	if a.AdditionalProperties != nil {
+		value, found = a.AdditionalProperties[fieldName]
+	}
+	return
+}
+
+// Setter for additional properties for EstimatedSavingsCurrentConfiguration_ReplicatedWorkloads
+func (a *EstimatedSavingsCurrentConfiguration_ReplicatedWorkloads) Set(fieldName string, value EstimatedSavingsReplicatedWorkload) {
+	if a.AdditionalProperties == nil {
+		a.AdditionalProperties = make(map[string]EstimatedSavingsReplicatedWorkload)
+	}
+	a.AdditionalProperties[fieldName] = value
+}
+
+// Override default JSON handling for EstimatedSavingsCurrentConfiguration_ReplicatedWorkloads to handle AdditionalProperties
+func (a *EstimatedSavingsCurrentConfiguration_ReplicatedWorkloads) UnmarshalJSON(b []byte) error {
+	object := make(map[string]json.RawMessage)
+	err := json.Unmarshal(b, &object)
+	if err != nil {
+		return err
+	}
+
+	if len(object) != 0 {
+		a.AdditionalProperties = make(map[string]EstimatedSavingsReplicatedWorkload)
+		for fieldName, fieldBuf := range object {
+			var fieldVal EstimatedSavingsReplicatedWorkload
+			err := json.Unmarshal(fieldBuf, &fieldVal)
+			if err != nil {
+				return errors.Wrap(err, fmt.Sprintf("error unmarshaling field %s", fieldName))
+			}
+			a.AdditionalProperties[fieldName] = fieldVal
+		}
+	}
+	return nil
+}
+
+// Override default JSON handling for EstimatedSavingsCurrentConfiguration_ReplicatedWorkloads to handle AdditionalProperties
+func (a EstimatedSavingsCurrentConfiguration_ReplicatedWorkloads) MarshalJSON() ([]byte, error) {
+	var err error
+	object := make(map[string]json.RawMessage)
+
+	for fieldName, field := range a.AdditionalProperties {
+		object[fieldName], err = json.Marshal(field)
+		if err != nil {
+			return nil, errors.Wrap(err, fmt.Sprintf("error marshaling '%s'", fieldName))
+		}
+	}
+	return json.Marshal(object)
+}
+
+// Getter for additional properties for EstimatedSavingsRecommendation_Details_ReplicatedWorkloads. Returns the specified
+// element and whether it was found
+func (a EstimatedSavingsRecommendation_Details_ReplicatedWorkloads) Get(fieldName string) (value EstimatedSavingsReplicatedWorkload, found bool) {
+	if a.AdditionalProperties != nil {
+		value, found = a.AdditionalProperties[fieldName]
+	}
+	return
+}
+
+// Setter for additional properties for EstimatedSavingsRecommendation_Details_ReplicatedWorkloads
+func (a *EstimatedSavingsRecommendation_Details_ReplicatedWorkloads) Set(fieldName string, value EstimatedSavingsReplicatedWorkload) {
+	if a.AdditionalProperties == nil {
+		a.AdditionalProperties = make(map[string]EstimatedSavingsReplicatedWorkload)
+	}
+	a.AdditionalProperties[fieldName] = value
+}
+
+// Override default JSON handling for EstimatedSavingsRecommendation_Details_ReplicatedWorkloads to handle AdditionalProperties
+func (a *EstimatedSavingsRecommendation_Details_ReplicatedWorkloads) UnmarshalJSON(b []byte) error {
+	object := make(map[string]json.RawMessage)
+	err := json.Unmarshal(b, &object)
+	if err != nil {
+		return err
+	}
+
+	if len(object) != 0 {
+		a.AdditionalProperties = make(map[string]EstimatedSavingsReplicatedWorkload)
+		for fieldName, fieldBuf := range object {
+			var fieldVal EstimatedSavingsReplicatedWorkload
+			err := json.Unmarshal(fieldBuf, &fieldVal)
+			if err != nil {
+				return errors.Wrap(err, fmt.Sprintf("error unmarshaling field %s", fieldName))
+			}
+			a.AdditionalProperties[fieldName] = fieldVal
+		}
+	}
+	return nil
+}
+
+// Override default JSON handling for EstimatedSavingsRecommendation_Details_ReplicatedWorkloads to handle AdditionalProperties
+func (a EstimatedSavingsRecommendation_Details_ReplicatedWorkloads) MarshalJSON() ([]byte, error) {
+	var err error
+	object := make(map[string]json.RawMessage)
+
+	for fieldName, field := range a.AdditionalProperties {
+		object[fieldName], err = json.Marshal(field)
+		if err != nil {
+			return nil, errors.Wrap(err, fmt.Sprintf("error marshaling '%s'", fieldName))
+		}
+	}
+	return json.Marshal(object)
+}
+
 // Getter for additional properties for InstallAddonRequest_ValuesOverrides. Returns the specified
 // element and whether it was found
 func (a InstallAddonRequest_ValuesOverrides) Get(fieldName string) (value string, found bool) {
@@ -2127,6 +3305,165 @@ func (a KubernetesCluster_Heartbeats) MarshalJSON() ([]byte, error) {
 	return json.Marshal(object)
 }
 
+// Getter for additional properties for Node_InstanceLabels. Returns the specified
+// element and whether it was found
+func (a Node_InstanceLabels) Get(fieldName string) (value string, found bool) {
+	if a.AdditionalProperties != nil {
+		value, found = a.AdditionalProperties[fieldName]
+	}
+	return
+}
+
+// Setter for additional properties for Node_InstanceLabels
+func (a *Node_InstanceLabels) Set(fieldName string, value string) {
+	if a.AdditionalProperties == nil {
+		a.AdditionalProperties = make(map[string]string)
+	}
+	a.AdditionalProperties[fieldName] = value
+}
+
+// Override default JSON handling for Node_InstanceLabels to handle AdditionalProperties
+func (a *Node_InstanceLabels) UnmarshalJSON(b []byte) error {
+	object := make(map[string]json.RawMessage)
+	err := json.Unmarshal(b, &object)
+	if err != nil {
+		return err
+	}
+
+	if len(object) != 0 {
+		a.AdditionalProperties = make(map[string]string)
+		for fieldName, fieldBuf := range object {
+			var fieldVal string
+			err := json.Unmarshal(fieldBuf, &fieldVal)
+			if err != nil {
+				return errors.Wrap(err, fmt.Sprintf("error unmarshaling field %s", fieldName))
+			}
+			a.AdditionalProperties[fieldName] = fieldVal
+		}
+	}
+	return nil
+}
+
+// Override default JSON handling for Node_InstanceLabels to handle AdditionalProperties
+func (a Node_InstanceLabels) MarshalJSON() ([]byte, error) {
+	var err error
+	object := make(map[string]json.RawMessage)
+
+	for fieldName, field := range a.AdditionalProperties {
+		object[fieldName], err = json.Marshal(field)
+		if err != nil {
+			return nil, errors.Wrap(err, fmt.Sprintf("error marshaling '%s'", fieldName))
+		}
+	}
+	return json.Marshal(object)
+}
+
+// Getter for additional properties for Node_Labels. Returns the specified
+// element and whether it was found
+func (a Node_Labels) Get(fieldName string) (value string, found bool) {
+	if a.AdditionalProperties != nil {
+		value, found = a.AdditionalProperties[fieldName]
+	}
+	return
+}
+
+// Setter for additional properties for Node_Labels
+func (a *Node_Labels) Set(fieldName string, value string) {
+	if a.AdditionalProperties == nil {
+		a.AdditionalProperties = make(map[string]string)
+	}
+	a.AdditionalProperties[fieldName] = value
+}
+
+// Override default JSON handling for Node_Labels to handle AdditionalProperties
+func (a *Node_Labels) UnmarshalJSON(b []byte) error {
+	object := make(map[string]json.RawMessage)
+	err := json.Unmarshal(b, &object)
+	if err != nil {
+		return err
+	}
+
+	if len(object) != 0 {
+		a.AdditionalProperties = make(map[string]string)
+		for fieldName, fieldBuf := range object {
+			var fieldVal string
+			err := json.Unmarshal(fieldBuf, &fieldVal)
+			if err != nil {
+				return errors.Wrap(err, fmt.Sprintf("error unmarshaling field %s", fieldName))
+			}
+			a.AdditionalProperties[fieldName] = fieldVal
+		}
+	}
+	return nil
+}
+
+// Override default JSON handling for Node_Labels to handle AdditionalProperties
+func (a Node_Labels) MarshalJSON() ([]byte, error) {
+	var err error
+	object := make(map[string]json.RawMessage)
+
+	for fieldName, field := range a.AdditionalProperties {
+		object[fieldName], err = json.Marshal(field)
+		if err != nil {
+			return nil, errors.Wrap(err, fmt.Sprintf("error marshaling '%s'", fieldName))
+		}
+	}
+	return json.Marshal(object)
+}
+
+// Getter for additional properties for RebalancedWorkloads_Selectors_MatchLabels. Returns the specified
+// element and whether it was found
+func (a RebalancedWorkloads_Selectors_MatchLabels) Get(fieldName string) (value string, found bool) {
+	if a.AdditionalProperties != nil {
+		value, found = a.AdditionalProperties[fieldName]
+	}
+	return
+}
+
+// Setter for additional properties for RebalancedWorkloads_Selectors_MatchLabels
+func (a *RebalancedWorkloads_Selectors_MatchLabels) Set(fieldName string, value string) {
+	if a.AdditionalProperties == nil {
+		a.AdditionalProperties = make(map[string]string)
+	}
+	a.AdditionalProperties[fieldName] = value
+}
+
+// Override default JSON handling for RebalancedWorkloads_Selectors_MatchLabels to handle AdditionalProperties
+func (a *RebalancedWorkloads_Selectors_MatchLabels) UnmarshalJSON(b []byte) error {
+	object := make(map[string]json.RawMessage)
+	err := json.Unmarshal(b, &object)
+	if err != nil {
+		return err
+	}
+
+	if len(object) != 0 {
+		a.AdditionalProperties = make(map[string]string)
+		for fieldName, fieldBuf := range object {
+			var fieldVal string
+			err := json.Unmarshal(fieldBuf, &fieldVal)
+			if err != nil {
+				return errors.Wrap(err, fmt.Sprintf("error unmarshaling field %s", fieldName))
+			}
+			a.AdditionalProperties[fieldName] = fieldVal
+		}
+	}
+	return nil
+}
+
+// Override default JSON handling for RebalancedWorkloads_Selectors_MatchLabels to handle AdditionalProperties
+func (a RebalancedWorkloads_Selectors_MatchLabels) MarshalJSON() ([]byte, error) {
+	var err error
+	object := make(map[string]json.RawMessage)
+
+	for fieldName, field := range a.AdditionalProperties {
+		object[fieldName], err = json.Marshal(field)
+		if err != nil {
+			return nil, errors.Wrap(err, fmt.Sprintf("error marshaling '%s'", fieldName))
+		}
+	}
+	return json.Marshal(object)
+}
+
 // Getter for additional properties for UpdateAddonRequest_ValuesOverrides. Returns the specified
 // element and whether it was found
 func (a UpdateAddonRequest_ValuesOverrides) Get(fieldName string) (value string, found bool) {
@@ -2168,6 +3505,271 @@ func (a *UpdateAddonRequest_ValuesOverrides) UnmarshalJSON(b []byte) error {
 
 // Override default JSON handling for UpdateAddonRequest_ValuesOverrides to handle AdditionalProperties
 func (a UpdateAddonRequest_ValuesOverrides) MarshalJSON() ([]byte, error) {
+	var err error
+	object := make(map[string]json.RawMessage)
+
+	for fieldName, field := range a.AdditionalProperties {
+		object[fieldName], err = json.Marshal(field)
+		if err != nil {
+			return nil, errors.Wrap(err, fmt.Sprintf("error marshaling '%s'", fieldName))
+		}
+	}
+	return json.Marshal(object)
+}
+
+// Getter for additional properties for CastaiClusterV1beta1Node_InstanceLabels. Returns the specified
+// element and whether it was found
+func (a CastaiClusterV1beta1Node_InstanceLabels) Get(fieldName string) (value string, found bool) {
+	if a.AdditionalProperties != nil {
+		value, found = a.AdditionalProperties[fieldName]
+	}
+	return
+}
+
+// Setter for additional properties for CastaiClusterV1beta1Node_InstanceLabels
+func (a *CastaiClusterV1beta1Node_InstanceLabels) Set(fieldName string, value string) {
+	if a.AdditionalProperties == nil {
+		a.AdditionalProperties = make(map[string]string)
+	}
+	a.AdditionalProperties[fieldName] = value
+}
+
+// Override default JSON handling for CastaiClusterV1beta1Node_InstanceLabels to handle AdditionalProperties
+func (a *CastaiClusterV1beta1Node_InstanceLabels) UnmarshalJSON(b []byte) error {
+	object := make(map[string]json.RawMessage)
+	err := json.Unmarshal(b, &object)
+	if err != nil {
+		return err
+	}
+
+	if len(object) != 0 {
+		a.AdditionalProperties = make(map[string]string)
+		for fieldName, fieldBuf := range object {
+			var fieldVal string
+			err := json.Unmarshal(fieldBuf, &fieldVal)
+			if err != nil {
+				return errors.Wrap(err, fmt.Sprintf("error unmarshaling field %s", fieldName))
+			}
+			a.AdditionalProperties[fieldName] = fieldVal
+		}
+	}
+	return nil
+}
+
+// Override default JSON handling for CastaiClusterV1beta1Node_InstanceLabels to handle AdditionalProperties
+func (a CastaiClusterV1beta1Node_InstanceLabels) MarshalJSON() ([]byte, error) {
+	var err error
+	object := make(map[string]json.RawMessage)
+
+	for fieldName, field := range a.AdditionalProperties {
+		object[fieldName], err = json.Marshal(field)
+		if err != nil {
+			return nil, errors.Wrap(err, fmt.Sprintf("error marshaling '%s'", fieldName))
+		}
+	}
+	return json.Marshal(object)
+}
+
+// Getter for additional properties for CastaiClusterV1beta1Node_Labels. Returns the specified
+// element and whether it was found
+func (a CastaiClusterV1beta1Node_Labels) Get(fieldName string) (value string, found bool) {
+	if a.AdditionalProperties != nil {
+		value, found = a.AdditionalProperties[fieldName]
+	}
+	return
+}
+
+// Setter for additional properties for CastaiClusterV1beta1Node_Labels
+func (a *CastaiClusterV1beta1Node_Labels) Set(fieldName string, value string) {
+	if a.AdditionalProperties == nil {
+		a.AdditionalProperties = make(map[string]string)
+	}
+	a.AdditionalProperties[fieldName] = value
+}
+
+// Override default JSON handling for CastaiClusterV1beta1Node_Labels to handle AdditionalProperties
+func (a *CastaiClusterV1beta1Node_Labels) UnmarshalJSON(b []byte) error {
+	object := make(map[string]json.RawMessage)
+	err := json.Unmarshal(b, &object)
+	if err != nil {
+		return err
+	}
+
+	if len(object) != 0 {
+		a.AdditionalProperties = make(map[string]string)
+		for fieldName, fieldBuf := range object {
+			var fieldVal string
+			err := json.Unmarshal(fieldBuf, &fieldVal)
+			if err != nil {
+				return errors.Wrap(err, fmt.Sprintf("error unmarshaling field %s", fieldName))
+			}
+			a.AdditionalProperties[fieldName] = fieldVal
+		}
+	}
+	return nil
+}
+
+// Override default JSON handling for CastaiClusterV1beta1Node_Labels to handle AdditionalProperties
+func (a CastaiClusterV1beta1Node_Labels) MarshalJSON() ([]byte, error) {
+	var err error
+	object := make(map[string]json.RawMessage)
+
+	for fieldName, field := range a.AdditionalProperties {
+		object[fieldName], err = json.Marshal(field)
+		if err != nil {
+			return nil, errors.Wrap(err, fmt.Sprintf("error marshaling '%s'", fieldName))
+		}
+	}
+	return json.Marshal(object)
+}
+
+// Getter for additional properties for CastaiMetricsV1beta1CloudMetrics_Labels. Returns the specified
+// element and whether it was found
+func (a CastaiMetricsV1beta1CloudMetrics_Labels) Get(fieldName string) (value string, found bool) {
+	if a.AdditionalProperties != nil {
+		value, found = a.AdditionalProperties[fieldName]
+	}
+	return
+}
+
+// Setter for additional properties for CastaiMetricsV1beta1CloudMetrics_Labels
+func (a *CastaiMetricsV1beta1CloudMetrics_Labels) Set(fieldName string, value string) {
+	if a.AdditionalProperties == nil {
+		a.AdditionalProperties = make(map[string]string)
+	}
+	a.AdditionalProperties[fieldName] = value
+}
+
+// Override default JSON handling for CastaiMetricsV1beta1CloudMetrics_Labels to handle AdditionalProperties
+func (a *CastaiMetricsV1beta1CloudMetrics_Labels) UnmarshalJSON(b []byte) error {
+	object := make(map[string]json.RawMessage)
+	err := json.Unmarshal(b, &object)
+	if err != nil {
+		return err
+	}
+
+	if len(object) != 0 {
+		a.AdditionalProperties = make(map[string]string)
+		for fieldName, fieldBuf := range object {
+			var fieldVal string
+			err := json.Unmarshal(fieldBuf, &fieldVal)
+			if err != nil {
+				return errors.Wrap(err, fmt.Sprintf("error unmarshaling field %s", fieldName))
+			}
+			a.AdditionalProperties[fieldName] = fieldVal
+		}
+	}
+	return nil
+}
+
+// Override default JSON handling for CastaiMetricsV1beta1CloudMetrics_Labels to handle AdditionalProperties
+func (a CastaiMetricsV1beta1CloudMetrics_Labels) MarshalJSON() ([]byte, error) {
+	var err error
+	object := make(map[string]json.RawMessage)
+
+	for fieldName, field := range a.AdditionalProperties {
+		object[fieldName], err = json.Marshal(field)
+		if err != nil {
+			return nil, errors.Wrap(err, fmt.Sprintf("error marshaling '%s'", fieldName))
+		}
+	}
+	return json.Marshal(object)
+}
+
+// Getter for additional properties for CastaiMetricsV1beta1NodeMetrics_Labels. Returns the specified
+// element and whether it was found
+func (a CastaiMetricsV1beta1NodeMetrics_Labels) Get(fieldName string) (value string, found bool) {
+	if a.AdditionalProperties != nil {
+		value, found = a.AdditionalProperties[fieldName]
+	}
+	return
+}
+
+// Setter for additional properties for CastaiMetricsV1beta1NodeMetrics_Labels
+func (a *CastaiMetricsV1beta1NodeMetrics_Labels) Set(fieldName string, value string) {
+	if a.AdditionalProperties == nil {
+		a.AdditionalProperties = make(map[string]string)
+	}
+	a.AdditionalProperties[fieldName] = value
+}
+
+// Override default JSON handling for CastaiMetricsV1beta1NodeMetrics_Labels to handle AdditionalProperties
+func (a *CastaiMetricsV1beta1NodeMetrics_Labels) UnmarshalJSON(b []byte) error {
+	object := make(map[string]json.RawMessage)
+	err := json.Unmarshal(b, &object)
+	if err != nil {
+		return err
+	}
+
+	if len(object) != 0 {
+		a.AdditionalProperties = make(map[string]string)
+		for fieldName, fieldBuf := range object {
+			var fieldVal string
+			err := json.Unmarshal(fieldBuf, &fieldVal)
+			if err != nil {
+				return errors.Wrap(err, fmt.Sprintf("error unmarshaling field %s", fieldName))
+			}
+			a.AdditionalProperties[fieldName] = fieldVal
+		}
+	}
+	return nil
+}
+
+// Override default JSON handling for CastaiMetricsV1beta1NodeMetrics_Labels to handle AdditionalProperties
+func (a CastaiMetricsV1beta1NodeMetrics_Labels) MarshalJSON() ([]byte, error) {
+	var err error
+	object := make(map[string]json.RawMessage)
+
+	for fieldName, field := range a.AdditionalProperties {
+		object[fieldName], err = json.Marshal(field)
+		if err != nil {
+			return nil, errors.Wrap(err, fmt.Sprintf("error marshaling '%s'", fieldName))
+		}
+	}
+	return json.Marshal(object)
+}
+
+// Getter for additional properties for ExternalclusterV1NodeConfig_KubernetesLabels. Returns the specified
+// element and whether it was found
+func (a ExternalclusterV1NodeConfig_KubernetesLabels) Get(fieldName string) (value string, found bool) {
+	if a.AdditionalProperties != nil {
+		value, found = a.AdditionalProperties[fieldName]
+	}
+	return
+}
+
+// Setter for additional properties for ExternalclusterV1NodeConfig_KubernetesLabels
+func (a *ExternalclusterV1NodeConfig_KubernetesLabels) Set(fieldName string, value string) {
+	if a.AdditionalProperties == nil {
+		a.AdditionalProperties = make(map[string]string)
+	}
+	a.AdditionalProperties[fieldName] = value
+}
+
+// Override default JSON handling for ExternalclusterV1NodeConfig_KubernetesLabels to handle AdditionalProperties
+func (a *ExternalclusterV1NodeConfig_KubernetesLabels) UnmarshalJSON(b []byte) error {
+	object := make(map[string]json.RawMessage)
+	err := json.Unmarshal(b, &object)
+	if err != nil {
+		return err
+	}
+
+	if len(object) != 0 {
+		a.AdditionalProperties = make(map[string]string)
+		for fieldName, fieldBuf := range object {
+			var fieldVal string
+			err := json.Unmarshal(fieldBuf, &fieldVal)
+			if err != nil {
+				return errors.Wrap(err, fmt.Sprintf("error unmarshaling field %s", fieldName))
+			}
+			a.AdditionalProperties[fieldName] = fieldVal
+		}
+	}
+	return nil
+}
+
+// Override default JSON handling for ExternalclusterV1NodeConfig_KubernetesLabels to handle AdditionalProperties
+func (a ExternalclusterV1NodeConfig_KubernetesLabels) MarshalJSON() ([]byte, error) {
 	var err error
 	object := make(map[string]json.RawMessage)
 

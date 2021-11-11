@@ -147,6 +147,9 @@ type ClientInterface interface {
 
 	CreateOrUpdateGslb(ctx context.Context, body CreateOrUpdateGslbJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// GetInstanceTypes request
+	GetInstanceTypes(ctx context.Context, params *GetInstanceTypesParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// CreateInvitation request  with any body
 	CreateInvitationWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -198,8 +201,14 @@ type ClientInterface interface {
 	// ArchiveCluster request
 	ArchiveCluster(ctx context.Context, clusterId ClusterId, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// GetClusterAuditLog request
-	GetClusterAuditLog(ctx context.Context, clusterId ClusterId, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// GetCostHistory request
+	GetCostHistory(ctx context.Context, clusterId ClusterId, params *GetCostHistoryParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetClusterCpuUtilizationMetrics request
+	GetClusterCpuUtilizationMetrics(ctx context.Context, clusterId ClusterId, params *GetClusterCpuUtilizationMetricsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetClusterCurrentMetrics request
+	GetClusterCurrentMetrics(ctx context.Context, clusterId ClusterId, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// GetClusterFeedbackEvents request
 	GetClusterFeedbackEvents(ctx context.Context, clusterId ClusterId, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -221,6 +230,9 @@ type ClientInterface interface {
 
 	ConfigureClusterAddons(ctx context.Context, clusterId ClusterId, body ConfigureClusterAddonsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// GetClusterMemoryUtilizationMetrics request
+	GetClusterMemoryUtilizationMetrics(ctx context.Context, clusterId ClusterId, params *GetClusterMemoryUtilizationMetricsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// GetClusterMetrics request
 	GetClusterMetrics(ctx context.Context, clusterId ClusterId, params *GetClusterMetricsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -234,7 +246,7 @@ type ClientInterface interface {
 	GetNodeConstraints(ctx context.Context, clusterId ClusterId, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// GetClusterNodes request
-	GetClusterNodes(ctx context.Context, clusterId ClusterId, reqEditors ...RequestEditorFn) (*http.Response, error)
+	GetClusterNodes(ctx context.Context, clusterId ClusterId, params *GetClusterNodesParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// AddClusterNode request  with any body
 	AddClusterNodeWithBody(ctx context.Context, clusterId ClusterId, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -293,6 +305,25 @@ type ClientInterface interface {
 	// GetProblematicWorkloads request
 	GetProblematicWorkloads(ctx context.Context, clusterId ClusterId, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// GetRebalancedWorkloads request
+	GetRebalancedWorkloads(ctx context.Context, clusterId ClusterId, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// ListRebalancingPlans request
+	ListRebalancingPlans(ctx context.Context, clusterId ClusterId, params *ListRebalancingPlansParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// Rebalance request  with any body
+	RebalanceWithBody(ctx context.Context, clusterId ClusterId, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	Rebalance(ctx context.Context, clusterId ClusterId, body RebalanceJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetRebalancingPlan request
+	GetRebalancingPlan(ctx context.Context, clusterId ClusterId, rebalancingPlanId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// ExecuteRebalancingPlan request  with any body
+	ExecuteRebalancingPlanWithBody(ctx context.Context, clusterId ClusterId, rebalancingPlanId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	ExecuteRebalancingPlan(ctx context.Context, clusterId ClusterId, rebalancingPlanId string, body ExecuteRebalancingPlanJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// ResumeCluster request
 	ResumeCluster(ctx context.Context, clusterId ClusterId, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -302,58 +333,84 @@ type ClientInterface interface {
 	// TriggerClusterReconcile request
 	TriggerClusterReconcile(ctx context.Context, clusterId ClusterId, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// ListExternalClusters request
-	ListExternalClusters(ctx context.Context, params *ListExternalClustersParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// GetWorkloads request
+	GetWorkloads(ctx context.Context, clusterId ClusterId, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// RegisterExternalCluster request  with any body
-	RegisterExternalClusterWithBody(ctx context.Context, params *RegisterExternalClusterParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// ExternalClusterAPIListClusters request
+	ExternalClusterAPIListClusters(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	RegisterExternalCluster(ctx context.Context, params *RegisterExternalClusterParams, body RegisterExternalClusterJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// ExternalClusterAPIRegisterCluster request  with any body
+	ExternalClusterAPIRegisterClusterWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	ExternalClusterAPIRegisterCluster(ctx context.Context, body ExternalClusterAPIRegisterClusterJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// GetExternalClusterOperation request
 	GetExternalClusterOperation(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// DeleteExternalCluster request
-	DeleteExternalCluster(ctx context.Context, clusterId string, params *DeleteExternalClusterParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// PrometheusRawMetrics request
+	PrometheusRawMetrics(ctx context.Context, params *PrometheusRawMetricsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// GetExternalCluster request
-	GetExternalCluster(ctx context.Context, clusterId string, params *GetExternalClusterParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// ExternalClusterAPIDeleteCluster request
+	ExternalClusterAPIDeleteCluster(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// UpdateExternalCluster request  with any body
-	UpdateExternalClusterWithBody(ctx context.Context, clusterId string, params *UpdateExternalClusterParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// ExternalClusterAPIGetCluster request
+	ExternalClusterAPIGetCluster(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	UpdateExternalCluster(ctx context.Context, clusterId string, params *UpdateExternalClusterParams, body UpdateExternalClusterJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// ExternalClusterAPIUpdateCluster request  with any body
+	ExternalClusterAPIUpdateClusterWithBody(ctx context.Context, clusterId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// GetCredentialsScript request
-	GetCredentialsScript(ctx context.Context, clusterId string, params *GetCredentialsScriptParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+	ExternalClusterAPIUpdateCluster(ctx context.Context, clusterId string, body ExternalClusterAPIUpdateClusterJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// DisconnectExternalCluster request  with any body
-	DisconnectExternalClusterWithBody(ctx context.Context, clusterId ClusterId, params *DisconnectExternalClusterParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// GetExternalClusterCpuUtilizationMetrics request
+	GetExternalClusterCpuUtilizationMetrics(ctx context.Context, clusterId ClusterId, params *GetExternalClusterCpuUtilizationMetricsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	DisconnectExternalCluster(ctx context.Context, clusterId ClusterId, params *DisconnectExternalClusterParams, body DisconnectExternalClusterJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// ExternalClusterAPIGetCredentialsScript request
+	ExternalClusterAPIGetCredentialsScript(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// GetExternalClusterKubeconfig request
-	GetExternalClusterKubeconfig(ctx context.Context, clusterId string, params *GetExternalClusterKubeconfigParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// GetExternalClusterCurrentMetrics request
+	GetExternalClusterCurrentMetrics(ctx context.Context, clusterId ClusterId, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// ListExternalClusterNodes request
-	ListExternalClusterNodes(ctx context.Context, clusterId string, params *ListExternalClusterNodesParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// ExternalClusterAPIDisconnectCluster request  with any body
+	ExternalClusterAPIDisconnectClusterWithBody(ctx context.Context, clusterId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// AddExternalClusterNode request  with any body
-	AddExternalClusterNodeWithBody(ctx context.Context, clusterId string, params *AddExternalClusterNodeParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+	ExternalClusterAPIDisconnectCluster(ctx context.Context, clusterId string, body ExternalClusterAPIDisconnectClusterJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	AddExternalClusterNode(ctx context.Context, clusterId string, params *AddExternalClusterNodeParams, body AddExternalClusterNodeJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// GetEstimatedSavings request
+	GetEstimatedSavings(ctx context.Context, clusterId ClusterId, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// DeleteExternalClusterNode request
-	DeleteExternalClusterNode(ctx context.Context, clusterId string, nodeId string, params *DeleteExternalClusterNodeParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// ExternalClusterAPIGetKubeconfig request
+	ExternalClusterAPIGetKubeconfig(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// PauseExternalCluster request
-	PauseExternalCluster(ctx context.Context, clusterId ClusterId, params *PauseExternalClusterParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// GetExternalClusterMemoryUtilizationMetrics request
+	GetExternalClusterMemoryUtilizationMetrics(ctx context.Context, clusterId ClusterId, params *GetExternalClusterMemoryUtilizationMetricsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// PrometheusRead request
-	PrometheusRead(ctx context.Context, clusterId ClusterId, params *PrometheusReadParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// ExternalClusterAPIGetMetrics request
+	ExternalClusterAPIGetMetrics(ctx context.Context, clusterId string, params *ExternalClusterAPIGetMetricsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// ResumeExternalCluster request
-	ResumeExternalCluster(ctx context.Context, clusterId ClusterId, params *ResumeExternalClusterParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// ExternalClusterAPIListNodes request
+	ExternalClusterAPIListNodes(ctx context.Context, clusterId string, params *ExternalClusterAPIListNodesParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// ExternalClusterAPIAddNode request  with any body
+	ExternalClusterAPIAddNodeWithBody(ctx context.Context, clusterId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	ExternalClusterAPIAddNode(ctx context.Context, clusterId string, body ExternalClusterAPIAddNodeJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// ExternalClusterAPIDeleteNode request
+	ExternalClusterAPIDeleteNode(ctx context.Context, clusterId string, nodeId string, params *ExternalClusterAPIDeleteNodeParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// ExternalClusterAPIGetNode request
+	ExternalClusterAPIGetNode(ctx context.Context, clusterId string, nodeId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// ExternalClusterAPIDrainNode request  with any body
+	ExternalClusterAPIDrainNodeWithBody(ctx context.Context, clusterId string, nodeId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	ExternalClusterAPIDrainNode(ctx context.Context, clusterId string, nodeId string, body ExternalClusterAPIDrainNodeJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// ExternalClusterAPIPauseCluster request
+	ExternalClusterAPIPauseCluster(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// ExternalClusterAPIResumeCluster request
+	ExternalClusterAPIResumeCluster(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// GetOperation request
 	GetOperation(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -365,9 +422,6 @@ type ClientInterface interface {
 	UpdateCurrentUserProfileWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	UpdateCurrentUserProfile(ctx context.Context, body UpdateCurrentUserProfileJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
-
-	// GetExternalClustersToken request
-	GetExternalClustersToken(ctx context.Context, params *GetExternalClustersTokenParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// ListOrganizations request
 	ListOrganizations(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -399,11 +453,19 @@ type ClientInterface interface {
 	// DeleteOrganizationUser request
 	DeleteOrganizationUser(ctx context.Context, id string, userId string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// UpdateOrganizationUser request  with any body
+	UpdateOrganizationUserWithBody(ctx context.Context, id string, userId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	UpdateOrganizationUser(ctx context.Context, id string, userId string, body UpdateOrganizationUserJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// ListRegions request
 	ListRegions(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// GetUsageReport request
 	GetUsageReport(ctx context.Context, params *GetUsageReportParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// ExternalClusterAPIGetCredentialsScriptTemplate request
+	ExternalClusterAPIGetCredentialsScriptTemplate(ctx context.Context, provider string, reqEditors ...RequestEditorFn) (*http.Response, error)
 }
 
 func (c *Client) ListAddons(ctx context.Context, params *ListAddonsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
@@ -637,6 +699,17 @@ func (c *Client) CreateOrUpdateGslb(ctx context.Context, body CreateOrUpdateGslb
 	return c.Client.Do(req)
 }
 
+func (c *Client) GetInstanceTypes(ctx context.Context, params *GetInstanceTypesParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetInstanceTypesRequest(c.Server, params)
+	if err != nil {
+		return nil, err
+	}
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
 func (c *Client) CreateInvitationWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewCreateInvitationRequestWithBody(c.Server, contentType, body)
 	if err != nil {
@@ -846,8 +919,30 @@ func (c *Client) ArchiveCluster(ctx context.Context, clusterId ClusterId, reqEdi
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetClusterAuditLog(ctx context.Context, clusterId ClusterId, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewGetClusterAuditLogRequest(c.Server, clusterId)
+func (c *Client) GetCostHistory(ctx context.Context, clusterId ClusterId, params *GetCostHistoryParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetCostHistoryRequest(c.Server, clusterId, params)
+	if err != nil {
+		return nil, err
+	}
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetClusterCpuUtilizationMetrics(ctx context.Context, clusterId ClusterId, params *GetClusterCpuUtilizationMetricsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetClusterCpuUtilizationMetricsRequest(c.Server, clusterId, params)
+	if err != nil {
+		return nil, err
+	}
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetClusterCurrentMetrics(ctx context.Context, clusterId ClusterId, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetClusterCurrentMetricsRequest(c.Server, clusterId)
 	if err != nil {
 		return nil, err
 	}
@@ -934,6 +1029,17 @@ func (c *Client) ConfigureClusterAddons(ctx context.Context, clusterId ClusterId
 	return c.Client.Do(req)
 }
 
+func (c *Client) GetClusterMemoryUtilizationMetrics(ctx context.Context, clusterId ClusterId, params *GetClusterMemoryUtilizationMetricsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetClusterMemoryUtilizationMetricsRequest(c.Server, clusterId, params)
+	if err != nil {
+		return nil, err
+	}
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
 func (c *Client) GetClusterMetrics(ctx context.Context, clusterId ClusterId, params *GetClusterMetricsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetClusterMetricsRequest(c.Server, clusterId, params)
 	if err != nil {
@@ -978,8 +1084,8 @@ func (c *Client) GetNodeConstraints(ctx context.Context, clusterId ClusterId, re
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetClusterNodes(ctx context.Context, clusterId ClusterId, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewGetClusterNodesRequest(c.Server, clusterId)
+func (c *Client) GetClusterNodes(ctx context.Context, clusterId ClusterId, params *GetClusterNodesParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetClusterNodesRequest(c.Server, clusterId, params)
 	if err != nil {
 		return nil, err
 	}
@@ -1220,6 +1326,83 @@ func (c *Client) GetProblematicWorkloads(ctx context.Context, clusterId ClusterI
 	return c.Client.Do(req)
 }
 
+func (c *Client) GetRebalancedWorkloads(ctx context.Context, clusterId ClusterId, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetRebalancedWorkloadsRequest(c.Server, clusterId)
+	if err != nil {
+		return nil, err
+	}
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) ListRebalancingPlans(ctx context.Context, clusterId ClusterId, params *ListRebalancingPlansParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewListRebalancingPlansRequest(c.Server, clusterId, params)
+	if err != nil {
+		return nil, err
+	}
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) RebalanceWithBody(ctx context.Context, clusterId ClusterId, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewRebalanceRequestWithBody(c.Server, clusterId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) Rebalance(ctx context.Context, clusterId ClusterId, body RebalanceJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewRebalanceRequest(c.Server, clusterId, body)
+	if err != nil {
+		return nil, err
+	}
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetRebalancingPlan(ctx context.Context, clusterId ClusterId, rebalancingPlanId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetRebalancingPlanRequest(c.Server, clusterId, rebalancingPlanId)
+	if err != nil {
+		return nil, err
+	}
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) ExecuteRebalancingPlanWithBody(ctx context.Context, clusterId ClusterId, rebalancingPlanId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewExecuteRebalancingPlanRequestWithBody(c.Server, clusterId, rebalancingPlanId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) ExecuteRebalancingPlan(ctx context.Context, clusterId ClusterId, rebalancingPlanId string, body ExecuteRebalancingPlanJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewExecuteRebalancingPlanRequest(c.Server, clusterId, rebalancingPlanId, body)
+	if err != nil {
+		return nil, err
+	}
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
 func (c *Client) ResumeCluster(ctx context.Context, clusterId ClusterId, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewResumeClusterRequest(c.Server, clusterId)
 	if err != nil {
@@ -1253,8 +1436,8 @@ func (c *Client) TriggerClusterReconcile(ctx context.Context, clusterId ClusterI
 	return c.Client.Do(req)
 }
 
-func (c *Client) ListExternalClusters(ctx context.Context, params *ListExternalClustersParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewListExternalClustersRequest(c.Server, params)
+func (c *Client) GetWorkloads(ctx context.Context, clusterId ClusterId, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetWorkloadsRequest(c.Server, clusterId)
 	if err != nil {
 		return nil, err
 	}
@@ -1264,8 +1447,8 @@ func (c *Client) ListExternalClusters(ctx context.Context, params *ListExternalC
 	return c.Client.Do(req)
 }
 
-func (c *Client) RegisterExternalClusterWithBody(ctx context.Context, params *RegisterExternalClusterParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewRegisterExternalClusterRequestWithBody(c.Server, params, contentType, body)
+func (c *Client) ExternalClusterAPIListClusters(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewExternalClusterAPIListClustersRequest(c.Server)
 	if err != nil {
 		return nil, err
 	}
@@ -1275,8 +1458,19 @@ func (c *Client) RegisterExternalClusterWithBody(ctx context.Context, params *Re
 	return c.Client.Do(req)
 }
 
-func (c *Client) RegisterExternalCluster(ctx context.Context, params *RegisterExternalClusterParams, body RegisterExternalClusterJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewRegisterExternalClusterRequest(c.Server, params, body)
+func (c *Client) ExternalClusterAPIRegisterClusterWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewExternalClusterAPIRegisterClusterRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) ExternalClusterAPIRegisterCluster(ctx context.Context, body ExternalClusterAPIRegisterClusterJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewExternalClusterAPIRegisterClusterRequest(c.Server, body)
 	if err != nil {
 		return nil, err
 	}
@@ -1297,8 +1491,8 @@ func (c *Client) GetExternalClusterOperation(ctx context.Context, id string, req
 	return c.Client.Do(req)
 }
 
-func (c *Client) DeleteExternalCluster(ctx context.Context, clusterId string, params *DeleteExternalClusterParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewDeleteExternalClusterRequest(c.Server, clusterId, params)
+func (c *Client) PrometheusRawMetrics(ctx context.Context, params *PrometheusRawMetricsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPrometheusRawMetricsRequest(c.Server, params)
 	if err != nil {
 		return nil, err
 	}
@@ -1308,8 +1502,8 @@ func (c *Client) DeleteExternalCluster(ctx context.Context, clusterId string, pa
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetExternalCluster(ctx context.Context, clusterId string, params *GetExternalClusterParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewGetExternalClusterRequest(c.Server, clusterId, params)
+func (c *Client) ExternalClusterAPIDeleteCluster(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewExternalClusterAPIDeleteClusterRequest(c.Server, clusterId)
 	if err != nil {
 		return nil, err
 	}
@@ -1319,8 +1513,8 @@ func (c *Client) GetExternalCluster(ctx context.Context, clusterId string, param
 	return c.Client.Do(req)
 }
 
-func (c *Client) UpdateExternalClusterWithBody(ctx context.Context, clusterId string, params *UpdateExternalClusterParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewUpdateExternalClusterRequestWithBody(c.Server, clusterId, params, contentType, body)
+func (c *Client) ExternalClusterAPIGetCluster(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewExternalClusterAPIGetClusterRequest(c.Server, clusterId)
 	if err != nil {
 		return nil, err
 	}
@@ -1330,8 +1524,8 @@ func (c *Client) UpdateExternalClusterWithBody(ctx context.Context, clusterId st
 	return c.Client.Do(req)
 }
 
-func (c *Client) UpdateExternalCluster(ctx context.Context, clusterId string, params *UpdateExternalClusterParams, body UpdateExternalClusterJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewUpdateExternalClusterRequest(c.Server, clusterId, params, body)
+func (c *Client) ExternalClusterAPIUpdateClusterWithBody(ctx context.Context, clusterId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewExternalClusterAPIUpdateClusterRequestWithBody(c.Server, clusterId, contentType, body)
 	if err != nil {
 		return nil, err
 	}
@@ -1341,8 +1535,8 @@ func (c *Client) UpdateExternalCluster(ctx context.Context, clusterId string, pa
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetCredentialsScript(ctx context.Context, clusterId string, params *GetCredentialsScriptParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewGetCredentialsScriptRequest(c.Server, clusterId, params)
+func (c *Client) ExternalClusterAPIUpdateCluster(ctx context.Context, clusterId string, body ExternalClusterAPIUpdateClusterJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewExternalClusterAPIUpdateClusterRequest(c.Server, clusterId, body)
 	if err != nil {
 		return nil, err
 	}
@@ -1352,8 +1546,8 @@ func (c *Client) GetCredentialsScript(ctx context.Context, clusterId string, par
 	return c.Client.Do(req)
 }
 
-func (c *Client) DisconnectExternalClusterWithBody(ctx context.Context, clusterId ClusterId, params *DisconnectExternalClusterParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewDisconnectExternalClusterRequestWithBody(c.Server, clusterId, params, contentType, body)
+func (c *Client) GetExternalClusterCpuUtilizationMetrics(ctx context.Context, clusterId ClusterId, params *GetExternalClusterCpuUtilizationMetricsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetExternalClusterCpuUtilizationMetricsRequest(c.Server, clusterId, params)
 	if err != nil {
 		return nil, err
 	}
@@ -1363,8 +1557,8 @@ func (c *Client) DisconnectExternalClusterWithBody(ctx context.Context, clusterI
 	return c.Client.Do(req)
 }
 
-func (c *Client) DisconnectExternalCluster(ctx context.Context, clusterId ClusterId, params *DisconnectExternalClusterParams, body DisconnectExternalClusterJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewDisconnectExternalClusterRequest(c.Server, clusterId, params, body)
+func (c *Client) ExternalClusterAPIGetCredentialsScript(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewExternalClusterAPIGetCredentialsScriptRequest(c.Server, clusterId)
 	if err != nil {
 		return nil, err
 	}
@@ -1374,8 +1568,8 @@ func (c *Client) DisconnectExternalCluster(ctx context.Context, clusterId Cluste
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetExternalClusterKubeconfig(ctx context.Context, clusterId string, params *GetExternalClusterKubeconfigParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewGetExternalClusterKubeconfigRequest(c.Server, clusterId, params)
+func (c *Client) GetExternalClusterCurrentMetrics(ctx context.Context, clusterId ClusterId, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetExternalClusterCurrentMetricsRequest(c.Server, clusterId)
 	if err != nil {
 		return nil, err
 	}
@@ -1385,8 +1579,8 @@ func (c *Client) GetExternalClusterKubeconfig(ctx context.Context, clusterId str
 	return c.Client.Do(req)
 }
 
-func (c *Client) ListExternalClusterNodes(ctx context.Context, clusterId string, params *ListExternalClusterNodesParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewListExternalClusterNodesRequest(c.Server, clusterId, params)
+func (c *Client) ExternalClusterAPIDisconnectClusterWithBody(ctx context.Context, clusterId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewExternalClusterAPIDisconnectClusterRequestWithBody(c.Server, clusterId, contentType, body)
 	if err != nil {
 		return nil, err
 	}
@@ -1396,8 +1590,8 @@ func (c *Client) ListExternalClusterNodes(ctx context.Context, clusterId string,
 	return c.Client.Do(req)
 }
 
-func (c *Client) AddExternalClusterNodeWithBody(ctx context.Context, clusterId string, params *AddExternalClusterNodeParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewAddExternalClusterNodeRequestWithBody(c.Server, clusterId, params, contentType, body)
+func (c *Client) ExternalClusterAPIDisconnectCluster(ctx context.Context, clusterId string, body ExternalClusterAPIDisconnectClusterJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewExternalClusterAPIDisconnectClusterRequest(c.Server, clusterId, body)
 	if err != nil {
 		return nil, err
 	}
@@ -1407,8 +1601,8 @@ func (c *Client) AddExternalClusterNodeWithBody(ctx context.Context, clusterId s
 	return c.Client.Do(req)
 }
 
-func (c *Client) AddExternalClusterNode(ctx context.Context, clusterId string, params *AddExternalClusterNodeParams, body AddExternalClusterNodeJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewAddExternalClusterNodeRequest(c.Server, clusterId, params, body)
+func (c *Client) GetEstimatedSavings(ctx context.Context, clusterId ClusterId, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetEstimatedSavingsRequest(c.Server, clusterId)
 	if err != nil {
 		return nil, err
 	}
@@ -1418,8 +1612,8 @@ func (c *Client) AddExternalClusterNode(ctx context.Context, clusterId string, p
 	return c.Client.Do(req)
 }
 
-func (c *Client) DeleteExternalClusterNode(ctx context.Context, clusterId string, nodeId string, params *DeleteExternalClusterNodeParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewDeleteExternalClusterNodeRequest(c.Server, clusterId, nodeId, params)
+func (c *Client) ExternalClusterAPIGetKubeconfig(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewExternalClusterAPIGetKubeconfigRequest(c.Server, clusterId)
 	if err != nil {
 		return nil, err
 	}
@@ -1429,8 +1623,8 @@ func (c *Client) DeleteExternalClusterNode(ctx context.Context, clusterId string
 	return c.Client.Do(req)
 }
 
-func (c *Client) PauseExternalCluster(ctx context.Context, clusterId ClusterId, params *PauseExternalClusterParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewPauseExternalClusterRequest(c.Server, clusterId, params)
+func (c *Client) GetExternalClusterMemoryUtilizationMetrics(ctx context.Context, clusterId ClusterId, params *GetExternalClusterMemoryUtilizationMetricsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetExternalClusterMemoryUtilizationMetricsRequest(c.Server, clusterId, params)
 	if err != nil {
 		return nil, err
 	}
@@ -1440,8 +1634,8 @@ func (c *Client) PauseExternalCluster(ctx context.Context, clusterId ClusterId, 
 	return c.Client.Do(req)
 }
 
-func (c *Client) PrometheusRead(ctx context.Context, clusterId ClusterId, params *PrometheusReadParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewPrometheusReadRequest(c.Server, clusterId, params)
+func (c *Client) ExternalClusterAPIGetMetrics(ctx context.Context, clusterId string, params *ExternalClusterAPIGetMetricsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewExternalClusterAPIGetMetricsRequest(c.Server, clusterId, params)
 	if err != nil {
 		return nil, err
 	}
@@ -1451,8 +1645,96 @@ func (c *Client) PrometheusRead(ctx context.Context, clusterId ClusterId, params
 	return c.Client.Do(req)
 }
 
-func (c *Client) ResumeExternalCluster(ctx context.Context, clusterId ClusterId, params *ResumeExternalClusterParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewResumeExternalClusterRequest(c.Server, clusterId, params)
+func (c *Client) ExternalClusterAPIListNodes(ctx context.Context, clusterId string, params *ExternalClusterAPIListNodesParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewExternalClusterAPIListNodesRequest(c.Server, clusterId, params)
+	if err != nil {
+		return nil, err
+	}
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) ExternalClusterAPIAddNodeWithBody(ctx context.Context, clusterId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewExternalClusterAPIAddNodeRequestWithBody(c.Server, clusterId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) ExternalClusterAPIAddNode(ctx context.Context, clusterId string, body ExternalClusterAPIAddNodeJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewExternalClusterAPIAddNodeRequest(c.Server, clusterId, body)
+	if err != nil {
+		return nil, err
+	}
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) ExternalClusterAPIDeleteNode(ctx context.Context, clusterId string, nodeId string, params *ExternalClusterAPIDeleteNodeParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewExternalClusterAPIDeleteNodeRequest(c.Server, clusterId, nodeId, params)
+	if err != nil {
+		return nil, err
+	}
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) ExternalClusterAPIGetNode(ctx context.Context, clusterId string, nodeId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewExternalClusterAPIGetNodeRequest(c.Server, clusterId, nodeId)
+	if err != nil {
+		return nil, err
+	}
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) ExternalClusterAPIDrainNodeWithBody(ctx context.Context, clusterId string, nodeId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewExternalClusterAPIDrainNodeRequestWithBody(c.Server, clusterId, nodeId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) ExternalClusterAPIDrainNode(ctx context.Context, clusterId string, nodeId string, body ExternalClusterAPIDrainNodeJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewExternalClusterAPIDrainNodeRequest(c.Server, clusterId, nodeId, body)
+	if err != nil {
+		return nil, err
+	}
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) ExternalClusterAPIPauseCluster(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewExternalClusterAPIPauseClusterRequest(c.Server, clusterId)
+	if err != nil {
+		return nil, err
+	}
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) ExternalClusterAPIResumeCluster(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewExternalClusterAPIResumeClusterRequest(c.Server, clusterId)
 	if err != nil {
 		return nil, err
 	}
@@ -1497,17 +1779,6 @@ func (c *Client) UpdateCurrentUserProfileWithBody(ctx context.Context, contentTy
 
 func (c *Client) UpdateCurrentUserProfile(ctx context.Context, body UpdateCurrentUserProfileJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewUpdateCurrentUserProfileRequest(c.Server, body)
-	if err != nil {
-		return nil, err
-	}
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
-func (c *Client) GetExternalClustersToken(ctx context.Context, params *GetExternalClustersTokenParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewGetExternalClustersTokenRequest(c.Server, params)
 	if err != nil {
 		return nil, err
 	}
@@ -1638,6 +1909,28 @@ func (c *Client) DeleteOrganizationUser(ctx context.Context, id string, userId s
 	return c.Client.Do(req)
 }
 
+func (c *Client) UpdateOrganizationUserWithBody(ctx context.Context, id string, userId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUpdateOrganizationUserRequestWithBody(c.Server, id, userId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) UpdateOrganizationUser(ctx context.Context, id string, userId string, body UpdateOrganizationUserJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUpdateOrganizationUserRequest(c.Server, id, userId, body)
+	if err != nil {
+		return nil, err
+	}
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
 func (c *Client) ListRegions(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewListRegionsRequest(c.Server)
 	if err != nil {
@@ -1660,6 +1953,17 @@ func (c *Client) GetUsageReport(ctx context.Context, params *GetUsageReportParam
 	return c.Client.Do(req)
 }
 
+func (c *Client) ExternalClusterAPIGetCredentialsScriptTemplate(ctx context.Context, provider string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewExternalClusterAPIGetCredentialsScriptTemplateRequest(c.Server, provider)
+	if err != nil {
+		return nil, err
+	}
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
 // NewListAddonsRequest generates requests for ListAddons
 func NewListAddonsRequest(server string, params *ListAddonsParams) (*http.Request, error) {
 	var err error
@@ -1669,7 +1973,7 @@ func NewListAddonsRequest(server string, params *ListAddonsParams) (*http.Reques
 		return nil, err
 	}
 
-	basePath := fmt.Sprintf("/addons")
+	basePath := fmt.Sprintf("/v1/addons")
 	if basePath[0] == '/' {
 		basePath = basePath[1:]
 	}
@@ -1764,7 +2068,7 @@ func NewGetAgentInstallScriptRequest(server string, params *GetAgentInstallScrip
 		return nil, err
 	}
 
-	basePath := fmt.Sprintf("/agent.sh")
+	basePath := fmt.Sprintf("/v1/agent.sh")
 	if basePath[0] == '/' {
 		basePath = basePath[1:]
 	}
@@ -1968,6 +2272,54 @@ func NewGetAgentInstallScriptRequest(server string, params *GetAgentInstallScrip
 
 	}
 
+	if params.AksLocation != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "aks.location", *params.AksLocation); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.AksNodeResourceGroup != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "aks.nodeResourceGroup", *params.AksNodeResourceGroup); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.AksSubscriptionId != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "aks.subscriptionId", *params.AksSubscriptionId); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
 	queryUrl.RawQuery = queryValues.Encode()
 
 	req, err := http.NewRequest("GET", queryUrl.String(), nil)
@@ -1987,7 +2339,7 @@ func NewListAuditEventsRequest(server string, params *ListAuditEventsParams) (*h
 		return nil, err
 	}
 
-	basePath := fmt.Sprintf("/audit")
+	basePath := fmt.Sprintf("/v1/audit")
 	if basePath[0] == '/' {
 		basePath = basePath[1:]
 	}
@@ -2079,6 +2431,38 @@ func NewListAuditEventsRequest(server string, params *ListAuditEventsParams) (*h
 
 	}
 
+	if params.Label != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "label", *params.Label); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.LabelValue != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "labelValue", *params.LabelValue); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
 	queryUrl.RawQuery = queryValues.Encode()
 
 	req, err := http.NewRequest("GET", queryUrl.String(), nil)
@@ -2098,7 +2482,7 @@ func NewListAuthTokensRequest(server string, params *ListAuthTokensParams) (*htt
 		return nil, err
 	}
 
-	basePath := fmt.Sprintf("/auth/tokens")
+	basePath := fmt.Sprintf("/v1/auth/tokens")
 	if basePath[0] == '/' {
 		basePath = basePath[1:]
 	}
@@ -2147,7 +2531,7 @@ func NewCreateAuthTokenRequestWithBody(server string, params *CreateAuthTokenPar
 		return nil, err
 	}
 
-	basePath := fmt.Sprintf("/auth/tokens")
+	basePath := fmt.Sprintf("/v1/auth/tokens")
 	if basePath[0] == '/' {
 		basePath = basePath[1:]
 	}
@@ -2194,7 +2578,7 @@ func NewDeleteAuthTokenRequest(server string, authTokenId AuthTokenId, params *D
 		return nil, err
 	}
 
-	basePath := fmt.Sprintf("/auth/tokens/%s", pathParam0)
+	basePath := fmt.Sprintf("/v1/auth/tokens/%s", pathParam0)
 	if basePath[0] == '/' {
 		basePath = basePath[1:]
 	}
@@ -2239,7 +2623,7 @@ func NewGetAuthTokenRequest(server string, authTokenId AuthTokenId, params *GetA
 		return nil, err
 	}
 
-	basePath := fmt.Sprintf("/auth/tokens/%s", pathParam0)
+	basePath := fmt.Sprintf("/v1/auth/tokens/%s", pathParam0)
 	if basePath[0] == '/' {
 		basePath = basePath[1:]
 	}
@@ -2295,7 +2679,7 @@ func NewUpdateAuthTokenRequestWithBody(server string, authTokenId AuthTokenId, p
 		return nil, err
 	}
 
-	basePath := fmt.Sprintf("/auth/tokens/%s", pathParam0)
+	basePath := fmt.Sprintf("/v1/auth/tokens/%s", pathParam0)
 	if basePath[0] == '/' {
 		basePath = basePath[1:]
 	}
@@ -2346,7 +2730,7 @@ func NewPlanClusterPriceRequestWithBody(server string, contentType string, body 
 		return nil, err
 	}
 
-	basePath := fmt.Sprintf("/cluster-price-plan")
+	basePath := fmt.Sprintf("/v1/cluster-price-plan")
 	if basePath[0] == '/' {
 		basePath = basePath[1:]
 	}
@@ -2375,7 +2759,7 @@ func NewListCloudCredentialsRequest(server string) (*http.Request, error) {
 		return nil, err
 	}
 
-	basePath := fmt.Sprintf("/credentials")
+	basePath := fmt.Sprintf("/v1/credentials")
 	if basePath[0] == '/' {
 		basePath = basePath[1:]
 	}
@@ -2413,7 +2797,7 @@ func NewCreateCloudCredentialsRequestWithBody(server string, contentType string,
 		return nil, err
 	}
 
-	basePath := fmt.Sprintf("/credentials")
+	basePath := fmt.Sprintf("/v1/credentials")
 	if basePath[0] == '/' {
 		basePath = basePath[1:]
 	}
@@ -2449,7 +2833,7 @@ func NewDeleteCloudCredentialsRequest(server string, credentialsId CredentialsId
 		return nil, err
 	}
 
-	basePath := fmt.Sprintf("/credentials/%s", pathParam0)
+	basePath := fmt.Sprintf("/v1/credentials/%s", pathParam0)
 	if basePath[0] == '/' {
 		basePath = basePath[1:]
 	}
@@ -2483,7 +2867,7 @@ func NewGetCloudCredentialsRequest(server string, credentialsId CredentialsId) (
 		return nil, err
 	}
 
-	basePath := fmt.Sprintf("/credentials/%s", pathParam0)
+	basePath := fmt.Sprintf("/v1/credentials/%s", pathParam0)
 	if basePath[0] == '/' {
 		basePath = basePath[1:]
 	}
@@ -2521,7 +2905,7 @@ func NewDeleteGslbRequestWithBody(server string, contentType string, body io.Rea
 		return nil, err
 	}
 
-	basePath := fmt.Sprintf("/gslb")
+	basePath := fmt.Sprintf("/v1/gslb")
 	if basePath[0] == '/' {
 		basePath = basePath[1:]
 	}
@@ -2561,7 +2945,7 @@ func NewCreateOrUpdateGslbRequestWithBody(server string, contentType string, bod
 		return nil, err
 	}
 
-	basePath := fmt.Sprintf("/gslb")
+	basePath := fmt.Sprintf("/v1/gslb")
 	if basePath[0] == '/' {
 		basePath = basePath[1:]
 	}
@@ -2577,6 +2961,149 @@ func NewCreateOrUpdateGslbRequestWithBody(server string, contentType string, bod
 	}
 
 	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewGetInstanceTypesRequest generates requests for GetInstanceTypes
+func NewGetInstanceTypesRequest(server string, params *GetInstanceTypesParams) (*http.Request, error) {
+	var err error
+
+	queryUrl, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	basePath := fmt.Sprintf("/v1/inventory/instance-types")
+	if basePath[0] == '/' {
+		basePath = basePath[1:]
+	}
+
+	queryUrl, err = queryUrl.Parse(basePath)
+	if err != nil {
+		return nil, err
+	}
+
+	queryValues := queryUrl.Query()
+
+	if params.Provider != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "provider", *params.Provider); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.Region != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "region", *params.Region); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.ZoneId != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "zoneId", *params.ZoneId); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.InstanceType != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "instanceType", *params.InstanceType); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.SpotInstances != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "spotInstances", *params.SpotInstances); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.PageLimit != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "page.limit", *params.PageLimit); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.PageCursor != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "page.cursor", *params.PageCursor); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	queryUrl.RawQuery = queryValues.Encode()
+
+	req, err := http.NewRequest("GET", queryUrl.String(), nil)
+	if err != nil {
+		return nil, err
+	}
 
 	return req, nil
 }
@@ -2601,7 +3128,7 @@ func NewCreateInvitationRequestWithBody(server string, contentType string, body 
 		return nil, err
 	}
 
-	basePath := fmt.Sprintf("/invitations")
+	basePath := fmt.Sprintf("/v1/invitations")
 	if basePath[0] == '/' {
 		basePath = basePath[1:]
 	}
@@ -2648,7 +3175,7 @@ func NewClaimInvitationRequestWithBody(server string, id string, contentType str
 		return nil, err
 	}
 
-	basePath := fmt.Sprintf("/invitations/%s", pathParam0)
+	basePath := fmt.Sprintf("/v1/invitations/%s", pathParam0)
 	if basePath[0] == '/' {
 		basePath = basePath[1:]
 	}
@@ -2677,7 +3204,7 @@ func NewListKubernetesClustersRequest(server string, params *ListKubernetesClust
 		return nil, err
 	}
 
-	basePath := fmt.Sprintf("/kubernetes/clusters")
+	basePath := fmt.Sprintf("/v1/kubernetes/clusters")
 	if basePath[0] == '/' {
 		basePath = basePath[1:]
 	}
@@ -2735,7 +3262,7 @@ func NewCreateNewClusterRequestWithBody(server string, contentType string, body 
 		return nil, err
 	}
 
-	basePath := fmt.Sprintf("/kubernetes/clusters")
+	basePath := fmt.Sprintf("/v1/kubernetes/clusters")
 	if basePath[0] == '/' {
 		basePath = basePath[1:]
 	}
@@ -2771,7 +3298,7 @@ func NewDeleteClusterRequest(server string, clusterId ClusterId) (*http.Request,
 		return nil, err
 	}
 
-	basePath := fmt.Sprintf("/kubernetes/clusters/%s", pathParam0)
+	basePath := fmt.Sprintf("/v1/kubernetes/clusters/%s", pathParam0)
 	if basePath[0] == '/' {
 		basePath = basePath[1:]
 	}
@@ -2805,7 +3332,7 @@ func NewGetClusterRequest(server string, clusterId ClusterId) (*http.Request, er
 		return nil, err
 	}
 
-	basePath := fmt.Sprintf("/kubernetes/clusters/%s", pathParam0)
+	basePath := fmt.Sprintf("/v1/kubernetes/clusters/%s", pathParam0)
 	if basePath[0] == '/' {
 		basePath = basePath[1:]
 	}
@@ -2850,7 +3377,7 @@ func NewUpdateClusterRequestWithBody(server string, clusterId ClusterId, content
 		return nil, err
 	}
 
-	basePath := fmt.Sprintf("/kubernetes/clusters/%s", pathParam0)
+	basePath := fmt.Sprintf("/v1/kubernetes/clusters/%s", pathParam0)
 	if basePath[0] == '/' {
 		basePath = basePath[1:]
 	}
@@ -2886,7 +3413,7 @@ func NewGetClusterAddonsRequest(server string, clusterId string) (*http.Request,
 		return nil, err
 	}
 
-	basePath := fmt.Sprintf("/kubernetes/clusters/%s/addons", pathParam0)
+	basePath := fmt.Sprintf("/v1/kubernetes/clusters/%s/addons", pathParam0)
 	if basePath[0] == '/' {
 		basePath = basePath[1:]
 	}
@@ -2931,7 +3458,7 @@ func NewInstallClusterAddonRequestWithBody(server string, clusterId string, cont
 		return nil, err
 	}
 
-	basePath := fmt.Sprintf("/kubernetes/clusters/%s/addons", pathParam0)
+	basePath := fmt.Sprintf("/v1/kubernetes/clusters/%s/addons", pathParam0)
 	if basePath[0] == '/' {
 		basePath = basePath[1:]
 	}
@@ -2981,7 +3508,7 @@ func NewDeleteClusterAddonRequest(server string, clusterId string, repository st
 		return nil, err
 	}
 
-	basePath := fmt.Sprintf("/kubernetes/clusters/%s/addons/%s/%s", pathParam0, pathParam1, pathParam2)
+	basePath := fmt.Sprintf("/v1/kubernetes/clusters/%s/addons/%s/%s", pathParam0, pathParam1, pathParam2)
 	if basePath[0] == '/' {
 		basePath = basePath[1:]
 	}
@@ -3029,7 +3556,7 @@ func NewGetClusterAddonRequest(server string, clusterId string, repository strin
 		return nil, err
 	}
 
-	basePath := fmt.Sprintf("/kubernetes/clusters/%s/addons/%s/%s", pathParam0, pathParam1, pathParam2)
+	basePath := fmt.Sprintf("/v1/kubernetes/clusters/%s/addons/%s/%s", pathParam0, pathParam1, pathParam2)
 	if basePath[0] == '/' {
 		basePath = basePath[1:]
 	}
@@ -3088,7 +3615,7 @@ func NewUpdateClusterAddonRequestWithBody(server string, clusterId string, repos
 		return nil, err
 	}
 
-	basePath := fmt.Sprintf("/kubernetes/clusters/%s/addons/%s/%s", pathParam0, pathParam1, pathParam2)
+	basePath := fmt.Sprintf("/v1/kubernetes/clusters/%s/addons/%s/%s", pathParam0, pathParam1, pathParam2)
 	if basePath[0] == '/' {
 		basePath = basePath[1:]
 	}
@@ -3124,7 +3651,7 @@ func NewArchiveClusterRequest(server string, clusterId ClusterId) (*http.Request
 		return nil, err
 	}
 
-	basePath := fmt.Sprintf("/kubernetes/clusters/%s/archive", pathParam0)
+	basePath := fmt.Sprintf("/v1/kubernetes/clusters/%s/archive", pathParam0)
 	if basePath[0] == '/' {
 		basePath = basePath[1:]
 	}
@@ -3142,8 +3669,8 @@ func NewArchiveClusterRequest(server string, clusterId ClusterId) (*http.Request
 	return req, nil
 }
 
-// NewGetClusterAuditLogRequest generates requests for GetClusterAuditLog
-func NewGetClusterAuditLogRequest(server string, clusterId ClusterId) (*http.Request, error) {
+// NewGetCostHistoryRequest generates requests for GetCostHistory
+func NewGetCostHistoryRequest(server string, clusterId ClusterId, params *GetCostHistoryParams) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -3158,7 +3685,131 @@ func NewGetClusterAuditLogRequest(server string, clusterId ClusterId) (*http.Req
 		return nil, err
 	}
 
-	basePath := fmt.Sprintf("/kubernetes/clusters/%s/auditlog", pathParam0)
+	basePath := fmt.Sprintf("/v1/kubernetes/clusters/%s/cost-history", pathParam0)
+	if basePath[0] == '/' {
+		basePath = basePath[1:]
+	}
+
+	queryUrl, err = queryUrl.Parse(basePath)
+	if err != nil {
+		return nil, err
+	}
+
+	queryValues := queryUrl.Query()
+
+	if params.FromDate != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "fromDate", *params.FromDate); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.ToDate != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "toDate", *params.ToDate); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	queryUrl.RawQuery = queryValues.Encode()
+
+	req, err := http.NewRequest("GET", queryUrl.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewGetClusterCpuUtilizationMetricsRequest generates requests for GetClusterCpuUtilizationMetrics
+func NewGetClusterCpuUtilizationMetricsRequest(server string, clusterId ClusterId, params *GetClusterCpuUtilizationMetricsParams) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParam("simple", false, "clusterId", clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	queryUrl, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	basePath := fmt.Sprintf("/v1/kubernetes/clusters/%s/cpu-utilization-metrics", pathParam0)
+	if basePath[0] == '/' {
+		basePath = basePath[1:]
+	}
+
+	queryUrl, err = queryUrl.Parse(basePath)
+	if err != nil {
+		return nil, err
+	}
+
+	queryValues := queryUrl.Query()
+
+	if params.PeriodHours != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "periodHours", *params.PeriodHours); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	queryUrl.RawQuery = queryValues.Encode()
+
+	req, err := http.NewRequest("GET", queryUrl.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewGetClusterCurrentMetricsRequest generates requests for GetClusterCurrentMetrics
+func NewGetClusterCurrentMetricsRequest(server string, clusterId ClusterId) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParam("simple", false, "clusterId", clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	queryUrl, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	basePath := fmt.Sprintf("/v1/kubernetes/clusters/%s/current-metrics", pathParam0)
 	if basePath[0] == '/' {
 		basePath = basePath[1:]
 	}
@@ -3192,7 +3843,7 @@ func NewGetClusterFeedbackEventsRequest(server string, clusterId ClusterId) (*ht
 		return nil, err
 	}
 
-	basePath := fmt.Sprintf("/kubernetes/clusters/%s/feedbackevents", pathParam0)
+	basePath := fmt.Sprintf("/v1/kubernetes/clusters/%s/feedbackevents", pathParam0)
 	if basePath[0] == '/' {
 		basePath = basePath[1:]
 	}
@@ -3226,7 +3877,7 @@ func NewGetClusterHealthRequest(server string, clusterId ClusterId) (*http.Reque
 		return nil, err
 	}
 
-	basePath := fmt.Sprintf("/kubernetes/clusters/%s/health", pathParam0)
+	basePath := fmt.Sprintf("/v1/kubernetes/clusters/%s/health", pathParam0)
 	if basePath[0] == '/' {
 		basePath = basePath[1:]
 	}
@@ -3260,7 +3911,7 @@ func NewGetClusterIngressControllerRequest(server string, clusterId ClusterId) (
 		return nil, err
 	}
 
-	basePath := fmt.Sprintf("/kubernetes/clusters/%s/ingress-controller", pathParam0)
+	basePath := fmt.Sprintf("/v1/kubernetes/clusters/%s/ingress-controller", pathParam0)
 	if basePath[0] == '/' {
 		basePath = basePath[1:]
 	}
@@ -3294,7 +3945,7 @@ func NewGetClusterKubeconfigRequest(server string, clusterId ClusterId) (*http.R
 		return nil, err
 	}
 
-	basePath := fmt.Sprintf("/kubernetes/clusters/%s/kubeconfig", pathParam0)
+	basePath := fmt.Sprintf("/v1/kubernetes/clusters/%s/kubeconfig", pathParam0)
 	if basePath[0] == '/' {
 		basePath = basePath[1:]
 	}
@@ -3328,7 +3979,7 @@ func NewGetLegacyClusterAddonsRequest(server string, clusterId ClusterId) (*http
 		return nil, err
 	}
 
-	basePath := fmt.Sprintf("/kubernetes/clusters/%s/legacy-addons", pathParam0)
+	basePath := fmt.Sprintf("/v1/kubernetes/clusters/%s/legacy-addons", pathParam0)
 	if basePath[0] == '/' {
 		basePath = basePath[1:]
 	}
@@ -3373,7 +4024,7 @@ func NewConfigureClusterAddonsRequestWithBody(server string, clusterId ClusterId
 		return nil, err
 	}
 
-	basePath := fmt.Sprintf("/kubernetes/clusters/%s/legacy-addons", pathParam0)
+	basePath := fmt.Sprintf("/v1/kubernetes/clusters/%s/legacy-addons", pathParam0)
 	if basePath[0] == '/' {
 		basePath = basePath[1:]
 	}
@@ -3389,6 +4040,60 @@ func NewConfigureClusterAddonsRequestWithBody(server string, clusterId ClusterId
 	}
 
 	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewGetClusterMemoryUtilizationMetricsRequest generates requests for GetClusterMemoryUtilizationMetrics
+func NewGetClusterMemoryUtilizationMetricsRequest(server string, clusterId ClusterId, params *GetClusterMemoryUtilizationMetricsParams) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParam("simple", false, "clusterId", clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	queryUrl, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	basePath := fmt.Sprintf("/v1/kubernetes/clusters/%s/memory-utilization-metrics", pathParam0)
+	if basePath[0] == '/' {
+		basePath = basePath[1:]
+	}
+
+	queryUrl, err = queryUrl.Parse(basePath)
+	if err != nil {
+		return nil, err
+	}
+
+	queryValues := queryUrl.Query()
+
+	if params.PeriodHours != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "periodHours", *params.PeriodHours); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	queryUrl.RawQuery = queryValues.Encode()
+
+	req, err := http.NewRequest("GET", queryUrl.String(), nil)
+	if err != nil {
+		return nil, err
+	}
 
 	return req, nil
 }
@@ -3409,7 +4114,7 @@ func NewGetClusterMetricsRequest(server string, clusterId ClusterId, params *Get
 		return nil, err
 	}
 
-	basePath := fmt.Sprintf("/kubernetes/clusters/%s/metrics", pathParam0)
+	basePath := fmt.Sprintf("/v1/kubernetes/clusters/%s/metrics", pathParam0)
 	if basePath[0] == '/' {
 		basePath = basePath[1:]
 	}
@@ -3459,7 +4164,7 @@ func NewGetClusterRebalancePlanRequest(server string, clusterId ClusterId) (*htt
 		return nil, err
 	}
 
-	basePath := fmt.Sprintf("/kubernetes/clusters/%s/migration-plan", pathParam0)
+	basePath := fmt.Sprintf("/v1/kubernetes/clusters/%s/migration-plan", pathParam0)
 	if basePath[0] == '/' {
 		basePath = basePath[1:]
 	}
@@ -3493,7 +4198,7 @@ func NewGenerateClusterRebalancePlanRequest(server string, clusterId ClusterId) 
 		return nil, err
 	}
 
-	basePath := fmt.Sprintf("/kubernetes/clusters/%s/migration-plan", pathParam0)
+	basePath := fmt.Sprintf("/v1/kubernetes/clusters/%s/migration-plan", pathParam0)
 	if basePath[0] == '/' {
 		basePath = basePath[1:]
 	}
@@ -3527,7 +4232,7 @@ func NewGetNodeConstraintsRequest(server string, clusterId ClusterId) (*http.Req
 		return nil, err
 	}
 
-	basePath := fmt.Sprintf("/kubernetes/clusters/%s/node-constraints", pathParam0)
+	basePath := fmt.Sprintf("/v1/kubernetes/clusters/%s/node-constraints", pathParam0)
 	if basePath[0] == '/' {
 		basePath = basePath[1:]
 	}
@@ -3546,7 +4251,7 @@ func NewGetNodeConstraintsRequest(server string, clusterId ClusterId) (*http.Req
 }
 
 // NewGetClusterNodesRequest generates requests for GetClusterNodes
-func NewGetClusterNodesRequest(server string, clusterId ClusterId) (*http.Request, error) {
+func NewGetClusterNodesRequest(server string, clusterId ClusterId, params *GetClusterNodesParams) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -3561,7 +4266,7 @@ func NewGetClusterNodesRequest(server string, clusterId ClusterId) (*http.Reques
 		return nil, err
 	}
 
-	basePath := fmt.Sprintf("/kubernetes/clusters/%s/nodes", pathParam0)
+	basePath := fmt.Sprintf("/v1/kubernetes/clusters/%s/nodes", pathParam0)
 	if basePath[0] == '/' {
 		basePath = basePath[1:]
 	}
@@ -3571,9 +4276,56 @@ func NewGetClusterNodesRequest(server string, clusterId ClusterId) (*http.Reques
 		return nil, err
 	}
 
+	queryValues := queryUrl.Query()
+
+	if params.PageLimit != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "page.limit", *params.PageLimit); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.PageCursor != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "page.cursor", *params.PageCursor); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	queryUrl.RawQuery = queryValues.Encode()
+
 	req, err := http.NewRequest("GET", queryUrl.String(), nil)
 	if err != nil {
 		return nil, err
+	}
+
+	if params.XCastAiOrganizationId != nil {
+		var headerParam0 string
+
+		headerParam0, err = runtime.StyleParam("simple", false, "X-CastAi-Organization-Id", *params.XCastAiOrganizationId)
+		if err != nil {
+			return nil, err
+		}
+
+		req.Header.Set("X-CastAi-Organization-Id", headerParam0)
 	}
 
 	return req, nil
@@ -3606,7 +4358,7 @@ func NewAddClusterNodeRequestWithBody(server string, clusterId ClusterId, conten
 		return nil, err
 	}
 
-	basePath := fmt.Sprintf("/kubernetes/clusters/%s/nodes", pathParam0)
+	basePath := fmt.Sprintf("/v1/kubernetes/clusters/%s/nodes", pathParam0)
 	if basePath[0] == '/' {
 		basePath = basePath[1:]
 	}
@@ -3649,7 +4401,7 @@ func NewDeleteClusterNodeRequest(server string, clusterId ClusterId, nodeId stri
 		return nil, err
 	}
 
-	basePath := fmt.Sprintf("/kubernetes/clusters/%s/nodes/%s", pathParam0, pathParam1)
+	basePath := fmt.Sprintf("/v1/kubernetes/clusters/%s/nodes/%s", pathParam0, pathParam1)
 	if basePath[0] == '/' {
 		basePath = basePath[1:]
 	}
@@ -3690,7 +4442,7 @@ func NewGetClusterNodeRequest(server string, clusterId ClusterId, nodeId string)
 		return nil, err
 	}
 
-	basePath := fmt.Sprintf("/kubernetes/clusters/%s/nodes/%s", pathParam0, pathParam1)
+	basePath := fmt.Sprintf("/v1/kubernetes/clusters/%s/nodes/%s", pathParam0, pathParam1)
 	if basePath[0] == '/' {
 		basePath = basePath[1:]
 	}
@@ -3731,7 +4483,7 @@ func NewCloseNodeSshRequest(server string, clusterId ClusterId, nodeId string) (
 		return nil, err
 	}
 
-	basePath := fmt.Sprintf("/kubernetes/clusters/%s/nodes/%s/close-ssh", pathParam0, pathParam1)
+	basePath := fmt.Sprintf("/v1/kubernetes/clusters/%s/nodes/%s/close-ssh", pathParam0, pathParam1)
 	if basePath[0] == '/' {
 		basePath = basePath[1:]
 	}
@@ -3772,7 +4524,7 @@ func NewInterruptClusterNodeRequest(server string, clusterId ClusterId, nodeId s
 		return nil, err
 	}
 
-	basePath := fmt.Sprintf("/kubernetes/clusters/%s/nodes/%s/interrupt", pathParam0, pathParam1)
+	basePath := fmt.Sprintf("/v1/kubernetes/clusters/%s/nodes/%s/interrupt", pathParam0, pathParam1)
 	if basePath[0] == '/' {
 		basePath = basePath[1:]
 	}
@@ -3824,7 +4576,7 @@ func NewSetupNodeSshRequestWithBody(server string, clusterId ClusterId, nodeId s
 		return nil, err
 	}
 
-	basePath := fmt.Sprintf("/kubernetes/clusters/%s/nodes/%s/setup-ssh", pathParam0, pathParam1)
+	basePath := fmt.Sprintf("/v1/kubernetes/clusters/%s/nodes/%s/setup-ssh", pathParam0, pathParam1)
 	if basePath[0] == '/' {
 		basePath = basePath[1:]
 	}
@@ -3871,7 +4623,7 @@ func NewUpdateNodeListRequestWithBody(server string, clusterId ClusterId, conten
 		return nil, err
 	}
 
-	basePath := fmt.Sprintf("/kubernetes/clusters/%s/nodes:update", pathParam0)
+	basePath := fmt.Sprintf("/v1/kubernetes/clusters/%s/nodes:update", pathParam0)
 	if basePath[0] == '/' {
 		basePath = basePath[1:]
 	}
@@ -3918,7 +4670,7 @@ func NewPauseClusterRequestWithBody(server string, clusterId ClusterId, contentT
 		return nil, err
 	}
 
-	basePath := fmt.Sprintf("/kubernetes/clusters/%s/pause", pathParam0)
+	basePath := fmt.Sprintf("/v1/kubernetes/clusters/%s/pause", pathParam0)
 	if basePath[0] == '/' {
 		basePath = basePath[1:]
 	}
@@ -3954,7 +4706,7 @@ func NewPauseClusterReconcileRequest(server string, clusterId ClusterId) (*http.
 		return nil, err
 	}
 
-	basePath := fmt.Sprintf("/kubernetes/clusters/%s/pause-reconcile", pathParam0)
+	basePath := fmt.Sprintf("/v1/kubernetes/clusters/%s/pause-reconcile", pathParam0)
 	if basePath[0] == '/' {
 		basePath = basePath[1:]
 	}
@@ -3988,7 +4740,7 @@ func NewDeleteClusterPauseScheduleRequest(server string, clusterId ClusterId) (*
 		return nil, err
 	}
 
-	basePath := fmt.Sprintf("/kubernetes/clusters/%s/pause-schedule", pathParam0)
+	basePath := fmt.Sprintf("/v1/kubernetes/clusters/%s/pause-schedule", pathParam0)
 	if basePath[0] == '/' {
 		basePath = basePath[1:]
 	}
@@ -4022,7 +4774,7 @@ func NewGetClusterPauseScheduleRequest(server string, clusterId ClusterId) (*htt
 		return nil, err
 	}
 
-	basePath := fmt.Sprintf("/kubernetes/clusters/%s/pause-schedule", pathParam0)
+	basePath := fmt.Sprintf("/v1/kubernetes/clusters/%s/pause-schedule", pathParam0)
 	if basePath[0] == '/' {
 		basePath = basePath[1:]
 	}
@@ -4067,7 +4819,7 @@ func NewSetClusterPauseScheduleRequestWithBody(server string, clusterId ClusterI
 		return nil, err
 	}
 
-	basePath := fmt.Sprintf("/kubernetes/clusters/%s/pause-schedule", pathParam0)
+	basePath := fmt.Sprintf("/v1/kubernetes/clusters/%s/pause-schedule", pathParam0)
 	if basePath[0] == '/' {
 		basePath = basePath[1:]
 	}
@@ -4103,7 +4855,7 @@ func NewGetPoliciesRequest(server string, clusterId ClusterId) (*http.Request, e
 		return nil, err
 	}
 
-	basePath := fmt.Sprintf("/kubernetes/clusters/%s/policies", pathParam0)
+	basePath := fmt.Sprintf("/v1/kubernetes/clusters/%s/policies", pathParam0)
 	if basePath[0] == '/' {
 		basePath = basePath[1:]
 	}
@@ -4148,7 +4900,7 @@ func NewUpsertPoliciesRequestWithBody(server string, clusterId ClusterId, conten
 		return nil, err
 	}
 
-	basePath := fmt.Sprintf("/kubernetes/clusters/%s/policies", pathParam0)
+	basePath := fmt.Sprintf("/v1/kubernetes/clusters/%s/policies", pathParam0)
 	if basePath[0] == '/' {
 		basePath = basePath[1:]
 	}
@@ -4184,7 +4936,7 @@ func NewGetProblematicWorkloadsRequest(server string, clusterId ClusterId) (*htt
 		return nil, err
 	}
 
-	basePath := fmt.Sprintf("/kubernetes/clusters/%s/problematic-workloads", pathParam0)
+	basePath := fmt.Sprintf("/v1/kubernetes/clusters/%s/problematic-workloads", pathParam0)
 	if basePath[0] == '/' {
 		basePath = basePath[1:]
 	}
@@ -4198,6 +4950,252 @@ func NewGetProblematicWorkloadsRequest(server string, clusterId ClusterId) (*htt
 	if err != nil {
 		return nil, err
 	}
+
+	return req, nil
+}
+
+// NewGetRebalancedWorkloadsRequest generates requests for GetRebalancedWorkloads
+func NewGetRebalancedWorkloadsRequest(server string, clusterId ClusterId) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParam("simple", false, "clusterId", clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	queryUrl, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	basePath := fmt.Sprintf("/v1/kubernetes/clusters/%s/rebalanced-workloads", pathParam0)
+	if basePath[0] == '/' {
+		basePath = basePath[1:]
+	}
+
+	queryUrl, err = queryUrl.Parse(basePath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryUrl.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewListRebalancingPlansRequest generates requests for ListRebalancingPlans
+func NewListRebalancingPlansRequest(server string, clusterId ClusterId, params *ListRebalancingPlansParams) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParam("simple", false, "clusterId", clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	queryUrl, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	basePath := fmt.Sprintf("/v1/kubernetes/clusters/%s/rebalancing-plans", pathParam0)
+	if basePath[0] == '/' {
+		basePath = basePath[1:]
+	}
+
+	queryUrl, err = queryUrl.Parse(basePath)
+	if err != nil {
+		return nil, err
+	}
+
+	queryValues := queryUrl.Query()
+
+	if params.Limit != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "limit", *params.Limit); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.Cursor != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "cursor", *params.Cursor); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	queryUrl.RawQuery = queryValues.Encode()
+
+	req, err := http.NewRequest("GET", queryUrl.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewRebalanceRequest calls the generic Rebalance builder with application/json body
+func NewRebalanceRequest(server string, clusterId ClusterId, body RebalanceJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewRebalanceRequestWithBody(server, clusterId, "application/json", bodyReader)
+}
+
+// NewRebalanceRequestWithBody generates requests for Rebalance with any type of body
+func NewRebalanceRequestWithBody(server string, clusterId ClusterId, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParam("simple", false, "clusterId", clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	queryUrl, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	basePath := fmt.Sprintf("/v1/kubernetes/clusters/%s/rebalancing-plans", pathParam0)
+	if basePath[0] == '/' {
+		basePath = basePath[1:]
+	}
+
+	queryUrl, err = queryUrl.Parse(basePath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryUrl.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewGetRebalancingPlanRequest generates requests for GetRebalancingPlan
+func NewGetRebalancingPlanRequest(server string, clusterId ClusterId, rebalancingPlanId string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParam("simple", false, "clusterId", clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParam("simple", false, "rebalancingPlanId", rebalancingPlanId)
+	if err != nil {
+		return nil, err
+	}
+
+	queryUrl, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	basePath := fmt.Sprintf("/v1/kubernetes/clusters/%s/rebalancing-plans/%s", pathParam0, pathParam1)
+	if basePath[0] == '/' {
+		basePath = basePath[1:]
+	}
+
+	queryUrl, err = queryUrl.Parse(basePath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryUrl.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewExecuteRebalancingPlanRequest calls the generic ExecuteRebalancingPlan builder with application/json body
+func NewExecuteRebalancingPlanRequest(server string, clusterId ClusterId, rebalancingPlanId string, body ExecuteRebalancingPlanJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewExecuteRebalancingPlanRequestWithBody(server, clusterId, rebalancingPlanId, "application/json", bodyReader)
+}
+
+// NewExecuteRebalancingPlanRequestWithBody generates requests for ExecuteRebalancingPlan with any type of body
+func NewExecuteRebalancingPlanRequestWithBody(server string, clusterId ClusterId, rebalancingPlanId string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParam("simple", false, "clusterId", clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParam("simple", false, "rebalancingPlanId", rebalancingPlanId)
+	if err != nil {
+		return nil, err
+	}
+
+	queryUrl, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	basePath := fmt.Sprintf("/v1/kubernetes/clusters/%s/rebalancing-plans/%s/execute", pathParam0, pathParam1)
+	if basePath[0] == '/' {
+		basePath = basePath[1:]
+	}
+
+	queryUrl, err = queryUrl.Parse(basePath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryUrl.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
 
 	return req, nil
 }
@@ -4218,7 +5216,7 @@ func NewResumeClusterRequest(server string, clusterId ClusterId) (*http.Request,
 		return nil, err
 	}
 
-	basePath := fmt.Sprintf("/kubernetes/clusters/%s/resume", pathParam0)
+	basePath := fmt.Sprintf("/v1/kubernetes/clusters/%s/resume", pathParam0)
 	if basePath[0] == '/' {
 		basePath = basePath[1:]
 	}
@@ -4252,7 +5250,7 @@ func NewResumeClusterReconcileRequest(server string, clusterId ClusterId) (*http
 		return nil, err
 	}
 
-	basePath := fmt.Sprintf("/kubernetes/clusters/%s/resume-reconcile", pathParam0)
+	basePath := fmt.Sprintf("/v1/kubernetes/clusters/%s/resume-reconcile", pathParam0)
 	if basePath[0] == '/' {
 		basePath = basePath[1:]
 	}
@@ -4286,7 +5284,7 @@ func NewTriggerClusterReconcileRequest(server string, clusterId ClusterId) (*htt
 		return nil, err
 	}
 
-	basePath := fmt.Sprintf("/kubernetes/clusters/%s/trigger-reconcile", pathParam0)
+	basePath := fmt.Sprintf("/v1/kubernetes/clusters/%s/trigger-reconcile", pathParam0)
 	if basePath[0] == '/' {
 		basePath = basePath[1:]
 	}
@@ -4304,16 +5302,23 @@ func NewTriggerClusterReconcileRequest(server string, clusterId ClusterId) (*htt
 	return req, nil
 }
 
-// NewListExternalClustersRequest generates requests for ListExternalClusters
-func NewListExternalClustersRequest(server string, params *ListExternalClustersParams) (*http.Request, error) {
+// NewGetWorkloadsRequest generates requests for GetWorkloads
+func NewGetWorkloadsRequest(server string, clusterId ClusterId) (*http.Request, error) {
 	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParam("simple", false, "clusterId", clusterId)
+	if err != nil {
+		return nil, err
+	}
 
 	queryUrl, err := url.Parse(server)
 	if err != nil {
 		return nil, err
 	}
 
-	basePath := fmt.Sprintf("/kubernetes/external-clusters")
+	basePath := fmt.Sprintf("/v1/kubernetes/clusters/%s/workloads", pathParam0)
 	if basePath[0] == '/' {
 		basePath = basePath[1:]
 	}
@@ -4328,33 +5333,11 @@ func NewListExternalClustersRequest(server string, params *ListExternalClustersP
 		return nil, err
 	}
 
-	if params.XCastAiOrganizationId != nil {
-		var headerParam0 string
-
-		headerParam0, err = runtime.StyleParam("simple", false, "X-CastAi-Organization-Id", *params.XCastAiOrganizationId)
-		if err != nil {
-			return nil, err
-		}
-
-		req.Header.Set("X-CastAi-Organization-Id", headerParam0)
-	}
-
 	return req, nil
 }
 
-// NewRegisterExternalClusterRequest calls the generic RegisterExternalCluster builder with application/json body
-func NewRegisterExternalClusterRequest(server string, params *RegisterExternalClusterParams, body RegisterExternalClusterJSONRequestBody) (*http.Request, error) {
-	var bodyReader io.Reader
-	buf, err := json.Marshal(body)
-	if err != nil {
-		return nil, err
-	}
-	bodyReader = bytes.NewReader(buf)
-	return NewRegisterExternalClusterRequestWithBody(server, params, "application/json", bodyReader)
-}
-
-// NewRegisterExternalClusterRequestWithBody generates requests for RegisterExternalCluster with any type of body
-func NewRegisterExternalClusterRequestWithBody(server string, params *RegisterExternalClusterParams, contentType string, body io.Reader) (*http.Request, error) {
+// NewExternalClusterAPIListClustersRequest generates requests for ExternalClusterAPIListClusters
+func NewExternalClusterAPIListClustersRequest(server string) (*http.Request, error) {
 	var err error
 
 	queryUrl, err := url.Parse(server)
@@ -4362,7 +5345,45 @@ func NewRegisterExternalClusterRequestWithBody(server string, params *RegisterEx
 		return nil, err
 	}
 
-	basePath := fmt.Sprintf("/kubernetes/external-clusters")
+	basePath := fmt.Sprintf("/v1/kubernetes/external-clusters")
+	if basePath[0] == '/' {
+		basePath = basePath[1:]
+	}
+
+	queryUrl, err = queryUrl.Parse(basePath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryUrl.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewExternalClusterAPIRegisterClusterRequest calls the generic ExternalClusterAPIRegisterCluster builder with application/json body
+func NewExternalClusterAPIRegisterClusterRequest(server string, body ExternalClusterAPIRegisterClusterJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewExternalClusterAPIRegisterClusterRequestWithBody(server, "application/json", bodyReader)
+}
+
+// NewExternalClusterAPIRegisterClusterRequestWithBody generates requests for ExternalClusterAPIRegisterCluster with any type of body
+func NewExternalClusterAPIRegisterClusterRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	queryUrl, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	basePath := fmt.Sprintf("/v1/kubernetes/external-clusters")
 	if basePath[0] == '/' {
 		basePath = basePath[1:]
 	}
@@ -4378,17 +5399,6 @@ func NewRegisterExternalClusterRequestWithBody(server string, params *RegisterEx
 	}
 
 	req.Header.Add("Content-Type", contentType)
-
-	if params.XCastAiOrganizationId != nil {
-		var headerParam0 string
-
-		headerParam0, err = runtime.StyleParam("simple", false, "X-CastAi-Organization-Id", *params.XCastAiOrganizationId)
-		if err != nil {
-			return nil, err
-		}
-
-		req.Header.Set("X-CastAi-Organization-Id", headerParam0)
-	}
 
 	return req, nil
 }
@@ -4409,7 +5419,7 @@ func NewGetExternalClusterOperationRequest(server string, id string) (*http.Requ
 		return nil, err
 	}
 
-	basePath := fmt.Sprintf("/kubernetes/external-clusters/operations/%s", pathParam0)
+	basePath := fmt.Sprintf("/v1/kubernetes/external-clusters/operations/%s", pathParam0)
 	if basePath[0] == '/' {
 		basePath = basePath[1:]
 	}
@@ -4427,8 +5437,46 @@ func NewGetExternalClusterOperationRequest(server string, id string) (*http.Requ
 	return req, nil
 }
 
-// NewDeleteExternalClusterRequest generates requests for DeleteExternalCluster
-func NewDeleteExternalClusterRequest(server string, clusterId string, params *DeleteExternalClusterParams) (*http.Request, error) {
+// NewPrometheusRawMetricsRequest generates requests for PrometheusRawMetrics
+func NewPrometheusRawMetricsRequest(server string, params *PrometheusRawMetricsParams) (*http.Request, error) {
+	var err error
+
+	queryUrl, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	basePath := fmt.Sprintf("/v1/kubernetes/external-clusters/prometheus/metrics")
+	if basePath[0] == '/' {
+		basePath = basePath[1:]
+	}
+
+	queryUrl, err = queryUrl.Parse(basePath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryUrl.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	if params.XCastAiOrganizationId != nil {
+		var headerParam0 string
+
+		headerParam0, err = runtime.StyleParam("simple", false, "X-CastAi-Organization-Id", *params.XCastAiOrganizationId)
+		if err != nil {
+			return nil, err
+		}
+
+		req.Header.Set("X-CastAi-Organization-Id", headerParam0)
+	}
+
+	return req, nil
+}
+
+// NewExternalClusterAPIDeleteClusterRequest generates requests for ExternalClusterAPIDeleteCluster
+func NewExternalClusterAPIDeleteClusterRequest(server string, clusterId string) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -4443,7 +5491,7 @@ func NewDeleteExternalClusterRequest(server string, clusterId string, params *De
 		return nil, err
 	}
 
-	basePath := fmt.Sprintf("/kubernetes/external-clusters/%s", pathParam0)
+	basePath := fmt.Sprintf("/v1/kubernetes/external-clusters/%s", pathParam0)
 	if basePath[0] == '/' {
 		basePath = basePath[1:]
 	}
@@ -4458,22 +5506,11 @@ func NewDeleteExternalClusterRequest(server string, clusterId string, params *De
 		return nil, err
 	}
 
-	if params.XCastAiOrganizationId != nil {
-		var headerParam0 string
-
-		headerParam0, err = runtime.StyleParam("simple", false, "X-CastAi-Organization-Id", *params.XCastAiOrganizationId)
-		if err != nil {
-			return nil, err
-		}
-
-		req.Header.Set("X-CastAi-Organization-Id", headerParam0)
-	}
-
 	return req, nil
 }
 
-// NewGetExternalClusterRequest generates requests for GetExternalCluster
-func NewGetExternalClusterRequest(server string, clusterId string, params *GetExternalClusterParams) (*http.Request, error) {
+// NewExternalClusterAPIGetClusterRequest generates requests for ExternalClusterAPIGetCluster
+func NewExternalClusterAPIGetClusterRequest(server string, clusterId string) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -4488,7 +5525,7 @@ func NewGetExternalClusterRequest(server string, clusterId string, params *GetEx
 		return nil, err
 	}
 
-	basePath := fmt.Sprintf("/kubernetes/external-clusters/%s", pathParam0)
+	basePath := fmt.Sprintf("/v1/kubernetes/external-clusters/%s", pathParam0)
 	if basePath[0] == '/' {
 		basePath = basePath[1:]
 	}
@@ -4503,33 +5540,22 @@ func NewGetExternalClusterRequest(server string, clusterId string, params *GetEx
 		return nil, err
 	}
 
-	if params.XCastAiOrganizationId != nil {
-		var headerParam0 string
-
-		headerParam0, err = runtime.StyleParam("simple", false, "X-CastAi-Organization-Id", *params.XCastAiOrganizationId)
-		if err != nil {
-			return nil, err
-		}
-
-		req.Header.Set("X-CastAi-Organization-Id", headerParam0)
-	}
-
 	return req, nil
 }
 
-// NewUpdateExternalClusterRequest calls the generic UpdateExternalCluster builder with application/json body
-func NewUpdateExternalClusterRequest(server string, clusterId string, params *UpdateExternalClusterParams, body UpdateExternalClusterJSONRequestBody) (*http.Request, error) {
+// NewExternalClusterAPIUpdateClusterRequest calls the generic ExternalClusterAPIUpdateCluster builder with application/json body
+func NewExternalClusterAPIUpdateClusterRequest(server string, clusterId string, body ExternalClusterAPIUpdateClusterJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
 	buf, err := json.Marshal(body)
 	if err != nil {
 		return nil, err
 	}
 	bodyReader = bytes.NewReader(buf)
-	return NewUpdateExternalClusterRequestWithBody(server, clusterId, params, "application/json", bodyReader)
+	return NewExternalClusterAPIUpdateClusterRequestWithBody(server, clusterId, "application/json", bodyReader)
 }
 
-// NewUpdateExternalClusterRequestWithBody generates requests for UpdateExternalCluster with any type of body
-func NewUpdateExternalClusterRequestWithBody(server string, clusterId string, params *UpdateExternalClusterParams, contentType string, body io.Reader) (*http.Request, error) {
+// NewExternalClusterAPIUpdateClusterRequestWithBody generates requests for ExternalClusterAPIUpdateCluster with any type of body
+func NewExternalClusterAPIUpdateClusterRequestWithBody(server string, clusterId string, contentType string, body io.Reader) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -4544,7 +5570,7 @@ func NewUpdateExternalClusterRequestWithBody(server string, clusterId string, pa
 		return nil, err
 	}
 
-	basePath := fmt.Sprintf("/kubernetes/external-clusters/%s", pathParam0)
+	basePath := fmt.Sprintf("/v1/kubernetes/external-clusters/%s", pathParam0)
 	if basePath[0] == '/' {
 		basePath = basePath[1:]
 	}
@@ -4561,22 +5587,11 @@ func NewUpdateExternalClusterRequestWithBody(server string, clusterId string, pa
 
 	req.Header.Add("Content-Type", contentType)
 
-	if params.XCastAiOrganizationId != nil {
-		var headerParam0 string
-
-		headerParam0, err = runtime.StyleParam("simple", false, "X-CastAi-Organization-Id", *params.XCastAiOrganizationId)
-		if err != nil {
-			return nil, err
-		}
-
-		req.Header.Set("X-CastAi-Organization-Id", headerParam0)
-	}
-
 	return req, nil
 }
 
-// NewGetCredentialsScriptRequest generates requests for GetCredentialsScript
-func NewGetCredentialsScriptRequest(server string, clusterId string, params *GetCredentialsScriptParams) (*http.Request, error) {
+// NewGetExternalClusterCpuUtilizationMetricsRequest generates requests for GetExternalClusterCpuUtilizationMetrics
+func NewGetExternalClusterCpuUtilizationMetricsRequest(server string, clusterId ClusterId, params *GetExternalClusterCpuUtilizationMetricsParams) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -4591,7 +5606,61 @@ func NewGetCredentialsScriptRequest(server string, clusterId string, params *Get
 		return nil, err
 	}
 
-	basePath := fmt.Sprintf("/kubernetes/external-clusters/%s/credentials-script", pathParam0)
+	basePath := fmt.Sprintf("/v1/kubernetes/external-clusters/%s/cpu-utilization-metrics", pathParam0)
+	if basePath[0] == '/' {
+		basePath = basePath[1:]
+	}
+
+	queryUrl, err = queryUrl.Parse(basePath)
+	if err != nil {
+		return nil, err
+	}
+
+	queryValues := queryUrl.Query()
+
+	if params.PeriodHours != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "periodHours", *params.PeriodHours); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	queryUrl.RawQuery = queryValues.Encode()
+
+	req, err := http.NewRequest("GET", queryUrl.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewExternalClusterAPIGetCredentialsScriptRequest generates requests for ExternalClusterAPIGetCredentialsScript
+func NewExternalClusterAPIGetCredentialsScriptRequest(server string, clusterId string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParam("simple", false, "clusterId", clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	queryUrl, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	basePath := fmt.Sprintf("/v1/kubernetes/external-clusters/%s/credentials-script", pathParam0)
 	if basePath[0] == '/' {
 		basePath = basePath[1:]
 	}
@@ -4606,33 +5675,11 @@ func NewGetCredentialsScriptRequest(server string, clusterId string, params *Get
 		return nil, err
 	}
 
-	if params.XCastAiOrganizationId != nil {
-		var headerParam0 string
-
-		headerParam0, err = runtime.StyleParam("simple", false, "X-CastAi-Organization-Id", *params.XCastAiOrganizationId)
-		if err != nil {
-			return nil, err
-		}
-
-		req.Header.Set("X-CastAi-Organization-Id", headerParam0)
-	}
-
 	return req, nil
 }
 
-// NewDisconnectExternalClusterRequest calls the generic DisconnectExternalCluster builder with application/json body
-func NewDisconnectExternalClusterRequest(server string, clusterId ClusterId, params *DisconnectExternalClusterParams, body DisconnectExternalClusterJSONRequestBody) (*http.Request, error) {
-	var bodyReader io.Reader
-	buf, err := json.Marshal(body)
-	if err != nil {
-		return nil, err
-	}
-	bodyReader = bytes.NewReader(buf)
-	return NewDisconnectExternalClusterRequestWithBody(server, clusterId, params, "application/json", bodyReader)
-}
-
-// NewDisconnectExternalClusterRequestWithBody generates requests for DisconnectExternalCluster with any type of body
-func NewDisconnectExternalClusterRequestWithBody(server string, clusterId ClusterId, params *DisconnectExternalClusterParams, contentType string, body io.Reader) (*http.Request, error) {
+// NewGetExternalClusterCurrentMetricsRequest generates requests for GetExternalClusterCurrentMetrics
+func NewGetExternalClusterCurrentMetricsRequest(server string, clusterId ClusterId) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -4647,7 +5694,52 @@ func NewDisconnectExternalClusterRequestWithBody(server string, clusterId Cluste
 		return nil, err
 	}
 
-	basePath := fmt.Sprintf("/kubernetes/external-clusters/%s/disconnect", pathParam0)
+	basePath := fmt.Sprintf("/v1/kubernetes/external-clusters/%s/current-metrics", pathParam0)
+	if basePath[0] == '/' {
+		basePath = basePath[1:]
+	}
+
+	queryUrl, err = queryUrl.Parse(basePath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryUrl.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewExternalClusterAPIDisconnectClusterRequest calls the generic ExternalClusterAPIDisconnectCluster builder with application/json body
+func NewExternalClusterAPIDisconnectClusterRequest(server string, clusterId string, body ExternalClusterAPIDisconnectClusterJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewExternalClusterAPIDisconnectClusterRequestWithBody(server, clusterId, "application/json", bodyReader)
+}
+
+// NewExternalClusterAPIDisconnectClusterRequestWithBody generates requests for ExternalClusterAPIDisconnectCluster with any type of body
+func NewExternalClusterAPIDisconnectClusterRequestWithBody(server string, clusterId string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParam("simple", false, "clusterId", clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	queryUrl, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	basePath := fmt.Sprintf("/v1/kubernetes/external-clusters/%s/disconnect", pathParam0)
 	if basePath[0] == '/' {
 		basePath = basePath[1:]
 	}
@@ -4664,22 +5756,11 @@ func NewDisconnectExternalClusterRequestWithBody(server string, clusterId Cluste
 
 	req.Header.Add("Content-Type", contentType)
 
-	if params.XCastAiOrganizationId != nil {
-		var headerParam0 string
-
-		headerParam0, err = runtime.StyleParam("simple", false, "X-CastAi-Organization-Id", *params.XCastAiOrganizationId)
-		if err != nil {
-			return nil, err
-		}
-
-		req.Header.Set("X-CastAi-Organization-Id", headerParam0)
-	}
-
 	return req, nil
 }
 
-// NewGetExternalClusterKubeconfigRequest generates requests for GetExternalClusterKubeconfig
-func NewGetExternalClusterKubeconfigRequest(server string, clusterId string, params *GetExternalClusterKubeconfigParams) (*http.Request, error) {
+// NewGetEstimatedSavingsRequest generates requests for GetEstimatedSavings
+func NewGetEstimatedSavingsRequest(server string, clusterId ClusterId) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -4694,7 +5775,7 @@ func NewGetExternalClusterKubeconfigRequest(server string, clusterId string, par
 		return nil, err
 	}
 
-	basePath := fmt.Sprintf("/kubernetes/external-clusters/%s/kubeconfig", pathParam0)
+	basePath := fmt.Sprintf("/v1/kubernetes/external-clusters/%s/estimated-savings", pathParam0)
 	if basePath[0] == '/' {
 		basePath = basePath[1:]
 	}
@@ -4709,22 +5790,11 @@ func NewGetExternalClusterKubeconfigRequest(server string, clusterId string, par
 		return nil, err
 	}
 
-	if params.XCastAiOrganizationId != nil {
-		var headerParam0 string
-
-		headerParam0, err = runtime.StyleParam("simple", false, "X-CastAi-Organization-Id", *params.XCastAiOrganizationId)
-		if err != nil {
-			return nil, err
-		}
-
-		req.Header.Set("X-CastAi-Organization-Id", headerParam0)
-	}
-
 	return req, nil
 }
 
-// NewListExternalClusterNodesRequest generates requests for ListExternalClusterNodes
-func NewListExternalClusterNodesRequest(server string, clusterId string, params *ListExternalClusterNodesParams) (*http.Request, error) {
+// NewExternalClusterAPIGetKubeconfigRequest generates requests for ExternalClusterAPIGetKubeconfig
+func NewExternalClusterAPIGetKubeconfigRequest(server string, clusterId string) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -4739,7 +5809,7 @@ func NewListExternalClusterNodesRequest(server string, clusterId string, params 
 		return nil, err
 	}
 
-	basePath := fmt.Sprintf("/kubernetes/external-clusters/%s/nodes", pathParam0)
+	basePath := fmt.Sprintf("/v1/kubernetes/external-clusters/%s/kubeconfig", pathParam0)
 	if basePath[0] == '/' {
 		basePath = basePath[1:]
 	}
@@ -4754,33 +5824,200 @@ func NewListExternalClusterNodesRequest(server string, clusterId string, params 
 		return nil, err
 	}
 
-	if params.XCastAiOrganizationId != nil {
-		var headerParam0 string
+	return req, nil
+}
 
-		headerParam0, err = runtime.StyleParam("simple", false, "X-CastAi-Organization-Id", *params.XCastAiOrganizationId)
-		if err != nil {
+// NewGetExternalClusterMemoryUtilizationMetricsRequest generates requests for GetExternalClusterMemoryUtilizationMetrics
+func NewGetExternalClusterMemoryUtilizationMetricsRequest(server string, clusterId ClusterId, params *GetExternalClusterMemoryUtilizationMetricsParams) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParam("simple", false, "clusterId", clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	queryUrl, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	basePath := fmt.Sprintf("/v1/kubernetes/external-clusters/%s/memory-utilization-metrics", pathParam0)
+	if basePath[0] == '/' {
+		basePath = basePath[1:]
+	}
+
+	queryUrl, err = queryUrl.Parse(basePath)
+	if err != nil {
+		return nil, err
+	}
+
+	queryValues := queryUrl.Query()
+
+	if params.PeriodHours != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "periodHours", *params.PeriodHours); err != nil {
 			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
 		}
 
-		req.Header.Set("X-CastAi-Organization-Id", headerParam0)
+	}
+
+	queryUrl.RawQuery = queryValues.Encode()
+
+	req, err := http.NewRequest("GET", queryUrl.String(), nil)
+	if err != nil {
+		return nil, err
 	}
 
 	return req, nil
 }
 
-// NewAddExternalClusterNodeRequest calls the generic AddExternalClusterNode builder with application/json body
-func NewAddExternalClusterNodeRequest(server string, clusterId string, params *AddExternalClusterNodeParams, body AddExternalClusterNodeJSONRequestBody) (*http.Request, error) {
+// NewExternalClusterAPIGetMetricsRequest generates requests for ExternalClusterAPIGetMetrics
+func NewExternalClusterAPIGetMetricsRequest(server string, clusterId string, params *ExternalClusterAPIGetMetricsParams) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParam("simple", false, "clusterId", clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	queryUrl, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	basePath := fmt.Sprintf("/v1/kubernetes/external-clusters/%s/metrics", pathParam0)
+	if basePath[0] == '/' {
+		basePath = basePath[1:]
+	}
+
+	queryUrl, err = queryUrl.Parse(basePath)
+	if err != nil {
+		return nil, err
+	}
+
+	queryValues := queryUrl.Query()
+
+	if params.MetricType != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "metricType", *params.MetricType); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	queryUrl.RawQuery = queryValues.Encode()
+
+	req, err := http.NewRequest("GET", queryUrl.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewExternalClusterAPIListNodesRequest generates requests for ExternalClusterAPIListNodes
+func NewExternalClusterAPIListNodesRequest(server string, clusterId string, params *ExternalClusterAPIListNodesParams) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParam("simple", false, "clusterId", clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	queryUrl, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	basePath := fmt.Sprintf("/v1/kubernetes/external-clusters/%s/nodes", pathParam0)
+	if basePath[0] == '/' {
+		basePath = basePath[1:]
+	}
+
+	queryUrl, err = queryUrl.Parse(basePath)
+	if err != nil {
+		return nil, err
+	}
+
+	queryValues := queryUrl.Query()
+
+	if params.PageLimit != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "page.limit", *params.PageLimit); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.PageCursor != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "page.cursor", *params.PageCursor); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	queryUrl.RawQuery = queryValues.Encode()
+
+	req, err := http.NewRequest("GET", queryUrl.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewExternalClusterAPIAddNodeRequest calls the generic ExternalClusterAPIAddNode builder with application/json body
+func NewExternalClusterAPIAddNodeRequest(server string, clusterId string, body ExternalClusterAPIAddNodeJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
 	buf, err := json.Marshal(body)
 	if err != nil {
 		return nil, err
 	}
 	bodyReader = bytes.NewReader(buf)
-	return NewAddExternalClusterNodeRequestWithBody(server, clusterId, params, "application/json", bodyReader)
+	return NewExternalClusterAPIAddNodeRequestWithBody(server, clusterId, "application/json", bodyReader)
 }
 
-// NewAddExternalClusterNodeRequestWithBody generates requests for AddExternalClusterNode with any type of body
-func NewAddExternalClusterNodeRequestWithBody(server string, clusterId string, params *AddExternalClusterNodeParams, contentType string, body io.Reader) (*http.Request, error) {
+// NewExternalClusterAPIAddNodeRequestWithBody generates requests for ExternalClusterAPIAddNode with any type of body
+func NewExternalClusterAPIAddNodeRequestWithBody(server string, clusterId string, contentType string, body io.Reader) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -4795,7 +6032,7 @@ func NewAddExternalClusterNodeRequestWithBody(server string, clusterId string, p
 		return nil, err
 	}
 
-	basePath := fmt.Sprintf("/kubernetes/external-clusters/%s/nodes", pathParam0)
+	basePath := fmt.Sprintf("/v1/kubernetes/external-clusters/%s/nodes", pathParam0)
 	if basePath[0] == '/' {
 		basePath = basePath[1:]
 	}
@@ -4812,22 +6049,11 @@ func NewAddExternalClusterNodeRequestWithBody(server string, clusterId string, p
 
 	req.Header.Add("Content-Type", contentType)
 
-	if params.XCastAiOrganizationId != nil {
-		var headerParam0 string
-
-		headerParam0, err = runtime.StyleParam("simple", false, "X-CastAi-Organization-Id", *params.XCastAiOrganizationId)
-		if err != nil {
-			return nil, err
-		}
-
-		req.Header.Set("X-CastAi-Organization-Id", headerParam0)
-	}
-
 	return req, nil
 }
 
-// NewDeleteExternalClusterNodeRequest generates requests for DeleteExternalClusterNode
-func NewDeleteExternalClusterNodeRequest(server string, clusterId string, nodeId string, params *DeleteExternalClusterNodeParams) (*http.Request, error) {
+// NewExternalClusterAPIDeleteNodeRequest generates requests for ExternalClusterAPIDeleteNode
+func NewExternalClusterAPIDeleteNodeRequest(server string, clusterId string, nodeId string, params *ExternalClusterAPIDeleteNodeParams) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -4849,7 +6075,7 @@ func NewDeleteExternalClusterNodeRequest(server string, clusterId string, nodeId
 		return nil, err
 	}
 
-	basePath := fmt.Sprintf("/kubernetes/external-clusters/%s/nodes/%s", pathParam0, pathParam1)
+	basePath := fmt.Sprintf("/v1/kubernetes/external-clusters/%s/nodes/%s", pathParam0, pathParam1)
 	if basePath[0] == '/' {
 		basePath = basePath[1:]
 	}
@@ -4858,28 +6084,148 @@ func NewDeleteExternalClusterNodeRequest(server string, clusterId string, nodeId
 	if err != nil {
 		return nil, err
 	}
+
+	queryValues := queryUrl.Query()
+
+	if params.DrainTimeout != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "drainTimeout", *params.DrainTimeout); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.ForceDelete != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "forceDelete", *params.ForceDelete); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	queryUrl.RawQuery = queryValues.Encode()
 
 	req, err := http.NewRequest("DELETE", queryUrl.String(), nil)
 	if err != nil {
 		return nil, err
 	}
 
-	if params.XCastAiOrganizationId != nil {
-		var headerParam0 string
+	return req, nil
+}
 
-		headerParam0, err = runtime.StyleParam("simple", false, "X-CastAi-Organization-Id", *params.XCastAiOrganizationId)
-		if err != nil {
-			return nil, err
-		}
+// NewExternalClusterAPIGetNodeRequest generates requests for ExternalClusterAPIGetNode
+func NewExternalClusterAPIGetNodeRequest(server string, clusterId string, nodeId string) (*http.Request, error) {
+	var err error
 
-		req.Header.Set("X-CastAi-Organization-Id", headerParam0)
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParam("simple", false, "clusterId", clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParam("simple", false, "nodeId", nodeId)
+	if err != nil {
+		return nil, err
+	}
+
+	queryUrl, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	basePath := fmt.Sprintf("/v1/kubernetes/external-clusters/%s/nodes/%s", pathParam0, pathParam1)
+	if basePath[0] == '/' {
+		basePath = basePath[1:]
+	}
+
+	queryUrl, err = queryUrl.Parse(basePath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryUrl.String(), nil)
+	if err != nil {
+		return nil, err
 	}
 
 	return req, nil
 }
 
-// NewPauseExternalClusterRequest generates requests for PauseExternalCluster
-func NewPauseExternalClusterRequest(server string, clusterId ClusterId, params *PauseExternalClusterParams) (*http.Request, error) {
+// NewExternalClusterAPIDrainNodeRequest calls the generic ExternalClusterAPIDrainNode builder with application/json body
+func NewExternalClusterAPIDrainNodeRequest(server string, clusterId string, nodeId string, body ExternalClusterAPIDrainNodeJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewExternalClusterAPIDrainNodeRequestWithBody(server, clusterId, nodeId, "application/json", bodyReader)
+}
+
+// NewExternalClusterAPIDrainNodeRequestWithBody generates requests for ExternalClusterAPIDrainNode with any type of body
+func NewExternalClusterAPIDrainNodeRequestWithBody(server string, clusterId string, nodeId string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParam("simple", false, "clusterId", clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParam("simple", false, "nodeId", nodeId)
+	if err != nil {
+		return nil, err
+	}
+
+	queryUrl, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	basePath := fmt.Sprintf("/v1/kubernetes/external-clusters/%s/nodes/%s/drain", pathParam0, pathParam1)
+	if basePath[0] == '/' {
+		basePath = basePath[1:]
+	}
+
+	queryUrl, err = queryUrl.Parse(basePath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryUrl.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewExternalClusterAPIPauseClusterRequest generates requests for ExternalClusterAPIPauseCluster
+func NewExternalClusterAPIPauseClusterRequest(server string, clusterId string) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -4894,7 +6240,7 @@ func NewPauseExternalClusterRequest(server string, clusterId ClusterId, params *
 		return nil, err
 	}
 
-	basePath := fmt.Sprintf("/kubernetes/external-clusters/%s/pause", pathParam0)
+	basePath := fmt.Sprintf("/v1/kubernetes/external-clusters/%s/pause", pathParam0)
 	if basePath[0] == '/' {
 		basePath = basePath[1:]
 	}
@@ -4909,22 +6255,11 @@ func NewPauseExternalClusterRequest(server string, clusterId ClusterId, params *
 		return nil, err
 	}
 
-	if params.XCastAiOrganizationId != nil {
-		var headerParam0 string
-
-		headerParam0, err = runtime.StyleParam("simple", false, "X-CastAi-Organization-Id", *params.XCastAiOrganizationId)
-		if err != nil {
-			return nil, err
-		}
-
-		req.Header.Set("X-CastAi-Organization-Id", headerParam0)
-	}
-
 	return req, nil
 }
 
-// NewPrometheusReadRequest generates requests for PrometheusRead
-func NewPrometheusReadRequest(server string, clusterId ClusterId, params *PrometheusReadParams) (*http.Request, error) {
+// NewExternalClusterAPIResumeClusterRequest generates requests for ExternalClusterAPIResumeCluster
+func NewExternalClusterAPIResumeClusterRequest(server string, clusterId string) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -4939,7 +6274,7 @@ func NewPrometheusReadRequest(server string, clusterId ClusterId, params *Promet
 		return nil, err
 	}
 
-	basePath := fmt.Sprintf("/kubernetes/external-clusters/%s/prometheus/read", pathParam0)
+	basePath := fmt.Sprintf("/v1/kubernetes/external-clusters/%s/resume", pathParam0)
 	if basePath[0] == '/' {
 		basePath = basePath[1:]
 	}
@@ -4952,62 +6287,6 @@ func NewPrometheusReadRequest(server string, clusterId ClusterId, params *Promet
 	req, err := http.NewRequest("POST", queryUrl.String(), nil)
 	if err != nil {
 		return nil, err
-	}
-
-	if params.XCastAiOrganizationId != nil {
-		var headerParam0 string
-
-		headerParam0, err = runtime.StyleParam("simple", false, "X-CastAi-Organization-Id", *params.XCastAiOrganizationId)
-		if err != nil {
-			return nil, err
-		}
-
-		req.Header.Set("X-CastAi-Organization-Id", headerParam0)
-	}
-
-	return req, nil
-}
-
-// NewResumeExternalClusterRequest generates requests for ResumeExternalCluster
-func NewResumeExternalClusterRequest(server string, clusterId ClusterId, params *ResumeExternalClusterParams) (*http.Request, error) {
-	var err error
-
-	var pathParam0 string
-
-	pathParam0, err = runtime.StyleParam("simple", false, "clusterId", clusterId)
-	if err != nil {
-		return nil, err
-	}
-
-	queryUrl, err := url.Parse(server)
-	if err != nil {
-		return nil, err
-	}
-
-	basePath := fmt.Sprintf("/kubernetes/external-clusters/%s/resume", pathParam0)
-	if basePath[0] == '/' {
-		basePath = basePath[1:]
-	}
-
-	queryUrl, err = queryUrl.Parse(basePath)
-	if err != nil {
-		return nil, err
-	}
-
-	req, err := http.NewRequest("POST", queryUrl.String(), nil)
-	if err != nil {
-		return nil, err
-	}
-
-	if params.XCastAiOrganizationId != nil {
-		var headerParam0 string
-
-		headerParam0, err = runtime.StyleParam("simple", false, "X-CastAi-Organization-Id", *params.XCastAiOrganizationId)
-		if err != nil {
-			return nil, err
-		}
-
-		req.Header.Set("X-CastAi-Organization-Id", headerParam0)
 	}
 
 	return req, nil
@@ -5029,7 +6308,7 @@ func NewGetOperationRequest(server string, id string) (*http.Request, error) {
 		return nil, err
 	}
 
-	basePath := fmt.Sprintf("/kubernetes/operations/%s", pathParam0)
+	basePath := fmt.Sprintf("/v1/kubernetes/operations/%s", pathParam0)
 	if basePath[0] == '/' {
 		basePath = basePath[1:]
 	}
@@ -5056,7 +6335,7 @@ func NewCurrentUserProfileRequest(server string) (*http.Request, error) {
 		return nil, err
 	}
 
-	basePath := fmt.Sprintf("/me")
+	basePath := fmt.Sprintf("/v1/me")
 	if basePath[0] == '/' {
 		basePath = basePath[1:]
 	}
@@ -5094,7 +6373,7 @@ func NewUpdateCurrentUserProfileRequestWithBody(server string, contentType strin
 		return nil, err
 	}
 
-	basePath := fmt.Sprintf("/me")
+	basePath := fmt.Sprintf("/v1/me")
 	if basePath[0] == '/' {
 		basePath = basePath[1:]
 	}
@@ -5114,44 +6393,6 @@ func NewUpdateCurrentUserProfileRequestWithBody(server string, contentType strin
 	return req, nil
 }
 
-// NewGetExternalClustersTokenRequest generates requests for GetExternalClustersToken
-func NewGetExternalClustersTokenRequest(server string, params *GetExternalClustersTokenParams) (*http.Request, error) {
-	var err error
-
-	queryUrl, err := url.Parse(server)
-	if err != nil {
-		return nil, err
-	}
-
-	basePath := fmt.Sprintf("/me/external-clusters-token")
-	if basePath[0] == '/' {
-		basePath = basePath[1:]
-	}
-
-	queryUrl, err = queryUrl.Parse(basePath)
-	if err != nil {
-		return nil, err
-	}
-
-	req, err := http.NewRequest("GET", queryUrl.String(), nil)
-	if err != nil {
-		return nil, err
-	}
-
-	if params.XCastAiOrganizationId != nil {
-		var headerParam0 string
-
-		headerParam0, err = runtime.StyleParam("simple", false, "X-CastAi-Organization-Id", *params.XCastAiOrganizationId)
-		if err != nil {
-			return nil, err
-		}
-
-		req.Header.Set("X-CastAi-Organization-Id", headerParam0)
-	}
-
-	return req, nil
-}
-
 // NewListOrganizationsRequest generates requests for ListOrganizations
 func NewListOrganizationsRequest(server string) (*http.Request, error) {
 	var err error
@@ -5161,7 +6402,7 @@ func NewListOrganizationsRequest(server string) (*http.Request, error) {
 		return nil, err
 	}
 
-	basePath := fmt.Sprintf("/organizations")
+	basePath := fmt.Sprintf("/v1/organizations")
 	if basePath[0] == '/' {
 		basePath = basePath[1:]
 	}
@@ -5199,7 +6440,7 @@ func NewCreateOrganizationRequestWithBody(server string, contentType string, bod
 		return nil, err
 	}
 
-	basePath := fmt.Sprintf("/organizations")
+	basePath := fmt.Sprintf("/v1/organizations")
 	if basePath[0] == '/' {
 		basePath = basePath[1:]
 	}
@@ -5235,7 +6476,7 @@ func NewDeleteOrganizationRequest(server string, id string) (*http.Request, erro
 		return nil, err
 	}
 
-	basePath := fmt.Sprintf("/organizations/%s", pathParam0)
+	basePath := fmt.Sprintf("/v1/organizations/%s", pathParam0)
 	if basePath[0] == '/' {
 		basePath = basePath[1:]
 	}
@@ -5269,7 +6510,7 @@ func NewGetOrganizationRequest(server string, id string) (*http.Request, error) 
 		return nil, err
 	}
 
-	basePath := fmt.Sprintf("/organizations/%s", pathParam0)
+	basePath := fmt.Sprintf("/v1/organizations/%s", pathParam0)
 	if basePath[0] == '/' {
 		basePath = basePath[1:]
 	}
@@ -5314,7 +6555,7 @@ func NewUpdateOrganizationRequestWithBody(server string, id string, contentType 
 		return nil, err
 	}
 
-	basePath := fmt.Sprintf("/organizations/%s", pathParam0)
+	basePath := fmt.Sprintf("/v1/organizations/%s", pathParam0)
 	if basePath[0] == '/' {
 		basePath = basePath[1:]
 	}
@@ -5350,7 +6591,7 @@ func NewGetOrganizationUsersRequest(server string, id string) (*http.Request, er
 		return nil, err
 	}
 
-	basePath := fmt.Sprintf("/organizations/%s/users", pathParam0)
+	basePath := fmt.Sprintf("/v1/organizations/%s/users", pathParam0)
 	if basePath[0] == '/' {
 		basePath = basePath[1:]
 	}
@@ -5395,7 +6636,7 @@ func NewCreateOrganizationUserRequestWithBody(server string, id string, contentT
 		return nil, err
 	}
 
-	basePath := fmt.Sprintf("/organizations/%s/users", pathParam0)
+	basePath := fmt.Sprintf("/v1/organizations/%s/users", pathParam0)
 	if basePath[0] == '/' {
 		basePath = basePath[1:]
 	}
@@ -5438,7 +6679,7 @@ func NewDeleteOrganizationUserRequest(server string, id string, userId string) (
 		return nil, err
 	}
 
-	basePath := fmt.Sprintf("/organizations/%s/users/%s", pathParam0, pathParam1)
+	basePath := fmt.Sprintf("/v1/organizations/%s/users/%s", pathParam0, pathParam1)
 	if basePath[0] == '/' {
 		basePath = basePath[1:]
 	}
@@ -5456,6 +6697,60 @@ func NewDeleteOrganizationUserRequest(server string, id string, userId string) (
 	return req, nil
 }
 
+// NewUpdateOrganizationUserRequest calls the generic UpdateOrganizationUser builder with application/json body
+func NewUpdateOrganizationUserRequest(server string, id string, userId string, body UpdateOrganizationUserJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewUpdateOrganizationUserRequestWithBody(server, id, userId, "application/json", bodyReader)
+}
+
+// NewUpdateOrganizationUserRequestWithBody generates requests for UpdateOrganizationUser with any type of body
+func NewUpdateOrganizationUserRequestWithBody(server string, id string, userId string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParam("simple", false, "id", id)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParam("simple", false, "userId", userId)
+	if err != nil {
+		return nil, err
+	}
+
+	queryUrl, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	basePath := fmt.Sprintf("/v1/organizations/%s/users/%s", pathParam0, pathParam1)
+	if basePath[0] == '/' {
+		basePath = basePath[1:]
+	}
+
+	queryUrl, err = queryUrl.Parse(basePath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("PUT", queryUrl.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
 // NewListRegionsRequest generates requests for ListRegions
 func NewListRegionsRequest(server string) (*http.Request, error) {
 	var err error
@@ -5465,7 +6760,7 @@ func NewListRegionsRequest(server string) (*http.Request, error) {
 		return nil, err
 	}
 
-	basePath := fmt.Sprintf("/regions")
+	basePath := fmt.Sprintf("/v1/regions")
 	if basePath[0] == '/' {
 		basePath = basePath[1:]
 	}
@@ -5492,7 +6787,7 @@ func NewGetUsageReportRequest(server string, params *GetUsageReportParams) (*htt
 		return nil, err
 	}
 
-	basePath := fmt.Sprintf("/report/usage/daily")
+	basePath := fmt.Sprintf("/v1/report/usage/daily")
 	if basePath[0] == '/' {
 		basePath = basePath[1:]
 	}
@@ -5553,6 +6848,40 @@ func NewGetUsageReportRequest(server string, params *GetUsageReportParams) (*htt
 	}
 
 	queryUrl.RawQuery = queryValues.Encode()
+
+	req, err := http.NewRequest("GET", queryUrl.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewExternalClusterAPIGetCredentialsScriptTemplateRequest generates requests for ExternalClusterAPIGetCredentialsScriptTemplate
+func NewExternalClusterAPIGetCredentialsScriptTemplateRequest(server string, provider string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParam("simple", false, "provider", provider)
+	if err != nil {
+		return nil, err
+	}
+
+	queryUrl, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	basePath := fmt.Sprintf("/v1/scripts/%s/onboarding.sh", pathParam0)
+	if basePath[0] == '/' {
+		basePath = basePath[1:]
+	}
+
+	queryUrl, err = queryUrl.Parse(basePath)
+	if err != nil {
+		return nil, err
+	}
 
 	req, err := http.NewRequest("GET", queryUrl.String(), nil)
 	if err != nil {
@@ -5663,6 +6992,9 @@ type ClientWithResponsesInterface interface {
 
 	CreateOrUpdateGslbWithResponse(ctx context.Context, body CreateOrUpdateGslbJSONRequestBody) (*CreateOrUpdateGslbResponse, error)
 
+	// GetInstanceTypes request
+	GetInstanceTypesWithResponse(ctx context.Context, params *GetInstanceTypesParams) (*GetInstanceTypesResponse, error)
+
 	// CreateInvitation request  with any body
 	CreateInvitationWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*CreateInvitationResponse, error)
 
@@ -5714,8 +7046,14 @@ type ClientWithResponsesInterface interface {
 	// ArchiveCluster request
 	ArchiveClusterWithResponse(ctx context.Context, clusterId ClusterId) (*ArchiveClusterResponse, error)
 
-	// GetClusterAuditLog request
-	GetClusterAuditLogWithResponse(ctx context.Context, clusterId ClusterId) (*GetClusterAuditLogResponse, error)
+	// GetCostHistory request
+	GetCostHistoryWithResponse(ctx context.Context, clusterId ClusterId, params *GetCostHistoryParams) (*GetCostHistoryResponse, error)
+
+	// GetClusterCpuUtilizationMetrics request
+	GetClusterCpuUtilizationMetricsWithResponse(ctx context.Context, clusterId ClusterId, params *GetClusterCpuUtilizationMetricsParams) (*GetClusterCpuUtilizationMetricsResponse, error)
+
+	// GetClusterCurrentMetrics request
+	GetClusterCurrentMetricsWithResponse(ctx context.Context, clusterId ClusterId) (*GetClusterCurrentMetricsResponse, error)
 
 	// GetClusterFeedbackEvents request
 	GetClusterFeedbackEventsWithResponse(ctx context.Context, clusterId ClusterId) (*GetClusterFeedbackEventsResponse, error)
@@ -5737,6 +7075,9 @@ type ClientWithResponsesInterface interface {
 
 	ConfigureClusterAddonsWithResponse(ctx context.Context, clusterId ClusterId, body ConfigureClusterAddonsJSONRequestBody) (*ConfigureClusterAddonsResponse, error)
 
+	// GetClusterMemoryUtilizationMetrics request
+	GetClusterMemoryUtilizationMetricsWithResponse(ctx context.Context, clusterId ClusterId, params *GetClusterMemoryUtilizationMetricsParams) (*GetClusterMemoryUtilizationMetricsResponse, error)
+
 	// GetClusterMetrics request
 	GetClusterMetricsWithResponse(ctx context.Context, clusterId ClusterId, params *GetClusterMetricsParams) (*GetClusterMetricsResponse, error)
 
@@ -5750,7 +7091,7 @@ type ClientWithResponsesInterface interface {
 	GetNodeConstraintsWithResponse(ctx context.Context, clusterId ClusterId) (*GetNodeConstraintsResponse, error)
 
 	// GetClusterNodes request
-	GetClusterNodesWithResponse(ctx context.Context, clusterId ClusterId) (*GetClusterNodesResponse, error)
+	GetClusterNodesWithResponse(ctx context.Context, clusterId ClusterId, params *GetClusterNodesParams) (*GetClusterNodesResponse, error)
 
 	// AddClusterNode request  with any body
 	AddClusterNodeWithBodyWithResponse(ctx context.Context, clusterId ClusterId, contentType string, body io.Reader) (*AddClusterNodeResponse, error)
@@ -5809,6 +7150,25 @@ type ClientWithResponsesInterface interface {
 	// GetProblematicWorkloads request
 	GetProblematicWorkloadsWithResponse(ctx context.Context, clusterId ClusterId) (*GetProblematicWorkloadsResponse, error)
 
+	// GetRebalancedWorkloads request
+	GetRebalancedWorkloadsWithResponse(ctx context.Context, clusterId ClusterId) (*GetRebalancedWorkloadsResponse, error)
+
+	// ListRebalancingPlans request
+	ListRebalancingPlansWithResponse(ctx context.Context, clusterId ClusterId, params *ListRebalancingPlansParams) (*ListRebalancingPlansResponse, error)
+
+	// Rebalance request  with any body
+	RebalanceWithBodyWithResponse(ctx context.Context, clusterId ClusterId, contentType string, body io.Reader) (*RebalanceResponse, error)
+
+	RebalanceWithResponse(ctx context.Context, clusterId ClusterId, body RebalanceJSONRequestBody) (*RebalanceResponse, error)
+
+	// GetRebalancingPlan request
+	GetRebalancingPlanWithResponse(ctx context.Context, clusterId ClusterId, rebalancingPlanId string) (*GetRebalancingPlanResponse, error)
+
+	// ExecuteRebalancingPlan request  with any body
+	ExecuteRebalancingPlanWithBodyWithResponse(ctx context.Context, clusterId ClusterId, rebalancingPlanId string, contentType string, body io.Reader) (*ExecuteRebalancingPlanResponse, error)
+
+	ExecuteRebalancingPlanWithResponse(ctx context.Context, clusterId ClusterId, rebalancingPlanId string, body ExecuteRebalancingPlanJSONRequestBody) (*ExecuteRebalancingPlanResponse, error)
+
 	// ResumeCluster request
 	ResumeClusterWithResponse(ctx context.Context, clusterId ClusterId) (*ResumeClusterResponse, error)
 
@@ -5818,58 +7178,84 @@ type ClientWithResponsesInterface interface {
 	// TriggerClusterReconcile request
 	TriggerClusterReconcileWithResponse(ctx context.Context, clusterId ClusterId) (*TriggerClusterReconcileResponse, error)
 
-	// ListExternalClusters request
-	ListExternalClustersWithResponse(ctx context.Context, params *ListExternalClustersParams) (*ListExternalClustersResponse, error)
+	// GetWorkloads request
+	GetWorkloadsWithResponse(ctx context.Context, clusterId ClusterId) (*GetWorkloadsResponse, error)
 
-	// RegisterExternalCluster request  with any body
-	RegisterExternalClusterWithBodyWithResponse(ctx context.Context, params *RegisterExternalClusterParams, contentType string, body io.Reader) (*RegisterExternalClusterResponse, error)
+	// ExternalClusterAPIListClusters request
+	ExternalClusterAPIListClustersWithResponse(ctx context.Context) (*ExternalClusterAPIListClustersResponse, error)
 
-	RegisterExternalClusterWithResponse(ctx context.Context, params *RegisterExternalClusterParams, body RegisterExternalClusterJSONRequestBody) (*RegisterExternalClusterResponse, error)
+	// ExternalClusterAPIRegisterCluster request  with any body
+	ExternalClusterAPIRegisterClusterWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*ExternalClusterAPIRegisterClusterResponse, error)
+
+	ExternalClusterAPIRegisterClusterWithResponse(ctx context.Context, body ExternalClusterAPIRegisterClusterJSONRequestBody) (*ExternalClusterAPIRegisterClusterResponse, error)
 
 	// GetExternalClusterOperation request
 	GetExternalClusterOperationWithResponse(ctx context.Context, id string) (*GetExternalClusterOperationResponse, error)
 
-	// DeleteExternalCluster request
-	DeleteExternalClusterWithResponse(ctx context.Context, clusterId string, params *DeleteExternalClusterParams) (*DeleteExternalClusterResponse, error)
+	// PrometheusRawMetrics request
+	PrometheusRawMetricsWithResponse(ctx context.Context, params *PrometheusRawMetricsParams) (*PrometheusRawMetricsResponse, error)
 
-	// GetExternalCluster request
-	GetExternalClusterWithResponse(ctx context.Context, clusterId string, params *GetExternalClusterParams) (*GetExternalClusterResponse, error)
+	// ExternalClusterAPIDeleteCluster request
+	ExternalClusterAPIDeleteClusterWithResponse(ctx context.Context, clusterId string) (*ExternalClusterAPIDeleteClusterResponse, error)
 
-	// UpdateExternalCluster request  with any body
-	UpdateExternalClusterWithBodyWithResponse(ctx context.Context, clusterId string, params *UpdateExternalClusterParams, contentType string, body io.Reader) (*UpdateExternalClusterResponse, error)
+	// ExternalClusterAPIGetCluster request
+	ExternalClusterAPIGetClusterWithResponse(ctx context.Context, clusterId string) (*ExternalClusterAPIGetClusterResponse, error)
 
-	UpdateExternalClusterWithResponse(ctx context.Context, clusterId string, params *UpdateExternalClusterParams, body UpdateExternalClusterJSONRequestBody) (*UpdateExternalClusterResponse, error)
+	// ExternalClusterAPIUpdateCluster request  with any body
+	ExternalClusterAPIUpdateClusterWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader) (*ExternalClusterAPIUpdateClusterResponse, error)
 
-	// GetCredentialsScript request
-	GetCredentialsScriptWithResponse(ctx context.Context, clusterId string, params *GetCredentialsScriptParams) (*GetCredentialsScriptResponse, error)
+	ExternalClusterAPIUpdateClusterWithResponse(ctx context.Context, clusterId string, body ExternalClusterAPIUpdateClusterJSONRequestBody) (*ExternalClusterAPIUpdateClusterResponse, error)
 
-	// DisconnectExternalCluster request  with any body
-	DisconnectExternalClusterWithBodyWithResponse(ctx context.Context, clusterId ClusterId, params *DisconnectExternalClusterParams, contentType string, body io.Reader) (*DisconnectExternalClusterResponse, error)
+	// GetExternalClusterCpuUtilizationMetrics request
+	GetExternalClusterCpuUtilizationMetricsWithResponse(ctx context.Context, clusterId ClusterId, params *GetExternalClusterCpuUtilizationMetricsParams) (*GetExternalClusterCpuUtilizationMetricsResponse, error)
 
-	DisconnectExternalClusterWithResponse(ctx context.Context, clusterId ClusterId, params *DisconnectExternalClusterParams, body DisconnectExternalClusterJSONRequestBody) (*DisconnectExternalClusterResponse, error)
+	// ExternalClusterAPIGetCredentialsScript request
+	ExternalClusterAPIGetCredentialsScriptWithResponse(ctx context.Context, clusterId string) (*ExternalClusterAPIGetCredentialsScriptResponse, error)
 
-	// GetExternalClusterKubeconfig request
-	GetExternalClusterKubeconfigWithResponse(ctx context.Context, clusterId string, params *GetExternalClusterKubeconfigParams) (*GetExternalClusterKubeconfigResponse, error)
+	// GetExternalClusterCurrentMetrics request
+	GetExternalClusterCurrentMetricsWithResponse(ctx context.Context, clusterId ClusterId) (*GetExternalClusterCurrentMetricsResponse, error)
 
-	// ListExternalClusterNodes request
-	ListExternalClusterNodesWithResponse(ctx context.Context, clusterId string, params *ListExternalClusterNodesParams) (*ListExternalClusterNodesResponse, error)
+	// ExternalClusterAPIDisconnectCluster request  with any body
+	ExternalClusterAPIDisconnectClusterWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader) (*ExternalClusterAPIDisconnectClusterResponse, error)
 
-	// AddExternalClusterNode request  with any body
-	AddExternalClusterNodeWithBodyWithResponse(ctx context.Context, clusterId string, params *AddExternalClusterNodeParams, contentType string, body io.Reader) (*AddExternalClusterNodeResponse, error)
+	ExternalClusterAPIDisconnectClusterWithResponse(ctx context.Context, clusterId string, body ExternalClusterAPIDisconnectClusterJSONRequestBody) (*ExternalClusterAPIDisconnectClusterResponse, error)
 
-	AddExternalClusterNodeWithResponse(ctx context.Context, clusterId string, params *AddExternalClusterNodeParams, body AddExternalClusterNodeJSONRequestBody) (*AddExternalClusterNodeResponse, error)
+	// GetEstimatedSavings request
+	GetEstimatedSavingsWithResponse(ctx context.Context, clusterId ClusterId) (*GetEstimatedSavingsResponse, error)
 
-	// DeleteExternalClusterNode request
-	DeleteExternalClusterNodeWithResponse(ctx context.Context, clusterId string, nodeId string, params *DeleteExternalClusterNodeParams) (*DeleteExternalClusterNodeResponse, error)
+	// ExternalClusterAPIGetKubeconfig request
+	ExternalClusterAPIGetKubeconfigWithResponse(ctx context.Context, clusterId string) (*ExternalClusterAPIGetKubeconfigResponse, error)
 
-	// PauseExternalCluster request
-	PauseExternalClusterWithResponse(ctx context.Context, clusterId ClusterId, params *PauseExternalClusterParams) (*PauseExternalClusterResponse, error)
+	// GetExternalClusterMemoryUtilizationMetrics request
+	GetExternalClusterMemoryUtilizationMetricsWithResponse(ctx context.Context, clusterId ClusterId, params *GetExternalClusterMemoryUtilizationMetricsParams) (*GetExternalClusterMemoryUtilizationMetricsResponse, error)
 
-	// PrometheusRead request
-	PrometheusReadWithResponse(ctx context.Context, clusterId ClusterId, params *PrometheusReadParams) (*PrometheusReadResponse, error)
+	// ExternalClusterAPIGetMetrics request
+	ExternalClusterAPIGetMetricsWithResponse(ctx context.Context, clusterId string, params *ExternalClusterAPIGetMetricsParams) (*ExternalClusterAPIGetMetricsResponse, error)
 
-	// ResumeExternalCluster request
-	ResumeExternalClusterWithResponse(ctx context.Context, clusterId ClusterId, params *ResumeExternalClusterParams) (*ResumeExternalClusterResponse, error)
+	// ExternalClusterAPIListNodes request
+	ExternalClusterAPIListNodesWithResponse(ctx context.Context, clusterId string, params *ExternalClusterAPIListNodesParams) (*ExternalClusterAPIListNodesResponse, error)
+
+	// ExternalClusterAPIAddNode request  with any body
+	ExternalClusterAPIAddNodeWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader) (*ExternalClusterAPIAddNodeResponse, error)
+
+	ExternalClusterAPIAddNodeWithResponse(ctx context.Context, clusterId string, body ExternalClusterAPIAddNodeJSONRequestBody) (*ExternalClusterAPIAddNodeResponse, error)
+
+	// ExternalClusterAPIDeleteNode request
+	ExternalClusterAPIDeleteNodeWithResponse(ctx context.Context, clusterId string, nodeId string, params *ExternalClusterAPIDeleteNodeParams) (*ExternalClusterAPIDeleteNodeResponse, error)
+
+	// ExternalClusterAPIGetNode request
+	ExternalClusterAPIGetNodeWithResponse(ctx context.Context, clusterId string, nodeId string) (*ExternalClusterAPIGetNodeResponse, error)
+
+	// ExternalClusterAPIDrainNode request  with any body
+	ExternalClusterAPIDrainNodeWithBodyWithResponse(ctx context.Context, clusterId string, nodeId string, contentType string, body io.Reader) (*ExternalClusterAPIDrainNodeResponse, error)
+
+	ExternalClusterAPIDrainNodeWithResponse(ctx context.Context, clusterId string, nodeId string, body ExternalClusterAPIDrainNodeJSONRequestBody) (*ExternalClusterAPIDrainNodeResponse, error)
+
+	// ExternalClusterAPIPauseCluster request
+	ExternalClusterAPIPauseClusterWithResponse(ctx context.Context, clusterId string) (*ExternalClusterAPIPauseClusterResponse, error)
+
+	// ExternalClusterAPIResumeCluster request
+	ExternalClusterAPIResumeClusterWithResponse(ctx context.Context, clusterId string) (*ExternalClusterAPIResumeClusterResponse, error)
 
 	// GetOperation request
 	GetOperationWithResponse(ctx context.Context, id string) (*GetOperationResponse, error)
@@ -5881,9 +7267,6 @@ type ClientWithResponsesInterface interface {
 	UpdateCurrentUserProfileWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*UpdateCurrentUserProfileResponse, error)
 
 	UpdateCurrentUserProfileWithResponse(ctx context.Context, body UpdateCurrentUserProfileJSONRequestBody) (*UpdateCurrentUserProfileResponse, error)
-
-	// GetExternalClustersToken request
-	GetExternalClustersTokenWithResponse(ctx context.Context, params *GetExternalClustersTokenParams) (*GetExternalClustersTokenResponse, error)
 
 	// ListOrganizations request
 	ListOrganizationsWithResponse(ctx context.Context) (*ListOrganizationsResponse, error)
@@ -5915,11 +7298,19 @@ type ClientWithResponsesInterface interface {
 	// DeleteOrganizationUser request
 	DeleteOrganizationUserWithResponse(ctx context.Context, id string, userId string) (*DeleteOrganizationUserResponse, error)
 
+	// UpdateOrganizationUser request  with any body
+	UpdateOrganizationUserWithBodyWithResponse(ctx context.Context, id string, userId string, contentType string, body io.Reader) (*UpdateOrganizationUserResponse, error)
+
+	UpdateOrganizationUserWithResponse(ctx context.Context, id string, userId string, body UpdateOrganizationUserJSONRequestBody) (*UpdateOrganizationUserResponse, error)
+
 	// ListRegions request
 	ListRegionsWithResponse(ctx context.Context) (*ListRegionsResponse, error)
 
 	// GetUsageReport request
 	GetUsageReportWithResponse(ctx context.Context, params *GetUsageReportParams) (*GetUsageReportResponse, error)
+
+	// ExternalClusterAPIGetCredentialsScriptTemplate request
+	ExternalClusterAPIGetCredentialsScriptTemplateWithResponse(ctx context.Context, provider string) (*ExternalClusterAPIGetCredentialsScriptTemplateResponse, error)
 }
 
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
@@ -6378,6 +7769,36 @@ func (r CreateOrUpdateGslbResponse) GetBody() []byte {
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
+type GetInstanceTypesResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *InstanceList
+}
+
+// Status returns HTTPResponse.Status
+func (r GetInstanceTypesResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetInstanceTypesResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r GetInstanceTypesResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
 type CreateInvitationResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -6765,14 +8186,14 @@ func (r ArchiveClusterResponse) GetBody() []byte {
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
-type GetClusterAuditLogResponse struct {
+type GetCostHistoryResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *KubernetesClusterAuditLogEventsList
+	JSON200      *ClusterCostHistoryResponse
 }
 
 // Status returns HTTPResponse.Status
-func (r GetClusterAuditLogResponse) Status() string {
+func (r GetCostHistoryResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -6780,7 +8201,7 @@ func (r GetClusterAuditLogResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r GetClusterAuditLogResponse) StatusCode() int {
+func (r GetCostHistoryResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -6789,7 +8210,65 @@ func (r GetClusterAuditLogResponse) StatusCode() int {
 
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
-func (r GetClusterAuditLogResponse) GetBody() []byte {
+func (r GetCostHistoryResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type GetClusterCpuUtilizationMetricsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+}
+
+// Status returns HTTPResponse.Status
+func (r GetClusterCpuUtilizationMetricsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetClusterCpuUtilizationMetricsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r GetClusterCpuUtilizationMetricsResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type GetClusterCurrentMetricsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+}
+
+// Status returns HTTPResponse.Status
+func (r GetClusterCurrentMetricsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetClusterCurrentMetricsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r GetClusterCurrentMetricsResponse) GetBody() []byte {
 	return r.Body
 }
 
@@ -6973,6 +8452,35 @@ func (r ConfigureClusterAddonsResponse) StatusCode() int {
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
 func (r ConfigureClusterAddonsResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type GetClusterMemoryUtilizationMetricsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+}
+
+// Status returns HTTPResponse.Status
+func (r GetClusterMemoryUtilizationMetricsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetClusterMemoryUtilizationMetricsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r GetClusterMemoryUtilizationMetricsResponse) GetBody() []byte {
 	return r.Body
 }
 
@@ -7581,6 +9089,156 @@ func (r GetProblematicWorkloadsResponse) GetBody() []byte {
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
+type GetRebalancedWorkloadsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *RebalancedWorkloads
+}
+
+// Status returns HTTPResponse.Status
+func (r GetRebalancedWorkloadsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetRebalancedWorkloadsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r GetRebalancedWorkloadsResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type ListRebalancingPlansResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *RebalancingPlansResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r ListRebalancingPlansResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r ListRebalancingPlansResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r ListRebalancingPlansResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type RebalanceResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON202      *RebalancingAccepted
+}
+
+// Status returns HTTPResponse.Status
+func (r RebalanceResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r RebalanceResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r RebalanceResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type GetRebalancingPlanResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *RebalancingPlan
+}
+
+// Status returns HTTPResponse.Status
+func (r GetRebalancingPlanResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetRebalancingPlanResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r GetRebalancingPlanResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type ExecuteRebalancingPlanResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *RebalancingPlan
+}
+
+// Status returns HTTPResponse.Status
+func (r ExecuteRebalancingPlanResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r ExecuteRebalancingPlanResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r ExecuteRebalancingPlanResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
 type ResumeClusterResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -7670,14 +9328,14 @@ func (r TriggerClusterReconcileResponse) GetBody() []byte {
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
-type ListExternalClustersResponse struct {
+type GetWorkloadsResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *ExternalClustersList
+	JSON200      *ClusterWorkloads
 }
 
 // Status returns HTTPResponse.Status
-func (r ListExternalClustersResponse) Status() string {
+func (r GetWorkloadsResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -7685,7 +9343,7 @@ func (r ListExternalClustersResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r ListExternalClustersResponse) StatusCode() int {
+func (r GetWorkloadsResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -7694,20 +9352,20 @@ func (r ListExternalClustersResponse) StatusCode() int {
 
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
-func (r ListExternalClustersResponse) GetBody() []byte {
+func (r GetWorkloadsResponse) GetBody() []byte {
 	return r.Body
 }
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
-type RegisterExternalClusterResponse struct {
+type ExternalClusterAPIListClustersResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *ExternalCluster
+	JSON200      *ExternalclusterV1ListClustersResponse
 }
 
 // Status returns HTTPResponse.Status
-func (r RegisterExternalClusterResponse) Status() string {
+func (r ExternalClusterAPIListClustersResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -7715,7 +9373,7 @@ func (r RegisterExternalClusterResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r RegisterExternalClusterResponse) StatusCode() int {
+func (r ExternalClusterAPIListClustersResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -7724,7 +9382,37 @@ func (r RegisterExternalClusterResponse) StatusCode() int {
 
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
-func (r RegisterExternalClusterResponse) GetBody() []byte {
+func (r ExternalClusterAPIListClustersResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type ExternalClusterAPIRegisterClusterResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *ExternalclusterV1Cluster
+}
+
+// Status returns HTTPResponse.Status
+func (r ExternalClusterAPIRegisterClusterResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r ExternalClusterAPIRegisterClusterResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r ExternalClusterAPIRegisterClusterResponse) GetBody() []byte {
 	return r.Body
 }
 
@@ -7760,13 +9448,13 @@ func (r GetExternalClusterOperationResponse) GetBody() []byte {
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
-type DeleteExternalClusterResponse struct {
+type PrometheusRawMetricsResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 }
 
 // Status returns HTTPResponse.Status
-func (r DeleteExternalClusterResponse) Status() string {
+func (r PrometheusRawMetricsResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -7774,7 +9462,7 @@ func (r DeleteExternalClusterResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r DeleteExternalClusterResponse) StatusCode() int {
+func (r PrometheusRawMetricsResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -7783,20 +9471,19 @@ func (r DeleteExternalClusterResponse) StatusCode() int {
 
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
-func (r DeleteExternalClusterResponse) GetBody() []byte {
+func (r PrometheusRawMetricsResponse) GetBody() []byte {
 	return r.Body
 }
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
-type GetExternalClusterResponse struct {
+type ExternalClusterAPIDeleteClusterResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *ExternalCluster
 }
 
 // Status returns HTTPResponse.Status
-func (r GetExternalClusterResponse) Status() string {
+func (r ExternalClusterAPIDeleteClusterResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -7804,7 +9491,7 @@ func (r GetExternalClusterResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r GetExternalClusterResponse) StatusCode() int {
+func (r ExternalClusterAPIDeleteClusterResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -7813,20 +9500,20 @@ func (r GetExternalClusterResponse) StatusCode() int {
 
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
-func (r GetExternalClusterResponse) GetBody() []byte {
+func (r ExternalClusterAPIDeleteClusterResponse) GetBody() []byte {
 	return r.Body
 }
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
-type UpdateExternalClusterResponse struct {
+type ExternalClusterAPIGetClusterResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *ExternalCluster
+	JSON200      *ExternalclusterV1Cluster
 }
 
 // Status returns HTTPResponse.Status
-func (r UpdateExternalClusterResponse) Status() string {
+func (r ExternalClusterAPIGetClusterResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -7834,7 +9521,7 @@ func (r UpdateExternalClusterResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r UpdateExternalClusterResponse) StatusCode() int {
+func (r ExternalClusterAPIGetClusterResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -7843,20 +9530,20 @@ func (r UpdateExternalClusterResponse) StatusCode() int {
 
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
-func (r UpdateExternalClusterResponse) GetBody() []byte {
+func (r ExternalClusterAPIGetClusterResponse) GetBody() []byte {
 	return r.Body
 }
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
-type GetCredentialsScriptResponse struct {
+type ExternalClusterAPIUpdateClusterResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *CredentialsScript
+	JSON200      *ExternalclusterV1Cluster
 }
 
 // Status returns HTTPResponse.Status
-func (r GetCredentialsScriptResponse) Status() string {
+func (r ExternalClusterAPIUpdateClusterResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -7864,7 +9551,7 @@ func (r GetCredentialsScriptResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r GetCredentialsScriptResponse) StatusCode() int {
+func (r ExternalClusterAPIUpdateClusterResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -7873,20 +9560,19 @@ func (r GetCredentialsScriptResponse) StatusCode() int {
 
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
-func (r GetCredentialsScriptResponse) GetBody() []byte {
+func (r ExternalClusterAPIUpdateClusterResponse) GetBody() []byte {
 	return r.Body
 }
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
-type DisconnectExternalClusterResponse struct {
+type GetExternalClusterCpuUtilizationMetricsResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *ExternalCluster
 }
 
 // Status returns HTTPResponse.Status
-func (r DisconnectExternalClusterResponse) Status() string {
+func (r GetExternalClusterCpuUtilizationMetricsResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -7894,7 +9580,7 @@ func (r DisconnectExternalClusterResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r DisconnectExternalClusterResponse) StatusCode() int {
+func (r GetExternalClusterCpuUtilizationMetricsResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -7903,20 +9589,20 @@ func (r DisconnectExternalClusterResponse) StatusCode() int {
 
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
-func (r DisconnectExternalClusterResponse) GetBody() []byte {
+func (r GetExternalClusterCpuUtilizationMetricsResponse) GetBody() []byte {
 	return r.Body
 }
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
-type GetExternalClusterKubeconfigResponse struct {
+type ExternalClusterAPIGetCredentialsScriptResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *ExternalClusterKubeconfig
+	JSON200      *ExternalclusterV1GetCredentialsScriptResponse
 }
 
 // Status returns HTTPResponse.Status
-func (r GetExternalClusterKubeconfigResponse) Status() string {
+func (r ExternalClusterAPIGetCredentialsScriptResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -7924,7 +9610,7 @@ func (r GetExternalClusterKubeconfigResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r GetExternalClusterKubeconfigResponse) StatusCode() int {
+func (r ExternalClusterAPIGetCredentialsScriptResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -7933,20 +9619,19 @@ func (r GetExternalClusterKubeconfigResponse) StatusCode() int {
 
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
-func (r GetExternalClusterKubeconfigResponse) GetBody() []byte {
+func (r ExternalClusterAPIGetCredentialsScriptResponse) GetBody() []byte {
 	return r.Body
 }
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
-type ListExternalClusterNodesResponse struct {
+type GetExternalClusterCurrentMetricsResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *ExternalClusterNodes
 }
 
 // Status returns HTTPResponse.Status
-func (r ListExternalClusterNodesResponse) Status() string {
+func (r GetExternalClusterCurrentMetricsResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -7954,7 +9639,7 @@ func (r ListExternalClusterNodesResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r ListExternalClusterNodesResponse) StatusCode() int {
+func (r GetExternalClusterCurrentMetricsResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -7963,20 +9648,20 @@ func (r ListExternalClusterNodesResponse) StatusCode() int {
 
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
-func (r ListExternalClusterNodesResponse) GetBody() []byte {
+func (r GetExternalClusterCurrentMetricsResponse) GetBody() []byte {
 	return r.Body
 }
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
-type AddExternalClusterNodeResponse struct {
+type ExternalClusterAPIDisconnectClusterResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON201      *ExternalClusterAddNodeResult
+	JSON200      *ExternalclusterV1Cluster
 }
 
 // Status returns HTTPResponse.Status
-func (r AddExternalClusterNodeResponse) Status() string {
+func (r ExternalClusterAPIDisconnectClusterResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -7984,7 +9669,7 @@ func (r AddExternalClusterNodeResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r AddExternalClusterNodeResponse) StatusCode() int {
+func (r ExternalClusterAPIDisconnectClusterResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -7993,20 +9678,20 @@ func (r AddExternalClusterNodeResponse) StatusCode() int {
 
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
-func (r AddExternalClusterNodeResponse) GetBody() []byte {
+func (r ExternalClusterAPIDisconnectClusterResponse) GetBody() []byte {
 	return r.Body
 }
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
-type DeleteExternalClusterNodeResponse struct {
+type GetEstimatedSavingsResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON201      *ExternalClusterDeleteNodeResult
+	JSON200      *EstimatedSavingsResponse
 }
 
 // Status returns HTTPResponse.Status
-func (r DeleteExternalClusterNodeResponse) Status() string {
+func (r GetEstimatedSavingsResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -8014,7 +9699,7 @@ func (r DeleteExternalClusterNodeResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r DeleteExternalClusterNodeResponse) StatusCode() int {
+func (r GetEstimatedSavingsResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -8023,20 +9708,20 @@ func (r DeleteExternalClusterNodeResponse) StatusCode() int {
 
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
-func (r DeleteExternalClusterNodeResponse) GetBody() []byte {
+func (r GetEstimatedSavingsResponse) GetBody() []byte {
 	return r.Body
 }
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
-type PauseExternalClusterResponse struct {
+type ExternalClusterAPIGetKubeconfigResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *ExternalCluster
+	JSON200      *ExternalclusterV1GetKubeconfigResponse
 }
 
 // Status returns HTTPResponse.Status
-func (r PauseExternalClusterResponse) Status() string {
+func (r ExternalClusterAPIGetKubeconfigResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -8044,7 +9729,7 @@ func (r PauseExternalClusterResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r PauseExternalClusterResponse) StatusCode() int {
+func (r ExternalClusterAPIGetKubeconfigResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -8053,19 +9738,19 @@ func (r PauseExternalClusterResponse) StatusCode() int {
 
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
-func (r PauseExternalClusterResponse) GetBody() []byte {
+func (r ExternalClusterAPIGetKubeconfigResponse) GetBody() []byte {
 	return r.Body
 }
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
-type PrometheusReadResponse struct {
+type GetExternalClusterMemoryUtilizationMetricsResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 }
 
 // Status returns HTTPResponse.Status
-func (r PrometheusReadResponse) Status() string {
+func (r GetExternalClusterMemoryUtilizationMetricsResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -8073,7 +9758,7 @@ func (r PrometheusReadResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r PrometheusReadResponse) StatusCode() int {
+func (r GetExternalClusterMemoryUtilizationMetricsResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -8082,20 +9767,20 @@ func (r PrometheusReadResponse) StatusCode() int {
 
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
-func (r PrometheusReadResponse) GetBody() []byte {
+func (r GetExternalClusterMemoryUtilizationMetricsResponse) GetBody() []byte {
 	return r.Body
 }
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
-type ResumeExternalClusterResponse struct {
+type ExternalClusterAPIGetMetricsResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *ExternalCluster
+	JSON200      *CastaiMetricsV1beta1GetClusterMetricsResponse
 }
 
 // Status returns HTTPResponse.Status
-func (r ResumeExternalClusterResponse) Status() string {
+func (r ExternalClusterAPIGetMetricsResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -8103,7 +9788,7 @@ func (r ResumeExternalClusterResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r ResumeExternalClusterResponse) StatusCode() int {
+func (r ExternalClusterAPIGetMetricsResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -8112,7 +9797,217 @@ func (r ResumeExternalClusterResponse) StatusCode() int {
 
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
-func (r ResumeExternalClusterResponse) GetBody() []byte {
+func (r ExternalClusterAPIGetMetricsResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type ExternalClusterAPIListNodesResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *CastaiClusterV1beta1ListNodesResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r ExternalClusterAPIListNodesResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r ExternalClusterAPIListNodesResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r ExternalClusterAPIListNodesResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type ExternalClusterAPIAddNodeResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *ExternalclusterV1AddNodeResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r ExternalClusterAPIAddNodeResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r ExternalClusterAPIAddNodeResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r ExternalClusterAPIAddNodeResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type ExternalClusterAPIDeleteNodeResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *ExternalclusterV1DeleteNodeResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r ExternalClusterAPIDeleteNodeResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r ExternalClusterAPIDeleteNodeResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r ExternalClusterAPIDeleteNodeResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type ExternalClusterAPIGetNodeResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *CastaiClusterV1beta1Node
+}
+
+// Status returns HTTPResponse.Status
+func (r ExternalClusterAPIGetNodeResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r ExternalClusterAPIGetNodeResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r ExternalClusterAPIGetNodeResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type ExternalClusterAPIDrainNodeResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *ExternalclusterV1DrainNodeResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r ExternalClusterAPIDrainNodeResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r ExternalClusterAPIDrainNodeResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r ExternalClusterAPIDrainNodeResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type ExternalClusterAPIPauseClusterResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *ExternalclusterV1Cluster
+}
+
+// Status returns HTTPResponse.Status
+func (r ExternalClusterAPIPauseClusterResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r ExternalClusterAPIPauseClusterResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r ExternalClusterAPIPauseClusterResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type ExternalClusterAPIResumeClusterResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *ExternalclusterV1Cluster
+}
+
+// Status returns HTTPResponse.Status
+func (r ExternalClusterAPIResumeClusterResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r ExternalClusterAPIResumeClusterResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r ExternalClusterAPIResumeClusterResponse) GetBody() []byte {
 	return r.Body
 }
 
@@ -8151,7 +10046,7 @@ func (r GetOperationResponse) GetBody() []byte {
 type CurrentUserProfileResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *UserProfile
+	JSON200      *UserProfileResponse
 }
 
 // Status returns HTTPResponse.Status
@@ -8203,36 +10098,6 @@ func (r UpdateCurrentUserProfileResponse) StatusCode() int {
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
 func (r UpdateCurrentUserProfileResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-
-type GetExternalClustersTokenResponse struct {
-	Body         []byte
-	HTTPResponse *http.Response
-	JSON200      *ExternalClusterRegistrationToken
-}
-
-// Status returns HTTPResponse.Status
-func (r GetExternalClustersTokenResponse) Status() string {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.Status
-	}
-	return http.StatusText(0)
-}
-
-// StatusCode returns HTTPResponse.StatusCode
-func (r GetExternalClustersTokenResponse) StatusCode() int {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.StatusCode
-	}
-	return 0
-}
-
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r GetExternalClustersTokenResponse) GetBody() []byte {
 	return r.Body
 }
 
@@ -8478,6 +10343,36 @@ func (r DeleteOrganizationUserResponse) GetBody() []byte {
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
+type UpdateOrganizationUserResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *OrganizationUser
+}
+
+// Status returns HTTPResponse.Status
+func (r UpdateOrganizationUserResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r UpdateOrganizationUserResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r UpdateOrganizationUserResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
 type ListRegionsResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -8533,6 +10428,35 @@ func (r GetUsageReportResponse) StatusCode() int {
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
 func (r GetUsageReportResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type ExternalClusterAPIGetCredentialsScriptTemplateResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+}
+
+// Status returns HTTPResponse.Status
+func (r ExternalClusterAPIGetCredentialsScriptTemplateResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r ExternalClusterAPIGetCredentialsScriptTemplateResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r ExternalClusterAPIGetCredentialsScriptTemplateResponse) GetBody() []byte {
 	return r.Body
 }
 
@@ -8721,6 +10645,15 @@ func (c *ClientWithResponses) CreateOrUpdateGslbWithResponse(ctx context.Context
 	return ParseCreateOrUpdateGslbResponse(rsp)
 }
 
+// GetInstanceTypesWithResponse request returning *GetInstanceTypesResponse
+func (c *ClientWithResponses) GetInstanceTypesWithResponse(ctx context.Context, params *GetInstanceTypesParams) (*GetInstanceTypesResponse, error) {
+	rsp, err := c.GetInstanceTypes(ctx, params)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetInstanceTypesResponse(rsp)
+}
+
 // CreateInvitationWithBodyWithResponse request with arbitrary body returning *CreateInvitationResponse
 func (c *ClientWithResponses) CreateInvitationWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*CreateInvitationResponse, error) {
 	rsp, err := c.CreateInvitationWithBody(ctx, contentType, body)
@@ -8886,13 +10819,31 @@ func (c *ClientWithResponses) ArchiveClusterWithResponse(ctx context.Context, cl
 	return ParseArchiveClusterResponse(rsp)
 }
 
-// GetClusterAuditLogWithResponse request returning *GetClusterAuditLogResponse
-func (c *ClientWithResponses) GetClusterAuditLogWithResponse(ctx context.Context, clusterId ClusterId) (*GetClusterAuditLogResponse, error) {
-	rsp, err := c.GetClusterAuditLog(ctx, clusterId)
+// GetCostHistoryWithResponse request returning *GetCostHistoryResponse
+func (c *ClientWithResponses) GetCostHistoryWithResponse(ctx context.Context, clusterId ClusterId, params *GetCostHistoryParams) (*GetCostHistoryResponse, error) {
+	rsp, err := c.GetCostHistory(ctx, clusterId, params)
 	if err != nil {
 		return nil, err
 	}
-	return ParseGetClusterAuditLogResponse(rsp)
+	return ParseGetCostHistoryResponse(rsp)
+}
+
+// GetClusterCpuUtilizationMetricsWithResponse request returning *GetClusterCpuUtilizationMetricsResponse
+func (c *ClientWithResponses) GetClusterCpuUtilizationMetricsWithResponse(ctx context.Context, clusterId ClusterId, params *GetClusterCpuUtilizationMetricsParams) (*GetClusterCpuUtilizationMetricsResponse, error) {
+	rsp, err := c.GetClusterCpuUtilizationMetrics(ctx, clusterId, params)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetClusterCpuUtilizationMetricsResponse(rsp)
+}
+
+// GetClusterCurrentMetricsWithResponse request returning *GetClusterCurrentMetricsResponse
+func (c *ClientWithResponses) GetClusterCurrentMetricsWithResponse(ctx context.Context, clusterId ClusterId) (*GetClusterCurrentMetricsResponse, error) {
+	rsp, err := c.GetClusterCurrentMetrics(ctx, clusterId)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetClusterCurrentMetricsResponse(rsp)
 }
 
 // GetClusterFeedbackEventsWithResponse request returning *GetClusterFeedbackEventsResponse
@@ -8957,6 +10908,15 @@ func (c *ClientWithResponses) ConfigureClusterAddonsWithResponse(ctx context.Con
 	return ParseConfigureClusterAddonsResponse(rsp)
 }
 
+// GetClusterMemoryUtilizationMetricsWithResponse request returning *GetClusterMemoryUtilizationMetricsResponse
+func (c *ClientWithResponses) GetClusterMemoryUtilizationMetricsWithResponse(ctx context.Context, clusterId ClusterId, params *GetClusterMemoryUtilizationMetricsParams) (*GetClusterMemoryUtilizationMetricsResponse, error) {
+	rsp, err := c.GetClusterMemoryUtilizationMetrics(ctx, clusterId, params)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetClusterMemoryUtilizationMetricsResponse(rsp)
+}
+
 // GetClusterMetricsWithResponse request returning *GetClusterMetricsResponse
 func (c *ClientWithResponses) GetClusterMetricsWithResponse(ctx context.Context, clusterId ClusterId, params *GetClusterMetricsParams) (*GetClusterMetricsResponse, error) {
 	rsp, err := c.GetClusterMetrics(ctx, clusterId, params)
@@ -8994,8 +10954,8 @@ func (c *ClientWithResponses) GetNodeConstraintsWithResponse(ctx context.Context
 }
 
 // GetClusterNodesWithResponse request returning *GetClusterNodesResponse
-func (c *ClientWithResponses) GetClusterNodesWithResponse(ctx context.Context, clusterId ClusterId) (*GetClusterNodesResponse, error) {
-	rsp, err := c.GetClusterNodes(ctx, clusterId)
+func (c *ClientWithResponses) GetClusterNodesWithResponse(ctx context.Context, clusterId ClusterId, params *GetClusterNodesParams) (*GetClusterNodesResponse, error) {
+	rsp, err := c.GetClusterNodes(ctx, clusterId, params)
 	if err != nil {
 		return nil, err
 	}
@@ -9185,6 +11145,67 @@ func (c *ClientWithResponses) GetProblematicWorkloadsWithResponse(ctx context.Co
 	return ParseGetProblematicWorkloadsResponse(rsp)
 }
 
+// GetRebalancedWorkloadsWithResponse request returning *GetRebalancedWorkloadsResponse
+func (c *ClientWithResponses) GetRebalancedWorkloadsWithResponse(ctx context.Context, clusterId ClusterId) (*GetRebalancedWorkloadsResponse, error) {
+	rsp, err := c.GetRebalancedWorkloads(ctx, clusterId)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetRebalancedWorkloadsResponse(rsp)
+}
+
+// ListRebalancingPlansWithResponse request returning *ListRebalancingPlansResponse
+func (c *ClientWithResponses) ListRebalancingPlansWithResponse(ctx context.Context, clusterId ClusterId, params *ListRebalancingPlansParams) (*ListRebalancingPlansResponse, error) {
+	rsp, err := c.ListRebalancingPlans(ctx, clusterId, params)
+	if err != nil {
+		return nil, err
+	}
+	return ParseListRebalancingPlansResponse(rsp)
+}
+
+// RebalanceWithBodyWithResponse request with arbitrary body returning *RebalanceResponse
+func (c *ClientWithResponses) RebalanceWithBodyWithResponse(ctx context.Context, clusterId ClusterId, contentType string, body io.Reader) (*RebalanceResponse, error) {
+	rsp, err := c.RebalanceWithBody(ctx, clusterId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseRebalanceResponse(rsp)
+}
+
+func (c *ClientWithResponses) RebalanceWithResponse(ctx context.Context, clusterId ClusterId, body RebalanceJSONRequestBody) (*RebalanceResponse, error) {
+	rsp, err := c.Rebalance(ctx, clusterId, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseRebalanceResponse(rsp)
+}
+
+// GetRebalancingPlanWithResponse request returning *GetRebalancingPlanResponse
+func (c *ClientWithResponses) GetRebalancingPlanWithResponse(ctx context.Context, clusterId ClusterId, rebalancingPlanId string) (*GetRebalancingPlanResponse, error) {
+	rsp, err := c.GetRebalancingPlan(ctx, clusterId, rebalancingPlanId)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetRebalancingPlanResponse(rsp)
+}
+
+// ExecuteRebalancingPlanWithBodyWithResponse request with arbitrary body returning *ExecuteRebalancingPlanResponse
+func (c *ClientWithResponses) ExecuteRebalancingPlanWithBodyWithResponse(ctx context.Context, clusterId ClusterId, rebalancingPlanId string, contentType string, body io.Reader) (*ExecuteRebalancingPlanResponse, error) {
+	rsp, err := c.ExecuteRebalancingPlanWithBody(ctx, clusterId, rebalancingPlanId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseExecuteRebalancingPlanResponse(rsp)
+}
+
+func (c *ClientWithResponses) ExecuteRebalancingPlanWithResponse(ctx context.Context, clusterId ClusterId, rebalancingPlanId string, body ExecuteRebalancingPlanJSONRequestBody) (*ExecuteRebalancingPlanResponse, error) {
+	rsp, err := c.ExecuteRebalancingPlan(ctx, clusterId, rebalancingPlanId, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseExecuteRebalancingPlanResponse(rsp)
+}
+
 // ResumeClusterWithResponse request returning *ResumeClusterResponse
 func (c *ClientWithResponses) ResumeClusterWithResponse(ctx context.Context, clusterId ClusterId) (*ResumeClusterResponse, error) {
 	rsp, err := c.ResumeCluster(ctx, clusterId)
@@ -9212,30 +11233,39 @@ func (c *ClientWithResponses) TriggerClusterReconcileWithResponse(ctx context.Co
 	return ParseTriggerClusterReconcileResponse(rsp)
 }
 
-// ListExternalClustersWithResponse request returning *ListExternalClustersResponse
-func (c *ClientWithResponses) ListExternalClustersWithResponse(ctx context.Context, params *ListExternalClustersParams) (*ListExternalClustersResponse, error) {
-	rsp, err := c.ListExternalClusters(ctx, params)
+// GetWorkloadsWithResponse request returning *GetWorkloadsResponse
+func (c *ClientWithResponses) GetWorkloadsWithResponse(ctx context.Context, clusterId ClusterId) (*GetWorkloadsResponse, error) {
+	rsp, err := c.GetWorkloads(ctx, clusterId)
 	if err != nil {
 		return nil, err
 	}
-	return ParseListExternalClustersResponse(rsp)
+	return ParseGetWorkloadsResponse(rsp)
 }
 
-// RegisterExternalClusterWithBodyWithResponse request with arbitrary body returning *RegisterExternalClusterResponse
-func (c *ClientWithResponses) RegisterExternalClusterWithBodyWithResponse(ctx context.Context, params *RegisterExternalClusterParams, contentType string, body io.Reader) (*RegisterExternalClusterResponse, error) {
-	rsp, err := c.RegisterExternalClusterWithBody(ctx, params, contentType, body)
+// ExternalClusterAPIListClustersWithResponse request returning *ExternalClusterAPIListClustersResponse
+func (c *ClientWithResponses) ExternalClusterAPIListClustersWithResponse(ctx context.Context) (*ExternalClusterAPIListClustersResponse, error) {
+	rsp, err := c.ExternalClusterAPIListClusters(ctx)
 	if err != nil {
 		return nil, err
 	}
-	return ParseRegisterExternalClusterResponse(rsp)
+	return ParseExternalClusterAPIListClustersResponse(rsp)
 }
 
-func (c *ClientWithResponses) RegisterExternalClusterWithResponse(ctx context.Context, params *RegisterExternalClusterParams, body RegisterExternalClusterJSONRequestBody) (*RegisterExternalClusterResponse, error) {
-	rsp, err := c.RegisterExternalCluster(ctx, params, body)
+// ExternalClusterAPIRegisterClusterWithBodyWithResponse request with arbitrary body returning *ExternalClusterAPIRegisterClusterResponse
+func (c *ClientWithResponses) ExternalClusterAPIRegisterClusterWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*ExternalClusterAPIRegisterClusterResponse, error) {
+	rsp, err := c.ExternalClusterAPIRegisterClusterWithBody(ctx, contentType, body)
 	if err != nil {
 		return nil, err
 	}
-	return ParseRegisterExternalClusterResponse(rsp)
+	return ParseExternalClusterAPIRegisterClusterResponse(rsp)
+}
+
+func (c *ClientWithResponses) ExternalClusterAPIRegisterClusterWithResponse(ctx context.Context, body ExternalClusterAPIRegisterClusterJSONRequestBody) (*ExternalClusterAPIRegisterClusterResponse, error) {
+	rsp, err := c.ExternalClusterAPIRegisterCluster(ctx, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseExternalClusterAPIRegisterClusterResponse(rsp)
 }
 
 // GetExternalClusterOperationWithResponse request returning *GetExternalClusterOperationResponse
@@ -9247,136 +11277,207 @@ func (c *ClientWithResponses) GetExternalClusterOperationWithResponse(ctx contex
 	return ParseGetExternalClusterOperationResponse(rsp)
 }
 
-// DeleteExternalClusterWithResponse request returning *DeleteExternalClusterResponse
-func (c *ClientWithResponses) DeleteExternalClusterWithResponse(ctx context.Context, clusterId string, params *DeleteExternalClusterParams) (*DeleteExternalClusterResponse, error) {
-	rsp, err := c.DeleteExternalCluster(ctx, clusterId, params)
+// PrometheusRawMetricsWithResponse request returning *PrometheusRawMetricsResponse
+func (c *ClientWithResponses) PrometheusRawMetricsWithResponse(ctx context.Context, params *PrometheusRawMetricsParams) (*PrometheusRawMetricsResponse, error) {
+	rsp, err := c.PrometheusRawMetrics(ctx, params)
 	if err != nil {
 		return nil, err
 	}
-	return ParseDeleteExternalClusterResponse(rsp)
+	return ParsePrometheusRawMetricsResponse(rsp)
 }
 
-// GetExternalClusterWithResponse request returning *GetExternalClusterResponse
-func (c *ClientWithResponses) GetExternalClusterWithResponse(ctx context.Context, clusterId string, params *GetExternalClusterParams) (*GetExternalClusterResponse, error) {
-	rsp, err := c.GetExternalCluster(ctx, clusterId, params)
+// ExternalClusterAPIDeleteClusterWithResponse request returning *ExternalClusterAPIDeleteClusterResponse
+func (c *ClientWithResponses) ExternalClusterAPIDeleteClusterWithResponse(ctx context.Context, clusterId string) (*ExternalClusterAPIDeleteClusterResponse, error) {
+	rsp, err := c.ExternalClusterAPIDeleteCluster(ctx, clusterId)
 	if err != nil {
 		return nil, err
 	}
-	return ParseGetExternalClusterResponse(rsp)
+	return ParseExternalClusterAPIDeleteClusterResponse(rsp)
 }
 
-// UpdateExternalClusterWithBodyWithResponse request with arbitrary body returning *UpdateExternalClusterResponse
-func (c *ClientWithResponses) UpdateExternalClusterWithBodyWithResponse(ctx context.Context, clusterId string, params *UpdateExternalClusterParams, contentType string, body io.Reader) (*UpdateExternalClusterResponse, error) {
-	rsp, err := c.UpdateExternalClusterWithBody(ctx, clusterId, params, contentType, body)
+// ExternalClusterAPIGetClusterWithResponse request returning *ExternalClusterAPIGetClusterResponse
+func (c *ClientWithResponses) ExternalClusterAPIGetClusterWithResponse(ctx context.Context, clusterId string) (*ExternalClusterAPIGetClusterResponse, error) {
+	rsp, err := c.ExternalClusterAPIGetCluster(ctx, clusterId)
 	if err != nil {
 		return nil, err
 	}
-	return ParseUpdateExternalClusterResponse(rsp)
+	return ParseExternalClusterAPIGetClusterResponse(rsp)
 }
 
-func (c *ClientWithResponses) UpdateExternalClusterWithResponse(ctx context.Context, clusterId string, params *UpdateExternalClusterParams, body UpdateExternalClusterJSONRequestBody) (*UpdateExternalClusterResponse, error) {
-	rsp, err := c.UpdateExternalCluster(ctx, clusterId, params, body)
+// ExternalClusterAPIUpdateClusterWithBodyWithResponse request with arbitrary body returning *ExternalClusterAPIUpdateClusterResponse
+func (c *ClientWithResponses) ExternalClusterAPIUpdateClusterWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader) (*ExternalClusterAPIUpdateClusterResponse, error) {
+	rsp, err := c.ExternalClusterAPIUpdateClusterWithBody(ctx, clusterId, contentType, body)
 	if err != nil {
 		return nil, err
 	}
-	return ParseUpdateExternalClusterResponse(rsp)
+	return ParseExternalClusterAPIUpdateClusterResponse(rsp)
 }
 
-// GetCredentialsScriptWithResponse request returning *GetCredentialsScriptResponse
-func (c *ClientWithResponses) GetCredentialsScriptWithResponse(ctx context.Context, clusterId string, params *GetCredentialsScriptParams) (*GetCredentialsScriptResponse, error) {
-	rsp, err := c.GetCredentialsScript(ctx, clusterId, params)
+func (c *ClientWithResponses) ExternalClusterAPIUpdateClusterWithResponse(ctx context.Context, clusterId string, body ExternalClusterAPIUpdateClusterJSONRequestBody) (*ExternalClusterAPIUpdateClusterResponse, error) {
+	rsp, err := c.ExternalClusterAPIUpdateCluster(ctx, clusterId, body)
 	if err != nil {
 		return nil, err
 	}
-	return ParseGetCredentialsScriptResponse(rsp)
+	return ParseExternalClusterAPIUpdateClusterResponse(rsp)
 }
 
-// DisconnectExternalClusterWithBodyWithResponse request with arbitrary body returning *DisconnectExternalClusterResponse
-func (c *ClientWithResponses) DisconnectExternalClusterWithBodyWithResponse(ctx context.Context, clusterId ClusterId, params *DisconnectExternalClusterParams, contentType string, body io.Reader) (*DisconnectExternalClusterResponse, error) {
-	rsp, err := c.DisconnectExternalClusterWithBody(ctx, clusterId, params, contentType, body)
+// GetExternalClusterCpuUtilizationMetricsWithResponse request returning *GetExternalClusterCpuUtilizationMetricsResponse
+func (c *ClientWithResponses) GetExternalClusterCpuUtilizationMetricsWithResponse(ctx context.Context, clusterId ClusterId, params *GetExternalClusterCpuUtilizationMetricsParams) (*GetExternalClusterCpuUtilizationMetricsResponse, error) {
+	rsp, err := c.GetExternalClusterCpuUtilizationMetrics(ctx, clusterId, params)
 	if err != nil {
 		return nil, err
 	}
-	return ParseDisconnectExternalClusterResponse(rsp)
+	return ParseGetExternalClusterCpuUtilizationMetricsResponse(rsp)
 }
 
-func (c *ClientWithResponses) DisconnectExternalClusterWithResponse(ctx context.Context, clusterId ClusterId, params *DisconnectExternalClusterParams, body DisconnectExternalClusterJSONRequestBody) (*DisconnectExternalClusterResponse, error) {
-	rsp, err := c.DisconnectExternalCluster(ctx, clusterId, params, body)
+// ExternalClusterAPIGetCredentialsScriptWithResponse request returning *ExternalClusterAPIGetCredentialsScriptResponse
+func (c *ClientWithResponses) ExternalClusterAPIGetCredentialsScriptWithResponse(ctx context.Context, clusterId string) (*ExternalClusterAPIGetCredentialsScriptResponse, error) {
+	rsp, err := c.ExternalClusterAPIGetCredentialsScript(ctx, clusterId)
 	if err != nil {
 		return nil, err
 	}
-	return ParseDisconnectExternalClusterResponse(rsp)
+	return ParseExternalClusterAPIGetCredentialsScriptResponse(rsp)
 }
 
-// GetExternalClusterKubeconfigWithResponse request returning *GetExternalClusterKubeconfigResponse
-func (c *ClientWithResponses) GetExternalClusterKubeconfigWithResponse(ctx context.Context, clusterId string, params *GetExternalClusterKubeconfigParams) (*GetExternalClusterKubeconfigResponse, error) {
-	rsp, err := c.GetExternalClusterKubeconfig(ctx, clusterId, params)
+// GetExternalClusterCurrentMetricsWithResponse request returning *GetExternalClusterCurrentMetricsResponse
+func (c *ClientWithResponses) GetExternalClusterCurrentMetricsWithResponse(ctx context.Context, clusterId ClusterId) (*GetExternalClusterCurrentMetricsResponse, error) {
+	rsp, err := c.GetExternalClusterCurrentMetrics(ctx, clusterId)
 	if err != nil {
 		return nil, err
 	}
-	return ParseGetExternalClusterKubeconfigResponse(rsp)
+	return ParseGetExternalClusterCurrentMetricsResponse(rsp)
 }
 
-// ListExternalClusterNodesWithResponse request returning *ListExternalClusterNodesResponse
-func (c *ClientWithResponses) ListExternalClusterNodesWithResponse(ctx context.Context, clusterId string, params *ListExternalClusterNodesParams) (*ListExternalClusterNodesResponse, error) {
-	rsp, err := c.ListExternalClusterNodes(ctx, clusterId, params)
+// ExternalClusterAPIDisconnectClusterWithBodyWithResponse request with arbitrary body returning *ExternalClusterAPIDisconnectClusterResponse
+func (c *ClientWithResponses) ExternalClusterAPIDisconnectClusterWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader) (*ExternalClusterAPIDisconnectClusterResponse, error) {
+	rsp, err := c.ExternalClusterAPIDisconnectClusterWithBody(ctx, clusterId, contentType, body)
 	if err != nil {
 		return nil, err
 	}
-	return ParseListExternalClusterNodesResponse(rsp)
+	return ParseExternalClusterAPIDisconnectClusterResponse(rsp)
 }
 
-// AddExternalClusterNodeWithBodyWithResponse request with arbitrary body returning *AddExternalClusterNodeResponse
-func (c *ClientWithResponses) AddExternalClusterNodeWithBodyWithResponse(ctx context.Context, clusterId string, params *AddExternalClusterNodeParams, contentType string, body io.Reader) (*AddExternalClusterNodeResponse, error) {
-	rsp, err := c.AddExternalClusterNodeWithBody(ctx, clusterId, params, contentType, body)
+func (c *ClientWithResponses) ExternalClusterAPIDisconnectClusterWithResponse(ctx context.Context, clusterId string, body ExternalClusterAPIDisconnectClusterJSONRequestBody) (*ExternalClusterAPIDisconnectClusterResponse, error) {
+	rsp, err := c.ExternalClusterAPIDisconnectCluster(ctx, clusterId, body)
 	if err != nil {
 		return nil, err
 	}
-	return ParseAddExternalClusterNodeResponse(rsp)
+	return ParseExternalClusterAPIDisconnectClusterResponse(rsp)
 }
 
-func (c *ClientWithResponses) AddExternalClusterNodeWithResponse(ctx context.Context, clusterId string, params *AddExternalClusterNodeParams, body AddExternalClusterNodeJSONRequestBody) (*AddExternalClusterNodeResponse, error) {
-	rsp, err := c.AddExternalClusterNode(ctx, clusterId, params, body)
+// GetEstimatedSavingsWithResponse request returning *GetEstimatedSavingsResponse
+func (c *ClientWithResponses) GetEstimatedSavingsWithResponse(ctx context.Context, clusterId ClusterId) (*GetEstimatedSavingsResponse, error) {
+	rsp, err := c.GetEstimatedSavings(ctx, clusterId)
 	if err != nil {
 		return nil, err
 	}
-	return ParseAddExternalClusterNodeResponse(rsp)
+	return ParseGetEstimatedSavingsResponse(rsp)
 }
 
-// DeleteExternalClusterNodeWithResponse request returning *DeleteExternalClusterNodeResponse
-func (c *ClientWithResponses) DeleteExternalClusterNodeWithResponse(ctx context.Context, clusterId string, nodeId string, params *DeleteExternalClusterNodeParams) (*DeleteExternalClusterNodeResponse, error) {
-	rsp, err := c.DeleteExternalClusterNode(ctx, clusterId, nodeId, params)
+// ExternalClusterAPIGetKubeconfigWithResponse request returning *ExternalClusterAPIGetKubeconfigResponse
+func (c *ClientWithResponses) ExternalClusterAPIGetKubeconfigWithResponse(ctx context.Context, clusterId string) (*ExternalClusterAPIGetKubeconfigResponse, error) {
+	rsp, err := c.ExternalClusterAPIGetKubeconfig(ctx, clusterId)
 	if err != nil {
 		return nil, err
 	}
-	return ParseDeleteExternalClusterNodeResponse(rsp)
+	return ParseExternalClusterAPIGetKubeconfigResponse(rsp)
 }
 
-// PauseExternalClusterWithResponse request returning *PauseExternalClusterResponse
-func (c *ClientWithResponses) PauseExternalClusterWithResponse(ctx context.Context, clusterId ClusterId, params *PauseExternalClusterParams) (*PauseExternalClusterResponse, error) {
-	rsp, err := c.PauseExternalCluster(ctx, clusterId, params)
+// GetExternalClusterMemoryUtilizationMetricsWithResponse request returning *GetExternalClusterMemoryUtilizationMetricsResponse
+func (c *ClientWithResponses) GetExternalClusterMemoryUtilizationMetricsWithResponse(ctx context.Context, clusterId ClusterId, params *GetExternalClusterMemoryUtilizationMetricsParams) (*GetExternalClusterMemoryUtilizationMetricsResponse, error) {
+	rsp, err := c.GetExternalClusterMemoryUtilizationMetrics(ctx, clusterId, params)
 	if err != nil {
 		return nil, err
 	}
-	return ParsePauseExternalClusterResponse(rsp)
+	return ParseGetExternalClusterMemoryUtilizationMetricsResponse(rsp)
 }
 
-// PrometheusReadWithResponse request returning *PrometheusReadResponse
-func (c *ClientWithResponses) PrometheusReadWithResponse(ctx context.Context, clusterId ClusterId, params *PrometheusReadParams) (*PrometheusReadResponse, error) {
-	rsp, err := c.PrometheusRead(ctx, clusterId, params)
+// ExternalClusterAPIGetMetricsWithResponse request returning *ExternalClusterAPIGetMetricsResponse
+func (c *ClientWithResponses) ExternalClusterAPIGetMetricsWithResponse(ctx context.Context, clusterId string, params *ExternalClusterAPIGetMetricsParams) (*ExternalClusterAPIGetMetricsResponse, error) {
+	rsp, err := c.ExternalClusterAPIGetMetrics(ctx, clusterId, params)
 	if err != nil {
 		return nil, err
 	}
-	return ParsePrometheusReadResponse(rsp)
+	return ParseExternalClusterAPIGetMetricsResponse(rsp)
 }
 
-// ResumeExternalClusterWithResponse request returning *ResumeExternalClusterResponse
-func (c *ClientWithResponses) ResumeExternalClusterWithResponse(ctx context.Context, clusterId ClusterId, params *ResumeExternalClusterParams) (*ResumeExternalClusterResponse, error) {
-	rsp, err := c.ResumeExternalCluster(ctx, clusterId, params)
+// ExternalClusterAPIListNodesWithResponse request returning *ExternalClusterAPIListNodesResponse
+func (c *ClientWithResponses) ExternalClusterAPIListNodesWithResponse(ctx context.Context, clusterId string, params *ExternalClusterAPIListNodesParams) (*ExternalClusterAPIListNodesResponse, error) {
+	rsp, err := c.ExternalClusterAPIListNodes(ctx, clusterId, params)
 	if err != nil {
 		return nil, err
 	}
-	return ParseResumeExternalClusterResponse(rsp)
+	return ParseExternalClusterAPIListNodesResponse(rsp)
+}
+
+// ExternalClusterAPIAddNodeWithBodyWithResponse request with arbitrary body returning *ExternalClusterAPIAddNodeResponse
+func (c *ClientWithResponses) ExternalClusterAPIAddNodeWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader) (*ExternalClusterAPIAddNodeResponse, error) {
+	rsp, err := c.ExternalClusterAPIAddNodeWithBody(ctx, clusterId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseExternalClusterAPIAddNodeResponse(rsp)
+}
+
+func (c *ClientWithResponses) ExternalClusterAPIAddNodeWithResponse(ctx context.Context, clusterId string, body ExternalClusterAPIAddNodeJSONRequestBody) (*ExternalClusterAPIAddNodeResponse, error) {
+	rsp, err := c.ExternalClusterAPIAddNode(ctx, clusterId, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseExternalClusterAPIAddNodeResponse(rsp)
+}
+
+// ExternalClusterAPIDeleteNodeWithResponse request returning *ExternalClusterAPIDeleteNodeResponse
+func (c *ClientWithResponses) ExternalClusterAPIDeleteNodeWithResponse(ctx context.Context, clusterId string, nodeId string, params *ExternalClusterAPIDeleteNodeParams) (*ExternalClusterAPIDeleteNodeResponse, error) {
+	rsp, err := c.ExternalClusterAPIDeleteNode(ctx, clusterId, nodeId, params)
+	if err != nil {
+		return nil, err
+	}
+	return ParseExternalClusterAPIDeleteNodeResponse(rsp)
+}
+
+// ExternalClusterAPIGetNodeWithResponse request returning *ExternalClusterAPIGetNodeResponse
+func (c *ClientWithResponses) ExternalClusterAPIGetNodeWithResponse(ctx context.Context, clusterId string, nodeId string) (*ExternalClusterAPIGetNodeResponse, error) {
+	rsp, err := c.ExternalClusterAPIGetNode(ctx, clusterId, nodeId)
+	if err != nil {
+		return nil, err
+	}
+	return ParseExternalClusterAPIGetNodeResponse(rsp)
+}
+
+// ExternalClusterAPIDrainNodeWithBodyWithResponse request with arbitrary body returning *ExternalClusterAPIDrainNodeResponse
+func (c *ClientWithResponses) ExternalClusterAPIDrainNodeWithBodyWithResponse(ctx context.Context, clusterId string, nodeId string, contentType string, body io.Reader) (*ExternalClusterAPIDrainNodeResponse, error) {
+	rsp, err := c.ExternalClusterAPIDrainNodeWithBody(ctx, clusterId, nodeId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseExternalClusterAPIDrainNodeResponse(rsp)
+}
+
+func (c *ClientWithResponses) ExternalClusterAPIDrainNodeWithResponse(ctx context.Context, clusterId string, nodeId string, body ExternalClusterAPIDrainNodeJSONRequestBody) (*ExternalClusterAPIDrainNodeResponse, error) {
+	rsp, err := c.ExternalClusterAPIDrainNode(ctx, clusterId, nodeId, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseExternalClusterAPIDrainNodeResponse(rsp)
+}
+
+// ExternalClusterAPIPauseClusterWithResponse request returning *ExternalClusterAPIPauseClusterResponse
+func (c *ClientWithResponses) ExternalClusterAPIPauseClusterWithResponse(ctx context.Context, clusterId string) (*ExternalClusterAPIPauseClusterResponse, error) {
+	rsp, err := c.ExternalClusterAPIPauseCluster(ctx, clusterId)
+	if err != nil {
+		return nil, err
+	}
+	return ParseExternalClusterAPIPauseClusterResponse(rsp)
+}
+
+// ExternalClusterAPIResumeClusterWithResponse request returning *ExternalClusterAPIResumeClusterResponse
+func (c *ClientWithResponses) ExternalClusterAPIResumeClusterWithResponse(ctx context.Context, clusterId string) (*ExternalClusterAPIResumeClusterResponse, error) {
+	rsp, err := c.ExternalClusterAPIResumeCluster(ctx, clusterId)
+	if err != nil {
+		return nil, err
+	}
+	return ParseExternalClusterAPIResumeClusterResponse(rsp)
 }
 
 // GetOperationWithResponse request returning *GetOperationResponse
@@ -9412,15 +11513,6 @@ func (c *ClientWithResponses) UpdateCurrentUserProfileWithResponse(ctx context.C
 		return nil, err
 	}
 	return ParseUpdateCurrentUserProfileResponse(rsp)
-}
-
-// GetExternalClustersTokenWithResponse request returning *GetExternalClustersTokenResponse
-func (c *ClientWithResponses) GetExternalClustersTokenWithResponse(ctx context.Context, params *GetExternalClustersTokenParams) (*GetExternalClustersTokenResponse, error) {
-	rsp, err := c.GetExternalClustersToken(ctx, params)
-	if err != nil {
-		return nil, err
-	}
-	return ParseGetExternalClustersTokenResponse(rsp)
 }
 
 // ListOrganizationsWithResponse request returning *ListOrganizationsResponse
@@ -9519,6 +11611,23 @@ func (c *ClientWithResponses) DeleteOrganizationUserWithResponse(ctx context.Con
 	return ParseDeleteOrganizationUserResponse(rsp)
 }
 
+// UpdateOrganizationUserWithBodyWithResponse request with arbitrary body returning *UpdateOrganizationUserResponse
+func (c *ClientWithResponses) UpdateOrganizationUserWithBodyWithResponse(ctx context.Context, id string, userId string, contentType string, body io.Reader) (*UpdateOrganizationUserResponse, error) {
+	rsp, err := c.UpdateOrganizationUserWithBody(ctx, id, userId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseUpdateOrganizationUserResponse(rsp)
+}
+
+func (c *ClientWithResponses) UpdateOrganizationUserWithResponse(ctx context.Context, id string, userId string, body UpdateOrganizationUserJSONRequestBody) (*UpdateOrganizationUserResponse, error) {
+	rsp, err := c.UpdateOrganizationUser(ctx, id, userId, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseUpdateOrganizationUserResponse(rsp)
+}
+
 // ListRegionsWithResponse request returning *ListRegionsResponse
 func (c *ClientWithResponses) ListRegionsWithResponse(ctx context.Context) (*ListRegionsResponse, error) {
 	rsp, err := c.ListRegions(ctx)
@@ -9535,6 +11644,15 @@ func (c *ClientWithResponses) GetUsageReportWithResponse(ctx context.Context, pa
 		return nil, err
 	}
 	return ParseGetUsageReportResponse(rsp)
+}
+
+// ExternalClusterAPIGetCredentialsScriptTemplateWithResponse request returning *ExternalClusterAPIGetCredentialsScriptTemplateResponse
+func (c *ClientWithResponses) ExternalClusterAPIGetCredentialsScriptTemplateWithResponse(ctx context.Context, provider string) (*ExternalClusterAPIGetCredentialsScriptTemplateResponse, error) {
+	rsp, err := c.ExternalClusterAPIGetCredentialsScriptTemplate(ctx, provider)
+	if err != nil {
+		return nil, err
+	}
+	return ParseExternalClusterAPIGetCredentialsScriptTemplateResponse(rsp)
 }
 
 // ParseListAddonsResponse parses an HTTP response from a ListAddonsWithResponse call
@@ -9906,6 +12024,32 @@ func ParseCreateOrUpdateGslbResponse(rsp *http.Response) (*CreateOrUpdateGslbRes
 	return response, nil
 }
 
+// ParseGetInstanceTypesResponse parses an HTTP response from a GetInstanceTypesWithResponse call
+func ParseGetInstanceTypesResponse(rsp *http.Response) (*GetInstanceTypesResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetInstanceTypesResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest InstanceList
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
 // ParseCreateInvitationResponse parses an HTTP response from a CreateInvitationWithResponse call
 func ParseCreateInvitationResponse(rsp *http.Response) (*CreateInvitationResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
@@ -10223,27 +12367,65 @@ func ParseArchiveClusterResponse(rsp *http.Response) (*ArchiveClusterResponse, e
 	return response, nil
 }
 
-// ParseGetClusterAuditLogResponse parses an HTTP response from a GetClusterAuditLogWithResponse call
-func ParseGetClusterAuditLogResponse(rsp *http.Response) (*GetClusterAuditLogResponse, error) {
+// ParseGetCostHistoryResponse parses an HTTP response from a GetCostHistoryWithResponse call
+func ParseGetCostHistoryResponse(rsp *http.Response) (*GetCostHistoryResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
 	defer rsp.Body.Close()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &GetClusterAuditLogResponse{
+	response := &GetCostHistoryResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest KubernetesClusterAuditLogEventsList
+		var dest ClusterCostHistoryResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
 		response.JSON200 = &dest
 
+	}
+
+	return response, nil
+}
+
+// ParseGetClusterCpuUtilizationMetricsResponse parses an HTTP response from a GetClusterCpuUtilizationMetricsWithResponse call
+func ParseGetClusterCpuUtilizationMetricsResponse(rsp *http.Response) (*GetClusterCpuUtilizationMetricsResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetClusterCpuUtilizationMetricsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	}
+
+	return response, nil
+}
+
+// ParseGetClusterCurrentMetricsResponse parses an HTTP response from a GetClusterCurrentMetricsWithResponse call
+func ParseGetClusterCurrentMetricsResponse(rsp *http.Response) (*GetClusterCurrentMetricsResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetClusterCurrentMetricsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
 	}
 
 	return response, nil
@@ -10421,6 +12603,25 @@ func ParseConfigureClusterAddonsResponse(rsp *http.Response) (*ConfigureClusterA
 		}
 		response.JSON409 = &dest
 
+	}
+
+	return response, nil
+}
+
+// ParseGetClusterMemoryUtilizationMetricsResponse parses an HTTP response from a GetClusterMemoryUtilizationMetricsWithResponse call
+func ParseGetClusterMemoryUtilizationMetricsResponse(rsp *http.Response) (*GetClusterMemoryUtilizationMetricsResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetClusterMemoryUtilizationMetricsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
 	}
 
 	return response, nil
@@ -10967,6 +13168,136 @@ func ParseGetProblematicWorkloadsResponse(rsp *http.Response) (*GetProblematicWo
 	return response, nil
 }
 
+// ParseGetRebalancedWorkloadsResponse parses an HTTP response from a GetRebalancedWorkloadsWithResponse call
+func ParseGetRebalancedWorkloadsResponse(rsp *http.Response) (*GetRebalancedWorkloadsResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetRebalancedWorkloadsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest RebalancedWorkloads
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseListRebalancingPlansResponse parses an HTTP response from a ListRebalancingPlansWithResponse call
+func ParseListRebalancingPlansResponse(rsp *http.Response) (*ListRebalancingPlansResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &ListRebalancingPlansResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest RebalancingPlansResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseRebalanceResponse parses an HTTP response from a RebalanceWithResponse call
+func ParseRebalanceResponse(rsp *http.Response) (*RebalanceResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &RebalanceResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 202:
+		var dest RebalancingAccepted
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON202 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetRebalancingPlanResponse parses an HTTP response from a GetRebalancingPlanWithResponse call
+func ParseGetRebalancingPlanResponse(rsp *http.Response) (*GetRebalancingPlanResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetRebalancingPlanResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest RebalancingPlan
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseExecuteRebalancingPlanResponse parses an HTTP response from a ExecuteRebalancingPlanWithResponse call
+func ParseExecuteRebalancingPlanResponse(rsp *http.Response) (*ExecuteRebalancingPlanResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &ExecuteRebalancingPlanResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest RebalancingPlan
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
 // ParseResumeClusterResponse parses an HTTP response from a ResumeClusterWithResponse call
 func ParseResumeClusterResponse(rsp *http.Response) (*ResumeClusterResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
@@ -11038,22 +13369,22 @@ func ParseTriggerClusterReconcileResponse(rsp *http.Response) (*TriggerClusterRe
 	return response, nil
 }
 
-// ParseListExternalClustersResponse parses an HTTP response from a ListExternalClustersWithResponse call
-func ParseListExternalClustersResponse(rsp *http.Response) (*ListExternalClustersResponse, error) {
+// ParseGetWorkloadsResponse parses an HTTP response from a GetWorkloadsWithResponse call
+func ParseGetWorkloadsResponse(rsp *http.Response) (*GetWorkloadsResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
 	defer rsp.Body.Close()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &ListExternalClustersResponse{
+	response := &GetWorkloadsResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest ExternalClustersList
+		var dest ClusterWorkloads
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -11064,22 +13395,48 @@ func ParseListExternalClustersResponse(rsp *http.Response) (*ListExternalCluster
 	return response, nil
 }
 
-// ParseRegisterExternalClusterResponse parses an HTTP response from a RegisterExternalClusterWithResponse call
-func ParseRegisterExternalClusterResponse(rsp *http.Response) (*RegisterExternalClusterResponse, error) {
+// ParseExternalClusterAPIListClustersResponse parses an HTTP response from a ExternalClusterAPIListClustersWithResponse call
+func ParseExternalClusterAPIListClustersResponse(rsp *http.Response) (*ExternalClusterAPIListClustersResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
 	defer rsp.Body.Close()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &RegisterExternalClusterResponse{
+	response := &ExternalClusterAPIListClustersResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest ExternalCluster
+		var dest ExternalclusterV1ListClustersResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseExternalClusterAPIRegisterClusterResponse parses an HTTP response from a ExternalClusterAPIRegisterClusterWithResponse call
+func ParseExternalClusterAPIRegisterClusterResponse(rsp *http.Response) (*ExternalClusterAPIRegisterClusterResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &ExternalClusterAPIRegisterClusterResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ExternalclusterV1Cluster
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -11116,15 +13473,15 @@ func ParseGetExternalClusterOperationResponse(rsp *http.Response) (*GetExternalC
 	return response, nil
 }
 
-// ParseDeleteExternalClusterResponse parses an HTTP response from a DeleteExternalClusterWithResponse call
-func ParseDeleteExternalClusterResponse(rsp *http.Response) (*DeleteExternalClusterResponse, error) {
+// ParsePrometheusRawMetricsResponse parses an HTTP response from a PrometheusRawMetricsWithResponse call
+func ParsePrometheusRawMetricsResponse(rsp *http.Response) (*PrometheusRawMetricsResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
 	defer rsp.Body.Close()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &DeleteExternalClusterResponse{
+	response := &PrometheusRawMetricsResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
@@ -11135,22 +13492,41 @@ func ParseDeleteExternalClusterResponse(rsp *http.Response) (*DeleteExternalClus
 	return response, nil
 }
 
-// ParseGetExternalClusterResponse parses an HTTP response from a GetExternalClusterWithResponse call
-func ParseGetExternalClusterResponse(rsp *http.Response) (*GetExternalClusterResponse, error) {
+// ParseExternalClusterAPIDeleteClusterResponse parses an HTTP response from a ExternalClusterAPIDeleteClusterWithResponse call
+func ParseExternalClusterAPIDeleteClusterResponse(rsp *http.Response) (*ExternalClusterAPIDeleteClusterResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
 	defer rsp.Body.Close()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &GetExternalClusterResponse{
+	response := &ExternalClusterAPIDeleteClusterResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	}
+
+	return response, nil
+}
+
+// ParseExternalClusterAPIGetClusterResponse parses an HTTP response from a ExternalClusterAPIGetClusterWithResponse call
+func ParseExternalClusterAPIGetClusterResponse(rsp *http.Response) (*ExternalClusterAPIGetClusterResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &ExternalClusterAPIGetClusterResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest ExternalCluster
+		var dest ExternalclusterV1Cluster
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -11161,22 +13537,22 @@ func ParseGetExternalClusterResponse(rsp *http.Response) (*GetExternalClusterRes
 	return response, nil
 }
 
-// ParseUpdateExternalClusterResponse parses an HTTP response from a UpdateExternalClusterWithResponse call
-func ParseUpdateExternalClusterResponse(rsp *http.Response) (*UpdateExternalClusterResponse, error) {
+// ParseExternalClusterAPIUpdateClusterResponse parses an HTTP response from a ExternalClusterAPIUpdateClusterWithResponse call
+func ParseExternalClusterAPIUpdateClusterResponse(rsp *http.Response) (*ExternalClusterAPIUpdateClusterResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
 	defer rsp.Body.Close()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &UpdateExternalClusterResponse{
+	response := &ExternalClusterAPIUpdateClusterResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest ExternalCluster
+		var dest ExternalclusterV1Cluster
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -11187,22 +13563,41 @@ func ParseUpdateExternalClusterResponse(rsp *http.Response) (*UpdateExternalClus
 	return response, nil
 }
 
-// ParseGetCredentialsScriptResponse parses an HTTP response from a GetCredentialsScriptWithResponse call
-func ParseGetCredentialsScriptResponse(rsp *http.Response) (*GetCredentialsScriptResponse, error) {
+// ParseGetExternalClusterCpuUtilizationMetricsResponse parses an HTTP response from a GetExternalClusterCpuUtilizationMetricsWithResponse call
+func ParseGetExternalClusterCpuUtilizationMetricsResponse(rsp *http.Response) (*GetExternalClusterCpuUtilizationMetricsResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
 	defer rsp.Body.Close()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &GetCredentialsScriptResponse{
+	response := &GetExternalClusterCpuUtilizationMetricsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	}
+
+	return response, nil
+}
+
+// ParseExternalClusterAPIGetCredentialsScriptResponse parses an HTTP response from a ExternalClusterAPIGetCredentialsScriptWithResponse call
+func ParseExternalClusterAPIGetCredentialsScriptResponse(rsp *http.Response) (*ExternalClusterAPIGetCredentialsScriptResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &ExternalClusterAPIGetCredentialsScriptResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest CredentialsScript
+		var dest ExternalclusterV1GetCredentialsScriptResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -11213,22 +13608,41 @@ func ParseGetCredentialsScriptResponse(rsp *http.Response) (*GetCredentialsScrip
 	return response, nil
 }
 
-// ParseDisconnectExternalClusterResponse parses an HTTP response from a DisconnectExternalClusterWithResponse call
-func ParseDisconnectExternalClusterResponse(rsp *http.Response) (*DisconnectExternalClusterResponse, error) {
+// ParseGetExternalClusterCurrentMetricsResponse parses an HTTP response from a GetExternalClusterCurrentMetricsWithResponse call
+func ParseGetExternalClusterCurrentMetricsResponse(rsp *http.Response) (*GetExternalClusterCurrentMetricsResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
 	defer rsp.Body.Close()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &DisconnectExternalClusterResponse{
+	response := &GetExternalClusterCurrentMetricsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	}
+
+	return response, nil
+}
+
+// ParseExternalClusterAPIDisconnectClusterResponse parses an HTTP response from a ExternalClusterAPIDisconnectClusterWithResponse call
+func ParseExternalClusterAPIDisconnectClusterResponse(rsp *http.Response) (*ExternalClusterAPIDisconnectClusterResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &ExternalClusterAPIDisconnectClusterResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest ExternalCluster
+		var dest ExternalclusterV1Cluster
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -11239,22 +13653,22 @@ func ParseDisconnectExternalClusterResponse(rsp *http.Response) (*DisconnectExte
 	return response, nil
 }
 
-// ParseGetExternalClusterKubeconfigResponse parses an HTTP response from a GetExternalClusterKubeconfigWithResponse call
-func ParseGetExternalClusterKubeconfigResponse(rsp *http.Response) (*GetExternalClusterKubeconfigResponse, error) {
+// ParseGetEstimatedSavingsResponse parses an HTTP response from a GetEstimatedSavingsWithResponse call
+func ParseGetEstimatedSavingsResponse(rsp *http.Response) (*GetEstimatedSavingsResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
 	defer rsp.Body.Close()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &GetExternalClusterKubeconfigResponse{
+	response := &GetEstimatedSavingsResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest ExternalClusterKubeconfig
+		var dest EstimatedSavingsResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -11265,22 +13679,22 @@ func ParseGetExternalClusterKubeconfigResponse(rsp *http.Response) (*GetExternal
 	return response, nil
 }
 
-// ParseListExternalClusterNodesResponse parses an HTTP response from a ListExternalClusterNodesWithResponse call
-func ParseListExternalClusterNodesResponse(rsp *http.Response) (*ListExternalClusterNodesResponse, error) {
+// ParseExternalClusterAPIGetKubeconfigResponse parses an HTTP response from a ExternalClusterAPIGetKubeconfigWithResponse call
+func ParseExternalClusterAPIGetKubeconfigResponse(rsp *http.Response) (*ExternalClusterAPIGetKubeconfigResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
 	defer rsp.Body.Close()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &ListExternalClusterNodesResponse{
+	response := &ExternalClusterAPIGetKubeconfigResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest ExternalClusterNodes
+		var dest ExternalclusterV1GetKubeconfigResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -11291,74 +13705,41 @@ func ParseListExternalClusterNodesResponse(rsp *http.Response) (*ListExternalClu
 	return response, nil
 }
 
-// ParseAddExternalClusterNodeResponse parses an HTTP response from a AddExternalClusterNodeWithResponse call
-func ParseAddExternalClusterNodeResponse(rsp *http.Response) (*AddExternalClusterNodeResponse, error) {
+// ParseGetExternalClusterMemoryUtilizationMetricsResponse parses an HTTP response from a GetExternalClusterMemoryUtilizationMetricsWithResponse call
+func ParseGetExternalClusterMemoryUtilizationMetricsResponse(rsp *http.Response) (*GetExternalClusterMemoryUtilizationMetricsResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
 	defer rsp.Body.Close()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &AddExternalClusterNodeResponse{
+	response := &GetExternalClusterMemoryUtilizationMetricsResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
 
 	switch {
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 201:
-		var dest ExternalClusterAddNodeResult
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON201 = &dest
-
 	}
 
 	return response, nil
 }
 
-// ParseDeleteExternalClusterNodeResponse parses an HTTP response from a DeleteExternalClusterNodeWithResponse call
-func ParseDeleteExternalClusterNodeResponse(rsp *http.Response) (*DeleteExternalClusterNodeResponse, error) {
+// ParseExternalClusterAPIGetMetricsResponse parses an HTTP response from a ExternalClusterAPIGetMetricsWithResponse call
+func ParseExternalClusterAPIGetMetricsResponse(rsp *http.Response) (*ExternalClusterAPIGetMetricsResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
 	defer rsp.Body.Close()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &DeleteExternalClusterNodeResponse{
-		Body:         bodyBytes,
-		HTTPResponse: rsp,
-	}
-
-	switch {
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 201:
-		var dest ExternalClusterDeleteNodeResult
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON201 = &dest
-
-	}
-
-	return response, nil
-}
-
-// ParsePauseExternalClusterResponse parses an HTTP response from a PauseExternalClusterWithResponse call
-func ParsePauseExternalClusterResponse(rsp *http.Response) (*PauseExternalClusterResponse, error) {
-	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
-	if err != nil {
-		return nil, err
-	}
-
-	response := &PauseExternalClusterResponse{
+	response := &ExternalClusterAPIGetMetricsResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest ExternalCluster
+		var dest CastaiMetricsV1beta1GetClusterMetricsResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -11369,41 +13750,178 @@ func ParsePauseExternalClusterResponse(rsp *http.Response) (*PauseExternalCluste
 	return response, nil
 }
 
-// ParsePrometheusReadResponse parses an HTTP response from a PrometheusReadWithResponse call
-func ParsePrometheusReadResponse(rsp *http.Response) (*PrometheusReadResponse, error) {
+// ParseExternalClusterAPIListNodesResponse parses an HTTP response from a ExternalClusterAPIListNodesWithResponse call
+func ParseExternalClusterAPIListNodesResponse(rsp *http.Response) (*ExternalClusterAPIListNodesResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
 	defer rsp.Body.Close()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &PrometheusReadResponse{
-		Body:         bodyBytes,
-		HTTPResponse: rsp,
-	}
-
-	switch {
-	}
-
-	return response, nil
-}
-
-// ParseResumeExternalClusterResponse parses an HTTP response from a ResumeExternalClusterWithResponse call
-func ParseResumeExternalClusterResponse(rsp *http.Response) (*ResumeExternalClusterResponse, error) {
-	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
-	if err != nil {
-		return nil, err
-	}
-
-	response := &ResumeExternalClusterResponse{
+	response := &ExternalClusterAPIListNodesResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest ExternalCluster
+		var dest CastaiClusterV1beta1ListNodesResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseExternalClusterAPIAddNodeResponse parses an HTTP response from a ExternalClusterAPIAddNodeWithResponse call
+func ParseExternalClusterAPIAddNodeResponse(rsp *http.Response) (*ExternalClusterAPIAddNodeResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &ExternalClusterAPIAddNodeResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ExternalclusterV1AddNodeResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseExternalClusterAPIDeleteNodeResponse parses an HTTP response from a ExternalClusterAPIDeleteNodeWithResponse call
+func ParseExternalClusterAPIDeleteNodeResponse(rsp *http.Response) (*ExternalClusterAPIDeleteNodeResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &ExternalClusterAPIDeleteNodeResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ExternalclusterV1DeleteNodeResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseExternalClusterAPIGetNodeResponse parses an HTTP response from a ExternalClusterAPIGetNodeWithResponse call
+func ParseExternalClusterAPIGetNodeResponse(rsp *http.Response) (*ExternalClusterAPIGetNodeResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &ExternalClusterAPIGetNodeResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest CastaiClusterV1beta1Node
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseExternalClusterAPIDrainNodeResponse parses an HTTP response from a ExternalClusterAPIDrainNodeWithResponse call
+func ParseExternalClusterAPIDrainNodeResponse(rsp *http.Response) (*ExternalClusterAPIDrainNodeResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &ExternalClusterAPIDrainNodeResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ExternalclusterV1DrainNodeResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseExternalClusterAPIPauseClusterResponse parses an HTTP response from a ExternalClusterAPIPauseClusterWithResponse call
+func ParseExternalClusterAPIPauseClusterResponse(rsp *http.Response) (*ExternalClusterAPIPauseClusterResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &ExternalClusterAPIPauseClusterResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ExternalclusterV1Cluster
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseExternalClusterAPIResumeClusterResponse parses an HTTP response from a ExternalClusterAPIResumeClusterWithResponse call
+func ParseExternalClusterAPIResumeClusterResponse(rsp *http.Response) (*ExternalClusterAPIResumeClusterResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &ExternalClusterAPIResumeClusterResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ExternalclusterV1Cluster
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -11455,7 +13973,7 @@ func ParseCurrentUserProfileResponse(rsp *http.Response) (*CurrentUserProfileRes
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest UserProfile
+		var dest UserProfileResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -11482,32 +14000,6 @@ func ParseUpdateCurrentUserProfileResponse(rsp *http.Response) (*UpdateCurrentUs
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest UserProfile
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON200 = &dest
-
-	}
-
-	return response, nil
-}
-
-// ParseGetExternalClustersTokenResponse parses an HTTP response from a GetExternalClustersTokenWithResponse call
-func ParseGetExternalClustersTokenResponse(rsp *http.Response) (*GetExternalClustersTokenResponse, error) {
-	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
-	if err != nil {
-		return nil, err
-	}
-
-	response := &GetExternalClustersTokenResponse{
-		Body:         bodyBytes,
-		HTTPResponse: rsp,
-	}
-
-	switch {
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest ExternalClusterRegistrationToken
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -11726,6 +14218,32 @@ func ParseDeleteOrganizationUserResponse(rsp *http.Response) (*DeleteOrganizatio
 	return response, nil
 }
 
+// ParseUpdateOrganizationUserResponse parses an HTTP response from a UpdateOrganizationUserWithResponse call
+func ParseUpdateOrganizationUserResponse(rsp *http.Response) (*UpdateOrganizationUserResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &UpdateOrganizationUserResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest OrganizationUser
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
 // ParseListRegionsResponse parses an HTTP response from a ListRegionsWithResponse call
 func ParseListRegionsResponse(rsp *http.Response) (*ListRegionsResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
@@ -11776,6 +14294,25 @@ func ParseGetUsageReportResponse(rsp *http.Response) (*GetUsageReportResponse, e
 	case rsp.StatusCode == 200:
 		// Content-type (text/csv) unsupported
 
+	}
+
+	return response, nil
+}
+
+// ParseExternalClusterAPIGetCredentialsScriptTemplateResponse parses an HTTP response from a ExternalClusterAPIGetCredentialsScriptTemplateWithResponse call
+func ParseExternalClusterAPIGetCredentialsScriptTemplateResponse(rsp *http.Response) (*ExternalClusterAPIGetCredentialsScriptTemplateResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &ExternalClusterAPIGetCredentialsScriptTemplateResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
 	}
 
 	return response, nil

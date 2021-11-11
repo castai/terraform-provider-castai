@@ -309,11 +309,11 @@ func resourceCastaiCluster() *schema.Resource {
 func resourceCastaiClusterCreate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*ProviderConfig).api
 
-	var nodes []sdk.Node
+	var nodes []sdk.NewNode
 	for _, val := range data.Get(ClusterFieldInitializeParams + ".0." + ClusterFieldNodes).([]interface{}) {
 		nodeData := val.(map[string]interface{})
 		nodeShape := sdk.NodeShape(nodeData[ClusterFieldNodesShape].(string))
-		nodes = append(nodes, sdk.Node{
+		nodes = append(nodes, sdk.NewNode{
 			Role:  sdk.NodeType(nodeData[ClusterFieldNodesRole].(string)),
 			Cloud: sdk.CloudType(nodeData[ClusterFieldNodesCloud].(string)),
 			Shape: &nodeShape,
