@@ -34,6 +34,7 @@ func Provider() *schema.Provider {
 		DataSourcesMap: map[string]*schema.Resource{
 			"castai_credentials": dataSourceCastaiCredentials(),
 			"castai_cluster":     dataSourceCastaiCluster(),
+			"castai_gcp_user_policies":  dataSourceGcpPolicies(),
 		},
 
 		ConfigureContextFunc: providerConfigure(),

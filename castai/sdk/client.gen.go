@@ -168,6 +168,9 @@ type ClientInterface interface {
 
 	CreateNewCluster(ctx context.Context, body CreateNewClusterJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// PrometheusRawMetrics request
+	PrometheusRawMetrics(ctx context.Context, params *PrometheusRawMetricsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// DeleteCluster request
 	DeleteCluster(ctx context.Context, clusterId ClusterId, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -178,6 +181,19 @@ type ClientInterface interface {
 	UpdateClusterWithBody(ctx context.Context, clusterId ClusterId, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	UpdateCluster(ctx context.Context, clusterId ClusterId, body UpdateClusterJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// ClusterActionsAPIPollClusterActions request
+	ClusterActionsAPIPollClusterActions(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// ClusterActionsAPIIngestLogs request  with any body
+	ClusterActionsAPIIngestLogsWithBody(ctx context.Context, clusterId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	ClusterActionsAPIIngestLogs(ctx context.Context, clusterId string, body ClusterActionsAPIIngestLogsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// ClusterActionsAPIAckClusterAction request  with any body
+	ClusterActionsAPIAckClusterActionWithBody(ctx context.Context, clusterId string, actionId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	ClusterActionsAPIAckClusterAction(ctx context.Context, clusterId string, actionId string, body ClusterActionsAPIAckClusterActionJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// GetClusterAddons request
 	GetClusterAddons(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -204,11 +220,14 @@ type ClientInterface interface {
 	// GetCostHistory request
 	GetCostHistory(ctx context.Context, clusterId ClusterId, params *GetCostHistoryParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// GetClusterCpuUtilizationMetrics request
-	GetClusterCpuUtilizationMetrics(ctx context.Context, clusterId ClusterId, params *GetClusterCpuUtilizationMetricsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// GetDashboardMetricsCommonStats request
+	GetDashboardMetricsCommonStats(ctx context.Context, clusterId ClusterId, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// GetClusterCurrentMetrics request
-	GetClusterCurrentMetrics(ctx context.Context, clusterId ClusterId, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// GetDashboardMetricsCpuUsage request
+	GetDashboardMetricsCpuUsage(ctx context.Context, clusterId ClusterId, params *GetDashboardMetricsCpuUsageParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetDashboardMetricsMemoryUsage request
+	GetDashboardMetricsMemoryUsage(ctx context.Context, clusterId ClusterId, params *GetDashboardMetricsMemoryUsageParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// GetClusterFeedbackEvents request
 	GetClusterFeedbackEvents(ctx context.Context, clusterId ClusterId, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -230,17 +249,8 @@ type ClientInterface interface {
 
 	ConfigureClusterAddons(ctx context.Context, clusterId ClusterId, body ConfigureClusterAddonsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// GetClusterMemoryUtilizationMetrics request
-	GetClusterMemoryUtilizationMetrics(ctx context.Context, clusterId ClusterId, params *GetClusterMemoryUtilizationMetricsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
-
 	// GetClusterMetrics request
 	GetClusterMetrics(ctx context.Context, clusterId ClusterId, params *GetClusterMetricsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
-
-	// GetClusterRebalancePlan request
-	GetClusterRebalancePlan(ctx context.Context, clusterId ClusterId, reqEditors ...RequestEditorFn) (*http.Response, error)
-
-	// GenerateClusterRebalancePlan request
-	GenerateClusterRebalancePlan(ctx context.Context, clusterId ClusterId, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// GetNodeConstraints request
 	GetNodeConstraints(ctx context.Context, clusterId ClusterId, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -347,9 +357,6 @@ type ClientInterface interface {
 	// GetExternalClusterOperation request
 	GetExternalClusterOperation(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// PrometheusRawMetrics request
-	PrometheusRawMetrics(ctx context.Context, params *PrometheusRawMetricsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
-
 	// ExternalClusterAPIDeleteCluster request
 	ExternalClusterAPIDeleteCluster(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -361,14 +368,8 @@ type ClientInterface interface {
 
 	ExternalClusterAPIUpdateCluster(ctx context.Context, clusterId string, body ExternalClusterAPIUpdateClusterJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// GetExternalClusterCpuUtilizationMetrics request
-	GetExternalClusterCpuUtilizationMetrics(ctx context.Context, clusterId ClusterId, params *GetExternalClusterCpuUtilizationMetricsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
-
 	// ExternalClusterAPIGetCredentialsScript request
 	ExternalClusterAPIGetCredentialsScript(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error)
-
-	// GetExternalClusterCurrentMetrics request
-	GetExternalClusterCurrentMetrics(ctx context.Context, clusterId ClusterId, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// ExternalClusterAPIDisconnectCluster request  with any body
 	ExternalClusterAPIDisconnectClusterWithBody(ctx context.Context, clusterId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -380,9 +381,6 @@ type ClientInterface interface {
 
 	// ExternalClusterAPIGetKubeconfig request
 	ExternalClusterAPIGetKubeconfig(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error)
-
-	// GetExternalClusterMemoryUtilizationMetrics request
-	GetExternalClusterMemoryUtilizationMetrics(ctx context.Context, clusterId ClusterId, params *GetExternalClusterMemoryUtilizationMetricsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// ExternalClusterAPIGetMetrics request
 	ExternalClusterAPIGetMetrics(ctx context.Context, clusterId string, params *ExternalClusterAPIGetMetricsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -787,6 +785,17 @@ func (c *Client) CreateNewCluster(ctx context.Context, body CreateNewClusterJSON
 	return c.Client.Do(req)
 }
 
+func (c *Client) PrometheusRawMetrics(ctx context.Context, params *PrometheusRawMetricsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPrometheusRawMetricsRequest(c.Server, params)
+	if err != nil {
+		return nil, err
+	}
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
 func (c *Client) DeleteCluster(ctx context.Context, clusterId ClusterId, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewDeleteClusterRequest(c.Server, clusterId)
 	if err != nil {
@@ -822,6 +831,61 @@ func (c *Client) UpdateClusterWithBody(ctx context.Context, clusterId ClusterId,
 
 func (c *Client) UpdateCluster(ctx context.Context, clusterId ClusterId, body UpdateClusterJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewUpdateClusterRequest(c.Server, clusterId, body)
+	if err != nil {
+		return nil, err
+	}
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) ClusterActionsAPIPollClusterActions(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewClusterActionsAPIPollClusterActionsRequest(c.Server, clusterId)
+	if err != nil {
+		return nil, err
+	}
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) ClusterActionsAPIIngestLogsWithBody(ctx context.Context, clusterId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewClusterActionsAPIIngestLogsRequestWithBody(c.Server, clusterId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) ClusterActionsAPIIngestLogs(ctx context.Context, clusterId string, body ClusterActionsAPIIngestLogsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewClusterActionsAPIIngestLogsRequest(c.Server, clusterId, body)
+	if err != nil {
+		return nil, err
+	}
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) ClusterActionsAPIAckClusterActionWithBody(ctx context.Context, clusterId string, actionId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewClusterActionsAPIAckClusterActionRequestWithBody(c.Server, clusterId, actionId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) ClusterActionsAPIAckClusterAction(ctx context.Context, clusterId string, actionId string, body ClusterActionsAPIAckClusterActionJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewClusterActionsAPIAckClusterActionRequest(c.Server, clusterId, actionId, body)
 	if err != nil {
 		return nil, err
 	}
@@ -930,8 +994,8 @@ func (c *Client) GetCostHistory(ctx context.Context, clusterId ClusterId, params
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetClusterCpuUtilizationMetrics(ctx context.Context, clusterId ClusterId, params *GetClusterCpuUtilizationMetricsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewGetClusterCpuUtilizationMetricsRequest(c.Server, clusterId, params)
+func (c *Client) GetDashboardMetricsCommonStats(ctx context.Context, clusterId ClusterId, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetDashboardMetricsCommonStatsRequest(c.Server, clusterId)
 	if err != nil {
 		return nil, err
 	}
@@ -941,8 +1005,19 @@ func (c *Client) GetClusterCpuUtilizationMetrics(ctx context.Context, clusterId 
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetClusterCurrentMetrics(ctx context.Context, clusterId ClusterId, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewGetClusterCurrentMetricsRequest(c.Server, clusterId)
+func (c *Client) GetDashboardMetricsCpuUsage(ctx context.Context, clusterId ClusterId, params *GetDashboardMetricsCpuUsageParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetDashboardMetricsCpuUsageRequest(c.Server, clusterId, params)
+	if err != nil {
+		return nil, err
+	}
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetDashboardMetricsMemoryUsage(ctx context.Context, clusterId ClusterId, params *GetDashboardMetricsMemoryUsageParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetDashboardMetricsMemoryUsageRequest(c.Server, clusterId, params)
 	if err != nil {
 		return nil, err
 	}
@@ -1029,41 +1104,8 @@ func (c *Client) ConfigureClusterAddons(ctx context.Context, clusterId ClusterId
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetClusterMemoryUtilizationMetrics(ctx context.Context, clusterId ClusterId, params *GetClusterMemoryUtilizationMetricsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewGetClusterMemoryUtilizationMetricsRequest(c.Server, clusterId, params)
-	if err != nil {
-		return nil, err
-	}
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
 func (c *Client) GetClusterMetrics(ctx context.Context, clusterId ClusterId, params *GetClusterMetricsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetClusterMetricsRequest(c.Server, clusterId, params)
-	if err != nil {
-		return nil, err
-	}
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
-func (c *Client) GetClusterRebalancePlan(ctx context.Context, clusterId ClusterId, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewGetClusterRebalancePlanRequest(c.Server, clusterId)
-	if err != nil {
-		return nil, err
-	}
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
-func (c *Client) GenerateClusterRebalancePlan(ctx context.Context, clusterId ClusterId, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewGenerateClusterRebalancePlanRequest(c.Server, clusterId)
 	if err != nil {
 		return nil, err
 	}
@@ -1491,17 +1533,6 @@ func (c *Client) GetExternalClusterOperation(ctx context.Context, id string, req
 	return c.Client.Do(req)
 }
 
-func (c *Client) PrometheusRawMetrics(ctx context.Context, params *PrometheusRawMetricsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewPrometheusRawMetricsRequest(c.Server, params)
-	if err != nil {
-		return nil, err
-	}
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
 func (c *Client) ExternalClusterAPIDeleteCluster(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewExternalClusterAPIDeleteClusterRequest(c.Server, clusterId)
 	if err != nil {
@@ -1546,30 +1577,8 @@ func (c *Client) ExternalClusterAPIUpdateCluster(ctx context.Context, clusterId 
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetExternalClusterCpuUtilizationMetrics(ctx context.Context, clusterId ClusterId, params *GetExternalClusterCpuUtilizationMetricsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewGetExternalClusterCpuUtilizationMetricsRequest(c.Server, clusterId, params)
-	if err != nil {
-		return nil, err
-	}
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
 func (c *Client) ExternalClusterAPIGetCredentialsScript(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewExternalClusterAPIGetCredentialsScriptRequest(c.Server, clusterId)
-	if err != nil {
-		return nil, err
-	}
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
-func (c *Client) GetExternalClusterCurrentMetrics(ctx context.Context, clusterId ClusterId, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewGetExternalClusterCurrentMetricsRequest(c.Server, clusterId)
 	if err != nil {
 		return nil, err
 	}
@@ -1614,17 +1623,6 @@ func (c *Client) GetEstimatedSavings(ctx context.Context, clusterId ClusterId, r
 
 func (c *Client) ExternalClusterAPIGetKubeconfig(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewExternalClusterAPIGetKubeconfigRequest(c.Server, clusterId)
-	if err != nil {
-		return nil, err
-	}
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
-func (c *Client) GetExternalClusterMemoryUtilizationMetrics(ctx context.Context, clusterId ClusterId, params *GetExternalClusterMemoryUtilizationMetricsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewGetExternalClusterMemoryUtilizationMetricsRequest(c.Server, clusterId, params)
 	if err != nil {
 		return nil, err
 	}
@@ -3282,6 +3280,44 @@ func NewCreateNewClusterRequestWithBody(server string, contentType string, body 
 	return req, nil
 }
 
+// NewPrometheusRawMetricsRequest generates requests for PrometheusRawMetrics
+func NewPrometheusRawMetricsRequest(server string, params *PrometheusRawMetricsParams) (*http.Request, error) {
+	var err error
+
+	queryUrl, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	basePath := fmt.Sprintf("/v1/kubernetes/clusters/prometheus-raw-metrics")
+	if basePath[0] == '/' {
+		basePath = basePath[1:]
+	}
+
+	queryUrl, err = queryUrl.Parse(basePath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryUrl.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	if params.XCastAiOrganizationId != nil {
+		var headerParam0 string
+
+		headerParam0, err = runtime.StyleParam("simple", false, "X-CastAi-Organization-Id", *params.XCastAiOrganizationId)
+		if err != nil {
+			return nil, err
+		}
+
+		req.Header.Set("X-CastAi-Organization-Id", headerParam0)
+	}
+
+	return req, nil
+}
+
 // NewDeleteClusterRequest generates requests for DeleteCluster
 func NewDeleteClusterRequest(server string, clusterId ClusterId) (*http.Request, error) {
 	var err error
@@ -3388,6 +3424,141 @@ func NewUpdateClusterRequestWithBody(server string, clusterId ClusterId, content
 	}
 
 	req, err := http.NewRequest("PUT", queryUrl.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewClusterActionsAPIPollClusterActionsRequest generates requests for ClusterActionsAPIPollClusterActions
+func NewClusterActionsAPIPollClusterActionsRequest(server string, clusterId string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParam("simple", false, "clusterId", clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	queryUrl, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	basePath := fmt.Sprintf("/v1/kubernetes/clusters/%s/actions", pathParam0)
+	if basePath[0] == '/' {
+		basePath = basePath[1:]
+	}
+
+	queryUrl, err = queryUrl.Parse(basePath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryUrl.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewClusterActionsAPIIngestLogsRequest calls the generic ClusterActionsAPIIngestLogs builder with application/json body
+func NewClusterActionsAPIIngestLogsRequest(server string, clusterId string, body ClusterActionsAPIIngestLogsJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewClusterActionsAPIIngestLogsRequestWithBody(server, clusterId, "application/json", bodyReader)
+}
+
+// NewClusterActionsAPIIngestLogsRequestWithBody generates requests for ClusterActionsAPIIngestLogs with any type of body
+func NewClusterActionsAPIIngestLogsRequestWithBody(server string, clusterId string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParam("simple", false, "clusterId", clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	queryUrl, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	basePath := fmt.Sprintf("/v1/kubernetes/clusters/%s/actions/logs", pathParam0)
+	if basePath[0] == '/' {
+		basePath = basePath[1:]
+	}
+
+	queryUrl, err = queryUrl.Parse(basePath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryUrl.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewClusterActionsAPIAckClusterActionRequest calls the generic ClusterActionsAPIAckClusterAction builder with application/json body
+func NewClusterActionsAPIAckClusterActionRequest(server string, clusterId string, actionId string, body ClusterActionsAPIAckClusterActionJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewClusterActionsAPIAckClusterActionRequestWithBody(server, clusterId, actionId, "application/json", bodyReader)
+}
+
+// NewClusterActionsAPIAckClusterActionRequestWithBody generates requests for ClusterActionsAPIAckClusterAction with any type of body
+func NewClusterActionsAPIAckClusterActionRequestWithBody(server string, clusterId string, actionId string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParam("simple", false, "clusterId", clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParam("simple", false, "actionId", actionId)
+	if err != nil {
+		return nil, err
+	}
+
+	queryUrl, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	basePath := fmt.Sprintf("/v1/kubernetes/clusters/%s/actions/%s/ack", pathParam0, pathParam1)
+	if basePath[0] == '/' {
+		basePath = basePath[1:]
+	}
+
+	queryUrl, err = queryUrl.Parse(basePath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryUrl.String(), body)
 	if err != nil {
 		return nil, err
 	}
@@ -3739,8 +3910,8 @@ func NewGetCostHistoryRequest(server string, clusterId ClusterId, params *GetCos
 	return req, nil
 }
 
-// NewGetClusterCpuUtilizationMetricsRequest generates requests for GetClusterCpuUtilizationMetrics
-func NewGetClusterCpuUtilizationMetricsRequest(server string, clusterId ClusterId, params *GetClusterCpuUtilizationMetricsParams) (*http.Request, error) {
+// NewGetDashboardMetricsCommonStatsRequest generates requests for GetDashboardMetricsCommonStats
+func NewGetDashboardMetricsCommonStatsRequest(server string, clusterId ClusterId) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -3755,7 +3926,41 @@ func NewGetClusterCpuUtilizationMetricsRequest(server string, clusterId ClusterI
 		return nil, err
 	}
 
-	basePath := fmt.Sprintf("/v1/kubernetes/clusters/%s/cpu-utilization-metrics", pathParam0)
+	basePath := fmt.Sprintf("/v1/kubernetes/clusters/%s/dashboard-metrics", pathParam0)
+	if basePath[0] == '/' {
+		basePath = basePath[1:]
+	}
+
+	queryUrl, err = queryUrl.Parse(basePath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryUrl.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewGetDashboardMetricsCpuUsageRequest generates requests for GetDashboardMetricsCpuUsage
+func NewGetDashboardMetricsCpuUsageRequest(server string, clusterId ClusterId, params *GetDashboardMetricsCpuUsageParams) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParam("simple", false, "clusterId", clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	queryUrl, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	basePath := fmt.Sprintf("/v1/kubernetes/clusters/%s/dashboard-metrics/cpu-usage", pathParam0)
 	if basePath[0] == '/' {
 		basePath = basePath[1:]
 	}
@@ -3783,6 +3988,22 @@ func NewGetClusterCpuUtilizationMetricsRequest(server string, clusterId ClusterI
 
 	}
 
+	if params.StepSeconds != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "stepSeconds", *params.StepSeconds); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
 	queryUrl.RawQuery = queryValues.Encode()
 
 	req, err := http.NewRequest("GET", queryUrl.String(), nil)
@@ -3793,8 +4014,8 @@ func NewGetClusterCpuUtilizationMetricsRequest(server string, clusterId ClusterI
 	return req, nil
 }
 
-// NewGetClusterCurrentMetricsRequest generates requests for GetClusterCurrentMetrics
-func NewGetClusterCurrentMetricsRequest(server string, clusterId ClusterId) (*http.Request, error) {
+// NewGetDashboardMetricsMemoryUsageRequest generates requests for GetDashboardMetricsMemoryUsage
+func NewGetDashboardMetricsMemoryUsageRequest(server string, clusterId ClusterId, params *GetDashboardMetricsMemoryUsageParams) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -3809,7 +4030,7 @@ func NewGetClusterCurrentMetricsRequest(server string, clusterId ClusterId) (*ht
 		return nil, err
 	}
 
-	basePath := fmt.Sprintf("/v1/kubernetes/clusters/%s/current-metrics", pathParam0)
+	basePath := fmt.Sprintf("/v1/kubernetes/clusters/%s/dashboard-metrics/memory-usage", pathParam0)
 	if basePath[0] == '/' {
 		basePath = basePath[1:]
 	}
@@ -3818,6 +4039,42 @@ func NewGetClusterCurrentMetricsRequest(server string, clusterId ClusterId) (*ht
 	if err != nil {
 		return nil, err
 	}
+
+	queryValues := queryUrl.Query()
+
+	if params.PeriodHours != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "periodHours", *params.PeriodHours); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.StepSeconds != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "stepSeconds", *params.StepSeconds); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	queryUrl.RawQuery = queryValues.Encode()
 
 	req, err := http.NewRequest("GET", queryUrl.String(), nil)
 	if err != nil {
@@ -4044,60 +4301,6 @@ func NewConfigureClusterAddonsRequestWithBody(server string, clusterId ClusterId
 	return req, nil
 }
 
-// NewGetClusterMemoryUtilizationMetricsRequest generates requests for GetClusterMemoryUtilizationMetrics
-func NewGetClusterMemoryUtilizationMetricsRequest(server string, clusterId ClusterId, params *GetClusterMemoryUtilizationMetricsParams) (*http.Request, error) {
-	var err error
-
-	var pathParam0 string
-
-	pathParam0, err = runtime.StyleParam("simple", false, "clusterId", clusterId)
-	if err != nil {
-		return nil, err
-	}
-
-	queryUrl, err := url.Parse(server)
-	if err != nil {
-		return nil, err
-	}
-
-	basePath := fmt.Sprintf("/v1/kubernetes/clusters/%s/memory-utilization-metrics", pathParam0)
-	if basePath[0] == '/' {
-		basePath = basePath[1:]
-	}
-
-	queryUrl, err = queryUrl.Parse(basePath)
-	if err != nil {
-		return nil, err
-	}
-
-	queryValues := queryUrl.Query()
-
-	if params.PeriodHours != nil {
-
-		if queryFrag, err := runtime.StyleParam("form", true, "periodHours", *params.PeriodHours); err != nil {
-			return nil, err
-		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
-			return nil, err
-		} else {
-			for k, v := range parsed {
-				for _, v2 := range v {
-					queryValues.Add(k, v2)
-				}
-			}
-		}
-
-	}
-
-	queryUrl.RawQuery = queryValues.Encode()
-
-	req, err := http.NewRequest("GET", queryUrl.String(), nil)
-	if err != nil {
-		return nil, err
-	}
-
-	return req, nil
-}
-
 // NewGetClusterMetricsRequest generates requests for GetClusterMetrics
 func NewGetClusterMetricsRequest(server string, clusterId ClusterId, params *GetClusterMetricsParams) (*http.Request, error) {
 	var err error
@@ -4141,74 +4344,6 @@ func NewGetClusterMetricsRequest(server string, clusterId ClusterId, params *Get
 	queryUrl.RawQuery = queryValues.Encode()
 
 	req, err := http.NewRequest("GET", queryUrl.String(), nil)
-	if err != nil {
-		return nil, err
-	}
-
-	return req, nil
-}
-
-// NewGetClusterRebalancePlanRequest generates requests for GetClusterRebalancePlan
-func NewGetClusterRebalancePlanRequest(server string, clusterId ClusterId) (*http.Request, error) {
-	var err error
-
-	var pathParam0 string
-
-	pathParam0, err = runtime.StyleParam("simple", false, "clusterId", clusterId)
-	if err != nil {
-		return nil, err
-	}
-
-	queryUrl, err := url.Parse(server)
-	if err != nil {
-		return nil, err
-	}
-
-	basePath := fmt.Sprintf("/v1/kubernetes/clusters/%s/migration-plan", pathParam0)
-	if basePath[0] == '/' {
-		basePath = basePath[1:]
-	}
-
-	queryUrl, err = queryUrl.Parse(basePath)
-	if err != nil {
-		return nil, err
-	}
-
-	req, err := http.NewRequest("GET", queryUrl.String(), nil)
-	if err != nil {
-		return nil, err
-	}
-
-	return req, nil
-}
-
-// NewGenerateClusterRebalancePlanRequest generates requests for GenerateClusterRebalancePlan
-func NewGenerateClusterRebalancePlanRequest(server string, clusterId ClusterId) (*http.Request, error) {
-	var err error
-
-	var pathParam0 string
-
-	pathParam0, err = runtime.StyleParam("simple", false, "clusterId", clusterId)
-	if err != nil {
-		return nil, err
-	}
-
-	queryUrl, err := url.Parse(server)
-	if err != nil {
-		return nil, err
-	}
-
-	basePath := fmt.Sprintf("/v1/kubernetes/clusters/%s/migration-plan", pathParam0)
-	if basePath[0] == '/' {
-		basePath = basePath[1:]
-	}
-
-	queryUrl, err = queryUrl.Parse(basePath)
-	if err != nil {
-		return nil, err
-	}
-
-	req, err := http.NewRequest("POST", queryUrl.String(), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -5437,44 +5572,6 @@ func NewGetExternalClusterOperationRequest(server string, id string) (*http.Requ
 	return req, nil
 }
 
-// NewPrometheusRawMetricsRequest generates requests for PrometheusRawMetrics
-func NewPrometheusRawMetricsRequest(server string, params *PrometheusRawMetricsParams) (*http.Request, error) {
-	var err error
-
-	queryUrl, err := url.Parse(server)
-	if err != nil {
-		return nil, err
-	}
-
-	basePath := fmt.Sprintf("/v1/kubernetes/external-clusters/prometheus/metrics")
-	if basePath[0] == '/' {
-		basePath = basePath[1:]
-	}
-
-	queryUrl, err = queryUrl.Parse(basePath)
-	if err != nil {
-		return nil, err
-	}
-
-	req, err := http.NewRequest("GET", queryUrl.String(), nil)
-	if err != nil {
-		return nil, err
-	}
-
-	if params.XCastAiOrganizationId != nil {
-		var headerParam0 string
-
-		headerParam0, err = runtime.StyleParam("simple", false, "X-CastAi-Organization-Id", *params.XCastAiOrganizationId)
-		if err != nil {
-			return nil, err
-		}
-
-		req.Header.Set("X-CastAi-Organization-Id", headerParam0)
-	}
-
-	return req, nil
-}
-
 // NewExternalClusterAPIDeleteClusterRequest generates requests for ExternalClusterAPIDeleteCluster
 func NewExternalClusterAPIDeleteClusterRequest(server string, clusterId string) (*http.Request, error) {
 	var err error
@@ -5590,60 +5687,6 @@ func NewExternalClusterAPIUpdateClusterRequestWithBody(server string, clusterId 
 	return req, nil
 }
 
-// NewGetExternalClusterCpuUtilizationMetricsRequest generates requests for GetExternalClusterCpuUtilizationMetrics
-func NewGetExternalClusterCpuUtilizationMetricsRequest(server string, clusterId ClusterId, params *GetExternalClusterCpuUtilizationMetricsParams) (*http.Request, error) {
-	var err error
-
-	var pathParam0 string
-
-	pathParam0, err = runtime.StyleParam("simple", false, "clusterId", clusterId)
-	if err != nil {
-		return nil, err
-	}
-
-	queryUrl, err := url.Parse(server)
-	if err != nil {
-		return nil, err
-	}
-
-	basePath := fmt.Sprintf("/v1/kubernetes/external-clusters/%s/cpu-utilization-metrics", pathParam0)
-	if basePath[0] == '/' {
-		basePath = basePath[1:]
-	}
-
-	queryUrl, err = queryUrl.Parse(basePath)
-	if err != nil {
-		return nil, err
-	}
-
-	queryValues := queryUrl.Query()
-
-	if params.PeriodHours != nil {
-
-		if queryFrag, err := runtime.StyleParam("form", true, "periodHours", *params.PeriodHours); err != nil {
-			return nil, err
-		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
-			return nil, err
-		} else {
-			for k, v := range parsed {
-				for _, v2 := range v {
-					queryValues.Add(k, v2)
-				}
-			}
-		}
-
-	}
-
-	queryUrl.RawQuery = queryValues.Encode()
-
-	req, err := http.NewRequest("GET", queryUrl.String(), nil)
-	if err != nil {
-		return nil, err
-	}
-
-	return req, nil
-}
-
 // NewExternalClusterAPIGetCredentialsScriptRequest generates requests for ExternalClusterAPIGetCredentialsScript
 func NewExternalClusterAPIGetCredentialsScriptRequest(server string, clusterId string) (*http.Request, error) {
 	var err error
@@ -5661,40 +5704,6 @@ func NewExternalClusterAPIGetCredentialsScriptRequest(server string, clusterId s
 	}
 
 	basePath := fmt.Sprintf("/v1/kubernetes/external-clusters/%s/credentials-script", pathParam0)
-	if basePath[0] == '/' {
-		basePath = basePath[1:]
-	}
-
-	queryUrl, err = queryUrl.Parse(basePath)
-	if err != nil {
-		return nil, err
-	}
-
-	req, err := http.NewRequest("GET", queryUrl.String(), nil)
-	if err != nil {
-		return nil, err
-	}
-
-	return req, nil
-}
-
-// NewGetExternalClusterCurrentMetricsRequest generates requests for GetExternalClusterCurrentMetrics
-func NewGetExternalClusterCurrentMetricsRequest(server string, clusterId ClusterId) (*http.Request, error) {
-	var err error
-
-	var pathParam0 string
-
-	pathParam0, err = runtime.StyleParam("simple", false, "clusterId", clusterId)
-	if err != nil {
-		return nil, err
-	}
-
-	queryUrl, err := url.Parse(server)
-	if err != nil {
-		return nil, err
-	}
-
-	basePath := fmt.Sprintf("/v1/kubernetes/external-clusters/%s/current-metrics", pathParam0)
 	if basePath[0] == '/' {
 		basePath = basePath[1:]
 	}
@@ -5818,60 +5827,6 @@ func NewExternalClusterAPIGetKubeconfigRequest(server string, clusterId string) 
 	if err != nil {
 		return nil, err
 	}
-
-	req, err := http.NewRequest("GET", queryUrl.String(), nil)
-	if err != nil {
-		return nil, err
-	}
-
-	return req, nil
-}
-
-// NewGetExternalClusterMemoryUtilizationMetricsRequest generates requests for GetExternalClusterMemoryUtilizationMetrics
-func NewGetExternalClusterMemoryUtilizationMetricsRequest(server string, clusterId ClusterId, params *GetExternalClusterMemoryUtilizationMetricsParams) (*http.Request, error) {
-	var err error
-
-	var pathParam0 string
-
-	pathParam0, err = runtime.StyleParam("simple", false, "clusterId", clusterId)
-	if err != nil {
-		return nil, err
-	}
-
-	queryUrl, err := url.Parse(server)
-	if err != nil {
-		return nil, err
-	}
-
-	basePath := fmt.Sprintf("/v1/kubernetes/external-clusters/%s/memory-utilization-metrics", pathParam0)
-	if basePath[0] == '/' {
-		basePath = basePath[1:]
-	}
-
-	queryUrl, err = queryUrl.Parse(basePath)
-	if err != nil {
-		return nil, err
-	}
-
-	queryValues := queryUrl.Query()
-
-	if params.PeriodHours != nil {
-
-		if queryFrag, err := runtime.StyleParam("form", true, "periodHours", *params.PeriodHours); err != nil {
-			return nil, err
-		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
-			return nil, err
-		} else {
-			for k, v := range parsed {
-				for _, v2 := range v {
-					queryValues.Add(k, v2)
-				}
-			}
-		}
-
-	}
-
-	queryUrl.RawQuery = queryValues.Encode()
 
 	req, err := http.NewRequest("GET", queryUrl.String(), nil)
 	if err != nil {
@@ -7013,6 +6968,9 @@ type ClientWithResponsesInterface interface {
 
 	CreateNewClusterWithResponse(ctx context.Context, body CreateNewClusterJSONRequestBody) (*CreateNewClusterResponse, error)
 
+	// PrometheusRawMetrics request
+	PrometheusRawMetricsWithResponse(ctx context.Context, params *PrometheusRawMetricsParams) (*PrometheusRawMetricsResponse, error)
+
 	// DeleteCluster request
 	DeleteClusterWithResponse(ctx context.Context, clusterId ClusterId) (*DeleteClusterResponse, error)
 
@@ -7023,6 +6981,19 @@ type ClientWithResponsesInterface interface {
 	UpdateClusterWithBodyWithResponse(ctx context.Context, clusterId ClusterId, contentType string, body io.Reader) (*UpdateClusterResponse, error)
 
 	UpdateClusterWithResponse(ctx context.Context, clusterId ClusterId, body UpdateClusterJSONRequestBody) (*UpdateClusterResponse, error)
+
+	// ClusterActionsAPIPollClusterActions request
+	ClusterActionsAPIPollClusterActionsWithResponse(ctx context.Context, clusterId string) (*ClusterActionsAPIPollClusterActionsResponse, error)
+
+	// ClusterActionsAPIIngestLogs request  with any body
+	ClusterActionsAPIIngestLogsWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader) (*ClusterActionsAPIIngestLogsResponse, error)
+
+	ClusterActionsAPIIngestLogsWithResponse(ctx context.Context, clusterId string, body ClusterActionsAPIIngestLogsJSONRequestBody) (*ClusterActionsAPIIngestLogsResponse, error)
+
+	// ClusterActionsAPIAckClusterAction request  with any body
+	ClusterActionsAPIAckClusterActionWithBodyWithResponse(ctx context.Context, clusterId string, actionId string, contentType string, body io.Reader) (*ClusterActionsAPIAckClusterActionResponse, error)
+
+	ClusterActionsAPIAckClusterActionWithResponse(ctx context.Context, clusterId string, actionId string, body ClusterActionsAPIAckClusterActionJSONRequestBody) (*ClusterActionsAPIAckClusterActionResponse, error)
 
 	// GetClusterAddons request
 	GetClusterAddonsWithResponse(ctx context.Context, clusterId string) (*GetClusterAddonsResponse, error)
@@ -7049,11 +7020,14 @@ type ClientWithResponsesInterface interface {
 	// GetCostHistory request
 	GetCostHistoryWithResponse(ctx context.Context, clusterId ClusterId, params *GetCostHistoryParams) (*GetCostHistoryResponse, error)
 
-	// GetClusterCpuUtilizationMetrics request
-	GetClusterCpuUtilizationMetricsWithResponse(ctx context.Context, clusterId ClusterId, params *GetClusterCpuUtilizationMetricsParams) (*GetClusterCpuUtilizationMetricsResponse, error)
+	// GetDashboardMetricsCommonStats request
+	GetDashboardMetricsCommonStatsWithResponse(ctx context.Context, clusterId ClusterId) (*GetDashboardMetricsCommonStatsResponse, error)
 
-	// GetClusterCurrentMetrics request
-	GetClusterCurrentMetricsWithResponse(ctx context.Context, clusterId ClusterId) (*GetClusterCurrentMetricsResponse, error)
+	// GetDashboardMetricsCpuUsage request
+	GetDashboardMetricsCpuUsageWithResponse(ctx context.Context, clusterId ClusterId, params *GetDashboardMetricsCpuUsageParams) (*GetDashboardMetricsCpuUsageResponse, error)
+
+	// GetDashboardMetricsMemoryUsage request
+	GetDashboardMetricsMemoryUsageWithResponse(ctx context.Context, clusterId ClusterId, params *GetDashboardMetricsMemoryUsageParams) (*GetDashboardMetricsMemoryUsageResponse, error)
 
 	// GetClusterFeedbackEvents request
 	GetClusterFeedbackEventsWithResponse(ctx context.Context, clusterId ClusterId) (*GetClusterFeedbackEventsResponse, error)
@@ -7075,17 +7049,8 @@ type ClientWithResponsesInterface interface {
 
 	ConfigureClusterAddonsWithResponse(ctx context.Context, clusterId ClusterId, body ConfigureClusterAddonsJSONRequestBody) (*ConfigureClusterAddonsResponse, error)
 
-	// GetClusterMemoryUtilizationMetrics request
-	GetClusterMemoryUtilizationMetricsWithResponse(ctx context.Context, clusterId ClusterId, params *GetClusterMemoryUtilizationMetricsParams) (*GetClusterMemoryUtilizationMetricsResponse, error)
-
 	// GetClusterMetrics request
 	GetClusterMetricsWithResponse(ctx context.Context, clusterId ClusterId, params *GetClusterMetricsParams) (*GetClusterMetricsResponse, error)
-
-	// GetClusterRebalancePlan request
-	GetClusterRebalancePlanWithResponse(ctx context.Context, clusterId ClusterId) (*GetClusterRebalancePlanResponse, error)
-
-	// GenerateClusterRebalancePlan request
-	GenerateClusterRebalancePlanWithResponse(ctx context.Context, clusterId ClusterId) (*GenerateClusterRebalancePlanResponse, error)
 
 	// GetNodeConstraints request
 	GetNodeConstraintsWithResponse(ctx context.Context, clusterId ClusterId) (*GetNodeConstraintsResponse, error)
@@ -7192,9 +7157,6 @@ type ClientWithResponsesInterface interface {
 	// GetExternalClusterOperation request
 	GetExternalClusterOperationWithResponse(ctx context.Context, id string) (*GetExternalClusterOperationResponse, error)
 
-	// PrometheusRawMetrics request
-	PrometheusRawMetricsWithResponse(ctx context.Context, params *PrometheusRawMetricsParams) (*PrometheusRawMetricsResponse, error)
-
 	// ExternalClusterAPIDeleteCluster request
 	ExternalClusterAPIDeleteClusterWithResponse(ctx context.Context, clusterId string) (*ExternalClusterAPIDeleteClusterResponse, error)
 
@@ -7206,14 +7168,8 @@ type ClientWithResponsesInterface interface {
 
 	ExternalClusterAPIUpdateClusterWithResponse(ctx context.Context, clusterId string, body ExternalClusterAPIUpdateClusterJSONRequestBody) (*ExternalClusterAPIUpdateClusterResponse, error)
 
-	// GetExternalClusterCpuUtilizationMetrics request
-	GetExternalClusterCpuUtilizationMetricsWithResponse(ctx context.Context, clusterId ClusterId, params *GetExternalClusterCpuUtilizationMetricsParams) (*GetExternalClusterCpuUtilizationMetricsResponse, error)
-
 	// ExternalClusterAPIGetCredentialsScript request
 	ExternalClusterAPIGetCredentialsScriptWithResponse(ctx context.Context, clusterId string) (*ExternalClusterAPIGetCredentialsScriptResponse, error)
-
-	// GetExternalClusterCurrentMetrics request
-	GetExternalClusterCurrentMetricsWithResponse(ctx context.Context, clusterId ClusterId) (*GetExternalClusterCurrentMetricsResponse, error)
 
 	// ExternalClusterAPIDisconnectCluster request  with any body
 	ExternalClusterAPIDisconnectClusterWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader) (*ExternalClusterAPIDisconnectClusterResponse, error)
@@ -7225,9 +7181,6 @@ type ClientWithResponsesInterface interface {
 
 	// ExternalClusterAPIGetKubeconfig request
 	ExternalClusterAPIGetKubeconfigWithResponse(ctx context.Context, clusterId string) (*ExternalClusterAPIGetKubeconfigResponse, error)
-
-	// GetExternalClusterMemoryUtilizationMetrics request
-	GetExternalClusterMemoryUtilizationMetricsWithResponse(ctx context.Context, clusterId ClusterId, params *GetExternalClusterMemoryUtilizationMetricsParams) (*GetExternalClusterMemoryUtilizationMetricsResponse, error)
 
 	// ExternalClusterAPIGetMetrics request
 	ExternalClusterAPIGetMetricsWithResponse(ctx context.Context, clusterId string, params *ExternalClusterAPIGetMetricsParams) (*ExternalClusterAPIGetMetricsResponse, error)
@@ -7919,6 +7872,35 @@ func (r CreateNewClusterResponse) GetBody() []byte {
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
+type PrometheusRawMetricsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+}
+
+// Status returns HTTPResponse.Status
+func (r PrometheusRawMetricsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r PrometheusRawMetricsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r PrometheusRawMetricsResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
 type DeleteClusterResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -8003,6 +7985,96 @@ func (r UpdateClusterResponse) StatusCode() int {
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
 func (r UpdateClusterResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type ClusterActionsAPIPollClusterActionsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *ClusteractionsV1PollClusterActionsResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r ClusterActionsAPIPollClusterActionsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r ClusterActionsAPIPollClusterActionsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r ClusterActionsAPIPollClusterActionsResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type ClusterActionsAPIIngestLogsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *ClusteractionsV1IngestLogsResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r ClusterActionsAPIIngestLogsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r ClusterActionsAPIIngestLogsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r ClusterActionsAPIIngestLogsResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type ClusterActionsAPIAckClusterActionResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *ClusteractionsV1AckClusterActionResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r ClusterActionsAPIAckClusterActionResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r ClusterActionsAPIAckClusterActionResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r ClusterActionsAPIAckClusterActionResponse) GetBody() []byte {
 	return r.Body
 }
 
@@ -8216,13 +8288,14 @@ func (r GetCostHistoryResponse) GetBody() []byte {
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
-type GetClusterCpuUtilizationMetricsResponse struct {
+type GetDashboardMetricsCommonStatsResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
+	JSON200      *DashboardMetricsCommonStats
 }
 
 // Status returns HTTPResponse.Status
-func (r GetClusterCpuUtilizationMetricsResponse) Status() string {
+func (r GetDashboardMetricsCommonStatsResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -8230,7 +8303,7 @@ func (r GetClusterCpuUtilizationMetricsResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r GetClusterCpuUtilizationMetricsResponse) StatusCode() int {
+func (r GetDashboardMetricsCommonStatsResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -8239,19 +8312,20 @@ func (r GetClusterCpuUtilizationMetricsResponse) StatusCode() int {
 
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
-func (r GetClusterCpuUtilizationMetricsResponse) GetBody() []byte {
+func (r GetDashboardMetricsCommonStatsResponse) GetBody() []byte {
 	return r.Body
 }
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
-type GetClusterCurrentMetricsResponse struct {
+type GetDashboardMetricsCpuUsageResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
+	JSON200      *DashboardMetricsCPUUsage
 }
 
 // Status returns HTTPResponse.Status
-func (r GetClusterCurrentMetricsResponse) Status() string {
+func (r GetDashboardMetricsCpuUsageResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -8259,7 +8333,7 @@ func (r GetClusterCurrentMetricsResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r GetClusterCurrentMetricsResponse) StatusCode() int {
+func (r GetDashboardMetricsCpuUsageResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -8268,7 +8342,37 @@ func (r GetClusterCurrentMetricsResponse) StatusCode() int {
 
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
-func (r GetClusterCurrentMetricsResponse) GetBody() []byte {
+func (r GetDashboardMetricsCpuUsageResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type GetDashboardMetricsMemoryUsageResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *DashboardMetricsMemoryUsage
+}
+
+// Status returns HTTPResponse.Status
+func (r GetDashboardMetricsMemoryUsageResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetDashboardMetricsMemoryUsageResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r GetDashboardMetricsMemoryUsageResponse) GetBody() []byte {
 	return r.Body
 }
 
@@ -8457,35 +8561,6 @@ func (r ConfigureClusterAddonsResponse) GetBody() []byte {
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
-type GetClusterMemoryUtilizationMetricsResponse struct {
-	Body         []byte
-	HTTPResponse *http.Response
-}
-
-// Status returns HTTPResponse.Status
-func (r GetClusterMemoryUtilizationMetricsResponse) Status() string {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.Status
-	}
-	return http.StatusText(0)
-}
-
-// StatusCode returns HTTPResponse.StatusCode
-func (r GetClusterMemoryUtilizationMetricsResponse) StatusCode() int {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.StatusCode
-	}
-	return 0
-}
-
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r GetClusterMemoryUtilizationMetricsResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-
 type GetClusterMetricsResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -8511,66 +8586,6 @@ func (r GetClusterMetricsResponse) StatusCode() int {
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
 func (r GetClusterMetricsResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-
-type GetClusterRebalancePlanResponse struct {
-	Body         []byte
-	HTTPResponse *http.Response
-	JSON200      *RebalancePlanResponse
-}
-
-// Status returns HTTPResponse.Status
-func (r GetClusterRebalancePlanResponse) Status() string {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.Status
-	}
-	return http.StatusText(0)
-}
-
-// StatusCode returns HTTPResponse.StatusCode
-func (r GetClusterRebalancePlanResponse) StatusCode() int {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.StatusCode
-	}
-	return 0
-}
-
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r GetClusterRebalancePlanResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-
-type GenerateClusterRebalancePlanResponse struct {
-	Body         []byte
-	HTTPResponse *http.Response
-	JSON202      *map[string]interface{}
-}
-
-// Status returns HTTPResponse.Status
-func (r GenerateClusterRebalancePlanResponse) Status() string {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.Status
-	}
-	return http.StatusText(0)
-}
-
-// StatusCode returns HTTPResponse.StatusCode
-func (r GenerateClusterRebalancePlanResponse) StatusCode() int {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.StatusCode
-	}
-	return 0
-}
-
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r GenerateClusterRebalancePlanResponse) GetBody() []byte {
 	return r.Body
 }
 
@@ -9448,35 +9463,6 @@ func (r GetExternalClusterOperationResponse) GetBody() []byte {
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
-type PrometheusRawMetricsResponse struct {
-	Body         []byte
-	HTTPResponse *http.Response
-}
-
-// Status returns HTTPResponse.Status
-func (r PrometheusRawMetricsResponse) Status() string {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.Status
-	}
-	return http.StatusText(0)
-}
-
-// StatusCode returns HTTPResponse.StatusCode
-func (r PrometheusRawMetricsResponse) StatusCode() int {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.StatusCode
-	}
-	return 0
-}
-
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r PrometheusRawMetricsResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-
 type ExternalClusterAPIDeleteClusterResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -9566,35 +9552,6 @@ func (r ExternalClusterAPIUpdateClusterResponse) GetBody() []byte {
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
-type GetExternalClusterCpuUtilizationMetricsResponse struct {
-	Body         []byte
-	HTTPResponse *http.Response
-}
-
-// Status returns HTTPResponse.Status
-func (r GetExternalClusterCpuUtilizationMetricsResponse) Status() string {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.Status
-	}
-	return http.StatusText(0)
-}
-
-// StatusCode returns HTTPResponse.StatusCode
-func (r GetExternalClusterCpuUtilizationMetricsResponse) StatusCode() int {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.StatusCode
-	}
-	return 0
-}
-
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r GetExternalClusterCpuUtilizationMetricsResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-
 type ExternalClusterAPIGetCredentialsScriptResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -9620,35 +9577,6 @@ func (r ExternalClusterAPIGetCredentialsScriptResponse) StatusCode() int {
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
 func (r ExternalClusterAPIGetCredentialsScriptResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-
-type GetExternalClusterCurrentMetricsResponse struct {
-	Body         []byte
-	HTTPResponse *http.Response
-}
-
-// Status returns HTTPResponse.Status
-func (r GetExternalClusterCurrentMetricsResponse) Status() string {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.Status
-	}
-	return http.StatusText(0)
-}
-
-// StatusCode returns HTTPResponse.StatusCode
-func (r GetExternalClusterCurrentMetricsResponse) StatusCode() int {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.StatusCode
-	}
-	return 0
-}
-
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r GetExternalClusterCurrentMetricsResponse) GetBody() []byte {
 	return r.Body
 }
 
@@ -9739,35 +9667,6 @@ func (r ExternalClusterAPIGetKubeconfigResponse) StatusCode() int {
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
 func (r ExternalClusterAPIGetKubeconfigResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-
-type GetExternalClusterMemoryUtilizationMetricsResponse struct {
-	Body         []byte
-	HTTPResponse *http.Response
-}
-
-// Status returns HTTPResponse.Status
-func (r GetExternalClusterMemoryUtilizationMetricsResponse) Status() string {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.Status
-	}
-	return http.StatusText(0)
-}
-
-// StatusCode returns HTTPResponse.StatusCode
-func (r GetExternalClusterMemoryUtilizationMetricsResponse) StatusCode() int {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.StatusCode
-	}
-	return 0
-}
-
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r GetExternalClusterMemoryUtilizationMetricsResponse) GetBody() []byte {
 	return r.Body
 }
 
@@ -10714,6 +10613,15 @@ func (c *ClientWithResponses) CreateNewClusterWithResponse(ctx context.Context, 
 	return ParseCreateNewClusterResponse(rsp)
 }
 
+// PrometheusRawMetricsWithResponse request returning *PrometheusRawMetricsResponse
+func (c *ClientWithResponses) PrometheusRawMetricsWithResponse(ctx context.Context, params *PrometheusRawMetricsParams) (*PrometheusRawMetricsResponse, error) {
+	rsp, err := c.PrometheusRawMetrics(ctx, params)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePrometheusRawMetricsResponse(rsp)
+}
+
 // DeleteClusterWithResponse request returning *DeleteClusterResponse
 func (c *ClientWithResponses) DeleteClusterWithResponse(ctx context.Context, clusterId ClusterId) (*DeleteClusterResponse, error) {
 	rsp, err := c.DeleteCluster(ctx, clusterId)
@@ -10747,6 +10655,49 @@ func (c *ClientWithResponses) UpdateClusterWithResponse(ctx context.Context, clu
 		return nil, err
 	}
 	return ParseUpdateClusterResponse(rsp)
+}
+
+// ClusterActionsAPIPollClusterActionsWithResponse request returning *ClusterActionsAPIPollClusterActionsResponse
+func (c *ClientWithResponses) ClusterActionsAPIPollClusterActionsWithResponse(ctx context.Context, clusterId string) (*ClusterActionsAPIPollClusterActionsResponse, error) {
+	rsp, err := c.ClusterActionsAPIPollClusterActions(ctx, clusterId)
+	if err != nil {
+		return nil, err
+	}
+	return ParseClusterActionsAPIPollClusterActionsResponse(rsp)
+}
+
+// ClusterActionsAPIIngestLogsWithBodyWithResponse request with arbitrary body returning *ClusterActionsAPIIngestLogsResponse
+func (c *ClientWithResponses) ClusterActionsAPIIngestLogsWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader) (*ClusterActionsAPIIngestLogsResponse, error) {
+	rsp, err := c.ClusterActionsAPIIngestLogsWithBody(ctx, clusterId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseClusterActionsAPIIngestLogsResponse(rsp)
+}
+
+func (c *ClientWithResponses) ClusterActionsAPIIngestLogsWithResponse(ctx context.Context, clusterId string, body ClusterActionsAPIIngestLogsJSONRequestBody) (*ClusterActionsAPIIngestLogsResponse, error) {
+	rsp, err := c.ClusterActionsAPIIngestLogs(ctx, clusterId, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseClusterActionsAPIIngestLogsResponse(rsp)
+}
+
+// ClusterActionsAPIAckClusterActionWithBodyWithResponse request with arbitrary body returning *ClusterActionsAPIAckClusterActionResponse
+func (c *ClientWithResponses) ClusterActionsAPIAckClusterActionWithBodyWithResponse(ctx context.Context, clusterId string, actionId string, contentType string, body io.Reader) (*ClusterActionsAPIAckClusterActionResponse, error) {
+	rsp, err := c.ClusterActionsAPIAckClusterActionWithBody(ctx, clusterId, actionId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseClusterActionsAPIAckClusterActionResponse(rsp)
+}
+
+func (c *ClientWithResponses) ClusterActionsAPIAckClusterActionWithResponse(ctx context.Context, clusterId string, actionId string, body ClusterActionsAPIAckClusterActionJSONRequestBody) (*ClusterActionsAPIAckClusterActionResponse, error) {
+	rsp, err := c.ClusterActionsAPIAckClusterAction(ctx, clusterId, actionId, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseClusterActionsAPIAckClusterActionResponse(rsp)
 }
 
 // GetClusterAddonsWithResponse request returning *GetClusterAddonsResponse
@@ -10828,22 +10779,31 @@ func (c *ClientWithResponses) GetCostHistoryWithResponse(ctx context.Context, cl
 	return ParseGetCostHistoryResponse(rsp)
 }
 
-// GetClusterCpuUtilizationMetricsWithResponse request returning *GetClusterCpuUtilizationMetricsResponse
-func (c *ClientWithResponses) GetClusterCpuUtilizationMetricsWithResponse(ctx context.Context, clusterId ClusterId, params *GetClusterCpuUtilizationMetricsParams) (*GetClusterCpuUtilizationMetricsResponse, error) {
-	rsp, err := c.GetClusterCpuUtilizationMetrics(ctx, clusterId, params)
+// GetDashboardMetricsCommonStatsWithResponse request returning *GetDashboardMetricsCommonStatsResponse
+func (c *ClientWithResponses) GetDashboardMetricsCommonStatsWithResponse(ctx context.Context, clusterId ClusterId) (*GetDashboardMetricsCommonStatsResponse, error) {
+	rsp, err := c.GetDashboardMetricsCommonStats(ctx, clusterId)
 	if err != nil {
 		return nil, err
 	}
-	return ParseGetClusterCpuUtilizationMetricsResponse(rsp)
+	return ParseGetDashboardMetricsCommonStatsResponse(rsp)
 }
 
-// GetClusterCurrentMetricsWithResponse request returning *GetClusterCurrentMetricsResponse
-func (c *ClientWithResponses) GetClusterCurrentMetricsWithResponse(ctx context.Context, clusterId ClusterId) (*GetClusterCurrentMetricsResponse, error) {
-	rsp, err := c.GetClusterCurrentMetrics(ctx, clusterId)
+// GetDashboardMetricsCpuUsageWithResponse request returning *GetDashboardMetricsCpuUsageResponse
+func (c *ClientWithResponses) GetDashboardMetricsCpuUsageWithResponse(ctx context.Context, clusterId ClusterId, params *GetDashboardMetricsCpuUsageParams) (*GetDashboardMetricsCpuUsageResponse, error) {
+	rsp, err := c.GetDashboardMetricsCpuUsage(ctx, clusterId, params)
 	if err != nil {
 		return nil, err
 	}
-	return ParseGetClusterCurrentMetricsResponse(rsp)
+	return ParseGetDashboardMetricsCpuUsageResponse(rsp)
+}
+
+// GetDashboardMetricsMemoryUsageWithResponse request returning *GetDashboardMetricsMemoryUsageResponse
+func (c *ClientWithResponses) GetDashboardMetricsMemoryUsageWithResponse(ctx context.Context, clusterId ClusterId, params *GetDashboardMetricsMemoryUsageParams) (*GetDashboardMetricsMemoryUsageResponse, error) {
+	rsp, err := c.GetDashboardMetricsMemoryUsage(ctx, clusterId, params)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetDashboardMetricsMemoryUsageResponse(rsp)
 }
 
 // GetClusterFeedbackEventsWithResponse request returning *GetClusterFeedbackEventsResponse
@@ -10908,15 +10868,6 @@ func (c *ClientWithResponses) ConfigureClusterAddonsWithResponse(ctx context.Con
 	return ParseConfigureClusterAddonsResponse(rsp)
 }
 
-// GetClusterMemoryUtilizationMetricsWithResponse request returning *GetClusterMemoryUtilizationMetricsResponse
-func (c *ClientWithResponses) GetClusterMemoryUtilizationMetricsWithResponse(ctx context.Context, clusterId ClusterId, params *GetClusterMemoryUtilizationMetricsParams) (*GetClusterMemoryUtilizationMetricsResponse, error) {
-	rsp, err := c.GetClusterMemoryUtilizationMetrics(ctx, clusterId, params)
-	if err != nil {
-		return nil, err
-	}
-	return ParseGetClusterMemoryUtilizationMetricsResponse(rsp)
-}
-
 // GetClusterMetricsWithResponse request returning *GetClusterMetricsResponse
 func (c *ClientWithResponses) GetClusterMetricsWithResponse(ctx context.Context, clusterId ClusterId, params *GetClusterMetricsParams) (*GetClusterMetricsResponse, error) {
 	rsp, err := c.GetClusterMetrics(ctx, clusterId, params)
@@ -10924,24 +10875,6 @@ func (c *ClientWithResponses) GetClusterMetricsWithResponse(ctx context.Context,
 		return nil, err
 	}
 	return ParseGetClusterMetricsResponse(rsp)
-}
-
-// GetClusterRebalancePlanWithResponse request returning *GetClusterRebalancePlanResponse
-func (c *ClientWithResponses) GetClusterRebalancePlanWithResponse(ctx context.Context, clusterId ClusterId) (*GetClusterRebalancePlanResponse, error) {
-	rsp, err := c.GetClusterRebalancePlan(ctx, clusterId)
-	if err != nil {
-		return nil, err
-	}
-	return ParseGetClusterRebalancePlanResponse(rsp)
-}
-
-// GenerateClusterRebalancePlanWithResponse request returning *GenerateClusterRebalancePlanResponse
-func (c *ClientWithResponses) GenerateClusterRebalancePlanWithResponse(ctx context.Context, clusterId ClusterId) (*GenerateClusterRebalancePlanResponse, error) {
-	rsp, err := c.GenerateClusterRebalancePlan(ctx, clusterId)
-	if err != nil {
-		return nil, err
-	}
-	return ParseGenerateClusterRebalancePlanResponse(rsp)
 }
 
 // GetNodeConstraintsWithResponse request returning *GetNodeConstraintsResponse
@@ -11277,15 +11210,6 @@ func (c *ClientWithResponses) GetExternalClusterOperationWithResponse(ctx contex
 	return ParseGetExternalClusterOperationResponse(rsp)
 }
 
-// PrometheusRawMetricsWithResponse request returning *PrometheusRawMetricsResponse
-func (c *ClientWithResponses) PrometheusRawMetricsWithResponse(ctx context.Context, params *PrometheusRawMetricsParams) (*PrometheusRawMetricsResponse, error) {
-	rsp, err := c.PrometheusRawMetrics(ctx, params)
-	if err != nil {
-		return nil, err
-	}
-	return ParsePrometheusRawMetricsResponse(rsp)
-}
-
 // ExternalClusterAPIDeleteClusterWithResponse request returning *ExternalClusterAPIDeleteClusterResponse
 func (c *ClientWithResponses) ExternalClusterAPIDeleteClusterWithResponse(ctx context.Context, clusterId string) (*ExternalClusterAPIDeleteClusterResponse, error) {
 	rsp, err := c.ExternalClusterAPIDeleteCluster(ctx, clusterId)
@@ -11321,15 +11245,6 @@ func (c *ClientWithResponses) ExternalClusterAPIUpdateClusterWithResponse(ctx co
 	return ParseExternalClusterAPIUpdateClusterResponse(rsp)
 }
 
-// GetExternalClusterCpuUtilizationMetricsWithResponse request returning *GetExternalClusterCpuUtilizationMetricsResponse
-func (c *ClientWithResponses) GetExternalClusterCpuUtilizationMetricsWithResponse(ctx context.Context, clusterId ClusterId, params *GetExternalClusterCpuUtilizationMetricsParams) (*GetExternalClusterCpuUtilizationMetricsResponse, error) {
-	rsp, err := c.GetExternalClusterCpuUtilizationMetrics(ctx, clusterId, params)
-	if err != nil {
-		return nil, err
-	}
-	return ParseGetExternalClusterCpuUtilizationMetricsResponse(rsp)
-}
-
 // ExternalClusterAPIGetCredentialsScriptWithResponse request returning *ExternalClusterAPIGetCredentialsScriptResponse
 func (c *ClientWithResponses) ExternalClusterAPIGetCredentialsScriptWithResponse(ctx context.Context, clusterId string) (*ExternalClusterAPIGetCredentialsScriptResponse, error) {
 	rsp, err := c.ExternalClusterAPIGetCredentialsScript(ctx, clusterId)
@@ -11337,15 +11252,6 @@ func (c *ClientWithResponses) ExternalClusterAPIGetCredentialsScriptWithResponse
 		return nil, err
 	}
 	return ParseExternalClusterAPIGetCredentialsScriptResponse(rsp)
-}
-
-// GetExternalClusterCurrentMetricsWithResponse request returning *GetExternalClusterCurrentMetricsResponse
-func (c *ClientWithResponses) GetExternalClusterCurrentMetricsWithResponse(ctx context.Context, clusterId ClusterId) (*GetExternalClusterCurrentMetricsResponse, error) {
-	rsp, err := c.GetExternalClusterCurrentMetrics(ctx, clusterId)
-	if err != nil {
-		return nil, err
-	}
-	return ParseGetExternalClusterCurrentMetricsResponse(rsp)
 }
 
 // ExternalClusterAPIDisconnectClusterWithBodyWithResponse request with arbitrary body returning *ExternalClusterAPIDisconnectClusterResponse
@@ -11381,15 +11287,6 @@ func (c *ClientWithResponses) ExternalClusterAPIGetKubeconfigWithResponse(ctx co
 		return nil, err
 	}
 	return ParseExternalClusterAPIGetKubeconfigResponse(rsp)
-}
-
-// GetExternalClusterMemoryUtilizationMetricsWithResponse request returning *GetExternalClusterMemoryUtilizationMetricsResponse
-func (c *ClientWithResponses) GetExternalClusterMemoryUtilizationMetricsWithResponse(ctx context.Context, clusterId ClusterId, params *GetExternalClusterMemoryUtilizationMetricsParams) (*GetExternalClusterMemoryUtilizationMetricsResponse, error) {
-	rsp, err := c.GetExternalClusterMemoryUtilizationMetrics(ctx, clusterId, params)
-	if err != nil {
-		return nil, err
-	}
-	return ParseGetExternalClusterMemoryUtilizationMetricsResponse(rsp)
 }
 
 // ExternalClusterAPIGetMetricsWithResponse request returning *ExternalClusterAPIGetMetricsResponse
@@ -12154,6 +12051,25 @@ func ParseCreateNewClusterResponse(rsp *http.Response) (*CreateNewClusterRespons
 	return response, nil
 }
 
+// ParsePrometheusRawMetricsResponse parses an HTTP response from a PrometheusRawMetricsWithResponse call
+func ParsePrometheusRawMetricsResponse(rsp *http.Response) (*PrometheusRawMetricsResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &PrometheusRawMetricsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	}
+
+	return response, nil
+}
+
 // ParseDeleteClusterResponse parses an HTTP response from a DeleteClusterWithResponse call
 func ParseDeleteClusterResponse(rsp *http.Response) (*DeleteClusterResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
@@ -12215,6 +12131,84 @@ func ParseUpdateClusterResponse(rsp *http.Response) (*UpdateClusterResponse, err
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest KubernetesCluster
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseClusterActionsAPIPollClusterActionsResponse parses an HTTP response from a ClusterActionsAPIPollClusterActionsWithResponse call
+func ParseClusterActionsAPIPollClusterActionsResponse(rsp *http.Response) (*ClusterActionsAPIPollClusterActionsResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &ClusterActionsAPIPollClusterActionsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ClusteractionsV1PollClusterActionsResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseClusterActionsAPIIngestLogsResponse parses an HTTP response from a ClusterActionsAPIIngestLogsWithResponse call
+func ParseClusterActionsAPIIngestLogsResponse(rsp *http.Response) (*ClusterActionsAPIIngestLogsResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &ClusterActionsAPIIngestLogsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ClusteractionsV1IngestLogsResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseClusterActionsAPIAckClusterActionResponse parses an HTTP response from a ClusterActionsAPIAckClusterActionWithResponse call
+func ParseClusterActionsAPIAckClusterActionResponse(rsp *http.Response) (*ClusterActionsAPIAckClusterActionResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &ClusterActionsAPIAckClusterActionResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ClusteractionsV1AckClusterActionResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -12393,39 +12387,79 @@ func ParseGetCostHistoryResponse(rsp *http.Response) (*GetCostHistoryResponse, e
 	return response, nil
 }
 
-// ParseGetClusterCpuUtilizationMetricsResponse parses an HTTP response from a GetClusterCpuUtilizationMetricsWithResponse call
-func ParseGetClusterCpuUtilizationMetricsResponse(rsp *http.Response) (*GetClusterCpuUtilizationMetricsResponse, error) {
+// ParseGetDashboardMetricsCommonStatsResponse parses an HTTP response from a GetDashboardMetricsCommonStatsWithResponse call
+func ParseGetDashboardMetricsCommonStatsResponse(rsp *http.Response) (*GetDashboardMetricsCommonStatsResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
 	defer rsp.Body.Close()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &GetClusterCpuUtilizationMetricsResponse{
+	response := &GetDashboardMetricsCommonStatsResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
 
 	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest DashboardMetricsCommonStats
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
 	}
 
 	return response, nil
 }
 
-// ParseGetClusterCurrentMetricsResponse parses an HTTP response from a GetClusterCurrentMetricsWithResponse call
-func ParseGetClusterCurrentMetricsResponse(rsp *http.Response) (*GetClusterCurrentMetricsResponse, error) {
+// ParseGetDashboardMetricsCpuUsageResponse parses an HTTP response from a GetDashboardMetricsCpuUsageWithResponse call
+func ParseGetDashboardMetricsCpuUsageResponse(rsp *http.Response) (*GetDashboardMetricsCpuUsageResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
 	defer rsp.Body.Close()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &GetClusterCurrentMetricsResponse{
+	response := &GetDashboardMetricsCpuUsageResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
 
 	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest DashboardMetricsCPUUsage
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetDashboardMetricsMemoryUsageResponse parses an HTTP response from a GetDashboardMetricsMemoryUsageWithResponse call
+func ParseGetDashboardMetricsMemoryUsageResponse(rsp *http.Response) (*GetDashboardMetricsMemoryUsageResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetDashboardMetricsMemoryUsageResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest DashboardMetricsMemoryUsage
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
 	}
 
 	return response, nil
@@ -12608,25 +12642,6 @@ func ParseConfigureClusterAddonsResponse(rsp *http.Response) (*ConfigureClusterA
 	return response, nil
 }
 
-// ParseGetClusterMemoryUtilizationMetricsResponse parses an HTTP response from a GetClusterMemoryUtilizationMetricsWithResponse call
-func ParseGetClusterMemoryUtilizationMetricsResponse(rsp *http.Response) (*GetClusterMemoryUtilizationMetricsResponse, error) {
-	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
-	if err != nil {
-		return nil, err
-	}
-
-	response := &GetClusterMemoryUtilizationMetricsResponse{
-		Body:         bodyBytes,
-		HTTPResponse: rsp,
-	}
-
-	switch {
-	}
-
-	return response, nil
-}
-
 // ParseGetClusterMetricsResponse parses an HTTP response from a GetClusterMetricsWithResponse call
 func ParseGetClusterMetricsResponse(rsp *http.Response) (*GetClusterMetricsResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
@@ -12647,58 +12662,6 @@ func ParseGetClusterMetricsResponse(rsp *http.Response) (*GetClusterMetricsRespo
 			return nil, err
 		}
 		response.JSON200 = &dest
-
-	}
-
-	return response, nil
-}
-
-// ParseGetClusterRebalancePlanResponse parses an HTTP response from a GetClusterRebalancePlanWithResponse call
-func ParseGetClusterRebalancePlanResponse(rsp *http.Response) (*GetClusterRebalancePlanResponse, error) {
-	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
-	if err != nil {
-		return nil, err
-	}
-
-	response := &GetClusterRebalancePlanResponse{
-		Body:         bodyBytes,
-		HTTPResponse: rsp,
-	}
-
-	switch {
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest RebalancePlanResponse
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON200 = &dest
-
-	}
-
-	return response, nil
-}
-
-// ParseGenerateClusterRebalancePlanResponse parses an HTTP response from a GenerateClusterRebalancePlanWithResponse call
-func ParseGenerateClusterRebalancePlanResponse(rsp *http.Response) (*GenerateClusterRebalancePlanResponse, error) {
-	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
-	if err != nil {
-		return nil, err
-	}
-
-	response := &GenerateClusterRebalancePlanResponse{
-		Body:         bodyBytes,
-		HTTPResponse: rsp,
-	}
-
-	switch {
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 202:
-		var dest map[string]interface{}
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON202 = &dest
 
 	}
 
@@ -13473,25 +13436,6 @@ func ParseGetExternalClusterOperationResponse(rsp *http.Response) (*GetExternalC
 	return response, nil
 }
 
-// ParsePrometheusRawMetricsResponse parses an HTTP response from a PrometheusRawMetricsWithResponse call
-func ParsePrometheusRawMetricsResponse(rsp *http.Response) (*PrometheusRawMetricsResponse, error) {
-	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
-	if err != nil {
-		return nil, err
-	}
-
-	response := &PrometheusRawMetricsResponse{
-		Body:         bodyBytes,
-		HTTPResponse: rsp,
-	}
-
-	switch {
-	}
-
-	return response, nil
-}
-
 // ParseExternalClusterAPIDeleteClusterResponse parses an HTTP response from a ExternalClusterAPIDeleteClusterWithResponse call
 func ParseExternalClusterAPIDeleteClusterResponse(rsp *http.Response) (*ExternalClusterAPIDeleteClusterResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
@@ -13563,25 +13507,6 @@ func ParseExternalClusterAPIUpdateClusterResponse(rsp *http.Response) (*External
 	return response, nil
 }
 
-// ParseGetExternalClusterCpuUtilizationMetricsResponse parses an HTTP response from a GetExternalClusterCpuUtilizationMetricsWithResponse call
-func ParseGetExternalClusterCpuUtilizationMetricsResponse(rsp *http.Response) (*GetExternalClusterCpuUtilizationMetricsResponse, error) {
-	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
-	if err != nil {
-		return nil, err
-	}
-
-	response := &GetExternalClusterCpuUtilizationMetricsResponse{
-		Body:         bodyBytes,
-		HTTPResponse: rsp,
-	}
-
-	switch {
-	}
-
-	return response, nil
-}
-
 // ParseExternalClusterAPIGetCredentialsScriptResponse parses an HTTP response from a ExternalClusterAPIGetCredentialsScriptWithResponse call
 func ParseExternalClusterAPIGetCredentialsScriptResponse(rsp *http.Response) (*ExternalClusterAPIGetCredentialsScriptResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
@@ -13603,25 +13528,6 @@ func ParseExternalClusterAPIGetCredentialsScriptResponse(rsp *http.Response) (*E
 		}
 		response.JSON200 = &dest
 
-	}
-
-	return response, nil
-}
-
-// ParseGetExternalClusterCurrentMetricsResponse parses an HTTP response from a GetExternalClusterCurrentMetricsWithResponse call
-func ParseGetExternalClusterCurrentMetricsResponse(rsp *http.Response) (*GetExternalClusterCurrentMetricsResponse, error) {
-	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
-	if err != nil {
-		return nil, err
-	}
-
-	response := &GetExternalClusterCurrentMetricsResponse{
-		Body:         bodyBytes,
-		HTTPResponse: rsp,
-	}
-
-	switch {
 	}
 
 	return response, nil
@@ -13700,25 +13606,6 @@ func ParseExternalClusterAPIGetKubeconfigResponse(rsp *http.Response) (*External
 		}
 		response.JSON200 = &dest
 
-	}
-
-	return response, nil
-}
-
-// ParseGetExternalClusterMemoryUtilizationMetricsResponse parses an HTTP response from a GetExternalClusterMemoryUtilizationMetricsWithResponse call
-func ParseGetExternalClusterMemoryUtilizationMetricsResponse(rsp *http.Response) (*GetExternalClusterMemoryUtilizationMetricsResponse, error) {
-	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
-	if err != nil {
-		return nil, err
-	}
-
-	response := &GetExternalClusterMemoryUtilizationMetricsResponse{
-		Body:         bodyBytes,
-		HTTPResponse: rsp,
-	}
-
-	switch {
 	}
 
 	return response, nil
