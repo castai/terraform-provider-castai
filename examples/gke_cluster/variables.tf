@@ -1,19 +1,19 @@
 variable "castai_api_token" {
-  default = "e1270f185dab25badd31f0af2d32e760bf589227b6a33dffcbaeea41b6a2cb59"
+  default = "<<replace-this-with-your-token>>"
 }
 
 variable "castai_url" {
-  default = "https://api-matas.bridge.dev-master.cast.ai/"
+  default = "<<replace-this-with-castai-api-url>>"
 }
 
 variable "project_id" {
-  default = "staging-eu-castai-vt5hy2"
+  default = "<<replace-this-with-your-gcp-project-id>>"
 }
 
 variable "cluster_name" {
-  default = "matas-test-tf"
+  default = "<<replace-this-with-your-cluster-name>>"
 }
 
 variable "custom_role_id" {
-  default = "castai.gkeAccess"
+  default = "<<replace-this-with-your-custom-role-id>>"
 }
