@@ -4,7 +4,7 @@ terraform {
   required_providers {
     castai = {
       source  = "castai/castai"
-      version = "0.0.3-local"
+      version = "0.0.9-local"
     }
   }
   required_version = ">= 0.13"
@@ -12,7 +12,12 @@ terraform {
 
 provider "castai" {
   api_token = var.castai_api_token
-  api_url = "https://api-matas.bridge.dev-master.cast.ai/v1"
+  api_url = var.castai_url
+}
+
+provider "google" {
+  project     = var.project_id
+  region      = "eu-central1"
 }
 
 locals {
@@ -32,7 +37,7 @@ resource "google_project_iam_custom_role" "castai_role" {
   role_id     = var.custom_role_id
   title       = "Role to manage GKE cluster via CAST AI"
   description = "Role to manage GKE cluster via CAST AI"
-  permissions = data.castai_gcp_user_policies.gke.policy
+  permissions = toset(data.castai_gcp_user_policies.gke.policy)
   project     = var.project_id
   stage       = "ALPHA"
 }
