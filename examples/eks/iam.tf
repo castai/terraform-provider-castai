@@ -12,16 +12,6 @@ locals {
   iam_user = "castai-eks-${var.cluster_name}"
   aws_account_id = data.aws_caller_identity.current.account_id
   instance_profile = "cast-${substr(var.cluster_name,0,40)}-eks-${substr(var.cluster_id,0,8)}"
-  instance_profile_roles = toset([
-    "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy",
-    "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly",
-    "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"])
-  lambda_policies = toset([
-    "arn:aws:iam::aws:policy/AmazonEC2ReadOnlyAccess",
-    "arn:aws:iam::aws:policy/AmazonEventBridgeReadOnlyAccess",
-    "arn:aws:iam::aws:policy/IAMReadOnlyAccess",
-    "arn:aws:iam::aws:policy/AWSLambda_ReadOnlyAccess"
-  ])
 }
 
 # RETRIEVE CLUSTER PARAMS AS EKS DATA_SOURCE
@@ -62,7 +52,7 @@ resource "aws_iam_instance_profile" "instance_profile" {
 }
 
 resource "aws_iam_role_policy_attachment" "castai_instance_profile_policy" {
-  for_each = local.instance_profile_roles
+  for_each = toset(data.castai_eks_settings.eks.instance_profile_policies)
 
   role       = aws_iam_instance_profile.instance_profile.role
   policy_arn = each.value
@@ -89,7 +79,7 @@ resource "aws_iam_user_policy" "castai_user_iam_policy" {
 }
 
 resource "aws_iam_user_policy_attachment" "castai_iam_lambda_policy_attachment" {
-  for_each = local.lambda_policies
+  for_each = toset(data.castai_eks_settings.eks.lambda_policies)
 
   user       = aws_iam_user.castai.name
   policy_arn = each.value
@@ -104,6 +94,7 @@ resource "aws_iam_user_policy_attachment" "castai_user_iam_policy_attachment" {
 }
 
 output "secret" {
-  value = aws_iam_access_key.castai.encrypted_secret
+  value = aws_iam_access_key.castai.secret
+  sensitive = true
 }
 

@@ -11,13 +11,15 @@ import (
 )
 
 const (
-	EksSettingsFieldAccountId          = "account_id"
-	EksSettingsFieldRegion             = "region"
-	EksSettingsFieldVpc                = "vpc"
-	EksSettingsFieldCluster            = "cluster"
-	EksSettingsFieldIamPolicyJson      = "iam_policy_json"
-	EksSettingsFieldIamUserPolicyJson  = "iam_user_policy_json"
-	EksSettingsFieldIamManagedPolicies = "iam_managed_policies"
+	EksSettingsFieldAccountId                = "account_id"
+	EksSettingsFieldRegion                   = "region"
+	EksSettingsFieldVpc                      = "vpc"
+	EksSettingsFieldCluster                  = "cluster"
+	EksSettingsFieldIamPolicyJson            = "iam_policy_json"
+	EksSettingsFieldIamUserPolicyJson        = "iam_user_policy_json"
+	EksSettingsFieldIamManagedPolicies       = "iam_managed_policies"
+	EksSettingsFieldLambdaPolicies          = "lambda_policies"
+	EksSettingsFieldInstanceProfilePolicies = "instance_profile_policies"
 )
 
 func dataSourceCastaiEksSettings() *schema.Resource {
@@ -62,6 +64,16 @@ func dataSourceCastaiEksSettings() *schema.Resource {
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Computed: true,
 			},
+			EksSettingsFieldLambdaPolicies: {
+				Type: schema.TypeSet,
+				Elem: &schema.Schema{Type:schema.TypeString},
+				Computed: true,
+			},
+			EksSettingsFieldInstanceProfilePolicies: {
+				Type: schema.TypeSet,
+				Elem: &schema.Schema{Type:schema.TypeString},
+				Computed: true,
+			},
 		},
 	}
 }
@@ -76,11 +88,16 @@ func dataSourceCastaiEksSettingsRead(ctx context.Context, data *schema.ResourceD
 
 	userPolicy, _ := policies.GetUserInlinePolicy(cluster, arn, vpc)
 	iamPolicy, _ := policies.GetIAMPolicy(accountID)
+	lambdaPolicy := policies.GetLambdaPolicy()
+	instanceProfilePolicy := policies.GetInstanceProfilePolicy()
 
 	data.SetId(fmt.Sprintf("eks-%s-%s-%s-%s", accountID, vpc, region, cluster))
 	data.Set(EksSettingsFieldIamPolicyJson, iamPolicy)
 	data.Set(EksSettingsFieldIamUserPolicyJson, userPolicy)
 	data.Set(EksSettingsFieldIamManagedPolicies, buildManagedPolicies())
+	data.Set(EksSettingsFieldLambdaPolicies, lambdaPolicy)
+	data.Set(EksSettingsFieldInstanceProfilePolicies, instanceProfilePolicy)
+
 	return nil
 }
 
