@@ -1,7 +1,6 @@
 # IAM user required for CAST.AI
 
 provider "castai" {
-  api_url   = "https://console.cast.ai//"
   api_token = var.castai_api_token
 }
 
@@ -24,9 +23,6 @@ locals {
     "arn:aws:iam::aws:policy/AWSLambda_ReadOnlyAccess"
   ])
 }
-
-# provides up-to-date permissions for new iam user (user policy json, iam policy json and managed services required).
-
 
 # RETRIEVE CLUSTER PARAMS AS EKS DATA_SOURCE
 data "castai_eks_settings" "eks" {
