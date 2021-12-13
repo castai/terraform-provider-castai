@@ -1,7 +1,7 @@
 # IAM user required for CAST.AI
 
 provider "castai" {
-  api_url   = "https://console-matas.bridge.dev-master.cast.ai/"
+  api_url   = "https://console.cast.ai//"
   api_token = var.castai_api_token
 }
 
@@ -74,8 +74,6 @@ resource "aws_iam_role_policy_attachment" "castai_instance_profile_policy" {
 
 resource "aws_iam_access_key" "castai" {
   user = aws_iam_user.castai.name
-
-  depends_on = [aws_iam_user.castai]
 }
 
 resource "aws_iam_policy" "castai_iam_policy" {
