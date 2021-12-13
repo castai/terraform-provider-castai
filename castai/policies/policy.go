@@ -11,7 +11,7 @@ var (
 	//go:embed iam-policy.json
 	IAMPolicy string
 	//go:embed user-policy.json
-	UserInlinePolicy string
+	UserPolicy string
 )
 
 func GetIAMPolicy(accountNumber string) (string, error) {
@@ -36,7 +36,7 @@ func GetIAMPolicy(accountNumber string) (string, error) {
 }
 
 func GetUserInlinePolicy(clusterName, arn, vpc string) (string, error) {
-	tmpl, err := template.New("json").Parse(UserInlinePolicy)
+	tmpl, err := template.New("json").Parse(UserPolicy)
 	if err != nil {
 		return "", fmt.Errorf("parsing template: %w", err)
 	}
