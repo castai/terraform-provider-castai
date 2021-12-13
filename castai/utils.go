@@ -10,3 +10,7 @@ func convertStringArr(arr []interface{}) []string {
 	}
 	return result
 }
+
+func toStringPtr(value string) *string {
+	return &value
+}
