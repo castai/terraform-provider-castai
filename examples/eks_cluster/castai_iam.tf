@@ -1,53 +1,46 @@
-# IAM user required for CAST.AI
-
-provider "castai" {
-  api_token = var.castai_api_token
-}
-
-provider "aws" {
-  region  = var.region
-}
+# ADD - iam user used to onboard and use by CAST.AI
 
 locals {
-  iam_user = "castai-eks-${var.cluster_name}"
-  aws_account_id = data.aws_caller_identity.current.account_id
-  instance_profile = "cast-${substr(var.cluster_name,0,40)}-eks-${substr(var.cluster_id,0,8)}"
+  iam_user              = "castai-eks-${var.cluster_name}"
+  aws_account_id        = data.aws_caller_identity.current.account_id
+  instance_profile_name = "castai-eks-instance-${substr(var.cluster_name,0,20)}"
+  vpc_id                = module.vpc.vpc_id
 }
 
-# RETRIEVE CLUSTER PARAMS AS EKS DATA_SOURCE
 data "castai_eks_settings" "eks" {
   account_id = local.aws_account_id
-  vpc        = var.vpc_id
-  region     = var.region
+  vpc        = local.vpc_id
+  region     = var.cluster_region
   cluster    = var.cluster_name
-}
 
-data "aws_caller_identity" "current" {}
+  depends_on = [module.vpc]
+}
 
 resource "aws_iam_user" "castai" {
   name = local.iam_user
+
+  depends_on = [aws_iam_user_policy.castai_user_iam_policy, aws_iam_policy.castai_iam_policy]
 }
 
 resource "aws_iam_role" "instance_profile_role" {
-  name = local.instance_profile
-
+  name               = local.instance_profile_name
   assume_role_policy = jsonencode({
-    Version:"2012-10-17"
-    Statement:[
+    Version : "2012-10-17"
+    Statement : [
       {
-        Sid = ""
-        Effect = "Allow"
+        Sid       = ""
+        Effect    = "Allow"
         Principal = {
           Service = "ec2.amazonaws.com"
         }
-        Action= ["sts:AssumeRole"]
+        Action    = ["sts:AssumeRole"]
       }
     ]
   })
 }
 
 resource "aws_iam_instance_profile" "instance_profile" {
-  name = local.instance_profile
+  name = local.instance_profile_name
   role = aws_iam_role.instance_profile_role.name
 }
 
@@ -73,7 +66,7 @@ resource "aws_iam_user_policy_attachment" "castai_iam_policy_attachment" {
 }
 
 resource "aws_iam_user_policy" "castai_user_iam_policy" {
-  name   = "castai-user-policy-${var.cluster_name}"
+  name   = "castai-user-policy-${local.cluster_name}"
   user   = aws_iam_user.castai.name
   policy = data.castai_eks_settings.eks.iam_user_policy_json
 }
@@ -92,9 +85,3 @@ resource "aws_iam_user_policy_attachment" "castai_user_iam_policy_attachment" {
   policy_arn = each.key
   depends_on = [aws_iam_policy.castai_iam_policy]
 }
-
-output "secret" {
-  value = aws_iam_access_key.castai.secret
-  sensitive = true
-}
-
