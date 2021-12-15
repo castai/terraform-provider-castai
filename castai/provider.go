@@ -29,11 +29,13 @@ func Provider() *schema.Provider {
 		ResourcesMap: map[string]*schema.Resource{
 			"castai_credentials": resourceCastaiClusterCredentials(),
 			"castai_cluster":     resourceCastaiCluster(),
+			"castai_eks_cluster": resourceCastaiEksCluster(),
 		},
 
 		DataSourcesMap: map[string]*schema.Resource{
 			"castai_credentials": dataSourceCastaiCredentials(),
 			"castai_cluster":     dataSourceCastaiCluster(),
+			"castai_eks_settings": dataSourceCastaiEksSettings(),
 			"castai_gcp_user_policies":  dataSourceGcpPolicies(),
 		},
 

@@ -1,0 +1,8 @@
+{
+  "Policies": [
+    "arn:aws:iam::aws:policy/AmazonEC2ReadOnlyAccess",
+    "arn:aws:iam::aws:policy/AmazonEventBridgeReadOnlyAccess",
+    "arn:aws:iam::aws:policy/IAMReadOnlyAccess",
+    "arn:aws:iam::aws:policy/AWSLambda_ReadOnlyAccess"
+  ]
+}
