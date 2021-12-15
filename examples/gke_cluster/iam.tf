@@ -21,13 +21,13 @@ resource "google_service_account" "castai_service_account" {
   project      = var.project_id
 }
 
-data "castai_gcp_user_policies" "gke" {}
+data "castai_gke_user_policies" "gke" {}
 
 resource "google_project_iam_custom_role" "castai_role" {
   role_id     = local.custom_role_id
   title       = "Role to manage GKE cluster via CAST AI"
   description = "Role to manage GKE cluster via CAST AI"
-  permissions = toset(data.castai_gcp_user_policies.gke.policy)
+  permissions = toset(data.castai_gke_user_policies.gke.policy)
   project     = var.project_id
   stage       = "ALPHA"
 }
@@ -53,5 +53,3 @@ output "private_key" {
   value = base64decode(google_service_account_key.castai_key.private_key)
   sensitive = true
 }
-
-

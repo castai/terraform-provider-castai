@@ -36,7 +36,7 @@ func Provider() *schema.Provider {
 			"castai_credentials": dataSourceCastaiCredentials(),
 			"castai_cluster":     dataSourceCastaiCluster(),
 			"castai_eks_settings": dataSourceCastaiEksSettings(),
-			"castai_gcp_user_policies":  dataSourceGcpPolicies(),
+			"castai_gke_user_policies":  dataSourceGkePolicies(),
 		},
 
 		ConfigureContextFunc: providerConfigure(),

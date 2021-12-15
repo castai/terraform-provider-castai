@@ -2,15 +2,15 @@ package castai
 
 import (
 	"context"
-	"github.com/castai/terraform-provider-castai/castai/policies/gcp"
+	"github.com/castai/terraform-provider-castai/castai/policies/gke"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func dataSourceGcpPolicies() *schema.Resource {
+func dataSourceGkePolicies() *schema.Resource {
 	return &schema.Resource{
-		ReadContext: dataSourceGcpPoliciesRead,
+		ReadContext: dataSourceGkePoliciesRead,
 		Schema: map[string]*schema.Schema {
 			"policy":  {
 				Type: schema.TypeList,
@@ -21,9 +21,9 @@ func dataSourceGcpPolicies() *schema.Resource {
 	}
 }
 
-func dataSourceGcpPoliciesRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	policies, _ := gcp.GetIAMPolicy()
-	data.SetId("gcp")
+func dataSourceGkePoliciesRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	policies, _ := gke.GetUserPolicy()
+	data.SetId("gke")
 	data.Set("policy", policies)
 
 	return nil

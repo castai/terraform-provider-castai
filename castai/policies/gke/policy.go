@@ -1,4 +1,4 @@
-package gcp
+package gke
 
 import (
 	_ "embed" // use go:embed
@@ -14,7 +14,7 @@ type pols struct {
 	Policies []string `json:"Policies"`
 }
 
-func GetIAMPolicy() ([]string, error) {
+func GetUserPolicy() ([]string, error) {
 	var p pols
 	err := json.Unmarshal(Policy, &p)
 	if err != nil {
