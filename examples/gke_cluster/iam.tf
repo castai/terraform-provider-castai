@@ -1,31 +1,21 @@
 ## IAM user required for CAST.AI
 
-terraform {
-  required_providers {
-    castai = {
-      source  = "castai/castai"
-      version = "0.0.9-local"
-    }
-  }
-  required_version = ">= 0.13"
-}
-
 provider "castai" {
   api_token = var.castai_api_token
-  api_url = var.castai_url
 }
 
 provider "google" {
   project     = var.project_id
-  region      = "eu-central1"
+  region      = var.cluster_region
 }
 
 locals {
+  service_account_id    = "castai-gke-tf-${substr(sha1(var.cluster_name),0,8)}"
   service_account_email = "${local.service_account_id}@${var.project_id}.iam.gserviceaccount.com"
-  service_account_id    =  "castai-gke-${substr(sha1(var.cluster_name),1,8)}"
+  custom_role_id        = "castai.gkeAccess.tf"
 }
 
-resource "google_service_account" "castai" {
+resource "google_service_account" "castai_service_account" {
   account_id   = local.service_account_id
   display_name = "Service account to manage ${var.cluster_name} cluster via CAST"
   project      = var.project_id
@@ -34,7 +24,7 @@ resource "google_service_account" "castai" {
 data "castai_gcp_user_policies" "gke" {}
 
 resource "google_project_iam_custom_role" "castai_role" {
-  role_id     = var.custom_role_id
+  role_id     = local.custom_role_id
   title       = "Role to manage GKE cluster via CAST AI"
   description = "Role to manage GKE cluster via CAST AI"
   permissions = toset(data.castai_gcp_user_policies.gke.policy)
@@ -46,16 +36,22 @@ resource "google_project_iam_binding" "project" {
   for_each = toset([
     "roles/container.developer",
     "roles/iam.serviceAccountUser",
-    "projects/${var.project_id}/roles/${var.custom_role_id}"
+    "projects/${var.project_id}/roles/${local.custom_role_id}"
   ])
 
   project = var.project_id
   role    = each.key
-  members = [local.service_account_email]
+  members = ["serviceAccount:${local.service_account_email}"]
 }
 
 resource "google_service_account_key" "castai_key" {
-  service_account_id = local.service_account_id
+  service_account_id = google_service_account.castai_service_account.account_id
   public_key_type    = "TYPE_X509_PEM_FILE"
 }
+
+output "private_key" {
+  value = base64decode(google_service_account_key.castai_key.private_key)
+  sensitive = true
+}
+
 
