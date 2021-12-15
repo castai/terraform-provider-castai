@@ -8,9 +8,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
-func dataSourceGkePolicies() *schema.Resource {
+func dataSourceGKEPolicies() *schema.Resource {
 	return &schema.Resource{
-		ReadContext: dataSourceGkePoliciesRead,
+		ReadContext: dataSourceGKEPoliciesRead,
 		Schema: map[string]*schema.Schema {
 			"policy":  {
 				Type: schema.TypeList,
@@ -21,7 +21,7 @@ func dataSourceGkePolicies() *schema.Resource {
 	}
 }
 
-func dataSourceGkePoliciesRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceGKEPoliciesRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	policies, _ := gke.GetUserPolicy()
 	data.SetId("gke")
 	data.Set("policy", policies)
