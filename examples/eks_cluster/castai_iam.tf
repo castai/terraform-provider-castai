@@ -18,8 +18,6 @@ data "castai_eks_settings" "eks" {
 
 resource "aws_iam_user" "castai" {
   name = local.iam_user
-
-  depends_on = [aws_iam_user_policy.castai_user_iam_policy, aws_iam_policy.castai_iam_policy]
 }
 
 resource "aws_iam_role" "instance_profile_role" {
