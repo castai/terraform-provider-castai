@@ -89,5 +89,3 @@ tag is pushed with pattern `v*` (ie. `v0.1.0`).
 to publish the provider in the Terraform Registry.
 
 Releases will appear as **drafts**. Once marked as published on the GitHub Releases page, they will become available via the Terraform Registry.
-
-test
