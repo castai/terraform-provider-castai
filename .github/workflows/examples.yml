@@ -1,0 +1,13 @@
+name: Build
+on:
+  push:
+    branches: [ '*' ]
+    paths:
+      - '**.md'
+      - 'examples/**'
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - run: 'echo "No build required" '
