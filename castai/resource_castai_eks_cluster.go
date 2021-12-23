@@ -23,7 +23,7 @@ const (
 	FieldEKSClusterAccessKeyId        = "access_key_id"
 	FieldEKSClusterSecretAccessKey    = "secret_access_key"
 	FieldEKSClusterInstanceProfileArn = "instance_profile_arn"
-	FieldEksClusterAgentToken         = "agent_token"
+	FieldEKSClusterAgentToken         = "agent_token"
 	FieldEKSClusterToken              = "cluster_token"
 	FieldEKSClusterCredentialsId      = "credentials_id"
 )
@@ -81,7 +81,7 @@ func resourceCastaiEKSCluster() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			FieldEksClusterAgentToken: {
+			FieldEKSClusterAgentToken: {
 				Type:       schema.TypeString,
 				Computed:   true,
 				Deprecated: "agent_token is deprecated, use cluster_token instead",
@@ -165,12 +165,12 @@ func resourceCastaiEKSClusterRead(ctx context.Context, data *schema.ResourceData
 		data.Set(FieldEKSClusterInstanceProfileArn, *resp.JSON200.Eks.InstanceProfileArn)
 	}
 
-	if _, ok := data.GetOk(FieldEksClusterAgentToken); !ok {
+	if _, ok := data.GetOk(FieldEKSClusterAgentToken); !ok {
 		tkn, err := retrieveAgentToken(ctx, client)
 		if err != nil {
 			return diag.FromErr(err)
 		}
-		data.Set(FieldEksClusterAgentToken, tkn)
+		data.Set(FieldEKSClusterAgentToken, tkn)
 	}
 
 	// Create token only if missing.
