@@ -31,7 +31,7 @@ provider "castai" {
 resource "castai_eks_cluster" "my_castai_cluster" {
   account_id = var.aws_account_id
   region     = var.cluster_region
-  cluster    = var.cluster_name
+  name       = var.cluster_name
 }
 
 resource "helm_release" "castai_agent" {

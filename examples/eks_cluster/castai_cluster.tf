@@ -17,7 +17,7 @@ resource "castai_eks_cluster" "my_castai_cluster" {
   secret_access_key    = aws_iam_access_key.castai.secret
   instance_profile_arn = aws_iam_instance_profile.instance_profile.arn
 
-  depends_on = [aws_iam_user.castai]
+  depends_on = [module.eks]
 }
 
 resource "helm_release" "castai_agent" {
