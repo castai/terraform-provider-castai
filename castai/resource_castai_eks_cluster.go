@@ -126,7 +126,13 @@ func resourceCastaiEKSClusterCreate(ctx context.Context, data *schema.ResourceDa
 		return diag.FromErr(checkErr)
 	}
 
-	data.SetId(*response.JSON200.Id)
+	clusterID := *response.JSON200.Id
+	tkn, err := createClusterToken(ctx, client, clusterID)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	data.Set(FieldEKSClusterToken, tkn)
+	data.SetId(clusterID)
 
 	log.Printf("[INFO] Cluster with id %q has been registered, don't forget to install castai-agent helm chart", data.Id())
 
@@ -171,15 +177,6 @@ func resourceCastaiEKSClusterRead(ctx context.Context, data *schema.ResourceData
 			return diag.FromErr(err)
 		}
 		data.Set(FieldEKSClusterAgentToken, tkn)
-	}
-
-	// Create token only if missing.
-	if _, ok := data.GetOk(FieldEKSClusterToken); !ok {
-		tkn, err := createClusterToken(ctx, client, data.Id())
-		if err != nil {
-			return diag.FromErr(err)
-		}
-		data.Set(FieldEKSClusterToken, tkn)
 	}
 
 	return nil
