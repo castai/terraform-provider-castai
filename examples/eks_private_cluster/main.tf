@@ -37,6 +37,18 @@ module "castai-aws-iam" {
   create_iam_resources_per_cluster = true
 }
 
+resource "castai_eks_cluster" "my_castai_cluster" {
+  account_id = var.aws_account_id
+  region     = var.cluster_region
+  name       = module.eks.cluster_id
+
+  access_key_id        = module.castai-aws-iam.aws_access_key_id
+  secret_access_key    = module.castai-aws-iam.aws_secret_access_key
+  instance_profile_arn = module.castai-aws-iam.instance_profile_role_arn
+
+  depends_on = [module.eks]
+}
+
 resource "helm_release" "castai_agent" {
   name            = "castai-agent"
   repository      = "https://castai.github.io/helm-charts"
@@ -52,18 +64,6 @@ resource "helm_release" "castai_agent" {
     name  = "apiKey"
     value = castai_eks_cluster.my_castai_cluster.cluster_token
   }
-}
-
-resource "castai_eks_cluster" "my_castai_cluster" {
-  account_id = var.aws_account_id
-  region     = var.cluster_region
-  name       = module.eks.cluster_id
-
-  access_key_id        = module.castai-aws-iam.aws_access_key_id
-  secret_access_key    = module.castai-aws-iam.aws_secret_access_key
-  instance_profile_arn = module.castai-aws-iam.instance_profile_role_arn
-
-  depends_on = [module.eks]
 }
 
 resource "helm_release" "castai_cluster_controller" {
