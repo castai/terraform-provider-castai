@@ -410,6 +410,9 @@ type ClientInterface interface {
 	// ExternalClusterAPIResumeCluster request
 	ExternalClusterAPIResumeCluster(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// ExternalClusterAPICreateClusterToken request
+	ExternalClusterAPICreateClusterToken(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// GetOperation request
 	GetOperation(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -1733,6 +1736,17 @@ func (c *Client) ExternalClusterAPIPauseCluster(ctx context.Context, clusterId s
 
 func (c *Client) ExternalClusterAPIResumeCluster(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewExternalClusterAPIResumeClusterRequest(c.Server, clusterId)
+	if err != nil {
+		return nil, err
+	}
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) ExternalClusterAPICreateClusterToken(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewExternalClusterAPICreateClusterTokenRequest(c.Server, clusterId)
 	if err != nil {
 		return nil, err
 	}
@@ -6247,6 +6261,40 @@ func NewExternalClusterAPIResumeClusterRequest(server string, clusterId string) 
 	return req, nil
 }
 
+// NewExternalClusterAPICreateClusterTokenRequest generates requests for ExternalClusterAPICreateClusterToken
+func NewExternalClusterAPICreateClusterTokenRequest(server string, clusterId string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParam("simple", false, "clusterId", clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	queryUrl, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	basePath := fmt.Sprintf("/v1/kubernetes/external-clusters/%s/token", pathParam0)
+	if basePath[0] == '/' {
+		basePath = basePath[1:]
+	}
+
+	queryUrl, err = queryUrl.Parse(basePath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryUrl.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 // NewGetOperationRequest generates requests for GetOperation
 func NewGetOperationRequest(server string, id string) (*http.Request, error) {
 	var err error
@@ -7209,6 +7257,9 @@ type ClientWithResponsesInterface interface {
 
 	// ExternalClusterAPIResumeCluster request
 	ExternalClusterAPIResumeClusterWithResponse(ctx context.Context, clusterId string) (*ExternalClusterAPIResumeClusterResponse, error)
+
+	// ExternalClusterAPICreateClusterToken request
+	ExternalClusterAPICreateClusterTokenWithResponse(ctx context.Context, clusterId string) (*ExternalClusterAPICreateClusterTokenResponse, error)
 
 	// GetOperation request
 	GetOperationWithResponse(ctx context.Context, id string) (*GetOperationResponse, error)
@@ -9912,6 +9963,36 @@ func (r ExternalClusterAPIResumeClusterResponse) GetBody() []byte {
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
+type ExternalClusterAPICreateClusterTokenResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *ExternalclusterV1CreateClusterTokenResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r ExternalClusterAPICreateClusterTokenResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r ExternalClusterAPICreateClusterTokenResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r ExternalClusterAPICreateClusterTokenResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
 type GetOperationResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -11375,6 +11456,15 @@ func (c *ClientWithResponses) ExternalClusterAPIResumeClusterWithResponse(ctx co
 		return nil, err
 	}
 	return ParseExternalClusterAPIResumeClusterResponse(rsp)
+}
+
+// ExternalClusterAPICreateClusterTokenWithResponse request returning *ExternalClusterAPICreateClusterTokenResponse
+func (c *ClientWithResponses) ExternalClusterAPICreateClusterTokenWithResponse(ctx context.Context, clusterId string) (*ExternalClusterAPICreateClusterTokenResponse, error) {
+	rsp, err := c.ExternalClusterAPICreateClusterToken(ctx, clusterId)
+	if err != nil {
+		return nil, err
+	}
+	return ParseExternalClusterAPICreateClusterTokenResponse(rsp)
 }
 
 // GetOperationWithResponse request returning *GetOperationResponse
@@ -13809,6 +13899,32 @@ func ParseExternalClusterAPIResumeClusterResponse(rsp *http.Response) (*External
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest ExternalclusterV1Cluster
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseExternalClusterAPICreateClusterTokenResponse parses an HTTP response from a ExternalClusterAPICreateClusterTokenWithResponse call
+func ParseExternalClusterAPICreateClusterTokenResponse(rsp *http.Response) (*ExternalClusterAPICreateClusterTokenResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &ExternalClusterAPICreateClusterTokenResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ExternalclusterV1CreateClusterTokenResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}

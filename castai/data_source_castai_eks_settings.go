@@ -3,6 +3,7 @@ package castai
 import (
 	"context"
 	"fmt"
+
 	"github.com/castai/terraform-provider-castai/castai/policies"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -11,78 +12,78 @@ import (
 )
 
 const (
-	EksSettingsFieldAccountId                = "account_id"
-	EksSettingsFieldRegion                   = "region"
-	EksSettingsFieldVpc                      = "vpc"
-	EksSettingsFieldCluster                  = "cluster"
-	EksSettingsFieldIamPolicyJson            = "iam_policy_json"
-	EksSettingsFieldIamUserPolicyJson        = "iam_user_policy_json"
-	EksSettingsFieldIamManagedPolicies       = "iam_managed_policies"
-	EksSettingsFieldLambdaPolicies          = "lambda_policies"
-	EksSettingsFieldInstanceProfilePolicies = "instance_profile_policies"
+	EKSSettingsFieldAccountId               = "account_id"
+	EKSSettingsFieldRegion                  = "region"
+	EKSSettingsFieldVpc                     = "vpc"
+	EKSSettingsFieldCluster                 = "cluster"
+	EKSSettingsFieldIamPolicyJson           = "iam_policy_json"
+	EKSSettingsFieldIamUserPolicyJson       = "iam_user_policy_json"
+	EKSSettingsFieldIamManagedPolicies      = "iam_managed_policies"
+	EKSSettingsFieldLambdaPolicies          = "lambda_policies"
+	EKSSettingsFieldInstanceProfilePolicies = "instance_profile_policies"
 )
 
-func dataSourceCastaiEksSettings() *schema.Resource {
+func dataSourceCastaiEKSSettings() *schema.Resource {
 	return &schema.Resource{
-		ReadContext: dataSourceCastaiEksSettingsRead,
+		ReadContext: dataSourceCastaiEKSSettingsRead,
 
 		Schema: map[string]*schema.Schema{
-			EksSettingsFieldAccountId: {
+			EKSSettingsFieldAccountId: {
 				Type:             schema.TypeString,
 				Required:         true,
 				ForceNew:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
-			EksSettingsFieldRegion: {
+			EKSSettingsFieldRegion: {
 				Type:             schema.TypeString,
 				Required:         true,
 				ForceNew:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
-			EksSettingsFieldVpc: {
+			EKSSettingsFieldVpc: {
 				Type:             schema.TypeString,
 				Required:         true,
 				ForceNew:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
-			EksSettingsFieldCluster: {
+			EKSSettingsFieldCluster: {
 				Type:             schema.TypeString,
 				Required:         true,
 				ForceNew:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
-			EksSettingsFieldIamPolicyJson: {
+			EKSSettingsFieldIamPolicyJson: {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			EksSettingsFieldIamUserPolicyJson: {
+			EKSSettingsFieldIamUserPolicyJson: {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			EksSettingsFieldIamManagedPolicies: {
+			EKSSettingsFieldIamManagedPolicies: {
 				Type:     schema.TypeSet,
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Computed: true,
 			},
-			EksSettingsFieldLambdaPolicies: {
-				Type: schema.TypeSet,
-				Elem: &schema.Schema{Type:schema.TypeString},
+			EKSSettingsFieldLambdaPolicies: {
+				Type:     schema.TypeSet,
+				Elem:     &schema.Schema{Type: schema.TypeString},
 				Computed: true,
 			},
-			EksSettingsFieldInstanceProfilePolicies: {
-				Type: schema.TypeSet,
-				Elem: &schema.Schema{Type:schema.TypeString},
+			EKSSettingsFieldInstanceProfilePolicies: {
+				Type:     schema.TypeSet,
+				Elem:     &schema.Schema{Type: schema.TypeString},
 				Computed: true,
 			},
 		},
 	}
 }
 
-func dataSourceCastaiEksSettingsRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	accountID := data.Get(EksSettingsFieldAccountId).(string)
-	vpc := data.Get(EksSettingsFieldVpc).(string)
-	region := data.Get(EksSettingsFieldRegion).(string)
-	cluster := data.Get(EksSettingsFieldCluster).(string)
+func dataSourceCastaiEKSSettingsRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	accountID := data.Get(EKSSettingsFieldAccountId).(string)
+	vpc := data.Get(EKSSettingsFieldVpc).(string)
+	region := data.Get(EKSSettingsFieldRegion).(string)
+	cluster := data.Get(EKSSettingsFieldCluster).(string)
 
 	arn := fmt.Sprintf("%s:%s", region, accountID)
 
@@ -92,11 +93,11 @@ func dataSourceCastaiEksSettingsRead(ctx context.Context, data *schema.ResourceD
 	instanceProfilePolicy := policies.GetInstanceProfilePolicy()
 
 	data.SetId(fmt.Sprintf("eks-%s-%s-%s-%s", accountID, vpc, region, cluster))
-	data.Set(EksSettingsFieldIamPolicyJson, iamPolicy)
-	data.Set(EksSettingsFieldIamUserPolicyJson, userPolicy)
-	data.Set(EksSettingsFieldIamManagedPolicies, buildManagedPolicies())
-	data.Set(EksSettingsFieldLambdaPolicies, lambdaPolicy)
-	data.Set(EksSettingsFieldInstanceProfilePolicies, instanceProfilePolicy)
+	data.Set(EKSSettingsFieldIamPolicyJson, iamPolicy)
+	data.Set(EKSSettingsFieldIamUserPolicyJson, userPolicy)
+	data.Set(EKSSettingsFieldIamManagedPolicies, buildManagedPolicies())
+	data.Set(EKSSettingsFieldLambdaPolicies, lambdaPolicy)
+	data.Set(EKSSettingsFieldInstanceProfilePolicies, instanceProfilePolicy)
 
 	return nil
 }

@@ -8,31 +8,32 @@ import (
 	"strings"
 	"time"
 
-	"github.com/castai/terraform-provider-castai/castai/sdk"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+
+	"github.com/castai/terraform-provider-castai/castai/sdk"
 )
 
 const (
-	FieldEksClusterName               = "name"
-	FieldEksClusterAccountId          = "account_id"
-	FieldEksClusterRegion             = "region"
-	FieldEksClusterAccessKeyId        = "access_key_id"
-	FieldEksClusterSecretAccessKey    = "secret_access_key"
-	FieldEksClusterInstanceProfileArn = "instance_profile_arn"
-	FieldEksClusterAgentToken         = "agent_token"
-
-	FieldEksClusterCredentialsId = "credentials_id"
+	FieldEKSClusterName               = "name"
+	FieldEKSClusterAccountId          = "account_id"
+	FieldEKSClusterRegion             = "region"
+	FieldEKSClusterAccessKeyId        = "access_key_id"
+	FieldEKSClusterSecretAccessKey    = "secret_access_key"
+	FieldEKSClusterInstanceProfileArn = "instance_profile_arn"
+	FieldEKSClusterAgentToken         = "agent_token"
+	FieldEKSClusterToken              = "cluster_token"
+	FieldEKSClusterCredentialsId      = "credentials_id"
 )
 
-func resourceCastaiEksCluster() *schema.Resource {
+func resourceCastaiEKSCluster() *schema.Resource {
 	return &schema.Resource{
-		CreateContext: resourceCastaiEksClusterCreate,
-		ReadContext:   resourceCastaiEksClusterRead,
-		UpdateContext: resourceCastaiEksClusterUpdate,
-		DeleteContext: resourceCastaiEksClusterDelete,
+		CreateContext: resourceCastaiEKSClusterCreate,
+		ReadContext:   resourceCastaiEKSClusterRead,
+		UpdateContext: resourceCastaiEKSClusterUpdate,
+		DeleteContext: resourceCastaiEKSClusterDelete,
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(5 * time.Minute),
@@ -41,56 +42,63 @@ func resourceCastaiEksCluster() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			FieldEksClusterName: {
+			FieldEKSClusterName: {
 				Type:             schema.TypeString,
 				Required:         true,
 				ForceNew:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
-			FieldEksClusterAccountId: {
+			FieldEKSClusterAccountId: {
 				Type:             schema.TypeString,
 				Required:         true,
 				ForceNew:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
-			FieldEksClusterRegion: {
+			FieldEKSClusterRegion: {
 				Type:             schema.TypeString,
 				Required:         true,
 				ForceNew:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
-			FieldEksClusterAccessKeyId: {
+			FieldEKSClusterAccessKeyId: {
 				Type:             schema.TypeString,
 				Sensitive:        true,
 				Optional:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
-			FieldEksClusterSecretAccessKey: {
+			FieldEKSClusterSecretAccessKey: {
 				Type:             schema.TypeString,
 				Sensitive:        true,
 				Optional:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
-			FieldEksClusterInstanceProfileArn: {
+			FieldEKSClusterInstanceProfileArn: {
 				Type:             schema.TypeString,
 				Optional:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
-			FieldEksClusterAgentToken: {
+			FieldEKSClusterCredentialsId: {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			FieldEksClusterCredentialsId: {
-				Type:     schema.TypeString,
-				Computed: true,
+			FieldEKSClusterAgentToken: {
+				Type:       schema.TypeString,
+				Computed:   true,
+				Deprecated: "agent_token is deprecated, use cluster_token instead",
+				Sensitive:  true,
+			},
+			FieldEKSClusterToken: {
+				Type:      schema.TypeString,
+				Computed:  true,
+				Sensitive: true,
 			},
 		},
 		CustomizeDiff: func(ctx context.Context, diff *schema.ResourceDiff, i interface{}) error {
-			_, accessKeyIdProvided := diff.GetOk(FieldEksClusterAccessKeyId)
-			_, secretAccessKeyProvided := diff.GetOk(FieldEksClusterSecretAccessKey)
+			_, accessKeyIdProvided := diff.GetOk(FieldEKSClusterAccessKeyId)
+			_, secretAccessKeyProvided := diff.GetOk(FieldEKSClusterSecretAccessKey)
 
 			if accessKeyIdProvided != secretAccessKeyProvided {
-				return fmt.Errorf("when used `%s` and `%s` must be both specified", FieldEksClusterAccessKeyId, FieldEksClusterSecretAccessKey)
+				return fmt.Errorf("when used `%s` and `%s` must be both specified", FieldEKSClusterAccessKeyId, FieldEKSClusterSecretAccessKey)
 			}
 
 			return nil
@@ -98,17 +106,17 @@ func resourceCastaiEksCluster() *schema.Resource {
 	}
 }
 
-func resourceCastaiEksClusterCreate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceCastaiEKSClusterCreate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*ProviderConfig).api
 
 	req := sdk.ExternalClusterAPIRegisterClusterJSONRequestBody{
-		Name: data.Get(FieldEksClusterName).(string),
+		Name: data.Get(FieldEKSClusterName).(string),
 	}
 
 	req.Eks = &sdk.ExternalclusterV1EKSClusterParams{
-		AccountId:   toStringPtr(data.Get(FieldEksClusterAccountId).(string)),
-		Region:      toStringPtr(data.Get(FieldEksClusterRegion).(string)),
-		ClusterName: toStringPtr(data.Get(FieldEksClusterName).(string)),
+		AccountId:   toStringPtr(data.Get(FieldEKSClusterAccountId).(string)),
+		Region:      toStringPtr(data.Get(FieldEKSClusterRegion).(string)),
+		ClusterName: toStringPtr(data.Get(FieldEKSClusterName).(string)),
 	}
 
 	log.Printf("[INFO] Registering new external cluster: %#v", req)
@@ -118,7 +126,13 @@ func resourceCastaiEksClusterCreate(ctx context.Context, data *schema.ResourceDa
 		return diag.FromErr(checkErr)
 	}
 
-	data.SetId(*response.JSON200.Id)
+	clusterID := *response.JSON200.Id
+	tkn, err := createClusterToken(ctx, client, clusterID)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	data.Set(FieldEKSClusterToken, tkn)
+	data.SetId(clusterID)
 
 	log.Printf("[INFO] Cluster with id %q has been registered, don't forget to install castai-agent helm chart", data.Id())
 
@@ -126,10 +140,10 @@ func resourceCastaiEksClusterCreate(ctx context.Context, data *schema.ResourceDa
 		return diag.FromErr(err)
 	}
 
-	return resourceCastaiEksClusterRead(ctx, data, meta)
+	return resourceCastaiEKSClusterRead(ctx, data, meta)
 }
 
-func resourceCastaiEksClusterRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceCastaiEKSClusterRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*ProviderConfig).api
 
 	if data.Id() == "" {
@@ -139,44 +153,46 @@ func resourceCastaiEksClusterRead(ctx context.Context, data *schema.ResourceData
 
 	log.Printf("[INFO] Getting cluster information.")
 
-	response, err := client.ExternalClusterAPIGetClusterWithResponse(ctx, data.Id())
+	resp, err := client.ExternalClusterAPIGetClusterWithResponse(ctx, data.Id())
 	if err != nil {
 		return diag.FromErr(err)
-	} else if response.StatusCode() == http.StatusNotFound {
+	} else if resp.StatusCode() == http.StatusNotFound {
 		log.Printf("[WARN] Removing cluster %s from state because it no longer exists in CAST.AI", data.Id())
 		data.SetId("")
 		return nil
 	}
 
-	data.Set(FieldEksClusterCredentialsId, *response.JSON200.CredentialsId)
+	data.Set(FieldEKSClusterCredentialsId, *resp.JSON200.CredentialsId)
 
-	if response.JSON200.Eks != nil {
-		data.Set(FieldEksClusterAccountId, *response.JSON200.Eks.AccountId)
-		data.Set(FieldEksClusterRegion, *response.JSON200.Eks.Region)
-		data.Set(FieldEksClusterName, *response.JSON200.Eks.ClusterName)
-		data.Set(FieldEksClusterInstanceProfileArn, *response.JSON200.Eks.InstanceProfileArn)
+	if resp.JSON200.Eks != nil {
+		data.Set(FieldEKSClusterAccountId, *resp.JSON200.Eks.AccountId)
+		data.Set(FieldEKSClusterRegion, *resp.JSON200.Eks.Region)
+		data.Set(FieldEKSClusterName, *resp.JSON200.Eks.ClusterName)
+		data.Set(FieldEKSClusterInstanceProfileArn, *resp.JSON200.Eks.InstanceProfileArn)
 	}
 
-	agentToken, err := retrieveAgentToken(ctx, client)
-	if err != nil {
-		return diag.FromErr(err)
+	if _, ok := data.GetOk(FieldEKSClusterAgentToken); !ok {
+		tkn, err := retrieveAgentToken(ctx, client)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		data.Set(FieldEKSClusterAgentToken, tkn)
 	}
-	data.Set(FieldEksClusterAgentToken, agentToken)
 
 	return nil
 }
 
-func resourceCastaiEksClusterUpdate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceCastaiEKSClusterUpdate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*ProviderConfig).api
 
 	if err := updateClusterSettings(ctx, data, client); err != nil {
 		return diag.FromErr(err)
 	}
 
-	return resourceCastaiEksClusterRead(ctx, data, meta)
+	return resourceCastaiEKSClusterRead(ctx, data, meta)
 }
 
-func resourceCastaiEksClusterDelete(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceCastaiEKSClusterDelete(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*ProviderConfig).api
 
 	clusterId := data.Id()
@@ -240,7 +256,7 @@ func resourceCastaiEksClusterDelete(ctx context.Context, data *schema.ResourceDa
 }
 
 func updateClusterSettings(ctx context.Context, data *schema.ResourceData, client *sdk.ClientWithResponses) error {
-	if !data.HasChanges(FieldEksClusterAccessKeyId, FieldEksClusterSecretAccessKey, FieldEksClusterInstanceProfileArn) {
+	if !data.HasChanges(FieldEKSClusterAccessKeyId, FieldEKSClusterSecretAccessKey, FieldEKSClusterInstanceProfileArn) {
 		log.Printf("[INFO] Nothing to update in cluster setttings.")
 		return nil
 	}
@@ -251,8 +267,8 @@ func updateClusterSettings(ctx context.Context, data *schema.ResourceData, clien
 		Eks: &sdk.ExternalclusterV1UpdateEKSClusterParams{},
 	}
 
-	accessKeyId, accessKeyIdProvided := data.GetOk(FieldEksClusterAccessKeyId)
-	secretAccessKey, secretAccessKeyProvided := data.GetOk(FieldEksClusterSecretAccessKey)
+	accessKeyId, accessKeyIdProvided := data.GetOk(FieldEKSClusterAccessKeyId)
+	secretAccessKey, secretAccessKeyProvided := data.GetOk(FieldEKSClusterSecretAccessKey)
 	if accessKeyIdProvided && secretAccessKeyProvided {
 		credentials, err := sdk.ToCloudCredentialsAWS(accessKeyId.(string), secretAccessKey.(string))
 		if err != nil {
@@ -262,7 +278,7 @@ func updateClusterSettings(ctx context.Context, data *schema.ResourceData, clien
 		req.Credentials = &credentials
 	}
 
-	if arn, ok := data.GetOk(FieldEksClusterInstanceProfileArn); ok {
+	if arn, ok := data.GetOk(FieldEKSClusterInstanceProfileArn); ok {
 		req.Eks.InstanceProfileArn = toStringPtr(arn.(string))
 	}
 
@@ -274,6 +290,7 @@ func updateClusterSettings(ctx context.Context, data *schema.ResourceData, clien
 	return nil
 }
 
+// Deprecated. Remove with agent_token.
 func retrieveAgentToken(ctx context.Context, client *sdk.ClientWithResponses) (string, error) {
 	response, err := client.GetAgentInstallScriptWithResponse(ctx, &sdk.GetAgentInstallScriptParams{})
 	if err != nil {
@@ -282,4 +299,13 @@ func retrieveAgentToken(ctx context.Context, client *sdk.ClientWithResponses) (s
 
 	// at the moment, agent registration token only appears in `curl agent manifests` snippet and is extracted from there.
 	return strings.Split(strings.TrimPrefix(string(response.Body), `curl -H "Authorization: Token `), `"`)[0], nil
+}
+
+func createClusterToken(ctx context.Context, client *sdk.ClientWithResponses, clusterID string) (string, error) {
+	resp, err := client.ExternalClusterAPICreateClusterTokenWithResponse(ctx, clusterID)
+	if err != nil {
+		return "", fmt.Errorf("creating cluster token: %w", err)
+	}
+
+	return *resp.JSON200.Token, nil
 }
