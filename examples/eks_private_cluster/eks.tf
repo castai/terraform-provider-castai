@@ -41,15 +41,15 @@ module "eks" {
   map_users = [
     # ADD - give access to the cluster for created cast.ai user
     {
-      userarn  = module.castai-aws-iam.user_arn
-      username = module.castai-aws-iam.user_name
+      userarn  = module.castai-eks-iam.user_arn
+      username = module.castai-eks-iam.user_name
       groups   = ["system:masters"]
     },
   ]
   map_roles = [
     # ADD - give access to nodes spawned by cast.ai
     {
-      rolearn  = module.castai-aws-iam.instance_profile_role_arn
+      rolearn  = module.castai-eks-iam.instance_profile_role_arn
       username = "system:node:{{EC2PrivateDNSName}}"
       groups   = ["system:bootstrappers", "system:nodes"]
     },

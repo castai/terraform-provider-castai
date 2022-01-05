@@ -26,8 +26,8 @@ provider "aws" {
   secret_key = var.aws_secret_access_key
 }
 
-module "castai-aws-iam" {
-  source = "../../../terraform-castai-eks"
+module "castai-eks-iam" {
+  source = "../../../terraform-castai-eks-iam"
 
   aws_account_id     = var.aws_account_id
   aws_cluster_region = var.cluster_region
@@ -37,48 +37,14 @@ module "castai-aws-iam" {
   create_iam_resources_per_cluster = true
 }
 
-resource "castai_eks_cluster" "my_castai_cluster" {
-  account_id = var.aws_account_id
-  region     = var.cluster_region
-  name       = module.eks.cluster_id
+module "castai-eks-cluster" {
+  source = "../../../terraform-castai-eks-cluster"
 
-  access_key_id        = module.castai-aws-iam.aws_access_key_id
-  secret_access_key    = module.castai-aws-iam.aws_secret_access_key
-  instance_profile_arn = module.castai-aws-iam.instance_profile_role_arn
+  aws_account_id     = var.aws_account_id
+  aws_cluster_region = var.cluster_region
+  aws_cluster_name   = module.eks.cluster_id
 
-  depends_on = [module.eks]
-}
-
-resource "helm_release" "castai_agent" {
-  name            = "castai-agent"
-  repository      = "https://castai.github.io/helm-charts"
-  chart           = "castai-agent"
-  cleanup_on_fail = true
-
-  set {
-    name  = "provider"
-    value = "eks"
-  }
-
-  set_sensitive {
-    name  = "apiKey"
-    value = castai_eks_cluster.my_castai_cluster.cluster_token
-  }
-}
-
-resource "helm_release" "castai_cluster_controller" {
-  name            = "castai-cluster-controller"
-  repository      = "https://castai.github.io/helm-charts"
-  chart           = "castai-cluster-controller"
-  cleanup_on_fail = true
-
-  set {
-    name = "castai.clusterID"
-    value = castai_eks_cluster.my_castai_cluster.id
-  }
-
-  set_sensitive {
-    name  = "castai.apiKey"
-    value = castai_eks_cluster.my_castai_cluster.cluster_token
-  }
+  aws_access_key_id             = module.castai-eks-iam.aws_access_key_id
+  aws_secret_access_key         = module.castai-eks-iam.aws_secret_access_key
+  aws_instance_profile_arn      = module.castai-eks-iam.instance_profile_arn
 }
