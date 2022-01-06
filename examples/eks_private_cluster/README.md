@@ -1,6 +1,6 @@
 ## EKS and CAST AI setup example
 
-Reference setup for EKS clusters without public API access, connected to CAST AI
+Reference setup for EKS clusters connected to CAST AI
 
 ### Instruction for full setup (create vpc, eks and connect with CAST AI)
 
