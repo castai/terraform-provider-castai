@@ -27,7 +27,7 @@ provider "aws" {
 }
 
 module "castai-eks-iam" {
-  source = "../../../terraform-castai-eks-iam"
+  source  = "castai/eks-iam/castai"
 
   aws_account_id     = var.aws_account_id
   aws_cluster_region = var.cluster_region
@@ -38,7 +38,7 @@ module "castai-eks-iam" {
 }
 
 module "castai-eks-cluster" {
-  source = "../../../terraform-castai-eks-cluster"
+  source  = "castai/eks-cluster/castai"
 
   aws_account_id     = var.aws_account_id
   aws_cluster_region = var.cluster_region
