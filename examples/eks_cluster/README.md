@@ -1,4 +1,4 @@
-## EKS and CAST.AI setup example
+## EKS and CAST AI setup example
 
 Reference setup for new or existing EKS cluster connected with CAST.AI
 
@@ -7,7 +7,7 @@ Reference setup for new or existing EKS cluster connected with CAST.AI
 - `terraform apply -target module.vpc` (needs to be created before creating further iam and CAST.AI resources)
 - `terraform apply` (applying the rest of resources)
 
-### Connecting existing EKS cluster to CAST.AI
+### Connecting existing EKS cluster to CAST AI
 
 - Take setup of aws iam credential for CAST.AI from [aws_iam_castai.tf](castai_aws_iam.tf)
 - Take setup of CAST.AI cluster and agent installation from [main.tf](main.tf)

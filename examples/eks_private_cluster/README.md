@@ -1,4 +1,4 @@
-## EKS and CAST.AI setup example
+## EKS and CAST AI setup example
 
 Reference setup for EKS clusters without public API access, connected to CAST.AI
 
