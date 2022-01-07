@@ -40,5 +40,5 @@ provider "castai" {
 - **api_token** (String) The token used to connect to CAST.AI API.
 
 ### Optional
-
-- **api_url** (String) CAST AI API url.
+ 
+- **api_url** (String) CAST AI API url (for developers).

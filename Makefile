@@ -16,6 +16,11 @@ generate-sdk:
 	@echo "==> Generating castai sdk client"
 	go generate castai/sdk/generate.go
 
+# The following command also rewrites existing documentation
+generate-docs:
+	@echo "==> Generating castai sdk client"
+	go generate main.go
+
 build: init-examples
 build: generate-sdk
 build:
