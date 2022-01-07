@@ -22,7 +22,7 @@ func Provider() *schema.Provider {
 				Type:        schema.TypeString,
 				Required:    true,
 				DefaultFunc: schema.EnvDefaultFunc("CASTAI_API_TOKEN", nil),
-				Description: "The token used to connect to CAST.AI API.",
+				Description: "The token used to connect to CAST AI API.",
 			},
 		},
 
