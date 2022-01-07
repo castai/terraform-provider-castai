@@ -17,17 +17,17 @@ This data source can be used to retrieve AWS IAM policies that are required by C
 
 All of the following arguments are required
 
-- **account_id** (String) - ID of your AWS account
-- **cluster** (String) - name of your EKS cluster
-- **region** (String) - AWS region where the cluster is placed
+- **account_id** (String) - ID of your AWS account.
+- **cluster** (String) - name of your EKS cluster.
+- **region** (String) - AWS region where the cluster is placed.
 - **vpc** (String) - ID of the VPC which EKS cluster is using.
 
 ### Attribute Reference
 
-- **iam_managed_policies** (Set of String)
-- **iam_policy_json** (String)
-- **iam_user_policy_json** (String)
-- **instance_profile_policies** (Set of String)
-- **lambda_policies** (Set of String)
+The following attributes are exported:
+
+- **iam_policy_json** (String) -  IAM policies that should be attached as a new policy for managing EKS clusters and used by CAST AI.
+- **iam_user_policy_json** (String)  - IAM policies that should be attached as inline policies to the CAST AI user for restrictive access.
+- **lambda_policies** (Set of String) - set of policies required for the AWS Lambda spot interruption handler.
 
 
