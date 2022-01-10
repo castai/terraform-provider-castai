@@ -47,4 +47,10 @@ module "castai-eks-cluster" {
   aws_access_key_id             = module.castai-eks-iam.aws_access_key_id
   aws_secret_access_key         = module.castai-eks-iam.aws_secret_access_key
   aws_instance_profile_arn      = module.castai-eks-iam.instance_profile_arn
+
+  subnets         = module.vpc.public_subnets
+  security_groups = [aws_security_group.all_worker_mgmt.id]
+
+  api_url = var.api_url
 }
+

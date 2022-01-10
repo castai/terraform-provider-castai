@@ -23,6 +23,8 @@ const (
 	FieldEKSClusterAccessKeyId        = "access_key_id"
 	FieldEKSClusterSecretAccessKey    = "secret_access_key"
 	FieldEKSClusterInstanceProfileArn = "instance_profile_arn"
+	FieldEKSClusterSecurityGroups     = "security_groups"
+	FieldEKSClusterSubnets            = "subnets"
 	FieldEKSClusterAgentToken         = "agent_token"
 	FieldEKSClusterToken              = "cluster_token"
 	FieldEKSClusterCredentialsId      = "credentials_id"
@@ -91,6 +93,20 @@ func resourceCastaiEKSCluster() *schema.Resource {
 				Type:      schema.TypeString,
 				Computed:  true,
 				Sensitive: true,
+			},
+			FieldEKSClusterSecurityGroups: {
+				Type: schema.TypeList,
+				Optional: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
+			FieldEKSClusterSubnets: {
+				Type: schema.TypeList,
+				Optional: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
 			},
 		},
 		CustomizeDiff: func(ctx context.Context, diff *schema.ResourceDiff, i interface{}) error {
@@ -169,6 +185,8 @@ func resourceCastaiEKSClusterRead(ctx context.Context, data *schema.ResourceData
 		data.Set(FieldEKSClusterRegion, *resp.JSON200.Eks.Region)
 		data.Set(FieldEKSClusterName, *resp.JSON200.Eks.ClusterName)
 		data.Set(FieldEKSClusterInstanceProfileArn, *resp.JSON200.Eks.InstanceProfileArn)
+		data.Set(FieldEKSClusterSubnets, *resp.JSON200.Eks.Subnets)
+		data.Set(FieldEKSClusterSecurityGroups, *resp.JSON200.Eks.SecurityGroups)
 	}
 
 	if _, ok := data.GetOk(FieldEKSClusterAgentToken); !ok {
@@ -280,6 +298,16 @@ func updateClusterSettings(ctx context.Context, data *schema.ResourceData, clien
 
 	if arn, ok := data.GetOk(FieldEKSClusterInstanceProfileArn); ok {
 		req.Eks.InstanceProfileArn = toStringPtr(arn.(string))
+	}
+
+	if sgs, ok := data.GetOk(FieldEKSClusterSecurityGroups); ok {
+		s := sgs.([]string)
+		req.Eks.SecurityGroups = &s
+	}
+
+	if subnets, ok := data.GetOk(FieldEKSClusterSubnets); ok {
+		sb := subnets.([]string)
+		req.Eks.Subnets = &sb
 	}
 
 	response, err := client.ExternalClusterAPIUpdateClusterWithResponse(ctx, data.Id(), req)

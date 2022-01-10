@@ -1601,7 +1601,8 @@ type RebalancingPlan struct {
 	DeletedNodesAt *time.Time `json:"deletedNodesAt,omitempty"`
 
 	// Timestamp of the rebalancing plan blue nodes draining. Null if not yet drained.
-	DrainedNodesAt *time.Time `json:"drainedNodesAt,omitempty"`
+	DrainedNodesAt *time.Time              `json:"drainedNodesAt,omitempty"`
+	Errors         *[]RebalancingPlanError `json:"errors,omitempty"`
 
 	// Timestamp of the rebalancing plan finish. Null if not yet finished.
 	FinishedAt *time.Time `json:"finishedAt,omitempty"`
@@ -1640,6 +1641,22 @@ type RebalancingPlan struct {
 
 	// Timestamp of the rebalancing plan last update.
 	UpdatedAt *time.Time `json:"updatedAt,omitempty"`
+}
+
+// RebalancingPlanError defines model for RebalancingPlanError.
+type RebalancingPlanError struct {
+
+	// Detailed error message
+	Message *string `json:"message,omitempty"`
+
+	// Node id.
+	Node *string `json:"node,omitempty"`
+
+	// Pod name.
+	Pod *string `json:"pod,omitempty"`
+
+	// Error reason
+	Reason *string `json:"reason,omitempty"`
 }
 
 // RebalancingPlanOperation defines model for RebalancingPlanOperation.
