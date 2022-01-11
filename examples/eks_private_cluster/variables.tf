@@ -31,6 +31,10 @@ variable "cluster_name" {
 
 # Addresses with whitelisted access to Kubernetes API
 variable "whitelisted_ips" {
+  type = list(string)
+  default = []
+}
+
 variable "subnets" {
   type = list(string)
   description = "Subnets for the cluster"
