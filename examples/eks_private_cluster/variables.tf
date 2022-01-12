@@ -37,12 +37,12 @@ variable "whitelisted_ips" {
 
 variable "subnets" {
   type = list(string)
-  description = "Subnets for the cluster"
+  description = "Optional custom subnets for the cluster. If not set subnets from the EKS cluster configuration are used."
   default = []
 }
 
 variable "security_groups" {
   type = list(string)
-  description = "Security groups for the cluster"
+  description = "Optional custom security groups for the cluster. If not set security groups from the EKS cluster configuration are used."
   default = []
 }

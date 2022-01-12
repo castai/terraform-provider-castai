@@ -180,13 +180,13 @@ func resourceCastaiEKSClusterRead(ctx context.Context, data *schema.ResourceData
 
 	data.Set(FieldEKSClusterCredentialsId, *resp.JSON200.CredentialsId)
 
-	if resp.JSON200.Eks != nil {
-		data.Set(FieldEKSClusterAccountId, *resp.JSON200.Eks.AccountId)
-		data.Set(FieldEKSClusterRegion, *resp.JSON200.Eks.Region)
-		data.Set(FieldEKSClusterName, *resp.JSON200.Eks.ClusterName)
-		data.Set(FieldEKSClusterInstanceProfileArn, *resp.JSON200.Eks.InstanceProfileArn)
-		data.Set(FieldEKSClusterSubnets, *resp.JSON200.Eks.Subnets)
-		data.Set(FieldEKSClusterSecurityGroups, *resp.JSON200.Eks.SecurityGroups)
+	if eks := resp.JSON200.Eks; eks != nil {
+		data.Set(FieldEKSClusterAccountId, *eks.AccountId)
+		data.Set(FieldEKSClusterRegion, *eks.Region)
+		data.Set(FieldEKSClusterName, *eks.ClusterName)
+		data.Set(FieldEKSClusterInstanceProfileArn, *eks.InstanceProfileArn)
+		data.Set(FieldEKSClusterSubnets, *eks.Subnets)
+		data.Set(FieldEKSClusterSecurityGroups, *eks.SecurityGroups)
 	}
 
 	if _, ok := data.GetOk(FieldEKSClusterAgentToken); !ok {
@@ -274,7 +274,7 @@ func resourceCastaiEKSClusterDelete(ctx context.Context, data *schema.ResourceDa
 }
 
 func updateClusterSettings(ctx context.Context, data *schema.ResourceData, client *sdk.ClientWithResponses) error {
-	if !data.HasChanges(FieldEKSClusterAccessKeyId, FieldEKSClusterSecretAccessKey, FieldEKSClusterInstanceProfileArn) {
+	if !data.HasChanges(FieldEKSClusterAccessKeyId, FieldEKSClusterSecretAccessKey, FieldEKSClusterInstanceProfileArn, FieldEKSClusterSubnets, FieldEKSClusterSecurityGroups) {
 		log.Printf("[INFO] Nothing to update in cluster setttings.")
 		return nil
 	}
@@ -300,14 +300,31 @@ func updateClusterSettings(ctx context.Context, data *schema.ResourceData, clien
 		req.Eks.InstanceProfileArn = toStringPtr(arn.(string))
 	}
 
-	if sgs, ok := data.GetOk(FieldEKSClusterSecurityGroups); ok {
-		s := sgs.([]string)
-		req.Eks.SecurityGroups = &s
+	if s, ok := data.GetOk(FieldEKSClusterSecurityGroups); ok {
+		sgsRaw := s.([]interface{})
+		securityGroups := make([]string, len(sgsRaw))
+		for idx, group := range sgsRaw {
+			securityGroups[idx] = group.(string)
+		}
+		req.Eks.SecurityGroups = &securityGroups
+	} else {
+		// data.GetOk returns false on empty TypeList
+		emptyArr := make([]string, 0)
+		req.Eks.SecurityGroups = &emptyArr
 	}
 
-	if subnets, ok := data.GetOk(FieldEKSClusterSubnets); ok {
-		sb := subnets.([]string)
-		req.Eks.Subnets = &sb
+	if s, ok := data.GetOk(FieldEKSClusterSubnets); ok {
+		subnetsRaw := s.([]interface{})
+		subnetsString := make([]string, len(subnetsRaw))
+
+		for idx, subnet := range subnetsRaw {
+			subnetsString[idx] = subnet.(string)
+		}
+		req.Eks.Subnets = &subnetsString
+	} else {
+		// data.GetOk returns false on empty TypeList
+		emptyArr := make([]string, 0)
+		req.Eks.Subnets = &emptyArr
 	}
 
 	response, err := client.ExternalClusterAPIUpdateClusterWithResponse(ctx, data.Id(), req)
