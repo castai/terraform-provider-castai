@@ -2386,6 +2386,16 @@ type ExternalclusterV1EKSClusterParams_Tags struct {
 	AdditionalProperties map[string]string `json:"-"`
 }
 
+// ExternalclusterV1EKSClusterSecurityGroups defines model for externalcluster.v1.EKSClusterSecurityGroups.
+type ExternalclusterV1EKSClusterSecurityGroups struct {
+	SecurityGroups *[]string `json:"securityGroups,omitempty"`
+}
+
+// ExternalclusterV1EKSClusterSubnets defines model for externalcluster.v1.EKSClusterSubnets.
+type ExternalclusterV1EKSClusterSubnets struct {
+	Subnets *[]string `json:"subnets,omitempty"`
+}
+
 // ExternalclusterV1GKEClusterParams defines model for externalcluster.v1.GKEClusterParams.
 type ExternalclusterV1GKEClusterParams struct {
 
@@ -2555,14 +2565,9 @@ type ExternalclusterV1Subnet struct {
 type ExternalclusterV1UpdateEKSClusterParams struct {
 
 	// Optional instance profile ARN for CAST provisioned nodes.
-	InstanceProfileArn *string `json:"instanceProfileArn,omitempty"`
-
-	// Optional security groups for CAST provisioned nodes.
-	SecurityGroups *[]string `json:"securityGroups,omitempty"`
-
-	// Optional subnets for CAST provisioned nodes.
-	// If not set, subnets from EKS cluster configuration are used.
-	Subnets *[]string `json:"subnets,omitempty"`
+	InstanceProfileArn *string                                    `json:"instanceProfileArn,omitempty"`
+	SecurityGroups     *ExternalclusterV1EKSClusterSecurityGroups `json:"securityGroups,omitempty"`
+	Subnets            *ExternalclusterV1EKSClusterSubnets        `json:"subnets,omitempty"`
 
 	// Optional tags for CAST provisioned nodes.
 	Tags *ExternalclusterV1UpdateEKSClusterParams_Tags `json:"tags,omitempty"`

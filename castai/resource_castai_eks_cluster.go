@@ -306,11 +306,10 @@ func updateClusterSettings(ctx context.Context, data *schema.ResourceData, clien
 		for idx, group := range sgsRaw {
 			securityGroups[idx] = group.(string)
 		}
-		req.Eks.SecurityGroups = &securityGroups
+		req.Eks.SecurityGroups = &sdk.ExternalclusterV1EKSClusterSecurityGroups{SecurityGroups: &securityGroups}
 	} else {
 		// data.GetOk returns false on empty TypeList
-		emptyArr := make([]string, 0)
-		req.Eks.SecurityGroups = &emptyArr
+		req.Eks.SecurityGroups = &sdk.ExternalclusterV1EKSClusterSecurityGroups{SecurityGroups: &[]string{}}
 	}
 
 	if s, ok := data.GetOk(FieldEKSClusterSubnets); ok {
@@ -320,11 +319,10 @@ func updateClusterSettings(ctx context.Context, data *schema.ResourceData, clien
 		for idx, subnet := range subnetsRaw {
 			subnetsString[idx] = subnet.(string)
 		}
-		req.Eks.Subnets = &subnetsString
+		req.Eks.Subnets = &sdk.ExternalclusterV1EKSClusterSubnets{Subnets: &subnetsString}
 	} else {
 		// data.GetOk returns false on empty TypeList
-		emptyArr := make([]string, 0)
-		req.Eks.Subnets = &emptyArr
+		req.Eks.Subnets = &sdk.ExternalclusterV1EKSClusterSubnets{Subnets: &[]string{}}
 	}
 
 	response, err := client.ExternalClusterAPIUpdateClusterWithResponse(ctx, data.Id(), req)
