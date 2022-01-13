@@ -31,6 +31,18 @@ variable "cluster_name" {
 
 # Addresses with whitelisted access to Kubernetes API
 variable "whitelisted_ips" {
+  type = list(string)
   default = []
 }
 
+variable "subnets" {
+  type = list(string)
+  description = "Optional custom subnets for the cluster. If not set subnets from the EKS cluster configuration are used."
+  default = []
+}
+
+variable "security_groups" {
+  type = list(string)
+  description = "Optional custom security groups for the cluster. If not set security groups from the EKS cluster configuration are used."
+  default = []
+}
