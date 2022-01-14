@@ -24,6 +24,11 @@ The following arguments are required:
 - **secret_access_key** (String, Sensitive) - AWS secret access key of the CAST AI IAM account.
 - **instance_profile_arn** (String) - AWS ARN of the instance profile to be used by CAST AI.
 
+The following arguments are optional:
+
+- **security_groups** (List of String) - Optional custom security groups for the cluster. If not set security groups from the EKS cluster configuration are used.
+- **subnets** (List of String) - Optional custom subnets for the cluster. If not set subnets from the EKS cluster configuration are used.
+
 ### Attribute Reference
 
 - **agent_token** (String, Sensitive, Deprecated) - deprecated agent token.
