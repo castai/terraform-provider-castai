@@ -50,6 +50,7 @@ module "castai-eks-cluster" {
 
   subnets         = var.subnets
   security_groups = var.security_groups
+  tags            = var.tags
 
   api_url = var.api_url
 }
