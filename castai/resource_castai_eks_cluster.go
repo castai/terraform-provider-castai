@@ -25,7 +25,7 @@ const (
 	FieldEKSClusterInstanceProfileArn = "instance_profile_arn"
 	FieldEKSClusterSecurityGroups     = "security_groups"
 	FieldEKSClusterSubnets            = "subnets"
-	FieldEKSClusterTags				  = "tags"
+	FieldEKSClusterTags               = "tags"
 	FieldEKSClusterAgentToken         = "agent_token"
 	FieldEKSClusterToken              = "cluster_token"
 	FieldEKSClusterCredentialsId      = "credentials_id"
@@ -96,21 +96,21 @@ func resourceCastaiEKSCluster() *schema.Resource {
 				Sensitive: true,
 			},
 			FieldEKSClusterSecurityGroups: {
-				Type: schema.TypeList,
+				Type:     schema.TypeList,
 				Optional: true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
 			},
 			FieldEKSClusterSubnets: {
-				Type: schema.TypeList,
+				Type:     schema.TypeList,
 				Optional: true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
 			},
 			FieldEKSClusterTags: {
-				Type: schema.TypeMap,
+				Type:     schema.TypeMap,
 				Optional: true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
