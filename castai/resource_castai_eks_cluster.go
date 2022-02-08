@@ -25,6 +25,7 @@ const (
 	FieldEKSClusterInstanceProfileArn = "instance_profile_arn"
 	FieldEKSClusterSecurityGroups     = "security_groups"
 	FieldEKSClusterSubnets            = "subnets"
+	FieldEKSClusterTags				  = "tags"
 	FieldEKSClusterAgentToken         = "agent_token"
 	FieldEKSClusterToken              = "cluster_token"
 	FieldEKSClusterCredentialsId      = "credentials_id"
@@ -103,6 +104,13 @@ func resourceCastaiEKSCluster() *schema.Resource {
 			},
 			FieldEKSClusterSubnets: {
 				Type: schema.TypeList,
+				Optional: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
+			FieldEKSClusterTags: {
+				Type: schema.TypeMap,
 				Optional: true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
@@ -187,6 +195,7 @@ func resourceCastaiEKSClusterRead(ctx context.Context, data *schema.ResourceData
 		data.Set(FieldEKSClusterInstanceProfileArn, *eks.InstanceProfileArn)
 		data.Set(FieldEKSClusterSubnets, *eks.Subnets)
 		data.Set(FieldEKSClusterSecurityGroups, *eks.SecurityGroups)
+		data.Set(FieldEKSClusterTags, *eks.Tags)
 	}
 
 	if _, ok := data.GetOk(FieldEKSClusterAgentToken); !ok {
@@ -274,7 +283,13 @@ func resourceCastaiEKSClusterDelete(ctx context.Context, data *schema.ResourceDa
 }
 
 func updateClusterSettings(ctx context.Context, data *schema.ResourceData, client *sdk.ClientWithResponses) error {
-	if !data.HasChanges(FieldEKSClusterAccessKeyId, FieldEKSClusterSecretAccessKey, FieldEKSClusterInstanceProfileArn, FieldEKSClusterSubnets, FieldEKSClusterSecurityGroups) {
+	if !data.HasChanges(
+		FieldEKSClusterAccessKeyId,
+		FieldEKSClusterSecretAccessKey,
+		FieldEKSClusterInstanceProfileArn,
+		FieldEKSClusterSubnets,
+		FieldEKSClusterSecurityGroups,
+		FieldEKSClusterTags) {
 		log.Printf("[INFO] Nothing to update in cluster setttings.")
 		return nil
 	}
@@ -317,6 +332,18 @@ func updateClusterSettings(ctx context.Context, data *schema.ResourceData, clien
 			subnetsString[idx] = subnet.(string)
 		}
 		req.Eks.Subnets = &subnetsString
+	}
+
+	if tags, ok := data.GetOk(FieldEKSClusterTags); ok {
+		tagsRaw := tags.(map[string]interface{})
+		tagsString := make(map[string]string, len(tagsRaw))
+
+		for k, v := range tagsRaw {
+			tagsString[k] = v.(string)
+		}
+		req.Eks.Tags = &sdk.ExternalclusterV1UpdateEKSClusterParams_Tags{
+			AdditionalProperties: tagsString,
+		}
 	}
 
 	response, err := client.ExternalClusterAPIUpdateClusterWithResponse(ctx, data.Id(), req)
