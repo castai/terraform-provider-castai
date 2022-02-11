@@ -252,6 +252,15 @@ type ClientInterface interface {
 	// GetClusterMetrics request
 	GetClusterMetrics(ctx context.Context, clusterId ClusterId, params *GetClusterMetricsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// GetClusterMetricsCpuUsage request
+	GetClusterMetricsCpuUsage(ctx context.Context, clusterId ClusterId, params *GetClusterMetricsCpuUsageParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetClusterMetricsGauges request
+	GetClusterMetricsGauges(ctx context.Context, clusterId ClusterId, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetClusterMetricsMemoryUsage request
+	GetClusterMetricsMemoryUsage(ctx context.Context, clusterId ClusterId, params *GetClusterMetricsMemoryUsageParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// GetNodeConstraints request
 	GetNodeConstraints(ctx context.Context, clusterId ClusterId, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -423,6 +432,9 @@ type ClientInterface interface {
 	UpdateCurrentUserProfileWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	UpdateCurrentUserProfile(ctx context.Context, body UpdateCurrentUserProfileJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetPromMetrics request
+	GetPromMetrics(ctx context.Context, params *GetPromMetricsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// ListOrganizations request
 	ListOrganizations(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -1118,6 +1130,39 @@ func (c *Client) GetClusterMetrics(ctx context.Context, clusterId ClusterId, par
 	return c.Client.Do(req)
 }
 
+func (c *Client) GetClusterMetricsCpuUsage(ctx context.Context, clusterId ClusterId, params *GetClusterMetricsCpuUsageParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetClusterMetricsCpuUsageRequest(c.Server, clusterId, params)
+	if err != nil {
+		return nil, err
+	}
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetClusterMetricsGauges(ctx context.Context, clusterId ClusterId, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetClusterMetricsGaugesRequest(c.Server, clusterId)
+	if err != nil {
+		return nil, err
+	}
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetClusterMetricsMemoryUsage(ctx context.Context, clusterId ClusterId, params *GetClusterMetricsMemoryUsageParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetClusterMetricsMemoryUsageRequest(c.Server, clusterId, params)
+	if err != nil {
+		return nil, err
+	}
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
 func (c *Client) GetNodeConstraints(ctx context.Context, clusterId ClusterId, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetNodeConstraintsRequest(c.Server, clusterId)
 	if err != nil {
@@ -1791,6 +1836,17 @@ func (c *Client) UpdateCurrentUserProfileWithBody(ctx context.Context, contentTy
 
 func (c *Client) UpdateCurrentUserProfile(ctx context.Context, body UpdateCurrentUserProfileJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewUpdateCurrentUserProfileRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetPromMetrics(ctx context.Context, params *GetPromMetricsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetPromMetricsRequest(c.Server, params)
 	if err != nil {
 		return nil, err
 	}
@@ -4002,6 +4058,38 @@ func NewGetDashboardMetricsCpuUsageRequest(server string, clusterId ClusterId, p
 
 	}
 
+	if params.StartTime != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "startTime", *params.StartTime); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.EndTime != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "endTime", *params.EndTime); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
 	if params.StepSeconds != nil {
 
 		if queryFrag, err := runtime.StyleParam("form", true, "stepSeconds", *params.StepSeconds); err != nil {
@@ -4059,6 +4147,38 @@ func NewGetDashboardMetricsMemoryUsageRequest(server string, clusterId ClusterId
 	if params.PeriodHours != nil {
 
 		if queryFrag, err := runtime.StyleParam("form", true, "periodHours", *params.PeriodHours); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.StartTime != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "startTime", *params.StartTime); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.EndTime != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "endTime", *params.EndTime); err != nil {
 			return nil, err
 		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
 			return nil, err
@@ -4331,7 +4451,7 @@ func NewGetClusterMetricsRequest(server string, clusterId ClusterId, params *Get
 		return nil, err
 	}
 
-	basePath := fmt.Sprintf("/v1/kubernetes/clusters/%s/metrics", pathParam0)
+	basePath := fmt.Sprintf("/v1/kubernetes/clusters/%s/legacy-metrics", pathParam0)
 	if basePath[0] == '/' {
 		basePath = basePath[1:]
 	}
@@ -4353,6 +4473,244 @@ func NewGetClusterMetricsRequest(server string, clusterId ClusterId, params *Get
 				queryValues.Add(k, v2)
 			}
 		}
+	}
+
+	queryUrl.RawQuery = queryValues.Encode()
+
+	req, err := http.NewRequest("GET", queryUrl.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewGetClusterMetricsCpuUsageRequest generates requests for GetClusterMetricsCpuUsage
+func NewGetClusterMetricsCpuUsageRequest(server string, clusterId ClusterId, params *GetClusterMetricsCpuUsageParams) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParam("simple", false, "clusterId", clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	queryUrl, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	basePath := fmt.Sprintf("/v1/kubernetes/clusters/%s/metrics/cpu-usage", pathParam0)
+	if basePath[0] == '/' {
+		basePath = basePath[1:]
+	}
+
+	queryUrl, err = queryUrl.Parse(basePath)
+	if err != nil {
+		return nil, err
+	}
+
+	queryValues := queryUrl.Query()
+
+	if params.PeriodHours != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "periodHours", *params.PeriodHours); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.StartTime != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "startTime", *params.StartTime); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.EndTime != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "endTime", *params.EndTime); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.StepSeconds != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "stepSeconds", *params.StepSeconds); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	queryUrl.RawQuery = queryValues.Encode()
+
+	req, err := http.NewRequest("GET", queryUrl.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewGetClusterMetricsGaugesRequest generates requests for GetClusterMetricsGauges
+func NewGetClusterMetricsGaugesRequest(server string, clusterId ClusterId) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParam("simple", false, "clusterId", clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	queryUrl, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	basePath := fmt.Sprintf("/v1/kubernetes/clusters/%s/metrics/gauges", pathParam0)
+	if basePath[0] == '/' {
+		basePath = basePath[1:]
+	}
+
+	queryUrl, err = queryUrl.Parse(basePath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryUrl.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewGetClusterMetricsMemoryUsageRequest generates requests for GetClusterMetricsMemoryUsage
+func NewGetClusterMetricsMemoryUsageRequest(server string, clusterId ClusterId, params *GetClusterMetricsMemoryUsageParams) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParam("simple", false, "clusterId", clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	queryUrl, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	basePath := fmt.Sprintf("/v1/kubernetes/clusters/%s/metrics/memory-usage", pathParam0)
+	if basePath[0] == '/' {
+		basePath = basePath[1:]
+	}
+
+	queryUrl, err = queryUrl.Parse(basePath)
+	if err != nil {
+		return nil, err
+	}
+
+	queryValues := queryUrl.Query()
+
+	if params.PeriodHours != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "periodHours", *params.PeriodHours); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.StartTime != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "startTime", *params.StartTime); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.EndTime != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "endTime", *params.EndTime); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.StepSeconds != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "stepSeconds", *params.StepSeconds); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
 	}
 
 	queryUrl.RawQuery = queryValues.Encode()
@@ -6396,6 +6754,64 @@ func NewUpdateCurrentUserProfileRequestWithBody(server string, contentType strin
 	return req, nil
 }
 
+// NewGetPromMetricsRequest generates requests for GetPromMetrics
+func NewGetPromMetricsRequest(server string, params *GetPromMetricsParams) (*http.Request, error) {
+	var err error
+
+	queryUrl, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	basePath := fmt.Sprintf("/v1/metrics/prom")
+	if basePath[0] == '/' {
+		basePath = basePath[1:]
+	}
+
+	queryUrl, err = queryUrl.Parse(basePath)
+	if err != nil {
+		return nil, err
+	}
+
+	queryValues := queryUrl.Query()
+
+	if params.ClusterNames != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "clusterNames", *params.ClusterNames); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	queryUrl.RawQuery = queryValues.Encode()
+
+	req, err := http.NewRequest("GET", queryUrl.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	if params.XCastAiOrganizationId != nil {
+		var headerParam0 string
+
+		headerParam0, err = runtime.StyleParam("simple", false, "X-CastAi-Organization-Id", *params.XCastAiOrganizationId)
+		if err != nil {
+			return nil, err
+		}
+
+		req.Header.Set("X-CastAi-Organization-Id", headerParam0)
+	}
+
+	return req, nil
+}
+
 // NewListOrganizationsRequest generates requests for ListOrganizations
 func NewListOrganizationsRequest(server string) (*http.Request, error) {
 	var err error
@@ -7100,6 +7516,15 @@ type ClientWithResponsesInterface interface {
 	// GetClusterMetrics request
 	GetClusterMetricsWithResponse(ctx context.Context, clusterId ClusterId, params *GetClusterMetricsParams) (*GetClusterMetricsResponse, error)
 
+	// GetClusterMetricsCpuUsage request
+	GetClusterMetricsCpuUsageWithResponse(ctx context.Context, clusterId ClusterId, params *GetClusterMetricsCpuUsageParams) (*GetClusterMetricsCpuUsageResponse, error)
+
+	// GetClusterMetricsGauges request
+	GetClusterMetricsGaugesWithResponse(ctx context.Context, clusterId ClusterId) (*GetClusterMetricsGaugesResponse, error)
+
+	// GetClusterMetricsMemoryUsage request
+	GetClusterMetricsMemoryUsageWithResponse(ctx context.Context, clusterId ClusterId, params *GetClusterMetricsMemoryUsageParams) (*GetClusterMetricsMemoryUsageResponse, error)
+
 	// GetNodeConstraints request
 	GetNodeConstraintsWithResponse(ctx context.Context, clusterId ClusterId) (*GetNodeConstraintsResponse, error)
 
@@ -7271,6 +7696,9 @@ type ClientWithResponsesInterface interface {
 	UpdateCurrentUserProfileWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*UpdateCurrentUserProfileResponse, error)
 
 	UpdateCurrentUserProfileWithResponse(ctx context.Context, body UpdateCurrentUserProfileJSONRequestBody) (*UpdateCurrentUserProfileResponse, error)
+
+	// GetPromMetrics request
+	GetPromMetricsWithResponse(ctx context.Context, params *GetPromMetricsParams) (*GetPromMetricsResponse, error)
 
 	// ListOrganizations request
 	ListOrganizationsWithResponse(ctx context.Context) (*ListOrganizationsResponse, error)
@@ -8637,6 +9065,96 @@ func (r GetClusterMetricsResponse) StatusCode() int {
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
 func (r GetClusterMetricsResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type GetClusterMetricsCpuUsageResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *ClusterMetricsCpuUsage
+}
+
+// Status returns HTTPResponse.Status
+func (r GetClusterMetricsCpuUsageResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetClusterMetricsCpuUsageResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r GetClusterMetricsCpuUsageResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type GetClusterMetricsGaugesResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *ClusterMetricsGauges
+}
+
+// Status returns HTTPResponse.Status
+func (r GetClusterMetricsGaugesResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetClusterMetricsGaugesResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r GetClusterMetricsGaugesResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type GetClusterMetricsMemoryUsageResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *ClusterMetricsMemoryUsage
+}
+
+// Status returns HTTPResponse.Status
+func (r GetClusterMetricsMemoryUsageResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetClusterMetricsMemoryUsageResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r GetClusterMetricsMemoryUsageResponse) GetBody() []byte {
 	return r.Body
 }
 
@@ -10083,6 +10601,35 @@ func (r UpdateCurrentUserProfileResponse) GetBody() []byte {
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
+type GetPromMetricsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+}
+
+// Status returns HTTPResponse.Status
+func (r GetPromMetricsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetPromMetricsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r GetPromMetricsResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
 type ListOrganizationsResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -10958,6 +11505,33 @@ func (c *ClientWithResponses) GetClusterMetricsWithResponse(ctx context.Context,
 	return ParseGetClusterMetricsResponse(rsp)
 }
 
+// GetClusterMetricsCpuUsageWithResponse request returning *GetClusterMetricsCpuUsageResponse
+func (c *ClientWithResponses) GetClusterMetricsCpuUsageWithResponse(ctx context.Context, clusterId ClusterId, params *GetClusterMetricsCpuUsageParams) (*GetClusterMetricsCpuUsageResponse, error) {
+	rsp, err := c.GetClusterMetricsCpuUsage(ctx, clusterId, params)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetClusterMetricsCpuUsageResponse(rsp)
+}
+
+// GetClusterMetricsGaugesWithResponse request returning *GetClusterMetricsGaugesResponse
+func (c *ClientWithResponses) GetClusterMetricsGaugesWithResponse(ctx context.Context, clusterId ClusterId) (*GetClusterMetricsGaugesResponse, error) {
+	rsp, err := c.GetClusterMetricsGauges(ctx, clusterId)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetClusterMetricsGaugesResponse(rsp)
+}
+
+// GetClusterMetricsMemoryUsageWithResponse request returning *GetClusterMetricsMemoryUsageResponse
+func (c *ClientWithResponses) GetClusterMetricsMemoryUsageWithResponse(ctx context.Context, clusterId ClusterId, params *GetClusterMetricsMemoryUsageParams) (*GetClusterMetricsMemoryUsageResponse, error) {
+	rsp, err := c.GetClusterMetricsMemoryUsage(ctx, clusterId, params)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetClusterMetricsMemoryUsageResponse(rsp)
+}
+
 // GetNodeConstraintsWithResponse request returning *GetNodeConstraintsResponse
 func (c *ClientWithResponses) GetNodeConstraintsWithResponse(ctx context.Context, clusterId ClusterId) (*GetNodeConstraintsResponse, error) {
 	rsp, err := c.GetNodeConstraints(ctx, clusterId)
@@ -11500,6 +12074,15 @@ func (c *ClientWithResponses) UpdateCurrentUserProfileWithResponse(ctx context.C
 		return nil, err
 	}
 	return ParseUpdateCurrentUserProfileResponse(rsp)
+}
+
+// GetPromMetricsWithResponse request returning *GetPromMetricsResponse
+func (c *ClientWithResponses) GetPromMetricsWithResponse(ctx context.Context, params *GetPromMetricsParams) (*GetPromMetricsResponse, error) {
+	rsp, err := c.GetPromMetrics(ctx, params)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetPromMetricsResponse(rsp)
 }
 
 // ListOrganizationsWithResponse request returning *ListOrganizationsResponse
@@ -12748,6 +13331,84 @@ func ParseGetClusterMetricsResponse(rsp *http.Response) (*GetClusterMetricsRespo
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest ClusterMetrics
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetClusterMetricsCpuUsageResponse parses an HTTP response from a GetClusterMetricsCpuUsageWithResponse call
+func ParseGetClusterMetricsCpuUsageResponse(rsp *http.Response) (*GetClusterMetricsCpuUsageResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetClusterMetricsCpuUsageResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ClusterMetricsCpuUsage
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetClusterMetricsGaugesResponse parses an HTTP response from a GetClusterMetricsGaugesWithResponse call
+func ParseGetClusterMetricsGaugesResponse(rsp *http.Response) (*GetClusterMetricsGaugesResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetClusterMetricsGaugesResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ClusterMetricsGauges
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetClusterMetricsMemoryUsageResponse parses an HTTP response from a GetClusterMetricsMemoryUsageWithResponse call
+func ParseGetClusterMetricsMemoryUsageResponse(rsp *http.Response) (*GetClusterMetricsMemoryUsageResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetClusterMetricsMemoryUsageResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ClusterMetricsMemoryUsage
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -14008,6 +14669,25 @@ func ParseUpdateCurrentUserProfileResponse(rsp *http.Response) (*UpdateCurrentUs
 		}
 		response.JSON200 = &dest
 
+	}
+
+	return response, nil
+}
+
+// ParseGetPromMetricsResponse parses an HTTP response from a GetPromMetricsWithResponse call
+func ParseGetPromMetricsResponse(rsp *http.Response) (*GetPromMetricsResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetPromMetricsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
 	}
 
 	return response, nil

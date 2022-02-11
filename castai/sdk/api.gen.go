@@ -464,6 +464,36 @@ type ClusterMetrics_NodeMetrics_Labels struct {
 	AdditionalProperties map[string]string `json:"-"`
 }
 
+// ClusterMetricsCpuUsage defines model for ClusterMetricsCpuUsage.
+type ClusterMetricsCpuUsage struct {
+	Provisioned []MetricSampleStream `json:"provisioned"`
+	Requested   []MetricSampleStream `json:"requested"`
+}
+
+// ClusterMetricsGauges defines model for ClusterMetricsGauges.
+type ClusterMetricsGauges struct {
+	CastaiManagedNodesCount   *int `json:"castaiManagedNodesCount,omitempty"`
+	CpuAllocatableMillicores  *int `json:"cpuAllocatableMillicores,omitempty"`
+	CpuProvisionedMillicores  *int `json:"cpuProvisionedMillicores,omitempty"`
+	CpuRequestedMillicores    *int `json:"cpuRequestedMillicores,omitempty"`
+	MemoryAllocatableBytes    *int `json:"memoryAllocatableBytes,omitempty"`
+	MemoryProvisionedBytes    *int `json:"memoryProvisionedBytes,omitempty"`
+	MemoryRequestedBytes      *int `json:"memoryRequestedBytes,omitempty"`
+	OnDemandNodesCount        *int `json:"onDemandNodesCount,omitempty"`
+	ProviderManagedNodesCount *int `json:"providerManagedNodesCount,omitempty"`
+	ScheduledPodsCount        *int `json:"scheduledPodsCount,omitempty"`
+	SpotNodesCount            *int `json:"spotNodesCount,omitempty"`
+	TotalNodesCount           *int `json:"totalNodesCount,omitempty"`
+	TotalPodsCount            *int `json:"totalPodsCount,omitempty"`
+	UnscheduledPodsCount      *int `json:"unscheduledPodsCount,omitempty"`
+}
+
+// ClusterMetricsMemoryUsage defines model for ClusterMetricsMemoryUsage.
+type ClusterMetricsMemoryUsage struct {
+	Provisioned []MetricSampleStream `json:"provisioned"`
+	Requested   []MetricSampleStream `json:"requested"`
+}
+
 // ClusterProblematicWorkloads defines model for ClusterProblematicWorkloads.
 type ClusterProblematicWorkloads struct {
 
@@ -1110,8 +1140,10 @@ type Node struct {
 	Resources *struct {
 		CpuAllocatableMilli *int `json:"cpuAllocatableMilli,omitempty"`
 		CpuCapacityMilli    *int `json:"cpuCapacityMilli,omitempty"`
+		CpuRequestsMilli    *int `json:"cpuRequestsMilli,omitempty"`
 		MemAllocatableMib   *int `json:"memAllocatableMib,omitempty"`
 		MemCapacityMib      *int `json:"memCapacityMib,omitempty"`
+		MemRequestsMib      *int `json:"memRequestsMib,omitempty"`
 	} `json:"resources,omitempty"`
 
 	// Specifies the node type.
@@ -2051,10 +2083,12 @@ type CastaiClusterV1beta1Resources struct {
 
 	// VCPU (in MiB) available on the instance type. Will be populated only with GetNode request.
 	CpuCapacityMilli  *int32 `json:"cpuCapacityMilli"`
+	CpuRequestsMilli  *int32 `json:"cpuRequestsMilli,omitempty"`
 	MemAllocatableMib *int32 `json:"memAllocatableMib,omitempty"`
 
 	// Ram (in MiB) available on the instance type. Will be populated only with GetNode request.
 	MemCapacityMib *int32 `json:"memCapacityMib"`
+	MemRequestsMib *int32 `json:"memRequestsMib,omitempty"`
 }
 
 // CastaiClusterV1beta1Taint defines model for castai.cluster.v1beta1.Taint.
@@ -2114,6 +2148,7 @@ type ClusteractionsV1ClusterAction struct {
 	ActionDisconnectCluster *ClusteractionsV1ClusterActionDisconnectCluster `json:"actionDisconnectCluster,omitempty"`
 	ActionDrainNode         *ClusteractionsV1ClusterActionDrainNode         `json:"actionDrainNode,omitempty"`
 	ActionPatchNode         *ClusteractionsV1ClusterActionPatchNode         `json:"actionPatchNode,omitempty"`
+	ActionSendAksInitData   *ClusteractionsV1ClusterActionSendAKSInitData   `json:"actionSendAksInitData,omitempty"`
 	CreatedAt               *time.Time                                      `json:"createdAt,omitempty"`
 	DoneAt                  *time.Time                                      `json:"doneAt,omitempty"`
 	Error                   *string                                         `json:"error"`
@@ -2180,6 +2215,9 @@ type ClusteractionsV1ClusterActionPatchNode struct {
 type ClusteractionsV1ClusterActionPatchNode_Labels struct {
 	AdditionalProperties map[string]string `json:"-"`
 }
+
+// ClusteractionsV1ClusterActionSendAKSInitData defines model for clusteractions.v1.ClusterActionSendAKSInitData.
+type ClusteractionsV1ClusterActionSendAKSInitData map[string]interface{}
 
 // ClusteractionsV1IngestLogsResponse defines model for clusteractions.v1.IngestLogsResponse.
 type ClusteractionsV1IngestLogsResponse map[string]interface{}
@@ -2255,6 +2293,9 @@ type ExternalclusterV1Cluster struct {
 	// AKSClusterParams defines AKS-specific arguments.
 	Aks *ExternalclusterV1AKSClusterParams `json:"aks,omitempty"`
 
+	// All available zones in cluster's region.
+	AllRegionZones *[]ExternalclusterV1Zone `json:"allRegionZones,omitempty"`
+
 	// User friendly unique cluster identifier.
 	ClusterNameId *string `json:"clusterNameId,omitempty"`
 
@@ -2312,9 +2353,6 @@ type ExternalclusterV1ClusterUpdate struct {
 
 	// UpdateEKSClusterParams defines updatable EKS cluster configuration.
 	Eks *ExternalclusterV1UpdateEKSClusterParams `json:"eks,omitempty"`
-
-	// UpdateGKEClusterParams defines updatable GKE cluster configuration.
-	Gke *ExternalclusterV1UpdateGKEClusterParams `json:"gke,omitempty"`
 
 	// UpdateKOPSClusterParams defines updatable KOPS cluster configuration.
 	Kops *ExternalclusterV1UpdateKOPSClusterParams `json:"kops,omitempty"`
@@ -2571,13 +2609,6 @@ type ExternalclusterV1UpdateEKSClusterParams struct {
 // ExternalclusterV1UpdateEKSClusterParams_Tags defines model for ExternalclusterV1UpdateEKSClusterParams.Tags.
 type ExternalclusterV1UpdateEKSClusterParams_Tags struct {
 	AdditionalProperties map[string]string `json:"-"`
-}
-
-// ExternalclusterV1UpdateGKEClusterParams defines model for externalcluster.v1.UpdateGKEClusterParams.
-type ExternalclusterV1UpdateGKEClusterParams struct {
-
-	// Location of the cluster.
-	Location *string `json:"location,omitempty"`
 }
 
 // ExternalclusterV1UpdateKOPSClusterParams defines model for externalcluster.v1.UpdateKOPSClusterParams.
@@ -2851,8 +2882,14 @@ type GetCostHistoryParams struct {
 // GetDashboardMetricsCpuUsageParams defines parameters for GetDashboardMetricsCpuUsage.
 type GetDashboardMetricsCpuUsageParams struct {
 
-	// Metrics period in hours, e.g., periodHours=24
+	// Metrics period in hours, e.g., periodHours=24. This field is ignored if startTime and endTime fields are set.
 	PeriodHours *string `json:"periodHours,omitempty"`
+
+	// Metrics range start time in unix timestamp, e.g., startTime=1640091345020
+	StartTime *string `json:"startTime,omitempty"`
+
+	// Metrics range end time in unix timestamp, e.g., endTime=1640091345030
+	EndTime *string `json:"endTime,omitempty"`
 
 	// Metrics data points steps in seconds, e.g., stepSeconds=3600
 	StepSeconds *string `json:"stepSeconds,omitempty"`
@@ -2861,8 +2898,14 @@ type GetDashboardMetricsCpuUsageParams struct {
 // GetDashboardMetricsMemoryUsageParams defines parameters for GetDashboardMetricsMemoryUsage.
 type GetDashboardMetricsMemoryUsageParams struct {
 
-	// Metrics period in hours, e.g., periodHours=24
+	// Metrics period in hours, e.g., periodHours=24. This field is ignored if startTime and endTime fields are set.
 	PeriodHours *string `json:"periodHours,omitempty"`
+
+	// Metrics range start time in unix timestamp, e.g., startTime=1640091345020
+	StartTime *string `json:"startTime,omitempty"`
+
+	// Metrics range end time in unix timestamp, e.g., endTime=1640091345030
+	EndTime *string `json:"endTime,omitempty"`
 
 	// Metrics data points steps in seconds, e.g., stepSeconds=3600
 	StepSeconds *string `json:"stepSeconds,omitempty"`
@@ -2876,6 +2919,38 @@ type GetClusterMetricsParams struct {
 
 	// The type of metrics to query
 	MetricType MetricType `json:"metricType"`
+}
+
+// GetClusterMetricsCpuUsageParams defines parameters for GetClusterMetricsCpuUsage.
+type GetClusterMetricsCpuUsageParams struct {
+
+	// Metrics period in hours, e.g., periodHours=24. This field is ignored if startTime and endTime fields are set.
+	PeriodHours *string `json:"periodHours,omitempty"`
+
+	// Metrics range start time in unix timestamp, e.g., startTime=1640091345020
+	StartTime *string `json:"startTime,omitempty"`
+
+	// Metrics range end time in unix timestamp, e.g., endTime=1640091345030
+	EndTime *string `json:"endTime,omitempty"`
+
+	// Metrics data points steps in seconds, e.g., stepSeconds=3600
+	StepSeconds *string `json:"stepSeconds,omitempty"`
+}
+
+// GetClusterMetricsMemoryUsageParams defines parameters for GetClusterMetricsMemoryUsage.
+type GetClusterMetricsMemoryUsageParams struct {
+
+	// Metrics period in hours, e.g., periodHours=24. This field is ignored if startTime and endTime fields are set.
+	PeriodHours *string `json:"periodHours,omitempty"`
+
+	// Metrics range start time in unix timestamp, e.g., startTime=1640091345020
+	StartTime *string `json:"startTime,omitempty"`
+
+	// Metrics range end time in unix timestamp, e.g., endTime=1640091345030
+	EndTime *string `json:"endTime,omitempty"`
+
+	// Metrics data points steps in seconds, e.g., stepSeconds=3600
+	StepSeconds *string `json:"stepSeconds,omitempty"`
 }
 
 // GetClusterNodesParams defines parameters for GetClusterNodes.
@@ -2973,6 +3048,14 @@ type ExternalClusterAPIDrainNodeJSONBody ExternalclusterV1DrainConfig
 
 // UpdateCurrentUserProfileJSONBody defines parameters for UpdateCurrentUserProfile.
 type UpdateCurrentUserProfileJSONBody UserProfile
+
+// GetPromMetricsParams defines parameters for GetPromMetrics.
+type GetPromMetricsParams struct {
+
+	// Optional cluster names. Values should match castai_cluster label on metrics. It could also be found on GET cluster clusterNameId field.
+	ClusterNames          *[]string             `json:"clusterNames,omitempty"`
+	XCastAiOrganizationId *HeaderOrganizationId `json:"X-CastAi-Organization-Id,omitempty"`
+}
 
 // CreateOrganizationJSONBody defines parameters for CreateOrganization.
 type CreateOrganizationJSONBody Organization
