@@ -48,7 +48,6 @@ func resourceCastaiAutoscaler() *schema.Resource {
 			},
 			FieldAutoscalerPolicies: {
 				Type:     schema.TypeString,
-				Optional: true,
 				Computed: true,
 			},
 		},
