@@ -52,6 +52,25 @@ module "castai-eks-cluster" {
   security_groups = var.security_groups
   tags            = var.tags
 
-  api_url = var.api_url
+  autoscaler_policies_json = <<-EOT
+    {
+        "enabled": true,
+        "isScopedMode": true,
+        "unschedulablePods": {
+            "enabled": true
+        },
+        "spotInstances": {
+            "enabled": true,
+            "clouds": ["aws"],
+            "spotBackups": {
+                "enabled": true
+            }
+        },
+        "nodeDownscaler": {
+            "emptyNodes": {
+                "enabled": true
+            }
+        }
+    }
+  EOT
 }
-
