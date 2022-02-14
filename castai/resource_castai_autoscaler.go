@@ -140,13 +140,13 @@ func updateAutoscalerPolicies(ctx context.Context, data *schema.ResourceData, me
 
 	changedPolicies, found := data.GetOk(FieldAutoscalerPolicies)
 	if !found {
-		log.Printf("[DEBUG] changed policies json not found. Sipping autoscaler policies changes")
+		log.Printf("[DEBUG] changed policies json not found. Skipping autoscaler policies changes")
 		return nil
 	}
 
 	changedPoliciesJSON := changedPolicies.(string)
 	if changedPoliciesJSON == "" {
-		log.Printf("[DEBUG] changed policies json not found. Sipping autoscaler policies changes")
+		log.Printf("[DEBUG] changed policies json not found. Skipping autoscaler policies changes")
 		return nil
 	}
 
@@ -198,7 +198,7 @@ func readAutoscalerPolicies(ctx context.Context, data *schema.ResourceData, meta
 func getChangedPolicies(ctx context.Context, data *schema.ResourceData, meta interface{}, clusterId sdk.ClusterId) ([]byte, error) {
 	policyChangesJSON, found := data.GetOk(FieldAutoscalerPoliciesJSON)
 	if !found {
-		log.Printf("[DEBUG] policies json not provided. Sipping autoscaler policies changes")
+		log.Printf("[DEBUG] policies json not provided. Skipping autoscaler policies changes")
 		return nil, nil
 	}
 

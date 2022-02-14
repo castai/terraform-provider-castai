@@ -15,14 +15,13 @@ CAST AI autoscaler resource to manage autoscaler settings
 
 ### Optional
 
-- **autoscaler_policies_json** (String)
-- **cluster_id** (String)
-- **id** (String) The ID of this resource.
+- **autoscaler_policies_json** (String) - autoscaler policies JSON string to override current autoscaler settings
+- **cluster_id** (String) - CAST AI cluster id
 - **timeouts** (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only
 
-- **autoscaler_policies** (String)
+- **autoscaler_policies** (String) - computed value to store full policies configuration
 
 <a id="nestedblock--timeouts"></a>
 ### Nested Schema for `timeouts`
