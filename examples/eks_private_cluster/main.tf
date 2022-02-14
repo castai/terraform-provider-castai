@@ -54,29 +54,23 @@ module "castai-eks-cluster" {
 
   autoscaler_policies_json = <<-EOT
     {
-      "enabled": true,
-      "isScopedMode": false,
-      "unschedulablePods": {
         "enabled": true,
-        "nodeConstraints": {
-				"enabled": true,
-				"maxCpuCores": 96
-			}
-      },
-      "spotInstances": {
-        "enabled": true,
-        "clouds": [
-            "aws"
-        ],
-		"spotBackups": {
-		  "enabled": true
+        "isScopedMode": true,
+        "unschedulablePods": {
+            "enabled": true
+        },
+        "spotInstances": {
+            "enabled": true,
+            "clouds": ["aws"],
+            "spotBackups": {
+                "enabled": true
+            }
+        },
+        "nodeDownscaler": {
+            "emptyNodes": {
+                "enabled": true
+            }
         }
-      },
-      "nodeDownscaler": {
-		    "emptyNodes": {
-		      "enabled": true
-		    }
-		  }
     }
   EOT
 }

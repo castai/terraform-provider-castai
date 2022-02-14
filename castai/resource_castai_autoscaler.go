@@ -19,9 +19,9 @@ import (
 )
 
 const (
-	FieldAutoscalerPoliciesJSON        = "autoscaler_policies_json"
-	FieldClusterId                     = "cluster_id"
-	FieldAutoscalerPoliciesChangedJSON = "autoscaler_policies_changed_json"
+	FieldAutoscalerPoliciesJSON = "autoscaler_policies_json"
+	FieldClusterId              = "cluster_id"
+	FieldAutoscalerPolicies     = "autoscaler_policies"
 )
 
 func resourceCastaiAutoscaler() *schema.Resource {
@@ -46,7 +46,7 @@ func resourceCastaiAutoscaler() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 			},
-			FieldAutoscalerPoliciesChangedJSON: {
+			FieldAutoscalerPolicies: {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
@@ -129,7 +129,7 @@ func updateAutoscalerPolicies(ctx context.Context, data *schema.ResourceData, me
 		return err
 	}
 
-	changedPolicies, found := data.GetOk(FieldAutoscalerPoliciesChangedJSON)
+	changedPolicies, found := data.GetOk(FieldAutoscalerPolicies)
 	if !found {
 		log.Printf("[DEBUG] changed policies json not found. Sipping autoscaler policies changes")
 		return nil
@@ -168,16 +168,31 @@ func readAutoscalerPolicies(ctx context.Context, data *schema.ResourceData, meta
 		return nil
 	}
 
+	policies, err := getChangedPolicies(ctx, data, meta, clusterId)
+	if err != nil {
+		return err
+	}
+
+	err = data.Set(FieldAutoscalerPolicies, string(policies))
+	if err != nil {
+		log.Printf("[ERROR] Failed to set field: %v", err)
+		return err
+	}
+
+	return nil
+}
+
+func getChangedPolicies(ctx context.Context, data *schema.ResourceData, meta interface{}, clusterId sdk.ClusterId) ([]byte, error) {
 	policyChangesJSON, found := data.GetOk(FieldAutoscalerPoliciesJSON)
 	if !found {
 		log.Printf("[DEBUG] policies json not provided. Sipping autoscaler policies changes")
-		return nil
+		return nil, nil
 	}
 
 	policyChanges := []byte(policyChangesJSON.(string))
 	if !json.Valid(policyChanges) {
 		log.Printf("[WARN] policies JSON invalid: %v", string(policyChanges))
-		return fmt.Errorf("policies JSON invalid")
+		return nil, fmt.Errorf("policies JSON invalid")
 	}
 
 	client := meta.(*ProviderConfig).api
@@ -185,18 +200,16 @@ func readAutoscalerPolicies(ctx context.Context, data *schema.ResourceData, meta
 	currentPolicies, err := getCurrentPolicies(ctx, client, clusterId)
 	if err != nil {
 		log.Printf("[WARN] Getting current policies: %v", err)
-		return fmt.Errorf("failed to get policies from API: %v", err)
+		return nil, fmt.Errorf("failed to get policies from API: %v", err)
 	}
 
-	policies, err := jsonpatch.MergeMergePatches(currentPolicies, policyChanges)
+	policies, err := jsonpatch.MergePatch(currentPolicies, policyChanges)
 	if err != nil {
 		log.Printf("[WARN] Failed mergin policy changes: %v", err)
-		return fmt.Errorf("failed to merge policies: %v", err)
+		return nil, fmt.Errorf("failed to merge policies: %v", err)
 	}
 
-	data.Set(FieldAutoscalerPoliciesChangedJSON, string(policies))
-
-	return nil
+	return policies, nil
 }
 
 func getClusterId(data *schema.ResourceData) sdk.ClusterId {
