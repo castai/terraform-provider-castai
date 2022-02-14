@@ -55,7 +55,17 @@ func resourceCastaiAutoscaler() *schema.Resource {
 }
 
 func resourceCastaiAutoscalerDelete(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	// nothing to delete
+	clusterId := getClusterId(data)
+	if clusterId == "" {
+		log.Print("[INFO] ClusterId is missing. Will skip operation.")
+		return nil
+	}
+
+	err := upsertPolicies(ctx, meta, clusterId, `{"enabled":false}`)
+	if err != nil {
+		log.Printf("[ERROR] Failed to disable autoscaler policies: %v", err)
+		return diag.FromErr(err)
+	}
 
 	return nil
 }
@@ -140,6 +150,10 @@ func updateAutoscalerPolicies(ctx context.Context, data *schema.ResourceData, me
 		return nil
 	}
 
+	return upsertPolicies(ctx, meta, clusterId, changedPoliciesJSON)
+}
+
+func upsertPolicies(ctx context.Context, meta interface{}, clusterId sdk.ClusterId, changedPoliciesJSON string) error {
 	client := meta.(*ProviderConfig).api
 
 	result, err := client.UpsertPoliciesWithBody(ctx, clusterId, "application/json", bytes.NewReader([]byte(changedPoliciesJSON)))
