@@ -2347,6 +2347,7 @@ type ExternalclusterV1Cluster struct {
 
 // ExternalclusterV1ClusterUpdate defines model for externalcluster.v1.ClusterUpdate.
 type ExternalclusterV1ClusterUpdate struct {
+	Aks *ExternalclusterV1UpdateAKSClusterParams `json:"aks,omitempty"`
 
 	// JSON encoded cluster credentials string.
 	Credentials *string `json:"credentials,omitempty"`
@@ -2401,7 +2402,8 @@ type ExternalclusterV1EKSClusterParams struct {
 	AccountId *string `json:"accountId,omitempty"`
 
 	// Name of the cluster.
-	ClusterName *string `json:"clusterName,omitempty"`
+	ClusterName  *string `json:"clusterName,omitempty"`
+	DnsClusterIp *string `json:"dnsClusterIp,omitempty"`
 
 	// Output only. Cluster's instance profile ARN used for CAST provisioned nodes.
 	InstanceProfileArn *string `json:"instanceProfileArn,omitempty"`
@@ -2589,8 +2591,17 @@ type ExternalclusterV1Subnet struct {
 	ZoneName *string `json:"zoneName,omitempty"`
 }
 
+// ExternalclusterV1UpdateAKSClusterParams defines model for externalcluster.v1.UpdateAKSClusterParams.
+type ExternalclusterV1UpdateAKSClusterParams struct {
+
+	// Optional subnet ids for CAST provisioned nodes.
+	// If not set, subnets from AKS cluster configuration are used.
+	Subnets *[]string `json:"subnets,omitempty"`
+}
+
 // ExternalclusterV1UpdateEKSClusterParams defines model for externalcluster.v1.UpdateEKSClusterParams.
 type ExternalclusterV1UpdateEKSClusterParams struct {
+	DnsClusterIp *string `json:"dnsClusterIp,omitempty"`
 
 	// Optional instance profile ARN for CAST provisioned nodes.
 	InstanceProfileArn *string `json:"instanceProfileArn,omitempty"`

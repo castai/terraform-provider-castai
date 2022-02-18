@@ -25,6 +25,7 @@ const (
 	FieldEKSClusterInstanceProfileArn = "instance_profile_arn"
 	FieldEKSClusterSecurityGroups     = "security_groups"
 	FieldEKSClusterSubnets            = "subnets"
+	FieldEKSClusterDNSClusterIP       = "dns_cluster_ip"
 	FieldEKSClusterTags               = "tags"
 	FieldEKSClusterAgentToken         = "agent_token"
 	FieldEKSClusterToken              = "cluster_token"
@@ -109,6 +110,11 @@ func resourceCastaiEKSCluster() *schema.Resource {
 					Type: schema.TypeString,
 				},
 			},
+			FieldEKSClusterDNSClusterIP: {
+				Type:             schema.TypeString,
+				Optional:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.IsIPv4Address),
+			},
 			FieldEKSClusterTags: {
 				Type:     schema.TypeMap,
 				Optional: true,
@@ -189,13 +195,16 @@ func resourceCastaiEKSClusterRead(ctx context.Context, data *schema.ResourceData
 	data.Set(FieldEKSClusterCredentialsId, *resp.JSON200.CredentialsId)
 
 	if eks := resp.JSON200.Eks; eks != nil {
-		data.Set(FieldEKSClusterAccountId, *eks.AccountId)
-		data.Set(FieldEKSClusterRegion, *eks.Region)
-		data.Set(FieldEKSClusterName, *eks.ClusterName)
-		data.Set(FieldEKSClusterInstanceProfileArn, *eks.InstanceProfileArn)
-		data.Set(FieldEKSClusterSubnets, *eks.Subnets)
-		data.Set(FieldEKSClusterSecurityGroups, *eks.SecurityGroups)
-		data.Set(FieldEKSClusterTags, *eks.Tags)
+		data.Set(FieldEKSClusterAccountId, toString(eks.AccountId))
+		data.Set(FieldEKSClusterRegion, toString(eks.Region))
+		data.Set(FieldEKSClusterName, toString(eks.ClusterName))
+		data.Set(FieldEKSClusterInstanceProfileArn, toString(eks.InstanceProfileArn))
+		data.Set(FieldEKSClusterSubnets, toStringSlice(eks.Subnets))
+		data.Set(FieldEKSClusterDNSClusterIP, toString(eks.DnsClusterIp))
+		data.Set(FieldEKSClusterSecurityGroups, toStringSlice(eks.SecurityGroups))
+		if eks.Tags != nil {
+			data.Set(FieldEKSClusterTags, eks.Tags.AdditionalProperties)
+		}
 	}
 
 	if _, ok := data.GetOk(FieldEKSClusterAgentToken); !ok {
@@ -288,8 +297,10 @@ func updateClusterSettings(ctx context.Context, data *schema.ResourceData, clien
 		FieldEKSClusterSecretAccessKey,
 		FieldEKSClusterInstanceProfileArn,
 		FieldEKSClusterSubnets,
+		FieldEKSClusterDNSClusterIP,
 		FieldEKSClusterSecurityGroups,
-		FieldEKSClusterTags) {
+		FieldEKSClusterTags,
+	) {
 		log.Printf("[INFO] Nothing to update in cluster setttings.")
 		return nil
 	}
@@ -332,6 +343,10 @@ func updateClusterSettings(ctx context.Context, data *schema.ResourceData, clien
 			subnetsString[idx] = subnet.(string)
 		}
 		req.Eks.Subnets = &subnetsString
+	}
+
+	if s, ok := data.GetOk(FieldEKSClusterDNSClusterIP); ok {
+		req.Eks.DnsClusterIp = toStringPtr(s.(string))
 	}
 
 	if tags, ok := data.GetOk(FieldEKSClusterTags); ok {

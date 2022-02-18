@@ -14,3 +14,17 @@ func convertStringArr(arr []interface{}) []string {
 func toStringPtr(value string) *string {
 	return &value
 }
+
+func toString(s *string) string {
+	if s == nil {
+		return ""
+	}
+	return *s
+}
+
+func toStringSlice(arr *[]string) []string {
+	if arr == nil {
+		return nil
+	}
+	return *arr
+}
