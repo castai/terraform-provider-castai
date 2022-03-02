@@ -1,31 +1,32 @@
 variable "castai_api_token" {
-  default = ""
+  type        = string
+  description = "CAST.AI api token"
 }
 
 variable "aws_account_id" {
-  default = ""
+  type        = string
+  description = "AWS account your cluster is located."
 }
 
 variable "aws_access_key_id" {
-  default = ""
+  type        = string
+  description = "Your own access key id for operating terraform"
 }
 
 variable "aws_secret_access_key" {
-  default = ""
+  type        = string
+  description = "Your own access key secret for operating terraform"
 }
 
 variable "cluster_region" {
   type        = string
   description = "AWS region your cluster is located."
-  default = "eu-central-1"
 }
 
 variable "cluster_name" {
   type        = string
   description = "EKS cluster name in AWS account."
-  default = ""
 }
-
 
 # Addresses with whitelisted access to Kubernetes API
 variable "whitelisted_ips" {
