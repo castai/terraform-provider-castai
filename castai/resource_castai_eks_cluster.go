@@ -17,19 +17,20 @@ import (
 )
 
 const (
-	FieldEKSClusterName               = "name"
-	FieldEKSClusterAccountId          = "account_id"
-	FieldEKSClusterRegion             = "region"
-	FieldEKSClusterAccessKeyId        = "access_key_id"
-	FieldEKSClusterSecretAccessKey    = "secret_access_key"
-	FieldEKSClusterInstanceProfileArn = "instance_profile_arn"
-	FieldEKSClusterSecurityGroups     = "security_groups"
-	FieldEKSClusterSubnets            = "subnets"
-	FieldEKSClusterDNSClusterIP       = "dns_cluster_ip"
-	FieldEKSClusterTags               = "tags"
-	FieldEKSClusterAgentToken         = "agent_token"
-	FieldEKSClusterToken              = "cluster_token"
-	FieldEKSClusterCredentialsId      = "credentials_id"
+	FieldEKSClusterName                    = "name"
+	FieldEKSClusterAccountId               = "account_id"
+	FieldEKSClusterRegion                  = "region"
+	FieldEKSClusterAccessKeyId             = "access_key_id"
+	FieldEKSClusterSecretAccessKey         = "secret_access_key"
+	FieldEKSClusterInstanceProfileArn      = "instance_profile_arn"
+	FieldEKSClusterSecurityGroups          = "security_groups"
+	FieldEKSClusterSubnets                 = "subnets"
+	FieldEKSClusterDNSClusterIP            = "dns_cluster_ip"
+	FieldEKSClusterTags                    = "tags"
+	FieldEKSClusterAgentToken              = "agent_token"
+	FieldEKSClusterToken                   = "cluster_token"
+	FieldEKSClusterCredentialsId           = "credentials_id"
+	FieldEKSClusterDeleteNodesOnDisconnect = "delete_nodes_on_disconnect"
 )
 
 func resourceCastaiEKSCluster() *schema.Resource {
@@ -121,6 +122,10 @@ func resourceCastaiEKSCluster() *schema.Resource {
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
+			},
+			FieldEKSClusterDeleteNodesOnDisconnect: {
+				Type:     schema.TypeBool,
+				Optional: true,
 			},
 		},
 		CustomizeDiff: func(ctx context.Context, diff *schema.ResourceDiff, i interface{}) error {
@@ -261,8 +266,16 @@ func resourceCastaiEKSClusterDelete(ctx context.Context, data *schema.ResourceDa
 
 		if clusterResponse.JSON200.CredentialsId != nil && agentStatus != sdk.ClusterAgentStatusDisconnected {
 			log.Printf("[INFO] Disconnecting cluster.")
+			deleteNodes := false
 
-			response, err := client.ExternalClusterAPIDisconnectClusterWithResponse(ctx, clusterId, sdk.ExternalClusterAPIDisconnectClusterJSONRequestBody{})
+			delete, ok := data.GetOk(FieldEKSClusterDeleteNodesOnDisconnect)
+			if ok {
+				deleteNodes = delete.(bool)
+			}
+
+			response, err := client.ExternalClusterAPIDisconnectClusterWithResponse(ctx, clusterId, sdk.ExternalClusterAPIDisconnectClusterJSONRequestBody{
+				DeleteProvisionedNodes: &deleteNodes,
+			})
 			if checkErr := sdk.CheckOKResponse(response, err); checkErr != nil {
 				return resource.NonRetryableError(err)
 			}
