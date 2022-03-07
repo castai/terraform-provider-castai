@@ -22,7 +22,7 @@ provider "helm" {
   }
 }
 
-# Your CAST.AI Eks configuration
+# Your CAST AI EKS configuration
 
 provider "castai" {
   api_token = var.castai_api_token

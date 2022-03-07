@@ -13,9 +13,6 @@ module "eks" {
   cluster_create_endpoint_private_access_sg_rule = true
   cluster_endpoint_private_access_cidrs = ["10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24"]
 
-  cluster_endpoint_public_access  = true
-  cluster_endpoint_public_access_cidrs = var.whitelisted_ips
-
   node_groups_defaults = {
     ami_type  = "AL2_x86_64"
     disk_size = 50
