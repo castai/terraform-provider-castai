@@ -266,15 +266,8 @@ func resourceCastaiEKSClusterDelete(ctx context.Context, data *schema.ResourceDa
 
 		if clusterResponse.JSON200.CredentialsId != nil && agentStatus != sdk.ClusterAgentStatusDisconnected {
 			log.Printf("[INFO] Disconnecting cluster.")
-			deleteNodes := false
-
-			delete, ok := data.GetOk(FieldEKSClusterDeleteNodesOnDisconnect)
-			if ok {
-				deleteNodes = delete.(bool)
-			}
-
 			response, err := client.ExternalClusterAPIDisconnectClusterWithResponse(ctx, clusterId, sdk.ExternalClusterAPIDisconnectClusterJSONRequestBody{
-				DeleteProvisionedNodes: &deleteNodes,
+				DeleteProvisionedNodes: getOptionalBool(data, FieldEKSClusterDeleteNodesOnDisconnect, false),
 			})
 			if checkErr := sdk.CheckOKResponse(response, err); checkErr != nil {
 				return resource.NonRetryableError(err)
@@ -400,4 +393,13 @@ func createClusterToken(ctx context.Context, client *sdk.ClientWithResponses, cl
 	}
 
 	return *resp.JSON200.Token, nil
+}
+
+func getOptionalBool(data *schema.ResourceData, field string, defaultValue bool) *bool {
+	delete, ok := data.GetOk(field)
+	if ok {
+		deleteNodes := delete.(bool)
+		return &deleteNodes
+	}
+	return &defaultValue
 }

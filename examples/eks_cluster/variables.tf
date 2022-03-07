@@ -28,12 +28,6 @@ variable "cluster_name" {
   description = "EKS cluster name in AWS account."
 }
 
-# Addresses with whitelisted access to Kubernetes API
-variable "whitelisted_ips" {
-  type = list(string)
-  default = ["0.0.0.0/0"]
-}
-
 variable "subnets" {
   type = list(string)
   description = "Optional custom subnets for the cluster. If not set subnets from the EKS cluster configuration are used."
