@@ -399,7 +399,7 @@ func resourceCastaiClusterRead(ctx context.Context, data *schema.ResourceData, m
 		data.Set(ClusterFieldKubeconfig, []interface{}{})
 	}
 
-	policies, err := client.GetPoliciesWithResponse(ctx, sdk.ClusterId(data.Id()))
+	policies, err := client.PoliciesAPIGetClusterPoliciesWithResponse(ctx, data.Id())
 	if checkErr := sdk.CheckGetResponse(policies, err); checkErr == nil {
 		log.Printf("[INFO] Autoscaling policies for cluster %q", data.Id())
 		data.Set(PolicyFieldAutoscalerPolicies, flattenAutoscalerPolicies(policies.JSON200))
@@ -485,97 +485,97 @@ func waitForClusterToReachStatusFunc(ctx context.Context, client *sdk.ClientWith
 	}
 }
 
-func expandAutoscalerPolicies(pc map[string]interface{}) sdk.UpsertPoliciesJSONRequestBody {
+func expandAutoscalerPolicies(pc map[string]interface{}) sdk.PoliciesAPIUpsertClusterPoliciesJSONRequestBody {
+	//var clusterLimits sdk.PoliciesV1ClusterLimitsPolicy
+	//for _, val := range pc[PolicyFieldClusterLimits].([]interface{}) {
+	//	limitData := val.(map[string]interface{})
+	//	for _, valn := range limitData[PolicyFieldClusterLimitsCPU].([]interface{}) {
+	//		cpuData := valn.(map[string]interface{})
+	//		clusterLimits = sdk.PoliciesV1ClusterLimitsPolicy{
+	//			Enabled: toBoolPtr(limitData[PolicyFieldEnabled].(bool)),
+	//			Cpu: &sdk.PoliciesV1ClusterLimitsCpu{
+	//				MaxCores: toInt32Ptr(int32(cpuData[PolicyFieldClusterLimitsCPUmax].(int))),
+	//				MinCores: toInt32Ptr(int32(cpuData[PolicyFieldClusterLimitsCPUmin].(int))),
+	//			},
+	//		}
+	//	}
+	//}
+	//
+	//var nodeDownscalerPolicy sdk.PoliciesV1NodeDownscaler
+	//for _, val := range pc[PolicyFieldNodeDownscaler].([]interface{}) {
+	//	ndData := val.(map[string]interface{})
+	//	for _, valn := range ndData[PolicyFieldNodeDownscalerEmptyNodes].([]interface{}) {
+	//		ndData := valn.(map[string]interface{})
+	//		nodeDownscalerDelay := int32(ndData[PolicyFieldNodeDownscalerEmptyNodesDelay].(int))
+	//		nodeDownscalerEnabled := ndData[PolicyFieldEnabled].(bool)
+	//		nodeDownscalerPolicy = sdk.PoliciesV1NodeDownscaler{
+	//			EmptyNodes: &sdk.PoliciesV1NodeDownscalerEmptyNodes{
+	//				DelaySeconds: &nodeDownscalerDelay,
+	//				Enabled:      &nodeDownscalerEnabled,
+	//			},
+	//		}
+	//	}
+	//}
+	//
+	//var spotInstancesPolicy sdk.PoliciesV1SpotInstances
+	//for _, val := range pc[PolicyFieldSpotInstances].([]interface{}) {
+	//	siData := val.(map[string]interface{})
+	//
+	//	//clouds := convertStringArr(siData[PolicyFieldSpotInstancesClouds].([]interface{}))
+	//	spotInstancesPolicy = sdk.PoliciesV1SpotInstances{
+	//		Enabled: toBoolPtr(siData[PolicyFieldEnabled].(bool)),
+	//		// Clouds:  &clouds, TODO(anjmao): Fix
+	//	}
+	//}
+	//
+	//var unschedulablePodsPolicy sdk.PoliciesV1UnschedulablePodsPolicy
+	//var headroomPol sdk.PoliciesV1Headroom
+	//var nodeConstraintPol sdk.PoliciesV1NodeConstraints
+	//
+	//for _, val := range pc[PolicyFieldUnschedulablePods].([]interface{}) {
+	//	upData := val.(map[string]interface{})
+	//	for _, valn := range upData[PolicyFieldUnschedulablePodsHeadroom].([]interface{}) {
+	//		hpData := valn.(map[string]interface{})
+	//
+	//		hpEnabled := hpData[PolicyFieldEnabled].(bool)
+	//		headroomPol = sdk.PoliciesV1Headroom{
+	//			Enabled:          &hpEnabled,
+	//			CpuPercentage:    hpData[PolicyFieldUnschedulablePodsHeadroomCPUp].(int),
+	//			MemoryPercentage: hpData[PolicyFieldUnschedulablePodsHeadroomRAMp].(int),
+	//		}
+	//	}
+	//
+	//	for _, valn := range upData[PolicyFieldUnschedulablePodsNodeConstraint].([]interface{}) {
+	//		ncData := valn.(map[string]interface{})
+	//
+	//		nodeConstraintPol = sdk.PoliciesV1NodeConstraints{
+	//			Enabled:     ncData[PolicyFieldEnabled].(bool),
+	//			MaxCpuCores: int32(ncData[PolicyFieldUnschedulablePodsNodeConstraintMaxCPU].(int)),
+	//			MaxRamMib:   int32(ncData[PolicyFieldUnschedulablePodsNodeConstraintMaxRAM].(int)) * 1024,
+	//			MinCpuCores: int32(ncData[PolicyFieldUnschedulablePodsNodeConstraintMinCPU].(int)),
+	//			MinRamMib:   int32(ncData[PolicyFieldUnschedulablePodsNodeConstraintMinRAM].(int)) * 1024,
+	//		}
+	//	}
+	//
+	//	unschedulablePodsPolicy = sdk.PoliciesV1UnschedulablePodsPolicy{
+	//		Enabled:         upData[PolicyFieldEnabled].(bool),
+	//		Headroom:        headroomPol,
+	//		NodeConstraints: &nodeConstraintPol,
+	//	}
+	//}
+	//
+	//autoscalerConfig := sdk.PoliciesAPIUpsertClusterPoliciesJSONBody{
+	//	ClusterLimits:     clusterLimits,
+	//	Enabled:           pc[PolicyFieldEnabled].(bool),
+	//	NodeDownscaler:    &nodeDownscalerPolicy,
+	//	SpotInstances:     spotInstancesPolicy,
+	//	UnschedulablePods: unschedulablePodsPolicy,
+	//}
 
-	//fmt.Printf("update policies %#v", pc)
+	//log.Printf("[DEBUG] Reading autoscaler Policies #{autoscalerConfig}")
+	//return autoscalerConfig
 
-	var clusterLimits sdk.ClusterLimitsPolicy
-	for _, val := range pc[PolicyFieldClusterLimits].([]interface{}) {
-		limitData := val.(map[string]interface{})
-		for _, valn := range limitData[PolicyFieldClusterLimitsCPU].([]interface{}) {
-			cpuData := valn.(map[string]interface{})
-			clusterLimits = sdk.ClusterLimitsPolicy{
-				Enabled: limitData[PolicyFieldEnabled].(bool),
-				Cpu: sdk.ClusterLimitsCpu{
-					MaxCores: int64(cpuData[PolicyFieldClusterLimitsCPUmax].(int)),
-					MinCores: int64(cpuData[PolicyFieldClusterLimitsCPUmin].(int)),
-				},
-			}
-		}
-	}
-
-	var nodeDownscalerPolicy sdk.NodeDownscaler
-	for _, val := range pc[PolicyFieldNodeDownscaler].([]interface{}) {
-		ndData := val.(map[string]interface{})
-		for _, valn := range ndData[PolicyFieldNodeDownscalerEmptyNodes].([]interface{}) {
-			ndData := valn.(map[string]interface{})
-			nodeDownscalerDelay := ndData[PolicyFieldNodeDownscalerEmptyNodesDelay].(int)
-			nodeDownscalerEnabled := ndData[PolicyFieldEnabled].(bool)
-			nodeDownscalerPolicy = sdk.NodeDownscaler{
-				EmptyNodes: &sdk.NodeDownscalerEmptyNodes{
-					DelaySeconds: &nodeDownscalerDelay,
-					Enabled:      &nodeDownscalerEnabled,
-				},
-			}
-		}
-	}
-
-	var spotInstancesPolicy sdk.SpotInstances
-	for _, val := range pc[PolicyFieldSpotInstances].([]interface{}) {
-		siData := val.(map[string]interface{})
-
-		spotInstancesPolicy = sdk.SpotInstances{
-			Enabled: siData[PolicyFieldEnabled].(bool),
-			Clouds:  convertStringArr(siData[PolicyFieldSpotInstancesClouds].([]interface{})),
-		}
-	}
-
-	var unschedulablePodsPolicy sdk.UnschedulablePodsPolicy
-	var headroomPol sdk.Headroom
-	var nodeConstraintPol sdk.NodeConstraints
-
-	for _, val := range pc[PolicyFieldUnschedulablePods].([]interface{}) {
-		upData := val.(map[string]interface{})
-		for _, valn := range upData[PolicyFieldUnschedulablePodsHeadroom].([]interface{}) {
-			hpData := valn.(map[string]interface{})
-
-			hpEnabled := hpData[PolicyFieldEnabled].(bool)
-			headroomPol = sdk.Headroom{
-				Enabled:          &hpEnabled,
-				CpuPercentage:    hpData[PolicyFieldUnschedulablePodsHeadroomCPUp].(int),
-				MemoryPercentage: hpData[PolicyFieldUnschedulablePodsHeadroomRAMp].(int),
-			}
-		}
-
-		for _, valn := range upData[PolicyFieldUnschedulablePodsNodeConstraint].([]interface{}) {
-			ncData := valn.(map[string]interface{})
-
-			nodeConstraintPol = sdk.NodeConstraints{
-				Enabled:     ncData[PolicyFieldEnabled].(bool),
-				MaxCpuCores: int32(ncData[PolicyFieldUnschedulablePodsNodeConstraintMaxCPU].(int)),
-				MaxRamMib:   int32(ncData[PolicyFieldUnschedulablePodsNodeConstraintMaxRAM].(int)) * 1024,
-				MinCpuCores: int32(ncData[PolicyFieldUnschedulablePodsNodeConstraintMinCPU].(int)),
-				MinRamMib:   int32(ncData[PolicyFieldUnschedulablePodsNodeConstraintMinRAM].(int)) * 1024,
-			}
-		}
-
-		unschedulablePodsPolicy = sdk.UnschedulablePodsPolicy{
-			Enabled:         upData[PolicyFieldEnabled].(bool),
-			Headroom:        headroomPol,
-			NodeConstraints: &nodeConstraintPol,
-		}
-	}
-
-	autoscalerConfig := sdk.UpsertPoliciesJSONRequestBody{
-		ClusterLimits:     clusterLimits,
-		Enabled:           pc[PolicyFieldEnabled].(bool),
-		NodeDownscaler:    &nodeDownscalerPolicy,
-		SpotInstances:     spotInstancesPolicy,
-		UnschedulablePods: unschedulablePodsPolicy,
-	}
-
-	log.Printf("[DEBUG] Reading autoscaler Policies #{autoscalerConfig}")
-	return autoscalerConfig
+	return sdk.PoliciesAPIUpsertClusterPoliciesJSONRequestBody{}
 }
 
 func toClusterNetwork(vpnType interface{}) *sdk.Network {
@@ -618,7 +618,7 @@ func updateCluster(ctx context.Context, client *sdk.ClientWithResponses, cluster
 
 func updatePolicies(ctx context.Context, client *sdk.ClientWithResponses, clusterID string, policiesConfig map[string]interface{}) diag.Diagnostics {
 
-	resppol, err := client.UpsertPoliciesWithResponse(ctx, sdk.ClusterId(clusterID), expandAutoscalerPolicies(policiesConfig))
+	resppol, err := client.PoliciesAPIUpsertClusterPoliciesWithResponse(ctx, clusterID, expandAutoscalerPolicies(policiesConfig))
 	if checkErr := sdk.CheckGetResponse(resppol, err); checkErr != nil {
 		return diag.FromErr(checkErr)
 	}

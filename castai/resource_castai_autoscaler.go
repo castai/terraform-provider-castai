@@ -108,7 +108,7 @@ func resourceCastaiAutoscalerUpdate(ctx context.Context, data *schema.ResourceDa
 func getCurrentPolicies(ctx context.Context, client *sdk.ClientWithResponses, clusterId sdk.ClusterId) ([]byte, error) {
 	log.Printf("[INFO] Getting cluster autoscaler information.")
 
-	resp, err := client.GetPolicies(ctx, clusterId)
+	resp, err := client.PoliciesAPIGetClusterPolicies(ctx, string(clusterId))
 	if err != nil {
 		return nil, err
 	} else if resp.StatusCode == http.StatusNotFound {
@@ -156,7 +156,7 @@ func updateAutoscalerPolicies(ctx context.Context, data *schema.ResourceData, me
 func upsertPolicies(ctx context.Context, meta interface{}, clusterId sdk.ClusterId, changedPoliciesJSON string) error {
 	client := meta.(*ProviderConfig).api
 
-	result, err := client.UpsertPoliciesWithBody(ctx, clusterId, "application/json", bytes.NewReader([]byte(changedPoliciesJSON)))
+	result, err := client.PoliciesAPIUpsertClusterPoliciesWithBody(ctx, string(clusterId), "application/json", bytes.NewReader([]byte(changedPoliciesJSON)))
 	if err != nil {
 		log.Printf("[ERROR] Error upserting policies: %v", err)
 		return fmt.Errorf("error updating policies: %v", err)

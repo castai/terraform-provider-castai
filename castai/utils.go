@@ -22,9 +22,17 @@ func toString(s *string) string {
 	return *s
 }
 
+func toInt32Ptr(v int32) *int32 {
+	return &v
+}
+
 func toStringSlice(arr *[]string) []string {
 	if arr == nil {
 		return nil
 	}
 	return *arr
+}
+
+func toBoolPtr(v bool) *bool {
+	return &v
 }
