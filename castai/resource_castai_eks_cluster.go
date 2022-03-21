@@ -26,6 +26,7 @@ const (
 	FieldEKSClusterSecurityGroups          = "security_groups"
 	FieldEKSClusterSubnets                 = "subnets"
 	FieldEKSClusterDNSClusterIP            = "dns_cluster_ip"
+	FieldEKSClusterSSHPublicKey            = "ssh_public_key"
 	FieldEKSClusterTags                    = "tags"
 	FieldEKSClusterAgentToken              = "agent_token"
 	FieldEKSClusterToken                   = "cluster_token"
@@ -115,6 +116,10 @@ func resourceCastaiEKSCluster() *schema.Resource {
 				Type:             schema.TypeString,
 				Optional:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.IsIPv4Address),
+			},
+			FieldEKSClusterSSHPublicKey: {
+				Type:     schema.TypeString,
+				Optional: true,
 			},
 			FieldEKSClusterTags: {
 				Type:     schema.TypeMap,
@@ -206,6 +211,7 @@ func resourceCastaiEKSClusterRead(ctx context.Context, data *schema.ResourceData
 		data.Set(FieldEKSClusterInstanceProfileArn, toString(eks.InstanceProfileArn))
 		data.Set(FieldEKSClusterSubnets, toStringSlice(eks.Subnets))
 		data.Set(FieldEKSClusterDNSClusterIP, toString(eks.DnsClusterIp))
+		data.Set(FieldEKSClusterSSHPublicKey, toString(resp.JSON200.SshPublicKey))
 		data.Set(FieldEKSClusterSecurityGroups, toStringSlice(eks.SecurityGroups))
 		if eks.Tags != nil {
 			data.Set(FieldEKSClusterTags, eks.Tags.AdditionalProperties)
@@ -353,6 +359,10 @@ func updateClusterSettings(ctx context.Context, data *schema.ResourceData, clien
 
 	if s, ok := data.GetOk(FieldEKSClusterDNSClusterIP); ok {
 		req.Eks.DnsClusterIp = toStringPtr(s.(string))
+	}
+
+	if s, ok := data.GetOk(FieldEKSClusterSSHPublicKey); ok {
+		req.SshPublicKey = toStringPtr(s.(string))
 	}
 
 	if tags, ok := data.GetOk(FieldEKSClusterTags); ok {
