@@ -161,12 +161,12 @@ func resourceCastaiEKSClusterCreate(ctx context.Context, data *schema.ResourceDa
 
 	log.Printf("[INFO] Registering new external cluster: %#v", req)
 
-	response, err := client.ExternalClusterAPIRegisterClusterWithResponse(ctx, req)
-	if checkErr := sdk.CheckOKResponse(response, err); checkErr != nil {
+	resp, err := client.ExternalClusterAPIRegisterClusterWithResponse(ctx, req)
+	if checkErr := sdk.CheckOKResponse(resp, err); checkErr != nil {
 		return diag.FromErr(checkErr)
 	}
 
-	clusterID := *response.JSON200.Id
+	clusterID := *resp.JSON200.Id
 	tkn, err := createClusterToken(ctx, client, clusterID)
 	if err != nil {
 		return diag.FromErr(err)
@@ -200,6 +200,10 @@ func resourceCastaiEKSClusterRead(ctx context.Context, data *schema.ResourceData
 		log.Printf("[WARN] Removing cluster %s from state because it no longer exists in CAST.AI", data.Id())
 		data.SetId("")
 		return nil
+	}
+
+	if checkErr := sdk.CheckOKResponse(resp, err); checkErr != nil {
+		return diag.FromErr(checkErr)
 	}
 
 	data.Set(FieldEKSClusterCredentialsId, *resp.JSON200.CredentialsId)
@@ -406,9 +410,9 @@ func createClusterToken(ctx context.Context, client *sdk.ClientWithResponses, cl
 }
 
 func getOptionalBool(data *schema.ResourceData, field string, defaultValue bool) *bool {
-	delete, ok := data.GetOk(field)
+	del, ok := data.GetOk(field)
 	if ok {
-		deleteNodes := delete.(bool)
+		deleteNodes := del.(bool)
 		return &deleteNodes
 	}
 	return &defaultValue

@@ -16,23 +16,21 @@ import (
 	mock_sdk "github.com/castai/terraform-provider-castai/castai/sdk/mock"
 )
 
-func TestEKSClusterResource(t *testing.T) {
+func TestEKSClusterResourceReadContext(t *testing.T) {
+	r := require.New(t)
+	mockctrl := gomock.NewController(t)
+	mockClient := mock_sdk.NewMockClientInterface(mockctrl)
 
-	t.Run("test get existing cluster", func(t *testing.T) {
-		r := require.New(t)
-		mockctrl := gomock.NewController(t)
-		mockClient := mock_sdk.NewMockClientInterface(mockctrl)
+	ctx := context.Background()
+	provider := &ProviderConfig{
+		api: &sdk.ClientWithResponses{
+			ClientInterface: mockClient,
+		},
+	}
 
-		ctx := context.Background()
-		provider := &ProviderConfig{
-			api: &sdk.ClientWithResponses{
-				ClientInterface: mockClient,
-			},
-		}
+	clusterId := "b6bfc074-a267-400f-b8f1-db0850c369b1"
 
-		clusterId := "b6bfc074-a267-400f-b8f1-db0850c369b1"
-
-		body := io.NopCloser(bytes.NewReader([]byte(`{
+	body := io.NopCloser(bytes.NewReader([]byte(`{
   "id": "b6bfc074-a267-400f-b8f1-db0850c369b1",
   "name": "eks-cluster",
   "organizationId": "2836f775-aaaa-eeee-bbbb-3d3c29512692",
@@ -50,73 +48,52 @@ func TestEKSClusterResource(t *testing.T) {
     "clusterName": "eks-cluster",
     "region": "eu-central-1",
     "accountId": "487609000000",
-    "subnets": [],
-    "securityGroups": [],
-    "instanceProfileArn": "",
-    "tags": {},
-    "dnsClusterIp": ""
+    "subnets": ["sub1", "sub2"],
+    "securityGroups": ["sg1"],
+    "instanceProfileArn": "arn",
+    "tags": {"aws":"tag"},
+    "dnsClusterIp": "10.100.100.1"
   },
-  "subnets": [
-    {
-      "id": "subnet-0bbb192080507aa35",
-      "name": "",
-      "zoneName": "eu-central-1a"
-    },
-    {
-      "id": "subnet-01a88dbdefa2d3838",
-      "name": "",
-      "zoneName": "eu-central-1b"
-    },
-    {
-      "id": "subnet-07027d0f432135aac",
-      "name": "",
-      "zoneName": "eu-central-1c"
-    }
-  ],
-  "zones": [
-    {
-      "id": "euc1-az2",
-      "name": "eu-central-1a"
-    },
-    {
-      "id": "euc1-az3",
-      "name": "eu-central-1b"
-    },
-    {
-      "id": "euc1-az1",
-      "name": "eu-central-1c"
-    }
-  ],
+  "sshPublicKey": "key-123",
   "clusterNameId": "eks-cluster-b6bfc074",
-  "private": true,
-  "allRegionZones": [
-    {
-      "id": "euc1-az2",
-      "name": "eu-central-1a"
-    },
-    {
-      "id": "euc1-az3",
-      "name": "eu-central-1b"
-    },
-    {
-      "id": "euc1-az1",
-      "name": "eu-central-1c"
-    }
-  ]
+  "private": true
 }`)))
-		response := &http.Response{StatusCode: 200, Body: body}
-		mockClient.EXPECT().
-			ExternalClusterAPIGetCluster(gomock.Any(), clusterId).
-			Return(response, nil)
+	mockClient.EXPECT().
+		ExternalClusterAPIGetCluster(gomock.Any(), clusterId).
+		Return(&http.Response{StatusCode: 200, Body: body, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
 
-		resource := resourceCastaiEKSCluster()
+	mockClient.EXPECT().
+		GetAgentInstallScript(gomock.Any(), gomock.Any()).
+		Return(
+			&http.Response{StatusCode: 200, Body: io.NopCloser(bytes.NewReader([]byte(`curl -H "Authorization: Token 123`)))},
+			nil)
 
-		val := cty.ObjectVal(map[string]cty.Value{})
-		state := terraform.NewInstanceStateShimmedFromValue(val, 0)
-		state.ID = clusterId
-		data := resource.Data(state)
+	resource := resourceCastaiEKSCluster()
 
-		result := resource.ReadContext(ctx, data, provider)
-		r.Nil(result)
-	})
+	val := cty.ObjectVal(map[string]cty.Value{})
+	state := terraform.NewInstanceStateShimmedFromValue(val, 0)
+	state.ID = clusterId
+
+	data := resource.Data(state)
+	result := resource.ReadContext(ctx, data, provider)
+	r.Nil(result)
+	r.False(result.HasError())
+	r.Equal(`ID = b6bfc074-a267-400f-b8f1-db0850c369b1
+account_id = 487609000000
+agent_token = 123
+credentials_id = 9b8d0456-177b-4a3d-b162-e68030d656aa
+dns_cluster_ip = 10.100.100.1
+instance_profile_arn = arn
+name = eks-cluster
+region = eu-central-1
+security_groups.# = 1
+security_groups.0 = sg1
+ssh_public_key = key-123
+subnets.# = 2
+subnets.0 = sub1
+subnets.1 = sub2
+tags.% = 1
+tags.aws = tag
+Tainted = false
+`, data.State().String())
 }
