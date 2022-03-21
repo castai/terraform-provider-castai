@@ -168,9 +168,9 @@ func TestAutoscalerResource_PoliciesUpdateAction(t *testing.T) {
 
 	policiesUpdated := false
 
-	mockClient.EXPECT().GetPolicies(gomock.Any(), sdk.ClusterId(clusterId), gomock.Any()).Return(response, nil).Times(1)
-	mockClient.EXPECT().UpsertPoliciesWithBody(gomock.Any(), sdk.ClusterId(clusterId), "application/json", gomock.Any()).
-		DoAndReturn(func(ctx context.Context, clusterId sdk.ClusterId, contentType string, body io.Reader) (*http.Response, error) {
+	mockClient.EXPECT().PoliciesAPIGetClusterPolicies(gomock.Any(), clusterId, gomock.Any()).Return(response, nil).Times(1)
+	mockClient.EXPECT().PoliciesAPIUpsertClusterPoliciesWithBody(gomock.Any(), clusterId, "application/json", gomock.Any()).
+		DoAndReturn(func(ctx context.Context, clusterId string, contentType string, body io.Reader) (*http.Response, error) {
 			got, _ := io.ReadAll(body)
 			expected := []byte(updatedPolicies)
 
