@@ -399,7 +399,7 @@ func resourceCastaiClusterRead(ctx context.Context, data *schema.ResourceData, m
 		data.Set(ClusterFieldKubeconfig, []interface{}{})
 	}
 
-	policies, err := client.GetPoliciesWithResponse(ctx, sdk.ClusterId(data.Id()))
+	policies, err := client.PoliciesAPIGetClusterPoliciesWithResponse(ctx, data.Id())
 	if checkErr := sdk.CheckGetResponse(policies, err); checkErr == nil {
 		log.Printf("[INFO] Autoscaling policies for cluster %q", data.Id())
 		data.Set(PolicyFieldAutoscalerPolicies, flattenAutoscalerPolicies(policies.JSON200))
@@ -485,54 +485,52 @@ func waitForClusterToReachStatusFunc(ctx context.Context, client *sdk.ClientWith
 	}
 }
 
-func expandAutoscalerPolicies(pc map[string]interface{}) sdk.UpsertPoliciesJSONRequestBody {
-
-	//fmt.Printf("update policies %#v", pc)
-
-	var clusterLimits sdk.ClusterLimitsPolicy
+func expandAutoscalerPolicies(pc map[string]interface{}) sdk.PoliciesAPIUpsertClusterPoliciesJSONRequestBody {
+	var clusterLimits sdk.PoliciesV1ClusterLimitsPolicy
 	for _, val := range pc[PolicyFieldClusterLimits].([]interface{}) {
 		limitData := val.(map[string]interface{})
 		for _, valn := range limitData[PolicyFieldClusterLimitsCPU].([]interface{}) {
 			cpuData := valn.(map[string]interface{})
-			clusterLimits = sdk.ClusterLimitsPolicy{
-				Enabled: limitData[PolicyFieldEnabled].(bool),
-				Cpu: sdk.ClusterLimitsCpu{
-					MaxCores: int64(cpuData[PolicyFieldClusterLimitsCPUmax].(int)),
-					MinCores: int64(cpuData[PolicyFieldClusterLimitsCPUmin].(int)),
+			clusterLimits = sdk.PoliciesV1ClusterLimitsPolicy{
+				Enabled: toBoolPtr(limitData[PolicyFieldEnabled].(bool)),
+				Cpu: &sdk.PoliciesV1ClusterLimitsCpu{
+					MaxCores: toInt32Ptr(cpuData[PolicyFieldClusterLimitsCPUmax].(int32)),
+					MinCores: toInt32Ptr(cpuData[PolicyFieldClusterLimitsCPUmin].(int32)),
 				},
 			}
 		}
 	}
 
-	var nodeDownscalerPolicy sdk.NodeDownscaler
+	var nodeDownscalerPolicy sdk.PoliciesV1NodeDownscaler
 	for _, val := range pc[PolicyFieldNodeDownscaler].([]interface{}) {
 		ndData := val.(map[string]interface{})
 		for _, valn := range ndData[PolicyFieldNodeDownscalerEmptyNodes].([]interface{}) {
 			ndData := valn.(map[string]interface{})
-			nodeDownscalerDelay := ndData[PolicyFieldNodeDownscalerEmptyNodesDelay].(int)
+			nodeDownscalerDelay := toInt32Ptr(ndData[PolicyFieldNodeDownscalerEmptyNodesDelay].(int32))
 			nodeDownscalerEnabled := ndData[PolicyFieldEnabled].(bool)
-			nodeDownscalerPolicy = sdk.NodeDownscaler{
-				EmptyNodes: &sdk.NodeDownscalerEmptyNodes{
-					DelaySeconds: &nodeDownscalerDelay,
+			nodeDownscalerPolicy = sdk.PoliciesV1NodeDownscaler{
+				EmptyNodes: &sdk.PoliciesV1NodeDownscalerEmptyNodes{
+					DelaySeconds: nodeDownscalerDelay,
 					Enabled:      &nodeDownscalerEnabled,
 				},
 			}
 		}
 	}
 
-	var spotInstancesPolicy sdk.SpotInstances
+	var spotInstancesPolicy sdk.PoliciesV1SpotInstances
 	for _, val := range pc[PolicyFieldSpotInstances].([]interface{}) {
 		siData := val.(map[string]interface{})
 
-		spotInstancesPolicy = sdk.SpotInstances{
-			Enabled: siData[PolicyFieldEnabled].(bool),
-			Clouds:  convertStringArr(siData[PolicyFieldSpotInstancesClouds].([]interface{})),
+		clouds := toCastaiClouds(siData[PolicyFieldSpotInstancesClouds].([]interface{}))
+		spotInstancesPolicy = sdk.PoliciesV1SpotInstances{
+			Enabled: toBoolPtr(siData[PolicyFieldEnabled].(bool)),
+			Clouds:  &clouds,
 		}
 	}
 
-	var unschedulablePodsPolicy sdk.UnschedulablePodsPolicy
-	var headroomPol sdk.Headroom
-	var nodeConstraintPol sdk.NodeConstraints
+	var unschedulablePodsPolicy sdk.PoliciesV1UnschedulablePodsPolicy
+	var headroomPol sdk.PoliciesV1Headroom
+	var nodeConstraintPol sdk.PoliciesV1NodeConstraints
 
 	for _, val := range pc[PolicyFieldUnschedulablePods].([]interface{}) {
 		upData := val.(map[string]interface{})
@@ -540,38 +538,38 @@ func expandAutoscalerPolicies(pc map[string]interface{}) sdk.UpsertPoliciesJSONR
 			hpData := valn.(map[string]interface{})
 
 			hpEnabled := hpData[PolicyFieldEnabled].(bool)
-			headroomPol = sdk.Headroom{
+			headroomPol = sdk.PoliciesV1Headroom{
 				Enabled:          &hpEnabled,
-				CpuPercentage:    hpData[PolicyFieldUnschedulablePodsHeadroomCPUp].(int),
-				MemoryPercentage: hpData[PolicyFieldUnschedulablePodsHeadroomRAMp].(int),
+				CpuPercentage:    toInt32Ptr(hpData[PolicyFieldUnschedulablePodsHeadroomCPUp].(int32)),
+				MemoryPercentage: toInt32Ptr(hpData[PolicyFieldUnschedulablePodsHeadroomRAMp].(int32)),
 			}
 		}
 
 		for _, valn := range upData[PolicyFieldUnschedulablePodsNodeConstraint].([]interface{}) {
 			ncData := valn.(map[string]interface{})
 
-			nodeConstraintPol = sdk.NodeConstraints{
-				Enabled:     ncData[PolicyFieldEnabled].(bool),
-				MaxCpuCores: int32(ncData[PolicyFieldUnschedulablePodsNodeConstraintMaxCPU].(int)),
-				MaxRamMib:   int32(ncData[PolicyFieldUnschedulablePodsNodeConstraintMaxRAM].(int)) * 1024,
-				MinCpuCores: int32(ncData[PolicyFieldUnschedulablePodsNodeConstraintMinCPU].(int)),
-				MinRamMib:   int32(ncData[PolicyFieldUnschedulablePodsNodeConstraintMinRAM].(int)) * 1024,
+			nodeConstraintPol = sdk.PoliciesV1NodeConstraints{
+				Enabled:     toBoolPtr(ncData[PolicyFieldEnabled].(bool)),
+				MaxCpuCores: toInt32Ptr(ncData[PolicyFieldUnschedulablePodsNodeConstraintMaxCPU].(int32)),
+				MaxRamMib:   toInt32Ptr(ncData[PolicyFieldUnschedulablePodsNodeConstraintMaxRAM].(int32) * 1024),
+				MinCpuCores: toInt32Ptr(ncData[PolicyFieldUnschedulablePodsNodeConstraintMinCPU].(int32)),
+				MinRamMib:   toInt32Ptr(ncData[PolicyFieldUnschedulablePodsNodeConstraintMinRAM].(int32) * 1024),
 			}
 		}
 
-		unschedulablePodsPolicy = sdk.UnschedulablePodsPolicy{
-			Enabled:         upData[PolicyFieldEnabled].(bool),
-			Headroom:        headroomPol,
+		unschedulablePodsPolicy = sdk.PoliciesV1UnschedulablePodsPolicy{
+			Enabled:         toBoolPtr(upData[PolicyFieldEnabled].(bool)),
+			Headroom:        &headroomPol,
 			NodeConstraints: &nodeConstraintPol,
 		}
 	}
 
-	autoscalerConfig := sdk.UpsertPoliciesJSONRequestBody{
-		ClusterLimits:     clusterLimits,
-		Enabled:           pc[PolicyFieldEnabled].(bool),
+	autoscalerConfig := sdk.PoliciesAPIUpsertClusterPoliciesJSONRequestBody{
+		ClusterLimits:     &clusterLimits,
+		Enabled:           toBoolPtr(pc[PolicyFieldEnabled].(bool)),
 		NodeDownscaler:    &nodeDownscalerPolicy,
-		SpotInstances:     spotInstancesPolicy,
-		UnschedulablePods: unschedulablePodsPolicy,
+		SpotInstances:     &spotInstancesPolicy,
+		UnschedulablePods: &unschedulablePodsPolicy,
 	}
 
 	log.Printf("[DEBUG] Reading autoscaler Policies #{autoscalerConfig}")
@@ -618,7 +616,7 @@ func updateCluster(ctx context.Context, client *sdk.ClientWithResponses, cluster
 
 func updatePolicies(ctx context.Context, client *sdk.ClientWithResponses, clusterID string, policiesConfig map[string]interface{}) diag.Diagnostics {
 
-	resppol, err := client.UpsertPoliciesWithResponse(ctx, sdk.ClusterId(clusterID), expandAutoscalerPolicies(policiesConfig))
+	resppol, err := client.PoliciesAPIUpsertClusterPoliciesWithResponse(ctx, clusterID, expandAutoscalerPolicies(policiesConfig))
 	if checkErr := sdk.CheckGetResponse(resppol, err); checkErr != nil {
 		return diag.FromErr(checkErr)
 	}

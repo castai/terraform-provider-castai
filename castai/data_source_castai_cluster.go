@@ -252,7 +252,7 @@ func dataSourceCastaiClusterRead(ctx context.Context, data *schema.ResourceData,
 		data.Set(ClusterFieldKubeconfig, []interface{}{})
 	}
 
-	policies, err := client.GetPoliciesWithResponse(ctx, sdk.ClusterId(data.Id()))
+	policies, err := client.PoliciesAPIGetClusterPoliciesWithResponse(ctx, data.Id())
 	if checkErr := sdk.CheckGetResponse(policies, err); checkErr == nil {
 		log.Printf("[INFO] Autoscaling policies for cluster %q", data.Id())
 		data.Set(PolicyFieldAutoscalerPolicies, flattenAutoscalerPolicies(policies.JSON200))
@@ -263,17 +263,17 @@ func dataSourceCastaiClusterRead(ctx context.Context, data *schema.ResourceData,
 	return nil
 }
 
-func flattenAutoscalerPolicies(readPol *sdk.PoliciesConfig) []map[string]interface{} {
+func flattenAutoscalerPolicies(readPol *sdk.PoliciesV1Policies) []map[string]interface{} {
 	return []map[string]interface{}{
 		{
-			PolicyFieldEnabled: readPol.Enabled,
+			PolicyFieldEnabled: toBool(readPol.Enabled),
 			PolicyFieldClusterLimits: []map[string]interface{}{
 				{
-					PolicyFieldEnabled: readPol.ClusterLimits.Enabled,
+					PolicyFieldEnabled: toBool(readPol.ClusterLimits.Enabled),
 					PolicyFieldClusterLimitsCPU: []map[string]interface{}{
 						{
-							PolicyFieldClusterLimitsCPUmax: readPol.ClusterLimits.Cpu.MaxCores,
-							PolicyFieldClusterLimitsCPUmin: readPol.ClusterLimits.Cpu.MinCores,
+							PolicyFieldClusterLimitsCPUmax: toInt32(readPol.ClusterLimits.Cpu.MaxCores),
+							PolicyFieldClusterLimitsCPUmin: toInt32(readPol.ClusterLimits.Cpu.MinCores),
 						},
 					},
 				},
@@ -282,35 +282,35 @@ func flattenAutoscalerPolicies(readPol *sdk.PoliciesConfig) []map[string]interfa
 				{
 					PolicyFieldNodeDownscalerEmptyNodes: []map[string]interface{}{
 						{
-							PolicyFieldEnabled:                       readPol.NodeDownscaler.EmptyNodes.Enabled,
-							PolicyFieldNodeDownscalerEmptyNodesDelay: readPol.NodeDownscaler.EmptyNodes.DelaySeconds,
+							PolicyFieldEnabled:                       toBool(readPol.NodeDownscaler.EmptyNodes.Enabled),
+							PolicyFieldNodeDownscalerEmptyNodesDelay: toInt32(readPol.NodeDownscaler.EmptyNodes.DelaySeconds),
 						},
 					},
 				},
 			},
 			PolicyFieldSpotInstances: []map[string]interface{}{
 				{
-					PolicyFieldEnabled:             readPol.SpotInstances.Enabled,
-					PolicyFieldSpotInstancesClouds: readPol.SpotInstances.Clouds,
+					PolicyFieldEnabled:             toBool(readPol.SpotInstances.Enabled),
+					PolicyFieldSpotInstancesClouds: toCloudsStringSlice(readPol.SpotInstances.Clouds),
 				},
 			},
 			PolicyFieldUnschedulablePods: []map[string]interface{}{
 				{
-					PolicyFieldEnabled: readPol.UnschedulablePods.Enabled,
+					PolicyFieldEnabled: toBool(readPol.UnschedulablePods.Enabled),
 					PolicyFieldUnschedulablePodsHeadroom: []map[string]interface{}{
 						{
-							PolicyFieldEnabled:                       readPol.UnschedulablePods.Headroom.Enabled,
-							PolicyFieldUnschedulablePodsHeadroomCPUp: readPol.UnschedulablePods.Headroom.CpuPercentage,
-							PolicyFieldUnschedulablePodsHeadroomRAMp: readPol.UnschedulablePods.Headroom.MemoryPercentage,
+							PolicyFieldEnabled:                       toBool(readPol.UnschedulablePods.Headroom.Enabled),
+							PolicyFieldUnschedulablePodsHeadroomCPUp: toInt32(readPol.UnschedulablePods.Headroom.CpuPercentage),
+							PolicyFieldUnschedulablePodsHeadroomRAMp: toInt32(readPol.UnschedulablePods.Headroom.MemoryPercentage),
 						},
 					},
 					PolicyFieldUnschedulablePodsNodeConstraint: []map[string]interface{}{
 						{
-							PolicyFieldEnabled: readPol.UnschedulablePods.NodeConstraints.Enabled,
-							PolicyFieldUnschedulablePodsNodeConstraintMaxCPU: readPol.UnschedulablePods.NodeConstraints.MaxCpuCores,
-							PolicyFieldUnschedulablePodsNodeConstraintMaxRAM: readPol.UnschedulablePods.NodeConstraints.MaxRamMib / 1024.0,
-							PolicyFieldUnschedulablePodsNodeConstraintMinCPU: readPol.UnschedulablePods.NodeConstraints.MinCpuCores,
-							PolicyFieldUnschedulablePodsNodeConstraintMinRAM: readPol.UnschedulablePods.NodeConstraints.MinRamMib / 1024.0,
+							PolicyFieldEnabled: toBool(readPol.UnschedulablePods.NodeConstraints.Enabled),
+							PolicyFieldUnschedulablePodsNodeConstraintMaxCPU: toInt32(readPol.UnschedulablePods.NodeConstraints.MaxCpuCores),
+							PolicyFieldUnschedulablePodsNodeConstraintMaxRAM: toInt32(readPol.UnschedulablePods.NodeConstraints.MaxRamMib) / 1024.0,
+							PolicyFieldUnschedulablePodsNodeConstraintMinCPU: toInt32(readPol.UnschedulablePods.NodeConstraints.MinCpuCores),
+							PolicyFieldUnschedulablePodsNodeConstraintMinRAM: toInt32(readPol.UnschedulablePods.NodeConstraints.MinRamMib) / 1024.0,
 						},
 					},
 				},
