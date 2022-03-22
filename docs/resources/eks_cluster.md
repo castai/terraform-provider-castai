@@ -29,6 +29,7 @@ The following arguments are optional:
 - **security_groups** (List of String) - Optional custom security groups for the cluster. If not set security groups from the EKS cluster configuration are used.
 - **subnets** (List of String) - Optional custom subnets for the cluster. If not set subnets from the EKS cluster configuration are used.
 - **dns_cluster_ip** (String) - Overrides the IP address to use for DNS queries within the cluster. Defaults to 10.100.0.10 or 172.20.0.10 based on the IP address of the primary interface..
+- **ssh_public_key** (String) - Accepted values are base64 encoded SSH public key or AWS key pair ID.
 
 ### Attribute Reference
 

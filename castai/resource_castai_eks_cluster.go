@@ -26,6 +26,7 @@ const (
 	FieldEKSClusterSecurityGroups          = "security_groups"
 	FieldEKSClusterSubnets                 = "subnets"
 	FieldEKSClusterDNSClusterIP            = "dns_cluster_ip"
+	FieldEKSClusterSSHPublicKey            = "ssh_public_key"
 	FieldEKSClusterTags                    = "tags"
 	FieldEKSClusterAgentToken              = "agent_token"
 	FieldEKSClusterToken                   = "cluster_token"
@@ -116,6 +117,10 @@ func resourceCastaiEKSCluster() *schema.Resource {
 				Optional:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.IsIPv4Address),
 			},
+			FieldEKSClusterSSHPublicKey: {
+				Type:     schema.TypeString,
+				Optional: true,
+			},
 			FieldEKSClusterTags: {
 				Type:     schema.TypeMap,
 				Optional: true,
@@ -156,12 +161,12 @@ func resourceCastaiEKSClusterCreate(ctx context.Context, data *schema.ResourceDa
 
 	log.Printf("[INFO] Registering new external cluster: %#v", req)
 
-	response, err := client.ExternalClusterAPIRegisterClusterWithResponse(ctx, req)
-	if checkErr := sdk.CheckOKResponse(response, err); checkErr != nil {
+	resp, err := client.ExternalClusterAPIRegisterClusterWithResponse(ctx, req)
+	if checkErr := sdk.CheckOKResponse(resp, err); checkErr != nil {
 		return diag.FromErr(checkErr)
 	}
 
-	clusterID := *response.JSON200.Id
+	clusterID := *resp.JSON200.Id
 	tkn, err := createClusterToken(ctx, client, clusterID)
 	if err != nil {
 		return diag.FromErr(err)
@@ -197,6 +202,10 @@ func resourceCastaiEKSClusterRead(ctx context.Context, data *schema.ResourceData
 		return nil
 	}
 
+	if checkErr := sdk.CheckOKResponse(resp, err); checkErr != nil {
+		return diag.FromErr(checkErr)
+	}
+
 	data.Set(FieldEKSClusterCredentialsId, *resp.JSON200.CredentialsId)
 
 	if eks := resp.JSON200.Eks; eks != nil {
@@ -206,6 +215,7 @@ func resourceCastaiEKSClusterRead(ctx context.Context, data *schema.ResourceData
 		data.Set(FieldEKSClusterInstanceProfileArn, toString(eks.InstanceProfileArn))
 		data.Set(FieldEKSClusterSubnets, toStringSlice(eks.Subnets))
 		data.Set(FieldEKSClusterDNSClusterIP, toString(eks.DnsClusterIp))
+		data.Set(FieldEKSClusterSSHPublicKey, toString(resp.JSON200.SshPublicKey))
 		data.Set(FieldEKSClusterSecurityGroups, toStringSlice(eks.SecurityGroups))
 		if eks.Tags != nil {
 			data.Set(FieldEKSClusterTags, eks.Tags.AdditionalProperties)
@@ -355,6 +365,10 @@ func updateClusterSettings(ctx context.Context, data *schema.ResourceData, clien
 		req.Eks.DnsClusterIp = toStringPtr(s.(string))
 	}
 
+	if s, ok := data.GetOk(FieldEKSClusterSSHPublicKey); ok {
+		req.SshPublicKey = toStringPtr(s.(string))
+	}
+
 	if tags, ok := data.GetOk(FieldEKSClusterTags); ok {
 		tagsRaw := tags.(map[string]interface{})
 		tagsString := make(map[string]string, len(tagsRaw))
@@ -396,9 +410,9 @@ func createClusterToken(ctx context.Context, client *sdk.ClientWithResponses, cl
 }
 
 func getOptionalBool(data *schema.ResourceData, field string, defaultValue bool) *bool {
-	delete, ok := data.GetOk(field)
+	del, ok := data.GetOk(field)
 	if ok {
-		deleteNodes := delete.(bool)
+		deleteNodes := del.(bool)
 		return &deleteNodes
 	}
 	return &defaultValue

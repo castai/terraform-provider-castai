@@ -494,26 +494,6 @@ func (mr *MockClientInterfaceMockRecorder) CreateOrUpdateGslb(ctx, body interfac
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateOrUpdateGslb", reflect.TypeOf((*MockClientInterface)(nil).CreateOrUpdateGslb), varargs...)
 }
 
-// GetInstanceTypes mocks base method
-func (m *MockClientInterface) GetInstanceTypes(ctx context.Context, params *sdk.GetInstanceTypesParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
-	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, params}
-	for _, a := range reqEditors {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "GetInstanceTypes", varargs...)
-	ret0, _ := ret[0].(*http.Response)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetInstanceTypes indicates an expected call of GetInstanceTypes
-func (mr *MockClientInterfaceMockRecorder) GetInstanceTypes(ctx, params interface{}, reqEditors ...interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, params}, reqEditors...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetInstanceTypes", reflect.TypeOf((*MockClientInterface)(nil).GetInstanceTypes), varargs...)
-}
-
 // CreateInvitationWithBody mocks base method
 func (m *MockClientInterface) CreateInvitationWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
@@ -1314,24 +1294,24 @@ func (mr *MockClientInterfaceMockRecorder) GetClusterMetricsMemoryUsage(ctx, clu
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetClusterMetricsMemoryUsage", reflect.TypeOf((*MockClientInterface)(nil).GetClusterMetricsMemoryUsage), varargs...)
 }
 
-// GetNodeConstraints mocks base method
-func (m *MockClientInterface) GetNodeConstraints(ctx context.Context, clusterId sdk.ClusterId, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+// PoliciesAPIGetClusterNodeConstraints mocks base method
+func (m *MockClientInterface) PoliciesAPIGetClusterNodeConstraints(ctx context.Context, clusterId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{ctx, clusterId}
 	for _, a := range reqEditors {
 		varargs = append(varargs, a)
 	}
-	ret := m.ctrl.Call(m, "GetNodeConstraints", varargs...)
+	ret := m.ctrl.Call(m, "PoliciesAPIGetClusterNodeConstraints", varargs...)
 	ret0, _ := ret[0].(*http.Response)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// GetNodeConstraints indicates an expected call of GetNodeConstraints
-func (mr *MockClientInterfaceMockRecorder) GetNodeConstraints(ctx, clusterId interface{}, reqEditors ...interface{}) *gomock.Call {
+// PoliciesAPIGetClusterNodeConstraints indicates an expected call of PoliciesAPIGetClusterNodeConstraints
+func (mr *MockClientInterfaceMockRecorder) PoliciesAPIGetClusterNodeConstraints(ctx, clusterId interface{}, reqEditors ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{ctx, clusterId}, reqEditors...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetNodeConstraints", reflect.TypeOf((*MockClientInterface)(nil).GetNodeConstraints), varargs...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PoliciesAPIGetClusterNodeConstraints", reflect.TypeOf((*MockClientInterface)(nil).PoliciesAPIGetClusterNodeConstraints), varargs...)
 }
 
 // GetClusterNodes mocks base method
@@ -1694,64 +1674,64 @@ func (mr *MockClientInterfaceMockRecorder) SetClusterPauseSchedule(ctx, clusterI
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetClusterPauseSchedule", reflect.TypeOf((*MockClientInterface)(nil).SetClusterPauseSchedule), varargs...)
 }
 
-// GetPolicies mocks base method
-func (m *MockClientInterface) GetPolicies(ctx context.Context, clusterId sdk.ClusterId, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+// PoliciesAPIGetClusterPolicies mocks base method
+func (m *MockClientInterface) PoliciesAPIGetClusterPolicies(ctx context.Context, clusterId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{ctx, clusterId}
 	for _, a := range reqEditors {
 		varargs = append(varargs, a)
 	}
-	ret := m.ctrl.Call(m, "GetPolicies", varargs...)
+	ret := m.ctrl.Call(m, "PoliciesAPIGetClusterPolicies", varargs...)
 	ret0, _ := ret[0].(*http.Response)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// GetPolicies indicates an expected call of GetPolicies
-func (mr *MockClientInterfaceMockRecorder) GetPolicies(ctx, clusterId interface{}, reqEditors ...interface{}) *gomock.Call {
+// PoliciesAPIGetClusterPolicies indicates an expected call of PoliciesAPIGetClusterPolicies
+func (mr *MockClientInterfaceMockRecorder) PoliciesAPIGetClusterPolicies(ctx, clusterId interface{}, reqEditors ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{ctx, clusterId}, reqEditors...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPolicies", reflect.TypeOf((*MockClientInterface)(nil).GetPolicies), varargs...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PoliciesAPIGetClusterPolicies", reflect.TypeOf((*MockClientInterface)(nil).PoliciesAPIGetClusterPolicies), varargs...)
 }
 
-// UpsertPoliciesWithBody mocks base method
-func (m *MockClientInterface) UpsertPoliciesWithBody(ctx context.Context, clusterId sdk.ClusterId, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+// PoliciesAPIUpsertClusterPoliciesWithBody mocks base method
+func (m *MockClientInterface) PoliciesAPIUpsertClusterPoliciesWithBody(ctx context.Context, clusterId, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{ctx, clusterId, contentType, body}
 	for _, a := range reqEditors {
 		varargs = append(varargs, a)
 	}
-	ret := m.ctrl.Call(m, "UpsertPoliciesWithBody", varargs...)
+	ret := m.ctrl.Call(m, "PoliciesAPIUpsertClusterPoliciesWithBody", varargs...)
 	ret0, _ := ret[0].(*http.Response)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// UpsertPoliciesWithBody indicates an expected call of UpsertPoliciesWithBody
-func (mr *MockClientInterfaceMockRecorder) UpsertPoliciesWithBody(ctx, clusterId, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+// PoliciesAPIUpsertClusterPoliciesWithBody indicates an expected call of PoliciesAPIUpsertClusterPoliciesWithBody
+func (mr *MockClientInterfaceMockRecorder) PoliciesAPIUpsertClusterPoliciesWithBody(ctx, clusterId, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{ctx, clusterId, contentType, body}, reqEditors...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpsertPoliciesWithBody", reflect.TypeOf((*MockClientInterface)(nil).UpsertPoliciesWithBody), varargs...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PoliciesAPIUpsertClusterPoliciesWithBody", reflect.TypeOf((*MockClientInterface)(nil).PoliciesAPIUpsertClusterPoliciesWithBody), varargs...)
 }
 
-// UpsertPolicies mocks base method
-func (m *MockClientInterface) UpsertPolicies(ctx context.Context, clusterId sdk.ClusterId, body sdk.UpsertPoliciesJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+// PoliciesAPIUpsertClusterPolicies mocks base method
+func (m *MockClientInterface) PoliciesAPIUpsertClusterPolicies(ctx context.Context, clusterId string, body sdk.PoliciesAPIUpsertClusterPoliciesJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{ctx, clusterId, body}
 	for _, a := range reqEditors {
 		varargs = append(varargs, a)
 	}
-	ret := m.ctrl.Call(m, "UpsertPolicies", varargs...)
+	ret := m.ctrl.Call(m, "PoliciesAPIUpsertClusterPolicies", varargs...)
 	ret0, _ := ret[0].(*http.Response)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// UpsertPolicies indicates an expected call of UpsertPolicies
-func (mr *MockClientInterfaceMockRecorder) UpsertPolicies(ctx, clusterId, body interface{}, reqEditors ...interface{}) *gomock.Call {
+// PoliciesAPIUpsertClusterPolicies indicates an expected call of PoliciesAPIUpsertClusterPolicies
+func (mr *MockClientInterfaceMockRecorder) PoliciesAPIUpsertClusterPolicies(ctx, clusterId, body interface{}, reqEditors ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{ctx, clusterId, body}, reqEditors...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpsertPolicies", reflect.TypeOf((*MockClientInterface)(nil).UpsertPolicies), varargs...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PoliciesAPIUpsertClusterPolicies", reflect.TypeOf((*MockClientInterface)(nil).PoliciesAPIUpsertClusterPolicies), varargs...)
 }
 
 // GetProblematicWorkloads mocks base method
@@ -2232,6 +2212,46 @@ func (mr *MockClientInterfaceMockRecorder) GetEstimatedSavings(ctx, clusterId in
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{ctx, clusterId}, reqEditors...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetEstimatedSavings", reflect.TypeOf((*MockClientInterface)(nil).GetEstimatedSavings), varargs...)
+}
+
+// ExternalClusterAPIHandleCloudEventWithBody mocks base method
+func (m *MockClientInterface) ExternalClusterAPIHandleCloudEventWithBody(ctx context.Context, clusterId, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ExternalClusterAPIHandleCloudEventWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExternalClusterAPIHandleCloudEventWithBody indicates an expected call of ExternalClusterAPIHandleCloudEventWithBody
+func (mr *MockClientInterfaceMockRecorder) ExternalClusterAPIHandleCloudEventWithBody(ctx, clusterId, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIHandleCloudEventWithBody", reflect.TypeOf((*MockClientInterface)(nil).ExternalClusterAPIHandleCloudEventWithBody), varargs...)
+}
+
+// ExternalClusterAPIHandleCloudEvent mocks base method
+func (m *MockClientInterface) ExternalClusterAPIHandleCloudEvent(ctx context.Context, clusterId string, body sdk.ExternalClusterAPIHandleCloudEventJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ExternalClusterAPIHandleCloudEvent", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExternalClusterAPIHandleCloudEvent indicates an expected call of ExternalClusterAPIHandleCloudEvent
+func (mr *MockClientInterfaceMockRecorder) ExternalClusterAPIHandleCloudEvent(ctx, clusterId, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIHandleCloudEvent", reflect.TypeOf((*MockClientInterface)(nil).ExternalClusterAPIHandleCloudEvent), varargs...)
 }
 
 // ExternalClusterAPIGetKubeconfig mocks base method
@@ -3232,21 +3252,6 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) CreateOrUpdateGslbWithRe
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateOrUpdateGslbWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).CreateOrUpdateGslbWithResponse), ctx, body)
 }
 
-// GetInstanceTypesWithResponse mocks base method
-func (m *MockClientWithResponsesInterface) GetInstanceTypesWithResponse(ctx context.Context, params *sdk.GetInstanceTypesParams) (*sdk.GetInstanceTypesResponse, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetInstanceTypesWithResponse", ctx, params)
-	ret0, _ := ret[0].(*sdk.GetInstanceTypesResponse)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetInstanceTypesWithResponse indicates an expected call of GetInstanceTypesWithResponse
-func (mr *MockClientWithResponsesInterfaceMockRecorder) GetInstanceTypesWithResponse(ctx, params interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetInstanceTypesWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).GetInstanceTypesWithResponse), ctx, params)
-}
-
 // CreateInvitationWithBodyWithResponse mocks base method
 func (m *MockClientWithResponsesInterface) CreateInvitationWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*sdk.CreateInvitationResponse, error) {
 	m.ctrl.T.Helper()
@@ -3847,19 +3852,19 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) GetClusterMetricsMemoryU
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetClusterMetricsMemoryUsageWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).GetClusterMetricsMemoryUsageWithResponse), ctx, clusterId, params)
 }
 
-// GetNodeConstraintsWithResponse mocks base method
-func (m *MockClientWithResponsesInterface) GetNodeConstraintsWithResponse(ctx context.Context, clusterId sdk.ClusterId) (*sdk.GetNodeConstraintsResponse, error) {
+// PoliciesAPIGetClusterNodeConstraintsWithResponse mocks base method
+func (m *MockClientWithResponsesInterface) PoliciesAPIGetClusterNodeConstraintsWithResponse(ctx context.Context, clusterId string) (*sdk.PoliciesAPIGetClusterNodeConstraintsResponse, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetNodeConstraintsWithResponse", ctx, clusterId)
-	ret0, _ := ret[0].(*sdk.GetNodeConstraintsResponse)
+	ret := m.ctrl.Call(m, "PoliciesAPIGetClusterNodeConstraintsWithResponse", ctx, clusterId)
+	ret0, _ := ret[0].(*sdk.PoliciesAPIGetClusterNodeConstraintsResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// GetNodeConstraintsWithResponse indicates an expected call of GetNodeConstraintsWithResponse
-func (mr *MockClientWithResponsesInterfaceMockRecorder) GetNodeConstraintsWithResponse(ctx, clusterId interface{}) *gomock.Call {
+// PoliciesAPIGetClusterNodeConstraintsWithResponse indicates an expected call of PoliciesAPIGetClusterNodeConstraintsWithResponse
+func (mr *MockClientWithResponsesInterfaceMockRecorder) PoliciesAPIGetClusterNodeConstraintsWithResponse(ctx, clusterId interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetNodeConstraintsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).GetNodeConstraintsWithResponse), ctx, clusterId)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PoliciesAPIGetClusterNodeConstraintsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).PoliciesAPIGetClusterNodeConstraintsWithResponse), ctx, clusterId)
 }
 
 // GetClusterNodesWithResponse mocks base method
@@ -4132,49 +4137,49 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) SetClusterPauseScheduleW
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetClusterPauseScheduleWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).SetClusterPauseScheduleWithResponse), ctx, clusterId, body)
 }
 
-// GetPoliciesWithResponse mocks base method
-func (m *MockClientWithResponsesInterface) GetPoliciesWithResponse(ctx context.Context, clusterId sdk.ClusterId) (*sdk.GetPoliciesResponse, error) {
+// PoliciesAPIGetClusterPoliciesWithResponse mocks base method
+func (m *MockClientWithResponsesInterface) PoliciesAPIGetClusterPoliciesWithResponse(ctx context.Context, clusterId string) (*sdk.PoliciesAPIGetClusterPoliciesResponse, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetPoliciesWithResponse", ctx, clusterId)
-	ret0, _ := ret[0].(*sdk.GetPoliciesResponse)
+	ret := m.ctrl.Call(m, "PoliciesAPIGetClusterPoliciesWithResponse", ctx, clusterId)
+	ret0, _ := ret[0].(*sdk.PoliciesAPIGetClusterPoliciesResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// GetPoliciesWithResponse indicates an expected call of GetPoliciesWithResponse
-func (mr *MockClientWithResponsesInterfaceMockRecorder) GetPoliciesWithResponse(ctx, clusterId interface{}) *gomock.Call {
+// PoliciesAPIGetClusterPoliciesWithResponse indicates an expected call of PoliciesAPIGetClusterPoliciesWithResponse
+func (mr *MockClientWithResponsesInterfaceMockRecorder) PoliciesAPIGetClusterPoliciesWithResponse(ctx, clusterId interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPoliciesWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).GetPoliciesWithResponse), ctx, clusterId)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PoliciesAPIGetClusterPoliciesWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).PoliciesAPIGetClusterPoliciesWithResponse), ctx, clusterId)
 }
 
-// UpsertPoliciesWithBodyWithResponse mocks base method
-func (m *MockClientWithResponsesInterface) UpsertPoliciesWithBodyWithResponse(ctx context.Context, clusterId sdk.ClusterId, contentType string, body io.Reader) (*sdk.UpsertPoliciesResponse, error) {
+// PoliciesAPIUpsertClusterPoliciesWithBodyWithResponse mocks base method
+func (m *MockClientWithResponsesInterface) PoliciesAPIUpsertClusterPoliciesWithBodyWithResponse(ctx context.Context, clusterId, contentType string, body io.Reader) (*sdk.PoliciesAPIUpsertClusterPoliciesResponse, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpsertPoliciesWithBodyWithResponse", ctx, clusterId, contentType, body)
-	ret0, _ := ret[0].(*sdk.UpsertPoliciesResponse)
+	ret := m.ctrl.Call(m, "PoliciesAPIUpsertClusterPoliciesWithBodyWithResponse", ctx, clusterId, contentType, body)
+	ret0, _ := ret[0].(*sdk.PoliciesAPIUpsertClusterPoliciesResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// UpsertPoliciesWithBodyWithResponse indicates an expected call of UpsertPoliciesWithBodyWithResponse
-func (mr *MockClientWithResponsesInterfaceMockRecorder) UpsertPoliciesWithBodyWithResponse(ctx, clusterId, contentType, body interface{}) *gomock.Call {
+// PoliciesAPIUpsertClusterPoliciesWithBodyWithResponse indicates an expected call of PoliciesAPIUpsertClusterPoliciesWithBodyWithResponse
+func (mr *MockClientWithResponsesInterfaceMockRecorder) PoliciesAPIUpsertClusterPoliciesWithBodyWithResponse(ctx, clusterId, contentType, body interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpsertPoliciesWithBodyWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).UpsertPoliciesWithBodyWithResponse), ctx, clusterId, contentType, body)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PoliciesAPIUpsertClusterPoliciesWithBodyWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).PoliciesAPIUpsertClusterPoliciesWithBodyWithResponse), ctx, clusterId, contentType, body)
 }
 
-// UpsertPoliciesWithResponse mocks base method
-func (m *MockClientWithResponsesInterface) UpsertPoliciesWithResponse(ctx context.Context, clusterId sdk.ClusterId, body sdk.UpsertPoliciesJSONRequestBody) (*sdk.UpsertPoliciesResponse, error) {
+// PoliciesAPIUpsertClusterPoliciesWithResponse mocks base method
+func (m *MockClientWithResponsesInterface) PoliciesAPIUpsertClusterPoliciesWithResponse(ctx context.Context, clusterId string, body sdk.PoliciesAPIUpsertClusterPoliciesJSONRequestBody) (*sdk.PoliciesAPIUpsertClusterPoliciesResponse, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpsertPoliciesWithResponse", ctx, clusterId, body)
-	ret0, _ := ret[0].(*sdk.UpsertPoliciesResponse)
+	ret := m.ctrl.Call(m, "PoliciesAPIUpsertClusterPoliciesWithResponse", ctx, clusterId, body)
+	ret0, _ := ret[0].(*sdk.PoliciesAPIUpsertClusterPoliciesResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// UpsertPoliciesWithResponse indicates an expected call of UpsertPoliciesWithResponse
-func (mr *MockClientWithResponsesInterfaceMockRecorder) UpsertPoliciesWithResponse(ctx, clusterId, body interface{}) *gomock.Call {
+// PoliciesAPIUpsertClusterPoliciesWithResponse indicates an expected call of PoliciesAPIUpsertClusterPoliciesWithResponse
+func (mr *MockClientWithResponsesInterfaceMockRecorder) PoliciesAPIUpsertClusterPoliciesWithResponse(ctx, clusterId, body interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpsertPoliciesWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).UpsertPoliciesWithResponse), ctx, clusterId, body)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PoliciesAPIUpsertClusterPoliciesWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).PoliciesAPIUpsertClusterPoliciesWithResponse), ctx, clusterId, body)
 }
 
 // GetProblematicWorkloadsWithResponse mocks base method
@@ -4535,6 +4540,36 @@ func (m *MockClientWithResponsesInterface) GetEstimatedSavingsWithResponse(ctx c
 func (mr *MockClientWithResponsesInterfaceMockRecorder) GetEstimatedSavingsWithResponse(ctx, clusterId interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetEstimatedSavingsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).GetEstimatedSavingsWithResponse), ctx, clusterId)
+}
+
+// ExternalClusterAPIHandleCloudEventWithBodyWithResponse mocks base method
+func (m *MockClientWithResponsesInterface) ExternalClusterAPIHandleCloudEventWithBodyWithResponse(ctx context.Context, clusterId, contentType string, body io.Reader) (*sdk.ExternalClusterAPIHandleCloudEventResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ExternalClusterAPIHandleCloudEventWithBodyWithResponse", ctx, clusterId, contentType, body)
+	ret0, _ := ret[0].(*sdk.ExternalClusterAPIHandleCloudEventResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExternalClusterAPIHandleCloudEventWithBodyWithResponse indicates an expected call of ExternalClusterAPIHandleCloudEventWithBodyWithResponse
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIHandleCloudEventWithBodyWithResponse(ctx, clusterId, contentType, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIHandleCloudEventWithBodyWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIHandleCloudEventWithBodyWithResponse), ctx, clusterId, contentType, body)
+}
+
+// ExternalClusterAPIHandleCloudEventWithResponse mocks base method
+func (m *MockClientWithResponsesInterface) ExternalClusterAPIHandleCloudEventWithResponse(ctx context.Context, clusterId string, body sdk.ExternalClusterAPIHandleCloudEventJSONRequestBody) (*sdk.ExternalClusterAPIHandleCloudEventResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ExternalClusterAPIHandleCloudEventWithResponse", ctx, clusterId, body)
+	ret0, _ := ret[0].(*sdk.ExternalClusterAPIHandleCloudEventResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExternalClusterAPIHandleCloudEventWithResponse indicates an expected call of ExternalClusterAPIHandleCloudEventWithResponse
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIHandleCloudEventWithResponse(ctx, clusterId, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIHandleCloudEventWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIHandleCloudEventWithResponse), ctx, clusterId, body)
 }
 
 // ExternalClusterAPIGetKubeconfigWithResponse mocks base method

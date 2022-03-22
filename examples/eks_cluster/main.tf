@@ -54,6 +54,8 @@ module "castai-eks-cluster" {
 
   delete_nodes_on_disconnect = var.delete_nodes_on_disconnect
 
+  ssh_public_key = "key-123"
+
   autoscaler_policies_json = <<-EOT
     {
         "enabled": true,
