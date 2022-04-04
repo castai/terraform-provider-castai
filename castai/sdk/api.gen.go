@@ -12,8 +12,8 @@ import (
 )
 
 const (
-	BearerAuthScopes = "BearerAuth.Scopes"
 	ApiKeyAuthScopes = "ApiKeyAuth.Scopes"
+	BearerAuthScopes = "BearerAuth.Scopes"
 )
 
 // AddNodeResult defines model for AddNodeResult.
