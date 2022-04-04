@@ -147,9 +147,6 @@ type ClientInterface interface {
 
 	CreateOrUpdateGslb(ctx context.Context, body CreateOrUpdateGslbJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// GetInstanceTypes request
-	GetInstanceTypes(ctx context.Context, params *GetInstanceTypesParams, reqEditors ...RequestEditorFn) (*http.Response, error)
-
 	// CreateInvitation request  with any body
 	CreateInvitationWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -252,8 +249,17 @@ type ClientInterface interface {
 	// GetClusterMetrics request
 	GetClusterMetrics(ctx context.Context, clusterId ClusterId, params *GetClusterMetricsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// GetNodeConstraints request
-	GetNodeConstraints(ctx context.Context, clusterId ClusterId, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// GetClusterMetricsCpuUsage request
+	GetClusterMetricsCpuUsage(ctx context.Context, clusterId ClusterId, params *GetClusterMetricsCpuUsageParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetClusterMetricsGauges request
+	GetClusterMetricsGauges(ctx context.Context, clusterId ClusterId, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetClusterMetricsMemoryUsage request
+	GetClusterMetricsMemoryUsage(ctx context.Context, clusterId ClusterId, params *GetClusterMetricsMemoryUsageParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// PoliciesAPIGetClusterNodeConstraints request
+	PoliciesAPIGetClusterNodeConstraints(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// GetClusterNodes request
 	GetClusterNodes(ctx context.Context, clusterId ClusterId, params *GetClusterNodesParams, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -304,13 +310,13 @@ type ClientInterface interface {
 
 	SetClusterPauseSchedule(ctx context.Context, clusterId ClusterId, body SetClusterPauseScheduleJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// GetPolicies request
-	GetPolicies(ctx context.Context, clusterId ClusterId, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// PoliciesAPIGetClusterPolicies request
+	PoliciesAPIGetClusterPolicies(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// UpsertPolicies request  with any body
-	UpsertPoliciesWithBody(ctx context.Context, clusterId ClusterId, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// PoliciesAPIUpsertClusterPolicies request  with any body
+	PoliciesAPIUpsertClusterPoliciesWithBody(ctx context.Context, clusterId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	UpsertPolicies(ctx context.Context, clusterId ClusterId, body UpsertPoliciesJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+	PoliciesAPIUpsertClusterPolicies(ctx context.Context, clusterId string, body PoliciesAPIUpsertClusterPoliciesJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// GetProblematicWorkloads request
 	GetProblematicWorkloads(ctx context.Context, clusterId ClusterId, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -379,6 +385,11 @@ type ClientInterface interface {
 	// GetEstimatedSavings request
 	GetEstimatedSavings(ctx context.Context, clusterId ClusterId, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// ExternalClusterAPIHandleCloudEvent request  with any body
+	ExternalClusterAPIHandleCloudEventWithBody(ctx context.Context, clusterId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	ExternalClusterAPIHandleCloudEvent(ctx context.Context, clusterId string, body ExternalClusterAPIHandleCloudEventJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// ExternalClusterAPIGetKubeconfig request
 	ExternalClusterAPIGetKubeconfig(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -423,6 +434,9 @@ type ClientInterface interface {
 	UpdateCurrentUserProfileWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	UpdateCurrentUserProfile(ctx context.Context, body UpdateCurrentUserProfileJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// GetPromMetrics request
+	GetPromMetrics(ctx context.Context, params *GetPromMetricsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// ListOrganizations request
 	ListOrganizations(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -691,17 +705,6 @@ func (c *Client) CreateOrUpdateGslbWithBody(ctx context.Context, contentType str
 
 func (c *Client) CreateOrUpdateGslb(ctx context.Context, body CreateOrUpdateGslbJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewCreateOrUpdateGslbRequest(c.Server, body)
-	if err != nil {
-		return nil, err
-	}
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
-func (c *Client) GetInstanceTypes(ctx context.Context, params *GetInstanceTypesParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewGetInstanceTypesRequest(c.Server, params)
 	if err != nil {
 		return nil, err
 	}
@@ -1118,8 +1121,41 @@ func (c *Client) GetClusterMetrics(ctx context.Context, clusterId ClusterId, par
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetNodeConstraints(ctx context.Context, clusterId ClusterId, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewGetNodeConstraintsRequest(c.Server, clusterId)
+func (c *Client) GetClusterMetricsCpuUsage(ctx context.Context, clusterId ClusterId, params *GetClusterMetricsCpuUsageParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetClusterMetricsCpuUsageRequest(c.Server, clusterId, params)
+	if err != nil {
+		return nil, err
+	}
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetClusterMetricsGauges(ctx context.Context, clusterId ClusterId, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetClusterMetricsGaugesRequest(c.Server, clusterId)
+	if err != nil {
+		return nil, err
+	}
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetClusterMetricsMemoryUsage(ctx context.Context, clusterId ClusterId, params *GetClusterMetricsMemoryUsageParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetClusterMetricsMemoryUsageRequest(c.Server, clusterId, params)
+	if err != nil {
+		return nil, err
+	}
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) PoliciesAPIGetClusterNodeConstraints(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPoliciesAPIGetClusterNodeConstraintsRequest(c.Server, clusterId)
 	if err != nil {
 		return nil, err
 	}
@@ -1327,8 +1363,8 @@ func (c *Client) SetClusterPauseSchedule(ctx context.Context, clusterId ClusterI
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetPolicies(ctx context.Context, clusterId ClusterId, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewGetPoliciesRequest(c.Server, clusterId)
+func (c *Client) PoliciesAPIGetClusterPolicies(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPoliciesAPIGetClusterPoliciesRequest(c.Server, clusterId)
 	if err != nil {
 		return nil, err
 	}
@@ -1338,8 +1374,8 @@ func (c *Client) GetPolicies(ctx context.Context, clusterId ClusterId, reqEditor
 	return c.Client.Do(req)
 }
 
-func (c *Client) UpsertPoliciesWithBody(ctx context.Context, clusterId ClusterId, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewUpsertPoliciesRequestWithBody(c.Server, clusterId, contentType, body)
+func (c *Client) PoliciesAPIUpsertClusterPoliciesWithBody(ctx context.Context, clusterId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPoliciesAPIUpsertClusterPoliciesRequestWithBody(c.Server, clusterId, contentType, body)
 	if err != nil {
 		return nil, err
 	}
@@ -1349,8 +1385,8 @@ func (c *Client) UpsertPoliciesWithBody(ctx context.Context, clusterId ClusterId
 	return c.Client.Do(req)
 }
 
-func (c *Client) UpsertPolicies(ctx context.Context, clusterId ClusterId, body UpsertPoliciesJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewUpsertPoliciesRequest(c.Server, clusterId, body)
+func (c *Client) PoliciesAPIUpsertClusterPolicies(ctx context.Context, clusterId string, body PoliciesAPIUpsertClusterPoliciesJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewPoliciesAPIUpsertClusterPoliciesRequest(c.Server, clusterId, body)
 	if err != nil {
 		return nil, err
 	}
@@ -1624,6 +1660,28 @@ func (c *Client) GetEstimatedSavings(ctx context.Context, clusterId ClusterId, r
 	return c.Client.Do(req)
 }
 
+func (c *Client) ExternalClusterAPIHandleCloudEventWithBody(ctx context.Context, clusterId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewExternalClusterAPIHandleCloudEventRequestWithBody(c.Server, clusterId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) ExternalClusterAPIHandleCloudEvent(ctx context.Context, clusterId string, body ExternalClusterAPIHandleCloudEventJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewExternalClusterAPIHandleCloudEventRequest(c.Server, clusterId, body)
+	if err != nil {
+		return nil, err
+	}
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
 func (c *Client) ExternalClusterAPIGetKubeconfig(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewExternalClusterAPIGetKubeconfigRequest(c.Server, clusterId)
 	if err != nil {
@@ -1791,6 +1849,17 @@ func (c *Client) UpdateCurrentUserProfileWithBody(ctx context.Context, contentTy
 
 func (c *Client) UpdateCurrentUserProfile(ctx context.Context, body UpdateCurrentUserProfileJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewUpdateCurrentUserProfileRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetPromMetrics(ctx context.Context, params *GetPromMetricsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetPromMetricsRequest(c.Server, params)
 	if err != nil {
 		return nil, err
 	}
@@ -2977,149 +3046,6 @@ func NewCreateOrUpdateGslbRequestWithBody(server string, contentType string, bod
 	return req, nil
 }
 
-// NewGetInstanceTypesRequest generates requests for GetInstanceTypes
-func NewGetInstanceTypesRequest(server string, params *GetInstanceTypesParams) (*http.Request, error) {
-	var err error
-
-	queryUrl, err := url.Parse(server)
-	if err != nil {
-		return nil, err
-	}
-
-	basePath := fmt.Sprintf("/v1/inventory/instance-types")
-	if basePath[0] == '/' {
-		basePath = basePath[1:]
-	}
-
-	queryUrl, err = queryUrl.Parse(basePath)
-	if err != nil {
-		return nil, err
-	}
-
-	queryValues := queryUrl.Query()
-
-	if params.Provider != nil {
-
-		if queryFrag, err := runtime.StyleParam("form", true, "provider", *params.Provider); err != nil {
-			return nil, err
-		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
-			return nil, err
-		} else {
-			for k, v := range parsed {
-				for _, v2 := range v {
-					queryValues.Add(k, v2)
-				}
-			}
-		}
-
-	}
-
-	if params.Region != nil {
-
-		if queryFrag, err := runtime.StyleParam("form", true, "region", *params.Region); err != nil {
-			return nil, err
-		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
-			return nil, err
-		} else {
-			for k, v := range parsed {
-				for _, v2 := range v {
-					queryValues.Add(k, v2)
-				}
-			}
-		}
-
-	}
-
-	if params.ZoneId != nil {
-
-		if queryFrag, err := runtime.StyleParam("form", true, "zoneId", *params.ZoneId); err != nil {
-			return nil, err
-		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
-			return nil, err
-		} else {
-			for k, v := range parsed {
-				for _, v2 := range v {
-					queryValues.Add(k, v2)
-				}
-			}
-		}
-
-	}
-
-	if params.InstanceType != nil {
-
-		if queryFrag, err := runtime.StyleParam("form", true, "instanceType", *params.InstanceType); err != nil {
-			return nil, err
-		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
-			return nil, err
-		} else {
-			for k, v := range parsed {
-				for _, v2 := range v {
-					queryValues.Add(k, v2)
-				}
-			}
-		}
-
-	}
-
-	if params.SpotInstances != nil {
-
-		if queryFrag, err := runtime.StyleParam("form", true, "spotInstances", *params.SpotInstances); err != nil {
-			return nil, err
-		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
-			return nil, err
-		} else {
-			for k, v := range parsed {
-				for _, v2 := range v {
-					queryValues.Add(k, v2)
-				}
-			}
-		}
-
-	}
-
-	if params.PageLimit != nil {
-
-		if queryFrag, err := runtime.StyleParam("form", true, "page.limit", *params.PageLimit); err != nil {
-			return nil, err
-		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
-			return nil, err
-		} else {
-			for k, v := range parsed {
-				for _, v2 := range v {
-					queryValues.Add(k, v2)
-				}
-			}
-		}
-
-	}
-
-	if params.PageCursor != nil {
-
-		if queryFrag, err := runtime.StyleParam("form", true, "page.cursor", *params.PageCursor); err != nil {
-			return nil, err
-		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
-			return nil, err
-		} else {
-			for k, v := range parsed {
-				for _, v2 := range v {
-					queryValues.Add(k, v2)
-				}
-			}
-		}
-
-	}
-
-	queryUrl.RawQuery = queryValues.Encode()
-
-	req, err := http.NewRequest("GET", queryUrl.String(), nil)
-	if err != nil {
-		return nil, err
-	}
-
-	return req, nil
-}
-
 // NewCreateInvitationRequest calls the generic CreateInvitation builder with application/json body
 func NewCreateInvitationRequest(server string, body CreateInvitationJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
@@ -4002,6 +3928,38 @@ func NewGetDashboardMetricsCpuUsageRequest(server string, clusterId ClusterId, p
 
 	}
 
+	if params.StartTime != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "startTime", *params.StartTime); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.EndTime != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "endTime", *params.EndTime); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
 	if params.StepSeconds != nil {
 
 		if queryFrag, err := runtime.StyleParam("form", true, "stepSeconds", *params.StepSeconds); err != nil {
@@ -4059,6 +4017,38 @@ func NewGetDashboardMetricsMemoryUsageRequest(server string, clusterId ClusterId
 	if params.PeriodHours != nil {
 
 		if queryFrag, err := runtime.StyleParam("form", true, "periodHours", *params.PeriodHours); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.StartTime != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "startTime", *params.StartTime); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.EndTime != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "endTime", *params.EndTime); err != nil {
 			return nil, err
 		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
 			return nil, err
@@ -4331,7 +4321,7 @@ func NewGetClusterMetricsRequest(server string, clusterId ClusterId, params *Get
 		return nil, err
 	}
 
-	basePath := fmt.Sprintf("/v1/kubernetes/clusters/%s/metrics", pathParam0)
+	basePath := fmt.Sprintf("/v1/kubernetes/clusters/%s/legacy-metrics", pathParam0)
 	if basePath[0] == '/' {
 		basePath = basePath[1:]
 	}
@@ -4365,8 +4355,246 @@ func NewGetClusterMetricsRequest(server string, clusterId ClusterId, params *Get
 	return req, nil
 }
 
-// NewGetNodeConstraintsRequest generates requests for GetNodeConstraints
-func NewGetNodeConstraintsRequest(server string, clusterId ClusterId) (*http.Request, error) {
+// NewGetClusterMetricsCpuUsageRequest generates requests for GetClusterMetricsCpuUsage
+func NewGetClusterMetricsCpuUsageRequest(server string, clusterId ClusterId, params *GetClusterMetricsCpuUsageParams) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParam("simple", false, "clusterId", clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	queryUrl, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	basePath := fmt.Sprintf("/v1/kubernetes/clusters/%s/metrics/cpu-usage", pathParam0)
+	if basePath[0] == '/' {
+		basePath = basePath[1:]
+	}
+
+	queryUrl, err = queryUrl.Parse(basePath)
+	if err != nil {
+		return nil, err
+	}
+
+	queryValues := queryUrl.Query()
+
+	if params.PeriodHours != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "periodHours", *params.PeriodHours); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.StartTime != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "startTime", *params.StartTime); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.EndTime != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "endTime", *params.EndTime); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.StepSeconds != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "stepSeconds", *params.StepSeconds); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	queryUrl.RawQuery = queryValues.Encode()
+
+	req, err := http.NewRequest("GET", queryUrl.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewGetClusterMetricsGaugesRequest generates requests for GetClusterMetricsGauges
+func NewGetClusterMetricsGaugesRequest(server string, clusterId ClusterId) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParam("simple", false, "clusterId", clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	queryUrl, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	basePath := fmt.Sprintf("/v1/kubernetes/clusters/%s/metrics/gauges", pathParam0)
+	if basePath[0] == '/' {
+		basePath = basePath[1:]
+	}
+
+	queryUrl, err = queryUrl.Parse(basePath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryUrl.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewGetClusterMetricsMemoryUsageRequest generates requests for GetClusterMetricsMemoryUsage
+func NewGetClusterMetricsMemoryUsageRequest(server string, clusterId ClusterId, params *GetClusterMetricsMemoryUsageParams) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParam("simple", false, "clusterId", clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	queryUrl, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	basePath := fmt.Sprintf("/v1/kubernetes/clusters/%s/metrics/memory-usage", pathParam0)
+	if basePath[0] == '/' {
+		basePath = basePath[1:]
+	}
+
+	queryUrl, err = queryUrl.Parse(basePath)
+	if err != nil {
+		return nil, err
+	}
+
+	queryValues := queryUrl.Query()
+
+	if params.PeriodHours != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "periodHours", *params.PeriodHours); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.StartTime != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "startTime", *params.StartTime); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.EndTime != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "endTime", *params.EndTime); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.StepSeconds != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "stepSeconds", *params.StepSeconds); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	queryUrl.RawQuery = queryValues.Encode()
+
+	req, err := http.NewRequest("GET", queryUrl.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewPoliciesAPIGetClusterNodeConstraintsRequest generates requests for PoliciesAPIGetClusterNodeConstraints
+func NewPoliciesAPIGetClusterNodeConstraintsRequest(server string, clusterId string) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -4988,8 +5216,8 @@ func NewSetClusterPauseScheduleRequestWithBody(server string, clusterId ClusterI
 	return req, nil
 }
 
-// NewGetPoliciesRequest generates requests for GetPolicies
-func NewGetPoliciesRequest(server string, clusterId ClusterId) (*http.Request, error) {
+// NewPoliciesAPIGetClusterPoliciesRequest generates requests for PoliciesAPIGetClusterPolicies
+func NewPoliciesAPIGetClusterPoliciesRequest(server string, clusterId string) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -5022,19 +5250,19 @@ func NewGetPoliciesRequest(server string, clusterId ClusterId) (*http.Request, e
 	return req, nil
 }
 
-// NewUpsertPoliciesRequest calls the generic UpsertPolicies builder with application/json body
-func NewUpsertPoliciesRequest(server string, clusterId ClusterId, body UpsertPoliciesJSONRequestBody) (*http.Request, error) {
+// NewPoliciesAPIUpsertClusterPoliciesRequest calls the generic PoliciesAPIUpsertClusterPolicies builder with application/json body
+func NewPoliciesAPIUpsertClusterPoliciesRequest(server string, clusterId string, body PoliciesAPIUpsertClusterPoliciesJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
 	buf, err := json.Marshal(body)
 	if err != nil {
 		return nil, err
 	}
 	bodyReader = bytes.NewReader(buf)
-	return NewUpsertPoliciesRequestWithBody(server, clusterId, "application/json", bodyReader)
+	return NewPoliciesAPIUpsertClusterPoliciesRequestWithBody(server, clusterId, "application/json", bodyReader)
 }
 
-// NewUpsertPoliciesRequestWithBody generates requests for UpsertPolicies with any type of body
-func NewUpsertPoliciesRequestWithBody(server string, clusterId ClusterId, contentType string, body io.Reader) (*http.Request, error) {
+// NewPoliciesAPIUpsertClusterPoliciesRequestWithBody generates requests for PoliciesAPIUpsertClusterPolicies with any type of body
+func NewPoliciesAPIUpsertClusterPoliciesRequestWithBody(server string, clusterId string, contentType string, body io.Reader) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -5816,6 +6044,53 @@ func NewGetEstimatedSavingsRequest(server string, clusterId ClusterId) (*http.Re
 	return req, nil
 }
 
+// NewExternalClusterAPIHandleCloudEventRequest calls the generic ExternalClusterAPIHandleCloudEvent builder with application/json body
+func NewExternalClusterAPIHandleCloudEventRequest(server string, clusterId string, body ExternalClusterAPIHandleCloudEventJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewExternalClusterAPIHandleCloudEventRequestWithBody(server, clusterId, "application/json", bodyReader)
+}
+
+// NewExternalClusterAPIHandleCloudEventRequestWithBody generates requests for ExternalClusterAPIHandleCloudEvent with any type of body
+func NewExternalClusterAPIHandleCloudEventRequestWithBody(server string, clusterId string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParam("simple", false, "clusterId", clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	queryUrl, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	basePath := fmt.Sprintf("/v1/kubernetes/external-clusters/%s/events", pathParam0)
+	if basePath[0] == '/' {
+		basePath = basePath[1:]
+	}
+
+	queryUrl, err = queryUrl.Parse(basePath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryUrl.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
 // NewExternalClusterAPIGetKubeconfigRequest generates requests for ExternalClusterAPIGetKubeconfig
 func NewExternalClusterAPIGetKubeconfigRequest(server string, clusterId string) (*http.Request, error) {
 	var err error
@@ -6392,6 +6667,64 @@ func NewUpdateCurrentUserProfileRequestWithBody(server string, contentType strin
 	}
 
 	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewGetPromMetricsRequest generates requests for GetPromMetrics
+func NewGetPromMetricsRequest(server string, params *GetPromMetricsParams) (*http.Request, error) {
+	var err error
+
+	queryUrl, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	basePath := fmt.Sprintf("/v1/metrics/prom")
+	if basePath[0] == '/' {
+		basePath = basePath[1:]
+	}
+
+	queryUrl, err = queryUrl.Parse(basePath)
+	if err != nil {
+		return nil, err
+	}
+
+	queryValues := queryUrl.Query()
+
+	if params.ClusterNames != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "clusterNames", *params.ClusterNames); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	queryUrl.RawQuery = queryValues.Encode()
+
+	req, err := http.NewRequest("GET", queryUrl.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	if params.XCastAiOrganizationId != nil {
+		var headerParam0 string
+
+		headerParam0, err = runtime.StyleParam("simple", false, "X-CastAi-Organization-Id", *params.XCastAiOrganizationId)
+		if err != nil {
+			return nil, err
+		}
+
+		req.Header.Set("X-CastAi-Organization-Id", headerParam0)
+	}
 
 	return req, nil
 }
@@ -6995,9 +7328,6 @@ type ClientWithResponsesInterface interface {
 
 	CreateOrUpdateGslbWithResponse(ctx context.Context, body CreateOrUpdateGslbJSONRequestBody) (*CreateOrUpdateGslbResponse, error)
 
-	// GetInstanceTypes request
-	GetInstanceTypesWithResponse(ctx context.Context, params *GetInstanceTypesParams) (*GetInstanceTypesResponse, error)
-
 	// CreateInvitation request  with any body
 	CreateInvitationWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*CreateInvitationResponse, error)
 
@@ -7100,8 +7430,17 @@ type ClientWithResponsesInterface interface {
 	// GetClusterMetrics request
 	GetClusterMetricsWithResponse(ctx context.Context, clusterId ClusterId, params *GetClusterMetricsParams) (*GetClusterMetricsResponse, error)
 
-	// GetNodeConstraints request
-	GetNodeConstraintsWithResponse(ctx context.Context, clusterId ClusterId) (*GetNodeConstraintsResponse, error)
+	// GetClusterMetricsCpuUsage request
+	GetClusterMetricsCpuUsageWithResponse(ctx context.Context, clusterId ClusterId, params *GetClusterMetricsCpuUsageParams) (*GetClusterMetricsCpuUsageResponse, error)
+
+	// GetClusterMetricsGauges request
+	GetClusterMetricsGaugesWithResponse(ctx context.Context, clusterId ClusterId) (*GetClusterMetricsGaugesResponse, error)
+
+	// GetClusterMetricsMemoryUsage request
+	GetClusterMetricsMemoryUsageWithResponse(ctx context.Context, clusterId ClusterId, params *GetClusterMetricsMemoryUsageParams) (*GetClusterMetricsMemoryUsageResponse, error)
+
+	// PoliciesAPIGetClusterNodeConstraints request
+	PoliciesAPIGetClusterNodeConstraintsWithResponse(ctx context.Context, clusterId string) (*PoliciesAPIGetClusterNodeConstraintsResponse, error)
 
 	// GetClusterNodes request
 	GetClusterNodesWithResponse(ctx context.Context, clusterId ClusterId, params *GetClusterNodesParams) (*GetClusterNodesResponse, error)
@@ -7152,13 +7491,13 @@ type ClientWithResponsesInterface interface {
 
 	SetClusterPauseScheduleWithResponse(ctx context.Context, clusterId ClusterId, body SetClusterPauseScheduleJSONRequestBody) (*SetClusterPauseScheduleResponse, error)
 
-	// GetPolicies request
-	GetPoliciesWithResponse(ctx context.Context, clusterId ClusterId) (*GetPoliciesResponse, error)
+	// PoliciesAPIGetClusterPolicies request
+	PoliciesAPIGetClusterPoliciesWithResponse(ctx context.Context, clusterId string) (*PoliciesAPIGetClusterPoliciesResponse, error)
 
-	// UpsertPolicies request  with any body
-	UpsertPoliciesWithBodyWithResponse(ctx context.Context, clusterId ClusterId, contentType string, body io.Reader) (*UpsertPoliciesResponse, error)
+	// PoliciesAPIUpsertClusterPolicies request  with any body
+	PoliciesAPIUpsertClusterPoliciesWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader) (*PoliciesAPIUpsertClusterPoliciesResponse, error)
 
-	UpsertPoliciesWithResponse(ctx context.Context, clusterId ClusterId, body UpsertPoliciesJSONRequestBody) (*UpsertPoliciesResponse, error)
+	PoliciesAPIUpsertClusterPoliciesWithResponse(ctx context.Context, clusterId string, body PoliciesAPIUpsertClusterPoliciesJSONRequestBody) (*PoliciesAPIUpsertClusterPoliciesResponse, error)
 
 	// GetProblematicWorkloads request
 	GetProblematicWorkloadsWithResponse(ctx context.Context, clusterId ClusterId) (*GetProblematicWorkloadsResponse, error)
@@ -7227,6 +7566,11 @@ type ClientWithResponsesInterface interface {
 	// GetEstimatedSavings request
 	GetEstimatedSavingsWithResponse(ctx context.Context, clusterId ClusterId) (*GetEstimatedSavingsResponse, error)
 
+	// ExternalClusterAPIHandleCloudEvent request  with any body
+	ExternalClusterAPIHandleCloudEventWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader) (*ExternalClusterAPIHandleCloudEventResponse, error)
+
+	ExternalClusterAPIHandleCloudEventWithResponse(ctx context.Context, clusterId string, body ExternalClusterAPIHandleCloudEventJSONRequestBody) (*ExternalClusterAPIHandleCloudEventResponse, error)
+
 	// ExternalClusterAPIGetKubeconfig request
 	ExternalClusterAPIGetKubeconfigWithResponse(ctx context.Context, clusterId string) (*ExternalClusterAPIGetKubeconfigResponse, error)
 
@@ -7271,6 +7615,9 @@ type ClientWithResponsesInterface interface {
 	UpdateCurrentUserProfileWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*UpdateCurrentUserProfileResponse, error)
 
 	UpdateCurrentUserProfileWithResponse(ctx context.Context, body UpdateCurrentUserProfileJSONRequestBody) (*UpdateCurrentUserProfileResponse, error)
+
+	// GetPromMetrics request
+	GetPromMetricsWithResponse(ctx context.Context, params *GetPromMetricsParams) (*GetPromMetricsResponse, error)
 
 	// ListOrganizations request
 	ListOrganizationsWithResponse(ctx context.Context) (*ListOrganizationsResponse, error)
@@ -7768,36 +8115,6 @@ func (r CreateOrUpdateGslbResponse) StatusCode() int {
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
 func (r CreateOrUpdateGslbResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-
-type GetInstanceTypesResponse struct {
-	Body         []byte
-	HTTPResponse *http.Response
-	JSON200      *InstanceList
-}
-
-// Status returns HTTPResponse.Status
-func (r GetInstanceTypesResponse) Status() string {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.Status
-	}
-	return http.StatusText(0)
-}
-
-// StatusCode returns HTTPResponse.StatusCode
-func (r GetInstanceTypesResponse) StatusCode() int {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.StatusCode
-	}
-	return 0
-}
-
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r GetInstanceTypesResponse) GetBody() []byte {
 	return r.Body
 }
 
@@ -8642,14 +8959,14 @@ func (r GetClusterMetricsResponse) GetBody() []byte {
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
-type GetNodeConstraintsResponse struct {
+type GetClusterMetricsCpuUsageResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *ValidNodeConstraints
+	JSON200      *ClusterMetricsCpuUsage
 }
 
 // Status returns HTTPResponse.Status
-func (r GetNodeConstraintsResponse) Status() string {
+func (r GetClusterMetricsCpuUsageResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -8657,7 +8974,7 @@ func (r GetNodeConstraintsResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r GetNodeConstraintsResponse) StatusCode() int {
+func (r GetClusterMetricsCpuUsageResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -8666,7 +8983,97 @@ func (r GetNodeConstraintsResponse) StatusCode() int {
 
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
-func (r GetNodeConstraintsResponse) GetBody() []byte {
+func (r GetClusterMetricsCpuUsageResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type GetClusterMetricsGaugesResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *ClusterMetricsGauges
+}
+
+// Status returns HTTPResponse.Status
+func (r GetClusterMetricsGaugesResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetClusterMetricsGaugesResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r GetClusterMetricsGaugesResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type GetClusterMetricsMemoryUsageResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *ClusterMetricsMemoryUsage
+}
+
+// Status returns HTTPResponse.Status
+func (r GetClusterMetricsMemoryUsageResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetClusterMetricsMemoryUsageResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r GetClusterMetricsMemoryUsageResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type PoliciesAPIGetClusterNodeConstraintsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *PoliciesV1GetClusterNodeConstraintsResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r PoliciesAPIGetClusterNodeConstraintsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r PoliciesAPIGetClusterNodeConstraintsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r PoliciesAPIGetClusterNodeConstraintsResponse) GetBody() []byte {
 	return r.Body
 }
 
@@ -9065,14 +9472,14 @@ func (r SetClusterPauseScheduleResponse) GetBody() []byte {
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
-type GetPoliciesResponse struct {
+type PoliciesAPIGetClusterPoliciesResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *PoliciesConfig
+	JSON200      *PoliciesV1Policies
 }
 
 // Status returns HTTPResponse.Status
-func (r GetPoliciesResponse) Status() string {
+func (r PoliciesAPIGetClusterPoliciesResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -9080,7 +9487,7 @@ func (r GetPoliciesResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r GetPoliciesResponse) StatusCode() int {
+func (r PoliciesAPIGetClusterPoliciesResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -9089,20 +9496,20 @@ func (r GetPoliciesResponse) StatusCode() int {
 
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
-func (r GetPoliciesResponse) GetBody() []byte {
+func (r PoliciesAPIGetClusterPoliciesResponse) GetBody() []byte {
 	return r.Body
 }
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
-type UpsertPoliciesResponse struct {
+type PoliciesAPIUpsertClusterPoliciesResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *PoliciesConfig
+	JSON200      *PoliciesV1Policies
 }
 
 // Status returns HTTPResponse.Status
-func (r UpsertPoliciesResponse) Status() string {
+func (r PoliciesAPIUpsertClusterPoliciesResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -9110,7 +9517,7 @@ func (r UpsertPoliciesResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r UpsertPoliciesResponse) StatusCode() int {
+func (r PoliciesAPIUpsertClusterPoliciesResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -9119,7 +9526,7 @@ func (r UpsertPoliciesResponse) StatusCode() int {
 
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
-func (r UpsertPoliciesResponse) GetBody() []byte {
+func (r PoliciesAPIUpsertClusterPoliciesResponse) GetBody() []byte {
 	return r.Body
 }
 
@@ -9693,6 +10100,36 @@ func (r GetEstimatedSavingsResponse) GetBody() []byte {
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
+type ExternalClusterAPIHandleCloudEventResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *ExternalclusterV1HandleCloudEventResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r ExternalClusterAPIHandleCloudEventResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r ExternalClusterAPIHandleCloudEventResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r ExternalClusterAPIHandleCloudEventResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
 type ExternalClusterAPIGetKubeconfigResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -10078,6 +10515,35 @@ func (r UpdateCurrentUserProfileResponse) StatusCode() int {
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
 func (r UpdateCurrentUserProfileResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type GetPromMetricsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+}
+
+// Status returns HTTPResponse.Status
+func (r GetPromMetricsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetPromMetricsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r GetPromMetricsResponse) GetBody() []byte {
 	return r.Body
 }
 
@@ -10625,15 +11091,6 @@ func (c *ClientWithResponses) CreateOrUpdateGslbWithResponse(ctx context.Context
 	return ParseCreateOrUpdateGslbResponse(rsp)
 }
 
-// GetInstanceTypesWithResponse request returning *GetInstanceTypesResponse
-func (c *ClientWithResponses) GetInstanceTypesWithResponse(ctx context.Context, params *GetInstanceTypesParams) (*GetInstanceTypesResponse, error) {
-	rsp, err := c.GetInstanceTypes(ctx, params)
-	if err != nil {
-		return nil, err
-	}
-	return ParseGetInstanceTypesResponse(rsp)
-}
-
 // CreateInvitationWithBodyWithResponse request with arbitrary body returning *CreateInvitationResponse
 func (c *ClientWithResponses) CreateInvitationWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*CreateInvitationResponse, error) {
 	rsp, err := c.CreateInvitationWithBody(ctx, contentType, body)
@@ -10958,13 +11415,40 @@ func (c *ClientWithResponses) GetClusterMetricsWithResponse(ctx context.Context,
 	return ParseGetClusterMetricsResponse(rsp)
 }
 
-// GetNodeConstraintsWithResponse request returning *GetNodeConstraintsResponse
-func (c *ClientWithResponses) GetNodeConstraintsWithResponse(ctx context.Context, clusterId ClusterId) (*GetNodeConstraintsResponse, error) {
-	rsp, err := c.GetNodeConstraints(ctx, clusterId)
+// GetClusterMetricsCpuUsageWithResponse request returning *GetClusterMetricsCpuUsageResponse
+func (c *ClientWithResponses) GetClusterMetricsCpuUsageWithResponse(ctx context.Context, clusterId ClusterId, params *GetClusterMetricsCpuUsageParams) (*GetClusterMetricsCpuUsageResponse, error) {
+	rsp, err := c.GetClusterMetricsCpuUsage(ctx, clusterId, params)
 	if err != nil {
 		return nil, err
 	}
-	return ParseGetNodeConstraintsResponse(rsp)
+	return ParseGetClusterMetricsCpuUsageResponse(rsp)
+}
+
+// GetClusterMetricsGaugesWithResponse request returning *GetClusterMetricsGaugesResponse
+func (c *ClientWithResponses) GetClusterMetricsGaugesWithResponse(ctx context.Context, clusterId ClusterId) (*GetClusterMetricsGaugesResponse, error) {
+	rsp, err := c.GetClusterMetricsGauges(ctx, clusterId)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetClusterMetricsGaugesResponse(rsp)
+}
+
+// GetClusterMetricsMemoryUsageWithResponse request returning *GetClusterMetricsMemoryUsageResponse
+func (c *ClientWithResponses) GetClusterMetricsMemoryUsageWithResponse(ctx context.Context, clusterId ClusterId, params *GetClusterMetricsMemoryUsageParams) (*GetClusterMetricsMemoryUsageResponse, error) {
+	rsp, err := c.GetClusterMetricsMemoryUsage(ctx, clusterId, params)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetClusterMetricsMemoryUsageResponse(rsp)
+}
+
+// PoliciesAPIGetClusterNodeConstraintsWithResponse request returning *PoliciesAPIGetClusterNodeConstraintsResponse
+func (c *ClientWithResponses) PoliciesAPIGetClusterNodeConstraintsWithResponse(ctx context.Context, clusterId string) (*PoliciesAPIGetClusterNodeConstraintsResponse, error) {
+	rsp, err := c.PoliciesAPIGetClusterNodeConstraints(ctx, clusterId)
+	if err != nil {
+		return nil, err
+	}
+	return ParsePoliciesAPIGetClusterNodeConstraintsResponse(rsp)
 }
 
 // GetClusterNodesWithResponse request returning *GetClusterNodesResponse
@@ -11124,30 +11608,30 @@ func (c *ClientWithResponses) SetClusterPauseScheduleWithResponse(ctx context.Co
 	return ParseSetClusterPauseScheduleResponse(rsp)
 }
 
-// GetPoliciesWithResponse request returning *GetPoliciesResponse
-func (c *ClientWithResponses) GetPoliciesWithResponse(ctx context.Context, clusterId ClusterId) (*GetPoliciesResponse, error) {
-	rsp, err := c.GetPolicies(ctx, clusterId)
+// PoliciesAPIGetClusterPoliciesWithResponse request returning *PoliciesAPIGetClusterPoliciesResponse
+func (c *ClientWithResponses) PoliciesAPIGetClusterPoliciesWithResponse(ctx context.Context, clusterId string) (*PoliciesAPIGetClusterPoliciesResponse, error) {
+	rsp, err := c.PoliciesAPIGetClusterPolicies(ctx, clusterId)
 	if err != nil {
 		return nil, err
 	}
-	return ParseGetPoliciesResponse(rsp)
+	return ParsePoliciesAPIGetClusterPoliciesResponse(rsp)
 }
 
-// UpsertPoliciesWithBodyWithResponse request with arbitrary body returning *UpsertPoliciesResponse
-func (c *ClientWithResponses) UpsertPoliciesWithBodyWithResponse(ctx context.Context, clusterId ClusterId, contentType string, body io.Reader) (*UpsertPoliciesResponse, error) {
-	rsp, err := c.UpsertPoliciesWithBody(ctx, clusterId, contentType, body)
+// PoliciesAPIUpsertClusterPoliciesWithBodyWithResponse request with arbitrary body returning *PoliciesAPIUpsertClusterPoliciesResponse
+func (c *ClientWithResponses) PoliciesAPIUpsertClusterPoliciesWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader) (*PoliciesAPIUpsertClusterPoliciesResponse, error) {
+	rsp, err := c.PoliciesAPIUpsertClusterPoliciesWithBody(ctx, clusterId, contentType, body)
 	if err != nil {
 		return nil, err
 	}
-	return ParseUpsertPoliciesResponse(rsp)
+	return ParsePoliciesAPIUpsertClusterPoliciesResponse(rsp)
 }
 
-func (c *ClientWithResponses) UpsertPoliciesWithResponse(ctx context.Context, clusterId ClusterId, body UpsertPoliciesJSONRequestBody) (*UpsertPoliciesResponse, error) {
-	rsp, err := c.UpsertPolicies(ctx, clusterId, body)
+func (c *ClientWithResponses) PoliciesAPIUpsertClusterPoliciesWithResponse(ctx context.Context, clusterId string, body PoliciesAPIUpsertClusterPoliciesJSONRequestBody) (*PoliciesAPIUpsertClusterPoliciesResponse, error) {
+	rsp, err := c.PoliciesAPIUpsertClusterPolicies(ctx, clusterId, body)
 	if err != nil {
 		return nil, err
 	}
-	return ParseUpsertPoliciesResponse(rsp)
+	return ParsePoliciesAPIUpsertClusterPoliciesResponse(rsp)
 }
 
 // GetProblematicWorkloadsWithResponse request returning *GetProblematicWorkloadsResponse
@@ -11361,6 +11845,23 @@ func (c *ClientWithResponses) GetEstimatedSavingsWithResponse(ctx context.Contex
 	return ParseGetEstimatedSavingsResponse(rsp)
 }
 
+// ExternalClusterAPIHandleCloudEventWithBodyWithResponse request with arbitrary body returning *ExternalClusterAPIHandleCloudEventResponse
+func (c *ClientWithResponses) ExternalClusterAPIHandleCloudEventWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader) (*ExternalClusterAPIHandleCloudEventResponse, error) {
+	rsp, err := c.ExternalClusterAPIHandleCloudEventWithBody(ctx, clusterId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseExternalClusterAPIHandleCloudEventResponse(rsp)
+}
+
+func (c *ClientWithResponses) ExternalClusterAPIHandleCloudEventWithResponse(ctx context.Context, clusterId string, body ExternalClusterAPIHandleCloudEventJSONRequestBody) (*ExternalClusterAPIHandleCloudEventResponse, error) {
+	rsp, err := c.ExternalClusterAPIHandleCloudEvent(ctx, clusterId, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseExternalClusterAPIHandleCloudEventResponse(rsp)
+}
+
 // ExternalClusterAPIGetKubeconfigWithResponse request returning *ExternalClusterAPIGetKubeconfigResponse
 func (c *ClientWithResponses) ExternalClusterAPIGetKubeconfigWithResponse(ctx context.Context, clusterId string) (*ExternalClusterAPIGetKubeconfigResponse, error) {
 	rsp, err := c.ExternalClusterAPIGetKubeconfig(ctx, clusterId)
@@ -11500,6 +12001,15 @@ func (c *ClientWithResponses) UpdateCurrentUserProfileWithResponse(ctx context.C
 		return nil, err
 	}
 	return ParseUpdateCurrentUserProfileResponse(rsp)
+}
+
+// GetPromMetricsWithResponse request returning *GetPromMetricsResponse
+func (c *ClientWithResponses) GetPromMetricsWithResponse(ctx context.Context, params *GetPromMetricsParams) (*GetPromMetricsResponse, error) {
+	rsp, err := c.GetPromMetrics(ctx, params)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetPromMetricsResponse(rsp)
 }
 
 // ListOrganizationsWithResponse request returning *ListOrganizationsResponse
@@ -12001,32 +12511,6 @@ func ParseCreateOrUpdateGslbResponse(rsp *http.Response) (*CreateOrUpdateGslbRes
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest GSLBResponse
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON200 = &dest
-
-	}
-
-	return response, nil
-}
-
-// ParseGetInstanceTypesResponse parses an HTTP response from a GetInstanceTypesWithResponse call
-func ParseGetInstanceTypesResponse(rsp *http.Response) (*GetInstanceTypesResponse, error) {
-	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
-	if err != nil {
-		return nil, err
-	}
-
-	response := &GetInstanceTypesResponse{
-		Body:         bodyBytes,
-		HTTPResponse: rsp,
-	}
-
-	switch {
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest InstanceList
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -12758,22 +13242,100 @@ func ParseGetClusterMetricsResponse(rsp *http.Response) (*GetClusterMetricsRespo
 	return response, nil
 }
 
-// ParseGetNodeConstraintsResponse parses an HTTP response from a GetNodeConstraintsWithResponse call
-func ParseGetNodeConstraintsResponse(rsp *http.Response) (*GetNodeConstraintsResponse, error) {
+// ParseGetClusterMetricsCpuUsageResponse parses an HTTP response from a GetClusterMetricsCpuUsageWithResponse call
+func ParseGetClusterMetricsCpuUsageResponse(rsp *http.Response) (*GetClusterMetricsCpuUsageResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
 	defer rsp.Body.Close()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &GetNodeConstraintsResponse{
+	response := &GetClusterMetricsCpuUsageResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest ValidNodeConstraints
+		var dest ClusterMetricsCpuUsage
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetClusterMetricsGaugesResponse parses an HTTP response from a GetClusterMetricsGaugesWithResponse call
+func ParseGetClusterMetricsGaugesResponse(rsp *http.Response) (*GetClusterMetricsGaugesResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetClusterMetricsGaugesResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ClusterMetricsGauges
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetClusterMetricsMemoryUsageResponse parses an HTTP response from a GetClusterMetricsMemoryUsageWithResponse call
+func ParseGetClusterMetricsMemoryUsageResponse(rsp *http.Response) (*GetClusterMetricsMemoryUsageResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetClusterMetricsMemoryUsageResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ClusterMetricsMemoryUsage
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParsePoliciesAPIGetClusterNodeConstraintsResponse parses an HTTP response from a PoliciesAPIGetClusterNodeConstraintsWithResponse call
+func ParsePoliciesAPIGetClusterNodeConstraintsResponse(rsp *http.Response) (*PoliciesAPIGetClusterNodeConstraintsResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &PoliciesAPIGetClusterNodeConstraintsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest PoliciesV1GetClusterNodeConstraintsResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -13143,22 +13705,22 @@ func ParseSetClusterPauseScheduleResponse(rsp *http.Response) (*SetClusterPauseS
 	return response, nil
 }
 
-// ParseGetPoliciesResponse parses an HTTP response from a GetPoliciesWithResponse call
-func ParseGetPoliciesResponse(rsp *http.Response) (*GetPoliciesResponse, error) {
+// ParsePoliciesAPIGetClusterPoliciesResponse parses an HTTP response from a PoliciesAPIGetClusterPoliciesWithResponse call
+func ParsePoliciesAPIGetClusterPoliciesResponse(rsp *http.Response) (*PoliciesAPIGetClusterPoliciesResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
 	defer rsp.Body.Close()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &GetPoliciesResponse{
+	response := &PoliciesAPIGetClusterPoliciesResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest PoliciesConfig
+		var dest PoliciesV1Policies
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -13169,22 +13731,22 @@ func ParseGetPoliciesResponse(rsp *http.Response) (*GetPoliciesResponse, error) 
 	return response, nil
 }
 
-// ParseUpsertPoliciesResponse parses an HTTP response from a UpsertPoliciesWithResponse call
-func ParseUpsertPoliciesResponse(rsp *http.Response) (*UpsertPoliciesResponse, error) {
+// ParsePoliciesAPIUpsertClusterPoliciesResponse parses an HTTP response from a PoliciesAPIUpsertClusterPoliciesWithResponse call
+func ParsePoliciesAPIUpsertClusterPoliciesResponse(rsp *http.Response) (*PoliciesAPIUpsertClusterPoliciesResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
 	defer rsp.Body.Close()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &UpsertPoliciesResponse{
+	response := &PoliciesAPIUpsertClusterPoliciesResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest PoliciesConfig
+		var dest PoliciesV1Policies
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -13675,6 +14237,32 @@ func ParseGetEstimatedSavingsResponse(rsp *http.Response) (*GetEstimatedSavingsR
 	return response, nil
 }
 
+// ParseExternalClusterAPIHandleCloudEventResponse parses an HTTP response from a ExternalClusterAPIHandleCloudEventWithResponse call
+func ParseExternalClusterAPIHandleCloudEventResponse(rsp *http.Response) (*ExternalClusterAPIHandleCloudEventResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &ExternalClusterAPIHandleCloudEventResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ExternalclusterV1HandleCloudEventResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
 // ParseExternalClusterAPIGetKubeconfigResponse parses an HTTP response from a ExternalClusterAPIGetKubeconfigWithResponse call
 func ParseExternalClusterAPIGetKubeconfigResponse(rsp *http.Response) (*ExternalClusterAPIGetKubeconfigResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
@@ -14008,6 +14596,25 @@ func ParseUpdateCurrentUserProfileResponse(rsp *http.Response) (*UpdateCurrentUs
 		}
 		response.JSON200 = &dest
 
+	}
+
+	return response, nil
+}
+
+// ParseGetPromMetricsResponse parses an HTTP response from a GetPromMetricsWithResponse call
+func ParseGetPromMetricsResponse(rsp *http.Response) (*GetPromMetricsResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetPromMetricsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
 	}
 
 	return response, nil

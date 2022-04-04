@@ -401,26 +401,6 @@ type ClusterHealthNodes struct {
 	Msg   string              `json:"msg"`
 }
 
-// ClusterLimitsCpu defines model for ClusterLimitsCpu.
-type ClusterLimitsCpu struct {
-
-	// Defines the maximum allowed amount of vCPUs in the whole cluster.
-	MaxCores int64 `json:"maxCores"`
-
-	// Defines the minimum allowed amount of vCPUs in the whole cluster.
-	MinCores int64 `json:"minCores"`
-}
-
-// ClusterLimitsPolicy defines model for ClusterLimitsPolicy.
-type ClusterLimitsPolicy struct {
-
-	// Defines the minimum and maximum amount of vCPUs for cluster's worker nodes.
-	Cpu ClusterLimitsCpu `json:"cpu"`
-
-	// Enable/disable cluster size limits policy.
-	Enabled bool `json:"enabled"`
-}
-
 // ClusterMetrics defines model for ClusterMetrics.
 type ClusterMetrics struct {
 
@@ -462,6 +442,36 @@ type ClusterMetrics_CloudMetrics_Labels struct {
 // ClusterMetrics_NodeMetrics_Labels defines model for ClusterMetrics.NodeMetrics.Labels.
 type ClusterMetrics_NodeMetrics_Labels struct {
 	AdditionalProperties map[string]string `json:"-"`
+}
+
+// ClusterMetricsCpuUsage defines model for ClusterMetricsCpuUsage.
+type ClusterMetricsCpuUsage struct {
+	Provisioned []MetricSampleStream `json:"provisioned"`
+	Requested   []MetricSampleStream `json:"requested"`
+}
+
+// ClusterMetricsGauges defines model for ClusterMetricsGauges.
+type ClusterMetricsGauges struct {
+	CastaiManagedNodesCount   *int `json:"castaiManagedNodesCount,omitempty"`
+	CpuAllocatableMillicores  *int `json:"cpuAllocatableMillicores,omitempty"`
+	CpuProvisionedMillicores  *int `json:"cpuProvisionedMillicores,omitempty"`
+	CpuRequestedMillicores    *int `json:"cpuRequestedMillicores,omitempty"`
+	MemoryAllocatableBytes    *int `json:"memoryAllocatableBytes,omitempty"`
+	MemoryProvisionedBytes    *int `json:"memoryProvisionedBytes,omitempty"`
+	MemoryRequestedBytes      *int `json:"memoryRequestedBytes,omitempty"`
+	OnDemandNodesCount        *int `json:"onDemandNodesCount,omitempty"`
+	ProviderManagedNodesCount *int `json:"providerManagedNodesCount,omitempty"`
+	ScheduledPodsCount        *int `json:"scheduledPodsCount,omitempty"`
+	SpotNodesCount            *int `json:"spotNodesCount,omitempty"`
+	TotalNodesCount           *int `json:"totalNodesCount,omitempty"`
+	TotalPodsCount            *int `json:"totalPodsCount,omitempty"`
+	UnscheduledPodsCount      *int `json:"unscheduledPodsCount,omitempty"`
+}
+
+// ClusterMetricsMemoryUsage defines model for ClusterMetricsMemoryUsage.
+type ClusterMetricsMemoryUsage struct {
+	Provisioned []MetricSampleStream `json:"provisioned"`
+	Requested   []MetricSampleStream `json:"requested"`
 }
 
 // ClusterProblematicWorkloads defines model for ClusterProblematicWorkloads.
@@ -809,19 +819,6 @@ type GSLBResponse struct {
 	Dns string `json:"dns"`
 }
 
-// Headroom defines model for Headroom.
-type Headroom struct {
-
-	// Defines percentage of additional CPU capacity to be added
-	CpuPercentage int `json:"cpuPercentage"`
-
-	// Defines whether Headroom is enabled.
-	Enabled *bool `json:"enabled,omitempty"`
-
-	// Defines percentage of additional memory capacity to be added
-	MemoryPercentage int `json:"memoryPercentage"`
-}
-
 // Heartbeat defines model for Heartbeat.
 type Heartbeat struct {
 
@@ -853,42 +850,6 @@ type InstallAddonRequest struct {
 // InstallAddonRequest_ValuesOverrides defines model for InstallAddonRequest.ValuesOverrides.
 type InstallAddonRequest_ValuesOverrides struct {
 	AdditionalProperties map[string]string `json:"-"`
-}
-
-// InstanceList defines model for InstanceList.
-type InstanceList struct {
-	Items *[]InstanceType `json:"items,omitempty"`
-
-	// Cursor token to be used for paging.
-	NextCursor *string `json:"nextCursor,omitempty"`
-}
-
-// InstanceType defines model for InstanceType.
-type InstanceType struct {
-
-	// CPU architecture for the instance type
-	Architecture *string `json:"architecture,omitempty"`
-
-	// Name of the instance type
-	InstanceType *string `json:"instanceType,omitempty"`
-
-	// Hourly price for the instance type
-	Price *string `json:"price,omitempty"`
-
-	// Cloud provider of the instance type
-	Provider *string `json:"provider,omitempty"`
-
-	// Memory of the instance type in MiB
-	Ram *int `json:"ram,omitempty"`
-
-	// Region where the instance type is located
-	Region *string `json:"region,omitempty"`
-
-	// Amount of vCPU's that the instance type has
-	Vcpu *int `json:"vcpu,omitempty"`
-
-	// Global zone ID where the instance type is located, if it is spot
-	Zone *string `json:"zone,omitempty"`
 }
 
 // IpSecConfig defines model for IpSecConfig.
@@ -1110,8 +1071,10 @@ type Node struct {
 	Resources *struct {
 		CpuAllocatableMilli *int `json:"cpuAllocatableMilli,omitempty"`
 		CpuCapacityMilli    *int `json:"cpuCapacityMilli,omitempty"`
+		CpuRequestsMilli    *int `json:"cpuRequestsMilli,omitempty"`
 		MemAllocatableMib   *int `json:"memAllocatableMib,omitempty"`
 		MemCapacityMib      *int `json:"memCapacityMib,omitempty"`
+		MemRequestsMib      *int `json:"memRequestsMib,omitempty"`
 	} `json:"resources,omitempty"`
 
 	// Specifies the node type.
@@ -1146,40 +1109,6 @@ type Node_InstanceLabels struct {
 // Node_Labels defines model for Node.Labels.
 type Node_Labels struct {
 	AdditionalProperties map[string]string `json:"-"`
-}
-
-// NodeConstraints defines model for NodeConstraints.
-type NodeConstraints struct {
-
-	// Defines whether NodeConstraints are enabled.
-	Enabled bool `json:"enabled"`
-
-	// Defines max CPU cores for the node to pick.
-	MaxCpuCores int32 `json:"maxCpuCores"`
-
-	// Defines max RAM in MiB for the node to pick.
-	MaxRamMib int32 `json:"maxRamMib"`
-
-	// Defines min CPU cores for the node to pick.
-	MinCpuCores int32 `json:"minCpuCores"`
-
-	// Defines min RAM in MiB for the node to pick.
-	MinRamMib int32 `json:"minRamMib"`
-}
-
-// NodeDownscaler defines model for NodeDownscaler.
-type NodeDownscaler struct {
-	EmptyNodes *NodeDownscalerEmptyNodes `json:"emptyNodes,omitempty"`
-}
-
-// NodeDownscalerEmptyNodes defines model for NodeDownscalerEmptyNodes.
-type NodeDownscalerEmptyNodes struct {
-
-	// Period (in seconds) to wait before removing the node. Might be useful to control the aggressiveness of the downscaler: increasing the value will make the cluster more responsive to dynamic workloads in the expense of higher cluster cost.
-	DelaySeconds *int `json:"delaySeconds,omitempty"`
-
-	// Defines whether Node Downscaler should opt in for removing empty worker nodes when possible.
-	Enabled *bool `json:"enabled,omitempty"`
 }
 
 // NodeList defines model for NodeList.
@@ -1342,28 +1271,6 @@ type PauseScheduleSpan struct {
 	DayOfTheWeek string `json:"dayOfTheWeek"`
 }
 
-// PoliciesConfig defines model for PoliciesConfig.
-type PoliciesConfig struct {
-
-	// Defines minimum and maximum amount of vCPUs for cluster's worker nodes.
-	ClusterLimits ClusterLimitsPolicy `json:"clusterLimits"`
-
-	// Enable/disable all policies
-	Enabled bool `json:"enabled"`
-
-	// Run autoscaler in scoped mode. Only specifically marked pods will be considered for autoscaling, and only nodes provisioned by autoscaler will be considered for downscaling.
-	IsScopedMode *bool `json:"isScopedMode,omitempty"`
-
-	// Node Downscaler defines policies for removing nodes based on the configured conditions.
-	NodeDownscaler *NodeDownscaler `json:"nodeDownscaler,omitempty"`
-
-	// Policy defining whether autoscaler can use spot instances for provisioning additional workloads.
-	SpotInstances SpotInstances `json:"spotInstances"`
-
-	// Policy defining autoscaler's behavior when unscedulable pods were detected.
-	UnschedulablePods UnschedulablePodsPolicy `json:"unschedulablePods"`
-}
-
 // ProblematicController defines model for ProblematicController.
 type ProblematicController struct {
 
@@ -1488,6 +1395,9 @@ type RebalancingCreateNodeOperationParams struct {
 	// Whether the created node is a spot instance.
 	IsSpot bool `json:"isSpot"`
 
+	// Whether this node is a spot fallback.
+	IsSpotFallback *bool `json:"isSpotFallback,omitempty"`
+
 	// The subnet id of the created node. if empty - the subnet id will be random based on the availability zone.
 	SubnetId *string `json:"subnetId,omitempty"`
 
@@ -1506,6 +1416,9 @@ type RebalancingDeleteNodeOperationParams struct {
 
 	// Whether the node is a spot instance.
 	IsSpot *bool `json:"isSpot,omitempty"`
+
+	// Whether this node is a spot fallback.
+	IsSpotFallback *bool `json:"isSpotFallback,omitempty"`
 }
 
 // RebalancingDiff defines model for RebalancingDiff.
@@ -1532,6 +1445,9 @@ type RebalancingDrainNodeOperationParams struct {
 
 	// Whether the node is a spot instance.
 	IsSpot *bool `json:"isSpot,omitempty"`
+
+	// Whether this node is a spot fallback.
+	IsSpotFallback *bool `json:"isSpotFallback,omitempty"`
 }
 
 // RebalancingNode defines model for RebalancingNode.
@@ -1551,6 +1467,9 @@ type RebalancingNode struct {
 
 	// Whether this node is a spot instance.
 	IsSpot bool `json:"isSpot"`
+
+	// Whether this node is a spot fallback.
+	IsSpotFallback bool `json:"isSpotFallback"`
 
 	// The provider name which managed this node. Possible types:
 	//
@@ -1601,7 +1520,8 @@ type RebalancingPlan struct {
 	DeletedNodesAt *time.Time `json:"deletedNodesAt,omitempty"`
 
 	// Timestamp of the rebalancing plan blue nodes draining. Null if not yet drained.
-	DrainedNodesAt *time.Time `json:"drainedNodesAt,omitempty"`
+	DrainedNodesAt *time.Time              `json:"drainedNodesAt,omitempty"`
+	Errors         *[]RebalancingPlanError `json:"errors,omitempty"`
 
 	// Timestamp of the rebalancing plan finish. Null if not yet finished.
 	FinishedAt *time.Time `json:"finishedAt,omitempty"`
@@ -1640,6 +1560,22 @@ type RebalancingPlan struct {
 
 	// Timestamp of the rebalancing plan last update.
 	UpdatedAt *time.Time `json:"updatedAt,omitempty"`
+}
+
+// RebalancingPlanError defines model for RebalancingPlanError.
+type RebalancingPlanError struct {
+
+	// Detailed error message
+	Message *string `json:"message,omitempty"`
+
+	// Node id.
+	Node *string `json:"node,omitempty"`
+
+	// Pod name.
+	Pod *string `json:"pod,omitempty"`
+
+	// Error reason
+	Reason *string `json:"reason,omitempty"`
 }
 
 // RebalancingPlanOperation defines model for RebalancingPlanOperation.
@@ -1720,55 +1656,11 @@ type ResourceUsageReport struct {
 	ToDate string `json:"toDate"`
 }
 
-// SpotInstances defines model for SpotInstances.
-type SpotInstances struct {
-
-	// Enable/disable spot instances policy.
-	Clouds []string `json:"clouds"`
-
-	// Enable/disable spot instances policy.
-	Enabled bool `json:"enabled"`
-
-	// Max allowed reclaim rate when choosing spot instance type. E.g. if the value is 10%, instance types having
-	// 10% or higher reclaim rate will not be considered. Set to zero to use all instance types regardless of
-	// reclaim rate.
-	MaxReclaimRate *int `json:"maxReclaimRate,omitempty"`
-
-	// Policy defining whether autoscaler can use spot backups instead of spot instances when spot instances are not available.
-	SpotBackups *struct {
-
-		// Enable/disable spot backups policy.
-		Enabled *bool `json:"enabled,omitempty"`
-
-		// Defines interval on how often spot backups restore to real spot should occur
-		SpotBackupRestoreRateSeconds *int `json:"spotBackupRestoreRateSeconds"`
-	} `json:"spotBackups"`
-}
-
 // Taint defines model for Taint.
 type Taint struct {
 	Effect *string `json:"effect,omitempty"`
 	Key    *string `json:"key,omitempty"`
 	Value  *string `json:"value,omitempty"`
-}
-
-// UnschedulablePodsPolicy defines model for UnschedulablePodsPolicy.
-type UnschedulablePodsPolicy struct {
-
-	// Defines default ratio of 1 CPU to Volume GiB when creating new nodes. If set to 25, the ration would be 1 CPU : 25 GiB, for example a node with 16 CPU would have a 400 GiB volume.
-	DiskGibToCpuRatio *int `json:"diskGibToCpuRatio,omitempty"`
-
-	// Enable/disable unschedulable pods detection policy.
-	Enabled bool `json:"enabled"`
-
-	// Additional headroom based on cluster's total available capacity.
-	Headroom Headroom `json:"headroom"`
-
-	// Additional headroom based on cluster's total available capacity.
-	HeadroomSpot *Headroom `json:"headroomSpot,omitempty"`
-
-	// Defines the node constraints that will be applied when autoscaling with Unschedulable Pods policy.
-	NodeConstraints *NodeConstraints `json:"nodeConstraints,omitempty"`
 }
 
 // UpdateAddonRequest defines model for UpdateAddonRequest.
@@ -1816,21 +1708,6 @@ type UserProfileResponse struct {
 
 	// Indicates user first login to the console.
 	FirstLogin *bool `json:"firstLogin,omitempty"`
-}
-
-// ValidNodeConstraint defines model for ValidNodeConstraint.
-type ValidNodeConstraint struct {
-
-	// number of cpu cores
-	CpuCores *int `json:"cpuCores,omitempty"`
-
-	// amount of mebibytes
-	RamMib *int `json:"ramMib,omitempty"`
-}
-
-// ValidNodeConstraints defines model for ValidNodeConstraints.
-type ValidNodeConstraints struct {
-	Items *[]ValidNodeConstraint `json:"items,omitempty"`
 }
 
 // VpnConfig defines model for VpnConfig.
@@ -1928,6 +1805,9 @@ type WorkloadNode struct {
 
 	// Total number of problematic pods in node
 	TotalProblematicPods int `json:"totalProblematicPods"`
+
+	// Total number of this workload replicas on this node
+	WorkloadReplicas *int `json:"workloadReplicas,omitempty"`
 }
 
 // CastaiClusterV1beta1ListNodesResponse defines model for castai.cluster.v1beta1.ListNodesResponse.
@@ -2034,10 +1914,12 @@ type CastaiClusterV1beta1Resources struct {
 
 	// VCPU (in MiB) available on the instance type. Will be populated only with GetNode request.
 	CpuCapacityMilli  *int32 `json:"cpuCapacityMilli"`
+	CpuRequestsMilli  *int32 `json:"cpuRequestsMilli,omitempty"`
 	MemAllocatableMib *int32 `json:"memAllocatableMib,omitempty"`
 
 	// Ram (in MiB) available on the instance type. Will be populated only with GetNode request.
 	MemCapacityMib *int32 `json:"memCapacityMib"`
+	MemRequestsMib *int32 `json:"memRequestsMib,omitempty"`
 }
 
 // CastaiClusterV1beta1Taint defines model for castai.cluster.v1beta1.Taint.
@@ -2078,6 +1960,21 @@ type CastaiMetricsV1beta1NodeMetrics_Labels struct {
 	AdditionalProperties map[string]string `json:"-"`
 }
 
+// CastaiV1Cloud defines model for castai.v1.Cloud.
+type CastaiV1Cloud string
+
+// List of CastaiV1Cloud
+const (
+	CastaiV1Cloud_AWS     CastaiV1Cloud = "AWS"
+	CastaiV1Cloud_AZURE   CastaiV1Cloud = "AZURE"
+	CastaiV1Cloud_GCP     CastaiV1Cloud = "GCP"
+	CastaiV1Cloud_INVALID CastaiV1Cloud = "INVALID"
+	CastaiV1Cloud_aws     CastaiV1Cloud = "aws"
+	CastaiV1Cloud_azure   CastaiV1Cloud = "azure"
+	CastaiV1Cloud_gcp     CastaiV1Cloud = "gcp"
+	CastaiV1Cloud_invalid CastaiV1Cloud = "invalid"
+)
+
 // ClusteractionsV1AckClusterActionResponse defines model for clusteractions.v1.AckClusterActionResponse.
 type ClusteractionsV1AckClusterActionResponse map[string]interface{}
 
@@ -2097,6 +1994,7 @@ type ClusteractionsV1ClusterAction struct {
 	ActionDisconnectCluster *ClusteractionsV1ClusterActionDisconnectCluster `json:"actionDisconnectCluster,omitempty"`
 	ActionDrainNode         *ClusteractionsV1ClusterActionDrainNode         `json:"actionDrainNode,omitempty"`
 	ActionPatchNode         *ClusteractionsV1ClusterActionPatchNode         `json:"actionPatchNode,omitempty"`
+	ActionSendAksInitData   *ClusteractionsV1ClusterActionSendAKSInitData   `json:"actionSendAksInitData,omitempty"`
 	CreatedAt               *time.Time                                      `json:"createdAt,omitempty"`
 	DoneAt                  *time.Time                                      `json:"doneAt,omitempty"`
 	Error                   *string                                         `json:"error"`
@@ -2164,6 +2062,9 @@ type ClusteractionsV1ClusterActionPatchNode_Labels struct {
 	AdditionalProperties map[string]string `json:"-"`
 }
 
+// ClusteractionsV1ClusterActionSendAKSInitData defines model for clusteractions.v1.ClusterActionSendAKSInitData.
+type ClusteractionsV1ClusterActionSendAKSInitData map[string]interface{}
+
 // ClusteractionsV1IngestLogsResponse defines model for clusteractions.v1.IngestLogsResponse.
 type ClusteractionsV1IngestLogsResponse map[string]interface{}
 
@@ -2206,6 +2107,9 @@ type ClusteractionsV1PollClusterActionsResponse struct {
 // ExternalclusterV1AKSClusterParams defines model for externalcluster.v1.AKSClusterParams.
 type ExternalclusterV1AKSClusterParams struct {
 
+	// Max pods per node. Default is 30.
+	MaxPodsPerNode *int32 `json:"maxPodsPerNode,omitempty"`
+
 	// Node resource group of the cluster.
 	NodeResourceGroup *string `json:"nodeResourceGroup,omitempty"`
 
@@ -2226,6 +2130,22 @@ type ExternalclusterV1AddNodeResponse struct {
 	OperationId string `json:"operationId"`
 }
 
+// ExternalclusterV1CloudEvent defines model for externalcluster.v1.CloudEvent.
+type ExternalclusterV1CloudEvent struct {
+
+	// Event type.
+	EventType *string `json:"eventType,omitempty"`
+
+	// Node provider ID, eg.: aws instance-id.
+	Node *string `json:"node,omitempty"`
+
+	// Cast node ID.
+	NodeId *string `json:"nodeId"`
+
+	// Node state.
+	NodeState *string `json:"nodeState,omitempty"`
+}
+
 // ExternalclusterV1Cluster defines model for externalcluster.v1.Cluster.
 type ExternalclusterV1Cluster struct {
 
@@ -2237,6 +2157,9 @@ type ExternalclusterV1Cluster struct {
 
 	// AKSClusterParams defines AKS-specific arguments.
 	Aks *ExternalclusterV1AKSClusterParams `json:"aks,omitempty"`
+
+	// All available zones in cluster's region.
+	AllRegionZones *[]ExternalclusterV1Zone `json:"allRegionZones,omitempty"`
 
 	// User friendly unique cluster identifier.
 	ClusterNameId *string `json:"clusterNameId,omitempty"`
@@ -2277,6 +2200,9 @@ type ExternalclusterV1Cluster struct {
 	// Region represents cluster region.
 	Region *ExternalclusterV1Region `json:"region,omitempty"`
 
+	// Optional SSH public key for nodes.
+	SshPublicKey *string `json:"sshPublicKey"`
+
 	// Current status of the cluster.
 	Status *string `json:"status,omitempty"`
 
@@ -2289,6 +2215,7 @@ type ExternalclusterV1Cluster struct {
 
 // ExternalclusterV1ClusterUpdate defines model for externalcluster.v1.ClusterUpdate.
 type ExternalclusterV1ClusterUpdate struct {
+	Aks *ExternalclusterV1UpdateAKSClusterParams `json:"aks,omitempty"`
 
 	// JSON encoded cluster credentials string.
 	Credentials *string `json:"credentials,omitempty"`
@@ -2296,11 +2223,11 @@ type ExternalclusterV1ClusterUpdate struct {
 	// UpdateEKSClusterParams defines updatable EKS cluster configuration.
 	Eks *ExternalclusterV1UpdateEKSClusterParams `json:"eks,omitempty"`
 
-	// UpdateGKEClusterParams defines updatable GKE cluster configuration.
-	Gke *ExternalclusterV1UpdateGKEClusterParams `json:"gke,omitempty"`
-
 	// UpdateKOPSClusterParams defines updatable KOPS cluster configuration.
 	Kops *ExternalclusterV1UpdateKOPSClusterParams `json:"kops,omitempty"`
+
+	// Optional SSH public key. Value should be base64 encoded. For AWS (eks,kops) it's also allowed to pass key pair id.
+	SshPublicKey *string `json:"sshPublicKey"`
 }
 
 // ExternalclusterV1CreateClusterTokenResponse defines model for externalcluster.v1.CreateClusterTokenResponse.
@@ -2346,7 +2273,8 @@ type ExternalclusterV1EKSClusterParams struct {
 	AccountId *string `json:"accountId,omitempty"`
 
 	// Name of the cluster.
-	ClusterName *string `json:"clusterName,omitempty"`
+	ClusterName  *string `json:"clusterName,omitempty"`
+	DnsClusterIp *string `json:"dnsClusterIp,omitempty"`
 
 	// Output only. Cluster's instance profile ARN used for CAST provisioned nodes.
 	InstanceProfileArn *string `json:"instanceProfileArn,omitempty"`
@@ -2407,6 +2335,9 @@ type ExternalclusterV1GetKubeconfigResponse struct {
 	Kubeconfig *[]byte `json:"kubeconfig,omitempty"`
 }
 
+// ExternalclusterV1HandleCloudEventResponse defines model for externalcluster.v1.HandleCloudEventResponse.
+type ExternalclusterV1HandleCloudEventResponse map[string]interface{}
+
 // ExternalclusterV1KOPSClusterParams defines model for externalcluster.v1.KOPSClusterParams.
 type ExternalclusterV1KOPSClusterParams struct {
 
@@ -2415,6 +2346,9 @@ type ExternalclusterV1KOPSClusterParams struct {
 
 	// Name of the cluster.
 	ClusterName *string `json:"clusterName,omitempty"`
+
+	// Custom vm image. See https://kops.sigs.k8s.io/operations/images for more details.
+	Image *string `json:"image,omitempty"`
 
 	// Region of the cluster.
 	Region *string `json:"region,omitempty"`
@@ -2534,8 +2468,21 @@ type ExternalclusterV1Subnet struct {
 	ZoneName *string `json:"zoneName,omitempty"`
 }
 
+// ExternalclusterV1UpdateAKSClusterParams defines model for externalcluster.v1.UpdateAKSClusterParams.
+type ExternalclusterV1UpdateAKSClusterParams struct {
+
+	// Maximum number of pods that can be run on a node, which affects how many IP addresses you will need for each node. Defaults to 30.
+	// With the Azure CNI plugin you can specify a value between 10 and 250 inclusive, and with the kubenet plugin you can specify a value between 10 and 110 inclusive.
+	MaxPodsPerNode *int32 `json:"maxPodsPerNode,omitempty"`
+
+	// Optional subnet ids for CAST provisioned nodes.
+	// If not set, subnets from AKS cluster configuration are used.
+	Subnets *[]string `json:"subnets,omitempty"`
+}
+
 // ExternalclusterV1UpdateEKSClusterParams defines model for externalcluster.v1.UpdateEKSClusterParams.
 type ExternalclusterV1UpdateEKSClusterParams struct {
+	DnsClusterIp *string `json:"dnsClusterIp,omitempty"`
 
 	// Optional instance profile ARN for CAST provisioned nodes.
 	InstanceProfileArn *string `json:"instanceProfileArn,omitempty"`
@@ -2556,15 +2503,11 @@ type ExternalclusterV1UpdateEKSClusterParams_Tags struct {
 	AdditionalProperties map[string]string `json:"-"`
 }
 
-// ExternalclusterV1UpdateGKEClusterParams defines model for externalcluster.v1.UpdateGKEClusterParams.
-type ExternalclusterV1UpdateGKEClusterParams struct {
-
-	// Location of the cluster.
-	Location *string `json:"location,omitempty"`
-}
-
 // ExternalclusterV1UpdateKOPSClusterParams defines model for externalcluster.v1.UpdateKOPSClusterParams.
 type ExternalclusterV1UpdateKOPSClusterParams struct {
+
+	// Optional custom vm image. See https://kops.sigs.k8s.io/operations/images for more details.
+	Image *string `json:"image,omitempty"`
 
 	// Optional tags for CAST provisioned nodes.
 	Tags *ExternalclusterV1UpdateKOPSClusterParams_Tags `json:"tags,omitempty"`
@@ -2583,6 +2526,197 @@ type ExternalclusterV1Zone struct {
 
 	// Zone name.
 	Name *string `json:"name,omitempty"`
+}
+
+// PoliciesV1ClusterLimitsCpu defines model for policies.v1.ClusterLimitsCpu.
+type PoliciesV1ClusterLimitsCpu struct {
+
+	// Defines the maximum allowed amount of vCPUs in the whole cluster.
+	MaxCores *int32 `json:"maxCores,omitempty"`
+
+	// Defines the minimum allowed amount of CPUs in the whole cluster.
+	MinCores *int32 `json:"minCores,omitempty"`
+}
+
+// PoliciesV1ClusterLimitsPolicy defines model for policies.v1.ClusterLimitsPolicy.
+type PoliciesV1ClusterLimitsPolicy struct {
+
+	// Defines the minimum and maximum amount of vCPUs for cluster's worker nodes.
+	Cpu *PoliciesV1ClusterLimitsCpu `json:"cpu,omitempty"`
+
+	// Enable/disable cluster size limits policy.
+	Enabled *bool `json:"enabled"`
+}
+
+// PoliciesV1Evictor defines model for policies.v1.Evictor.
+type PoliciesV1Evictor struct {
+
+	// Enable/disable aggressive mode. By default, Evictor does not target nodes that are running unreplicated pods.
+	// This mode will make the Evictor start considering application with just a single replica.
+	AggressiveMode *bool `json:"aggressiveMode"`
+
+	// * We have detected an already existing Evictor installation. If you want CAST AI to manage the Evictor instead,
+	//   then you will need to remove the current installation first.
+	Allowed *bool `json:"allowed"`
+
+	// Configure the interval duration between Evictor operations. This property can be used to lower or raise the
+	// frequency of the Evictor's find-and-drain operations.
+	CycleInterval *string `json:"cycleInterval"`
+
+	// Enable/disable dry-run. This property allows you to prevent the Evictor from carrying any operations out and
+	// preview the actions it would take.
+	DryRun *bool `json:"dryRun"`
+
+	// Enable/disable the Evictor policy. This will either install or uninstall the Evictor component in your cluster.
+	Enabled *bool `json:"enabled"`
+
+	// Enable/disable scoped mode. By default, Evictor targets all nodes in the cluster. This mode will constrain in to
+	// just the nodes which were created by CAST AI.
+	ScopedMode *bool `json:"scopedMode"`
+}
+
+// PoliciesV1GetClusterNodeConstraintsResponse defines model for policies.v1.GetClusterNodeConstraintsResponse.
+type PoliciesV1GetClusterNodeConstraintsResponse struct {
+
+	// The ID of the cluster.
+	ClusterId *string `json:"clusterId,omitempty"`
+
+	// A list of viable CPU:Memory combinations.
+	Items *[]PoliciesV1GetClusterNodeConstraintsResponseCpuRam `json:"items,omitempty"`
+}
+
+// PoliciesV1GetClusterNodeConstraintsResponseCpuRam defines model for policies.v1.GetClusterNodeConstraintsResponse.CpuRam.
+type PoliciesV1GetClusterNodeConstraintsResponseCpuRam struct {
+
+	// Number of CPUs.
+	CpuCores *int32 `json:"cpuCores,omitempty"`
+
+	// Number of memory in MiB.
+	RamMib *int32 `json:"ramMib,omitempty"`
+}
+
+// PoliciesV1Headroom defines model for policies.v1.Headroom.
+type PoliciesV1Headroom struct {
+
+	// Defines percentage of additional CPU capacity to be added.
+	CpuPercentage *int32 `json:"cpuPercentage,omitempty"`
+
+	// Defines whether Headroom is enabled.
+	Enabled          *bool  `json:"enabled"`
+	MemoryPercentage *int32 `json:"memoryPercentage,omitempty"`
+}
+
+// PoliciesV1NodeConstraints defines model for policies.v1.NodeConstraints.
+type PoliciesV1NodeConstraints struct {
+
+	// Defines whether NodeConstraints are enabled.
+	Enabled *bool `json:"enabled"`
+
+	// Defines max CPU cores for the node to pick.
+	MaxCpuCores *int32 `json:"maxCpuCores,omitempty"`
+
+	// Defines max RAM in MiB for the node to pick.
+	MaxRamMib *int32 `json:"maxRamMib,omitempty"`
+
+	// Defines min CPU cores for the node to pick.
+	MinCpuCores *int32 `json:"minCpuCores,omitempty"`
+
+	// Defines min RAM in MiB for the node to pick.
+	MinRamMib *int32 `json:"minRamMib,omitempty"`
+}
+
+// PoliciesV1NodeDownscaler defines model for policies.v1.NodeDownscaler.
+type PoliciesV1NodeDownscaler struct {
+
+	// Defines whether Node Downscaler should opt in for removing empty worker nodes when possible.
+	EmptyNodes *PoliciesV1NodeDownscalerEmptyNodes `json:"emptyNodes,omitempty"`
+
+	// Defines the CAST AI Evictor component settings. Evictor watches the pods running in your cluster and looks for
+	// ways to compact them into fewer nodes, making nodes empty, which will be removed by the the empty worker nodes
+	// policy.
+	Evictor *PoliciesV1Evictor `json:"evictor,omitempty"`
+}
+
+// PoliciesV1NodeDownscalerEmptyNodes defines model for policies.v1.NodeDownscalerEmptyNodes.
+type PoliciesV1NodeDownscalerEmptyNodes struct {
+
+	// * increasing the value will make the cluster more responsive to dynamic
+	// * workloads in the expense of higher cluster cost.
+	DelaySeconds *int32 `json:"delaySeconds"`
+
+	// Enable/disable the empty worker nodes policy.
+	Enabled *bool `json:"enabled"`
+}
+
+// PoliciesV1Policies defines model for policies.v1.Policies.
+type PoliciesV1Policies struct {
+
+	// Defines minimum and maximum amount of CPU the cluster can have.
+	ClusterLimits *PoliciesV1ClusterLimitsPolicy `json:"clusterLimits,omitempty"`
+
+	// Enable/disable all policies.
+	Enabled *bool `json:"enabled"`
+
+	// Run autoscaler in scoped mode. Only specifically marked pods will be considered for autoscaling, and only nodes
+	// provisioned by autoscaler will be considered for downscaling.
+	IsScopedMode *bool `json:"isScopedMode"`
+
+	// Node Downscaler defines policies for removing nodes based on the configured conditions.
+	NodeDownscaler *PoliciesV1NodeDownscaler `json:"nodeDownscaler,omitempty"`
+
+	// Policy defining whether autoscaler can use spot instances for provisioning additional workloads.
+	SpotInstances *PoliciesV1SpotInstances `json:"spotInstances,omitempty"`
+
+	// Policy defining autoscaler's behavior when unscedulable pods were detected.
+	UnschedulablePods *PoliciesV1UnschedulablePodsPolicy `json:"unschedulablePods,omitempty"`
+}
+
+// PoliciesV1SpotBackups defines model for policies.v1.SpotBackups.
+type PoliciesV1SpotBackups struct {
+
+	// Enable/disable spot backups policy.
+	Enabled *bool `json:"enabled"`
+
+	// Defines interval on how often spot backups restore to real spot should occur.
+	SpotBackupRestoreRateSeconds *int32 `json:"spotBackupRestoreRateSeconds"`
+}
+
+// PoliciesV1SpotInstances defines model for policies.v1.SpotInstances.
+type PoliciesV1SpotInstances struct {
+
+	// Enable spot instances for these cloud service providers.
+	Clouds *[]CastaiV1Cloud `json:"clouds,omitempty"`
+
+	// Enable/disable spot instances policy.
+	Enabled *bool `json:"enabled"`
+
+	// Max allowed reclaim rate when choosing spot instance type. E.g. if the value is 10%, instance types having 10% or
+	// higher reclaim rate will not be considered. Set to zero to use all instance types regardless of reclaim rate.
+	MaxReclaimRate *int32 `json:"maxReclaimRate"`
+
+	// Policy defining whether autoscaler can use spot backups instead of spot instances when spot instances are not
+	// available.
+	SpotBackups *PoliciesV1SpotBackups `json:"spotBackups,omitempty"`
+}
+
+// PoliciesV1UnschedulablePodsPolicy defines model for policies.v1.UnschedulablePodsPolicy.
+type PoliciesV1UnschedulablePodsPolicy struct {
+
+	// Defines default ratio of 1 CPU to Volume GiB when creating new nodes. If set to 25, the ration would be
+	// 1 CPU : 25 GiB, for example a node with 16 CPU would have a 400 GiB volume.
+	DiskGibToCpuRatio *int32 `json:"diskGibToCpuRatio"`
+
+	// Enable/disable unschedulable pods detection policy.
+	Enabled *bool `json:"enabled"`
+
+	// Defines Headroom for Unschedulable Pods.
+	Headroom *PoliciesV1Headroom `json:"headroom,omitempty"`
+
+	// Defines Headroom for Unschedulable Pods.
+	HeadroomSpot *PoliciesV1Headroom `json:"headroomSpot,omitempty"`
+
+	// Defines the NodeConstraints that will be applied when autoscaling with UnschedulablePodsPolicy.
+	NodeConstraints *PoliciesV1NodeConstraints `json:"nodeConstraints,omitempty"`
 }
 
 // MetricType defines model for MetricType.
@@ -2758,31 +2892,6 @@ type DeleteGslbJSONBody GSLBDeleteRequest
 // CreateOrUpdateGslbJSONBody defines parameters for CreateOrUpdateGslb.
 type CreateOrUpdateGslbJSONBody GSLBRequest
 
-// GetInstanceTypesParams defines parameters for GetInstanceTypes.
-type GetInstanceTypesParams struct {
-
-	// Instance cloud provider name
-	Provider *string `json:"provider,omitempty"`
-
-	// Region of the instance type
-	Region *string `json:"region,omitempty"`
-
-	// Cloud service provider's zone id, if the instance is spot
-	ZoneId *string `json:"zoneId,omitempty"`
-
-	// Name of the instance type
-	InstanceType *string `json:"instanceType,omitempty"`
-
-	// Whether the required instance is spot or not. Omission of the value returns both.
-	SpotInstances *bool `json:"spotInstances,omitempty"`
-
-	// A limit on the number of instance types to be returned, between 1 and 500. Default is 30.
-	PageLimit *int `json:"page.limit,omitempty"`
-
-	// A cursor for use in Instance types pagination. This is a token that defines your place in the list. For instance, if you make a list request - you will receive nextCursor field in response metadata. Given that nextCursor field is not empty, it can be used as a cursor query parameter to get subsequent items. If nextCursor is empty - there are no more items to retrieve.
-	PageCursor *string `json:"page.cursor,omitempty"`
-}
-
 // CreateInvitationJSONBody defines parameters for CreateInvitation.
 type CreateInvitationJSONBody NewInvitations
 
@@ -2834,8 +2943,14 @@ type GetCostHistoryParams struct {
 // GetDashboardMetricsCpuUsageParams defines parameters for GetDashboardMetricsCpuUsage.
 type GetDashboardMetricsCpuUsageParams struct {
 
-	// Metrics period in hours, e.g., periodHours=24
+	// Metrics period in hours, e.g., periodHours=24. This field is ignored if startTime and endTime fields are set.
 	PeriodHours *string `json:"periodHours,omitempty"`
+
+	// Metrics range start time in unix timestamp, e.g., startTime=1640091345020
+	StartTime *string `json:"startTime,omitempty"`
+
+	// Metrics range end time in unix timestamp, e.g., endTime=1640091345030
+	EndTime *string `json:"endTime,omitempty"`
 
 	// Metrics data points steps in seconds, e.g., stepSeconds=3600
 	StepSeconds *string `json:"stepSeconds,omitempty"`
@@ -2844,8 +2959,14 @@ type GetDashboardMetricsCpuUsageParams struct {
 // GetDashboardMetricsMemoryUsageParams defines parameters for GetDashboardMetricsMemoryUsage.
 type GetDashboardMetricsMemoryUsageParams struct {
 
-	// Metrics period in hours, e.g., periodHours=24
+	// Metrics period in hours, e.g., periodHours=24. This field is ignored if startTime and endTime fields are set.
 	PeriodHours *string `json:"periodHours,omitempty"`
+
+	// Metrics range start time in unix timestamp, e.g., startTime=1640091345020
+	StartTime *string `json:"startTime,omitempty"`
+
+	// Metrics range end time in unix timestamp, e.g., endTime=1640091345030
+	EndTime *string `json:"endTime,omitempty"`
 
 	// Metrics data points steps in seconds, e.g., stepSeconds=3600
 	StepSeconds *string `json:"stepSeconds,omitempty"`
@@ -2859,6 +2980,38 @@ type GetClusterMetricsParams struct {
 
 	// The type of metrics to query
 	MetricType MetricType `json:"metricType"`
+}
+
+// GetClusterMetricsCpuUsageParams defines parameters for GetClusterMetricsCpuUsage.
+type GetClusterMetricsCpuUsageParams struct {
+
+	// Metrics period in hours, e.g., periodHours=24. This field is ignored if startTime and endTime fields are set.
+	PeriodHours *string `json:"periodHours,omitempty"`
+
+	// Metrics range start time in unix timestamp, e.g., startTime=1640091345020
+	StartTime *string `json:"startTime,omitempty"`
+
+	// Metrics range end time in unix timestamp, e.g., endTime=1640091345030
+	EndTime *string `json:"endTime,omitempty"`
+
+	// Metrics data points steps in seconds, e.g., stepSeconds=3600
+	StepSeconds *string `json:"stepSeconds,omitempty"`
+}
+
+// GetClusterMetricsMemoryUsageParams defines parameters for GetClusterMetricsMemoryUsage.
+type GetClusterMetricsMemoryUsageParams struct {
+
+	// Metrics period in hours, e.g., periodHours=24. This field is ignored if startTime and endTime fields are set.
+	PeriodHours *string `json:"periodHours,omitempty"`
+
+	// Metrics range start time in unix timestamp, e.g., startTime=1640091345020
+	StartTime *string `json:"startTime,omitempty"`
+
+	// Metrics range end time in unix timestamp, e.g., endTime=1640091345030
+	EndTime *string `json:"endTime,omitempty"`
+
+	// Metrics data points steps in seconds, e.g., stepSeconds=3600
+	StepSeconds *string `json:"stepSeconds,omitempty"`
 }
 
 // GetClusterNodesParams defines parameters for GetClusterNodes.
@@ -2894,8 +3047,8 @@ type PauseClusterJSONBody PauseCluster
 // SetClusterPauseScheduleJSONBody defines parameters for SetClusterPauseSchedule.
 type SetClusterPauseScheduleJSONBody PauseSchedule
 
-// UpsertPoliciesJSONBody defines parameters for UpsertPolicies.
-type UpsertPoliciesJSONBody PoliciesConfig
+// PoliciesAPIUpsertClusterPoliciesJSONBody defines parameters for PoliciesAPIUpsertClusterPolicies.
+type PoliciesAPIUpsertClusterPoliciesJSONBody PoliciesV1Policies
 
 // ListRebalancingPlansParams defines parameters for ListRebalancingPlans.
 type ListRebalancingPlansParams struct {
@@ -2921,6 +3074,9 @@ type ExternalClusterAPIUpdateClusterJSONBody ExternalclusterV1ClusterUpdate
 
 // ExternalClusterAPIDisconnectClusterJSONBody defines parameters for ExternalClusterAPIDisconnectCluster.
 type ExternalClusterAPIDisconnectClusterJSONBody ExternalclusterV1DisconnectConfig
+
+// ExternalClusterAPIHandleCloudEventJSONBody defines parameters for ExternalClusterAPIHandleCloudEvent.
+type ExternalClusterAPIHandleCloudEventJSONBody ExternalclusterV1CloudEvent
 
 // ExternalClusterAPIGetMetricsParams defines parameters for ExternalClusterAPIGetMetrics.
 type ExternalClusterAPIGetMetricsParams struct {
@@ -2956,6 +3112,14 @@ type ExternalClusterAPIDrainNodeJSONBody ExternalclusterV1DrainConfig
 
 // UpdateCurrentUserProfileJSONBody defines parameters for UpdateCurrentUserProfile.
 type UpdateCurrentUserProfileJSONBody UserProfile
+
+// GetPromMetricsParams defines parameters for GetPromMetrics.
+type GetPromMetricsParams struct {
+
+	// Optional cluster names. Values should match castai_cluster label on metrics. It could also be found on GET cluster clusterNameId field.
+	ClusterNames          *[]string             `json:"clusterNames,omitempty"`
+	XCastAiOrganizationId *HeaderOrganizationId `json:"X-CastAi-Organization-Id,omitempty"`
+}
 
 // CreateOrganizationJSONBody defines parameters for CreateOrganization.
 type CreateOrganizationJSONBody Organization
@@ -3042,8 +3206,8 @@ type PauseClusterJSONRequestBody PauseClusterJSONBody
 // SetClusterPauseScheduleJSONRequestBody defines body for SetClusterPauseSchedule for application/json ContentType.
 type SetClusterPauseScheduleJSONRequestBody SetClusterPauseScheduleJSONBody
 
-// UpsertPoliciesJSONRequestBody defines body for UpsertPolicies for application/json ContentType.
-type UpsertPoliciesJSONRequestBody UpsertPoliciesJSONBody
+// PoliciesAPIUpsertClusterPoliciesJSONRequestBody defines body for PoliciesAPIUpsertClusterPolicies for application/json ContentType.
+type PoliciesAPIUpsertClusterPoliciesJSONRequestBody PoliciesAPIUpsertClusterPoliciesJSONBody
 
 // RebalanceJSONRequestBody defines body for Rebalance for application/json ContentType.
 type RebalanceJSONRequestBody RebalanceJSONBody
@@ -3059,6 +3223,9 @@ type ExternalClusterAPIUpdateClusterJSONRequestBody ExternalClusterAPIUpdateClus
 
 // ExternalClusterAPIDisconnectClusterJSONRequestBody defines body for ExternalClusterAPIDisconnectCluster for application/json ContentType.
 type ExternalClusterAPIDisconnectClusterJSONRequestBody ExternalClusterAPIDisconnectClusterJSONBody
+
+// ExternalClusterAPIHandleCloudEventJSONRequestBody defines body for ExternalClusterAPIHandleCloudEvent for application/json ContentType.
+type ExternalClusterAPIHandleCloudEventJSONRequestBody ExternalClusterAPIHandleCloudEventJSONBody
 
 // ExternalClusterAPIAddNodeJSONRequestBody defines body for ExternalClusterAPIAddNode for application/json ContentType.
 type ExternalClusterAPIAddNodeJSONRequestBody ExternalClusterAPIAddNodeJSONBody

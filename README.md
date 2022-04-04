@@ -1,8 +1,8 @@
 <a href="https://cast.ai">
-    <img src="https://cast.ai/wp-content/themes/cast/assets/img/cast-logo-dark-blue.svg" align="right" height="100" />
+    <img src="https://cast.ai/wp-content/themes/cast/img/cast-logo-dark-blue.svg" align="right" height="100" />
 </a>
 
-Terraform Provider for CAST.AI
+Terraform Provider for CAST AI
 ==================
 
 
