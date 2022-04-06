@@ -23,6 +23,7 @@ const (
 	FieldGKEClusterDeleteNodesOnDisconnect = "delete_nodes_on_disconnect"
 	FieldGKEClusterSSHPublicKey            = "ssh_public_key"
 	FieldGKEClusterCredentialsId           = "credentials_id"
+	FieldGKEClusterCredentials             = "credentials_json"
 )
 
 func resourceCastaiGKECluster() *schema.Resource {
@@ -35,7 +36,7 @@ func resourceCastaiGKECluster() *schema.Resource {
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(5 * time.Minute),
 			Update: schema.DefaultTimeout(1 * time.Minute),
-			Delete: schema.DefaultTimeout(2 * time.Minute),
+			Delete: schema.DefaultTimeout(3 * time.Minute),
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -66,6 +67,12 @@ func resourceCastaiGKECluster() *schema.Resource {
 				Computed:  true,
 				Sensitive: true,
 			},
+			FieldGKEClusterCredentials: {
+				Type:             schema.TypeString,
+				Sensitive:        true,
+				Optional:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+			},
 			FieldEKSClusterDeleteNodesOnDisconnect: {
 				Type:     schema.TypeBool,
 				Optional: true,
@@ -88,6 +95,7 @@ func resourceCastaiGKEClusterCreate(ctx context.Context, data *schema.ResourceDa
 	req.Gke = &sdk.ExternalclusterV1GKEClusterParams{
 		ProjectId:   toStringPtr(data.Get(FieldGKEClusterProjectId).(string)),
 		Region:      toStringPtr(data.Get(FieldGKEClusterRegion).(string)),
+		Location:    toStringPtr(data.Get(FieldGKEClusterRegion).(string)),
 		ClusterName: toStringPtr(data.Get(FieldGKEClusterName).(string)),
 	}
 
@@ -234,7 +242,8 @@ func resourceCastaiGKEClusterDelete(ctx context.Context, data *schema.ResourceDa
 }
 func updateGKEClusterSettings(ctx context.Context, data *schema.ResourceData, client *sdk.ClientWithResponses) error {
 	if !data.HasChanges(
-		FieldEKSClusterSSHPublicKey,
+		FieldGKEClusterSSHPublicKey,
+		FieldGKEClusterCredentials,
 	) {
 		log.Printf("[INFO] Nothing to update in cluster setttings.")
 		return nil
@@ -243,6 +252,11 @@ func updateGKEClusterSettings(ctx context.Context, data *schema.ResourceData, cl
 	log.Printf("[INFO] Updating cluster settings.")
 
 	req := sdk.ExternalClusterAPIUpdateClusterJSONRequestBody{}
+
+	credentialsJSON, ok := data.GetOk(FieldGKEClusterCredentials)
+	if ok {
+		req.Credentials = toStringPtr(credentialsJSON.(string))
+	}
 
 	if s, ok := data.GetOk(FieldGKEClusterSSHPublicKey); ok {
 		req.SshPublicKey = toStringPtr(s.(string))
