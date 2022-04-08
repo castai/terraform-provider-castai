@@ -32,6 +32,7 @@ func resourceCastaiGKECluster() *schema.Resource {
 		ReadContext:   resourceCastaiGKEClusterRead,
 		UpdateContext: resourceCastaiGKEClusterUpdate,
 		DeleteContext: resourceCastaiGKEClusterDelete,
+		Description:   "GKE cluster resource allows connecting an existing GEK cluster to CAST AI.",
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(5 * time.Minute),
@@ -45,41 +46,49 @@ func resourceCastaiGKECluster() *schema.Resource {
 				Required:         true,
 				ForceNew:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+				Description:      "GKE cluster name",
 			},
 			FieldGKEClusterCredentialsId: {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "CAST AI credentials id for cluster",
 			},
 			FieldGKEClusterProjectId: {
 				Type:             schema.TypeString,
 				Required:         true,
 				ForceNew:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+				Description:      "GCP project id",
 			},
 			FieldGKEClusterRegion: {
 				Type:             schema.TypeString,
 				Required:         true,
 				ForceNew:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+				Description:      "GCP cluster token",
 			},
 			FieldGKEClusterToken: {
-				Type:      schema.TypeString,
-				Computed:  true,
-				Sensitive: true,
+				Type:        schema.TypeString,
+				Computed:    true,
+				Sensitive:   true,
+				Description: "CAST.AI agent cluster token",
 			},
 			FieldGKEClusterCredentials: {
 				Type:             schema.TypeString,
 				Sensitive:        true,
 				Optional:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+				Description:      "GCP credentials.json from ServiceAccount with credentials for CAST AI",
 			},
-			FieldEKSClusterDeleteNodesOnDisconnect: {
-				Type:     schema.TypeBool,
-				Optional: true,
+			FieldGKEClusterDeleteNodesOnDisconnect: {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Should CAST AI remove nodes managed by CAST.AI on disconnect",
 			},
 			FieldGKEClusterSSHPublicKey: {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "SSHPublicKey for nodes",
 			},
 		},
 	}

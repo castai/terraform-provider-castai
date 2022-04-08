@@ -56,6 +56,6 @@ variable "cluster_zones" {
 
 variable "delete_nodes_on_disconnect" {
   type = bool
-  description = "Optional parameter, if set to true - CAST AI provisioned nodes will be deleted from EC2 on cluster disconnection."
+  description = "Optional parameter, if set to true - CAST AI provisioned nodes will be deleted from cloud on cluster disconnection."
   default = false
 }
