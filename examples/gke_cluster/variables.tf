@@ -6,7 +6,7 @@ variable "cluster_name" {}
 
 variable "castai_api_url" {
   description = "CAST.AI API URL"
-  default = "https://api.cast.ai/"
+  default     = "https://api.cast.ai/"
 }
 
 variable "network_name" {
@@ -22,7 +22,7 @@ variable "ip_range_nodes_name" {
 variable "ip_range_nodes_cidr" {
   description = "The ip range CIDR to use for nodes"
 
-  default     = "10.10.0.0/16"
+  default = "10.10.0.0/16"
 }
 
 variable "ip_range_pods_name" {
@@ -33,7 +33,7 @@ variable "ip_range_pods_name" {
 variable "ip_range_pods_cidr" {
   description = "The ip range CIDR to use for pods"
 
-  default     = "10.20.0.0/16"
+  default = "10.20.0.0/16"
 }
 
 variable "ip_range_services_name" {
@@ -44,7 +44,7 @@ variable "ip_range_services_name" {
 variable "ip_range_services_cidr" {
   description = "The ip range CIDR to use for services"
 
-  default     = "10.30.0.0/24"
+  default = "10.30.0.0/24"
 }
 
 variable "cluster_zones" {
@@ -55,7 +55,7 @@ variable "cluster_zones" {
 }
 
 variable "delete_nodes_on_disconnect" {
-  type = bool
+  type        = bool
   description = "Optional parameter, if set to true - CAST AI provisioned nodes will be deleted from cloud on cluster disconnection."
-  default = false
+  default     = false
 }
