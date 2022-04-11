@@ -8,7 +8,6 @@ provider "helm" {
 
 provider "castai" {
   api_token = var.castai_api_token
-  api_url   = var.castai_api_url
 }
 
 module "castai-gke-iam" {
@@ -23,7 +22,6 @@ module "castai-gke-iam" {
 module "castai-gke-cluster" {
   source = "castai/gke-cluster/castai"
 
-  api_url            = var.castai_api_url
   project_id         = var.project_id
   gke_cluster_name   = var.cluster_name
   gke_cluster_region = var.cluster_region
@@ -55,4 +53,6 @@ module "castai-gke-cluster" {
         }
     }
   EOT
+
+  depends_on = [module.gke]
 }
