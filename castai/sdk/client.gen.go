@@ -374,8 +374,11 @@ type ClientInterface interface {
 
 	ExternalClusterAPIUpdateCluster(ctx context.Context, clusterId string, body ExternalClusterAPIUpdateClusterJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// ExternalClusterAPIGetAssumeRoleUser request
+	ExternalClusterAPIGetAssumeRoleUser(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// ExternalClusterAPIGetCredentialsScript request
-	ExternalClusterAPIGetCredentialsScript(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+	ExternalClusterAPIGetCredentialsScript(ctx context.Context, clusterId string, params *ExternalClusterAPIGetCredentialsScriptParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// ExternalClusterAPIDisconnectCluster request  with any body
 	ExternalClusterAPIDisconnectClusterWithBody(ctx context.Context, clusterId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -417,6 +420,9 @@ type ClientInterface interface {
 
 	// ExternalClusterAPIPauseCluster request
 	ExternalClusterAPIPauseCluster(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// ExternalClusterAPIReconcileCluster request
+	ExternalClusterAPIReconcileCluster(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// ExternalClusterAPIResumeCluster request
 	ExternalClusterAPIResumeCluster(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -480,7 +486,7 @@ type ClientInterface interface {
 	GetUsageReport(ctx context.Context, params *GetUsageReportParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// ExternalClusterAPIGetCredentialsScriptTemplate request
-	ExternalClusterAPIGetCredentialsScriptTemplate(ctx context.Context, provider string, reqEditors ...RequestEditorFn) (*http.Response, error)
+	ExternalClusterAPIGetCredentialsScriptTemplate(ctx context.Context, provider string, params *ExternalClusterAPIGetCredentialsScriptTemplateParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 }
 
 func (c *Client) ListAddons(ctx context.Context, params *ListAddonsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
@@ -1616,8 +1622,19 @@ func (c *Client) ExternalClusterAPIUpdateCluster(ctx context.Context, clusterId 
 	return c.Client.Do(req)
 }
 
-func (c *Client) ExternalClusterAPIGetCredentialsScript(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewExternalClusterAPIGetCredentialsScriptRequest(c.Server, clusterId)
+func (c *Client) ExternalClusterAPIGetAssumeRoleUser(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewExternalClusterAPIGetAssumeRoleUserRequest(c.Server, clusterId)
+	if err != nil {
+		return nil, err
+	}
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) ExternalClusterAPIGetCredentialsScript(ctx context.Context, clusterId string, params *ExternalClusterAPIGetCredentialsScriptParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewExternalClusterAPIGetCredentialsScriptRequest(c.Server, clusterId, params)
 	if err != nil {
 		return nil, err
 	}
@@ -1783,6 +1800,17 @@ func (c *Client) ExternalClusterAPIDrainNode(ctx context.Context, clusterId stri
 
 func (c *Client) ExternalClusterAPIPauseCluster(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewExternalClusterAPIPauseClusterRequest(c.Server, clusterId)
+	if err != nil {
+		return nil, err
+	}
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) ExternalClusterAPIReconcileCluster(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewExternalClusterAPIReconcileClusterRequest(c.Server, clusterId)
 	if err != nil {
 		return nil, err
 	}
@@ -2034,8 +2062,8 @@ func (c *Client) GetUsageReport(ctx context.Context, params *GetUsageReportParam
 	return c.Client.Do(req)
 }
 
-func (c *Client) ExternalClusterAPIGetCredentialsScriptTemplate(ctx context.Context, provider string, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewExternalClusterAPIGetCredentialsScriptTemplateRequest(c.Server, provider)
+func (c *Client) ExternalClusterAPIGetCredentialsScriptTemplate(ctx context.Context, provider string, params *ExternalClusterAPIGetCredentialsScriptTemplateParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewExternalClusterAPIGetCredentialsScriptTemplateRequest(c.Server, provider, params)
 	if err != nil {
 		return nil, err
 	}
@@ -5929,8 +5957,42 @@ func NewExternalClusterAPIUpdateClusterRequestWithBody(server string, clusterId 
 	return req, nil
 }
 
+// NewExternalClusterAPIGetAssumeRoleUserRequest generates requests for ExternalClusterAPIGetAssumeRoleUser
+func NewExternalClusterAPIGetAssumeRoleUserRequest(server string, clusterId string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParam("simple", false, "clusterId", clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	queryUrl, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	basePath := fmt.Sprintf("/v1/kubernetes/external-clusters/%s/assume-role-user", pathParam0)
+	if basePath[0] == '/' {
+		basePath = basePath[1:]
+	}
+
+	queryUrl, err = queryUrl.Parse(basePath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryUrl.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 // NewExternalClusterAPIGetCredentialsScriptRequest generates requests for ExternalClusterAPIGetCredentialsScript
-func NewExternalClusterAPIGetCredentialsScriptRequest(server string, clusterId string) (*http.Request, error) {
+func NewExternalClusterAPIGetCredentialsScriptRequest(server string, clusterId string, params *ExternalClusterAPIGetCredentialsScriptParams) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -5954,6 +6016,26 @@ func NewExternalClusterAPIGetCredentialsScriptRequest(server string, clusterId s
 	if err != nil {
 		return nil, err
 	}
+
+	queryValues := queryUrl.Query()
+
+	if params.CrossRole != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "crossRole", *params.CrossRole); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	queryUrl.RawQuery = queryValues.Encode()
 
 	req, err := http.NewRequest("GET", queryUrl.String(), nil)
 	if err != nil {
@@ -6485,6 +6567,40 @@ func NewExternalClusterAPIPauseClusterRequest(server string, clusterId string) (
 	}
 
 	basePath := fmt.Sprintf("/v1/kubernetes/external-clusters/%s/pause", pathParam0)
+	if basePath[0] == '/' {
+		basePath = basePath[1:]
+	}
+
+	queryUrl, err = queryUrl.Parse(basePath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryUrl.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewExternalClusterAPIReconcileClusterRequest generates requests for ExternalClusterAPIReconcileCluster
+func NewExternalClusterAPIReconcileClusterRequest(server string, clusterId string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParam("simple", false, "clusterId", clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	queryUrl, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	basePath := fmt.Sprintf("/v1/kubernetes/external-clusters/%s/reconcile", pathParam0)
 	if basePath[0] == '/' {
 		basePath = basePath[1:]
 	}
@@ -7194,7 +7310,7 @@ func NewGetUsageReportRequest(server string, params *GetUsageReportParams) (*htt
 }
 
 // NewExternalClusterAPIGetCredentialsScriptTemplateRequest generates requests for ExternalClusterAPIGetCredentialsScriptTemplate
-func NewExternalClusterAPIGetCredentialsScriptTemplateRequest(server string, provider string) (*http.Request, error) {
+func NewExternalClusterAPIGetCredentialsScriptTemplateRequest(server string, provider string, params *ExternalClusterAPIGetCredentialsScriptTemplateParams) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -7218,6 +7334,26 @@ func NewExternalClusterAPIGetCredentialsScriptTemplateRequest(server string, pro
 	if err != nil {
 		return nil, err
 	}
+
+	queryValues := queryUrl.Query()
+
+	if params.CrossRole != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "crossRole", *params.CrossRole); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	queryUrl.RawQuery = queryValues.Encode()
 
 	req, err := http.NewRequest("GET", queryUrl.String(), nil)
 	if err != nil {
@@ -7555,8 +7691,11 @@ type ClientWithResponsesInterface interface {
 
 	ExternalClusterAPIUpdateClusterWithResponse(ctx context.Context, clusterId string, body ExternalClusterAPIUpdateClusterJSONRequestBody) (*ExternalClusterAPIUpdateClusterResponse, error)
 
+	// ExternalClusterAPIGetAssumeRoleUser request
+	ExternalClusterAPIGetAssumeRoleUserWithResponse(ctx context.Context, clusterId string) (*ExternalClusterAPIGetAssumeRoleUserResponse, error)
+
 	// ExternalClusterAPIGetCredentialsScript request
-	ExternalClusterAPIGetCredentialsScriptWithResponse(ctx context.Context, clusterId string) (*ExternalClusterAPIGetCredentialsScriptResponse, error)
+	ExternalClusterAPIGetCredentialsScriptWithResponse(ctx context.Context, clusterId string, params *ExternalClusterAPIGetCredentialsScriptParams) (*ExternalClusterAPIGetCredentialsScriptResponse, error)
 
 	// ExternalClusterAPIDisconnectCluster request  with any body
 	ExternalClusterAPIDisconnectClusterWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader) (*ExternalClusterAPIDisconnectClusterResponse, error)
@@ -7598,6 +7737,9 @@ type ClientWithResponsesInterface interface {
 
 	// ExternalClusterAPIPauseCluster request
 	ExternalClusterAPIPauseClusterWithResponse(ctx context.Context, clusterId string) (*ExternalClusterAPIPauseClusterResponse, error)
+
+	// ExternalClusterAPIReconcileCluster request
+	ExternalClusterAPIReconcileClusterWithResponse(ctx context.Context, clusterId string) (*ExternalClusterAPIReconcileClusterResponse, error)
 
 	// ExternalClusterAPIResumeCluster request
 	ExternalClusterAPIResumeClusterWithResponse(ctx context.Context, clusterId string) (*ExternalClusterAPIResumeClusterResponse, error)
@@ -7661,7 +7803,7 @@ type ClientWithResponsesInterface interface {
 	GetUsageReportWithResponse(ctx context.Context, params *GetUsageReportParams) (*GetUsageReportResponse, error)
 
 	// ExternalClusterAPIGetCredentialsScriptTemplate request
-	ExternalClusterAPIGetCredentialsScriptTemplateWithResponse(ctx context.Context, provider string) (*ExternalClusterAPIGetCredentialsScriptTemplateResponse, error)
+	ExternalClusterAPIGetCredentialsScriptTemplateWithResponse(ctx context.Context, provider string, params *ExternalClusterAPIGetCredentialsScriptTemplateParams) (*ExternalClusterAPIGetCredentialsScriptTemplateResponse, error)
 }
 
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
@@ -10010,6 +10152,36 @@ func (r ExternalClusterAPIUpdateClusterResponse) GetBody() []byte {
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
+type ExternalClusterAPIGetAssumeRoleUserResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *ExternalclusterV1GetAssumeRoleUserResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r ExternalClusterAPIGetAssumeRoleUserResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r ExternalClusterAPIGetAssumeRoleUserResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r ExternalClusterAPIGetAssumeRoleUserResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
 type ExternalClusterAPIGetCredentialsScriptResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -10365,6 +10537,36 @@ func (r ExternalClusterAPIPauseClusterResponse) StatusCode() int {
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
 func (r ExternalClusterAPIPauseClusterResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type ExternalClusterAPIReconcileClusterResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *ExternalclusterV1ReconcileClusterResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r ExternalClusterAPIReconcileClusterResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r ExternalClusterAPIReconcileClusterResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r ExternalClusterAPIReconcileClusterResponse) GetBody() []byte {
 	return r.Body
 }
 
@@ -11810,9 +12012,18 @@ func (c *ClientWithResponses) ExternalClusterAPIUpdateClusterWithResponse(ctx co
 	return ParseExternalClusterAPIUpdateClusterResponse(rsp)
 }
 
+// ExternalClusterAPIGetAssumeRoleUserWithResponse request returning *ExternalClusterAPIGetAssumeRoleUserResponse
+func (c *ClientWithResponses) ExternalClusterAPIGetAssumeRoleUserWithResponse(ctx context.Context, clusterId string) (*ExternalClusterAPIGetAssumeRoleUserResponse, error) {
+	rsp, err := c.ExternalClusterAPIGetAssumeRoleUser(ctx, clusterId)
+	if err != nil {
+		return nil, err
+	}
+	return ParseExternalClusterAPIGetAssumeRoleUserResponse(rsp)
+}
+
 // ExternalClusterAPIGetCredentialsScriptWithResponse request returning *ExternalClusterAPIGetCredentialsScriptResponse
-func (c *ClientWithResponses) ExternalClusterAPIGetCredentialsScriptWithResponse(ctx context.Context, clusterId string) (*ExternalClusterAPIGetCredentialsScriptResponse, error) {
-	rsp, err := c.ExternalClusterAPIGetCredentialsScript(ctx, clusterId)
+func (c *ClientWithResponses) ExternalClusterAPIGetCredentialsScriptWithResponse(ctx context.Context, clusterId string, params *ExternalClusterAPIGetCredentialsScriptParams) (*ExternalClusterAPIGetCredentialsScriptResponse, error) {
+	rsp, err := c.ExternalClusterAPIGetCredentialsScript(ctx, clusterId, params)
 	if err != nil {
 		return nil, err
 	}
@@ -11948,6 +12159,15 @@ func (c *ClientWithResponses) ExternalClusterAPIPauseClusterWithResponse(ctx con
 		return nil, err
 	}
 	return ParseExternalClusterAPIPauseClusterResponse(rsp)
+}
+
+// ExternalClusterAPIReconcileClusterWithResponse request returning *ExternalClusterAPIReconcileClusterResponse
+func (c *ClientWithResponses) ExternalClusterAPIReconcileClusterWithResponse(ctx context.Context, clusterId string) (*ExternalClusterAPIReconcileClusterResponse, error) {
+	rsp, err := c.ExternalClusterAPIReconcileCluster(ctx, clusterId)
+	if err != nil {
+		return nil, err
+	}
+	return ParseExternalClusterAPIReconcileClusterResponse(rsp)
 }
 
 // ExternalClusterAPIResumeClusterWithResponse request returning *ExternalClusterAPIResumeClusterResponse
@@ -12144,8 +12364,8 @@ func (c *ClientWithResponses) GetUsageReportWithResponse(ctx context.Context, pa
 }
 
 // ExternalClusterAPIGetCredentialsScriptTemplateWithResponse request returning *ExternalClusterAPIGetCredentialsScriptTemplateResponse
-func (c *ClientWithResponses) ExternalClusterAPIGetCredentialsScriptTemplateWithResponse(ctx context.Context, provider string) (*ExternalClusterAPIGetCredentialsScriptTemplateResponse, error) {
-	rsp, err := c.ExternalClusterAPIGetCredentialsScriptTemplate(ctx, provider)
+func (c *ClientWithResponses) ExternalClusterAPIGetCredentialsScriptTemplateWithResponse(ctx context.Context, provider string, params *ExternalClusterAPIGetCredentialsScriptTemplateParams) (*ExternalClusterAPIGetCredentialsScriptTemplateResponse, error) {
+	rsp, err := c.ExternalClusterAPIGetCredentialsScriptTemplate(ctx, provider, params)
 	if err != nil {
 		return nil, err
 	}
@@ -14159,6 +14379,32 @@ func ParseExternalClusterAPIUpdateClusterResponse(rsp *http.Response) (*External
 	return response, nil
 }
 
+// ParseExternalClusterAPIGetAssumeRoleUserResponse parses an HTTP response from a ExternalClusterAPIGetAssumeRoleUserWithResponse call
+func ParseExternalClusterAPIGetAssumeRoleUserResponse(rsp *http.Response) (*ExternalClusterAPIGetAssumeRoleUserResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &ExternalClusterAPIGetAssumeRoleUserResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ExternalclusterV1GetAssumeRoleUserResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
 // ParseExternalClusterAPIGetCredentialsScriptResponse parses an HTTP response from a ExternalClusterAPIGetCredentialsScriptWithResponse call
 func ParseExternalClusterAPIGetCredentialsScriptResponse(rsp *http.Response) (*ExternalClusterAPIGetCredentialsScriptResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
@@ -14461,6 +14707,32 @@ func ParseExternalClusterAPIPauseClusterResponse(rsp *http.Response) (*ExternalC
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest ExternalclusterV1Cluster
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseExternalClusterAPIReconcileClusterResponse parses an HTTP response from a ExternalClusterAPIReconcileClusterWithResponse call
+func ParseExternalClusterAPIReconcileClusterResponse(rsp *http.Response) (*ExternalClusterAPIReconcileClusterResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &ExternalClusterAPIReconcileClusterResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ExternalclusterV1ReconcileClusterResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}

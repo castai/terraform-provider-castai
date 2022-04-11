@@ -12,8 +12,8 @@ import (
 )
 
 const (
-	ApiKeyAuthScopes = "ApiKeyAuth.Scopes"
 	BearerAuthScopes = "BearerAuth.Scopes"
+	ApiKeyAuthScopes = "ApiKeyAuth.Scopes"
 )
 
 // AddNodeResult defines model for AddNodeResult.
@@ -452,20 +452,21 @@ type ClusterMetricsCpuUsage struct {
 
 // ClusterMetricsGauges defines model for ClusterMetricsGauges.
 type ClusterMetricsGauges struct {
-	CastaiManagedNodesCount   *int `json:"castaiManagedNodesCount,omitempty"`
-	CpuAllocatableMillicores  *int `json:"cpuAllocatableMillicores,omitempty"`
-	CpuProvisionedMillicores  *int `json:"cpuProvisionedMillicores,omitempty"`
-	CpuRequestedMillicores    *int `json:"cpuRequestedMillicores,omitempty"`
-	MemoryAllocatableBytes    *int `json:"memoryAllocatableBytes,omitempty"`
-	MemoryProvisionedBytes    *int `json:"memoryProvisionedBytes,omitempty"`
-	MemoryRequestedBytes      *int `json:"memoryRequestedBytes,omitempty"`
-	OnDemandNodesCount        *int `json:"onDemandNodesCount,omitempty"`
-	ProviderManagedNodesCount *int `json:"providerManagedNodesCount,omitempty"`
-	ScheduledPodsCount        *int `json:"scheduledPodsCount,omitempty"`
-	SpotNodesCount            *int `json:"spotNodesCount,omitempty"`
-	TotalNodesCount           *int `json:"totalNodesCount,omitempty"`
-	TotalPodsCount            *int `json:"totalPodsCount,omitempty"`
-	UnscheduledPodsCount      *int `json:"unscheduledPodsCount,omitempty"`
+	CastaiManagedNodesCount      *int `json:"castaiManagedNodesCount,omitempty"`
+	CastaiSpotFallbackNodesCount *int `json:"castaiSpotFallbackNodesCount,omitempty"`
+	CpuAllocatableMillicores     *int `json:"cpuAllocatableMillicores,omitempty"`
+	CpuProvisionedMillicores     *int `json:"cpuProvisionedMillicores,omitempty"`
+	CpuRequestedMillicores       *int `json:"cpuRequestedMillicores,omitempty"`
+	MemoryAllocatableBytes       *int `json:"memoryAllocatableBytes,omitempty"`
+	MemoryProvisionedBytes       *int `json:"memoryProvisionedBytes,omitempty"`
+	MemoryRequestedBytes         *int `json:"memoryRequestedBytes,omitempty"`
+	OnDemandNodesCount           *int `json:"onDemandNodesCount,omitempty"`
+	ProviderManagedNodesCount    *int `json:"providerManagedNodesCount,omitempty"`
+	ScheduledPodsCount           *int `json:"scheduledPodsCount,omitempty"`
+	SpotNodesCount               *int `json:"spotNodesCount,omitempty"`
+	TotalNodesCount              *int `json:"totalNodesCount,omitempty"`
+	TotalPodsCount               *int `json:"totalPodsCount,omitempty"`
+	UnscheduledPodsCount         *int `json:"unscheduledPodsCount,omitempty"`
 }
 
 // ClusterMetricsMemoryUsage defines model for ClusterMetricsMemoryUsage.
@@ -1988,6 +1989,7 @@ type ClusteractionsV1ChartSource struct {
 // ClusteractionsV1ClusterAction defines model for clusteractions.v1.ClusterAction.
 type ClusteractionsV1ClusterAction struct {
 	ActionApproveCsr        *ClusteractionsV1ClusterActionApproveCSR        `json:"actionApproveCsr,omitempty"`
+	ActionChartUninstall    *ClusteractionsV1ClusterActionChartUninstall    `json:"actionChartUninstall,omitempty"`
 	ActionChartUpsert       *ClusteractionsV1ClusterActionChartUpsert       `json:"actionChartUpsert,omitempty"`
 	ActionCreateEvent       *ClusteractionsV1ClusterActionCreateEvent       `json:"actionCreateEvent,omitempty"`
 	ActionDeleteNode        *ClusteractionsV1ClusterActionDeleteNode        `json:"actionDeleteNode,omitempty"`
@@ -2009,6 +2011,12 @@ type ClusteractionsV1ClusterActionAck struct {
 // ClusteractionsV1ClusterActionApproveCSR defines model for clusteractions.v1.ClusterActionApproveCSR.
 type ClusteractionsV1ClusterActionApproveCSR struct {
 	NodeName *string `json:"nodeName,omitempty"`
+}
+
+// ClusteractionsV1ClusterActionChartUninstall defines model for clusteractions.v1.ClusterActionChartUninstall.
+type ClusteractionsV1ClusterActionChartUninstall struct {
+	Namespace   *string `json:"namespace,omitempty"`
+	ReleaseName *string `json:"releaseName,omitempty"`
 }
 
 // ClusteractionsV1ClusterActionChartUpsert defines model for clusteractions.v1.ClusterActionChartUpsert.
@@ -2270,7 +2278,8 @@ type ExternalclusterV1DrainNodeResponse struct {
 type ExternalclusterV1EKSClusterParams struct {
 
 	// AWS Account ID where cluster runs.
-	AccountId *string `json:"accountId,omitempty"`
+	AccountId     *string `json:"accountId,omitempty"`
+	AssumeRoleArn *string `json:"assumeRoleArn,omitempty"`
 
 	// Name of the cluster.
 	ClusterName  *string `json:"clusterName,omitempty"`
@@ -2321,6 +2330,11 @@ type ExternalclusterV1GPUConfig struct {
 
 	// GPU type.
 	Type *string `json:"type,omitempty"`
+}
+
+// ExternalclusterV1GetAssumeRoleUserResponse defines model for externalcluster.v1.GetAssumeRoleUserResponse.
+type ExternalclusterV1GetAssumeRoleUserResponse struct {
+	Arn *string `json:"arn,omitempty"`
 }
 
 // ExternalclusterV1GetCredentialsScriptResponse defines model for externalcluster.v1.GetCredentialsScriptResponse.
@@ -2420,6 +2434,9 @@ type ExternalclusterV1NodeVolume struct {
 	Size *int32 `json:"size,omitempty"`
 }
 
+// ExternalclusterV1ReconcileClusterResponse defines model for externalcluster.v1.ReconcileClusterResponse.
+type ExternalclusterV1ReconcileClusterResponse map[string]interface{}
+
 // ExternalclusterV1Region defines model for externalcluster.v1.Region.
 type ExternalclusterV1Region struct {
 
@@ -2482,7 +2499,8 @@ type ExternalclusterV1UpdateAKSClusterParams struct {
 
 // ExternalclusterV1UpdateEKSClusterParams defines model for externalcluster.v1.UpdateEKSClusterParams.
 type ExternalclusterV1UpdateEKSClusterParams struct {
-	DnsClusterIp *string `json:"dnsClusterIp,omitempty"`
+	AssumeRoleArn *string `json:"assumeRoleArn,omitempty"`
+	DnsClusterIp  *string `json:"dnsClusterIp,omitempty"`
 
 	// Optional instance profile ARN for CAST provisioned nodes.
 	InstanceProfileArn *string `json:"instanceProfileArn,omitempty"`
@@ -3072,6 +3090,11 @@ type ExternalClusterAPIRegisterClusterJSONBody ExternalclusterV1RegisterClusterR
 // ExternalClusterAPIUpdateClusterJSONBody defines parameters for ExternalClusterAPIUpdateCluster.
 type ExternalClusterAPIUpdateClusterJSONBody ExternalclusterV1ClusterUpdate
 
+// ExternalClusterAPIGetCredentialsScriptParams defines parameters for ExternalClusterAPIGetCredentialsScript.
+type ExternalClusterAPIGetCredentialsScriptParams struct {
+	CrossRole *bool `json:"crossRole,omitempty"`
+}
+
 // ExternalClusterAPIDisconnectClusterJSONBody defines parameters for ExternalClusterAPIDisconnectCluster.
 type ExternalClusterAPIDisconnectClusterJSONBody ExternalclusterV1DisconnectConfig
 
@@ -3144,6 +3167,11 @@ type GetUsageReportParams struct {
 
 	// Request filter parameter declaring point of time until which the results should be returned. Moment in time must be declared in RFC3339 format. https://tools.ietf.org/html/rfc3339
 	ToDate *FilterToDate `json:"toDate,omitempty"`
+}
+
+// ExternalClusterAPIGetCredentialsScriptTemplateParams defines parameters for ExternalClusterAPIGetCredentialsScriptTemplate.
+type ExternalClusterAPIGetCredentialsScriptTemplateParams struct {
+	CrossRole *bool `json:"crossRole,omitempty"`
 }
 
 // CreateAuthTokenJSONRequestBody defines body for CreateAuthToken for application/json ContentType.
