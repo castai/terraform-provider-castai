@@ -5,9 +5,8 @@
 package main
 
 import (
-	"github.com/hashicorp/terraform-plugin-sdk/v2/plugin"
-
 	"github.com/castai/terraform-provider-castai/castai"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/plugin"
 )
 
 func main() {
