@@ -37,7 +37,7 @@ func resourceCastaiGKECluster() *schema.Resource {
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(5 * time.Minute),
 			Update: schema.DefaultTimeout(1 * time.Minute),
-			Delete: schema.DefaultTimeout(6 * time.Minute), // Cluster action timeout is 5 minutes
+			Delete: schema.DefaultTimeout(6 * time.Minute), // Cluster action timeout is 5 minutes.
 		},
 
 		Schema: map[string]*schema.Schema{
