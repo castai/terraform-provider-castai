@@ -31,13 +31,14 @@ func Provider() *schema.Provider {
 			"castai_cluster":     resourceCastaiCluster(),
 			"castai_eks_cluster": resourceCastaiEKSCluster(),
 			"castai_autoscaler":  resourceCastaiAutoscaler(),
+			"castai_gke_cluster": resourceCastaiGKECluster(),
 		},
 
 		DataSourcesMap: map[string]*schema.Resource{
-			"castai_credentials": dataSourceCastaiCredentials(),
-			"castai_cluster":     dataSourceCastaiCluster(),
-			"castai_eks_settings": dataSourceCastaiEKSSettings(),
-			"castai_gke_user_policies":  dataSourceGKEPolicies(),
+			"castai_credentials":       dataSourceCastaiCredentials(),
+			"castai_cluster":           dataSourceCastaiCluster(),
+			"castai_eks_settings":      dataSourceCastaiEKSSettings(),
+			"castai_gke_user_policies": dataSourceGKEPolicies(),
 		},
 
 		ConfigureContextFunc: providerConfigure(),
