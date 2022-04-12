@@ -2,9 +2,6 @@ name: Build
 on:
   push:
     branches: [ '*' ]
-    paths-ignore:
-      - '**.md'
-      - 'examples/**'
 jobs:
   build:
     name: Build
