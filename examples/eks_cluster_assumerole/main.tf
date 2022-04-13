@@ -12,7 +12,6 @@ provider "helm" {
 
 provider "castai" {
   api_token = var.castai_api_token
-  api_url = "https://api-matas.bridge.dev-master.cast.ai"
 }
 
 provider "kubernetes" {
@@ -35,9 +34,6 @@ data "castai_eks_user_arn" "castai_user_arn" {
   cluster_id = data.castai_eks_clusterid.castai_cluster_id.id
 }
 
-data "aws_eks_cluster" "eks" {
-  name = module.eks.cluster_id
-}
 
 module "castai-eks-role-iam" {
   source  = "../../../terraform-castai-eks-role-iam"
@@ -67,6 +63,4 @@ module "castai-eks-cluster" {
   tags            = var.tags
 
   delete_nodes_on_disconnect = var.delete_nodes_on_disconnect
-
-  api_url = "https://api-matas.bridge.dev-master.cast.ai"
 }
