@@ -22,7 +22,7 @@ const (
 	FieldEKSClusterRegion                  = "region"
 	FieldEKSClusterAccessKeyId             = "access_key_id"
 	FieldEKSClusterSecretAccessKey         = "secret_access_key"
-	FieldEKSClusterAssumeRoleArn 		   = "assume_role_arn"
+	FieldEKSClusterAssumeRoleArn           = "assume_role_arn"
 	FieldEKSClusterInstanceProfileArn      = "instance_profile_arn"
 	FieldEKSClusterSecurityGroups          = "security_groups"
 	FieldEKSClusterSubnets                 = "subnets"
@@ -68,17 +68,17 @@ func resourceCastaiEKSCluster() *schema.Resource {
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 			FieldEKSClusterAccessKeyId: {
-				Type:             schema.TypeString,
-				Sensitive:        true,
-				Optional:         true,
+				Type:      schema.TypeString,
+				Sensitive: true,
+				Optional:  true,
 			},
 			FieldEKSClusterSecretAccessKey: {
-				Type:             schema.TypeString,
-				Sensitive:        true,
-				Optional:         true,
+				Type:      schema.TypeString,
+				Sensitive: true,
+				Optional:  true,
 			},
 			FieldEKSClusterAssumeRoleArn: {
-				Type: schema.TypeString,
+				Type:     schema.TypeString,
 				Optional: true,
 			},
 			FieldEKSClusterInstanceProfileArn: {
