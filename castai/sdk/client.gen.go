@@ -396,9 +396,6 @@ type ClientInterface interface {
 	// ExternalClusterAPIGetKubeconfig request
 	ExternalClusterAPIGetKubeconfig(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// ExternalClusterAPIGetMetrics request
-	ExternalClusterAPIGetMetrics(ctx context.Context, clusterId string, params *ExternalClusterAPIGetMetricsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
-
 	// ExternalClusterAPIListNodes request
 	ExternalClusterAPIListNodes(ctx context.Context, clusterId string, params *ExternalClusterAPIListNodesParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -1701,17 +1698,6 @@ func (c *Client) ExternalClusterAPIHandleCloudEvent(ctx context.Context, cluster
 
 func (c *Client) ExternalClusterAPIGetKubeconfig(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewExternalClusterAPIGetKubeconfigRequest(c.Server, clusterId)
-	if err != nil {
-		return nil, err
-	}
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
-func (c *Client) ExternalClusterAPIGetMetrics(ctx context.Context, clusterId string, params *ExternalClusterAPIGetMetricsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewExternalClusterAPIGetMetricsRequest(c.Server, clusterId, params)
 	if err != nil {
 		return nil, err
 	}
@@ -6207,60 +6193,6 @@ func NewExternalClusterAPIGetKubeconfigRequest(server string, clusterId string) 
 	return req, nil
 }
 
-// NewExternalClusterAPIGetMetricsRequest generates requests for ExternalClusterAPIGetMetrics
-func NewExternalClusterAPIGetMetricsRequest(server string, clusterId string, params *ExternalClusterAPIGetMetricsParams) (*http.Request, error) {
-	var err error
-
-	var pathParam0 string
-
-	pathParam0, err = runtime.StyleParam("simple", false, "clusterId", clusterId)
-	if err != nil {
-		return nil, err
-	}
-
-	queryUrl, err := url.Parse(server)
-	if err != nil {
-		return nil, err
-	}
-
-	basePath := fmt.Sprintf("/v1/kubernetes/external-clusters/%s/metrics", pathParam0)
-	if basePath[0] == '/' {
-		basePath = basePath[1:]
-	}
-
-	queryUrl, err = queryUrl.Parse(basePath)
-	if err != nil {
-		return nil, err
-	}
-
-	queryValues := queryUrl.Query()
-
-	if params.MetricType != nil {
-
-		if queryFrag, err := runtime.StyleParam("form", true, "metricType", *params.MetricType); err != nil {
-			return nil, err
-		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
-			return nil, err
-		} else {
-			for k, v := range parsed {
-				for _, v2 := range v {
-					queryValues.Add(k, v2)
-				}
-			}
-		}
-
-	}
-
-	queryUrl.RawQuery = queryValues.Encode()
-
-	req, err := http.NewRequest("GET", queryUrl.String(), nil)
-	if err != nil {
-		return nil, err
-	}
-
-	return req, nil
-}
-
 // NewExternalClusterAPIListNodesRequest generates requests for ExternalClusterAPIListNodes
 func NewExternalClusterAPIListNodesRequest(server string, clusterId string, params *ExternalClusterAPIListNodesParams) (*http.Request, error) {
 	var err error
@@ -7712,9 +7644,6 @@ type ClientWithResponsesInterface interface {
 
 	// ExternalClusterAPIGetKubeconfig request
 	ExternalClusterAPIGetKubeconfigWithResponse(ctx context.Context, clusterId string) (*ExternalClusterAPIGetKubeconfigResponse, error)
-
-	// ExternalClusterAPIGetMetrics request
-	ExternalClusterAPIGetMetricsWithResponse(ctx context.Context, clusterId string, params *ExternalClusterAPIGetMetricsParams) (*ExternalClusterAPIGetMetricsResponse, error)
 
 	// ExternalClusterAPIListNodes request
 	ExternalClusterAPIListNodesWithResponse(ctx context.Context, clusterId string, params *ExternalClusterAPIListNodesParams) (*ExternalClusterAPIListNodesResponse, error)
@@ -10332,36 +10261,6 @@ func (r ExternalClusterAPIGetKubeconfigResponse) GetBody() []byte {
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
-type ExternalClusterAPIGetMetricsResponse struct {
-	Body         []byte
-	HTTPResponse *http.Response
-	JSON200      *CastaiMetricsV1beta1GetClusterMetricsResponse
-}
-
-// Status returns HTTPResponse.Status
-func (r ExternalClusterAPIGetMetricsResponse) Status() string {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.Status
-	}
-	return http.StatusText(0)
-}
-
-// StatusCode returns HTTPResponse.StatusCode
-func (r ExternalClusterAPIGetMetricsResponse) StatusCode() int {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.StatusCode
-	}
-	return 0
-}
-
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r ExternalClusterAPIGetMetricsResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-
 type ExternalClusterAPIListNodesResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -12080,15 +11979,6 @@ func (c *ClientWithResponses) ExternalClusterAPIGetKubeconfigWithResponse(ctx co
 		return nil, err
 	}
 	return ParseExternalClusterAPIGetKubeconfigResponse(rsp)
-}
-
-// ExternalClusterAPIGetMetricsWithResponse request returning *ExternalClusterAPIGetMetricsResponse
-func (c *ClientWithResponses) ExternalClusterAPIGetMetricsWithResponse(ctx context.Context, clusterId string, params *ExternalClusterAPIGetMetricsParams) (*ExternalClusterAPIGetMetricsResponse, error) {
-	rsp, err := c.ExternalClusterAPIGetMetrics(ctx, clusterId, params)
-	if err != nil {
-		return nil, err
-	}
-	return ParseExternalClusterAPIGetMetricsResponse(rsp)
 }
 
 // ExternalClusterAPIListNodesWithResponse request returning *ExternalClusterAPIListNodesResponse
@@ -14525,32 +14415,6 @@ func ParseExternalClusterAPIGetKubeconfigResponse(rsp *http.Response) (*External
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest ExternalclusterV1GetKubeconfigResponse
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON200 = &dest
-
-	}
-
-	return response, nil
-}
-
-// ParseExternalClusterAPIGetMetricsResponse parses an HTTP response from a ExternalClusterAPIGetMetricsWithResponse call
-func ParseExternalClusterAPIGetMetricsResponse(rsp *http.Response) (*ExternalClusterAPIGetMetricsResponse, error) {
-	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
-	if err != nil {
-		return nil, err
-	}
-
-	response := &ExternalClusterAPIGetMetricsResponse{
-		Body:         bodyBytes,
-		HTTPResponse: rsp,
-	}
-
-	switch {
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest CastaiMetricsV1beta1GetClusterMetricsResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}

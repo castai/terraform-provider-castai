@@ -12,8 +12,8 @@ import (
 )
 
 const (
-	BearerAuthScopes = "BearerAuth.Scopes"
 	ApiKeyAuthScopes = "ApiKeyAuth.Scopes"
+	BearerAuthScopes = "BearerAuth.Scopes"
 )
 
 // AddNodeResult defines model for AddNodeResult.
@@ -1930,37 +1930,6 @@ type CastaiClusterV1beta1Taint struct {
 	Value  *string `json:"value,omitempty"`
 }
 
-// CastaiMetricsV1beta1CloudMetrics defines model for castai.metrics.v1beta1.CloudMetrics.
-type CastaiMetricsV1beta1CloudMetrics struct {
-	Labels                 *CastaiMetricsV1beta1CloudMetrics_Labels `json:"labels,omitempty"`
-	PodCount               *int32                                   `json:"podCount,omitempty"`
-	RequestedCPUPercentage *int32                                   `json:"requestedCPUPercentage,omitempty"`
-	RequestedMemPercentage *int32                                   `json:"requestedMemPercentage,omitempty"`
-}
-
-// CastaiMetricsV1beta1CloudMetrics_Labels defines model for CastaiMetricsV1beta1CloudMetrics.Labels.
-type CastaiMetricsV1beta1CloudMetrics_Labels struct {
-	AdditionalProperties map[string]string `json:"-"`
-}
-
-// CastaiMetricsV1beta1GetClusterMetricsResponse defines model for castai.metrics.v1beta1.GetClusterMetricsResponse.
-type CastaiMetricsV1beta1GetClusterMetricsResponse struct {
-	CloudMetrics *[]CastaiMetricsV1beta1CloudMetrics `json:"cloudMetrics,omitempty"`
-	NodeMetrics  *[]CastaiMetricsV1beta1NodeMetrics  `json:"nodeMetrics,omitempty"`
-}
-
-// CastaiMetricsV1beta1NodeMetrics defines model for castai.metrics.v1beta1.NodeMetrics.
-type CastaiMetricsV1beta1NodeMetrics struct {
-	Labels                 *CastaiMetricsV1beta1NodeMetrics_Labels `json:"labels,omitempty"`
-	RequestedCPUPercentage *int32                                  `json:"requestedCPUPercentage,omitempty"`
-	RequestedMemPercentage *int32                                  `json:"requestedMemPercentage,omitempty"`
-}
-
-// CastaiMetricsV1beta1NodeMetrics_Labels defines model for CastaiMetricsV1beta1NodeMetrics.Labels.
-type CastaiMetricsV1beta1NodeMetrics_Labels struct {
-	AdditionalProperties map[string]string `json:"-"`
-}
-
 // CastaiV1Cloud defines model for castai.v1.Cloud.
 type CastaiV1Cloud string
 
@@ -2034,7 +2003,9 @@ type ClusteractionsV1ClusterActionChartUpsert_ValuesOverrides struct {
 
 // ClusteractionsV1ClusterActionCreateEvent defines model for clusteractions.v1.ClusterActionCreateEvent.
 type ClusteractionsV1ClusterActionCreateEvent struct {
-	Action             *string                          `json:"action,omitempty"`
+	Action *string `json:"action,omitempty"`
+
+	// Event time should not be set during action scheduling. It's added during actions poll.
 	EventTime          *time.Time                       `json:"eventTime,omitempty"`
 	EventType          *string                          `json:"eventType,omitempty"`
 	Message            *string                          `json:"message,omitempty"`
@@ -2195,9 +2166,6 @@ type ExternalclusterV1Cluster struct {
 
 	// The cluster's organization ID.
 	OrganizationId *string `json:"organizationId,omitempty"`
-
-	// Private indicates if managed cluster's k8s api is private or public.
-	Private *bool `json:"private,omitempty"`
 
 	// Cluster cloud provider type.
 	ProviderType *string `json:"providerType,omitempty"`
@@ -2474,6 +2442,9 @@ type ExternalclusterV1RegisterClusterRequest struct {
 
 // ExternalclusterV1Subnet defines model for externalcluster.v1.Subnet.
 type ExternalclusterV1Subnet struct {
+
+	// Cidr block of the subnet.
+	Cidr *string `json:"cidr,omitempty"`
 
 	// The ID of the subnet.
 	Id *string `json:"id,omitempty"`
@@ -3100,13 +3071,6 @@ type ExternalClusterAPIDisconnectClusterJSONBody ExternalclusterV1DisconnectConf
 
 // ExternalClusterAPIHandleCloudEventJSONBody defines parameters for ExternalClusterAPIHandleCloudEvent.
 type ExternalClusterAPIHandleCloudEventJSONBody ExternalclusterV1CloudEvent
-
-// ExternalClusterAPIGetMetricsParams defines parameters for ExternalClusterAPIGetMetrics.
-type ExternalClusterAPIGetMetricsParams struct {
-
-	// The type of metrics to retrieve.
-	MetricType *[]string `json:"metricType,omitempty"`
-}
 
 // ExternalClusterAPIListNodesParams defines parameters for ExternalClusterAPIListNodes.
 type ExternalClusterAPIListNodesParams struct {
@@ -4059,112 +4023,6 @@ func (a *CastaiClusterV1beta1Node_Labels) UnmarshalJSON(b []byte) error {
 
 // Override default JSON handling for CastaiClusterV1beta1Node_Labels to handle AdditionalProperties
 func (a CastaiClusterV1beta1Node_Labels) MarshalJSON() ([]byte, error) {
-	var err error
-	object := make(map[string]json.RawMessage)
-
-	for fieldName, field := range a.AdditionalProperties {
-		object[fieldName], err = json.Marshal(field)
-		if err != nil {
-			return nil, errors.Wrap(err, fmt.Sprintf("error marshaling '%s'", fieldName))
-		}
-	}
-	return json.Marshal(object)
-}
-
-// Getter for additional properties for CastaiMetricsV1beta1CloudMetrics_Labels. Returns the specified
-// element and whether it was found
-func (a CastaiMetricsV1beta1CloudMetrics_Labels) Get(fieldName string) (value string, found bool) {
-	if a.AdditionalProperties != nil {
-		value, found = a.AdditionalProperties[fieldName]
-	}
-	return
-}
-
-// Setter for additional properties for CastaiMetricsV1beta1CloudMetrics_Labels
-func (a *CastaiMetricsV1beta1CloudMetrics_Labels) Set(fieldName string, value string) {
-	if a.AdditionalProperties == nil {
-		a.AdditionalProperties = make(map[string]string)
-	}
-	a.AdditionalProperties[fieldName] = value
-}
-
-// Override default JSON handling for CastaiMetricsV1beta1CloudMetrics_Labels to handle AdditionalProperties
-func (a *CastaiMetricsV1beta1CloudMetrics_Labels) UnmarshalJSON(b []byte) error {
-	object := make(map[string]json.RawMessage)
-	err := json.Unmarshal(b, &object)
-	if err != nil {
-		return err
-	}
-
-	if len(object) != 0 {
-		a.AdditionalProperties = make(map[string]string)
-		for fieldName, fieldBuf := range object {
-			var fieldVal string
-			err := json.Unmarshal(fieldBuf, &fieldVal)
-			if err != nil {
-				return errors.Wrap(err, fmt.Sprintf("error unmarshaling field %s", fieldName))
-			}
-			a.AdditionalProperties[fieldName] = fieldVal
-		}
-	}
-	return nil
-}
-
-// Override default JSON handling for CastaiMetricsV1beta1CloudMetrics_Labels to handle AdditionalProperties
-func (a CastaiMetricsV1beta1CloudMetrics_Labels) MarshalJSON() ([]byte, error) {
-	var err error
-	object := make(map[string]json.RawMessage)
-
-	for fieldName, field := range a.AdditionalProperties {
-		object[fieldName], err = json.Marshal(field)
-		if err != nil {
-			return nil, errors.Wrap(err, fmt.Sprintf("error marshaling '%s'", fieldName))
-		}
-	}
-	return json.Marshal(object)
-}
-
-// Getter for additional properties for CastaiMetricsV1beta1NodeMetrics_Labels. Returns the specified
-// element and whether it was found
-func (a CastaiMetricsV1beta1NodeMetrics_Labels) Get(fieldName string) (value string, found bool) {
-	if a.AdditionalProperties != nil {
-		value, found = a.AdditionalProperties[fieldName]
-	}
-	return
-}
-
-// Setter for additional properties for CastaiMetricsV1beta1NodeMetrics_Labels
-func (a *CastaiMetricsV1beta1NodeMetrics_Labels) Set(fieldName string, value string) {
-	if a.AdditionalProperties == nil {
-		a.AdditionalProperties = make(map[string]string)
-	}
-	a.AdditionalProperties[fieldName] = value
-}
-
-// Override default JSON handling for CastaiMetricsV1beta1NodeMetrics_Labels to handle AdditionalProperties
-func (a *CastaiMetricsV1beta1NodeMetrics_Labels) UnmarshalJSON(b []byte) error {
-	object := make(map[string]json.RawMessage)
-	err := json.Unmarshal(b, &object)
-	if err != nil {
-		return err
-	}
-
-	if len(object) != 0 {
-		a.AdditionalProperties = make(map[string]string)
-		for fieldName, fieldBuf := range object {
-			var fieldVal string
-			err := json.Unmarshal(fieldBuf, &fieldVal)
-			if err != nil {
-				return errors.Wrap(err, fmt.Sprintf("error unmarshaling field %s", fieldName))
-			}
-			a.AdditionalProperties[fieldName] = fieldVal
-		}
-	}
-	return nil
-}
-
-// Override default JSON handling for CastaiMetricsV1beta1NodeMetrics_Labels to handle AdditionalProperties
-func (a CastaiMetricsV1beta1NodeMetrics_Labels) MarshalJSON() ([]byte, error) {
 	var err error
 	object := make(map[string]json.RawMessage)
 

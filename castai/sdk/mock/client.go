@@ -2294,26 +2294,6 @@ func (mr *MockClientInterfaceMockRecorder) ExternalClusterAPIGetKubeconfig(ctx, 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIGetKubeconfig", reflect.TypeOf((*MockClientInterface)(nil).ExternalClusterAPIGetKubeconfig), varargs...)
 }
 
-// ExternalClusterAPIGetMetrics mocks base method
-func (m *MockClientInterface) ExternalClusterAPIGetMetrics(ctx context.Context, clusterId string, params *sdk.ExternalClusterAPIGetMetricsParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
-	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, clusterId, params}
-	for _, a := range reqEditors {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "ExternalClusterAPIGetMetrics", varargs...)
-	ret0, _ := ret[0].(*http.Response)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// ExternalClusterAPIGetMetrics indicates an expected call of ExternalClusterAPIGetMetrics
-func (mr *MockClientInterfaceMockRecorder) ExternalClusterAPIGetMetrics(ctx, clusterId, params interface{}, reqEditors ...interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, clusterId, params}, reqEditors...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIGetMetrics", reflect.TypeOf((*MockClientInterface)(nil).ExternalClusterAPIGetMetrics), varargs...)
-}
-
 // ExternalClusterAPIListNodes mocks base method
 func (m *MockClientInterface) ExternalClusterAPIListNodes(ctx context.Context, clusterId string, params *sdk.ExternalClusterAPIListNodesParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
@@ -4640,21 +4620,6 @@ func (m *MockClientWithResponsesInterface) ExternalClusterAPIGetKubeconfigWithRe
 func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIGetKubeconfigWithResponse(ctx, clusterId interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIGetKubeconfigWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIGetKubeconfigWithResponse), ctx, clusterId)
-}
-
-// ExternalClusterAPIGetMetricsWithResponse mocks base method
-func (m *MockClientWithResponsesInterface) ExternalClusterAPIGetMetricsWithResponse(ctx context.Context, clusterId string, params *sdk.ExternalClusterAPIGetMetricsParams) (*sdk.ExternalClusterAPIGetMetricsResponse, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ExternalClusterAPIGetMetricsWithResponse", ctx, clusterId, params)
-	ret0, _ := ret[0].(*sdk.ExternalClusterAPIGetMetricsResponse)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// ExternalClusterAPIGetMetricsWithResponse indicates an expected call of ExternalClusterAPIGetMetricsWithResponse
-func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIGetMetricsWithResponse(ctx, clusterId, params interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIGetMetricsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIGetMetricsWithResponse), ctx, clusterId, params)
 }
 
 // ExternalClusterAPIListNodesWithResponse mocks base method
