@@ -197,7 +197,7 @@ func resourceCastaiEKSClusterRead(ctx context.Context, data *schema.ResourceData
 	if err != nil {
 		return diag.FromErr(err)
 	} else if resp.StatusCode() == http.StatusNotFound {
-		log.Printf("[WARN] Removing cluster %s from state because it no longer exists in CAST.AI", data.Id())
+		log.Printf("[WARN] Removing cluster %s from state because it no longer exists in CAST AI", data.Id())
 		data.SetId("")
 		return nil
 	}
