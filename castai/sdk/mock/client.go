@@ -2134,10 +2134,30 @@ func (mr *MockClientInterfaceMockRecorder) ExternalClusterAPIUpdateCluster(ctx, 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIUpdateCluster", reflect.TypeOf((*MockClientInterface)(nil).ExternalClusterAPIUpdateCluster), varargs...)
 }
 
-// ExternalClusterAPIGetCredentialsScript mocks base method
-func (m *MockClientInterface) ExternalClusterAPIGetCredentialsScript(ctx context.Context, clusterId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+// ExternalClusterAPIGetAssumeRoleUser mocks base method
+func (m *MockClientInterface) ExternalClusterAPIGetAssumeRoleUser(ctx context.Context, clusterId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{ctx, clusterId}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ExternalClusterAPIGetAssumeRoleUser", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExternalClusterAPIGetAssumeRoleUser indicates an expected call of ExternalClusterAPIGetAssumeRoleUser
+func (mr *MockClientInterfaceMockRecorder) ExternalClusterAPIGetAssumeRoleUser(ctx, clusterId interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIGetAssumeRoleUser", reflect.TypeOf((*MockClientInterface)(nil).ExternalClusterAPIGetAssumeRoleUser), varargs...)
+}
+
+// ExternalClusterAPIGetCredentialsScript mocks base method
+func (m *MockClientInterface) ExternalClusterAPIGetCredentialsScript(ctx context.Context, clusterId string, params *sdk.ExternalClusterAPIGetCredentialsScriptParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, params}
 	for _, a := range reqEditors {
 		varargs = append(varargs, a)
 	}
@@ -2148,9 +2168,9 @@ func (m *MockClientInterface) ExternalClusterAPIGetCredentialsScript(ctx context
 }
 
 // ExternalClusterAPIGetCredentialsScript indicates an expected call of ExternalClusterAPIGetCredentialsScript
-func (mr *MockClientInterfaceMockRecorder) ExternalClusterAPIGetCredentialsScript(ctx, clusterId interface{}, reqEditors ...interface{}) *gomock.Call {
+func (mr *MockClientInterfaceMockRecorder) ExternalClusterAPIGetCredentialsScript(ctx, clusterId, params interface{}, reqEditors ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, clusterId}, reqEditors...)
+	varargs := append([]interface{}{ctx, clusterId, params}, reqEditors...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIGetCredentialsScript", reflect.TypeOf((*MockClientInterface)(nil).ExternalClusterAPIGetCredentialsScript), varargs...)
 }
 
@@ -2272,26 +2292,6 @@ func (mr *MockClientInterfaceMockRecorder) ExternalClusterAPIGetKubeconfig(ctx, 
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{ctx, clusterId}, reqEditors...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIGetKubeconfig", reflect.TypeOf((*MockClientInterface)(nil).ExternalClusterAPIGetKubeconfig), varargs...)
-}
-
-// ExternalClusterAPIGetMetrics mocks base method
-func (m *MockClientInterface) ExternalClusterAPIGetMetrics(ctx context.Context, clusterId string, params *sdk.ExternalClusterAPIGetMetricsParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
-	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, clusterId, params}
-	for _, a := range reqEditors {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "ExternalClusterAPIGetMetrics", varargs...)
-	ret0, _ := ret[0].(*http.Response)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// ExternalClusterAPIGetMetrics indicates an expected call of ExternalClusterAPIGetMetrics
-func (mr *MockClientInterfaceMockRecorder) ExternalClusterAPIGetMetrics(ctx, clusterId, params interface{}, reqEditors ...interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, clusterId, params}, reqEditors...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIGetMetrics", reflect.TypeOf((*MockClientInterface)(nil).ExternalClusterAPIGetMetrics), varargs...)
 }
 
 // ExternalClusterAPIListNodes mocks base method
@@ -2452,6 +2452,26 @@ func (mr *MockClientInterfaceMockRecorder) ExternalClusterAPIPauseCluster(ctx, c
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{ctx, clusterId}, reqEditors...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIPauseCluster", reflect.TypeOf((*MockClientInterface)(nil).ExternalClusterAPIPauseCluster), varargs...)
+}
+
+// ExternalClusterAPIReconcileCluster mocks base method
+func (m *MockClientInterface) ExternalClusterAPIReconcileCluster(ctx context.Context, clusterId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ExternalClusterAPIReconcileCluster", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExternalClusterAPIReconcileCluster indicates an expected call of ExternalClusterAPIReconcileCluster
+func (mr *MockClientInterfaceMockRecorder) ExternalClusterAPIReconcileCluster(ctx, clusterId interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIReconcileCluster", reflect.TypeOf((*MockClientInterface)(nil).ExternalClusterAPIReconcileCluster), varargs...)
 }
 
 // ExternalClusterAPIResumeCluster mocks base method
@@ -2895,9 +2915,9 @@ func (mr *MockClientInterfaceMockRecorder) GetUsageReport(ctx, params interface{
 }
 
 // ExternalClusterAPIGetCredentialsScriptTemplate mocks base method
-func (m *MockClientInterface) ExternalClusterAPIGetCredentialsScriptTemplate(ctx context.Context, provider string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+func (m *MockClientInterface) ExternalClusterAPIGetCredentialsScriptTemplate(ctx context.Context, provider string, params *sdk.ExternalClusterAPIGetCredentialsScriptTemplateParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, provider}
+	varargs := []interface{}{ctx, provider, params}
 	for _, a := range reqEditors {
 		varargs = append(varargs, a)
 	}
@@ -2908,9 +2928,9 @@ func (m *MockClientInterface) ExternalClusterAPIGetCredentialsScriptTemplate(ctx
 }
 
 // ExternalClusterAPIGetCredentialsScriptTemplate indicates an expected call of ExternalClusterAPIGetCredentialsScriptTemplate
-func (mr *MockClientInterfaceMockRecorder) ExternalClusterAPIGetCredentialsScriptTemplate(ctx, provider interface{}, reqEditors ...interface{}) *gomock.Call {
+func (mr *MockClientInterfaceMockRecorder) ExternalClusterAPIGetCredentialsScriptTemplate(ctx, provider, params interface{}, reqEditors ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, provider}, reqEditors...)
+	varargs := append([]interface{}{ctx, provider, params}, reqEditors...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIGetCredentialsScriptTemplate", reflect.TypeOf((*MockClientInterface)(nil).ExternalClusterAPIGetCredentialsScriptTemplate), varargs...)
 }
 
@@ -4482,19 +4502,34 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIUpdate
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIUpdateClusterWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIUpdateClusterWithResponse), ctx, clusterId, body)
 }
 
-// ExternalClusterAPIGetCredentialsScriptWithResponse mocks base method
-func (m *MockClientWithResponsesInterface) ExternalClusterAPIGetCredentialsScriptWithResponse(ctx context.Context, clusterId string) (*sdk.ExternalClusterAPIGetCredentialsScriptResponse, error) {
+// ExternalClusterAPIGetAssumeRoleUserWithResponse mocks base method
+func (m *MockClientWithResponsesInterface) ExternalClusterAPIGetAssumeRoleUserWithResponse(ctx context.Context, clusterId string) (*sdk.ExternalClusterAPIGetAssumeRoleUserResponse, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ExternalClusterAPIGetCredentialsScriptWithResponse", ctx, clusterId)
+	ret := m.ctrl.Call(m, "ExternalClusterAPIGetAssumeRoleUserWithResponse", ctx, clusterId)
+	ret0, _ := ret[0].(*sdk.ExternalClusterAPIGetAssumeRoleUserResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExternalClusterAPIGetAssumeRoleUserWithResponse indicates an expected call of ExternalClusterAPIGetAssumeRoleUserWithResponse
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIGetAssumeRoleUserWithResponse(ctx, clusterId interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIGetAssumeRoleUserWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIGetAssumeRoleUserWithResponse), ctx, clusterId)
+}
+
+// ExternalClusterAPIGetCredentialsScriptWithResponse mocks base method
+func (m *MockClientWithResponsesInterface) ExternalClusterAPIGetCredentialsScriptWithResponse(ctx context.Context, clusterId string, params *sdk.ExternalClusterAPIGetCredentialsScriptParams) (*sdk.ExternalClusterAPIGetCredentialsScriptResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ExternalClusterAPIGetCredentialsScriptWithResponse", ctx, clusterId, params)
 	ret0, _ := ret[0].(*sdk.ExternalClusterAPIGetCredentialsScriptResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // ExternalClusterAPIGetCredentialsScriptWithResponse indicates an expected call of ExternalClusterAPIGetCredentialsScriptWithResponse
-func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIGetCredentialsScriptWithResponse(ctx, clusterId interface{}) *gomock.Call {
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIGetCredentialsScriptWithResponse(ctx, clusterId, params interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIGetCredentialsScriptWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIGetCredentialsScriptWithResponse), ctx, clusterId)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIGetCredentialsScriptWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIGetCredentialsScriptWithResponse), ctx, clusterId, params)
 }
 
 // ExternalClusterAPIDisconnectClusterWithBodyWithResponse mocks base method
@@ -4585,21 +4620,6 @@ func (m *MockClientWithResponsesInterface) ExternalClusterAPIGetKubeconfigWithRe
 func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIGetKubeconfigWithResponse(ctx, clusterId interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIGetKubeconfigWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIGetKubeconfigWithResponse), ctx, clusterId)
-}
-
-// ExternalClusterAPIGetMetricsWithResponse mocks base method
-func (m *MockClientWithResponsesInterface) ExternalClusterAPIGetMetricsWithResponse(ctx context.Context, clusterId string, params *sdk.ExternalClusterAPIGetMetricsParams) (*sdk.ExternalClusterAPIGetMetricsResponse, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ExternalClusterAPIGetMetricsWithResponse", ctx, clusterId, params)
-	ret0, _ := ret[0].(*sdk.ExternalClusterAPIGetMetricsResponse)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// ExternalClusterAPIGetMetricsWithResponse indicates an expected call of ExternalClusterAPIGetMetricsWithResponse
-func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIGetMetricsWithResponse(ctx, clusterId, params interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIGetMetricsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIGetMetricsWithResponse), ctx, clusterId, params)
 }
 
 // ExternalClusterAPIListNodesWithResponse mocks base method
@@ -4720,6 +4740,21 @@ func (m *MockClientWithResponsesInterface) ExternalClusterAPIPauseClusterWithRes
 func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIPauseClusterWithResponse(ctx, clusterId interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIPauseClusterWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIPauseClusterWithResponse), ctx, clusterId)
+}
+
+// ExternalClusterAPIReconcileClusterWithResponse mocks base method
+func (m *MockClientWithResponsesInterface) ExternalClusterAPIReconcileClusterWithResponse(ctx context.Context, clusterId string) (*sdk.ExternalClusterAPIReconcileClusterResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ExternalClusterAPIReconcileClusterWithResponse", ctx, clusterId)
+	ret0, _ := ret[0].(*sdk.ExternalClusterAPIReconcileClusterResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExternalClusterAPIReconcileClusterWithResponse indicates an expected call of ExternalClusterAPIReconcileClusterWithResponse
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIReconcileClusterWithResponse(ctx, clusterId interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIReconcileClusterWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIReconcileClusterWithResponse), ctx, clusterId)
 }
 
 // ExternalClusterAPIResumeClusterWithResponse mocks base method
@@ -5053,18 +5088,18 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) GetUsageReportWithRespon
 }
 
 // ExternalClusterAPIGetCredentialsScriptTemplateWithResponse mocks base method
-func (m *MockClientWithResponsesInterface) ExternalClusterAPIGetCredentialsScriptTemplateWithResponse(ctx context.Context, provider string) (*sdk.ExternalClusterAPIGetCredentialsScriptTemplateResponse, error) {
+func (m *MockClientWithResponsesInterface) ExternalClusterAPIGetCredentialsScriptTemplateWithResponse(ctx context.Context, provider string, params *sdk.ExternalClusterAPIGetCredentialsScriptTemplateParams) (*sdk.ExternalClusterAPIGetCredentialsScriptTemplateResponse, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ExternalClusterAPIGetCredentialsScriptTemplateWithResponse", ctx, provider)
+	ret := m.ctrl.Call(m, "ExternalClusterAPIGetCredentialsScriptTemplateWithResponse", ctx, provider, params)
 	ret0, _ := ret[0].(*sdk.ExternalClusterAPIGetCredentialsScriptTemplateResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // ExternalClusterAPIGetCredentialsScriptTemplateWithResponse indicates an expected call of ExternalClusterAPIGetCredentialsScriptTemplateWithResponse
-func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIGetCredentialsScriptTemplateWithResponse(ctx, provider interface{}) *gomock.Call {
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIGetCredentialsScriptTemplateWithResponse(ctx, provider, params interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIGetCredentialsScriptTemplateWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIGetCredentialsScriptTemplateWithResponse), ctx, provider)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIGetCredentialsScriptTemplateWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIGetCredentialsScriptTemplateWithResponse), ctx, provider, params)
 }
 
 // MockResponse is a mock of Response interface

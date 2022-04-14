@@ -452,20 +452,21 @@ type ClusterMetricsCpuUsage struct {
 
 // ClusterMetricsGauges defines model for ClusterMetricsGauges.
 type ClusterMetricsGauges struct {
-	CastaiManagedNodesCount   *int `json:"castaiManagedNodesCount,omitempty"`
-	CpuAllocatableMillicores  *int `json:"cpuAllocatableMillicores,omitempty"`
-	CpuProvisionedMillicores  *int `json:"cpuProvisionedMillicores,omitempty"`
-	CpuRequestedMillicores    *int `json:"cpuRequestedMillicores,omitempty"`
-	MemoryAllocatableBytes    *int `json:"memoryAllocatableBytes,omitempty"`
-	MemoryProvisionedBytes    *int `json:"memoryProvisionedBytes,omitempty"`
-	MemoryRequestedBytes      *int `json:"memoryRequestedBytes,omitempty"`
-	OnDemandNodesCount        *int `json:"onDemandNodesCount,omitempty"`
-	ProviderManagedNodesCount *int `json:"providerManagedNodesCount,omitempty"`
-	ScheduledPodsCount        *int `json:"scheduledPodsCount,omitempty"`
-	SpotNodesCount            *int `json:"spotNodesCount,omitempty"`
-	TotalNodesCount           *int `json:"totalNodesCount,omitempty"`
-	TotalPodsCount            *int `json:"totalPodsCount,omitempty"`
-	UnscheduledPodsCount      *int `json:"unscheduledPodsCount,omitempty"`
+	CastaiManagedNodesCount      *int `json:"castaiManagedNodesCount,omitempty"`
+	CastaiSpotFallbackNodesCount *int `json:"castaiSpotFallbackNodesCount,omitempty"`
+	CpuAllocatableMillicores     *int `json:"cpuAllocatableMillicores,omitempty"`
+	CpuProvisionedMillicores     *int `json:"cpuProvisionedMillicores,omitempty"`
+	CpuRequestedMillicores       *int `json:"cpuRequestedMillicores,omitempty"`
+	MemoryAllocatableBytes       *int `json:"memoryAllocatableBytes,omitempty"`
+	MemoryProvisionedBytes       *int `json:"memoryProvisionedBytes,omitempty"`
+	MemoryRequestedBytes         *int `json:"memoryRequestedBytes,omitempty"`
+	OnDemandNodesCount           *int `json:"onDemandNodesCount,omitempty"`
+	ProviderManagedNodesCount    *int `json:"providerManagedNodesCount,omitempty"`
+	ScheduledPodsCount           *int `json:"scheduledPodsCount,omitempty"`
+	SpotNodesCount               *int `json:"spotNodesCount,omitempty"`
+	TotalNodesCount              *int `json:"totalNodesCount,omitempty"`
+	TotalPodsCount               *int `json:"totalPodsCount,omitempty"`
+	UnscheduledPodsCount         *int `json:"unscheduledPodsCount,omitempty"`
 }
 
 // ClusterMetricsMemoryUsage defines model for ClusterMetricsMemoryUsage.
@@ -1929,37 +1930,6 @@ type CastaiClusterV1beta1Taint struct {
 	Value  *string `json:"value,omitempty"`
 }
 
-// CastaiMetricsV1beta1CloudMetrics defines model for castai.metrics.v1beta1.CloudMetrics.
-type CastaiMetricsV1beta1CloudMetrics struct {
-	Labels                 *CastaiMetricsV1beta1CloudMetrics_Labels `json:"labels,omitempty"`
-	PodCount               *int32                                   `json:"podCount,omitempty"`
-	RequestedCPUPercentage *int32                                   `json:"requestedCPUPercentage,omitempty"`
-	RequestedMemPercentage *int32                                   `json:"requestedMemPercentage,omitempty"`
-}
-
-// CastaiMetricsV1beta1CloudMetrics_Labels defines model for CastaiMetricsV1beta1CloudMetrics.Labels.
-type CastaiMetricsV1beta1CloudMetrics_Labels struct {
-	AdditionalProperties map[string]string `json:"-"`
-}
-
-// CastaiMetricsV1beta1GetClusterMetricsResponse defines model for castai.metrics.v1beta1.GetClusterMetricsResponse.
-type CastaiMetricsV1beta1GetClusterMetricsResponse struct {
-	CloudMetrics *[]CastaiMetricsV1beta1CloudMetrics `json:"cloudMetrics,omitempty"`
-	NodeMetrics  *[]CastaiMetricsV1beta1NodeMetrics  `json:"nodeMetrics,omitempty"`
-}
-
-// CastaiMetricsV1beta1NodeMetrics defines model for castai.metrics.v1beta1.NodeMetrics.
-type CastaiMetricsV1beta1NodeMetrics struct {
-	Labels                 *CastaiMetricsV1beta1NodeMetrics_Labels `json:"labels,omitempty"`
-	RequestedCPUPercentage *int32                                  `json:"requestedCPUPercentage,omitempty"`
-	RequestedMemPercentage *int32                                  `json:"requestedMemPercentage,omitempty"`
-}
-
-// CastaiMetricsV1beta1NodeMetrics_Labels defines model for CastaiMetricsV1beta1NodeMetrics.Labels.
-type CastaiMetricsV1beta1NodeMetrics_Labels struct {
-	AdditionalProperties map[string]string `json:"-"`
-}
-
 // CastaiV1Cloud defines model for castai.v1.Cloud.
 type CastaiV1Cloud string
 
@@ -1988,6 +1958,7 @@ type ClusteractionsV1ChartSource struct {
 // ClusteractionsV1ClusterAction defines model for clusteractions.v1.ClusterAction.
 type ClusteractionsV1ClusterAction struct {
 	ActionApproveCsr        *ClusteractionsV1ClusterActionApproveCSR        `json:"actionApproveCsr,omitempty"`
+	ActionChartUninstall    *ClusteractionsV1ClusterActionChartUninstall    `json:"actionChartUninstall,omitempty"`
 	ActionChartUpsert       *ClusteractionsV1ClusterActionChartUpsert       `json:"actionChartUpsert,omitempty"`
 	ActionCreateEvent       *ClusteractionsV1ClusterActionCreateEvent       `json:"actionCreateEvent,omitempty"`
 	ActionDeleteNode        *ClusteractionsV1ClusterActionDeleteNode        `json:"actionDeleteNode,omitempty"`
@@ -2011,6 +1982,12 @@ type ClusteractionsV1ClusterActionApproveCSR struct {
 	NodeName *string `json:"nodeName,omitempty"`
 }
 
+// ClusteractionsV1ClusterActionChartUninstall defines model for clusteractions.v1.ClusterActionChartUninstall.
+type ClusteractionsV1ClusterActionChartUninstall struct {
+	Namespace   *string `json:"namespace,omitempty"`
+	ReleaseName *string `json:"releaseName,omitempty"`
+}
+
 // ClusteractionsV1ClusterActionChartUpsert defines model for clusteractions.v1.ClusterActionChartUpsert.
 type ClusteractionsV1ClusterActionChartUpsert struct {
 	ChartSource     *ClusteractionsV1ChartSource                              `json:"chartSource,omitempty"`
@@ -2026,7 +2003,9 @@ type ClusteractionsV1ClusterActionChartUpsert_ValuesOverrides struct {
 
 // ClusteractionsV1ClusterActionCreateEvent defines model for clusteractions.v1.ClusterActionCreateEvent.
 type ClusteractionsV1ClusterActionCreateEvent struct {
-	Action             *string                          `json:"action,omitempty"`
+	Action *string `json:"action,omitempty"`
+
+	// Event time should not be set during action scheduling. It's added during actions poll.
 	EventTime          *time.Time                       `json:"eventTime,omitempty"`
 	EventType          *string                          `json:"eventType,omitempty"`
 	Message            *string                          `json:"message,omitempty"`
@@ -2188,9 +2167,6 @@ type ExternalclusterV1Cluster struct {
 	// The cluster's organization ID.
 	OrganizationId *string `json:"organizationId,omitempty"`
 
-	// Private indicates if managed cluster's k8s api is private or public.
-	Private *bool `json:"private,omitempty"`
-
 	// Cluster cloud provider type.
 	ProviderType *string `json:"providerType,omitempty"`
 
@@ -2270,7 +2246,8 @@ type ExternalclusterV1DrainNodeResponse struct {
 type ExternalclusterV1EKSClusterParams struct {
 
 	// AWS Account ID where cluster runs.
-	AccountId *string `json:"accountId,omitempty"`
+	AccountId     *string `json:"accountId,omitempty"`
+	AssumeRoleArn *string `json:"assumeRoleArn,omitempty"`
 
 	// Name of the cluster.
 	ClusterName  *string `json:"clusterName,omitempty"`
@@ -2321,6 +2298,11 @@ type ExternalclusterV1GPUConfig struct {
 
 	// GPU type.
 	Type *string `json:"type,omitempty"`
+}
+
+// ExternalclusterV1GetAssumeRoleUserResponse defines model for externalcluster.v1.GetAssumeRoleUserResponse.
+type ExternalclusterV1GetAssumeRoleUserResponse struct {
+	Arn *string `json:"arn,omitempty"`
 }
 
 // ExternalclusterV1GetCredentialsScriptResponse defines model for externalcluster.v1.GetCredentialsScriptResponse.
@@ -2420,6 +2402,9 @@ type ExternalclusterV1NodeVolume struct {
 	Size *int32 `json:"size,omitempty"`
 }
 
+// ExternalclusterV1ReconcileClusterResponse defines model for externalcluster.v1.ReconcileClusterResponse.
+type ExternalclusterV1ReconcileClusterResponse map[string]interface{}
+
 // ExternalclusterV1Region defines model for externalcluster.v1.Region.
 type ExternalclusterV1Region struct {
 
@@ -2458,6 +2443,9 @@ type ExternalclusterV1RegisterClusterRequest struct {
 // ExternalclusterV1Subnet defines model for externalcluster.v1.Subnet.
 type ExternalclusterV1Subnet struct {
 
+	// Cidr block of the subnet.
+	Cidr *string `json:"cidr,omitempty"`
+
 	// The ID of the subnet.
 	Id *string `json:"id,omitempty"`
 
@@ -2482,7 +2470,8 @@ type ExternalclusterV1UpdateAKSClusterParams struct {
 
 // ExternalclusterV1UpdateEKSClusterParams defines model for externalcluster.v1.UpdateEKSClusterParams.
 type ExternalclusterV1UpdateEKSClusterParams struct {
-	DnsClusterIp *string `json:"dnsClusterIp,omitempty"`
+	AssumeRoleArn *string `json:"assumeRoleArn,omitempty"`
+	DnsClusterIp  *string `json:"dnsClusterIp,omitempty"`
 
 	// Optional instance profile ARN for CAST provisioned nodes.
 	InstanceProfileArn *string `json:"instanceProfileArn,omitempty"`
@@ -3072,18 +3061,16 @@ type ExternalClusterAPIRegisterClusterJSONBody ExternalclusterV1RegisterClusterR
 // ExternalClusterAPIUpdateClusterJSONBody defines parameters for ExternalClusterAPIUpdateCluster.
 type ExternalClusterAPIUpdateClusterJSONBody ExternalclusterV1ClusterUpdate
 
+// ExternalClusterAPIGetCredentialsScriptParams defines parameters for ExternalClusterAPIGetCredentialsScript.
+type ExternalClusterAPIGetCredentialsScriptParams struct {
+	CrossRole *bool `json:"crossRole,omitempty"`
+}
+
 // ExternalClusterAPIDisconnectClusterJSONBody defines parameters for ExternalClusterAPIDisconnectCluster.
 type ExternalClusterAPIDisconnectClusterJSONBody ExternalclusterV1DisconnectConfig
 
 // ExternalClusterAPIHandleCloudEventJSONBody defines parameters for ExternalClusterAPIHandleCloudEvent.
 type ExternalClusterAPIHandleCloudEventJSONBody ExternalclusterV1CloudEvent
-
-// ExternalClusterAPIGetMetricsParams defines parameters for ExternalClusterAPIGetMetrics.
-type ExternalClusterAPIGetMetricsParams struct {
-
-	// The type of metrics to retrieve.
-	MetricType *[]string `json:"metricType,omitempty"`
-}
 
 // ExternalClusterAPIListNodesParams defines parameters for ExternalClusterAPIListNodes.
 type ExternalClusterAPIListNodesParams struct {
@@ -3144,6 +3131,11 @@ type GetUsageReportParams struct {
 
 	// Request filter parameter declaring point of time until which the results should be returned. Moment in time must be declared in RFC3339 format. https://tools.ietf.org/html/rfc3339
 	ToDate *FilterToDate `json:"toDate,omitempty"`
+}
+
+// ExternalClusterAPIGetCredentialsScriptTemplateParams defines parameters for ExternalClusterAPIGetCredentialsScriptTemplate.
+type ExternalClusterAPIGetCredentialsScriptTemplateParams struct {
+	CrossRole *bool `json:"crossRole,omitempty"`
 }
 
 // CreateAuthTokenJSONRequestBody defines body for CreateAuthToken for application/json ContentType.
@@ -4031,112 +4023,6 @@ func (a *CastaiClusterV1beta1Node_Labels) UnmarshalJSON(b []byte) error {
 
 // Override default JSON handling for CastaiClusterV1beta1Node_Labels to handle AdditionalProperties
 func (a CastaiClusterV1beta1Node_Labels) MarshalJSON() ([]byte, error) {
-	var err error
-	object := make(map[string]json.RawMessage)
-
-	for fieldName, field := range a.AdditionalProperties {
-		object[fieldName], err = json.Marshal(field)
-		if err != nil {
-			return nil, errors.Wrap(err, fmt.Sprintf("error marshaling '%s'", fieldName))
-		}
-	}
-	return json.Marshal(object)
-}
-
-// Getter for additional properties for CastaiMetricsV1beta1CloudMetrics_Labels. Returns the specified
-// element and whether it was found
-func (a CastaiMetricsV1beta1CloudMetrics_Labels) Get(fieldName string) (value string, found bool) {
-	if a.AdditionalProperties != nil {
-		value, found = a.AdditionalProperties[fieldName]
-	}
-	return
-}
-
-// Setter for additional properties for CastaiMetricsV1beta1CloudMetrics_Labels
-func (a *CastaiMetricsV1beta1CloudMetrics_Labels) Set(fieldName string, value string) {
-	if a.AdditionalProperties == nil {
-		a.AdditionalProperties = make(map[string]string)
-	}
-	a.AdditionalProperties[fieldName] = value
-}
-
-// Override default JSON handling for CastaiMetricsV1beta1CloudMetrics_Labels to handle AdditionalProperties
-func (a *CastaiMetricsV1beta1CloudMetrics_Labels) UnmarshalJSON(b []byte) error {
-	object := make(map[string]json.RawMessage)
-	err := json.Unmarshal(b, &object)
-	if err != nil {
-		return err
-	}
-
-	if len(object) != 0 {
-		a.AdditionalProperties = make(map[string]string)
-		for fieldName, fieldBuf := range object {
-			var fieldVal string
-			err := json.Unmarshal(fieldBuf, &fieldVal)
-			if err != nil {
-				return errors.Wrap(err, fmt.Sprintf("error unmarshaling field %s", fieldName))
-			}
-			a.AdditionalProperties[fieldName] = fieldVal
-		}
-	}
-	return nil
-}
-
-// Override default JSON handling for CastaiMetricsV1beta1CloudMetrics_Labels to handle AdditionalProperties
-func (a CastaiMetricsV1beta1CloudMetrics_Labels) MarshalJSON() ([]byte, error) {
-	var err error
-	object := make(map[string]json.RawMessage)
-
-	for fieldName, field := range a.AdditionalProperties {
-		object[fieldName], err = json.Marshal(field)
-		if err != nil {
-			return nil, errors.Wrap(err, fmt.Sprintf("error marshaling '%s'", fieldName))
-		}
-	}
-	return json.Marshal(object)
-}
-
-// Getter for additional properties for CastaiMetricsV1beta1NodeMetrics_Labels. Returns the specified
-// element and whether it was found
-func (a CastaiMetricsV1beta1NodeMetrics_Labels) Get(fieldName string) (value string, found bool) {
-	if a.AdditionalProperties != nil {
-		value, found = a.AdditionalProperties[fieldName]
-	}
-	return
-}
-
-// Setter for additional properties for CastaiMetricsV1beta1NodeMetrics_Labels
-func (a *CastaiMetricsV1beta1NodeMetrics_Labels) Set(fieldName string, value string) {
-	if a.AdditionalProperties == nil {
-		a.AdditionalProperties = make(map[string]string)
-	}
-	a.AdditionalProperties[fieldName] = value
-}
-
-// Override default JSON handling for CastaiMetricsV1beta1NodeMetrics_Labels to handle AdditionalProperties
-func (a *CastaiMetricsV1beta1NodeMetrics_Labels) UnmarshalJSON(b []byte) error {
-	object := make(map[string]json.RawMessage)
-	err := json.Unmarshal(b, &object)
-	if err != nil {
-		return err
-	}
-
-	if len(object) != 0 {
-		a.AdditionalProperties = make(map[string]string)
-		for fieldName, fieldBuf := range object {
-			var fieldVal string
-			err := json.Unmarshal(fieldBuf, &fieldVal)
-			if err != nil {
-				return errors.Wrap(err, fmt.Sprintf("error unmarshaling field %s", fieldName))
-			}
-			a.AdditionalProperties[fieldName] = fieldVal
-		}
-	}
-	return nil
-}
-
-// Override default JSON handling for CastaiMetricsV1beta1NodeMetrics_Labels to handle AdditionalProperties
-func (a CastaiMetricsV1beta1NodeMetrics_Labels) MarshalJSON() ([]byte, error) {
 	var err error
 	object := make(map[string]json.RawMessage)
 

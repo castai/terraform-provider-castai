@@ -38,6 +38,8 @@ func Provider() *schema.Provider {
 			"castai_credentials":       dataSourceCastaiCredentials(),
 			"castai_cluster":           dataSourceCastaiCluster(),
 			"castai_eks_settings":      dataSourceCastaiEKSSettings(),
+			"castai_eks_clusterid":     dataSourceCastaiEKSClusterID(),
+			"castai_eks_user_arn":      dataSourceCastaiEKSClusterUserARN(),
 			"castai_gke_user_policies": dataSourceGKEPolicies(),
 		},
 

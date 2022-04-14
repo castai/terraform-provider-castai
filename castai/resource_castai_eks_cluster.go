@@ -22,6 +22,7 @@ const (
 	FieldEKSClusterRegion                  = "region"
 	FieldEKSClusterAccessKeyId             = "access_key_id"
 	FieldEKSClusterSecretAccessKey         = "secret_access_key"
+	FieldEKSClusterAssumeRoleArn           = "assume_role_arn"
 	FieldEKSClusterInstanceProfileArn      = "instance_profile_arn"
 	FieldEKSClusterSecurityGroups          = "security_groups"
 	FieldEKSClusterSubnets                 = "subnets"
@@ -67,16 +68,18 @@ func resourceCastaiEKSCluster() *schema.Resource {
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 			FieldEKSClusterAccessKeyId: {
-				Type:             schema.TypeString,
-				Sensitive:        true,
-				Optional:         true,
-				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+				Type:      schema.TypeString,
+				Sensitive: true,
+				Optional:  true,
 			},
 			FieldEKSClusterSecretAccessKey: {
-				Type:             schema.TypeString,
-				Sensitive:        true,
-				Optional:         true,
-				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+				Type:      schema.TypeString,
+				Sensitive: true,
+				Optional:  true,
+			},
+			FieldEKSClusterAssumeRoleArn: {
+				Type:     schema.TypeString,
+				Optional: true,
 			},
 			FieldEKSClusterInstanceProfileArn: {
 				Type:             schema.TypeString,
@@ -173,8 +176,6 @@ func resourceCastaiEKSClusterCreate(ctx context.Context, data *schema.ResourceDa
 	}
 	data.Set(FieldEKSClusterToken, tkn)
 	data.SetId(clusterID)
-
-	log.Printf("[INFO] Cluster with id %q has been registered, don't forget to install castai-agent helm chart", data.Id())
 
 	if err := updateClusterSettings(ctx, data, client); err != nil {
 		return diag.FromErr(err)
@@ -311,6 +312,7 @@ func updateClusterSettings(ctx context.Context, data *schema.ResourceData, clien
 	if !data.HasChanges(
 		FieldEKSClusterAccessKeyId,
 		FieldEKSClusterSecretAccessKey,
+		FieldEKSClusterAssumeRoleArn,
 		FieldEKSClusterInstanceProfileArn,
 		FieldEKSClusterSubnets,
 		FieldEKSClusterDNSClusterIP,
@@ -329,6 +331,12 @@ func updateClusterSettings(ctx context.Context, data *schema.ResourceData, clien
 
 	accessKeyId, accessKeyIdProvided := data.GetOk(FieldEKSClusterAccessKeyId)
 	secretAccessKey, secretAccessKeyProvided := data.GetOk(FieldEKSClusterSecretAccessKey)
+	assumeRoleARN, assumeRoleProvided := data.GetOk(FieldEKSClusterAssumeRoleArn)
+
+	if accessKeyIdProvided && secretAccessKeyProvided && assumeRoleProvided {
+		return fmt.Errorf("specify either the access key ID and secret access key pair or AssumeRole ARN")
+	}
+
 	if accessKeyIdProvided && secretAccessKeyProvided {
 		credentials, err := sdk.ToCloudCredentialsAWS(accessKeyId.(string), secretAccessKey.(string))
 		if err != nil {
@@ -336,6 +344,10 @@ func updateClusterSettings(ctx context.Context, data *schema.ResourceData, clien
 		}
 
 		req.Credentials = &credentials
+	}
+
+	if assumeRoleProvided {
+		req.Eks.AssumeRoleArn = toStringPtr(assumeRoleARN.(string))
 	}
 
 	if arn, ok := data.GetOk(FieldEKSClusterInstanceProfileArn); ok {
