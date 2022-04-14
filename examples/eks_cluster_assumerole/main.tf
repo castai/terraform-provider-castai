@@ -34,9 +34,8 @@ data "castai_eks_user_arn" "castai_user_arn" {
   cluster_id = data.castai_eks_clusterid.castai_cluster_id.id
 }
 
-
 module "castai-eks-role-iam" {
-  source  = "../../../terraform-castai-eks-role-iam"
+  source = "castai/eks-iam-role/castai"
 
   aws_account_id     = var.aws_account_id
   aws_cluster_region = var.aws_cluster_region
@@ -49,7 +48,7 @@ module "castai-eks-role-iam" {
 }
 
 module "castai-eks-cluster" {
-  source  = "../../../terraform-castai-eks-cluster"
+  source  = "castai/eks-cluster/castai"
 
   aws_account_id     = var.aws_account_id
   aws_cluster_region = var.aws_cluster_region
