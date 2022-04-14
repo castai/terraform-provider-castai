@@ -1,5 +1,5 @@
 locals {
-  role_name = "matas-04-08"
+  role_name = "castai-eks-role"
 }
 
 provider "helm" {
