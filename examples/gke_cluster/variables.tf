@@ -1,7 +1,13 @@
 variable "castai_api_token" {}
 
 variable "project_id" {}
-variable "cluster_region" {}
+variable "cluster_region" {
+  type = string
+  description = "The region to create the cluster"
+
+  default = "europe-west1"
+}
+
 variable "cluster_name" {}
 
 
@@ -9,7 +15,7 @@ variable "cluster_zones" {
   type        = list(string)
   description = "The zones to create the cluster."
 
-  default = ["europe-west-1-a", "europe-west-1-b"]
+  default = ["europe-west1-b", "europe-west1-c"]
 }
 
 variable "delete_nodes_on_disconnect" {
