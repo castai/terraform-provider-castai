@@ -15,8 +15,8 @@ module "gke" {
   zones                      = var.cluster_zones
   network                    = module.vpc.network_name
   subnetwork                 = module.vpc.subnets_names[0]
-  ip_range_pods              = "10.20.0.0/16"
-  ip_range_services          = "10.30.0.0/24"
+  ip_range_pods              = "ip-range-pods"
+  ip_range_services          = "ip-range-services"
   http_load_balancing        = false
   network_policy             = false
   horizontal_pod_autoscaling = true
