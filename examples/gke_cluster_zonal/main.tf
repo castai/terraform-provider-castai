@@ -29,7 +29,6 @@ module "castai-gke-cluster" {
   gke_credentials            = module.castai-gke-iam.private_key
   delete_nodes_on_disconnect = var.delete_nodes_on_disconnect
 
-
   # Full schema can be found here https://api.cast.ai/v1/spec/#/PoliciesAPI/PoliciesAPIUpsertClusterPolicies
   autoscaler_policies_json = <<-EOT
     {
