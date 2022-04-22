@@ -47,7 +47,7 @@ func TestGKEClusterResourceReadContext(t *testing.T) {
   "gke": {
     "clusterName": "gke-cluster",
     "region": "eu-central-1",
-	"location": "location",
+	"location": "eu-central-1",
 	"projectId": "project-id"
   },
   "sshPublicKey": "key-123",
@@ -77,9 +77,9 @@ func TestGKEClusterResourceReadContext(t *testing.T) {
 	r.Equal(`ID = b6bfc074-a267-400f-b8f1-db0850c36gke
 cluster_token = gke123
 credentials_id = 9b8d0456-177b-4a3d-b162-e68030d65GKE
+location = eu-central-1
 name = gke-cluster
 project_id = project-id
-region = eu-central-1
 ssh_public_key = key-123
 Tainted = false
 `, data.State().String())
