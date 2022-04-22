@@ -26,7 +26,7 @@ data "aws_eks_cluster_auth" "eks" {
 
 data "castai_eks_clusterid" "castai_cluster_id" {
   account_id                 = var.aws_account_id
-  region                     = var.aws_cluster_region
+  region                     = var.cluster_region
   cluster_name               = var.cluster_name
 }
 
@@ -35,10 +35,10 @@ data "castai_eks_user_arn" "castai_user_arn" {
 }
 
 module "castai-eks-role-iam" {
-  source = "castai/eks-iam-role/castai"
+  source = "castai/eks-role-iam/castai"
 
   aws_account_id     = var.aws_account_id
-  aws_cluster_region = var.aws_cluster_region
+  aws_cluster_region = var.cluster_region
   aws_cluster_name   = var.cluster_name
   aws_cluster_vpc_id = module.vpc.vpc_id
 
@@ -51,7 +51,7 @@ module "castai-eks-cluster" {
   source  = "castai/eks-cluster/castai"
 
   aws_account_id     = var.aws_account_id
-  aws_cluster_region = var.aws_cluster_region
+  aws_cluster_region = var.cluster_region
   aws_cluster_name   = module.eks.cluster_id
 
   aws_assume_role_arn           = module.castai-eks-role-iam.role_arn
