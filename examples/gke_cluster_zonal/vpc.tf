@@ -15,12 +15,12 @@ module "vpc" {
   secondary_ranges = {
     (local.ip_range_nodes) = [
       {
-        range_name    =  local.ip_range_pods
-        ip_cidr_range =  "10.20.0.0/16"
+        range_name    = local.ip_range_pods
+        ip_cidr_range =  "10.1.0.0/20"
       },
       {
-        range_name    =  local.ip_range_services
-        ip_cidr_range =  "10.30.0.0/24"
+        range_name    = local.ip_range_services
+        ip_cidr_range =  "10.3.0.0/20"
       }
     ]
   }

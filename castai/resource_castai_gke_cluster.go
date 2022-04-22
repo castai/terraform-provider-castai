@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -18,7 +19,7 @@ import (
 const (
 	FieldGKEClusterName                    = "name"
 	FieldGKEClusterProjectId               = "project_id"
-	FieldGKEClusterRegion                  = "region"
+	FieldGKEClusterLocation                = "location"
 	FieldGKEClusterToken                   = "cluster_token"
 	FieldGKEClusterDeleteNodesOnDisconnect = "delete_nodes_on_disconnect"
 	FieldGKEClusterSSHPublicKey            = "ssh_public_key"
@@ -60,12 +61,12 @@ func resourceCastaiGKECluster() *schema.Resource {
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 				Description:      "GCP project id",
 			},
-			FieldGKEClusterRegion: {
+			FieldGKEClusterLocation: {
 				Type:             schema.TypeString,
 				Required:         true,
 				ForceNew:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
-				Description:      "GCP cluster token",
+				Description:      "GCP cluster zone in case of zonal or region in case of regional cluster",
 			},
 			FieldGKEClusterToken: {
 				Type:        schema.TypeString,
@@ -101,10 +102,21 @@ func resourceCastaiGKEClusterCreate(ctx context.Context, data *schema.ResourceDa
 		Name: data.Get(FieldGKEClusterName).(string),
 	}
 
+	location := data.Get(FieldGKEClusterLocation).(string)
+	region := location
+	// Check if location is zone or location.
+	if strings.Count(location, "-") > 1 {
+		// region "europe-central2"
+		// zone "europe-central2-a"
+		regionParts := strings.Split(location, "-")
+		regionParts = regionParts[:2]
+		region = strings.Join(regionParts, "-")
+	}
+
 	req.Gke = &sdk.ExternalclusterV1GKEClusterParams{
 		ProjectId:   toStringPtr(data.Get(FieldGKEClusterProjectId).(string)),
-		Region:      toStringPtr(data.Get(FieldGKEClusterRegion).(string)),
-		Location:    toStringPtr(data.Get(FieldGKEClusterRegion).(string)),
+		Region:      &region,
+		Location:    &location,
 		ClusterName: toStringPtr(data.Get(FieldGKEClusterName).(string)),
 	}
 
@@ -160,7 +172,7 @@ func resourceCastaiGKEClusterRead(ctx context.Context, data *schema.ResourceData
 	}
 	if GKE := resp.JSON200.Gke; GKE != nil {
 		data.Set(FieldGKEClusterProjectId, toString(GKE.ProjectId))
-		data.Set(FieldGKEClusterRegion, toString(GKE.Region))
+		data.Set(FieldGKEClusterLocation, toString(GKE.Location))
 		data.Set(FieldGKEClusterName, toString(GKE.ClusterName))
 	}
 	clusterID := *resp.JSON200.Id

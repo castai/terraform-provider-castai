@@ -9,9 +9,9 @@ provider "kubernetes" {
 module "gke" {
   source                     = "terraform-google-modules/kubernetes-engine/google"
   version                    = "20.0.0"
+  regional                   = false
   project_id                 = var.project_id
   name                       = var.cluster_name
-  region                     = var.cluster_region
   zones                      = var.cluster_zones
   network                    = module.vpc.network_name
   subnetwork                 = module.vpc.subnets_names[0]
@@ -26,6 +26,7 @@ module "gke" {
     {
       name               = "default-node-pool"
       machine_type       = "e2-medium"
+      node_locations     = var.cluster_zones[0]
       min_count          = 1
       max_count          = 100
       local_ssd_count    = 0
