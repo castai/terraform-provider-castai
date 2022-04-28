@@ -27,14 +27,10 @@
       "Sid": "NonResourcePermissions",
       "Effect": "Allow",
       "Action": [
-        "iam:CreateInstanceProfile",
         "iam:DeleteInstanceProfile",
-        "iam:CreateRole",
-        "iam:DeleteRole",
-        "iam:AttachRolePolicy",
-        "iam:DetachRolePolicy",
-        "iam:AddRoleToInstanceProfile",
         "iam:RemoveRoleFromInstanceProfile",
+        "iam:DeleteRole",
+        "iam:DetachRolePolicy",
         "iam:CreateServiceLinkedRole",
         "iam:DeleteServiceLinkedRole",
         "ec2:CreateSecurityGroup",
@@ -44,28 +40,6 @@
         "ec2:ImportKeyPair"
       ],
       "Resource": "*"
-    },
-    {
-      "Sid": "TagOnLaunching",
-      "Effect": "Allow",
-      "Action": "ec2:CreateTags",
-      "Resource": "arn:aws:ec2:*:{{ .AccountNumber }}:instance/*",
-      "Condition": {
-        "StringEquals": {
-          "ec2:CreateAction": "RunInstances"
-        }
-      }
-    },
-    {
-      "Sid": "TagSecurityGroups",
-      "Effect": "Allow",
-      "Action": "ec2:CreateTags",
-      "Resource": "arn:aws:ec2:*:{{ .AccountNumber }}:security-group/*",
-      "Condition": {
-        "StringEquals": {
-          "ec2:CreateAction": "CreateSecurityGroup"
-        }
-      }
     },
     {
       "Sid": "RunInstancesPermissions",
