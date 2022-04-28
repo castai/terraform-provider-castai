@@ -46,11 +46,10 @@
       "Sid": "VpcRestrictedActions",
       "Effect": "Allow",
       "Action": [
-        "ec2:RevokeSecurityGroupIngress",
-        "ec2:RevokeSecurityGroupEgress",
         "ec2:AuthorizeSecurityGroupEgress",
         "ec2:AuthorizeSecurityGroupIngress",
-        "ec2:DeleteSecurityGroup"
+        "ec2:DeleteSecurityGroup",
+        "ec2:DeleteNetworkInterface"
       ],
       "Resource": "*",
       "Condition": {
@@ -64,7 +63,6 @@
       "Effect": "Allow",
       "Action": [
         "autoscaling:UpdateAutoScalingGroup",
-        "autoscaling:DeleteAutoScalingGroup",
         "autoscaling:SuspendProcesses",
         "autoscaling:ResumeProcesses",
         "autoscaling:TerminateInstanceInAutoScalingGroup"
@@ -84,9 +82,7 @@
       "Effect": "Allow",
       "Action": [
         "eks:Describe*",
-        "eks:List*",
-        "eks:DeleteNodegroup",
-        "eks:UpdateNodegroupConfig"
+        "eks:List*"
       ],
       "Resource": [
         "arn:aws:eks:{{ .ARN }}:cluster/{{ .ClusterName }}",
