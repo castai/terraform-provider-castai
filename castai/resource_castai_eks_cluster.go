@@ -170,11 +170,6 @@ func resourceCastaiEKSClusterCreate(ctx context.Context, data *schema.ResourceDa
 	}
 
 	clusterID := *resp.JSON200.Id
-	tkn, err := createClusterToken(ctx, client, clusterID)
-	if err != nil {
-		return diag.FromErr(err)
-	}
-	data.Set(FieldEKSClusterToken, tkn)
 	data.SetId(clusterID)
 
 	if err := updateClusterSettings(ctx, data, client); err != nil {
@@ -279,6 +274,7 @@ func resourceCastaiEKSClusterDelete(ctx context.Context, data *schema.ResourceDa
 			log.Printf("[INFO] Disconnecting cluster.")
 			response, err := client.ExternalClusterAPIDisconnectClusterWithResponse(ctx, clusterId, sdk.ExternalClusterAPIDisconnectClusterJSONRequestBody{
 				DeleteProvisionedNodes: getOptionalBool(data, FieldEKSClusterDeleteNodesOnDisconnect, false),
+				KeepKubernetesResources: toBoolPtr(true),
 			})
 			if checkErr := sdk.CheckOKResponse(response, err); checkErr != nil {
 				return resource.NonRetryableError(err)
