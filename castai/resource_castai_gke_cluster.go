@@ -233,6 +233,7 @@ func resourceCastaiGKEClusterDelete(ctx context.Context, data *schema.ResourceDa
 			log.Printf("[INFO] Disconnecting cluster.")
 			response, err := client.ExternalClusterAPIDisconnectClusterWithResponse(ctx, clusterId, sdk.ExternalClusterAPIDisconnectClusterJSONRequestBody{
 				DeleteProvisionedNodes: getOptionalBool(data, FieldGKEClusterDeleteNodesOnDisconnect, false),
+				KeepKubernetesResources: toBoolPtr(true),
 			})
 			if checkErr := sdk.CheckOKResponse(response, err); checkErr != nil {
 				return resource.NonRetryableError(err)
