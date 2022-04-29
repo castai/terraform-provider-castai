@@ -36,14 +36,6 @@ module "eks" {
     },
   ]
 
-  map_users = [
-    # ADD - give access to the cluster for created cast.ai user
-    {
-      userarn  = module.castai-eks-iam.user_arn
-      username = module.castai-eks-iam.user_name
-      groups   = ["system:masters"]
-    },
-  ]
   map_roles = [
     # ADD - give access to nodes spawned by cast.ai
     {
