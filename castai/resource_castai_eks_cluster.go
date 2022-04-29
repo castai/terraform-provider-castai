@@ -30,7 +30,6 @@ const (
 	FieldEKSClusterSSHPublicKey            = "ssh_public_key"
 	FieldEKSClusterTags                    = "tags"
 	FieldEKSClusterAgentToken              = "agent_token"
-	FieldEKSClusterToken                   = "cluster_token"
 	FieldEKSClusterCredentialsId           = "credentials_id"
 	FieldEKSClusterDeleteNodesOnDisconnect = "delete_nodes_on_disconnect"
 )
@@ -95,11 +94,6 @@ func resourceCastaiEKSCluster() *schema.Resource {
 				Computed:   true,
 				Deprecated: "agent_token is deprecated, use cluster_token instead",
 				Sensitive:  true,
-			},
-			FieldEKSClusterToken: {
-				Type:      schema.TypeString,
-				Computed:  true,
-				Sensitive: true,
 			},
 			FieldEKSClusterSecurityGroups: {
 				Type:     schema.TypeList,
