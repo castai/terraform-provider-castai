@@ -1849,6 +1849,7 @@ type CastaiClusterV1beta1Node struct {
 
 	// NodeNetwork represents node network.
 	Network   *CastaiClusterV1beta1NodeNetwork `json:"network,omitempty"`
+	NodeInfo  *CastaiClusterV1beta1NodeInfo    `json:"nodeInfo,omitempty"`
 	Region    *string                          `json:"region,omitempty"`
 	Resources *CastaiClusterV1beta1Resources   `json:"resources,omitempty"`
 
@@ -1874,6 +1875,17 @@ type CastaiClusterV1beta1Node_InstanceLabels struct {
 // CastaiClusterV1beta1Node_Labels defines model for CastaiClusterV1beta1Node.Labels.
 type CastaiClusterV1beta1Node_Labels struct {
 	AdditionalProperties map[string]string `json:"-"`
+}
+
+// CastaiClusterV1beta1NodeInfo defines model for castai.cluster.v1beta1.NodeInfo.
+type CastaiClusterV1beta1NodeInfo struct {
+	Architecture            *string `json:"architecture,omitempty"`
+	ContainerRuntimeVersion *string `json:"containerRuntimeVersion,omitempty"`
+	KernelVersion           *string `json:"kernelVersion,omitempty"`
+	KubeProxyVersion        *string `json:"kubeProxyVersion,omitempty"`
+	KubeletVersion          *string `json:"kubeletVersion,omitempty"`
+	OperatingSystem         *string `json:"operatingSystem,omitempty"`
+	OsImage                 *string `json:"osImage,omitempty"`
 }
 
 // CastaiClusterV1beta1NodeNetwork defines model for castai.cluster.v1beta1.NodeNetwork.
@@ -2159,13 +2171,17 @@ type ExternalclusterV1Cluster struct {
 	Id *string `json:"id,omitempty"`
 
 	// KOPSClusterParams defines KOPS-specific arguments.
-	Kops *ExternalclusterV1KOPSClusterParams `json:"kops,omitempty"`
+	Kops              *ExternalclusterV1KOPSClusterParams `json:"kops,omitempty"`
+	KubernetesVersion *string                             `json:"kubernetesVersion"`
 
 	// The name of the external cluster.
 	Name *string `json:"name,omitempty"`
 
 	// The cluster's organization ID.
 	OrganizationId *string `json:"organizationId,omitempty"`
+
+	// Cluster location where cloud provider organizes cloud resources, eg.: GCP project ID, AWS account ID.
+	ProviderNamespaceId *string `json:"providerNamespaceId,omitempty"`
 
 	// Cluster cloud provider type.
 	ProviderType *string `json:"providerType,omitempty"`
@@ -2223,6 +2239,9 @@ type ExternalclusterV1DisconnectConfig struct {
 
 	// Whether CAST provisioned nodes should be deleted.
 	DeleteProvisionedNodes *bool `json:"deleteProvisionedNodes,omitempty"`
+
+	// Whether CAST Kubernetes resources should be kept.
+	KeepKubernetesResources *bool `json:"keepKubernetesResources,omitempty"`
 }
 
 // ExternalclusterV1DrainConfig defines model for externalcluster.v1.DrainConfig.
