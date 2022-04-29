@@ -9,24 +9,24 @@ import (
 )
 
 const (
-	FieldClusterID = "cluster_id"
+	FieldClusterID    = "cluster_id"
 	FieldClusterToken = "cluster_token"
 )
 
 func resourceCastaiClusterToken() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceCastaiClusterTokenCreate,
-		ReadContext: resourceCastaiClusterTokenRead,
+		ReadContext:   resourceCastaiClusterTokenRead,
 		UpdateContext: nil,
 		DeleteContext: resourceCastaiClusterTokenDelete,
 		Schema: map[string]*schema.Schema{
 			FieldClusterID: {
-				Type: schema.TypeString,
+				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
 			},
 			FieldClusterToken: {
-				Type: schema.TypeString,
+				Type:      schema.TypeString,
 				Computed:  true,
 				Sensitive: true,
 			},
