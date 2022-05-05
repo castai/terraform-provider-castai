@@ -64,10 +64,8 @@ module "castai-eks-cluster" {
   aws_instance_profile_arn      = module.castai-eks-role-iam.instance_profile_arn
 
   subnets         = var.subnets
-  security_groups =  [
-   "sg-03278a09a7e4db07d",
-   "sg-0d925eeb4ebd9eb1f",
-  ]
+  # As for now (05.05.2022) you need to fill security groups after cluster onboarding with values from plan.  
+  security_groups =  []
 #  security_groups = var.security_groups
   tags            = var.tags
 
