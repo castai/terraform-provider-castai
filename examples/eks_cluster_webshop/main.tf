@@ -64,9 +64,6 @@ module "castai-eks-cluster" {
   aws_instance_profile_arn      = module.castai-eks-role-iam.instance_profile_arn
 
   subnets         = var.subnets
-  # As for now (05.05.2022) you need to fill security groups after cluster onboarding with values from plan.  
-  security_groups =  []
-#  security_groups = var.security_groups
   tags            = var.tags
 
   delete_nodes_on_disconnect = var.delete_nodes_on_disconnect

@@ -49,7 +49,7 @@ module "castai-eks-cluster" {
   aws_instance_profile_arn      = module.castai-eks-iam.instance_profile_arn
 
   subnets         = var.subnets
-  security_groups = var.security_groups
+  override_security_groups = var.security_groups
   tags            = var.tags
 
   delete_nodes_on_disconnect = var.delete_nodes_on_disconnect
