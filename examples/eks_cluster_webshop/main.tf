@@ -55,6 +55,7 @@ module "castai-eks-role-iam" {
 
 module "castai-eks-cluster" {
   source  = "castai/eks-cluster/castai"
+  api_url = "https://api-anjmao.localenv.cast.ai"
 
   aws_account_id     = var.aws_account_id
   aws_cluster_region = var.cluster_region

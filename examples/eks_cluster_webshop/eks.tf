@@ -28,8 +28,8 @@ module "eks" {
     vpc-cni = {
       resolve_conflicts = "OVERWRITE"
     }
+    aws-ebs-csi-driver = {}
   }
-
 
   self_managed_node_groups = {
     default_node_group = {}
@@ -92,6 +92,21 @@ module "eks" {
       groups   = ["system:bootstrappers", "system:nodes"]
     },
   ]
+}
+
+module "ebs_csi_irsa_role" {
+  source = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
+  version = "~> 4.21.1"
+
+  role_name             = "ebs-csi"
+  attach_ebs_csi_policy = true
+
+  oidc_providers = {
+    ex = {
+      provider_arn               = module.eks.oidc_provider_arn
+      namespace_service_accounts = ["kube-system:ebs-csi-controller-sa"]
+    }
+  }
 }
 
 data "aws_eks_cluster" "eks" {
