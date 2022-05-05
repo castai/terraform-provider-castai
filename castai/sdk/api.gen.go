@@ -1634,13 +1634,13 @@ type RebalancingRequest struct {
 type ResourceUsage struct {
 
 	// cpu hours used for given date.
-	Cpu int `json:"cpu"`
+	Cpu float32 `json:"cpu"`
 
 	// start of usage time in RFC3339 format.
 	From string `json:"from"`
 
 	// memory (MB) hours used for given date.
-	Memory int `json:"memory"`
+	Memory float32 `json:"memory"`
 
 	// end of usage time in RFC3339 format.
 	To string `json:"to"`
@@ -1826,7 +1826,7 @@ type CastaiClusterV1beta1Node struct {
 	CreatedAt *time.Time `json:"createdAt,omitempty"`
 	Id        *string    `json:"id,omitempty"`
 
-	// Will be populated only with GetNode request.
+	// Deprecated. Use node_info architecture field.
 	InstanceArchitecture *string `json:"instanceArchitecture"`
 
 	// Will be populated only with GetNode request.
@@ -1836,9 +1836,7 @@ type CastaiClusterV1beta1Node struct {
 	InstanceLabels *CastaiClusterV1beta1Node_InstanceLabels `json:"instanceLabels,omitempty"`
 
 	// Will be populated only with GetNode request.
-	InstanceName *string `json:"instanceName"`
-
-	// Will be populated only with GetNode request.
+	InstanceName  *string `json:"instanceName"`
 	InstancePrice *string `json:"instancePrice"`
 	InstanceType  *string `json:"instanceType,omitempty"`
 
@@ -1924,15 +1922,11 @@ const (
 // CastaiClusterV1beta1Resources defines model for castai.cluster.v1beta1.Resources.
 type CastaiClusterV1beta1Resources struct {
 	CpuAllocatableMilli *int32 `json:"cpuAllocatableMilli,omitempty"`
-
-	// VCPU (in MiB) available on the instance type. Will be populated only with GetNode request.
-	CpuCapacityMilli  *int32 `json:"cpuCapacityMilli"`
-	CpuRequestsMilli  *int32 `json:"cpuRequestsMilli,omitempty"`
-	MemAllocatableMib *int32 `json:"memAllocatableMib,omitempty"`
-
-	// Ram (in MiB) available on the instance type. Will be populated only with GetNode request.
-	MemCapacityMib *int32 `json:"memCapacityMib"`
-	MemRequestsMib *int32 `json:"memRequestsMib,omitempty"`
+	CpuCapacityMilli    *int32 `json:"cpuCapacityMilli,omitempty"`
+	CpuRequestsMilli    *int32 `json:"cpuRequestsMilli,omitempty"`
+	MemAllocatableMib   *int32 `json:"memAllocatableMib,omitempty"`
+	MemCapacityMib      *int32 `json:"memCapacityMib,omitempty"`
+	MemRequestsMib      *int32 `json:"memRequestsMib,omitempty"`
 }
 
 // CastaiClusterV1beta1Taint defines model for castai.cluster.v1beta1.Taint.
@@ -2578,6 +2572,10 @@ type PoliciesV1Evictor struct {
 	// Enable/disable the Evictor policy. This will either install or uninstall the Evictor component in your cluster.
 	Enabled *bool `json:"enabled"`
 
+	// Configure the node grace period which controls the duration which must pass after a node has been created before
+	// Evictor starts considering that node.
+	NodeGracePeriodMinutes *int32 `json:"nodeGracePeriodMinutes"`
+
 	// Enable/disable scoped mode. By default, Evictor targets all nodes in the cluster. This mode will constrain in to
 	// just the nodes which were created by CAST AI.
 	ScopedMode *bool `json:"scopedMode"`
@@ -2710,8 +2708,9 @@ type PoliciesV1SpotInstances struct {
 // PoliciesV1UnschedulablePodsPolicy defines model for policies.v1.UnschedulablePodsPolicy.
 type PoliciesV1UnschedulablePodsPolicy struct {
 
-	// Defines default ratio of 1 CPU to Volume GiB when creating new nodes. If set to 25, the ration would be
-	// 1 CPU : 25 GiB, for example a node with 16 CPU would have a 400 GiB volume.
+	// Defines default ratio of 1 CPU to Volume GiB  which will be summed with minimum value when creating new nodes.
+	// If set to 5, the ration would be: 1 CPU : 5 GiB.
+	// For example a node with 16 CPU would have (16 * 5 GiB) + minimum(100GiB) = 180 GiB volume size.
 	DiskGibToCpuRatio *int32 `json:"diskGibToCpuRatio"`
 
 	// Enable/disable unschedulable pods detection policy.
