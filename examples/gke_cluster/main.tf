@@ -53,5 +53,5 @@ module "castai-gke-cluster" {
     }
   EOT
 
-  depends_on = [module.gke]
+  depends_on = [module.gke, module.castai-gke-iam]
 }

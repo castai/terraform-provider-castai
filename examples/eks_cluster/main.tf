@@ -77,4 +77,6 @@ module "castai-eks-cluster" {
         }
     }
   EOT
+
+  depends_on = [module.castai-eks-iam]
 }

@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
@@ -17,14 +16,11 @@ import (
 )
 
 const (
-	FieldGKEClusterName                    = "name"
-	FieldGKEClusterProjectId               = "project_id"
-	FieldGKEClusterLocation                = "location"
-	FieldGKEClusterToken                   = "cluster_token"
-	FieldGKEClusterDeleteNodesOnDisconnect = "delete_nodes_on_disconnect"
-	FieldGKEClusterSSHPublicKey            = "ssh_public_key"
-	FieldGKEClusterCredentialsId           = "credentials_id"
-	FieldGKEClusterCredentials             = "credentials_json"
+	FieldGKEClusterName          = "name"
+	FieldGKEClusterProjectId     = "project_id"
+	FieldGKEClusterLocation      = "location"
+	FieldGKEClusterCredentialsId = "credentials_id"
+	FieldGKEClusterCredentials   = "credentials_json"
 )
 
 func resourceCastaiGKECluster() *schema.Resource {
@@ -32,7 +28,7 @@ func resourceCastaiGKECluster() *schema.Resource {
 		CreateContext: resourceCastaiGKEClusterCreate,
 		ReadContext:   resourceCastaiGKEClusterRead,
 		UpdateContext: resourceCastaiGKEClusterUpdate,
-		DeleteContext: resourceCastaiGKEClusterDelete,
+		DeleteContext: resourceCastaiPublicCloudClusterDelete,
 		Description:   "GKE cluster resource allows connecting an existing GEK cluster to CAST AI.",
 
 		Timeouts: &schema.ResourceTimeout{
@@ -68,7 +64,7 @@ func resourceCastaiGKECluster() *schema.Resource {
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 				Description:      "GCP cluster zone in case of zonal or region in case of regional cluster",
 			},
-			FieldGKEClusterToken: {
+			FieldClusterToken: {
 				Type:        schema.TypeString,
 				Computed:    true,
 				Sensitive:   true,
@@ -81,12 +77,12 @@ func resourceCastaiGKECluster() *schema.Resource {
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 				Description:      "GCP credentials.json from ServiceAccount with credentials for CAST AI",
 			},
-			FieldGKEClusterDeleteNodesOnDisconnect: {
+			FieldDeleteNodesOnDisconnect: {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				Description: "Should CAST AI remove nodes managed by CAST.AI on disconnect",
 			},
-			FieldGKEClusterSSHPublicKey: {
+			FieldClusterSSHPublicKey: {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "SSHPublicKey for nodes",
@@ -132,7 +128,7 @@ func resourceCastaiGKEClusterCreate(ctx context.Context, data *schema.ResourceDa
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	data.Set(FieldGKEClusterToken, tkn)
+	data.Set(FieldClusterToken, tkn)
 	data.SetId(clusterID)
 
 	if err := updateGKEClusterSettings(ctx, data, client); err != nil {
@@ -168,7 +164,7 @@ func resourceCastaiGKEClusterRead(ctx context.Context, data *schema.ResourceData
 
 	data.Set(FieldGKEClusterCredentialsId, toString(resp.JSON200.CredentialsId))
 	if resp.JSON200.SshPublicKey != nil {
-		data.Set(FieldGKEClusterSSHPublicKey, toString(resp.JSON200.SshPublicKey))
+		data.Set(FieldClusterSSHPublicKey, toString(resp.JSON200.SshPublicKey))
 	}
 	if GKE := resp.JSON200.Gke; GKE != nil {
 		data.Set(FieldGKEClusterProjectId, toString(GKE.ProjectId))
@@ -177,12 +173,12 @@ func resourceCastaiGKEClusterRead(ctx context.Context, data *schema.ResourceData
 	}
 	clusterID := *resp.JSON200.Id
 
-	if _, ok := data.GetOk(FieldGKEClusterToken); !ok {
+	if _, ok := data.GetOk(FieldClusterToken); !ok {
 		tkn, err := createClusterToken(ctx, client, clusterID)
 		if err != nil {
 			return diag.FromErr(err)
 		}
-		data.Set(FieldGKEClusterToken, tkn)
+		data.Set(FieldClusterToken, tkn)
 	}
 
 	return nil
@@ -198,73 +194,9 @@ func resourceCastaiGKEClusterUpdate(ctx context.Context, data *schema.ResourceDa
 	return resourceCastaiGKEClusterRead(ctx, data, meta)
 }
 
-func resourceCastaiGKEClusterDelete(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ProviderConfig).api
-
-	clusterId := data.Id()
-
-	log.Printf("[INFO] Checking current status of the cluster.")
-
-	err := resource.RetryContext(ctx, data.Timeout(schema.TimeoutDelete), func() *resource.RetryError {
-		clusterResponse, err := client.ExternalClusterAPIGetClusterWithResponse(ctx, clusterId)
-		if checkErr := sdk.CheckOKResponse(clusterResponse, err); checkErr != nil {
-			return resource.NonRetryableError(err)
-		}
-
-		clusterStatus := *clusterResponse.JSON200.Status
-		agentStatus := *clusterResponse.JSON200.AgentStatus
-		log.Printf("[INFO] Current cluster status=%s, agent_status=%s", clusterStatus, agentStatus)
-
-		if clusterStatus == sdk.ClusterStatusDeleted || clusterStatus == sdk.ClusterStatusArchived {
-			log.Printf("[INFO] Cluster is already deleted, removing from state.")
-			data.SetId("")
-			return nil
-		}
-
-		if agentStatus == sdk.ClusterAgentStatusDisconnecting {
-			return resource.RetryableError(fmt.Errorf("agent is disconnecting"))
-		}
-
-		if clusterStatus == sdk.ClusterStatusDeleting {
-			return resource.RetryableError(fmt.Errorf("cluster is deleting"))
-		}
-
-		if clusterResponse.JSON200.CredentialsId != nil && agentStatus != sdk.ClusterAgentStatusDisconnected {
-			log.Printf("[INFO] Disconnecting cluster.")
-			response, err := client.ExternalClusterAPIDisconnectClusterWithResponse(ctx, clusterId, sdk.ExternalClusterAPIDisconnectClusterJSONRequestBody{
-				DeleteProvisionedNodes: getOptionalBool(data, FieldGKEClusterDeleteNodesOnDisconnect, false),
-				KeepKubernetesResources: toBoolPtr(true),
-			})
-			if checkErr := sdk.CheckOKResponse(response, err); checkErr != nil {
-				return resource.NonRetryableError(err)
-			}
-
-			return resource.RetryableError(fmt.Errorf("triggered agent disconnection"))
-		}
-
-		if agentStatus == sdk.ClusterAgentStatusDisconnected && clusterStatus != sdk.ClusterStatusDeleted {
-			log.Printf("[INFO] Deleting cluster.")
-
-			if err := sdk.CheckResponseNoContent(client.ExternalClusterAPIDeleteClusterWithResponse(ctx, clusterId)); err != nil {
-				return resource.NonRetryableError(err)
-			}
-
-			return resource.RetryableError(fmt.Errorf("triggered cluster deletion"))
-
-		}
-
-		return resource.RetryableError(fmt.Errorf("retrying"))
-	})
-
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	return nil
-}
 func updateGKEClusterSettings(ctx context.Context, data *schema.ResourceData, client *sdk.ClientWithResponses) error {
 	if !data.HasChanges(
-		FieldGKEClusterSSHPublicKey,
+		FieldClusterSSHPublicKey,
 		FieldGKEClusterCredentials,
 	) {
 		log.Printf("[INFO] Nothing to update in cluster setttings.")
@@ -280,7 +212,7 @@ func updateGKEClusterSettings(ctx context.Context, data *schema.ResourceData, cl
 		req.Credentials = toStringPtr(credentialsJSON.(string))
 	}
 
-	if s, ok := data.GetOk(FieldGKEClusterSSHPublicKey); ok {
+	if s, ok := data.GetOk(FieldClusterSSHPublicKey); ok {
 		req.SshPublicKey = toStringPtr(s.(string))
 	}
 
