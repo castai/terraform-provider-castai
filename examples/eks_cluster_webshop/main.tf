@@ -60,6 +60,8 @@ module "castai-eks-cluster" {
   aws_cluster_region = var.cluster_region
   aws_cluster_name   = module.eks.cluster_id
 
+  // You can provide SGs that CAST AI should use
+  override_security_groups = null
   aws_assume_role_arn           = module.castai-eks-role-iam.role_arn
   aws_instance_profile_arn      = module.castai-eks-role-iam.instance_profile_arn
 

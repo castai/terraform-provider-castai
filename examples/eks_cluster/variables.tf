@@ -29,25 +29,25 @@ variable "cluster_name" {
 }
 
 variable "subnets" {
-  type = list(string)
+  type        = list(string)
   description = "Optional custom subnets for the cluster. If not set subnets from the EKS cluster configuration are used."
-  default = []
+  default     = []
 }
 
 variable "security_groups" {
-  type = list(string)
+  type        = list(string)
   description = "Optional custom security groups for the cluster. If not set security groups from the EKS cluster configuration are used."
-  default = []
+  default     = null
 }
 
 variable "tags" {
-  type = map
+  type        = map(any)
   description = "Optional tags for new cluster nodes. This parameter applies only to new nodes - tags for old nodes are not reconciled."
-  default = {}
+  default     = {}
 }
 
 variable "delete_nodes_on_disconnect" {
-  type = bool
+  type        = bool
   description = "Optional parameter, if set to true - CAST AI provisioned nodes will be deleted from EC2 on cluster disconnection."
-  default = false
+  default     = false
 }

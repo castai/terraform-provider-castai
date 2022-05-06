@@ -1,12 +1,12 @@
 terraform {
   required_providers {
-    castai     = {
+    castai = {
       source = "castai/castai"
     }
     kubernetes = {
       source = "hashicorp/kubernetes"
     }
-    helm       = {
+    helm = {
       source = "hashicorp/helm"
     }
   }

@@ -1,6 +1,6 @@
 #2. create EKS cluster
 module "eks" {
-  source = "terraform-aws-modules/eks/aws"
+  source  = "terraform-aws-modules/eks/aws"
   version = "17.24.0"
 
   cluster_name    = var.cluster_name
@@ -9,9 +9,9 @@ module "eks" {
   vpc_id  = module.vpc.vpc_id
   subnets = [module.vpc.private_subnets[0], module.vpc.public_subnets[1]]
 
-  cluster_endpoint_private_access = true
+  cluster_endpoint_private_access                = true
   cluster_create_endpoint_private_access_sg_rule = true
-  cluster_endpoint_private_access_cidrs = ["10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24"]
+  cluster_endpoint_private_access_cidrs          = ["10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24"]
 
   node_groups_defaults = {
     ami_type  = "AL2_x86_64"
@@ -26,13 +26,13 @@ module "eks" {
 
   worker_groups = [
     {
-      name                          = "worker-group-1"
-      instance_type                 = "t3.medium"
-      asg_desired_capacity          = 1
+      name                 = "worker-group-1"
+      instance_type        = "t3.medium"
+      asg_desired_capacity = 1
       additional_security_group_ids = [
         aws_security_group.worker_group_mgmt_one.id, aws_security_group.worker_group_mgmt_two.id
       ]
-      eni_delete                    = "true"
+      eni_delete = "true"
     },
   ]
 
