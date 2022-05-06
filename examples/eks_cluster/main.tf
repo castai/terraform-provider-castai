@@ -27,7 +27,7 @@ provider "aws" {
 }
 
 module "castai-eks-iam" {
-  source  = "castai/eks-iam/castai"
+  source = "castai/eks-iam/castai"
 
   aws_account_id     = var.aws_account_id
   aws_cluster_region = var.cluster_region
@@ -38,19 +38,19 @@ module "castai-eks-iam" {
 }
 
 module "castai-eks-cluster" {
-  source  = "castai/eks-cluster/castai"
+  source = "castai/eks-cluster/castai"
 
   aws_account_id     = var.aws_account_id
   aws_cluster_region = var.cluster_region
   aws_cluster_name   = module.eks.cluster_id
 
-  aws_access_key_id             = module.castai-eks-iam.aws_access_key_id
-  aws_secret_access_key         = module.castai-eks-iam.aws_secret_access_key
-  aws_instance_profile_arn      = module.castai-eks-iam.instance_profile_arn
+  aws_access_key_id        = module.castai-eks-iam.aws_access_key_id
+  aws_secret_access_key    = module.castai-eks-iam.aws_secret_access_key
+  aws_instance_profile_arn = module.castai-eks-iam.instance_profile_arn
 
-  subnets         = var.subnets
-  security_groups = var.security_groups
-  tags            = var.tags
+  subnets                  = var.subnets
+  override_security_groups = var.security_groups
+  tags                     = var.tags
 
   delete_nodes_on_disconnect = var.delete_nodes_on_disconnect
 

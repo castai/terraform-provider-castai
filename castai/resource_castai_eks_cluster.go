@@ -25,6 +25,7 @@ const (
 	FieldEKSClusterAssumeRoleArn           = "assume_role_arn"
 	FieldEKSClusterInstanceProfileArn      = "instance_profile_arn"
 	FieldEKSClusterSecurityGroups          = "security_groups"
+	FieldEKSClusterOverrideSecurityGroups  = "override_security_groups"
 	FieldEKSClusterSubnets                 = "subnets"
 	FieldEKSClusterDNSClusterIP            = "dns_cluster_ip"
 	FieldEKSClusterSSHPublicKey            = "ssh_public_key"
@@ -95,9 +96,16 @@ func resourceCastaiEKSCluster() *schema.Resource {
 				Deprecated: "agent_token is deprecated, use cluster_token instead",
 				Sensitive:  true,
 			},
-			FieldEKSClusterSecurityGroups: {
+			FieldEKSClusterOverrideSecurityGroups: {
 				Type:     schema.TypeList,
 				Optional: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+			},
+			FieldEKSClusterSecurityGroups: {
+				Type:     schema.TypeList,
+				Computed: true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
@@ -267,7 +275,7 @@ func resourceCastaiEKSClusterDelete(ctx context.Context, data *schema.ResourceDa
 		if clusterResponse.JSON200.CredentialsId != nil && agentStatus != sdk.ClusterAgentStatusDisconnected {
 			log.Printf("[INFO] Disconnecting cluster.")
 			response, err := client.ExternalClusterAPIDisconnectClusterWithResponse(ctx, clusterId, sdk.ExternalClusterAPIDisconnectClusterJSONRequestBody{
-				DeleteProvisionedNodes: getOptionalBool(data, FieldEKSClusterDeleteNodesOnDisconnect, false),
+				DeleteProvisionedNodes:  getOptionalBool(data, FieldEKSClusterDeleteNodesOnDisconnect, false),
 				KeepKubernetesResources: toBoolPtr(true),
 			})
 			if checkErr := sdk.CheckOKResponse(response, err); checkErr != nil {
@@ -306,7 +314,7 @@ func updateClusterSettings(ctx context.Context, data *schema.ResourceData, clien
 		FieldEKSClusterInstanceProfileArn,
 		FieldEKSClusterSubnets,
 		FieldEKSClusterDNSClusterIP,
-		FieldEKSClusterSecurityGroups,
+		FieldEKSClusterOverrideSecurityGroups,
 		FieldEKSClusterTags,
 	) {
 		log.Printf("[INFO] Nothing to update in cluster setttings.")
@@ -344,13 +352,15 @@ func updateClusterSettings(ctx context.Context, data *schema.ResourceData, clien
 		req.Eks.InstanceProfileArn = toStringPtr(arn.(string))
 	}
 
-	if s, ok := data.GetOk(FieldEKSClusterSecurityGroups); ok {
-		sgsRaw := s.([]interface{})
-		securityGroups := make([]string, len(sgsRaw))
-		for idx, group := range sgsRaw {
-			securityGroups[idx] = group.(string)
+	if s, ok := data.GetOk(FieldEKSClusterOverrideSecurityGroups); ok {
+		sgsRaw, ok := s.([]interface{})
+		if ok {
+			securityGroups := make([]string, len(sgsRaw))
+			for idx, group := range sgsRaw {
+				securityGroups[idx] = group.(string)
+			}
+			req.Eks.SecurityGroups = &securityGroups
 		}
-		req.Eks.SecurityGroups = &securityGroups
 	}
 
 	if s, ok := data.GetOk(FieldEKSClusterSubnets); ok {
