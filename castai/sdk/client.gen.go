@@ -217,6 +217,9 @@ type ClientInterface interface {
 	// GetCostHistory request
 	GetCostHistory(ctx context.Context, clusterId ClusterId, params *GetCostHistoryParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// GetCostReport request
+	GetCostReport(ctx context.Context, clusterId ClusterId, params *GetCostReportParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// GetDashboardMetricsCommonStats request
 	GetDashboardMetricsCommonStats(ctx context.Context, clusterId ClusterId, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -994,6 +997,17 @@ func (c *Client) ArchiveCluster(ctx context.Context, clusterId ClusterId, reqEdi
 
 func (c *Client) GetCostHistory(ctx context.Context, clusterId ClusterId, params *GetCostHistoryParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetCostHistoryRequest(c.Server, clusterId, params)
+	if err != nil {
+		return nil, err
+	}
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) GetCostReport(ctx context.Context, clusterId ClusterId, params *GetCostReportParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewGetCostReportRequest(c.Server, clusterId, params)
 	if err != nil {
 		return nil, err
 	}
@@ -3852,6 +3866,84 @@ func NewGetCostHistoryRequest(server string, clusterId ClusterId, params *GetCos
 			}
 		}
 
+	}
+
+	queryUrl.RawQuery = queryValues.Encode()
+
+	req, err := http.NewRequest("GET", queryUrl.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewGetCostReportRequest generates requests for GetCostReport
+func NewGetCostReportRequest(server string, clusterId ClusterId, params *GetCostReportParams) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParam("simple", false, "clusterId", clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	queryUrl, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	basePath := fmt.Sprintf("/v1/kubernetes/clusters/%s/cost-report", pathParam0)
+	if basePath[0] == '/' {
+		basePath = basePath[1:]
+	}
+
+	queryUrl, err = queryUrl.Parse(basePath)
+	if err != nil {
+		return nil, err
+	}
+
+	queryValues := queryUrl.Query()
+
+	if params.StepSeconds != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "stepSeconds", *params.StepSeconds); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if queryFrag, err := runtime.StyleParam("form", true, "startTime", params.StartTime); err != nil {
+		return nil, err
+	} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+		return nil, err
+	} else {
+		for k, v := range parsed {
+			for _, v2 := range v {
+				queryValues.Add(k, v2)
+			}
+		}
+	}
+
+	if queryFrag, err := runtime.StyleParam("form", true, "endTime", params.EndTime); err != nil {
+		return nil, err
+	} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+		return nil, err
+	} else {
+		for k, v := range parsed {
+			for _, v2 := range v {
+				queryValues.Add(k, v2)
+			}
+		}
 	}
 
 	queryUrl.RawQuery = queryValues.Encode()
@@ -7466,6 +7558,9 @@ type ClientWithResponsesInterface interface {
 	// GetCostHistory request
 	GetCostHistoryWithResponse(ctx context.Context, clusterId ClusterId, params *GetCostHistoryParams) (*GetCostHistoryResponse, error)
 
+	// GetCostReport request
+	GetCostReportWithResponse(ctx context.Context, clusterId ClusterId, params *GetCostReportParams) (*GetCostReportResponse, error)
+
 	// GetDashboardMetricsCommonStats request
 	GetDashboardMetricsCommonStatsWithResponse(ctx context.Context, clusterId ClusterId) (*GetDashboardMetricsCommonStatsResponse, error)
 
@@ -8722,6 +8817,36 @@ func (r GetCostHistoryResponse) StatusCode() int {
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
 func (r GetCostHistoryResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type GetCostReportResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *ClusterCostReportResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r GetCostReportResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r GetCostReportResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r GetCostReportResponse) GetBody() []byte {
 	return r.Body
 }
 
@@ -11418,6 +11543,15 @@ func (c *ClientWithResponses) GetCostHistoryWithResponse(ctx context.Context, cl
 	return ParseGetCostHistoryResponse(rsp)
 }
 
+// GetCostReportWithResponse request returning *GetCostReportResponse
+func (c *ClientWithResponses) GetCostReportWithResponse(ctx context.Context, clusterId ClusterId, params *GetCostReportParams) (*GetCostReportResponse, error) {
+	rsp, err := c.GetCostReport(ctx, clusterId, params)
+	if err != nil {
+		return nil, err
+	}
+	return ParseGetCostReportResponse(rsp)
+}
+
 // GetDashboardMetricsCommonStatsWithResponse request returning *GetDashboardMetricsCommonStatsResponse
 func (c *ClientWithResponses) GetDashboardMetricsCommonStatsWithResponse(ctx context.Context, clusterId ClusterId) (*GetDashboardMetricsCommonStatsResponse, error) {
 	rsp, err := c.GetDashboardMetricsCommonStats(ctx, clusterId)
@@ -13061,6 +13195,32 @@ func ParseGetCostHistoryResponse(rsp *http.Response) (*GetCostHistoryResponse, e
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest ClusterCostHistoryResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseGetCostReportResponse parses an HTTP response from a GetCostReportWithResponse call
+func ParseGetCostReportResponse(rsp *http.Response) (*GetCostReportResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &GetCostReportResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ClusterCostReportResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}

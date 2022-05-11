@@ -26,6 +26,10 @@ func (c *Config) configureProvider() (interface{}, error) {
 			Transport: logging.NewTransport("CAST.AI", http.DefaultTransport),
 			Timeout:   1 * time.Minute,
 		}
+		client.RequestEditors = append(client.RequestEditors, func(_ context.Context, req *http.Request) error {
+			req.Header.Set("user-agent", "castai-terraform-provider")
+			return nil
+		})
 		return nil
 	}
 

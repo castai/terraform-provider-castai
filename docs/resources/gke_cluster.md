@@ -17,9 +17,9 @@ GKE cluster resource allows connecting an existing GEK cluster to CAST AI.
 
 ### Required
 
+- **location** (String) GCP cluster zone in case of zonal or region in case of regional cluster
 - **name** (String) GKE cluster name
 - **project_id** (String) GCP project id
-- **region** (String) GCP cluster token
 
 ### Optional
 

@@ -62,4 +62,8 @@ module "castai-eks-cluster" {
   tags                     = var.tags
 
   delete_nodes_on_disconnect = var.delete_nodes_on_disconnect
+
+  // depends_on helps terraform with creating proper dependencies graph in case of resource creation and in this case destroy
+  // module "castai-eks-cluster" has to be destroyed before module "castai-eks-role-iam"
+  depends_on = [module.castai-eks-role-iam]
 }

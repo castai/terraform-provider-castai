@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
@@ -17,22 +16,18 @@ import (
 )
 
 const (
-	FieldEKSClusterName                    = "name"
-	FieldEKSClusterAccountId               = "account_id"
-	FieldEKSClusterRegion                  = "region"
-	FieldEKSClusterAccessKeyId             = "access_key_id"
-	FieldEKSClusterSecretAccessKey         = "secret_access_key"
-	FieldEKSClusterAssumeRoleArn           = "assume_role_arn"
-	FieldEKSClusterInstanceProfileArn      = "instance_profile_arn"
-	FieldEKSClusterSecurityGroups          = "security_groups"
-	FieldEKSClusterOverrideSecurityGroups  = "override_security_groups"
-	FieldEKSClusterSubnets                 = "subnets"
-	FieldEKSClusterDNSClusterIP            = "dns_cluster_ip"
-	FieldEKSClusterSSHPublicKey            = "ssh_public_key"
-	FieldEKSClusterTags                    = "tags"
-	FieldEKSClusterAgentToken              = "agent_token"
-	FieldEKSClusterCredentialsId           = "credentials_id"
-	FieldEKSClusterDeleteNodesOnDisconnect = "delete_nodes_on_disconnect"
+	FieldEKSClusterName                   = "name"
+	FieldEKSClusterAccountId              = "account_id"
+	FieldEKSClusterRegion                 = "region"
+	FieldEKSClusterAccessKeyId            = "access_key_id"
+	FieldEKSClusterSecretAccessKey        = "secret_access_key"
+	FieldEKSClusterAssumeRoleArn          = "assume_role_arn"
+	FieldEKSClusterInstanceProfileArn     = "instance_profile_arn"
+	FieldEKSClusterSecurityGroups         = "security_groups"
+	FieldEKSClusterOverrideSecurityGroups = "override_security_groups"
+	FieldEKSClusterSubnets                = "subnets"
+	FieldEKSClusterTags                   = "tags"
+	FieldEKSClusterDNSClusterIP           = "dns_cluster_ip"
 )
 
 func resourceCastaiEKSCluster() *schema.Resource {
@@ -40,7 +35,8 @@ func resourceCastaiEKSCluster() *schema.Resource {
 		CreateContext: resourceCastaiEKSClusterCreate,
 		ReadContext:   resourceCastaiEKSClusterRead,
 		UpdateContext: resourceCastaiEKSClusterUpdate,
-		DeleteContext: resourceCastaiEKSClusterDelete,
+		DeleteContext: resourceCastaiPublicCloudClusterDelete,
+		Description:   "EKS cluster resource allows connecting an existing EKS cluster to CAST AI.",
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(5 * time.Minute),
@@ -54,43 +50,52 @@ func resourceCastaiEKSCluster() *schema.Resource {
 				Required:         true,
 				ForceNew:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+				Description:      "name of your EKS cluster",
 			},
 			FieldEKSClusterAccountId: {
 				Type:             schema.TypeString,
 				Required:         true,
 				ForceNew:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+				Description:      "ID of AWS account",
 			},
 			FieldEKSClusterRegion: {
 				Type:             schema.TypeString,
 				Required:         true,
 				ForceNew:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+				Description:      "AWS region where the cluster is placed",
 			},
 			FieldEKSClusterAccessKeyId: {
-				Type:      schema.TypeString,
-				Sensitive: true,
-				Optional:  true,
+				Type:        schema.TypeString,
+				Sensitive:   true,
+				Optional:    true,
+				Description: "AWS access key ID of the CAST AI IAM account",
 			},
 			FieldEKSClusterSecretAccessKey: {
-				Type:      schema.TypeString,
-				Sensitive: true,
-				Optional:  true,
+				Type:        schema.TypeString,
+				Sensitive:   true,
+				Optional:    true,
+				Description: "AWS secret access key of the CAST AI IAM account",
 			},
 			FieldEKSClusterAssumeRoleArn: {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "AWS ARN for assume role that should be used instead of IAM account",
 			},
 			FieldEKSClusterInstanceProfileArn: {
 				Type:             schema.TypeString,
 				Optional:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+				Description:      "AWS ARN of the instance profile to be used by CAST AI",
 			},
-			FieldEKSClusterCredentialsId: {
-				Type:     schema.TypeString,
-				Computed: true,
+			FieldClusterCredentialsId: {
+				Type:        schema.TypeString,
+				Computed:    true,
+				ForceNew:    true,
+				Description: "CAST AI internal credentials ID",
 			},
-			FieldEKSClusterAgentToken: {
+			FieldClusterAgentToken: {
 				Type:       schema.TypeString,
 				Computed:   true,
 				Deprecated: "agent_token is deprecated, use cluster_token instead",
@@ -102,6 +107,7 @@ func resourceCastaiEKSCluster() *schema.Resource {
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
+				Description: "Optional custom security groups for the cluster. If not set security groups from the EKS cluster configuration are used.",
 			},
 			FieldEKSClusterSecurityGroups: {
 				Type:     schema.TypeList,
@@ -109,6 +115,7 @@ func resourceCastaiEKSCluster() *schema.Resource {
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
+				Description: "IDs of security groups that are used by CAST AI",
 			},
 			FieldEKSClusterSubnets: {
 				Type:     schema.TypeList,
@@ -116,15 +123,18 @@ func resourceCastaiEKSCluster() *schema.Resource {
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
+				Description: "Custom subnets for the cluster. If not set subnets from the EKS cluster configuration are used.",
 			},
 			FieldEKSClusterDNSClusterIP: {
 				Type:             schema.TypeString,
 				Optional:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.IsIPv4Address),
+				Description:      "Overrides the IP address to use for DNS queries within the cluster. Defaults to 10.100.0.10 or 172.20.0.10 based on the IP address of the primary interface",
 			},
-			FieldEKSClusterSSHPublicKey: {
-				Type:     schema.TypeString,
-				Optional: true,
+			FieldClusterSSHPublicKey: {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Accepted values are base64 encoded SSH public key or AWS key pair ID.",
 			},
 			FieldEKSClusterTags: {
 				Type:     schema.TypeMap,
@@ -132,10 +142,12 @@ func resourceCastaiEKSCluster() *schema.Resource {
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
+				Description: "Tags which should be added to CAST AI nodes",
 			},
-			FieldEKSClusterDeleteNodesOnDisconnect: {
-				Type:     schema.TypeBool,
-				Optional: true,
+			FieldDeleteNodesOnDisconnect: {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Should CAST AI remove nodes managed by CAST AI on disconnect",
 			},
 		},
 		CustomizeDiff: func(ctx context.Context, diff *schema.ResourceDiff, i interface{}) error {
@@ -204,7 +216,7 @@ func resourceCastaiEKSClusterRead(ctx context.Context, data *schema.ResourceData
 		return diag.FromErr(checkErr)
 	}
 
-	data.Set(FieldEKSClusterCredentialsId, *resp.JSON200.CredentialsId)
+	data.Set(FieldClusterCredentialsId, *resp.JSON200.CredentialsId)
 
 	if eks := resp.JSON200.Eks; eks != nil {
 		data.Set(FieldEKSClusterAccountId, toString(eks.AccountId))
@@ -212,20 +224,24 @@ func resourceCastaiEKSClusterRead(ctx context.Context, data *schema.ResourceData
 		data.Set(FieldEKSClusterName, toString(eks.ClusterName))
 		data.Set(FieldEKSClusterInstanceProfileArn, toString(eks.InstanceProfileArn))
 		data.Set(FieldEKSClusterSubnets, toStringSlice(eks.Subnets))
-		data.Set(FieldEKSClusterDNSClusterIP, toString(eks.DnsClusterIp))
-		data.Set(FieldEKSClusterSSHPublicKey, toString(resp.JSON200.SshPublicKey))
+		if v := toString(eks.DnsClusterIp); v != "" {
+			data.Set(FieldEKSClusterDNSClusterIP, v)
+		}
+		if v := toString(resp.JSON200.SshPublicKey); v != "" {
+			data.Set(FieldClusterSSHPublicKey, v)
+		}
 		data.Set(FieldEKSClusterSecurityGroups, toStringSlice(eks.SecurityGroups))
 		if eks.Tags != nil {
 			data.Set(FieldEKSClusterTags, eks.Tags.AdditionalProperties)
 		}
 	}
 
-	if _, ok := data.GetOk(FieldEKSClusterAgentToken); !ok {
+	if _, ok := data.GetOk(FieldClusterAgentToken); !ok {
 		tkn, err := retrieveAgentToken(ctx, client)
 		if err != nil {
 			return diag.FromErr(err)
 		}
-		data.Set(FieldEKSClusterAgentToken, tkn)
+		data.Set(FieldClusterAgentToken, tkn)
 	}
 
 	return nil
@@ -241,71 +257,6 @@ func resourceCastaiEKSClusterUpdate(ctx context.Context, data *schema.ResourceDa
 	return resourceCastaiEKSClusterRead(ctx, data, meta)
 }
 
-func resourceCastaiEKSClusterDelete(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ProviderConfig).api
-
-	clusterId := data.Id()
-
-	log.Printf("[INFO] Checking current status of the cluster.")
-
-	err := resource.RetryContext(ctx, data.Timeout(schema.TimeoutDelete), func() *resource.RetryError {
-		clusterResponse, err := client.ExternalClusterAPIGetClusterWithResponse(ctx, clusterId)
-		if checkErr := sdk.CheckOKResponse(clusterResponse, err); checkErr != nil {
-			return resource.NonRetryableError(err)
-		}
-
-		clusterStatus := *clusterResponse.JSON200.Status
-		agentStatus := *clusterResponse.JSON200.AgentStatus
-		log.Printf("[INFO] Current cluster status=%s, agent_status=%s", clusterStatus, agentStatus)
-
-		if clusterStatus == sdk.ClusterStatusDeleted || clusterStatus == sdk.ClusterStatusArchived {
-			log.Printf("[INFO] Cluster is already deleted, removing from state.")
-			data.SetId("")
-			return nil
-		}
-
-		if agentStatus == sdk.ClusterAgentStatusDisconnecting {
-			return resource.RetryableError(fmt.Errorf("agent is disconnecting"))
-		}
-
-		if clusterStatus == sdk.ClusterStatusDeleting {
-			return resource.RetryableError(fmt.Errorf("cluster is deleting"))
-		}
-
-		if clusterResponse.JSON200.CredentialsId != nil && agentStatus != sdk.ClusterAgentStatusDisconnected {
-			log.Printf("[INFO] Disconnecting cluster.")
-			response, err := client.ExternalClusterAPIDisconnectClusterWithResponse(ctx, clusterId, sdk.ExternalClusterAPIDisconnectClusterJSONRequestBody{
-				DeleteProvisionedNodes:  getOptionalBool(data, FieldEKSClusterDeleteNodesOnDisconnect, false),
-				KeepKubernetesResources: toBoolPtr(true),
-			})
-			if checkErr := sdk.CheckOKResponse(response, err); checkErr != nil {
-				return resource.NonRetryableError(err)
-			}
-
-			return resource.RetryableError(fmt.Errorf("triggered agent disconnection"))
-		}
-
-		if agentStatus == sdk.ClusterAgentStatusDisconnected && clusterStatus != sdk.ClusterStatusDeleted {
-			log.Printf("[INFO] Deleting cluster.")
-
-			if err := sdk.CheckResponseNoContent(client.ExternalClusterAPIDeleteClusterWithResponse(ctx, clusterId)); err != nil {
-				return resource.NonRetryableError(err)
-			}
-
-			return resource.RetryableError(fmt.Errorf("triggered cluster deletion"))
-
-		}
-
-		return resource.RetryableError(fmt.Errorf("retrying"))
-	})
-
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	return nil
-}
-
 func updateClusterSettings(ctx context.Context, data *schema.ResourceData, client *sdk.ClientWithResponses) error {
 	if !data.HasChanges(
 		FieldEKSClusterAccessKeyId,
@@ -316,6 +267,7 @@ func updateClusterSettings(ctx context.Context, data *schema.ResourceData, clien
 		FieldEKSClusterDNSClusterIP,
 		FieldEKSClusterOverrideSecurityGroups,
 		FieldEKSClusterTags,
+		FieldClusterCredentialsId,
 	) {
 		log.Printf("[INFO] Nothing to update in cluster setttings.")
 		return nil
@@ -377,7 +329,7 @@ func updateClusterSettings(ctx context.Context, data *schema.ResourceData, clien
 		req.Eks.DnsClusterIp = toStringPtr(s.(string))
 	}
 
-	if s, ok := data.GetOk(FieldEKSClusterSSHPublicKey); ok {
+	if s, ok := data.GetOk(FieldClusterSSHPublicKey); ok {
 		req.SshPublicKey = toStringPtr(s.(string))
 	}
 

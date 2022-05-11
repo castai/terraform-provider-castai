@@ -21,14 +21,16 @@ func resourceCastaiClusterToken() *schema.Resource {
 		DeleteContext: resourceCastaiClusterTokenDelete,
 		Schema: map[string]*schema.Schema{
 			FieldClusterID: {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+				Type:        schema.TypeString,
+				Required:    true,
+				ForceNew:    true,
+				Description: "CAST AI cluster id",
 			},
 			FieldClusterToken: {
-				Type:      schema.TypeString,
-				Computed:  true,
-				Sensitive: true,
+				Type:        schema.TypeString,
+				Description: "computed value to store cluster token",
+				Computed:    true,
+				Sensitive:   true,
 			},
 		},
 	}

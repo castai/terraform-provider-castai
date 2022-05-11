@@ -30,6 +30,7 @@ func resourceCastaiAutoscaler() *schema.Resource {
 		CreateContext: resourceCastaiAutoscalerCreate,
 		UpdateContext: resourceCastaiAutoscalerUpdate,
 		DeleteContext: resourceCastaiAutoscalerDelete,
+		Description:   "CAST AI autoscaler resource to manage autoscaler settings",
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(2 * time.Minute),
@@ -41,14 +42,17 @@ func resourceCastaiAutoscaler() *schema.Resource {
 				Type:             schema.TypeString,
 				Optional:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
+				Description:      "CAST AI cluster id",
 			},
 			FieldAutoscalerPoliciesJSON: {
-				Type:     schema.TypeString,
-				Optional: true,
+				Type:        schema.TypeString,
+				Description: "autoscaler policies JSON string to override current autoscaler settings",
+				Optional:    true,
 			},
 			FieldAutoscalerPolicies: {
-				Type:     schema.TypeString,
-				Computed: true,
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "computed value to store full policies configuration",
 			},
 		},
 	}

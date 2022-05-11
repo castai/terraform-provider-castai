@@ -1014,6 +1014,26 @@ func (mr *MockClientInterfaceMockRecorder) GetCostHistory(ctx, clusterId, params
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCostHistory", reflect.TypeOf((*MockClientInterface)(nil).GetCostHistory), varargs...)
 }
 
+// GetCostReport mocks base method
+func (m *MockClientInterface) GetCostReport(ctx context.Context, clusterId sdk.ClusterId, params *sdk.GetCostReportParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "GetCostReport", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetCostReport indicates an expected call of GetCostReport
+func (mr *MockClientInterfaceMockRecorder) GetCostReport(ctx, clusterId, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCostReport", reflect.TypeOf((*MockClientInterface)(nil).GetCostReport), varargs...)
+}
+
 // GetDashboardMetricsCommonStats mocks base method
 func (m *MockClientInterface) GetDashboardMetricsCommonStats(ctx context.Context, clusterId sdk.ClusterId, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
@@ -3660,6 +3680,21 @@ func (m *MockClientWithResponsesInterface) GetCostHistoryWithResponse(ctx contex
 func (mr *MockClientWithResponsesInterfaceMockRecorder) GetCostHistoryWithResponse(ctx, clusterId, params interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCostHistoryWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).GetCostHistoryWithResponse), ctx, clusterId, params)
+}
+
+// GetCostReportWithResponse mocks base method
+func (m *MockClientWithResponsesInterface) GetCostReportWithResponse(ctx context.Context, clusterId sdk.ClusterId, params *sdk.GetCostReportParams) (*sdk.GetCostReportResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetCostReportWithResponse", ctx, clusterId, params)
+	ret0, _ := ret[0].(*sdk.GetCostReportResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetCostReportWithResponse indicates an expected call of GetCostReportWithResponse
+func (mr *MockClientWithResponsesInterfaceMockRecorder) GetCostReportWithResponse(ctx, clusterId, params interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCostReportWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).GetCostReportWithResponse), ctx, clusterId, params)
 }
 
 // GetDashboardMetricsCommonStatsWithResponse mocks base method

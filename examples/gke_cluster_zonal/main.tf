@@ -52,5 +52,7 @@ module "castai-gke-cluster" {
     }
   EOT
 
-  depends_on = [module.gke]
+  // depends_on helps terraform with creating proper dependencies graph in case of resource creation and in this case destroy
+  // module "castai-gke-cluster" has to be destroyed before module "castai-gke-iam" and "module.gke"
+  depends_on = [module.gke, module.castai-gke-iam]
 }

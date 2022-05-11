@@ -369,6 +369,41 @@ type ClusterCostHistoryResponse struct {
 	Items *[]ClusterCostHistoryEntry `json:"items,omitempty"`
 }
 
+// ClusterCostReportEntry defines model for ClusterCostReportEntry.
+type ClusterCostReportEntry struct {
+
+	// Average cost of on-demand instances
+	CostOnDemand float32 `json:"costOnDemand"`
+
+	// Average cost of spot instances
+	CostSpot float32 `json:"costSpot"`
+
+	// Average cost of spot-fallback instances
+	CostSpotFallback float32 `json:"costSpotFallback"`
+
+	// Average number of CPUs on on-demand instances
+	CpuCountOnDemand float32 `json:"cpuCountOnDemand"`
+
+	// Average number of CPUs on spot instances
+	CpuCountSpot float32 `json:"cpuCountSpot"`
+
+	// Average number of CPUs on spot-fallback instances
+	CpuCountSpotFallback float32 `json:"cpuCountSpotFallback"`
+
+	// Timestamp of the record
+	Timestamp *time.Time `json:"timestamp,omitempty"`
+}
+
+// ClusterCostReportResponse defines model for ClusterCostReportResponse.
+type ClusterCostReportResponse struct {
+
+	// Cluster id
+	ClusterId string `json:"clusterId"`
+
+	// Cost report entries
+	Items *[]ClusterCostReportEntry `json:"items,omitempty"`
+}
+
 // ClusterHealth defines model for ClusterHealth.
 type ClusterHealth struct {
 	Cilium     ClusterHealthCilium     `json:"cilium"`
@@ -2747,6 +2782,9 @@ type FilterClusterId string
 // FilterFromDate defines model for filterFromDate.
 type FilterFromDate string
 
+// FilterStepSeconds defines model for filterStepSeconds.
+type FilterStepSeconds string
+
 // FilterToDate defines model for filterToDate.
 type FilterToDate string
 
@@ -2945,6 +2983,19 @@ type GetCostHistoryParams struct {
 
 	// Request filter parameter declaring point of time until which the results should be returned. Moment in time must be declared in RFC3339 format. https://tools.ietf.org/html/rfc3339
 	ToDate *FilterToDate `json:"toDate,omitempty"`
+}
+
+// GetCostReportParams defines parameters for GetCostReport.
+type GetCostReportParams struct {
+
+	// Data points steps in seconds, e.g., stepSeconds=3600
+	StepSeconds *FilterStepSeconds `json:"stepSeconds,omitempty"`
+
+	// Range start time in RFC3339 format.
+	StartTime string `json:"startTime"`
+
+	// Range end time in RFC3339 format.
+	EndTime string `json:"endTime"`
 }
 
 // GetDashboardMetricsCpuUsageParams defines parameters for GetDashboardMetricsCpuUsage.
