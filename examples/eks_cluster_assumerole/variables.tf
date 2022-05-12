@@ -4,12 +4,6 @@ variable "castai_api_token" {
   default     = ""
 }
 
-variable "aws_account_id" {
-  type        = string
-  description = "AWS account your cluster is located."
-  default     = ""
-}
-
 variable "aws_access_key_id" {
   type        = string
   description = "Your own access key id for operating terraform"

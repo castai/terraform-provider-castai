@@ -26,12 +26,14 @@ provider "kubernetes" {
   token                  = data.aws_eks_cluster_auth.eks.token
 }
 
+data "aws_caller_identity" "current" {}
+
 data "aws_eks_cluster_auth" "eks" {
   name = module.eks.cluster_id
 }
 
 data "castai_eks_clusterid" "castai_cluster_id" {
-  account_id                 = var.aws_account_id
+  account_id                 = data.aws_caller_identity.current.account_id
   region                     = var.cluster_region
   cluster_name               = var.cluster_name
 }
@@ -43,7 +45,7 @@ data "castai_eks_user_arn" "castai_user_arn" {
 module "castai-eks-role-iam" {
   source = "castai/eks-role-iam/castai"
 
-  aws_account_id     = var.aws_account_id
+  aws_account_id     = data.aws_caller_identity.current.account_id
   aws_cluster_region = var.cluster_region
   aws_cluster_name   = var.cluster_name
   aws_cluster_vpc_id = module.vpc.vpc_id
@@ -56,7 +58,7 @@ module "castai-eks-role-iam" {
 module "castai-eks-cluster" {
   source  = "castai/eks-cluster/castai"
 
-  aws_account_id     = var.aws_account_id
+  aws_account_id     = data.aws_caller_identity.current.account_id
   aws_cluster_region = var.cluster_region
   aws_cluster_name   = module.eks.cluster_id
 

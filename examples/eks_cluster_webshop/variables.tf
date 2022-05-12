@@ -3,11 +3,6 @@ variable "castai_api_token" {
   description = "CAST.AI api token"
 }
 
-variable "aws_account_id" {
-  type        = string
-  description = "AWS account your cluster is located."
-}
-
 variable "aws_access_key_id" {
   type        = string
   description = "Your own access key id for operating terraform"
