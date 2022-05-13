@@ -33,7 +33,6 @@ func TestTerraformGKEOnboarding(t *testing.T) {
 
 	r := require.New(t)
 	ctx := context.Background()
-	// FIXME: not working yet
 	//defer terraform.Destroy(t, terraformOptions)
 
 	terraform.InitAndApply(t, terraformOptions)
@@ -43,6 +42,7 @@ func TestTerraformGKEOnboarding(t *testing.T) {
 	castAIClient, err := createClient(cfg.APIURL, cfg.Token)
 	r.NoError(err)
 
+	fmt.Println("Waiting for cluster to become ready")
 	// Validate if cluster become ready in our console.
 	r.Eventuallyf(func() bool {
 		res, err := castAIClient.ExternalClusterAPIGetClusterWithResponse(ctx, clusterID)
@@ -53,11 +53,13 @@ func TestTerraformGKEOnboarding(t *testing.T) {
 		return false
 	}, time.Minute*5, time.Second*30, "cluster doesn't become ready after timeout")
 
+	fmt.Println("Adding node")
 	// Try to add node
 	addNode, err := castAIClient.ExternalClusterAPIAddNodeWithResponse(ctx, clusterID, sdk.ExternalClusterAPIAddNodeJSONRequestBody{InstanceType: "e2-medium"})
 	r.NoError(err)
 	r.Equal(200, addNode.StatusCode(), fmt.Sprintf("Response from adding node should be 200, body: %s", string(addNode.Body)))
 
+	fmt.Println("Waiting for node to be added")
 	lastBodyForOp := ""
 	r.Eventually(func() bool {
 		opStatus, err := castAIClient.GetExternalClusterOperationWithResponse(ctx, addNode.JSON200.OperationId)
