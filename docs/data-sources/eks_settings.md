@@ -32,6 +32,5 @@ description: |-
 - **iam_policy_json** (String)
 - **iam_user_policy_json** (String)
 - **instance_profile_policies** (Set of String)
-- **lambda_policies** (Set of String)
 
 

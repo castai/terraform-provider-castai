@@ -8,7 +8,7 @@ description: |-
 
 # CAST AI Provider
 
-CAST AI Provider can be used to connect cloud Kubernetes clusters to CAST AI. 
+CAST AI Provider can be used to connect cloud Kubernetes clusters to CAST AI.
 
 ## Example Usage
 
@@ -40,5 +40,5 @@ provider "castai" {
 - **api_token** (String) The token used to connect to CAST.AI API.
 
 ### Optional
- 
+
 - **api_url** (String) CAST AI API url (for developers).

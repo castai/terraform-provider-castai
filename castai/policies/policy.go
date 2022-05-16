@@ -13,24 +13,12 @@ var (
 	IAMPolicy string
 	//go:embed user-policy.json
 	UserPolicy string
-	//go:embed lambda-policy.json
-	LambdaPolicy []byte
 	//go:embed instance-profile-policy.json
 	InstanceProfilePolicy []byte
 )
 
 type policy struct {
 	Policies []string `json:"Policies"`
-}
-
-func GetLambdaPolicy() []string {
-	var p policy
-	err := json.Unmarshal(LambdaPolicy, &p)
-	if err != nil {
-		return nil
-	}
-
-	return p.Policies
 }
 
 func GetInstanceProfilePolicy() []string {
@@ -72,16 +60,16 @@ func GetUserInlinePolicy(clusterName, arn, vpc string) (string, error) {
 
 	type tmplValues struct {
 		ClusterName string
-		ARN string
-		VPC string
+		ARN         string
+		VPC         string
 	}
 
 	var buf bytes.Buffer
 
 	if err := tmpl.Execute(&buf, tmplValues{
 		ClusterName: clusterName,
-		ARN: arn,
-		VPC: vpc,
+		ARN:         arn,
+		VPC:         vpc,
 	}); err != nil {
 		return "", fmt.Errorf("interpolating template: %w", err)
 	}

@@ -13,17 +13,6 @@
       }
     },
     {
-      "Sid": "PassRoleLambda",
-      "Action": "iam:PassRole",
-      "Effect": "Allow",
-      "Resource": "arn:aws:iam::*:role/*",
-      "Condition": {
-        "StringEquals": {
-          "iam:PassedToService": "lambda.amazonaws.com"
-        }
-      }
-    },
-    {
       "Sid": "NonResourcePermissions",
       "Effect": "Allow",
       "Action": [
@@ -52,21 +41,6 @@
         "arn:aws:ec2:*:{{ .AccountNumber }}:key-pair/*",
         "arn:aws:ec2:*::image/*"
       ]
-    },
-    {
-      "Sid": "CreateLambdaFunctionRestriction",
-      "Effect": "Allow",
-      "Action": [
-        "lambda:CreateFunction",
-        "lambda:UpdateFunctionCode",
-        "lambda:AddPermission",
-        "lambda:DeleteFunction",
-        "events:PutRule",
-        "events:PutTargets",
-        "events:DeleteRule",
-        "events:RemoveTargets"
-      ],
-      "Resource": "*"
     }
   ]
 }

@@ -19,7 +19,6 @@ const (
 	EKSSettingsFieldIamPolicyJson           = "iam_policy_json"
 	EKSSettingsFieldIamUserPolicyJson       = "iam_user_policy_json"
 	EKSSettingsFieldIamManagedPolicies      = "iam_managed_policies"
-	EKSSettingsFieldLambdaPolicies          = "lambda_policies"
 	EKSSettingsFieldInstanceProfilePolicies = "instance_profile_policies"
 )
 
@@ -65,11 +64,6 @@ func dataSourceCastaiEKSSettings() *schema.Resource {
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Computed: true,
 			},
-			EKSSettingsFieldLambdaPolicies: {
-				Type:     schema.TypeSet,
-				Elem:     &schema.Schema{Type: schema.TypeString},
-				Computed: true,
-			},
 			EKSSettingsFieldInstanceProfilePolicies: {
 				Type:     schema.TypeSet,
 				Elem:     &schema.Schema{Type: schema.TypeString},
@@ -89,14 +83,12 @@ func dataSourceCastaiEKSSettingsRead(ctx context.Context, data *schema.ResourceD
 
 	userPolicy, _ := policies.GetUserInlinePolicy(cluster, arn, vpc)
 	iamPolicy, _ := policies.GetIAMPolicy(accountID)
-	lambdaPolicy := policies.GetLambdaPolicy()
 	instanceProfilePolicy := policies.GetInstanceProfilePolicy()
 
 	data.SetId(fmt.Sprintf("eks-%s-%s-%s-%s", accountID, vpc, region, cluster))
 	data.Set(EKSSettingsFieldIamPolicyJson, iamPolicy)
 	data.Set(EKSSettingsFieldIamUserPolicyJson, userPolicy)
 	data.Set(EKSSettingsFieldIamManagedPolicies, buildManagedPolicies())
-	data.Set(EKSSettingsFieldLambdaPolicies, lambdaPolicy)
 	data.Set(EKSSettingsFieldInstanceProfilePolicies, instanceProfilePolicy)
 
 	return nil
@@ -105,8 +97,6 @@ func dataSourceCastaiEKSSettingsRead(ctx context.Context, data *schema.ResourceD
 func buildManagedPolicies() []string {
 	return []string{
 		"arn:aws:iam::aws:policy/AmazonEC2ReadOnlyAccess",
-		"arn:aws:iam::aws:policy/AmazonEventBridgeReadOnlyAccess",
 		"arn:aws:iam::aws:policy/IAMReadOnlyAccess",
-		"arn:aws:iam::aws:policy/AWSLambda_ReadOnlyAccess",
 	}
 }
