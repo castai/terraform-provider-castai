@@ -1,0 +1,12 @@
+write:
+  persistence:
+    size: 10Gi
+    storageClass: ebs-sc
+
+read:
+  persistence:
+    size: 10Gi
+    storageClass: ebs-sc
+
+serviceMonitor:
+  enabled: true

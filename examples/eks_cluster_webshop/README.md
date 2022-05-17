@@ -20,18 +20,135 @@ delete_nodes_on_disconnect = true
 ```shell
 terraform init
 terraform apply -target module.vpc # create vpc first
+terraform apply -target module.eks # create EKS cluster
 terraform apply # apply the rest
 ```
 
-After cluster creating you can add ingress/LB for application 
+## Deployed components 
+
+### Loki + promtail
+
+For logs this example uses Loki from `loki-simple-scalable` helm chart which deploys a few read and write components. 
+Keep in mind that in scope of this example wasn't to have s3 buckket configured for Loki
 
 ```shell
-kubectl apply -f k8s/
+$ kubectl get pod -n tools | grep loki
+loki-gateway-7479f46545-pp7c9                            1/1     Running   0          6h27m
+loki-read-0                                              1/1     Running   0          6h27m
+loki-read-1                                              1/1     Running   0          6h27m
+loki-read-2                                              1/1     Running   0          6h27m
+loki-write-0                                             1/1     Running   0          6h27m
+loki-write-1                                             1/1     Running   0          6h27m
+loki-write-2                                             1/1     Running   0          6h27m
 ```
 
-Checking LB address
+### kube-prometheus-stack
+
+Alertmanager + Prometheus + Grafana
+
+More info about prometheus can be found [here](https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/user-guides/getting-started.md)
+
 ```shell
-$ kubectl  get ingress -A
-NAMESPACE    NAME         CLASS   HOSTS                                            ADDRESS                                                                 PORTS   AGE
-echoserver   echoserver   alb     *.example.com,*.eu-central-1.elb.amazonaws.com   k8s-albdemogroup-ID-iD.eu-central-1.elb.amazonaws.com   80      59m
+$ kubectl get pod -n tools | grep "prom-stack"
+alertmanager-prom-stack-kube-prometheus-alertmanager-0   2/2     Running   0          6h16m
+prom-stack-grafana-7dfbb4f775-966tg                      3/3     Running   0          6h16m
+prom-stack-kube-prometheus-operator-7d6fd799db-th94m     1/1     Running   0          6h16m
+prom-stack-kube-state-metrics-776f694dcc-snmjm           1/1     Running   0          6h16m
+prom-stack-prometheus-node-exporter-gnx5c                1/1     Running   0          6h16m
+prom-stack-prometheus-node-exporter-qcv45                1/1     Running   0          6h16m
+prom-stack-prometheus-node-exporter-vj4qx                1/1     Running   0          6h16m
+prometheus-prom-stack-kube-prometheus-prometheus-0       2/2     Running   0          6h16m
+```
+
+Grafana is pre-installed with useful dashboard for checking PODs and nodes stats. Password
+```shell
+terraform output --json | jq ".grafana_password.value"
+```
+
+Please note that grafana is lacking of persistence (PVC has to be in ReadWriteMany accessMode) - adding database layer is required for production usage
+
+Accessing grafana 
+
+```shell
+kubectl port-forward -n tools svc/prom-stack-grafana 8081:80                                                                                                                         
+```
+In the browser you can use http://localhost:8081
+
+### cert-manager
+
+For managing certificates we are using [cert-manager](https://cert-manager.io/docs/installation/helm/)
+You can issue a certificate using [let's encrypt](https://getbetterdevops.io/k8s-ingress-with-letsencrypt/) or [external provider](https://cert-manager.io/v1.0-docs/configuration/external/)
+In this example only self-singed ClusterIssuer is created
+
+### EKS CSI driver
+
+EKS CSI driver is installed as addon for cluster. StorageClass that uses ebs-csi driver is called`ebs-sc`
+
+```shell
+$ kubectl get storageclasses.storage.k8s.io
+NAME            PROVISIONER             RECLAIMPOLICY   VOLUMEBINDINGMODE      ALLOWVOLUMEEXPANSION   AGE
+ebs-sc          ebs.csi.aws.com         Retain          WaitForFirstConsumer   true                   7h22m
+gp2 (default)   kubernetes.io/aws-ebs   Delete          WaitForFirstConsumer   false                  7h26m
+```
+
+### nginx-ingress and ALB
+
+#### NIGNX 
+
+For ingress you can use nginx-ingress controller for which in terraform we are creating a static IP in terraform
+
+IP for Loadbalancer for NGINX:
+
+```shell
+terraform output --json | jq ".ingress_ips.value"
+```
+
+#### Application Load Balancer
+
+In case of ALB the controller is creating ALB in AWS for each group (annotation `alb.ingress.kubernetes.io/group.name`)
+
+Note: For exposing service with type `ClusterIP` you need to add annotations: `alb.ingress.kubernetes.io/target-type: ip`
+
+More info about available annotations for ALB can be found [here](https://kubernetes-sigs.github.io/aws-load-balancer-controller/v2.2/guide/ingress/annotations/)
+
+# Demo application
+
+Demo apps is a echo-server with additional container that uses PVC 
+
+```shell
+kubectl apply -f k8s/namespaces.yaml # create namespaces
+kubectl apply -f k8s # create other resources
+```
+
+Accessing service using ingress
+
+```shell
+$ curl -X GET http://demo.example.com  -x <IP_OF_LB>:80
+
+CLIENT VALUES:
+client_address=10.0.3.190
+command=GET
+real path=/
+query=nil
+request_version=1.1
+request_uri=http://demo.example.com:8080/
+
+SERVER VALUES:
+server_version=nginx: 1.10.0 - lua: 10001
+
+HEADERS RECEIVED:
+accept=*/*
+host=demo.example.com
+proxy-connection=Keep-Alive
+user-agent=curl/7.77.0
+x-forwarded-for=10.0.3.198
+x-forwarded-host=demo.example.com
+x-forwarded-port=80
+x-forwarded-proto=http
+x-forwarded-scheme=http
+x-real-ip=10.0.3.198
+x-request-id=f35e9aa54092d3ebd3cdf922e1f217b8
+x-scheme=http
+BODY:
+-no body in request-% 
 ```

@@ -4,13 +4,11 @@ metadata:
   name: echoserver
   namespace: echoserver
   annotations:
-    alb.ingress.kubernetes.io/scheme: internet-facing
-    alb.ingress.kubernetes.io/tags: Environment=dev,Team=app
-    alb.ingress.kubernetes.io/group.name: alb-demo-group
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
 spec:
-  ingressClassName: alb
+  ingressClassName: nginx
   rules:
-    - host: "*.example.com"
+    - host: "demo.example.com"
       http:
         paths:
           - path: /
@@ -20,14 +18,3 @@ spec:
                 name: echoserver
                 port:
                   number: 80
-    - host: "*.eu-central-1.elb.amazonaws.com"
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: echoserver
-                port:
-                  number: 80
-
