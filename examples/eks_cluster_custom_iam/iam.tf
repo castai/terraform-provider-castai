@@ -97,13 +97,14 @@ resource "aws_iam_role_policy" "inline_role_policy" {
           }
         }
       },
-      # Needed to tag non cast nodes
+      # Needed to tag non CAST nodes
       {
         Sid    = "NonResourcePermissions",
         Effect = "Allow",
         Action = [
-          "ec2:ImportKeyPair",
           "ec2:CreateTags",
+          # Necessary only if public SSH key for CAST nodes will be used
+          "ec2:ImportKeyPair",
         ],
         Resource = "*"
       },
@@ -190,7 +191,10 @@ resource "aws_iam_role_policy" "inline_role_policy" {
         Effect : "Allow",
         Action : [
           "autoscaling:UpdateAutoScalingGroup",
-          "autoscaling:TerminateInstanceInAutoScalingGroup"
+          "autoscaling:TerminateInstanceInAutoScalingGroup",
+          # Necessary for pause/resume
+          "autoscaling:SuspendProcesses",
+          "autoscaling:ResumeProcesses",
         ],
         Resource : "arn:aws:autoscaling:${var.cluster_region}:${local.account_id}:autoScalingGroup:*:autoScalingGroupName/*",
         Condition : {
