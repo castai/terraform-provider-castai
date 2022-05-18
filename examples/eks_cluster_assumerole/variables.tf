@@ -28,18 +28,6 @@ variable "cluster_name" {
   default     = ""
 }
 
-variable "subnets" {
-  type        = list(string)
-  description = "Optional custom subnets for the cluster. If not set subnets from the EKS cluster configuration are used."
-  default     = []
-}
-
-variable "security_groups" {
-  type        = list(string)
-  description = "Optional custom security groups for the cluster. If not set security groups from the EKS cluster configuration are used."
-  default     = null
-}
-
 variable "tags" {
   type        = map(any)
   description = "Optional tags for new cluster nodes. This parameter applies only to new nodes - tags for old nodes are not reconciled."

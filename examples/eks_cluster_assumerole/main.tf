@@ -59,9 +59,13 @@ module "castai-eks-cluster" {
   aws_assume_role_arn      = module.castai-eks-role-iam.role_arn
   aws_instance_profile_arn = module.castai-eks-role-iam.instance_profile_arn
 
-  subnets                  = var.subnets
-  override_security_groups = var.security_groups
-  tags                     = var.tags
+  subnets                  = module.vpc
+  override_security_groups = [
+    aws_security_group.worker_group_mgmt_one.id,
+    aws_security_group.worker_group_mgmt_two.id,
+    aws_security_group.all_worker_mgmt.id,
+  ]
+  tags = var.tags
 
   delete_nodes_on_disconnect = var.delete_nodes_on_disconnect
 
