@@ -59,7 +59,7 @@ module "castai-eks-cluster" {
   aws_assume_role_arn      = module.castai-eks-role-iam.role_arn
   aws_instance_profile_arn = module.castai-eks-role-iam.instance_profile_arn
 
-  subnets                  = module.vpc
+  subnets                  = module.vpc.private_subnets
   override_security_groups = [
     aws_security_group.worker_group_mgmt_one.id,
     aws_security_group.worker_group_mgmt_two.id,
