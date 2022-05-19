@@ -3,6 +3,9 @@ terraform {
     castai = {
       source = "castai/castai"
     }
+    aws = {
+      source = "hashicorp/aws"
+    }
     kubernetes = {
       source = "hashicorp/kubernetes"
     }

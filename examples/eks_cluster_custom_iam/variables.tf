@@ -1,31 +1,16 @@
 variable "castai_api_token" {
   type        = string
   description = "CAST.AI api token"
-  default     = ""
-}
-
-variable "aws_access_key_id" {
-  type        = string
-  description = "Your own access key id for operating terraform"
-  default     = ""
-}
-
-variable "aws_secret_access_key" {
-  type        = string
-  description = "Your own access key secret for operating terraform"
-  default     = ""
 }
 
 variable "cluster_region" {
   type        = string
   description = "AWS region your cluster is located."
-  default     = ""
 }
 
 variable "cluster_name" {
   type        = string
   description = "EKS cluster name in AWS account."
-  default     = ""
 }
 
 variable "tags" {
