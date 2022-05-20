@@ -8,3 +8,25 @@ module "load_balancer_controller" {
 
   helm_chart_version = "1.4.1"
 }
+
+resource "helm_release" "nginx" {
+  name             = "nginx-ingress"
+  repository       = "https://kubernetes.github.io/ingress-nginx"
+  chart            = "ingress-nginx"
+  namespace        = "ingress-nginx"
+  create_namespace = true
+  cleanup_on_fail  = true
+  wait             = true
+  version          = "4.1.1"
+
+  values = [
+    templatefile("./helm-values/ingress-nginx.yaml", { ingress_id = join(",", [for ip in aws_eip.this : ip.id]) })
+  ]
+
+  depends_on = [helm_release.kube_prometheus_stack]
+}
+
+resource "aws_eip" "this" {
+  count = 3
+}
+

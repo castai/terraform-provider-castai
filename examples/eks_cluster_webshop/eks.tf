@@ -9,7 +9,8 @@ module "eks" {
   vpc_id     = module.vpc.vpc_id
   subnet_ids = module.vpc.private_subnets
 
-  cluster_endpoint_private_access                = true
+  cluster_endpoint_private_access = true
+  cluster_endpoint_public_access  = true
 
   eks_managed_node_group_defaults = {
     ami_type  = "AL2_x86_64"
@@ -17,7 +18,7 @@ module "eks" {
   }
 
   self_managed_node_group_defaults = {
-    root_volume_type = "gp2"
+    root_volume_type      = "gp2"
     create_security_group = false
   }
   cluster_addons = {
@@ -28,15 +29,21 @@ module "eks" {
     vpc-cni = {
       resolve_conflicts = "OVERWRITE"
     }
+    aws-ebs-csi-driver = {
+      service_account_role_arn = module.ebs_csi_irsa_role.iam_role_arn
+      resolve_conflicts        = "OVERWRITE"
+    }
   }
 
 
   self_managed_node_groups = {
     default_node_group = {}
     worker-group-1 = {
-      instance_type        = "t3.medium"
-      asg_desired_capacity = 3
-      eni_delete = "true"
+      instance_type = "t3.medium"
+      max_size      = 3
+      min_size      = 2
+      desired_size  = 2
+      eni_delete    = "true"
     },
   }
 
@@ -79,22 +86,44 @@ module "eks" {
       source_cluster_security_group = true
       description                   = "Allow access from control plane to webhook port of AWS load balancer controller"
     }
+    nginx_ingress_allow_access_from_control_plane = {
+      type                          = "ingress"
+      protocol                      = "tcp"
+      from_port                     = 8443
+      to_port                       = 8443
+      source_cluster_security_group = true
+      description                   = "Allow access from control plane to webhook port of nginx-ingress controller"
+    }
   }
 
   create_aws_auth_configmap = true
   manage_aws_auth_configmap = true
+}
 
-  aws_auth_roles = [
-    # ADD - give access to nodes spawned by cast.ai
-    {
-      rolearn  = module.castai-eks-role-iam.instance_profile_role_arn
-      username = "system:node:{{EC2PrivateDNSName}}"
-      groups   = ["system:bootstrappers", "system:nodes"]
-    },
-  ]
+module "ebs_csi_irsa_role" {
+  source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
+  version = "~> 4.21.1"
+
+  role_name             = "ebs-csi"
+  attach_ebs_csi_policy = true
+
+  oidc_providers = {
+    ex = {
+      provider_arn               = module.eks.oidc_provider_arn
+      namespace_service_accounts = ["kube-system:ebs-csi-controller-sa"]
+    }
+  }
 }
 
 data "aws_eks_cluster" "eks" {
   name = module.eks.cluster_id
 }
 
+resource "kubernetes_storage_class" "ebs_csi" {
+  metadata {
+    name = "ebs-sc"
+  }
+  storage_provisioner = "ebs.csi.aws.com"
+  reclaim_policy      = "Retain"
+  volume_binding_mode = "WaitForFirstConsumer"
+}
