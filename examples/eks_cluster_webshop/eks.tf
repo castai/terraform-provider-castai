@@ -96,6 +96,15 @@ module "eks" {
     }
   }
 
+  aws_auth_roles = [
+    # ADD - give access to nodes spawned by cast.ai
+    {
+      rolearn  = module.castai-eks-role-iam.instance_profile_role_arn
+      username = "system:node:{{EC2PrivateDNSName}}"
+      groups   = ["system:bootstrappers", "system:nodes"]
+    },
+  ]
+
   create_aws_auth_configmap = true
   manage_aws_auth_configmap = true
 }
