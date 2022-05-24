@@ -35,7 +35,7 @@ terraform {
 }
 
 provider "castai" {
-  api_key = "<<your-castai-api-key>>"
+  api_token = "<<your-castai-api-key>>"
 }
 ```
 
