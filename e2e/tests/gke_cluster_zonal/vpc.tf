@@ -7,7 +7,7 @@ module "vpc" {
     {
       subnet_name           = local.ip_range_nodes
       subnet_ip             = "10.0.0.0/16"
-      subnet_region         = var.cluster_region
+      subnet_region         = var.network_region
       subnet_private_access = "true"
     },
   ]

@@ -5,7 +5,6 @@ go 1.16
 require (
 	github.com/deepmap/oapi-codegen v1.5.1
 	github.com/evanphx/json-patch v4.9.0+incompatible
-	github.com/go-chi/chi v1.5.1 // indirect
 	github.com/golang/mock v1.5.0
 	github.com/gruntwork-io/terratest v0.40.7
 	github.com/hashicorp/go-cty v1.4.1-0.20200414143053-d3edf31b6320

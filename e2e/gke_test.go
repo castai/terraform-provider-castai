@@ -17,8 +17,10 @@ func TestTerraformGKEOnboarding(t *testing.T) {
 	varsFile, err := createVarsFile(map[string]interface{}{
 		"cluster_name":     cfg.GKEClusterName,
 		"cluster_location": cfg.GKEClusterLocation,
+		"network_region":   cfg.GKENetworkRegion,
 		"castai_api_token": cfg.Token,
 		"project_id":       cfg.GKEProjectID,
+		"gcp_credentials":  cfg.GKECredentials,
 	}, "gke")
 
 	if err != nil {
@@ -33,8 +35,7 @@ func TestTerraformGKEOnboarding(t *testing.T) {
 
 	r := require.New(t)
 	ctx := context.Background()
-	//defer terraform.Destroy(t, terraformOptions)
-
+	defer terraform.Destroy(t, terraformOptions)
 	terraform.InitAndApply(t, terraformOptions)
 
 	clusterID := terraform.OutputRequired(t, terraformOptions, "castai_cluster_id")

@@ -15,8 +15,10 @@ type Config struct {
 	LogFormat          string `envconfig:"LOG_FORMAT" default:"text"`
 	Environment        string `envconfig:"CAST_ENVIRONMENT" default:""`
 	GKEClusterName     string `envconfig:"GKE_CLUSTER_NAME" default:""`
+	GKENetworkRegion   string `envconfig:"GKE_NETWORK_REGION" default:""`
 	GKEProjectID       string `envconfig:"GKE_PROJECT_ID" default:""`
 	GKEClusterLocation string `envconfig:"GKE_CLUSTER_LOCATION" default:"eu-central"`
+	GKECredentials     string `envconfig:"GKE_CREDENTIALS"`
 	APIURL             string `envconfig:"CASTAI_URL" default:"https://api.cast.ai"`
 	Token              string `envconfig:"CASTAI_TOKEN" defualt:""`
 }
