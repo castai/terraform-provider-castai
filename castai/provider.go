@@ -42,6 +42,7 @@ func Provider() *schema.Provider {
 			"castai_eks_clusterid":     dataSourceCastaiEKSClusterID(),
 			"castai_eks_user_arn":      dataSourceCastaiEKSClusterUserARN(),
 			"castai_gke_user_policies": dataSourceGKEPolicies(),
+			"castai_aks_user_policies": dataSourceAKSPolicies(),
 		},
 
 		ConfigureContextFunc: providerConfigure(),

@@ -1,4 +1,4 @@
-package policies
+package eks
 
 import (
 	"strings"
