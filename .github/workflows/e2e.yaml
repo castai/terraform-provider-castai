@@ -1,4 +1,4 @@
-name: Testing terraform code
+name: Terraform E2E
 on:
   push:
     branches:
@@ -7,8 +7,14 @@ jobs:
   test:
     runs-on: ubuntu-latest
     env:
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
+      E2E_GCP_CREDENTIALS: ${{ secrets.GCP_CREDENTIALS }}
+      E2E_GKE_CLUSTER_NAME: ${{ secrets.GKE_CLUSTER_NAME }}
+      E2E_GKE_CLUSTER_LOCATION: ${{ secrets.GKE_CLUSTER_LOCATION }}
+      E2E_GKE_NETWORK_REGION: ${{ secrets.GKE_NETWORK_REGION }}
+      E2E_GKE_PROJECT_ID:  ${{ secrets.GKE_PROJECT_ID }}
+      E2E_CASTAI_URL:  ${{ secrets.CASTAI_URL }}
+      E2E_CASTAI_TOKEN: ${{ secrets.CASTAI_TOKEN }}
+      TERRAFORM_CLOUD_TOKENS: app.terraform.io=${{ secrets.TF_CLOUD_TOKEN }}
 
     steps:
       - uses: actions/checkout@v2
@@ -24,7 +30,11 @@ jobs:
           key: ${{ runner.os }}-build-${{ hashFiles('**/go.sum') }}
           restore-keys: |
             ${{ runner.os }}-build-
-
+      - name: Use workspace
+        uses: dflook/terraform-new-workspace@v1
+        with:
+          path: terraform
+          workspace: castai-e2e-tf-
       - name: Test
         working-directory: e2e/
         run: go test -v

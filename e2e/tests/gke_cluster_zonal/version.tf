@@ -13,4 +13,12 @@ terraform {
     }
   }
   required_version = ">= 1.0"
+
+  backend "remote" {
+    organization = "CastAI"
+
+    workspaces {
+      prefix = "cast-ai-gcp-tf-e2e-"
+    }
+  }
 }
