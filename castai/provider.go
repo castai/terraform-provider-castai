@@ -33,6 +33,7 @@ func Provider() *schema.Provider {
 			"castai_autoscaler":    resourceCastaiAutoscaler(),
 			"castai_gke_cluster":   resourceCastaiGKECluster(),
 			"castai_cluster_token": resourceCastaiClusterToken(),
+			"castai_aks_cluster":   resourceCastaiAKSCluster(),
 		},
 
 		DataSourcesMap: map[string]*schema.Resource{

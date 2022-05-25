@@ -1,0 +1,213 @@
+package castai
+
+import (
+	"context"
+	"fmt"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"log"
+	"net/http"
+	"time"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+
+	"github.com/castai/terraform-provider-castai/castai/sdk"
+)
+
+const (
+	FieldAKSClusterName              = "name"
+	FieldAKSClusterRegion            = "region"
+	FieldAKSClusterSubscriptionID    = "subscription_id"
+	FieldAKSClusterNodeResourceGroup = "node_resource_group"
+	FieldAKSClusterClientID          = "client_id"
+	FieldAKSClusterClientSecret      = "client_secret"
+	FieldAKSClusterTenantID          = "tenant_id"
+)
+
+func resourceCastaiAKSCluster() *schema.Resource {
+	return &schema.Resource{
+		ReadContext:   resourceCastaiAKSClusterRead,
+		CreateContext: resourceCastaiAKSClusterCreate,
+		UpdateContext: resourceCastaiAKSClusterUpdate,
+		DeleteContext: resourceCastaiPublicCloudClusterDelete,
+		Description:   "AKS cluster resource allows connecting an existing EKS cluster to CAST AI.",
+
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(5 * time.Minute),
+			Update: schema.DefaultTimeout(1 * time.Minute),
+			Delete: schema.DefaultTimeout(2 * time.Minute),
+		},
+
+		Schema: map[string]*schema.Schema{
+			FieldAKSClusterName: {
+				Type:             schema.TypeString,
+				Required:         true,
+				ForceNew:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+				Description:      "AKS cluster name",
+			},
+			FieldAKSClusterRegion: {
+				Type:             schema.TypeString,
+				Required:         true,
+				ForceNew:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+				Description:      "AKS cluster region",
+			},
+			FieldAKSClusterSubscriptionID: {
+				Type:             schema.TypeString,
+				Required:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+			},
+			FieldAKSClusterNodeResourceGroup: {
+				Type:             schema.TypeString,
+				Required:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+			},
+			FieldAKSClusterTenantID: {
+				Type:             schema.TypeString,
+				Required:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+			},
+			FieldAKSClusterClientID: {
+				Type:             schema.TypeString,
+				Required:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+			},
+			FieldAKSClusterClientSecret: {
+				Type:             schema.TypeString,
+				Required:         true,
+				Sensitive:        true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+			},
+			FieldClusterToken: {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Sensitive:   true,
+				Description: "CAST AI cluster token",
+			},
+			FieldDeleteNodesOnDisconnect: {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Should CAST AI remove nodes managed by CAST.AI on disconnect",
+			},
+		},
+	}
+}
+
+func resourceCastaiAKSClusterRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client := meta.(*ProviderConfig).api
+
+	if data.Id() == "" {
+		log.Printf("[INFO] id is null not fetching anything.")
+		return nil
+	}
+
+	log.Printf("[INFO] Getting cluster information.")
+
+	resp, err := client.ExternalClusterAPIGetClusterWithResponse(ctx, data.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	} else if resp.StatusCode() == http.StatusNotFound {
+		log.Printf("[WARN] Removing cluster %s from state because it no longer exists in CAST AI", data.Id())
+		data.SetId("")
+		return nil
+	}
+
+	if checkErr := sdk.CheckOKResponse(resp, err); checkErr != nil {
+		return diag.FromErr(checkErr)
+	}
+
+	data.Set(FieldClusterCredentialsId, *resp.JSON200.CredentialsId)
+
+	if aks := resp.JSON200.Aks; aks != nil {
+		data.Set(FieldAKSClusterRegion, toString(aks.Region))
+	}
+	clusterID := *resp.JSON200.Id
+
+	if _, ok := data.GetOk(FieldClusterToken); !ok {
+		tkn, err := createClusterToken(ctx, client, clusterID)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		data.Set(FieldClusterToken, tkn)
+	}
+
+	return nil
+}
+
+func resourceCastaiAKSClusterCreate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client := meta.(*ProviderConfig).api
+
+	req := sdk.ExternalClusterAPIRegisterClusterJSONRequestBody{
+		Name: data.Get(FieldAKSClusterName).(string),
+	}
+
+	req.Aks = &sdk.ExternalclusterV1AKSClusterParams{
+		Region:            toStringPtr(data.Get(FieldAKSClusterRegion).(string)),
+		SubscriptionId:    toStringPtr(data.Get(FieldAKSClusterSubscriptionID).(string)),
+		NodeResourceGroup: toStringPtr(data.Get(FieldAKSClusterNodeResourceGroup).(string)),
+	}
+
+	log.Printf("[INFO] Registering new external AKS cluster: %#v", req)
+
+	resp, err := client.ExternalClusterAPIRegisterClusterWithResponse(ctx, req)
+	if checkErr := sdk.CheckOKResponse(resp, err); checkErr != nil {
+		return diag.FromErr(checkErr)
+	}
+
+	clusterID := *resp.JSON200.Id
+	data.SetId(clusterID)
+
+	if err := updateAKSClusterSettings(ctx, data, client); err != nil {
+		return diag.FromErr(err)
+	}
+
+	return resourceCastaiAKSClusterRead(ctx, data, meta)
+}
+
+func resourceCastaiAKSClusterUpdate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client := meta.(*ProviderConfig).api
+
+	if err := updateAKSClusterSettings(ctx, data, client); err != nil {
+		return diag.FromErr(err)
+	}
+
+	return resourceCastaiEKSClusterRead(ctx, data, meta)
+}
+
+func updateAKSClusterSettings(ctx context.Context, data *schema.ResourceData, client *sdk.ClientWithResponses) error {
+	if !data.HasChanges(
+		FieldAKSClusterClientID,
+		FieldAKSClusterClientSecret,
+		FieldAKSClusterTenantID,
+		FieldAKSClusterSubscriptionID,
+	) {
+		log.Printf("[INFO] Nothing to update in cluster setttings.")
+		return nil
+	}
+
+	log.Printf("[INFO] Updating cluster settings.")
+
+	req := sdk.ExternalClusterAPIUpdateClusterJSONRequestBody{
+		Aks: &sdk.ExternalclusterV1UpdateAKSClusterParams{},
+	}
+
+	clientID := data.Get(FieldAKSClusterClientID).(string)
+	tenantID := data.Get(FieldAKSClusterTenantID).(string)
+	clientSecret := data.Get(FieldAKSClusterClientSecret).(string)
+	subscriptionID := data.Get(FieldAKSClusterSubscriptionID).(string)
+
+	credentials, err := sdk.ToCloudCredentialsAzure(clientID, clientSecret, tenantID, subscriptionID)
+	if err != nil {
+		return err
+	}
+
+	req.Credentials = &credentials
+
+	response, err := client.ExternalClusterAPIUpdateClusterWithResponse(ctx, data.Id(), req)
+	if checkErr := sdk.CheckOKResponse(response, err); checkErr != nil {
+		return fmt.Errorf("updating cluster settings: %w", checkErr)
+	}
+
+	return nil
+}
