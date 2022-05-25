@@ -10,17 +10,17 @@ import (
 )
 
 type Config struct {
-	Owner              string `envconfig:"OWNER" default:""`
-	LogLevel           string `envconfig:"LOG_LEVEL" default:"info"`
-	LogFormat          string `envconfig:"LOG_FORMAT" default:"text"`
-	Environment        string `envconfig:"CAST_ENVIRONMENT" default:""`
-	GKEClusterName     string `envconfig:"GKE_CLUSTER_NAME" default:""`
-	GKENetworkRegion   string `envconfig:"GKE_NETWORK_REGION" default:""`
-	GKEProjectID       string `envconfig:"GKE_PROJECT_ID" default:""`
-	GKEClusterLocation string `envconfig:"GKE_CLUSTER_LOCATION" default:"eu-central"`
-	GKECredentials     string `envconfig:"GKE_CREDENTIALS"`
-	APIURL             string `envconfig:"CASTAI_URL" default:"https://api.cast.ai"`
-	Token              string `envconfig:"CASTAI_TOKEN" defualt:""`
+	Owner                string `envconfig:"OWNER" default:""`
+	LogLevel             string `envconfig:"LOG_LEVEL" default:"info"`
+	LogFormat            string `envconfig:"LOG_FORMAT" default:"text"`
+	Environment          string `envconfig:"CAST_ENVIRONMENT" default:""`
+	GKEClusterName       string `envconfig:"GKE_CLUSTER_NAME" default:""`
+	GKENetworkRegion     string `envconfig:"GKE_NETWORK_REGION" default:""`
+	GKEProjectID         string `envconfig:"GKE_PROJECT_ID" default:""`
+	GKEClusterLocation   string `envconfig:"GKE_CLUSTER_LOCATION" default:"eu-central"`
+	GCPCredentialsBase64 string `envconfig:"GCP_CREDENTIALS_BASE64"`
+	APIURL               string `envconfig:"CASTAI_URL" default:"https://api.cast.ai"`
+	Token                string `envconfig:"CASTAI_TOKEN" defualt:""`
 }
 
 func getDefaultUserName() string {

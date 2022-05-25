@@ -13,6 +13,16 @@ provider "castai" {
   api_token = var.castai_api_token
 }
 
+provider "google" {
+  credentials = base64decode(var.gcp_credentials_base64)
+  region = var.network_region
+}
+
+provider "google-beta" {
+  credentials = base64decode(var.gcp_credentials_base64)
+  region = var.network_region
+}
+
 module "castai-gke-iam" {
   source = "castai/gke-iam/castai"
 

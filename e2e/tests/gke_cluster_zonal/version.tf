@@ -5,20 +5,20 @@ terraform {
     }
     google = {
       source  = "hashicorp/google"
-      version = "4.16.0"
+      version = "4.22.0"
     }
     google-beta = {
       source  = "hashicorp/google-beta"
-      version = "4.16.0"
+      version = "4.22.0"
     }
   }
   required_version = ">= 1.0"
 
-  backend "remote" {
-    organization = "CastAI"
-
-    workspaces {
-      prefix = "cast-ai-gcp-tf-e2e-"
-    }
-  }
+#  backend "remote" {
+#    organization = "CastAI"
+#
+#    workspaces {
+#      prefix = "cast-ai-gcp-tf-e2e-"
+#    }
+#  }
 }

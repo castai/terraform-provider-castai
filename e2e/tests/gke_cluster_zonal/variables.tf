@@ -21,6 +21,6 @@ variable "cluster_zones" {
   default = ["europe-west1-b", "europe-west1-c"]
 }
 
-variable "gcp_credentials" {
+variable "gcp_credentials_base64" {
   type = string
 }
