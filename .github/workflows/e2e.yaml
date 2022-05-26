@@ -2,13 +2,17 @@ name: Terraform E2E
 on:
   repository_dispatch:
     types: [ tf-e2e ]
+  workflow_run:
+    workflows: [ "Release" ]
+    types:
+      - completed
+    branches:
+      - 'master'
   push:
     paths-ignore:
       - '**.md'
       - 'examples/**'
-    branches:
-      - feat/e2e-poc # FIXME: Change after merge to master
-      -
+
 concurrency:
   group: e2e
   cancel-in-progress: false
