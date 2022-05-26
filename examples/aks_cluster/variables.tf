@@ -8,7 +8,7 @@ variable "aks_cluster_name" {
   description = "Name of the AKS cluster, resources will be created for."
 }
 
-variable "aks_resource_group" {
+variable "aks_cluster_region" {
   type        = string
-  description = "Name of the AKS resource group that will be created for AKS cluster."
+  description = "Region of the AKS cluster, resources will be created for."
 }
