@@ -634,26 +634,6 @@ func (mr *MockClientInterfaceMockRecorder) CreateNewCluster(ctx, body interface{
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateNewCluster", reflect.TypeOf((*MockClientInterface)(nil).CreateNewCluster), varargs...)
 }
 
-// PrometheusRawMetrics mocks base method
-func (m *MockClientInterface) PrometheusRawMetrics(ctx context.Context, params *sdk.PrometheusRawMetricsParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
-	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, params}
-	for _, a := range reqEditors {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "PrometheusRawMetrics", varargs...)
-	ret0, _ := ret[0].(*http.Response)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// PrometheusRawMetrics indicates an expected call of PrometheusRawMetrics
-func (mr *MockClientInterfaceMockRecorder) PrometheusRawMetrics(ctx, params interface{}, reqEditors ...interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, params}, reqEditors...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PrometheusRawMetrics", reflect.TypeOf((*MockClientInterface)(nil).PrometheusRawMetrics), varargs...)
-}
-
 // DeleteCluster mocks base method
 func (m *MockClientInterface) DeleteCluster(ctx context.Context, clusterId sdk.ClusterId, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
@@ -1034,66 +1014,6 @@ func (mr *MockClientInterfaceMockRecorder) GetCostReport(ctx, clusterId, params 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCostReport", reflect.TypeOf((*MockClientInterface)(nil).GetCostReport), varargs...)
 }
 
-// GetDashboardMetricsCommonStats mocks base method
-func (m *MockClientInterface) GetDashboardMetricsCommonStats(ctx context.Context, clusterId sdk.ClusterId, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
-	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, clusterId}
-	for _, a := range reqEditors {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "GetDashboardMetricsCommonStats", varargs...)
-	ret0, _ := ret[0].(*http.Response)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetDashboardMetricsCommonStats indicates an expected call of GetDashboardMetricsCommonStats
-func (mr *MockClientInterfaceMockRecorder) GetDashboardMetricsCommonStats(ctx, clusterId interface{}, reqEditors ...interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, clusterId}, reqEditors...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetDashboardMetricsCommonStats", reflect.TypeOf((*MockClientInterface)(nil).GetDashboardMetricsCommonStats), varargs...)
-}
-
-// GetDashboardMetricsCpuUsage mocks base method
-func (m *MockClientInterface) GetDashboardMetricsCpuUsage(ctx context.Context, clusterId sdk.ClusterId, params *sdk.GetDashboardMetricsCpuUsageParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
-	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, clusterId, params}
-	for _, a := range reqEditors {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "GetDashboardMetricsCpuUsage", varargs...)
-	ret0, _ := ret[0].(*http.Response)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetDashboardMetricsCpuUsage indicates an expected call of GetDashboardMetricsCpuUsage
-func (mr *MockClientInterfaceMockRecorder) GetDashboardMetricsCpuUsage(ctx, clusterId, params interface{}, reqEditors ...interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, clusterId, params}, reqEditors...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetDashboardMetricsCpuUsage", reflect.TypeOf((*MockClientInterface)(nil).GetDashboardMetricsCpuUsage), varargs...)
-}
-
-// GetDashboardMetricsMemoryUsage mocks base method
-func (m *MockClientInterface) GetDashboardMetricsMemoryUsage(ctx context.Context, clusterId sdk.ClusterId, params *sdk.GetDashboardMetricsMemoryUsageParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
-	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, clusterId, params}
-	for _, a := range reqEditors {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "GetDashboardMetricsMemoryUsage", varargs...)
-	ret0, _ := ret[0].(*http.Response)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetDashboardMetricsMemoryUsage indicates an expected call of GetDashboardMetricsMemoryUsage
-func (mr *MockClientInterfaceMockRecorder) GetDashboardMetricsMemoryUsage(ctx, clusterId, params interface{}, reqEditors ...interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, clusterId, params}, reqEditors...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetDashboardMetricsMemoryUsage", reflect.TypeOf((*MockClientInterface)(nil).GetDashboardMetricsMemoryUsage), varargs...)
-}
-
 // GetClusterFeedbackEvents mocks base method
 func (m *MockClientInterface) GetClusterFeedbackEvents(ctx context.Context, clusterId sdk.ClusterId, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
@@ -1254,64 +1174,64 @@ func (mr *MockClientInterfaceMockRecorder) GetClusterMetrics(ctx, clusterId, par
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetClusterMetrics", reflect.TypeOf((*MockClientInterface)(nil).GetClusterMetrics), varargs...)
 }
 
-// GetClusterMetricsCpuUsage mocks base method
-func (m *MockClientInterface) GetClusterMetricsCpuUsage(ctx context.Context, clusterId sdk.ClusterId, params *sdk.GetClusterMetricsCpuUsageParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+// MetricsAPIGetCPUUsageMetrics mocks base method
+func (m *MockClientInterface) MetricsAPIGetCPUUsageMetrics(ctx context.Context, clusterId string, params *sdk.MetricsAPIGetCPUUsageMetricsParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{ctx, clusterId, params}
 	for _, a := range reqEditors {
 		varargs = append(varargs, a)
 	}
-	ret := m.ctrl.Call(m, "GetClusterMetricsCpuUsage", varargs...)
+	ret := m.ctrl.Call(m, "MetricsAPIGetCPUUsageMetrics", varargs...)
 	ret0, _ := ret[0].(*http.Response)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// GetClusterMetricsCpuUsage indicates an expected call of GetClusterMetricsCpuUsage
-func (mr *MockClientInterfaceMockRecorder) GetClusterMetricsCpuUsage(ctx, clusterId, params interface{}, reqEditors ...interface{}) *gomock.Call {
+// MetricsAPIGetCPUUsageMetrics indicates an expected call of MetricsAPIGetCPUUsageMetrics
+func (mr *MockClientInterfaceMockRecorder) MetricsAPIGetCPUUsageMetrics(ctx, clusterId, params interface{}, reqEditors ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{ctx, clusterId, params}, reqEditors...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetClusterMetricsCpuUsage", reflect.TypeOf((*MockClientInterface)(nil).GetClusterMetricsCpuUsage), varargs...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "MetricsAPIGetCPUUsageMetrics", reflect.TypeOf((*MockClientInterface)(nil).MetricsAPIGetCPUUsageMetrics), varargs...)
 }
 
-// GetClusterMetricsGauges mocks base method
-func (m *MockClientInterface) GetClusterMetricsGauges(ctx context.Context, clusterId sdk.ClusterId, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+// MetricsAPIGetGaugesMetrics mocks base method
+func (m *MockClientInterface) MetricsAPIGetGaugesMetrics(ctx context.Context, clusterId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{ctx, clusterId}
 	for _, a := range reqEditors {
 		varargs = append(varargs, a)
 	}
-	ret := m.ctrl.Call(m, "GetClusterMetricsGauges", varargs...)
+	ret := m.ctrl.Call(m, "MetricsAPIGetGaugesMetrics", varargs...)
 	ret0, _ := ret[0].(*http.Response)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// GetClusterMetricsGauges indicates an expected call of GetClusterMetricsGauges
-func (mr *MockClientInterfaceMockRecorder) GetClusterMetricsGauges(ctx, clusterId interface{}, reqEditors ...interface{}) *gomock.Call {
+// MetricsAPIGetGaugesMetrics indicates an expected call of MetricsAPIGetGaugesMetrics
+func (mr *MockClientInterfaceMockRecorder) MetricsAPIGetGaugesMetrics(ctx, clusterId interface{}, reqEditors ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{ctx, clusterId}, reqEditors...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetClusterMetricsGauges", reflect.TypeOf((*MockClientInterface)(nil).GetClusterMetricsGauges), varargs...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "MetricsAPIGetGaugesMetrics", reflect.TypeOf((*MockClientInterface)(nil).MetricsAPIGetGaugesMetrics), varargs...)
 }
 
-// GetClusterMetricsMemoryUsage mocks base method
-func (m *MockClientInterface) GetClusterMetricsMemoryUsage(ctx context.Context, clusterId sdk.ClusterId, params *sdk.GetClusterMetricsMemoryUsageParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+// MetricsAPIGetMemoryUsageMetrics mocks base method
+func (m *MockClientInterface) MetricsAPIGetMemoryUsageMetrics(ctx context.Context, clusterId string, params *sdk.MetricsAPIGetMemoryUsageMetricsParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{ctx, clusterId, params}
 	for _, a := range reqEditors {
 		varargs = append(varargs, a)
 	}
-	ret := m.ctrl.Call(m, "GetClusterMetricsMemoryUsage", varargs...)
+	ret := m.ctrl.Call(m, "MetricsAPIGetMemoryUsageMetrics", varargs...)
 	ret0, _ := ret[0].(*http.Response)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// GetClusterMetricsMemoryUsage indicates an expected call of GetClusterMetricsMemoryUsage
-func (mr *MockClientInterfaceMockRecorder) GetClusterMetricsMemoryUsage(ctx, clusterId, params interface{}, reqEditors ...interface{}) *gomock.Call {
+// MetricsAPIGetMemoryUsageMetrics indicates an expected call of MetricsAPIGetMemoryUsageMetrics
+func (mr *MockClientInterfaceMockRecorder) MetricsAPIGetMemoryUsageMetrics(ctx, clusterId, params interface{}, reqEditors ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{ctx, clusterId, params}, reqEditors...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetClusterMetricsMemoryUsage", reflect.TypeOf((*MockClientInterface)(nil).GetClusterMetricsMemoryUsage), varargs...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "MetricsAPIGetMemoryUsageMetrics", reflect.TypeOf((*MockClientInterface)(nil).MetricsAPIGetMemoryUsageMetrics), varargs...)
 }
 
 // PoliciesAPIGetClusterNodeConstraints mocks base method
@@ -3397,21 +3317,6 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) CreateNewClusterWithResp
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateNewClusterWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).CreateNewClusterWithResponse), ctx, body)
 }
 
-// PrometheusRawMetricsWithResponse mocks base method
-func (m *MockClientWithResponsesInterface) PrometheusRawMetricsWithResponse(ctx context.Context, params *sdk.PrometheusRawMetricsParams) (*sdk.PrometheusRawMetricsResponse, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "PrometheusRawMetricsWithResponse", ctx, params)
-	ret0, _ := ret[0].(*sdk.PrometheusRawMetricsResponse)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// PrometheusRawMetricsWithResponse indicates an expected call of PrometheusRawMetricsWithResponse
-func (mr *MockClientWithResponsesInterfaceMockRecorder) PrometheusRawMetricsWithResponse(ctx, params interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PrometheusRawMetricsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).PrometheusRawMetricsWithResponse), ctx, params)
-}
-
 // DeleteClusterWithResponse mocks base method
 func (m *MockClientWithResponsesInterface) DeleteClusterWithResponse(ctx context.Context, clusterId sdk.ClusterId) (*sdk.DeleteClusterResponse, error) {
 	m.ctrl.T.Helper()
@@ -3697,51 +3602,6 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) GetCostReportWithRespons
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCostReportWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).GetCostReportWithResponse), ctx, clusterId, params)
 }
 
-// GetDashboardMetricsCommonStatsWithResponse mocks base method
-func (m *MockClientWithResponsesInterface) GetDashboardMetricsCommonStatsWithResponse(ctx context.Context, clusterId sdk.ClusterId) (*sdk.GetDashboardMetricsCommonStatsResponse, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetDashboardMetricsCommonStatsWithResponse", ctx, clusterId)
-	ret0, _ := ret[0].(*sdk.GetDashboardMetricsCommonStatsResponse)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetDashboardMetricsCommonStatsWithResponse indicates an expected call of GetDashboardMetricsCommonStatsWithResponse
-func (mr *MockClientWithResponsesInterfaceMockRecorder) GetDashboardMetricsCommonStatsWithResponse(ctx, clusterId interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetDashboardMetricsCommonStatsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).GetDashboardMetricsCommonStatsWithResponse), ctx, clusterId)
-}
-
-// GetDashboardMetricsCpuUsageWithResponse mocks base method
-func (m *MockClientWithResponsesInterface) GetDashboardMetricsCpuUsageWithResponse(ctx context.Context, clusterId sdk.ClusterId, params *sdk.GetDashboardMetricsCpuUsageParams) (*sdk.GetDashboardMetricsCpuUsageResponse, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetDashboardMetricsCpuUsageWithResponse", ctx, clusterId, params)
-	ret0, _ := ret[0].(*sdk.GetDashboardMetricsCpuUsageResponse)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetDashboardMetricsCpuUsageWithResponse indicates an expected call of GetDashboardMetricsCpuUsageWithResponse
-func (mr *MockClientWithResponsesInterfaceMockRecorder) GetDashboardMetricsCpuUsageWithResponse(ctx, clusterId, params interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetDashboardMetricsCpuUsageWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).GetDashboardMetricsCpuUsageWithResponse), ctx, clusterId, params)
-}
-
-// GetDashboardMetricsMemoryUsageWithResponse mocks base method
-func (m *MockClientWithResponsesInterface) GetDashboardMetricsMemoryUsageWithResponse(ctx context.Context, clusterId sdk.ClusterId, params *sdk.GetDashboardMetricsMemoryUsageParams) (*sdk.GetDashboardMetricsMemoryUsageResponse, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetDashboardMetricsMemoryUsageWithResponse", ctx, clusterId, params)
-	ret0, _ := ret[0].(*sdk.GetDashboardMetricsMemoryUsageResponse)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetDashboardMetricsMemoryUsageWithResponse indicates an expected call of GetDashboardMetricsMemoryUsageWithResponse
-func (mr *MockClientWithResponsesInterfaceMockRecorder) GetDashboardMetricsMemoryUsageWithResponse(ctx, clusterId, params interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetDashboardMetricsMemoryUsageWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).GetDashboardMetricsMemoryUsageWithResponse), ctx, clusterId, params)
-}
-
 // GetClusterFeedbackEventsWithResponse mocks base method
 func (m *MockClientWithResponsesInterface) GetClusterFeedbackEventsWithResponse(ctx context.Context, clusterId sdk.ClusterId) (*sdk.GetClusterFeedbackEventsResponse, error) {
 	m.ctrl.T.Helper()
@@ -3862,49 +3722,49 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) GetClusterMetricsWithRes
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetClusterMetricsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).GetClusterMetricsWithResponse), ctx, clusterId, params)
 }
 
-// GetClusterMetricsCpuUsageWithResponse mocks base method
-func (m *MockClientWithResponsesInterface) GetClusterMetricsCpuUsageWithResponse(ctx context.Context, clusterId sdk.ClusterId, params *sdk.GetClusterMetricsCpuUsageParams) (*sdk.GetClusterMetricsCpuUsageResponse, error) {
+// MetricsAPIGetCPUUsageMetricsWithResponse mocks base method
+func (m *MockClientWithResponsesInterface) MetricsAPIGetCPUUsageMetricsWithResponse(ctx context.Context, clusterId string, params *sdk.MetricsAPIGetCPUUsageMetricsParams) (*sdk.MetricsAPIGetCPUUsageMetricsResponse, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetClusterMetricsCpuUsageWithResponse", ctx, clusterId, params)
-	ret0, _ := ret[0].(*sdk.GetClusterMetricsCpuUsageResponse)
+	ret := m.ctrl.Call(m, "MetricsAPIGetCPUUsageMetricsWithResponse", ctx, clusterId, params)
+	ret0, _ := ret[0].(*sdk.MetricsAPIGetCPUUsageMetricsResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// GetClusterMetricsCpuUsageWithResponse indicates an expected call of GetClusterMetricsCpuUsageWithResponse
-func (mr *MockClientWithResponsesInterfaceMockRecorder) GetClusterMetricsCpuUsageWithResponse(ctx, clusterId, params interface{}) *gomock.Call {
+// MetricsAPIGetCPUUsageMetricsWithResponse indicates an expected call of MetricsAPIGetCPUUsageMetricsWithResponse
+func (mr *MockClientWithResponsesInterfaceMockRecorder) MetricsAPIGetCPUUsageMetricsWithResponse(ctx, clusterId, params interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetClusterMetricsCpuUsageWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).GetClusterMetricsCpuUsageWithResponse), ctx, clusterId, params)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "MetricsAPIGetCPUUsageMetricsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).MetricsAPIGetCPUUsageMetricsWithResponse), ctx, clusterId, params)
 }
 
-// GetClusterMetricsGaugesWithResponse mocks base method
-func (m *MockClientWithResponsesInterface) GetClusterMetricsGaugesWithResponse(ctx context.Context, clusterId sdk.ClusterId) (*sdk.GetClusterMetricsGaugesResponse, error) {
+// MetricsAPIGetGaugesMetricsWithResponse mocks base method
+func (m *MockClientWithResponsesInterface) MetricsAPIGetGaugesMetricsWithResponse(ctx context.Context, clusterId string) (*sdk.MetricsAPIGetGaugesMetricsResponse, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetClusterMetricsGaugesWithResponse", ctx, clusterId)
-	ret0, _ := ret[0].(*sdk.GetClusterMetricsGaugesResponse)
+	ret := m.ctrl.Call(m, "MetricsAPIGetGaugesMetricsWithResponse", ctx, clusterId)
+	ret0, _ := ret[0].(*sdk.MetricsAPIGetGaugesMetricsResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// GetClusterMetricsGaugesWithResponse indicates an expected call of GetClusterMetricsGaugesWithResponse
-func (mr *MockClientWithResponsesInterfaceMockRecorder) GetClusterMetricsGaugesWithResponse(ctx, clusterId interface{}) *gomock.Call {
+// MetricsAPIGetGaugesMetricsWithResponse indicates an expected call of MetricsAPIGetGaugesMetricsWithResponse
+func (mr *MockClientWithResponsesInterfaceMockRecorder) MetricsAPIGetGaugesMetricsWithResponse(ctx, clusterId interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetClusterMetricsGaugesWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).GetClusterMetricsGaugesWithResponse), ctx, clusterId)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "MetricsAPIGetGaugesMetricsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).MetricsAPIGetGaugesMetricsWithResponse), ctx, clusterId)
 }
 
-// GetClusterMetricsMemoryUsageWithResponse mocks base method
-func (m *MockClientWithResponsesInterface) GetClusterMetricsMemoryUsageWithResponse(ctx context.Context, clusterId sdk.ClusterId, params *sdk.GetClusterMetricsMemoryUsageParams) (*sdk.GetClusterMetricsMemoryUsageResponse, error) {
+// MetricsAPIGetMemoryUsageMetricsWithResponse mocks base method
+func (m *MockClientWithResponsesInterface) MetricsAPIGetMemoryUsageMetricsWithResponse(ctx context.Context, clusterId string, params *sdk.MetricsAPIGetMemoryUsageMetricsParams) (*sdk.MetricsAPIGetMemoryUsageMetricsResponse, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetClusterMetricsMemoryUsageWithResponse", ctx, clusterId, params)
-	ret0, _ := ret[0].(*sdk.GetClusterMetricsMemoryUsageResponse)
+	ret := m.ctrl.Call(m, "MetricsAPIGetMemoryUsageMetricsWithResponse", ctx, clusterId, params)
+	ret0, _ := ret[0].(*sdk.MetricsAPIGetMemoryUsageMetricsResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// GetClusterMetricsMemoryUsageWithResponse indicates an expected call of GetClusterMetricsMemoryUsageWithResponse
-func (mr *MockClientWithResponsesInterfaceMockRecorder) GetClusterMetricsMemoryUsageWithResponse(ctx, clusterId, params interface{}) *gomock.Call {
+// MetricsAPIGetMemoryUsageMetricsWithResponse indicates an expected call of MetricsAPIGetMemoryUsageMetricsWithResponse
+func (mr *MockClientWithResponsesInterfaceMockRecorder) MetricsAPIGetMemoryUsageMetricsWithResponse(ctx, clusterId, params interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetClusterMetricsMemoryUsageWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).GetClusterMetricsMemoryUsageWithResponse), ctx, clusterId, params)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "MetricsAPIGetMemoryUsageMetricsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).MetricsAPIGetMemoryUsageMetricsWithResponse), ctx, clusterId, params)
 }
 
 // PoliciesAPIGetClusterNodeConstraintsWithResponse mocks base method

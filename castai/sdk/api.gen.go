@@ -12,8 +12,8 @@ import (
 )
 
 const (
-	BearerAuthScopes = "BearerAuth.Scopes"
 	ApiKeyAuthScopes = "ApiKeyAuth.Scopes"
+	BearerAuthScopes = "BearerAuth.Scopes"
 )
 
 // AddNodeResult defines model for AddNodeResult.
@@ -479,37 +479,6 @@ type ClusterMetrics_NodeMetrics_Labels struct {
 	AdditionalProperties map[string]string `json:"-"`
 }
 
-// ClusterMetricsCpuUsage defines model for ClusterMetricsCpuUsage.
-type ClusterMetricsCpuUsage struct {
-	Provisioned []MetricSampleStream `json:"provisioned"`
-	Requested   []MetricSampleStream `json:"requested"`
-}
-
-// ClusterMetricsGauges defines model for ClusterMetricsGauges.
-type ClusterMetricsGauges struct {
-	CastaiManagedNodesCount      *int `json:"castaiManagedNodesCount,omitempty"`
-	CastaiSpotFallbackNodesCount *int `json:"castaiSpotFallbackNodesCount,omitempty"`
-	CpuAllocatableMillicores     *int `json:"cpuAllocatableMillicores,omitempty"`
-	CpuProvisionedMillicores     *int `json:"cpuProvisionedMillicores,omitempty"`
-	CpuRequestedMillicores       *int `json:"cpuRequestedMillicores,omitempty"`
-	MemoryAllocatableBytes       *int `json:"memoryAllocatableBytes,omitempty"`
-	MemoryProvisionedBytes       *int `json:"memoryProvisionedBytes,omitempty"`
-	MemoryRequestedBytes         *int `json:"memoryRequestedBytes,omitempty"`
-	OnDemandNodesCount           *int `json:"onDemandNodesCount,omitempty"`
-	ProviderManagedNodesCount    *int `json:"providerManagedNodesCount,omitempty"`
-	ScheduledPodsCount           *int `json:"scheduledPodsCount,omitempty"`
-	SpotNodesCount               *int `json:"spotNodesCount,omitempty"`
-	TotalNodesCount              *int `json:"totalNodesCount,omitempty"`
-	TotalPodsCount               *int `json:"totalPodsCount,omitempty"`
-	UnscheduledPodsCount         *int `json:"unscheduledPodsCount,omitempty"`
-}
-
-// ClusterMetricsMemoryUsage defines model for ClusterMetricsMemoryUsage.
-type ClusterMetricsMemoryUsage struct {
-	Provisioned []MetricSampleStream `json:"provisioned"`
-	Requested   []MetricSampleStream `json:"requested"`
-}
-
 // ClusterProblematicWorkloads defines model for ClusterProblematicWorkloads.
 type ClusterProblematicWorkloads struct {
 
@@ -576,36 +545,6 @@ type CreateCluster struct {
 
 	// CAST AI region to create the cluster in.
 	Region string `json:"region"`
-}
-
-// DashboardMetricsCPUUsage defines model for DashboardMetricsCPUUsage.
-type DashboardMetricsCPUUsage struct {
-	Provisioned []MetricSampleStream `json:"provisioned"`
-	Requested   []MetricSampleStream `json:"requested"`
-}
-
-// DashboardMetricsCommonStats defines model for DashboardMetricsCommonStats.
-type DashboardMetricsCommonStats struct {
-	CastaiManagedNodesCount   *int `json:"castaiManagedNodesCount,omitempty"`
-	CpuAllocatableMillicores  *int `json:"cpuAllocatableMillicores,omitempty"`
-	CpuProvisionedMillicores  *int `json:"cpuProvisionedMillicores,omitempty"`
-	CpuRequestedMillicores    *int `json:"cpuRequestedMillicores,omitempty"`
-	MemoryAllocatableBytes    *int `json:"memoryAllocatableBytes,omitempty"`
-	MemoryProvisionedBytes    *int `json:"memoryProvisionedBytes,omitempty"`
-	MemoryRequestedBytes      *int `json:"memoryRequestedBytes,omitempty"`
-	OnDemandNodesCount        *int `json:"onDemandNodesCount,omitempty"`
-	ProviderManagedNodesCount *int `json:"providerManagedNodesCount,omitempty"`
-	ScheduledPodsCount        *int `json:"scheduledPodsCount,omitempty"`
-	SpotNodesCount            *int `json:"spotNodesCount,omitempty"`
-	TotalNodesCount           *int `json:"totalNodesCount,omitempty"`
-	TotalPodsCount            *int `json:"totalPodsCount,omitempty"`
-	UnscheduledPodsCount      *int `json:"unscheduledPodsCount,omitempty"`
-}
-
-// DashboardMetricsMemoryUsage defines model for DashboardMetricsMemoryUsage.
-type DashboardMetricsMemoryUsage struct {
-	Provisioned []MetricSampleStream `json:"provisioned"`
-	Requested   []MetricSampleStream `json:"requested"`
 }
 
 // DeleteNodeResult defines model for DeleteNodeResult.
@@ -976,23 +915,6 @@ type KubernetesIngressController struct {
 
 	// Available ingress controller ports.
 	Ports []int `json:"ports"`
-}
-
-// MetricSampleStream defines model for MetricSampleStream.
-type MetricSampleStream struct {
-	Labels *MetricSampleStream_Labels `json:"labels,omitempty"`
-	Values []MetricSampleValue        `json:"values"`
-}
-
-// MetricSampleStream_Labels defines model for MetricSampleStream.Labels.
-type MetricSampleStream_Labels struct {
-	AdditionalProperties map[string]string `json:"-"`
-}
-
-// MetricSampleValue defines model for MetricSampleValue.
-type MetricSampleValue struct {
-	Timestamp int    `json:"timestamp"`
-	Value     string `json:"value"`
 }
 
 // Network defines model for Network.
@@ -1539,6 +1461,13 @@ type RebalancingNode struct {
 	TotalProblematicPods int `json:"totalProblematicPods"`
 }
 
+// RebalancingNodeItem defines model for RebalancingNodeItem.
+type RebalancingNodeItem struct {
+
+	// Node ID to rebalance
+	NodeId *string `json:"nodeId,omitempty"`
+}
+
 // RebalancingPlan defines model for RebalancingPlan.
 type RebalancingPlan struct {
 
@@ -1663,6 +1592,9 @@ type RebalancingRequest struct {
 
 	// The minimum count of worker nodes to be had in the rebalancing plan. Default is 3.
 	MinNodes *int `json:"minNodes,omitempty"`
+
+	// Subset of nodes to rebalance. If empty, it is considered to include all nodes (full rebalancing).
+	RebalancingNodes *[]RebalancingNodeItem `json:"rebalancingNodes,omitempty"`
 }
 
 // ResourceUsage defines model for ResourceUsage.
@@ -1971,6 +1903,60 @@ type CastaiClusterV1beta1Taint struct {
 	Value  *string `json:"value,omitempty"`
 }
 
+// CastaiMetricsV1beta1GetCPUUsageMetricsResponse defines model for castai.metrics.v1beta1.GetCPUUsageMetricsResponse.
+type CastaiMetricsV1beta1GetCPUUsageMetricsResponse struct {
+	Provisioned []CastaiMetricsV1beta1MetricSampleStream `json:"provisioned"`
+	Requested   []CastaiMetricsV1beta1MetricSampleStream `json:"requested"`
+}
+
+// CastaiMetricsV1beta1GetGaugesMetricsResponse defines model for castai.metrics.v1beta1.GetGaugesMetricsResponse.
+type CastaiMetricsV1beta1GetGaugesMetricsResponse struct {
+	CastaiManagedNodesCount      *int32   `json:"castaiManagedNodesCount,omitempty"`
+	CastaiSpotFallbackNodesCount *int32   `json:"castaiSpotFallbackNodesCount,omitempty"`
+	CpuAllocatableCores          *float32 `json:"cpuAllocatableCores,omitempty"`
+	CpuAllocatableMillicores     *string  `json:"cpuAllocatableMillicores,omitempty"`
+	CpuProvisionedCores          *float32 `json:"cpuProvisionedCores,omitempty"`
+	CpuProvisionedMillicores     *string  `json:"cpuProvisionedMillicores,omitempty"`
+	CpuRequestedCores            *float32 `json:"cpuRequestedCores,omitempty"`
+	CpuRequestedMillicores       *string  `json:"cpuRequestedMillicores,omitempty"`
+	MemoryAllocatableBytes       *string  `json:"memoryAllocatableBytes,omitempty"`
+	MemoryAllocatableGib         *float32 `json:"memoryAllocatableGib,omitempty"`
+	MemoryProvisionedBytes       *string  `json:"memoryProvisionedBytes,omitempty"`
+	MemoryProvisionedGib         *float32 `json:"memoryProvisionedGib,omitempty"`
+	MemoryRequestedBytes         *string  `json:"memoryRequestedBytes,omitempty"`
+	MemoryRequestedGib           *float32 `json:"memoryRequestedGib,omitempty"`
+	OnDemandNodesCount           *int32   `json:"onDemandNodesCount,omitempty"`
+	ProviderManagedNodesCount    *int32   `json:"providerManagedNodesCount,omitempty"`
+	ScheduledPodsCount           *int32   `json:"scheduledPodsCount,omitempty"`
+	SpotNodesCount               *int32   `json:"spotNodesCount,omitempty"`
+	TotalNodesCount              *int32   `json:"totalNodesCount,omitempty"`
+	TotalPodsCount               *int32   `json:"totalPodsCount,omitempty"`
+	UnscheduledPodsCount         *int32   `json:"unscheduledPodsCount,omitempty"`
+}
+
+// CastaiMetricsV1beta1GetMemoryUsageMetricsResponse defines model for castai.metrics.v1beta1.GetMemoryUsageMetricsResponse.
+type CastaiMetricsV1beta1GetMemoryUsageMetricsResponse struct {
+	Provisioned *[]CastaiMetricsV1beta1MetricSampleStream `json:"provisioned,omitempty"`
+	Requested   *[]CastaiMetricsV1beta1MetricSampleStream `json:"requested,omitempty"`
+}
+
+// CastaiMetricsV1beta1MetricSampleStream defines model for castai.metrics.v1beta1.MetricSampleStream.
+type CastaiMetricsV1beta1MetricSampleStream struct {
+	Labels *CastaiMetricsV1beta1MetricSampleStream_Labels `json:"labels,omitempty"`
+	Values *[]CastaiMetricsV1beta1MetricSampleValue       `json:"values,omitempty"`
+}
+
+// CastaiMetricsV1beta1MetricSampleStream_Labels defines model for CastaiMetricsV1beta1MetricSampleStream.Labels.
+type CastaiMetricsV1beta1MetricSampleStream_Labels struct {
+	AdditionalProperties map[string]string `json:"-"`
+}
+
+// CastaiMetricsV1beta1MetricSampleValue defines model for castai.metrics.v1beta1.MetricSampleValue.
+type CastaiMetricsV1beta1MetricSampleValue struct {
+	Timestamp *string `json:"timestamp,omitempty"`
+	Value     *string `json:"value,omitempty"`
+}
+
 // CastaiV1Cloud defines model for castai.v1.Cloud.
 type CastaiV1Cloud string
 
@@ -2001,6 +1987,7 @@ type ClusteractionsV1ClusterAction struct {
 	ActionApproveCsr        *ClusteractionsV1ClusterActionApproveCSR        `json:"actionApproveCsr,omitempty"`
 	ActionChartUninstall    *ClusteractionsV1ClusterActionChartUninstall    `json:"actionChartUninstall,omitempty"`
 	ActionChartUpsert       *ClusteractionsV1ClusterActionChartUpsert       `json:"actionChartUpsert,omitempty"`
+	ActionCheckNodeDeleted  *ClusteractionsV1ClusterActionCheckNodeDeleted  `json:"actionCheckNodeDeleted,omitempty"`
 	ActionCreateEvent       *ClusteractionsV1ClusterActionCreateEvent       `json:"actionCreateEvent,omitempty"`
 	ActionDeleteNode        *ClusteractionsV1ClusterActionDeleteNode        `json:"actionDeleteNode,omitempty"`
 	ActionDisconnectCluster *ClusteractionsV1ClusterActionDisconnectCluster `json:"actionDisconnectCluster,omitempty"`
@@ -2040,6 +2027,11 @@ type ClusteractionsV1ClusterActionChartUpsert struct {
 // ClusteractionsV1ClusterActionChartUpsert_ValuesOverrides defines model for ClusteractionsV1ClusterActionChartUpsert.ValuesOverrides.
 type ClusteractionsV1ClusterActionChartUpsert_ValuesOverrides struct {
 	AdditionalProperties map[string]string `json:"-"`
+}
+
+// ClusteractionsV1ClusterActionCheckNodeDeleted defines model for clusteractions.v1.ClusterActionCheckNodeDeleted.
+type ClusteractionsV1ClusterActionCheckNodeDeleted struct {
+	NodeName *string `json:"nodeName,omitempty"`
 }
 
 // ClusteractionsV1ClusterActionCreateEvent defines model for clusteractions.v1.ClusterActionCreateEvent.
@@ -2202,6 +2194,9 @@ type ExternalclusterV1Cluster struct {
 	// KOPSClusterParams defines KOPS-specific arguments.
 	Kops              *ExternalclusterV1KOPSClusterParams `json:"kops,omitempty"`
 	KubernetesVersion *string                             `json:"kubernetesVersion"`
+
+	// Method used to onboard the cluster, eg.: console, terraform.
+	ManagedBy *string `json:"managedBy,omitempty"`
 
 	// The name of the external cluster.
 	Name *string `json:"name,omitempty"`
@@ -2743,6 +2738,9 @@ type PoliciesV1SpotInstances struct {
 // PoliciesV1UnschedulablePodsPolicy defines model for policies.v1.UnschedulablePodsPolicy.
 type PoliciesV1UnschedulablePodsPolicy struct {
 
+	// Defines custom instance usage settings.
+	CustomInstancesEnabled *bool `json:"customInstancesEnabled"`
+
 	// Defines default ratio of 1 CPU to Volume GiB  which will be summed with minimum value when creating new nodes.
 	// If set to 5, the ration would be: 1 CPU : 5 GiB.
 	// For example a node with 16 CPU would have (16 * 5 GiB) + minimum(100GiB) = 180 GiB volume size.
@@ -2955,11 +2953,6 @@ type ListKubernetesClustersParams struct {
 // CreateNewClusterJSONBody defines parameters for CreateNewCluster.
 type CreateNewClusterJSONBody CreateCluster
 
-// PrometheusRawMetricsParams defines parameters for PrometheusRawMetrics.
-type PrometheusRawMetricsParams struct {
-	XCastAiOrganizationId *HeaderOrganizationId `json:"X-CastAi-Organization-Id,omitempty"`
-}
-
 // UpdateClusterJSONBody defines parameters for UpdateCluster.
 type UpdateClusterJSONBody UpdateCluster
 
@@ -2998,38 +2991,6 @@ type GetCostReportParams struct {
 	EndTime string `json:"endTime"`
 }
 
-// GetDashboardMetricsCpuUsageParams defines parameters for GetDashboardMetricsCpuUsage.
-type GetDashboardMetricsCpuUsageParams struct {
-
-	// Metrics period in hours, e.g., periodHours=24. This field is ignored if startTime and endTime fields are set.
-	PeriodHours *string `json:"periodHours,omitempty"`
-
-	// Metrics range start time in unix timestamp, e.g., startTime=1640091345020
-	StartTime *string `json:"startTime,omitempty"`
-
-	// Metrics range end time in unix timestamp, e.g., endTime=1640091345030
-	EndTime *string `json:"endTime,omitempty"`
-
-	// Metrics data points steps in seconds, e.g., stepSeconds=3600
-	StepSeconds *string `json:"stepSeconds,omitempty"`
-}
-
-// GetDashboardMetricsMemoryUsageParams defines parameters for GetDashboardMetricsMemoryUsage.
-type GetDashboardMetricsMemoryUsageParams struct {
-
-	// Metrics period in hours, e.g., periodHours=24. This field is ignored if startTime and endTime fields are set.
-	PeriodHours *string `json:"periodHours,omitempty"`
-
-	// Metrics range start time in unix timestamp, e.g., startTime=1640091345020
-	StartTime *string `json:"startTime,omitempty"`
-
-	// Metrics range end time in unix timestamp, e.g., endTime=1640091345030
-	EndTime *string `json:"endTime,omitempty"`
-
-	// Metrics data points steps in seconds, e.g., stepSeconds=3600
-	StepSeconds *string `json:"stepSeconds,omitempty"`
-}
-
 // ConfigureClusterAddonsJSONBody defines parameters for ConfigureClusterAddons.
 type ConfigureClusterAddonsJSONBody AddonsConfig
 
@@ -3040,36 +3001,36 @@ type GetClusterMetricsParams struct {
 	MetricType MetricType `json:"metricType"`
 }
 
-// GetClusterMetricsCpuUsageParams defines parameters for GetClusterMetricsCpuUsage.
-type GetClusterMetricsCpuUsageParams struct {
+// MetricsAPIGetCPUUsageMetricsParams defines parameters for MetricsAPIGetCPUUsageMetrics.
+type MetricsAPIGetCPUUsageMetricsParams struct {
 
 	// Metrics period in hours, e.g., periodHours=24. This field is ignored if startTime and endTime fields are set.
-	PeriodHours *string `json:"periodHours,omitempty"`
+	PeriodHours *int32 `json:"periodHours,omitempty"`
 
-	// Metrics range start time in unix timestamp, e.g., startTime=1640091345020
-	StartTime *string `json:"startTime,omitempty"`
+	// Metrics data points steps in seconds, e.g., stepSeconds=3600.
+	StepSeconds *int32 `json:"stepSeconds,omitempty"`
 
-	// Metrics range end time in unix timestamp, e.g., endTime=1640091345030
-	EndTime *string `json:"endTime,omitempty"`
+	// Metrics range start time in unix timestamp, e.g., startTime=1640091345020.
+	StartTime *int64 `json:"startTime,omitempty"`
 
-	// Metrics data points steps in seconds, e.g., stepSeconds=3600
-	StepSeconds *string `json:"stepSeconds,omitempty"`
+	// Metrics range end time in unix timestamp, e.g., endTime=1640091345030.
+	EndTime *int64 `json:"endTime,omitempty"`
 }
 
-// GetClusterMetricsMemoryUsageParams defines parameters for GetClusterMetricsMemoryUsage.
-type GetClusterMetricsMemoryUsageParams struct {
+// MetricsAPIGetMemoryUsageMetricsParams defines parameters for MetricsAPIGetMemoryUsageMetrics.
+type MetricsAPIGetMemoryUsageMetricsParams struct {
 
 	// Metrics period in hours, e.g., periodHours=24. This field is ignored if startTime and endTime fields are set.
-	PeriodHours *string `json:"periodHours,omitempty"`
+	PeriodHours *int32 `json:"periodHours,omitempty"`
 
-	// Metrics range start time in unix timestamp, e.g., startTime=1640091345020
-	StartTime *string `json:"startTime,omitempty"`
+	// Metrics data points steps in seconds, e.g., stepSeconds=3600.
+	StepSeconds *int32 `json:"stepSeconds,omitempty"`
 
-	// Metrics range end time in unix timestamp, e.g., endTime=1640091345030
-	EndTime *string `json:"endTime,omitempty"`
+	// Metrics range start time in unix timestamp, e.g., startTime=1640091345020.
+	StartTime *int64 `json:"startTime,omitempty"`
 
-	// Metrics data points steps in seconds, e.g., stepSeconds=3600
-	StepSeconds *string `json:"stepSeconds,omitempty"`
+	// Metrics range end time in unix timestamp, e.g., endTime=1640091345030.
+	EndTime *int64 `json:"endTime,omitempty"`
 }
 
 // GetClusterNodesParams defines parameters for GetClusterNodes.
@@ -3733,59 +3694,6 @@ func (a KubernetesCluster_Heartbeats) MarshalJSON() ([]byte, error) {
 	return json.Marshal(object)
 }
 
-// Getter for additional properties for MetricSampleStream_Labels. Returns the specified
-// element and whether it was found
-func (a MetricSampleStream_Labels) Get(fieldName string) (value string, found bool) {
-	if a.AdditionalProperties != nil {
-		value, found = a.AdditionalProperties[fieldName]
-	}
-	return
-}
-
-// Setter for additional properties for MetricSampleStream_Labels
-func (a *MetricSampleStream_Labels) Set(fieldName string, value string) {
-	if a.AdditionalProperties == nil {
-		a.AdditionalProperties = make(map[string]string)
-	}
-	a.AdditionalProperties[fieldName] = value
-}
-
-// Override default JSON handling for MetricSampleStream_Labels to handle AdditionalProperties
-func (a *MetricSampleStream_Labels) UnmarshalJSON(b []byte) error {
-	object := make(map[string]json.RawMessage)
-	err := json.Unmarshal(b, &object)
-	if err != nil {
-		return err
-	}
-
-	if len(object) != 0 {
-		a.AdditionalProperties = make(map[string]string)
-		for fieldName, fieldBuf := range object {
-			var fieldVal string
-			err := json.Unmarshal(fieldBuf, &fieldVal)
-			if err != nil {
-				return errors.Wrap(err, fmt.Sprintf("error unmarshaling field %s", fieldName))
-			}
-			a.AdditionalProperties[fieldName] = fieldVal
-		}
-	}
-	return nil
-}
-
-// Override default JSON handling for MetricSampleStream_Labels to handle AdditionalProperties
-func (a MetricSampleStream_Labels) MarshalJSON() ([]byte, error) {
-	var err error
-	object := make(map[string]json.RawMessage)
-
-	for fieldName, field := range a.AdditionalProperties {
-		object[fieldName], err = json.Marshal(field)
-		if err != nil {
-			return nil, errors.Wrap(err, fmt.Sprintf("error marshaling '%s'", fieldName))
-		}
-	}
-	return json.Marshal(object)
-}
-
 // Getter for additional properties for Node_InstanceLabels. Returns the specified
 // element and whether it was found
 func (a Node_InstanceLabels) Get(fieldName string) (value string, found bool) {
@@ -4092,6 +4000,59 @@ func (a *CastaiClusterV1beta1Node_Labels) UnmarshalJSON(b []byte) error {
 
 // Override default JSON handling for CastaiClusterV1beta1Node_Labels to handle AdditionalProperties
 func (a CastaiClusterV1beta1Node_Labels) MarshalJSON() ([]byte, error) {
+	var err error
+	object := make(map[string]json.RawMessage)
+
+	for fieldName, field := range a.AdditionalProperties {
+		object[fieldName], err = json.Marshal(field)
+		if err != nil {
+			return nil, errors.Wrap(err, fmt.Sprintf("error marshaling '%s'", fieldName))
+		}
+	}
+	return json.Marshal(object)
+}
+
+// Getter for additional properties for CastaiMetricsV1beta1MetricSampleStream_Labels. Returns the specified
+// element and whether it was found
+func (a CastaiMetricsV1beta1MetricSampleStream_Labels) Get(fieldName string) (value string, found bool) {
+	if a.AdditionalProperties != nil {
+		value, found = a.AdditionalProperties[fieldName]
+	}
+	return
+}
+
+// Setter for additional properties for CastaiMetricsV1beta1MetricSampleStream_Labels
+func (a *CastaiMetricsV1beta1MetricSampleStream_Labels) Set(fieldName string, value string) {
+	if a.AdditionalProperties == nil {
+		a.AdditionalProperties = make(map[string]string)
+	}
+	a.AdditionalProperties[fieldName] = value
+}
+
+// Override default JSON handling for CastaiMetricsV1beta1MetricSampleStream_Labels to handle AdditionalProperties
+func (a *CastaiMetricsV1beta1MetricSampleStream_Labels) UnmarshalJSON(b []byte) error {
+	object := make(map[string]json.RawMessage)
+	err := json.Unmarshal(b, &object)
+	if err != nil {
+		return err
+	}
+
+	if len(object) != 0 {
+		a.AdditionalProperties = make(map[string]string)
+		for fieldName, fieldBuf := range object {
+			var fieldVal string
+			err := json.Unmarshal(fieldBuf, &fieldVal)
+			if err != nil {
+				return errors.Wrap(err, fmt.Sprintf("error unmarshaling field %s", fieldName))
+			}
+			a.AdditionalProperties[fieldName] = fieldVal
+		}
+	}
+	return nil
+}
+
+// Override default JSON handling for CastaiMetricsV1beta1MetricSampleStream_Labels to handle AdditionalProperties
+func (a CastaiMetricsV1beta1MetricSampleStream_Labels) MarshalJSON() ([]byte, error) {
 	var err error
 	object := make(map[string]json.RawMessage)
 
