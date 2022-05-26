@@ -13,35 +13,13 @@ import (
 )
 
 func TestTerraformGKEOnboarding(t *testing.T) {
-	//varsFile, err := createVarsFile(map[string]interface{}{
-	//	"cluster_name":           cfg.GKEClusterName,
-	//	"cluster_location":       cfg.GKEClusterLocation,
-	//	"network_region":         cfg.GKENetworkRegion,
-	//	"castai_api_token":       cfg.Token,
-	//	"gcp_credentials_base64": cfg.GCPCredentialsBase64,
-	//	"project_id":             cfg.GKEProjectID,
-	//}, "gke")
-	//
-	//if cfg.GCPCredentialsBase64 == "" {
-	//	panic("empty credentials")
-	//}
-	//
-	//if err != nil {
-	//	panic(err)
-	//}
-	//defer os.Remove(varsFile)
-
 	terraformOptions := terraform.WithDefaultRetryableErrors(t, &terraform.Options{
 		TerraformDir: "./tests/gke_cluster_zonal",
-		//VarFiles:     []string{varsFile},
 	})
 
 	r := require.New(t)
 	ctx := context.Background()
 	defer terraform.Destroy(t, terraformOptions)
-	//terraform.Init(t, terraformOptions)
-	//terraform.InitAndPlan(t, terraformOptions)
-	//return
 	terraform.InitAndApply(t, terraformOptions)
 	clusterID := terraform.OutputRequired(t, terraformOptions, "castai_cluster_id")
 
@@ -80,5 +58,9 @@ func TestTerraformGKEOnboarding(t *testing.T) {
 	r.NoError(err)
 	r.NotNil(node.JSON200.State.Phase)
 	r.Equal("ready", *node.JSON200.State.Phase)
+
+	planAfterApply := terraform.Plan(t, terraformOptions)
+	r.Contains("No changes. Your infrastructure matches the configuration.", planAfterApply, "Plan after apply shouldn't contain changes")
+
 	fmt.Println("Test done")
 }

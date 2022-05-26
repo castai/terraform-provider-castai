@@ -1,6 +1,11 @@
 name: Terraform E2E
 on:
+  repository_dispatch:
+    types: [ tf-e2e ]
   push:
+    paths-ignore:
+      - '**.md'
+      - 'examples/**'
     branches:
       - feat/e2e-poc # FIXME: Change after merge to master
       -
@@ -12,11 +17,6 @@ jobs:
   test:
     runs-on: ubuntu-latest
     env:
-#      E2E_GCP_CREDENTIALS_BASE64: ${{ secrets.GCP_CREDENTIALS_BASE64 }}
-#      E2E_GKE_CLUSTER_NAME: ${{ secrets.GKE_CLUSTER_NAME }}
-#      E2E_GKE_CLUSTER_LOCATION: ${{ secrets.GKE_CLUSTER_LOCATION }}
-#      E2E_GKE_NETWORK_REGION: ${{ secrets.GKE_NETWORK_REGION }}
-#      E2E_GKE_PROJECT_ID:  ${{ secrets.GKE_PROJECT_ID }}
       E2E_CASTAI_URL:  ${{ secrets.CASTAI_URL }}
       E2E_CASTAI_TOKEN: ${{ secrets.CASTAI_TOKEN }}
       E2E_GKE_WORKSPACE: ${{ secrets.GKE_WORKSPACE }}
