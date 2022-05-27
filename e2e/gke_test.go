@@ -60,7 +60,7 @@ func TestTerraformGKEOnboarding(t *testing.T) {
 	r.Equal("ready", *node.JSON200.State.Phase)
 
 	planAfterApply := terraform.Plan(t, terraformOptions)
-	r.Contains("No changes. Your infrastructure matches the configuration.", planAfterApply, "Plan after apply shouldn't contain changes")
+	r.Contains(planAfterApply, "Your infrastructure matches the configuration.", "Plan after apply shouldn't contain changes")
 
 	fmt.Println("Test done")
 }
