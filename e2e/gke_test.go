@@ -19,7 +19,11 @@ func TestTerraformGKEOnboarding(t *testing.T) {
 
 	r := require.New(t)
 	ctx := context.Background()
-	defer terraform.Destroy(t, terraformOptions)
+	defer func() {
+		if !t.Failed() {
+			terraform.Destroy(t, terraformOptions)
+		}
+	}()
 	terraform.InitAndApply(t, terraformOptions)
 	clusterID := terraform.OutputRequired(t, terraformOptions, "castai_cluster_id")
 
