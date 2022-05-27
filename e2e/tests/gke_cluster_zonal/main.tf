@@ -11,6 +11,7 @@ provider "helm" {
 
 provider "castai" {
   api_token = var.castai_api_token
+  api_url  = var.castai_api_url
 }
 
 provider "google" {
@@ -37,7 +38,7 @@ module "castai-gke-cluster" {
   project_id         = var.project_id
   gke_cluster_name   = var.cluster_name
   gke_cluster_location = var.cluster_location
-
+  api_url = var.castai_api_url
   gke_credentials            = module.castai-gke-iam.private_key
   delete_nodes_on_disconnect = true
 
