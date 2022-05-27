@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"net/http"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -94,4 +95,27 @@ func resourceCastaiPublicCloudClusterDelete(ctx context.Context, data *schema.Re
 	}
 
 	return nil
+}
+
+func fetchClusterData(ctx context.Context, client *sdk.ClientWithResponses, clusterID string) (*sdk.ExternalClusterAPIGetClusterResponse, error) {
+	resp, err := client.ExternalClusterAPIGetClusterWithResponse(ctx, clusterID)
+	if err != nil {
+		return nil, err
+	}
+
+	if resp.StatusCode() == http.StatusNotFound {
+		log.Printf("[WARN] Removing cluster %s from state because it no longer exists in CAST AI", clusterID)
+		return nil, nil
+	}
+
+	if checkErr := sdk.CheckOKResponse(resp, err); checkErr != nil {
+		return nil, checkErr
+	}
+
+	if resp.JSON200 != nil && toString(resp.JSON200.Status) == sdk.ClusterStatusArchived {
+		log.Printf("[WARN] Removing cluster %s from state because it is archived in CAST AI", clusterID)
+		return nil, nil
+	}
+
+	return resp, nil
 }

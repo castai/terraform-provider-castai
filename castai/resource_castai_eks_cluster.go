@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"net/http"
 	"strings"
 	"time"
 
@@ -203,17 +202,14 @@ func resourceCastaiEKSClusterRead(ctx context.Context, data *schema.ResourceData
 
 	log.Printf("[INFO] Getting cluster information.")
 
-	resp, err := client.ExternalClusterAPIGetClusterWithResponse(ctx, data.Id())
+	resp, err := fetchClusterData(ctx, client, data.Id())
 	if err != nil {
 		return diag.FromErr(err)
-	} else if resp.StatusCode() == http.StatusNotFound {
-		log.Printf("[WARN] Removing cluster %s from state because it no longer exists in CAST AI", data.Id())
-		data.SetId("")
-		return nil
 	}
 
-	if checkErr := sdk.CheckOKResponse(resp, err); checkErr != nil {
-		return diag.FromErr(checkErr)
+	if resp == nil {
+		data.SetId("")
+		return nil
 	}
 
 	data.Set(FieldClusterCredentialsId, *resp.JSON200.CredentialsId)

@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"net/http"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -57,32 +56,32 @@ func resourceCastaiAKSCluster() *schema.Resource {
 				Type:             schema.TypeString,
 				Required:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
-				Description: "ID of the Azure subscription.",
+				Description:      "ID of the Azure subscription.",
 			},
 			FieldAKSClusterNodeResourceGroup: {
 				Type:             schema.TypeString,
 				Required:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
-				Description: "Azure resource group in which nodes are and will be created.",
+				Description:      "Azure resource group in which nodes are and will be created.",
 			},
 			FieldAKSClusterTenantID: {
 				Type:             schema.TypeString,
 				Required:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
-				Description: "Azure AD tenant ID from the used subscription.",
+				Description:      "Azure AD tenant ID from the used subscription.",
 			},
 			FieldAKSClusterClientID: {
 				Type:             schema.TypeString,
 				Required:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
-				Description: "Azure AD application ID that is created and used by CAST AI.",
+				Description:      "Azure AD application ID that is created and used by CAST AI.",
 			},
 			FieldAKSClusterClientSecret: {
 				Type:             schema.TypeString,
 				Required:         true,
 				Sensitive:        true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
-				Description: "Azure AD application password that will be used by CAST AI.",
+				Description:      "Azure AD application password that will be used by CAST AI.",
 			},
 			FieldClusterToken: {
 				Type:        schema.TypeString,
@@ -109,17 +108,14 @@ func resourceCastaiAKSClusterRead(ctx context.Context, data *schema.ResourceData
 
 	log.Printf("[INFO] Getting cluster information.")
 
-	resp, err := client.ExternalClusterAPIGetClusterWithResponse(ctx, data.Id())
+	resp, err := fetchClusterData(ctx, client, data.Id())
 	if err != nil {
 		return diag.FromErr(err)
-	} else if resp.StatusCode() == http.StatusNotFound {
-		log.Printf("[WARN] Removing cluster %s from state because it no longer exists in CAST AI", data.Id())
-		data.SetId("")
-		return nil
 	}
 
-	if checkErr := sdk.CheckOKResponse(resp, err); checkErr != nil {
-		return diag.FromErr(checkErr)
+	if resp == nil {
+		data.SetId("")
+		return nil
 	}
 
 	data.Set(FieldClusterCredentialsId, *resp.JSON200.CredentialsId)
