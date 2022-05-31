@@ -28,7 +28,7 @@ func TestTerraformGKEOnboarding(t *testing.T) {
 	r.NoError(err)
 	clusterID := terraform.OutputRequired(t, terraformOptions, "castai_cluster_id")
 
-	castAIClient, err := createClient(cfg.APIURL, cfg.Token)
+	castAIClient, err := sdk.CreateClient(cfg.APIURL, cfg.Token, "terraform-e2e")
 	r.NoError(err)
 
 	fmt.Println("Waiting for cluster to become ready in CAST AI console")
