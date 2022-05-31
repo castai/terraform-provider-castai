@@ -1,0 +1,45 @@
+name: Terraform E2E
+on:
+  repository_dispatch:
+    types: [ tf-e2e ]
+  workflow_run:
+    workflows: [ "Release" ]
+    types:
+      - completed
+    branches:
+      - 'master'
+
+concurrency:
+  group: e2e
+  cancel-in-progress: false
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      E2E_CASTAI_URL:  ${{ secrets.CASTAI_URL }}
+      E2E_CASTAI_TOKEN: ${{ secrets.CASTAI_TOKEN }}
+      E2E_GKE_WORKSPACE: ${{ secrets.GKE_WORKSPACE }}
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.18
+
+      - name: Cache Go modules
+        uses: actions/cache@v2
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-build-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-build-
+      - uses: hashicorp/setup-terraform@v2
+        with:
+          cli_config_credentials_token: ${{ secrets.TF_CLOUD_TOKEN }}
+          cli_config_credentials_hostname: app.terraform.io
+          terraform_wrapper: false
+      - name: Test
+        working-directory: e2e/
+        run: go test -v -test.timeout 0

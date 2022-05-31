@@ -16,3 +16,6 @@ examples/**/.kube/*
 examples/localdev/*
 !examples/localdev/main.tf.sample
 !examples/localdev/versions.tf
+e2e/**/.env
+e2e/**/local.auto.tfvars
+terraform.tfstate
