@@ -8,10 +8,6 @@ on:
       - completed
     branches:
       - 'master'
-  push:
-    paths-ignore:
-      - '**.md'
-      - 'examples/**'
 
 concurrency:
   group: e2e
