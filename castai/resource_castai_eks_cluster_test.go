@@ -144,12 +144,6 @@ func TestEKSClusterResourceReadContextArchived(t *testing.T) {
 		ExternalClusterAPIGetCluster(gomock.Any(), clusterId).
 		Return(&http.Response{StatusCode: 200, Body: body, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
 
-	mockClient.EXPECT().
-		GetAgentInstallScript(gomock.Any(), gomock.Any()).
-		Return(
-			&http.Response{StatusCode: 200, Body: io.NopCloser(bytes.NewReader([]byte(`curl -H "Authorization: Token 123`)))},
-			nil)
-
 	resource := resourceCastaiEKSCluster()
 
 	val := cty.ObjectVal(map[string]cty.Value{})
