@@ -24,13 +24,14 @@ func TestTerraformGKEOnboarding(t *testing.T) {
 			terraform.Destroy(t, terraformOptions)
 		}
 	}()
-	terraform.InitAndApply(t, terraformOptions)
+	_, err := terraform.InitAndApplyE(t, terraformOptions)
+	r.NoError(err)
 	clusterID := terraform.OutputRequired(t, terraformOptions, "castai_cluster_id")
 
 	castAIClient, err := createClient(cfg.APIURL, cfg.Token)
 	r.NoError(err)
 
-	fmt.Println("Waiting for cluster to become ready")
+	fmt.Println("Waiting for cluster to become ready in CAST AI console")
 	// Validate if cluster become ready in our console.
 	r.Eventuallyf(func() bool {
 		res, err := castAIClient.ExternalClusterAPIGetClusterWithResponse(ctx, clusterID)

@@ -7,7 +7,7 @@ import (
 type Config struct {
 	GKEWorkspace string `envconfig:"GKE_WORKSPACE"`
 	APIURL       string `envconfig:"CASTAI_URL" default:"https://api.cast.ai"`
-	Token        string `envconfig:"CASTAI_TOKEN" defualt:""`
+	Token        string `envconfig:"CASTAI_TOKEN"`
 }
 
 func Load() (*Config, error) {
