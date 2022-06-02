@@ -96,14 +96,7 @@ module "eks" {
     }
   }
 
-  aws_auth_roles = [
-    # ADD - give access to nodes spawned by cast.ai
-    {
-      rolearn  = module.castai-eks-role-iam.instance_profile_role_arn
-      username = "system:node:{{EC2PrivateDNSName}}"
-      groups   = ["system:bootstrappers", "system:nodes"]
-    },
-  ]
+  aws_auth_roles = local.aws_auth_roles
 
   create_aws_auth_configmap = true
   manage_aws_auth_configmap = true
@@ -135,4 +128,18 @@ resource "kubernetes_storage_class" "ebs_csi" {
   storage_provisioner = "ebs.csi.aws.com"
   reclaim_policy      = "Retain"
   volume_binding_mode = "WaitForFirstConsumer"
+}
+
+locals {
+  aws_auth_roles_cast = {
+    rolearn  = module.castai-eks-role-iam.instance_profile_role_arn
+    username = "system:node:{{EC2PrivateDNSName}}"
+    groups   = ["system:bootstrappers", "system:nodes"]
+  }
+
+  aws_auth_roles = concat([local.aws_auth_roles_cast], var.eks_user_role_arn != null ? [{
+    rolearn = var.eks_user_role_arn,
+    username = "admin"
+    groups = ["system:masters"]
+  }] : [])
 }

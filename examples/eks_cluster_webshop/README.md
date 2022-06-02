@@ -152,3 +152,57 @@ x-scheme=http
 BODY:
 -no body in request-% 
 ```
+
+# Allowing access to cluster other users (assume role)
+
+By default, full access to AWS EKS cluster is granted to a IAM user that created given cluster. If you want to add a new IAM user/role
+you need to edit [AWS auth-config map](https://docs.aws.amazon.com/eks/latest/userguide/add-user-role.html). This example contains simple path for 
+granting a role an admin access to cluster, you can add variable `eks_user_role_arn` which should have ARN for role that you want to grant access to cluster (this role has to have EKS cluster describe).
+
+## Example 
+
+In this example we will add access to EKS cluster for role `arn:aws:iam::123456789012:role/assume-test`. We need to add this role to `aws-auth`. Setting variable `eks_user_role_arn` will be enough in our case. 
+Then apply terraform changes.
+Example local.auto.tfvars
+```
+castai_api_token = "<API>"
+aws_account_id = "ID"
+aws_access_key_id = "KEY"
+aws_secret_access_key = "SECRET" 
+cluster_region = "eu-central-1"
+cluster_name = "my-cluster-25-04-1"
+delete_nodes_on_disconnect = true
+eks_user_role_arn = "arn:aws:iam::123456789012:role/-assume-test"
+```
+
+
+To validate if role was added please run [eksctl](https://docs.aws.amazon.com/eks/latest/userguide/eksctl.html)
+```shell
+ eksctl get iamidentitymapping --cluster <cluster_name> --region=<region>
+ 
+2022-06-02 10:13:01 [ℹ]  eksctl version 0.89.0
+2022-06-02 10:13:01 [ℹ]  using region <region>
+ARN											USERNAME			GROUPS					ACCOUNT
+arn:aws:iam::123456789012:role/castai-eks-instance-<cluster_name>			system:node:{{EC2PrivateDNSName}}system:bootstrappers,system:nodes
+arn:aws:iam::123456789012:role/default_node_group-node-group-aa   system:node:{{EC2PrivateDNSName}}system:bootstrappers,system:nodes
+arn:aws:iam::123456789012:role/worker-group-1-node-group-aa system:node:{{EC2PrivateDNSName}}system:bootstrappers,system:nodes
+arn:aws:iam::123456789012:role/assume-test					admin				system:masters # <- role for our user
+```
+
+### Testing 
+
+1. Get env variables for role assume 
+```shell
+aws sts assume-role --role-arn "arn:aws:iam::123456789012:role/assume-test" --role-session-name AWS-Session
+```
+2. Export `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_SESSION_TOKEN`
+3. Validate if you have correct role for aws cli
+```shell
+{
+    "UserId": "ABCDEFGHIJKLM:AWS-Session",
+    "Account": "123456789012",
+    "Arn": "arn:aws:sts::123456789012:assumed-role/assume-test/AWS-Session"
+}
+(
+```
+4. `kubectl get nodes` should work
