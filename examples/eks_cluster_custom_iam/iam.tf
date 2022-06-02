@@ -63,6 +63,11 @@ resource "aws_iam_role" "assume_role" {
         Principal = {
           AWS = data.castai_eks_user_arn.castai_user_arn.arn
         }
+        Condition = {
+          StringEquals = {
+            "sts:ExternalId" = data.castai_eks_clusterid.castai_cluster_id.id
+          }
+        }
       },
     ]
   })
@@ -71,8 +76,7 @@ resource "aws_iam_role" "assume_role" {
 # Attach readonly policies to role
 resource "aws_iam_role_policy_attachment" "assume_role_readonly_policy_attachment" {
   for_each = toset([
-    "arn:aws:iam::aws:policy/AmazonEC2ReadOnlyAccess",
-    "arn:aws:iam::aws:policy/IAMReadOnlyAccess",
+    "arn:aws:iam::aws:policy/AmazonEC2ReadOnlyAccess"
   ])
   role       = aws_iam_role.assume_role.name
   policy_arn = each.value
@@ -97,14 +101,26 @@ resource "aws_iam_role_policy" "inline_role_policy" {
           }
         }
       },
+      # Needed to validate permissions
+      {
+        "Sid" : "IAMPermissions",
+        "Effect" : "Allow",
+        "Action" : [
+          "iam:GetRole",
+          "iam:SimulatePrincipalPolicy",
+          "iam:GetInstanceProfile"
+        ],
+        "Resource" : [
+          "arn:aws:iam::${local.account_id}:role/${aws_iam_role.assume_role.name}",
+          "arn:aws:iam::${local.account_id}:instance-profile/${aws_iam_instance_profile.castai_instance_profile.name}"
+        ]
+      },
       # Needed to tag non CAST nodes
       {
         Sid    = "NonResourcePermissions",
         Effect = "Allow",
         Action = [
           "ec2:CreateTags",
-          # Necessary only if public SSH key for CAST nodes will be used
-          "ec2:ImportKeyPair",
         ],
         Resource = "*"
       },
@@ -116,7 +132,8 @@ resource "aws_iam_role_policy" "inline_role_policy" {
         Resource : "arn:aws:ec2:${var.cluster_region}:${local.account_id}:instance/*",
         Condition : {
           StringEquals : {
-            "aws:RequestTag/kubernetes.io/cluster/${var.cluster_name}" : "owned"
+            "aws:RequestTag/kubernetes.io/cluster/${var.cluster_name}" : "owned",
+            "aws:RequestTag/cast:cluster-id" : data.castai_eks_clusterid.castai_cluster_id.id,
           }
         }
       },
@@ -140,15 +157,12 @@ resource "aws_iam_role_policy" "inline_role_policy" {
           "ec2:TerminateInstances",
           "ec2:StartInstances",
           "ec2:StopInstances",
-          "ec2:CreateTags"
         ],
         Resource : "arn:aws:ec2:${var.cluster_region}:${local.account_id}:instance/*",
         Condition : {
           StringEquals : {
-            "ec2:ResourceTag/kubernetes.io/cluster/${var.cluster_name}" : [
-              "owned",
-              "shared"
-            ]
+            "ec2:ResourceTag/kubernetes.io/cluster/${var.cluster_name}" : ["owned", "shared"],
+            "ec2:ResourceTag/cast:cluster-id" : data.castai_eks_clusterid.castai_cluster_id.id,
           }
         }
       },
@@ -166,24 +180,9 @@ resource "aws_iam_role_policy" "inline_role_policy" {
           [
             "arn:aws:ec2:*:${local.account_id}:network-interface/*",
             "arn:aws:ec2:*:${local.account_id}:volume/*",
-            "arn:aws:ec2:*:${local.account_id}:key-pair/*",
             "arn:aws:ec2:*::image/*",
           ]
         ),
-      },
-      # Restrict detached nic removal to cluster vpc
-      {
-        Sid : "VpcRestrictedActions",
-        Effect : "Allow",
-        Action : [
-          "ec2:DeleteNetworkInterface"
-        ],
-        Resource : "arn:aws:ec2:${var.cluster_region}:${local.account_id}:network-interface/*",
-        Condition : {
-          "StringEquals" : {
-            "ec2:Vpc" : "arn:aws:ec2:${var.cluster_region}:${local.account_id}:vpc/${module.vpc.vpc_id}"
-          }
-        }
       },
       # Restrict scaling down autoscaling groups to specific cluster
       {
