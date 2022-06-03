@@ -155,9 +155,8 @@ BODY:
 
 # Allowing access to cluster for other users (assume role)
 
-By default, full access to AWS EKS cluster is granted to a IAM user that created given cluster. If you want to add a new IAM user/role
-you need to edit [AWS auth-config map](https://docs.aws.amazon.com/eks/latest/userguide/add-user-role.html). This example contains simple path for 
-granting a role an admin access to cluster, you can add variable `eks_user_role_arn` which should have ARN for role that you want to grant access to cluster (this role has to have EKS cluster describe).
+By default, full access to AWS EKS cluster is granted to a IAM user that created given cluster. If you want to add a new IAM user/role you need to edit [AWS auth-config map](https://docs.aws.amazon.com/eks/latest/userguide/add-user-role.html). 
+This example contains simple path for granting a role an admin access to cluster, you can add variable `eks_user_role_arn` which should have ARN for role that you want to grant access to cluster (this role has to have EKS cluster describe).
 
 ## Example 
 
@@ -191,13 +190,21 @@ arn:aws:iam::123456789012:role/assume-test					admin				system:masters # <- role
 
 ### Testing 
 
+Example based on https://aws.amazon.com/premiumsupport/knowledge-center/iam-assume-role-cli/
+
 1. Get env variables for role assume 
 ```shell
 aws sts assume-role --role-arn "arn:aws:iam::123456789012:role/assume-test" --role-session-name AWS-Session
 ```
-2. Export `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_SESSION_TOKEN`
+2. Export `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_SESSION_TOKEN` get values from assume-role command
+```shell
+   export AWS_ACCESS_KEY_ID=RoleAccessKeyID
+   export AWS_SECRET_ACCESS_KEY=RoleSecretKey
+   export AWS_SESSION_TOKEN=RoleSessionToken
+```
 3. Validate if you have correct role for aws cli
 ```shell
+ aws sts get-caller-identity
 {
     "UserId": "ABCDEFGHIJKLM:AWS-Session",
     "Account": "123456789012",
