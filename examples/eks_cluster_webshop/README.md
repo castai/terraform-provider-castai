@@ -153,7 +153,7 @@ BODY:
 -no body in request-% 
 ```
 
-# Allowing access to cluster other users (assume role)
+# Allowing access to cluster for other users (assume role)
 
 By default, full access to AWS EKS cluster is granted to a IAM user that created given cluster. If you want to add a new IAM user/role
 you need to edit [AWS auth-config map](https://docs.aws.amazon.com/eks/latest/userguide/add-user-role.html). This example contains simple path for 
