@@ -46,3 +46,10 @@ variable "delete_nodes_on_disconnect" {
   description = "Optional parameter, if set to true - CAST AI provisioned nodes will be deleted from EC2 on cluster disconnection."
   default     = false
 }
+
+variable "eks_user_role_arn" {
+  type = string
+  description = "Optional role arn that should be added to aws-auth Configmap for users that should have access to EKS cluster. More info: https://docs.aws.amazon.com/eks/latest/userguide/add-user-role.html"
+
+  default = null
+}
