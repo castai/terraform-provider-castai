@@ -171,7 +171,7 @@ aws_secret_access_key = "SECRET"
 cluster_region = "eu-central-1"
 cluster_name = "my-cluster-25-04-1"
 delete_nodes_on_disconnect = true
-eks_user_role_arn = "arn:aws:iam::123456789012:role/-assume-test"
+eks_user_role_arn = "arn:aws:iam::123456789012:role/assume-test"
 ```
 
 
