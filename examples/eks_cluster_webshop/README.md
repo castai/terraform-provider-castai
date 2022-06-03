@@ -205,4 +205,4 @@ aws sts assume-role --role-arn "arn:aws:iam::123456789012:role/assume-test" --ro
 }
 (
 ```
-4. `kubectl get nodes` should work
+4. Verify configuration by running `kubectl get nodes`.
