@@ -33,7 +33,7 @@ module "castai-gke-cluster" {
   autoscaler_policies_json = <<-EOT
     {
         "enabled": true,
-        "isScopedMode": true,
+        "isScopedMode": false,
         "unschedulablePods": {
             "enabled": true
         },
