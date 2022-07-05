@@ -1,6 +1,6 @@
 variable "castai_api_token" {
   type        = string
-  description = "Name of the AKS cluster, resources will be created for."
+  description = "CAST AI API token used for user authentication"
 }
 
 variable "aks_cluster_name" {
