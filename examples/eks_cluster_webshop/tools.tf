@@ -27,24 +27,13 @@ resource "helm_release" "loki" {
   create_namespace = true
   cleanup_on_fail  = true
   wait             = true
-  version          = "1.0.0"
+  version          = "1.8.0"
 
   values = [
-    file("./helm-values/loki.yaml")
+    templatefile("./helm-values/loki.yaml.tpl", { bucket_name = var.loki_bucket_name, s3_path = "s3://${var.cluster_region}", loki_role_arn = module.eks_iam_role_s3.service_account_role_arn})
   ]
 
   depends_on = [helm_release.kube_prometheus_stack]
-}
-
-resource "helm_release" "promtail" {
-  name             = "promtail"
-  repository       = "https://grafana.github.io/helm-charts"
-  chart            = "promtail"
-  namespace        = "tools"
-  create_namespace = true
-  cleanup_on_fail  = true
-  wait             = true
-  version          = "4.2.0"
 }
 
 resource "helm_release" "cert_manager" {

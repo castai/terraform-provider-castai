@@ -40,8 +40,8 @@ module "eks" {
     default_node_group = {}
     worker-group-1 = {
       instance_type = "t3.medium"
-      max_size      = 3
-      min_size      = 2
+      max_size      = 5
+      min_size      = 3
       desired_size  = 2
       eni_delete    = "true"
     },
