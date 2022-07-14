@@ -264,6 +264,7 @@ func updateClusterSettings(ctx context.Context, data *schema.ResourceData, clien
 		FieldEKSClusterOverrideSecurityGroups,
 		FieldEKSClusterTags,
 		FieldClusterCredentialsId,
+		FieldClusterSSHPublicKey,
 	) {
 		log.Printf("[INFO] Nothing to update in cluster setttings.")
 		return nil
