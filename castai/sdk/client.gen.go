@@ -123,6 +123,18 @@ type ClientInterface interface {
 
 	PlanClusterPrice(ctx context.Context, body PlanClusterPriceJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// CostReportAPIGetClusterCostHistory2 request
+	CostReportAPIGetClusterCostHistory2(ctx context.Context, clusterId string, params *CostReportAPIGetClusterCostHistory2Params, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// CostReportAPIGetClusterCostReport2 request
+	CostReportAPIGetClusterCostReport2(ctx context.Context, clusterId string, params *CostReportAPIGetClusterCostReport2Params, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// CostReportAPIGetClusterWorkloadReport request
+	CostReportAPIGetClusterWorkloadReport(ctx context.Context, clusterId string, params *CostReportAPIGetClusterWorkloadReportParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// CostReportAPIGetClustersDailyCostReport request
+	CostReportAPIGetClustersDailyCostReport(ctx context.Context, params *CostReportAPIGetClustersDailyCostReportParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// ListCloudCredentials request
 	ListCloudCredentials(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -211,11 +223,14 @@ type ClientInterface interface {
 	// ArchiveCluster request
 	ArchiveCluster(ctx context.Context, clusterId ClusterId, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// GetCostHistory request
-	GetCostHistory(ctx context.Context, clusterId ClusterId, params *GetCostHistoryParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// CostReportAPIGetClusterCostHistory request
+	CostReportAPIGetClusterCostHistory(ctx context.Context, clusterId string, params *CostReportAPIGetClusterCostHistoryParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// GetCostReport request
-	GetCostReport(ctx context.Context, clusterId ClusterId, params *GetCostReportParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// CostReportAPIGetClusterCostReport request
+	CostReportAPIGetClusterCostReport(ctx context.Context, clusterId string, params *CostReportAPIGetClusterCostReportParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// CostReportAPIGetSavingsRecommendation2 request
+	CostReportAPIGetSavingsRecommendation2(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// GetClusterFeedbackEvents request
 	GetClusterFeedbackEvents(ctx context.Context, clusterId ClusterId, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -225,6 +240,9 @@ type ClientInterface interface {
 
 	// GetClusterIngressController request
 	GetClusterIngressController(ctx context.Context, clusterId ClusterId, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// InventoryBlacklistAPIGetClusterInventoryBlacklist request
+	InventoryBlacklistAPIGetClusterInventoryBlacklist(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// GetClusterKubeconfig request
 	GetClusterKubeconfig(ctx context.Context, clusterId ClusterId, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -344,7 +362,7 @@ type ClientInterface interface {
 	GetWorkloads(ctx context.Context, clusterId ClusterId, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// ExternalClusterAPIListClusters request
-	ExternalClusterAPIListClusters(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
+	ExternalClusterAPIListClusters(ctx context.Context, params *ExternalClusterAPIListClustersParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// ExternalClusterAPIRegisterCluster request  with any body
 	ExternalClusterAPIRegisterClusterWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -376,16 +394,13 @@ type ClientInterface interface {
 
 	ExternalClusterAPIDisconnectCluster(ctx context.Context, clusterId string, body ExternalClusterAPIDisconnectClusterJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// GetEstimatedSavings request
-	GetEstimatedSavings(ctx context.Context, clusterId ClusterId, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// CostReportAPIGetSavingsRecommendation request
+	CostReportAPIGetSavingsRecommendation(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// ExternalClusterAPIHandleCloudEvent request  with any body
 	ExternalClusterAPIHandleCloudEventWithBody(ctx context.Context, clusterId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	ExternalClusterAPIHandleCloudEvent(ctx context.Context, clusterId string, body ExternalClusterAPIHandleCloudEventJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
-
-	// ExternalClusterAPIGetKubeconfig request
-	ExternalClusterAPIGetKubeconfig(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// ExternalClusterAPIListNodes request
 	ExternalClusterAPIListNodes(ctx context.Context, clusterId string, params *ExternalClusterAPIListNodesParams, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -475,6 +490,21 @@ type ClientInterface interface {
 
 	// ExternalClusterAPIGetCredentialsScriptTemplate request
 	ExternalClusterAPIGetCredentialsScriptTemplate(ctx context.Context, provider string, params *ExternalClusterAPIGetCredentialsScriptTemplateParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// InsightsAPIGetLatestReport request
+	InsightsAPIGetLatestReport(ctx context.Context, params *InsightsAPIGetLatestReportParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// InsightsAPIGetCheckDetails request
+	InsightsAPIGetCheckDetails(ctx context.Context, ruleId string, params *InsightsAPIGetCheckDetailsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// InsightsAPIGetReportFilters request
+	InsightsAPIGetReportFilters(ctx context.Context, params *InsightsAPIGetReportFiltersParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// InsightsAPIScheduleScan request
+	InsightsAPIScheduleScan(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// InsightsAPIGetChecksHistory request
+	InsightsAPIGetChecksHistory(ctx context.Context, clusterId string, params *InsightsAPIGetChecksHistoryParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 }
 
 func (c *Client) ListAddons(ctx context.Context, params *ListAddonsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
@@ -600,6 +630,50 @@ func (c *Client) PlanClusterPriceWithBody(ctx context.Context, contentType strin
 
 func (c *Client) PlanClusterPrice(ctx context.Context, body PlanClusterPriceJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewPlanClusterPriceRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) CostReportAPIGetClusterCostHistory2(ctx context.Context, clusterId string, params *CostReportAPIGetClusterCostHistory2Params, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCostReportAPIGetClusterCostHistory2Request(c.Server, clusterId, params)
+	if err != nil {
+		return nil, err
+	}
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) CostReportAPIGetClusterCostReport2(ctx context.Context, clusterId string, params *CostReportAPIGetClusterCostReport2Params, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCostReportAPIGetClusterCostReport2Request(c.Server, clusterId, params)
+	if err != nil {
+		return nil, err
+	}
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) CostReportAPIGetClusterWorkloadReport(ctx context.Context, clusterId string, params *CostReportAPIGetClusterWorkloadReportParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCostReportAPIGetClusterWorkloadReportRequest(c.Server, clusterId, params)
+	if err != nil {
+		return nil, err
+	}
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) CostReportAPIGetClustersDailyCostReport(ctx context.Context, params *CostReportAPIGetClustersDailyCostReportParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCostReportAPIGetClustersDailyCostReportRequest(c.Server, params)
 	if err != nil {
 		return nil, err
 	}
@@ -972,8 +1046,8 @@ func (c *Client) ArchiveCluster(ctx context.Context, clusterId ClusterId, reqEdi
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetCostHistory(ctx context.Context, clusterId ClusterId, params *GetCostHistoryParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewGetCostHistoryRequest(c.Server, clusterId, params)
+func (c *Client) CostReportAPIGetClusterCostHistory(ctx context.Context, clusterId string, params *CostReportAPIGetClusterCostHistoryParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCostReportAPIGetClusterCostHistoryRequest(c.Server, clusterId, params)
 	if err != nil {
 		return nil, err
 	}
@@ -983,8 +1057,19 @@ func (c *Client) GetCostHistory(ctx context.Context, clusterId ClusterId, params
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetCostReport(ctx context.Context, clusterId ClusterId, params *GetCostReportParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewGetCostReportRequest(c.Server, clusterId, params)
+func (c *Client) CostReportAPIGetClusterCostReport(ctx context.Context, clusterId string, params *CostReportAPIGetClusterCostReportParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCostReportAPIGetClusterCostReportRequest(c.Server, clusterId, params)
+	if err != nil {
+		return nil, err
+	}
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) CostReportAPIGetSavingsRecommendation2(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCostReportAPIGetSavingsRecommendation2Request(c.Server, clusterId)
 	if err != nil {
 		return nil, err
 	}
@@ -1018,6 +1103,17 @@ func (c *Client) GetClusterHealth(ctx context.Context, clusterId ClusterId, reqE
 
 func (c *Client) GetClusterIngressController(ctx context.Context, clusterId ClusterId, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetClusterIngressControllerRequest(c.Server, clusterId)
+	if err != nil {
+		return nil, err
+	}
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) InventoryBlacklistAPIGetClusterInventoryBlacklist(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewInventoryBlacklistAPIGetClusterInventoryBlacklistRequest(c.Server, clusterId)
 	if err != nil {
 		return nil, err
 	}
@@ -1489,8 +1585,8 @@ func (c *Client) GetWorkloads(ctx context.Context, clusterId ClusterId, reqEdito
 	return c.Client.Do(req)
 }
 
-func (c *Client) ExternalClusterAPIListClusters(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewExternalClusterAPIListClustersRequest(c.Server)
+func (c *Client) ExternalClusterAPIListClusters(ctx context.Context, params *ExternalClusterAPIListClustersParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewExternalClusterAPIListClustersRequest(c.Server, params)
 	if err != nil {
 		return nil, err
 	}
@@ -1621,8 +1717,8 @@ func (c *Client) ExternalClusterAPIDisconnectCluster(ctx context.Context, cluste
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetEstimatedSavings(ctx context.Context, clusterId ClusterId, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewGetEstimatedSavingsRequest(c.Server, clusterId)
+func (c *Client) CostReportAPIGetSavingsRecommendation(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCostReportAPIGetSavingsRecommendationRequest(c.Server, clusterId)
 	if err != nil {
 		return nil, err
 	}
@@ -1645,17 +1741,6 @@ func (c *Client) ExternalClusterAPIHandleCloudEventWithBody(ctx context.Context,
 
 func (c *Client) ExternalClusterAPIHandleCloudEvent(ctx context.Context, clusterId string, body ExternalClusterAPIHandleCloudEventJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewExternalClusterAPIHandleCloudEventRequest(c.Server, clusterId, body)
-	if err != nil {
-		return nil, err
-	}
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
-func (c *Client) ExternalClusterAPIGetKubeconfig(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewExternalClusterAPIGetKubeconfigRequest(c.Server, clusterId)
 	if err != nil {
 		return nil, err
 	}
@@ -2008,6 +2093,61 @@ func (c *Client) GetUsageReport(ctx context.Context, params *GetUsageReportParam
 
 func (c *Client) ExternalClusterAPIGetCredentialsScriptTemplate(ctx context.Context, provider string, params *ExternalClusterAPIGetCredentialsScriptTemplateParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewExternalClusterAPIGetCredentialsScriptTemplateRequest(c.Server, provider, params)
+	if err != nil {
+		return nil, err
+	}
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) InsightsAPIGetLatestReport(ctx context.Context, params *InsightsAPIGetLatestReportParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewInsightsAPIGetLatestReportRequest(c.Server, params)
+	if err != nil {
+		return nil, err
+	}
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) InsightsAPIGetCheckDetails(ctx context.Context, ruleId string, params *InsightsAPIGetCheckDetailsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewInsightsAPIGetCheckDetailsRequest(c.Server, ruleId, params)
+	if err != nil {
+		return nil, err
+	}
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) InsightsAPIGetReportFilters(ctx context.Context, params *InsightsAPIGetReportFiltersParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewInsightsAPIGetReportFiltersRequest(c.Server, params)
+	if err != nil {
+		return nil, err
+	}
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) InsightsAPIScheduleScan(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewInsightsAPIScheduleScanRequest(c.Server)
+	if err != nil {
+		return nil, err
+	}
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) InsightsAPIGetChecksHistory(ctx context.Context, clusterId string, params *InsightsAPIGetChecksHistoryParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewInsightsAPIGetChecksHistoryRequest(c.Server, clusterId, params)
 	if err != nil {
 		return nil, err
 	}
@@ -2799,6 +2939,279 @@ func NewPlanClusterPriceRequestWithBody(server string, contentType string, body 
 	}
 
 	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewCostReportAPIGetClusterCostHistory2Request generates requests for CostReportAPIGetClusterCostHistory2
+func NewCostReportAPIGetClusterCostHistory2Request(server string, clusterId string, params *CostReportAPIGetClusterCostHistory2Params) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParam("simple", false, "clusterId", clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	queryUrl, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	basePath := fmt.Sprintf("/v1/cost-reports/clusters/%s/history", pathParam0)
+	if basePath[0] == '/' {
+		basePath = basePath[1:]
+	}
+
+	queryUrl, err = queryUrl.Parse(basePath)
+	if err != nil {
+		return nil, err
+	}
+
+	queryValues := queryUrl.Query()
+
+	if queryFrag, err := runtime.StyleParam("form", true, "fromDate", params.FromDate); err != nil {
+		return nil, err
+	} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+		return nil, err
+	} else {
+		for k, v := range parsed {
+			for _, v2 := range v {
+				queryValues.Add(k, v2)
+			}
+		}
+	}
+
+	if queryFrag, err := runtime.StyleParam("form", true, "toDate", params.ToDate); err != nil {
+		return nil, err
+	} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+		return nil, err
+	} else {
+		for k, v := range parsed {
+			for _, v2 := range v {
+				queryValues.Add(k, v2)
+			}
+		}
+	}
+
+	queryUrl.RawQuery = queryValues.Encode()
+
+	req, err := http.NewRequest("GET", queryUrl.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewCostReportAPIGetClusterCostReport2Request generates requests for CostReportAPIGetClusterCostReport2
+func NewCostReportAPIGetClusterCostReport2Request(server string, clusterId string, params *CostReportAPIGetClusterCostReport2Params) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParam("simple", false, "clusterId", clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	queryUrl, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	basePath := fmt.Sprintf("/v1/cost-reports/clusters/%s/overview", pathParam0)
+	if basePath[0] == '/' {
+		basePath = basePath[1:]
+	}
+
+	queryUrl, err = queryUrl.Parse(basePath)
+	if err != nil {
+		return nil, err
+	}
+
+	queryValues := queryUrl.Query()
+
+	if queryFrag, err := runtime.StyleParam("form", true, "startTime", params.StartTime); err != nil {
+		return nil, err
+	} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+		return nil, err
+	} else {
+		for k, v := range parsed {
+			for _, v2 := range v {
+				queryValues.Add(k, v2)
+			}
+		}
+	}
+
+	if queryFrag, err := runtime.StyleParam("form", true, "endTime", params.EndTime); err != nil {
+		return nil, err
+	} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+		return nil, err
+	} else {
+		for k, v := range parsed {
+			for _, v2 := range v {
+				queryValues.Add(k, v2)
+			}
+		}
+	}
+
+	if params.StepSeconds != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "stepSeconds", *params.StepSeconds); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	queryUrl.RawQuery = queryValues.Encode()
+
+	req, err := http.NewRequest("GET", queryUrl.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewCostReportAPIGetClusterWorkloadReportRequest generates requests for CostReportAPIGetClusterWorkloadReport
+func NewCostReportAPIGetClusterWorkloadReportRequest(server string, clusterId string, params *CostReportAPIGetClusterWorkloadReportParams) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParam("simple", false, "clusterId", clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	queryUrl, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	basePath := fmt.Sprintf("/v1/cost-reports/clusters/%s/workload-costs", pathParam0)
+	if basePath[0] == '/' {
+		basePath = basePath[1:]
+	}
+
+	queryUrl, err = queryUrl.Parse(basePath)
+	if err != nil {
+		return nil, err
+	}
+
+	queryValues := queryUrl.Query()
+
+	if queryFrag, err := runtime.StyleParam("form", true, "startTime", params.StartTime); err != nil {
+		return nil, err
+	} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+		return nil, err
+	} else {
+		for k, v := range parsed {
+			for _, v2 := range v {
+				queryValues.Add(k, v2)
+			}
+		}
+	}
+
+	if queryFrag, err := runtime.StyleParam("form", true, "endTime", params.EndTime); err != nil {
+		return nil, err
+	} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+		return nil, err
+	} else {
+		for k, v := range parsed {
+			for _, v2 := range v {
+				queryValues.Add(k, v2)
+			}
+		}
+	}
+
+	if params.StepSeconds != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "stepSeconds", *params.StepSeconds); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	queryUrl.RawQuery = queryValues.Encode()
+
+	req, err := http.NewRequest("GET", queryUrl.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewCostReportAPIGetClustersDailyCostReportRequest generates requests for CostReportAPIGetClustersDailyCostReport
+func NewCostReportAPIGetClustersDailyCostReportRequest(server string, params *CostReportAPIGetClustersDailyCostReportParams) (*http.Request, error) {
+	var err error
+
+	queryUrl, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	basePath := fmt.Sprintf("/v1/cost-reports/organization/daily-cost")
+	if basePath[0] == '/' {
+		basePath = basePath[1:]
+	}
+
+	queryUrl, err = queryUrl.Parse(basePath)
+	if err != nil {
+		return nil, err
+	}
+
+	queryValues := queryUrl.Query()
+
+	if queryFrag, err := runtime.StyleParam("form", true, "startTime", params.StartTime); err != nil {
+		return nil, err
+	} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+		return nil, err
+	} else {
+		for k, v := range parsed {
+			for _, v2 := range v {
+				queryValues.Add(k, v2)
+			}
+		}
+	}
+
+	if queryFrag, err := runtime.StyleParam("form", true, "endTime", params.EndTime); err != nil {
+		return nil, err
+	} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+		return nil, err
+	} else {
+		for k, v := range parsed {
+			for _, v2 := range v {
+				queryValues.Add(k, v2)
+			}
+		}
+	}
+
+	queryUrl.RawQuery = queryValues.Encode()
+
+	req, err := http.NewRequest("GET", queryUrl.String(), nil)
+	if err != nil {
+		return nil, err
+	}
 
 	return req, nil
 }
@@ -3714,8 +4127,8 @@ func NewArchiveClusterRequest(server string, clusterId ClusterId) (*http.Request
 	return req, nil
 }
 
-// NewGetCostHistoryRequest generates requests for GetCostHistory
-func NewGetCostHistoryRequest(server string, clusterId ClusterId, params *GetCostHistoryParams) (*http.Request, error) {
+// NewCostReportAPIGetClusterCostHistoryRequest generates requests for CostReportAPIGetClusterCostHistory
+func NewCostReportAPIGetClusterCostHistoryRequest(server string, clusterId string, params *CostReportAPIGetClusterCostHistoryParams) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -3742,36 +4155,28 @@ func NewGetCostHistoryRequest(server string, clusterId ClusterId, params *GetCos
 
 	queryValues := queryUrl.Query()
 
-	if params.FromDate != nil {
-
-		if queryFrag, err := runtime.StyleParam("form", true, "fromDate", *params.FromDate); err != nil {
-			return nil, err
-		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
-			return nil, err
-		} else {
-			for k, v := range parsed {
-				for _, v2 := range v {
-					queryValues.Add(k, v2)
-				}
+	if queryFrag, err := runtime.StyleParam("form", true, "fromDate", params.FromDate); err != nil {
+		return nil, err
+	} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+		return nil, err
+	} else {
+		for k, v := range parsed {
+			for _, v2 := range v {
+				queryValues.Add(k, v2)
 			}
 		}
-
 	}
 
-	if params.ToDate != nil {
-
-		if queryFrag, err := runtime.StyleParam("form", true, "toDate", *params.ToDate); err != nil {
-			return nil, err
-		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
-			return nil, err
-		} else {
-			for k, v := range parsed {
-				for _, v2 := range v {
-					queryValues.Add(k, v2)
-				}
+	if queryFrag, err := runtime.StyleParam("form", true, "toDate", params.ToDate); err != nil {
+		return nil, err
+	} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+		return nil, err
+	} else {
+		for k, v := range parsed {
+			for _, v2 := range v {
+				queryValues.Add(k, v2)
 			}
 		}
-
 	}
 
 	queryUrl.RawQuery = queryValues.Encode()
@@ -3784,8 +4189,8 @@ func NewGetCostHistoryRequest(server string, clusterId ClusterId, params *GetCos
 	return req, nil
 }
 
-// NewGetCostReportRequest generates requests for GetCostReport
-func NewGetCostReportRequest(server string, clusterId ClusterId, params *GetCostReportParams) (*http.Request, error) {
+// NewCostReportAPIGetClusterCostReportRequest generates requests for CostReportAPIGetClusterCostReport
+func NewCostReportAPIGetClusterCostReportRequest(server string, clusterId string, params *CostReportAPIGetClusterCostReportParams) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -3812,22 +4217,6 @@ func NewGetCostReportRequest(server string, clusterId ClusterId, params *GetCost
 
 	queryValues := queryUrl.Query()
 
-	if params.StepSeconds != nil {
-
-		if queryFrag, err := runtime.StyleParam("form", true, "stepSeconds", *params.StepSeconds); err != nil {
-			return nil, err
-		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
-			return nil, err
-		} else {
-			for k, v := range parsed {
-				for _, v2 := range v {
-					queryValues.Add(k, v2)
-				}
-			}
-		}
-
-	}
-
 	if queryFrag, err := runtime.StyleParam("form", true, "startTime", params.StartTime); err != nil {
 		return nil, err
 	} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
@@ -3852,7 +4241,57 @@ func NewGetCostReportRequest(server string, clusterId ClusterId, params *GetCost
 		}
 	}
 
+	if params.StepSeconds != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "stepSeconds", *params.StepSeconds); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
 	queryUrl.RawQuery = queryValues.Encode()
+
+	req, err := http.NewRequest("GET", queryUrl.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewCostReportAPIGetSavingsRecommendation2Request generates requests for CostReportAPIGetSavingsRecommendation2
+func NewCostReportAPIGetSavingsRecommendation2Request(server string, clusterId string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParam("simple", false, "clusterId", clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	queryUrl, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	basePath := fmt.Sprintf("/v1/kubernetes/clusters/%s/estimated-savings", pathParam0)
+	if basePath[0] == '/' {
+		basePath = basePath[1:]
+	}
+
+	queryUrl, err = queryUrl.Parse(basePath)
+	if err != nil {
+		return nil, err
+	}
 
 	req, err := http.NewRequest("GET", queryUrl.String(), nil)
 	if err != nil {
@@ -3947,6 +4386,40 @@ func NewGetClusterIngressControllerRequest(server string, clusterId ClusterId) (
 	}
 
 	basePath := fmt.Sprintf("/v1/kubernetes/clusters/%s/ingress-controller", pathParam0)
+	if basePath[0] == '/' {
+		basePath = basePath[1:]
+	}
+
+	queryUrl, err = queryUrl.Parse(basePath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryUrl.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewInventoryBlacklistAPIGetClusterInventoryBlacklistRequest generates requests for InventoryBlacklistAPIGetClusterInventoryBlacklist
+func NewInventoryBlacklistAPIGetClusterInventoryBlacklistRequest(server string, clusterId string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParam("simple", false, "clusterId", clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	queryUrl, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	basePath := fmt.Sprintf("/v1/kubernetes/clusters/%s/inventory-blacklist", pathParam0)
 	if basePath[0] == '/' {
 		basePath = basePath[1:]
 	}
@@ -5488,7 +5961,7 @@ func NewGetWorkloadsRequest(server string, clusterId ClusterId) (*http.Request, 
 }
 
 // NewExternalClusterAPIListClustersRequest generates requests for ExternalClusterAPIListClusters
-func NewExternalClusterAPIListClustersRequest(server string) (*http.Request, error) {
+func NewExternalClusterAPIListClustersRequest(server string, params *ExternalClusterAPIListClustersParams) (*http.Request, error) {
 	var err error
 
 	queryUrl, err := url.Parse(server)
@@ -5505,6 +5978,26 @@ func NewExternalClusterAPIListClustersRequest(server string) (*http.Request, err
 	if err != nil {
 		return nil, err
 	}
+
+	queryValues := queryUrl.Query()
+
+	if params.IncludeMetrics != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "includeMetrics", *params.IncludeMetrics); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	queryUrl.RawQuery = queryValues.Encode()
 
 	req, err := http.NewRequest("GET", queryUrl.String(), nil)
 	if err != nil {
@@ -5838,8 +6331,8 @@ func NewExternalClusterAPIDisconnectClusterRequestWithBody(server string, cluste
 	return req, nil
 }
 
-// NewGetEstimatedSavingsRequest generates requests for GetEstimatedSavings
-func NewGetEstimatedSavingsRequest(server string, clusterId ClusterId) (*http.Request, error) {
+// NewCostReportAPIGetSavingsRecommendationRequest generates requests for CostReportAPIGetSavingsRecommendation
+func NewCostReportAPIGetSavingsRecommendationRequest(server string, clusterId string) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -5915,40 +6408,6 @@ func NewExternalClusterAPIHandleCloudEventRequestWithBody(server string, cluster
 	}
 
 	req.Header.Add("Content-Type", contentType)
-
-	return req, nil
-}
-
-// NewExternalClusterAPIGetKubeconfigRequest generates requests for ExternalClusterAPIGetKubeconfig
-func NewExternalClusterAPIGetKubeconfigRequest(server string, clusterId string) (*http.Request, error) {
-	var err error
-
-	var pathParam0 string
-
-	pathParam0, err = runtime.StyleParam("simple", false, "clusterId", clusterId)
-	if err != nil {
-		return nil, err
-	}
-
-	queryUrl, err := url.Parse(server)
-	if err != nil {
-		return nil, err
-	}
-
-	basePath := fmt.Sprintf("/v1/kubernetes/external-clusters/%s/kubeconfig", pathParam0)
-	if basePath[0] == '/' {
-		basePath = basePath[1:]
-	}
-
-	queryUrl, err = queryUrl.Parse(basePath)
-	if err != nil {
-		return nil, err
-	}
-
-	req, err := http.NewRequest("GET", queryUrl.String(), nil)
-	if err != nil {
-		return nil, err
-	}
 
 	return req, nil
 }
@@ -7055,6 +7514,339 @@ func NewExternalClusterAPIGetCredentialsScriptTemplateRequest(server string, pro
 	return req, nil
 }
 
+// NewInsightsAPIGetLatestReportRequest generates requests for InsightsAPIGetLatestReport
+func NewInsightsAPIGetLatestReportRequest(server string, params *InsightsAPIGetLatestReportParams) (*http.Request, error) {
+	var err error
+
+	queryUrl, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	basePath := fmt.Sprintf("/v1/security/insights/report")
+	if basePath[0] == '/' {
+		basePath = basePath[1:]
+	}
+
+	queryUrl, err = queryUrl.Parse(basePath)
+	if err != nil {
+		return nil, err
+	}
+
+	queryValues := queryUrl.Query()
+
+	if params.ClusterId != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "clusterId", *params.ClusterId); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.Namespace != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "namespace", *params.Namespace); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.Category != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "category", *params.Category); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.SeverityLevel != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "severityLevel", *params.SeverityLevel); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.FromDate != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "fromDate", *params.FromDate); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	queryUrl.RawQuery = queryValues.Encode()
+
+	req, err := http.NewRequest("GET", queryUrl.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewInsightsAPIGetCheckDetailsRequest generates requests for InsightsAPIGetCheckDetails
+func NewInsightsAPIGetCheckDetailsRequest(server string, ruleId string, params *InsightsAPIGetCheckDetailsParams) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParam("simple", false, "ruleId", ruleId)
+	if err != nil {
+		return nil, err
+	}
+
+	queryUrl, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	basePath := fmt.Sprintf("/v1/security/insights/report/checks/%s", pathParam0)
+	if basePath[0] == '/' {
+		basePath = basePath[1:]
+	}
+
+	queryUrl, err = queryUrl.Parse(basePath)
+	if err != nil {
+		return nil, err
+	}
+
+	queryValues := queryUrl.Query()
+
+	if params.ClusterId != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "clusterId", *params.ClusterId); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.Namespace != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "namespace", *params.Namespace); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	queryUrl.RawQuery = queryValues.Encode()
+
+	req, err := http.NewRequest("GET", queryUrl.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewInsightsAPIGetReportFiltersRequest generates requests for InsightsAPIGetReportFilters
+func NewInsightsAPIGetReportFiltersRequest(server string, params *InsightsAPIGetReportFiltersParams) (*http.Request, error) {
+	var err error
+
+	queryUrl, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	basePath := fmt.Sprintf("/v1/security/insights/report/filters")
+	if basePath[0] == '/' {
+		basePath = basePath[1:]
+	}
+
+	queryUrl, err = queryUrl.Parse(basePath)
+	if err != nil {
+		return nil, err
+	}
+
+	queryValues := queryUrl.Query()
+
+	if params.ClusterId != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "clusterId", *params.ClusterId); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	queryUrl.RawQuery = queryValues.Encode()
+
+	req, err := http.NewRequest("GET", queryUrl.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewInsightsAPIScheduleScanRequest generates requests for InsightsAPIScheduleScan
+func NewInsightsAPIScheduleScanRequest(server string) (*http.Request, error) {
+	var err error
+
+	queryUrl, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	basePath := fmt.Sprintf("/v1/security/insights/report/schedule-scan")
+	if basePath[0] == '/' {
+		basePath = basePath[1:]
+	}
+
+	queryUrl, err = queryUrl.Parse(basePath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryUrl.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewInsightsAPIGetChecksHistoryRequest generates requests for InsightsAPIGetChecksHistory
+func NewInsightsAPIGetChecksHistoryRequest(server string, clusterId string, params *InsightsAPIGetChecksHistoryParams) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParam("simple", false, "clusterId", clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	queryUrl, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	basePath := fmt.Sprintf("/v1/security/insights/%s/history", pathParam0)
+	if basePath[0] == '/' {
+		basePath = basePath[1:]
+	}
+
+	queryUrl, err = queryUrl.Parse(basePath)
+	if err != nil {
+		return nil, err
+	}
+
+	queryValues := queryUrl.Query()
+
+	if queryFrag, err := runtime.StyleParam("form", true, "startTime", params.StartTime); err != nil {
+		return nil, err
+	} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+		return nil, err
+	} else {
+		for k, v := range parsed {
+			for _, v2 := range v {
+				queryValues.Add(k, v2)
+			}
+		}
+	}
+
+	if queryFrag, err := runtime.StyleParam("form", true, "endTime", params.EndTime); err != nil {
+		return nil, err
+	} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+		return nil, err
+	} else {
+		for k, v := range parsed {
+			for _, v2 := range v {
+				queryValues.Add(k, v2)
+			}
+		}
+	}
+
+	if params.StepSeconds != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "stepSeconds", *params.StepSeconds); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	queryUrl.RawQuery = queryValues.Encode()
+
+	req, err := http.NewRequest("GET", queryUrl.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 func (c *Client) applyEditors(ctx context.Context, req *http.Request, additionalEditors []RequestEditorFn) error {
 	req = req.WithContext(ctx)
 	for _, r := range c.RequestEditors {
@@ -7131,6 +7923,18 @@ type ClientWithResponsesInterface interface {
 	PlanClusterPriceWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*PlanClusterPriceResponse, error)
 
 	PlanClusterPriceWithResponse(ctx context.Context, body PlanClusterPriceJSONRequestBody) (*PlanClusterPriceResponse, error)
+
+	// CostReportAPIGetClusterCostHistory2 request
+	CostReportAPIGetClusterCostHistory2WithResponse(ctx context.Context, clusterId string, params *CostReportAPIGetClusterCostHistory2Params) (*CostReportAPIGetClusterCostHistory2Response, error)
+
+	// CostReportAPIGetClusterCostReport2 request
+	CostReportAPIGetClusterCostReport2WithResponse(ctx context.Context, clusterId string, params *CostReportAPIGetClusterCostReport2Params) (*CostReportAPIGetClusterCostReport2Response, error)
+
+	// CostReportAPIGetClusterWorkloadReport request
+	CostReportAPIGetClusterWorkloadReportWithResponse(ctx context.Context, clusterId string, params *CostReportAPIGetClusterWorkloadReportParams) (*CostReportAPIGetClusterWorkloadReportResponse, error)
+
+	// CostReportAPIGetClustersDailyCostReport request
+	CostReportAPIGetClustersDailyCostReportWithResponse(ctx context.Context, params *CostReportAPIGetClustersDailyCostReportParams) (*CostReportAPIGetClustersDailyCostReportResponse, error)
 
 	// ListCloudCredentials request
 	ListCloudCredentialsWithResponse(ctx context.Context) (*ListCloudCredentialsResponse, error)
@@ -7220,11 +8024,14 @@ type ClientWithResponsesInterface interface {
 	// ArchiveCluster request
 	ArchiveClusterWithResponse(ctx context.Context, clusterId ClusterId) (*ArchiveClusterResponse, error)
 
-	// GetCostHistory request
-	GetCostHistoryWithResponse(ctx context.Context, clusterId ClusterId, params *GetCostHistoryParams) (*GetCostHistoryResponse, error)
+	// CostReportAPIGetClusterCostHistory request
+	CostReportAPIGetClusterCostHistoryWithResponse(ctx context.Context, clusterId string, params *CostReportAPIGetClusterCostHistoryParams) (*CostReportAPIGetClusterCostHistoryResponse, error)
 
-	// GetCostReport request
-	GetCostReportWithResponse(ctx context.Context, clusterId ClusterId, params *GetCostReportParams) (*GetCostReportResponse, error)
+	// CostReportAPIGetClusterCostReport request
+	CostReportAPIGetClusterCostReportWithResponse(ctx context.Context, clusterId string, params *CostReportAPIGetClusterCostReportParams) (*CostReportAPIGetClusterCostReportResponse, error)
+
+	// CostReportAPIGetSavingsRecommendation2 request
+	CostReportAPIGetSavingsRecommendation2WithResponse(ctx context.Context, clusterId string) (*CostReportAPIGetSavingsRecommendation2Response, error)
 
 	// GetClusterFeedbackEvents request
 	GetClusterFeedbackEventsWithResponse(ctx context.Context, clusterId ClusterId) (*GetClusterFeedbackEventsResponse, error)
@@ -7234,6 +8041,9 @@ type ClientWithResponsesInterface interface {
 
 	// GetClusterIngressController request
 	GetClusterIngressControllerWithResponse(ctx context.Context, clusterId ClusterId) (*GetClusterIngressControllerResponse, error)
+
+	// InventoryBlacklistAPIGetClusterInventoryBlacklist request
+	InventoryBlacklistAPIGetClusterInventoryBlacklistWithResponse(ctx context.Context, clusterId string) (*InventoryBlacklistAPIGetClusterInventoryBlacklistResponse, error)
 
 	// GetClusterKubeconfig request
 	GetClusterKubeconfigWithResponse(ctx context.Context, clusterId ClusterId) (*GetClusterKubeconfigResponse, error)
@@ -7353,7 +8163,7 @@ type ClientWithResponsesInterface interface {
 	GetWorkloadsWithResponse(ctx context.Context, clusterId ClusterId) (*GetWorkloadsResponse, error)
 
 	// ExternalClusterAPIListClusters request
-	ExternalClusterAPIListClustersWithResponse(ctx context.Context) (*ExternalClusterAPIListClustersResponse, error)
+	ExternalClusterAPIListClustersWithResponse(ctx context.Context, params *ExternalClusterAPIListClustersParams) (*ExternalClusterAPIListClustersResponse, error)
 
 	// ExternalClusterAPIRegisterCluster request  with any body
 	ExternalClusterAPIRegisterClusterWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*ExternalClusterAPIRegisterClusterResponse, error)
@@ -7385,16 +8195,13 @@ type ClientWithResponsesInterface interface {
 
 	ExternalClusterAPIDisconnectClusterWithResponse(ctx context.Context, clusterId string, body ExternalClusterAPIDisconnectClusterJSONRequestBody) (*ExternalClusterAPIDisconnectClusterResponse, error)
 
-	// GetEstimatedSavings request
-	GetEstimatedSavingsWithResponse(ctx context.Context, clusterId ClusterId) (*GetEstimatedSavingsResponse, error)
+	// CostReportAPIGetSavingsRecommendation request
+	CostReportAPIGetSavingsRecommendationWithResponse(ctx context.Context, clusterId string) (*CostReportAPIGetSavingsRecommendationResponse, error)
 
 	// ExternalClusterAPIHandleCloudEvent request  with any body
 	ExternalClusterAPIHandleCloudEventWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader) (*ExternalClusterAPIHandleCloudEventResponse, error)
 
 	ExternalClusterAPIHandleCloudEventWithResponse(ctx context.Context, clusterId string, body ExternalClusterAPIHandleCloudEventJSONRequestBody) (*ExternalClusterAPIHandleCloudEventResponse, error)
-
-	// ExternalClusterAPIGetKubeconfig request
-	ExternalClusterAPIGetKubeconfigWithResponse(ctx context.Context, clusterId string) (*ExternalClusterAPIGetKubeconfigResponse, error)
 
 	// ExternalClusterAPIListNodes request
 	ExternalClusterAPIListNodesWithResponse(ctx context.Context, clusterId string, params *ExternalClusterAPIListNodesParams) (*ExternalClusterAPIListNodesResponse, error)
@@ -7484,6 +8291,21 @@ type ClientWithResponsesInterface interface {
 
 	// ExternalClusterAPIGetCredentialsScriptTemplate request
 	ExternalClusterAPIGetCredentialsScriptTemplateWithResponse(ctx context.Context, provider string, params *ExternalClusterAPIGetCredentialsScriptTemplateParams) (*ExternalClusterAPIGetCredentialsScriptTemplateResponse, error)
+
+	// InsightsAPIGetLatestReport request
+	InsightsAPIGetLatestReportWithResponse(ctx context.Context, params *InsightsAPIGetLatestReportParams) (*InsightsAPIGetLatestReportResponse, error)
+
+	// InsightsAPIGetCheckDetails request
+	InsightsAPIGetCheckDetailsWithResponse(ctx context.Context, ruleId string, params *InsightsAPIGetCheckDetailsParams) (*InsightsAPIGetCheckDetailsResponse, error)
+
+	// InsightsAPIGetReportFilters request
+	InsightsAPIGetReportFiltersWithResponse(ctx context.Context, params *InsightsAPIGetReportFiltersParams) (*InsightsAPIGetReportFiltersResponse, error)
+
+	// InsightsAPIScheduleScan request
+	InsightsAPIScheduleScanWithResponse(ctx context.Context) (*InsightsAPIScheduleScanResponse, error)
+
+	// InsightsAPIGetChecksHistory request
+	InsightsAPIGetChecksHistoryWithResponse(ctx context.Context, clusterId string, params *InsightsAPIGetChecksHistoryParams) (*InsightsAPIGetChecksHistoryResponse, error)
 }
 
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
@@ -7759,6 +8581,126 @@ func (r PlanClusterPriceResponse) StatusCode() int {
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
 func (r PlanClusterPriceResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type CostReportAPIGetClusterCostHistory2Response struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *CostreportV1beta1GetClusterCostHistoryResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r CostReportAPIGetClusterCostHistory2Response) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r CostReportAPIGetClusterCostHistory2Response) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r CostReportAPIGetClusterCostHistory2Response) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type CostReportAPIGetClusterCostReport2Response struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *CostreportV1beta1GetClusterCostReportResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r CostReportAPIGetClusterCostReport2Response) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r CostReportAPIGetClusterCostReport2Response) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r CostReportAPIGetClusterCostReport2Response) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type CostReportAPIGetClusterWorkloadReportResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *CostreportV1beta1GetClusterWorkloadReportResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r CostReportAPIGetClusterWorkloadReportResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r CostReportAPIGetClusterWorkloadReportResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r CostReportAPIGetClusterWorkloadReportResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type CostReportAPIGetClustersDailyCostReportResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *CostreportV1beta1GetClustersDailyCostReportResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r CostReportAPIGetClustersDailyCostReportResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r CostReportAPIGetClustersDailyCostReportResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r CostReportAPIGetClustersDailyCostReportResponse) GetBody() []byte {
 	return r.Body
 }
 
@@ -8419,14 +9361,14 @@ func (r ArchiveClusterResponse) GetBody() []byte {
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
-type GetCostHistoryResponse struct {
+type CostReportAPIGetClusterCostHistoryResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *ClusterCostHistoryResponse
+	JSON200      *CostreportV1beta1GetClusterCostHistoryResponse
 }
 
 // Status returns HTTPResponse.Status
-func (r GetCostHistoryResponse) Status() string {
+func (r CostReportAPIGetClusterCostHistoryResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -8434,7 +9376,7 @@ func (r GetCostHistoryResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r GetCostHistoryResponse) StatusCode() int {
+func (r CostReportAPIGetClusterCostHistoryResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -8443,20 +9385,20 @@ func (r GetCostHistoryResponse) StatusCode() int {
 
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
-func (r GetCostHistoryResponse) GetBody() []byte {
+func (r CostReportAPIGetClusterCostHistoryResponse) GetBody() []byte {
 	return r.Body
 }
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
-type GetCostReportResponse struct {
+type CostReportAPIGetClusterCostReportResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *ClusterCostReportResponse
+	JSON200      *CostreportV1beta1GetClusterCostReportResponse
 }
 
 // Status returns HTTPResponse.Status
-func (r GetCostReportResponse) Status() string {
+func (r CostReportAPIGetClusterCostReportResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -8464,7 +9406,7 @@ func (r GetCostReportResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r GetCostReportResponse) StatusCode() int {
+func (r CostReportAPIGetClusterCostReportResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -8473,7 +9415,37 @@ func (r GetCostReportResponse) StatusCode() int {
 
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
-func (r GetCostReportResponse) GetBody() []byte {
+func (r CostReportAPIGetClusterCostReportResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type CostReportAPIGetSavingsRecommendation2Response struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *CostreportV1beta1GetSavingsRecommendationResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r CostReportAPIGetSavingsRecommendation2Response) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r CostReportAPIGetSavingsRecommendation2Response) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r CostReportAPIGetSavingsRecommendation2Response) GetBody() []byte {
 	return r.Body
 }
 
@@ -8565,6 +9537,36 @@ func (r GetClusterIngressControllerResponse) StatusCode() int {
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
 func (r GetClusterIngressControllerResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type InventoryBlacklistAPIGetClusterInventoryBlacklistResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *InventoryblacklistV1GetClusterInventoryBlacklistResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r InventoryBlacklistAPIGetClusterInventoryBlacklistResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r InventoryBlacklistAPIGetClusterInventoryBlacklistResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r InventoryBlacklistAPIGetClusterInventoryBlacklistResponse) GetBody() []byte {
 	return r.Body
 }
 
@@ -9833,14 +10835,14 @@ func (r ExternalClusterAPIDisconnectClusterResponse) GetBody() []byte {
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
-type GetEstimatedSavingsResponse struct {
+type CostReportAPIGetSavingsRecommendationResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *EstimatedSavingsResponse
+	JSON200      *CostreportV1beta1GetSavingsRecommendationResponse
 }
 
 // Status returns HTTPResponse.Status
-func (r GetEstimatedSavingsResponse) Status() string {
+func (r CostReportAPIGetSavingsRecommendationResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -9848,7 +10850,7 @@ func (r GetEstimatedSavingsResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r GetEstimatedSavingsResponse) StatusCode() int {
+func (r CostReportAPIGetSavingsRecommendationResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -9857,7 +10859,7 @@ func (r GetEstimatedSavingsResponse) StatusCode() int {
 
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
-func (r GetEstimatedSavingsResponse) GetBody() []byte {
+func (r CostReportAPIGetSavingsRecommendationResponse) GetBody() []byte {
 	return r.Body
 }
 
@@ -9888,36 +10890,6 @@ func (r ExternalClusterAPIHandleCloudEventResponse) StatusCode() int {
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
 func (r ExternalClusterAPIHandleCloudEventResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-
-type ExternalClusterAPIGetKubeconfigResponse struct {
-	Body         []byte
-	HTTPResponse *http.Response
-	JSON200      *ExternalclusterV1GetKubeconfigResponse
-}
-
-// Status returns HTTPResponse.Status
-func (r ExternalClusterAPIGetKubeconfigResponse) Status() string {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.Status
-	}
-	return http.StatusText(0)
-}
-
-// StatusCode returns HTTPResponse.StatusCode
-func (r ExternalClusterAPIGetKubeconfigResponse) StatusCode() int {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.StatusCode
-	}
-	return 0
-}
-
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r ExternalClusterAPIGetKubeconfigResponse) GetBody() []byte {
 	return r.Body
 }
 
@@ -10671,6 +11643,156 @@ func (r ExternalClusterAPIGetCredentialsScriptTemplateResponse) GetBody() []byte
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
+type InsightsAPIGetLatestReportResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *InsightsV1GetLatestReportResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r InsightsAPIGetLatestReportResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r InsightsAPIGetLatestReportResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r InsightsAPIGetLatestReportResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type InsightsAPIGetCheckDetailsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *InsightsV1GetCheckDetailsResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r InsightsAPIGetCheckDetailsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r InsightsAPIGetCheckDetailsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r InsightsAPIGetCheckDetailsResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type InsightsAPIGetReportFiltersResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *InsightsV1GetReportFiltersResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r InsightsAPIGetReportFiltersResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r InsightsAPIGetReportFiltersResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r InsightsAPIGetReportFiltersResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type InsightsAPIScheduleScanResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *InsightsV1ScheduleScanResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r InsightsAPIScheduleScanResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r InsightsAPIScheduleScanResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r InsightsAPIScheduleScanResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type InsightsAPIGetChecksHistoryResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *InsightsV1GetChecksHistoryResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r InsightsAPIGetChecksHistoryResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r InsightsAPIGetChecksHistoryResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r InsightsAPIGetChecksHistoryResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
 // ListAddonsWithResponse request returning *ListAddonsResponse
 func (c *ClientWithResponses) ListAddonsWithResponse(ctx context.Context, params *ListAddonsParams) (*ListAddonsResponse, error) {
 	rsp, err := c.ListAddons(ctx, params)
@@ -10774,6 +11896,42 @@ func (c *ClientWithResponses) PlanClusterPriceWithResponse(ctx context.Context, 
 		return nil, err
 	}
 	return ParsePlanClusterPriceResponse(rsp)
+}
+
+// CostReportAPIGetClusterCostHistory2WithResponse request returning *CostReportAPIGetClusterCostHistory2Response
+func (c *ClientWithResponses) CostReportAPIGetClusterCostHistory2WithResponse(ctx context.Context, clusterId string, params *CostReportAPIGetClusterCostHistory2Params) (*CostReportAPIGetClusterCostHistory2Response, error) {
+	rsp, err := c.CostReportAPIGetClusterCostHistory2(ctx, clusterId, params)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCostReportAPIGetClusterCostHistory2Response(rsp)
+}
+
+// CostReportAPIGetClusterCostReport2WithResponse request returning *CostReportAPIGetClusterCostReport2Response
+func (c *ClientWithResponses) CostReportAPIGetClusterCostReport2WithResponse(ctx context.Context, clusterId string, params *CostReportAPIGetClusterCostReport2Params) (*CostReportAPIGetClusterCostReport2Response, error) {
+	rsp, err := c.CostReportAPIGetClusterCostReport2(ctx, clusterId, params)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCostReportAPIGetClusterCostReport2Response(rsp)
+}
+
+// CostReportAPIGetClusterWorkloadReportWithResponse request returning *CostReportAPIGetClusterWorkloadReportResponse
+func (c *ClientWithResponses) CostReportAPIGetClusterWorkloadReportWithResponse(ctx context.Context, clusterId string, params *CostReportAPIGetClusterWorkloadReportParams) (*CostReportAPIGetClusterWorkloadReportResponse, error) {
+	rsp, err := c.CostReportAPIGetClusterWorkloadReport(ctx, clusterId, params)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCostReportAPIGetClusterWorkloadReportResponse(rsp)
+}
+
+// CostReportAPIGetClustersDailyCostReportWithResponse request returning *CostReportAPIGetClustersDailyCostReportResponse
+func (c *ClientWithResponses) CostReportAPIGetClustersDailyCostReportWithResponse(ctx context.Context, params *CostReportAPIGetClustersDailyCostReportParams) (*CostReportAPIGetClustersDailyCostReportResponse, error) {
+	rsp, err := c.CostReportAPIGetClustersDailyCostReport(ctx, params)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCostReportAPIGetClustersDailyCostReportResponse(rsp)
 }
 
 // ListCloudCredentialsWithResponse request returning *ListCloudCredentialsResponse
@@ -11062,22 +12220,31 @@ func (c *ClientWithResponses) ArchiveClusterWithResponse(ctx context.Context, cl
 	return ParseArchiveClusterResponse(rsp)
 }
 
-// GetCostHistoryWithResponse request returning *GetCostHistoryResponse
-func (c *ClientWithResponses) GetCostHistoryWithResponse(ctx context.Context, clusterId ClusterId, params *GetCostHistoryParams) (*GetCostHistoryResponse, error) {
-	rsp, err := c.GetCostHistory(ctx, clusterId, params)
+// CostReportAPIGetClusterCostHistoryWithResponse request returning *CostReportAPIGetClusterCostHistoryResponse
+func (c *ClientWithResponses) CostReportAPIGetClusterCostHistoryWithResponse(ctx context.Context, clusterId string, params *CostReportAPIGetClusterCostHistoryParams) (*CostReportAPIGetClusterCostHistoryResponse, error) {
+	rsp, err := c.CostReportAPIGetClusterCostHistory(ctx, clusterId, params)
 	if err != nil {
 		return nil, err
 	}
-	return ParseGetCostHistoryResponse(rsp)
+	return ParseCostReportAPIGetClusterCostHistoryResponse(rsp)
 }
 
-// GetCostReportWithResponse request returning *GetCostReportResponse
-func (c *ClientWithResponses) GetCostReportWithResponse(ctx context.Context, clusterId ClusterId, params *GetCostReportParams) (*GetCostReportResponse, error) {
-	rsp, err := c.GetCostReport(ctx, clusterId, params)
+// CostReportAPIGetClusterCostReportWithResponse request returning *CostReportAPIGetClusterCostReportResponse
+func (c *ClientWithResponses) CostReportAPIGetClusterCostReportWithResponse(ctx context.Context, clusterId string, params *CostReportAPIGetClusterCostReportParams) (*CostReportAPIGetClusterCostReportResponse, error) {
+	rsp, err := c.CostReportAPIGetClusterCostReport(ctx, clusterId, params)
 	if err != nil {
 		return nil, err
 	}
-	return ParseGetCostReportResponse(rsp)
+	return ParseCostReportAPIGetClusterCostReportResponse(rsp)
+}
+
+// CostReportAPIGetSavingsRecommendation2WithResponse request returning *CostReportAPIGetSavingsRecommendation2Response
+func (c *ClientWithResponses) CostReportAPIGetSavingsRecommendation2WithResponse(ctx context.Context, clusterId string) (*CostReportAPIGetSavingsRecommendation2Response, error) {
+	rsp, err := c.CostReportAPIGetSavingsRecommendation2(ctx, clusterId)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCostReportAPIGetSavingsRecommendation2Response(rsp)
 }
 
 // GetClusterFeedbackEventsWithResponse request returning *GetClusterFeedbackEventsResponse
@@ -11105,6 +12272,15 @@ func (c *ClientWithResponses) GetClusterIngressControllerWithResponse(ctx contex
 		return nil, err
 	}
 	return ParseGetClusterIngressControllerResponse(rsp)
+}
+
+// InventoryBlacklistAPIGetClusterInventoryBlacklistWithResponse request returning *InventoryBlacklistAPIGetClusterInventoryBlacklistResponse
+func (c *ClientWithResponses) InventoryBlacklistAPIGetClusterInventoryBlacklistWithResponse(ctx context.Context, clusterId string) (*InventoryBlacklistAPIGetClusterInventoryBlacklistResponse, error) {
+	rsp, err := c.InventoryBlacklistAPIGetClusterInventoryBlacklist(ctx, clusterId)
+	if err != nil {
+		return nil, err
+	}
+	return ParseInventoryBlacklistAPIGetClusterInventoryBlacklistResponse(rsp)
 }
 
 // GetClusterKubeconfigWithResponse request returning *GetClusterKubeconfigResponse
@@ -11477,8 +12653,8 @@ func (c *ClientWithResponses) GetWorkloadsWithResponse(ctx context.Context, clus
 }
 
 // ExternalClusterAPIListClustersWithResponse request returning *ExternalClusterAPIListClustersResponse
-func (c *ClientWithResponses) ExternalClusterAPIListClustersWithResponse(ctx context.Context) (*ExternalClusterAPIListClustersResponse, error) {
-	rsp, err := c.ExternalClusterAPIListClusters(ctx)
+func (c *ClientWithResponses) ExternalClusterAPIListClustersWithResponse(ctx context.Context, params *ExternalClusterAPIListClustersParams) (*ExternalClusterAPIListClustersResponse, error) {
+	rsp, err := c.ExternalClusterAPIListClusters(ctx, params)
 	if err != nil {
 		return nil, err
 	}
@@ -11581,13 +12757,13 @@ func (c *ClientWithResponses) ExternalClusterAPIDisconnectClusterWithResponse(ct
 	return ParseExternalClusterAPIDisconnectClusterResponse(rsp)
 }
 
-// GetEstimatedSavingsWithResponse request returning *GetEstimatedSavingsResponse
-func (c *ClientWithResponses) GetEstimatedSavingsWithResponse(ctx context.Context, clusterId ClusterId) (*GetEstimatedSavingsResponse, error) {
-	rsp, err := c.GetEstimatedSavings(ctx, clusterId)
+// CostReportAPIGetSavingsRecommendationWithResponse request returning *CostReportAPIGetSavingsRecommendationResponse
+func (c *ClientWithResponses) CostReportAPIGetSavingsRecommendationWithResponse(ctx context.Context, clusterId string) (*CostReportAPIGetSavingsRecommendationResponse, error) {
+	rsp, err := c.CostReportAPIGetSavingsRecommendation(ctx, clusterId)
 	if err != nil {
 		return nil, err
 	}
-	return ParseGetEstimatedSavingsResponse(rsp)
+	return ParseCostReportAPIGetSavingsRecommendationResponse(rsp)
 }
 
 // ExternalClusterAPIHandleCloudEventWithBodyWithResponse request with arbitrary body returning *ExternalClusterAPIHandleCloudEventResponse
@@ -11605,15 +12781,6 @@ func (c *ClientWithResponses) ExternalClusterAPIHandleCloudEventWithResponse(ctx
 		return nil, err
 	}
 	return ParseExternalClusterAPIHandleCloudEventResponse(rsp)
-}
-
-// ExternalClusterAPIGetKubeconfigWithResponse request returning *ExternalClusterAPIGetKubeconfigResponse
-func (c *ClientWithResponses) ExternalClusterAPIGetKubeconfigWithResponse(ctx context.Context, clusterId string) (*ExternalClusterAPIGetKubeconfigResponse, error) {
-	rsp, err := c.ExternalClusterAPIGetKubeconfig(ctx, clusterId)
-	if err != nil {
-		return nil, err
-	}
-	return ParseExternalClusterAPIGetKubeconfigResponse(rsp)
 }
 
 // ExternalClusterAPIListNodesWithResponse request returning *ExternalClusterAPIListNodesResponse
@@ -11897,6 +13064,51 @@ func (c *ClientWithResponses) ExternalClusterAPIGetCredentialsScriptTemplateWith
 	return ParseExternalClusterAPIGetCredentialsScriptTemplateResponse(rsp)
 }
 
+// InsightsAPIGetLatestReportWithResponse request returning *InsightsAPIGetLatestReportResponse
+func (c *ClientWithResponses) InsightsAPIGetLatestReportWithResponse(ctx context.Context, params *InsightsAPIGetLatestReportParams) (*InsightsAPIGetLatestReportResponse, error) {
+	rsp, err := c.InsightsAPIGetLatestReport(ctx, params)
+	if err != nil {
+		return nil, err
+	}
+	return ParseInsightsAPIGetLatestReportResponse(rsp)
+}
+
+// InsightsAPIGetCheckDetailsWithResponse request returning *InsightsAPIGetCheckDetailsResponse
+func (c *ClientWithResponses) InsightsAPIGetCheckDetailsWithResponse(ctx context.Context, ruleId string, params *InsightsAPIGetCheckDetailsParams) (*InsightsAPIGetCheckDetailsResponse, error) {
+	rsp, err := c.InsightsAPIGetCheckDetails(ctx, ruleId, params)
+	if err != nil {
+		return nil, err
+	}
+	return ParseInsightsAPIGetCheckDetailsResponse(rsp)
+}
+
+// InsightsAPIGetReportFiltersWithResponse request returning *InsightsAPIGetReportFiltersResponse
+func (c *ClientWithResponses) InsightsAPIGetReportFiltersWithResponse(ctx context.Context, params *InsightsAPIGetReportFiltersParams) (*InsightsAPIGetReportFiltersResponse, error) {
+	rsp, err := c.InsightsAPIGetReportFilters(ctx, params)
+	if err != nil {
+		return nil, err
+	}
+	return ParseInsightsAPIGetReportFiltersResponse(rsp)
+}
+
+// InsightsAPIScheduleScanWithResponse request returning *InsightsAPIScheduleScanResponse
+func (c *ClientWithResponses) InsightsAPIScheduleScanWithResponse(ctx context.Context) (*InsightsAPIScheduleScanResponse, error) {
+	rsp, err := c.InsightsAPIScheduleScan(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return ParseInsightsAPIScheduleScanResponse(rsp)
+}
+
+// InsightsAPIGetChecksHistoryWithResponse request returning *InsightsAPIGetChecksHistoryResponse
+func (c *ClientWithResponses) InsightsAPIGetChecksHistoryWithResponse(ctx context.Context, clusterId string, params *InsightsAPIGetChecksHistoryParams) (*InsightsAPIGetChecksHistoryResponse, error) {
+	rsp, err := c.InsightsAPIGetChecksHistory(ctx, clusterId, params)
+	if err != nil {
+		return nil, err
+	}
+	return ParseInsightsAPIGetChecksHistoryResponse(rsp)
+}
+
 // ParseListAddonsResponse parses an HTTP response from a ListAddonsWithResponse call
 func ParseListAddonsResponse(rsp *http.Response) (*ListAddonsResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
@@ -12114,6 +13326,110 @@ func ParsePlanClusterPriceResponse(rsp *http.Response) (*PlanClusterPriceRespons
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest ClusterCostEstimate
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseCostReportAPIGetClusterCostHistory2Response parses an HTTP response from a CostReportAPIGetClusterCostHistory2WithResponse call
+func ParseCostReportAPIGetClusterCostHistory2Response(rsp *http.Response) (*CostReportAPIGetClusterCostHistory2Response, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &CostReportAPIGetClusterCostHistory2Response{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest CostreportV1beta1GetClusterCostHistoryResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseCostReportAPIGetClusterCostReport2Response parses an HTTP response from a CostReportAPIGetClusterCostReport2WithResponse call
+func ParseCostReportAPIGetClusterCostReport2Response(rsp *http.Response) (*CostReportAPIGetClusterCostReport2Response, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &CostReportAPIGetClusterCostReport2Response{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest CostreportV1beta1GetClusterCostReportResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseCostReportAPIGetClusterWorkloadReportResponse parses an HTTP response from a CostReportAPIGetClusterWorkloadReportWithResponse call
+func ParseCostReportAPIGetClusterWorkloadReportResponse(rsp *http.Response) (*CostReportAPIGetClusterWorkloadReportResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &CostReportAPIGetClusterWorkloadReportResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest CostreportV1beta1GetClusterWorkloadReportResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseCostReportAPIGetClustersDailyCostReportResponse parses an HTTP response from a CostReportAPIGetClustersDailyCostReportWithResponse call
+func ParseCostReportAPIGetClustersDailyCostReportResponse(rsp *http.Response) (*CostReportAPIGetClustersDailyCostReportResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &CostReportAPIGetClustersDailyCostReportResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest CostreportV1beta1GetClustersDailyCostReportResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -12661,22 +13977,22 @@ func ParseArchiveClusterResponse(rsp *http.Response) (*ArchiveClusterResponse, e
 	return response, nil
 }
 
-// ParseGetCostHistoryResponse parses an HTTP response from a GetCostHistoryWithResponse call
-func ParseGetCostHistoryResponse(rsp *http.Response) (*GetCostHistoryResponse, error) {
+// ParseCostReportAPIGetClusterCostHistoryResponse parses an HTTP response from a CostReportAPIGetClusterCostHistoryWithResponse call
+func ParseCostReportAPIGetClusterCostHistoryResponse(rsp *http.Response) (*CostReportAPIGetClusterCostHistoryResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
 	defer rsp.Body.Close()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &GetCostHistoryResponse{
+	response := &CostReportAPIGetClusterCostHistoryResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest ClusterCostHistoryResponse
+		var dest CostreportV1beta1GetClusterCostHistoryResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -12687,22 +14003,48 @@ func ParseGetCostHistoryResponse(rsp *http.Response) (*GetCostHistoryResponse, e
 	return response, nil
 }
 
-// ParseGetCostReportResponse parses an HTTP response from a GetCostReportWithResponse call
-func ParseGetCostReportResponse(rsp *http.Response) (*GetCostReportResponse, error) {
+// ParseCostReportAPIGetClusterCostReportResponse parses an HTTP response from a CostReportAPIGetClusterCostReportWithResponse call
+func ParseCostReportAPIGetClusterCostReportResponse(rsp *http.Response) (*CostReportAPIGetClusterCostReportResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
 	defer rsp.Body.Close()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &GetCostReportResponse{
+	response := &CostReportAPIGetClusterCostReportResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest ClusterCostReportResponse
+		var dest CostreportV1beta1GetClusterCostReportResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseCostReportAPIGetSavingsRecommendation2Response parses an HTTP response from a CostReportAPIGetSavingsRecommendation2WithResponse call
+func ParseCostReportAPIGetSavingsRecommendation2Response(rsp *http.Response) (*CostReportAPIGetSavingsRecommendation2Response, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &CostReportAPIGetSavingsRecommendation2Response{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest CostreportV1beta1GetSavingsRecommendationResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -12792,6 +14134,32 @@ func ParseGetClusterIngressControllerResponse(rsp *http.Response) (*GetClusterIn
 			return nil, err
 		}
 		response.JSON404 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseInventoryBlacklistAPIGetClusterInventoryBlacklistResponse parses an HTTP response from a InventoryBlacklistAPIGetClusterInventoryBlacklistWithResponse call
+func ParseInventoryBlacklistAPIGetClusterInventoryBlacklistResponse(rsp *http.Response) (*InventoryBlacklistAPIGetClusterInventoryBlacklistResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &InventoryBlacklistAPIGetClusterInventoryBlacklistResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest InventoryblacklistV1GetClusterInventoryBlacklistResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
 
 	}
 
@@ -13911,22 +15279,22 @@ func ParseExternalClusterAPIDisconnectClusterResponse(rsp *http.Response) (*Exte
 	return response, nil
 }
 
-// ParseGetEstimatedSavingsResponse parses an HTTP response from a GetEstimatedSavingsWithResponse call
-func ParseGetEstimatedSavingsResponse(rsp *http.Response) (*GetEstimatedSavingsResponse, error) {
+// ParseCostReportAPIGetSavingsRecommendationResponse parses an HTTP response from a CostReportAPIGetSavingsRecommendationWithResponse call
+func ParseCostReportAPIGetSavingsRecommendationResponse(rsp *http.Response) (*CostReportAPIGetSavingsRecommendationResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
 	defer rsp.Body.Close()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &GetEstimatedSavingsResponse{
+	response := &CostReportAPIGetSavingsRecommendationResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest EstimatedSavingsResponse
+		var dest CostreportV1beta1GetSavingsRecommendationResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -13953,32 +15321,6 @@ func ParseExternalClusterAPIHandleCloudEventResponse(rsp *http.Response) (*Exter
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest ExternalclusterV1HandleCloudEventResponse
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON200 = &dest
-
-	}
-
-	return response, nil
-}
-
-// ParseExternalClusterAPIGetKubeconfigResponse parses an HTTP response from a ExternalClusterAPIGetKubeconfigWithResponse call
-func ParseExternalClusterAPIGetKubeconfigResponse(rsp *http.Response) (*ExternalClusterAPIGetKubeconfigResponse, error) {
-	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
-	if err != nil {
-		return nil, err
-	}
-
-	response := &ExternalClusterAPIGetKubeconfigResponse{
-		Body:         bodyBytes,
-		HTTPResponse: rsp,
-	}
-
-	switch {
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest ExternalclusterV1GetKubeconfigResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -14623,6 +15965,136 @@ func ParseExternalClusterAPIGetCredentialsScriptTemplateResponse(rsp *http.Respo
 	}
 
 	switch {
+	}
+
+	return response, nil
+}
+
+// ParseInsightsAPIGetLatestReportResponse parses an HTTP response from a InsightsAPIGetLatestReportWithResponse call
+func ParseInsightsAPIGetLatestReportResponse(rsp *http.Response) (*InsightsAPIGetLatestReportResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &InsightsAPIGetLatestReportResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest InsightsV1GetLatestReportResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseInsightsAPIGetCheckDetailsResponse parses an HTTP response from a InsightsAPIGetCheckDetailsWithResponse call
+func ParseInsightsAPIGetCheckDetailsResponse(rsp *http.Response) (*InsightsAPIGetCheckDetailsResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &InsightsAPIGetCheckDetailsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest InsightsV1GetCheckDetailsResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseInsightsAPIGetReportFiltersResponse parses an HTTP response from a InsightsAPIGetReportFiltersWithResponse call
+func ParseInsightsAPIGetReportFiltersResponse(rsp *http.Response) (*InsightsAPIGetReportFiltersResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &InsightsAPIGetReportFiltersResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest InsightsV1GetReportFiltersResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseInsightsAPIScheduleScanResponse parses an HTTP response from a InsightsAPIScheduleScanWithResponse call
+func ParseInsightsAPIScheduleScanResponse(rsp *http.Response) (*InsightsAPIScheduleScanResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &InsightsAPIScheduleScanResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest InsightsV1ScheduleScanResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseInsightsAPIGetChecksHistoryResponse parses an HTTP response from a InsightsAPIGetChecksHistoryWithResponse call
+func ParseInsightsAPIGetChecksHistoryResponse(rsp *http.Response) (*InsightsAPIGetChecksHistoryResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &InsightsAPIGetChecksHistoryResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest InsightsV1GetChecksHistoryResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
 	}
 
 	return response, nil

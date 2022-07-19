@@ -12,8 +12,8 @@ import (
 )
 
 const (
-	ApiKeyAuthScopes = "ApiKeyAuth.Scopes"
 	BearerAuthScopes = "BearerAuth.Scopes"
+	ApiKeyAuthScopes = "ApiKeyAuth.Scopes"
 )
 
 // AddNodeResult defines model for AddNodeResult.
@@ -312,31 +312,6 @@ type ClusterAddonsList struct {
 	List []ClusterAddon `json:"list"`
 }
 
-// ClusterCostDetails defines model for ClusterCostDetails.
-type ClusterCostDetails struct {
-
-	// Average hourly cost of the cluster
-	CostPerHour float32 `json:"costPerHour"`
-
-	// Average number of CPUs in all nodes of type Spot in the cluster
-	SpotCpu float32 `json:"spotCpu"`
-
-	// Average number of nodes of type Spot in the cluster
-	SpotNodeCount float32 `json:"spotNodeCount"`
-
-	// Average RAM (GiB) memory of all nodes of type Spot in cluster
-	SpotRamGib float32 `json:"spotRamGib"`
-
-	// Average number of CPUs in all nodes in the cluster
-	TotalCpu float32 `json:"totalCpu"`
-
-	// Average number of nodes in the cluster
-	TotalNodeCount float32 `json:"totalNodeCount"`
-
-	// Average RAM (GiB) memory of all nodes in the cluster
-	TotalRamGib float32 `json:"totalRamGib"`
-}
-
 // ClusterCostEstimate defines model for ClusterCostEstimate.
 type ClusterCostEstimate struct {
 	PerCloud *CostsPerProviderEstimate `json:"perCloud,omitempty"`
@@ -344,64 +319,6 @@ type ClusterCostEstimate struct {
 
 	// Estimated Price
 	Total *EstimatedPriceAmount `json:"total,omitempty"`
-}
-
-// ClusterCostHistoryEntry defines model for ClusterCostHistoryEntry.
-type ClusterCostHistoryEntry struct {
-
-	// Timestamp of the record
-	CreatedAt time.Time `json:"createdAt"`
-
-	// Defines average cost and resources of the cluster
-	Current ClusterCostDetails `json:"current"`
-
-	// Defines average cost and resources of the cluster
-	Optimized ClusterCostDetails `json:"optimized"`
-}
-
-// ClusterCostHistoryResponse defines model for ClusterCostHistoryResponse.
-type ClusterCostHistoryResponse struct {
-
-	// Cluster id
-	ClusterId string `json:"clusterId"`
-
-	// Cost history entries
-	Items *[]ClusterCostHistoryEntry `json:"items,omitempty"`
-}
-
-// ClusterCostReportEntry defines model for ClusterCostReportEntry.
-type ClusterCostReportEntry struct {
-
-	// Average cost of on-demand instances
-	CostOnDemand float32 `json:"costOnDemand"`
-
-	// Average cost of spot instances
-	CostSpot float32 `json:"costSpot"`
-
-	// Average cost of spot-fallback instances
-	CostSpotFallback float32 `json:"costSpotFallback"`
-
-	// Average number of CPUs on on-demand instances
-	CpuCountOnDemand float32 `json:"cpuCountOnDemand"`
-
-	// Average number of CPUs on spot instances
-	CpuCountSpot float32 `json:"cpuCountSpot"`
-
-	// Average number of CPUs on spot-fallback instances
-	CpuCountSpotFallback float32 `json:"cpuCountSpotFallback"`
-
-	// Timestamp of the record
-	Timestamp *time.Time `json:"timestamp,omitempty"`
-}
-
-// ClusterCostReportResponse defines model for ClusterCostReportResponse.
-type ClusterCostReportResponse struct {
-
-	// Cluster id
-	ClusterId string `json:"clusterId"`
-
-	// Cost report entries
-	Items *[]ClusterCostReportEntry `json:"items,omitempty"`
 }
 
 // ClusterHealth defines model for ClusterHealth.
@@ -620,126 +537,6 @@ type EstimatedPriceAmount struct {
 
 	// Price in dollars per month (30 days, e.g. "1.234")
 	Monthly *string `json:"monthly,omitempty"`
-}
-
-// EstimatedSavingsCurrentConfiguration defines model for EstimatedSavingsCurrentConfiguration.
-type EstimatedSavingsCurrentConfiguration struct {
-
-	// Current list of cluster nodes.
-	Nodes *[]EstimatedSavingsNode `json:"nodes,omitempty"`
-
-	// Current list of cluster pods.
-	Pods *[]string `json:"pods,omitempty"`
-
-	// A map of replicated workloads.
-	ReplicatedWorkloads *EstimatedSavingsCurrentConfiguration_ReplicatedWorkloads `json:"replicatedWorkloads,omitempty"`
-	TotalPrice          *EstimatedSavingsCurrentConfigurationTotalPrice           `json:"totalPrice,omitempty"`
-}
-
-// EstimatedSavingsCurrentConfiguration_ReplicatedWorkloads defines model for EstimatedSavingsCurrentConfiguration.ReplicatedWorkloads.
-type EstimatedSavingsCurrentConfiguration_ReplicatedWorkloads struct {
-	AdditionalProperties map[string]EstimatedSavingsReplicatedWorkload `json:"-"`
-}
-
-// EstimatedSavingsCurrentConfigurationTotalPrice defines model for EstimatedSavingsCurrentConfigurationTotalPrice.
-type EstimatedSavingsCurrentConfigurationTotalPrice struct {
-
-	// Total hourly price of the node configuration in $ currency.
-	Hourly string `json:"hourly"`
-
-	// Total monthly price of the node configuration in $ currency.
-	Monthly string `json:"monthly"`
-}
-
-// EstimatedSavingsNode defines model for EstimatedSavingsNode.
-type EstimatedSavingsNode struct {
-
-	// Number CPU core node capacity.
-	CpuCores int `json:"cpuCores"`
-
-	// Name of the node's instance type.
-	InstanceType string `json:"instanceType"`
-
-	// Hourly price of the node in $ curreny.
-	Price string `json:"price"`
-
-	// Number of memory node capacity in bytes.
-	RamBytes int `json:"ramBytes"`
-
-	// Whether this node is a spot instance.
-	Spot bool `json:"spot"`
-}
-
-// EstimatedSavingsRecommendation defines model for EstimatedSavingsRecommendation.
-type EstimatedSavingsRecommendation struct {
-
-	// Details of this savings recommendation.
-	Details *struct {
-
-		// Cluster node configuration after applying the suggestions.
-		ConfigurationAfter struct {
-
-			// Recommended list of nodes.
-			Nodes *[]EstimatedSavingsNode `json:"nodes,omitempty"`
-		} `json:"configurationAfter"`
-
-		// A map of replicated workloads.
-		ReplicatedWorkloads *EstimatedSavingsRecommendation_Details_ReplicatedWorkloads `json:"replicatedWorkloads,omitempty"`
-	} `json:"details,omitempty"`
-	Hourly  *EstimatedSavingsRecommendationPrice `json:"hourly,omitempty"`
-	Monthly *EstimatedSavingsRecommendationPrice `json:"monthly,omitempty"`
-
-	// Available savings by applying this configuration.
-	SavingsPercentage *string `json:"savingsPercentage,omitempty"`
-}
-
-// EstimatedSavingsRecommendation_Details_ReplicatedWorkloads defines model for EstimatedSavingsRecommendation.Details.ReplicatedWorkloads.
-type EstimatedSavingsRecommendation_Details_ReplicatedWorkloads struct {
-	AdditionalProperties map[string]EstimatedSavingsReplicatedWorkload `json:"-"`
-}
-
-// EstimatedSavingsRecommendationPrice defines model for EstimatedSavingsRecommendationPrice.
-type EstimatedSavingsRecommendationPrice struct {
-
-	// Price after applying this configuration.
-	PriceAfter string `json:"priceAfter"`
-
-	// Price before applying this configuration.
-	PriceBefore string `json:"priceBefore"`
-}
-
-// EstimatedSavingsRecommendations defines model for EstimatedSavingsRecommendations.
-type EstimatedSavingsRecommendations struct {
-	Layman        *EstimatedSavingsRecommendation `json:"Layman,omitempty"`
-	SpotInstances *EstimatedSavingsRecommendation `json:"SpotInstances,omitempty"`
-}
-
-// EstimatedSavingsReplicatedWorkload defines model for EstimatedSavingsReplicatedWorkload.
-type EstimatedSavingsReplicatedWorkload struct {
-
-	// Lifecycle type of the node that hosts this workload.
-	CurrentNodeType string `json:"currentNodeType"`
-
-	// The workload controller type.
-	OwnerType string `json:"ownerType"`
-
-	// Recommended lifecycle type of the node to host this workload.
-	RecommendedNodeType string `json:"recommendedNodeType"`
-
-	// A list of replicas (pods) of this workload.
-	Replicas []string `json:"replicas"`
-}
-
-// EstimatedSavingsResponse defines model for EstimatedSavingsResponse.
-type EstimatedSavingsResponse struct {
-	CurrentConfiguration *EstimatedSavingsCurrentConfiguration `json:"currentConfiguration,omitempty"`
-
-	// Whether rebalancing is recommended. Calculated based on available savings.
-	IsRebalancingRecommended *bool `json:"isRebalancingRecommended,omitempty"`
-
-	// Timestamp of the last cluster snapshot used to calculate the report.
-	LastUpdatedAt   *time.Time                       `json:"lastUpdatedAt,omitempty"`
-	Recommendations *EstimatedSavingsRecommendations `json:"recommendations,omitempty"`
 }
 
 // ExecuteRebalancingPlanRequest defines model for ExecuteRebalancingPlanRequest.
@@ -1103,9 +900,9 @@ const (
 // NodeSpotConfig defines model for NodeSpotConfig.
 type NodeSpotConfig struct {
 
-	// Indicates whether the node should be spot/preemtive, suitable for fault-tolerant workloads.
+	// Indicates whether the node should be spot, suitable for fault-tolerant workloads.
 	//
-	// `true` if instance should be Spot (AWS), Preemtible (GCP), etc.
+	// `true` if instance should be Spot.
 	//
 	// `false` if the node should be stable on-demand.
 	IsSpot bool `json:"isSpot"`
@@ -1414,6 +1211,9 @@ type RebalancingNode struct {
 	// Timestamp of the node creation date.
 	CreatedAt time.Time `json:"createdAt"`
 
+	// Node ID. Not available for nodes which don't yet exist.
+	Id *string `json:"id,omitempty"`
+
 	// The instance type of this node.
 	InstanceType string `json:"instanceType"`
 
@@ -1500,6 +1300,9 @@ type RebalancingPlan struct {
 	// List of operations needed to execute this rebalancing plan.
 	Operations []RebalancingPlanOperation `json:"operations"`
 
+	// Subset of nodes used in the rebalancing plan in case of partial rebalancing.  If full rebalancing was selected, this field will be empty.
+	RebalancingNodeIds *[]string `json:"rebalancingNodeIds,omitempty"`
+
 	// ID of the rebalancing plan.
 	RebalancingPlanId string `json:"rebalancingPlanId"`
 
@@ -1539,7 +1342,17 @@ type RebalancingPlanError struct {
 	// Pod name.
 	Pod *string `json:"pod,omitempty"`
 
-	// Error reason
+	// List of possible rebalancing plan error reasons:
+	//
+	// | Reason | Details |
+	// | --- | --- |
+	// | nodeCreateFailed | An operation error related with the node creation was found. |
+	// | nodeDeleteFailed | An operation error related with the node deletion was found. |
+	// | nodeDrainFailed | An operation error related with the node draining was found. |
+	// | rebalancingPlanGenerationFailed | An error was found when trying to generate a rebalancing plan. |
+	// | rebalancingPlanTimeout | The rebalancing plan was considered stuck due to timeout and the rebalancing plan will be marked as failed. |
+	// | unknown | Error reason could not be determined. |
+	// | upscalingFailed | One or more upscaling events failed, the errors were added to the error plan and returned. |
 	Reason *string `json:"reason,omitempty"`
 }
 
@@ -1903,6 +1716,17 @@ type CastaiClusterV1beta1Taint struct {
 	Value  *string `json:"value,omitempty"`
 }
 
+// CastaiMetricsV1beta1ClusterMetrics defines model for castai.metrics.v1beta1.ClusterMetrics.
+type CastaiMetricsV1beta1ClusterMetrics struct {
+	CpuAllocatableCores    *float32 `json:"cpuAllocatableCores,omitempty"`
+	CpuRequestedCores      *float32 `json:"cpuRequestedCores,omitempty"`
+	MemoryAllocatableGib   *float32 `json:"memoryAllocatableGib,omitempty"`
+	MemoryRequestedGib     *float32 `json:"memoryRequestedGib,omitempty"`
+	OnDemandNodesCount     *int32   `json:"onDemandNodesCount,omitempty"`
+	SpotFallbackNodesCount *int32   `json:"spotFallbackNodesCount,omitempty"`
+	SpotNodesCount         *int32   `json:"spotNodesCount,omitempty"`
+}
+
 // CastaiMetricsV1beta1GetCPUUsageMetricsResponse defines model for castai.metrics.v1beta1.GetCPUUsageMetricsResponse.
 type CastaiMetricsV1beta1GetCPUUsageMetricsResponse struct {
 	Provisioned []CastaiMetricsV1beta1MetricSampleStream `json:"provisioned"`
@@ -1985,6 +1809,7 @@ type ClusteractionsV1ChartSource struct {
 // ClusteractionsV1ClusterAction defines model for clusteractions.v1.ClusterAction.
 type ClusteractionsV1ClusterAction struct {
 	ActionApproveCsr        *ClusteractionsV1ClusterActionApproveCSR        `json:"actionApproveCsr,omitempty"`
+	ActionChartRollback     *ClusteractionsV1ClusterActionChartRollback     `json:"actionChartRollback,omitempty"`
 	ActionChartUninstall    *ClusteractionsV1ClusterActionChartUninstall    `json:"actionChartUninstall,omitempty"`
 	ActionChartUpsert       *ClusteractionsV1ClusterActionChartUpsert       `json:"actionChartUpsert,omitempty"`
 	ActionCheckNodeDeleted  *ClusteractionsV1ClusterActionCheckNodeDeleted  `json:"actionCheckNodeDeleted,omitempty"`
@@ -2008,6 +1833,15 @@ type ClusteractionsV1ClusterActionAck struct {
 // ClusteractionsV1ClusterActionApproveCSR defines model for clusteractions.v1.ClusterActionApproveCSR.
 type ClusteractionsV1ClusterActionApproveCSR struct {
 	NodeName *string `json:"nodeName,omitempty"`
+}
+
+// ClusteractionsV1ClusterActionChartRollback defines model for clusteractions.v1.ClusterActionChartRollback.
+type ClusteractionsV1ClusterActionChartRollback struct {
+	Namespace   *string `json:"namespace,omitempty"`
+	ReleaseName *string `json:"releaseName,omitempty"`
+
+	// Version to rollback from.
+	Version *string `json:"version,omitempty"`
 }
 
 // ClusteractionsV1ClusterActionChartUninstall defines model for clusteractions.v1.ClusterActionChartUninstall.
@@ -2064,9 +1898,15 @@ type ClusteractionsV1ClusterActionDrainNode struct {
 
 // ClusteractionsV1ClusterActionPatchNode defines model for clusteractions.v1.ClusterActionPatchNode.
 type ClusteractionsV1ClusterActionPatchNode struct {
-	Labels   *ClusteractionsV1ClusterActionPatchNode_Labels `json:"labels,omitempty"`
-	NodeName *string                                        `json:"nodeName,omitempty"`
-	Taints   *[]ClusteractionsV1NodeTaint                   `json:"taints,omitempty"`
+	Annotations *ClusteractionsV1ClusterActionPatchNode_Annotations `json:"annotations,omitempty"`
+	Labels      *ClusteractionsV1ClusterActionPatchNode_Labels      `json:"labels,omitempty"`
+	NodeName    *string                                             `json:"nodeName,omitempty"`
+	Taints      *[]ClusteractionsV1NodeTaint                        `json:"taints,omitempty"`
+}
+
+// ClusteractionsV1ClusterActionPatchNode_Annotations defines model for ClusteractionsV1ClusterActionPatchNode.Annotations.
+type ClusteractionsV1ClusterActionPatchNode_Annotations struct {
+	AdditionalProperties map[string]string `json:"-"`
 }
 
 // ClusteractionsV1ClusterActionPatchNode_Labels defines model for ClusteractionsV1ClusterActionPatchNode.Labels.
@@ -2114,6 +1954,249 @@ type ClusteractionsV1ObjectReference struct {
 // ClusteractionsV1PollClusterActionsResponse defines model for clusteractions.v1.PollClusterActionsResponse.
 type ClusteractionsV1PollClusterActionsResponse struct {
 	Items *[]ClusteractionsV1ClusterAction `json:"items,omitempty"`
+}
+
+// CostreportV1beta1GetClusterCostHistoryResponse defines model for costreport.v1beta1.GetClusterCostHistoryResponse.
+type CostreportV1beta1GetClusterCostHistoryResponse struct {
+
+	// ID of the cluster.
+	ClusterId *string `json:"clusterId,omitempty"`
+
+	// Cost entries.
+	Items *[]CostreportV1beta1GetClusterCostHistoryResponseCostEntry `json:"items,omitempty"`
+}
+
+// CostreportV1beta1GetClusterCostHistoryResponseCostDetails defines model for costreport.v1beta1.GetClusterCostHistoryResponse.CostDetails.
+type CostreportV1beta1GetClusterCostHistoryResponseCostDetails struct {
+
+	// Average hourly cost of the cluster.
+	CostPerHour *float64 `json:"costPerHour,omitempty"`
+
+	// Average number of CPUs in all nodes of type Spot in the cluster.
+	SpotCpu *float64 `json:"spotCpu,omitempty"`
+
+	// Average number of nodes of type Spot in the cluster.
+	SpotNodeCount *float64 `json:"spotNodeCount,omitempty"`
+
+	// Average RAM (GiB) memory of all nodes of type Spot in cluster.
+	SpotRamGib *float64 `json:"spotRamGib,omitempty"`
+
+	// Average number of CPUs in all nodes in the cluster.
+	TotalCpu *float64 `json:"totalCpu,omitempty"`
+
+	// Average number of nodes in the cluster.
+	TotalNodeCount *float64 `json:"totalNodeCount,omitempty"`
+
+	// Average RAM (GiB) memory of all nodes in the cluster.
+	TotalRamGib *float64 `json:"totalRamGib,omitempty"`
+}
+
+// CostreportV1beta1GetClusterCostHistoryResponseCostEntry defines model for costreport.v1beta1.GetClusterCostHistoryResponse.CostEntry.
+type CostreportV1beta1GetClusterCostHistoryResponseCostEntry struct {
+
+	// Timestamp of entry creation.
+	CreatedAt *time.Time `json:"createdAt,omitempty"`
+
+	// Defines cluster cost details: cost and resources.
+	Current *CostreportV1beta1GetClusterCostHistoryResponseCostDetails `json:"current,omitempty"`
+
+	// Defines cluster cost details: cost and resources.
+	Optimized *CostreportV1beta1GetClusterCostHistoryResponseCostDetails `json:"optimized,omitempty"`
+}
+
+// CostreportV1beta1GetClusterCostReportResponse defines model for costreport.v1beta1.GetClusterCostReportResponse.
+type CostreportV1beta1GetClusterCostReportResponse struct {
+
+	// ID of the cluster.
+	ClusterId *string `json:"clusterId,omitempty"`
+
+	// Cost report entries.
+	Items *[]CostreportV1beta1GetClusterCostReportResponseCostReportItem `json:"items,omitempty"`
+}
+
+// CostreportV1beta1GetClusterCostReportResponseCostReportItem defines model for costreport.v1beta1.GetClusterCostReportResponse.CostReportItem.
+type CostreportV1beta1GetClusterCostReportResponseCostReportItem struct {
+
+	// Average cost of on-demand instances.
+	CostOnDemand *string `json:"costOnDemand,omitempty"`
+
+	// Average cost of spot instances.
+	CostSpot *string `json:"costSpot,omitempty"`
+
+	// Average cost of spot-fallback instances.
+	CostSpotFallback *string `json:"costSpotFallback,omitempty"`
+
+	// Average number of CPUs on on-demand instances.
+	CpuCountOnDemand *string `json:"cpuCountOnDemand,omitempty"`
+
+	// Average number of CPUs on spot instances.
+	CpuCountSpot *string `json:"cpuCountSpot,omitempty"`
+
+	// Average number of CPUs on spot-fallback instances.
+	CpuCountSpotFallback *string `json:"cpuCountSpotFallback,omitempty"`
+
+	// Timestamp of entry creation.
+	Timestamp *time.Time `json:"timestamp,omitempty"`
+}
+
+// CostreportV1beta1GetClusterWorkloadReportResponse defines model for costreport.v1beta1.GetClusterWorkloadReportResponse.
+type CostreportV1beta1GetClusterWorkloadReportResponse struct {
+
+	// ID of the cluster.
+	ClusterId *string `json:"clusterId,omitempty"`
+
+	// Workload cost entries.
+	Items *[]CostreportV1beta1GetClusterWorkloadReportResponseWorkloadItem `json:"items,omitempty"`
+}
+
+// CostreportV1beta1GetClusterWorkloadReportResponseWorkloadCostItem defines model for costreport.v1beta1.GetClusterWorkloadReportResponse.WorkloadCostItem.
+type CostreportV1beta1GetClusterWorkloadReportResponseWorkloadCostItem struct {
+
+	// Average cost of the workload that is on on-demand instances for the given time period.
+	CostOnDemand *string `json:"costOnDemand,omitempty"`
+
+	// Average cost of the workload that is on spot instances for the given time period.
+	CostSpot *string `json:"costSpot,omitempty"`
+
+	// Average cost of the workload that is on spot-fallback instances for the given time period.
+	CostSpotFallback *string `json:"costSpotFallback,omitempty"`
+
+	// Average number of CPUs of the workload that is on on-demand instances for the given time period.
+	CpuCountOnDemand *string `json:"cpuCountOnDemand,omitempty"`
+
+	// Average number of CPUs of the workload that is on spot instances for the given time period.
+	CpuCountSpot *string `json:"cpuCountSpot,omitempty"`
+
+	// Average number of CPUs of the workload that is on spot-fallback instances for the given time period.
+	CpuCountSpotFallback *string `json:"cpuCountSpotFallback,omitempty"`
+
+	// Average amount of pods for the workload that are on on-demand instances for the given time period.
+	PodCountOnDemand *string `json:"podCountOnDemand,omitempty"`
+
+	// Average amount of pods for the workload that are on spot instances for the given time period.
+	PodCountSpot *string `json:"podCountSpot,omitempty"`
+
+	// Average amount of pods for the workload that are on spot-fallback instances for the given time period.
+	PodCountSpotFallback *string `json:"podCountSpotFallback,omitempty"`
+
+	// Timestamp of entry creation.
+	Timestamp *time.Time `json:"timestamp,omitempty"`
+
+	// Number of minutes the workload was running on on-demand instances for the given time period.
+	UptimeMinutesOnDemand *string `json:"uptimeMinutesOnDemand,omitempty"`
+
+	// Number of minutes the workload was running on spot instances for the given time period.
+	UptimeMinutesSpot *string `json:"uptimeMinutesSpot,omitempty"`
+
+	// Number of minutes the workload was running on spot-fallback instances for the given time period.
+	UptimeMinutesSpotFallback *string `json:"uptimeMinutesSpotFallback,omitempty"`
+}
+
+// CostreportV1beta1GetClusterWorkloadReportResponseWorkloadItem defines model for costreport.v1beta1.GetClusterWorkloadReportResponse.WorkloadItem.
+type CostreportV1beta1GetClusterWorkloadReportResponseWorkloadItem struct {
+
+	// Cost metrics of the workload.
+	CostMetrics *[]CostreportV1beta1GetClusterWorkloadReportResponseWorkloadCostItem `json:"costMetrics,omitempty"`
+
+	// Namespace the workload is in.
+	Namespace *string `json:"namespace,omitempty"`
+
+	// Name of the workload.
+	WorkloadName *string `json:"workloadName,omitempty"`
+
+	// Type of the workload.
+	WorkloadType *string `json:"workloadType,omitempty"`
+}
+
+// CostreportV1beta1GetClustersDailyCostReportResponse defines model for costreport.v1beta1.GetClustersDailyCostReportResponse.
+type CostreportV1beta1GetClustersDailyCostReportResponse struct {
+	Items *[]CostreportV1beta1GetClustersDailyCostReportResponseClusterCostItem `json:"items,omitempty"`
+
+	// Defines total cost of all clusters within requested date range.
+	TotalCostDaily *float64 `json:"totalCostDaily,omitempty"`
+}
+
+// CostreportV1beta1GetClustersDailyCostReportResponseClusterCostItem defines model for costreport.v1beta1.GetClustersDailyCostReportResponse.ClusterCostItem.
+type CostreportV1beta1GetClustersDailyCostReportResponseClusterCostItem struct {
+
+	// ID of the cluster.
+	ClusterId *string `json:"clusterId,omitempty"`
+
+	// Defines total cost of all clusters within requested date range for single cluster.
+	TotalCostDaily *float64 `json:"totalCostDaily,omitempty"`
+}
+
+// CostreportV1beta1GetSavingsRecommendationResponse defines model for costreport.v1beta1.GetSavingsRecommendationResponse.
+type CostreportV1beta1GetSavingsRecommendationResponse struct {
+
+	// SavingsCurrentConfiguration defines current cluster configuration.
+	CurrentConfiguration *CostreportV1beta1SavingsCurrentConfiguration `json:"currentConfiguration,omitempty"`
+
+	// Whether rebalancing is recommended. Calculated based on available savings.
+	IsRebalancingRecommended *bool `json:"isRebalancingRecommended,omitempty"`
+
+	// Timestamp of the last cluster snapshot used to calculate the report.
+	LastUpdatedAt *time.Time `json:"lastUpdatedAt,omitempty"`
+
+	// Different types of estimated savings reports.
+	Recommendations *CostreportV1beta1GetSavingsRecommendationResponse_Recommendations `json:"recommendations,omitempty"`
+}
+
+// CostreportV1beta1GetSavingsRecommendationResponse_Recommendations defines model for CostreportV1beta1GetSavingsRecommendationResponse.Recommendations.
+type CostreportV1beta1GetSavingsRecommendationResponse_Recommendations struct {
+	AdditionalProperties map[string]CostreportV1beta1SavingsRecommendation `json:"-"`
+}
+
+// CostreportV1beta1Saving defines model for costreport.v1beta1.Saving.
+type CostreportV1beta1Saving struct {
+
+	// Price after applying this configuration.
+	PriceAfter *string `json:"priceAfter,omitempty"`
+
+	// Price before applying this configuration.
+	PriceBefore *string `json:"priceBefore,omitempty"`
+}
+
+// CostreportV1beta1SavingsCurrentConfiguration defines model for costreport.v1beta1.SavingsCurrentConfiguration.
+type CostreportV1beta1SavingsCurrentConfiguration struct {
+
+	// A single cluster node.
+	Nodes *map[string]interface{} `json:"nodes,omitempty"`
+
+	// Pod name.
+	Pods *[]string `json:"pods,omitempty"`
+
+	// A map of replicated workloads.
+	ReplicatedWorkloads *map[string]interface{} `json:"replicatedWorkloads,omitempty"`
+
+	// SavingsPrice defines pricing details.
+	TotalPrice *CostreportV1beta1SavingsPrice `json:"totalPrice,omitempty"`
+}
+
+// CostreportV1beta1SavingsPrice defines model for costreport.v1beta1.SavingsPrice.
+type CostreportV1beta1SavingsPrice struct {
+
+	// Total hourly price of the node configuration in $ currency.
+	Hourly *string `json:"hourly,omitempty"`
+
+	// Total monthly price of the node configuration in $ currency.
+	Monthly *string `json:"monthly,omitempty"`
+}
+
+// CostreportV1beta1SavingsRecommendation defines model for costreport.v1beta1.SavingsRecommendation.
+type CostreportV1beta1SavingsRecommendation struct {
+
+	// Details of this savings recommendation.
+	Details *map[string]interface{} `json:"details,omitempty"`
+
+	// Saving defines price before and after applying a savings recommendation.
+	Hourly *CostreportV1beta1Saving `json:"hourly,omitempty"`
+
+	// Saving defines price before and after applying a savings recommendation.
+	Monthly *CostreportV1beta1Saving `json:"monthly,omitempty"`
+
+	// Available savings by applying this configuration.
+	SavingsPercentage *string `json:"savingsPercentage,omitempty"`
 }
 
 // ExternalclusterV1AKSClusterParams defines model for externalcluster.v1.AKSClusterParams.
@@ -2196,7 +2279,8 @@ type ExternalclusterV1Cluster struct {
 	KubernetesVersion *string                             `json:"kubernetesVersion"`
 
 	// Method used to onboard the cluster, eg.: console, terraform.
-	ManagedBy *string `json:"managedBy,omitempty"`
+	ManagedBy *string                             `json:"managedBy,omitempty"`
+	Metrics   *CastaiMetricsV1beta1ClusterMetrics `json:"metrics,omitempty"`
 
 	// The name of the external cluster.
 	Name *string `json:"name,omitempty"`
@@ -2296,6 +2380,9 @@ type ExternalclusterV1EKSClusterParams struct {
 	ClusterName  *string `json:"clusterName,omitempty"`
 	DnsClusterIp *string `json:"dnsClusterIp,omitempty"`
 
+	// Docker daemon configuration properties.
+	DockerConfig *map[string]interface{} `json:"dockerConfig,omitempty"`
+
 	// Output only. Cluster's instance profile ARN used for CAST provisioned nodes.
 	InstanceProfileArn *string `json:"instanceProfileArn,omitempty"`
 
@@ -2351,13 +2438,6 @@ type ExternalclusterV1GetAssumeRoleUserResponse struct {
 // ExternalclusterV1GetCredentialsScriptResponse defines model for externalcluster.v1.GetCredentialsScriptResponse.
 type ExternalclusterV1GetCredentialsScriptResponse struct {
 	Script *string `json:"script,omitempty"`
-}
-
-// ExternalclusterV1GetKubeconfigResponse defines model for externalcluster.v1.GetKubeconfigResponse.
-type ExternalclusterV1GetKubeconfigResponse struct {
-
-	// Cluster's base64 encoded kubeconfig.
-	Kubeconfig *[]byte `json:"kubeconfig,omitempty"`
 }
 
 // ExternalclusterV1HandleCloudEventResponse defines model for externalcluster.v1.HandleCloudEventResponse.
@@ -2516,6 +2596,9 @@ type ExternalclusterV1UpdateEKSClusterParams struct {
 	AssumeRoleArn *string `json:"assumeRoleArn,omitempty"`
 	DnsClusterIp  *string `json:"dnsClusterIp,omitempty"`
 
+	// Optional docker daemon configuration properties. Provide only properties that you want to override. Available values https://docs.docker.com/engine/reference/commandline/dockerd/#daemon-configuration-file
+	DockerConfig *map[string]interface{} `json:"dockerConfig,omitempty"`
+
 	// Optional instance profile ARN for CAST provisioned nodes.
 	InstanceProfileArn *string `json:"instanceProfileArn,omitempty"`
 
@@ -2558,6 +2641,173 @@ type ExternalclusterV1Zone struct {
 
 	// Zone name.
 	Name *string `json:"name,omitempty"`
+}
+
+// InsightsV1ChecksCountHistoryItem defines model for insights.v1.ChecksCountHistoryItem.
+type InsightsV1ChecksCountHistoryItem struct {
+
+	// Number of checks that failed.
+	ChecksFailed *int32 `json:"checksFailed,omitempty"`
+
+	// Number of checks that passed.
+	ChecksPassed *int32 `json:"checksPassed,omitempty"`
+
+	// Total checks performed.
+	ChecksTotal *int32 `json:"checksTotal,omitempty"`
+
+	// Timestamp of entry creation.
+	Timestamp *time.Time `json:"timestamp,omitempty"`
+}
+
+// InsightsV1GetCheckDetailsResponse defines model for insights.v1.GetCheckDetailsResponse.
+type InsightsV1GetCheckDetailsResponse struct {
+
+	// Category of insight.
+	Category *string `json:"category,omitempty"`
+
+	// Check detailed description.
+	Description *string `json:"description,omitempty"`
+
+	// Check labels.
+	Labels *[]string `json:"labels,omitempty"`
+
+	// Human readable rule name.
+	Name *string `json:"name,omitempty"`
+
+	// Resources that matched this rule.
+	Objects *[]InsightsV1GetCheckDetailsResponseObjectItem `json:"objects,omitempty"`
+
+	// Machine readable rule name.
+	RuleId *string `json:"ruleId,omitempty"`
+
+	// Rule's criticality level.
+	SeverityLevel *string `json:"severityLevel,omitempty"`
+
+	// Rule's severity rating [0.0,10.0].
+	SeverityScore *float32 `json:"severityScore,omitempty"`
+}
+
+// InsightsV1GetCheckDetailsResponseObjectItem defines model for insights.v1.GetCheckDetailsResponse.ObjectItem.
+type InsightsV1GetCheckDetailsResponseObjectItem struct {
+	ApiVersion *string    `json:"apiVersion,omitempty"`
+	ClusterId  *string    `json:"clusterId,omitempty"`
+	Kind       *string    `json:"kind,omitempty"`
+	Name       *string    `json:"name,omitempty"`
+	Namespace  *string    `json:"namespace,omitempty"`
+	ScannedAt  *time.Time `json:"scannedAt,omitempty"`
+}
+
+// InsightsV1GetChecksHistoryResponse defines model for insights.v1.GetChecksHistoryResponse.
+type InsightsV1GetChecksHistoryResponse struct {
+	Items *[]InsightsV1ChecksCountHistoryItem `json:"items,omitempty"`
+}
+
+// InsightsV1GetLatestReportResponse defines model for insights.v1.GetLatestReportResponse.
+type InsightsV1GetLatestReportResponse struct {
+
+	// Filtered checks.
+	Checks  *[]InsightsV1GetLatestReportResponseCheckItem `json:"checks,omitempty"`
+	Summary *InsightsV1GetLatestReportResponseSummary     `json:"summary,omitempty"`
+}
+
+// InsightsV1GetLatestReportResponseCheckItem defines model for insights.v1.GetLatestReportResponse.CheckItem.
+type InsightsV1GetLatestReportResponseCheckItem struct {
+
+	// Number of objects that did not pass the check.
+	Failed *int32 `json:"failed,omitempty"`
+
+	// Check labels.
+	Labels *[]string `json:"labels,omitempty"`
+
+	// Human readable rule name.
+	Name *string `json:"name,omitempty"`
+
+	// Machine readable rule name.
+	RuleId *string `json:"ruleId,omitempty"`
+
+	// Rule's criticality level.
+	SeverityLevel *string `json:"severityLevel,omitempty"`
+
+	// Rule's severity rating [0.0,10.0].
+	SeverityScore *float32 `json:"severityScore,omitempty"`
+
+	// Total number of objects that there checked.
+	Total *int32 `json:"total,omitempty"`
+
+	// Category of insight.
+	Type *string `json:"type,omitempty"`
+}
+
+// InsightsV1GetLatestReportResponseSummary defines model for insights.v1.GetLatestReportResponse.Summary.
+type InsightsV1GetLatestReportResponseSummary struct {
+
+	// Checks count by severity level.
+	ChecksBySeverityLevel *InsightsV1GetLatestReportResponseSummary_ChecksBySeverityLevel `json:"checksBySeverityLevel,omitempty"`
+
+	// Number of checks that failed.
+	ChecksFailed *int32 `json:"checksFailed,omitempty"`
+
+	// Number of checks that passed.
+	ChecksPassed *int32 `json:"checksPassed,omitempty"`
+
+	// Total checks performed.
+	ChecksTotal *int32 `json:"checksTotal,omitempty"`
+
+	// Number of resources that have no issues.
+	ResourcesHealthy *int32 `json:"resourcesHealthy,omitempty"`
+
+	// Number of resources scanned.
+	ResourcesScanned *int32 `json:"resourcesScanned,omitempty"`
+
+	// Number of resources that have issues.
+	ResourcesWithIssues *int32 `json:"resourcesWithIssues,omitempty"`
+}
+
+// InsightsV1GetLatestReportResponseSummary_ChecksBySeverityLevel defines model for InsightsV1GetLatestReportResponseSummary.ChecksBySeverityLevel.
+type InsightsV1GetLatestReportResponseSummary_ChecksBySeverityLevel struct {
+	AdditionalProperties map[string]int32 `json:"-"`
+}
+
+// InsightsV1GetReportFiltersResponse defines model for insights.v1.GetReportFiltersResponse.
+type InsightsV1GetReportFiltersResponse struct {
+	Categories     *[]string `json:"categories,omitempty"`
+	Namespaces     *[]string `json:"namespaces,omitempty"`
+	SeverityLevels *[]string `json:"severityLevels,omitempty"`
+}
+
+// InsightsV1ScheduleScanResponse defines model for insights.v1.ScheduleScanResponse.
+type InsightsV1ScheduleScanResponse map[string]interface{}
+
+// InventoryblacklistV1GetClusterInventoryBlacklistResponse defines model for inventoryblacklist.v1.GetClusterInventoryBlacklistResponse.
+type InventoryblacklistV1GetClusterInventoryBlacklistResponse struct {
+
+	// The ID of the cluster.
+	ClusterId *string `json:"clusterId,omitempty"`
+
+	// Blacklisted instances of inventory items for that cluster or organization.
+	Items *[]InventoryblacklistV1InventoryBlacklistItem `json:"items,omitempty"`
+}
+
+// InventoryblacklistV1InventoryBlacklistItem defines model for inventoryblacklist.v1.InventoryBlacklistItem.
+type InventoryblacklistV1InventoryBlacklistItem struct {
+
+	// Cluster id, that will only be set if instance type or family is blacklisted for specific cluster.
+	ClusterId *string `json:"clusterId"`
+
+	// The date time when the instance type or family was disabled.
+	DisabledAt *time.Time `json:"disabledAt,omitempty"`
+
+	// The date time when the disabling is due to be expired.
+	// This is for the situations when disabling is done by the platform due to cloud availability.
+	ExpiresAt      *time.Time `json:"expiresAt"`
+	InstanceFamily *string    `json:"instanceFamily"`
+	InstanceType   *string    `json:"instanceType"`
+
+	// Organization id for which the instance type or family is blacklisted.
+	OrganizationId *string `json:"organizationId,omitempty"`
+
+	// Reason for disabling instance type or family.
+	Reason *string `json:"reason,omitempty"`
 }
 
 // PoliciesV1ClusterLimitsCpu defines model for policies.v1.ClusterLimitsCpu.
@@ -2780,9 +3030,6 @@ type FilterClusterId string
 // FilterFromDate defines model for filterFromDate.
 type FilterFromDate string
 
-// FilterStepSeconds defines model for filterStepSeconds.
-type FilterStepSeconds string
-
 // FilterToDate defines model for filterToDate.
 type FilterToDate string
 
@@ -2926,6 +3173,52 @@ type PlanClusterPriceJSONBody struct {
 	Region *ClusterRegion `json:"region,omitempty"`
 }
 
+// CostReportAPIGetClusterCostHistory2Params defines parameters for CostReportAPIGetClusterCostHistory2.
+type CostReportAPIGetClusterCostHistory2Params struct {
+
+	// Filter items to include from specified time.
+	FromDate time.Time `json:"fromDate"`
+
+	// Filter items to include up to specified time.
+	ToDate time.Time `json:"toDate"`
+}
+
+// CostReportAPIGetClusterCostReport2Params defines parameters for CostReportAPIGetClusterCostReport2.
+type CostReportAPIGetClusterCostReport2Params struct {
+
+	// Filter items to include from specified time.
+	StartTime time.Time `json:"startTime"`
+
+	// Filter items to include up to specified time.
+	EndTime time.Time `json:"endTime"`
+
+	// Aggregate items in specified interval steps.
+	StepSeconds *int32 `json:"stepSeconds,omitempty"`
+}
+
+// CostReportAPIGetClusterWorkloadReportParams defines parameters for CostReportAPIGetClusterWorkloadReport.
+type CostReportAPIGetClusterWorkloadReportParams struct {
+
+	// Filter items to include from specified time.
+	StartTime time.Time `json:"startTime"`
+
+	// Filter items to include up to specified time.
+	EndTime time.Time `json:"endTime"`
+
+	// Aggregate items in specified interval steps.
+	StepSeconds *int32 `json:"stepSeconds,omitempty"`
+}
+
+// CostReportAPIGetClustersDailyCostReportParams defines parameters for CostReportAPIGetClustersDailyCostReport.
+type CostReportAPIGetClustersDailyCostReportParams struct {
+
+	// Filter items to include from specified time.
+	StartTime time.Time `json:"startTime"`
+
+	// Filter items to include up to specified time.
+	EndTime time.Time `json:"endTime"`
+}
+
 // CreateCloudCredentialsJSONBody defines parameters for CreateCloudCredentials.
 type CreateCloudCredentialsJSONBody CloudCredentials
 
@@ -2968,27 +3261,27 @@ type InstallClusterAddonJSONBody InstallAddonRequest
 // UpdateClusterAddonJSONBody defines parameters for UpdateClusterAddon.
 type UpdateClusterAddonJSONBody UpdateAddonRequest
 
-// GetCostHistoryParams defines parameters for GetCostHistory.
-type GetCostHistoryParams struct {
+// CostReportAPIGetClusterCostHistoryParams defines parameters for CostReportAPIGetClusterCostHistory.
+type CostReportAPIGetClusterCostHistoryParams struct {
 
-	// Request filter parameter declaring point of time after which the results should be returned. Moment in time must be declared in RFC3339 format. https://tools.ietf.org/html/rfc3339
-	FromDate *FilterFromDate `json:"fromDate,omitempty"`
+	// Filter items to include from specified time.
+	FromDate time.Time `json:"fromDate"`
 
-	// Request filter parameter declaring point of time until which the results should be returned. Moment in time must be declared in RFC3339 format. https://tools.ietf.org/html/rfc3339
-	ToDate *FilterToDate `json:"toDate,omitempty"`
+	// Filter items to include up to specified time.
+	ToDate time.Time `json:"toDate"`
 }
 
-// GetCostReportParams defines parameters for GetCostReport.
-type GetCostReportParams struct {
+// CostReportAPIGetClusterCostReportParams defines parameters for CostReportAPIGetClusterCostReport.
+type CostReportAPIGetClusterCostReportParams struct {
 
-	// Data points steps in seconds, e.g., stepSeconds=3600
-	StepSeconds *FilterStepSeconds `json:"stepSeconds,omitempty"`
+	// Filter items to include from specified time.
+	StartTime time.Time `json:"startTime"`
 
-	// Range start time in RFC3339 format.
-	StartTime string `json:"startTime"`
+	// Filter items to include up to specified time.
+	EndTime time.Time `json:"endTime"`
 
-	// Range end time in RFC3339 format.
-	EndTime string `json:"endTime"`
+	// Aggregate items in specified interval steps.
+	StepSeconds *int32 `json:"stepSeconds,omitempty"`
 }
 
 // ConfigureClusterAddonsJSONBody defines parameters for ConfigureClusterAddons.
@@ -3085,6 +3378,13 @@ type RebalanceJSONBody RebalancingRequest
 // ExecuteRebalancingPlanJSONBody defines parameters for ExecuteRebalancingPlan.
 type ExecuteRebalancingPlanJSONBody ExecuteRebalancingPlanRequest
 
+// ExternalClusterAPIListClustersParams defines parameters for ExternalClusterAPIListClusters.
+type ExternalClusterAPIListClustersParams struct {
+
+	// Include metrics with cluster response.
+	IncludeMetrics *bool `json:"includeMetrics,omitempty"`
+}
+
 // ExternalClusterAPIRegisterClusterJSONBody defines parameters for ExternalClusterAPIRegisterCluster.
 type ExternalClusterAPIRegisterClusterJSONBody ExternalclusterV1RegisterClusterRequest
 
@@ -3166,6 +3466,55 @@ type GetUsageReportParams struct {
 // ExternalClusterAPIGetCredentialsScriptTemplateParams defines parameters for ExternalClusterAPIGetCredentialsScriptTemplate.
 type ExternalClusterAPIGetCredentialsScriptTemplateParams struct {
 	CrossRole *bool `json:"crossRole,omitempty"`
+}
+
+// InsightsAPIGetLatestReportParams defines parameters for InsightsAPIGetLatestReport.
+type InsightsAPIGetLatestReportParams struct {
+
+	// (optional) cluster_id filter.
+	ClusterId *string `json:"clusterId,omitempty"`
+
+	// (optional) namespace filter.
+	Namespace *string `json:"namespace,omitempty"`
+
+	// (optional) threat category filter.
+	Category *string `json:"category,omitempty"`
+
+	// (optional) severity filter.
+	SeverityLevel *string `json:"severityLevel,omitempty"`
+
+	// (optional) return scan which happened after this timestamp.
+	FromDate *time.Time `json:"fromDate,omitempty"`
+}
+
+// InsightsAPIGetCheckDetailsParams defines parameters for InsightsAPIGetCheckDetails.
+type InsightsAPIGetCheckDetailsParams struct {
+
+	// (optional) cluster_id filter.
+	ClusterId *string `json:"clusterId,omitempty"`
+
+	// (optional) namespace filter.
+	Namespace *string `json:"namespace,omitempty"`
+}
+
+// InsightsAPIGetReportFiltersParams defines parameters for InsightsAPIGetReportFilters.
+type InsightsAPIGetReportFiltersParams struct {
+
+	// (optional) return filters available for specific cluster.
+	ClusterId *string `json:"clusterId,omitempty"`
+}
+
+// InsightsAPIGetChecksHistoryParams defines parameters for InsightsAPIGetChecksHistory.
+type InsightsAPIGetChecksHistoryParams struct {
+
+	// Filter items to include from specified time.
+	StartTime time.Time `json:"startTime"`
+
+	// Filter items to include up to specified time.
+	EndTime time.Time `json:"endTime"`
+
+	// Aggregate items in specified interval steps.
+	StepSeconds *int32 `json:"stepSeconds,omitempty"`
 }
 
 // CreateAuthTokenJSONRequestBody defines body for CreateAuthToken for application/json ContentType.
@@ -3470,112 +3819,6 @@ func (a *CostsPerTypeEstimate) UnmarshalJSON(b []byte) error {
 
 // Override default JSON handling for CostsPerTypeEstimate to handle AdditionalProperties
 func (a CostsPerTypeEstimate) MarshalJSON() ([]byte, error) {
-	var err error
-	object := make(map[string]json.RawMessage)
-
-	for fieldName, field := range a.AdditionalProperties {
-		object[fieldName], err = json.Marshal(field)
-		if err != nil {
-			return nil, errors.Wrap(err, fmt.Sprintf("error marshaling '%s'", fieldName))
-		}
-	}
-	return json.Marshal(object)
-}
-
-// Getter for additional properties for EstimatedSavingsCurrentConfiguration_ReplicatedWorkloads. Returns the specified
-// element and whether it was found
-func (a EstimatedSavingsCurrentConfiguration_ReplicatedWorkloads) Get(fieldName string) (value EstimatedSavingsReplicatedWorkload, found bool) {
-	if a.AdditionalProperties != nil {
-		value, found = a.AdditionalProperties[fieldName]
-	}
-	return
-}
-
-// Setter for additional properties for EstimatedSavingsCurrentConfiguration_ReplicatedWorkloads
-func (a *EstimatedSavingsCurrentConfiguration_ReplicatedWorkloads) Set(fieldName string, value EstimatedSavingsReplicatedWorkload) {
-	if a.AdditionalProperties == nil {
-		a.AdditionalProperties = make(map[string]EstimatedSavingsReplicatedWorkload)
-	}
-	a.AdditionalProperties[fieldName] = value
-}
-
-// Override default JSON handling for EstimatedSavingsCurrentConfiguration_ReplicatedWorkloads to handle AdditionalProperties
-func (a *EstimatedSavingsCurrentConfiguration_ReplicatedWorkloads) UnmarshalJSON(b []byte) error {
-	object := make(map[string]json.RawMessage)
-	err := json.Unmarshal(b, &object)
-	if err != nil {
-		return err
-	}
-
-	if len(object) != 0 {
-		a.AdditionalProperties = make(map[string]EstimatedSavingsReplicatedWorkload)
-		for fieldName, fieldBuf := range object {
-			var fieldVal EstimatedSavingsReplicatedWorkload
-			err := json.Unmarshal(fieldBuf, &fieldVal)
-			if err != nil {
-				return errors.Wrap(err, fmt.Sprintf("error unmarshaling field %s", fieldName))
-			}
-			a.AdditionalProperties[fieldName] = fieldVal
-		}
-	}
-	return nil
-}
-
-// Override default JSON handling for EstimatedSavingsCurrentConfiguration_ReplicatedWorkloads to handle AdditionalProperties
-func (a EstimatedSavingsCurrentConfiguration_ReplicatedWorkloads) MarshalJSON() ([]byte, error) {
-	var err error
-	object := make(map[string]json.RawMessage)
-
-	for fieldName, field := range a.AdditionalProperties {
-		object[fieldName], err = json.Marshal(field)
-		if err != nil {
-			return nil, errors.Wrap(err, fmt.Sprintf("error marshaling '%s'", fieldName))
-		}
-	}
-	return json.Marshal(object)
-}
-
-// Getter for additional properties for EstimatedSavingsRecommendation_Details_ReplicatedWorkloads. Returns the specified
-// element and whether it was found
-func (a EstimatedSavingsRecommendation_Details_ReplicatedWorkloads) Get(fieldName string) (value EstimatedSavingsReplicatedWorkload, found bool) {
-	if a.AdditionalProperties != nil {
-		value, found = a.AdditionalProperties[fieldName]
-	}
-	return
-}
-
-// Setter for additional properties for EstimatedSavingsRecommendation_Details_ReplicatedWorkloads
-func (a *EstimatedSavingsRecommendation_Details_ReplicatedWorkloads) Set(fieldName string, value EstimatedSavingsReplicatedWorkload) {
-	if a.AdditionalProperties == nil {
-		a.AdditionalProperties = make(map[string]EstimatedSavingsReplicatedWorkload)
-	}
-	a.AdditionalProperties[fieldName] = value
-}
-
-// Override default JSON handling for EstimatedSavingsRecommendation_Details_ReplicatedWorkloads to handle AdditionalProperties
-func (a *EstimatedSavingsRecommendation_Details_ReplicatedWorkloads) UnmarshalJSON(b []byte) error {
-	object := make(map[string]json.RawMessage)
-	err := json.Unmarshal(b, &object)
-	if err != nil {
-		return err
-	}
-
-	if len(object) != 0 {
-		a.AdditionalProperties = make(map[string]EstimatedSavingsReplicatedWorkload)
-		for fieldName, fieldBuf := range object {
-			var fieldVal EstimatedSavingsReplicatedWorkload
-			err := json.Unmarshal(fieldBuf, &fieldVal)
-			if err != nil {
-				return errors.Wrap(err, fmt.Sprintf("error unmarshaling field %s", fieldName))
-			}
-			a.AdditionalProperties[fieldName] = fieldVal
-		}
-	}
-	return nil
-}
-
-// Override default JSON handling for EstimatedSavingsRecommendation_Details_ReplicatedWorkloads to handle AdditionalProperties
-func (a EstimatedSavingsRecommendation_Details_ReplicatedWorkloads) MarshalJSON() ([]byte, error) {
 	var err error
 	object := make(map[string]json.RawMessage)
 
@@ -4118,6 +4361,59 @@ func (a ClusteractionsV1ClusterActionChartUpsert_ValuesOverrides) MarshalJSON() 
 	return json.Marshal(object)
 }
 
+// Getter for additional properties for ClusteractionsV1ClusterActionPatchNode_Annotations. Returns the specified
+// element and whether it was found
+func (a ClusteractionsV1ClusterActionPatchNode_Annotations) Get(fieldName string) (value string, found bool) {
+	if a.AdditionalProperties != nil {
+		value, found = a.AdditionalProperties[fieldName]
+	}
+	return
+}
+
+// Setter for additional properties for ClusteractionsV1ClusterActionPatchNode_Annotations
+func (a *ClusteractionsV1ClusterActionPatchNode_Annotations) Set(fieldName string, value string) {
+	if a.AdditionalProperties == nil {
+		a.AdditionalProperties = make(map[string]string)
+	}
+	a.AdditionalProperties[fieldName] = value
+}
+
+// Override default JSON handling for ClusteractionsV1ClusterActionPatchNode_Annotations to handle AdditionalProperties
+func (a *ClusteractionsV1ClusterActionPatchNode_Annotations) UnmarshalJSON(b []byte) error {
+	object := make(map[string]json.RawMessage)
+	err := json.Unmarshal(b, &object)
+	if err != nil {
+		return err
+	}
+
+	if len(object) != 0 {
+		a.AdditionalProperties = make(map[string]string)
+		for fieldName, fieldBuf := range object {
+			var fieldVal string
+			err := json.Unmarshal(fieldBuf, &fieldVal)
+			if err != nil {
+				return errors.Wrap(err, fmt.Sprintf("error unmarshaling field %s", fieldName))
+			}
+			a.AdditionalProperties[fieldName] = fieldVal
+		}
+	}
+	return nil
+}
+
+// Override default JSON handling for ClusteractionsV1ClusterActionPatchNode_Annotations to handle AdditionalProperties
+func (a ClusteractionsV1ClusterActionPatchNode_Annotations) MarshalJSON() ([]byte, error) {
+	var err error
+	object := make(map[string]json.RawMessage)
+
+	for fieldName, field := range a.AdditionalProperties {
+		object[fieldName], err = json.Marshal(field)
+		if err != nil {
+			return nil, errors.Wrap(err, fmt.Sprintf("error marshaling '%s'", fieldName))
+		}
+	}
+	return json.Marshal(object)
+}
+
 // Getter for additional properties for ClusteractionsV1ClusterActionPatchNode_Labels. Returns the specified
 // element and whether it was found
 func (a ClusteractionsV1ClusterActionPatchNode_Labels) Get(fieldName string) (value string, found bool) {
@@ -4212,6 +4508,59 @@ func (a *ClusteractionsV1LogEvent_Fields) UnmarshalJSON(b []byte) error {
 
 // Override default JSON handling for ClusteractionsV1LogEvent_Fields to handle AdditionalProperties
 func (a ClusteractionsV1LogEvent_Fields) MarshalJSON() ([]byte, error) {
+	var err error
+	object := make(map[string]json.RawMessage)
+
+	for fieldName, field := range a.AdditionalProperties {
+		object[fieldName], err = json.Marshal(field)
+		if err != nil {
+			return nil, errors.Wrap(err, fmt.Sprintf("error marshaling '%s'", fieldName))
+		}
+	}
+	return json.Marshal(object)
+}
+
+// Getter for additional properties for CostreportV1beta1GetSavingsRecommendationResponse_Recommendations. Returns the specified
+// element and whether it was found
+func (a CostreportV1beta1GetSavingsRecommendationResponse_Recommendations) Get(fieldName string) (value CostreportV1beta1SavingsRecommendation, found bool) {
+	if a.AdditionalProperties != nil {
+		value, found = a.AdditionalProperties[fieldName]
+	}
+	return
+}
+
+// Setter for additional properties for CostreportV1beta1GetSavingsRecommendationResponse_Recommendations
+func (a *CostreportV1beta1GetSavingsRecommendationResponse_Recommendations) Set(fieldName string, value CostreportV1beta1SavingsRecommendation) {
+	if a.AdditionalProperties == nil {
+		a.AdditionalProperties = make(map[string]CostreportV1beta1SavingsRecommendation)
+	}
+	a.AdditionalProperties[fieldName] = value
+}
+
+// Override default JSON handling for CostreportV1beta1GetSavingsRecommendationResponse_Recommendations to handle AdditionalProperties
+func (a *CostreportV1beta1GetSavingsRecommendationResponse_Recommendations) UnmarshalJSON(b []byte) error {
+	object := make(map[string]json.RawMessage)
+	err := json.Unmarshal(b, &object)
+	if err != nil {
+		return err
+	}
+
+	if len(object) != 0 {
+		a.AdditionalProperties = make(map[string]CostreportV1beta1SavingsRecommendation)
+		for fieldName, fieldBuf := range object {
+			var fieldVal CostreportV1beta1SavingsRecommendation
+			err := json.Unmarshal(fieldBuf, &fieldVal)
+			if err != nil {
+				return errors.Wrap(err, fmt.Sprintf("error unmarshaling field %s", fieldName))
+			}
+			a.AdditionalProperties[fieldName] = fieldVal
+		}
+	}
+	return nil
+}
+
+// Override default JSON handling for CostreportV1beta1GetSavingsRecommendationResponse_Recommendations to handle AdditionalProperties
+func (a CostreportV1beta1GetSavingsRecommendationResponse_Recommendations) MarshalJSON() ([]byte, error) {
 	var err error
 	object := make(map[string]json.RawMessage)
 
@@ -4477,6 +4826,59 @@ func (a *ExternalclusterV1UpdateKOPSClusterParams_Tags) UnmarshalJSON(b []byte) 
 
 // Override default JSON handling for ExternalclusterV1UpdateKOPSClusterParams_Tags to handle AdditionalProperties
 func (a ExternalclusterV1UpdateKOPSClusterParams_Tags) MarshalJSON() ([]byte, error) {
+	var err error
+	object := make(map[string]json.RawMessage)
+
+	for fieldName, field := range a.AdditionalProperties {
+		object[fieldName], err = json.Marshal(field)
+		if err != nil {
+			return nil, errors.Wrap(err, fmt.Sprintf("error marshaling '%s'", fieldName))
+		}
+	}
+	return json.Marshal(object)
+}
+
+// Getter for additional properties for InsightsV1GetLatestReportResponseSummary_ChecksBySeverityLevel. Returns the specified
+// element and whether it was found
+func (a InsightsV1GetLatestReportResponseSummary_ChecksBySeverityLevel) Get(fieldName string) (value int32, found bool) {
+	if a.AdditionalProperties != nil {
+		value, found = a.AdditionalProperties[fieldName]
+	}
+	return
+}
+
+// Setter for additional properties for InsightsV1GetLatestReportResponseSummary_ChecksBySeverityLevel
+func (a *InsightsV1GetLatestReportResponseSummary_ChecksBySeverityLevel) Set(fieldName string, value int32) {
+	if a.AdditionalProperties == nil {
+		a.AdditionalProperties = make(map[string]int32)
+	}
+	a.AdditionalProperties[fieldName] = value
+}
+
+// Override default JSON handling for InsightsV1GetLatestReportResponseSummary_ChecksBySeverityLevel to handle AdditionalProperties
+func (a *InsightsV1GetLatestReportResponseSummary_ChecksBySeverityLevel) UnmarshalJSON(b []byte) error {
+	object := make(map[string]json.RawMessage)
+	err := json.Unmarshal(b, &object)
+	if err != nil {
+		return err
+	}
+
+	if len(object) != 0 {
+		a.AdditionalProperties = make(map[string]int32)
+		for fieldName, fieldBuf := range object {
+			var fieldVal int32
+			err := json.Unmarshal(fieldBuf, &fieldVal)
+			if err != nil {
+				return errors.Wrap(err, fmt.Sprintf("error unmarshaling field %s", fieldName))
+			}
+			a.AdditionalProperties[fieldName] = fieldVal
+		}
+	}
+	return nil
+}
+
+// Override default JSON handling for InsightsV1GetLatestReportResponseSummary_ChecksBySeverityLevel to handle AdditionalProperties
+func (a InsightsV1GetLatestReportResponseSummary_ChecksBySeverityLevel) MarshalJSON() ([]byte, error) {
 	var err error
 	object := make(map[string]json.RawMessage)
 
