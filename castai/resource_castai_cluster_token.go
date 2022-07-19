@@ -13,12 +13,14 @@ const (
 	FieldClusterToken = "cluster_token"
 )
 
+// FIXME: remove me at 19.01.2023
 func resourceCastaiClusterToken() *schema.Resource {
 	return &schema.Resource{
-		CreateContext: resourceCastaiClusterTokenCreate,
-		ReadContext:   resourceCastaiClusterTokenRead,
-		UpdateContext: nil,
-		DeleteContext: resourceCastaiClusterTokenDelete,
+		CreateContext:      resourceCastaiClusterTokenCreate,
+		ReadContext:        resourceCastaiClusterTokenRead,
+		UpdateContext:      nil,
+		DeleteContext:      resourceCastaiClusterTokenDelete,
+		DeprecationMessage: "Usage of cluster token is deprecated please use castai_(eks|gke|aks)_cluster.castai_cluster.cluster_token",
 		Schema: map[string]*schema.Schema{
 			FieldClusterID: {
 				Type:        schema.TypeString,
