@@ -1,11 +1,10 @@
 write:
-  replicas: 1
   persistence:
     size: 10Gi
     storageClass: ebs-sc
   resources:
     limits:
-      cpu: "2"
+      cpu: "1"
       memory: 1Gi
     requests:
       cpu: "0.5"
@@ -13,13 +12,12 @@ write:
 
 
 read:
-  replicas: 1
   persistence:
     size: 10Gi
     storageClass: ebs-sc
   resources:
     limits:
-      cpu: "2"
+      cpu: "1"
       memory: 1Gi
     requests:
       cpu: "0.5"
