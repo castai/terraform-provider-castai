@@ -69,7 +69,11 @@ module "castai-eks-cluster" {
   aws_cluster_name   = module.eks.cluster_id
 
   // You can provide SGs that CAST AI should use
-  override_security_groups = null
+  override_security_groups = [
+      module.eks.cluster_security_group_id,
+      module.eks.node_security_group_id,
+      aws_security_group.worker_group_mgmt_one.id,
+  ]
   aws_assume_role_arn      = module.castai-eks-role-iam.role_arn
   aws_instance_profile_arn = module.castai-eks-role-iam.instance_profile_arn
 

@@ -53,3 +53,7 @@ variable "eks_user_role_arn" {
 
   default = null
 }
+
+variable "loki_bucket_name" {
+  type = string
+}
