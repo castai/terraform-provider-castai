@@ -13,6 +13,7 @@ aws_secret_access_key = "SECRET"
 cluster_region = "eu-central-1"
 cluster_name = "my-cluster-25-04-1"
 delete_nodes_on_disconnect = true
+loki_bucket_name = "loki-logs-bucket"
 ```
 
 ## Using
@@ -41,6 +42,9 @@ loki-write-0                                             1/1     Running   0    
 loki-write-1                                             1/1     Running   0          6h27m
 loki-write-2                                             1/1     Running   0          6h27m
 ```
+
+Loki for storing logs uses S3 bucket created by terraform (`loki_bucket_name` variable contains bucket name). To access the s3 bucket this example uses [IAM for Service Account](https://docs.aws.amazon.com/eks/latest/userguide/iam-roles-for-service-accounts.html)
+
 
 ### kube-prometheus-stack
 
