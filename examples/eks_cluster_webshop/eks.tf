@@ -42,7 +42,7 @@ module "eks" {
       instance_type = "t3.medium"
       max_size      = 5
       min_size      = 3
-      desired_size  = 2
+      desired_size  = 3
       eni_delete    = "true"
     },
   }

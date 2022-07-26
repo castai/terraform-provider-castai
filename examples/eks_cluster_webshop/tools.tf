@@ -36,6 +36,17 @@ resource "helm_release" "loki" {
   depends_on = [helm_release.kube_prometheus_stack]
 }
 
+resource "helm_release" "promtail" {
+  name             = "promtail"
+  repository       = "https://grafana.github.io/helm-charts"
+  chart            = "promtail"
+  namespace        = "tools"
+  create_namespace = true
+  cleanup_on_fail  = true
+  wait             = true
+  version          = "6.2.2"
+}
+
 resource "helm_release" "cert_manager" {
   name             = "cert-manager"
   repository       = "https://charts.jetstack.io"
