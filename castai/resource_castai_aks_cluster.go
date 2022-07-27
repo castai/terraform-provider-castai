@@ -212,7 +212,7 @@ func updateAKSClusterSettings(ctx context.Context, data *schema.ResourceData, cl
 		response, err := client.ExternalClusterAPIUpdateClusterWithResponse(ctx, data.Id(), req)
 		return sdk.CheckOKResponse(response, err)
 	}, b); err != nil {
-		return fmt.Errorf("submitting AKS credentials to CAST AI: %w", err)
+		return fmt.Errorf("updating cluster configuration: %w", err)
 	}
 
 	return nil
