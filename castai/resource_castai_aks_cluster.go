@@ -6,6 +6,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/cenkalti/backoff/v4"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -205,9 +206,13 @@ func updateAKSClusterSettings(ctx context.Context, data *schema.ResourceData, cl
 
 	req.Credentials = &credentials
 
-	response, err := client.ExternalClusterAPIUpdateClusterWithResponse(ctx, data.Id(), req)
-	if checkErr := sdk.CheckOKResponse(response, err); checkErr != nil {
-		return fmt.Errorf("updating cluster settings: %w", checkErr)
+	// Retries are required for newly created IAM resources to initialise on Azure side.
+	b := backoff.WithContext(backoff.WithMaxRetries(backoff.NewConstantBackOff(10*time.Second), 30), ctx)
+	if err = backoff.Retry(func() error {
+		response, err := client.ExternalClusterAPIUpdateClusterWithResponse(ctx, data.Id(), req)
+		return sdk.CheckOKResponse(response, err)
+	}, b); err != nil {
+		return fmt.Errorf("updating cluster configuration: %w", err)
 	}
 
 	return nil
