@@ -35,7 +35,8 @@ module "eks_iam_role_s3" {
   source = "cloudposse/eks-iam-role/aws"
 
   tags        = var.tags
-
+  stage       = var.cluster_name
+  
   aws_account_number          = data.aws_caller_identity.current.account_id
   eks_cluster_oidc_issuer_url = module.eks.cluster_oidc_issuer_url
 
