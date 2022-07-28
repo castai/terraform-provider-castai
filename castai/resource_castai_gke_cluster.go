@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cenkalti/backoff/v4"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -212,9 +213,11 @@ func updateGKEClusterSettings(ctx context.Context, data *schema.ResourceData, cl
 		req.SshPublicKey = toStringPtr(s.(string))
 	}
 
-	response, err := client.ExternalClusterAPIUpdateClusterWithResponse(ctx, data.Id(), req)
-	if checkErr := sdk.CheckOKResponse(response, err); checkErr != nil {
-		return fmt.Errorf("updating cluster settings: %w", checkErr)
+	if err := backoff.Retry(func() error {
+		response, err := client.ExternalClusterAPIUpdateClusterWithResponse(ctx, data.Id(), req)
+		return sdk.CheckOKResponse(response, err)
+	}, backoff.NewExponentialBackOff()); err != nil {
+		return fmt.Errorf("updating cluster configuration: %w", err)
 	}
 
 	return nil
