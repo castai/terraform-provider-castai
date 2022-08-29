@@ -1,1 +1,4 @@
 **/go.sum -diff linguist-generated
+**/*.gen.go -diff linguist-generated
+**/mock/*.go -diff linguist-generated
+**/mock*/*.go -diff linguist-generated
