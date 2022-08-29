@@ -64,8 +64,7 @@ func resourceNodeConfiguration() *schema.Resource {
 				Type:     schema.TypeList,
 				Required: true,
 				Elem: &schema.Schema{
-					Type:             schema.TypeString,
-					ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+					Type: schema.TypeString,
 				},
 				Description: "Subnet ids to be used for provisioned nodes",
 			},
@@ -109,7 +108,7 @@ func resourceNodeConfiguration() *schema.Resource {
 							Type:             schema.TypeString,
 							Optional:         true,
 							Description:      "IP address to use for DNS queries within the cluster",
-							ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+							ValidateDiagFunc: validation.ToDiagFunc(validation.IsIPv4Address),
 						},
 						"instance_profile_arn": {
 							Type:             schema.TypeString,
