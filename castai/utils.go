@@ -1,6 +1,8 @@
 package castai
 
-import "github.com/castai/terraform-provider-castai/castai/sdk"
+import (
+	"github.com/castai/terraform-provider-castai/castai/sdk"
+)
 
 func convertStringArr(arr []interface{}) []string {
 	var result []string
@@ -15,6 +17,36 @@ func convertStringArr(arr []interface{}) []string {
 
 func toStringPtr(value string) *string {
 	return &value
+}
+
+func toStringValue(value *string) string {
+	if value == nil {
+		return ""
+	}
+	return *value
+}
+
+func toPtr[S any](src S) *S {
+	return &src
+}
+
+func toStringMap(m map[string]interface{}) map[string]string {
+	out := make(map[string]string, len(m))
+	for k, v := range m {
+		out[k] = v.(string)
+	}
+	return out
+}
+
+func toStringList(items []interface{}) []string {
+	out := make([]string, 0, len(items))
+	for _, v := range items {
+		val, ok := v.(string)
+		if ok && val != "" {
+			out = append(out, val)
+		}
+	}
+	return out
 }
 
 func toString(s *string) string {

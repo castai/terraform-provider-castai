@@ -6,6 +6,7 @@ const (
 	ClusterStatusDeleting = "deleting"
 	ClusterStatusDeleted  = "deleted"
 	ClusterStatusArchived = "archived"
+	ClusterStatusFailed   = "failed"
 
 	ClusterAgentStatusDisconnected  = "disconnected"
 	ClusterAgentStatusDisconnecting = "disconnecting"
