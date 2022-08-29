@@ -32,4 +32,4 @@ test:
 
 testacc:
 	@echo "==> Running acceptance tests"
-	TF_ACC=1 go test ./... -v -timeout 120m
+	TF_ACC=1 go test ./castai/... -v -timeout 120m

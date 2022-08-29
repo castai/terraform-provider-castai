@@ -132,8 +132,8 @@ type ClientInterface interface {
 	// CostReportAPIGetClusterWorkloadReport request
 	CostReportAPIGetClusterWorkloadReport(ctx context.Context, clusterId string, params *CostReportAPIGetClusterWorkloadReportParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// CostReportAPIGetClustersDailyCostReport request
-	CostReportAPIGetClustersDailyCostReport(ctx context.Context, params *CostReportAPIGetClustersDailyCostReportParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// CostReportAPIGetClustersCostReport request
+	CostReportAPIGetClustersCostReport(ctx context.Context, params *CostReportAPIGetClustersCostReportParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// ListCloudCredentials request
 	ListCloudCredentials(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -158,6 +158,9 @@ type ClientInterface interface {
 	CreateOrUpdateGslbWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	CreateOrUpdateGslb(ctx context.Context, body CreateOrUpdateGslbJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// InventoryBlacklistAPIListBlacklists request
+	InventoryBlacklistAPIListBlacklists(ctx context.Context, params *InventoryBlacklistAPIListBlacklistsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// InventoryBlacklistAPIAddBlacklist request  with any body
 	InventoryBlacklistAPIAddBlacklistWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -245,14 +248,16 @@ type ClientInterface interface {
 	// GetClusterFeedbackEvents request
 	GetClusterFeedbackEvents(ctx context.Context, clusterId ClusterId, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// NodeTemplatesAPIFilterInstanceTypes request  with any body
+	NodeTemplatesAPIFilterInstanceTypesWithBody(ctx context.Context, clusterId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	NodeTemplatesAPIFilterInstanceTypes(ctx context.Context, clusterId string, body NodeTemplatesAPIFilterInstanceTypesJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// GetClusterHealth request
 	GetClusterHealth(ctx context.Context, clusterId ClusterId, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// GetClusterIngressController request
 	GetClusterIngressController(ctx context.Context, clusterId ClusterId, reqEditors ...RequestEditorFn) (*http.Response, error)
-
-	// InventoryBlacklistAPIGetClusterInventoryBlacklist request
-	InventoryBlacklistAPIGetClusterInventoryBlacklist(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// GetClusterKubeconfig request
 	GetClusterKubeconfig(ctx context.Context, clusterId ClusterId, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -301,6 +306,22 @@ type ClientInterface interface {
 
 	// PoliciesAPIGetClusterNodeConstraints request
 	PoliciesAPIGetClusterNodeConstraints(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// NodeTemplatesAPIListNodeTemplates request
+	NodeTemplatesAPIListNodeTemplates(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// NodeTemplatesAPICreateNodeTemplate request  with any body
+	NodeTemplatesAPICreateNodeTemplateWithBody(ctx context.Context, clusterId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	NodeTemplatesAPICreateNodeTemplate(ctx context.Context, clusterId string, body NodeTemplatesAPICreateNodeTemplateJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// NodeTemplatesAPIDeleteNodeTemplate request
+	NodeTemplatesAPIDeleteNodeTemplate(ctx context.Context, clusterId string, nodeTemplateName string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// NodeTemplatesAPIUpdateNodeTemplate request  with any body
+	NodeTemplatesAPIUpdateNodeTemplateWithBody(ctx context.Context, clusterId string, nodeTemplateName string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	NodeTemplatesAPIUpdateNodeTemplate(ctx context.Context, clusterId string, nodeTemplateName string, body NodeTemplatesAPIUpdateNodeTemplateJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// GetClusterNodes request
 	GetClusterNodes(ctx context.Context, clusterId ClusterId, params *GetClusterNodesParams, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -479,6 +500,33 @@ type ClientInterface interface {
 	// GetPromMetrics request
 	GetPromMetrics(ctx context.Context, params *GetPromMetricsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// NotificationAPIListNotifications request
+	NotificationAPIListNotifications(ctx context.Context, params *NotificationAPIListNotificationsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// NotificationAPIAckNotifications request  with any body
+	NotificationAPIAckNotificationsWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	NotificationAPIAckNotifications(ctx context.Context, body NotificationAPIAckNotificationsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// NotificationAPICreateWebhookConfig request  with any body
+	NotificationAPICreateWebhookConfigWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	NotificationAPICreateWebhookConfig(ctx context.Context, body NotificationAPICreateWebhookConfigJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// NotificationAPIDeleteWebhookConfig request
+	NotificationAPIDeleteWebhookConfig(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// NotificationAPIGetWebhookConfig request
+	NotificationAPIGetWebhookConfig(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// NotificationAPIUpdateWebhookConfig request  with any body
+	NotificationAPIUpdateWebhookConfigWithBody(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	NotificationAPIUpdateWebhookConfig(ctx context.Context, id string, body NotificationAPIUpdateWebhookConfigJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// NotificationAPIGetNotification request
+	NotificationAPIGetNotification(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// ListOrganizations request
 	ListOrganizations(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -532,11 +580,22 @@ type ClientInterface interface {
 	// InsightsAPIGetBestPracticesReportFilters request
 	InsightsAPIGetBestPracticesReportFilters(ctx context.Context, params *InsightsAPIGetBestPracticesReportFiltersParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// InsightsAPIScheduleBestPracticesScan request
-	InsightsAPIScheduleBestPracticesScan(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// InsightsAPIScheduleBestPracticesScan request  with any body
+	InsightsAPIScheduleBestPracticesScanWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	InsightsAPIScheduleBestPracticesScan(ctx context.Context, body InsightsAPIScheduleBestPracticesScanJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// InsightsAPIGetBestPracticesReportSummary request
 	InsightsAPIGetBestPracticesReportSummary(ctx context.Context, params *InsightsAPIGetBestPracticesReportSummaryParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// InsightsAPIGetBestPracticesOverview request
+	InsightsAPIGetBestPracticesOverview(ctx context.Context, params *InsightsAPIGetBestPracticesOverviewParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// InsightsAPIGetOverviewSummary request
+	InsightsAPIGetOverviewSummary(ctx context.Context, params *InsightsAPIGetOverviewSummaryParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// InsightsAPIGetVulnerabilitiesOverview request
+	InsightsAPIGetVulnerabilitiesOverview(ctx context.Context, params *InsightsAPIGetVulnerabilitiesOverviewParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// InsightsAPIGetVulnerabilitiesReport request
 	InsightsAPIGetVulnerabilitiesReport(ctx context.Context, params *InsightsAPIGetVulnerabilitiesReportParams, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -544,17 +603,21 @@ type ClientInterface interface {
 	// InsightsAPIGetVulnerabilitiesDetails request
 	InsightsAPIGetVulnerabilitiesDetails(ctx context.Context, objectId string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// InsightsAPIGetVulnerabilitiesReportFilters request
-	InsightsAPIGetVulnerabilitiesReportFilters(ctx context.Context, params *InsightsAPIGetVulnerabilitiesReportFiltersParams, reqEditors ...RequestEditorFn) (*http.Response, error)
-
 	// InsightsAPIGetVulnerabilitiesResources request
 	InsightsAPIGetVulnerabilitiesResources(ctx context.Context, objectId string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// InsightsAPIScheduleVulnerabilitiesScan request
-	InsightsAPIScheduleVulnerabilitiesScan(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// InsightsAPIScheduleVulnerabilitiesScan request  with any body
+	InsightsAPIScheduleVulnerabilitiesScanWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	InsightsAPIScheduleVulnerabilitiesScan(ctx context.Context, body InsightsAPIScheduleVulnerabilitiesScanJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// InsightsAPIGetVulnerabilitiesReportSummary request
 	InsightsAPIGetVulnerabilitiesReportSummary(ctx context.Context, params *InsightsAPIGetVulnerabilitiesReportSummaryParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// InsightsAPIIngestAgentLog request  with any body
+	InsightsAPIIngestAgentLogWithBody(ctx context.Context, clusterId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	InsightsAPIIngestAgentLog(ctx context.Context, clusterId string, body InsightsAPIIngestAgentLogJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 }
 
 func (c *Client) ListAddons(ctx context.Context, params *ListAddonsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
@@ -722,8 +785,8 @@ func (c *Client) CostReportAPIGetClusterWorkloadReport(ctx context.Context, clus
 	return c.Client.Do(req)
 }
 
-func (c *Client) CostReportAPIGetClustersDailyCostReport(ctx context.Context, params *CostReportAPIGetClustersDailyCostReportParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewCostReportAPIGetClustersDailyCostReportRequest(c.Server, params)
+func (c *Client) CostReportAPIGetClustersCostReport(ctx context.Context, params *CostReportAPIGetClustersCostReportParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCostReportAPIGetClustersCostReportRequest(c.Server, params)
 	if err != nil {
 		return nil, err
 	}
@@ -823,6 +886,17 @@ func (c *Client) CreateOrUpdateGslbWithBody(ctx context.Context, contentType str
 
 func (c *Client) CreateOrUpdateGslb(ctx context.Context, body CreateOrUpdateGslbJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewCreateOrUpdateGslbRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) InventoryBlacklistAPIListBlacklists(ctx context.Context, params *InventoryBlacklistAPIListBlacklistsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewInventoryBlacklistAPIListBlacklistsRequest(c.Server, params)
 	if err != nil {
 		return nil, err
 	}
@@ -1184,6 +1258,28 @@ func (c *Client) GetClusterFeedbackEvents(ctx context.Context, clusterId Cluster
 	return c.Client.Do(req)
 }
 
+func (c *Client) NodeTemplatesAPIFilterInstanceTypesWithBody(ctx context.Context, clusterId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewNodeTemplatesAPIFilterInstanceTypesRequestWithBody(c.Server, clusterId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) NodeTemplatesAPIFilterInstanceTypes(ctx context.Context, clusterId string, body NodeTemplatesAPIFilterInstanceTypesJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewNodeTemplatesAPIFilterInstanceTypesRequest(c.Server, clusterId, body)
+	if err != nil {
+		return nil, err
+	}
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
 func (c *Client) GetClusterHealth(ctx context.Context, clusterId ClusterId, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetClusterHealthRequest(c.Server, clusterId)
 	if err != nil {
@@ -1197,17 +1293,6 @@ func (c *Client) GetClusterHealth(ctx context.Context, clusterId ClusterId, reqE
 
 func (c *Client) GetClusterIngressController(ctx context.Context, clusterId ClusterId, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewGetClusterIngressControllerRequest(c.Server, clusterId)
-	if err != nil {
-		return nil, err
-	}
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
-func (c *Client) InventoryBlacklistAPIGetClusterInventoryBlacklist(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewInventoryBlacklistAPIGetClusterInventoryBlacklistRequest(c.Server, clusterId)
 	if err != nil {
 		return nil, err
 	}
@@ -1395,6 +1480,72 @@ func (c *Client) NodeConfigurationAPISetDefault(ctx context.Context, clusterId s
 
 func (c *Client) PoliciesAPIGetClusterNodeConstraints(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewPoliciesAPIGetClusterNodeConstraintsRequest(c.Server, clusterId)
+	if err != nil {
+		return nil, err
+	}
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) NodeTemplatesAPIListNodeTemplates(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewNodeTemplatesAPIListNodeTemplatesRequest(c.Server, clusterId)
+	if err != nil {
+		return nil, err
+	}
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) NodeTemplatesAPICreateNodeTemplateWithBody(ctx context.Context, clusterId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewNodeTemplatesAPICreateNodeTemplateRequestWithBody(c.Server, clusterId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) NodeTemplatesAPICreateNodeTemplate(ctx context.Context, clusterId string, body NodeTemplatesAPICreateNodeTemplateJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewNodeTemplatesAPICreateNodeTemplateRequest(c.Server, clusterId, body)
+	if err != nil {
+		return nil, err
+	}
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) NodeTemplatesAPIDeleteNodeTemplate(ctx context.Context, clusterId string, nodeTemplateName string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewNodeTemplatesAPIDeleteNodeTemplateRequest(c.Server, clusterId, nodeTemplateName)
+	if err != nil {
+		return nil, err
+	}
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) NodeTemplatesAPIUpdateNodeTemplateWithBody(ctx context.Context, clusterId string, nodeTemplateName string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewNodeTemplatesAPIUpdateNodeTemplateRequestWithBody(c.Server, clusterId, nodeTemplateName, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) NodeTemplatesAPIUpdateNodeTemplate(ctx context.Context, clusterId string, nodeTemplateName string, body NodeTemplatesAPIUpdateNodeTemplateJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewNodeTemplatesAPIUpdateNodeTemplateRequest(c.Server, clusterId, nodeTemplateName, body)
 	if err != nil {
 		return nil, err
 	}
@@ -2108,6 +2259,116 @@ func (c *Client) GetPromMetrics(ctx context.Context, params *GetPromMetricsParam
 	return c.Client.Do(req)
 }
 
+func (c *Client) NotificationAPIListNotifications(ctx context.Context, params *NotificationAPIListNotificationsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewNotificationAPIListNotificationsRequest(c.Server, params)
+	if err != nil {
+		return nil, err
+	}
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) NotificationAPIAckNotificationsWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewNotificationAPIAckNotificationsRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) NotificationAPIAckNotifications(ctx context.Context, body NotificationAPIAckNotificationsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewNotificationAPIAckNotificationsRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) NotificationAPICreateWebhookConfigWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewNotificationAPICreateWebhookConfigRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) NotificationAPICreateWebhookConfig(ctx context.Context, body NotificationAPICreateWebhookConfigJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewNotificationAPICreateWebhookConfigRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) NotificationAPIDeleteWebhookConfig(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewNotificationAPIDeleteWebhookConfigRequest(c.Server, id)
+	if err != nil {
+		return nil, err
+	}
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) NotificationAPIGetWebhookConfig(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewNotificationAPIGetWebhookConfigRequest(c.Server, id)
+	if err != nil {
+		return nil, err
+	}
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) NotificationAPIUpdateWebhookConfigWithBody(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewNotificationAPIUpdateWebhookConfigRequestWithBody(c.Server, id, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) NotificationAPIUpdateWebhookConfig(ctx context.Context, id string, body NotificationAPIUpdateWebhookConfigJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewNotificationAPIUpdateWebhookConfigRequest(c.Server, id, body)
+	if err != nil {
+		return nil, err
+	}
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) NotificationAPIGetNotification(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewNotificationAPIGetNotificationRequest(c.Server, id)
+	if err != nil {
+		return nil, err
+	}
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
 func (c *Client) ListOrganizations(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewListOrganizationsRequest(c.Server)
 	if err != nil {
@@ -2317,8 +2578,19 @@ func (c *Client) InsightsAPIGetBestPracticesReportFilters(ctx context.Context, p
 	return c.Client.Do(req)
 }
 
-func (c *Client) InsightsAPIScheduleBestPracticesScan(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewInsightsAPIScheduleBestPracticesScanRequest(c.Server)
+func (c *Client) InsightsAPIScheduleBestPracticesScanWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewInsightsAPIScheduleBestPracticesScanRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) InsightsAPIScheduleBestPracticesScan(ctx context.Context, body InsightsAPIScheduleBestPracticesScanJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewInsightsAPIScheduleBestPracticesScanRequest(c.Server, body)
 	if err != nil {
 		return nil, err
 	}
@@ -2330,6 +2602,39 @@ func (c *Client) InsightsAPIScheduleBestPracticesScan(ctx context.Context, reqEd
 
 func (c *Client) InsightsAPIGetBestPracticesReportSummary(ctx context.Context, params *InsightsAPIGetBestPracticesReportSummaryParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewInsightsAPIGetBestPracticesReportSummaryRequest(c.Server, params)
+	if err != nil {
+		return nil, err
+	}
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) InsightsAPIGetBestPracticesOverview(ctx context.Context, params *InsightsAPIGetBestPracticesOverviewParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewInsightsAPIGetBestPracticesOverviewRequest(c.Server, params)
+	if err != nil {
+		return nil, err
+	}
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) InsightsAPIGetOverviewSummary(ctx context.Context, params *InsightsAPIGetOverviewSummaryParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewInsightsAPIGetOverviewSummaryRequest(c.Server, params)
+	if err != nil {
+		return nil, err
+	}
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) InsightsAPIGetVulnerabilitiesOverview(ctx context.Context, params *InsightsAPIGetVulnerabilitiesOverviewParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewInsightsAPIGetVulnerabilitiesOverviewRequest(c.Server, params)
 	if err != nil {
 		return nil, err
 	}
@@ -2361,17 +2666,6 @@ func (c *Client) InsightsAPIGetVulnerabilitiesDetails(ctx context.Context, objec
 	return c.Client.Do(req)
 }
 
-func (c *Client) InsightsAPIGetVulnerabilitiesReportFilters(ctx context.Context, params *InsightsAPIGetVulnerabilitiesReportFiltersParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewInsightsAPIGetVulnerabilitiesReportFiltersRequest(c.Server, params)
-	if err != nil {
-		return nil, err
-	}
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
 func (c *Client) InsightsAPIGetVulnerabilitiesResources(ctx context.Context, objectId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewInsightsAPIGetVulnerabilitiesResourcesRequest(c.Server, objectId)
 	if err != nil {
@@ -2383,8 +2677,19 @@ func (c *Client) InsightsAPIGetVulnerabilitiesResources(ctx context.Context, obj
 	return c.Client.Do(req)
 }
 
-func (c *Client) InsightsAPIScheduleVulnerabilitiesScan(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewInsightsAPIScheduleVulnerabilitiesScanRequest(c.Server)
+func (c *Client) InsightsAPIScheduleVulnerabilitiesScanWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewInsightsAPIScheduleVulnerabilitiesScanRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) InsightsAPIScheduleVulnerabilitiesScan(ctx context.Context, body InsightsAPIScheduleVulnerabilitiesScanJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewInsightsAPIScheduleVulnerabilitiesScanRequest(c.Server, body)
 	if err != nil {
 		return nil, err
 	}
@@ -2396,6 +2701,28 @@ func (c *Client) InsightsAPIScheduleVulnerabilitiesScan(ctx context.Context, req
 
 func (c *Client) InsightsAPIGetVulnerabilitiesReportSummary(ctx context.Context, params *InsightsAPIGetVulnerabilitiesReportSummaryParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewInsightsAPIGetVulnerabilitiesReportSummaryRequest(c.Server, params)
+	if err != nil {
+		return nil, err
+	}
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) InsightsAPIIngestAgentLogWithBody(ctx context.Context, clusterId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewInsightsAPIIngestAgentLogRequestWithBody(c.Server, clusterId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) InsightsAPIIngestAgentLog(ctx context.Context, clusterId string, body InsightsAPIIngestAgentLogJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewInsightsAPIIngestAgentLogRequest(c.Server, clusterId, body)
 	if err != nil {
 		return nil, err
 	}
@@ -3409,8 +3736,8 @@ func NewCostReportAPIGetClusterWorkloadReportRequest(server string, clusterId st
 	return req, nil
 }
 
-// NewCostReportAPIGetClustersDailyCostReportRequest generates requests for CostReportAPIGetClustersDailyCostReport
-func NewCostReportAPIGetClustersDailyCostReportRequest(server string, params *CostReportAPIGetClustersDailyCostReportParams) (*http.Request, error) {
+// NewCostReportAPIGetClustersCostReportRequest generates requests for CostReportAPIGetClustersCostReport
+func NewCostReportAPIGetClustersCostReportRequest(server string, params *CostReportAPIGetClustersCostReportParams) (*http.Request, error) {
 	var err error
 
 	queryUrl, err := url.Parse(server)
@@ -3675,6 +4002,69 @@ func NewCreateOrUpdateGslbRequestWithBody(server string, contentType string, bod
 	}
 
 	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewInventoryBlacklistAPIListBlacklistsRequest generates requests for InventoryBlacklistAPIListBlacklists
+func NewInventoryBlacklistAPIListBlacklistsRequest(server string, params *InventoryBlacklistAPIListBlacklistsParams) (*http.Request, error) {
+	var err error
+
+	queryUrl, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	basePath := fmt.Sprintf("/v1/inventory/blacklist")
+	if basePath[0] == '/' {
+		basePath = basePath[1:]
+	}
+
+	queryUrl, err = queryUrl.Parse(basePath)
+	if err != nil {
+		return nil, err
+	}
+
+	queryValues := queryUrl.Query()
+
+	if params.OrganizationId != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "organizationId", *params.OrganizationId); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.ClusterId != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "clusterId", *params.ClusterId); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	queryUrl.RawQuery = queryValues.Encode()
+
+	req, err := http.NewRequest("GET", queryUrl.String(), nil)
+	if err != nil {
+		return nil, err
+	}
 
 	return req, nil
 }
@@ -4663,6 +5053,53 @@ func NewGetClusterFeedbackEventsRequest(server string, clusterId ClusterId) (*ht
 	return req, nil
 }
 
+// NewNodeTemplatesAPIFilterInstanceTypesRequest calls the generic NodeTemplatesAPIFilterInstanceTypes builder with application/json body
+func NewNodeTemplatesAPIFilterInstanceTypesRequest(server string, clusterId string, body NodeTemplatesAPIFilterInstanceTypesJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewNodeTemplatesAPIFilterInstanceTypesRequestWithBody(server, clusterId, "application/json", bodyReader)
+}
+
+// NewNodeTemplatesAPIFilterInstanceTypesRequestWithBody generates requests for NodeTemplatesAPIFilterInstanceTypes with any type of body
+func NewNodeTemplatesAPIFilterInstanceTypesRequestWithBody(server string, clusterId string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParam("simple", false, "clusterId", clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	queryUrl, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	basePath := fmt.Sprintf("/v1/kubernetes/clusters/%s/filter-instance-types", pathParam0)
+	if basePath[0] == '/' {
+		basePath = basePath[1:]
+	}
+
+	queryUrl, err = queryUrl.Parse(basePath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryUrl.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
 // NewGetClusterHealthRequest generates requests for GetClusterHealth
 func NewGetClusterHealthRequest(server string, clusterId ClusterId) (*http.Request, error) {
 	var err error
@@ -4714,40 +5151,6 @@ func NewGetClusterIngressControllerRequest(server string, clusterId ClusterId) (
 	}
 
 	basePath := fmt.Sprintf("/v1/kubernetes/clusters/%s/ingress-controller", pathParam0)
-	if basePath[0] == '/' {
-		basePath = basePath[1:]
-	}
-
-	queryUrl, err = queryUrl.Parse(basePath)
-	if err != nil {
-		return nil, err
-	}
-
-	req, err := http.NewRequest("GET", queryUrl.String(), nil)
-	if err != nil {
-		return nil, err
-	}
-
-	return req, nil
-}
-
-// NewInventoryBlacklistAPIGetClusterInventoryBlacklistRequest generates requests for InventoryBlacklistAPIGetClusterInventoryBlacklist
-func NewInventoryBlacklistAPIGetClusterInventoryBlacklistRequest(server string, clusterId string) (*http.Request, error) {
-	var err error
-
-	var pathParam0 string
-
-	pathParam0, err = runtime.StyleParam("simple", false, "clusterId", clusterId)
-	if err != nil {
-		return nil, err
-	}
-
-	queryUrl, err := url.Parse(server)
-	if err != nil {
-		return nil, err
-	}
-
-	basePath := fmt.Sprintf("/v1/kubernetes/clusters/%s/inventory-blacklist", pathParam0)
 	if basePath[0] == '/' {
 		basePath = basePath[1:]
 	}
@@ -5456,6 +5859,182 @@ func NewPoliciesAPIGetClusterNodeConstraintsRequest(server string, clusterId str
 	if err != nil {
 		return nil, err
 	}
+
+	return req, nil
+}
+
+// NewNodeTemplatesAPIListNodeTemplatesRequest generates requests for NodeTemplatesAPIListNodeTemplates
+func NewNodeTemplatesAPIListNodeTemplatesRequest(server string, clusterId string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParam("simple", false, "clusterId", clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	queryUrl, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	basePath := fmt.Sprintf("/v1/kubernetes/clusters/%s/node-templates", pathParam0)
+	if basePath[0] == '/' {
+		basePath = basePath[1:]
+	}
+
+	queryUrl, err = queryUrl.Parse(basePath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryUrl.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewNodeTemplatesAPICreateNodeTemplateRequest calls the generic NodeTemplatesAPICreateNodeTemplate builder with application/json body
+func NewNodeTemplatesAPICreateNodeTemplateRequest(server string, clusterId string, body NodeTemplatesAPICreateNodeTemplateJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewNodeTemplatesAPICreateNodeTemplateRequestWithBody(server, clusterId, "application/json", bodyReader)
+}
+
+// NewNodeTemplatesAPICreateNodeTemplateRequestWithBody generates requests for NodeTemplatesAPICreateNodeTemplate with any type of body
+func NewNodeTemplatesAPICreateNodeTemplateRequestWithBody(server string, clusterId string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParam("simple", false, "clusterId", clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	queryUrl, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	basePath := fmt.Sprintf("/v1/kubernetes/clusters/%s/node-templates", pathParam0)
+	if basePath[0] == '/' {
+		basePath = basePath[1:]
+	}
+
+	queryUrl, err = queryUrl.Parse(basePath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryUrl.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewNodeTemplatesAPIDeleteNodeTemplateRequest generates requests for NodeTemplatesAPIDeleteNodeTemplate
+func NewNodeTemplatesAPIDeleteNodeTemplateRequest(server string, clusterId string, nodeTemplateName string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParam("simple", false, "clusterId", clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParam("simple", false, "nodeTemplateName", nodeTemplateName)
+	if err != nil {
+		return nil, err
+	}
+
+	queryUrl, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	basePath := fmt.Sprintf("/v1/kubernetes/clusters/%s/node-templates/%s", pathParam0, pathParam1)
+	if basePath[0] == '/' {
+		basePath = basePath[1:]
+	}
+
+	queryUrl, err = queryUrl.Parse(basePath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("DELETE", queryUrl.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewNodeTemplatesAPIUpdateNodeTemplateRequest calls the generic NodeTemplatesAPIUpdateNodeTemplate builder with application/json body
+func NewNodeTemplatesAPIUpdateNodeTemplateRequest(server string, clusterId string, nodeTemplateName string, body NodeTemplatesAPIUpdateNodeTemplateJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewNodeTemplatesAPIUpdateNodeTemplateRequestWithBody(server, clusterId, nodeTemplateName, "application/json", bodyReader)
+}
+
+// NewNodeTemplatesAPIUpdateNodeTemplateRequestWithBody generates requests for NodeTemplatesAPIUpdateNodeTemplate with any type of body
+func NewNodeTemplatesAPIUpdateNodeTemplateRequestWithBody(server string, clusterId string, nodeTemplateName string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParam("simple", false, "clusterId", clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParam("simple", false, "nodeTemplateName", nodeTemplateName)
+	if err != nil {
+		return nil, err
+	}
+
+	queryUrl, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	basePath := fmt.Sprintf("/v1/kubernetes/clusters/%s/node-templates/%s", pathParam0, pathParam1)
+	if basePath[0] == '/' {
+		basePath = basePath[1:]
+	}
+
+	queryUrl, err = queryUrl.Parse(basePath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("PUT", queryUrl.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
 
 	return req, nil
 }
@@ -6860,6 +7439,22 @@ func NewExternalClusterAPIGetCredentialsScriptRequest(server string, clusterId s
 
 	}
 
+	if params.NvidiaDevicePlugin != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "nvidiaDevicePlugin", *params.NvidiaDevicePlugin); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
 	queryUrl.RawQuery = queryValues.Encode()
 
 	req, err := http.NewRequest("GET", queryUrl.String(), nil)
@@ -7577,6 +8172,362 @@ func NewGetPromMetricsRequest(server string, params *GetPromMetricsParams) (*htt
 		}
 
 		req.Header.Set("X-CastAi-Organization-Id", headerParam0)
+	}
+
+	return req, nil
+}
+
+// NewNotificationAPIListNotificationsRequest generates requests for NotificationAPIListNotifications
+func NewNotificationAPIListNotificationsRequest(server string, params *NotificationAPIListNotificationsParams) (*http.Request, error) {
+	var err error
+
+	queryUrl, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	basePath := fmt.Sprintf("/v1/notifications")
+	if basePath[0] == '/' {
+		basePath = basePath[1:]
+	}
+
+	queryUrl, err = queryUrl.Parse(basePath)
+	if err != nil {
+		return nil, err
+	}
+
+	queryValues := queryUrl.Query()
+
+	if params.PageLimit != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "page.limit", *params.PageLimit); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.PageCursor != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "page.cursor", *params.PageCursor); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.FilterFromDate != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "filter.fromDate", *params.FilterFromDate); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.FilterToDate != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "filter.toDate", *params.FilterToDate); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.FilterSeverities != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "filter.severities", *params.FilterSeverities); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.FilterIsAcked != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "filter.isAcked", *params.FilterIsAcked); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	queryUrl.RawQuery = queryValues.Encode()
+
+	req, err := http.NewRequest("GET", queryUrl.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewNotificationAPIAckNotificationsRequest calls the generic NotificationAPIAckNotifications builder with application/json body
+func NewNotificationAPIAckNotificationsRequest(server string, body NotificationAPIAckNotificationsJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewNotificationAPIAckNotificationsRequestWithBody(server, "application/json", bodyReader)
+}
+
+// NewNotificationAPIAckNotificationsRequestWithBody generates requests for NotificationAPIAckNotifications with any type of body
+func NewNotificationAPIAckNotificationsRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	queryUrl, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	basePath := fmt.Sprintf("/v1/notifications/ack")
+	if basePath[0] == '/' {
+		basePath = basePath[1:]
+	}
+
+	queryUrl, err = queryUrl.Parse(basePath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryUrl.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewNotificationAPICreateWebhookConfigRequest calls the generic NotificationAPICreateWebhookConfig builder with application/json body
+func NewNotificationAPICreateWebhookConfigRequest(server string, body NotificationAPICreateWebhookConfigJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewNotificationAPICreateWebhookConfigRequestWithBody(server, "application/json", bodyReader)
+}
+
+// NewNotificationAPICreateWebhookConfigRequestWithBody generates requests for NotificationAPICreateWebhookConfig with any type of body
+func NewNotificationAPICreateWebhookConfigRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	queryUrl, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	basePath := fmt.Sprintf("/v1/notifications/webhook-configuration")
+	if basePath[0] == '/' {
+		basePath = basePath[1:]
+	}
+
+	queryUrl, err = queryUrl.Parse(basePath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryUrl.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewNotificationAPIDeleteWebhookConfigRequest generates requests for NotificationAPIDeleteWebhookConfig
+func NewNotificationAPIDeleteWebhookConfigRequest(server string, id string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParam("simple", false, "id", id)
+	if err != nil {
+		return nil, err
+	}
+
+	queryUrl, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	basePath := fmt.Sprintf("/v1/notifications/webhook-configuration/%s", pathParam0)
+	if basePath[0] == '/' {
+		basePath = basePath[1:]
+	}
+
+	queryUrl, err = queryUrl.Parse(basePath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("DELETE", queryUrl.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewNotificationAPIGetWebhookConfigRequest generates requests for NotificationAPIGetWebhookConfig
+func NewNotificationAPIGetWebhookConfigRequest(server string, id string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParam("simple", false, "id", id)
+	if err != nil {
+		return nil, err
+	}
+
+	queryUrl, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	basePath := fmt.Sprintf("/v1/notifications/webhook-configuration/%s", pathParam0)
+	if basePath[0] == '/' {
+		basePath = basePath[1:]
+	}
+
+	queryUrl, err = queryUrl.Parse(basePath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryUrl.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewNotificationAPIUpdateWebhookConfigRequest calls the generic NotificationAPIUpdateWebhookConfig builder with application/json body
+func NewNotificationAPIUpdateWebhookConfigRequest(server string, id string, body NotificationAPIUpdateWebhookConfigJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewNotificationAPIUpdateWebhookConfigRequestWithBody(server, id, "application/json", bodyReader)
+}
+
+// NewNotificationAPIUpdateWebhookConfigRequestWithBody generates requests for NotificationAPIUpdateWebhookConfig with any type of body
+func NewNotificationAPIUpdateWebhookConfigRequestWithBody(server string, id string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParam("simple", false, "id", id)
+	if err != nil {
+		return nil, err
+	}
+
+	queryUrl, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	basePath := fmt.Sprintf("/v1/notifications/webhook-configuration/%s", pathParam0)
+	if basePath[0] == '/' {
+		basePath = basePath[1:]
+	}
+
+	queryUrl, err = queryUrl.Parse(basePath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("PUT", queryUrl.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewNotificationAPIGetNotificationRequest generates requests for NotificationAPIGetNotification
+func NewNotificationAPIGetNotificationRequest(server string, id string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParam("simple", false, "id", id)
+	if err != nil {
+		return nil, err
+	}
+
+	queryUrl, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	basePath := fmt.Sprintf("/v1/notifications/%s", pathParam0)
+	if basePath[0] == '/' {
+		basePath = basePath[1:]
+	}
+
+	queryUrl, err = queryUrl.Parse(basePath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryUrl.String(), nil)
+	if err != nil {
+		return nil, err
 	}
 
 	return req, nil
@@ -8328,8 +9279,19 @@ func NewInsightsAPIGetBestPracticesReportFiltersRequest(server string, params *I
 	return req, nil
 }
 
-// NewInsightsAPIScheduleBestPracticesScanRequest generates requests for InsightsAPIScheduleBestPracticesScan
-func NewInsightsAPIScheduleBestPracticesScanRequest(server string) (*http.Request, error) {
+// NewInsightsAPIScheduleBestPracticesScanRequest calls the generic InsightsAPIScheduleBestPracticesScan builder with application/json body
+func NewInsightsAPIScheduleBestPracticesScanRequest(server string, body InsightsAPIScheduleBestPracticesScanJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewInsightsAPIScheduleBestPracticesScanRequestWithBody(server, "application/json", bodyReader)
+}
+
+// NewInsightsAPIScheduleBestPracticesScanRequestWithBody generates requests for InsightsAPIScheduleBestPracticesScan with any type of body
+func NewInsightsAPIScheduleBestPracticesScanRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
 	var err error
 
 	queryUrl, err := url.Parse(server)
@@ -8347,10 +9309,12 @@ func NewInsightsAPIScheduleBestPracticesScanRequest(server string) (*http.Reques
 		return nil, err
 	}
 
-	req, err := http.NewRequest("POST", queryUrl.String(), nil)
+	req, err := http.NewRequest("POST", queryUrl.String(), body)
 	if err != nil {
 		return nil, err
 	}
+
+	req.Header.Add("Content-Type", contentType)
 
 	return req, nil
 }
@@ -8375,6 +9339,243 @@ func NewInsightsAPIGetBestPracticesReportSummaryRequest(server string, params *I
 	}
 
 	queryValues := queryUrl.Query()
+
+	if params.ClusterId != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "clusterId", *params.ClusterId); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	queryUrl.RawQuery = queryValues.Encode()
+
+	req, err := http.NewRequest("GET", queryUrl.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewInsightsAPIGetBestPracticesOverviewRequest generates requests for InsightsAPIGetBestPracticesOverview
+func NewInsightsAPIGetBestPracticesOverviewRequest(server string, params *InsightsAPIGetBestPracticesOverviewParams) (*http.Request, error) {
+	var err error
+
+	queryUrl, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	basePath := fmt.Sprintf("/v1/security/insights/overview/best-practices")
+	if basePath[0] == '/' {
+		basePath = basePath[1:]
+	}
+
+	queryUrl, err = queryUrl.Parse(basePath)
+	if err != nil {
+		return nil, err
+	}
+
+	queryValues := queryUrl.Query()
+
+	if params.FromDate != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "fromDate", *params.FromDate); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.ToDate != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "toDate", *params.ToDate); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.ClusterId != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "clusterId", *params.ClusterId); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	queryUrl.RawQuery = queryValues.Encode()
+
+	req, err := http.NewRequest("GET", queryUrl.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewInsightsAPIGetOverviewSummaryRequest generates requests for InsightsAPIGetOverviewSummary
+func NewInsightsAPIGetOverviewSummaryRequest(server string, params *InsightsAPIGetOverviewSummaryParams) (*http.Request, error) {
+	var err error
+
+	queryUrl, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	basePath := fmt.Sprintf("/v1/security/insights/overview/summary")
+	if basePath[0] == '/' {
+		basePath = basePath[1:]
+	}
+
+	queryUrl, err = queryUrl.Parse(basePath)
+	if err != nil {
+		return nil, err
+	}
+
+	queryValues := queryUrl.Query()
+
+	if params.FromDate != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "fromDate", *params.FromDate); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.ToDate != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "toDate", *params.ToDate); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.ClusterId != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "clusterId", *params.ClusterId); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	queryUrl.RawQuery = queryValues.Encode()
+
+	req, err := http.NewRequest("GET", queryUrl.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewInsightsAPIGetVulnerabilitiesOverviewRequest generates requests for InsightsAPIGetVulnerabilitiesOverview
+func NewInsightsAPIGetVulnerabilitiesOverviewRequest(server string, params *InsightsAPIGetVulnerabilitiesOverviewParams) (*http.Request, error) {
+	var err error
+
+	queryUrl, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	basePath := fmt.Sprintf("/v1/security/insights/overview/vulnerabilities")
+	if basePath[0] == '/' {
+		basePath = basePath[1:]
+	}
+
+	queryUrl, err = queryUrl.Parse(basePath)
+	if err != nil {
+		return nil, err
+	}
+
+	queryValues := queryUrl.Query()
+
+	if params.FromDate != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "fromDate", *params.FromDate); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.ToDate != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "toDate", *params.ToDate); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
 
 	if params.ClusterId != nil {
 
@@ -8471,22 +9672,6 @@ func NewInsightsAPIGetVulnerabilitiesReportRequest(server string, params *Insigh
 
 	}
 
-	if params.Namespace != nil {
-
-		if queryFrag, err := runtime.StyleParam("form", true, "namespace", *params.Namespace); err != nil {
-			return nil, err
-		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
-			return nil, err
-		} else {
-			for k, v := range parsed {
-				for _, v2 := range v {
-					queryValues.Add(k, v2)
-				}
-			}
-		}
-
-	}
-
 	if params.From != nil {
 
 		if queryFrag, err := runtime.StyleParam("form", true, "from", *params.From); err != nil {
@@ -8547,53 +9732,6 @@ func NewInsightsAPIGetVulnerabilitiesDetailsRequest(server string, objectId stri
 	return req, nil
 }
 
-// NewInsightsAPIGetVulnerabilitiesReportFiltersRequest generates requests for InsightsAPIGetVulnerabilitiesReportFilters
-func NewInsightsAPIGetVulnerabilitiesReportFiltersRequest(server string, params *InsightsAPIGetVulnerabilitiesReportFiltersParams) (*http.Request, error) {
-	var err error
-
-	queryUrl, err := url.Parse(server)
-	if err != nil {
-		return nil, err
-	}
-
-	basePath := fmt.Sprintf("/v1/security/insights/vulnerabilities/filters")
-	if basePath[0] == '/' {
-		basePath = basePath[1:]
-	}
-
-	queryUrl, err = queryUrl.Parse(basePath)
-	if err != nil {
-		return nil, err
-	}
-
-	queryValues := queryUrl.Query()
-
-	if params.ClusterId != nil {
-
-		if queryFrag, err := runtime.StyleParam("form", true, "clusterId", *params.ClusterId); err != nil {
-			return nil, err
-		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
-			return nil, err
-		} else {
-			for k, v := range parsed {
-				for _, v2 := range v {
-					queryValues.Add(k, v2)
-				}
-			}
-		}
-
-	}
-
-	queryUrl.RawQuery = queryValues.Encode()
-
-	req, err := http.NewRequest("GET", queryUrl.String(), nil)
-	if err != nil {
-		return nil, err
-	}
-
-	return req, nil
-}
-
 // NewInsightsAPIGetVulnerabilitiesResourcesRequest generates requests for InsightsAPIGetVulnerabilitiesResources
 func NewInsightsAPIGetVulnerabilitiesResourcesRequest(server string, objectId string) (*http.Request, error) {
 	var err error
@@ -8628,8 +9766,19 @@ func NewInsightsAPIGetVulnerabilitiesResourcesRequest(server string, objectId st
 	return req, nil
 }
 
-// NewInsightsAPIScheduleVulnerabilitiesScanRequest generates requests for InsightsAPIScheduleVulnerabilitiesScan
-func NewInsightsAPIScheduleVulnerabilitiesScanRequest(server string) (*http.Request, error) {
+// NewInsightsAPIScheduleVulnerabilitiesScanRequest calls the generic InsightsAPIScheduleVulnerabilitiesScan builder with application/json body
+func NewInsightsAPIScheduleVulnerabilitiesScanRequest(server string, body InsightsAPIScheduleVulnerabilitiesScanJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewInsightsAPIScheduleVulnerabilitiesScanRequestWithBody(server, "application/json", bodyReader)
+}
+
+// NewInsightsAPIScheduleVulnerabilitiesScanRequestWithBody generates requests for InsightsAPIScheduleVulnerabilitiesScan with any type of body
+func NewInsightsAPIScheduleVulnerabilitiesScanRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
 	var err error
 
 	queryUrl, err := url.Parse(server)
@@ -8647,10 +9796,12 @@ func NewInsightsAPIScheduleVulnerabilitiesScanRequest(server string) (*http.Requ
 		return nil, err
 	}
 
-	req, err := http.NewRequest("POST", queryUrl.String(), nil)
+	req, err := http.NewRequest("POST", queryUrl.String(), body)
 	if err != nil {
 		return nil, err
 	}
+
+	req.Header.Add("Content-Type", contentType)
 
 	return req, nil
 }
@@ -8698,6 +9849,53 @@ func NewInsightsAPIGetVulnerabilitiesReportSummaryRequest(server string, params 
 	if err != nil {
 		return nil, err
 	}
+
+	return req, nil
+}
+
+// NewInsightsAPIIngestAgentLogRequest calls the generic InsightsAPIIngestAgentLog builder with application/json body
+func NewInsightsAPIIngestAgentLogRequest(server string, clusterId string, body InsightsAPIIngestAgentLogJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewInsightsAPIIngestAgentLogRequestWithBody(server, clusterId, "application/json", bodyReader)
+}
+
+// NewInsightsAPIIngestAgentLogRequestWithBody generates requests for InsightsAPIIngestAgentLog with any type of body
+func NewInsightsAPIIngestAgentLogRequestWithBody(server string, clusterId string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParam("simple", false, "clusterId", clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	queryUrl, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	basePath := fmt.Sprintf("/v1/security/insights/%s/log", pathParam0)
+	if basePath[0] == '/' {
+		basePath = basePath[1:]
+	}
+
+	queryUrl, err = queryUrl.Parse(basePath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryUrl.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
 
 	return req, nil
 }
@@ -8788,8 +9986,8 @@ type ClientWithResponsesInterface interface {
 	// CostReportAPIGetClusterWorkloadReport request
 	CostReportAPIGetClusterWorkloadReportWithResponse(ctx context.Context, clusterId string, params *CostReportAPIGetClusterWorkloadReportParams) (*CostReportAPIGetClusterWorkloadReportResponse, error)
 
-	// CostReportAPIGetClustersDailyCostReport request
-	CostReportAPIGetClustersDailyCostReportWithResponse(ctx context.Context, params *CostReportAPIGetClustersDailyCostReportParams) (*CostReportAPIGetClustersDailyCostReportResponse, error)
+	// CostReportAPIGetClustersCostReport request
+	CostReportAPIGetClustersCostReportWithResponse(ctx context.Context, params *CostReportAPIGetClustersCostReportParams) (*CostReportAPIGetClustersCostReportResponse, error)
 
 	// ListCloudCredentials request
 	ListCloudCredentialsWithResponse(ctx context.Context) (*ListCloudCredentialsResponse, error)
@@ -8814,6 +10012,9 @@ type ClientWithResponsesInterface interface {
 	CreateOrUpdateGslbWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*CreateOrUpdateGslbResponse, error)
 
 	CreateOrUpdateGslbWithResponse(ctx context.Context, body CreateOrUpdateGslbJSONRequestBody) (*CreateOrUpdateGslbResponse, error)
+
+	// InventoryBlacklistAPIListBlacklists request
+	InventoryBlacklistAPIListBlacklistsWithResponse(ctx context.Context, params *InventoryBlacklistAPIListBlacklistsParams) (*InventoryBlacklistAPIListBlacklistsResponse, error)
 
 	// InventoryBlacklistAPIAddBlacklist request  with any body
 	InventoryBlacklistAPIAddBlacklistWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*InventoryBlacklistAPIAddBlacklistResponse, error)
@@ -8901,14 +10102,16 @@ type ClientWithResponsesInterface interface {
 	// GetClusterFeedbackEvents request
 	GetClusterFeedbackEventsWithResponse(ctx context.Context, clusterId ClusterId) (*GetClusterFeedbackEventsResponse, error)
 
+	// NodeTemplatesAPIFilterInstanceTypes request  with any body
+	NodeTemplatesAPIFilterInstanceTypesWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader) (*NodeTemplatesAPIFilterInstanceTypesResponse, error)
+
+	NodeTemplatesAPIFilterInstanceTypesWithResponse(ctx context.Context, clusterId string, body NodeTemplatesAPIFilterInstanceTypesJSONRequestBody) (*NodeTemplatesAPIFilterInstanceTypesResponse, error)
+
 	// GetClusterHealth request
 	GetClusterHealthWithResponse(ctx context.Context, clusterId ClusterId) (*GetClusterHealthResponse, error)
 
 	// GetClusterIngressController request
 	GetClusterIngressControllerWithResponse(ctx context.Context, clusterId ClusterId) (*GetClusterIngressControllerResponse, error)
-
-	// InventoryBlacklistAPIGetClusterInventoryBlacklist request
-	InventoryBlacklistAPIGetClusterInventoryBlacklistWithResponse(ctx context.Context, clusterId string) (*InventoryBlacklistAPIGetClusterInventoryBlacklistResponse, error)
 
 	// GetClusterKubeconfig request
 	GetClusterKubeconfigWithResponse(ctx context.Context, clusterId ClusterId) (*GetClusterKubeconfigResponse, error)
@@ -8957,6 +10160,22 @@ type ClientWithResponsesInterface interface {
 
 	// PoliciesAPIGetClusterNodeConstraints request
 	PoliciesAPIGetClusterNodeConstraintsWithResponse(ctx context.Context, clusterId string) (*PoliciesAPIGetClusterNodeConstraintsResponse, error)
+
+	// NodeTemplatesAPIListNodeTemplates request
+	NodeTemplatesAPIListNodeTemplatesWithResponse(ctx context.Context, clusterId string) (*NodeTemplatesAPIListNodeTemplatesResponse, error)
+
+	// NodeTemplatesAPICreateNodeTemplate request  with any body
+	NodeTemplatesAPICreateNodeTemplateWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader) (*NodeTemplatesAPICreateNodeTemplateResponse, error)
+
+	NodeTemplatesAPICreateNodeTemplateWithResponse(ctx context.Context, clusterId string, body NodeTemplatesAPICreateNodeTemplateJSONRequestBody) (*NodeTemplatesAPICreateNodeTemplateResponse, error)
+
+	// NodeTemplatesAPIDeleteNodeTemplate request
+	NodeTemplatesAPIDeleteNodeTemplateWithResponse(ctx context.Context, clusterId string, nodeTemplateName string) (*NodeTemplatesAPIDeleteNodeTemplateResponse, error)
+
+	// NodeTemplatesAPIUpdateNodeTemplate request  with any body
+	NodeTemplatesAPIUpdateNodeTemplateWithBodyWithResponse(ctx context.Context, clusterId string, nodeTemplateName string, contentType string, body io.Reader) (*NodeTemplatesAPIUpdateNodeTemplateResponse, error)
+
+	NodeTemplatesAPIUpdateNodeTemplateWithResponse(ctx context.Context, clusterId string, nodeTemplateName string, body NodeTemplatesAPIUpdateNodeTemplateJSONRequestBody) (*NodeTemplatesAPIUpdateNodeTemplateResponse, error)
 
 	// GetClusterNodes request
 	GetClusterNodesWithResponse(ctx context.Context, clusterId ClusterId, params *GetClusterNodesParams) (*GetClusterNodesResponse, error)
@@ -9135,6 +10354,33 @@ type ClientWithResponsesInterface interface {
 	// GetPromMetrics request
 	GetPromMetricsWithResponse(ctx context.Context, params *GetPromMetricsParams) (*GetPromMetricsResponse, error)
 
+	// NotificationAPIListNotifications request
+	NotificationAPIListNotificationsWithResponse(ctx context.Context, params *NotificationAPIListNotificationsParams) (*NotificationAPIListNotificationsResponse, error)
+
+	// NotificationAPIAckNotifications request  with any body
+	NotificationAPIAckNotificationsWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*NotificationAPIAckNotificationsResponse, error)
+
+	NotificationAPIAckNotificationsWithResponse(ctx context.Context, body NotificationAPIAckNotificationsJSONRequestBody) (*NotificationAPIAckNotificationsResponse, error)
+
+	// NotificationAPICreateWebhookConfig request  with any body
+	NotificationAPICreateWebhookConfigWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*NotificationAPICreateWebhookConfigResponse, error)
+
+	NotificationAPICreateWebhookConfigWithResponse(ctx context.Context, body NotificationAPICreateWebhookConfigJSONRequestBody) (*NotificationAPICreateWebhookConfigResponse, error)
+
+	// NotificationAPIDeleteWebhookConfig request
+	NotificationAPIDeleteWebhookConfigWithResponse(ctx context.Context, id string) (*NotificationAPIDeleteWebhookConfigResponse, error)
+
+	// NotificationAPIGetWebhookConfig request
+	NotificationAPIGetWebhookConfigWithResponse(ctx context.Context, id string) (*NotificationAPIGetWebhookConfigResponse, error)
+
+	// NotificationAPIUpdateWebhookConfig request  with any body
+	NotificationAPIUpdateWebhookConfigWithBodyWithResponse(ctx context.Context, id string, contentType string, body io.Reader) (*NotificationAPIUpdateWebhookConfigResponse, error)
+
+	NotificationAPIUpdateWebhookConfigWithResponse(ctx context.Context, id string, body NotificationAPIUpdateWebhookConfigJSONRequestBody) (*NotificationAPIUpdateWebhookConfigResponse, error)
+
+	// NotificationAPIGetNotification request
+	NotificationAPIGetNotificationWithResponse(ctx context.Context, id string) (*NotificationAPIGetNotificationResponse, error)
+
 	// ListOrganizations request
 	ListOrganizationsWithResponse(ctx context.Context) (*ListOrganizationsResponse, error)
 
@@ -9188,11 +10434,22 @@ type ClientWithResponsesInterface interface {
 	// InsightsAPIGetBestPracticesReportFilters request
 	InsightsAPIGetBestPracticesReportFiltersWithResponse(ctx context.Context, params *InsightsAPIGetBestPracticesReportFiltersParams) (*InsightsAPIGetBestPracticesReportFiltersResponse, error)
 
-	// InsightsAPIScheduleBestPracticesScan request
-	InsightsAPIScheduleBestPracticesScanWithResponse(ctx context.Context) (*InsightsAPIScheduleBestPracticesScanResponse, error)
+	// InsightsAPIScheduleBestPracticesScan request  with any body
+	InsightsAPIScheduleBestPracticesScanWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*InsightsAPIScheduleBestPracticesScanResponse, error)
+
+	InsightsAPIScheduleBestPracticesScanWithResponse(ctx context.Context, body InsightsAPIScheduleBestPracticesScanJSONRequestBody) (*InsightsAPIScheduleBestPracticesScanResponse, error)
 
 	// InsightsAPIGetBestPracticesReportSummary request
 	InsightsAPIGetBestPracticesReportSummaryWithResponse(ctx context.Context, params *InsightsAPIGetBestPracticesReportSummaryParams) (*InsightsAPIGetBestPracticesReportSummaryResponse, error)
+
+	// InsightsAPIGetBestPracticesOverview request
+	InsightsAPIGetBestPracticesOverviewWithResponse(ctx context.Context, params *InsightsAPIGetBestPracticesOverviewParams) (*InsightsAPIGetBestPracticesOverviewResponse, error)
+
+	// InsightsAPIGetOverviewSummary request
+	InsightsAPIGetOverviewSummaryWithResponse(ctx context.Context, params *InsightsAPIGetOverviewSummaryParams) (*InsightsAPIGetOverviewSummaryResponse, error)
+
+	// InsightsAPIGetVulnerabilitiesOverview request
+	InsightsAPIGetVulnerabilitiesOverviewWithResponse(ctx context.Context, params *InsightsAPIGetVulnerabilitiesOverviewParams) (*InsightsAPIGetVulnerabilitiesOverviewResponse, error)
 
 	// InsightsAPIGetVulnerabilitiesReport request
 	InsightsAPIGetVulnerabilitiesReportWithResponse(ctx context.Context, params *InsightsAPIGetVulnerabilitiesReportParams) (*InsightsAPIGetVulnerabilitiesReportResponse, error)
@@ -9200,17 +10457,21 @@ type ClientWithResponsesInterface interface {
 	// InsightsAPIGetVulnerabilitiesDetails request
 	InsightsAPIGetVulnerabilitiesDetailsWithResponse(ctx context.Context, objectId string) (*InsightsAPIGetVulnerabilitiesDetailsResponse, error)
 
-	// InsightsAPIGetVulnerabilitiesReportFilters request
-	InsightsAPIGetVulnerabilitiesReportFiltersWithResponse(ctx context.Context, params *InsightsAPIGetVulnerabilitiesReportFiltersParams) (*InsightsAPIGetVulnerabilitiesReportFiltersResponse, error)
-
 	// InsightsAPIGetVulnerabilitiesResources request
 	InsightsAPIGetVulnerabilitiesResourcesWithResponse(ctx context.Context, objectId string) (*InsightsAPIGetVulnerabilitiesResourcesResponse, error)
 
-	// InsightsAPIScheduleVulnerabilitiesScan request
-	InsightsAPIScheduleVulnerabilitiesScanWithResponse(ctx context.Context) (*InsightsAPIScheduleVulnerabilitiesScanResponse, error)
+	// InsightsAPIScheduleVulnerabilitiesScan request  with any body
+	InsightsAPIScheduleVulnerabilitiesScanWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*InsightsAPIScheduleVulnerabilitiesScanResponse, error)
+
+	InsightsAPIScheduleVulnerabilitiesScanWithResponse(ctx context.Context, body InsightsAPIScheduleVulnerabilitiesScanJSONRequestBody) (*InsightsAPIScheduleVulnerabilitiesScanResponse, error)
 
 	// InsightsAPIGetVulnerabilitiesReportSummary request
 	InsightsAPIGetVulnerabilitiesReportSummaryWithResponse(ctx context.Context, params *InsightsAPIGetVulnerabilitiesReportSummaryParams) (*InsightsAPIGetVulnerabilitiesReportSummaryResponse, error)
+
+	// InsightsAPIIngestAgentLog request  with any body
+	InsightsAPIIngestAgentLogWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader) (*InsightsAPIIngestAgentLogResponse, error)
+
+	InsightsAPIIngestAgentLogWithResponse(ctx context.Context, clusterId string, body InsightsAPIIngestAgentLogJSONRequestBody) (*InsightsAPIIngestAgentLogResponse, error)
 }
 
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
@@ -9581,14 +10842,14 @@ func (r CostReportAPIGetClusterWorkloadReportResponse) GetBody() []byte {
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
-type CostReportAPIGetClustersDailyCostReportResponse struct {
+type CostReportAPIGetClustersCostReportResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *CostreportV1beta1GetClustersDailyCostReportResponse
+	JSON200      *CostreportV1beta1GetClustersCostReportResponse
 }
 
 // Status returns HTTPResponse.Status
-func (r CostReportAPIGetClustersDailyCostReportResponse) Status() string {
+func (r CostReportAPIGetClustersCostReportResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -9596,7 +10857,7 @@ func (r CostReportAPIGetClustersDailyCostReportResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r CostReportAPIGetClustersDailyCostReportResponse) StatusCode() int {
+func (r CostReportAPIGetClustersCostReportResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -9605,7 +10866,7 @@ func (r CostReportAPIGetClustersDailyCostReportResponse) StatusCode() int {
 
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
-func (r CostReportAPIGetClustersDailyCostReportResponse) GetBody() []byte {
+func (r CostReportAPIGetClustersCostReportResponse) GetBody() []byte {
 	return r.Body
 }
 
@@ -9784,6 +11045,36 @@ func (r CreateOrUpdateGslbResponse) StatusCode() int {
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
 func (r CreateOrUpdateGslbResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type InventoryBlacklistAPIListBlacklistsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *InventoryblacklistV1ListBlacklistsResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r InventoryBlacklistAPIListBlacklistsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r InventoryBlacklistAPIListBlacklistsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r InventoryBlacklistAPIListBlacklistsResponse) GetBody() []byte {
 	return r.Body
 }
 
@@ -10446,6 +11737,36 @@ func (r GetClusterFeedbackEventsResponse) GetBody() []byte {
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
+type NodeTemplatesAPIFilterInstanceTypesResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *NodetemplatesV1FilterInstanceTypesResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r NodeTemplatesAPIFilterInstanceTypesResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r NodeTemplatesAPIFilterInstanceTypesResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r NodeTemplatesAPIFilterInstanceTypesResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
 type GetClusterHealthResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -10502,36 +11823,6 @@ func (r GetClusterIngressControllerResponse) StatusCode() int {
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
 func (r GetClusterIngressControllerResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-
-type InventoryBlacklistAPIGetClusterInventoryBlacklistResponse struct {
-	Body         []byte
-	HTTPResponse *http.Response
-	JSON200      *InventoryblacklistV1GetClusterInventoryBlacklistResponse
-}
-
-// Status returns HTTPResponse.Status
-func (r InventoryBlacklistAPIGetClusterInventoryBlacklistResponse) Status() string {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.Status
-	}
-	return http.StatusText(0)
-}
-
-// StatusCode returns HTTPResponse.StatusCode
-func (r InventoryBlacklistAPIGetClusterInventoryBlacklistResponse) StatusCode() int {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.StatusCode
-	}
-	return 0
-}
-
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r InventoryBlacklistAPIGetClusterInventoryBlacklistResponse) GetBody() []byte {
 	return r.Body
 }
 
@@ -10954,6 +12245,126 @@ func (r PoliciesAPIGetClusterNodeConstraintsResponse) StatusCode() int {
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
 func (r PoliciesAPIGetClusterNodeConstraintsResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type NodeTemplatesAPIListNodeTemplatesResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *NodetemplatesV1ListNodeTemplatesResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r NodeTemplatesAPIListNodeTemplatesResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r NodeTemplatesAPIListNodeTemplatesResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r NodeTemplatesAPIListNodeTemplatesResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type NodeTemplatesAPICreateNodeTemplateResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *NodetemplatesV1NodeTemplate
+}
+
+// Status returns HTTPResponse.Status
+func (r NodeTemplatesAPICreateNodeTemplateResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r NodeTemplatesAPICreateNodeTemplateResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r NodeTemplatesAPICreateNodeTemplateResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type NodeTemplatesAPIDeleteNodeTemplateResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *NodetemplatesV1DeleteNodeTemplateResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r NodeTemplatesAPIDeleteNodeTemplateResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r NodeTemplatesAPIDeleteNodeTemplateResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r NodeTemplatesAPIDeleteNodeTemplateResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type NodeTemplatesAPIUpdateNodeTemplateResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *NodetemplatesV1NodeTemplate
+}
+
+// Status returns HTTPResponse.Status
+func (r NodeTemplatesAPIUpdateNodeTemplateResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r NodeTemplatesAPIUpdateNodeTemplateResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r NodeTemplatesAPIUpdateNodeTemplateResponse) GetBody() []byte {
 	return r.Body
 }
 
@@ -12429,6 +13840,216 @@ func (r GetPromMetricsResponse) GetBody() []byte {
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
+type NotificationAPIListNotificationsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *CastaiNotificationsV1beta1ListNotificationsResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r NotificationAPIListNotificationsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r NotificationAPIListNotificationsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r NotificationAPIListNotificationsResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type NotificationAPIAckNotificationsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *CastaiNotificationsV1beta1AckNotificationsResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r NotificationAPIAckNotificationsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r NotificationAPIAckNotificationsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r NotificationAPIAckNotificationsResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type NotificationAPICreateWebhookConfigResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *CastaiNotificationsV1beta1WebhookConfig
+}
+
+// Status returns HTTPResponse.Status
+func (r NotificationAPICreateWebhookConfigResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r NotificationAPICreateWebhookConfigResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r NotificationAPICreateWebhookConfigResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type NotificationAPIDeleteWebhookConfigResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *CastaiNotificationsV1beta1DeleteWebhookConfigResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r NotificationAPIDeleteWebhookConfigResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r NotificationAPIDeleteWebhookConfigResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r NotificationAPIDeleteWebhookConfigResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type NotificationAPIGetWebhookConfigResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *CastaiNotificationsV1beta1WebhookConfig
+}
+
+// Status returns HTTPResponse.Status
+func (r NotificationAPIGetWebhookConfigResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r NotificationAPIGetWebhookConfigResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r NotificationAPIGetWebhookConfigResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type NotificationAPIUpdateWebhookConfigResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *CastaiNotificationsV1beta1WebhookConfig
+}
+
+// Status returns HTTPResponse.Status
+func (r NotificationAPIUpdateWebhookConfigResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r NotificationAPIUpdateWebhookConfigResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r NotificationAPIUpdateWebhookConfigResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type NotificationAPIGetNotificationResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *CastaiNotificationsV1beta1Notification
+}
+
+// Status returns HTTPResponse.Status
+func (r NotificationAPIGetNotificationResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r NotificationAPIGetNotificationResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r NotificationAPIGetNotificationResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
 type ListOrganizationsResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -12938,6 +14559,96 @@ func (r InsightsAPIGetBestPracticesReportSummaryResponse) GetBody() []byte {
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
+type InsightsAPIGetBestPracticesOverviewResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *InsightsV1GetBestPracticesOverviewResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r InsightsAPIGetBestPracticesOverviewResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r InsightsAPIGetBestPracticesOverviewResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r InsightsAPIGetBestPracticesOverviewResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type InsightsAPIGetOverviewSummaryResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *InsightsV1GetOverviewSummaryResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r InsightsAPIGetOverviewSummaryResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r InsightsAPIGetOverviewSummaryResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r InsightsAPIGetOverviewSummaryResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type InsightsAPIGetVulnerabilitiesOverviewResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *InsightsV1GetVulnerabilitiesOverviewResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r InsightsAPIGetVulnerabilitiesOverviewResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r InsightsAPIGetVulnerabilitiesOverviewResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r InsightsAPIGetVulnerabilitiesOverviewResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
 type InsightsAPIGetVulnerabilitiesReportResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -12993,36 +14704,6 @@ func (r InsightsAPIGetVulnerabilitiesDetailsResponse) StatusCode() int {
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
 func (r InsightsAPIGetVulnerabilitiesDetailsResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-
-type InsightsAPIGetVulnerabilitiesReportFiltersResponse struct {
-	Body         []byte
-	HTTPResponse *http.Response
-	JSON200      *InsightsV1GetVulnerabilitiesReportFiltersResponse
-}
-
-// Status returns HTTPResponse.Status
-func (r InsightsAPIGetVulnerabilitiesReportFiltersResponse) Status() string {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.Status
-	}
-	return http.StatusText(0)
-}
-
-// StatusCode returns HTTPResponse.StatusCode
-func (r InsightsAPIGetVulnerabilitiesReportFiltersResponse) StatusCode() int {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.StatusCode
-	}
-	return 0
-}
-
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r InsightsAPIGetVulnerabilitiesReportFiltersResponse) GetBody() []byte {
 	return r.Body
 }
 
@@ -13113,6 +14794,36 @@ func (r InsightsAPIGetVulnerabilitiesReportSummaryResponse) StatusCode() int {
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
 func (r InsightsAPIGetVulnerabilitiesReportSummaryResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type InsightsAPIIngestAgentLogResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *InsightsV1IngestAgentLogResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r InsightsAPIIngestAgentLogResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r InsightsAPIIngestAgentLogResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r InsightsAPIIngestAgentLogResponse) GetBody() []byte {
 	return r.Body
 }
 
@@ -13250,13 +14961,13 @@ func (c *ClientWithResponses) CostReportAPIGetClusterWorkloadReportWithResponse(
 	return ParseCostReportAPIGetClusterWorkloadReportResponse(rsp)
 }
 
-// CostReportAPIGetClustersDailyCostReportWithResponse request returning *CostReportAPIGetClustersDailyCostReportResponse
-func (c *ClientWithResponses) CostReportAPIGetClustersDailyCostReportWithResponse(ctx context.Context, params *CostReportAPIGetClustersDailyCostReportParams) (*CostReportAPIGetClustersDailyCostReportResponse, error) {
-	rsp, err := c.CostReportAPIGetClustersDailyCostReport(ctx, params)
+// CostReportAPIGetClustersCostReportWithResponse request returning *CostReportAPIGetClustersCostReportResponse
+func (c *ClientWithResponses) CostReportAPIGetClustersCostReportWithResponse(ctx context.Context, params *CostReportAPIGetClustersCostReportParams) (*CostReportAPIGetClustersCostReportResponse, error) {
+	rsp, err := c.CostReportAPIGetClustersCostReport(ctx, params)
 	if err != nil {
 		return nil, err
 	}
-	return ParseCostReportAPIGetClustersDailyCostReportResponse(rsp)
+	return ParseCostReportAPIGetClustersCostReportResponse(rsp)
 }
 
 // ListCloudCredentialsWithResponse request returning *ListCloudCredentialsResponse
@@ -13335,6 +15046,15 @@ func (c *ClientWithResponses) CreateOrUpdateGslbWithResponse(ctx context.Context
 		return nil, err
 	}
 	return ParseCreateOrUpdateGslbResponse(rsp)
+}
+
+// InventoryBlacklistAPIListBlacklistsWithResponse request returning *InventoryBlacklistAPIListBlacklistsResponse
+func (c *ClientWithResponses) InventoryBlacklistAPIListBlacklistsWithResponse(ctx context.Context, params *InventoryBlacklistAPIListBlacklistsParams) (*InventoryBlacklistAPIListBlacklistsResponse, error) {
+	rsp, err := c.InventoryBlacklistAPIListBlacklists(ctx, params)
+	if err != nil {
+		return nil, err
+	}
+	return ParseInventoryBlacklistAPIListBlacklistsResponse(rsp)
 }
 
 // InventoryBlacklistAPIAddBlacklistWithBodyWithResponse request with arbitrary body returning *InventoryBlacklistAPIAddBlacklistResponse
@@ -13615,6 +15335,23 @@ func (c *ClientWithResponses) GetClusterFeedbackEventsWithResponse(ctx context.C
 	return ParseGetClusterFeedbackEventsResponse(rsp)
 }
 
+// NodeTemplatesAPIFilterInstanceTypesWithBodyWithResponse request with arbitrary body returning *NodeTemplatesAPIFilterInstanceTypesResponse
+func (c *ClientWithResponses) NodeTemplatesAPIFilterInstanceTypesWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader) (*NodeTemplatesAPIFilterInstanceTypesResponse, error) {
+	rsp, err := c.NodeTemplatesAPIFilterInstanceTypesWithBody(ctx, clusterId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseNodeTemplatesAPIFilterInstanceTypesResponse(rsp)
+}
+
+func (c *ClientWithResponses) NodeTemplatesAPIFilterInstanceTypesWithResponse(ctx context.Context, clusterId string, body NodeTemplatesAPIFilterInstanceTypesJSONRequestBody) (*NodeTemplatesAPIFilterInstanceTypesResponse, error) {
+	rsp, err := c.NodeTemplatesAPIFilterInstanceTypes(ctx, clusterId, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseNodeTemplatesAPIFilterInstanceTypesResponse(rsp)
+}
+
 // GetClusterHealthWithResponse request returning *GetClusterHealthResponse
 func (c *ClientWithResponses) GetClusterHealthWithResponse(ctx context.Context, clusterId ClusterId) (*GetClusterHealthResponse, error) {
 	rsp, err := c.GetClusterHealth(ctx, clusterId)
@@ -13631,15 +15368,6 @@ func (c *ClientWithResponses) GetClusterIngressControllerWithResponse(ctx contex
 		return nil, err
 	}
 	return ParseGetClusterIngressControllerResponse(rsp)
-}
-
-// InventoryBlacklistAPIGetClusterInventoryBlacklistWithResponse request returning *InventoryBlacklistAPIGetClusterInventoryBlacklistResponse
-func (c *ClientWithResponses) InventoryBlacklistAPIGetClusterInventoryBlacklistWithResponse(ctx context.Context, clusterId string) (*InventoryBlacklistAPIGetClusterInventoryBlacklistResponse, error) {
-	rsp, err := c.InventoryBlacklistAPIGetClusterInventoryBlacklist(ctx, clusterId)
-	if err != nil {
-		return nil, err
-	}
-	return ParseInventoryBlacklistAPIGetClusterInventoryBlacklistResponse(rsp)
 }
 
 // GetClusterKubeconfigWithResponse request returning *GetClusterKubeconfigResponse
@@ -13790,6 +15518,58 @@ func (c *ClientWithResponses) PoliciesAPIGetClusterNodeConstraintsWithResponse(c
 		return nil, err
 	}
 	return ParsePoliciesAPIGetClusterNodeConstraintsResponse(rsp)
+}
+
+// NodeTemplatesAPIListNodeTemplatesWithResponse request returning *NodeTemplatesAPIListNodeTemplatesResponse
+func (c *ClientWithResponses) NodeTemplatesAPIListNodeTemplatesWithResponse(ctx context.Context, clusterId string) (*NodeTemplatesAPIListNodeTemplatesResponse, error) {
+	rsp, err := c.NodeTemplatesAPIListNodeTemplates(ctx, clusterId)
+	if err != nil {
+		return nil, err
+	}
+	return ParseNodeTemplatesAPIListNodeTemplatesResponse(rsp)
+}
+
+// NodeTemplatesAPICreateNodeTemplateWithBodyWithResponse request with arbitrary body returning *NodeTemplatesAPICreateNodeTemplateResponse
+func (c *ClientWithResponses) NodeTemplatesAPICreateNodeTemplateWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader) (*NodeTemplatesAPICreateNodeTemplateResponse, error) {
+	rsp, err := c.NodeTemplatesAPICreateNodeTemplateWithBody(ctx, clusterId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseNodeTemplatesAPICreateNodeTemplateResponse(rsp)
+}
+
+func (c *ClientWithResponses) NodeTemplatesAPICreateNodeTemplateWithResponse(ctx context.Context, clusterId string, body NodeTemplatesAPICreateNodeTemplateJSONRequestBody) (*NodeTemplatesAPICreateNodeTemplateResponse, error) {
+	rsp, err := c.NodeTemplatesAPICreateNodeTemplate(ctx, clusterId, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseNodeTemplatesAPICreateNodeTemplateResponse(rsp)
+}
+
+// NodeTemplatesAPIDeleteNodeTemplateWithResponse request returning *NodeTemplatesAPIDeleteNodeTemplateResponse
+func (c *ClientWithResponses) NodeTemplatesAPIDeleteNodeTemplateWithResponse(ctx context.Context, clusterId string, nodeTemplateName string) (*NodeTemplatesAPIDeleteNodeTemplateResponse, error) {
+	rsp, err := c.NodeTemplatesAPIDeleteNodeTemplate(ctx, clusterId, nodeTemplateName)
+	if err != nil {
+		return nil, err
+	}
+	return ParseNodeTemplatesAPIDeleteNodeTemplateResponse(rsp)
+}
+
+// NodeTemplatesAPIUpdateNodeTemplateWithBodyWithResponse request with arbitrary body returning *NodeTemplatesAPIUpdateNodeTemplateResponse
+func (c *ClientWithResponses) NodeTemplatesAPIUpdateNodeTemplateWithBodyWithResponse(ctx context.Context, clusterId string, nodeTemplateName string, contentType string, body io.Reader) (*NodeTemplatesAPIUpdateNodeTemplateResponse, error) {
+	rsp, err := c.NodeTemplatesAPIUpdateNodeTemplateWithBody(ctx, clusterId, nodeTemplateName, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseNodeTemplatesAPIUpdateNodeTemplateResponse(rsp)
+}
+
+func (c *ClientWithResponses) NodeTemplatesAPIUpdateNodeTemplateWithResponse(ctx context.Context, clusterId string, nodeTemplateName string, body NodeTemplatesAPIUpdateNodeTemplateJSONRequestBody) (*NodeTemplatesAPIUpdateNodeTemplateResponse, error) {
+	rsp, err := c.NodeTemplatesAPIUpdateNodeTemplate(ctx, clusterId, nodeTemplateName, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseNodeTemplatesAPIUpdateNodeTemplateResponse(rsp)
 }
 
 // GetClusterNodesWithResponse request returning *GetClusterNodesResponse
@@ -14353,6 +16133,93 @@ func (c *ClientWithResponses) GetPromMetricsWithResponse(ctx context.Context, pa
 	return ParseGetPromMetricsResponse(rsp)
 }
 
+// NotificationAPIListNotificationsWithResponse request returning *NotificationAPIListNotificationsResponse
+func (c *ClientWithResponses) NotificationAPIListNotificationsWithResponse(ctx context.Context, params *NotificationAPIListNotificationsParams) (*NotificationAPIListNotificationsResponse, error) {
+	rsp, err := c.NotificationAPIListNotifications(ctx, params)
+	if err != nil {
+		return nil, err
+	}
+	return ParseNotificationAPIListNotificationsResponse(rsp)
+}
+
+// NotificationAPIAckNotificationsWithBodyWithResponse request with arbitrary body returning *NotificationAPIAckNotificationsResponse
+func (c *ClientWithResponses) NotificationAPIAckNotificationsWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*NotificationAPIAckNotificationsResponse, error) {
+	rsp, err := c.NotificationAPIAckNotificationsWithBody(ctx, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseNotificationAPIAckNotificationsResponse(rsp)
+}
+
+func (c *ClientWithResponses) NotificationAPIAckNotificationsWithResponse(ctx context.Context, body NotificationAPIAckNotificationsJSONRequestBody) (*NotificationAPIAckNotificationsResponse, error) {
+	rsp, err := c.NotificationAPIAckNotifications(ctx, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseNotificationAPIAckNotificationsResponse(rsp)
+}
+
+// NotificationAPICreateWebhookConfigWithBodyWithResponse request with arbitrary body returning *NotificationAPICreateWebhookConfigResponse
+func (c *ClientWithResponses) NotificationAPICreateWebhookConfigWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*NotificationAPICreateWebhookConfigResponse, error) {
+	rsp, err := c.NotificationAPICreateWebhookConfigWithBody(ctx, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseNotificationAPICreateWebhookConfigResponse(rsp)
+}
+
+func (c *ClientWithResponses) NotificationAPICreateWebhookConfigWithResponse(ctx context.Context, body NotificationAPICreateWebhookConfigJSONRequestBody) (*NotificationAPICreateWebhookConfigResponse, error) {
+	rsp, err := c.NotificationAPICreateWebhookConfig(ctx, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseNotificationAPICreateWebhookConfigResponse(rsp)
+}
+
+// NotificationAPIDeleteWebhookConfigWithResponse request returning *NotificationAPIDeleteWebhookConfigResponse
+func (c *ClientWithResponses) NotificationAPIDeleteWebhookConfigWithResponse(ctx context.Context, id string) (*NotificationAPIDeleteWebhookConfigResponse, error) {
+	rsp, err := c.NotificationAPIDeleteWebhookConfig(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	return ParseNotificationAPIDeleteWebhookConfigResponse(rsp)
+}
+
+// NotificationAPIGetWebhookConfigWithResponse request returning *NotificationAPIGetWebhookConfigResponse
+func (c *ClientWithResponses) NotificationAPIGetWebhookConfigWithResponse(ctx context.Context, id string) (*NotificationAPIGetWebhookConfigResponse, error) {
+	rsp, err := c.NotificationAPIGetWebhookConfig(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	return ParseNotificationAPIGetWebhookConfigResponse(rsp)
+}
+
+// NotificationAPIUpdateWebhookConfigWithBodyWithResponse request with arbitrary body returning *NotificationAPIUpdateWebhookConfigResponse
+func (c *ClientWithResponses) NotificationAPIUpdateWebhookConfigWithBodyWithResponse(ctx context.Context, id string, contentType string, body io.Reader) (*NotificationAPIUpdateWebhookConfigResponse, error) {
+	rsp, err := c.NotificationAPIUpdateWebhookConfigWithBody(ctx, id, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseNotificationAPIUpdateWebhookConfigResponse(rsp)
+}
+
+func (c *ClientWithResponses) NotificationAPIUpdateWebhookConfigWithResponse(ctx context.Context, id string, body NotificationAPIUpdateWebhookConfigJSONRequestBody) (*NotificationAPIUpdateWebhookConfigResponse, error) {
+	rsp, err := c.NotificationAPIUpdateWebhookConfig(ctx, id, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseNotificationAPIUpdateWebhookConfigResponse(rsp)
+}
+
+// NotificationAPIGetNotificationWithResponse request returning *NotificationAPIGetNotificationResponse
+func (c *ClientWithResponses) NotificationAPIGetNotificationWithResponse(ctx context.Context, id string) (*NotificationAPIGetNotificationResponse, error) {
+	rsp, err := c.NotificationAPIGetNotification(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	return ParseNotificationAPIGetNotificationResponse(rsp)
+}
+
 // ListOrganizationsWithResponse request returning *ListOrganizationsResponse
 func (c *ClientWithResponses) ListOrganizationsWithResponse(ctx context.Context) (*ListOrganizationsResponse, error) {
 	rsp, err := c.ListOrganizations(ctx)
@@ -14520,9 +16387,17 @@ func (c *ClientWithResponses) InsightsAPIGetBestPracticesReportFiltersWithRespon
 	return ParseInsightsAPIGetBestPracticesReportFiltersResponse(rsp)
 }
 
-// InsightsAPIScheduleBestPracticesScanWithResponse request returning *InsightsAPIScheduleBestPracticesScanResponse
-func (c *ClientWithResponses) InsightsAPIScheduleBestPracticesScanWithResponse(ctx context.Context) (*InsightsAPIScheduleBestPracticesScanResponse, error) {
-	rsp, err := c.InsightsAPIScheduleBestPracticesScan(ctx)
+// InsightsAPIScheduleBestPracticesScanWithBodyWithResponse request with arbitrary body returning *InsightsAPIScheduleBestPracticesScanResponse
+func (c *ClientWithResponses) InsightsAPIScheduleBestPracticesScanWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*InsightsAPIScheduleBestPracticesScanResponse, error) {
+	rsp, err := c.InsightsAPIScheduleBestPracticesScanWithBody(ctx, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseInsightsAPIScheduleBestPracticesScanResponse(rsp)
+}
+
+func (c *ClientWithResponses) InsightsAPIScheduleBestPracticesScanWithResponse(ctx context.Context, body InsightsAPIScheduleBestPracticesScanJSONRequestBody) (*InsightsAPIScheduleBestPracticesScanResponse, error) {
+	rsp, err := c.InsightsAPIScheduleBestPracticesScan(ctx, body)
 	if err != nil {
 		return nil, err
 	}
@@ -14536,6 +16411,33 @@ func (c *ClientWithResponses) InsightsAPIGetBestPracticesReportSummaryWithRespon
 		return nil, err
 	}
 	return ParseInsightsAPIGetBestPracticesReportSummaryResponse(rsp)
+}
+
+// InsightsAPIGetBestPracticesOverviewWithResponse request returning *InsightsAPIGetBestPracticesOverviewResponse
+func (c *ClientWithResponses) InsightsAPIGetBestPracticesOverviewWithResponse(ctx context.Context, params *InsightsAPIGetBestPracticesOverviewParams) (*InsightsAPIGetBestPracticesOverviewResponse, error) {
+	rsp, err := c.InsightsAPIGetBestPracticesOverview(ctx, params)
+	if err != nil {
+		return nil, err
+	}
+	return ParseInsightsAPIGetBestPracticesOverviewResponse(rsp)
+}
+
+// InsightsAPIGetOverviewSummaryWithResponse request returning *InsightsAPIGetOverviewSummaryResponse
+func (c *ClientWithResponses) InsightsAPIGetOverviewSummaryWithResponse(ctx context.Context, params *InsightsAPIGetOverviewSummaryParams) (*InsightsAPIGetOverviewSummaryResponse, error) {
+	rsp, err := c.InsightsAPIGetOverviewSummary(ctx, params)
+	if err != nil {
+		return nil, err
+	}
+	return ParseInsightsAPIGetOverviewSummaryResponse(rsp)
+}
+
+// InsightsAPIGetVulnerabilitiesOverviewWithResponse request returning *InsightsAPIGetVulnerabilitiesOverviewResponse
+func (c *ClientWithResponses) InsightsAPIGetVulnerabilitiesOverviewWithResponse(ctx context.Context, params *InsightsAPIGetVulnerabilitiesOverviewParams) (*InsightsAPIGetVulnerabilitiesOverviewResponse, error) {
+	rsp, err := c.InsightsAPIGetVulnerabilitiesOverview(ctx, params)
+	if err != nil {
+		return nil, err
+	}
+	return ParseInsightsAPIGetVulnerabilitiesOverviewResponse(rsp)
 }
 
 // InsightsAPIGetVulnerabilitiesReportWithResponse request returning *InsightsAPIGetVulnerabilitiesReportResponse
@@ -14556,15 +16458,6 @@ func (c *ClientWithResponses) InsightsAPIGetVulnerabilitiesDetailsWithResponse(c
 	return ParseInsightsAPIGetVulnerabilitiesDetailsResponse(rsp)
 }
 
-// InsightsAPIGetVulnerabilitiesReportFiltersWithResponse request returning *InsightsAPIGetVulnerabilitiesReportFiltersResponse
-func (c *ClientWithResponses) InsightsAPIGetVulnerabilitiesReportFiltersWithResponse(ctx context.Context, params *InsightsAPIGetVulnerabilitiesReportFiltersParams) (*InsightsAPIGetVulnerabilitiesReportFiltersResponse, error) {
-	rsp, err := c.InsightsAPIGetVulnerabilitiesReportFilters(ctx, params)
-	if err != nil {
-		return nil, err
-	}
-	return ParseInsightsAPIGetVulnerabilitiesReportFiltersResponse(rsp)
-}
-
 // InsightsAPIGetVulnerabilitiesResourcesWithResponse request returning *InsightsAPIGetVulnerabilitiesResourcesResponse
 func (c *ClientWithResponses) InsightsAPIGetVulnerabilitiesResourcesWithResponse(ctx context.Context, objectId string) (*InsightsAPIGetVulnerabilitiesResourcesResponse, error) {
 	rsp, err := c.InsightsAPIGetVulnerabilitiesResources(ctx, objectId)
@@ -14574,9 +16467,17 @@ func (c *ClientWithResponses) InsightsAPIGetVulnerabilitiesResourcesWithResponse
 	return ParseInsightsAPIGetVulnerabilitiesResourcesResponse(rsp)
 }
 
-// InsightsAPIScheduleVulnerabilitiesScanWithResponse request returning *InsightsAPIScheduleVulnerabilitiesScanResponse
-func (c *ClientWithResponses) InsightsAPIScheduleVulnerabilitiesScanWithResponse(ctx context.Context) (*InsightsAPIScheduleVulnerabilitiesScanResponse, error) {
-	rsp, err := c.InsightsAPIScheduleVulnerabilitiesScan(ctx)
+// InsightsAPIScheduleVulnerabilitiesScanWithBodyWithResponse request with arbitrary body returning *InsightsAPIScheduleVulnerabilitiesScanResponse
+func (c *ClientWithResponses) InsightsAPIScheduleVulnerabilitiesScanWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*InsightsAPIScheduleVulnerabilitiesScanResponse, error) {
+	rsp, err := c.InsightsAPIScheduleVulnerabilitiesScanWithBody(ctx, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseInsightsAPIScheduleVulnerabilitiesScanResponse(rsp)
+}
+
+func (c *ClientWithResponses) InsightsAPIScheduleVulnerabilitiesScanWithResponse(ctx context.Context, body InsightsAPIScheduleVulnerabilitiesScanJSONRequestBody) (*InsightsAPIScheduleVulnerabilitiesScanResponse, error) {
+	rsp, err := c.InsightsAPIScheduleVulnerabilitiesScan(ctx, body)
 	if err != nil {
 		return nil, err
 	}
@@ -14590,6 +16491,23 @@ func (c *ClientWithResponses) InsightsAPIGetVulnerabilitiesReportSummaryWithResp
 		return nil, err
 	}
 	return ParseInsightsAPIGetVulnerabilitiesReportSummaryResponse(rsp)
+}
+
+// InsightsAPIIngestAgentLogWithBodyWithResponse request with arbitrary body returning *InsightsAPIIngestAgentLogResponse
+func (c *ClientWithResponses) InsightsAPIIngestAgentLogWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader) (*InsightsAPIIngestAgentLogResponse, error) {
+	rsp, err := c.InsightsAPIIngestAgentLogWithBody(ctx, clusterId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseInsightsAPIIngestAgentLogResponse(rsp)
+}
+
+func (c *ClientWithResponses) InsightsAPIIngestAgentLogWithResponse(ctx context.Context, clusterId string, body InsightsAPIIngestAgentLogJSONRequestBody) (*InsightsAPIIngestAgentLogResponse, error) {
+	rsp, err := c.InsightsAPIIngestAgentLog(ctx, clusterId, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseInsightsAPIIngestAgentLogResponse(rsp)
 }
 
 // ParseListAddonsResponse parses an HTTP response from a ListAddonsWithResponse call
@@ -14897,22 +16815,22 @@ func ParseCostReportAPIGetClusterWorkloadReportResponse(rsp *http.Response) (*Co
 	return response, nil
 }
 
-// ParseCostReportAPIGetClustersDailyCostReportResponse parses an HTTP response from a CostReportAPIGetClustersDailyCostReportWithResponse call
-func ParseCostReportAPIGetClustersDailyCostReportResponse(rsp *http.Response) (*CostReportAPIGetClustersDailyCostReportResponse, error) {
+// ParseCostReportAPIGetClustersCostReportResponse parses an HTTP response from a CostReportAPIGetClustersCostReportWithResponse call
+func ParseCostReportAPIGetClustersCostReportResponse(rsp *http.Response) (*CostReportAPIGetClustersCostReportResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
 	defer rsp.Body.Close()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &CostReportAPIGetClustersDailyCostReportResponse{
+	response := &CostReportAPIGetClustersCostReportResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest CostreportV1beta1GetClustersDailyCostReportResponse
+		var dest CostreportV1beta1GetClustersCostReportResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -15055,6 +16973,32 @@ func ParseCreateOrUpdateGslbResponse(rsp *http.Response) (*CreateOrUpdateGslbRes
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest GSLBResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseInventoryBlacklistAPIListBlacklistsResponse parses an HTTP response from a InventoryBlacklistAPIListBlacklistsWithResponse call
+func ParseInventoryBlacklistAPIListBlacklistsResponse(rsp *http.Response) (*InventoryBlacklistAPIListBlacklistsResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &InventoryBlacklistAPIListBlacklistsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest InventoryblacklistV1ListBlacklistsResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -15616,6 +17560,32 @@ func ParseGetClusterFeedbackEventsResponse(rsp *http.Response) (*GetClusterFeedb
 	return response, nil
 }
 
+// ParseNodeTemplatesAPIFilterInstanceTypesResponse parses an HTTP response from a NodeTemplatesAPIFilterInstanceTypesWithResponse call
+func ParseNodeTemplatesAPIFilterInstanceTypesResponse(rsp *http.Response) (*NodeTemplatesAPIFilterInstanceTypesResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &NodeTemplatesAPIFilterInstanceTypesResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest NodetemplatesV1FilterInstanceTypesResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
 // ParseGetClusterHealthResponse parses an HTTP response from a GetClusterHealthWithResponse call
 func ParseGetClusterHealthResponse(rsp *http.Response) (*GetClusterHealthResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
@@ -15669,32 +17639,6 @@ func ParseGetClusterIngressControllerResponse(rsp *http.Response) (*GetClusterIn
 			return nil, err
 		}
 		response.JSON404 = &dest
-
-	}
-
-	return response, nil
-}
-
-// ParseInventoryBlacklistAPIGetClusterInventoryBlacklistResponse parses an HTTP response from a InventoryBlacklistAPIGetClusterInventoryBlacklistWithResponse call
-func ParseInventoryBlacklistAPIGetClusterInventoryBlacklistResponse(rsp *http.Response) (*InventoryBlacklistAPIGetClusterInventoryBlacklistResponse, error) {
-	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
-	if err != nil {
-		return nil, err
-	}
-
-	response := &InventoryBlacklistAPIGetClusterInventoryBlacklistResponse{
-		Body:         bodyBytes,
-		HTTPResponse: rsp,
-	}
-
-	switch {
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest InventoryblacklistV1GetClusterInventoryBlacklistResponse
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON200 = &dest
 
 	}
 
@@ -16069,6 +18013,110 @@ func ParsePoliciesAPIGetClusterNodeConstraintsResponse(rsp *http.Response) (*Pol
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest PoliciesV1GetClusterNodeConstraintsResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseNodeTemplatesAPIListNodeTemplatesResponse parses an HTTP response from a NodeTemplatesAPIListNodeTemplatesWithResponse call
+func ParseNodeTemplatesAPIListNodeTemplatesResponse(rsp *http.Response) (*NodeTemplatesAPIListNodeTemplatesResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &NodeTemplatesAPIListNodeTemplatesResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest NodetemplatesV1ListNodeTemplatesResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseNodeTemplatesAPICreateNodeTemplateResponse parses an HTTP response from a NodeTemplatesAPICreateNodeTemplateWithResponse call
+func ParseNodeTemplatesAPICreateNodeTemplateResponse(rsp *http.Response) (*NodeTemplatesAPICreateNodeTemplateResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &NodeTemplatesAPICreateNodeTemplateResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest NodetemplatesV1NodeTemplate
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseNodeTemplatesAPIDeleteNodeTemplateResponse parses an HTTP response from a NodeTemplatesAPIDeleteNodeTemplateWithResponse call
+func ParseNodeTemplatesAPIDeleteNodeTemplateResponse(rsp *http.Response) (*NodeTemplatesAPIDeleteNodeTemplateResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &NodeTemplatesAPIDeleteNodeTemplateResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest NodetemplatesV1DeleteNodeTemplateResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseNodeTemplatesAPIUpdateNodeTemplateResponse parses an HTTP response from a NodeTemplatesAPIUpdateNodeTemplateWithResponse call
+func ParseNodeTemplatesAPIUpdateNodeTemplateResponse(rsp *http.Response) (*NodeTemplatesAPIUpdateNodeTemplateResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &NodeTemplatesAPIUpdateNodeTemplateResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest NodetemplatesV1NodeTemplate
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -17353,6 +19401,188 @@ func ParseGetPromMetricsResponse(rsp *http.Response) (*GetPromMetricsResponse, e
 	return response, nil
 }
 
+// ParseNotificationAPIListNotificationsResponse parses an HTTP response from a NotificationAPIListNotificationsWithResponse call
+func ParseNotificationAPIListNotificationsResponse(rsp *http.Response) (*NotificationAPIListNotificationsResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &NotificationAPIListNotificationsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest CastaiNotificationsV1beta1ListNotificationsResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseNotificationAPIAckNotificationsResponse parses an HTTP response from a NotificationAPIAckNotificationsWithResponse call
+func ParseNotificationAPIAckNotificationsResponse(rsp *http.Response) (*NotificationAPIAckNotificationsResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &NotificationAPIAckNotificationsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest CastaiNotificationsV1beta1AckNotificationsResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseNotificationAPICreateWebhookConfigResponse parses an HTTP response from a NotificationAPICreateWebhookConfigWithResponse call
+func ParseNotificationAPICreateWebhookConfigResponse(rsp *http.Response) (*NotificationAPICreateWebhookConfigResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &NotificationAPICreateWebhookConfigResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest CastaiNotificationsV1beta1WebhookConfig
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseNotificationAPIDeleteWebhookConfigResponse parses an HTTP response from a NotificationAPIDeleteWebhookConfigWithResponse call
+func ParseNotificationAPIDeleteWebhookConfigResponse(rsp *http.Response) (*NotificationAPIDeleteWebhookConfigResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &NotificationAPIDeleteWebhookConfigResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest CastaiNotificationsV1beta1DeleteWebhookConfigResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseNotificationAPIGetWebhookConfigResponse parses an HTTP response from a NotificationAPIGetWebhookConfigWithResponse call
+func ParseNotificationAPIGetWebhookConfigResponse(rsp *http.Response) (*NotificationAPIGetWebhookConfigResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &NotificationAPIGetWebhookConfigResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest CastaiNotificationsV1beta1WebhookConfig
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseNotificationAPIUpdateWebhookConfigResponse parses an HTTP response from a NotificationAPIUpdateWebhookConfigWithResponse call
+func ParseNotificationAPIUpdateWebhookConfigResponse(rsp *http.Response) (*NotificationAPIUpdateWebhookConfigResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &NotificationAPIUpdateWebhookConfigResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest CastaiNotificationsV1beta1WebhookConfig
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseNotificationAPIGetNotificationResponse parses an HTTP response from a NotificationAPIGetNotificationWithResponse call
+func ParseNotificationAPIGetNotificationResponse(rsp *http.Response) (*NotificationAPIGetNotificationResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &NotificationAPIGetNotificationResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest CastaiNotificationsV1beta1Notification
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
 // ParseListOrganizationsResponse parses an HTTP response from a ListOrganizationsWithResponse call
 func ParseListOrganizationsResponse(rsp *http.Response) (*ListOrganizationsResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
@@ -17791,6 +20021,84 @@ func ParseInsightsAPIGetBestPracticesReportSummaryResponse(rsp *http.Response) (
 	return response, nil
 }
 
+// ParseInsightsAPIGetBestPracticesOverviewResponse parses an HTTP response from a InsightsAPIGetBestPracticesOverviewWithResponse call
+func ParseInsightsAPIGetBestPracticesOverviewResponse(rsp *http.Response) (*InsightsAPIGetBestPracticesOverviewResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &InsightsAPIGetBestPracticesOverviewResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest InsightsV1GetBestPracticesOverviewResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseInsightsAPIGetOverviewSummaryResponse parses an HTTP response from a InsightsAPIGetOverviewSummaryWithResponse call
+func ParseInsightsAPIGetOverviewSummaryResponse(rsp *http.Response) (*InsightsAPIGetOverviewSummaryResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &InsightsAPIGetOverviewSummaryResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest InsightsV1GetOverviewSummaryResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseInsightsAPIGetVulnerabilitiesOverviewResponse parses an HTTP response from a InsightsAPIGetVulnerabilitiesOverviewWithResponse call
+func ParseInsightsAPIGetVulnerabilitiesOverviewResponse(rsp *http.Response) (*InsightsAPIGetVulnerabilitiesOverviewResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &InsightsAPIGetVulnerabilitiesOverviewResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest InsightsV1GetVulnerabilitiesOverviewResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
 // ParseInsightsAPIGetVulnerabilitiesReportResponse parses an HTTP response from a InsightsAPIGetVulnerabilitiesReportWithResponse call
 func ParseInsightsAPIGetVulnerabilitiesReportResponse(rsp *http.Response) (*InsightsAPIGetVulnerabilitiesReportResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
@@ -17833,32 +20141,6 @@ func ParseInsightsAPIGetVulnerabilitiesDetailsResponse(rsp *http.Response) (*Ins
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest InsightsV1GetVulnerabilitiesDetailsResponse
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON200 = &dest
-
-	}
-
-	return response, nil
-}
-
-// ParseInsightsAPIGetVulnerabilitiesReportFiltersResponse parses an HTTP response from a InsightsAPIGetVulnerabilitiesReportFiltersWithResponse call
-func ParseInsightsAPIGetVulnerabilitiesReportFiltersResponse(rsp *http.Response) (*InsightsAPIGetVulnerabilitiesReportFiltersResponse, error) {
-	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
-	if err != nil {
-		return nil, err
-	}
-
-	response := &InsightsAPIGetVulnerabilitiesReportFiltersResponse{
-		Body:         bodyBytes,
-		HTTPResponse: rsp,
-	}
-
-	switch {
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest InsightsV1GetVulnerabilitiesReportFiltersResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -17937,6 +20219,32 @@ func ParseInsightsAPIGetVulnerabilitiesReportSummaryResponse(rsp *http.Response)
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest InsightsV1GetVulnerabilitiesReportSummaryResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseInsightsAPIIngestAgentLogResponse parses an HTTP response from a InsightsAPIIngestAgentLogWithResponse call
+func ParseInsightsAPIIngestAgentLogResponse(rsp *http.Response) (*InsightsAPIIngestAgentLogResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &InsightsAPIIngestAgentLogResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest InsightsV1IngestAgentLogResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}

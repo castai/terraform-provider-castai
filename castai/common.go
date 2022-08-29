@@ -22,7 +22,6 @@ const (
 
 func resourceCastaiPublicCloudClusterDelete(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*ProviderConfig).api
-
 	clusterId := data.Id()
 
 	log.Printf("[INFO] Checking current status of the cluster.")
@@ -43,16 +42,22 @@ func resourceCastaiPublicCloudClusterDelete(ctx context.Context, data *schema.Re
 			return nil
 		}
 
-		// If cluster doesn't have credentials we have to call delete cluster instead of disconnect because disconnect
-		// wii do nothing on cluster with empty credentials.
-		if toString(clusterResponse.JSON200.CredentialsId) == "" {
+		triggerDelete := func() *resource.RetryError {
 			log.Printf("[INFO] Deleting cluster.")
-
 			if err := sdk.CheckResponseNoContent(client.ExternalClusterAPIDeleteClusterWithResponse(ctx, clusterId)); err != nil {
 				return resource.NonRetryableError(err)
 			}
-
 			return resource.RetryableError(fmt.Errorf("triggered cluster deletion"))
+		}
+
+		// If cluster doesn't have credentials we have to call delete cluster instead of disconnect because disconnect
+		// will do nothing on cluster with empty credentials.
+		if toString(clusterResponse.JSON200.CredentialsId) == "" {
+			return triggerDelete()
+		}
+
+		if clusterStatus == sdk.ClusterStatusFailed {
+			return triggerDelete()
 		}
 
 		if agentStatus == sdk.ClusterAgentStatusDisconnecting {
@@ -77,14 +82,7 @@ func resourceCastaiPublicCloudClusterDelete(ctx context.Context, data *schema.Re
 		}
 
 		if agentStatus == sdk.ClusterAgentStatusDisconnected && clusterStatus != sdk.ClusterStatusDeleted {
-			log.Printf("[INFO] Deleting cluster.")
-
-			if err := sdk.CheckResponseNoContent(client.ExternalClusterAPIDeleteClusterWithResponse(ctx, clusterId)); err != nil {
-				return resource.NonRetryableError(err)
-			}
-
-			return resource.RetryableError(fmt.Errorf("triggered cluster deletion"))
-
+			return triggerDelete()
 		}
 
 		return resource.RetryableError(fmt.Errorf("retrying"))

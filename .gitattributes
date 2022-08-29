@@ -1,1 +1,3 @@
-**/go.sum -diff linguist-generated
+go.sum linguist-generated=true
+**/*.gen.go linguist-generated=true
+**/mock/*.go linguist-generated=true
