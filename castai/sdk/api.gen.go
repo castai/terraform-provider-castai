@@ -1626,10 +1626,11 @@ type CastaiClusterV1beta1Node struct {
 	Name     *string                          `json:"name,omitempty"`
 
 	// NodeNetwork represents node network.
-	Network   *CastaiClusterV1beta1NodeNetwork `json:"network,omitempty"`
-	NodeInfo  *CastaiClusterV1beta1NodeInfo    `json:"nodeInfo,omitempty"`
-	Region    *string                          `json:"region,omitempty"`
-	Resources *CastaiClusterV1beta1Resources   `json:"resources,omitempty"`
+	Network             *CastaiClusterV1beta1NodeNetwork `json:"network,omitempty"`
+	NodeConfigurationId *string                          `json:"nodeConfigurationId"`
+	NodeInfo            *CastaiClusterV1beta1NodeInfo    `json:"nodeInfo,omitempty"`
+	Region              *string                          `json:"region,omitempty"`
+	Resources           *CastaiClusterV1beta1Resources   `json:"resources,omitempty"`
 
 	// NodeType defines the role of the VM when joining the Kubernetes cluster. Default value is not allowed.
 	Role  *CastaiClusterV1beta1NodeType `json:"role,omitempty"`
@@ -1779,6 +1780,126 @@ type CastaiMetricsV1beta1MetricSampleStream_Labels struct {
 type CastaiMetricsV1beta1MetricSampleValue struct {
 	Timestamp *string `json:"timestamp,omitempty"`
 	Value     *string `json:"value,omitempty"`
+}
+
+// CastaiNotificationsV1beta1AckNotificationsRequest defines model for castai.notifications.v1beta1.AckNotificationsRequest.
+type CastaiNotificationsV1beta1AckNotificationsRequest struct {
+	Ids *[]string `json:"ids,omitempty"`
+}
+
+// CastaiNotificationsV1beta1AckNotificationsResponse defines model for castai.notifications.v1beta1.AckNotificationsResponse.
+type CastaiNotificationsV1beta1AckNotificationsResponse struct {
+	Total *string `json:"total,omitempty"`
+}
+
+// CastaiNotificationsV1beta1AddWebhookConfig defines model for castai.notifications.v1beta1.AddWebhookConfig.
+type CastaiNotificationsV1beta1AddWebhookConfig struct {
+	AuthKeys         *CastaiNotificationsV1beta1AddWebhookConfig_AuthKeys `json:"authKeys,omitempty"`
+	CallbackUrl      string                                               `json:"callbackUrl"`
+	Name             string                                               `json:"name"`
+	RequestTemplate  string                                               `json:"requestTemplate"`
+	SeverityTriggers []CastaiNotificationsV1beta1Severity                 `json:"severityTriggers"`
+}
+
+// CastaiNotificationsV1beta1AddWebhookConfig_AuthKeys defines model for CastaiNotificationsV1beta1AddWebhookConfig.AuthKeys.
+type CastaiNotificationsV1beta1AddWebhookConfig_AuthKeys struct {
+	AdditionalProperties map[string]string `json:"-"`
+}
+
+// CastaiNotificationsV1beta1ClusterMetadata defines model for castai.notifications.v1beta1.ClusterMetadata.
+type CastaiNotificationsV1beta1ClusterMetadata struct {
+	Id           *string `json:"id,omitempty"`
+	Name         *string `json:"name,omitempty"`
+	ProviderType *string `json:"providerType,omitempty"`
+}
+
+// CastaiNotificationsV1beta1DeleteWebhookConfigResponse defines model for castai.notifications.v1beta1.DeleteWebhookConfigResponse.
+type CastaiNotificationsV1beta1DeleteWebhookConfigResponse map[string]interface{}
+
+// CastaiNotificationsV1beta1ListNotificationsResponse defines model for castai.notifications.v1beta1.ListNotificationsResponse.
+type CastaiNotificationsV1beta1ListNotificationsResponse struct {
+	Count *int32                                    `json:"count,omitempty"`
+	Items *[]CastaiNotificationsV1beta1Notification `json:"items,omitempty"`
+
+	// next_cursor is a token to be used in future request to retrieve subsequent items. If empty - no more items present.
+	NextCursor *string `json:"nextCursor,omitempty"`
+}
+
+// CastaiNotificationsV1beta1Notification defines model for castai.notifications.v1beta1.Notification.
+type CastaiNotificationsV1beta1Notification struct {
+	AckAt           *time.Time                                 `json:"ackAt,omitempty"`
+	ClusterMetadata *CastaiNotificationsV1beta1ClusterMetadata `json:"clusterMetadata,omitempty"`
+	CreatedAt       *time.Time                                 `json:"createdAt,omitempty"`
+
+	// Free-form details from the event.
+	Details *string `json:"details,omitempty"`
+	Id      *string `json:"id,omitempty"`
+
+	// A high-level, text summary message of the event. Will be used to construct an alert's summary.
+	Message           *string                                      `json:"message,omitempty"`
+	Name              *string                                      `json:"name,omitempty"`
+	OperationMetadata *CastaiNotificationsV1beta1OperationMetadata `json:"operationMetadata,omitempty"`
+	OrganizationId    *string                                      `json:"organizationId,omitempty"`
+
+	// Indicates the severity of the impact to the affected system.
+	Severity *string `json:"severity,omitempty"`
+
+	// When the upstream system detected / created the event.
+	Timestamp *time.Time `json:"timestamp,omitempty"`
+}
+
+// CastaiNotificationsV1beta1OperationMetadata defines model for castai.notifications.v1beta1.OperationMetadata.
+type CastaiNotificationsV1beta1OperationMetadata struct {
+	Id   *string `json:"id,omitempty"`
+	Type *string `json:"type,omitempty"`
+}
+
+// CastaiNotificationsV1beta1Severity defines model for castai.notifications.v1beta1.Severity.
+type CastaiNotificationsV1beta1Severity string
+
+// List of CastaiNotificationsV1beta1Severity
+const (
+	CastaiNotificationsV1beta1Severity_CRITICAL    CastaiNotificationsV1beta1Severity = "CRITICAL"
+	CastaiNotificationsV1beta1Severity_ERROR       CastaiNotificationsV1beta1Severity = "ERROR"
+	CastaiNotificationsV1beta1Severity_INFO        CastaiNotificationsV1beta1Severity = "INFO"
+	CastaiNotificationsV1beta1Severity_SUCCESS     CastaiNotificationsV1beta1Severity = "SUCCESS"
+	CastaiNotificationsV1beta1Severity_UNSPECIFIED CastaiNotificationsV1beta1Severity = "UNSPECIFIED"
+	CastaiNotificationsV1beta1Severity_WARNING     CastaiNotificationsV1beta1Severity = "WARNING"
+)
+
+// CastaiNotificationsV1beta1UpdateWebhookConfig defines model for castai.notifications.v1beta1.UpdateWebhookConfig.
+type CastaiNotificationsV1beta1UpdateWebhookConfig struct {
+	AuthKeys         *CastaiNotificationsV1beta1UpdateWebhookConfig_AuthKeys `json:"authKeys,omitempty"`
+	CallbackUrl      string                                                  `json:"callbackUrl"`
+	Name             string                                                  `json:"name"`
+	RequestTemplate  string                                                  `json:"requestTemplate"`
+	SeverityTriggers []CastaiNotificationsV1beta1Severity                    `json:"severityTriggers"`
+}
+
+// CastaiNotificationsV1beta1UpdateWebhookConfig_AuthKeys defines model for CastaiNotificationsV1beta1UpdateWebhookConfig.AuthKeys.
+type CastaiNotificationsV1beta1UpdateWebhookConfig_AuthKeys struct {
+	AdditionalProperties map[string]string `json:"-"`
+}
+
+// CastaiNotificationsV1beta1WebhookConfig defines model for castai.notifications.v1beta1.WebhookConfig.
+type CastaiNotificationsV1beta1WebhookConfig struct {
+	AuthKeys         *CastaiNotificationsV1beta1WebhookConfig_AuthKeys `json:"authKeys,omitempty"`
+	CallbackUrl      *string                                           `json:"callbackUrl,omitempty"`
+	CreatedAt        *time.Time                                        `json:"createdAt,omitempty"`
+	DeletedAt        *time.Time                                        `json:"deletedAt,omitempty"`
+	Error            *string                                           `json:"error,omitempty"`
+	Id               *string                                           `json:"id,omitempty"`
+	Name             *string                                           `json:"name,omitempty"`
+	RequestTemplate  *string                                           `json:"requestTemplate,omitempty"`
+	SeverityTriggers *[]CastaiNotificationsV1beta1Severity             `json:"severityTriggers,omitempty"`
+	Status           *string                                           `json:"status,omitempty"`
+	TenantId         *string                                           `json:"tenantId,omitempty"`
+	UpdatedAt        *time.Time                                        `json:"updatedAt,omitempty"`
+}
+
+// CastaiNotificationsV1beta1WebhookConfig_AuthKeys defines model for CastaiNotificationsV1beta1WebhookConfig.AuthKeys.
+type CastaiNotificationsV1beta1WebhookConfig_AuthKeys struct {
+	AdditionalProperties map[string]string `json:"-"`
 }
 
 // CastaiV1Cloud defines model for castai.v1.Cloud.
@@ -2002,6 +2123,15 @@ type CostreportV1beta1GetClusterCostHistoryResponseCostEntry struct {
 
 	// Defines cluster cost details: cost and resources.
 	Optimized *CostreportV1beta1GetClusterCostHistoryResponseCostDetails `json:"optimized,omitempty"`
+
+	// Defines cluster cost details: cost and resources.
+	OptimizedLayman *CostreportV1beta1GetClusterCostHistoryResponseCostDetails `json:"optimizedLayman,omitempty"`
+
+	// Defines cluster cost details: cost and resources.
+	OptimizedSpotInstances *CostreportV1beta1GetClusterCostHistoryResponseCostDetails `json:"optimizedSpotInstances,omitempty"`
+
+	// Defines cluster cost details: cost and resources.
+	OptimizedSpotOnly *CostreportV1beta1GetClusterCostHistoryResponseCostDetails `json:"optimizedSpotOnly,omitempty"`
 }
 
 // CostreportV1beta1GetClusterCostReportResponse defines model for costreport.v1beta1.GetClusterCostReportResponse.
@@ -2108,22 +2238,35 @@ type CostreportV1beta1GetClusterWorkloadReportResponseWorkloadItem struct {
 	WorkloadType *string `json:"workloadType,omitempty"`
 }
 
-// CostreportV1beta1GetClustersDailyCostReportResponse defines model for costreport.v1beta1.GetClustersDailyCostReportResponse.
-type CostreportV1beta1GetClustersDailyCostReportResponse struct {
-	Items *[]CostreportV1beta1GetClustersDailyCostReportResponseClusterCostItem `json:"items,omitempty"`
-
-	// Defines total cost of all clusters within requested date range.
-	TotalCostDaily *float64 `json:"totalCostDaily,omitempty"`
+// CostreportV1beta1GetClustersCostReportResponse defines model for costreport.v1beta1.GetClustersCostReportResponse.
+type CostreportV1beta1GetClustersCostReportResponse struct {
+	Items *[]CostreportV1beta1GetClustersCostReportResponseClusterCostItem `json:"items,omitempty"`
 }
 
-// CostreportV1beta1GetClustersDailyCostReportResponseClusterCostItem defines model for costreport.v1beta1.GetClustersDailyCostReportResponse.ClusterCostItem.
-type CostreportV1beta1GetClustersDailyCostReportResponseClusterCostItem struct {
+// CostreportV1beta1GetClustersCostReportResponseClusterCostItem defines model for costreport.v1beta1.GetClustersCostReportResponse.ClusterCostItem.
+type CostreportV1beta1GetClustersCostReportResponseClusterCostItem struct {
 
 	// ID of the cluster.
 	ClusterId *string `json:"clusterId,omitempty"`
 
-	// Defines total cost of all clusters within requested date range for single cluster.
-	TotalCostDaily *float64 `json:"totalCostDaily,omitempty"`
+	// Cost details of cluster per interval.
+	Intervals *[]CostreportV1beta1GetClustersCostReportResponseIntervalItem `json:"intervals,omitempty"`
+}
+
+// CostreportV1beta1GetClustersCostReportResponseIntervalItem defines model for costreport.v1beta1.GetClustersCostReportResponse.IntervalItem.
+type CostreportV1beta1GetClustersCostReportResponseIntervalItem struct {
+
+	// Cost of on-demand instances.
+	CostOnDemandPerHour *string `json:"costOnDemandPerHour,omitempty"`
+
+	// Cost of spot-fallback instances.
+	CostSpotFallbackPerHour *string `json:"costSpotFallbackPerHour,omitempty"`
+
+	// Cost of spot instances.
+	CostSpotPerHour *string `json:"costSpotPerHour,omitempty"`
+
+	// Timestamp of entry.
+	Timestamp *time.Time `json:"timestamp,omitempty"`
 }
 
 // CostreportV1beta1GetSavingsRecommendationResponse defines model for costreport.v1beta1.GetSavingsRecommendationResponse.
@@ -2414,6 +2557,9 @@ type ExternalclusterV1GKEClusterParams struct {
 	// Location of the cluster.
 	Location *string `json:"location,omitempty"`
 
+	// Max pods per node. Default is 110.
+	MaxPodsPerNode *int32 `json:"maxPodsPerNode,omitempty"`
+
 	// GCP project ID where cluster runs.
 	ProjectId *string `json:"projectId,omitempty"`
 
@@ -2478,6 +2624,14 @@ type ExternalclusterV1ListClustersResponse struct {
 
 // ExternalclusterV1NodeConfig defines model for externalcluster.v1.NodeConfig.
 type ExternalclusterV1NodeConfig struct {
+
+	// ID reference of Node configuration (template) to be used for node creation. Supersedes Configuration Name.
+	ConfigurationId *string `json:"configurationId"`
+
+	// Name reference of Node configuration (template)to be used for node creation.
+	// Superseded if Configuration ID reference is provided.
+	// Request will fail if several configurations with same name exists for a given cluster.
+	ConfigurationName *string `json:"configurationName"`
 
 	// GPUConfig describes instance GPU configuration.
 	//
@@ -2569,6 +2723,10 @@ type ExternalclusterV1Subnet struct {
 	// Deprecated. Subnet name is not filled and should not be used.
 	Name *string `json:"name,omitempty"`
 
+	// Public defines if subnet is publicly routable.
+	// Optional. Populated for EKS provider only.
+	Public *bool `json:"public"`
+
 	// Subnet's zone name.
 	ZoneName *string `json:"zoneName,omitempty"`
 }
@@ -2643,6 +2801,9 @@ type InsightsV1GetBestPracticesCheckDetailsResponse struct {
 	// Category of insight.
 	Category *string `json:"category,omitempty"`
 
+	// CVSSV3 vulnerability vector.
+	Cvss3vector *string `json:"cvss3vector,omitempty"`
+
 	// Check detailed description.
 	Description *string `json:"description,omitempty"`
 
@@ -2674,6 +2835,26 @@ type InsightsV1GetBestPracticesCheckDetailsResponseObjectItem struct {
 	Namespace  *string `json:"namespace,omitempty"`
 }
 
+// InsightsV1GetBestPracticesOverviewResponse defines model for insights.v1.GetBestPracticesOverviewResponse.
+type InsightsV1GetBestPracticesOverviewResponse struct {
+	Resources *InsightsV1GetBestPracticesOverviewResponseResources `json:"resources,omitempty"`
+
+	// Resources as timeseries data keyed by RFC3339 timestamp.
+	Timeseries *InsightsV1GetBestPracticesOverviewResponse_Timeseries `json:"timeseries,omitempty"`
+}
+
+// InsightsV1GetBestPracticesOverviewResponse_Timeseries defines model for InsightsV1GetBestPracticesOverviewResponse.Timeseries.
+type InsightsV1GetBestPracticesOverviewResponse_Timeseries struct {
+	AdditionalProperties map[string]InsightsV1GetBestPracticesOverviewResponseResources `json:"-"`
+}
+
+// InsightsV1GetBestPracticesOverviewResponseResources defines model for insights.v1.GetBestPracticesOverviewResponse.Resources.
+type InsightsV1GetBestPracticesOverviewResponseResources struct {
+	Affected   *int32 `json:"affected,omitempty"`
+	Total      *int32 `json:"total,omitempty"`
+	Unaffected *int32 `json:"unaffected,omitempty"`
+}
+
 // InsightsV1GetBestPracticesReportFiltersResponse defines model for insights.v1.GetBestPracticesReportFiltersResponse.
 type InsightsV1GetBestPracticesReportFiltersResponse struct {
 	Categories     *[]string `json:"categories,omitempty"`
@@ -2691,6 +2872,9 @@ type InsightsV1GetBestPracticesReportResponse struct {
 // InsightsV1GetBestPracticesReportResponseCheckItem defines model for insights.v1.GetBestPracticesReportResponse.CheckItem.
 type InsightsV1GetBestPracticesReportResponseCheckItem struct {
 
+	// CVSSV3 vulnerability vector.
+	Cvss3vector *string `json:"cvss3vector,omitempty"`
+
 	// Number of objects that did not pass the check.
 	Failed *int32 `json:"failed,omitempty"`
 
@@ -2704,9 +2888,7 @@ type InsightsV1GetBestPracticesReportResponseCheckItem struct {
 	RuleId *string `json:"ruleId,omitempty"`
 
 	// Rule's criticality level.
-	SeverityLevel *string `json:"severityLevel,omitempty"`
-
-	// Rule's severity rating [0.0,10.0].
+	SeverityLevel *string  `json:"severityLevel,omitempty"`
 	SeverityScore *float32 `json:"severityScore,omitempty"`
 
 	// Total number of objects that there checked.
@@ -2735,6 +2917,29 @@ type InsightsV1GetBestPracticesReportSummaryResponse struct {
 // InsightsV1GetBestPracticesReportSummaryResponse_FailedChecksBySeverityLevel defines model for InsightsV1GetBestPracticesReportSummaryResponse.FailedChecksBySeverityLevel.
 type InsightsV1GetBestPracticesReportSummaryResponse_FailedChecksBySeverityLevel struct {
 	AdditionalProperties map[string]int32 `json:"-"`
+}
+
+// InsightsV1GetOverviewSummaryResponse defines model for insights.v1.GetOverviewSummaryResponse.
+type InsightsV1GetOverviewSummaryResponse struct {
+	Issues *InsightsV1GetOverviewSummaryResponseIssues `json:"issues,omitempty"`
+
+	// Issues as timeseries data keyed by RFC3339 timestamp.
+	Timeseries *InsightsV1GetOverviewSummaryResponse_Timeseries `json:"timeseries,omitempty"`
+}
+
+// InsightsV1GetOverviewSummaryResponse_Timeseries defines model for InsightsV1GetOverviewSummaryResponse.Timeseries.
+type InsightsV1GetOverviewSummaryResponse_Timeseries struct {
+	AdditionalProperties map[string]InsightsV1GetOverviewSummaryResponseIssues `json:"-"`
+}
+
+// InsightsV1GetOverviewSummaryResponseIssues defines model for insights.v1.GetOverviewSummaryResponse.Issues.
+type InsightsV1GetOverviewSummaryResponseIssues struct {
+	Critical *int32 `json:"critical,omitempty"`
+	High     *int32 `json:"high,omitempty"`
+	Low      *int32 `json:"low,omitempty"`
+	Medium   *int32 `json:"medium,omitempty"`
+	None     *int32 `json:"none,omitempty"`
+	Total    *int32 `json:"total,omitempty"`
 }
 
 // InsightsV1GetVulnerabilitiesDetailsResponse defines model for insights.v1.GetVulnerabilitiesDetailsResponse.
@@ -2772,11 +2977,24 @@ type InsightsV1GetVulnerabilitiesDetailsResponseVulnerabilityItem struct {
 	SeverityLevel *string `json:"severityLevel,omitempty"`
 }
 
-// InsightsV1GetVulnerabilitiesReportFiltersResponse defines model for insights.v1.GetVulnerabilitiesReportFiltersResponse.
-type InsightsV1GetVulnerabilitiesReportFiltersResponse struct {
-	Namespaces  *[]string `json:"namespaces,omitempty"`
-	ObjectKinds *[]string `json:"objectKinds,omitempty"`
-	ObjectNames *[]string `json:"objectNames,omitempty"`
+// InsightsV1GetVulnerabilitiesOverviewResponse defines model for insights.v1.GetVulnerabilitiesOverviewResponse.
+type InsightsV1GetVulnerabilitiesOverviewResponse struct {
+	Resources *InsightsV1GetVulnerabilitiesOverviewResponseResources `json:"resources,omitempty"`
+
+	// Resources as timeseries data keyed by RFC3339 timestamp.
+	Timeseries *InsightsV1GetVulnerabilitiesOverviewResponse_Timeseries `json:"timeseries,omitempty"`
+}
+
+// InsightsV1GetVulnerabilitiesOverviewResponse_Timeseries defines model for InsightsV1GetVulnerabilitiesOverviewResponse.Timeseries.
+type InsightsV1GetVulnerabilitiesOverviewResponse_Timeseries struct {
+	AdditionalProperties map[string]InsightsV1GetVulnerabilitiesOverviewResponseResources `json:"-"`
+}
+
+// InsightsV1GetVulnerabilitiesOverviewResponseResources defines model for insights.v1.GetVulnerabilitiesOverviewResponse.Resources.
+type InsightsV1GetVulnerabilitiesOverviewResponseResources struct {
+	Affected   *int32 `json:"affected,omitempty"`
+	Total      *int32 `json:"total,omitempty"`
+	Unaffected *int32 `json:"unaffected,omitempty"`
 }
 
 // InsightsV1GetVulnerabilitiesReportResponse defines model for insights.v1.GetVulnerabilitiesReportResponse.
@@ -2847,8 +3065,34 @@ type InsightsV1GetVulnerabilitiesResourcesResponseResourceItem struct {
 	Name *string `json:"name,omitempty"`
 }
 
+// InsightsV1IngestAgentLogResponse defines model for insights.v1.IngestAgentLogResponse.
+type InsightsV1IngestAgentLogResponse map[string]interface{}
+
+// InsightsV1LogEvent defines model for insights.v1.LogEvent.
+type InsightsV1LogEvent struct {
+	Fields  *InsightsV1LogEvent_Fields `json:"fields,omitempty"`
+	Level   *string                    `json:"level,omitempty"`
+	Message *string                    `json:"message,omitempty"`
+	Time    *time.Time                 `json:"time,omitempty"`
+}
+
+// InsightsV1LogEvent_Fields defines model for InsightsV1LogEvent.Fields.
+type InsightsV1LogEvent_Fields struct {
+	AdditionalProperties map[string]string `json:"-"`
+}
+
+// InsightsV1ScheduleBestPracticesScanRequest defines model for insights.v1.ScheduleBestPracticesScanRequest.
+type InsightsV1ScheduleBestPracticesScanRequest struct {
+	ClusterId *string `json:"clusterId,omitempty"`
+}
+
 // InsightsV1ScheduleBestPracticesScanResponse defines model for insights.v1.ScheduleBestPracticesScanResponse.
 type InsightsV1ScheduleBestPracticesScanResponse map[string]interface{}
+
+// InsightsV1ScheduleVulnerabilitiesScanRequest defines model for insights.v1.ScheduleVulnerabilitiesScanRequest.
+type InsightsV1ScheduleVulnerabilitiesScanRequest struct {
+	ClusterId *string `json:"clusterId,omitempty"`
+}
 
 // InsightsV1ScheduleVulnerabilitiesScanResponse defines model for insights.v1.ScheduleVulnerabilitiesScanResponse.
 type InsightsV1ScheduleVulnerabilitiesScanResponse map[string]interface{}
@@ -2857,16 +3101,17 @@ type InsightsV1ScheduleVulnerabilitiesScanResponse map[string]interface{}
 type InventoryblacklistV1AddBlacklistRequest struct {
 
 	// Cluster id, that will only be set if instance type or family is blacklisted for specific cluster.
-	ClusterId *string `json:"clusterId"`
+	ClusterId *string `json:"clusterId,omitempty"`
 
 	// The date time when the disabling is due to be expired.
-	// This is for the situations when disabling is done by the platform due to cloud availability.
+	// This is for the situations when disabling is done by the platform due to
+	// cloud availability.
 	ExpiresAt      *time.Time `json:"expiresAt"`
 	InstanceFamily *string    `json:"instanceFamily"`
 	InstanceType   *string    `json:"instanceType"`
 
 	// Organization id for which the instance type or family is blacklisted.
-	OrganizationId *string `json:"organizationId"`
+	OrganizationId *string `json:"organizationId,omitempty"`
 
 	// Reason for disabling instance type or family.
 	Reason *string `json:"reason,omitempty"`
@@ -2897,16 +3142,6 @@ type InventoryblacklistV1AddBlacklistResponse struct {
 	Reason *string `json:"reason,omitempty"`
 }
 
-// InventoryblacklistV1GetClusterInventoryBlacklistResponse defines model for inventoryblacklist.v1.GetClusterInventoryBlacklistResponse.
-type InventoryblacklistV1GetClusterInventoryBlacklistResponse struct {
-
-	// The ID of the cluster.
-	ClusterId *string `json:"clusterId,omitempty"`
-
-	// Blacklisted instances of inventory items for that cluster or organization.
-	Items *[]InventoryblacklistV1InventoryBlacklistItem `json:"items,omitempty"`
-}
-
 // InventoryblacklistV1InventoryBlacklistItem defines model for inventoryblacklist.v1.InventoryBlacklistItem.
 type InventoryblacklistV1InventoryBlacklistItem struct {
 
@@ -2929,11 +3164,19 @@ type InventoryblacklistV1InventoryBlacklistItem struct {
 	Reason *string `json:"reason,omitempty"`
 }
 
+// InventoryblacklistV1ListBlacklistsResponse defines model for inventoryblacklist.v1.ListBlacklistsResponse.
+type InventoryblacklistV1ListBlacklistsResponse struct {
+
+	// Blacklisted instances of inventory items for that cluster or organization.
+	Items *[]InventoryblacklistV1InventoryBlacklistItem `json:"items,omitempty"`
+}
+
 // InventoryblacklistV1RemoveBlacklistRequest defines model for inventoryblacklist.v1.RemoveBlacklistRequest.
 type InventoryblacklistV1RemoveBlacklistRequest struct {
 
-	// Cluster id, that will only be set if instance type or family is blacklisted for specific cluster.
-	ClusterId      *string `json:"clusterId"`
+	// Cluster id, that will only be set if instance type or family is
+	// blacklisted for specific cluster.
+	ClusterId      *string `json:"clusterId,omitempty"`
 	InstanceFamily *string `json:"instanceFamily"`
 	InstanceType   *string `json:"instanceType"`
 
@@ -2998,12 +3241,6 @@ type NodeconfigV1NewNodeConfiguration struct {
 	Image *string                 `json:"image"`
 	Kops  *NodeconfigV1KOPSConfig `json:"kops,omitempty"`
 
-	// Kubernetes labels to be used for provisioned nodes.
-	KubernetesLabels *NodeconfigV1NewNodeConfiguration_KubernetesLabels `json:"kubernetesLabels,omitempty"`
-
-	// Kubernetes taints to be used for provisioned nodes.
-	KubernetesTaints *[]CastaiClusterV1beta1Taint `json:"kubernetesTaints,omitempty"`
-
 	// The name of the node configuration.
 	Name string `json:"name"`
 
@@ -3015,11 +3252,6 @@ type NodeconfigV1NewNodeConfiguration struct {
 
 	// Tags to be added on cloud instances for provisioned nodes.
 	Tags *NodeconfigV1NewNodeConfiguration_Tags `json:"tags,omitempty"`
-}
-
-// NodeconfigV1NewNodeConfiguration_KubernetesLabels defines model for NodeconfigV1NewNodeConfiguration.KubernetesLabels.
-type NodeconfigV1NewNodeConfiguration_KubernetesLabels struct {
-	AdditionalProperties map[string]string `json:"-"`
 }
 
 // NodeconfigV1NewNodeConfiguration_Tags defines model for NodeconfigV1NewNodeConfiguration.Tags.
@@ -3051,12 +3283,6 @@ type NodeconfigV1NodeConfiguration struct {
 	Image *string                 `json:"image"`
 	Kops  *NodeconfigV1KOPSConfig `json:"kops,omitempty"`
 
-	// Kubernetes labels to be used for provisioned nodes.
-	KubernetesLabels *NodeconfigV1NodeConfiguration_KubernetesLabels `json:"kubernetesLabels,omitempty"`
-
-	// Kubernetes taints to be used for provisioned nodes.
-	KubernetesTaints *[]CastaiClusterV1beta1Taint `json:"kubernetesTaints,omitempty"`
-
 	// The name of the node configuration.
 	Name *string `json:"name,omitempty"`
 
@@ -3074,11 +3300,6 @@ type NodeconfigV1NodeConfiguration struct {
 
 	// The version of the node configuration.
 	Version *int32 `json:"version,omitempty"`
-}
-
-// NodeconfigV1NodeConfiguration_KubernetesLabels defines model for NodeconfigV1NodeConfiguration.KubernetesLabels.
-type NodeconfigV1NodeConfiguration_KubernetesLabels struct {
-	AdditionalProperties map[string]string `json:"-"`
 }
 
 // NodeconfigV1NodeConfiguration_Tags defines model for NodeconfigV1NodeConfiguration.Tags.
@@ -3101,12 +3322,6 @@ type NodeconfigV1NodeConfigurationUpdate struct {
 	Image *string                 `json:"image"`
 	Kops  *NodeconfigV1KOPSConfig `json:"kops,omitempty"`
 
-	// Kubernetes labels to be used for provisioned nodes.
-	KubernetesLabels *NodeconfigV1NodeConfigurationUpdate_KubernetesLabels `json:"kubernetesLabels,omitempty"`
-
-	// Kubernetes taints to be used for provisioned nodes.
-	KubernetesTaints *[]CastaiClusterV1beta1Taint `json:"kubernetesTaints,omitempty"`
-
 	// Optional SSH public key to be used for provisioned nodes. Value should be base64 encoded.
 	SshPublicKey *string `json:"sshPublicKey"`
 
@@ -3117,14 +3332,114 @@ type NodeconfigV1NodeConfigurationUpdate struct {
 	Tags *NodeconfigV1NodeConfigurationUpdate_Tags `json:"tags,omitempty"`
 }
 
-// NodeconfigV1NodeConfigurationUpdate_KubernetesLabels defines model for NodeconfigV1NodeConfigurationUpdate.KubernetesLabels.
-type NodeconfigV1NodeConfigurationUpdate_KubernetesLabels struct {
-	AdditionalProperties map[string]string `json:"-"`
-}
-
 // NodeconfigV1NodeConfigurationUpdate_Tags defines model for NodeconfigV1NodeConfigurationUpdate.Tags.
 type NodeconfigV1NodeConfigurationUpdate_Tags struct {
 	AdditionalProperties map[string]string `json:"-"`
+}
+
+// NodetemplatesV1AvailableInstanceType defines model for nodetemplates.v1.AvailableInstanceType.
+type NodetemplatesV1AvailableInstanceType struct {
+	AvailableGpuDevices    *[]NodetemplatesV1AvailableInstanceTypeGPUDevice            `json:"availableGpuDevices,omitempty"`
+	Cpu                    *string                                                     `json:"cpu,omitempty"`
+	CpuCost                *float64                                                    `json:"cpuCost,omitempty"`
+	Family                 *string                                                     `json:"family,omitempty"`
+	IsComputeOptimized     *bool                                                       `json:"isComputeOptimized,omitempty"`
+	Memory                 *string                                                     `json:"memory,omitempty"`
+	Name                   *string                                                     `json:"name,omitempty"`
+	StorageOptimizedOption *NodetemplatesV1AvailableInstanceTypeStorageOptimizedOption `json:"storageOptimizedOption,omitempty"`
+}
+
+// NodetemplatesV1AvailableInstanceTypeGPUDevice defines model for nodetemplates.v1.AvailableInstanceType.GPUDevice.
+type NodetemplatesV1AvailableInstanceTypeGPUDevice struct {
+	Count        *int32  `json:"count,omitempty"`
+	Manufacturer *string `json:"manufacturer,omitempty"`
+	Name         *string `json:"name,omitempty"`
+}
+
+// NodetemplatesV1AvailableInstanceTypeStorageOptimizedOption defines model for nodetemplates.v1.AvailableInstanceType.StorageOptimizedOption.
+type NodetemplatesV1AvailableInstanceTypeStorageOptimizedOption string
+
+// List of NodetemplatesV1AvailableInstanceTypeStorageOptimizedOption
+const (
+	NodetemplatesV1AvailableInstanceTypeStorageOptimizedOption_Always   NodetemplatesV1AvailableInstanceTypeStorageOptimizedOption = "Always"
+	NodetemplatesV1AvailableInstanceTypeStorageOptimizedOption_Never    NodetemplatesV1AvailableInstanceTypeStorageOptimizedOption = "Never"
+	NodetemplatesV1AvailableInstanceTypeStorageOptimizedOption_OnDemand NodetemplatesV1AvailableInstanceTypeStorageOptimizedOption = "OnDemand"
+)
+
+// NodetemplatesV1DeleteNodeTemplateResponse defines model for nodetemplates.v1.DeleteNodeTemplateResponse.
+type NodetemplatesV1DeleteNodeTemplateResponse map[string]interface{}
+
+// NodetemplatesV1FilterInstanceTypesResponse defines model for nodetemplates.v1.FilterInstanceTypesResponse.
+type NodetemplatesV1FilterInstanceTypesResponse struct {
+	AvailableInstanceTypes *[]NodetemplatesV1AvailableInstanceType `json:"availableInstanceTypes,omitempty"`
+}
+
+// NodetemplatesV1ListNodeTemplatesResponse defines model for nodetemplates.v1.ListNodeTemplatesResponse.
+type NodetemplatesV1ListNodeTemplatesResponse struct {
+	Items *[]NodetemplatesV1NodeTemplateListItem `json:"items,omitempty"`
+}
+
+// NodetemplatesV1NewNodeTemplate defines model for nodetemplates.v1.NewNodeTemplate.
+type NodetemplatesV1NewNodeTemplate struct {
+	ConfigurationId *string                             `json:"configurationId,omitempty"`
+	Constraints     *NodetemplatesV1TemplateConstraints `json:"constraints,omitempty"`
+	Name            *string                             `json:"name,omitempty"`
+}
+
+// NodetemplatesV1NodeTemplate defines model for nodetemplates.v1.NodeTemplate.
+type NodetemplatesV1NodeTemplate struct {
+	ConfigurationId   *string                             `json:"configurationId,omitempty"`
+	ConfigurationName *string                             `json:"configurationName,omitempty"`
+	Constraints       *NodetemplatesV1TemplateConstraints `json:"constraints,omitempty"`
+	Name              *string                             `json:"name,omitempty"`
+	Version           *string                             `json:"version,omitempty"`
+}
+
+// NodetemplatesV1NodeTemplateListItem defines model for nodetemplates.v1.NodeTemplateListItem.
+type NodetemplatesV1NodeTemplateListItem struct {
+	Stats    *NodetemplatesV1NodeTemplateListItemStats `json:"stats,omitempty"`
+	Template *NodetemplatesV1NodeTemplate              `json:"template,omitempty"`
+}
+
+// NodetemplatesV1NodeTemplateListItemStats defines model for nodetemplates.v1.NodeTemplateListItem.Stats.
+type NodetemplatesV1NodeTemplateListItemStats struct {
+	CountFallback *int32 `json:"countFallback,omitempty"`
+	CountOnDemand *int32 `json:"countOnDemand,omitempty"`
+	CountSpot     *int32 `json:"countSpot,omitempty"`
+}
+
+// NodetemplatesV1TemplateConstraints defines model for nodetemplates.v1.TemplateConstraints.
+type NodetemplatesV1TemplateConstraints struct {
+	ComputeOptimized *bool                                                        `json:"computeOptimized"`
+	Gpu              *NodetemplatesV1TemplateConstraintsGPUConstraints            `json:"gpu,omitempty"`
+	InstanceFamilies *NodetemplatesV1TemplateConstraintsInstanceFamilyConstraints `json:"instanceFamilies,omitempty"`
+	MaxCpu           *int32                                                       `json:"maxCpu"`
+	MaxMemory        *int32                                                       `json:"maxMemory"`
+	MinCpu           *int32                                                       `json:"minCpu"`
+	MinMemory        *int32                                                       `json:"minMemory"`
+	Spot             *bool                                                        `json:"spot"`
+	StorageOptimized *bool                                                        `json:"storageOptimized"`
+}
+
+// NodetemplatesV1TemplateConstraintsGPUConstraints defines model for nodetemplates.v1.TemplateConstraints.GPUConstraints.
+type NodetemplatesV1TemplateConstraintsGPUConstraints struct {
+	ExcludeNames  *[]string `json:"excludeNames,omitempty"`
+	IncludeNames  *[]string `json:"includeNames,omitempty"`
+	Manufacturers *[]string `json:"manufacturers,omitempty"`
+	MaxCount      *int32    `json:"maxCount"`
+	MinCount      *int32    `json:"minCount"`
+}
+
+// NodetemplatesV1TemplateConstraintsInstanceFamilyConstraints defines model for nodetemplates.v1.TemplateConstraints.InstanceFamilyConstraints.
+type NodetemplatesV1TemplateConstraintsInstanceFamilyConstraints struct {
+	Exclude *[]string `json:"exclude,omitempty"`
+	Include *[]string `json:"include,omitempty"`
+}
+
+// NodetemplatesV1UpdateNodeTemplate defines model for nodetemplates.v1.UpdateNodeTemplate.
+type NodetemplatesV1UpdateNodeTemplate struct {
+	ConfigurationId *string                             `json:"configurationId,omitempty"`
+	Constraints     *NodetemplatesV1TemplateConstraints `json:"constraints,omitempty"`
 }
 
 // PoliciesV1ClusterLimitsCpu defines model for policies.v1.ClusterLimitsCpu.
@@ -3526,8 +3841,8 @@ type CostReportAPIGetClusterWorkloadReportParams struct {
 	StepSeconds *int32 `json:"stepSeconds,omitempty"`
 }
 
-// CostReportAPIGetClustersDailyCostReportParams defines parameters for CostReportAPIGetClustersDailyCostReport.
-type CostReportAPIGetClustersDailyCostReportParams struct {
+// CostReportAPIGetClustersCostReportParams defines parameters for CostReportAPIGetClustersCostReport.
+type CostReportAPIGetClustersCostReportParams struct {
 
 	// Filter items to include from specified time.
 	StartTime time.Time `json:"startTime"`
@@ -3544,6 +3859,16 @@ type DeleteGslbJSONBody GSLBDeleteRequest
 
 // CreateOrUpdateGslbJSONBody defines parameters for CreateOrUpdateGslb.
 type CreateOrUpdateGslbJSONBody GSLBRequest
+
+// InventoryBlacklistAPIListBlacklistsParams defines parameters for InventoryBlacklistAPIListBlacklists.
+type InventoryBlacklistAPIListBlacklistsParams struct {
+
+	// Organization id for which the instance type or family is blacklisted.
+	OrganizationId *string `json:"organizationId,omitempty"`
+
+	// Cluster id, that will only be set if instance type or family is blacklisted for specific cluster.
+	ClusterId *string `json:"clusterId,omitempty"`
+}
 
 // InventoryBlacklistAPIAddBlacklistJSONBody defines parameters for InventoryBlacklistAPIAddBlacklist.
 type InventoryBlacklistAPIAddBlacklistJSONBody InventoryblacklistV1AddBlacklistRequest
@@ -3607,6 +3932,9 @@ type CostReportAPIGetClusterCostReportParams struct {
 	StepSeconds *int32 `json:"stepSeconds,omitempty"`
 }
 
+// NodeTemplatesAPIFilterInstanceTypesJSONBody defines parameters for NodeTemplatesAPIFilterInstanceTypes.
+type NodeTemplatesAPIFilterInstanceTypesJSONBody NodetemplatesV1NodeTemplate
+
 // ConfigureClusterAddonsJSONBody defines parameters for ConfigureClusterAddons.
 type ConfigureClusterAddonsJSONBody AddonsConfig
 
@@ -3654,6 +3982,12 @@ type NodeConfigurationAPICreateConfigurationJSONBody NodeconfigV1NewNodeConfigur
 
 // NodeConfigurationAPIUpdateConfigurationJSONBody defines parameters for NodeConfigurationAPIUpdateConfiguration.
 type NodeConfigurationAPIUpdateConfigurationJSONBody NodeconfigV1NodeConfigurationUpdate
+
+// NodeTemplatesAPICreateNodeTemplateJSONBody defines parameters for NodeTemplatesAPICreateNodeTemplate.
+type NodeTemplatesAPICreateNodeTemplateJSONBody NodetemplatesV1NewNodeTemplate
+
+// NodeTemplatesAPIUpdateNodeTemplateJSONBody defines parameters for NodeTemplatesAPIUpdateNodeTemplate.
+type NodeTemplatesAPIUpdateNodeTemplateJSONBody NodetemplatesV1UpdateNodeTemplate
 
 // GetClusterNodesParams defines parameters for GetClusterNodes.
 type GetClusterNodesParams struct {
@@ -3722,7 +4056,12 @@ type ExternalClusterAPIUpdateClusterJSONBody ExternalclusterV1ClusterUpdate
 
 // ExternalClusterAPIGetCredentialsScriptParams defines parameters for ExternalClusterAPIGetCredentialsScript.
 type ExternalClusterAPIGetCredentialsScriptParams struct {
+
+	// Whether an AWS CrossRole should be used for authentication.
 	CrossRole *bool `json:"crossRole,omitempty"`
+
+	// Whether NVIDIA device plugin DaemonSet should be installed during Phase 2 on-boarding.
+	NvidiaDevicePlugin *bool `json:"nvidiaDevicePlugin,omitempty"`
 }
 
 // ExternalClusterAPIDisconnectClusterJSONBody defines parameters for ExternalClusterAPIDisconnectCluster.
@@ -3766,6 +4105,36 @@ type GetPromMetricsParams struct {
 	ClusterNames          *[]string             `json:"clusterNames,omitempty"`
 	XCastAiOrganizationId *HeaderOrganizationId `json:"X-CastAi-Organization-Id,omitempty"`
 }
+
+// NotificationAPIListNotificationsParams defines parameters for NotificationAPIListNotifications.
+type NotificationAPIListNotificationsParams struct {
+	PageLimit *string `json:"page.limit,omitempty"`
+
+	// Cursor defines token indicating where to start the page.
+	// Empty value indicates to start from beginning of the dataset.
+	PageCursor *string `json:"page.cursor,omitempty"`
+
+	// the from date range to filter.
+	FilterFromDate *string `json:"filter.fromDate,omitempty"`
+
+	// The to date range to filter.
+	FilterToDate *string `json:"filter.toDate,omitempty"`
+
+	// The severities you want to filter.
+	FilterSeverities *[]string `json:"filter.severities,omitempty"`
+
+	// Filters request to return acknowledged or not acknowledged notifications.
+	FilterIsAcked *bool `json:"filter.isAcked,omitempty"`
+}
+
+// NotificationAPIAckNotificationsJSONBody defines parameters for NotificationAPIAckNotifications.
+type NotificationAPIAckNotificationsJSONBody CastaiNotificationsV1beta1AckNotificationsRequest
+
+// NotificationAPICreateWebhookConfigJSONBody defines parameters for NotificationAPICreateWebhookConfig.
+type NotificationAPICreateWebhookConfigJSONBody CastaiNotificationsV1beta1AddWebhookConfig
+
+// NotificationAPIUpdateWebhookConfigJSONBody defines parameters for NotificationAPIUpdateWebhookConfig.
+type NotificationAPIUpdateWebhookConfigJSONBody CastaiNotificationsV1beta1UpdateWebhookConfig
 
 // CreateOrganizationJSONBody defines parameters for CreateOrganization.
 type CreateOrganizationJSONBody Organization
@@ -3833,10 +4202,52 @@ type InsightsAPIGetBestPracticesReportFiltersParams struct {
 	ClusterId *string `json:"clusterId,omitempty"`
 }
 
+// InsightsAPIScheduleBestPracticesScanJSONBody defines parameters for InsightsAPIScheduleBestPracticesScan.
+type InsightsAPIScheduleBestPracticesScanJSONBody InsightsV1ScheduleBestPracticesScanRequest
+
 // InsightsAPIGetBestPracticesReportSummaryParams defines parameters for InsightsAPIGetBestPracticesReportSummary.
 type InsightsAPIGetBestPracticesReportSummaryParams struct {
 
 	// (optional) cluster_id filter.
+	ClusterId *string `json:"clusterId,omitempty"`
+}
+
+// InsightsAPIGetBestPracticesOverviewParams defines parameters for InsightsAPIGetBestPracticesOverview.
+type InsightsAPIGetBestPracticesOverviewParams struct {
+
+	// (required) Start of time range.
+	FromDate *time.Time `json:"fromDate,omitempty"`
+
+	// (optional) End of time range.
+	ToDate *time.Time `json:"toDate,omitempty"`
+
+	// (optional) ID of cluster.
+	ClusterId *string `json:"clusterId,omitempty"`
+}
+
+// InsightsAPIGetOverviewSummaryParams defines parameters for InsightsAPIGetOverviewSummary.
+type InsightsAPIGetOverviewSummaryParams struct {
+
+	// (required) Start of time range.
+	FromDate *time.Time `json:"fromDate,omitempty"`
+
+	// (optional) End of time range.
+	ToDate *time.Time `json:"toDate,omitempty"`
+
+	// (optional) ID of cluster.
+	ClusterId *string `json:"clusterId,omitempty"`
+}
+
+// InsightsAPIGetVulnerabilitiesOverviewParams defines parameters for InsightsAPIGetVulnerabilitiesOverview.
+type InsightsAPIGetVulnerabilitiesOverviewParams struct {
+
+	// (required) Start of time range.
+	FromDate *time.Time `json:"fromDate,omitempty"`
+
+	// (optional) End of time range.
+	ToDate *time.Time `json:"toDate,omitempty"`
+
+	// (optional) ID of cluster.
 	ClusterId *string `json:"clusterId,omitempty"`
 }
 
@@ -3852,19 +4263,12 @@ type InsightsAPIGetVulnerabilitiesReportParams struct {
 	// (optional) object_kind filter.
 	ObjectKind *string `json:"objectKind,omitempty"`
 
-	// (optional) namespace filter.
-	Namespace *string `json:"namespace,omitempty"`
-
 	// (optional) return scan which happened after this timestamp.
 	From *time.Time `json:"from,omitempty"`
 }
 
-// InsightsAPIGetVulnerabilitiesReportFiltersParams defines parameters for InsightsAPIGetVulnerabilitiesReportFilters.
-type InsightsAPIGetVulnerabilitiesReportFiltersParams struct {
-
-	// (optional) return filters available for specific cluster.
-	ClusterId *string `json:"clusterId,omitempty"`
-}
+// InsightsAPIScheduleVulnerabilitiesScanJSONBody defines parameters for InsightsAPIScheduleVulnerabilitiesScan.
+type InsightsAPIScheduleVulnerabilitiesScanJSONBody InsightsV1ScheduleVulnerabilitiesScanRequest
 
 // InsightsAPIGetVulnerabilitiesReportSummaryParams defines parameters for InsightsAPIGetVulnerabilitiesReportSummary.
 type InsightsAPIGetVulnerabilitiesReportSummaryParams struct {
@@ -3872,6 +4276,9 @@ type InsightsAPIGetVulnerabilitiesReportSummaryParams struct {
 	// (optional) cluster_id filter.
 	ClusterId *string `json:"clusterId,omitempty"`
 }
+
+// InsightsAPIIngestAgentLogJSONBody defines parameters for InsightsAPIIngestAgentLog.
+type InsightsAPIIngestAgentLogJSONBody InsightsV1LogEvent
 
 // CreateAuthTokenJSONRequestBody defines body for CreateAuthToken for application/json ContentType.
 type CreateAuthTokenJSONRequestBody CreateAuthTokenJSONBody
@@ -3921,6 +4328,9 @@ type InstallClusterAddonJSONRequestBody InstallClusterAddonJSONBody
 // UpdateClusterAddonJSONRequestBody defines body for UpdateClusterAddon for application/json ContentType.
 type UpdateClusterAddonJSONRequestBody UpdateClusterAddonJSONBody
 
+// NodeTemplatesAPIFilterInstanceTypesJSONRequestBody defines body for NodeTemplatesAPIFilterInstanceTypes for application/json ContentType.
+type NodeTemplatesAPIFilterInstanceTypesJSONRequestBody NodeTemplatesAPIFilterInstanceTypesJSONBody
+
 // ConfigureClusterAddonsJSONRequestBody defines body for ConfigureClusterAddons for application/json ContentType.
 type ConfigureClusterAddonsJSONRequestBody ConfigureClusterAddonsJSONBody
 
@@ -3929,6 +4339,12 @@ type NodeConfigurationAPICreateConfigurationJSONRequestBody NodeConfigurationAPI
 
 // NodeConfigurationAPIUpdateConfigurationJSONRequestBody defines body for NodeConfigurationAPIUpdateConfiguration for application/json ContentType.
 type NodeConfigurationAPIUpdateConfigurationJSONRequestBody NodeConfigurationAPIUpdateConfigurationJSONBody
+
+// NodeTemplatesAPICreateNodeTemplateJSONRequestBody defines body for NodeTemplatesAPICreateNodeTemplate for application/json ContentType.
+type NodeTemplatesAPICreateNodeTemplateJSONRequestBody NodeTemplatesAPICreateNodeTemplateJSONBody
+
+// NodeTemplatesAPIUpdateNodeTemplateJSONRequestBody defines body for NodeTemplatesAPIUpdateNodeTemplate for application/json ContentType.
+type NodeTemplatesAPIUpdateNodeTemplateJSONRequestBody NodeTemplatesAPIUpdateNodeTemplateJSONBody
 
 // AddClusterNodeJSONRequestBody defines body for AddClusterNode for application/json ContentType.
 type AddClusterNodeJSONRequestBody AddClusterNodeJSONBody
@@ -3975,6 +4391,15 @@ type ExternalClusterAPIDrainNodeJSONRequestBody ExternalClusterAPIDrainNodeJSONB
 // UpdateCurrentUserProfileJSONRequestBody defines body for UpdateCurrentUserProfile for application/json ContentType.
 type UpdateCurrentUserProfileJSONRequestBody UpdateCurrentUserProfileJSONBody
 
+// NotificationAPIAckNotificationsJSONRequestBody defines body for NotificationAPIAckNotifications for application/json ContentType.
+type NotificationAPIAckNotificationsJSONRequestBody NotificationAPIAckNotificationsJSONBody
+
+// NotificationAPICreateWebhookConfigJSONRequestBody defines body for NotificationAPICreateWebhookConfig for application/json ContentType.
+type NotificationAPICreateWebhookConfigJSONRequestBody NotificationAPICreateWebhookConfigJSONBody
+
+// NotificationAPIUpdateWebhookConfigJSONRequestBody defines body for NotificationAPIUpdateWebhookConfig for application/json ContentType.
+type NotificationAPIUpdateWebhookConfigJSONRequestBody NotificationAPIUpdateWebhookConfigJSONBody
+
 // CreateOrganizationJSONRequestBody defines body for CreateOrganization for application/json ContentType.
 type CreateOrganizationJSONRequestBody CreateOrganizationJSONBody
 
@@ -3986,6 +4411,15 @@ type CreateOrganizationUserJSONRequestBody CreateOrganizationUserJSONBody
 
 // UpdateOrganizationUserJSONRequestBody defines body for UpdateOrganizationUser for application/json ContentType.
 type UpdateOrganizationUserJSONRequestBody UpdateOrganizationUserJSONBody
+
+// InsightsAPIScheduleBestPracticesScanJSONRequestBody defines body for InsightsAPIScheduleBestPracticesScan for application/json ContentType.
+type InsightsAPIScheduleBestPracticesScanJSONRequestBody InsightsAPIScheduleBestPracticesScanJSONBody
+
+// InsightsAPIScheduleVulnerabilitiesScanJSONRequestBody defines body for InsightsAPIScheduleVulnerabilitiesScan for application/json ContentType.
+type InsightsAPIScheduleVulnerabilitiesScanJSONRequestBody InsightsAPIScheduleVulnerabilitiesScanJSONBody
+
+// InsightsAPIIngestAgentLogJSONRequestBody defines body for InsightsAPIIngestAgentLog for application/json ContentType.
+type InsightsAPIIngestAgentLogJSONRequestBody InsightsAPIIngestAgentLogJSONBody
 
 // Getter for additional properties for AuditEvent_Labels. Returns the specified
 // element and whether it was found
@@ -4676,6 +5110,165 @@ func (a CastaiMetricsV1beta1MetricSampleStream_Labels) MarshalJSON() ([]byte, er
 	return json.Marshal(object)
 }
 
+// Getter for additional properties for CastaiNotificationsV1beta1AddWebhookConfig_AuthKeys. Returns the specified
+// element and whether it was found
+func (a CastaiNotificationsV1beta1AddWebhookConfig_AuthKeys) Get(fieldName string) (value string, found bool) {
+	if a.AdditionalProperties != nil {
+		value, found = a.AdditionalProperties[fieldName]
+	}
+	return
+}
+
+// Setter for additional properties for CastaiNotificationsV1beta1AddWebhookConfig_AuthKeys
+func (a *CastaiNotificationsV1beta1AddWebhookConfig_AuthKeys) Set(fieldName string, value string) {
+	if a.AdditionalProperties == nil {
+		a.AdditionalProperties = make(map[string]string)
+	}
+	a.AdditionalProperties[fieldName] = value
+}
+
+// Override default JSON handling for CastaiNotificationsV1beta1AddWebhookConfig_AuthKeys to handle AdditionalProperties
+func (a *CastaiNotificationsV1beta1AddWebhookConfig_AuthKeys) UnmarshalJSON(b []byte) error {
+	object := make(map[string]json.RawMessage)
+	err := json.Unmarshal(b, &object)
+	if err != nil {
+		return err
+	}
+
+	if len(object) != 0 {
+		a.AdditionalProperties = make(map[string]string)
+		for fieldName, fieldBuf := range object {
+			var fieldVal string
+			err := json.Unmarshal(fieldBuf, &fieldVal)
+			if err != nil {
+				return errors.Wrap(err, fmt.Sprintf("error unmarshaling field %s", fieldName))
+			}
+			a.AdditionalProperties[fieldName] = fieldVal
+		}
+	}
+	return nil
+}
+
+// Override default JSON handling for CastaiNotificationsV1beta1AddWebhookConfig_AuthKeys to handle AdditionalProperties
+func (a CastaiNotificationsV1beta1AddWebhookConfig_AuthKeys) MarshalJSON() ([]byte, error) {
+	var err error
+	object := make(map[string]json.RawMessage)
+
+	for fieldName, field := range a.AdditionalProperties {
+		object[fieldName], err = json.Marshal(field)
+		if err != nil {
+			return nil, errors.Wrap(err, fmt.Sprintf("error marshaling '%s'", fieldName))
+		}
+	}
+	return json.Marshal(object)
+}
+
+// Getter for additional properties for CastaiNotificationsV1beta1UpdateWebhookConfig_AuthKeys. Returns the specified
+// element and whether it was found
+func (a CastaiNotificationsV1beta1UpdateWebhookConfig_AuthKeys) Get(fieldName string) (value string, found bool) {
+	if a.AdditionalProperties != nil {
+		value, found = a.AdditionalProperties[fieldName]
+	}
+	return
+}
+
+// Setter for additional properties for CastaiNotificationsV1beta1UpdateWebhookConfig_AuthKeys
+func (a *CastaiNotificationsV1beta1UpdateWebhookConfig_AuthKeys) Set(fieldName string, value string) {
+	if a.AdditionalProperties == nil {
+		a.AdditionalProperties = make(map[string]string)
+	}
+	a.AdditionalProperties[fieldName] = value
+}
+
+// Override default JSON handling for CastaiNotificationsV1beta1UpdateWebhookConfig_AuthKeys to handle AdditionalProperties
+func (a *CastaiNotificationsV1beta1UpdateWebhookConfig_AuthKeys) UnmarshalJSON(b []byte) error {
+	object := make(map[string]json.RawMessage)
+	err := json.Unmarshal(b, &object)
+	if err != nil {
+		return err
+	}
+
+	if len(object) != 0 {
+		a.AdditionalProperties = make(map[string]string)
+		for fieldName, fieldBuf := range object {
+			var fieldVal string
+			err := json.Unmarshal(fieldBuf, &fieldVal)
+			if err != nil {
+				return errors.Wrap(err, fmt.Sprintf("error unmarshaling field %s", fieldName))
+			}
+			a.AdditionalProperties[fieldName] = fieldVal
+		}
+	}
+	return nil
+}
+
+// Override default JSON handling for CastaiNotificationsV1beta1UpdateWebhookConfig_AuthKeys to handle AdditionalProperties
+func (a CastaiNotificationsV1beta1UpdateWebhookConfig_AuthKeys) MarshalJSON() ([]byte, error) {
+	var err error
+	object := make(map[string]json.RawMessage)
+
+	for fieldName, field := range a.AdditionalProperties {
+		object[fieldName], err = json.Marshal(field)
+		if err != nil {
+			return nil, errors.Wrap(err, fmt.Sprintf("error marshaling '%s'", fieldName))
+		}
+	}
+	return json.Marshal(object)
+}
+
+// Getter for additional properties for CastaiNotificationsV1beta1WebhookConfig_AuthKeys. Returns the specified
+// element and whether it was found
+func (a CastaiNotificationsV1beta1WebhookConfig_AuthKeys) Get(fieldName string) (value string, found bool) {
+	if a.AdditionalProperties != nil {
+		value, found = a.AdditionalProperties[fieldName]
+	}
+	return
+}
+
+// Setter for additional properties for CastaiNotificationsV1beta1WebhookConfig_AuthKeys
+func (a *CastaiNotificationsV1beta1WebhookConfig_AuthKeys) Set(fieldName string, value string) {
+	if a.AdditionalProperties == nil {
+		a.AdditionalProperties = make(map[string]string)
+	}
+	a.AdditionalProperties[fieldName] = value
+}
+
+// Override default JSON handling for CastaiNotificationsV1beta1WebhookConfig_AuthKeys to handle AdditionalProperties
+func (a *CastaiNotificationsV1beta1WebhookConfig_AuthKeys) UnmarshalJSON(b []byte) error {
+	object := make(map[string]json.RawMessage)
+	err := json.Unmarshal(b, &object)
+	if err != nil {
+		return err
+	}
+
+	if len(object) != 0 {
+		a.AdditionalProperties = make(map[string]string)
+		for fieldName, fieldBuf := range object {
+			var fieldVal string
+			err := json.Unmarshal(fieldBuf, &fieldVal)
+			if err != nil {
+				return errors.Wrap(err, fmt.Sprintf("error unmarshaling field %s", fieldName))
+			}
+			a.AdditionalProperties[fieldName] = fieldVal
+		}
+	}
+	return nil
+}
+
+// Override default JSON handling for CastaiNotificationsV1beta1WebhookConfig_AuthKeys to handle AdditionalProperties
+func (a CastaiNotificationsV1beta1WebhookConfig_AuthKeys) MarshalJSON() ([]byte, error) {
+	var err error
+	object := make(map[string]json.RawMessage)
+
+	for fieldName, field := range a.AdditionalProperties {
+		object[fieldName], err = json.Marshal(field)
+		if err != nil {
+			return nil, errors.Wrap(err, fmt.Sprintf("error marshaling '%s'", fieldName))
+		}
+	}
+	return json.Marshal(object)
+}
+
 // Getter for additional properties for ClusteractionsV1ClusterActionChartUpsert_ValuesOverrides. Returns the specified
 // element and whether it was found
 func (a ClusteractionsV1ClusterActionChartUpsert_ValuesOverrides) Get(fieldName string) (value string, found bool) {
@@ -5206,6 +5799,59 @@ func (a ExternalclusterV1UpdateKOPSClusterParams_Tags) MarshalJSON() ([]byte, er
 	return json.Marshal(object)
 }
 
+// Getter for additional properties for InsightsV1GetBestPracticesOverviewResponse_Timeseries. Returns the specified
+// element and whether it was found
+func (a InsightsV1GetBestPracticesOverviewResponse_Timeseries) Get(fieldName string) (value InsightsV1GetBestPracticesOverviewResponseResources, found bool) {
+	if a.AdditionalProperties != nil {
+		value, found = a.AdditionalProperties[fieldName]
+	}
+	return
+}
+
+// Setter for additional properties for InsightsV1GetBestPracticesOverviewResponse_Timeseries
+func (a *InsightsV1GetBestPracticesOverviewResponse_Timeseries) Set(fieldName string, value InsightsV1GetBestPracticesOverviewResponseResources) {
+	if a.AdditionalProperties == nil {
+		a.AdditionalProperties = make(map[string]InsightsV1GetBestPracticesOverviewResponseResources)
+	}
+	a.AdditionalProperties[fieldName] = value
+}
+
+// Override default JSON handling for InsightsV1GetBestPracticesOverviewResponse_Timeseries to handle AdditionalProperties
+func (a *InsightsV1GetBestPracticesOverviewResponse_Timeseries) UnmarshalJSON(b []byte) error {
+	object := make(map[string]json.RawMessage)
+	err := json.Unmarshal(b, &object)
+	if err != nil {
+		return err
+	}
+
+	if len(object) != 0 {
+		a.AdditionalProperties = make(map[string]InsightsV1GetBestPracticesOverviewResponseResources)
+		for fieldName, fieldBuf := range object {
+			var fieldVal InsightsV1GetBestPracticesOverviewResponseResources
+			err := json.Unmarshal(fieldBuf, &fieldVal)
+			if err != nil {
+				return errors.Wrap(err, fmt.Sprintf("error unmarshaling field %s", fieldName))
+			}
+			a.AdditionalProperties[fieldName] = fieldVal
+		}
+	}
+	return nil
+}
+
+// Override default JSON handling for InsightsV1GetBestPracticesOverviewResponse_Timeseries to handle AdditionalProperties
+func (a InsightsV1GetBestPracticesOverviewResponse_Timeseries) MarshalJSON() ([]byte, error) {
+	var err error
+	object := make(map[string]json.RawMessage)
+
+	for fieldName, field := range a.AdditionalProperties {
+		object[fieldName], err = json.Marshal(field)
+		if err != nil {
+			return nil, errors.Wrap(err, fmt.Sprintf("error marshaling '%s'", fieldName))
+		}
+	}
+	return json.Marshal(object)
+}
+
 // Getter for additional properties for InsightsV1GetBestPracticesReportSummaryResponse_FailedChecksBySeverityLevel. Returns the specified
 // element and whether it was found
 func (a InsightsV1GetBestPracticesReportSummaryResponse_FailedChecksBySeverityLevel) Get(fieldName string) (value int32, found bool) {
@@ -5247,6 +5893,112 @@ func (a *InsightsV1GetBestPracticesReportSummaryResponse_FailedChecksBySeverityL
 
 // Override default JSON handling for InsightsV1GetBestPracticesReportSummaryResponse_FailedChecksBySeverityLevel to handle AdditionalProperties
 func (a InsightsV1GetBestPracticesReportSummaryResponse_FailedChecksBySeverityLevel) MarshalJSON() ([]byte, error) {
+	var err error
+	object := make(map[string]json.RawMessage)
+
+	for fieldName, field := range a.AdditionalProperties {
+		object[fieldName], err = json.Marshal(field)
+		if err != nil {
+			return nil, errors.Wrap(err, fmt.Sprintf("error marshaling '%s'", fieldName))
+		}
+	}
+	return json.Marshal(object)
+}
+
+// Getter for additional properties for InsightsV1GetOverviewSummaryResponse_Timeseries. Returns the specified
+// element and whether it was found
+func (a InsightsV1GetOverviewSummaryResponse_Timeseries) Get(fieldName string) (value InsightsV1GetOverviewSummaryResponseIssues, found bool) {
+	if a.AdditionalProperties != nil {
+		value, found = a.AdditionalProperties[fieldName]
+	}
+	return
+}
+
+// Setter for additional properties for InsightsV1GetOverviewSummaryResponse_Timeseries
+func (a *InsightsV1GetOverviewSummaryResponse_Timeseries) Set(fieldName string, value InsightsV1GetOverviewSummaryResponseIssues) {
+	if a.AdditionalProperties == nil {
+		a.AdditionalProperties = make(map[string]InsightsV1GetOverviewSummaryResponseIssues)
+	}
+	a.AdditionalProperties[fieldName] = value
+}
+
+// Override default JSON handling for InsightsV1GetOverviewSummaryResponse_Timeseries to handle AdditionalProperties
+func (a *InsightsV1GetOverviewSummaryResponse_Timeseries) UnmarshalJSON(b []byte) error {
+	object := make(map[string]json.RawMessage)
+	err := json.Unmarshal(b, &object)
+	if err != nil {
+		return err
+	}
+
+	if len(object) != 0 {
+		a.AdditionalProperties = make(map[string]InsightsV1GetOverviewSummaryResponseIssues)
+		for fieldName, fieldBuf := range object {
+			var fieldVal InsightsV1GetOverviewSummaryResponseIssues
+			err := json.Unmarshal(fieldBuf, &fieldVal)
+			if err != nil {
+				return errors.Wrap(err, fmt.Sprintf("error unmarshaling field %s", fieldName))
+			}
+			a.AdditionalProperties[fieldName] = fieldVal
+		}
+	}
+	return nil
+}
+
+// Override default JSON handling for InsightsV1GetOverviewSummaryResponse_Timeseries to handle AdditionalProperties
+func (a InsightsV1GetOverviewSummaryResponse_Timeseries) MarshalJSON() ([]byte, error) {
+	var err error
+	object := make(map[string]json.RawMessage)
+
+	for fieldName, field := range a.AdditionalProperties {
+		object[fieldName], err = json.Marshal(field)
+		if err != nil {
+			return nil, errors.Wrap(err, fmt.Sprintf("error marshaling '%s'", fieldName))
+		}
+	}
+	return json.Marshal(object)
+}
+
+// Getter for additional properties for InsightsV1GetVulnerabilitiesOverviewResponse_Timeseries. Returns the specified
+// element and whether it was found
+func (a InsightsV1GetVulnerabilitiesOverviewResponse_Timeseries) Get(fieldName string) (value InsightsV1GetVulnerabilitiesOverviewResponseResources, found bool) {
+	if a.AdditionalProperties != nil {
+		value, found = a.AdditionalProperties[fieldName]
+	}
+	return
+}
+
+// Setter for additional properties for InsightsV1GetVulnerabilitiesOverviewResponse_Timeseries
+func (a *InsightsV1GetVulnerabilitiesOverviewResponse_Timeseries) Set(fieldName string, value InsightsV1GetVulnerabilitiesOverviewResponseResources) {
+	if a.AdditionalProperties == nil {
+		a.AdditionalProperties = make(map[string]InsightsV1GetVulnerabilitiesOverviewResponseResources)
+	}
+	a.AdditionalProperties[fieldName] = value
+}
+
+// Override default JSON handling for InsightsV1GetVulnerabilitiesOverviewResponse_Timeseries to handle AdditionalProperties
+func (a *InsightsV1GetVulnerabilitiesOverviewResponse_Timeseries) UnmarshalJSON(b []byte) error {
+	object := make(map[string]json.RawMessage)
+	err := json.Unmarshal(b, &object)
+	if err != nil {
+		return err
+	}
+
+	if len(object) != 0 {
+		a.AdditionalProperties = make(map[string]InsightsV1GetVulnerabilitiesOverviewResponseResources)
+		for fieldName, fieldBuf := range object {
+			var fieldVal InsightsV1GetVulnerabilitiesOverviewResponseResources
+			err := json.Unmarshal(fieldBuf, &fieldVal)
+			if err != nil {
+				return errors.Wrap(err, fmt.Sprintf("error unmarshaling field %s", fieldName))
+			}
+			a.AdditionalProperties[fieldName] = fieldVal
+		}
+	}
+	return nil
+}
+
+// Override default JSON handling for InsightsV1GetVulnerabilitiesOverviewResponse_Timeseries to handle AdditionalProperties
+func (a InsightsV1GetVulnerabilitiesOverviewResponse_Timeseries) MarshalJSON() ([]byte, error) {
 	var err error
 	object := make(map[string]json.RawMessage)
 
@@ -5365,25 +6117,25 @@ func (a InsightsV1GetVulnerabilitiesReportSummaryResponse_VulnerabilitiesBySever
 	return json.Marshal(object)
 }
 
-// Getter for additional properties for NodeconfigV1NewNodeConfiguration_KubernetesLabels. Returns the specified
+// Getter for additional properties for InsightsV1LogEvent_Fields. Returns the specified
 // element and whether it was found
-func (a NodeconfigV1NewNodeConfiguration_KubernetesLabels) Get(fieldName string) (value string, found bool) {
+func (a InsightsV1LogEvent_Fields) Get(fieldName string) (value string, found bool) {
 	if a.AdditionalProperties != nil {
 		value, found = a.AdditionalProperties[fieldName]
 	}
 	return
 }
 
-// Setter for additional properties for NodeconfigV1NewNodeConfiguration_KubernetesLabels
-func (a *NodeconfigV1NewNodeConfiguration_KubernetesLabels) Set(fieldName string, value string) {
+// Setter for additional properties for InsightsV1LogEvent_Fields
+func (a *InsightsV1LogEvent_Fields) Set(fieldName string, value string) {
 	if a.AdditionalProperties == nil {
 		a.AdditionalProperties = make(map[string]string)
 	}
 	a.AdditionalProperties[fieldName] = value
 }
 
-// Override default JSON handling for NodeconfigV1NewNodeConfiguration_KubernetesLabels to handle AdditionalProperties
-func (a *NodeconfigV1NewNodeConfiguration_KubernetesLabels) UnmarshalJSON(b []byte) error {
+// Override default JSON handling for InsightsV1LogEvent_Fields to handle AdditionalProperties
+func (a *InsightsV1LogEvent_Fields) UnmarshalJSON(b []byte) error {
 	object := make(map[string]json.RawMessage)
 	err := json.Unmarshal(b, &object)
 	if err != nil {
@@ -5404,8 +6156,8 @@ func (a *NodeconfigV1NewNodeConfiguration_KubernetesLabels) UnmarshalJSON(b []by
 	return nil
 }
 
-// Override default JSON handling for NodeconfigV1NewNodeConfiguration_KubernetesLabels to handle AdditionalProperties
-func (a NodeconfigV1NewNodeConfiguration_KubernetesLabels) MarshalJSON() ([]byte, error) {
+// Override default JSON handling for InsightsV1LogEvent_Fields to handle AdditionalProperties
+func (a InsightsV1LogEvent_Fields) MarshalJSON() ([]byte, error) {
 	var err error
 	object := make(map[string]json.RawMessage)
 
@@ -5471,59 +6223,6 @@ func (a NodeconfigV1NewNodeConfiguration_Tags) MarshalJSON() ([]byte, error) {
 	return json.Marshal(object)
 }
 
-// Getter for additional properties for NodeconfigV1NodeConfiguration_KubernetesLabels. Returns the specified
-// element and whether it was found
-func (a NodeconfigV1NodeConfiguration_KubernetesLabels) Get(fieldName string) (value string, found bool) {
-	if a.AdditionalProperties != nil {
-		value, found = a.AdditionalProperties[fieldName]
-	}
-	return
-}
-
-// Setter for additional properties for NodeconfigV1NodeConfiguration_KubernetesLabels
-func (a *NodeconfigV1NodeConfiguration_KubernetesLabels) Set(fieldName string, value string) {
-	if a.AdditionalProperties == nil {
-		a.AdditionalProperties = make(map[string]string)
-	}
-	a.AdditionalProperties[fieldName] = value
-}
-
-// Override default JSON handling for NodeconfigV1NodeConfiguration_KubernetesLabels to handle AdditionalProperties
-func (a *NodeconfigV1NodeConfiguration_KubernetesLabels) UnmarshalJSON(b []byte) error {
-	object := make(map[string]json.RawMessage)
-	err := json.Unmarshal(b, &object)
-	if err != nil {
-		return err
-	}
-
-	if len(object) != 0 {
-		a.AdditionalProperties = make(map[string]string)
-		for fieldName, fieldBuf := range object {
-			var fieldVal string
-			err := json.Unmarshal(fieldBuf, &fieldVal)
-			if err != nil {
-				return errors.Wrap(err, fmt.Sprintf("error unmarshaling field %s", fieldName))
-			}
-			a.AdditionalProperties[fieldName] = fieldVal
-		}
-	}
-	return nil
-}
-
-// Override default JSON handling for NodeconfigV1NodeConfiguration_KubernetesLabels to handle AdditionalProperties
-func (a NodeconfigV1NodeConfiguration_KubernetesLabels) MarshalJSON() ([]byte, error) {
-	var err error
-	object := make(map[string]json.RawMessage)
-
-	for fieldName, field := range a.AdditionalProperties {
-		object[fieldName], err = json.Marshal(field)
-		if err != nil {
-			return nil, errors.Wrap(err, fmt.Sprintf("error marshaling '%s'", fieldName))
-		}
-	}
-	return json.Marshal(object)
-}
-
 // Getter for additional properties for NodeconfigV1NodeConfiguration_Tags. Returns the specified
 // element and whether it was found
 func (a NodeconfigV1NodeConfiguration_Tags) Get(fieldName string) (value string, found bool) {
@@ -5565,59 +6264,6 @@ func (a *NodeconfigV1NodeConfiguration_Tags) UnmarshalJSON(b []byte) error {
 
 // Override default JSON handling for NodeconfigV1NodeConfiguration_Tags to handle AdditionalProperties
 func (a NodeconfigV1NodeConfiguration_Tags) MarshalJSON() ([]byte, error) {
-	var err error
-	object := make(map[string]json.RawMessage)
-
-	for fieldName, field := range a.AdditionalProperties {
-		object[fieldName], err = json.Marshal(field)
-		if err != nil {
-			return nil, errors.Wrap(err, fmt.Sprintf("error marshaling '%s'", fieldName))
-		}
-	}
-	return json.Marshal(object)
-}
-
-// Getter for additional properties for NodeconfigV1NodeConfigurationUpdate_KubernetesLabels. Returns the specified
-// element and whether it was found
-func (a NodeconfigV1NodeConfigurationUpdate_KubernetesLabels) Get(fieldName string) (value string, found bool) {
-	if a.AdditionalProperties != nil {
-		value, found = a.AdditionalProperties[fieldName]
-	}
-	return
-}
-
-// Setter for additional properties for NodeconfigV1NodeConfigurationUpdate_KubernetesLabels
-func (a *NodeconfigV1NodeConfigurationUpdate_KubernetesLabels) Set(fieldName string, value string) {
-	if a.AdditionalProperties == nil {
-		a.AdditionalProperties = make(map[string]string)
-	}
-	a.AdditionalProperties[fieldName] = value
-}
-
-// Override default JSON handling for NodeconfigV1NodeConfigurationUpdate_KubernetesLabels to handle AdditionalProperties
-func (a *NodeconfigV1NodeConfigurationUpdate_KubernetesLabels) UnmarshalJSON(b []byte) error {
-	object := make(map[string]json.RawMessage)
-	err := json.Unmarshal(b, &object)
-	if err != nil {
-		return err
-	}
-
-	if len(object) != 0 {
-		a.AdditionalProperties = make(map[string]string)
-		for fieldName, fieldBuf := range object {
-			var fieldVal string
-			err := json.Unmarshal(fieldBuf, &fieldVal)
-			if err != nil {
-				return errors.Wrap(err, fmt.Sprintf("error unmarshaling field %s", fieldName))
-			}
-			a.AdditionalProperties[fieldName] = fieldVal
-		}
-	}
-	return nil
-}
-
-// Override default JSON handling for NodeconfigV1NodeConfigurationUpdate_KubernetesLabels to handle AdditionalProperties
-func (a NodeconfigV1NodeConfigurationUpdate_KubernetesLabels) MarshalJSON() ([]byte, error) {
 	var err error
 	object := make(map[string]json.RawMessage)
 
