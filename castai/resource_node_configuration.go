@@ -64,7 +64,8 @@ func resourceNodeConfiguration() *schema.Resource {
 				Type:     schema.TypeList,
 				Required: true,
 				Elem: &schema.Schema{
-					Type: schema.TypeString,
+					Type:             schema.TypeString,
+					ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 				},
 				Description: "Subnet ids to be used for provisioned nodes",
 			},
