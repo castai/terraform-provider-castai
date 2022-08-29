@@ -1,4 +1,4 @@
-**/go.sum linguist-generated
-**/*.gen.go linguist-generated
-**/mock/*.go linguist-generated
-**/mock*/*.go linguist-generated
+**/go.sum linguist-generated=true
+**/*.gen.go linguist-generated=true
+**/mock/*.go linguist-generated=true
+**/mock*/*.go linguist-generated=true
