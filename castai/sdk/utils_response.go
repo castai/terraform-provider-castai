@@ -25,6 +25,10 @@ func CheckDeleteResponse(response Response, err error) error {
 	return CheckResponseNoContent(response, err)
 }
 
+func StatusOk(resp Response) error {
+	return checkResponse(resp, nil, http.StatusOK)
+}
+
 func checkResponse(response Response, err error, expectedStatus int) error {
 	if err != nil {
 		return err

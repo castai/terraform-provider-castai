@@ -75,7 +75,13 @@ resource "castai_node_configuration" "test" {
     dns_cluster_ip       = "10.100.0.10"
 	security_groups      = [aws_security_group.test.id]
   }
-}`, rName))
+}
+
+resource "castai_node_configuration_default" "test" {
+  cluster_id       = castai_eks_cluster.test.id
+  configuration_id = castai_node_configuration.test.id
+}
+`, rName))
 }
 
 func testAccNodeConfigurationUpdated(rName string) string {
@@ -221,6 +227,10 @@ func testAccCheckNodeConfigurationDestroy(s *terraform.State) error {
 			return err
 		}
 		if response.StatusCode() == http.StatusNotFound {
+			return nil
+		}
+		if *response.JSON200.Default {
+			// Default node config can't be deleted.
 			return nil
 		}
 
