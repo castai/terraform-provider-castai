@@ -35,6 +35,7 @@ func resourceNodeConfiguration() *schema.Resource {
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(1 * time.Minute),
+			Read:   schema.DefaultTimeout(1 * time.Minute),
 			Update: schema.DefaultTimeout(1 * time.Minute),
 			Delete: schema.DefaultTimeout(1 * time.Minute),
 		},
@@ -301,16 +302,35 @@ func resourceNodeConfigurationUpdate(ctx context.Context, d *schema.ResourceData
 		return diag.FromErr(checkErr)
 	}
 
-	return nil
+	return resourceNodeConfigurationRead(ctx, d, meta)
 }
 
 func resourceNodeConfigurationDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*ProviderConfig).api
-
 	clusterID := d.Get(FieldClusterID).(string)
-	resp, err := client.NodeConfigurationAPIDeleteConfigurationWithResponse(ctx, clusterID, d.Id())
-	if checkErr := sdk.CheckOKResponse(resp, err); checkErr != nil {
-		return diag.FromErr(checkErr)
+
+	resp, err := client.NodeConfigurationAPIGetConfigurationWithResponse(ctx, clusterID, d.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	if resp.StatusCode() == http.StatusNotFound {
+		log.Printf("[DEBUG] Node configuration (%s) not found, skipping delete", d.Id())
+		return nil
+	}
+
+	if err := sdk.StatusOk(resp); err != nil {
+		return diag.FromErr(err)
+	}
+
+	if *resp.JSON200.Default {
+		log.Printf("[WARN] Default node configuration (%s) can't be deleted, removing from state", d.Id())
+		return nil
+	}
+
+	del, err := client.NodeConfigurationAPIDeleteConfigurationWithResponse(ctx, clusterID, d.Id())
+	if err := sdk.CheckOKResponse(del, err); err != nil {
+		return diag.FromErr(err)
 	}
 
 	return nil
