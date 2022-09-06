@@ -508,6 +508,9 @@ type ClientInterface interface {
 
 	NotificationAPIAckNotifications(ctx context.Context, body NotificationAPIAckNotificationsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// NotificationAPIListWebhookConfigs request
+	NotificationAPIListWebhookConfigs(ctx context.Context, params *NotificationAPIListWebhookConfigsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// NotificationAPICreateWebhookConfig request  with any body
 	NotificationAPICreateWebhookConfigWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -2283,6 +2286,17 @@ func (c *Client) NotificationAPIAckNotificationsWithBody(ctx context.Context, co
 
 func (c *Client) NotificationAPIAckNotifications(ctx context.Context, body NotificationAPIAckNotificationsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewNotificationAPIAckNotificationsRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) NotificationAPIListWebhookConfigs(ctx context.Context, params *NotificationAPIListWebhookConfigsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewNotificationAPIListWebhookConfigsRequest(c.Server, params)
 	if err != nil {
 		return nil, err
 	}
@@ -8344,6 +8358,69 @@ func NewNotificationAPIAckNotificationsRequestWithBody(server string, contentTyp
 	return req, nil
 }
 
+// NewNotificationAPIListWebhookConfigsRequest generates requests for NotificationAPIListWebhookConfigs
+func NewNotificationAPIListWebhookConfigsRequest(server string, params *NotificationAPIListWebhookConfigsParams) (*http.Request, error) {
+	var err error
+
+	queryUrl, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	basePath := fmt.Sprintf("/v1/notifications/webhook-configurations")
+	if basePath[0] == '/' {
+		basePath = basePath[1:]
+	}
+
+	queryUrl, err = queryUrl.Parse(basePath)
+	if err != nil {
+		return nil, err
+	}
+
+	queryValues := queryUrl.Query()
+
+	if params.PageLimit != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "page.limit", *params.PageLimit); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.PageCursor != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "page.cursor", *params.PageCursor); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	queryUrl.RawQuery = queryValues.Encode()
+
+	req, err := http.NewRequest("GET", queryUrl.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 // NewNotificationAPICreateWebhookConfigRequest calls the generic NotificationAPICreateWebhookConfig builder with application/json body
 func NewNotificationAPICreateWebhookConfigRequest(server string, body NotificationAPICreateWebhookConfigJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
@@ -8364,7 +8441,7 @@ func NewNotificationAPICreateWebhookConfigRequestWithBody(server string, content
 		return nil, err
 	}
 
-	basePath := fmt.Sprintf("/v1/notifications/webhook-configuration")
+	basePath := fmt.Sprintf("/v1/notifications/webhook-configurations")
 	if basePath[0] == '/' {
 		basePath = basePath[1:]
 	}
@@ -8400,7 +8477,7 @@ func NewNotificationAPIDeleteWebhookConfigRequest(server string, id string) (*ht
 		return nil, err
 	}
 
-	basePath := fmt.Sprintf("/v1/notifications/webhook-configuration/%s", pathParam0)
+	basePath := fmt.Sprintf("/v1/notifications/webhook-configurations/%s", pathParam0)
 	if basePath[0] == '/' {
 		basePath = basePath[1:]
 	}
@@ -8434,7 +8511,7 @@ func NewNotificationAPIGetWebhookConfigRequest(server string, id string) (*http.
 		return nil, err
 	}
 
-	basePath := fmt.Sprintf("/v1/notifications/webhook-configuration/%s", pathParam0)
+	basePath := fmt.Sprintf("/v1/notifications/webhook-configurations/%s", pathParam0)
 	if basePath[0] == '/' {
 		basePath = basePath[1:]
 	}
@@ -8479,7 +8556,7 @@ func NewNotificationAPIUpdateWebhookConfigRequestWithBody(server string, id stri
 		return nil, err
 	}
 
-	basePath := fmt.Sprintf("/v1/notifications/webhook-configuration/%s", pathParam0)
+	basePath := fmt.Sprintf("/v1/notifications/webhook-configurations/%s", pathParam0)
 	if basePath[0] == '/' {
 		basePath = basePath[1:]
 	}
@@ -10361,6 +10438,9 @@ type ClientWithResponsesInterface interface {
 	NotificationAPIAckNotificationsWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*NotificationAPIAckNotificationsResponse, error)
 
 	NotificationAPIAckNotificationsWithResponse(ctx context.Context, body NotificationAPIAckNotificationsJSONRequestBody) (*NotificationAPIAckNotificationsResponse, error)
+
+	// NotificationAPIListWebhookConfigs request
+	NotificationAPIListWebhookConfigsWithResponse(ctx context.Context, params *NotificationAPIListWebhookConfigsParams) (*NotificationAPIListWebhookConfigsResponse, error)
 
 	// NotificationAPICreateWebhookConfig request  with any body
 	NotificationAPICreateWebhookConfigWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*NotificationAPICreateWebhookConfigResponse, error)
@@ -13900,6 +13980,36 @@ func (r NotificationAPIAckNotificationsResponse) GetBody() []byte {
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
+type NotificationAPIListWebhookConfigsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *CastaiNotificationsV1beta1ListWebhookConfigsResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r NotificationAPIListWebhookConfigsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r NotificationAPIListWebhookConfigsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r NotificationAPIListWebhookConfigsResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
 type NotificationAPICreateWebhookConfigResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -16157,6 +16267,15 @@ func (c *ClientWithResponses) NotificationAPIAckNotificationsWithResponse(ctx co
 		return nil, err
 	}
 	return ParseNotificationAPIAckNotificationsResponse(rsp)
+}
+
+// NotificationAPIListWebhookConfigsWithResponse request returning *NotificationAPIListWebhookConfigsResponse
+func (c *ClientWithResponses) NotificationAPIListWebhookConfigsWithResponse(ctx context.Context, params *NotificationAPIListWebhookConfigsParams) (*NotificationAPIListWebhookConfigsResponse, error) {
+	rsp, err := c.NotificationAPIListWebhookConfigs(ctx, params)
+	if err != nil {
+		return nil, err
+	}
+	return ParseNotificationAPIListWebhookConfigsResponse(rsp)
 }
 
 // NotificationAPICreateWebhookConfigWithBodyWithResponse request with arbitrary body returning *NotificationAPICreateWebhookConfigResponse
@@ -19443,6 +19562,32 @@ func ParseNotificationAPIAckNotificationsResponse(rsp *http.Response) (*Notifica
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest CastaiNotificationsV1beta1AckNotificationsResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseNotificationAPIListWebhookConfigsResponse parses an HTTP response from a NotificationAPIListWebhookConfigsWithResponse call
+func ParseNotificationAPIListWebhookConfigsResponse(rsp *http.Response) (*NotificationAPIListWebhookConfigsResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &NotificationAPIListWebhookConfigsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest CastaiNotificationsV1beta1ListWebhookConfigsResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}

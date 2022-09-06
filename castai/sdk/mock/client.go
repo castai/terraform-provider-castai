@@ -3235,6 +3235,26 @@ func (mr *MockClientInterfaceMockRecorder) NotificationAPIListNotifications(ctx,
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NotificationAPIListNotifications", reflect.TypeOf((*MockClientInterface)(nil).NotificationAPIListNotifications), varargs...)
 }
 
+// NotificationAPIListWebhookConfigs mocks base method.
+func (m *MockClientInterface) NotificationAPIListWebhookConfigs(ctx context.Context, params *sdk.NotificationAPIListWebhookConfigsParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "NotificationAPIListWebhookConfigs", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// NotificationAPIListWebhookConfigs indicates an expected call of NotificationAPIListWebhookConfigs.
+func (mr *MockClientInterfaceMockRecorder) NotificationAPIListWebhookConfigs(ctx, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NotificationAPIListWebhookConfigs", reflect.TypeOf((*MockClientInterface)(nil).NotificationAPIListWebhookConfigs), varargs...)
+}
+
 // NotificationAPIUpdateWebhookConfig mocks base method.
 func (m *MockClientInterface) NotificationAPIUpdateWebhookConfig(ctx context.Context, id string, body sdk.NotificationAPIUpdateWebhookConfigJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
@@ -6306,6 +6326,21 @@ func (m *MockClientWithResponsesInterface) NotificationAPIListNotificationsWithR
 func (mr *MockClientWithResponsesInterfaceMockRecorder) NotificationAPIListNotificationsWithResponse(ctx, params interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NotificationAPIListNotificationsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).NotificationAPIListNotificationsWithResponse), ctx, params)
+}
+
+// NotificationAPIListWebhookConfigsWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) NotificationAPIListWebhookConfigsWithResponse(ctx context.Context, params *sdk.NotificationAPIListWebhookConfigsParams) (*sdk.NotificationAPIListWebhookConfigsResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "NotificationAPIListWebhookConfigsWithResponse", ctx, params)
+	ret0, _ := ret[0].(*sdk.NotificationAPIListWebhookConfigsResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// NotificationAPIListWebhookConfigsWithResponse indicates an expected call of NotificationAPIListWebhookConfigsWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) NotificationAPIListWebhookConfigsWithResponse(ctx, params interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NotificationAPIListWebhookConfigsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).NotificationAPIListWebhookConfigsWithResponse), ctx, params)
 }
 
 // NotificationAPIUpdateWebhookConfigWithBodyWithResponse mocks base method.

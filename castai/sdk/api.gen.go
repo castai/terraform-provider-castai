@@ -12,8 +12,8 @@ import (
 )
 
 const (
-	ApiKeyAuthScopes = "ApiKeyAuth.Scopes"
 	BearerAuthScopes = "BearerAuth.Scopes"
+	ApiKeyAuthScopes = "ApiKeyAuth.Scopes"
 )
 
 // AddNodeResult defines model for AddNodeResult.
@@ -1825,6 +1825,14 @@ type CastaiNotificationsV1beta1ListNotificationsResponse struct {
 	NextCursor *string `json:"nextCursor,omitempty"`
 }
 
+// CastaiNotificationsV1beta1ListWebhookConfigsResponse defines model for castai.notifications.v1beta1.ListWebhookConfigsResponse.
+type CastaiNotificationsV1beta1ListWebhookConfigsResponse struct {
+	Items *[]CastaiNotificationsV1beta1WebhookConfig `json:"items,omitempty"`
+
+	// next_cursor is a token to be used in future request to retrieve subsequent items. If empty - no more items present.
+	NextCursor *string `json:"nextCursor,omitempty"`
+}
+
 // CastaiNotificationsV1beta1Notification defines model for castai.notifications.v1beta1.Notification.
 type CastaiNotificationsV1beta1Notification struct {
 	AckAt           *time.Time                                 `json:"ackAt,omitempty"`
@@ -1890,10 +1898,10 @@ type CastaiNotificationsV1beta1WebhookConfig struct {
 	Error            *string                                           `json:"error,omitempty"`
 	Id               *string                                           `json:"id,omitempty"`
 	Name             *string                                           `json:"name,omitempty"`
+	OrganizationId   *string                                           `json:"organizationId,omitempty"`
 	RequestTemplate  *string                                           `json:"requestTemplate,omitempty"`
 	SeverityTriggers *[]CastaiNotificationsV1beta1Severity             `json:"severityTriggers,omitempty"`
 	Status           *string                                           `json:"status,omitempty"`
-	TenantId         *string                                           `json:"tenantId,omitempty"`
 	UpdatedAt        *time.Time                                        `json:"updatedAt,omitempty"`
 }
 
@@ -2934,12 +2942,13 @@ type InsightsV1GetOverviewSummaryResponse_Timeseries struct {
 
 // InsightsV1GetOverviewSummaryResponseIssues defines model for insights.v1.GetOverviewSummaryResponse.Issues.
 type InsightsV1GetOverviewSummaryResponseIssues struct {
-	Critical *int32 `json:"critical,omitempty"`
-	High     *int32 `json:"high,omitempty"`
-	Low      *int32 `json:"low,omitempty"`
-	Medium   *int32 `json:"medium,omitempty"`
-	None     *int32 `json:"none,omitempty"`
-	Total    *int32 `json:"total,omitempty"`
+	Critical     *int32 `json:"critical,omitempty"`
+	High         *int32 `json:"high,omitempty"`
+	Low          *int32 `json:"low,omitempty"`
+	Medium       *int32 `json:"medium,omitempty"`
+	None         *int32 `json:"none,omitempty"`
+	NotAvailable *int32 `json:"notAvailable,omitempty"`
+	Total        *int32 `json:"total,omitempty"`
 }
 
 // InsightsV1GetVulnerabilitiesDetailsResponse defines model for insights.v1.GetVulnerabilitiesDetailsResponse.
@@ -3238,8 +3247,14 @@ type NodeconfigV1NewNodeConfiguration struct {
 	Eks          *NodeconfigV1EKSConfig  `json:"eks,omitempty"`
 
 	// Image to be used while provisioning the node. If nothing is provided will be resolved to latest available image based on Kubernetes version if possible.
-	Image *string                 `json:"image"`
-	Kops  *NodeconfigV1KOPSConfig `json:"kops,omitempty"`
+	Image *string `json:"image"`
+
+	// Init script to be run on your instance at launch. Should not contain any sensitive data. Value should be base64 encoded.
+	InitScript *string                 `json:"initScript"`
+	Kops       *NodeconfigV1KOPSConfig `json:"kops,omitempty"`
+
+	// Optional kubelet configuration properties. Applicable for EKS only.
+	KubeletConfig *map[string]interface{} `json:"kubeletConfig,omitempty"`
 
 	// The name of the node configuration.
 	Name string `json:"name"`
@@ -3280,8 +3295,14 @@ type NodeconfigV1NodeConfiguration struct {
 	Id *string `json:"id,omitempty"`
 
 	// Image to be used while provisioning the node. If nothing is provided will be resolved to latest available image based on Kubernetes version if possible.
-	Image *string                 `json:"image"`
-	Kops  *NodeconfigV1KOPSConfig `json:"kops,omitempty"`
+	Image *string `json:"image"`
+
+	// Base64 encoded init script to be run on your instance at launch.
+	InitScript *string                 `json:"initScript"`
+	Kops       *NodeconfigV1KOPSConfig `json:"kops,omitempty"`
+
+	// Optional kubelet configuration properties. Applicable for EKS only.
+	KubeletConfig *map[string]interface{} `json:"kubeletConfig,omitempty"`
 
 	// The name of the node configuration.
 	Name *string `json:"name,omitempty"`
@@ -3319,8 +3340,14 @@ type NodeconfigV1NodeConfigurationUpdate struct {
 	Eks          *NodeconfigV1EKSConfig  `json:"eks,omitempty"`
 
 	// Image to be used while provisioning the node. If nothing is provided will be resolved to latest available image based on Kubernetes version if possible.
-	Image *string                 `json:"image"`
-	Kops  *NodeconfigV1KOPSConfig `json:"kops,omitempty"`
+	Image *string `json:"image"`
+
+	// Init script to be run on your instance at launch. Should not contain any sensitive data. Value should be base64 encoded.
+	InitScript *string                 `json:"initScript"`
+	Kops       *NodeconfigV1KOPSConfig `json:"kops,omitempty"`
+
+	// Optional kubelet configuration properties. Applicable for EKS only.
+	KubeletConfig *map[string]interface{} `json:"kubeletConfig,omitempty"`
 
 	// Optional SSH public key to be used for provisioned nodes. Value should be base64 encoded.
 	SshPublicKey *string `json:"sshPublicKey"`
@@ -4129,6 +4156,15 @@ type NotificationAPIListNotificationsParams struct {
 
 // NotificationAPIAckNotificationsJSONBody defines parameters for NotificationAPIAckNotifications.
 type NotificationAPIAckNotificationsJSONBody CastaiNotificationsV1beta1AckNotificationsRequest
+
+// NotificationAPIListWebhookConfigsParams defines parameters for NotificationAPIListWebhookConfigs.
+type NotificationAPIListWebhookConfigsParams struct {
+	PageLimit *string `json:"page.limit,omitempty"`
+
+	// Cursor defines token indicating where to start the page.
+	// Empty value indicates to start from beginning of the dataset.
+	PageCursor *string `json:"page.cursor,omitempty"`
+}
 
 // NotificationAPICreateWebhookConfigJSONBody defines parameters for NotificationAPICreateWebhookConfig.
 type NotificationAPICreateWebhookConfigJSONBody CastaiNotificationsV1beta1AddWebhookConfig
