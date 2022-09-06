@@ -9,6 +9,7 @@ import (
 
 	"github.com/golang/mock/gomock"
 	"github.com/hashicorp/go-cty/cty"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/stretchr/testify/require"
 
@@ -138,4 +139,35 @@ func TestGKEClusterResourceReadContextArchived(t *testing.T) {
 	r.Nil(result)
 	r.False(result.HasError())
 	r.Equal(`<not created>`, data.State().String())
+}
+
+func TestGKEClusterResourceUpdateError(t *testing.T) {
+	r := require.New(t)
+	mockctrl := gomock.NewController(t)
+	mockClient := mock_sdk.NewMockClientInterface(mockctrl)
+
+	ctx := context.Background()
+	provider := &ProviderConfig{
+		api: &sdk.ClientWithResponses{
+			ClientInterface: mockClient,
+		},
+	}
+
+	clusterId := "b6bfc074-a267-400f-b8f1-db0850c36gk3d"
+	mockClient.EXPECT().
+		ExternalClusterAPIUpdateCluster(gomock.Any(), clusterId, gomock.Any(), gomock.Any()).
+		Return(&http.Response{StatusCode: 400, Body: io.NopCloser(bytes.NewBufferString(`{"message":"Bad Request", "fieldViolations":[{"field":"credentials","description":"error"}]}`)), Header: map[string][]string{"Content-Type": {"json"}}}, nil)
+
+	resource := resourceCastaiGKECluster()
+
+	raw := make(map[string]interface{})
+	raw[FieldGKEClusterCredentials] = "something"
+
+	data := schema.TestResourceDataRaw(t, resource.Schema, raw)
+	data.Set(FieldGKEClusterCredentials, "creds")
+	data.SetId(clusterId)
+	result := resource.UpdateContext(ctx, data, provider)
+	r.NotNil(result)
+	r.True(result.HasError())
+	r.Equal("updating cluster configuration: expected status code 200, received: status=400 body={\"message\":\"Bad Request\", \"fieldViolations\":[{\"field\":\"credentials\",\"description\":\"error\"}]}", result[0].Summary)
 }

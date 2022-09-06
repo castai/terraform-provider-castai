@@ -345,7 +345,15 @@ func updateClusterSettings(ctx context.Context, data *schema.ResourceData, clien
 
 	if err := backoff.Retry(func() error {
 		response, err := client.ExternalClusterAPIUpdateClusterWithResponse(ctx, data.Id(), req)
-		return sdk.CheckOKResponse(response, err)
+		if err != nil {
+			return err
+		}
+		err = sdk.StatusOk(response)
+		// In case of malformed user request return error to user right away.
+		if response.StatusCode() == 400 {
+			return backoff.Permanent(err)
+		}
+		return err
 	}, backoff.NewExponentialBackOff()); err != nil {
 		return fmt.Errorf("updating cluster configuration: %w", err)
 	}
