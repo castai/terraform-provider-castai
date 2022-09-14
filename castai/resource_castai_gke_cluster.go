@@ -86,6 +86,7 @@ func resourceCastaiGKECluster() *schema.Resource {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "SSHPublicKey for nodes",
+				Deprecated:  "use castai_node_configuration resource instead. This attribute will be removed in the next major version of the provider.",
 			},
 		},
 	}

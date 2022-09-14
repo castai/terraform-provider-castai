@@ -71,12 +71,14 @@ func resourceCastaiEKSCluster() *schema.Resource {
 				Sensitive:   true,
 				Optional:    true,
 				Description: "AWS access key ID of the CAST AI IAM account",
+				Deprecated:  "use assume_role_arn field instead. This attribute will be removed in the next major version of the provider.",
 			},
 			FieldEKSClusterSecretAccessKey: {
 				Type:        schema.TypeString,
 				Sensitive:   true,
 				Optional:    true,
 				Description: "AWS secret access key of the CAST AI IAM account",
+				Deprecated:  "use assume_role_arn field instead. This attribute will be removed in the next major version of the provider.",
 			},
 			FieldEKSClusterAssumeRoleArn: {
 				Type:        schema.TypeString,
@@ -88,6 +90,7 @@ func resourceCastaiEKSCluster() *schema.Resource {
 				Optional:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 				Description:      "AWS ARN of the instance profile to be used by CAST AI",
+				Deprecated:       "use castai_node_configuration resource instead. This attribute will be removed in the next major version of the provider.",
 			},
 			FieldClusterCredentialsId: {
 				Type:        schema.TypeString,
@@ -98,7 +101,7 @@ func resourceCastaiEKSCluster() *schema.Resource {
 			FieldClusterAgentToken: {
 				Type:       schema.TypeString,
 				Computed:   true,
-				Deprecated: "agent_token is deprecated, use cluster_token instead",
+				Deprecated: "agent_token is deprecated, use cluster_token instead. This attribute will be removed in the next major version of the provider.",
 				Sensitive:  true,
 			},
 			FieldEKSClusterOverrideSecurityGroups: {
@@ -108,6 +111,7 @@ func resourceCastaiEKSCluster() *schema.Resource {
 					Type: schema.TypeString,
 				},
 				Description: "Optional custom security groups for the cluster. If not set security groups from the EKS cluster configuration are used.",
+				Deprecated:  "use castai_node_configuration resource instead. This attribute will be removed in the next major version of the provider.",
 			},
 			FieldEKSClusterSecurityGroups: {
 				Type:     schema.TypeList,
@@ -116,6 +120,7 @@ func resourceCastaiEKSCluster() *schema.Resource {
 					Type: schema.TypeString,
 				},
 				Description: "IDs of security groups that are used by CAST AI",
+				Deprecated:  "use castai_node_configuration resource instead. This attribute will be removed in the next major version of the provider.",
 			},
 			FieldEKSClusterSubnets: {
 				Type:     schema.TypeList,
@@ -124,17 +129,20 @@ func resourceCastaiEKSCluster() *schema.Resource {
 					Type: schema.TypeString,
 				},
 				Description: "Custom subnets for the cluster. If not set subnets from the EKS cluster configuration are used.",
+				Deprecated:  "use castai_node_configuration resource instead. This attribute will be removed in the next major version of the provider.",
 			},
 			FieldEKSClusterDNSClusterIP: {
 				Type:             schema.TypeString,
 				Optional:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.IsIPv4Address),
 				Description:      "Overrides the IP address to use for DNS queries within the cluster. Defaults to 10.100.0.10 or 172.20.0.10 based on the IP address of the primary interface",
+				Deprecated:       "use castai_node_configuration resource instead. This attribute will be removed in the next major version of the provider.",
 			},
 			FieldClusterSSHPublicKey: {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "Accepted values are base64 encoded SSH public key or AWS key pair ID.",
+				Deprecated:  "use castai_node_configuration resource instead. This attribute will be removed in the next major version of the provider.",
 			},
 			FieldEKSClusterTags: {
 				Type:     schema.TypeMap,
@@ -143,6 +151,7 @@ func resourceCastaiEKSCluster() *schema.Resource {
 					Type: schema.TypeString,
 				},
 				Description: "Tags which should be added to CAST AI nodes",
+				Deprecated:  "use castai_node_configuration resource instead. This attribute will be removed in the next major version of the provider.",
 			},
 			FieldDeleteNodesOnDisconnect: {
 				Type:        schema.TypeBool,
