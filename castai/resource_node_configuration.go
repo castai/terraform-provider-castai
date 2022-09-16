@@ -90,10 +90,9 @@ func resourceNodeConfiguration() *schema.Resource {
 				Description: "Tags to be added on cloud instances for provisioned nodes",
 			},
 			FieldNodeConfigurationEKS: {
-				Type:         schema.TypeList,
-				Optional:     true,
-				MaxItems:     1,
-				ExactlyOneOf: []string{"aks", "eks", "kops"},
+				Type:     schema.TypeList,
+				Optional: true,
+				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"security_groups": {
