@@ -126,10 +126,9 @@ func resourceNodeConfiguration() *schema.Resource {
 				},
 			},
 			FieldNodeConfigurationAKS: {
-				Type:         schema.TypeList,
-				Optional:     true,
-				MaxItems:     1,
-				ExactlyOneOf: []string{"aks", "eks", "kops"},
+				Type:     schema.TypeList,
+				Optional: true,
+				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"max_pods_per_node": {
@@ -143,10 +142,9 @@ func resourceNodeConfiguration() *schema.Resource {
 				},
 			},
 			FieldNodeConfigurationKOPS: {
-				Type:         schema.TypeList,
-				Optional:     true,
-				MaxItems:     1,
-				ExactlyOneOf: []string{"aks", "eks", "kops"},
+				Type:     schema.TypeList,
+				Optional: true,
+				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"key_pair_id": {
