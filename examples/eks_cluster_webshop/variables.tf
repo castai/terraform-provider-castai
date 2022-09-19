@@ -23,18 +23,6 @@ variable "cluster_name" {
   description = "EKS cluster name in AWS account."
 }
 
-variable "subnets" {
-  type        = list(string)
-  description = "Optional custom subnets for the cluster. If not set subnets from the EKS cluster configuration are used."
-  default     = []
-}
-
-variable "security_groups" {
-  type        = list(string)
-  description = "Optional custom security groups for the cluster. If not set security groups from the EKS cluster configuration are used."
-  default     = []
-}
-
 variable "tags" {
   type        = map(any)
   description = "Optional tags for new cluster nodes. This parameter applies only to new nodes - tags for old nodes are not reconciled."
@@ -48,7 +36,7 @@ variable "delete_nodes_on_disconnect" {
 }
 
 variable "eks_user_role_arn" {
-  type = string
+  type        = string
   description = "Optional role arn that should be added to aws-auth Configmap for users that should have access to EKS cluster. More info: https://docs.aws.amazon.com/eks/latest/userguide/add-user-role.html"
 
   default = null
