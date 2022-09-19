@@ -22,12 +22,24 @@ module "castai-gke-iam" {
 module "castai-gke-cluster" {
   source = "castai/gke-cluster/castai"
 
-  project_id         = var.project_id
-  gke_cluster_name   = var.cluster_name
+  project_id           = var.project_id
+  gke_cluster_name     = var.cluster_name
   gke_cluster_location = module.gke.location
 
   gke_credentials            = module.castai-gke-iam.private_key
   delete_nodes_on_disconnect = var.delete_nodes_on_disconnect
+
+  default_node_configuration = module.castai-gke-cluster.castai_node_configurations["default"]
+
+  node_configurations = {
+    default = {
+      disk_cpu_ratio = 25
+      subnets        = [module.vpc.subnets_ids[0]]
+      tags           = {
+        "env" : "prod"
+      }
+    }
+  }
 
   # Full schema can be found here https://api.cast.ai/v1/spec/#/PoliciesAPI/PoliciesAPIUpsertClusterPolicies
   autoscaler_policies_json = <<-EOT

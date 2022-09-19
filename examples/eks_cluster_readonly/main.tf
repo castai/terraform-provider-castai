@@ -1,9 +1,7 @@
 # Your EKS cluster access configuration.
 
 provider "aws" {
-  region     = var.cluster_region
-  access_key = var.aws_access_key_id
-  secret_key = var.aws_secret_access_key
+  region = var.cluster_region
 }
 
 data "aws_eks_cluster" "cluster" {
@@ -22,14 +20,20 @@ provider "helm" {
   }
 }
 
+data "aws_caller_identity" "current" {}
+
 # Your CAST AI EKS configuration
 
 provider "castai" {
   api_token = var.castai_api_token
 }
 
-resource "castai_eks_cluster" "my_castai_cluster" {
-  account_id = var.aws_account_id
+resource "castai_cluster_token" "this" {
+  cluster_id = castai_eks_cluster.this.id
+}
+
+resource "castai_eks_cluster" "this" {
+  account_id = data.aws_caller_identity.current.account_id
   region     = var.cluster_region
   name       = var.cluster_name
 }
@@ -46,6 +50,6 @@ resource "helm_release" "castai_agent" {
   }
   set_sensitive {
     name  = "apiKey"
-    value = castai_eks_cluster.my_castai_cluster.cluster_token
+    value = castai_cluster_token.this.cluster_token
   }
 }

@@ -2,14 +2,13 @@ variable "castai_api_token" {}
 
 variable "project_id" {}
 variable "cluster_region" {
-  type = string
+  type        = string
   description = "The region to create the cluster"
 
   default = "europe-west1"
 }
 
 variable "cluster_name" {}
-
 
 variable "cluster_zones" {
   type        = list(string)

@@ -57,17 +57,22 @@ module "castai-eks-cluster" {
   aws_cluster_name   = module.eks.cluster_id
 
   aws_assume_role_arn      = module.castai-eks-role-iam.role_arn
-  aws_instance_profile_arn = module.castai-eks-role-iam.instance_profile_arn
-
-  subnets                  = module.vpc.private_subnets
-  override_security_groups = [
-    aws_security_group.worker_group_mgmt_one.id,
-    aws_security_group.worker_group_mgmt_two.id,
-    aws_security_group.all_worker_mgmt.id,
-  ]
-  tags = var.tags
-
   delete_nodes_on_disconnect = var.delete_nodes_on_disconnect
+
+  default_node_configuration = module.castai-eks-cluster.castai_node_configurations["default"]
+
+  node_configurations = {
+    default = {
+      subnets         = module.vpc.private_subnets
+      tags            = var.tags
+      security_groups = [
+        aws_security_group.worker_group_mgmt_one.id,
+        aws_security_group.worker_group_mgmt_two.id,
+        aws_security_group.all_worker_mgmt.id,
+      ]
+      instance_profile_arn = module.castai-eks-role-iam.instance_profile_arn
+    }
+  }
 
   // depends_on helps terraform with creating proper dependencies graph in case of resource creation and in this case destroy
   // module "castai-eks-cluster" has to be destroyed before module "castai-eks-role-iam"
