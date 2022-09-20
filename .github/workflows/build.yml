@@ -36,6 +36,5 @@ jobs:
       - name: Acceptance test
         env: # Or as an environment variable
           CASTAI_API_TOKEN: ${{ secrets.$CASTAI_URL }}
-#        run: make testacc && echo $CASTAI_URL
         run: echo $CASTAI_API_TOKEN
 
