@@ -34,5 +34,5 @@ jobs:
         run: make test
 
       - name: Acceptance test
-      - run: make testacc
+        run: make testacc
 
