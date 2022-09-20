@@ -47,7 +47,7 @@ func testAccPreCheck(t *testing.T) {
 		}
 
 		if v := os.Getenv("CASTAI_API_TOKEN"); v == "" {
-			t.Skipf("CASTAI_API_TOKEN must be set for acceptance tests")
+			t.Fatal("CASTAI_API_TOKEN must be set for acceptance tests")
 		}
 
 		if err := testAccProvider.Configure(context.Background(), terraform.NewResourceConfigRaw(nil)); err != nil {
