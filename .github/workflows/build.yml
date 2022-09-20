@@ -33,6 +33,6 @@ jobs:
       - name: Test
         run: make test
 
-      - name: Acceptance Test
+      - name: Acceptance test
       - run: make testacc
 
