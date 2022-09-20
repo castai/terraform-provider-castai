@@ -40,7 +40,7 @@ jobs:
           terraform_wrapper: false
 
       - name: Acceptance test
-        env: # Or as an environment variable
+        env:
           CASTAI_API_TOKEN: ${{ secrets.CASTAI_DEV_MASTER_TOKEN }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_TF_ACCEPTANCE_TEST_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_TF_ACCEPTANCE_TEST_SECRET_KEY_ID }}
