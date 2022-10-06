@@ -132,6 +132,14 @@ type ClientInterface interface {
 	// CostReportAPIGetClusterWorkloadReport request
 	CostReportAPIGetClusterWorkloadReport(ctx context.Context, clusterId string, params *CostReportAPIGetClusterWorkloadReportParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// CostReportAPIGetClusterWorkloadReport2 request  with any body
+	CostReportAPIGetClusterWorkloadReport2WithBody(ctx context.Context, clusterId string, params *CostReportAPIGetClusterWorkloadReport2Params, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	CostReportAPIGetClusterWorkloadReport2(ctx context.Context, clusterId string, params *CostReportAPIGetClusterWorkloadReport2Params, body CostReportAPIGetClusterWorkloadReport2JSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// CostReportAPIGetClusterWorkloadLabels request
+	CostReportAPIGetClusterWorkloadLabels(ctx context.Context, clusterId string, params *CostReportAPIGetClusterWorkloadLabelsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// CostReportAPIGetClustersCostReport request
 	CostReportAPIGetClustersCostReport(ctx context.Context, params *CostReportAPIGetClustersCostReportParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -617,10 +625,21 @@ type ClientInterface interface {
 	// InsightsAPIGetVulnerabilitiesReportSummary request
 	InsightsAPIGetVulnerabilitiesReportSummary(ctx context.Context, params *InsightsAPIGetVulnerabilitiesReportSummaryParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// InsightsAPIDisconnectAgent request
+	InsightsAPIDisconnectAgent(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// InsightsAPIIngestAgentLog request  with any body
 	InsightsAPIIngestAgentLogWithBody(ctx context.Context, clusterId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	InsightsAPIIngestAgentLog(ctx context.Context, clusterId string, body InsightsAPIIngestAgentLogJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// InsightsAPIPostAgentTelemetry request  with any body
+	InsightsAPIPostAgentTelemetryWithBody(ctx context.Context, clusterId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	InsightsAPIPostAgentTelemetry(ctx context.Context, clusterId string, body InsightsAPIPostAgentTelemetryJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// InsightsAPIGetAgentInstallScript request
+	InsightsAPIGetAgentInstallScript(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error)
 }
 
 func (c *Client) ListAddons(ctx context.Context, params *ListAddonsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
@@ -779,6 +798,39 @@ func (c *Client) CostReportAPIGetClusterCostReport2(ctx context.Context, cluster
 
 func (c *Client) CostReportAPIGetClusterWorkloadReport(ctx context.Context, clusterId string, params *CostReportAPIGetClusterWorkloadReportParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewCostReportAPIGetClusterWorkloadReportRequest(c.Server, clusterId, params)
+	if err != nil {
+		return nil, err
+	}
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) CostReportAPIGetClusterWorkloadReport2WithBody(ctx context.Context, clusterId string, params *CostReportAPIGetClusterWorkloadReport2Params, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCostReportAPIGetClusterWorkloadReport2RequestWithBody(c.Server, clusterId, params, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) CostReportAPIGetClusterWorkloadReport2(ctx context.Context, clusterId string, params *CostReportAPIGetClusterWorkloadReport2Params, body CostReportAPIGetClusterWorkloadReport2JSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCostReportAPIGetClusterWorkloadReport2Request(c.Server, clusterId, params, body)
+	if err != nil {
+		return nil, err
+	}
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) CostReportAPIGetClusterWorkloadLabels(ctx context.Context, clusterId string, params *CostReportAPIGetClusterWorkloadLabelsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCostReportAPIGetClusterWorkloadLabelsRequest(c.Server, clusterId, params)
 	if err != nil {
 		return nil, err
 	}
@@ -2724,6 +2776,17 @@ func (c *Client) InsightsAPIGetVulnerabilitiesReportSummary(ctx context.Context,
 	return c.Client.Do(req)
 }
 
+func (c *Client) InsightsAPIDisconnectAgent(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewInsightsAPIDisconnectAgentRequest(c.Server, clusterId)
+	if err != nil {
+		return nil, err
+	}
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
 func (c *Client) InsightsAPIIngestAgentLogWithBody(ctx context.Context, clusterId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewInsightsAPIIngestAgentLogRequestWithBody(c.Server, clusterId, contentType, body)
 	if err != nil {
@@ -2737,6 +2800,39 @@ func (c *Client) InsightsAPIIngestAgentLogWithBody(ctx context.Context, clusterI
 
 func (c *Client) InsightsAPIIngestAgentLog(ctx context.Context, clusterId string, body InsightsAPIIngestAgentLogJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewInsightsAPIIngestAgentLogRequest(c.Server, clusterId, body)
+	if err != nil {
+		return nil, err
+	}
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) InsightsAPIPostAgentTelemetryWithBody(ctx context.Context, clusterId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewInsightsAPIPostAgentTelemetryRequestWithBody(c.Server, clusterId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) InsightsAPIPostAgentTelemetry(ctx context.Context, clusterId string, body InsightsAPIPostAgentTelemetryJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewInsightsAPIPostAgentTelemetryRequest(c.Server, clusterId, body)
+	if err != nil {
+		return nil, err
+	}
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) InsightsAPIGetAgentInstallScript(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewInsightsAPIGetAgentInstallScriptRequest(c.Server, clusterId)
 	if err != nil {
 		return nil, err
 	}
@@ -3738,6 +3834,175 @@ func NewCostReportAPIGetClusterWorkloadReportRequest(server string, clusterId st
 			}
 		}
 
+	}
+
+	if params.FilterWorkloadNames != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "filter.workloadNames", *params.FilterWorkloadNames); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	queryUrl.RawQuery = queryValues.Encode()
+
+	req, err := http.NewRequest("GET", queryUrl.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewCostReportAPIGetClusterWorkloadReport2Request calls the generic CostReportAPIGetClusterWorkloadReport2 builder with application/json body
+func NewCostReportAPIGetClusterWorkloadReport2Request(server string, clusterId string, params *CostReportAPIGetClusterWorkloadReport2Params, body CostReportAPIGetClusterWorkloadReport2JSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewCostReportAPIGetClusterWorkloadReport2RequestWithBody(server, clusterId, params, "application/json", bodyReader)
+}
+
+// NewCostReportAPIGetClusterWorkloadReport2RequestWithBody generates requests for CostReportAPIGetClusterWorkloadReport2 with any type of body
+func NewCostReportAPIGetClusterWorkloadReport2RequestWithBody(server string, clusterId string, params *CostReportAPIGetClusterWorkloadReport2Params, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParam("simple", false, "clusterId", clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	queryUrl, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	basePath := fmt.Sprintf("/v1/cost-reports/clusters/%s/workload-costs", pathParam0)
+	if basePath[0] == '/' {
+		basePath = basePath[1:]
+	}
+
+	queryUrl, err = queryUrl.Parse(basePath)
+	if err != nil {
+		return nil, err
+	}
+
+	queryValues := queryUrl.Query()
+
+	if queryFrag, err := runtime.StyleParam("form", true, "startTime", params.StartTime); err != nil {
+		return nil, err
+	} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+		return nil, err
+	} else {
+		for k, v := range parsed {
+			for _, v2 := range v {
+				queryValues.Add(k, v2)
+			}
+		}
+	}
+
+	if queryFrag, err := runtime.StyleParam("form", true, "endTime", params.EndTime); err != nil {
+		return nil, err
+	} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+		return nil, err
+	} else {
+		for k, v := range parsed {
+			for _, v2 := range v {
+				queryValues.Add(k, v2)
+			}
+		}
+	}
+
+	if params.StepSeconds != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "stepSeconds", *params.StepSeconds); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	queryUrl.RawQuery = queryValues.Encode()
+
+	req, err := http.NewRequest("POST", queryUrl.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewCostReportAPIGetClusterWorkloadLabelsRequest generates requests for CostReportAPIGetClusterWorkloadLabels
+func NewCostReportAPIGetClusterWorkloadLabelsRequest(server string, clusterId string, params *CostReportAPIGetClusterWorkloadLabelsParams) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParam("simple", false, "clusterId", clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	queryUrl, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	basePath := fmt.Sprintf("/v1/cost-reports/clusters/%s/workload-labels", pathParam0)
+	if basePath[0] == '/' {
+		basePath = basePath[1:]
+	}
+
+	queryUrl, err = queryUrl.Parse(basePath)
+	if err != nil {
+		return nil, err
+	}
+
+	queryValues := queryUrl.Query()
+
+	if queryFrag, err := runtime.StyleParam("form", true, "startTime", params.StartTime); err != nil {
+		return nil, err
+	} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+		return nil, err
+	} else {
+		for k, v := range parsed {
+			for _, v2 := range v {
+				queryValues.Add(k, v2)
+			}
+		}
+	}
+
+	if queryFrag, err := runtime.StyleParam("form", true, "endTime", params.EndTime); err != nil {
+		return nil, err
+	} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+		return nil, err
+	} else {
+		for k, v := range parsed {
+			for _, v2 := range v {
+				queryValues.Add(k, v2)
+			}
+		}
 	}
 
 	queryUrl.RawQuery = queryValues.Encode()
@@ -8244,38 +8509,6 @@ func NewNotificationAPIListNotificationsRequest(server string, params *Notificat
 
 	}
 
-	if params.FilterFromDate != nil {
-
-		if queryFrag, err := runtime.StyleParam("form", true, "filter.fromDate", *params.FilterFromDate); err != nil {
-			return nil, err
-		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
-			return nil, err
-		} else {
-			for k, v := range parsed {
-				for _, v2 := range v {
-					queryValues.Add(k, v2)
-				}
-			}
-		}
-
-	}
-
-	if params.FilterToDate != nil {
-
-		if queryFrag, err := runtime.StyleParam("form", true, "filter.toDate", *params.FilterToDate); err != nil {
-			return nil, err
-		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
-			return nil, err
-		} else {
-			for k, v := range parsed {
-				for _, v2 := range v {
-					queryValues.Add(k, v2)
-				}
-			}
-		}
-
-	}
-
 	if params.FilterSeverities != nil {
 
 		if queryFrag, err := runtime.StyleParam("form", true, "filter.severities", *params.FilterSeverities); err != nil {
@@ -8295,6 +8528,150 @@ func NewNotificationAPIListNotificationsRequest(server string, params *Notificat
 	if params.FilterIsAcked != nil {
 
 		if queryFrag, err := runtime.StyleParam("form", true, "filter.isAcked", *params.FilterIsAcked); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.FilterNotificationId != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "filter.notificationId", *params.FilterNotificationId); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.FilterNotificationName != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "filter.notificationName", *params.FilterNotificationName); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.FilterClusterId != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "filter.clusterId", *params.FilterClusterId); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.FilterClusterName != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "filter.clusterName", *params.FilterClusterName); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.FilterOperationId != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "filter.operationId", *params.FilterOperationId); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.FilterOperationType != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "filter.operationType", *params.FilterOperationType); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.FilterProject != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "filter.project", *params.FilterProject); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.SortField != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "sort.field", *params.SortField); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.SortOrder != nil {
+
+		if queryFrag, err := runtime.StyleParam("form", true, "sort.order", *params.SortOrder); err != nil {
 			return nil, err
 		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
 			return nil, err
@@ -9930,6 +10307,40 @@ func NewInsightsAPIGetVulnerabilitiesReportSummaryRequest(server string, params 
 	return req, nil
 }
 
+// NewInsightsAPIDisconnectAgentRequest generates requests for InsightsAPIDisconnectAgent
+func NewInsightsAPIDisconnectAgentRequest(server string, clusterId string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParam("simple", false, "clusterId", clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	queryUrl, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	basePath := fmt.Sprintf("/v1/security/insights/%s/disconnect", pathParam0)
+	if basePath[0] == '/' {
+		basePath = basePath[1:]
+	}
+
+	queryUrl, err = queryUrl.Parse(basePath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryUrl.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 // NewInsightsAPIIngestAgentLogRequest calls the generic InsightsAPIIngestAgentLog builder with application/json body
 func NewInsightsAPIIngestAgentLogRequest(server string, clusterId string, body InsightsAPIIngestAgentLogJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
@@ -9973,6 +10384,87 @@ func NewInsightsAPIIngestAgentLogRequestWithBody(server string, clusterId string
 	}
 
 	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewInsightsAPIPostAgentTelemetryRequest calls the generic InsightsAPIPostAgentTelemetry builder with application/json body
+func NewInsightsAPIPostAgentTelemetryRequest(server string, clusterId string, body InsightsAPIPostAgentTelemetryJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewInsightsAPIPostAgentTelemetryRequestWithBody(server, clusterId, "application/json", bodyReader)
+}
+
+// NewInsightsAPIPostAgentTelemetryRequestWithBody generates requests for InsightsAPIPostAgentTelemetry with any type of body
+func NewInsightsAPIPostAgentTelemetryRequestWithBody(server string, clusterId string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParam("simple", false, "clusterId", clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	queryUrl, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	basePath := fmt.Sprintf("/v1/security/insights/%s/telemetry", pathParam0)
+	if basePath[0] == '/' {
+		basePath = basePath[1:]
+	}
+
+	queryUrl, err = queryUrl.Parse(basePath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryUrl.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewInsightsAPIGetAgentInstallScriptRequest generates requests for InsightsAPIGetAgentInstallScript
+func NewInsightsAPIGetAgentInstallScriptRequest(server string, clusterId string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParam("simple", false, "clusterId", clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	queryUrl, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	basePath := fmt.Sprintf("/v1/security/%s/agent.sh", pathParam0)
+	if basePath[0] == '/' {
+		basePath = basePath[1:]
+	}
+
+	queryUrl, err = queryUrl.Parse(basePath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryUrl.String(), nil)
+	if err != nil {
+		return nil, err
+	}
 
 	return req, nil
 }
@@ -10062,6 +10554,14 @@ type ClientWithResponsesInterface interface {
 
 	// CostReportAPIGetClusterWorkloadReport request
 	CostReportAPIGetClusterWorkloadReportWithResponse(ctx context.Context, clusterId string, params *CostReportAPIGetClusterWorkloadReportParams) (*CostReportAPIGetClusterWorkloadReportResponse, error)
+
+	// CostReportAPIGetClusterWorkloadReport2 request  with any body
+	CostReportAPIGetClusterWorkloadReport2WithBodyWithResponse(ctx context.Context, clusterId string, params *CostReportAPIGetClusterWorkloadReport2Params, contentType string, body io.Reader) (*CostReportAPIGetClusterWorkloadReport2Response, error)
+
+	CostReportAPIGetClusterWorkloadReport2WithResponse(ctx context.Context, clusterId string, params *CostReportAPIGetClusterWorkloadReport2Params, body CostReportAPIGetClusterWorkloadReport2JSONRequestBody) (*CostReportAPIGetClusterWorkloadReport2Response, error)
+
+	// CostReportAPIGetClusterWorkloadLabels request
+	CostReportAPIGetClusterWorkloadLabelsWithResponse(ctx context.Context, clusterId string, params *CostReportAPIGetClusterWorkloadLabelsParams) (*CostReportAPIGetClusterWorkloadLabelsResponse, error)
 
 	// CostReportAPIGetClustersCostReport request
 	CostReportAPIGetClustersCostReportWithResponse(ctx context.Context, params *CostReportAPIGetClustersCostReportParams) (*CostReportAPIGetClustersCostReportResponse, error)
@@ -10548,10 +11048,21 @@ type ClientWithResponsesInterface interface {
 	// InsightsAPIGetVulnerabilitiesReportSummary request
 	InsightsAPIGetVulnerabilitiesReportSummaryWithResponse(ctx context.Context, params *InsightsAPIGetVulnerabilitiesReportSummaryParams) (*InsightsAPIGetVulnerabilitiesReportSummaryResponse, error)
 
+	// InsightsAPIDisconnectAgent request
+	InsightsAPIDisconnectAgentWithResponse(ctx context.Context, clusterId string) (*InsightsAPIDisconnectAgentResponse, error)
+
 	// InsightsAPIIngestAgentLog request  with any body
 	InsightsAPIIngestAgentLogWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader) (*InsightsAPIIngestAgentLogResponse, error)
 
 	InsightsAPIIngestAgentLogWithResponse(ctx context.Context, clusterId string, body InsightsAPIIngestAgentLogJSONRequestBody) (*InsightsAPIIngestAgentLogResponse, error)
+
+	// InsightsAPIPostAgentTelemetry request  with any body
+	InsightsAPIPostAgentTelemetryWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader) (*InsightsAPIPostAgentTelemetryResponse, error)
+
+	InsightsAPIPostAgentTelemetryWithResponse(ctx context.Context, clusterId string, body InsightsAPIPostAgentTelemetryJSONRequestBody) (*InsightsAPIPostAgentTelemetryResponse, error)
+
+	// InsightsAPIGetAgentInstallScript request
+	InsightsAPIGetAgentInstallScriptWithResponse(ctx context.Context, clusterId string) (*InsightsAPIGetAgentInstallScriptResponse, error)
 }
 
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
@@ -10917,6 +11428,66 @@ func (r CostReportAPIGetClusterWorkloadReportResponse) StatusCode() int {
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
 func (r CostReportAPIGetClusterWorkloadReportResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type CostReportAPIGetClusterWorkloadReport2Response struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *CostreportV1beta1GetClusterWorkloadReportResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r CostReportAPIGetClusterWorkloadReport2Response) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r CostReportAPIGetClusterWorkloadReport2Response) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r CostReportAPIGetClusterWorkloadReport2Response) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type CostReportAPIGetClusterWorkloadLabelsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *CostreportV1beta1GetClusterWorkloadLabelsResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r CostReportAPIGetClusterWorkloadLabelsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r CostReportAPIGetClusterWorkloadLabelsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r CostReportAPIGetClusterWorkloadLabelsResponse) GetBody() []byte {
 	return r.Body
 }
 
@@ -14909,6 +15480,36 @@ func (r InsightsAPIGetVulnerabilitiesReportSummaryResponse) GetBody() []byte {
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
+type InsightsAPIDisconnectAgentResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *InsightsV1DisconnectAgentResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r InsightsAPIDisconnectAgentResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r InsightsAPIDisconnectAgentResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r InsightsAPIDisconnectAgentResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
 type InsightsAPIIngestAgentLogResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -14934,6 +15535,65 @@ func (r InsightsAPIIngestAgentLogResponse) StatusCode() int {
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
 func (r InsightsAPIIngestAgentLogResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type InsightsAPIPostAgentTelemetryResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *InsightsV1PostAgentTelemetryResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r InsightsAPIPostAgentTelemetryResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r InsightsAPIPostAgentTelemetryResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r InsightsAPIPostAgentTelemetryResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type InsightsAPIGetAgentInstallScriptResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+}
+
+// Status returns HTTPResponse.Status
+func (r InsightsAPIGetAgentInstallScriptResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r InsightsAPIGetAgentInstallScriptResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r InsightsAPIGetAgentInstallScriptResponse) GetBody() []byte {
 	return r.Body
 }
 
@@ -15069,6 +15729,32 @@ func (c *ClientWithResponses) CostReportAPIGetClusterWorkloadReportWithResponse(
 		return nil, err
 	}
 	return ParseCostReportAPIGetClusterWorkloadReportResponse(rsp)
+}
+
+// CostReportAPIGetClusterWorkloadReport2WithBodyWithResponse request with arbitrary body returning *CostReportAPIGetClusterWorkloadReport2Response
+func (c *ClientWithResponses) CostReportAPIGetClusterWorkloadReport2WithBodyWithResponse(ctx context.Context, clusterId string, params *CostReportAPIGetClusterWorkloadReport2Params, contentType string, body io.Reader) (*CostReportAPIGetClusterWorkloadReport2Response, error) {
+	rsp, err := c.CostReportAPIGetClusterWorkloadReport2WithBody(ctx, clusterId, params, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCostReportAPIGetClusterWorkloadReport2Response(rsp)
+}
+
+func (c *ClientWithResponses) CostReportAPIGetClusterWorkloadReport2WithResponse(ctx context.Context, clusterId string, params *CostReportAPIGetClusterWorkloadReport2Params, body CostReportAPIGetClusterWorkloadReport2JSONRequestBody) (*CostReportAPIGetClusterWorkloadReport2Response, error) {
+	rsp, err := c.CostReportAPIGetClusterWorkloadReport2(ctx, clusterId, params, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCostReportAPIGetClusterWorkloadReport2Response(rsp)
+}
+
+// CostReportAPIGetClusterWorkloadLabelsWithResponse request returning *CostReportAPIGetClusterWorkloadLabelsResponse
+func (c *ClientWithResponses) CostReportAPIGetClusterWorkloadLabelsWithResponse(ctx context.Context, clusterId string, params *CostReportAPIGetClusterWorkloadLabelsParams) (*CostReportAPIGetClusterWorkloadLabelsResponse, error) {
+	rsp, err := c.CostReportAPIGetClusterWorkloadLabels(ctx, clusterId, params)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCostReportAPIGetClusterWorkloadLabelsResponse(rsp)
 }
 
 // CostReportAPIGetClustersCostReportWithResponse request returning *CostReportAPIGetClustersCostReportResponse
@@ -16612,6 +17298,15 @@ func (c *ClientWithResponses) InsightsAPIGetVulnerabilitiesReportSummaryWithResp
 	return ParseInsightsAPIGetVulnerabilitiesReportSummaryResponse(rsp)
 }
 
+// InsightsAPIDisconnectAgentWithResponse request returning *InsightsAPIDisconnectAgentResponse
+func (c *ClientWithResponses) InsightsAPIDisconnectAgentWithResponse(ctx context.Context, clusterId string) (*InsightsAPIDisconnectAgentResponse, error) {
+	rsp, err := c.InsightsAPIDisconnectAgent(ctx, clusterId)
+	if err != nil {
+		return nil, err
+	}
+	return ParseInsightsAPIDisconnectAgentResponse(rsp)
+}
+
 // InsightsAPIIngestAgentLogWithBodyWithResponse request with arbitrary body returning *InsightsAPIIngestAgentLogResponse
 func (c *ClientWithResponses) InsightsAPIIngestAgentLogWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader) (*InsightsAPIIngestAgentLogResponse, error) {
 	rsp, err := c.InsightsAPIIngestAgentLogWithBody(ctx, clusterId, contentType, body)
@@ -16627,6 +17322,32 @@ func (c *ClientWithResponses) InsightsAPIIngestAgentLogWithResponse(ctx context.
 		return nil, err
 	}
 	return ParseInsightsAPIIngestAgentLogResponse(rsp)
+}
+
+// InsightsAPIPostAgentTelemetryWithBodyWithResponse request with arbitrary body returning *InsightsAPIPostAgentTelemetryResponse
+func (c *ClientWithResponses) InsightsAPIPostAgentTelemetryWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader) (*InsightsAPIPostAgentTelemetryResponse, error) {
+	rsp, err := c.InsightsAPIPostAgentTelemetryWithBody(ctx, clusterId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseInsightsAPIPostAgentTelemetryResponse(rsp)
+}
+
+func (c *ClientWithResponses) InsightsAPIPostAgentTelemetryWithResponse(ctx context.Context, clusterId string, body InsightsAPIPostAgentTelemetryJSONRequestBody) (*InsightsAPIPostAgentTelemetryResponse, error) {
+	rsp, err := c.InsightsAPIPostAgentTelemetry(ctx, clusterId, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseInsightsAPIPostAgentTelemetryResponse(rsp)
+}
+
+// InsightsAPIGetAgentInstallScriptWithResponse request returning *InsightsAPIGetAgentInstallScriptResponse
+func (c *ClientWithResponses) InsightsAPIGetAgentInstallScriptWithResponse(ctx context.Context, clusterId string) (*InsightsAPIGetAgentInstallScriptResponse, error) {
+	rsp, err := c.InsightsAPIGetAgentInstallScript(ctx, clusterId)
+	if err != nil {
+		return nil, err
+	}
+	return ParseInsightsAPIGetAgentInstallScriptResponse(rsp)
 }
 
 // ParseListAddonsResponse parses an HTTP response from a ListAddonsWithResponse call
@@ -16924,6 +17645,58 @@ func ParseCostReportAPIGetClusterWorkloadReportResponse(rsp *http.Response) (*Co
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest CostreportV1beta1GetClusterWorkloadReportResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseCostReportAPIGetClusterWorkloadReport2Response parses an HTTP response from a CostReportAPIGetClusterWorkloadReport2WithResponse call
+func ParseCostReportAPIGetClusterWorkloadReport2Response(rsp *http.Response) (*CostReportAPIGetClusterWorkloadReport2Response, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &CostReportAPIGetClusterWorkloadReport2Response{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest CostreportV1beta1GetClusterWorkloadReportResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseCostReportAPIGetClusterWorkloadLabelsResponse parses an HTTP response from a CostReportAPIGetClusterWorkloadLabelsWithResponse call
+func ParseCostReportAPIGetClusterWorkloadLabelsResponse(rsp *http.Response) (*CostReportAPIGetClusterWorkloadLabelsResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &CostReportAPIGetClusterWorkloadLabelsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest CostreportV1beta1GetClusterWorkloadLabelsResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -20374,6 +21147,32 @@ func ParseInsightsAPIGetVulnerabilitiesReportSummaryResponse(rsp *http.Response)
 	return response, nil
 }
 
+// ParseInsightsAPIDisconnectAgentResponse parses an HTTP response from a InsightsAPIDisconnectAgentWithResponse call
+func ParseInsightsAPIDisconnectAgentResponse(rsp *http.Response) (*InsightsAPIDisconnectAgentResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &InsightsAPIDisconnectAgentResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest InsightsV1DisconnectAgentResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
 // ParseInsightsAPIIngestAgentLogResponse parses an HTTP response from a InsightsAPIIngestAgentLogWithResponse call
 func ParseInsightsAPIIngestAgentLogResponse(rsp *http.Response) (*InsightsAPIIngestAgentLogResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
@@ -20395,6 +21194,51 @@ func ParseInsightsAPIIngestAgentLogResponse(rsp *http.Response) (*InsightsAPIIng
 		}
 		response.JSON200 = &dest
 
+	}
+
+	return response, nil
+}
+
+// ParseInsightsAPIPostAgentTelemetryResponse parses an HTTP response from a InsightsAPIPostAgentTelemetryWithResponse call
+func ParseInsightsAPIPostAgentTelemetryResponse(rsp *http.Response) (*InsightsAPIPostAgentTelemetryResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &InsightsAPIPostAgentTelemetryResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest InsightsV1PostAgentTelemetryResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseInsightsAPIGetAgentInstallScriptResponse parses an HTTP response from a InsightsAPIGetAgentInstallScriptWithResponse call
+func ParseInsightsAPIGetAgentInstallScriptResponse(rsp *http.Response) (*InsightsAPIGetAgentInstallScriptResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &InsightsAPIGetAgentInstallScriptResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
 	}
 
 	return response, nil

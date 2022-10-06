@@ -183,6 +183,7 @@ func TestAutoscalerResource_PoliciesUpdateAction(t *testing.T) {
 
 			return &http.Response{
 				StatusCode: 200,
+				Body:       io.NopCloser(bytes.NewReader([]byte(""))),
 			}, nil
 		}).Times(1)
 
