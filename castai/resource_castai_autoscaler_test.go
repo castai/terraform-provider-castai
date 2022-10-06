@@ -192,6 +192,113 @@ func TestAutoscalerResource_PoliciesUpdateAction(t *testing.T) {
 	r.True(policiesUpdated)
 }
 
+func TestAutoscalerResource_PoliciesUpdateAction_Fail(t *testing.T) {
+	currentPolicies := `
+		{
+		    "enabled": true,
+		    "isScopedMode": false,
+		    "unschedulablePods": {
+		        "enabled": true,
+		        "headroom": {
+		            "cpuPercentage": 10,
+		            "memoryPercentage": 10,
+		            "enabled": true
+		        },
+		        "headroomSpot": {
+		            "cpuPercentage": 10,
+		            "memoryPercentage": 10,
+		            "enabled": true
+		        },
+		        "nodeConstraints": {
+		            "minCpuCores": 2,
+		            "maxCpuCores": 32,
+		            "minRamMib": 4096,
+		            "maxRamMib": 262144,
+		            "enabled": false
+		        },
+		        "diskGibToCpuRatio": 25
+		    },
+		    "clusterLimits": {
+		        "enabled": false,
+		        "cpu": {
+		            "minCores": 1,
+		            "maxCores": 20
+		        }
+		    },
+		    "spotInstances": {
+		        "enabled": true,
+		        "clouds": [
+		            "azure"
+		        ],
+		        "maxReclaimRate": 0,
+		        "spotBackups": {
+		            "enabled": false,
+		            "spotBackupRestoreRateSeconds": 1800
+		        }
+		    },
+		    "nodeDownscaler": {
+		        "emptyNodes": {
+		            "enabled": false,
+		            "delaySeconds": 0
+		        }
+		    }
+		}`
+
+	policyChanges := `{
+		"isScopedMode":true,
+		"unschedulablePods": {
+			"nodeConstraints": {
+				"enabled": true,
+				"maxCpuCores": 96
+			}
+		},
+		"spotInstances": {
+			"clouds": ["aws"],
+			"spotBackups": {
+				"enabled": true
+			}
+		}
+	}`
+
+	r := require.New(t)
+	mockctrl := gomock.NewController(t)
+	mockClient := mock_sdk.NewMockClientInterface(mockctrl)
+
+	ctx := context.Background()
+	provider := &ProviderConfig{
+		api: &sdk.ClientWithResponses{
+			ClientInterface: mockClient,
+		},
+	}
+
+	resource := resourceCastaiAutoscaler()
+
+	clusterId := "cluster_id"
+	val := cty.ObjectVal(map[string]cty.Value{
+		FieldAutoscalerPoliciesJSON: cty.StringVal(policyChanges),
+		FieldClusterId:              cty.StringVal(clusterId),
+	})
+	state := terraform.NewInstanceStateShimmedFromValue(val, 0)
+	data := resource.Data(state)
+
+	body := io.NopCloser(bytes.NewReader([]byte(currentPolicies)))
+	response := &http.Response{StatusCode: 200, Body: body}
+
+	mockClient.EXPECT().PoliciesAPIGetClusterPolicies(gomock.Any(), clusterId, gomock.Any()).Return(response, nil).Times(1)
+	mockClient.EXPECT().PoliciesAPIUpsertClusterPoliciesWithBody(gomock.Any(), clusterId, "application/json", gomock.Any()).
+		DoAndReturn(func(ctx context.Context, clusterId string, contentType string, body io.Reader) (*http.Response, error) {
+			return &http.Response{
+				StatusCode: 400,
+				Body:       io.NopCloser(bytes.NewReader([]byte(`{"message":"policies config: Evictor policy management is not allowed: Evictor installed externally. Uninstall Evictor first and try again.","fieldViolations":[]`))),
+			}, nil
+		}).Times(1)
+
+	result := resource.UpdateContext(ctx, data, provider)
+	r.NotNil(result)
+	r.True(result.HasError())
+	r.Equal(`expected status code 200, received: status=400 body={"message":"policies config: Evictor policy management is not allowed: Evictor installed externally. Uninstall Evictor first and try again.","fieldViolations":[]`, result[0].Summary)
+}
+
 func JSONBytesEqual(a, b []byte) (bool, error) {
 	var j, j2 interface{}
 	if err := json.Unmarshal(a, &j); err != nil {
