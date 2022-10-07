@@ -160,19 +160,12 @@ func updateAutoscalerPolicies(ctx context.Context, data *schema.ResourceData, me
 func upsertPolicies(ctx context.Context, meta interface{}, clusterId sdk.ClusterId, changedPoliciesJSON string) error {
 	client := meta.(*ProviderConfig).api
 
-	result, err := client.PoliciesAPIUpsertClusterPoliciesWithBody(ctx, string(clusterId), "application/json", bytes.NewReader([]byte(changedPoliciesJSON)))
-	if err != nil {
-		log.Printf("[ERROR] Error upserting policies: %v", err)
-		return fmt.Errorf("error updating policies: %v", err)
+	resp, err := client.PoliciesAPIUpsertClusterPoliciesWithBodyWithResponse(ctx, string(clusterId), "application/json", bytes.NewReader([]byte(changedPoliciesJSON)))
+	if checkErr := sdk.CheckOKResponse(resp, err); checkErr != nil {
+		return checkErr
 	}
 
-	if result.StatusCode > 199 && result.StatusCode <= 299 {
-		log.Printf("[INFO] Policies updated: \n%v\n", changedPoliciesJSON)
-		return nil
-	}
-
-	log.Printf("[ERROR] Failed updating policies. Received status code: %v", result.Status)
-	return fmt.Errorf("failed updating policies: %v", result.Status)
+	return nil
 }
 
 func readAutoscalerPolicies(ctx context.Context, data *schema.ResourceData, meta interface{}) error {

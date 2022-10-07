@@ -1153,6 +1153,9 @@ type RebalancingCreateNodeOperationParams struct {
 	// Whether this node is a spot fallback.
 	IsSpotFallback *bool `json:"isSpotFallback,omitempty"`
 
+	// Node configuration ID to be used for the new node.
+	NodeConfigurationId string `json:"nodeConfigurationId"`
+
 	// The subnet id of the created node. if empty - the subnet id will be random based on the availability zone.
 	SubnetId *string `json:"subnetId,omitempty"`
 
@@ -1314,6 +1317,8 @@ type RebalancingPlan struct {
 	//
 	// `creating_nodes` - the rebalancing plan is being executed, green nodes are being created.
 	//
+	// `preparing_nodes` - the rebalancing plan is being executed, green nodes are being prepared.
+	//
 	// `draining_nodes` - the rebalancing plan is being executed, blue nodes are being drained.
 	//
 	// `deleting_nodes` - the rebalancing plan is being executed, blue nodes are being deleted.
@@ -1383,9 +1388,14 @@ type RebalancingPlanOperation struct {
 	// The id of the node this operation will be executed on.
 	NodeId *string `json:"nodeId,omitempty"`
 
+	// Defines the parameters for the `prepare_node` operation type.
+	PrepareParams *RebalancingPrepareNodeOperationParams `json:"prepareParams,omitempty"`
+
 	// Type of the operation. Possible types:
 	//
 	// `create_node` - a node will be created with specific `create` `params`.
+	//
+	// `prepare_node` - a node will be prepared with specific `prepare` `params`.
 	//
 	// `drain_node` - a node will be drained with specific `drain` `params`.
 	//
@@ -1398,6 +1408,22 @@ type RebalancingPlansResponse struct {
 
 	// List of rebalancing plans
 	Items *[]RebalancingPlan `json:"items,omitempty"`
+}
+
+// RebalancingPrepareNodeOperationParams defines model for RebalancingPrepareNodeOperationParams.
+type RebalancingPrepareNodeOperationParams struct {
+
+	// The cloud service provider name.
+	Csp *string `json:"csp,omitempty"`
+
+	// The instance type of the node.
+	InstanceType *string `json:"instanceType,omitempty"`
+
+	// Whether the node is a spot instance.
+	IsSpot *bool `json:"isSpot,omitempty"`
+
+	// Whether this node is a spot fallback.
+	IsSpotFallback *bool `json:"isSpotFallback,omitempty"`
 }
 
 // RebalancingRequest defines model for RebalancingRequest.
@@ -1591,6 +1617,18 @@ type WorkloadNode struct {
 	WorkloadReplicas *int `json:"workloadReplicas,omitempty"`
 }
 
+// CastaiClusterV1beta1GPUDevice defines model for castai.cluster.v1beta1.GPUDevice.
+type CastaiClusterV1beta1GPUDevice struct {
+	Count        *int32  `json:"count,omitempty"`
+	Manufacturer *string `json:"manufacturer,omitempty"`
+	MemoryMib    *int32  `json:"memoryMib,omitempty"`
+}
+
+// CastaiClusterV1beta1GPUInfo defines model for castai.cluster.v1beta1.GPUInfo.
+type CastaiClusterV1beta1GPUInfo struct {
+	GpuDevices *[]CastaiClusterV1beta1GPUDevice `json:"gpuDevices,omitempty"`
+}
+
 // CastaiClusterV1beta1ListNodesResponse defines model for castai.cluster.v1beta1.ListNodesResponse.
 type CastaiClusterV1beta1ListNodesResponse struct {
 	Items      *[]CastaiClusterV1beta1Node `json:"items,omitempty"`
@@ -1603,8 +1641,9 @@ type CastaiClusterV1beta1Node struct {
 	Cloud   *string `json:"cloud,omitempty"`
 
 	// created_at represents timestamp of when node was created in cloud infrastructure.
-	CreatedAt *time.Time `json:"createdAt,omitempty"`
-	Id        *string    `json:"id,omitempty"`
+	CreatedAt *time.Time                   `json:"createdAt,omitempty"`
+	GpuInfo   *CastaiClusterV1beta1GPUInfo `json:"gpuInfo,omitempty"`
+	Id        *string                      `json:"id,omitempty"`
 
 	// Deprecated. Use node_info architecture field.
 	InstanceArchitecture *string `json:"instanceArchitecture"`
@@ -1810,6 +1849,7 @@ type CastaiNotificationsV1beta1AddWebhookConfig_AuthKeys struct {
 type CastaiNotificationsV1beta1ClusterMetadata struct {
 	Id           *string `json:"id,omitempty"`
 	Name         *string `json:"name,omitempty"`
+	Project      *string `json:"project,omitempty"`
 	ProviderType *string `json:"providerType,omitempty"`
 }
 
@@ -1818,8 +1858,9 @@ type CastaiNotificationsV1beta1DeleteWebhookConfigResponse map[string]interface{
 
 // CastaiNotificationsV1beta1ListNotificationsResponse defines model for castai.notifications.v1beta1.ListNotificationsResponse.
 type CastaiNotificationsV1beta1ListNotificationsResponse struct {
-	Count *int32                                    `json:"count,omitempty"`
-	Items *[]CastaiNotificationsV1beta1Notification `json:"items,omitempty"`
+	Count        *int32                                    `json:"count,omitempty"`
+	CountUnacked *int32                                    `json:"countUnacked,omitempty"`
+	Items        *[]CastaiNotificationsV1beta1Notification `json:"items,omitempty"`
 
 	// next_cursor is a token to be used in future request to retrieve subsequent items. If empty - no more items present.
 	NextCursor *string `json:"nextCursor,omitempty"`
@@ -1836,6 +1877,7 @@ type CastaiNotificationsV1beta1ListWebhookConfigsResponse struct {
 // CastaiNotificationsV1beta1Notification defines model for castai.notifications.v1beta1.Notification.
 type CastaiNotificationsV1beta1Notification struct {
 	AckAt           *time.Time                                 `json:"ackAt,omitempty"`
+	AckedBy         *string                                    `json:"ackedBy"`
 	ClusterMetadata *CastaiNotificationsV1beta1ClusterMetadata `json:"clusterMetadata,omitempty"`
 	CreatedAt       *time.Time                                 `json:"createdAt,omitempty"`
 
@@ -1942,6 +1984,7 @@ type ClusteractionsV1ClusterAction struct {
 	ActionChartUninstall    *ClusteractionsV1ClusterActionChartUninstall    `json:"actionChartUninstall,omitempty"`
 	ActionChartUpsert       *ClusteractionsV1ClusterActionChartUpsert       `json:"actionChartUpsert,omitempty"`
 	ActionCheckNodeDeleted  *ClusteractionsV1ClusterActionCheckNodeDeleted  `json:"actionCheckNodeDeleted,omitempty"`
+	ActionCheckNodeStatus   *ClusteractionsV1ClusterActionCheckNodeStatus   `json:"actionCheckNodeStatus,omitempty"`
 	ActionCreateEvent       *ClusteractionsV1ClusterActionCreateEvent       `json:"actionCreateEvent,omitempty"`
 	ActionDeleteNode        *ClusteractionsV1ClusterActionDeleteNode        `json:"actionDeleteNode,omitempty"`
 	ActionDisconnectCluster *ClusteractionsV1ClusterActionDisconnectCluster `json:"actionDisconnectCluster,omitempty"`
@@ -1995,6 +2038,17 @@ type ClusteractionsV1ClusterActionChartUpsert_ValuesOverrides struct {
 // ClusteractionsV1ClusterActionCheckNodeDeleted defines model for clusteractions.v1.ClusterActionCheckNodeDeleted.
 type ClusteractionsV1ClusterActionCheckNodeDeleted struct {
 	NodeName *string `json:"nodeName,omitempty"`
+}
+
+// ClusteractionsV1ClusterActionCheckNodeStatus defines model for clusteractions.v1.ClusterActionCheckNodeStatus.
+type ClusteractionsV1ClusterActionCheckNodeStatus struct {
+	NodeName *string `json:"nodeName,omitempty"`
+
+	// - NodeStatus_UNSPECIFIED: Not provided status
+	//  - NodeStatus_READY: Node joined cluster
+	//  - NodeStatus_DELETED: Node not exist in cluster
+	NodeStatus         *ClusteractionsV1NodeStatus `json:"nodeStatus,omitempty"`
+	WaitTimeoutSeconds *int32                      `json:"waitTimeoutSeconds,omitempty"`
 }
 
 // ClusteractionsV1ClusterActionCreateEvent defines model for clusteractions.v1.ClusterActionCreateEvent.
@@ -2061,6 +2115,16 @@ type ClusteractionsV1LogEvent struct {
 type ClusteractionsV1LogEvent_Fields struct {
 	AdditionalProperties map[string]string `json:"-"`
 }
+
+// ClusteractionsV1NodeStatus defines model for clusteractions.v1.NodeStatus.
+type ClusteractionsV1NodeStatus string
+
+// List of ClusteractionsV1NodeStatus
+const (
+	ClusteractionsV1NodeStatus_NodeStatus_DELETED     ClusteractionsV1NodeStatus = "NodeStatus_DELETED"
+	ClusteractionsV1NodeStatus_NodeStatus_READY       ClusteractionsV1NodeStatus = "NodeStatus_READY"
+	ClusteractionsV1NodeStatus_NodeStatus_UNSPECIFIED ClusteractionsV1NodeStatus = "NodeStatus_UNSPECIFIED"
+)
 
 // ClusteractionsV1NodeTaint defines model for clusteractions.v1.NodeTaint.
 type ClusteractionsV1NodeTaint struct {
@@ -2175,6 +2239,24 @@ type CostreportV1beta1GetClusterCostReportResponseCostReportItem struct {
 
 	// Timestamp of entry creation.
 	Timestamp *time.Time `json:"timestamp,omitempty"`
+}
+
+// CostreportV1beta1GetClusterWorkloadLabelsResponse defines model for costreport.v1beta1.GetClusterWorkloadLabelsResponse.
+type CostreportV1beta1GetClusterWorkloadLabelsResponse struct {
+
+	// ID of the cluster.
+	ClusterId *string `json:"clusterId,omitempty"`
+
+	// List of workload labels.
+	Items *[]CostreportV1beta1GetClusterWorkloadLabelsResponseLabelValues `json:"items,omitempty"`
+}
+
+// CostreportV1beta1GetClusterWorkloadLabelsResponseLabelValues defines model for costreport.v1beta1.GetClusterWorkloadLabelsResponse.LabelValues.
+type CostreportV1beta1GetClusterWorkloadLabelsResponseLabelValues struct {
+
+	// Label name.
+	Label  *string   `json:"label,omitempty"`
+	Values *[]string `json:"values,omitempty"`
 }
 
 // CostreportV1beta1GetClusterWorkloadReportResponse defines model for costreport.v1beta1.GetClusterWorkloadReportResponse.
@@ -2348,6 +2430,18 @@ type CostreportV1beta1SavingsRecommendation struct {
 
 	// Available savings by applying this configuration.
 	SavingsPercentage *string `json:"savingsPercentage,omitempty"`
+}
+
+// CostreportV1beta1WorkloadFilter defines model for costreport.v1beta1.WorkloadFilter.
+type CostreportV1beta1WorkloadFilter struct {
+	Labels        *[]CostreportV1beta1WorkloadFilterLabelValue `json:"labels,omitempty"`
+	WorkloadNames *[]string                                    `json:"workloadNames,omitempty"`
+}
+
+// CostreportV1beta1WorkloadFilterLabelValue defines model for costreport.v1beta1.WorkloadFilter.LabelValue.
+type CostreportV1beta1WorkloadFilterLabelValue struct {
+	Label *string `json:"label,omitempty"`
+	Value *string `json:"value,omitempty"`
 }
 
 // ExternalclusterV1AKSClusterParams defines model for externalcluster.v1.AKSClusterParams.
@@ -2803,6 +2897,9 @@ type ExternalclusterV1Zone struct {
 	Name *string `json:"name,omitempty"`
 }
 
+// InsightsV1DisconnectAgentResponse defines model for insights.v1.DisconnectAgentResponse.
+type InsightsV1DisconnectAgentResponse map[string]interface{}
+
 // InsightsV1GetBestPracticesCheckDetailsResponse defines model for insights.v1.GetBestPracticesCheckDetailsResponse.
 type InsightsV1GetBestPracticesCheckDetailsResponse struct {
 
@@ -2920,6 +3017,9 @@ type InsightsV1GetBestPracticesReportSummaryResponse struct {
 
 	// Checks count by severity level.
 	FailedChecksBySeverityLevel *InsightsV1GetBestPracticesReportSummaryResponse_FailedChecksBySeverityLevel `json:"failedChecksBySeverityLevel,omitempty"`
+
+	// Timestamp of last scan.
+	LastScannedAt *time.Time `json:"lastScannedAt,omitempty"`
 }
 
 // InsightsV1GetBestPracticesReportSummaryResponse_FailedChecksBySeverityLevel defines model for InsightsV1GetBestPracticesReportSummaryResponse.FailedChecksBySeverityLevel.
@@ -3043,6 +3143,9 @@ type InsightsV1GetVulnerabilitiesReportResponseObjectItem_VulnerabilitiesBySever
 // InsightsV1GetVulnerabilitiesReportSummaryResponse defines model for insights.v1.GetVulnerabilitiesReportSummaryResponse.
 type InsightsV1GetVulnerabilitiesReportSummaryResponse struct {
 
+	// Timestamp of last scan.
+	LastScannedAt *time.Time `json:"lastScannedAt,omitempty"`
+
 	// Number of vulnerabilities found.
 	TotalVulnerabilities *int32 `json:"totalVulnerabilities,omitempty"`
 
@@ -3070,8 +3173,9 @@ type InsightsV1GetVulnerabilitiesResourcesResponse struct {
 
 // InsightsV1GetVulnerabilitiesResourcesResponseResourceItem defines model for insights.v1.GetVulnerabilitiesResourcesResponse.ResourceItem.
 type InsightsV1GetVulnerabilitiesResourcesResponseResourceItem struct {
-	Kind *string `json:"kind,omitempty"`
-	Name *string `json:"name,omitempty"`
+	Kind      *string `json:"kind,omitempty"`
+	Name      *string `json:"name,omitempty"`
+	Namespace *string `json:"namespace,omitempty"`
 }
 
 // InsightsV1IngestAgentLogResponse defines model for insights.v1.IngestAgentLogResponse.
@@ -3088,6 +3192,12 @@ type InsightsV1LogEvent struct {
 // InsightsV1LogEvent_Fields defines model for InsightsV1LogEvent.Fields.
 type InsightsV1LogEvent_Fields struct {
 	AdditionalProperties map[string]string `json:"-"`
+}
+
+// InsightsV1PostAgentTelemetryResponse defines model for insights.v1.PostAgentTelemetryResponse.
+type InsightsV1PostAgentTelemetryResponse struct {
+	DisabledFeatures *[]string `json:"disabledFeatures,omitempty"`
+	FullResync       *bool     `json:"fullResync,omitempty"`
 }
 
 // InsightsV1ScheduleBestPracticesScanRequest defines model for insights.v1.ScheduleBestPracticesScanRequest.
@@ -3204,6 +3314,19 @@ type NodeconfigV1AKSConfig struct {
 	MaxPodsPerNode *int32 `json:"maxPodsPerNode,omitempty"`
 }
 
+// NodeconfigV1ContainerRuntime defines model for nodeconfig.v1.ContainerRuntime.
+type NodeconfigV1ContainerRuntime string
+
+// List of NodeconfigV1ContainerRuntime
+const (
+	NodeconfigV1ContainerRuntime_CONTAINERD  NodeconfigV1ContainerRuntime = "CONTAINERD"
+	NodeconfigV1ContainerRuntime_DOCKERD     NodeconfigV1ContainerRuntime = "DOCKERD"
+	NodeconfigV1ContainerRuntime_UNSPECIFIED NodeconfigV1ContainerRuntime = "UNSPECIFIED"
+	NodeconfigV1ContainerRuntime_containerd  NodeconfigV1ContainerRuntime = "containerd"
+	NodeconfigV1ContainerRuntime_dockerd     NodeconfigV1ContainerRuntime = "dockerd"
+	NodeconfigV1ContainerRuntime_unspecified NodeconfigV1ContainerRuntime = "unspecified"
+)
+
 // NodeconfigV1DeleteConfigurationResponse defines model for nodeconfig.v1.DeleteConfigurationResponse.
 type NodeconfigV1DeleteConfigurationResponse map[string]interface{}
 
@@ -3238,6 +3361,9 @@ type NodeconfigV1ListConfigurationsResponse struct {
 // NodeconfigV1NewNodeConfiguration defines model for nodeconfig.v1.NewNodeConfiguration.
 type NodeconfigV1NewNodeConfiguration struct {
 	Aks *NodeconfigV1AKSConfig `json:"aks,omitempty"`
+
+	// List of supported container runtimes kubelet should use.
+	ContainerRuntime *NodeconfigV1ContainerRuntime `json:"containerRuntime,omitempty"`
 
 	// Disk to CPU ratio. Sets the number of GiBs to be added for every CPU on the node. The root volume will have a minimum of 100GiB and will be further increased based on value.
 	DiskCpuRatio *int32 `json:"diskCpuRatio,omitempty"`
@@ -3278,6 +3404,9 @@ type NodeconfigV1NewNodeConfiguration_Tags struct {
 type NodeconfigV1NodeConfiguration struct {
 	Aks *NodeconfigV1AKSConfig `json:"aks,omitempty"`
 
+	// List of supported container runtimes kubelet should use.
+	ContainerRuntime *NodeconfigV1ContainerRuntime `json:"containerRuntime,omitempty"`
+
 	// The date when node configuration was created.
 	CreatedAt *time.Time `json:"createdAt,omitempty"`
 
@@ -3288,7 +3417,7 @@ type NodeconfigV1NodeConfiguration struct {
 	DiskCpuRatio *int32 `json:"diskCpuRatio,omitempty"`
 
 	// Optional docker daemon configuration properties. Applicable for EKS only.
-	DockerConfig *map[string]interface{} `json:"dockerConfig,omitempty"`
+	DockerConfig *map[string]interface{} `json:"dockerConfig"`
 	Eks          *NodeconfigV1EKSConfig  `json:"eks,omitempty"`
 
 	// The node configuration ID.
@@ -3302,7 +3431,7 @@ type NodeconfigV1NodeConfiguration struct {
 	Kops       *NodeconfigV1KOPSConfig `json:"kops,omitempty"`
 
 	// Optional kubelet configuration properties. Applicable for EKS only.
-	KubeletConfig *map[string]interface{} `json:"kubeletConfig,omitempty"`
+	KubeletConfig *map[string]interface{} `json:"kubeletConfig"`
 
 	// The name of the node configuration.
 	Name *string `json:"name,omitempty"`
@@ -3331,6 +3460,9 @@ type NodeconfigV1NodeConfiguration_Tags struct {
 // NodeconfigV1NodeConfigurationUpdate defines model for nodeconfig.v1.NodeConfigurationUpdate.
 type NodeconfigV1NodeConfigurationUpdate struct {
 	Aks *NodeconfigV1AKSConfig `json:"aks,omitempty"`
+
+	// List of supported container runtimes kubelet should use.
+	ContainerRuntime *NodeconfigV1ContainerRuntime `json:"containerRuntime,omitempty"`
 
 	// Disk to CPU ratio. Sets the number of GiBs to be added for every CPU on the node. The root volume will have a minimum of 100GiB and will be further increased based on value.
 	DiskCpuRatio *int32 `json:"diskCpuRatio,omitempty"`
@@ -3401,6 +3533,12 @@ type NodetemplatesV1FilterInstanceTypesResponse struct {
 	AvailableInstanceTypes *[]NodetemplatesV1AvailableInstanceType `json:"availableInstanceTypes,omitempty"`
 }
 
+// NodetemplatesV1Label defines model for nodetemplates.v1.Label.
+type NodetemplatesV1Label struct {
+	Key   *string `json:"key,omitempty"`
+	Value *string `json:"value,omitempty"`
+}
+
 // NodetemplatesV1ListNodeTemplatesResponse defines model for nodetemplates.v1.ListNodeTemplatesResponse.
 type NodetemplatesV1ListNodeTemplatesResponse struct {
 	Items *[]NodetemplatesV1NodeTemplateListItem `json:"items,omitempty"`
@@ -3410,7 +3548,11 @@ type NodetemplatesV1ListNodeTemplatesResponse struct {
 type NodetemplatesV1NewNodeTemplate struct {
 	ConfigurationId *string                             `json:"configurationId,omitempty"`
 	Constraints     *NodetemplatesV1TemplateConstraints `json:"constraints,omitempty"`
+	CustomLabel     *NodetemplatesV1Label               `json:"customLabel,omitempty"`
 	Name            *string                             `json:"name,omitempty"`
+
+	// Marks whether the templated nodes will have a taint.
+	ShouldTaint *bool `json:"shouldTaint"`
 }
 
 // NodetemplatesV1NodeTemplate defines model for nodetemplates.v1.NodeTemplate.
@@ -3418,8 +3560,12 @@ type NodetemplatesV1NodeTemplate struct {
 	ConfigurationId   *string                             `json:"configurationId,omitempty"`
 	ConfigurationName *string                             `json:"configurationName,omitempty"`
 	Constraints       *NodetemplatesV1TemplateConstraints `json:"constraints,omitempty"`
+	CustomLabel       *NodetemplatesV1Label               `json:"customLabel,omitempty"`
 	Name              *string                             `json:"name,omitempty"`
-	Version           *string                             `json:"version,omitempty"`
+
+	// Marks whether the templated nodes will have a taint.
+	ShouldTaint *bool   `json:"shouldTaint,omitempty"`
+	Version     *string `json:"version,omitempty"`
 }
 
 // NodetemplatesV1NodeTemplateListItem defines model for nodetemplates.v1.NodeTemplateListItem.
@@ -3446,6 +3592,9 @@ type NodetemplatesV1TemplateConstraints struct {
 	MinMemory        *int32                                                       `json:"minMemory"`
 	Spot             *bool                                                        `json:"spot"`
 	StorageOptimized *bool                                                        `json:"storageOptimized"`
+
+	// Spot instance fallback constraint - when true, on-demand instances will be created, when spots are unavailable.
+	UseSpotFallbacks *bool `json:"useSpotFallbacks"`
 }
 
 // NodetemplatesV1TemplateConstraintsGPUConstraints defines model for nodetemplates.v1.TemplateConstraints.GPUConstraints.
@@ -3467,6 +3616,10 @@ type NodetemplatesV1TemplateConstraintsInstanceFamilyConstraints struct {
 type NodetemplatesV1UpdateNodeTemplate struct {
 	ConfigurationId *string                             `json:"configurationId,omitempty"`
 	Constraints     *NodetemplatesV1TemplateConstraints `json:"constraints,omitempty"`
+	CustomLabel     *NodetemplatesV1Label               `json:"customLabel,omitempty"`
+
+	// Marks whether the templated nodes will have a taint.
+	ShouldTaint *bool `json:"shouldTaint"`
 }
 
 // PoliciesV1ClusterLimitsCpu defines model for policies.v1.ClusterLimitsCpu.
@@ -3865,7 +4018,34 @@ type CostReportAPIGetClusterWorkloadReportParams struct {
 	EndTime time.Time `json:"endTime"`
 
 	// Aggregate items in specified interval steps.
+	StepSeconds         *int32    `json:"stepSeconds,omitempty"`
+	FilterWorkloadNames *[]string `json:"filter.workloadNames,omitempty"`
+}
+
+// CostReportAPIGetClusterWorkloadReport2JSONBody defines parameters for CostReportAPIGetClusterWorkloadReport2.
+type CostReportAPIGetClusterWorkloadReport2JSONBody CostreportV1beta1WorkloadFilter
+
+// CostReportAPIGetClusterWorkloadReport2Params defines parameters for CostReportAPIGetClusterWorkloadReport2.
+type CostReportAPIGetClusterWorkloadReport2Params struct {
+
+	// Filter items to include from specified time.
+	StartTime time.Time `json:"startTime"`
+
+	// Filter items to include up to specified time.
+	EndTime time.Time `json:"endTime"`
+
+	// Aggregate items in specified interval steps.
 	StepSeconds *int32 `json:"stepSeconds,omitempty"`
+}
+
+// CostReportAPIGetClusterWorkloadLabelsParams defines parameters for CostReportAPIGetClusterWorkloadLabels.
+type CostReportAPIGetClusterWorkloadLabelsParams struct {
+
+	// Filter items to include from specified time.
+	StartTime time.Time `json:"startTime"`
+
+	// Filter items to include up to specified time.
+	EndTime time.Time `json:"endTime"`
 }
 
 // CostReportAPIGetClustersCostReportParams defines parameters for CostReportAPIGetClustersCostReport.
@@ -4141,17 +4321,43 @@ type NotificationAPIListNotificationsParams struct {
 	// Empty value indicates to start from beginning of the dataset.
 	PageCursor *string `json:"page.cursor,omitempty"`
 
-	// the from date range to filter.
-	FilterFromDate *string `json:"filter.fromDate,omitempty"`
-
-	// The to date range to filter.
-	FilterToDate *string `json:"filter.toDate,omitempty"`
-
 	// The severities you want to filter.
 	FilterSeverities *[]string `json:"filter.severities,omitempty"`
 
-	// Filters request to return acknowledged or not acknowledged notifications.
+	// Filters to return acknowledged or not acknowledged notifications.
 	FilterIsAcked *bool `json:"filter.isAcked,omitempty"`
+
+	// The id of the Notification.
+	FilterNotificationId *string `json:"filter.notificationId,omitempty"`
+
+	// The name of the Notification.
+	FilterNotificationName *string `json:"filter.notificationName,omitempty"`
+
+	// The id of the Cluster included in the ClusterMetadata.
+	FilterClusterId *string `json:"filter.clusterId,omitempty"`
+
+	// The name of the Cluster included in the ClusterMetadata.
+	FilterClusterName *string `json:"filter.clusterName,omitempty"`
+
+	// The id of the Operation included in the OperationMetadata.
+	FilterOperationId *string `json:"filter.operationId,omitempty"`
+
+	// The type of the Operation included in the OperationMetadata.
+	FilterOperationType *string `json:"filter.operationType,omitempty"`
+
+	// The project the cluster belongs in the ClusterMetadata.
+	FilterProject *string `json:"filter.project,omitempty"`
+
+	// Name of the field you want to sort.
+	SortField *string `json:"sort.field,omitempty"`
+
+	// The sort order, possible values ASC or DESC, if not provided asc is the default.
+	//
+	//  - ASC: ASC
+	//  - asc: desc
+	//  - DESC: ASC
+	//  - desc: desc
+	SortOrder *string `json:"sort.order,omitempty"`
 }
 
 // NotificationAPIAckNotificationsJSONBody defines parameters for NotificationAPIAckNotifications.
@@ -4316,6 +4522,9 @@ type InsightsAPIGetVulnerabilitiesReportSummaryParams struct {
 // InsightsAPIIngestAgentLogJSONBody defines parameters for InsightsAPIIngestAgentLog.
 type InsightsAPIIngestAgentLogJSONBody InsightsV1LogEvent
 
+// InsightsAPIPostAgentTelemetryJSONBody defines parameters for InsightsAPIPostAgentTelemetry.
+type InsightsAPIPostAgentTelemetryJSONBody map[string]interface{}
+
 // CreateAuthTokenJSONRequestBody defines body for CreateAuthToken for application/json ContentType.
 type CreateAuthTokenJSONRequestBody CreateAuthTokenJSONBody
 
@@ -4324,6 +4533,9 @@ type UpdateAuthTokenJSONRequestBody UpdateAuthTokenJSONBody
 
 // PlanClusterPriceJSONRequestBody defines body for PlanClusterPrice for application/json ContentType.
 type PlanClusterPriceJSONRequestBody PlanClusterPriceJSONBody
+
+// CostReportAPIGetClusterWorkloadReport2JSONRequestBody defines body for CostReportAPIGetClusterWorkloadReport2 for application/json ContentType.
+type CostReportAPIGetClusterWorkloadReport2JSONRequestBody CostReportAPIGetClusterWorkloadReport2JSONBody
 
 // CreateCloudCredentialsJSONRequestBody defines body for CreateCloudCredentials for application/json ContentType.
 type CreateCloudCredentialsJSONRequestBody CreateCloudCredentialsJSONBody
@@ -4456,6 +4668,9 @@ type InsightsAPIScheduleVulnerabilitiesScanJSONRequestBody InsightsAPIScheduleVu
 
 // InsightsAPIIngestAgentLogJSONRequestBody defines body for InsightsAPIIngestAgentLog for application/json ContentType.
 type InsightsAPIIngestAgentLogJSONRequestBody InsightsAPIIngestAgentLogJSONBody
+
+// InsightsAPIPostAgentTelemetryJSONRequestBody defines body for InsightsAPIPostAgentTelemetry for application/json ContentType.
+type InsightsAPIPostAgentTelemetryJSONRequestBody InsightsAPIPostAgentTelemetryJSONBody
 
 // Getter for additional properties for AuditEvent_Labels. Returns the specified
 // element and whether it was found
