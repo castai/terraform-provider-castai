@@ -478,10 +478,10 @@ func waitForClusterToReachStatusFunc(ctx context.Context, client *sdk.ClientWith
 
 		for _, retryableStatus := range retryableStatuses {
 			if string(*cluster.Status) == retryableStatus {
-				return resource.RetryableError(fmt.Errorf("waiting for cluster to reach %q status, id=%q name=%q, status=%s", targetStatus, cluster.Id, cluster.Name, cluster.Status))
+				return resource.RetryableError(fmt.Errorf("waiting for cluster to reach %q status, id=%q name=%q, status=%s", targetStatus, *cluster.Id, cluster.Name, *cluster.Status))
 			}
 		}
-		return resource.NonRetryableError(fmt.Errorf("cluster has reached unexpected status, id=%q name=%q, status=%s", cluster.Id, cluster.Name, cluster.Status))
+		return resource.NonRetryableError(fmt.Errorf("cluster has reached unexpected status, id=%q name=%q, status=%s", *cluster.Id, cluster.Name, *cluster.Status))
 	}
 }
 
