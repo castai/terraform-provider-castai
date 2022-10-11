@@ -335,7 +335,7 @@ func resourceCastaiClusterCreate(ctx context.Context, data *schema.ResourceData,
 		return diag.FromErr(checkErr)
 	}
 
-	data.SetId(response.JSON201.Id)
+	data.SetId(*response.JSON201.Id)
 
 	log.Printf("[DEBUG] Waiting for cluster to reach `ready` status, id=%q name=%q", data.Id(), data.Get(ClusterFieldName))
 	err = resource.RetryContext(ctx, data.Timeout(schema.TimeoutCreate), waitForClusterToReachCreatedFunc(ctx, client, data.Id()))
@@ -472,16 +472,16 @@ func waitForClusterToReachStatusFunc(ctx context.Context, client *sdk.ClientWith
 
 		cluster := response.JSON200
 
-		if cluster.Status == targetStatus {
+		if string(*cluster.Status) == targetStatus {
 			return nil
 		}
 
 		for _, retryableStatus := range retryableStatuses {
-			if cluster.Status == retryableStatus {
-				return resource.RetryableError(fmt.Errorf("waiting for cluster to reach %q status, id=%q name=%q, status=%s", targetStatus, cluster.Id, cluster.Name, cluster.Status))
+			if string(*cluster.Status) == retryableStatus {
+				return resource.RetryableError(fmt.Errorf("waiting for cluster to reach %q status, id=%q name=%q, status=%s", targetStatus, *cluster.Id, cluster.Name, *cluster.Status))
 			}
 		}
-		return resource.NonRetryableError(fmt.Errorf("cluster has reached unexpected status, id=%q name=%q, status=%s", cluster.Id, cluster.Name, cluster.Status))
+		return resource.NonRetryableError(fmt.Errorf("cluster has reached unexpected status, id=%q name=%q, status=%s", *cluster.Id, cluster.Name, *cluster.Status))
 	}
 }
 
