@@ -233,7 +233,7 @@ func dataSourceCastaiClusterRead(ctx context.Context, data *schema.ResourceData,
 
 	log.Printf("[INFO] found cluster: %v", response.JSON200)
 
-	data.SetId(response.JSON200.Id)
+	data.SetId(*response.JSON200.Id)
 	data.Set("name", response.JSON200.Name)
 	data.Set("status", response.JSON200.Status)
 	data.Set("region", response.JSON200.Region.Name)

@@ -167,13 +167,13 @@ func resourceCastaiCredentialsCreate(ctx context.Context, data *schema.ResourceD
 	response, err := client.CreateCloudCredentialsWithResponse(ctx, sdk.CreateCloudCredentialsJSONRequestBody{
 		Name:        data.Get(CredentialsFieldName).(string),
 		Cloud:       cloud,
-		Credentials: credentials,
+		Credentials: &credentials,
 	})
 	if checkErr := sdk.CheckCreateResponse(response, err); checkErr != nil {
 		return diag.FromErr(checkErr)
 	}
 
-	data.SetId(response.JSON201.Id)
+	data.SetId(*response.JSON201.Id)
 	return nil
 }
 
