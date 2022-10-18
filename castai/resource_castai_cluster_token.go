@@ -19,7 +19,7 @@ func resourceCastaiClusterToken() *schema.Resource {
 		ReadContext:        resourceCastaiClusterTokenRead,
 		UpdateContext:      nil,
 		DeleteContext:      resourceCastaiClusterTokenDelete,
-		DeprecationMessage: "castai_cluster_token resource is deprecated. Use castai_{aks/eks/gke}_cluster cluster_token field",
+		DeprecationMessage: "castai_cluster_token resource is deprecated. Use castai_(aks|eks|gke)_cluster cluster_token field",
 		Schema: map[string]*schema.Schema{
 			FieldClusterID: {
 				Type:        schema.TypeString,
