@@ -81,7 +81,6 @@ func TestEKSClusterResourceReadContext(t *testing.T) {
 	r.False(result.HasError())
 	r.Equal(`ID = b6bfc074-a267-400f-b8f1-db0850c369b1
 account_id = 487609000000
-agent_token = 123
 credentials_id = 9b8d0456-177b-4a3d-b162-e68030d656aa
 dns_cluster_ip = 10.100.100.1
 instance_profile_arn = arn

@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"strings"
 	"time"
 
 	"github.com/cenkalti/backoff/v4"
@@ -98,12 +97,6 @@ func resourceCastaiEKSCluster() *schema.Resource {
 				ForceNew:    true,
 				Description: "CAST AI internal credentials ID",
 			},
-			FieldClusterAgentToken: {
-				Type:       schema.TypeString,
-				Computed:   true,
-				Deprecated: "agent_token is deprecated, use cluster_token instead. This attribute will be removed in the next major version of the provider.",
-				Sensitive:  true,
-			},
 			FieldEKSClusterOverrideSecurityGroups: {
 				Type:     schema.TypeList,
 				Optional: true,
@@ -158,6 +151,12 @@ func resourceCastaiEKSCluster() *schema.Resource {
 				Optional:    true,
 				Description: "Should CAST AI remove nodes managed by CAST AI on disconnect",
 			},
+			FieldClusterToken: {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Sensitive:   true,
+				Description: "CAST AI cluster token.",
+			},
 		},
 		CustomizeDiff: func(ctx context.Context, diff *schema.ResourceDiff, i interface{}) error {
 			_, accessKeyIdProvided := diff.GetOk(FieldEKSClusterAccessKeyId)
@@ -193,6 +192,11 @@ func resourceCastaiEKSClusterCreate(ctx context.Context, data *schema.ResourceDa
 	}
 
 	clusterID := *resp.JSON200.Id
+	tkn, err := createClusterToken(ctx, client, clusterID)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	data.Set(FieldClusterToken, tkn)
 	data.SetId(clusterID)
 
 	if err := updateClusterSettings(ctx, data, client); err != nil {
@@ -241,13 +245,14 @@ func resourceCastaiEKSClusterRead(ctx context.Context, data *schema.ResourceData
 			data.Set(FieldEKSClusterTags, eks.Tags.AdditionalProperties)
 		}
 	}
+	clusterID := *resp.JSON200.Id
 
-	if _, ok := data.GetOk(FieldClusterAgentToken); !ok {
-		tkn, err := retrieveAgentToken(ctx, client)
+	if _, ok := data.GetOk(FieldClusterToken); !ok {
+		tkn, err := createClusterToken(ctx, client, clusterID)
 		if err != nil {
 			return diag.FromErr(err)
 		}
-		data.Set(FieldClusterAgentToken, tkn)
+		data.Set(FieldClusterToken, tkn)
 	}
 
 	return nil
@@ -368,17 +373,6 @@ func updateClusterSettings(ctx context.Context, data *schema.ResourceData, clien
 	}
 
 	return nil
-}
-
-// Deprecated. Remove with agent_token.
-func retrieveAgentToken(ctx context.Context, client *sdk.ClientWithResponses) (string, error) {
-	response, err := client.GetAgentInstallScriptWithResponse(ctx, &sdk.GetAgentInstallScriptParams{})
-	if err != nil {
-		return "", fmt.Errorf("retrieving agent install script: %w", err)
-	}
-
-	// at the moment, agent registration token only appears in `curl agent manifests` snippet and is extracted from there.
-	return strings.Split(strings.TrimPrefix(string(response.Body), `curl -H "Authorization: Token `), `"`)[0], nil
 }
 
 func createClusterToken(ctx context.Context, client *sdk.ClientWithResponses, clusterID string) (string, error) {
