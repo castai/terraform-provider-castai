@@ -17,38 +17,38 @@ description: |-
 
 ### Required
 
-- `credentials` (Set of String)
-- `initialize_params` (Block List, Min: 1, Max: 1) (see [below for nested schema](#nestedblock--initialize_params))
-- `name` (String)
-- `region` (String)
+- **credentials** (Set of String)
+- **initialize_params** (Block List, Min: 1, Max: 1) (see [below for nested schema](#nestedblock--initialize_params))
+- **name** (String)
+- **region** (String)
 
 ### Optional
 
-- `autoscaler_policies` (Block List, Max: 1) (see [below for nested schema](#nestedblock--autoscaler_policies))
-- `status` (String)
-- `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
-- `vpn_type` (String)
+- **autoscaler_policies** (Block List, Max: 1) (see [below for nested schema](#nestedblock--autoscaler_policies))
+- **id** (String) The ID of this resource.
+- **status** (String)
+- **timeouts** (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
+- **vpn_type** (String)
 
 ### Read-Only
 
-- `id` (String) The ID of this resource.
-- `kubeconfig` (List of Object) (see [below for nested schema](#nestedatt--kubeconfig))
+- **kubeconfig** (List of Object) (see [below for nested schema](#nestedatt--kubeconfig))
 
 <a id="nestedblock--initialize_params"></a>
 ### Nested Schema for `initialize_params`
 
 Required:
 
-- `nodes` (Block List, Min: 1) (see [below for nested schema](#nestedblock--initialize_params--nodes))
+- **nodes** (Block List, Min: 1) (see [below for nested schema](#nestedblock--initialize_params--nodes))
 
 <a id="nestedblock--initialize_params--nodes"></a>
 ### Nested Schema for `initialize_params.nodes`
 
 Required:
 
-- `cloud` (String)
-- `role` (String)
-- `shape` (String)
+- **cloud** (String)
+- **role** (String)
+- **shape** (String)
 
 
 
@@ -57,27 +57,27 @@ Required:
 
 Optional:
 
-- `cluster_limits` (Block List, Max: 1) (see [below for nested schema](#nestedblock--autoscaler_policies--cluster_limits))
-- `enabled` (Boolean)
-- `node_downscaler` (Block List, Max: 1) (see [below for nested schema](#nestedblock--autoscaler_policies--node_downscaler))
-- `spot_instances` (Block List, Max: 1) (see [below for nested schema](#nestedblock--autoscaler_policies--spot_instances))
-- `unschedulable_pods` (Block List, Max: 1) (see [below for nested schema](#nestedblock--autoscaler_policies--unschedulable_pods))
+- **cluster_limits** (Block List, Max: 1) (see [below for nested schema](#nestedblock--autoscaler_policies--cluster_limits))
+- **enabled** (Boolean)
+- **node_downscaler** (Block List, Max: 1) (see [below for nested schema](#nestedblock--autoscaler_policies--node_downscaler))
+- **spot_instances** (Block List, Max: 1) (see [below for nested schema](#nestedblock--autoscaler_policies--spot_instances))
+- **unschedulable_pods** (Block List, Max: 1) (see [below for nested schema](#nestedblock--autoscaler_policies--unschedulable_pods))
 
 <a id="nestedblock--autoscaler_policies--cluster_limits"></a>
 ### Nested Schema for `autoscaler_policies.cluster_limits`
 
 Optional:
 
-- `cpu` (Block List, Max: 1) (see [below for nested schema](#nestedblock--autoscaler_policies--cluster_limits--cpu))
-- `enabled` (Boolean)
+- **cpu** (Block List, Max: 1) (see [below for nested schema](#nestedblock--autoscaler_policies--cluster_limits--cpu))
+- **enabled** (Boolean)
 
 <a id="nestedblock--autoscaler_policies--cluster_limits--cpu"></a>
 ### Nested Schema for `autoscaler_policies.cluster_limits.cpu`
 
 Optional:
 
-- `max_cores` (Number)
-- `min_cores` (Number)
+- **max_cores** (Number)
+- **min_cores** (Number)
 
 
 
@@ -86,15 +86,15 @@ Optional:
 
 Optional:
 
-- `empty_nodes` (Block List, Max: 1) (see [below for nested schema](#nestedblock--autoscaler_policies--node_downscaler--empty_nodes))
+- **empty_nodes** (Block List, Max: 1) (see [below for nested schema](#nestedblock--autoscaler_policies--node_downscaler--empty_nodes))
 
 <a id="nestedblock--autoscaler_policies--node_downscaler--empty_nodes"></a>
 ### Nested Schema for `autoscaler_policies.node_downscaler.empty_nodes`
 
 Optional:
 
-- `delay_seconds` (Number)
-- `enabled` (Boolean)
+- **delay_seconds** (Number)
+- **enabled** (Boolean)
 
 
 
@@ -103,8 +103,8 @@ Optional:
 
 Optional:
 
-- `clouds` (List of String)
-- `enabled` (Boolean)
+- **clouds** (List of String)
+- **enabled** (Boolean)
 
 
 <a id="nestedblock--autoscaler_policies--unschedulable_pods"></a>
@@ -112,18 +112,18 @@ Optional:
 
 Optional:
 
-- `enabled` (Boolean)
-- `headroom` (Block List, Max: 1) (see [below for nested schema](#nestedblock--autoscaler_policies--unschedulable_pods--headroom))
-- `node_constraints` (Block List, Max: 1) (see [below for nested schema](#nestedblock--autoscaler_policies--unschedulable_pods--node_constraints))
+- **enabled** (Boolean)
+- **headroom** (Block List, Max: 1) (see [below for nested schema](#nestedblock--autoscaler_policies--unschedulable_pods--headroom))
+- **node_constraints** (Block List, Max: 1) (see [below for nested schema](#nestedblock--autoscaler_policies--unschedulable_pods--node_constraints))
 
 <a id="nestedblock--autoscaler_policies--unschedulable_pods--headroom"></a>
 ### Nested Schema for `autoscaler_policies.unschedulable_pods.headroom`
 
 Optional:
 
-- `cpu_percentage` (Number)
-- `enabled` (Boolean)
-- `memory_percentage` (Number)
+- **cpu_percentage** (Number)
+- **enabled** (Boolean)
+- **memory_percentage** (Number)
 
 
 <a id="nestedblock--autoscaler_policies--unschedulable_pods--node_constraints"></a>
@@ -131,11 +131,11 @@ Optional:
 
 Optional:
 
-- `enabled` (Boolean)
-- `max_node_cpu_cores` (Number)
-- `max_node_ram_gib` (Number)
-- `min_node_cpu_cores` (Number)
-- `min_node_ram_gib` (Number)
+- **enabled** (Boolean)
+- **max_node_cpu_cores** (Number)
+- **max_node_ram_gib** (Number)
+- **min_node_cpu_cores** (Number)
+- **min_node_ram_gib** (Number)
 
 
 
@@ -145,9 +145,9 @@ Optional:
 
 Optional:
 
-- `create` (String)
-- `delete` (String)
-- `update` (String)
+- **create** (String)
+- **delete** (String)
+- **update** (String)
 
 
 <a id="nestedatt--kubeconfig"></a>
@@ -155,10 +155,10 @@ Optional:
 
 Read-Only:
 
-- `client_certificate` (String)
-- `client_key` (String)
-- `cluster_ca_certificate` (String)
-- `host` (String)
-- `raw_config` (String)
+- **client_certificate** (String)
+- **client_key** (String)
+- **cluster_ca_certificate** (String)
+- **host** (String)
+- **raw_config** (String)
 
 

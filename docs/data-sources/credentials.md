@@ -17,11 +17,11 @@ description: |-
 
 ### Optional
 
-- `name` (String)
+- **id** (String) The ID of this resource.
+- **name** (String)
 
 ### Read-Only
 
-- `cloud` (String)
-- `id` (String) The ID of this resource.
+- **cloud** (String)
 
 

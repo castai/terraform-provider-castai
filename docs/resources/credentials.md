@@ -17,27 +17,27 @@ description: |-
 
 ### Required
 
-- `name` (String)
+- **name** (String)
 
 ### Optional
 
-- `aws` (Block List, Max: 1) (see [below for nested schema](#nestedblock--aws))
-- `azure` (Block List, Max: 1) (see [below for nested schema](#nestedblock--azure))
-- `do` (Block List, Max: 1) (see [below for nested schema](#nestedblock--do))
-- `gcp` (Block List, Max: 1) (see [below for nested schema](#nestedblock--gcp))
+- **aws** (Block List, Max: 1) (see [below for nested schema](#nestedblock--aws))
+- **azure** (Block List, Max: 1) (see [below for nested schema](#nestedblock--azure))
+- **do** (Block List, Max: 1) (see [below for nested schema](#nestedblock--do))
+- **gcp** (Block List, Max: 1) (see [below for nested schema](#nestedblock--gcp))
+- **id** (String) The ID of this resource.
 
 ### Read-Only
 
-- `cloud` (String)
-- `id` (String) The ID of this resource.
+- **cloud** (String)
 
 <a id="nestedblock--aws"></a>
 ### Nested Schema for `aws`
 
 Required:
 
-- `access_key_id` (String, Sensitive)
-- `secret_access_key` (String, Sensitive)
+- **access_key_id** (String, Sensitive)
+- **secret_access_key** (String, Sensitive)
 
 
 <a id="nestedblock--azure"></a>
@@ -45,7 +45,7 @@ Required:
 
 Required:
 
-- `service_principal_json` (String, Sensitive)
+- **service_principal_json** (String, Sensitive)
 
 
 <a id="nestedblock--do"></a>
@@ -53,7 +53,7 @@ Required:
 
 Required:
 
-- `token` (String, Sensitive)
+- **token** (String, Sensitive)
 
 
 <a id="nestedblock--gcp"></a>
@@ -61,6 +61,6 @@ Required:
 
 Required:
 
-- `service_account_json` (String, Sensitive)
+- **service_account_json** (String, Sensitive)
 
 

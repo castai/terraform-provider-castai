@@ -17,11 +17,14 @@ description: |-
 
 ### Required
 
-- `cluster_id` (String)
+- **cluster_id** (String)
+
+### Optional
+
+- **id** (String) The ID of this resource.
 
 ### Read-Only
 
-- `arn` (String)
-- `id` (String) The ID of this resource.
+- **arn** (String)
 
 
