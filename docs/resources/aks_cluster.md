@@ -17,31 +17,31 @@ AKS cluster resource allows connecting an existing EKS cluster to CAST AI.
 
 ### Required
 
-- **client_id** (String) Azure AD application ID that is created and used by CAST AI.
-- **client_secret** (String, Sensitive) Azure AD application password that will be used by CAST AI.
-- **name** (String) AKS cluster name.
-- **node_resource_group** (String) Azure resource group in which nodes are and will be created.
-- **region** (String) AKS cluster region.
-- **subscription_id** (String) ID of the Azure subscription.
-- **tenant_id** (String) Azure AD tenant ID from the used subscription.
+- `client_id` (String) Azure AD application ID that is created and used by CAST AI.
+- `client_secret` (String, Sensitive) Azure AD application password that will be used by CAST AI.
+- `name` (String) AKS cluster name.
+- `node_resource_group` (String) Azure resource group in which nodes are and will be created.
+- `region` (String) AKS cluster region.
+- `subscription_id` (String) ID of the Azure subscription.
+- `tenant_id` (String) Azure AD tenant ID from the used subscription.
 
 ### Optional
 
-- **delete_nodes_on_disconnect** (Boolean) Should CAST AI remove nodes managed by CAST.AI on disconnect.
-- **id** (String) The ID of this resource.
-- **timeouts** (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
+- `delete_nodes_on_disconnect` (Boolean) Should CAST AI remove nodes managed by CAST.AI on disconnect.
+- `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only
 
-- **cluster_token** (String, Sensitive) CAST AI cluster token.
+- `cluster_token` (String, Sensitive) CAST AI cluster token.
+- `id` (String) The ID of this resource.
 
 <a id="nestedblock--timeouts"></a>
 ### Nested Schema for `timeouts`
 
 Optional:
 
-- **create** (String)
-- **delete** (String)
-- **update** (String)
+- `create` (String)
+- `delete` (String)
+- `update` (String)
 
 

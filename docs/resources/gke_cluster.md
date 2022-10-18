@@ -17,30 +17,30 @@ GKE cluster resource allows connecting an existing GEK cluster to CAST AI.
 
 ### Required
 
-- **location** (String) GCP cluster zone in case of zonal or region in case of regional cluster
-- **name** (String) GKE cluster name
-- **project_id** (String) GCP project id
+- `location` (String) GCP cluster zone in case of zonal or region in case of regional cluster
+- `name` (String) GKE cluster name
+- `project_id` (String) GCP project id
 
 ### Optional
 
-- **credentials_json** (String, Sensitive) GCP credentials.json from ServiceAccount with credentials for CAST AI
-- **delete_nodes_on_disconnect** (Boolean) Should CAST AI remove nodes managed by CAST.AI on disconnect
-- **id** (String) The ID of this resource.
-- **ssh_public_key** (String) SSHPublicKey for nodes
-- **timeouts** (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
+- `credentials_json` (String, Sensitive) GCP credentials.json from ServiceAccount with credentials for CAST AI
+- `delete_nodes_on_disconnect` (Boolean) Should CAST AI remove nodes managed by CAST.AI on disconnect
+- `ssh_public_key` (String, Deprecated) SSHPublicKey for nodes
+- `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only
 
-- **cluster_token** (String, Sensitive) CAST.AI agent cluster token
-- **credentials_id** (String) CAST AI credentials id for cluster
+- `cluster_token` (String, Sensitive) CAST.AI agent cluster token
+- `credentials_id` (String) CAST AI credentials id for cluster
+- `id` (String) The ID of this resource.
 
 <a id="nestedblock--timeouts"></a>
 ### Nested Schema for `timeouts`
 
 Optional:
 
-- **create** (String)
-- **delete** (String)
-- **update** (String)
+- `create` (String)
+- `delete` (String)
+- `update` (String)
 
 
