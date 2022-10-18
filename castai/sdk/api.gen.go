@@ -2159,10 +2159,10 @@ type CastaiNotificationsV1beta1WebhookConfig_AuthKeys struct {
 
 // Types of cloud service providers CAST AI supports.
 //
-//  - invalid: Invalid.
-//  - aws: Amazon web services.
-//  - gcp: Google cloud provider.
-//  - azure: Microsoft Azure.
+//   - invalid: Invalid.
+//   - aws: Amazon web services.
+//   - gcp: Google cloud provider.
+//   - azure: Microsoft Azure.
 type CastaiV1Cloud string
 
 // ClusteractionsV1AckClusterActionResponse defines model for clusteractions.v1.AckClusterActionResponse.
@@ -2202,6 +2202,7 @@ type ClusteractionsV1ClusterActionAck struct {
 
 // ClusteractionsV1ClusterActionApproveCSR defines model for clusteractions.v1.ClusterActionApproveCSR.
 type ClusteractionsV1ClusterActionApproveCSR struct {
+	NodeId   *string `json:"nodeId,omitempty"`
 	NodeName *string `json:"nodeName,omitempty"`
 }
 
@@ -2235,11 +2236,13 @@ type ClusteractionsV1ClusterActionChartUpsert_ValuesOverrides struct {
 
 // ClusteractionsV1ClusterActionCheckNodeDeleted defines model for clusteractions.v1.ClusterActionCheckNodeDeleted.
 type ClusteractionsV1ClusterActionCheckNodeDeleted struct {
+	NodeId   *string `json:"nodeId,omitempty"`
 	NodeName *string `json:"nodeName,omitempty"`
 }
 
 // ClusteractionsV1ClusterActionCheckNodeStatus defines model for clusteractions.v1.ClusterActionCheckNodeStatus.
 type ClusteractionsV1ClusterActionCheckNodeStatus struct {
+	NodeId   *string `json:"nodeId,omitempty"`
 	NodeName *string `json:"nodeName,omitempty"`
 
 	// - NodeStatus_UNSPECIFIED: Not provided status
@@ -2264,6 +2267,7 @@ type ClusteractionsV1ClusterActionCreateEvent struct {
 
 // ClusteractionsV1ClusterActionDeleteNode defines model for clusteractions.v1.ClusterActionDeleteNode.
 type ClusteractionsV1ClusterActionDeleteNode struct {
+	NodeId   *string `json:"nodeId,omitempty"`
 	NodeName *string `json:"nodeName,omitempty"`
 }
 
@@ -2274,6 +2278,7 @@ type ClusteractionsV1ClusterActionDisconnectCluster = map[string]interface{}
 type ClusteractionsV1ClusterActionDrainNode struct {
 	DrainTimeoutSeconds *int32  `json:"drainTimeoutSeconds,omitempty"`
 	Force               *bool   `json:"force,omitempty"`
+	NodeId              *string `json:"nodeId,omitempty"`
 	NodeName            *string `json:"nodeName,omitempty"`
 }
 
@@ -2281,6 +2286,7 @@ type ClusteractionsV1ClusterActionDrainNode struct {
 type ClusteractionsV1ClusterActionPatchNode struct {
 	Annotations *ClusteractionsV1ClusterActionPatchNode_Annotations `json:"annotations,omitempty"`
 	Labels      *ClusteractionsV1ClusterActionPatchNode_Labels      `json:"labels,omitempty"`
+	NodeId      *string                                             `json:"nodeId,omitempty"`
 	NodeName    *string                                             `json:"nodeName,omitempty"`
 	Taints      *[]ClusteractionsV1NodeTaint                        `json:"taints,omitempty"`
 }
@@ -2315,8 +2321,8 @@ type ClusteractionsV1LogEvent_Fields struct {
 }
 
 // - NodeStatus_UNSPECIFIED: Not provided status
-//  - NodeStatus_READY: Node joined cluster
-//  - NodeStatus_DELETED: Node not exist in cluster
+//   - NodeStatus_READY: Node joined cluster
+//   - NodeStatus_DELETED: Node not exist in cluster
 type ClusteractionsV1NodeStatus string
 
 // ClusteractionsV1NodeTaint defines model for clusteractions.v1.NodeTaint.
@@ -2683,8 +2689,10 @@ type ExternalclusterV1Cluster struct {
 	CredentialsId *string `json:"credentialsId,omitempty"`
 
 	// EKSClusterParams defines EKS-specific arguments.
-	Eks              *ExternalclusterV1EKSClusterParams `json:"eks,omitempty"`
-	FirstOperationAt *time.Time                         `json:"firstOperationAt,omitempty"`
+	Eks *ExternalclusterV1EKSClusterParams `json:"eks,omitempty"`
+
+	// Timestamp when the first operation was performed for a given cluster, which marks when cluster optimisation started by CAST AI.
+	FirstOperationAt *time.Time `json:"firstOperationAt,omitempty"`
 
 	// GKEClusterParams defines GKE-specific arguments.
 	Gke *ExternalclusterV1GKEClusterParams `json:"gke,omitempty"`
@@ -2714,6 +2722,9 @@ type ExternalclusterV1Cluster struct {
 
 	// Shows last reconcile error if any.
 	ReconcileError *string `json:"reconcileError"`
+
+	// Timestamp when the last reconcile was performed.
+	ReconciledAt *time.Time `json:"reconciledAt"`
 
 	// Region represents cluster region.
 	Region *ExternalclusterV1Region `json:"region,omitempty"`
@@ -3707,15 +3718,18 @@ type NodetemplatesV1NodeTemplateListItemStats struct {
 
 // NodetemplatesV1TemplateConstraints defines model for nodetemplates.v1.TemplateConstraints.
 type NodetemplatesV1TemplateConstraints struct {
-	ComputeOptimized *bool                                                        `json:"computeOptimized"`
-	Gpu              *NodetemplatesV1TemplateConstraintsGPUConstraints            `json:"gpu,omitempty"`
-	InstanceFamilies *NodetemplatesV1TemplateConstraintsInstanceFamilyConstraints `json:"instanceFamilies,omitempty"`
-	MaxCpu           *int32                                                       `json:"maxCpu"`
-	MaxMemory        *int32                                                       `json:"maxMemory"`
-	MinCpu           *int32                                                       `json:"minCpu"`
-	MinMemory        *int32                                                       `json:"minMemory"`
-	Spot             *bool                                                        `json:"spot"`
-	StorageOptimized *bool                                                        `json:"storageOptimized"`
+	ComputeOptimized *bool `json:"computeOptimized"`
+
+	// Fallback restore rate in seconds: defines how much time should pass before spot fallback should be attempted to be restored to real spot.
+	FallbackRestoreRateSeconds *int32                                                       `json:"fallbackRestoreRateSeconds"`
+	Gpu                        *NodetemplatesV1TemplateConstraintsGPUConstraints            `json:"gpu,omitempty"`
+	InstanceFamilies           *NodetemplatesV1TemplateConstraintsInstanceFamilyConstraints `json:"instanceFamilies,omitempty"`
+	MaxCpu                     *int32                                                       `json:"maxCpu"`
+	MaxMemory                  *int32                                                       `json:"maxMemory"`
+	MinCpu                     *int32                                                       `json:"minCpu"`
+	MinMemory                  *int32                                                       `json:"minMemory"`
+	Spot                       *bool                                                        `json:"spot"`
+	StorageOptimized           *bool                                                        `json:"storageOptimized"`
 
 	// Spot instance fallback constraint - when true, on-demand instances will be created, when spots are unavailable.
 	UseSpotFallbacks *bool `json:"useSpotFallbacks"`
@@ -3846,6 +3860,9 @@ type PoliciesV1NodeConstraints struct {
 type PoliciesV1NodeDownscaler struct {
 	// Defines whether Node Downscaler should opt in for removing empty worker nodes when possible.
 	EmptyNodes *PoliciesV1NodeDownscalerEmptyNodes `json:"emptyNodes,omitempty"`
+
+	// Enable/disable node downscaler policy.
+	Enabled *bool `json:"enabled"`
 
 	// Defines the CAST AI Evictor component settings. Evictor watches the pods running in your cluster and looks for
 	// ways to compact them into fewer nodes, making nodes empty, which will be removed by the the empty worker nodes
