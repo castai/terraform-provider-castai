@@ -32,7 +32,9 @@ module "eks" {
       additional_security_group_ids = [
         aws_security_group.worker_group_mgmt_one.id, aws_security_group.worker_group_mgmt_two.id
       ]
-      eni_delete = "true"
+      eni_delete = true
+      # TODO: should be true ONLY for public subnet
+      public_ip  = true
     },
   ]
 
