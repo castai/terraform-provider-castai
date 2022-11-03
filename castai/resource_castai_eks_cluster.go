@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"strings"
 	"time"
 
 	"github.com/cenkalti/backoff/v4"
@@ -185,17 +184,6 @@ func updateClusterSettings(ctx context.Context, data *schema.ResourceData, clien
 	}
 
 	return nil
-}
-
-// Deprecated. Remove with agent_token.
-func retrieveAgentToken(ctx context.Context, client *sdk.ClientWithResponses) (string, error) {
-	response, err := client.GetAgentInstallScriptWithResponse(ctx, &sdk.GetAgentInstallScriptParams{})
-	if err != nil {
-		return "", fmt.Errorf("retrieving agent install script: %w", err)
-	}
-
-	// at the moment, agent registration token only appears in `curl agent manifests` snippet and is extracted from there.
-	return strings.Split(strings.TrimPrefix(string(response.Body), `curl -H "Authorization: Token `), `"`)[0], nil
 }
 
 func createClusterToken(ctx context.Context, client *sdk.ClientWithResponses, clusterID string) (string, error) {
