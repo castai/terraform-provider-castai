@@ -7,7 +7,7 @@ module "eks" {
   cluster_version = "1.22"
 
   vpc_id  = module.vpc.vpc_id
-  subnets = [module.vpc.private_subnets[0], module.vpc.private_subnets[1]]
+  subnets = module.vpc.private_subnets
 
   cluster_endpoint_private_access                = true
   cluster_create_endpoint_private_access_sg_rule = true
