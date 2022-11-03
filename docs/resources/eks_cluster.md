@@ -23,24 +23,14 @@ EKS cluster resource allows connecting an existing EKS cluster to CAST AI.
 
 ### Optional
 
-- `access_key_id` (String, Sensitive, Deprecated) AWS access key ID of the CAST AI IAM account
 - `assume_role_arn` (String) AWS ARN for assume role that should be used instead of IAM account
 - `delete_nodes_on_disconnect` (Boolean) Should CAST AI remove nodes managed by CAST AI on disconnect
-- `dns_cluster_ip` (String, Deprecated) Overrides the IP address to use for DNS queries within the cluster. Defaults to 10.100.0.10 or 172.20.0.10 based on the IP address of the primary interface
-- `instance_profile_arn` (String, Deprecated) AWS ARN of the instance profile to be used by CAST AI
-- `override_security_groups` (List of String, Deprecated) Optional custom security groups for the cluster. If not set security groups from the EKS cluster configuration are used.
-- `secret_access_key` (String, Sensitive, Deprecated) AWS secret access key of the CAST AI IAM account
-- `ssh_public_key` (String, Deprecated) Accepted values are base64 encoded SSH public key or AWS key pair ID.
-- `subnets` (List of String, Deprecated) Custom subnets for the cluster. If not set subnets from the EKS cluster configuration are used.
-- `tags` (Map of String, Deprecated) Tags which should be added to CAST AI nodes
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only
 
-- `agent_token` (String, Sensitive, Deprecated)
 - `credentials_id` (String) CAST AI internal credentials ID
 - `id` (String) The ID of this resource.
-- `security_groups` (List of String, Deprecated) IDs of security groups that are used by CAST AI
 
 <a id="nestedblock--timeouts"></a>
 ### Nested Schema for `timeouts`
