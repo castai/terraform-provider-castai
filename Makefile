@@ -18,7 +18,8 @@ generate-sdk:
 
 # The following command also rewrites existing documentation
 generate-docs:
-	tfplugindocs
+	go install github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs@v0.13.0
+	tfplugindocs generate --rendered-provider-name "CAST AI"
 
 build: init-examples
 build: generate-sdk
