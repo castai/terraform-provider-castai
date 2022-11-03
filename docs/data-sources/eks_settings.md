@@ -17,20 +17,17 @@ description: |-
 
 ### Required
 
-- **account_id** (String)
-- **cluster** (String)
-- **region** (String)
-- **vpc** (String)
-
-### Optional
-
-- **id** (String) The ID of this resource.
+- `account_id` (String)
+- `cluster` (String)
+- `region` (String)
+- `vpc` (String)
 
 ### Read-Only
 
-- **iam_managed_policies** (Set of String)
-- **iam_policy_json** (String)
-- **iam_user_policy_json** (String)
-- **instance_profile_policies** (Set of String)
+- `iam_managed_policies` (Set of String)
+- `iam_policy_json` (String)
+- `iam_user_policy_json` (String)
+- `id` (String) The ID of this resource.
+- `instance_profile_policies` (Set of String)
 
 
