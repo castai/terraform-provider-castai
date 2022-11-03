@@ -17,12 +17,12 @@ description: |-
 
 ### Required
 
-- **account_id** (String)
-- **cluster_name** (String)
-- **region** (String)
+- `account_id` (String)
+- `cluster_name` (String)
+- `region` (String)
 
-### Optional
+### Read-Only
 
-- **id** (String) The ID of this resource.
+- `id` (String) The ID of this resource.
 
 

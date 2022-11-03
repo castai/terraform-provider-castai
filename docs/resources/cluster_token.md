@@ -17,14 +17,11 @@ description: |-
 
 ### Required
 
-- **cluster_id** (String) CAST AI cluster id
-
-### Optional
-
-- **id** (String) The ID of this resource.
+- `cluster_id` (String) CAST AI cluster id
 
 ### Read-Only
 
-- **cluster_token** (String, Sensitive) computed value to store cluster token
+- `cluster_token` (String, Sensitive) computed value to store cluster token
+- `id` (String) The ID of this resource.
 
 

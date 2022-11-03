@@ -18,7 +18,7 @@ generate-sdk:
 
 # The following command also rewrites existing documentation
 generate-docs:
-	go generate main.go
+	tfplugindocs
 
 build: init-examples
 build: generate-sdk
