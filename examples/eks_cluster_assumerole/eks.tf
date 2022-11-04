@@ -4,10 +4,10 @@ module "eks" {
   version = "17.24.0"
 
   cluster_name    = var.cluster_name
-  cluster_version = "1.21"
+  cluster_version = "1.23"
 
   vpc_id  = module.vpc.vpc_id
-  subnets = [module.vpc.private_subnets[0], module.vpc.public_subnets[1]]
+  subnets = module.vpc.private_subnets
 
   cluster_endpoint_private_access                = true
   cluster_create_endpoint_private_access_sg_rule = true
@@ -32,7 +32,7 @@ module "eks" {
       additional_security_group_ids = [
         aws_security_group.worker_group_mgmt_one.id, aws_security_group.worker_group_mgmt_two.id
       ]
-      eni_delete = "true"
+      eni_delete = true
     },
   ]
 

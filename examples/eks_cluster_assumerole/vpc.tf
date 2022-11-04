@@ -6,14 +6,17 @@ module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
   version = "3.11.0"
 
-  name            = var.cluster_name
-  cidr            = "10.0.0.0/16"
-  azs             = data.aws_availability_zones.available.names
-  private_subnets = ["10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24"]
-  public_subnets  = ["10.0.4.0/24", "10.0.5.0/24", "10.0.6.0/24"]
-
-  single_nat_gateway   = true
+  name                 = var.cluster_name
+  cidr                 = "10.0.0.0/16"
+  azs                  = data.aws_availability_zones.available.names
   enable_dns_hostnames = true
+  private_subnets      = ["10.0.1.0/24", "10.0.2.0/24", "10.0.3.0/24"]
+  public_subnets       = ["10.0.4.0/24", "10.0.5.0/24", "10.0.6.0/24"]
+
+  # Using a single NAT gateway for all subnets
+  enable_nat_gateway     = true
+  single_nat_gateway     = true
+  one_nat_gateway_per_az = false
 
   tags = {
     "kubernetes.io/cluster/${var.cluster_name}" = "shared"
