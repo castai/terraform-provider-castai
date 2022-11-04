@@ -12,6 +12,7 @@ provider "helm" {
 
 provider "castai" {
   api_token = var.castai_api_token
+  api_url   = var.castai_api_url
 }
 
 provider "kubernetes" {
@@ -52,11 +53,12 @@ module "castai-eks-role-iam" {
 module "castai-eks-cluster" {
   source = "castai/eks-cluster/castai"
 
+  api_url            = var.castai_api_url
   aws_account_id     = data.aws_caller_identity.current.account_id
   aws_cluster_region = var.cluster_region
   aws_cluster_name   = module.eks.cluster_id
 
-  aws_assume_role_arn      = module.castai-eks-role-iam.role_arn
+  aws_assume_role_arn        = module.castai-eks-role-iam.role_arn
   delete_nodes_on_disconnect = var.delete_nodes_on_disconnect
 
   default_node_configuration = module.castai-eks-cluster.castai_node_configurations["default"]
