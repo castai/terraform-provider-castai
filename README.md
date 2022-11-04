@@ -60,9 +60,9 @@ in [terraform 0.13 upgrade guide](https://www.terraform.io/upgrade-guides/0-13.h
 Migrating to 1.x.x
 ------------
 Version 1.x.x no longer supports setting cluster configuration directly and `castai_node_configuration` resource should
-be used.
+be used. This applies to all `castai_*_cluster` resources.
 
-Additionally, `access_key_id` and `secret_access_key` was removed in favor of `assume_role_arn`.
+Additionally, in case of `castai_eks_cluster` `access_key_id` and `secret_access_key` was removed in favor of `assume_role_arn`.
 
 Having old configuration:
 
