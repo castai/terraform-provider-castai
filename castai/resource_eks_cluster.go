@@ -21,7 +21,7 @@ const (
 	FieldEKSClusterAssumeRoleArn = "assume_role_arn"
 )
 
-func resourceCastaiEKSCluster() *schema.Resource {
+func resourceEKSCluster() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceCastaiEKSClusterCreate,
 		ReadContext:   resourceCastaiEKSClusterRead,

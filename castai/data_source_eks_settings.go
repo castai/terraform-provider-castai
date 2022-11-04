@@ -22,7 +22,7 @@ const (
 	EKSSettingsFieldInstanceProfilePolicies = "instance_profile_policies"
 )
 
-func dataSourceCastaiEKSSettings() *schema.Resource {
+func dataSourceEKSSettings() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: dataSourceCastaiEKSSettingsRead,
 

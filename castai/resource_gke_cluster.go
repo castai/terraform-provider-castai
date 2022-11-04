@@ -23,7 +23,7 @@ const (
 	FieldGKEClusterCredentials   = "credentials_json"
 )
 
-func resourceCastaiGKECluster() *schema.Resource {
+func resourceGKECluster() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceCastaiGKEClusterCreate,
 		ReadContext:   resourceCastaiGKEClusterRead,

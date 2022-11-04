@@ -2,6 +2,7 @@ package castai
 
 import (
 	"context"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -10,12 +11,12 @@ import (
 )
 
 const (
-	EKSClusterIDFieldAccountId = "account_id"
-	EKSClusterIDFieldRegion = "region"
+	EKSClusterIDFieldAccountId   = "account_id"
+	EKSClusterIDFieldRegion      = "region"
 	EKSClusterIDFieldClusterName = "cluster_name"
 )
 
-func dataSourceCastaiEKSClusterID() *schema.Resource {
+func dataSourceEKSClusterID() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: dataSourceCastaiEKSClusterIDRead,
 		Schema: map[string]*schema.Schema{

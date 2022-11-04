@@ -24,7 +24,7 @@ const (
 	FieldAutoscalerPolicies     = "autoscaler_policies"
 )
 
-func resourceCastaiAutoscaler() *schema.Resource {
+func resourceAutoscaler() *schema.Resource {
 	return &schema.Resource{
 		ReadContext:   resourceCastaiAutoscalerRead,
 		CreateContext: resourceCastaiAutoscalerCreate,
