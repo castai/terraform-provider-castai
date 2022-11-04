@@ -23,7 +23,7 @@ Using the provider
 
 To install this provider, put the following code into your Terraform configuration. Then, run `terraform init`.
 
-```
+```terraform
 terraform {
   required_providers {
     castai = {
