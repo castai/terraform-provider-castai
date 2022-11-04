@@ -123,6 +123,22 @@ type ClientInterface interface {
 
 	PlanClusterPrice(ctx context.Context, body PlanClusterPriceJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// CostReportAPIListAllocationGroups request
+	CostReportAPIListAllocationGroups(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// CostReportAPICreateAllocationGroup request with any body
+	CostReportAPICreateAllocationGroupWithBody(ctx context.Context, clusterId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	CostReportAPICreateAllocationGroup(ctx context.Context, clusterId string, body CostReportAPICreateAllocationGroupJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// CostReportAPIDeleteAllocationGroup request
+	CostReportAPIDeleteAllocationGroup(ctx context.Context, clusterId string, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// CostReportAPIUpdateAllocationGroup request with any body
+	CostReportAPIUpdateAllocationGroupWithBody(ctx context.Context, clusterId string, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	CostReportAPIUpdateAllocationGroup(ctx context.Context, clusterId string, id string, body CostReportAPIUpdateAllocationGroupJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// CostReportAPIGetClusterCostHistory2 request
 	CostReportAPIGetClusterCostHistory2(ctx context.Context, clusterId string, params *CostReportAPIGetClusterCostHistory2Params, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -617,6 +633,12 @@ type ClientInterface interface {
 	// InsightsAPIGetVulnerabilitiesResources request
 	InsightsAPIGetVulnerabilitiesResources(ctx context.Context, objectId string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// InsightsAPIGetPackageVulnerabilities request
+	InsightsAPIGetPackageVulnerabilities(ctx context.Context, objectId string, params *InsightsAPIGetPackageVulnerabilitiesParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// InsightsAPIGetResourceVulnerablePackages request
+	InsightsAPIGetResourceVulnerablePackages(ctx context.Context, objectId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// InsightsAPIScheduleVulnerabilitiesScan request with any body
 	InsightsAPIScheduleVulnerabilitiesScanWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -639,7 +661,10 @@ type ClientInterface interface {
 	InsightsAPIPostAgentTelemetry(ctx context.Context, clusterId string, body InsightsAPIPostAgentTelemetryJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// InsightsAPIGetAgentInstallScript request
-	InsightsAPIGetAgentInstallScript(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+	InsightsAPIGetAgentInstallScript(ctx context.Context, clusterId string, params *InsightsAPIGetAgentInstallScriptParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// InsightsAPIGetAgentCloudScript request
+	InsightsAPIGetAgentCloudScript(ctx context.Context, provider string, reqEditors ...RequestEditorFn) (*http.Response, error)
 }
 
 func (c *Client) ListAddons(ctx context.Context, params *ListAddonsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
@@ -776,6 +801,78 @@ func (c *Client) PlanClusterPriceWithBody(ctx context.Context, contentType strin
 
 func (c *Client) PlanClusterPrice(ctx context.Context, body PlanClusterPriceJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewPlanClusterPriceRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) CostReportAPIListAllocationGroups(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCostReportAPIListAllocationGroupsRequest(c.Server, clusterId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) CostReportAPICreateAllocationGroupWithBody(ctx context.Context, clusterId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCostReportAPICreateAllocationGroupRequestWithBody(c.Server, clusterId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) CostReportAPICreateAllocationGroup(ctx context.Context, clusterId string, body CostReportAPICreateAllocationGroupJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCostReportAPICreateAllocationGroupRequest(c.Server, clusterId, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) CostReportAPIDeleteAllocationGroup(ctx context.Context, clusterId string, id string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCostReportAPIDeleteAllocationGroupRequest(c.Server, clusterId, id)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) CostReportAPIUpdateAllocationGroupWithBody(ctx context.Context, clusterId string, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCostReportAPIUpdateAllocationGroupRequestWithBody(c.Server, clusterId, id, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) CostReportAPIUpdateAllocationGroup(ctx context.Context, clusterId string, id string, body CostReportAPIUpdateAllocationGroupJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCostReportAPIUpdateAllocationGroupRequest(c.Server, clusterId, id, body)
 	if err != nil {
 		return nil, err
 	}
@@ -2934,6 +3031,30 @@ func (c *Client) InsightsAPIGetVulnerabilitiesResources(ctx context.Context, obj
 	return c.Client.Do(req)
 }
 
+func (c *Client) InsightsAPIGetPackageVulnerabilities(ctx context.Context, objectId string, params *InsightsAPIGetPackageVulnerabilitiesParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewInsightsAPIGetPackageVulnerabilitiesRequest(c.Server, objectId, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) InsightsAPIGetResourceVulnerablePackages(ctx context.Context, objectId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewInsightsAPIGetResourceVulnerablePackagesRequest(c.Server, objectId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
 func (c *Client) InsightsAPIScheduleVulnerabilitiesScanWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewInsightsAPIScheduleVulnerabilitiesScanRequestWithBody(c.Server, contentType, body)
 	if err != nil {
@@ -3030,8 +3151,20 @@ func (c *Client) InsightsAPIPostAgentTelemetry(ctx context.Context, clusterId st
 	return c.Client.Do(req)
 }
 
-func (c *Client) InsightsAPIGetAgentInstallScript(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewInsightsAPIGetAgentInstallScriptRequest(c.Server, clusterId)
+func (c *Client) InsightsAPIGetAgentInstallScript(ctx context.Context, clusterId string, params *InsightsAPIGetAgentInstallScriptParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewInsightsAPIGetAgentInstallScriptRequest(c.Server, clusterId, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) InsightsAPIGetAgentCloudScript(ctx context.Context, provider string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewInsightsAPIGetAgentCloudScriptRequest(c.Server, provider)
 	if err != nil {
 		return nil, err
 	}
@@ -3819,6 +3952,182 @@ func NewPlanClusterPriceRequestWithBody(server string, contentType string, body 
 	}
 
 	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewCostReportAPIListAllocationGroupsRequest generates requests for CostReportAPIListAllocationGroups
+func NewCostReportAPIListAllocationGroupsRequest(server string, clusterId string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "clusterId", runtime.ParamLocationPath, clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/cost-reports/clusters/%s/allocation-groups", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewCostReportAPICreateAllocationGroupRequest calls the generic CostReportAPICreateAllocationGroup builder with application/json body
+func NewCostReportAPICreateAllocationGroupRequest(server string, clusterId string, body CostReportAPICreateAllocationGroupJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewCostReportAPICreateAllocationGroupRequestWithBody(server, clusterId, "application/json", bodyReader)
+}
+
+// NewCostReportAPICreateAllocationGroupRequestWithBody generates requests for CostReportAPICreateAllocationGroup with any type of body
+func NewCostReportAPICreateAllocationGroupRequestWithBody(server string, clusterId string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "clusterId", runtime.ParamLocationPath, clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/cost-reports/clusters/%s/allocation-groups", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewCostReportAPIDeleteAllocationGroupRequest generates requests for CostReportAPIDeleteAllocationGroup
+func NewCostReportAPIDeleteAllocationGroupRequest(server string, clusterId string, id string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "clusterId", runtime.ParamLocationPath, clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/cost-reports/clusters/%s/allocation-groups/%s", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("DELETE", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewCostReportAPIUpdateAllocationGroupRequest calls the generic CostReportAPIUpdateAllocationGroup builder with application/json body
+func NewCostReportAPIUpdateAllocationGroupRequest(server string, clusterId string, id string, body CostReportAPIUpdateAllocationGroupJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewCostReportAPIUpdateAllocationGroupRequestWithBody(server, clusterId, id, "application/json", bodyReader)
+}
+
+// NewCostReportAPIUpdateAllocationGroupRequestWithBody generates requests for CostReportAPIUpdateAllocationGroup with any type of body
+func NewCostReportAPIUpdateAllocationGroupRequestWithBody(server string, clusterId string, id string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "clusterId", runtime.ParamLocationPath, clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/cost-reports/clusters/%s/allocation-groups/%s", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("PUT", queryURL.String(), body)
 	if err != nil {
 		return nil, err
 	}
@@ -10420,6 +10729,110 @@ func NewInsightsAPIGetVulnerabilitiesResourcesRequest(server string, objectId st
 	return req, nil
 }
 
+// NewInsightsAPIGetPackageVulnerabilitiesRequest generates requests for InsightsAPIGetPackageVulnerabilities
+func NewInsightsAPIGetPackageVulnerabilitiesRequest(server string, objectId string, params *InsightsAPIGetPackageVulnerabilitiesParams) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "objectId", runtime.ParamLocationPath, objectId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/security/insights/vulnerabilities/resources/%s/package", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	queryValues := queryURL.Query()
+
+	if params.PackageName != nil {
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "packageName", runtime.ParamLocationQuery, *params.PackageName); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.Version != nil {
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "version", runtime.ParamLocationQuery, *params.Version); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	queryURL.RawQuery = queryValues.Encode()
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewInsightsAPIGetResourceVulnerablePackagesRequest generates requests for InsightsAPIGetResourceVulnerablePackages
+func NewInsightsAPIGetResourceVulnerablePackagesRequest(server string, objectId string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "objectId", runtime.ParamLocationPath, objectId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/security/insights/vulnerabilities/resources/%s/packages", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 // NewInsightsAPIScheduleVulnerabilitiesScanRequest calls the generic InsightsAPIScheduleVulnerabilitiesScan builder with application/json body
 func NewInsightsAPIScheduleVulnerabilitiesScanRequest(server string, body InsightsAPIScheduleVulnerabilitiesScanJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
@@ -10636,7 +11049,7 @@ func NewInsightsAPIPostAgentTelemetryRequestWithBody(server string, clusterId st
 }
 
 // NewInsightsAPIGetAgentInstallScriptRequest generates requests for InsightsAPIGetAgentInstallScript
-func NewInsightsAPIGetAgentInstallScriptRequest(server string, clusterId string) (*http.Request, error) {
+func NewInsightsAPIGetAgentInstallScriptRequest(server string, clusterId string, params *InsightsAPIGetAgentInstallScriptParams) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -10652,6 +11065,60 @@ func NewInsightsAPIGetAgentInstallScriptRequest(server string, clusterId string)
 	}
 
 	operationPath := fmt.Sprintf("/v1/security/%s/agent.sh", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	queryValues := queryURL.Query()
+
+	if params.EnableCloudscan != nil {
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "enableCloudscan", runtime.ParamLocationQuery, *params.EnableCloudscan); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	queryURL.RawQuery = queryValues.Encode()
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewInsightsAPIGetAgentCloudScriptRequest generates requests for InsightsAPIGetAgentCloudScript
+func NewInsightsAPIGetAgentCloudScriptRequest(server string, provider string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "provider", runtime.ParamLocationPath, provider)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/security/%s/agent-cloud.sh", pathParam0)
 	if operationPath[0] == '/' {
 		operationPath = "." + operationPath
 	}
@@ -10744,6 +11211,22 @@ type ClientWithResponsesInterface interface {
 	PlanClusterPriceWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*PlanClusterPriceResponse, error)
 
 	PlanClusterPriceWithResponse(ctx context.Context, body PlanClusterPriceJSONRequestBody) (*PlanClusterPriceResponse, error)
+
+	// CostReportAPIListAllocationGroups request
+	CostReportAPIListAllocationGroupsWithResponse(ctx context.Context, clusterId string) (*CostReportAPIListAllocationGroupsResponse, error)
+
+	// CostReportAPICreateAllocationGroup request  with any body
+	CostReportAPICreateAllocationGroupWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader) (*CostReportAPICreateAllocationGroupResponse, error)
+
+	CostReportAPICreateAllocationGroupWithResponse(ctx context.Context, clusterId string, body CostReportAPICreateAllocationGroupJSONRequestBody) (*CostReportAPICreateAllocationGroupResponse, error)
+
+	// CostReportAPIDeleteAllocationGroup request
+	CostReportAPIDeleteAllocationGroupWithResponse(ctx context.Context, clusterId string, id string) (*CostReportAPIDeleteAllocationGroupResponse, error)
+
+	// CostReportAPIUpdateAllocationGroup request  with any body
+	CostReportAPIUpdateAllocationGroupWithBodyWithResponse(ctx context.Context, clusterId string, id string, contentType string, body io.Reader) (*CostReportAPIUpdateAllocationGroupResponse, error)
+
+	CostReportAPIUpdateAllocationGroupWithResponse(ctx context.Context, clusterId string, id string, body CostReportAPIUpdateAllocationGroupJSONRequestBody) (*CostReportAPIUpdateAllocationGroupResponse, error)
 
 	// CostReportAPIGetClusterCostHistory2 request
 	CostReportAPIGetClusterCostHistory2WithResponse(ctx context.Context, clusterId string, params *CostReportAPIGetClusterCostHistory2Params) (*CostReportAPIGetClusterCostHistory2Response, error)
@@ -11239,6 +11722,12 @@ type ClientWithResponsesInterface interface {
 	// InsightsAPIGetVulnerabilitiesResources request
 	InsightsAPIGetVulnerabilitiesResourcesWithResponse(ctx context.Context, objectId string) (*InsightsAPIGetVulnerabilitiesResourcesResponse, error)
 
+	// InsightsAPIGetPackageVulnerabilities request
+	InsightsAPIGetPackageVulnerabilitiesWithResponse(ctx context.Context, objectId string, params *InsightsAPIGetPackageVulnerabilitiesParams) (*InsightsAPIGetPackageVulnerabilitiesResponse, error)
+
+	// InsightsAPIGetResourceVulnerablePackages request
+	InsightsAPIGetResourceVulnerablePackagesWithResponse(ctx context.Context, objectId string) (*InsightsAPIGetResourceVulnerablePackagesResponse, error)
+
 	// InsightsAPIScheduleVulnerabilitiesScan request  with any body
 	InsightsAPIScheduleVulnerabilitiesScanWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*InsightsAPIScheduleVulnerabilitiesScanResponse, error)
 
@@ -11261,7 +11750,10 @@ type ClientWithResponsesInterface interface {
 	InsightsAPIPostAgentTelemetryWithResponse(ctx context.Context, clusterId string, body InsightsAPIPostAgentTelemetryJSONRequestBody) (*InsightsAPIPostAgentTelemetryResponse, error)
 
 	// InsightsAPIGetAgentInstallScript request
-	InsightsAPIGetAgentInstallScriptWithResponse(ctx context.Context, clusterId string) (*InsightsAPIGetAgentInstallScriptResponse, error)
+	InsightsAPIGetAgentInstallScriptWithResponse(ctx context.Context, clusterId string, params *InsightsAPIGetAgentInstallScriptParams) (*InsightsAPIGetAgentInstallScriptResponse, error)
+
+	// InsightsAPIGetAgentCloudScript request
+	InsightsAPIGetAgentCloudScriptWithResponse(ctx context.Context, provider string) (*InsightsAPIGetAgentCloudScriptResponse, error)
 }
 
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
@@ -11537,6 +12029,126 @@ func (r PlanClusterPriceResponse) StatusCode() int {
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
 func (r PlanClusterPriceResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type CostReportAPIListAllocationGroupsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *CostreportV1beta1ListAllocationGroupsResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r CostReportAPIListAllocationGroupsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r CostReportAPIListAllocationGroupsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r CostReportAPIListAllocationGroupsResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type CostReportAPICreateAllocationGroupResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *CostreportV1beta1AllocationGroup
+}
+
+// Status returns HTTPResponse.Status
+func (r CostReportAPICreateAllocationGroupResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r CostReportAPICreateAllocationGroupResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r CostReportAPICreateAllocationGroupResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type CostReportAPIDeleteAllocationGroupResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *CostreportV1beta1DeleteAllocationGroupResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r CostReportAPIDeleteAllocationGroupResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r CostReportAPIDeleteAllocationGroupResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r CostReportAPIDeleteAllocationGroupResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type CostReportAPIUpdateAllocationGroupResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *CostreportV1beta1AllocationGroup
+}
+
+// Status returns HTTPResponse.Status
+func (r CostReportAPIUpdateAllocationGroupResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r CostReportAPIUpdateAllocationGroupResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r CostReportAPIUpdateAllocationGroupResponse) GetBody() []byte {
 	return r.Body
 }
 
@@ -15619,6 +16231,66 @@ func (r InsightsAPIGetVulnerabilitiesResourcesResponse) GetBody() []byte {
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
+type InsightsAPIGetPackageVulnerabilitiesResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *InsightsV1GetPackageVulnerabilitiesResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r InsightsAPIGetPackageVulnerabilitiesResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r InsightsAPIGetPackageVulnerabilitiesResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r InsightsAPIGetPackageVulnerabilitiesResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type InsightsAPIGetResourceVulnerablePackagesResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *InsightsV1GetResourceVulnerablePackagesResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r InsightsAPIGetResourceVulnerablePackagesResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r InsightsAPIGetResourceVulnerablePackagesResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r InsightsAPIGetResourceVulnerablePackagesResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
 type InsightsAPIScheduleVulnerabilitiesScanResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -15798,6 +16470,35 @@ func (r InsightsAPIGetAgentInstallScriptResponse) GetBody() []byte {
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
+type InsightsAPIGetAgentCloudScriptResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+}
+
+// Status returns HTTPResponse.Status
+func (r InsightsAPIGetAgentCloudScriptResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r InsightsAPIGetAgentCloudScriptResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r InsightsAPIGetAgentCloudScriptResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
 // ListAddonsWithResponse request returning *ListAddonsResponse
 func (c *ClientWithResponses) ListAddonsWithResponse(ctx context.Context, params *ListAddonsParams) (*ListAddonsResponse, error) {
 	rsp, err := c.ListAddons(ctx, params)
@@ -15901,6 +16602,58 @@ func (c *ClientWithResponses) PlanClusterPriceWithResponse(ctx context.Context, 
 		return nil, err
 	}
 	return ParsePlanClusterPriceResponse(rsp)
+}
+
+// CostReportAPIListAllocationGroupsWithResponse request returning *CostReportAPIListAllocationGroupsResponse
+func (c *ClientWithResponses) CostReportAPIListAllocationGroupsWithResponse(ctx context.Context, clusterId string) (*CostReportAPIListAllocationGroupsResponse, error) {
+	rsp, err := c.CostReportAPIListAllocationGroups(ctx, clusterId)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCostReportAPIListAllocationGroupsResponse(rsp)
+}
+
+// CostReportAPICreateAllocationGroupWithBodyWithResponse request with arbitrary body returning *CostReportAPICreateAllocationGroupResponse
+func (c *ClientWithResponses) CostReportAPICreateAllocationGroupWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader) (*CostReportAPICreateAllocationGroupResponse, error) {
+	rsp, err := c.CostReportAPICreateAllocationGroupWithBody(ctx, clusterId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCostReportAPICreateAllocationGroupResponse(rsp)
+}
+
+func (c *ClientWithResponses) CostReportAPICreateAllocationGroupWithResponse(ctx context.Context, clusterId string, body CostReportAPICreateAllocationGroupJSONRequestBody) (*CostReportAPICreateAllocationGroupResponse, error) {
+	rsp, err := c.CostReportAPICreateAllocationGroup(ctx, clusterId, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCostReportAPICreateAllocationGroupResponse(rsp)
+}
+
+// CostReportAPIDeleteAllocationGroupWithResponse request returning *CostReportAPIDeleteAllocationGroupResponse
+func (c *ClientWithResponses) CostReportAPIDeleteAllocationGroupWithResponse(ctx context.Context, clusterId string, id string) (*CostReportAPIDeleteAllocationGroupResponse, error) {
+	rsp, err := c.CostReportAPIDeleteAllocationGroup(ctx, clusterId, id)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCostReportAPIDeleteAllocationGroupResponse(rsp)
+}
+
+// CostReportAPIUpdateAllocationGroupWithBodyWithResponse request with arbitrary body returning *CostReportAPIUpdateAllocationGroupResponse
+func (c *ClientWithResponses) CostReportAPIUpdateAllocationGroupWithBodyWithResponse(ctx context.Context, clusterId string, id string, contentType string, body io.Reader) (*CostReportAPIUpdateAllocationGroupResponse, error) {
+	rsp, err := c.CostReportAPIUpdateAllocationGroupWithBody(ctx, clusterId, id, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCostReportAPIUpdateAllocationGroupResponse(rsp)
+}
+
+func (c *ClientWithResponses) CostReportAPIUpdateAllocationGroupWithResponse(ctx context.Context, clusterId string, id string, body CostReportAPIUpdateAllocationGroupJSONRequestBody) (*CostReportAPIUpdateAllocationGroupResponse, error) {
+	rsp, err := c.CostReportAPIUpdateAllocationGroup(ctx, clusterId, id, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCostReportAPIUpdateAllocationGroupResponse(rsp)
 }
 
 // CostReportAPIGetClusterCostHistory2WithResponse request returning *CostReportAPIGetClusterCostHistory2Response
@@ -17471,6 +18224,24 @@ func (c *ClientWithResponses) InsightsAPIGetVulnerabilitiesResourcesWithResponse
 	return ParseInsightsAPIGetVulnerabilitiesResourcesResponse(rsp)
 }
 
+// InsightsAPIGetPackageVulnerabilitiesWithResponse request returning *InsightsAPIGetPackageVulnerabilitiesResponse
+func (c *ClientWithResponses) InsightsAPIGetPackageVulnerabilitiesWithResponse(ctx context.Context, objectId string, params *InsightsAPIGetPackageVulnerabilitiesParams) (*InsightsAPIGetPackageVulnerabilitiesResponse, error) {
+	rsp, err := c.InsightsAPIGetPackageVulnerabilities(ctx, objectId, params)
+	if err != nil {
+		return nil, err
+	}
+	return ParseInsightsAPIGetPackageVulnerabilitiesResponse(rsp)
+}
+
+// InsightsAPIGetResourceVulnerablePackagesWithResponse request returning *InsightsAPIGetResourceVulnerablePackagesResponse
+func (c *ClientWithResponses) InsightsAPIGetResourceVulnerablePackagesWithResponse(ctx context.Context, objectId string) (*InsightsAPIGetResourceVulnerablePackagesResponse, error) {
+	rsp, err := c.InsightsAPIGetResourceVulnerablePackages(ctx, objectId)
+	if err != nil {
+		return nil, err
+	}
+	return ParseInsightsAPIGetResourceVulnerablePackagesResponse(rsp)
+}
+
 // InsightsAPIScheduleVulnerabilitiesScanWithBodyWithResponse request with arbitrary body returning *InsightsAPIScheduleVulnerabilitiesScanResponse
 func (c *ClientWithResponses) InsightsAPIScheduleVulnerabilitiesScanWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*InsightsAPIScheduleVulnerabilitiesScanResponse, error) {
 	rsp, err := c.InsightsAPIScheduleVulnerabilitiesScanWithBody(ctx, contentType, body)
@@ -17541,12 +18312,21 @@ func (c *ClientWithResponses) InsightsAPIPostAgentTelemetryWithResponse(ctx cont
 }
 
 // InsightsAPIGetAgentInstallScriptWithResponse request returning *InsightsAPIGetAgentInstallScriptResponse
-func (c *ClientWithResponses) InsightsAPIGetAgentInstallScriptWithResponse(ctx context.Context, clusterId string) (*InsightsAPIGetAgentInstallScriptResponse, error) {
-	rsp, err := c.InsightsAPIGetAgentInstallScript(ctx, clusterId)
+func (c *ClientWithResponses) InsightsAPIGetAgentInstallScriptWithResponse(ctx context.Context, clusterId string, params *InsightsAPIGetAgentInstallScriptParams) (*InsightsAPIGetAgentInstallScriptResponse, error) {
+	rsp, err := c.InsightsAPIGetAgentInstallScript(ctx, clusterId, params)
 	if err != nil {
 		return nil, err
 	}
 	return ParseInsightsAPIGetAgentInstallScriptResponse(rsp)
+}
+
+// InsightsAPIGetAgentCloudScriptWithResponse request returning *InsightsAPIGetAgentCloudScriptResponse
+func (c *ClientWithResponses) InsightsAPIGetAgentCloudScriptWithResponse(ctx context.Context, provider string) (*InsightsAPIGetAgentCloudScriptResponse, error) {
+	rsp, err := c.InsightsAPIGetAgentCloudScript(ctx, provider)
+	if err != nil {
+		return nil, err
+	}
+	return ParseInsightsAPIGetAgentCloudScriptResponse(rsp)
 }
 
 // ParseListAddonsResponse parses an HTTP response from a ListAddonsWithResponse call
@@ -17763,6 +18543,110 @@ func ParsePlanClusterPriceResponse(rsp *http.Response) (*PlanClusterPriceRespons
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest ClusterCostEstimate
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseCostReportAPIListAllocationGroupsResponse parses an HTTP response from a CostReportAPIListAllocationGroupsWithResponse call
+func ParseCostReportAPIListAllocationGroupsResponse(rsp *http.Response) (*CostReportAPIListAllocationGroupsResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &CostReportAPIListAllocationGroupsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest CostreportV1beta1ListAllocationGroupsResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseCostReportAPICreateAllocationGroupResponse parses an HTTP response from a CostReportAPICreateAllocationGroupWithResponse call
+func ParseCostReportAPICreateAllocationGroupResponse(rsp *http.Response) (*CostReportAPICreateAllocationGroupResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &CostReportAPICreateAllocationGroupResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest CostreportV1beta1AllocationGroup
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseCostReportAPIDeleteAllocationGroupResponse parses an HTTP response from a CostReportAPIDeleteAllocationGroupWithResponse call
+func ParseCostReportAPIDeleteAllocationGroupResponse(rsp *http.Response) (*CostReportAPIDeleteAllocationGroupResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &CostReportAPIDeleteAllocationGroupResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest CostreportV1beta1DeleteAllocationGroupResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseCostReportAPIUpdateAllocationGroupResponse parses an HTTP response from a CostReportAPIUpdateAllocationGroupWithResponse call
+func ParseCostReportAPIUpdateAllocationGroupResponse(rsp *http.Response) (*CostReportAPIUpdateAllocationGroupResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &CostReportAPIUpdateAllocationGroupResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest CostreportV1beta1AllocationGroup
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -21252,6 +22136,58 @@ func ParseInsightsAPIGetVulnerabilitiesResourcesResponse(rsp *http.Response) (*I
 	return response, nil
 }
 
+// ParseInsightsAPIGetPackageVulnerabilitiesResponse parses an HTTP response from a InsightsAPIGetPackageVulnerabilitiesWithResponse call
+func ParseInsightsAPIGetPackageVulnerabilitiesResponse(rsp *http.Response) (*InsightsAPIGetPackageVulnerabilitiesResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &InsightsAPIGetPackageVulnerabilitiesResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest InsightsV1GetPackageVulnerabilitiesResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseInsightsAPIGetResourceVulnerablePackagesResponse parses an HTTP response from a InsightsAPIGetResourceVulnerablePackagesWithResponse call
+func ParseInsightsAPIGetResourceVulnerablePackagesResponse(rsp *http.Response) (*InsightsAPIGetResourceVulnerablePackagesResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &InsightsAPIGetResourceVulnerablePackagesResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest InsightsV1GetResourceVulnerablePackagesResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
 // ParseInsightsAPIScheduleVulnerabilitiesScanResponse parses an HTTP response from a InsightsAPIScheduleVulnerabilitiesScanWithResponse call
 func ParseInsightsAPIScheduleVulnerabilitiesScanResponse(rsp *http.Response) (*InsightsAPIScheduleVulnerabilitiesScanResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
@@ -21391,6 +22327,22 @@ func ParseInsightsAPIGetAgentInstallScriptResponse(rsp *http.Response) (*Insight
 	}
 
 	response := &InsightsAPIGetAgentInstallScriptResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	return response, nil
+}
+
+// ParseInsightsAPIGetAgentCloudScriptResponse parses an HTTP response from a InsightsAPIGetAgentCloudScriptWithResponse call
+func ParseInsightsAPIGetAgentCloudScriptResponse(rsp *http.Response) (*InsightsAPIGetAgentCloudScriptResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &InsightsAPIGetAgentCloudScriptResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}

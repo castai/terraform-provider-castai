@@ -2159,10 +2159,10 @@ type CastaiNotificationsV1beta1WebhookConfig_AuthKeys struct {
 
 // Types of cloud service providers CAST AI supports.
 //
-//  - invalid: Invalid.
-//  - aws: Amazon web services.
-//  - gcp: Google cloud provider.
-//  - azure: Microsoft Azure.
+//   - invalid: Invalid.
+//   - aws: Amazon web services.
+//   - gcp: Google cloud provider.
+//   - azure: Microsoft Azure.
 type CastaiV1Cloud string
 
 // ClusteractionsV1AckClusterActionResponse defines model for clusteractions.v1.AckClusterActionResponse.
@@ -2202,6 +2202,7 @@ type ClusteractionsV1ClusterActionAck struct {
 
 // ClusteractionsV1ClusterActionApproveCSR defines model for clusteractions.v1.ClusterActionApproveCSR.
 type ClusteractionsV1ClusterActionApproveCSR struct {
+	NodeId   *string `json:"nodeId,omitempty"`
 	NodeName *string `json:"nodeName,omitempty"`
 }
 
@@ -2235,11 +2236,13 @@ type ClusteractionsV1ClusterActionChartUpsert_ValuesOverrides struct {
 
 // ClusteractionsV1ClusterActionCheckNodeDeleted defines model for clusteractions.v1.ClusterActionCheckNodeDeleted.
 type ClusteractionsV1ClusterActionCheckNodeDeleted struct {
+	NodeId   *string `json:"nodeId,omitempty"`
 	NodeName *string `json:"nodeName,omitempty"`
 }
 
 // ClusteractionsV1ClusterActionCheckNodeStatus defines model for clusteractions.v1.ClusterActionCheckNodeStatus.
 type ClusteractionsV1ClusterActionCheckNodeStatus struct {
+	NodeId   *string `json:"nodeId,omitempty"`
 	NodeName *string `json:"nodeName,omitempty"`
 
 	// - NodeStatus_UNSPECIFIED: Not provided status
@@ -2264,6 +2267,7 @@ type ClusteractionsV1ClusterActionCreateEvent struct {
 
 // ClusteractionsV1ClusterActionDeleteNode defines model for clusteractions.v1.ClusterActionDeleteNode.
 type ClusteractionsV1ClusterActionDeleteNode struct {
+	NodeId   *string `json:"nodeId,omitempty"`
 	NodeName *string `json:"nodeName,omitempty"`
 }
 
@@ -2274,6 +2278,7 @@ type ClusteractionsV1ClusterActionDisconnectCluster = map[string]interface{}
 type ClusteractionsV1ClusterActionDrainNode struct {
 	DrainTimeoutSeconds *int32  `json:"drainTimeoutSeconds,omitempty"`
 	Force               *bool   `json:"force,omitempty"`
+	NodeId              *string `json:"nodeId,omitempty"`
 	NodeName            *string `json:"nodeName,omitempty"`
 }
 
@@ -2281,6 +2286,7 @@ type ClusteractionsV1ClusterActionDrainNode struct {
 type ClusteractionsV1ClusterActionPatchNode struct {
 	Annotations *ClusteractionsV1ClusterActionPatchNode_Annotations `json:"annotations,omitempty"`
 	Labels      *ClusteractionsV1ClusterActionPatchNode_Labels      `json:"labels,omitempty"`
+	NodeId      *string                                             `json:"nodeId,omitempty"`
 	NodeName    *string                                             `json:"nodeName,omitempty"`
 	Taints      *[]ClusteractionsV1NodeTaint                        `json:"taints,omitempty"`
 }
@@ -2315,8 +2321,8 @@ type ClusteractionsV1LogEvent_Fields struct {
 }
 
 // - NodeStatus_UNSPECIFIED: Not provided status
-//  - NodeStatus_READY: Node joined cluster
-//  - NodeStatus_DELETED: Node not exist in cluster
+//   - NodeStatus_READY: Node joined cluster
+//   - NodeStatus_DELETED: Node not exist in cluster
 type ClusteractionsV1NodeStatus string
 
 // ClusteractionsV1NodeTaint defines model for clusteractions.v1.NodeTaint.
@@ -2341,6 +2347,33 @@ type ClusteractionsV1ObjectReference struct {
 type ClusteractionsV1PollClusterActionsResponse struct {
 	Items *[]ClusteractionsV1ClusterAction `json:"items,omitempty"`
 }
+
+// CostreportV1beta1AllocationGroup defines model for costreport.v1beta1.AllocationGroup.
+type CostreportV1beta1AllocationGroup struct {
+	Filter *CostreportV1beta1AllocationGroupFilter `json:"filter,omitempty"`
+	Id     *string                                 `json:"id,omitempty"`
+	Name   *string                                 `json:"name,omitempty"`
+}
+
+// CostreportV1beta1AllocationGroupDetails defines model for costreport.v1beta1.AllocationGroupDetails.
+type CostreportV1beta1AllocationGroupDetails struct {
+	Filter *CostreportV1beta1AllocationGroupFilter `json:"filter,omitempty"`
+	Name   *string                                 `json:"name,omitempty"`
+}
+
+// CostreportV1beta1AllocationGroupFilter defines model for costreport.v1beta1.AllocationGroupFilter.
+type CostreportV1beta1AllocationGroupFilter struct {
+	Labels *[]CostreportV1beta1AllocationGroupFilterLabelValue `json:"labels,omitempty"`
+}
+
+// CostreportV1beta1AllocationGroupFilterLabelValue defines model for costreport.v1beta1.AllocationGroupFilter.LabelValue.
+type CostreportV1beta1AllocationGroupFilterLabelValue struct {
+	Label *string `json:"label,omitempty"`
+	Value *string `json:"value,omitempty"`
+}
+
+// CostreportV1beta1DeleteAllocationGroupResponse defines model for costreport.v1beta1.DeleteAllocationGroupResponse.
+type CostreportV1beta1DeleteAllocationGroupResponse = map[string]interface{}
 
 // Defines get cluster cost history request.
 type CostreportV1beta1GetClusterCostHistoryResponse struct {
@@ -2560,6 +2593,12 @@ type CostreportV1beta1GetSavingsRecommendationResponse_Recommendations struct {
 	AdditionalProperties map[string]CostreportV1beta1SavingsRecommendation `json:"-"`
 }
 
+// CostreportV1beta1ListAllocationGroupsResponse defines model for costreport.v1beta1.ListAllocationGroupsResponse.
+type CostreportV1beta1ListAllocationGroupsResponse struct {
+	ClusterId *string                             `json:"clusterId,omitempty"`
+	Items     *[]CostreportV1beta1AllocationGroup `json:"items,omitempty"`
+}
+
 // Saving defines price before and after applying a savings recommendation.
 type CostreportV1beta1Saving struct {
 	// Price after applying this configuration.
@@ -2625,6 +2664,9 @@ type ExternalclusterV1AKSClusterParams struct {
 	// Max pods per node. Default is 30.
 	MaxPodsPerNode *int32 `json:"maxPodsPerNode,omitempty"`
 
+	// Network plugin in use by the cluster. Can be `kubenet` or `azure`.
+	NetworkPlugin *string `json:"networkPlugin,omitempty"`
+
 	// Node resource group of the cluster.
 	NodeResourceGroup *string `json:"nodeResourceGroup,omitempty"`
 
@@ -2683,8 +2725,10 @@ type ExternalclusterV1Cluster struct {
 	CredentialsId *string `json:"credentialsId,omitempty"`
 
 	// EKSClusterParams defines EKS-specific arguments.
-	Eks              *ExternalclusterV1EKSClusterParams `json:"eks,omitempty"`
-	FirstOperationAt *time.Time                         `json:"firstOperationAt,omitempty"`
+	Eks *ExternalclusterV1EKSClusterParams `json:"eks,omitempty"`
+
+	// Timestamp when the first operation was performed for a given cluster, which marks when cluster optimisation started by CAST AI.
+	FirstOperationAt *time.Time `json:"firstOperationAt,omitempty"`
 
 	// GKEClusterParams defines GKE-specific arguments.
 	Gke *ExternalclusterV1GKEClusterParams `json:"gke,omitempty"`
@@ -2714,6 +2758,9 @@ type ExternalclusterV1Cluster struct {
 
 	// Shows last reconcile error if any.
 	ReconcileError *string `json:"reconcileError"`
+
+	// Timestamp when the last reconcile was performed.
+	ReconciledAt *time.Time `json:"reconciledAt"`
 
 	// Region represents cluster region.
 	Region *ExternalclusterV1Region `json:"region,omitempty"`
@@ -3056,6 +3103,11 @@ type ExternalclusterV1Zone struct {
 	Name *string `json:"name,omitempty"`
 }
 
+// InlineObject defines model for inline_object.
+type InlineObject struct {
+	InitialSync *bool `json:"initialSync,omitempty"`
+}
+
 // InsightsV1DisconnectAgentResponse defines model for insights.v1.DisconnectAgentResponse.
 type InsightsV1DisconnectAgentResponse = map[string]interface{}
 
@@ -3206,37 +3258,39 @@ type InsightsV1GetOverviewSummaryResponseIssues struct {
 	Total        *int32 `json:"total,omitempty"`
 }
 
+// InsightsV1GetPackageVulnerabilitiesResponse defines model for insights.v1.GetPackageVulnerabilitiesResponse.
+type InsightsV1GetPackageVulnerabilitiesResponse struct {
+	// List of vulnerabilities associated to object.
+	Vulnerabilities *[]InsightsV1VulnerabilityItem `json:"vulnerabilities,omitempty"`
+}
+
+// InsightsV1GetResourceVulnerablePackagesResponse defines model for insights.v1.GetResourceVulnerablePackagesResponse.
+type InsightsV1GetResourceVulnerablePackagesResponse struct {
+	AppPackages *[]InsightsV1GetResourceVulnerablePackagesResponsePackageItem `json:"appPackages,omitempty"`
+	OsPackages  *[]InsightsV1GetResourceVulnerablePackagesResponsePackageItem `json:"osPackages,omitempty"`
+}
+
+// InsightsV1GetResourceVulnerablePackagesResponseIssues defines model for insights.v1.GetResourceVulnerablePackagesResponse.Issues.
+type InsightsV1GetResourceVulnerablePackagesResponseIssues struct {
+	Critical     *int32 `json:"critical,omitempty"`
+	High         *int32 `json:"high,omitempty"`
+	Low          *int32 `json:"low,omitempty"`
+	Medium       *int32 `json:"medium,omitempty"`
+	None         *int32 `json:"none,omitempty"`
+	NotAvailable *int32 `json:"notAvailable,omitempty"`
+}
+
+// InsightsV1GetResourceVulnerablePackagesResponsePackageItem defines model for insights.v1.GetResourceVulnerablePackagesResponse.PackageItem.
+type InsightsV1GetResourceVulnerablePackagesResponsePackageItem struct {
+	Issues  *InsightsV1GetResourceVulnerablePackagesResponseIssues `json:"issues,omitempty"`
+	Name    *string                                                `json:"name,omitempty"`
+	Version *string                                                `json:"version,omitempty"`
+}
+
 // InsightsV1GetVulnerabilitiesDetailsResponse defines model for insights.v1.GetVulnerabilitiesDetailsResponse.
 type InsightsV1GetVulnerabilitiesDetailsResponse struct {
 	// List of vulnerabilities associated to object.
-	Vulnerabilities *[]InsightsV1GetVulnerabilitiesDetailsResponseVulnerabilityItem `json:"vulnerabilities,omitempty"`
-}
-
-// InsightsV1GetVulnerabilitiesDetailsResponseVulnerabilityItem defines model for insights.v1.GetVulnerabilitiesDetailsResponse.VulnerabilityItem.
-type InsightsV1GetVulnerabilitiesDetailsResponseVulnerabilityItem struct {
-	// Affected versions.
-	AffectedVersions *string `json:"affectedVersions,omitempty"`
-
-	// CVSSV3 vulnerability vector.
-	Cssv3vector *string `json:"cssv3vector,omitempty"`
-
-	// CVE name.
-	Cve *string `json:"cve,omitempty"`
-
-	// CVSSV3 vulnerability score.
-	Cvssv3Score *float32 `json:"cvssv3Score,omitempty"`
-
-	// CVE description.
-	Description *string `json:"description,omitempty"`
-
-	// External link to CVE.
-	ExternalLink *string `json:"externalLink,omitempty"`
-
-	// Versions with fixed vulnerability.
-	FixedVersions *string `json:"fixedVersions,omitempty"`
-
-	// Severity level.
-	SeverityLevel *string `json:"severityLevel,omitempty"`
+	Vulnerabilities *[]InsightsV1VulnerabilityItem `json:"vulnerabilities,omitempty"`
 }
 
 // InsightsV1GetVulnerabilitiesOverviewResponse defines model for insights.v1.GetVulnerabilitiesOverviewResponse.
@@ -3347,6 +3401,8 @@ type InsightsV1LogEvent_Fields struct {
 type InsightsV1PostAgentTelemetryResponse struct {
 	DisabledFeatures *[]string `json:"disabledFeatures,omitempty"`
 	FullResync       *bool     `json:"fullResync,omitempty"`
+	ImageIds         *[]string `json:"imageIds,omitempty"`
+	NodeIds          *[]string `json:"nodeIds,omitempty"`
 }
 
 // InsightsV1ScheduleBestPracticesScanRequest defines model for insights.v1.ScheduleBestPracticesScanRequest.
@@ -3364,6 +3420,33 @@ type InsightsV1ScheduleVulnerabilitiesScanRequest struct {
 
 // InsightsV1ScheduleVulnerabilitiesScanResponse defines model for insights.v1.ScheduleVulnerabilitiesScanResponse.
 type InsightsV1ScheduleVulnerabilitiesScanResponse = map[string]interface{}
+
+// InsightsV1VulnerabilityItem defines model for insights.v1.VulnerabilityItem.
+type InsightsV1VulnerabilityItem struct {
+	// Affected versions.
+	AffectedVersions *string `json:"affectedVersions,omitempty"`
+
+	// CVE name.
+	Cve *string `json:"cve,omitempty"`
+
+	// CVSSV3 vulnerability vector.
+	Cvss3vector *string `json:"cvss3vector,omitempty"`
+
+	// CVSSV3 vulnerability score.
+	Cvssv3Score *float32 `json:"cvssv3Score,omitempty"`
+
+	// CVE description.
+	Description *string `json:"description,omitempty"`
+
+	// External link to CVE.
+	ExternalLink *string `json:"externalLink,omitempty"`
+
+	// Versions with fixed vulnerability.
+	FixedVersions *string `json:"fixedVersions,omitempty"`
+
+	// Severity level.
+	SeverityLevel *string `json:"severityLevel,omitempty"`
+}
 
 // Defines request object to add autoscaler inventory's blacklist item.
 type InventoryblacklistV1AddBlacklistRequest struct {
@@ -3707,15 +3790,18 @@ type NodetemplatesV1NodeTemplateListItemStats struct {
 
 // NodetemplatesV1TemplateConstraints defines model for nodetemplates.v1.TemplateConstraints.
 type NodetemplatesV1TemplateConstraints struct {
-	ComputeOptimized *bool                                                        `json:"computeOptimized"`
-	Gpu              *NodetemplatesV1TemplateConstraintsGPUConstraints            `json:"gpu,omitempty"`
-	InstanceFamilies *NodetemplatesV1TemplateConstraintsInstanceFamilyConstraints `json:"instanceFamilies,omitempty"`
-	MaxCpu           *int32                                                       `json:"maxCpu"`
-	MaxMemory        *int32                                                       `json:"maxMemory"`
-	MinCpu           *int32                                                       `json:"minCpu"`
-	MinMemory        *int32                                                       `json:"minMemory"`
-	Spot             *bool                                                        `json:"spot"`
-	StorageOptimized *bool                                                        `json:"storageOptimized"`
+	ComputeOptimized *bool `json:"computeOptimized"`
+
+	// Fallback restore rate in seconds: defines how much time should pass before spot fallback should be attempted to be restored to real spot.
+	FallbackRestoreRateSeconds *int32                                                       `json:"fallbackRestoreRateSeconds"`
+	Gpu                        *NodetemplatesV1TemplateConstraintsGPUConstraints            `json:"gpu,omitempty"`
+	InstanceFamilies           *NodetemplatesV1TemplateConstraintsInstanceFamilyConstraints `json:"instanceFamilies,omitempty"`
+	MaxCpu                     *int32                                                       `json:"maxCpu"`
+	MaxMemory                  *int32                                                       `json:"maxMemory"`
+	MinCpu                     *int32                                                       `json:"minCpu"`
+	MinMemory                  *int32                                                       `json:"minMemory"`
+	Spot                       *bool                                                        `json:"spot"`
+	StorageOptimized           *bool                                                        `json:"storageOptimized"`
 
 	// Spot instance fallback constraint - when true, on-demand instances will be created, when spots are unavailable.
 	UseSpotFallbacks *bool `json:"useSpotFallbacks"`
@@ -3846,6 +3932,9 @@ type PoliciesV1NodeConstraints struct {
 type PoliciesV1NodeDownscaler struct {
 	// Defines whether Node Downscaler should opt in for removing empty worker nodes when possible.
 	EmptyNodes *PoliciesV1NodeDownscalerEmptyNodes `json:"emptyNodes,omitempty"`
+
+	// Enable/disable node downscaler policy.
+	Enabled *bool `json:"enabled"`
 
 	// Defines the CAST AI Evictor component settings. Evictor watches the pods running in your cluster and looks for
 	// ways to compact them into fewer nodes, making nodes empty, which will be removed by the the empty worker nodes
@@ -4101,6 +4190,12 @@ type PlanClusterPriceJSONBody struct {
 	// CAST AI region used by cluster.
 	Region *ClusterRegion `json:"region,omitempty"`
 }
+
+// CostReportAPICreateAllocationGroupJSONBody defines parameters for CostReportAPICreateAllocationGroup.
+type CostReportAPICreateAllocationGroupJSONBody = CostreportV1beta1AllocationGroupDetails
+
+// CostReportAPIUpdateAllocationGroupJSONBody defines parameters for CostReportAPIUpdateAllocationGroup.
+type CostReportAPIUpdateAllocationGroupJSONBody = CostreportV1beta1AllocationGroupDetails
 
 // CostReportAPIGetClusterCostHistory2Params defines parameters for CostReportAPIGetClusterCostHistory2.
 type CostReportAPIGetClusterCostHistory2Params struct {
@@ -4606,6 +4701,12 @@ type InsightsAPIGetVulnerabilitiesReportParams struct {
 	From *time.Time `form:"from,omitempty" json:"from,omitempty"`
 }
 
+// InsightsAPIGetPackageVulnerabilitiesParams defines parameters for InsightsAPIGetPackageVulnerabilities.
+type InsightsAPIGetPackageVulnerabilitiesParams struct {
+	PackageName *string `form:"packageName,omitempty" json:"packageName,omitempty"`
+	Version     *string `form:"version,omitempty" json:"version,omitempty"`
+}
+
 // InsightsAPIScheduleVulnerabilitiesScanJSONBody defines parameters for InsightsAPIScheduleVulnerabilitiesScan.
 type InsightsAPIScheduleVulnerabilitiesScanJSONBody = InsightsV1ScheduleVulnerabilitiesScanRequest
 
@@ -4618,8 +4719,11 @@ type InsightsAPIGetVulnerabilitiesReportSummaryParams struct {
 // InsightsAPIIngestAgentLogJSONBody defines parameters for InsightsAPIIngestAgentLog.
 type InsightsAPIIngestAgentLogJSONBody = InsightsV1LogEvent
 
-// InsightsAPIPostAgentTelemetryJSONBody defines parameters for InsightsAPIPostAgentTelemetry.
-type InsightsAPIPostAgentTelemetryJSONBody = map[string]interface{}
+// InsightsAPIGetAgentInstallScriptParams defines parameters for InsightsAPIGetAgentInstallScript.
+type InsightsAPIGetAgentInstallScriptParams struct {
+	// (required) append cloud credential creation.
+	EnableCloudscan *bool `form:"enableCloudscan,omitempty" json:"enableCloudscan,omitempty"`
+}
 
 // CreateAuthTokenJSONRequestBody defines body for CreateAuthToken for application/json ContentType.
 type CreateAuthTokenJSONRequestBody = CreateAuthTokenJSONBody
@@ -4629,6 +4733,12 @@ type UpdateAuthTokenJSONRequestBody = UpdateAuthTokenJSONBody
 
 // PlanClusterPriceJSONRequestBody defines body for PlanClusterPrice for application/json ContentType.
 type PlanClusterPriceJSONRequestBody PlanClusterPriceJSONBody
+
+// CostReportAPICreateAllocationGroupJSONRequestBody defines body for CostReportAPICreateAllocationGroup for application/json ContentType.
+type CostReportAPICreateAllocationGroupJSONRequestBody = CostReportAPICreateAllocationGroupJSONBody
+
+// CostReportAPIUpdateAllocationGroupJSONRequestBody defines body for CostReportAPIUpdateAllocationGroup for application/json ContentType.
+type CostReportAPIUpdateAllocationGroupJSONRequestBody = CostReportAPIUpdateAllocationGroupJSONBody
 
 // CostReportAPIGetClusterWorkloadReport2JSONRequestBody defines body for CostReportAPIGetClusterWorkloadReport2 for application/json ContentType.
 type CostReportAPIGetClusterWorkloadReport2JSONRequestBody = CostReportAPIGetClusterWorkloadReport2JSONBody
@@ -4766,7 +4876,7 @@ type InsightsAPIScheduleVulnerabilitiesScanJSONRequestBody = InsightsAPISchedule
 type InsightsAPIIngestAgentLogJSONRequestBody = InsightsAPIIngestAgentLogJSONBody
 
 // InsightsAPIPostAgentTelemetryJSONRequestBody defines body for InsightsAPIPostAgentTelemetry for application/json ContentType.
-type InsightsAPIPostAgentTelemetryJSONRequestBody = InsightsAPIPostAgentTelemetryJSONBody
+type InsightsAPIPostAgentTelemetryJSONRequestBody = InlineObject
 
 // Getter for additional properties for AuditEvent_Labels. Returns the specified
 // element and whether it was found
