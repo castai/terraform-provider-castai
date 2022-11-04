@@ -24,7 +24,7 @@ var (
 )
 
 func init() {
-	testAccProvider = Provider()
+	testAccProvider = Provider("v1.0.0")
 	providerFactories = map[string]func() (*schema.Provider, error){
 		ProviderName: func() (*schema.Provider, error) {
 			return testAccProvider, nil
@@ -34,7 +34,7 @@ func init() {
 }
 
 func TestProvider(t *testing.T) {
-	if err := Provider().InternalValidate(); err != nil {
+	if err := Provider("v1.0.0").InternalValidate(); err != nil {
 		t.Fatalf("internal consistency validation failed: %v", err)
 	}
 }

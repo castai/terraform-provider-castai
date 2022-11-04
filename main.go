@@ -1,13 +1,21 @@
 package main
 
 import (
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/plugin"
 
 	"github.com/castai/terraform-provider-castai/castai"
 )
 
+var (
+	commit  = "undefined"
+	version = "local"
+)
+
 func main() {
 	plugin.Serve(&plugin.ServeOpts{
-		ProviderFunc: castai.Provider,
+		ProviderFunc: func() *schema.Provider {
+			return castai.Provider(version)
+		},
 	})
 }
