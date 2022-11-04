@@ -25,7 +25,6 @@ GKE cluster resource allows connecting an existing GEK cluster to CAST AI.
 
 - `credentials_json` (String, Sensitive) GCP credentials.json from ServiceAccount with credentials for CAST AI
 - `delete_nodes_on_disconnect` (Boolean) Should CAST AI remove nodes managed by CAST.AI on disconnect
-- `ssh_public_key` (String, Deprecated) SSHPublicKey for nodes
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only

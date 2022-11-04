@@ -51,9 +51,7 @@ func TestGKEClusterResourceReadContext(t *testing.T) {
 	"location": "eu-central-1",
 	"projectId": "project-id"
   },
-  "sshPublicKey": "key-123",
-  "clusterNameId": "gke-cluster-b6bfc074",
-  "private": true
+  "clusterNameId": "gke-cluster-b6bfc074"
 }`)))
 	mockClient.EXPECT().
 		ExternalClusterAPIGetCluster(gomock.Any(), clusterId).
@@ -81,7 +79,6 @@ credentials_id = 9b8d0456-177b-4a3d-b162-e68030d65GKE
 location = eu-central-1
 name = gke-cluster
 project_id = project-id
-ssh_public_key = key-123
 Tainted = false
 `, data.State().String())
 }
