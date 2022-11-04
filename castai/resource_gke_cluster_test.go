@@ -63,7 +63,7 @@ func TestGKEClusterResourceReadContext(t *testing.T) {
 			&http.Response{StatusCode: 200, Body: io.NopCloser(bytes.NewReader([]byte(`{"token": "gke123"}`))), Header: map[string][]string{"Content-Type": {"json"}}},
 			nil)
 
-	resource := resourceCastaiGKECluster()
+	resource := resourceGKECluster()
 
 	val := cty.ObjectVal(map[string]cty.Value{})
 	state := terraform.NewInstanceStateShimmedFromValue(val, 0)
@@ -125,7 +125,7 @@ func TestGKEClusterResourceReadContextArchived(t *testing.T) {
 		ExternalClusterAPIGetCluster(gomock.Any(), clusterId).
 		Return(&http.Response{StatusCode: 200, Body: body, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
 
-	resource := resourceCastaiGKECluster()
+	resource := resourceGKECluster()
 
 	val := cty.ObjectVal(map[string]cty.Value{})
 	state := terraform.NewInstanceStateShimmedFromValue(val, 0)
@@ -155,7 +155,7 @@ func TestGKEClusterResourceUpdateError(t *testing.T) {
 		ExternalClusterAPIUpdateCluster(gomock.Any(), clusterId, gomock.Any(), gomock.Any()).
 		Return(&http.Response{StatusCode: 400, Body: io.NopCloser(bytes.NewBufferString(`{"message":"Bad Request", "fieldViolations":[{"field":"credentials","description":"error"}]}`)), Header: map[string][]string{"Content-Type": {"json"}}}, nil)
 
-	resource := resourceCastaiGKECluster()
+	resource := resourceGKECluster()
 
 	raw := make(map[string]interface{})
 	raw[FieldGKEClusterCredentials] = "something"

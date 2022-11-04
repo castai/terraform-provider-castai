@@ -27,19 +27,19 @@ func Provider() *schema.Provider {
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
-			"castai_eks_cluster":                resourceCastaiEKSCluster(),
-			"castai_gke_cluster":                resourceCastaiGKECluster(),
-			"castai_aks_cluster":                resourceCastaiAKSCluster(),
-			"castai_autoscaler":                 resourceCastaiAutoscaler(),
-			"castai_cluster_token":              resourceCastaiClusterToken(),
+			"castai_eks_cluster":                resourceEKSCluster(),
+			"castai_gke_cluster":                resourceGKECluster(),
+			"castai_aks_cluster":                resourceAKSCluster(),
+			"castai_autoscaler":                 resourceAutoscaler(),
+			"castai_cluster_token":              resourceClusterToken(),
 			"castai_node_configuration":         resourceNodeConfiguration(),
 			"castai_node_configuration_default": resourceNodeConfigurationDefault(),
 		},
 
 		DataSourcesMap: map[string]*schema.Resource{
-			"castai_eks_settings":      dataSourceCastaiEKSSettings(),
-			"castai_eks_clusterid":     dataSourceCastaiEKSClusterID(),
-			"castai_eks_user_arn":      dataSourceCastaiEKSClusterUserARN(),
+			"castai_eks_settings":      dataSourceEKSSettings(),
+			"castai_eks_clusterid":     dataSourceEKSClusterID(),
+			"castai_eks_user_arn":      dataSourceEKSClusterUserARN(),
 			"castai_gke_user_policies": dataSourceGKEPolicies(),
 		},
 

@@ -2,6 +2,7 @@ package castai
 
 import (
 	"context"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -11,10 +12,10 @@ import (
 
 const (
 	EKSClusterUserARNFieldClusterID = "cluster_id"
-	EKSClusterUserARNFieldARN = "arn"
+	EKSClusterUserARNFieldARN       = "arn"
 )
 
-func dataSourceCastaiEKSClusterUserARN() *schema.Resource {
+func dataSourceEKSClusterUserARN() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: dataSourceCastaiEKSUserARN,
 		Schema: map[string]*schema.Schema{
@@ -24,7 +25,7 @@ func dataSourceCastaiEKSClusterUserARN() *schema.Resource {
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 			EKSClusterUserARNFieldARN: {
-				Type: schema.TypeString,
+				Type:     schema.TypeString,
 				Computed: true,
 			},
 		},
