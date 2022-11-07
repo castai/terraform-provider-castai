@@ -33,7 +33,9 @@ module "eks" {
     one = {
       name          = "${var.cluster_name}-default"
       instance_type = "t3.large"
-      desired_size  = 1
+      max_size      = 5
+      min_size      = 2
+      desired_size  = 2
     }
   }
 

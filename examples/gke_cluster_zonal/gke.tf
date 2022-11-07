@@ -27,7 +27,7 @@ module "gke" {
       name               = "default-node-pool"
       machine_type       = "e2-medium"
       node_locations     = var.cluster_zones[0]
-      min_count          = 1
+      min_count          = 2
       max_count          = 100
       local_ssd_count    = 0
       disk_size_gb       = 100
@@ -36,7 +36,7 @@ module "gke" {
       auto_repair        = true
       auto_upgrade       = true
       preemptible        = false
-      initial_node_count = 1
+      initial_node_count = 2
     },
   ]
 }
