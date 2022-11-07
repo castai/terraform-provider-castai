@@ -28,7 +28,9 @@ module "eks" {
     {
       name                 = "worker-group-1"
       instance_type        = "t3.medium"
-      asg_desired_capacity = 1
+      asg_desired_capacity = 2
+      asg_max_size         = 3
+      asg_min_size         = 2
       additional_security_group_ids = [
         aws_security_group.worker_group_mgmt_one.id, aws_security_group.worker_group_mgmt_two.id
       ]
