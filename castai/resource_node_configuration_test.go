@@ -41,6 +41,15 @@ func TestAccResourceNodeConfiguration_basic(t *testing.T) {
 				),
 			},
 			{
+				ResourceName: resourceName,
+				ImportStateIdFunc: func(s *terraform.State) (string, error) {
+					clusterID := s.RootModule().Resources["castai_eks_cluster.test"].Primary.ID
+					return fmt.Sprintf("%v/%v", clusterID, rName), nil
+				},
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
 				Config: testAccNodeConfigurationUpdated(rName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "disk_cpu_ratio", "25"),

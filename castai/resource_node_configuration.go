@@ -2,10 +2,13 @@ package castai
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -32,6 +35,9 @@ func resourceNodeConfiguration() *schema.Resource {
 		ReadContext:   resourceNodeConfigurationRead,
 		UpdateContext: resourceNodeConfigurationUpdate,
 		DeleteContext: resourceNodeConfigurationDelete,
+		Importer: &schema.ResourceImporter{
+			StateContext: nodeConfigStateImporter,
+		},
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(1 * time.Minute),
@@ -424,4 +430,36 @@ func flattenAKSConfig(config *sdk.NodeconfigV1AKSConfig) []map[string]interface{
 	}
 
 	return []map[string]interface{}{m}
+}
+
+func nodeConfigStateImporter(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	ids := strings.Split(d.Id(), "/")
+	if len(ids) != 2 || ids[0] == "" || ids[1] == "" {
+		return nil, fmt.Errorf("expected import id with format: <cluster_id>/<node_configuration name or id>. Got: %q", d.Id())
+	}
+
+	clusterID, id := ids[0], ids[1]
+	d.Set(FieldClusterID, clusterID)
+	d.SetId(id)
+
+	// Return if node config ID provided.
+	if _, err := uuid.Parse(id); err == nil {
+		return []*schema.ResourceData{d}, nil
+	}
+
+	// Find node configuration ID based on provided name.
+	client := meta.(*ProviderConfig).api
+	resp, err := client.NodeConfigurationAPIListConfigurationsWithResponse(ctx, clusterID)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, cfg := range *resp.JSON200.Items {
+		if toString(cfg.Name) == id {
+			d.SetId(toString(cfg.Id))
+			return []*schema.ResourceData{d}, nil
+		}
+	}
+
+	return nil, fmt.Errorf("failed to find node configuration with the following name: %v", id)
 }
