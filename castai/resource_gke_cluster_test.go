@@ -51,9 +51,7 @@ func TestGKEClusterResourceReadContext(t *testing.T) {
 	"location": "eu-central-1",
 	"projectId": "project-id"
   },
-  "sshPublicKey": "key-123",
-  "clusterNameId": "gke-cluster-b6bfc074",
-  "private": true
+  "clusterNameId": "gke-cluster-b6bfc074"
 }`)))
 	mockClient.EXPECT().
 		ExternalClusterAPIGetCluster(gomock.Any(), clusterId).
@@ -65,7 +63,7 @@ func TestGKEClusterResourceReadContext(t *testing.T) {
 			&http.Response{StatusCode: 200, Body: io.NopCloser(bytes.NewReader([]byte(`{"token": "gke123"}`))), Header: map[string][]string{"Content-Type": {"json"}}},
 			nil)
 
-	resource := resourceCastaiGKECluster()
+	resource := resourceGKECluster()
 
 	val := cty.ObjectVal(map[string]cty.Value{})
 	state := terraform.NewInstanceStateShimmedFromValue(val, 0)
@@ -81,7 +79,6 @@ credentials_id = 9b8d0456-177b-4a3d-b162-e68030d65GKE
 location = eu-central-1
 name = gke-cluster
 project_id = project-id
-ssh_public_key = key-123
 Tainted = false
 `, data.State().String())
 }
@@ -128,7 +125,7 @@ func TestGKEClusterResourceReadContextArchived(t *testing.T) {
 		ExternalClusterAPIGetCluster(gomock.Any(), clusterId).
 		Return(&http.Response{StatusCode: 200, Body: body, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
 
-	resource := resourceCastaiGKECluster()
+	resource := resourceGKECluster()
 
 	val := cty.ObjectVal(map[string]cty.Value{})
 	state := terraform.NewInstanceStateShimmedFromValue(val, 0)
@@ -158,7 +155,7 @@ func TestGKEClusterResourceUpdateError(t *testing.T) {
 		ExternalClusterAPIUpdateCluster(gomock.Any(), clusterId, gomock.Any(), gomock.Any()).
 		Return(&http.Response{StatusCode: 400, Body: io.NopCloser(bytes.NewBufferString(`{"message":"Bad Request", "fieldViolations":[{"field":"credentials","description":"error"}]}`)), Header: map[string][]string{"Content-Type": {"json"}}}, nil)
 
-	resource := resourceCastaiGKECluster()
+	resource := resourceGKECluster()
 
 	raw := make(map[string]interface{})
 	raw[FieldGKEClusterCredentials] = "something"

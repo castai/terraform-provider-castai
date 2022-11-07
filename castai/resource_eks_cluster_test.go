@@ -63,13 +63,7 @@ func TestEKSClusterResourceReadContext(t *testing.T) {
 		ExternalClusterAPIGetCluster(gomock.Any(), clusterId).
 		Return(&http.Response{StatusCode: 200, Body: body, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
 
-	mockClient.EXPECT().
-		GetAgentInstallScript(gomock.Any(), gomock.Any()).
-		Return(
-			&http.Response{StatusCode: 200, Body: io.NopCloser(bytes.NewReader([]byte(`curl -H "Authorization: Token 123`)))},
-			nil)
-
-	resource := resourceCastaiEKSCluster()
+	resource := resourceEKSCluster()
 
 	val := cty.ObjectVal(map[string]cty.Value{})
 	state := terraform.NewInstanceStateShimmedFromValue(val, 0)
@@ -81,20 +75,9 @@ func TestEKSClusterResourceReadContext(t *testing.T) {
 	r.False(result.HasError())
 	r.Equal(`ID = b6bfc074-a267-400f-b8f1-db0850c369b1
 account_id = 487609000000
-agent_token = 123
 credentials_id = 9b8d0456-177b-4a3d-b162-e68030d656aa
-dns_cluster_ip = 10.100.100.1
-instance_profile_arn = arn
 name = eks-cluster
 region = eu-central-1
-security_groups.# = 1
-security_groups.0 = sg1
-ssh_public_key = key-123
-subnets.# = 2
-subnets.0 = sub1
-subnets.1 = sub2
-tags.% = 1
-tags.aws = tag
 Tainted = false
 `, data.State().String())
 }
@@ -145,7 +128,7 @@ func TestEKSClusterResourceReadContextArchived(t *testing.T) {
 		ExternalClusterAPIGetCluster(gomock.Any(), clusterId).
 		Return(&http.Response{StatusCode: 200, Body: body, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
 
-	resource := resourceCastaiEKSCluster()
+	resource := resourceEKSCluster()
 
 	val := cty.ObjectVal(map[string]cty.Value{})
 	state := terraform.NewInstanceStateShimmedFromValue(val, 0)
@@ -175,7 +158,7 @@ func TestEKSClusterResourceUpdateError(t *testing.T) {
 		ExternalClusterAPIUpdateCluster(gomock.Any(), clusterId, gomock.Any(), gomock.Any()).
 		Return(&http.Response{StatusCode: 400, Body: io.NopCloser(bytes.NewBufferString(`{"message":"Bad Request", "fieldViolations":[{"field":"credentials","description":"error"}]}`)), Header: map[string][]string{"Content-Type": {"json"}}}, nil)
 
-	resource := resourceCastaiEKSCluster()
+	resource := resourceEKSCluster()
 
 	raw := make(map[string]interface{})
 	raw[FieldEKSClusterAssumeRoleArn] = "something"
@@ -241,13 +224,7 @@ func TestEKSClusterResourceUpdateRetry(t *testing.T) {
 		ExternalClusterAPIGetCluster(gomock.Any(), clusterId).
 		Return(&http.Response{StatusCode: 200, Body: io.NopCloser(body), Header: map[string][]string{"Content-Type": {"json"}}}, nil)
 
-	mockClient.EXPECT().
-		GetAgentInstallScript(gomock.Any(), gomock.Any()).
-		Return(
-			&http.Response{StatusCode: 200, Body: io.NopCloser(bytes.NewReader([]byte(`curl -H "Authorization: Token 123`)))},
-			nil)
-
-	resource := resourceCastaiEKSCluster()
+	resource := resourceEKSCluster()
 
 	raw := make(map[string]interface{})
 	raw[FieldEKSClusterAssumeRoleArn] = "something"

@@ -2,13 +2,20 @@ package castai
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+
+	"github.com/castai/terraform-provider-castai/castai/sdk"
 )
 
-func Provider() *schema.Provider {
+type ProviderConfig struct {
+	api *sdk.ClientWithResponses
+}
+
+func Provider(version string) *schema.Provider {
 	p := &schema.Provider{
 		Schema: map[string]*schema.Schema{
 			"api_url": {
@@ -27,40 +34,39 @@ func Provider() *schema.Provider {
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
-			"castai_eks_cluster":                resourceCastaiEKSCluster(),
-			"castai_gke_cluster":                resourceCastaiGKECluster(),
-			"castai_aks_cluster":                resourceCastaiAKSCluster(),
-			"castai_autoscaler":                 resourceCastaiAutoscaler(),
-			"castai_cluster_token":              resourceCastaiClusterToken(),
+			"castai_eks_cluster":                resourceEKSCluster(),
+			"castai_gke_cluster":                resourceGKECluster(),
+			"castai_aks_cluster":                resourceAKSCluster(),
+			"castai_autoscaler":                 resourceAutoscaler(),
+			"castai_cluster_token":              resourceClusterToken(),
 			"castai_node_configuration":         resourceNodeConfiguration(),
 			"castai_node_configuration_default": resourceNodeConfigurationDefault(),
 		},
 
 		DataSourcesMap: map[string]*schema.Resource{
-			"castai_eks_settings":      dataSourceCastaiEKSSettings(),
-			"castai_eks_clusterid":     dataSourceCastaiEKSClusterID(),
-			"castai_eks_user_arn":      dataSourceCastaiEKSClusterUserARN(),
+			"castai_eks_settings":      dataSourceEKSSettings(),
+			"castai_eks_clusterid":     dataSourceEKSClusterID(),
+			"castai_eks_user_arn":      dataSourceEKSClusterUserARN(),
 			"castai_gke_user_policies": dataSourceGKEPolicies(),
 		},
 
-		ConfigureContextFunc: providerConfigure(),
+		ConfigureContextFunc: providerConfigure(version),
 	}
 
 	return p
 }
 
-func providerConfigure() schema.ConfigureContextFunc {
+func providerConfigure(version string) schema.ConfigureContextFunc {
 	return func(ctx context.Context, data *schema.ResourceData) (interface{}, diag.Diagnostics) {
-		config := Config{
-			ApiUrl:   data.Get("api_url").(string),
-			ApiToken: data.Get("api_token").(string),
-		}
+		apiURL := data.Get("api_url").(string)
+		apiToken := data.Get("api_token").(string)
 
-		meta, err := config.configureProvider()
+		agent := fmt.Sprintf("castai-terraform-provider/%v", version)
+		client, err := sdk.CreateClient(apiURL, apiToken, agent)
 		if err != nil {
 			return nil, diag.FromErr(err)
 		}
 
-		return meta, nil
+		return &ProviderConfig{api: client}, nil
 	}
 }

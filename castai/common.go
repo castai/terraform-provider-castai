@@ -15,8 +15,6 @@ import (
 
 const (
 	FieldDeleteNodesOnDisconnect = "delete_nodes_on_disconnect"
-	FieldClusterSSHPublicKey     = "ssh_public_key"
-	FieldClusterAgentToken       = "agent_token"
 	FieldClusterCredentialsId    = "credentials_id"
 )
 

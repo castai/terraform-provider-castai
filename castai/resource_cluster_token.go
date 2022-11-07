@@ -13,7 +13,7 @@ const (
 	FieldClusterToken = "cluster_token"
 )
 
-func resourceCastaiClusterToken() *schema.Resource {
+func resourceClusterToken() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceCastaiClusterTokenCreate,
 		ReadContext:   resourceCastaiClusterTokenRead,

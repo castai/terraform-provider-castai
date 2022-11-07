@@ -24,7 +24,7 @@ const (
 	FieldAKSClusterTenantID          = "tenant_id"
 )
 
-func resourceCastaiAKSCluster() *schema.Resource {
+func resourceAKSCluster() *schema.Resource {
 	return &schema.Resource{
 		ReadContext:   resourceCastaiAKSClusterRead,
 		CreateContext: resourceCastaiAKSClusterCreate,

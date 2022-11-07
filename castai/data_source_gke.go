@@ -11,11 +11,11 @@ import (
 func dataSourceGKEPolicies() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: dataSourceGKEPoliciesRead,
-		Schema: map[string]*schema.Schema {
-			"policy":  {
-				Type: schema.TypeList,
+		Schema: map[string]*schema.Schema{
+			"policy": {
+				Type:     schema.TypeList,
 				Computed: true,
-				Elem: &schema.Schema{Type: schema.TypeString},
+				Elem:     &schema.Schema{Type: schema.TypeString},
 			},
 		},
 	}

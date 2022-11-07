@@ -23,7 +23,7 @@ const (
 	FieldGKEClusterCredentials   = "credentials_json"
 )
 
-func resourceCastaiGKECluster() *schema.Resource {
+func resourceGKECluster() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceCastaiGKEClusterCreate,
 		ReadContext:   resourceCastaiGKEClusterRead,
@@ -81,12 +81,6 @@ func resourceCastaiGKECluster() *schema.Resource {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				Description: "Should CAST AI remove nodes managed by CAST.AI on disconnect",
-			},
-			FieldClusterSSHPublicKey: {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "SSHPublicKey for nodes",
-				Deprecated:  "use castai_node_configuration resource instead. This attribute will be removed in the next major version of the provider.",
 			},
 		},
 	}
@@ -161,9 +155,6 @@ func resourceCastaiGKEClusterRead(ctx context.Context, data *schema.ResourceData
 	}
 
 	data.Set(FieldGKEClusterCredentialsId, toString(resp.JSON200.CredentialsId))
-	if resp.JSON200.SshPublicKey != nil {
-		data.Set(FieldClusterSSHPublicKey, toString(resp.JSON200.SshPublicKey))
-	}
 	if GKE := resp.JSON200.Gke; GKE != nil {
 		data.Set(FieldGKEClusterProjectId, toString(GKE.ProjectId))
 		data.Set(FieldGKEClusterLocation, toString(GKE.Location))
@@ -194,7 +185,6 @@ func resourceCastaiGKEClusterUpdate(ctx context.Context, data *schema.ResourceDa
 
 func updateGKEClusterSettings(ctx context.Context, data *schema.ResourceData, client *sdk.ClientWithResponses) error {
 	if !data.HasChanges(
-		FieldClusterSSHPublicKey,
 		FieldGKEClusterCredentials,
 	) {
 		log.Printf("[INFO] Nothing to update in cluster setttings.")
@@ -208,10 +198,6 @@ func updateGKEClusterSettings(ctx context.Context, data *schema.ResourceData, cl
 	credentialsJSON, ok := data.GetOk(FieldGKEClusterCredentials)
 	if ok {
 		req.Credentials = toStringPtr(credentialsJSON.(string))
-	}
-
-	if s, ok := data.GetOk(FieldClusterSSHPublicKey); ok {
-		req.SshPublicKey = toStringPtr(s.(string))
 	}
 
 	if err := backoff.Retry(func() error {

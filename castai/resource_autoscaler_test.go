@@ -153,7 +153,7 @@ func TestAutoscalerResource_PoliciesUpdateAction(t *testing.T) {
 		},
 	}
 
-	resource := resourceCastaiAutoscaler()
+	resource := resourceAutoscaler()
 
 	clusterId := "cluster_id"
 	val := cty.ObjectVal(map[string]cty.Value{
@@ -271,7 +271,7 @@ func TestAutoscalerResource_PoliciesUpdateAction_Fail(t *testing.T) {
 		},
 	}
 
-	resource := resourceCastaiAutoscaler()
+	resource := resourceAutoscaler()
 
 	clusterId := "cluster_id"
 	val := cty.ObjectVal(map[string]cty.Value{
