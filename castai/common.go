@@ -14,8 +14,10 @@ import (
 )
 
 const (
-	FieldDeleteNodesOnDisconnect = "delete_nodes_on_disconnect"
+	FieldClusterID               = "cluster_id"
+	FieldClusterToken            = "cluster_token"
 	FieldClusterCredentialsId    = "credentials_id"
+	FieldDeleteNodesOnDisconnect = "delete_nodes_on_disconnect"
 )
 
 func resourceCastaiPublicCloudClusterDelete(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {

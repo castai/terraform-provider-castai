@@ -2,15 +2,9 @@ package castai
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-)
-
-const (
-	FieldClusterID    = "cluster_id"
-	FieldClusterToken = "cluster_token"
 )
 
 func resourceClusterToken() *schema.Resource {
@@ -19,7 +13,7 @@ func resourceClusterToken() *schema.Resource {
 		ReadContext:        resourceCastaiClusterTokenRead,
 		UpdateContext:      nil,
 		DeleteContext:      resourceCastaiClusterTokenDelete,
-		DeprecationMessage: `Resource "cluster_token" will be deprecated in the next major release in favour of cluster resource attribute.`,
+		DeprecationMessage: `Resource "cluster_token" is deprecated in favour of cluster resource attribute.`,
 
 		Schema: map[string]*schema.Schema{
 			FieldClusterID: {
@@ -33,32 +27,18 @@ func resourceClusterToken() *schema.Resource {
 				Description: "computed value to store cluster token",
 				Computed:    true,
 				Sensitive:   true,
-				Deprecated:  `Resource "cluster_token" will be deprecated in the next major release in favour of cluster resource attribute.`,
+				Deprecated:  `Resource "cluster_token" is deprecated in favour of cluster resource attribute.`,
 			},
 		},
 	}
 }
 
 func resourceCastaiClusterTokenRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	if _, ok := data.GetOk(FieldClusterToken); !ok {
-		return diag.Errorf("Cluster token is not created")
-	}
-
-	return nil
+	return diag.Errorf(`Resource "cluster_token" is deprecated in favour of cluster resource attribute.`)
 }
 
 func resourceCastaiClusterTokenCreate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ProviderConfig).api
-
-	clusterID := data.Get(FieldClusterID).(string)
-	tkn, err := createClusterToken(ctx, client, clusterID)
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	data.Set(FieldClusterToken, tkn)
-	data.SetId(fmt.Sprintf("%s-cluster-token", clusterID))
-	return nil
+	return diag.Errorf(`Resource "cluster_token" is deprecated in favour of cluster resource attribute.`)
 }
 
 func resourceCastaiClusterTokenDelete(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
