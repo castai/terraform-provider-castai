@@ -63,6 +63,10 @@ func TestEKSClusterResourceReadContext(t *testing.T) {
 		ExternalClusterAPIGetCluster(gomock.Any(), clusterId).
 		Return(&http.Response{StatusCode: 200, Body: body, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
 
+	mockClient.EXPECT().
+		ExternalClusterAPICreateClusterToken(gomock.Any(), gomock.Any()).
+		Return(&http.Response{StatusCode: 200, Body: io.NopCloser(bytes.NewReader([]byte(`{"token": "eks12345"}`))), Header: map[string][]string{"Content-Type": {"json"}}}, nil)
+
 	resource := resourceEKSCluster()
 
 	val := cty.ObjectVal(map[string]cty.Value{})
@@ -75,6 +79,7 @@ func TestEKSClusterResourceReadContext(t *testing.T) {
 	r.False(result.HasError())
 	r.Equal(`ID = b6bfc074-a267-400f-b8f1-db0850c369b1
 account_id = 487609000000
+cluster_token = eks12345
 credentials_id = 9b8d0456-177b-4a3d-b162-e68030d656aa
 name = eks-cluster
 region = eu-central-1
@@ -171,6 +176,7 @@ func TestEKSClusterResourceUpdateError(t *testing.T) {
 	r.True(result.HasError())
 	r.Equal("updating cluster configuration: expected status code 200, received: status=400 body={\"message\":\"Bad Request\", \"fieldViolations\":[{\"field\":\"credentials\",\"description\":\"error\"}]}", result[0].Summary)
 }
+
 func TestEKSClusterResourceUpdateRetry(t *testing.T) {
 	r := require.New(t)
 	mockctrl := gomock.NewController(t)
@@ -223,6 +229,10 @@ func TestEKSClusterResourceUpdateRetry(t *testing.T) {
 	mockClient.EXPECT().
 		ExternalClusterAPIGetCluster(gomock.Any(), clusterId).
 		Return(&http.Response{StatusCode: 200, Body: io.NopCloser(body), Header: map[string][]string{"Content-Type": {"json"}}}, nil)
+
+	mockClient.EXPECT().
+		ExternalClusterAPICreateClusterToken(gomock.Any(), gomock.Any()).
+		Return(&http.Response{StatusCode: 200, Body: io.NopCloser(bytes.NewReader([]byte(`{"token": "eks12345"}`))), Header: map[string][]string{"Content-Type": {"json"}}}, nil)
 
 	resource := resourceEKSCluster()
 
