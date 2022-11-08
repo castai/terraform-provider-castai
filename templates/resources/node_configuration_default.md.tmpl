@@ -1,0 +1,19 @@
+---
+page_title: "{{.Name}} {{.Type}} - {{.ProviderName}}"
+subcategory: ""
+description: |-
+{{ .Description | plainmarkdown | trimspace | prefixlines "  " }}
+---
+
+# {{.Name}} ({{.Type}})
+
+{{ .Description | trimspace }}
+
+Sets existing node configuration as `default`. All newly provisioned nodes will use `default` node configuration if not specified differently.
+There can only be single `default` node configuration per cluster.
+
+## Example Usage
+
+{{ tffile "examples/resources/node_configuration_default/resource.tf" }}
+
+{{ .SchemaMarkdown | trimspace }}

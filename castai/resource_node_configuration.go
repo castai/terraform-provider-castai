@@ -116,9 +116,10 @@ func resourceNodeConfiguration() *schema.Resource {
 				},
 			},
 			FieldNodeConfigurationDockerConfig: {
-				Type:             schema.TypeString,
-				Optional:         true,
-				Description:      "Optional docker daemon configuration properties in JSON format. Provide only properties that you want to override. Applicable for EKS only. Available values https://docs.docker.com/engine/reference/commandline/dockerd/#daemon-configuration-file",
+				Type:     schema.TypeString,
+				Optional: true,
+				Description: "Optional docker daemon configuration properties in JSON format. Provide only properties that you want to override. Applicable for EKS only. " +
+					"[Available values](https://docs.docker.com/engine/reference/commandline/dockerd/#daemon-configuration-file)",
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsJSON),
 			},
 			FieldNodeConfigurationKubeletConfig: {
