@@ -29,6 +29,7 @@ func TestAccResourceNodeConfiguration_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "disk_cpu_ratio", "35"),
 					resource.TestCheckResourceAttr(resourceName, "image", ""),
 					resource.TestCheckResourceAttr(resourceName, "ssh_public_key", ""),
+					resource.TestCheckResourceAttr(resourceName, "init_script", "IyEvYmluL2Jhc2gKZWNobyAiaGVsbG8iCg=="),
 					resource.TestCheckResourceAttr(resourceName, "subnets.#", "2"),
 					resource.TestCheckResourceAttr(resourceName, "tags.%", "1"),
 					resource.TestCheckResourceAttr(resourceName, "tags.env", "development"),
@@ -54,6 +55,7 @@ func TestAccResourceNodeConfiguration_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "disk_cpu_ratio", "25"),
 					resource.TestCheckResourceAttr(resourceName, "image", "amazon-eks-node-1.23-v20220824"),
+					resource.TestCheckResourceAttr(resourceName, "init_script", ""),
 					resource.TestCheckResourceAttr(resourceName, "tags.%", "0"),
 					resource.TestCheckResourceAttr(resourceName, "eks.0.dns_cluster_ip", ""),
 					resource.TestCheckResourceAttr(resourceName, "eks.0.security_groups.#", "1"),
@@ -71,11 +73,20 @@ func TestAccResourceNodeConfiguration_basic(t *testing.T) {
 
 func testAccNodeConfigurationConfig(rName string) string {
 	return ConfigCompose(testAccClusterConfig(rName), fmt.Sprintf(`
+variable "init_script" {
+  type = string
+  default = <<EOF
+#!/bin/bash
+echo "hello"
+EOF
+}
+
 resource "castai_node_configuration" "test" {
   name   		  = %[1]q
   cluster_id      = castai_eks_cluster.test.id
   disk_cpu_ratio  = 35
   subnets   	  = aws_subnet.test[*].id
+  init_script     = base64encode(var.init_script)
   tags = {
     env = "development"
   }

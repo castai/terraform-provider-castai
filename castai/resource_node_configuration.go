@@ -24,6 +24,7 @@ const (
 	FieldNodeConfigurationSSHPublicKey = "ssh_public_key"
 	FieldNodeConfigurationImage        = "image"
 	FieldNodeConfigurationTags         = "tags"
+	FieldNodeConfigurationInitScript   = "init_script"
 	FieldNodeConfigurationAKS          = "aks"
 	FieldNodeConfigurationEKS          = "eks"
 	FieldNodeConfigurationKOPS         = "kops"
@@ -94,6 +95,12 @@ func resourceNodeConfiguration() *schema.Resource {
 					Type: schema.TypeString,
 				},
 				Description: "Tags to be added on cloud instances for provisioned nodes",
+			},
+			FieldNodeConfigurationInitScript: {
+				Type:             schema.TypeString,
+				Optional:         true,
+				Description:      "Init script to be run on your instance at launch. Should not contain any sensitive data. Value should be base64 encoded.",
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsBase64),
 			},
 			FieldNodeConfigurationEKS: {
 				Type:     schema.TypeList,
@@ -187,6 +194,9 @@ func resourceNodeConfigurationCreate(ctx context.Context, d *schema.ResourceData
 	if v, ok := d.GetOk(FieldNodeConfigurationSSHPublicKey); ok {
 		req.SshPublicKey = toPtr(v.(string))
 	}
+	if v, ok := d.GetOk(FieldNodeConfigurationInitScript); ok {
+		req.InitScript = toPtr(v.(string))
+	}
 	if v := d.Get(FieldNodeConfigurationTags).(map[string]interface{}); len(v) > 0 {
 		req.Tags = &sdk.NodeconfigV1NewNodeConfiguration_Tags{
 			AdditionalProperties: toStringMap(v),
@@ -238,6 +248,7 @@ func resourceNodeConfigurationRead(ctx context.Context, d *schema.ResourceData, 
 	d.Set(FieldNodeConfigurationSubnets, nodeConfig.Subnets)
 	d.Set(FieldNodeConfigurationSSHPublicKey, nodeConfig.SshPublicKey)
 	d.Set(FieldNodeConfigurationImage, nodeConfig.Image)
+	d.Set(FieldNodeConfigurationInitScript, nodeConfig.InitScript)
 	d.Set(FieldNodeConfigurationTags, nodeConfig.Tags.AdditionalProperties)
 
 	if err := d.Set(FieldNodeConfigurationEKS, flattenEKSConfig(nodeConfig.Eks)); err != nil {
@@ -259,6 +270,7 @@ func resourceNodeConfigurationUpdate(ctx context.Context, d *schema.ResourceData
 		FieldNodeConfigurationSubnets,
 		FieldNodeConfigurationSSHPublicKey,
 		FieldNodeConfigurationImage,
+		FieldNodeConfigurationInitScript,
 		FieldNodeConfigurationTags,
 		FieldNodeConfigurationAKS,
 		FieldNodeConfigurationEKS,
@@ -282,6 +294,9 @@ func resourceNodeConfigurationUpdate(ctx context.Context, d *schema.ResourceData
 	}
 	if v, ok := d.GetOk(FieldNodeConfigurationSSHPublicKey); ok {
 		req.SshPublicKey = toPtr(v.(string))
+	}
+	if v, ok := d.GetOk(FieldNodeConfigurationInitScript); ok {
+		req.InitScript = toPtr(v.(string))
 	}
 	if v := d.Get(FieldNodeConfigurationTags).(map[string]interface{}); len(v) > 0 {
 		req.Tags = &sdk.NodeconfigV1NodeConfigurationUpdate_Tags{
