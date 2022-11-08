@@ -18,16 +18,17 @@ import (
 )
 
 const (
-	FieldNodeConfigurationName         = "name"
-	FieldNodeConfigurationDiskCpuRatio = "disk_cpu_ratio"
-	FieldNodeConfigurationSubnets      = "subnets"
-	FieldNodeConfigurationSSHPublicKey = "ssh_public_key"
-	FieldNodeConfigurationImage        = "image"
-	FieldNodeConfigurationTags         = "tags"
-	FieldNodeConfigurationInitScript   = "init_script"
-	FieldNodeConfigurationAKS          = "aks"
-	FieldNodeConfigurationEKS          = "eks"
-	FieldNodeConfigurationKOPS         = "kops"
+	FieldNodeConfigurationName             = "name"
+	FieldNodeConfigurationDiskCpuRatio     = "disk_cpu_ratio"
+	FieldNodeConfigurationSubnets          = "subnets"
+	FieldNodeConfigurationSSHPublicKey     = "ssh_public_key"
+	FieldNodeConfigurationImage            = "image"
+	FieldNodeConfigurationTags             = "tags"
+	FieldNodeConfigurationInitScript       = "init_script"
+	FieldNodeConfigurationContainerRuntime = "container_runtime"
+	FieldNodeConfigurationAKS              = "aks"
+	FieldNodeConfigurationEKS              = "eks"
+	FieldNodeConfigurationKOPS             = "kops"
 )
 
 func resourceNodeConfiguration() *schema.Resource {
@@ -101,6 +102,15 @@ func resourceNodeConfiguration() *schema.Resource {
 				Optional:         true,
 				Description:      "Init script to be run on your instance at launch. Should not contain any sensitive data. Value should be base64 encoded.",
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsBase64),
+			},
+			FieldNodeConfigurationContainerRuntime: {
+				Type:             schema.TypeString,
+				Optional:         true,
+				Description:      "Optional container runtime to be used by kubelet. Applicable for EKS only",
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"dockerd", "containerd"}, true)),
+				DiffSuppressFunc: func(k, oldValue, newValue string, d *schema.ResourceData) bool {
+					return strings.EqualFold(oldValue, newValue)
+				},
 			},
 			FieldNodeConfigurationEKS: {
 				Type:     schema.TypeList,
@@ -197,6 +207,9 @@ func resourceNodeConfigurationCreate(ctx context.Context, d *schema.ResourceData
 	if v, ok := d.GetOk(FieldNodeConfigurationInitScript); ok {
 		req.InitScript = toPtr(v.(string))
 	}
+	if v, ok := d.GetOk(FieldNodeConfigurationContainerRuntime); ok {
+		req.ContainerRuntime = toPtr(sdk.NodeconfigV1ContainerRuntime(v.(string)))
+	}
 	if v := d.Get(FieldNodeConfigurationTags).(map[string]interface{}); len(v) > 0 {
 		req.Tags = &sdk.NodeconfigV1NewNodeConfiguration_Tags{
 			AdditionalProperties: toStringMap(v),
@@ -249,6 +262,7 @@ func resourceNodeConfigurationRead(ctx context.Context, d *schema.ResourceData, 
 	d.Set(FieldNodeConfigurationSSHPublicKey, nodeConfig.SshPublicKey)
 	d.Set(FieldNodeConfigurationImage, nodeConfig.Image)
 	d.Set(FieldNodeConfigurationInitScript, nodeConfig.InitScript)
+	d.Set(FieldNodeConfigurationContainerRuntime, nodeConfig.ContainerRuntime)
 	d.Set(FieldNodeConfigurationTags, nodeConfig.Tags.AdditionalProperties)
 
 	if err := d.Set(FieldNodeConfigurationEKS, flattenEKSConfig(nodeConfig.Eks)); err != nil {
@@ -271,6 +285,7 @@ func resourceNodeConfigurationUpdate(ctx context.Context, d *schema.ResourceData
 		FieldNodeConfigurationSSHPublicKey,
 		FieldNodeConfigurationImage,
 		FieldNodeConfigurationInitScript,
+		FieldNodeConfigurationContainerRuntime,
 		FieldNodeConfigurationTags,
 		FieldNodeConfigurationAKS,
 		FieldNodeConfigurationEKS,
@@ -297,6 +312,9 @@ func resourceNodeConfigurationUpdate(ctx context.Context, d *schema.ResourceData
 	}
 	if v, ok := d.GetOk(FieldNodeConfigurationInitScript); ok {
 		req.InitScript = toPtr(v.(string))
+	}
+	if v, ok := d.GetOk(FieldNodeConfigurationContainerRuntime); ok {
+		req.ContainerRuntime = toPtr(sdk.NodeconfigV1ContainerRuntime(v.(string)))
 	}
 	if v := d.Get(FieldNodeConfigurationTags).(map[string]interface{}); len(v) > 0 {
 		req.Tags = &sdk.NodeconfigV1NodeConfigurationUpdate_Tags{
@@ -450,7 +468,7 @@ func flattenAKSConfig(config *sdk.NodeconfigV1AKSConfig) []map[string]interface{
 func nodeConfigStateImporter(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	ids := strings.Split(d.Id(), "/")
 	if len(ids) != 2 || ids[0] == "" || ids[1] == "" {
-		return nil, fmt.Errorf("expected import id with format: <cluster_id>/<node_configuration name or id>. Got: %q", d.Id())
+		return nil, fmt.Errorf("expected import id with format: <cluster_id>/<node_configuration name or id>, got: %q", d.Id())
 	}
 
 	clusterID, id := ids[0], ids[1]
