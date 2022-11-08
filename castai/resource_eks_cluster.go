@@ -57,6 +57,12 @@ func resourceEKSCluster() *schema.Resource {
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 				Description:      "AWS region where the cluster is placed",
 			},
+			FieldClusterToken: {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Sensitive:   true,
+				Description: "CAST.AI agent cluster token",
+			},
 			FieldEKSClusterAssumeRoleArn: {
 				Type:     schema.TypeString,
 				Optional: true,
@@ -134,6 +140,15 @@ func resourceCastaiEKSClusterRead(ctx context.Context, data *schema.ResourceData
 		data.Set(FieldEKSClusterAccountId, toString(eks.AccountId))
 		data.Set(FieldEKSClusterRegion, toString(eks.Region))
 		data.Set(FieldEKSClusterName, toString(eks.ClusterName))
+	}
+	clusterID := *resp.JSON200.Id
+
+	if _, ok := data.GetOk(FieldClusterToken); !ok {
+		tkn, err := createClusterToken(ctx, client, clusterID)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		data.Set(FieldClusterToken, tkn)
 	}
 
 	return nil

@@ -45,6 +45,7 @@ resource "castai_eks_cluster" "this" {
 
 ### Read-Only
 
+- `cluster_token` (String, Sensitive) CAST.AI agent cluster token
 - `credentials_id` (String) CAST AI internal credentials ID
 - `id` (String) The ID of this resource.
 
