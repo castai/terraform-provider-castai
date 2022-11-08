@@ -15,10 +15,12 @@ const (
 
 func resourceClusterToken() *schema.Resource {
 	return &schema.Resource{
-		CreateContext: resourceCastaiClusterTokenCreate,
-		ReadContext:   resourceCastaiClusterTokenRead,
-		UpdateContext: nil,
-		DeleteContext: resourceCastaiClusterTokenDelete,
+		CreateContext:      resourceCastaiClusterTokenCreate,
+		ReadContext:        resourceCastaiClusterTokenRead,
+		UpdateContext:      nil,
+		DeleteContext:      resourceCastaiClusterTokenDelete,
+		DeprecationMessage: `Resource "cluster_token" will be deprecated in the next major release in favour of cluster resource attribute.`,
+
 		Schema: map[string]*schema.Schema{
 			FieldClusterID: {
 				Type:        schema.TypeString,
@@ -31,6 +33,7 @@ func resourceClusterToken() *schema.Resource {
 				Description: "computed value to store cluster token",
 				Computed:    true,
 				Sensitive:   true,
+				Deprecated:  `Resource "cluster_token" will be deprecated in the next major release in favour of cluster resource attribute.`,
 			},
 		},
 	}
