@@ -28,6 +28,7 @@ const (
 	FieldNodeConfigurationInitScript       = "init_script"
 	FieldNodeConfigurationContainerRuntime = "container_runtime"
 	FieldNodeConfigurationDockerConfig     = "docker_config"
+	FieldNodeConfigurationKubeletConfig    = "kubelet_config"
 	FieldNodeConfigurationAKS              = "aks"
 	FieldNodeConfigurationEKS              = "eks"
 	FieldNodeConfigurationKOPS             = "kops"
@@ -102,7 +103,7 @@ func resourceNodeConfiguration() *schema.Resource {
 			FieldNodeConfigurationInitScript: {
 				Type:             schema.TypeString,
 				Optional:         true,
-				Description:      "Init script to be run on your instance at launch. Should not contain any sensitive data. Value should be base64 encoded.",
+				Description:      "Init script to be run on your instance at launch. Should not contain any sensitive data. Value should be base64 encoded",
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsBase64),
 			},
 			FieldNodeConfigurationContainerRuntime: {
@@ -117,7 +118,13 @@ func resourceNodeConfiguration() *schema.Resource {
 			FieldNodeConfigurationDockerConfig: {
 				Type:             schema.TypeString,
 				Optional:         true,
-				Description:      "Optional docker daemon configuration properties. Provide only properties that you want to override",
+				Description:      "Optional docker daemon configuration properties in JSON format. Provide only properties that you want to override. Applicable for EKS only. Available values https://docs.docker.com/engine/reference/commandline/dockerd/#daemon-configuration-file",
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsJSON),
+			},
+			FieldNodeConfigurationKubeletConfig: {
+				Type:             schema.TypeString,
+				Optional:         true,
+				Description:      "Optional kubelet configuration properties in JSON format. Provide only properties that you want to override. Applicable for EKS only",
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsJSON),
 			},
 			FieldNodeConfigurationEKS: {
@@ -225,6 +232,13 @@ func resourceNodeConfigurationCreate(ctx context.Context, d *schema.ResourceData
 		}
 		req.DockerConfig = toPtr(m)
 	}
+	if v, ok := d.GetOk(FieldNodeConfigurationKubeletConfig); ok {
+		m, err := stringToMap(v.(string))
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		req.KubeletConfig = toPtr(m)
+	}
 	if v := d.Get(FieldNodeConfigurationTags).(map[string]interface{}); len(v) > 0 {
 		req.Tags = &sdk.NodeconfigV1NewNodeConfiguration_Tags{
 			AdditionalProperties: toStringMap(v),
@@ -278,15 +292,22 @@ func resourceNodeConfigurationRead(ctx context.Context, d *schema.ResourceData, 
 	d.Set(FieldNodeConfigurationImage, nodeConfig.Image)
 	d.Set(FieldNodeConfigurationInitScript, nodeConfig.InitScript)
 	d.Set(FieldNodeConfigurationContainerRuntime, nodeConfig.ContainerRuntime)
+	d.Set(FieldNodeConfigurationTags, nodeConfig.Tags.AdditionalProperties)
+
 	if cfg := nodeConfig.DockerConfig; cfg != nil {
-		marshal, err := json.Marshal(nodeConfig.DockerConfig)
+		b, err := json.Marshal(nodeConfig.DockerConfig)
 		if err != nil {
 			return diag.FromErr(err)
 		}
-		d.Set(FieldNodeConfigurationDockerConfig, string(marshal))
+		d.Set(FieldNodeConfigurationDockerConfig, string(b))
 	}
-
-	d.Set(FieldNodeConfigurationTags, nodeConfig.Tags.AdditionalProperties)
+	if cfg := nodeConfig.KubeletConfig; cfg != nil {
+		b, err := json.Marshal(nodeConfig.KubeletConfig)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		d.Set(FieldNodeConfigurationKubeletConfig, string(b))
+	}
 
 	if err := d.Set(FieldNodeConfigurationEKS, flattenEKSConfig(nodeConfig.Eks)); err != nil {
 		return diag.Errorf("error setting eks config: %v", err)
@@ -310,6 +331,7 @@ func resourceNodeConfigurationUpdate(ctx context.Context, d *schema.ResourceData
 		FieldNodeConfigurationInitScript,
 		FieldNodeConfigurationContainerRuntime,
 		FieldNodeConfigurationDockerConfig,
+		FieldNodeConfigurationKubeletConfig,
 		FieldNodeConfigurationTags,
 		FieldNodeConfigurationAKS,
 		FieldNodeConfigurationEKS,
@@ -346,6 +368,13 @@ func resourceNodeConfigurationUpdate(ctx context.Context, d *schema.ResourceData
 			return diag.FromErr(err)
 		}
 		req.DockerConfig = toPtr(m)
+	}
+	if v, ok := d.GetOk(FieldNodeConfigurationKubeletConfig); ok {
+		m, err := stringToMap(v.(string))
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		req.KubeletConfig = toPtr(m)
 	}
 	if v := d.Get(FieldNodeConfigurationTags).(map[string]interface{}); len(v) > 0 {
 		req.Tags = &sdk.NodeconfigV1NodeConfigurationUpdate_Tags{
