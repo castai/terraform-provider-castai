@@ -2,6 +2,7 @@ package castai
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -26,6 +27,7 @@ const (
 	FieldNodeConfigurationTags             = "tags"
 	FieldNodeConfigurationInitScript       = "init_script"
 	FieldNodeConfigurationContainerRuntime = "container_runtime"
+	FieldNodeConfigurationDockerConfig     = "docker_config"
 	FieldNodeConfigurationAKS              = "aks"
 	FieldNodeConfigurationEKS              = "eks"
 	FieldNodeConfigurationKOPS             = "kops"
@@ -111,6 +113,12 @@ func resourceNodeConfiguration() *schema.Resource {
 				DiffSuppressFunc: func(k, oldValue, newValue string, d *schema.ResourceData) bool {
 					return strings.EqualFold(oldValue, newValue)
 				},
+			},
+			FieldNodeConfigurationDockerConfig: {
+				Type:             schema.TypeString,
+				Optional:         true,
+				Description:      "Optional docker daemon configuration properties. Provide only properties that you want to override",
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsJSON),
 			},
 			FieldNodeConfigurationEKS: {
 				Type:     schema.TypeList,
@@ -210,6 +218,13 @@ func resourceNodeConfigurationCreate(ctx context.Context, d *schema.ResourceData
 	if v, ok := d.GetOk(FieldNodeConfigurationContainerRuntime); ok {
 		req.ContainerRuntime = toPtr(sdk.NodeconfigV1ContainerRuntime(v.(string)))
 	}
+	if v, ok := d.GetOk(FieldNodeConfigurationDockerConfig); ok {
+		m, err := stringToMap(v.(string))
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		req.DockerConfig = toPtr(m)
+	}
 	if v := d.Get(FieldNodeConfigurationTags).(map[string]interface{}); len(v) > 0 {
 		req.Tags = &sdk.NodeconfigV1NewNodeConfiguration_Tags{
 			AdditionalProperties: toStringMap(v),
@@ -263,6 +278,14 @@ func resourceNodeConfigurationRead(ctx context.Context, d *schema.ResourceData, 
 	d.Set(FieldNodeConfigurationImage, nodeConfig.Image)
 	d.Set(FieldNodeConfigurationInitScript, nodeConfig.InitScript)
 	d.Set(FieldNodeConfigurationContainerRuntime, nodeConfig.ContainerRuntime)
+	if cfg := nodeConfig.DockerConfig; cfg != nil {
+		marshal, err := json.Marshal(nodeConfig.DockerConfig)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		d.Set(FieldNodeConfigurationDockerConfig, string(marshal))
+	}
+
 	d.Set(FieldNodeConfigurationTags, nodeConfig.Tags.AdditionalProperties)
 
 	if err := d.Set(FieldNodeConfigurationEKS, flattenEKSConfig(nodeConfig.Eks)); err != nil {
@@ -286,6 +309,7 @@ func resourceNodeConfigurationUpdate(ctx context.Context, d *schema.ResourceData
 		FieldNodeConfigurationImage,
 		FieldNodeConfigurationInitScript,
 		FieldNodeConfigurationContainerRuntime,
+		FieldNodeConfigurationDockerConfig,
 		FieldNodeConfigurationTags,
 		FieldNodeConfigurationAKS,
 		FieldNodeConfigurationEKS,
@@ -315,6 +339,13 @@ func resourceNodeConfigurationUpdate(ctx context.Context, d *schema.ResourceData
 	}
 	if v, ok := d.GetOk(FieldNodeConfigurationContainerRuntime); ok {
 		req.ContainerRuntime = toPtr(sdk.NodeconfigV1ContainerRuntime(v.(string)))
+	}
+	if v, ok := d.GetOk(FieldNodeConfigurationDockerConfig); ok {
+		m, err := stringToMap(v.(string))
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		req.DockerConfig = toPtr(m)
 	}
 	if v := d.Get(FieldNodeConfigurationTags).(map[string]interface{}); len(v) > 0 {
 		req.Tags = &sdk.NodeconfigV1NodeConfigurationUpdate_Tags{
@@ -403,10 +434,10 @@ func flattenEKSConfig(config *sdk.NodeconfigV1EKSConfig) []map[string]interface{
 		"instance_profile_arn": config.InstanceProfileArn,
 	}
 	if v := config.KeyPairId; v != nil {
-		m["key_paid_id"] = toStringValue(v)
+		m["key_paid_id"] = toString(v)
 	}
 	if v := config.DnsClusterIp; v != nil {
-		m["dns_cluster_ip"] = toStringValue(v)
+		m["dns_cluster_ip"] = toString(v)
 	}
 	if v := config.SecurityGroups; v != nil {
 		m["security_groups"] = *config.SecurityGroups
@@ -434,7 +465,7 @@ func flattenKOPSConfig(config *sdk.NodeconfigV1KOPSConfig) []map[string]interfac
 	}
 	m := map[string]interface{}{}
 	if v := config.KeyPairId; v != nil {
-		m["key_paid_id"] = toStringValue(v)
+		m["key_paid_id"] = toString(v)
 	}
 
 	return []map[string]interface{}{m}

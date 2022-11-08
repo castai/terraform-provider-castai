@@ -105,10 +105,10 @@ func resourceCastaiGKEClusterCreate(ctx context.Context, data *schema.ResourceDa
 	}
 
 	req.Gke = &sdk.ExternalclusterV1GKEClusterParams{
-		ProjectId:   toStringPtr(data.Get(FieldGKEClusterProjectId).(string)),
+		ProjectId:   toPtr(data.Get(FieldGKEClusterProjectId).(string)),
 		Region:      &region,
 		Location:    &location,
-		ClusterName: toStringPtr(data.Get(FieldGKEClusterName).(string)),
+		ClusterName: toPtr(data.Get(FieldGKEClusterName).(string)),
 	}
 
 	log.Printf("[INFO] Registering new external cluster: %#v", req)
@@ -197,7 +197,7 @@ func updateGKEClusterSettings(ctx context.Context, data *schema.ResourceData, cl
 
 	credentialsJSON, ok := data.GetOk(FieldGKEClusterCredentials)
 	if ok {
-		req.Credentials = toStringPtr(credentialsJSON.(string))
+		req.Credentials = toPtr(credentialsJSON.(string))
 	}
 
 	if err := backoff.Retry(func() error {

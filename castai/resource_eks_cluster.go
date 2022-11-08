@@ -85,9 +85,9 @@ func resourceCastaiEKSClusterCreate(ctx context.Context, data *schema.ResourceDa
 	}
 
 	req.Eks = &sdk.ExternalclusterV1EKSClusterParams{
-		AccountId:   toStringPtr(data.Get(FieldEKSClusterAccountId).(string)),
-		Region:      toStringPtr(data.Get(FieldEKSClusterRegion).(string)),
-		ClusterName: toStringPtr(data.Get(FieldEKSClusterName).(string)),
+		AccountId:   toPtr(data.Get(FieldEKSClusterAccountId).(string)),
+		Region:      toPtr(data.Get(FieldEKSClusterRegion).(string)),
+		ClusterName: toPtr(data.Get(FieldEKSClusterName).(string)),
 	}
 
 	log.Printf("[INFO] Registering new external cluster: %#v", req)
@@ -165,7 +165,7 @@ func updateClusterSettings(ctx context.Context, data *schema.ResourceData, clien
 
 	assumeRoleARN, assumeRoleProvided := data.GetOk(FieldEKSClusterAssumeRoleArn)
 	if assumeRoleProvided {
-		req.Eks.AssumeRoleArn = toStringPtr(assumeRoleARN.(string))
+		req.Eks.AssumeRoleArn = toPtr(assumeRoleARN.(string))
 	}
 
 	if err := backoff.Retry(func() error {

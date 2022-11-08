@@ -31,6 +31,7 @@ func TestAccResourceNodeConfiguration_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "ssh_public_key", ""),
 					resource.TestCheckResourceAttr(resourceName, "init_script", "IyEvYmluL2Jhc2gKZWNobyAiaGVsbG8iCg=="),
 					resource.TestCheckResourceAttr(resourceName, "container_runtime", "DOCKERD"),
+					resource.TestCheckResourceAttr(resourceName, "docker_config", "{\"insecure-registries\":[\"registry.com:5000\"],\"max-concurrent-downloads\":10}"),
 					resource.TestCheckResourceAttr(resourceName, "subnets.#", "2"),
 					resource.TestCheckResourceAttr(resourceName, "tags.%", "1"),
 					resource.TestCheckResourceAttr(resourceName, "tags.env", "development"),
@@ -58,6 +59,7 @@ func TestAccResourceNodeConfiguration_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "image", "amazon-eks-node-1.23-v20220824"),
 					resource.TestCheckResourceAttr(resourceName, "init_script", ""),
 					resource.TestCheckResourceAttr(resourceName, "container_runtime", "CONTAINERD"),
+					resource.TestCheckResourceAttr(resourceName, "docker_config", ""),
 					resource.TestCheckResourceAttr(resourceName, "tags.%", "0"),
 					resource.TestCheckResourceAttr(resourceName, "eks.0.dns_cluster_ip", ""),
 					resource.TestCheckResourceAttr(resourceName, "eks.0.security_groups.#", "1"),
@@ -89,6 +91,10 @@ resource "castai_node_configuration" "test" {
   disk_cpu_ratio    = 35
   subnets   	    = aws_subnet.test[*].id
   init_script       = base64encode(var.init_script)
+  docker_config     = jsonencode({
+    "insecure-registries"      = ["registry.com:5000"],
+    "max-concurrent-downloads" = 10
+  })
   container_runtime = "dockerd"
   tags = {
     env = "development"

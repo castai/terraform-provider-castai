@@ -145,9 +145,9 @@ func resourceCastaiAKSClusterCreate(ctx context.Context, data *schema.ResourceDa
 	}
 
 	req.Aks = &sdk.ExternalclusterV1AKSClusterParams{
-		Region:            toStringPtr(data.Get(FieldAKSClusterRegion).(string)),
-		SubscriptionId:    toStringPtr(data.Get(FieldAKSClusterSubscriptionID).(string)),
-		NodeResourceGroup: toStringPtr(data.Get(FieldAKSClusterNodeResourceGroup).(string)),
+		Region:            toPtr(data.Get(FieldAKSClusterRegion).(string)),
+		SubscriptionId:    toPtr(data.Get(FieldAKSClusterSubscriptionID).(string)),
+		NodeResourceGroup: toPtr(data.Get(FieldAKSClusterNodeResourceGroup).(string)),
 	}
 
 	log.Printf("[INFO] Registering new external AKS cluster: %#v", req)
