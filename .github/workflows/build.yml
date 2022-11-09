@@ -4,6 +4,7 @@ on:
     branches: [ '*' ]
     paths-ignore:
       - '**.md'
+      - '**.md.tmpl'
       - 'examples/**'
 jobs:
   build:

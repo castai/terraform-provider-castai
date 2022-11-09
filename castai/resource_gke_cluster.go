@@ -29,7 +29,7 @@ func resourceGKECluster() *schema.Resource {
 		ReadContext:   resourceCastaiGKEClusterRead,
 		UpdateContext: resourceCastaiGKEClusterUpdate,
 		DeleteContext: resourceCastaiPublicCloudClusterDelete,
-		Description:   "GKE cluster resource allows connecting an existing GEK cluster to CAST AI.",
+		Description:   "GKE cluster resource allows connecting an existing GKE cluster to CAST AI.",
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(5 * time.Minute),
