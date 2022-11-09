@@ -52,9 +52,9 @@ func dataSourceCastaiEKSClusterIDRead(ctx context.Context, data *schema.Resource
 	}
 
 	req.Eks = &sdk.ExternalclusterV1EKSClusterParams{
-		AccountId:   toStringPtr(data.Get(EKSClusterIDFieldAccountId).(string)),
-		Region:      toStringPtr(data.Get(EKSClusterIDFieldRegion).(string)),
-		ClusterName: toStringPtr(data.Get(EKSClusterIDFieldClusterName).(string)),
+		AccountId:   toPtr(data.Get(EKSClusterIDFieldAccountId).(string)),
+		Region:      toPtr(data.Get(EKSClusterIDFieldRegion).(string)),
+		ClusterName: toPtr(data.Get(EKSClusterIDFieldClusterName).(string)),
 	}
 
 	resp, err := client.ExternalClusterAPIRegisterClusterWithResponse(ctx, req)

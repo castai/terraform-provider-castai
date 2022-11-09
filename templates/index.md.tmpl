@@ -1,0 +1,37 @@
+---
+page_title: "CAST AI Provider"
+description: |-
+  Use CAST AI provider to onboard the cluster and manage resources supported by CAST AI.
+---
+
+# {{ .RenderedProviderName | upper }} Provider
+
+CAST AI provider can be used to onboard your cluster and manage resources supported by CAST AI.
+
+-> **Note** To use the provider, an API token first must be generated for your account at https://console.cast.ai/
+
+## Provider configuration
+
+Terraform 0.13 and later:
+
+```terraform
+terraform {
+  required_providers {
+    castai = {
+      source  = "castai/castai"
+      version = "1.2.0"
+    }
+  }
+}
+
+# Configure the provider
+provider "castai" {
+  api_token = "my-castai-api-token"
+}
+```
+
+## Example Usage
+
+{{ tffile "examples/eks_cluster_readonly/main.tf" }}
+
+{{ .SchemaMarkdown | trimspace }}

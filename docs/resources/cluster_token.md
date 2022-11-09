@@ -21,7 +21,7 @@ description: |-
 
 ### Read-Only
 
-- `cluster_token` (String, Sensitive) computed value to store cluster token
+- `cluster_token` (String, Sensitive, Deprecated) computed value to store cluster token
 - `id` (String) The ID of this resource.
 
 

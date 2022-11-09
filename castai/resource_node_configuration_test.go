@@ -29,6 +29,10 @@ func TestAccResourceNodeConfiguration_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "disk_cpu_ratio", "35"),
 					resource.TestCheckResourceAttr(resourceName, "image", ""),
 					resource.TestCheckResourceAttr(resourceName, "ssh_public_key", ""),
+					resource.TestCheckResourceAttr(resourceName, "init_script", "IyEvYmluL2Jhc2gKZWNobyAiaGVsbG8iCg=="),
+					resource.TestCheckResourceAttr(resourceName, "container_runtime", "DOCKERD"),
+					resource.TestCheckResourceAttr(resourceName, "docker_config", "{\"insecure-registries\":[\"registry.com:5000\"],\"max-concurrent-downloads\":10}"),
+					resource.TestCheckResourceAttr(resourceName, "kubelet_config", "{\"registryBurst\":20,\"registryPullQPS\":10}"),
 					resource.TestCheckResourceAttr(resourceName, "subnets.#", "2"),
 					resource.TestCheckResourceAttr(resourceName, "tags.%", "1"),
 					resource.TestCheckResourceAttr(resourceName, "tags.env", "development"),
@@ -54,6 +58,10 @@ func TestAccResourceNodeConfiguration_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "disk_cpu_ratio", "25"),
 					resource.TestCheckResourceAttr(resourceName, "image", "amazon-eks-node-1.23-v20220824"),
+					resource.TestCheckResourceAttr(resourceName, "init_script", ""),
+					resource.TestCheckResourceAttr(resourceName, "container_runtime", "CONTAINERD"),
+					resource.TestCheckResourceAttr(resourceName, "docker_config", ""),
+					resource.TestCheckResourceAttr(resourceName, "kubelet_config", "{\"eventRecordQPS\":10}"),
 					resource.TestCheckResourceAttr(resourceName, "tags.%", "0"),
 					resource.TestCheckResourceAttr(resourceName, "eks.0.dns_cluster_ip", ""),
 					resource.TestCheckResourceAttr(resourceName, "eks.0.security_groups.#", "1"),
@@ -71,11 +79,29 @@ func TestAccResourceNodeConfiguration_basic(t *testing.T) {
 
 func testAccNodeConfigurationConfig(rName string) string {
 	return ConfigCompose(testAccClusterConfig(rName), fmt.Sprintf(`
+variable "init_script" {
+  type = string
+  default = <<EOF
+#!/bin/bash
+echo "hello"
+EOF
+}
+
 resource "castai_node_configuration" "test" {
-  name   		  = %[1]q
-  cluster_id      = castai_eks_cluster.test.id
-  disk_cpu_ratio  = 35
-  subnets   	  = aws_subnet.test[*].id
+  name   		    = %[1]q
+  cluster_id        = castai_eks_cluster.test.id
+  disk_cpu_ratio    = 35
+  subnets   	    = aws_subnet.test[*].id
+  init_script       = base64encode(var.init_script)
+  docker_config     = jsonencode({
+    "insecure-registries"      = ["registry.com:5000"],
+    "max-concurrent-downloads" = 10
+  })
+  kubelet_config     = jsonencode({
+	"registryBurst": 20,
+	"registryPullQPS": 10
+  })
+  container_runtime = "dockerd"
   tags = {
     env = "development"
   }
@@ -96,10 +122,14 @@ resource "castai_node_configuration_default" "test" {
 func testAccNodeConfigurationUpdated(rName string) string {
 	return ConfigCompose(testAccClusterConfig(rName), fmt.Sprintf(`
 resource "castai_node_configuration" "test" {
-  name   		  = %[1]q
-  cluster_id      = castai_eks_cluster.test.id
-  subnets   	  = aws_subnet.test[*].id
-  image           = "amazon-eks-node-1.23-v20220824" 
+  name   		    = %[1]q
+  cluster_id        = castai_eks_cluster.test.id
+  subnets   	    = aws_subnet.test[*].id
+  image             = "amazon-eks-node-1.23-v20220824" 
+  container_runtime = "containerd"
+  kubelet_config     = jsonencode({
+    "eventRecordQPS": 10
+  })
   eks {
 	instance_profile_arn = aws_iam_instance_profile.test.arn
     security_groups      = [aws_security_group.test.id]
