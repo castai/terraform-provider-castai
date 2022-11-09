@@ -18,3 +18,25 @@ it as the default using `castai_node_configuration_default` resource.
 {{ tffile "examples/resources/node_configuration/resource.tf" }}
 
 {{ .SchemaMarkdown | trimspace }}
+
+
+## Importing
+You can use the `terraform import` command to import existing node configuration to Terraform state.
+
+To import a resource, first write a resource block for it in your configuration, establishing the name by which
+it will be known to Terraform:
+```hcl
+resource "castai_node_configuration" "default" {
+  # ...
+}
+```
+
+Now terraform import can be run to attach an existing node configuration to this resource:
+```shell
+$ terraform import castai_node_configuration.default <cluster_id>/default
+```
+
+If you are using CAST AI Terraform modules, import command will be slightly different:
+```shell
+$ terraform import 'module.castai-eks-cluster.castai_node_configuration.this["default"]' <cluster_id>/default
+```

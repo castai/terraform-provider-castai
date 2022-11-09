@@ -3,12 +3,12 @@
 page_title: "castai_gke_cluster Resource - terraform-provider-castai"
 subcategory: ""
 description: |-
-  GKE cluster resource allows connecting an existing GEK cluster to CAST AI.
+  GKE cluster resource allows connecting an existing GKE cluster to CAST AI.
 ---
 
 # castai_gke_cluster (Resource)
 
-GKE cluster resource allows connecting an existing GEK cluster to CAST AI.
+GKE cluster resource allows connecting an existing GKE cluster to CAST AI.
 
 
 
