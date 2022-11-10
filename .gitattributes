@@ -1,3 +1,4 @@
 go.sum linguist-generated=true
 **/*.gen.go linguist-generated=true
 **/mock/*.go linguist-generated=true
+docs/** linguist-documentation
