@@ -58,9 +58,10 @@ func resourceEKSCluster() *schema.Resource {
 				Description:      "AWS region where the cluster is placed",
 			},
 			FieldEKSClusterAssumeRoleArn: {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "AWS ARN for assume role that should be used instead of IAM account",
+				Type:     schema.TypeString,
+				Optional: true,
+				Description: "AWS IAM role ARN that will be assumed by CAST AI user. " +
+					"This role should allow `sts:AssumeRole` action for CAST AI user that can be retrieved using `castai_eks_user_arn` data source",
 			},
 			FieldClusterCredentialsId: {
 				Type:        schema.TypeString,
