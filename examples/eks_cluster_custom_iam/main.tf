@@ -16,6 +16,7 @@ provider "aws" {
 
 provider "castai" {
   api_token = var.castai_api_token
+  api_url   = var.castai_api_url
 }
 
 provider "kubernetes" {
@@ -39,6 +40,7 @@ data "castai_eks_user_arn" "castai_user_arn" {
 module "castai-eks-cluster" {
   source = "castai/eks-cluster/castai"
 
+  api_url             = var.castai_api_url
   aws_account_id      = data.aws_caller_identity.current.account_id
   aws_cluster_region  = var.cluster_region
   aws_cluster_name    = module.eks.cluster_id
