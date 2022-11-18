@@ -10,7 +10,7 @@ examples/**/crash.log
 examples/**/*.tfstate
 examples/**/*.tfstate.backup
 examples/**/.terraform.lock.hcl
-examples/**/local.auto.tfvars
+examples/**/*.tfvars
 examples/**/.kube/*
 # terraform examples/localdev is meant for local development
 examples/localdev/*
