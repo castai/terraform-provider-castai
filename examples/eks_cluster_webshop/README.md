@@ -4,7 +4,7 @@ This example showcase how you can create EKS cluster with NAT Gateway and Applic
 
 ## Example configuration
 
-Save these variable to your local terraform.tfvars file, replacing the sample values below. In order to obtain the value of aws_account_id, run the following command and copy the value of "Account" into the variable file below.
+Save these variables to your local terraform.tfvars file, replacing the sample values below. In order to obtain the value of aws_account_id, run the following command and copy the value of "Account" into the variable file.
 
 ```shell
 aws sts get-caller-identity
