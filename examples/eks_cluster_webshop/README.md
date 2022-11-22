@@ -4,8 +4,14 @@ This example showcase how you can create EKS cluster with NAT Gateway and Applic
 
 ## Example configuration
 
+Save these variable to your local terraform.tfvars file, replacing the sample values below. In order to obtain the value of aws_account_id, run the following command and copy the value of "Account" into the variable file below.
+
+```shell
+aws sts get-caller-identity
+```
+
 ```hcl
-# local.auto.tfvars
+# terraform.tfvars
 castai_api_token = "<API>"
 aws_account_id = "ID"
 aws_access_key_id = "KEY"
@@ -23,6 +29,16 @@ terraform init
 terraform apply -target module.vpc # create vpc first
 terraform apply -target module.eks # create EKS cluster
 terraform apply # apply the rest
+```
+
+## Getting a Kubeconfig File
+
+The EKS cluster will be created once the above Terraform completes. In order to access the newly created
+cluster, run the following eksctl command. The command will append your local kubeconfig file and set the
+correct context.
+
+```shell
+aws eks update-kubeconfig --region <cluster_region_code> --name <cluster_name>
 ```
 
 ## Deployed components 
@@ -120,7 +136,7 @@ More info about available annotations for ALB can be found [here](https://kubern
 Demo apps is a echo-server with additional container that uses PVC 
 
 ```shell
-kubectl apply -f k8s/namespaces.yaml # create namespaces
+kubectl apply -f k8s/namespace.yaml # create namespaces
 kubectl apply -f k8s # create other resources
 ```
 
