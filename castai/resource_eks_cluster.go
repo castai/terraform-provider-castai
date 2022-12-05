@@ -134,6 +134,7 @@ func resourceCastaiEKSClusterRead(ctx context.Context, data *schema.ResourceData
 		data.Set(FieldEKSClusterAccountId, toString(eks.AccountId))
 		data.Set(FieldEKSClusterRegion, toString(eks.Region))
 		data.Set(FieldEKSClusterName, toString(eks.ClusterName))
+		data.Set(FieldEKSClusterAssumeRoleArn, toString(eks.AssumeRoleArn))
 	}
 
 	return nil
