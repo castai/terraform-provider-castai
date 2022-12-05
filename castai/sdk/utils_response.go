@@ -9,20 +9,12 @@ func CheckGetResponse(response Response, err error) error {
 	return checkResponse(response, err, http.StatusOK)
 }
 
-func CheckCreateResponse(response Response, err error) error {
-	return checkResponse(response, err, http.StatusCreated)
-}
-
 func CheckOKResponse(response Response, err error) error {
 	return checkResponse(response, err, http.StatusOK)
 }
 
 func CheckResponseNoContent(response Response, err error) error {
 	return checkResponse(response, err, http.StatusNoContent)
-}
-
-func CheckDeleteResponse(response Response, err error) error {
-	return CheckResponseNoContent(response, err)
 }
 
 func StatusOk(resp Response) error {
