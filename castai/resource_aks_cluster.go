@@ -190,9 +190,7 @@ func updateAKSClusterSettings(ctx context.Context, data *schema.ResourceData, cl
 
 	log.Printf("[INFO] Updating cluster settings.")
 
-	req := sdk.ExternalClusterAPIUpdateClusterJSONRequestBody{
-		Aks: &sdk.ExternalclusterV1UpdateAKSClusterParams{},
-	}
+	req := sdk.ExternalClusterAPIUpdateClusterJSONRequestBody{}
 
 	clientID := data.Get(FieldAKSClusterClientID).(string)
 	tenantID := data.Get(FieldAKSClusterTenantID).(string)

@@ -9,6 +9,18 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/logging"
 )
 
+// Currently, sdk doesn't have generated constants for cluster status and agent status, declaring our own.
+const (
+	ClusterStatusReady    = "ready"
+	ClusterStatusDeleting = "deleting"
+	ClusterStatusDeleted  = "deleted"
+	ClusterStatusArchived = "archived"
+	ClusterStatusFailed   = "failed"
+
+	ClusterAgentStatusDisconnected  = "disconnected"
+	ClusterAgentStatusDisconnecting = "disconnecting"
+)
+
 func CreateClient(apiURL, apiToken, userAgent string) (*ClientWithResponses, error) {
 	httpClientOption := func(client *Client) error {
 		client.Client = &http.Client{
