@@ -63,6 +63,12 @@ func resourceEKSCluster() *schema.Resource {
 				Description: "AWS IAM role ARN that will be assumed by CAST AI user. " +
 					"This role should allow `sts:AssumeRole` action for CAST AI user that can be retrieved using `castai_eks_user_arn` data source",
 			},
+			FieldClusterToken: {
+				Type:        schema.TypeString,
+				Description: "computed value to store cluster token",
+				Computed:    true,
+				Sensitive:   true,
+			},
 			FieldClusterCredentialsId: {
 				Type:        schema.TypeString,
 				Computed:    true,
@@ -99,11 +105,17 @@ func resourceCastaiEKSClusterCreate(ctx context.Context, data *schema.ResourceDa
 	}
 
 	clusterID := *resp.JSON200.Id
+	tkn, err := createClusterToken(ctx, client, clusterID)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 	data.SetId(clusterID)
+	data.Set(FieldClusterToken, tkn)
 
 	if err := updateClusterSettings(ctx, data, client); err != nil {
 		return diag.FromErr(err)
 	}
+	log.Printf("[INFO] Cluster with id %q has been registered, don't forget to install castai-agent helm chart", data.Id())
 
 	return resourceCastaiEKSClusterRead(ctx, data, meta)
 }
@@ -135,6 +147,15 @@ func resourceCastaiEKSClusterRead(ctx context.Context, data *schema.ResourceData
 		data.Set(FieldEKSClusterRegion, toString(eks.Region))
 		data.Set(FieldEKSClusterName, toString(eks.ClusterName))
 		data.Set(FieldEKSClusterAssumeRoleArn, toString(eks.AssumeRoleArn))
+	}
+	clusterID := *resp.JSON200.Id
+
+	if _, ok := data.GetOk(FieldClusterToken); !ok {
+		tkn, err := createClusterToken(ctx, client, clusterID)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		data.Set(FieldClusterToken, tkn)
 	}
 
 	return nil
