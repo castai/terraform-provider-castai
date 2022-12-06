@@ -16,6 +16,7 @@ import (
 func TestAccResourceNodeConfiguration_basic(t *testing.T) {
 	rName := fmt.Sprintf("%v-node-config-%v", ResourcePrefix, acctest.RandString(8))
 	resourceName := "castai_node_configuration.test"
+	clusterName := "core-tf-acc"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
@@ -23,7 +24,7 @@ func TestAccResourceNodeConfiguration_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckNodeConfigurationDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNodeConfigurationConfig(rName),
+				Config: testAccNodeConfigurationConfig(rName, clusterName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "name", rName),
 					resource.TestCheckResourceAttr(resourceName, "disk_cpu_ratio", "35"),
@@ -54,7 +55,7 @@ func TestAccResourceNodeConfiguration_basic(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccNodeConfigurationUpdated(rName),
+				Config: testAccNodeConfigurationUpdated(rName, clusterName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "disk_cpu_ratio", "25"),
 					resource.TestCheckResourceAttr(resourceName, "image", "amazon-eks-node-1.23-v20220824"),
@@ -77,8 +78,8 @@ func TestAccResourceNodeConfiguration_basic(t *testing.T) {
 	})
 }
 
-func testAccNodeConfigurationConfig(rName string) string {
-	return ConfigCompose(testAccClusterConfig(rName), fmt.Sprintf(`
+func testAccNodeConfigurationConfig(rName, clusterName string) string {
+	return ConfigCompose(testAccClusterConfig(rName, clusterName), fmt.Sprintf(`
 variable "init_script" {
   type = string
   default = <<EOF
@@ -119,8 +120,8 @@ resource "castai_node_configuration_default" "test" {
 `, rName))
 }
 
-func testAccNodeConfigurationUpdated(rName string) string {
-	return ConfigCompose(testAccClusterConfig(rName), fmt.Sprintf(`
+func testAccNodeConfigurationUpdated(rName, clusterName string) string {
+	return ConfigCompose(testAccClusterConfig(rName, clusterName), fmt.Sprintf(`
 resource "castai_node_configuration" "test" {
   name   		    = %[1]q
   cluster_id        = castai_eks_cluster.test.id
@@ -137,7 +138,7 @@ resource "castai_node_configuration" "test" {
 }`, rName))
 }
 
-func testAccClusterConfig(rName string) string {
+func testAccClusterConfig(rName string, clusterName string) string {
 	return ConfigCompose(testAccAWSConfig(rName), fmt.Sprintf(`
 data "castai_eks_clusterid" "test" {
   account_id   = data.aws_caller_identity.current.account_id
@@ -155,7 +156,7 @@ resource "castai_eks_cluster" "test" {
   name            = %[1]q
   assume_role_arn = aws_iam_role.test.arn
 }
-`, rName))
+`, clusterName))
 }
 
 func testAccAWSConfig(rName string) string {
