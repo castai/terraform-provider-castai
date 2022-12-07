@@ -2267,6 +2267,7 @@ type InsightsV1GetBestPracticesCheckDetailsResponse struct {
 
 	// Check labels.
 	Labels         *[]string `json:"labels,omitempty"`
+	Manual         *bool     `json:"manual,omitempty"`
 	MdCheckDetails *string   `json:"mdCheckDetails,omitempty"`
 
 	// Human readable rule name.
@@ -2337,6 +2338,7 @@ type InsightsV1GetBestPracticesReportResponseCheckItem struct {
 
 	// Check labels.
 	Labels *[]string `json:"labels,omitempty"`
+	Manual *bool     `json:"manual,omitempty"`
 
 	// Human readable rule name.
 	Name *string `json:"name,omitempty"`
@@ -2348,7 +2350,7 @@ type InsightsV1GetBestPracticesReportResponseCheckItem struct {
 	SeverityLevel *string  `json:"severityLevel,omitempty"`
 	SeverityScore *float32 `json:"severityScore,omitempty"`
 
-	// Total number of objects that there checked.
+	// Total number of objects that were checked.
 	Total *int32 `json:"total,omitempty"`
 
 	// Category of insight.
@@ -2359,6 +2361,7 @@ type InsightsV1GetBestPracticesReportResponseCheckItem struct {
 type InsightsV1GetBestPracticesReportSummaryResponse struct {
 	// Number of checks that failed.
 	ChecksFailed *int32 `json:"checksFailed,omitempty"`
+	ChecksManual *int32 `json:"checksManual,omitempty"`
 
 	// Number of checks that passed.
 	ChecksPassed *int32 `json:"checksPassed,omitempty"`
