@@ -2,7 +2,7 @@ package castai
 
 import (
 	"context"
-	"fmt"
+	"errors"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -13,12 +13,18 @@ const (
 	FieldClusterToken = "cluster_token"
 )
 
+// Deprecated.
 func resourceClusterToken() *schema.Resource {
 	return &schema.Resource{
-		CreateContext:      resourceCastaiClusterTokenCreate,
-		ReadContext:        resourceCastaiClusterTokenRead,
-		UpdateContext:      nil,
-		DeleteContext:      resourceCastaiClusterTokenDelete,
+		CreateContext: func(_ context.Context, _ *schema.ResourceData, _ interface{}) diag.Diagnostics {
+			return diag.FromErr(errors.New("use castai_eks_cluster.cluster_token instead"))
+		},
+		ReadContext: func(_ context.Context, _ *schema.ResourceData, _ interface{}) diag.Diagnostics {
+			return diag.FromErr(errors.New("use castai_eks_cluster.cluster_token instead"))
+		},
+		DeleteContext: func(_ context.Context, _ *schema.ResourceData, _ interface{}) diag.Diagnostics {
+			return nil
+		},
 		DeprecationMessage: `Resource "cluster_token" will be deprecated in the next major release in favour of cluster resource attribute.`,
 
 		Schema: map[string]*schema.Schema{
@@ -37,31 +43,4 @@ func resourceClusterToken() *schema.Resource {
 			},
 		},
 	}
-}
-
-func resourceCastaiClusterTokenRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	if _, ok := data.GetOk(FieldClusterToken); !ok {
-		return diag.Errorf("Cluster token is not created")
-	}
-
-	return nil
-}
-
-func resourceCastaiClusterTokenCreate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ProviderConfig).api
-
-	clusterID := data.Get(FieldClusterID).(string)
-	tkn, err := createClusterToken(ctx, client, clusterID)
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	data.Set(FieldClusterToken, tkn)
-	data.SetId(fmt.Sprintf("%s-cluster-token", clusterID))
-	return nil
-}
-
-func resourceCastaiClusterTokenDelete(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	data.SetId("")
-	return nil
 }

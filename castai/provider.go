@@ -39,17 +39,18 @@ func Provider(version string) *schema.Provider {
 			"castai_gke_cluster":                resourceGKECluster(),
 			"castai_aks_cluster":                resourceAKSCluster(),
 			"castai_autoscaler":                 resourceAutoscaler(),
-			"castai_cluster_token":              resourceClusterToken(),
 			"castai_node_configuration":         resourceNodeConfiguration(),
 			"castai_node_configuration_default": resourceNodeConfigurationDefault(),
+			// TODO: remove with next major release.
+			"castai_cluster_token": resourceClusterToken(),
 		},
 
 		DataSourcesMap: map[string]*schema.Resource{
-			"castai_eks_settings": dataSourceEKSSettings(),
-			// TODO: remove with next major release.
-			"castai_eks_clusterid":     dataSourceEKSClusterID(),
+			"castai_eks_settings":      dataSourceEKSSettings(),
 			"castai_eks_user_arn":      dataSourceEKSClusterUserARN(),
 			"castai_gke_user_policies": dataSourceGKEPolicies(),
+			// TODO: remove with next major release.
+			"castai_eks_clusterid": dataSourceEKSClusterID(),
 		},
 
 		ConfigureContextFunc: providerConfigure(version),
