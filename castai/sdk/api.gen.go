@@ -1657,6 +1657,138 @@ type CostreportV1beta1GetClustersCostReportResponseIntervalItem struct {
 	Timestamp *time.Time `json:"timestamp,omitempty"`
 }
 
+// CostreportV1beta1GetCostAllocationGroupSummaryResponse defines model for costreport.v1beta1.GetCostAllocationGroupSummaryResponse.
+type CostreportV1beta1GetCostAllocationGroupSummaryResponse struct {
+	Items *[]CostreportV1beta1GetCostAllocationGroupSummaryResponseCostAllocationGroupItem `json:"items,omitempty"`
+}
+
+// CostreportV1beta1GetCostAllocationGroupSummaryResponseCostAllocationGroupItem defines model for costreport.v1beta1.GetCostAllocationGroupSummaryResponse.CostAllocationGroupItem.
+type CostreportV1beta1GetCostAllocationGroupSummaryResponseCostAllocationGroupItem struct {
+	GroupId   *string                                                           `json:"groupId,omitempty"`
+	GroupName *string                                                           `json:"groupName,omitempty"`
+	Items     *[]CostreportV1beta1GetCostAllocationGroupSummaryResponseCostItem `json:"items,omitempty"`
+}
+
+// Defines cost details for a given time.
+type CostreportV1beta1GetCostAllocationGroupSummaryResponseCostItem struct {
+	// Average cost of on-demand instances for the given time period.
+	CostOnDemand *string `json:"costOnDemand,omitempty"`
+
+	// Average cost of spot instances for the given time period.
+	CostSpot *string `json:"costSpot,omitempty"`
+
+	// Average cost of spot-fallback instances for the given time period.
+	CostSpotFallback *string `json:"costSpotFallback,omitempty"`
+
+	// Average number of CPUs used on on-demand instances for the given time period.
+	CpuCountOnDemand *string `json:"cpuCountOnDemand,omitempty"`
+
+	// Average number of CPUs used on spot instances for the given time period.
+	CpuCountSpot *string `json:"cpuCountSpot,omitempty"`
+
+	// Average number of CPUs used on spot-fallback instances for the given time period.
+	CpuCountSpotFallback *string `json:"cpuCountSpotFallback,omitempty"`
+
+	// Average amount of pods on on-demand instances for the given time period.
+	PodCountOnDemand *string `json:"podCountOnDemand,omitempty"`
+
+	// Average amount of pods on spot instances for the given time period.
+	PodCountSpot *string `json:"podCountSpot,omitempty"`
+
+	// Average amount of pods on spot-fallback instances for the given time period.
+	PodCountSpotFallback *string `json:"podCountSpotFallback,omitempty"`
+
+	// Timestamp of entry.
+	Timestamp *time.Time `json:"timestamp,omitempty"`
+
+	// Total cost of on-demand instances for the given time period.
+	TotalCostOnDemand *string `json:"totalCostOnDemand,omitempty"`
+
+	// Total cost of spot instances for the given time period.
+	TotalCostSpot *string `json:"totalCostSpot,omitempty"`
+
+	// Total cost of spot-fallback instances for the given time period.
+	TotalCostSpotFallback *string `json:"totalCostSpotFallback,omitempty"`
+
+	// Number of workloads included in group.
+	WorkloadCount *string `json:"workloadCount,omitempty"`
+}
+
+// Defines cluster workload cost response.
+type CostreportV1beta1GetCostAllocationGroupWorkloadsResponse struct {
+	GroupId   *string `json:"groupId,omitempty"`
+	GroupName *string `json:"groupName,omitempty"`
+
+	// Workload entries.
+	Items *[]CostreportV1beta1GetCostAllocationGroupWorkloadsResponseWorkloadItem `json:"items,omitempty"`
+}
+
+// Defines a workloads cost for a given time.
+type CostreportV1beta1GetCostAllocationGroupWorkloadsResponseWorkloadCostItem struct {
+	// Average cost of the workload that is on on-demand instances for the given time period.
+	CostOnDemand *string `json:"costOnDemand,omitempty"`
+
+	// Average cost of the workload that is on spot instances for the given time period.
+	CostSpot *string `json:"costSpot,omitempty"`
+
+	// Average cost of the workload that is on spot-fallback instances for the given time period.
+	CostSpotFallback *string `json:"costSpotFallback,omitempty"`
+
+	// Average number of CPUs of the workload that is on on-demand instances for the given time period.
+	CpuCountOnDemand *string `json:"cpuCountOnDemand,omitempty"`
+
+	// Average number of CPUs of the workload that is on spot instances for the given time period.
+	CpuCountSpot *string `json:"cpuCountSpot,omitempty"`
+
+	// Average number of CPUs of the workload that is on spot-fallback instances for the given time period.
+	CpuCountSpotFallback *string `json:"cpuCountSpotFallback,omitempty"`
+
+	// Average amount of pods for the workload that are on on-demand instances for the given time period.
+	PodCountOnDemand *string `json:"podCountOnDemand,omitempty"`
+
+	// Average amount of pods for the workload that are on spot instances for the given time period.
+	PodCountSpot *string `json:"podCountSpot,omitempty"`
+
+	// Average amount of pods for the workload that are on spot-fallback instances for the given time period.
+	PodCountSpotFallback *string `json:"podCountSpotFallback,omitempty"`
+
+	// Timestamp of entry creation.
+	Timestamp *time.Time `json:"timestamp,omitempty"`
+
+	// Total cost of the workload that is on on-demand instances for the given time period.
+	TotalCostOnDemand *string `json:"totalCostOnDemand,omitempty"`
+
+	// Total cost of the workload that is on spot instances for the given time period.
+	TotalCostSpot *string `json:"totalCostSpot,omitempty"`
+
+	// Total cost of the workload that is on spot-fallback instances for the given time period.
+	TotalCostSpotFallback *string `json:"totalCostSpotFallback,omitempty"`
+
+	// Number of minutes the workload was running on on-demand instances for the given time period.
+	UptimeMinutesOnDemand *string `json:"uptimeMinutesOnDemand,omitempty"`
+
+	// Number of minutes the workload was running on spot instances for the given time period.
+	UptimeMinutesSpot *string `json:"uptimeMinutesSpot,omitempty"`
+
+	// Number of minutes the workload was running on spot-fallback instances for the given time period.
+	UptimeMinutesSpotFallback *string `json:"uptimeMinutesSpotFallback,omitempty"`
+}
+
+// Defines a workload.
+type CostreportV1beta1GetCostAllocationGroupWorkloadsResponseWorkloadItem struct {
+	// Cost metrics of the workload.
+	Items *[]CostreportV1beta1GetCostAllocationGroupWorkloadsResponseWorkloadCostItem `json:"items,omitempty"`
+
+	// Namespace the workload is in.
+	Namespace *string `json:"namespace,omitempty"`
+
+	// Name of the workload.
+	WorkloadName *string `json:"workloadName,omitempty"`
+
+	// Type of the workload.
+	WorkloadType *string `json:"workloadType,omitempty"`
+}
+
 // Defines savings recommendation response.
 type CostreportV1beta1GetSavingsRecommendationResponse struct {
 	// SavingsCurrentConfiguration defines current cluster configuration.
@@ -2601,8 +2733,14 @@ type InsightsV1VulnerabilityItem struct {
 	// Versions with fixed vulnerability.
 	FixedVersions *string `json:"fixedVersions,omitempty"`
 
+	// Reference links.
+	ReferenceLinks *[]string `json:"referenceLinks,omitempty"`
+
 	// Severity level.
 	SeverityLevel *string `json:"severityLevel,omitempty"`
+
+	// Usage of package associated with vulnerability is detected.
+	UsageDetected *bool `json:"usageDetected,omitempty"`
 }
 
 // Defines request object to add autoscaler inventory's blacklist item.
@@ -3325,6 +3463,24 @@ type CostReportAPIListAllocationGroupsParams struct {
 
 // CostReportAPICreateAllocationGroupJSONBody defines parameters for CostReportAPICreateAllocationGroup.
 type CostReportAPICreateAllocationGroupJSONBody = CostreportV1beta1AllocationGroupDetails
+
+// CostReportAPIGetCostAllocationGroupSummaryParams defines parameters for CostReportAPIGetCostAllocationGroupSummary.
+type CostReportAPIGetCostAllocationGroupSummaryParams struct {
+	// Filter items to include from specified time.
+	StartTime time.Time `form:"startTime" json:"startTime"`
+
+	// Filter items to include up to specified time.
+	EndTime time.Time `form:"endTime" json:"endTime"`
+}
+
+// CostReportAPIGetCostAllocationGroupWorkloadsParams defines parameters for CostReportAPIGetCostAllocationGroupWorkloads.
+type CostReportAPIGetCostAllocationGroupWorkloadsParams struct {
+	// Filter items to include from specified time.
+	StartTime time.Time `form:"startTime" json:"startTime"`
+
+	// Filter items to include up to specified time.
+	EndTime time.Time `form:"endTime" json:"endTime"`
+}
 
 // CostReportAPIUpdateAllocationGroupJSONBody defines parameters for CostReportAPIUpdateAllocationGroup.
 type CostReportAPIUpdateAllocationGroupJSONBody = CostreportV1beta1AllocationGroupDetails

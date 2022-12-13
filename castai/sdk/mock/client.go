@@ -455,6 +455,46 @@ func (mr *MockClientInterfaceMockRecorder) CostReportAPIGetClustersCostReport(ct
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CostReportAPIGetClustersCostReport", reflect.TypeOf((*MockClientInterface)(nil).CostReportAPIGetClustersCostReport), varargs...)
 }
 
+// CostReportAPIGetCostAllocationGroupSummary mocks base method.
+func (m *MockClientInterface) CostReportAPIGetCostAllocationGroupSummary(ctx context.Context, params *sdk.CostReportAPIGetCostAllocationGroupSummaryParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "CostReportAPIGetCostAllocationGroupSummary", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CostReportAPIGetCostAllocationGroupSummary indicates an expected call of CostReportAPIGetCostAllocationGroupSummary.
+func (mr *MockClientInterfaceMockRecorder) CostReportAPIGetCostAllocationGroupSummary(ctx, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CostReportAPIGetCostAllocationGroupSummary", reflect.TypeOf((*MockClientInterface)(nil).CostReportAPIGetCostAllocationGroupSummary), varargs...)
+}
+
+// CostReportAPIGetCostAllocationGroupWorkloads mocks base method.
+func (m *MockClientInterface) CostReportAPIGetCostAllocationGroupWorkloads(ctx context.Context, groupId string, params *sdk.CostReportAPIGetCostAllocationGroupWorkloadsParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, groupId, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "CostReportAPIGetCostAllocationGroupWorkloads", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CostReportAPIGetCostAllocationGroupWorkloads indicates an expected call of CostReportAPIGetCostAllocationGroupWorkloads.
+func (mr *MockClientInterfaceMockRecorder) CostReportAPIGetCostAllocationGroupWorkloads(ctx, groupId, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, groupId, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CostReportAPIGetCostAllocationGroupWorkloads", reflect.TypeOf((*MockClientInterface)(nil).CostReportAPIGetCostAllocationGroupWorkloads), varargs...)
+}
+
 // CostReportAPIGetSavingsRecommendation mocks base method.
 func (m *MockClientInterface) CostReportAPIGetSavingsRecommendation(ctx context.Context, clusterId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
@@ -3501,6 +3541,36 @@ func (m *MockClientWithResponsesInterface) CostReportAPIGetClustersCostReportWit
 func (mr *MockClientWithResponsesInterfaceMockRecorder) CostReportAPIGetClustersCostReportWithResponse(ctx, params interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CostReportAPIGetClustersCostReportWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).CostReportAPIGetClustersCostReportWithResponse), ctx, params)
+}
+
+// CostReportAPIGetCostAllocationGroupSummaryWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) CostReportAPIGetCostAllocationGroupSummaryWithResponse(ctx context.Context, params *sdk.CostReportAPIGetCostAllocationGroupSummaryParams) (*sdk.CostReportAPIGetCostAllocationGroupSummaryResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CostReportAPIGetCostAllocationGroupSummaryWithResponse", ctx, params)
+	ret0, _ := ret[0].(*sdk.CostReportAPIGetCostAllocationGroupSummaryResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CostReportAPIGetCostAllocationGroupSummaryWithResponse indicates an expected call of CostReportAPIGetCostAllocationGroupSummaryWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) CostReportAPIGetCostAllocationGroupSummaryWithResponse(ctx, params interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CostReportAPIGetCostAllocationGroupSummaryWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).CostReportAPIGetCostAllocationGroupSummaryWithResponse), ctx, params)
+}
+
+// CostReportAPIGetCostAllocationGroupWorkloadsWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) CostReportAPIGetCostAllocationGroupWorkloadsWithResponse(ctx context.Context, groupId string, params *sdk.CostReportAPIGetCostAllocationGroupWorkloadsParams) (*sdk.CostReportAPIGetCostAllocationGroupWorkloadsResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CostReportAPIGetCostAllocationGroupWorkloadsWithResponse", ctx, groupId, params)
+	ret0, _ := ret[0].(*sdk.CostReportAPIGetCostAllocationGroupWorkloadsResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CostReportAPIGetCostAllocationGroupWorkloadsWithResponse indicates an expected call of CostReportAPIGetCostAllocationGroupWorkloadsWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) CostReportAPIGetCostAllocationGroupWorkloadsWithResponse(ctx, groupId, params interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CostReportAPIGetCostAllocationGroupWorkloadsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).CostReportAPIGetCostAllocationGroupWorkloadsWithResponse), ctx, groupId, params)
 }
 
 // CostReportAPIGetSavingsRecommendation2WithResponse mocks base method.
