@@ -65,7 +65,7 @@ resource "aws_iam_role" "assume_role" {
         }
         Condition = {
           StringEquals = {
-            "sts:ExternalId" = data.castai_eks_clusterid.castai_cluster_id.id
+            "sts:ExternalId" = castai_eks_clusterid.cluster_id.id
           }
         }
       },
@@ -133,7 +133,7 @@ resource "aws_iam_role_policy" "inline_role_policy" {
         Condition : {
           StringEquals : {
             "aws:RequestTag/kubernetes.io/cluster/${var.cluster_name}" : "owned",
-            "aws:RequestTag/cast:cluster-id" : data.castai_eks_clusterid.castai_cluster_id.id,
+            "aws:RequestTag/cast:cluster-id" : castai_eks_clusterid.cluster_id.id,
           }
         }
       },
@@ -162,7 +162,7 @@ resource "aws_iam_role_policy" "inline_role_policy" {
         Condition : {
           StringEquals : {
             "ec2:ResourceTag/kubernetes.io/cluster/${var.cluster_name}" : ["owned", "shared"],
-            "ec2:ResourceTag/cast:cluster-id" : data.castai_eks_clusterid.castai_cluster_id.id,
+            "ec2:ResourceTag/cast:cluster-id" : castai_eks_clusterid.cluster_id.id,
           }
         }
       },
