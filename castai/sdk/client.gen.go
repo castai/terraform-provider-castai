@@ -123,6 +123,12 @@ type ClientInterface interface {
 
 	CostReportAPICreateAllocationGroup(ctx context.Context, body CostReportAPICreateAllocationGroupJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// CostReportAPIGetCostAllocationGroupSummary request
+	CostReportAPIGetCostAllocationGroupSummary(ctx context.Context, params *CostReportAPIGetCostAllocationGroupSummaryParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// CostReportAPIGetCostAllocationGroupWorkloads request
+	CostReportAPIGetCostAllocationGroupWorkloads(ctx context.Context, groupId string, params *CostReportAPIGetCostAllocationGroupWorkloadsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// CostReportAPIDeleteAllocationGroup request
 	CostReportAPIDeleteAllocationGroup(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -655,6 +661,30 @@ func (c *Client) CostReportAPICreateAllocationGroupWithBody(ctx context.Context,
 
 func (c *Client) CostReportAPICreateAllocationGroup(ctx context.Context, body CostReportAPICreateAllocationGroupJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewCostReportAPICreateAllocationGroupRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) CostReportAPIGetCostAllocationGroupSummary(ctx context.Context, params *CostReportAPIGetCostAllocationGroupSummaryParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCostReportAPIGetCostAllocationGroupSummaryRequest(c.Server, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) CostReportAPIGetCostAllocationGroupWorkloads(ctx context.Context, groupId string, params *CostReportAPIGetCostAllocationGroupWorkloadsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCostReportAPIGetCostAllocationGroupWorkloadsRequest(c.Server, groupId, params)
 	if err != nil {
 		return nil, err
 	}
@@ -3127,6 +3157,123 @@ func NewCostReportAPICreateAllocationGroupRequestWithBody(server string, content
 	}
 
 	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewCostReportAPIGetCostAllocationGroupSummaryRequest generates requests for CostReportAPIGetCostAllocationGroupSummary
+func NewCostReportAPIGetCostAllocationGroupSummaryRequest(server string, params *CostReportAPIGetCostAllocationGroupSummaryParams) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/cost-reports/allocation-groups/summary")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	queryValues := queryURL.Query()
+
+	if queryFrag, err := runtime.StyleParamWithLocation("form", true, "startTime", runtime.ParamLocationQuery, params.StartTime); err != nil {
+		return nil, err
+	} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+		return nil, err
+	} else {
+		for k, v := range parsed {
+			for _, v2 := range v {
+				queryValues.Add(k, v2)
+			}
+		}
+	}
+
+	if queryFrag, err := runtime.StyleParamWithLocation("form", true, "endTime", runtime.ParamLocationQuery, params.EndTime); err != nil {
+		return nil, err
+	} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+		return nil, err
+	} else {
+		for k, v := range parsed {
+			for _, v2 := range v {
+				queryValues.Add(k, v2)
+			}
+		}
+	}
+
+	queryURL.RawQuery = queryValues.Encode()
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewCostReportAPIGetCostAllocationGroupWorkloadsRequest generates requests for CostReportAPIGetCostAllocationGroupWorkloads
+func NewCostReportAPIGetCostAllocationGroupWorkloadsRequest(server string, groupId string, params *CostReportAPIGetCostAllocationGroupWorkloadsParams) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "groupId", runtime.ParamLocationPath, groupId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/cost-reports/allocation-groups/%s/workloads", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	queryValues := queryURL.Query()
+
+	if queryFrag, err := runtime.StyleParamWithLocation("form", true, "startTime", runtime.ParamLocationQuery, params.StartTime); err != nil {
+		return nil, err
+	} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+		return nil, err
+	} else {
+		for k, v := range parsed {
+			for _, v2 := range v {
+				queryValues.Add(k, v2)
+			}
+		}
+	}
+
+	if queryFrag, err := runtime.StyleParamWithLocation("form", true, "endTime", runtime.ParamLocationQuery, params.EndTime); err != nil {
+		return nil, err
+	} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+		return nil, err
+	} else {
+		for k, v := range parsed {
+			for _, v2 := range v {
+				queryValues.Add(k, v2)
+			}
+		}
+	}
+
+	queryURL.RawQuery = queryValues.Encode()
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
 
 	return req, nil
 }
@@ -8826,6 +8973,12 @@ type ClientWithResponsesInterface interface {
 
 	CostReportAPICreateAllocationGroupWithResponse(ctx context.Context, body CostReportAPICreateAllocationGroupJSONRequestBody) (*CostReportAPICreateAllocationGroupResponse, error)
 
+	// CostReportAPIGetCostAllocationGroupSummary request
+	CostReportAPIGetCostAllocationGroupSummaryWithResponse(ctx context.Context, params *CostReportAPIGetCostAllocationGroupSummaryParams) (*CostReportAPIGetCostAllocationGroupSummaryResponse, error)
+
+	// CostReportAPIGetCostAllocationGroupWorkloads request
+	CostReportAPIGetCostAllocationGroupWorkloadsWithResponse(ctx context.Context, groupId string, params *CostReportAPIGetCostAllocationGroupWorkloadsParams) (*CostReportAPIGetCostAllocationGroupWorkloadsResponse, error)
+
 	// CostReportAPIDeleteAllocationGroup request
 	CostReportAPIDeleteAllocationGroupWithResponse(ctx context.Context, id string) (*CostReportAPIDeleteAllocationGroupResponse, error)
 
@@ -9497,6 +9650,66 @@ func (r CostReportAPICreateAllocationGroupResponse) StatusCode() int {
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
 func (r CostReportAPICreateAllocationGroupResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type CostReportAPIGetCostAllocationGroupSummaryResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *CostreportV1beta1GetCostAllocationGroupSummaryResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r CostReportAPIGetCostAllocationGroupSummaryResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r CostReportAPIGetCostAllocationGroupSummaryResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r CostReportAPIGetCostAllocationGroupSummaryResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type CostReportAPIGetCostAllocationGroupWorkloadsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *CostreportV1beta1GetCostAllocationGroupWorkloadsResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r CostReportAPIGetCostAllocationGroupWorkloadsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r CostReportAPIGetCostAllocationGroupWorkloadsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r CostReportAPIGetCostAllocationGroupWorkloadsResponse) GetBody() []byte {
 	return r.Body
 }
 
@@ -12871,6 +13084,24 @@ func (c *ClientWithResponses) CostReportAPICreateAllocationGroupWithResponse(ctx
 	return ParseCostReportAPICreateAllocationGroupResponse(rsp)
 }
 
+// CostReportAPIGetCostAllocationGroupSummaryWithResponse request returning *CostReportAPIGetCostAllocationGroupSummaryResponse
+func (c *ClientWithResponses) CostReportAPIGetCostAllocationGroupSummaryWithResponse(ctx context.Context, params *CostReportAPIGetCostAllocationGroupSummaryParams) (*CostReportAPIGetCostAllocationGroupSummaryResponse, error) {
+	rsp, err := c.CostReportAPIGetCostAllocationGroupSummary(ctx, params)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCostReportAPIGetCostAllocationGroupSummaryResponse(rsp)
+}
+
+// CostReportAPIGetCostAllocationGroupWorkloadsWithResponse request returning *CostReportAPIGetCostAllocationGroupWorkloadsResponse
+func (c *ClientWithResponses) CostReportAPIGetCostAllocationGroupWorkloadsWithResponse(ctx context.Context, groupId string, params *CostReportAPIGetCostAllocationGroupWorkloadsParams) (*CostReportAPIGetCostAllocationGroupWorkloadsResponse, error) {
+	rsp, err := c.CostReportAPIGetCostAllocationGroupWorkloads(ctx, groupId, params)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCostReportAPIGetCostAllocationGroupWorkloadsResponse(rsp)
+}
+
 // CostReportAPIDeleteAllocationGroupWithResponse request returning *CostReportAPIDeleteAllocationGroupResponse
 func (c *ClientWithResponses) CostReportAPIDeleteAllocationGroupWithResponse(ctx context.Context, id string) (*CostReportAPIDeleteAllocationGroupResponse, error) {
 	rsp, err := c.CostReportAPIDeleteAllocationGroup(ctx, id)
@@ -14346,6 +14577,58 @@ func ParseCostReportAPICreateAllocationGroupResponse(rsp *http.Response) (*CostR
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest CostreportV1beta1AllocationGroup
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseCostReportAPIGetCostAllocationGroupSummaryResponse parses an HTTP response from a CostReportAPIGetCostAllocationGroupSummaryWithResponse call
+func ParseCostReportAPIGetCostAllocationGroupSummaryResponse(rsp *http.Response) (*CostReportAPIGetCostAllocationGroupSummaryResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &CostReportAPIGetCostAllocationGroupSummaryResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest CostreportV1beta1GetCostAllocationGroupSummaryResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseCostReportAPIGetCostAllocationGroupWorkloadsResponse parses an HTTP response from a CostReportAPIGetCostAllocationGroupWorkloadsWithResponse call
+func ParseCostReportAPIGetCostAllocationGroupWorkloadsResponse(rsp *http.Response) (*CostReportAPIGetCostAllocationGroupWorkloadsResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &CostReportAPIGetCostAllocationGroupWorkloadsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest CostreportV1beta1GetCostAllocationGroupWorkloadsResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}

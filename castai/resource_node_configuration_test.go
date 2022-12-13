@@ -140,14 +140,14 @@ resource "castai_node_configuration" "test" {
 
 func testAccClusterConfig(rName string, clusterName string) string {
 	return ConfigCompose(testAccAWSConfig(rName), fmt.Sprintf(`
-data "castai_eks_clusterid" "test" {
+resource "castai_eks_clusterid" "test" {
   account_id   = data.aws_caller_identity.current.account_id
   region       = "eu-central-1"
   cluster_name = %[1]q
 }
 
 data "castai_eks_user_arn" "test" {
-  cluster_id = data.castai_eks_clusterid.test.id
+  cluster_id = castai_eks_clusterid.test.id
 }
 
 resource "castai_eks_cluster" "test" {

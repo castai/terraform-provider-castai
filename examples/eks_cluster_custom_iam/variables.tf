@@ -3,6 +3,11 @@ variable "castai_api_token" {
   description = "CAST.AI api token"
 }
 
+variable "castai_api_url" {
+  type    = string
+  default = "https://api.cast.ai"
+}
+
 variable "cluster_region" {
   type        = string
   description = "AWS region your cluster is located."

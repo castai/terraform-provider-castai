@@ -10,30 +10,25 @@ import (
 	"github.com/castai/terraform-provider-castai/castai/sdk"
 )
 
-const (
-	EKSClusterIDFieldAccountId   = "account_id"
-	EKSClusterIDFieldRegion      = "region"
-	EKSClusterIDFieldClusterName = "cluster_name"
-)
-
-func dataSourceEKSClusterID() *schema.Resource {
+func resourceEKSClusterID() *schema.Resource {
 	return &schema.Resource{
-		DeprecationMessage: `Use castai_eks_clusterid resource instead`,
-		ReadContext:        dataSourceCastaiEKSClusterIDRead,
+		CreateContext: resourceEKSClusterIDCreate,
+		ReadContext:   resourceEKSClusterIDRead,
+		DeleteContext: resourceEKSClusterIDDelete,
 		Schema: map[string]*schema.Schema{
-			EKSClusterIDFieldAccountId: {
+			"account_id": {
 				Type:             schema.TypeString,
 				Required:         true,
 				ForceNew:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
-			EKSClusterIDFieldRegion: {
+			"region": {
 				Type:             schema.TypeString,
 				Required:         true,
 				ForceNew:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
-			EKSClusterIDFieldClusterName: {
+			"cluster_name": {
 				Type:             schema.TypeString,
 				Required:         true,
 				ForceNew:         true,
@@ -43,19 +38,16 @@ func dataSourceEKSClusterID() *schema.Resource {
 	}
 }
 
-// like in Agent startup - we do RegisterCluster
-func dataSourceCastaiEKSClusterIDRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	// Terraform SDK Data source has no access to state
+func resourceEKSClusterIDCreate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*ProviderConfig).api
-
 	req := sdk.ExternalClusterAPIRegisterClusterJSONRequestBody{
-		Name: data.Get(EKSClusterIDFieldClusterName).(string),
+		Name: data.Get("cluster_name").(string),
 	}
 
 	req.Eks = &sdk.ExternalclusterV1EKSClusterParams{
-		AccountId:   toPtr(data.Get(EKSClusterIDFieldAccountId).(string)),
-		Region:      toPtr(data.Get(EKSClusterIDFieldRegion).(string)),
-		ClusterName: toPtr(data.Get(EKSClusterIDFieldClusterName).(string)),
+		AccountId:   toPtr(data.Get("account_id").(string)),
+		Region:      toPtr(data.Get("region").(string)),
+		ClusterName: toPtr(data.Get("cluster_name").(string)),
 	}
 
 	resp, err := client.ExternalClusterAPIRegisterClusterWithResponse(ctx, req)
@@ -67,4 +59,33 @@ func dataSourceCastaiEKSClusterIDRead(ctx context.Context, data *schema.Resource
 	data.SetId(clusterID)
 
 	return nil
+}
+
+func resourceEKSClusterIDRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client := meta.(*ProviderConfig).api
+	if data.Id() == "" {
+		return nil
+	}
+
+	resp, err := fetchClusterData(ctx, client, data.Id())
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	if resp == nil {
+		data.SetId("")
+		return nil
+	}
+
+	if eks := resp.JSON200.Eks; eks != nil {
+		data.Set("account_id", toString(eks.AccountId))
+		data.Set("region", toString(eks.Region))
+		data.Set("cluster_name", toString(eks.ClusterName))
+	}
+
+	return nil
+}
+
+func resourceEKSClusterIDDelete(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	return resourceCastaiPublicCloudClusterDelete(ctx, data, meta)
 }
