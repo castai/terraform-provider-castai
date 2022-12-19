@@ -464,7 +464,7 @@ func flattenEKSConfig(config *sdk.NodeconfigV1EKSConfig) []map[string]interface{
 		"instance_profile_arn": config.InstanceProfileArn,
 	}
 	if v := config.KeyPairId; v != nil {
-		m["key_paid_id"] = toString(v)
+		m["key_pair_id"] = toString(v)
 	}
 	if v := config.DnsClusterIp; v != nil {
 		m["dns_cluster_ip"] = toString(v)
@@ -495,7 +495,7 @@ func flattenKOPSConfig(config *sdk.NodeconfigV1KOPSConfig) []map[string]interfac
 	}
 	m := map[string]interface{}{}
 	if v := config.KeyPairId; v != nil {
-		m["key_paid_id"] = toString(v)
+		m["key_pair_id"] = toString(v)
 	}
 
 	return []map[string]interface{}{m}
