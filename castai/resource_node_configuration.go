@@ -158,7 +158,7 @@ func resourceNodeConfiguration() *schema.Resource {
 						"key_pair_id": {
 							Type:             schema.TypeString,
 							Optional:         true,
-							Description:      "AWS key pair ID to be used for provisioned nodes. Has priority over sshPublicKey",
+							Description:      "AWS key pair ID to be used for provisioned nodes. Has priority over ssh_public_key",
 							ValidateDiagFunc: castval.ValidKeyPairFormat(),
 						},
 					},
