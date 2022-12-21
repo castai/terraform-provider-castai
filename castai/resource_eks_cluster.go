@@ -72,8 +72,7 @@ func resourceEKSCluster() *schema.Resource {
 			FieldClusterCredentialsId: {
 				Type:        schema.TypeString,
 				Computed:    true,
-				ForceNew:    true,
-				Description: "CAST AI internal credentials ID",
+=				Description: "CAST AI internal credentials ID",
 			},
 			FieldDeleteNodesOnDisconnect: {
 				Type:        schema.TypeBool,
