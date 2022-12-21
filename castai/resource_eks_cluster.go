@@ -109,7 +109,9 @@ func resourceCastaiEKSClusterCreate(ctx context.Context, data *schema.ResourceDa
 		return diag.FromErr(err)
 	}
 	data.SetId(clusterID)
-	data.Set(FieldClusterToken, tkn)
+	if err := data.Set(FieldClusterToken, tkn); err != nil {
+		return diag.FromErr(fmt.Errorf("setting cluster token: %w", err))
+	}
 
 	if err := updateClusterSettings(ctx, data, client); err != nil {
 		return diag.FromErr(err)

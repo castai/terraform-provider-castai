@@ -161,7 +161,7 @@ func TestGKEClusterResourceUpdateError(t *testing.T) {
 	raw[FieldGKEClusterCredentials] = "something"
 
 	data := schema.TestResourceDataRaw(t, resource.Schema, raw)
-	data.Set(FieldGKEClusterCredentials, "creds")
+	_ = data.Set(FieldGKEClusterCredentials, "creds")
 	data.SetId(clusterId)
 	result := resource.UpdateContext(ctx, data, provider)
 	r.NotNil(result)
