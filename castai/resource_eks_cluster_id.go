@@ -2,6 +2,7 @@ package castai
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -78,9 +79,15 @@ func resourceEKSClusterIDRead(ctx context.Context, data *schema.ResourceData, me
 	}
 
 	if eks := resp.JSON200.Eks; eks != nil {
-		data.Set("account_id", toString(eks.AccountId))
-		data.Set("region", toString(eks.Region))
-		data.Set("cluster_name", toString(eks.ClusterName))
+		if err := data.Set("account_id", toString(eks.AccountId)); err != nil {
+			return diag.FromErr(fmt.Errorf("setting account id: %w", err))
+		}
+		if err := data.Set("region", toString(eks.Region)); err != nil {
+			return diag.FromErr(fmt.Errorf("setting region: %w", err))
+		}
+		if err := data.Set("cluster_name", toString(eks.ClusterName)); err != nil {
+			return diag.FromErr(fmt.Errorf("setting cluster name: %w", err))
+		}
 	}
 
 	return nil

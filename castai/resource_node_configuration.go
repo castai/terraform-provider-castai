@@ -286,28 +286,48 @@ func resourceNodeConfigurationRead(ctx context.Context, d *schema.ResourceData, 
 
 	nodeConfig := resp.JSON200
 
-	d.Set(FieldNodeConfigurationName, nodeConfig.Name)
-	d.Set(FieldNodeConfigurationDiskCpuRatio, nodeConfig.DiskCpuRatio)
-	d.Set(FieldNodeConfigurationSubnets, nodeConfig.Subnets)
-	d.Set(FieldNodeConfigurationSSHPublicKey, nodeConfig.SshPublicKey)
-	d.Set(FieldNodeConfigurationImage, nodeConfig.Image)
-	d.Set(FieldNodeConfigurationInitScript, nodeConfig.InitScript)
-	d.Set(FieldNodeConfigurationContainerRuntime, nodeConfig.ContainerRuntime)
-	d.Set(FieldNodeConfigurationTags, nodeConfig.Tags.AdditionalProperties)
+	if err := d.Set(FieldNodeConfigurationName, nodeConfig.Name); err != nil {
+		return diag.FromErr(fmt.Errorf("setting name: %w", err))
+	}
+	if err := d.Set(FieldNodeConfigurationDiskCpuRatio, nodeConfig.DiskCpuRatio); err != nil {
+		return diag.FromErr(fmt.Errorf("setting disk cpu ratio: %w", err))
+	}
+	if err := d.Set(FieldNodeConfigurationSubnets, nodeConfig.Subnets); err != nil {
+		return diag.FromErr(fmt.Errorf("setting subnets: %w", err))
+	}
+	if err := d.Set(FieldNodeConfigurationSSHPublicKey, nodeConfig.SshPublicKey); err != nil {
+		return diag.FromErr(fmt.Errorf("setting ssh public key: %w", err))
+	}
+	if err := d.Set(FieldNodeConfigurationImage, nodeConfig.Image); err != nil {
+		return diag.FromErr(fmt.Errorf("setting image: %w", err))
+	}
+	if err := d.Set(FieldNodeConfigurationInitScript, nodeConfig.InitScript); err != nil {
+		return diag.FromErr(fmt.Errorf("setting init script: %w", err))
+	}
+	if err := d.Set(FieldNodeConfigurationContainerRuntime, nodeConfig.ContainerRuntime); err != nil {
+		return diag.FromErr(fmt.Errorf("setting container runtime: %w", err))
+	}
+	if err := d.Set(FieldNodeConfigurationTags, nodeConfig.Tags.AdditionalProperties); err != nil {
+		return diag.FromErr(fmt.Errorf("setting tags: %w", err))
+	}
 
 	if cfg := nodeConfig.DockerConfig; cfg != nil {
 		b, err := json.Marshal(nodeConfig.DockerConfig)
 		if err != nil {
 			return diag.FromErr(err)
 		}
-		d.Set(FieldNodeConfigurationDockerConfig, string(b))
+		if err := d.Set(FieldNodeConfigurationDockerConfig, string(b)); err != nil {
+			return diag.FromErr(fmt.Errorf("setting docker config: %w", err))
+		}
 	}
 	if cfg := nodeConfig.KubeletConfig; cfg != nil {
 		b, err := json.Marshal(nodeConfig.KubeletConfig)
 		if err != nil {
 			return diag.FromErr(err)
 		}
-		d.Set(FieldNodeConfigurationKubeletConfig, string(b))
+		if err := d.Set(FieldNodeConfigurationKubeletConfig, string(b)); err != nil {
+			return diag.FromErr(fmt.Errorf("setting kubelet config: %w", err))
+		}
 	}
 
 	if err := d.Set(FieldNodeConfigurationEKS, flattenEKSConfig(nodeConfig.Eks)); err != nil {
@@ -533,7 +553,9 @@ func nodeConfigStateImporter(ctx context.Context, d *schema.ResourceData, meta i
 	}
 
 	clusterID, id := ids[0], ids[1]
-	d.Set(FieldClusterID, clusterID)
+	if err := d.Set(FieldClusterID, clusterID); err != nil {
+		return nil, fmt.Errorf("setting cluster id: %w", err)
+	}
 	d.SetId(id)
 
 	// Return if node config ID provided.

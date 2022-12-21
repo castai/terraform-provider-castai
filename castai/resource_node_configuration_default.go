@@ -2,6 +2,7 @@ package castai
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -83,7 +84,9 @@ func resourceNodeConfigurationDefaultRead(ctx context.Context, d *schema.Resourc
 		// If configuration is no longer default, we should trigger state change.
 		configID = nil
 	}
-	d.Set("configuration_id", configID)
+	if err := d.Set("configuration_id", configID); err != nil {
+		return diag.FromErr(fmt.Errorf("setting configuration id: %w", err))
+	}
 
 	return nil
 }

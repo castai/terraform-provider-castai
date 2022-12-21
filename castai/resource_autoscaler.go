@@ -95,7 +95,7 @@ func resourceCastaiAutoscalerCreate(ctx context.Context, data *schema.ResourceDa
 		return diag.FromErr(err)
 	}
 
-	data.SetId(string(getClusterId(data)))
+	data.SetId(getClusterId(data))
 	return nil
 }
 
@@ -105,7 +105,7 @@ func resourceCastaiAutoscalerUpdate(ctx context.Context, data *schema.ResourceDa
 		return diag.FromErr(err)
 	}
 
-	data.SetId(string(getClusterId(data)))
+	data.SetId(getClusterId(data))
 	return nil
 }
 
@@ -228,5 +228,5 @@ func getClusterId(data *schema.ResourceData) sdk.ClusterId {
 		return ""
 	}
 
-	return sdk.ClusterId(value.(string))
+	return value.(string)
 }

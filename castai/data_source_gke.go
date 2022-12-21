@@ -2,6 +2,8 @@ package castai
 
 import (
 	"context"
+	"fmt"
+
 	"github.com/castai/terraform-provider-castai/castai/policies/gke"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -24,7 +26,9 @@ func dataSourceGKEPolicies() *schema.Resource {
 func dataSourceGKEPoliciesRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	policies, _ := gke.GetUserPolicy()
 	data.SetId("gke")
-	data.Set("policy", policies)
+	if err := data.Set("policy", policies); err != nil {
+		return diag.FromErr(fmt.Errorf("setting gke policy: %w", err))
+	}
 
 	return nil
 }
