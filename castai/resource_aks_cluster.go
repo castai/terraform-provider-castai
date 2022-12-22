@@ -119,10 +119,14 @@ func resourceCastaiAKSClusterRead(ctx context.Context, data *schema.ResourceData
 		return nil
 	}
 
-	data.Set(FieldClusterCredentialsId, *resp.JSON200.CredentialsId)
+	if err := data.Set(FieldClusterCredentialsId, *resp.JSON200.CredentialsId); err != nil {
+		return diag.FromErr(fmt.Errorf("setting credentials: %w", err))
+	}
 
 	if aks := resp.JSON200.Aks; aks != nil {
-		data.Set(FieldAKSClusterRegion, toString(aks.Region))
+		if err := data.Set(FieldAKSClusterRegion, toString(aks.Region)); err != nil {
+			return diag.FromErr(fmt.Errorf("setting region: %w", err))
+		}
 	}
 	clusterID := *resp.JSON200.Id
 
@@ -131,7 +135,9 @@ func resourceCastaiAKSClusterRead(ctx context.Context, data *schema.ResourceData
 		if err != nil {
 			return diag.FromErr(err)
 		}
-		data.Set(FieldClusterToken, tkn)
+		if err := data.Set(FieldClusterToken, tkn); err != nil {
+			return diag.FromErr(fmt.Errorf("setting cluster token: %w", err))
+		}
 	}
 
 	return nil

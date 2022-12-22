@@ -172,7 +172,7 @@ func TestEKSClusterResourceUpdateError(t *testing.T) {
 	raw[FieldEKSClusterAssumeRoleArn] = "something"
 
 	data := schema.TestResourceDataRaw(t, resource.Schema, raw)
-	data.Set(FieldEKSClusterAssumeRoleArn, "creds")
+	_ = data.Set(FieldEKSClusterAssumeRoleArn, "creds")
 	data.SetId(clusterId)
 	result := resource.UpdateContext(ctx, data, provider)
 	r.NotNil(result)
@@ -246,7 +246,7 @@ func TestEKSClusterResourceUpdateRetry(t *testing.T) {
 	raw[FieldEKSClusterAssumeRoleArn] = "something"
 
 	data := schema.TestResourceDataRaw(t, resource.Schema, raw)
-	data.Set(FieldEKSClusterAssumeRoleArn, "creds")
+	_ = data.Set(FieldEKSClusterAssumeRoleArn, "creds")
 	data.SetId(clusterId)
 	result := resource.UpdateContext(ctx, data, provider)
 	r.Nil(result)

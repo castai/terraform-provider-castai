@@ -73,7 +73,7 @@ func dataSourceEKSSettings() *schema.Resource {
 	}
 }
 
-func dataSourceCastaiEKSSettingsRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func dataSourceCastaiEKSSettingsRead(ctx context.Context, data *schema.ResourceData, _ interface{}) diag.Diagnostics {
 	accountID := data.Get(EKSSettingsFieldAccountId).(string)
 	vpc := data.Get(EKSSettingsFieldVpc).(string)
 	region := data.Get(EKSSettingsFieldRegion).(string)
@@ -86,10 +86,18 @@ func dataSourceCastaiEKSSettingsRead(ctx context.Context, data *schema.ResourceD
 	instanceProfilePolicy := policies.GetInstanceProfilePolicy()
 
 	data.SetId(fmt.Sprintf("eks-%s-%s-%s-%s", accountID, vpc, region, cluster))
-	data.Set(EKSSettingsFieldIamPolicyJson, iamPolicy)
-	data.Set(EKSSettingsFieldIamUserPolicyJson, userPolicy)
-	data.Set(EKSSettingsFieldIamManagedPolicies, buildManagedPolicies())
-	data.Set(EKSSettingsFieldInstanceProfilePolicies, instanceProfilePolicy)
+	if err := data.Set(EKSSettingsFieldIamPolicyJson, iamPolicy); err != nil {
+		return diag.FromErr(fmt.Errorf("setting iam policy: %w", err))
+	}
+	if err := data.Set(EKSSettingsFieldIamUserPolicyJson, userPolicy); err != nil {
+		return diag.FromErr(fmt.Errorf("setting iam user policy: %w", err))
+	}
+	if err := data.Set(EKSSettingsFieldIamManagedPolicies, buildManagedPolicies()); err != nil {
+		return diag.FromErr(fmt.Errorf("setting iam manged policies: %w", err))
+	}
+	if err := data.Set(EKSSettingsFieldInstanceProfilePolicies, instanceProfilePolicy); err != nil {
+		return diag.FromErr(fmt.Errorf("setting instance profile policies: %w", err))
+	}
 
 	return nil
 }

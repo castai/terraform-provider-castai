@@ -109,7 +109,9 @@ func resourceCastaiEKSClusterCreate(ctx context.Context, data *schema.ResourceDa
 		return diag.FromErr(err)
 	}
 	data.SetId(clusterID)
-	data.Set(FieldClusterToken, tkn)
+	if err := data.Set(FieldClusterToken, tkn); err != nil {
+		return diag.FromErr(fmt.Errorf("setting cluster token: %w", err))
+	}
 
 	if err := updateClusterSettings(ctx, data, client); err != nil {
 		return diag.FromErr(err)
@@ -139,13 +141,23 @@ func resourceCastaiEKSClusterRead(ctx context.Context, data *schema.ResourceData
 		return nil
 	}
 
-	data.Set(FieldClusterCredentialsId, *resp.JSON200.CredentialsId)
+	if err := data.Set(FieldClusterCredentialsId, *resp.JSON200.CredentialsId); err != nil {
+		return diag.FromErr(fmt.Errorf("setting credentials id: %w", err))
+	}
 
 	if eks := resp.JSON200.Eks; eks != nil {
-		data.Set(FieldEKSClusterAccountId, toString(eks.AccountId))
-		data.Set(FieldEKSClusterRegion, toString(eks.Region))
-		data.Set(FieldEKSClusterName, toString(eks.ClusterName))
-		data.Set(FieldEKSClusterAssumeRoleArn, toString(eks.AssumeRoleArn))
+		if err := data.Set(FieldEKSClusterAccountId, toString(eks.AccountId)); err != nil {
+			return diag.FromErr(fmt.Errorf("setting account id: %w", err))
+		}
+		if err := data.Set(FieldEKSClusterRegion, toString(eks.Region)); err != nil {
+			return diag.FromErr(fmt.Errorf("setting region: %w", err))
+		}
+		if err := data.Set(FieldEKSClusterName, toString(eks.ClusterName)); err != nil {
+			return diag.FromErr(fmt.Errorf("setting cluster name: %w", err))
+		}
+		if err := data.Set(FieldEKSClusterAssumeRoleArn, toString(eks.AssumeRoleArn)); err != nil {
+			return diag.FromErr(fmt.Errorf("setting assume role arn: %w", err))
+		}
 	}
 	clusterID := *resp.JSON200.Id
 
@@ -154,7 +166,9 @@ func resourceCastaiEKSClusterRead(ctx context.Context, data *schema.ResourceData
 		if err != nil {
 			return diag.FromErr(err)
 		}
-		data.Set(FieldClusterToken, tkn)
+		if err := data.Set(FieldClusterToken, tkn); err != nil {
+			return diag.FromErr(fmt.Errorf("setting cluster token: %w", err))
+		}
 	}
 
 	return nil
