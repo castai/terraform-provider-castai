@@ -1,3 +1,4 @@
+# 3. Create IAM resources required for connecting cluster to CAST AI.
 locals {
   resource_name_postfix = var.cluster_name
   account_id            = data.aws_caller_identity.current.account_id
@@ -5,13 +6,14 @@ locals {
   instance_profile_role_name = "castai-eks-${local.resource_name_postfix}-node-role"
   iam_role_name              = "castai-eks-${local.resource_name_postfix}-cluster-role"
   iam_inline_policy_name     = "CastEKSRestrictedAccess"
+  role_name                  = "castai-eks-role"
 }
 
 ################################################################################
 # Instance profile
 ################################################################################
 
-# Create instance profile for CAST AI created nodes
+# Create instance profile for CAST AI created nodes.
 resource "aws_iam_instance_profile" "castai_instance_profile" {
   name = local.instance_profile_role_name
   role = aws_iam_role.castai_instance_profile_role.name
@@ -35,7 +37,7 @@ resource "aws_iam_role" "castai_instance_profile_role" {
   })
 }
 
-# Attach policies to instance profile
+# Attach policies to instance profile.
 resource "aws_iam_role_policy_attachment" "instance_profile_policy" {
   for_each = toset([
     "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy",
@@ -51,7 +53,7 @@ resource "aws_iam_role_policy_attachment" "instance_profile_policy" {
 # Assume role
 ################################################################################
 
-# Create role that will be assumed by CAST AI user
+# Create role that will be assumed by CAST AI user.
 resource "aws_iam_role" "assume_role" {
   name               = local.iam_role_name
   assume_role_policy = jsonencode({
@@ -73,7 +75,7 @@ resource "aws_iam_role" "assume_role" {
   })
 }
 
-# Attach readonly policies to role
+# Attach readonly policies to role.
 resource "aws_iam_role_policy_attachment" "assume_role_readonly_policy_attachment" {
   for_each = toset([
     "arn:aws:iam::aws:policy/AmazonEC2ReadOnlyAccess"
@@ -82,14 +84,14 @@ resource "aws_iam_role_policy_attachment" "assume_role_readonly_policy_attachmen
   policy_arn = each.value
 }
 
-# Attach inline policy to role
+# Attach inline policy to role.
 resource "aws_iam_role_policy" "inline_role_policy" {
   name   = local.iam_inline_policy_name
   role   = aws_iam_role.assume_role.name
   policy = jsonencode({
     Version   = "2012-10-17"
     Statement = [
-      # Needed to be able launch instance with instance profile
+      # Needed to be able launch instance with instance profile.
       {
         Sid       = "PassRoleEC2",
         Action    = "iam:PassRole",
@@ -101,7 +103,7 @@ resource "aws_iam_role_policy" "inline_role_policy" {
           }
         }
       },
-      # Needed to validate permissions
+      # Needed to validate permissions.
       {
         "Sid" : "IAMPermissions",
         "Effect" : "Allow",
@@ -115,7 +117,7 @@ resource "aws_iam_role_policy" "inline_role_policy" {
           "arn:aws:iam::${local.account_id}:instance-profile/${aws_iam_instance_profile.castai_instance_profile.name}"
         ]
       },
-      # Needed to tag non CAST nodes
+      # Needed to tag non CAST nodes.
       {
         Sid    = "NonResourcePermissions",
         Effect = "Allow",
@@ -124,7 +126,7 @@ resource "aws_iam_role_policy" "inline_role_policy" {
         ],
         Resource = "*"
       },
-      # Restrict run instance to cluster tag
+      # Restrict run instance to cluster tag.
       {
         Sid : "RunInstancesTagRestriction",
         Effect : "Allow",
@@ -137,7 +139,7 @@ resource "aws_iam_role_policy" "inline_role_policy" {
           }
         }
       },
-      # Restrict run instance to specific vpc and subnets
+      # Restrict run instance to specific vpc and subnets.
       {
         Sid : "RunInstancesVpcRestriction",
         Effect : "Allow",
@@ -149,7 +151,7 @@ resource "aws_iam_role_policy" "inline_role_policy" {
           }
         }
       },
-      # Restrict instance actions to specific cluster tag
+      # Restrict instance actions to specific cluster tag.
       {
         Sid : "InstanceActionsTagRestriction",
         Effect : "Allow",
@@ -166,7 +168,7 @@ resource "aws_iam_role_policy" "inline_role_policy" {
           }
         }
       },
-      # Needed to be able to run instance with provided resources
+      # Needed to be able to run instance with provided resources.
       {
         Sid      = "RunInstancesPermissions",
         Effect   = "Allow",
@@ -184,7 +186,7 @@ resource "aws_iam_role_policy" "inline_role_policy" {
           ]
         ),
       },
-      # Restrict scaling down autoscaling groups to specific cluster
+      # Restrict scaling down autoscaling groups to specific cluster.
       {
         Sid : "AutoscalingActionsTagRestriction",
         Effect : "Allow",
@@ -205,7 +207,7 @@ resource "aws_iam_role_policy" "inline_role_policy" {
           }
         }
       },
-      # Allow to read cluster related resources
+      # Allow to read cluster related resources.
       {
         Sid : "EKS",
         Effect : "Allow",

@@ -1,25 +1,24 @@
-variable "castai_api_token" {
-  type        = string
-  description = "CAST.AI api token"
-  default     = ""
-}
-
-variable "castai_api_url" {
-  type        = string
-  description = "CAST AI API url"
-  default     = "https://api.cast.ai"
-}
-
-variable "cluster_region" {
-  type        = string
-  description = "AWS region your cluster is located."
-  default     = ""
-}
-
+# EKS module variables.
 variable "cluster_name" {
   type        = string
   description = "EKS cluster name in AWS account."
-  default     = ""
+}
+
+variable "cluster_version" {
+  type        = string
+  description = "EKS cluster name version."
+  default     = "1.23"
+}
+
+variable "cluster_region" {
+  type = string
+  description = "AWS Region in which EKS cluster and supporting resources will be created."
+}
+
+# Variables required for connecting EKS cluster to CAST AI.
+variable "castai_api_token" {
+  type = string
+  description = "CAST AI API token created in console.cast.ai API Access keys section"
 }
 
 variable "tags" {
