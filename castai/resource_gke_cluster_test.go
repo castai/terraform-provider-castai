@@ -57,12 +57,6 @@ func TestGKEClusterResourceReadContext(t *testing.T) {
 		ExternalClusterAPIGetCluster(gomock.Any(), clusterId).
 		Return(&http.Response{StatusCode: 200, Body: body, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
 
-	mockClient.EXPECT().
-		ExternalClusterAPICreateClusterToken(gomock.Any(), gomock.Any()).
-		Return(
-			&http.Response{StatusCode: 200, Body: io.NopCloser(bytes.NewReader([]byte(`{"token": "gke123"}`))), Header: map[string][]string{"Content-Type": {"json"}}},
-			nil)
-
 	resource := resourceGKECluster()
 
 	val := cty.ObjectVal(map[string]cty.Value{})
@@ -74,7 +68,6 @@ func TestGKEClusterResourceReadContext(t *testing.T) {
 	r.Nil(result)
 	r.False(result.HasError())
 	r.Equal(`ID = b6bfc074-a267-400f-b8f1-db0850c36gke
-cluster_token = gke123
 credentials_id = 9b8d0456-177b-4a3d-b162-e68030d65GKE
 location = eu-central-1
 name = gke-cluster
