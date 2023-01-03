@@ -31,7 +31,7 @@ func resourceAKSCluster() *schema.Resource {
 		UpdateContext: resourceCastaiAKSClusterUpdate,
 		DeleteContext: resourceCastaiClusterDelete,
 		CustomizeDiff: clusterTokenDiff,
-		Description:   "AKS cluster resource allows connecting an existing EKS cluster to CAST AI.",
+		Description:   "AKS cluster resource allows connecting an existing AKS cluster to CAST AI.",
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(5 * time.Minute),
@@ -178,7 +178,7 @@ func resourceCastaiAKSClusterUpdate(ctx context.Context, data *schema.ResourceDa
 		return diag.FromErr(err)
 	}
 
-	return resourceCastaiEKSClusterRead(ctx, data, meta)
+	return resourceCastaiAKSClusterRead(ctx, data, meta)
 }
 
 func updateAKSClusterSettings(ctx context.Context, data *schema.ResourceData, client *sdk.ClientWithResponses) error {
