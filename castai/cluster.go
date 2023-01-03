@@ -117,6 +117,15 @@ func fetchClusterData(ctx context.Context, client *sdk.ClientWithResponses, clus
 	return resp, nil
 }
 
+func createClusterToken(ctx context.Context, client *sdk.ClientWithResponses, clusterID string) (string, error) {
+	resp, err := client.ExternalClusterAPICreateClusterTokenWithResponse(ctx, clusterID)
+	if err != nil {
+		return "", fmt.Errorf("creating cluster token: %w", err)
+	}
+
+	return *resp.JSON200.Token, nil
+}
+
 func clusterTokenDiff(_ context.Context, diff *schema.ResourceDiff, _ interface{}) error {
 	if diff.Id() == "" {
 		return nil

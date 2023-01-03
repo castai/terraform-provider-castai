@@ -109,10 +109,10 @@ func resourceCastaiEKSClusterCreate(ctx context.Context, data *schema.ResourceDa
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	data.SetId(clusterID)
 	if err := data.Set(FieldClusterToken, tkn); err != nil {
 		return diag.FromErr(fmt.Errorf("setting cluster token: %w", err))
 	}
+	data.SetId(clusterID)
 
 	if err := updateClusterSettings(ctx, data, client); err != nil {
 		return diag.FromErr(err)
@@ -210,15 +210,6 @@ func updateClusterSettings(ctx context.Context, data *schema.ResourceData, clien
 	}
 
 	return nil
-}
-
-func createClusterToken(ctx context.Context, client *sdk.ClientWithResponses, clusterID string) (string, error) {
-	resp, err := client.ExternalClusterAPICreateClusterTokenWithResponse(ctx, clusterID)
-	if err != nil {
-		return "", fmt.Errorf("creating cluster token: %w", err)
-	}
-
-	return *resp.JSON200.Token, nil
 }
 
 func getOptionalBool(data *schema.ResourceData, field string, defaultValue bool) *bool {

@@ -154,11 +154,19 @@ func resourceCastaiAKSClusterCreate(ctx context.Context, data *schema.ResourceDa
 	}
 
 	clusterID := *resp.JSON200.Id
+	tkn, err := createClusterToken(ctx, client, clusterID)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	if err := data.Set(FieldClusterToken, tkn); err != nil {
+		return diag.FromErr(fmt.Errorf("setting cluster token: %w", err))
+	}
 	data.SetId(clusterID)
 
 	if err := updateAKSClusterSettings(ctx, data, client); err != nil {
 		return diag.FromErr(err)
 	}
+	log.Printf("[INFO] Cluster with id %q has been registered, don't forget to install castai-agent helm chart", data.Id())
 
 	return resourceCastaiAKSClusterRead(ctx, data, meta)
 }
