@@ -19,3 +19,7 @@ terraform init
 ```
 terraform apply -var-file=tf.vars 
 ```
+4. To destroy resources created by this example:
+```
+terraform destroy -var-file=tf.vars 
+```

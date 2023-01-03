@@ -1,3 +1,13 @@
+# 3. Connect GKE cluster to CAST AI in read-only mode.
+
+# Configure Data sources and providers required for CAST AI connection.
+
+data "google_client_config" "default" {}
+
+provider "castai" {
+  api_token = var.castai_api_token
+}
+
 provider "helm" {
   kubernetes {
     host                   = "https://${module.gke.endpoint}"
@@ -6,17 +16,12 @@ provider "helm" {
   }
 }
 
-provider "castai" {
-  api_token = var.castai_api_token
-}
-
+# Configure GKE cluster connection using CAST AI gke-cluster module.
 module "castai-gke-iam" {
   source = "castai/gke-iam/castai"
 
   project_id       = var.project_id
   gke_cluster_name = var.cluster_name
-
-  depends_on = [module.gke]
 }
 
 module "castai-gke-cluster" {
@@ -35,17 +40,25 @@ module "castai-gke-cluster" {
     default = {
       disk_cpu_ratio = 25
       subnets        = [module.vpc.subnets_ids[0]]
-      tags           = {
-        "env" : "prod"
-      }
+      tags           = var.tags
     }
+
+    test_node_config = {
+      disk_cpu_ratio = 10
+      subnets         = [module.vpc.subnets_ids[0]]
+      tags            = var.tags
+    }
+
   }
 
-  # Full schema can be found here https://api.cast.ai/v1/spec/#/PoliciesAPI/PoliciesAPIUpsertClusterPolicies
-  autoscaler_policies_json = <<-EOT
+  // Configure Autoscaler policies as per API specification https://api.cast.ai/v1/spec/#/PoliciesAPI/PoliciesAPIUpsertClusterPolicies.
+  // Here:
+  //  - unschedulablePods - Unscheduled pods policy
+  //  - spotInstances     - Spot instances configuration
+  //  - nodeDownscaler    - Node deletion policy
+  autoscaler_policies_json   = <<-EOT
     {
         "enabled": true,
-        "isScopedMode": false,
         "unschedulablePods": {
             "enabled": true
         },
@@ -57,9 +70,25 @@ module "castai-gke-cluster" {
             }
         },
         "nodeDownscaler": {
+            "enabled": true,
             "emptyNodes": {
                 "enabled": true
+            },
+            "evictor": {
+                "aggressiveMode": false,
+                "cycleInterval": "5m10s",
+                "dryRun": false,
+                "enabled": true,
+                "nodeGracePeriodMinutes": 10,
+                "scopedMode": false
             }
+        },
+        "clusterLimits": {
+            "cpu": {
+                "maxCores": 20,
+                "minCores": 1
+            },
+            "enabled": true
         }
     }
   EOT

@@ -7,7 +7,7 @@ IAM policies required to connect the cluster to CAST AI in the example are creat
 Example configuration should be analysed in the following order:
 1. Create VPC - `vpc.tf`
 2. Create EKS cluster - `eks.tf`
-3. Create IAM and other CAST AI related resources to connect EKS cluster to CAST AI, configure Autoscaler and Node Configuration  - `castai.tf`
+3. Create IAM and other CAST AI related resources to connect EKS cluster to CAST AI, configure Autoscaler and Node Configurations  - `castai.tf`
 
 # Usage
 1. Update `tf.vars` file with your cluster name, cluster region and CAST AI API token.
@@ -18,4 +18,8 @@ terraform init
 3. Run Terraform apply:
 ```
 terraform apply -var-file=tf.vars 
+```
+4. To destroy resources created by this example:
+```
+terraform destroy -var-file=tf.vars 
 ```

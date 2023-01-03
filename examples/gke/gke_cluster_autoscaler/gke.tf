@@ -1,14 +1,8 @@
-data "google_client_config" "default" {}
-
-provider "kubernetes" {
-  host                   = "https://${module.gke.endpoint}"
-  token                  = data.google_client_config.default.access_token
-  cluster_ca_certificate = base64decode(module.gke.ca_certificate)
-}
+# 2. Create GKE cluster.
 
 module "gke" {
   source                     = "terraform-google-modules/kubernetes-engine/google"
-  version                    = "20.0.0"
+  version                    = "24.1.0"
   project_id                 = var.project_id
   name                       = var.cluster_name
   region                     = var.cluster_region
@@ -26,8 +20,9 @@ module "gke" {
     {
       name               = "default-node-pool"
       machine_type       = "e2-medium"
-      min_count          = 2
-      max_count          = 100
+      min_count          = 2 # has to be >=2 to successfully deploy CAST AI controller.
+      max_count          = 10
+      autoscaling        = true
       local_ssd_count    = 0
       disk_size_gb       = 100
       disk_type          = "pd-standard"
