@@ -16,7 +16,6 @@ provider "helm" {
   }
 }
 
-
 # Configure AKS cluster connection to CAST AI using CAST AI aks-cluster module.
 module "castai-aks-cluster" {
   source = "castai/aks/castai"
@@ -96,4 +95,3 @@ module "castai-aks-cluster" {
   EOT
 
 }
-

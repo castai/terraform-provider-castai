@@ -223,4 +223,3 @@ resource "aws_iam_role_policy" "inline_role_policy" {
     ]
   })
 }
-
