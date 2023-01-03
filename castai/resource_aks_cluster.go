@@ -180,7 +180,7 @@ func resourceCastaiAKSClusterUpdate(ctx context.Context, data *schema.ResourceDa
 		return diag.FromErr(err)
 	}
 
-	return resourceCastaiEKSClusterRead(ctx, data, meta)
+	return resourceCastaiAKSClusterRead(ctx, data, meta)
 }
 
 func updateAKSClusterSettings(ctx context.Context, data *schema.ResourceData, client *sdk.ClientWithResponses) error {
