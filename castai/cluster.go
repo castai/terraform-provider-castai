@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -18,7 +19,7 @@ const (
 	FieldClusterCredentialsId    = "credentials_id"
 )
 
-func resourceCastaiPublicCloudClusterDelete(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceCastaiClusterDelete(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*ProviderConfig).api
 	clusterId := data.Id()
 
@@ -114,4 +115,22 @@ func fetchClusterData(ctx context.Context, client *sdk.ClientWithResponses, clus
 	}
 
 	return resp, nil
+}
+
+func clusterTokenDiff(_ context.Context, diff *schema.ResourceDiff, _ interface{}) error {
+	if diff.Id() == "" {
+		return nil
+	}
+	if diff.Get(FieldClusterToken).(string) != "" {
+		return nil
+	}
+
+	// During migration to the latest version, cluster resource might have empty token as it was introduced later on.
+	// If that's the case - we are forcing re-creation by providing random new value and setting "ForceNew" flag.
+	log.Print("[INFO] token not set, forcing re-create")
+	if err := diff.SetNew(FieldClusterToken, uuid.NewString()); err != nil {
+		return fmt.Errorf("setting cluster token: %w", err)
+	}
+
+	return diff.ForceNew(FieldClusterToken)
 }

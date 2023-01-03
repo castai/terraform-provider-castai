@@ -29,7 +29,8 @@ func resourceAKSCluster() *schema.Resource {
 		ReadContext:   resourceCastaiAKSClusterRead,
 		CreateContext: resourceCastaiAKSClusterCreate,
 		UpdateContext: resourceCastaiAKSClusterUpdate,
-		DeleteContext: resourceCastaiPublicCloudClusterDelete,
+		DeleteContext: resourceCastaiClusterDelete,
+		CustomizeDiff: clusterTokenDiff,
 		Description:   "AKS cluster resource allows connecting an existing EKS cluster to CAST AI.",
 
 		Timeouts: &schema.ResourceTimeout{
@@ -126,17 +127,6 @@ func resourceCastaiAKSClusterRead(ctx context.Context, data *schema.ResourceData
 	if aks := resp.JSON200.Aks; aks != nil {
 		if err := data.Set(FieldAKSClusterRegion, toString(aks.Region)); err != nil {
 			return diag.FromErr(fmt.Errorf("setting region: %w", err))
-		}
-	}
-	clusterID := *resp.JSON200.Id
-
-	if _, ok := data.GetOk(FieldClusterToken); !ok {
-		tkn, err := createClusterToken(ctx, client, clusterID)
-		if err != nil {
-			return diag.FromErr(err)
-		}
-		if err := data.Set(FieldClusterToken, tkn); err != nil {
-			return diag.FromErr(fmt.Errorf("setting cluster token: %w", err))
 		}
 	}
 

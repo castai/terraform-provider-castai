@@ -28,7 +28,8 @@ func resourceGKECluster() *schema.Resource {
 		CreateContext: resourceCastaiGKEClusterCreate,
 		ReadContext:   resourceCastaiGKEClusterRead,
 		UpdateContext: resourceCastaiGKEClusterUpdate,
-		DeleteContext: resourceCastaiPublicCloudClusterDelete,
+		DeleteContext: resourceCastaiClusterDelete,
+		CustomizeDiff: clusterTokenDiff,
 		Description:   "GKE cluster resource allows connecting an existing GKE cluster to CAST AI.",
 
 		Timeouts: &schema.ResourceTimeout{
@@ -168,17 +169,6 @@ func resourceCastaiGKEClusterRead(ctx context.Context, data *schema.ResourceData
 		}
 		if err := data.Set(FieldGKEClusterName, toString(GKE.ClusterName)); err != nil {
 			return diag.FromErr(fmt.Errorf("setting cluster name: %w", err))
-		}
-	}
-	clusterID := *resp.JSON200.Id
-
-	if _, ok := data.GetOk(FieldClusterToken); !ok {
-		tkn, err := createClusterToken(ctx, client, clusterID)
-		if err != nil {
-			return diag.FromErr(err)
-		}
-		if err := data.Set(FieldClusterToken, tkn); err != nil {
-			return diag.FromErr(fmt.Errorf("setting cluster token: %w", err))
 		}
 	}
 
