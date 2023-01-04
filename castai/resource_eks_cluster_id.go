@@ -94,5 +94,5 @@ func resourceEKSClusterIDRead(ctx context.Context, data *schema.ResourceData, me
 }
 
 func resourceEKSClusterIDDelete(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	return resourceCastaiPublicCloudClusterDelete(ctx, data, meta)
+	return resourceCastaiClusterDelete(ctx, data, meta)
 }

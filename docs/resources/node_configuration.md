@@ -97,7 +97,7 @@ Required:
 Optional:
 
 - `dns_cluster_ip` (String) IP address to use for DNS queries within the cluster
-- `key_pair_id` (String) AWS key pair ID to be used for provisioned nodes. Has priority over sshPublicKey
+- `key_pair_id` (String) AWS key pair ID to be used for provisioned nodes. Has priority over ssh_public_key
 
 
 <a id="nestedblock--kops"></a>
