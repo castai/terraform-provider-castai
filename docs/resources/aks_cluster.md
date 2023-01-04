@@ -2,12 +2,12 @@
 page_title: "castai_aks_cluster Resource - terraform-provider-castai"
 subcategory: ""
 description: |-
-  AKS cluster resource allows connecting an existing EKS cluster to CAST AI.
+  AKS cluster resource allows connecting an existing AKS cluster to CAST AI.
 ---
 
 # castai_aks_cluster (Resource)
 
-AKS cluster resource allows connecting an existing EKS cluster to CAST AI.
+AKS cluster resource allows connecting an existing AKS cluster to CAST AI.
 
 ## Example Usage
 
