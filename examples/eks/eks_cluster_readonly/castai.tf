@@ -1,4 +1,4 @@
-# 3. Connect EKS cluster to CAST AI in read-only mode.
+# Connect EKS cluster to CAST AI in read-only mode.
 
 # Configure Data sources and providers required for CAST AI connection.
 data "aws_caller_identity" "current" {}

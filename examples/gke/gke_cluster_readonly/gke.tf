@@ -24,7 +24,6 @@ module "gke" {
       machine_type       = "e2-medium"
       min_count          = 2
       max_count          = 10
-      autoscaling        = true
       local_ssd_count    = 0
       disk_size_gb       = 100
       disk_type          = "pd-standard"

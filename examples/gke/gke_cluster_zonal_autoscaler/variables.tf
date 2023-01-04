@@ -29,7 +29,7 @@ variable "castai_api_token" {
 
 variable "delete_nodes_on_disconnect" {
   type        = bool
-  description = "Optional parameter, if set to true - CAST AI provisioned nodes will be deleted from cloud on cluster disconnection."
+  description = "Optional parameter, if set to true - CAST AI provisioned nodes will be deleted from cloud on cluster disconnection. For production use it is recommended to set it to false."
   default     = true
 }
 

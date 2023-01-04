@@ -7,7 +7,7 @@ variable "cluster_name" {
 variable "cluster_version" {
   type        = string
   description = "EKS cluster name version."
-  default     = "1.23"
+  default     = "1.24"
 }
 
 variable "cluster_region" {
@@ -21,14 +21,14 @@ variable "castai_api_token" {
   description = "CAST AI API token created in console.cast.ai API Access keys section"
 }
 
+variable "delete_nodes_on_disconnect" {
+  type        = bool
+  description = "Optional parameter, if set to true - CAST AI provisioned nodes will be deleted from cloud on cluster disconnection. For production use it is recommended to set it to false."
+  default     = true
+}
+
 variable "tags" {
   type        = map(any)
   description = "Optional tags for new cluster nodes. This parameter applies only to new nodes - tags for old nodes are not reconciled."
   default     = {}
-}
-
-variable "delete_nodes_on_disconnect" {
-  type        = bool
-  description = "Optional parameter, if set to true - CAST AI provisioned nodes will be deleted from EC2 on cluster disconnection."
-  default     = true
 }

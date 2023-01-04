@@ -4,7 +4,7 @@ description: |-
   Use CAST AI provider to onboard the cluster and manage resources supported by CAST AI.
 ---
 
-# {{ .RenderedProviderName | upper }} Provider
+# CAST AI Provider
 
 CAST AI provider can be used to onboard your cluster and manage resources supported by CAST AI.
 
@@ -32,6 +32,6 @@ provider "castai" {
 
 ## Example Usage
 
-{{ tffile "examples/eks_cluster_readonly/main.tf" }}
+{{ tffile "examples/eks/eks_cluster_readonly/castai.tf" }}
 
 {{ .SchemaMarkdown | trimspace }}
