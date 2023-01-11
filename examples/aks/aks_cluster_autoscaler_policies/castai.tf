@@ -43,12 +43,7 @@ module "castai-aks-cluster" {
       disk_cpu_ratio  = 25
       subnets         = [azurerm_subnet.internal.id]
       tags            = var.tags
-
-      kubelet_config = jsonencode({
-        "registryBurst" : 20,
-        "registryPullQPS" : 10
-      })
-      max_pods_per_node = 20
+      max_pods_per_node = 40
     }
   }
 
