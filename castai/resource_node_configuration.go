@@ -70,7 +70,7 @@ func resourceNodeConfiguration() *schema.Resource {
 				Optional:         true,
 				Default:          0,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.IntAtLeast(0)),
-				Description:      "Disk to CPU ratio. Sets the number of GiBs to be added for every CPU on the node",
+				Description:      "Disk to CPU ratio. Sets the number of GiBs to be added for every CPU on the node. Defaults to 0",
 			},
 			FieldNodeConfigurationSubnets: {
 				Type:     schema.TypeList,
