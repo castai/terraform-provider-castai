@@ -96,6 +96,11 @@ func resourceAKSCluster() *schema.Resource {
 				Optional:    true,
 				Description: "Should CAST AI remove nodes managed by CAST.AI on disconnect.",
 			},
+			FieldClusterCredentialsId: {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "CAST AI internal credentials ID",
+			},
 		},
 	}
 }
