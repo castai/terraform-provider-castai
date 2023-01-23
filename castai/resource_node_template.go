@@ -19,6 +19,7 @@ import (
 const (
 	FieldNodeTemplatesJSON = "node_templates_json"
 	FieldNodeTemplates     = "node_templates"
+	FieldNodeTemplateName  = "name"
 )
 
 func resourceNodeTemplate() *schema.Resource {
@@ -48,6 +49,13 @@ func resourceNodeTemplate() *schema.Resource {
 				Type:        schema.TypeString,
 				Computed:    true,
 				Description: "computed value to store cluster node templates",
+			},
+			FieldNodeTemplateName: {
+				Type:             schema.TypeString,
+				Required:         true,
+				ForceNew:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+				Description:      "Name of the node template",
 			},
 		},
 	}
@@ -100,7 +108,7 @@ func updateNodeTemplate(ctx context.Context, data *schema.ResourceData, meta int
 func updateNodeTemplates(ctx context.Context, meta interface{}, clusterId sdk.ClusterId, changedNodeTemplatesJSON string) error {
 	client := meta.(*ProviderConfig).api
 
-	resp, err := client.NodeTemplatesAPIUpdateNodeTemplateWithBodyWithResponse(ctx, string(clusterId), "name", "application/json", bytes.NewReader([]byte(changedNodeTemplatesJSON)))
+	resp, err := client.NodeTemplatesAPIUpdateNodeTemplateWithBodyWithResponse(ctx, clusterId, "name", "application/json", bytes.NewReader([]byte(changedNodeTemplatesJSON)))
 	if checkErr := sdk.CheckOKResponse(resp, err); checkErr != nil {
 		return checkErr
 	}
