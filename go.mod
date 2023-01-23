@@ -1,19 +1,19 @@
 module github.com/castai/terraform-provider-castai
 
-go 1.18
+go 1.19
 
 require (
 	github.com/cenkalti/backoff/v4 v4.1.3
 	github.com/deepmap/oapi-codegen v1.11.0
 	github.com/evanphx/json-patch v4.9.0+incompatible
 	github.com/golang/mock v1.5.0
+	github.com/google/uuid v1.3.0
 	github.com/gruntwork-io/terratest v0.40.18
 	github.com/hashicorp/go-cty v1.4.1-0.20200414143053-d3edf31b6320
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.22.0
 	github.com/joho/godotenv v1.4.0
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/stretchr/testify v1.7.2
-	gopkg.in/yaml.v2 v2.4.0
 )
 
 require (
@@ -30,7 +30,6 @@ require (
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/golang/snappy v0.0.3 // indirect
 	github.com/google/go-cmp v0.5.9 // indirect
-	github.com/google/uuid v1.3.0 // indirect
 	github.com/googleapis/gax-go/v2 v2.0.5 // indirect
 	github.com/hashicorp/errwrap v1.0.0 // indirect
 	github.com/hashicorp/go-checkpoint v0.5.0 // indirect
