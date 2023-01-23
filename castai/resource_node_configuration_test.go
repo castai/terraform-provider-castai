@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
-
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
@@ -57,7 +56,7 @@ func TestAccResourceNodeConfiguration_basic(t *testing.T) {
 			{
 				Config: testAccNodeConfigurationUpdated(rName, clusterName),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "disk_cpu_ratio", "5"),
+					resource.TestCheckResourceAttr(resourceName, "disk_cpu_ratio", "0"),
 					resource.TestCheckResourceAttr(resourceName, "image", "amazon-eks-node-1.23-v20220824"),
 					resource.TestCheckResourceAttr(resourceName, "init_script", ""),
 					resource.TestCheckResourceAttr(resourceName, "container_runtime", "CONTAINERD"),

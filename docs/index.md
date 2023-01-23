@@ -33,36 +33,30 @@ provider "castai" {
 ## Example Usage
 
 ```terraform
-# Your EKS cluster access configuration.
+# Connect EKS cluster to CAST AI in read-only mode.
 
-provider "aws" {
-  region = var.cluster_region
-}
-
-data "aws_eks_cluster" "cluster" {
-  name = var.cluster_name
-}
-
-data "aws_eks_cluster_auth" "cluster" {
-  name = var.cluster_name
-}
-
-provider "helm" {
-  kubernetes {
-    host                   = data.aws_eks_cluster.cluster.endpoint
-    cluster_ca_certificate = base64decode(data.aws_eks_cluster.cluster.certificate_authority[0].data)
-    token                  = data.aws_eks_cluster_auth.cluster.token
-  }
-}
-
+# Configure Data sources and providers required for CAST AI connection.
 data "aws_caller_identity" "current" {}
-
-# Your CAST AI EKS configuration
 
 provider "castai" {
   api_token = var.castai_api_token
 }
 
+provider "helm" {
+  kubernetes {
+    host                   = module.eks.cluster_endpoint
+    cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
+      exec {
+        api_version = "client.authentication.k8s.io/v1beta1"
+        command     = "aws"
+        # This requires the awscli to be installed locally where Terraform is executed.
+        args = ["eks", "get-token", "--cluster-name", module.eks.cluster_name]
+      }
+  }
+}
+
+
+# Configure EKS cluster connection to CAST AI in read-only mode.
 resource "castai_eks_cluster" "this" {
   account_id = data.aws_caller_identity.current.account_id
   region     = var.cluster_region
@@ -70,10 +64,12 @@ resource "castai_eks_cluster" "this" {
 }
 
 resource "helm_release" "castai_agent" {
-  name            = "castai-agent"
-  repository      = "https://castai.github.io/helm-charts"
-  chart           = "castai-agent"
-  cleanup_on_fail = true
+  name             = "castai-agent"
+  repository       = "https://castai.github.io/helm-charts"
+  chart            = "castai-agent"
+  namespace        = "castai-agent"
+  create_namespace = true
+  cleanup_on_fail  = true
 
   set {
     name  = "provider"
@@ -82,6 +78,12 @@ resource "helm_release" "castai_agent" {
   set_sensitive {
     name  = "apiKey"
     value = castai_eks_cluster.this.cluster_token
+  }
+
+  # Required until https://github.com/castai/helm-charts/issues/135 is fixed.
+  set {
+    name  = "createNamespace"
+    value = "false"
   }
 }
 ```

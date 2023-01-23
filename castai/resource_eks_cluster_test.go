@@ -59,15 +59,9 @@ func TestEKSClusterResourceReadContext(t *testing.T) {
   "clusterNameId": "eks-cluster-b6bfc074",
   "private": true
 }`)))
-	clusterTokenBody := io.NopCloser(bytes.NewReader([]byte(`{"token": "really_long_token"}`)))
-
 	mockClient.EXPECT().
 		ExternalClusterAPIGetCluster(gomock.Any(), clusterId).
 		Return(&http.Response{StatusCode: 200, Body: body, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
-
-	mockClient.EXPECT().
-		ExternalClusterAPICreateClusterToken(gomock.Any(), clusterId).
-		Return(&http.Response{StatusCode: 200, Body: clusterTokenBody, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
 
 	resource := resourceEKSCluster()
 
@@ -82,7 +76,6 @@ func TestEKSClusterResourceReadContext(t *testing.T) {
 	r.Equal(`ID = b6bfc074-a267-400f-b8f1-db0850c369b1
 account_id = 487609000000
 assume_role_arn = 
-cluster_token = really_long_token
 credentials_id = 9b8d0456-177b-4a3d-b162-e68030d656aa
 name = eks-cluster
 region = eu-central-1
@@ -172,7 +165,7 @@ func TestEKSClusterResourceUpdateError(t *testing.T) {
 	raw[FieldEKSClusterAssumeRoleArn] = "something"
 
 	data := schema.TestResourceDataRaw(t, resource.Schema, raw)
-	data.Set(FieldEKSClusterAssumeRoleArn, "creds")
+	_ = data.Set(FieldEKSClusterAssumeRoleArn, "creds")
 	data.SetId(clusterId)
 	result := resource.UpdateContext(ctx, data, provider)
 	r.NotNil(result)
@@ -222,12 +215,6 @@ func TestEKSClusterResourceUpdateRetry(t *testing.T) {
   "clusterNameId": "eks-cluster-b6bfc074",
   "private": true
 }`)
-	clusterTokenBody := io.NopCloser(bytes.NewReader([]byte(`{"token": "really_long_token"}`)))
-
-	mockClient.EXPECT().
-		ExternalClusterAPICreateClusterToken(gomock.Any(), newClusterId).
-		Return(&http.Response{StatusCode: 200, Body: clusterTokenBody, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
-
 	mockClient.EXPECT().
 		ExternalClusterAPIUpdateCluster(gomock.Any(), clusterId, gomock.Any(), gomock.Any()).
 		Return(&http.Response{StatusCode: 500, Body: io.NopCloser(bytes.NewBufferString(`{"message":"Internal Server Error"}`)), Header: map[string][]string{"Content-Type": {"json"}}}, nil)
@@ -246,7 +233,7 @@ func TestEKSClusterResourceUpdateRetry(t *testing.T) {
 	raw[FieldEKSClusterAssumeRoleArn] = "something"
 
 	data := schema.TestResourceDataRaw(t, resource.Schema, raw)
-	data.Set(FieldEKSClusterAssumeRoleArn, "creds")
+	_ = data.Set(FieldEKSClusterAssumeRoleArn, "creds")
 	data.SetId(clusterId)
 	result := resource.UpdateContext(ctx, data, provider)
 	r.Nil(result)

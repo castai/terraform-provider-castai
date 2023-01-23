@@ -20,6 +20,7 @@ import (
 
 const (
 	FieldAutoscalerPoliciesJSON = "autoscaler_policies_json"
+	FieldClusterId              = "cluster_id"
 	FieldAutoscalerPolicies     = "autoscaler_policies"
 )
 
@@ -94,7 +95,7 @@ func resourceCastaiAutoscalerCreate(ctx context.Context, data *schema.ResourceDa
 		return diag.FromErr(err)
 	}
 
-	data.SetId(string(getClusterId(data)))
+	data.SetId(getClusterId(data))
 	return nil
 }
 
@@ -104,18 +105,18 @@ func resourceCastaiAutoscalerUpdate(ctx context.Context, data *schema.ResourceDa
 		return diag.FromErr(err)
 	}
 
-	data.SetId(string(getClusterId(data)))
+	data.SetId(getClusterId(data))
 	return nil
 }
 
 func getCurrentPolicies(ctx context.Context, client *sdk.ClientWithResponses, clusterId sdk.ClusterId) ([]byte, error) {
 	log.Printf("[INFO] Getting cluster autoscaler information.")
 
-	resp, err := client.PoliciesAPIGetClusterPolicies(ctx, clusterId)
+	resp, err := client.PoliciesAPIGetClusterPolicies(ctx, string(clusterId))
 	if err != nil {
 		return nil, err
 	} else if resp.StatusCode == http.StatusNotFound {
-		return nil, fmt.Errorf("cluster %s policies does not exists at CAST AI", clusterId)
+		return nil, fmt.Errorf("cluster %s policies do not exist at CAST AI", clusterId)
 	}
 
 	bytes, err := io.ReadAll(resp.Body)
@@ -214,9 +215,18 @@ func getChangedPolicies(ctx context.Context, data *schema.ResourceData, meta int
 
 	policies, err := jsonpatch.MergePatch(currentPolicies, policyChanges)
 	if err != nil {
-		log.Printf("[WARN] Failed merging policy changes: %v", err)
+		log.Printf("[WARN] Failed to merge policy changes: %v", err)
 		return nil, fmt.Errorf("failed to merge policies: %v", err)
 	}
 
 	return policies, nil
+}
+
+func getClusterId(data *schema.ResourceData) sdk.ClusterId {
+	value, found := data.GetOk(FieldClusterId)
+	if !found {
+		return ""
+	}
+
+	return value.(string)
 }

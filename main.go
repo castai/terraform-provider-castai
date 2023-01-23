@@ -8,7 +8,7 @@ import (
 )
 
 var (
-	commit  = "undefined"
+	commit  = "undefined" // nolint:unused
 	version = "local"
 )
 

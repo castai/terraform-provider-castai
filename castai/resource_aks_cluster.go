@@ -29,8 +29,9 @@ func resourceAKSCluster() *schema.Resource {
 		ReadContext:   resourceCastaiAKSClusterRead,
 		CreateContext: resourceCastaiAKSClusterCreate,
 		UpdateContext: resourceCastaiAKSClusterUpdate,
-		DeleteContext: resourceCastaiPublicCloudClusterDelete,
-		Description:   "AKS cluster resource allows connecting an existing EKS cluster to CAST AI.",
+		DeleteContext: resourceCastaiClusterDelete,
+		CustomizeDiff: clusterTokenDiff,
+		Description:   "AKS cluster resource allows connecting an existing AKS cluster to CAST AI.",
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(5 * time.Minute),
@@ -95,6 +96,11 @@ func resourceAKSCluster() *schema.Resource {
 				Optional:    true,
 				Description: "Should CAST AI remove nodes managed by CAST.AI on disconnect.",
 			},
+			FieldClusterCredentialsId: {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "CAST AI internal credentials ID",
+			},
 		},
 	}
 }
@@ -119,19 +125,14 @@ func resourceCastaiAKSClusterRead(ctx context.Context, data *schema.ResourceData
 		return nil
 	}
 
-	data.Set(FieldClusterCredentialsId, *resp.JSON200.CredentialsId)
+	if err := data.Set(FieldClusterCredentialsId, *resp.JSON200.CredentialsId); err != nil {
+		return diag.FromErr(fmt.Errorf("setting credentials: %w", err))
+	}
 
 	if aks := resp.JSON200.Aks; aks != nil {
-		data.Set(FieldAKSClusterRegion, toString(aks.Region))
-	}
-	clusterID := *resp.JSON200.Id
-
-	if _, ok := data.GetOk(FieldClusterToken); !ok {
-		tkn, err := createClusterToken(ctx, client, clusterID)
-		if err != nil {
-			return diag.FromErr(err)
+		if err := data.Set(FieldAKSClusterRegion, toString(aks.Region)); err != nil {
+			return diag.FromErr(fmt.Errorf("setting region: %w", err))
 		}
-		data.Set(FieldClusterToken, tkn)
 	}
 
 	return nil
@@ -158,11 +159,19 @@ func resourceCastaiAKSClusterCreate(ctx context.Context, data *schema.ResourceDa
 	}
 
 	clusterID := *resp.JSON200.Id
+	tkn, err := createClusterToken(ctx, client, clusterID)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	if err := data.Set(FieldClusterToken, tkn); err != nil {
+		return diag.FromErr(fmt.Errorf("setting cluster token: %w", err))
+	}
 	data.SetId(clusterID)
 
 	if err := updateAKSClusterSettings(ctx, data, client); err != nil {
 		return diag.FromErr(err)
 	}
+	log.Printf("[INFO] Cluster with id %q has been registered, don't forget to install castai-agent helm chart", data.Id())
 
 	return resourceCastaiAKSClusterRead(ctx, data, meta)
 }
@@ -174,7 +183,7 @@ func resourceCastaiAKSClusterUpdate(ctx context.Context, data *schema.ResourceDa
 		return diag.FromErr(err)
 	}
 
-	return resourceCastaiEKSClusterRead(ctx, data, meta)
+	return resourceCastaiAKSClusterRead(ctx, data, meta)
 }
 
 func updateAKSClusterSettings(ctx context.Context, data *schema.ResourceData, client *sdk.ClientWithResponses) error {

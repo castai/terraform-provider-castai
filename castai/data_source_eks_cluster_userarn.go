@@ -2,6 +2,7 @@ package castai
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -45,7 +46,9 @@ func dataSourceCastaiEKSUserARN(ctx context.Context, data *schema.ResourceData, 
 	arn := *resp.JSON200.Arn
 
 	data.SetId(arn)
-	data.Set(EKSClusterUserARNFieldARN, arn)
+	if err := data.Set(EKSClusterUserARNFieldARN, arn); err != nil {
+		return diag.FromErr(fmt.Errorf("setting user arn: %w", err))
+	}
 
 	return nil
 }

@@ -28,7 +28,8 @@ func resourceGKECluster() *schema.Resource {
 		CreateContext: resourceCastaiGKEClusterCreate,
 		ReadContext:   resourceCastaiGKEClusterRead,
 		UpdateContext: resourceCastaiGKEClusterUpdate,
-		DeleteContext: resourceCastaiPublicCloudClusterDelete,
+		DeleteContext: resourceCastaiClusterDelete,
+		CustomizeDiff: clusterTokenDiff,
 		Description:   "GKE cluster resource allows connecting an existing GKE cluster to CAST AI.",
 
 		Timeouts: &schema.ResourceTimeout{
@@ -123,7 +124,9 @@ func resourceCastaiGKEClusterCreate(ctx context.Context, data *schema.ResourceDa
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	data.Set(FieldClusterToken, tkn)
+	if err := data.Set(FieldClusterToken, tkn); err != nil {
+		return diag.FromErr(fmt.Errorf("setting cluster token: %w", err))
+	}
 	data.SetId(clusterID)
 
 	if err := updateGKEClusterSettings(ctx, data, client); err != nil {
@@ -154,20 +157,19 @@ func resourceCastaiGKEClusterRead(ctx context.Context, data *schema.ResourceData
 		return nil
 	}
 
-	data.Set(FieldGKEClusterCredentialsId, toString(resp.JSON200.CredentialsId))
-	if GKE := resp.JSON200.Gke; GKE != nil {
-		data.Set(FieldGKEClusterProjectId, toString(GKE.ProjectId))
-		data.Set(FieldGKEClusterLocation, toString(GKE.Location))
-		data.Set(FieldGKEClusterName, toString(GKE.ClusterName))
+	if err := data.Set(FieldGKEClusterCredentialsId, toString(resp.JSON200.CredentialsId)); err != nil {
+		return diag.FromErr(fmt.Errorf("setting credentials id: %w", err))
 	}
-	clusterID := *resp.JSON200.Id
-
-	if _, ok := data.GetOk(FieldClusterToken); !ok {
-		tkn, err := createClusterToken(ctx, client, clusterID)
-		if err != nil {
-			return diag.FromErr(err)
+	if GKE := resp.JSON200.Gke; GKE != nil {
+		if err := data.Set(FieldGKEClusterProjectId, toString(GKE.ProjectId)); err != nil {
+			return diag.FromErr(fmt.Errorf("setting project id: %w", err))
 		}
-		data.Set(FieldClusterToken, tkn)
+		if err := data.Set(FieldGKEClusterLocation, toString(GKE.Location)); err != nil {
+			return diag.FromErr(fmt.Errorf("setting location: %w", err))
+		}
+		if err := data.Set(FieldGKEClusterName, toString(GKE.ClusterName)); err != nil {
+			return diag.FromErr(fmt.Errorf("setting cluster name: %w", err))
+		}
 	}
 
 	return nil

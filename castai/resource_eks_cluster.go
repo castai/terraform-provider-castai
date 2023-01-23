@@ -26,8 +26,9 @@ func resourceEKSCluster() *schema.Resource {
 		CreateContext: resourceCastaiEKSClusterCreate,
 		ReadContext:   resourceCastaiEKSClusterRead,
 		UpdateContext: resourceCastaiEKSClusterUpdate,
-		DeleteContext: resourceCastaiPublicCloudClusterDelete,
+		DeleteContext: resourceCastaiClusterDelete,
 		Description:   "EKS cluster resource allows connecting an existing EKS cluster to CAST AI.",
+		CustomizeDiff: clusterTokenDiff,
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(5 * time.Minute),
@@ -108,8 +109,10 @@ func resourceCastaiEKSClusterCreate(ctx context.Context, data *schema.ResourceDa
 	if err != nil {
 		return diag.FromErr(err)
 	}
+	if err := data.Set(FieldClusterToken, tkn); err != nil {
+		return diag.FromErr(fmt.Errorf("setting cluster token: %w", err))
+	}
 	data.SetId(clusterID)
-	data.Set(FieldClusterToken, tkn)
 
 	if err := updateClusterSettings(ctx, data, client); err != nil {
 		return diag.FromErr(err)
@@ -139,22 +142,23 @@ func resourceCastaiEKSClusterRead(ctx context.Context, data *schema.ResourceData
 		return nil
 	}
 
-	data.Set(FieldClusterCredentialsId, *resp.JSON200.CredentialsId)
+	if err := data.Set(FieldClusterCredentialsId, *resp.JSON200.CredentialsId); err != nil {
+		return diag.FromErr(fmt.Errorf("setting credentials id: %w", err))
+	}
 
 	if eks := resp.JSON200.Eks; eks != nil {
-		data.Set(FieldEKSClusterAccountId, toString(eks.AccountId))
-		data.Set(FieldEKSClusterRegion, toString(eks.Region))
-		data.Set(FieldEKSClusterName, toString(eks.ClusterName))
-		data.Set(FieldEKSClusterAssumeRoleArn, toString(eks.AssumeRoleArn))
-	}
-	clusterID := *resp.JSON200.Id
-
-	if _, ok := data.GetOk(FieldClusterToken); !ok {
-		tkn, err := createClusterToken(ctx, client, clusterID)
-		if err != nil {
-			return diag.FromErr(err)
+		if err := data.Set(FieldEKSClusterAccountId, toString(eks.AccountId)); err != nil {
+			return diag.FromErr(fmt.Errorf("setting account id: %w", err))
 		}
-		data.Set(FieldClusterToken, tkn)
+		if err := data.Set(FieldEKSClusterRegion, toString(eks.Region)); err != nil {
+			return diag.FromErr(fmt.Errorf("setting region: %w", err))
+		}
+		if err := data.Set(FieldEKSClusterName, toString(eks.ClusterName)); err != nil {
+			return diag.FromErr(fmt.Errorf("setting cluster name: %w", err))
+		}
+		if err := data.Set(FieldEKSClusterAssumeRoleArn, toString(eks.AssumeRoleArn)); err != nil {
+			return diag.FromErr(fmt.Errorf("setting assume role arn: %w", err))
+		}
 	}
 
 	return nil
@@ -206,15 +210,6 @@ func updateClusterSettings(ctx context.Context, data *schema.ResourceData, clien
 	}
 
 	return nil
-}
-
-func createClusterToken(ctx context.Context, client *sdk.ClientWithResponses, clusterID string) (string, error) {
-	resp, err := client.ExternalClusterAPICreateClusterTokenWithResponse(ctx, clusterID)
-	if err != nil {
-		return "", fmt.Errorf("creating cluster token: %w", err)
-	}
-
-	return *resp.JSON200.Token, nil
 }
 
 func getOptionalBool(data *schema.ResourceData, field string, defaultValue bool) *bool {

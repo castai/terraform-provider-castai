@@ -2,12 +2,12 @@
 page_title: "castai_aks_cluster Resource - terraform-provider-castai"
 subcategory: ""
 description: |-
-  AKS cluster resource allows connecting an existing EKS cluster to CAST AI.
+  AKS cluster resource allows connecting an existing AKS cluster to CAST AI.
 ---
 
 # castai_aks_cluster (Resource)
 
-AKS cluster resource allows connecting an existing EKS cluster to CAST AI.
+AKS cluster resource allows connecting an existing AKS cluster to CAST AI.
 
 ## Example Usage
 
@@ -49,6 +49,7 @@ resource "castai_aks_cluster" "this" {
 ### Read-Only
 
 - `cluster_token` (String, Sensitive) CAST AI cluster token.
+- `credentials_id` (String) CAST AI internal credentials ID
 - `id` (String) The ID of this resource.
 
 <a id="nestedblock--timeouts"></a>
