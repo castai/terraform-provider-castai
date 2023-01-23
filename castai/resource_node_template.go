@@ -9,9 +9,11 @@ import (
 	jsonpatch "github.com/evanphx/json-patch"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"io"
 	"log"
 	"net/http"
+	"time"
 )
 
 const (
@@ -24,6 +26,30 @@ func resourceNodeTemplate() *schema.Resource {
 		ReadContext:   resourceNodeTemplateRead,
 		UpdateContext: resourceNodeTemplateUpdate,
 		Description:   "CAST AI node template resource to manage autoscaler node templates",
+
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(2 * time.Minute),
+			Update: schema.DefaultTimeout(2 * time.Minute),
+		},
+
+		Schema: map[string]*schema.Schema{
+			FieldClusterId: {
+				Type:             schema.TypeString,
+				Optional:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
+				Description:      "CAST AI cluster id",
+			},
+			FieldNodeTemplatesJSON: {
+				Type:        schema.TypeString,
+				Description: "node templates JSON string to override current node templates",
+				Optional:    true,
+			},
+			FieldNodeTemplates: {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "computed value to store cluster node templates",
+			},
+		},
 	}
 }
 
