@@ -67,52 +67,6 @@ func TestNodeTemplatesResource_NodeTemplatesUpdateAction(t *testing.T) {
 		}
 	`
 
-	updatedNodeTemplates := `
-		{
-		  "items": [
-			{
-			  "template": {
-				"configurationId": "7dc4f922-29c9-4377-889c-0c8c5fb8d497",
-				"configurationName": "default",
-				"name": "gpu",
-				"constraints": {
-				  "spot": false,
-				  "useSpotFallbacks": false,
-				  "fallbackRestoreRateSeconds": 0,
-				  "storageOptimized": false,
-				  "computeOptimized": false,
-				  "instanceFamilies": {
-					"include": [],
-					"exclude": [
-					  "p4d",
-					  "p3dn",
-					  "p2"
-					]
-				  },
-				  "gpu": {
-					"manufacturers": [
-					  "NVIDIA"
-					],
-					"includeNames": [],
-					"excludeNames": []
-				  }
-				},
-				"version": "3",
-				"shouldTaint": false,
-				"rebalancingConfig": {
-				  "minNodes": 0
-				}
-			  },
-			  "stats": {
-				"countOnDemand": 0,
-				"countSpot": 0,
-				"countFallback": 0
-			  }
-			}
-		  ]
-		}
-	`
-
 	r := require.New(t)
 	mockctrl := gomock.NewController(t)
 	mockClient := mock_sdk.NewMockClientInterface(mockctrl)
@@ -128,8 +82,10 @@ func TestNodeTemplatesResource_NodeTemplatesUpdateAction(t *testing.T) {
 
 	clusterId := "cluster_id"
 	val := cty.ObjectVal(map[string]cty.Value{
-		FieldNodeTemplatesJSON: cty.StringVal(updatedNodeTemplates),
-		FieldClusterId:         cty.StringVal(clusterId),
+		FieldClusterId:                   cty.StringVal(clusterId),
+		FieldNodeTemplateName:            cty.StringVal("gpu"),
+		FieldNodeTemplateConfigurationId: cty.StringVal("7dc4f922-29c9-4377-889c-0c8c5fb8d497"),
+		FieldNodeTemplateShouldTaint:     cty.BoolVal(true),
 	})
 
 	state := terraform.NewInstanceStateShimmedFromValue(val, 0)
@@ -139,7 +95,7 @@ func TestNodeTemplatesResource_NodeTemplatesUpdateAction(t *testing.T) {
 	nodeTemplatesUpdated := false
 
 	mockClient.EXPECT().NodeTemplatesAPIListNodeTemplates(gomock.Any(), clusterId, gomock.Any()).Return(response, nil).Times(1)
-	mockClient.EXPECT().NodeTemplatesAPIUpdateNodeTemplateWithBody(gomock.Any(), clusterId, "name", "application/json", gomock.Any()).
+	mockClient.EXPECT().NodeTemplatesAPIUpdateNodeTemplateWithBody(gomock.Any(), clusterId, "gpu", "application/json", gomock.Any()).
 		DoAndReturn(func(ctx context.Context, clusterId string, contentType string, body io.Reader) (*http.Response, error) {
 			got, _ := io.ReadAll(body)
 			expected := []byte(currentNodeTemplates)
