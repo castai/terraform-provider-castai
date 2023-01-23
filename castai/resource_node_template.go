@@ -1,6 +1,7 @@
 package castai
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -20,8 +21,9 @@ const (
 
 func resourceNodeTemplate() *schema.Resource {
 	return &schema.Resource{
-		ReadContext: resourceNodeTemplateRead,
-		Description: "CAST AI node template resource to manage autoscaler node templates",
+		ReadContext:   resourceNodeTemplateRead,
+		UpdateContext: resourceNodeTemplateUpdate,
+		Description:   "CAST AI node template resource to manage autoscaler node templates",
 	}
 }
 
@@ -30,6 +32,53 @@ func resourceNodeTemplateRead(ctx context.Context, data *schema.ResourceData, me
 	if err != nil {
 		return diag.FromErr(err)
 	}
+	return nil
+}
+func resourceNodeTemplateUpdate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	err := updateNodeTemplate(ctx, data, meta)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	data.SetId(getClusterId(data))
+	return nil
+}
+
+func updateNodeTemplate(ctx context.Context, data *schema.ResourceData, meta interface{}) error {
+	clusterId := getClusterId(data)
+	if clusterId == "" {
+		log.Print("[INFO] ClusterId is missing. Will skip operation.")
+		return nil
+	}
+
+	err := readNodeTemplate(ctx, data, meta)
+	if err != nil {
+		return err
+	}
+
+	changedNodeTemplates, found := data.GetOk(FieldNodeTemplates)
+	if !found {
+		log.Printf("[DEBUG] changed node templates json not found. Skipping node templates changes")
+		return nil
+	}
+
+	changedNodeTemplatesJSON := changedNodeTemplates.(string)
+	if changedNodeTemplatesJSON == "" {
+		log.Printf("[DEBUG] changed policies json not found. Skipping autoscaler policies changes")
+		return nil
+	}
+
+	return updateNodeTemplates(ctx, meta, clusterId, changedNodeTemplatesJSON)
+}
+
+func updateNodeTemplates(ctx context.Context, meta interface{}, clusterId sdk.ClusterId, changedNodeTemplatesJSON string) error {
+	client := meta.(*ProviderConfig).api
+
+	resp, err := client.NodeTemplatesAPIUpdateNodeTemplateWithBodyWithResponse(ctx, string(clusterId), "name", "application/json", bytes.NewReader([]byte(changedNodeTemplatesJSON)))
+	if checkErr := sdk.CheckOKResponse(resp, err); checkErr != nil {
+		return checkErr
+	}
+
 	return nil
 }
 

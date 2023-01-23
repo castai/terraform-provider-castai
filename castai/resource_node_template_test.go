@@ -16,7 +16,7 @@ import (
 	"testing"
 )
 
-func TestAutoscalerResource_NodeTemplatesUpdateAction(t *testing.T) {
+func TestNodeTemplatesResource_NodeTemplatesUpdateAction(t *testing.T) {
 	currentNodeTemplates := `
 		{
 		  "items": [
@@ -62,31 +62,43 @@ func TestAutoscalerResource_NodeTemplatesUpdateAction(t *testing.T) {
 				"countSpot": 0,
 				"countFallback": 0
 			  }
-			},
+			}
+		  ]
+		}
+	`
+
+	updatedNodeTemplates := `
+		{
+		  "items": [
 			{
 			  "template": {
 				"configurationId": "7dc4f922-29c9-4377-889c-0c8c5fb8d497",
 				"configurationName": "default",
-				"name": "bingo-vng",
+				"name": "gpu",
 				"constraints": {
-				  "spot": true,
+				  "spot": false,
 				  "useSpotFallbacks": false,
 				  "fallbackRestoreRateSeconds": 0,
 				  "storageOptimized": false,
 				  "computeOptimized": false,
+				  "instanceFamilies": {
+					"include": [],
+					"exclude": [
+					  "p4d",
+					  "p3dn",
+					  "p2"
+					]
+				  },
 				  "gpu": {
 					"manufacturers": [
 					  "NVIDIA"
 					],
-					"includeNames": [
-					  "A100",
-					  "V100"
-					],
+					"includeNames": [],
 					"excludeNames": []
 				  }
 				},
-				"version": "1",
-				"shouldTaint": true,
+				"version": "3",
+				"shouldTaint": false,
 				"rebalancingConfig": {
 				  "minNodes": 0
 				}
@@ -116,8 +128,8 @@ func TestAutoscalerResource_NodeTemplatesUpdateAction(t *testing.T) {
 
 	clusterId := "cluster_id"
 	val := cty.ObjectVal(map[string]cty.Value{
-		FieldAutoscalerPoliciesJSON: cty.StringVal(currentNodeTemplates),
-		FieldClusterId:              cty.StringVal(clusterId),
+		FieldNodeTemplatesJSON: cty.StringVal(updatedNodeTemplates),
+		FieldClusterId:         cty.StringVal(clusterId),
 	})
 
 	state := terraform.NewInstanceStateShimmedFromValue(val, 0)
