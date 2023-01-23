@@ -112,7 +112,7 @@ func resourceCastaiAutoscalerUpdate(ctx context.Context, data *schema.ResourceDa
 func getCurrentPolicies(ctx context.Context, client *sdk.ClientWithResponses, clusterId sdk.ClusterId) ([]byte, error) {
 	log.Printf("[INFO] Getting cluster autoscaler information.")
 
-	resp, err := client.PoliciesAPIGetClusterPolicies(ctx, string(clusterId))
+	resp, err := client.PoliciesAPIGetClusterPolicies(ctx, clusterId)
 	if err != nil {
 		return nil, err
 	} else if resp.StatusCode == http.StatusNotFound {
