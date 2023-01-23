@@ -902,32 +902,6 @@ type RebalancingRequest struct {
 	RebalancingNodes *[]RebalancingNodeItem `json:"rebalancingNodes,omitempty"`
 }
 
-// ResourceUsage defines model for ResourceUsage.
-type ResourceUsage struct {
-	// cpu hours used for given date.
-	Cpu float32 `json:"cpu"`
-
-	// start of usage time in RFC3339 format.
-	From string `json:"from"`
-
-	// memory (MB) hours used for given date.
-	Memory float32 `json:"memory"`
-
-	// end of usage time in RFC3339 format.
-	To string `json:"to"`
-}
-
-// ResourceUsageReport defines model for ResourceUsageReport.
-type ResourceUsageReport struct {
-	Dates []ResourceUsage `json:"dates"`
-
-	// reported usage has occurred after this date. RFC3339 format.
-	FromDate string `json:"fromDate"`
-
-	// reported usage has occurred before this date. RFC3339 format.
-	ToDate string `json:"toDate"`
-}
-
 // UpdateOrganizationUser defines model for UpdateOrganizationUser.
 type UpdateOrganizationUser struct {
 	Role OrganizationRole `json:"role"`
@@ -1237,6 +1211,65 @@ type CastaiNotificationsV1beta1WebhookConfig struct {
 // CastaiNotificationsV1beta1WebhookConfig_AuthKeys defines model for CastaiNotificationsV1beta1WebhookConfig.AuthKeys.
 type CastaiNotificationsV1beta1WebhookConfig_AuthKeys struct {
 	AdditionalProperties map[string]string `json:"-"`
+}
+
+// CastaiUsageV1beta1ClusterMetadata defines model for castai.usage.v1beta1.ClusterMetadata.
+type CastaiUsageV1beta1ClusterMetadata struct {
+	// The cluster id.
+	Id string `json:"id"`
+
+	// The cluster name.
+	Name string `json:"name"`
+
+	// The project the cluster belongs to.
+	ProviderNamespaceId string `json:"providerNamespaceId"`
+
+	// The cloud provider.
+	ProviderType string `json:"providerType"`
+}
+
+// CastaiUsageV1beta1ClusterUsage defines model for castai.usage.v1beta1.ClusterUsage.
+type CastaiUsageV1beta1ClusterUsage struct {
+	Cluster CastaiUsageV1beta1ClusterMetadata `json:"cluster"`
+	Entries []CastaiUsageV1beta1ResourceUsage `json:"entries"`
+}
+
+// CastaiUsageV1beta1GetAvgUsageResponse defines model for castai.usage.v1beta1.GetAvgUsageResponse.
+type CastaiUsageV1beta1GetAvgUsageResponse struct {
+	// Average count of CPU used in the given period.
+	AvgBillableCpus float32 `json:"avgBillableCpus"`
+
+	// Average hour usage in the given period.
+	AvgCpuHours float32 `json:"avgCpuHours"`
+}
+
+// CastaiUsageV1beta1GetUsageReportResponse defines model for castai.usage.v1beta1.GetUsageReportResponse.
+type CastaiUsageV1beta1GetUsageReportResponse struct {
+	Clusters *[]CastaiUsageV1beta1ClusterUsage `json:"clusters,omitempty"`
+
+	// Period of time of resource usage.
+	Period *CastaiUsageV1beta1Period `json:"period,omitempty"`
+}
+
+// Period of time of resource usage.
+type CastaiUsageV1beta1Period struct {
+	// Start time of resource usage period.
+	From *time.Time `json:"from,omitempty"`
+
+	// End time of resource usage period.
+	To *time.Time `json:"to,omitempty"`
+}
+
+// ResourceUsage defines resources usage for given period.
+type CastaiUsageV1beta1ResourceUsage struct {
+	// Average count of CPU used in the given day.
+	BillableCpus float32 `json:"billableCpus"`
+
+	// Average hour usage in the given day.
+	CpuHours float32 `json:"cpuHours"`
+
+	// The day of usage.
+	Day string `json:"day"`
 }
 
 // Types of cloud service providers CAST AI supports.
@@ -2442,9 +2475,10 @@ type InsightsV1GetBestPracticesOverviewResponse_Timeseries struct {
 
 // InsightsV1GetBestPracticesOverviewResponseResources defines model for insights.v1.GetBestPracticesOverviewResponse.Resources.
 type InsightsV1GetBestPracticesOverviewResponseResources struct {
-	Affected   *int32 `json:"affected,omitempty"`
-	Total      *int32 `json:"total,omitempty"`
-	Unaffected *int32 `json:"unaffected,omitempty"`
+	Affected     *int32 `json:"affected,omitempty"`
+	NotAvailable *int32 `json:"notAvailable,omitempty"`
+	Total        *int32 `json:"total,omitempty"`
+	Unaffected   *int32 `json:"unaffected,omitempty"`
 }
 
 // InsightsV1GetBestPracticesReportFiltersResponse defines model for insights.v1.GetBestPracticesReportFiltersResponse.
@@ -2555,12 +2589,13 @@ type InsightsV1GetResourceVulnerablePackagesResponse struct {
 
 // InsightsV1GetResourceVulnerablePackagesResponseIssues defines model for insights.v1.GetResourceVulnerablePackagesResponse.Issues.
 type InsightsV1GetResourceVulnerablePackagesResponseIssues struct {
-	Critical     *int32 `json:"critical,omitempty"`
-	High         *int32 `json:"high,omitempty"`
-	Low          *int32 `json:"low,omitempty"`
-	Medium       *int32 `json:"medium,omitempty"`
-	None         *int32 `json:"none,omitempty"`
-	NotAvailable *int32 `json:"notAvailable,omitempty"`
+	Critical       *int32 `json:"critical,omitempty"`
+	FixesAvailable *int32 `json:"fixesAvailable,omitempty"`
+	High           *int32 `json:"high,omitempty"`
+	Low            *int32 `json:"low,omitempty"`
+	Medium         *int32 `json:"medium,omitempty"`
+	None           *int32 `json:"none,omitempty"`
+	NotAvailable   *int32 `json:"notAvailable,omitempty"`
 }
 
 // InsightsV1GetResourceVulnerablePackagesResponsePackageItem defines model for insights.v1.GetResourceVulnerablePackagesResponse.PackageItem.
@@ -2819,7 +2854,9 @@ type InventoryblacklistV1RemoveBlacklistRequest struct {
 	// blacklisted for specific cluster.
 	ClusterId      *string `json:"clusterId,omitempty"`
 	InstanceFamily *string `json:"instanceFamily"`
-	InstanceType   *string `json:"instanceType"`
+
+	// Reason for disabling instance type or family.
+	InstanceType *string `json:"instanceType"`
 
 	// Organization id for which the instance type or family is blacklisted.
 	OrganizationId *string `json:"organizationId,omitempty"`
@@ -2891,6 +2928,9 @@ type NodeconfigV1NewNodeConfiguration struct {
 	// Optional kubelet configuration properties. Applicable for EKS only.
 	KubeletConfig *map[string]interface{} `json:"kubeletConfig,omitempty"`
 
+	// Minimal disk size in GiB. Defaults to 100.
+	MinDiskSize *int32 `json:"minDiskSize"`
+
 	// The name of the node configuration.
 	Name string `json:"name"`
 
@@ -2942,6 +2982,9 @@ type NodeconfigV1NodeConfiguration struct {
 	// Optional kubelet configuration properties. Applicable for EKS only.
 	KubeletConfig *map[string]interface{} `json:"kubeletConfig"`
 
+	// Minimal disk size in GiB.
+	MinDiskSize *int32 `json:"minDiskSize,omitempty"`
+
 	// The name of the node configuration.
 	Name *string `json:"name,omitempty"`
 
@@ -2989,6 +3032,9 @@ type NodeconfigV1NodeConfigurationUpdate struct {
 
 	// Optional kubelet configuration properties. Applicable for EKS only.
 	KubeletConfig *map[string]interface{} `json:"kubeletConfig,omitempty"`
+
+	// Minimal disk size in GiB. Defaults to 100.
+	MinDiskSize *int32 `json:"minDiskSize"`
 
 	// Optional SSH public key to be used for provisioned nodes. Value should be base64 encoded.
 	SshPublicKey *string `json:"sshPublicKey"`
@@ -3304,6 +3350,7 @@ type PoliciesV1UnschedulablePodsPolicy struct {
 	// Defines default ratio of 1 CPU to Volume GiB  which will be summed with minimum value when creating new nodes.
 	// If set to 5, the ration would be: 1 CPU : 5 GiB.
 	// For example a node with 16 CPU would have (16 * 5 GiB) + minimum(100GiB) = 180 GiB volume size.
+	// Deprecated. Input only (for backwards-compatibility, ignored).
 	DiskGibToCpuRatio *int32 `json:"diskGibToCpuRatio"`
 
 	// Enable/disable unschedulable pods detection policy.
@@ -3611,13 +3658,13 @@ type MetricsAPIGetCPUUsageMetricsParams struct {
 	// Metrics period in hours, e.g., periodHours=24. This field is ignored if startTime and endTime fields are set.
 	PeriodHours *int32 `form:"periodHours,omitempty" json:"periodHours,omitempty"`
 
-	// Metrics data points steps in seconds, e.g., stepSeconds=3600.
+	// Metrics data points steps in seconds, e.g., stepSeconds=3600
 	StepSeconds *int32 `form:"stepSeconds,omitempty" json:"stepSeconds,omitempty"`
 
-	// Metrics range start time in unix timestamp, e.g., startTime=1640091345020.
+	// Metrics range start time in unix timestamp, e.g., startTime=1640091345020
 	StartTime *int64 `form:"startTime,omitempty" json:"startTime,omitempty"`
 
-	// Metrics range end time in unix timestamp, e.g., endTime=1640091345030.
+	// Metrics range end time in unix timestamp, e.g., endTime=1640091345030
 	EndTime *int64 `form:"endTime,omitempty" json:"endTime,omitempty"`
 }
 
@@ -3626,13 +3673,13 @@ type MetricsAPIGetMemoryUsageMetricsParams struct {
 	// Metrics period in hours, e.g., periodHours=24. This field is ignored if startTime and endTime fields are set.
 	PeriodHours *int32 `form:"periodHours,omitempty" json:"periodHours,omitempty"`
 
-	// Metrics data points steps in seconds, e.g., stepSeconds=3600.
+	// Metrics data points steps in seconds, e.g., stepSeconds=3600
 	StepSeconds *int32 `form:"stepSeconds,omitempty" json:"stepSeconds,omitempty"`
 
-	// Metrics range start time in unix timestamp, e.g., startTime=1640091345020.
+	// Metrics range start time in unix timestamp, e.g., startTime=1640091345020
 	StartTime *int64 `form:"startTime,omitempty" json:"startTime,omitempty"`
 
-	// Metrics range end time in unix timestamp, e.g., endTime=1640091345030.
+	// Metrics range end time in unix timestamp, e.g., endTime=1640091345030
 	EndTime *int64 `form:"endTime,omitempty" json:"endTime,omitempty"`
 }
 
@@ -3686,7 +3733,7 @@ type ExternalClusterAPIGetCredentialsScriptParams struct {
 	// Whether NVIDIA device plugin DaemonSet should be installed during Phase 2 on-boarding.
 	NvidiaDevicePlugin *bool `form:"nvidiaDevicePlugin,omitempty" json:"nvidiaDevicePlugin,omitempty"`
 
-	// Whether CAST AI Security Insights agent should be installed.
+	// Whether CAST AI Security Insights agent should be installed
 	InstallSecurityAgent *bool `form:"installSecurityAgent,omitempty" json:"installSecurityAgent,omitempty"`
 }
 
@@ -3738,37 +3785,37 @@ type NotificationAPIListNotificationsParams struct {
 	// Empty value indicates to start from beginning of the dataset.
 	PageCursor *string `form:"page.cursor,omitempty" json:"page.cursor,omitempty"`
 
-	// The severities you want to filter.
+	// The severities you want to filter
 	FilterSeverities *[]NotificationAPIListNotificationsParamsFilterSeverities `form:"filter.severities,omitempty" json:"filter.severities,omitempty"`
 
 	// Filters to return acknowledged or not acknowledged notifications.
 	FilterIsAcked *bool `form:"filter.isAcked,omitempty" json:"filter.isAcked,omitempty"`
 
-	// The id of the Notification.
+	// The id of the Notification
 	FilterNotificationId *string `form:"filter.notificationId,omitempty" json:"filter.notificationId,omitempty"`
 
-	// The name of the Notification.
+	// The name of the Notification
 	FilterNotificationName *string `form:"filter.notificationName,omitempty" json:"filter.notificationName,omitempty"`
 
-	// The id of the Cluster included in the ClusterMetadata.
+	// The id of the Cluster included in the ClusterMetadata
 	FilterClusterId *string `form:"filter.clusterId,omitempty" json:"filter.clusterId,omitempty"`
 
-	// The name of the Cluster included in the ClusterMetadata.
+	// The name of the Cluster included in the ClusterMetadata
 	FilterClusterName *string `form:"filter.clusterName,omitempty" json:"filter.clusterName,omitempty"`
 
-	// The id of the Operation included in the OperationMetadata.
+	// The id of the Operation included in the OperationMetadata
 	FilterOperationId *string `form:"filter.operationId,omitempty" json:"filter.operationId,omitempty"`
 
-	// The type of the Operation included in the OperationMetadata.
+	// The type of the Operation included in the OperationMetadata
 	FilterOperationType *string `form:"filter.operationType,omitempty" json:"filter.operationType,omitempty"`
 
-	// The project the cluster belongs in the ClusterMetadata.
+	// The project the cluster belongs in the ClusterMetadata
 	FilterProject *string `form:"filter.project,omitempty" json:"filter.project,omitempty"`
 
-	// Name of the field you want to sort.
+	// Name of the field you want to sort
 	SortField *string `form:"sort.field,omitempty" json:"sort.field,omitempty"`
 
-	// The sort order, possible values ASC or DESC, if not provided asc is the default.
+	// The sort order, possible values ASC or DESC, if not provided asc is the default
 	//
 	//  - ASC: ASC
 	//  - asc: desc
@@ -3794,16 +3841,16 @@ type NotificationAPIListWebhookConfigsParams struct {
 	// Empty value indicates to start from beginning of the dataset.
 	PageCursor *string `form:"page.cursor,omitempty" json:"page.cursor,omitempty"`
 
-	// The severities to be applied for filtering.
+	// The severities to be applied for filtering
 	FilterSeverities *[]NotificationAPIListWebhookConfigsParamsFilterSeverities `form:"filter.severities,omitempty" json:"filter.severities,omitempty"`
 
-	// The status to be applied for filtering.
+	// The status to be applied for filtering
 	FilterStatus *string `form:"filter.status,omitempty" json:"filter.status,omitempty"`
 
-	// Name of the field you want to sort.
+	// Name of the field you want to sort
 	SortField *string `form:"sort.field,omitempty" json:"sort.field,omitempty"`
 
-	// The sort order, possible values ASC or DESC, if not provided asc is the default.
+	// The sort order, possible values ASC or DESC, if not provided asc is the default
 	//
 	//  - ASC: ASC
 	//  - asc: desc
@@ -3836,16 +3883,25 @@ type CreateOrganizationUserJSONBody = NewOrganizationUser
 // UpdateOrganizationUserJSONBody defines parameters for UpdateOrganizationUser.
 type UpdateOrganizationUserJSONBody = UpdateOrganizationUser
 
-// GetUsageReportParams defines parameters for GetUsageReport.
-type GetUsageReportParams struct {
-	// Request filter parameter representing unique cluster ID. For instance, if you make a list request with clusterId filter parameter - returned results will represent the respective cluster. Cluster ID must be a valid UUID.
-	ClusterId *FilterClusterId `form:"clusterId,omitempty" json:"clusterId,omitempty"`
+// UsageAPIGetAvgUsageParams defines parameters for UsageAPIGetAvgUsage.
+type UsageAPIGetAvgUsageParams struct {
+	// Start time of resource usage period.
+	PeriodFrom *time.Time `form:"period.from,omitempty" json:"period.from,omitempty"`
 
-	// Request filter parameter declaring point of time after which the results should be returned. Moment in time must be declared in RFC3339 format. https://tools.ietf.org/html/rfc3339
-	FromDate *FilterFromDate `form:"fromDate,omitempty" json:"fromDate,omitempty"`
+	// End time of resource usage period.
+	PeriodTo *time.Time `form:"period.to,omitempty" json:"period.to,omitempty"`
+}
 
-	// Request filter parameter declaring point of time until which the results should be returned. Moment in time must be declared in RFC3339 format. https://tools.ietf.org/html/rfc3339
-	ToDate *FilterToDate `form:"toDate,omitempty" json:"toDate,omitempty"`
+// UsageAPIGetUsageReportParams defines parameters for UsageAPIGetUsageReport.
+type UsageAPIGetUsageReportParams struct {
+	// Start time of resource usage period.
+	FilterPeriodFrom *time.Time `form:"filter.period.from,omitempty" json:"filter.period.from,omitempty"`
+
+	// End time of resource usage period.
+	FilterPeriodTo *time.Time `form:"filter.period.to,omitempty" json:"filter.period.to,omitempty"`
+
+	// Optional cluster id for usage filtering
+	FilterClusterId *string `form:"filter.clusterId,omitempty" json:"filter.clusterId,omitempty"`
 }
 
 // ExternalClusterAPIGetCredentialsScriptTemplateParams defines parameters for ExternalClusterAPIGetCredentialsScriptTemplate.
@@ -3855,34 +3911,34 @@ type ExternalClusterAPIGetCredentialsScriptTemplateParams struct {
 
 // InsightsAPIGetBestPracticesReportParams defines parameters for InsightsAPIGetBestPracticesReport.
 type InsightsAPIGetBestPracticesReportParams struct {
-	// (optional) cluster_id filter.
+	// (optional) cluster_id filter
 	ClusterId *string `form:"clusterId,omitempty" json:"clusterId,omitempty"`
 
-	// (optional) namespace filter.
+	// (optional) namespace filter
 	Namespace *string `form:"namespace,omitempty" json:"namespace,omitempty"`
 
-	// (optional) threat category filter.
+	// (optional) threat category filter
 	Category *string `form:"category,omitempty" json:"category,omitempty"`
 
-	// (optional) severity filter.
+	// (optional) severity filter
 	SeverityLevel *string `form:"severityLevel,omitempty" json:"severityLevel,omitempty"`
 
-	// (optional) return scan which happened after this timestamp.
+	// (optional) return scan which happened after this timestamp
 	From *time.Time `form:"from,omitempty" json:"from,omitempty"`
 }
 
 // InsightsAPIGetBestPracticesCheckDetailsParams defines parameters for InsightsAPIGetBestPracticesCheckDetails.
 type InsightsAPIGetBestPracticesCheckDetailsParams struct {
-	// (optional) cluster_id filter.
+	// (optional) cluster_id filter
 	ClusterId *string `form:"clusterId,omitempty" json:"clusterId,omitempty"`
 
-	// (optional) namespace filter.
+	// (optional) namespace filter
 	Namespace *string `form:"namespace,omitempty" json:"namespace,omitempty"`
 }
 
 // InsightsAPIGetBestPracticesReportFiltersParams defines parameters for InsightsAPIGetBestPracticesReportFilters.
 type InsightsAPIGetBestPracticesReportFiltersParams struct {
-	// (optional) return filters available for specific cluster.
+	// (optional) return filters available for specific cluster
 	ClusterId *string `form:"clusterId,omitempty" json:"clusterId,omitempty"`
 }
 
@@ -3891,7 +3947,7 @@ type InsightsAPIScheduleBestPracticesScanJSONBody = InsightsV1ScheduleBestPracti
 
 // InsightsAPIGetBestPracticesReportSummaryParams defines parameters for InsightsAPIGetBestPracticesReportSummary.
 type InsightsAPIGetBestPracticesReportSummaryParams struct {
-	// (optional) cluster_id filter.
+	// (optional) cluster_id filter
 	ClusterId *string `form:"clusterId,omitempty" json:"clusterId,omitempty"`
 }
 
@@ -3903,7 +3959,7 @@ type InsightsAPIGetBestPracticesOverviewParams struct {
 	// (optional) End of time range.
 	ToDate *time.Time `form:"toDate,omitempty" json:"toDate,omitempty"`
 
-	// (optional) ID of cluster.
+	// (optional) ID of cluster
 	ClusterId *string `form:"clusterId,omitempty" json:"clusterId,omitempty"`
 }
 
@@ -3915,7 +3971,7 @@ type InsightsAPIGetOverviewSummaryParams struct {
 	// (optional) End of time range.
 	ToDate *time.Time `form:"toDate,omitempty" json:"toDate,omitempty"`
 
-	// (optional) ID of cluster.
+	// (optional) ID of cluster
 	ClusterId *string `form:"clusterId,omitempty" json:"clusterId,omitempty"`
 }
 
@@ -3927,28 +3983,28 @@ type InsightsAPIGetVulnerabilitiesOverviewParams struct {
 	// (optional) End of time range.
 	ToDate *time.Time `form:"toDate,omitempty" json:"toDate,omitempty"`
 
-	// (optional) ID of cluster.
+	// (optional) ID of cluster
 	ClusterId *string `form:"clusterId,omitempty" json:"clusterId,omitempty"`
 }
 
 // InsightsAPIGetVulnerabilitiesReportParams defines parameters for InsightsAPIGetVulnerabilitiesReport.
 type InsightsAPIGetVulnerabilitiesReportParams struct {
-	// (optional) cluster_id filter.
+	// (optional) cluster_id filter
 	ClusterId *string `form:"clusterId,omitempty" json:"clusterId,omitempty"`
 
-	// (optional) object_name filter.
+	// (optional) object_name filter
 	ObjectName *string `form:"objectName,omitempty" json:"objectName,omitempty"`
 
-	// (optional) object_kind filter.
+	// (optional) object_kind filter
 	ObjectKind *string `form:"objectKind,omitempty" json:"objectKind,omitempty"`
 
-	// (optional) namespace filter.
+	// (optional) namespace filter
 	Namespace *string `form:"namespace,omitempty" json:"namespace,omitempty"`
 
-	// (optional) return scan which happened after this timestamp.
+	// (optional) return scan which happened after this timestamp
 	From *time.Time `form:"from,omitempty" json:"from,omitempty"`
 
-	// (optional) CVE filter.
+	// (optional) CVE filter
 	Cve *string `form:"cve,omitempty" json:"cve,omitempty"`
 }
 
@@ -3963,7 +4019,7 @@ type InsightsAPIScheduleVulnerabilitiesScanJSONBody = InsightsV1ScheduleVulnerab
 
 // InsightsAPIGetVulnerabilitiesReportSummaryParams defines parameters for InsightsAPIGetVulnerabilitiesReportSummary.
 type InsightsAPIGetVulnerabilitiesReportSummaryParams struct {
-	// (optional) cluster_id filter.
+	// (optional) cluster_id filter
 	ClusterId *string `form:"clusterId,omitempty" json:"clusterId,omitempty"`
 }
 
@@ -3972,7 +4028,7 @@ type InsightsAPIIngestAgentLogJSONBody = InsightsV1LogEvent
 
 // InsightsAPIGetAgentInstallScriptParams defines parameters for InsightsAPIGetAgentInstallScript.
 type InsightsAPIGetAgentInstallScriptParams struct {
-	// (required) append cloud credential creation.
+	// (required) append cloud credential creation
 	EnableCloudscan *bool `form:"enableCloudscan,omitempty" json:"enableCloudscan,omitempty"`
 }
 

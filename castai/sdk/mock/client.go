@@ -1635,26 +1635,6 @@ func (mr *MockClientInterfaceMockRecorder) GetRebalancingPlan(ctx, clusterId, re
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetRebalancingPlan", reflect.TypeOf((*MockClientInterface)(nil).GetRebalancingPlan), varargs...)
 }
 
-// GetUsageReport mocks base method.
-func (m *MockClientInterface) GetUsageReport(ctx context.Context, params *sdk.GetUsageReportParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
-	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, params}
-	for _, a := range reqEditors {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "GetUsageReport", varargs...)
-	ret0, _ := ret[0].(*http.Response)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetUsageReport indicates an expected call of GetUsageReport.
-func (mr *MockClientInterfaceMockRecorder) GetUsageReport(ctx, params interface{}, reqEditors ...interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, params}, reqEditors...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUsageReport", reflect.TypeOf((*MockClientInterface)(nil).GetUsageReport), varargs...)
-}
-
 // GetWorkloads mocks base method.
 func (m *MockClientInterface) GetWorkloads(ctx context.Context, clusterId sdk.ClusterId, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
@@ -3235,6 +3215,46 @@ func (mr *MockClientInterfaceMockRecorder) UpdateOrganizationWithBody(ctx, id, c
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateOrganizationWithBody", reflect.TypeOf((*MockClientInterface)(nil).UpdateOrganizationWithBody), varargs...)
 }
 
+// UsageAPIGetAvgUsage mocks base method.
+func (m *MockClientInterface) UsageAPIGetAvgUsage(ctx context.Context, params *sdk.UsageAPIGetAvgUsageParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "UsageAPIGetAvgUsage", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UsageAPIGetAvgUsage indicates an expected call of UsageAPIGetAvgUsage.
+func (mr *MockClientInterfaceMockRecorder) UsageAPIGetAvgUsage(ctx, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UsageAPIGetAvgUsage", reflect.TypeOf((*MockClientInterface)(nil).UsageAPIGetAvgUsage), varargs...)
+}
+
+// UsageAPIGetUsageReport mocks base method.
+func (m *MockClientInterface) UsageAPIGetUsageReport(ctx context.Context, params *sdk.UsageAPIGetUsageReportParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "UsageAPIGetUsageReport", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UsageAPIGetUsageReport indicates an expected call of UsageAPIGetUsageReport.
+func (mr *MockClientInterfaceMockRecorder) UsageAPIGetUsageReport(ctx, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UsageAPIGetUsageReport", reflect.TypeOf((*MockClientInterface)(nil).UsageAPIGetUsageReport), varargs...)
+}
+
 // MockClientWithResponsesInterface is a mock of ClientWithResponsesInterface interface.
 type MockClientWithResponsesInterface struct {
 	ctrl     *gomock.Controller
@@ -4428,21 +4448,6 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) GetRebalancingPlanWithRe
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetRebalancingPlanWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).GetRebalancingPlanWithResponse), ctx, clusterId, rebalancingPlanId)
 }
 
-// GetUsageReportWithResponse mocks base method.
-func (m *MockClientWithResponsesInterface) GetUsageReportWithResponse(ctx context.Context, params *sdk.GetUsageReportParams) (*sdk.GetUsageReportResponse, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetUsageReportWithResponse", ctx, params)
-	ret0, _ := ret[0].(*sdk.GetUsageReportResponse)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetUsageReportWithResponse indicates an expected call of GetUsageReportWithResponse.
-func (mr *MockClientWithResponsesInterfaceMockRecorder) GetUsageReportWithResponse(ctx, params interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUsageReportWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).GetUsageReportWithResponse), ctx, params)
-}
-
 // GetWorkloadsWithResponse mocks base method.
 func (m *MockClientWithResponsesInterface) GetWorkloadsWithResponse(ctx context.Context, clusterId sdk.ClusterId) (*sdk.GetWorkloadsResponse, error) {
 	m.ctrl.T.Helper()
@@ -5626,6 +5631,36 @@ func (m *MockClientWithResponsesInterface) UpdateOrganizationWithResponse(ctx co
 func (mr *MockClientWithResponsesInterfaceMockRecorder) UpdateOrganizationWithResponse(ctx, id, body interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateOrganizationWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).UpdateOrganizationWithResponse), ctx, id, body)
+}
+
+// UsageAPIGetAvgUsageWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) UsageAPIGetAvgUsageWithResponse(ctx context.Context, params *sdk.UsageAPIGetAvgUsageParams) (*sdk.UsageAPIGetAvgUsageResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UsageAPIGetAvgUsageWithResponse", ctx, params)
+	ret0, _ := ret[0].(*sdk.UsageAPIGetAvgUsageResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UsageAPIGetAvgUsageWithResponse indicates an expected call of UsageAPIGetAvgUsageWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) UsageAPIGetAvgUsageWithResponse(ctx, params interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UsageAPIGetAvgUsageWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).UsageAPIGetAvgUsageWithResponse), ctx, params)
+}
+
+// UsageAPIGetUsageReportWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) UsageAPIGetUsageReportWithResponse(ctx context.Context, params *sdk.UsageAPIGetUsageReportParams) (*sdk.UsageAPIGetUsageReportResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UsageAPIGetUsageReportWithResponse", ctx, params)
+	ret0, _ := ret[0].(*sdk.UsageAPIGetUsageReportResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UsageAPIGetUsageReportWithResponse indicates an expected call of UsageAPIGetUsageReportWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) UsageAPIGetUsageReportWithResponse(ctx, params interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UsageAPIGetUsageReportWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).UsageAPIGetUsageReportWithResponse), ctx, params)
 }
 
 // MockResponse is a mock of Response interface.

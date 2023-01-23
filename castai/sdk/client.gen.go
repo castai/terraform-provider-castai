@@ -452,8 +452,11 @@ type ClientInterface interface {
 
 	UpdateOrganizationUser(ctx context.Context, id string, userId string, body UpdateOrganizationUserJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// GetUsageReport request
-	GetUsageReport(ctx context.Context, params *GetUsageReportParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// UsageAPIGetAvgUsage request
+	UsageAPIGetAvgUsage(ctx context.Context, params *UsageAPIGetAvgUsageParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// UsageAPIGetUsageReport request
+	UsageAPIGetUsageReport(ctx context.Context, params *UsageAPIGetUsageReportParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// ExternalClusterAPIGetCredentialsScriptTemplate request
 	ExternalClusterAPIGetCredentialsScriptTemplate(ctx context.Context, provider string, params *ExternalClusterAPIGetCredentialsScriptTemplateParams, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -2111,8 +2114,20 @@ func (c *Client) UpdateOrganizationUser(ctx context.Context, id string, userId s
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetUsageReport(ctx context.Context, params *GetUsageReportParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewGetUsageReportRequest(c.Server, params)
+func (c *Client) UsageAPIGetAvgUsage(ctx context.Context, params *UsageAPIGetAvgUsageParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUsageAPIGetAvgUsageRequest(c.Server, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) UsageAPIGetUsageReport(ctx context.Context, params *UsageAPIGetUsageReportParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUsageAPIGetUsageReportRequest(c.Server, params)
 	if err != nil {
 		return nil, err
 	}
@@ -7610,8 +7625,71 @@ func NewUpdateOrganizationUserRequestWithBody(server string, id string, userId s
 	return req, nil
 }
 
-// NewGetUsageReportRequest generates requests for GetUsageReport
-func NewGetUsageReportRequest(server string, params *GetUsageReportParams) (*http.Request, error) {
+// NewUsageAPIGetAvgUsageRequest generates requests for UsageAPIGetAvgUsage
+func NewUsageAPIGetAvgUsageRequest(server string, params *UsageAPIGetAvgUsageParams) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/report/usage/avg")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	queryValues := queryURL.Query()
+
+	if params.PeriodFrom != nil {
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "period.from", runtime.ParamLocationQuery, *params.PeriodFrom); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.PeriodTo != nil {
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "period.to", runtime.ParamLocationQuery, *params.PeriodTo); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	queryURL.RawQuery = queryValues.Encode()
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewUsageAPIGetUsageReportRequest generates requests for UsageAPIGetUsageReport
+func NewUsageAPIGetUsageReportRequest(server string, params *UsageAPIGetUsageReportParams) (*http.Request, error) {
 	var err error
 
 	serverURL, err := url.Parse(server)
@@ -7631,9 +7709,9 @@ func NewGetUsageReportRequest(server string, params *GetUsageReportParams) (*htt
 
 	queryValues := queryURL.Query()
 
-	if params.ClusterId != nil {
+	if params.FilterPeriodFrom != nil {
 
-		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "clusterId", runtime.ParamLocationQuery, *params.ClusterId); err != nil {
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "filter.period.from", runtime.ParamLocationQuery, *params.FilterPeriodFrom); err != nil {
 			return nil, err
 		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
 			return nil, err
@@ -7647,9 +7725,9 @@ func NewGetUsageReportRequest(server string, params *GetUsageReportParams) (*htt
 
 	}
 
-	if params.FromDate != nil {
+	if params.FilterPeriodTo != nil {
 
-		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "fromDate", runtime.ParamLocationQuery, *params.FromDate); err != nil {
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "filter.period.to", runtime.ParamLocationQuery, *params.FilterPeriodTo); err != nil {
 			return nil, err
 		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
 			return nil, err
@@ -7663,9 +7741,9 @@ func NewGetUsageReportRequest(server string, params *GetUsageReportParams) (*htt
 
 	}
 
-	if params.ToDate != nil {
+	if params.FilterClusterId != nil {
 
-		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "toDate", runtime.ParamLocationQuery, *params.ToDate); err != nil {
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "filter.clusterId", runtime.ParamLocationQuery, *params.FilterClusterId); err != nil {
 			return nil, err
 		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
 			return nil, err
@@ -9302,8 +9380,11 @@ type ClientWithResponsesInterface interface {
 
 	UpdateOrganizationUserWithResponse(ctx context.Context, id string, userId string, body UpdateOrganizationUserJSONRequestBody) (*UpdateOrganizationUserResponse, error)
 
-	// GetUsageReport request
-	GetUsageReportWithResponse(ctx context.Context, params *GetUsageReportParams) (*GetUsageReportResponse, error)
+	// UsageAPIGetAvgUsage request
+	UsageAPIGetAvgUsageWithResponse(ctx context.Context, params *UsageAPIGetAvgUsageParams) (*UsageAPIGetAvgUsageResponse, error)
+
+	// UsageAPIGetUsageReport request
+	UsageAPIGetUsageReportWithResponse(ctx context.Context, params *UsageAPIGetUsageReportParams) (*UsageAPIGetUsageReportResponse, error)
 
 	// ExternalClusterAPIGetCredentialsScriptTemplate request
 	ExternalClusterAPIGetCredentialsScriptTemplateWithResponse(ctx context.Context, provider string, params *ExternalClusterAPIGetCredentialsScriptTemplateParams) (*ExternalClusterAPIGetCredentialsScriptTemplateResponse, error)
@@ -12322,14 +12403,14 @@ func (r UpdateOrganizationUserResponse) GetBody() []byte {
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
-type GetUsageReportResponse struct {
+type UsageAPIGetAvgUsageResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *ResourceUsageReport
+	JSON200      *CastaiUsageV1beta1GetAvgUsageResponse
 }
 
 // Status returns HTTPResponse.Status
-func (r GetUsageReportResponse) Status() string {
+func (r UsageAPIGetAvgUsageResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -12337,7 +12418,7 @@ func (r GetUsageReportResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r GetUsageReportResponse) StatusCode() int {
+func (r UsageAPIGetAvgUsageResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -12346,7 +12427,37 @@ func (r GetUsageReportResponse) StatusCode() int {
 
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
-func (r GetUsageReportResponse) GetBody() []byte {
+func (r UsageAPIGetAvgUsageResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type UsageAPIGetUsageReportResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *CastaiUsageV1beta1GetUsageReportResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r UsageAPIGetUsageReportResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r UsageAPIGetUsageReportResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r UsageAPIGetUsageReportResponse) GetBody() []byte {
 	return r.Body
 }
 
@@ -14133,13 +14244,22 @@ func (c *ClientWithResponses) UpdateOrganizationUserWithResponse(ctx context.Con
 	return ParseUpdateOrganizationUserResponse(rsp)
 }
 
-// GetUsageReportWithResponse request returning *GetUsageReportResponse
-func (c *ClientWithResponses) GetUsageReportWithResponse(ctx context.Context, params *GetUsageReportParams) (*GetUsageReportResponse, error) {
-	rsp, err := c.GetUsageReport(ctx, params)
+// UsageAPIGetAvgUsageWithResponse request returning *UsageAPIGetAvgUsageResponse
+func (c *ClientWithResponses) UsageAPIGetAvgUsageWithResponse(ctx context.Context, params *UsageAPIGetAvgUsageParams) (*UsageAPIGetAvgUsageResponse, error) {
+	rsp, err := c.UsageAPIGetAvgUsage(ctx, params)
 	if err != nil {
 		return nil, err
 	}
-	return ParseGetUsageReportResponse(rsp)
+	return ParseUsageAPIGetAvgUsageResponse(rsp)
+}
+
+// UsageAPIGetUsageReportWithResponse request returning *UsageAPIGetUsageReportResponse
+func (c *ClientWithResponses) UsageAPIGetUsageReportWithResponse(ctx context.Context, params *UsageAPIGetUsageReportParams) (*UsageAPIGetUsageReportResponse, error) {
+	rsp, err := c.UsageAPIGetUsageReport(ctx, params)
+	if err != nil {
+		return nil, err
+	}
+	return ParseUsageAPIGetUsageReportResponse(rsp)
 }
 
 // ExternalClusterAPIGetCredentialsScriptTemplateWithResponse request returning *ExternalClusterAPIGetCredentialsScriptTemplateResponse
@@ -16871,29 +16991,52 @@ func ParseUpdateOrganizationUserResponse(rsp *http.Response) (*UpdateOrganizatio
 	return response, nil
 }
 
-// ParseGetUsageReportResponse parses an HTTP response from a GetUsageReportWithResponse call
-func ParseGetUsageReportResponse(rsp *http.Response) (*GetUsageReportResponse, error) {
+// ParseUsageAPIGetAvgUsageResponse parses an HTTP response from a UsageAPIGetAvgUsageWithResponse call
+func ParseUsageAPIGetAvgUsageResponse(rsp *http.Response) (*UsageAPIGetAvgUsageResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
 	defer rsp.Body.Close()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &GetUsageReportResponse{
+	response := &UsageAPIGetAvgUsageResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest ResourceUsageReport
+		var dest CastaiUsageV1beta1GetAvgUsageResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
 		response.JSON200 = &dest
 
-	case rsp.StatusCode == 200:
-		// Content-type (text/csv) unsupported
+	}
+
+	return response, nil
+}
+
+// ParseUsageAPIGetUsageReportResponse parses an HTTP response from a UsageAPIGetUsageReportWithResponse call
+func ParseUsageAPIGetUsageReportResponse(rsp *http.Response) (*UsageAPIGetUsageReportResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &UsageAPIGetUsageReportResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest CastaiUsageV1beta1GetUsageReportResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
 
 	}
 
