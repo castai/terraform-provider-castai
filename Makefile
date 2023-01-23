@@ -14,7 +14,7 @@ init-examples:
 
 generate-sdk:
 	@echo "==> Generating castai sdk client"
-	@API_TAGS=ExternalClusterAPI,PoliciesAPI,NodeConfigurationAPI,auth-tokens go generate castai/sdk/generate.go
+	@API_TAGS=ExternalClusterAPI,PoliciesAPI,NodeConfigurationAPI,NodeTemplatesAPI,auth-tokens go generate castai/sdk/generate.go
 
 # The following command also rewrites existing documentation
 generate-docs:
