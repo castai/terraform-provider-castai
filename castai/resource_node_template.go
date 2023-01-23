@@ -79,6 +79,13 @@ func resourceNodeTemplateRead(ctx context.Context, data *schema.ResourceData, me
 	if err := data.Set(FieldNodeTemplateName, nodeTemplate.Name); err != nil {
 		return diag.FromErr(fmt.Errorf("setting name: %w", err))
 	}
+	if err := data.Set(FieldNodeTemplateConfigurationId, nodeTemplate.ConfigurationId); err != nil {
+		return diag.FromErr(fmt.Errorf("setting configuration id: %w", err))
+	}
+	if err := data.Set(FieldNodeTemplateShouldTaint, nodeTemplate.ShouldTaint); err != nil {
+		return diag.FromErr(fmt.Errorf("setting shoulds taint: %w", err))
+	}
+
 	return nil
 }
 func resourceNodeTemplateUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
