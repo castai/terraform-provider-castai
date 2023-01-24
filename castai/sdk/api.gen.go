@@ -235,6 +235,9 @@ type ExternalclusterV1Cluster struct {
 	// The name of the external cluster.
 	Name *string `json:"name,omitempty"`
 
+	// OpenShiftClusterParams defines OpenShift-specific arguments.
+	Openshift *ExternalclusterV1OpenshiftClusterParams `json:"openshift,omitempty"`
+
 	// The cluster's organization ID.
 	OrganizationId *string `json:"organizationId,omitempty"`
 
@@ -561,8 +564,33 @@ type ExternalclusterV1NodeType string
 
 // NodeVolume defines node's local root volume configuration.
 type ExternalclusterV1NodeVolume struct {
+	// RaidConfig allow You have two or more devices, of approximately the same size, and you want to combine their storage capacity
+	// and also combine their performance by accessing them in parallel.
+	RaidConfig *ExternalclusterV1RaidConfig `json:"raidConfig,omitempty"`
+
 	// Volume size in GiB.
 	Size *int32 `json:"size,omitempty"`
+}
+
+// OpenShiftClusterParams defines OpenShift-specific arguments.
+type ExternalclusterV1OpenshiftClusterParams struct {
+	// Cloud provider of the cluster.
+	Cloud *string `json:"cloud,omitempty"`
+
+	// Name of the cluster.
+	ClusterName *string `json:"clusterName,omitempty"`
+	InternalId  *string `json:"internalId,omitempty"`
+
+	// Region of the cluster.
+	Region *string `json:"region,omitempty"`
+}
+
+// RaidConfig allow You have two or more devices, of approximately the same size, and you want to combine their storage capacity
+// and also combine their performance by accessing them in parallel.
+type ExternalclusterV1RaidConfig struct {
+	// Specify the RAID0 chunk size in kilobytes, this parameter affects the read/write in the disk array and must be tailored
+	// for the type of data written by the workloads in the node. If not provided it will default to 64KB.
+	ChunkSize *int32 `json:"chunkSize"`
 }
 
 // ReconcileClusterResponse is the result of ReconcileClusterRequest.
@@ -596,6 +624,9 @@ type ExternalclusterV1RegisterClusterRequest struct {
 
 	// The name of the cluster.
 	Name string `json:"name"`
+
+	// OpenShiftClusterParams defines OpenShift-specific arguments.
+	Openshift *ExternalclusterV1OpenshiftClusterParams `json:"openshift,omitempty"`
 
 	// Organization of the cluster.
 	OrganizationId *string `json:"organizationId,omitempty"`
@@ -679,6 +710,20 @@ type NodeconfigV1EKSConfig struct {
 	SecurityGroups *[]string `json:"securityGroups,omitempty"`
 }
 
+// NodeconfigV1GKEConfig defines model for nodeconfig.v1.GKEConfig.
+type NodeconfigV1GKEConfig struct {
+	// Maximum number of pods that can be run on a node, which affects how many IP addresses you will need for each node. Defaults to 110.
+	// For Standard GKE clusters, you can run a maximum of 256 Pods on a node with a /23 range, not 512 as you might expect. This provides a buffer so that Pods don't become unschedulable due to a transient lack of IP addresses in the Pod IP range for a given node.
+	// For all ranges, at most half as many Pods can be scheduled as IP addresses in the range.
+	MaxPodsPerNode *int32 `json:"maxPodsPerNode,omitempty"`
+}
+
+// NodeconfigV1GetSuggestedConfigurationResponse defines model for nodeconfig.v1.GetSuggestedConfigurationResponse.
+type NodeconfigV1GetSuggestedConfigurationResponse struct {
+	SecurityGroups *[]NodeconfigV1SecurityGroup `json:"securityGroups,omitempty"`
+	Subnets        *[]NodeconfigV1SubnetDetails `json:"subnets,omitempty"`
+}
+
 // NodeconfigV1KOPSConfig defines model for nodeconfig.v1.KOPSConfig.
 type NodeconfigV1KOPSConfig struct {
 	// AWS key pair ID to be used for provisioned nodes. Has priority over sshPublicKey.
@@ -703,6 +748,7 @@ type NodeconfigV1NewNodeConfiguration struct {
 	// Optional docker daemon configuration properties. Provide only properties that you want to override. Available values https://docs.docker.com/engine/reference/commandline/dockerd/#daemon-configuration-file
 	DockerConfig *map[string]interface{} `json:"dockerConfig,omitempty"`
 	Eks          *NodeconfigV1EKSConfig  `json:"eks,omitempty"`
+	Gke          *NodeconfigV1GKEConfig  `json:"gke,omitempty"`
 
 	// Image to be used while provisioning the node. If nothing is provided will be resolved to latest available image based on Kubernetes version if possible.
 	Image *string `json:"image"`
@@ -754,6 +800,7 @@ type NodeconfigV1NodeConfiguration struct {
 	// Optional docker daemon configuration properties. Applicable for EKS only.
 	DockerConfig *map[string]interface{} `json:"dockerConfig"`
 	Eks          *NodeconfigV1EKSConfig  `json:"eks,omitempty"`
+	Gke          *NodeconfigV1GKEConfig  `json:"gke,omitempty"`
 
 	// The node configuration ID.
 	Id *string `json:"id,omitempty"`
@@ -808,6 +855,7 @@ type NodeconfigV1NodeConfigurationUpdate struct {
 	// Optional docker daemon configuration properties. Provide only properties that you want to override. Available values https://docs.docker.com/engine/reference/commandline/dockerd/#daemon-configuration-file
 	DockerConfig *map[string]interface{} `json:"dockerConfig,omitempty"`
 	Eks          *NodeconfigV1EKSConfig  `json:"eks,omitempty"`
+	Gke          *NodeconfigV1GKEConfig  `json:"gke,omitempty"`
 
 	// Image to be used while provisioning the node. If nothing is provided will be resolved to latest available image based on Kubernetes version if possible.
 	Image *string `json:"image"`
@@ -835,6 +883,33 @@ type NodeconfigV1NodeConfigurationUpdate struct {
 // Tags to be added on cloud instances for provisioned nodes.
 type NodeconfigV1NodeConfigurationUpdate_Tags struct {
 	AdditionalProperties map[string]string `json:"-"`
+}
+
+// NodeconfigV1SecurityGroup defines model for nodeconfig.v1.SecurityGroup.
+type NodeconfigV1SecurityGroup struct {
+	// A description of the security group.
+	Description *string `json:"description,omitempty"`
+
+	// The ID of the security group.
+	Id *string `json:"id,omitempty"`
+
+	// The name of the security group.
+	Name *string `json:"name,omitempty"`
+}
+
+// SubnetDetails contains all subnet attributes relevant for node configuration.
+type NodeconfigV1SubnetDetails struct {
+	// Available Ip Address populated for EKS provider only.
+	AvailableIpAddressCount *int32 `json:"availableIpAddressCount"`
+
+	// Cidr block of the subnet.
+	Cidr *string `json:"cidr,omitempty"`
+
+	// The ID of the subnet.
+	Id *string `json:"id,omitempty"`
+
+	// Cluster zone.
+	Zone *ExternalclusterV1Zone `json:"zone,omitempty"`
 }
 
 // Defines the minimum and maximum amount of vCPUs for cluster's worker nodes.

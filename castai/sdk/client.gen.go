@@ -117,6 +117,9 @@ type ClientInterface interface {
 
 	NodeConfigurationAPICreateConfiguration(ctx context.Context, clusterId string, body NodeConfigurationAPICreateConfigurationJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// NodeConfigurationAPIGetSuggestedConfiguration request
+	NodeConfigurationAPIGetSuggestedConfiguration(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// NodeConfigurationAPIDeleteConfiguration request
 	NodeConfigurationAPIDeleteConfiguration(ctx context.Context, clusterId string, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -325,6 +328,18 @@ func (c *Client) NodeConfigurationAPICreateConfigurationWithBody(ctx context.Con
 
 func (c *Client) NodeConfigurationAPICreateConfiguration(ctx context.Context, clusterId string, body NodeConfigurationAPICreateConfigurationJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewNodeConfigurationAPICreateConfigurationRequest(c.Server, clusterId, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) NodeConfigurationAPIGetSuggestedConfiguration(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewNodeConfigurationAPIGetSuggestedConfigurationRequest(c.Server, clusterId)
 	if err != nil {
 		return nil, err
 	}
@@ -1069,6 +1084,40 @@ func NewNodeConfigurationAPICreateConfigurationRequestWithBody(server string, cl
 	}
 
 	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewNodeConfigurationAPIGetSuggestedConfigurationRequest generates requests for NodeConfigurationAPIGetSuggestedConfiguration
+func NewNodeConfigurationAPIGetSuggestedConfigurationRequest(server string, clusterId string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "clusterId", runtime.ParamLocationPath, clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/kubernetes/clusters/%s/node-configurations/suggestions", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
 
 	return req, nil
 }
@@ -2364,6 +2413,9 @@ type ClientWithResponsesInterface interface {
 
 	NodeConfigurationAPICreateConfigurationWithResponse(ctx context.Context, clusterId string, body NodeConfigurationAPICreateConfigurationJSONRequestBody) (*NodeConfigurationAPICreateConfigurationResponse, error)
 
+	// NodeConfigurationAPIGetSuggestedConfiguration request
+	NodeConfigurationAPIGetSuggestedConfigurationWithResponse(ctx context.Context, clusterId string) (*NodeConfigurationAPIGetSuggestedConfigurationResponse, error)
+
 	// NodeConfigurationAPIDeleteConfiguration request
 	NodeConfigurationAPIDeleteConfigurationWithResponse(ctx context.Context, clusterId string, id string) (*NodeConfigurationAPIDeleteConfigurationResponse, error)
 
@@ -2675,6 +2727,36 @@ func (r NodeConfigurationAPICreateConfigurationResponse) StatusCode() int {
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
 func (r NodeConfigurationAPICreateConfigurationResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type NodeConfigurationAPIGetSuggestedConfigurationResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *NodeconfigV1GetSuggestedConfigurationResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r NodeConfigurationAPIGetSuggestedConfigurationResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r NodeConfigurationAPIGetSuggestedConfigurationResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r NodeConfigurationAPIGetSuggestedConfigurationResponse) GetBody() []byte {
 	return r.Body
 }
 
@@ -3575,6 +3657,15 @@ func (c *ClientWithResponses) NodeConfigurationAPICreateConfigurationWithRespons
 	return ParseNodeConfigurationAPICreateConfigurationResponse(rsp)
 }
 
+// NodeConfigurationAPIGetSuggestedConfigurationWithResponse request returning *NodeConfigurationAPIGetSuggestedConfigurationResponse
+func (c *ClientWithResponses) NodeConfigurationAPIGetSuggestedConfigurationWithResponse(ctx context.Context, clusterId string) (*NodeConfigurationAPIGetSuggestedConfigurationResponse, error) {
+	rsp, err := c.NodeConfigurationAPIGetSuggestedConfiguration(ctx, clusterId)
+	if err != nil {
+		return nil, err
+	}
+	return ParseNodeConfigurationAPIGetSuggestedConfigurationResponse(rsp)
+}
+
 // NodeConfigurationAPIDeleteConfigurationWithResponse request returning *NodeConfigurationAPIDeleteConfigurationResponse
 func (c *ClientWithResponses) NodeConfigurationAPIDeleteConfigurationWithResponse(ctx context.Context, clusterId string, id string) (*NodeConfigurationAPIDeleteConfigurationResponse, error) {
 	rsp, err := c.NodeConfigurationAPIDeleteConfiguration(ctx, clusterId, id)
@@ -4044,6 +4135,32 @@ func ParseNodeConfigurationAPICreateConfigurationResponse(rsp *http.Response) (*
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest NodeconfigV1NodeConfiguration
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseNodeConfigurationAPIGetSuggestedConfigurationResponse parses an HTTP response from a NodeConfigurationAPIGetSuggestedConfigurationWithResponse call
+func ParseNodeConfigurationAPIGetSuggestedConfigurationResponse(rsp *http.Response) (*NodeConfigurationAPIGetSuggestedConfigurationResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &NodeConfigurationAPIGetSuggestedConfigurationResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest NodeconfigV1GetSuggestedConfigurationResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}

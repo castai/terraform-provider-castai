@@ -44,9 +44,10 @@ module "castai-gke-cluster" {
     }
 
     test_node_config = {
-      disk_cpu_ratio = 10
-      subnets         = [module.vpc.subnets_ids[0]]
-      tags            = var.tags
+      disk_cpu_ratio    = 10
+      subnets           = [module.vpc.subnets_ids[0]]
+      tags              = var.tags
+      max_pods_per_node = 40
     }
 
   }
