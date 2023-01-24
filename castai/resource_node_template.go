@@ -49,6 +49,7 @@ func resourceNodeTemplate() *schema.Resource {
 			FieldNodeTemplateName: {
 				Type:             schema.TypeString,
 				Required:         true,
+				ForceNew:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 				Description:      "Name of the node template",
 			},
