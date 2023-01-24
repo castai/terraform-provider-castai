@@ -775,6 +775,26 @@ func (mr *MockClientInterfaceMockRecorder) NodeConfigurationAPIGetConfiguration(
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NodeConfigurationAPIGetConfiguration", reflect.TypeOf((*MockClientInterface)(nil).NodeConfigurationAPIGetConfiguration), varargs...)
 }
 
+// NodeConfigurationAPIGetSuggestedConfiguration mocks base method.
+func (m *MockClientInterface) NodeConfigurationAPIGetSuggestedConfiguration(ctx context.Context, clusterId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "NodeConfigurationAPIGetSuggestedConfiguration", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// NodeConfigurationAPIGetSuggestedConfiguration indicates an expected call of NodeConfigurationAPIGetSuggestedConfiguration.
+func (mr *MockClientInterfaceMockRecorder) NodeConfigurationAPIGetSuggestedConfiguration(ctx, clusterId interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NodeConfigurationAPIGetSuggestedConfiguration", reflect.TypeOf((*MockClientInterface)(nil).NodeConfigurationAPIGetSuggestedConfiguration), varargs...)
+}
+
 // NodeConfigurationAPIListConfigurations mocks base method.
 func (m *MockClientInterface) NodeConfigurationAPIListConfigurations(ctx context.Context, clusterId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
@@ -1521,6 +1541,21 @@ func (m *MockClientWithResponsesInterface) NodeConfigurationAPIGetConfigurationW
 func (mr *MockClientWithResponsesInterfaceMockRecorder) NodeConfigurationAPIGetConfigurationWithResponse(ctx, clusterId, id interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NodeConfigurationAPIGetConfigurationWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).NodeConfigurationAPIGetConfigurationWithResponse), ctx, clusterId, id)
+}
+
+// NodeConfigurationAPIGetSuggestedConfigurationWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) NodeConfigurationAPIGetSuggestedConfigurationWithResponse(ctx context.Context, clusterId string) (*sdk.NodeConfigurationAPIGetSuggestedConfigurationResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "NodeConfigurationAPIGetSuggestedConfigurationWithResponse", ctx, clusterId)
+	ret0, _ := ret[0].(*sdk.NodeConfigurationAPIGetSuggestedConfigurationResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// NodeConfigurationAPIGetSuggestedConfigurationWithResponse indicates an expected call of NodeConfigurationAPIGetSuggestedConfigurationWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) NodeConfigurationAPIGetSuggestedConfigurationWithResponse(ctx, clusterId interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NodeConfigurationAPIGetSuggestedConfigurationWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).NodeConfigurationAPIGetSuggestedConfigurationWithResponse), ctx, clusterId)
 }
 
 // NodeConfigurationAPIListConfigurationsWithResponse mocks base method.

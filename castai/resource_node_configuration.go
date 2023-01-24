@@ -32,6 +32,7 @@ const (
 	FieldNodeConfigurationAKS              = "aks"
 	FieldNodeConfigurationEKS              = "eks"
 	FieldNodeConfigurationKOPS             = "kops"
+	FieldNodeConfigurationGKE              = "gke"
 )
 
 func resourceNodeConfiguration() *schema.Resource {
@@ -195,6 +196,22 @@ func resourceNodeConfiguration() *schema.Resource {
 					},
 				},
 			},
+			FieldNodeConfigurationGKE: {
+				Type:     schema.TypeList,
+				Optional: true,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"max_pods_per_node": {
+							Type:             schema.TypeInt,
+							Default:          110,
+							Optional:         true,
+							ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(10, 256)),
+							Description:      "Maximum number of pods that can be run on a node, which affects how many IP addresses you will need for each node. Defaults to 110",
+						},
+					},
+				},
+			},
 		},
 		CustomizeDiff: func(ctx context.Context, diff *schema.ResourceDiff, i interface{}) error {
 			return nil
@@ -255,6 +272,9 @@ func resourceNodeConfigurationCreate(ctx context.Context, d *schema.ResourceData
 	}
 	if v, ok := d.GetOk(FieldNodeConfigurationAKS); ok && len(v.([]interface{})) > 0 {
 		req.Aks = toAKSSConfig(v.([]interface{})[0].(map[string]interface{}))
+	}
+	if v, ok := d.GetOk(FieldNodeConfigurationGKE); ok && len(v.([]interface{})) > 0 {
+		req.Gke = toGKEConfig(v.([]interface{})[0].(map[string]interface{}))
 	}
 
 	resp, err := client.NodeConfigurationAPICreateConfigurationWithResponse(ctx, clusterID, req)
@@ -339,6 +359,9 @@ func resourceNodeConfigurationRead(ctx context.Context, d *schema.ResourceData, 
 	if err := d.Set(FieldNodeConfigurationAKS, flattenAKSConfig(nodeConfig.Aks)); err != nil {
 		return diag.Errorf("error setting aks config: %v", err)
 	}
+	if err := d.Set(FieldNodeConfigurationGKE, flattenGKEConfig(nodeConfig.Gke)); err != nil {
+		return diag.Errorf("error setting gke config: %v", err)
+	}
 
 	return nil
 }
@@ -357,6 +380,7 @@ func resourceNodeConfigurationUpdate(ctx context.Context, d *schema.ResourceData
 		FieldNodeConfigurationAKS,
 		FieldNodeConfigurationEKS,
 		FieldNodeConfigurationKOPS,
+		FieldNodeConfigurationGKE,
 	) {
 		log.Printf("[INFO] Nothing to update in node configuration")
 		return nil
@@ -412,6 +436,9 @@ func resourceNodeConfigurationUpdate(ctx context.Context, d *schema.ResourceData
 	}
 	if v, ok := d.GetOk(FieldNodeConfigurationAKS); ok && len(v.([]interface{})) > 0 {
 		req.Aks = toAKSSConfig(v.([]interface{})[0].(map[string]interface{}))
+	}
+	if v, ok := d.GetOk(FieldNodeConfigurationGKE); ok && len(v.([]interface{})) > 0 {
+		req.Gke = toGKEConfig(v.([]interface{})[0].(map[string]interface{}))
 	}
 
 	resp, err := client.NodeConfigurationAPIUpdateConfigurationWithResponse(ctx, clusterID, d.Id(), req)
@@ -535,6 +562,31 @@ func toAKSSConfig(obj map[string]interface{}) *sdk.NodeconfigV1AKSConfig {
 }
 
 func flattenAKSConfig(config *sdk.NodeconfigV1AKSConfig) []map[string]interface{} {
+	if config == nil {
+		return nil
+	}
+	m := map[string]interface{}{}
+	if v := config.MaxPodsPerNode; v != nil {
+		m["max_pods_per_node"] = *config.MaxPodsPerNode
+	}
+
+	return []map[string]interface{}{m}
+}
+
+func toGKEConfig(obj map[string]interface{}) *sdk.NodeconfigV1GKEConfig {
+	if obj == nil {
+		return nil
+	}
+
+	out := &sdk.NodeconfigV1GKEConfig{}
+	if v, ok := obj["max_pods_per_node"].(int); ok {
+		out.MaxPodsPerNode = toPtr(int32(v))
+	}
+
+	return out
+}
+
+func flattenGKEConfig(config *sdk.NodeconfigV1GKEConfig) []map[string]interface{} {
 	if config == nil {
 		return nil
 	}
