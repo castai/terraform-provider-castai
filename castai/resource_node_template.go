@@ -13,7 +13,6 @@ import (
 )
 
 const (
-	FieldNodeTemplates                 = "template"
 	FieldNodeTemplateName              = "name"
 	FieldNodeTemplateConfigurationId   = "configuration_id"
 	FieldNodeTemplateShouldTaint       = "should_taint"
@@ -26,6 +25,7 @@ func resourceNodeTemplate() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceNodeTemplateCreate,
 		ReadContext:   resourceNodeTemplateRead,
+		DeleteContext: resourceNodeTemplateDelete,
 		UpdateContext: resourceNodeTemplateUpdate,
 		Importer: &schema.ResourceImporter{
 			StateContext: nodeTemplateStateImporter,
@@ -54,55 +54,61 @@ func resourceNodeTemplate() *schema.Resource {
 			},
 			FieldNodeTemplateConfigurationId: {
 				Type:             schema.TypeString,
-				Optional:         false,
+				Optional:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
 				Description:      "CAST AI node configuration id to be used for node template",
 			},
 			FieldNodeTemplateShouldTaint: {
 				Type:        schema.TypeBool,
-				Optional:    false,
+				Optional:    true,
 				Description: "Should taint nodes created from this template",
 			},
 		},
 	}
 }
 
-func resourceNodeTemplateRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNodeTemplateRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	log.Printf("[INFO] List Node Templates get call start")
 	defer log.Printf("[INFO] List Node Templates get call end")
 
-	clusterID := getClusterId(data)
+	clusterID := getClusterId(d)
 	if clusterID == "" {
 		log.Print("[INFO] ClusterId is missing. Will skip operation.")
 		return nil
 	}
 
-	nodeTemplate, err := getNodeTemplateByName(ctx, data, meta, clusterID)
+	nodeTemplate, err := getNodeTemplateByName(ctx, d, meta, clusterID)
 	if err != nil {
 		return diag.FromErr(err)
 	}
 
-	if err := data.Set(FieldNodeTemplateName, nodeTemplate.Name); err != nil {
+	if err := d.Set(FieldNodeTemplateName, nodeTemplate.Name); err != nil {
 		return diag.FromErr(fmt.Errorf("setting name: %w", err))
 	}
-	if err := data.Set(FieldNodeTemplateConfigurationId, nodeTemplate.ConfigurationId); err != nil {
+	if err := d.Set(FieldNodeTemplateConfigurationId, nodeTemplate.ConfigurationId); err != nil {
 		return diag.FromErr(fmt.Errorf("setting configuration id: %w", err))
 	}
-	if err := data.Set(FieldNodeTemplateShouldTaint, nodeTemplate.ShouldTaint); err != nil {
+	if err := d.Set(FieldNodeTemplateShouldTaint, nodeTemplate.ShouldTaint); err != nil {
 		return diag.FromErr(fmt.Errorf("setting shoulds taint: %w", err))
 	}
 
 	return nil
 }
-func resourceNodeTemplateUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	if !d.HasChanges(
-		FieldNodeTemplateName,
-		FieldNodeTemplateConfigurationId,
-		FieldNodeTemplateShouldTaint,
-	) {
-		log.Printf("[INFO] Nothing to update in node template: %q", d.Get(FieldNodeTemplateName))
-		return nil
+
+func resourceNodeTemplateDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client := meta.(*ProviderConfig).api
+	clusterID := d.Get(FieldClusterID).(string)
+	name := d.Get(FieldNodeTemplateName).(string)
+
+	resp, err := client.NodeTemplatesAPIDeleteNodeTemplateWithResponse(ctx, clusterID, name)
+	if checkErr := sdk.CheckOKResponse(resp, err); checkErr != nil {
+		return diag.FromErr(checkErr)
 	}
+
+	return nil
+}
+
+func resourceNodeTemplateUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*ProviderConfig).api
 	clusterID := d.Get(FieldClusterID).(string)
 	name := d.Get(FieldNodeTemplateName).(string)
@@ -141,17 +147,13 @@ func resourceNodeTemplateCreate(ctx context.Context, d *schema.ResourceData, met
 	return resourceNodeTemplateRead(ctx, d, meta)
 }
 
-func nodeTemplateStateImporter(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	return nil, nil
-}
-
 func getNodeTemplateByName(ctx context.Context, data *schema.ResourceData, meta interface{}, clusterID sdk.ClusterId) (*sdk.NodetemplatesV1NodeTemplate, error) {
 	client := meta.(*ProviderConfig).api
 	nodeTemplateName := data.Get("name").(string)
 
 	log.Printf("[INFO] Getting current node templates")
 	resp, err := client.NodeTemplatesAPIListNodeTemplatesWithResponse(ctx, clusterID)
-	notFound := fmt.Errorf("cluster %s node templates not found at CAST AI", clusterID)
+	notFound := fmt.Errorf("node templates for cluster %q not found at CAST AI", clusterID)
 	if err != nil {
 		return nil, err
 	}
@@ -168,7 +170,7 @@ func getNodeTemplateByName(ctx context.Context, data *schema.ResourceData, meta 
 	}
 
 	t, ok := lo.Find[sdk.NodetemplatesV1NodeTemplateListItem](lo.FromPtr(templates.Items), func(t sdk.NodetemplatesV1NodeTemplateListItem) bool {
-		return t.Template.Name == lo.ToPtr(nodeTemplateName)
+		return lo.FromPtr(t.Template.Name) == nodeTemplateName
 	})
 
 	if !ok {
@@ -181,4 +183,21 @@ func getNodeTemplateByName(ctx context.Context, data *schema.ResourceData, meta 
 	}
 
 	return t.Template, nil
+}
+
+func nodeTemplateStateImporter(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	clusterID := getClusterId(d)
+	// Find node configuration templates
+	client := meta.(*ProviderConfig).api
+	resp, err := client.NodeTemplatesAPIListNodeTemplatesWithResponse(ctx, clusterID)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, cfg := range *resp.JSON200.Items {
+		d.SetId(toString(cfg.Template.Name))
+		return []*schema.ResourceData{d}, nil
+	}
+
+	return nil, nil
 }
