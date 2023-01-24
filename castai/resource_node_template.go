@@ -24,13 +24,19 @@ const (
 
 func resourceNodeTemplate() *schema.Resource {
 	return &schema.Resource{
+		CreateContext: resourceNodeTemplateCreate,
 		ReadContext:   resourceNodeTemplateRead,
 		UpdateContext: resourceNodeTemplateUpdate,
-		Description:   "CAST AI node template resource to manage autoscaler node templates",
+		Importer: &schema.ResourceImporter{
+			StateContext: nodeTemplateStateImporter,
+		},
+		Description: "CAST AI node template resource to manage node templates",
 
 		Timeouts: &schema.ResourceTimeout{
-			Create: schema.DefaultTimeout(2 * time.Minute),
-			Update: schema.DefaultTimeout(2 * time.Minute),
+			Create: schema.DefaultTimeout(1 * time.Minute),
+			Read:   schema.DefaultTimeout(1 * time.Minute),
+			Update: schema.DefaultTimeout(1 * time.Minute),
+			Delete: schema.DefaultTimeout(1 * time.Minute),
 		},
 
 		Schema: map[string]*schema.Schema{
@@ -48,7 +54,7 @@ func resourceNodeTemplate() *schema.Resource {
 			},
 			FieldNodeTemplateConfigurationId: {
 				Type:             schema.TypeString,
-				Optional:         true,
+				Optional:         false,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
 				Description:      "CAST AI node configuration id to be used for node template",
 			},
@@ -94,7 +100,7 @@ func resourceNodeTemplateUpdate(ctx context.Context, d *schema.ResourceData, met
 		FieldNodeTemplateConfigurationId,
 		FieldNodeTemplateShouldTaint,
 	) {
-		log.Printf("[INFO] Nothing to update in node template")
+		log.Printf("[INFO] Nothing to update in node template: %q", d.Get(FieldNodeTemplateName))
 		return nil
 	}
 	client := meta.(*ProviderConfig).api
@@ -116,6 +122,27 @@ func resourceNodeTemplateUpdate(ctx context.Context, d *schema.ResourceData, met
 	}
 
 	return resourceNodeTemplateRead(ctx, d, meta)
+}
+
+func resourceNodeTemplateCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client := meta.(*ProviderConfig).api
+	clusterID := d.Get(FieldClusterID).(string)
+	req := sdk.NodeTemplatesAPICreateNodeTemplateJSONRequestBody{
+		Name: lo.ToPtr(d.Get(FieldNodeTemplateName).(string)),
+	}
+
+	resp, err := client.NodeTemplatesAPICreateNodeTemplateWithResponse(ctx, clusterID, req)
+	if checkErr := sdk.CheckOKResponse(resp, err); checkErr != nil {
+		return diag.FromErr(checkErr)
+	}
+
+	d.SetId(lo.FromPtr(resp.JSON200.Name))
+
+	return resourceNodeTemplateRead(ctx, d, meta)
+}
+
+func nodeTemplateStateImporter(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	return nil, nil
 }
 
 func getNodeTemplateByName(ctx context.Context, data *schema.ResourceData, meta interface{}, clusterID sdk.ClusterId) (*sdk.NodetemplatesV1NodeTemplate, error) {

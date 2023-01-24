@@ -84,7 +84,7 @@ func TestNodeTemplatesResource_NodeTemplatesUpdateAction(t *testing.T) {
 	val := cty.ObjectVal(map[string]cty.Value{
 		FieldClusterId:                   cty.StringVal(clusterId),
 		FieldNodeTemplateName:            cty.StringVal("gpu"),
-		FieldNodeTemplateConfigurationId: cty.StringVal("7dc4f922-29c9-4377-889c-0c8c5fb8d497"),
+		FieldNodeTemplateConfigurationId: cty.StringVal("75316caf-698d-495d-9db7-c0cee8a6f9fb"),
 		FieldNodeTemplateShouldTaint:     cty.BoolVal(true),
 	})
 
