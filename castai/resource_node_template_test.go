@@ -97,10 +97,43 @@ Tainted = false
 
 }
 
+func TestNodeTemplateResourceReadContextEmptyList(t *testing.T) {
+	r := require.New(t)
+	mockctrl := gomock.NewController(t)
+	mockClient := mock_sdk.NewMockClientInterface(mockctrl)
+
+	ctx := context.Background()
+	provider := &ProviderConfig{
+		api: &sdk.ClientWithResponses{
+			ClientInterface: mockClient,
+		},
+	}
+
+	clusterId := "b6bfc074-a267-400f-b8f1-db0850c369b1"
+	body := io.NopCloser(bytes.NewReader([]byte(`{"items": []}`)))
+	mockClient.EXPECT().
+		NodeTemplatesAPIListNodeTemplates(gomock.Any(), clusterId).
+		Return(&http.Response{StatusCode: 200, Body: body, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
+
+	resource := resourceNodeTemplate()
+	val := cty.ObjectVal(map[string]cty.Value{
+		FieldClusterId:        cty.StringVal(clusterId),
+		FieldNodeTemplateName: cty.StringVal("gpu"),
+	})
+	state := terraform.NewInstanceStateShimmedFromValue(val, 0)
+	state.ID = clusterId
+
+	data := resource.Data(state)
+	result := resource.ReadContext(ctx, data, provider)
+	r.NotNil(result)
+	r.True(result.HasError())
+	r.Equal(result[0].Summary, "failed to find node template with name: gpu")
+}
+
 //func TestAccResourceNodeTemplate_basic(t *testing.T) {
 //	rName := fmt.Sprintf("%v-node-template-%v", ResourcePrefix, acctest.RandString(8))
 //	resourceName := "castai_node_template.test"
-//	clusterName := " zilvinas-01-24"
+//	clusterName := " zilvinas-01-25"
 //
 //	resource.ParallelTest(t, resource.TestCase{
 //		PreCheck:          func() { testAccPreCheck(t) },
