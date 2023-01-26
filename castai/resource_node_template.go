@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/samber/lo"
 	"log"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -83,6 +84,22 @@ func resourceNodeTemplate() *schema.Resource {
 							Type:     schema.TypeInt,
 							Optional: true,
 						},
+						"min_cpu": {
+							Type:     schema.TypeInt,
+							Optional: true,
+						},
+						"max_cpu": {
+							Type:     schema.TypeInt,
+							Optional: true,
+						},
+						"min_memory": {
+							Type:     schema.TypeInt,
+							Optional: true,
+						},
+						"max_memory": {
+							Type:     schema.TypeInt,
+							Optional: true,
+						},
 						"storage_optimized": {
 							Type:     schema.TypeBool,
 							Optional: true,
@@ -107,7 +124,8 @@ func resourceNodeTemplate() *schema.Resource {
 							},
 						},
 						"gpu": {
-							Type: schema.TypeMap,
+							Type:     schema.TypeMap,
+							Optional: true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"manufacturers": {
@@ -120,6 +138,14 @@ func resourceNodeTemplate() *schema.Resource {
 									},
 									"exclude_names": {
 										Type:     schema.TypeList,
+										Optional: true,
+									},
+									"min_count": {
+										Type:     schema.TypeInt,
+										Optional: true,
+									},
+									"max_count": {
+										Type:     schema.TypeInt,
 										Optional: true,
 									},
 								},
@@ -170,13 +196,11 @@ func resourceNodeTemplateRead(ctx context.Context, d *schema.ResourceData, meta 
 	if err != nil {
 		return diag.FromErr(err)
 	}
-
 	if !d.IsNewResource() && nodeTemplate == nil {
 		log.Printf("[WARN] Node template (%s) not found, removing from state", d.Id())
 		d.SetId("")
 		return nil
 	}
-
 	if err := d.Set(FieldNodeTemplateName, nodeTemplate.Name); err != nil {
 		return diag.FromErr(fmt.Errorf("setting name: %w", err))
 	}
@@ -191,11 +215,96 @@ func resourceNodeTemplateRead(ctx context.Context, d *schema.ResourceData, meta 
 			return diag.FromErr(fmt.Errorf("setting configuration id: %w", err))
 		}
 	}
+	if nodeTemplate.Constraints != nil {
+		if err := d.Set(FieldNodeTemplateConstraints, flattenConstraints(nodeTemplate.Constraints)); err != nil {
+			return diag.FromErr(fmt.Errorf("setting constraints: %w", err))
+		}
+	}
 	if err := d.Set(FieldNodeTemplateCustomLabel, flattenCustomLabel(nodeTemplate.CustomLabel)); err != nil {
 		return diag.FromErr(fmt.Errorf("setting custom label: %w", err))
 	}
 
 	return nil
+}
+
+func flattenConstraints(c *sdk.NodetemplatesV1TemplateConstraints) map[string]interface{} {
+	if c == nil {
+		return nil
+	}
+
+	out := make(map[string]interface{})
+	if c.Gpu != nil {
+		out["gpu"] = toPtr(flattenGpu(c.Gpu))
+	}
+	if c.InstanceFamilies != nil {
+		out["instance_families"] = flattenInstanceFamilies(c.InstanceFamilies)
+	}
+	if c.ComputeOptimized != nil {
+		out["compute_optimized"] = strconv.FormatBool(lo.FromPtr(c.ComputeOptimized))
+	}
+	if c.StorageOptimized != nil {
+		out["storage_optimized"] = strconv.FormatBool(lo.FromPtr(c.StorageOptimized))
+	}
+	if c.Spot != nil {
+		out["spot"] = toPtr(c.Spot)
+	}
+
+	if c.UseSpotFallbacks != nil {
+		out["use_spot_fallbacks"] = strconv.FormatBool(lo.FromPtr(c.UseSpotFallbacks))
+	}
+	if c.FallbackRestoreRateSeconds != nil {
+		out["fallback_restore_rate_seconds"] = c.FallbackRestoreRateSeconds
+	}
+	if c.MinMemory != nil {
+		out["min_memory"] = c.MinMemory
+	}
+	if c.MaxMemory != nil {
+		out["max_memory"] = c.MaxMemory
+	}
+	if c.MinCpu != nil {
+		out["min_cpu"] = c.MinCpu
+	}
+	if c.MaxCpu != nil {
+		out["max_cpu"] = c.MaxCpu
+	}
+	return out
+}
+
+func flattenInstanceFamilies(families *sdk.NodetemplatesV1TemplateConstraintsInstanceFamilyConstraints) map[string]interface{} {
+	if families == nil {
+		return nil
+	}
+	out := map[string]interface{}{}
+	if families.Exclude != nil {
+		out["exclude"] = lo.FromPtr(families.Exclude)
+	}
+	if families.Include != nil {
+		out["include"] = lo.FromPtr(families.Include)
+	}
+	return out
+}
+
+func flattenGpu(gpu *sdk.NodetemplatesV1TemplateConstraintsGPUConstraints) map[string]interface{} {
+	if gpu == nil {
+		return nil
+	}
+	out := map[string]interface{}{}
+	if gpu.ExcludeNames != nil {
+		out["exclude_names"] = toPtr(gpu.ExcludeNames)
+	}
+	if gpu.IncludeNames != nil {
+		out["include_names"] = toPtr(gpu.IncludeNames)
+	}
+	if gpu.Manufacturers != nil {
+		out["manufacturers"] = gpu.Manufacturers
+	}
+	if gpu.MinCount != nil {
+		out["min_count"] = gpu.MinCount
+	}
+	if gpu.MaxCount != nil {
+		out["max_count"] = gpu.MaxCount
+	}
+	return out
 }
 
 func resourceNodeTemplateDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
