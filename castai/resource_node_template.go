@@ -15,12 +15,12 @@ import (
 )
 
 const (
-	FieldNodeTemplateName              = "name"
-	FieldNodeTemplateConfigurationId   = "configuration_id"
-	FieldNodeTemplateShouldTaint       = "should_taint"
-	FieldNodeTemplateRebalancingConfig = "rebalancing_config"
-	FieldNodeTemplateCustomLabel       = "custom_label"
-	FieldNodeTemplateConstraints       = "constraints"
+	FieldNodeTemplateName                      = "name"
+	FieldNodeTemplateConfigurationId           = "configuration_id"
+	FieldNodeTemplateShouldTaint               = "should_taint"
+	FieldNodeTemplateRebalancingConfigMinNodes = "rebalancing_config_min_nodes"
+	FieldNodeTemplateCustomLabel               = "custom_label"
+	FieldNodeTemplateConstraints               = "constraints"
 )
 
 func resourceNodeTemplate() *schema.Resource {
@@ -66,6 +66,28 @@ func resourceNodeTemplate() *schema.Resource {
 				Optional:    true,
 				Description: "Should taint nodes created from this template",
 			},
+			FieldNodeTemplateCustomLabel: {
+				Type:     schema.TypeMap,
+				Optional: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"key": {
+							Type: schema.TypeString,
+						},
+						"value": {
+							Type: schema.TypeString,
+						},
+					},
+				},
+				Description: "Custom label key/value to be added to nodes created from this template",
+			},
+			FieldNodeTemplateRebalancingConfigMinNodes: {
+				Type:             schema.TypeInt,
+				Optional:         true,
+				Default:          0,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.IntAtLeast(0)),
+				Description:      "Minimum nodes that will be kept when rebalancing nodes using this node template.",
+			},
 		},
 	}
 }
@@ -98,7 +120,15 @@ func resourceNodeTemplateRead(ctx context.Context, d *schema.ResourceData, meta 
 		return diag.FromErr(fmt.Errorf("setting configuration id: %w", err))
 	}
 	if err := d.Set(FieldNodeTemplateShouldTaint, nodeTemplate.ShouldTaint); err != nil {
-		return diag.FromErr(fmt.Errorf("setting shoulds taint: %w", err))
+		return diag.FromErr(fmt.Errorf("setting should taint: %w", err))
+	}
+	if nodeTemplate.RebalancingConfig != nil {
+		if err := d.Set(FieldNodeTemplateRebalancingConfigMinNodes, nodeTemplate.RebalancingConfig.MinNodes); err != nil {
+			return diag.FromErr(fmt.Errorf("setting configuration id: %w", err))
+		}
+	}
+	if err := d.Set(FieldNodeTemplateCustomLabel, flattenCustomLabel(nodeTemplate.CustomLabel)); err != nil {
+		return diag.FromErr(fmt.Errorf("setting custom label: %w", err))
 	}
 
 	return nil
@@ -136,6 +166,10 @@ func resourceNodeTemplateUpdate(ctx context.Context, d *schema.ResourceData, met
 		req.ConfigurationId = toPtr(v.(string))
 	}
 
+	if v := d.Get(FieldNodeTemplateCustomLabel).(map[string]interface{}); len(v) > 0 {
+		req.CustomLabel = toCustomLabel(v)
+	}
+
 	if v, _ := d.GetOk(FieldNodeTemplateShouldTaint); v != nil {
 		req.ShouldTaint = toPtr(v.(bool))
 	}
@@ -156,6 +190,8 @@ func resourceNodeTemplateCreate(ctx context.Context, d *schema.ResourceData, met
 	req := sdk.NodeTemplatesAPICreateNodeTemplateJSONRequestBody{
 		Name:            lo.ToPtr(d.Get(FieldNodeTemplateName).(string)),
 		ConfigurationId: lo.ToPtr(d.Get(FieldNodeTemplateConfigurationId).(string)),
+		ShouldTaint:     lo.ToPtr(d.Get(FieldNodeTemplateShouldTaint).(bool)),
+		CustomLabel:     toCustomLabel(d.Get(FieldNodeTemplateCustomLabel).(map[string]interface{})),
 	}
 
 	resp, err := client.NodeTemplatesAPICreateNodeTemplateWithResponse(ctx, clusterID, req)
@@ -241,4 +277,35 @@ func nodeTemplateStateImporter(ctx context.Context, d *schema.ResourceData, meta
 	}
 
 	return nil, fmt.Errorf("failed to find node template with the following name: %v", id)
+}
+
+func toCustomLabel(obj map[string]interface{}) *sdk.NodetemplatesV1Label {
+	if obj == nil {
+		return nil
+	}
+
+	out := &sdk.NodetemplatesV1Label{}
+	if v, ok := obj["key"].(string); ok && v != "" {
+		out.Key = toPtr(v)
+	}
+	if v, ok := obj["value"].(string); ok {
+		out.Value = toPtr(v)
+	}
+
+	return out
+}
+
+func flattenCustomLabel(label *sdk.NodetemplatesV1Label) map[string]string {
+	if label == nil {
+		return nil
+	}
+
+	m := map[string]string{}
+	if v := label.Key; v != nil {
+		m["key"] = toString(v)
+	}
+	if v := label.Value; v != nil {
+		m["value"] = toString(v)
+	}
+	return m
 }
