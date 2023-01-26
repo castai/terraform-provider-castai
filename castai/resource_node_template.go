@@ -379,6 +379,10 @@ func resourceNodeTemplateCreate(ctx context.Context, d *schema.ResourceData, met
 		ConfigurationId: lo.ToPtr(d.Get(FieldNodeTemplateConfigurationId).(string)),
 		ShouldTaint:     lo.ToPtr(d.Get(FieldNodeTemplateShouldTaint).(bool)),
 		CustomLabel:     toCustomLabel(d.Get(FieldNodeTemplateCustomLabel).(map[string]interface{})),
+		Constraints:     toTemplateConstraints(d.Get(FieldNodeTemplateConstraints).(map[string]interface{})),
+		RebalancingConfig: &sdk.NodetemplatesV1RebalancingConfiguration{
+			MinNodes: lo.ToPtr(d.Get(FieldNodeTemplateRebalancingConfigMinNodes).(int32)),
+		},
 	}
 
 	resp, err := client.NodeTemplatesAPICreateNodeTemplateWithResponse(ctx, clusterID, req)
@@ -495,4 +499,89 @@ func flattenCustomLabel(label *sdk.NodetemplatesV1Label) map[string]string {
 		m["value"] = toString(v)
 	}
 	return m
+}
+
+func toTemplateConstraints(obj map[string]interface{}) *sdk.NodetemplatesV1TemplateConstraints {
+	if obj == nil {
+		return nil
+	}
+
+	out := &sdk.NodetemplatesV1TemplateConstraints{}
+	if v, ok := obj["compute_optimized"].(bool); ok {
+		out.ComputeOptimized = toPtr(v)
+	}
+	if v, ok := obj["fallback_restore_rate_seconds"].(int32); ok {
+		out.FallbackRestoreRateSeconds = toPtr(v)
+	}
+	if v, ok := obj["gpu"].(map[string]any); ok {
+		out.Gpu = toTemplateConstraintsGpuConstraints(v)
+	}
+	if v, ok := obj["instance_families"].(map[string]any); ok {
+		out.InstanceFamilies = toTemplateConstraintsInstanceFamilies(v)
+	}
+	if v, ok := obj["max_cpu"].(int32); ok {
+		out.MaxCpu = toPtr(v)
+	}
+	if v, ok := obj["max_memory"].(int32); ok {
+		out.MaxMemory = toPtr(v)
+	}
+	if v, ok := obj["min_cpu"].(int32); ok {
+		out.MinCpu = toPtr(v)
+	}
+	if v, ok := obj["min_memory"].(int32); ok {
+		out.MinMemory = toPtr(v)
+	}
+	if v, ok := obj["spot"].(bool); ok {
+		out.Spot = toPtr(v)
+	}
+	if v, ok := obj["storage_optimized"].(bool); ok {
+		out.StorageOptimized = toPtr(v)
+	}
+	if v, ok := obj["use_spot_fallbacks"].(bool); ok {
+		out.UseSpotFallbacks = toPtr(v)
+	}
+
+	return out
+}
+
+func toTemplateConstraintsInstanceFamilies(o map[string]interface{}) *sdk.NodetemplatesV1TemplateConstraintsInstanceFamilyConstraints {
+	if o == nil {
+		return nil
+	}
+
+	out := &sdk.NodetemplatesV1TemplateConstraintsInstanceFamilyConstraints{}
+	if v, ok := o["exclude"].([]string); ok {
+		out.Exclude = toPtr(v)
+	}
+	if v, ok := o["include"].([]string); ok {
+		out.Include = toPtr(v)
+	}
+	return out
+}
+
+func toTemplateConstraintsGpuConstraints(o map[string]interface{}) *sdk.NodetemplatesV1TemplateConstraintsGPUConstraints {
+	if o == nil {
+		return nil
+	}
+
+	out := &sdk.NodetemplatesV1TemplateConstraintsGPUConstraints{}
+	if v, ok := o["manufacturers"].([]string); ok {
+		out.Manufacturers = toPtr(v)
+	}
+
+	if v, ok := o["exclude_names"].([]string); ok {
+		out.ExcludeNames = toPtr(v)
+	}
+	if v, ok := o["include_names"].([]string); ok {
+		out.IncludeNames = toPtr(v)
+	}
+
+	if v, ok := o["min_count"].(int32); ok {
+		out.MinCount = toPtr(v)
+	}
+	if v, ok := o["max_count"].(int32); ok {
+		out.MaxCount = toPtr(v)
+	}
+
+	return out
 }
