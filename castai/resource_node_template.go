@@ -4,11 +4,13 @@ import (
 	"context"
 	"fmt"
 	"github.com/castai/terraform-provider-castai/castai/sdk"
+	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/samber/lo"
 	"log"
+	"strings"
 	"time"
 )
 
@@ -83,6 +85,12 @@ func resourceNodeTemplateRead(ctx context.Context, d *schema.ResourceData, meta 
 		return diag.FromErr(err)
 	}
 
+	if !d.IsNewResource() && nodeTemplate == nil {
+		log.Printf("[WARN] Node template (%s) not found, removing from state", d.Id())
+		d.SetId("")
+		return nil
+	}
+
 	if err := d.Set(FieldNodeTemplateName, nodeTemplate.Name); err != nil {
 		return diag.FromErr(fmt.Errorf("setting name: %w", err))
 	}
@@ -110,6 +118,15 @@ func resourceNodeTemplateDelete(ctx context.Context, d *schema.ResourceData, met
 }
 
 func resourceNodeTemplateUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	if !d.HasChanges(
+		FieldNodeTemplateName,
+		FieldNodeTemplateShouldTaint,
+		FieldNodeTemplateConfigurationId,
+	) {
+		log.Printf("[INFO] Nothing to update in node configuration")
+		return nil
+	}
+
 	client := meta.(*ProviderConfig).api
 	clusterID := d.Get(FieldClusterID).(string)
 	name := d.Get(FieldNodeTemplateName).(string)
@@ -119,7 +136,7 @@ func resourceNodeTemplateUpdate(ctx context.Context, d *schema.ResourceData, met
 		req.ConfigurationId = toPtr(v.(string))
 	}
 
-	if v, ok := d.GetOk(FieldNodeTemplateShouldTaint); ok {
+	if v, _ := d.GetOk(FieldNodeTemplateShouldTaint); v != nil {
 		req.ShouldTaint = toPtr(v.(bool))
 	}
 
@@ -132,10 +149,13 @@ func resourceNodeTemplateUpdate(ctx context.Context, d *schema.ResourceData, met
 }
 
 func resourceNodeTemplateCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	log.Printf("[INFO] Create Node Template post call start")
+	defer log.Printf("[INFO] Create Node Template post call end")
 	client := meta.(*ProviderConfig).api
 	clusterID := d.Get(FieldClusterID).(string)
 	req := sdk.NodeTemplatesAPICreateNodeTemplateJSONRequestBody{
-		Name: lo.ToPtr(d.Get(FieldNodeTemplateName).(string)),
+		Name:            lo.ToPtr(d.Get(FieldNodeTemplateName).(string)),
+		ConfigurationId: lo.ToPtr(d.Get(FieldNodeTemplateConfigurationId).(string)),
 	}
 
 	resp, err := client.NodeTemplatesAPICreateNodeTemplateWithResponse(ctx, clusterID, req)
@@ -150,7 +170,7 @@ func resourceNodeTemplateCreate(ctx context.Context, d *schema.ResourceData, met
 
 func getNodeTemplateByName(ctx context.Context, data *schema.ResourceData, meta interface{}, clusterID sdk.ClusterId) (*sdk.NodetemplatesV1NodeTemplate, error) {
 	client := meta.(*ProviderConfig).api
-	nodeTemplateName := data.Get("name").(string)
+	nodeTemplateName := data.Id()
 
 	log.Printf("[INFO] Getting current node templates")
 	resp, err := client.NodeTemplatesAPIListNodeTemplatesWithResponse(ctx, clusterID)
@@ -187,18 +207,38 @@ func getNodeTemplateByName(ctx context.Context, data *schema.ResourceData, meta 
 }
 
 func nodeTemplateStateImporter(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	clusterID := getClusterId(d)
-	// Find node configuration templates
+	ids := strings.Split(d.Id(), "/")
+	if len(ids) != 2 || ids[0] == "" || ids[1] == "" {
+		return nil, fmt.Errorf("expected import id with format: <cluster_id>/<node_template name or id>, got: %q", d.Id())
+	}
+
+	clusterID, id := ids[0], ids[1]
+	if err := d.Set(FieldClusterID, clusterID); err != nil {
+		return nil, fmt.Errorf("setting cluster id: %w", err)
+	}
+	d.SetId(id)
+
+	// Return if node config ID provided.
+	if _, err := uuid.Parse(id); err == nil {
+		return []*schema.ResourceData{d}, nil
+	}
+
+	// Find node templates
 	client := meta.(*ProviderConfig).api
 	resp, err := client.NodeTemplatesAPIListNodeTemplatesWithResponse(ctx, clusterID)
 	if err != nil {
 		return nil, err
 	}
 
-	for _, cfg := range *resp.JSON200.Items {
-		d.SetId(toString(cfg.Template.Name))
-		return []*schema.ResourceData{d}, nil
+	if resp.JSON200 != nil {
+		for _, cfg := range *resp.JSON200.Items {
+			name := toString(cfg.Template.Name)
+			if name == id {
+				d.SetId(name)
+				return []*schema.ResourceData{d}, nil
+			}
+		}
 	}
 
-	return nil, nil
+	return nil, fmt.Errorf("failed to find node template with the following name: %v", id)
 }

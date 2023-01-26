@@ -3,15 +3,19 @@ package castai
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"github.com/castai/terraform-provider-castai/castai/sdk"
 	mock_sdk "github.com/castai/terraform-provider-castai/castai/sdk/mock"
 	"github.com/golang/mock/gomock"
 	"github.com/hashicorp/go-cty/cty"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/stretchr/testify/require"
 	"io"
 	"net/http"
 	"testing"
+	"time"
 )
 
 func TestNodeTemplateResourceReadContext(t *testing.T) {
@@ -81,7 +85,7 @@ func TestNodeTemplateResourceReadContext(t *testing.T) {
 		FieldNodeTemplateName: cty.StringVal("gpu"),
 	})
 	state := terraform.NewInstanceStateShimmedFromValue(val, 0)
-	state.ID = clusterId
+	state.ID = "gpu"
 
 	data := resource.Data(state)
 	result := resource.ReadContext(ctx, data, provider)
@@ -130,60 +134,118 @@ func TestNodeTemplateResourceReadContextEmptyList(t *testing.T) {
 	r.Equal(result[0].Summary, "failed to find node template with name: gpu")
 }
 
-//func TestAccResourceNodeTemplate_basic(t *testing.T) {
-//	rName := fmt.Sprintf("%v-node-template-%v", ResourcePrefix, acctest.RandString(8))
-//	resourceName := "castai_node_template.test"
-//	clusterName := " zilvinas-01-25"
-//
-//	resource.ParallelTest(t, resource.TestCase{
-//		PreCheck:          func() { testAccPreCheck(t) },
-//		ProviderFactories: providerFactories,
-//		CheckDestroy:      testAccCheckNodeTemplateDestroy,
-//		Steps: []resource.TestStep{
-//			{
-//				Config: testAccNodeTemplateConfig(rName, clusterName),
-//				Check:  resource.ComposeTestCheckFunc(resource.TestCheckResourceAttr(resourceName, "name", rName)),
-//			},
-//		},
-//	})
-//}
-//
-//func testAccNodeTemplateConfig(rName, clusterName string) string {
-//	return ConfigCompose(testAccClusterConfig(rName, clusterName), fmt.Sprintf(`
-//		resource "castai_node_template" "test" {
-//			name = %[1]q
-//			configuration_id = "f2840db8-522a-4abe-9653-28aaa4b086b4"
-//			should_taint = true
-//		}
-//	`, rName))
-//}
-//
-//func testAccCheckNodeTemplateDestroy(s *terraform.State) error {
-//	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-//	defer cancel()
-//
-//	client := testAccProvider.Meta().(*ProviderConfig).api
-//	for _, rs := range s.RootModule().Resources {
-//		if rs.Type != "castai_node_template" {
-//			continue
-//		}
-//
-//		id := rs.Primary.ID
-//		clusterID := rs.Primary.Attributes["cluster_id"]
-//		response, err := client.NodeTemplatesAPIListNodeTemplatesWithResponse(ctx, clusterID)
-//		if err != nil {
-//			return err
-//		}
-//		if response.StatusCode() == http.StatusNotFound {
-//			return nil
-//		}
-//		if *response.JSON200.Items == nil {
-//			// Should be no templates
-//			return nil
-//		}
-//
-//		return fmt.Errorf("node template %q still exists", id)
-//	}
-//
-//	return nil
-//}
+func TestAccResourceNodeTemplate_basic(t *testing.T) {
+	rName := fmt.Sprintf("%v-node-template-%v", ResourcePrefix, acctest.RandString(8))
+	resourceName := "castai_node_template.test"
+	clusterName := "cost-terraform"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: providerFactories,
+		CheckDestroy:      testAccCheckNodeTemplateDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccNodeTemplateConfig(rName, clusterName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "name", rName),
+					resource.TestCheckResourceAttr(resourceName, "should_taint", "true"),
+				),
+			},
+			{
+				ResourceName: resourceName,
+				ImportStateIdFunc: func(s *terraform.State) (string, error) {
+					clusterID := s.RootModule().Resources["castai_eks_cluster.test"].Primary.ID
+					//clusterID := s.RootModule().Resources["castai_node_template.test"].Primary.ID
+					return fmt.Sprintf("%v/%v", clusterID, rName), nil
+				},
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: testNodeTemplateUpdated(rName, clusterName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "name", rName),
+					resource.TestCheckResourceAttr(resourceName, "should_taint", "false"),
+				),
+			},
+		},
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"aws": {
+				Source:            "hashicorp/aws",
+				VersionConstraint: "~> 4.0",
+			},
+		},
+	})
+}
+
+func testAccNodeTemplateConfig(rName, clusterName string) string {
+	return ConfigCompose(testAccClusterConfig(rName, clusterName), testAccNodeConfig(rName), fmt.Sprintf(`
+		resource "castai_node_template" "test" {
+			cluster_id        = castai_eks_clusterid.test.id
+			name = %[1]q
+			configuration_id = castai_node_configuration.test.id
+			should_taint = true
+		}
+	`, rName))
+}
+
+func testNodeTemplateUpdated(rName, clusterName string) string {
+	return ConfigCompose(testAccClusterConfig(rName, clusterName), testAccNodeConfig(rName), fmt.Sprintf(`
+		resource "castai_node_template" "test" {
+			cluster_id        = castai_eks_clusterid.test.id
+			name = %[1]q
+			configuration_id = castai_node_configuration.test.id
+			should_taint = false
+		}
+	`, rName))
+}
+
+func testAccCheckNodeTemplateDestroy(s *terraform.State) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	client := testAccProvider.Meta().(*ProviderConfig).api
+	for _, rs := range s.RootModule().Resources {
+		if rs.Type != "castai_node_template" {
+			continue
+		}
+
+		id := rs.Primary.ID
+		clusterID := rs.Primary.Attributes["cluster_id"]
+		response, err := client.NodeTemplatesAPIListNodeTemplatesWithResponse(ctx, clusterID)
+		if err != nil {
+			return err
+		}
+		if response.StatusCode() == http.StatusNotFound {
+			return nil
+		}
+		if len(*response.JSON200.Items) == 0 {
+			// Should be no templates
+			return nil
+		}
+
+		return fmt.Errorf("node template %q still exists", id)
+	}
+
+	return nil
+}
+
+func testAccNodeConfig(rName string) string {
+	return ConfigCompose(fmt.Sprintf(`
+resource "castai_node_configuration" "test" {
+  name   		    = %[1]q
+  cluster_id        = castai_eks_cluster.test.id
+  disk_cpu_ratio    = 35
+  subnets   	    = aws_subnet.test[*].id
+  container_runtime = "dockerd"
+  tags = {
+    env = "development"
+  }
+  eks {
+	instance_profile_arn = aws_iam_instance_profile.test.arn
+    dns_cluster_ip       = "10.100.0.10"
+	security_groups      = [aws_security_group.test.id]
+  }
+}
+`, rName))
+}
