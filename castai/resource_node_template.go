@@ -183,7 +183,7 @@ func resourceNodeTemplate() *schema.Resource {
 	}
 }
 
-func resourceNodeTemplateRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNodeTemplateRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	log.Printf("[INFO] List Node Templates get call start")
 	defer log.Printf("[INFO] List Node Templates get call end")
 
@@ -233,12 +233,12 @@ func resourceNodeTemplateRead(ctx context.Context, d *schema.ResourceData, meta 
 	return nil
 }
 
-func flattenConstraints(c *sdk.NodetemplatesV1TemplateConstraints) (map[string]interface{}, error) {
+func flattenConstraints(c *sdk.NodetemplatesV1TemplateConstraints) (map[string]any, error) {
 	if c == nil {
 		return nil, nil
 	}
 
-	out := make(map[string]interface{})
+	out := make(map[string]any)
 	if c.Gpu != nil {
 		b, err := json.Marshal(flattenGpu(c.Gpu))
 		if err != nil {
@@ -284,11 +284,11 @@ func flattenConstraints(c *sdk.NodetemplatesV1TemplateConstraints) (map[string]i
 	return out, nil
 }
 
-func flattenInstanceFamilies(families *sdk.NodetemplatesV1TemplateConstraintsInstanceFamilyConstraints) map[string]interface{} {
+func flattenInstanceFamilies(families *sdk.NodetemplatesV1TemplateConstraintsInstanceFamilyConstraints) map[string]any {
 	if families == nil {
 		return nil
 	}
-	out := map[string]interface{}{}
+	out := map[string]any{}
 	if families.Exclude != nil {
 		out["exclude"] = lo.FromPtr(families.Exclude)
 	}
@@ -298,11 +298,11 @@ func flattenInstanceFamilies(families *sdk.NodetemplatesV1TemplateConstraintsIns
 	return out
 }
 
-func flattenGpu(gpu *sdk.NodetemplatesV1TemplateConstraintsGPUConstraints) map[string]interface{} {
+func flattenGpu(gpu *sdk.NodetemplatesV1TemplateConstraintsGPUConstraints) map[string]any {
 	if gpu == nil {
 		return nil
 	}
-	out := map[string]interface{}{}
+	out := map[string]any{}
 	if gpu.ExcludeNames != nil {
 		out["exclude_names"] = toPtr(gpu.ExcludeNames)
 	}
@@ -321,7 +321,7 @@ func flattenGpu(gpu *sdk.NodetemplatesV1TemplateConstraintsGPUConstraints) map[s
 	return out
 }
 
-func resourceNodeTemplateDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNodeTemplateDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(*ProviderConfig).api
 	clusterID := d.Get(FieldClusterID).(string)
 	name := d.Get(FieldNodeTemplateName).(string)
@@ -334,7 +334,7 @@ func resourceNodeTemplateDelete(ctx context.Context, d *schema.ResourceData, met
 	return nil
 }
 
-func resourceNodeTemplateUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNodeTemplateUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	if !d.HasChanges(
 		FieldNodeTemplateName,
 		FieldNodeTemplateShouldTaint,
@@ -353,7 +353,7 @@ func resourceNodeTemplateUpdate(ctx context.Context, d *schema.ResourceData, met
 		req.ConfigurationId = toPtr(v.(string))
 	}
 
-	if v := d.Get(FieldNodeTemplateCustomLabel).(map[string]interface{}); len(v) > 0 {
+	if v := d.Get(FieldNodeTemplateCustomLabel).(map[string]any); len(v) > 0 {
 		req.CustomLabel = toCustomLabel(v)
 	}
 
@@ -369,7 +369,7 @@ func resourceNodeTemplateUpdate(ctx context.Context, d *schema.ResourceData, met
 	return resourceNodeTemplateRead(ctx, d, meta)
 }
 
-func resourceNodeTemplateCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceNodeTemplateCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	log.Printf("[INFO] Create Node Template post call start")
 	defer log.Printf("[INFO] Create Node Template post call end")
 	client := meta.(*ProviderConfig).api
@@ -378,8 +378,8 @@ func resourceNodeTemplateCreate(ctx context.Context, d *schema.ResourceData, met
 		Name:            lo.ToPtr(d.Get(FieldNodeTemplateName).(string)),
 		ConfigurationId: lo.ToPtr(d.Get(FieldNodeTemplateConfigurationId).(string)),
 		ShouldTaint:     lo.ToPtr(d.Get(FieldNodeTemplateShouldTaint).(bool)),
-		CustomLabel:     toCustomLabel(d.Get(FieldNodeTemplateCustomLabel).(map[string]interface{})),
-		Constraints:     toTemplateConstraints(d.Get(FieldNodeTemplateConstraints).(map[string]interface{})),
+		CustomLabel:     toCustomLabel(d.Get(FieldNodeTemplateCustomLabel).(map[string]any)),
+		Constraints:     toTemplateConstraints(d.Get(FieldNodeTemplateConstraints).(map[string]any)),
 		RebalancingConfig: &sdk.NodetemplatesV1RebalancingConfiguration{
 			MinNodes: lo.ToPtr(d.Get(FieldNodeTemplateRebalancingConfigMinNodes).(int32)),
 		},
@@ -395,7 +395,7 @@ func resourceNodeTemplateCreate(ctx context.Context, d *schema.ResourceData, met
 	return resourceNodeTemplateRead(ctx, d, meta)
 }
 
-func getNodeTemplateByName(ctx context.Context, data *schema.ResourceData, meta interface{}, clusterID sdk.ClusterId) (*sdk.NodetemplatesV1NodeTemplate, error) {
+func getNodeTemplateByName(ctx context.Context, data *schema.ResourceData, meta any, clusterID sdk.ClusterId) (*sdk.NodetemplatesV1NodeTemplate, error) {
 	client := meta.(*ProviderConfig).api
 	nodeTemplateName := data.Id()
 
@@ -433,7 +433,7 @@ func getNodeTemplateByName(ctx context.Context, data *schema.ResourceData, meta 
 	return t.Template, nil
 }
 
-func nodeTemplateStateImporter(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func nodeTemplateStateImporter(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
 	ids := strings.Split(d.Id(), "/")
 	if len(ids) != 2 || ids[0] == "" || ids[1] == "" {
 		return nil, fmt.Errorf("expected import id with format: <cluster_id>/<node_template name or id>, got: %q", d.Id())
@@ -470,7 +470,7 @@ func nodeTemplateStateImporter(ctx context.Context, d *schema.ResourceData, meta
 	return nil, fmt.Errorf("failed to find node template with the following name: %v", id)
 }
 
-func toCustomLabel(obj map[string]interface{}) *sdk.NodetemplatesV1Label {
+func toCustomLabel(obj map[string]any) *sdk.NodetemplatesV1Label {
 	if obj == nil {
 		return nil
 	}
@@ -501,7 +501,7 @@ func flattenCustomLabel(label *sdk.NodetemplatesV1Label) map[string]string {
 	return m
 }
 
-func toTemplateConstraints(obj map[string]interface{}) *sdk.NodetemplatesV1TemplateConstraints {
+func toTemplateConstraints(obj map[string]any) *sdk.NodetemplatesV1TemplateConstraints {
 	if obj == nil {
 		return nil
 	}
@@ -544,7 +544,7 @@ func toTemplateConstraints(obj map[string]interface{}) *sdk.NodetemplatesV1Templ
 	return out
 }
 
-func toTemplateConstraintsInstanceFamilies(o map[string]interface{}) *sdk.NodetemplatesV1TemplateConstraintsInstanceFamilyConstraints {
+func toTemplateConstraintsInstanceFamilies(o map[string]any) *sdk.NodetemplatesV1TemplateConstraintsInstanceFamilyConstraints {
 	if o == nil {
 		return nil
 	}
@@ -559,7 +559,7 @@ func toTemplateConstraintsInstanceFamilies(o map[string]interface{}) *sdk.Nodete
 	return out
 }
 
-func toTemplateConstraintsGpuConstraints(o map[string]interface{}) *sdk.NodetemplatesV1TemplateConstraintsGPUConstraints {
+func toTemplateConstraintsGpuConstraints(o map[string]any) *sdk.NodetemplatesV1TemplateConstraintsGPUConstraints {
 	if o == nil {
 		return nil
 	}
