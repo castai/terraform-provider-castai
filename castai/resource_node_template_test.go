@@ -155,7 +155,6 @@ func TestAccResourceNodeTemplate_basic(t *testing.T) {
 				ResourceName: resourceName,
 				ImportStateIdFunc: func(s *terraform.State) (string, error) {
 					clusterID := s.RootModule().Resources["castai_eks_cluster.test"].Primary.ID
-					//clusterID := s.RootModule().Resources["castai_node_template.test"].Primary.ID
 					return fmt.Sprintf("%v/%v", clusterID, rName), nil
 				},
 				ImportState:       true,
