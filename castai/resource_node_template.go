@@ -2,6 +2,7 @@ package castai
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"github.com/castai/terraform-provider-castai/castai/sdk"
 	"github.com/google/uuid"
@@ -216,7 +217,12 @@ func resourceNodeTemplateRead(ctx context.Context, d *schema.ResourceData, meta 
 		}
 	}
 	if nodeTemplate.Constraints != nil {
-		if err := d.Set(FieldNodeTemplateConstraints, flattenConstraints(nodeTemplate.Constraints)); err != nil {
+		constraints, err := flattenConstraints(nodeTemplate.Constraints)
+		if err != nil {
+			return diag.FromErr(fmt.Errorf("flattening constraints: %w", err))
+		}
+
+		if err := d.Set(FieldNodeTemplateConstraints, constraints); err != nil {
 			return diag.FromErr(fmt.Errorf("setting constraints: %w", err))
 		}
 	}
@@ -227,17 +233,25 @@ func resourceNodeTemplateRead(ctx context.Context, d *schema.ResourceData, meta 
 	return nil
 }
 
-func flattenConstraints(c *sdk.NodetemplatesV1TemplateConstraints) map[string]interface{} {
+func flattenConstraints(c *sdk.NodetemplatesV1TemplateConstraints) (map[string]interface{}, error) {
 	if c == nil {
-		return nil
+		return nil, nil
 	}
 
 	out := make(map[string]interface{})
 	if c.Gpu != nil {
-		out["gpu"] = toPtr(flattenGpu(c.Gpu))
+		b, err := json.Marshal(flattenGpu(c.Gpu))
+		if err != nil {
+			return nil, err
+		}
+		out["gpu"] = string(b)
 	}
 	if c.InstanceFamilies != nil {
-		out["instance_families"] = flattenInstanceFamilies(c.InstanceFamilies)
+		b, err := json.Marshal(flattenInstanceFamilies(c.InstanceFamilies))
+		if err != nil {
+			return nil, err
+		}
+		out["instance_families"] = string(b)
 	}
 	if c.ComputeOptimized != nil {
 		out["compute_optimized"] = strconv.FormatBool(lo.FromPtr(c.ComputeOptimized))
@@ -246,14 +260,14 @@ func flattenConstraints(c *sdk.NodetemplatesV1TemplateConstraints) map[string]in
 		out["storage_optimized"] = strconv.FormatBool(lo.FromPtr(c.StorageOptimized))
 	}
 	if c.Spot != nil {
-		out["spot"] = toPtr(c.Spot)
+		out["spot"] = strconv.FormatBool(lo.FromPtr(c.Spot))
 	}
 
 	if c.UseSpotFallbacks != nil {
 		out["use_spot_fallbacks"] = strconv.FormatBool(lo.FromPtr(c.UseSpotFallbacks))
 	}
 	if c.FallbackRestoreRateSeconds != nil {
-		out["fallback_restore_rate_seconds"] = c.FallbackRestoreRateSeconds
+		out["fallback_restore_rate_seconds"] = string(lo.FromPtr(c.FallbackRestoreRateSeconds))
 	}
 	if c.MinMemory != nil {
 		out["min_memory"] = c.MinMemory
@@ -267,7 +281,7 @@ func flattenConstraints(c *sdk.NodetemplatesV1TemplateConstraints) map[string]in
 	if c.MaxCpu != nil {
 		out["max_cpu"] = c.MaxCpu
 	}
-	return out
+	return out, nil
 }
 
 func flattenInstanceFamilies(families *sdk.NodetemplatesV1TemplateConstraintsInstanceFamilyConstraints) map[string]interface{} {
