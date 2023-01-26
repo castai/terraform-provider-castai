@@ -83,6 +83,7 @@ func resourceNodeTemplate() *schema.Resource {
 						},
 						"fallback_restore_rate_seconds": {
 							Type:     schema.TypeInt,
+							Default:  0,
 							Optional: true,
 						},
 						"min_cpu": {
@@ -267,19 +268,19 @@ func flattenConstraints(c *sdk.NodetemplatesV1TemplateConstraints) (map[string]a
 		out["use_spot_fallbacks"] = strconv.FormatBool(lo.FromPtr(c.UseSpotFallbacks))
 	}
 	if c.FallbackRestoreRateSeconds != nil {
-		out["fallback_restore_rate_seconds"] = string(lo.FromPtr(c.FallbackRestoreRateSeconds))
+		out["fallback_restore_rate_seconds"] = strconv.FormatInt(int64(*c.FallbackRestoreRateSeconds), 10)
 	}
 	if c.MinMemory != nil {
-		out["min_memory"] = c.MinMemory
+		out["min_memory"] = strconv.FormatInt(int64(*c.MinMemory), 10)
 	}
 	if c.MaxMemory != nil {
-		out["max_memory"] = c.MaxMemory
+		out["max_memory"] = strconv.FormatInt(int64(*c.MaxMemory), 10)
 	}
 	if c.MinCpu != nil {
-		out["min_cpu"] = c.MinCpu
+		out["min_cpu"] = strconv.FormatInt(int64(*c.MinCpu), 10)
 	}
 	if c.MaxCpu != nil {
-		out["max_cpu"] = c.MaxCpu
+		out["max_cpu"] = strconv.FormatInt(int64(*c.MaxCpu), 10)
 	}
 	return out, nil
 }

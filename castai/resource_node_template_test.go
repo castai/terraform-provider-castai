@@ -45,6 +45,8 @@ func TestNodeTemplateResourceReadContext(t *testing.T) {
 				  "fallbackRestoreRateSeconds": 0,
 				  "storageOptimized": false,
 				  "computeOptimized": false,
+                  "minCpu": 10,
+                  "maxCpu": 10000,
 				  "instanceFamilies": {
 					"include": [],
 					"exclude": [
@@ -94,6 +96,16 @@ func TestNodeTemplateResourceReadContext(t *testing.T) {
 	r.Equal(`ID = gpu
 cluster_id = b6bfc074-a267-400f-b8f1-db0850c369b1
 configuration_id = 7dc4f922-29c9-4377-889c-0c8c5fb8d497
+constraints.% = 9
+constraints.compute_optimized = false
+constraints.fallback_restore_rate_seconds = 0
+constraints.gpu = {"exclude_names":[],"include_names":[],"manufacturers":["NVIDIA"]}
+constraints.instance_families = {"exclude":["p4d","p3dn","p2","g3s","g5g","g5","g3"],"include":[]}
+constraints.max_cpu = 10000
+constraints.min_cpu = 10
+constraints.spot = false
+constraints.storage_optimized = false
+constraints.use_spot_fallbacks = false
 custom_label.% = 0
 name = gpu
 rebalancing_config_min_nodes = 0
