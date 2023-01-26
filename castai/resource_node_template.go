@@ -339,6 +339,9 @@ func resourceNodeTemplateUpdate(ctx context.Context, d *schema.ResourceData, met
 		FieldNodeTemplateName,
 		FieldNodeTemplateShouldTaint,
 		FieldNodeTemplateConfigurationId,
+		FieldNodeTemplateRebalancingConfigMinNodes,
+		FieldNodeTemplateCustomLabel,
+		FieldNodeTemplateConstraints,
 	) {
 		log.Printf("[INFO] Nothing to update in node configuration")
 		return nil
@@ -359,6 +362,16 @@ func resourceNodeTemplateUpdate(ctx context.Context, d *schema.ResourceData, met
 
 	if v, _ := d.GetOk(FieldNodeTemplateShouldTaint); v != nil {
 		req.ShouldTaint = toPtr(v.(bool))
+	}
+
+	if v, _ := d.GetOk(FieldNodeTemplateRebalancingConfigMinNodes); v != nil {
+		req.RebalancingConfig = &sdk.NodetemplatesV1RebalancingConfiguration{
+			MinNodes: toPtr(v.(int32)),
+		}
+	}
+
+	if v := d.Get(FieldNodeTemplateConstraints).(map[string]any); len(v) > 0 {
+		req.Constraints = toTemplateConstraints(v)
 	}
 
 	resp, err := client.NodeTemplatesAPIUpdateNodeTemplateWithResponse(ctx, clusterID, name, req)
