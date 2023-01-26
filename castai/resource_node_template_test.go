@@ -139,7 +139,7 @@ func TestNodeTemplateResourceReadContextEmptyList(t *testing.T) {
 		FieldNodeTemplateName: cty.StringVal("gpu"),
 	})
 	state := terraform.NewInstanceStateShimmedFromValue(val, 0)
-	state.ID = clusterId
+	state.ID = "gpu"
 
 	data := resource.Data(state)
 	result := resource.ReadContext(ctx, data, provider)
