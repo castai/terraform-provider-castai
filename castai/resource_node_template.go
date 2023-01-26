@@ -66,16 +66,80 @@ func resourceNodeTemplate() *schema.Resource {
 				Optional:    true,
 				Description: "Should taint nodes created from this template",
 			},
+			FieldNodeTemplateConstraints: {
+				Type:     schema.TypeMap,
+				Optional: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"spot": {
+							Type:     schema.TypeBool,
+							Optional: true,
+						},
+						"use_spot_fallbacks": {
+							Type:     schema.TypeBool,
+							Optional: true,
+						},
+						"fallback_restore_rate_seconds": {
+							Type:     schema.TypeInt,
+							Optional: true,
+						},
+						"storage_optimized": {
+							Type:     schema.TypeBool,
+							Optional: true,
+						},
+						"compute_optimized": {
+							Type:     schema.TypeBool,
+							Optional: true,
+						},
+						"instance_families": {
+							Type: schema.TypeMap,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"include": {
+										Type:     schema.TypeList,
+										Optional: true,
+									},
+									"exclude": {
+										Type:     schema.TypeList,
+										Optional: true,
+									},
+								},
+							},
+						},
+						"gpu": {
+							Type: schema.TypeMap,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"manufacturers": {
+										Type:     schema.TypeList,
+										Optional: true,
+									},
+									"include_names": {
+										Type:     schema.TypeList,
+										Optional: true,
+									},
+									"exclude_names": {
+										Type:     schema.TypeList,
+										Optional: true,
+									},
+								},
+							},
+						},
+					},
+				},
+			},
 			FieldNodeTemplateCustomLabel: {
 				Type:     schema.TypeMap,
 				Optional: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"key": {
-							Type: schema.TypeString,
+							Type:             schema.TypeString,
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 						},
 						"value": {
-							Type: schema.TypeString,
+							Type:             schema.TypeString,
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 						},
 					},
 				},
