@@ -91,7 +91,7 @@ func TestNodeTemplateResourceReadContext(t *testing.T) {
 	result := resource.ReadContext(ctx, data, provider)
 	r.Nil(result)
 	r.False(result.HasError())
-	r.Equal(`ID = b6bfc074-a267-400f-b8f1-db0850c369b1
+	r.Equal(`ID = gpu
 cluster_id = b6bfc074-a267-400f-b8f1-db0850c369b1
 configuration_id = 7dc4f922-29c9-4377-889c-0c8c5fb8d497
 name = gpu
