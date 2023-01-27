@@ -112,15 +112,22 @@ func resourceNodeTemplate() *schema.Resource {
 						"instance_families": {
 							Type:     schema.TypeList,
 							MaxItems: 1,
+							Optional: true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"include": {
 										Type:     schema.TypeList,
 										Optional: true,
+										Elem: &schema.Schema{
+											Type: schema.TypeString,
+										},
 									},
 									"exclude": {
 										Type:     schema.TypeList,
 										Optional: true,
+										Elem: &schema.Schema{
+											Type: schema.TypeString,
+										},
 									},
 								},
 							},
@@ -134,14 +141,22 @@ func resourceNodeTemplate() *schema.Resource {
 									"manufacturers": {
 										Type:     schema.TypeList,
 										Optional: true,
-									},
+										Elem: &schema.Schema{
+											Type: schema.TypeString,
+										}},
 									"include_names": {
 										Type:     schema.TypeList,
 										Optional: true,
+										Elem: &schema.Schema{
+											Type: schema.TypeString,
+										},
 									},
 									"exclude_names": {
 										Type:     schema.TypeList,
 										Optional: true,
+										Elem: &schema.Schema{
+											Type: schema.TypeString,
+										},
 									},
 									"min_count": {
 										Type:     schema.TypeInt,
@@ -158,7 +173,8 @@ func resourceNodeTemplate() *schema.Resource {
 				},
 			},
 			FieldNodeTemplateCustomLabel: {
-				Type:     schema.TypeMap,
+				Type:     schema.TypeList,
+				MaxItems: 1,
 				Optional: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -350,8 +366,8 @@ func resourceNodeTemplateUpdate(ctx context.Context, d *schema.ResourceData, met
 		req.ConfigurationId = toPtr(v.(string))
 	}
 
-	if v := d.Get(FieldNodeTemplateCustomLabel).(map[string]any); len(v) > 0 {
-		req.CustomLabel = toCustomLabel(v)
+	if v := d.Get(FieldNodeTemplateCustomLabel).([]map[string]string); len(v) > 0 {
+		req.CustomLabel = toCustomLabel(v[0])
 	}
 
 	if v, _ := d.GetOk(FieldNodeTemplateShouldTaint); v != nil {
@@ -385,7 +401,7 @@ func resourceNodeTemplateCreate(ctx context.Context, d *schema.ResourceData, met
 		Name:            lo.ToPtr(d.Get(FieldNodeTemplateName).(string)),
 		ConfigurationId: lo.ToPtr(d.Get(FieldNodeTemplateConfigurationId).(string)),
 		ShouldTaint:     lo.ToPtr(d.Get(FieldNodeTemplateShouldTaint).(bool)),
-		CustomLabel:     toCustomLabel(d.Get(FieldNodeTemplateCustomLabel).(map[string]any)),
+		CustomLabel:     toCustomLabel(d.Get(FieldNodeTemplateCustomLabel).([]map[string]string)[0]),
 		Constraints:     toTemplateConstraints(d.Get(FieldNodeTemplateConstraints).(map[string]any)),
 		RebalancingConfig: &sdk.NodetemplatesV1RebalancingConfiguration{
 			MinNodes: lo.ToPtr(d.Get(FieldNodeTemplateRebalancingConfigMinNodes).(int32)),
@@ -477,23 +493,23 @@ func nodeTemplateStateImporter(ctx context.Context, d *schema.ResourceData, meta
 	return nil, fmt.Errorf("failed to find node template with the following name: %v", id)
 }
 
-func toCustomLabel(obj map[string]any) *sdk.NodetemplatesV1Label {
+func toCustomLabel(obj map[string]string) *sdk.NodetemplatesV1Label {
 	if obj == nil {
 		return nil
 	}
 
 	out := &sdk.NodetemplatesV1Label{}
-	if v, ok := obj["key"].(string); ok && v != "" {
+	if v, ok := obj["key"]; ok && v != "" {
 		out.Key = toPtr(v)
 	}
-	if v, ok := obj["value"].(string); ok {
+	if v, ok := obj["value"]; ok {
 		out.Value = toPtr(v)
 	}
 
 	return out
 }
 
-func flattenCustomLabel(label *sdk.NodetemplatesV1Label) map[string]string {
+func flattenCustomLabel(label *sdk.NodetemplatesV1Label) []map[string]string {
 	if label == nil {
 		return nil
 	}
@@ -505,7 +521,7 @@ func flattenCustomLabel(label *sdk.NodetemplatesV1Label) map[string]string {
 	if v := label.Value; v != nil {
 		m["value"] = toString(v)
 	}
-	return m
+	return []map[string]string{m}
 }
 
 func toTemplateConstraints(obj map[string]any) *sdk.NodetemplatesV1TemplateConstraints {
