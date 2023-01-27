@@ -179,10 +179,12 @@ func resourceNodeTemplate() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"key": {
+							Required:         true,
 							Type:             schema.TypeString,
 							ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 						},
 						"value": {
+							Required:         true,
 							Type:             schema.TypeString,
 							ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 						},
@@ -401,11 +403,20 @@ func resourceNodeTemplateCreate(ctx context.Context, d *schema.ResourceData, met
 		Name:            lo.ToPtr(d.Get(FieldNodeTemplateName).(string)),
 		ConfigurationId: lo.ToPtr(d.Get(FieldNodeTemplateConfigurationId).(string)),
 		ShouldTaint:     lo.ToPtr(d.Get(FieldNodeTemplateShouldTaint).(bool)),
-		CustomLabel:     toCustomLabel(d.Get(FieldNodeTemplateCustomLabel).([]map[string]string)[0]),
-		Constraints:     toTemplateConstraints(d.Get(FieldNodeTemplateConstraints).(map[string]any)),
-		RebalancingConfig: &sdk.NodetemplatesV1RebalancingConfiguration{
-			MinNodes: lo.ToPtr(d.Get(FieldNodeTemplateRebalancingConfigMinNodes).(int32)),
-		},
+	}
+
+	if v, ok := d.Get(FieldNodeTemplateRebalancingConfigMinNodes).(int32); ok {
+		req.RebalancingConfig = &sdk.NodetemplatesV1RebalancingConfiguration{
+			MinNodes: lo.ToPtr(v),
+		}
+	}
+
+	if v, ok := d.Get(FieldNodeTemplateCustomLabel).([]any); ok && len(v) > 0 {
+		req.CustomLabel = toCustomLabel(v[0].(map[string]string))
+	}
+
+	if v, ok := d.Get(FieldNodeTemplateConstraints).([]any); ok && len(v) > 0 {
+		req.Constraints = toTemplateConstraints(v[0].(map[string]any))
 	}
 
 	resp, err := client.NodeTemplatesAPICreateNodeTemplateWithResponse(ctx, clusterID, req)
@@ -502,7 +513,7 @@ func toCustomLabel(obj map[string]string) *sdk.NodetemplatesV1Label {
 	if v, ok := obj["key"]; ok && v != "" {
 		out.Key = toPtr(v)
 	}
-	if v, ok := obj["value"]; ok {
+	if v, ok := obj["value"]; ok && v != "" {
 		out.Value = toPtr(v)
 	}
 
