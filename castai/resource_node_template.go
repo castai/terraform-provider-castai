@@ -2,7 +2,6 @@ package castai
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"github.com/castai/terraform-provider-castai/castai/sdk"
 	"github.com/google/uuid"
@@ -11,7 +10,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/samber/lo"
 	"log"
-	"strconv"
 	"strings"
 	"time"
 )
@@ -69,7 +67,8 @@ func resourceNodeTemplate() *schema.Resource {
 				Description: "Should taint nodes created from this template",
 			},
 			FieldNodeTemplateConstraints: {
-				Type:     schema.TypeMap,
+				Type:     schema.TypeList,
+				MaxItems: 1,
 				Optional: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -111,7 +110,8 @@ func resourceNodeTemplate() *schema.Resource {
 							Optional: true,
 						},
 						"instance_families": {
-							Type: schema.TypeMap,
+							Type:     schema.TypeList,
+							MaxItems: 1,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"include": {
@@ -126,7 +126,8 @@ func resourceNodeTemplate() *schema.Resource {
 							},
 						},
 						"gpu": {
-							Type:     schema.TypeMap,
+							Type:     schema.TypeList,
+							MaxItems: 1,
 							Optional: true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
@@ -234,81 +235,73 @@ func resourceNodeTemplateRead(ctx context.Context, d *schema.ResourceData, meta 
 	return nil
 }
 
-func flattenConstraints(c *sdk.NodetemplatesV1TemplateConstraints) (map[string]any, error) {
+func flattenConstraints(c *sdk.NodetemplatesV1TemplateConstraints) ([]map[string]any, error) {
 	if c == nil {
 		return nil, nil
 	}
 
 	out := make(map[string]any)
 	if c.Gpu != nil {
-		b, err := json.Marshal(flattenGpu(c.Gpu))
-		if err != nil {
-			return nil, err
-		}
-		out["gpu"] = string(b)
+		out["gpu"] = flattenGpu(c.Gpu)
 	}
 	if c.InstanceFamilies != nil {
-		b, err := json.Marshal(flattenInstanceFamilies(c.InstanceFamilies))
-		if err != nil {
-			return nil, err
-		}
-		out["instance_families"] = string(b)
+		out["instance_families"] = flattenInstanceFamilies(c.InstanceFamilies)
 	}
 	if c.ComputeOptimized != nil {
-		out["compute_optimized"] = strconv.FormatBool(lo.FromPtr(c.ComputeOptimized))
+		out["compute_optimized"] = c.ComputeOptimized
 	}
 	if c.StorageOptimized != nil {
-		out["storage_optimized"] = strconv.FormatBool(lo.FromPtr(c.StorageOptimized))
+		out["storage_optimized"] = c.StorageOptimized
 	}
 	if c.Spot != nil {
-		out["spot"] = strconv.FormatBool(lo.FromPtr(c.Spot))
+		out["spot"] = c.Spot
 	}
 
 	if c.UseSpotFallbacks != nil {
-		out["use_spot_fallbacks"] = strconv.FormatBool(lo.FromPtr(c.UseSpotFallbacks))
+		out["use_spot_fallbacks"] = c.UseSpotFallbacks
 	}
 	if c.FallbackRestoreRateSeconds != nil {
-		out["fallback_restore_rate_seconds"] = strconv.FormatInt(int64(*c.FallbackRestoreRateSeconds), 10)
+		out["fallback_restore_rate_seconds"] = c.FallbackRestoreRateSeconds
 	}
 	if c.MinMemory != nil {
-		out["min_memory"] = strconv.FormatInt(int64(*c.MinMemory), 10)
+		out["min_memory"] = c.MinMemory
 	}
 	if c.MaxMemory != nil {
-		out["max_memory"] = strconv.FormatInt(int64(*c.MaxMemory), 10)
+		out["max_memory"] = c.MaxMemory
 	}
 	if c.MinCpu != nil {
-		out["min_cpu"] = strconv.FormatInt(int64(*c.MinCpu), 10)
+		out["min_cpu"] = c.MinCpu
 	}
 	if c.MaxCpu != nil {
-		out["max_cpu"] = strconv.FormatInt(int64(*c.MaxCpu), 10)
+		out["max_cpu"] = c.MaxCpu
 	}
-	return out, nil
+	return []map[string]any{out}, nil
 }
 
-func flattenInstanceFamilies(families *sdk.NodetemplatesV1TemplateConstraintsInstanceFamilyConstraints) map[string]any {
+func flattenInstanceFamilies(families *sdk.NodetemplatesV1TemplateConstraintsInstanceFamilyConstraints) []map[string][]string {
 	if families == nil {
 		return nil
 	}
-	out := map[string]any{}
+	out := map[string][]string{}
 	if families.Exclude != nil {
 		out["exclude"] = lo.FromPtr(families.Exclude)
 	}
 	if families.Include != nil {
 		out["include"] = lo.FromPtr(families.Include)
 	}
-	return out
+	return []map[string][]string{out}
 }
 
-func flattenGpu(gpu *sdk.NodetemplatesV1TemplateConstraintsGPUConstraints) map[string]any {
+func flattenGpu(gpu *sdk.NodetemplatesV1TemplateConstraintsGPUConstraints) []map[string]any {
 	if gpu == nil {
 		return nil
 	}
 	out := map[string]any{}
 	if gpu.ExcludeNames != nil {
-		out["exclude_names"] = toPtr(gpu.ExcludeNames)
+		out["exclude_names"] = gpu.ExcludeNames
 	}
 	if gpu.IncludeNames != nil {
-		out["include_names"] = toPtr(gpu.IncludeNames)
+		out["include_names"] = gpu.IncludeNames
 	}
 	if gpu.Manufacturers != nil {
 		out["manufacturers"] = gpu.Manufacturers
@@ -319,7 +312,7 @@ func flattenGpu(gpu *sdk.NodetemplatesV1TemplateConstraintsGPUConstraints) map[s
 	if gpu.MaxCount != nil {
 		out["max_count"] = gpu.MaxCount
 	}
-	return out
+	return []map[string]any{out}
 }
 
 func resourceNodeTemplateDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
@@ -530,8 +523,8 @@ func toTemplateConstraints(obj map[string]any) *sdk.NodetemplatesV1TemplateConst
 	if v, ok := obj["gpu"].(map[string]any); ok {
 		out.Gpu = toTemplateConstraintsGpuConstraints(v)
 	}
-	if v, ok := obj["instance_families"].(map[string]any); ok {
-		out.InstanceFamilies = toTemplateConstraintsInstanceFamilies(v)
+	if v, ok := obj["instance_families"]; ok && len(v.([]any)) > 0 {
+		out.InstanceFamilies = toTemplateConstraintsInstanceFamilies(v.([]map[string]any)[0])
 	}
 	if v, ok := obj["max_cpu"].(int32); ok {
 		out.MaxCpu = toPtr(v)
