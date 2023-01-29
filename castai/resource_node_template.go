@@ -338,6 +338,7 @@ func resourceNodeTemplateDelete(ctx context.Context, d *schema.ResourceData, met
 	clusterID := d.Get(FieldClusterID).(string)
 	name := d.Get(FieldNodeTemplateName).(string)
 
+	fmt.Printf("delete for cluster[%q] and template[%q]", clusterID, name)
 	resp, err := client.NodeTemplatesAPIDeleteNodeTemplateWithResponse(ctx, clusterID, name)
 	if checkErr := sdk.CheckOKResponse(resp, err); checkErr != nil {
 		return diag.FromErr(checkErr)
@@ -368,8 +369,8 @@ func resourceNodeTemplateUpdate(ctx context.Context, d *schema.ResourceData, met
 		req.ConfigurationId = toPtr(v.(string))
 	}
 
-	if v := d.Get(FieldNodeTemplateCustomLabel).([]map[string]string); len(v) > 0 {
-		req.CustomLabel = toCustomLabel(v[0])
+	if v, ok := d.Get(FieldNodeTemplateCustomLabel).([]any); ok && len(v) > 0 {
+		req.CustomLabel = toCustomLabel(v[0].(map[string]string))
 	}
 
 	if v, _ := d.GetOk(FieldNodeTemplateShouldTaint); v != nil {
@@ -382,8 +383,8 @@ func resourceNodeTemplateUpdate(ctx context.Context, d *schema.ResourceData, met
 		}
 	}
 
-	if v := d.Get(FieldNodeTemplateConstraints).(map[string]any); len(v) > 0 {
-		req.Constraints = toTemplateConstraints(v)
+	if v, ok := d.Get(FieldNodeTemplateConstraints).([]any); ok && len(v) > 0 {
+		req.Constraints = toTemplateConstraints(v[0].(map[string]any))
 	}
 
 	resp, err := client.NodeTemplatesAPIUpdateNodeTemplateWithResponse(ctx, clusterID, name, req)

@@ -215,6 +215,14 @@ func testAccNodeTemplateConfig(rName, clusterName string) string {
 			name = %[1]q
 			configuration_id = castai_node_configuration.test.id
 			should_taint = true
+
+			constraints {
+				compute_optimized = false
+				fallback_restore_rate_seconds = 0
+				spot = false
+				storage_optimized = false
+				use_spot_fallbacks = false
+			}
 		}
 	`, rName))
 }
