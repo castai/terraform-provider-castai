@@ -74,10 +74,12 @@ func resourceNodeTemplate() *schema.Resource {
 					Schema: map[string]*schema.Schema{
 						"spot": {
 							Type:     schema.TypeBool,
+							Default:  false,
 							Optional: true,
 						},
 						"use_spot_fallbacks": {
 							Type:     schema.TypeBool,
+							Default:  false,
 							Optional: true,
 						},
 						"fallback_restore_rate_seconds": {
@@ -104,10 +106,12 @@ func resourceNodeTemplate() *schema.Resource {
 						"storage_optimized": {
 							Type:     schema.TypeBool,
 							Optional: true,
+							Default:  false,
 						},
 						"compute_optimized": {
 							Type:     schema.TypeBool,
 							Optional: true,
+							Default:  false,
 						},
 						"instance_families": {
 							Type:     schema.TypeList,
@@ -338,7 +342,6 @@ func resourceNodeTemplateDelete(ctx context.Context, d *schema.ResourceData, met
 	clusterID := d.Get(FieldClusterID).(string)
 	name := d.Get(FieldNodeTemplateName).(string)
 
-	fmt.Printf("delete for cluster[%q] and template[%q]", clusterID, name)
 	resp, err := client.NodeTemplatesAPIDeleteNodeTemplateWithResponse(ctx, clusterID, name)
 	if checkErr := sdk.CheckOKResponse(resp, err); checkErr != nil {
 		return diag.FromErr(checkErr)
@@ -379,7 +382,7 @@ func resourceNodeTemplateUpdate(ctx context.Context, d *schema.ResourceData, met
 
 	if v, _ := d.GetOk(FieldNodeTemplateRebalancingConfigMinNodes); v != nil {
 		req.RebalancingConfig = &sdk.NodetemplatesV1RebalancingConfiguration{
-			MinNodes: toPtr(v.(int32)),
+			MinNodes: toPtr(int32(v.(int))),
 		}
 	}
 

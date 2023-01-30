@@ -196,6 +196,8 @@ func TestAccResourceNodeTemplate_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "name", rName),
 					resource.TestCheckResourceAttr(resourceName, "should_taint", "false"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.use_spot_fallbacks", "true"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.spot", "true"),
 				),
 			},
 		},
@@ -234,6 +236,14 @@ func testNodeTemplateUpdated(rName, clusterName string) string {
 			name = %[1]q
 			configuration_id = castai_node_configuration.test.id
 			should_taint = false
+
+			constraints {
+				compute_optimized = false
+				fallback_restore_rate_seconds = 0
+				spot = true 
+				storage_optimized = false
+				use_spot_fallbacks = true
+			}
 		}
 	`, rName))
 }
