@@ -42,6 +42,7 @@ func TestAccResourceNodeConfiguration_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "eks.0.key_pair_id", ""),
 					resource.TestCheckResourceAttr(resourceName, "aks.#", "0"),
 					resource.TestCheckResourceAttr(resourceName, "kops.#", "0"),
+					resource.TestCheckResourceAttr(resourceName, "gke.#", "0"),
 				),
 			},
 			{

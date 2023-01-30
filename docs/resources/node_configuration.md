@@ -66,6 +66,7 @@ resource "castai_node_configuration" "default" {
 - `disk_cpu_ratio` (Number) Disk to CPU ratio. Sets the number of GiBs to be added for every CPU on the node. Defaults to 0
 - `docker_config` (String) Optional docker daemon configuration properties in JSON format. Provide only properties that you want to override. Applicable for EKS only. [Available values](https://docs.docker.com/engine/reference/commandline/dockerd/#daemon-configuration-file)
 - `eks` (Block List, Max: 1) (see [below for nested schema](#nestedblock--eks))
+- `gke` (Block List, Max: 1) (see [below for nested schema](#nestedblock--gke))
 - `image` (String) Image to be used while provisioning the node. If nothing is provided will be resolved to latest available image based on Kubernetes version if possible
 - `init_script` (String) Init script to be run on your instance at launch. Should not contain any sensitive data. Value should be base64 encoded
 - `kops` (Block List, Max: 1) (see [below for nested schema](#nestedblock--kops))
@@ -98,6 +99,14 @@ Optional:
 
 - `dns_cluster_ip` (String) IP address to use for DNS queries within the cluster
 - `key_pair_id` (String) AWS key pair ID to be used for provisioned nodes. Has priority over ssh_public_key
+
+
+<a id="nestedblock--gke"></a>
+### Nested Schema for `gke`
+
+Optional:
+
+- `max_pods_per_node` (Number) Maximum number of pods that can be run on a node, which affects how many IP addresses you will need for each node. Defaults to 110
 
 
 <a id="nestedblock--kops"></a>

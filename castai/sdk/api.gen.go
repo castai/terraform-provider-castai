@@ -54,62 +54,6 @@ const (
 	OnDemand NodetemplatesV1AvailableInstanceTypeStorageOptimizedOption = "OnDemand"
 )
 
-// AuthToken defines model for AuthToken.
-type AuthToken struct {
-	// Indicates whether this auth token is active.
-	Active *bool `json:"active,omitempty"`
-
-	// Auth token creation UTC time in RFC3339 format.
-	CreatedAt *time.Time `json:"createdAt,omitempty"`
-
-	// Auth token deletion UTC time in RFC3339 format.
-	DeletedAt *time.Time `json:"deletedAt,omitempty"`
-
-	// Auth token ID, generated at the time of creation
-	Id *string `json:"id,omitempty"`
-
-	// Auth token last used UTC time in RFC3339 format.
-	LastUsedAt *time.Time `json:"lastUsedAt,omitempty"`
-
-	// Name of the token. Must be unique among other active tokens for the current user.
-	Name string `json:"name"`
-
-	// Indicates whether auth token has readonly permissions.
-	Readonly bool `json:"readonly"`
-}
-
-// AuthTokenCreateResponse defines model for AuthTokenCreateResponse.
-type AuthTokenCreateResponse struct {
-	// Indicates whether this auth token is active.
-	Active *bool `json:"active,omitempty"`
-
-	// Auth token creation UTC time in RFC3339 format.
-	CreatedAt *time.Time `json:"createdAt,omitempty"`
-
-	// Auth token ID, generated at the time of creation
-	Id *string `json:"id,omitempty"`
-
-	// Name of the token. Must be unique among other active tokens for the current user.
-	Name string `json:"name"`
-
-	// Indicates whether auth token has readonly permissions.
-	Readonly bool `json:"readonly"`
-
-	// Generated secret for this auth token (only shown once on creation)
-	Token *string `json:"token,omitempty"`
-}
-
-// AuthTokenList defines model for AuthTokenList.
-type AuthTokenList struct {
-	Items []AuthToken `json:"items"`
-}
-
-// AuthTokenUpdateRequest defines model for AuthTokenUpdateRequest.
-type AuthTokenUpdateRequest struct {
-	// Indicates whether this auth token is active.
-	Active bool `json:"active"`
-}
-
 // OperationResponse defines model for OperationResponse.
 type OperationResponse struct {
 	// Operation creation time in RFC3339Nano format.
@@ -717,6 +661,14 @@ type NodeconfigV1EKSConfig struct {
 	SecurityGroups *[]string `json:"securityGroups,omitempty"`
 }
 
+// NodeconfigV1GKEConfig defines model for nodeconfig.v1.GKEConfig.
+type NodeconfigV1GKEConfig struct {
+	// Maximum number of pods that can be run on a node, which affects how many IP addresses you will need for each node. Defaults to 110.
+	// For Standard GKE clusters, you can run a maximum of 256 Pods on a node with a /23 range, not 512 as you might expect. This provides a buffer so that Pods don't become unschedulable due to a transient lack of IP addresses in the Pod IP range for a given node.
+	// For all ranges, at most half as many Pods can be scheduled as IP addresses in the range.
+	MaxPodsPerNode *int32 `json:"maxPodsPerNode,omitempty"`
+}
+
 // NodeconfigV1GetSuggestedConfigurationResponse defines model for nodeconfig.v1.GetSuggestedConfigurationResponse.
 type NodeconfigV1GetSuggestedConfigurationResponse struct {
 	SecurityGroups *[]NodeconfigV1SecurityGroup `json:"securityGroups,omitempty"`
@@ -747,6 +699,7 @@ type NodeconfigV1NewNodeConfiguration struct {
 	// Optional docker daemon configuration properties. Provide only properties that you want to override. Available values https://docs.docker.com/engine/reference/commandline/dockerd/#daemon-configuration-file
 	DockerConfig *map[string]interface{} `json:"dockerConfig,omitempty"`
 	Eks          *NodeconfigV1EKSConfig  `json:"eks,omitempty"`
+	Gke          *NodeconfigV1GKEConfig  `json:"gke,omitempty"`
 
 	// Image to be used while provisioning the node. If nothing is provided will be resolved to latest available image based on Kubernetes version if possible.
 	Image *string `json:"image"`
@@ -798,6 +751,7 @@ type NodeconfigV1NodeConfiguration struct {
 	// Optional docker daemon configuration properties. Applicable for EKS only.
 	DockerConfig *map[string]interface{} `json:"dockerConfig"`
 	Eks          *NodeconfigV1EKSConfig  `json:"eks,omitempty"`
+	Gke          *NodeconfigV1GKEConfig  `json:"gke,omitempty"`
 
 	// The node configuration ID.
 	Id *string `json:"id,omitempty"`
@@ -852,6 +806,7 @@ type NodeconfigV1NodeConfigurationUpdate struct {
 	// Optional docker daemon configuration properties. Provide only properties that you want to override. Available values https://docs.docker.com/engine/reference/commandline/dockerd/#daemon-configuration-file
 	DockerConfig *map[string]interface{} `json:"dockerConfig,omitempty"`
 	Eks          *NodeconfigV1EKSConfig  `json:"eks,omitempty"`
+	Gke          *NodeconfigV1GKEConfig  `json:"gke,omitempty"`
 
 	// Image to be used while provisioning the node. If nothing is provided will be resolved to latest available image based on Kubernetes version if possible.
 	Image *string `json:"image"`
@@ -1243,37 +1198,6 @@ type CredentialsId = string
 // HeaderOrganizationId defines model for headerOrganizationId.
 type HeaderOrganizationId = openapi_types.UUID
 
-// ListAuthTokensParams defines parameters for ListAuthTokens.
-type ListAuthTokensParams struct {
-	XCastAiOrganizationId *HeaderOrganizationId `json:"X-CastAi-Organization-Id,omitempty"`
-}
-
-// CreateAuthTokenJSONBody defines parameters for CreateAuthToken.
-type CreateAuthTokenJSONBody = AuthToken
-
-// CreateAuthTokenParams defines parameters for CreateAuthToken.
-type CreateAuthTokenParams struct {
-	XCastAiOrganizationId *HeaderOrganizationId `json:"X-CastAi-Organization-Id,omitempty"`
-}
-
-// DeleteAuthTokenParams defines parameters for DeleteAuthToken.
-type DeleteAuthTokenParams struct {
-	XCastAiOrganizationId *HeaderOrganizationId `json:"X-CastAi-Organization-Id,omitempty"`
-}
-
-// GetAuthTokenParams defines parameters for GetAuthToken.
-type GetAuthTokenParams struct {
-	XCastAiOrganizationId *HeaderOrganizationId `json:"X-CastAi-Organization-Id,omitempty"`
-}
-
-// UpdateAuthTokenJSONBody defines parameters for UpdateAuthToken.
-type UpdateAuthTokenJSONBody = AuthTokenUpdateRequest
-
-// UpdateAuthTokenParams defines parameters for UpdateAuthToken.
-type UpdateAuthTokenParams struct {
-	XCastAiOrganizationId *HeaderOrganizationId `json:"X-CastAi-Organization-Id,omitempty"`
-}
-
 // NodeTemplatesAPIFilterInstanceTypesJSONBody defines parameters for NodeTemplatesAPIFilterInstanceTypes.
 type NodeTemplatesAPIFilterInstanceTypesJSONBody = NodetemplatesV1NodeTemplate
 
@@ -1350,12 +1274,6 @@ type ExternalClusterAPIDrainNodeJSONBody = ExternalclusterV1DrainConfig
 type ExternalClusterAPIGetCredentialsScriptTemplateParams struct {
 	CrossRole *bool `form:"crossRole,omitempty" json:"crossRole,omitempty"`
 }
-
-// CreateAuthTokenJSONRequestBody defines body for CreateAuthToken for application/json ContentType.
-type CreateAuthTokenJSONRequestBody = CreateAuthTokenJSONBody
-
-// UpdateAuthTokenJSONRequestBody defines body for UpdateAuthToken for application/json ContentType.
-type UpdateAuthTokenJSONRequestBody = UpdateAuthTokenJSONBody
 
 // NodeTemplatesAPIFilterInstanceTypesJSONRequestBody defines body for NodeTemplatesAPIFilterInstanceTypes for application/json ContentType.
 type NodeTemplatesAPIFilterInstanceTypesJSONRequestBody = NodeTemplatesAPIFilterInstanceTypesJSONBody
