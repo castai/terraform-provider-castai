@@ -4,18 +4,20 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"github.com/castai/terraform-provider-castai/castai/sdk"
-	mock_sdk "github.com/castai/terraform-provider-castai/castai/sdk/mock"
+	"io"
+	"net/http"
+	"testing"
+	"time"
+
 	"github.com/golang/mock/gomock"
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/stretchr/testify/require"
-	"io"
-	"net/http"
-	"testing"
-	"time"
+
+	"github.com/castai/terraform-provider-castai/castai/sdk"
+	mock_sdk "github.com/castai/terraform-provider-castai/castai/sdk/mock"
 )
 
 func TestNodeTemplateResourceReadContext(t *testing.T) {
@@ -211,7 +213,7 @@ func TestAccResourceNodeTemplate_basic(t *testing.T) {
 }
 
 func testAccNodeTemplateConfig(rName, clusterName string) string {
-	return ConfigCompose(testAccClusterConfig(rName, clusterName), testAccNodeConfig(rName), fmt.Sprintf(`
+	return ConfigCompose(testAccEKSClusterConfig(rName, clusterName), testAccNodeConfig(rName), fmt.Sprintf(`
 		resource "castai_node_template" "test" {
 			cluster_id        = castai_eks_clusterid.test.id
 			name = %[1]q
@@ -230,7 +232,7 @@ func testAccNodeTemplateConfig(rName, clusterName string) string {
 }
 
 func testNodeTemplateUpdated(rName, clusterName string) string {
-	return ConfigCompose(testAccClusterConfig(rName, clusterName), testAccNodeConfig(rName), fmt.Sprintf(`
+	return ConfigCompose(testAccEKSClusterConfig(rName, clusterName), testAccNodeConfig(rName), fmt.Sprintf(`
 		resource "castai_node_template" "test" {
 			cluster_id        = castai_eks_clusterid.test.id
 			name = %[1]q

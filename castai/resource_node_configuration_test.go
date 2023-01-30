@@ -79,7 +79,7 @@ func TestAccResourceNodeConfiguration_basic(t *testing.T) {
 }
 
 func testAccNodeConfigurationConfig(rName, clusterName string) string {
-	return ConfigCompose(testAccClusterConfig(rName, clusterName), fmt.Sprintf(`
+	return ConfigCompose(testAccEKSClusterConfig(rName, clusterName), fmt.Sprintf(`
 variable "init_script" {
   type = string
   default = <<EOF
@@ -121,7 +121,7 @@ resource "castai_node_configuration_default" "test" {
 }
 
 func testAccNodeConfigurationUpdated(rName, clusterName string) string {
-	return ConfigCompose(testAccClusterConfig(rName, clusterName), fmt.Sprintf(`
+	return ConfigCompose(testAccEKSClusterConfig(rName, clusterName), fmt.Sprintf(`
 resource "castai_node_configuration" "test" {
   name   		    = %[1]q
   cluster_id        = castai_eks_cluster.test.id
@@ -138,7 +138,7 @@ resource "castai_node_configuration" "test" {
 }`, rName))
 }
 
-func testAccClusterConfig(rName string, clusterName string) string {
+func testAccEKSClusterConfig(rName string, clusterName string) string {
 	return ConfigCompose(testAccAWSConfig(rName), fmt.Sprintf(`
 resource "castai_eks_clusterid" "test" {
   account_id   = data.aws_caller_identity.current.account_id
