@@ -109,6 +109,11 @@ type ClientInterface interface {
 
 	UpdateAuthToken(ctx context.Context, authTokenId AuthTokenId, params *UpdateAuthTokenParams, body UpdateAuthTokenJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// NodeTemplatesAPIFilterInstanceTypes request with any body
+	NodeTemplatesAPIFilterInstanceTypesWithBody(ctx context.Context, clusterId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	NodeTemplatesAPIFilterInstanceTypes(ctx context.Context, clusterId string, body NodeTemplatesAPIFilterInstanceTypesJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// NodeConfigurationAPIListConfigurations request
 	NodeConfigurationAPIListConfigurations(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -136,6 +141,22 @@ type ClientInterface interface {
 
 	// PoliciesAPIGetClusterNodeConstraints request
 	PoliciesAPIGetClusterNodeConstraints(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// NodeTemplatesAPIListNodeTemplates request
+	NodeTemplatesAPIListNodeTemplates(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// NodeTemplatesAPICreateNodeTemplate request with any body
+	NodeTemplatesAPICreateNodeTemplateWithBody(ctx context.Context, clusterId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	NodeTemplatesAPICreateNodeTemplate(ctx context.Context, clusterId string, body NodeTemplatesAPICreateNodeTemplateJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// NodeTemplatesAPIDeleteNodeTemplate request
+	NodeTemplatesAPIDeleteNodeTemplate(ctx context.Context, clusterId string, nodeTemplateName string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// NodeTemplatesAPIUpdateNodeTemplate request with any body
+	NodeTemplatesAPIUpdateNodeTemplateWithBody(ctx context.Context, clusterId string, nodeTemplateName string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	NodeTemplatesAPIUpdateNodeTemplate(ctx context.Context, clusterId string, nodeTemplateName string, body NodeTemplatesAPIUpdateNodeTemplateJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// PoliciesAPIGetClusterPolicies request
 	PoliciesAPIGetClusterPolicies(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -302,6 +323,30 @@ func (c *Client) UpdateAuthToken(ctx context.Context, authTokenId AuthTokenId, p
 	return c.Client.Do(req)
 }
 
+func (c *Client) NodeTemplatesAPIFilterInstanceTypesWithBody(ctx context.Context, clusterId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewNodeTemplatesAPIFilterInstanceTypesRequestWithBody(c.Server, clusterId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) NodeTemplatesAPIFilterInstanceTypes(ctx context.Context, clusterId string, body NodeTemplatesAPIFilterInstanceTypesJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewNodeTemplatesAPIFilterInstanceTypesRequest(c.Server, clusterId, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
 func (c *Client) NodeConfigurationAPIListConfigurations(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewNodeConfigurationAPIListConfigurationsRequest(c.Server, clusterId)
 	if err != nil {
@@ -412,6 +457,78 @@ func (c *Client) NodeConfigurationAPISetDefault(ctx context.Context, clusterId s
 
 func (c *Client) PoliciesAPIGetClusterNodeConstraints(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewPoliciesAPIGetClusterNodeConstraintsRequest(c.Server, clusterId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) NodeTemplatesAPIListNodeTemplates(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewNodeTemplatesAPIListNodeTemplatesRequest(c.Server, clusterId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) NodeTemplatesAPICreateNodeTemplateWithBody(ctx context.Context, clusterId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewNodeTemplatesAPICreateNodeTemplateRequestWithBody(c.Server, clusterId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) NodeTemplatesAPICreateNodeTemplate(ctx context.Context, clusterId string, body NodeTemplatesAPICreateNodeTemplateJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewNodeTemplatesAPICreateNodeTemplateRequest(c.Server, clusterId, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) NodeTemplatesAPIDeleteNodeTemplate(ctx context.Context, clusterId string, nodeTemplateName string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewNodeTemplatesAPIDeleteNodeTemplateRequest(c.Server, clusterId, nodeTemplateName)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) NodeTemplatesAPIUpdateNodeTemplateWithBody(ctx context.Context, clusterId string, nodeTemplateName string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewNodeTemplatesAPIUpdateNodeTemplateRequestWithBody(c.Server, clusterId, nodeTemplateName, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) NodeTemplatesAPIUpdateNodeTemplate(ctx context.Context, clusterId string, nodeTemplateName string, body NodeTemplatesAPIUpdateNodeTemplateJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewNodeTemplatesAPIUpdateNodeTemplateRequest(c.Server, clusterId, nodeTemplateName, body)
 	if err != nil {
 		return nil, err
 	}
@@ -1007,6 +1124,53 @@ func NewUpdateAuthTokenRequestWithBody(server string, authTokenId AuthTokenId, p
 	return req, nil
 }
 
+// NewNodeTemplatesAPIFilterInstanceTypesRequest calls the generic NodeTemplatesAPIFilterInstanceTypes builder with application/json body
+func NewNodeTemplatesAPIFilterInstanceTypesRequest(server string, clusterId string, body NodeTemplatesAPIFilterInstanceTypesJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewNodeTemplatesAPIFilterInstanceTypesRequestWithBody(server, clusterId, "application/json", bodyReader)
+}
+
+// NewNodeTemplatesAPIFilterInstanceTypesRequestWithBody generates requests for NodeTemplatesAPIFilterInstanceTypes with any type of body
+func NewNodeTemplatesAPIFilterInstanceTypesRequestWithBody(server string, clusterId string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "clusterId", runtime.ParamLocationPath, clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/kubernetes/clusters/%s/filter-instance-types", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
 // NewNodeConfigurationAPIListConfigurationsRequest generates requests for NodeConfigurationAPIListConfigurations
 func NewNodeConfigurationAPIListConfigurationsRequest(server string, clusterId string) (*http.Request, error) {
 	var err error
@@ -1329,6 +1493,182 @@ func NewPoliciesAPIGetClusterNodeConstraintsRequest(server string, clusterId str
 	if err != nil {
 		return nil, err
 	}
+
+	return req, nil
+}
+
+// NewNodeTemplatesAPIListNodeTemplatesRequest generates requests for NodeTemplatesAPIListNodeTemplates
+func NewNodeTemplatesAPIListNodeTemplatesRequest(server string, clusterId string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "clusterId", runtime.ParamLocationPath, clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/kubernetes/clusters/%s/node-templates", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewNodeTemplatesAPICreateNodeTemplateRequest calls the generic NodeTemplatesAPICreateNodeTemplate builder with application/json body
+func NewNodeTemplatesAPICreateNodeTemplateRequest(server string, clusterId string, body NodeTemplatesAPICreateNodeTemplateJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewNodeTemplatesAPICreateNodeTemplateRequestWithBody(server, clusterId, "application/json", bodyReader)
+}
+
+// NewNodeTemplatesAPICreateNodeTemplateRequestWithBody generates requests for NodeTemplatesAPICreateNodeTemplate with any type of body
+func NewNodeTemplatesAPICreateNodeTemplateRequestWithBody(server string, clusterId string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "clusterId", runtime.ParamLocationPath, clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/kubernetes/clusters/%s/node-templates", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewNodeTemplatesAPIDeleteNodeTemplateRequest generates requests for NodeTemplatesAPIDeleteNodeTemplate
+func NewNodeTemplatesAPIDeleteNodeTemplateRequest(server string, clusterId string, nodeTemplateName string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "clusterId", runtime.ParamLocationPath, clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "nodeTemplateName", runtime.ParamLocationPath, nodeTemplateName)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/kubernetes/clusters/%s/node-templates/%s", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("DELETE", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewNodeTemplatesAPIUpdateNodeTemplateRequest calls the generic NodeTemplatesAPIUpdateNodeTemplate builder with application/json body
+func NewNodeTemplatesAPIUpdateNodeTemplateRequest(server string, clusterId string, nodeTemplateName string, body NodeTemplatesAPIUpdateNodeTemplateJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewNodeTemplatesAPIUpdateNodeTemplateRequestWithBody(server, clusterId, nodeTemplateName, "application/json", bodyReader)
+}
+
+// NewNodeTemplatesAPIUpdateNodeTemplateRequestWithBody generates requests for NodeTemplatesAPIUpdateNodeTemplate with any type of body
+func NewNodeTemplatesAPIUpdateNodeTemplateRequestWithBody(server string, clusterId string, nodeTemplateName string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "clusterId", runtime.ParamLocationPath, clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "nodeTemplateName", runtime.ParamLocationPath, nodeTemplateName)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/kubernetes/clusters/%s/node-templates/%s", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("PUT", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
 
 	return req, nil
 }
@@ -2405,6 +2745,11 @@ type ClientWithResponsesInterface interface {
 
 	UpdateAuthTokenWithResponse(ctx context.Context, authTokenId AuthTokenId, params *UpdateAuthTokenParams, body UpdateAuthTokenJSONRequestBody) (*UpdateAuthTokenResponse, error)
 
+	// NodeTemplatesAPIFilterInstanceTypes request  with any body
+	NodeTemplatesAPIFilterInstanceTypesWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader) (*NodeTemplatesAPIFilterInstanceTypesResponse, error)
+
+	NodeTemplatesAPIFilterInstanceTypesWithResponse(ctx context.Context, clusterId string, body NodeTemplatesAPIFilterInstanceTypesJSONRequestBody) (*NodeTemplatesAPIFilterInstanceTypesResponse, error)
+
 	// NodeConfigurationAPIListConfigurations request
 	NodeConfigurationAPIListConfigurationsWithResponse(ctx context.Context, clusterId string) (*NodeConfigurationAPIListConfigurationsResponse, error)
 
@@ -2432,6 +2777,22 @@ type ClientWithResponsesInterface interface {
 
 	// PoliciesAPIGetClusterNodeConstraints request
 	PoliciesAPIGetClusterNodeConstraintsWithResponse(ctx context.Context, clusterId string) (*PoliciesAPIGetClusterNodeConstraintsResponse, error)
+
+	// NodeTemplatesAPIListNodeTemplates request
+	NodeTemplatesAPIListNodeTemplatesWithResponse(ctx context.Context, clusterId string) (*NodeTemplatesAPIListNodeTemplatesResponse, error)
+
+	// NodeTemplatesAPICreateNodeTemplate request  with any body
+	NodeTemplatesAPICreateNodeTemplateWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader) (*NodeTemplatesAPICreateNodeTemplateResponse, error)
+
+	NodeTemplatesAPICreateNodeTemplateWithResponse(ctx context.Context, clusterId string, body NodeTemplatesAPICreateNodeTemplateJSONRequestBody) (*NodeTemplatesAPICreateNodeTemplateResponse, error)
+
+	// NodeTemplatesAPIDeleteNodeTemplate request
+	NodeTemplatesAPIDeleteNodeTemplateWithResponse(ctx context.Context, clusterId string, nodeTemplateName string) (*NodeTemplatesAPIDeleteNodeTemplateResponse, error)
+
+	// NodeTemplatesAPIUpdateNodeTemplate request  with any body
+	NodeTemplatesAPIUpdateNodeTemplateWithBodyWithResponse(ctx context.Context, clusterId string, nodeTemplateName string, contentType string, body io.Reader) (*NodeTemplatesAPIUpdateNodeTemplateResponse, error)
+
+	NodeTemplatesAPIUpdateNodeTemplateWithResponse(ctx context.Context, clusterId string, nodeTemplateName string, body NodeTemplatesAPIUpdateNodeTemplateJSONRequestBody) (*NodeTemplatesAPIUpdateNodeTemplateResponse, error)
 
 	// PoliciesAPIGetClusterPolicies request
 	PoliciesAPIGetClusterPoliciesWithResponse(ctx context.Context, clusterId string) (*PoliciesAPIGetClusterPoliciesResponse, error)
@@ -2672,6 +3033,36 @@ func (r UpdateAuthTokenResponse) GetBody() []byte {
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
+type NodeTemplatesAPIFilterInstanceTypesResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *NodetemplatesV1FilterInstanceTypesResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r NodeTemplatesAPIFilterInstanceTypesResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r NodeTemplatesAPIFilterInstanceTypesResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r NodeTemplatesAPIFilterInstanceTypesResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
 type NodeConfigurationAPIListConfigurationsResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -2907,6 +3298,126 @@ func (r PoliciesAPIGetClusterNodeConstraintsResponse) StatusCode() int {
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
 func (r PoliciesAPIGetClusterNodeConstraintsResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type NodeTemplatesAPIListNodeTemplatesResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *NodetemplatesV1ListNodeTemplatesResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r NodeTemplatesAPIListNodeTemplatesResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r NodeTemplatesAPIListNodeTemplatesResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r NodeTemplatesAPIListNodeTemplatesResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type NodeTemplatesAPICreateNodeTemplateResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *NodetemplatesV1NodeTemplate
+}
+
+// Status returns HTTPResponse.Status
+func (r NodeTemplatesAPICreateNodeTemplateResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r NodeTemplatesAPICreateNodeTemplateResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r NodeTemplatesAPICreateNodeTemplateResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type NodeTemplatesAPIDeleteNodeTemplateResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *NodetemplatesV1DeleteNodeTemplateResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r NodeTemplatesAPIDeleteNodeTemplateResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r NodeTemplatesAPIDeleteNodeTemplateResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r NodeTemplatesAPIDeleteNodeTemplateResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type NodeTemplatesAPIUpdateNodeTemplateResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *NodetemplatesV1NodeTemplate
+}
+
+// Status returns HTTPResponse.Status
+func (r NodeTemplatesAPIUpdateNodeTemplateResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r NodeTemplatesAPIUpdateNodeTemplateResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r NodeTemplatesAPIUpdateNodeTemplateResponse) GetBody() []byte {
 	return r.Body
 }
 
@@ -3631,6 +4142,23 @@ func (c *ClientWithResponses) UpdateAuthTokenWithResponse(ctx context.Context, a
 	return ParseUpdateAuthTokenResponse(rsp)
 }
 
+// NodeTemplatesAPIFilterInstanceTypesWithBodyWithResponse request with arbitrary body returning *NodeTemplatesAPIFilterInstanceTypesResponse
+func (c *ClientWithResponses) NodeTemplatesAPIFilterInstanceTypesWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader) (*NodeTemplatesAPIFilterInstanceTypesResponse, error) {
+	rsp, err := c.NodeTemplatesAPIFilterInstanceTypesWithBody(ctx, clusterId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseNodeTemplatesAPIFilterInstanceTypesResponse(rsp)
+}
+
+func (c *ClientWithResponses) NodeTemplatesAPIFilterInstanceTypesWithResponse(ctx context.Context, clusterId string, body NodeTemplatesAPIFilterInstanceTypesJSONRequestBody) (*NodeTemplatesAPIFilterInstanceTypesResponse, error) {
+	rsp, err := c.NodeTemplatesAPIFilterInstanceTypes(ctx, clusterId, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseNodeTemplatesAPIFilterInstanceTypesResponse(rsp)
+}
+
 // NodeConfigurationAPIListConfigurationsWithResponse request returning *NodeConfigurationAPIListConfigurationsResponse
 func (c *ClientWithResponses) NodeConfigurationAPIListConfigurationsWithResponse(ctx context.Context, clusterId string) (*NodeConfigurationAPIListConfigurationsResponse, error) {
 	rsp, err := c.NodeConfigurationAPIListConfigurations(ctx, clusterId)
@@ -3717,6 +4245,58 @@ func (c *ClientWithResponses) PoliciesAPIGetClusterNodeConstraintsWithResponse(c
 		return nil, err
 	}
 	return ParsePoliciesAPIGetClusterNodeConstraintsResponse(rsp)
+}
+
+// NodeTemplatesAPIListNodeTemplatesWithResponse request returning *NodeTemplatesAPIListNodeTemplatesResponse
+func (c *ClientWithResponses) NodeTemplatesAPIListNodeTemplatesWithResponse(ctx context.Context, clusterId string) (*NodeTemplatesAPIListNodeTemplatesResponse, error) {
+	rsp, err := c.NodeTemplatesAPIListNodeTemplates(ctx, clusterId)
+	if err != nil {
+		return nil, err
+	}
+	return ParseNodeTemplatesAPIListNodeTemplatesResponse(rsp)
+}
+
+// NodeTemplatesAPICreateNodeTemplateWithBodyWithResponse request with arbitrary body returning *NodeTemplatesAPICreateNodeTemplateResponse
+func (c *ClientWithResponses) NodeTemplatesAPICreateNodeTemplateWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader) (*NodeTemplatesAPICreateNodeTemplateResponse, error) {
+	rsp, err := c.NodeTemplatesAPICreateNodeTemplateWithBody(ctx, clusterId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseNodeTemplatesAPICreateNodeTemplateResponse(rsp)
+}
+
+func (c *ClientWithResponses) NodeTemplatesAPICreateNodeTemplateWithResponse(ctx context.Context, clusterId string, body NodeTemplatesAPICreateNodeTemplateJSONRequestBody) (*NodeTemplatesAPICreateNodeTemplateResponse, error) {
+	rsp, err := c.NodeTemplatesAPICreateNodeTemplate(ctx, clusterId, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseNodeTemplatesAPICreateNodeTemplateResponse(rsp)
+}
+
+// NodeTemplatesAPIDeleteNodeTemplateWithResponse request returning *NodeTemplatesAPIDeleteNodeTemplateResponse
+func (c *ClientWithResponses) NodeTemplatesAPIDeleteNodeTemplateWithResponse(ctx context.Context, clusterId string, nodeTemplateName string) (*NodeTemplatesAPIDeleteNodeTemplateResponse, error) {
+	rsp, err := c.NodeTemplatesAPIDeleteNodeTemplate(ctx, clusterId, nodeTemplateName)
+	if err != nil {
+		return nil, err
+	}
+	return ParseNodeTemplatesAPIDeleteNodeTemplateResponse(rsp)
+}
+
+// NodeTemplatesAPIUpdateNodeTemplateWithBodyWithResponse request with arbitrary body returning *NodeTemplatesAPIUpdateNodeTemplateResponse
+func (c *ClientWithResponses) NodeTemplatesAPIUpdateNodeTemplateWithBodyWithResponse(ctx context.Context, clusterId string, nodeTemplateName string, contentType string, body io.Reader) (*NodeTemplatesAPIUpdateNodeTemplateResponse, error) {
+	rsp, err := c.NodeTemplatesAPIUpdateNodeTemplateWithBody(ctx, clusterId, nodeTemplateName, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseNodeTemplatesAPIUpdateNodeTemplateResponse(rsp)
+}
+
+func (c *ClientWithResponses) NodeTemplatesAPIUpdateNodeTemplateWithResponse(ctx context.Context, clusterId string, nodeTemplateName string, body NodeTemplatesAPIUpdateNodeTemplateJSONRequestBody) (*NodeTemplatesAPIUpdateNodeTemplateResponse, error) {
+	rsp, err := c.NodeTemplatesAPIUpdateNodeTemplate(ctx, clusterId, nodeTemplateName, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseNodeTemplatesAPIUpdateNodeTemplateResponse(rsp)
 }
 
 // PoliciesAPIGetClusterPoliciesWithResponse request returning *PoliciesAPIGetClusterPoliciesResponse
@@ -4093,6 +4673,32 @@ func ParseUpdateAuthTokenResponse(rsp *http.Response) (*UpdateAuthTokenResponse,
 	return response, nil
 }
 
+// ParseNodeTemplatesAPIFilterInstanceTypesResponse parses an HTTP response from a NodeTemplatesAPIFilterInstanceTypesWithResponse call
+func ParseNodeTemplatesAPIFilterInstanceTypesResponse(rsp *http.Response) (*NodeTemplatesAPIFilterInstanceTypesResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &NodeTemplatesAPIFilterInstanceTypesResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest NodetemplatesV1FilterInstanceTypesResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
 // ParseNodeConfigurationAPIListConfigurationsResponse parses an HTTP response from a NodeConfigurationAPIListConfigurationsWithResponse call
 func ParseNodeConfigurationAPIListConfigurationsResponse(rsp *http.Response) (*NodeConfigurationAPIListConfigurationsResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
@@ -4291,6 +4897,110 @@ func ParsePoliciesAPIGetClusterNodeConstraintsResponse(rsp *http.Response) (*Pol
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest PoliciesV1GetClusterNodeConstraintsResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseNodeTemplatesAPIListNodeTemplatesResponse parses an HTTP response from a NodeTemplatesAPIListNodeTemplatesWithResponse call
+func ParseNodeTemplatesAPIListNodeTemplatesResponse(rsp *http.Response) (*NodeTemplatesAPIListNodeTemplatesResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &NodeTemplatesAPIListNodeTemplatesResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest NodetemplatesV1ListNodeTemplatesResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseNodeTemplatesAPICreateNodeTemplateResponse parses an HTTP response from a NodeTemplatesAPICreateNodeTemplateWithResponse call
+func ParseNodeTemplatesAPICreateNodeTemplateResponse(rsp *http.Response) (*NodeTemplatesAPICreateNodeTemplateResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &NodeTemplatesAPICreateNodeTemplateResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest NodetemplatesV1NodeTemplate
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseNodeTemplatesAPIDeleteNodeTemplateResponse parses an HTTP response from a NodeTemplatesAPIDeleteNodeTemplateWithResponse call
+func ParseNodeTemplatesAPIDeleteNodeTemplateResponse(rsp *http.Response) (*NodeTemplatesAPIDeleteNodeTemplateResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &NodeTemplatesAPIDeleteNodeTemplateResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest NodetemplatesV1DeleteNodeTemplateResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseNodeTemplatesAPIUpdateNodeTemplateResponse parses an HTTP response from a NodeTemplatesAPIUpdateNodeTemplateWithResponse call
+func ParseNodeTemplatesAPIUpdateNodeTemplateResponse(rsp *http.Response) (*NodeTemplatesAPIUpdateNodeTemplateResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &NodeTemplatesAPIUpdateNodeTemplateResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest NodetemplatesV1NodeTemplate
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}

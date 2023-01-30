@@ -47,6 +47,13 @@ const (
 	Unspecified NodeconfigV1ContainerRuntime = "unspecified"
 )
 
+// Defines values for NodetemplatesV1AvailableInstanceTypeStorageOptimizedOption.
+const (
+	Always   NodetemplatesV1AvailableInstanceTypeStorageOptimizedOption = "Always"
+	Never    NodetemplatesV1AvailableInstanceTypeStorageOptimizedOption = "Never"
+	OnDemand NodetemplatesV1AvailableInstanceTypeStorageOptimizedOption = "OnDemand"
+)
+
 // AuthToken defines model for AuthToken.
 type AuthToken struct {
 	// Indicates whether this auth token is active.
@@ -912,6 +919,136 @@ type NodeconfigV1SubnetDetails struct {
 	Zone *ExternalclusterV1Zone `json:"zone,omitempty"`
 }
 
+// NodetemplatesV1AvailableInstanceType defines model for nodetemplates.v1.AvailableInstanceType.
+type NodetemplatesV1AvailableInstanceType struct {
+	AvailableGpuDevices    *[]NodetemplatesV1AvailableInstanceTypeGPUDevice            `json:"availableGpuDevices,omitempty"`
+	Cpu                    *string                                                     `json:"cpu,omitempty"`
+	CpuCost                *float64                                                    `json:"cpuCost,omitempty"`
+	Family                 *string                                                     `json:"family,omitempty"`
+	IsComputeOptimized     *bool                                                       `json:"isComputeOptimized,omitempty"`
+	Memory                 *string                                                     `json:"memory,omitempty"`
+	Name                   *string                                                     `json:"name,omitempty"`
+	StorageOptimizedOption *NodetemplatesV1AvailableInstanceTypeStorageOptimizedOption `json:"storageOptimizedOption,omitempty"`
+}
+
+// NodetemplatesV1AvailableInstanceTypeGPUDevice defines model for nodetemplates.v1.AvailableInstanceType.GPUDevice.
+type NodetemplatesV1AvailableInstanceTypeGPUDevice struct {
+	Count        *int32  `json:"count,omitempty"`
+	Manufacturer *string `json:"manufacturer,omitempty"`
+	Name         *string `json:"name,omitempty"`
+}
+
+// NodetemplatesV1AvailableInstanceTypeStorageOptimizedOption defines model for nodetemplates.v1.AvailableInstanceType.StorageOptimizedOption.
+type NodetemplatesV1AvailableInstanceTypeStorageOptimizedOption string
+
+// NodetemplatesV1DeleteNodeTemplateResponse defines model for nodetemplates.v1.DeleteNodeTemplateResponse.
+type NodetemplatesV1DeleteNodeTemplateResponse = map[string]interface{}
+
+// NodetemplatesV1FilterInstanceTypesResponse defines model for nodetemplates.v1.FilterInstanceTypesResponse.
+type NodetemplatesV1FilterInstanceTypesResponse struct {
+	AvailableInstanceTypes *[]NodetemplatesV1AvailableInstanceType `json:"availableInstanceTypes,omitempty"`
+}
+
+// NodetemplatesV1Label defines model for nodetemplates.v1.Label.
+type NodetemplatesV1Label struct {
+	Key   *string `json:"key,omitempty"`
+	Value *string `json:"value,omitempty"`
+}
+
+// NodetemplatesV1ListNodeTemplatesResponse defines model for nodetemplates.v1.ListNodeTemplatesResponse.
+type NodetemplatesV1ListNodeTemplatesResponse struct {
+	Items *[]NodetemplatesV1NodeTemplateListItem `json:"items,omitempty"`
+}
+
+// NodetemplatesV1NewNodeTemplate defines model for nodetemplates.v1.NewNodeTemplate.
+type NodetemplatesV1NewNodeTemplate struct {
+	ConfigurationId   *string                                  `json:"configurationId,omitempty"`
+	Constraints       *NodetemplatesV1TemplateConstraints      `json:"constraints,omitempty"`
+	CustomLabel       *NodetemplatesV1Label                    `json:"customLabel,omitempty"`
+	Name              *string                                  `json:"name,omitempty"`
+	RebalancingConfig *NodetemplatesV1RebalancingConfiguration `json:"rebalancingConfig,omitempty"`
+
+	// Marks whether the templated nodes will have a taint.
+	ShouldTaint *bool `json:"shouldTaint"`
+}
+
+// NodetemplatesV1NodeTemplate defines model for nodetemplates.v1.NodeTemplate.
+type NodetemplatesV1NodeTemplate struct {
+	ConfigurationId   *string                                  `json:"configurationId,omitempty"`
+	ConfigurationName *string                                  `json:"configurationName,omitempty"`
+	Constraints       *NodetemplatesV1TemplateConstraints      `json:"constraints,omitempty"`
+	CustomLabel       *NodetemplatesV1Label                    `json:"customLabel,omitempty"`
+	Name              *string                                  `json:"name,omitempty"`
+	RebalancingConfig *NodetemplatesV1RebalancingConfiguration `json:"rebalancingConfig,omitempty"`
+
+	// Marks whether the templated nodes will have a taint.
+	ShouldTaint *bool   `json:"shouldTaint,omitempty"`
+	Version     *string `json:"version,omitempty"`
+}
+
+// NodetemplatesV1NodeTemplateListItem defines model for nodetemplates.v1.NodeTemplateListItem.
+type NodetemplatesV1NodeTemplateListItem struct {
+	Stats    *NodetemplatesV1NodeTemplateListItemStats `json:"stats,omitempty"`
+	Template *NodetemplatesV1NodeTemplate              `json:"template,omitempty"`
+}
+
+// NodetemplatesV1NodeTemplateListItemStats defines model for nodetemplates.v1.NodeTemplateListItem.Stats.
+type NodetemplatesV1NodeTemplateListItemStats struct {
+	CountFallback *int32 `json:"countFallback,omitempty"`
+	CountOnDemand *int32 `json:"countOnDemand,omitempty"`
+	CountSpot     *int32 `json:"countSpot,omitempty"`
+}
+
+// NodetemplatesV1RebalancingConfiguration defines model for nodetemplates.v1.RebalancingConfiguration.
+type NodetemplatesV1RebalancingConfiguration struct {
+	MinNodes *int32 `json:"minNodes"`
+}
+
+// NodetemplatesV1TemplateConstraints defines model for nodetemplates.v1.TemplateConstraints.
+type NodetemplatesV1TemplateConstraints struct {
+	ComputeOptimized *bool `json:"computeOptimized"`
+
+	// Fallback restore rate in seconds: defines how much time should pass before spot fallback should be attempted to be restored to real spot.
+	FallbackRestoreRateSeconds *int32                                                       `json:"fallbackRestoreRateSeconds"`
+	Gpu                        *NodetemplatesV1TemplateConstraintsGPUConstraints            `json:"gpu,omitempty"`
+	InstanceFamilies           *NodetemplatesV1TemplateConstraintsInstanceFamilyConstraints `json:"instanceFamilies,omitempty"`
+	MaxCpu                     *int32                                                       `json:"maxCpu"`
+	MaxMemory                  *int32                                                       `json:"maxMemory"`
+	MinCpu                     *int32                                                       `json:"minCpu"`
+	MinMemory                  *int32                                                       `json:"minMemory"`
+	Spot                       *bool                                                        `json:"spot"`
+	StorageOptimized           *bool                                                        `json:"storageOptimized"`
+
+	// Spot instance fallback constraint - when true, on-demand instances will be created, when spots are unavailable.
+	UseSpotFallbacks *bool `json:"useSpotFallbacks"`
+}
+
+// NodetemplatesV1TemplateConstraintsGPUConstraints defines model for nodetemplates.v1.TemplateConstraints.GPUConstraints.
+type NodetemplatesV1TemplateConstraintsGPUConstraints struct {
+	ExcludeNames  *[]string `json:"excludeNames,omitempty"`
+	IncludeNames  *[]string `json:"includeNames,omitempty"`
+	Manufacturers *[]string `json:"manufacturers,omitempty"`
+	MaxCount      *int32    `json:"maxCount"`
+	MinCount      *int32    `json:"minCount"`
+}
+
+// NodetemplatesV1TemplateConstraintsInstanceFamilyConstraints defines model for nodetemplates.v1.TemplateConstraints.InstanceFamilyConstraints.
+type NodetemplatesV1TemplateConstraintsInstanceFamilyConstraints struct {
+	Exclude *[]string `json:"exclude,omitempty"`
+	Include *[]string `json:"include,omitempty"`
+}
+
+// NodetemplatesV1UpdateNodeTemplate defines model for nodetemplates.v1.UpdateNodeTemplate.
+type NodetemplatesV1UpdateNodeTemplate struct {
+	ConfigurationId   *string                                  `json:"configurationId,omitempty"`
+	Constraints       *NodetemplatesV1TemplateConstraints      `json:"constraints,omitempty"`
+	CustomLabel       *NodetemplatesV1Label                    `json:"customLabel,omitempty"`
+	RebalancingConfig *NodetemplatesV1RebalancingConfiguration `json:"rebalancingConfig,omitempty"`
+
+	// Marks whether the templated nodes will have a taint.
+	ShouldTaint *bool `json:"shouldTaint"`
+}
+
 // Defines the minimum and maximum amount of vCPUs for cluster's worker nodes.
 type PoliciesV1ClusterLimitsCpu struct {
 	// Defines the maximum allowed amount of vCPUs in the whole cluster.
@@ -1148,11 +1285,20 @@ type UpdateAuthTokenParams struct {
 	XCastAiOrganizationId *HeaderOrganizationId `json:"X-CastAi-Organization-Id,omitempty"`
 }
 
+// NodeTemplatesAPIFilterInstanceTypesJSONBody defines parameters for NodeTemplatesAPIFilterInstanceTypes.
+type NodeTemplatesAPIFilterInstanceTypesJSONBody = NodetemplatesV1NodeTemplate
+
 // NodeConfigurationAPICreateConfigurationJSONBody defines parameters for NodeConfigurationAPICreateConfiguration.
 type NodeConfigurationAPICreateConfigurationJSONBody = NodeconfigV1NewNodeConfiguration
 
 // NodeConfigurationAPIUpdateConfigurationJSONBody defines parameters for NodeConfigurationAPIUpdateConfiguration.
 type NodeConfigurationAPIUpdateConfigurationJSONBody = NodeconfigV1NodeConfigurationUpdate
+
+// NodeTemplatesAPICreateNodeTemplateJSONBody defines parameters for NodeTemplatesAPICreateNodeTemplate.
+type NodeTemplatesAPICreateNodeTemplateJSONBody = NodetemplatesV1NewNodeTemplate
+
+// NodeTemplatesAPIUpdateNodeTemplateJSONBody defines parameters for NodeTemplatesAPIUpdateNodeTemplate.
+type NodeTemplatesAPIUpdateNodeTemplateJSONBody = NodetemplatesV1UpdateNodeTemplate
 
 // PoliciesAPIUpsertClusterPoliciesJSONBody defines parameters for PoliciesAPIUpsertClusterPolicies.
 type PoliciesAPIUpsertClusterPoliciesJSONBody = PoliciesV1Policies
@@ -1222,11 +1368,20 @@ type CreateAuthTokenJSONRequestBody = CreateAuthTokenJSONBody
 // UpdateAuthTokenJSONRequestBody defines body for UpdateAuthToken for application/json ContentType.
 type UpdateAuthTokenJSONRequestBody = UpdateAuthTokenJSONBody
 
+// NodeTemplatesAPIFilterInstanceTypesJSONRequestBody defines body for NodeTemplatesAPIFilterInstanceTypes for application/json ContentType.
+type NodeTemplatesAPIFilterInstanceTypesJSONRequestBody = NodeTemplatesAPIFilterInstanceTypesJSONBody
+
 // NodeConfigurationAPICreateConfigurationJSONRequestBody defines body for NodeConfigurationAPICreateConfiguration for application/json ContentType.
 type NodeConfigurationAPICreateConfigurationJSONRequestBody = NodeConfigurationAPICreateConfigurationJSONBody
 
 // NodeConfigurationAPIUpdateConfigurationJSONRequestBody defines body for NodeConfigurationAPIUpdateConfiguration for application/json ContentType.
 type NodeConfigurationAPIUpdateConfigurationJSONRequestBody = NodeConfigurationAPIUpdateConfigurationJSONBody
+
+// NodeTemplatesAPICreateNodeTemplateJSONRequestBody defines body for NodeTemplatesAPICreateNodeTemplate for application/json ContentType.
+type NodeTemplatesAPICreateNodeTemplateJSONRequestBody = NodeTemplatesAPICreateNodeTemplateJSONBody
+
+// NodeTemplatesAPIUpdateNodeTemplateJSONRequestBody defines body for NodeTemplatesAPIUpdateNodeTemplate for application/json ContentType.
+type NodeTemplatesAPIUpdateNodeTemplateJSONRequestBody = NodeTemplatesAPIUpdateNodeTemplateJSONBody
 
 // PoliciesAPIUpsertClusterPoliciesJSONRequestBody defines body for PoliciesAPIUpsertClusterPolicies for application/json ContentType.
 type PoliciesAPIUpsertClusterPoliciesJSONRequestBody = PoliciesAPIUpsertClusterPoliciesJSONBody
