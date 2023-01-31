@@ -567,8 +567,8 @@ func toTemplateConstraints(obj map[string]any) *sdk.NodetemplatesV1TemplateConst
 	if v, ok := obj["compute_optimized"].(bool); ok {
 		out.ComputeOptimized = toPtr(v)
 	}
-	if v, ok := obj["fallback_restore_rate_seconds"].(int32); ok {
-		out.FallbackRestoreRateSeconds = toPtr(v)
+	if v, ok := obj["fallback_restore_rate_seconds"].(int); ok {
+		out.FallbackRestoreRateSeconds = toPtr(int32(v))
 	}
 	if v, ok := obj["gpu"].(map[string]any); ok {
 		out.Gpu = toTemplateConstraintsGpuConstraints(v)
@@ -576,17 +576,17 @@ func toTemplateConstraints(obj map[string]any) *sdk.NodetemplatesV1TemplateConst
 	if v, ok := obj["instance_families"].([]any); ok && len(v) > 0 {
 		out.InstanceFamilies = toTemplateConstraintsInstanceFamilies(v[0].(map[string]any))
 	}
-	if v, ok := obj["max_cpu"].(int32); ok {
-		out.MaxCpu = toPtr(v)
+	if v, ok := obj["max_cpu"].(int); ok {
+		out.MaxCpu = toPtr(int32(v))
 	}
-	if v, ok := obj["max_memory"].(int32); ok {
-		out.MaxMemory = toPtr(v)
+	if v, ok := obj["max_memory"].(int); ok {
+		out.MaxMemory = toPtr(int32(v))
 	}
-	if v, ok := obj["min_cpu"].(int32); ok {
-		out.MinCpu = toPtr(v)
+	if v, ok := obj["min_cpu"].(int); ok {
+		out.MinCpu = toPtr(int32(v))
 	}
-	if v, ok := obj["min_memory"].(int32); ok {
-		out.MinMemory = toPtr(v)
+	if v, ok := obj["min_memory"].(int); ok {
+		out.MinMemory = toPtr(int32(v))
 	}
 	if v, ok := obj["spot"].(bool); ok {
 		out.Spot = toPtr(v)
@@ -633,11 +633,11 @@ func toTemplateConstraintsGpuConstraints(o map[string]any) *sdk.NodetemplatesV1T
 		out.IncludeNames = toPtr(toStringList(v))
 	}
 
-	if v, ok := o["min_count"].(int32); ok {
-		out.MinCount = toPtr(v)
+	if v, ok := o["min_count"].(int); ok {
+		out.MinCount = toPtr(int32(v))
 	}
-	if v, ok := o["max_count"].(int32); ok {
-		out.MaxCount = toPtr(v)
+	if v, ok := o["max_count"].(int); ok {
+		out.MaxCount = toPtr(int32(v))
 	}
 
 	return out
