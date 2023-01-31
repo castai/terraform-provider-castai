@@ -180,6 +180,8 @@ func TestAccResourceNodeTemplate_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "name", rName),
 					resource.TestCheckResourceAttr(resourceName, "should_taint", "true"),
+					resource.TestCheckResourceAttr(resourceName, "custom_label.0.key", "custom-key"),
+					resource.TestCheckResourceAttr(resourceName, "custom_label.0.label", "custom-value"),
 				),
 			},
 			{
@@ -196,6 +198,7 @@ func TestAccResourceNodeTemplate_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "name", rName),
 					resource.TestCheckResourceAttr(resourceName, "should_taint", "false"),
+					resource.TestCheckResourceAttr(resourceName, "custom_label.#.key", "0"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.use_spot_fallbacks", "true"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.spot", "true"),
 				),
@@ -217,6 +220,11 @@ func testAccNodeTemplateConfig(rName, clusterName string) string {
 			name = %[1]q
 			configuration_id = castai_node_configuration.test.id
 			should_taint = true
+
+			custom_label {
+				key = "custom-key"
+				value = "custom-value"
+			}
 
 			constraints {
 				compute_optimized = false
