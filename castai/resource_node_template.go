@@ -392,7 +392,7 @@ func resourceNodeTemplateUpdate(ctx context.Context, d *schema.ResourceData, met
 	}
 
 	if v, ok := d.Get(FieldNodeTemplateCustomLabel).([]any); ok && len(v) > 0 {
-		req.CustomLabel = toCustomLabel(v[0].(map[string]string))
+		req.CustomLabel = toCustomLabel(v[0].(map[string]any))
 	}
 
 	if v, _ := d.GetOk(FieldNodeTemplateShouldTaint); v != nil {
@@ -435,7 +435,7 @@ func resourceNodeTemplateCreate(ctx context.Context, d *schema.ResourceData, met
 	}
 
 	if v, ok := d.Get(FieldNodeTemplateCustomLabel).([]any); ok && len(v) > 0 {
-		req.CustomLabel = toCustomLabel(v[0].(map[string]string))
+		req.CustomLabel = toCustomLabel(v[0].(map[string]any))
 	}
 
 	if v, ok := d.Get(FieldNodeTemplateConstraints).([]any); ok && len(v) > 0 {
@@ -527,17 +527,17 @@ func nodeTemplateStateImporter(ctx context.Context, d *schema.ResourceData, meta
 	return nil, fmt.Errorf("failed to find node template with the following name: %v", id)
 }
 
-func toCustomLabel(obj map[string]string) *sdk.NodetemplatesV1Label {
+func toCustomLabel(obj map[string]any) *sdk.NodetemplatesV1Label {
 	if obj == nil {
 		return nil
 	}
 
 	out := &sdk.NodetemplatesV1Label{}
 	if v, ok := obj["key"]; ok && v != "" {
-		out.Key = toPtr(v)
+		out.Key = toPtr(v.(string))
 	}
 	if v, ok := obj["value"]; ok && v != "" {
-		out.Value = toPtr(v)
+		out.Value = toPtr(v.(string))
 	}
 
 	return out
@@ -573,8 +573,8 @@ func toTemplateConstraints(obj map[string]any) *sdk.NodetemplatesV1TemplateConst
 	if v, ok := obj["gpu"].(map[string]any); ok {
 		out.Gpu = toTemplateConstraintsGpuConstraints(v)
 	}
-	if v, ok := obj["instance_families"]; ok && len(v.([]any)) > 0 {
-		out.InstanceFamilies = toTemplateConstraintsInstanceFamilies(v.([]map[string]any)[0])
+	if v, ok := obj["instance_families"].([]any); ok && len(v) > 0 {
+		out.InstanceFamilies = toTemplateConstraintsInstanceFamilies(v[0].(map[string]any))
 	}
 	if v, ok := obj["max_cpu"].(int32); ok {
 		out.MaxCpu = toPtr(v)
