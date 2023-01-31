@@ -92,13 +92,13 @@ func TestAccResourceAKSCluster(t *testing.T) {
 				Config: testAccAKSClusterConfig(rName, clusterName, resourceGroupName, nodeResourceGroupName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "name", rName),
-					resource.TestCheckResourceAttrSet(resourceName, "eks.0.instance_profile_arn"),
+					resource.TestCheckResourceAttrSet(resourceName, "credentials_id"),
 				),
 			},
 		},
 		ExternalProviders: map[string]resource.ExternalProvider{
 			"azure": {
-				Source:            "hashicorp/azure",
+				Source:            "hashicorp/azurerm",
 				VersionConstraint: "~> 3.7.0",
 			},
 			"azuread": {
@@ -140,8 +140,8 @@ resource "castai_aks_cluster" "test" {
   name            = %[1]q
 
   region          = "westeurope"
-  subscription_id = data.azurerm_subscription.subscription_id 
-  tenant_id       = data.azurerm_subscription.tenant_id
+  subscription_id = data.azurerm_subscription.current.subscription_id 
+  tenant_id       = data.azurerm_subscription.current.tenant_id
   client_id       = azuread_application.castai.application_id
   client_secret   = azuread_application_password.castai.value
   node_resource_group        = %[2]q
@@ -168,7 +168,7 @@ resource "azurerm_role_definition" "castai" {
   name            = %[1]q
   description = "Role used by CAST AI"
 
-  scope = "/subscriptions/${data.azurerm_subscription.subscription_id}/resourceGroups/%[2]q"
+  scope = "/subscriptions/${data.azurerm_subscription.current.subscription_id}/resourceGroups/%[2]s"
 
   permissions {
     actions = [
@@ -217,8 +217,8 @@ resource "azurerm_role_definition" "castai" {
   }
 
   assignable_scopes = [
-    "/subscriptions/${data.azurerm_subscription.subscription_id}/resourceGroups/%[2]q",
-    "/subscriptions/${data.azurerm_subscription.subscription_id}/resourceGroups/%[3]q"
+    "/subscriptions/${data.azurerm_subscription.current.subscription_id}/resourceGroups/%[2]s",
+    "/subscriptions/${data.azurerm_subscription.current.subscription_id}/resourceGroups/%[3]s"
   ]
 }
 
@@ -227,14 +227,14 @@ resource "azurerm_role_assignment" "castai_resource_group" {
   principal_id       = azuread_service_principal.castai.id
   role_definition_id = azurerm_role_definition.castai.role_definition_resource_id
 
-  scope = "/subscriptions/${data.azurerm_subscription.subscription_id}/resourceGroups/%[2]q"
+  scope = "/subscriptions/${data.azurerm_subscription.current.subscription_id}/resourceGroups/%[2]s"
 }
 
 resource "azurerm_role_assignment" "castai_node_resource_group" {
   principal_id       = azuread_service_principal.castai.id
   role_definition_id = azurerm_role_definition.castai.role_definition_resource_id
 
-  scope = "/subscriptions/${data.azurerm_subscription.subscription_id}/resourceGroups/%[3]q"
+  scope = "/subscriptions/${data.azurerm_subscription.current.subscription_id}/resourceGroups/%[3]s"
 }
 
 // Azure AD
