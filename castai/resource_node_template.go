@@ -607,11 +607,11 @@ func toTemplateConstraintsInstanceFamilies(o map[string]any) *sdk.NodetemplatesV
 	}
 
 	out := &sdk.NodetemplatesV1TemplateConstraintsInstanceFamilyConstraints{}
-	if v, ok := o["exclude"].([]string); ok {
-		out.Exclude = toPtr(v)
+	if v, ok := o["exclude"].([]any); ok {
+		out.Exclude = toPtr(toStringList(v))
 	}
-	if v, ok := o["include"].([]string); ok {
-		out.Include = toPtr(v)
+	if v, ok := o["include"].([]any); ok {
+		out.Include = toPtr(toStringList(v))
 	}
 	return out
 }
@@ -622,15 +622,15 @@ func toTemplateConstraintsGpuConstraints(o map[string]any) *sdk.NodetemplatesV1T
 	}
 
 	out := &sdk.NodetemplatesV1TemplateConstraintsGPUConstraints{}
-	if v, ok := o["manufacturers"].([]string); ok {
-		out.Manufacturers = toPtr(v)
+	if v, ok := o["manufacturers"].([]any); ok {
+		out.Manufacturers = toPtr(toStringList(v))
 	}
 
-	if v, ok := o["exclude_names"].([]string); ok {
-		out.ExcludeNames = toPtr(v)
+	if v, ok := o["exclude_names"].([]any); ok {
+		out.ExcludeNames = toPtr(toStringList(v))
 	}
-	if v, ok := o["include_names"].([]string); ok {
-		out.IncludeNames = toPtr(v)
+	if v, ok := o["include_names"].([]any); ok {
+		out.IncludeNames = toPtr(toStringList(v))
 	}
 
 	if v, ok := o["min_count"].(int32); ok {
