@@ -97,7 +97,7 @@ func TestAccResourceAKSCluster(t *testing.T) {
 					resource.TestCheckResourceAttrSet(resourceName, "cluster_token"),
 				),
 			},
-		},]
+		},
 		ExternalProviders: map[string]resource.ExternalProvider{
 			"azure": {
 				Source:            "hashicorp/azurerm",
