@@ -168,7 +168,7 @@ func TestNodeTemplateResourceReadContextEmptyList(t *testing.T) {
 func TestAccResourceNodeTemplate_basic(t *testing.T) {
 	rName := fmt.Sprintf("%v-node-template-%v", ResourcePrefix, acctest.RandString(8))
 	resourceName := "castai_node_template.test"
-	clusterName := "cost-terraform"
+	clusterName := "zilvinas-tf"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
@@ -183,6 +183,9 @@ func TestAccResourceNodeTemplate_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "custom_label.0.key", "custom-key"),
 					resource.TestCheckResourceAttr(resourceName, "custom_label.0.value", "custom-value"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.instance_families.0.exclude.0", "m5"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.gpu.0.manufacturers.0", "NVIDIA"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.gpu.0.include_names.#", "0"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.gpu.0.exclude_names.#", "0"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.min_cpu", "4"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.max_cpu", "100"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.use_spot_fallbacks", "true"),
@@ -207,6 +210,9 @@ func TestAccResourceNodeTemplate_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.use_spot_fallbacks", "true"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.spot", "true"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.instance_families.#", "0"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.gpu.0.manufacturers.#", "0"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.gpu.0.include_names.#", "0"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.gpu.0.exclude_names.#", "0"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.min_cpu", "0"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.max_cpu", "0"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.use_spot_fallbacks", "true"),
@@ -245,6 +251,11 @@ func testAccNodeTemplateConfig(rName, clusterName string) string {
 				instance_families {
 				  exclude = ["m5"]
 				}
+				gpu {
+					include_names = []
+					exclude_names = []
+					manufacturers = ["NVIDIA"]
+				}	
 				compute_optimized = false
 				storage_optimized = false
 			}
