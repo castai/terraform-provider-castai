@@ -392,7 +392,7 @@ func resourceNodeTemplateUpdate(ctx context.Context, d *schema.ResourceData, met
 	}
 
 	if v, ok := d.Get(FieldNodeTemplateCustomLabel).([]any); ok && len(v) > 0 {
-		req.CustomLabel = toCustomLabel(v[0].(map[string]string))
+		req.CustomLabel = toCustomLabel(v[0].(map[string]any))
 	}
 
 	if v, _ := d.GetOk(FieldNodeTemplateShouldTaint); v != nil {
@@ -435,7 +435,7 @@ func resourceNodeTemplateCreate(ctx context.Context, d *schema.ResourceData, met
 	}
 
 	if v, ok := d.Get(FieldNodeTemplateCustomLabel).([]any); ok && len(v) > 0 {
-		req.CustomLabel = toCustomLabel(v[0].(map[string]string))
+		req.CustomLabel = toCustomLabel(v[0].(map[string]any))
 	}
 
 	if v, ok := d.Get(FieldNodeTemplateConstraints).([]any); ok && len(v) > 0 {
@@ -527,17 +527,17 @@ func nodeTemplateStateImporter(ctx context.Context, d *schema.ResourceData, meta
 	return nil, fmt.Errorf("failed to find node template with the following name: %v", id)
 }
 
-func toCustomLabel(obj map[string]string) *sdk.NodetemplatesV1Label {
+func toCustomLabel(obj map[string]any) *sdk.NodetemplatesV1Label {
 	if obj == nil {
 		return nil
 	}
 
 	out := &sdk.NodetemplatesV1Label{}
 	if v, ok := obj["key"]; ok && v != "" {
-		out.Key = toPtr(v)
+		out.Key = toPtr(v.(string))
 	}
 	if v, ok := obj["value"]; ok && v != "" {
-		out.Value = toPtr(v)
+		out.Value = toPtr(v.(string))
 	}
 
 	return out
@@ -567,26 +567,26 @@ func toTemplateConstraints(obj map[string]any) *sdk.NodetemplatesV1TemplateConst
 	if v, ok := obj["compute_optimized"].(bool); ok {
 		out.ComputeOptimized = toPtr(v)
 	}
-	if v, ok := obj["fallback_restore_rate_seconds"].(int32); ok {
-		out.FallbackRestoreRateSeconds = toPtr(v)
+	if v, ok := obj["fallback_restore_rate_seconds"].(int); ok {
+		out.FallbackRestoreRateSeconds = toPtr(int32(v))
 	}
-	if v, ok := obj["gpu"].(map[string]any); ok {
-		out.Gpu = toTemplateConstraintsGpuConstraints(v)
+	if v, ok := obj["gpu"].([]any); ok && len(v) > 0 {
+		out.Gpu = toTemplateConstraintsGpuConstraints(v[0].(map[string]any))
 	}
-	if v, ok := obj["instance_families"]; ok && len(v.([]any)) > 0 {
-		out.InstanceFamilies = toTemplateConstraintsInstanceFamilies(v.([]map[string]any)[0])
+	if v, ok := obj["instance_families"].([]any); ok && len(v) > 0 {
+		out.InstanceFamilies = toTemplateConstraintsInstanceFamilies(v[0].(map[string]any))
 	}
-	if v, ok := obj["max_cpu"].(int32); ok {
-		out.MaxCpu = toPtr(v)
+	if v, ok := obj["max_cpu"].(int); ok {
+		out.MaxCpu = toPtr(int32(v))
 	}
-	if v, ok := obj["max_memory"].(int32); ok {
-		out.MaxMemory = toPtr(v)
+	if v, ok := obj["max_memory"].(int); ok {
+		out.MaxMemory = toPtr(int32(v))
 	}
-	if v, ok := obj["min_cpu"].(int32); ok {
-		out.MinCpu = toPtr(v)
+	if v, ok := obj["min_cpu"].(int); ok {
+		out.MinCpu = toPtr(int32(v))
 	}
-	if v, ok := obj["min_memory"].(int32); ok {
-		out.MinMemory = toPtr(v)
+	if v, ok := obj["min_memory"].(int); ok {
+		out.MinMemory = toPtr(int32(v))
 	}
 	if v, ok := obj["spot"].(bool); ok {
 		out.Spot = toPtr(v)
@@ -607,11 +607,11 @@ func toTemplateConstraintsInstanceFamilies(o map[string]any) *sdk.NodetemplatesV
 	}
 
 	out := &sdk.NodetemplatesV1TemplateConstraintsInstanceFamilyConstraints{}
-	if v, ok := o["exclude"].([]string); ok {
-		out.Exclude = toPtr(v)
+	if v, ok := o["exclude"].([]any); ok {
+		out.Exclude = toPtr(toStringList(v))
 	}
-	if v, ok := o["include"].([]string); ok {
-		out.Include = toPtr(v)
+	if v, ok := o["include"].([]any); ok {
+		out.Include = toPtr(toStringList(v))
 	}
 	return out
 }
@@ -622,22 +622,22 @@ func toTemplateConstraintsGpuConstraints(o map[string]any) *sdk.NodetemplatesV1T
 	}
 
 	out := &sdk.NodetemplatesV1TemplateConstraintsGPUConstraints{}
-	if v, ok := o["manufacturers"].([]string); ok {
-		out.Manufacturers = toPtr(v)
+	if v, ok := o["manufacturers"].([]any); ok {
+		out.Manufacturers = toPtr(toStringList(v))
 	}
 
-	if v, ok := o["exclude_names"].([]string); ok {
-		out.ExcludeNames = toPtr(v)
+	if v, ok := o["exclude_names"].([]any); ok {
+		out.ExcludeNames = toPtr(toStringList(v))
 	}
-	if v, ok := o["include_names"].([]string); ok {
-		out.IncludeNames = toPtr(v)
+	if v, ok := o["include_names"].([]any); ok {
+		out.IncludeNames = toPtr(toStringList(v))
 	}
 
-	if v, ok := o["min_count"].(int32); ok {
-		out.MinCount = toPtr(v)
+	if v, ok := o["min_count"].(int); ok {
+		out.MinCount = toPtr(int32(v))
 	}
-	if v, ok := o["max_count"].(int32); ok {
-		out.MaxCount = toPtr(v)
+	if v, ok := o["max_count"].(int); ok {
+		out.MaxCount = toPtr(int32(v))
 	}
 
 	return out
