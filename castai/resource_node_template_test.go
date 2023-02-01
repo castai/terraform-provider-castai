@@ -168,9 +168,9 @@ func TestNodeTemplateResourceReadContextEmptyList(t *testing.T) {
 func TestAccResourceNodeTemplate_basic(t *testing.T) {
 	rName := fmt.Sprintf("%v-node-template-%v", ResourcePrefix, acctest.RandString(8))
 	resourceName := "castai_node_template.test"
-	clusterName := "cost-terraform"
+	clusterName := "zilvinas-tf"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
 		ProviderFactories: providerFactories,
 		CheckDestroy:      testAccCheckNodeTemplateDestroy,
@@ -181,7 +181,12 @@ func TestAccResourceNodeTemplate_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "name", rName),
 					resource.TestCheckResourceAttr(resourceName, "should_taint", "true"),
 					resource.TestCheckResourceAttr(resourceName, "custom_label.0.key", "custom-key"),
-					resource.TestCheckResourceAttr(resourceName, "custom_label.0.label", "custom-value"),
+					resource.TestCheckResourceAttr(resourceName, "custom_label.0.value", "custom-value"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.instance_families.0.exclude.0", "m5"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.min_cpu", "4"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.max_cpu", "100"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.use_spot_fallbacks", "true"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.spot", "true"),
 				),
 			},
 			{
@@ -198,7 +203,12 @@ func TestAccResourceNodeTemplate_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "name", rName),
 					resource.TestCheckResourceAttr(resourceName, "should_taint", "false"),
-					resource.TestCheckResourceAttr(resourceName, "custom_label.#.key", "0"),
+					resource.TestCheckResourceAttr(resourceName, "custom_label.#", "0"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.use_spot_fallbacks", "true"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.spot", "true"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.instance_families.#", "0"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.min_cpu", "0"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.max_cpu", "0"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.use_spot_fallbacks", "true"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.spot", "true"),
 				),
@@ -227,11 +237,16 @@ func testAccNodeTemplateConfig(rName, clusterName string) string {
 			}
 
 			constraints {
+				fallback_restore_rate_seconds = 1800
+				spot = true
+				use_spot_fallbacks = true
+				min_cpu = 4
+				max_cpu = 100
+				instance_families {
+				  exclude = ["m5"]
+				}
 				compute_optimized = false
-				fallback_restore_rate_seconds = 0
-				spot = false
 				storage_optimized = false
-				use_spot_fallbacks = false
 			}
 		}
 	`, rName))
@@ -246,11 +261,11 @@ func testNodeTemplateUpdated(rName, clusterName string) string {
 			should_taint = false
 
 			constraints {
-				compute_optimized = false
-				fallback_restore_rate_seconds = 0
-				spot = true 
-				storage_optimized = false
 				use_spot_fallbacks = true
+				spot = true 
+				fallback_restore_rate_seconds = 1800
+				storage_optimized = false
+				compute_optimized = false
 			}
 		}
 	`, rName))
