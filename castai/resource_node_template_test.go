@@ -168,7 +168,7 @@ func TestNodeTemplateResourceReadContextEmptyList(t *testing.T) {
 func TestAccResourceNodeTemplate_basic(t *testing.T) {
 	rName := fmt.Sprintf("%v-node-template-%v", ResourcePrefix, acctest.RandString(8))
 	resourceName := "castai_node_template.test"
-	clusterName := "zilvinas-tf"
+	clusterName := "cost-terraform"
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
