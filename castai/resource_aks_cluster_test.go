@@ -42,7 +42,7 @@ func TestAKSClusterResourceReadContext(t *testing.T) {
   "status": "ready",
   "agentSnapshotReceivedAt": "2022-03-21T10:33:56.192020Z",
   "agentStatus": "online",
-  "providerType": "eks",
+  "providerType": "aks",
   "aks": {
 	"maxPodsPerNode": 100,
     "networkPlugin": "calico",
@@ -50,7 +50,6 @@ func TestAKSClusterResourceReadContext(t *testing.T) {
     "region": "westeurope",
     "subscriptionId": "subID"
   },
-  "sshPublicKey": "key-123",
   "clusterNameId": "aks-cluster-b6bfc074",
   "private": true
 }`)))
@@ -58,14 +57,14 @@ func TestAKSClusterResourceReadContext(t *testing.T) {
 		ExternalClusterAPIGetCluster(gomock.Any(), clusterId).
 		Return(&http.Response{StatusCode: 200, Body: body, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
 
-	resource := resourceAKSCluster()
+	aksResource := resourceAKSCluster()
 
 	val := cty.ObjectVal(map[string]cty.Value{})
 	state := terraform.NewInstanceStateShimmedFromValue(val, 0)
 	state.ID = clusterId
 
-	data := resource.Data(state)
-	result := resource.ReadContext(ctx, data, provider)
+	data := aksResource.Data(state)
+	result := aksResource.ReadContext(ctx, data, provider)
 	r.Nil(result)
 	r.False(result.HasError())
 	r.Equal(`ID = b6bfc074-a267-400f-b8f1-db0850c369b1
@@ -94,9 +93,11 @@ func TestAccResourceAKSCluster(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "name", clusterName),
 					resource.TestCheckResourceAttrSet(resourceName, "credentials_id"),
+					resource.TestCheckResourceAttr(resourceName, "region", "westeurope"),
+					resource.TestCheckResourceAttrSet(resourceName, "cluster_token"),
 				),
 			},
-		},
+		},]
 		ExternalProviders: map[string]resource.ExternalProvider{
 			"azure": {
 				Source:            "hashicorp/azurerm",
