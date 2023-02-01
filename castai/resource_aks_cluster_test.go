@@ -7,7 +7,6 @@ import (
 	"io"
 	"net/http"
 	"testing"
-	"time"
 
 	"github.com/golang/mock/gomock"
 	"github.com/hashicorp/go-cty/cty"
@@ -109,31 +108,6 @@ func TestAccResourceAKSCluster(t *testing.T) {
 			},
 		},
 	})
-}
-
-func testAccCheckAKSClusterDestroy(s *terraform.State) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	client := testAccProvider.Meta().(*ProviderConfig).api
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "castai_aks_cluster" {
-			continue
-		}
-
-		id := rs.Primary.ID
-		response, err := client.ExternalClusterAPIGetClusterWithResponse(ctx, id)
-		if err != nil {
-			return err
-		}
-		if response.StatusCode() == http.StatusNotFound {
-			return nil
-		}
-
-		return fmt.Errorf("cluster %s still exists", rs.Primary.ID)
-	}
-
-	return nil
 }
 
 func testAccAKSClusterConfig(rName string, clusterName string, resourceGroupName, nodeResourceGroup string) string {
