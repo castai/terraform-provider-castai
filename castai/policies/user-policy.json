@@ -46,8 +46,6 @@
       "Sid": "VpcRestrictedActions",
       "Effect": "Allow",
       "Action": [
-        "ec2:AuthorizeSecurityGroupEgress",
-        "ec2:AuthorizeSecurityGroupIngress",
         "ec2:DeleteSecurityGroup",
         "ec2:DeleteNetworkInterface"
       ],

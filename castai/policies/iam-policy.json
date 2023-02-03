@@ -22,7 +22,6 @@
         "iam:DetachRolePolicy",
         "iam:CreateServiceLinkedRole",
         "iam:DeleteServiceLinkedRole",
-        "ec2:CreateSecurityGroup",
         "ec2:CreateKeyPair",
         "ec2:DeleteKeyPair",
         "ec2:CreateTags",
