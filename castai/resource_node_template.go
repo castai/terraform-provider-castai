@@ -570,10 +570,10 @@ func toTemplateConstraints(obj map[string]any) *sdk.NodetemplatesV1TemplateConst
 	if v, ok := obj["fallback_restore_rate_seconds"].(int); ok {
 		out.FallbackRestoreRateSeconds = toPtr(int32(v))
 	}
-	if v, ok := obj["gpu"].([]any); ok && len(v) > 0 {
+	if v, ok := obj["gpu"].([]any); ok && len(v) > 0 && v[0] != nil {
 		out.Gpu = toTemplateConstraintsGpuConstraints(v[0].(map[string]any))
 	}
-	if v, ok := obj["instance_families"].([]any); ok && len(v) > 0 {
+	if v, ok := obj["instance_families"].([]any); ok && len(v) > 0 && v[0] != nil {
 		out.InstanceFamilies = toTemplateConstraintsInstanceFamilies(v[0].(map[string]any))
 	}
 	if v, ok := obj["max_cpu"].(int); ok {
