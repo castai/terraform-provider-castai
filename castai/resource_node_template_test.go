@@ -216,7 +216,7 @@ func TestAccResourceNodeTemplate_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.gpu.0.include_names.#", "0"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.gpu.0.exclude_names.#", "0"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.min_cpu", "0"),
-					resource.TestCheckNoResourceAttr(resourceName, "constraints.0.max_cpu"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.max_cpu", "0"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.use_spot_fallbacks", "true"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.spot", "true"),
 				),
