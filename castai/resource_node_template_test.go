@@ -118,6 +118,7 @@ constraints.0.instance_families.0.exclude.4 = g5g
 constraints.0.instance_families.0.exclude.5 = g5
 constraints.0.instance_families.0.exclude.6 = g3
 constraints.0.instance_families.0.include.# = 0
+constraints.0.max_cpu = 10000
 constraints.0.max_memory = 0
 constraints.0.min_cpu = 10
 constraints.0.min_memory = 0
