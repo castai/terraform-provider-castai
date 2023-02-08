@@ -576,10 +576,10 @@ func toTemplateConstraints(obj map[string]any) *sdk.NodetemplatesV1TemplateConst
 	if v, ok := obj["instance_families"].([]any); ok && len(v) > 0 {
 		out.InstanceFamilies = toTemplateConstraintsInstanceFamilies(v[0].(map[string]any))
 	}
-	if v, ok := obj["max_cpu"].(int); ok {
+	if v, ok := obj["max_cpu"].(int); ok && v != 0 {
 		out.MaxCpu = toPtr(int32(v))
 	}
-	if v, ok := obj["max_memory"].(int); ok {
+	if v, ok := obj["max_memory"].(int); ok && v != 0 {
 		out.MaxMemory = toPtr(int32(v))
 	}
 	if v, ok := obj["min_cpu"].(int); ok {
@@ -636,7 +636,7 @@ func toTemplateConstraintsGpuConstraints(o map[string]any) *sdk.NodetemplatesV1T
 	if v, ok := o["min_count"].(int); ok {
 		out.MinCount = toPtr(int32(v))
 	}
-	if v, ok := o["max_count"].(int); ok {
+	if v, ok := o["max_count"].(int); ok && v != 0 {
 		out.MaxCount = toPtr(int32(v))
 	}
 
