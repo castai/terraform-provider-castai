@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"regexp"
 	"strings"
 	"time"
 
@@ -214,10 +213,6 @@ func resourceNodeConfiguration() *schema.Resource {
 							Type: schema.TypeList,
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
-								ValidateFunc: validation.All(
-									validation.StringLenBetween(1, 63),
-									validation.StringMatch(regexp.MustCompile("^[a-z][a-z0-9-]*[^-]$"), "must contain only alphanumeric lowercase characters and hyphens"),
-								),
 							},
 							ValidateDiagFunc: validation.ToDiagFunc(validation.ListOfUniqueStrings),
 							MaxItems:         64,
