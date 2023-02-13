@@ -214,10 +214,9 @@ func resourceNodeConfiguration() *schema.Resource {
 							Elem: &schema.Schema{
 								Type: schema.TypeString,
 							},
-							ValidateDiagFunc: validation.ToDiagFunc(validation.ListOfUniqueStrings),
-							MaxItems:         64,
-							Optional:         true,
-							Description:      "Network tags to be added on a VM. (See [network tags](https://cloud.google.com/vpc/docs/add-remove-network-tags))",
+							MaxItems:    64,
+							Optional:    true,
+							Description: "Network tags to be added on a VM. (See [network tags](https://cloud.google.com/vpc/docs/add-remove-network-tags))",
 						},
 					},
 				},
