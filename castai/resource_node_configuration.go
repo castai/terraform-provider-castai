@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"regexp"
 	"strings"
 	"time"
 
@@ -208,6 +209,20 @@ func resourceNodeConfiguration() *schema.Resource {
 							Optional:         true,
 							ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(10, 256)),
 							Description:      "Maximum number of pods that can be run on a node, which affects how many IP addresses you will need for each node. Defaults to 110",
+						},
+						"network_tags": {
+							Type: schema.TypeList,
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+								ValidateFunc: validation.All(
+									validation.StringLenBetween(1, 63),
+									validation.StringMatch(regexp.MustCompile("^[a-z][a-z0-9-]*[^-]$"), "must contain only alphanumeric lowercase characters and hyphens"),
+								),
+							},
+							ValidateDiagFunc: validation.ToDiagFunc(validation.ListOfUniqueStrings),
+							MaxItems:         64,
+							Optional:         true,
+							Description:      "Network tags to be added on a VM. (See [network tags](https://cloud.google.com/vpc/docs/add-remove-network-tags))",
 						},
 					},
 				},
@@ -582,6 +597,9 @@ func toGKEConfig(obj map[string]interface{}) *sdk.NodeconfigV1GKEConfig {
 	if v, ok := obj["max_pods_per_node"].(int); ok {
 		out.MaxPodsPerNode = toPtr(int32(v))
 	}
+	if v, ok := obj["network_tags"].([]interface{}); ok {
+		out.NetworkTags = toPtr(toStringList(v))
+	}
 
 	return out
 }
@@ -593,6 +611,9 @@ func flattenGKEConfig(config *sdk.NodeconfigV1GKEConfig) []map[string]interface{
 	m := map[string]interface{}{}
 	if v := config.MaxPodsPerNode; v != nil {
 		m["max_pods_per_node"] = *config.MaxPodsPerNode
+	}
+	if v := config.NetworkTags; v != nil {
+		m["network_tags"] = *v
 	}
 
 	return []map[string]interface{}{m}

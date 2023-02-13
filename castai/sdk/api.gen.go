@@ -54,6 +54,14 @@ const (
 	OnDemand NodetemplatesV1AvailableInstanceTypeStorageOptimizedOption = "OnDemand"
 )
 
+// Defines values for PoliciesV1EvictorStatus.
+const (
+	Compatible   PoliciesV1EvictorStatus = "Compatible"
+	Incompatible PoliciesV1EvictorStatus = "Incompatible"
+	Missing      PoliciesV1EvictorStatus = "Missing"
+	Unknown      PoliciesV1EvictorStatus = "Unknown"
+)
+
 // AuthToken defines model for AuthToken.
 type AuthToken struct {
 	// Indicates whether this auth token is active.
@@ -723,6 +731,9 @@ type NodeconfigV1GKEConfig struct {
 	// For Standard GKE clusters, you can run a maximum of 256 Pods on a node with a /23 range, not 512 as you might expect. This provides a buffer so that Pods don't become unschedulable due to a transient lack of IP addresses in the Pod IP range for a given node.
 	// For all ranges, at most half as many Pods can be scheduled as IP addresses in the range.
 	MaxPodsPerNode *int32 `json:"maxPodsPerNode,omitempty"`
+
+	// Network tags to be added on a VM. Each tag must be 1-63 characters long, start with a lowercase letter and end with either a number or a lowercase letter.
+	NetworkTags *[]string `json:"networkTags,omitempty"`
 }
 
 // NodeconfigV1GetSuggestedConfigurationResponse defines model for nodeconfig.v1.GetSuggestedConfigurationResponse.
@@ -1077,6 +1088,8 @@ type PoliciesV1Evictor struct {
 
 	// * We have detected an already existing Evictor installation. If you want CAST AI to manage the Evictor instead,
 	//   then you will need to remove the current installation first.
+	//
+	// Deprecated; use "status" instead.
 	Allowed *bool `json:"allowed"`
 
 	// Configure the interval duration between Evictor operations. This property can be used to lower or raise the
@@ -1096,8 +1109,12 @@ type PoliciesV1Evictor struct {
 
 	// Enable/disable scoped mode. By default, Evictor targets all nodes in the cluster. This mode will constrain in to
 	// just the nodes which were created by CAST AI.
-	ScopedMode *bool `json:"scopedMode"`
+	ScopedMode *bool                    `json:"scopedMode"`
+	Status     *PoliciesV1EvictorStatus `json:"status,omitempty"`
 }
+
+// PoliciesV1EvictorStatus defines model for policies.v1.EvictorStatus.
+type PoliciesV1EvictorStatus string
 
 // Defines cluster node constraints response.
 type PoliciesV1GetClusterNodeConstraintsResponse struct {
