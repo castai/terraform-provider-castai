@@ -5,11 +5,13 @@ init-examples:
 	TF_PROVIDER_FILENAME=terraform-provider-castai; \
 	GOOS=`go tool dist env | awk -F'=' '/^GOOS/ { print $$2}' | tr -d '"'`; \
 	GOARCH=`go tool dist env | awk -F'=' '/^GOARCH/ { print $$2}' | tr -d '"'`; \
-	for tfproject in examples/* ; do \
-		TF_PROJECT_PLUGIN_PATH="$${tfproject}/terraform.d/plugins/registry.terraform.io/castai/castai/0.0.0-local/$${GOOS}_$${GOARCH}"; \
-		echo "creating $${TF_PROVIDER_FILENAME} symlink to $${TF_PROJECT_PLUGIN_PATH}/$${TF_PROVIDER_FILENAME}"; \
-		mkdir -p "${PWD}/$${TF_PROJECT_PLUGIN_PATH}"; \
-		ln -sf "${PWD}/terraform-provider-castai" "$${TF_PROJECT_PLUGIN_PATH}"; \
+	for examples in examples/eks examples/gke examples/aks ; do \
+		for tfproject in $$examples/* ; do \
+			TF_PROJECT_PLUGIN_PATH="$${tfproject}/terraform.d/plugins/registry.terraform.io/castai/castai/0.0.0-local/$${GOOS}_$${GOARCH}"; \
+			echo "creating $${TF_PROVIDER_FILENAME} symlink to $${TF_PROJECT_PLUGIN_PATH}/$${TF_PROVIDER_FILENAME}"; \
+			mkdir -p "${PWD}/$${TF_PROJECT_PLUGIN_PATH}"; \
+			ln -sf "${PWD}/terraform-provider-castai" "$${TF_PROJECT_PLUGIN_PATH}"; \
+		done \
 	done
 
 generate-sdk:
