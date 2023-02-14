@@ -48,6 +48,7 @@ module "castai-gke-cluster" {
       subnets           = [module.vpc.subnets_ids[0]]
       tags              = var.tags
       max_pods_per_node = 40
+      network_tags      = ["dev"]
     }
 
   }
@@ -55,19 +56,19 @@ module "castai-gke-cluster" {
   node_templates = {
     spot_tmpl = {
       configuration_id = module.castai-gke-cluster.castai_node_configurations["default"]
-      should_taint = true
-      custom_label = {
-        key = "custom-key"
+      should_taint     = true
+      custom_label     = {
+        key   = "custom-key"
         value = "label-value"
       }
 
       constraints = {
         fallback_restore_rate_seconds = 1800
-        spot = true
-        use_spot_fallbacks = true
-        min_cpu = 4
-        max_cpu = 100
-        instance_families = {
+        spot                          = true
+        use_spot_fallbacks            = true
+        min_cpu                       = 4
+        max_cpu                       = 100
+        instance_families             = {
           exclude = ["e2"]
         }
         compute_optimized = false
@@ -81,7 +82,7 @@ module "castai-gke-cluster" {
   //  - unschedulablePods - Unscheduled pods policy
   //  - spotInstances     - Spot instances configuration
   //  - nodeDownscaler    - Node deletion policy
-  autoscaler_policies_json   = <<-EOT
+  autoscaler_policies_json = <<-EOT
     {
         "enabled": true,
         "unschedulablePods": {

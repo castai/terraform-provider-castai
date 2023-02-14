@@ -107,6 +107,7 @@ Optional:
 Optional:
 
 - `max_pods_per_node` (Number) Maximum number of pods that can be run on a node, which affects how many IP addresses you will need for each node. Defaults to 110
+- `network_tags` (List of String) Network tags to be added on a VM. (See [network tags](https://cloud.google.com/vpc/docs/add-remove-network-tags))
 
 
 <a id="nestedblock--kops"></a>
