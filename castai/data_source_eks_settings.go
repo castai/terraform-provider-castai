@@ -25,7 +25,7 @@ const (
 func dataSourceEKSSettings() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: dataSourceCastaiEKSSettingsRead,
-
+		Description: "Retrieve IAM policy, IAM User Policy and instance profile policies for the specified cluster",
 		Schema: map[string]*schema.Schema{
 			EKSSettingsFieldAccountId: {
 				Type:             schema.TypeString,

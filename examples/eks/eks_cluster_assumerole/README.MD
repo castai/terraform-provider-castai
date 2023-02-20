@@ -2,7 +2,7 @@
 
 Following example shows how to onboard EKS cluster to CAST AI with CAST AI managed IAM policies.
 
-IAM policies in the example are created by [castai/eks-role-iam/castai module](https://github.com/castai/terraform-castai-eks-iam).
+IAM policies in the example are created by [castai/eks-iam-role/castai module](https://github.com/castai/terraform-castai-eks-role-iam).
 
 Example configuration should be analysed in the following order:
 1. Create VPC - `vpc.tf`

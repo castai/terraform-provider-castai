@@ -2,12 +2,12 @@
 page_title: "castai_node_configuration Resource - terraform-provider-castai"
 subcategory: ""
 description: |-
-  
+  Create node configuration for given cluster. Node configuration reference https://docs.cast.ai/docs/node-configuration
 ---
 
 # castai_node_configuration (Resource)
 
-
+Create node configuration for given cluster. Node configuration [reference](https://docs.cast.ai/docs/node-configuration)
 
 Manages cluster node configurations that will be applied to CAST AI provisioned nodes.
 If you choose to add new node configuration that will be applied to all newly provisioned nodes, you will have to mark
@@ -62,7 +62,7 @@ resource "castai_node_configuration" "default" {
 ### Optional
 
 - `aks` (Block List, Max: 1) (see [below for nested schema](#nestedblock--aks))
-- `container_runtime` (String) Optional container runtime to be used by kubelet. Applicable for EKS only
+- `container_runtime` (String) Optional container runtime to be used by kubelet. Applicable for EKS only.  Supported values include: `dockerd`, `containerd`
 - `disk_cpu_ratio` (Number) Disk to CPU ratio. Sets the number of GiBs to be added for every CPU on the node. Defaults to 0
 - `docker_config` (String) Optional docker daemon configuration properties in JSON format. Provide only properties that you want to override. Applicable for EKS only. [Available values](https://docs.docker.com/engine/reference/commandline/dockerd/#daemon-configuration-file)
 - `eks` (Block List, Max: 1) (see [below for nested schema](#nestedblock--eks))
@@ -70,7 +70,7 @@ resource "castai_node_configuration" "default" {
 - `image` (String) Image to be used while provisioning the node. If nothing is provided will be resolved to latest available image based on Kubernetes version if possible
 - `init_script` (String) Init script to be run on your instance at launch. Should not contain any sensitive data. Value should be base64 encoded
 - `kops` (Block List, Max: 1) (see [below for nested schema](#nestedblock--kops))
-- `kubelet_config` (String) Optional kubelet configuration properties in JSON format. Provide only properties that you want to override. Applicable for EKS only
+- `kubelet_config` (String) Optional kubelet configuration properties in JSON format. Provide only properties that you want to override. Applicable for EKS only. [Available values](https://kubernetes.io/docs/reference/config-api/kubelet-config.v1beta1/)
 - `ssh_public_key` (String) SSH public key to be used for provisioned nodes
 - `tags` (Map of String) Tags to be added on cloud instances for provisioned nodes
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))

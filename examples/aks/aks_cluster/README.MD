@@ -1,6 +1,6 @@
 # Example of AKS cluster connected to CAST AI
 Following example creates AKS cluster and its supporting resources.
-After AKS cluster is created it is onboarded to CAST AI without enabling [Autoscaler policies](https://docs.cast.ai/product-overview/console/autoscaler/#overview-of-autoscaler-policies) and no custom [node configurations](https://docs.cast.ai/guides/node-configuration/). 
+After AKS cluster is created it is onboarded to CAST AI without enabling [Autoscaler policies](https://docs.cast.ai/reference/policiesapi_upsertclusterpolicies) and no custom [node configurations](https://docs.cast.ai/docs/node-configuration/). 
 Example configuration should be analysed in the following order:
 1. Create Virtual network - `vnet.tf`
 2. Create AKS cluster - `aks.tf`
