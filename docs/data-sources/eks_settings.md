@@ -3,12 +3,12 @@
 page_title: "castai_eks_settings Data Source - terraform-provider-castai"
 subcategory: ""
 description: |-
-  
+  Retrieve IAM policy, IAM User Policy and instance profile policies for the specified cluster
 ---
 
 # castai_eks_settings (Data Source)
 
-
+Retrieve IAM policy, IAM User Policy and instance profile policies for the specified cluster
 
 
 

@@ -1,6 +1,6 @@
 ## GKE and CAST AI example with CAST AI Autoscaler policies and additional Node Configurations
 
-Following example shows how to onboard GKE cluster to CAST AI, configure [Autoscaler policies](https://docs.cast.ai/product-overview/console/autoscaler/#overview-of-autoscaler-policies) and additional [Node Configurations](https://docs.cast.ai/guides/node-configuration/).
+Following example shows how to onboard GKE cluster to CAST AI, configure [Autoscaler policies](https://docs.cast.ai/reference/policiesapi_upsertclusterpolicies) and additional [Node Configurations](https://docs.cast.ai/docs/node-configuration/).
 
 IAM policies required to connect the cluster to CAST AI in the example are created by [castai/gke-role-iam/castai module](https://github.com/castai/terraform-castai-gke-iam).
 

@@ -44,6 +44,7 @@ func resourceNodeConfiguration() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: nodeConfigStateImporter,
 		},
+		Description: "Create node configuration for given cluster. Node configuration [reference](https://docs.cast.ai/docs/node-configuration)",
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(1 * time.Minute),
@@ -90,7 +91,7 @@ func resourceNodeConfiguration() *schema.Resource {
 			FieldNodeConfigurationImage: {
 				Type:             schema.TypeString,
 				Optional:         true,
-				Description:      "Image to be used while provisioning the node. If nothing is provided will be resolved to latest available image based on Kubernetes version if possible",
+				Description:      "Image to be used while provisioning the node. If nothing is provided will be resolved to latest available image based on Kubernetes version if possible ",
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 			FieldNodeConfigurationTags: {
@@ -110,7 +111,7 @@ func resourceNodeConfiguration() *schema.Resource {
 			FieldNodeConfigurationContainerRuntime: {
 				Type:             schema.TypeString,
 				Optional:         true,
-				Description:      "Optional container runtime to be used by kubelet. Applicable for EKS only",
+				Description:      "Optional container runtime to be used by kubelet. Applicable for EKS only.  Supported values include: `dockerd`, `containerd`",
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"dockerd", "containerd"}, true)),
 				DiffSuppressFunc: func(k, oldValue, newValue string, d *schema.ResourceData) bool {
 					return strings.EqualFold(oldValue, newValue)
@@ -124,9 +125,10 @@ func resourceNodeConfiguration() *schema.Resource {
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsJSON),
 			},
 			FieldNodeConfigurationKubeletConfig: {
-				Type:             schema.TypeString,
-				Optional:         true,
-				Description:      "Optional kubelet configuration properties in JSON format. Provide only properties that you want to override. Applicable for EKS only",
+				Type:     schema.TypeString,
+				Optional: true,
+				Description: "Optional kubelet configuration properties in JSON format. Provide only properties that you want to override. Applicable for EKS only. " +
+					"[Available values](https://kubernetes.io/docs/reference/config-api/kubelet-config.v1beta1/)",
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsJSON),
 			},
 			FieldNodeConfigurationEKS: {
