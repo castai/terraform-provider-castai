@@ -524,7 +524,7 @@ func toEKSConfig(obj map[string]interface{}) *sdk.NodeconfigV1EKSConfig {
 	if v, ok := obj["volume_type"].(string); ok && v != "" {
 		out.VolumeType = toPtr(v)
 	}
-	if v, ok := obj["volume_iops"].(int); ok {
+	if v, ok := obj["volume_iops"].(int); ok && v != 0 {
 		out.VolumeIops = toPtr(int32(v))
 	}
 
