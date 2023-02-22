@@ -113,7 +113,7 @@ resource "castai_node_configuration" "test" {
     dns_cluster_ip       = "10.100.0.10"
 	security_groups      = [aws_security_group.test.id]
 	volume_type 		 = "gp3"
-    volume_iops		     = "3100"
+    volume_iops		     = 3100
   }
 }
 
