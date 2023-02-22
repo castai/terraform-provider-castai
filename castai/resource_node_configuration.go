@@ -168,7 +168,7 @@ func resourceNodeConfiguration() *schema.Resource {
 							Type:             schema.TypeString,
 							Optional:         true,
 							Description:      "AWS EBS volume type to be used for CAST provisioned nodes",
-							ValidateDiagFunc: castval.ValidEc2VolumeType(),
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"gp3", "io1", "io2"}, true)),
 						},
 						"volume_iops": {
 							Type:             schema.TypeInt,
