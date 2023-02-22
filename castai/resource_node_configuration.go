@@ -161,8 +161,20 @@ func resourceNodeConfiguration() *schema.Resource {
 						"key_pair_id": {
 							Type:             schema.TypeString,
 							Optional:         true,
-							Description:      "AWS key pair ID to be used for provisioned nodes. Has priority over ssh_public_key",
+							Description:      "AWS key pair ID to be used for CAST provisioned nodes. Has priority over ssh_public_key",
 							ValidateDiagFunc: castval.ValidKeyPairFormat(),
+						},
+						"volume_type": {
+							Type:             schema.TypeString,
+							Optional:         true,
+							Description:      "AWS EBS volume type to be used for CAST provisioned nodes",
+							ValidateDiagFunc: castval.ValidEc2VolumeType(),
+						},
+						"volume_iops": {
+							Type:             schema.TypeInt,
+							Optional:         true,
+							Description:      "AWS EBS volume IOPS to be used for CAST provisioned nodes",
+							ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(100, 100000)),
 						},
 					},
 				},
@@ -509,6 +521,12 @@ func toEKSConfig(obj map[string]interface{}) *sdk.NodeconfigV1EKSConfig {
 	if v, ok := obj["security_groups"].([]interface{}); ok && len(v) > 0 {
 		out.SecurityGroups = toPtr(toStringList(v))
 	}
+	if v, ok := obj["volume_type"].(string); ok && v != "" {
+		out.VolumeType = toPtr(v)
+	}
+	if v, ok := obj["volume_iops"].(int); ok {
+		out.VolumeIops = toPtr(int32(v))
+	}
 
 	return out
 }
@@ -529,6 +547,12 @@ func flattenEKSConfig(config *sdk.NodeconfigV1EKSConfig) []map[string]interface{
 	}
 	if v := config.SecurityGroups; v != nil {
 		m["security_groups"] = *config.SecurityGroups
+	}
+	if v := config.VolumeType; v != nil {
+		m["volume_type"] = toString(v)
+	}
+	if v := config.VolumeIops; v != nil {
+		m["volume_iops"] = *config.VolumeIops
 	}
 
 	return []map[string]interface{}{m}
