@@ -98,7 +98,9 @@ Required:
 Optional:
 
 - `dns_cluster_ip` (String) IP address to use for DNS queries within the cluster
-- `key_pair_id` (String) AWS key pair ID to be used for provisioned nodes. Has priority over ssh_public_key
+- `key_pair_id` (String) AWS key pair ID to be used for CAST provisioned nodes. Has priority over ssh_public_key
+- `volume_iops` (Number) AWS EBS volume IOPS to be used for CAST provisioned nodes
+- `volume_type` (String) AWS EBS volume type to be used for CAST provisioned nodes
 
 
 <a id="nestedblock--gke"></a>

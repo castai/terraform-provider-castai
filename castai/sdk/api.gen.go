@@ -723,6 +723,12 @@ type NodeconfigV1EKSConfig struct {
 
 	// Cluster's security groups configuration.
 	SecurityGroups *[]string `json:"securityGroups,omitempty"`
+
+	// EBS volume IOPS value to be used for provisioned nodes.
+	VolumeIops *int32 `json:"volumeIops"`
+
+	// EBS volume type to be used for provisioned nodes. Defaults to gp3.
+	VolumeType *string `json:"volumeType"`
 }
 
 // NodeconfigV1GKEConfig defines model for nodeconfig.v1.GKEConfig.

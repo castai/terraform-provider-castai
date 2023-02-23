@@ -40,6 +40,8 @@ func TestAccResourceNodeConfiguration_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "eks.0.dns_cluster_ip", "10.100.0.10"),
 					resource.TestCheckResourceAttr(resourceName, "eks.0.security_groups.#", "1"),
 					resource.TestCheckResourceAttr(resourceName, "eks.0.key_pair_id", ""),
+					resource.TestCheckResourceAttr(resourceName, "eks.0.volume_type", "gp3"),
+					resource.TestCheckResourceAttr(resourceName, "eks.0.volume_iops", "3100"),
 					resource.TestCheckResourceAttr(resourceName, "aks.#", "0"),
 					resource.TestCheckResourceAttr(resourceName, "kops.#", "0"),
 					resource.TestCheckResourceAttr(resourceName, "gke.#", "0"),
@@ -110,6 +112,8 @@ resource "castai_node_configuration" "test" {
 	instance_profile_arn = aws_iam_instance_profile.test.arn
     dns_cluster_ip       = "10.100.0.10"
 	security_groups      = [aws_security_group.test.id]
+	volume_type 		 = "gp3"
+    volume_iops		     = 3100
   }
 }
 
