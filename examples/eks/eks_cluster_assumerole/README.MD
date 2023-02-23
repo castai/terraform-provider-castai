@@ -23,3 +23,8 @@ terraform apply -var-file=tf.vars
 ```
 terraform destroy -var-file=tf.vars 
 ```
+
+> **Note**
+> 
+> If you are onboarding existing cluster to CAST AI you need to also update [aws-auth](https://docs.aws.amazon.com/eks/latest/userguide/add-user-role.html) configmap. In the configmap instance profile
+> used by CAST AI has to be present. Example of entry can be found [here](https://github.com/castai/terraform-provider-castai/blob/157babd57b0977f499eb162e9bee27bee51d292a/examples/eks/eks_cluster_assumerole/eks.tf#L28-L38).
