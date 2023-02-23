@@ -12,14 +12,13 @@ import (
 )
 
 const (
-	EKSSettingsFieldAccountId               = "account_id"
-	EKSSettingsFieldRegion                  = "region"
-	EKSSettingsFieldVpc                     = "vpc"
-	EKSSettingsFieldCluster                 = "cluster"
-	EKSSettingsFieldIamPolicyJson           = "iam_policy_json"
-	EKSSettingsFieldIamUserPolicyJson       = "iam_user_policy_json"
-	EKSSettingsFieldIamManagedPolicies      = "iam_managed_policies"
-	EKSSettingsFieldInstanceProfilePolicies = "instance_profile_policies"
+	EKSSettingsFieldAccountId          = "account_id"
+	EKSSettingsFieldRegion             = "region"
+	EKSSettingsFieldVpc                = "vpc"
+	EKSSettingsFieldCluster            = "cluster"
+	EKSSettingsFieldIamPolicyJson      = "iam_policy_json"
+	EKSSettingsFieldIamUserPolicyJson  = "iam_user_policy_json"
+	EKSSettingsFieldIamManagedPolicies = "iam_managed_policies"
 )
 
 func dataSourceEKSSettings() *schema.Resource {
@@ -64,11 +63,6 @@ func dataSourceEKSSettings() *schema.Resource {
 				Elem:     &schema.Schema{Type: schema.TypeString},
 				Computed: true,
 			},
-			EKSSettingsFieldInstanceProfilePolicies: {
-				Type:     schema.TypeSet,
-				Elem:     &schema.Schema{Type: schema.TypeString},
-				Computed: true,
-			},
 		},
 	}
 }
@@ -83,7 +77,6 @@ func dataSourceCastaiEKSSettingsRead(ctx context.Context, data *schema.ResourceD
 
 	userPolicy, _ := policies.GetUserInlinePolicy(cluster, arn, vpc)
 	iamPolicy, _ := policies.GetIAMPolicy(accountID)
-	instanceProfilePolicy := policies.GetInstanceProfilePolicy()
 
 	data.SetId(fmt.Sprintf("eks-%s-%s-%s-%s", accountID, vpc, region, cluster))
 	if err := data.Set(EKSSettingsFieldIamPolicyJson, iamPolicy); err != nil {
@@ -94,9 +87,6 @@ func dataSourceCastaiEKSSettingsRead(ctx context.Context, data *schema.ResourceD
 	}
 	if err := data.Set(EKSSettingsFieldIamManagedPolicies, buildManagedPolicies()); err != nil {
 		return diag.FromErr(fmt.Errorf("setting iam manged policies: %w", err))
-	}
-	if err := data.Set(EKSSettingsFieldInstanceProfilePolicies, instanceProfilePolicy); err != nil {
-		return diag.FromErr(fmt.Errorf("setting instance profile policies: %w", err))
 	}
 
 	return nil
