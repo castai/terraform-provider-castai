@@ -65,9 +65,10 @@ func dataSourceEKSSettings() *schema.Resource {
 				Computed: true,
 			},
 			EKSSettingsFieldInstanceProfilePolicies: {
-				Type:     schema.TypeSet,
-				Elem:     &schema.Schema{Type: schema.TypeString},
-				Computed: true,
+				Type:       schema.TypeSet,
+				Elem:       &schema.Schema{Type: schema.TypeString},
+				Computed:   true,
+				Deprecated: "Remove the use of 'data.castai_eks_settings.resource_name.instance_profile_policies'. Instace profiles policies should be set explicitly using 'aws_iam_role_policy_attachment'.",
 			},
 		},
 	}
