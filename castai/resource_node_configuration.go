@@ -167,7 +167,7 @@ func resourceNodeConfiguration() *schema.Resource {
 						"volume_type": {
 							Type:             schema.TypeString,
 							Optional:         true,
-							Description:      "AWS EBS volume type to be used for CAST provisioned nodes",
+							Description:      "AWS EBS volume type to be used for CAST provisioned nodes. One of: gp3, io1, io2",
 							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"gp3", "io1", "io2"}, true)),
 						},
 						"volume_iops": {
@@ -175,6 +175,12 @@ func resourceNodeConfiguration() *schema.Resource {
 							Optional:         true,
 							Description:      "AWS EBS volume IOPS to be used for CAST provisioned nodes",
 							ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(100, 100000)),
+						},
+						"volume_throughput": {
+							Type:             schema.TypeInt,
+							Optional:         true,
+							Description:      "AWS EBS volume throughput in MiB/s to be used for CAST provisioned nodes",
+							ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(125, 1000)),
 						},
 					},
 				},
@@ -527,6 +533,9 @@ func toEKSConfig(obj map[string]interface{}) *sdk.NodeconfigV1EKSConfig {
 	if v, ok := obj["volume_iops"].(int); ok && v != 0 {
 		out.VolumeIops = toPtr(int32(v))
 	}
+	if v, ok := obj["volume_throughput"].(int); ok && v != 0 {
+		out.VolumeThroughput = toPtr(int32(v))
+	}
 
 	return out
 }
@@ -553,6 +562,9 @@ func flattenEKSConfig(config *sdk.NodeconfigV1EKSConfig) []map[string]interface{
 	}
 	if v := config.VolumeIops; v != nil {
 		m["volume_iops"] = *config.VolumeIops
+	}
+	if v := config.VolumeThroughput; v != nil {
+		m["volume_throughput"] = *config.VolumeThroughput
 	}
 
 	return []map[string]interface{}{m}

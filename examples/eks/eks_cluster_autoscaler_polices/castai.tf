@@ -89,6 +89,7 @@ module "castai-eks-cluster" {
       container_runtime = "containerd"
       volume_type = "gp3"
       volume_iops = 3100
+      volume_throughput = 130
     }
   }
 
