@@ -26,7 +26,8 @@ CAST AI node template resource to manage node templates
 - `constraints` (Block List, Max: 1) (see [below for nested schema](#nestedblock--constraints))
 - `custom_label` (Block List, Max: 1) Custom label key/value to be added to nodes created from this template (see [below for nested schema](#nestedblock--custom_label))
 - `rebalancing_config_min_nodes` (Number) Minimum nodes that will be kept when rebalancing nodes using this node template.
-- `should_taint` (Boolean) Marks whether the templated nodes will have a taint.
+- `should_taint` (Boolean) Marks whether the templated nodes will have the default taint.
+- `custom_taints` (Block List) Custom taints to apply to the templated nodes. `should_taint` cannot be `true` when using `custom_taints` (see [below for nested schema](#nestedblock--custom_taints))
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only
@@ -80,6 +81,13 @@ Required:
 - `key` (String) Label key to be added to nodes created from this template.
 - `value` (String) Label value to be added to nodes created from this template.
 
+<a id="nestedblock--custom_taints"></a>
+### Nested Schema for `custom_taints`
+
+Required:
+- `key` (String) Key of a taint to be added to the templated nodes.
+- `value` (String) Value of a taint to be added to the templated nodes.
+- `effect` (Enumerator) Effect of a taint to be added to the templated nodes. The possible values are `NoSchedule`, `PreferNoSchedule` and `NoExecute`.
 
 <a id="nestedblock--timeouts"></a>
 ### Nested Schema for `timeouts`
