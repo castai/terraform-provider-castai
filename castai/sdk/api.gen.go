@@ -727,6 +727,9 @@ type NodeconfigV1EKSConfig struct {
 	// EBS volume IOPS value to be used for provisioned nodes.
 	VolumeIops *int32 `json:"volumeIops"`
 
+	// EBS volume throughput in MiB/s to be used for provisioned nodes.
+	VolumeThroughput *int32 `json:"volumeThroughput"`
+
 	// EBS volume type to be used for provisioned nodes. Defaults to gp3.
 	VolumeType *string `json:"volumeType"`
 }
