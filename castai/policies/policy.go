@@ -14,10 +14,6 @@ var (
 	UserPolicy string
 )
 
-type policy struct {
-	Policies []string `json:"Policies"`
-}
-
 func GetIAMPolicy(accountNumber string) (string, error) {
 	tmpl, err := template.New("json").Parse(IAMPolicy)
 	if err != nil {
