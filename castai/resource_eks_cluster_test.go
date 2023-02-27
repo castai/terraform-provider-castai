@@ -53,7 +53,8 @@ func TestEKSClusterResourceReadContext(t *testing.T) {
     "securityGroups": ["sg1"],
     "instanceProfileArn": "arn",
     "tags": {"aws":"tag"},
-    "dnsClusterIp": "10.100.100.1"
+    "dnsClusterIp": "10.100.100.1",
+	"imdsV1": true
   },
   "sshPublicKey": "key-123",
   "clusterNameId": "eks-cluster-b6bfc074",
@@ -119,7 +120,8 @@ func TestEKSClusterResourceReadContextArchived(t *testing.T) {
     "securityGroups": ["sg1"],
     "instanceProfileArn": "arn",
     "tags": {"aws":"tag"},
-    "dnsClusterIp": "10.100.100.1"
+    "dnsClusterIp": "10.100.100.1",
+	"imdsV1": true
   },
   "sshPublicKey": "key-123",
   "clusterNameId": "eks-cluster-b6bfc074",
@@ -209,7 +211,8 @@ func TestEKSClusterResourceUpdateRetry(t *testing.T) {
     "securityGroups": ["sg1"],
     "instanceProfileArn": "arn",
     "tags": {"aws":"tag"},
-    "dnsClusterIp": "10.100.100.1"
+    "dnsClusterIp": "10.100.100.1",
+	"imdsV1": true
   },
   "sshPublicKey": "key-123",
   "clusterNameId": "eks-cluster-b6bfc074",

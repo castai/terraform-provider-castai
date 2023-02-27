@@ -714,6 +714,7 @@ type NodeconfigV1DeleteConfigurationResponse = map[string]interface{}
 type NodeconfigV1EKSConfig struct {
 	// IP address to use for DNS queries within the cluster. Defaults to 10.100.0.10 or 172.20.0.10 based on the IP address of the primary interface.
 	DnsClusterIp *string `json:"dnsClusterIp"`
+	ImdsV1       *bool   `json:"imdsV1"`
 
 	// Cluster's instance profile ARN used for CAST provisioned nodes.
 	InstanceProfileArn string `json:"instanceProfileArn"`

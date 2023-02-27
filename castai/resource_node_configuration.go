@@ -182,6 +182,11 @@ func resourceNodeConfiguration() *schema.Resource {
 							Description:      "AWS EBS volume throughput in MiB/s to be used for CAST provisioned nodes",
 							ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(125, 1000)),
 						},
+						"imds_v1": {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Description: "Allow IMDSv1, the default is true",
+						},
 					},
 				},
 			},
