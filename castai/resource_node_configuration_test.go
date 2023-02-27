@@ -117,7 +117,7 @@ resource "castai_node_configuration" "test" {
 	volume_type 		 = "gp3"
     volume_iops		     = 3100
 	volume_throughput 	 = 130
-
+	imds_v1				 = true
   }
 }
 
