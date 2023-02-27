@@ -182,6 +182,11 @@ func resourceNodeConfiguration() *schema.Resource {
 							Description:      "AWS EBS volume throughput in MiB/s to be used for CAST provisioned nodes",
 							ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(125, 1000)),
 						},
+						"imds_v1": {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Description: "Allow IMDSv1, the default is true",
+						},
 					},
 				},
 			},
@@ -536,6 +541,9 @@ func toEKSConfig(obj map[string]interface{}) *sdk.NodeconfigV1EKSConfig {
 	if v, ok := obj["volume_throughput"].(int); ok && v != 0 {
 		out.VolumeThroughput = toPtr(int32(v))
 	}
+	if v, ok := obj["imds_v1"].(bool); ok {
+		out.ImdsV1 = toPtr(v)
+	}
 
 	return out
 }
@@ -565,6 +573,9 @@ func flattenEKSConfig(config *sdk.NodeconfigV1EKSConfig) []map[string]interface{
 	}
 	if v := config.VolumeThroughput; v != nil {
 		m["volume_throughput"] = *config.VolumeThroughput
+	}
+	if v := config.ImdsV1; v != nil {
+		m["imds_v1"] = *config.ImdsV1
 	}
 
 	return []map[string]interface{}{m}

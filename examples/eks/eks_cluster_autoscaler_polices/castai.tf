@@ -19,12 +19,12 @@ provider "helm" {
   kubernetes {
     host                   = module.eks.cluster_endpoint
     cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
-      exec {
-        api_version = "client.authentication.k8s.io/v1beta1"
-        command     = "aws"
-        # This requires the awscli to be installed locally where Terraform is executed.
-        args = ["eks", "get-token", "--cluster-name", module.eks.cluster_name]
-      }
+    exec {
+      api_version = "client.authentication.k8s.io/v1beta1"
+      command     = "aws"
+      # This requires the awscli to be installed locally where Terraform is executed.
+      args = ["eks", "get-token", "--cluster-name", module.eks.cluster_name]
+    }
   }
 }
 
@@ -63,8 +63,8 @@ module "castai-eks-cluster" {
 
   node_configurations = {
     default = {
-      subnets         = module.vpc.private_subnets
-      tags            = var.tags
+      subnets = module.vpc.private_subnets
+      tags    = var.tags
       security_groups = [
         module.eks.cluster_security_group_id,
         module.eks.node_security_group_id,
@@ -74,8 +74,8 @@ module "castai-eks-cluster" {
     }
 
     test_node_config = {
-      subnets         = module.vpc.private_subnets
-      tags            = var.tags
+      subnets = module.vpc.private_subnets
+      tags    = var.tags
       security_groups = [
         module.eks.cluster_security_group_id,
         module.eks.node_security_group_id,
@@ -87,27 +87,28 @@ module "castai-eks-cluster" {
         "registryPullQPS" : 10
       })
       container_runtime = "containerd"
-      volume_type = "gp3"
-      volume_iops = 3100
+      volume_type       = "gp3"
+      volume_iops       = 3100
       volume_throughput = 130
+      imds_v1           = true
     }
   }
 
   node_templates = {
     spot_tmpl = {
       configuration_id = module.castai-eks-cluster.castai_node_configurations["default"]
-      should_taint = true
+      should_taint     = true
       custom_label = {
-        key = "custom-key"
+        key   = "custom-key"
         value = "label-value"
       }
 
       constraints = {
         fallback_restore_rate_seconds = 1800
-        spot = true
-        use_spot_fallbacks = true
-        min_cpu = 4
-        max_cpu = 100
+        spot                          = true
+        use_spot_fallbacks            = true
+        min_cpu                       = 4
+        max_cpu                       = 100
         instance_families = {
           exclude = ["m5"]
         }
@@ -122,7 +123,7 @@ module "castai-eks-cluster" {
   //  - unschedulablePods - Unscheduled pods policy
   //  - spotInstances     - Spot instances configuration
   //  - nodeDownscaler    - Node deletion policy
-  autoscaler_policies_json   = <<-EOT
+  autoscaler_policies_json = <<-EOT
     {
         "enabled": true,
         "unschedulablePods": {

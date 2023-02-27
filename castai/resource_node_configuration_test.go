@@ -43,6 +43,7 @@ func TestAccResourceNodeConfiguration_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "eks.0.volume_type", "gp3"),
 					resource.TestCheckResourceAttr(resourceName, "eks.0.volume_iops", "3100"),
 					resource.TestCheckResourceAttr(resourceName, "eks.0.volume_throughput", "130"),
+					resource.TestCheckResourceAttr(resourceName, "eks.0.imds_v1", "true"),
 					resource.TestCheckResourceAttr(resourceName, "aks.#", "0"),
 					resource.TestCheckResourceAttr(resourceName, "kops.#", "0"),
 					resource.TestCheckResourceAttr(resourceName, "gke.#", "0"),
@@ -116,6 +117,7 @@ resource "castai_node_configuration" "test" {
 	volume_type 		 = "gp3"
     volume_iops		     = 3100
 	volume_throughput 	 = 130
+	imds_v1				 = true
   }
 }
 
