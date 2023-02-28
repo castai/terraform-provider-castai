@@ -24,7 +24,8 @@ CAST AI node template resource to manage node templates
 - `cluster_id` (String) CAST AI cluster id.
 - `configuration_id` (String) CAST AI node configuration id to be used for node template.
 - `constraints` (Block List, Max: 1) (see [below for nested schema](#nestedblock--constraints))
-- `custom_label` (Block List, Max: 1) Custom label key/value to be added to nodes created from this template (see [below for nested schema](#nestedblock--custom_label))
+- `custom_label` (Block List, Max: 1) Custom label key/value to be added to nodes created from this template. (see [below for nested schema](#nestedblock--custom_label))
+- `custom_taints` (Block List) Custom taints to be added to the nodes created from this template. `shouldTaint` has to be `true` in order to create/update the node template with custom taints. If `shouldTaint` is `true`, but no custom taints are provided, the nodes will be tainted with the default node template taint. (see [below for nested schema](#nestedblock--custom_taints))
 - `rebalancing_config_min_nodes` (Number) Minimum nodes that will be kept when rebalancing nodes using this node template.
 - `should_taint` (Boolean) Marks whether the templated nodes will have a taint.
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
@@ -79,6 +80,19 @@ Required:
 
 - `key` (String) Label key to be added to nodes created from this template.
 - `value` (String) Label value to be added to nodes created from this template.
+
+
+<a id="nestedblock--custom_taints"></a>
+### Nested Schema for `custom_taints`
+
+Required:
+
+- `key` (String) Key of a taint to be added to nodes created from this template.
+- `value` (String) Value of a taint to be added to nodes created from this template.
+
+Optional:
+
+- `effect` (String) Effect of a taint to be added to nodes created from this template. The effect must always be NoSchedule.
 
 
 <a id="nestedblock--timeouts"></a>

@@ -70,7 +70,19 @@ func TestNodeTemplateResourceReadContext(t *testing.T) {
 				  }
 				},
 				"version": "3",
-				"shouldTaint": false,
+				"shouldTaint": true,
+				"customTaints": [
+				  {
+				    "key": "some-key-1",
+				    "value": "some-value-1",
+				    "effect": "NoSchedule"
+				  },
+				  {
+				    "key": "some-key-2",
+				    "value": "some-value-2",
+				    "effect": "NoSchedule"
+				  }
+				],
 				"rebalancingConfig": {
 				  "minNodes": 0
 				}
@@ -126,12 +138,18 @@ constraints.0.spot = false
 constraints.0.storage_optimized = false
 constraints.0.use_spot_fallbacks = false
 custom_label.# = 0
+custom_taints.# = 2
+custom_taints.0.effect = NoSchedule
+custom_taints.0.key = some-key-1
+custom_taints.0.value = some-value-1
+custom_taints.1.effect = NoSchedule
+custom_taints.1.key = some-key-2
+custom_taints.1.value = some-value-2
 name = gpu
 rebalancing_config_min_nodes = 0
-should_taint = false
+should_taint = true
 Tainted = false
 `, data.State().String())
-
 }
 
 func TestNodeTemplateResourceReadContextEmptyList(t *testing.T) {
@@ -182,8 +200,13 @@ func TestAccResourceNodeTemplate_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "name", rName),
 					resource.TestCheckResourceAttr(resourceName, "should_taint", "true"),
-					resource.TestCheckResourceAttr(resourceName, "custom_label.0.key", "custom-key"),
-					resource.TestCheckResourceAttr(resourceName, "custom_label.0.value", "custom-value"),
+					resource.TestCheckResourceAttr(resourceName, "custom_label.0.key", "custom-key-1"),
+					resource.TestCheckResourceAttr(resourceName, "custom_label.0.value", "custom-value-1"),
+					resource.TestCheckResourceAttr(resourceName, "custom_taints.#", "2"),
+					resource.TestCheckResourceAttr(resourceName, "custom_taints.0.key", "custom-taint-key-1"),
+					resource.TestCheckResourceAttr(resourceName, "custom_taints.0.value", "custom-taint-value-1"),
+					resource.TestCheckResourceAttr(resourceName, "custom_taints.1.key", "custom-taint-key-2"),
+					resource.TestCheckResourceAttr(resourceName, "custom_taints.1.value", "custom-taint-value-2"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.instance_families.0.exclude.0", "m5"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.gpu.0.manufacturers.0", "NVIDIA"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.gpu.0.include_names.#", "0"),
@@ -207,8 +230,11 @@ func TestAccResourceNodeTemplate_basic(t *testing.T) {
 				Config: testNodeTemplateUpdated(rName, clusterName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "name", rName),
-					resource.TestCheckResourceAttr(resourceName, "should_taint", "false"),
+					resource.TestCheckResourceAttr(resourceName, "should_taint", "true"),
 					resource.TestCheckResourceAttr(resourceName, "custom_label.#", "0"),
+					resource.TestCheckResourceAttr(resourceName, "custom_taints.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "custom_taints.0.key", "custom-taint-key-1"),
+					resource.TestCheckResourceAttr(resourceName, "custom_taints.0.value", "custom-taint-value-1"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.use_spot_fallbacks", "true"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.spot", "true"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.instance_families.#", "0"),
@@ -240,8 +266,20 @@ func testAccNodeTemplateConfig(rName, clusterName string) string {
 			should_taint = true
 
 			custom_label {
-				key = "custom-key"
-				value = "custom-value"
+				key = "custom-key-1"
+				value = "custom-value-1"
+			}
+
+			custom_taints {
+				key = "custom-taint-key-1"
+				value = "custom-taint-value-1"
+				effect = "NoSchedule"
+			}
+
+			custom_taints {
+				key = "custom-taint-key-2"
+				value = "custom-taint-value-2"
+				effect = "NoSchedule"
 			}
 
 			constraints {
@@ -271,7 +309,13 @@ func testNodeTemplateUpdated(rName, clusterName string) string {
 			cluster_id        = castai_eks_clusterid.test.id
 			name = %[1]q
 			configuration_id = castai_node_configuration.test.id
-			should_taint = false
+			should_taint = true
+
+			custom_taints {
+				key = "custom-taint-key-1"
+				value = "custom-taint-value-1"
+				effect = "NoSchedule"
+			}
 
 			constraints {
 				use_spot_fallbacks = true

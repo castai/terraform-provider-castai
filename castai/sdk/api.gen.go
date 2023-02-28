@@ -156,10 +156,10 @@ type CastaiMetricsV1beta1ClusterMetrics struct {
 
 // Types of cloud service providers CAST AI supports.
 //
-//   - invalid: Invalid.
-//   - aws: Amazon web services.
-//   - gcp: Google cloud provider.
-//   - azure: Microsoft Azure.
+//  - invalid: Invalid.
+//  - aws: Amazon web services.
+//  - gcp: Google cloud provider.
+//  - azure: Microsoft Azure.
 type CastaiV1Cloud string
 
 // AKSClusterParams defines AKS-specific arguments.
@@ -983,9 +983,12 @@ type NodetemplatesV1ListNodeTemplatesResponse struct {
 
 // NodetemplatesV1NewNodeTemplate defines model for nodetemplates.v1.NewNodeTemplate.
 type NodetemplatesV1NewNodeTemplate struct {
-	ConfigurationId   *string                                  `json:"configurationId,omitempty"`
-	Constraints       *NodetemplatesV1TemplateConstraints      `json:"constraints,omitempty"`
-	CustomLabel       *NodetemplatesV1Label                    `json:"customLabel,omitempty"`
+	ConfigurationId *string                             `json:"configurationId,omitempty"`
+	Constraints     *NodetemplatesV1TemplateConstraints `json:"constraints,omitempty"`
+	CustomLabel     *NodetemplatesV1Label               `json:"customLabel,omitempty"`
+
+	// Custom taints for the template.
+	CustomTaints      *[]NodetemplatesV1TaintWithoutEffect     `json:"customTaints,omitempty"`
 	Name              *string                                  `json:"name,omitempty"`
 	RebalancingConfig *NodetemplatesV1RebalancingConfiguration `json:"rebalancingConfig,omitempty"`
 
@@ -995,10 +998,13 @@ type NodetemplatesV1NewNodeTemplate struct {
 
 // NodetemplatesV1NodeTemplate defines model for nodetemplates.v1.NodeTemplate.
 type NodetemplatesV1NodeTemplate struct {
-	ConfigurationId   *string                                  `json:"configurationId,omitempty"`
-	ConfigurationName *string                                  `json:"configurationName,omitempty"`
-	Constraints       *NodetemplatesV1TemplateConstraints      `json:"constraints,omitempty"`
-	CustomLabel       *NodetemplatesV1Label                    `json:"customLabel,omitempty"`
+	ConfigurationId   *string                             `json:"configurationId,omitempty"`
+	ConfigurationName *string                             `json:"configurationName,omitempty"`
+	Constraints       *NodetemplatesV1TemplateConstraints `json:"constraints,omitempty"`
+	CustomLabel       *NodetemplatesV1Label               `json:"customLabel,omitempty"`
+
+	// Custom taints for the template.
+	CustomTaints      *[]NodetemplatesV1Taint                  `json:"customTaints,omitempty"`
 	Name              *string                                  `json:"name,omitempty"`
 	RebalancingConfig *NodetemplatesV1RebalancingConfiguration `json:"rebalancingConfig,omitempty"`
 
@@ -1023,6 +1029,20 @@ type NodetemplatesV1NodeTemplateListItemStats struct {
 // NodetemplatesV1RebalancingConfiguration defines model for nodetemplates.v1.RebalancingConfiguration.
 type NodetemplatesV1RebalancingConfiguration struct {
 	MinNodes *int32 `json:"minNodes"`
+}
+
+// Taint is used in responses.
+type NodetemplatesV1Taint struct {
+	Effect *string `json:"effect,omitempty"`
+	Key    *string `json:"key,omitempty"`
+	Value  *string `json:"value,omitempty"`
+}
+
+// TaintWithoutEffect is used when creating/updating a node template.
+// We only support the NoSchedule effect for node templates, hence it cannot be set/updated.
+type NodetemplatesV1TaintWithoutEffect struct {
+	Key   *string `json:"key,omitempty"`
+	Value *string `json:"value"`
 }
 
 // NodetemplatesV1TemplateConstraints defines model for nodetemplates.v1.TemplateConstraints.
@@ -1061,9 +1081,12 @@ type NodetemplatesV1TemplateConstraintsInstanceFamilyConstraints struct {
 
 // NodetemplatesV1UpdateNodeTemplate defines model for nodetemplates.v1.UpdateNodeTemplate.
 type NodetemplatesV1UpdateNodeTemplate struct {
-	ConfigurationId   *string                                  `json:"configurationId,omitempty"`
-	Constraints       *NodetemplatesV1TemplateConstraints      `json:"constraints,omitempty"`
-	CustomLabel       *NodetemplatesV1Label                    `json:"customLabel,omitempty"`
+	ConfigurationId *string                             `json:"configurationId,omitempty"`
+	Constraints     *NodetemplatesV1TemplateConstraints `json:"constraints,omitempty"`
+	CustomLabel     *NodetemplatesV1Label               `json:"customLabel,omitempty"`
+
+	// Custom taints for the template.
+	CustomTaints      *[]NodetemplatesV1TaintWithoutEffect     `json:"customTaints,omitempty"`
 	RebalancingConfig *NodetemplatesV1RebalancingConfiguration `json:"rebalancingConfig,omitempty"`
 
 	// Marks whether the templated nodes will have a taint.
