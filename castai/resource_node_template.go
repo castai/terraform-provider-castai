@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/samber/lo"
 	"log"
+	"regexp"
 	"strings"
 	"time"
 )
@@ -20,6 +21,7 @@ const (
 	FieldNodeTemplateShouldTaint               = "should_taint"
 	FieldNodeTemplateRebalancingConfigMinNodes = "rebalancing_config_min_nodes"
 	FieldNodeTemplateCustomLabel               = "custom_label"
+	FieldNodeTemplateCustomTaints              = "custom_taints"
 	FieldNodeTemplateConstraints               = "constraints"
 )
 
@@ -213,7 +215,38 @@ func resourceNodeTemplate() *schema.Resource {
 						},
 					},
 				},
-				Description: "Custom label key/value to be added to nodes created from this template",
+				Description: "Custom label key/value to be added to nodes created from this template.",
+			},
+			FieldNodeTemplateCustomTaints: {
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"key": {
+							Required:         true,
+							Type:             schema.TypeString,
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+							Description:      "Key of a taint to be added to nodes created from this template.",
+						},
+						"value": {
+							Required:         true,
+							Type:             schema.TypeString,
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+							Description:      "Value of a taint to be added to nodes created from this template.",
+						},
+						"effect": {
+							Optional: true,
+							Type:     schema.TypeString,
+							ValidateDiagFunc: validation.ToDiagFunc(
+								validation.StringMatch(regexp.MustCompile("^NoSchedule$"), "effect must be NoSchedule"),
+							),
+							Description: "Effect of a taint to be added to nodes created from this template. The effect must always be NoSchedule.",
+						},
+					},
+				},
+				Description: "Custom taints to be added to the nodes created from this template. " +
+					"`shouldTaint` has to be `true` in order to create/update the node template with custom taints. " +
+					"If `shouldTaint` is `true`, but no custom taints are provided, the nodes will be tainted with the default node template taint.",
 			},
 			FieldNodeTemplateRebalancingConfigMinNodes: {
 				Type:             schema.TypeInt,
@@ -271,6 +304,9 @@ func resourceNodeTemplateRead(ctx context.Context, d *schema.ResourceData, meta 
 	}
 	if err := d.Set(FieldNodeTemplateCustomLabel, flattenCustomLabel(nodeTemplate.CustomLabel)); err != nil {
 		return diag.FromErr(fmt.Errorf("setting custom label: %w", err))
+	}
+	if err := d.Set(FieldNodeTemplateCustomTaints, flattenCustomTaints(nodeTemplate.CustomTaints)); err != nil {
+		return diag.FromErr(fmt.Errorf("setting custom taints: %w", err))
 	}
 
 	return nil
@@ -376,6 +412,7 @@ func resourceNodeTemplateUpdate(ctx context.Context, d *schema.ResourceData, met
 		FieldNodeTemplateConfigurationId,
 		FieldNodeTemplateRebalancingConfigMinNodes,
 		FieldNodeTemplateCustomLabel,
+		FieldNodeTemplateCustomTaints,
 		FieldNodeTemplateConstraints,
 	) {
 		log.Printf("[INFO] Nothing to update in node configuration")
@@ -397,6 +434,19 @@ func resourceNodeTemplateUpdate(ctx context.Context, d *schema.ResourceData, met
 
 	if v, _ := d.GetOk(FieldNodeTemplateShouldTaint); v != nil {
 		req.ShouldTaint = toPtr(v.(bool))
+	}
+
+	if v, ok := d.Get(FieldNodeTemplateCustomTaints).([]any); ok && len(v) > 0 {
+		ts := []map[string]any{}
+		for _, val := range v {
+			ts = append(ts, val.(map[string]any))
+		}
+
+		req.CustomTaints = toCustomTaintsWithoutEffect(ts)
+	}
+
+	if !(*req.ShouldTaint) && req.CustomTaints != nil && len(*req.CustomTaints) > 0 {
+		return diag.FromErr(fmt.Errorf("shouldTaint must be true for the node template to get updated with custom taints"))
 	}
 
 	if v, _ := d.GetOk(FieldNodeTemplateRebalancingConfigMinNodes); v != nil {
@@ -436,6 +486,19 @@ func resourceNodeTemplateCreate(ctx context.Context, d *schema.ResourceData, met
 
 	if v, ok := d.Get(FieldNodeTemplateCustomLabel).([]any); ok && len(v) > 0 {
 		req.CustomLabel = toCustomLabel(v[0].(map[string]any))
+	}
+
+	if v, ok := d.Get(FieldNodeTemplateCustomTaints).([]any); ok && len(v) > 0 {
+		ts := []map[string]any{}
+		for _, val := range v {
+			ts = append(ts, val.(map[string]any))
+		}
+
+		req.CustomTaints = toCustomTaintsWithoutEffect(ts)
+	}
+
+	if !(*req.ShouldTaint) && req.CustomTaints != nil && len(*req.CustomTaints) > 0 {
+		return diag.FromErr(fmt.Errorf("shouldTaint must be true for the node template to get created with custom taints"))
 	}
 
 	if v, ok := d.Get(FieldNodeTemplateConstraints).([]any); ok && len(v) > 0 {
@@ -543,6 +606,29 @@ func toCustomLabel(obj map[string]any) *sdk.NodetemplatesV1Label {
 	return out
 }
 
+func toCustomTaintsWithoutEffect(objs []map[string]any) *[]sdk.NodetemplatesV1TaintWithoutEffect {
+	if len(objs) == 0 {
+		return nil
+	}
+
+	out := &[]sdk.NodetemplatesV1TaintWithoutEffect{}
+
+	for _, taint := range objs {
+		t := sdk.NodetemplatesV1TaintWithoutEffect{}
+
+		if v, ok := taint["key"]; ok && v != "" {
+			t.Key = toPtr(v.(string))
+		}
+		if v, ok := taint["value"]; ok && v != "" {
+			t.Value = toPtr(v.(string))
+		}
+
+		*out = append(*out, t)
+	}
+
+	return out
+}
+
 func flattenCustomLabel(label *sdk.NodetemplatesV1Label) []map[string]string {
 	if label == nil {
 		return nil
@@ -556,6 +642,30 @@ func flattenCustomLabel(label *sdk.NodetemplatesV1Label) []map[string]string {
 		m["value"] = toString(v)
 	}
 	return []map[string]string{m}
+}
+
+func flattenCustomTaints(taints *[]sdk.NodetemplatesV1Taint) []map[string]string {
+	if taints == nil {
+		return nil
+	}
+
+	var ts []map[string]string
+	for _, taint := range *taints {
+		t := map[string]string{}
+		if k := taint.Key; k != nil {
+			t["key"] = toString(k)
+		}
+		if v := taint.Value; v != nil {
+			t["value"] = toString(v)
+		}
+		if e := taint.Effect; e != nil {
+			t["effect"] = toString(e)
+		}
+
+		ts = append(ts, t)
+	}
+
+	return ts
 }
 
 func toTemplateConstraints(obj map[string]any) *sdk.NodetemplatesV1TemplateConstraints {
