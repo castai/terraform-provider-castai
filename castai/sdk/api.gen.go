@@ -987,6 +987,10 @@ type NodetemplatesV1NewNodeTemplate struct {
 	Constraints     *NodetemplatesV1TemplateConstraints `json:"constraints,omitempty"`
 	CustomLabel     *NodetemplatesV1Label               `json:"customLabel,omitempty"`
 
+	// Custom labels for the template.
+	// The passed values will be ignored if the field custom_label is present.
+	CustomLabels *NodetemplatesV1NewNodeTemplate_CustomLabels `json:"customLabels,omitempty"`
+
 	// Custom taints for the template.
 	CustomTaints      *[]NodetemplatesV1TaintWithoutEffect     `json:"customTaints,omitempty"`
 	Name              *string                                  `json:"name,omitempty"`
@@ -996,12 +1000,21 @@ type NodetemplatesV1NewNodeTemplate struct {
 	ShouldTaint *bool `json:"shouldTaint"`
 }
 
+// Custom labels for the template.
+// The passed values will be ignored if the field custom_label is present.
+type NodetemplatesV1NewNodeTemplate_CustomLabels struct {
+	AdditionalProperties map[string]string `json:"-"`
+}
+
 // NodetemplatesV1NodeTemplate defines model for nodetemplates.v1.NodeTemplate.
 type NodetemplatesV1NodeTemplate struct {
 	ConfigurationId   *string                             `json:"configurationId,omitempty"`
 	ConfigurationName *string                             `json:"configurationName,omitempty"`
 	Constraints       *NodetemplatesV1TemplateConstraints `json:"constraints,omitempty"`
 	CustomLabel       *NodetemplatesV1Label               `json:"customLabel,omitempty"`
+
+	// Custom labels for the template.
+	CustomLabels *NodetemplatesV1NodeTemplate_CustomLabels `json:"customLabels,omitempty"`
 
 	// Custom taints for the template.
 	CustomTaints      *[]NodetemplatesV1Taint                  `json:"customTaints,omitempty"`
@@ -1011,6 +1024,11 @@ type NodetemplatesV1NodeTemplate struct {
 	// Marks whether the templated nodes will have a taint.
 	ShouldTaint *bool   `json:"shouldTaint,omitempty"`
 	Version     *string `json:"version,omitempty"`
+}
+
+// Custom labels for the template.
+type NodetemplatesV1NodeTemplate_CustomLabels struct {
+	AdditionalProperties map[string]string `json:"-"`
 }
 
 // NodetemplatesV1NodeTemplateListItem defines model for nodetemplates.v1.NodeTemplateListItem.
@@ -1085,12 +1103,22 @@ type NodetemplatesV1UpdateNodeTemplate struct {
 	Constraints     *NodetemplatesV1TemplateConstraints `json:"constraints,omitempty"`
 	CustomLabel     *NodetemplatesV1Label               `json:"customLabel,omitempty"`
 
+	// Custom labels for the template.
+	// The passed values will be ignored if the field custom_label is present.
+	CustomLabels *NodetemplatesV1UpdateNodeTemplate_CustomLabels `json:"customLabels,omitempty"`
+
 	// Custom taints for the template.
 	CustomTaints      *[]NodetemplatesV1TaintWithoutEffect     `json:"customTaints,omitempty"`
 	RebalancingConfig *NodetemplatesV1RebalancingConfiguration `json:"rebalancingConfig,omitempty"`
 
 	// Marks whether the templated nodes will have a taint.
 	ShouldTaint *bool `json:"shouldTaint"`
+}
+
+// Custom labels for the template.
+// The passed values will be ignored if the field custom_label is present.
+type NodetemplatesV1UpdateNodeTemplate_CustomLabels struct {
+	AdditionalProperties map[string]string `json:"-"`
 }
 
 // Defines the minimum and maximum amount of vCPUs for cluster's worker nodes.
@@ -1813,6 +1841,165 @@ func (a *NodeconfigV1NodeConfigurationUpdate_Tags) UnmarshalJSON(b []byte) error
 
 // Override default JSON handling for NodeconfigV1NodeConfigurationUpdate_Tags to handle AdditionalProperties
 func (a NodeconfigV1NodeConfigurationUpdate_Tags) MarshalJSON() ([]byte, error) {
+	var err error
+	object := make(map[string]json.RawMessage)
+
+	for fieldName, field := range a.AdditionalProperties {
+		object[fieldName], err = json.Marshal(field)
+		if err != nil {
+			return nil, fmt.Errorf("error marshaling '%s': %w", fieldName, err)
+		}
+	}
+	return json.Marshal(object)
+}
+
+// Getter for additional properties for NodetemplatesV1NewNodeTemplate_CustomLabels. Returns the specified
+// element and whether it was found
+func (a NodetemplatesV1NewNodeTemplate_CustomLabels) Get(fieldName string) (value string, found bool) {
+	if a.AdditionalProperties != nil {
+		value, found = a.AdditionalProperties[fieldName]
+	}
+	return
+}
+
+// Setter for additional properties for NodetemplatesV1NewNodeTemplate_CustomLabels
+func (a *NodetemplatesV1NewNodeTemplate_CustomLabels) Set(fieldName string, value string) {
+	if a.AdditionalProperties == nil {
+		a.AdditionalProperties = make(map[string]string)
+	}
+	a.AdditionalProperties[fieldName] = value
+}
+
+// Override default JSON handling for NodetemplatesV1NewNodeTemplate_CustomLabels to handle AdditionalProperties
+func (a *NodetemplatesV1NewNodeTemplate_CustomLabels) UnmarshalJSON(b []byte) error {
+	object := make(map[string]json.RawMessage)
+	err := json.Unmarshal(b, &object)
+	if err != nil {
+		return err
+	}
+
+	if len(object) != 0 {
+		a.AdditionalProperties = make(map[string]string)
+		for fieldName, fieldBuf := range object {
+			var fieldVal string
+			err := json.Unmarshal(fieldBuf, &fieldVal)
+			if err != nil {
+				return fmt.Errorf("error unmarshaling field %s: %w", fieldName, err)
+			}
+			a.AdditionalProperties[fieldName] = fieldVal
+		}
+	}
+	return nil
+}
+
+// Override default JSON handling for NodetemplatesV1NewNodeTemplate_CustomLabels to handle AdditionalProperties
+func (a NodetemplatesV1NewNodeTemplate_CustomLabels) MarshalJSON() ([]byte, error) {
+	var err error
+	object := make(map[string]json.RawMessage)
+
+	for fieldName, field := range a.AdditionalProperties {
+		object[fieldName], err = json.Marshal(field)
+		if err != nil {
+			return nil, fmt.Errorf("error marshaling '%s': %w", fieldName, err)
+		}
+	}
+	return json.Marshal(object)
+}
+
+// Getter for additional properties for NodetemplatesV1NodeTemplate_CustomLabels. Returns the specified
+// element and whether it was found
+func (a NodetemplatesV1NodeTemplate_CustomLabels) Get(fieldName string) (value string, found bool) {
+	if a.AdditionalProperties != nil {
+		value, found = a.AdditionalProperties[fieldName]
+	}
+	return
+}
+
+// Setter for additional properties for NodetemplatesV1NodeTemplate_CustomLabels
+func (a *NodetemplatesV1NodeTemplate_CustomLabels) Set(fieldName string, value string) {
+	if a.AdditionalProperties == nil {
+		a.AdditionalProperties = make(map[string]string)
+	}
+	a.AdditionalProperties[fieldName] = value
+}
+
+// Override default JSON handling for NodetemplatesV1NodeTemplate_CustomLabels to handle AdditionalProperties
+func (a *NodetemplatesV1NodeTemplate_CustomLabels) UnmarshalJSON(b []byte) error {
+	object := make(map[string]json.RawMessage)
+	err := json.Unmarshal(b, &object)
+	if err != nil {
+		return err
+	}
+
+	if len(object) != 0 {
+		a.AdditionalProperties = make(map[string]string)
+		for fieldName, fieldBuf := range object {
+			var fieldVal string
+			err := json.Unmarshal(fieldBuf, &fieldVal)
+			if err != nil {
+				return fmt.Errorf("error unmarshaling field %s: %w", fieldName, err)
+			}
+			a.AdditionalProperties[fieldName] = fieldVal
+		}
+	}
+	return nil
+}
+
+// Override default JSON handling for NodetemplatesV1NodeTemplate_CustomLabels to handle AdditionalProperties
+func (a NodetemplatesV1NodeTemplate_CustomLabels) MarshalJSON() ([]byte, error) {
+	var err error
+	object := make(map[string]json.RawMessage)
+
+	for fieldName, field := range a.AdditionalProperties {
+		object[fieldName], err = json.Marshal(field)
+		if err != nil {
+			return nil, fmt.Errorf("error marshaling '%s': %w", fieldName, err)
+		}
+	}
+	return json.Marshal(object)
+}
+
+// Getter for additional properties for NodetemplatesV1UpdateNodeTemplate_CustomLabels. Returns the specified
+// element and whether it was found
+func (a NodetemplatesV1UpdateNodeTemplate_CustomLabels) Get(fieldName string) (value string, found bool) {
+	if a.AdditionalProperties != nil {
+		value, found = a.AdditionalProperties[fieldName]
+	}
+	return
+}
+
+// Setter for additional properties for NodetemplatesV1UpdateNodeTemplate_CustomLabels
+func (a *NodetemplatesV1UpdateNodeTemplate_CustomLabels) Set(fieldName string, value string) {
+	if a.AdditionalProperties == nil {
+		a.AdditionalProperties = make(map[string]string)
+	}
+	a.AdditionalProperties[fieldName] = value
+}
+
+// Override default JSON handling for NodetemplatesV1UpdateNodeTemplate_CustomLabels to handle AdditionalProperties
+func (a *NodetemplatesV1UpdateNodeTemplate_CustomLabels) UnmarshalJSON(b []byte) error {
+	object := make(map[string]json.RawMessage)
+	err := json.Unmarshal(b, &object)
+	if err != nil {
+		return err
+	}
+
+	if len(object) != 0 {
+		a.AdditionalProperties = make(map[string]string)
+		for fieldName, fieldBuf := range object {
+			var fieldVal string
+			err := json.Unmarshal(fieldBuf, &fieldVal)
+			if err != nil {
+				return fmt.Errorf("error unmarshaling field %s: %w", fieldName, err)
+			}
+			a.AdditionalProperties[fieldName] = fieldVal
+		}
+	}
+	return nil
+}
+
+// Override default JSON handling for NodetemplatesV1UpdateNodeTemplate_CustomLabels to handle AdditionalProperties
+func (a NodetemplatesV1UpdateNodeTemplate_CustomLabels) MarshalJSON() ([]byte, error) {
 	var err error
 	object := make(map[string]json.RawMessage)
 
