@@ -166,6 +166,22 @@ type ClientInterface interface {
 
 	PoliciesAPIUpsertClusterPolicies(ctx context.Context, clusterId string, body PoliciesAPIUpsertClusterPoliciesJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// ScheduledRebalancingAPIListRebalancingJobs request
+	ScheduledRebalancingAPIListRebalancingJobs(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// ScheduledRebalancingAPICreateRebalancingJob request with any body
+	ScheduledRebalancingAPICreateRebalancingJobWithBody(ctx context.Context, clusterId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	ScheduledRebalancingAPICreateRebalancingJob(ctx context.Context, clusterId string, body ScheduledRebalancingAPICreateRebalancingJobJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// ScheduledRebalancingAPIGetRebalancingJob request
+	ScheduledRebalancingAPIGetRebalancingJob(ctx context.Context, clusterId string, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// ScheduledRebalancingAPIUpdateRebalancingJob request with any body
+	ScheduledRebalancingAPIUpdateRebalancingJobWithBody(ctx context.Context, clusterId string, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	ScheduledRebalancingAPIUpdateRebalancingJob(ctx context.Context, clusterId string, id string, body ScheduledRebalancingAPIUpdateRebalancingJobJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// ExternalClusterAPIListClusters request
 	ExternalClusterAPIListClusters(ctx context.Context, params *ExternalClusterAPIListClustersParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -234,6 +250,17 @@ type ClientInterface interface {
 
 	// ExternalClusterAPICreateClusterToken request
 	ExternalClusterAPICreateClusterToken(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// ScheduledRebalancingAPIListRebalancingSchedules request
+	ScheduledRebalancingAPIListRebalancingSchedules(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// ScheduledRebalancingAPICreateRebalancingSchedule request with any body
+	ScheduledRebalancingAPICreateRebalancingScheduleWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	ScheduledRebalancingAPICreateRebalancingSchedule(ctx context.Context, body ScheduledRebalancingAPICreateRebalancingScheduleJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// ScheduledRebalancingAPIGetRebalancingSchedule request
+	ScheduledRebalancingAPIGetRebalancingSchedule(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// ExternalClusterAPIGetCredentialsScriptTemplate request
 	ExternalClusterAPIGetCredentialsScriptTemplate(ctx context.Context, provider string, params *ExternalClusterAPIGetCredentialsScriptTemplateParams, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -575,6 +602,78 @@ func (c *Client) PoliciesAPIUpsertClusterPolicies(ctx context.Context, clusterId
 	return c.Client.Do(req)
 }
 
+func (c *Client) ScheduledRebalancingAPIListRebalancingJobs(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewScheduledRebalancingAPIListRebalancingJobsRequest(c.Server, clusterId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) ScheduledRebalancingAPICreateRebalancingJobWithBody(ctx context.Context, clusterId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewScheduledRebalancingAPICreateRebalancingJobRequestWithBody(c.Server, clusterId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) ScheduledRebalancingAPICreateRebalancingJob(ctx context.Context, clusterId string, body ScheduledRebalancingAPICreateRebalancingJobJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewScheduledRebalancingAPICreateRebalancingJobRequest(c.Server, clusterId, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) ScheduledRebalancingAPIGetRebalancingJob(ctx context.Context, clusterId string, id string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewScheduledRebalancingAPIGetRebalancingJobRequest(c.Server, clusterId, id)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) ScheduledRebalancingAPIUpdateRebalancingJobWithBody(ctx context.Context, clusterId string, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewScheduledRebalancingAPIUpdateRebalancingJobRequestWithBody(c.Server, clusterId, id, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) ScheduledRebalancingAPIUpdateRebalancingJob(ctx context.Context, clusterId string, id string, body ScheduledRebalancingAPIUpdateRebalancingJobJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewScheduledRebalancingAPIUpdateRebalancingJobRequest(c.Server, clusterId, id, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
 func (c *Client) ExternalClusterAPIListClusters(ctx context.Context, params *ExternalClusterAPIListClustersParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewExternalClusterAPIListClustersRequest(c.Server, params)
 	if err != nil {
@@ -865,6 +964,54 @@ func (c *Client) ExternalClusterAPIResumeCluster(ctx context.Context, clusterId 
 
 func (c *Client) ExternalClusterAPICreateClusterToken(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewExternalClusterAPICreateClusterTokenRequest(c.Server, clusterId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) ScheduledRebalancingAPIListRebalancingSchedules(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewScheduledRebalancingAPIListRebalancingSchedulesRequest(c.Server)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) ScheduledRebalancingAPICreateRebalancingScheduleWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewScheduledRebalancingAPICreateRebalancingScheduleRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) ScheduledRebalancingAPICreateRebalancingSchedule(ctx context.Context, body ScheduledRebalancingAPICreateRebalancingScheduleJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewScheduledRebalancingAPICreateRebalancingScheduleRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) ScheduledRebalancingAPIGetRebalancingSchedule(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewScheduledRebalancingAPIGetRebalancingScheduleRequest(c.Server, id)
 	if err != nil {
 		return nil, err
 	}
@@ -1735,6 +1882,182 @@ func NewPoliciesAPIUpsertClusterPoliciesRequestWithBody(server string, clusterId
 	}
 
 	operationPath := fmt.Sprintf("/v1/kubernetes/clusters/%s/policies", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("PUT", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewScheduledRebalancingAPIListRebalancingJobsRequest generates requests for ScheduledRebalancingAPIListRebalancingJobs
+func NewScheduledRebalancingAPIListRebalancingJobsRequest(server string, clusterId string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "clusterId", runtime.ParamLocationPath, clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/kubernetes/clusters/%s/rebalancing-jobs", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewScheduledRebalancingAPICreateRebalancingJobRequest calls the generic ScheduledRebalancingAPICreateRebalancingJob builder with application/json body
+func NewScheduledRebalancingAPICreateRebalancingJobRequest(server string, clusterId string, body ScheduledRebalancingAPICreateRebalancingJobJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewScheduledRebalancingAPICreateRebalancingJobRequestWithBody(server, clusterId, "application/json", bodyReader)
+}
+
+// NewScheduledRebalancingAPICreateRebalancingJobRequestWithBody generates requests for ScheduledRebalancingAPICreateRebalancingJob with any type of body
+func NewScheduledRebalancingAPICreateRebalancingJobRequestWithBody(server string, clusterId string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "clusterId", runtime.ParamLocationPath, clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/kubernetes/clusters/%s/rebalancing-jobs", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewScheduledRebalancingAPIGetRebalancingJobRequest generates requests for ScheduledRebalancingAPIGetRebalancingJob
+func NewScheduledRebalancingAPIGetRebalancingJobRequest(server string, clusterId string, id string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "clusterId", runtime.ParamLocationPath, clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/kubernetes/clusters/%s/rebalancing-jobs/%s", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewScheduledRebalancingAPIUpdateRebalancingJobRequest calls the generic ScheduledRebalancingAPIUpdateRebalancingJob builder with application/json body
+func NewScheduledRebalancingAPIUpdateRebalancingJobRequest(server string, clusterId string, id string, body ScheduledRebalancingAPIUpdateRebalancingJobJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewScheduledRebalancingAPIUpdateRebalancingJobRequestWithBody(server, clusterId, id, "application/json", bodyReader)
+}
+
+// NewScheduledRebalancingAPIUpdateRebalancingJobRequestWithBody generates requests for ScheduledRebalancingAPIUpdateRebalancingJob with any type of body
+func NewScheduledRebalancingAPIUpdateRebalancingJobRequestWithBody(server string, clusterId string, id string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "clusterId", runtime.ParamLocationPath, clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/kubernetes/clusters/%s/rebalancing-jobs/%s", pathParam0, pathParam1)
 	if operationPath[0] == '/' {
 		operationPath = "." + operationPath
 	}
@@ -2629,6 +2952,107 @@ func NewExternalClusterAPICreateClusterTokenRequest(server string, clusterId str
 	return req, nil
 }
 
+// NewScheduledRebalancingAPIListRebalancingSchedulesRequest generates requests for ScheduledRebalancingAPIListRebalancingSchedules
+func NewScheduledRebalancingAPIListRebalancingSchedulesRequest(server string) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/rebalancing-schedules")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewScheduledRebalancingAPICreateRebalancingScheduleRequest calls the generic ScheduledRebalancingAPICreateRebalancingSchedule builder with application/json body
+func NewScheduledRebalancingAPICreateRebalancingScheduleRequest(server string, body ScheduledRebalancingAPICreateRebalancingScheduleJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewScheduledRebalancingAPICreateRebalancingScheduleRequestWithBody(server, "application/json", bodyReader)
+}
+
+// NewScheduledRebalancingAPICreateRebalancingScheduleRequestWithBody generates requests for ScheduledRebalancingAPICreateRebalancingSchedule with any type of body
+func NewScheduledRebalancingAPICreateRebalancingScheduleRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/rebalancing-schedules")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewScheduledRebalancingAPIGetRebalancingScheduleRequest generates requests for ScheduledRebalancingAPIGetRebalancingSchedule
+func NewScheduledRebalancingAPIGetRebalancingScheduleRequest(server string, id string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/rebalancing-schedules/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 // NewExternalClusterAPIGetCredentialsScriptTemplateRequest generates requests for ExternalClusterAPIGetCredentialsScriptTemplate
 func NewExternalClusterAPIGetCredentialsScriptTemplateRequest(server string, provider string, params *ExternalClusterAPIGetCredentialsScriptTemplateParams) (*http.Request, error) {
 	var err error
@@ -2802,6 +3226,22 @@ type ClientWithResponsesInterface interface {
 
 	PoliciesAPIUpsertClusterPoliciesWithResponse(ctx context.Context, clusterId string, body PoliciesAPIUpsertClusterPoliciesJSONRequestBody) (*PoliciesAPIUpsertClusterPoliciesResponse, error)
 
+	// ScheduledRebalancingAPIListRebalancingJobs request
+	ScheduledRebalancingAPIListRebalancingJobsWithResponse(ctx context.Context, clusterId string) (*ScheduledRebalancingAPIListRebalancingJobsResponse, error)
+
+	// ScheduledRebalancingAPICreateRebalancingJob request  with any body
+	ScheduledRebalancingAPICreateRebalancingJobWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader) (*ScheduledRebalancingAPICreateRebalancingJobResponse, error)
+
+	ScheduledRebalancingAPICreateRebalancingJobWithResponse(ctx context.Context, clusterId string, body ScheduledRebalancingAPICreateRebalancingJobJSONRequestBody) (*ScheduledRebalancingAPICreateRebalancingJobResponse, error)
+
+	// ScheduledRebalancingAPIGetRebalancingJob request
+	ScheduledRebalancingAPIGetRebalancingJobWithResponse(ctx context.Context, clusterId string, id string) (*ScheduledRebalancingAPIGetRebalancingJobResponse, error)
+
+	// ScheduledRebalancingAPIUpdateRebalancingJob request  with any body
+	ScheduledRebalancingAPIUpdateRebalancingJobWithBodyWithResponse(ctx context.Context, clusterId string, id string, contentType string, body io.Reader) (*ScheduledRebalancingAPIUpdateRebalancingJobResponse, error)
+
+	ScheduledRebalancingAPIUpdateRebalancingJobWithResponse(ctx context.Context, clusterId string, id string, body ScheduledRebalancingAPIUpdateRebalancingJobJSONRequestBody) (*ScheduledRebalancingAPIUpdateRebalancingJobResponse, error)
+
 	// ExternalClusterAPIListClusters request
 	ExternalClusterAPIListClustersWithResponse(ctx context.Context, params *ExternalClusterAPIListClustersParams) (*ExternalClusterAPIListClustersResponse, error)
 
@@ -2870,6 +3310,17 @@ type ClientWithResponsesInterface interface {
 
 	// ExternalClusterAPICreateClusterToken request
 	ExternalClusterAPICreateClusterTokenWithResponse(ctx context.Context, clusterId string) (*ExternalClusterAPICreateClusterTokenResponse, error)
+
+	// ScheduledRebalancingAPIListRebalancingSchedules request
+	ScheduledRebalancingAPIListRebalancingSchedulesWithResponse(ctx context.Context) (*ScheduledRebalancingAPIListRebalancingSchedulesResponse, error)
+
+	// ScheduledRebalancingAPICreateRebalancingSchedule request  with any body
+	ScheduledRebalancingAPICreateRebalancingScheduleWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*ScheduledRebalancingAPICreateRebalancingScheduleResponse, error)
+
+	ScheduledRebalancingAPICreateRebalancingScheduleWithResponse(ctx context.Context, body ScheduledRebalancingAPICreateRebalancingScheduleJSONRequestBody) (*ScheduledRebalancingAPICreateRebalancingScheduleResponse, error)
+
+	// ScheduledRebalancingAPIGetRebalancingSchedule request
+	ScheduledRebalancingAPIGetRebalancingScheduleWithResponse(ctx context.Context, id string) (*ScheduledRebalancingAPIGetRebalancingScheduleResponse, error)
 
 	// ExternalClusterAPIGetCredentialsScriptTemplate request
 	ExternalClusterAPIGetCredentialsScriptTemplateWithResponse(ctx context.Context, provider string, params *ExternalClusterAPIGetCredentialsScriptTemplateParams) (*ExternalClusterAPIGetCredentialsScriptTemplateResponse, error)
@@ -3483,6 +3934,126 @@ func (r PoliciesAPIUpsertClusterPoliciesResponse) GetBody() []byte {
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
+type ScheduledRebalancingAPIListRebalancingJobsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *ScheduledrebalancingV1ListRebalancingJobsResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r ScheduledRebalancingAPIListRebalancingJobsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r ScheduledRebalancingAPIListRebalancingJobsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r ScheduledRebalancingAPIListRebalancingJobsResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type ScheduledRebalancingAPICreateRebalancingJobResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *ScheduledrebalancingV1RebalancingJob
+}
+
+// Status returns HTTPResponse.Status
+func (r ScheduledRebalancingAPICreateRebalancingJobResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r ScheduledRebalancingAPICreateRebalancingJobResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r ScheduledRebalancingAPICreateRebalancingJobResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type ScheduledRebalancingAPIGetRebalancingJobResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *ScheduledrebalancingV1RebalancingJob
+}
+
+// Status returns HTTPResponse.Status
+func (r ScheduledRebalancingAPIGetRebalancingJobResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r ScheduledRebalancingAPIGetRebalancingJobResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r ScheduledRebalancingAPIGetRebalancingJobResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type ScheduledRebalancingAPIUpdateRebalancingJobResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *ScheduledrebalancingV1RebalancingJob
+}
+
+// Status returns HTTPResponse.Status
+func (r ScheduledRebalancingAPIUpdateRebalancingJobResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r ScheduledRebalancingAPIUpdateRebalancingJobResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r ScheduledRebalancingAPIUpdateRebalancingJobResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
 type ExternalClusterAPIListClustersResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -4052,6 +4623,96 @@ func (r ExternalClusterAPICreateClusterTokenResponse) GetBody() []byte {
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
+type ScheduledRebalancingAPIListRebalancingSchedulesResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *ScheduledrebalancingV1ListRebalancingSchedulesResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r ScheduledRebalancingAPIListRebalancingSchedulesResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r ScheduledRebalancingAPIListRebalancingSchedulesResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r ScheduledRebalancingAPIListRebalancingSchedulesResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type ScheduledRebalancingAPICreateRebalancingScheduleResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *ScheduledrebalancingV1RebalancingSchedule
+}
+
+// Status returns HTTPResponse.Status
+func (r ScheduledRebalancingAPICreateRebalancingScheduleResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r ScheduledRebalancingAPICreateRebalancingScheduleResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r ScheduledRebalancingAPICreateRebalancingScheduleResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type ScheduledRebalancingAPIGetRebalancingScheduleResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *ScheduledrebalancingV1RebalancingSchedule
+}
+
+// Status returns HTTPResponse.Status
+func (r ScheduledRebalancingAPIGetRebalancingScheduleResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r ScheduledRebalancingAPIGetRebalancingScheduleResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r ScheduledRebalancingAPIGetRebalancingScheduleResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
 type ExternalClusterAPIGetCredentialsScriptTemplateResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -4325,6 +4986,58 @@ func (c *ClientWithResponses) PoliciesAPIUpsertClusterPoliciesWithResponse(ctx c
 	return ParsePoliciesAPIUpsertClusterPoliciesResponse(rsp)
 }
 
+// ScheduledRebalancingAPIListRebalancingJobsWithResponse request returning *ScheduledRebalancingAPIListRebalancingJobsResponse
+func (c *ClientWithResponses) ScheduledRebalancingAPIListRebalancingJobsWithResponse(ctx context.Context, clusterId string) (*ScheduledRebalancingAPIListRebalancingJobsResponse, error) {
+	rsp, err := c.ScheduledRebalancingAPIListRebalancingJobs(ctx, clusterId)
+	if err != nil {
+		return nil, err
+	}
+	return ParseScheduledRebalancingAPIListRebalancingJobsResponse(rsp)
+}
+
+// ScheduledRebalancingAPICreateRebalancingJobWithBodyWithResponse request with arbitrary body returning *ScheduledRebalancingAPICreateRebalancingJobResponse
+func (c *ClientWithResponses) ScheduledRebalancingAPICreateRebalancingJobWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader) (*ScheduledRebalancingAPICreateRebalancingJobResponse, error) {
+	rsp, err := c.ScheduledRebalancingAPICreateRebalancingJobWithBody(ctx, clusterId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseScheduledRebalancingAPICreateRebalancingJobResponse(rsp)
+}
+
+func (c *ClientWithResponses) ScheduledRebalancingAPICreateRebalancingJobWithResponse(ctx context.Context, clusterId string, body ScheduledRebalancingAPICreateRebalancingJobJSONRequestBody) (*ScheduledRebalancingAPICreateRebalancingJobResponse, error) {
+	rsp, err := c.ScheduledRebalancingAPICreateRebalancingJob(ctx, clusterId, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseScheduledRebalancingAPICreateRebalancingJobResponse(rsp)
+}
+
+// ScheduledRebalancingAPIGetRebalancingJobWithResponse request returning *ScheduledRebalancingAPIGetRebalancingJobResponse
+func (c *ClientWithResponses) ScheduledRebalancingAPIGetRebalancingJobWithResponse(ctx context.Context, clusterId string, id string) (*ScheduledRebalancingAPIGetRebalancingJobResponse, error) {
+	rsp, err := c.ScheduledRebalancingAPIGetRebalancingJob(ctx, clusterId, id)
+	if err != nil {
+		return nil, err
+	}
+	return ParseScheduledRebalancingAPIGetRebalancingJobResponse(rsp)
+}
+
+// ScheduledRebalancingAPIUpdateRebalancingJobWithBodyWithResponse request with arbitrary body returning *ScheduledRebalancingAPIUpdateRebalancingJobResponse
+func (c *ClientWithResponses) ScheduledRebalancingAPIUpdateRebalancingJobWithBodyWithResponse(ctx context.Context, clusterId string, id string, contentType string, body io.Reader) (*ScheduledRebalancingAPIUpdateRebalancingJobResponse, error) {
+	rsp, err := c.ScheduledRebalancingAPIUpdateRebalancingJobWithBody(ctx, clusterId, id, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseScheduledRebalancingAPIUpdateRebalancingJobResponse(rsp)
+}
+
+func (c *ClientWithResponses) ScheduledRebalancingAPIUpdateRebalancingJobWithResponse(ctx context.Context, clusterId string, id string, body ScheduledRebalancingAPIUpdateRebalancingJobJSONRequestBody) (*ScheduledRebalancingAPIUpdateRebalancingJobResponse, error) {
+	rsp, err := c.ScheduledRebalancingAPIUpdateRebalancingJob(ctx, clusterId, id, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseScheduledRebalancingAPIUpdateRebalancingJobResponse(rsp)
+}
+
 // ExternalClusterAPIListClustersWithResponse request returning *ExternalClusterAPIListClustersResponse
 func (c *ClientWithResponses) ExternalClusterAPIListClustersWithResponse(ctx context.Context, params *ExternalClusterAPIListClustersParams) (*ExternalClusterAPIListClustersResponse, error) {
 	rsp, err := c.ExternalClusterAPIListClusters(ctx, params)
@@ -4542,6 +5255,41 @@ func (c *ClientWithResponses) ExternalClusterAPICreateClusterTokenWithResponse(c
 		return nil, err
 	}
 	return ParseExternalClusterAPICreateClusterTokenResponse(rsp)
+}
+
+// ScheduledRebalancingAPIListRebalancingSchedulesWithResponse request returning *ScheduledRebalancingAPIListRebalancingSchedulesResponse
+func (c *ClientWithResponses) ScheduledRebalancingAPIListRebalancingSchedulesWithResponse(ctx context.Context) (*ScheduledRebalancingAPIListRebalancingSchedulesResponse, error) {
+	rsp, err := c.ScheduledRebalancingAPIListRebalancingSchedules(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return ParseScheduledRebalancingAPIListRebalancingSchedulesResponse(rsp)
+}
+
+// ScheduledRebalancingAPICreateRebalancingScheduleWithBodyWithResponse request with arbitrary body returning *ScheduledRebalancingAPICreateRebalancingScheduleResponse
+func (c *ClientWithResponses) ScheduledRebalancingAPICreateRebalancingScheduleWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*ScheduledRebalancingAPICreateRebalancingScheduleResponse, error) {
+	rsp, err := c.ScheduledRebalancingAPICreateRebalancingScheduleWithBody(ctx, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseScheduledRebalancingAPICreateRebalancingScheduleResponse(rsp)
+}
+
+func (c *ClientWithResponses) ScheduledRebalancingAPICreateRebalancingScheduleWithResponse(ctx context.Context, body ScheduledRebalancingAPICreateRebalancingScheduleJSONRequestBody) (*ScheduledRebalancingAPICreateRebalancingScheduleResponse, error) {
+	rsp, err := c.ScheduledRebalancingAPICreateRebalancingSchedule(ctx, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseScheduledRebalancingAPICreateRebalancingScheduleResponse(rsp)
+}
+
+// ScheduledRebalancingAPIGetRebalancingScheduleWithResponse request returning *ScheduledRebalancingAPIGetRebalancingScheduleResponse
+func (c *ClientWithResponses) ScheduledRebalancingAPIGetRebalancingScheduleWithResponse(ctx context.Context, id string) (*ScheduledRebalancingAPIGetRebalancingScheduleResponse, error) {
+	rsp, err := c.ScheduledRebalancingAPIGetRebalancingSchedule(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	return ParseScheduledRebalancingAPIGetRebalancingScheduleResponse(rsp)
 }
 
 // ExternalClusterAPIGetCredentialsScriptTemplateWithResponse request returning *ExternalClusterAPIGetCredentialsScriptTemplateResponse
@@ -5063,6 +5811,110 @@ func ParsePoliciesAPIUpsertClusterPoliciesResponse(rsp *http.Response) (*Policie
 	return response, nil
 }
 
+// ParseScheduledRebalancingAPIListRebalancingJobsResponse parses an HTTP response from a ScheduledRebalancingAPIListRebalancingJobsWithResponse call
+func ParseScheduledRebalancingAPIListRebalancingJobsResponse(rsp *http.Response) (*ScheduledRebalancingAPIListRebalancingJobsResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &ScheduledRebalancingAPIListRebalancingJobsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ScheduledrebalancingV1ListRebalancingJobsResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseScheduledRebalancingAPICreateRebalancingJobResponse parses an HTTP response from a ScheduledRebalancingAPICreateRebalancingJobWithResponse call
+func ParseScheduledRebalancingAPICreateRebalancingJobResponse(rsp *http.Response) (*ScheduledRebalancingAPICreateRebalancingJobResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &ScheduledRebalancingAPICreateRebalancingJobResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ScheduledrebalancingV1RebalancingJob
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseScheduledRebalancingAPIGetRebalancingJobResponse parses an HTTP response from a ScheduledRebalancingAPIGetRebalancingJobWithResponse call
+func ParseScheduledRebalancingAPIGetRebalancingJobResponse(rsp *http.Response) (*ScheduledRebalancingAPIGetRebalancingJobResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &ScheduledRebalancingAPIGetRebalancingJobResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ScheduledrebalancingV1RebalancingJob
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseScheduledRebalancingAPIUpdateRebalancingJobResponse parses an HTTP response from a ScheduledRebalancingAPIUpdateRebalancingJobWithResponse call
+func ParseScheduledRebalancingAPIUpdateRebalancingJobResponse(rsp *http.Response) (*ScheduledRebalancingAPIUpdateRebalancingJobResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &ScheduledRebalancingAPIUpdateRebalancingJobResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ScheduledrebalancingV1RebalancingJob
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
 // ParseExternalClusterAPIListClustersResponse parses an HTTP response from a ExternalClusterAPIListClustersWithResponse call
 func ParseExternalClusterAPIListClustersResponse(rsp *http.Response) (*ExternalClusterAPIListClustersResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
@@ -5537,6 +6389,84 @@ func ParseExternalClusterAPICreateClusterTokenResponse(rsp *http.Response) (*Ext
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest ExternalclusterV1CreateClusterTokenResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseScheduledRebalancingAPIListRebalancingSchedulesResponse parses an HTTP response from a ScheduledRebalancingAPIListRebalancingSchedulesWithResponse call
+func ParseScheduledRebalancingAPIListRebalancingSchedulesResponse(rsp *http.Response) (*ScheduledRebalancingAPIListRebalancingSchedulesResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &ScheduledRebalancingAPIListRebalancingSchedulesResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ScheduledrebalancingV1ListRebalancingSchedulesResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseScheduledRebalancingAPICreateRebalancingScheduleResponse parses an HTTP response from a ScheduledRebalancingAPICreateRebalancingScheduleWithResponse call
+func ParseScheduledRebalancingAPICreateRebalancingScheduleResponse(rsp *http.Response) (*ScheduledRebalancingAPICreateRebalancingScheduleResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &ScheduledRebalancingAPICreateRebalancingScheduleResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ScheduledrebalancingV1RebalancingSchedule
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseScheduledRebalancingAPIGetRebalancingScheduleResponse parses an HTTP response from a ScheduledRebalancingAPIGetRebalancingScheduleWithResponse call
+func ParseScheduledRebalancingAPIGetRebalancingScheduleResponse(rsp *http.Response) (*ScheduledRebalancingAPIGetRebalancingScheduleResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &ScheduledRebalancingAPIGetRebalancingScheduleResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ScheduledrebalancingV1RebalancingSchedule
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
