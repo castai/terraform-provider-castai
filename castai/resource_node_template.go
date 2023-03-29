@@ -27,7 +27,14 @@ const (
 	FieldNodeTemplateConstraints               = "constraints"
 )
 
+const (
+	ArchAMD64 = "amd64"
+	ArchARM64 = "arm64"
+)
+
 func resourceNodeTemplate() *schema.Resource {
+	supportedArchitectures := []string{ArchAMD64, ArchARM64}
+
 	return &schema.Resource{
 		CreateContext: resourceNodeTemplateCreate,
 		ReadContext:   resourceNodeTemplateRead,
@@ -193,6 +200,21 @@ func resourceNodeTemplate() *schema.Resource {
 									},
 								},
 							},
+						},
+						"architectures": {
+							Type:     schema.TypeList,
+							MaxItems: 2,
+							MinItems: 1,
+							Optional: true,
+							Computed: true,
+							Elem: &schema.Schema{
+								Type:             schema.TypeString,
+								ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(supportedArchitectures, false)),
+							},
+							DefaultFunc: func() (interface{}, error) {
+								return []string{ArchAMD64}, nil
+							},
+							Description: fmt.Sprintf("List of acceptable instance CPU architectures, the default is %s. Allowed values: %s.", ArchAMD64, strings.Join(supportedArchitectures, ", ")),
 						},
 					},
 				},
@@ -376,6 +398,9 @@ func flattenConstraints(c *sdk.NodetemplatesV1TemplateConstraints) ([]map[string
 	}
 	if c.MaxCpu != nil {
 		out["max_cpu"] = c.MaxCpu
+	}
+	if c.Architectures != nil {
+		out["architectures"] = lo.FromPtr(c.Architectures)
 	}
 	return []map[string]any{out}, nil
 }
@@ -765,6 +790,9 @@ func toTemplateConstraints(obj map[string]any) *sdk.NodetemplatesV1TemplateConst
 	}
 	if v, ok := obj["use_spot_fallbacks"].(bool); ok {
 		out.UseSpotFallbacks = toPtr(v)
+	}
+	if v, ok := obj["architectures"].([]any); ok {
+		out.Architectures = toPtr(toStringList(v))
 	}
 
 	return out
