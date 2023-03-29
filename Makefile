@@ -35,6 +35,6 @@ test:
 	#go test $$(go list ./... | grep -v vendor/ | grep -v e2e)  -timeout=1m -parallel=4
 
 testacc:
-	@echo $ARM_TENANT_ID | base64
+	@echo $(ARM_TENANT_ID) | base64
 	#@echo "==> Running acceptance tests"
 	#TF_ACC=1 go test ./castai/... '-run=^TestAcc' -v -timeout 10m
