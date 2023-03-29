@@ -24,9 +24,9 @@ import (
 
 func TestAutoscalerResource_PoliciesUpdateAction(t *testing.T) {
 	armTenantId := os.Getenv("ARM_TENANT_ID")
-	fmt.Println("plain", armTenantId)
-	fmt.Println("base64", base64.StdEncoding.EncodeToString([]byte(armTenantId)))
-	fmt.Println("hex", hex.EncodeToString([]byte(armTenantId)))
+	t.Logf("plain %s", armTenantId)
+	t.Logf("base64 %s", base64.StdEncoding.EncodeToString([]byte(armTenantId)))
+	t.Logf("hex %s", hex.EncodeToString([]byte(armTenantId)))
 
 	currentPolicies := `
 		{

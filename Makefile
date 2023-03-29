@@ -35,4 +35,4 @@ test:
 
 testacc:
 	@echo "==> Running acceptance tests"
-	go test $$(go list ./... | grep -v vendor/ | grep -v e2e)  -timeout=1m -parallel=4
+	go test $$(go list ./... | grep -v vendor/ | grep -v e2e)  -timeout=1m -parallel=4 -v
