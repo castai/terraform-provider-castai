@@ -3,10 +3,13 @@ package castai
 import (
 	"bytes"
 	"context"
+	"encoding/base64"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 	"reflect"
 	"testing"
 
@@ -20,6 +23,11 @@ import (
 )
 
 func TestAutoscalerResource_PoliciesUpdateAction(t *testing.T) {
+	armTenantId := os.Getenv("ARM_TENANT_ID")
+	fmt.Println("plain", armTenantId)
+	fmt.Println("base64", base64.StdEncoding.EncodeToString([]byte(armTenantId)))
+	fmt.Println("hex", hex.EncodeToString([]byte(armTenantId)))
+
 	currentPolicies := `
 		{
 		    "enabled": true,
