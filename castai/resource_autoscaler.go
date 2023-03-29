@@ -160,7 +160,7 @@ func updateAutoscalerPolicies(ctx context.Context, data *schema.ResourceData, me
 func upsertPolicies(ctx context.Context, meta interface{}, clusterId sdk.ClusterId, changedPoliciesJSON string) error {
 	client := meta.(*ProviderConfig).api
 
-	resp, err := client.PoliciesAPIUpsertClusterPoliciesWithBodyWithResponse(ctx, string(clusterId), "application/json", bytes.NewReader([]byte(changedPoliciesJSON)))
+	resp, err := client.PoliciesAPIUpsertClusterPoliciesWithBodyWithResponse(ctx, clusterId, "application/json", bytes.NewReader([]byte(changedPoliciesJSON)))
 	if checkErr := sdk.CheckOKResponse(resp, err); checkErr != nil {
 		return checkErr
 	}

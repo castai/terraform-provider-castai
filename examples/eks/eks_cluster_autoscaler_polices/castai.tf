@@ -146,7 +146,8 @@ module "castai-eks-cluster" {
             "clouds": ["aws"],
             "spotBackups": {
                 "enabled": true
-            }
+            },
+            "spotDiversityEnabled": false
         },
         "nodeDownscaler": {
             "enabled": true,

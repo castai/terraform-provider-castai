@@ -99,7 +99,8 @@ module "castai-aks-cluster" {
             "clouds": ["azure"],
             "spotBackups": {
                 "enabled": true
-            }
+            },
+            "spotDiversityEnabled": false
         },
         "nodeDownscaler": {
             "enabled": true,
