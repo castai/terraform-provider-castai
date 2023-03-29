@@ -156,10 +156,10 @@ type CastaiMetricsV1beta1ClusterMetrics struct {
 
 // Types of cloud service providers CAST AI supports.
 //
-//  - invalid: Invalid.
-//  - aws: Amazon web services.
-//  - gcp: Google cloud provider.
-//  - azure: Microsoft Azure.
+//   - invalid: Invalid.
+//   - aws: Amazon web services.
+//   - gcp: Google cloud provider.
+//   - azure: Microsoft Azure.
 type CastaiV1Cloud string
 
 // AKSClusterParams defines AKS-specific arguments.
@@ -942,6 +942,7 @@ type NodeconfigV1SubnetDetails struct {
 
 // NodetemplatesV1AvailableInstanceType defines model for nodetemplates.v1.AvailableInstanceType.
 type NodetemplatesV1AvailableInstanceType struct {
+	Architecture           *string                                                     `json:"architecture,omitempty"`
 	AvailableGpuDevices    *[]NodetemplatesV1AvailableInstanceTypeGPUDevice            `json:"availableGpuDevices,omitempty"`
 	Cpu                    *string                                                     `json:"cpu,omitempty"`
 	CpuCost                *float64                                                    `json:"cpuCost,omitempty"`
@@ -985,7 +986,7 @@ type NodetemplatesV1ListNodeTemplatesResponse struct {
 type NodetemplatesV1NewNodeTemplate struct {
 	ConfigurationId        *string                             `json:"configurationId,omitempty"`
 	Constraints            *NodetemplatesV1TemplateConstraints `json:"constraints,omitempty"`
-	CustomInstancesEnabled *bool                               `json:"customInstancesEnabled,omitempty"`
+	CustomInstancesEnabled *bool                               `json:"customInstancesEnabled"`
 	CustomLabel            *NodetemplatesV1Label               `json:"customLabel,omitempty"`
 
 	// Custom labels for the template.
@@ -1067,7 +1068,8 @@ type NodetemplatesV1TaintWithoutEffect struct {
 
 // NodetemplatesV1TemplateConstraints defines model for nodetemplates.v1.TemplateConstraints.
 type NodetemplatesV1TemplateConstraints struct {
-	ComputeOptimized *bool `json:"computeOptimized"`
+	Architectures    *[]string `json:"architectures,omitempty"`
+	ComputeOptimized *bool     `json:"computeOptimized"`
 
 	// Fallback restore rate in seconds: defines how much time should pass before spot fallback should be attempted to be restored to real spot.
 	FallbackRestoreRateSeconds *int32                                                       `json:"fallbackRestoreRateSeconds"`
@@ -1103,7 +1105,7 @@ type NodetemplatesV1TemplateConstraintsInstanceFamilyConstraints struct {
 type NodetemplatesV1UpdateNodeTemplate struct {
 	ConfigurationId        *string                             `json:"configurationId,omitempty"`
 	Constraints            *NodetemplatesV1TemplateConstraints `json:"constraints,omitempty"`
-	CustomInstancesEnabled *bool                               `json:"customInstancesEnabled,omitempty"`
+	CustomInstancesEnabled *bool                               `json:"customInstancesEnabled"`
 	CustomLabel            *NodetemplatesV1Label               `json:"customLabel,omitempty"`
 
 	// Custom labels for the template.
@@ -1297,6 +1299,11 @@ type PoliciesV1SpotInstances struct {
 	// Policy defining whether autoscaler can use spot backups instead of spot instances when spot instances are not
 	// available.
 	SpotBackups *PoliciesV1SpotBackups `json:"spotBackups,omitempty"`
+
+	// Enable/disable spot diversity policy.
+	//
+	// When enabled, autoscaler will try to balance between diverse and cost optimal instance types.
+	SpotDiversityEnabled *bool `json:"spotDiversityEnabled"`
 }
 
 // Policy defining autoscaler's behavior when unscedulable pods were detected.
