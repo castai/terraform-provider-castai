@@ -89,7 +89,8 @@ func TestNodeTemplateResourceReadContext(t *testing.T) {
 				],
 				"rebalancingConfig": {
 				  "minNodes": 0
-				}
+				},
+				"customInstancesEnabled": true
 			  }
 			}
 		  ]
@@ -141,6 +142,7 @@ constraints.0.min_memory = 0
 constraints.0.spot = false
 constraints.0.storage_optimized = false
 constraints.0.use_spot_fallbacks = false
+custom_instances_enabled = true
 custom_label.# = 0
 custom_labels.% = 2
 custom_labels.key-1 = value-1
@@ -207,6 +209,7 @@ func TestAccResourceNodeTemplate_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "name", rName),
 					resource.TestCheckResourceAttr(resourceName, "should_taint", "true"),
+					resource.TestCheckResourceAttr(resourceName, "custom_instances_enabled", "false"),
 					resource.TestCheckResourceAttr(resourceName, "custom_label.#", "0"),
 					resource.TestCheckResourceAttr(resourceName, "custom_labels.%", "2"),
 					resource.TestCheckResourceAttr(resourceName, "custom_labels.custom-key-1", "custom-value-1"),
@@ -240,6 +243,7 @@ func TestAccResourceNodeTemplate_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "name", rName),
 					resource.TestCheckResourceAttr(resourceName, "should_taint", "true"),
+					resource.TestCheckResourceAttr(resourceName, "custom_instances_enabled", "false"),
 					resource.TestCheckResourceAttr(resourceName, "custom_label.#", "0"),
 					resource.TestCheckResourceAttr(resourceName, "custom_labels.%", "2"),
 					resource.TestCheckResourceAttr(resourceName, "custom_labels.custom-key-1", "custom-value-1"),

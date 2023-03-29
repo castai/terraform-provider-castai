@@ -86,6 +86,8 @@ module "castai-gke-cluster" {
         compute_optimized = false
         storage_optimized = false
       }
+
+      custom_instances_enabled = true
     }
   }
 
