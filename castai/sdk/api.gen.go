@@ -983,9 +983,10 @@ type NodetemplatesV1ListNodeTemplatesResponse struct {
 
 // NodetemplatesV1NewNodeTemplate defines model for nodetemplates.v1.NewNodeTemplate.
 type NodetemplatesV1NewNodeTemplate struct {
-	ConfigurationId *string                             `json:"configurationId,omitempty"`
-	Constraints     *NodetemplatesV1TemplateConstraints `json:"constraints,omitempty"`
-	CustomLabel     *NodetemplatesV1Label               `json:"customLabel,omitempty"`
+	ConfigurationId        *string                             `json:"configurationId,omitempty"`
+	Constraints            *NodetemplatesV1TemplateConstraints `json:"constraints,omitempty"`
+	CustomInstancesEnabled *bool                               `json:"customInstancesEnabled,omitempty"`
+	CustomLabel            *NodetemplatesV1Label               `json:"customLabel,omitempty"`
 
 	// Custom labels for the template.
 	// The passed values will be ignored if the field custom_label is present.
@@ -1008,10 +1009,11 @@ type NodetemplatesV1NewNodeTemplate_CustomLabels struct {
 
 // NodetemplatesV1NodeTemplate defines model for nodetemplates.v1.NodeTemplate.
 type NodetemplatesV1NodeTemplate struct {
-	ConfigurationId   *string                             `json:"configurationId,omitempty"`
-	ConfigurationName *string                             `json:"configurationName,omitempty"`
-	Constraints       *NodetemplatesV1TemplateConstraints `json:"constraints,omitempty"`
-	CustomLabel       *NodetemplatesV1Label               `json:"customLabel,omitempty"`
+	ConfigurationId        *string                             `json:"configurationId,omitempty"`
+	ConfigurationName      *string                             `json:"configurationName,omitempty"`
+	Constraints            *NodetemplatesV1TemplateConstraints `json:"constraints,omitempty"`
+	CustomInstancesEnabled *bool                               `json:"customInstancesEnabled,omitempty"`
+	CustomLabel            *NodetemplatesV1Label               `json:"customLabel,omitempty"`
 
 	// Custom labels for the template.
 	CustomLabels *NodetemplatesV1NodeTemplate_CustomLabels `json:"customLabels,omitempty"`
@@ -1099,9 +1101,10 @@ type NodetemplatesV1TemplateConstraintsInstanceFamilyConstraints struct {
 
 // NodetemplatesV1UpdateNodeTemplate defines model for nodetemplates.v1.UpdateNodeTemplate.
 type NodetemplatesV1UpdateNodeTemplate struct {
-	ConfigurationId *string                             `json:"configurationId,omitempty"`
-	Constraints     *NodetemplatesV1TemplateConstraints `json:"constraints,omitempty"`
-	CustomLabel     *NodetemplatesV1Label               `json:"customLabel,omitempty"`
+	ConfigurationId        *string                             `json:"configurationId,omitempty"`
+	Constraints            *NodetemplatesV1TemplateConstraints `json:"constraints,omitempty"`
+	CustomInstancesEnabled *bool                               `json:"customInstancesEnabled,omitempty"`
+	CustomLabel            *NodetemplatesV1Label               `json:"customLabel,omitempty"`
 
 	// Custom labels for the template.
 	// The passed values will be ignored if the field custom_label is present.
