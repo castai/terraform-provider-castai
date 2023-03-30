@@ -41,6 +41,7 @@ CAST AI node template resource to manage node templates
 
 Optional:
 
+- `architectures` (List of String) List of acceptable instance CPU architectures, the default is amd64. Allowed values: amd64, arm64.
 - `compute_optimized` (Boolean) Compute optimized instance constraint - will only pick compute optimized nodes if true.
 - `fallback_restore_rate_seconds` (Number) Fallback restore rate in seconds: defines how much time should pass before spot fallback should be attempted to be restored to real spot.
 - `gpu` (Block List, Max: 1) (see [below for nested schema](#nestedblock--constraints--gpu))
