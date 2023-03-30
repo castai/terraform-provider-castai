@@ -107,7 +107,8 @@ module "castai-gke-cluster" {
             "clouds": ["gcp"],
             "spotBackups": {
                 "enabled": true
-            }
+            },
+            "spotDiversityEnabled": false
         },
         "nodeDownscaler": {
             "enabled": true,
