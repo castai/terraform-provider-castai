@@ -99,7 +99,7 @@ func TestAccResourceAKSCluster(t *testing.T) {
 			},
 		},
 		ExternalProviders: map[string]resource.ExternalProvider{
-			"azure": {
+			"azurerm": {
 				Source:            "hashicorp/azurerm",
 				VersionConstraint: "~> 3.7.0",
 			},

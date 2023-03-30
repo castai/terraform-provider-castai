@@ -61,6 +61,7 @@ func TestNodeTemplateResourceReadContext(t *testing.T) {
 					  "g3"
 					]
 				  },
+	              "architectures": ["amd64", "arm64"],
 				  "gpu": {
 					"manufacturers": [
 					  "NVIDIA"
@@ -116,6 +117,9 @@ func TestNodeTemplateResourceReadContext(t *testing.T) {
 cluster_id = b6bfc074-a267-400f-b8f1-db0850c369b1
 configuration_id = 7dc4f922-29c9-4377-889c-0c8c5fb8d497
 constraints.# = 1
+constraints.0.architectures.# = 2
+constraints.0.architectures.0 = amd64
+constraints.0.architectures.1 = arm64
 constraints.0.compute_optimized = false
 constraints.0.fallback_restore_rate_seconds = 0
 constraints.0.gpu.# = 1
@@ -227,6 +231,8 @@ func TestAccResourceNodeTemplate_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.max_cpu", "100"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.use_spot_fallbacks", "true"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.spot", "true"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.architectures.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.architectures.0", "amd64"),
 				),
 			},
 			{
@@ -261,6 +267,8 @@ func TestAccResourceNodeTemplate_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.max_cpu", "0"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.use_spot_fallbacks", "true"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.spot", "true"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.architectures.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.architectures.0", "arm64"),
 				),
 			},
 		},
@@ -344,6 +352,7 @@ func testNodeTemplateUpdated(rName, clusterName string) string {
 				fallback_restore_rate_seconds = 1800
 				storage_optimized = false
 				compute_optimized = false
+				architectures = ["arm64"]
 			}
 		}
 	`, rName))
