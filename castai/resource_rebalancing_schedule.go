@@ -140,7 +140,7 @@ func resourceRebalancingScheduleUpdate(ctx context.Context, d *schema.ResourceDa
 	if checkErr := sdk.CheckOKResponse(resp, err); checkErr != nil {
 		return diag.FromErr(checkErr)
 	}
-	return nil
+	return resourceRebalancingScheduleRead(ctx, d, meta)
 }
 
 func resourceRebalancingScheduleDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
