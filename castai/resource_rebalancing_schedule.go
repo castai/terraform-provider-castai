@@ -102,6 +102,7 @@ func resourceRebalancingScheduleRead(ctx context.Context, d *schema.ResourceData
 }
 
 func setStateFromSchedule(schedule *sdk.ScheduledrebalancingV1RebalancingSchedule, d *schema.ResourceData) error {
+	d.SetId(*schedule.Id)
 	if err := d.Set("name", schedule.Name); err != nil {
 		return err
 	}
@@ -127,9 +128,10 @@ func rebalancingScheduleStateImporter(ctx context.Context, d *schema.ResourceDat
 
 	// if ID was provided for import, just
 	id := d.Id()
-	resourceGetter := getRebalancingScheduleByName
-	if _, err := uuid.Parse(id); err == nil {
-		resourceGetter = getRebalancingScheduleById
+	resourceGetter := getRebalancingScheduleById
+	if _, err := uuid.Parse(id); err != nil {
+		tflog.Info(ctx, "provided schedule ID is not a UUID, will import by name")
+		resourceGetter = getRebalancingScheduleByName
 	}
 
 	schedule, err := resourceGetter(ctx, client, id)
