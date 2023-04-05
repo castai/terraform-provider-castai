@@ -51,10 +51,12 @@ module "castai-aks-cluster" {
     spot_tmpl = {
       configuration_id = module.castai-aks-cluster.castai_node_configurations["default"]
       should_taint = true
-      custom_label = {
-        key = "custom-key"
-        value = "label-value"
+
+      custom_labels = {
+        custom-label-key-1 = "custom-label-value-1"
+        custom-label-key-2 = "custom-label-value-2"
       }
+
       custom_taints = [
         {
           key = "custom-taint-key-1"
@@ -97,7 +99,8 @@ module "castai-aks-cluster" {
             "clouds": ["azure"],
             "spotBackups": {
                 "enabled": true
-            }
+            },
+            "spotDiversityEnabled": false
         },
         "nodeDownscaler": {
             "enabled": true,

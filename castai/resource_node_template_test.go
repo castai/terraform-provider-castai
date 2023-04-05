@@ -61,6 +61,7 @@ func TestNodeTemplateResourceReadContext(t *testing.T) {
 					  "g3"
 					]
 				  },
+	              "architectures": ["amd64", "arm64"],
 				  "gpu": {
 					"manufacturers": [
 					  "NVIDIA"
@@ -71,6 +72,10 @@ func TestNodeTemplateResourceReadContext(t *testing.T) {
 				},
 				"version": "3",
 				"shouldTaint": true,
+				"customLabels": {
+					"key-1": "value-1",
+					"key-2": "value-2"
+				},
 				"customTaints": [
 				  {
 				    "key": "some-key-1",
@@ -85,7 +90,8 @@ func TestNodeTemplateResourceReadContext(t *testing.T) {
 				],
 				"rebalancingConfig": {
 				  "minNodes": 0
-				}
+				},
+				"customInstancesEnabled": true
 			  }
 			}
 		  ]
@@ -111,6 +117,9 @@ func TestNodeTemplateResourceReadContext(t *testing.T) {
 cluster_id = b6bfc074-a267-400f-b8f1-db0850c369b1
 configuration_id = 7dc4f922-29c9-4377-889c-0c8c5fb8d497
 constraints.# = 1
+constraints.0.architectures.# = 2
+constraints.0.architectures.0 = amd64
+constraints.0.architectures.1 = arm64
 constraints.0.compute_optimized = false
 constraints.0.fallback_restore_rate_seconds = 0
 constraints.0.gpu.# = 1
@@ -137,7 +146,11 @@ constraints.0.min_memory = 0
 constraints.0.spot = false
 constraints.0.storage_optimized = false
 constraints.0.use_spot_fallbacks = false
+custom_instances_enabled = true
 custom_label.# = 0
+custom_labels.% = 2
+custom_labels.key-1 = value-1
+custom_labels.key-2 = value-2
 custom_taints.# = 2
 custom_taints.0.effect = NoSchedule
 custom_taints.0.key = some-key-1
@@ -200,8 +213,11 @@ func TestAccResourceNodeTemplate_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "name", rName),
 					resource.TestCheckResourceAttr(resourceName, "should_taint", "true"),
-					resource.TestCheckResourceAttr(resourceName, "custom_label.0.key", "custom-key-1"),
-					resource.TestCheckResourceAttr(resourceName, "custom_label.0.value", "custom-value-1"),
+					resource.TestCheckResourceAttr(resourceName, "custom_instances_enabled", "false"),
+					resource.TestCheckResourceAttr(resourceName, "custom_label.#", "0"),
+					resource.TestCheckResourceAttr(resourceName, "custom_labels.%", "2"),
+					resource.TestCheckResourceAttr(resourceName, "custom_labels.custom-key-1", "custom-value-1"),
+					resource.TestCheckResourceAttr(resourceName, "custom_labels.custom-key-2", "custom-value-2"),
 					resource.TestCheckResourceAttr(resourceName, "custom_taints.#", "2"),
 					resource.TestCheckResourceAttr(resourceName, "custom_taints.0.key", "custom-taint-key-1"),
 					resource.TestCheckResourceAttr(resourceName, "custom_taints.0.value", "custom-taint-value-1"),
@@ -215,6 +231,8 @@ func TestAccResourceNodeTemplate_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.max_cpu", "100"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.use_spot_fallbacks", "true"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.spot", "true"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.architectures.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.architectures.0", "amd64"),
 				),
 			},
 			{
@@ -231,7 +249,11 @@ func TestAccResourceNodeTemplate_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "name", rName),
 					resource.TestCheckResourceAttr(resourceName, "should_taint", "true"),
+					resource.TestCheckResourceAttr(resourceName, "custom_instances_enabled", "false"),
 					resource.TestCheckResourceAttr(resourceName, "custom_label.#", "0"),
+					resource.TestCheckResourceAttr(resourceName, "custom_labels.%", "2"),
+					resource.TestCheckResourceAttr(resourceName, "custom_labels.custom-key-1", "custom-value-1"),
+					resource.TestCheckResourceAttr(resourceName, "custom_labels.custom-key-2", "custom-value-2"),
 					resource.TestCheckResourceAttr(resourceName, "custom_taints.#", "1"),
 					resource.TestCheckResourceAttr(resourceName, "custom_taints.0.key", "custom-taint-key-1"),
 					resource.TestCheckResourceAttr(resourceName, "custom_taints.0.value", "custom-taint-value-1"),
@@ -245,6 +267,8 @@ func TestAccResourceNodeTemplate_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.max_cpu", "0"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.use_spot_fallbacks", "true"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.spot", "true"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.architectures.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.architectures.0", "arm64"),
 				),
 			},
 		},
@@ -265,9 +289,9 @@ func testAccNodeTemplateConfig(rName, clusterName string) string {
 			configuration_id = castai_node_configuration.test.id
 			should_taint = true
 
-			custom_label {
-				key = "custom-key-1"
-				value = "custom-value-1"
+			custom_labels = {
+				custom-key-1 = "custom-value-1"
+				custom-key-2 = "custom-value-2"
 			}
 
 			custom_taints {
@@ -310,6 +334,11 @@ func testNodeTemplateUpdated(rName, clusterName string) string {
 			name = %[1]q
 			configuration_id = castai_node_configuration.test.id
 			should_taint = true
+			
+			custom_labels = {
+				custom-key-1 = "custom-value-1"
+				custom-key-2 = "custom-value-2"
+			}
 
 			custom_taints {
 				key = "custom-taint-key-1"
@@ -323,6 +352,7 @@ func testNodeTemplateUpdated(rName, clusterName string) string {
 				fallback_restore_rate_seconds = 1800
 				storage_optimized = false
 				compute_optimized = false
+				architectures = ["arm64"]
 			}
 		}
 	`, rName))

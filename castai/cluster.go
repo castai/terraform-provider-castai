@@ -8,7 +8,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
 	"github.com/castai/terraform-provider-castai/castai/sdk"
@@ -25,10 +25,10 @@ func resourceCastaiClusterDelete(ctx context.Context, data *schema.ResourceData,
 
 	log.Printf("[INFO] Checking current status of the cluster.")
 
-	err := resource.RetryContext(ctx, data.Timeout(schema.TimeoutDelete), func() *resource.RetryError {
+	err := retry.RetryContext(ctx, data.Timeout(schema.TimeoutDelete), func() *retry.RetryError {
 		clusterResponse, err := client.ExternalClusterAPIGetClusterWithResponse(ctx, clusterId)
 		if checkErr := sdk.CheckOKResponse(clusterResponse, err); checkErr != nil {
-			return resource.NonRetryableError(err)
+			return retry.NonRetryableError(err)
 		}
 
 		clusterStatus := *clusterResponse.JSON200.Status
@@ -41,12 +41,12 @@ func resourceCastaiClusterDelete(ctx context.Context, data *schema.ResourceData,
 			return nil
 		}
 
-		triggerDelete := func() *resource.RetryError {
+		triggerDelete := func() *retry.RetryError {
 			log.Printf("[INFO] Deleting cluster.")
 			if err := sdk.CheckResponseNoContent(client.ExternalClusterAPIDeleteClusterWithResponse(ctx, clusterId)); err != nil {
-				return resource.NonRetryableError(err)
+				return retry.NonRetryableError(err)
 			}
-			return resource.RetryableError(fmt.Errorf("triggered cluster deletion"))
+			return retry.RetryableError(fmt.Errorf("triggered cluster deletion"))
 		}
 
 		// If cluster doesn't have credentials we have to call delete cluster instead of disconnect because disconnect
@@ -60,11 +60,11 @@ func resourceCastaiClusterDelete(ctx context.Context, data *schema.ResourceData,
 		}
 
 		if agentStatus == sdk.ClusterAgentStatusDisconnecting {
-			return resource.RetryableError(fmt.Errorf("agent is disconnecting"))
+			return retry.RetryableError(fmt.Errorf("agent is disconnecting"))
 		}
 
 		if clusterStatus == sdk.ClusterStatusDeleting {
-			return resource.RetryableError(fmt.Errorf("cluster is deleting"))
+			return retry.RetryableError(fmt.Errorf("cluster is deleting"))
 		}
 
 		if toString(clusterResponse.JSON200.CredentialsId) != "" && agentStatus != sdk.ClusterAgentStatusDisconnected {
@@ -74,17 +74,17 @@ func resourceCastaiClusterDelete(ctx context.Context, data *schema.ResourceData,
 				KeepKubernetesResources: toPtr(true),
 			})
 			if checkErr := sdk.CheckOKResponse(response, err); checkErr != nil {
-				return resource.NonRetryableError(err)
+				return retry.NonRetryableError(err)
 			}
 
-			return resource.RetryableError(fmt.Errorf("triggered agent disconnection"))
+			return retry.RetryableError(fmt.Errorf("triggered agent disconnection"))
 		}
 
 		if agentStatus == sdk.ClusterAgentStatusDisconnected && clusterStatus != sdk.ClusterStatusDeleted {
 			return triggerDelete()
 		}
 
-		return resource.RetryableError(fmt.Errorf("retrying"))
+		return retry.RetryableError(fmt.Errorf("retrying"))
 	})
 
 	if err != nil {

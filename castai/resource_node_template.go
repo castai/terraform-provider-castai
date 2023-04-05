@@ -21,11 +21,20 @@ const (
 	FieldNodeTemplateShouldTaint               = "should_taint"
 	FieldNodeTemplateRebalancingConfigMinNodes = "rebalancing_config_min_nodes"
 	FieldNodeTemplateCustomLabel               = "custom_label"
+	FieldNodeTemplateCustomLabels              = "custom_labels"
 	FieldNodeTemplateCustomTaints              = "custom_taints"
+	FieldNodeTemplateCustomInstancesEnabled    = "custom_instances_enabled"
 	FieldNodeTemplateConstraints               = "constraints"
 )
 
+const (
+	ArchAMD64 = "amd64"
+	ArchARM64 = "arm64"
+)
+
 func resourceNodeTemplate() *schema.Resource {
+	supportedArchitectures := []string{ArchAMD64, ArchARM64}
+
 	return &schema.Resource{
 		CreateContext: resourceNodeTemplateCreate,
 		ReadContext:   resourceNodeTemplateRead,
@@ -192,6 +201,21 @@ func resourceNodeTemplate() *schema.Resource {
 								},
 							},
 						},
+						"architectures": {
+							Type:     schema.TypeList,
+							MaxItems: 2,
+							MinItems: 1,
+							Optional: true,
+							Computed: true,
+							Elem: &schema.Schema{
+								Type:             schema.TypeString,
+								ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(supportedArchitectures, false)),
+							},
+							DefaultFunc: func() (interface{}, error) {
+								return []string{ArchAMD64}, nil
+							},
+							Description: fmt.Sprintf("List of acceptable instance CPU architectures, the default is %s. Allowed values: %s.", ArchAMD64, strings.Join(supportedArchitectures, ", ")),
+						},
 					},
 				},
 			},
@@ -216,6 +240,16 @@ func resourceNodeTemplate() *schema.Resource {
 					},
 				},
 				Description: "Custom label key/value to be added to nodes created from this template.",
+				Deprecated:  "Remove the use of `custom_label` field. The custom labels should be set through the `custom_labels` field.",
+			},
+			FieldNodeTemplateCustomLabels: {
+				Type:     schema.TypeMap,
+				Optional: true,
+				Elem: &schema.Schema{
+					Type: schema.TypeString,
+				},
+				Description: "Custom labels to be added to nodes created from this template. " +
+					"If the field `custom_label` is present, the value of `custom_labels` will be ignored.",
 			},
 			FieldNodeTemplateCustomTaints: {
 				Type:     schema.TypeList,
@@ -254,6 +288,13 @@ func resourceNodeTemplate() *schema.Resource {
 				Default:          0,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.IntAtLeast(0)),
 				Description:      "Minimum nodes that will be kept when rebalancing nodes using this node template.",
+			},
+			FieldNodeTemplateCustomInstancesEnabled: {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
+				Description: "Marks whether custom instances should be used when deciding which parts of inventory are available. " +
+					"Custom instances are only supported in GCP.",
 			},
 		},
 	}
@@ -305,8 +346,14 @@ func resourceNodeTemplateRead(ctx context.Context, d *schema.ResourceData, meta 
 	if err := d.Set(FieldNodeTemplateCustomLabel, flattenCustomLabel(nodeTemplate.CustomLabel)); err != nil {
 		return diag.FromErr(fmt.Errorf("setting custom label: %w", err))
 	}
+	if err := d.Set(FieldNodeTemplateCustomLabels, nodeTemplate.CustomLabels.AdditionalProperties); err != nil {
+		return diag.FromErr(fmt.Errorf("setting custom labels: %w", err))
+	}
 	if err := d.Set(FieldNodeTemplateCustomTaints, flattenCustomTaints(nodeTemplate.CustomTaints)); err != nil {
 		return diag.FromErr(fmt.Errorf("setting custom taints: %w", err))
+	}
+	if err := d.Set(FieldNodeTemplateCustomInstancesEnabled, lo.FromPtrOr(nodeTemplate.CustomInstancesEnabled, false)); err != nil {
+		return diag.FromErr(fmt.Errorf("setting custom instances enabled: %w", err))
 	}
 
 	return nil
@@ -351,6 +398,9 @@ func flattenConstraints(c *sdk.NodetemplatesV1TemplateConstraints) ([]map[string
 	}
 	if c.MaxCpu != nil {
 		out["max_cpu"] = c.MaxCpu
+	}
+	if c.Architectures != nil {
+		out["architectures"] = lo.FromPtr(c.Architectures)
 	}
 	return []map[string]any{out}, nil
 }
@@ -412,7 +462,9 @@ func resourceNodeTemplateUpdate(ctx context.Context, d *schema.ResourceData, met
 		FieldNodeTemplateConfigurationId,
 		FieldNodeTemplateRebalancingConfigMinNodes,
 		FieldNodeTemplateCustomLabel,
+		FieldNodeTemplateCustomLabels,
 		FieldNodeTemplateCustomTaints,
+		FieldNodeTemplateCustomInstancesEnabled,
 		FieldNodeTemplateConstraints,
 	) {
 		log.Printf("[INFO] Nothing to update in node configuration")
@@ -430,6 +482,18 @@ func resourceNodeTemplateUpdate(ctx context.Context, d *schema.ResourceData, met
 
 	if v, ok := d.Get(FieldNodeTemplateCustomLabel).([]any); ok && len(v) > 0 {
 		req.CustomLabel = toCustomLabel(v[0].(map[string]any))
+	}
+
+	if req.CustomLabel == nil {
+		if v, ok := d.Get(FieldNodeTemplateCustomLabels).(map[string]any); ok && len(v) > 0 {
+			customLabels := map[string]string{}
+
+			for k, v := range v {
+				customLabels[k] = v.(string)
+			}
+
+			req.CustomLabels = &sdk.NodetemplatesV1UpdateNodeTemplate_CustomLabels{AdditionalProperties: customLabels}
+		}
 	}
 
 	if v, _ := d.GetOk(FieldNodeTemplateShouldTaint); v != nil {
@@ -457,6 +521,10 @@ func resourceNodeTemplateUpdate(ctx context.Context, d *schema.ResourceData, met
 
 	if v, ok := d.Get(FieldNodeTemplateConstraints).([]any); ok && len(v) > 0 {
 		req.Constraints = toTemplateConstraints(v[0].(map[string]any))
+	}
+
+	if v, _ := d.GetOk(FieldNodeTemplateCustomInstancesEnabled); v != nil {
+		req.CustomInstancesEnabled = lo.ToPtr(v.(bool))
 	}
 
 	resp, err := client.NodeTemplatesAPIUpdateNodeTemplateWithResponse(ctx, clusterID, name, req)
@@ -488,6 +556,18 @@ func resourceNodeTemplateCreate(ctx context.Context, d *schema.ResourceData, met
 		req.CustomLabel = toCustomLabel(v[0].(map[string]any))
 	}
 
+	if req.CustomLabel == nil {
+		if v, ok := d.Get(FieldNodeTemplateCustomLabels).(map[string]any); ok && len(v) > 0 {
+			customLabels := map[string]string{}
+
+			for k, v := range v {
+				customLabels[k] = v.(string)
+			}
+
+			req.CustomLabels = &sdk.NodetemplatesV1NewNodeTemplate_CustomLabels{AdditionalProperties: customLabels}
+		}
+	}
+
 	if v, ok := d.Get(FieldNodeTemplateCustomTaints).([]any); ok && len(v) > 0 {
 		ts := []map[string]any{}
 		for _, val := range v {
@@ -503,6 +583,10 @@ func resourceNodeTemplateCreate(ctx context.Context, d *schema.ResourceData, met
 
 	if v, ok := d.Get(FieldNodeTemplateConstraints).([]any); ok && len(v) > 0 {
 		req.Constraints = toTemplateConstraints(v[0].(map[string]any))
+	}
+
+	if v, _ := d.GetOk(FieldNodeTemplateCustomInstancesEnabled); v != nil {
+		req.CustomInstancesEnabled = lo.ToPtr(v.(bool))
 	}
 
 	resp, err := client.NodeTemplatesAPICreateNodeTemplateWithResponse(ctx, clusterID, req)
@@ -706,6 +790,9 @@ func toTemplateConstraints(obj map[string]any) *sdk.NodetemplatesV1TemplateConst
 	}
 	if v, ok := obj["use_spot_fallbacks"].(bool); ok {
 		out.UseSpotFallbacks = toPtr(v)
+	}
+	if v, ok := obj["architectures"].([]any); ok {
+		out.Architectures = toPtr(toStringList(v))
 	}
 
 	return out
