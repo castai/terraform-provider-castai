@@ -22,9 +22,17 @@ func TestAccResourceRebalancingSchedule_basic(t *testing.T) {
 				),
 			},
 			{
-				ImportState:   true,
-				ResourceName:  "castai_rebalancing_schedule.test",
-				ImportStateId: rName,
+				// import by ID
+				ImportState:       true,
+				ResourceName:      "castai_rebalancing_schedule.test",
+				ImportStateVerify: true,
+			},
+			{
+				// import by name
+				ImportState:       true,
+				ResourceName:      "castai_rebalancing_schedule.test",
+				ImportStateId:     rName,
+				ImportStateVerify: true,
 			},
 		},
 	})

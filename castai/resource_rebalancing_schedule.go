@@ -94,6 +94,7 @@ func resourceRebalancingScheduleRead(ctx context.Context, d *schema.ResourceData
 		d.SetId("")
 		return nil
 	}
+
 	if err := setStateFromSchedule(schedule, d); err != nil {
 		return diag.FromErr(fmt.Errorf("setting name: %w", err))
 	}
@@ -104,6 +105,13 @@ func resourceRebalancingScheduleRead(ctx context.Context, d *schema.ResourceData
 func setStateFromSchedule(schedule *sdk.ScheduledrebalancingV1RebalancingSchedule, d *schema.ResourceData) error {
 	d.SetId(*schedule.Id)
 	if err := d.Set("name", schedule.Name); err != nil {
+		return err
+	}
+	if err := d.Set("schedule", []map[string]interface{}{
+		{
+			"cron": schedule.Schedule.Cron,
+		},
+	}); err != nil {
 		return err
 	}
 	return nil
@@ -126,22 +134,16 @@ func resourceRebalancingScheduleDelete(ctx context.Context, d *schema.ResourceDa
 func rebalancingScheduleStateImporter(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
 	client := meta.(*ProviderConfig).api
 
-	// if ID was provided for import, just
-	id := d.Id()
-	resourceGetter := getRebalancingScheduleById
-	if _, err := uuid.Parse(id); err != nil {
+	// if importing by UUID, nothing to do; if importing by name, fetch schedule ID and set that as resource ID
+	if _, err := uuid.Parse(d.Id()); err != nil {
 		tflog.Info(ctx, "provided schedule ID is not a UUID, will import by name")
-		resourceGetter = getRebalancingScheduleByName
+		schedule, err := getRebalancingScheduleByName(ctx, client, d.Id())
+		if err != nil {
+			return nil, err
+		}
+		d.SetId(lo.FromPtr(schedule.Id))
 	}
 
-	schedule, err := resourceGetter(ctx, client, id)
-	if err != nil {
-		return nil, err
-	}
-
-	if err := setStateFromSchedule(schedule, d); err != nil {
-		return nil, err
-	}
 	return []*schema.ResourceData{d}, nil
 }
 

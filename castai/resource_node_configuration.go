@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/samber/lo"
 	"log"
 	"net/http"
 	"strings"
@@ -687,7 +688,7 @@ func nodeConfigStateImporter(ctx context.Context, d *schema.ResourceData, meta i
 	}
 
 	for _, cfg := range *resp.JSON200.Items {
-		if toString(cfg.Name) == id {
+		if lo.FromPtr(cfg.Name) == id {
 			d.SetId(toString(cfg.Id))
 			return []*schema.ResourceData{d}, nil
 		}
