@@ -53,6 +53,33 @@ func resourceRebalancingSchedule() *schema.Resource {
 					},
 				},
 			},
+			"launch_configuration": {
+				Type:     schema.TypeList,
+				Required: true,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"node_ttl": {
+							Type:             schema.TypeInt,
+							Optional:         true,
+							ValidateDiagFunc: validation.ToDiagFunc(validation.IntAtLeast(1)),
+							Description:      "Specifies amount of time since node creation before the node is allowed to be considered for automated rebalancing",
+						},
+						"num_targeted_nodes": {
+							Type:             schema.TypeInt,
+							Optional:         true,
+							ValidateDiagFunc: validation.ToDiagFunc(validation.IntAtLeast(1)),
+							Description:      "Maximum number of nodes that will be selected for rebalancing",
+						},
+						"rebalancing_min_nodes": {
+							Type:             schema.TypeInt,
+							Optional:         true,
+							ValidateDiagFunc: validation.ToDiagFunc(validation.IntAtLeast(1)),
+							Description:      "Minimum number of nodes that should be kept in the cluster after rebalancing",
+						},
+					},
+				},
+			},
 		},
 	}
 }
@@ -60,7 +87,7 @@ func resourceRebalancingSchedule() *schema.Resource {
 func resourceRebalancingScheduleCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(*ProviderConfig).api
 
-	schedule := resourceToRebalancingSchedule(d)
+	schedule := stateToSchedule(d)
 
 	req := sdk.ScheduledRebalancingAPICreateRebalancingScheduleJSONRequestBody{
 		Name:                schedule.Name,
@@ -78,23 +105,6 @@ func resourceRebalancingScheduleCreate(ctx context.Context, d *schema.ResourceDa
 
 	return resourceRebalancingScheduleRead(ctx, d, meta)
 }
-
-func resourceToRebalancingSchedule(d *schema.ResourceData) *sdk.ScheduledrebalancingV1RebalancingSchedule {
-	scheduleData := d.Get("schedule").([]interface{})[0].(map[string]interface{})
-	result := sdk.ScheduledrebalancingV1RebalancingSchedule{
-		Id:   lo.ToPtr(d.Id()),
-		Name: d.Get("name").(string),
-		Schedule: sdk.ScheduledrebalancingV1Schedule{
-			Cron: scheduleData["cron"].(string),
-		},
-		LaunchConfiguration: sdk.ScheduledrebalancingV1LaunchConfiguration{},
-		TriggerConditions: sdk.ScheduledrebalancingV1TriggerConditions{
-			SavingsPercentage: lo.ToPtr[float32](1.15),
-		},
-	}
-	return &result
-}
-
 func resourceRebalancingScheduleRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	schedule, err := getRebalancingScheduleById(ctx, meta.(*ProviderConfig).api, d.Id())
 	if err != nil {
@@ -106,31 +116,16 @@ func resourceRebalancingScheduleRead(ctx context.Context, d *schema.ResourceData
 		return nil
 	}
 
-	if err := setStateFromSchedule(schedule, d); err != nil {
-		return diag.FromErr(fmt.Errorf("setting name: %w", err))
+	if err := scheduleToState(schedule, d); err != nil {
+		return diag.FromErr(err)
 	}
 
-	return nil
-}
-
-func setStateFromSchedule(schedule *sdk.ScheduledrebalancingV1RebalancingSchedule, d *schema.ResourceData) error {
-	d.SetId(*schedule.Id)
-	if err := d.Set("name", schedule.Name); err != nil {
-		return err
-	}
-	if err := d.Set("schedule", []map[string]interface{}{
-		{
-			"cron": schedule.Schedule.Cron,
-		},
-	}); err != nil {
-		return err
-	}
 	return nil
 }
 
 func resourceRebalancingScheduleUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(*ProviderConfig).api
-	schedule := resourceToRebalancingSchedule(d)
+	schedule := stateToSchedule(d)
 
 	req := sdk.ScheduledRebalancingAPIUpdateRebalancingScheduleJSONRequestBody{
 		Name:                lo.ToPtr(schedule.Name),
@@ -171,6 +166,60 @@ func rebalancingScheduleStateImporter(ctx context.Context, d *schema.ResourceDat
 	}
 
 	return []*schema.ResourceData{d}, nil
+}
+
+func stateToSchedule(d *schema.ResourceData) *sdk.ScheduledrebalancingV1RebalancingSchedule {
+	scheduleData := toSection(d, "schedule")
+
+	result := sdk.ScheduledrebalancingV1RebalancingSchedule{
+		Id:   lo.ToPtr(d.Id()),
+		Name: d.Get("name").(string),
+		Schedule: sdk.ScheduledrebalancingV1Schedule{
+			Cron: scheduleData["cron"].(string),
+		},
+		TriggerConditions: sdk.ScheduledrebalancingV1TriggerConditions{
+			SavingsPercentage: lo.ToPtr[float32](1.15),
+		},
+	}
+
+	if launchConfigurationData := toSection(d, "launch_configuration"); launchConfigurationData != nil {
+		result.LaunchConfiguration = sdk.ScheduledrebalancingV1LaunchConfiguration{
+			NodeTtl:          readOptionalInt[int32](launchConfigurationData, "node_ttl"),
+			NumTargetedNodes: readOptionalInt[int32](launchConfigurationData, "num_targeted_nodes"),
+			RebalancingOptions: &sdk.ScheduledrebalancingV1RebalancingOptions{
+				MinNodes: readOptionalInt[int32](launchConfigurationData, "rebalancing_min_nodes"),
+			},
+			Selector: nil,
+		}
+	}
+
+	return &result
+}
+
+func scheduleToState(schedule *sdk.ScheduledrebalancingV1RebalancingSchedule, d *schema.ResourceData) error {
+	d.SetId(*schedule.Id)
+	if err := d.Set("name", schedule.Name); err != nil {
+		return err
+	}
+	if err := d.Set("schedule", []map[string]any{
+		{
+			"cron": schedule.Schedule.Cron,
+		},
+	}); err != nil {
+		return err
+	}
+
+	launchConfig := map[string]any{
+		"node_ttl":           schedule.LaunchConfiguration.NodeTtl,
+		"num_targeted_nodes": schedule.LaunchConfiguration.NumTargetedNodes,
+	}
+	if schedule.LaunchConfiguration.RebalancingOptions != nil {
+		launchConfig["rebalancing_min_nodes"] = schedule.LaunchConfiguration.RebalancingOptions.MinNodes
+	}
+	if err := d.Set("launch_configuration", []map[string]any{launchConfig}); err != nil {
+		return err
+	}
+	return nil
 }
 
 func getRebalancingScheduleByName(ctx context.Context, client *sdk.ClientWithResponses, name string) (*sdk.ScheduledrebalancingV1RebalancingSchedule, error) {

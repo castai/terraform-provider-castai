@@ -53,6 +53,8 @@ resource "castai_rebalancing_schedule" "test" {
 	schedule {
 		cron = "5 4 * * *"
 	}
+	launch_configuration {
+	}
 }
 `
 	return fmt.Sprintf(template, rName)
@@ -64,6 +66,11 @@ resource "castai_rebalancing_schedule" "test" {
 	name = %q
 	schedule {
 		cron = "1 4 * * *"
+	}
+	launch_configuration {
+		node_ttl = 10
+		num_targeted_nodes = 3
+		rebalancing_min_nodes = 2
 	}
 }
 `
