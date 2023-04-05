@@ -1195,6 +1195,46 @@ func (mr *MockClientInterfaceMockRecorder) ScheduledRebalancingAPICreateRebalanc
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ScheduledRebalancingAPICreateRebalancingScheduleWithBody", reflect.TypeOf((*MockClientInterface)(nil).ScheduledRebalancingAPICreateRebalancingScheduleWithBody), varargs...)
 }
 
+// ScheduledRebalancingAPIDeleteRebalancingJob mocks base method.
+func (m *MockClientInterface) ScheduledRebalancingAPIDeleteRebalancingJob(ctx context.Context, clusterId, id string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, id}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ScheduledRebalancingAPIDeleteRebalancingJob", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ScheduledRebalancingAPIDeleteRebalancingJob indicates an expected call of ScheduledRebalancingAPIDeleteRebalancingJob.
+func (mr *MockClientInterfaceMockRecorder) ScheduledRebalancingAPIDeleteRebalancingJob(ctx, clusterId, id interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, id}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ScheduledRebalancingAPIDeleteRebalancingJob", reflect.TypeOf((*MockClientInterface)(nil).ScheduledRebalancingAPIDeleteRebalancingJob), varargs...)
+}
+
+// ScheduledRebalancingAPIDeleteRebalancingSchedule mocks base method.
+func (m *MockClientInterface) ScheduledRebalancingAPIDeleteRebalancingSchedule(ctx context.Context, id string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, id}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ScheduledRebalancingAPIDeleteRebalancingSchedule", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ScheduledRebalancingAPIDeleteRebalancingSchedule indicates an expected call of ScheduledRebalancingAPIDeleteRebalancingSchedule.
+func (mr *MockClientInterfaceMockRecorder) ScheduledRebalancingAPIDeleteRebalancingSchedule(ctx, id interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, id}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ScheduledRebalancingAPIDeleteRebalancingSchedule", reflect.TypeOf((*MockClientInterface)(nil).ScheduledRebalancingAPIDeleteRebalancingSchedule), varargs...)
+}
+
 // ScheduledRebalancingAPIGetRebalancingJob mocks base method.
 func (m *MockClientInterface) ScheduledRebalancingAPIGetRebalancingJob(ctx context.Context, clusterId, id string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
@@ -1313,6 +1353,46 @@ func (mr *MockClientInterfaceMockRecorder) ScheduledRebalancingAPIUpdateRebalanc
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{ctx, clusterId, id, contentType, body}, reqEditors...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ScheduledRebalancingAPIUpdateRebalancingJobWithBody", reflect.TypeOf((*MockClientInterface)(nil).ScheduledRebalancingAPIUpdateRebalancingJobWithBody), varargs...)
+}
+
+// ScheduledRebalancingAPIUpdateRebalancingSchedule mocks base method.
+func (m *MockClientInterface) ScheduledRebalancingAPIUpdateRebalancingSchedule(ctx context.Context, params *sdk.ScheduledRebalancingAPIUpdateRebalancingScheduleParams, body sdk.ScheduledRebalancingAPIUpdateRebalancingScheduleJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, params, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ScheduledRebalancingAPIUpdateRebalancingSchedule", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ScheduledRebalancingAPIUpdateRebalancingSchedule indicates an expected call of ScheduledRebalancingAPIUpdateRebalancingSchedule.
+func (mr *MockClientInterfaceMockRecorder) ScheduledRebalancingAPIUpdateRebalancingSchedule(ctx, params, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, params, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ScheduledRebalancingAPIUpdateRebalancingSchedule", reflect.TypeOf((*MockClientInterface)(nil).ScheduledRebalancingAPIUpdateRebalancingSchedule), varargs...)
+}
+
+// ScheduledRebalancingAPIUpdateRebalancingScheduleWithBody mocks base method.
+func (m *MockClientInterface) ScheduledRebalancingAPIUpdateRebalancingScheduleWithBody(ctx context.Context, params *sdk.ScheduledRebalancingAPIUpdateRebalancingScheduleParams, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, params, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ScheduledRebalancingAPIUpdateRebalancingScheduleWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ScheduledRebalancingAPIUpdateRebalancingScheduleWithBody indicates an expected call of ScheduledRebalancingAPIUpdateRebalancingScheduleWithBody.
+func (mr *MockClientInterfaceMockRecorder) ScheduledRebalancingAPIUpdateRebalancingScheduleWithBody(ctx, params, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, params, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ScheduledRebalancingAPIUpdateRebalancingScheduleWithBody", reflect.TypeOf((*MockClientInterface)(nil).ScheduledRebalancingAPIUpdateRebalancingScheduleWithBody), varargs...)
 }
 
 // UpdateAuthToken mocks base method.
@@ -2218,6 +2298,36 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) ScheduledRebalancingAPIC
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ScheduledRebalancingAPICreateRebalancingScheduleWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ScheduledRebalancingAPICreateRebalancingScheduleWithResponse), ctx, body)
 }
 
+// ScheduledRebalancingAPIDeleteRebalancingJobWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) ScheduledRebalancingAPIDeleteRebalancingJobWithResponse(ctx context.Context, clusterId, id string) (*sdk.ScheduledRebalancingAPIDeleteRebalancingJobResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ScheduledRebalancingAPIDeleteRebalancingJobWithResponse", ctx, clusterId, id)
+	ret0, _ := ret[0].(*sdk.ScheduledRebalancingAPIDeleteRebalancingJobResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ScheduledRebalancingAPIDeleteRebalancingJobWithResponse indicates an expected call of ScheduledRebalancingAPIDeleteRebalancingJobWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ScheduledRebalancingAPIDeleteRebalancingJobWithResponse(ctx, clusterId, id interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ScheduledRebalancingAPIDeleteRebalancingJobWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ScheduledRebalancingAPIDeleteRebalancingJobWithResponse), ctx, clusterId, id)
+}
+
+// ScheduledRebalancingAPIDeleteRebalancingScheduleWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) ScheduledRebalancingAPIDeleteRebalancingScheduleWithResponse(ctx context.Context, id string) (*sdk.ScheduledRebalancingAPIDeleteRebalancingScheduleResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ScheduledRebalancingAPIDeleteRebalancingScheduleWithResponse", ctx, id)
+	ret0, _ := ret[0].(*sdk.ScheduledRebalancingAPIDeleteRebalancingScheduleResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ScheduledRebalancingAPIDeleteRebalancingScheduleWithResponse indicates an expected call of ScheduledRebalancingAPIDeleteRebalancingScheduleWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ScheduledRebalancingAPIDeleteRebalancingScheduleWithResponse(ctx, id interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ScheduledRebalancingAPIDeleteRebalancingScheduleWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ScheduledRebalancingAPIDeleteRebalancingScheduleWithResponse), ctx, id)
+}
+
 // ScheduledRebalancingAPIGetRebalancingJobWithResponse mocks base method.
 func (m *MockClientWithResponsesInterface) ScheduledRebalancingAPIGetRebalancingJobWithResponse(ctx context.Context, clusterId, id string) (*sdk.ScheduledRebalancingAPIGetRebalancingJobResponse, error) {
 	m.ctrl.T.Helper()
@@ -2306,6 +2416,36 @@ func (m *MockClientWithResponsesInterface) ScheduledRebalancingAPIUpdateRebalanc
 func (mr *MockClientWithResponsesInterfaceMockRecorder) ScheduledRebalancingAPIUpdateRebalancingJobWithResponse(ctx, clusterId, id, body interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ScheduledRebalancingAPIUpdateRebalancingJobWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ScheduledRebalancingAPIUpdateRebalancingJobWithResponse), ctx, clusterId, id, body)
+}
+
+// ScheduledRebalancingAPIUpdateRebalancingScheduleWithBodyWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) ScheduledRebalancingAPIUpdateRebalancingScheduleWithBodyWithResponse(ctx context.Context, params *sdk.ScheduledRebalancingAPIUpdateRebalancingScheduleParams, contentType string, body io.Reader) (*sdk.ScheduledRebalancingAPIUpdateRebalancingScheduleResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ScheduledRebalancingAPIUpdateRebalancingScheduleWithBodyWithResponse", ctx, params, contentType, body)
+	ret0, _ := ret[0].(*sdk.ScheduledRebalancingAPIUpdateRebalancingScheduleResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ScheduledRebalancingAPIUpdateRebalancingScheduleWithBodyWithResponse indicates an expected call of ScheduledRebalancingAPIUpdateRebalancingScheduleWithBodyWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ScheduledRebalancingAPIUpdateRebalancingScheduleWithBodyWithResponse(ctx, params, contentType, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ScheduledRebalancingAPIUpdateRebalancingScheduleWithBodyWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ScheduledRebalancingAPIUpdateRebalancingScheduleWithBodyWithResponse), ctx, params, contentType, body)
+}
+
+// ScheduledRebalancingAPIUpdateRebalancingScheduleWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) ScheduledRebalancingAPIUpdateRebalancingScheduleWithResponse(ctx context.Context, params *sdk.ScheduledRebalancingAPIUpdateRebalancingScheduleParams, body sdk.ScheduledRebalancingAPIUpdateRebalancingScheduleJSONRequestBody) (*sdk.ScheduledRebalancingAPIUpdateRebalancingScheduleResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ScheduledRebalancingAPIUpdateRebalancingScheduleWithResponse", ctx, params, body)
+	ret0, _ := ret[0].(*sdk.ScheduledRebalancingAPIUpdateRebalancingScheduleResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ScheduledRebalancingAPIUpdateRebalancingScheduleWithResponse indicates an expected call of ScheduledRebalancingAPIUpdateRebalancingScheduleWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ScheduledRebalancingAPIUpdateRebalancingScheduleWithResponse(ctx, params, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ScheduledRebalancingAPIUpdateRebalancingScheduleWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ScheduledRebalancingAPIUpdateRebalancingScheduleWithResponse), ctx, params, body)
 }
 
 // UpdateAuthTokenWithBodyWithResponse mocks base method.
