@@ -19,6 +19,7 @@ func TestAccResourceRebalancingSchedule_basic(t *testing.T) {
 				Config: testAccRebalancingScheduleConfig(rName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("castai_rebalancing_schedule.test", "name", rName),
+					resource.TestCheckResourceAttr("castai_rebalancing_schedule.test", "schedule.0.cron", "5 4 * * *"),
 				),
 			},
 			{
@@ -34,6 +35,13 @@ func TestAccResourceRebalancingSchedule_basic(t *testing.T) {
 				ImportStateId:     rName,
 				ImportStateVerify: true,
 			},
+			{
+				Config: testAccRebalancingScheduleConfigUpdated(rName + " renamed"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("castai_rebalancing_schedule.test", "name", rName+" renamed"),
+					resource.TestCheckResourceAttr("castai_rebalancing_schedule.test", "schedule.0.cron", "1 4 * * *"),
+				),
+			},
 		},
 	})
 }
@@ -44,6 +52,18 @@ resource "castai_rebalancing_schedule" "test" {
 	name = %q
 	schedule {
 		cron = "5 4 * * *"
+	}
+}
+`
+	return fmt.Sprintf(template, rName)
+}
+
+func testAccRebalancingScheduleConfigUpdated(rName string) string {
+	template := `
+resource "castai_rebalancing_schedule" "test" {
+	name = %q
+	schedule {
+		cron = "1 4 * * *"
 	}
 }
 `

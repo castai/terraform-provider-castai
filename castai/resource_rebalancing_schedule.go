@@ -35,7 +35,6 @@ func resourceRebalancingSchedule() *schema.Resource {
 			"name": {
 				Type:             schema.TypeString,
 				Required:         true,
-				ForceNew:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 				Description:      "Name of the schedule",
 			},
@@ -61,17 +60,13 @@ func resourceRebalancingSchedule() *schema.Resource {
 func resourceRebalancingScheduleCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(*ProviderConfig).api
 
-	scheduleData := d.Get("schedule").([]interface{})[0].(map[string]interface{})
+	schedule := resourceToRebalancingSchedule(d)
 
 	req := sdk.ScheduledRebalancingAPICreateRebalancingScheduleJSONRequestBody{
-		Name: d.Get("name").(string),
-		Schedule: sdk.ScheduledrebalancingV1Schedule{
-			Cron: scheduleData["cron"].(string),
-		},
-		LaunchConfiguration: sdk.ScheduledrebalancingV1LaunchConfiguration{},
-		TriggerConditions: sdk.ScheduledrebalancingV1TriggerConditions{
-			SavingsPercentage: lo.ToPtr[float32](1.15),
-		},
+		Name:                schedule.Name,
+		Schedule:            schedule.Schedule,
+		LaunchConfiguration: schedule.LaunchConfiguration,
+		TriggerConditions:   schedule.TriggerConditions,
 	}
 
 	resp, err := client.ScheduledRebalancingAPICreateRebalancingScheduleWithResponse(ctx, req)
@@ -82,6 +77,22 @@ func resourceRebalancingScheduleCreate(ctx context.Context, d *schema.ResourceDa
 	d.SetId(*resp.JSON200.Id)
 
 	return resourceRebalancingScheduleRead(ctx, d, meta)
+}
+
+func resourceToRebalancingSchedule(d *schema.ResourceData) *sdk.ScheduledrebalancingV1RebalancingSchedule {
+	scheduleData := d.Get("schedule").([]interface{})[0].(map[string]interface{})
+	result := sdk.ScheduledrebalancingV1RebalancingSchedule{
+		Id:   lo.ToPtr(d.Id()),
+		Name: d.Get("name").(string),
+		Schedule: sdk.ScheduledrebalancingV1Schedule{
+			Cron: scheduleData["cron"].(string),
+		},
+		LaunchConfiguration: sdk.ScheduledrebalancingV1LaunchConfiguration{},
+		TriggerConditions: sdk.ScheduledrebalancingV1TriggerConditions{
+			SavingsPercentage: lo.ToPtr[float32](1.15),
+		},
+	}
+	return &result
 }
 
 func resourceRebalancingScheduleRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
@@ -118,7 +129,22 @@ func setStateFromSchedule(schedule *sdk.ScheduledrebalancingV1RebalancingSchedul
 }
 
 func resourceRebalancingScheduleUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
-	panic("update")
+	client := meta.(*ProviderConfig).api
+	schedule := resourceToRebalancingSchedule(d)
+
+	req := sdk.ScheduledRebalancingAPIUpdateRebalancingScheduleJSONRequestBody{
+		Name:                lo.ToPtr(schedule.Name),
+		Schedule:            &schedule.Schedule,
+		LaunchConfiguration: &schedule.LaunchConfiguration,
+		TriggerConditions:   &schedule.TriggerConditions,
+	}
+
+	resp, err := client.ScheduledRebalancingAPIUpdateRebalancingScheduleWithResponse(ctx, &sdk.ScheduledRebalancingAPIUpdateRebalancingScheduleParams{
+		Id: lo.ToPtr(d.Id()),
+	}, req)
+	if checkErr := sdk.CheckOKResponse(resp, err); checkErr != nil {
+		return diag.FromErr(checkErr)
+	}
 	return nil
 }
 
