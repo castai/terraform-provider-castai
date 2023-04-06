@@ -3,6 +3,8 @@ package castai
 import (
 	"context"
 	"fmt"
+	"time"
+
 	"github.com/castai/terraform-provider-castai/castai/sdk"
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
@@ -10,7 +12,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/samber/lo"
-	"time"
 )
 
 func resourceRebalancingSchedule() *schema.Resource {
