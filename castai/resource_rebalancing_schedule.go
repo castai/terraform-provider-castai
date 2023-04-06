@@ -179,7 +179,7 @@ func stateToSchedule(d *schema.ResourceData) *sdk.ScheduledrebalancingV1Rebalanc
 			Cron: scheduleData["cron"].(string),
 		},
 		TriggerConditions: sdk.ScheduledrebalancingV1TriggerConditions{
-			SavingsPercentage: lo.ToPtr[float32](1.15),
+			SavingsPercentage: lo.ToPtr[float32](1.15), // TODO: hacks from the past
 		},
 	}
 
