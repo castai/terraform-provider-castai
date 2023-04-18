@@ -41,6 +41,7 @@ func Provider(version string) *schema.Provider {
 			"castai_autoscaler":                 resourceAutoscaler(),
 			"castai_node_template":              resourceNodeTemplate(),
 			"castai_rebalancing_schedule":       resourceRebalancingSchedule(),
+			"castai_rebalancing_job":            resourceRebalancingJob(),
 			"castai_node_configuration":         resourceNodeConfiguration(),
 			"castai_node_configuration_default": resourceNodeConfigurationDefault(),
 			// TODO: remove with next major release.
