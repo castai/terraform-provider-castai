@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"math"
 	"time"
 
 	"github.com/castai/terraform-provider-castai/castai/sdk"
@@ -57,13 +58,13 @@ func resourceRebalancingSchedule() *schema.Resource {
 			},
 			"trigger_conditions": {
 				Type:     schema.TypeList,
-				Optional: true,
+				Required: true,
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						"savings_percentage": {
 							Type:             schema.TypeFloat,
-							Optional:         true,
+							Required:         true,
 							ValidateDiagFunc: validation.ToDiagFunc(validation.FloatAtLeast(0.0)),
 							Description:      "Defines minimum number of savings expected",
 						},
@@ -72,7 +73,7 @@ func resourceRebalancingSchedule() *schema.Resource {
 			},
 			"launch_configuration": {
 				Type:     schema.TypeList,
-				Optional: true,
+				Required: true,
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
@@ -264,7 +265,24 @@ func scheduleToState(schedule *sdk.ScheduledrebalancingV1RebalancingSchedule, d 
 	if err := d.Set("launch_configuration", []map[string]any{launchConfig}); err != nil {
 		return err
 	}
+
+	triggerConditions := map[string]any{
+		"savings_percentage": toFloat64PtrTruncated(schedule.TriggerConditions.SavingsPercentage),
+	}
+	if err := d.Set("trigger_conditions", []map[string]any{triggerConditions}); err != nil {
+		return err
+	}
+
 	return nil
+}
+
+// toFloat64PtrTruncated returns float truncated to 5 numbers of precision
+func toFloat64PtrTruncated(v *float32) *float64 {
+	if v == nil {
+		return nil
+	}
+	const floatPrecisionTruncate float64 = 100000.0
+	return lo.ToPtr(math.Round(float64(*v)*floatPrecisionTruncate) / floatPrecisionTruncate)
 }
 
 // nullifySelectorRequirements converts empty lists to null values; even though semantically

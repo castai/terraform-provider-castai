@@ -53,6 +53,9 @@ resource "castai_rebalancing_schedule" "test" {
 	schedule {
 		cron = "5 4 * * *"
 	}
+	trigger_conditions {
+		savings_percentage = 15.25
+	}
 	launch_configuration {
 	}
 }
@@ -68,7 +71,7 @@ resource "castai_rebalancing_schedule" "test" {
 		cron = "1 4 * * *"
 	}
 	trigger_conditions {
-		savings_percentage = 1.2
+		savings_percentage = 1.23456
 	}
 	launch_configuration {
 		node_ttl_seconds = 10
