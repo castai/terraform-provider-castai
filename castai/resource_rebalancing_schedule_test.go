@@ -36,6 +36,7 @@ func TestAccResourceRebalancingSchedule_basic(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
+				// test edits
 				Config: makeUpdatedRebalancingScheduleConfig(rName + " renamed"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("castai_rebalancing_schedule.test", "name", rName+" renamed"),
