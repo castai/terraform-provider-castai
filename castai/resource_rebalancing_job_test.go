@@ -2,30 +2,44 @@ package castai
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"testing"
 )
 
 func TestAccResourceRebalancingJob_basic(t *testing.T) {
-	rName := fmt.Sprintf("%v-rebalancing-job-%v", ResourcePrefix, acctest.RandString(8))
-
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() { testAccPreCheck(t) },
 
 		ProviderFactories: providerFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: makeInitialRebalancingJobConfig(rName),
+				Config: makeInitialRebalancingJobConfig(),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("castai_rebalancing_job.test", "enabled", "true"),
+				),
+			},
+			{
+				ResourceName: "castai_rebalancing_job.test",
+				ImportStateIdFunc: func(s *terraform.State) (string, error) {
+					clusterID := s.RootModule().Resources["castai_eks_clusterid.test"].Primary.ID
+					rebalancingScheduleID := s.RootModule().Resources["castai_rebalancing_schedule.test"].Primary.ID
+					return fmt.Sprintf("%v/%v", clusterID, rebalancingScheduleID), nil
+				},
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
+				Config: makeUpdatedRebalancingJobConfig(),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("castai_rebalancing_job.test", "enabled", "false"),
 				),
 			},
 		},
 	})
 }
 
-func makeInitialRebalancingJobConfig(rName string) string {
+func makeRebalancingJobConfig(config string) string {
 	template := `
 resource "castai_eks_clusterid" "test" {
   account_id   = "fake"
@@ -34,7 +48,7 @@ resource "castai_eks_clusterid" "test" {
 }
 
 resource "castai_rebalancing_schedule" "test" {
-	name = %q
+	name = "test"
 	schedule {
 		cron = "5 4 * * *"
 	}
@@ -45,11 +59,18 @@ resource "castai_rebalancing_schedule" "test" {
 	}
 }
 
-// %q
 resource "castai_rebalancing_job" "test" {
 	cluster_id = castai_eks_clusterid.test.id
 	rebalancing_schedule_id = castai_rebalancing_schedule.test.id
+	%s
 }
 `
-	return fmt.Sprintf(template, rName)
+	return fmt.Sprintf(template, config)
+}
+
+func makeInitialRebalancingJobConfig() string {
+	return makeRebalancingJobConfig("")
+}
+func makeUpdatedRebalancingJobConfig() string {
+	return makeRebalancingJobConfig("enabled=false")
 }

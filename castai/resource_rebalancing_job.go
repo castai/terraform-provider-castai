@@ -133,16 +133,21 @@ func rebalancingJobStateImporter(ctx context.Context, d *schema.ResourceData, me
 
 	// if importing by UUID, nothing to do; if importing by name, fetch job ID and set that as resource ID
 	if _, err := uuid.Parse(d.Id()); err != nil {
-		tflog.Info(ctx, "provided job ID is not a UUID, will import by cluster ID/schedule ID combination")
+		tflog.Info(ctx, "provided job ID is not a UUID, will import by cluster ID/schedule ID combination", map[string]interface{}{
+			"id": d.Id(),
+		})
 		ids := strings.Split(d.Id(), "/")
 		if len(ids) != 2 {
 			return nil, fmt.Errorf("expected ID format to be 'clusterID/scheduleID'")
 		}
-		job, err := getRebalancingJobByScheduleID(ctx, client, ids[0], ids[1])
+		clusterID := ids[0]
+		scheduleID := ids[1]
+		job, err := getRebalancingJobByScheduleID(ctx, client, clusterID, scheduleID)
 		if err != nil {
 			return nil, err
 		}
 		d.SetId(lo.FromPtr(job.Id))
+		d.Set(FieldClusterId, clusterID)
 	}
 
 	return []*schema.ResourceData{d}, nil
@@ -182,6 +187,11 @@ func getRebalancingJobByScheduleID(ctx context.Context, client *sdk.ClientWithRe
 
 	for _, job := range *resp.JSON200.Jobs {
 		if *job.RebalancingScheduleId == scheduleID {
+			tflog.Debug(ctx, "job found", map[string]interface{}{
+				"cluster_id":  clusterID,
+				"schedule_id": scheduleID,
+				"job_id":      job.Id,
+			})
 			return &job, nil
 		}
 	}
