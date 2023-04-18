@@ -1339,7 +1339,7 @@ type ScheduledrebalancingV1DeleteRebalancingScheduleResponse = map[string]interf
 // ScheduledrebalancingV1LaunchConfiguration defines model for scheduledrebalancing.v1.LaunchConfiguration.
 type ScheduledrebalancingV1LaunchConfiguration struct {
 	// Specifies amount of time since node creation before the node is allowed to be considered for automated rebalancing.
-	NodeTtl *int32 `json:"nodeTtl,omitempty"`
+	NodeTtlSeconds *int32 `json:"nodeTtlSeconds,omitempty"`
 
 	// Maximum number of nodes that will be selected for rebalancing.
 	NumTargetedNodes   *int32                                    `json:"numTargetedNodes,omitempty"`

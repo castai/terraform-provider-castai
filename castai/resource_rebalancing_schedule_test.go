@@ -67,10 +67,24 @@ resource "castai_rebalancing_schedule" "test" {
 	schedule {
 		cron = "1 4 * * *"
 	}
+	trigger_conditions {
+		savings_percentage = 1.2
+	}
 	launch_configuration {
-		node_ttl = 10
+		node_ttl_seconds = 10
 		num_targeted_nodes = 3
 		rebalancing_min_nodes = 2
+		selector = jsonencode({
+			nodeSelectorTerms = [{
+				matchExpressions = [
+					{
+						key =  "thing"
+						operator = "in"
+						values = ["a", "b", "c"]
+					}
+				]
+			}]
+		})
 	}
 }
 `

@@ -2,6 +2,7 @@ package castai
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"time"
 
@@ -54,13 +55,28 @@ func resourceRebalancingSchedule() *schema.Resource {
 					},
 				},
 			},
-			"launch_configuration": {
+			"trigger_conditions": {
 				Type:     schema.TypeList,
-				Required: true,
+				Optional: true,
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"node_ttl": {
+						"savings_percentage": {
+							Type:             schema.TypeFloat,
+							Optional:         true,
+							ValidateDiagFunc: validation.ToDiagFunc(validation.FloatAtLeast(0.0)),
+							Description:      "Defines minimum number of savings expected",
+						},
+					},
+				},
+			},
+			"launch_configuration": {
+				Type:     schema.TypeList,
+				Optional: true,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"node_ttl_seconds": {
 							Type:             schema.TypeInt,
 							Optional:         true,
 							ValidateDiagFunc: validation.ToDiagFunc(validation.IntAtLeast(1)),
@@ -78,6 +94,12 @@ func resourceRebalancingSchedule() *schema.Resource {
 							ValidateDiagFunc: validation.ToDiagFunc(validation.IntAtLeast(1)),
 							Description:      "Minimum number of nodes that should be kept in the cluster after rebalancing",
 						},
+						"selector": {
+							Type:             schema.TypeString,
+							Optional:         true,
+							Description:      "Node selector in JSON format.",
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsJSON),
+						},
 					},
 				},
 			},
@@ -88,7 +110,10 @@ func resourceRebalancingSchedule() *schema.Resource {
 func resourceRebalancingScheduleCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(*ProviderConfig).api
 
-	schedule := stateToSchedule(d)
+	schedule, err := stateToSchedule(d)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	req := sdk.ScheduledRebalancingAPICreateRebalancingScheduleJSONRequestBody{
 		Name:                schedule.Name,
@@ -126,7 +151,10 @@ func resourceRebalancingScheduleRead(ctx context.Context, d *schema.ResourceData
 
 func resourceRebalancingScheduleUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(*ProviderConfig).api
-	schedule := stateToSchedule(d)
+	schedule, err := stateToSchedule(d)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	req := sdk.ScheduledRebalancingAPIUpdateRebalancingScheduleJSONRequestBody{
 		Name:                lo.ToPtr(schedule.Name),
@@ -169,7 +197,7 @@ func rebalancingScheduleStateImporter(ctx context.Context, d *schema.ResourceDat
 	return []*schema.ResourceData{d}, nil
 }
 
-func stateToSchedule(d *schema.ResourceData) *sdk.ScheduledrebalancingV1RebalancingSchedule {
+func stateToSchedule(d *schema.ResourceData) (*sdk.ScheduledrebalancingV1RebalancingSchedule, error) {
 	scheduleData := toSection(d, "schedule")
 
 	result := sdk.ScheduledrebalancingV1RebalancingSchedule{
@@ -178,23 +206,29 @@ func stateToSchedule(d *schema.ResourceData) *sdk.ScheduledrebalancingV1Rebalanc
 		Schedule: sdk.ScheduledrebalancingV1Schedule{
 			Cron: scheduleData["cron"].(string),
 		},
-		TriggerConditions: sdk.ScheduledrebalancingV1TriggerConditions{
-			SavingsPercentage: lo.ToPtr[float32](1.15), // TODO: hacks from the past
-		},
 	}
-
-	if launchConfigurationData := toSection(d, "launch_configuration"); launchConfigurationData != nil {
-		result.LaunchConfiguration = sdk.ScheduledrebalancingV1LaunchConfiguration{
-			NodeTtl:          readOptionalInt[int32](launchConfigurationData, "node_ttl"),
-			NumTargetedNodes: readOptionalInt[int32](launchConfigurationData, "num_targeted_nodes"),
-			RebalancingOptions: &sdk.ScheduledrebalancingV1RebalancingOptions{
-				MinNodes: readOptionalInt[int32](launchConfigurationData, "rebalancing_min_nodes"),
-			},
-			Selector: nil,
+	if triggerConditions := toSection(d, "trigger_conditions"); triggerConditions != nil {
+		result.TriggerConditions = sdk.ScheduledrebalancingV1TriggerConditions{
+			SavingsPercentage: readOptionalNumber[float64, float32](triggerConditions, "savings_percentage"),
 		}
 	}
 
-	return &result
+	if launchConfigurationData := toSection(d, "launch_configuration"); launchConfigurationData != nil {
+		selector, err := readOptionalJson[sdk.ScheduledrebalancingV1NodeSelector](launchConfigurationData, "selector")
+		if err != nil {
+			return nil, fmt.Errorf("parsing selector: %w", err)
+		}
+		result.LaunchConfiguration = sdk.ScheduledrebalancingV1LaunchConfiguration{
+			NodeTtlSeconds:   readOptionalNumber[int, int32](launchConfigurationData, "node_ttl_seconds"),
+			NumTargetedNodes: readOptionalNumber[int, int32](launchConfigurationData, "num_targeted_nodes"),
+			RebalancingOptions: &sdk.ScheduledrebalancingV1RebalancingOptions{
+				MinNodes: readOptionalNumber[int, int32](launchConfigurationData, "rebalancing_min_nodes"),
+			},
+			Selector: selector,
+		}
+	}
+
+	return &result, nil
 }
 
 func scheduleToState(schedule *sdk.ScheduledrebalancingV1RebalancingSchedule, d *schema.ResourceData) error {
@@ -211,16 +245,52 @@ func scheduleToState(schedule *sdk.ScheduledrebalancingV1RebalancingSchedule, d 
 	}
 
 	launchConfig := map[string]any{
-		"node_ttl":           schedule.LaunchConfiguration.NodeTtl,
+		"node_ttl_seconds":   schedule.LaunchConfiguration.NodeTtlSeconds,
 		"num_targeted_nodes": schedule.LaunchConfiguration.NumTargetedNodes,
 	}
 	if schedule.LaunchConfiguration.RebalancingOptions != nil {
 		launchConfig["rebalancing_min_nodes"] = schedule.LaunchConfiguration.RebalancingOptions.MinNodes
 	}
+
+	selector := schedule.LaunchConfiguration.Selector
+	if selector != nil && selector.NodeSelectorTerms != nil && len(*selector.NodeSelectorTerms) > 0 {
+		nullifySelectorEmptyLists(selector)
+		selectorJSON, err := json.Marshal(selector)
+		if err != nil {
+			return fmt.Errorf("serializing selector: %w", err)
+		}
+		launchConfig["selector"] = string(selectorJSON)
+	}
 	if err := d.Set("launch_configuration", []map[string]any{launchConfig}); err != nil {
 		return err
 	}
 	return nil
+}
+
+// nullifySelectorRequirements converts empty lists to null values; even though semantically
+// both are the same for business logic, terraform complains about mismatches in state after re-reading the resource
+func nullifySelectorEmptyLists(selector *sdk.ScheduledrebalancingV1NodeSelector) {
+	selector.NodeSelectorTerms = toNilList(selector.NodeSelectorTerms)
+	if selector.NodeSelectorTerms != nil {
+		for i := range *selector.NodeSelectorTerms {
+			t := &(*selector.NodeSelectorTerms)[i]
+			t.MatchExpressions = toNilList(t.MatchExpressions)
+			t.MatchFields = toNilList(t.MatchFields)
+
+			nullifySelectorRequirements(t.MatchExpressions)
+			nullifySelectorRequirements(t.MatchFields)
+		}
+	}
+}
+
+func nullifySelectorRequirements(requirements *[]sdk.ScheduledrebalancingV1NodeSelectorRequirement) {
+	if requirements == nil {
+		return
+	}
+	for i := range *requirements {
+		r := &(*requirements)[i]
+		r.Values = toNilList(r.Values)
+	}
 }
 
 func getRebalancingScheduleByName(ctx context.Context, client *sdk.ClientWithResponses, name string) (*sdk.ScheduledrebalancingV1RebalancingSchedule, error) {

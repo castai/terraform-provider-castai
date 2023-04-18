@@ -76,8 +76,33 @@ func readAndConvertOptionalValue[Storage any, T any](d map[string]any, key strin
 	return lo.ToPtr(conversion(*val))
 }
 
-func readOptionalInt[T constraints.Integer](d map[string]any, key string) *T {
-	return readAndConvertOptionalValue[int, T](d, key, func(v int) T {
+type Number interface {
+	constraints.Integer | constraints.Float
+}
+
+func readOptionalNumber[Storage Number, T Number](d map[string]any, key string) *T {
+	return readAndConvertOptionalValue[Storage, T](d, key, func(v Storage) T {
 		return T(v)
 	})
+}
+
+func readOptionalJson[T any](d map[string]any, key string) (*T, error) {
+	val := readOptionalValue[string](d, key)
+	if val == nil {
+		return nil, nil
+	}
+
+	var out T
+	err := json.Unmarshal([]byte(*val), &out)
+	if err != nil {
+		return nil, err
+	}
+	return &out, nil
+}
+
+func toNilList[T any](l *[]T) *[]T {
+	if l == nil || len(*l) == 0 {
+		return nil
+	}
+	return l
 }
