@@ -6,3 +6,5 @@ package sdk
 //go:generate oapi-codegen -o client.gen.go --old-config-style -templates codegen/templates -generate client -include-tags $API_TAGS -package sdk https://api.cast.ai/v1/spec/openapi.json
 //go:generate go install github.com/golang/mock/mockgen
 //go:generate mockgen -source client.gen.go -destination mock/client.go . ClientInterface
+
+// asdf
