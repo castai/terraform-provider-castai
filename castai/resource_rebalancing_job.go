@@ -147,7 +147,9 @@ func rebalancingJobStateImporter(ctx context.Context, d *schema.ResourceData, me
 			return nil, err
 		}
 		d.SetId(lo.FromPtr(job.Id))
-		d.Set(FieldClusterId, clusterID)
+		if err := d.Set(FieldClusterId, clusterID); err != nil {
+			return nil, err
+		}
 	}
 
 	return []*schema.ResourceData{d}, nil
