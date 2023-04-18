@@ -27,11 +27,29 @@ func TestAccResourceRebalancingJob_basic(t *testing.T) {
 
 func makeInitialRebalancingJobConfig(rName string) string {
 	template := `
+resource "castai_eks_clusterid" "test" {
+  account_id   = "fake"
+  region       = "eu-central-1"
+  cluster_name = "fake"
+}
+
+resource "castai_rebalancing_schedule" "test" {
+	name = %q
+	schedule {
+		cron = "5 4 * * *"
+	}
+	trigger_conditions {
+		savings_percentage = 15.25
+	}
+	launch_configuration {
+	}
+}
+
 // %q
 resource "castai_rebalancing_job" "test" {
-	cluster_id = castai_eks_cluster.test.id
-	rebalancing_schedule_id = "b6bfc074-a267-400f-b8f1-db0850c369b1"
+	cluster_id = castai_eks_clusterid.test.id
+	rebalancing_schedule_id = castai_rebalancing_schedule.test.id
 }
 `
-	return ConfigCompose(testAccEKSClusterConfig(rName, "cost-terraform"), fmt.Sprintf(template, rName))
+	return fmt.Sprintf(template, rName)
 }

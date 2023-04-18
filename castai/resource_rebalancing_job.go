@@ -161,7 +161,7 @@ func stateToRebalancingJob(d *schema.ResourceData) (*sdk.ScheduledrebalancingV1R
 
 func rebalancingJobToState(job *sdk.ScheduledrebalancingV1RebalancingJob, d *schema.ResourceData) error {
 	d.SetId(*job.Id)
-	if err := d.Set("schedule_id", job.RebalancingScheduleId); err != nil {
+	if err := d.Set("rebalancing_schedule_id", job.RebalancingScheduleId); err != nil {
 		return err
 	}
 	if err := d.Set("cluster_id", job.ClusterId); err != nil {
