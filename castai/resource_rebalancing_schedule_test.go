@@ -16,7 +16,7 @@ func TestAccResourceRebalancingSchedule_basic(t *testing.T) {
 		ProviderFactories: providerFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccRebalancingScheduleConfig(rName),
+				Config: makeInitialRebalancingScheduleConfig(rName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("castai_rebalancing_schedule.test", "name", rName),
 					resource.TestCheckResourceAttr("castai_rebalancing_schedule.test", "schedule.0.cron", "5 4 * * *"),
@@ -36,7 +36,7 @@ func TestAccResourceRebalancingSchedule_basic(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccRebalancingScheduleConfigUpdated(rName + " renamed"),
+				Config: makeUpdatedRebalancingScheduleConfig(rName + " renamed"),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("castai_rebalancing_schedule.test", "name", rName+" renamed"),
 					resource.TestCheckResourceAttr("castai_rebalancing_schedule.test", "schedule.0.cron", "1 4 * * *"),
@@ -46,7 +46,7 @@ func TestAccResourceRebalancingSchedule_basic(t *testing.T) {
 	})
 }
 
-func testAccRebalancingScheduleConfig(rName string) string {
+func makeInitialRebalancingScheduleConfig(rName string) string {
 	template := `
 resource "castai_rebalancing_schedule" "test" {
 	name = %q
@@ -63,7 +63,7 @@ resource "castai_rebalancing_schedule" "test" {
 	return fmt.Sprintf(template, rName)
 }
 
-func testAccRebalancingScheduleConfigUpdated(rName string) string {
+func makeUpdatedRebalancingScheduleConfig(rName string) string {
 	template := `
 resource "castai_rebalancing_schedule" "test" {
 	name = %q

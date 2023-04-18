@@ -277,6 +277,7 @@ func scheduleToState(schedule *sdk.ScheduledrebalancingV1RebalancingSchedule, d 
 }
 
 // toFloat64PtrTruncated returns float truncated to 5 numbers of precision
+// truncation is needed to avoid state mismatches during all the conversions of float32<->float64
 func toFloat64PtrTruncated(v *float32) *float64 {
 	if v == nil {
 		return nil
