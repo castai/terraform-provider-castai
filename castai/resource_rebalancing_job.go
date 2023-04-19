@@ -50,7 +50,7 @@ func resourceRebalancingJob() *schema.Resource {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				Default:     true,
-				Description: "TODO",
+				Description: "The job will only be executed if it's enabled",
 			},
 		},
 	}
