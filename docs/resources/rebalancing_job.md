@@ -3,12 +3,12 @@
 page_title: "castai_rebalancing_job Resource - terraform-provider-castai"
 subcategory: ""
 description: |-
-  TODO
+  Job assigns rebalancing shcedule to a cluster.
 ---
 
 # castai_rebalancing_job (Resource)
 
-TODO
+Job assigns rebalancing shcedule to a cluster.
 
 
 
