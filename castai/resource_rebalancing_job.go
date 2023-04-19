@@ -24,7 +24,7 @@ func resourceRebalancingJob() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: rebalancingJobStateImporter,
 		},
-		Description: "TODO",
+		Description: "Job assigns rebalancing shcedule to a cluster.",
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(1 * time.Minute),
