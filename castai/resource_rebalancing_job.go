@@ -141,8 +141,8 @@ func rebalancingJobStateImporter(ctx context.Context, d *schema.ResourceData, me
 			return nil, fmt.Errorf("expected ID format to be 'clusterID/scheduleID'")
 		}
 		clusterID := ids[0]
-		scheduleID := ids[1]
-		job, err := getRebalancingJobByScheduleID(ctx, client, clusterID, scheduleID)
+		scheduleName := ids[1]
+		job, err := getRebalancingJobByScheduleName(ctx, client, clusterID, scheduleName)
 		if err != nil {
 			return nil, err
 		}
@@ -181,12 +181,18 @@ func rebalancingJobToState(job *sdk.ScheduledrebalancingV1RebalancingJob, d *sch
 	return nil
 }
 
-func getRebalancingJobByScheduleID(ctx context.Context, client *sdk.ClientWithResponses, clusterID string, scheduleID string) (*sdk.ScheduledrebalancingV1RebalancingJob, error) {
+func getRebalancingJobByScheduleName(ctx context.Context, client *sdk.ClientWithResponses, clusterID string, scheduleName string) (*sdk.ScheduledrebalancingV1RebalancingJob, error) {
+	schedule, err := getRebalancingScheduleByName(ctx, client, scheduleName)
+	if err != nil {
+		return nil, fmt.Errorf("getting schedule: %w", err)
+	}
+
 	resp, err := client.ScheduledRebalancingAPIListRebalancingJobsWithResponse(ctx, clusterID)
 	if checkErr := sdk.CheckOKResponse(resp, err); checkErr != nil {
 		return nil, checkErr
 	}
 
+	scheduleID := *schedule.Id
 	for _, job := range *resp.JSON200.Jobs {
 		if *job.RebalancingScheduleId == scheduleID {
 			tflog.Debug(ctx, "job found", map[string]interface{}{
@@ -198,7 +204,7 @@ func getRebalancingJobByScheduleID(ctx context.Context, client *sdk.ClientWithRe
 		}
 	}
 
-	return nil, fmt.Errorf("rebalancing job for schedule %q was not found", scheduleID)
+	return nil, fmt.Errorf("rebalancing job for schedule %q was not found", scheduleName)
 }
 
 func getRebalancingJobById(ctx context.Context, client *sdk.ClientWithResponses, clusterID string, id string) (*sdk.ScheduledrebalancingV1RebalancingJob, error) {

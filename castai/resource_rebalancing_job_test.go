@@ -23,8 +23,8 @@ func TestAccResourceRebalancingJob_basic(t *testing.T) {
 				ResourceName: "castai_rebalancing_job.test",
 				ImportStateIdFunc: func(s *terraform.State) (string, error) {
 					clusterID := s.RootModule().Resources["castai_eks_clusterid.test"].Primary.ID
-					rebalancingScheduleID := s.RootModule().Resources["castai_rebalancing_schedule.test"].Primary.ID
-					return fmt.Sprintf("%v/%v", clusterID, rebalancingScheduleID), nil
+					rebalancingScheduleName := "test"
+					return fmt.Sprintf("%v/%v", clusterID, rebalancingScheduleName), nil
 				},
 				ImportState:       true,
 				ImportStateVerify: true,

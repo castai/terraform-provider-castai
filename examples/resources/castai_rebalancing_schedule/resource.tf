@@ -7,7 +7,8 @@ resource "castai_rebalancing_schedule" "spots" {
 		savings_percentage = 20
 	}
 	launch_configuration {
-		node_ttl_seconds = 180
+	    # only consider instances older than 5 minutes
+		node_ttl_seconds = 300
 		num_targeted_nodes = 3
 		rebalancing_min_nodes = 2
 		selector = jsonencode({
