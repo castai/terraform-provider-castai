@@ -22,7 +22,7 @@ TODO
 
 ### Optional
 
-- `enabled` (Boolean) TODO
+- `enabled` (Boolean) The job will only be executed if it's enabled
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only
