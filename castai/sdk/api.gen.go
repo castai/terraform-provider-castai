@@ -1330,6 +1330,100 @@ type PoliciesV1UnschedulablePodsPolicy struct {
 	NodeConstraints *PoliciesV1NodeConstraints `json:"nodeConstraints,omitempty"`
 }
 
+// ScheduledrebalancingV1DeleteRebalancingJobResponse defines model for scheduledrebalancing.v1.DeleteRebalancingJobResponse.
+type ScheduledrebalancingV1DeleteRebalancingJobResponse = map[string]interface{}
+
+// ScheduledrebalancingV1DeleteRebalancingScheduleResponse defines model for scheduledrebalancing.v1.DeleteRebalancingScheduleResponse.
+type ScheduledrebalancingV1DeleteRebalancingScheduleResponse = map[string]interface{}
+
+// ScheduledrebalancingV1LaunchConfiguration defines model for scheduledrebalancing.v1.LaunchConfiguration.
+type ScheduledrebalancingV1LaunchConfiguration struct {
+	// Specifies amount of time since node creation before the node is allowed to be considered for automated rebalancing.
+	NodeTtlSeconds *int32 `json:"nodeTtlSeconds,omitempty"`
+
+	// Maximum number of nodes that will be selected for rebalancing.
+	NumTargetedNodes   *int32                                    `json:"numTargetedNodes,omitempty"`
+	RebalancingOptions *ScheduledrebalancingV1RebalancingOptions `json:"rebalancingOptions,omitempty"`
+	Selector           *ScheduledrebalancingV1NodeSelector       `json:"selector,omitempty"`
+}
+
+// ScheduledrebalancingV1ListRebalancingJobsResponse defines model for scheduledrebalancing.v1.ListRebalancingJobsResponse.
+type ScheduledrebalancingV1ListRebalancingJobsResponse struct {
+	Jobs *[]ScheduledrebalancingV1RebalancingJob `json:"jobs,omitempty"`
+}
+
+// ScheduledrebalancingV1ListRebalancingSchedulesResponse defines model for scheduledrebalancing.v1.ListRebalancingSchedulesResponse.
+type ScheduledrebalancingV1ListRebalancingSchedulesResponse struct {
+	Schedules *[]ScheduledrebalancingV1RebalancingSchedule `json:"schedules,omitempty"`
+}
+
+// ScheduledrebalancingV1NodeSelector defines model for scheduledrebalancing.v1.NodeSelector.
+type ScheduledrebalancingV1NodeSelector struct {
+	// Required. A list of node selector terms. The terms are ORed.
+	NodeSelectorTerms *[]ScheduledrebalancingV1NodeSelectorTerm `json:"nodeSelectorTerms,omitempty"`
+}
+
+// A node selector requirement is a selector that contains values, a key, and an operator
+// that relates the key and values.
+type ScheduledrebalancingV1NodeSelectorRequirement struct {
+	// The label key that the selector applies to.
+	Key *string `json:"key"`
+
+	// Represents a key's relationship to a set of values.
+	// Valid operators are In, NotIn, Exists, DoesNotExist. Gt, and Lt.
+	Operator *string   `json:"operator"`
+	Values   *[]string `json:"values,omitempty"`
+}
+
+// ScheduledrebalancingV1NodeSelectorTerm defines model for scheduledrebalancing.v1.NodeSelectorTerm.
+type ScheduledrebalancingV1NodeSelectorTerm struct {
+	MatchExpressions *[]ScheduledrebalancingV1NodeSelectorRequirement `json:"matchExpressions,omitempty"`
+	MatchFields      *[]ScheduledrebalancingV1NodeSelectorRequirement `json:"matchFields,omitempty"`
+}
+
+// ScheduledrebalancingV1RebalancingJob defines model for scheduledrebalancing.v1.RebalancingJob.
+type ScheduledrebalancingV1RebalancingJob struct {
+	ClusterId             *string `json:"clusterId,omitempty"`
+	Enabled               *bool   `json:"enabled"`
+	Id                    *string `json:"id,omitempty"`
+	RebalancingPlanId     *string `json:"rebalancingPlanId,omitempty"`
+	RebalancingScheduleId *string `json:"rebalancingScheduleId,omitempty"`
+}
+
+// ScheduledrebalancingV1RebalancingOptions defines model for scheduledrebalancing.v1.RebalancingOptions.
+type ScheduledrebalancingV1RebalancingOptions struct {
+	// Minimum number of nodes that should be kept in the cluster after rebalancing.
+	MinNodes *int32 `json:"minNodes,omitempty"`
+}
+
+// ScheduledrebalancingV1RebalancingSchedule defines model for scheduledrebalancing.v1.RebalancingSchedule.
+type ScheduledrebalancingV1RebalancingSchedule struct {
+	Id                  *string                                   `json:"id,omitempty"`
+	LaunchConfiguration ScheduledrebalancingV1LaunchConfiguration `json:"launchConfiguration"`
+	Name                string                                    `json:"name"`
+	NextTriggerAt       *time.Time                                `json:"nextTriggerAt,omitempty"`
+	Schedule            ScheduledrebalancingV1Schedule            `json:"schedule"`
+	TriggerConditions   ScheduledrebalancingV1TriggerConditions   `json:"triggerConditions"`
+}
+
+// ScheduledrebalancingV1RebalancingScheduleUpdate defines model for scheduledrebalancing.v1.RebalancingScheduleUpdate.
+type ScheduledrebalancingV1RebalancingScheduleUpdate struct {
+	LaunchConfiguration *ScheduledrebalancingV1LaunchConfiguration `json:"launchConfiguration,omitempty"`
+	Name                *string                                    `json:"name,omitempty"`
+	Schedule            *ScheduledrebalancingV1Schedule            `json:"schedule,omitempty"`
+	TriggerConditions   *ScheduledrebalancingV1TriggerConditions   `json:"triggerConditions,omitempty"`
+}
+
+// ScheduledrebalancingV1Schedule defines model for scheduledrebalancing.v1.Schedule.
+type ScheduledrebalancingV1Schedule struct {
+	Cron string `json:"cron"`
+}
+
+// ScheduledrebalancingV1TriggerConditions defines model for scheduledrebalancing.v1.TriggerConditions.
+type ScheduledrebalancingV1TriggerConditions struct {
+	SavingsPercentage *float32 `json:"savingsPercentage,omitempty"`
+}
+
 // AuthTokenId defines model for authTokenId.
 type AuthTokenId = string
 
@@ -1391,6 +1485,12 @@ type NodeTemplatesAPIUpdateNodeTemplateJSONBody = NodetemplatesV1UpdateNodeTempl
 // PoliciesAPIUpsertClusterPoliciesJSONBody defines parameters for PoliciesAPIUpsertClusterPolicies.
 type PoliciesAPIUpsertClusterPoliciesJSONBody = PoliciesV1Policies
 
+// ScheduledRebalancingAPICreateRebalancingJobJSONBody defines parameters for ScheduledRebalancingAPICreateRebalancingJob.
+type ScheduledRebalancingAPICreateRebalancingJobJSONBody = ScheduledrebalancingV1RebalancingJob
+
+// ScheduledRebalancingAPIUpdateRebalancingJobJSONBody defines parameters for ScheduledRebalancingAPIUpdateRebalancingJob.
+type ScheduledRebalancingAPIUpdateRebalancingJobJSONBody = ScheduledrebalancingV1RebalancingJob
+
 // ExternalClusterAPIListClustersParams defines parameters for ExternalClusterAPIListClusters.
 type ExternalClusterAPIListClustersParams struct {
 	// Include metrics with cluster response.
@@ -1445,6 +1545,17 @@ type ExternalClusterAPIDeleteNodeParams struct {
 // ExternalClusterAPIDrainNodeJSONBody defines parameters for ExternalClusterAPIDrainNode.
 type ExternalClusterAPIDrainNodeJSONBody = ExternalclusterV1DrainConfig
 
+// ScheduledRebalancingAPICreateRebalancingScheduleJSONBody defines parameters for ScheduledRebalancingAPICreateRebalancingSchedule.
+type ScheduledRebalancingAPICreateRebalancingScheduleJSONBody = ScheduledrebalancingV1RebalancingSchedule
+
+// ScheduledRebalancingAPIUpdateRebalancingScheduleJSONBody defines parameters for ScheduledRebalancingAPIUpdateRebalancingSchedule.
+type ScheduledRebalancingAPIUpdateRebalancingScheduleJSONBody = ScheduledrebalancingV1RebalancingScheduleUpdate
+
+// ScheduledRebalancingAPIUpdateRebalancingScheduleParams defines parameters for ScheduledRebalancingAPIUpdateRebalancingSchedule.
+type ScheduledRebalancingAPIUpdateRebalancingScheduleParams struct {
+	Id *string `form:"id,omitempty" json:"id,omitempty"`
+}
+
 // ExternalClusterAPIGetCredentialsScriptTemplateParams defines parameters for ExternalClusterAPIGetCredentialsScriptTemplate.
 type ExternalClusterAPIGetCredentialsScriptTemplateParams struct {
 	CrossRole *bool `form:"crossRole,omitempty" json:"crossRole,omitempty"`
@@ -1474,6 +1585,12 @@ type NodeTemplatesAPIUpdateNodeTemplateJSONRequestBody = NodeTemplatesAPIUpdateN
 // PoliciesAPIUpsertClusterPoliciesJSONRequestBody defines body for PoliciesAPIUpsertClusterPolicies for application/json ContentType.
 type PoliciesAPIUpsertClusterPoliciesJSONRequestBody = PoliciesAPIUpsertClusterPoliciesJSONBody
 
+// ScheduledRebalancingAPICreateRebalancingJobJSONRequestBody defines body for ScheduledRebalancingAPICreateRebalancingJob for application/json ContentType.
+type ScheduledRebalancingAPICreateRebalancingJobJSONRequestBody = ScheduledRebalancingAPICreateRebalancingJobJSONBody
+
+// ScheduledRebalancingAPIUpdateRebalancingJobJSONRequestBody defines body for ScheduledRebalancingAPIUpdateRebalancingJob for application/json ContentType.
+type ScheduledRebalancingAPIUpdateRebalancingJobJSONRequestBody = ScheduledRebalancingAPIUpdateRebalancingJobJSONBody
+
 // ExternalClusterAPIRegisterClusterJSONRequestBody defines body for ExternalClusterAPIRegisterCluster for application/json ContentType.
 type ExternalClusterAPIRegisterClusterJSONRequestBody = ExternalClusterAPIRegisterClusterJSONBody
 
@@ -1491,6 +1608,12 @@ type ExternalClusterAPIAddNodeJSONRequestBody = ExternalClusterAPIAddNodeJSONBod
 
 // ExternalClusterAPIDrainNodeJSONRequestBody defines body for ExternalClusterAPIDrainNode for application/json ContentType.
 type ExternalClusterAPIDrainNodeJSONRequestBody = ExternalClusterAPIDrainNodeJSONBody
+
+// ScheduledRebalancingAPICreateRebalancingScheduleJSONRequestBody defines body for ScheduledRebalancingAPICreateRebalancingSchedule for application/json ContentType.
+type ScheduledRebalancingAPICreateRebalancingScheduleJSONRequestBody = ScheduledRebalancingAPICreateRebalancingScheduleJSONBody
+
+// ScheduledRebalancingAPIUpdateRebalancingScheduleJSONRequestBody defines body for ScheduledRebalancingAPIUpdateRebalancingSchedule for application/json ContentType.
+type ScheduledRebalancingAPIUpdateRebalancingScheduleJSONRequestBody = ScheduledRebalancingAPIUpdateRebalancingScheduleJSONBody
 
 // Getter for additional properties for ExternalclusterV1EKSClusterParams_Tags. Returns the specified
 // element and whether it was found
