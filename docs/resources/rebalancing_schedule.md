@@ -46,7 +46,7 @@ resource "castai_rebalancing_schedule" "spots" {
 ### Required
 
 - `launch_configuration` (Block List, Min: 1, Max: 1) (see [below for nested schema](#nestedblock--launch_configuration))
-- `name` (String) Name of the schedule
+- `name` (String) Name of the schedule.
 - `schedule` (Block List, Min: 1, Max: 1) (see [below for nested schema](#nestedblock--schedule))
 - `trigger_conditions` (Block List, Min: 1, Max: 1) (see [below for nested schema](#nestedblock--trigger_conditions))
 
@@ -63,9 +63,9 @@ resource "castai_rebalancing_schedule" "spots" {
 
 Optional:
 
-- `node_ttl_seconds` (Number) Specifies amount of time since node creation before the node is allowed to be considered for automated rebalancing
-- `num_targeted_nodes` (Number) Maximum number of nodes that will be selected for rebalancing
-- `rebalancing_min_nodes` (Number) Minimum number of nodes that should be kept in the cluster after rebalancing
+- `node_ttl_seconds` (Number) Specifies amount of time since node creation before the node is allowed to be considered for automated rebalancing.
+- `num_targeted_nodes` (Number) Maximum number of nodes that will be selected for rebalancing.
+- `rebalancing_min_nodes` (Number) Minimum number of nodes that should be kept in the cluster after rebalancing.
 - `selector` (String) Node selector in JSON format.
 
 
@@ -74,7 +74,7 @@ Optional:
 
 Required:
 
-- `cron` (String) Cron expression defining when the schedule should trigger
+- `cron` (String) Cron expression defining when the schedule should trigger.
 
 
 <a id="nestedblock--trigger_conditions"></a>
@@ -82,7 +82,7 @@ Required:
 
 Required:
 
-- `savings_percentage` (Number) Defines the minimum percentage of savings expected
+- `savings_percentage` (Number) Defines the minimum percentage of savings expected.
 
 
 <a id="nestedblock--timeouts"></a>

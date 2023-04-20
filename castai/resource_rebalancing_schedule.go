@@ -39,7 +39,7 @@ func resourceRebalancingSchedule() *schema.Resource {
 				Type:             schema.TypeString,
 				Required:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
-				Description:      "Name of the schedule",
+				Description:      "Name of the schedule.",
 			},
 			"schedule": {
 				Type:     schema.TypeList,
@@ -51,7 +51,7 @@ func resourceRebalancingSchedule() *schema.Resource {
 							Type:             schema.TypeString,
 							Required:         true,
 							ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
-							Description:      "Cron expression defining when the schedule should trigger",
+							Description:      "Cron expression defining when the schedule should trigger.",
 						},
 					},
 				},
@@ -66,7 +66,7 @@ func resourceRebalancingSchedule() *schema.Resource {
 							Type:             schema.TypeFloat,
 							Required:         true,
 							ValidateDiagFunc: validation.ToDiagFunc(validation.FloatAtLeast(0.0)),
-							Description:      "Defines the minimum percentage of savings expected",
+							Description:      "Defines the minimum percentage of savings expected.",
 						},
 					},
 				},
@@ -81,19 +81,19 @@ func resourceRebalancingSchedule() *schema.Resource {
 							Type:             schema.TypeInt,
 							Optional:         true,
 							ValidateDiagFunc: validation.ToDiagFunc(validation.IntAtLeast(1)),
-							Description:      "Specifies amount of time since node creation before the node is allowed to be considered for automated rebalancing",
+							Description:      "Specifies amount of time since node creation before the node is allowed to be considered for automated rebalancing.",
 						},
 						"num_targeted_nodes": {
 							Type:             schema.TypeInt,
 							Optional:         true,
 							ValidateDiagFunc: validation.ToDiagFunc(validation.IntAtLeast(1)),
-							Description:      "Maximum number of nodes that will be selected for rebalancing",
+							Description:      "Maximum number of nodes that will be selected for rebalancing.",
 						},
 						"rebalancing_min_nodes": {
 							Type:             schema.TypeInt,
 							Optional:         true,
 							ValidateDiagFunc: validation.ToDiagFunc(validation.IntAtLeast(1)),
-							Description:      "Minimum number of nodes that should be kept in the cluster after rebalancing",
+							Description:      "Minimum number of nodes that should be kept in the cluster after rebalancing.",
 						},
 						"selector": {
 							Type:             schema.TypeString,
@@ -132,6 +132,7 @@ func resourceRebalancingScheduleCreate(ctx context.Context, d *schema.ResourceDa
 
 	return resourceRebalancingScheduleRead(ctx, d, meta)
 }
+
 func resourceRebalancingScheduleRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	schedule, err := getRebalancingScheduleById(ctx, meta.(*ProviderConfig).api, d.Id())
 	if err != nil {
