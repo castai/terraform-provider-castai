@@ -24,7 +24,7 @@ func resourceRebalancingJob() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: rebalancingJobStateImporter,
 		},
-		Description: "Job assigns rebalancing shcedule to a cluster.",
+		Description: "Job assigns a rebalancing schedule to a cluster.",
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(1 * time.Minute),
@@ -44,13 +44,13 @@ func resourceRebalancingJob() *schema.Resource {
 				Type:             schema.TypeString,
 				Required:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
-				Description:      "rebalancing schedule of this job",
+				Description:      "Rebalancing schedule of this job.",
 			},
 			"enabled": {
 				Type:        schema.TypeBool,
 				Optional:    true,
 				Default:     true,
-				Description: "The job will only be executed if it's enabled",
+				Description: "The job will only be executed if it's enabled.",
 			},
 		},
 	}
@@ -80,6 +80,7 @@ func resourceRebalancingJobCreate(ctx context.Context, d *schema.ResourceData, m
 
 	return resourceRebalancingJobRead(ctx, d, meta)
 }
+
 func resourceRebalancingJobRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	clusterID := d.Get("cluster_id").(string)
 	job, err := getRebalancingJobById(ctx, meta.(*ProviderConfig).api, clusterID, d.Id())

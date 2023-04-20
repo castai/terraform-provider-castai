@@ -3,12 +3,12 @@
 page_title: "castai_rebalancing_job Resource - terraform-provider-castai"
 subcategory: ""
 description: |-
-  Job assigns rebalancing shcedule to a cluster.
+  Job assigns a rebalancing schedule to a cluster.
 ---
 
 # castai_rebalancing_job (Resource)
 
-Job assigns rebalancing shcedule to a cluster.
+Job assigns a rebalancing schedule to a cluster.
 
 ## Example Usage
 
@@ -26,11 +26,11 @@ resource "castai_rebalancing_job" "spots" {
 ### Required
 
 - `cluster_id` (String) CAST AI cluster id.
-- `rebalancing_schedule_id` (String) rebalancing schedule of this job
+- `rebalancing_schedule_id` (String) Rebalancing schedule of this job.
 
 ### Optional
 
-- `enabled` (Boolean) The job will only be executed if it's enabled
+- `enabled` (Boolean) The job will only be executed if it's enabled.
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only

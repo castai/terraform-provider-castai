@@ -82,7 +82,7 @@ Required:
 
 Required:
 
-- `savings_percentage` (Number) Defines minimum number of savings expected
+- `savings_percentage` (Number) Defines the minimum percentage of savings expected
 
 
 <a id="nestedblock--timeouts"></a>

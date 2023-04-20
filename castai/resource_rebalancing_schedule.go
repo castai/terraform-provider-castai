@@ -66,7 +66,7 @@ func resourceRebalancingSchedule() *schema.Resource {
 							Type:             schema.TypeFloat,
 							Required:         true,
 							ValidateDiagFunc: validation.ToDiagFunc(validation.FloatAtLeast(0.0)),
-							Description:      "Defines minimum number of savings expected",
+							Description:      "Defines the minimum percentage of savings expected",
 						},
 					},
 				},
