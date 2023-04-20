@@ -3,12 +3,12 @@
 page_title: "castai_rebalancing_schedule Resource - terraform-provider-castai"
 subcategory: ""
 description: |-
-  CAST AI rebalancing schedule resource to manage rebalancing schedules
+  CAST AI rebalancing schedule resource to manage rebalancing schedules.
 ---
 
 # castai_rebalancing_schedule (Resource)
 
-CAST AI rebalancing schedule resource to manage rebalancing schedules
+CAST AI rebalancing schedule resource to manage rebalancing schedules.
 
 ## Example Usage
 

@@ -25,7 +25,7 @@ func resourceRebalancingSchedule() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: rebalancingScheduleStateImporter,
 		},
-		Description: "CAST AI rebalancing schedule resource to manage rebalancing schedules",
+		Description: "CAST AI rebalancing schedule resource to manage rebalancing schedules.",
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(1 * time.Minute),
