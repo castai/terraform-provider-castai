@@ -11,6 +11,7 @@ data "castai_eks_user_arn" "castai_user_arn" {
   cluster_id = castai_eks_clusterid.cluster_id.id
 }
 
+
 provider "castai" {
   api_token = var.castai_api_token
 }
@@ -130,11 +131,11 @@ module "castai-eks-cluster" {
     }
   }
 
-  // Configure Autoscaler policies as per API specification https://api.cast.ai/v1/spec/#/PoliciesAPI/PoliciesAPIUpsertClusterPolicies.
-  // Here:
-  //  - unschedulablePods - Unscheduled pods policy
-  //  - spotInstances     - Spot instances configuration
-  //  - nodeDownscaler    - Node deletion policy
+  # Configure Autoscaler policies as per API specification https://api.cast.ai/v1/spec/#/PoliciesAPI/PoliciesAPIUpsertClusterPolicies.
+  # Here:
+  #  - unschedulablePods - Unscheduled pods policy
+  #  - spotInstances     - Spot instances configuration
+  #  - nodeDownscaler    - Node deletion policy
   autoscaler_policies_json = <<-EOT
     {
         "enabled": true,
@@ -173,7 +174,39 @@ module "castai-eks-cluster" {
     }
   EOT
 
-  // depends_on helps Terraform with creating proper dependencies graph in case of resource creation and in this case destroy.
-  // module "castai-eks-cluster" has to be destroyed before module "castai-eks-role-iam".
+  # depends_on helps Terraform with creating proper dependencies graph in case of resource creation and in this case destroy.
+  # module "castai-eks-cluster" has to be destroyed before module "castai-eks-role-iam".
   depends_on = [module.castai-eks-role-iam]
+}
+
+resource "castai_rebalancing_schedule" "spots" {
+	name = "rebalance spots at every 30th minute"
+	schedule {
+		cron = "*/30 * * * *"
+	}
+	trigger_conditions {
+		savings_percentage = 20
+	}
+	launch_configuration {
+		# only consider instances older than 5 minutes
+		node_ttl_seconds = 300
+		num_targeted_nodes = 3
+		rebalancing_min_nodes = 2
+		selector = jsonencode({
+			nodeSelectorTerms = [{
+				matchExpressions = [
+					{
+						key =  "scheduling.cast.ai/spot"
+						operator = "Exists"
+					}
+				]
+			}]
+		})
+	}
+}
+
+resource "castai_rebalancing_job" "spots" {
+	cluster_id = castai_eks_clusterid.cluster_id.id
+	rebalancing_schedule_id = castai_rebalancing_schedule.spots.id
+	enabled = true
 }
