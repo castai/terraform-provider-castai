@@ -271,6 +271,7 @@ func resourceNodeTemplate() *schema.Resource {
 						"effect": {
 							Optional: true,
 							Type:     schema.TypeString,
+							Default:  "NoSchedule",
 							ValidateDiagFunc: validation.ToDiagFunc(
 								validation.StringMatch(regexp.MustCompile("^NoSchedule$"), "effect must be NoSchedule"),
 							),
