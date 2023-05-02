@@ -1430,9 +1430,6 @@ type AuthTokenId = string
 // ClusterId defines model for clusterId.
 type ClusterId = string
 
-// CredentialsId defines model for credentialsId.
-type CredentialsId = string
-
 // HeaderOrganizationId defines model for headerOrganizationId.
 type HeaderOrganizationId = openapi_types.UUID
 
