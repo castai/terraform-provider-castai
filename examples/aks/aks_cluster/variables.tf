@@ -23,8 +23,14 @@ variable "castai_api_url" {
 
 # Variables required for connecting EKS cluster to CAST AI
 variable "castai_api_token" {
-  type = string
+  type        = string
   description = "CAST AI API token created in console.cast.ai API Access keys section"
+}
+
+variable "castai_api_url" {
+  type        = string
+  description = "CAST AI url to API, default value is https://api.cast.ai"
+  default     = "https://api.cast.ai"
 }
 
 variable "delete_nodes_on_disconnect" {
