@@ -3,6 +3,12 @@ variable "castai_api_token" {
   description = "CAST.AI api token"
 }
 
+variable "castai_api_url" {
+  type = string
+  description = "URL of alternative CAST AI API to be used during development or testing"
+  default     = "https://api.cast.ai"
+}
+
 variable "aws_access_key_id" {
   type        = string
   description = "Your own access key id for operating terraform"

@@ -11,6 +11,7 @@ provider "helm" {
 }
 
 provider "castai" {
+  api_url = var.castai_api_url
   api_token = var.castai_api_token
 }
 
@@ -63,6 +64,8 @@ module "castai-eks-role-iam" {
 
 module "castai-eks-cluster" {
   source = "castai/eks-cluster/castai"
+
+  api_url = var.castai_api_url
 
   aws_account_id      = data.aws_caller_identity.current.account_id
   aws_cluster_region  = var.cluster_region
