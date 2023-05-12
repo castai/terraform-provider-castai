@@ -15,6 +15,12 @@ variable "cluster_version" {
   default     = "1.24"
 }
 
+variable "castai_api_url" {
+  type = string
+  description = "URL of alternative CAST AI API to be used during development or testing"
+  default     = "https://api.cast.ai"
+}
+
 # Variables required for connecting EKS cluster to CAST AI.
 variable "castai_api_token" {
   type = string

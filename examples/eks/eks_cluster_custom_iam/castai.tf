@@ -8,6 +8,7 @@ data "castai_eks_user_arn" "castai_user_arn" {
 }
 
 provider "castai" {
+  api_url = var.castai_api_url
   api_token = var.castai_api_token
 }
 
@@ -34,6 +35,8 @@ resource "castai_eks_clusterid" "cluster_id" {
 
 module "castai-eks-cluster" {
   source = "castai/eks-cluster/castai"
+
+  api_url = var.castai_api_url
 
   aws_account_id      = data.aws_caller_identity.current.account_id
   aws_cluster_region  = var.cluster_region
