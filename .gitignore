@@ -12,6 +12,7 @@ examples/**/*.tfstate.backup
 examples/**/.terraform.lock.hcl
 examples/**/*.tfvars
 examples/**/.kube/*
+examples/**/**/tf.vars
 # terraform examples/localdev is meant for local development
 examples/localdev/*
 !examples/localdev/main.tf.sample

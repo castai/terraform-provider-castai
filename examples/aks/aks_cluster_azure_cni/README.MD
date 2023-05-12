@@ -7,16 +7,17 @@ Example configuration should be analysed in the following order:
 3. Create CAST AI related resources to connect AKS cluster to CAST AI - `castai.tf`
 
 # Usage
-1. Update `tf.vars` file with your cluster name, cluster region and CAST AI API token.
-2. Initialize Terraform. Under example root folder run:
+1. Rename `tf.vars.example` to `tf.vars`
+2. Update `tf.vars` file with your cluster name, cluster region and CAST AI API token.
+3. Initialize Terraform. Under example root folder run:
 ```
 terraform init
 ```
-3. Run Terraform apply:
+4. Run Terraform apply:
 ```
 terraform apply -var-file=tf.vars
 ```
-4. To destroy resources created by this example:
+5. To destroy resources created by this example:
 ```
 terraform destroy -var-file=tf.vars
 ```
