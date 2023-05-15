@@ -4,16 +4,16 @@
 data "azurerm_subscription" "current" {}
 
 provider "castai" {
-  api_url = var.castai_api_url
+  api_url   = var.castai_api_url
   api_token = var.castai_api_token
 }
 
 provider "helm" {
   kubernetes {
     host                   = azurerm_kubernetes_cluster.this.kube_config.0.host
-    client_certificate     = base64decode(azurerm_kubernetes_cluster.this.kube_config.0.client_certificate)
+    client_certificate      = base64decode(azurerm_kubernetes_cluster.this.kube_config.0.client_certificate)
     client_key             = base64decode(azurerm_kubernetes_cluster.this.kube_config.0.client_key)
-    cluster_ca_certificate = base64decode(azurerm_kubernetes_cluster.this.kube_config.0.cluster_ca_certificate)
+    cluster_ca_certificate  = base64decode(azurerm_kubernetes_cluster.this.kube_config.0.cluster_ca_certificate)
   }
 }
 
@@ -22,6 +22,7 @@ module "castai-aks-cluster" {
   source = "castai/aks/castai"
 
   api_url = var.castai_api_url
+
   aks_cluster_name    = var.cluster_name
   aks_cluster_region  = var.cluster_region
   node_resource_group = azurerm_kubernetes_cluster.this.node_resource_group

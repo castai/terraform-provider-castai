@@ -5,6 +5,7 @@ data "aws_caller_identity" "current" {}
 
 provider "castai" {
   api_token = var.castai_api_token
+  api_url   = var.castai_api_url
 }
 
 provider "helm" {
@@ -26,6 +27,7 @@ resource "castai_eks_cluster" "this" {
   account_id = data.aws_caller_identity.current.account_id
   region     = var.cluster_region
   name       = var.cluster_name
+  api_url    = var.castai_api_url
 }
 
 resource "helm_release" "castai_agent" {

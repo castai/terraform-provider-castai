@@ -5,7 +5,7 @@ data "azurerm_subscription" "current" {}
 
 provider "castai" {
   api_token = var.castai_api_token
-  api_url   = var.castai_api_url
+  api_url  = var.castai_api_url
 }
 
 provider "helm" {
@@ -21,7 +21,7 @@ provider "helm" {
 module "castai-aks-cluster" {
   source = "castai/aks/castai"
 
-  api_url             = var.castai_api_url
+  api_url  = var.castai_api_url
 
   aks_cluster_name    = var.cluster_name
   aks_cluster_region  = var.cluster_region
