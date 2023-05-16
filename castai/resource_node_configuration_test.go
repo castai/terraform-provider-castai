@@ -27,6 +27,7 @@ func TestAccResourceNodeConfiguration_basic(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "name", rName),
 					resource.TestCheckResourceAttr(resourceName, "disk_cpu_ratio", "35"),
+					resource.TestCheckResourceAttr(resourceName, "min_disk_size", "122"),
 					resource.TestCheckResourceAttr(resourceName, "image", ""),
 					resource.TestCheckResourceAttr(resourceName, "ssh_public_key", ""),
 					resource.TestCheckResourceAttr(resourceName, "init_script", "IyEvYmluL2Jhc2gKZWNobyAiaGVsbG8iCg=="),
@@ -62,6 +63,7 @@ func TestAccResourceNodeConfiguration_basic(t *testing.T) {
 				Config: testAccNodeConfigurationUpdated(rName, clusterName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "disk_cpu_ratio", "0"),
+					resource.TestCheckResourceAttr(resourceName, "min_disk_size", "100"),
 					resource.TestCheckResourceAttr(resourceName, "image", "amazon-eks-node-1.23-v20220824"),
 					resource.TestCheckResourceAttr(resourceName, "init_script", ""),
 					resource.TestCheckResourceAttr(resourceName, "container_runtime", "CONTAINERD"),
@@ -96,6 +98,7 @@ resource "castai_node_configuration" "test" {
   name   		    = %[1]q
   cluster_id        = castai_eks_cluster.test.id
   disk_cpu_ratio    = 35
+  min_disk_size     = 122
   subnets   	    = aws_subnet.test[*].id
   init_script       = base64encode(var.init_script)
   docker_config     = jsonencode({

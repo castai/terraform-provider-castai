@@ -4,11 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/samber/lo"
 	"log"
 	"net/http"
 	"strings"
 	"time"
+
+	"github.com/samber/lo"
 
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -22,6 +23,7 @@ import (
 const (
 	FieldNodeConfigurationName             = "name"
 	FieldNodeConfigurationDiskCpuRatio     = "disk_cpu_ratio"
+	FieldNodeConfigurationMinDiskSize      = "min_disk_size"
 	FieldNodeConfigurationSubnets          = "subnets"
 	FieldNodeConfigurationSSHPublicKey     = "ssh_public_key"
 	FieldNodeConfigurationImage            = "image"
@@ -74,6 +76,13 @@ func resourceNodeConfiguration() *schema.Resource {
 				Default:          0,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.IntAtLeast(0)),
 				Description:      "Disk to CPU ratio. Sets the number of GiBs to be added for every CPU on the node. Defaults to 0",
+			},
+			FieldNodeConfigurationMinDiskSize: {
+				Type:             schema.TypeInt,
+				Optional:         true,
+				Default:          100,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(30, 1000)),
+				Description:      "Minimal disk size in GiB. Defaults to 100, min 30, max 1000",
 			},
 			FieldNodeConfigurationSubnets: {
 				Type:     schema.TypeList,
@@ -261,6 +270,7 @@ func resourceNodeConfigurationCreate(ctx context.Context, d *schema.ResourceData
 	req := sdk.NodeConfigurationAPICreateConfigurationJSONRequestBody{
 		Name:         d.Get(FieldNodeConfigurationName).(string),
 		DiskCpuRatio: toPtr(int32(d.Get(FieldNodeConfigurationDiskCpuRatio).(int))),
+		MinDiskSize:  toPtr(int32(d.Get(FieldNodeConfigurationMinDiskSize).(int))),
 	}
 
 	if v, ok := d.GetOk(FieldNodeConfigurationSubnets); ok {
@@ -347,6 +357,9 @@ func resourceNodeConfigurationRead(ctx context.Context, d *schema.ResourceData, 
 	if err := d.Set(FieldNodeConfigurationDiskCpuRatio, nodeConfig.DiskCpuRatio); err != nil {
 		return diag.FromErr(fmt.Errorf("setting disk cpu ratio: %w", err))
 	}
+	if err := d.Set(FieldNodeConfigurationMinDiskSize, nodeConfig.MinDiskSize); err != nil {
+		return diag.FromErr(fmt.Errorf("setting min disk size: %w", err))
+	}
 	if err := d.Set(FieldNodeConfigurationSubnets, nodeConfig.Subnets); err != nil {
 		return diag.FromErr(fmt.Errorf("setting subnets: %w", err))
 	}
@@ -404,6 +417,7 @@ func resourceNodeConfigurationRead(ctx context.Context, d *schema.ResourceData, 
 func resourceNodeConfigurationUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	if !d.HasChanges(
 		FieldNodeConfigurationDiskCpuRatio,
+		FieldNodeConfigurationMinDiskSize,
 		FieldNodeConfigurationSubnets,
 		FieldNodeConfigurationSSHPublicKey,
 		FieldNodeConfigurationImage,
@@ -425,6 +439,7 @@ func resourceNodeConfigurationUpdate(ctx context.Context, d *schema.ResourceData
 	clusterID := d.Get(FieldClusterID).(string)
 	req := sdk.NodeConfigurationAPIUpdateConfigurationJSONRequestBody{
 		DiskCpuRatio: toPtr(int32(d.Get(FieldNodeConfigurationDiskCpuRatio).(int))),
+		MinDiskSize:  toPtr(int32(d.Get(FieldNodeConfigurationMinDiskSize).(int))),
 	}
 
 	if v, ok := d.GetOk(FieldNodeConfigurationSubnets); ok {

@@ -10,6 +10,7 @@ resource "castai_node_configuration" "default" {
   name           = "default"
   cluster_id     = castai_eks_cluster.test.id
   disk_cpu_ratio = 35
+  min_disk_size  = 133
   subnets        = aws_subnet.test[*].id
   init_script    = base64encode(var.init_script)
   docker_config  = jsonencode({
