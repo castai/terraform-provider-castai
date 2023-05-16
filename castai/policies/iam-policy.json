@@ -19,7 +19,7 @@
         "ec2:CreateKeyPair",
         "ec2:CreateTags",
         "ec2:ImportKeyPair",
-        "iam:CreateServiceLinkedRole",
+        "iam:CreateServiceLinkedRole"
       ],
       "Resource": "*"
     },
