@@ -18,7 +18,8 @@
       "Action": [
         "ec2:CreateKeyPair",
         "ec2:CreateTags",
-        "ec2:ImportKeyPair"
+        "ec2:ImportKeyPair",
+        "ec2:DeleteKeyPair"
       ],
       "Resource": "*"
     },
