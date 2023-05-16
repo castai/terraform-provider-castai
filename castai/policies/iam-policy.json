@@ -16,14 +16,7 @@
       "Sid": "NonResourcePermissions",
       "Effect": "Allow",
       "Action": [
-        "iam:DeleteInstanceProfile",
-        "iam:RemoveRoleFromInstanceProfile",
-        "iam:DeleteRole",
-        "iam:DetachRolePolicy",
-        "iam:CreateServiceLinkedRole",
-        "iam:DeleteServiceLinkedRole",
         "ec2:CreateKeyPair",
-        "ec2:DeleteKeyPair",
         "ec2:CreateTags",
         "ec2:ImportKeyPair"
       ],

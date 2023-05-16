@@ -3,7 +3,7 @@ locals {
   resource_name_postfix = var.cluster_name
   account_id            = data.aws_caller_identity.current.account_id
 
-  instance_profile_role_name = "castai-eks-${local.resource_name_postfix}-node-role"
+  instance_profile_role_name  = "castai-eks-${local.resource_name_postfix}-node-role"
   iam_role_name              = "castai-eks-${local.resource_name_postfix}-cluster-role"
   iam_inline_policy_name     = "CastEKSRestrictedAccess"
   role_name                  = "castai-eks-role"
