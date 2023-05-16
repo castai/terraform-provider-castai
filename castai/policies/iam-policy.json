@@ -20,6 +20,7 @@
         "iam:DetachRolePolicy",
         "ec2:CreateTags",
         "ec2:ImportKeyPair",
+        "ec2:DeleteKeyPair",
         "iam:CreateServiceLinkedRole"
       ],
       "Resource": "*"
