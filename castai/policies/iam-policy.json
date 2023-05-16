@@ -17,6 +17,7 @@
       "Effect": "Allow",
       "Action": [
         "ec2:CreateKeyPair",
+        "iam:DetachRolePolicy",
         "ec2:CreateTags",
         "ec2:ImportKeyPair",
         "iam:CreateServiceLinkedRole"
