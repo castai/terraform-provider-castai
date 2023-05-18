@@ -151,7 +151,11 @@ module "castai-eks-cluster" {
             "spotBackups": {
                 "enabled": true
             },
-            "spotDiversityEnabled": false
+            "spotDiversityEnabled": false,
+            "spotInterruptionPredictions": {
+              "enabled": true,
+              "type": "AWSRebalanceRecommendations"
+            }
         },
         "nodeDownscaler": {
             "enabled": true,
