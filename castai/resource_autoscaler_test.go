@@ -75,6 +75,7 @@ func TestAutoscalerResource_PoliciesUpdateAction(t *testing.T) {
 	// 2. enable node constraints and change max CPU
 	// 3. enable spot backups
 	// 4. change spot cloud to aws - just to test if we can do change on arrays
+	// 5. enable the spot interruption predictions
 	policyChanges := `{
 		"isScopedMode":true,
 		"unschedulablePods": {
@@ -87,6 +88,10 @@ func TestAutoscalerResource_PoliciesUpdateAction(t *testing.T) {
 			"clouds": ["aws"],
 			"spotBackups": {
 				"enabled": true
+			},
+			"spotInterruptionPredictions": {
+				"enabled": true,
+				"type": "AWSRebalanceRecommendations"
 			}
 		}
 	}`
@@ -132,6 +137,10 @@ func TestAutoscalerResource_PoliciesUpdateAction(t *testing.T) {
 		        "spotBackups": {
 		            "enabled": true,
 		            "spotBackupRestoreRateSeconds": 1800
+		        },
+		        "spotInterruptionPredictions": {
+		            "enabled": true,
+		            "type": "AWSRebalanceRecommendations"
 		        }
 		    },
 		    "nodeDownscaler": {
