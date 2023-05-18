@@ -2,12 +2,15 @@
 locals {
   resource_name_postfix = var.cluster_name
   account_id            = data.aws_caller_identity.current.account_id
+  partition             = data.aws_partition.current.partition
 
   instance_profile_role_name = "castai-eks-${local.resource_name_postfix}-node-role"
   iam_role_name              = "castai-eks-${local.resource_name_postfix}-cluster-role"
   iam_inline_policy_name     = "CastEKSRestrictedAccess"
   role_name                  = "castai-eks-role"
 }
+
+data "aws_partition" "current" {}
 
 ################################################################################
 # Instance profile
@@ -40,9 +43,9 @@ resource "aws_iam_role" "castai_instance_profile_role" {
 # Attach policies to instance profile.
 resource "aws_iam_role_policy_attachment" "instance_profile_policy" {
   for_each = toset([
-    "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy",
-    "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly",
-    "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy",
+    "arn:${local.partition}:iam::aws:policy/AmazonEKSWorkerNodePolicy",
+    "arn:${local.partition}:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly",
+    "arn:${local.partition}:iam::aws:policy/AmazonEKS_CNI_Policy",
   ])
 
   role       = aws_iam_instance_profile.castai_instance_profile.role
@@ -78,7 +81,7 @@ resource "aws_iam_role" "assume_role" {
 # Attach readonly policies to role.
 resource "aws_iam_role_policy_attachment" "assume_role_readonly_policy_attachment" {
   for_each = toset([
-    "arn:aws:iam::aws:policy/AmazonEC2ReadOnlyAccess"
+    "arn:${local.partition}:iam::aws:policy/AmazonEC2ReadOnlyAccess"
   ])
   role       = aws_iam_role.assume_role.name
   policy_arn = each.value
@@ -96,7 +99,7 @@ resource "aws_iam_role_policy" "inline_role_policy" {
         Sid       = "PassRoleEC2",
         Action    = "iam:PassRole",
         Effect    = "Allow",
-        Resource  = "arn:aws:iam::${local.account_id}:role/${aws_iam_role.castai_instance_profile_role.name}",
+        Resource  = "arn:${local.partition}:iam::${local.account_id}:role/${aws_iam_role.castai_instance_profile_role.name}",
         Condition = {
           StringEquals = {
             "iam:PassedToService" = "ec2.amazonaws.com"
@@ -113,8 +116,8 @@ resource "aws_iam_role_policy" "inline_role_policy" {
           "iam:GetInstanceProfile"
         ],
         "Resource" : [
-          "arn:aws:iam::${local.account_id}:role/${aws_iam_role.assume_role.name}",
-          "arn:aws:iam::${local.account_id}:instance-profile/${aws_iam_instance_profile.castai_instance_profile.name}"
+          "arn:${local.partition}:iam::${local.account_id}:role/${aws_iam_role.assume_role.name}",
+          "arn:${local.partition}:iam::${local.account_id}:instance-profile/${aws_iam_instance_profile.castai_instance_profile.name}"
         ]
       },
       # Needed to tag non CAST nodes.
@@ -131,7 +134,7 @@ resource "aws_iam_role_policy" "inline_role_policy" {
         Sid : "RunInstancesTagRestriction",
         Effect : "Allow",
         Action : "ec2:RunInstances",
-        Resource : "arn:aws:ec2:${var.cluster_region}:${local.account_id}:instance/*",
+        Resource : "arn:${local.partition}:ec2:${var.cluster_region}:${local.account_id}:instance/*",
         Condition : {
           StringEquals : {
             "aws:RequestTag/kubernetes.io/cluster/${var.cluster_name}" : "owned",
@@ -144,10 +147,10 @@ resource "aws_iam_role_policy" "inline_role_policy" {
         Sid : "RunInstancesVpcRestriction",
         Effect : "Allow",
         Action : "ec2:RunInstances",
-        Resource : formatlist("arn:aws:ec2:${var.cluster_region}:${local.account_id}:subnet/%s", module.vpc.private_subnets)
+        Resource : formatlist("arn:${local.partition}:ec2:${var.cluster_region}:${local.account_id}:subnet/%s", module.vpc.private_subnets)
         Condition : {
           StringEquals : {
-            "ec2:Vpc" : "arn:aws:ec2:${var.cluster_region}:${local.account_id}:vpc/${module.vpc.vpc_id}"
+            "ec2:Vpc" : "arn:${local.partition}:ec2:${var.cluster_region}:${local.account_id}:vpc/${module.vpc.vpc_id}"
           }
         }
       },
@@ -160,7 +163,7 @@ resource "aws_iam_role_policy" "inline_role_policy" {
           "ec2:StartInstances",
           "ec2:StopInstances",
         ],
-        Resource : "arn:aws:ec2:${var.cluster_region}:${local.account_id}:instance/*",
+        Resource : "arn:${local.partition}:ec2:${var.cluster_region}:${local.account_id}:instance/*",
         Condition : {
           StringEquals : {
             "ec2:ResourceTag/kubernetes.io/cluster/${var.cluster_name}" : ["owned", "shared"],
@@ -174,15 +177,15 @@ resource "aws_iam_role_policy" "inline_role_policy" {
         Effect   = "Allow",
         Action   = "ec2:RunInstances",
         Resource = concat(
-          formatlist("arn:aws:ec2:*:${local.account_id}:security-group/%s", [
+          formatlist("arn:${local.partition}:ec2:*:${local.account_id}:security-group/%s", [
             module.eks.cluster_security_group_id,
             module.eks.node_security_group_id,
             aws_security_group.additional.id,
           ]),
           [
-            "arn:aws:ec2:*:${local.account_id}:network-interface/*",
-            "arn:aws:ec2:*:${local.account_id}:volume/*",
-            "arn:aws:ec2:*::image/*",
+            "arn:${local.partition}:ec2:*:${local.account_id}:network-interface/*",
+            "arn:${local.partition}:ec2:*:${local.account_id}:volume/*",
+            "arn:${local.partition}:ec2:*::image/*",
           ]
         ),
       },
@@ -197,7 +200,7 @@ resource "aws_iam_role_policy" "inline_role_policy" {
           "autoscaling:SuspendProcesses",
           "autoscaling:ResumeProcesses",
         ],
-        Resource : "arn:aws:autoscaling:${var.cluster_region}:${local.account_id}:autoScalingGroup:*:autoScalingGroupName/*",
+        Resource : "arn:${local.partition}:autoscaling:${var.cluster_region}:${local.account_id}:autoScalingGroup:*:autoScalingGroupName/*",
         Condition : {
           StringEquals : {
             "autoscaling:ResourceTag/kubernetes.io/cluster/${var.cluster_name}" : [
@@ -216,8 +219,8 @@ resource "aws_iam_role_policy" "inline_role_policy" {
           "eks:List*"
         ],
         Resource : [
-          "arn:aws:eks:${var.cluster_region}:${local.account_id}:cluster/${var.cluster_name}",
-          "arn:aws:eks:${var.cluster_region}:${local.account_id}:nodegroup/${var.cluster_name}/*/*"
+          "arn:${local.partition}:eks:${var.cluster_region}:${local.account_id}:cluster/${var.cluster_name}",
+          "arn:${local.partition}:eks:${var.cluster_region}:${local.account_id}:nodegroup/${var.cluster_name}/*/*"
         ]
       }
     ]
