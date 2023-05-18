@@ -3,6 +3,7 @@ package castai
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/castai/terraform-provider-castai/castai/policies"
 
@@ -19,6 +20,8 @@ const (
 	EKSSettingsFieldIamPolicyJson      = "iam_policy_json"
 	EKSSettingsFieldIamUserPolicyJson  = "iam_user_policy_json"
 	EKSSettingsFieldIamManagedPolicies = "iam_managed_policies"
+
+	GovCloudPrefix = "us-gov"
 )
 
 func dataSourceEKSSettings() *schema.Resource {
@@ -74,9 +77,11 @@ func dataSourceCastaiEKSSettingsRead(ctx context.Context, data *schema.ResourceD
 	cluster := data.Get(EKSSettingsFieldCluster).(string)
 
 	arn := fmt.Sprintf("%s:%s", region, accountID)
+	partition := getPartition(region)
 
-	userPolicy, _ := policies.GetUserInlinePolicy(cluster, arn, vpc)
-	iamPolicy, _ := policies.GetIAMPolicy(accountID)
+	userPolicy, _ := policies.GetUserInlinePolicy(cluster, arn, vpc, partition)
+	iamPolicy, _ := policies.GetIAMPolicy(accountID, partition)
+	managedPolicies := policies.GetManagedPolicies(partition)
 
 	data.SetId(fmt.Sprintf("eks-%s-%s-%s-%s", accountID, vpc, region, cluster))
 	if err := data.Set(EKSSettingsFieldIamPolicyJson, iamPolicy); err != nil {
@@ -85,16 +90,18 @@ func dataSourceCastaiEKSSettingsRead(ctx context.Context, data *schema.ResourceD
 	if err := data.Set(EKSSettingsFieldIamUserPolicyJson, userPolicy); err != nil {
 		return diag.FromErr(fmt.Errorf("setting iam user policy: %w", err))
 	}
-	if err := data.Set(EKSSettingsFieldIamManagedPolicies, buildManagedPolicies()); err != nil {
-		return diag.FromErr(fmt.Errorf("setting iam manged policies: %w", err))
+	if err := data.Set(EKSSettingsFieldIamManagedPolicies, managedPolicies); err != nil {
+		return diag.FromErr(fmt.Errorf("setting iam managed policies: %w", err))
 	}
 
 	return nil
 }
 
-func buildManagedPolicies() []string {
-	return []string{
-		"arn:aws:iam::aws:policy/AmazonEC2ReadOnlyAccess",
-		"arn:aws:iam::aws:policy/IAMReadOnlyAccess",
+func getPartition(region string) string {
+	switch {
+	case strings.Contains(region, GovCloudPrefix):
+		return "aws-us-gov"
+	default:
+		return "aws"
 	}
 }
