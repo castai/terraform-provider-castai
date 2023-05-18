@@ -1,3 +1,8 @@
+locals {
+    partition = data.aws_partition.current.partition
+}
+
+data "aws_partition" "current" {}
 
 data "aws_iam_policy_document" "this" {
   statement {
@@ -8,8 +13,8 @@ data "aws_iam_policy_document" "this" {
     ]
     effect = "Allow"
     resources = [
-      "arn:aws:s3:::${aws_s3_bucket.chunks.bucket}",
-      "arn:aws:s3:::${aws_s3_bucket.chunks.bucket}/*"
+      "arn:${local.partition}:s3:::${aws_s3_bucket.chunks.bucket}",
+      "arn:${local.partition}:s3:::${aws_s3_bucket.chunks.bucket}/*"
     ]
   }
   statement {
