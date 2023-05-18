@@ -14,7 +14,7 @@ var (
 	UserPolicy string
 )
 
-func GetIAMPolicy(accountNumber string) (string, error) {
+func GetIAMPolicy(accountNumber, partition string) (string, error) {
 	tmpl, err := template.New("json").Parse(IAMPolicy)
 	if err != nil {
 		return "", fmt.Errorf("parsing template: %w", err)
@@ -22,12 +22,14 @@ func GetIAMPolicy(accountNumber string) (string, error) {
 
 	type tmplValues struct {
 		AccountNumber string
+		Partition     string
 	}
 
 	var buf bytes.Buffer
 
 	if err := tmpl.Execute(&buf, tmplValues{
 		AccountNumber: accountNumber,
+		Partition:     partition,
 	}); err != nil {
 		return "", fmt.Errorf("interpolating template: %w", err)
 	}
@@ -35,7 +37,7 @@ func GetIAMPolicy(accountNumber string) (string, error) {
 	return buf.String(), nil
 }
 
-func GetUserInlinePolicy(clusterName, arn, vpc string) (string, error) {
+func GetUserInlinePolicy(clusterName, arn, vpc, partition string) (string, error) {
 	tmpl, err := template.New("json").Parse(UserPolicy)
 	if err != nil {
 		return "", fmt.Errorf("parsing template: %w", err)
@@ -45,6 +47,7 @@ func GetUserInlinePolicy(clusterName, arn, vpc string) (string, error) {
 		ClusterName string
 		ARN         string
 		VPC         string
+		Partition   string
 	}
 
 	var buf bytes.Buffer
@@ -53,9 +56,17 @@ func GetUserInlinePolicy(clusterName, arn, vpc string) (string, error) {
 		ClusterName: clusterName,
 		ARN:         arn,
 		VPC:         vpc,
+		Partition:   partition,
 	}); err != nil {
 		return "", fmt.Errorf("interpolating template: %w", err)
 	}
 
 	return buf.String(), nil
+}
+
+func GetManagedPolicies(partition string) []string {
+	return []string{
+		"arn:" + partition + ":iam::aws:policy/AmazonEC2ReadOnlyAccess",
+		"arn:" + partition + ":iam::aws:policy/IAMReadOnlyAccess",
+	}
 }

@@ -5,7 +5,7 @@
       "Sid": "PassRoleEC2",
       "Action": "iam:PassRole",
       "Effect": "Allow",
-      "Resource": "arn:aws:iam::*:role/*",
+      "Resource": "arn:{{ .Partition }}:iam::*:role/*",
       "Condition": {
         "StringEquals": {
           "iam:PassedToService": "ec2.amazonaws.com"
@@ -34,11 +34,11 @@
       "Effect": "Allow",
       "Action": "ec2:RunInstances",
       "Resource": [
-        "arn:aws:ec2:*:{{ .AccountNumber }}:network-interface/*",
-        "arn:aws:ec2:*:{{ .AccountNumber }}:security-group/*",
-        "arn:aws:ec2:*:{{ .AccountNumber }}:volume/*",
-        "arn:aws:ec2:*:{{ .AccountNumber }}:key-pair/*",
-        "arn:aws:ec2:*::image/*"
+        "arn:{{ .Partition }}:ec2:*:{{ .AccountNumber }}:network-interface/*",
+        "arn:{{ .Partition }}:ec2:*:{{ .AccountNumber }}:security-group/*",
+        "arn:{{ .Partition }}:ec2:*:{{ .AccountNumber }}:volume/*",
+        "arn:{{ .Partition }}:ec2:*:{{ .AccountNumber }}:key-pair/*",
+        "arn:{{ .Partition }}:ec2:*::image/*"
       ]
     }
   ]

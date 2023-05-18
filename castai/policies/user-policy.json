@@ -5,7 +5,7 @@
       "Sid": "RunInstancesTagRestriction",
       "Effect": "Allow",
       "Action": "ec2:RunInstances",
-      "Resource": "arn:aws:ec2:{{ .ARN }}:instance/*",
+      "Resource": "arn:{{ .Partition }}:ec2:{{ .ARN }}:instance/*",
       "Condition": {
         "StringEquals": {
           "aws:RequestTag/kubernetes.io/cluster/{{ .ClusterName }}": "owned"
@@ -16,10 +16,10 @@
       "Sid": "RunInstancesVpcRestriction",
       "Effect": "Allow",
       "Action": "ec2:RunInstances",
-      "Resource": "arn:aws:ec2:{{ .ARN }}:subnet/*",
+      "Resource": "arn:{{ .Partition }}:ec2:{{ .ARN }}:subnet/*",
       "Condition": {
         "StringEquals": {
-          "ec2:Vpc": "arn:aws:ec2:{{ .ARN }}:vpc/{{ .VPC }}"
+          "ec2:Vpc": "arn:{{ .Partition }}:ec2:{{ .ARN }}:vpc/{{ .VPC }}"
         }
       }
     },
@@ -32,7 +32,7 @@
         "ec2:StopInstances",
         "ec2:CreateTags"
       ],
-      "Resource": "arn:aws:ec2:{{ .ARN }}:instance/*",
+      "Resource": "arn:{{ .Partition }}:ec2:{{ .ARN }}:instance/*",
       "Condition": {
         "StringEquals": {
           "ec2:ResourceTag/kubernetes.io/cluster/{{ .ClusterName }}": [
@@ -52,7 +52,7 @@
       "Resource": "*",
       "Condition": {
         "StringEquals": {
-          "ec2:Vpc": "arn:aws:ec2:{{ .ARN }}:vpc/{{ .VPC }}"
+          "ec2:Vpc": "arn:{{ .Partition }}:ec2:{{ .ARN }}:vpc/{{ .VPC }}"
         }
       }
     },
@@ -65,7 +65,7 @@
         "autoscaling:ResumeProcesses",
         "autoscaling:TerminateInstanceInAutoScalingGroup"
       ],
-      "Resource": "arn:aws:autoscaling:{{ .ARN }}:autoScalingGroup:*:autoScalingGroupName/*",
+      "Resource": "arn:{{ .Partition }}:autoscaling:{{ .ARN }}:autoScalingGroup:*:autoScalingGroupName/*",
       "Condition": {
         "StringEquals": {
           "autoscaling:ResourceTag/kubernetes.io/cluster/{{ .ClusterName }}": [
@@ -83,8 +83,8 @@
         "eks:List*"
       ],
       "Resource": [
-        "arn:aws:eks:{{ .ARN }}:cluster/{{ .ClusterName }}",
-        "arn:aws:eks:{{ .ARN }}:nodegroup/{{ .ClusterName }}/*/*"
+        "arn:{{ .Partition }}:eks:{{ .ARN }}:cluster/{{ .ClusterName }}",
+        "arn:{{ .Partition }}:eks:{{ .ARN }}:nodegroup/{{ .ClusterName }}/*/*"
       ]
     }
   ]
