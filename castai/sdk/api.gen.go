@@ -1311,6 +1311,10 @@ type PoliciesV1SpotInstances struct {
 	// When enabled, autoscaler will try to balance between diverse and cost optimal instance types.
 	SpotDiversityEnabled *bool `json:"spotDiversityEnabled"`
 
+	// Allowed node configuration price increase when diversifying instance types.
+	// E.g. if the value is 10%, then the overall price of diversified instance types can be 10% higher than the price of the optimal configuration.
+	SpotDiversityPriceIncreaseLimitPercent *int32 `json:"spotDiversityPriceIncreaseLimitPercent"`
+
 	// SpotInterruptionPredictions allows to configure the handling of SPOT interrupt predictions.
 	SpotInterruptionPredictions *PoliciesV1SpotInterruptionPredictions `json:"spotInterruptionPredictions,omitempty"`
 }

@@ -111,7 +111,8 @@ module "castai-gke-cluster" {
             "spotBackups": {
                 "enabled": true
             },
-            "spotDiversityEnabled": false
+            "spotDiversityEnabled": false,
+            "spotDiversityPriceIncreaseLimitPercent": 20
         },
         "nodeDownscaler": {
             "enabled": true,

@@ -152,6 +152,7 @@ module "castai-eks-cluster" {
                 "enabled": true
             },
             "spotDiversityEnabled": false,
+            "spotDiversityPriceIncreaseLimitPercent": 20,
             "spotInterruptionPredictions": {
               "enabled": true,
               "type": "AWSRebalanceRecommendations"
