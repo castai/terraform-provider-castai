@@ -1,4 +1,4 @@
-name: Build
+name: Terraform Examples Validation
 on:
   pull_request:
     branches: [ '*' ]
@@ -6,8 +6,16 @@ on:
       - '**.md'
       - 'examples/**'
 jobs:
-  build:
-    name: Build
+  terraform_validation:
     runs-on: ubuntu-latest
+
     steps:
-      - run: 'echo "No build required" '
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v2
+
+      - name: Validate Terraform examples
+        id: validate_examples
+        run: make validate-terraform-examples
