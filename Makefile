@@ -16,7 +16,7 @@ init-examples:
 
 generate-sdk:
 	@echo "==> Generating castai sdk client"
-	@API_TAGS=ExternalClusterAPI,PoliciesAPI,NodeConfigurationAPI,NodeTemplatesAPI,AuthTokensAPI,ScheduledRebalancingAPI go generate castai/sdk/generate.go
+	@API_TAGS=ExternalClusterAPI,PoliciesAPI,NodeConfigurationAPI,NodeTemplatesAPI,AuthTokenAPI,ScheduledRebalancingAPI go generate castai/sdk/generate.go
 
 # The following command also rewrites existing documentation
 generate-docs:
@@ -36,3 +36,11 @@ test:
 testacc:
 	@echo "==> Running acceptance tests"
 	TF_ACC=1 go test ./castai/... '-run=^TestAcc' -v -timeout 10m
+
+validate-terraform-examples:
+	for example in examples/eks examples/gke examples/aks ; do \
+		cd $example \
+		terraform init \
+		terraform validate \
+		cd .. \
+	done

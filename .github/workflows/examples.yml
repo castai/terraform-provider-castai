@@ -11,21 +11,15 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Set up Terraform
-        uses: hashicorp/setup-terraform@v1
-
-      - name: Find example folders
-        id: find_examples
-        run: |
-          examples=$(find . -type d -name "example*")
-          echo "::set-output name=examples::$examples"
+        uses: hashicorp/setup-terraform@v2
 
       - name: Validate Terraform examples
         id: validate_examples
         run: |
-          for example in ${{ steps.find_examples.outputs.examples }}; do
+          for example in examples/eks examples/gke examples/aks ; do
             cd $example
             terraform init
             terraform validate
