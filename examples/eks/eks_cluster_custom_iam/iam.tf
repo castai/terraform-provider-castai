@@ -24,13 +24,13 @@ resource "aws_iam_instance_profile" "castai_instance_profile" {
 
 # Create instance profile role
 resource "aws_iam_role" "castai_instance_profile_role" {
-  name               = local.instance_profile_role_name
+  name = local.instance_profile_role_name
   assume_role_policy = jsonencode({
     Version : "2012-10-17"
     Statement : [
       {
-        "Sid"     = ""
-        Effect    = "Allow"
+        "Sid"  = ""
+        Effect = "Allow"
         Principal = {
           Service = "ec2.amazonaws.com"
         }
@@ -58,13 +58,13 @@ resource "aws_iam_role_policy_attachment" "instance_profile_policy" {
 
 # Create role that will be assumed by CAST AI user.
 resource "aws_iam_role" "assume_role" {
-  name               = local.iam_role_name
+  name = local.iam_role_name
   assume_role_policy = jsonencode({
-    Version   = "2012-10-17"
+    Version = "2012-10-17"
     Statement = [
       {
-        Action    = "sts:AssumeRole"
-        Effect    = "Allow"
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
         Principal = {
           AWS = data.castai_eks_user_arn.castai_user_arn.arn
         }
@@ -89,17 +89,17 @@ resource "aws_iam_role_policy_attachment" "assume_role_readonly_policy_attachmen
 
 # Attach inline policy to role.
 resource "aws_iam_role_policy" "inline_role_policy" {
-  name   = local.iam_inline_policy_name
-  role   = aws_iam_role.assume_role.name
+  name = local.iam_inline_policy_name
+  role = aws_iam_role.assume_role.name
   policy = jsonencode({
-    Version   = "2012-10-17"
+    Version = "2012-10-17"
     Statement = [
       # Needed to be able launch instance with instance profile.
       {
-        Sid       = "PassRoleEC2",
-        Action    = "iam:PassRole",
-        Effect    = "Allow",
-        Resource  = "arn:${local.partition}:iam::${local.account_id}:role/${aws_iam_role.castai_instance_profile_role.name}",
+        Sid      = "PassRoleEC2",
+        Action   = "iam:PassRole",
+        Effect   = "Allow",
+        Resource = "arn:${local.partition}:iam::${local.account_id}:role/${aws_iam_role.castai_instance_profile_role.name}",
         Condition = {
           StringEquals = {
             "iam:PassedToService" = "ec2.amazonaws.com"
@@ -173,9 +173,9 @@ resource "aws_iam_role_policy" "inline_role_policy" {
       },
       # Needed to be able to run instance with provided resources.
       {
-        Sid      = "RunInstancesPermissions",
-        Effect   = "Allow",
-        Action   = "ec2:RunInstances",
+        Sid    = "RunInstancesPermissions",
+        Effect = "Allow",
+        Action = "ec2:RunInstances",
         Resource = concat(
           formatlist("arn:${local.partition}:ec2:*:${local.account_id}:security-group/%s", [
             module.eks.cluster_security_group_id,

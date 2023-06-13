@@ -6,8 +6,28 @@ on:
       - '**.md'
       - 'examples/**'
 jobs:
-  build:
-    name: Build
+  terraform_examples_validation:
     runs-on: ubuntu-latest
+
     steps:
-      - run: 'echo "No build required" '
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v1
+
+      - name: Find example folders
+        id: find_examples
+        run: |
+          examples=$(find . -type d -name "example*")
+          echo "::set-output name=examples::$examples"
+
+      - name: Validate Terraform examples
+        id: validate_examples
+        run: |
+          for example in ${{ steps.find_examples.outputs.examples }}; do
+            cd $example
+            terraform init
+            terraform validate
+            cd ..
+          done

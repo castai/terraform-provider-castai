@@ -1,5 +1,5 @@
 locals {
-    partition = data.aws_partition.current.partition
+  partition = data.aws_partition.current.partition
 }
 
 data "aws_partition" "current" {}
@@ -22,26 +22,34 @@ data "aws_iam_policy_document" "this" {
       "iam:GetRole",
       "iam:PassRole"
     ]
-    effect = "Allow"
+    effect    = "Allow"
     resources = ["*"]
   }
 }
 
 resource "aws_s3_bucket" "chunks" {
   bucket = var.loki_bucket_name
-  acl    = "private"
   tags   = var.tags
-  versioning {
-    enabled = false
+}
+
+resource "aws_s3_bucket_versioning" "versioning" {
+  bucket = aws_s3_bucket.chunks.id
+  versioning_configuration {
+    status = "Enabled"
   }
+}
+
+resource "aws_s3_bucket_acl" "example" {
+  bucket = aws_s3_bucket.chunks.id
+  acl    = "private"
 }
 
 module "eks_iam_role_s3" {
   source = "cloudposse/eks-iam-role/aws"
 
-  tags        = var.tags
-  stage       = var.cluster_name
-  
+  tags  = var.tags
+  stage = var.cluster_name
+
   aws_account_number          = data.aws_caller_identity.current.account_id
   eks_cluster_oidc_issuer_url = module.eks.cluster_oidc_issuer_url
 
