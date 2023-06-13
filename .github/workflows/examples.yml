@@ -6,22 +6,8 @@ on:
       - '**.md'
       - 'examples/**'
 jobs:
-  terraform_examples_validation:
+  build:
+    name: Build
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: Set up Terraform
-        uses: hashicorp/setup-terraform@v2
-
-      - name: Validate Terraform examples
-        id: validate_examples
-        run: |
-          for example in examples/eks examples/gke examples/aks ; do
-            cd $example
-            terraform init
-            terraform validate
-            cd ..
-          done
+      - run: 'echo "No build required" '

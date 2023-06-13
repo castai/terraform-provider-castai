@@ -38,9 +38,12 @@ testacc:
 	TF_ACC=1 go test ./castai/... '-run=^TestAcc' -v -timeout 10m
 
 validate-terraform-examples:
-	for example in examples/eks examples/gke examples/aks ; do \
-		cd $example \
-		terraform init \
-		terraform validate \
-		cd .. \
+	for examples in examples/eks examples/gke examples/aks ; do \
+		for tfproject in $$examples/* ; do \
+			echo "==> Validating terraform example $$tfproject"; \
+			cd $$tfproject; \
+			terraform init; \
+			terraform validate; \
+			cd -; \
+		done \
 	done
