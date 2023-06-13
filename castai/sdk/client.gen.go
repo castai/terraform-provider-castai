@@ -90,24 +90,24 @@ func WithRequestEditorFn(fn RequestEditorFn) ClientOption {
 
 // The interface specification for the client above.
 type ClientInterface interface {
-	// ListAuthTokens request
-	ListAuthTokens(ctx context.Context, params *ListAuthTokensParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// AuthTokenAPIListAuthTokens request
+	AuthTokenAPIListAuthTokens(ctx context.Context, params *AuthTokenAPIListAuthTokensParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// CreateAuthToken request with any body
-	CreateAuthTokenWithBody(ctx context.Context, params *CreateAuthTokenParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// AuthTokenAPICreateAuthToken request with any body
+	AuthTokenAPICreateAuthTokenWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	CreateAuthToken(ctx context.Context, params *CreateAuthTokenParams, body CreateAuthTokenJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+	AuthTokenAPICreateAuthToken(ctx context.Context, body AuthTokenAPICreateAuthTokenJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// DeleteAuthToken request
-	DeleteAuthToken(ctx context.Context, authTokenId AuthTokenId, params *DeleteAuthTokenParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// AuthTokenAPIDeleteAuthToken request
+	AuthTokenAPIDeleteAuthToken(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// GetAuthToken request
-	GetAuthToken(ctx context.Context, authTokenId AuthTokenId, params *GetAuthTokenParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// AuthTokenAPIGetAuthToken request
+	AuthTokenAPIGetAuthToken(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// UpdateAuthToken request with any body
-	UpdateAuthTokenWithBody(ctx context.Context, authTokenId AuthTokenId, params *UpdateAuthTokenParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// AuthTokenAPIUpdateAuthToken request with any body
+	AuthTokenAPIUpdateAuthTokenWithBody(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	UpdateAuthToken(ctx context.Context, authTokenId AuthTokenId, params *UpdateAuthTokenParams, body UpdateAuthTokenJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+	AuthTokenAPIUpdateAuthToken(ctx context.Context, id string, body AuthTokenAPIUpdateAuthTokenJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// NodeTemplatesAPIFilterInstanceTypes request with any body
 	NodeTemplatesAPIFilterInstanceTypesWithBody(ctx context.Context, clusterId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -215,6 +215,9 @@ type ClientInterface interface {
 	// ExternalClusterAPIGetAssumeRoleUser request
 	ExternalClusterAPIGetAssumeRoleUser(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// ExternalClusterAPIGetCleanupScript request
+	ExternalClusterAPIGetCleanupScript(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// ExternalClusterAPIGetCredentialsScript request
 	ExternalClusterAPIGetCredentialsScript(ctx context.Context, clusterId string, params *ExternalClusterAPIGetCredentialsScriptParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -278,12 +281,18 @@ type ClientInterface interface {
 	// ScheduledRebalancingAPIGetRebalancingSchedule request
 	ScheduledRebalancingAPIGetRebalancingSchedule(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// ExternalClusterAPIGetCleanupScriptTemplate request
+	ExternalClusterAPIGetCleanupScriptTemplate(ctx context.Context, provider string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// ExternalClusterAPIGetCredentialsScriptTemplate request
 	ExternalClusterAPIGetCredentialsScriptTemplate(ctx context.Context, provider string, params *ExternalClusterAPIGetCredentialsScriptTemplateParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// ScheduledRebalancingAPIListAvailableRebalancingTZ request
+	ScheduledRebalancingAPIListAvailableRebalancingTZ(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
 }
 
-func (c *Client) ListAuthTokens(ctx context.Context, params *ListAuthTokensParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewListAuthTokensRequest(c.Server, params)
+func (c *Client) AuthTokenAPIListAuthTokens(ctx context.Context, params *AuthTokenAPIListAuthTokensParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewAuthTokenAPIListAuthTokensRequest(c.Server, params)
 	if err != nil {
 		return nil, err
 	}
@@ -294,8 +303,8 @@ func (c *Client) ListAuthTokens(ctx context.Context, params *ListAuthTokensParam
 	return c.Client.Do(req)
 }
 
-func (c *Client) CreateAuthTokenWithBody(ctx context.Context, params *CreateAuthTokenParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewCreateAuthTokenRequestWithBody(c.Server, params, contentType, body)
+func (c *Client) AuthTokenAPICreateAuthTokenWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewAuthTokenAPICreateAuthTokenRequestWithBody(c.Server, contentType, body)
 	if err != nil {
 		return nil, err
 	}
@@ -306,8 +315,8 @@ func (c *Client) CreateAuthTokenWithBody(ctx context.Context, params *CreateAuth
 	return c.Client.Do(req)
 }
 
-func (c *Client) CreateAuthToken(ctx context.Context, params *CreateAuthTokenParams, body CreateAuthTokenJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewCreateAuthTokenRequest(c.Server, params, body)
+func (c *Client) AuthTokenAPICreateAuthToken(ctx context.Context, body AuthTokenAPICreateAuthTokenJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewAuthTokenAPICreateAuthTokenRequest(c.Server, body)
 	if err != nil {
 		return nil, err
 	}
@@ -318,8 +327,8 @@ func (c *Client) CreateAuthToken(ctx context.Context, params *CreateAuthTokenPar
 	return c.Client.Do(req)
 }
 
-func (c *Client) DeleteAuthToken(ctx context.Context, authTokenId AuthTokenId, params *DeleteAuthTokenParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewDeleteAuthTokenRequest(c.Server, authTokenId, params)
+func (c *Client) AuthTokenAPIDeleteAuthToken(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewAuthTokenAPIDeleteAuthTokenRequest(c.Server, id)
 	if err != nil {
 		return nil, err
 	}
@@ -330,8 +339,8 @@ func (c *Client) DeleteAuthToken(ctx context.Context, authTokenId AuthTokenId, p
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetAuthToken(ctx context.Context, authTokenId AuthTokenId, params *GetAuthTokenParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewGetAuthTokenRequest(c.Server, authTokenId, params)
+func (c *Client) AuthTokenAPIGetAuthToken(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewAuthTokenAPIGetAuthTokenRequest(c.Server, id)
 	if err != nil {
 		return nil, err
 	}
@@ -342,8 +351,8 @@ func (c *Client) GetAuthToken(ctx context.Context, authTokenId AuthTokenId, para
 	return c.Client.Do(req)
 }
 
-func (c *Client) UpdateAuthTokenWithBody(ctx context.Context, authTokenId AuthTokenId, params *UpdateAuthTokenParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewUpdateAuthTokenRequestWithBody(c.Server, authTokenId, params, contentType, body)
+func (c *Client) AuthTokenAPIUpdateAuthTokenWithBody(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewAuthTokenAPIUpdateAuthTokenRequestWithBody(c.Server, id, contentType, body)
 	if err != nil {
 		return nil, err
 	}
@@ -354,8 +363,8 @@ func (c *Client) UpdateAuthTokenWithBody(ctx context.Context, authTokenId AuthTo
 	return c.Client.Do(req)
 }
 
-func (c *Client) UpdateAuthToken(ctx context.Context, authTokenId AuthTokenId, params *UpdateAuthTokenParams, body UpdateAuthTokenJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewUpdateAuthTokenRequest(c.Server, authTokenId, params, body)
+func (c *Client) AuthTokenAPIUpdateAuthToken(ctx context.Context, id string, body AuthTokenAPIUpdateAuthTokenJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewAuthTokenAPIUpdateAuthTokenRequest(c.Server, id, body)
 	if err != nil {
 		return nil, err
 	}
@@ -834,6 +843,18 @@ func (c *Client) ExternalClusterAPIGetAssumeRoleUser(ctx context.Context, cluste
 	return c.Client.Do(req)
 }
 
+func (c *Client) ExternalClusterAPIGetCleanupScript(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewExternalClusterAPIGetCleanupScriptRequest(c.Server, clusterId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
 func (c *Client) ExternalClusterAPIGetCredentialsScript(ctx context.Context, clusterId string, params *ExternalClusterAPIGetCredentialsScriptParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewExternalClusterAPIGetCredentialsScriptRequest(c.Server, clusterId, params)
 	if err != nil {
@@ -1110,6 +1131,18 @@ func (c *Client) ScheduledRebalancingAPIGetRebalancingSchedule(ctx context.Conte
 	return c.Client.Do(req)
 }
 
+func (c *Client) ExternalClusterAPIGetCleanupScriptTemplate(ctx context.Context, provider string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewExternalClusterAPIGetCleanupScriptTemplateRequest(c.Server, provider)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
 func (c *Client) ExternalClusterAPIGetCredentialsScriptTemplate(ctx context.Context, provider string, params *ExternalClusterAPIGetCredentialsScriptTemplateParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewExternalClusterAPIGetCredentialsScriptTemplateRequest(c.Server, provider, params)
 	if err != nil {
@@ -1122,8 +1155,20 @@ func (c *Client) ExternalClusterAPIGetCredentialsScriptTemplate(ctx context.Cont
 	return c.Client.Do(req)
 }
 
-// NewListAuthTokensRequest generates requests for ListAuthTokens
-func NewListAuthTokensRequest(server string, params *ListAuthTokensParams) (*http.Request, error) {
+func (c *Client) ScheduledRebalancingAPIListAvailableRebalancingTZ(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewScheduledRebalancingAPIListAvailableRebalancingTZRequest(c.Server)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// NewAuthTokenAPIListAuthTokensRequest generates requests for AuthTokenAPIListAuthTokens
+func NewAuthTokenAPIListAuthTokensRequest(server string, params *AuthTokenAPIListAuthTokensParams) (*http.Request, error) {
 	var err error
 
 	serverURL, err := url.Parse(server)
@@ -1141,38 +1186,47 @@ func NewListAuthTokensRequest(server string, params *ListAuthTokensParams) (*htt
 		return nil, err
 	}
 
+	queryValues := queryURL.Query()
+
+	if params.UserId != nil {
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "userId", runtime.ParamLocationQuery, *params.UserId); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	queryURL.RawQuery = queryValues.Encode()
+
 	req, err := http.NewRequest("GET", queryURL.String(), nil)
 	if err != nil {
 		return nil, err
 	}
 
-	if params.XCastAiOrganizationId != nil {
-		var headerParam0 string
-
-		headerParam0, err = runtime.StyleParamWithLocation("simple", false, "X-CastAi-Organization-Id", runtime.ParamLocationHeader, *params.XCastAiOrganizationId)
-		if err != nil {
-			return nil, err
-		}
-
-		req.Header.Set("X-CastAi-Organization-Id", headerParam0)
-	}
-
 	return req, nil
 }
 
-// NewCreateAuthTokenRequest calls the generic CreateAuthToken builder with application/json body
-func NewCreateAuthTokenRequest(server string, params *CreateAuthTokenParams, body CreateAuthTokenJSONRequestBody) (*http.Request, error) {
+// NewAuthTokenAPICreateAuthTokenRequest calls the generic AuthTokenAPICreateAuthToken builder with application/json body
+func NewAuthTokenAPICreateAuthTokenRequest(server string, body AuthTokenAPICreateAuthTokenJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
 	buf, err := json.Marshal(body)
 	if err != nil {
 		return nil, err
 	}
 	bodyReader = bytes.NewReader(buf)
-	return NewCreateAuthTokenRequestWithBody(server, params, "application/json", bodyReader)
+	return NewAuthTokenAPICreateAuthTokenRequestWithBody(server, "application/json", bodyReader)
 }
 
-// NewCreateAuthTokenRequestWithBody generates requests for CreateAuthToken with any type of body
-func NewCreateAuthTokenRequestWithBody(server string, params *CreateAuthTokenParams, contentType string, body io.Reader) (*http.Request, error) {
+// NewAuthTokenAPICreateAuthTokenRequestWithBody generates requests for AuthTokenAPICreateAuthToken with any type of body
+func NewAuthTokenAPICreateAuthTokenRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
 	var err error
 
 	serverURL, err := url.Parse(server)
@@ -1197,27 +1251,16 @@ func NewCreateAuthTokenRequestWithBody(server string, params *CreateAuthTokenPar
 
 	req.Header.Add("Content-Type", contentType)
 
-	if params.XCastAiOrganizationId != nil {
-		var headerParam0 string
-
-		headerParam0, err = runtime.StyleParamWithLocation("simple", false, "X-CastAi-Organization-Id", runtime.ParamLocationHeader, *params.XCastAiOrganizationId)
-		if err != nil {
-			return nil, err
-		}
-
-		req.Header.Set("X-CastAi-Organization-Id", headerParam0)
-	}
-
 	return req, nil
 }
 
-// NewDeleteAuthTokenRequest generates requests for DeleteAuthToken
-func NewDeleteAuthTokenRequest(server string, authTokenId AuthTokenId, params *DeleteAuthTokenParams) (*http.Request, error) {
+// NewAuthTokenAPIDeleteAuthTokenRequest generates requests for AuthTokenAPIDeleteAuthToken
+func NewAuthTokenAPIDeleteAuthTokenRequest(server string, id string) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
 
-	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "authTokenId", runtime.ParamLocationPath, authTokenId)
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
 	if err != nil {
 		return nil, err
 	}
@@ -1242,27 +1285,16 @@ func NewDeleteAuthTokenRequest(server string, authTokenId AuthTokenId, params *D
 		return nil, err
 	}
 
-	if params.XCastAiOrganizationId != nil {
-		var headerParam0 string
-
-		headerParam0, err = runtime.StyleParamWithLocation("simple", false, "X-CastAi-Organization-Id", runtime.ParamLocationHeader, *params.XCastAiOrganizationId)
-		if err != nil {
-			return nil, err
-		}
-
-		req.Header.Set("X-CastAi-Organization-Id", headerParam0)
-	}
-
 	return req, nil
 }
 
-// NewGetAuthTokenRequest generates requests for GetAuthToken
-func NewGetAuthTokenRequest(server string, authTokenId AuthTokenId, params *GetAuthTokenParams) (*http.Request, error) {
+// NewAuthTokenAPIGetAuthTokenRequest generates requests for AuthTokenAPIGetAuthToken
+func NewAuthTokenAPIGetAuthTokenRequest(server string, id string) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
 
-	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "authTokenId", runtime.ParamLocationPath, authTokenId)
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
 	if err != nil {
 		return nil, err
 	}
@@ -1287,38 +1319,27 @@ func NewGetAuthTokenRequest(server string, authTokenId AuthTokenId, params *GetA
 		return nil, err
 	}
 
-	if params.XCastAiOrganizationId != nil {
-		var headerParam0 string
-
-		headerParam0, err = runtime.StyleParamWithLocation("simple", false, "X-CastAi-Organization-Id", runtime.ParamLocationHeader, *params.XCastAiOrganizationId)
-		if err != nil {
-			return nil, err
-		}
-
-		req.Header.Set("X-CastAi-Organization-Id", headerParam0)
-	}
-
 	return req, nil
 }
 
-// NewUpdateAuthTokenRequest calls the generic UpdateAuthToken builder with application/json body
-func NewUpdateAuthTokenRequest(server string, authTokenId AuthTokenId, params *UpdateAuthTokenParams, body UpdateAuthTokenJSONRequestBody) (*http.Request, error) {
+// NewAuthTokenAPIUpdateAuthTokenRequest calls the generic AuthTokenAPIUpdateAuthToken builder with application/json body
+func NewAuthTokenAPIUpdateAuthTokenRequest(server string, id string, body AuthTokenAPIUpdateAuthTokenJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
 	buf, err := json.Marshal(body)
 	if err != nil {
 		return nil, err
 	}
 	bodyReader = bytes.NewReader(buf)
-	return NewUpdateAuthTokenRequestWithBody(server, authTokenId, params, "application/json", bodyReader)
+	return NewAuthTokenAPIUpdateAuthTokenRequestWithBody(server, id, "application/json", bodyReader)
 }
 
-// NewUpdateAuthTokenRequestWithBody generates requests for UpdateAuthToken with any type of body
-func NewUpdateAuthTokenRequestWithBody(server string, authTokenId AuthTokenId, params *UpdateAuthTokenParams, contentType string, body io.Reader) (*http.Request, error) {
+// NewAuthTokenAPIUpdateAuthTokenRequestWithBody generates requests for AuthTokenAPIUpdateAuthToken with any type of body
+func NewAuthTokenAPIUpdateAuthTokenRequestWithBody(server string, id string, contentType string, body io.Reader) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
 
-	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "authTokenId", runtime.ParamLocationPath, authTokenId)
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
 	if err != nil {
 		return nil, err
 	}
@@ -1344,17 +1365,6 @@ func NewUpdateAuthTokenRequestWithBody(server string, authTokenId AuthTokenId, p
 	}
 
 	req.Header.Add("Content-Type", contentType)
-
-	if params.XCastAiOrganizationId != nil {
-		var headerParam0 string
-
-		headerParam0, err = runtime.StyleParamWithLocation("simple", false, "X-CastAi-Organization-Id", runtime.ParamLocationHeader, *params.XCastAiOrganizationId)
-		if err != nil {
-			return nil, err
-		}
-
-		req.Header.Set("X-CastAi-Organization-Id", headerParam0)
-	}
 
 	return req, nil
 }
@@ -2523,6 +2533,40 @@ func NewExternalClusterAPIGetAssumeRoleUserRequest(server string, clusterId stri
 	return req, nil
 }
 
+// NewExternalClusterAPIGetCleanupScriptRequest generates requests for ExternalClusterAPIGetCleanupScript
+func NewExternalClusterAPIGetCleanupScriptRequest(server string, clusterId string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "clusterId", runtime.ParamLocationPath, clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/kubernetes/external-clusters/%s/cleanup-script", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 // NewExternalClusterAPIGetCredentialsScriptRequest generates requests for ExternalClusterAPIGetCredentialsScript
 func NewExternalClusterAPIGetCredentialsScriptRequest(server string, clusterId string, params *ExternalClusterAPIGetCredentialsScriptParams) (*http.Request, error) {
 	var err error
@@ -3323,6 +3367,40 @@ func NewScheduledRebalancingAPIGetRebalancingScheduleRequest(server string, id s
 	return req, nil
 }
 
+// NewExternalClusterAPIGetCleanupScriptTemplateRequest generates requests for ExternalClusterAPIGetCleanupScriptTemplate
+func NewExternalClusterAPIGetCleanupScriptTemplateRequest(server string, provider string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "provider", runtime.ParamLocationPath, provider)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/scripts/%s/cleanup.sh", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 // NewExternalClusterAPIGetCredentialsScriptTemplateRequest generates requests for ExternalClusterAPIGetCredentialsScriptTemplate
 func NewExternalClusterAPIGetCredentialsScriptTemplateRequest(server string, provider string, params *ExternalClusterAPIGetCredentialsScriptTemplateParams) (*http.Request, error) {
 	var err error
@@ -3377,6 +3455,33 @@ func NewExternalClusterAPIGetCredentialsScriptTemplateRequest(server string, pro
 	return req, nil
 }
 
+// NewScheduledRebalancingAPIListAvailableRebalancingTZRequest generates requests for ScheduledRebalancingAPIListAvailableRebalancingTZ
+func NewScheduledRebalancingAPIListAvailableRebalancingTZRequest(server string) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/time-zones")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 func (c *Client) applyEditors(ctx context.Context, req *http.Request, additionalEditors []RequestEditorFn) error {
 	for _, r := range c.RequestEditors {
 		if err := r(ctx, req); err != nil {
@@ -3420,24 +3525,24 @@ func WithBaseURL(baseURL string) ClientOption {
 
 // ClientWithResponsesInterface is the interface specification for the client with responses above.
 type ClientWithResponsesInterface interface {
-	// ListAuthTokens request
-	ListAuthTokensWithResponse(ctx context.Context, params *ListAuthTokensParams) (*ListAuthTokensResponse, error)
+	// AuthTokenAPIListAuthTokens request
+	AuthTokenAPIListAuthTokensWithResponse(ctx context.Context, params *AuthTokenAPIListAuthTokensParams) (*AuthTokenAPIListAuthTokensResponse, error)
 
-	// CreateAuthToken request  with any body
-	CreateAuthTokenWithBodyWithResponse(ctx context.Context, params *CreateAuthTokenParams, contentType string, body io.Reader) (*CreateAuthTokenResponse, error)
+	// AuthTokenAPICreateAuthToken request  with any body
+	AuthTokenAPICreateAuthTokenWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*AuthTokenAPICreateAuthTokenResponse, error)
 
-	CreateAuthTokenWithResponse(ctx context.Context, params *CreateAuthTokenParams, body CreateAuthTokenJSONRequestBody) (*CreateAuthTokenResponse, error)
+	AuthTokenAPICreateAuthTokenWithResponse(ctx context.Context, body AuthTokenAPICreateAuthTokenJSONRequestBody) (*AuthTokenAPICreateAuthTokenResponse, error)
 
-	// DeleteAuthToken request
-	DeleteAuthTokenWithResponse(ctx context.Context, authTokenId AuthTokenId, params *DeleteAuthTokenParams) (*DeleteAuthTokenResponse, error)
+	// AuthTokenAPIDeleteAuthToken request
+	AuthTokenAPIDeleteAuthTokenWithResponse(ctx context.Context, id string) (*AuthTokenAPIDeleteAuthTokenResponse, error)
 
-	// GetAuthToken request
-	GetAuthTokenWithResponse(ctx context.Context, authTokenId AuthTokenId, params *GetAuthTokenParams) (*GetAuthTokenResponse, error)
+	// AuthTokenAPIGetAuthToken request
+	AuthTokenAPIGetAuthTokenWithResponse(ctx context.Context, id string) (*AuthTokenAPIGetAuthTokenResponse, error)
 
-	// UpdateAuthToken request  with any body
-	UpdateAuthTokenWithBodyWithResponse(ctx context.Context, authTokenId AuthTokenId, params *UpdateAuthTokenParams, contentType string, body io.Reader) (*UpdateAuthTokenResponse, error)
+	// AuthTokenAPIUpdateAuthToken request  with any body
+	AuthTokenAPIUpdateAuthTokenWithBodyWithResponse(ctx context.Context, id string, contentType string, body io.Reader) (*AuthTokenAPIUpdateAuthTokenResponse, error)
 
-	UpdateAuthTokenWithResponse(ctx context.Context, authTokenId AuthTokenId, params *UpdateAuthTokenParams, body UpdateAuthTokenJSONRequestBody) (*UpdateAuthTokenResponse, error)
+	AuthTokenAPIUpdateAuthTokenWithResponse(ctx context.Context, id string, body AuthTokenAPIUpdateAuthTokenJSONRequestBody) (*AuthTokenAPIUpdateAuthTokenResponse, error)
 
 	// NodeTemplatesAPIFilterInstanceTypes request  with any body
 	NodeTemplatesAPIFilterInstanceTypesWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader) (*NodeTemplatesAPIFilterInstanceTypesResponse, error)
@@ -3545,6 +3650,9 @@ type ClientWithResponsesInterface interface {
 	// ExternalClusterAPIGetAssumeRoleUser request
 	ExternalClusterAPIGetAssumeRoleUserWithResponse(ctx context.Context, clusterId string) (*ExternalClusterAPIGetAssumeRoleUserResponse, error)
 
+	// ExternalClusterAPIGetCleanupScript request
+	ExternalClusterAPIGetCleanupScriptWithResponse(ctx context.Context, clusterId string) (*ExternalClusterAPIGetCleanupScriptResponse, error)
+
 	// ExternalClusterAPIGetCredentialsScript request
 	ExternalClusterAPIGetCredentialsScriptWithResponse(ctx context.Context, clusterId string, params *ExternalClusterAPIGetCredentialsScriptParams) (*ExternalClusterAPIGetCredentialsScriptResponse, error)
 
@@ -3608,8 +3716,14 @@ type ClientWithResponsesInterface interface {
 	// ScheduledRebalancingAPIGetRebalancingSchedule request
 	ScheduledRebalancingAPIGetRebalancingScheduleWithResponse(ctx context.Context, id string) (*ScheduledRebalancingAPIGetRebalancingScheduleResponse, error)
 
+	// ExternalClusterAPIGetCleanupScriptTemplate request
+	ExternalClusterAPIGetCleanupScriptTemplateWithResponse(ctx context.Context, provider string) (*ExternalClusterAPIGetCleanupScriptTemplateResponse, error)
+
 	// ExternalClusterAPIGetCredentialsScriptTemplate request
 	ExternalClusterAPIGetCredentialsScriptTemplateWithResponse(ctx context.Context, provider string, params *ExternalClusterAPIGetCredentialsScriptTemplateParams) (*ExternalClusterAPIGetCredentialsScriptTemplateResponse, error)
+
+	// ScheduledRebalancingAPIListAvailableRebalancingTZ request
+	ScheduledRebalancingAPIListAvailableRebalancingTZWithResponse(ctx context.Context) (*ScheduledRebalancingAPIListAvailableRebalancingTZResponse, error)
 }
 
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
@@ -3621,14 +3735,14 @@ type Response interface {
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
-type ListAuthTokensResponse struct {
+type AuthTokenAPIListAuthTokensResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *AuthTokenList
+	JSON200      *CastaiAuthtokenV1beta1ListAuthTokensResponse
 }
 
 // Status returns HTTPResponse.Status
-func (r ListAuthTokensResponse) Status() string {
+func (r AuthTokenAPIListAuthTokensResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -3636,7 +3750,7 @@ func (r ListAuthTokensResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r ListAuthTokensResponse) StatusCode() int {
+func (r AuthTokenAPIListAuthTokensResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -3645,20 +3759,20 @@ func (r ListAuthTokensResponse) StatusCode() int {
 
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
-func (r ListAuthTokensResponse) GetBody() []byte {
+func (r AuthTokenAPIListAuthTokensResponse) GetBody() []byte {
 	return r.Body
 }
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
-type CreateAuthTokenResponse struct {
+type AuthTokenAPICreateAuthTokenResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON201      *AuthTokenCreateResponse
+	JSON200      *CastaiAuthtokenV1beta1AuthToken
 }
 
 // Status returns HTTPResponse.Status
-func (r CreateAuthTokenResponse) Status() string {
+func (r AuthTokenAPICreateAuthTokenResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -3666,7 +3780,7 @@ func (r CreateAuthTokenResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r CreateAuthTokenResponse) StatusCode() int {
+func (r AuthTokenAPICreateAuthTokenResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -3675,19 +3789,20 @@ func (r CreateAuthTokenResponse) StatusCode() int {
 
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
-func (r CreateAuthTokenResponse) GetBody() []byte {
+func (r AuthTokenAPICreateAuthTokenResponse) GetBody() []byte {
 	return r.Body
 }
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
-type DeleteAuthTokenResponse struct {
+type AuthTokenAPIDeleteAuthTokenResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
+	JSON200      *CastaiAuthtokenV1beta1DeleteAuthTokenResponse
 }
 
 // Status returns HTTPResponse.Status
-func (r DeleteAuthTokenResponse) Status() string {
+func (r AuthTokenAPIDeleteAuthTokenResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -3695,7 +3810,7 @@ func (r DeleteAuthTokenResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r DeleteAuthTokenResponse) StatusCode() int {
+func (r AuthTokenAPIDeleteAuthTokenResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -3704,20 +3819,20 @@ func (r DeleteAuthTokenResponse) StatusCode() int {
 
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
-func (r DeleteAuthTokenResponse) GetBody() []byte {
+func (r AuthTokenAPIDeleteAuthTokenResponse) GetBody() []byte {
 	return r.Body
 }
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
-type GetAuthTokenResponse struct {
+type AuthTokenAPIGetAuthTokenResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *AuthToken
+	JSON200      *CastaiAuthtokenV1beta1AuthToken
 }
 
 // Status returns HTTPResponse.Status
-func (r GetAuthTokenResponse) Status() string {
+func (r AuthTokenAPIGetAuthTokenResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -3725,7 +3840,7 @@ func (r GetAuthTokenResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r GetAuthTokenResponse) StatusCode() int {
+func (r AuthTokenAPIGetAuthTokenResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -3734,20 +3849,20 @@ func (r GetAuthTokenResponse) StatusCode() int {
 
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
-func (r GetAuthTokenResponse) GetBody() []byte {
+func (r AuthTokenAPIGetAuthTokenResponse) GetBody() []byte {
 	return r.Body
 }
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
-type UpdateAuthTokenResponse struct {
+type AuthTokenAPIUpdateAuthTokenResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *AuthToken
+	JSON200      *CastaiAuthtokenV1beta1AuthToken
 }
 
 // Status returns HTTPResponse.Status
-func (r UpdateAuthTokenResponse) Status() string {
+func (r AuthTokenAPIUpdateAuthTokenResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -3755,7 +3870,7 @@ func (r UpdateAuthTokenResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r UpdateAuthTokenResponse) StatusCode() int {
+func (r AuthTokenAPIUpdateAuthTokenResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -3764,7 +3879,7 @@ func (r UpdateAuthTokenResponse) StatusCode() int {
 
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
-func (r UpdateAuthTokenResponse) GetBody() []byte {
+func (r AuthTokenAPIUpdateAuthTokenResponse) GetBody() []byte {
 	return r.Body
 }
 
@@ -4609,6 +4724,36 @@ func (r ExternalClusterAPIGetAssumeRoleUserResponse) GetBody() []byte {
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
+type ExternalClusterAPIGetCleanupScriptResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *ExternalclusterV1GetCleanupScriptResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r ExternalClusterAPIGetCleanupScriptResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r ExternalClusterAPIGetCleanupScriptResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r ExternalClusterAPIGetCleanupScriptResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
 type ExternalClusterAPIGetCredentialsScriptResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -5119,6 +5264,35 @@ func (r ScheduledRebalancingAPIGetRebalancingScheduleResponse) GetBody() []byte 
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
+type ExternalClusterAPIGetCleanupScriptTemplateResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+}
+
+// Status returns HTTPResponse.Status
+func (r ExternalClusterAPIGetCleanupScriptTemplateResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r ExternalClusterAPIGetCleanupScriptTemplateResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r ExternalClusterAPIGetCleanupScriptTemplateResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
 type ExternalClusterAPIGetCredentialsScriptTemplateResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -5148,65 +5322,95 @@ func (r ExternalClusterAPIGetCredentialsScriptTemplateResponse) GetBody() []byte
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
-// ListAuthTokensWithResponse request returning *ListAuthTokensResponse
-func (c *ClientWithResponses) ListAuthTokensWithResponse(ctx context.Context, params *ListAuthTokensParams) (*ListAuthTokensResponse, error) {
-	rsp, err := c.ListAuthTokens(ctx, params)
-	if err != nil {
-		return nil, err
-	}
-	return ParseListAuthTokensResponse(rsp)
+type ScheduledRebalancingAPIListAvailableRebalancingTZResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *ScheduledrebalancingV1ListAvailableRebalancingTZResponse
 }
 
-// CreateAuthTokenWithBodyWithResponse request with arbitrary body returning *CreateAuthTokenResponse
-func (c *ClientWithResponses) CreateAuthTokenWithBodyWithResponse(ctx context.Context, params *CreateAuthTokenParams, contentType string, body io.Reader) (*CreateAuthTokenResponse, error) {
-	rsp, err := c.CreateAuthTokenWithBody(ctx, params, contentType, body)
-	if err != nil {
-		return nil, err
+// Status returns HTTPResponse.Status
+func (r ScheduledRebalancingAPIListAvailableRebalancingTZResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
 	}
-	return ParseCreateAuthTokenResponse(rsp)
+	return http.StatusText(0)
 }
 
-func (c *ClientWithResponses) CreateAuthTokenWithResponse(ctx context.Context, params *CreateAuthTokenParams, body CreateAuthTokenJSONRequestBody) (*CreateAuthTokenResponse, error) {
-	rsp, err := c.CreateAuthToken(ctx, params, body)
-	if err != nil {
-		return nil, err
+// StatusCode returns HTTPResponse.StatusCode
+func (r ScheduledRebalancingAPIListAvailableRebalancingTZResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
 	}
-	return ParseCreateAuthTokenResponse(rsp)
+	return 0
 }
 
-// DeleteAuthTokenWithResponse request returning *DeleteAuthTokenResponse
-func (c *ClientWithResponses) DeleteAuthTokenWithResponse(ctx context.Context, authTokenId AuthTokenId, params *DeleteAuthTokenParams) (*DeleteAuthTokenResponse, error) {
-	rsp, err := c.DeleteAuthToken(ctx, authTokenId, params)
-	if err != nil {
-		return nil, err
-	}
-	return ParseDeleteAuthTokenResponse(rsp)
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r ScheduledRebalancingAPIListAvailableRebalancingTZResponse) GetBody() []byte {
+	return r.Body
 }
 
-// GetAuthTokenWithResponse request returning *GetAuthTokenResponse
-func (c *ClientWithResponses) GetAuthTokenWithResponse(ctx context.Context, authTokenId AuthTokenId, params *GetAuthTokenParams) (*GetAuthTokenResponse, error) {
-	rsp, err := c.GetAuthToken(ctx, authTokenId, params)
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+// AuthTokenAPIListAuthTokensWithResponse request returning *AuthTokenAPIListAuthTokensResponse
+func (c *ClientWithResponses) AuthTokenAPIListAuthTokensWithResponse(ctx context.Context, params *AuthTokenAPIListAuthTokensParams) (*AuthTokenAPIListAuthTokensResponse, error) {
+	rsp, err := c.AuthTokenAPIListAuthTokens(ctx, params)
 	if err != nil {
 		return nil, err
 	}
-	return ParseGetAuthTokenResponse(rsp)
+	return ParseAuthTokenAPIListAuthTokensResponse(rsp)
 }
 
-// UpdateAuthTokenWithBodyWithResponse request with arbitrary body returning *UpdateAuthTokenResponse
-func (c *ClientWithResponses) UpdateAuthTokenWithBodyWithResponse(ctx context.Context, authTokenId AuthTokenId, params *UpdateAuthTokenParams, contentType string, body io.Reader) (*UpdateAuthTokenResponse, error) {
-	rsp, err := c.UpdateAuthTokenWithBody(ctx, authTokenId, params, contentType, body)
+// AuthTokenAPICreateAuthTokenWithBodyWithResponse request with arbitrary body returning *AuthTokenAPICreateAuthTokenResponse
+func (c *ClientWithResponses) AuthTokenAPICreateAuthTokenWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*AuthTokenAPICreateAuthTokenResponse, error) {
+	rsp, err := c.AuthTokenAPICreateAuthTokenWithBody(ctx, contentType, body)
 	if err != nil {
 		return nil, err
 	}
-	return ParseUpdateAuthTokenResponse(rsp)
+	return ParseAuthTokenAPICreateAuthTokenResponse(rsp)
 }
 
-func (c *ClientWithResponses) UpdateAuthTokenWithResponse(ctx context.Context, authTokenId AuthTokenId, params *UpdateAuthTokenParams, body UpdateAuthTokenJSONRequestBody) (*UpdateAuthTokenResponse, error) {
-	rsp, err := c.UpdateAuthToken(ctx, authTokenId, params, body)
+func (c *ClientWithResponses) AuthTokenAPICreateAuthTokenWithResponse(ctx context.Context, body AuthTokenAPICreateAuthTokenJSONRequestBody) (*AuthTokenAPICreateAuthTokenResponse, error) {
+	rsp, err := c.AuthTokenAPICreateAuthToken(ctx, body)
 	if err != nil {
 		return nil, err
 	}
-	return ParseUpdateAuthTokenResponse(rsp)
+	return ParseAuthTokenAPICreateAuthTokenResponse(rsp)
+}
+
+// AuthTokenAPIDeleteAuthTokenWithResponse request returning *AuthTokenAPIDeleteAuthTokenResponse
+func (c *ClientWithResponses) AuthTokenAPIDeleteAuthTokenWithResponse(ctx context.Context, id string) (*AuthTokenAPIDeleteAuthTokenResponse, error) {
+	rsp, err := c.AuthTokenAPIDeleteAuthToken(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	return ParseAuthTokenAPIDeleteAuthTokenResponse(rsp)
+}
+
+// AuthTokenAPIGetAuthTokenWithResponse request returning *AuthTokenAPIGetAuthTokenResponse
+func (c *ClientWithResponses) AuthTokenAPIGetAuthTokenWithResponse(ctx context.Context, id string) (*AuthTokenAPIGetAuthTokenResponse, error) {
+	rsp, err := c.AuthTokenAPIGetAuthToken(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	return ParseAuthTokenAPIGetAuthTokenResponse(rsp)
+}
+
+// AuthTokenAPIUpdateAuthTokenWithBodyWithResponse request with arbitrary body returning *AuthTokenAPIUpdateAuthTokenResponse
+func (c *ClientWithResponses) AuthTokenAPIUpdateAuthTokenWithBodyWithResponse(ctx context.Context, id string, contentType string, body io.Reader) (*AuthTokenAPIUpdateAuthTokenResponse, error) {
+	rsp, err := c.AuthTokenAPIUpdateAuthTokenWithBody(ctx, id, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseAuthTokenAPIUpdateAuthTokenResponse(rsp)
+}
+
+func (c *ClientWithResponses) AuthTokenAPIUpdateAuthTokenWithResponse(ctx context.Context, id string, body AuthTokenAPIUpdateAuthTokenJSONRequestBody) (*AuthTokenAPIUpdateAuthTokenResponse, error) {
+	rsp, err := c.AuthTokenAPIUpdateAuthToken(ctx, id, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseAuthTokenAPIUpdateAuthTokenResponse(rsp)
 }
 
 // NodeTemplatesAPIFilterInstanceTypesWithBodyWithResponse request with arbitrary body returning *NodeTemplatesAPIFilterInstanceTypesResponse
@@ -5549,6 +5753,15 @@ func (c *ClientWithResponses) ExternalClusterAPIGetAssumeRoleUserWithResponse(ct
 	return ParseExternalClusterAPIGetAssumeRoleUserResponse(rsp)
 }
 
+// ExternalClusterAPIGetCleanupScriptWithResponse request returning *ExternalClusterAPIGetCleanupScriptResponse
+func (c *ClientWithResponses) ExternalClusterAPIGetCleanupScriptWithResponse(ctx context.Context, clusterId string) (*ExternalClusterAPIGetCleanupScriptResponse, error) {
+	rsp, err := c.ExternalClusterAPIGetCleanupScript(ctx, clusterId)
+	if err != nil {
+		return nil, err
+	}
+	return ParseExternalClusterAPIGetCleanupScriptResponse(rsp)
+}
+
 // ExternalClusterAPIGetCredentialsScriptWithResponse request returning *ExternalClusterAPIGetCredentialsScriptResponse
 func (c *ClientWithResponses) ExternalClusterAPIGetCredentialsScriptWithResponse(ctx context.Context, clusterId string, params *ExternalClusterAPIGetCredentialsScriptParams) (*ExternalClusterAPIGetCredentialsScriptResponse, error) {
 	rsp, err := c.ExternalClusterAPIGetCredentialsScript(ctx, clusterId, params)
@@ -5750,6 +5963,15 @@ func (c *ClientWithResponses) ScheduledRebalancingAPIGetRebalancingScheduleWithR
 	return ParseScheduledRebalancingAPIGetRebalancingScheduleResponse(rsp)
 }
 
+// ExternalClusterAPIGetCleanupScriptTemplateWithResponse request returning *ExternalClusterAPIGetCleanupScriptTemplateResponse
+func (c *ClientWithResponses) ExternalClusterAPIGetCleanupScriptTemplateWithResponse(ctx context.Context, provider string) (*ExternalClusterAPIGetCleanupScriptTemplateResponse, error) {
+	rsp, err := c.ExternalClusterAPIGetCleanupScriptTemplate(ctx, provider)
+	if err != nil {
+		return nil, err
+	}
+	return ParseExternalClusterAPIGetCleanupScriptTemplateResponse(rsp)
+}
+
 // ExternalClusterAPIGetCredentialsScriptTemplateWithResponse request returning *ExternalClusterAPIGetCredentialsScriptTemplateResponse
 func (c *ClientWithResponses) ExternalClusterAPIGetCredentialsScriptTemplateWithResponse(ctx context.Context, provider string, params *ExternalClusterAPIGetCredentialsScriptTemplateParams) (*ExternalClusterAPIGetCredentialsScriptTemplateResponse, error) {
 	rsp, err := c.ExternalClusterAPIGetCredentialsScriptTemplate(ctx, provider, params)
@@ -5759,22 +5981,31 @@ func (c *ClientWithResponses) ExternalClusterAPIGetCredentialsScriptTemplateWith
 	return ParseExternalClusterAPIGetCredentialsScriptTemplateResponse(rsp)
 }
 
-// ParseListAuthTokensResponse parses an HTTP response from a ListAuthTokensWithResponse call
-func ParseListAuthTokensResponse(rsp *http.Response) (*ListAuthTokensResponse, error) {
+// ScheduledRebalancingAPIListAvailableRebalancingTZWithResponse request returning *ScheduledRebalancingAPIListAvailableRebalancingTZResponse
+func (c *ClientWithResponses) ScheduledRebalancingAPIListAvailableRebalancingTZWithResponse(ctx context.Context) (*ScheduledRebalancingAPIListAvailableRebalancingTZResponse, error) {
+	rsp, err := c.ScheduledRebalancingAPIListAvailableRebalancingTZ(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return ParseScheduledRebalancingAPIListAvailableRebalancingTZResponse(rsp)
+}
+
+// ParseAuthTokenAPIListAuthTokensResponse parses an HTTP response from a AuthTokenAPIListAuthTokensWithResponse call
+func ParseAuthTokenAPIListAuthTokensResponse(rsp *http.Response) (*AuthTokenAPIListAuthTokensResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
 	defer rsp.Body.Close()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &ListAuthTokensResponse{
+	response := &AuthTokenAPIListAuthTokensResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest AuthTokenList
+		var dest CastaiAuthtokenV1beta1ListAuthTokensResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -5785,64 +6016,22 @@ func ParseListAuthTokensResponse(rsp *http.Response) (*ListAuthTokensResponse, e
 	return response, nil
 }
 
-// ParseCreateAuthTokenResponse parses an HTTP response from a CreateAuthTokenWithResponse call
-func ParseCreateAuthTokenResponse(rsp *http.Response) (*CreateAuthTokenResponse, error) {
+// ParseAuthTokenAPICreateAuthTokenResponse parses an HTTP response from a AuthTokenAPICreateAuthTokenWithResponse call
+func ParseAuthTokenAPICreateAuthTokenResponse(rsp *http.Response) (*AuthTokenAPICreateAuthTokenResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
 	defer rsp.Body.Close()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &CreateAuthTokenResponse{
-		Body:         bodyBytes,
-		HTTPResponse: rsp,
-	}
-
-	switch {
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 201:
-		var dest AuthTokenCreateResponse
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON201 = &dest
-
-	}
-
-	return response, nil
-}
-
-// ParseDeleteAuthTokenResponse parses an HTTP response from a DeleteAuthTokenWithResponse call
-func ParseDeleteAuthTokenResponse(rsp *http.Response) (*DeleteAuthTokenResponse, error) {
-	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
-	if err != nil {
-		return nil, err
-	}
-
-	response := &DeleteAuthTokenResponse{
-		Body:         bodyBytes,
-		HTTPResponse: rsp,
-	}
-
-	return response, nil
-}
-
-// ParseGetAuthTokenResponse parses an HTTP response from a GetAuthTokenWithResponse call
-func ParseGetAuthTokenResponse(rsp *http.Response) (*GetAuthTokenResponse, error) {
-	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
-	if err != nil {
-		return nil, err
-	}
-
-	response := &GetAuthTokenResponse{
+	response := &AuthTokenAPICreateAuthTokenResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest AuthToken
+		var dest CastaiAuthtokenV1beta1AuthToken
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -5853,22 +6042,74 @@ func ParseGetAuthTokenResponse(rsp *http.Response) (*GetAuthTokenResponse, error
 	return response, nil
 }
 
-// ParseUpdateAuthTokenResponse parses an HTTP response from a UpdateAuthTokenWithResponse call
-func ParseUpdateAuthTokenResponse(rsp *http.Response) (*UpdateAuthTokenResponse, error) {
+// ParseAuthTokenAPIDeleteAuthTokenResponse parses an HTTP response from a AuthTokenAPIDeleteAuthTokenWithResponse call
+func ParseAuthTokenAPIDeleteAuthTokenResponse(rsp *http.Response) (*AuthTokenAPIDeleteAuthTokenResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
 	defer rsp.Body.Close()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &UpdateAuthTokenResponse{
+	response := &AuthTokenAPIDeleteAuthTokenResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest AuthToken
+		var dest CastaiAuthtokenV1beta1DeleteAuthTokenResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseAuthTokenAPIGetAuthTokenResponse parses an HTTP response from a AuthTokenAPIGetAuthTokenWithResponse call
+func ParseAuthTokenAPIGetAuthTokenResponse(rsp *http.Response) (*AuthTokenAPIGetAuthTokenResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &AuthTokenAPIGetAuthTokenResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest CastaiAuthtokenV1beta1AuthToken
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseAuthTokenAPIUpdateAuthTokenResponse parses an HTTP response from a AuthTokenAPIUpdateAuthTokenWithResponse call
+func ParseAuthTokenAPIUpdateAuthTokenResponse(rsp *http.Response) (*AuthTokenAPIUpdateAuthTokenResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &AuthTokenAPIUpdateAuthTokenResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest CastaiAuthtokenV1beta1AuthToken
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -6597,6 +6838,32 @@ func ParseExternalClusterAPIGetAssumeRoleUserResponse(rsp *http.Response) (*Exte
 	return response, nil
 }
 
+// ParseExternalClusterAPIGetCleanupScriptResponse parses an HTTP response from a ExternalClusterAPIGetCleanupScriptWithResponse call
+func ParseExternalClusterAPIGetCleanupScriptResponse(rsp *http.Response) (*ExternalClusterAPIGetCleanupScriptResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &ExternalClusterAPIGetCleanupScriptResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ExternalclusterV1GetCleanupScriptResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
 // ParseExternalClusterAPIGetCredentialsScriptResponse parses an HTTP response from a ExternalClusterAPIGetCredentialsScriptWithResponse call
 func ParseExternalClusterAPIGetCredentialsScriptResponse(rsp *http.Response) (*ExternalClusterAPIGetCredentialsScriptResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
@@ -7039,6 +7306,22 @@ func ParseScheduledRebalancingAPIGetRebalancingScheduleResponse(rsp *http.Respon
 	return response, nil
 }
 
+// ParseExternalClusterAPIGetCleanupScriptTemplateResponse parses an HTTP response from a ExternalClusterAPIGetCleanupScriptTemplateWithResponse call
+func ParseExternalClusterAPIGetCleanupScriptTemplateResponse(rsp *http.Response) (*ExternalClusterAPIGetCleanupScriptTemplateResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &ExternalClusterAPIGetCleanupScriptTemplateResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	return response, nil
+}
+
 // ParseExternalClusterAPIGetCredentialsScriptTemplateResponse parses an HTTP response from a ExternalClusterAPIGetCredentialsScriptTemplateWithResponse call
 func ParseExternalClusterAPIGetCredentialsScriptTemplateResponse(rsp *http.Response) (*ExternalClusterAPIGetCredentialsScriptTemplateResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
@@ -7050,6 +7333,32 @@ func ParseExternalClusterAPIGetCredentialsScriptTemplateResponse(rsp *http.Respo
 	response := &ExternalClusterAPIGetCredentialsScriptTemplateResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
+	}
+
+	return response, nil
+}
+
+// ParseScheduledRebalancingAPIListAvailableRebalancingTZResponse parses an HTTP response from a ScheduledRebalancingAPIListAvailableRebalancingTZWithResponse call
+func ParseScheduledRebalancingAPIListAvailableRebalancingTZResponse(rsp *http.Response) (*ScheduledRebalancingAPIListAvailableRebalancingTZResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &ScheduledRebalancingAPIListAvailableRebalancingTZResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ScheduledrebalancingV1ListAvailableRebalancingTZResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
 	}
 
 	return response, nil

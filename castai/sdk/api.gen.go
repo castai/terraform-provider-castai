@@ -68,61 +68,14 @@ const (
 	CASTAIInterruptionPredictions PoliciesV1SpotInterruptionPredictionsType = "CASTAIInterruptionPredictions"
 )
 
-// AuthToken defines model for AuthToken.
-type AuthToken struct {
-	// Indicates whether this auth token is active.
-	Active *bool `json:"active,omitempty"`
-
-	// Auth token creation UTC time in RFC3339 format.
-	CreatedAt *time.Time `json:"createdAt,omitempty"`
-
-	// Auth token deletion UTC time in RFC3339 format.
-	DeletedAt *time.Time `json:"deletedAt,omitempty"`
-
-	// Auth token ID, generated at the time of creation
-	Id *string `json:"id,omitempty"`
-
-	// Auth token last used UTC time in RFC3339 format.
-	LastUsedAt *time.Time `json:"lastUsedAt,omitempty"`
-
-	// Name of the token. Must be unique among other active tokens for the current user.
-	Name string `json:"name"`
-
-	// Indicates whether auth token has readonly permissions.
-	Readonly bool `json:"readonly"`
-}
-
-// AuthTokenCreateResponse defines model for AuthTokenCreateResponse.
-type AuthTokenCreateResponse struct {
-	// Indicates whether this auth token is active.
-	Active *bool `json:"active,omitempty"`
-
-	// Auth token creation UTC time in RFC3339 format.
-	CreatedAt *time.Time `json:"createdAt,omitempty"`
-
-	// Auth token ID, generated at the time of creation
-	Id *string `json:"id,omitempty"`
-
-	// Name of the token. Must be unique among other active tokens for the current user.
-	Name string `json:"name"`
-
-	// Indicates whether auth token has readonly permissions.
-	Readonly bool `json:"readonly"`
-
-	// Generated secret for this auth token (only shown once on creation)
-	Token *string `json:"token,omitempty"`
-}
-
-// AuthTokenList defines model for AuthTokenList.
-type AuthTokenList struct {
-	Items []AuthToken `json:"items"`
-}
-
-// AuthTokenUpdateRequest defines model for AuthTokenUpdateRequest.
-type AuthTokenUpdateRequest struct {
-	// Indicates whether this auth token is active.
-	Active bool `json:"active"`
-}
+// Defines values for ScheduledrebalancingV1JobStatus.
+const (
+	JobStatusFailed     ScheduledrebalancingV1JobStatus = "JobStatusFailed"
+	JobStatusFinished   ScheduledrebalancingV1JobStatus = "JobStatusFinished"
+	JobStatusInProgress ScheduledrebalancingV1JobStatus = "JobStatusInProgress"
+	JobStatusPending    ScheduledrebalancingV1JobStatus = "JobStatusPending"
+	JobStatusSkipped    ScheduledrebalancingV1JobStatus = "JobStatusSkipped"
+)
 
 // OperationResponse defines model for OperationResponse.
 type OperationResponse struct {
@@ -147,6 +100,43 @@ type OperationResponse struct {
 
 	// ID of the operation.
 	Id string `json:"id"`
+}
+
+// Auth token used to authenticate via api.
+type CastaiAuthtokenV1beta1AuthToken struct {
+	// (read only) Indicates whether the token is active.
+	Active *bool `json:"active,omitempty"`
+
+	// (read only) Time when the token was created (unix timestamp in nanoseconds).
+	CreatedAt *time.Time `json:"createdAt,omitempty"`
+
+	// (read only) ID of the token.
+	Id *string `json:"id,omitempty"`
+
+	// (read only) Time when this token was last used (unix timestamp in nanoseconds).
+	LastUsedAt *time.Time `json:"lastUsedAt,omitempty"`
+
+	// (required) User provided name of the token.
+	Name *string `json:"name,omitempty"`
+
+	// whether token has readonly permissions.
+	Readonly *bool `json:"readonly,omitempty"`
+
+	// (read only, visible once on creation) actual token used to authenticate via api.
+	Token *string `json:"token"`
+}
+
+// AuthTokenUpdate is used to update an existing auth token.
+type CastaiAuthtokenV1beta1AuthTokenUpdate struct {
+	Active *bool `json:"active,omitempty"`
+}
+
+// CastaiAuthtokenV1beta1DeleteAuthTokenResponse defines model for castai.authtoken.v1beta1.DeleteAuthTokenResponse.
+type CastaiAuthtokenV1beta1DeleteAuthTokenResponse = map[string]interface{}
+
+// CastaiAuthtokenV1beta1ListAuthTokensResponse defines model for castai.authtoken.v1beta1.ListAuthTokensResponse.
+type CastaiAuthtokenV1beta1ListAuthTokensResponse struct {
+	Items *[]CastaiAuthtokenV1beta1AuthToken `json:"items,omitempty"`
 }
 
 // CastaiMetricsV1beta1ClusterMetrics defines model for castai.metrics.v1beta1.ClusterMetrics.
@@ -410,6 +400,11 @@ type ExternalclusterV1GPUInfo struct {
 // ExternalclusterV1GetAssumeRoleUserResponse defines model for externalcluster.v1.GetAssumeRoleUserResponse.
 type ExternalclusterV1GetAssumeRoleUserResponse struct {
 	Arn *string `json:"arn,omitempty"`
+}
+
+// GetCleanupScriptResponse is the result of GetCleanupScriptRequest.
+type ExternalclusterV1GetCleanupScriptResponse struct {
+	Script *string `json:"script,omitempty"`
 }
 
 // GetCredentialsScriptResponse is the result of GetCredentialsScriptRequest.
@@ -1000,7 +995,10 @@ type NodetemplatesV1NewNodeTemplate struct {
 	CustomLabels *NodetemplatesV1NewNodeTemplate_CustomLabels `json:"customLabels,omitempty"`
 
 	// Custom taints for the template.
-	CustomTaints      *[]NodetemplatesV1TaintWithoutEffect     `json:"customTaints,omitempty"`
+	CustomTaints *[]NodetemplatesV1TaintWithoutEffect `json:"customTaints,omitempty"`
+
+	// This field is used to enable/disable autoscaling for the template.
+	IsEnabled         *bool                                    `json:"isEnabled"`
 	Name              *string                                  `json:"name,omitempty"`
 	RebalancingConfig *NodetemplatesV1RebalancingConfiguration `json:"rebalancingConfig,omitempty"`
 
@@ -1026,7 +1024,10 @@ type NodetemplatesV1NodeTemplate struct {
 	CustomLabels *NodetemplatesV1NodeTemplate_CustomLabels `json:"customLabels,omitempty"`
 
 	// Custom taints for the template.
-	CustomTaints      *[]NodetemplatesV1Taint                  `json:"customTaints,omitempty"`
+	CustomTaints *[]NodetemplatesV1Taint `json:"customTaints,omitempty"`
+
+	// This field is used to enable/disable autoscaling for the template.
+	IsEnabled         *bool                                    `json:"isEnabled,omitempty"`
 	Name              *string                                  `json:"name,omitempty"`
 	RebalancingConfig *NodetemplatesV1RebalancingConfiguration `json:"rebalancingConfig,omitempty"`
 
@@ -1055,6 +1056,8 @@ type NodetemplatesV1NodeTemplateListItemStats struct {
 
 // NodetemplatesV1RebalancingConfiguration defines model for nodetemplates.v1.RebalancingConfiguration.
 type NodetemplatesV1RebalancingConfiguration struct {
+	// Minimum amount of nodes to create for template
+	// Note, this setting is only relevant for very small clusters, for larger clusters it's recommended to leave this at 0.
 	MinNodes *int32 `json:"minNodes"`
 }
 
@@ -1085,8 +1088,22 @@ type NodetemplatesV1TemplateConstraints struct {
 	MaxMemory                  *int32                                                       `json:"maxMemory"`
 	MinCpu                     *int32                                                       `json:"minCpu"`
 	MinMemory                  *int32                                                       `json:"minMemory"`
-	Spot                       *bool                                                        `json:"spot"`
-	StorageOptimized           *bool                                                        `json:"storageOptimized"`
+
+	// Should include on-demand instances in the considered pool.
+	OnDemand *bool `json:"onDemand"`
+
+	// Should include spot instances in the considered pool.
+	// Note 1: if both spot and on-demand are false, then on-demand is assumed.
+	// Note 2: if both spot and on-demand are true, then you can specify which lifecycle you want by adding
+	//  nodeSelector:
+	//        scheduling.cast.ai/spot: "true"
+	// selector, or an equivalent affinity to the pod manifest and
+	//  tolerations:
+	//      - key: scheduling.cast.ai/spot
+	//        operator: Exists
+	// toleration.
+	Spot             *bool `json:"spot"`
+	StorageOptimized *bool `json:"storageOptimized"`
 
 	// Spot instance fallback constraint - when true, on-demand instances will be created, when spots are unavailable.
 	UseSpotFallbacks *bool `json:"useSpotFallbacks"`
@@ -1119,7 +1136,10 @@ type NodetemplatesV1UpdateNodeTemplate struct {
 	CustomLabels *NodetemplatesV1UpdateNodeTemplate_CustomLabels `json:"customLabels,omitempty"`
 
 	// Custom taints for the template.
-	CustomTaints      *[]NodetemplatesV1TaintWithoutEffect     `json:"customTaints,omitempty"`
+	CustomTaints *[]NodetemplatesV1TaintWithoutEffect `json:"customTaints,omitempty"`
+
+	// This field is used to enable/disable autoscaling for the template.
+	IsEnabled         *bool                                    `json:"isEnabled"`
 	RebalancingConfig *NodetemplatesV1RebalancingConfiguration `json:"rebalancingConfig,omitempty"`
 
 	// Marks whether the templated nodes will have a taint.
@@ -1361,6 +1381,9 @@ type ScheduledrebalancingV1DeleteRebalancingJobResponse = map[string]interface{}
 // ScheduledrebalancingV1DeleteRebalancingScheduleResponse defines model for scheduledrebalancing.v1.DeleteRebalancingScheduleResponse.
 type ScheduledrebalancingV1DeleteRebalancingScheduleResponse = map[string]interface{}
 
+// JobStatus defines rebalancing job's last execution status.
+type ScheduledrebalancingV1JobStatus string
+
 // ScheduledrebalancingV1LaunchConfiguration defines model for scheduledrebalancing.v1.LaunchConfiguration.
 type ScheduledrebalancingV1LaunchConfiguration struct {
 	// Specifies amount of time since node creation before the node is allowed to be considered for automated rebalancing.
@@ -1370,6 +1393,11 @@ type ScheduledrebalancingV1LaunchConfiguration struct {
 	NumTargetedNodes   *int32                                    `json:"numTargetedNodes,omitempty"`
 	RebalancingOptions *ScheduledrebalancingV1RebalancingOptions `json:"rebalancingOptions,omitempty"`
 	Selector           *ScheduledrebalancingV1NodeSelector       `json:"selector,omitempty"`
+}
+
+// ScheduledrebalancingV1ListAvailableRebalancingTZResponse defines model for scheduledrebalancing.v1.ListAvailableRebalancingTZResponse.
+type ScheduledrebalancingV1ListAvailableRebalancingTZResponse struct {
+	TimeZones *[]string `json:"timeZones,omitempty"`
 }
 
 // ScheduledrebalancingV1ListRebalancingJobsResponse defines model for scheduledrebalancing.v1.ListRebalancingJobsResponse.
@@ -1419,11 +1447,18 @@ type ScheduledrebalancingV1PreviewRebalancingScheduleResponse struct {
 
 // ScheduledrebalancingV1RebalancingJob defines model for scheduledrebalancing.v1.RebalancingJob.
 type ScheduledrebalancingV1RebalancingJob struct {
-	ClusterId             *string `json:"clusterId,omitempty"`
-	Enabled               *bool   `json:"enabled"`
-	Id                    *string `json:"id,omitempty"`
-	RebalancingPlanId     *string `json:"rebalancingPlanId,omitempty"`
-	RebalancingScheduleId *string `json:"rebalancingScheduleId,omitempty"`
+	ClusterId *string `json:"clusterId,omitempty"`
+
+	// Specifies if job is currently enabled; disabled jobs are not triggered.
+	Enabled               *bool      `json:"enabled"`
+	Id                    *string    `json:"id,omitempty"`
+	LastTriggerAt         *time.Time `json:"lastTriggerAt"`
+	NextTriggerAt         *time.Time `json:"nextTriggerAt"`
+	RebalancingPlanId     *string    `json:"rebalancingPlanId,omitempty"`
+	RebalancingScheduleId *string    `json:"rebalancingScheduleId,omitempty"`
+
+	// JobStatus defines rebalancing job's last execution status.
+	Status *ScheduledrebalancingV1JobStatus `json:"status,omitempty"`
 }
 
 // ScheduledrebalancingV1RebalancingOptions defines model for scheduledrebalancing.v1.RebalancingOptions.
@@ -1435,6 +1470,8 @@ type ScheduledrebalancingV1RebalancingOptions struct {
 // ScheduledrebalancingV1RebalancingSchedule defines model for scheduledrebalancing.v1.RebalancingSchedule.
 type ScheduledrebalancingV1RebalancingSchedule struct {
 	Id                  *string                                   `json:"id,omitempty"`
+	Jobs                *[]ScheduledrebalancingV1RebalancingJob   `json:"jobs,omitempty"`
+	LastTriggerAt       *time.Time                                `json:"lastTriggerAt"`
 	LaunchConfiguration ScheduledrebalancingV1LaunchConfiguration `json:"launchConfiguration"`
 	Name                string                                    `json:"name"`
 	NextTriggerAt       *time.Time                                `json:"nextTriggerAt,omitempty"`
@@ -1460,45 +1497,22 @@ type ScheduledrebalancingV1TriggerConditions struct {
 	SavingsPercentage *float32 `json:"savingsPercentage,omitempty"`
 }
 
-// AuthTokenId defines model for authTokenId.
-type AuthTokenId = string
-
 // ClusterId defines model for clusterId.
 type ClusterId = string
 
 // HeaderOrganizationId defines model for headerOrganizationId.
 type HeaderOrganizationId = openapi_types.UUID
 
-// ListAuthTokensParams defines parameters for ListAuthTokens.
-type ListAuthTokensParams struct {
-	XCastAiOrganizationId *HeaderOrganizationId `json:"X-CastAi-Organization-Id,omitempty"`
+// AuthTokenAPIListAuthTokensParams defines parameters for AuthTokenAPIListAuthTokens.
+type AuthTokenAPIListAuthTokensParams struct {
+	UserId *string `form:"userId,omitempty" json:"userId,omitempty"`
 }
 
-// CreateAuthTokenJSONBody defines parameters for CreateAuthToken.
-type CreateAuthTokenJSONBody = AuthToken
+// AuthTokenAPICreateAuthTokenJSONBody defines parameters for AuthTokenAPICreateAuthToken.
+type AuthTokenAPICreateAuthTokenJSONBody = CastaiAuthtokenV1beta1AuthToken
 
-// CreateAuthTokenParams defines parameters for CreateAuthToken.
-type CreateAuthTokenParams struct {
-	XCastAiOrganizationId *HeaderOrganizationId `json:"X-CastAi-Organization-Id,omitempty"`
-}
-
-// DeleteAuthTokenParams defines parameters for DeleteAuthToken.
-type DeleteAuthTokenParams struct {
-	XCastAiOrganizationId *HeaderOrganizationId `json:"X-CastAi-Organization-Id,omitempty"`
-}
-
-// GetAuthTokenParams defines parameters for GetAuthToken.
-type GetAuthTokenParams struct {
-	XCastAiOrganizationId *HeaderOrganizationId `json:"X-CastAi-Organization-Id,omitempty"`
-}
-
-// UpdateAuthTokenJSONBody defines parameters for UpdateAuthToken.
-type UpdateAuthTokenJSONBody = AuthTokenUpdateRequest
-
-// UpdateAuthTokenParams defines parameters for UpdateAuthToken.
-type UpdateAuthTokenParams struct {
-	XCastAiOrganizationId *HeaderOrganizationId `json:"X-CastAi-Organization-Id,omitempty"`
-}
+// AuthTokenAPIUpdateAuthTokenJSONBody defines parameters for AuthTokenAPIUpdateAuthToken.
+type AuthTokenAPIUpdateAuthTokenJSONBody = CastaiAuthtokenV1beta1AuthTokenUpdate
 
 // NodeTemplatesAPIFilterInstanceTypesJSONBody defines parameters for NodeTemplatesAPIFilterInstanceTypes.
 type NodeTemplatesAPIFilterInstanceTypesJSONBody = NodetemplatesV1NodeTemplate
@@ -1597,11 +1611,11 @@ type ExternalClusterAPIGetCredentialsScriptTemplateParams struct {
 	CrossRole *bool `form:"crossRole,omitempty" json:"crossRole,omitempty"`
 }
 
-// CreateAuthTokenJSONRequestBody defines body for CreateAuthToken for application/json ContentType.
-type CreateAuthTokenJSONRequestBody = CreateAuthTokenJSONBody
+// AuthTokenAPICreateAuthTokenJSONRequestBody defines body for AuthTokenAPICreateAuthToken for application/json ContentType.
+type AuthTokenAPICreateAuthTokenJSONRequestBody = AuthTokenAPICreateAuthTokenJSONBody
 
-// UpdateAuthTokenJSONRequestBody defines body for UpdateAuthToken for application/json ContentType.
-type UpdateAuthTokenJSONRequestBody = UpdateAuthTokenJSONBody
+// AuthTokenAPIUpdateAuthTokenJSONRequestBody defines body for AuthTokenAPIUpdateAuthToken for application/json ContentType.
+type AuthTokenAPIUpdateAuthTokenJSONRequestBody = AuthTokenAPIUpdateAuthTokenJSONBody
 
 // NodeTemplatesAPIFilterInstanceTypesJSONRequestBody defines body for NodeTemplatesAPIFilterInstanceTypes for application/json ContentType.
 type NodeTemplatesAPIFilterInstanceTypesJSONRequestBody = NodeTemplatesAPIFilterInstanceTypesJSONBody

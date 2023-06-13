@@ -75,64 +75,144 @@ func (m *MockClientInterface) EXPECT() *MockClientInterfaceMockRecorder {
 	return m.recorder
 }
 
-// CreateAuthToken mocks base method.
-func (m *MockClientInterface) CreateAuthToken(ctx context.Context, params *sdk.CreateAuthTokenParams, body sdk.CreateAuthTokenJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+// AuthTokenAPICreateAuthToken mocks base method.
+func (m *MockClientInterface) AuthTokenAPICreateAuthToken(ctx context.Context, body sdk.AuthTokenAPICreateAuthTokenJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, params, body}
+	varargs := []interface{}{ctx, body}
 	for _, a := range reqEditors {
 		varargs = append(varargs, a)
 	}
-	ret := m.ctrl.Call(m, "CreateAuthToken", varargs...)
+	ret := m.ctrl.Call(m, "AuthTokenAPICreateAuthToken", varargs...)
 	ret0, _ := ret[0].(*http.Response)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// CreateAuthToken indicates an expected call of CreateAuthToken.
-func (mr *MockClientInterfaceMockRecorder) CreateAuthToken(ctx, params, body interface{}, reqEditors ...interface{}) *gomock.Call {
+// AuthTokenAPICreateAuthToken indicates an expected call of AuthTokenAPICreateAuthToken.
+func (mr *MockClientInterfaceMockRecorder) AuthTokenAPICreateAuthToken(ctx, body interface{}, reqEditors ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, params, body}, reqEditors...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateAuthToken", reflect.TypeOf((*MockClientInterface)(nil).CreateAuthToken), varargs...)
+	varargs := append([]interface{}{ctx, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AuthTokenAPICreateAuthToken", reflect.TypeOf((*MockClientInterface)(nil).AuthTokenAPICreateAuthToken), varargs...)
 }
 
-// CreateAuthTokenWithBody mocks base method.
-func (m *MockClientInterface) CreateAuthTokenWithBody(ctx context.Context, params *sdk.CreateAuthTokenParams, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+// AuthTokenAPICreateAuthTokenWithBody mocks base method.
+func (m *MockClientInterface) AuthTokenAPICreateAuthTokenWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, params, contentType, body}
+	varargs := []interface{}{ctx, contentType, body}
 	for _, a := range reqEditors {
 		varargs = append(varargs, a)
 	}
-	ret := m.ctrl.Call(m, "CreateAuthTokenWithBody", varargs...)
+	ret := m.ctrl.Call(m, "AuthTokenAPICreateAuthTokenWithBody", varargs...)
 	ret0, _ := ret[0].(*http.Response)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// CreateAuthTokenWithBody indicates an expected call of CreateAuthTokenWithBody.
-func (mr *MockClientInterfaceMockRecorder) CreateAuthTokenWithBody(ctx, params, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+// AuthTokenAPICreateAuthTokenWithBody indicates an expected call of AuthTokenAPICreateAuthTokenWithBody.
+func (mr *MockClientInterfaceMockRecorder) AuthTokenAPICreateAuthTokenWithBody(ctx, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, params, contentType, body}, reqEditors...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateAuthTokenWithBody", reflect.TypeOf((*MockClientInterface)(nil).CreateAuthTokenWithBody), varargs...)
+	varargs := append([]interface{}{ctx, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AuthTokenAPICreateAuthTokenWithBody", reflect.TypeOf((*MockClientInterface)(nil).AuthTokenAPICreateAuthTokenWithBody), varargs...)
 }
 
-// DeleteAuthToken mocks base method.
-func (m *MockClientInterface) DeleteAuthToken(ctx context.Context, authTokenId sdk.AuthTokenId, params *sdk.DeleteAuthTokenParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+// AuthTokenAPIDeleteAuthToken mocks base method.
+func (m *MockClientInterface) AuthTokenAPIDeleteAuthToken(ctx context.Context, id string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, authTokenId, params}
+	varargs := []interface{}{ctx, id}
 	for _, a := range reqEditors {
 		varargs = append(varargs, a)
 	}
-	ret := m.ctrl.Call(m, "DeleteAuthToken", varargs...)
+	ret := m.ctrl.Call(m, "AuthTokenAPIDeleteAuthToken", varargs...)
 	ret0, _ := ret[0].(*http.Response)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// DeleteAuthToken indicates an expected call of DeleteAuthToken.
-func (mr *MockClientInterfaceMockRecorder) DeleteAuthToken(ctx, authTokenId, params interface{}, reqEditors ...interface{}) *gomock.Call {
+// AuthTokenAPIDeleteAuthToken indicates an expected call of AuthTokenAPIDeleteAuthToken.
+func (mr *MockClientInterfaceMockRecorder) AuthTokenAPIDeleteAuthToken(ctx, id interface{}, reqEditors ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, authTokenId, params}, reqEditors...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteAuthToken", reflect.TypeOf((*MockClientInterface)(nil).DeleteAuthToken), varargs...)
+	varargs := append([]interface{}{ctx, id}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AuthTokenAPIDeleteAuthToken", reflect.TypeOf((*MockClientInterface)(nil).AuthTokenAPIDeleteAuthToken), varargs...)
+}
+
+// AuthTokenAPIGetAuthToken mocks base method.
+func (m *MockClientInterface) AuthTokenAPIGetAuthToken(ctx context.Context, id string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, id}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "AuthTokenAPIGetAuthToken", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// AuthTokenAPIGetAuthToken indicates an expected call of AuthTokenAPIGetAuthToken.
+func (mr *MockClientInterfaceMockRecorder) AuthTokenAPIGetAuthToken(ctx, id interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, id}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AuthTokenAPIGetAuthToken", reflect.TypeOf((*MockClientInterface)(nil).AuthTokenAPIGetAuthToken), varargs...)
+}
+
+// AuthTokenAPIListAuthTokens mocks base method.
+func (m *MockClientInterface) AuthTokenAPIListAuthTokens(ctx context.Context, params *sdk.AuthTokenAPIListAuthTokensParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "AuthTokenAPIListAuthTokens", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// AuthTokenAPIListAuthTokens indicates an expected call of AuthTokenAPIListAuthTokens.
+func (mr *MockClientInterfaceMockRecorder) AuthTokenAPIListAuthTokens(ctx, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AuthTokenAPIListAuthTokens", reflect.TypeOf((*MockClientInterface)(nil).AuthTokenAPIListAuthTokens), varargs...)
+}
+
+// AuthTokenAPIUpdateAuthToken mocks base method.
+func (m *MockClientInterface) AuthTokenAPIUpdateAuthToken(ctx context.Context, id string, body sdk.AuthTokenAPIUpdateAuthTokenJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, id, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "AuthTokenAPIUpdateAuthToken", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// AuthTokenAPIUpdateAuthToken indicates an expected call of AuthTokenAPIUpdateAuthToken.
+func (mr *MockClientInterfaceMockRecorder) AuthTokenAPIUpdateAuthToken(ctx, id, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, id, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AuthTokenAPIUpdateAuthToken", reflect.TypeOf((*MockClientInterface)(nil).AuthTokenAPIUpdateAuthToken), varargs...)
+}
+
+// AuthTokenAPIUpdateAuthTokenWithBody mocks base method.
+func (m *MockClientInterface) AuthTokenAPIUpdateAuthTokenWithBody(ctx context.Context, id, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, id, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "AuthTokenAPIUpdateAuthTokenWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// AuthTokenAPIUpdateAuthTokenWithBody indicates an expected call of AuthTokenAPIUpdateAuthTokenWithBody.
+func (mr *MockClientInterfaceMockRecorder) AuthTokenAPIUpdateAuthTokenWithBody(ctx, id, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, id, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AuthTokenAPIUpdateAuthTokenWithBody", reflect.TypeOf((*MockClientInterface)(nil).AuthTokenAPIUpdateAuthTokenWithBody), varargs...)
 }
 
 // ExternalClusterAPIAddNode mocks base method.
@@ -333,6 +413,46 @@ func (mr *MockClientInterfaceMockRecorder) ExternalClusterAPIGetAssumeRoleUser(c
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{ctx, clusterId}, reqEditors...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIGetAssumeRoleUser", reflect.TypeOf((*MockClientInterface)(nil).ExternalClusterAPIGetAssumeRoleUser), varargs...)
+}
+
+// ExternalClusterAPIGetCleanupScript mocks base method.
+func (m *MockClientInterface) ExternalClusterAPIGetCleanupScript(ctx context.Context, clusterId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ExternalClusterAPIGetCleanupScript", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExternalClusterAPIGetCleanupScript indicates an expected call of ExternalClusterAPIGetCleanupScript.
+func (mr *MockClientInterfaceMockRecorder) ExternalClusterAPIGetCleanupScript(ctx, clusterId interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIGetCleanupScript", reflect.TypeOf((*MockClientInterface)(nil).ExternalClusterAPIGetCleanupScript), varargs...)
+}
+
+// ExternalClusterAPIGetCleanupScriptTemplate mocks base method.
+func (m *MockClientInterface) ExternalClusterAPIGetCleanupScriptTemplate(ctx context.Context, provider string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, provider}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ExternalClusterAPIGetCleanupScriptTemplate", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExternalClusterAPIGetCleanupScriptTemplate indicates an expected call of ExternalClusterAPIGetCleanupScriptTemplate.
+func (mr *MockClientInterfaceMockRecorder) ExternalClusterAPIGetCleanupScriptTemplate(ctx, provider interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, provider}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIGetCleanupScriptTemplate", reflect.TypeOf((*MockClientInterface)(nil).ExternalClusterAPIGetCleanupScriptTemplate), varargs...)
 }
 
 // ExternalClusterAPIGetCluster mocks base method.
@@ -635,26 +755,6 @@ func (mr *MockClientInterfaceMockRecorder) ExternalClusterAPIUpdateClusterWithBo
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIUpdateClusterWithBody", reflect.TypeOf((*MockClientInterface)(nil).ExternalClusterAPIUpdateClusterWithBody), varargs...)
 }
 
-// GetAuthToken mocks base method.
-func (m *MockClientInterface) GetAuthToken(ctx context.Context, authTokenId sdk.AuthTokenId, params *sdk.GetAuthTokenParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
-	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, authTokenId, params}
-	for _, a := range reqEditors {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "GetAuthToken", varargs...)
-	ret0, _ := ret[0].(*http.Response)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetAuthToken indicates an expected call of GetAuthToken.
-func (mr *MockClientInterfaceMockRecorder) GetAuthToken(ctx, authTokenId, params interface{}, reqEditors ...interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, authTokenId, params}, reqEditors...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAuthToken", reflect.TypeOf((*MockClientInterface)(nil).GetAuthToken), varargs...)
-}
-
 // GetExternalClusterOperation mocks base method.
 func (m *MockClientInterface) GetExternalClusterOperation(ctx context.Context, id string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
@@ -673,26 +773,6 @@ func (mr *MockClientInterfaceMockRecorder) GetExternalClusterOperation(ctx, id i
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{ctx, id}, reqEditors...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetExternalClusterOperation", reflect.TypeOf((*MockClientInterface)(nil).GetExternalClusterOperation), varargs...)
-}
-
-// ListAuthTokens mocks base method.
-func (m *MockClientInterface) ListAuthTokens(ctx context.Context, params *sdk.ListAuthTokensParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
-	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, params}
-	for _, a := range reqEditors {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "ListAuthTokens", varargs...)
-	ret0, _ := ret[0].(*http.Response)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// ListAuthTokens indicates an expected call of ListAuthTokens.
-func (mr *MockClientInterfaceMockRecorder) ListAuthTokens(ctx, params interface{}, reqEditors ...interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, params}, reqEditors...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListAuthTokens", reflect.TypeOf((*MockClientInterface)(nil).ListAuthTokens), varargs...)
 }
 
 // NodeConfigurationAPICreateConfiguration mocks base method.
@@ -1275,6 +1355,26 @@ func (mr *MockClientInterfaceMockRecorder) ScheduledRebalancingAPIGetRebalancing
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ScheduledRebalancingAPIGetRebalancingSchedule", reflect.TypeOf((*MockClientInterface)(nil).ScheduledRebalancingAPIGetRebalancingSchedule), varargs...)
 }
 
+// ScheduledRebalancingAPIListAvailableRebalancingTZ mocks base method.
+func (m *MockClientInterface) ScheduledRebalancingAPIListAvailableRebalancingTZ(ctx context.Context, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ScheduledRebalancingAPIListAvailableRebalancingTZ", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ScheduledRebalancingAPIListAvailableRebalancingTZ indicates an expected call of ScheduledRebalancingAPIListAvailableRebalancingTZ.
+func (mr *MockClientInterfaceMockRecorder) ScheduledRebalancingAPIListAvailableRebalancingTZ(ctx interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ScheduledRebalancingAPIListAvailableRebalancingTZ", reflect.TypeOf((*MockClientInterface)(nil).ScheduledRebalancingAPIListAvailableRebalancingTZ), varargs...)
+}
+
 // ScheduledRebalancingAPIListRebalancingJobs mocks base method.
 func (m *MockClientInterface) ScheduledRebalancingAPIListRebalancingJobs(ctx context.Context, clusterId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
@@ -1435,46 +1535,6 @@ func (mr *MockClientInterfaceMockRecorder) ScheduledRebalancingAPIUpdateRebalanc
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ScheduledRebalancingAPIUpdateRebalancingScheduleWithBody", reflect.TypeOf((*MockClientInterface)(nil).ScheduledRebalancingAPIUpdateRebalancingScheduleWithBody), varargs...)
 }
 
-// UpdateAuthToken mocks base method.
-func (m *MockClientInterface) UpdateAuthToken(ctx context.Context, authTokenId sdk.AuthTokenId, params *sdk.UpdateAuthTokenParams, body sdk.UpdateAuthTokenJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
-	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, authTokenId, params, body}
-	for _, a := range reqEditors {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "UpdateAuthToken", varargs...)
-	ret0, _ := ret[0].(*http.Response)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// UpdateAuthToken indicates an expected call of UpdateAuthToken.
-func (mr *MockClientInterfaceMockRecorder) UpdateAuthToken(ctx, authTokenId, params, body interface{}, reqEditors ...interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, authTokenId, params, body}, reqEditors...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateAuthToken", reflect.TypeOf((*MockClientInterface)(nil).UpdateAuthToken), varargs...)
-}
-
-// UpdateAuthTokenWithBody mocks base method.
-func (m *MockClientInterface) UpdateAuthTokenWithBody(ctx context.Context, authTokenId sdk.AuthTokenId, params *sdk.UpdateAuthTokenParams, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
-	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, authTokenId, params, contentType, body}
-	for _, a := range reqEditors {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "UpdateAuthTokenWithBody", varargs...)
-	ret0, _ := ret[0].(*http.Response)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// UpdateAuthTokenWithBody indicates an expected call of UpdateAuthTokenWithBody.
-func (mr *MockClientInterfaceMockRecorder) UpdateAuthTokenWithBody(ctx, authTokenId, params, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, authTokenId, params, contentType, body}, reqEditors...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateAuthTokenWithBody", reflect.TypeOf((*MockClientInterface)(nil).UpdateAuthTokenWithBody), varargs...)
-}
-
 // MockClientWithResponsesInterface is a mock of ClientWithResponsesInterface interface.
 type MockClientWithResponsesInterface struct {
 	ctrl     *gomock.Controller
@@ -1498,49 +1558,109 @@ func (m *MockClientWithResponsesInterface) EXPECT() *MockClientWithResponsesInte
 	return m.recorder
 }
 
-// CreateAuthTokenWithBodyWithResponse mocks base method.
-func (m *MockClientWithResponsesInterface) CreateAuthTokenWithBodyWithResponse(ctx context.Context, params *sdk.CreateAuthTokenParams, contentType string, body io.Reader) (*sdk.CreateAuthTokenResponse, error) {
+// AuthTokenAPICreateAuthTokenWithBodyWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) AuthTokenAPICreateAuthTokenWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*sdk.AuthTokenAPICreateAuthTokenResponse, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateAuthTokenWithBodyWithResponse", ctx, params, contentType, body)
-	ret0, _ := ret[0].(*sdk.CreateAuthTokenResponse)
+	ret := m.ctrl.Call(m, "AuthTokenAPICreateAuthTokenWithBodyWithResponse", ctx, contentType, body)
+	ret0, _ := ret[0].(*sdk.AuthTokenAPICreateAuthTokenResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// CreateAuthTokenWithBodyWithResponse indicates an expected call of CreateAuthTokenWithBodyWithResponse.
-func (mr *MockClientWithResponsesInterfaceMockRecorder) CreateAuthTokenWithBodyWithResponse(ctx, params, contentType, body interface{}) *gomock.Call {
+// AuthTokenAPICreateAuthTokenWithBodyWithResponse indicates an expected call of AuthTokenAPICreateAuthTokenWithBodyWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) AuthTokenAPICreateAuthTokenWithBodyWithResponse(ctx, contentType, body interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateAuthTokenWithBodyWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).CreateAuthTokenWithBodyWithResponse), ctx, params, contentType, body)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AuthTokenAPICreateAuthTokenWithBodyWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).AuthTokenAPICreateAuthTokenWithBodyWithResponse), ctx, contentType, body)
 }
 
-// CreateAuthTokenWithResponse mocks base method.
-func (m *MockClientWithResponsesInterface) CreateAuthTokenWithResponse(ctx context.Context, params *sdk.CreateAuthTokenParams, body sdk.CreateAuthTokenJSONRequestBody) (*sdk.CreateAuthTokenResponse, error) {
+// AuthTokenAPICreateAuthTokenWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) AuthTokenAPICreateAuthTokenWithResponse(ctx context.Context, body sdk.AuthTokenAPICreateAuthTokenJSONRequestBody) (*sdk.AuthTokenAPICreateAuthTokenResponse, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateAuthTokenWithResponse", ctx, params, body)
-	ret0, _ := ret[0].(*sdk.CreateAuthTokenResponse)
+	ret := m.ctrl.Call(m, "AuthTokenAPICreateAuthTokenWithResponse", ctx, body)
+	ret0, _ := ret[0].(*sdk.AuthTokenAPICreateAuthTokenResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// CreateAuthTokenWithResponse indicates an expected call of CreateAuthTokenWithResponse.
-func (mr *MockClientWithResponsesInterfaceMockRecorder) CreateAuthTokenWithResponse(ctx, params, body interface{}) *gomock.Call {
+// AuthTokenAPICreateAuthTokenWithResponse indicates an expected call of AuthTokenAPICreateAuthTokenWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) AuthTokenAPICreateAuthTokenWithResponse(ctx, body interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateAuthTokenWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).CreateAuthTokenWithResponse), ctx, params, body)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AuthTokenAPICreateAuthTokenWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).AuthTokenAPICreateAuthTokenWithResponse), ctx, body)
 }
 
-// DeleteAuthTokenWithResponse mocks base method.
-func (m *MockClientWithResponsesInterface) DeleteAuthTokenWithResponse(ctx context.Context, authTokenId sdk.AuthTokenId, params *sdk.DeleteAuthTokenParams) (*sdk.DeleteAuthTokenResponse, error) {
+// AuthTokenAPIDeleteAuthTokenWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) AuthTokenAPIDeleteAuthTokenWithResponse(ctx context.Context, id string) (*sdk.AuthTokenAPIDeleteAuthTokenResponse, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "DeleteAuthTokenWithResponse", ctx, authTokenId, params)
-	ret0, _ := ret[0].(*sdk.DeleteAuthTokenResponse)
+	ret := m.ctrl.Call(m, "AuthTokenAPIDeleteAuthTokenWithResponse", ctx, id)
+	ret0, _ := ret[0].(*sdk.AuthTokenAPIDeleteAuthTokenResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// DeleteAuthTokenWithResponse indicates an expected call of DeleteAuthTokenWithResponse.
-func (mr *MockClientWithResponsesInterfaceMockRecorder) DeleteAuthTokenWithResponse(ctx, authTokenId, params interface{}) *gomock.Call {
+// AuthTokenAPIDeleteAuthTokenWithResponse indicates an expected call of AuthTokenAPIDeleteAuthTokenWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) AuthTokenAPIDeleteAuthTokenWithResponse(ctx, id interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteAuthTokenWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DeleteAuthTokenWithResponse), ctx, authTokenId, params)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AuthTokenAPIDeleteAuthTokenWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).AuthTokenAPIDeleteAuthTokenWithResponse), ctx, id)
+}
+
+// AuthTokenAPIGetAuthTokenWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) AuthTokenAPIGetAuthTokenWithResponse(ctx context.Context, id string) (*sdk.AuthTokenAPIGetAuthTokenResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "AuthTokenAPIGetAuthTokenWithResponse", ctx, id)
+	ret0, _ := ret[0].(*sdk.AuthTokenAPIGetAuthTokenResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// AuthTokenAPIGetAuthTokenWithResponse indicates an expected call of AuthTokenAPIGetAuthTokenWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) AuthTokenAPIGetAuthTokenWithResponse(ctx, id interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AuthTokenAPIGetAuthTokenWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).AuthTokenAPIGetAuthTokenWithResponse), ctx, id)
+}
+
+// AuthTokenAPIListAuthTokensWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) AuthTokenAPIListAuthTokensWithResponse(ctx context.Context, params *sdk.AuthTokenAPIListAuthTokensParams) (*sdk.AuthTokenAPIListAuthTokensResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "AuthTokenAPIListAuthTokensWithResponse", ctx, params)
+	ret0, _ := ret[0].(*sdk.AuthTokenAPIListAuthTokensResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// AuthTokenAPIListAuthTokensWithResponse indicates an expected call of AuthTokenAPIListAuthTokensWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) AuthTokenAPIListAuthTokensWithResponse(ctx, params interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AuthTokenAPIListAuthTokensWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).AuthTokenAPIListAuthTokensWithResponse), ctx, params)
+}
+
+// AuthTokenAPIUpdateAuthTokenWithBodyWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) AuthTokenAPIUpdateAuthTokenWithBodyWithResponse(ctx context.Context, id, contentType string, body io.Reader) (*sdk.AuthTokenAPIUpdateAuthTokenResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "AuthTokenAPIUpdateAuthTokenWithBodyWithResponse", ctx, id, contentType, body)
+	ret0, _ := ret[0].(*sdk.AuthTokenAPIUpdateAuthTokenResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// AuthTokenAPIUpdateAuthTokenWithBodyWithResponse indicates an expected call of AuthTokenAPIUpdateAuthTokenWithBodyWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) AuthTokenAPIUpdateAuthTokenWithBodyWithResponse(ctx, id, contentType, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AuthTokenAPIUpdateAuthTokenWithBodyWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).AuthTokenAPIUpdateAuthTokenWithBodyWithResponse), ctx, id, contentType, body)
+}
+
+// AuthTokenAPIUpdateAuthTokenWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) AuthTokenAPIUpdateAuthTokenWithResponse(ctx context.Context, id string, body sdk.AuthTokenAPIUpdateAuthTokenJSONRequestBody) (*sdk.AuthTokenAPIUpdateAuthTokenResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "AuthTokenAPIUpdateAuthTokenWithResponse", ctx, id, body)
+	ret0, _ := ret[0].(*sdk.AuthTokenAPIUpdateAuthTokenResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// AuthTokenAPIUpdateAuthTokenWithResponse indicates an expected call of AuthTokenAPIUpdateAuthTokenWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) AuthTokenAPIUpdateAuthTokenWithResponse(ctx, id, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AuthTokenAPIUpdateAuthTokenWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).AuthTokenAPIUpdateAuthTokenWithResponse), ctx, id, body)
 }
 
 // ExternalClusterAPIAddNodeWithBodyWithResponse mocks base method.
@@ -1691,6 +1811,36 @@ func (m *MockClientWithResponsesInterface) ExternalClusterAPIGetAssumeRoleUserWi
 func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIGetAssumeRoleUserWithResponse(ctx, clusterId interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIGetAssumeRoleUserWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIGetAssumeRoleUserWithResponse), ctx, clusterId)
+}
+
+// ExternalClusterAPIGetCleanupScriptTemplateWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) ExternalClusterAPIGetCleanupScriptTemplateWithResponse(ctx context.Context, provider string) (*sdk.ExternalClusterAPIGetCleanupScriptTemplateResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ExternalClusterAPIGetCleanupScriptTemplateWithResponse", ctx, provider)
+	ret0, _ := ret[0].(*sdk.ExternalClusterAPIGetCleanupScriptTemplateResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExternalClusterAPIGetCleanupScriptTemplateWithResponse indicates an expected call of ExternalClusterAPIGetCleanupScriptTemplateWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIGetCleanupScriptTemplateWithResponse(ctx, provider interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIGetCleanupScriptTemplateWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIGetCleanupScriptTemplateWithResponse), ctx, provider)
+}
+
+// ExternalClusterAPIGetCleanupScriptWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) ExternalClusterAPIGetCleanupScriptWithResponse(ctx context.Context, clusterId string) (*sdk.ExternalClusterAPIGetCleanupScriptResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ExternalClusterAPIGetCleanupScriptWithResponse", ctx, clusterId)
+	ret0, _ := ret[0].(*sdk.ExternalClusterAPIGetCleanupScriptResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExternalClusterAPIGetCleanupScriptWithResponse indicates an expected call of ExternalClusterAPIGetCleanupScriptWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIGetCleanupScriptWithResponse(ctx, clusterId interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIGetCleanupScriptWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIGetCleanupScriptWithResponse), ctx, clusterId)
 }
 
 // ExternalClusterAPIGetClusterWithResponse mocks base method.
@@ -1918,21 +2068,6 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIUpdate
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIUpdateClusterWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIUpdateClusterWithResponse), ctx, clusterId, body)
 }
 
-// GetAuthTokenWithResponse mocks base method.
-func (m *MockClientWithResponsesInterface) GetAuthTokenWithResponse(ctx context.Context, authTokenId sdk.AuthTokenId, params *sdk.GetAuthTokenParams) (*sdk.GetAuthTokenResponse, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetAuthTokenWithResponse", ctx, authTokenId, params)
-	ret0, _ := ret[0].(*sdk.GetAuthTokenResponse)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetAuthTokenWithResponse indicates an expected call of GetAuthTokenWithResponse.
-func (mr *MockClientWithResponsesInterfaceMockRecorder) GetAuthTokenWithResponse(ctx, authTokenId, params interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAuthTokenWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).GetAuthTokenWithResponse), ctx, authTokenId, params)
-}
-
 // GetExternalClusterOperationWithResponse mocks base method.
 func (m *MockClientWithResponsesInterface) GetExternalClusterOperationWithResponse(ctx context.Context, id string) (*sdk.GetExternalClusterOperationResponse, error) {
 	m.ctrl.T.Helper()
@@ -1946,21 +2081,6 @@ func (m *MockClientWithResponsesInterface) GetExternalClusterOperationWithRespon
 func (mr *MockClientWithResponsesInterfaceMockRecorder) GetExternalClusterOperationWithResponse(ctx, id interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetExternalClusterOperationWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).GetExternalClusterOperationWithResponse), ctx, id)
-}
-
-// ListAuthTokensWithResponse mocks base method.
-func (m *MockClientWithResponsesInterface) ListAuthTokensWithResponse(ctx context.Context, params *sdk.ListAuthTokensParams) (*sdk.ListAuthTokensResponse, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ListAuthTokensWithResponse", ctx, params)
-	ret0, _ := ret[0].(*sdk.ListAuthTokensResponse)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// ListAuthTokensWithResponse indicates an expected call of ListAuthTokensWithResponse.
-func (mr *MockClientWithResponsesInterfaceMockRecorder) ListAuthTokensWithResponse(ctx, params interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListAuthTokensWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ListAuthTokensWithResponse), ctx, params)
 }
 
 // NodeConfigurationAPICreateConfigurationWithBodyWithResponse mocks base method.
@@ -2398,6 +2518,21 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) ScheduledRebalancingAPIG
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ScheduledRebalancingAPIGetRebalancingScheduleWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ScheduledRebalancingAPIGetRebalancingScheduleWithResponse), ctx, id)
 }
 
+// ScheduledRebalancingAPIListAvailableRebalancingTZWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) ScheduledRebalancingAPIListAvailableRebalancingTZWithResponse(ctx context.Context) (*sdk.ScheduledRebalancingAPIListAvailableRebalancingTZResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ScheduledRebalancingAPIListAvailableRebalancingTZWithResponse", ctx)
+	ret0, _ := ret[0].(*sdk.ScheduledRebalancingAPIListAvailableRebalancingTZResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ScheduledRebalancingAPIListAvailableRebalancingTZWithResponse indicates an expected call of ScheduledRebalancingAPIListAvailableRebalancingTZWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ScheduledRebalancingAPIListAvailableRebalancingTZWithResponse(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ScheduledRebalancingAPIListAvailableRebalancingTZWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ScheduledRebalancingAPIListAvailableRebalancingTZWithResponse), ctx)
+}
+
 // ScheduledRebalancingAPIListRebalancingJobsWithResponse mocks base method.
 func (m *MockClientWithResponsesInterface) ScheduledRebalancingAPIListRebalancingJobsWithResponse(ctx context.Context, clusterId string) (*sdk.ScheduledRebalancingAPIListRebalancingJobsResponse, error) {
 	m.ctrl.T.Helper()
@@ -2516,36 +2651,6 @@ func (m *MockClientWithResponsesInterface) ScheduledRebalancingAPIUpdateRebalanc
 func (mr *MockClientWithResponsesInterfaceMockRecorder) ScheduledRebalancingAPIUpdateRebalancingScheduleWithResponse(ctx, params, body interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ScheduledRebalancingAPIUpdateRebalancingScheduleWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ScheduledRebalancingAPIUpdateRebalancingScheduleWithResponse), ctx, params, body)
-}
-
-// UpdateAuthTokenWithBodyWithResponse mocks base method.
-func (m *MockClientWithResponsesInterface) UpdateAuthTokenWithBodyWithResponse(ctx context.Context, authTokenId sdk.AuthTokenId, params *sdk.UpdateAuthTokenParams, contentType string, body io.Reader) (*sdk.UpdateAuthTokenResponse, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpdateAuthTokenWithBodyWithResponse", ctx, authTokenId, params, contentType, body)
-	ret0, _ := ret[0].(*sdk.UpdateAuthTokenResponse)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// UpdateAuthTokenWithBodyWithResponse indicates an expected call of UpdateAuthTokenWithBodyWithResponse.
-func (mr *MockClientWithResponsesInterfaceMockRecorder) UpdateAuthTokenWithBodyWithResponse(ctx, authTokenId, params, contentType, body interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateAuthTokenWithBodyWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).UpdateAuthTokenWithBodyWithResponse), ctx, authTokenId, params, contentType, body)
-}
-
-// UpdateAuthTokenWithResponse mocks base method.
-func (m *MockClientWithResponsesInterface) UpdateAuthTokenWithResponse(ctx context.Context, authTokenId sdk.AuthTokenId, params *sdk.UpdateAuthTokenParams, body sdk.UpdateAuthTokenJSONRequestBody) (*sdk.UpdateAuthTokenResponse, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpdateAuthTokenWithResponse", ctx, authTokenId, params, body)
-	ret0, _ := ret[0].(*sdk.UpdateAuthTokenResponse)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// UpdateAuthTokenWithResponse indicates an expected call of UpdateAuthTokenWithResponse.
-func (mr *MockClientWithResponsesInterfaceMockRecorder) UpdateAuthTokenWithResponse(ctx, authTokenId, params, body interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateAuthTokenWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).UpdateAuthTokenWithResponse), ctx, authTokenId, params, body)
 }
 
 // MockResponse is a mock of Response interface.
