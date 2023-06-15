@@ -443,8 +443,9 @@ type ExternalclusterV1ListNodesResponse struct {
 
 // Node represents a single VM that run as Kubernetes master or worker.
 type ExternalclusterV1Node struct {
-	AddedBy *string `json:"addedBy,omitempty"`
-	Cloud   *string `json:"cloud,omitempty"`
+	AddedBy     *string                            `json:"addedBy,omitempty"`
+	Annotations *ExternalclusterV1Node_Annotations `json:"annotations,omitempty"`
+	Cloud       *string                            `json:"cloud,omitempty"`
 
 	// created_at represents timestamp of when node was created in cloud infrastructure.
 	CreatedAt *time.Time                `json:"createdAt,omitempty"`
@@ -489,6 +490,11 @@ type ExternalclusterV1Node struct {
 	Taints        *[]ExternalclusterV1Taint   `json:"taints,omitempty"`
 	Unschedulable *bool                       `json:"unschedulable,omitempty"`
 	Zone          *string                     `json:"zone,omitempty"`
+}
+
+// ExternalclusterV1Node_Annotations defines model for ExternalclusterV1Node.Annotations.
+type ExternalclusterV1Node_Annotations struct {
+	AdditionalProperties map[string]string `json:"-"`
 }
 
 // Will be populated only with GetNode request.
@@ -715,6 +721,7 @@ type NodeconfigV1DeleteConfigurationResponse = map[string]interface{}
 type NodeconfigV1EKSConfig struct {
 	// IP address to use for DNS queries within the cluster. Defaults to 10.100.0.10 or 172.20.0.10 based on the IP address of the primary interface.
 	DnsClusterIp *string `json:"dnsClusterIp"`
+	ImdsHopLimit *int32  `json:"imdsHopLimit"`
 	ImdsV1       *bool   `json:"imdsV1"`
 
 	// Cluster's instance profile ARN used for CAST provisioned nodes.
@@ -1709,6 +1716,59 @@ func (a *ExternalclusterV1EKSClusterParams_Tags) UnmarshalJSON(b []byte) error {
 
 // Override default JSON handling for ExternalclusterV1EKSClusterParams_Tags to handle AdditionalProperties
 func (a ExternalclusterV1EKSClusterParams_Tags) MarshalJSON() ([]byte, error) {
+	var err error
+	object := make(map[string]json.RawMessage)
+
+	for fieldName, field := range a.AdditionalProperties {
+		object[fieldName], err = json.Marshal(field)
+		if err != nil {
+			return nil, fmt.Errorf("error marshaling '%s': %w", fieldName, err)
+		}
+	}
+	return json.Marshal(object)
+}
+
+// Getter for additional properties for ExternalclusterV1Node_Annotations. Returns the specified
+// element and whether it was found
+func (a ExternalclusterV1Node_Annotations) Get(fieldName string) (value string, found bool) {
+	if a.AdditionalProperties != nil {
+		value, found = a.AdditionalProperties[fieldName]
+	}
+	return
+}
+
+// Setter for additional properties for ExternalclusterV1Node_Annotations
+func (a *ExternalclusterV1Node_Annotations) Set(fieldName string, value string) {
+	if a.AdditionalProperties == nil {
+		a.AdditionalProperties = make(map[string]string)
+	}
+	a.AdditionalProperties[fieldName] = value
+}
+
+// Override default JSON handling for ExternalclusterV1Node_Annotations to handle AdditionalProperties
+func (a *ExternalclusterV1Node_Annotations) UnmarshalJSON(b []byte) error {
+	object := make(map[string]json.RawMessage)
+	err := json.Unmarshal(b, &object)
+	if err != nil {
+		return err
+	}
+
+	if len(object) != 0 {
+		a.AdditionalProperties = make(map[string]string)
+		for fieldName, fieldBuf := range object {
+			var fieldVal string
+			err := json.Unmarshal(fieldBuf, &fieldVal)
+			if err != nil {
+				return fmt.Errorf("error unmarshaling field %s: %w", fieldName, err)
+			}
+			a.AdditionalProperties[fieldName] = fieldVal
+		}
+	}
+	return nil
+}
+
+// Override default JSON handling for ExternalclusterV1Node_Annotations to handle AdditionalProperties
+func (a ExternalclusterV1Node_Annotations) MarshalJSON() ([]byte, error) {
 	var err error
 	object := make(map[string]json.RawMessage)
 
