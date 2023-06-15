@@ -100,6 +100,7 @@ Required:
 Optional:
 
 - `dns_cluster_ip` (String) IP address to use for DNS queries within the cluster
+- `imds_hop_limit` (Number) Allow configure the IMDSv2 hop limit, the default is 2
 - `imds_v1` (Boolean) Allow IMDSv1, the default is true
 - `key_pair_id` (String) AWS key pair ID to be used for CAST provisioned nodes. Has priority over ssh_public_key
 - `volume_iops` (Number) AWS EBS volume IOPS to be used for CAST provisioned nodes

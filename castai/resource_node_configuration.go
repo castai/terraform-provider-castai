@@ -197,6 +197,11 @@ func resourceNodeConfiguration() *schema.Resource {
 							Optional:    true,
 							Description: "Allow IMDSv1, the default is true",
 						},
+						"imds_hop_limit": {
+							Type:        schema.TypeInt,
+							Optional:    true,
+							Description: "Allow configure the IMDSv2 hop limit, the default is 2",
+						},
 					},
 				},
 			},
@@ -560,6 +565,9 @@ func toEKSConfig(obj map[string]interface{}) *sdk.NodeconfigV1EKSConfig {
 	if v, ok := obj["imds_v1"].(bool); ok {
 		out.ImdsV1 = toPtr(v)
 	}
+	if v, ok := obj["imds_hop_limit"].(int); ok {
+		out.ImdsHopLimit = toPtr(int32(v))
+	}
 
 	return out
 }
@@ -592,6 +600,9 @@ func flattenEKSConfig(config *sdk.NodeconfigV1EKSConfig) []map[string]interface{
 	}
 	if v := config.ImdsV1; v != nil {
 		m["imds_v1"] = *config.ImdsV1
+	}
+	if v := config.ImdsHopLimit; v != nil {
+		m["imds_hop_limit"] = *config.ImdsHopLimit
 	}
 
 	return []map[string]interface{}{m}
