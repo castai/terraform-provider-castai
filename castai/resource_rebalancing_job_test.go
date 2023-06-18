@@ -56,6 +56,10 @@ resource "castai_rebalancing_schedule" "test" {
 		savings_percentage = 15.25
 	}
 	launch_configuration {
+		execution_conditions {
+			enabled = false
+			achieved_savings_percentage = 0
+		}
 	}
 }
 

@@ -64,6 +64,7 @@ func readOptionalValue[T any](d map[string]any, key string) *T {
 	if !ok {
 		return nil
 	}
+
 	return lo.ToPtr(val.(T))
 }
 
@@ -88,7 +89,7 @@ func readOptionalNumber[Storage Number, T Number](d map[string]any, key string) 
 
 func readOptionalJson[T any](d map[string]any, key string) (*T, error) {
 	val := readOptionalValue[string](d, key)
-	if val == nil {
+	if val == nil || *val == "" {
 		return nil, nil
 	}
 

@@ -21,5 +21,9 @@ resource "castai_rebalancing_schedule" "spots" {
 				]
 			}]
 		})
+		execution_conditions {
+			enabled = true
+			achieved_savings_percentage = 10
+		}
 	}
 }
