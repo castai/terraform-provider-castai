@@ -1388,6 +1388,16 @@ type ScheduledrebalancingV1DeleteRebalancingJobResponse = map[string]interface{}
 // ScheduledrebalancingV1DeleteRebalancingScheduleResponse defines model for scheduledrebalancing.v1.DeleteRebalancingScheduleResponse.
 type ScheduledrebalancingV1DeleteRebalancingScheduleResponse = map[string]interface{}
 
+// Defines the conditions which must be met in order to fully execute the plan.
+type ScheduledrebalancingV1ExecutionConditions struct {
+	// Identifies the minimum percentage of predicted savings that should be achieved.
+	// The rebalancing plan will not proceed after creating the nodes if the achieved savings percentage
+	// is not achieved.
+	// This field's value will not be considered if the initially predicted savings are negative.
+	AchievedSavingsPercentage *int32 `json:"achievedSavingsPercentage,omitempty"`
+	Enabled                   *bool  `json:"enabled,omitempty"`
+}
+
 // JobStatus defines rebalancing job's last execution status.
 type ScheduledrebalancingV1JobStatus string
 
@@ -1470,6 +1480,9 @@ type ScheduledrebalancingV1RebalancingJob struct {
 
 // ScheduledrebalancingV1RebalancingOptions defines model for scheduledrebalancing.v1.RebalancingOptions.
 type ScheduledrebalancingV1RebalancingOptions struct {
+	// Defines the conditions which must be met in order to fully execute the plan.
+	ExecutionConditions *ScheduledrebalancingV1ExecutionConditions `json:"executionConditions,omitempty"`
+
 	// Minimum number of nodes that should be kept in the cluster after rebalancing.
 	MinNodes *int32 `json:"minNodes,omitempty"`
 }

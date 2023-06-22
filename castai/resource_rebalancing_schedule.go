@@ -95,6 +95,28 @@ func resourceRebalancingSchedule() *schema.Resource {
 							ValidateDiagFunc: validation.ToDiagFunc(validation.IntAtLeast(1)),
 							Description:      "Minimum number of nodes that should be kept in the cluster after rebalancing.",
 						},
+						"execution_conditions": {
+							Type:     schema.TypeList,
+							MaxItems: 1,
+							Optional: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"enabled": {
+										Type:        schema.TypeBool,
+										Required:    true,
+										Description: "Enables or disables the execution conditions.",
+									},
+									"achieved_savings_percentage": {
+										Type:             schema.TypeInt,
+										Optional:         true,
+										Default:          0,
+										ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(0, 100)),
+										Description: "The percentage of the predicted savings that must be achieved in order to fully execute the plan." +
+											"If the savings are not achieved after creating the new nodes, the plan will fail and delete the created nodes.",
+									},
+								},
+							},
+						},
 						"selector": {
 							Type:             schema.TypeString,
 							Optional:         true,
@@ -220,11 +242,22 @@ func stateToSchedule(d *schema.ResourceData) (*sdk.ScheduledrebalancingV1Rebalan
 		if err != nil {
 			return nil, fmt.Errorf("parsing selector: %w", err)
 		}
+
+		var executionConditions *sdk.ScheduledrebalancingV1ExecutionConditions
+		executionConditionsData := launchConfigurationData["execution_conditions"].([]any)
+		if len(executionConditionsData) != 0 {
+			executionConditions = &sdk.ScheduledrebalancingV1ExecutionConditions{
+				Enabled:                   lo.ToPtr(executionConditionsData[0].(map[string]any)["enabled"].(bool)),
+				AchievedSavingsPercentage: lo.ToPtr(int32(executionConditionsData[0].(map[string]any)["achieved_savings_percentage"].(int))),
+			}
+		}
+
 		result.LaunchConfiguration = sdk.ScheduledrebalancingV1LaunchConfiguration{
 			NodeTtlSeconds:   readOptionalNumber[int, int32](launchConfigurationData, "node_ttl_seconds"),
 			NumTargetedNodes: readOptionalNumber[int, int32](launchConfigurationData, "num_targeted_nodes"),
 			RebalancingOptions: &sdk.ScheduledrebalancingV1RebalancingOptions{
-				MinNodes: readOptionalNumber[int, int32](launchConfigurationData, "rebalancing_min_nodes"),
+				MinNodes:            readOptionalNumber[int, int32](launchConfigurationData, "rebalancing_min_nodes"),
+				ExecutionConditions: executionConditions,
 			},
 			Selector: selector,
 		}
@@ -250,8 +283,19 @@ func scheduleToState(schedule *sdk.ScheduledrebalancingV1RebalancingSchedule, d 
 		"node_ttl_seconds":   schedule.LaunchConfiguration.NodeTtlSeconds,
 		"num_targeted_nodes": schedule.LaunchConfiguration.NumTargetedNodes,
 	}
+
 	if schedule.LaunchConfiguration.RebalancingOptions != nil {
 		launchConfig["rebalancing_min_nodes"] = schedule.LaunchConfiguration.RebalancingOptions.MinNodes
+
+		executionConditions := schedule.LaunchConfiguration.RebalancingOptions.ExecutionConditions
+		if executionConditions != nil {
+			launchConfig["execution_conditions"] = []map[string]any{
+				{
+					"enabled":                     executionConditions.Enabled,
+					"achieved_savings_percentage": executionConditions.AchievedSavingsPercentage,
+				},
+			}
+		}
 	}
 
 	selector := schedule.LaunchConfiguration.Selector
@@ -263,6 +307,7 @@ func scheduleToState(schedule *sdk.ScheduledrebalancingV1RebalancingSchedule, d 
 		}
 		launchConfig["selector"] = string(selectorJSON)
 	}
+
 	if err := d.Set("launch_configuration", []map[string]any{launchConfig}); err != nil {
 		return err
 	}
