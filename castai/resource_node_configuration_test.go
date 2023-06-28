@@ -43,6 +43,7 @@ func TestAccResourceNodeConfiguration_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "eks.0.key_pair_id", ""),
 					resource.TestCheckResourceAttr(resourceName, "eks.0.volume_type", "gp3"),
 					resource.TestCheckResourceAttr(resourceName, "eks.0.volume_iops", "3100"),
+					resource.TestCheckResourceAttr(resourceName, "eks.0.imds_hop_limit", "5"),
 					resource.TestCheckResourceAttr(resourceName, "eks.0.volume_throughput", "130"),
 					resource.TestCheckResourceAttr(resourceName, "eks.0.imds_v1", "true"),
 					resource.TestCheckResourceAttr(resourceName, "eks.0.imds_hop_limit", "3"),
@@ -102,7 +103,7 @@ resource "castai_node_configuration" "test" {
   min_disk_size     = 122
   subnets   	    = aws_subnet.test[*].id
   init_script       = base64encode(var.init_script)
-  docker_config     = jsonencode({
+  docker_config      = jsonencode({
     "insecure-registries"      = ["registry.com:5000"],
     "max-concurrent-downloads" = 10
   })
@@ -121,6 +122,7 @@ resource "castai_node_configuration" "test" {
 	volume_type 		 = "gp3"
     volume_iops		     = 3100
 	volume_throughput 	 = 130
+	imds_hop_limit 		 = 5
 	imds_v1				 = true
 	imds_hop_limit       = 3
   }
@@ -139,7 +141,7 @@ resource "castai_node_configuration" "test" {
   name   		    = %[1]q
   cluster_id        = castai_eks_cluster.test.id
   subnets   	    = aws_subnet.test[*].id
-  image             = "amazon-eks-node-1.23-v20220824" 
+  image             = "amazon-eks-node-1.23-v20220824"
   container_runtime = "containerd"
   kubelet_config     = jsonencode({
     "eventRecordQPS": 10
