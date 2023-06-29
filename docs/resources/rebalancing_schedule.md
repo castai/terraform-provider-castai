@@ -67,10 +67,23 @@ resource "castai_rebalancing_schedule" "spots" {
 
 Optional:
 
+- `execution_conditions` (Block List, Max: 1) (see [below for nested schema](#nestedblock--launch_configuration--execution_conditions))
 - `node_ttl_seconds` (Number) Specifies amount of time since node creation before the node is allowed to be considered for automated rebalancing.
 - `num_targeted_nodes` (Number) Maximum number of nodes that will be selected for rebalancing.
 - `rebalancing_min_nodes` (Number) Minimum number of nodes that should be kept in the cluster after rebalancing.
 - `selector` (String) Node selector in JSON format.
+
+<a id="nestedblock--launch_configuration--execution_conditions"></a>
+### Nested Schema for `launch_configuration.execution_conditions`
+
+Required:
+
+- `enabled` (Boolean) Enables or disables the execution conditions.
+
+Optional:
+
+- `achieved_savings_percentage` (Number) The percentage of the predicted savings that must be achieved in order to fully execute the plan.If the savings are not achieved after creating the new nodes, the plan will fail and delete the created nodes.
+
 
 
 <a id="nestedblock--schedule"></a>
