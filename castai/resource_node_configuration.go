@@ -678,7 +678,7 @@ func toGKEConfig(obj map[string]interface{}) *sdk.NodeconfigV1GKEConfig {
 	if v, ok := obj["network_tags"].([]interface{}); ok {
 		out.NetworkTags = toPtr(toStringList(v))
 	}
-	if v, ok := obj["disk_type"].(string); ok {
+	if v, ok := obj["disk_type"].(string); ok && v != "" {
 		out.DiskType = toPtr(v)
 	}
 
