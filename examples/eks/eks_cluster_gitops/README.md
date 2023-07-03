@@ -18,3 +18,9 @@ Prerequisites:
 5. Update [aws-auth](https://docs.aws.amazon.com/eks/latest/userguide/add-user-role.html) configmap with instance profile used by CAST AI. This instance profile is used by CAST AI managed nodes to communicate with EKS control plane.  Example of entry can be found [here](https://github.com/castai/terraform-provider-castai/blob/157babd57b0977f499eb162e9bee27bee51d292a/examples/eks/eks_cluster_assumerole/eks.tf#L28-L38).
 6. After all CAST AI components are installed in the cluster its status in CAST AI console would change from `Connecting` to `Connected` which means that cluster onboarding process completed successfully.
 
+
+## Importing already onboarded cluster to Terraform
+
+This example can also be used to import EKS cluster to Terraform which is already onboarded to CAST AI console trough [script](https://docs.cast.ai/docs/cluster-onboarding#how-it-works).   
+For importing existing cluster follow steps 1-3 above and change `castai_node_configuration.default` Node Configuration name.
+This would allow to manage already onboarded clusters' CAST AI Node Configurations and Node Templates through IaC.
