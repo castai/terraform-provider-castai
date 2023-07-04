@@ -82,6 +82,7 @@ resource "castai_rebalancing_schedule" "test" {
 		node_ttl_seconds = 10
 		num_targeted_nodes = 3
 		rebalancing_min_nodes = 2
+		keep_drain_timeout_nodes = true
 		selector = jsonencode({
 			nodeSelectorTerms = [{
 				matchExpressions = [

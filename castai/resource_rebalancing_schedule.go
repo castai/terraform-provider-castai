@@ -95,6 +95,11 @@ func resourceRebalancingSchedule() *schema.Resource {
 							ValidateDiagFunc: validation.ToDiagFunc(validation.IntAtLeast(1)),
 							Description:      "Minimum number of nodes that should be kept in the cluster after rebalancing.",
 						},
+						"keep_drain_timeout_nodes": {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Description: "Defines whether the nodes that failed to get drained until a predefined timeout, will be kept with a rebalancing.cast.ai/status=drain-failed annotation instead of forcefully drained.",
+						},
 						"execution_conditions": {
 							Type:     schema.TypeList,
 							MaxItems: 1,
@@ -243,6 +248,8 @@ func stateToSchedule(d *schema.ResourceData) (*sdk.ScheduledrebalancingV1Rebalan
 			return nil, fmt.Errorf("parsing selector: %w", err)
 		}
 
+		keepDrainTimeoutNodes := readOptionalValue[bool](launchConfigurationData, "keep_drain_timeout_nodes")
+
 		var executionConditions *sdk.ScheduledrebalancingV1ExecutionConditions
 		executionConditionsData := launchConfigurationData["execution_conditions"].([]any)
 		if len(executionConditionsData) != 0 {
@@ -256,8 +263,9 @@ func stateToSchedule(d *schema.ResourceData) (*sdk.ScheduledrebalancingV1Rebalan
 			NodeTtlSeconds:   readOptionalNumber[int, int32](launchConfigurationData, "node_ttl_seconds"),
 			NumTargetedNodes: readOptionalNumber[int, int32](launchConfigurationData, "num_targeted_nodes"),
 			RebalancingOptions: &sdk.ScheduledrebalancingV1RebalancingOptions{
-				MinNodes:            readOptionalNumber[int, int32](launchConfigurationData, "rebalancing_min_nodes"),
-				ExecutionConditions: executionConditions,
+				MinNodes:              readOptionalNumber[int, int32](launchConfigurationData, "rebalancing_min_nodes"),
+				KeepDrainTimeoutNodes: keepDrainTimeoutNodes,
+				ExecutionConditions:   executionConditions,
 			},
 			Selector: selector,
 		}
@@ -286,6 +294,7 @@ func scheduleToState(schedule *sdk.ScheduledrebalancingV1RebalancingSchedule, d 
 
 	if schedule.LaunchConfiguration.RebalancingOptions != nil {
 		launchConfig["rebalancing_min_nodes"] = schedule.LaunchConfiguration.RebalancingOptions.MinNodes
+		launchConfig["keep_drain_timeout_nodes"] = schedule.LaunchConfiguration.RebalancingOptions.KeepDrainTimeoutNodes
 
 		executionConditions := schedule.LaunchConfiguration.RebalancingOptions.ExecutionConditions
 		if executionConditions != nil {

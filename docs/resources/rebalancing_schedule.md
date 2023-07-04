@@ -26,6 +26,7 @@ resource "castai_rebalancing_schedule" "spots" {
 		node_ttl_seconds = 300
 		num_targeted_nodes = 3
 		rebalancing_min_nodes = 2
+		keep_drain_timeout_nodes = true
 		selector = jsonencode({
 			nodeSelectorTerms = [{
 				matchExpressions = [
@@ -68,6 +69,7 @@ resource "castai_rebalancing_schedule" "spots" {
 Optional:
 
 - `execution_conditions` (Block List, Max: 1) (see [below for nested schema](#nestedblock--launch_configuration--execution_conditions))
+- `keep_drain_timeout_nodes` (Boolean) Defines whether the nodes that failed to get drained until a predefined timeout, will be kept with a rebalancing.cast.ai/status=drain-failed annotation instead of forcefully drained.
 - `node_ttl_seconds` (Number) Specifies amount of time since node creation before the node is allowed to be considered for automated rebalancing.
 - `num_targeted_nodes` (Number) Maximum number of nodes that will be selected for rebalancing.
 - `rebalancing_min_nodes` (Number) Minimum number of nodes that should be kept in the cluster after rebalancing.

@@ -1493,6 +1493,10 @@ type ScheduledrebalancingV1RebalancingOptions struct {
 	// Defines the conditions which must be met in order to fully execute the plan.
 	ExecutionConditions *ScheduledrebalancingV1ExecutionConditions `json:"executionConditions,omitempty"`
 
+	// Defines whether the nodes that failed to get drained until a predefined timeout, will be kept with a
+	// rebalancing.cast.ai/status=drain-failed annotation instead of forcefully drained.
+	KeepDrainTimeoutNodes *bool `json:"keepDrainTimeoutNodes"`
+
 	// Minimum number of nodes that should be kept in the cluster after rebalancing.
 	MinNodes *int32 `json:"minNodes,omitempty"`
 }
