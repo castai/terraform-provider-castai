@@ -52,6 +52,7 @@ module "castai-gke-cluster" {
       disk_cpu_ratio    = 10
       subnets           = [module.vpc.subnets_ids[0]]
       max_pods_per_node = 40
+      disk_type         = "pd-ssd",
       network_tags      = ["dev"]
     }
   }

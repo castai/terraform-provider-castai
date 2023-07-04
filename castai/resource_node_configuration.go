@@ -260,6 +260,12 @@ func resourceNodeConfiguration() *schema.Resource {
 							Optional:    true,
 							Description: "Network tags to be added on a VM. (See [network tags](https://cloud.google.com/vpc/docs/add-remove-network-tags))",
 						},
+						"disk_type": {
+							Type:             schema.TypeString,
+							Optional:         true,
+							Description:      "Type of boot disk attached to the node. (See [disk types](https://cloud.google.com/compute/docs/disks#pdspecs)). One of: pd-standard, pd-balanced, pd-ssd, pd-extreme ",
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"pd-standard", "pd-balanced", "pd-ssd", "pd-extreme"}, false)),
+						},
 					},
 				},
 			},
@@ -672,6 +678,9 @@ func toGKEConfig(obj map[string]interface{}) *sdk.NodeconfigV1GKEConfig {
 	if v, ok := obj["network_tags"].([]interface{}); ok {
 		out.NetworkTags = toPtr(toStringList(v))
 	}
+	if v, ok := obj["disk_type"].(string); ok && v != "" {
+		out.DiskType = toPtr(v)
+	}
 
 	return out
 }
@@ -686,6 +695,9 @@ func flattenGKEConfig(config *sdk.NodeconfigV1GKEConfig) []map[string]interface{
 	}
 	if v := config.NetworkTags; v != nil {
 		m["network_tags"] = *v
+	}
+	if v := config.DiskType; v != nil {
+		m["disk_type"] = *v
 	}
 
 	return []map[string]interface{}{m}
