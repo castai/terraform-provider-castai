@@ -16,18 +16,6 @@ const (
 	BearerAuthScopes = "BearerAuth.Scopes"
 )
 
-// Defines values for CastaiV1Cloud.
-const (
-	AWS     CastaiV1Cloud = "AWS"
-	AZURE   CastaiV1Cloud = "AZURE"
-	Aws     CastaiV1Cloud = "aws"
-	Azure   CastaiV1Cloud = "azure"
-	GCP     CastaiV1Cloud = "GCP"
-	Gcp     CastaiV1Cloud = "gcp"
-	INVALID CastaiV1Cloud = "INVALID"
-	Invalid CastaiV1Cloud = "invalid"
-)
-
 // Defines values for ExternalclusterV1NodeType.
 const (
 	Master          ExternalclusterV1NodeType = "master"
@@ -149,14 +137,6 @@ type CastaiMetricsV1beta1ClusterMetrics struct {
 	SpotFallbackNodesCount *int32   `json:"spotFallbackNodesCount,omitempty"`
 	SpotNodesCount         *int32   `json:"spotNodesCount,omitempty"`
 }
-
-// Types of cloud service providers CAST AI supports.
-//
-//   - invalid: Invalid.
-//   - aws: Amazon web services.
-//   - gcp: Google cloud provider.
-//   - azure: Microsoft Azure.
-type CastaiV1Cloud string
 
 // AKSClusterParams defines AKS-specific arguments.
 type ExternalclusterV1AKSClusterParams struct {
@@ -706,8 +686,9 @@ type ExternalclusterV1Zone struct {
 
 // NodeconfigV1AKSConfig defines model for nodeconfig.v1.AKSConfig.
 type NodeconfigV1AKSConfig struct {
-	// Maximum number of pods that can be run on a node, which affects how many IP addresses you will need for each node. Defaults to 30.
-	// With the Azure CNI plugin you can specify a value between 10 and 250 inclusive, and with the kubenet plugin you can specify a value between 10 and 110 inclusive.
+	// Maximum number of pods that can be run on a node, which affects how many IP addresses you will need for each node.
+	// Defaults to 30. Values between 10 and 250 are allowed.
+	// Setting values above 110 will require specific CNI configuration. Please refer to Microsoft documentation for additional guidance.
 	MaxPodsPerNode *int32 `json:"maxPodsPerNode,omitempty"`
 }
 
@@ -1009,7 +990,9 @@ type NodetemplatesV1NewNodeTemplate struct {
 	Name              *string                                  `json:"name,omitempty"`
 	RebalancingConfig *NodetemplatesV1RebalancingConfiguration `json:"rebalancingConfig,omitempty"`
 
-	// Marks whether the templated nodes will have a taint.
+	// Marks whether the templated nodes will have a taint template taint.
+	// Based on the template constraints, the template may still have additional taints.
+	// For example, if both lifecycles (spot, on-demand) are enabled, to use spot nodes, the spot nodes of this template will have the spot taint.
 	ShouldTaint *bool `json:"shouldTaint"`
 }
 
@@ -1118,8 +1101,12 @@ type NodetemplatesV1TemplateConstraints struct {
 
 // NodetemplatesV1TemplateConstraintsGPUConstraints defines model for nodetemplates.v1.TemplateConstraints.GPUConstraints.
 type NodetemplatesV1TemplateConstraintsGPUConstraints struct {
-	ExcludeNames  *[]string `json:"excludeNames,omitempty"`
-	IncludeNames  *[]string `json:"includeNames,omitempty"`
+	ExcludeNames *[]string `json:"excludeNames,omitempty"`
+	IncludeNames *[]string `json:"includeNames,omitempty"`
+
+	// This template is gpu only. Setting this to true, will result in only instances with GPUs being considered.
+	// In addition, this ensures that all of the added instances for this template won't have any nvidia taints.
+	IsGpuOnly     *bool     `json:"isGpuOnly"`
 	Manufacturers *[]string `json:"manufacturers,omitempty"`
 	MaxCount      *int32    `json:"maxCount"`
 	MinCount      *int32    `json:"minCount"`
@@ -1319,9 +1306,6 @@ type PoliciesV1SpotBackups struct {
 
 // Policy defining whether autoscaler can use spot instances for provisioning additional workloads.
 type PoliciesV1SpotInstances struct {
-	// Enable spot instances for these cloud service providers.
-	Clouds *[]CastaiV1Cloud `json:"clouds,omitempty"`
-
 	// Enable/disable spot instances policy.
 	Enabled *bool `json:"enabled"`
 
