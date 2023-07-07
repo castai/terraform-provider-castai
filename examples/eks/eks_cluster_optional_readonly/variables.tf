@@ -40,6 +40,7 @@ variable "aws_assume_role_arn" {
 }
 
 variable "readonly" {
-  type = bool
-  default = true
+  type        = bool
+  description = "Controls if cluster is connected to CAST AI in 'read-only' mode ir in 'Full Access' mode"
+  default     = true
 }
