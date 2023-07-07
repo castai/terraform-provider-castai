@@ -4,7 +4,7 @@ on:
     branches: [ '*' ]
     paths:
       - '**.md'
-      - 'examples/*/*'
+      - 'examples/**'
 jobs:
   terraform_validation:
     runs-on: ubuntu-latest
