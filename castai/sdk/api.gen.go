@@ -289,10 +289,18 @@ type ExternalclusterV1ClusterUpdate struct {
 	Eks *ExternalclusterV1UpdateEKSClusterParams `json:"eks,omitempty"`
 }
 
+// ExternalclusterV1CreateAssumeRolePrincipalResponse defines model for externalcluster.v1.CreateAssumeRolePrincipalResponse.
+type ExternalclusterV1CreateAssumeRolePrincipalResponse struct {
+	Arn *string `json:"arn,omitempty"`
+}
+
 // ExternalclusterV1CreateClusterTokenResponse defines model for externalcluster.v1.CreateClusterTokenResponse.
 type ExternalclusterV1CreateClusterTokenResponse struct {
 	Token *string `json:"token,omitempty"`
 }
+
+// ExternalclusterV1DeleteAssumeRolePrincipalResponse defines model for externalcluster.v1.DeleteAssumeRolePrincipalResponse.
+type ExternalclusterV1DeleteAssumeRolePrincipalResponse = map[string]interface{}
 
 // DeleteNodeResponse is the result of DeleteNodeRequest.
 type ExternalclusterV1DeleteNodeResponse struct {
@@ -395,6 +403,11 @@ type ExternalclusterV1GPUDevice struct {
 // ExternalclusterV1GPUInfo defines model for externalcluster.v1.GPUInfo.
 type ExternalclusterV1GPUInfo struct {
 	GpuDevices *[]ExternalclusterV1GPUDevice `json:"gpuDevices,omitempty"`
+}
+
+// ExternalclusterV1GetAssumeRolePrincipalResponse defines model for externalcluster.v1.GetAssumeRolePrincipalResponse.
+type ExternalclusterV1GetAssumeRolePrincipalResponse struct {
+	Arn *string `json:"arn,omitempty"`
 }
 
 // ExternalclusterV1GetAssumeRoleUserResponse defines model for externalcluster.v1.GetAssumeRoleUserResponse.

@@ -66,7 +66,7 @@ resource "aws_iam_role" "assume_role" {
         Action = "sts:AssumeRole"
         Effect = "Allow"
         Principal = {
-          AWS = data.castai_eks_user_arn.castai_user_arn.arn
+          AWS = castai_eks_user_arn.castai_user_arn.arn
         }
         Condition = {
           StringEquals = {

@@ -18,7 +18,8 @@ const (
 
 func dataSourceEKSClusterUserARN() *schema.Resource {
 	return &schema.Resource{
-		ReadContext: dataSourceCastaiEKSUserARN,
+		ReadContext:        dataSourceCastaiEKSUserARN,
+		DeprecationMessage: `Use castai_eks_user_arn resource instead`,
 		Schema: map[string]*schema.Schema{
 			EKSClusterUserARNFieldClusterID: {
 				Type:             schema.TypeString,

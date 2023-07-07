@@ -44,12 +44,15 @@ func Provider(version string) *schema.Provider {
 			"castai_rebalancing_job":            resourceRebalancingJob(),
 			"castai_node_configuration":         resourceNodeConfiguration(),
 			"castai_node_configuration_default": resourceNodeConfigurationDefault(),
+			"castai_eks_user_arn":               resourceEKSClusterUserARN(),
 		},
 
 		DataSourcesMap: map[string]*schema.Resource{
 			"castai_eks_settings":      dataSourceEKSSettings(),
-			"castai_eks_user_arn":      dataSourceEKSClusterUserARN(),
 			"castai_gke_user_policies": dataSourceGKEPolicies(),
+
+			// TODO: remove in next major release
+			"castai_eks_user_arn": dataSourceEKSClusterUserARN(),
 		},
 
 		ConfigureContextFunc: providerConfigure(version),

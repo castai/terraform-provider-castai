@@ -212,6 +212,15 @@ type ClientInterface interface {
 
 	ExternalClusterAPIUpdateCluster(ctx context.Context, clusterId string, body ExternalClusterAPIUpdateClusterJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// ExternalClusterAPIDeleteAssumeRolePrincipal request
+	ExternalClusterAPIDeleteAssumeRolePrincipal(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// ExternalClusterAPIGetAssumeRolePrincipal request
+	ExternalClusterAPIGetAssumeRolePrincipal(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// ExternalClusterAPICreateAssumeRolePrincipal request
+	ExternalClusterAPICreateAssumeRolePrincipal(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// ExternalClusterAPIGetAssumeRoleUser request
 	ExternalClusterAPIGetAssumeRoleUser(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -821,6 +830,42 @@ func (c *Client) ExternalClusterAPIUpdateClusterWithBody(ctx context.Context, cl
 
 func (c *Client) ExternalClusterAPIUpdateCluster(ctx context.Context, clusterId string, body ExternalClusterAPIUpdateClusterJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewExternalClusterAPIUpdateClusterRequest(c.Server, clusterId, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) ExternalClusterAPIDeleteAssumeRolePrincipal(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewExternalClusterAPIDeleteAssumeRolePrincipalRequest(c.Server, clusterId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) ExternalClusterAPIGetAssumeRolePrincipal(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewExternalClusterAPIGetAssumeRolePrincipalRequest(c.Server, clusterId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) ExternalClusterAPICreateAssumeRolePrincipal(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewExternalClusterAPICreateAssumeRolePrincipalRequest(c.Server, clusterId)
 	if err != nil {
 		return nil, err
 	}
@@ -2499,6 +2544,108 @@ func NewExternalClusterAPIUpdateClusterRequestWithBody(server string, clusterId 
 	return req, nil
 }
 
+// NewExternalClusterAPIDeleteAssumeRolePrincipalRequest generates requests for ExternalClusterAPIDeleteAssumeRolePrincipal
+func NewExternalClusterAPIDeleteAssumeRolePrincipalRequest(server string, clusterId string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "clusterId", runtime.ParamLocationPath, clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/kubernetes/external-clusters/%s/assume-role-principal", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("DELETE", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewExternalClusterAPIGetAssumeRolePrincipalRequest generates requests for ExternalClusterAPIGetAssumeRolePrincipal
+func NewExternalClusterAPIGetAssumeRolePrincipalRequest(server string, clusterId string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "clusterId", runtime.ParamLocationPath, clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/kubernetes/external-clusters/%s/assume-role-principal", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewExternalClusterAPICreateAssumeRolePrincipalRequest generates requests for ExternalClusterAPICreateAssumeRolePrincipal
+func NewExternalClusterAPICreateAssumeRolePrincipalRequest(server string, clusterId string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "clusterId", runtime.ParamLocationPath, clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/kubernetes/external-clusters/%s/assume-role-principal", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 // NewExternalClusterAPIGetAssumeRoleUserRequest generates requests for ExternalClusterAPIGetAssumeRoleUser
 func NewExternalClusterAPIGetAssumeRoleUserRequest(server string, clusterId string) (*http.Request, error) {
 	var err error
@@ -3647,6 +3794,15 @@ type ClientWithResponsesInterface interface {
 
 	ExternalClusterAPIUpdateClusterWithResponse(ctx context.Context, clusterId string, body ExternalClusterAPIUpdateClusterJSONRequestBody) (*ExternalClusterAPIUpdateClusterResponse, error)
 
+	// ExternalClusterAPIDeleteAssumeRolePrincipal request
+	ExternalClusterAPIDeleteAssumeRolePrincipalWithResponse(ctx context.Context, clusterId string) (*ExternalClusterAPIDeleteAssumeRolePrincipalResponse, error)
+
+	// ExternalClusterAPIGetAssumeRolePrincipal request
+	ExternalClusterAPIGetAssumeRolePrincipalWithResponse(ctx context.Context, clusterId string) (*ExternalClusterAPIGetAssumeRolePrincipalResponse, error)
+
+	// ExternalClusterAPICreateAssumeRolePrincipal request
+	ExternalClusterAPICreateAssumeRolePrincipalWithResponse(ctx context.Context, clusterId string) (*ExternalClusterAPICreateAssumeRolePrincipalResponse, error)
+
 	// ExternalClusterAPIGetAssumeRoleUser request
 	ExternalClusterAPIGetAssumeRoleUserWithResponse(ctx context.Context, clusterId string) (*ExternalClusterAPIGetAssumeRoleUserResponse, error)
 
@@ -4689,6 +4845,96 @@ func (r ExternalClusterAPIUpdateClusterResponse) StatusCode() int {
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
 func (r ExternalClusterAPIUpdateClusterResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type ExternalClusterAPIDeleteAssumeRolePrincipalResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *ExternalclusterV1DeleteAssumeRolePrincipalResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r ExternalClusterAPIDeleteAssumeRolePrincipalResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r ExternalClusterAPIDeleteAssumeRolePrincipalResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r ExternalClusterAPIDeleteAssumeRolePrincipalResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type ExternalClusterAPIGetAssumeRolePrincipalResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *ExternalclusterV1GetAssumeRolePrincipalResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r ExternalClusterAPIGetAssumeRolePrincipalResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r ExternalClusterAPIGetAssumeRolePrincipalResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r ExternalClusterAPIGetAssumeRolePrincipalResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type ExternalClusterAPICreateAssumeRolePrincipalResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *ExternalclusterV1CreateAssumeRolePrincipalResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r ExternalClusterAPICreateAssumeRolePrincipalResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r ExternalClusterAPICreateAssumeRolePrincipalResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r ExternalClusterAPICreateAssumeRolePrincipalResponse) GetBody() []byte {
 	return r.Body
 }
 
@@ -5742,6 +5988,33 @@ func (c *ClientWithResponses) ExternalClusterAPIUpdateClusterWithResponse(ctx co
 		return nil, err
 	}
 	return ParseExternalClusterAPIUpdateClusterResponse(rsp)
+}
+
+// ExternalClusterAPIDeleteAssumeRolePrincipalWithResponse request returning *ExternalClusterAPIDeleteAssumeRolePrincipalResponse
+func (c *ClientWithResponses) ExternalClusterAPIDeleteAssumeRolePrincipalWithResponse(ctx context.Context, clusterId string) (*ExternalClusterAPIDeleteAssumeRolePrincipalResponse, error) {
+	rsp, err := c.ExternalClusterAPIDeleteAssumeRolePrincipal(ctx, clusterId)
+	if err != nil {
+		return nil, err
+	}
+	return ParseExternalClusterAPIDeleteAssumeRolePrincipalResponse(rsp)
+}
+
+// ExternalClusterAPIGetAssumeRolePrincipalWithResponse request returning *ExternalClusterAPIGetAssumeRolePrincipalResponse
+func (c *ClientWithResponses) ExternalClusterAPIGetAssumeRolePrincipalWithResponse(ctx context.Context, clusterId string) (*ExternalClusterAPIGetAssumeRolePrincipalResponse, error) {
+	rsp, err := c.ExternalClusterAPIGetAssumeRolePrincipal(ctx, clusterId)
+	if err != nil {
+		return nil, err
+	}
+	return ParseExternalClusterAPIGetAssumeRolePrincipalResponse(rsp)
+}
+
+// ExternalClusterAPICreateAssumeRolePrincipalWithResponse request returning *ExternalClusterAPICreateAssumeRolePrincipalResponse
+func (c *ClientWithResponses) ExternalClusterAPICreateAssumeRolePrincipalWithResponse(ctx context.Context, clusterId string) (*ExternalClusterAPICreateAssumeRolePrincipalResponse, error) {
+	rsp, err := c.ExternalClusterAPICreateAssumeRolePrincipal(ctx, clusterId)
+	if err != nil {
+		return nil, err
+	}
+	return ParseExternalClusterAPICreateAssumeRolePrincipalResponse(rsp)
 }
 
 // ExternalClusterAPIGetAssumeRoleUserWithResponse request returning *ExternalClusterAPIGetAssumeRoleUserResponse
@@ -6802,6 +7075,84 @@ func ParseExternalClusterAPIUpdateClusterResponse(rsp *http.Response) (*External
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest ExternalclusterV1Cluster
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseExternalClusterAPIDeleteAssumeRolePrincipalResponse parses an HTTP response from a ExternalClusterAPIDeleteAssumeRolePrincipalWithResponse call
+func ParseExternalClusterAPIDeleteAssumeRolePrincipalResponse(rsp *http.Response) (*ExternalClusterAPIDeleteAssumeRolePrincipalResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &ExternalClusterAPIDeleteAssumeRolePrincipalResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ExternalclusterV1DeleteAssumeRolePrincipalResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseExternalClusterAPIGetAssumeRolePrincipalResponse parses an HTTP response from a ExternalClusterAPIGetAssumeRolePrincipalWithResponse call
+func ParseExternalClusterAPIGetAssumeRolePrincipalResponse(rsp *http.Response) (*ExternalClusterAPIGetAssumeRolePrincipalResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &ExternalClusterAPIGetAssumeRolePrincipalResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ExternalclusterV1GetAssumeRolePrincipalResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseExternalClusterAPICreateAssumeRolePrincipalResponse parses an HTTP response from a ExternalClusterAPICreateAssumeRolePrincipalWithResponse call
+func ParseExternalClusterAPICreateAssumeRolePrincipalResponse(rsp *http.Response) (*ExternalClusterAPICreateAssumeRolePrincipalResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &ExternalClusterAPICreateAssumeRolePrincipalResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ExternalclusterV1CreateAssumeRolePrincipalResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
