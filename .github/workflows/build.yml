@@ -5,7 +5,7 @@ on:
     paths-ignore:
       - '**.md'
       - '**.md.tmpl'
-      - 'examples/*/*'
+      - 'examples/**'
 jobs:
   build:
     name: Build
