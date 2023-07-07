@@ -1,6 +1,6 @@
 # Example of EKS cluster connected to CAST AI to read-only mode with ability to switch cluster to full access mode.
 Following example creates EKS cluster and its supporting resources using AWS community modules.
-After EKS cluster is created by default it is onboarded to CAST AI in Read-only mode.
+After EKS cluster is created, by default it is onboarded to CAST AI in Read-only mode.
 Read-only behaviour is controlled by bool variable `readonly`.
 Example configuration should be analysed in the following order:
 1. Create VPC - `vpc.tf`
@@ -27,9 +27,9 @@ terraform destroy -var-file=tf.vars
 # Enable full access mode after cluster was already onboarded to read-only mode
 1. Set variable `readonly = false` and run `terraform apply -var-file=tf.vars`
 
-Note: Current provider version (v3.13.0) does not support  `castai_eks_cluster` is in-place re-creation.
+Note: Current provider version (v3.13.0) does not support `castai_eks_cluster` resource in-place re-creation.
 If `castai_eks_cluster` have to be re-created follow the steps below:
 1. Delete cluster using [/DeleteCluster](https://api.cast.ai/v1/spec/#/ExternalClusterAPI/ExternalClusterAPIDeleteCluster) API call.
-If cluster was already onboarded to full access mode, and you don't want to delete CAST AI created K8s nodes, make sure that `castai_eks_cluster` parameter `delete_nodes_on_disconnect` is set to false.
+If cluster was already onboarded to full access mode, and you don't want to delete CAST AI created K8s nodes, make sure that `castai_eks_cluster` parameter is set to `delete_nodes_on_disconnect = false`.
 2. Run `terraform apply -var-file=tf.vars`
 
