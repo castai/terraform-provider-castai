@@ -29,13 +29,11 @@ variable "aws_assume_role_arn" {
 variable "subnets" {
   type = list(string)
   description = "Subnet IDs used by CAST AI to provision nodes"
-  #  default = ["subnet-12345678abcdefghi", "subnet-12345678abcdefghz"]
 }
 
 variable "security_groups" {
   type = list(string)
   description = "Security Groups IDs used by CAST AI nodes to connect to K8s control plane, other nodes and have outbound access to Internet"
-  #  default = ["sg-12345678abcdefghi", "sg-12345678abcdefghz"]
 }
 
 variable "instance_profile" {
