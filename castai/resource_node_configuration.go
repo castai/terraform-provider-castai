@@ -193,8 +193,9 @@ func resourceNodeConfiguration() *schema.Resource {
 							ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(125, 1000)),
 						},
 						"imds_v1": {
-							Type:        schema.TypeBool,
-							Optional:    true,
+							Type:     schema.TypeBool,
+							Optional: true,
+							Default:  true, 
 							Description: "Allow IMDSv1, the default is true",
 						},
 						"imds_hop_limit": {
