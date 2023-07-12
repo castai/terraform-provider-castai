@@ -195,7 +195,8 @@ func resourceNodeConfiguration() *schema.Resource {
 						"imds_v1": {
 							Type:        schema.TypeBool,
 							Optional:    true,
-							Description: "Allow IMDSv1, the default is true",
+							Default:     true,
+							Description: "When the value is true both IMDSv1 and IMDSv2 are enabled. Setting the value to false disables permanently IMDSv1 and might affect legacy workloads running on the node created with this configuration. The default is true if the flag isn't provided",
 						},
 						"imds_hop_limit": {
 							Type:             schema.TypeInt,
