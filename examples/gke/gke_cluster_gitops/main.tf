@@ -1,4 +1,4 @@
-resource "castai_gke_cluster" "my_castai_cluster" {
+resource "castai_gke_cluster" "this" {
   project_id                 = var.project_id
   location                   = var.cluster_region
   name                       = var.cluster_name
@@ -8,7 +8,7 @@ resource "castai_gke_cluster" "my_castai_cluster" {
 }
 
 resource "castai_node_configuration" "default" {
-  cluster_id     = castai_gke_cluster.my_castai_cluster.id
+  cluster_id     = castai_gke_cluster.this.id
   name           = "default"
   disk_cpu_ratio = 0
   min_disk_size  = 100
@@ -27,6 +27,6 @@ module "castai-gke-iam" {
 }
 
 resource "castai_node_configuration_default" "this" {
-  cluster_id       = castai_gke_cluster.my_castai_cluster.id
+  cluster_id       = castai_gke_cluster.this.id
   configuration_id = castai_node_configuration.default.id
 }
