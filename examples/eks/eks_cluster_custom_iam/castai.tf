@@ -3,7 +3,7 @@
 # Configure Data sources and providers required for CAST AI connection.
 data "aws_caller_identity" "current" {}
 
-data "castai_eks_user_arn" "castai_user_arn" {
+resource "castai_eks_user_arn" "castai_user_arn" {
   cluster_id = castai_eks_clusterid.cluster_id.id
 }
 

@@ -27,7 +27,7 @@ resource "castai_eks_cluster" "this" {
   assume_role_arn            = var.readonly ? null: aws_iam_role.assume_role.arn
 }
 
-data "castai_eks_user_arn" "castai_user_arn" {
+resource "castai_eks_user_arn" "castai_user_arn" {
   cluster_id = castai_eks_clusterid.cluster_id.id
 }
 

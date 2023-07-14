@@ -255,6 +255,26 @@ func (mr *MockClientInterfaceMockRecorder) ExternalClusterAPIAddNodeWithBody(ctx
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIAddNodeWithBody", reflect.TypeOf((*MockClientInterface)(nil).ExternalClusterAPIAddNodeWithBody), varargs...)
 }
 
+// ExternalClusterAPICreateAssumeRolePrincipal mocks base method.
+func (m *MockClientInterface) ExternalClusterAPICreateAssumeRolePrincipal(ctx context.Context, clusterId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ExternalClusterAPICreateAssumeRolePrincipal", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExternalClusterAPICreateAssumeRolePrincipal indicates an expected call of ExternalClusterAPICreateAssumeRolePrincipal.
+func (mr *MockClientInterfaceMockRecorder) ExternalClusterAPICreateAssumeRolePrincipal(ctx, clusterId interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPICreateAssumeRolePrincipal", reflect.TypeOf((*MockClientInterface)(nil).ExternalClusterAPICreateAssumeRolePrincipal), varargs...)
+}
+
 // ExternalClusterAPICreateClusterToken mocks base method.
 func (m *MockClientInterface) ExternalClusterAPICreateClusterToken(ctx context.Context, clusterId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
@@ -273,6 +293,26 @@ func (mr *MockClientInterfaceMockRecorder) ExternalClusterAPICreateClusterToken(
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{ctx, clusterId}, reqEditors...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPICreateClusterToken", reflect.TypeOf((*MockClientInterface)(nil).ExternalClusterAPICreateClusterToken), varargs...)
+}
+
+// ExternalClusterAPIDeleteAssumeRolePrincipal mocks base method.
+func (m *MockClientInterface) ExternalClusterAPIDeleteAssumeRolePrincipal(ctx context.Context, clusterId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ExternalClusterAPIDeleteAssumeRolePrincipal", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExternalClusterAPIDeleteAssumeRolePrincipal indicates an expected call of ExternalClusterAPIDeleteAssumeRolePrincipal.
+func (mr *MockClientInterfaceMockRecorder) ExternalClusterAPIDeleteAssumeRolePrincipal(ctx, clusterId interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIDeleteAssumeRolePrincipal", reflect.TypeOf((*MockClientInterface)(nil).ExternalClusterAPIDeleteAssumeRolePrincipal), varargs...)
 }
 
 // ExternalClusterAPIDeleteCluster mocks base method.
@@ -393,6 +433,26 @@ func (mr *MockClientInterfaceMockRecorder) ExternalClusterAPIDrainNodeWithBody(c
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{ctx, clusterId, nodeId, contentType, body}, reqEditors...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIDrainNodeWithBody", reflect.TypeOf((*MockClientInterface)(nil).ExternalClusterAPIDrainNodeWithBody), varargs...)
+}
+
+// ExternalClusterAPIGetAssumeRolePrincipal mocks base method.
+func (m *MockClientInterface) ExternalClusterAPIGetAssumeRolePrincipal(ctx context.Context, clusterId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ExternalClusterAPIGetAssumeRolePrincipal", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExternalClusterAPIGetAssumeRolePrincipal indicates an expected call of ExternalClusterAPIGetAssumeRolePrincipal.
+func (mr *MockClientInterfaceMockRecorder) ExternalClusterAPIGetAssumeRolePrincipal(ctx, clusterId interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIGetAssumeRolePrincipal", reflect.TypeOf((*MockClientInterface)(nil).ExternalClusterAPIGetAssumeRolePrincipal), varargs...)
 }
 
 // ExternalClusterAPIGetAssumeRoleUser mocks base method.
@@ -1693,6 +1753,21 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIAddNod
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIAddNodeWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIAddNodeWithResponse), ctx, clusterId, body)
 }
 
+// ExternalClusterAPICreateAssumeRolePrincipalWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) ExternalClusterAPICreateAssumeRolePrincipalWithResponse(ctx context.Context, clusterId string) (*sdk.ExternalClusterAPICreateAssumeRolePrincipalResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ExternalClusterAPICreateAssumeRolePrincipalWithResponse", ctx, clusterId)
+	ret0, _ := ret[0].(*sdk.ExternalClusterAPICreateAssumeRolePrincipalResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExternalClusterAPICreateAssumeRolePrincipalWithResponse indicates an expected call of ExternalClusterAPICreateAssumeRolePrincipalWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPICreateAssumeRolePrincipalWithResponse(ctx, clusterId interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPICreateAssumeRolePrincipalWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPICreateAssumeRolePrincipalWithResponse), ctx, clusterId)
+}
+
 // ExternalClusterAPICreateClusterTokenWithResponse mocks base method.
 func (m *MockClientWithResponsesInterface) ExternalClusterAPICreateClusterTokenWithResponse(ctx context.Context, clusterId string) (*sdk.ExternalClusterAPICreateClusterTokenResponse, error) {
 	m.ctrl.T.Helper()
@@ -1706,6 +1781,21 @@ func (m *MockClientWithResponsesInterface) ExternalClusterAPICreateClusterTokenW
 func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPICreateClusterTokenWithResponse(ctx, clusterId interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPICreateClusterTokenWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPICreateClusterTokenWithResponse), ctx, clusterId)
+}
+
+// ExternalClusterAPIDeleteAssumeRolePrincipalWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) ExternalClusterAPIDeleteAssumeRolePrincipalWithResponse(ctx context.Context, clusterId string) (*sdk.ExternalClusterAPIDeleteAssumeRolePrincipalResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ExternalClusterAPIDeleteAssumeRolePrincipalWithResponse", ctx, clusterId)
+	ret0, _ := ret[0].(*sdk.ExternalClusterAPIDeleteAssumeRolePrincipalResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExternalClusterAPIDeleteAssumeRolePrincipalWithResponse indicates an expected call of ExternalClusterAPIDeleteAssumeRolePrincipalWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIDeleteAssumeRolePrincipalWithResponse(ctx, clusterId interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIDeleteAssumeRolePrincipalWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIDeleteAssumeRolePrincipalWithResponse), ctx, clusterId)
 }
 
 // ExternalClusterAPIDeleteClusterWithResponse mocks base method.
@@ -1796,6 +1886,21 @@ func (m *MockClientWithResponsesInterface) ExternalClusterAPIDrainNodeWithRespon
 func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIDrainNodeWithResponse(ctx, clusterId, nodeId, body interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIDrainNodeWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIDrainNodeWithResponse), ctx, clusterId, nodeId, body)
+}
+
+// ExternalClusterAPIGetAssumeRolePrincipalWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) ExternalClusterAPIGetAssumeRolePrincipalWithResponse(ctx context.Context, clusterId string) (*sdk.ExternalClusterAPIGetAssumeRolePrincipalResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ExternalClusterAPIGetAssumeRolePrincipalWithResponse", ctx, clusterId)
+	ret0, _ := ret[0].(*sdk.ExternalClusterAPIGetAssumeRolePrincipalResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExternalClusterAPIGetAssumeRolePrincipalWithResponse indicates an expected call of ExternalClusterAPIGetAssumeRolePrincipalWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIGetAssumeRolePrincipalWithResponse(ctx, clusterId interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIGetAssumeRolePrincipalWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIGetAssumeRolePrincipalWithResponse), ctx, clusterId)
 }
 
 // ExternalClusterAPIGetAssumeRoleUserWithResponse mocks base method.
