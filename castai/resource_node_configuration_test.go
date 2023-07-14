@@ -159,7 +159,7 @@ resource "castai_eks_clusterid" "test" {
   cluster_name = %[1]q
 }
 
-data "castai_eks_user_arn" "test" {
+resource "castai_eks_user_arn" "test" {
   cluster_id = castai_eks_clusterid.test.id
 }
 
@@ -228,7 +228,7 @@ resource "aws_iam_role" "test" {
         Action    = "sts:AssumeRole"
         Effect    = "Allow"
         Principal = {
-          AWS = data.castai_eks_user_arn.test.arn
+          AWS = castai_eks_user_arn.test.arn
         }
       },
     ]
