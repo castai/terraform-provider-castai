@@ -24,7 +24,7 @@ variable "castai_api_token" {
 variable "castai_api_url" {
   type        = string
   description = "CAST AI url to API, default value is https://api.cast.ai"
-  default     = "https://api.dev-master.cast.ai"
+  default     = "https://api.cast.ai"
 }
 
 variable "delete_nodes_on_disconnect" {
