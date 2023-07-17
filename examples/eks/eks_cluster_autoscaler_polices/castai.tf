@@ -39,7 +39,7 @@ module "castai-eks-role-iam" {
   aws_cluster_name   = var.cluster_name
   aws_cluster_vpc_id = module.vpc.vpc_id
 
-  castai_user_arn = data.castai_eks_user_arn.castai_user_arn.arn
+  castai_user_arn = castai_eks_user_arn.castai_user_arn.arn
 
   create_iam_resources_per_cluster = true
 }
