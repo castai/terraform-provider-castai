@@ -1,0 +1,6 @@
+castai_api_token  = "PLACEHOLDER"
+cluster_name      = "PLACEHOLDER"
+cluster_region    = "PLACEHOLDER"
+resource_group    = "PLACEHOLDER"
+subscription_id   = "PLACEHOLDER"
+subnets           = ["PLACEHOLDER1", "PLACEHOLDER2"]
