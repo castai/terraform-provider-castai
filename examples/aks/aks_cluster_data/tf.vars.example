@@ -1,0 +1,8 @@
+cluster_name     = "<place-holder>"
+cluster_region   = "<place-holder>"
+castai_api_token = "<place-holder>"
+
+subnet_name = "<place-holder>"
+vnet_name = "<place-holder>
+subnet_resource_group_name = "<place-holder>
+cluster_resource_group_name = "<place-holder>"
