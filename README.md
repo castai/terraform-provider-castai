@@ -168,7 +168,7 @@ resource "castai_eks_cluster" "this" {
 ```
 and usage `castai_eks_cluster.this.cluster_token`
 
-* default value for `imds_v1` was change dot `true`, in case that your configuration didn't had this specified
+* default value for `imds_v1` was change to `true`, in case that your configuration didn't had this specified
 please explicitly set this value to `false`
 
 
