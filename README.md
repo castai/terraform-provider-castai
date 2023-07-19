@@ -119,6 +119,7 @@ Migrating to 4.x.x
 
 Version 4.x.x changed:
 * `castai_eks_clusterid` type from data source to resource
+
 Having old configuration: 
 
 ```terraform
@@ -142,6 +143,7 @@ resource "castai_eks_clusterid" "cluster_id" {
 and usage `castai_eks_clusterid.cluster_id.id`
 
 * removal of `castai_cluster_token` resource in favour of `cluster_token` in `castai_eks_cluster`
+
 Having old configuration: 
 ```terraform
 resource "castai_cluster_token" "this" {
@@ -155,6 +157,7 @@ resource "castai_eks_cluster" "this" {
     
 ```
 and usage `castai_cluster_token.this.cluster_token`
+
 New configuration will look like:
 ```terraform
 resource "castai_eks_cluster" "this" {
@@ -164,6 +167,7 @@ resource "castai_eks_cluster" "this" {
 }
 ```
 and usage `castai_eks_cluster.this.cluster_token`
+
 * default value for `imds_v1` was change dot `true`, in case that your configuration didn't had this specified
 please explicitly set this value to `false`
 
