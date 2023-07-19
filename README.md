@@ -114,7 +114,7 @@ If you have used `castai-eks-cluster` module follow:
 https://github.com/castai/terraform-castai-eks-cluster/blob/main/README.md#migrating-from-2xx-to-3xx
 
 
-Migrating to 4.x.x
+Migrating from 3.x.x to 4.x.x
 ---------------------------
 
 Version 4.x.x changed:
