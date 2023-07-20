@@ -113,6 +113,65 @@ resource "castai_node_configuration_default" "test" {
 If you have used `castai-eks-cluster` module follow:
 https://github.com/castai/terraform-castai-eks-cluster/blob/main/README.md#migrating-from-2xx-to-3xx
 
+
+Migrating from 3.x.x to 4.x.x
+---------------------------
+
+Version 4.x.x changed:
+* `castai_eks_clusterid` type from data source to resource
+
+Having old configuration: 
+
+```terraform
+data "castai_eks_clusterid" "cluster_id" {
+  account_id   = data.aws_caller_identity.current.account_id
+  region       = var.cluster_region
+  cluster_name = var.cluster_name
+} 
+```
+and usage `data.castai_eks_clusterid.cluster_id.id`
+
+New configuration will look like:
+
+```terrafrom
+resource "castai_eks_clusterid" "cluster_id" {
+  account_id   = data.aws_caller_identity.current.account_id
+  region       = var.cluster_region
+  cluster_name = var.cluster_name
+}
+```
+and usage `castai_eks_clusterid.cluster_id.id`
+
+* removal of `castai_cluster_token` resource in favour of `cluster_token` in `castai_eks_cluster`
+
+Having old configuration: 
+```terraform
+resource "castai_cluster_token" "this" {
+  cluster_id = castai_eks_cluster.this.id
+}
+resource "castai_eks_cluster" "this" {
+  account_id = data.aws_caller_identity.current.account_id
+  region     = var.cluster_region
+  name       = var.cluster_name
+}
+    
+```
+and usage `castai_cluster_token.this.cluster_token`
+
+New configuration will look like:
+```terraform
+resource "castai_eks_cluster" "this" {
+  account_id = data.aws_caller_identity.current.account_id
+  region     = var.cluster_region
+  name       = var.cluster_name
+}
+```
+and usage `castai_eks_cluster.this.cluster_token`
+
+* default value for `imds_v1` was change to `true`, in case that your configuration didn't had this specified
+please explicitly set this value to `false`
+
+
 Developing the provider
 ---------------------------
 
