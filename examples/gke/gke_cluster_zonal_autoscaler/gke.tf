@@ -19,7 +19,7 @@ module "gke" {
   node_pools = [
     {
       name               = "default-node-pool"
-      machine_type       = "e2-medium"
+      machine_type       = "e2-standard-2"
       node_locations     = var.cluster_zones[0]
       min_count          = 0
       max_count          = 10
