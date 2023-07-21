@@ -7,13 +7,14 @@ import (
 	"math"
 	"time"
 
-	"github.com/castai/terraform-provider-castai/castai/sdk"
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/samber/lo"
+
+	"github.com/castai/terraform-provider-castai/castai/sdk"
 )
 
 func resourceRebalancingSchedule() *schema.Resource {
@@ -95,7 +96,7 @@ func resourceRebalancingSchedule() *schema.Resource {
 							ValidateDiagFunc: validation.ToDiagFunc(validation.IntAtLeast(1)),
 							Description:      "Minimum number of nodes that should be kept in the cluster after rebalancing.",
 						},
-						"keep_drain_timeout_nodes": {
+						"evict_gracefully": {
 							Type:        schema.TypeBool,
 							Optional:    true,
 							Description: "Defines whether the nodes that failed to get drained until a predefined timeout, will be kept with a rebalancing.cast.ai/status=drain-failed annotation instead of forcefully drained.",
@@ -248,7 +249,7 @@ func stateToSchedule(d *schema.ResourceData) (*sdk.ScheduledrebalancingV1Rebalan
 			return nil, fmt.Errorf("parsing selector: %w", err)
 		}
 
-		keepDrainTimeoutNodes := readOptionalValue[bool](launchConfigurationData, "keep_drain_timeout_nodes")
+		evictGracefully := readOptionalValue[bool](launchConfigurationData, "evict_gracefully")
 
 		var executionConditions *sdk.ScheduledrebalancingV1ExecutionConditions
 		executionConditionsData := launchConfigurationData["execution_conditions"].([]any)
@@ -263,9 +264,9 @@ func stateToSchedule(d *schema.ResourceData) (*sdk.ScheduledrebalancingV1Rebalan
 			NodeTtlSeconds:   readOptionalNumber[int, int32](launchConfigurationData, "node_ttl_seconds"),
 			NumTargetedNodes: readOptionalNumber[int, int32](launchConfigurationData, "num_targeted_nodes"),
 			RebalancingOptions: &sdk.ScheduledrebalancingV1RebalancingOptions{
-				MinNodes:              readOptionalNumber[int, int32](launchConfigurationData, "rebalancing_min_nodes"),
-				KeepDrainTimeoutNodes: keepDrainTimeoutNodes,
-				ExecutionConditions:   executionConditions,
+				MinNodes:            readOptionalNumber[int, int32](launchConfigurationData, "rebalancing_min_nodes"),
+				EvictGracefully:     evictGracefully,
+				ExecutionConditions: executionConditions,
 			},
 			Selector: selector,
 		}
@@ -294,7 +295,7 @@ func scheduleToState(schedule *sdk.ScheduledrebalancingV1RebalancingSchedule, d 
 
 	if schedule.LaunchConfiguration.RebalancingOptions != nil {
 		launchConfig["rebalancing_min_nodes"] = schedule.LaunchConfiguration.RebalancingOptions.MinNodes
-		launchConfig["keep_drain_timeout_nodes"] = schedule.LaunchConfiguration.RebalancingOptions.KeepDrainTimeoutNodes
+		launchConfig["evict_gracefully"] = schedule.LaunchConfiguration.RebalancingOptions.EvictGracefully
 
 		executionConditions := schedule.LaunchConfiguration.RebalancingOptions.ExecutionConditions
 		if executionConditions != nil {

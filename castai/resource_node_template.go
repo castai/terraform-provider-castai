@@ -3,16 +3,18 @@ package castai
 import (
 	"context"
 	"fmt"
-	"github.com/castai/terraform-provider-castai/castai/sdk"
+	"log"
+	"regexp"
+	"strings"
+	"time"
+
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/samber/lo"
-	"log"
-	"regexp"
-	"strings"
-	"time"
+
+	"github.com/castai/terraform-provider-castai/castai/sdk"
 )
 
 const (
@@ -605,7 +607,9 @@ func getNodeTemplateByName(ctx context.Context, data *schema.ResourceData, meta 
 	nodeTemplateName := data.Id()
 
 	log.Printf("[INFO] Getting current node templates")
-	resp, err := client.NodeTemplatesAPIListNodeTemplatesWithResponse(ctx, clusterID)
+	resp, err := client.NodeTemplatesAPIListNodeTemplatesWithResponse(ctx, clusterID, &sdk.NodeTemplatesAPIListNodeTemplatesParams{
+		IncludeDefault: lo.ToPtr(false),
+	})
 	notFound := fmt.Errorf("node templates for cluster %q not found at CAST AI", clusterID)
 	if err != nil {
 		return nil, err
@@ -657,7 +661,9 @@ func nodeTemplateStateImporter(ctx context.Context, d *schema.ResourceData, meta
 
 	// Find node templates
 	client := meta.(*ProviderConfig).api
-	resp, err := client.NodeTemplatesAPIListNodeTemplatesWithResponse(ctx, clusterID)
+	resp, err := client.NodeTemplatesAPIListNodeTemplatesWithResponse(ctx, clusterID, &sdk.NodeTemplatesAPIListNodeTemplatesParams{
+		IncludeDefault: lo.ToPtr(false),
+	})
 	if err != nil {
 		return nil, err
 	}

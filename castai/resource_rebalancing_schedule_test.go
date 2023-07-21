@@ -2,9 +2,10 @@ package castai
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"testing"
 )
 
 func TestAccResourceRebalancingSchedule_basic(t *testing.T) {
@@ -82,7 +83,7 @@ resource "castai_rebalancing_schedule" "test" {
 		node_ttl_seconds = 10
 		num_targeted_nodes = 3
 		rebalancing_min_nodes = 2
-		keep_drain_timeout_nodes = true
+		evict_gracefully = true
 		selector = jsonencode({
 			nodeSelectorTerms = [{
 				matchExpressions = [

@@ -143,7 +143,7 @@ type ClientInterface interface {
 	PoliciesAPIGetClusterNodeConstraints(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// NodeTemplatesAPIListNodeTemplates request
-	NodeTemplatesAPIListNodeTemplates(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+	NodeTemplatesAPIListNodeTemplates(ctx context.Context, clusterId string, params *NodeTemplatesAPIListNodeTemplatesParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// NodeTemplatesAPICreateNodeTemplate request with any body
 	NodeTemplatesAPICreateNodeTemplateWithBody(ctx context.Context, clusterId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -528,8 +528,8 @@ func (c *Client) PoliciesAPIGetClusterNodeConstraints(ctx context.Context, clust
 	return c.Client.Do(req)
 }
 
-func (c *Client) NodeTemplatesAPIListNodeTemplates(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewNodeTemplatesAPIListNodeTemplatesRequest(c.Server, clusterId)
+func (c *Client) NodeTemplatesAPIListNodeTemplates(ctx context.Context, clusterId string, params *NodeTemplatesAPIListNodeTemplatesParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewNodeTemplatesAPIListNodeTemplatesRequest(c.Server, clusterId, params)
 	if err != nil {
 		return nil, err
 	}
@@ -1788,7 +1788,7 @@ func NewPoliciesAPIGetClusterNodeConstraintsRequest(server string, clusterId str
 }
 
 // NewNodeTemplatesAPIListNodeTemplatesRequest generates requests for NodeTemplatesAPIListNodeTemplates
-func NewNodeTemplatesAPIListNodeTemplatesRequest(server string, clusterId string) (*http.Request, error) {
+func NewNodeTemplatesAPIListNodeTemplatesRequest(server string, clusterId string, params *NodeTemplatesAPIListNodeTemplatesParams) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -1812,6 +1812,26 @@ func NewNodeTemplatesAPIListNodeTemplatesRequest(server string, clusterId string
 	if err != nil {
 		return nil, err
 	}
+
+	queryValues := queryURL.Query()
+
+	if params.IncludeDefault != nil {
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "includeDefault", runtime.ParamLocationQuery, *params.IncludeDefault); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	queryURL.RawQuery = queryValues.Encode()
 
 	req, err := http.NewRequest("GET", queryURL.String(), nil)
 	if err != nil {
@@ -3725,7 +3745,7 @@ type ClientWithResponsesInterface interface {
 	PoliciesAPIGetClusterNodeConstraintsWithResponse(ctx context.Context, clusterId string) (*PoliciesAPIGetClusterNodeConstraintsResponse, error)
 
 	// NodeTemplatesAPIListNodeTemplates request
-	NodeTemplatesAPIListNodeTemplatesWithResponse(ctx context.Context, clusterId string) (*NodeTemplatesAPIListNodeTemplatesResponse, error)
+	NodeTemplatesAPIListNodeTemplatesWithResponse(ctx context.Context, clusterId string, params *NodeTemplatesAPIListNodeTemplatesParams) (*NodeTemplatesAPIListNodeTemplatesResponse, error)
 
 	// NodeTemplatesAPICreateNodeTemplate request  with any body
 	NodeTemplatesAPICreateNodeTemplateWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader) (*NodeTemplatesAPICreateNodeTemplateResponse, error)
@@ -5765,8 +5785,8 @@ func (c *ClientWithResponses) PoliciesAPIGetClusterNodeConstraintsWithResponse(c
 }
 
 // NodeTemplatesAPIListNodeTemplatesWithResponse request returning *NodeTemplatesAPIListNodeTemplatesResponse
-func (c *ClientWithResponses) NodeTemplatesAPIListNodeTemplatesWithResponse(ctx context.Context, clusterId string) (*NodeTemplatesAPIListNodeTemplatesResponse, error) {
-	rsp, err := c.NodeTemplatesAPIListNodeTemplates(ctx, clusterId)
+func (c *ClientWithResponses) NodeTemplatesAPIListNodeTemplatesWithResponse(ctx context.Context, clusterId string, params *NodeTemplatesAPIListNodeTemplatesParams) (*NodeTemplatesAPIListNodeTemplatesResponse, error) {
+	rsp, err := c.NodeTemplatesAPIListNodeTemplates(ctx, clusterId, params)
 	if err != nil {
 		return nil, err
 	}

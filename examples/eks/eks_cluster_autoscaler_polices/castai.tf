@@ -200,7 +200,7 @@ resource "castai_rebalancing_schedule" "spots" {
 		node_ttl_seconds = 300
 		num_targeted_nodes = 3
 		rebalancing_min_nodes = 2
-		keep_drain_timeout_nodes = false
+		evict_gracefully = false
 		selector = jsonencode({
 			nodeSelectorTerms = [{
 				matchExpressions = [
