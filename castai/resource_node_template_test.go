@@ -14,6 +14,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/samber/lo"
 	"github.com/stretchr/testify/require"
 
 	"github.com/castai/terraform-provider-castai/castai/sdk"
@@ -98,7 +99,7 @@ func TestNodeTemplateResourceReadContext(t *testing.T) {
 		}
 	`)))
 	mockClient.EXPECT().
-		NodeTemplatesAPIListNodeTemplates(gomock.Any(), clusterId).
+		NodeTemplatesAPIListNodeTemplates(gomock.Any(), clusterId, gomock.Any()).
 		Return(&http.Response{StatusCode: 200, Body: body, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
 
 	resource := resourceNodeTemplate()
@@ -180,7 +181,7 @@ func TestNodeTemplateResourceReadContextEmptyList(t *testing.T) {
 	clusterId := "b6bfc074-a267-400f-b8f1-db0850c369b1"
 	body := io.NopCloser(bytes.NewReader([]byte(`{"items": []}`)))
 	mockClient.EXPECT().
-		NodeTemplatesAPIListNodeTemplates(gomock.Any(), clusterId).
+		NodeTemplatesAPIListNodeTemplates(gomock.Any(), clusterId, gomock.Any()).
 		Return(&http.Response{StatusCode: 200, Body: body, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
 
 	resource := resourceNodeTemplate()
@@ -370,7 +371,9 @@ func testAccCheckNodeTemplateDestroy(s *terraform.State) error {
 
 		id := rs.Primary.ID
 		clusterID := rs.Primary.Attributes["cluster_id"]
-		response, err := client.NodeTemplatesAPIListNodeTemplatesWithResponse(ctx, clusterID)
+		response, err := client.NodeTemplatesAPIListNodeTemplatesWithResponse(ctx, clusterID, &sdk.NodeTemplatesAPIListNodeTemplatesParams{
+			IncludeDefault: lo.ToPtr(false),
+		})
 		if err != nil {
 			return err
 		}
