@@ -46,6 +46,7 @@ Optional:
 - `fallback_restore_rate_seconds` (Number) Fallback restore rate in seconds: defines how much time should pass before spot fallback should be attempted to be restored to real spot.
 - `gpu` (Block List, Max: 1) (see [below for nested schema](#nestedblock--constraints--gpu))
 - `instance_families` (Block List, Max: 1) (see [below for nested schema](#nestedblock--constraints--instance_families))
+- `is_gpu_only` (Boolean) GPU instance constraint - will only pick nodes with GPU if true
 - `max_cpu` (Number) Max CPU cores per node.
 - `max_memory` (Number) Max Memory (Mib) per node.
 - `min_cpu` (Number) Min CPU cores per node.

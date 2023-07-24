@@ -109,7 +109,7 @@ func resourceCastaiAutoscalerUpdate(ctx context.Context, data *schema.ResourceDa
 	return nil
 }
 
-func getCurrentPolicies(ctx context.Context, client *sdk.ClientWithResponses, clusterId sdk.ClusterId) ([]byte, error) {
+func getCurrentPolicies(ctx context.Context, client *sdk.ClientWithResponses, clusterId string) ([]byte, error) {
 	log.Printf("[INFO] Getting cluster autoscaler information.")
 
 	resp, err := client.PoliciesAPIGetClusterPolicies(ctx, clusterId)
@@ -157,7 +157,7 @@ func updateAutoscalerPolicies(ctx context.Context, data *schema.ResourceData, me
 	return upsertPolicies(ctx, meta, clusterId, changedPoliciesJSON)
 }
 
-func upsertPolicies(ctx context.Context, meta interface{}, clusterId sdk.ClusterId, changedPoliciesJSON string) error {
+func upsertPolicies(ctx context.Context, meta interface{}, clusterId string, changedPoliciesJSON string) error {
 	client := meta.(*ProviderConfig).api
 
 	resp, err := client.PoliciesAPIUpsertClusterPoliciesWithBodyWithResponse(ctx, clusterId, "application/json", bytes.NewReader([]byte(changedPoliciesJSON)))
@@ -192,7 +192,7 @@ func readAutoscalerPolicies(ctx context.Context, data *schema.ResourceData, meta
 	return nil
 }
 
-func getChangedPolicies(ctx context.Context, data *schema.ResourceData, meta interface{}, clusterId sdk.ClusterId) ([]byte, error) {
+func getChangedPolicies(ctx context.Context, data *schema.ResourceData, meta interface{}, clusterId string) ([]byte, error) {
 	policyChangesJSON, found := data.GetOk(FieldAutoscalerPoliciesJSON)
 	if !found {
 		log.Printf("[DEBUG] policies json not provided. Skipping autoscaler policies changes")
@@ -222,7 +222,7 @@ func getChangedPolicies(ctx context.Context, data *schema.ResourceData, meta int
 	return policies, nil
 }
 
-func getClusterId(data *schema.ResourceData) sdk.ClusterId {
+func getClusterId(data *schema.ResourceData) string {
 	value, found := data.GetOk(FieldClusterId)
 	if !found {
 		return ""

@@ -130,6 +130,7 @@ module "castai-eks-cluster" {
         }
         compute_optimized = false
         storage_optimized = false
+        is_gpu_only = false
       }
     }
   }

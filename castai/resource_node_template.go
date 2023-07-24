@@ -133,6 +133,12 @@ func resourceNodeTemplate() *schema.Resource {
 							Default:     false,
 							Description: "Compute optimized instance constraint - will only pick compute optimized nodes if true.",
 						},
+						"is_gpu_only": {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Default:     false,
+							Description: "GPU instance constraint - will only pick nodes with GPU if true",
+						},
 						"instance_families": {
 							Type:     schema.TypeList,
 							MaxItems: 1,
@@ -381,6 +387,9 @@ func flattenConstraints(c *sdk.NodetemplatesV1TemplateConstraints) ([]map[string
 	if c.Spot != nil {
 		out["spot"] = c.Spot
 	}
+	if c.IsGpuOnly != nil {
+		out["is_gpu_only"] = c.IsGpuOnly
+	}
 
 	if c.UseSpotFallbacks != nil {
 		out["use_spot_fallbacks"] = c.UseSpotFallbacks
@@ -600,12 +609,14 @@ func resourceNodeTemplateCreate(ctx context.Context, d *schema.ResourceData, met
 	return resourceNodeTemplateRead(ctx, d, meta)
 }
 
-func getNodeTemplateByName(ctx context.Context, data *schema.ResourceData, meta any, clusterID sdk.ClusterId) (*sdk.NodetemplatesV1NodeTemplate, error) {
+func getNodeTemplateByName(ctx context.Context, data *schema.ResourceData, meta any, clusterID string) (*sdk.NodetemplatesV1NodeTemplate, error) {
 	client := meta.(*ProviderConfig).api
 	nodeTemplateName := data.Id()
 
 	log.Printf("[INFO] Getting current node templates")
-	resp, err := client.NodeTemplatesAPIListNodeTemplatesWithResponse(ctx, clusterID)
+	resp, err := client.NodeTemplatesAPIListNodeTemplatesWithResponse(ctx, clusterID, &sdk.NodeTemplatesAPIListNodeTemplatesParams{
+		IncludeDefault: lo.ToPtr(false),
+	})
 	notFound := fmt.Errorf("node templates for cluster %q not found at CAST AI", clusterID)
 	if err != nil {
 		return nil, err
@@ -657,7 +668,9 @@ func nodeTemplateStateImporter(ctx context.Context, d *schema.ResourceData, meta
 
 	// Find node templates
 	client := meta.(*ProviderConfig).api
-	resp, err := client.NodeTemplatesAPIListNodeTemplatesWithResponse(ctx, clusterID)
+	resp, err := client.NodeTemplatesAPIListNodeTemplatesWithResponse(ctx, clusterID, &sdk.NodeTemplatesAPIListNodeTemplatesParams{
+		IncludeDefault: lo.ToPtr(false),
+	})
 	if err != nil {
 		return nil, err
 	}
@@ -794,6 +807,9 @@ func toTemplateConstraints(obj map[string]any) *sdk.NodetemplatesV1TemplateConst
 	}
 	if v, ok := obj["architectures"].([]any); ok {
 		out.Architectures = toPtr(toStringList(v))
+	}
+	if v, ok := obj["is_gpu_only"].(bool); ok {
+		out.IsGpuOnly = toPtr(v)
 	}
 
 	return out
