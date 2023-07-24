@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"github.com/samber/lo"
 	"io"
 	"net/http"
 	"testing"
@@ -98,7 +99,9 @@ func TestNodeTemplateResourceReadContext(t *testing.T) {
 		}
 	`)))
 	mockClient.EXPECT().
-		NodeTemplatesAPIListNodeTemplates(gomock.Any(), clusterId).
+		NodeTemplatesAPIListNodeTemplates(gomock.Any(), clusterId, gomock.Eq(&sdk.NodeTemplatesAPIListNodeTemplatesParams{
+			IncludeDefault: lo.ToPtr(false),
+		})).
 		Return(&http.Response{StatusCode: 200, Body: body, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
 
 	resource := resourceNodeTemplate()
@@ -139,6 +142,7 @@ constraints.0.instance_families.0.exclude.4 = g5g
 constraints.0.instance_families.0.exclude.5 = g5
 constraints.0.instance_families.0.exclude.6 = g3
 constraints.0.instance_families.0.include.# = 0
+constraints.0.is_gpu_only = false
 constraints.0.max_cpu = 10000
 constraints.0.max_memory = 0
 constraints.0.min_cpu = 10
@@ -180,7 +184,9 @@ func TestNodeTemplateResourceReadContextEmptyList(t *testing.T) {
 	clusterId := "b6bfc074-a267-400f-b8f1-db0850c369b1"
 	body := io.NopCloser(bytes.NewReader([]byte(`{"items": []}`)))
 	mockClient.EXPECT().
-		NodeTemplatesAPIListNodeTemplates(gomock.Any(), clusterId).
+		NodeTemplatesAPIListNodeTemplates(gomock.Any(), clusterId, gomock.Eq(&sdk.NodeTemplatesAPIListNodeTemplatesParams{
+			IncludeDefault: lo.ToPtr(false),
+		})).
 		Return(&http.Response{StatusCode: 200, Body: body, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
 
 	resource := resourceNodeTemplate()
@@ -370,7 +376,9 @@ func testAccCheckNodeTemplateDestroy(s *terraform.State) error {
 
 		id := rs.Primary.ID
 		clusterID := rs.Primary.Attributes["cluster_id"]
-		response, err := client.NodeTemplatesAPIListNodeTemplatesWithResponse(ctx, clusterID)
+		response, err := client.NodeTemplatesAPIListNodeTemplatesWithResponse(ctx, clusterID, &sdk.NodeTemplatesAPIListNodeTemplatesParams{
+			IncludeDefault: lo.ToPtr(false),
+		})
 		if err != nil {
 			return err
 		}

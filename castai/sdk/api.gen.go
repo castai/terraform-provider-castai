@@ -467,14 +467,12 @@ type ExternalclusterV1Node struct {
 
 	// Deprecated. Use node_info architecture field.
 	InstanceArchitecture *string `json:"instanceArchitecture"`
+	InstanceId           *string `json:"instanceId"`
 
-	// Will be populated only with GetNode request.
-	InstanceId *string `json:"instanceId"`
-
-	// Will be populated only with GetNode request.
+	// Output only. Cloud provider instance tags/labels.
 	InstanceLabels *ExternalclusterV1Node_InstanceLabels `json:"instanceLabels,omitempty"`
 
-	// Will be populated only with GetNode request.
+	// Output only. Cloud provider instance name.
 	InstanceName  *string `json:"instanceName"`
 	InstancePrice *string `json:"instancePrice"`
 	InstanceType  *string `json:"instanceType,omitempty"`
@@ -488,12 +486,10 @@ type ExternalclusterV1Node struct {
 	Network             *ExternalclusterV1NodeNetwork `json:"network,omitempty"`
 	NodeConfigurationId *string                       `json:"nodeConfigurationId"`
 	NodeInfo            *ExternalclusterV1NodeInfo    `json:"nodeInfo,omitempty"`
-	Region              *string                       `json:"region,omitempty"`
 	Resources           *ExternalclusterV1Resources   `json:"resources,omitempty"`
 
 	// NodeType defines the role of the VM when joining the Kubernetes cluster. Default value is not allowed.
-	Role  *ExternalclusterV1NodeType `json:"role,omitempty"`
-	Shape *string                    `json:"shape,omitempty"`
+	Role *ExternalclusterV1NodeType `json:"role,omitempty"`
 
 	// NodeSpotConfig defines if node should be created as spot instance, and params for creation.
 	SpotConfig *ExternalclusterV1NodeSpotConfig `json:"spotConfig,omitempty"`
@@ -510,7 +506,7 @@ type ExternalclusterV1Node_Annotations struct {
 	AdditionalProperties map[string]string `json:"-"`
 }
 
-// Will be populated only with GetNode request.
+// Output only. Cloud provider instance tags/labels.
 type ExternalclusterV1Node_InstanceLabels struct {
 	AdditionalProperties map[string]string `json:"-"`
 }
@@ -1021,6 +1017,9 @@ type NodetemplatesV1NewNodeTemplate struct {
 	// Custom taints for the template.
 	CustomTaints *[]NodetemplatesV1TaintWithoutEffect `json:"customTaints,omitempty"`
 
+	// Flag whether this template is the default template for the cluster.
+	IsDefault *bool `json:"isDefault,omitempty"`
+
 	// This field is used to enable/disable autoscaling for the template.
 	IsEnabled         *bool                                    `json:"isEnabled"`
 	Name              *string                                  `json:"name,omitempty"`
@@ -1051,6 +1050,9 @@ type NodetemplatesV1NodeTemplate struct {
 
 	// Custom taints for the template.
 	CustomTaints *[]NodetemplatesV1Taint `json:"customTaints,omitempty"`
+
+	// Flag whether this template is the default template for the cluster.
+	IsDefault *bool `json:"isDefault,omitempty"`
 
 	// This field is used to enable/disable autoscaling for the template.
 	IsEnabled         *bool                                    `json:"isEnabled,omitempty"`
@@ -1106,14 +1108,21 @@ type NodetemplatesV1TemplateConstraints struct {
 	Architectures    *[]string `json:"architectures,omitempty"`
 	ComputeOptimized *bool     `json:"computeOptimized"`
 
+	// Enable/disable spot diversity policy. When enabled, autoscaler will try to balance between diverse and cost optimal instance types.
+	EnableSpotDiversity *bool `json:"enableSpotDiversity"`
+
 	// Fallback restore rate in seconds: defines how much time should pass before spot fallback should be attempted to be restored to real spot.
 	FallbackRestoreRateSeconds *int32                                                       `json:"fallbackRestoreRateSeconds"`
 	Gpu                        *NodetemplatesV1TemplateConstraintsGPUConstraints            `json:"gpu,omitempty"`
 	InstanceFamilies           *NodetemplatesV1TemplateConstraintsInstanceFamilyConstraints `json:"instanceFamilies,omitempty"`
-	MaxCpu                     *int32                                                       `json:"maxCpu"`
-	MaxMemory                  *int32                                                       `json:"maxMemory"`
-	MinCpu                     *int32                                                       `json:"minCpu"`
-	MinMemory                  *int32                                                       `json:"minMemory"`
+
+	// This template is gpu only. Setting this to true, will result in only instances with GPUs being considered.
+	// In addition, this ensures that all of the added instances for this template won't have any nvidia taints.
+	IsGpuOnly *bool  `json:"isGpuOnly"`
+	MaxCpu    *int32 `json:"maxCpu"`
+	MaxMemory *int32 `json:"maxMemory"`
+	MinCpu    *int32 `json:"minCpu"`
+	MinMemory *int32 `json:"minMemory"`
 
 	// Should include on-demand instances in the considered pool.
 	OnDemand *bool `json:"onDemand"`
@@ -1128,8 +1137,17 @@ type NodetemplatesV1TemplateConstraints struct {
 	//      - key: scheduling.cast.ai/spot
 	//        operator: Exists
 	// toleration.
-	Spot             *bool `json:"spot"`
-	StorageOptimized *bool `json:"storageOptimized"`
+	Spot *bool `json:"spot"`
+
+	// Allowed node configuration price increase when diversifying instance types. E.g. if the value is 10%, then the overall price of diversified instance types can be 10% higher than the price of the optimal configuration.
+	SpotDiversityPriceIncreaseLimitPercent *int32 `json:"spotDiversityPriceIncreaseLimitPercent"`
+
+	// Enable/disable spot interruption predictions.
+	SpotInterruptionPredictionsEnabled *bool `json:"spotInterruptionPredictionsEnabled"`
+
+	// Spot interruption predictions type. Can be either "aws-rebalance-recommendations" or "interruption-predictions".
+	SpotInterruptionPredictionsType *string `json:"spotInterruptionPredictionsType"`
+	StorageOptimized                *bool   `json:"storageOptimized"`
 
 	// Spot instance fallback constraint - when true, on-demand instances will be created, when spots are unavailable.
 	UseSpotFallbacks *bool `json:"useSpotFallbacks"`
@@ -1137,12 +1155,8 @@ type NodetemplatesV1TemplateConstraints struct {
 
 // NodetemplatesV1TemplateConstraintsGPUConstraints defines model for nodetemplates.v1.TemplateConstraints.GPUConstraints.
 type NodetemplatesV1TemplateConstraintsGPUConstraints struct {
-	ExcludeNames *[]string `json:"excludeNames,omitempty"`
-	IncludeNames *[]string `json:"includeNames,omitempty"`
-
-	// This template is gpu only. Setting this to true, will result in only instances with GPUs being considered.
-	// In addition, this ensures that all of the added instances for this template won't have any nvidia taints.
-	IsGpuOnly     *bool     `json:"isGpuOnly"`
+	ExcludeNames  *[]string `json:"excludeNames,omitempty"`
+	IncludeNames  *[]string `json:"includeNames,omitempty"`
 	Manufacturers *[]string `json:"manufacturers,omitempty"`
 	MaxCount      *int32    `json:"maxCount"`
 	MinCount      *int32    `json:"minCount"`
@@ -1167,6 +1181,9 @@ type NodetemplatesV1UpdateNodeTemplate struct {
 
 	// Custom taints for the template.
 	CustomTaints *[]NodetemplatesV1TaintWithoutEffect `json:"customTaints,omitempty"`
+
+	// Flag whether this template is the default template for the cluster.
+	IsDefault *bool `json:"isDefault,omitempty"`
 
 	// This field is used to enable/disable autoscaling for the template.
 	IsEnabled         *bool                                    `json:"isEnabled"`
@@ -1503,12 +1520,13 @@ type ScheduledrebalancingV1RebalancingJob struct {
 
 // ScheduledrebalancingV1RebalancingOptions defines model for scheduledrebalancing.v1.RebalancingOptions.
 type ScheduledrebalancingV1RebalancingOptions struct {
-	// Defines the conditions which must be met in order to fully execute the plan.
-	ExecutionConditions *ScheduledrebalancingV1ExecutionConditions `json:"executionConditions,omitempty"`
-
 	// Defines whether the nodes that failed to get drained until a predefined timeout, will be kept with a
 	// rebalancing.cast.ai/status=drain-failed annotation instead of forcefully drained.
-	KeepDrainTimeoutNodes *bool `json:"keepDrainTimeoutNodes"`
+	EvictGracefully *bool `json:"evictGracefully"`
+
+	// Defines the conditions which must be met in order to fully execute the plan.
+	ExecutionConditions   *ScheduledrebalancingV1ExecutionConditions `json:"executionConditions,omitempty"`
+	KeepDrainTimeoutNodes *bool                                      `json:"keepDrainTimeoutNodes"`
 
 	// Minimum number of nodes that should be kept in the cluster after rebalancing.
 	MinNodes *int32 `json:"minNodes,omitempty"`
@@ -1550,9 +1568,6 @@ type ScheduledrebalancingV1TriggerConditions struct {
 	SavingsPercentage *float32 `json:"savingsPercentage,omitempty"`
 }
 
-// ClusterId defines model for clusterId.
-type ClusterId = string
-
 // HeaderOrganizationId defines model for headerOrganizationId.
 type HeaderOrganizationId = openapi_types.UUID
 
@@ -1575,6 +1590,12 @@ type NodeConfigurationAPICreateConfigurationJSONBody = NodeconfigV1NewNodeConfig
 
 // NodeConfigurationAPIUpdateConfigurationJSONBody defines parameters for NodeConfigurationAPIUpdateConfiguration.
 type NodeConfigurationAPIUpdateConfigurationJSONBody = NodeconfigV1NodeConfigurationUpdate
+
+// NodeTemplatesAPIListNodeTemplatesParams defines parameters for NodeTemplatesAPIListNodeTemplates.
+type NodeTemplatesAPIListNodeTemplatesParams struct {
+	// Flag whether to include the default template
+	IncludeDefault *bool `form:"includeDefault,omitempty" json:"includeDefault,omitempty"`
+}
 
 // NodeTemplatesAPICreateNodeTemplateJSONBody defines parameters for NodeTemplatesAPICreateNodeTemplate.
 type NodeTemplatesAPICreateNodeTemplateJSONBody = NodetemplatesV1NewNodeTemplate
