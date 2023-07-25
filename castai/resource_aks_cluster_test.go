@@ -97,6 +97,18 @@ func TestAccResourceAKSCluster(t *testing.T) {
 					resource.TestCheckResourceAttrSet(resourceName, "cluster_token"),
 				),
 			},
+			{
+				Config: testAccAKSNodeConfigurationConfig(rName, clusterName, resourceGroupName, nodeResourceGroupName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "name", rName),
+					resource.TestCheckResourceAttr(resourceName, "disk_cpu_ratio", "35"),
+					resource.TestCheckResourceAttr(resourceName, "min_disk_size", "122"),
+					resource.TestCheckResourceAttr(resourceName, "image", ""),
+					resource.TestCheckResourceAttr(resourceName, "ssh_public_key", ""),
+					resource.TestCheckResourceAttr(resourceName, "init_script", "IyEvYmluL2Jhc2gKZWNobyAiaGVsbG8iCg=="),
+					resource.TestCheckResourceAttr(resourceName, "container_runtime", "DOCKERD"),
+				),
+			},
 		},
 		ExternalProviders: map[string]resource.ExternalProvider{
 			"azurerm": {
