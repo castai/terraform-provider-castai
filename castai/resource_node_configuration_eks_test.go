@@ -12,7 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccResourceNodeConfiguration_basic(t *testing.T) {
+func TestAccResourceNodeConfiguration_eks(t *testing.T) {
 	rName := fmt.Sprintf("%v-node-config-%v", ResourcePrefix, acctest.RandString(8))
 	resourceName := "castai_node_configuration.test"
 	clusterName := "core-tf-acc"
@@ -23,7 +23,7 @@ func TestAccResourceNodeConfiguration_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckNodeConfigurationDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNodeConfigurationConfig(rName, clusterName),
+				Config: testAccEKSNodeConfigurationConfig(rName, clusterName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "name", rName),
 					resource.TestCheckResourceAttr(resourceName, "disk_cpu_ratio", "35"),
@@ -61,7 +61,7 @@ func TestAccResourceNodeConfiguration_basic(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccNodeConfigurationUpdated(rName, clusterName),
+				Config: testAccEKSNodeConfigurationUpdated(rName, clusterName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "disk_cpu_ratio", "0"),
 					resource.TestCheckResourceAttr(resourceName, "min_disk_size", "100"),
@@ -85,7 +85,7 @@ func TestAccResourceNodeConfiguration_basic(t *testing.T) {
 	})
 }
 
-func testAccNodeConfigurationConfig(rName, clusterName string) string {
+func testAccEKSNodeConfigurationConfig(rName, clusterName string) string {
 	return ConfigCompose(testAccEKSClusterConfig(rName, clusterName), fmt.Sprintf(`
 variable "init_script" {
   type = string
@@ -133,7 +133,7 @@ resource "castai_node_configuration_default" "test" {
 `, rName))
 }
 
-func testAccNodeConfigurationUpdated(rName, clusterName string) string {
+func testAccEKSNodeConfigurationUpdated(rName, clusterName string) string {
 	return ConfigCompose(testAccEKSClusterConfig(rName, clusterName), fmt.Sprintf(`
 resource "castai_node_configuration" "test" {
   name   		    = %[1]q

@@ -136,6 +136,12 @@ provider "azurerm" {
 
 data "azurerm_subscription" "current" {}
 
+data "azurerm_subnet" "internal" {
+  name                 =  "internal"
+  virtual_network_name = "%[2]s-network"
+  resource_group_name  = %[2]q 
+}
+
 provider "azuread" {
   tenant_id = data.azurerm_subscription.current.tenant_id
 }
