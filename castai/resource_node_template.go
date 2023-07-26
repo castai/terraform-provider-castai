@@ -16,15 +16,41 @@ import (
 )
 
 const (
-	FieldNodeTemplateName                      = "name"
-	FieldNodeTemplateConfigurationId           = "configuration_id"
-	FieldNodeTemplateShouldTaint               = "should_taint"
-	FieldNodeTemplateRebalancingConfigMinNodes = "rebalancing_config_min_nodes"
-	FieldNodeTemplateCustomLabel               = "custom_label"
-	FieldNodeTemplateCustomLabels              = "custom_labels"
-	FieldNodeTemplateCustomTaints              = "custom_taints"
-	FieldNodeTemplateCustomInstancesEnabled    = "custom_instances_enabled"
-	FieldNodeTemplateConstraints               = "constraints"
+	FieldNodeTemplateArchitectures                          = "architectures"
+	FieldNodeTemplateComputeOptimized                       = "compute_optimized"
+	FieldNodeTemplateConfigurationId                        = "configuration_id"
+	FieldNodeTemplateConstraints                            = "constraints"
+	FieldNodeTemplateCustomInstancesEnabled                 = "custom_instances_enabled"
+	FieldNodeTemplateCustomLabel                            = "custom_label"
+	FieldNodeTemplateCustomLabels                           = "custom_labels"
+	FieldNodeTemplateCustomTaints                           = "custom_taints"
+	FieldNodeTemplateEnableSpotDiversity                    = "enable_spot_diversity"
+	FieldNodeTemplateExclude                                = "exclude"
+	FieldNodeTemplateExcludeNames                           = "exclude_names"
+	FieldNodeTemplateFallbackRestoreRateSeconds             = "fallback_restore_rate_seconds"
+	FieldNodeTemplateGpu                                    = "gpu"
+	FieldNodeTemplateInclude                                = "include"
+	FieldNodeTemplateIncludeNames                           = "include_names"
+	FieldNodeTemplateInstanceFamilies                       = "instance_families"
+	FieldNodeTemplateIsDefault                              = "is_default"
+	FieldNodeTemplateIsGpuOnly                              = "is_gpu_only"
+	FieldNodeTemplateManufacturers                          = "manufacturers"
+	FieldNodeTemplateMaxCount                               = "max_count"
+	FieldNodeTemplateMaxCpu                                 = "max_cpu"
+	FieldNodeTemplateMaxMemory                              = "max_memory"
+	FieldNodeTemplateMinCount                               = "min_count"
+	FieldNodeTemplateMinCpu                                 = "min_cpu"
+	FieldNodeTemplateMinMemory                              = "min_memory"
+	FieldNodeTemplateName                                   = "name"
+	FieldNodeTemplateOnDemand                               = "on_demand"
+	FieldNodeTemplateRebalancingConfigMinNodes              = "rebalancing_config_min_nodes"
+	FieldNodeTemplateShouldTaint                            = "should_taint"
+	FieldNodeTemplateSpot                                   = "spot"
+	FieldNodeTemplateSpotDiversityPriceIncreaseLimitPercent = "spot_diversity_price_increase_limit_percent"
+	FieldNodeTemplateSpotInterruptionPredictionsEnabled     = "spot_interruption_predictions_enabled"
+	FieldNodeTemplateSpotInterruptionPredictionsType        = "spot_interruption_predictions_type"
+	FieldNodeTemplateStorageOptimized                       = "storage_optimized"
+	FieldNodeTemplateUseSpotFallbacks                       = "use_spot_fallbacks"
 )
 
 const (
@@ -66,6 +92,12 @@ func resourceNodeTemplate() *schema.Resource {
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 				Description:      "Name of the node template.",
 			},
+			FieldNodeTemplateIsDefault: {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     false,
+				Description: "Flag whether the node template is default.",
+			},
 			FieldNodeTemplateConfigurationId: {
 				Type:             schema.TypeString,
 				Optional:         true,
@@ -83,69 +115,100 @@ func resourceNodeTemplate() *schema.Resource {
 				Optional: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"spot": {
+						FieldNodeTemplateSpot: {
 							Type:        schema.TypeBool,
 							Default:     false,
 							Optional:    true,
-							Description: "Spot instance constraint - true only spot, false only on-demand.",
+							Description: "Should include spot instances in the considered pool.",
 						},
-						"use_spot_fallbacks": {
+						FieldNodeTemplateOnDemand: {
+							Type:        schema.TypeBool,
+							Default:     false,
+							Optional:    true,
+							Description: "Should include on-demand instances in the considered pool.",
+						},
+						FieldNodeTemplateUseSpotFallbacks: {
 							Type:        schema.TypeBool,
 							Default:     false,
 							Optional:    true,
 							Description: "Spot instance fallback constraint - when true, on-demand instances will be created, when spots are unavailable.",
 						},
-						"fallback_restore_rate_seconds": {
+						FieldNodeTemplateFallbackRestoreRateSeconds: {
 							Type:        schema.TypeInt,
 							Default:     0,
 							Optional:    true,
 							Description: "Fallback restore rate in seconds: defines how much time should pass before spot fallback should be attempted to be restored to real spot.",
 						},
-						"min_cpu": {
+						FieldNodeTemplateEnableSpotDiversity: {
+							Type:        schema.TypeBool,
+							Default:     false,
+							Optional:    true,
+							Description: "Enable/disable spot diversity policy. When enabled, autoscaler will try to balance between diverse and cost optimal instance types.",
+						},
+						FieldNodeTemplateSpotDiversityPriceIncreaseLimitPercent: {
+							Type:        schema.TypeInt,
+							Default:     20,
+							Optional:    true,
+							Description: "Allowed node configuration price increase when diversifying instance types. E.g. if the value is 10%, then the overall price of diversified instance types can be 10% higher than the price of the optimal configuration.",
+						},
+						FieldNodeTemplateSpotInterruptionPredictionsEnabled: {
+							Type:        schema.TypeBool,
+							Default:     false,
+							Optional:    true,
+							Description: "Enable/disable spot interruption predictions.",
+						},
+						FieldNodeTemplateSpotInterruptionPredictionsType: {
+							Type:             schema.TypeString,
+							Default:          "aws-rebalance-recommendations",
+							Optional:         true,
+							Description:      "Spot interruption predictions type. Can be either \"aws-rebalance-recommendations\" or \"interruption-predictions\".",
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"aws-rebalance-recommendations", "interruption-predictions"}, false)),
+						},
+						FieldNodeTemplateMinCpu: {
 							Type:        schema.TypeInt,
 							Optional:    true,
 							Description: "Min CPU cores per node.",
 						},
-						"max_cpu": {
+						FieldNodeTemplateMaxCpu: {
 							Type:        schema.TypeInt,
 							Optional:    true,
 							Description: "Max CPU cores per node.",
 						},
-						"min_memory": {
+						FieldNodeTemplateMinMemory: {
 							Type:        schema.TypeInt,
 							Optional:    true,
 							Description: "Min Memory (Mib) per node.",
 						},
-						"max_memory": {
+						FieldNodeTemplateMaxMemory: {
 							Type:        schema.TypeInt,
 							Optional:    true,
 							Description: "Max Memory (Mib) per node.",
 						},
-						"storage_optimized": {
+						FieldNodeTemplateStorageOptimized: {
 							Type:        schema.TypeBool,
 							Optional:    true,
 							Default:     false,
 							Description: "Storage optimized instance constraint - will only pick storage optimized nodes if true",
 						},
-						"compute_optimized": {
-							Type:        schema.TypeBool,
-							Optional:    true,
-							Default:     false,
-							Description: "Compute optimized instance constraint - will only pick compute optimized nodes if true.",
-						},
-						"is_gpu_only": {
+						FieldNodeTemplateIsGpuOnly: {
 							Type:        schema.TypeBool,
 							Optional:    true,
 							Default:     false,
 							Description: "GPU instance constraint - will only pick nodes with GPU if true",
 						},
-						"instance_families": {
+						FieldNodeTemplateComputeOptimized: {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Default:     false,
+							Description: "Compute optimized instance constraint - will only pick compute optimized nodes if true.",
+						},
+						FieldNodeTemplateInstanceFamilies: {
 							Type:     schema.TypeList,
 							MaxItems: 1,
 							Optional: true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
-									"include": {
+									FieldNodeTemplateInclude: {
 										Type:     schema.TypeList,
 										Optional: true,
 										Elem: &schema.Schema{
@@ -153,7 +216,7 @@ func resourceNodeTemplate() *schema.Resource {
 										},
 										Description: "Instance families to exclude when filtering (includes all other families).",
 									},
-									"exclude": {
+									FieldNodeTemplateExclude: {
 										Type:     schema.TypeList,
 										Optional: true,
 										Elem: &schema.Schema{
@@ -164,13 +227,13 @@ func resourceNodeTemplate() *schema.Resource {
 								},
 							},
 						},
-						"gpu": {
+						FieldNodeTemplateGpu: {
 							Type:     schema.TypeList,
 							MaxItems: 1,
 							Optional: true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
-									"manufacturers": {
+									FieldNodeTemplateManufacturers: {
 										Type:     schema.TypeList,
 										Optional: true,
 										Elem: &schema.Schema{
@@ -178,7 +241,7 @@ func resourceNodeTemplate() *schema.Resource {
 										},
 										Description: "Manufacturers of the gpus to select - NVIDIA, AMD.",
 									},
-									"include_names": {
+									FieldNodeTemplateIncludeNames: {
 										Type:     schema.TypeList,
 										Optional: true,
 										Elem: &schema.Schema{
@@ -186,7 +249,7 @@ func resourceNodeTemplate() *schema.Resource {
 										},
 										Description: "Instance families to include when filtering (excludes all other families).",
 									},
-									"exclude_names": {
+									FieldNodeTemplateExcludeNames: {
 										Type:     schema.TypeList,
 										Optional: true,
 										Elem: &schema.Schema{
@@ -194,12 +257,12 @@ func resourceNodeTemplate() *schema.Resource {
 										},
 										Description: "Names of the GPUs to exclude.",
 									},
-									"min_count": {
+									FieldNodeTemplateMinCount: {
 										Type:        schema.TypeInt,
 										Optional:    true,
 										Description: "Min GPU count for the instance type to have.",
 									},
-									"max_count": {
+									FieldNodeTemplateMaxCount: {
 										Type:        schema.TypeInt,
 										Optional:    true,
 										Description: "Max GPU count for the instance type to have.",
@@ -207,7 +270,7 @@ func resourceNodeTemplate() *schema.Resource {
 								},
 							},
 						},
-						"architectures": {
+						FieldNodeTemplateArchitectures: {
 							Type:     schema.TypeList,
 							MaxItems: 2,
 							MinItems: 1,
@@ -231,13 +294,13 @@ func resourceNodeTemplate() *schema.Resource {
 				Optional: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"key": {
+						FieldKey: {
 							Required:         true,
 							Type:             schema.TypeString,
 							ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 							Description:      "Label key to be added to nodes created from this template.",
 						},
-						"value": {
+						FieldValue: {
 							Required:         true,
 							Type:             schema.TypeString,
 							ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
@@ -262,19 +325,19 @@ func resourceNodeTemplate() *schema.Resource {
 				Optional: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"key": {
+						FieldKey: {
 							Required:         true,
 							Type:             schema.TypeString,
 							ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 							Description:      "Key of a taint to be added to nodes created from this template.",
 						},
-						"value": {
+						FieldValue: {
 							Required:         true,
 							Type:             schema.TypeString,
 							ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 							Description:      "Value of a taint to be added to nodes created from this template.",
 						},
-						"effect": {
+						FieldEffect: {
 							Optional: true,
 							Type:     schema.TypeString,
 							Default:  "NoSchedule",
@@ -329,6 +392,9 @@ func resourceNodeTemplateRead(ctx context.Context, d *schema.ResourceData, meta 
 	if err := d.Set(FieldNodeTemplateName, nodeTemplate.Name); err != nil {
 		return diag.FromErr(fmt.Errorf("setting name: %w", err))
 	}
+	if err := d.Set(FieldNodeTemplateIsDefault, nodeTemplate.IsDefault); err != nil {
+		return diag.FromErr(fmt.Errorf("setting is default: %w", err))
+	}
 	if err := d.Set(FieldNodeTemplateConfigurationId, nodeTemplate.ConfigurationId); err != nil {
 		return diag.FromErr(fmt.Errorf("setting configuration id: %w", err))
 	}
@@ -373,44 +439,58 @@ func flattenConstraints(c *sdk.NodetemplatesV1TemplateConstraints) ([]map[string
 
 	out := make(map[string]any)
 	if c.Gpu != nil {
-		out["gpu"] = flattenGpu(c.Gpu)
+		out[FieldNodeTemplateGpu] = flattenGpu(c.Gpu)
 	}
 	if c.InstanceFamilies != nil {
-		out["instance_families"] = flattenInstanceFamilies(c.InstanceFamilies)
+		out[FieldNodeTemplateInstanceFamilies] = flattenInstanceFamilies(c.InstanceFamilies)
 	}
 	if c.ComputeOptimized != nil {
-		out["compute_optimized"] = c.ComputeOptimized
+		out[FieldNodeTemplateComputeOptimized] = c.ComputeOptimized
 	}
 	if c.StorageOptimized != nil {
-		out["storage_optimized"] = c.StorageOptimized
+		out[FieldNodeTemplateStorageOptimized] = c.StorageOptimized
 	}
 	if c.Spot != nil {
-		out["spot"] = c.Spot
+		out[FieldNodeTemplateSpot] = c.Spot
+	}
+	if c.OnDemand != nil {
+		out[FieldNodeTemplateOnDemand] = c.OnDemand
 	}
 	if c.IsGpuOnly != nil {
-		out["is_gpu_only"] = c.IsGpuOnly
+		out[FieldNodeTemplateIsGpuOnly] = c.IsGpuOnly
 	}
-
 	if c.UseSpotFallbacks != nil {
-		out["use_spot_fallbacks"] = c.UseSpotFallbacks
+		out[FieldNodeTemplateUseSpotFallbacks] = c.UseSpotFallbacks
 	}
 	if c.FallbackRestoreRateSeconds != nil {
-		out["fallback_restore_rate_seconds"] = c.FallbackRestoreRateSeconds
+		out[FieldNodeTemplateFallbackRestoreRateSeconds] = c.FallbackRestoreRateSeconds
+	}
+	if c.EnableSpotDiversity != nil {
+		out[FieldNodeTemplateEnableSpotDiversity] = c.EnableSpotDiversity
+	}
+	if c.SpotDiversityPriceIncreaseLimitPercent != nil {
+		out[FieldNodeTemplateSpotDiversityPriceIncreaseLimitPercent] = c.SpotDiversityPriceIncreaseLimitPercent
+	}
+	if c.SpotInterruptionPredictionsEnabled != nil {
+		out[FieldNodeTemplateSpotInterruptionPredictionsEnabled] = c.SpotInterruptionPredictionsEnabled
+	}
+	if c.SpotInterruptionPredictionsType != nil {
+		out[FieldNodeTemplateSpotInterruptionPredictionsType] = c.SpotInterruptionPredictionsType
 	}
 	if c.MinMemory != nil {
-		out["min_memory"] = c.MinMemory
+		out[FieldNodeTemplateMinMemory] = c.MinMemory
 	}
 	if c.MaxMemory != nil {
-		out["max_memory"] = c.MaxMemory
+		out[FieldNodeTemplateMaxMemory] = c.MaxMemory
 	}
 	if c.MinCpu != nil {
-		out["min_cpu"] = c.MinCpu
+		out[FieldNodeTemplateMinCpu] = c.MinCpu
 	}
 	if c.MaxCpu != nil {
-		out["max_cpu"] = c.MaxCpu
+		out[FieldNodeTemplateMaxCpu] = c.MaxCpu
 	}
 	if c.Architectures != nil {
-		out["architectures"] = lo.FromPtr(c.Architectures)
+		out[FieldNodeTemplateArchitectures] = lo.FromPtr(c.Architectures)
 	}
 	return []map[string]any{out}, nil
 }
@@ -421,10 +501,10 @@ func flattenInstanceFamilies(families *sdk.NodetemplatesV1TemplateConstraintsIns
 	}
 	out := map[string][]string{}
 	if families.Exclude != nil {
-		out["exclude"] = lo.FromPtr(families.Exclude)
+		out[FieldNodeTemplateExclude] = lo.FromPtr(families.Exclude)
 	}
 	if families.Include != nil {
-		out["include"] = lo.FromPtr(families.Include)
+		out[FieldNodeTemplateInclude] = lo.FromPtr(families.Include)
 	}
 	return []map[string][]string{out}
 }
@@ -435,19 +515,19 @@ func flattenGpu(gpu *sdk.NodetemplatesV1TemplateConstraintsGPUConstraints) []map
 	}
 	out := map[string]any{}
 	if gpu.ExcludeNames != nil {
-		out["exclude_names"] = gpu.ExcludeNames
+		out[FieldNodeTemplateExcludeNames] = gpu.ExcludeNames
 	}
 	if gpu.IncludeNames != nil {
-		out["include_names"] = gpu.IncludeNames
+		out[FieldNodeTemplateIncludeNames] = gpu.IncludeNames
 	}
 	if gpu.Manufacturers != nil {
-		out["manufacturers"] = gpu.Manufacturers
+		out[FieldNodeTemplateManufacturers] = gpu.Manufacturers
 	}
 	if gpu.MinCount != nil {
-		out["min_count"] = gpu.MinCount
+		out[FieldNodeTemplateMinCount] = gpu.MinCount
 	}
 	if gpu.MaxCount != nil {
-		out["max_count"] = gpu.MaxCount
+		out[FieldNodeTemplateMaxCount] = gpu.MaxCount
 	}
 	return []map[string]any{out}
 }
@@ -486,6 +566,10 @@ func resourceNodeTemplateUpdate(ctx context.Context, d *schema.ResourceData, met
 	name := d.Get(FieldNodeTemplateName).(string)
 
 	req := sdk.NodeTemplatesAPIUpdateNodeTemplateJSONRequestBody{}
+	if v, ok := d.GetOk(FieldNodeTemplateIsDefault); ok {
+		req.IsDefault = toPtr(v.(bool))
+	}
+
 	if v, ok := d.GetOk(FieldNodeTemplateConfigurationId); ok {
 		req.ConfigurationId = toPtr(v.(string))
 	}
@@ -552,6 +636,7 @@ func resourceNodeTemplateCreate(ctx context.Context, d *schema.ResourceData, met
 	clusterID := d.Get(FieldClusterID).(string)
 	req := sdk.NodeTemplatesAPICreateNodeTemplateJSONRequestBody{
 		Name:            lo.ToPtr(d.Get(FieldNodeTemplateName).(string)),
+		IsDefault:       lo.ToPtr(d.Get(FieldNodeTemplateIsDefault).(bool)),
 		ConfigurationId: lo.ToPtr(d.Get(FieldNodeTemplateConfigurationId).(string)),
 		ShouldTaint:     lo.ToPtr(d.Get(FieldNodeTemplateShouldTaint).(bool)),
 	}
@@ -614,9 +699,7 @@ func getNodeTemplateByName(ctx context.Context, data *schema.ResourceData, meta 
 	nodeTemplateName := data.Id()
 
 	log.Printf("[INFO] Getting current node templates")
-	resp, err := client.NodeTemplatesAPIListNodeTemplatesWithResponse(ctx, clusterID, &sdk.NodeTemplatesAPIListNodeTemplatesParams{
-		IncludeDefault: lo.ToPtr(false),
-	})
+	resp, err := client.NodeTemplatesAPIListNodeTemplatesWithResponse(ctx, clusterID, &sdk.NodeTemplatesAPIListNodeTemplatesParams{IncludeDefault: lo.ToPtr(true)})
 	notFound := fmt.Errorf("node templates for cluster %q not found at CAST AI", clusterID)
 	if err != nil {
 		return nil, err
@@ -668,9 +751,7 @@ func nodeTemplateStateImporter(ctx context.Context, d *schema.ResourceData, meta
 
 	// Find node templates
 	client := meta.(*ProviderConfig).api
-	resp, err := client.NodeTemplatesAPIListNodeTemplatesWithResponse(ctx, clusterID, &sdk.NodeTemplatesAPIListNodeTemplatesParams{
-		IncludeDefault: lo.ToPtr(false),
-	})
+	resp, err := client.NodeTemplatesAPIListNodeTemplatesWithResponse(ctx, clusterID, &sdk.NodeTemplatesAPIListNodeTemplatesParams{IncludeDefault: lo.ToPtr(true)})
 	if err != nil {
 		return nil, err
 	}
@@ -694,10 +775,10 @@ func toCustomLabel(obj map[string]any) *sdk.NodetemplatesV1Label {
 	}
 
 	out := &sdk.NodetemplatesV1Label{}
-	if v, ok := obj["key"]; ok && v != "" {
+	if v, ok := obj[FieldKey]; ok && v != "" {
 		out.Key = toPtr(v.(string))
 	}
-	if v, ok := obj["value"]; ok && v != "" {
+	if v, ok := obj[FieldValue]; ok && v != "" {
 		out.Value = toPtr(v.(string))
 	}
 
@@ -714,10 +795,10 @@ func toCustomTaintsWithoutEffect(objs []map[string]any) *[]sdk.NodetemplatesV1Ta
 	for _, taint := range objs {
 		t := sdk.NodetemplatesV1TaintWithoutEffect{}
 
-		if v, ok := taint["key"]; ok && v != "" {
+		if v, ok := taint[FieldKey]; ok && v != "" {
 			t.Key = toPtr(v.(string))
 		}
-		if v, ok := taint["value"]; ok && v != "" {
+		if v, ok := taint[FieldValue]; ok && v != "" {
 			t.Value = toPtr(v.(string))
 		}
 
@@ -734,10 +815,10 @@ func flattenCustomLabel(label *sdk.NodetemplatesV1Label) []map[string]string {
 
 	m := map[string]string{}
 	if v := label.Key; v != nil {
-		m["key"] = toString(v)
+		m[FieldKey] = toString(v)
 	}
 	if v := label.Value; v != nil {
-		m["value"] = toString(v)
+		m[FieldValue] = toString(v)
 	}
 	return []map[string]string{m}
 }
@@ -751,13 +832,13 @@ func flattenCustomTaints(taints *[]sdk.NodetemplatesV1Taint) []map[string]string
 	for _, taint := range *taints {
 		t := map[string]string{}
 		if k := taint.Key; k != nil {
-			t["key"] = toString(k)
+			t[FieldKey] = toString(k)
 		}
 		if v := taint.Value; v != nil {
-			t["value"] = toString(v)
+			t[FieldValue] = toString(v)
 		}
 		if e := taint.Effect; e != nil {
-			t["effect"] = toString(e)
+			t[FieldEffect] = toString(e)
 		}
 
 		ts = append(ts, t)
@@ -772,44 +853,59 @@ func toTemplateConstraints(obj map[string]any) *sdk.NodetemplatesV1TemplateConst
 	}
 
 	out := &sdk.NodetemplatesV1TemplateConstraints{}
-	if v, ok := obj["compute_optimized"].(bool); ok {
+	if v, ok := obj[FieldNodeTemplateComputeOptimized].(bool); ok {
 		out.ComputeOptimized = toPtr(v)
 	}
-	if v, ok := obj["fallback_restore_rate_seconds"].(int); ok {
+	if v, ok := obj[FieldNodeTemplateFallbackRestoreRateSeconds].(int); ok {
 		out.FallbackRestoreRateSeconds = toPtr(int32(v))
 	}
-	if v, ok := obj["gpu"].([]any); ok && len(v) > 0 {
+	if v, ok := obj[FieldNodeTemplateGpu].([]any); ok && len(v) > 0 {
 		out.Gpu = toTemplateConstraintsGpuConstraints(v[0].(map[string]any))
 	}
-	if v, ok := obj["instance_families"].([]any); ok && len(v) > 0 {
+	if v, ok := obj[FieldNodeTemplateInstanceFamilies].([]any); ok && len(v) > 0 {
 		out.InstanceFamilies = toTemplateConstraintsInstanceFamilies(v[0].(map[string]any))
 	}
-	if v, ok := obj["max_cpu"].(int); ok && v != 0 {
+	if v, ok := obj[FieldNodeTemplateMaxCpu].(int); ok && v != 0 {
 		out.MaxCpu = toPtr(int32(v))
 	}
-	if v, ok := obj["max_memory"].(int); ok && v != 0 {
+	if v, ok := obj[FieldNodeTemplateMaxMemory].(int); ok && v != 0 {
 		out.MaxMemory = toPtr(int32(v))
 	}
-	if v, ok := obj["min_cpu"].(int); ok {
+	if v, ok := obj[FieldNodeTemplateMinCpu].(int); ok {
 		out.MinCpu = toPtr(int32(v))
 	}
-	if v, ok := obj["min_memory"].(int); ok {
+	if v, ok := obj[FieldNodeTemplateMinMemory].(int); ok {
 		out.MinMemory = toPtr(int32(v))
 	}
-	if v, ok := obj["spot"].(bool); ok {
+	if v, ok := obj[FieldNodeTemplateSpot].(bool); ok {
 		out.Spot = toPtr(v)
 	}
-	if v, ok := obj["storage_optimized"].(bool); ok {
+	if v, ok := obj[FieldNodeTemplateOnDemand].(bool); ok {
+		out.OnDemand = toPtr(v)
+	}
+	if v, ok := obj[FieldNodeTemplateStorageOptimized].(bool); ok {
 		out.StorageOptimized = toPtr(v)
 	}
-	if v, ok := obj["use_spot_fallbacks"].(bool); ok {
+	if v, ok := obj[FieldNodeTemplateUseSpotFallbacks].(bool); ok {
 		out.UseSpotFallbacks = toPtr(v)
 	}
-	if v, ok := obj["architectures"].([]any); ok {
+	if v, ok := obj[FieldNodeTemplateArchitectures].([]any); ok {
 		out.Architectures = toPtr(toStringList(v))
 	}
-	if v, ok := obj["is_gpu_only"].(bool); ok {
+	if v, ok := obj[FieldNodeTemplateIsGpuOnly].(bool); ok {
 		out.IsGpuOnly = toPtr(v)
+	}
+	if v, ok := obj[FieldNodeTemplateEnableSpotDiversity].(bool); ok {
+		out.EnableSpotDiversity = toPtr(v)
+	}
+	if v, ok := obj[FieldNodeTemplateSpotDiversityPriceIncreaseLimitPercent].(int); ok {
+		out.SpotDiversityPriceIncreaseLimitPercent = toPtr(int32(v))
+	}
+	if v, ok := obj[FieldNodeTemplateSpotInterruptionPredictionsEnabled].(bool); ok {
+		out.SpotInterruptionPredictionsEnabled = toPtr(v)
+	}
+	if v, ok := obj[FieldNodeTemplateSpotInterruptionPredictionsType].(string); ok {
+		out.SpotInterruptionPredictionsType = toPtr(v)
 	}
 
 	return out
@@ -821,10 +917,10 @@ func toTemplateConstraintsInstanceFamilies(o map[string]any) *sdk.NodetemplatesV
 	}
 
 	out := &sdk.NodetemplatesV1TemplateConstraintsInstanceFamilyConstraints{}
-	if v, ok := o["exclude"].([]any); ok {
+	if v, ok := o[FieldNodeTemplateExclude].([]any); ok {
 		out.Exclude = toPtr(toStringList(v))
 	}
-	if v, ok := o["include"].([]any); ok {
+	if v, ok := o[FieldNodeTemplateInclude].([]any); ok {
 		out.Include = toPtr(toStringList(v))
 	}
 	return out
@@ -836,21 +932,21 @@ func toTemplateConstraintsGpuConstraints(o map[string]any) *sdk.NodetemplatesV1T
 	}
 
 	out := &sdk.NodetemplatesV1TemplateConstraintsGPUConstraints{}
-	if v, ok := o["manufacturers"].([]any); ok {
+	if v, ok := o[FieldNodeTemplateManufacturers].([]any); ok {
 		out.Manufacturers = toPtr(toStringList(v))
 	}
 
-	if v, ok := o["exclude_names"].([]any); ok {
+	if v, ok := o[FieldNodeTemplateExcludeNames].([]any); ok {
 		out.ExcludeNames = toPtr(toStringList(v))
 	}
-	if v, ok := o["include_names"].([]any); ok {
+	if v, ok := o[FieldNodeTemplateIncludeNames].([]any); ok {
 		out.IncludeNames = toPtr(toStringList(v))
 	}
 
-	if v, ok := o["min_count"].(int); ok {
+	if v, ok := o[FieldNodeTemplateMinCount].(int); ok {
 		out.MinCount = toPtr(int32(v))
 	}
-	if v, ok := o["max_count"].(int); ok && v != 0 {
+	if v, ok := o[FieldNodeTemplateMaxCount].(int); ok && v != 0 {
 		out.MaxCount = toPtr(int32(v))
 	}
 
