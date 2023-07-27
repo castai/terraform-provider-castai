@@ -259,14 +259,8 @@ type ClientInterface interface {
 
 	ExternalClusterAPIDrainNode(ctx context.Context, clusterId string, nodeId string, body ExternalClusterAPIDrainNodeJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// ExternalClusterAPIPauseCluster request
-	ExternalClusterAPIPauseCluster(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error)
-
 	// ExternalClusterAPIReconcileCluster request
 	ExternalClusterAPIReconcileCluster(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error)
-
-	// ExternalClusterAPIResumeCluster request
-	ExternalClusterAPIResumeCluster(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// ExternalClusterAPICreateClusterToken request
 	ExternalClusterAPICreateClusterToken(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -1044,32 +1038,8 @@ func (c *Client) ExternalClusterAPIDrainNode(ctx context.Context, clusterId stri
 	return c.Client.Do(req)
 }
 
-func (c *Client) ExternalClusterAPIPauseCluster(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewExternalClusterAPIPauseClusterRequest(c.Server, clusterId)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
 func (c *Client) ExternalClusterAPIReconcileCluster(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewExternalClusterAPIReconcileClusterRequest(c.Server, clusterId)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
-func (c *Client) ExternalClusterAPIResumeCluster(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewExternalClusterAPIResumeClusterRequest(c.Server, clusterId)
 	if err != nil {
 		return nil, err
 	}
@@ -3203,40 +3173,6 @@ func NewExternalClusterAPIDrainNodeRequestWithBody(server string, clusterId stri
 	return req, nil
 }
 
-// NewExternalClusterAPIPauseClusterRequest generates requests for ExternalClusterAPIPauseCluster
-func NewExternalClusterAPIPauseClusterRequest(server string, clusterId string) (*http.Request, error) {
-	var err error
-
-	var pathParam0 string
-
-	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "clusterId", runtime.ParamLocationPath, clusterId)
-	if err != nil {
-		return nil, err
-	}
-
-	serverURL, err := url.Parse(server)
-	if err != nil {
-		return nil, err
-	}
-
-	operationPath := fmt.Sprintf("/v1/kubernetes/external-clusters/%s/pause", pathParam0)
-	if operationPath[0] == '/' {
-		operationPath = "." + operationPath
-	}
-
-	queryURL, err := serverURL.Parse(operationPath)
-	if err != nil {
-		return nil, err
-	}
-
-	req, err := http.NewRequest("POST", queryURL.String(), nil)
-	if err != nil {
-		return nil, err
-	}
-
-	return req, nil
-}
-
 // NewExternalClusterAPIReconcileClusterRequest generates requests for ExternalClusterAPIReconcileCluster
 func NewExternalClusterAPIReconcileClusterRequest(server string, clusterId string) (*http.Request, error) {
 	var err error
@@ -3254,40 +3190,6 @@ func NewExternalClusterAPIReconcileClusterRequest(server string, clusterId strin
 	}
 
 	operationPath := fmt.Sprintf("/v1/kubernetes/external-clusters/%s/reconcile", pathParam0)
-	if operationPath[0] == '/' {
-		operationPath = "." + operationPath
-	}
-
-	queryURL, err := serverURL.Parse(operationPath)
-	if err != nil {
-		return nil, err
-	}
-
-	req, err := http.NewRequest("POST", queryURL.String(), nil)
-	if err != nil {
-		return nil, err
-	}
-
-	return req, nil
-}
-
-// NewExternalClusterAPIResumeClusterRequest generates requests for ExternalClusterAPIResumeCluster
-func NewExternalClusterAPIResumeClusterRequest(server string, clusterId string) (*http.Request, error) {
-	var err error
-
-	var pathParam0 string
-
-	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "clusterId", runtime.ParamLocationPath, clusterId)
-	if err != nil {
-		return nil, err
-	}
-
-	serverURL, err := url.Parse(server)
-	if err != nil {
-		return nil, err
-	}
-
-	operationPath := fmt.Sprintf("/v1/kubernetes/external-clusters/%s/resume", pathParam0)
 	if operationPath[0] == '/' {
 		operationPath = "." + operationPath
 	}
@@ -3861,14 +3763,8 @@ type ClientWithResponsesInterface interface {
 
 	ExternalClusterAPIDrainNodeWithResponse(ctx context.Context, clusterId string, nodeId string, body ExternalClusterAPIDrainNodeJSONRequestBody) (*ExternalClusterAPIDrainNodeResponse, error)
 
-	// ExternalClusterAPIPauseCluster request
-	ExternalClusterAPIPauseClusterWithResponse(ctx context.Context, clusterId string) (*ExternalClusterAPIPauseClusterResponse, error)
-
 	// ExternalClusterAPIReconcileCluster request
 	ExternalClusterAPIReconcileClusterWithResponse(ctx context.Context, clusterId string) (*ExternalClusterAPIReconcileClusterResponse, error)
-
-	// ExternalClusterAPIResumeCluster request
-	ExternalClusterAPIResumeClusterWithResponse(ctx context.Context, clusterId string) (*ExternalClusterAPIResumeClusterResponse, error)
 
 	// ExternalClusterAPICreateClusterToken request
 	ExternalClusterAPICreateClusterTokenWithResponse(ctx context.Context, clusterId string) (*ExternalClusterAPICreateClusterTokenResponse, error)
@@ -5260,36 +5156,6 @@ func (r ExternalClusterAPIDrainNodeResponse) GetBody() []byte {
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
-type ExternalClusterAPIPauseClusterResponse struct {
-	Body         []byte
-	HTTPResponse *http.Response
-	JSON200      *ExternalclusterV1Cluster
-}
-
-// Status returns HTTPResponse.Status
-func (r ExternalClusterAPIPauseClusterResponse) Status() string {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.Status
-	}
-	return http.StatusText(0)
-}
-
-// StatusCode returns HTTPResponse.StatusCode
-func (r ExternalClusterAPIPauseClusterResponse) StatusCode() int {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.StatusCode
-	}
-	return 0
-}
-
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r ExternalClusterAPIPauseClusterResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-
 type ExternalClusterAPIReconcileClusterResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -5315,36 +5181,6 @@ func (r ExternalClusterAPIReconcileClusterResponse) StatusCode() int {
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
 func (r ExternalClusterAPIReconcileClusterResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-
-type ExternalClusterAPIResumeClusterResponse struct {
-	Body         []byte
-	HTTPResponse *http.Response
-	JSON200      *ExternalclusterV1Cluster
-}
-
-// Status returns HTTPResponse.Status
-func (r ExternalClusterAPIResumeClusterResponse) Status() string {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.Status
-	}
-	return http.StatusText(0)
-}
-
-// StatusCode returns HTTPResponse.StatusCode
-func (r ExternalClusterAPIResumeClusterResponse) StatusCode() int {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.StatusCode
-	}
-	return 0
-}
-
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r ExternalClusterAPIResumeClusterResponse) GetBody() []byte {
 	return r.Body
 }
 
@@ -6159,15 +5995,6 @@ func (c *ClientWithResponses) ExternalClusterAPIDrainNodeWithResponse(ctx contex
 	return ParseExternalClusterAPIDrainNodeResponse(rsp)
 }
 
-// ExternalClusterAPIPauseClusterWithResponse request returning *ExternalClusterAPIPauseClusterResponse
-func (c *ClientWithResponses) ExternalClusterAPIPauseClusterWithResponse(ctx context.Context, clusterId string) (*ExternalClusterAPIPauseClusterResponse, error) {
-	rsp, err := c.ExternalClusterAPIPauseCluster(ctx, clusterId)
-	if err != nil {
-		return nil, err
-	}
-	return ParseExternalClusterAPIPauseClusterResponse(rsp)
-}
-
 // ExternalClusterAPIReconcileClusterWithResponse request returning *ExternalClusterAPIReconcileClusterResponse
 func (c *ClientWithResponses) ExternalClusterAPIReconcileClusterWithResponse(ctx context.Context, clusterId string) (*ExternalClusterAPIReconcileClusterResponse, error) {
 	rsp, err := c.ExternalClusterAPIReconcileCluster(ctx, clusterId)
@@ -6175,15 +6002,6 @@ func (c *ClientWithResponses) ExternalClusterAPIReconcileClusterWithResponse(ctx
 		return nil, err
 	}
 	return ParseExternalClusterAPIReconcileClusterResponse(rsp)
-}
-
-// ExternalClusterAPIResumeClusterWithResponse request returning *ExternalClusterAPIResumeClusterResponse
-func (c *ClientWithResponses) ExternalClusterAPIResumeClusterWithResponse(ctx context.Context, clusterId string) (*ExternalClusterAPIResumeClusterResponse, error) {
-	rsp, err := c.ExternalClusterAPIResumeCluster(ctx, clusterId)
-	if err != nil {
-		return nil, err
-	}
-	return ParseExternalClusterAPIResumeClusterResponse(rsp)
 }
 
 // ExternalClusterAPICreateClusterTokenWithResponse request returning *ExternalClusterAPICreateClusterTokenResponse
@@ -7443,32 +7261,6 @@ func ParseExternalClusterAPIDrainNodeResponse(rsp *http.Response) (*ExternalClus
 	return response, nil
 }
 
-// ParseExternalClusterAPIPauseClusterResponse parses an HTTP response from a ExternalClusterAPIPauseClusterWithResponse call
-func ParseExternalClusterAPIPauseClusterResponse(rsp *http.Response) (*ExternalClusterAPIPauseClusterResponse, error) {
-	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
-	if err != nil {
-		return nil, err
-	}
-
-	response := &ExternalClusterAPIPauseClusterResponse{
-		Body:         bodyBytes,
-		HTTPResponse: rsp,
-	}
-
-	switch {
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest ExternalclusterV1Cluster
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON200 = &dest
-
-	}
-
-	return response, nil
-}
-
 // ParseExternalClusterAPIReconcileClusterResponse parses an HTTP response from a ExternalClusterAPIReconcileClusterWithResponse call
 func ParseExternalClusterAPIReconcileClusterResponse(rsp *http.Response) (*ExternalClusterAPIReconcileClusterResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
@@ -7485,32 +7277,6 @@ func ParseExternalClusterAPIReconcileClusterResponse(rsp *http.Response) (*Exter
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest ExternalclusterV1ReconcileClusterResponse
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON200 = &dest
-
-	}
-
-	return response, nil
-}
-
-// ParseExternalClusterAPIResumeClusterResponse parses an HTTP response from a ExternalClusterAPIResumeClusterWithResponse call
-func ParseExternalClusterAPIResumeClusterResponse(rsp *http.Response) (*ExternalClusterAPIResumeClusterResponse, error) {
-	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
-	if err != nil {
-		return nil, err
-	}
-
-	response := &ExternalClusterAPIResumeClusterResponse{
-		Body:         bodyBytes,
-		HTTPResponse: rsp,
-	}
-
-	switch {
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest ExternalclusterV1Cluster
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
