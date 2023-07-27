@@ -675,26 +675,6 @@ func (mr *MockClientInterfaceMockRecorder) ExternalClusterAPIListNodes(ctx, clus
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIListNodes", reflect.TypeOf((*MockClientInterface)(nil).ExternalClusterAPIListNodes), varargs...)
 }
 
-// ExternalClusterAPIPauseCluster mocks base method.
-func (m *MockClientInterface) ExternalClusterAPIPauseCluster(ctx context.Context, clusterId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
-	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, clusterId}
-	for _, a := range reqEditors {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "ExternalClusterAPIPauseCluster", varargs...)
-	ret0, _ := ret[0].(*http.Response)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// ExternalClusterAPIPauseCluster indicates an expected call of ExternalClusterAPIPauseCluster.
-func (mr *MockClientInterfaceMockRecorder) ExternalClusterAPIPauseCluster(ctx, clusterId interface{}, reqEditors ...interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, clusterId}, reqEditors...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIPauseCluster", reflect.TypeOf((*MockClientInterface)(nil).ExternalClusterAPIPauseCluster), varargs...)
-}
-
 // ExternalClusterAPIReconcileCluster mocks base method.
 func (m *MockClientInterface) ExternalClusterAPIReconcileCluster(ctx context.Context, clusterId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
@@ -753,26 +733,6 @@ func (mr *MockClientInterfaceMockRecorder) ExternalClusterAPIRegisterClusterWith
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{ctx, contentType, body}, reqEditors...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIRegisterClusterWithBody", reflect.TypeOf((*MockClientInterface)(nil).ExternalClusterAPIRegisterClusterWithBody), varargs...)
-}
-
-// ExternalClusterAPIResumeCluster mocks base method.
-func (m *MockClientInterface) ExternalClusterAPIResumeCluster(ctx context.Context, clusterId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
-	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, clusterId}
-	for _, a := range reqEditors {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "ExternalClusterAPIResumeCluster", varargs...)
-	ret0, _ := ret[0].(*http.Response)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// ExternalClusterAPIResumeCluster indicates an expected call of ExternalClusterAPIResumeCluster.
-func (mr *MockClientInterfaceMockRecorder) ExternalClusterAPIResumeCluster(ctx, clusterId interface{}, reqEditors ...interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, clusterId}, reqEditors...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIResumeCluster", reflect.TypeOf((*MockClientInterface)(nil).ExternalClusterAPIResumeCluster), varargs...)
 }
 
 // ExternalClusterAPIUpdateCluster mocks base method.
@@ -2068,21 +2028,6 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIListNo
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIListNodesWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIListNodesWithResponse), ctx, clusterId, params)
 }
 
-// ExternalClusterAPIPauseClusterWithResponse mocks base method.
-func (m *MockClientWithResponsesInterface) ExternalClusterAPIPauseClusterWithResponse(ctx context.Context, clusterId string) (*sdk.ExternalClusterAPIPauseClusterResponse, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ExternalClusterAPIPauseClusterWithResponse", ctx, clusterId)
-	ret0, _ := ret[0].(*sdk.ExternalClusterAPIPauseClusterResponse)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// ExternalClusterAPIPauseClusterWithResponse indicates an expected call of ExternalClusterAPIPauseClusterWithResponse.
-func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIPauseClusterWithResponse(ctx, clusterId interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIPauseClusterWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIPauseClusterWithResponse), ctx, clusterId)
-}
-
 // ExternalClusterAPIReconcileClusterWithResponse mocks base method.
 func (m *MockClientWithResponsesInterface) ExternalClusterAPIReconcileClusterWithResponse(ctx context.Context, clusterId string) (*sdk.ExternalClusterAPIReconcileClusterResponse, error) {
 	m.ctrl.T.Helper()
@@ -2126,21 +2071,6 @@ func (m *MockClientWithResponsesInterface) ExternalClusterAPIRegisterClusterWith
 func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIRegisterClusterWithResponse(ctx, body interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIRegisterClusterWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIRegisterClusterWithResponse), ctx, body)
-}
-
-// ExternalClusterAPIResumeClusterWithResponse mocks base method.
-func (m *MockClientWithResponsesInterface) ExternalClusterAPIResumeClusterWithResponse(ctx context.Context, clusterId string) (*sdk.ExternalClusterAPIResumeClusterResponse, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ExternalClusterAPIResumeClusterWithResponse", ctx, clusterId)
-	ret0, _ := ret[0].(*sdk.ExternalClusterAPIResumeClusterResponse)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// ExternalClusterAPIResumeClusterWithResponse indicates an expected call of ExternalClusterAPIResumeClusterWithResponse.
-func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIResumeClusterWithResponse(ctx, clusterId interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIResumeClusterWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIResumeClusterWithResponse), ctx, clusterId)
 }
 
 // ExternalClusterAPIUpdateClusterWithBodyWithResponse mocks base method.
