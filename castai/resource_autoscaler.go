@@ -20,7 +20,6 @@ import (
 
 const (
 	FieldAutoscalerPoliciesJSON = "autoscaler_policies_json"
-	FieldClusterId              = "cluster_id"
 	FieldAutoscalerPolicies     = "autoscaler_policies"
 )
 

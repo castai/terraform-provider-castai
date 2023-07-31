@@ -44,12 +44,17 @@ func TestNodeTemplateResourceReadContext(t *testing.T) {
 				"name": "gpu",
 				"constraints": {
 				  "spot": false,
+				  "onDemand": true,
 				  "useSpotFallbacks": false,
 				  "fallbackRestoreRateSeconds": 0,
+				  "enableSpotDiversity": false,
+				  "spotDiversityPriceIncreaseLimitPercent": 20,
+				  "spotInterruptionPredictionsEnabled": true,
+				  "spotInterruptionPredictionsType": "aws-rebalance-recommendations",
 				  "storageOptimized": false,
 				  "computeOptimized": false,
-                  "minCpu": 10,
-                  "maxCpu": 10000,
+				  "minCpu": 10,
+				  "maxCpu": 10000,
 				  "instanceFamilies": {
 					"include": [],
 					"exclude": [
@@ -99,9 +104,7 @@ func TestNodeTemplateResourceReadContext(t *testing.T) {
 		}
 	`)))
 	mockClient.EXPECT().
-		NodeTemplatesAPIListNodeTemplates(gomock.Any(), clusterId, gomock.Eq(&sdk.NodeTemplatesAPIListNodeTemplatesParams{
-			IncludeDefault: lo.ToPtr(false),
-		})).
+		NodeTemplatesAPIListNodeTemplates(gomock.Any(), clusterId, &sdk.NodeTemplatesAPIListNodeTemplatesParams{IncludeDefault: lo.ToPtr(true)}).
 		Return(&http.Response{StatusCode: 200, Body: body, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
 
 	resource := resourceNodeTemplate()
@@ -124,6 +127,7 @@ constraints.0.architectures.# = 2
 constraints.0.architectures.0 = amd64
 constraints.0.architectures.1 = arm64
 constraints.0.compute_optimized = false
+constraints.0.enable_spot_diversity = false
 constraints.0.fallback_restore_rate_seconds = 0
 constraints.0.gpu.# = 1
 constraints.0.gpu.0.exclude_names.# = 0
@@ -147,7 +151,11 @@ constraints.0.max_cpu = 10000
 constraints.0.max_memory = 0
 constraints.0.min_cpu = 10
 constraints.0.min_memory = 0
+constraints.0.on_demand = true
 constraints.0.spot = false
+constraints.0.spot_diversity_price_increase_limit_percent = 20
+constraints.0.spot_interruption_predictions_enabled = true
+constraints.0.spot_interruption_predictions_type = aws-rebalance-recommendations
 constraints.0.storage_optimized = false
 constraints.0.use_spot_fallbacks = false
 custom_instances_enabled = true
@@ -162,6 +170,7 @@ custom_taints.0.value = some-value-1
 custom_taints.1.effect = NoSchedule
 custom_taints.1.key = some-key-2
 custom_taints.1.value = some-value-2
+is_default = false
 name = gpu
 rebalancing_config_min_nodes = 0
 should_taint = true
@@ -184,9 +193,7 @@ func TestNodeTemplateResourceReadContextEmptyList(t *testing.T) {
 	clusterId := "b6bfc074-a267-400f-b8f1-db0850c369b1"
 	body := io.NopCloser(bytes.NewReader([]byte(`{"items": []}`)))
 	mockClient.EXPECT().
-		NodeTemplatesAPIListNodeTemplates(gomock.Any(), clusterId, gomock.Eq(&sdk.NodeTemplatesAPIListNodeTemplatesParams{
-			IncludeDefault: lo.ToPtr(false),
-		})).
+		NodeTemplatesAPIListNodeTemplates(gomock.Any(), clusterId, &sdk.NodeTemplatesAPIListNodeTemplatesParams{IncludeDefault: lo.ToPtr(true)}).
 		Return(&http.Response{StatusCode: 200, Body: body, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
 
 	resource := resourceNodeTemplate()
@@ -239,6 +246,12 @@ func TestAccResourceNodeTemplate_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.spot", "true"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.architectures.#", "1"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.architectures.0", "amd64"),
+					resource.TestCheckResourceAttr(resourceName, "is_default", "false"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.on_demand", "true"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.enable_spot_diversity", "true"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.spot_diversity_price_increase_limit_percent", "21"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.spot_interruption_predictions_enabled", "true"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.spot_interruption_predictions_type", "interruption-predictions"),
 				),
 			},
 			{
@@ -275,6 +288,12 @@ func TestAccResourceNodeTemplate_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.spot", "true"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.architectures.#", "1"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.architectures.0", "arm64"),
+					resource.TestCheckResourceAttr(resourceName, "is_default", "false"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.on_demand", "true"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.enable_spot_diversity", "true"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.spot_diversity_price_increase_limit_percent", "22"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.spot_interruption_predictions_enabled", "true"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.spot_interruption_predictions_type", "interruption-predictions"),
 				),
 			},
 		},
@@ -315,6 +334,11 @@ func testAccNodeTemplateConfig(rName, clusterName string) string {
 			constraints {
 				fallback_restore_rate_seconds = 1800
 				spot = true
+				on_demand = true
+				enable_spot_diversity = true
+				spot_diversity_price_increase_limit_percent = 21
+				spot_interruption_predictions_enabled = true
+				spot_interruption_predictions_type = "interruption-predictions"
 				use_spot_fallbacks = true
 				min_cpu = 4
 				max_cpu = 100
@@ -354,7 +378,12 @@ func testNodeTemplateUpdated(rName, clusterName string) string {
 
 			constraints {
 				use_spot_fallbacks = true
-				spot = true 
+				spot = true
+				on_demand = true
+				enable_spot_diversity = true
+				spot_diversity_price_increase_limit_percent = 22
+				spot_interruption_predictions_enabled = true
+				spot_interruption_predictions_type = "interruption-predictions"
 				fallback_restore_rate_seconds = 1800
 				storage_optimized = false
 				compute_optimized = false
@@ -376,9 +405,7 @@ func testAccCheckNodeTemplateDestroy(s *terraform.State) error {
 
 		id := rs.Primary.ID
 		clusterID := rs.Primary.Attributes["cluster_id"]
-		response, err := client.NodeTemplatesAPIListNodeTemplatesWithResponse(ctx, clusterID, &sdk.NodeTemplatesAPIListNodeTemplatesParams{
-			IncludeDefault: lo.ToPtr(false),
-		})
+		response, err := client.NodeTemplatesAPIListNodeTemplatesWithResponse(ctx, clusterID, &sdk.NodeTemplatesAPIListNodeTemplatesParams{IncludeDefault: lo.ToPtr(true)})
 		if err != nil {
 			return err
 		}
