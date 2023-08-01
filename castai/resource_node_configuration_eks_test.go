@@ -34,7 +34,7 @@ func TestAccResourceNodeConfiguration_eks(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "container_runtime", "DOCKERD"),
 					resource.TestCheckResourceAttr(resourceName, "docker_config", "{\"insecure-registries\":[\"registry.com:5000\"],\"max-concurrent-downloads\":10}"),
 					resource.TestCheckResourceAttr(resourceName, "kubelet_config", "{\"registryBurst\":20,\"registryPullQPS\":10}"),
-					resource.TestCheckResourceAttr(resourceName, "subnets.#", "2"),
+					resource.TestCheckResourceAttr(resourceName, "subnets.#", "3"),
 					resource.TestCheckResourceAttr(resourceName, "tags.%", "1"),
 					resource.TestCheckResourceAttr(resourceName, "tags.env", "development"),
 					resource.TestCheckResourceAttrSet(resourceName, "eks.0.instance_profile_arn"),
@@ -138,7 +138,7 @@ func testAccEKSNodeConfigurationUpdated(rName, clusterName string) string {
 resource "castai_node_configuration" "test" {
   name   		    = %[1]q
   cluster_id        = castai_eks_cluster.test.id
-  subnets   	    = [data.aws_subnet.test.id]
+  subnets   	    = data.aws_subnets.test
   image             = "amazon-eks-node-1.23-v20220824" 
   container_runtime = "containerd"
   kubelet_config     = jsonencode({
@@ -200,8 +200,18 @@ resource "aws_subnet" "test" {
 }
 
 // Define to use subnet ID of pre-created EKS cluster.
-data "aws_subnet" "test" {
-  id = "subnet-01217d390ddaea501"
+//data "aws_subnet" "test" {
+//  id = "subnet-01217d390ddaea501"
+//}
+
+//data "aws_subnet" "test" {
+//  id = "subnet-031d9d29aee94a6a2"
+//}
+
+data "aws_subnets" "test" {
+	tags = {
+		Name = "*core-tf-acc-cluster/SubnetPublic*"
+	}
 }
 
 resource "aws_security_group" "test" {
