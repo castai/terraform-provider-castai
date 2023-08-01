@@ -100,7 +100,7 @@ resource "castai_node_configuration" "test" {
   cluster_id        = castai_eks_cluster.test.id
   disk_cpu_ratio    = 35
   min_disk_size     = 122
-  subnets   	    = aws_subnet.test[*].id
+  subnets   	    = [data.aws_subnet.test.id]
   init_script       = base64encode(var.init_script)
   docker_config     = jsonencode({
     "insecure-registries"      = ["registry.com:5000"],
@@ -138,7 +138,7 @@ func testAccEKSNodeConfigurationUpdated(rName, clusterName string) string {
 resource "castai_node_configuration" "test" {
   name   		    = %[1]q
   cluster_id        = castai_eks_cluster.test.id
-  subnets   	    = aws_subnet.test[*].id
+  subnets   	    = [data.aws_subnet.test.id]
   image             = "amazon-eks-node-1.23-v20220824" 
   container_runtime = "containerd"
   kubelet_config     = jsonencode({
@@ -197,6 +197,11 @@ resource "aws_subnet" "test" {
   tags = {
     Name = %[1]q
   }
+}
+
+// Define to use subnet ID of pre-created EKS cluster.
+data "aws_subnet" "test" {
+  id = "subnet-01217d390ddaea501"
 }
 
 resource "aws_security_group" "test" {
