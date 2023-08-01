@@ -29,6 +29,8 @@ module "castai-gke-cluster" {
   source = "castai/gke-cluster/castai"
 
   api_url = var.castai_api_url
+  castai_api_token       = var.castai_api_token
+  wait_for_cluster_ready = true
 
   project_id           = var.project_id
   gke_cluster_name     = var.cluster_name

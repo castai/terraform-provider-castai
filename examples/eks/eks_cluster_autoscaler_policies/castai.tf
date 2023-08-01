@@ -55,6 +55,8 @@ module "castai-eks-cluster" {
   source = "castai/eks-cluster/castai"
 
   api_url = var.castai_api_url
+  castai_api_token       = var.castai_api_token
+  wait_for_cluster_ready = true
 
   aws_account_id     = data.aws_caller_identity.current.account_id
   aws_cluster_region = var.cluster_region
