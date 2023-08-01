@@ -429,7 +429,7 @@ resource "castai_node_configuration" "test" {
   name   		    = %[1]q
   cluster_id        = castai_eks_cluster.test.id
   disk_cpu_ratio    = 35
-  subnets   	    = aws_subnet.test[*].id
+  subnets   	    = data.aws_subnets.test.ids
   container_runtime = "dockerd"
   tags = {
     env = "development"
