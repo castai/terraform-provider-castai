@@ -21,3 +21,4 @@ terraform apply -var-file=tf.vars
 ```
 terraform destroy -var-file=tf.vars
 ```
+

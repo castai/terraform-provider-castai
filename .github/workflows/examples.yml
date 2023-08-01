@@ -21,6 +21,9 @@ jobs:
         with:
           terraform_version: ${{ matrix.version }}
 
+      - name: Print tf version
+        run: terraform version
+
       - name: Validate Terraform examples
         id: validate_examples
         run: make validate-terraform-examples
