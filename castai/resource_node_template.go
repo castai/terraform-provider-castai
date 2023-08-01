@@ -123,8 +123,8 @@ func resourceNodeTemplate() *schema.Resource {
 						},
 						FieldNodeTemplateOnDemand: {
 							Type:        schema.TypeBool,
-							Default:     false,
 							Optional:    true,
+							Computed:    true,
 							Description: "Should include on-demand instances in the considered pool.",
 						},
 						FieldNodeTemplateUseSpotFallbacks: {
@@ -147,7 +147,6 @@ func resourceNodeTemplate() *schema.Resource {
 						},
 						FieldNodeTemplateSpotDiversityPriceIncreaseLimitPercent: {
 							Type:        schema.TypeInt,
-							Default:     20,
 							Optional:    true,
 							Description: "Allowed node configuration price increase when diversifying instance types. E.g. if the value is 10%, then the overall price of diversified instance types can be 10% higher than the price of the optimal configuration.",
 						},
@@ -159,7 +158,6 @@ func resourceNodeTemplate() *schema.Resource {
 						},
 						FieldNodeTemplateSpotInterruptionPredictionsType: {
 							Type:             schema.TypeString,
-							Default:          "aws-rebalance-recommendations",
 							Optional:         true,
 							Description:      "Spot interruption predictions type. Can be either \"aws-rebalance-recommendations\" or \"interruption-predictions\".",
 							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"aws-rebalance-recommendations", "interruption-predictions"}, false)),
@@ -882,6 +880,10 @@ func toTemplateConstraints(obj map[string]any) *sdk.NodetemplatesV1TemplateConst
 	}
 	if v, ok := obj[FieldNodeTemplateOnDemand].(bool); ok {
 		out.OnDemand = toPtr(v)
+	} else {
+		if v, ok := obj[FieldNodeTemplateSpot].(bool); ok {
+			out.Spot = toPtr(!v)
+		}
 	}
 	if v, ok := obj[FieldNodeTemplateStorageOptimized].(bool); ok {
 		out.StorageOptimized = toPtr(v)

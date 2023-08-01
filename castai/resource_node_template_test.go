@@ -244,10 +244,10 @@ func TestAccResourceNodeTemplate_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.max_cpu", "100"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.use_spot_fallbacks", "true"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.spot", "true"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.on_demand", "false"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.architectures.#", "1"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.architectures.0", "amd64"),
 					resource.TestCheckResourceAttr(resourceName, "is_default", "false"),
-					resource.TestCheckResourceAttr(resourceName, "constraints.0.on_demand", "true"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.enable_spot_diversity", "true"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.spot_diversity_price_increase_limit_percent", "21"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.spot_interruption_predictions_enabled", "true"),
@@ -278,6 +278,7 @@ func TestAccResourceNodeTemplate_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "custom_taints.0.value", "custom-taint-value-1"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.use_spot_fallbacks", "true"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.spot", "true"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.on_demand", "true"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.instance_families.#", "0"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.gpu.0.manufacturers.#", "0"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.gpu.0.include_names.#", "0"),
@@ -285,11 +286,9 @@ func TestAccResourceNodeTemplate_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.min_cpu", "0"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.max_cpu", "0"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.use_spot_fallbacks", "true"),
-					resource.TestCheckResourceAttr(resourceName, "constraints.0.spot", "true"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.architectures.#", "1"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.architectures.0", "arm64"),
 					resource.TestCheckResourceAttr(resourceName, "is_default", "false"),
-					resource.TestCheckResourceAttr(resourceName, "constraints.0.on_demand", "true"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.enable_spot_diversity", "true"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.spot_diversity_price_increase_limit_percent", "22"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.spot_interruption_predictions_enabled", "true"),
@@ -334,7 +333,6 @@ func testAccNodeTemplateConfig(rName, clusterName string) string {
 			constraints {
 				fallback_restore_rate_seconds = 1800
 				spot = true
-				on_demand = true
 				enable_spot_diversity = true
 				spot_diversity_price_increase_limit_percent = 21
 				spot_interruption_predictions_enabled = true
