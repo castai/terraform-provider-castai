@@ -189,24 +189,16 @@ resource "aws_vpc" "test" {
   }
 }
 
-resource "aws_subnet" "test" {
-  count = 2
-  cidr_block              = cidrsubnet(aws_vpc.test.cidr_block, 8, count.index)
-  map_public_ip_on_launch = true
-  vpc_id                  = aws_vpc.test.id
-  tags = {
-    Name = %[1]q
-  }
-}
-
-// Define to use subnet ID of pre-created EKS cluster.
-//data "aws_subnet" "test" {
-//  id = "subnet-01217d390ddaea501"
+//resource "aws_subnet" "test" {
+//  count = 2
+//  cidr_block              = cidrsubnet(aws_vpc.test.cidr_block, 8, count.index)
+//  map_public_ip_on_launch = true
+//  vpc_id                  = aws_vpc.test.id
+//  tags = {
+//    Name = %[1]q
+//  }
 //}
 
-//data "aws_subnet" "test" {
-//  id = "subnet-031d9d29aee94a6a2"
-//}
 
 data "aws_subnets" "test" {
 	tags = {
