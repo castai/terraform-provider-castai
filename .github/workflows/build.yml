@@ -1,4 +1,10 @@
 name: Build
+
+# Only one instance of this job can be running
+concurrency:
+  group: build-and-test
+  cancel-in-progress: true
+
 on:
   pull_request:
     branches: [ '*' ]
