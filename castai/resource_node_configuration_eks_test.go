@@ -100,7 +100,7 @@ resource "castai_node_configuration" "test" {
   cluster_id        = castai_eks_cluster.test.id
   disk_cpu_ratio    = 35
   min_disk_size     = 122
-  subnets   	    = data.aws_subnet.test.ids
+  subnets   	    = data.aws_subnets.test.ids
   init_script       = base64encode(var.init_script)
   docker_config     = jsonencode({
     "insecure-registries"      = ["registry.com:5000"],
@@ -138,7 +138,7 @@ func testAccEKSNodeConfigurationUpdated(rName, clusterName string) string {
 resource "castai_node_configuration" "test" {
   name   		    = %[1]q
   cluster_id        = castai_eks_cluster.test.id
-  subnets   	    = data.aws_subnet.test.ids
+  subnets   	    = data.aws_subnets.test.ids
   image             = "amazon-eks-node-1.23-v20220824" 
   container_runtime = "containerd"
   kubelet_config     = jsonencode({
