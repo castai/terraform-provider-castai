@@ -34,7 +34,7 @@ func TestAccResourceNodeConfiguration_eks(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "container_runtime", "DOCKERD"),
 					resource.TestCheckResourceAttr(resourceName, "docker_config", "{\"insecure-registries\":[\"registry.com:5000\"],\"max-concurrent-downloads\":10}"),
 					resource.TestCheckResourceAttr(resourceName, "kubelet_config", "{\"registryBurst\":20,\"registryPullQPS\":10}"),
-					resource.TestCheckResourceAttr(resourceName, "subnets.#", "2"),
+					resource.TestCheckResourceAttr(resourceName, "subnets.#", "3"),
 					resource.TestCheckResourceAttr(resourceName, "tags.%", "1"),
 					resource.TestCheckResourceAttr(resourceName, "tags.env", "development"),
 					resource.TestCheckResourceAttrSet(resourceName, "eks.0.instance_profile_arn"),
@@ -100,7 +100,7 @@ resource "castai_node_configuration" "test" {
   cluster_id        = castai_eks_cluster.test.id
   disk_cpu_ratio    = 35
   min_disk_size     = 122
-  subnets   	    = aws_subnet.test[*].id
+  subnets   	    = data.aws_subnets.core.ids
   init_script       = base64encode(var.init_script)
   docker_config     = jsonencode({
     "insecure-registries"      = ["registry.com:5000"],
@@ -138,7 +138,7 @@ func testAccEKSNodeConfigurationUpdated(rName, clusterName string) string {
 resource "castai_node_configuration" "test" {
   name   		    = %[1]q
   cluster_id        = castai_eks_cluster.test.id
-  subnets   	    = aws_subnet.test[*].id
+  subnets   	    = data.aws_subnets.core.ids
   image             = "amazon-eks-node-1.23-v20220824" 
   container_runtime = "containerd"
   kubelet_config     = jsonencode({
@@ -189,14 +189,10 @@ resource "aws_vpc" "test" {
   }
 }
 
-resource "aws_subnet" "test" {
-  count = 2
-  cidr_block              = cidrsubnet(aws_vpc.test.cidr_block, 8, count.index)
-  map_public_ip_on_launch = true
-  vpc_id                  = aws_vpc.test.id
-  tags = {
-    Name = %[1]q
-  }
+data "aws_subnets" "core" {
+	tags = {
+		Name = "*core-tf-acc-cluster/SubnetPublic*"
+	}
 }
 
 resource "aws_security_group" "test" {

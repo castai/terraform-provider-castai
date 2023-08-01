@@ -425,11 +425,17 @@ func testAccCheckNodeTemplateDestroy(s *terraform.State) error {
 
 func testAccNodeConfig(rName string) string {
 	return ConfigCompose(fmt.Sprintf(`
+data "aws_subnets" "cost" {
+	tags = {
+		Name = "*cost-terraform-cluster/SubnetPublic*"
+	}
+}
+
 resource "castai_node_configuration" "test" {
   name   		    = %[1]q
   cluster_id        = castai_eks_cluster.test.id
   disk_cpu_ratio    = 35
-  subnets   	    = aws_subnet.test[*].id
+  subnets   	    = data.aws_subnets.cost.ids
   container_runtime = "dockerd"
   tags = {
     env = "development"
