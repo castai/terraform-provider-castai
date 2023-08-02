@@ -42,6 +42,7 @@ func TestNodeTemplateResourceReadContext(t *testing.T) {
 			  "template": {
 				"configurationId": "7dc4f922-29c9-4377-889c-0c8c5fb8d497",
 				"configurationName": "default",
+				"isEnabled": true,
 				"name": "gpu",
 				"constraints": {
 				  "spot": false,
@@ -172,6 +173,7 @@ custom_taints.1.effect = NoSchedule
 custom_taints.1.key = some-key-2
 custom_taints.1.value = some-value-2
 is_default = false
+is_enabled = true
 name = gpu
 rebalancing_config_min_nodes = 0
 should_taint = true
@@ -233,6 +235,7 @@ func TestNodeTemplateResourceDelete_defaultNodeTemplate(t *testing.T) {
 				"configurationId": "7dc4f922-29c9-4377-889c-0c8c5fb8d497",
 				"configurationName": "default",
 				"name": "default-by-castai",
+				"isEnabled": true,
 				"isDefault": true,
 				"constraints": {
 				  "spot": false,
@@ -296,6 +299,7 @@ func TestAccResourceNodeTemplate_basic(t *testing.T) {
 				Config: testAccNodeTemplateConfig(rName, clusterName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "name", rName),
+					resource.TestCheckResourceAttr(resourceName, "is_enabled", "true"),
 					resource.TestCheckResourceAttr(resourceName, "should_taint", "true"),
 					resource.TestCheckResourceAttr(resourceName, "custom_instances_enabled", "false"),
 					resource.TestCheckResourceAttr(resourceName, "custom_label.#", "0"),
@@ -338,6 +342,7 @@ func TestAccResourceNodeTemplate_basic(t *testing.T) {
 				Config: testNodeTemplateUpdated(rName, clusterName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "name", rName),
+					resource.TestCheckResourceAttr(resourceName, "is_enabled", "true"),
 					resource.TestCheckResourceAttr(resourceName, "should_taint", "true"),
 					resource.TestCheckResourceAttr(resourceName, "custom_instances_enabled", "false"),
 					resource.TestCheckResourceAttr(resourceName, "custom_label.#", "0"),

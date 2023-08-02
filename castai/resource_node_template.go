@@ -33,6 +33,7 @@ const (
 	FieldNodeTemplateIncludeNames                           = "include_names"
 	FieldNodeTemplateInstanceFamilies                       = "instance_families"
 	FieldNodeTemplateIsDefault                              = "is_default"
+	FieldNodeTemplateIsEnabled                              = "is_enabled"
 	FieldNodeTemplateIsGpuOnly                              = "is_gpu_only"
 	FieldNodeTemplateManufacturers                          = "manufacturers"
 	FieldNodeTemplateMaxCount                               = "max_count"
@@ -91,6 +92,12 @@ func resourceNodeTemplate() *schema.Resource {
 				ForceNew:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 				Description:      "Name of the node template.",
+			},
+			FieldNodeTemplateIsEnabled: {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Computed:    true,
+				Description: "Flag whether the node template is enabled and considered for autoscaling.",
 			},
 			FieldNodeTemplateIsDefault: {
 				Type:        schema.TypeBool,
@@ -390,6 +397,9 @@ func resourceNodeTemplateRead(ctx context.Context, d *schema.ResourceData, meta 
 	if err := d.Set(FieldNodeTemplateName, nodeTemplate.Name); err != nil {
 		return diag.FromErr(fmt.Errorf("setting name: %w", err))
 	}
+	if err := d.Set(FieldNodeTemplateIsEnabled, nodeTemplate.IsEnabled); err != nil {
+		return diag.FromErr(fmt.Errorf("setting is enabled: %w", err))
+	}
 	if err := d.Set(FieldNodeTemplateIsDefault, nodeTemplate.IsDefault); err != nil {
 		return diag.FromErr(fmt.Errorf("setting is default: %w", err))
 	}
@@ -566,6 +576,7 @@ func resourceNodeTemplateUpdate(ctx context.Context, d *schema.ResourceData, met
 		FieldNodeTemplateCustomTaints,
 		FieldNodeTemplateCustomInstancesEnabled,
 		FieldNodeTemplateConstraints,
+		FieldNodeTemplateIsEnabled,
 	) {
 		log.Printf("[INFO] Nothing to update in node configuration")
 		return nil
@@ -578,6 +589,10 @@ func resourceNodeTemplateUpdate(ctx context.Context, d *schema.ResourceData, met
 	req := sdk.NodeTemplatesAPIUpdateNodeTemplateJSONRequestBody{}
 	if v, ok := d.GetOk(FieldNodeTemplateIsDefault); ok {
 		req.IsDefault = toPtr(v.(bool))
+	}
+
+	if v, ok := d.GetOk(FieldNodeTemplateIsEnabled); ok {
+		req.IsEnabled = toPtr(v.(bool))
 	}
 
 	if v, ok := d.GetOk(FieldNodeTemplateConfigurationId); ok {
@@ -649,6 +664,10 @@ func resourceNodeTemplateCreate(ctx context.Context, d *schema.ResourceData, met
 		IsDefault:       lo.ToPtr(d.Get(FieldNodeTemplateIsDefault).(bool)),
 		ConfigurationId: lo.ToPtr(d.Get(FieldNodeTemplateConfigurationId).(string)),
 		ShouldTaint:     lo.ToPtr(d.Get(FieldNodeTemplateShouldTaint).(bool)),
+	}
+
+	if v, ok := d.GetOk(FieldNodeTemplateIsEnabled); ok {
+		req.IsEnabled = lo.ToPtr(v.(bool))
 	}
 
 	if v, ok := d.Get(FieldNodeTemplateRebalancingConfigMinNodes).(int32); ok {

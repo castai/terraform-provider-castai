@@ -29,6 +29,7 @@ CAST AI node template resource to manage node templates
 - `custom_labels` (Map of String) Custom labels to be added to nodes created from this template. If the field `custom_label` is present, the value of `custom_labels` will be ignored.
 - `custom_taints` (Block List) Custom taints to be added to the nodes created from this template. `shouldTaint` has to be `true` in order to create/update the node template with custom taints. If `shouldTaint` is `true`, but no custom taints are provided, the nodes will be tainted with the default node template taint. (see [below for nested schema](#nestedblock--custom_taints))
 - `is_default` (Boolean) Flag whether the node template is default.
+- `is_enabled` (Boolean) Flag whether the node template is enabled and considered for autoscaling.
 - `rebalancing_config_min_nodes` (Number) Minimum nodes that will be kept when rebalancing nodes using this node template.
 - `should_taint` (Boolean) Marks whether the templated nodes will have a taint.
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
