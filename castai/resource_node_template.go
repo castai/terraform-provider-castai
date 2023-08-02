@@ -535,6 +535,18 @@ func resourceNodeTemplateDelete(ctx context.Context, d *schema.ResourceData, met
 	clusterID := d.Get(FieldClusterID).(string)
 	name := d.Get(FieldNodeTemplateName).(string)
 
+	if isDefault, ok := d.Get(FieldNodeTemplateIsDefault).(bool); ok && isDefault {
+		return diag.Diagnostics{
+			{
+				Severity: diag.Warning,
+				Summary:  fmt.Sprintf("Skipping delete of \"%s\" node template", name),
+				Detail: "Default node templates cannot be deleted from CAST.ai. If you want to autoscaler to stop " +
+					"considering this node template, you can disable it (either from UI or by setting `is_enabled` " +
+					"flag to false).",
+			},
+		}
+	}
+
 	resp, err := client.NodeTemplatesAPIDeleteNodeTemplateWithResponse(ctx, clusterID, name)
 	if checkErr := sdk.CheckOKResponse(resp, err); checkErr != nil {
 		return diag.FromErr(checkErr)

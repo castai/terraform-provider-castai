@@ -12,6 +12,7 @@ import (
 
 	"github.com/golang/mock/gomock"
 	"github.com/hashicorp/go-cty/cty"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -209,6 +210,76 @@ func TestNodeTemplateResourceReadContextEmptyList(t *testing.T) {
 	r.NotNil(result)
 	r.True(result.HasError())
 	r.Equal(result[0].Summary, "failed to find node template with name: gpu")
+}
+
+func TestNodeTemplateResourceDelete_defaultNodeTemplate(t *testing.T) {
+	r := require.New(t)
+	mockctrl := gomock.NewController(t)
+	mockClient := mock_sdk.NewMockClientInterface(mockctrl)
+
+	ctx := context.Background()
+	provider := &ProviderConfig{
+		api: &sdk.ClientWithResponses{
+			ClientInterface: mockClient,
+		},
+	}
+
+	clusterId := "b6bfc074-a267-400f-b8f1-db0850c369b1"
+	body := io.NopCloser(bytes.NewReader([]byte(`
+		{
+		  "items": [
+			{
+			  "template": {
+				"configurationId": "7dc4f922-29c9-4377-889c-0c8c5fb8d497",
+				"configurationName": "default",
+				"name": "default-by-castai",
+				"isDefault": true,
+				"constraints": {
+				  "spot": false,
+				  "onDemand": true,
+				  "minCpu": 10,
+				  "maxCpu": 10000,
+				  "architectures": ["amd64", "arm64"]
+				},
+				"version": "3",
+				"shouldTaint": true,
+				"customLabels": {},
+				"customTaints": [],
+				"rebalancingConfig": {
+				  "minNodes": 0
+				},
+				"customInstancesEnabled": true
+			  }
+			}
+		  ]
+		}
+	`)))
+	mockClient.EXPECT().
+		NodeTemplatesAPIListNodeTemplates(gomock.Any(), clusterId, &sdk.NodeTemplatesAPIListNodeTemplatesParams{IncludeDefault: lo.ToPtr(true)}).
+		Return(&http.Response{StatusCode: 200, Body: body, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
+
+	resource := resourceNodeTemplate()
+	val := cty.ObjectVal(map[string]cty.Value{
+		FieldClusterId:        cty.StringVal(clusterId),
+		FieldNodeTemplateName: cty.StringVal("default-by-castai"),
+	})
+	state := terraform.NewInstanceStateShimmedFromValue(val, 0)
+	state.ID = "default-by-castai"
+
+	data := resource.Data(state)
+	result := resource.ReadContext(ctx, data, provider)
+	r.Nil(result)
+	r.False(result.HasError())
+
+	result = resource.DeleteContext(ctx, data, provider)
+	r.NotNil(result)
+	r.Len(result, 1)
+	r.False(result.HasError())
+	r.Equal(diag.Warning, result[0].Severity)
+	r.Equal("Skipping delete of \"default-by-castai\" node template", result[0].Summary)
+	r.Equal("Default node templates cannot be deleted from CAST.ai. If you want to autoscaler to stop"+
+		" considering this node template, you can disable it (either from UI or by setting `is_enabled` flag to"+
+		" false).", result[0].Detail)
 }
 
 func TestAccResourceNodeTemplate_basic(t *testing.T) {
