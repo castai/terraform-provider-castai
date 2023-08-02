@@ -1,0 +1,23 @@
+## AKS and CAST AI example for CAST AI Evictor Advanced Configuration CM
+Following example shows how to onboard AKS cluster to CAST AI, configure [Autoscaler policies](https://docs.cast.ai/reference/policiesapi_upsertclusterpolicies) and additional [Node Configurations](https://docs.cast.ai/docs/node-configuration/).
+
+Example configuration should be analysed in the following order:
+1. Create Virtual network - `vnet.tf`
+2. Create AKS cluster - `aks.tf`
+3. Create CAST AI related resources to connect AKS cluster to CAST AI, configure Evictor Advanced Configuration CM - `castai.tf`
+
+# Usage
+1. Rename `tf.vars.example` to `tf.vars`
+2. Update `tf.vars` file with your cluster name, cluster region, CAST AI API token and config.yaml structure.
+3. Initialize Terraform. Under example root folder run:
+```
+terraform init
+```
+4. Run Terraform apply:
+```
+terraform apply -var-file=tf.vars
+```
+5. To destroy resources created by this example:
+```
+terraform destroy -var-file=tf.vars
+```
