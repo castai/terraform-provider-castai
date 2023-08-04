@@ -53,6 +53,21 @@ module "castai-aks-cluster" {
   }
 
   node_templates = {
+    default_by_castai = {
+      name = "default-by-castai"
+      configuration_id = module.castai-aks-cluster.castai_node_configurations["default"]
+      is_default   = true
+      should_taint = false
+
+      constraints = {
+        on_demand          = true
+        spot               = true
+        use_spot_fallbacks = true
+
+        enable_spot_diversity                       = false
+        spot_diversity_price_increase_limit_percent = 20
+      }
+    }
     spot_tmpl = {
       configuration_id = module.castai-aks-cluster.castai_node_configurations["default"]
       should_taint = true
@@ -91,22 +106,12 @@ module "castai-aks-cluster" {
   // Configure Autoscaler policies as per API specification https://api.cast.ai/v1/spec/#/PoliciesAPI/PoliciesAPIUpsertClusterPolicies.
   // Here:
   //  - unschedulablePods - Unscheduled pods policy
-  //  - spotInstances     - Spot instances configuration
   //  - nodeDownscaler    - Node deletion policy
   autoscaler_policies_json   = <<-EOT
     {
         "enabled": true,
         "unschedulablePods": {
             "enabled": true
-        },
-        "spotInstances": {
-            "enabled": true,
-            "clouds": ["azure"],
-            "spotBackups": {
-                "enabled": true
-            },
-            "spotDiversityEnabled": false,
-            "spotDiversityPriceIncreaseLimitPercent": 20
         },
         "nodeDownscaler": {
             "enabled": true,

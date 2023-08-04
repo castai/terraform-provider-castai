@@ -214,6 +214,73 @@ func TestNodeTemplateResourceReadContextEmptyList(t *testing.T) {
 	r.Equal(result[0].Summary, "failed to find node template with name: gpu")
 }
 
+func TestNodeTemplateResourceCreate_defaultNodeTemplate(t *testing.T) {
+	r := require.New(t)
+	mockctrl := gomock.NewController(t)
+	mockClient := mock_sdk.NewMockClientInterface(mockctrl)
+
+	ctx := context.Background()
+	provider := &ProviderConfig{
+		api: &sdk.ClientWithResponses{
+			ClientInterface: mockClient,
+		},
+	}
+
+	clusterId := "b6bfc074-a267-400f-b8f1-db0850c369b1"
+	body := io.NopCloser(bytes.NewReader([]byte(`
+		{
+		  "items": [
+			{
+			  "template": {
+				"configurationId": "7dc4f922-29c9-4377-889c-0c8c5fb8d497",
+				"configurationName": "default",
+				"name": "default-by-castai",
+				"isEnabled": true,
+				"isDefault": true,
+				"constraints": {
+				  "spot": false,
+				  "onDemand": true,
+				  "minCpu": 10,
+				  "maxCpu": 10000,
+				  "architectures": ["amd64", "arm64"]
+				},
+				"version": "3",
+				"shouldTaint": true,
+				"customLabels": {},
+				"customTaints": [],
+				"rebalancingConfig": {
+				  "minNodes": 0
+				},
+				"customInstancesEnabled": true
+			  }
+			}
+		  ]
+		}
+	`)))
+	mockClient.EXPECT().
+		NodeTemplatesAPIListNodeTemplates(gomock.Any(), clusterId, &sdk.NodeTemplatesAPIListNodeTemplatesParams{IncludeDefault: lo.ToPtr(true)}).
+		Return(&http.Response{StatusCode: 200, Body: body, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
+
+	mockClient.EXPECT().
+		NodeTemplatesAPIUpdateNodeTemplate(gomock.Any(), clusterId, "default-by-castai", gomock.Any()).
+		Return(&http.Response{StatusCode: 200, Body: io.NopCloser(bytes.NewReader([]byte{}))}, nil)
+
+	resource := resourceNodeTemplate()
+	val := cty.ObjectVal(map[string]cty.Value{
+		FieldClusterId:                          cty.StringVal(clusterId),
+		FieldNodeTemplateName:                   cty.StringVal("default-by-castai"),
+		FieldNodeTemplateIsDefault:              cty.BoolVal(true),
+		FieldNodeTemplateCustomInstancesEnabled: cty.BoolVal(true),
+	})
+	state := terraform.NewInstanceStateShimmedFromValue(val, 0)
+	state.ID = "default-by-castai"
+
+	data := resource.Data(state)
+	result := resource.CreateContext(ctx, data, provider)
+	r.Nil(result)
+	r.False(result.HasError())
+}
+
 func TestNodeTemplateResourceDelete_defaultNodeTemplate(t *testing.T) {
 	r := require.New(t)
 	mockctrl := gomock.NewController(t)
@@ -479,7 +546,7 @@ func testAccCheckNodeTemplateDestroy(s *terraform.State) error {
 
 		id := rs.Primary.ID
 		clusterID := rs.Primary.Attributes["cluster_id"]
-		response, err := client.NodeTemplatesAPIListNodeTemplatesWithResponse(ctx, clusterID, &sdk.NodeTemplatesAPIListNodeTemplatesParams{IncludeDefault: lo.ToPtr(true)})
+		response, err := client.NodeTemplatesAPIListNodeTemplatesWithResponse(ctx, clusterID, &sdk.NodeTemplatesAPIListNodeTemplatesParams{IncludeDefault: lo.ToPtr(false)})
 		if err != nil {
 			return err
 		}
@@ -491,7 +558,7 @@ func testAccCheckNodeTemplateDestroy(s *terraform.State) error {
 			return nil
 		}
 
-		return fmt.Errorf("node template %q still exists", id)
+		return fmt.Errorf("node template %q still exists; %v", id, response)
 	}
 
 	return nil
