@@ -1,0 +1,4 @@
+name,provider,region,instance_type,price,count,start_date,end_date,zone_id,zone_name
+reservation1,aws,us-east-1,c5n.large,,3,2020-01-01T00:00:00Z,2050-01-01T00:00:00Z,,
+reservation2,aws,us-east-1,c5n.large,,2,2020-01-01T00:00:00Z,2050-01-01T00:00:00Z,,
+reservation3,aws,us-east-1,c5n.large,,1,2020-01-01T00:00:00Z,2050-01-01T00:00:00Z,,
