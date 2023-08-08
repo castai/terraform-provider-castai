@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"regexp"
 	"strings"
 	"time"
 
@@ -208,8 +209,8 @@ func resourceNodeConfiguration() *schema.Resource {
 						"volume_kms_key_arn": {
 							Type:             schema.TypeString,
 							Optional:         true,
-							Description:      "AWS KMS key ARN for encrypting EBS attached to the node",
-							ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+							Description:      "AWS KMS key ARN for encrypting EBS volume attached to the node",
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringMatch(regexp.MustCompile(`arn:aws:kms:.*`), "Must be a valid KMS key ARN")),
 						},
 					},
 				},
