@@ -205,6 +205,12 @@ func resourceNodeConfiguration() *schema.Resource {
 							ValidateDiagFunc: validation.ToDiagFunc(validation.IntAtLeast(2)),
 							Description:      "Allow configure the IMDSv2 hop limit, the default is 2",
 						},
+						"volume_kms_key_arn": {
+							Type:             schema.TypeString,
+							Optional:         true,
+							Description:      "AWS KMS key ARN for encrypting EBS attached to the node",
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+						},
 					},
 				},
 			},
@@ -578,6 +584,10 @@ func toEKSConfig(obj map[string]interface{}) *sdk.NodeconfigV1EKSConfig {
 		out.ImdsHopLimit = toPtr(int32(v))
 	}
 
+	if v, ok := obj["volume_kms_key_arn"].(string); ok && v != "" {
+		out.VolumeKmsKeyArn = toPtr(v)
+	}
+
 	return out
 }
 
@@ -612,6 +622,10 @@ func flattenEKSConfig(config *sdk.NodeconfigV1EKSConfig) []map[string]interface{
 	}
 	if v := config.ImdsHopLimit; v != nil {
 		m["imds_hop_limit"] = *config.ImdsHopLimit
+	}
+
+	if v := config.VolumeKmsKeyArn; v != nil {
+		m["volume_kms_key_arn"] = toString(config.VolumeKmsKeyArn)
 	}
 
 	return []map[string]interface{}{m}

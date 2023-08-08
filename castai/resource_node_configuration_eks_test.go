@@ -46,6 +46,7 @@ func TestAccResourceNodeConfiguration_eks(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "eks.0.volume_throughput", "130"),
 					resource.TestCheckResourceAttr(resourceName, "eks.0.imds_v1", "true"),
 					resource.TestCheckResourceAttr(resourceName, "eks.0.imds_hop_limit", "3"),
+					resource.TestCheckResourceAttr(resourceName, "eks.0.volume_kms_key_arn", "arn:aws:kms:eu-central-1:012345:key/1d989ee1-59cd-4238-8018-79bae29d1109"),
 					resource.TestCheckResourceAttr(resourceName, "aks.#", "0"),
 					resource.TestCheckResourceAttr(resourceName, "kops.#", "0"),
 					resource.TestCheckResourceAttr(resourceName, "gke.#", "0"),
@@ -121,6 +122,7 @@ resource "castai_node_configuration" "test" {
 	volume_type 		 = "gp3"
     volume_iops		     = 3100
 	volume_throughput 	 = 130
+    volume_kms_key_arn   = "arn:aws:kms:eu-central-1:012345:key/1d989ee1-59cd-4238-8018-79bae29d1109"
 	imds_v1				 = true
 	imds_hop_limit       = 3
   }

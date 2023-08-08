@@ -744,7 +744,8 @@ type NodeconfigV1EKSConfig struct {
 	SecurityGroups *[]string `json:"securityGroups,omitempty"`
 
 	// EBS volume IOPS value to be used for provisioned nodes.
-	VolumeIops *int32 `json:"volumeIops"`
+	VolumeIops      *int32  `json:"volumeIops"`
+	VolumeKmsKeyArn *string `json:"volumeKmsKeyArn"`
 
 	// EBS volume throughput in MiB/s to be used for provisioned nodes.
 	VolumeThroughput *int32 `json:"volumeThroughput"`
