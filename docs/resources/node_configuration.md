@@ -104,6 +104,7 @@ Optional:
 - `imds_v1` (Boolean) When the value is true both IMDSv1 and IMDSv2 are enabled. Setting the value to false disables permanently IMDSv1 and might affect legacy workloads running on the node created with this configuration. The default is true if the flag isn't provided
 - `key_pair_id` (String) AWS key pair ID to be used for CAST provisioned nodes. Has priority over ssh_public_key
 - `volume_iops` (Number) AWS EBS volume IOPS to be used for CAST provisioned nodes
+- `volume_kms_key_arn` (String) AWS KMS key ARN for encrypting EBS volume attached to the node
 - `volume_throughput` (Number) AWS EBS volume throughput in MiB/s to be used for CAST provisioned nodes
 - `volume_type` (String) AWS EBS volume type to be used for CAST provisioned nodes. One of: gp3, io1, io2
 
