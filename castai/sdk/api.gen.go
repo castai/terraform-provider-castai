@@ -16,6 +16,41 @@ const (
 	BearerAuthScopes = "BearerAuth.Scopes"
 )
 
+// Defines values for OrganizationRole.
+const (
+	Member OrganizationRole = "member"
+	Owner  OrganizationRole = "owner"
+	Viewer OrganizationRole = "viewer"
+)
+
+// Defines values for CastaiInventoryV1beta1AttachableGPUDeviceManufacturer.
+const (
+	CastaiInventoryV1beta1AttachableGPUDeviceManufacturerAMD     CastaiInventoryV1beta1AttachableGPUDeviceManufacturer = "AMD"
+	CastaiInventoryV1beta1AttachableGPUDeviceManufacturerNVIDIA  CastaiInventoryV1beta1AttachableGPUDeviceManufacturer = "NVIDIA"
+	CastaiInventoryV1beta1AttachableGPUDeviceManufacturerUNKNOWN CastaiInventoryV1beta1AttachableGPUDeviceManufacturer = "UNKNOWN"
+)
+
+// Defines values for CastaiInventoryV1beta1GPUDeviceManufacturer.
+const (
+	CastaiInventoryV1beta1GPUDeviceManufacturerAMD     CastaiInventoryV1beta1GPUDeviceManufacturer = "AMD"
+	CastaiInventoryV1beta1GPUDeviceManufacturerNVIDIA  CastaiInventoryV1beta1GPUDeviceManufacturer = "NVIDIA"
+	CastaiInventoryV1beta1GPUDeviceManufacturerUNKNOWN CastaiInventoryV1beta1GPUDeviceManufacturer = "UNKNOWN"
+)
+
+// Defines values for CastaiInventoryV1beta1StorageDriver.
+const (
+	CastaiInventoryV1beta1StorageDriverInvalid CastaiInventoryV1beta1StorageDriver = "invalid"
+	CastaiInventoryV1beta1StorageDriverNvme    CastaiInventoryV1beta1StorageDriver = "nvme"
+	CastaiInventoryV1beta1StorageDriverSata    CastaiInventoryV1beta1StorageDriver = "sata"
+)
+
+// Defines values for CastaiInventoryV1beta1StorageInfoDeviceType.
+const (
+	CastaiInventoryV1beta1StorageInfoDeviceTypeHdd     CastaiInventoryV1beta1StorageInfoDeviceType = "hdd"
+	CastaiInventoryV1beta1StorageInfoDeviceTypeInvalid CastaiInventoryV1beta1StorageInfoDeviceType = "invalid"
+	CastaiInventoryV1beta1StorageInfoDeviceTypeSsd     CastaiInventoryV1beta1StorageInfoDeviceType = "ssd"
+)
+
 // Defines values for CastaiV1Cloud.
 const (
 	AWS     CastaiV1Cloud = "AWS"
@@ -77,6 +112,31 @@ const (
 	JobStatusSkipped    ScheduledrebalancingV1JobStatus = "JobStatusSkipped"
 )
 
+// NewInvitations defines model for NewInvitations.
+type NewInvitations struct {
+	Members        []NewMembershipByEmail `json:"members"`
+	OrganizationId string                 `json:"organizationId"`
+}
+
+// NewInvitationsResponse defines model for NewInvitationsResponse.
+type NewInvitationsResponse struct {
+	InviteIds []string `json:"inviteIds"`
+}
+
+// NewMembershipByEmail defines model for NewMembershipByEmail.
+type NewMembershipByEmail struct {
+	Role      string `json:"role"`
+	UserEmail string `json:"userEmail"`
+}
+
+// NewOrganizationUser defines model for NewOrganizationUser.
+type NewOrganizationUser struct {
+	Role OrganizationRole `json:"role"`
+
+	// User ID to add to organization
+	UserId string `json:"userId"`
+}
+
 // OperationResponse defines model for OperationResponse.
 type OperationResponse struct {
 	// Operation creation time in RFC3339Nano format.
@@ -100,6 +160,70 @@ type OperationResponse struct {
 
 	// ID of the operation.
 	Id string `json:"id"`
+}
+
+// Organization defines model for Organization.
+type Organization struct {
+	// Organization ID
+	Id *string `json:"id,omitempty"`
+
+	// Organization name
+	Name string `json:"name"`
+}
+
+// OrganizationRole defines model for OrganizationRole.
+type OrganizationRole string
+
+// OrganizationUser defines model for OrganizationUser.
+type OrganizationUser struct {
+	// User role in organization
+	Role string      `json:"role"`
+	User UserProfile `json:"user"`
+}
+
+// OrganizationUsersList defines model for OrganizationUsersList.
+type OrganizationUsersList struct {
+	Users *[]OrganizationUser `json:"users,omitempty"`
+}
+
+// OrganizationsList defines model for OrganizationsList.
+type OrganizationsList struct {
+	Organizations []Organization `json:"organizations"`
+}
+
+// UpdateOrganizationUser defines model for UpdateOrganizationUser.
+type UpdateOrganizationUser struct {
+	Role OrganizationRole `json:"role"`
+}
+
+// UserProfile defines model for UserProfile.
+type UserProfile struct {
+	// user email
+	Email string `json:"email"`
+
+	// full name of logged-in user, e.g. "John Doe".
+	Name string `json:"name"`
+
+	// Globally unique username (used internally).
+	Username *string `json:"username,omitempty"`
+}
+
+// UserProfileResponse defines model for UserProfileResponse.
+type UserProfileResponse struct {
+	// user email
+	Email string `json:"email"`
+
+	// Indicates user first login to the console.
+	FirstLogin *bool `json:"firstLogin,omitempty"`
+
+	// User ID
+	Id *string `json:"id,omitempty"`
+
+	// full name of logged-in user, e.g. "John Doe".
+	Name string `json:"name"`
+
+	// Globally unique username (used internally).
+	Username *string `json:"username,omitempty"`
 }
 
 // Auth token used to authenticate via api.
@@ -138,6 +262,260 @@ type CastaiAuthtokenV1beta1DeleteAuthTokenResponse = map[string]interface{}
 type CastaiAuthtokenV1beta1ListAuthTokensResponse struct {
 	Items *[]CastaiAuthtokenV1beta1AuthToken `json:"items,omitempty"`
 }
+
+// CastaiInventoryV1beta1AddReservationResponse defines model for castai.inventory.v1beta1.AddReservationResponse.
+type CastaiInventoryV1beta1AddReservationResponse struct {
+	Reservation *CastaiInventoryV1beta1ReservationDetails `json:"reservation,omitempty"`
+}
+
+// CastaiInventoryV1beta1AttachableGPUDevice defines model for castai.inventory.v1beta1.AttachableGPUDevice.
+type CastaiInventoryV1beta1AttachableGPUDevice struct {
+	// Count of GPU to be attached.
+	Count *int32 `json:"count,omitempty"`
+
+	// GPU manufacturer.
+	Manufacturer *CastaiInventoryV1beta1AttachableGPUDeviceManufacturer `json:"manufacturer,omitempty"`
+
+	// Total amount of memory of the GPUs to be attached MiB.
+	MemoryMib *int32 `json:"memoryMib,omitempty"`
+
+	// Name of the GPU. For example nvidia-tesla-k80.
+	Name *string `json:"name,omitempty"`
+
+	// Total price of GPUs per hour.
+	PriceHourly *string `json:"priceHourly,omitempty"`
+}
+
+// GPU manufacturer.
+type CastaiInventoryV1beta1AttachableGPUDeviceManufacturer string
+
+// CastaiInventoryV1beta1CountableInstanceType defines model for castai.inventory.v1beta1.CountableInstanceType.
+type CastaiInventoryV1beta1CountableInstanceType struct {
+	ClusterId *string `json:"clusterId,omitempty"`
+	Count     *int32  `json:"count,omitempty"`
+
+	// InstanceType is a cloud service provider specific VM type with basic data.
+	InstanceType *CastaiInventoryV1beta1InstanceType `json:"instanceType,omitempty"`
+}
+
+// CastaiInventoryV1beta1GPUDevice defines model for castai.inventory.v1beta1.GPUDevice.
+type CastaiInventoryV1beta1GPUDevice struct {
+	Count *int32 `json:"count,omitempty"`
+
+	// - UNKNOWN: UNKNOWN is invalid.
+	//  - NVIDIA: NVIDIA.
+	//  - AMD: AMD.
+	Manufacturer *CastaiInventoryV1beta1GPUDeviceManufacturer `json:"manufacturer,omitempty"`
+	MemoryMib    *int32                                       `json:"memoryMib,omitempty"`
+	Name         *string                                      `json:"name,omitempty"`
+
+	// Price per GPU per hour.
+	PriceHourly *string `json:"priceHourly,omitempty"`
+}
+
+// - UNKNOWN: UNKNOWN is invalid.
+//   - NVIDIA: NVIDIA.
+//   - AMD: AMD.
+type CastaiInventoryV1beta1GPUDeviceManufacturer string
+
+// CastaiInventoryV1beta1GPUInfo defines model for castai.inventory.v1beta1.GPUInfo.
+type CastaiInventoryV1beta1GPUInfo struct {
+	GpuDevices *[]CastaiInventoryV1beta1GPUDevice `json:"gpuDevices,omitempty"`
+}
+
+// CastaiInventoryV1beta1GenericReservation defines model for castai.inventory.v1beta1.GenericReservation.
+type CastaiInventoryV1beta1GenericReservation struct {
+	Count                 *int32     `json:"count"`
+	DeepLinkToReservation *string    `json:"deepLinkToReservation"`
+	EndDate               *time.Time `json:"endDate"`
+	ExpirationDate        *time.Time `json:"expirationDate"`
+	InstanceType          *string    `json:"instanceType"`
+	Name                  *string    `json:"name,omitempty"`
+	Price                 *string    `json:"price"`
+	ProductName           *string    `json:"productName"`
+	Provider              *string    `json:"provider"`
+	PurchaseDate          *time.Time `json:"purchaseDate"`
+	Quantity              *int32     `json:"quantity"`
+	Region                *string    `json:"region,omitempty"`
+	StartDate             *time.Time `json:"startDate"`
+	Type                  *string    `json:"type"`
+	ZoneId                *string    `json:"zoneId"`
+	ZoneName              *string    `json:"zoneName"`
+}
+
+// CastaiInventoryV1beta1GenericReservationsList defines model for castai.inventory.v1beta1.GenericReservationsList.
+type CastaiInventoryV1beta1GenericReservationsList struct {
+	Items *[]CastaiInventoryV1beta1GenericReservation `json:"items,omitempty"`
+}
+
+// CastaiInventoryV1beta1GetReservationsBalanceResponse defines model for castai.inventory.v1beta1.GetReservationsBalanceResponse.
+type CastaiInventoryV1beta1GetReservationsBalanceResponse struct {
+	Reservations *[]CastaiInventoryV1beta1ReservationBalance `json:"reservations,omitempty"`
+}
+
+// CastaiInventoryV1beta1GetReservationsResponse defines model for castai.inventory.v1beta1.GetReservationsResponse.
+type CastaiInventoryV1beta1GetReservationsResponse struct {
+	Reservations *[]CastaiInventoryV1beta1ReservationDetails `json:"reservations,omitempty"`
+}
+
+// CastaiInventoryV1beta1GetResourceUsageResponse defines model for castai.inventory.v1beta1.GetResourceUsageResponse.
+type CastaiInventoryV1beta1GetResourceUsageResponse struct {
+	InstanceTypes *[]CastaiInventoryV1beta1CountableInstanceType `json:"instanceTypes,omitempty"`
+}
+
+// CastaiInventoryV1beta1InstanceReliability defines model for castai.inventory.v1beta1.InstanceReliability.
+type CastaiInventoryV1beta1InstanceReliability struct {
+	SpotReclaimRateHigh *string `json:"spotReclaimRateHigh,omitempty"`
+	SpotReclaimRateLow  *string `json:"spotReclaimRateLow,omitempty"`
+}
+
+// InstanceType is a cloud service provider specific VM type with basic data.
+type CastaiInventoryV1beta1InstanceType struct {
+	Architecture     *string `json:"architecture,omitempty"`
+	BareMetal        *bool   `json:"bareMetal,omitempty"`
+	Burstable        *bool   `json:"burstable,omitempty"`
+	CastChoice       *bool   `json:"castChoice,omitempty"`
+	ComputeOptimized *bool   `json:"computeOptimized,omitempty"`
+
+	// CPU base price of the instance type. $/CPU hour.
+	CpuPrice *string `json:"cpuPrice,omitempty"`
+
+	// CreatedAt is the timestamp of the creation of this instance type object.
+	CreatedAt      *time.Time                     `json:"createdAt,omitempty"`
+	CustomInstance *bool                          `json:"customInstance,omitempty"`
+	GpuInfo        *CastaiInventoryV1beta1GPUInfo `json:"gpuInfo,omitempty"`
+
+	// ID of the instance type.
+	Id *string `json:"id,omitempty"`
+
+	// InstanceType name. This value is provider specific.
+	InstanceType *string `json:"instanceType,omitempty"`
+
+	// Describes the network settings for the instance type.
+	NetworkInfo *CastaiInventoryV1beta1NetworkInfo `json:"networkInfo,omitempty"`
+	Obsolete    *bool                              `json:"obsolete,omitempty"`
+
+	// Price of the instance type. $/hour.
+	Price *string `json:"price,omitempty"`
+
+	// Provider name of the instance type.
+	Provider *string `json:"provider,omitempty"`
+
+	// Ram (in MiB) available on the instance type.
+	Ram *string `json:"ram,omitempty"`
+
+	// RAM base price of the instance type. $/GiB hour.
+	RamPrice *string `json:"ramPrice,omitempty"`
+
+	// Region of the instance type. This value is provider specific.
+	Region          *string                                    `json:"region,omitempty"`
+	SpotReliability *CastaiInventoryV1beta1InstanceReliability `json:"spotReliability,omitempty"`
+
+	// StorageInfo describes the available local volumes for an instance type.
+	StorageInfo *CastaiInventoryV1beta1StorageInfo `json:"storageInfo,omitempty"`
+
+	// UpdatedAt is the timestamp of the last update operation on this instance type object.
+	UpdatedAt *time.Time `json:"updatedAt,omitempty"`
+
+	// Vcpu available on the instance type.
+	Vcpu  *string                               `json:"vcpu,omitempty"`
+	Zones *[]CastaiInventoryV1beta1InstanceZone `json:"zones,omitempty"`
+}
+
+// CastaiInventoryV1beta1InstanceZone defines model for castai.inventory.v1beta1.InstanceZone.
+type CastaiInventoryV1beta1InstanceZone struct {
+	AttachableGpuDevices *[]CastaiInventoryV1beta1AttachableGPUDevice `json:"attachableGpuDevices,omitempty"`
+	AzId                 *string                                      `json:"azId,omitempty"`
+	CpuPrice             *string                                      `json:"cpuPrice,omitempty"`
+	LastUnavailableAt    *time.Time                                   `json:"lastUnavailableAt,omitempty"`
+	Price                *string                                      `json:"price,omitempty"`
+	RamPrice             *string                                      `json:"ramPrice,omitempty"`
+	Spot                 *bool                                        `json:"spot,omitempty"`
+	Unavailable          *bool                                        `json:"unavailable,omitempty"`
+}
+
+// Describes the network settings for the instance type.
+type CastaiInventoryV1beta1NetworkInfo struct {
+	// The maximum number of IPv4 addresses per network interface.
+	Ipv4AddressesPerInterface *int32 `json:"ipv4AddressesPerInterface,omitempty"`
+
+	// The maximum number of network interfaces for the instance type.
+	MaximumNetworkInterfaces *int32 `json:"maximumNetworkInterfaces,omitempty"`
+}
+
+// CastaiInventoryV1beta1OverwriteReservationsResponse defines model for castai.inventory.v1beta1.OverwriteReservationsResponse.
+type CastaiInventoryV1beta1OverwriteReservationsResponse struct {
+	Reservations *[]CastaiInventoryV1beta1ReservationDetails `json:"reservations,omitempty"`
+}
+
+// CastaiInventoryV1beta1ReservationBalance defines model for castai.inventory.v1beta1.ReservationBalance.
+type CastaiInventoryV1beta1ReservationBalance struct {
+	InstanceTypes *[]CastaiInventoryV1beta1CountableInstanceType `json:"instanceTypes,omitempty"`
+	Reservation   *CastaiInventoryV1beta1ReservationDetails      `json:"reservation,omitempty"`
+	Usage         *float64                                       `json:"usage,omitempty"`
+}
+
+// CastaiInventoryV1beta1ReservationDetails defines model for castai.inventory.v1beta1.ReservationDetails.
+type CastaiInventoryV1beta1ReservationDetails struct {
+	Count         *int32     `json:"count,omitempty"`
+	Cpu           *string    `json:"cpu,omitempty"`
+	CreatedAt     *time.Time `json:"createdAt,omitempty"`
+	EndDate       *time.Time `json:"endDate"`
+	InstanceType  *string    `json:"instanceType,omitempty"`
+	Name          *string    `json:"name,omitempty"`
+	Price         *string    `json:"price,omitempty"`
+	Provider      *string    `json:"provider,omitempty"`
+	RamMib        *string    `json:"ramMib,omitempty"`
+	Region        *string    `json:"region,omitempty"`
+	ReservationId *string    `json:"reservationId,omitempty"`
+	StartDate     *time.Time `json:"startDate,omitempty"`
+	UpdatedAt     *time.Time `json:"updatedAt,omitempty"`
+	ZoneId        *string    `json:"zoneId"`
+	ZoneName      *string    `json:"zoneName"`
+}
+
+// StorageDriver is the type of driver used for the local storage volume interface and CPU communication.
+//
+//   - invalid: Invalid is invalid.
+//   - nvme: NVMe driver is designed specifically for SSD drives and could be considered "optimized" for SSD usage.
+//   - sata: SATA driver is designed for HDD drives with spinning technology but also supports SSD drives.
+type CastaiInventoryV1beta1StorageDriver string
+
+// StorageInfo describes the available local volumes for an instance type.
+type CastaiInventoryV1beta1StorageInfo struct {
+	// List of local storage devices available on the instance type.
+	Devices *[]CastaiInventoryV1beta1StorageInfoDevice `json:"devices,omitempty"`
+
+	// StorageDriver is the type of driver used for the local storage volume interface and CPU communication.
+	//
+	//  - invalid: Invalid is invalid.
+	//  - nvme: NVMe driver is designed specifically for SSD drives and could be considered "optimized" for SSD usage.
+	//  - sata: SATA driver is designed for HDD drives with spinning technology but also supports SSD drives.
+	Driver *CastaiInventoryV1beta1StorageDriver `json:"driver,omitempty"`
+
+	// TotalSizeGiB is a sum of all storage devices' size.
+	TotalSizeGib *int32 `json:"totalSizeGib,omitempty"`
+}
+
+// Device is a local storage block device available on the instance type.
+type CastaiInventoryV1beta1StorageInfoDevice struct {
+	// The size in GiB.
+	SizeGib *int32 `json:"sizeGib,omitempty"`
+
+	// Type is the technology used for the local storage device.
+	//
+	//  - invalid: Invalid is invalid.
+	//  - ssd: SSD.
+	//  - hdd: HDD.
+	Type *CastaiInventoryV1beta1StorageInfoDeviceType `json:"type,omitempty"`
+}
+
+// Type is the technology used for the local storage device.
+//
+//   - invalid: Invalid is invalid.
+//   - ssd: SSD.
+//   - hdd: HDD.
+type CastaiInventoryV1beta1StorageInfoDeviceType string
 
 // CastaiMetricsV1beta1ClusterMetrics defines model for castai.metrics.v1beta1.ClusterMetrics.
 type CastaiMetricsV1beta1ClusterMetrics struct {
@@ -1583,6 +1961,12 @@ type AuthTokenAPICreateAuthTokenJSONBody = CastaiAuthtokenV1beta1AuthToken
 // AuthTokenAPIUpdateAuthTokenJSONBody defines parameters for AuthTokenAPIUpdateAuthToken.
 type AuthTokenAPIUpdateAuthTokenJSONBody = CastaiAuthtokenV1beta1AuthTokenUpdate
 
+// CreateInvitationJSONBody defines parameters for CreateInvitation.
+type CreateInvitationJSONBody = NewInvitations
+
+// ClaimInvitationJSONBody defines parameters for ClaimInvitation.
+type ClaimInvitationJSONBody = map[string]interface{}
+
 // NodeTemplatesAPIFilterInstanceTypesJSONBody defines parameters for NodeTemplatesAPIFilterInstanceTypes.
 type NodeTemplatesAPIFilterInstanceTypesJSONBody = NodetemplatesV1NodeTemplate
 
@@ -1670,6 +2054,27 @@ type ExternalClusterAPIDeleteNodeParams struct {
 // ExternalClusterAPIDrainNodeJSONBody defines parameters for ExternalClusterAPIDrainNode.
 type ExternalClusterAPIDrainNodeJSONBody = ExternalclusterV1DrainConfig
 
+// UpdateCurrentUserProfileJSONBody defines parameters for UpdateCurrentUserProfile.
+type UpdateCurrentUserProfileJSONBody = UserProfile
+
+// CreateOrganizationJSONBody defines parameters for CreateOrganization.
+type CreateOrganizationJSONBody = Organization
+
+// UpdateOrganizationJSONBody defines parameters for UpdateOrganization.
+type UpdateOrganizationJSONBody = Organization
+
+// CreateOrganizationUserJSONBody defines parameters for CreateOrganizationUser.
+type CreateOrganizationUserJSONBody = NewOrganizationUser
+
+// UpdateOrganizationUserJSONBody defines parameters for UpdateOrganizationUser.
+type UpdateOrganizationUserJSONBody = UpdateOrganizationUser
+
+// InventoryAPIAddReservationJSONBody defines parameters for InventoryAPIAddReservation.
+type InventoryAPIAddReservationJSONBody = CastaiInventoryV1beta1GenericReservation
+
+// InventoryAPIOverwriteReservationsJSONBody defines parameters for InventoryAPIOverwriteReservations.
+type InventoryAPIOverwriteReservationsJSONBody = CastaiInventoryV1beta1GenericReservationsList
+
 // ScheduledRebalancingAPICreateRebalancingScheduleJSONBody defines parameters for ScheduledRebalancingAPICreateRebalancingSchedule.
 type ScheduledRebalancingAPICreateRebalancingScheduleJSONBody = ScheduledrebalancingV1RebalancingSchedule
 
@@ -1691,6 +2096,12 @@ type AuthTokenAPICreateAuthTokenJSONRequestBody = AuthTokenAPICreateAuthTokenJSO
 
 // AuthTokenAPIUpdateAuthTokenJSONRequestBody defines body for AuthTokenAPIUpdateAuthToken for application/json ContentType.
 type AuthTokenAPIUpdateAuthTokenJSONRequestBody = AuthTokenAPIUpdateAuthTokenJSONBody
+
+// CreateInvitationJSONRequestBody defines body for CreateInvitation for application/json ContentType.
+type CreateInvitationJSONRequestBody = CreateInvitationJSONBody
+
+// ClaimInvitationJSONRequestBody defines body for ClaimInvitation for application/json ContentType.
+type ClaimInvitationJSONRequestBody = ClaimInvitationJSONBody
 
 // NodeTemplatesAPIFilterInstanceTypesJSONRequestBody defines body for NodeTemplatesAPIFilterInstanceTypes for application/json ContentType.
 type NodeTemplatesAPIFilterInstanceTypesJSONRequestBody = NodeTemplatesAPIFilterInstanceTypesJSONBody
@@ -1736,6 +2147,27 @@ type ExternalClusterAPIAddNodeJSONRequestBody = ExternalClusterAPIAddNodeJSONBod
 
 // ExternalClusterAPIDrainNodeJSONRequestBody defines body for ExternalClusterAPIDrainNode for application/json ContentType.
 type ExternalClusterAPIDrainNodeJSONRequestBody = ExternalClusterAPIDrainNodeJSONBody
+
+// UpdateCurrentUserProfileJSONRequestBody defines body for UpdateCurrentUserProfile for application/json ContentType.
+type UpdateCurrentUserProfileJSONRequestBody = UpdateCurrentUserProfileJSONBody
+
+// CreateOrganizationJSONRequestBody defines body for CreateOrganization for application/json ContentType.
+type CreateOrganizationJSONRequestBody = CreateOrganizationJSONBody
+
+// UpdateOrganizationJSONRequestBody defines body for UpdateOrganization for application/json ContentType.
+type UpdateOrganizationJSONRequestBody = UpdateOrganizationJSONBody
+
+// CreateOrganizationUserJSONRequestBody defines body for CreateOrganizationUser for application/json ContentType.
+type CreateOrganizationUserJSONRequestBody = CreateOrganizationUserJSONBody
+
+// UpdateOrganizationUserJSONRequestBody defines body for UpdateOrganizationUser for application/json ContentType.
+type UpdateOrganizationUserJSONRequestBody = UpdateOrganizationUserJSONBody
+
+// InventoryAPIAddReservationJSONRequestBody defines body for InventoryAPIAddReservation for application/json ContentType.
+type InventoryAPIAddReservationJSONRequestBody = InventoryAPIAddReservationJSONBody
+
+// InventoryAPIOverwriteReservationsJSONRequestBody defines body for InventoryAPIOverwriteReservations for application/json ContentType.
+type InventoryAPIOverwriteReservationsJSONRequestBody = InventoryAPIOverwriteReservationsJSONBody
 
 // ScheduledRebalancingAPICreateRebalancingScheduleJSONRequestBody defines body for ScheduledRebalancingAPICreateRebalancingSchedule for application/json ContentType.
 type ScheduledRebalancingAPICreateRebalancingScheduleJSONRequestBody = ScheduledRebalancingAPICreateRebalancingScheduleJSONBody
