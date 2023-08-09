@@ -6,6 +6,7 @@ import (
 	"github.com/castai/terraform-provider-castai/castai/sdk"
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/samber/lo"
@@ -566,7 +567,11 @@ func resourceNodeTemplateDelete(ctx context.Context, d *schema.ResourceData, met
 }
 
 func resourceNodeTemplateUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
-	if !d.HasChanges(
+	return updateNodeTemplate(ctx, d, meta, false)
+}
+
+func updateNodeTemplate(ctx context.Context, d *schema.ResourceData, meta any, skipChangeCheck bool) diag.Diagnostics {
+	if !skipChangeCheck && !d.HasChanges(
 		FieldNodeTemplateName,
 		FieldNodeTemplateShouldTaint,
 		FieldNodeTemplateConfigurationId,
@@ -578,7 +583,7 @@ func resourceNodeTemplateUpdate(ctx context.Context, d *schema.ResourceData, met
 		FieldNodeTemplateConstraints,
 		FieldNodeTemplateIsEnabled,
 	) {
-		log.Printf("[INFO] Nothing to update in node configuration")
+		log.Printf("[INFO] Nothing to update in node template")
 		return nil
 	}
 
@@ -659,6 +664,12 @@ func resourceNodeTemplateCreate(ctx context.Context, d *schema.ResourceData, met
 	defer log.Printf("[INFO] Create Node Template post call end")
 	client := meta.(*ProviderConfig).api
 	clusterID := d.Get(FieldClusterID).(string)
+
+	// default node template is created by default in the background, therefore we need to use PUT instead of POST
+	if d.Get(FieldNodeTemplateIsDefault).(bool) {
+		return updateDefaultNodeTemplate(ctx, d, meta)
+	}
+
 	req := sdk.NodeTemplatesAPICreateNodeTemplateJSONRequestBody{
 		Name:            lo.ToPtr(d.Get(FieldNodeTemplateName).(string)),
 		IsDefault:       lo.ToPtr(d.Get(FieldNodeTemplateIsDefault).(bool)),
@@ -721,6 +732,29 @@ func resourceNodeTemplateCreate(ctx context.Context, d *schema.ResourceData, met
 	d.SetId(lo.FromPtr(resp.JSON200.Name))
 
 	return resourceNodeTemplateRead(ctx, d, meta)
+}
+
+func updateDefaultNodeTemplate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
+	d.SetId(d.Get(FieldNodeTemplateName).(string))
+	// make timeout 5 seconds less than the creation timeout
+	timeout := d.Timeout(schema.TimeoutCreate) - 5*time.Second
+	// handle situation when default node template is not created yet by autoscaler policy
+	if err := retry.RetryContext(ctx, timeout, func() *retry.RetryError {
+		diagnostics := updateNodeTemplate(ctx, d, meta, true)
+
+		for _, d := range diagnostics {
+			if d.Severity == diag.Error {
+				if strings.Contains(d.Summary, "node template not found") {
+					return retry.RetryableError(fmt.Errorf(d.Summary))
+				}
+				return retry.NonRetryableError(fmt.Errorf(d.Summary))
+			}
+		}
+		return nil
+	}); err != nil {
+		return diag.FromErr(err)
+	}
+	return nil
 }
 
 func getNodeTemplateByName(ctx context.Context, data *schema.ResourceData, meta any, clusterID string) (*sdk.NodetemplatesV1NodeTemplate, error) {
