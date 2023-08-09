@@ -35,6 +35,7 @@
       "compute.zoneOperations.get",
       "compute.zones.list",
       "compute.zones.get",
-      "serviceusage.services.list"
+      "serviceusage.services.list",
+      "resourcemanager.projects.getIamPolicy"
     ]
 }
