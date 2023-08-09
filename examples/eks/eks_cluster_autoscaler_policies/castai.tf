@@ -103,7 +103,7 @@ module "castai-eks-cluster" {
   node_templates = {
     default_by_castai = {
       name = "default-by-castai"
-      configuration_id = module.castai-aks-cluster.castai_node_configurations["default"]
+      configuration_id = module.castai-eks-cluster.castai_node_configurations["default"]
       is_default   = true
       should_taint = false
 
