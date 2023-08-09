@@ -44,9 +44,10 @@ func resourceAutoscaler() *schema.Resource {
 				Description:      "CAST AI cluster id",
 			},
 			FieldAutoscalerPoliciesJSON: {
-				Type:        schema.TypeString,
-				Description: "autoscaler policies JSON string to override current autoscaler settings",
-				Optional:    true,
+				Type:             schema.TypeString,
+				Description:      "autoscaler policies JSON string to override current autoscaler settings",
+				Optional:         true,
+				ValidateDiagFunc: validateAutoscalerPolicyJSON(),
 			},
 			FieldAutoscalerPolicies: {
 				Type:        schema.TypeString,
@@ -228,4 +229,41 @@ func getClusterId(data *schema.ResourceData) string {
 	}
 
 	return value.(string)
+}
+
+func validateAutoscalerPolicyJSON() schema.SchemaValidateDiagFunc {
+	return validation.ToDiagFunc(func(i interface{}, k string) ([]string, []error) {
+		v, ok := i.(string)
+		if !ok {
+			return nil, []error{fmt.Errorf("expected type of %q to be string", k)}
+		}
+		policyMap := make(map[string]interface{})
+		err := json.Unmarshal([]byte(v), &policyMap)
+		if err != nil {
+			return nil, []error{fmt.Errorf("failed to deserialize JSON: %v", err)}
+		}
+		errors := make([]error, 0)
+		if _, found := policyMap["spotInstances"]; found {
+			errors = append(errors, createValidationError("spotInstances", v))
+		}
+		if unschedulablePods, found := policyMap["unschedulablePods"]; found {
+			if unschedulablePodsMap, ok := unschedulablePods.(map[string]interface{}); ok {
+				if _, found := unschedulablePodsMap["customInstancesEnabled"]; found {
+					errors = append(errors, createValidationError("customInstancesEnabled", v))
+				}
+				if _, found := unschedulablePodsMap["nodeConstraints"]; found {
+					errors = append(errors, createValidationError("nodeConstraints", v))
+				}
+			}
+		}
+
+		return nil, errors
+	})
+}
+
+func createValidationError(field, value string) error {
+	return fmt.Errorf("'%s' field was removed from policies JSON in 5.0.0. "+
+		"The configuration was migrated to default node template.\n\n"+
+		"See: https://github.com/castai/terraform-provider-castai#migrating-from-4xx-to-5xx\n\n"+
+		"Policy:\n%v", field, value)
 }

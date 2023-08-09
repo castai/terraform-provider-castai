@@ -6,6 +6,7 @@ import (
 	"github.com/castai/terraform-provider-castai/castai/sdk"
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/samber/lo"
@@ -33,6 +34,7 @@ const (
 	FieldNodeTemplateIncludeNames                           = "include_names"
 	FieldNodeTemplateInstanceFamilies                       = "instance_families"
 	FieldNodeTemplateIsDefault                              = "is_default"
+	FieldNodeTemplateIsEnabled                              = "is_enabled"
 	FieldNodeTemplateIsGpuOnly                              = "is_gpu_only"
 	FieldNodeTemplateManufacturers                          = "manufacturers"
 	FieldNodeTemplateMaxCount                               = "max_count"
@@ -92,6 +94,12 @@ func resourceNodeTemplate() *schema.Resource {
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 				Description:      "Name of the node template.",
 			},
+			FieldNodeTemplateIsEnabled: {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Computed:    true,
+				Description: "Flag whether the node template is enabled and considered for autoscaling.",
+			},
 			FieldNodeTemplateIsDefault: {
 				Type:        schema.TypeBool,
 				Optional:    true,
@@ -123,8 +131,8 @@ func resourceNodeTemplate() *schema.Resource {
 						},
 						FieldNodeTemplateOnDemand: {
 							Type:        schema.TypeBool,
-							Default:     false,
 							Optional:    true,
+							Computed:    true,
 							Description: "Should include on-demand instances in the considered pool.",
 						},
 						FieldNodeTemplateUseSpotFallbacks: {
@@ -147,7 +155,6 @@ func resourceNodeTemplate() *schema.Resource {
 						},
 						FieldNodeTemplateSpotDiversityPriceIncreaseLimitPercent: {
 							Type:        schema.TypeInt,
-							Default:     20,
 							Optional:    true,
 							Description: "Allowed node configuration price increase when diversifying instance types. E.g. if the value is 10%, then the overall price of diversified instance types can be 10% higher than the price of the optimal configuration.",
 						},
@@ -159,7 +166,6 @@ func resourceNodeTemplate() *schema.Resource {
 						},
 						FieldNodeTemplateSpotInterruptionPredictionsType: {
 							Type:             schema.TypeString,
-							Default:          "aws-rebalance-recommendations",
 							Optional:         true,
 							Description:      "Spot interruption predictions type. Can be either \"aws-rebalance-recommendations\" or \"interruption-predictions\".",
 							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"aws-rebalance-recommendations", "interruption-predictions"}, false)),
@@ -392,6 +398,9 @@ func resourceNodeTemplateRead(ctx context.Context, d *schema.ResourceData, meta 
 	if err := d.Set(FieldNodeTemplateName, nodeTemplate.Name); err != nil {
 		return diag.FromErr(fmt.Errorf("setting name: %w", err))
 	}
+	if err := d.Set(FieldNodeTemplateIsEnabled, nodeTemplate.IsEnabled); err != nil {
+		return diag.FromErr(fmt.Errorf("setting is enabled: %w", err))
+	}
 	if err := d.Set(FieldNodeTemplateIsDefault, nodeTemplate.IsDefault); err != nil {
 		return diag.FromErr(fmt.Errorf("setting is default: %w", err))
 	}
@@ -537,6 +546,18 @@ func resourceNodeTemplateDelete(ctx context.Context, d *schema.ResourceData, met
 	clusterID := d.Get(FieldClusterID).(string)
 	name := d.Get(FieldNodeTemplateName).(string)
 
+	if isDefault, ok := d.Get(FieldNodeTemplateIsDefault).(bool); ok && isDefault {
+		return diag.Diagnostics{
+			{
+				Severity: diag.Warning,
+				Summary:  fmt.Sprintf("Skipping delete of \"%s\" node template", name),
+				Detail: "Default node templates cannot be deleted from CAST.ai. If you want to autoscaler to stop " +
+					"considering this node template, you can disable it (either from UI or by setting `is_enabled` " +
+					"flag to false).",
+			},
+		}
+	}
+
 	resp, err := client.NodeTemplatesAPIDeleteNodeTemplateWithResponse(ctx, clusterID, name)
 	if checkErr := sdk.CheckOKResponse(resp, err); checkErr != nil {
 		return diag.FromErr(checkErr)
@@ -546,7 +567,11 @@ func resourceNodeTemplateDelete(ctx context.Context, d *schema.ResourceData, met
 }
 
 func resourceNodeTemplateUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
-	if !d.HasChanges(
+	return updateNodeTemplate(ctx, d, meta, false)
+}
+
+func updateNodeTemplate(ctx context.Context, d *schema.ResourceData, meta any, skipChangeCheck bool) diag.Diagnostics {
+	if !skipChangeCheck && !d.HasChanges(
 		FieldNodeTemplateName,
 		FieldNodeTemplateShouldTaint,
 		FieldNodeTemplateConfigurationId,
@@ -556,8 +581,9 @@ func resourceNodeTemplateUpdate(ctx context.Context, d *schema.ResourceData, met
 		FieldNodeTemplateCustomTaints,
 		FieldNodeTemplateCustomInstancesEnabled,
 		FieldNodeTemplateConstraints,
+		FieldNodeTemplateIsEnabled,
 	) {
-		log.Printf("[INFO] Nothing to update in node configuration")
+		log.Printf("[INFO] Nothing to update in node template")
 		return nil
 	}
 
@@ -568,6 +594,10 @@ func resourceNodeTemplateUpdate(ctx context.Context, d *schema.ResourceData, met
 	req := sdk.NodeTemplatesAPIUpdateNodeTemplateJSONRequestBody{}
 	if v, ok := d.GetOk(FieldNodeTemplateIsDefault); ok {
 		req.IsDefault = toPtr(v.(bool))
+	}
+
+	if v, ok := d.GetOk(FieldNodeTemplateIsEnabled); ok {
+		req.IsEnabled = toPtr(v.(bool))
 	}
 
 	if v, ok := d.GetOk(FieldNodeTemplateConfigurationId); ok {
@@ -634,11 +664,21 @@ func resourceNodeTemplateCreate(ctx context.Context, d *schema.ResourceData, met
 	defer log.Printf("[INFO] Create Node Template post call end")
 	client := meta.(*ProviderConfig).api
 	clusterID := d.Get(FieldClusterID).(string)
+
+	// default node template is created by default in the background, therefore we need to use PUT instead of POST
+	if d.Get(FieldNodeTemplateIsDefault).(bool) {
+		return updateDefaultNodeTemplate(ctx, d, meta)
+	}
+
 	req := sdk.NodeTemplatesAPICreateNodeTemplateJSONRequestBody{
 		Name:            lo.ToPtr(d.Get(FieldNodeTemplateName).(string)),
 		IsDefault:       lo.ToPtr(d.Get(FieldNodeTemplateIsDefault).(bool)),
 		ConfigurationId: lo.ToPtr(d.Get(FieldNodeTemplateConfigurationId).(string)),
 		ShouldTaint:     lo.ToPtr(d.Get(FieldNodeTemplateShouldTaint).(bool)),
+	}
+
+	if v, ok := d.GetOk(FieldNodeTemplateIsEnabled); ok {
+		req.IsEnabled = lo.ToPtr(v.(bool))
 	}
 
 	if v, ok := d.Get(FieldNodeTemplateRebalancingConfigMinNodes).(int32); ok {
@@ -692,6 +732,29 @@ func resourceNodeTemplateCreate(ctx context.Context, d *schema.ResourceData, met
 	d.SetId(lo.FromPtr(resp.JSON200.Name))
 
 	return resourceNodeTemplateRead(ctx, d, meta)
+}
+
+func updateDefaultNodeTemplate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
+	d.SetId(d.Get(FieldNodeTemplateName).(string))
+	// make timeout 5 seconds less than the creation timeout
+	timeout := d.Timeout(schema.TimeoutCreate) - 5*time.Second
+	// handle situation when default node template is not created yet by autoscaler policy
+	if err := retry.RetryContext(ctx, timeout, func() *retry.RetryError {
+		diagnostics := updateNodeTemplate(ctx, d, meta, true)
+
+		for _, d := range diagnostics {
+			if d.Severity == diag.Error {
+				if strings.Contains(d.Summary, "node template not found") {
+					return retry.RetryableError(fmt.Errorf(d.Summary))
+				}
+				return retry.NonRetryableError(fmt.Errorf(d.Summary))
+			}
+		}
+		return nil
+	}); err != nil {
+		return diag.FromErr(err)
+	}
+	return nil
 }
 
 func getNodeTemplateByName(ctx context.Context, data *schema.ResourceData, meta any, clusterID string) (*sdk.NodetemplatesV1NodeTemplate, error) {
@@ -882,6 +945,10 @@ func toTemplateConstraints(obj map[string]any) *sdk.NodetemplatesV1TemplateConst
 	}
 	if v, ok := obj[FieldNodeTemplateOnDemand].(bool); ok {
 		out.OnDemand = toPtr(v)
+	} else {
+		if v, ok := obj[FieldNodeTemplateSpot].(bool); ok {
+			out.Spot = toPtr(!v)
+		}
 	}
 	if v, ok := obj[FieldNodeTemplateStorageOptimized].(bool); ok {
 		out.StorageOptimized = toPtr(v)

@@ -8,6 +8,7 @@ import (
 	"io"
 	"net/http"
 	"reflect"
+	"strings"
 	"testing"
 
 	"github.com/golang/mock/gomock"
@@ -317,4 +318,130 @@ func JSONBytesEqual(a, b []byte) (bool, error) {
 		return false, err
 	}
 	return reflect.DeepEqual(j2, j), nil
+}
+
+func Test_validateAutoscalerPolicyJSON(t *testing.T) {
+	type testData struct {
+		json            string
+		valid           bool
+		expectedMessage string
+	}
+	tests := map[string]testData{
+		"should return no diagnostic error for valid autoscaler policies JSON": {
+			json: ` {
+					     "enabled": true,
+					     "unschedulablePods": {
+					         "enabled": true
+					     },
+					    "nodeDownscaler": {
+					         "enabled": true,
+					         "emptyNodes": {
+					             "enabled": true
+					         },
+					         "evictor": {
+					             "aggressiveMode": true,
+					             "cycleInterval": "5m10s",
+					             "dryRun": false,
+					             "enabled": true,
+					             "nodeGracePeriodMinutes": 10,
+					             "scopedMode": false
+					         }
+					     }
+					}`,
+			valid: true,
+		},
+		"should return diagnostic error if spot instances block is present in JSON": {
+			json: ` {
+					     "enabled": true,
+					     "unschedulablePods": {
+					         "enabled": true
+					     },
+					     "spotInstances": {
+					         "enabled": true,
+					         "clouds": ["gcp"],
+					         "spotBackups": {
+					             "enabled": true
+					         }
+					     },
+					     "nodeDownscaler": {
+					         "enabled": true,
+					         "emptyNodes": {
+					             "enabled": true
+					         },
+					         "evictor": {
+					             "aggressiveMode": true,
+					             "cycleInterval": "5m10s",
+					             "dryRun": false,
+					             "enabled": true,
+					             "nodeGracePeriodMinutes": 10,
+					             "scopedMode": false
+					         }
+					     }
+					}`,
+			valid:           false,
+			expectedMessage: "'spotInstances' field was removed from policies JSON in 5.0.0. The configuration was migrated to default node template.",
+		},
+		"should return diagnostic error if custom instance enabled attribute is present in JSON": {
+			json: ` {
+					     "enabled": true,
+					     "unschedulablePods": {
+					         "enabled": true,
+					         "customInstancesEnabled": true
+					     },
+					     "nodeDownscaler": {
+					         "enabled": true,
+					         "emptyNodes": {
+					             "enabled": true
+					         },
+					         "evictor": {
+					             "aggressiveMode": true,
+					             "cycleInterval": "5m10s",
+					             "dryRun": false,
+					             "enabled": true,
+					             "nodeGracePeriodMinutes": 10,
+					             "scopedMode": false
+					         }
+					     }
+					}`,
+			valid:           false,
+			expectedMessage: "'customInstancesEnabled' field was removed from policies JSON in 5.0.0. The configuration was migrated to default node template.",
+		},
+
+		"should return diagnostic error if node constraints attribute is present in JSON": {
+			json: ` {
+					     "enabled": true,
+					     "unschedulablePods": {
+					         "enabled": true,
+					         "nodeConstraints": {}
+					     },
+					     "nodeDownscaler": {
+					         "enabled": true,
+					         "emptyNodes": {
+					             "enabled": true
+					         },
+					         "evictor": {
+					             "aggressiveMode": true,
+					             "cycleInterval": "5m10s",
+					             "dryRun": false,
+					             "enabled": true,
+					             "nodeGracePeriodMinutes": 10,
+					             "scopedMode": false
+					         }
+					     }
+					}`,
+			valid:           false,
+			expectedMessage: "'nodeConstraints' field was removed from policies JSON in 5.0.0. The configuration was migrated to default node template.",
+		},
+	}
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			result := validateAutoscalerPolicyJSON()(tt.json, []cty.PathStep{cty.PathStep(nil)})
+			require.Equal(t, tt.valid, !result.HasError())
+			if !tt.valid {
+				for _, d := range result {
+					require.True(t, strings.Contains(d.Summary, tt.expectedMessage))
+				}
+			}
+		})
+	}
 }

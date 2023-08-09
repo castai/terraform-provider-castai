@@ -1,0 +1,60 @@
+---
+page_title: "{{.Name}} {{.Type}} - {{.ProviderName}}"
+subcategory: ""
+description: |-
+{{ .Description | plainmarkdown | trimspace | prefixlines "  " }}
+---
+
+# {{.Name}} ({{.Type}})
+
+{{ .Description | trimspace }}
+
+{{ if .HasExample -}}
+## Example Usage
+
+{{tffile .ExampleFile}}
+{{- end }}
+
+## Reservations CSV structure
+
+The file should be made up of reservation entries with comma separated values with the first row being column headers.
+
+- `count` (String) - amount of reserved instances
+- `end_date` (String) - end date of reservation
+- `instance_type` (String) - reserved instance type
+- `name` (String) - unique reservation name in region for specific instance type
+- `price` (String) - reservation price
+- `provider` (String) - reservation cloud provider (gcp, aws, azure)
+- `region` (String) - reservation region
+- `start_date` (String) - start date of reservation
+- `zone_id` (String) - reservation zone id
+- `zone_name` (String) - reservation zone name
+
+Example CSV file:
+
+```csv
+name,provider,region,instance_type,price,count,start_date,end_date,zone_id,zone_name
+reservation1,aws,us-east-1,c5n.large,,1,2020-01-01T00:00:00Z,2050-01-01T00:00:00Z,,
+reservation2,aws,us-east-1,c5n.large,,2,2020-01-01T00:00:00Z,2050-01-01T00:00:01Z,,
+```
+
+### Azure exported reservations
+
+Reservations exported from Azure in CSV format are also accepted. Example of such CSV file:
+
+```csv
+Name,Reservation Id,Reservation order Id,Status,Expiration date,Purchase date,Term,Scope,Scope subscription,Scope resource group,Type,Product name,Region,Quantity,Utilization % 1 Day,Utilization % 7 Day,Utilization % 30 Day,Deep link to reservation
+VM_RI_01-01-2023_01-01,3b3de39c-bc44-4d69-be2d-69527dfe9958,630226bb-5170-4b95-90b0-f222757130c1,Succeeded,2050-01-01T00:00:00Z,2023-01-11T00:00:00Z,P3Y,Single subscription,8faa0959-093b-4612-8686-a996ac19db00,All resource groups,VirtualMachines,Standard_D32as_v4,eastus,3,100,100,100,https://portal.azure.com#resource/providers/microsoft.capacity/reservationOrders/59791a62-264b-4b9f-aa3a-5eeb761e4583/reservations/883afd52-54c8-4bc6-a0f2-ccbaf7b84bda/overview
+VM_RI_01-01-2023_01-02,3b3de39c-bc44-4d69-be2d-69527dfe9958,630226bb-5170-4b95-90b0-f222757130c1,Succeeded,2050-01-01T00:00:00Z,2023-01-11T00:00:01Z,P3Y,Single subscription,8faa0959-093b-4612-8686-a996ac19db00,All resource groups,VirtualMachines,Standard_D32as_v4,eastus,2,100,100,100,https://portal.azure.com#resource/providers/microsoft.capacity/reservationOrders/59791a62-264b-4b9f-aa3a-5eeb761e4583/reservations/25b95bdb-b78b-4973-a60c-71e70f158eca/overview
+VM_RI_01-01-2023_01-03,3b3de39c-bc44-4d69-be2d-69527dfe9958,630226bb-5170-4b95-90b0-f222757130c1,Succeeded,2050-01-01T00:00:00Z,2023-01-11T00:00:02Z,P3Y,Single subscription,8faa0959-093b-4612-8686-a996ac19db00,All resource groups,VirtualMachines,Standard_D32as_v4,eastus,1,100,100,100,https://portal.azure.com#resource/providers/microsoft.capacity/reservationOrders/59791a62-264b-4b9f-aa3a-5eeb761e4583/reservations/1745741b-f3c6-46a9-ad16-b93775a1bc38/overview
+```
+
+{{ .SchemaMarkdown | trimspace }}
+
+{{ if .HasImport -}}
+## Import
+
+Import is supported using the following syntax:
+
+{{codefile "shell" .ImportFile}}
+{{- end }}
