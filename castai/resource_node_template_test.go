@@ -371,13 +371,13 @@ func TestAccResourceNodeTemplate_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "custom_instances_enabled", "false"),
 					resource.TestCheckResourceAttr(resourceName, "custom_label.#", "0"),
 					resource.TestCheckResourceAttr(resourceName, "custom_labels.%", "2"),
-					resource.TestCheckResourceAttr(resourceName, "custom_labels.custom-key-1", "custom-value-1"),
-					resource.TestCheckResourceAttr(resourceName, "custom_labels.custom-key-2", "custom-value-2"),
+					resource.TestCheckResourceAttr(resourceName, fmt.Sprintf("custom_labels.%s-1", rName), fmt.Sprintf("%s-1", rName)),
+					resource.TestCheckResourceAttr(resourceName, fmt.Sprintf("custom_labels.%s-2", rName), fmt.Sprintf("%s-2", rName)),
 					resource.TestCheckResourceAttr(resourceName, "custom_taints.#", "2"),
-					resource.TestCheckResourceAttr(resourceName, "custom_taints.0.key", "custom-taint-key-1"),
-					resource.TestCheckResourceAttr(resourceName, "custom_taints.0.value", "custom-taint-value-1"),
-					resource.TestCheckResourceAttr(resourceName, "custom_taints.1.key", "custom-taint-key-2"),
-					resource.TestCheckResourceAttr(resourceName, "custom_taints.1.value", "custom-taint-value-2"),
+					resource.TestCheckResourceAttr(resourceName, "custom_taints.0.key", fmt.Sprintf("%s-1", rName)),
+					resource.TestCheckResourceAttr(resourceName, "custom_taints.0.value", fmt.Sprintf("%s-1", rName)),
+					resource.TestCheckResourceAttr(resourceName, "custom_taints.1.key", fmt.Sprintf("%s-2", rName)),
+					resource.TestCheckResourceAttr(resourceName, "custom_taints.1.value", fmt.Sprintf("%s-2", rName)),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.instance_families.0.exclude.0", "m5"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.gpu.0.manufacturers.0", "NVIDIA"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.gpu.0.include_names.#", "0"),
@@ -414,11 +414,11 @@ func TestAccResourceNodeTemplate_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "custom_instances_enabled", "false"),
 					resource.TestCheckResourceAttr(resourceName, "custom_label.#", "0"),
 					resource.TestCheckResourceAttr(resourceName, "custom_labels.%", "2"),
-					resource.TestCheckResourceAttr(resourceName, "custom_labels.custom-key-1", "custom-value-1"),
-					resource.TestCheckResourceAttr(resourceName, "custom_labels.custom-key-2", "custom-value-2"),
+					resource.TestCheckResourceAttr(resourceName, fmt.Sprintf("custom_labels.%s-1", rName), fmt.Sprintf("%s-1", rName)),
+					resource.TestCheckResourceAttr(resourceName, fmt.Sprintf("custom_labels.%s-2", rName), fmt.Sprintf("%s-2", rName)),
 					resource.TestCheckResourceAttr(resourceName, "custom_taints.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "custom_taints.0.key", "custom-taint-key-1"),
-					resource.TestCheckResourceAttr(resourceName, "custom_taints.0.value", "custom-taint-value-1"),
+					resource.TestCheckResourceAttr(resourceName, "custom_taints.0.key", fmt.Sprintf("%s-1", rName)),
+					resource.TestCheckResourceAttr(resourceName, "custom_taints.0.value", fmt.Sprintf("%s-1", rName)),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.use_spot_fallbacks", "true"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.spot", "true"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.on_demand", "true"),
@@ -457,19 +457,19 @@ func testAccNodeTemplateConfig(rName, clusterName string) string {
 			should_taint = true
 
 			custom_labels = {
-				custom-key-1 = "custom-value-1"
-				custom-key-2 = "custom-value-2"
+				%[1]s-1 = "%[1]s-1"
+				%[1]s-2 = "%[1]s-2"
 			}
 
 			custom_taints {
-				key = "custom-taint-key-1"
-				value = "custom-taint-value-1"
+				key = "%[1]s-1"
+				value = "%[1]s-1"
 				effect = "NoSchedule"
 			}
 
 			custom_taints {
-				key = "custom-taint-key-2"
-				value = "custom-taint-value-2"
+				key = "%[1]s-2"
+				value = "%[1]s-2"
 				effect = "NoSchedule"
 			}
 
@@ -507,13 +507,13 @@ func testNodeTemplateUpdated(rName, clusterName string) string {
 			should_taint = true
 			
 			custom_labels = {
-				custom-key-1 = "custom-value-1"
-				custom-key-2 = "custom-value-2"
+				%[1]s-1 = "%[1]s-1"
+				%[1]s-2 = "%[1]s-2"
 			}
 
 			custom_taints {
-				key = "custom-taint-key-1"
-				value = "custom-taint-value-1"
+				key = "%[1]s-1"
+				value = "%[1]s-1"
 				effect = "NoSchedule"
 			}
 
