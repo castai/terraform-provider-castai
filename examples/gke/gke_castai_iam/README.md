@@ -3,7 +3,7 @@
 Following example shows how to create GCP IAM resources required to connect GKE with CAST AI using [castai_gke_iam](https://registry.terraform.io/modules/castai/gke-iam/castai/latest) module.
 
 When creating a service account you can enforce conditional, attribute-based access on `iam.serviceAccountUser` role.
-It can access and act as all other service accounts or be scoped to the ones used by node pools in the GKE cluster.
+It can access and act as all other service accounts or be scoped to the ones used by node pools in the GKE cluster, which is more secure and therefore recommended.
 
 ### Steps to take to successfully create GCP IAM resources with `iam.serviceAccountUser` role and custom condition.
 
