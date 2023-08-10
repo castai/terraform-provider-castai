@@ -1,0 +1,5 @@
+castai_api_token            = "PLACEHOLDER"
+project_id                  = "PLACEHOLDER"
+cluster_name                = "PLACEHOLDER"
+castai_api_url              = "PLACEHOLDER"
+service_accounts_unique_ids = ["PLACEHOLDER"]
