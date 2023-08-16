@@ -28,6 +28,8 @@ CAST AI node template resource to manage node templates
 - `custom_label` (Block List, Max: 1, Deprecated) Custom label key/value to be added to nodes created from this template. (see [below for nested schema](#nestedblock--custom_label))
 - `custom_labels` (Map of String) Custom labels to be added to nodes created from this template. If the field `custom_label` is present, the value of `custom_labels` will be ignored.
 - `custom_taints` (Block List) Custom taints to be added to the nodes created from this template. `shouldTaint` has to be `true` in order to create/update the node template with custom taints. If `shouldTaint` is `true`, but no custom taints are provided, the nodes will be tainted with the default node template taint. (see [below for nested schema](#nestedblock--custom_taints))
+- `is_default` (Boolean) Flag whether the node template is default.
+- `is_enabled` (Boolean) Flag whether the node template is enabled and considered for autoscaling.
 - `rebalancing_config_min_nodes` (Number) Minimum nodes that will be kept when rebalancing nodes using this node template.
 - `should_taint` (Boolean) Marks whether the templated nodes will have a taint.
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
@@ -43,14 +45,20 @@ Optional:
 
 - `architectures` (List of String) List of acceptable instance CPU architectures, the default is amd64. Allowed values: amd64, arm64.
 - `compute_optimized` (Boolean) Compute optimized instance constraint - will only pick compute optimized nodes if true.
+- `enable_spot_diversity` (Boolean) Enable/disable spot diversity policy. When enabled, autoscaler will try to balance between diverse and cost optimal instance types.
 - `fallback_restore_rate_seconds` (Number) Fallback restore rate in seconds: defines how much time should pass before spot fallback should be attempted to be restored to real spot.
 - `gpu` (Block List, Max: 1) (see [below for nested schema](#nestedblock--constraints--gpu))
 - `instance_families` (Block List, Max: 1) (see [below for nested schema](#nestedblock--constraints--instance_families))
+- `is_gpu_only` (Boolean) GPU instance constraint - will only pick nodes with GPU if true
 - `max_cpu` (Number) Max CPU cores per node.
 - `max_memory` (Number) Max Memory (Mib) per node.
 - `min_cpu` (Number) Min CPU cores per node.
 - `min_memory` (Number) Min Memory (Mib) per node.
-- `spot` (Boolean) Spot instance constraint - true only spot, false only on-demand.
+- `on_demand` (Boolean) Should include on-demand instances in the considered pool.
+- `spot` (Boolean) Should include spot instances in the considered pool.
+- `spot_diversity_price_increase_limit_percent` (Number) Allowed node configuration price increase when diversifying instance types. E.g. if the value is 10%, then the overall price of diversified instance types can be 10% higher than the price of the optimal configuration.
+- `spot_interruption_predictions_enabled` (Boolean) Enable/disable spot interruption predictions.
+- `spot_interruption_predictions_type` (String) Spot interruption predictions type. Can be either "aws-rebalance-recommendations" or "interruption-predictions".
 - `storage_optimized` (Boolean) Storage optimized instance constraint - will only pick storage optimized nodes if true
 - `use_spot_fallbacks` (Boolean) Spot instance fallback constraint - when true, on-demand instances will be created, when spots are unavailable.
 

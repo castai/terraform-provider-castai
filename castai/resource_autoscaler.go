@@ -20,7 +20,6 @@ import (
 
 const (
 	FieldAutoscalerPoliciesJSON = "autoscaler_policies_json"
-	FieldClusterId              = "cluster_id"
 	FieldAutoscalerPolicies     = "autoscaler_policies"
 )
 
@@ -45,9 +44,10 @@ func resourceAutoscaler() *schema.Resource {
 				Description:      "CAST AI cluster id",
 			},
 			FieldAutoscalerPoliciesJSON: {
-				Type:        schema.TypeString,
-				Description: "autoscaler policies JSON string to override current autoscaler settings",
-				Optional:    true,
+				Type:             schema.TypeString,
+				Description:      "autoscaler policies JSON string to override current autoscaler settings",
+				Optional:         true,
+				ValidateDiagFunc: validateAutoscalerPolicyJSON(),
 			},
 			FieldAutoscalerPolicies: {
 				Type:        schema.TypeString,
@@ -109,7 +109,7 @@ func resourceCastaiAutoscalerUpdate(ctx context.Context, data *schema.ResourceDa
 	return nil
 }
 
-func getCurrentPolicies(ctx context.Context, client *sdk.ClientWithResponses, clusterId sdk.ClusterId) ([]byte, error) {
+func getCurrentPolicies(ctx context.Context, client *sdk.ClientWithResponses, clusterId string) ([]byte, error) {
 	log.Printf("[INFO] Getting cluster autoscaler information.")
 
 	resp, err := client.PoliciesAPIGetClusterPolicies(ctx, clusterId)
@@ -157,7 +157,7 @@ func updateAutoscalerPolicies(ctx context.Context, data *schema.ResourceData, me
 	return upsertPolicies(ctx, meta, clusterId, changedPoliciesJSON)
 }
 
-func upsertPolicies(ctx context.Context, meta interface{}, clusterId sdk.ClusterId, changedPoliciesJSON string) error {
+func upsertPolicies(ctx context.Context, meta interface{}, clusterId string, changedPoliciesJSON string) error {
 	client := meta.(*ProviderConfig).api
 
 	resp, err := client.PoliciesAPIUpsertClusterPoliciesWithBodyWithResponse(ctx, clusterId, "application/json", bytes.NewReader([]byte(changedPoliciesJSON)))
@@ -192,7 +192,7 @@ func readAutoscalerPolicies(ctx context.Context, data *schema.ResourceData, meta
 	return nil
 }
 
-func getChangedPolicies(ctx context.Context, data *schema.ResourceData, meta interface{}, clusterId sdk.ClusterId) ([]byte, error) {
+func getChangedPolicies(ctx context.Context, data *schema.ResourceData, meta interface{}, clusterId string) ([]byte, error) {
 	policyChangesJSON, found := data.GetOk(FieldAutoscalerPoliciesJSON)
 	if !found {
 		log.Printf("[DEBUG] policies json not provided. Skipping autoscaler policies changes")
@@ -222,11 +222,48 @@ func getChangedPolicies(ctx context.Context, data *schema.ResourceData, meta int
 	return policies, nil
 }
 
-func getClusterId(data *schema.ResourceData) sdk.ClusterId {
+func getClusterId(data *schema.ResourceData) string {
 	value, found := data.GetOk(FieldClusterId)
 	if !found {
 		return ""
 	}
 
 	return value.(string)
+}
+
+func validateAutoscalerPolicyJSON() schema.SchemaValidateDiagFunc {
+	return validation.ToDiagFunc(func(i interface{}, k string) ([]string, []error) {
+		v, ok := i.(string)
+		if !ok {
+			return nil, []error{fmt.Errorf("expected type of %q to be string", k)}
+		}
+		policyMap := make(map[string]interface{})
+		err := json.Unmarshal([]byte(v), &policyMap)
+		if err != nil {
+			return nil, []error{fmt.Errorf("failed to deserialize JSON: %v", err)}
+		}
+		errors := make([]error, 0)
+		if _, found := policyMap["spotInstances"]; found {
+			errors = append(errors, createValidationError("spotInstances", v))
+		}
+		if unschedulablePods, found := policyMap["unschedulablePods"]; found {
+			if unschedulablePodsMap, ok := unschedulablePods.(map[string]interface{}); ok {
+				if _, found := unschedulablePodsMap["customInstancesEnabled"]; found {
+					errors = append(errors, createValidationError("customInstancesEnabled", v))
+				}
+				if _, found := unschedulablePodsMap["nodeConstraints"]; found {
+					errors = append(errors, createValidationError("nodeConstraints", v))
+				}
+			}
+		}
+
+		return nil, errors
+	})
+}
+
+func createValidationError(field, value string) error {
+	return fmt.Errorf("'%s' field was removed from policies JSON in 5.0.0. "+
+		"The configuration was migrated to default node template.\n\n"+
+		"See: https://github.com/castai/terraform-provider-castai#migrating-from-4xx-to-5xx\n\n"+
+		"Policy:\n%v", field, value)
 }

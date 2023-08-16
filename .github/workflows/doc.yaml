@@ -1,0 +1,36 @@
+name: Generate SDK and Docs
+on:
+  pull_request:
+jobs:
+  generate-sdk:
+    name: Check if SDK is up to date
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-go@v4
+        with:
+          go-version: 1.19.5
+      - uses: actions/checkout@v3
+      - name: Check SDK
+        run: | 
+          make generate-sdk
+          if [[ -n $(git status -s) ]]
+          then
+            echo "SDK is not up to date, regenerate it by running 'make generate-sdk' and commit your changes."
+            exit 1
+          fi
+  generate-docs:
+    name: Check if documentation is up to date
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-go@v4
+        with:
+          go-version: 1.19.5
+      - uses: actions/checkout@v3
+      - name: Check SDK
+        run: | 
+          make generate-docs
+          if [[ -n $(git status -s) ]]
+          then
+            echo "Documentation is not up to date, regenerate it by running 'make generate-docs' and commit your changes."
+            exit 1
+          fi

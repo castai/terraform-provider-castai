@@ -171,6 +171,124 @@ and usage `castai_eks_cluster.this.cluster_token`
 * default value for `imds_v1` was change to `true`, in case that your configuration didn't had this specified
 please explicitly set this value to `false`
 
+Migrating from 4.x.x to 5.x.x
+---------------------------
+
+Version 5.x.x changed:
+* Terraform provider adopts [default node template concept](https://docs.cast.ai/docs/default-node-template)
+* Removed `spotInstances` field from `autoscaler_policies_json` attribute in `castai_autoscaler_policies` resource
+* Removed `customInstancesEnabled` field from `autoscaler_policies_json` attribute in `castai_autoscaler_policies` resource
+* Removed `nodeConstraints` field from `autoscaler_policies_json` attribute in `castai_autoscaler_policies` resource
+* All valid fields which were removed from `autoscaler_policies_json` have mapping in `castai_node_template` [resource](https://registry.terraform.io/providers/CastAI/castai/latest/docs/resources/node_template)
+
+Old configuration:
+```terraform
+resource "castai_autoscaler" "castai_autoscaler_policies" {
+  cluster_id               = data.castai_eks_clusterid.cluster_id.id // or other reference
+
+  autoscaler_policies_json = <<-EOT
+    {
+        "enabled": true,
+        "unschedulablePods": {
+            "enabled": true,
+            "customInstancesEnabled": true,
+            "nodeConstraints": {
+                "enabled": true,
+                "minCpuCores": 2,
+                "maxCpuCores": 4,
+                "minRamMib": 3814,
+                "maxRamMib": 16384
+            }
+        },
+        "spotInstances": {
+            "enabled": true,
+            "clouds": ["gcp"],
+            "spotBackups": {
+                "enabled": true
+            }
+        },
+        "nodeDownscaler": {
+            "enabled": true,
+            "emptyNodes": {
+                "enabled": true
+            },
+            "evictor": {
+                "aggressiveMode": true,
+                "cycleInterval": "5m10s",
+                "dryRun": false,
+                "enabled": true,
+                "nodeGracePeriodMinutes": 10,
+                "scopedMode": false
+            }
+        }
+    }
+  EOT
+}
+```
+
+New configuration:
+```terraform
+resource "castai_autoscaler" "castai_autoscaler_policies" {
+  cluster_id               = data.castai_eks_clusterid.cluster_id.id // or other reference
+
+  autoscaler_policies_json = <<-EOT
+    {
+        "enabled": true,
+        "unschedulablePods": {
+            "enabled": true
+        },
+        "nodeDownscaler": {
+            "enabled": true,
+            "emptyNodes": {
+                "enabled": true
+            },
+            "evictor": {
+                "aggressiveMode": true,
+                "cycleInterval": "5m10s",
+                "dryRun": false,
+                "enabled": true,
+                "nodeGracePeriodMinutes": 10,
+                "scopedMode": false
+            }
+        }
+    }
+  EOT
+}
+
+resource "castai_node_template" "default_by_castai" {
+  cluster_id = data.castai_eks_clusterid.cluster_id.id // or other reference
+
+  name                     = "default-by-castai"
+  configuration_id         = castai_node_configuration.default.id // or other reference
+  is_default               = true
+  should_taint             = false
+  custom_instances_enabled = true
+
+  constraints {
+    architectures = [
+      "amd64",
+      "arm64",
+    ]
+    on_demand          = true
+    spot               = true
+    use_spot_fallbacks = true
+    min_cpu            = 2
+    max_cpu            = 4
+    min_memory         = 3814
+    max_memory         = 16384
+  }
+
+  depends_on = [ castai_autoscaler.castai_autoscaler_policies ]
+}
+```
+
+If you have used `castai-eks-cluster` or other modules follow:
+https://github.com/castai/terraform-castai-eks-cluster/blob/main/README.md#migrating-from-5xx-to-6xx
+
+Note: `default-by-castai` default node template is created in background by CAST.ai, when creating managed resource
+in Terraform the provider will handle create as update. Alternatively you can perform Terraform state import and 
+everything will work correctly.
+
 
 Developing the provider
 ---------------------------
