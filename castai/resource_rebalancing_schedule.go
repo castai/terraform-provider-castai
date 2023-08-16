@@ -256,6 +256,9 @@ func stateToSchedule(d *schema.ResourceData) (*sdk.ScheduledrebalancingV1Rebalan
 		}
 
 		evictGracefully := readOptionalValue[bool](launchConfigurationData, "evict_gracefully")
+		if evictGracefully == nil || *evictGracefully == false {
+			evictGracefully = readOptionalValue[bool](launchConfigurationData, "keep_drain_timeout_nodes")
+		}
 
 		var executionConditions *sdk.ScheduledrebalancingV1ExecutionConditions
 		executionConditionsData := launchConfigurationData["execution_conditions"].([]any)
@@ -301,7 +304,12 @@ func scheduleToState(schedule *sdk.ScheduledrebalancingV1RebalancingSchedule, d 
 
 	if schedule.LaunchConfiguration.RebalancingOptions != nil {
 		launchConfig["rebalancing_min_nodes"] = schedule.LaunchConfiguration.RebalancingOptions.MinNodes
-		launchConfig["evict_gracefully"] = schedule.LaunchConfiguration.RebalancingOptions.EvictGracefully
+
+		if _, ok := d.GetOk("launch_configuration.keep_drain_timeout_nodes"); ok {
+			launchConfig["keep_drain_timeout_nodes"] = schedule.LaunchConfiguration.RebalancingOptions.EvictGracefully
+		} else {
+			launchConfig["evict_gracefully"] = schedule.LaunchConfiguration.RebalancingOptions.EvictGracefully
+		}
 
 		executionConditions := schedule.LaunchConfiguration.RebalancingOptions.ExecutionConditions
 		if executionConditions != nil {

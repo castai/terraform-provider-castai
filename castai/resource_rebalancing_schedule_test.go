@@ -63,6 +63,7 @@ resource "castai_rebalancing_schedule" "test" {
 			enabled = false
 			achieved_savings_percentage = 0
 		}
+		keep_drain_timeout_nodes = true
 	}
 }
 `
