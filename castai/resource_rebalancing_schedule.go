@@ -96,6 +96,12 @@ func resourceRebalancingSchedule() *schema.Resource {
 							ValidateDiagFunc: validation.ToDiagFunc(validation.IntAtLeast(1)),
 							Description:      "Minimum number of nodes that should be kept in the cluster after rebalancing.",
 						},
+						"keep_drain_timeout_nodes": {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Deprecated:  "use evict_gracefully instead",
+							Description: "Defines whether the nodes that failed to get drained until a predefined timeout, will be kept with a rebalancing.cast.ai/status=drain-failed annotation instead of forcefully drained.",
+						},
 						"evict_gracefully": {
 							Type:        schema.TypeBool,
 							Optional:    true,
