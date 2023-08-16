@@ -286,8 +286,14 @@ If you have used `castai-eks-cluster` or other modules follow:
 https://github.com/castai/terraform-castai-eks-cluster/blob/main/README.md#migrating-from-5xx-to-6xx
 
 Note: `default-by-castai` default node template is created in background by CAST.ai, when creating managed resource
-in Terraform the provider will handle create as update. Alternatively you can perform Terraform state import and 
-everything will work correctly.
+in Terraform the provider will handle create as update. **Importing `default-by-castai` default node template into Terraform
+state is not needed if you follow the migration guide**. Despite not being needed it can be performed and everything
+will work correctly.
+
+Example of node template import:
+```sh
+terraform import castai_node_template.default_by_castai 105e6fa3-20b1-424e-v589-9a64d1eeabea/default-by-castai
+```
 
 
 Developing the provider
