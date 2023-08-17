@@ -305,11 +305,7 @@ func scheduleToState(schedule *sdk.ScheduledrebalancingV1RebalancingSchedule, d 
 	if schedule.LaunchConfiguration.RebalancingOptions != nil {
 		launchConfig["rebalancing_min_nodes"] = schedule.LaunchConfiguration.RebalancingOptions.MinNodes
 
-		if _, ok := d.GetOk("launch_configuration.keep_drain_timeout_nodes"); ok {
-			launchConfig["keep_drain_timeout_nodes"] = schedule.LaunchConfiguration.RebalancingOptions.EvictGracefully
-		} else {
-			launchConfig["evict_gracefully"] = schedule.LaunchConfiguration.RebalancingOptions.EvictGracefully
-		}
+		launchConfig["evict_gracefully"] = schedule.LaunchConfiguration.RebalancingOptions.EvictGracefully
 
 		executionConditions := schedule.LaunchConfiguration.RebalancingOptions.ExecutionConditions
 		if executionConditions != nil {
