@@ -12,7 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccResourceNodeConfiguration_basic(t *testing.T) {
+func TestAccResourceNodeConfiguration_eks(t *testing.T) {
 	rName := fmt.Sprintf("%v-node-config-%v", ResourcePrefix, acctest.RandString(8))
 	resourceName := "castai_node_configuration.test"
 	clusterName := "core-tf-acc"
@@ -23,7 +23,7 @@ func TestAccResourceNodeConfiguration_basic(t *testing.T) {
 		CheckDestroy:      testAccCheckNodeConfigurationDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccNodeConfigurationConfig(rName, clusterName),
+				Config: testAccEKSNodeConfigurationConfig(rName, clusterName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "name", rName),
 					resource.TestCheckResourceAttr(resourceName, "disk_cpu_ratio", "35"),
@@ -34,7 +34,7 @@ func TestAccResourceNodeConfiguration_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "container_runtime", "DOCKERD"),
 					resource.TestCheckResourceAttr(resourceName, "docker_config", "{\"insecure-registries\":[\"registry.com:5000\"],\"max-concurrent-downloads\":10}"),
 					resource.TestCheckResourceAttr(resourceName, "kubelet_config", "{\"registryBurst\":20,\"registryPullQPS\":10}"),
-					resource.TestCheckResourceAttr(resourceName, "subnets.#", "2"),
+					resource.TestCheckResourceAttr(resourceName, "subnets.#", "3"),
 					resource.TestCheckResourceAttr(resourceName, "tags.%", "1"),
 					resource.TestCheckResourceAttr(resourceName, "tags.env", "development"),
 					resource.TestCheckResourceAttrSet(resourceName, "eks.0.instance_profile_arn"),
@@ -46,6 +46,7 @@ func TestAccResourceNodeConfiguration_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "eks.0.volume_throughput", "130"),
 					resource.TestCheckResourceAttr(resourceName, "eks.0.imds_v1", "true"),
 					resource.TestCheckResourceAttr(resourceName, "eks.0.imds_hop_limit", "3"),
+					resource.TestCheckResourceAttr(resourceName, "eks.0.volume_kms_key_arn", "arn:aws:kms:eu-central-1:012345:key/1d989ee1-59cd-4238-8018-79bae29d1109"),
 					resource.TestCheckResourceAttr(resourceName, "aks.#", "0"),
 					resource.TestCheckResourceAttr(resourceName, "kops.#", "0"),
 					resource.TestCheckResourceAttr(resourceName, "gke.#", "0"),
@@ -61,7 +62,7 @@ func TestAccResourceNodeConfiguration_basic(t *testing.T) {
 				ImportStateVerify: true,
 			},
 			{
-				Config: testAccNodeConfigurationUpdated(rName, clusterName),
+				Config: testAccEKSNodeConfigurationUpdated(rName, clusterName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "disk_cpu_ratio", "0"),
 					resource.TestCheckResourceAttr(resourceName, "min_disk_size", "100"),
@@ -85,7 +86,7 @@ func TestAccResourceNodeConfiguration_basic(t *testing.T) {
 	})
 }
 
-func testAccNodeConfigurationConfig(rName, clusterName string) string {
+func testAccEKSNodeConfigurationConfig(rName, clusterName string) string {
 	return ConfigCompose(testAccEKSClusterConfig(rName, clusterName), fmt.Sprintf(`
 variable "init_script" {
   type = string
@@ -100,7 +101,7 @@ resource "castai_node_configuration" "test" {
   cluster_id        = castai_eks_cluster.test.id
   disk_cpu_ratio    = 35
   min_disk_size     = 122
-  subnets   	    = aws_subnet.test[*].id
+  subnets   	    = data.aws_subnets.core.ids
   init_script       = base64encode(var.init_script)
   docker_config     = jsonencode({
     "insecure-registries"      = ["registry.com:5000"],
@@ -121,6 +122,7 @@ resource "castai_node_configuration" "test" {
 	volume_type 		 = "gp3"
     volume_iops		     = 3100
 	volume_throughput 	 = 130
+    volume_kms_key_arn   = "arn:aws:kms:eu-central-1:012345:key/1d989ee1-59cd-4238-8018-79bae29d1109"
 	imds_v1				 = true
 	imds_hop_limit       = 3
   }
@@ -133,12 +135,12 @@ resource "castai_node_configuration_default" "test" {
 `, rName))
 }
 
-func testAccNodeConfigurationUpdated(rName, clusterName string) string {
+func testAccEKSNodeConfigurationUpdated(rName, clusterName string) string {
 	return ConfigCompose(testAccEKSClusterConfig(rName, clusterName), fmt.Sprintf(`
 resource "castai_node_configuration" "test" {
   name   		    = %[1]q
   cluster_id        = castai_eks_cluster.test.id
-  subnets   	    = aws_subnet.test[*].id
+  subnets   	    = data.aws_subnets.core.ids
   image             = "amazon-eks-node-1.23-v20220824" 
   container_runtime = "containerd"
   kubelet_config     = jsonencode({
@@ -189,14 +191,10 @@ resource "aws_vpc" "test" {
   }
 }
 
-resource "aws_subnet" "test" {
-  count = 2
-  cidr_block              = cidrsubnet(aws_vpc.test.cidr_block, 8, count.index)
-  map_public_ip_on_launch = true
-  vpc_id                  = aws_vpc.test.id
-  tags = {
-    Name = %[1]q
-  }
+data "aws_subnets" "core" {
+	tags = {
+		Name = "*core-tf-acc-cluster/SubnetPublic*"
+	}
 }
 
 resource "aws_security_group" "test" {

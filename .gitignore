@@ -20,3 +20,4 @@ examples/localdev/*
 e2e/**/.env
 e2e/**/local.auto.tfvars
 terraform.tfstate
+.DS_Store
