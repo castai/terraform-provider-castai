@@ -43,6 +43,13 @@ func TestAccResourceRebalancingSchedule_basic(t *testing.T) {
 					resource.TestCheckResourceAttr("castai_rebalancing_schedule.test", "schedule.0.cron", "1 4 * * *"),
 				),
 			},
+			{
+				Config: makeUpdatedMinNodes(rName + " min_nodes_zero"),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("castai_rebalancing_schedule.test", "name", rName+" min_nodes_zero"),
+					resource.TestCheckResourceAttr("castai_rebalancing_schedule.test", "launch_configuration.0.rebalancing_min_nodes", "0"),
+				),
+			},
 		},
 	})
 }
@@ -94,6 +101,28 @@ resource "castai_rebalancing_schedule" "test" {
 				]
 			}]
 		})
+		execution_conditions {
+			enabled = true
+			achieved_savings_percentage = 10
+		}
+	}
+}
+`
+	return fmt.Sprintf(template, rName)
+}
+
+func makeUpdatedMinNodes(rName string) string {
+	template := `
+resource "castai_rebalancing_schedule" "test" {
+	name = %q
+	schedule {
+		cron = "1 4 * * *"
+	}
+	trigger_conditions {
+		savings_percentage = 1.23456
+	}
+	launch_configuration {
+		rebalancing_min_nodes = 0
 		execution_conditions {
 			enabled = true
 			achieved_savings_percentage = 10

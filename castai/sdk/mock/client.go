@@ -995,26 +995,6 @@ func (mr *MockClientInterfaceMockRecorder) ExternalClusterAPIUpdateClusterWithBo
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIUpdateClusterWithBody", reflect.TypeOf((*MockClientInterface)(nil).ExternalClusterAPIUpdateClusterWithBody), varargs...)
 }
 
-// GetExternalClusterOperation mocks base method.
-func (m *MockClientInterface) GetExternalClusterOperation(ctx context.Context, id string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
-	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, id}
-	for _, a := range reqEditors {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "GetExternalClusterOperation", varargs...)
-	ret0, _ := ret[0].(*http.Response)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetExternalClusterOperation indicates an expected call of GetExternalClusterOperation.
-func (mr *MockClientInterfaceMockRecorder) GetExternalClusterOperation(ctx, id interface{}, reqEditors ...interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, id}, reqEditors...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetExternalClusterOperation", reflect.TypeOf((*MockClientInterface)(nil).GetExternalClusterOperation), varargs...)
-}
-
 // GetOrganization mocks base method.
 func (m *MockClientInterface) GetOrganization(ctx context.Context, id string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
@@ -1593,6 +1573,26 @@ func (mr *MockClientInterfaceMockRecorder) NodeTemplatesAPIUpdateNodeTemplateWit
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{ctx, clusterId, nodeTemplateName, contentType, body}, reqEditors...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NodeTemplatesAPIUpdateNodeTemplateWithBody", reflect.TypeOf((*MockClientInterface)(nil).NodeTemplatesAPIUpdateNodeTemplateWithBody), varargs...)
+}
+
+// OperationsAPIGetOperation mocks base method.
+func (m *MockClientInterface) OperationsAPIGetOperation(ctx context.Context, id string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, id}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "OperationsAPIGetOperation", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// OperationsAPIGetOperation indicates an expected call of OperationsAPIGetOperation.
+func (mr *MockClientInterfaceMockRecorder) OperationsAPIGetOperation(ctx, id interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, id}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "OperationsAPIGetOperation", reflect.TypeOf((*MockClientInterface)(nil).OperationsAPIGetOperation), varargs...)
 }
 
 // PoliciesAPIGetClusterNodeConstraints mocks base method.
@@ -2848,21 +2848,6 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIUpdate
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIUpdateClusterWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIUpdateClusterWithResponse), ctx, clusterId, body)
 }
 
-// GetExternalClusterOperationWithResponse mocks base method.
-func (m *MockClientWithResponsesInterface) GetExternalClusterOperationWithResponse(ctx context.Context, id string) (*sdk.GetExternalClusterOperationResponse, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetExternalClusterOperationWithResponse", ctx, id)
-	ret0, _ := ret[0].(*sdk.GetExternalClusterOperationResponse)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetExternalClusterOperationWithResponse indicates an expected call of GetExternalClusterOperationWithResponse.
-func (mr *MockClientWithResponsesInterfaceMockRecorder) GetExternalClusterOperationWithResponse(ctx, id interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetExternalClusterOperationWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).GetExternalClusterOperationWithResponse), ctx, id)
-}
-
 // GetOrganizationUsersWithResponse mocks base method.
 func (m *MockClientWithResponsesInterface) GetOrganizationUsersWithResponse(ctx context.Context, id string) (*sdk.GetOrganizationUsersResponse, error) {
 	m.ctrl.T.Helper()
@@ -3296,6 +3281,21 @@ func (m *MockClientWithResponsesInterface) NodeTemplatesAPIUpdateNodeTemplateWit
 func (mr *MockClientWithResponsesInterfaceMockRecorder) NodeTemplatesAPIUpdateNodeTemplateWithResponse(ctx, clusterId, nodeTemplateName, body interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NodeTemplatesAPIUpdateNodeTemplateWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).NodeTemplatesAPIUpdateNodeTemplateWithResponse), ctx, clusterId, nodeTemplateName, body)
+}
+
+// OperationsAPIGetOperationWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) OperationsAPIGetOperationWithResponse(ctx context.Context, id string) (*sdk.OperationsAPIGetOperationResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "OperationsAPIGetOperationWithResponse", ctx, id)
+	ret0, _ := ret[0].(*sdk.OperationsAPIGetOperationResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// OperationsAPIGetOperationWithResponse indicates an expected call of OperationsAPIGetOperationWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) OperationsAPIGetOperationWithResponse(ctx, id interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "OperationsAPIGetOperationWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).OperationsAPIGetOperationWithResponse), ctx, id)
 }
 
 // PoliciesAPIGetClusterNodeConstraintsWithResponse mocks base method.

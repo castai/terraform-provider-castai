@@ -208,8 +208,8 @@ type ClientInterface interface {
 
 	ExternalClusterAPIRegisterCluster(ctx context.Context, body ExternalClusterAPIRegisterClusterJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// GetExternalClusterOperation request
-	GetExternalClusterOperation(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// OperationsAPIGetOperation request
+	OperationsAPIGetOperation(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// ExternalClusterAPIDeleteCluster request
 	ExternalClusterAPIDeleteCluster(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -900,8 +900,8 @@ func (c *Client) ExternalClusterAPIRegisterCluster(ctx context.Context, body Ext
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetExternalClusterOperation(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewGetExternalClusterOperationRequest(c.Server, id)
+func (c *Client) OperationsAPIGetOperation(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewOperationsAPIGetOperationRequest(c.Server, id)
 	if err != nil {
 		return nil, err
 	}
@@ -2898,8 +2898,8 @@ func NewExternalClusterAPIRegisterClusterRequestWithBody(server string, contentT
 	return req, nil
 }
 
-// NewGetExternalClusterOperationRequest generates requests for GetExternalClusterOperation
-func NewGetExternalClusterOperationRequest(server string, id string) (*http.Request, error) {
+// NewOperationsAPIGetOperationRequest generates requests for OperationsAPIGetOperation
+func NewOperationsAPIGetOperationRequest(server string, id string) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -4928,8 +4928,8 @@ type ClientWithResponsesInterface interface {
 
 	ExternalClusterAPIRegisterClusterWithResponse(ctx context.Context, body ExternalClusterAPIRegisterClusterJSONRequestBody) (*ExternalClusterAPIRegisterClusterResponse, error)
 
-	// GetExternalClusterOperation request
-	GetExternalClusterOperationWithResponse(ctx context.Context, id string) (*GetExternalClusterOperationResponse, error)
+	// OperationsAPIGetOperation request
+	OperationsAPIGetOperationWithResponse(ctx context.Context, id string) (*OperationsAPIGetOperationResponse, error)
 
 	// ExternalClusterAPIDeleteCluster request
 	ExternalClusterAPIDeleteClusterWithResponse(ctx context.Context, clusterId string) (*ExternalClusterAPIDeleteClusterResponse, error)
@@ -6001,14 +6001,14 @@ func (r ExternalClusterAPIRegisterClusterResponse) GetBody() []byte {
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
-type GetExternalClusterOperationResponse struct {
+type OperationsAPIGetOperationResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *OperationResponse
+	JSON200      *CastaiOperationsV1beta1Operation
 }
 
 // Status returns HTTPResponse.Status
-func (r GetExternalClusterOperationResponse) Status() string {
+func (r OperationsAPIGetOperationResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -6016,7 +6016,7 @@ func (r GetExternalClusterOperationResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r GetExternalClusterOperationResponse) StatusCode() int {
+func (r OperationsAPIGetOperationResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -6025,7 +6025,7 @@ func (r GetExternalClusterOperationResponse) StatusCode() int {
 
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
-func (r GetExternalClusterOperationResponse) GetBody() []byte {
+func (r OperationsAPIGetOperationResponse) GetBody() []byte {
 	return r.Body
 }
 
@@ -7730,13 +7730,13 @@ func (c *ClientWithResponses) ExternalClusterAPIRegisterClusterWithResponse(ctx 
 	return ParseExternalClusterAPIRegisterClusterResponse(rsp)
 }
 
-// GetExternalClusterOperationWithResponse request returning *GetExternalClusterOperationResponse
-func (c *ClientWithResponses) GetExternalClusterOperationWithResponse(ctx context.Context, id string) (*GetExternalClusterOperationResponse, error) {
-	rsp, err := c.GetExternalClusterOperation(ctx, id)
+// OperationsAPIGetOperationWithResponse request returning *OperationsAPIGetOperationResponse
+func (c *ClientWithResponses) OperationsAPIGetOperationWithResponse(ctx context.Context, id string) (*OperationsAPIGetOperationResponse, error) {
+	rsp, err := c.OperationsAPIGetOperation(ctx, id)
 	if err != nil {
 		return nil, err
 	}
-	return ParseGetExternalClusterOperationResponse(rsp)
+	return ParseOperationsAPIGetOperationResponse(rsp)
 }
 
 // ExternalClusterAPIDeleteClusterWithResponse request returning *ExternalClusterAPIDeleteClusterResponse
@@ -9027,22 +9027,22 @@ func ParseExternalClusterAPIRegisterClusterResponse(rsp *http.Response) (*Extern
 	return response, nil
 }
 
-// ParseGetExternalClusterOperationResponse parses an HTTP response from a GetExternalClusterOperationWithResponse call
-func ParseGetExternalClusterOperationResponse(rsp *http.Response) (*GetExternalClusterOperationResponse, error) {
+// ParseOperationsAPIGetOperationResponse parses an HTTP response from a OperationsAPIGetOperationWithResponse call
+func ParseOperationsAPIGetOperationResponse(rsp *http.Response) (*OperationsAPIGetOperationResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
 	defer rsp.Body.Close()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &GetExternalClusterOperationResponse{
+	response := &OperationsAPIGetOperationResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest OperationResponse
+		var dest CastaiOperationsV1beta1Operation
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
