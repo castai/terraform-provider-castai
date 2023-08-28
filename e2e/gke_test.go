@@ -51,11 +51,11 @@ func TestTerraformGKEOnboarding(t *testing.T) {
 	fmt.Println("Waiting for node to be added")
 	lastBodyForOp := ""
 	r.Eventually(func() bool {
-		opStatus, err := castAIClient.GetExternalClusterOperationWithResponse(ctx, addNode.JSON200.OperationId)
+		opStatus, err := castAIClient.OperationsAPIGetOperationWithResponse(ctx, addNode.JSON200.OperationId)
 		r.NoError(err)
 		lastBodyForOp = string(opStatus.Body)
 		r.False(opStatus.JSON200 != nil && opStatus.JSON200.Error != nil, fmt.Sprintf("Error while waiting for operation end. body: %s", lastBodyForOp))
-		return opStatus.JSON200 != nil && opStatus.JSON200.Done
+		return opStatus.JSON200 != nil && opStatus.JSON200.Done != nil && *opStatus.JSON200.Done
 
 	}, time.Minute*5, time.Second*15, fmt.Sprintf("waiting for add node operation timeout. body: %s, opID: %s", lastBodyForOp, addNode.JSON200.OperationId))
 

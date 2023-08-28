@@ -137,31 +137,6 @@ type NewOrganizationUser struct {
 	UserId string `json:"userId"`
 }
 
-// OperationResponse defines model for OperationResponse.
-type OperationResponse struct {
-	// Operation creation time in RFC3339Nano format.
-	CreatedAt time.Time `json:"createdAt"`
-
-	// Indicates whether the operation is done. If 'true', the operation has finished. If 'false', the operation is still in progress.
-	Done bool `json:"done"`
-
-	// Error details for the operation. Only populated when the operation is done and has failed. If operation has completed successfully, the error will not be set.
-	Error *struct {
-		// Human readable caption text describing the error reason.
-		Details string `json:"details"`
-
-		// Reason is an operation specific failure code. Refer to documentation of the endpoint which generated the long-running operation about possible outcomes. Common error reasons:
-		// * `internal_error`: An unknown error occurred. Retry the operation.
-		Reason string `json:"reason"`
-	} `json:"error,omitempty"`
-
-	// Operation finishe time in RFC3339Nano format.
-	FinishedAt *time.Time `json:"finishedAt,omitempty"`
-
-	// ID of the operation.
-	Id string `json:"id"`
-}
-
 // Organization defines model for Organization.
 type Organization struct {
 	// Organization ID
@@ -528,6 +503,34 @@ type CastaiMetricsV1beta1ClusterMetrics struct {
 	SpotNodesCount         *int32   `json:"spotNodesCount,omitempty"`
 }
 
+// Operation object.
+type CastaiOperationsV1beta1Operation struct {
+	// Operation creation timestamp in RFC3339Nano format.
+	CreatedAt *time.Time `json:"createdAt,omitempty"`
+
+	// Indicates whether the operation has finished or not. If 'false', the operation is still in progress. If 'true',
+	// the has finished.
+	Done *bool `json:"done,omitempty"`
+
+	// OperationError object.
+	Error *CastaiOperationsV1beta1OperationError `json:"error,omitempty"`
+
+	// Operation finish timestamp in RFC3339Nano format.
+	FinishedAt *time.Time `json:"finishedAt,omitempty"`
+
+	// ID of the operation.
+	Id *string `json:"id,omitempty"`
+}
+
+// OperationError object.
+type CastaiOperationsV1beta1OperationError struct {
+	// Details is a concise human readable explanation for the error.
+	Details *string `json:"details,omitempty"`
+
+	// Reason is an operation specific failure code. Refer to documentation about possible outcomes.
+	Reason *string `json:"reason,omitempty"`
+}
+
 // Types of cloud service providers CAST AI supports.
 //
 //   - invalid: Invalid.
@@ -637,7 +640,8 @@ type ExternalclusterV1Cluster struct {
 	ProviderType *string `json:"providerType,omitempty"`
 
 	// Shows last reconcile error if any.
-	ReconcileError *string `json:"reconcileError"`
+	ReconcileError *string                                `json:"reconcileError"`
+	ReconcileInfo  *ExternalclusterV1ClusterReconcileInfo `json:"reconcileInfo,omitempty"`
 
 	// Timestamp when the last reconcile was performed.
 	ReconciledAt *time.Time `json:"reconciledAt"`
@@ -656,6 +660,28 @@ type ExternalclusterV1Cluster struct {
 
 	// Cluster zones.
 	Zones *[]ExternalclusterV1Zone `json:"zones,omitempty"`
+}
+
+// ExternalclusterV1ClusterReconcileInfo defines model for externalcluster.v1.Cluster.ReconcileInfo.
+type ExternalclusterV1ClusterReconcileInfo struct {
+	// Shows last reconcile error if any.
+	Error *string `json:"error"`
+
+	// Number of times the reconcile was retried.
+	ErrorCount *int32  `json:"errorCount,omitempty"`
+	Mode       *string `json:"mode,omitempty"`
+
+	// Timestamp when the last reconcile was performed.
+	ReconciledAt *time.Time `json:"reconciledAt"`
+
+	// Timestamp when the reconcile was retried.
+	RetryAt *time.Time `json:"retryAt"`
+
+	// Timestamp when the reconcile was started.
+	StartedAt *time.Time `json:"startedAt"`
+
+	// Reconcile status.
+	Status *string `json:"status"`
 }
 
 // ExternalclusterV1ClusterUpdate defines model for externalcluster.v1.ClusterUpdate.
