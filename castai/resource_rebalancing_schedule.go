@@ -92,7 +92,7 @@ func resourceRebalancingSchedule() *schema.Resource {
 						"rebalancing_min_nodes": {
 							Type:             schema.TypeInt,
 							Optional:         true,
-							ValidateDiagFunc: validation.ToDiagFunc(validation.IntAtLeast(1)),
+							ValidateDiagFunc: validation.ToDiagFunc(validation.IntAtLeast(0)),
 							Description:      "Minimum number of nodes that should be kept in the cluster after rebalancing.",
 						},
 						"keep_drain_timeout_nodes": {
