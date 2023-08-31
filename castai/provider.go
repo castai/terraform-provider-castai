@@ -3,6 +3,7 @@ package castai
 import (
 	"context"
 	"fmt"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -45,11 +46,13 @@ func Provider(version string) *schema.Provider {
 			"castai_node_configuration_default": resourceNodeConfigurationDefault(),
 			"castai_eks_user_arn":               resourceEKSClusterUserARN(),
 			"castai_reservations":               resourceReservations(),
+			"castai_organization_members":       resourceOrganizationMembers(),
 		},
 
 		DataSourcesMap: map[string]*schema.Resource{
 			"castai_eks_settings":      dataSourceEKSSettings(),
 			"castai_gke_user_policies": dataSourceGKEPolicies(),
+			"castai_organization":      dataSourceOrganization(),
 
 			// TODO: remove in next major release
 			"castai_eks_user_arn": dataSourceEKSClusterUserARN(),

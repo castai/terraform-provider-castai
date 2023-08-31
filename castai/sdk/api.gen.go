@@ -112,6 +112,20 @@ const (
 	JobStatusSkipped    ScheduledrebalancingV1JobStatus = "JobStatusSkipped"
 )
 
+// Invitation defines model for Invitation.
+type Invitation struct {
+	Id          string    `json:"id"`
+	InviteEmail string    `json:"inviteEmail"`
+	Role        string    `json:"role"`
+	ValidUntil  time.Time `json:"validUntil"`
+}
+
+// InvitationsList defines model for InvitationsList.
+type InvitationsList struct {
+	Invitations []Invitation `json:"invitations"`
+	NextCursor  string       `json:"nextCursor"`
+}
+
 // NewInvitations defines model for NewInvitations.
 type NewInvitations struct {
 	Members        []NewMembershipByEmail `json:"members"`
@@ -175,6 +189,9 @@ type UpdateOrganizationUser struct {
 type UserProfile struct {
 	// user email
 	Email string `json:"email"`
+
+	// User ID
+	Id string `json:"id"`
 
 	// full name of logged-in user, e.g. "John Doe".
 	Name string `json:"name"`
@@ -1986,6 +2003,15 @@ type AuthTokenAPICreateAuthTokenJSONBody = CastaiAuthtokenV1beta1AuthToken
 
 // AuthTokenAPIUpdateAuthTokenJSONBody defines parameters for AuthTokenAPIUpdateAuthToken.
 type AuthTokenAPIUpdateAuthTokenJSONBody = CastaiAuthtokenV1beta1AuthTokenUpdate
+
+// ListInvitationsParams defines parameters for ListInvitations.
+type ListInvitationsParams struct {
+	PageLimit *string `form:"page.limit,omitempty" json:"page.limit,omitempty"`
+
+	// Cursor that defines token indicating where to start the next page.
+	// Empty value indicates to start from beginning of the dataset.
+	PageCursor *string `form:"page.cursor,omitempty" json:"page.cursor,omitempty"`
+}
 
 // CreateInvitationJSONBody defines parameters for CreateInvitation.
 type CreateInvitationJSONBody = NewInvitations
