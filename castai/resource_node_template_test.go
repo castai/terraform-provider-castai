@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"github.com/samber/lo"
 	"io"
 	"net/http"
 	"testing"
@@ -16,6 +15,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/samber/lo"
 	"github.com/stretchr/testify/require"
 
 	"github.com/castai/terraform-provider-castai/castai/sdk"

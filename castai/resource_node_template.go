@@ -3,17 +3,19 @@ package castai
 import (
 	"context"
 	"fmt"
-	"github.com/castai/terraform-provider-castai/castai/sdk"
+	"log"
+	"regexp"
+	"strings"
+	"time"
+
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/samber/lo"
-	"log"
-	"regexp"
-	"strings"
-	"time"
+
+	"github.com/castai/terraform-provider-castai/castai/sdk"
 )
 
 const (
