@@ -17,7 +17,7 @@ CAST AI organization members resource to manage organization members
 
 ### Required
 
-- `organization_id` (String) CAST AI cluster ID.
+- `organization_id` (String) CAST AI organization ID.
 
 ### Optional
 
