@@ -95,7 +95,7 @@ resource "castai_rebalancing_schedule" "test" {
 				matchExpressions = [
 					{
 						key =  "thing"
-						operator = "in"
+						operator = "In"
 						values = ["a", "b", "c"]
 					}
 				]
