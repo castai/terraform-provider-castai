@@ -43,7 +43,7 @@ func resourceOrganizationMembers() *schema.Resource {
 				Type:        schema.TypeString,
 				Required:    true,
 				ForceNew:    true,
-				Description: "CAST AI cluster ID.",
+				Description: "CAST AI organization ID.",
 			},
 			FieldOrganizationMembersOwners: {
 				Type:     schema.TypeList,
