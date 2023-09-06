@@ -2,9 +2,10 @@ package castai
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"testing"
 )
 
 func TestAccResourceRebalancingSchedule_basic(t *testing.T) {
@@ -95,7 +96,7 @@ resource "castai_rebalancing_schedule" "test" {
 				matchExpressions = [
 					{
 						key =  "thing"
-						operator = "in"
+						operator = "In"
 						values = ["a", "b", "c"]
 					}
 				]
