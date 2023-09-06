@@ -18,6 +18,8 @@ import (
 )
 
 func TestOrganizationResourceReadContext(t *testing.T) {
+	t.Parallel()
+
 	r := require.New(t)
 	mockClient := mock_sdk.NewMockClientInterface(gomock.NewController(t))
 

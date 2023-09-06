@@ -19,6 +19,7 @@ import (
 
 func TestOrganizationDataSourceRead(t *testing.T) {
 	t.Parallel()
+
 	r := require.New(t)
 	mockClient := mock_sdk.NewMockClientInterface(gomock.NewController(t))
 
@@ -67,6 +68,7 @@ Tainted = false
 
 func TestOrganizationDataSourceReadError(t *testing.T) {
 	t.Parallel()
+
 	r := require.New(t)
 	mockClient := mock_sdk.NewMockClientInterface(gomock.NewController(t))
 
