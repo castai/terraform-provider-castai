@@ -126,6 +126,10 @@ resource "aws_iam_role_policy" "inline_role_policy" {
         Effect = "Allow",
         Action = [
           "ec2:CreateTags",
+          "ec2:CreateKeyPair",
+          "ec2:DeleteKeyPair",
+          "ec2:CreateTags",
+          "ec2:ImportKeyPair",
         ],
         Resource = "*"
       },
