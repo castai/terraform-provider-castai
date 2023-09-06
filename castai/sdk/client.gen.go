@@ -109,10 +109,16 @@ type ClientInterface interface {
 
 	AuthTokenAPIUpdateAuthToken(ctx context.Context, id string, body AuthTokenAPIUpdateAuthTokenJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// ListInvitations request
+	ListInvitations(ctx context.Context, params *ListInvitationsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// CreateInvitation request with any body
 	CreateInvitationWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	CreateInvitation(ctx context.Context, body CreateInvitationJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// DeleteInvitation request
+	DeleteInvitation(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// ClaimInvitation request with any body
 	ClaimInvitationWithBody(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -456,6 +462,18 @@ func (c *Client) AuthTokenAPIUpdateAuthToken(ctx context.Context, id string, bod
 	return c.Client.Do(req)
 }
 
+func (c *Client) ListInvitations(ctx context.Context, params *ListInvitationsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewListInvitationsRequest(c.Server, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
 func (c *Client) CreateInvitationWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewCreateInvitationRequestWithBody(c.Server, contentType, body)
 	if err != nil {
@@ -470,6 +488,18 @@ func (c *Client) CreateInvitationWithBody(ctx context.Context, contentType strin
 
 func (c *Client) CreateInvitation(ctx context.Context, body CreateInvitationJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewCreateInvitationRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) DeleteInvitation(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewDeleteInvitationRequest(c.Server, id)
 	if err != nil {
 		return nil, err
 	}
@@ -1810,6 +1840,69 @@ func NewAuthTokenAPIUpdateAuthTokenRequestWithBody(server string, id string, con
 	return req, nil
 }
 
+// NewListInvitationsRequest generates requests for ListInvitations
+func NewListInvitationsRequest(server string, params *ListInvitationsParams) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/invitations")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	queryValues := queryURL.Query()
+
+	if params.PageLimit != nil {
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "page.limit", runtime.ParamLocationQuery, *params.PageLimit); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.PageCursor != nil {
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "page.cursor", runtime.ParamLocationQuery, *params.PageCursor); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	queryURL.RawQuery = queryValues.Encode()
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 // NewCreateInvitationRequest calls the generic CreateInvitation builder with application/json body
 func NewCreateInvitationRequest(server string, body CreateInvitationJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
@@ -1846,6 +1939,40 @@ func NewCreateInvitationRequestWithBody(server string, contentType string, body 
 	}
 
 	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewDeleteInvitationRequest generates requests for DeleteInvitation
+func NewDeleteInvitationRequest(server string, id string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/invitations/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("DELETE", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
 
 	return req, nil
 }
@@ -4829,10 +4956,16 @@ type ClientWithResponsesInterface interface {
 
 	AuthTokenAPIUpdateAuthTokenWithResponse(ctx context.Context, id string, body AuthTokenAPIUpdateAuthTokenJSONRequestBody) (*AuthTokenAPIUpdateAuthTokenResponse, error)
 
+	// ListInvitations request
+	ListInvitationsWithResponse(ctx context.Context, params *ListInvitationsParams) (*ListInvitationsResponse, error)
+
 	// CreateInvitation request  with any body
 	CreateInvitationWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*CreateInvitationResponse, error)
 
 	CreateInvitationWithResponse(ctx context.Context, body CreateInvitationJSONRequestBody) (*CreateInvitationResponse, error)
+
+	// DeleteInvitation request
+	DeleteInvitationWithResponse(ctx context.Context, id string) (*DeleteInvitationResponse, error)
 
 	// ClaimInvitation request  with any body
 	ClaimInvitationWithBodyWithResponse(ctx context.Context, id string, contentType string, body io.Reader) (*ClaimInvitationResponse, error)
@@ -5251,6 +5384,36 @@ func (r AuthTokenAPIUpdateAuthTokenResponse) GetBody() []byte {
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
+type ListInvitationsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *InvitationsList
+}
+
+// Status returns HTTPResponse.Status
+func (r ListInvitationsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r ListInvitationsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r ListInvitationsResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
 type CreateInvitationResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -5276,6 +5439,36 @@ func (r CreateInvitationResponse) StatusCode() int {
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
 func (r CreateInvitationResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type DeleteInvitationResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *map[string]interface{}
+}
+
+// Status returns HTTPResponse.Status
+func (r DeleteInvitationResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r DeleteInvitationResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r DeleteInvitationResponse) GetBody() []byte {
 	return r.Body
 }
 
@@ -7409,6 +7602,15 @@ func (c *ClientWithResponses) AuthTokenAPIUpdateAuthTokenWithResponse(ctx contex
 	return ParseAuthTokenAPIUpdateAuthTokenResponse(rsp)
 }
 
+// ListInvitationsWithResponse request returning *ListInvitationsResponse
+func (c *ClientWithResponses) ListInvitationsWithResponse(ctx context.Context, params *ListInvitationsParams) (*ListInvitationsResponse, error) {
+	rsp, err := c.ListInvitations(ctx, params)
+	if err != nil {
+		return nil, err
+	}
+	return ParseListInvitationsResponse(rsp)
+}
+
 // CreateInvitationWithBodyWithResponse request with arbitrary body returning *CreateInvitationResponse
 func (c *ClientWithResponses) CreateInvitationWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*CreateInvitationResponse, error) {
 	rsp, err := c.CreateInvitationWithBody(ctx, contentType, body)
@@ -7424,6 +7626,15 @@ func (c *ClientWithResponses) CreateInvitationWithResponse(ctx context.Context, 
 		return nil, err
 	}
 	return ParseCreateInvitationResponse(rsp)
+}
+
+// DeleteInvitationWithResponse request returning *DeleteInvitationResponse
+func (c *ClientWithResponses) DeleteInvitationWithResponse(ctx context.Context, id string) (*DeleteInvitationResponse, error) {
+	rsp, err := c.DeleteInvitation(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	return ParseDeleteInvitationResponse(rsp)
 }
 
 // ClaimInvitationWithBodyWithResponse request with arbitrary body returning *ClaimInvitationResponse
@@ -8377,6 +8588,32 @@ func ParseAuthTokenAPIUpdateAuthTokenResponse(rsp *http.Response) (*AuthTokenAPI
 	return response, nil
 }
 
+// ParseListInvitationsResponse parses an HTTP response from a ListInvitationsWithResponse call
+func ParseListInvitationsResponse(rsp *http.Response) (*ListInvitationsResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &ListInvitationsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest InvitationsList
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
 // ParseCreateInvitationResponse parses an HTTP response from a CreateInvitationWithResponse call
 func ParseCreateInvitationResponse(rsp *http.Response) (*CreateInvitationResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
@@ -8393,6 +8630,32 @@ func ParseCreateInvitationResponse(rsp *http.Response) (*CreateInvitationRespons
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest NewInvitationsResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseDeleteInvitationResponse parses an HTTP response from a DeleteInvitationWithResponse call
+func ParseDeleteInvitationResponse(rsp *http.Response) (*DeleteInvitationResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &DeleteInvitationResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest map[string]interface{}
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}

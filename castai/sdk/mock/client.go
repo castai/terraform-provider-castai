@@ -395,6 +395,26 @@ func (mr *MockClientInterfaceMockRecorder) CurrentUserProfile(ctx interface{}, r
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CurrentUserProfile", reflect.TypeOf((*MockClientInterface)(nil).CurrentUserProfile), varargs...)
 }
 
+// DeleteInvitation mocks base method.
+func (m *MockClientInterface) DeleteInvitation(ctx context.Context, id string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, id}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DeleteInvitation", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DeleteInvitation indicates an expected call of DeleteInvitation.
+func (mr *MockClientInterfaceMockRecorder) DeleteInvitation(ctx, id interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, id}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteInvitation", reflect.TypeOf((*MockClientInterface)(nil).DeleteInvitation), varargs...)
+}
+
 // DeleteOrganization mocks base method.
 func (m *MockClientInterface) DeleteOrganization(ctx context.Context, id string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
@@ -1213,6 +1233,26 @@ func (mr *MockClientInterfaceMockRecorder) InventoryAPISyncClusterResources(ctx,
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{ctx, organizationId, clusterId}, reqEditors...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InventoryAPISyncClusterResources", reflect.TypeOf((*MockClientInterface)(nil).InventoryAPISyncClusterResources), varargs...)
+}
+
+// ListInvitations mocks base method.
+func (m *MockClientInterface) ListInvitations(ctx context.Context, params *sdk.ListInvitationsParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ListInvitations", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ListInvitations indicates an expected call of ListInvitations.
+func (mr *MockClientInterfaceMockRecorder) ListInvitations(ctx, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListInvitations", reflect.TypeOf((*MockClientInterface)(nil).ListInvitations), varargs...)
 }
 
 // ListOrganizations mocks base method.
@@ -2398,6 +2438,21 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) CurrentUserProfileWithRe
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CurrentUserProfileWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).CurrentUserProfileWithResponse), ctx)
 }
 
+// DeleteInvitationWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) DeleteInvitationWithResponse(ctx context.Context, id string) (*sdk.DeleteInvitationResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteInvitationWithResponse", ctx, id)
+	ret0, _ := ret[0].(*sdk.DeleteInvitationResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DeleteInvitationWithResponse indicates an expected call of DeleteInvitationWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DeleteInvitationWithResponse(ctx, id interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteInvitationWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DeleteInvitationWithResponse), ctx, id)
+}
+
 // DeleteOrganizationUserWithResponse mocks base method.
 func (m *MockClientWithResponsesInterface) DeleteOrganizationUserWithResponse(ctx context.Context, id, userId string) (*sdk.DeleteOrganizationUserResponse, error) {
 	m.ctrl.T.Helper()
@@ -3011,6 +3066,21 @@ func (m *MockClientWithResponsesInterface) InventoryAPISyncClusterResourcesWithR
 func (mr *MockClientWithResponsesInterfaceMockRecorder) InventoryAPISyncClusterResourcesWithResponse(ctx, organizationId, clusterId interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InventoryAPISyncClusterResourcesWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).InventoryAPISyncClusterResourcesWithResponse), ctx, organizationId, clusterId)
+}
+
+// ListInvitationsWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) ListInvitationsWithResponse(ctx context.Context, params *sdk.ListInvitationsParams) (*sdk.ListInvitationsResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ListInvitationsWithResponse", ctx, params)
+	ret0, _ := ret[0].(*sdk.ListInvitationsResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ListInvitationsWithResponse indicates an expected call of ListInvitationsWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ListInvitationsWithResponse(ctx, params interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ListInvitationsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ListInvitationsWithResponse), ctx, params)
 }
 
 // ListOrganizationsWithResponse mocks base method.
