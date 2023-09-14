@@ -88,10 +88,12 @@ module "castai-gke-cluster" {
         {
           key = "custom-taint-key-1"
           value = "custom-taint-value-1"
+          effect = "NoSchedule"
         },
         {
           key = "custom-taint-key-2"
           value = "custom-taint-value-2"
+          effect = "NoSchedule"
         }
       ]
 

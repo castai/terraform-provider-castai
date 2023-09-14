@@ -89,6 +89,13 @@ const (
 	OnDemand NodetemplatesV1AvailableInstanceTypeStorageOptimizedOption = "OnDemand"
 )
 
+// Defines values for NodetemplatesV1TaintEffect.
+const (
+	NoExecute        NodetemplatesV1TaintEffect = "NoExecute"
+	NoSchedule       NodetemplatesV1TaintEffect = "NoSchedule"
+	PreferNoSchedule NodetemplatesV1TaintEffect = "PreferNoSchedule"
+)
+
 // Defines values for PoliciesV1EvictorStatus.
 const (
 	Compatible   PoliciesV1EvictorStatus = "Compatible"
@@ -1437,7 +1444,7 @@ type NodetemplatesV1NewNodeTemplate struct {
 	CustomLabels *NodetemplatesV1NewNodeTemplate_CustomLabels `json:"customLabels,omitempty"`
 
 	// Custom taints for the template.
-	CustomTaints *[]NodetemplatesV1TaintWithoutEffect `json:"customTaints,omitempty"`
+	CustomTaints *[]NodetemplatesV1TaintWithOptionalEffect `json:"customTaints,omitempty"`
 
 	// Flag whether this template is the default template for the cluster.
 	IsDefault *bool `json:"isDefault,omitempty"`
@@ -1518,11 +1525,16 @@ type NodetemplatesV1Taint struct {
 	Value  *string `json:"value,omitempty"`
 }
 
-// TaintWithoutEffect is used when creating/updating a node template.
-// We only support the NoSchedule effect for node templates, hence it cannot be set/updated.
-type NodetemplatesV1TaintWithoutEffect struct {
-	Key   *string `json:"key,omitempty"`
-	Value *string `json:"value"`
+// TaintEffect is a node taint effect.
+type NodetemplatesV1TaintEffect string
+
+// TaintWithOptionalEffect is used when creating/updating a node template.
+// We are adding support for specifying taint effect on node templates and effect should be optional to be backwards compatible.
+type NodetemplatesV1TaintWithOptionalEffect struct {
+	// TaintEffect is a node taint effect.
+	Effect *NodetemplatesV1TaintEffect `json:"effect,omitempty"`
+	Key    string                      `json:"key"`
+	Value  *string                     `json:"value"`
 }
 
 // NodetemplatesV1TemplateConstraints defines model for nodetemplates.v1.TemplateConstraints.
@@ -1602,7 +1614,7 @@ type NodetemplatesV1UpdateNodeTemplate struct {
 	CustomLabels *NodetemplatesV1UpdateNodeTemplate_CustomLabels `json:"customLabels,omitempty"`
 
 	// Custom taints for the template.
-	CustomTaints *[]NodetemplatesV1TaintWithoutEffect `json:"customTaints,omitempty"`
+	CustomTaints *[]NodetemplatesV1TaintWithOptionalEffect `json:"customTaints,omitempty"`
 
 	// Flag whether this template is the default template for the cluster.
 	IsDefault *bool `json:"isDefault,omitempty"`
