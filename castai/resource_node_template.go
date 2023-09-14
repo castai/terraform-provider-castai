@@ -11,7 +11,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/samber/lo"
 	"log"
-	"regexp"
 	"strings"
 	"time"
 )
@@ -53,6 +52,12 @@ const (
 	FieldNodeTemplateSpotInterruptionPredictionsType        = "spot_interruption_predictions_type"
 	FieldNodeTemplateStorageOptimized                       = "storage_optimized"
 	FieldNodeTemplateUseSpotFallbacks                       = "use_spot_fallbacks"
+)
+
+const (
+	TaintEffectNoSchedule       = "NoSchedule"
+	TaintEffectNoExecute        = "NoExecute"
+	TaintEffectPreferNoSchedule = "PreferNoSchedule"
 )
 
 const (
@@ -346,11 +351,11 @@ func resourceNodeTemplate() *schema.Resource {
 						FieldEffect: {
 							Optional: true,
 							Type:     schema.TypeString,
-							Default:  "NoSchedule",
+							Default:  TaintEffectNoSchedule,
 							ValidateDiagFunc: validation.ToDiagFunc(
-								validation.StringMatch(regexp.MustCompile("^NoSchedule$"), "effect must be NoSchedule"),
+								validation.StringInSlice([]string{TaintEffectNoSchedule, TaintEffectNoExecute, TaintEffectPreferNoSchedule}, false),
 							),
-							Description: "Effect of a taint to be added to nodes created from this template. The effect must always be NoSchedule.",
+							Description: "Effect of a taint to be added to nodes created from this template.",
 						},
 					},
 				},
@@ -630,7 +635,7 @@ func updateNodeTemplate(ctx context.Context, d *schema.ResourceData, meta any, s
 			ts = append(ts, val.(map[string]any))
 		}
 
-		req.CustomTaints = toCustomTaintsWithoutEffect(ts)
+		req.CustomTaints = toCustomTaintsWithOptionalEffect(ts)
 	}
 
 	if !(*req.ShouldTaint) && req.CustomTaints != nil && len(*req.CustomTaints) > 0 {
@@ -709,7 +714,7 @@ func resourceNodeTemplateCreate(ctx context.Context, d *schema.ResourceData, met
 			ts = append(ts, val.(map[string]any))
 		}
 
-		req.CustomTaints = toCustomTaintsWithoutEffect(ts)
+		req.CustomTaints = toCustomTaintsWithOptionalEffect(ts)
 	}
 
 	if !(*req.ShouldTaint) && req.CustomTaints != nil && len(*req.CustomTaints) > 0 {
@@ -848,21 +853,24 @@ func toCustomLabel(obj map[string]any) *sdk.NodetemplatesV1Label {
 	return out
 }
 
-func toCustomTaintsWithoutEffect(objs []map[string]any) *[]sdk.NodetemplatesV1TaintWithoutEffect {
+func toCustomTaintsWithOptionalEffect(objs []map[string]any) *[]sdk.NodetemplatesV1TaintWithOptionalEffect {
 	if len(objs) == 0 {
 		return nil
 	}
 
-	out := &[]sdk.NodetemplatesV1TaintWithoutEffect{}
+	out := &[]sdk.NodetemplatesV1TaintWithOptionalEffect{}
 
 	for _, taint := range objs {
-		t := sdk.NodetemplatesV1TaintWithoutEffect{}
+		t := sdk.NodetemplatesV1TaintWithOptionalEffect{}
 
 		if v, ok := taint[FieldKey]; ok && v != "" {
-			t.Key = toPtr(v.(string))
+			t.Key = v.(string)
 		}
 		if v, ok := taint[FieldValue]; ok && v != "" {
 			t.Value = toPtr(v.(string))
+		}
+		if v, ok := taint[FieldEffect]; ok && v != "" {
+			t.Effect = toPtr(sdk.NodetemplatesV1TaintEffect(v.(string)))
 		}
 
 		*out = append(*out, t)
