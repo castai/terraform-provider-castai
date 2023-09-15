@@ -43,20 +43,6 @@
       }
     },
     {
-      "Sid": "VpcRestrictedActions",
-      "Effect": "Allow",
-      "Action": [
-        "ec2:DeleteSecurityGroup",
-        "ec2:DeleteNetworkInterface"
-      ],
-      "Resource": "*",
-      "Condition": {
-        "StringEquals": {
-          "ec2:Vpc": "arn:{{ .Partition }}:ec2:{{ .ARN }}:vpc/{{ .VPC }}"
-        }
-      }
-    },
-    {
       "Sid": "AutoscalingActionsTagRestriction",
       "Effect": "Allow",
       "Action": [
