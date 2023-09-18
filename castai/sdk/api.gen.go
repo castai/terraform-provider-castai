@@ -91,9 +91,8 @@ const (
 
 // Defines values for NodetemplatesV1TaintEffect.
 const (
-	NoExecute        NodetemplatesV1TaintEffect = "NoExecute"
-	NoSchedule       NodetemplatesV1TaintEffect = "NoSchedule"
-	PreferNoSchedule NodetemplatesV1TaintEffect = "PreferNoSchedule"
+	NoExecute  NodetemplatesV1TaintEffect = "NoExecute"
+	NoSchedule NodetemplatesV1TaintEffect = "NoSchedule"
 )
 
 // Defines values for PoliciesV1EvictorStatus.
@@ -1520,9 +1519,10 @@ type NodetemplatesV1RebalancingConfiguration struct {
 
 // Taint is used in responses.
 type NodetemplatesV1Taint struct {
-	Effect *string `json:"effect,omitempty"`
-	Key    *string `json:"key,omitempty"`
-	Value  *string `json:"value,omitempty"`
+	// TaintEffect is a node taint effect.
+	Effect *NodetemplatesV1TaintEffect `json:"effect,omitempty"`
+	Key    *string                     `json:"key,omitempty"`
+	Value  *string                     `json:"value,omitempty"`
 }
 
 // TaintEffect is a node taint effect.

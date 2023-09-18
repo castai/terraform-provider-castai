@@ -103,7 +103,7 @@ Required:
 
 Optional:
 
-- `effect` (String) Effect of a taint to be added to nodes created from this template.
+- `effect` (String) Effect of a taint to be added to nodes created from this template, the default is NoSchedule. Allowed values: NoSchedule, NoExecute.
 
 
 <a id="nestedblock--timeouts"></a>

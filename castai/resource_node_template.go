@@ -55,9 +55,8 @@ const (
 )
 
 const (
-	TaintEffectNoSchedule       = "NoSchedule"
-	TaintEffectNoExecute        = "NoExecute"
-	TaintEffectPreferNoSchedule = "PreferNoSchedule"
+	TaintEffectNoSchedule = "NoSchedule"
+	TaintEffectNoExecute  = "NoExecute"
 )
 
 const (
@@ -353,9 +352,9 @@ func resourceNodeTemplate() *schema.Resource {
 							Type:     schema.TypeString,
 							Default:  TaintEffectNoSchedule,
 							ValidateDiagFunc: validation.ToDiagFunc(
-								validation.StringInSlice([]string{TaintEffectNoSchedule, TaintEffectNoExecute, TaintEffectPreferNoSchedule}, false),
+								validation.StringInSlice([]string{TaintEffectNoSchedule, TaintEffectNoExecute}, false),
 							),
-							Description: "Effect of a taint to be added to nodes created from this template.",
+							Description: fmt.Sprintf("Effect of a taint to be added to nodes created from this template, the default is %s. Allowed values: %s.", TaintEffectNoSchedule, strings.Join([]string{TaintEffectNoSchedule, TaintEffectNoExecute}, ", ")),
 						},
 					},
 				},
@@ -909,7 +908,7 @@ func flattenCustomTaints(taints *[]sdk.NodetemplatesV1Taint) []map[string]string
 			t[FieldValue] = toString(v)
 		}
 		if e := taint.Effect; e != nil {
-			t[FieldEffect] = toString(e)
+			t[FieldEffect] = string(*e)
 		}
 
 		ts = append(ts, t)
