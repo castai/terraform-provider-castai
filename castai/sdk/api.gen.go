@@ -23,6 +23,15 @@ const (
 	Viewer OrganizationRole = "viewer"
 )
 
+// Defines values for CastaiEvictorV1LabelSelectorExpressionOperator.
+const (
+	CastaiEvictorV1LabelSelectorExpressionOperatorDoesNotExist CastaiEvictorV1LabelSelectorExpressionOperator = "DoesNotExist"
+	CastaiEvictorV1LabelSelectorExpressionOperatorExists       CastaiEvictorV1LabelSelectorExpressionOperator = "Exists"
+	CastaiEvictorV1LabelSelectorExpressionOperatorIn           CastaiEvictorV1LabelSelectorExpressionOperator = "In"
+	CastaiEvictorV1LabelSelectorExpressionOperatorInvalid      CastaiEvictorV1LabelSelectorExpressionOperator = "Invalid"
+	CastaiEvictorV1LabelSelectorExpressionOperatorNotIn        CastaiEvictorV1LabelSelectorExpressionOperator = "NotIn"
+)
+
 // Defines values for CastaiInventoryV1beta1AttachableGPUDeviceManufacturer.
 const (
 	CastaiInventoryV1beta1AttachableGPUDeviceManufacturerAMD     CastaiInventoryV1beta1AttachableGPUDeviceManufacturer = "AMD"
@@ -53,14 +62,14 @@ const (
 
 // Defines values for CastaiV1Cloud.
 const (
-	AWS     CastaiV1Cloud = "AWS"
-	AZURE   CastaiV1Cloud = "AZURE"
-	Aws     CastaiV1Cloud = "aws"
-	Azure   CastaiV1Cloud = "azure"
-	GCP     CastaiV1Cloud = "GCP"
-	Gcp     CastaiV1Cloud = "gcp"
-	INVALID CastaiV1Cloud = "INVALID"
-	Invalid CastaiV1Cloud = "invalid"
+	CastaiV1CloudAWS     CastaiV1Cloud = "AWS"
+	CastaiV1CloudAZURE   CastaiV1Cloud = "AZURE"
+	CastaiV1CloudAws     CastaiV1Cloud = "aws"
+	CastaiV1CloudAzure   CastaiV1Cloud = "azure"
+	CastaiV1CloudGCP     CastaiV1Cloud = "GCP"
+	CastaiV1CloudGcp     CastaiV1Cloud = "gcp"
+	CastaiV1CloudINVALID CastaiV1Cloud = "INVALID"
+	CastaiV1CloudInvalid CastaiV1Cloud = "invalid"
 )
 
 // Defines values for ExternalclusterV1NodeType.
@@ -259,6 +268,78 @@ type CastaiAuthtokenV1beta1DeleteAuthTokenResponse = map[string]interface{}
 // CastaiAuthtokenV1beta1ListAuthTokensResponse defines model for castai.authtoken.v1beta1.ListAuthTokensResponse.
 type CastaiAuthtokenV1beta1ListAuthTokensResponse struct {
 	Items *[]CastaiAuthtokenV1beta1AuthToken `json:"items,omitempty"`
+}
+
+// AdvancedConfig the evictor advanced configuration.
+type CastaiEvictorV1AdvancedConfig struct {
+	EvictionConfig []CastaiEvictorV1EvictionConfig `json:"evictionConfig"`
+}
+
+// EvictionConfig used to specify more granular settings per node/pod filters.
+type CastaiEvictorV1EvictionConfig struct {
+	NodeSelector *CastaiEvictorV1NodeSelector    `json:"nodeSelector,omitempty"`
+	PodSelector  *CastaiEvictorV1PodSelector     `json:"podSelector,omitempty"`
+	Settings     CastaiEvictorV1EvictionSettings `json:"settings"`
+}
+
+// CastaiEvictorV1EvictionSettings defines model for castai.evictor.v1.EvictionSettings.
+type CastaiEvictorV1EvictionSettings struct {
+	Aggressive      *CastaiEvictorV1EvictionSettingsSettingEnabled `json:"aggressive,omitempty"`
+	Disposable      *CastaiEvictorV1EvictionSettingsSettingEnabled `json:"disposable,omitempty"`
+	RemovalDisabled *CastaiEvictorV1EvictionSettingsSettingEnabled `json:"removalDisabled,omitempty"`
+}
+
+// CastaiEvictorV1EvictionSettingsSettingEnabled defines model for castai.evictor.v1.EvictionSettings.SettingEnabled.
+type CastaiEvictorV1EvictionSettingsSettingEnabled struct {
+	Enabled bool `json:"enabled"`
+}
+
+// LabelSelector is a proto mirror of the metav1.LabelSelector K8s API object. Properties `match_labels` and
+// `match_expressions` are ANDed.
+type CastaiEvictorV1LabelSelector struct {
+	// A more advanced label query with operators. Multiple expressions are ANDed.
+	MatchExpressions *[]CastaiEvictorV1LabelSelectorExpression `json:"matchExpressions,omitempty"`
+
+	// Used to query resource labels.
+	MatchLabels *CastaiEvictorV1LabelSelector_MatchLabels `json:"matchLabels,omitempty"`
+}
+
+// Used to query resource labels.
+type CastaiEvictorV1LabelSelector_MatchLabels struct {
+	AdditionalProperties map[string]string `json:"-"`
+}
+
+// Expression is a proto mirror of the metav1.LabelSelectorRequirement K8s API object.
+type CastaiEvictorV1LabelSelectorExpression struct {
+	// Key is a label.
+	Key string `json:"key"`
+
+	// Operator set of operators which can be used in the label selector expressions.
+	Operator CastaiEvictorV1LabelSelectorExpressionOperator `json:"operator"`
+
+	// Values is an array of string values. If the operator is In or NotIn, the values array must be non-empty. If the
+	// operator is Exists or DoesNotExist, the values array must be empty.
+	Values *[]string `json:"values,omitempty"`
+}
+
+// Operator set of operators which can be used in the label selector expressions.
+type CastaiEvictorV1LabelSelectorExpressionOperator string
+
+// CastaiEvictorV1NodeSelector defines model for castai.evictor.v1.NodeSelector.
+type CastaiEvictorV1NodeSelector struct {
+	// LabelSelector is a proto mirror of the metav1.LabelSelector K8s API object. Properties `match_labels` and
+	// `match_expressions` are ANDed.
+	LabelSelector CastaiEvictorV1LabelSelector `json:"labelSelector"`
+}
+
+// CastaiEvictorV1PodSelector defines model for castai.evictor.v1.PodSelector.
+type CastaiEvictorV1PodSelector struct {
+	Kind *string `json:"kind,omitempty"`
+
+	// LabelSelector is a proto mirror of the metav1.LabelSelector K8s API object. Properties `match_labels` and
+	// `match_expressions` are ANDed.
+	LabelSelector CastaiEvictorV1LabelSelector `json:"labelSelector"`
+	Namespace     *string                      `json:"namespace,omitempty"`
 }
 
 // CastaiInventoryV1beta1AddReservationResponse defines model for castai.inventory.v1beta1.AddReservationResponse.
@@ -1564,7 +1645,8 @@ type NodetemplatesV1TemplateConstraints struct {
 	MinMemory *int32 `json:"minMemory"`
 
 	// Should include on-demand instances in the considered pool.
-	OnDemand *bool `json:"onDemand"`
+	OnDemand *bool     `json:"onDemand"`
+	Os       *[]string `json:"os,omitempty"`
 
 	// Should include spot instances in the considered pool.
 	// Note 1: if both spot and on-demand are false, then on-demand is assumed.
@@ -2036,6 +2118,9 @@ type CreateInvitationJSONBody = NewInvitations
 // ClaimInvitationJSONBody defines parameters for ClaimInvitation.
 type ClaimInvitationJSONBody = map[string]interface{}
 
+// EvictorAPIUpsertAdvancedConfigJSONBody defines parameters for EvictorAPIUpsertAdvancedConfig.
+type EvictorAPIUpsertAdvancedConfigJSONBody = CastaiEvictorV1AdvancedConfig
+
 // NodeTemplatesAPIFilterInstanceTypesJSONBody defines parameters for NodeTemplatesAPIFilterInstanceTypes.
 type NodeTemplatesAPIFilterInstanceTypesJSONBody = NodetemplatesV1NodeTemplate
 
@@ -2172,6 +2257,9 @@ type CreateInvitationJSONRequestBody = CreateInvitationJSONBody
 // ClaimInvitationJSONRequestBody defines body for ClaimInvitation for application/json ContentType.
 type ClaimInvitationJSONRequestBody = ClaimInvitationJSONBody
 
+// EvictorAPIUpsertAdvancedConfigJSONRequestBody defines body for EvictorAPIUpsertAdvancedConfig for application/json ContentType.
+type EvictorAPIUpsertAdvancedConfigJSONRequestBody = EvictorAPIUpsertAdvancedConfigJSONBody
+
 // NodeTemplatesAPIFilterInstanceTypesJSONRequestBody defines body for NodeTemplatesAPIFilterInstanceTypes for application/json ContentType.
 type NodeTemplatesAPIFilterInstanceTypesJSONRequestBody = NodeTemplatesAPIFilterInstanceTypesJSONBody
 
@@ -2243,6 +2331,59 @@ type ScheduledRebalancingAPICreateRebalancingScheduleJSONRequestBody = Scheduled
 
 // ScheduledRebalancingAPIUpdateRebalancingScheduleJSONRequestBody defines body for ScheduledRebalancingAPIUpdateRebalancingSchedule for application/json ContentType.
 type ScheduledRebalancingAPIUpdateRebalancingScheduleJSONRequestBody = ScheduledRebalancingAPIUpdateRebalancingScheduleJSONBody
+
+// Getter for additional properties for CastaiEvictorV1LabelSelector_MatchLabels. Returns the specified
+// element and whether it was found
+func (a CastaiEvictorV1LabelSelector_MatchLabels) Get(fieldName string) (value string, found bool) {
+	if a.AdditionalProperties != nil {
+		value, found = a.AdditionalProperties[fieldName]
+	}
+	return
+}
+
+// Setter for additional properties for CastaiEvictorV1LabelSelector_MatchLabels
+func (a *CastaiEvictorV1LabelSelector_MatchLabels) Set(fieldName string, value string) {
+	if a.AdditionalProperties == nil {
+		a.AdditionalProperties = make(map[string]string)
+	}
+	a.AdditionalProperties[fieldName] = value
+}
+
+// Override default JSON handling for CastaiEvictorV1LabelSelector_MatchLabels to handle AdditionalProperties
+func (a *CastaiEvictorV1LabelSelector_MatchLabels) UnmarshalJSON(b []byte) error {
+	object := make(map[string]json.RawMessage)
+	err := json.Unmarshal(b, &object)
+	if err != nil {
+		return err
+	}
+
+	if len(object) != 0 {
+		a.AdditionalProperties = make(map[string]string)
+		for fieldName, fieldBuf := range object {
+			var fieldVal string
+			err := json.Unmarshal(fieldBuf, &fieldVal)
+			if err != nil {
+				return fmt.Errorf("error unmarshaling field %s: %w", fieldName, err)
+			}
+			a.AdditionalProperties[fieldName] = fieldVal
+		}
+	}
+	return nil
+}
+
+// Override default JSON handling for CastaiEvictorV1LabelSelector_MatchLabels to handle AdditionalProperties
+func (a CastaiEvictorV1LabelSelector_MatchLabels) MarshalJSON() ([]byte, error) {
+	var err error
+	object := make(map[string]json.RawMessage)
+
+	for fieldName, field := range a.AdditionalProperties {
+		object[fieldName], err = json.Marshal(field)
+		if err != nil {
+			return nil, fmt.Errorf("error marshaling '%s': %w", fieldName, err)
+		}
+	}
+	return json.Marshal(object)
+}
 
 // Getter for additional properties for ExternalclusterV1EKSClusterParams_Tags. Returns the specified
 // element and whether it was found

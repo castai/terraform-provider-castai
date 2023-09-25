@@ -39,6 +39,7 @@ func Provider(version string) *schema.Provider {
 			"castai_gke_cluster":                resourceGKECluster(),
 			"castai_aks_cluster":                resourceAKSCluster(),
 			"castai_autoscaler":                 resourceAutoscaler(),
+			"castai_evictor_advanced_config":    resourceEvictionConfig(),
 			"castai_node_template":              resourceNodeTemplate(),
 			"castai_rebalancing_schedule":       resourceRebalancingSchedule(),
 			"castai_rebalancing_job":            resourceRebalancingJob(),

@@ -455,6 +455,66 @@ func (mr *MockClientInterfaceMockRecorder) DeleteOrganizationUser(ctx, id, userI
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteOrganizationUser", reflect.TypeOf((*MockClientInterface)(nil).DeleteOrganizationUser), varargs...)
 }
 
+// EvictorAPIGetAdvancedConfig mocks base method.
+func (m *MockClientInterface) EvictorAPIGetAdvancedConfig(ctx context.Context, clusterId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "EvictorAPIGetAdvancedConfig", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// EvictorAPIGetAdvancedConfig indicates an expected call of EvictorAPIGetAdvancedConfig.
+func (mr *MockClientInterfaceMockRecorder) EvictorAPIGetAdvancedConfig(ctx, clusterId interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EvictorAPIGetAdvancedConfig", reflect.TypeOf((*MockClientInterface)(nil).EvictorAPIGetAdvancedConfig), varargs...)
+}
+
+// EvictorAPIUpsertAdvancedConfig mocks base method.
+func (m *MockClientInterface) EvictorAPIUpsertAdvancedConfig(ctx context.Context, clusterId string, body sdk.EvictorAPIUpsertAdvancedConfigJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "EvictorAPIUpsertAdvancedConfig", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// EvictorAPIUpsertAdvancedConfig indicates an expected call of EvictorAPIUpsertAdvancedConfig.
+func (mr *MockClientInterfaceMockRecorder) EvictorAPIUpsertAdvancedConfig(ctx, clusterId, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EvictorAPIUpsertAdvancedConfig", reflect.TypeOf((*MockClientInterface)(nil).EvictorAPIUpsertAdvancedConfig), varargs...)
+}
+
+// EvictorAPIUpsertAdvancedConfigWithBody mocks base method.
+func (m *MockClientInterface) EvictorAPIUpsertAdvancedConfigWithBody(ctx context.Context, clusterId, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "EvictorAPIUpsertAdvancedConfigWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// EvictorAPIUpsertAdvancedConfigWithBody indicates an expected call of EvictorAPIUpsertAdvancedConfigWithBody.
+func (mr *MockClientInterfaceMockRecorder) EvictorAPIUpsertAdvancedConfigWithBody(ctx, clusterId, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EvictorAPIUpsertAdvancedConfigWithBody", reflect.TypeOf((*MockClientInterface)(nil).EvictorAPIUpsertAdvancedConfigWithBody), varargs...)
+}
+
 // ExternalClusterAPIAddNode mocks base method.
 func (m *MockClientInterface) ExternalClusterAPIAddNode(ctx context.Context, clusterId string, body sdk.ExternalClusterAPIAddNodeJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
@@ -2481,6 +2541,51 @@ func (m *MockClientWithResponsesInterface) DeleteOrganizationWithResponse(ctx co
 func (mr *MockClientWithResponsesInterfaceMockRecorder) DeleteOrganizationWithResponse(ctx, id interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteOrganizationWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DeleteOrganizationWithResponse), ctx, id)
+}
+
+// EvictorAPIGetAdvancedConfigWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) EvictorAPIGetAdvancedConfigWithResponse(ctx context.Context, clusterId string) (*sdk.EvictorAPIGetAdvancedConfigResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "EvictorAPIGetAdvancedConfigWithResponse", ctx, clusterId)
+	ret0, _ := ret[0].(*sdk.EvictorAPIGetAdvancedConfigResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// EvictorAPIGetAdvancedConfigWithResponse indicates an expected call of EvictorAPIGetAdvancedConfigWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) EvictorAPIGetAdvancedConfigWithResponse(ctx, clusterId interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EvictorAPIGetAdvancedConfigWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).EvictorAPIGetAdvancedConfigWithResponse), ctx, clusterId)
+}
+
+// EvictorAPIUpsertAdvancedConfigWithBodyWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) EvictorAPIUpsertAdvancedConfigWithBodyWithResponse(ctx context.Context, clusterId, contentType string, body io.Reader) (*sdk.EvictorAPIUpsertAdvancedConfigResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "EvictorAPIUpsertAdvancedConfigWithBodyWithResponse", ctx, clusterId, contentType, body)
+	ret0, _ := ret[0].(*sdk.EvictorAPIUpsertAdvancedConfigResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// EvictorAPIUpsertAdvancedConfigWithBodyWithResponse indicates an expected call of EvictorAPIUpsertAdvancedConfigWithBodyWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) EvictorAPIUpsertAdvancedConfigWithBodyWithResponse(ctx, clusterId, contentType, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EvictorAPIUpsertAdvancedConfigWithBodyWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).EvictorAPIUpsertAdvancedConfigWithBodyWithResponse), ctx, clusterId, contentType, body)
+}
+
+// EvictorAPIUpsertAdvancedConfigWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) EvictorAPIUpsertAdvancedConfigWithResponse(ctx context.Context, clusterId string, body sdk.EvictorAPIUpsertAdvancedConfigJSONRequestBody) (*sdk.EvictorAPIUpsertAdvancedConfigResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "EvictorAPIUpsertAdvancedConfigWithResponse", ctx, clusterId, body)
+	ret0, _ := ret[0].(*sdk.EvictorAPIUpsertAdvancedConfigResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// EvictorAPIUpsertAdvancedConfigWithResponse indicates an expected call of EvictorAPIUpsertAdvancedConfigWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) EvictorAPIUpsertAdvancedConfigWithResponse(ctx, clusterId, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EvictorAPIUpsertAdvancedConfigWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).EvictorAPIUpsertAdvancedConfigWithResponse), ctx, clusterId, body)
 }
 
 // ExternalClusterAPIAddNodeWithBodyWithResponse mocks base method.

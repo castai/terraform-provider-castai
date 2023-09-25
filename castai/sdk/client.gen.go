@@ -125,6 +125,14 @@ type ClientInterface interface {
 
 	ClaimInvitation(ctx context.Context, id string, body ClaimInvitationJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// EvictorAPIGetAdvancedConfig request
+	EvictorAPIGetAdvancedConfig(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// EvictorAPIUpsertAdvancedConfig request with any body
+	EvictorAPIUpsertAdvancedConfigWithBody(ctx context.Context, clusterId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	EvictorAPIUpsertAdvancedConfig(ctx context.Context, clusterId string, body EvictorAPIUpsertAdvancedConfigJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// NodeTemplatesAPIFilterInstanceTypes request with any body
 	NodeTemplatesAPIFilterInstanceTypesWithBody(ctx context.Context, clusterId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -524,6 +532,42 @@ func (c *Client) ClaimInvitationWithBody(ctx context.Context, id string, content
 
 func (c *Client) ClaimInvitation(ctx context.Context, id string, body ClaimInvitationJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewClaimInvitationRequest(c.Server, id, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) EvictorAPIGetAdvancedConfig(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewEvictorAPIGetAdvancedConfigRequest(c.Server, clusterId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) EvictorAPIUpsertAdvancedConfigWithBody(ctx context.Context, clusterId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewEvictorAPIUpsertAdvancedConfigRequestWithBody(c.Server, clusterId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) EvictorAPIUpsertAdvancedConfig(ctx context.Context, clusterId string, body EvictorAPIUpsertAdvancedConfigJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewEvictorAPIUpsertAdvancedConfigRequest(c.Server, clusterId, body)
 	if err != nil {
 		return nil, err
 	}
@@ -2005,6 +2049,87 @@ func NewClaimInvitationRequestWithBody(server string, id string, contentType str
 	}
 
 	operationPath := fmt.Sprintf("/v1/invitations/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewEvictorAPIGetAdvancedConfigRequest generates requests for EvictorAPIGetAdvancedConfig
+func NewEvictorAPIGetAdvancedConfigRequest(server string, clusterId string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "clusterId", runtime.ParamLocationPath, clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/kubernetes/clusters/%s/evictor-advanced-config", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewEvictorAPIUpsertAdvancedConfigRequest calls the generic EvictorAPIUpsertAdvancedConfig builder with application/json body
+func NewEvictorAPIUpsertAdvancedConfigRequest(server string, clusterId string, body EvictorAPIUpsertAdvancedConfigJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewEvictorAPIUpsertAdvancedConfigRequestWithBody(server, clusterId, "application/json", bodyReader)
+}
+
+// NewEvictorAPIUpsertAdvancedConfigRequestWithBody generates requests for EvictorAPIUpsertAdvancedConfig with any type of body
+func NewEvictorAPIUpsertAdvancedConfigRequestWithBody(server string, clusterId string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "clusterId", runtime.ParamLocationPath, clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/kubernetes/clusters/%s/evictor-advanced-config", pathParam0)
 	if operationPath[0] == '/' {
 		operationPath = "." + operationPath
 	}
@@ -4972,6 +5097,14 @@ type ClientWithResponsesInterface interface {
 
 	ClaimInvitationWithResponse(ctx context.Context, id string, body ClaimInvitationJSONRequestBody) (*ClaimInvitationResponse, error)
 
+	// EvictorAPIGetAdvancedConfig request
+	EvictorAPIGetAdvancedConfigWithResponse(ctx context.Context, clusterId string) (*EvictorAPIGetAdvancedConfigResponse, error)
+
+	// EvictorAPIUpsertAdvancedConfig request  with any body
+	EvictorAPIUpsertAdvancedConfigWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader) (*EvictorAPIUpsertAdvancedConfigResponse, error)
+
+	EvictorAPIUpsertAdvancedConfigWithResponse(ctx context.Context, clusterId string, body EvictorAPIUpsertAdvancedConfigJSONRequestBody) (*EvictorAPIUpsertAdvancedConfigResponse, error)
+
 	// NodeTemplatesAPIFilterInstanceTypes request  with any body
 	NodeTemplatesAPIFilterInstanceTypesWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader) (*NodeTemplatesAPIFilterInstanceTypesResponse, error)
 
@@ -5499,6 +5632,66 @@ func (r ClaimInvitationResponse) StatusCode() int {
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
 func (r ClaimInvitationResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type EvictorAPIGetAdvancedConfigResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *CastaiEvictorV1AdvancedConfig
+}
+
+// Status returns HTTPResponse.Status
+func (r EvictorAPIGetAdvancedConfigResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r EvictorAPIGetAdvancedConfigResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r EvictorAPIGetAdvancedConfigResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type EvictorAPIUpsertAdvancedConfigResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *CastaiEvictorV1AdvancedConfig
+}
+
+// Status returns HTTPResponse.Status
+func (r EvictorAPIUpsertAdvancedConfigResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r EvictorAPIUpsertAdvancedConfigResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r EvictorAPIUpsertAdvancedConfigResponse) GetBody() []byte {
 	return r.Body
 }
 
@@ -7654,6 +7847,32 @@ func (c *ClientWithResponses) ClaimInvitationWithResponse(ctx context.Context, i
 	return ParseClaimInvitationResponse(rsp)
 }
 
+// EvictorAPIGetAdvancedConfigWithResponse request returning *EvictorAPIGetAdvancedConfigResponse
+func (c *ClientWithResponses) EvictorAPIGetAdvancedConfigWithResponse(ctx context.Context, clusterId string) (*EvictorAPIGetAdvancedConfigResponse, error) {
+	rsp, err := c.EvictorAPIGetAdvancedConfig(ctx, clusterId)
+	if err != nil {
+		return nil, err
+	}
+	return ParseEvictorAPIGetAdvancedConfigResponse(rsp)
+}
+
+// EvictorAPIUpsertAdvancedConfigWithBodyWithResponse request with arbitrary body returning *EvictorAPIUpsertAdvancedConfigResponse
+func (c *ClientWithResponses) EvictorAPIUpsertAdvancedConfigWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader) (*EvictorAPIUpsertAdvancedConfigResponse, error) {
+	rsp, err := c.EvictorAPIUpsertAdvancedConfigWithBody(ctx, clusterId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseEvictorAPIUpsertAdvancedConfigResponse(rsp)
+}
+
+func (c *ClientWithResponses) EvictorAPIUpsertAdvancedConfigWithResponse(ctx context.Context, clusterId string, body EvictorAPIUpsertAdvancedConfigJSONRequestBody) (*EvictorAPIUpsertAdvancedConfigResponse, error) {
+	rsp, err := c.EvictorAPIUpsertAdvancedConfig(ctx, clusterId, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseEvictorAPIUpsertAdvancedConfigResponse(rsp)
+}
+
 // NodeTemplatesAPIFilterInstanceTypesWithBodyWithResponse request with arbitrary body returning *NodeTemplatesAPIFilterInstanceTypesResponse
 func (c *ClientWithResponses) NodeTemplatesAPIFilterInstanceTypesWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader) (*NodeTemplatesAPIFilterInstanceTypesResponse, error) {
 	rsp, err := c.NodeTemplatesAPIFilterInstanceTypesWithBody(ctx, clusterId, contentType, body)
@@ -8682,6 +8901,58 @@ func ParseClaimInvitationResponse(rsp *http.Response) (*ClaimInvitationResponse,
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest map[string]interface{}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseEvictorAPIGetAdvancedConfigResponse parses an HTTP response from a EvictorAPIGetAdvancedConfigWithResponse call
+func ParseEvictorAPIGetAdvancedConfigResponse(rsp *http.Response) (*EvictorAPIGetAdvancedConfigResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &EvictorAPIGetAdvancedConfigResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest CastaiEvictorV1AdvancedConfig
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseEvictorAPIUpsertAdvancedConfigResponse parses an HTTP response from a EvictorAPIUpsertAdvancedConfigWithResponse call
+func ParseEvictorAPIUpsertAdvancedConfigResponse(rsp *http.Response) (*EvictorAPIUpsertAdvancedConfigResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &EvictorAPIUpsertAdvancedConfigResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest CastaiEvictorV1AdvancedConfig
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
