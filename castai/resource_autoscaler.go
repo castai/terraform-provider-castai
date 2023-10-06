@@ -10,7 +10,6 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/davecgh/go-spew/spew"
 	jsonpatch "github.com/evanphx/json-patch"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -114,7 +113,6 @@ func getCurrentPolicies(ctx context.Context, client sdk.ClientWithResponsesInter
 	log.Printf("[INFO] Getting cluster autoscaler information.")
 
 	resp, err := client.PoliciesAPIGetClusterPoliciesWithResponse(ctx, clusterId)
-	spew.Dump(resp)
 	if err != nil {
 		return nil, err
 	} else if resp.StatusCode() == http.StatusNotFound {
