@@ -154,7 +154,7 @@ func resourceCastaiAKSClusterCreate(ctx context.Context, data *schema.ResourceDa
 	log.Printf("[INFO] Registering new external AKS cluster: %#v", req)
 
 	resp, err := client.ExternalClusterAPIRegisterClusterWithResponse(ctx, req)
-	if checkErr := sdk.CheckOKResponse(resp, err); checkErr != nil {
+	if checkErr := sdk.CheckOKResponse(resp.HTTPResponse, err); checkErr != nil {
 		return diag.FromErr(checkErr)
 	}
 
@@ -186,7 +186,7 @@ func resourceCastaiAKSClusterUpdate(ctx context.Context, data *schema.ResourceDa
 	return resourceCastaiAKSClusterRead(ctx, data, meta)
 }
 
-func updateAKSClusterSettings(ctx context.Context, data *schema.ResourceData, client *sdk.ClientWithResponses) error {
+func updateAKSClusterSettings(ctx context.Context, data *schema.ResourceData, client sdk.ClientWithResponsesInterface) error {
 	if !data.HasChanges(
 		FieldAKSClusterClientID,
 		FieldAKSClusterClientSecret,
@@ -217,7 +217,7 @@ func updateAKSClusterSettings(ctx context.Context, data *schema.ResourceData, cl
 	b := backoff.WithContext(backoff.WithMaxRetries(backoff.NewConstantBackOff(10*time.Second), 30), ctx)
 	if err = backoff.Retry(func() error {
 		response, err := client.ExternalClusterAPIUpdateClusterWithResponse(ctx, data.Id(), req)
-		return sdk.CheckOKResponse(response, err)
+		return sdk.CheckOKResponse(response.HTTPResponse, err)
 	}, b); err != nil {
 		return fmt.Errorf("updating cluster configuration: %w", err)
 	}

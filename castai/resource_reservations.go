@@ -4,15 +4,16 @@ import (
 	"context"
 	"encoding/csv"
 	"fmt"
+	"log"
+	"strings"
+	"time"
+
 	"github.com/castai/terraform-provider-castai/castai/reservations"
 	"github.com/castai/terraform-provider-castai/castai/sdk"
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/samber/lo"
-	"log"
-	"strings"
-	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -212,7 +213,7 @@ func upsertReservations(ctx context.Context, meta interface{}, organizationId st
 	response, err := client.InventoryAPIOverwriteReservationsWithResponse(ctx, organizationId, sdk.InventoryAPIOverwriteReservationsJSONRequestBody{
 		Items: &mappedReservations,
 	})
-	if checkErr := sdk.CheckOKResponse(response, err); checkErr != nil {
+	if checkErr := sdk.CheckOKResponse(response.HTTPResponse, err); checkErr != nil {
 		return fmt.Errorf("upserting reservations: %w", checkErr)
 	}
 
@@ -251,7 +252,7 @@ func getOrganizationReservationResources(ctx context.Context, meta any, organiza
 	client := meta.(*ProviderConfig).api
 
 	response, err := client.InventoryAPIGetReservationsWithResponse(ctx, organizationId)
-	if checkErr := sdk.CheckOKResponse(response, err); checkErr != nil {
+	if checkErr := sdk.CheckOKResponse(response.HTTPResponse, err); checkErr != nil {
 		return nil, fmt.Errorf("fetching reservations: %w", checkErr)
 	}
 
@@ -273,16 +274,16 @@ func getOrganizationId(ctx context.Context, d *schema.ResourceData, meta any) (s
 		return organizationId.String(), nil
 	}
 
-	response, err := client.ListOrganizationsWithResponse(ctx)
-	if checkErr := sdk.CheckOKResponse(response, err); checkErr != nil {
+	response, err := client.UsersAPIListOrganizationsWithResponse(ctx, &sdk.UsersAPIListOrganizationsParams{})
+	if checkErr := sdk.CheckOKResponse(response.HTTPResponse, err); checkErr != nil {
 		return "", fmt.Errorf("fetching organizations: %w", checkErr)
 	}
 
-	if len(response.JSON200.Organizations) > 1 {
+	if response.JSON200.Organizations != nil && len(*response.JSON200.Organizations) > 1 {
 		return "", fmt.Errorf("found more than 1 organization, you can specify exact organization using 'organization_id' attribute")
 	}
 
-	for _, organization := range response.JSON200.Organizations {
+	for _, organization := range *response.JSON200.Organizations {
 		return *organization.Id, nil
 	}
 

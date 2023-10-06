@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/davecgh/go-spew/spew"
 	jsonpatch "github.com/evanphx/json-patch"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -109,18 +110,19 @@ func resourceCastaiAutoscalerUpdate(ctx context.Context, data *schema.ResourceDa
 	return nil
 }
 
-func getCurrentPolicies(ctx context.Context, client *sdk.ClientWithResponses, clusterId string) ([]byte, error) {
+func getCurrentPolicies(ctx context.Context, client sdk.ClientWithResponsesInterface, clusterId string) ([]byte, error) {
 	log.Printf("[INFO] Getting cluster autoscaler information.")
 
-	resp, err := client.PoliciesAPIGetClusterPolicies(ctx, clusterId)
+	resp, err := client.PoliciesAPIGetClusterPoliciesWithResponse(ctx, clusterId)
+	spew.Dump(resp)
 	if err != nil {
 		return nil, err
-	} else if resp.StatusCode == http.StatusNotFound {
+	} else if resp.StatusCode() == http.StatusNotFound {
 		return nil, fmt.Errorf("cluster %s policies do not exist at CAST AI", clusterId)
 	}
 
-	bytes, err := io.ReadAll(resp.Body)
-	defer resp.Body.Close()
+	bytes, err := io.ReadAll(resp.HTTPResponse.Body)
+	defer resp.HTTPResponse.Body.Close()
 	if err != nil {
 		return nil, fmt.Errorf("reading response body: %w", err)
 	}
@@ -161,7 +163,7 @@ func upsertPolicies(ctx context.Context, meta interface{}, clusterId string, cha
 	client := meta.(*ProviderConfig).api
 
 	resp, err := client.PoliciesAPIUpsertClusterPoliciesWithBodyWithResponse(ctx, clusterId, "application/json", bytes.NewReader([]byte(changedPoliciesJSON)))
-	if checkErr := sdk.CheckOKResponse(resp, err); checkErr != nil {
+	if checkErr := sdk.CheckOKResponse(resp.HTTPResponse, err); checkErr != nil {
 		return checkErr
 	}
 

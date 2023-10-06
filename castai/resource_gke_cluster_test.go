@@ -134,19 +134,19 @@ func TestGKEClusterResourceReadContextArchived(t *testing.T) {
 func TestGKEClusterResourceUpdateError(t *testing.T) {
 	r := require.New(t)
 	mockctrl := gomock.NewController(t)
-	mockClient := mock_sdk.NewMockClientInterface(mockctrl)
+	mockClient := mock_sdk.NewMockClientWithResponsesInterface(mockctrl)
 
 	ctx := context.Background()
 	provider := &ProviderConfig{
-		api: &sdk.ClientWithResponses{
-			ClientInterface: mockClient,
-		},
+		api: mockClient,
 	}
 
 	clusterId := "b6bfc074-a267-400f-b8f1-db0850c36gk3d"
 	mockClient.EXPECT().
-		ExternalClusterAPIUpdateCluster(gomock.Any(), clusterId, gomock.Any(), gomock.Any()).
-		Return(&http.Response{StatusCode: 400, Body: io.NopCloser(bytes.NewBufferString(`{"message":"Bad Request", "fieldViolations":[{"field":"credentials","description":"error"}]}`)), Header: map[string][]string{"Content-Type": {"json"}}}, nil)
+		ExternalClusterAPIUpdateClusterWithResponse(gomock.Any(), clusterId, gomock.Any(), gomock.Any()).
+		Return(&sdk.ExternalClusterAPIUpdateClusterResponse{
+			HTTPResponse: &http.Response{StatusCode: 400, Body: io.NopCloser(bytes.NewBufferString(`{"message":"Bad Request", "fieldViolations":[{"field":"credentials","description":"error"}]}`)), Header: map[string][]string{"Content-Type": {"json"}}},
+		}, nil)
 
 	resource := resourceGKECluster()
 

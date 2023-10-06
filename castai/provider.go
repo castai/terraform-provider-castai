@@ -12,7 +12,7 @@ import (
 )
 
 type ProviderConfig struct {
-	api *sdk.ClientWithResponses
+	api sdk.ClientWithResponsesInterface
 }
 
 func Provider(version string) *schema.Provider {
