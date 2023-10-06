@@ -3,6 +3,7 @@ package castai
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"io"
 	"net/http"
 	"testing"
@@ -20,18 +21,16 @@ import (
 func TestEKSClusterResourceReadContext(t *testing.T) {
 	r := require.New(t)
 	mockctrl := gomock.NewController(t)
-	mockClient := mock_sdk.NewMockClientInterface(mockctrl)
+	mockClient := mock_sdk.NewMockClientWithResponsesInterface(mockctrl)
 
 	ctx := context.Background()
 	provider := &ProviderConfig{
-		api: &sdk.ClientWithResponses{
-			ClientInterface: mockClient,
-		},
+		api: mockClient,
 	}
 
 	clusterId := "b6bfc074-a267-400f-b8f1-db0850c369b1"
 
-	body := io.NopCloser(bytes.NewReader([]byte(`{
+	clusterJSON := `{
   "id": "b6bfc074-a267-400f-b8f1-db0850c369b1",
   "name": "eks-cluster",
   "organizationId": "2836f775-aaaa-eeee-bbbb-3d3c29512692",
@@ -59,10 +58,23 @@ func TestEKSClusterResourceReadContext(t *testing.T) {
   "sshPublicKey": "key-123",
   "clusterNameId": "eks-cluster-b6bfc074",
   "private": true
-}`)))
+}`
+
+	var clusterResponse sdk.ExternalclusterV1Cluster
+	err := json.Unmarshal([]byte(clusterJSON), &clusterResponse)
+	r.Nil(err)
+
+	response := &sdk.ExternalClusterAPIGetClusterResponse{
+		HTTPResponse: &http.Response{
+			StatusCode: http.StatusOK,
+			Body:       io.NopCloser(bytes.NewBufferString(clusterJSON)),
+		},
+		JSON200: &clusterResponse,
+	}
+
 	mockClient.EXPECT().
-		ExternalClusterAPIGetCluster(gomock.Any(), clusterId).
-		Return(&http.Response{StatusCode: 200, Body: body, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
+		ExternalClusterAPIGetClusterWithResponse(gomock.Any(), clusterId).
+		Return(response, nil)
 
 	resource := resourceEKSCluster()
 
@@ -70,18 +82,20 @@ func TestEKSClusterResourceReadContext(t *testing.T) {
 	state := terraform.NewInstanceStateShimmedFromValue(val, 0)
 	state.ID = clusterId
 
-	data := resource.Data(state)
-	result := resource.ReadContext(ctx, data, provider)
-	r.Nil(result)
-	r.False(result.HasError())
-	r.Equal(`ID = b6bfc074-a267-400f-b8f1-db0850c369b1
+	expected := `ID = b6bfc074-a267-400f-b8f1-db0850c369b1
 account_id = 487609000000
 assume_role_arn = 
 credentials_id = 9b8d0456-177b-4a3d-b162-e68030d656aa
 name = eks-cluster
 region = eu-central-1
 Tainted = false
-`, data.State().String())
+`
+
+	data := resource.Data(state)
+	result := resource.ReadContext(ctx, data, provider)
+	r.Nil(result)
+	r.False(result.HasError())
+	r.Equal(expected, data.State().String())
 }
 
 func TestEKSClusterResourceReadContextArchived(t *testing.T) {
@@ -147,19 +161,24 @@ func TestEKSClusterResourceReadContextArchived(t *testing.T) {
 func TestEKSClusterResourceUpdateError(t *testing.T) {
 	r := require.New(t)
 	mockctrl := gomock.NewController(t)
-	mockClient := mock_sdk.NewMockClientInterface(mockctrl)
+	mockClient := mock_sdk.NewMockClientWithResponsesInterface(mockctrl)
 
 	ctx := context.Background()
 	provider := &ProviderConfig{
-		api: &sdk.ClientWithResponses{
-			ClientInterface: mockClient,
-		},
+		api: mockClient,
 	}
 
 	clusterId := "b6bfc074-a267-400f-b8f1-db0850c36gk3d"
+
+	response := &sdk.ExternalClusterAPIUpdateClusterResponse{
+		HTTPResponse: &http.Response{
+			StatusCode: http.StatusBadRequest,
+			Body:       io.NopCloser(bytes.NewBufferString(`{"message":"Bad Request", "fieldViolations":[{"field":"credentials","description":"error"}]}`)),
+		},
+	}
 	mockClient.EXPECT().
-		ExternalClusterAPIUpdateCluster(gomock.Any(), clusterId, gomock.Any(), gomock.Any()).
-		Return(&http.Response{StatusCode: 400, Body: io.NopCloser(bytes.NewBufferString(`{"message":"Bad Request", "fieldViolations":[{"field":"credentials","description":"error"}]}`)), Header: map[string][]string{"Content-Type": {"json"}}}, nil)
+		ExternalClusterAPIUpdateClusterWithResponse(gomock.Any(), clusterId, gomock.Any(), gomock.Any()).
+		Return(response, nil)
 
 	resource := resourceEKSCluster()
 

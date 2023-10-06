@@ -1,9 +1,11 @@
 package castai
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
+	"net/http"
+	"testing"
+
 	"github.com/castai/terraform-provider-castai/castai/reservations"
 	"github.com/castai/terraform-provider-castai/castai/sdk"
 	mock_sdk "github.com/castai/terraform-provider-castai/castai/sdk/mock"
@@ -12,9 +14,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/require"
-	"io"
-	"net/http"
-	"testing"
 )
 
 func TestReservations_Azure_BasicReservationsCSV(t *testing.T) {
@@ -159,35 +158,46 @@ func Test_getOrganizationId(t *testing.T) {
 
 	type args struct {
 		organizationIdAttribute *string
-		organizationsResponse   *sdk.OrganizationsList
+		organizationsResponse   *sdk.UsersAPIListOrganizationsResponse
 	}
 	tests := map[string]struct {
-		args                     args
+		argsF                    func(*args)
 		want                     *string
 		expectErrMessageContains *string
 	}{
 		"should use organization id property when it is provided": {
-			args: args{
-				organizationIdAttribute: lo.ToPtr(organizationId1),
+			argsF: func(a *args) {
+				a.organizationIdAttribute = lo.ToPtr(organizationId1)
 			},
 			want: lo.ToPtr(organizationId1),
 		},
 		"should use organization id from organizations list when organization is found": {
-			args: args{
-				organizationsResponse: &sdk.OrganizationsList{
-					Organizations: []sdk.Organization{
+			argsF: func(a *args) {
+				payload := &sdk.CastaiUsersV1beta1ListOrganizationsResponse{
+					Organizations: &[]sdk.CastaiUsersV1beta1UserOrganization{
 						{
 							Id: lo.ToPtr(organizationId2),
 						},
 					},
-				},
+				}
+				data, err := json.Marshal(payload)
+				if err != nil {
+					t.Fatal(err)
+				}
+				a.organizationsResponse = &sdk.UsersAPIListOrganizationsResponse{
+					JSON200: payload,
+					Body:    data,
+					HTTPResponse: &http.Response{
+						StatusCode: http.StatusOK,
+					},
+				}
 			},
 			want: lo.ToPtr(organizationId2),
 		},
 		"should return an error when organization id is not provided and more than one organization is found": {
-			args: args{
-				organizationsResponse: &sdk.OrganizationsList{
-					Organizations: []sdk.Organization{
+			argsF: func(a *args) {
+				payload := &sdk.CastaiUsersV1beta1ListOrganizationsResponse{
+					Organizations: &[]sdk.CastaiUsersV1beta1UserOrganization{
 						{
 							Id: lo.ToPtr(organizationId1),
 						},
@@ -195,7 +205,18 @@ func Test_getOrganizationId(t *testing.T) {
 							Id: lo.ToPtr(organizationId2),
 						},
 					},
-				},
+				}
+				data, err := json.Marshal(payload)
+				if err != nil {
+					t.Fatal(err)
+				}
+				a.organizationsResponse = &sdk.UsersAPIListOrganizationsResponse{
+					JSON200: payload,
+					Body:    data,
+					HTTPResponse: &http.Response{
+						StatusCode: http.StatusOK,
+					},
+				}
 			},
 			expectErrMessageContains: lo.ToPtr("found more than 1 organization, you can specify exact organization using 'organization_id' attribute"),
 		},
@@ -207,29 +228,27 @@ func Test_getOrganizationId(t *testing.T) {
 		t.Run(testName, func(t *testing.T) {
 			r := require.New(t)
 			mockctrl := gomock.NewController(t)
-			mockClient := mock_sdk.NewMockClientInterface(mockctrl)
+			mockClient := mock_sdk.NewMockClientWithResponsesInterface(mockctrl)
 
 			ctx := context.Background()
 			provider := &ProviderConfig{
-				api: &sdk.ClientWithResponses{
-					ClientInterface: mockClient,
-				},
+				api: mockClient,
 			}
 
-			if tt.args.organizationsResponse != nil {
-				organizationsResponseBytes, err := json.Marshal(tt.args.organizationsResponse)
-				r.NoError(err)
+			var a args
+			tt.argsF(&a)
 
+			if a.organizationsResponse != nil {
 				mockClient.EXPECT().
-					ListOrganizations(gomock.Any()).
-					Return(&http.Response{StatusCode: 200, Body: io.NopCloser(bytes.NewBufferString(string(organizationsResponseBytes))), Header: map[string][]string{"Content-Type": {"json"}}}, nil)
+					UsersAPIListOrganizationsWithResponse(gomock.Any(), gomock.Any()).
+					Return(a.organizationsResponse, nil)
 			}
 
 			rReservations := resourceReservations()
 
 			raw := make(map[string]interface{})
-			if tt.args.organizationIdAttribute != nil {
-				raw[reservations.FieldReservationsOrganizationId] = *tt.args.organizationIdAttribute
+			if a.organizationIdAttribute != nil {
+				raw[reservations.FieldReservationsOrganizationId] = *a.organizationIdAttribute
 			}
 
 			data := schema.TestResourceDataRaw(t, rReservations.Schema, raw)

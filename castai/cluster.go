@@ -29,7 +29,7 @@ func resourceCastaiClusterDelete(ctx context.Context, data *schema.ResourceData,
 
 	err := retry.RetryContext(ctx, data.Timeout(schema.TimeoutDelete), func() *retry.RetryError {
 		clusterResponse, err := client.ExternalClusterAPIGetClusterWithResponse(ctx, clusterId)
-		if checkErr := sdk.CheckOKResponse(clusterResponse, err); checkErr != nil {
+		if checkErr := sdk.CheckOKResponse(clusterResponse.HTTPResponse, err); checkErr != nil {
 			return retry.NonRetryableError(err)
 		}
 
@@ -45,7 +45,8 @@ func resourceCastaiClusterDelete(ctx context.Context, data *schema.ResourceData,
 
 		triggerDelete := func() *retry.RetryError {
 			log.Printf("[INFO] Deleting cluster.")
-			if err := sdk.CheckResponseNoContent(client.ExternalClusterAPIDeleteClusterWithResponse(ctx, clusterId)); err != nil {
+			resp, err := client.ExternalClusterAPIDeleteClusterWithResponse(ctx, clusterId)
+			if err := sdk.CheckResponseNoContent(resp.HTTPResponse, err); err != nil {
 				return retry.NonRetryableError(err)
 			}
 			return retry.RetryableError(fmt.Errorf("triggered cluster deletion"))
@@ -75,7 +76,7 @@ func resourceCastaiClusterDelete(ctx context.Context, data *schema.ResourceData,
 				DeleteProvisionedNodes:  getOptionalBool(data, FieldDeleteNodesOnDisconnect, false),
 				KeepKubernetesResources: toPtr(true),
 			})
-			if checkErr := sdk.CheckOKResponse(response, err); checkErr != nil {
+			if checkErr := sdk.CheckOKResponse(response.HTTPResponse, err); checkErr != nil {
 				return retry.NonRetryableError(err)
 			}
 
@@ -96,7 +97,7 @@ func resourceCastaiClusterDelete(ctx context.Context, data *schema.ResourceData,
 	return nil
 }
 
-func fetchClusterData(ctx context.Context, client *sdk.ClientWithResponses, clusterID string) (*sdk.ExternalClusterAPIGetClusterResponse, error) {
+func fetchClusterData(ctx context.Context, client sdk.ClientWithResponsesInterface, clusterID string) (*sdk.ExternalClusterAPIGetClusterResponse, error) {
 	resp, err := client.ExternalClusterAPIGetClusterWithResponse(ctx, clusterID)
 	if err != nil {
 		return nil, err
@@ -107,7 +108,7 @@ func fetchClusterData(ctx context.Context, client *sdk.ClientWithResponses, clus
 		return nil, nil
 	}
 
-	if checkErr := sdk.CheckOKResponse(resp, err); checkErr != nil {
+	if checkErr := sdk.CheckOKResponse(resp.HTTPResponse, err); checkErr != nil {
 		return nil, checkErr
 	}
 
@@ -119,7 +120,7 @@ func fetchClusterData(ctx context.Context, client *sdk.ClientWithResponses, clus
 	return resp, nil
 }
 
-func createClusterToken(ctx context.Context, client *sdk.ClientWithResponses, clusterID string) (string, error) {
+func createClusterToken(ctx context.Context, client sdk.ClientWithResponsesInterface, clusterID string) (string, error) {
 	resp, err := client.ExternalClusterAPICreateClusterTokenWithResponse(ctx, clusterID)
 	if err != nil {
 		return "", fmt.Errorf("creating cluster token: %w", err)

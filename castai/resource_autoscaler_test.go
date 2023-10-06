@@ -21,7 +21,7 @@ import (
 )
 
 func TestAutoscalerResource_PoliciesUpdateAction(t *testing.T) {
-	currentPolicies := `
+	currentPoliciesJSON := `
 		{
 		    "enabled": true,
 		    "isScopedMode": false,
@@ -77,7 +77,7 @@ func TestAutoscalerResource_PoliciesUpdateAction(t *testing.T) {
 	// 3. enable spot backups
 	// 4. change spot cloud to aws - just to test if we can do change on arrays
 	// 5. enable the spot interruption predictions
-	policyChanges := `{
+	policyChangesJSON := `{
 		"isScopedMode":true,
 		"unschedulablePods": {
 			"nodeConstraints": {
@@ -97,7 +97,7 @@ func TestAutoscalerResource_PoliciesUpdateAction(t *testing.T) {
 		}
 	}`
 
-	updatedPolicies := `
+	updatedPoliciesJSON := `
 		{
 		    "enabled": true,
 		    "isScopedMode": true,
@@ -154,35 +154,43 @@ func TestAutoscalerResource_PoliciesUpdateAction(t *testing.T) {
 
 	r := require.New(t)
 	mockctrl := gomock.NewController(t)
-	mockClient := mock_sdk.NewMockClientInterface(mockctrl)
+	mockClient := mock_sdk.NewMockClientWithResponsesInterface(mockctrl)
 
 	ctx := context.Background()
 	provider := &ProviderConfig{
-		api: &sdk.ClientWithResponses{
-			ClientInterface: mockClient,
-		},
+		api: mockClient,
 	}
 
 	resource := resourceAutoscaler()
 
 	clusterId := "cluster_id"
 	val := cty.ObjectVal(map[string]cty.Value{
-		FieldAutoscalerPoliciesJSON: cty.StringVal(policyChanges),
+		FieldAutoscalerPoliciesJSON: cty.StringVal(policyChangesJSON),
 		FieldClusterId:              cty.StringVal(clusterId),
 	})
 	state := terraform.NewInstanceStateShimmedFromValue(val, 0)
 	data := resource.Data(state)
 
-	body := io.NopCloser(bytes.NewReader([]byte(currentPolicies)))
-	response := &http.Response{StatusCode: 200, Body: body}
-
 	policiesUpdated := false
 
-	mockClient.EXPECT().PoliciesAPIGetClusterPolicies(gomock.Any(), clusterId, gomock.Any()).Return(response, nil).Times(1)
-	mockClient.EXPECT().PoliciesAPIUpsertClusterPoliciesWithBody(gomock.Any(), clusterId, "application/json", gomock.Any()).
-		DoAndReturn(func(ctx context.Context, clusterId string, contentType string, body io.Reader) (*http.Response, error) {
+	var currentPolicies sdk.PoliciesV1Policies
+	err := json.Unmarshal([]byte(currentPoliciesJSON), &currentPolicies)
+	r.NoError(err)
+
+	responsePayload := &sdk.PoliciesAPIGetClusterPoliciesResponse{
+		JSON200: &currentPolicies,
+		Body:    []byte(currentPoliciesJSON),
+		HTTPResponse: &http.Response{
+			StatusCode: http.StatusOK,
+			Body:       io.NopCloser(bytes.NewReader([]byte(currentPoliciesJSON))),
+		},
+	}
+
+	mockClient.EXPECT().PoliciesAPIGetClusterPoliciesWithResponse(gomock.Any(), clusterId, gomock.Any()).Return(responsePayload, nil).Times(1)
+	mockClient.EXPECT().PoliciesAPIUpsertClusterPoliciesWithBodyWithResponse(gomock.Any(), clusterId, "application/json", gomock.Any()).
+		DoAndReturn(func(ctx context.Context, clusterId string, contentType string, body io.Reader) (*sdk.PoliciesAPIUpsertClusterPoliciesResponse, error) {
 			got, _ := io.ReadAll(body)
-			expected := []byte(updatedPolicies)
+			expected := []byte(updatedPoliciesJSON)
 
 			eq, err := JSONBytesEqual(got, expected)
 			r.NoError(err)
@@ -191,9 +199,11 @@ func TestAutoscalerResource_PoliciesUpdateAction(t *testing.T) {
 
 			policiesUpdated = true
 
-			return &http.Response{
-				StatusCode: 200,
-				Body:       io.NopCloser(bytes.NewReader([]byte(""))),
+			return &sdk.PoliciesAPIUpsertClusterPoliciesResponse{
+				HTTPResponse: &http.Response{
+					StatusCode: http.StatusOK,
+				},
+				Body: []byte(""),
 			}, nil
 		}).Times(1)
 
@@ -203,7 +213,7 @@ func TestAutoscalerResource_PoliciesUpdateAction(t *testing.T) {
 }
 
 func TestAutoscalerResource_PoliciesUpdateAction_Fail(t *testing.T) {
-	currentPolicies := `
+	currentPoliciesJSON := `
 		{
 		    "enabled": true,
 		    "isScopedMode": false,
@@ -254,7 +264,7 @@ func TestAutoscalerResource_PoliciesUpdateAction_Fail(t *testing.T) {
 		    }
 		}`
 
-	policyChanges := `{
+	policyChangesJSON := `{
 		"isScopedMode":true,
 		"unschedulablePods": {
 			"nodeConstraints": {
@@ -272,34 +282,46 @@ func TestAutoscalerResource_PoliciesUpdateAction_Fail(t *testing.T) {
 
 	r := require.New(t)
 	mockctrl := gomock.NewController(t)
-	mockClient := mock_sdk.NewMockClientInterface(mockctrl)
+	mockClient := mock_sdk.NewMockClientWithResponsesInterface(mockctrl)
 
 	ctx := context.Background()
 	provider := &ProviderConfig{
-		api: &sdk.ClientWithResponses{
-			ClientInterface: mockClient,
-		},
+		api: mockClient,
 	}
 
 	resource := resourceAutoscaler()
 
 	clusterId := "cluster_id"
 	val := cty.ObjectVal(map[string]cty.Value{
-		FieldAutoscalerPoliciesJSON: cty.StringVal(policyChanges),
+		FieldAutoscalerPoliciesJSON: cty.StringVal(policyChangesJSON),
 		FieldClusterId:              cty.StringVal(clusterId),
 	})
 	state := terraform.NewInstanceStateShimmedFromValue(val, 0)
 	data := resource.Data(state)
 
-	body := io.NopCloser(bytes.NewReader([]byte(currentPolicies)))
-	response := &http.Response{StatusCode: 200, Body: body}
+	var currentPolicies sdk.PoliciesV1Policies
+	err := json.Unmarshal([]byte(currentPoliciesJSON), &currentPolicies)
+	r.NoError(err)
 
-	mockClient.EXPECT().PoliciesAPIGetClusterPolicies(gomock.Any(), clusterId, gomock.Any()).Return(response, nil).Times(1)
-	mockClient.EXPECT().PoliciesAPIUpsertClusterPoliciesWithBody(gomock.Any(), clusterId, "application/json", gomock.Any()).
-		DoAndReturn(func(ctx context.Context, clusterId string, contentType string, body io.Reader) (*http.Response, error) {
-			return &http.Response{
-				StatusCode: 400,
-				Body:       io.NopCloser(bytes.NewReader([]byte(`{"message":"policies config: Evictor policy management is not allowed: Evictor installed externally. Uninstall Evictor first and try again.","fieldViolations":[]`))),
+	responsePayload := &sdk.PoliciesAPIGetClusterPoliciesResponse{
+		JSON200: &currentPolicies,
+		Body:    []byte(currentPoliciesJSON),
+		HTTPResponse: &http.Response{
+			StatusCode: http.StatusOK,
+			Body:       io.NopCloser(bytes.NewReader([]byte(currentPoliciesJSON))),
+		},
+	}
+
+	mockClient.EXPECT().PoliciesAPIGetClusterPoliciesWithResponse(gomock.Any(), clusterId, gomock.Any()).Return(responsePayload, nil).Times(1)
+	mockClient.EXPECT().PoliciesAPIUpsertClusterPoliciesWithBodyWithResponse(gomock.Any(), clusterId, "application/json", gomock.Any()).
+		DoAndReturn(func(ctx context.Context, clusterId string, contentType string, body io.Reader) (*sdk.PoliciesAPIUpsertClusterPoliciesResponse, error) {
+
+			return &sdk.PoliciesAPIUpsertClusterPoliciesResponse{
+				HTTPResponse: &http.Response{
+					StatusCode: http.StatusBadRequest,
+					Body:       io.NopCloser(bytes.NewReader([]byte(`{"message":"policies config: Evictor policy management is not allowed: Evictor installed externally. Uninstall Evictor first and try again.","fieldViolations":[]`))),
+				},
+				Body: []byte(""),
 			}, nil
 		}).Times(1)
 

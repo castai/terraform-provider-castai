@@ -344,7 +344,7 @@ func resourceNodeConfigurationCreate(ctx context.Context, d *schema.ResourceData
 	}
 
 	resp, err := client.NodeConfigurationAPICreateConfigurationWithResponse(ctx, clusterID, req)
-	if checkErr := sdk.CheckOKResponse(resp, err); checkErr != nil {
+	if checkErr := sdk.CheckOKResponse(resp.HTTPResponse, err); checkErr != nil {
 		return diag.FromErr(checkErr)
 	}
 
@@ -366,7 +366,7 @@ func resourceNodeConfigurationRead(ctx context.Context, d *schema.ResourceData, 
 		d.SetId("")
 		return nil
 	}
-	if err := sdk.CheckOKResponse(resp, err); err != nil {
+	if err := sdk.CheckOKResponse(resp.HTTPResponse, err); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -513,7 +513,7 @@ func resourceNodeConfigurationUpdate(ctx context.Context, d *schema.ResourceData
 	}
 
 	resp, err := client.NodeConfigurationAPIUpdateConfigurationWithResponse(ctx, clusterID, d.Id(), req)
-	if checkErr := sdk.CheckOKResponse(resp, err); checkErr != nil {
+	if checkErr := sdk.CheckOKResponse(resp.HTTPResponse, err); checkErr != nil {
 		return diag.FromErr(checkErr)
 	}
 
@@ -534,7 +534,7 @@ func resourceNodeConfigurationDelete(ctx context.Context, d *schema.ResourceData
 		return nil
 	}
 
-	if err := sdk.StatusOk(resp); err != nil {
+	if err := sdk.StatusOk(resp.HTTPResponse); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -544,7 +544,7 @@ func resourceNodeConfigurationDelete(ctx context.Context, d *schema.ResourceData
 	}
 
 	del, err := client.NodeConfigurationAPIDeleteConfigurationWithResponse(ctx, clusterID, d.Id())
-	if err := sdk.CheckOKResponse(del, err); err != nil {
+	if err := sdk.CheckOKResponse(del.HTTPResponse, err); err != nil {
 		return diag.FromErr(err)
 	}
 

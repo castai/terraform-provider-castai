@@ -111,8 +111,8 @@ func testAccGKEClusterConfig(rName string, clusterName string, projectID string)
 	return ConfigCompose(testAccGCPConfig(rName, clusterName, projectID), fmt.Sprintf(`
 resource "castai_gke_cluster" "test" {
   project_id                 = %[1]q
-  location                   = "us-central1-c" 
-  name                       = %[2]q 
+  location                   = "us-central1-c"
+  name                       = %[2]q
   credentials_json           = base64decode(google_service_account_key.castai_key.private_key)
 }
 

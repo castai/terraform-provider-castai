@@ -40,7 +40,7 @@ func dataSourceCastaiEKSUserARN(ctx context.Context, data *schema.ResourceData, 
 	clusterID := data.Get(EKSClusterUserARNFieldClusterID).(string)
 
 	resp, err := client.ExternalClusterAPIGetAssumeRoleUserWithResponse(ctx, clusterID)
-	if checkErr := sdk.CheckOKResponse(resp, err); checkErr != nil {
+	if checkErr := sdk.CheckOKResponse(resp.HTTPResponse, err); checkErr != nil {
 		return diag.FromErr(checkErr)
 	}
 

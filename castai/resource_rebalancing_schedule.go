@@ -151,7 +151,7 @@ func resourceRebalancingScheduleCreate(ctx context.Context, d *schema.ResourceDa
 	}
 
 	resp, err := client.ScheduledRebalancingAPICreateRebalancingScheduleWithResponse(ctx, req)
-	if checkErr := sdk.CheckOKResponse(resp, err); checkErr != nil {
+	if checkErr := sdk.CheckOKResponse(resp.HTTPResponse, err); checkErr != nil {
 		return diag.FromErr(checkErr)
 	}
 
@@ -195,7 +195,7 @@ func resourceRebalancingScheduleUpdate(ctx context.Context, d *schema.ResourceDa
 	resp, err := client.ScheduledRebalancingAPIUpdateRebalancingScheduleWithResponse(ctx, &sdk.ScheduledRebalancingAPIUpdateRebalancingScheduleParams{
 		Id: lo.ToPtr(d.Id()),
 	}, req)
-	if checkErr := sdk.CheckOKResponse(resp, err); checkErr != nil {
+	if checkErr := sdk.CheckOKResponse(resp.HTTPResponse, err); checkErr != nil {
 		return diag.FromErr(checkErr)
 	}
 	return resourceRebalancingScheduleRead(ctx, d, meta)
@@ -204,7 +204,7 @@ func resourceRebalancingScheduleUpdate(ctx context.Context, d *schema.ResourceDa
 func resourceRebalancingScheduleDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(*ProviderConfig).api
 	resp, err := client.ScheduledRebalancingAPIDeleteRebalancingScheduleWithResponse(ctx, d.Id())
-	if checkErr := sdk.CheckOKResponse(resp, err); checkErr != nil {
+	if checkErr := sdk.CheckOKResponse(resp.HTTPResponse, err); checkErr != nil {
 		return diag.FromErr(checkErr)
 	}
 	return nil
@@ -367,9 +367,9 @@ func nullifySelectorRequirements(requirements *[]sdk.ScheduledrebalancingV1NodeS
 	}
 }
 
-func getRebalancingScheduleByName(ctx context.Context, client *sdk.ClientWithResponses, name string) (*sdk.ScheduledrebalancingV1RebalancingSchedule, error) {
+func getRebalancingScheduleByName(ctx context.Context, client sdk.ClientWithResponsesInterface, name string) (*sdk.ScheduledrebalancingV1RebalancingSchedule, error) {
 	resp, err := client.ScheduledRebalancingAPIListRebalancingSchedulesWithResponse(ctx)
-	if checkErr := sdk.CheckOKResponse(resp, err); checkErr != nil {
+	if checkErr := sdk.CheckOKResponse(resp.HTTPResponse, err); checkErr != nil {
 		return nil, checkErr
 	}
 
@@ -382,12 +382,12 @@ func getRebalancingScheduleByName(ctx context.Context, client *sdk.ClientWithRes
 	return nil, fmt.Errorf("rebalancing schedule %q was not found", name)
 }
 
-func getRebalancingScheduleById(ctx context.Context, client *sdk.ClientWithResponses, id string) (*sdk.ScheduledrebalancingV1RebalancingSchedule, error) {
+func getRebalancingScheduleById(ctx context.Context, client sdk.ClientWithResponsesInterface, id string) (*sdk.ScheduledrebalancingV1RebalancingSchedule, error) {
 	resp, err := client.ScheduledRebalancingAPIGetRebalancingScheduleWithResponse(ctx, id)
 	if err != nil {
 		return nil, err
 	}
-	if err := sdk.CheckOKResponse(resp, err); err != nil {
+	if err := sdk.CheckOKResponse(resp.HTTPResponse, err); err != nil {
 		return nil, err
 	}
 

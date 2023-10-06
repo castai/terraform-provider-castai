@@ -50,7 +50,7 @@ func resourceNodeConfigurationDefaultCreate(ctx context.Context, d *schema.Resou
 	id := d.Get("configuration_id").(string)
 
 	resp, err := client.NodeConfigurationAPISetDefaultWithResponse(ctx, clusterID, id)
-	if checkErr := sdk.CheckOKResponse(resp, err); checkErr != nil {
+	if checkErr := sdk.CheckOKResponse(resp.HTTPResponse, err); checkErr != nil {
 		return diag.FromErr(checkErr)
 	}
 
@@ -75,7 +75,7 @@ func resourceNodeConfigurationDefaultRead(ctx context.Context, d *schema.Resourc
 		return nil
 	}
 
-	if err := sdk.CheckOKResponse(resp, err); err != nil {
+	if err := sdk.CheckOKResponse(resp.HTTPResponse, err); err != nil {
 		return diag.FromErr(err)
 	}
 

@@ -43,8 +43,8 @@ func CreateClient(apiURL, apiToken, userAgent string) (*ClientWithResponses, err
 	if err != nil {
 		return nil, err
 	}
-
-	if checkErr := CheckGetResponse(apiClient.AuthTokenAPIListAuthTokensWithResponse(context.Background(), &AuthTokenAPIListAuthTokensParams{})); checkErr != nil {
+	resp, err := apiClient.AuthTokenAPIListAuthTokensWithResponse(context.Background(), &AuthTokenAPIListAuthTokensParams{})
+	if checkErr := CheckGetResponse(resp.HTTPResponse, err); checkErr != nil {
 		return nil, fmt.Errorf("validating api token (by listing auth tokens): %v", checkErr)
 	}
 

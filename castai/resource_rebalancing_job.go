@@ -3,9 +3,10 @@ package castai
 import (
 	"context"
 	"fmt"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"strings"
 	"time"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/castai/terraform-provider-castai/castai/sdk"
 	"github.com/google/uuid"
@@ -72,7 +73,7 @@ func resourceRebalancingJobCreate(ctx context.Context, d *schema.ResourceData, m
 	}
 
 	resp, err := client.ScheduledRebalancingAPICreateRebalancingJobWithResponse(ctx, *job.ClusterId, req)
-	if checkErr := sdk.CheckOKResponse(resp, err); checkErr != nil {
+	if checkErr := sdk.CheckOKResponse(resp.HTTPResponse, err); checkErr != nil {
 		return diag.FromErr(checkErr)
 	}
 
@@ -112,7 +113,7 @@ func resourceRebalancingJobUpdate(ctx context.Context, d *schema.ResourceData, m
 	}
 
 	resp, err := client.ScheduledRebalancingAPIUpdateRebalancingJobWithResponse(ctx, *job.ClusterId, *job.Id, req)
-	if checkErr := sdk.CheckOKResponse(resp, err); checkErr != nil {
+	if checkErr := sdk.CheckOKResponse(resp.HTTPResponse, err); checkErr != nil {
 		return diag.FromErr(checkErr)
 	}
 	return resourceRebalancingJobRead(ctx, d, meta)
@@ -123,7 +124,7 @@ func resourceRebalancingJobDelete(ctx context.Context, d *schema.ResourceData, m
 	clusterID := d.Get("cluster_id").(string)
 
 	resp, err := client.ScheduledRebalancingAPIDeleteRebalancingJobWithResponse(ctx, clusterID, d.Id())
-	if checkErr := sdk.CheckOKResponse(resp, err); checkErr != nil {
+	if checkErr := sdk.CheckOKResponse(resp.HTTPResponse, err); checkErr != nil {
 		return diag.FromErr(checkErr)
 	}
 	return nil
@@ -182,14 +183,14 @@ func rebalancingJobToState(job *sdk.ScheduledrebalancingV1RebalancingJob, d *sch
 	return nil
 }
 
-func getRebalancingJobByScheduleName(ctx context.Context, client *sdk.ClientWithResponses, clusterID string, scheduleName string) (*sdk.ScheduledrebalancingV1RebalancingJob, error) {
+func getRebalancingJobByScheduleName(ctx context.Context, client sdk.ClientWithResponsesInterface, clusterID string, scheduleName string) (*sdk.ScheduledrebalancingV1RebalancingJob, error) {
 	schedule, err := getRebalancingScheduleByName(ctx, client, scheduleName)
 	if err != nil {
 		return nil, fmt.Errorf("getting schedule: %w", err)
 	}
 
 	resp, err := client.ScheduledRebalancingAPIListRebalancingJobsWithResponse(ctx, clusterID)
-	if checkErr := sdk.CheckOKResponse(resp, err); checkErr != nil {
+	if checkErr := sdk.CheckOKResponse(resp.HTTPResponse, err); checkErr != nil {
 		return nil, checkErr
 	}
 
@@ -208,12 +209,12 @@ func getRebalancingJobByScheduleName(ctx context.Context, client *sdk.ClientWith
 	return nil, fmt.Errorf("rebalancing job for schedule %q was not found", scheduleName)
 }
 
-func getRebalancingJobById(ctx context.Context, client *sdk.ClientWithResponses, clusterID string, id string) (*sdk.ScheduledrebalancingV1RebalancingJob, error) {
+func getRebalancingJobById(ctx context.Context, client sdk.ClientWithResponsesInterface, clusterID string, id string) (*sdk.ScheduledrebalancingV1RebalancingJob, error) {
 	resp, err := client.ScheduledRebalancingAPIGetRebalancingJobWithResponse(ctx, clusterID, id)
 	if err != nil {
 		return nil, err
 	}
-	if err := sdk.CheckOKResponse(resp, err); err != nil {
+	if err := sdk.CheckOKResponse(resp.HTTPResponse, err); err != nil {
 		return nil, err
 	}
 

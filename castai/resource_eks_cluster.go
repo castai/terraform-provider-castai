@@ -100,7 +100,7 @@ func resourceCastaiEKSClusterCreate(ctx context.Context, data *schema.ResourceDa
 	log.Printf("[INFO] Registering new external cluster: %#v", req)
 
 	resp, err := client.ExternalClusterAPIRegisterClusterWithResponse(ctx, req)
-	if checkErr := sdk.CheckOKResponse(resp, err); checkErr != nil {
+	if checkErr := sdk.CheckOKResponse(resp.HTTPResponse, err); checkErr != nil {
 		return diag.FromErr(checkErr)
 	}
 
@@ -174,7 +174,7 @@ func resourceCastaiEKSClusterUpdate(ctx context.Context, data *schema.ResourceDa
 	return resourceCastaiEKSClusterRead(ctx, data, meta)
 }
 
-func updateClusterSettings(ctx context.Context, data *schema.ResourceData, client *sdk.ClientWithResponses) error {
+func updateClusterSettings(ctx context.Context, data *schema.ResourceData, client sdk.ClientWithResponsesInterface) error {
 	if !data.HasChanges(
 		FieldEKSClusterAssumeRoleArn,
 		FieldClusterCredentialsId,
@@ -199,7 +199,7 @@ func updateClusterSettings(ctx context.Context, data *schema.ResourceData, clien
 		if err != nil {
 			return err
 		}
-		err = sdk.StatusOk(response)
+		err = sdk.StatusOk(response.HTTPResponse)
 		// In case of malformed user request return error to user right away.
 		if response.StatusCode() == 400 {
 			return backoff.Permanent(err)

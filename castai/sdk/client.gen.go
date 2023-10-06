@@ -5,17 +5,2906 @@ package sdk
 
 import (
 	"bytes"
+	"compress/gzip"
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"path"
 	"strings"
+	"time"
 
 	"github.com/deepmap/oapi-codegen/pkg/runtime"
+	openapi_types "github.com/deepmap/oapi-codegen/pkg/types"
+	"github.com/getkin/kin-openapi/openapi3"
 )
+
+const (
+	ApiKeyAuthScopes = "ApiKeyAuth.Scopes"
+	BearerAuthScopes = "BearerAuth.Scopes"
+)
+
+// Defines values for CastaiInventoryV1beta1AttachableGPUDeviceManufacturer.
+const (
+	CastaiInventoryV1beta1AttachableGPUDeviceManufacturerAMD     CastaiInventoryV1beta1AttachableGPUDeviceManufacturer = "AMD"
+	CastaiInventoryV1beta1AttachableGPUDeviceManufacturerNVIDIA  CastaiInventoryV1beta1AttachableGPUDeviceManufacturer = "NVIDIA"
+	CastaiInventoryV1beta1AttachableGPUDeviceManufacturerUNKNOWN CastaiInventoryV1beta1AttachableGPUDeviceManufacturer = "UNKNOWN"
+)
+
+// Defines values for CastaiInventoryV1beta1GPUDeviceManufacturer.
+const (
+	CastaiInventoryV1beta1GPUDeviceManufacturerAMD     CastaiInventoryV1beta1GPUDeviceManufacturer = "AMD"
+	CastaiInventoryV1beta1GPUDeviceManufacturerNVIDIA  CastaiInventoryV1beta1GPUDeviceManufacturer = "NVIDIA"
+	CastaiInventoryV1beta1GPUDeviceManufacturerUNKNOWN CastaiInventoryV1beta1GPUDeviceManufacturer = "UNKNOWN"
+)
+
+// Defines values for CastaiInventoryV1beta1StorageDriver.
+const (
+	CastaiInventoryV1beta1StorageDriverInvalid CastaiInventoryV1beta1StorageDriver = "invalid"
+	CastaiInventoryV1beta1StorageDriverNvme    CastaiInventoryV1beta1StorageDriver = "nvme"
+	CastaiInventoryV1beta1StorageDriverSata    CastaiInventoryV1beta1StorageDriver = "sata"
+)
+
+// Defines values for CastaiInventoryV1beta1StorageInfoDeviceType.
+const (
+	CastaiInventoryV1beta1StorageInfoDeviceTypeHdd     CastaiInventoryV1beta1StorageInfoDeviceType = "hdd"
+	CastaiInventoryV1beta1StorageInfoDeviceTypeInvalid CastaiInventoryV1beta1StorageInfoDeviceType = "invalid"
+	CastaiInventoryV1beta1StorageInfoDeviceTypeSsd     CastaiInventoryV1beta1StorageInfoDeviceType = "ssd"
+)
+
+// Defines values for CastaiV1Cloud.
+const (
+	AWS     CastaiV1Cloud = "AWS"
+	AZURE   CastaiV1Cloud = "AZURE"
+	Aws     CastaiV1Cloud = "aws"
+	Azure   CastaiV1Cloud = "azure"
+	GCP     CastaiV1Cloud = "GCP"
+	Gcp     CastaiV1Cloud = "gcp"
+	INVALID CastaiV1Cloud = "INVALID"
+	Invalid CastaiV1Cloud = "invalid"
+)
+
+// Defines values for ExternalclusterV1NodeType.
+const (
+	Master          ExternalclusterV1NodeType = "master"
+	NODETYPEINVALID ExternalclusterV1NodeType = "NODE_TYPE_INVALID"
+	NODETYPEMASTER  ExternalclusterV1NodeType = "NODE_TYPE_MASTER"
+	NODETYPEWORKER  ExternalclusterV1NodeType = "NODE_TYPE_WORKER"
+	Worker          ExternalclusterV1NodeType = "worker"
+)
+
+// Defines values for NodeconfigV1ContainerRuntime.
+const (
+	CONTAINERD  NodeconfigV1ContainerRuntime = "CONTAINERD"
+	Containerd  NodeconfigV1ContainerRuntime = "containerd"
+	DOCKERD     NodeconfigV1ContainerRuntime = "DOCKERD"
+	Dockerd     NodeconfigV1ContainerRuntime = "dockerd"
+	UNSPECIFIED NodeconfigV1ContainerRuntime = "UNSPECIFIED"
+	Unspecified NodeconfigV1ContainerRuntime = "unspecified"
+)
+
+// Defines values for NodetemplatesV1AvailableInstanceTypeStorageOptimizedOption.
+const (
+	Always   NodetemplatesV1AvailableInstanceTypeStorageOptimizedOption = "Always"
+	Never    NodetemplatesV1AvailableInstanceTypeStorageOptimizedOption = "Never"
+	OnDemand NodetemplatesV1AvailableInstanceTypeStorageOptimizedOption = "OnDemand"
+)
+
+// Defines values for NodetemplatesV1TaintEffect.
+const (
+	NoExecute  NodetemplatesV1TaintEffect = "NoExecute"
+	NoSchedule NodetemplatesV1TaintEffect = "NoSchedule"
+)
+
+// Defines values for PoliciesV1EvictorStatus.
+const (
+	Compatible   PoliciesV1EvictorStatus = "Compatible"
+	Incompatible PoliciesV1EvictorStatus = "Incompatible"
+	Missing      PoliciesV1EvictorStatus = "Missing"
+	Unknown      PoliciesV1EvictorStatus = "Unknown"
+)
+
+// Defines values for PoliciesV1SpotInterruptionPredictionsType.
+const (
+	AWSRebalanceRecommendations   PoliciesV1SpotInterruptionPredictionsType = "AWSRebalanceRecommendations"
+	CASTAIInterruptionPredictions PoliciesV1SpotInterruptionPredictionsType = "CASTAIInterruptionPredictions"
+)
+
+// Defines values for ScheduledrebalancingV1JobStatus.
+const (
+	JobStatusFailed     ScheduledrebalancingV1JobStatus = "JobStatusFailed"
+	JobStatusFinished   ScheduledrebalancingV1JobStatus = "JobStatusFinished"
+	JobStatusInProgress ScheduledrebalancingV1JobStatus = "JobStatusInProgress"
+	JobStatusPending    ScheduledrebalancingV1JobStatus = "JobStatusPending"
+	JobStatusSkipped    ScheduledrebalancingV1JobStatus = "JobStatusSkipped"
+)
+
+// Auth token used to authenticate via api.
+type CastaiAuthtokenV1beta1AuthToken struct {
+	// (read only) Indicates whether the token is active.
+	Active *bool `json:"active,omitempty"`
+
+	// (read only) Time when the token was created (unix timestamp in nanoseconds).
+	CreatedAt *time.Time `json:"createdAt,omitempty"`
+
+	// (read only) ID of the token.
+	Id *string `json:"id,omitempty"`
+
+	// (read only) Time when this token was last used (unix timestamp in nanoseconds).
+	LastUsedAt *time.Time `json:"lastUsedAt,omitempty"`
+
+	// (required) User provided name of the token.
+	Name *string `json:"name,omitempty"`
+
+	// whether token has readonly permissions.
+	Readonly *bool `json:"readonly,omitempty"`
+
+	// (read only, visible once on creation) actual token used to authenticate via api.
+	Token *string `json:"token"`
+}
+
+// AuthTokenUpdate is used to update an existing auth token.
+type CastaiAuthtokenV1beta1AuthTokenUpdate struct {
+	Active *bool `json:"active,omitempty"`
+}
+
+// CastaiAuthtokenV1beta1DeleteAuthTokenResponse defines model for castai.authtoken.v1beta1.DeleteAuthTokenResponse.
+type CastaiAuthtokenV1beta1DeleteAuthTokenResponse = map[string]interface{}
+
+// CastaiAuthtokenV1beta1ListAuthTokensResponse defines model for castai.authtoken.v1beta1.ListAuthTokensResponse.
+type CastaiAuthtokenV1beta1ListAuthTokensResponse struct {
+	Items *[]CastaiAuthtokenV1beta1AuthToken `json:"items,omitempty"`
+}
+
+// CastaiInventoryV1beta1AddReservationResponse defines model for castai.inventory.v1beta1.AddReservationResponse.
+type CastaiInventoryV1beta1AddReservationResponse struct {
+	Reservation *CastaiInventoryV1beta1ReservationDetails `json:"reservation,omitempty"`
+}
+
+// CastaiInventoryV1beta1AttachableGPUDevice defines model for castai.inventory.v1beta1.AttachableGPUDevice.
+type CastaiInventoryV1beta1AttachableGPUDevice struct {
+	// Count of GPU to be attached.
+	Count *int32 `json:"count,omitempty"`
+
+	// GPU manufacturer.
+	Manufacturer *CastaiInventoryV1beta1AttachableGPUDeviceManufacturer `json:"manufacturer,omitempty"`
+
+	// Total amount of memory of the GPUs to be attached MiB.
+	MemoryMib *int32 `json:"memoryMib,omitempty"`
+
+	// Name of the GPU. For example nvidia-tesla-k80.
+	Name *string `json:"name,omitempty"`
+
+	// Total price of GPUs per hour.
+	PriceHourly *string `json:"priceHourly,omitempty"`
+}
+
+// GPU manufacturer.
+type CastaiInventoryV1beta1AttachableGPUDeviceManufacturer string
+
+// CastaiInventoryV1beta1CountableInstanceType defines model for castai.inventory.v1beta1.CountableInstanceType.
+type CastaiInventoryV1beta1CountableInstanceType struct {
+	ClusterId *string `json:"clusterId,omitempty"`
+	Count     *int32  `json:"count,omitempty"`
+
+	// InstanceType is a cloud service provider specific VM type with basic data.
+	InstanceType *CastaiInventoryV1beta1InstanceType `json:"instanceType,omitempty"`
+}
+
+// CastaiInventoryV1beta1GPUDevice defines model for castai.inventory.v1beta1.GPUDevice.
+type CastaiInventoryV1beta1GPUDevice struct {
+	Count *int32 `json:"count,omitempty"`
+
+	// - UNKNOWN: UNKNOWN is invalid.
+	//  - NVIDIA: NVIDIA.
+	//  - AMD: AMD.
+	Manufacturer *CastaiInventoryV1beta1GPUDeviceManufacturer `json:"manufacturer,omitempty"`
+	MemoryMib    *int32                                       `json:"memoryMib,omitempty"`
+	Name         *string                                      `json:"name,omitempty"`
+
+	// Price per GPU per hour.
+	PriceHourly *string `json:"priceHourly,omitempty"`
+}
+
+// - UNKNOWN: UNKNOWN is invalid.
+//   - NVIDIA: NVIDIA.
+//   - AMD: AMD.
+type CastaiInventoryV1beta1GPUDeviceManufacturer string
+
+// CastaiInventoryV1beta1GPUInfo defines model for castai.inventory.v1beta1.GPUInfo.
+type CastaiInventoryV1beta1GPUInfo struct {
+	GpuDevices *[]CastaiInventoryV1beta1GPUDevice `json:"gpuDevices,omitempty"`
+}
+
+// CastaiInventoryV1beta1GenericReservation defines model for castai.inventory.v1beta1.GenericReservation.
+type CastaiInventoryV1beta1GenericReservation struct {
+	Count                 *int32     `json:"count"`
+	DeepLinkToReservation *string    `json:"deepLinkToReservation"`
+	EndDate               *time.Time `json:"endDate"`
+	ExpirationDate        *time.Time `json:"expirationDate"`
+	InstanceType          *string    `json:"instanceType"`
+	Name                  *string    `json:"name,omitempty"`
+	Price                 *string    `json:"price"`
+	ProductName           *string    `json:"productName"`
+	Provider              *string    `json:"provider"`
+	PurchaseDate          *time.Time `json:"purchaseDate"`
+	Quantity              *int32     `json:"quantity"`
+	Region                *string    `json:"region,omitempty"`
+	StartDate             *time.Time `json:"startDate"`
+	Type                  *string    `json:"type"`
+	ZoneId                *string    `json:"zoneId"`
+	ZoneName              *string    `json:"zoneName"`
+}
+
+// CastaiInventoryV1beta1GenericReservationsList defines model for castai.inventory.v1beta1.GenericReservationsList.
+type CastaiInventoryV1beta1GenericReservationsList struct {
+	Items *[]CastaiInventoryV1beta1GenericReservation `json:"items,omitempty"`
+}
+
+// CastaiInventoryV1beta1GetReservationsBalanceResponse defines model for castai.inventory.v1beta1.GetReservationsBalanceResponse.
+type CastaiInventoryV1beta1GetReservationsBalanceResponse struct {
+	Reservations *[]CastaiInventoryV1beta1ReservationBalance `json:"reservations,omitempty"`
+}
+
+// CastaiInventoryV1beta1GetReservationsResponse defines model for castai.inventory.v1beta1.GetReservationsResponse.
+type CastaiInventoryV1beta1GetReservationsResponse struct {
+	Reservations *[]CastaiInventoryV1beta1ReservationDetails `json:"reservations,omitempty"`
+}
+
+// CastaiInventoryV1beta1GetResourceUsageResponse defines model for castai.inventory.v1beta1.GetResourceUsageResponse.
+type CastaiInventoryV1beta1GetResourceUsageResponse struct {
+	InstanceTypes *[]CastaiInventoryV1beta1CountableInstanceType `json:"instanceTypes,omitempty"`
+}
+
+// CastaiInventoryV1beta1InstanceReliability defines model for castai.inventory.v1beta1.InstanceReliability.
+type CastaiInventoryV1beta1InstanceReliability struct {
+	SpotReclaimRateHigh *string `json:"spotReclaimRateHigh,omitempty"`
+	SpotReclaimRateLow  *string `json:"spotReclaimRateLow,omitempty"`
+}
+
+// InstanceType is a cloud service provider specific VM type with basic data.
+type CastaiInventoryV1beta1InstanceType struct {
+	Architecture     *string `json:"architecture,omitempty"`
+	BareMetal        *bool   `json:"bareMetal,omitempty"`
+	Burstable        *bool   `json:"burstable,omitempty"`
+	CastChoice       *bool   `json:"castChoice,omitempty"`
+	ComputeOptimized *bool   `json:"computeOptimized,omitempty"`
+
+	// CPU base price of the instance type. $/CPU hour.
+	CpuPrice *string `json:"cpuPrice,omitempty"`
+
+	// CreatedAt is the timestamp of the creation of this instance type object.
+	CreatedAt      *time.Time                     `json:"createdAt,omitempty"`
+	CustomInstance *bool                          `json:"customInstance,omitempty"`
+	GpuInfo        *CastaiInventoryV1beta1GPUInfo `json:"gpuInfo,omitempty"`
+
+	// ID of the instance type.
+	Id *string `json:"id,omitempty"`
+
+	// InstanceType name. This value is provider specific.
+	InstanceType *string `json:"instanceType,omitempty"`
+
+	// Describes the network settings for the instance type.
+	NetworkInfo *CastaiInventoryV1beta1NetworkInfo `json:"networkInfo,omitempty"`
+	Obsolete    *bool                              `json:"obsolete,omitempty"`
+
+	// Price of the instance type. $/hour.
+	Price *string `json:"price,omitempty"`
+
+	// Provider name of the instance type.
+	Provider *string `json:"provider,omitempty"`
+
+	// Ram (in MiB) available on the instance type.
+	Ram *string `json:"ram,omitempty"`
+
+	// RAM base price of the instance type. $/GiB hour.
+	RamPrice *string `json:"ramPrice,omitempty"`
+
+	// Region of the instance type. This value is provider specific.
+	Region          *string                                    `json:"region,omitempty"`
+	SpotReliability *CastaiInventoryV1beta1InstanceReliability `json:"spotReliability,omitempty"`
+
+	// StorageInfo describes the available local volumes for an instance type.
+	StorageInfo *CastaiInventoryV1beta1StorageInfo `json:"storageInfo,omitempty"`
+
+	// UpdatedAt is the timestamp of the last update operation on this instance type object.
+	UpdatedAt *time.Time `json:"updatedAt,omitempty"`
+
+	// Vcpu available on the instance type.
+	Vcpu  *string                               `json:"vcpu,omitempty"`
+	Zones *[]CastaiInventoryV1beta1InstanceZone `json:"zones,omitempty"`
+}
+
+// CastaiInventoryV1beta1InstanceZone defines model for castai.inventory.v1beta1.InstanceZone.
+type CastaiInventoryV1beta1InstanceZone struct {
+	AttachableGpuDevices *[]CastaiInventoryV1beta1AttachableGPUDevice `json:"attachableGpuDevices,omitempty"`
+	AzId                 *string                                      `json:"azId,omitempty"`
+	CpuPrice             *string                                      `json:"cpuPrice,omitempty"`
+	LastUnavailableAt    *time.Time                                   `json:"lastUnavailableAt,omitempty"`
+	Price                *string                                      `json:"price,omitempty"`
+	RamPrice             *string                                      `json:"ramPrice,omitempty"`
+	Spot                 *bool                                        `json:"spot,omitempty"`
+	Unavailable          *bool                                        `json:"unavailable,omitempty"`
+}
+
+// Describes the network settings for the instance type.
+type CastaiInventoryV1beta1NetworkInfo struct {
+	// The maximum number of IPv4 addresses per network interface.
+	Ipv4AddressesPerInterface *int32 `json:"ipv4AddressesPerInterface,omitempty"`
+
+	// The maximum number of network interfaces for the instance type.
+	MaximumNetworkInterfaces *int32 `json:"maximumNetworkInterfaces,omitempty"`
+}
+
+// CastaiInventoryV1beta1OverwriteReservationsResponse defines model for castai.inventory.v1beta1.OverwriteReservationsResponse.
+type CastaiInventoryV1beta1OverwriteReservationsResponse struct {
+	Reservations *[]CastaiInventoryV1beta1ReservationDetails `json:"reservations,omitempty"`
+}
+
+// CastaiInventoryV1beta1ReservationBalance defines model for castai.inventory.v1beta1.ReservationBalance.
+type CastaiInventoryV1beta1ReservationBalance struct {
+	InstanceTypes *[]CastaiInventoryV1beta1CountableInstanceType `json:"instanceTypes,omitempty"`
+	Reservation   *CastaiInventoryV1beta1ReservationDetails      `json:"reservation,omitempty"`
+	Usage         *float64                                       `json:"usage,omitempty"`
+}
+
+// CastaiInventoryV1beta1ReservationDetails defines model for castai.inventory.v1beta1.ReservationDetails.
+type CastaiInventoryV1beta1ReservationDetails struct {
+	Count         *int32     `json:"count,omitempty"`
+	Cpu           *string    `json:"cpu,omitempty"`
+	CreatedAt     *time.Time `json:"createdAt,omitempty"`
+	EndDate       *time.Time `json:"endDate"`
+	InstanceType  *string    `json:"instanceType,omitempty"`
+	Name          *string    `json:"name,omitempty"`
+	Price         *string    `json:"price,omitempty"`
+	Provider      *string    `json:"provider,omitempty"`
+	RamMib        *string    `json:"ramMib,omitempty"`
+	Region        *string    `json:"region,omitempty"`
+	ReservationId *string    `json:"reservationId,omitempty"`
+	StartDate     *time.Time `json:"startDate,omitempty"`
+	UpdatedAt     *time.Time `json:"updatedAt,omitempty"`
+	ZoneId        *string    `json:"zoneId"`
+	ZoneName      *string    `json:"zoneName"`
+}
+
+// StorageDriver is the type of driver used for the local storage volume interface and CPU communication.
+//
+//   - invalid: Invalid is invalid.
+//   - nvme: NVMe driver is designed specifically for SSD drives and could be considered "optimized" for SSD usage.
+//   - sata: SATA driver is designed for HDD drives with spinning technology but also supports SSD drives.
+type CastaiInventoryV1beta1StorageDriver string
+
+// StorageInfo describes the available local volumes for an instance type.
+type CastaiInventoryV1beta1StorageInfo struct {
+	// List of local storage devices available on the instance type.
+	Devices *[]CastaiInventoryV1beta1StorageInfoDevice `json:"devices,omitempty"`
+
+	// StorageDriver is the type of driver used for the local storage volume interface and CPU communication.
+	//
+	//  - invalid: Invalid is invalid.
+	//  - nvme: NVMe driver is designed specifically for SSD drives and could be considered "optimized" for SSD usage.
+	//  - sata: SATA driver is designed for HDD drives with spinning technology but also supports SSD drives.
+	Driver *CastaiInventoryV1beta1StorageDriver `json:"driver,omitempty"`
+
+	// TotalSizeGiB is a sum of all storage devices' size.
+	TotalSizeGib *int32 `json:"totalSizeGib,omitempty"`
+}
+
+// Device is a local storage block device available on the instance type.
+type CastaiInventoryV1beta1StorageInfoDevice struct {
+	// The size in GiB.
+	SizeGib *int32 `json:"sizeGib,omitempty"`
+
+	// Type is the technology used for the local storage device.
+	//
+	//  - invalid: Invalid is invalid.
+	//  - ssd: SSD.
+	//  - hdd: HDD.
+	Type *CastaiInventoryV1beta1StorageInfoDeviceType `json:"type,omitempty"`
+}
+
+// Type is the technology used for the local storage device.
+//
+//   - invalid: Invalid is invalid.
+//   - ssd: SSD.
+//   - hdd: HDD.
+type CastaiInventoryV1beta1StorageInfoDeviceType string
+
+// CastaiMetricsV1beta1ClusterMetrics defines model for castai.metrics.v1beta1.ClusterMetrics.
+type CastaiMetricsV1beta1ClusterMetrics struct {
+	CpuAllocatableCores    *float32 `json:"cpuAllocatableCores,omitempty"`
+	CpuRequestedCores      *float32 `json:"cpuRequestedCores,omitempty"`
+	MemoryAllocatableGib   *float32 `json:"memoryAllocatableGib,omitempty"`
+	MemoryRequestedGib     *float32 `json:"memoryRequestedGib,omitempty"`
+	OnDemandNodesCount     *int32   `json:"onDemandNodesCount,omitempty"`
+	SpotFallbackNodesCount *int32   `json:"spotFallbackNodesCount,omitempty"`
+	SpotNodesCount         *int32   `json:"spotNodesCount,omitempty"`
+}
+
+// Operation object.
+type CastaiOperationsV1beta1Operation struct {
+	// Operation creation timestamp in RFC3339Nano format.
+	CreatedAt *time.Time `json:"createdAt,omitempty"`
+
+	// Indicates whether the operation has finished or not. If 'false', the operation is still in progress. If 'true',
+	// the has finished.
+	Done *bool `json:"done,omitempty"`
+
+	// OperationError object.
+	Error *CastaiOperationsV1beta1OperationError `json:"error,omitempty"`
+
+	// Operation finish timestamp in RFC3339Nano format.
+	FinishedAt *time.Time `json:"finishedAt,omitempty"`
+
+	// ID of the operation.
+	Id *string `json:"id,omitempty"`
+}
+
+// OperationError object.
+type CastaiOperationsV1beta1OperationError struct {
+	// Details is a concise human readable explanation for the error.
+	Details *string `json:"details,omitempty"`
+
+	// Reason is an operation specific failure code. Refer to documentation about possible outcomes.
+	Reason *string `json:"reason,omitempty"`
+}
+
+// CastaiUsersV1beta1AWSMarketplaceUser defines model for castai.users.v1beta1.AWSMarketplaceUser.
+type CastaiUsersV1beta1AWSMarketplaceUser struct {
+	// CustomerAWSAccountId is Resolved using Registration token.
+	CustomerAwsAccountId *string `json:"customerAwsAccountId,omitempty"`
+
+	// CustomerIdentifier is Resolved using Registration token.
+	CustomerIdentifier *string `json:"customerIdentifier,omitempty"`
+
+	// ProductCode is Resolved using Registration token.
+	ProductCode *string `json:"productCode,omitempty"`
+
+	// When a buyer visits your website during the registration process, the buyer
+	// submits a registration token through the browser.
+	RegistrationToken *string `json:"registrationToken,omitempty"`
+}
+
+// Defines the response for adding a user to an organization.
+type CastaiUsersV1beta1AddUserToOrganizationResponse = map[string]interface{}
+
+// CastaiUsersV1beta1ClaimInvitationResponse defines model for castai.users.v1beta1.ClaimInvitationResponse.
+type CastaiUsersV1beta1ClaimInvitationResponse struct {
+	// Membership describes user-organization membership details.
+	Membership     *CastaiUsersV1beta1Membership `json:"membership,omitempty"`
+	OrganizationId *string                       `json:"organizationId,omitempty"`
+}
+
+// CastaiUsersV1beta1CreateInvitationsRequest defines model for castai.users.v1beta1.CreateInvitationsRequest.
+type CastaiUsersV1beta1CreateInvitationsRequest struct {
+	Members *[]CastaiUsersV1beta1NewMembershipByEmail `json:"members,omitempty"`
+}
+
+// CastaiUsersV1beta1CreateInvitationsResponse defines model for castai.users.v1beta1.CreateInvitationsResponse.
+type CastaiUsersV1beta1CreateInvitationsResponse struct {
+	InvitationIds *[]string `json:"invitationIds,omitempty"`
+}
+
+// CastaiUsersV1beta1CurrentUserProfileResponse defines model for castai.users.v1beta1.CurrentUserProfileResponse.
+type CastaiUsersV1beta1CurrentUserProfileResponse struct {
+	Email      *string `json:"email,omitempty"`
+	FirstLogin *bool   `json:"firstLogin,omitempty"`
+	Id         *string `json:"id,omitempty"`
+	Name       *string `json:"name,omitempty"`
+	Username   *string `json:"username,omitempty"`
+}
+
+// Defines the empty response to invitation deletion.
+type CastaiUsersV1beta1DeleteInvitationResponse = map[string]interface{}
+
+// Defines the empty response to organization deletion.
+type CastaiUsersV1beta1DeleteOrganizationResponse = map[string]interface{}
+
+// CastaiUsersV1beta1GCPMarketplaceUser defines model for castai.users.v1beta1.GCPMarketplaceUser.
+type CastaiUsersV1beta1GCPMarketplaceUser struct {
+	// Google procurement account ID.
+	AccountId *string `json:"accountId,omitempty"`
+
+	// Roles is an array of strings representing the user's roles.
+	// Right now, it can be either: account_admin, which indicates that the user is a Billing Account Administrator of the billing account that purchased the product,
+	// or ** project_editor, which indicates that the user is a Project Editor, but not a Billing Administrator, of the project under that billing account.
+	Roles *[]string `json:"roles,omitempty"`
+
+	// User identity is the user's obfuscated GAIA ID, which can be used to initiate Open ID Connect.
+	UserIdentity *string `json:"userIdentity,omitempty"`
+}
+
+// Defines container for the organization's pending invitations.
+type CastaiUsersV1beta1ListInvitationsResponse struct {
+	// Array of organization's pending invitations.
+	Invitations *[]CastaiUsersV1beta1PendingInvitation `json:"invitations,omitempty"`
+	NextCursor  *string                                `json:"nextCursor,omitempty"`
+}
+
+// Defines the container for organization users.
+type CastaiUsersV1beta1ListOrganizationUsersResponse struct {
+	// Array of organization users.
+	Users *[]CastaiUsersV1beta1Membership `json:"users,omitempty"`
+}
+
+// Defines container for the user's organizations.
+type CastaiUsersV1beta1ListOrganizationsResponse struct {
+	// Array of user's organizations.
+	Organizations *[]CastaiUsersV1beta1UserOrganization `json:"organizations,omitempty"`
+}
+
+// Membership describes user-organization membership details.
+type CastaiUsersV1beta1Membership struct {
+	Role string `json:"role"`
+
+	// User represents a single system user.
+	User CastaiUsersV1beta1User `json:"user"`
+}
+
+// NewMembership contains data needed to create new membership in organization.
+type CastaiUsersV1beta1NewMembership struct {
+	Role   string `json:"role"`
+	UserId string `json:"userId"`
+}
+
+// CastaiUsersV1beta1NewMembershipByEmail defines model for castai.users.v1beta1.NewMembershipByEmail.
+type CastaiUsersV1beta1NewMembershipByEmail struct {
+	Role      string `json:"role"`
+	UserEmail string `json:"userEmail"`
+}
+
+// Organization which is the top level tenant in our system.
+type CastaiUsersV1beta1Organization struct {
+	// billing type of the organization.
+	BillingType *string `json:"billingType,omitempty"`
+
+	// organization creation date.
+	CreatedAt *time.Time `json:"createdAt,omitempty"`
+
+	// id of the organization.
+	Id *string `json:"id,omitempty"`
+
+	// name of the organization.
+	Name string `json:"name"`
+}
+
+// CastaiUsersV1beta1PendingInvitation defines model for castai.users.v1beta1.PendingInvitation.
+type CastaiUsersV1beta1PendingInvitation struct {
+	// id of the invitation.
+	Id string `json:"id"`
+
+	// email of the invited person.
+	InviteEmail string `json:"inviteEmail"`
+
+	// role of the invited person.
+	Role string `json:"role"`
+
+	// invitation expiration date.
+	ValidUntil time.Time `json:"validUntil"`
+}
+
+// Defines the response for removing a user from an organization.
+type CastaiUsersV1beta1RemoveUserFromOrganizationResponse = map[string]interface{}
+
+// CastaiUsersV1beta1Request defines model for castai.users.v1beta1.Request.
+type CastaiUsersV1beta1Request = map[string]interface{}
+
+// CastaiUsersV1beta1UpdateOrganizationUserRole defines model for castai.users.v1beta1.UpdateOrganizationUserRole.
+type CastaiUsersV1beta1UpdateOrganizationUserRole struct {
+	Role *string `json:"role,omitempty"`
+}
+
+// User represents a single system user.
+type CastaiUsersV1beta1User struct {
+	// (optional) whether SSO auth provider label was provided as a separate JWT claim; used when login handler calls users service.
+	AuthProvider       *string                               `json:"authProvider"`
+	AwsMarketplaceUser *CastaiUsersV1beta1AWSMarketplaceUser `json:"awsMarketplaceUser,omitempty"`
+
+	// (required) user email.
+	Email              string                                `json:"email"`
+	GcpMarketplaceUser *CastaiUsersV1beta1GCPMarketplaceUser `json:"gcpMarketplaceUser,omitempty"`
+	Id                 *string                               `json:"id,omitempty"`
+
+	// (required) readable user name, e.g. "John Doe".
+	Name string `json:"name"`
+
+	// (required) username, corresponds to auth0 user id.
+	Username string `json:"username"`
+}
+
+// UserOrganization describes organization user belongs to.
+type CastaiUsersV1beta1UserOrganization struct {
+	// organization creation date.
+	CreatedAt *time.Time `json:"createdAt,omitempty"`
+
+	// id of the organization.
+	Id *string `json:"id,omitempty"`
+
+	// name of the organization.
+	Name string `json:"name"`
+	Role string `json:"role"`
+}
+
+// Types of cloud service providers CAST AI supports.
+//
+//   - invalid: Invalid.
+//   - aws: Amazon web services.
+//   - gcp: Google cloud provider.
+//   - azure: Microsoft Azure.
+type CastaiV1Cloud string
+
+// AKSClusterParams defines AKS-specific arguments.
+type ExternalclusterV1AKSClusterParams struct {
+	// Deprecated. This field is no longer updatable and node configuration equivalent should be used.
+	MaxPodsPerNode *int32 `json:"maxPodsPerNode,omitempty"`
+
+	// Network plugin in use by the cluster. Can be `kubenet` or `azure`.
+	NetworkPlugin *string `json:"networkPlugin,omitempty"`
+
+	// Node resource group of the cluster.
+	NodeResourceGroup *string `json:"nodeResourceGroup,omitempty"`
+
+	// Region of the cluster.
+	Region *string `json:"region,omitempty"`
+
+	// Azure subscription ID where cluster runs.
+	SubscriptionId *string `json:"subscriptionId,omitempty"`
+}
+
+// AddNodeResponse is the result of AddNodeRequest.
+type ExternalclusterV1AddNodeResponse struct {
+	// The ID of the node.
+	NodeId string `json:"nodeId"`
+
+	// Add node operation ID.
+	OperationId string `json:"operationId"`
+}
+
+// CloudEvent represents a remote event that happened in the cloud, e.g. "node added".
+type ExternalclusterV1CloudEvent struct {
+	// Event type.
+	EventType *string `json:"eventType,omitempty"`
+
+	// Node provider ID, eg.: aws instance-id.
+	Node *string `json:"node,omitempty"`
+
+	// Cast node ID.
+	NodeId *string `json:"nodeId"`
+
+	// Node state.
+	NodeState *string `json:"nodeState,omitempty"`
+}
+
+// Cluster represents external kubernetes cluster.
+type ExternalclusterV1Cluster struct {
+	// The date agent snapshot was last received.
+	AgentSnapshotReceivedAt *time.Time `json:"agentSnapshotReceivedAt,omitempty"`
+
+	// Agent status.
+	AgentStatus *string `json:"agentStatus,omitempty"`
+
+	// AKSClusterParams defines AKS-specific arguments.
+	Aks *ExternalclusterV1AKSClusterParams `json:"aks,omitempty"`
+
+	// All available zones in cluster's region.
+	AllRegionZones *[]ExternalclusterV1Zone `json:"allRegionZones,omitempty"`
+
+	// User friendly unique cluster identifier.
+	ClusterNameId *string `json:"clusterNameId,omitempty"`
+
+	// The date when cluster was registered.
+	CreatedAt *time.Time `json:"createdAt,omitempty"`
+
+	// The cluster's credentials ID.
+	CredentialsId *string `json:"credentialsId,omitempty"`
+
+	// EKSClusterParams defines EKS-specific arguments.
+	Eks *ExternalclusterV1EKSClusterParams `json:"eks,omitempty"`
+
+	// Timestamp when the first operation was performed for a given cluster, which marks when cluster optimisation started by CAST AI.
+	FirstOperationAt *time.Time `json:"firstOperationAt,omitempty"`
+
+	// GKEClusterParams defines GKE-specific arguments.
+	Gke *ExternalclusterV1GKEClusterParams `json:"gke,omitempty"`
+
+	// The cluster's ID.
+	Id *string `json:"id,omitempty"`
+
+	// KOPSClusterParams defines KOPS-specific arguments.
+	Kops              *ExternalclusterV1KOPSClusterParams `json:"kops,omitempty"`
+	KubernetesVersion *string                             `json:"kubernetesVersion"`
+
+	// Method used to onboard the cluster, eg.: console, terraform.
+	ManagedBy *string                             `json:"managedBy,omitempty"`
+	Metrics   *CastaiMetricsV1beta1ClusterMetrics `json:"metrics,omitempty"`
+
+	// The name of the external cluster.
+	Name *string `json:"name,omitempty"`
+
+	// OpenShiftClusterParams defines OpenShift-specific arguments.
+	Openshift *ExternalclusterV1OpenshiftClusterParams `json:"openshift,omitempty"`
+
+	// The cluster's organization ID.
+	OrganizationId *string `json:"organizationId,omitempty"`
+
+	// Cluster location where cloud provider organizes cloud resources, eg.: GCP project ID, AWS account ID.
+	ProviderNamespaceId *string `json:"providerNamespaceId,omitempty"`
+
+	// Cluster cloud provider type.
+	ProviderType *string `json:"providerType,omitempty"`
+
+	// Shows last reconcile error if any.
+	ReconcileError *string                                `json:"reconcileError"`
+	ReconcileInfo  *ExternalclusterV1ClusterReconcileInfo `json:"reconcileInfo,omitempty"`
+
+	// Timestamp when the last reconcile was performed.
+	ReconciledAt *time.Time `json:"reconciledAt"`
+
+	// Region represents cluster region.
+	Region *ExternalclusterV1Region `json:"region,omitempty"`
+
+	// Deprecated. Node configuration equivalent should be used.
+	SshPublicKey *string `json:"sshPublicKey"`
+
+	// Current status of the cluster.
+	Status *string `json:"status,omitempty"`
+
+	// Cluster subnets.
+	Subnets *[]ExternalclusterV1Subnet `json:"subnets,omitempty"`
+
+	// Cluster zones.
+	Zones *[]ExternalclusterV1Zone `json:"zones,omitempty"`
+}
+
+// ExternalclusterV1ClusterReconcileInfo defines model for externalcluster.v1.Cluster.ReconcileInfo.
+type ExternalclusterV1ClusterReconcileInfo struct {
+	// Shows last reconcile error if any.
+	Error *string `json:"error"`
+
+	// Number of times the reconcile was retried.
+	ErrorCount *int32  `json:"errorCount,omitempty"`
+	Mode       *string `json:"mode,omitempty"`
+
+	// Timestamp when the last reconcile was performed.
+	ReconciledAt *time.Time `json:"reconciledAt"`
+
+	// Timestamp when the reconcile was retried.
+	RetryAt *time.Time `json:"retryAt"`
+
+	// Timestamp when the reconcile was started.
+	StartedAt *time.Time `json:"startedAt"`
+
+	// Reconcile status.
+	Status *string `json:"status"`
+}
+
+// ExternalclusterV1ClusterUpdate defines model for externalcluster.v1.ClusterUpdate.
+type ExternalclusterV1ClusterUpdate struct {
+	// JSON encoded cluster credentials string.
+	Credentials *string `json:"credentials,omitempty"`
+
+	// UpdateEKSClusterParams defines updatable EKS cluster configuration.
+	Eks *ExternalclusterV1UpdateEKSClusterParams `json:"eks,omitempty"`
+}
+
+// ExternalclusterV1CreateAssumeRolePrincipalResponse defines model for externalcluster.v1.CreateAssumeRolePrincipalResponse.
+type ExternalclusterV1CreateAssumeRolePrincipalResponse struct {
+	Arn *string `json:"arn,omitempty"`
+}
+
+// ExternalclusterV1CreateClusterTokenResponse defines model for externalcluster.v1.CreateClusterTokenResponse.
+type ExternalclusterV1CreateClusterTokenResponse struct {
+	Token *string `json:"token,omitempty"`
+}
+
+// ExternalclusterV1DeleteAssumeRolePrincipalResponse defines model for externalcluster.v1.DeleteAssumeRolePrincipalResponse.
+type ExternalclusterV1DeleteAssumeRolePrincipalResponse = map[string]interface{}
+
+// DeleteNodeResponse is the result of DeleteNodeRequest.
+type ExternalclusterV1DeleteNodeResponse struct {
+	// Node delete operation ID.
+	OperationId *string `json:"operationId,omitempty"`
+}
+
+// ExternalclusterV1DisconnectConfig defines model for externalcluster.v1.DisconnectConfig.
+type ExternalclusterV1DisconnectConfig struct {
+	// Whether CAST provisioned nodes should be deleted.
+	DeleteProvisionedNodes *bool `json:"deleteProvisionedNodes,omitempty"`
+
+	// Whether CAST Kubernetes resources should be kept.
+	KeepKubernetesResources *bool `json:"keepKubernetesResources,omitempty"`
+}
+
+// ExternalclusterV1DrainConfig defines model for externalcluster.v1.DrainConfig.
+type ExternalclusterV1DrainConfig struct {
+	// If set to true, pods will be forcefully deleted after drain timeout.
+	Force *bool `json:"force,omitempty"`
+
+	// Node drain timeout in seconds. Defaults to 600s if not set.
+	TimeoutSeconds *int32 `json:"timeoutSeconds,omitempty"`
+}
+
+// DrainNodeResponse is the result of DrainNodeRequest.
+type ExternalclusterV1DrainNodeResponse struct {
+	// Drain node operation ID.
+	OperationId string `json:"operationId"`
+}
+
+// EKSClusterParams defines EKS-specific arguments.
+type ExternalclusterV1EKSClusterParams struct {
+	// AWS Account ID where cluster runs.
+	AccountId     *string `json:"accountId,omitempty"`
+	AssumeRoleArn *string `json:"assumeRoleArn,omitempty"`
+
+	// Name of the cluster.
+	ClusterName  *string `json:"clusterName,omitempty"`
+	DnsClusterIp *string `json:"dnsClusterIp,omitempty"`
+
+	// Deprecated. Output only. Cluster's instance profile ARN used for CAST provisioned nodes.
+	InstanceProfileArn *string `json:"instanceProfileArn,omitempty"`
+
+	// Region of the cluster.
+	Region *string `json:"region,omitempty"`
+
+	// Deprecated. Output only. Cluster's security groups configuration.
+	SecurityGroups *[]string `json:"securityGroups,omitempty"`
+
+	// Deprecated. Output only. Cluster's subnets configuration.
+	Subnets *[]string `json:"subnets,omitempty"`
+
+	// Deprecated. Output only. CAST provisioned nodes tags configuration.
+	Tags *ExternalclusterV1EKSClusterParams_Tags `json:"tags,omitempty"`
+}
+
+// Deprecated. Output only. CAST provisioned nodes tags configuration.
+type ExternalclusterV1EKSClusterParams_Tags struct {
+	AdditionalProperties map[string]string `json:"-"`
+}
+
+// GKEClusterParams defines GKE-specific arguments.
+type ExternalclusterV1GKEClusterParams struct {
+	// Name of the cluster.
+	ClusterName *string `json:"clusterName,omitempty"`
+
+	// Location of the cluster.
+	Location *string `json:"location,omitempty"`
+
+	// Max pods per node. Default is 110.
+	MaxPodsPerNode *int32 `json:"maxPodsPerNode,omitempty"`
+
+	// GCP project ID where cluster runs.
+	ProjectId *string `json:"projectId,omitempty"`
+
+	// Region of the cluster.
+	Region *string `json:"region,omitempty"`
+}
+
+// GPUConfig describes instance GPU configuration.
+//
+// Required while provisioning GCP N1 instance types with GPU.
+// Eg.: n1-standard-2 with 8 x NVIDIA Tesla K80
+type ExternalclusterV1GPUConfig struct {
+	// Number of GPUs.
+	Count *int32 `json:"count,omitempty"`
+
+	// GPU type.
+	Type *string `json:"type,omitempty"`
+}
+
+// ExternalclusterV1GPUDevice defines model for externalcluster.v1.GPUDevice.
+type ExternalclusterV1GPUDevice struct {
+	Count        *int32  `json:"count,omitempty"`
+	Manufacturer *string `json:"manufacturer,omitempty"`
+	MemoryMib    *int32  `json:"memoryMib,omitempty"`
+}
+
+// ExternalclusterV1GPUInfo defines model for externalcluster.v1.GPUInfo.
+type ExternalclusterV1GPUInfo struct {
+	GpuDevices *[]ExternalclusterV1GPUDevice `json:"gpuDevices,omitempty"`
+}
+
+// ExternalclusterV1GetAssumeRolePrincipalResponse defines model for externalcluster.v1.GetAssumeRolePrincipalResponse.
+type ExternalclusterV1GetAssumeRolePrincipalResponse struct {
+	Arn *string `json:"arn,omitempty"`
+}
+
+// ExternalclusterV1GetAssumeRoleUserResponse defines model for externalcluster.v1.GetAssumeRoleUserResponse.
+type ExternalclusterV1GetAssumeRoleUserResponse struct {
+	Arn *string `json:"arn,omitempty"`
+}
+
+// GetCleanupScriptResponse is the result of GetCleanupScriptRequest.
+type ExternalclusterV1GetCleanupScriptResponse struct {
+	Script *string `json:"script,omitempty"`
+}
+
+// GetCredentialsScriptResponse is the result of GetCredentialsScriptRequest.
+type ExternalclusterV1GetCredentialsScriptResponse struct {
+	Script *string `json:"script,omitempty"`
+}
+
+// HandleCloudEventResponse is the result of HandleCloudEventRequest.
+type ExternalclusterV1HandleCloudEventResponse = map[string]interface{}
+
+// KOPSClusterParams defines KOPS-specific arguments.
+type ExternalclusterV1KOPSClusterParams struct {
+	// Cloud provider of the cluster.
+	Cloud *string `json:"cloud,omitempty"`
+
+	// Name of the cluster.
+	ClusterName *string `json:"clusterName,omitempty"`
+
+	// Region of the cluster.
+	Region *string `json:"region,omitempty"`
+
+	// KOPS state store url.
+	StateStore *string `json:"stateStore,omitempty"`
+}
+
+// ListClustersResponse is the result of ListClustersRequest.
+type ExternalclusterV1ListClustersResponse struct {
+	Items *[]ExternalclusterV1Cluster `json:"items,omitempty"`
+}
+
+// ExternalclusterV1ListNodesResponse defines model for externalcluster.v1.ListNodesResponse.
+type ExternalclusterV1ListNodesResponse struct {
+	Items      *[]ExternalclusterV1Node `json:"items,omitempty"`
+	NextCursor *string                  `json:"nextCursor,omitempty"`
+}
+
+// Node represents a single VM that run as Kubernetes master or worker.
+type ExternalclusterV1Node struct {
+	AddedBy     *string                            `json:"addedBy,omitempty"`
+	Annotations *ExternalclusterV1Node_Annotations `json:"annotations,omitempty"`
+	Cloud       *string                            `json:"cloud,omitempty"`
+
+	// created_at represents timestamp of when node was created in cloud infrastructure.
+	CreatedAt *time.Time                `json:"createdAt,omitempty"`
+	GpuInfo   *ExternalclusterV1GPUInfo `json:"gpuInfo,omitempty"`
+	Id        *string                   `json:"id,omitempty"`
+
+	// Deprecated. Use node_info architecture field.
+	InstanceArchitecture *string `json:"instanceArchitecture"`
+	InstanceId           *string `json:"instanceId"`
+
+	// Output only. Cloud provider instance tags/labels.
+	InstanceLabels *ExternalclusterV1Node_InstanceLabels `json:"instanceLabels,omitempty"`
+
+	// Output only. Cloud provider instance name.
+	InstanceName  *string `json:"instanceName"`
+	InstancePrice *string `json:"instancePrice"`
+	InstanceType  *string `json:"instanceType,omitempty"`
+
+	// joined_at represents timestamp of when node has joined kubernetes cluster.
+	JoinedAt *time.Time                    `json:"joinedAt,omitempty"`
+	Labels   *ExternalclusterV1Node_Labels `json:"labels,omitempty"`
+	Name     *string                       `json:"name,omitempty"`
+
+	// NodeNetwork represents node network.
+	Network             *ExternalclusterV1NodeNetwork `json:"network,omitempty"`
+	NodeConfigurationId *string                       `json:"nodeConfigurationId"`
+	NodeInfo            *ExternalclusterV1NodeInfo    `json:"nodeInfo,omitempty"`
+	Resources           *ExternalclusterV1Resources   `json:"resources,omitempty"`
+
+	// NodeType defines the role of the VM when joining the Kubernetes cluster. Default value is not allowed.
+	Role *ExternalclusterV1NodeType `json:"role,omitempty"`
+
+	// NodeSpotConfig defines if node should be created as spot instance, and params for creation.
+	SpotConfig *ExternalclusterV1NodeSpotConfig `json:"spotConfig,omitempty"`
+
+	// NodeState contains feedback information about progress on the node provisioning.
+	State         *ExternalclusterV1NodeState `json:"state,omitempty"`
+	Taints        *[]ExternalclusterV1Taint   `json:"taints,omitempty"`
+	Unschedulable *bool                       `json:"unschedulable,omitempty"`
+	Zone          *string                     `json:"zone,omitempty"`
+}
+
+// ExternalclusterV1Node_Annotations defines model for ExternalclusterV1Node.Annotations.
+type ExternalclusterV1Node_Annotations struct {
+	AdditionalProperties map[string]string `json:"-"`
+}
+
+// Output only. Cloud provider instance tags/labels.
+type ExternalclusterV1Node_InstanceLabels struct {
+	AdditionalProperties map[string]string `json:"-"`
+}
+
+// ExternalclusterV1Node_Labels defines model for ExternalclusterV1Node.Labels.
+type ExternalclusterV1Node_Labels struct {
+	AdditionalProperties map[string]string `json:"-"`
+}
+
+// ExternalclusterV1NodeConfig defines model for externalcluster.v1.NodeConfig.
+type ExternalclusterV1NodeConfig struct {
+	// ID reference of Node configuration (template) to be used for node creation. Supersedes Configuration Name.
+	ConfigurationId *string `json:"configurationId"`
+
+	// Name reference of Node configuration (template)to be used for node creation.
+	// Superseded if Configuration ID reference is provided.
+	// Request will fail if several configurations with same name exists for a given cluster.
+	ConfigurationName *string `json:"configurationName"`
+
+	// GPUConfig describes instance GPU configuration.
+	//
+	// Required while provisioning GCP N1 instance types with GPU.
+	// Eg.: n1-standard-2 with 8 x NVIDIA Tesla K80
+	GpuConfig *ExternalclusterV1GPUConfig `json:"gpuConfig,omitempty"`
+
+	// Instance type of the node.
+	InstanceType string `json:"instanceType"`
+
+	// Node Kubernetes labels.
+	KubernetesLabels *ExternalclusterV1NodeConfig_KubernetesLabels `json:"kubernetesLabels,omitempty"`
+
+	// Node Kubernetes taints.
+	KubernetesTaints *[]ExternalclusterV1Taint `json:"kubernetesTaints,omitempty"`
+
+	// NodeSpotConfig defines if node should be created as spot instance, and params for creation.
+	SpotConfig *ExternalclusterV1NodeSpotConfig `json:"spotConfig,omitempty"`
+
+	// Node subnet ID.
+	SubnetId *string `json:"subnetId"`
+
+	// NodeVolume defines node's local root volume configuration.
+	Volume *ExternalclusterV1NodeVolume `json:"volume,omitempty"`
+
+	// Zone of the node.
+	Zone *string `json:"zone"`
+}
+
+// Node Kubernetes labels.
+type ExternalclusterV1NodeConfig_KubernetesLabels struct {
+	AdditionalProperties map[string]string `json:"-"`
+}
+
+// ExternalclusterV1NodeInfo defines model for externalcluster.v1.NodeInfo.
+type ExternalclusterV1NodeInfo struct {
+	Architecture            *string `json:"architecture,omitempty"`
+	ContainerRuntimeVersion *string `json:"containerRuntimeVersion,omitempty"`
+	KernelVersion           *string `json:"kernelVersion,omitempty"`
+	KubeProxyVersion        *string `json:"kubeProxyVersion,omitempty"`
+	KubeletVersion          *string `json:"kubeletVersion,omitempty"`
+	OperatingSystem         *string `json:"operatingSystem,omitempty"`
+	OsImage                 *string `json:"osImage,omitempty"`
+}
+
+// NodeNetwork represents node network.
+type ExternalclusterV1NodeNetwork struct {
+	PrivateIp *string `json:"privateIp,omitempty"`
+	PublicIp  *string `json:"publicIp,omitempty"`
+}
+
+// NodeSpotConfig defines if node should be created as spot instance, and params for creation.
+type ExternalclusterV1NodeSpotConfig struct {
+	// Whether node should be created as spot instance.
+	IsSpot *bool `json:"isSpot,omitempty"`
+
+	// Spot instance price. Applicable only for AWS nodes.
+	Price *string `json:"price,omitempty"`
+}
+
+// NodeState contains feedback information about progress on the node provisioning.
+type ExternalclusterV1NodeState struct {
+	Phase *string `json:"phase,omitempty"`
+}
+
+// NodeType defines the role of the VM when joining the Kubernetes cluster. Default value is not allowed.
+type ExternalclusterV1NodeType string
+
+// NodeVolume defines node's local root volume configuration.
+type ExternalclusterV1NodeVolume struct {
+	// RaidConfig allow You have two or more devices, of approximately the same size, and you want to combine their storage capacity
+	// and also combine their performance by accessing them in parallel.
+	RaidConfig *ExternalclusterV1RaidConfig `json:"raidConfig,omitempty"`
+
+	// Volume size in GiB.
+	Size *int32 `json:"size,omitempty"`
+}
+
+// OpenShiftClusterParams defines OpenShift-specific arguments.
+type ExternalclusterV1OpenshiftClusterParams struct {
+	// Cloud provider of the cluster.
+	Cloud *string `json:"cloud,omitempty"`
+
+	// Name of the cluster.
+	ClusterName *string `json:"clusterName,omitempty"`
+	InternalId  *string `json:"internalId,omitempty"`
+
+	// Region of the cluster.
+	Region *string `json:"region,omitempty"`
+}
+
+// RaidConfig allow You have two or more devices, of approximately the same size, and you want to combine their storage capacity
+// and also combine their performance by accessing them in parallel.
+type ExternalclusterV1RaidConfig struct {
+	// Specify the RAID0 chunk size in kilobytes, this parameter affects the read/write in the disk array and must be tailored
+	// for the type of data written by the workloads in the node. If not provided it will default to 64KB.
+	ChunkSize *int32 `json:"chunkSize"`
+}
+
+// ReconcileClusterResponse is the result of ReconcileClusterRequest.
+type ExternalclusterV1ReconcileClusterResponse = map[string]interface{}
+
+// Region represents cluster region.
+type ExternalclusterV1Region struct {
+	// Display name of the region.
+	DisplayName *string `json:"displayName,omitempty"`
+
+	// Name of the region.
+	Name *string `json:"name,omitempty"`
+}
+
+// RegisterClusterRequest registers cluster.
+type ExternalclusterV1RegisterClusterRequest struct {
+	// AKSClusterParams defines AKS-specific arguments.
+	Aks *ExternalclusterV1AKSClusterParams `json:"aks,omitempty"`
+
+	// EKSClusterParams defines EKS-specific arguments.
+	Eks *ExternalclusterV1EKSClusterParams `json:"eks,omitempty"`
+
+	// GKEClusterParams defines GKE-specific arguments.
+	Gke *ExternalclusterV1GKEClusterParams `json:"gke,omitempty"`
+
+	// The ID of the cluster.
+	Id *string `json:"id,omitempty"`
+
+	// KOPSClusterParams defines KOPS-specific arguments.
+	Kops *ExternalclusterV1KOPSClusterParams `json:"kops,omitempty"`
+
+	// The name of the cluster.
+	Name string `json:"name"`
+
+	// OpenShiftClusterParams defines OpenShift-specific arguments.
+	Openshift *ExternalclusterV1OpenshiftClusterParams `json:"openshift,omitempty"`
+
+	// Organization of the cluster.
+	OrganizationId *string `json:"organizationId,omitempty"`
+}
+
+// ExternalclusterV1Resources defines model for externalcluster.v1.Resources.
+type ExternalclusterV1Resources struct {
+	CpuAllocatableMilli *int32 `json:"cpuAllocatableMilli,omitempty"`
+	CpuCapacityMilli    *int32 `json:"cpuCapacityMilli,omitempty"`
+	CpuRequestsMilli    *int32 `json:"cpuRequestsMilli,omitempty"`
+	MemAllocatableMib   *int32 `json:"memAllocatableMib,omitempty"`
+	MemCapacityMib      *int32 `json:"memCapacityMib,omitempty"`
+	MemRequestsMib      *int32 `json:"memRequestsMib,omitempty"`
+}
+
+// Subnet represents cluster subnet.
+type ExternalclusterV1Subnet struct {
+	// Cidr block of the subnet.
+	Cidr *string `json:"cidr,omitempty"`
+
+	// The ID of the subnet.
+	Id *string `json:"id,omitempty"`
+
+	// Deprecated. Subnet name is not filled and should not be used.
+	Name *string `json:"name,omitempty"`
+
+	// Public defines if subnet is publicly routable.
+	// Optional. Populated for EKS provider only.
+	Public *bool `json:"public"`
+
+	// Subnet's zone name.
+	ZoneName *string `json:"zoneName,omitempty"`
+}
+
+// Taint defines node taint in kubernetes cluster.
+type ExternalclusterV1Taint struct {
+	Effect string `json:"effect"`
+	Key    string `json:"key"`
+	Value  string `json:"value"`
+}
+
+// UpdateEKSClusterParams defines updatable EKS cluster configuration.
+type ExternalclusterV1UpdateEKSClusterParams struct {
+	AssumeRoleArn *string `json:"assumeRoleArn,omitempty"`
+}
+
+// Cluster zone.
+type ExternalclusterV1Zone struct {
+	// ID of the zone.
+	Id *string `json:"id,omitempty"`
+
+	// Zone name.
+	Name *string `json:"name,omitempty"`
+}
+
+// NodeconfigV1AKSConfig defines model for nodeconfig.v1.AKSConfig.
+type NodeconfigV1AKSConfig struct {
+	// Maximum number of pods that can be run on a node, which affects how many IP addresses you will need for each node.
+	// Defaults to 30. Values between 10 and 250 are allowed.
+	// Setting values above 110 will require specific CNI configuration. Please refer to Microsoft documentation for additional guidance.
+	MaxPodsPerNode *int32 `json:"maxPodsPerNode,omitempty"`
+}
+
+// List of supported container runtimes kubelet should use.
+type NodeconfigV1ContainerRuntime string
+
+// NodeconfigV1DeleteConfigurationResponse defines model for nodeconfig.v1.DeleteConfigurationResponse.
+type NodeconfigV1DeleteConfigurationResponse = map[string]interface{}
+
+// NodeconfigV1EKSConfig defines model for nodeconfig.v1.EKSConfig.
+type NodeconfigV1EKSConfig struct {
+	// IP address to use for DNS queries within the cluster. Defaults to 10.100.0.10 or 172.20.0.10 based on the IP address of the primary interface.
+	DnsClusterIp *string `json:"dnsClusterIp"`
+	ImdsHopLimit *int32  `json:"imdsHopLimit"`
+	ImdsV1       *bool   `json:"imdsV1"`
+
+	// Cluster's instance profile ARN used for CAST provisioned nodes.
+	InstanceProfileArn string `json:"instanceProfileArn"`
+
+	// AWS key pair ID to be used for provisioned nodes. Has priority over sshPublicKey.
+	KeyPairId *string `json:"keyPairId"`
+
+	// Cluster's security groups configuration.
+	SecurityGroups *[]string `json:"securityGroups,omitempty"`
+
+	// EBS volume IOPS value to be used for provisioned nodes.
+	VolumeIops      *int32  `json:"volumeIops"`
+	VolumeKmsKeyArn *string `json:"volumeKmsKeyArn"`
+
+	// EBS volume throughput in MiB/s to be used for provisioned nodes.
+	VolumeThroughput *int32 `json:"volumeThroughput"`
+
+	// EBS volume type to be used for provisioned nodes. Defaults to gp3.
+	VolumeType *string `json:"volumeType"`
+}
+
+// NodeconfigV1GKEConfig defines model for nodeconfig.v1.GKEConfig.
+type NodeconfigV1GKEConfig struct {
+	// Type of boot disk attached to the node. For available types please read official GCP docs(https://cloud.google.com/compute/docs/disks#pdspecs).
+	DiskType *string `json:"diskType"`
+
+	// Maximum number of pods that can be run on a node, which affects how many IP addresses you will need for each node. Defaults to 110.
+	// For Standard GKE clusters, you can run a maximum of 256 Pods on a node with a /23 range, not 512 as you might expect. This provides a buffer so that Pods don't become unschedulable due to a transient lack of IP addresses in the Pod IP range for a given node.
+	// For all ranges, at most half as many Pods can be scheduled as IP addresses in the range.
+	MaxPodsPerNode *int32 `json:"maxPodsPerNode,omitempty"`
+
+	// Network tags to be added on a VM. Each tag must be 1-63 characters long, start with a lowercase letter and end with either a number or a lowercase letter.
+	NetworkTags *[]string `json:"networkTags,omitempty"`
+}
+
+// NodeconfigV1GetSuggestedConfigurationResponse defines model for nodeconfig.v1.GetSuggestedConfigurationResponse.
+type NodeconfigV1GetSuggestedConfigurationResponse struct {
+	SecurityGroups *[]NodeconfigV1SecurityGroup `json:"securityGroups,omitempty"`
+	Subnets        *[]NodeconfigV1SubnetDetails `json:"subnets,omitempty"`
+}
+
+// NodeconfigV1KOPSConfig defines model for nodeconfig.v1.KOPSConfig.
+type NodeconfigV1KOPSConfig struct {
+	// AWS key pair ID to be used for provisioned nodes. Has priority over sshPublicKey.
+	KeyPairId *string `json:"keyPairId"`
+}
+
+// NodeconfigV1ListConfigurationsResponse defines model for nodeconfig.v1.ListConfigurationsResponse.
+type NodeconfigV1ListConfigurationsResponse struct {
+	Items *[]NodeconfigV1NodeConfiguration `json:"items,omitempty"`
+}
+
+// NodeconfigV1NewNodeConfiguration defines model for nodeconfig.v1.NewNodeConfiguration.
+type NodeconfigV1NewNodeConfiguration struct {
+	Aks *NodeconfigV1AKSConfig `json:"aks,omitempty"`
+
+	// List of supported container runtimes kubelet should use.
+	ContainerRuntime *NodeconfigV1ContainerRuntime `json:"containerRuntime,omitempty"`
+
+	// Disk to CPU ratio. Sets the number of GiBs to be added for every CPU on the node. The root volume will have a minimum of 100GiB and will be further increased based on value.
+	DiskCpuRatio *int32 `json:"diskCpuRatio,omitempty"`
+
+	// Optional docker daemon configuration properties. Provide only properties that you want to override. Available values https://docs.docker.com/engine/reference/commandline/dockerd/#daemon-configuration-file
+	DockerConfig *map[string]interface{} `json:"dockerConfig,omitempty"`
+	Eks          *NodeconfigV1EKSConfig  `json:"eks,omitempty"`
+	Gke          *NodeconfigV1GKEConfig  `json:"gke,omitempty"`
+
+	// Image to be used while provisioning the node. If nothing is provided will be resolved to latest available image based on Kubernetes version if possible.
+	Image *string `json:"image"`
+
+	// Init script to be run on your instance at launch. Should not contain any sensitive data. Value should be base64 encoded.
+	InitScript *string                 `json:"initScript"`
+	Kops       *NodeconfigV1KOPSConfig `json:"kops,omitempty"`
+
+	// Optional kubelet configuration properties. Applicable for EKS only.
+	KubeletConfig *map[string]interface{} `json:"kubeletConfig,omitempty"`
+
+	// Minimal disk size in GiB. Defaults to 100.
+	MinDiskSize *int32 `json:"minDiskSize"`
+
+	// The name of the node configuration.
+	Name string `json:"name"`
+
+	// Optional SSH public key to be used for provisioned nodes. Value should be base64 encoded.
+	SshPublicKey *string `json:"sshPublicKey"`
+
+	// Subnet ids to be used for provisioned nodes.
+	Subnets *[]string `json:"subnets,omitempty"`
+
+	// Tags to be added on cloud instances for provisioned nodes.
+	Tags *NodeconfigV1NewNodeConfiguration_Tags `json:"tags,omitempty"`
+}
+
+// Tags to be added on cloud instances for provisioned nodes.
+type NodeconfigV1NewNodeConfiguration_Tags struct {
+	AdditionalProperties map[string]string `json:"-"`
+}
+
+// NodeconfigV1NodeConfiguration defines model for nodeconfig.v1.NodeConfiguration.
+type NodeconfigV1NodeConfiguration struct {
+	Aks *NodeconfigV1AKSConfig `json:"aks,omitempty"`
+
+	// List of supported container runtimes kubelet should use.
+	ContainerRuntime *NodeconfigV1ContainerRuntime `json:"containerRuntime,omitempty"`
+
+	// The date when node configuration was created.
+	CreatedAt *time.Time `json:"createdAt,omitempty"`
+
+	// Whether node configuration is the default one.
+	Default *bool `json:"default,omitempty"`
+
+	// Disk to CPU ratio.
+	DiskCpuRatio *int32 `json:"diskCpuRatio,omitempty"`
+
+	// Optional docker daemon configuration properties. Applicable for EKS only.
+	DockerConfig *map[string]interface{} `json:"dockerConfig"`
+	Eks          *NodeconfigV1EKSConfig  `json:"eks,omitempty"`
+	Gke          *NodeconfigV1GKEConfig  `json:"gke,omitempty"`
+
+	// The node configuration ID.
+	Id *string `json:"id,omitempty"`
+
+	// Image to be used while provisioning the node. If nothing is provided will be resolved to latest available image based on Kubernetes version if possible.
+	Image *string `json:"image"`
+
+	// Base64 encoded init script to be run on your instance at launch.
+	InitScript *string                 `json:"initScript"`
+	Kops       *NodeconfigV1KOPSConfig `json:"kops,omitempty"`
+
+	// Optional kubelet configuration properties. Applicable for EKS only.
+	KubeletConfig *map[string]interface{} `json:"kubeletConfig"`
+
+	// Minimal disk size in GiB.
+	MinDiskSize *int32 `json:"minDiskSize,omitempty"`
+
+	// The name of the node configuration.
+	Name *string `json:"name,omitempty"`
+
+	// Base64 encoded ssh public key to be used for provisioned nodes.
+	SshPublicKey *string `json:"sshPublicKey"`
+
+	// Subnet ids to be used for provisioned nodes.
+	Subnets *[]string `json:"subnets,omitempty"`
+
+	// Tags to be added on cloud instances for provisioned nodes.
+	Tags *NodeconfigV1NodeConfiguration_Tags `json:"tags,omitempty"`
+
+	// The date when node configuration was updated.
+	UpdatedAt *time.Time `json:"updatedAt,omitempty"`
+
+	// The version of the node configuration.
+	Version *int32 `json:"version,omitempty"`
+}
+
+// Tags to be added on cloud instances for provisioned nodes.
+type NodeconfigV1NodeConfiguration_Tags struct {
+	AdditionalProperties map[string]string `json:"-"`
+}
+
+// NodeconfigV1NodeConfigurationUpdate defines model for nodeconfig.v1.NodeConfigurationUpdate.
+type NodeconfigV1NodeConfigurationUpdate struct {
+	Aks *NodeconfigV1AKSConfig `json:"aks,omitempty"`
+
+	// List of supported container runtimes kubelet should use.
+	ContainerRuntime *NodeconfigV1ContainerRuntime `json:"containerRuntime,omitempty"`
+
+	// Disk to CPU ratio. Sets the number of GiBs to be added for every CPU on the node. The root volume will have a minimum of 100GiB and will be further increased based on value.
+	DiskCpuRatio *int32 `json:"diskCpuRatio,omitempty"`
+
+	// Optional docker daemon configuration properties. Provide only properties that you want to override. Available values https://docs.docker.com/engine/reference/commandline/dockerd/#daemon-configuration-file
+	DockerConfig *map[string]interface{} `json:"dockerConfig,omitempty"`
+	Eks          *NodeconfigV1EKSConfig  `json:"eks,omitempty"`
+	Gke          *NodeconfigV1GKEConfig  `json:"gke,omitempty"`
+
+	// Image to be used while provisioning the node. If nothing is provided will be resolved to latest available image based on Kubernetes version if possible.
+	Image *string `json:"image"`
+
+	// Init script to be run on your instance at launch. Should not contain any sensitive data. Value should be base64 encoded.
+	InitScript *string                 `json:"initScript"`
+	Kops       *NodeconfigV1KOPSConfig `json:"kops,omitempty"`
+
+	// Optional kubelet configuration properties. Applicable for EKS only.
+	KubeletConfig *map[string]interface{} `json:"kubeletConfig,omitempty"`
+
+	// Minimal disk size in GiB. Defaults to 100.
+	MinDiskSize *int32 `json:"minDiskSize"`
+
+	// Optional SSH public key to be used for provisioned nodes. Value should be base64 encoded.
+	SshPublicKey *string `json:"sshPublicKey"`
+
+	// Subnet ids to be used for provisioned nodes.
+	Subnets *[]string `json:"subnets,omitempty"`
+
+	// Tags to be added on cloud instances for provisioned nodes.
+	Tags *NodeconfigV1NodeConfigurationUpdate_Tags `json:"tags,omitempty"`
+}
+
+// Tags to be added on cloud instances for provisioned nodes.
+type NodeconfigV1NodeConfigurationUpdate_Tags struct {
+	AdditionalProperties map[string]string `json:"-"`
+}
+
+// NodeconfigV1SecurityGroup defines model for nodeconfig.v1.SecurityGroup.
+type NodeconfigV1SecurityGroup struct {
+	// A description of the security group.
+	Description *string `json:"description,omitempty"`
+
+	// The ID of the security group.
+	Id *string `json:"id,omitempty"`
+
+	// The name of the security group.
+	Name *string `json:"name,omitempty"`
+}
+
+// SubnetDetails contains all subnet attributes relevant for node configuration.
+type NodeconfigV1SubnetDetails struct {
+	// Available Ip Address populated for EKS provider only.
+	AvailableIpAddressCount *int32 `json:"availableIpAddressCount"`
+
+	// Cidr block of the subnet.
+	Cidr *string `json:"cidr,omitempty"`
+
+	// The ID of the subnet.
+	Id *string `json:"id,omitempty"`
+
+	// Cluster zone.
+	Zone *ExternalclusterV1Zone `json:"zone,omitempty"`
+}
+
+// NodetemplatesV1AvailableInstanceType defines model for nodetemplates.v1.AvailableInstanceType.
+type NodetemplatesV1AvailableInstanceType struct {
+	Architecture           *string                                                     `json:"architecture,omitempty"`
+	AvailableGpuDevices    *[]NodetemplatesV1AvailableInstanceTypeGPUDevice            `json:"availableGpuDevices,omitempty"`
+	Cpu                    *string                                                     `json:"cpu,omitempty"`
+	CpuCost                *float64                                                    `json:"cpuCost,omitempty"`
+	Family                 *string                                                     `json:"family,omitempty"`
+	IsComputeOptimized     *bool                                                       `json:"isComputeOptimized,omitempty"`
+	Memory                 *string                                                     `json:"memory,omitempty"`
+	Name                   *string                                                     `json:"name,omitempty"`
+	StorageOptimizedOption *NodetemplatesV1AvailableInstanceTypeStorageOptimizedOption `json:"storageOptimizedOption,omitempty"`
+}
+
+// NodetemplatesV1AvailableInstanceTypeGPUDevice defines model for nodetemplates.v1.AvailableInstanceType.GPUDevice.
+type NodetemplatesV1AvailableInstanceTypeGPUDevice struct {
+	Count        *int32  `json:"count,omitempty"`
+	Manufacturer *string `json:"manufacturer,omitempty"`
+	Name         *string `json:"name,omitempty"`
+}
+
+// NodetemplatesV1AvailableInstanceTypeStorageOptimizedOption defines model for nodetemplates.v1.AvailableInstanceType.StorageOptimizedOption.
+type NodetemplatesV1AvailableInstanceTypeStorageOptimizedOption string
+
+// NodetemplatesV1DeleteNodeTemplateResponse defines model for nodetemplates.v1.DeleteNodeTemplateResponse.
+type NodetemplatesV1DeleteNodeTemplateResponse = map[string]interface{}
+
+// NodetemplatesV1FilterInstanceTypesResponse defines model for nodetemplates.v1.FilterInstanceTypesResponse.
+type NodetemplatesV1FilterInstanceTypesResponse struct {
+	AvailableInstanceTypes *[]NodetemplatesV1AvailableInstanceType `json:"availableInstanceTypes,omitempty"`
+}
+
+// NodetemplatesV1Label defines model for nodetemplates.v1.Label.
+type NodetemplatesV1Label struct {
+	Key   *string `json:"key,omitempty"`
+	Value *string `json:"value,omitempty"`
+}
+
+// NodetemplatesV1ListNodeTemplatesResponse defines model for nodetemplates.v1.ListNodeTemplatesResponse.
+type NodetemplatesV1ListNodeTemplatesResponse struct {
+	Items *[]NodetemplatesV1NodeTemplateListItem `json:"items,omitempty"`
+}
+
+// NodetemplatesV1NewNodeTemplate defines model for nodetemplates.v1.NewNodeTemplate.
+type NodetemplatesV1NewNodeTemplate struct {
+	ConfigurationId        *string                             `json:"configurationId,omitempty"`
+	Constraints            *NodetemplatesV1TemplateConstraints `json:"constraints,omitempty"`
+	CustomInstancesEnabled *bool                               `json:"customInstancesEnabled"`
+	CustomLabel            *NodetemplatesV1Label               `json:"customLabel,omitempty"`
+
+	// Custom labels for the template.
+	// The passed values will be ignored if the field custom_label is present.
+	CustomLabels *NodetemplatesV1NewNodeTemplate_CustomLabels `json:"customLabels,omitempty"`
+
+	// Custom taints for the template.
+	CustomTaints *[]NodetemplatesV1TaintWithOptionalEffect `json:"customTaints,omitempty"`
+
+	// Flag whether this template is the default template for the cluster.
+	IsDefault *bool `json:"isDefault,omitempty"`
+
+	// This field is used to enable/disable autoscaling for the template.
+	IsEnabled         *bool                                    `json:"isEnabled"`
+	Name              *string                                  `json:"name,omitempty"`
+	RebalancingConfig *NodetemplatesV1RebalancingConfiguration `json:"rebalancingConfig,omitempty"`
+
+	// Marks whether the templated nodes will have a taint template taint.
+	// Based on the template constraints, the template may still have additional taints.
+	// For example, if both lifecycles (spot, on-demand) are enabled, to use spot nodes, the spot nodes of this template will have the spot taint.
+	ShouldTaint *bool `json:"shouldTaint"`
+}
+
+// Custom labels for the template.
+// The passed values will be ignored if the field custom_label is present.
+type NodetemplatesV1NewNodeTemplate_CustomLabels struct {
+	AdditionalProperties map[string]string `json:"-"`
+}
+
+// NodetemplatesV1NodeTemplate defines model for nodetemplates.v1.NodeTemplate.
+type NodetemplatesV1NodeTemplate struct {
+	ConfigurationId        *string                             `json:"configurationId,omitempty"`
+	ConfigurationName      *string                             `json:"configurationName,omitempty"`
+	Constraints            *NodetemplatesV1TemplateConstraints `json:"constraints,omitempty"`
+	CustomInstancesEnabled *bool                               `json:"customInstancesEnabled,omitempty"`
+	CustomLabel            *NodetemplatesV1Label               `json:"customLabel,omitempty"`
+
+	// Custom labels for the template.
+	CustomLabels *NodetemplatesV1NodeTemplate_CustomLabels `json:"customLabels,omitempty"`
+
+	// Custom taints for the template.
+	CustomTaints *[]NodetemplatesV1Taint `json:"customTaints,omitempty"`
+
+	// Flag whether this template is the default template for the cluster.
+	IsDefault *bool `json:"isDefault,omitempty"`
+
+	// This field is used to enable/disable autoscaling for the template.
+	IsEnabled         *bool                                    `json:"isEnabled,omitempty"`
+	Name              *string                                  `json:"name,omitempty"`
+	RebalancingConfig *NodetemplatesV1RebalancingConfiguration `json:"rebalancingConfig,omitempty"`
+
+	// Marks whether the templated nodes will have a taint.
+	ShouldTaint *bool   `json:"shouldTaint,omitempty"`
+	Version     *string `json:"version,omitempty"`
+}
+
+// Custom labels for the template.
+type NodetemplatesV1NodeTemplate_CustomLabels struct {
+	AdditionalProperties map[string]string `json:"-"`
+}
+
+// NodetemplatesV1NodeTemplateListItem defines model for nodetemplates.v1.NodeTemplateListItem.
+type NodetemplatesV1NodeTemplateListItem struct {
+	Stats    *NodetemplatesV1NodeTemplateListItemStats `json:"stats,omitempty"`
+	Template *NodetemplatesV1NodeTemplate              `json:"template,omitempty"`
+}
+
+// NodetemplatesV1NodeTemplateListItemStats defines model for nodetemplates.v1.NodeTemplateListItem.Stats.
+type NodetemplatesV1NodeTemplateListItemStats struct {
+	CountFallback *int32 `json:"countFallback,omitempty"`
+	CountOnDemand *int32 `json:"countOnDemand,omitempty"`
+	CountSpot     *int32 `json:"countSpot,omitempty"`
+}
+
+// NodetemplatesV1RebalancingConfiguration defines model for nodetemplates.v1.RebalancingConfiguration.
+type NodetemplatesV1RebalancingConfiguration struct {
+	// Minimum amount of nodes to create for template
+	// Note, this setting is only relevant for very small clusters, for larger clusters it's recommended to leave this at 0.
+	MinNodes *int32 `json:"minNodes"`
+}
+
+// Taint is used in responses.
+type NodetemplatesV1Taint struct {
+	// TaintEffect is a node taint effect.
+	Effect *NodetemplatesV1TaintEffect `json:"effect,omitempty"`
+	Key    *string                     `json:"key,omitempty"`
+	Value  *string                     `json:"value,omitempty"`
+}
+
+// TaintEffect is a node taint effect.
+type NodetemplatesV1TaintEffect string
+
+// TaintWithOptionalEffect is used when creating/updating a node template.
+// We are adding support for specifying taint effect on node templates and effect should be optional to be backwards compatible.
+type NodetemplatesV1TaintWithOptionalEffect struct {
+	// TaintEffect is a node taint effect.
+	Effect *NodetemplatesV1TaintEffect `json:"effect,omitempty"`
+	Key    string                      `json:"key"`
+	Value  *string                     `json:"value"`
+}
+
+// NodetemplatesV1TemplateConstraints defines model for nodetemplates.v1.TemplateConstraints.
+type NodetemplatesV1TemplateConstraints struct {
+	Architectures    *[]string `json:"architectures,omitempty"`
+	ComputeOptimized *bool     `json:"computeOptimized"`
+
+	// Enable/disable spot diversity policy. When enabled, autoscaler will try to balance between diverse and cost optimal instance types.
+	EnableSpotDiversity *bool `json:"enableSpotDiversity"`
+
+	// Fallback restore rate in seconds: defines how much time should pass before spot fallback should be attempted to be restored to real spot.
+	FallbackRestoreRateSeconds *int32                                                       `json:"fallbackRestoreRateSeconds"`
+	Gpu                        *NodetemplatesV1TemplateConstraintsGPUConstraints            `json:"gpu,omitempty"`
+	InstanceFamilies           *NodetemplatesV1TemplateConstraintsInstanceFamilyConstraints `json:"instanceFamilies,omitempty"`
+
+	// This template is gpu only. Setting this to true, will result in only instances with GPUs being considered.
+	// In addition, this ensures that all of the added instances for this template won't have any nvidia taints.
+	IsGpuOnly *bool  `json:"isGpuOnly"`
+	MaxCpu    *int32 `json:"maxCpu"`
+	MaxMemory *int32 `json:"maxMemory"`
+	MinCpu    *int32 `json:"minCpu"`
+	MinMemory *int32 `json:"minMemory"`
+
+	// Should include on-demand instances in the considered pool.
+	OnDemand *bool `json:"onDemand"`
+
+	// Should include spot instances in the considered pool.
+	// Note 1: if both spot and on-demand are false, then on-demand is assumed.
+	// Note 2: if both spot and on-demand are true, then you can specify which lifecycle you want by adding
+	//  nodeSelector:
+	//        scheduling.cast.ai/spot: "true"
+	// selector, or an equivalent affinity to the pod manifest and
+	//  tolerations:
+	//      - key: scheduling.cast.ai/spot
+	//        operator: Exists
+	// toleration.
+	Spot *bool `json:"spot"`
+
+	// Allowed node configuration price increase when diversifying instance types. E.g. if the value is 10%, then the overall price of diversified instance types can be 10% higher than the price of the optimal configuration.
+	SpotDiversityPriceIncreaseLimitPercent *int32 `json:"spotDiversityPriceIncreaseLimitPercent"`
+
+	// Enable/disable spot interruption predictions.
+	SpotInterruptionPredictionsEnabled *bool `json:"spotInterruptionPredictionsEnabled"`
+
+	// Spot interruption predictions type. Can be either "aws-rebalance-recommendations" or "interruption-predictions".
+	SpotInterruptionPredictionsType *string `json:"spotInterruptionPredictionsType"`
+	StorageOptimized                *bool   `json:"storageOptimized"`
+
+	// Spot instance fallback constraint - when true, on-demand instances will be created, when spots are unavailable.
+	UseSpotFallbacks *bool `json:"useSpotFallbacks"`
+}
+
+// NodetemplatesV1TemplateConstraintsGPUConstraints defines model for nodetemplates.v1.TemplateConstraints.GPUConstraints.
+type NodetemplatesV1TemplateConstraintsGPUConstraints struct {
+	ExcludeNames  *[]string `json:"excludeNames,omitempty"`
+	IncludeNames  *[]string `json:"includeNames,omitempty"`
+	Manufacturers *[]string `json:"manufacturers,omitempty"`
+	MaxCount      *int32    `json:"maxCount"`
+	MinCount      *int32    `json:"minCount"`
+}
+
+// NodetemplatesV1TemplateConstraintsInstanceFamilyConstraints defines model for nodetemplates.v1.TemplateConstraints.InstanceFamilyConstraints.
+type NodetemplatesV1TemplateConstraintsInstanceFamilyConstraints struct {
+	Exclude *[]string `json:"exclude,omitempty"`
+	Include *[]string `json:"include,omitempty"`
+}
+
+// NodetemplatesV1UpdateNodeTemplate defines model for nodetemplates.v1.UpdateNodeTemplate.
+type NodetemplatesV1UpdateNodeTemplate struct {
+	ConfigurationId        *string                             `json:"configurationId,omitempty"`
+	Constraints            *NodetemplatesV1TemplateConstraints `json:"constraints,omitempty"`
+	CustomInstancesEnabled *bool                               `json:"customInstancesEnabled"`
+	CustomLabel            *NodetemplatesV1Label               `json:"customLabel,omitempty"`
+
+	// Custom labels for the template.
+	// The passed values will be ignored if the field custom_label is present.
+	CustomLabels *NodetemplatesV1UpdateNodeTemplate_CustomLabels `json:"customLabels,omitempty"`
+
+	// Custom taints for the template.
+	CustomTaints *[]NodetemplatesV1TaintWithOptionalEffect `json:"customTaints,omitempty"`
+
+	// Flag whether this template is the default template for the cluster.
+	IsDefault *bool `json:"isDefault,omitempty"`
+
+	// This field is used to enable/disable autoscaling for the template.
+	IsEnabled         *bool                                    `json:"isEnabled"`
+	RebalancingConfig *NodetemplatesV1RebalancingConfiguration `json:"rebalancingConfig,omitempty"`
+
+	// Marks whether the templated nodes will have a taint.
+	ShouldTaint *bool `json:"shouldTaint"`
+}
+
+// Custom labels for the template.
+// The passed values will be ignored if the field custom_label is present.
+type NodetemplatesV1UpdateNodeTemplate_CustomLabels struct {
+	AdditionalProperties map[string]string `json:"-"`
+}
+
+// Defines the minimum and maximum amount of vCPUs for cluster's worker nodes.
+type PoliciesV1ClusterLimitsCpu struct {
+	// Defines the maximum allowed amount of vCPUs in the whole cluster.
+	MaxCores *int32 `json:"maxCores,omitempty"`
+
+	// Defines the minimum allowed amount of CPUs in the whole cluster.
+	MinCores *int32 `json:"minCores,omitempty"`
+}
+
+// Defines minimum and maximum amount of CPU the cluster can have.
+type PoliciesV1ClusterLimitsPolicy struct {
+	// Defines the minimum and maximum amount of vCPUs for cluster's worker nodes.
+	Cpu *PoliciesV1ClusterLimitsCpu `json:"cpu,omitempty"`
+
+	// Enable/disable cluster size limits policy.
+	Enabled *bool `json:"enabled"`
+}
+
+// Defines the CAST AI Evictor component settings. Evictor watches the pods running in your cluster and looks for
+// ways to compact them into fewer nodes, making nodes empty, which will be removed by the the empty worker nodes
+// policy.
+type PoliciesV1Evictor struct {
+	// Enable/disable aggressive mode. By default, Evictor does not target nodes that are running unreplicated pods.
+	// This mode will make the Evictor start considering application with just a single replica.
+	AggressiveMode *bool `json:"aggressiveMode"`
+
+	// * We have detected an already existing Evictor installation. If you want CAST AI to manage the Evictor instead,
+	//   then you will need to remove the current installation first.
+	//
+	// Deprecated; use "status" instead.
+	Allowed *bool `json:"allowed"`
+
+	// Configure the interval duration between Evictor operations. This property can be used to lower or raise the
+	// frequency of the Evictor's find-and-drain operations.
+	CycleInterval *string `json:"cycleInterval"`
+
+	// Enable/disable dry-run. This property allows you to prevent the Evictor from carrying any operations out and
+	// preview the actions it would take.
+	DryRun *bool `json:"dryRun"`
+
+	// Enable/disable the Evictor policy. This will either install or uninstall the Evictor component in your cluster.
+	Enabled *bool `json:"enabled"`
+
+	// Configure the node grace period which controls the duration which must pass after a node has been created before
+	// Evictor starts considering that node.
+	NodeGracePeriodMinutes *int32 `json:"nodeGracePeriodMinutes"`
+
+	// Enable/disable scoped mode. By default, Evictor targets all nodes in the cluster. This mode will constrain in to
+	// just the nodes which were created by CAST AI.
+	ScopedMode *bool                    `json:"scopedMode"`
+	Status     *PoliciesV1EvictorStatus `json:"status,omitempty"`
+}
+
+// PoliciesV1EvictorStatus defines model for policies.v1.EvictorStatus.
+type PoliciesV1EvictorStatus string
+
+// Defines cluster node constraints response.
+type PoliciesV1GetClusterNodeConstraintsResponse struct {
+	// The ID of the cluster.
+	ClusterId *string `json:"clusterId,omitempty"`
+
+	// A list of viable CPU:Memory combinations.
+	Items *[]PoliciesV1GetClusterNodeConstraintsResponseCpuRam `json:"items,omitempty"`
+}
+
+// A viable CPU:Memory combination.
+type PoliciesV1GetClusterNodeConstraintsResponseCpuRam struct {
+	// Number of CPUs.
+	CpuCores *int32 `json:"cpuCores,omitempty"`
+
+	// Number of memory in MiB.
+	RamMib *int32 `json:"ramMib,omitempty"`
+}
+
+// Defines Headroom for Unschedulable Pods.
+type PoliciesV1Headroom struct {
+	// Defines percentage of additional CPU capacity to be added.
+	CpuPercentage *int32 `json:"cpuPercentage,omitempty"`
+
+	// Defines whether Headroom is enabled.
+	Enabled          *bool  `json:"enabled"`
+	MemoryPercentage *int32 `json:"memoryPercentage,omitempty"`
+}
+
+// Defines the NodeConstraints that will be applied when autoscaling with UnschedulablePodsPolicy.
+type PoliciesV1NodeConstraints struct {
+	// Defines whether NodeConstraints are enabled.
+	Enabled *bool `json:"enabled"`
+
+	// Defines max CPU cores for the node to pick.
+	MaxCpuCores *int32 `json:"maxCpuCores,omitempty"`
+
+	// Defines max RAM in MiB for the node to pick.
+	MaxRamMib *int32 `json:"maxRamMib,omitempty"`
+
+	// Defines min CPU cores for the node to pick.
+	MinCpuCores *int32 `json:"minCpuCores,omitempty"`
+
+	// Defines min RAM in MiB for the node to pick.
+	MinRamMib *int32 `json:"minRamMib,omitempty"`
+}
+
+// Node Downscaler defines policies for removing nodes based on the configured conditions.
+type PoliciesV1NodeDownscaler struct {
+	// Defines whether Node Downscaler should opt in for removing empty worker nodes when possible.
+	EmptyNodes *PoliciesV1NodeDownscalerEmptyNodes `json:"emptyNodes,omitempty"`
+
+	// Enable/disable node downscaler policy.
+	Enabled *bool `json:"enabled"`
+
+	// Defines the CAST AI Evictor component settings. Evictor watches the pods running in your cluster and looks for
+	// ways to compact them into fewer nodes, making nodes empty, which will be removed by the the empty worker nodes
+	// policy.
+	Evictor *PoliciesV1Evictor `json:"evictor,omitempty"`
+}
+
+// Defines whether Node Downscaler should opt in for removing empty worker nodes when possible.
+type PoliciesV1NodeDownscalerEmptyNodes struct {
+	// * increasing the value will make the cluster more responsive to dynamic
+	// * workloads in the expense of higher cluster cost.
+	DelaySeconds *int32 `json:"delaySeconds"`
+
+	// Enable/disable the empty worker nodes policy.
+	Enabled *bool `json:"enabled"`
+}
+
+// Defines the autoscaling policies details.
+type PoliciesV1Policies struct {
+	// Defines minimum and maximum amount of CPU the cluster can have.
+	ClusterLimits *PoliciesV1ClusterLimitsPolicy `json:"clusterLimits,omitempty"`
+
+	// Enable/disable all policies.
+	Enabled *bool `json:"enabled"`
+
+	// Run autoscaler in scoped mode. Only specifically marked pods will be considered for autoscaling, and only nodes
+	// provisioned by autoscaler will be considered for downscaling.
+	IsScopedMode *bool `json:"isScopedMode"`
+
+	// Node Downscaler defines policies for removing nodes based on the configured conditions.
+	NodeDownscaler *PoliciesV1NodeDownscaler `json:"nodeDownscaler,omitempty"`
+
+	// Policy defining whether autoscaler can use spot instances for provisioning additional workloads.
+	SpotInstances *PoliciesV1SpotInstances `json:"spotInstances,omitempty"`
+
+	// Policy defining autoscaler's behavior when unscedulable pods were detected.
+	UnschedulablePods *PoliciesV1UnschedulablePodsPolicy `json:"unschedulablePods,omitempty"`
+}
+
+// Policy defining whether autoscaler can use spot backups instead of spot instances when spot instances are not
+// available.
+type PoliciesV1SpotBackups struct {
+	// Enable/disable spot backups policy.
+	Enabled *bool `json:"enabled"`
+
+	// Defines interval on how often spot backups restore to real spot should occur.
+	SpotBackupRestoreRateSeconds *int32 `json:"spotBackupRestoreRateSeconds"`
+}
+
+// Policy defining whether autoscaler can use spot instances for provisioning additional workloads.
+type PoliciesV1SpotInstances struct {
+	// Enable spot instances for these cloud service providers.
+	Clouds *[]CastaiV1Cloud `json:"clouds,omitempty"`
+
+	// Enable/disable spot instances policy.
+	Enabled *bool `json:"enabled"`
+
+	// Max allowed reclaim rate when choosing spot instance type. E.g. if the value is 10%, instance types having 10% or
+	// higher reclaim rate will not be considered. Set to zero to use all instance types regardless of reclaim rate.
+	MaxReclaimRate *int32 `json:"maxReclaimRate"`
+
+	// Policy defining whether autoscaler can use spot backups instead of spot instances when spot instances are not
+	// available.
+	SpotBackups *PoliciesV1SpotBackups `json:"spotBackups,omitempty"`
+
+	// Enable/disable spot diversity policy.
+	//
+	// When enabled, autoscaler will try to balance between diverse and cost optimal instance types.
+	SpotDiversityEnabled *bool `json:"spotDiversityEnabled"`
+
+	// Allowed node configuration price increase when diversifying instance types.
+	// E.g. if the value is 10%, then the overall price of diversified instance types can be 10% higher than the price of the optimal configuration.
+	SpotDiversityPriceIncreaseLimitPercent *int32 `json:"spotDiversityPriceIncreaseLimitPercent"`
+
+	// SpotInterruptionPredictions allows to configure the handling of SPOT interrupt predictions.
+	SpotInterruptionPredictions *PoliciesV1SpotInterruptionPredictions `json:"spotInterruptionPredictions,omitempty"`
+}
+
+// SpotInterruptionPredictions allows to configure the handling of SPOT interrupt predictions.
+type PoliciesV1SpotInterruptionPredictions struct {
+	// Enable/disable spot interruption predictions.
+	Enabled *bool `json:"enabled,omitempty"`
+
+	// SpotInterruptionPredictionsType defines the type of the SPOT interruption predictions to enable.
+	Type *PoliciesV1SpotInterruptionPredictionsType `json:"type,omitempty"`
+}
+
+// SpotInterruptionPredictionsType defines the type of the SPOT interruption predictions to enable.
+type PoliciesV1SpotInterruptionPredictionsType string
+
+// Policy defining autoscaler's behavior when unscedulable pods were detected.
+type PoliciesV1UnschedulablePodsPolicy struct {
+	// Defines custom instance usage settings.
+	CustomInstancesEnabled *bool `json:"customInstancesEnabled"`
+
+	// Defines default ratio of 1 CPU to Volume GiB  which will be summed with minimum value when creating new nodes.
+	// If set to 5, the ration would be: 1 CPU : 5 GiB.
+	// For example a node with 16 CPU would have (16 * 5 GiB) + minimum(100GiB) = 180 GiB volume size.
+	// Deprecated. Input only (for backwards-compatibility, ignored).
+	DiskGibToCpuRatio *int32 `json:"diskGibToCpuRatio"`
+
+	// Enable/disable unschedulable pods detection policy.
+	Enabled *bool `json:"enabled"`
+
+	// Defines Headroom for Unschedulable Pods.
+	Headroom *PoliciesV1Headroom `json:"headroom,omitempty"`
+
+	// Defines Headroom for Unschedulable Pods.
+	HeadroomSpot *PoliciesV1Headroom `json:"headroomSpot,omitempty"`
+
+	// Defines the NodeConstraints that will be applied when autoscaling with UnschedulablePodsPolicy.
+	NodeConstraints *PoliciesV1NodeConstraints `json:"nodeConstraints,omitempty"`
+}
+
+// ScheduledrebalancingV1DeleteRebalancingJobResponse defines model for scheduledrebalancing.v1.DeleteRebalancingJobResponse.
+type ScheduledrebalancingV1DeleteRebalancingJobResponse = map[string]interface{}
+
+// ScheduledrebalancingV1DeleteRebalancingScheduleResponse defines model for scheduledrebalancing.v1.DeleteRebalancingScheduleResponse.
+type ScheduledrebalancingV1DeleteRebalancingScheduleResponse = map[string]interface{}
+
+// Defines the conditions which must be met in order to fully execute the plan.
+type ScheduledrebalancingV1ExecutionConditions struct {
+	// Identifies the minimum percentage of predicted savings that should be achieved.
+	// The rebalancing plan will not proceed after creating the nodes if the achieved savings percentage
+	// is not achieved.
+	// This field's value will not be considered if the initially predicted savings are negative.
+	AchievedSavingsPercentage *int32 `json:"achievedSavingsPercentage,omitempty"`
+	Enabled                   *bool  `json:"enabled,omitempty"`
+}
+
+// JobStatus defines rebalancing job's last execution status.
+type ScheduledrebalancingV1JobStatus string
+
+// ScheduledrebalancingV1LaunchConfiguration defines model for scheduledrebalancing.v1.LaunchConfiguration.
+type ScheduledrebalancingV1LaunchConfiguration struct {
+	// Specifies amount of time since node creation before the node is allowed to be considered for automated rebalancing.
+	NodeTtlSeconds *int32 `json:"nodeTtlSeconds,omitempty"`
+
+	// Maximum number of nodes that will be selected for rebalancing.
+	NumTargetedNodes   *int32                                    `json:"numTargetedNodes,omitempty"`
+	RebalancingOptions *ScheduledrebalancingV1RebalancingOptions `json:"rebalancingOptions,omitempty"`
+	Selector           *ScheduledrebalancingV1NodeSelector       `json:"selector,omitempty"`
+}
+
+// ScheduledrebalancingV1ListAvailableRebalancingTZResponse defines model for scheduledrebalancing.v1.ListAvailableRebalancingTZResponse.
+type ScheduledrebalancingV1ListAvailableRebalancingTZResponse struct {
+	TimeZones *[]ScheduledrebalancingV1TimeZone `json:"timeZones,omitempty"`
+}
+
+// ScheduledrebalancingV1ListRebalancingJobsResponse defines model for scheduledrebalancing.v1.ListRebalancingJobsResponse.
+type ScheduledrebalancingV1ListRebalancingJobsResponse struct {
+	Jobs *[]ScheduledrebalancingV1RebalancingJob `json:"jobs,omitempty"`
+}
+
+// ScheduledrebalancingV1ListRebalancingSchedulesResponse defines model for scheduledrebalancing.v1.ListRebalancingSchedulesResponse.
+type ScheduledrebalancingV1ListRebalancingSchedulesResponse struct {
+	Schedules *[]ScheduledrebalancingV1RebalancingSchedule `json:"schedules,omitempty"`
+}
+
+// ScheduledrebalancingV1Node defines model for scheduledrebalancing.v1.Node.
+type ScheduledrebalancingV1Node struct {
+	Id *string `json:"id,omitempty"`
+}
+
+// ScheduledrebalancingV1NodeSelector defines model for scheduledrebalancing.v1.NodeSelector.
+type ScheduledrebalancingV1NodeSelector struct {
+	// Required. A list of node selector terms. The terms are ORed.
+	NodeSelectorTerms *[]ScheduledrebalancingV1NodeSelectorTerm `json:"nodeSelectorTerms,omitempty"`
+}
+
+// A node selector requirement is a selector that contains values, a key, and an operator
+// that relates the key and values.
+type ScheduledrebalancingV1NodeSelectorRequirement struct {
+	// The label key that the selector applies to.
+	Key *string `json:"key"`
+
+	// Represents a key's relationship to a set of values.
+	// Valid operators are In, NotIn, Exists, DoesNotExist. Gt, and Lt.
+	Operator *string   `json:"operator"`
+	Values   *[]string `json:"values,omitempty"`
+}
+
+// ScheduledrebalancingV1NodeSelectorTerm defines model for scheduledrebalancing.v1.NodeSelectorTerm.
+type ScheduledrebalancingV1NodeSelectorTerm struct {
+	MatchExpressions *[]ScheduledrebalancingV1NodeSelectorRequirement `json:"matchExpressions,omitempty"`
+	MatchFields      *[]ScheduledrebalancingV1NodeSelectorRequirement `json:"matchFields,omitempty"`
+}
+
+// ScheduledrebalancingV1PreviewRebalancingScheduleResponse defines model for scheduledrebalancing.v1.PreviewRebalancingScheduleResponse.
+type ScheduledrebalancingV1PreviewRebalancingScheduleResponse struct {
+	AffectedNodes *[]ScheduledrebalancingV1Node `json:"affectedNodes,omitempty"`
+	WillTriggerAt *[]time.Time                  `json:"willTriggerAt,omitempty"`
+}
+
+// ScheduledrebalancingV1RebalancingJob defines model for scheduledrebalancing.v1.RebalancingJob.
+type ScheduledrebalancingV1RebalancingJob struct {
+	ClusterId *string `json:"clusterId,omitempty"`
+
+	// Specifies if job is currently enabled; disabled jobs are not triggered.
+	Enabled               *bool      `json:"enabled"`
+	Id                    *string    `json:"id,omitempty"`
+	LastTriggerAt         *time.Time `json:"lastTriggerAt"`
+	NextTriggerAt         *time.Time `json:"nextTriggerAt"`
+	RebalancingPlanId     *string    `json:"rebalancingPlanId,omitempty"`
+	RebalancingScheduleId *string    `json:"rebalancingScheduleId,omitempty"`
+
+	// JobStatus defines rebalancing job's last execution status.
+	Status *ScheduledrebalancingV1JobStatus `json:"status,omitempty"`
+}
+
+// ScheduledrebalancingV1RebalancingOptions defines model for scheduledrebalancing.v1.RebalancingOptions.
+type ScheduledrebalancingV1RebalancingOptions struct {
+	// Defines whether the nodes that failed to get drained until a predefined timeout, will be kept with a
+	// rebalancing.cast.ai/status=drain-failed annotation instead of forcefully drained.
+	EvictGracefully *bool `json:"evictGracefully"`
+
+	// Defines the conditions which must be met in order to fully execute the plan.
+	ExecutionConditions   *ScheduledrebalancingV1ExecutionConditions `json:"executionConditions,omitempty"`
+	KeepDrainTimeoutNodes *bool                                      `json:"keepDrainTimeoutNodes"`
+
+	// Minimum number of nodes that should be kept in the cluster after rebalancing.
+	MinNodes *int32 `json:"minNodes,omitempty"`
+}
+
+// ScheduledrebalancingV1RebalancingSchedule defines model for scheduledrebalancing.v1.RebalancingSchedule.
+type ScheduledrebalancingV1RebalancingSchedule struct {
+	Id                  *string                                   `json:"id,omitempty"`
+	Jobs                *[]ScheduledrebalancingV1RebalancingJob   `json:"jobs,omitempty"`
+	LastTriggerAt       *time.Time                                `json:"lastTriggerAt"`
+	LaunchConfiguration ScheduledrebalancingV1LaunchConfiguration `json:"launchConfiguration"`
+	Name                string                                    `json:"name"`
+	NextTriggerAt       *time.Time                                `json:"nextTriggerAt,omitempty"`
+	Schedule            ScheduledrebalancingV1Schedule            `json:"schedule"`
+	TriggerConditions   ScheduledrebalancingV1TriggerConditions   `json:"triggerConditions"`
+}
+
+// ScheduledrebalancingV1RebalancingScheduleUpdate defines model for scheduledrebalancing.v1.RebalancingScheduleUpdate.
+type ScheduledrebalancingV1RebalancingScheduleUpdate struct {
+	LaunchConfiguration *ScheduledrebalancingV1LaunchConfiguration `json:"launchConfiguration,omitempty"`
+	Name                *string                                    `json:"name,omitempty"`
+	Schedule            *ScheduledrebalancingV1Schedule            `json:"schedule,omitempty"`
+	TriggerConditions   *ScheduledrebalancingV1TriggerConditions   `json:"triggerConditions,omitempty"`
+}
+
+// ScheduledrebalancingV1Schedule defines model for scheduledrebalancing.v1.Schedule.
+type ScheduledrebalancingV1Schedule struct {
+	Cron string `json:"cron"`
+}
+
+// ScheduledrebalancingV1TimeZone defines model for scheduledrebalancing.v1.TimeZone.
+type ScheduledrebalancingV1TimeZone struct {
+	Name   *string `json:"name,omitempty"`
+	Offset *string `json:"offset,omitempty"`
+}
+
+// ScheduledrebalancingV1TriggerConditions defines model for scheduledrebalancing.v1.TriggerConditions.
+type ScheduledrebalancingV1TriggerConditions struct {
+	SavingsPercentage *float32 `json:"savingsPercentage,omitempty"`
+}
+
+// HeaderOrganizationId defines model for headerOrganizationId.
+type HeaderOrganizationId = openapi_types.UUID
+
+// AuthTokenAPIListAuthTokensParams defines parameters for AuthTokenAPIListAuthTokens.
+type AuthTokenAPIListAuthTokensParams struct {
+	UserId *string `form:"userId,omitempty" json:"userId,omitempty"`
+}
+
+// AuthTokenAPICreateAuthTokenJSONBody defines parameters for AuthTokenAPICreateAuthToken.
+type AuthTokenAPICreateAuthTokenJSONBody = CastaiAuthtokenV1beta1AuthToken
+
+// AuthTokenAPIUpdateAuthTokenJSONBody defines parameters for AuthTokenAPIUpdateAuthToken.
+type AuthTokenAPIUpdateAuthTokenJSONBody = CastaiAuthtokenV1beta1AuthTokenUpdate
+
+// UsersAPIListInvitationsParams defines parameters for UsersAPIListInvitations.
+type UsersAPIListInvitationsParams struct {
+	PageLimit *string `form:"page.limit,omitempty" json:"page.limit,omitempty"`
+
+	// Cursor that defines token indicating where to start the next page.
+	// Empty value indicates to start from beginning of the dataset.
+	PageCursor *string `form:"page.cursor,omitempty" json:"page.cursor,omitempty"`
+}
+
+// UsersAPICreateInvitationsJSONBody defines parameters for UsersAPICreateInvitations.
+type UsersAPICreateInvitationsJSONBody = CastaiUsersV1beta1CreateInvitationsRequest
+
+// UsersAPIClaimInvitationJSONBody defines parameters for UsersAPIClaimInvitation.
+type UsersAPIClaimInvitationJSONBody = CastaiUsersV1beta1Request
+
+// NodeTemplatesAPIFilterInstanceTypesJSONBody defines parameters for NodeTemplatesAPIFilterInstanceTypes.
+type NodeTemplatesAPIFilterInstanceTypesJSONBody = NodetemplatesV1NodeTemplate
+
+// NodeConfigurationAPICreateConfigurationJSONBody defines parameters for NodeConfigurationAPICreateConfiguration.
+type NodeConfigurationAPICreateConfigurationJSONBody = NodeconfigV1NewNodeConfiguration
+
+// NodeConfigurationAPIUpdateConfigurationJSONBody defines parameters for NodeConfigurationAPIUpdateConfiguration.
+type NodeConfigurationAPIUpdateConfigurationJSONBody = NodeconfigV1NodeConfigurationUpdate
+
+// NodeTemplatesAPIListNodeTemplatesParams defines parameters for NodeTemplatesAPIListNodeTemplates.
+type NodeTemplatesAPIListNodeTemplatesParams struct {
+	// Flag whether to include the default template
+	IncludeDefault *bool `form:"includeDefault,omitempty" json:"includeDefault,omitempty"`
+}
+
+// NodeTemplatesAPICreateNodeTemplateJSONBody defines parameters for NodeTemplatesAPICreateNodeTemplate.
+type NodeTemplatesAPICreateNodeTemplateJSONBody = NodetemplatesV1NewNodeTemplate
+
+// NodeTemplatesAPIUpdateNodeTemplateJSONBody defines parameters for NodeTemplatesAPIUpdateNodeTemplate.
+type NodeTemplatesAPIUpdateNodeTemplateJSONBody = NodetemplatesV1UpdateNodeTemplate
+
+// PoliciesAPIUpsertClusterPoliciesJSONBody defines parameters for PoliciesAPIUpsertClusterPolicies.
+type PoliciesAPIUpsertClusterPoliciesJSONBody = PoliciesV1Policies
+
+// ScheduledRebalancingAPICreateRebalancingJobJSONBody defines parameters for ScheduledRebalancingAPICreateRebalancingJob.
+type ScheduledRebalancingAPICreateRebalancingJobJSONBody = ScheduledrebalancingV1RebalancingJob
+
+// ScheduledRebalancingAPIUpdateRebalancingJobJSONBody defines parameters for ScheduledRebalancingAPIUpdateRebalancingJob.
+type ScheduledRebalancingAPIUpdateRebalancingJobJSONBody = ScheduledrebalancingV1RebalancingJob
+
+// ScheduledRebalancingAPIPreviewRebalancingScheduleJSONBody defines parameters for ScheduledRebalancingAPIPreviewRebalancingSchedule.
+type ScheduledRebalancingAPIPreviewRebalancingScheduleJSONBody = ScheduledrebalancingV1RebalancingScheduleUpdate
+
+// ExternalClusterAPIListClustersParams defines parameters for ExternalClusterAPIListClusters.
+type ExternalClusterAPIListClustersParams struct {
+	// Include metrics with cluster response.
+	IncludeMetrics *bool `form:"includeMetrics,omitempty" json:"includeMetrics,omitempty"`
+}
+
+// ExternalClusterAPIRegisterClusterJSONBody defines parameters for ExternalClusterAPIRegisterCluster.
+type ExternalClusterAPIRegisterClusterJSONBody = ExternalclusterV1RegisterClusterRequest
+
+// ExternalClusterAPIUpdateClusterJSONBody defines parameters for ExternalClusterAPIUpdateCluster.
+type ExternalClusterAPIUpdateClusterJSONBody = ExternalclusterV1ClusterUpdate
+
+// ExternalClusterAPIGetCredentialsScriptParams defines parameters for ExternalClusterAPIGetCredentialsScript.
+type ExternalClusterAPIGetCredentialsScriptParams struct {
+	// Whether an AWS CrossRole should be used for authentication.
+	CrossRole *bool `form:"crossRole,omitempty" json:"crossRole,omitempty"`
+
+	// Whether NVIDIA device plugin DaemonSet should be installed during Phase 2 on-boarding.
+	NvidiaDevicePlugin *bool `form:"nvidiaDevicePlugin,omitempty" json:"nvidiaDevicePlugin,omitempty"`
+
+	// Whether CAST AI Security Insights agent should be installed
+	InstallSecurityAgent *bool `form:"installSecurityAgent,omitempty" json:"installSecurityAgent,omitempty"`
+}
+
+// ExternalClusterAPIDisconnectClusterJSONBody defines parameters for ExternalClusterAPIDisconnectCluster.
+type ExternalClusterAPIDisconnectClusterJSONBody = ExternalclusterV1DisconnectConfig
+
+// ExternalClusterAPIHandleCloudEventJSONBody defines parameters for ExternalClusterAPIHandleCloudEvent.
+type ExternalClusterAPIHandleCloudEventJSONBody = ExternalclusterV1CloudEvent
+
+// ExternalClusterAPIListNodesParams defines parameters for ExternalClusterAPIListNodes.
+type ExternalClusterAPIListNodesParams struct {
+	PageLimit *string `form:"page.limit,omitempty" json:"page.limit,omitempty"`
+
+	// Cursor that defines token indicating where to start the next page.
+	// Empty value indicates to start from beginning of the dataset.
+	PageCursor *string `form:"page.cursor,omitempty" json:"page.cursor,omitempty"`
+}
+
+// ExternalClusterAPIAddNodeJSONBody defines parameters for ExternalClusterAPIAddNode.
+type ExternalClusterAPIAddNodeJSONBody = ExternalclusterV1NodeConfig
+
+// ExternalClusterAPIDeleteNodeParams defines parameters for ExternalClusterAPIDeleteNode.
+type ExternalClusterAPIDeleteNodeParams struct {
+	// Node drain timeout in seconds. Defaults to 600s if not set.
+	DrainTimeout *string `form:"drainTimeout,omitempty" json:"drainTimeout,omitempty"`
+
+	// If set to true, node will be deleted even if node fails to be drained gracefully.
+	ForceDelete *bool `form:"forceDelete,omitempty" json:"forceDelete,omitempty"`
+}
+
+// ExternalClusterAPIDrainNodeJSONBody defines parameters for ExternalClusterAPIDrainNode.
+type ExternalClusterAPIDrainNodeJSONBody = ExternalclusterV1DrainConfig
+
+// UsersAPIUpdateCurrentUserProfileJSONBody defines parameters for UsersAPIUpdateCurrentUserProfile.
+type UsersAPIUpdateCurrentUserProfileJSONBody = CastaiUsersV1beta1User
+
+// UsersAPIListOrganizationsParams defines parameters for UsersAPIListOrganizations.
+type UsersAPIListOrganizationsParams struct {
+	// Filter organizations by user id.
+	UserId *string `form:"userId,omitempty" json:"userId,omitempty"`
+
+	// Filter organizations by username.
+	Username *string `form:"username,omitempty" json:"username,omitempty"`
+}
+
+// UsersAPICreateOrganizationJSONBody defines parameters for UsersAPICreateOrganization.
+type UsersAPICreateOrganizationJSONBody = CastaiUsersV1beta1Organization
+
+// UsersAPIEditOrganizationJSONBody defines parameters for UsersAPIEditOrganization.
+type UsersAPIEditOrganizationJSONBody = CastaiUsersV1beta1Organization
+
+// InventoryAPIAddReservationJSONBody defines parameters for InventoryAPIAddReservation.
+type InventoryAPIAddReservationJSONBody = CastaiInventoryV1beta1GenericReservation
+
+// InventoryAPIOverwriteReservationsJSONBody defines parameters for InventoryAPIOverwriteReservations.
+type InventoryAPIOverwriteReservationsJSONBody = CastaiInventoryV1beta1GenericReservationsList
+
+// UsersAPIAddUserToOrganizationJSONBody defines parameters for UsersAPIAddUserToOrganization.
+type UsersAPIAddUserToOrganizationJSONBody = CastaiUsersV1beta1NewMembership
+
+// UsersAPIUpdateOrganizationUserJSONBody defines parameters for UsersAPIUpdateOrganizationUser.
+type UsersAPIUpdateOrganizationUserJSONBody = CastaiUsersV1beta1UpdateOrganizationUserRole
+
+// ScheduledRebalancingAPICreateRebalancingScheduleJSONBody defines parameters for ScheduledRebalancingAPICreateRebalancingSchedule.
+type ScheduledRebalancingAPICreateRebalancingScheduleJSONBody = ScheduledrebalancingV1RebalancingSchedule
+
+// ScheduledRebalancingAPIUpdateRebalancingScheduleJSONBody defines parameters for ScheduledRebalancingAPIUpdateRebalancingSchedule.
+type ScheduledRebalancingAPIUpdateRebalancingScheduleJSONBody = ScheduledrebalancingV1RebalancingScheduleUpdate
+
+// ScheduledRebalancingAPIUpdateRebalancingScheduleParams defines parameters for ScheduledRebalancingAPIUpdateRebalancingSchedule.
+type ScheduledRebalancingAPIUpdateRebalancingScheduleParams struct {
+	Id *string `form:"id,omitempty" json:"id,omitempty"`
+}
+
+// ExternalClusterAPIGetCredentialsScriptTemplateParams defines parameters for ExternalClusterAPIGetCredentialsScriptTemplate.
+type ExternalClusterAPIGetCredentialsScriptTemplateParams struct {
+	CrossRole *bool `form:"crossRole,omitempty" json:"crossRole,omitempty"`
+}
+
+// AuthTokenAPICreateAuthTokenJSONRequestBody defines body for AuthTokenAPICreateAuthToken for application/json ContentType.
+type AuthTokenAPICreateAuthTokenJSONRequestBody = AuthTokenAPICreateAuthTokenJSONBody
+
+// AuthTokenAPIUpdateAuthTokenJSONRequestBody defines body for AuthTokenAPIUpdateAuthToken for application/json ContentType.
+type AuthTokenAPIUpdateAuthTokenJSONRequestBody = AuthTokenAPIUpdateAuthTokenJSONBody
+
+// UsersAPICreateInvitationsJSONRequestBody defines body for UsersAPICreateInvitations for application/json ContentType.
+type UsersAPICreateInvitationsJSONRequestBody = UsersAPICreateInvitationsJSONBody
+
+// UsersAPIClaimInvitationJSONRequestBody defines body for UsersAPIClaimInvitation for application/json ContentType.
+type UsersAPIClaimInvitationJSONRequestBody = UsersAPIClaimInvitationJSONBody
+
+// NodeTemplatesAPIFilterInstanceTypesJSONRequestBody defines body for NodeTemplatesAPIFilterInstanceTypes for application/json ContentType.
+type NodeTemplatesAPIFilterInstanceTypesJSONRequestBody = NodeTemplatesAPIFilterInstanceTypesJSONBody
+
+// NodeConfigurationAPICreateConfigurationJSONRequestBody defines body for NodeConfigurationAPICreateConfiguration for application/json ContentType.
+type NodeConfigurationAPICreateConfigurationJSONRequestBody = NodeConfigurationAPICreateConfigurationJSONBody
+
+// NodeConfigurationAPIUpdateConfigurationJSONRequestBody defines body for NodeConfigurationAPIUpdateConfiguration for application/json ContentType.
+type NodeConfigurationAPIUpdateConfigurationJSONRequestBody = NodeConfigurationAPIUpdateConfigurationJSONBody
+
+// NodeTemplatesAPICreateNodeTemplateJSONRequestBody defines body for NodeTemplatesAPICreateNodeTemplate for application/json ContentType.
+type NodeTemplatesAPICreateNodeTemplateJSONRequestBody = NodeTemplatesAPICreateNodeTemplateJSONBody
+
+// NodeTemplatesAPIUpdateNodeTemplateJSONRequestBody defines body for NodeTemplatesAPIUpdateNodeTemplate for application/json ContentType.
+type NodeTemplatesAPIUpdateNodeTemplateJSONRequestBody = NodeTemplatesAPIUpdateNodeTemplateJSONBody
+
+// PoliciesAPIUpsertClusterPoliciesJSONRequestBody defines body for PoliciesAPIUpsertClusterPolicies for application/json ContentType.
+type PoliciesAPIUpsertClusterPoliciesJSONRequestBody = PoliciesAPIUpsertClusterPoliciesJSONBody
+
+// ScheduledRebalancingAPICreateRebalancingJobJSONRequestBody defines body for ScheduledRebalancingAPICreateRebalancingJob for application/json ContentType.
+type ScheduledRebalancingAPICreateRebalancingJobJSONRequestBody = ScheduledRebalancingAPICreateRebalancingJobJSONBody
+
+// ScheduledRebalancingAPIUpdateRebalancingJobJSONRequestBody defines body for ScheduledRebalancingAPIUpdateRebalancingJob for application/json ContentType.
+type ScheduledRebalancingAPIUpdateRebalancingJobJSONRequestBody = ScheduledRebalancingAPIUpdateRebalancingJobJSONBody
+
+// ScheduledRebalancingAPIPreviewRebalancingScheduleJSONRequestBody defines body for ScheduledRebalancingAPIPreviewRebalancingSchedule for application/json ContentType.
+type ScheduledRebalancingAPIPreviewRebalancingScheduleJSONRequestBody = ScheduledRebalancingAPIPreviewRebalancingScheduleJSONBody
+
+// ExternalClusterAPIRegisterClusterJSONRequestBody defines body for ExternalClusterAPIRegisterCluster for application/json ContentType.
+type ExternalClusterAPIRegisterClusterJSONRequestBody = ExternalClusterAPIRegisterClusterJSONBody
+
+// ExternalClusterAPIUpdateClusterJSONRequestBody defines body for ExternalClusterAPIUpdateCluster for application/json ContentType.
+type ExternalClusterAPIUpdateClusterJSONRequestBody = ExternalClusterAPIUpdateClusterJSONBody
+
+// ExternalClusterAPIDisconnectClusterJSONRequestBody defines body for ExternalClusterAPIDisconnectCluster for application/json ContentType.
+type ExternalClusterAPIDisconnectClusterJSONRequestBody = ExternalClusterAPIDisconnectClusterJSONBody
+
+// ExternalClusterAPIHandleCloudEventJSONRequestBody defines body for ExternalClusterAPIHandleCloudEvent for application/json ContentType.
+type ExternalClusterAPIHandleCloudEventJSONRequestBody = ExternalClusterAPIHandleCloudEventJSONBody
+
+// ExternalClusterAPIAddNodeJSONRequestBody defines body for ExternalClusterAPIAddNode for application/json ContentType.
+type ExternalClusterAPIAddNodeJSONRequestBody = ExternalClusterAPIAddNodeJSONBody
+
+// ExternalClusterAPIDrainNodeJSONRequestBody defines body for ExternalClusterAPIDrainNode for application/json ContentType.
+type ExternalClusterAPIDrainNodeJSONRequestBody = ExternalClusterAPIDrainNodeJSONBody
+
+// UsersAPIUpdateCurrentUserProfileJSONRequestBody defines body for UsersAPIUpdateCurrentUserProfile for application/json ContentType.
+type UsersAPIUpdateCurrentUserProfileJSONRequestBody = UsersAPIUpdateCurrentUserProfileJSONBody
+
+// UsersAPICreateOrganizationJSONRequestBody defines body for UsersAPICreateOrganization for application/json ContentType.
+type UsersAPICreateOrganizationJSONRequestBody = UsersAPICreateOrganizationJSONBody
+
+// UsersAPIEditOrganizationJSONRequestBody defines body for UsersAPIEditOrganization for application/json ContentType.
+type UsersAPIEditOrganizationJSONRequestBody = UsersAPIEditOrganizationJSONBody
+
+// InventoryAPIAddReservationJSONRequestBody defines body for InventoryAPIAddReservation for application/json ContentType.
+type InventoryAPIAddReservationJSONRequestBody = InventoryAPIAddReservationJSONBody
+
+// InventoryAPIOverwriteReservationsJSONRequestBody defines body for InventoryAPIOverwriteReservations for application/json ContentType.
+type InventoryAPIOverwriteReservationsJSONRequestBody = InventoryAPIOverwriteReservationsJSONBody
+
+// UsersAPIAddUserToOrganizationJSONRequestBody defines body for UsersAPIAddUserToOrganization for application/json ContentType.
+type UsersAPIAddUserToOrganizationJSONRequestBody = UsersAPIAddUserToOrganizationJSONBody
+
+// UsersAPIUpdateOrganizationUserJSONRequestBody defines body for UsersAPIUpdateOrganizationUser for application/json ContentType.
+type UsersAPIUpdateOrganizationUserJSONRequestBody = UsersAPIUpdateOrganizationUserJSONBody
+
+// ScheduledRebalancingAPICreateRebalancingScheduleJSONRequestBody defines body for ScheduledRebalancingAPICreateRebalancingSchedule for application/json ContentType.
+type ScheduledRebalancingAPICreateRebalancingScheduleJSONRequestBody = ScheduledRebalancingAPICreateRebalancingScheduleJSONBody
+
+// ScheduledRebalancingAPIUpdateRebalancingScheduleJSONRequestBody defines body for ScheduledRebalancingAPIUpdateRebalancingSchedule for application/json ContentType.
+type ScheduledRebalancingAPIUpdateRebalancingScheduleJSONRequestBody = ScheduledRebalancingAPIUpdateRebalancingScheduleJSONBody
+
+// Getter for additional properties for ExternalclusterV1EKSClusterParams_Tags. Returns the specified
+// element and whether it was found
+func (a ExternalclusterV1EKSClusterParams_Tags) Get(fieldName string) (value string, found bool) {
+	if a.AdditionalProperties != nil {
+		value, found = a.AdditionalProperties[fieldName]
+	}
+	return
+}
+
+// Setter for additional properties for ExternalclusterV1EKSClusterParams_Tags
+func (a *ExternalclusterV1EKSClusterParams_Tags) Set(fieldName string, value string) {
+	if a.AdditionalProperties == nil {
+		a.AdditionalProperties = make(map[string]string)
+	}
+	a.AdditionalProperties[fieldName] = value
+}
+
+// Override default JSON handling for ExternalclusterV1EKSClusterParams_Tags to handle AdditionalProperties
+func (a *ExternalclusterV1EKSClusterParams_Tags) UnmarshalJSON(b []byte) error {
+	object := make(map[string]json.RawMessage)
+	err := json.Unmarshal(b, &object)
+	if err != nil {
+		return err
+	}
+
+	if len(object) != 0 {
+		a.AdditionalProperties = make(map[string]string)
+		for fieldName, fieldBuf := range object {
+			var fieldVal string
+			err := json.Unmarshal(fieldBuf, &fieldVal)
+			if err != nil {
+				return fmt.Errorf("error unmarshaling field %s: %w", fieldName, err)
+			}
+			a.AdditionalProperties[fieldName] = fieldVal
+		}
+	}
+	return nil
+}
+
+// Override default JSON handling for ExternalclusterV1EKSClusterParams_Tags to handle AdditionalProperties
+func (a ExternalclusterV1EKSClusterParams_Tags) MarshalJSON() ([]byte, error) {
+	var err error
+	object := make(map[string]json.RawMessage)
+
+	for fieldName, field := range a.AdditionalProperties {
+		object[fieldName], err = json.Marshal(field)
+		if err != nil {
+			return nil, fmt.Errorf("error marshaling '%s': %w", fieldName, err)
+		}
+	}
+	return json.Marshal(object)
+}
+
+// Getter for additional properties for ExternalclusterV1Node_Annotations. Returns the specified
+// element and whether it was found
+func (a ExternalclusterV1Node_Annotations) Get(fieldName string) (value string, found bool) {
+	if a.AdditionalProperties != nil {
+		value, found = a.AdditionalProperties[fieldName]
+	}
+	return
+}
+
+// Setter for additional properties for ExternalclusterV1Node_Annotations
+func (a *ExternalclusterV1Node_Annotations) Set(fieldName string, value string) {
+	if a.AdditionalProperties == nil {
+		a.AdditionalProperties = make(map[string]string)
+	}
+	a.AdditionalProperties[fieldName] = value
+}
+
+// Override default JSON handling for ExternalclusterV1Node_Annotations to handle AdditionalProperties
+func (a *ExternalclusterV1Node_Annotations) UnmarshalJSON(b []byte) error {
+	object := make(map[string]json.RawMessage)
+	err := json.Unmarshal(b, &object)
+	if err != nil {
+		return err
+	}
+
+	if len(object) != 0 {
+		a.AdditionalProperties = make(map[string]string)
+		for fieldName, fieldBuf := range object {
+			var fieldVal string
+			err := json.Unmarshal(fieldBuf, &fieldVal)
+			if err != nil {
+				return fmt.Errorf("error unmarshaling field %s: %w", fieldName, err)
+			}
+			a.AdditionalProperties[fieldName] = fieldVal
+		}
+	}
+	return nil
+}
+
+// Override default JSON handling for ExternalclusterV1Node_Annotations to handle AdditionalProperties
+func (a ExternalclusterV1Node_Annotations) MarshalJSON() ([]byte, error) {
+	var err error
+	object := make(map[string]json.RawMessage)
+
+	for fieldName, field := range a.AdditionalProperties {
+		object[fieldName], err = json.Marshal(field)
+		if err != nil {
+			return nil, fmt.Errorf("error marshaling '%s': %w", fieldName, err)
+		}
+	}
+	return json.Marshal(object)
+}
+
+// Getter for additional properties for ExternalclusterV1Node_InstanceLabels. Returns the specified
+// element and whether it was found
+func (a ExternalclusterV1Node_InstanceLabels) Get(fieldName string) (value string, found bool) {
+	if a.AdditionalProperties != nil {
+		value, found = a.AdditionalProperties[fieldName]
+	}
+	return
+}
+
+// Setter for additional properties for ExternalclusterV1Node_InstanceLabels
+func (a *ExternalclusterV1Node_InstanceLabels) Set(fieldName string, value string) {
+	if a.AdditionalProperties == nil {
+		a.AdditionalProperties = make(map[string]string)
+	}
+	a.AdditionalProperties[fieldName] = value
+}
+
+// Override default JSON handling for ExternalclusterV1Node_InstanceLabels to handle AdditionalProperties
+func (a *ExternalclusterV1Node_InstanceLabels) UnmarshalJSON(b []byte) error {
+	object := make(map[string]json.RawMessage)
+	err := json.Unmarshal(b, &object)
+	if err != nil {
+		return err
+	}
+
+	if len(object) != 0 {
+		a.AdditionalProperties = make(map[string]string)
+		for fieldName, fieldBuf := range object {
+			var fieldVal string
+			err := json.Unmarshal(fieldBuf, &fieldVal)
+			if err != nil {
+				return fmt.Errorf("error unmarshaling field %s: %w", fieldName, err)
+			}
+			a.AdditionalProperties[fieldName] = fieldVal
+		}
+	}
+	return nil
+}
+
+// Override default JSON handling for ExternalclusterV1Node_InstanceLabels to handle AdditionalProperties
+func (a ExternalclusterV1Node_InstanceLabels) MarshalJSON() ([]byte, error) {
+	var err error
+	object := make(map[string]json.RawMessage)
+
+	for fieldName, field := range a.AdditionalProperties {
+		object[fieldName], err = json.Marshal(field)
+		if err != nil {
+			return nil, fmt.Errorf("error marshaling '%s': %w", fieldName, err)
+		}
+	}
+	return json.Marshal(object)
+}
+
+// Getter for additional properties for ExternalclusterV1Node_Labels. Returns the specified
+// element and whether it was found
+func (a ExternalclusterV1Node_Labels) Get(fieldName string) (value string, found bool) {
+	if a.AdditionalProperties != nil {
+		value, found = a.AdditionalProperties[fieldName]
+	}
+	return
+}
+
+// Setter for additional properties for ExternalclusterV1Node_Labels
+func (a *ExternalclusterV1Node_Labels) Set(fieldName string, value string) {
+	if a.AdditionalProperties == nil {
+		a.AdditionalProperties = make(map[string]string)
+	}
+	a.AdditionalProperties[fieldName] = value
+}
+
+// Override default JSON handling for ExternalclusterV1Node_Labels to handle AdditionalProperties
+func (a *ExternalclusterV1Node_Labels) UnmarshalJSON(b []byte) error {
+	object := make(map[string]json.RawMessage)
+	err := json.Unmarshal(b, &object)
+	if err != nil {
+		return err
+	}
+
+	if len(object) != 0 {
+		a.AdditionalProperties = make(map[string]string)
+		for fieldName, fieldBuf := range object {
+			var fieldVal string
+			err := json.Unmarshal(fieldBuf, &fieldVal)
+			if err != nil {
+				return fmt.Errorf("error unmarshaling field %s: %w", fieldName, err)
+			}
+			a.AdditionalProperties[fieldName] = fieldVal
+		}
+	}
+	return nil
+}
+
+// Override default JSON handling for ExternalclusterV1Node_Labels to handle AdditionalProperties
+func (a ExternalclusterV1Node_Labels) MarshalJSON() ([]byte, error) {
+	var err error
+	object := make(map[string]json.RawMessage)
+
+	for fieldName, field := range a.AdditionalProperties {
+		object[fieldName], err = json.Marshal(field)
+		if err != nil {
+			return nil, fmt.Errorf("error marshaling '%s': %w", fieldName, err)
+		}
+	}
+	return json.Marshal(object)
+}
+
+// Getter for additional properties for ExternalclusterV1NodeConfig_KubernetesLabels. Returns the specified
+// element and whether it was found
+func (a ExternalclusterV1NodeConfig_KubernetesLabels) Get(fieldName string) (value string, found bool) {
+	if a.AdditionalProperties != nil {
+		value, found = a.AdditionalProperties[fieldName]
+	}
+	return
+}
+
+// Setter for additional properties for ExternalclusterV1NodeConfig_KubernetesLabels
+func (a *ExternalclusterV1NodeConfig_KubernetesLabels) Set(fieldName string, value string) {
+	if a.AdditionalProperties == nil {
+		a.AdditionalProperties = make(map[string]string)
+	}
+	a.AdditionalProperties[fieldName] = value
+}
+
+// Override default JSON handling for ExternalclusterV1NodeConfig_KubernetesLabels to handle AdditionalProperties
+func (a *ExternalclusterV1NodeConfig_KubernetesLabels) UnmarshalJSON(b []byte) error {
+	object := make(map[string]json.RawMessage)
+	err := json.Unmarshal(b, &object)
+	if err != nil {
+		return err
+	}
+
+	if len(object) != 0 {
+		a.AdditionalProperties = make(map[string]string)
+		for fieldName, fieldBuf := range object {
+			var fieldVal string
+			err := json.Unmarshal(fieldBuf, &fieldVal)
+			if err != nil {
+				return fmt.Errorf("error unmarshaling field %s: %w", fieldName, err)
+			}
+			a.AdditionalProperties[fieldName] = fieldVal
+		}
+	}
+	return nil
+}
+
+// Override default JSON handling for ExternalclusterV1NodeConfig_KubernetesLabels to handle AdditionalProperties
+func (a ExternalclusterV1NodeConfig_KubernetesLabels) MarshalJSON() ([]byte, error) {
+	var err error
+	object := make(map[string]json.RawMessage)
+
+	for fieldName, field := range a.AdditionalProperties {
+		object[fieldName], err = json.Marshal(field)
+		if err != nil {
+			return nil, fmt.Errorf("error marshaling '%s': %w", fieldName, err)
+		}
+	}
+	return json.Marshal(object)
+}
+
+// Getter for additional properties for NodeconfigV1NewNodeConfiguration_Tags. Returns the specified
+// element and whether it was found
+func (a NodeconfigV1NewNodeConfiguration_Tags) Get(fieldName string) (value string, found bool) {
+	if a.AdditionalProperties != nil {
+		value, found = a.AdditionalProperties[fieldName]
+	}
+	return
+}
+
+// Setter for additional properties for NodeconfigV1NewNodeConfiguration_Tags
+func (a *NodeconfigV1NewNodeConfiguration_Tags) Set(fieldName string, value string) {
+	if a.AdditionalProperties == nil {
+		a.AdditionalProperties = make(map[string]string)
+	}
+	a.AdditionalProperties[fieldName] = value
+}
+
+// Override default JSON handling for NodeconfigV1NewNodeConfiguration_Tags to handle AdditionalProperties
+func (a *NodeconfigV1NewNodeConfiguration_Tags) UnmarshalJSON(b []byte) error {
+	object := make(map[string]json.RawMessage)
+	err := json.Unmarshal(b, &object)
+	if err != nil {
+		return err
+	}
+
+	if len(object) != 0 {
+		a.AdditionalProperties = make(map[string]string)
+		for fieldName, fieldBuf := range object {
+			var fieldVal string
+			err := json.Unmarshal(fieldBuf, &fieldVal)
+			if err != nil {
+				return fmt.Errorf("error unmarshaling field %s: %w", fieldName, err)
+			}
+			a.AdditionalProperties[fieldName] = fieldVal
+		}
+	}
+	return nil
+}
+
+// Override default JSON handling for NodeconfigV1NewNodeConfiguration_Tags to handle AdditionalProperties
+func (a NodeconfigV1NewNodeConfiguration_Tags) MarshalJSON() ([]byte, error) {
+	var err error
+	object := make(map[string]json.RawMessage)
+
+	for fieldName, field := range a.AdditionalProperties {
+		object[fieldName], err = json.Marshal(field)
+		if err != nil {
+			return nil, fmt.Errorf("error marshaling '%s': %w", fieldName, err)
+		}
+	}
+	return json.Marshal(object)
+}
+
+// Getter for additional properties for NodeconfigV1NodeConfiguration_Tags. Returns the specified
+// element and whether it was found
+func (a NodeconfigV1NodeConfiguration_Tags) Get(fieldName string) (value string, found bool) {
+	if a.AdditionalProperties != nil {
+		value, found = a.AdditionalProperties[fieldName]
+	}
+	return
+}
+
+// Setter for additional properties for NodeconfigV1NodeConfiguration_Tags
+func (a *NodeconfigV1NodeConfiguration_Tags) Set(fieldName string, value string) {
+	if a.AdditionalProperties == nil {
+		a.AdditionalProperties = make(map[string]string)
+	}
+	a.AdditionalProperties[fieldName] = value
+}
+
+// Override default JSON handling for NodeconfigV1NodeConfiguration_Tags to handle AdditionalProperties
+func (a *NodeconfigV1NodeConfiguration_Tags) UnmarshalJSON(b []byte) error {
+	object := make(map[string]json.RawMessage)
+	err := json.Unmarshal(b, &object)
+	if err != nil {
+		return err
+	}
+
+	if len(object) != 0 {
+		a.AdditionalProperties = make(map[string]string)
+		for fieldName, fieldBuf := range object {
+			var fieldVal string
+			err := json.Unmarshal(fieldBuf, &fieldVal)
+			if err != nil {
+				return fmt.Errorf("error unmarshaling field %s: %w", fieldName, err)
+			}
+			a.AdditionalProperties[fieldName] = fieldVal
+		}
+	}
+	return nil
+}
+
+// Override default JSON handling for NodeconfigV1NodeConfiguration_Tags to handle AdditionalProperties
+func (a NodeconfigV1NodeConfiguration_Tags) MarshalJSON() ([]byte, error) {
+	var err error
+	object := make(map[string]json.RawMessage)
+
+	for fieldName, field := range a.AdditionalProperties {
+		object[fieldName], err = json.Marshal(field)
+		if err != nil {
+			return nil, fmt.Errorf("error marshaling '%s': %w", fieldName, err)
+		}
+	}
+	return json.Marshal(object)
+}
+
+// Getter for additional properties for NodeconfigV1NodeConfigurationUpdate_Tags. Returns the specified
+// element and whether it was found
+func (a NodeconfigV1NodeConfigurationUpdate_Tags) Get(fieldName string) (value string, found bool) {
+	if a.AdditionalProperties != nil {
+		value, found = a.AdditionalProperties[fieldName]
+	}
+	return
+}
+
+// Setter for additional properties for NodeconfigV1NodeConfigurationUpdate_Tags
+func (a *NodeconfigV1NodeConfigurationUpdate_Tags) Set(fieldName string, value string) {
+	if a.AdditionalProperties == nil {
+		a.AdditionalProperties = make(map[string]string)
+	}
+	a.AdditionalProperties[fieldName] = value
+}
+
+// Override default JSON handling for NodeconfigV1NodeConfigurationUpdate_Tags to handle AdditionalProperties
+func (a *NodeconfigV1NodeConfigurationUpdate_Tags) UnmarshalJSON(b []byte) error {
+	object := make(map[string]json.RawMessage)
+	err := json.Unmarshal(b, &object)
+	if err != nil {
+		return err
+	}
+
+	if len(object) != 0 {
+		a.AdditionalProperties = make(map[string]string)
+		for fieldName, fieldBuf := range object {
+			var fieldVal string
+			err := json.Unmarshal(fieldBuf, &fieldVal)
+			if err != nil {
+				return fmt.Errorf("error unmarshaling field %s: %w", fieldName, err)
+			}
+			a.AdditionalProperties[fieldName] = fieldVal
+		}
+	}
+	return nil
+}
+
+// Override default JSON handling for NodeconfigV1NodeConfigurationUpdate_Tags to handle AdditionalProperties
+func (a NodeconfigV1NodeConfigurationUpdate_Tags) MarshalJSON() ([]byte, error) {
+	var err error
+	object := make(map[string]json.RawMessage)
+
+	for fieldName, field := range a.AdditionalProperties {
+		object[fieldName], err = json.Marshal(field)
+		if err != nil {
+			return nil, fmt.Errorf("error marshaling '%s': %w", fieldName, err)
+		}
+	}
+	return json.Marshal(object)
+}
+
+// Getter for additional properties for NodetemplatesV1NewNodeTemplate_CustomLabels. Returns the specified
+// element and whether it was found
+func (a NodetemplatesV1NewNodeTemplate_CustomLabels) Get(fieldName string) (value string, found bool) {
+	if a.AdditionalProperties != nil {
+		value, found = a.AdditionalProperties[fieldName]
+	}
+	return
+}
+
+// Setter for additional properties for NodetemplatesV1NewNodeTemplate_CustomLabels
+func (a *NodetemplatesV1NewNodeTemplate_CustomLabels) Set(fieldName string, value string) {
+	if a.AdditionalProperties == nil {
+		a.AdditionalProperties = make(map[string]string)
+	}
+	a.AdditionalProperties[fieldName] = value
+}
+
+// Override default JSON handling for NodetemplatesV1NewNodeTemplate_CustomLabels to handle AdditionalProperties
+func (a *NodetemplatesV1NewNodeTemplate_CustomLabels) UnmarshalJSON(b []byte) error {
+	object := make(map[string]json.RawMessage)
+	err := json.Unmarshal(b, &object)
+	if err != nil {
+		return err
+	}
+
+	if len(object) != 0 {
+		a.AdditionalProperties = make(map[string]string)
+		for fieldName, fieldBuf := range object {
+			var fieldVal string
+			err := json.Unmarshal(fieldBuf, &fieldVal)
+			if err != nil {
+				return fmt.Errorf("error unmarshaling field %s: %w", fieldName, err)
+			}
+			a.AdditionalProperties[fieldName] = fieldVal
+		}
+	}
+	return nil
+}
+
+// Override default JSON handling for NodetemplatesV1NewNodeTemplate_CustomLabels to handle AdditionalProperties
+func (a NodetemplatesV1NewNodeTemplate_CustomLabels) MarshalJSON() ([]byte, error) {
+	var err error
+	object := make(map[string]json.RawMessage)
+
+	for fieldName, field := range a.AdditionalProperties {
+		object[fieldName], err = json.Marshal(field)
+		if err != nil {
+			return nil, fmt.Errorf("error marshaling '%s': %w", fieldName, err)
+		}
+	}
+	return json.Marshal(object)
+}
+
+// Getter for additional properties for NodetemplatesV1NodeTemplate_CustomLabels. Returns the specified
+// element and whether it was found
+func (a NodetemplatesV1NodeTemplate_CustomLabels) Get(fieldName string) (value string, found bool) {
+	if a.AdditionalProperties != nil {
+		value, found = a.AdditionalProperties[fieldName]
+	}
+	return
+}
+
+// Setter for additional properties for NodetemplatesV1NodeTemplate_CustomLabels
+func (a *NodetemplatesV1NodeTemplate_CustomLabels) Set(fieldName string, value string) {
+	if a.AdditionalProperties == nil {
+		a.AdditionalProperties = make(map[string]string)
+	}
+	a.AdditionalProperties[fieldName] = value
+}
+
+// Override default JSON handling for NodetemplatesV1NodeTemplate_CustomLabels to handle AdditionalProperties
+func (a *NodetemplatesV1NodeTemplate_CustomLabels) UnmarshalJSON(b []byte) error {
+	object := make(map[string]json.RawMessage)
+	err := json.Unmarshal(b, &object)
+	if err != nil {
+		return err
+	}
+
+	if len(object) != 0 {
+		a.AdditionalProperties = make(map[string]string)
+		for fieldName, fieldBuf := range object {
+			var fieldVal string
+			err := json.Unmarshal(fieldBuf, &fieldVal)
+			if err != nil {
+				return fmt.Errorf("error unmarshaling field %s: %w", fieldName, err)
+			}
+			a.AdditionalProperties[fieldName] = fieldVal
+		}
+	}
+	return nil
+}
+
+// Override default JSON handling for NodetemplatesV1NodeTemplate_CustomLabels to handle AdditionalProperties
+func (a NodetemplatesV1NodeTemplate_CustomLabels) MarshalJSON() ([]byte, error) {
+	var err error
+	object := make(map[string]json.RawMessage)
+
+	for fieldName, field := range a.AdditionalProperties {
+		object[fieldName], err = json.Marshal(field)
+		if err != nil {
+			return nil, fmt.Errorf("error marshaling '%s': %w", fieldName, err)
+		}
+	}
+	return json.Marshal(object)
+}
+
+// Getter for additional properties for NodetemplatesV1UpdateNodeTemplate_CustomLabels. Returns the specified
+// element and whether it was found
+func (a NodetemplatesV1UpdateNodeTemplate_CustomLabels) Get(fieldName string) (value string, found bool) {
+	if a.AdditionalProperties != nil {
+		value, found = a.AdditionalProperties[fieldName]
+	}
+	return
+}
+
+// Setter for additional properties for NodetemplatesV1UpdateNodeTemplate_CustomLabels
+func (a *NodetemplatesV1UpdateNodeTemplate_CustomLabels) Set(fieldName string, value string) {
+	if a.AdditionalProperties == nil {
+		a.AdditionalProperties = make(map[string]string)
+	}
+	a.AdditionalProperties[fieldName] = value
+}
+
+// Override default JSON handling for NodetemplatesV1UpdateNodeTemplate_CustomLabels to handle AdditionalProperties
+func (a *NodetemplatesV1UpdateNodeTemplate_CustomLabels) UnmarshalJSON(b []byte) error {
+	object := make(map[string]json.RawMessage)
+	err := json.Unmarshal(b, &object)
+	if err != nil {
+		return err
+	}
+
+	if len(object) != 0 {
+		a.AdditionalProperties = make(map[string]string)
+		for fieldName, fieldBuf := range object {
+			var fieldVal string
+			err := json.Unmarshal(fieldBuf, &fieldVal)
+			if err != nil {
+				return fmt.Errorf("error unmarshaling field %s: %w", fieldName, err)
+			}
+			a.AdditionalProperties[fieldName] = fieldVal
+		}
+	}
+	return nil
+}
+
+// Override default JSON handling for NodetemplatesV1UpdateNodeTemplate_CustomLabels to handle AdditionalProperties
+func (a NodetemplatesV1UpdateNodeTemplate_CustomLabels) MarshalJSON() ([]byte, error) {
+	var err error
+	object := make(map[string]json.RawMessage)
+
+	for fieldName, field := range a.AdditionalProperties {
+		object[fieldName], err = json.Marshal(field)
+		if err != nil {
+			return nil, fmt.Errorf("error marshaling '%s': %w", fieldName, err)
+		}
+	}
+	return json.Marshal(object)
+}
 
 // RequestEditorFn  is the function signature for the RequestEditor callback function
 type RequestEditorFn func(ctx context.Context, req *http.Request) error
@@ -109,21 +2998,21 @@ type ClientInterface interface {
 
 	AuthTokenAPIUpdateAuthToken(ctx context.Context, id string, body AuthTokenAPIUpdateAuthTokenJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// ListInvitations request
-	ListInvitations(ctx context.Context, params *ListInvitationsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// UsersAPIListInvitations request
+	UsersAPIListInvitations(ctx context.Context, params *UsersAPIListInvitationsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// CreateInvitation request with any body
-	CreateInvitationWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// UsersAPICreateInvitations request with any body
+	UsersAPICreateInvitationsWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	CreateInvitation(ctx context.Context, body CreateInvitationJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+	UsersAPICreateInvitations(ctx context.Context, body UsersAPICreateInvitationsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// DeleteInvitation request
-	DeleteInvitation(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// UsersAPIDeleteInvitation request
+	UsersAPIDeleteInvitation(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// ClaimInvitation request with any body
-	ClaimInvitationWithBody(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// UsersAPIClaimInvitation request with any body
+	UsersAPIClaimInvitationWithBody(ctx context.Context, invitationId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	ClaimInvitation(ctx context.Context, id string, body ClaimInvitationJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+	UsersAPIClaimInvitation(ctx context.Context, invitationId string, body UsersAPIClaimInvitationJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// NodeTemplatesAPIFilterInstanceTypes request with any body
 	NodeTemplatesAPIFilterInstanceTypesWithBody(ctx context.Context, clusterId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -281,48 +3170,32 @@ type ClientInterface interface {
 	// ExternalClusterAPICreateClusterToken request
 	ExternalClusterAPICreateClusterToken(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// CurrentUserProfile request
-	CurrentUserProfile(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// UsersAPICurrentUserProfile request
+	UsersAPICurrentUserProfile(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// UpdateCurrentUserProfile request with any body
-	UpdateCurrentUserProfileWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// UsersAPIUpdateCurrentUserProfile request with any body
+	UsersAPIUpdateCurrentUserProfileWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	UpdateCurrentUserProfile(ctx context.Context, body UpdateCurrentUserProfileJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+	UsersAPIUpdateCurrentUserProfile(ctx context.Context, body UsersAPIUpdateCurrentUserProfileJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// ListOrganizations request
-	ListOrganizations(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// UsersAPIListOrganizations request
+	UsersAPIListOrganizations(ctx context.Context, params *UsersAPIListOrganizationsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// CreateOrganization request with any body
-	CreateOrganizationWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// UsersAPICreateOrganization request with any body
+	UsersAPICreateOrganizationWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	CreateOrganization(ctx context.Context, body CreateOrganizationJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+	UsersAPICreateOrganization(ctx context.Context, body UsersAPICreateOrganizationJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// DeleteOrganization request
-	DeleteOrganization(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// UsersAPIDeleteOrganization request
+	UsersAPIDeleteOrganization(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// GetOrganization request
-	GetOrganization(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// UsersAPIGetOrganization request
+	UsersAPIGetOrganization(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// UpdateOrganization request with any body
-	UpdateOrganizationWithBody(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// UsersAPIEditOrganization request with any body
+	UsersAPIEditOrganizationWithBody(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	UpdateOrganization(ctx context.Context, id string, body UpdateOrganizationJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
-
-	// GetOrganizationUsers request
-	GetOrganizationUsers(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
-
-	// CreateOrganizationUser request with any body
-	CreateOrganizationUserWithBody(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
-
-	CreateOrganizationUser(ctx context.Context, id string, body CreateOrganizationUserJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
-
-	// DeleteOrganizationUser request
-	DeleteOrganizationUser(ctx context.Context, id string, userId string, reqEditors ...RequestEditorFn) (*http.Response, error)
-
-	// UpdateOrganizationUser request with any body
-	UpdateOrganizationUserWithBody(ctx context.Context, id string, userId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
-
-	UpdateOrganizationUser(ctx context.Context, id string, userId string, body UpdateOrganizationUserJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+	UsersAPIEditOrganization(ctx context.Context, id string, body UsersAPIEditOrganizationJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// InventoryAPISyncClusterResources request
 	InventoryAPISyncClusterResources(ctx context.Context, organizationId string, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -348,6 +3221,22 @@ type ClientInterface interface {
 
 	// InventoryAPIGetResourceUsage request
 	InventoryAPIGetResourceUsage(ctx context.Context, organizationId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// UsersAPIListOrganizationUsers request
+	UsersAPIListOrganizationUsers(ctx context.Context, organizationId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// UsersAPIAddUserToOrganization request with any body
+	UsersAPIAddUserToOrganizationWithBody(ctx context.Context, organizationId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	UsersAPIAddUserToOrganization(ctx context.Context, organizationId string, body UsersAPIAddUserToOrganizationJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// UsersAPIRemoveUserFromOrganization request
+	UsersAPIRemoveUserFromOrganization(ctx context.Context, organizationId string, userId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// UsersAPIUpdateOrganizationUser request with any body
+	UsersAPIUpdateOrganizationUserWithBody(ctx context.Context, organizationId string, userId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	UsersAPIUpdateOrganizationUser(ctx context.Context, organizationId string, userId string, body UsersAPIUpdateOrganizationUserJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// ScheduledRebalancingAPIListRebalancingSchedules request
 	ScheduledRebalancingAPIListRebalancingSchedules(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -462,8 +3351,8 @@ func (c *Client) AuthTokenAPIUpdateAuthToken(ctx context.Context, id string, bod
 	return c.Client.Do(req)
 }
 
-func (c *Client) ListInvitations(ctx context.Context, params *ListInvitationsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewListInvitationsRequest(c.Server, params)
+func (c *Client) UsersAPIListInvitations(ctx context.Context, params *UsersAPIListInvitationsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUsersAPIListInvitationsRequest(c.Server, params)
 	if err != nil {
 		return nil, err
 	}
@@ -474,8 +3363,8 @@ func (c *Client) ListInvitations(ctx context.Context, params *ListInvitationsPar
 	return c.Client.Do(req)
 }
 
-func (c *Client) CreateInvitationWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewCreateInvitationRequestWithBody(c.Server, contentType, body)
+func (c *Client) UsersAPICreateInvitationsWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUsersAPICreateInvitationsRequestWithBody(c.Server, contentType, body)
 	if err != nil {
 		return nil, err
 	}
@@ -486,8 +3375,8 @@ func (c *Client) CreateInvitationWithBody(ctx context.Context, contentType strin
 	return c.Client.Do(req)
 }
 
-func (c *Client) CreateInvitation(ctx context.Context, body CreateInvitationJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewCreateInvitationRequest(c.Server, body)
+func (c *Client) UsersAPICreateInvitations(ctx context.Context, body UsersAPICreateInvitationsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUsersAPICreateInvitationsRequest(c.Server, body)
 	if err != nil {
 		return nil, err
 	}
@@ -498,8 +3387,8 @@ func (c *Client) CreateInvitation(ctx context.Context, body CreateInvitationJSON
 	return c.Client.Do(req)
 }
 
-func (c *Client) DeleteInvitation(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewDeleteInvitationRequest(c.Server, id)
+func (c *Client) UsersAPIDeleteInvitation(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUsersAPIDeleteInvitationRequest(c.Server, id)
 	if err != nil {
 		return nil, err
 	}
@@ -510,8 +3399,8 @@ func (c *Client) DeleteInvitation(ctx context.Context, id string, reqEditors ...
 	return c.Client.Do(req)
 }
 
-func (c *Client) ClaimInvitationWithBody(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewClaimInvitationRequestWithBody(c.Server, id, contentType, body)
+func (c *Client) UsersAPIClaimInvitationWithBody(ctx context.Context, invitationId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUsersAPIClaimInvitationRequestWithBody(c.Server, invitationId, contentType, body)
 	if err != nil {
 		return nil, err
 	}
@@ -522,8 +3411,8 @@ func (c *Client) ClaimInvitationWithBody(ctx context.Context, id string, content
 	return c.Client.Do(req)
 }
 
-func (c *Client) ClaimInvitation(ctx context.Context, id string, body ClaimInvitationJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewClaimInvitationRequest(c.Server, id, body)
+func (c *Client) UsersAPIClaimInvitation(ctx context.Context, invitationId string, body UsersAPIClaimInvitationJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUsersAPIClaimInvitationRequest(c.Server, invitationId, body)
 	if err != nil {
 		return nil, err
 	}
@@ -1218,8 +4107,8 @@ func (c *Client) ExternalClusterAPICreateClusterToken(ctx context.Context, clust
 	return c.Client.Do(req)
 }
 
-func (c *Client) CurrentUserProfile(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewCurrentUserProfileRequest(c.Server)
+func (c *Client) UsersAPICurrentUserProfile(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUsersAPICurrentUserProfileRequest(c.Server)
 	if err != nil {
 		return nil, err
 	}
@@ -1230,8 +4119,8 @@ func (c *Client) CurrentUserProfile(ctx context.Context, reqEditors ...RequestEd
 	return c.Client.Do(req)
 }
 
-func (c *Client) UpdateCurrentUserProfileWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewUpdateCurrentUserProfileRequestWithBody(c.Server, contentType, body)
+func (c *Client) UsersAPIUpdateCurrentUserProfileWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUsersAPIUpdateCurrentUserProfileRequestWithBody(c.Server, contentType, body)
 	if err != nil {
 		return nil, err
 	}
@@ -1242,8 +4131,8 @@ func (c *Client) UpdateCurrentUserProfileWithBody(ctx context.Context, contentTy
 	return c.Client.Do(req)
 }
 
-func (c *Client) UpdateCurrentUserProfile(ctx context.Context, body UpdateCurrentUserProfileJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewUpdateCurrentUserProfileRequest(c.Server, body)
+func (c *Client) UsersAPIUpdateCurrentUserProfile(ctx context.Context, body UsersAPIUpdateCurrentUserProfileJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUsersAPIUpdateCurrentUserProfileRequest(c.Server, body)
 	if err != nil {
 		return nil, err
 	}
@@ -1254,8 +4143,8 @@ func (c *Client) UpdateCurrentUserProfile(ctx context.Context, body UpdateCurren
 	return c.Client.Do(req)
 }
 
-func (c *Client) ListOrganizations(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewListOrganizationsRequest(c.Server)
+func (c *Client) UsersAPIListOrganizations(ctx context.Context, params *UsersAPIListOrganizationsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUsersAPIListOrganizationsRequest(c.Server, params)
 	if err != nil {
 		return nil, err
 	}
@@ -1266,8 +4155,8 @@ func (c *Client) ListOrganizations(ctx context.Context, reqEditors ...RequestEdi
 	return c.Client.Do(req)
 }
 
-func (c *Client) CreateOrganizationWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewCreateOrganizationRequestWithBody(c.Server, contentType, body)
+func (c *Client) UsersAPICreateOrganizationWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUsersAPICreateOrganizationRequestWithBody(c.Server, contentType, body)
 	if err != nil {
 		return nil, err
 	}
@@ -1278,8 +4167,8 @@ func (c *Client) CreateOrganizationWithBody(ctx context.Context, contentType str
 	return c.Client.Do(req)
 }
 
-func (c *Client) CreateOrganization(ctx context.Context, body CreateOrganizationJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewCreateOrganizationRequest(c.Server, body)
+func (c *Client) UsersAPICreateOrganization(ctx context.Context, body UsersAPICreateOrganizationJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUsersAPICreateOrganizationRequest(c.Server, body)
 	if err != nil {
 		return nil, err
 	}
@@ -1290,8 +4179,8 @@ func (c *Client) CreateOrganization(ctx context.Context, body CreateOrganization
 	return c.Client.Do(req)
 }
 
-func (c *Client) DeleteOrganization(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewDeleteOrganizationRequest(c.Server, id)
+func (c *Client) UsersAPIDeleteOrganization(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUsersAPIDeleteOrganizationRequest(c.Server, id)
 	if err != nil {
 		return nil, err
 	}
@@ -1302,8 +4191,8 @@ func (c *Client) DeleteOrganization(ctx context.Context, id string, reqEditors .
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetOrganization(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewGetOrganizationRequest(c.Server, id)
+func (c *Client) UsersAPIGetOrganization(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUsersAPIGetOrganizationRequest(c.Server, id)
 	if err != nil {
 		return nil, err
 	}
@@ -1314,8 +4203,8 @@ func (c *Client) GetOrganization(ctx context.Context, id string, reqEditors ...R
 	return c.Client.Do(req)
 }
 
-func (c *Client) UpdateOrganizationWithBody(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewUpdateOrganizationRequestWithBody(c.Server, id, contentType, body)
+func (c *Client) UsersAPIEditOrganizationWithBody(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUsersAPIEditOrganizationRequestWithBody(c.Server, id, contentType, body)
 	if err != nil {
 		return nil, err
 	}
@@ -1326,80 +4215,8 @@ func (c *Client) UpdateOrganizationWithBody(ctx context.Context, id string, cont
 	return c.Client.Do(req)
 }
 
-func (c *Client) UpdateOrganization(ctx context.Context, id string, body UpdateOrganizationJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewUpdateOrganizationRequest(c.Server, id, body)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
-func (c *Client) GetOrganizationUsers(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewGetOrganizationUsersRequest(c.Server, id)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
-func (c *Client) CreateOrganizationUserWithBody(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewCreateOrganizationUserRequestWithBody(c.Server, id, contentType, body)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
-func (c *Client) CreateOrganizationUser(ctx context.Context, id string, body CreateOrganizationUserJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewCreateOrganizationUserRequest(c.Server, id, body)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
-func (c *Client) DeleteOrganizationUser(ctx context.Context, id string, userId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewDeleteOrganizationUserRequest(c.Server, id, userId)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
-func (c *Client) UpdateOrganizationUserWithBody(ctx context.Context, id string, userId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewUpdateOrganizationUserRequestWithBody(c.Server, id, userId, contentType, body)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
-func (c *Client) UpdateOrganizationUser(ctx context.Context, id string, userId string, body UpdateOrganizationUserJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewUpdateOrganizationUserRequest(c.Server, id, userId, body)
+func (c *Client) UsersAPIEditOrganization(ctx context.Context, id string, body UsersAPIEditOrganizationJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUsersAPIEditOrganizationRequest(c.Server, id, body)
 	if err != nil {
 		return nil, err
 	}
@@ -1508,6 +4325,78 @@ func (c *Client) InventoryAPIDeleteReservation(ctx context.Context, organization
 
 func (c *Client) InventoryAPIGetResourceUsage(ctx context.Context, organizationId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewInventoryAPIGetResourceUsageRequest(c.Server, organizationId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) UsersAPIListOrganizationUsers(ctx context.Context, organizationId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUsersAPIListOrganizationUsersRequest(c.Server, organizationId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) UsersAPIAddUserToOrganizationWithBody(ctx context.Context, organizationId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUsersAPIAddUserToOrganizationRequestWithBody(c.Server, organizationId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) UsersAPIAddUserToOrganization(ctx context.Context, organizationId string, body UsersAPIAddUserToOrganizationJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUsersAPIAddUserToOrganizationRequest(c.Server, organizationId, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) UsersAPIRemoveUserFromOrganization(ctx context.Context, organizationId string, userId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUsersAPIRemoveUserFromOrganizationRequest(c.Server, organizationId, userId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) UsersAPIUpdateOrganizationUserWithBody(ctx context.Context, organizationId string, userId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUsersAPIUpdateOrganizationUserRequestWithBody(c.Server, organizationId, userId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) UsersAPIUpdateOrganizationUser(ctx context.Context, organizationId string, userId string, body UsersAPIUpdateOrganizationUserJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUsersAPIUpdateOrganizationUserRequest(c.Server, organizationId, userId, body)
 	if err != nil {
 		return nil, err
 	}
@@ -1840,8 +4729,8 @@ func NewAuthTokenAPIUpdateAuthTokenRequestWithBody(server string, id string, con
 	return req, nil
 }
 
-// NewListInvitationsRequest generates requests for ListInvitations
-func NewListInvitationsRequest(server string, params *ListInvitationsParams) (*http.Request, error) {
+// NewUsersAPIListInvitationsRequest generates requests for UsersAPIListInvitations
+func NewUsersAPIListInvitationsRequest(server string, params *UsersAPIListInvitationsParams) (*http.Request, error) {
 	var err error
 
 	serverURL, err := url.Parse(server)
@@ -1903,19 +4792,19 @@ func NewListInvitationsRequest(server string, params *ListInvitationsParams) (*h
 	return req, nil
 }
 
-// NewCreateInvitationRequest calls the generic CreateInvitation builder with application/json body
-func NewCreateInvitationRequest(server string, body CreateInvitationJSONRequestBody) (*http.Request, error) {
+// NewUsersAPICreateInvitationsRequest calls the generic UsersAPICreateInvitations builder with application/json body
+func NewUsersAPICreateInvitationsRequest(server string, body UsersAPICreateInvitationsJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
 	buf, err := json.Marshal(body)
 	if err != nil {
 		return nil, err
 	}
 	bodyReader = bytes.NewReader(buf)
-	return NewCreateInvitationRequestWithBody(server, "application/json", bodyReader)
+	return NewUsersAPICreateInvitationsRequestWithBody(server, "application/json", bodyReader)
 }
 
-// NewCreateInvitationRequestWithBody generates requests for CreateInvitation with any type of body
-func NewCreateInvitationRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+// NewUsersAPICreateInvitationsRequestWithBody generates requests for UsersAPICreateInvitations with any type of body
+func NewUsersAPICreateInvitationsRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
 	var err error
 
 	serverURL, err := url.Parse(server)
@@ -1943,8 +4832,8 @@ func NewCreateInvitationRequestWithBody(server string, contentType string, body 
 	return req, nil
 }
 
-// NewDeleteInvitationRequest generates requests for DeleteInvitation
-func NewDeleteInvitationRequest(server string, id string) (*http.Request, error) {
+// NewUsersAPIDeleteInvitationRequest generates requests for UsersAPIDeleteInvitation
+func NewUsersAPIDeleteInvitationRequest(server string, id string) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -1977,24 +4866,24 @@ func NewDeleteInvitationRequest(server string, id string) (*http.Request, error)
 	return req, nil
 }
 
-// NewClaimInvitationRequest calls the generic ClaimInvitation builder with application/json body
-func NewClaimInvitationRequest(server string, id string, body ClaimInvitationJSONRequestBody) (*http.Request, error) {
+// NewUsersAPIClaimInvitationRequest calls the generic UsersAPIClaimInvitation builder with application/json body
+func NewUsersAPIClaimInvitationRequest(server string, invitationId string, body UsersAPIClaimInvitationJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
 	buf, err := json.Marshal(body)
 	if err != nil {
 		return nil, err
 	}
 	bodyReader = bytes.NewReader(buf)
-	return NewClaimInvitationRequestWithBody(server, id, "application/json", bodyReader)
+	return NewUsersAPIClaimInvitationRequestWithBody(server, invitationId, "application/json", bodyReader)
 }
 
-// NewClaimInvitationRequestWithBody generates requests for ClaimInvitation with any type of body
-func NewClaimInvitationRequestWithBody(server string, id string, contentType string, body io.Reader) (*http.Request, error) {
+// NewUsersAPIClaimInvitationRequestWithBody generates requests for UsersAPIClaimInvitation with any type of body
+func NewUsersAPIClaimInvitationRequestWithBody(server string, invitationId string, contentType string, body io.Reader) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
 
-	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "invitationId", runtime.ParamLocationPath, invitationId)
 	if err != nil {
 		return nil, err
 	}
@@ -3881,8 +6770,8 @@ func NewExternalClusterAPICreateClusterTokenRequest(server string, clusterId str
 	return req, nil
 }
 
-// NewCurrentUserProfileRequest generates requests for CurrentUserProfile
-func NewCurrentUserProfileRequest(server string) (*http.Request, error) {
+// NewUsersAPICurrentUserProfileRequest generates requests for UsersAPICurrentUserProfile
+func NewUsersAPICurrentUserProfileRequest(server string) (*http.Request, error) {
 	var err error
 
 	serverURL, err := url.Parse(server)
@@ -3908,19 +6797,19 @@ func NewCurrentUserProfileRequest(server string) (*http.Request, error) {
 	return req, nil
 }
 
-// NewUpdateCurrentUserProfileRequest calls the generic UpdateCurrentUserProfile builder with application/json body
-func NewUpdateCurrentUserProfileRequest(server string, body UpdateCurrentUserProfileJSONRequestBody) (*http.Request, error) {
+// NewUsersAPIUpdateCurrentUserProfileRequest calls the generic UsersAPIUpdateCurrentUserProfile builder with application/json body
+func NewUsersAPIUpdateCurrentUserProfileRequest(server string, body UsersAPIUpdateCurrentUserProfileJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
 	buf, err := json.Marshal(body)
 	if err != nil {
 		return nil, err
 	}
 	bodyReader = bytes.NewReader(buf)
-	return NewUpdateCurrentUserProfileRequestWithBody(server, "application/json", bodyReader)
+	return NewUsersAPIUpdateCurrentUserProfileRequestWithBody(server, "application/json", bodyReader)
 }
 
-// NewUpdateCurrentUserProfileRequestWithBody generates requests for UpdateCurrentUserProfile with any type of body
-func NewUpdateCurrentUserProfileRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+// NewUsersAPIUpdateCurrentUserProfileRequestWithBody generates requests for UsersAPIUpdateCurrentUserProfile with any type of body
+func NewUsersAPIUpdateCurrentUserProfileRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
 	var err error
 
 	serverURL, err := url.Parse(server)
@@ -3948,8 +6837,8 @@ func NewUpdateCurrentUserProfileRequestWithBody(server string, contentType strin
 	return req, nil
 }
 
-// NewListOrganizationsRequest generates requests for ListOrganizations
-func NewListOrganizationsRequest(server string) (*http.Request, error) {
+// NewUsersAPIListOrganizationsRequest generates requests for UsersAPIListOrganizations
+func NewUsersAPIListOrganizationsRequest(server string, params *UsersAPIListOrganizationsParams) (*http.Request, error) {
 	var err error
 
 	serverURL, err := url.Parse(server)
@@ -3967,6 +6856,42 @@ func NewListOrganizationsRequest(server string) (*http.Request, error) {
 		return nil, err
 	}
 
+	queryValues := queryURL.Query()
+
+	if params.UserId != nil {
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "userId", runtime.ParamLocationQuery, *params.UserId); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.Username != nil {
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "username", runtime.ParamLocationQuery, *params.Username); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	queryURL.RawQuery = queryValues.Encode()
+
 	req, err := http.NewRequest("GET", queryURL.String(), nil)
 	if err != nil {
 		return nil, err
@@ -3975,19 +6900,19 @@ func NewListOrganizationsRequest(server string) (*http.Request, error) {
 	return req, nil
 }
 
-// NewCreateOrganizationRequest calls the generic CreateOrganization builder with application/json body
-func NewCreateOrganizationRequest(server string, body CreateOrganizationJSONRequestBody) (*http.Request, error) {
+// NewUsersAPICreateOrganizationRequest calls the generic UsersAPICreateOrganization builder with application/json body
+func NewUsersAPICreateOrganizationRequest(server string, body UsersAPICreateOrganizationJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
 	buf, err := json.Marshal(body)
 	if err != nil {
 		return nil, err
 	}
 	bodyReader = bytes.NewReader(buf)
-	return NewCreateOrganizationRequestWithBody(server, "application/json", bodyReader)
+	return NewUsersAPICreateOrganizationRequestWithBody(server, "application/json", bodyReader)
 }
 
-// NewCreateOrganizationRequestWithBody generates requests for CreateOrganization with any type of body
-func NewCreateOrganizationRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+// NewUsersAPICreateOrganizationRequestWithBody generates requests for UsersAPICreateOrganization with any type of body
+func NewUsersAPICreateOrganizationRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
 	var err error
 
 	serverURL, err := url.Parse(server)
@@ -4015,8 +6940,8 @@ func NewCreateOrganizationRequestWithBody(server string, contentType string, bod
 	return req, nil
 }
 
-// NewDeleteOrganizationRequest generates requests for DeleteOrganization
-func NewDeleteOrganizationRequest(server string, id string) (*http.Request, error) {
+// NewUsersAPIDeleteOrganizationRequest generates requests for UsersAPIDeleteOrganization
+func NewUsersAPIDeleteOrganizationRequest(server string, id string) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -4049,8 +6974,8 @@ func NewDeleteOrganizationRequest(server string, id string) (*http.Request, erro
 	return req, nil
 }
 
-// NewGetOrganizationRequest generates requests for GetOrganization
-func NewGetOrganizationRequest(server string, id string) (*http.Request, error) {
+// NewUsersAPIGetOrganizationRequest generates requests for UsersAPIGetOrganization
+func NewUsersAPIGetOrganizationRequest(server string, id string) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -4083,19 +7008,19 @@ func NewGetOrganizationRequest(server string, id string) (*http.Request, error) 
 	return req, nil
 }
 
-// NewUpdateOrganizationRequest calls the generic UpdateOrganization builder with application/json body
-func NewUpdateOrganizationRequest(server string, id string, body UpdateOrganizationJSONRequestBody) (*http.Request, error) {
+// NewUsersAPIEditOrganizationRequest calls the generic UsersAPIEditOrganization builder with application/json body
+func NewUsersAPIEditOrganizationRequest(server string, id string, body UsersAPIEditOrganizationJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
 	buf, err := json.Marshal(body)
 	if err != nil {
 		return nil, err
 	}
 	bodyReader = bytes.NewReader(buf)
-	return NewUpdateOrganizationRequestWithBody(server, id, "application/json", bodyReader)
+	return NewUsersAPIEditOrganizationRequestWithBody(server, id, "application/json", bodyReader)
 }
 
-// NewUpdateOrganizationRequestWithBody generates requests for UpdateOrganization with any type of body
-func NewUpdateOrganizationRequestWithBody(server string, id string, contentType string, body io.Reader) (*http.Request, error) {
+// NewUsersAPIEditOrganizationRequestWithBody generates requests for UsersAPIEditOrganization with any type of body
+func NewUsersAPIEditOrganizationRequestWithBody(server string, id string, contentType string, body io.Reader) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -4121,182 +7046,6 @@ func NewUpdateOrganizationRequestWithBody(server string, id string, contentType 
 	}
 
 	req, err := http.NewRequest("POST", queryURL.String(), body)
-	if err != nil {
-		return nil, err
-	}
-
-	req.Header.Add("Content-Type", contentType)
-
-	return req, nil
-}
-
-// NewGetOrganizationUsersRequest generates requests for GetOrganizationUsers
-func NewGetOrganizationUsersRequest(server string, id string) (*http.Request, error) {
-	var err error
-
-	var pathParam0 string
-
-	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
-	if err != nil {
-		return nil, err
-	}
-
-	serverURL, err := url.Parse(server)
-	if err != nil {
-		return nil, err
-	}
-
-	operationPath := fmt.Sprintf("/v1/organizations/%s/users", pathParam0)
-	if operationPath[0] == '/' {
-		operationPath = "." + operationPath
-	}
-
-	queryURL, err := serverURL.Parse(operationPath)
-	if err != nil {
-		return nil, err
-	}
-
-	req, err := http.NewRequest("GET", queryURL.String(), nil)
-	if err != nil {
-		return nil, err
-	}
-
-	return req, nil
-}
-
-// NewCreateOrganizationUserRequest calls the generic CreateOrganizationUser builder with application/json body
-func NewCreateOrganizationUserRequest(server string, id string, body CreateOrganizationUserJSONRequestBody) (*http.Request, error) {
-	var bodyReader io.Reader
-	buf, err := json.Marshal(body)
-	if err != nil {
-		return nil, err
-	}
-	bodyReader = bytes.NewReader(buf)
-	return NewCreateOrganizationUserRequestWithBody(server, id, "application/json", bodyReader)
-}
-
-// NewCreateOrganizationUserRequestWithBody generates requests for CreateOrganizationUser with any type of body
-func NewCreateOrganizationUserRequestWithBody(server string, id string, contentType string, body io.Reader) (*http.Request, error) {
-	var err error
-
-	var pathParam0 string
-
-	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
-	if err != nil {
-		return nil, err
-	}
-
-	serverURL, err := url.Parse(server)
-	if err != nil {
-		return nil, err
-	}
-
-	operationPath := fmt.Sprintf("/v1/organizations/%s/users", pathParam0)
-	if operationPath[0] == '/' {
-		operationPath = "." + operationPath
-	}
-
-	queryURL, err := serverURL.Parse(operationPath)
-	if err != nil {
-		return nil, err
-	}
-
-	req, err := http.NewRequest("POST", queryURL.String(), body)
-	if err != nil {
-		return nil, err
-	}
-
-	req.Header.Add("Content-Type", contentType)
-
-	return req, nil
-}
-
-// NewDeleteOrganizationUserRequest generates requests for DeleteOrganizationUser
-func NewDeleteOrganizationUserRequest(server string, id string, userId string) (*http.Request, error) {
-	var err error
-
-	var pathParam0 string
-
-	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
-	if err != nil {
-		return nil, err
-	}
-
-	var pathParam1 string
-
-	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "userId", runtime.ParamLocationPath, userId)
-	if err != nil {
-		return nil, err
-	}
-
-	serverURL, err := url.Parse(server)
-	if err != nil {
-		return nil, err
-	}
-
-	operationPath := fmt.Sprintf("/v1/organizations/%s/users/%s", pathParam0, pathParam1)
-	if operationPath[0] == '/' {
-		operationPath = "." + operationPath
-	}
-
-	queryURL, err := serverURL.Parse(operationPath)
-	if err != nil {
-		return nil, err
-	}
-
-	req, err := http.NewRequest("DELETE", queryURL.String(), nil)
-	if err != nil {
-		return nil, err
-	}
-
-	return req, nil
-}
-
-// NewUpdateOrganizationUserRequest calls the generic UpdateOrganizationUser builder with application/json body
-func NewUpdateOrganizationUserRequest(server string, id string, userId string, body UpdateOrganizationUserJSONRequestBody) (*http.Request, error) {
-	var bodyReader io.Reader
-	buf, err := json.Marshal(body)
-	if err != nil {
-		return nil, err
-	}
-	bodyReader = bytes.NewReader(buf)
-	return NewUpdateOrganizationUserRequestWithBody(server, id, userId, "application/json", bodyReader)
-}
-
-// NewUpdateOrganizationUserRequestWithBody generates requests for UpdateOrganizationUser with any type of body
-func NewUpdateOrganizationUserRequestWithBody(server string, id string, userId string, contentType string, body io.Reader) (*http.Request, error) {
-	var err error
-
-	var pathParam0 string
-
-	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
-	if err != nil {
-		return nil, err
-	}
-
-	var pathParam1 string
-
-	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "userId", runtime.ParamLocationPath, userId)
-	if err != nil {
-		return nil, err
-	}
-
-	serverURL, err := url.Parse(server)
-	if err != nil {
-		return nil, err
-	}
-
-	operationPath := fmt.Sprintf("/v1/organizations/%s/users/%s", pathParam0, pathParam1)
-	if operationPath[0] == '/' {
-		operationPath = "." + operationPath
-	}
-
-	queryURL, err := serverURL.Parse(operationPath)
-	if err != nil {
-		return nil, err
-	}
-
-	req, err := http.NewRequest("PUT", queryURL.String(), body)
 	if err != nil {
 		return nil, err
 	}
@@ -4580,6 +7329,182 @@ func NewInventoryAPIGetResourceUsageRequest(server string, organizationId string
 	if err != nil {
 		return nil, err
 	}
+
+	return req, nil
+}
+
+// NewUsersAPIListOrganizationUsersRequest generates requests for UsersAPIListOrganizationUsers
+func NewUsersAPIListOrganizationUsersRequest(server string, organizationId string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "organizationId", runtime.ParamLocationPath, organizationId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/organizations/%s/users", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewUsersAPIAddUserToOrganizationRequest calls the generic UsersAPIAddUserToOrganization builder with application/json body
+func NewUsersAPIAddUserToOrganizationRequest(server string, organizationId string, body UsersAPIAddUserToOrganizationJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewUsersAPIAddUserToOrganizationRequestWithBody(server, organizationId, "application/json", bodyReader)
+}
+
+// NewUsersAPIAddUserToOrganizationRequestWithBody generates requests for UsersAPIAddUserToOrganization with any type of body
+func NewUsersAPIAddUserToOrganizationRequestWithBody(server string, organizationId string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "organizationId", runtime.ParamLocationPath, organizationId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/organizations/%s/users", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewUsersAPIRemoveUserFromOrganizationRequest generates requests for UsersAPIRemoveUserFromOrganization
+func NewUsersAPIRemoveUserFromOrganizationRequest(server string, organizationId string, userId string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "organizationId", runtime.ParamLocationPath, organizationId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "userId", runtime.ParamLocationPath, userId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/organizations/%s/users/%s", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("DELETE", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewUsersAPIUpdateOrganizationUserRequest calls the generic UsersAPIUpdateOrganizationUser builder with application/json body
+func NewUsersAPIUpdateOrganizationUserRequest(server string, organizationId string, userId string, body UsersAPIUpdateOrganizationUserJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewUsersAPIUpdateOrganizationUserRequestWithBody(server, organizationId, userId, "application/json", bodyReader)
+}
+
+// NewUsersAPIUpdateOrganizationUserRequestWithBody generates requests for UsersAPIUpdateOrganizationUser with any type of body
+func NewUsersAPIUpdateOrganizationUserRequestWithBody(server string, organizationId string, userId string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "organizationId", runtime.ParamLocationPath, organizationId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "userId", runtime.ParamLocationPath, userId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/organizations/%s/users/%s", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("PUT", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
 
 	return req, nil
 }
@@ -4938,301 +7863,292 @@ func WithBaseURL(baseURL string) ClientOption {
 // ClientWithResponsesInterface is the interface specification for the client with responses above.
 type ClientWithResponsesInterface interface {
 	// AuthTokenAPIListAuthTokens request
-	AuthTokenAPIListAuthTokensWithResponse(ctx context.Context, params *AuthTokenAPIListAuthTokensParams) (*AuthTokenAPIListAuthTokensResponse, error)
+	AuthTokenAPIListAuthTokensWithResponse(ctx context.Context, params *AuthTokenAPIListAuthTokensParams, reqEditors ...RequestEditorFn) (*AuthTokenAPIListAuthTokensResponse, error)
 
-	// AuthTokenAPICreateAuthToken request  with any body
-	AuthTokenAPICreateAuthTokenWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*AuthTokenAPICreateAuthTokenResponse, error)
+	// AuthTokenAPICreateAuthToken request with any body
+	AuthTokenAPICreateAuthTokenWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*AuthTokenAPICreateAuthTokenResponse, error)
 
-	AuthTokenAPICreateAuthTokenWithResponse(ctx context.Context, body AuthTokenAPICreateAuthTokenJSONRequestBody) (*AuthTokenAPICreateAuthTokenResponse, error)
+	AuthTokenAPICreateAuthTokenWithResponse(ctx context.Context, body AuthTokenAPICreateAuthTokenJSONRequestBody, reqEditors ...RequestEditorFn) (*AuthTokenAPICreateAuthTokenResponse, error)
 
 	// AuthTokenAPIDeleteAuthToken request
-	AuthTokenAPIDeleteAuthTokenWithResponse(ctx context.Context, id string) (*AuthTokenAPIDeleteAuthTokenResponse, error)
+	AuthTokenAPIDeleteAuthTokenWithResponse(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*AuthTokenAPIDeleteAuthTokenResponse, error)
 
 	// AuthTokenAPIGetAuthToken request
-	AuthTokenAPIGetAuthTokenWithResponse(ctx context.Context, id string) (*AuthTokenAPIGetAuthTokenResponse, error)
+	AuthTokenAPIGetAuthTokenWithResponse(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*AuthTokenAPIGetAuthTokenResponse, error)
 
-	// AuthTokenAPIUpdateAuthToken request  with any body
-	AuthTokenAPIUpdateAuthTokenWithBodyWithResponse(ctx context.Context, id string, contentType string, body io.Reader) (*AuthTokenAPIUpdateAuthTokenResponse, error)
+	// AuthTokenAPIUpdateAuthToken request with any body
+	AuthTokenAPIUpdateAuthTokenWithBodyWithResponse(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*AuthTokenAPIUpdateAuthTokenResponse, error)
 
-	AuthTokenAPIUpdateAuthTokenWithResponse(ctx context.Context, id string, body AuthTokenAPIUpdateAuthTokenJSONRequestBody) (*AuthTokenAPIUpdateAuthTokenResponse, error)
+	AuthTokenAPIUpdateAuthTokenWithResponse(ctx context.Context, id string, body AuthTokenAPIUpdateAuthTokenJSONRequestBody, reqEditors ...RequestEditorFn) (*AuthTokenAPIUpdateAuthTokenResponse, error)
 
-	// ListInvitations request
-	ListInvitationsWithResponse(ctx context.Context, params *ListInvitationsParams) (*ListInvitationsResponse, error)
+	// UsersAPIListInvitations request
+	UsersAPIListInvitationsWithResponse(ctx context.Context, params *UsersAPIListInvitationsParams, reqEditors ...RequestEditorFn) (*UsersAPIListInvitationsResponse, error)
 
-	// CreateInvitation request  with any body
-	CreateInvitationWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*CreateInvitationResponse, error)
+	// UsersAPICreateInvitations request with any body
+	UsersAPICreateInvitationsWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UsersAPICreateInvitationsResponse, error)
 
-	CreateInvitationWithResponse(ctx context.Context, body CreateInvitationJSONRequestBody) (*CreateInvitationResponse, error)
+	UsersAPICreateInvitationsWithResponse(ctx context.Context, body UsersAPICreateInvitationsJSONRequestBody, reqEditors ...RequestEditorFn) (*UsersAPICreateInvitationsResponse, error)
 
-	// DeleteInvitation request
-	DeleteInvitationWithResponse(ctx context.Context, id string) (*DeleteInvitationResponse, error)
+	// UsersAPIDeleteInvitation request
+	UsersAPIDeleteInvitationWithResponse(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*UsersAPIDeleteInvitationResponse, error)
 
-	// ClaimInvitation request  with any body
-	ClaimInvitationWithBodyWithResponse(ctx context.Context, id string, contentType string, body io.Reader) (*ClaimInvitationResponse, error)
+	// UsersAPIClaimInvitation request with any body
+	UsersAPIClaimInvitationWithBodyWithResponse(ctx context.Context, invitationId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UsersAPIClaimInvitationResponse, error)
 
-	ClaimInvitationWithResponse(ctx context.Context, id string, body ClaimInvitationJSONRequestBody) (*ClaimInvitationResponse, error)
+	UsersAPIClaimInvitationWithResponse(ctx context.Context, invitationId string, body UsersAPIClaimInvitationJSONRequestBody, reqEditors ...RequestEditorFn) (*UsersAPIClaimInvitationResponse, error)
 
-	// NodeTemplatesAPIFilterInstanceTypes request  with any body
-	NodeTemplatesAPIFilterInstanceTypesWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader) (*NodeTemplatesAPIFilterInstanceTypesResponse, error)
+	// NodeTemplatesAPIFilterInstanceTypes request with any body
+	NodeTemplatesAPIFilterInstanceTypesWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*NodeTemplatesAPIFilterInstanceTypesResponse, error)
 
-	NodeTemplatesAPIFilterInstanceTypesWithResponse(ctx context.Context, clusterId string, body NodeTemplatesAPIFilterInstanceTypesJSONRequestBody) (*NodeTemplatesAPIFilterInstanceTypesResponse, error)
+	NodeTemplatesAPIFilterInstanceTypesWithResponse(ctx context.Context, clusterId string, body NodeTemplatesAPIFilterInstanceTypesJSONRequestBody, reqEditors ...RequestEditorFn) (*NodeTemplatesAPIFilterInstanceTypesResponse, error)
 
 	// NodeConfigurationAPIListConfigurations request
-	NodeConfigurationAPIListConfigurationsWithResponse(ctx context.Context, clusterId string) (*NodeConfigurationAPIListConfigurationsResponse, error)
+	NodeConfigurationAPIListConfigurationsWithResponse(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*NodeConfigurationAPIListConfigurationsResponse, error)
 
-	// NodeConfigurationAPICreateConfiguration request  with any body
-	NodeConfigurationAPICreateConfigurationWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader) (*NodeConfigurationAPICreateConfigurationResponse, error)
+	// NodeConfigurationAPICreateConfiguration request with any body
+	NodeConfigurationAPICreateConfigurationWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*NodeConfigurationAPICreateConfigurationResponse, error)
 
-	NodeConfigurationAPICreateConfigurationWithResponse(ctx context.Context, clusterId string, body NodeConfigurationAPICreateConfigurationJSONRequestBody) (*NodeConfigurationAPICreateConfigurationResponse, error)
+	NodeConfigurationAPICreateConfigurationWithResponse(ctx context.Context, clusterId string, body NodeConfigurationAPICreateConfigurationJSONRequestBody, reqEditors ...RequestEditorFn) (*NodeConfigurationAPICreateConfigurationResponse, error)
 
 	// NodeConfigurationAPIGetSuggestedConfiguration request
-	NodeConfigurationAPIGetSuggestedConfigurationWithResponse(ctx context.Context, clusterId string) (*NodeConfigurationAPIGetSuggestedConfigurationResponse, error)
+	NodeConfigurationAPIGetSuggestedConfigurationWithResponse(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*NodeConfigurationAPIGetSuggestedConfigurationResponse, error)
 
 	// NodeConfigurationAPIDeleteConfiguration request
-	NodeConfigurationAPIDeleteConfigurationWithResponse(ctx context.Context, clusterId string, id string) (*NodeConfigurationAPIDeleteConfigurationResponse, error)
+	NodeConfigurationAPIDeleteConfigurationWithResponse(ctx context.Context, clusterId string, id string, reqEditors ...RequestEditorFn) (*NodeConfigurationAPIDeleteConfigurationResponse, error)
 
 	// NodeConfigurationAPIGetConfiguration request
-	NodeConfigurationAPIGetConfigurationWithResponse(ctx context.Context, clusterId string, id string) (*NodeConfigurationAPIGetConfigurationResponse, error)
+	NodeConfigurationAPIGetConfigurationWithResponse(ctx context.Context, clusterId string, id string, reqEditors ...RequestEditorFn) (*NodeConfigurationAPIGetConfigurationResponse, error)
 
-	// NodeConfigurationAPIUpdateConfiguration request  with any body
-	NodeConfigurationAPIUpdateConfigurationWithBodyWithResponse(ctx context.Context, clusterId string, id string, contentType string, body io.Reader) (*NodeConfigurationAPIUpdateConfigurationResponse, error)
+	// NodeConfigurationAPIUpdateConfiguration request with any body
+	NodeConfigurationAPIUpdateConfigurationWithBodyWithResponse(ctx context.Context, clusterId string, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*NodeConfigurationAPIUpdateConfigurationResponse, error)
 
-	NodeConfigurationAPIUpdateConfigurationWithResponse(ctx context.Context, clusterId string, id string, body NodeConfigurationAPIUpdateConfigurationJSONRequestBody) (*NodeConfigurationAPIUpdateConfigurationResponse, error)
+	NodeConfigurationAPIUpdateConfigurationWithResponse(ctx context.Context, clusterId string, id string, body NodeConfigurationAPIUpdateConfigurationJSONRequestBody, reqEditors ...RequestEditorFn) (*NodeConfigurationAPIUpdateConfigurationResponse, error)
 
 	// NodeConfigurationAPISetDefault request
-	NodeConfigurationAPISetDefaultWithResponse(ctx context.Context, clusterId string, id string) (*NodeConfigurationAPISetDefaultResponse, error)
+	NodeConfigurationAPISetDefaultWithResponse(ctx context.Context, clusterId string, id string, reqEditors ...RequestEditorFn) (*NodeConfigurationAPISetDefaultResponse, error)
 
 	// PoliciesAPIGetClusterNodeConstraints request
-	PoliciesAPIGetClusterNodeConstraintsWithResponse(ctx context.Context, clusterId string) (*PoliciesAPIGetClusterNodeConstraintsResponse, error)
+	PoliciesAPIGetClusterNodeConstraintsWithResponse(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*PoliciesAPIGetClusterNodeConstraintsResponse, error)
 
 	// NodeTemplatesAPIListNodeTemplates request
-	NodeTemplatesAPIListNodeTemplatesWithResponse(ctx context.Context, clusterId string, params *NodeTemplatesAPIListNodeTemplatesParams) (*NodeTemplatesAPIListNodeTemplatesResponse, error)
+	NodeTemplatesAPIListNodeTemplatesWithResponse(ctx context.Context, clusterId string, params *NodeTemplatesAPIListNodeTemplatesParams, reqEditors ...RequestEditorFn) (*NodeTemplatesAPIListNodeTemplatesResponse, error)
 
-	// NodeTemplatesAPICreateNodeTemplate request  with any body
-	NodeTemplatesAPICreateNodeTemplateWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader) (*NodeTemplatesAPICreateNodeTemplateResponse, error)
+	// NodeTemplatesAPICreateNodeTemplate request with any body
+	NodeTemplatesAPICreateNodeTemplateWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*NodeTemplatesAPICreateNodeTemplateResponse, error)
 
-	NodeTemplatesAPICreateNodeTemplateWithResponse(ctx context.Context, clusterId string, body NodeTemplatesAPICreateNodeTemplateJSONRequestBody) (*NodeTemplatesAPICreateNodeTemplateResponse, error)
+	NodeTemplatesAPICreateNodeTemplateWithResponse(ctx context.Context, clusterId string, body NodeTemplatesAPICreateNodeTemplateJSONRequestBody, reqEditors ...RequestEditorFn) (*NodeTemplatesAPICreateNodeTemplateResponse, error)
 
 	// NodeTemplatesAPIDeleteNodeTemplate request
-	NodeTemplatesAPIDeleteNodeTemplateWithResponse(ctx context.Context, clusterId string, nodeTemplateName string) (*NodeTemplatesAPIDeleteNodeTemplateResponse, error)
+	NodeTemplatesAPIDeleteNodeTemplateWithResponse(ctx context.Context, clusterId string, nodeTemplateName string, reqEditors ...RequestEditorFn) (*NodeTemplatesAPIDeleteNodeTemplateResponse, error)
 
-	// NodeTemplatesAPIUpdateNodeTemplate request  with any body
-	NodeTemplatesAPIUpdateNodeTemplateWithBodyWithResponse(ctx context.Context, clusterId string, nodeTemplateName string, contentType string, body io.Reader) (*NodeTemplatesAPIUpdateNodeTemplateResponse, error)
+	// NodeTemplatesAPIUpdateNodeTemplate request with any body
+	NodeTemplatesAPIUpdateNodeTemplateWithBodyWithResponse(ctx context.Context, clusterId string, nodeTemplateName string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*NodeTemplatesAPIUpdateNodeTemplateResponse, error)
 
-	NodeTemplatesAPIUpdateNodeTemplateWithResponse(ctx context.Context, clusterId string, nodeTemplateName string, body NodeTemplatesAPIUpdateNodeTemplateJSONRequestBody) (*NodeTemplatesAPIUpdateNodeTemplateResponse, error)
+	NodeTemplatesAPIUpdateNodeTemplateWithResponse(ctx context.Context, clusterId string, nodeTemplateName string, body NodeTemplatesAPIUpdateNodeTemplateJSONRequestBody, reqEditors ...RequestEditorFn) (*NodeTemplatesAPIUpdateNodeTemplateResponse, error)
 
 	// PoliciesAPIGetClusterPolicies request
-	PoliciesAPIGetClusterPoliciesWithResponse(ctx context.Context, clusterId string) (*PoliciesAPIGetClusterPoliciesResponse, error)
+	PoliciesAPIGetClusterPoliciesWithResponse(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*PoliciesAPIGetClusterPoliciesResponse, error)
 
-	// PoliciesAPIUpsertClusterPolicies request  with any body
-	PoliciesAPIUpsertClusterPoliciesWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader) (*PoliciesAPIUpsertClusterPoliciesResponse, error)
+	// PoliciesAPIUpsertClusterPolicies request with any body
+	PoliciesAPIUpsertClusterPoliciesWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PoliciesAPIUpsertClusterPoliciesResponse, error)
 
-	PoliciesAPIUpsertClusterPoliciesWithResponse(ctx context.Context, clusterId string, body PoliciesAPIUpsertClusterPoliciesJSONRequestBody) (*PoliciesAPIUpsertClusterPoliciesResponse, error)
+	PoliciesAPIUpsertClusterPoliciesWithResponse(ctx context.Context, clusterId string, body PoliciesAPIUpsertClusterPoliciesJSONRequestBody, reqEditors ...RequestEditorFn) (*PoliciesAPIUpsertClusterPoliciesResponse, error)
 
 	// ScheduledRebalancingAPIListRebalancingJobs request
-	ScheduledRebalancingAPIListRebalancingJobsWithResponse(ctx context.Context, clusterId string) (*ScheduledRebalancingAPIListRebalancingJobsResponse, error)
+	ScheduledRebalancingAPIListRebalancingJobsWithResponse(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*ScheduledRebalancingAPIListRebalancingJobsResponse, error)
 
-	// ScheduledRebalancingAPICreateRebalancingJob request  with any body
-	ScheduledRebalancingAPICreateRebalancingJobWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader) (*ScheduledRebalancingAPICreateRebalancingJobResponse, error)
+	// ScheduledRebalancingAPICreateRebalancingJob request with any body
+	ScheduledRebalancingAPICreateRebalancingJobWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*ScheduledRebalancingAPICreateRebalancingJobResponse, error)
 
-	ScheduledRebalancingAPICreateRebalancingJobWithResponse(ctx context.Context, clusterId string, body ScheduledRebalancingAPICreateRebalancingJobJSONRequestBody) (*ScheduledRebalancingAPICreateRebalancingJobResponse, error)
+	ScheduledRebalancingAPICreateRebalancingJobWithResponse(ctx context.Context, clusterId string, body ScheduledRebalancingAPICreateRebalancingJobJSONRequestBody, reqEditors ...RequestEditorFn) (*ScheduledRebalancingAPICreateRebalancingJobResponse, error)
 
 	// ScheduledRebalancingAPIDeleteRebalancingJob request
-	ScheduledRebalancingAPIDeleteRebalancingJobWithResponse(ctx context.Context, clusterId string, id string) (*ScheduledRebalancingAPIDeleteRebalancingJobResponse, error)
+	ScheduledRebalancingAPIDeleteRebalancingJobWithResponse(ctx context.Context, clusterId string, id string, reqEditors ...RequestEditorFn) (*ScheduledRebalancingAPIDeleteRebalancingJobResponse, error)
 
 	// ScheduledRebalancingAPIGetRebalancingJob request
-	ScheduledRebalancingAPIGetRebalancingJobWithResponse(ctx context.Context, clusterId string, id string) (*ScheduledRebalancingAPIGetRebalancingJobResponse, error)
+	ScheduledRebalancingAPIGetRebalancingJobWithResponse(ctx context.Context, clusterId string, id string, reqEditors ...RequestEditorFn) (*ScheduledRebalancingAPIGetRebalancingJobResponse, error)
 
-	// ScheduledRebalancingAPIUpdateRebalancingJob request  with any body
-	ScheduledRebalancingAPIUpdateRebalancingJobWithBodyWithResponse(ctx context.Context, clusterId string, id string, contentType string, body io.Reader) (*ScheduledRebalancingAPIUpdateRebalancingJobResponse, error)
+	// ScheduledRebalancingAPIUpdateRebalancingJob request with any body
+	ScheduledRebalancingAPIUpdateRebalancingJobWithBodyWithResponse(ctx context.Context, clusterId string, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*ScheduledRebalancingAPIUpdateRebalancingJobResponse, error)
 
-	ScheduledRebalancingAPIUpdateRebalancingJobWithResponse(ctx context.Context, clusterId string, id string, body ScheduledRebalancingAPIUpdateRebalancingJobJSONRequestBody) (*ScheduledRebalancingAPIUpdateRebalancingJobResponse, error)
+	ScheduledRebalancingAPIUpdateRebalancingJobWithResponse(ctx context.Context, clusterId string, id string, body ScheduledRebalancingAPIUpdateRebalancingJobJSONRequestBody, reqEditors ...RequestEditorFn) (*ScheduledRebalancingAPIUpdateRebalancingJobResponse, error)
 
-	// ScheduledRebalancingAPIPreviewRebalancingSchedule request  with any body
-	ScheduledRebalancingAPIPreviewRebalancingScheduleWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader) (*ScheduledRebalancingAPIPreviewRebalancingScheduleResponse, error)
+	// ScheduledRebalancingAPIPreviewRebalancingSchedule request with any body
+	ScheduledRebalancingAPIPreviewRebalancingScheduleWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*ScheduledRebalancingAPIPreviewRebalancingScheduleResponse, error)
 
-	ScheduledRebalancingAPIPreviewRebalancingScheduleWithResponse(ctx context.Context, clusterId string, body ScheduledRebalancingAPIPreviewRebalancingScheduleJSONRequestBody) (*ScheduledRebalancingAPIPreviewRebalancingScheduleResponse, error)
+	ScheduledRebalancingAPIPreviewRebalancingScheduleWithResponse(ctx context.Context, clusterId string, body ScheduledRebalancingAPIPreviewRebalancingScheduleJSONRequestBody, reqEditors ...RequestEditorFn) (*ScheduledRebalancingAPIPreviewRebalancingScheduleResponse, error)
 
 	// ExternalClusterAPIListClusters request
-	ExternalClusterAPIListClustersWithResponse(ctx context.Context, params *ExternalClusterAPIListClustersParams) (*ExternalClusterAPIListClustersResponse, error)
+	ExternalClusterAPIListClustersWithResponse(ctx context.Context, params *ExternalClusterAPIListClustersParams, reqEditors ...RequestEditorFn) (*ExternalClusterAPIListClustersResponse, error)
 
-	// ExternalClusterAPIRegisterCluster request  with any body
-	ExternalClusterAPIRegisterClusterWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*ExternalClusterAPIRegisterClusterResponse, error)
+	// ExternalClusterAPIRegisterCluster request with any body
+	ExternalClusterAPIRegisterClusterWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*ExternalClusterAPIRegisterClusterResponse, error)
 
-	ExternalClusterAPIRegisterClusterWithResponse(ctx context.Context, body ExternalClusterAPIRegisterClusterJSONRequestBody) (*ExternalClusterAPIRegisterClusterResponse, error)
+	ExternalClusterAPIRegisterClusterWithResponse(ctx context.Context, body ExternalClusterAPIRegisterClusterJSONRequestBody, reqEditors ...RequestEditorFn) (*ExternalClusterAPIRegisterClusterResponse, error)
 
 	// OperationsAPIGetOperation request
-	OperationsAPIGetOperationWithResponse(ctx context.Context, id string) (*OperationsAPIGetOperationResponse, error)
+	OperationsAPIGetOperationWithResponse(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*OperationsAPIGetOperationResponse, error)
 
 	// ExternalClusterAPIDeleteCluster request
-	ExternalClusterAPIDeleteClusterWithResponse(ctx context.Context, clusterId string) (*ExternalClusterAPIDeleteClusterResponse, error)
+	ExternalClusterAPIDeleteClusterWithResponse(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*ExternalClusterAPIDeleteClusterResponse, error)
 
 	// ExternalClusterAPIGetCluster request
-	ExternalClusterAPIGetClusterWithResponse(ctx context.Context, clusterId string) (*ExternalClusterAPIGetClusterResponse, error)
+	ExternalClusterAPIGetClusterWithResponse(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*ExternalClusterAPIGetClusterResponse, error)
 
-	// ExternalClusterAPIUpdateCluster request  with any body
-	ExternalClusterAPIUpdateClusterWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader) (*ExternalClusterAPIUpdateClusterResponse, error)
+	// ExternalClusterAPIUpdateCluster request with any body
+	ExternalClusterAPIUpdateClusterWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*ExternalClusterAPIUpdateClusterResponse, error)
 
-	ExternalClusterAPIUpdateClusterWithResponse(ctx context.Context, clusterId string, body ExternalClusterAPIUpdateClusterJSONRequestBody) (*ExternalClusterAPIUpdateClusterResponse, error)
+	ExternalClusterAPIUpdateClusterWithResponse(ctx context.Context, clusterId string, body ExternalClusterAPIUpdateClusterJSONRequestBody, reqEditors ...RequestEditorFn) (*ExternalClusterAPIUpdateClusterResponse, error)
 
 	// ExternalClusterAPIDeleteAssumeRolePrincipal request
-	ExternalClusterAPIDeleteAssumeRolePrincipalWithResponse(ctx context.Context, clusterId string) (*ExternalClusterAPIDeleteAssumeRolePrincipalResponse, error)
+	ExternalClusterAPIDeleteAssumeRolePrincipalWithResponse(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*ExternalClusterAPIDeleteAssumeRolePrincipalResponse, error)
 
 	// ExternalClusterAPIGetAssumeRolePrincipal request
-	ExternalClusterAPIGetAssumeRolePrincipalWithResponse(ctx context.Context, clusterId string) (*ExternalClusterAPIGetAssumeRolePrincipalResponse, error)
+	ExternalClusterAPIGetAssumeRolePrincipalWithResponse(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*ExternalClusterAPIGetAssumeRolePrincipalResponse, error)
 
 	// ExternalClusterAPICreateAssumeRolePrincipal request
-	ExternalClusterAPICreateAssumeRolePrincipalWithResponse(ctx context.Context, clusterId string) (*ExternalClusterAPICreateAssumeRolePrincipalResponse, error)
+	ExternalClusterAPICreateAssumeRolePrincipalWithResponse(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*ExternalClusterAPICreateAssumeRolePrincipalResponse, error)
 
 	// ExternalClusterAPIGetAssumeRoleUser request
-	ExternalClusterAPIGetAssumeRoleUserWithResponse(ctx context.Context, clusterId string) (*ExternalClusterAPIGetAssumeRoleUserResponse, error)
+	ExternalClusterAPIGetAssumeRoleUserWithResponse(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*ExternalClusterAPIGetAssumeRoleUserResponse, error)
 
 	// ExternalClusterAPIGetCleanupScript request
-	ExternalClusterAPIGetCleanupScriptWithResponse(ctx context.Context, clusterId string) (*ExternalClusterAPIGetCleanupScriptResponse, error)
+	ExternalClusterAPIGetCleanupScriptWithResponse(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*ExternalClusterAPIGetCleanupScriptResponse, error)
 
 	// ExternalClusterAPIGetCredentialsScript request
-	ExternalClusterAPIGetCredentialsScriptWithResponse(ctx context.Context, clusterId string, params *ExternalClusterAPIGetCredentialsScriptParams) (*ExternalClusterAPIGetCredentialsScriptResponse, error)
+	ExternalClusterAPIGetCredentialsScriptWithResponse(ctx context.Context, clusterId string, params *ExternalClusterAPIGetCredentialsScriptParams, reqEditors ...RequestEditorFn) (*ExternalClusterAPIGetCredentialsScriptResponse, error)
 
-	// ExternalClusterAPIDisconnectCluster request  with any body
-	ExternalClusterAPIDisconnectClusterWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader) (*ExternalClusterAPIDisconnectClusterResponse, error)
+	// ExternalClusterAPIDisconnectCluster request with any body
+	ExternalClusterAPIDisconnectClusterWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*ExternalClusterAPIDisconnectClusterResponse, error)
 
-	ExternalClusterAPIDisconnectClusterWithResponse(ctx context.Context, clusterId string, body ExternalClusterAPIDisconnectClusterJSONRequestBody) (*ExternalClusterAPIDisconnectClusterResponse, error)
+	ExternalClusterAPIDisconnectClusterWithResponse(ctx context.Context, clusterId string, body ExternalClusterAPIDisconnectClusterJSONRequestBody, reqEditors ...RequestEditorFn) (*ExternalClusterAPIDisconnectClusterResponse, error)
 
-	// ExternalClusterAPIHandleCloudEvent request  with any body
-	ExternalClusterAPIHandleCloudEventWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader) (*ExternalClusterAPIHandleCloudEventResponse, error)
+	// ExternalClusterAPIHandleCloudEvent request with any body
+	ExternalClusterAPIHandleCloudEventWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*ExternalClusterAPIHandleCloudEventResponse, error)
 
-	ExternalClusterAPIHandleCloudEventWithResponse(ctx context.Context, clusterId string, body ExternalClusterAPIHandleCloudEventJSONRequestBody) (*ExternalClusterAPIHandleCloudEventResponse, error)
+	ExternalClusterAPIHandleCloudEventWithResponse(ctx context.Context, clusterId string, body ExternalClusterAPIHandleCloudEventJSONRequestBody, reqEditors ...RequestEditorFn) (*ExternalClusterAPIHandleCloudEventResponse, error)
 
 	// ExternalClusterAPIListNodes request
-	ExternalClusterAPIListNodesWithResponse(ctx context.Context, clusterId string, params *ExternalClusterAPIListNodesParams) (*ExternalClusterAPIListNodesResponse, error)
+	ExternalClusterAPIListNodesWithResponse(ctx context.Context, clusterId string, params *ExternalClusterAPIListNodesParams, reqEditors ...RequestEditorFn) (*ExternalClusterAPIListNodesResponse, error)
 
-	// ExternalClusterAPIAddNode request  with any body
-	ExternalClusterAPIAddNodeWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader) (*ExternalClusterAPIAddNodeResponse, error)
+	// ExternalClusterAPIAddNode request with any body
+	ExternalClusterAPIAddNodeWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*ExternalClusterAPIAddNodeResponse, error)
 
-	ExternalClusterAPIAddNodeWithResponse(ctx context.Context, clusterId string, body ExternalClusterAPIAddNodeJSONRequestBody) (*ExternalClusterAPIAddNodeResponse, error)
+	ExternalClusterAPIAddNodeWithResponse(ctx context.Context, clusterId string, body ExternalClusterAPIAddNodeJSONRequestBody, reqEditors ...RequestEditorFn) (*ExternalClusterAPIAddNodeResponse, error)
 
 	// ExternalClusterAPIDeleteNode request
-	ExternalClusterAPIDeleteNodeWithResponse(ctx context.Context, clusterId string, nodeId string, params *ExternalClusterAPIDeleteNodeParams) (*ExternalClusterAPIDeleteNodeResponse, error)
+	ExternalClusterAPIDeleteNodeWithResponse(ctx context.Context, clusterId string, nodeId string, params *ExternalClusterAPIDeleteNodeParams, reqEditors ...RequestEditorFn) (*ExternalClusterAPIDeleteNodeResponse, error)
 
 	// ExternalClusterAPIGetNode request
-	ExternalClusterAPIGetNodeWithResponse(ctx context.Context, clusterId string, nodeId string) (*ExternalClusterAPIGetNodeResponse, error)
+	ExternalClusterAPIGetNodeWithResponse(ctx context.Context, clusterId string, nodeId string, reqEditors ...RequestEditorFn) (*ExternalClusterAPIGetNodeResponse, error)
 
-	// ExternalClusterAPIDrainNode request  with any body
-	ExternalClusterAPIDrainNodeWithBodyWithResponse(ctx context.Context, clusterId string, nodeId string, contentType string, body io.Reader) (*ExternalClusterAPIDrainNodeResponse, error)
+	// ExternalClusterAPIDrainNode request with any body
+	ExternalClusterAPIDrainNodeWithBodyWithResponse(ctx context.Context, clusterId string, nodeId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*ExternalClusterAPIDrainNodeResponse, error)
 
-	ExternalClusterAPIDrainNodeWithResponse(ctx context.Context, clusterId string, nodeId string, body ExternalClusterAPIDrainNodeJSONRequestBody) (*ExternalClusterAPIDrainNodeResponse, error)
+	ExternalClusterAPIDrainNodeWithResponse(ctx context.Context, clusterId string, nodeId string, body ExternalClusterAPIDrainNodeJSONRequestBody, reqEditors ...RequestEditorFn) (*ExternalClusterAPIDrainNodeResponse, error)
 
 	// ExternalClusterAPIReconcileCluster request
-	ExternalClusterAPIReconcileClusterWithResponse(ctx context.Context, clusterId string) (*ExternalClusterAPIReconcileClusterResponse, error)
+	ExternalClusterAPIReconcileClusterWithResponse(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*ExternalClusterAPIReconcileClusterResponse, error)
 
 	// ExternalClusterAPICreateClusterToken request
-	ExternalClusterAPICreateClusterTokenWithResponse(ctx context.Context, clusterId string) (*ExternalClusterAPICreateClusterTokenResponse, error)
+	ExternalClusterAPICreateClusterTokenWithResponse(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*ExternalClusterAPICreateClusterTokenResponse, error)
 
-	// CurrentUserProfile request
-	CurrentUserProfileWithResponse(ctx context.Context) (*CurrentUserProfileResponse, error)
+	// UsersAPICurrentUserProfile request
+	UsersAPICurrentUserProfileWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*UsersAPICurrentUserProfileResponse, error)
 
-	// UpdateCurrentUserProfile request  with any body
-	UpdateCurrentUserProfileWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*UpdateCurrentUserProfileResponse, error)
+	// UsersAPIUpdateCurrentUserProfile request with any body
+	UsersAPIUpdateCurrentUserProfileWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UsersAPIUpdateCurrentUserProfileResponse, error)
 
-	UpdateCurrentUserProfileWithResponse(ctx context.Context, body UpdateCurrentUserProfileJSONRequestBody) (*UpdateCurrentUserProfileResponse, error)
+	UsersAPIUpdateCurrentUserProfileWithResponse(ctx context.Context, body UsersAPIUpdateCurrentUserProfileJSONRequestBody, reqEditors ...RequestEditorFn) (*UsersAPIUpdateCurrentUserProfileResponse, error)
 
-	// ListOrganizations request
-	ListOrganizationsWithResponse(ctx context.Context) (*ListOrganizationsResponse, error)
+	// UsersAPIListOrganizations request
+	UsersAPIListOrganizationsWithResponse(ctx context.Context, params *UsersAPIListOrganizationsParams, reqEditors ...RequestEditorFn) (*UsersAPIListOrganizationsResponse, error)
 
-	// CreateOrganization request  with any body
-	CreateOrganizationWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*CreateOrganizationResponse, error)
+	// UsersAPICreateOrganization request with any body
+	UsersAPICreateOrganizationWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UsersAPICreateOrganizationResponse, error)
 
-	CreateOrganizationWithResponse(ctx context.Context, body CreateOrganizationJSONRequestBody) (*CreateOrganizationResponse, error)
+	UsersAPICreateOrganizationWithResponse(ctx context.Context, body UsersAPICreateOrganizationJSONRequestBody, reqEditors ...RequestEditorFn) (*UsersAPICreateOrganizationResponse, error)
 
-	// DeleteOrganization request
-	DeleteOrganizationWithResponse(ctx context.Context, id string) (*DeleteOrganizationResponse, error)
+	// UsersAPIDeleteOrganization request
+	UsersAPIDeleteOrganizationWithResponse(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*UsersAPIDeleteOrganizationResponse, error)
 
-	// GetOrganization request
-	GetOrganizationWithResponse(ctx context.Context, id string) (*GetOrganizationResponse, error)
+	// UsersAPIGetOrganization request
+	UsersAPIGetOrganizationWithResponse(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*UsersAPIGetOrganizationResponse, error)
 
-	// UpdateOrganization request  with any body
-	UpdateOrganizationWithBodyWithResponse(ctx context.Context, id string, contentType string, body io.Reader) (*UpdateOrganizationResponse, error)
+	// UsersAPIEditOrganization request with any body
+	UsersAPIEditOrganizationWithBodyWithResponse(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UsersAPIEditOrganizationResponse, error)
 
-	UpdateOrganizationWithResponse(ctx context.Context, id string, body UpdateOrganizationJSONRequestBody) (*UpdateOrganizationResponse, error)
-
-	// GetOrganizationUsers request
-	GetOrganizationUsersWithResponse(ctx context.Context, id string) (*GetOrganizationUsersResponse, error)
-
-	// CreateOrganizationUser request  with any body
-	CreateOrganizationUserWithBodyWithResponse(ctx context.Context, id string, contentType string, body io.Reader) (*CreateOrganizationUserResponse, error)
-
-	CreateOrganizationUserWithResponse(ctx context.Context, id string, body CreateOrganizationUserJSONRequestBody) (*CreateOrganizationUserResponse, error)
-
-	// DeleteOrganizationUser request
-	DeleteOrganizationUserWithResponse(ctx context.Context, id string, userId string) (*DeleteOrganizationUserResponse, error)
-
-	// UpdateOrganizationUser request  with any body
-	UpdateOrganizationUserWithBodyWithResponse(ctx context.Context, id string, userId string, contentType string, body io.Reader) (*UpdateOrganizationUserResponse, error)
-
-	UpdateOrganizationUserWithResponse(ctx context.Context, id string, userId string, body UpdateOrganizationUserJSONRequestBody) (*UpdateOrganizationUserResponse, error)
+	UsersAPIEditOrganizationWithResponse(ctx context.Context, id string, body UsersAPIEditOrganizationJSONRequestBody, reqEditors ...RequestEditorFn) (*UsersAPIEditOrganizationResponse, error)
 
 	// InventoryAPISyncClusterResources request
-	InventoryAPISyncClusterResourcesWithResponse(ctx context.Context, organizationId string, clusterId string) (*InventoryAPISyncClusterResourcesResponse, error)
+	InventoryAPISyncClusterResourcesWithResponse(ctx context.Context, organizationId string, clusterId string, reqEditors ...RequestEditorFn) (*InventoryAPISyncClusterResourcesResponse, error)
 
 	// InventoryAPIGetReservations request
-	InventoryAPIGetReservationsWithResponse(ctx context.Context, organizationId string) (*InventoryAPIGetReservationsResponse, error)
+	InventoryAPIGetReservationsWithResponse(ctx context.Context, organizationId string, reqEditors ...RequestEditorFn) (*InventoryAPIGetReservationsResponse, error)
 
-	// InventoryAPIAddReservation request  with any body
-	InventoryAPIAddReservationWithBodyWithResponse(ctx context.Context, organizationId string, contentType string, body io.Reader) (*InventoryAPIAddReservationResponse, error)
+	// InventoryAPIAddReservation request with any body
+	InventoryAPIAddReservationWithBodyWithResponse(ctx context.Context, organizationId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*InventoryAPIAddReservationResponse, error)
 
-	InventoryAPIAddReservationWithResponse(ctx context.Context, organizationId string, body InventoryAPIAddReservationJSONRequestBody) (*InventoryAPIAddReservationResponse, error)
+	InventoryAPIAddReservationWithResponse(ctx context.Context, organizationId string, body InventoryAPIAddReservationJSONRequestBody, reqEditors ...RequestEditorFn) (*InventoryAPIAddReservationResponse, error)
 
 	// InventoryAPIGetReservationsBalance request
-	InventoryAPIGetReservationsBalanceWithResponse(ctx context.Context, organizationId string) (*InventoryAPIGetReservationsBalanceResponse, error)
+	InventoryAPIGetReservationsBalanceWithResponse(ctx context.Context, organizationId string, reqEditors ...RequestEditorFn) (*InventoryAPIGetReservationsBalanceResponse, error)
 
-	// InventoryAPIOverwriteReservations request  with any body
-	InventoryAPIOverwriteReservationsWithBodyWithResponse(ctx context.Context, organizationId string, contentType string, body io.Reader) (*InventoryAPIOverwriteReservationsResponse, error)
+	// InventoryAPIOverwriteReservations request with any body
+	InventoryAPIOverwriteReservationsWithBodyWithResponse(ctx context.Context, organizationId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*InventoryAPIOverwriteReservationsResponse, error)
 
-	InventoryAPIOverwriteReservationsWithResponse(ctx context.Context, organizationId string, body InventoryAPIOverwriteReservationsJSONRequestBody) (*InventoryAPIOverwriteReservationsResponse, error)
+	InventoryAPIOverwriteReservationsWithResponse(ctx context.Context, organizationId string, body InventoryAPIOverwriteReservationsJSONRequestBody, reqEditors ...RequestEditorFn) (*InventoryAPIOverwriteReservationsResponse, error)
 
 	// InventoryAPIDeleteReservation request
-	InventoryAPIDeleteReservationWithResponse(ctx context.Context, organizationId string, reservationId string) (*InventoryAPIDeleteReservationResponse, error)
+	InventoryAPIDeleteReservationWithResponse(ctx context.Context, organizationId string, reservationId string, reqEditors ...RequestEditorFn) (*InventoryAPIDeleteReservationResponse, error)
 
 	// InventoryAPIGetResourceUsage request
-	InventoryAPIGetResourceUsageWithResponse(ctx context.Context, organizationId string) (*InventoryAPIGetResourceUsageResponse, error)
+	InventoryAPIGetResourceUsageWithResponse(ctx context.Context, organizationId string, reqEditors ...RequestEditorFn) (*InventoryAPIGetResourceUsageResponse, error)
+
+	// UsersAPIListOrganizationUsers request
+	UsersAPIListOrganizationUsersWithResponse(ctx context.Context, organizationId string, reqEditors ...RequestEditorFn) (*UsersAPIListOrganizationUsersResponse, error)
+
+	// UsersAPIAddUserToOrganization request with any body
+	UsersAPIAddUserToOrganizationWithBodyWithResponse(ctx context.Context, organizationId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UsersAPIAddUserToOrganizationResponse, error)
+
+	UsersAPIAddUserToOrganizationWithResponse(ctx context.Context, organizationId string, body UsersAPIAddUserToOrganizationJSONRequestBody, reqEditors ...RequestEditorFn) (*UsersAPIAddUserToOrganizationResponse, error)
+
+	// UsersAPIRemoveUserFromOrganization request
+	UsersAPIRemoveUserFromOrganizationWithResponse(ctx context.Context, organizationId string, userId string, reqEditors ...RequestEditorFn) (*UsersAPIRemoveUserFromOrganizationResponse, error)
+
+	// UsersAPIUpdateOrganizationUser request with any body
+	UsersAPIUpdateOrganizationUserWithBodyWithResponse(ctx context.Context, organizationId string, userId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UsersAPIUpdateOrganizationUserResponse, error)
+
+	UsersAPIUpdateOrganizationUserWithResponse(ctx context.Context, organizationId string, userId string, body UsersAPIUpdateOrganizationUserJSONRequestBody, reqEditors ...RequestEditorFn) (*UsersAPIUpdateOrganizationUserResponse, error)
 
 	// ScheduledRebalancingAPIListRebalancingSchedules request
-	ScheduledRebalancingAPIListRebalancingSchedulesWithResponse(ctx context.Context) (*ScheduledRebalancingAPIListRebalancingSchedulesResponse, error)
+	ScheduledRebalancingAPIListRebalancingSchedulesWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*ScheduledRebalancingAPIListRebalancingSchedulesResponse, error)
 
-	// ScheduledRebalancingAPICreateRebalancingSchedule request  with any body
-	ScheduledRebalancingAPICreateRebalancingScheduleWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*ScheduledRebalancingAPICreateRebalancingScheduleResponse, error)
+	// ScheduledRebalancingAPICreateRebalancingSchedule request with any body
+	ScheduledRebalancingAPICreateRebalancingScheduleWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*ScheduledRebalancingAPICreateRebalancingScheduleResponse, error)
 
-	ScheduledRebalancingAPICreateRebalancingScheduleWithResponse(ctx context.Context, body ScheduledRebalancingAPICreateRebalancingScheduleJSONRequestBody) (*ScheduledRebalancingAPICreateRebalancingScheduleResponse, error)
+	ScheduledRebalancingAPICreateRebalancingScheduleWithResponse(ctx context.Context, body ScheduledRebalancingAPICreateRebalancingScheduleJSONRequestBody, reqEditors ...RequestEditorFn) (*ScheduledRebalancingAPICreateRebalancingScheduleResponse, error)
 
-	// ScheduledRebalancingAPIUpdateRebalancingSchedule request  with any body
-	ScheduledRebalancingAPIUpdateRebalancingScheduleWithBodyWithResponse(ctx context.Context, params *ScheduledRebalancingAPIUpdateRebalancingScheduleParams, contentType string, body io.Reader) (*ScheduledRebalancingAPIUpdateRebalancingScheduleResponse, error)
+	// ScheduledRebalancingAPIUpdateRebalancingSchedule request with any body
+	ScheduledRebalancingAPIUpdateRebalancingScheduleWithBodyWithResponse(ctx context.Context, params *ScheduledRebalancingAPIUpdateRebalancingScheduleParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*ScheduledRebalancingAPIUpdateRebalancingScheduleResponse, error)
 
-	ScheduledRebalancingAPIUpdateRebalancingScheduleWithResponse(ctx context.Context, params *ScheduledRebalancingAPIUpdateRebalancingScheduleParams, body ScheduledRebalancingAPIUpdateRebalancingScheduleJSONRequestBody) (*ScheduledRebalancingAPIUpdateRebalancingScheduleResponse, error)
+	ScheduledRebalancingAPIUpdateRebalancingScheduleWithResponse(ctx context.Context, params *ScheduledRebalancingAPIUpdateRebalancingScheduleParams, body ScheduledRebalancingAPIUpdateRebalancingScheduleJSONRequestBody, reqEditors ...RequestEditorFn) (*ScheduledRebalancingAPIUpdateRebalancingScheduleResponse, error)
 
 	// ScheduledRebalancingAPIDeleteRebalancingSchedule request
-	ScheduledRebalancingAPIDeleteRebalancingScheduleWithResponse(ctx context.Context, id string) (*ScheduledRebalancingAPIDeleteRebalancingScheduleResponse, error)
+	ScheduledRebalancingAPIDeleteRebalancingScheduleWithResponse(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*ScheduledRebalancingAPIDeleteRebalancingScheduleResponse, error)
 
 	// ScheduledRebalancingAPIGetRebalancingSchedule request
-	ScheduledRebalancingAPIGetRebalancingScheduleWithResponse(ctx context.Context, id string) (*ScheduledRebalancingAPIGetRebalancingScheduleResponse, error)
+	ScheduledRebalancingAPIGetRebalancingScheduleWithResponse(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*ScheduledRebalancingAPIGetRebalancingScheduleResponse, error)
 
 	// ExternalClusterAPIGetCleanupScriptTemplate request
-	ExternalClusterAPIGetCleanupScriptTemplateWithResponse(ctx context.Context, provider string) (*ExternalClusterAPIGetCleanupScriptTemplateResponse, error)
+	ExternalClusterAPIGetCleanupScriptTemplateWithResponse(ctx context.Context, provider string, reqEditors ...RequestEditorFn) (*ExternalClusterAPIGetCleanupScriptTemplateResponse, error)
 
 	// ExternalClusterAPIGetCredentialsScriptTemplate request
-	ExternalClusterAPIGetCredentialsScriptTemplateWithResponse(ctx context.Context, provider string, params *ExternalClusterAPIGetCredentialsScriptTemplateParams) (*ExternalClusterAPIGetCredentialsScriptTemplateResponse, error)
+	ExternalClusterAPIGetCredentialsScriptTemplateWithResponse(ctx context.Context, provider string, params *ExternalClusterAPIGetCredentialsScriptTemplateParams, reqEditors ...RequestEditorFn) (*ExternalClusterAPIGetCredentialsScriptTemplateResponse, error)
 
 	// ScheduledRebalancingAPIListAvailableRebalancingTZ request
-	ScheduledRebalancingAPIListAvailableRebalancingTZWithResponse(ctx context.Context) (*ScheduledRebalancingAPIListAvailableRebalancingTZResponse, error)
+	ScheduledRebalancingAPIListAvailableRebalancingTZWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*ScheduledRebalancingAPIListAvailableRebalancingTZResponse, error)
 }
-
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-type Response interface {
-	Status() string
-	StatusCode() int
-	GetBody() []byte
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
 type AuthTokenAPIListAuthTokensResponse struct {
 	Body         []byte
@@ -5256,14 +8172,6 @@ func (r AuthTokenAPIListAuthTokensResponse) StatusCode() int {
 	return 0
 }
 
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r AuthTokenAPIListAuthTokensResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-
 type AuthTokenAPICreateAuthTokenResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -5285,14 +8193,6 @@ func (r AuthTokenAPICreateAuthTokenResponse) StatusCode() int {
 	}
 	return 0
 }
-
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r AuthTokenAPICreateAuthTokenResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
 type AuthTokenAPIDeleteAuthTokenResponse struct {
 	Body         []byte
@@ -5316,14 +8216,6 @@ func (r AuthTokenAPIDeleteAuthTokenResponse) StatusCode() int {
 	return 0
 }
 
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r AuthTokenAPIDeleteAuthTokenResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-
 type AuthTokenAPIGetAuthTokenResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -5345,14 +8237,6 @@ func (r AuthTokenAPIGetAuthTokenResponse) StatusCode() int {
 	}
 	return 0
 }
-
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r AuthTokenAPIGetAuthTokenResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
 type AuthTokenAPIUpdateAuthTokenResponse struct {
 	Body         []byte
@@ -5376,22 +8260,14 @@ func (r AuthTokenAPIUpdateAuthTokenResponse) StatusCode() int {
 	return 0
 }
 
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r AuthTokenAPIUpdateAuthTokenResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-
-type ListInvitationsResponse struct {
+type UsersAPIListInvitationsResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *InvitationsList
+	JSON200      *CastaiUsersV1beta1ListInvitationsResponse
 }
 
 // Status returns HTTPResponse.Status
-func (r ListInvitationsResponse) Status() string {
+func (r UsersAPIListInvitationsResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -5399,29 +8275,21 @@ func (r ListInvitationsResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r ListInvitationsResponse) StatusCode() int {
+func (r UsersAPIListInvitationsResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r ListInvitationsResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-
-type CreateInvitationResponse struct {
+type UsersAPICreateInvitationsResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *NewInvitationsResponse
+	JSON200      *CastaiUsersV1beta1CreateInvitationsResponse
 }
 
 // Status returns HTTPResponse.Status
-func (r CreateInvitationResponse) Status() string {
+func (r UsersAPICreateInvitationsResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -5429,29 +8297,21 @@ func (r CreateInvitationResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r CreateInvitationResponse) StatusCode() int {
+func (r UsersAPICreateInvitationsResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r CreateInvitationResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-
-type DeleteInvitationResponse struct {
+type UsersAPIDeleteInvitationResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *map[string]interface{}
+	JSON200      *CastaiUsersV1beta1DeleteInvitationResponse
 }
 
 // Status returns HTTPResponse.Status
-func (r DeleteInvitationResponse) Status() string {
+func (r UsersAPIDeleteInvitationResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -5459,29 +8319,21 @@ func (r DeleteInvitationResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r DeleteInvitationResponse) StatusCode() int {
+func (r UsersAPIDeleteInvitationResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r DeleteInvitationResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-
-type ClaimInvitationResponse struct {
+type UsersAPIClaimInvitationResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *map[string]interface{}
+	JSON200      *CastaiUsersV1beta1ClaimInvitationResponse
 }
 
 // Status returns HTTPResponse.Status
-func (r ClaimInvitationResponse) Status() string {
+func (r UsersAPIClaimInvitationResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -5489,20 +8341,12 @@ func (r ClaimInvitationResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r ClaimInvitationResponse) StatusCode() int {
+func (r UsersAPIClaimInvitationResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
-
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r ClaimInvitationResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
 type NodeTemplatesAPIFilterInstanceTypesResponse struct {
 	Body         []byte
@@ -5526,14 +8370,6 @@ func (r NodeTemplatesAPIFilterInstanceTypesResponse) StatusCode() int {
 	return 0
 }
 
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r NodeTemplatesAPIFilterInstanceTypesResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-
 type NodeConfigurationAPIListConfigurationsResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -5555,14 +8391,6 @@ func (r NodeConfigurationAPIListConfigurationsResponse) StatusCode() int {
 	}
 	return 0
 }
-
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r NodeConfigurationAPIListConfigurationsResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
 type NodeConfigurationAPICreateConfigurationResponse struct {
 	Body         []byte
@@ -5586,14 +8414,6 @@ func (r NodeConfigurationAPICreateConfigurationResponse) StatusCode() int {
 	return 0
 }
 
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r NodeConfigurationAPICreateConfigurationResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-
 type NodeConfigurationAPIGetSuggestedConfigurationResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -5615,14 +8435,6 @@ func (r NodeConfigurationAPIGetSuggestedConfigurationResponse) StatusCode() int 
 	}
 	return 0
 }
-
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r NodeConfigurationAPIGetSuggestedConfigurationResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
 type NodeConfigurationAPIDeleteConfigurationResponse struct {
 	Body         []byte
@@ -5646,14 +8458,6 @@ func (r NodeConfigurationAPIDeleteConfigurationResponse) StatusCode() int {
 	return 0
 }
 
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r NodeConfigurationAPIDeleteConfigurationResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-
 type NodeConfigurationAPIGetConfigurationResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -5675,14 +8479,6 @@ func (r NodeConfigurationAPIGetConfigurationResponse) StatusCode() int {
 	}
 	return 0
 }
-
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r NodeConfigurationAPIGetConfigurationResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
 type NodeConfigurationAPIUpdateConfigurationResponse struct {
 	Body         []byte
@@ -5706,14 +8502,6 @@ func (r NodeConfigurationAPIUpdateConfigurationResponse) StatusCode() int {
 	return 0
 }
 
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r NodeConfigurationAPIUpdateConfigurationResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-
 type NodeConfigurationAPISetDefaultResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -5735,14 +8523,6 @@ func (r NodeConfigurationAPISetDefaultResponse) StatusCode() int {
 	}
 	return 0
 }
-
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r NodeConfigurationAPISetDefaultResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
 type PoliciesAPIGetClusterNodeConstraintsResponse struct {
 	Body         []byte
@@ -5766,14 +8546,6 @@ func (r PoliciesAPIGetClusterNodeConstraintsResponse) StatusCode() int {
 	return 0
 }
 
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r PoliciesAPIGetClusterNodeConstraintsResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-
 type NodeTemplatesAPIListNodeTemplatesResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -5795,14 +8567,6 @@ func (r NodeTemplatesAPIListNodeTemplatesResponse) StatusCode() int {
 	}
 	return 0
 }
-
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r NodeTemplatesAPIListNodeTemplatesResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
 type NodeTemplatesAPICreateNodeTemplateResponse struct {
 	Body         []byte
@@ -5826,14 +8590,6 @@ func (r NodeTemplatesAPICreateNodeTemplateResponse) StatusCode() int {
 	return 0
 }
 
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r NodeTemplatesAPICreateNodeTemplateResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-
 type NodeTemplatesAPIDeleteNodeTemplateResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -5855,14 +8611,6 @@ func (r NodeTemplatesAPIDeleteNodeTemplateResponse) StatusCode() int {
 	}
 	return 0
 }
-
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r NodeTemplatesAPIDeleteNodeTemplateResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
 type NodeTemplatesAPIUpdateNodeTemplateResponse struct {
 	Body         []byte
@@ -5886,14 +8634,6 @@ func (r NodeTemplatesAPIUpdateNodeTemplateResponse) StatusCode() int {
 	return 0
 }
 
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r NodeTemplatesAPIUpdateNodeTemplateResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-
 type PoliciesAPIGetClusterPoliciesResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -5915,14 +8655,6 @@ func (r PoliciesAPIGetClusterPoliciesResponse) StatusCode() int {
 	}
 	return 0
 }
-
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r PoliciesAPIGetClusterPoliciesResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
 type PoliciesAPIUpsertClusterPoliciesResponse struct {
 	Body         []byte
@@ -5946,14 +8678,6 @@ func (r PoliciesAPIUpsertClusterPoliciesResponse) StatusCode() int {
 	return 0
 }
 
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r PoliciesAPIUpsertClusterPoliciesResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-
 type ScheduledRebalancingAPIListRebalancingJobsResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -5975,14 +8699,6 @@ func (r ScheduledRebalancingAPIListRebalancingJobsResponse) StatusCode() int {
 	}
 	return 0
 }
-
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r ScheduledRebalancingAPIListRebalancingJobsResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
 type ScheduledRebalancingAPICreateRebalancingJobResponse struct {
 	Body         []byte
@@ -6006,14 +8722,6 @@ func (r ScheduledRebalancingAPICreateRebalancingJobResponse) StatusCode() int {
 	return 0
 }
 
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r ScheduledRebalancingAPICreateRebalancingJobResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-
 type ScheduledRebalancingAPIDeleteRebalancingJobResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -6035,14 +8743,6 @@ func (r ScheduledRebalancingAPIDeleteRebalancingJobResponse) StatusCode() int {
 	}
 	return 0
 }
-
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r ScheduledRebalancingAPIDeleteRebalancingJobResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
 type ScheduledRebalancingAPIGetRebalancingJobResponse struct {
 	Body         []byte
@@ -6066,14 +8766,6 @@ func (r ScheduledRebalancingAPIGetRebalancingJobResponse) StatusCode() int {
 	return 0
 }
 
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r ScheduledRebalancingAPIGetRebalancingJobResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-
 type ScheduledRebalancingAPIUpdateRebalancingJobResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -6095,14 +8787,6 @@ func (r ScheduledRebalancingAPIUpdateRebalancingJobResponse) StatusCode() int {
 	}
 	return 0
 }
-
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r ScheduledRebalancingAPIUpdateRebalancingJobResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
 type ScheduledRebalancingAPIPreviewRebalancingScheduleResponse struct {
 	Body         []byte
@@ -6126,14 +8810,6 @@ func (r ScheduledRebalancingAPIPreviewRebalancingScheduleResponse) StatusCode() 
 	return 0
 }
 
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r ScheduledRebalancingAPIPreviewRebalancingScheduleResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-
 type ExternalClusterAPIListClustersResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -6155,14 +8831,6 @@ func (r ExternalClusterAPIListClustersResponse) StatusCode() int {
 	}
 	return 0
 }
-
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r ExternalClusterAPIListClustersResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
 type ExternalClusterAPIRegisterClusterResponse struct {
 	Body         []byte
@@ -6186,14 +8854,6 @@ func (r ExternalClusterAPIRegisterClusterResponse) StatusCode() int {
 	return 0
 }
 
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r ExternalClusterAPIRegisterClusterResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-
 type OperationsAPIGetOperationResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -6216,14 +8876,6 @@ func (r OperationsAPIGetOperationResponse) StatusCode() int {
 	return 0
 }
 
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r OperationsAPIGetOperationResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-
 type ExternalClusterAPIDeleteClusterResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -6244,14 +8896,6 @@ func (r ExternalClusterAPIDeleteClusterResponse) StatusCode() int {
 	}
 	return 0
 }
-
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r ExternalClusterAPIDeleteClusterResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
 type ExternalClusterAPIGetClusterResponse struct {
 	Body         []byte
@@ -6275,14 +8919,6 @@ func (r ExternalClusterAPIGetClusterResponse) StatusCode() int {
 	return 0
 }
 
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r ExternalClusterAPIGetClusterResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-
 type ExternalClusterAPIUpdateClusterResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -6304,14 +8940,6 @@ func (r ExternalClusterAPIUpdateClusterResponse) StatusCode() int {
 	}
 	return 0
 }
-
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r ExternalClusterAPIUpdateClusterResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
 type ExternalClusterAPIDeleteAssumeRolePrincipalResponse struct {
 	Body         []byte
@@ -6335,14 +8963,6 @@ func (r ExternalClusterAPIDeleteAssumeRolePrincipalResponse) StatusCode() int {
 	return 0
 }
 
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r ExternalClusterAPIDeleteAssumeRolePrincipalResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-
 type ExternalClusterAPIGetAssumeRolePrincipalResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -6364,14 +8984,6 @@ func (r ExternalClusterAPIGetAssumeRolePrincipalResponse) StatusCode() int {
 	}
 	return 0
 }
-
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r ExternalClusterAPIGetAssumeRolePrincipalResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
 type ExternalClusterAPICreateAssumeRolePrincipalResponse struct {
 	Body         []byte
@@ -6395,14 +9007,6 @@ func (r ExternalClusterAPICreateAssumeRolePrincipalResponse) StatusCode() int {
 	return 0
 }
 
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r ExternalClusterAPICreateAssumeRolePrincipalResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-
 type ExternalClusterAPIGetAssumeRoleUserResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -6424,14 +9028,6 @@ func (r ExternalClusterAPIGetAssumeRoleUserResponse) StatusCode() int {
 	}
 	return 0
 }
-
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r ExternalClusterAPIGetAssumeRoleUserResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
 type ExternalClusterAPIGetCleanupScriptResponse struct {
 	Body         []byte
@@ -6455,14 +9051,6 @@ func (r ExternalClusterAPIGetCleanupScriptResponse) StatusCode() int {
 	return 0
 }
 
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r ExternalClusterAPIGetCleanupScriptResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-
 type ExternalClusterAPIGetCredentialsScriptResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -6484,14 +9072,6 @@ func (r ExternalClusterAPIGetCredentialsScriptResponse) StatusCode() int {
 	}
 	return 0
 }
-
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r ExternalClusterAPIGetCredentialsScriptResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
 type ExternalClusterAPIDisconnectClusterResponse struct {
 	Body         []byte
@@ -6515,14 +9095,6 @@ func (r ExternalClusterAPIDisconnectClusterResponse) StatusCode() int {
 	return 0
 }
 
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r ExternalClusterAPIDisconnectClusterResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-
 type ExternalClusterAPIHandleCloudEventResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -6544,14 +9116,6 @@ func (r ExternalClusterAPIHandleCloudEventResponse) StatusCode() int {
 	}
 	return 0
 }
-
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r ExternalClusterAPIHandleCloudEventResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
 type ExternalClusterAPIListNodesResponse struct {
 	Body         []byte
@@ -6575,14 +9139,6 @@ func (r ExternalClusterAPIListNodesResponse) StatusCode() int {
 	return 0
 }
 
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r ExternalClusterAPIListNodesResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-
 type ExternalClusterAPIAddNodeResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -6604,14 +9160,6 @@ func (r ExternalClusterAPIAddNodeResponse) StatusCode() int {
 	}
 	return 0
 }
-
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r ExternalClusterAPIAddNodeResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
 type ExternalClusterAPIDeleteNodeResponse struct {
 	Body         []byte
@@ -6635,14 +9183,6 @@ func (r ExternalClusterAPIDeleteNodeResponse) StatusCode() int {
 	return 0
 }
 
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r ExternalClusterAPIDeleteNodeResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-
 type ExternalClusterAPIGetNodeResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -6664,14 +9204,6 @@ func (r ExternalClusterAPIGetNodeResponse) StatusCode() int {
 	}
 	return 0
 }
-
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r ExternalClusterAPIGetNodeResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
 type ExternalClusterAPIDrainNodeResponse struct {
 	Body         []byte
@@ -6695,14 +9227,6 @@ func (r ExternalClusterAPIDrainNodeResponse) StatusCode() int {
 	return 0
 }
 
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r ExternalClusterAPIDrainNodeResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-
 type ExternalClusterAPIReconcileClusterResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -6724,14 +9248,6 @@ func (r ExternalClusterAPIReconcileClusterResponse) StatusCode() int {
 	}
 	return 0
 }
-
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r ExternalClusterAPIReconcileClusterResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
 type ExternalClusterAPICreateClusterTokenResponse struct {
 	Body         []byte
@@ -6755,22 +9271,14 @@ func (r ExternalClusterAPICreateClusterTokenResponse) StatusCode() int {
 	return 0
 }
 
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r ExternalClusterAPICreateClusterTokenResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-
-type CurrentUserProfileResponse struct {
+type UsersAPICurrentUserProfileResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *UserProfileResponse
+	JSON200      *CastaiUsersV1beta1CurrentUserProfileResponse
 }
 
 // Status returns HTTPResponse.Status
-func (r CurrentUserProfileResponse) Status() string {
+func (r UsersAPICurrentUserProfileResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -6778,29 +9286,21 @@ func (r CurrentUserProfileResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r CurrentUserProfileResponse) StatusCode() int {
+func (r UsersAPICurrentUserProfileResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r CurrentUserProfileResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-
-type UpdateCurrentUserProfileResponse struct {
+type UsersAPIUpdateCurrentUserProfileResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *UserProfile
+	JSON200      *CastaiUsersV1beta1User
 }
 
 // Status returns HTTPResponse.Status
-func (r UpdateCurrentUserProfileResponse) Status() string {
+func (r UsersAPIUpdateCurrentUserProfileResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -6808,29 +9308,21 @@ func (r UpdateCurrentUserProfileResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r UpdateCurrentUserProfileResponse) StatusCode() int {
+func (r UsersAPIUpdateCurrentUserProfileResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r UpdateCurrentUserProfileResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-
-type ListOrganizationsResponse struct {
+type UsersAPIListOrganizationsResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *OrganizationsList
+	JSON200      *CastaiUsersV1beta1ListOrganizationsResponse
 }
 
 // Status returns HTTPResponse.Status
-func (r ListOrganizationsResponse) Status() string {
+func (r UsersAPIListOrganizationsResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -6838,29 +9330,21 @@ func (r ListOrganizationsResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r ListOrganizationsResponse) StatusCode() int {
+func (r UsersAPIListOrganizationsResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r ListOrganizationsResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-
-type CreateOrganizationResponse struct {
+type UsersAPICreateOrganizationResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *Organization
+	JSON200      *CastaiUsersV1beta1Organization
 }
 
 // Status returns HTTPResponse.Status
-func (r CreateOrganizationResponse) Status() string {
+func (r UsersAPICreateOrganizationResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -6868,29 +9352,21 @@ func (r CreateOrganizationResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r CreateOrganizationResponse) StatusCode() int {
+func (r UsersAPICreateOrganizationResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r CreateOrganizationResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-
-type DeleteOrganizationResponse struct {
+type UsersAPIDeleteOrganizationResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *Organization
+	JSON200      *CastaiUsersV1beta1DeleteOrganizationResponse
 }
 
 // Status returns HTTPResponse.Status
-func (r DeleteOrganizationResponse) Status() string {
+func (r UsersAPIDeleteOrganizationResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -6898,29 +9374,21 @@ func (r DeleteOrganizationResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r DeleteOrganizationResponse) StatusCode() int {
+func (r UsersAPIDeleteOrganizationResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r DeleteOrganizationResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-
-type GetOrganizationResponse struct {
+type UsersAPIGetOrganizationResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *Organization
+	JSON200      *CastaiUsersV1beta1Organization
 }
 
 // Status returns HTTPResponse.Status
-func (r GetOrganizationResponse) Status() string {
+func (r UsersAPIGetOrganizationResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -6928,29 +9396,21 @@ func (r GetOrganizationResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r GetOrganizationResponse) StatusCode() int {
+func (r UsersAPIGetOrganizationResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
 
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r GetOrganizationResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-
-type UpdateOrganizationResponse struct {
+type UsersAPIEditOrganizationResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *Organization
+	JSON200      *CastaiUsersV1beta1Organization
 }
 
 // Status returns HTTPResponse.Status
-func (r UpdateOrganizationResponse) Status() string {
+func (r UsersAPIEditOrganizationResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -6958,140 +9418,12 @@ func (r UpdateOrganizationResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r UpdateOrganizationResponse) StatusCode() int {
+func (r UsersAPIEditOrganizationResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
 	return 0
 }
-
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r UpdateOrganizationResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-
-type GetOrganizationUsersResponse struct {
-	Body         []byte
-	HTTPResponse *http.Response
-	JSON200      *OrganizationUsersList
-}
-
-// Status returns HTTPResponse.Status
-func (r GetOrganizationUsersResponse) Status() string {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.Status
-	}
-	return http.StatusText(0)
-}
-
-// StatusCode returns HTTPResponse.StatusCode
-func (r GetOrganizationUsersResponse) StatusCode() int {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.StatusCode
-	}
-	return 0
-}
-
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r GetOrganizationUsersResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-
-type CreateOrganizationUserResponse struct {
-	Body         []byte
-	HTTPResponse *http.Response
-	JSON200      *OrganizationUser
-}
-
-// Status returns HTTPResponse.Status
-func (r CreateOrganizationUserResponse) Status() string {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.Status
-	}
-	return http.StatusText(0)
-}
-
-// StatusCode returns HTTPResponse.StatusCode
-func (r CreateOrganizationUserResponse) StatusCode() int {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.StatusCode
-	}
-	return 0
-}
-
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r CreateOrganizationUserResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-
-type DeleteOrganizationUserResponse struct {
-	Body         []byte
-	HTTPResponse *http.Response
-	JSON200      *map[string]interface{}
-}
-
-// Status returns HTTPResponse.Status
-func (r DeleteOrganizationUserResponse) Status() string {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.Status
-	}
-	return http.StatusText(0)
-}
-
-// StatusCode returns HTTPResponse.StatusCode
-func (r DeleteOrganizationUserResponse) StatusCode() int {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.StatusCode
-	}
-	return 0
-}
-
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r DeleteOrganizationUserResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-
-type UpdateOrganizationUserResponse struct {
-	Body         []byte
-	HTTPResponse *http.Response
-	JSON200      *OrganizationUser
-}
-
-// Status returns HTTPResponse.Status
-func (r UpdateOrganizationUserResponse) Status() string {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.Status
-	}
-	return http.StatusText(0)
-}
-
-// StatusCode returns HTTPResponse.StatusCode
-func (r UpdateOrganizationUserResponse) StatusCode() int {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.StatusCode
-	}
-	return 0
-}
-
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r UpdateOrganizationUserResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
 type InventoryAPISyncClusterResourcesResponse struct {
 	Body         []byte
@@ -7115,14 +9447,6 @@ func (r InventoryAPISyncClusterResourcesResponse) StatusCode() int {
 	return 0
 }
 
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r InventoryAPISyncClusterResourcesResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-
 type InventoryAPIGetReservationsResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -7144,14 +9468,6 @@ func (r InventoryAPIGetReservationsResponse) StatusCode() int {
 	}
 	return 0
 }
-
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r InventoryAPIGetReservationsResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
 type InventoryAPIAddReservationResponse struct {
 	Body         []byte
@@ -7175,14 +9491,6 @@ func (r InventoryAPIAddReservationResponse) StatusCode() int {
 	return 0
 }
 
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r InventoryAPIAddReservationResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-
 type InventoryAPIGetReservationsBalanceResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -7204,14 +9512,6 @@ func (r InventoryAPIGetReservationsBalanceResponse) StatusCode() int {
 	}
 	return 0
 }
-
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r InventoryAPIGetReservationsBalanceResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
 type InventoryAPIOverwriteReservationsResponse struct {
 	Body         []byte
@@ -7235,14 +9535,6 @@ func (r InventoryAPIOverwriteReservationsResponse) StatusCode() int {
 	return 0
 }
 
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r InventoryAPIOverwriteReservationsResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-
 type InventoryAPIDeleteReservationResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -7264,14 +9556,6 @@ func (r InventoryAPIDeleteReservationResponse) StatusCode() int {
 	}
 	return 0
 }
-
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r InventoryAPIDeleteReservationResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
 type InventoryAPIGetResourceUsageResponse struct {
 	Body         []byte
@@ -7295,13 +9579,93 @@ func (r InventoryAPIGetResourceUsageResponse) StatusCode() int {
 	return 0
 }
 
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r InventoryAPIGetResourceUsageResponse) GetBody() []byte {
-	return r.Body
+type UsersAPIListOrganizationUsersResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *CastaiUsersV1beta1ListOrganizationUsersResponse
 }
 
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Status returns HTTPResponse.Status
+func (r UsersAPIListOrganizationUsersResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r UsersAPIListOrganizationUsersResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type UsersAPIAddUserToOrganizationResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *CastaiUsersV1beta1AddUserToOrganizationResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r UsersAPIAddUserToOrganizationResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r UsersAPIAddUserToOrganizationResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type UsersAPIRemoveUserFromOrganizationResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *CastaiUsersV1beta1RemoveUserFromOrganizationResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r UsersAPIRemoveUserFromOrganizationResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r UsersAPIRemoveUserFromOrganizationResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+type UsersAPIUpdateOrganizationUserResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *CastaiUsersV1beta1Membership
+}
+
+// Status returns HTTPResponse.Status
+func (r UsersAPIUpdateOrganizationUserResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r UsersAPIUpdateOrganizationUserResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
 
 type ScheduledRebalancingAPIListRebalancingSchedulesResponse struct {
 	Body         []byte
@@ -7325,14 +9689,6 @@ func (r ScheduledRebalancingAPIListRebalancingSchedulesResponse) StatusCode() in
 	return 0
 }
 
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r ScheduledRebalancingAPIListRebalancingSchedulesResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-
 type ScheduledRebalancingAPICreateRebalancingScheduleResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -7354,14 +9710,6 @@ func (r ScheduledRebalancingAPICreateRebalancingScheduleResponse) StatusCode() i
 	}
 	return 0
 }
-
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r ScheduledRebalancingAPICreateRebalancingScheduleResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
 type ScheduledRebalancingAPIUpdateRebalancingScheduleResponse struct {
 	Body         []byte
@@ -7385,14 +9733,6 @@ func (r ScheduledRebalancingAPIUpdateRebalancingScheduleResponse) StatusCode() i
 	return 0
 }
 
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r ScheduledRebalancingAPIUpdateRebalancingScheduleResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-
 type ScheduledRebalancingAPIDeleteRebalancingScheduleResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -7414,14 +9754,6 @@ func (r ScheduledRebalancingAPIDeleteRebalancingScheduleResponse) StatusCode() i
 	}
 	return 0
 }
-
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r ScheduledRebalancingAPIDeleteRebalancingScheduleResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
 type ScheduledRebalancingAPIGetRebalancingScheduleResponse struct {
 	Body         []byte
@@ -7445,14 +9777,6 @@ func (r ScheduledRebalancingAPIGetRebalancingScheduleResponse) StatusCode() int 
 	return 0
 }
 
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r ScheduledRebalancingAPIGetRebalancingScheduleResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-
 type ExternalClusterAPIGetCleanupScriptTemplateResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -7474,14 +9798,6 @@ func (r ExternalClusterAPIGetCleanupScriptTemplateResponse) StatusCode() int {
 	return 0
 }
 
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r ExternalClusterAPIGetCleanupScriptTemplateResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-
 type ExternalClusterAPIGetCredentialsScriptTemplateResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -7502,14 +9818,6 @@ func (r ExternalClusterAPIGetCredentialsScriptTemplateResponse) StatusCode() int
 	}
 	return 0
 }
-
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r ExternalClusterAPIGetCredentialsScriptTemplateResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
 type ScheduledRebalancingAPIListAvailableRebalancingTZResponse struct {
 	Body         []byte
@@ -7533,17 +9841,9 @@ func (r ScheduledRebalancingAPIListAvailableRebalancingTZResponse) StatusCode() 
 	return 0
 }
 
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r ScheduledRebalancingAPIListAvailableRebalancingTZResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-
 // AuthTokenAPIListAuthTokensWithResponse request returning *AuthTokenAPIListAuthTokensResponse
-func (c *ClientWithResponses) AuthTokenAPIListAuthTokensWithResponse(ctx context.Context, params *AuthTokenAPIListAuthTokensParams) (*AuthTokenAPIListAuthTokensResponse, error) {
-	rsp, err := c.AuthTokenAPIListAuthTokens(ctx, params)
+func (c *ClientWithResponses) AuthTokenAPIListAuthTokensWithResponse(ctx context.Context, params *AuthTokenAPIListAuthTokensParams, reqEditors ...RequestEditorFn) (*AuthTokenAPIListAuthTokensResponse, error) {
+	rsp, err := c.AuthTokenAPIListAuthTokens(ctx, params, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
@@ -7551,16 +9851,16 @@ func (c *ClientWithResponses) AuthTokenAPIListAuthTokensWithResponse(ctx context
 }
 
 // AuthTokenAPICreateAuthTokenWithBodyWithResponse request with arbitrary body returning *AuthTokenAPICreateAuthTokenResponse
-func (c *ClientWithResponses) AuthTokenAPICreateAuthTokenWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*AuthTokenAPICreateAuthTokenResponse, error) {
-	rsp, err := c.AuthTokenAPICreateAuthTokenWithBody(ctx, contentType, body)
+func (c *ClientWithResponses) AuthTokenAPICreateAuthTokenWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*AuthTokenAPICreateAuthTokenResponse, error) {
+	rsp, err := c.AuthTokenAPICreateAuthTokenWithBody(ctx, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
 	return ParseAuthTokenAPICreateAuthTokenResponse(rsp)
 }
 
-func (c *ClientWithResponses) AuthTokenAPICreateAuthTokenWithResponse(ctx context.Context, body AuthTokenAPICreateAuthTokenJSONRequestBody) (*AuthTokenAPICreateAuthTokenResponse, error) {
-	rsp, err := c.AuthTokenAPICreateAuthToken(ctx, body)
+func (c *ClientWithResponses) AuthTokenAPICreateAuthTokenWithResponse(ctx context.Context, body AuthTokenAPICreateAuthTokenJSONRequestBody, reqEditors ...RequestEditorFn) (*AuthTokenAPICreateAuthTokenResponse, error) {
+	rsp, err := c.AuthTokenAPICreateAuthToken(ctx, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
@@ -7568,8 +9868,8 @@ func (c *ClientWithResponses) AuthTokenAPICreateAuthTokenWithResponse(ctx contex
 }
 
 // AuthTokenAPIDeleteAuthTokenWithResponse request returning *AuthTokenAPIDeleteAuthTokenResponse
-func (c *ClientWithResponses) AuthTokenAPIDeleteAuthTokenWithResponse(ctx context.Context, id string) (*AuthTokenAPIDeleteAuthTokenResponse, error) {
-	rsp, err := c.AuthTokenAPIDeleteAuthToken(ctx, id)
+func (c *ClientWithResponses) AuthTokenAPIDeleteAuthTokenWithResponse(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*AuthTokenAPIDeleteAuthTokenResponse, error) {
+	rsp, err := c.AuthTokenAPIDeleteAuthToken(ctx, id, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
@@ -7577,8 +9877,8 @@ func (c *ClientWithResponses) AuthTokenAPIDeleteAuthTokenWithResponse(ctx contex
 }
 
 // AuthTokenAPIGetAuthTokenWithResponse request returning *AuthTokenAPIGetAuthTokenResponse
-func (c *ClientWithResponses) AuthTokenAPIGetAuthTokenWithResponse(ctx context.Context, id string) (*AuthTokenAPIGetAuthTokenResponse, error) {
-	rsp, err := c.AuthTokenAPIGetAuthToken(ctx, id)
+func (c *ClientWithResponses) AuthTokenAPIGetAuthTokenWithResponse(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*AuthTokenAPIGetAuthTokenResponse, error) {
+	rsp, err := c.AuthTokenAPIGetAuthToken(ctx, id, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
@@ -7586,85 +9886,85 @@ func (c *ClientWithResponses) AuthTokenAPIGetAuthTokenWithResponse(ctx context.C
 }
 
 // AuthTokenAPIUpdateAuthTokenWithBodyWithResponse request with arbitrary body returning *AuthTokenAPIUpdateAuthTokenResponse
-func (c *ClientWithResponses) AuthTokenAPIUpdateAuthTokenWithBodyWithResponse(ctx context.Context, id string, contentType string, body io.Reader) (*AuthTokenAPIUpdateAuthTokenResponse, error) {
-	rsp, err := c.AuthTokenAPIUpdateAuthTokenWithBody(ctx, id, contentType, body)
+func (c *ClientWithResponses) AuthTokenAPIUpdateAuthTokenWithBodyWithResponse(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*AuthTokenAPIUpdateAuthTokenResponse, error) {
+	rsp, err := c.AuthTokenAPIUpdateAuthTokenWithBody(ctx, id, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
 	return ParseAuthTokenAPIUpdateAuthTokenResponse(rsp)
 }
 
-func (c *ClientWithResponses) AuthTokenAPIUpdateAuthTokenWithResponse(ctx context.Context, id string, body AuthTokenAPIUpdateAuthTokenJSONRequestBody) (*AuthTokenAPIUpdateAuthTokenResponse, error) {
-	rsp, err := c.AuthTokenAPIUpdateAuthToken(ctx, id, body)
+func (c *ClientWithResponses) AuthTokenAPIUpdateAuthTokenWithResponse(ctx context.Context, id string, body AuthTokenAPIUpdateAuthTokenJSONRequestBody, reqEditors ...RequestEditorFn) (*AuthTokenAPIUpdateAuthTokenResponse, error) {
+	rsp, err := c.AuthTokenAPIUpdateAuthToken(ctx, id, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
 	return ParseAuthTokenAPIUpdateAuthTokenResponse(rsp)
 }
 
-// ListInvitationsWithResponse request returning *ListInvitationsResponse
-func (c *ClientWithResponses) ListInvitationsWithResponse(ctx context.Context, params *ListInvitationsParams) (*ListInvitationsResponse, error) {
-	rsp, err := c.ListInvitations(ctx, params)
+// UsersAPIListInvitationsWithResponse request returning *UsersAPIListInvitationsResponse
+func (c *ClientWithResponses) UsersAPIListInvitationsWithResponse(ctx context.Context, params *UsersAPIListInvitationsParams, reqEditors ...RequestEditorFn) (*UsersAPIListInvitationsResponse, error) {
+	rsp, err := c.UsersAPIListInvitations(ctx, params, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseListInvitationsResponse(rsp)
+	return ParseUsersAPIListInvitationsResponse(rsp)
 }
 
-// CreateInvitationWithBodyWithResponse request with arbitrary body returning *CreateInvitationResponse
-func (c *ClientWithResponses) CreateInvitationWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*CreateInvitationResponse, error) {
-	rsp, err := c.CreateInvitationWithBody(ctx, contentType, body)
+// UsersAPICreateInvitationsWithBodyWithResponse request with arbitrary body returning *UsersAPICreateInvitationsResponse
+func (c *ClientWithResponses) UsersAPICreateInvitationsWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UsersAPICreateInvitationsResponse, error) {
+	rsp, err := c.UsersAPICreateInvitationsWithBody(ctx, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseCreateInvitationResponse(rsp)
+	return ParseUsersAPICreateInvitationsResponse(rsp)
 }
 
-func (c *ClientWithResponses) CreateInvitationWithResponse(ctx context.Context, body CreateInvitationJSONRequestBody) (*CreateInvitationResponse, error) {
-	rsp, err := c.CreateInvitation(ctx, body)
+func (c *ClientWithResponses) UsersAPICreateInvitationsWithResponse(ctx context.Context, body UsersAPICreateInvitationsJSONRequestBody, reqEditors ...RequestEditorFn) (*UsersAPICreateInvitationsResponse, error) {
+	rsp, err := c.UsersAPICreateInvitations(ctx, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseCreateInvitationResponse(rsp)
+	return ParseUsersAPICreateInvitationsResponse(rsp)
 }
 
-// DeleteInvitationWithResponse request returning *DeleteInvitationResponse
-func (c *ClientWithResponses) DeleteInvitationWithResponse(ctx context.Context, id string) (*DeleteInvitationResponse, error) {
-	rsp, err := c.DeleteInvitation(ctx, id)
+// UsersAPIDeleteInvitationWithResponse request returning *UsersAPIDeleteInvitationResponse
+func (c *ClientWithResponses) UsersAPIDeleteInvitationWithResponse(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*UsersAPIDeleteInvitationResponse, error) {
+	rsp, err := c.UsersAPIDeleteInvitation(ctx, id, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseDeleteInvitationResponse(rsp)
+	return ParseUsersAPIDeleteInvitationResponse(rsp)
 }
 
-// ClaimInvitationWithBodyWithResponse request with arbitrary body returning *ClaimInvitationResponse
-func (c *ClientWithResponses) ClaimInvitationWithBodyWithResponse(ctx context.Context, id string, contentType string, body io.Reader) (*ClaimInvitationResponse, error) {
-	rsp, err := c.ClaimInvitationWithBody(ctx, id, contentType, body)
+// UsersAPIClaimInvitationWithBodyWithResponse request with arbitrary body returning *UsersAPIClaimInvitationResponse
+func (c *ClientWithResponses) UsersAPIClaimInvitationWithBodyWithResponse(ctx context.Context, invitationId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UsersAPIClaimInvitationResponse, error) {
+	rsp, err := c.UsersAPIClaimInvitationWithBody(ctx, invitationId, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseClaimInvitationResponse(rsp)
+	return ParseUsersAPIClaimInvitationResponse(rsp)
 }
 
-func (c *ClientWithResponses) ClaimInvitationWithResponse(ctx context.Context, id string, body ClaimInvitationJSONRequestBody) (*ClaimInvitationResponse, error) {
-	rsp, err := c.ClaimInvitation(ctx, id, body)
+func (c *ClientWithResponses) UsersAPIClaimInvitationWithResponse(ctx context.Context, invitationId string, body UsersAPIClaimInvitationJSONRequestBody, reqEditors ...RequestEditorFn) (*UsersAPIClaimInvitationResponse, error) {
+	rsp, err := c.UsersAPIClaimInvitation(ctx, invitationId, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseClaimInvitationResponse(rsp)
+	return ParseUsersAPIClaimInvitationResponse(rsp)
 }
 
 // NodeTemplatesAPIFilterInstanceTypesWithBodyWithResponse request with arbitrary body returning *NodeTemplatesAPIFilterInstanceTypesResponse
-func (c *ClientWithResponses) NodeTemplatesAPIFilterInstanceTypesWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader) (*NodeTemplatesAPIFilterInstanceTypesResponse, error) {
-	rsp, err := c.NodeTemplatesAPIFilterInstanceTypesWithBody(ctx, clusterId, contentType, body)
+func (c *ClientWithResponses) NodeTemplatesAPIFilterInstanceTypesWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*NodeTemplatesAPIFilterInstanceTypesResponse, error) {
+	rsp, err := c.NodeTemplatesAPIFilterInstanceTypesWithBody(ctx, clusterId, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
 	return ParseNodeTemplatesAPIFilterInstanceTypesResponse(rsp)
 }
 
-func (c *ClientWithResponses) NodeTemplatesAPIFilterInstanceTypesWithResponse(ctx context.Context, clusterId string, body NodeTemplatesAPIFilterInstanceTypesJSONRequestBody) (*NodeTemplatesAPIFilterInstanceTypesResponse, error) {
-	rsp, err := c.NodeTemplatesAPIFilterInstanceTypes(ctx, clusterId, body)
+func (c *ClientWithResponses) NodeTemplatesAPIFilterInstanceTypesWithResponse(ctx context.Context, clusterId string, body NodeTemplatesAPIFilterInstanceTypesJSONRequestBody, reqEditors ...RequestEditorFn) (*NodeTemplatesAPIFilterInstanceTypesResponse, error) {
+	rsp, err := c.NodeTemplatesAPIFilterInstanceTypes(ctx, clusterId, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
@@ -7672,8 +9972,8 @@ func (c *ClientWithResponses) NodeTemplatesAPIFilterInstanceTypesWithResponse(ct
 }
 
 // NodeConfigurationAPIListConfigurationsWithResponse request returning *NodeConfigurationAPIListConfigurationsResponse
-func (c *ClientWithResponses) NodeConfigurationAPIListConfigurationsWithResponse(ctx context.Context, clusterId string) (*NodeConfigurationAPIListConfigurationsResponse, error) {
-	rsp, err := c.NodeConfigurationAPIListConfigurations(ctx, clusterId)
+func (c *ClientWithResponses) NodeConfigurationAPIListConfigurationsWithResponse(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*NodeConfigurationAPIListConfigurationsResponse, error) {
+	rsp, err := c.NodeConfigurationAPIListConfigurations(ctx, clusterId, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
@@ -7681,16 +9981,16 @@ func (c *ClientWithResponses) NodeConfigurationAPIListConfigurationsWithResponse
 }
 
 // NodeConfigurationAPICreateConfigurationWithBodyWithResponse request with arbitrary body returning *NodeConfigurationAPICreateConfigurationResponse
-func (c *ClientWithResponses) NodeConfigurationAPICreateConfigurationWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader) (*NodeConfigurationAPICreateConfigurationResponse, error) {
-	rsp, err := c.NodeConfigurationAPICreateConfigurationWithBody(ctx, clusterId, contentType, body)
+func (c *ClientWithResponses) NodeConfigurationAPICreateConfigurationWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*NodeConfigurationAPICreateConfigurationResponse, error) {
+	rsp, err := c.NodeConfigurationAPICreateConfigurationWithBody(ctx, clusterId, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
 	return ParseNodeConfigurationAPICreateConfigurationResponse(rsp)
 }
 
-func (c *ClientWithResponses) NodeConfigurationAPICreateConfigurationWithResponse(ctx context.Context, clusterId string, body NodeConfigurationAPICreateConfigurationJSONRequestBody) (*NodeConfigurationAPICreateConfigurationResponse, error) {
-	rsp, err := c.NodeConfigurationAPICreateConfiguration(ctx, clusterId, body)
+func (c *ClientWithResponses) NodeConfigurationAPICreateConfigurationWithResponse(ctx context.Context, clusterId string, body NodeConfigurationAPICreateConfigurationJSONRequestBody, reqEditors ...RequestEditorFn) (*NodeConfigurationAPICreateConfigurationResponse, error) {
+	rsp, err := c.NodeConfigurationAPICreateConfiguration(ctx, clusterId, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
@@ -7698,8 +9998,8 @@ func (c *ClientWithResponses) NodeConfigurationAPICreateConfigurationWithRespons
 }
 
 // NodeConfigurationAPIGetSuggestedConfigurationWithResponse request returning *NodeConfigurationAPIGetSuggestedConfigurationResponse
-func (c *ClientWithResponses) NodeConfigurationAPIGetSuggestedConfigurationWithResponse(ctx context.Context, clusterId string) (*NodeConfigurationAPIGetSuggestedConfigurationResponse, error) {
-	rsp, err := c.NodeConfigurationAPIGetSuggestedConfiguration(ctx, clusterId)
+func (c *ClientWithResponses) NodeConfigurationAPIGetSuggestedConfigurationWithResponse(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*NodeConfigurationAPIGetSuggestedConfigurationResponse, error) {
+	rsp, err := c.NodeConfigurationAPIGetSuggestedConfiguration(ctx, clusterId, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
@@ -7707,8 +10007,8 @@ func (c *ClientWithResponses) NodeConfigurationAPIGetSuggestedConfigurationWithR
 }
 
 // NodeConfigurationAPIDeleteConfigurationWithResponse request returning *NodeConfigurationAPIDeleteConfigurationResponse
-func (c *ClientWithResponses) NodeConfigurationAPIDeleteConfigurationWithResponse(ctx context.Context, clusterId string, id string) (*NodeConfigurationAPIDeleteConfigurationResponse, error) {
-	rsp, err := c.NodeConfigurationAPIDeleteConfiguration(ctx, clusterId, id)
+func (c *ClientWithResponses) NodeConfigurationAPIDeleteConfigurationWithResponse(ctx context.Context, clusterId string, id string, reqEditors ...RequestEditorFn) (*NodeConfigurationAPIDeleteConfigurationResponse, error) {
+	rsp, err := c.NodeConfigurationAPIDeleteConfiguration(ctx, clusterId, id, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
@@ -7716,8 +10016,8 @@ func (c *ClientWithResponses) NodeConfigurationAPIDeleteConfigurationWithRespons
 }
 
 // NodeConfigurationAPIGetConfigurationWithResponse request returning *NodeConfigurationAPIGetConfigurationResponse
-func (c *ClientWithResponses) NodeConfigurationAPIGetConfigurationWithResponse(ctx context.Context, clusterId string, id string) (*NodeConfigurationAPIGetConfigurationResponse, error) {
-	rsp, err := c.NodeConfigurationAPIGetConfiguration(ctx, clusterId, id)
+func (c *ClientWithResponses) NodeConfigurationAPIGetConfigurationWithResponse(ctx context.Context, clusterId string, id string, reqEditors ...RequestEditorFn) (*NodeConfigurationAPIGetConfigurationResponse, error) {
+	rsp, err := c.NodeConfigurationAPIGetConfiguration(ctx, clusterId, id, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
@@ -7725,16 +10025,16 @@ func (c *ClientWithResponses) NodeConfigurationAPIGetConfigurationWithResponse(c
 }
 
 // NodeConfigurationAPIUpdateConfigurationWithBodyWithResponse request with arbitrary body returning *NodeConfigurationAPIUpdateConfigurationResponse
-func (c *ClientWithResponses) NodeConfigurationAPIUpdateConfigurationWithBodyWithResponse(ctx context.Context, clusterId string, id string, contentType string, body io.Reader) (*NodeConfigurationAPIUpdateConfigurationResponse, error) {
-	rsp, err := c.NodeConfigurationAPIUpdateConfigurationWithBody(ctx, clusterId, id, contentType, body)
+func (c *ClientWithResponses) NodeConfigurationAPIUpdateConfigurationWithBodyWithResponse(ctx context.Context, clusterId string, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*NodeConfigurationAPIUpdateConfigurationResponse, error) {
+	rsp, err := c.NodeConfigurationAPIUpdateConfigurationWithBody(ctx, clusterId, id, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
 	return ParseNodeConfigurationAPIUpdateConfigurationResponse(rsp)
 }
 
-func (c *ClientWithResponses) NodeConfigurationAPIUpdateConfigurationWithResponse(ctx context.Context, clusterId string, id string, body NodeConfigurationAPIUpdateConfigurationJSONRequestBody) (*NodeConfigurationAPIUpdateConfigurationResponse, error) {
-	rsp, err := c.NodeConfigurationAPIUpdateConfiguration(ctx, clusterId, id, body)
+func (c *ClientWithResponses) NodeConfigurationAPIUpdateConfigurationWithResponse(ctx context.Context, clusterId string, id string, body NodeConfigurationAPIUpdateConfigurationJSONRequestBody, reqEditors ...RequestEditorFn) (*NodeConfigurationAPIUpdateConfigurationResponse, error) {
+	rsp, err := c.NodeConfigurationAPIUpdateConfiguration(ctx, clusterId, id, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
@@ -7742,8 +10042,8 @@ func (c *ClientWithResponses) NodeConfigurationAPIUpdateConfigurationWithRespons
 }
 
 // NodeConfigurationAPISetDefaultWithResponse request returning *NodeConfigurationAPISetDefaultResponse
-func (c *ClientWithResponses) NodeConfigurationAPISetDefaultWithResponse(ctx context.Context, clusterId string, id string) (*NodeConfigurationAPISetDefaultResponse, error) {
-	rsp, err := c.NodeConfigurationAPISetDefault(ctx, clusterId, id)
+func (c *ClientWithResponses) NodeConfigurationAPISetDefaultWithResponse(ctx context.Context, clusterId string, id string, reqEditors ...RequestEditorFn) (*NodeConfigurationAPISetDefaultResponse, error) {
+	rsp, err := c.NodeConfigurationAPISetDefault(ctx, clusterId, id, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
@@ -7751,8 +10051,8 @@ func (c *ClientWithResponses) NodeConfigurationAPISetDefaultWithResponse(ctx con
 }
 
 // PoliciesAPIGetClusterNodeConstraintsWithResponse request returning *PoliciesAPIGetClusterNodeConstraintsResponse
-func (c *ClientWithResponses) PoliciesAPIGetClusterNodeConstraintsWithResponse(ctx context.Context, clusterId string) (*PoliciesAPIGetClusterNodeConstraintsResponse, error) {
-	rsp, err := c.PoliciesAPIGetClusterNodeConstraints(ctx, clusterId)
+func (c *ClientWithResponses) PoliciesAPIGetClusterNodeConstraintsWithResponse(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*PoliciesAPIGetClusterNodeConstraintsResponse, error) {
+	rsp, err := c.PoliciesAPIGetClusterNodeConstraints(ctx, clusterId, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
@@ -7760,8 +10060,8 @@ func (c *ClientWithResponses) PoliciesAPIGetClusterNodeConstraintsWithResponse(c
 }
 
 // NodeTemplatesAPIListNodeTemplatesWithResponse request returning *NodeTemplatesAPIListNodeTemplatesResponse
-func (c *ClientWithResponses) NodeTemplatesAPIListNodeTemplatesWithResponse(ctx context.Context, clusterId string, params *NodeTemplatesAPIListNodeTemplatesParams) (*NodeTemplatesAPIListNodeTemplatesResponse, error) {
-	rsp, err := c.NodeTemplatesAPIListNodeTemplates(ctx, clusterId, params)
+func (c *ClientWithResponses) NodeTemplatesAPIListNodeTemplatesWithResponse(ctx context.Context, clusterId string, params *NodeTemplatesAPIListNodeTemplatesParams, reqEditors ...RequestEditorFn) (*NodeTemplatesAPIListNodeTemplatesResponse, error) {
+	rsp, err := c.NodeTemplatesAPIListNodeTemplates(ctx, clusterId, params, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
@@ -7769,16 +10069,16 @@ func (c *ClientWithResponses) NodeTemplatesAPIListNodeTemplatesWithResponse(ctx 
 }
 
 // NodeTemplatesAPICreateNodeTemplateWithBodyWithResponse request with arbitrary body returning *NodeTemplatesAPICreateNodeTemplateResponse
-func (c *ClientWithResponses) NodeTemplatesAPICreateNodeTemplateWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader) (*NodeTemplatesAPICreateNodeTemplateResponse, error) {
-	rsp, err := c.NodeTemplatesAPICreateNodeTemplateWithBody(ctx, clusterId, contentType, body)
+func (c *ClientWithResponses) NodeTemplatesAPICreateNodeTemplateWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*NodeTemplatesAPICreateNodeTemplateResponse, error) {
+	rsp, err := c.NodeTemplatesAPICreateNodeTemplateWithBody(ctx, clusterId, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
 	return ParseNodeTemplatesAPICreateNodeTemplateResponse(rsp)
 }
 
-func (c *ClientWithResponses) NodeTemplatesAPICreateNodeTemplateWithResponse(ctx context.Context, clusterId string, body NodeTemplatesAPICreateNodeTemplateJSONRequestBody) (*NodeTemplatesAPICreateNodeTemplateResponse, error) {
-	rsp, err := c.NodeTemplatesAPICreateNodeTemplate(ctx, clusterId, body)
+func (c *ClientWithResponses) NodeTemplatesAPICreateNodeTemplateWithResponse(ctx context.Context, clusterId string, body NodeTemplatesAPICreateNodeTemplateJSONRequestBody, reqEditors ...RequestEditorFn) (*NodeTemplatesAPICreateNodeTemplateResponse, error) {
+	rsp, err := c.NodeTemplatesAPICreateNodeTemplate(ctx, clusterId, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
@@ -7786,8 +10086,8 @@ func (c *ClientWithResponses) NodeTemplatesAPICreateNodeTemplateWithResponse(ctx
 }
 
 // NodeTemplatesAPIDeleteNodeTemplateWithResponse request returning *NodeTemplatesAPIDeleteNodeTemplateResponse
-func (c *ClientWithResponses) NodeTemplatesAPIDeleteNodeTemplateWithResponse(ctx context.Context, clusterId string, nodeTemplateName string) (*NodeTemplatesAPIDeleteNodeTemplateResponse, error) {
-	rsp, err := c.NodeTemplatesAPIDeleteNodeTemplate(ctx, clusterId, nodeTemplateName)
+func (c *ClientWithResponses) NodeTemplatesAPIDeleteNodeTemplateWithResponse(ctx context.Context, clusterId string, nodeTemplateName string, reqEditors ...RequestEditorFn) (*NodeTemplatesAPIDeleteNodeTemplateResponse, error) {
+	rsp, err := c.NodeTemplatesAPIDeleteNodeTemplate(ctx, clusterId, nodeTemplateName, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
@@ -7795,16 +10095,16 @@ func (c *ClientWithResponses) NodeTemplatesAPIDeleteNodeTemplateWithResponse(ctx
 }
 
 // NodeTemplatesAPIUpdateNodeTemplateWithBodyWithResponse request with arbitrary body returning *NodeTemplatesAPIUpdateNodeTemplateResponse
-func (c *ClientWithResponses) NodeTemplatesAPIUpdateNodeTemplateWithBodyWithResponse(ctx context.Context, clusterId string, nodeTemplateName string, contentType string, body io.Reader) (*NodeTemplatesAPIUpdateNodeTemplateResponse, error) {
-	rsp, err := c.NodeTemplatesAPIUpdateNodeTemplateWithBody(ctx, clusterId, nodeTemplateName, contentType, body)
+func (c *ClientWithResponses) NodeTemplatesAPIUpdateNodeTemplateWithBodyWithResponse(ctx context.Context, clusterId string, nodeTemplateName string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*NodeTemplatesAPIUpdateNodeTemplateResponse, error) {
+	rsp, err := c.NodeTemplatesAPIUpdateNodeTemplateWithBody(ctx, clusterId, nodeTemplateName, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
 	return ParseNodeTemplatesAPIUpdateNodeTemplateResponse(rsp)
 }
 
-func (c *ClientWithResponses) NodeTemplatesAPIUpdateNodeTemplateWithResponse(ctx context.Context, clusterId string, nodeTemplateName string, body NodeTemplatesAPIUpdateNodeTemplateJSONRequestBody) (*NodeTemplatesAPIUpdateNodeTemplateResponse, error) {
-	rsp, err := c.NodeTemplatesAPIUpdateNodeTemplate(ctx, clusterId, nodeTemplateName, body)
+func (c *ClientWithResponses) NodeTemplatesAPIUpdateNodeTemplateWithResponse(ctx context.Context, clusterId string, nodeTemplateName string, body NodeTemplatesAPIUpdateNodeTemplateJSONRequestBody, reqEditors ...RequestEditorFn) (*NodeTemplatesAPIUpdateNodeTemplateResponse, error) {
+	rsp, err := c.NodeTemplatesAPIUpdateNodeTemplate(ctx, clusterId, nodeTemplateName, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
@@ -7812,8 +10112,8 @@ func (c *ClientWithResponses) NodeTemplatesAPIUpdateNodeTemplateWithResponse(ctx
 }
 
 // PoliciesAPIGetClusterPoliciesWithResponse request returning *PoliciesAPIGetClusterPoliciesResponse
-func (c *ClientWithResponses) PoliciesAPIGetClusterPoliciesWithResponse(ctx context.Context, clusterId string) (*PoliciesAPIGetClusterPoliciesResponse, error) {
-	rsp, err := c.PoliciesAPIGetClusterPolicies(ctx, clusterId)
+func (c *ClientWithResponses) PoliciesAPIGetClusterPoliciesWithResponse(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*PoliciesAPIGetClusterPoliciesResponse, error) {
+	rsp, err := c.PoliciesAPIGetClusterPolicies(ctx, clusterId, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
@@ -7821,16 +10121,16 @@ func (c *ClientWithResponses) PoliciesAPIGetClusterPoliciesWithResponse(ctx cont
 }
 
 // PoliciesAPIUpsertClusterPoliciesWithBodyWithResponse request with arbitrary body returning *PoliciesAPIUpsertClusterPoliciesResponse
-func (c *ClientWithResponses) PoliciesAPIUpsertClusterPoliciesWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader) (*PoliciesAPIUpsertClusterPoliciesResponse, error) {
-	rsp, err := c.PoliciesAPIUpsertClusterPoliciesWithBody(ctx, clusterId, contentType, body)
+func (c *ClientWithResponses) PoliciesAPIUpsertClusterPoliciesWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*PoliciesAPIUpsertClusterPoliciesResponse, error) {
+	rsp, err := c.PoliciesAPIUpsertClusterPoliciesWithBody(ctx, clusterId, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
 	return ParsePoliciesAPIUpsertClusterPoliciesResponse(rsp)
 }
 
-func (c *ClientWithResponses) PoliciesAPIUpsertClusterPoliciesWithResponse(ctx context.Context, clusterId string, body PoliciesAPIUpsertClusterPoliciesJSONRequestBody) (*PoliciesAPIUpsertClusterPoliciesResponse, error) {
-	rsp, err := c.PoliciesAPIUpsertClusterPolicies(ctx, clusterId, body)
+func (c *ClientWithResponses) PoliciesAPIUpsertClusterPoliciesWithResponse(ctx context.Context, clusterId string, body PoliciesAPIUpsertClusterPoliciesJSONRequestBody, reqEditors ...RequestEditorFn) (*PoliciesAPIUpsertClusterPoliciesResponse, error) {
+	rsp, err := c.PoliciesAPIUpsertClusterPolicies(ctx, clusterId, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
@@ -7838,8 +10138,8 @@ func (c *ClientWithResponses) PoliciesAPIUpsertClusterPoliciesWithResponse(ctx c
 }
 
 // ScheduledRebalancingAPIListRebalancingJobsWithResponse request returning *ScheduledRebalancingAPIListRebalancingJobsResponse
-func (c *ClientWithResponses) ScheduledRebalancingAPIListRebalancingJobsWithResponse(ctx context.Context, clusterId string) (*ScheduledRebalancingAPIListRebalancingJobsResponse, error) {
-	rsp, err := c.ScheduledRebalancingAPIListRebalancingJobs(ctx, clusterId)
+func (c *ClientWithResponses) ScheduledRebalancingAPIListRebalancingJobsWithResponse(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*ScheduledRebalancingAPIListRebalancingJobsResponse, error) {
+	rsp, err := c.ScheduledRebalancingAPIListRebalancingJobs(ctx, clusterId, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
@@ -7847,16 +10147,16 @@ func (c *ClientWithResponses) ScheduledRebalancingAPIListRebalancingJobsWithResp
 }
 
 // ScheduledRebalancingAPICreateRebalancingJobWithBodyWithResponse request with arbitrary body returning *ScheduledRebalancingAPICreateRebalancingJobResponse
-func (c *ClientWithResponses) ScheduledRebalancingAPICreateRebalancingJobWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader) (*ScheduledRebalancingAPICreateRebalancingJobResponse, error) {
-	rsp, err := c.ScheduledRebalancingAPICreateRebalancingJobWithBody(ctx, clusterId, contentType, body)
+func (c *ClientWithResponses) ScheduledRebalancingAPICreateRebalancingJobWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*ScheduledRebalancingAPICreateRebalancingJobResponse, error) {
+	rsp, err := c.ScheduledRebalancingAPICreateRebalancingJobWithBody(ctx, clusterId, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
 	return ParseScheduledRebalancingAPICreateRebalancingJobResponse(rsp)
 }
 
-func (c *ClientWithResponses) ScheduledRebalancingAPICreateRebalancingJobWithResponse(ctx context.Context, clusterId string, body ScheduledRebalancingAPICreateRebalancingJobJSONRequestBody) (*ScheduledRebalancingAPICreateRebalancingJobResponse, error) {
-	rsp, err := c.ScheduledRebalancingAPICreateRebalancingJob(ctx, clusterId, body)
+func (c *ClientWithResponses) ScheduledRebalancingAPICreateRebalancingJobWithResponse(ctx context.Context, clusterId string, body ScheduledRebalancingAPICreateRebalancingJobJSONRequestBody, reqEditors ...RequestEditorFn) (*ScheduledRebalancingAPICreateRebalancingJobResponse, error) {
+	rsp, err := c.ScheduledRebalancingAPICreateRebalancingJob(ctx, clusterId, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
@@ -7864,8 +10164,8 @@ func (c *ClientWithResponses) ScheduledRebalancingAPICreateRebalancingJobWithRes
 }
 
 // ScheduledRebalancingAPIDeleteRebalancingJobWithResponse request returning *ScheduledRebalancingAPIDeleteRebalancingJobResponse
-func (c *ClientWithResponses) ScheduledRebalancingAPIDeleteRebalancingJobWithResponse(ctx context.Context, clusterId string, id string) (*ScheduledRebalancingAPIDeleteRebalancingJobResponse, error) {
-	rsp, err := c.ScheduledRebalancingAPIDeleteRebalancingJob(ctx, clusterId, id)
+func (c *ClientWithResponses) ScheduledRebalancingAPIDeleteRebalancingJobWithResponse(ctx context.Context, clusterId string, id string, reqEditors ...RequestEditorFn) (*ScheduledRebalancingAPIDeleteRebalancingJobResponse, error) {
+	rsp, err := c.ScheduledRebalancingAPIDeleteRebalancingJob(ctx, clusterId, id, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
@@ -7873,8 +10173,8 @@ func (c *ClientWithResponses) ScheduledRebalancingAPIDeleteRebalancingJobWithRes
 }
 
 // ScheduledRebalancingAPIGetRebalancingJobWithResponse request returning *ScheduledRebalancingAPIGetRebalancingJobResponse
-func (c *ClientWithResponses) ScheduledRebalancingAPIGetRebalancingJobWithResponse(ctx context.Context, clusterId string, id string) (*ScheduledRebalancingAPIGetRebalancingJobResponse, error) {
-	rsp, err := c.ScheduledRebalancingAPIGetRebalancingJob(ctx, clusterId, id)
+func (c *ClientWithResponses) ScheduledRebalancingAPIGetRebalancingJobWithResponse(ctx context.Context, clusterId string, id string, reqEditors ...RequestEditorFn) (*ScheduledRebalancingAPIGetRebalancingJobResponse, error) {
+	rsp, err := c.ScheduledRebalancingAPIGetRebalancingJob(ctx, clusterId, id, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
@@ -7882,16 +10182,16 @@ func (c *ClientWithResponses) ScheduledRebalancingAPIGetRebalancingJobWithRespon
 }
 
 // ScheduledRebalancingAPIUpdateRebalancingJobWithBodyWithResponse request with arbitrary body returning *ScheduledRebalancingAPIUpdateRebalancingJobResponse
-func (c *ClientWithResponses) ScheduledRebalancingAPIUpdateRebalancingJobWithBodyWithResponse(ctx context.Context, clusterId string, id string, contentType string, body io.Reader) (*ScheduledRebalancingAPIUpdateRebalancingJobResponse, error) {
-	rsp, err := c.ScheduledRebalancingAPIUpdateRebalancingJobWithBody(ctx, clusterId, id, contentType, body)
+func (c *ClientWithResponses) ScheduledRebalancingAPIUpdateRebalancingJobWithBodyWithResponse(ctx context.Context, clusterId string, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*ScheduledRebalancingAPIUpdateRebalancingJobResponse, error) {
+	rsp, err := c.ScheduledRebalancingAPIUpdateRebalancingJobWithBody(ctx, clusterId, id, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
 	return ParseScheduledRebalancingAPIUpdateRebalancingJobResponse(rsp)
 }
 
-func (c *ClientWithResponses) ScheduledRebalancingAPIUpdateRebalancingJobWithResponse(ctx context.Context, clusterId string, id string, body ScheduledRebalancingAPIUpdateRebalancingJobJSONRequestBody) (*ScheduledRebalancingAPIUpdateRebalancingJobResponse, error) {
-	rsp, err := c.ScheduledRebalancingAPIUpdateRebalancingJob(ctx, clusterId, id, body)
+func (c *ClientWithResponses) ScheduledRebalancingAPIUpdateRebalancingJobWithResponse(ctx context.Context, clusterId string, id string, body ScheduledRebalancingAPIUpdateRebalancingJobJSONRequestBody, reqEditors ...RequestEditorFn) (*ScheduledRebalancingAPIUpdateRebalancingJobResponse, error) {
+	rsp, err := c.ScheduledRebalancingAPIUpdateRebalancingJob(ctx, clusterId, id, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
@@ -7899,16 +10199,16 @@ func (c *ClientWithResponses) ScheduledRebalancingAPIUpdateRebalancingJobWithRes
 }
 
 // ScheduledRebalancingAPIPreviewRebalancingScheduleWithBodyWithResponse request with arbitrary body returning *ScheduledRebalancingAPIPreviewRebalancingScheduleResponse
-func (c *ClientWithResponses) ScheduledRebalancingAPIPreviewRebalancingScheduleWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader) (*ScheduledRebalancingAPIPreviewRebalancingScheduleResponse, error) {
-	rsp, err := c.ScheduledRebalancingAPIPreviewRebalancingScheduleWithBody(ctx, clusterId, contentType, body)
+func (c *ClientWithResponses) ScheduledRebalancingAPIPreviewRebalancingScheduleWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*ScheduledRebalancingAPIPreviewRebalancingScheduleResponse, error) {
+	rsp, err := c.ScheduledRebalancingAPIPreviewRebalancingScheduleWithBody(ctx, clusterId, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
 	return ParseScheduledRebalancingAPIPreviewRebalancingScheduleResponse(rsp)
 }
 
-func (c *ClientWithResponses) ScheduledRebalancingAPIPreviewRebalancingScheduleWithResponse(ctx context.Context, clusterId string, body ScheduledRebalancingAPIPreviewRebalancingScheduleJSONRequestBody) (*ScheduledRebalancingAPIPreviewRebalancingScheduleResponse, error) {
-	rsp, err := c.ScheduledRebalancingAPIPreviewRebalancingSchedule(ctx, clusterId, body)
+func (c *ClientWithResponses) ScheduledRebalancingAPIPreviewRebalancingScheduleWithResponse(ctx context.Context, clusterId string, body ScheduledRebalancingAPIPreviewRebalancingScheduleJSONRequestBody, reqEditors ...RequestEditorFn) (*ScheduledRebalancingAPIPreviewRebalancingScheduleResponse, error) {
+	rsp, err := c.ScheduledRebalancingAPIPreviewRebalancingSchedule(ctx, clusterId, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
@@ -7916,8 +10216,8 @@ func (c *ClientWithResponses) ScheduledRebalancingAPIPreviewRebalancingScheduleW
 }
 
 // ExternalClusterAPIListClustersWithResponse request returning *ExternalClusterAPIListClustersResponse
-func (c *ClientWithResponses) ExternalClusterAPIListClustersWithResponse(ctx context.Context, params *ExternalClusterAPIListClustersParams) (*ExternalClusterAPIListClustersResponse, error) {
-	rsp, err := c.ExternalClusterAPIListClusters(ctx, params)
+func (c *ClientWithResponses) ExternalClusterAPIListClustersWithResponse(ctx context.Context, params *ExternalClusterAPIListClustersParams, reqEditors ...RequestEditorFn) (*ExternalClusterAPIListClustersResponse, error) {
+	rsp, err := c.ExternalClusterAPIListClusters(ctx, params, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
@@ -7925,16 +10225,16 @@ func (c *ClientWithResponses) ExternalClusterAPIListClustersWithResponse(ctx con
 }
 
 // ExternalClusterAPIRegisterClusterWithBodyWithResponse request with arbitrary body returning *ExternalClusterAPIRegisterClusterResponse
-func (c *ClientWithResponses) ExternalClusterAPIRegisterClusterWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*ExternalClusterAPIRegisterClusterResponse, error) {
-	rsp, err := c.ExternalClusterAPIRegisterClusterWithBody(ctx, contentType, body)
+func (c *ClientWithResponses) ExternalClusterAPIRegisterClusterWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*ExternalClusterAPIRegisterClusterResponse, error) {
+	rsp, err := c.ExternalClusterAPIRegisterClusterWithBody(ctx, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
 	return ParseExternalClusterAPIRegisterClusterResponse(rsp)
 }
 
-func (c *ClientWithResponses) ExternalClusterAPIRegisterClusterWithResponse(ctx context.Context, body ExternalClusterAPIRegisterClusterJSONRequestBody) (*ExternalClusterAPIRegisterClusterResponse, error) {
-	rsp, err := c.ExternalClusterAPIRegisterCluster(ctx, body)
+func (c *ClientWithResponses) ExternalClusterAPIRegisterClusterWithResponse(ctx context.Context, body ExternalClusterAPIRegisterClusterJSONRequestBody, reqEditors ...RequestEditorFn) (*ExternalClusterAPIRegisterClusterResponse, error) {
+	rsp, err := c.ExternalClusterAPIRegisterCluster(ctx, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
@@ -7942,8 +10242,8 @@ func (c *ClientWithResponses) ExternalClusterAPIRegisterClusterWithResponse(ctx 
 }
 
 // OperationsAPIGetOperationWithResponse request returning *OperationsAPIGetOperationResponse
-func (c *ClientWithResponses) OperationsAPIGetOperationWithResponse(ctx context.Context, id string) (*OperationsAPIGetOperationResponse, error) {
-	rsp, err := c.OperationsAPIGetOperation(ctx, id)
+func (c *ClientWithResponses) OperationsAPIGetOperationWithResponse(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*OperationsAPIGetOperationResponse, error) {
+	rsp, err := c.OperationsAPIGetOperation(ctx, id, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
@@ -7951,8 +10251,8 @@ func (c *ClientWithResponses) OperationsAPIGetOperationWithResponse(ctx context.
 }
 
 // ExternalClusterAPIDeleteClusterWithResponse request returning *ExternalClusterAPIDeleteClusterResponse
-func (c *ClientWithResponses) ExternalClusterAPIDeleteClusterWithResponse(ctx context.Context, clusterId string) (*ExternalClusterAPIDeleteClusterResponse, error) {
-	rsp, err := c.ExternalClusterAPIDeleteCluster(ctx, clusterId)
+func (c *ClientWithResponses) ExternalClusterAPIDeleteClusterWithResponse(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*ExternalClusterAPIDeleteClusterResponse, error) {
+	rsp, err := c.ExternalClusterAPIDeleteCluster(ctx, clusterId, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
@@ -7960,8 +10260,8 @@ func (c *ClientWithResponses) ExternalClusterAPIDeleteClusterWithResponse(ctx co
 }
 
 // ExternalClusterAPIGetClusterWithResponse request returning *ExternalClusterAPIGetClusterResponse
-func (c *ClientWithResponses) ExternalClusterAPIGetClusterWithResponse(ctx context.Context, clusterId string) (*ExternalClusterAPIGetClusterResponse, error) {
-	rsp, err := c.ExternalClusterAPIGetCluster(ctx, clusterId)
+func (c *ClientWithResponses) ExternalClusterAPIGetClusterWithResponse(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*ExternalClusterAPIGetClusterResponse, error) {
+	rsp, err := c.ExternalClusterAPIGetCluster(ctx, clusterId, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
@@ -7969,16 +10269,16 @@ func (c *ClientWithResponses) ExternalClusterAPIGetClusterWithResponse(ctx conte
 }
 
 // ExternalClusterAPIUpdateClusterWithBodyWithResponse request with arbitrary body returning *ExternalClusterAPIUpdateClusterResponse
-func (c *ClientWithResponses) ExternalClusterAPIUpdateClusterWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader) (*ExternalClusterAPIUpdateClusterResponse, error) {
-	rsp, err := c.ExternalClusterAPIUpdateClusterWithBody(ctx, clusterId, contentType, body)
+func (c *ClientWithResponses) ExternalClusterAPIUpdateClusterWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*ExternalClusterAPIUpdateClusterResponse, error) {
+	rsp, err := c.ExternalClusterAPIUpdateClusterWithBody(ctx, clusterId, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
 	return ParseExternalClusterAPIUpdateClusterResponse(rsp)
 }
 
-func (c *ClientWithResponses) ExternalClusterAPIUpdateClusterWithResponse(ctx context.Context, clusterId string, body ExternalClusterAPIUpdateClusterJSONRequestBody) (*ExternalClusterAPIUpdateClusterResponse, error) {
-	rsp, err := c.ExternalClusterAPIUpdateCluster(ctx, clusterId, body)
+func (c *ClientWithResponses) ExternalClusterAPIUpdateClusterWithResponse(ctx context.Context, clusterId string, body ExternalClusterAPIUpdateClusterJSONRequestBody, reqEditors ...RequestEditorFn) (*ExternalClusterAPIUpdateClusterResponse, error) {
+	rsp, err := c.ExternalClusterAPIUpdateCluster(ctx, clusterId, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
@@ -7986,8 +10286,8 @@ func (c *ClientWithResponses) ExternalClusterAPIUpdateClusterWithResponse(ctx co
 }
 
 // ExternalClusterAPIDeleteAssumeRolePrincipalWithResponse request returning *ExternalClusterAPIDeleteAssumeRolePrincipalResponse
-func (c *ClientWithResponses) ExternalClusterAPIDeleteAssumeRolePrincipalWithResponse(ctx context.Context, clusterId string) (*ExternalClusterAPIDeleteAssumeRolePrincipalResponse, error) {
-	rsp, err := c.ExternalClusterAPIDeleteAssumeRolePrincipal(ctx, clusterId)
+func (c *ClientWithResponses) ExternalClusterAPIDeleteAssumeRolePrincipalWithResponse(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*ExternalClusterAPIDeleteAssumeRolePrincipalResponse, error) {
+	rsp, err := c.ExternalClusterAPIDeleteAssumeRolePrincipal(ctx, clusterId, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
@@ -7995,8 +10295,8 @@ func (c *ClientWithResponses) ExternalClusterAPIDeleteAssumeRolePrincipalWithRes
 }
 
 // ExternalClusterAPIGetAssumeRolePrincipalWithResponse request returning *ExternalClusterAPIGetAssumeRolePrincipalResponse
-func (c *ClientWithResponses) ExternalClusterAPIGetAssumeRolePrincipalWithResponse(ctx context.Context, clusterId string) (*ExternalClusterAPIGetAssumeRolePrincipalResponse, error) {
-	rsp, err := c.ExternalClusterAPIGetAssumeRolePrincipal(ctx, clusterId)
+func (c *ClientWithResponses) ExternalClusterAPIGetAssumeRolePrincipalWithResponse(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*ExternalClusterAPIGetAssumeRolePrincipalResponse, error) {
+	rsp, err := c.ExternalClusterAPIGetAssumeRolePrincipal(ctx, clusterId, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
@@ -8004,8 +10304,8 @@ func (c *ClientWithResponses) ExternalClusterAPIGetAssumeRolePrincipalWithRespon
 }
 
 // ExternalClusterAPICreateAssumeRolePrincipalWithResponse request returning *ExternalClusterAPICreateAssumeRolePrincipalResponse
-func (c *ClientWithResponses) ExternalClusterAPICreateAssumeRolePrincipalWithResponse(ctx context.Context, clusterId string) (*ExternalClusterAPICreateAssumeRolePrincipalResponse, error) {
-	rsp, err := c.ExternalClusterAPICreateAssumeRolePrincipal(ctx, clusterId)
+func (c *ClientWithResponses) ExternalClusterAPICreateAssumeRolePrincipalWithResponse(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*ExternalClusterAPICreateAssumeRolePrincipalResponse, error) {
+	rsp, err := c.ExternalClusterAPICreateAssumeRolePrincipal(ctx, clusterId, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
@@ -8013,8 +10313,8 @@ func (c *ClientWithResponses) ExternalClusterAPICreateAssumeRolePrincipalWithRes
 }
 
 // ExternalClusterAPIGetAssumeRoleUserWithResponse request returning *ExternalClusterAPIGetAssumeRoleUserResponse
-func (c *ClientWithResponses) ExternalClusterAPIGetAssumeRoleUserWithResponse(ctx context.Context, clusterId string) (*ExternalClusterAPIGetAssumeRoleUserResponse, error) {
-	rsp, err := c.ExternalClusterAPIGetAssumeRoleUser(ctx, clusterId)
+func (c *ClientWithResponses) ExternalClusterAPIGetAssumeRoleUserWithResponse(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*ExternalClusterAPIGetAssumeRoleUserResponse, error) {
+	rsp, err := c.ExternalClusterAPIGetAssumeRoleUser(ctx, clusterId, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
@@ -8022,8 +10322,8 @@ func (c *ClientWithResponses) ExternalClusterAPIGetAssumeRoleUserWithResponse(ct
 }
 
 // ExternalClusterAPIGetCleanupScriptWithResponse request returning *ExternalClusterAPIGetCleanupScriptResponse
-func (c *ClientWithResponses) ExternalClusterAPIGetCleanupScriptWithResponse(ctx context.Context, clusterId string) (*ExternalClusterAPIGetCleanupScriptResponse, error) {
-	rsp, err := c.ExternalClusterAPIGetCleanupScript(ctx, clusterId)
+func (c *ClientWithResponses) ExternalClusterAPIGetCleanupScriptWithResponse(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*ExternalClusterAPIGetCleanupScriptResponse, error) {
+	rsp, err := c.ExternalClusterAPIGetCleanupScript(ctx, clusterId, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
@@ -8031,8 +10331,8 @@ func (c *ClientWithResponses) ExternalClusterAPIGetCleanupScriptWithResponse(ctx
 }
 
 // ExternalClusterAPIGetCredentialsScriptWithResponse request returning *ExternalClusterAPIGetCredentialsScriptResponse
-func (c *ClientWithResponses) ExternalClusterAPIGetCredentialsScriptWithResponse(ctx context.Context, clusterId string, params *ExternalClusterAPIGetCredentialsScriptParams) (*ExternalClusterAPIGetCredentialsScriptResponse, error) {
-	rsp, err := c.ExternalClusterAPIGetCredentialsScript(ctx, clusterId, params)
+func (c *ClientWithResponses) ExternalClusterAPIGetCredentialsScriptWithResponse(ctx context.Context, clusterId string, params *ExternalClusterAPIGetCredentialsScriptParams, reqEditors ...RequestEditorFn) (*ExternalClusterAPIGetCredentialsScriptResponse, error) {
+	rsp, err := c.ExternalClusterAPIGetCredentialsScript(ctx, clusterId, params, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
@@ -8040,16 +10340,16 @@ func (c *ClientWithResponses) ExternalClusterAPIGetCredentialsScriptWithResponse
 }
 
 // ExternalClusterAPIDisconnectClusterWithBodyWithResponse request with arbitrary body returning *ExternalClusterAPIDisconnectClusterResponse
-func (c *ClientWithResponses) ExternalClusterAPIDisconnectClusterWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader) (*ExternalClusterAPIDisconnectClusterResponse, error) {
-	rsp, err := c.ExternalClusterAPIDisconnectClusterWithBody(ctx, clusterId, contentType, body)
+func (c *ClientWithResponses) ExternalClusterAPIDisconnectClusterWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*ExternalClusterAPIDisconnectClusterResponse, error) {
+	rsp, err := c.ExternalClusterAPIDisconnectClusterWithBody(ctx, clusterId, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
 	return ParseExternalClusterAPIDisconnectClusterResponse(rsp)
 }
 
-func (c *ClientWithResponses) ExternalClusterAPIDisconnectClusterWithResponse(ctx context.Context, clusterId string, body ExternalClusterAPIDisconnectClusterJSONRequestBody) (*ExternalClusterAPIDisconnectClusterResponse, error) {
-	rsp, err := c.ExternalClusterAPIDisconnectCluster(ctx, clusterId, body)
+func (c *ClientWithResponses) ExternalClusterAPIDisconnectClusterWithResponse(ctx context.Context, clusterId string, body ExternalClusterAPIDisconnectClusterJSONRequestBody, reqEditors ...RequestEditorFn) (*ExternalClusterAPIDisconnectClusterResponse, error) {
+	rsp, err := c.ExternalClusterAPIDisconnectCluster(ctx, clusterId, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
@@ -8057,16 +10357,16 @@ func (c *ClientWithResponses) ExternalClusterAPIDisconnectClusterWithResponse(ct
 }
 
 // ExternalClusterAPIHandleCloudEventWithBodyWithResponse request with arbitrary body returning *ExternalClusterAPIHandleCloudEventResponse
-func (c *ClientWithResponses) ExternalClusterAPIHandleCloudEventWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader) (*ExternalClusterAPIHandleCloudEventResponse, error) {
-	rsp, err := c.ExternalClusterAPIHandleCloudEventWithBody(ctx, clusterId, contentType, body)
+func (c *ClientWithResponses) ExternalClusterAPIHandleCloudEventWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*ExternalClusterAPIHandleCloudEventResponse, error) {
+	rsp, err := c.ExternalClusterAPIHandleCloudEventWithBody(ctx, clusterId, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
 	return ParseExternalClusterAPIHandleCloudEventResponse(rsp)
 }
 
-func (c *ClientWithResponses) ExternalClusterAPIHandleCloudEventWithResponse(ctx context.Context, clusterId string, body ExternalClusterAPIHandleCloudEventJSONRequestBody) (*ExternalClusterAPIHandleCloudEventResponse, error) {
-	rsp, err := c.ExternalClusterAPIHandleCloudEvent(ctx, clusterId, body)
+func (c *ClientWithResponses) ExternalClusterAPIHandleCloudEventWithResponse(ctx context.Context, clusterId string, body ExternalClusterAPIHandleCloudEventJSONRequestBody, reqEditors ...RequestEditorFn) (*ExternalClusterAPIHandleCloudEventResponse, error) {
+	rsp, err := c.ExternalClusterAPIHandleCloudEvent(ctx, clusterId, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
@@ -8074,8 +10374,8 @@ func (c *ClientWithResponses) ExternalClusterAPIHandleCloudEventWithResponse(ctx
 }
 
 // ExternalClusterAPIListNodesWithResponse request returning *ExternalClusterAPIListNodesResponse
-func (c *ClientWithResponses) ExternalClusterAPIListNodesWithResponse(ctx context.Context, clusterId string, params *ExternalClusterAPIListNodesParams) (*ExternalClusterAPIListNodesResponse, error) {
-	rsp, err := c.ExternalClusterAPIListNodes(ctx, clusterId, params)
+func (c *ClientWithResponses) ExternalClusterAPIListNodesWithResponse(ctx context.Context, clusterId string, params *ExternalClusterAPIListNodesParams, reqEditors ...RequestEditorFn) (*ExternalClusterAPIListNodesResponse, error) {
+	rsp, err := c.ExternalClusterAPIListNodes(ctx, clusterId, params, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
@@ -8083,16 +10383,16 @@ func (c *ClientWithResponses) ExternalClusterAPIListNodesWithResponse(ctx contex
 }
 
 // ExternalClusterAPIAddNodeWithBodyWithResponse request with arbitrary body returning *ExternalClusterAPIAddNodeResponse
-func (c *ClientWithResponses) ExternalClusterAPIAddNodeWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader) (*ExternalClusterAPIAddNodeResponse, error) {
-	rsp, err := c.ExternalClusterAPIAddNodeWithBody(ctx, clusterId, contentType, body)
+func (c *ClientWithResponses) ExternalClusterAPIAddNodeWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*ExternalClusterAPIAddNodeResponse, error) {
+	rsp, err := c.ExternalClusterAPIAddNodeWithBody(ctx, clusterId, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
 	return ParseExternalClusterAPIAddNodeResponse(rsp)
 }
 
-func (c *ClientWithResponses) ExternalClusterAPIAddNodeWithResponse(ctx context.Context, clusterId string, body ExternalClusterAPIAddNodeJSONRequestBody) (*ExternalClusterAPIAddNodeResponse, error) {
-	rsp, err := c.ExternalClusterAPIAddNode(ctx, clusterId, body)
+func (c *ClientWithResponses) ExternalClusterAPIAddNodeWithResponse(ctx context.Context, clusterId string, body ExternalClusterAPIAddNodeJSONRequestBody, reqEditors ...RequestEditorFn) (*ExternalClusterAPIAddNodeResponse, error) {
+	rsp, err := c.ExternalClusterAPIAddNode(ctx, clusterId, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
@@ -8100,8 +10400,8 @@ func (c *ClientWithResponses) ExternalClusterAPIAddNodeWithResponse(ctx context.
 }
 
 // ExternalClusterAPIDeleteNodeWithResponse request returning *ExternalClusterAPIDeleteNodeResponse
-func (c *ClientWithResponses) ExternalClusterAPIDeleteNodeWithResponse(ctx context.Context, clusterId string, nodeId string, params *ExternalClusterAPIDeleteNodeParams) (*ExternalClusterAPIDeleteNodeResponse, error) {
-	rsp, err := c.ExternalClusterAPIDeleteNode(ctx, clusterId, nodeId, params)
+func (c *ClientWithResponses) ExternalClusterAPIDeleteNodeWithResponse(ctx context.Context, clusterId string, nodeId string, params *ExternalClusterAPIDeleteNodeParams, reqEditors ...RequestEditorFn) (*ExternalClusterAPIDeleteNodeResponse, error) {
+	rsp, err := c.ExternalClusterAPIDeleteNode(ctx, clusterId, nodeId, params, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
@@ -8109,8 +10409,8 @@ func (c *ClientWithResponses) ExternalClusterAPIDeleteNodeWithResponse(ctx conte
 }
 
 // ExternalClusterAPIGetNodeWithResponse request returning *ExternalClusterAPIGetNodeResponse
-func (c *ClientWithResponses) ExternalClusterAPIGetNodeWithResponse(ctx context.Context, clusterId string, nodeId string) (*ExternalClusterAPIGetNodeResponse, error) {
-	rsp, err := c.ExternalClusterAPIGetNode(ctx, clusterId, nodeId)
+func (c *ClientWithResponses) ExternalClusterAPIGetNodeWithResponse(ctx context.Context, clusterId string, nodeId string, reqEditors ...RequestEditorFn) (*ExternalClusterAPIGetNodeResponse, error) {
+	rsp, err := c.ExternalClusterAPIGetNode(ctx, clusterId, nodeId, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
@@ -8118,16 +10418,16 @@ func (c *ClientWithResponses) ExternalClusterAPIGetNodeWithResponse(ctx context.
 }
 
 // ExternalClusterAPIDrainNodeWithBodyWithResponse request with arbitrary body returning *ExternalClusterAPIDrainNodeResponse
-func (c *ClientWithResponses) ExternalClusterAPIDrainNodeWithBodyWithResponse(ctx context.Context, clusterId string, nodeId string, contentType string, body io.Reader) (*ExternalClusterAPIDrainNodeResponse, error) {
-	rsp, err := c.ExternalClusterAPIDrainNodeWithBody(ctx, clusterId, nodeId, contentType, body)
+func (c *ClientWithResponses) ExternalClusterAPIDrainNodeWithBodyWithResponse(ctx context.Context, clusterId string, nodeId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*ExternalClusterAPIDrainNodeResponse, error) {
+	rsp, err := c.ExternalClusterAPIDrainNodeWithBody(ctx, clusterId, nodeId, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
 	return ParseExternalClusterAPIDrainNodeResponse(rsp)
 }
 
-func (c *ClientWithResponses) ExternalClusterAPIDrainNodeWithResponse(ctx context.Context, clusterId string, nodeId string, body ExternalClusterAPIDrainNodeJSONRequestBody) (*ExternalClusterAPIDrainNodeResponse, error) {
-	rsp, err := c.ExternalClusterAPIDrainNode(ctx, clusterId, nodeId, body)
+func (c *ClientWithResponses) ExternalClusterAPIDrainNodeWithResponse(ctx context.Context, clusterId string, nodeId string, body ExternalClusterAPIDrainNodeJSONRequestBody, reqEditors ...RequestEditorFn) (*ExternalClusterAPIDrainNodeResponse, error) {
+	rsp, err := c.ExternalClusterAPIDrainNode(ctx, clusterId, nodeId, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
@@ -8135,8 +10435,8 @@ func (c *ClientWithResponses) ExternalClusterAPIDrainNodeWithResponse(ctx contex
 }
 
 // ExternalClusterAPIReconcileClusterWithResponse request returning *ExternalClusterAPIReconcileClusterResponse
-func (c *ClientWithResponses) ExternalClusterAPIReconcileClusterWithResponse(ctx context.Context, clusterId string) (*ExternalClusterAPIReconcileClusterResponse, error) {
-	rsp, err := c.ExternalClusterAPIReconcileCluster(ctx, clusterId)
+func (c *ClientWithResponses) ExternalClusterAPIReconcileClusterWithResponse(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*ExternalClusterAPIReconcileClusterResponse, error) {
+	rsp, err := c.ExternalClusterAPIReconcileCluster(ctx, clusterId, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
@@ -8144,156 +10444,104 @@ func (c *ClientWithResponses) ExternalClusterAPIReconcileClusterWithResponse(ctx
 }
 
 // ExternalClusterAPICreateClusterTokenWithResponse request returning *ExternalClusterAPICreateClusterTokenResponse
-func (c *ClientWithResponses) ExternalClusterAPICreateClusterTokenWithResponse(ctx context.Context, clusterId string) (*ExternalClusterAPICreateClusterTokenResponse, error) {
-	rsp, err := c.ExternalClusterAPICreateClusterToken(ctx, clusterId)
+func (c *ClientWithResponses) ExternalClusterAPICreateClusterTokenWithResponse(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*ExternalClusterAPICreateClusterTokenResponse, error) {
+	rsp, err := c.ExternalClusterAPICreateClusterToken(ctx, clusterId, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
 	return ParseExternalClusterAPICreateClusterTokenResponse(rsp)
 }
 
-// CurrentUserProfileWithResponse request returning *CurrentUserProfileResponse
-func (c *ClientWithResponses) CurrentUserProfileWithResponse(ctx context.Context) (*CurrentUserProfileResponse, error) {
-	rsp, err := c.CurrentUserProfile(ctx)
+// UsersAPICurrentUserProfileWithResponse request returning *UsersAPICurrentUserProfileResponse
+func (c *ClientWithResponses) UsersAPICurrentUserProfileWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*UsersAPICurrentUserProfileResponse, error) {
+	rsp, err := c.UsersAPICurrentUserProfile(ctx, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseCurrentUserProfileResponse(rsp)
+	return ParseUsersAPICurrentUserProfileResponse(rsp)
 }
 
-// UpdateCurrentUserProfileWithBodyWithResponse request with arbitrary body returning *UpdateCurrentUserProfileResponse
-func (c *ClientWithResponses) UpdateCurrentUserProfileWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*UpdateCurrentUserProfileResponse, error) {
-	rsp, err := c.UpdateCurrentUserProfileWithBody(ctx, contentType, body)
+// UsersAPIUpdateCurrentUserProfileWithBodyWithResponse request with arbitrary body returning *UsersAPIUpdateCurrentUserProfileResponse
+func (c *ClientWithResponses) UsersAPIUpdateCurrentUserProfileWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UsersAPIUpdateCurrentUserProfileResponse, error) {
+	rsp, err := c.UsersAPIUpdateCurrentUserProfileWithBody(ctx, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseUpdateCurrentUserProfileResponse(rsp)
+	return ParseUsersAPIUpdateCurrentUserProfileResponse(rsp)
 }
 
-func (c *ClientWithResponses) UpdateCurrentUserProfileWithResponse(ctx context.Context, body UpdateCurrentUserProfileJSONRequestBody) (*UpdateCurrentUserProfileResponse, error) {
-	rsp, err := c.UpdateCurrentUserProfile(ctx, body)
+func (c *ClientWithResponses) UsersAPIUpdateCurrentUserProfileWithResponse(ctx context.Context, body UsersAPIUpdateCurrentUserProfileJSONRequestBody, reqEditors ...RequestEditorFn) (*UsersAPIUpdateCurrentUserProfileResponse, error) {
+	rsp, err := c.UsersAPIUpdateCurrentUserProfile(ctx, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseUpdateCurrentUserProfileResponse(rsp)
+	return ParseUsersAPIUpdateCurrentUserProfileResponse(rsp)
 }
 
-// ListOrganizationsWithResponse request returning *ListOrganizationsResponse
-func (c *ClientWithResponses) ListOrganizationsWithResponse(ctx context.Context) (*ListOrganizationsResponse, error) {
-	rsp, err := c.ListOrganizations(ctx)
+// UsersAPIListOrganizationsWithResponse request returning *UsersAPIListOrganizationsResponse
+func (c *ClientWithResponses) UsersAPIListOrganizationsWithResponse(ctx context.Context, params *UsersAPIListOrganizationsParams, reqEditors ...RequestEditorFn) (*UsersAPIListOrganizationsResponse, error) {
+	rsp, err := c.UsersAPIListOrganizations(ctx, params, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseListOrganizationsResponse(rsp)
+	return ParseUsersAPIListOrganizationsResponse(rsp)
 }
 
-// CreateOrganizationWithBodyWithResponse request with arbitrary body returning *CreateOrganizationResponse
-func (c *ClientWithResponses) CreateOrganizationWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*CreateOrganizationResponse, error) {
-	rsp, err := c.CreateOrganizationWithBody(ctx, contentType, body)
+// UsersAPICreateOrganizationWithBodyWithResponse request with arbitrary body returning *UsersAPICreateOrganizationResponse
+func (c *ClientWithResponses) UsersAPICreateOrganizationWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UsersAPICreateOrganizationResponse, error) {
+	rsp, err := c.UsersAPICreateOrganizationWithBody(ctx, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseCreateOrganizationResponse(rsp)
+	return ParseUsersAPICreateOrganizationResponse(rsp)
 }
 
-func (c *ClientWithResponses) CreateOrganizationWithResponse(ctx context.Context, body CreateOrganizationJSONRequestBody) (*CreateOrganizationResponse, error) {
-	rsp, err := c.CreateOrganization(ctx, body)
+func (c *ClientWithResponses) UsersAPICreateOrganizationWithResponse(ctx context.Context, body UsersAPICreateOrganizationJSONRequestBody, reqEditors ...RequestEditorFn) (*UsersAPICreateOrganizationResponse, error) {
+	rsp, err := c.UsersAPICreateOrganization(ctx, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseCreateOrganizationResponse(rsp)
+	return ParseUsersAPICreateOrganizationResponse(rsp)
 }
 
-// DeleteOrganizationWithResponse request returning *DeleteOrganizationResponse
-func (c *ClientWithResponses) DeleteOrganizationWithResponse(ctx context.Context, id string) (*DeleteOrganizationResponse, error) {
-	rsp, err := c.DeleteOrganization(ctx, id)
+// UsersAPIDeleteOrganizationWithResponse request returning *UsersAPIDeleteOrganizationResponse
+func (c *ClientWithResponses) UsersAPIDeleteOrganizationWithResponse(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*UsersAPIDeleteOrganizationResponse, error) {
+	rsp, err := c.UsersAPIDeleteOrganization(ctx, id, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseDeleteOrganizationResponse(rsp)
+	return ParseUsersAPIDeleteOrganizationResponse(rsp)
 }
 
-// GetOrganizationWithResponse request returning *GetOrganizationResponse
-func (c *ClientWithResponses) GetOrganizationWithResponse(ctx context.Context, id string) (*GetOrganizationResponse, error) {
-	rsp, err := c.GetOrganization(ctx, id)
+// UsersAPIGetOrganizationWithResponse request returning *UsersAPIGetOrganizationResponse
+func (c *ClientWithResponses) UsersAPIGetOrganizationWithResponse(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*UsersAPIGetOrganizationResponse, error) {
+	rsp, err := c.UsersAPIGetOrganization(ctx, id, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseGetOrganizationResponse(rsp)
+	return ParseUsersAPIGetOrganizationResponse(rsp)
 }
 
-// UpdateOrganizationWithBodyWithResponse request with arbitrary body returning *UpdateOrganizationResponse
-func (c *ClientWithResponses) UpdateOrganizationWithBodyWithResponse(ctx context.Context, id string, contentType string, body io.Reader) (*UpdateOrganizationResponse, error) {
-	rsp, err := c.UpdateOrganizationWithBody(ctx, id, contentType, body)
+// UsersAPIEditOrganizationWithBodyWithResponse request with arbitrary body returning *UsersAPIEditOrganizationResponse
+func (c *ClientWithResponses) UsersAPIEditOrganizationWithBodyWithResponse(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UsersAPIEditOrganizationResponse, error) {
+	rsp, err := c.UsersAPIEditOrganizationWithBody(ctx, id, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseUpdateOrganizationResponse(rsp)
+	return ParseUsersAPIEditOrganizationResponse(rsp)
 }
 
-func (c *ClientWithResponses) UpdateOrganizationWithResponse(ctx context.Context, id string, body UpdateOrganizationJSONRequestBody) (*UpdateOrganizationResponse, error) {
-	rsp, err := c.UpdateOrganization(ctx, id, body)
+func (c *ClientWithResponses) UsersAPIEditOrganizationWithResponse(ctx context.Context, id string, body UsersAPIEditOrganizationJSONRequestBody, reqEditors ...RequestEditorFn) (*UsersAPIEditOrganizationResponse, error) {
+	rsp, err := c.UsersAPIEditOrganization(ctx, id, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
-	return ParseUpdateOrganizationResponse(rsp)
-}
-
-// GetOrganizationUsersWithResponse request returning *GetOrganizationUsersResponse
-func (c *ClientWithResponses) GetOrganizationUsersWithResponse(ctx context.Context, id string) (*GetOrganizationUsersResponse, error) {
-	rsp, err := c.GetOrganizationUsers(ctx, id)
-	if err != nil {
-		return nil, err
-	}
-	return ParseGetOrganizationUsersResponse(rsp)
-}
-
-// CreateOrganizationUserWithBodyWithResponse request with arbitrary body returning *CreateOrganizationUserResponse
-func (c *ClientWithResponses) CreateOrganizationUserWithBodyWithResponse(ctx context.Context, id string, contentType string, body io.Reader) (*CreateOrganizationUserResponse, error) {
-	rsp, err := c.CreateOrganizationUserWithBody(ctx, id, contentType, body)
-	if err != nil {
-		return nil, err
-	}
-	return ParseCreateOrganizationUserResponse(rsp)
-}
-
-func (c *ClientWithResponses) CreateOrganizationUserWithResponse(ctx context.Context, id string, body CreateOrganizationUserJSONRequestBody) (*CreateOrganizationUserResponse, error) {
-	rsp, err := c.CreateOrganizationUser(ctx, id, body)
-	if err != nil {
-		return nil, err
-	}
-	return ParseCreateOrganizationUserResponse(rsp)
-}
-
-// DeleteOrganizationUserWithResponse request returning *DeleteOrganizationUserResponse
-func (c *ClientWithResponses) DeleteOrganizationUserWithResponse(ctx context.Context, id string, userId string) (*DeleteOrganizationUserResponse, error) {
-	rsp, err := c.DeleteOrganizationUser(ctx, id, userId)
-	if err != nil {
-		return nil, err
-	}
-	return ParseDeleteOrganizationUserResponse(rsp)
-}
-
-// UpdateOrganizationUserWithBodyWithResponse request with arbitrary body returning *UpdateOrganizationUserResponse
-func (c *ClientWithResponses) UpdateOrganizationUserWithBodyWithResponse(ctx context.Context, id string, userId string, contentType string, body io.Reader) (*UpdateOrganizationUserResponse, error) {
-	rsp, err := c.UpdateOrganizationUserWithBody(ctx, id, userId, contentType, body)
-	if err != nil {
-		return nil, err
-	}
-	return ParseUpdateOrganizationUserResponse(rsp)
-}
-
-func (c *ClientWithResponses) UpdateOrganizationUserWithResponse(ctx context.Context, id string, userId string, body UpdateOrganizationUserJSONRequestBody) (*UpdateOrganizationUserResponse, error) {
-	rsp, err := c.UpdateOrganizationUser(ctx, id, userId, body)
-	if err != nil {
-		return nil, err
-	}
-	return ParseUpdateOrganizationUserResponse(rsp)
+	return ParseUsersAPIEditOrganizationResponse(rsp)
 }
 
 // InventoryAPISyncClusterResourcesWithResponse request returning *InventoryAPISyncClusterResourcesResponse
-func (c *ClientWithResponses) InventoryAPISyncClusterResourcesWithResponse(ctx context.Context, organizationId string, clusterId string) (*InventoryAPISyncClusterResourcesResponse, error) {
-	rsp, err := c.InventoryAPISyncClusterResources(ctx, organizationId, clusterId)
+func (c *ClientWithResponses) InventoryAPISyncClusterResourcesWithResponse(ctx context.Context, organizationId string, clusterId string, reqEditors ...RequestEditorFn) (*InventoryAPISyncClusterResourcesResponse, error) {
+	rsp, err := c.InventoryAPISyncClusterResources(ctx, organizationId, clusterId, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
@@ -8301,8 +10549,8 @@ func (c *ClientWithResponses) InventoryAPISyncClusterResourcesWithResponse(ctx c
 }
 
 // InventoryAPIGetReservationsWithResponse request returning *InventoryAPIGetReservationsResponse
-func (c *ClientWithResponses) InventoryAPIGetReservationsWithResponse(ctx context.Context, organizationId string) (*InventoryAPIGetReservationsResponse, error) {
-	rsp, err := c.InventoryAPIGetReservations(ctx, organizationId)
+func (c *ClientWithResponses) InventoryAPIGetReservationsWithResponse(ctx context.Context, organizationId string, reqEditors ...RequestEditorFn) (*InventoryAPIGetReservationsResponse, error) {
+	rsp, err := c.InventoryAPIGetReservations(ctx, organizationId, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
@@ -8310,16 +10558,16 @@ func (c *ClientWithResponses) InventoryAPIGetReservationsWithResponse(ctx contex
 }
 
 // InventoryAPIAddReservationWithBodyWithResponse request with arbitrary body returning *InventoryAPIAddReservationResponse
-func (c *ClientWithResponses) InventoryAPIAddReservationWithBodyWithResponse(ctx context.Context, organizationId string, contentType string, body io.Reader) (*InventoryAPIAddReservationResponse, error) {
-	rsp, err := c.InventoryAPIAddReservationWithBody(ctx, organizationId, contentType, body)
+func (c *ClientWithResponses) InventoryAPIAddReservationWithBodyWithResponse(ctx context.Context, organizationId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*InventoryAPIAddReservationResponse, error) {
+	rsp, err := c.InventoryAPIAddReservationWithBody(ctx, organizationId, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
 	return ParseInventoryAPIAddReservationResponse(rsp)
 }
 
-func (c *ClientWithResponses) InventoryAPIAddReservationWithResponse(ctx context.Context, organizationId string, body InventoryAPIAddReservationJSONRequestBody) (*InventoryAPIAddReservationResponse, error) {
-	rsp, err := c.InventoryAPIAddReservation(ctx, organizationId, body)
+func (c *ClientWithResponses) InventoryAPIAddReservationWithResponse(ctx context.Context, organizationId string, body InventoryAPIAddReservationJSONRequestBody, reqEditors ...RequestEditorFn) (*InventoryAPIAddReservationResponse, error) {
+	rsp, err := c.InventoryAPIAddReservation(ctx, organizationId, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
@@ -8327,8 +10575,8 @@ func (c *ClientWithResponses) InventoryAPIAddReservationWithResponse(ctx context
 }
 
 // InventoryAPIGetReservationsBalanceWithResponse request returning *InventoryAPIGetReservationsBalanceResponse
-func (c *ClientWithResponses) InventoryAPIGetReservationsBalanceWithResponse(ctx context.Context, organizationId string) (*InventoryAPIGetReservationsBalanceResponse, error) {
-	rsp, err := c.InventoryAPIGetReservationsBalance(ctx, organizationId)
+func (c *ClientWithResponses) InventoryAPIGetReservationsBalanceWithResponse(ctx context.Context, organizationId string, reqEditors ...RequestEditorFn) (*InventoryAPIGetReservationsBalanceResponse, error) {
+	rsp, err := c.InventoryAPIGetReservationsBalance(ctx, organizationId, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
@@ -8336,16 +10584,16 @@ func (c *ClientWithResponses) InventoryAPIGetReservationsBalanceWithResponse(ctx
 }
 
 // InventoryAPIOverwriteReservationsWithBodyWithResponse request with arbitrary body returning *InventoryAPIOverwriteReservationsResponse
-func (c *ClientWithResponses) InventoryAPIOverwriteReservationsWithBodyWithResponse(ctx context.Context, organizationId string, contentType string, body io.Reader) (*InventoryAPIOverwriteReservationsResponse, error) {
-	rsp, err := c.InventoryAPIOverwriteReservationsWithBody(ctx, organizationId, contentType, body)
+func (c *ClientWithResponses) InventoryAPIOverwriteReservationsWithBodyWithResponse(ctx context.Context, organizationId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*InventoryAPIOverwriteReservationsResponse, error) {
+	rsp, err := c.InventoryAPIOverwriteReservationsWithBody(ctx, organizationId, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
 	return ParseInventoryAPIOverwriteReservationsResponse(rsp)
 }
 
-func (c *ClientWithResponses) InventoryAPIOverwriteReservationsWithResponse(ctx context.Context, organizationId string, body InventoryAPIOverwriteReservationsJSONRequestBody) (*InventoryAPIOverwriteReservationsResponse, error) {
-	rsp, err := c.InventoryAPIOverwriteReservations(ctx, organizationId, body)
+func (c *ClientWithResponses) InventoryAPIOverwriteReservationsWithResponse(ctx context.Context, organizationId string, body InventoryAPIOverwriteReservationsJSONRequestBody, reqEditors ...RequestEditorFn) (*InventoryAPIOverwriteReservationsResponse, error) {
+	rsp, err := c.InventoryAPIOverwriteReservations(ctx, organizationId, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
@@ -8353,8 +10601,8 @@ func (c *ClientWithResponses) InventoryAPIOverwriteReservationsWithResponse(ctx 
 }
 
 // InventoryAPIDeleteReservationWithResponse request returning *InventoryAPIDeleteReservationResponse
-func (c *ClientWithResponses) InventoryAPIDeleteReservationWithResponse(ctx context.Context, organizationId string, reservationId string) (*InventoryAPIDeleteReservationResponse, error) {
-	rsp, err := c.InventoryAPIDeleteReservation(ctx, organizationId, reservationId)
+func (c *ClientWithResponses) InventoryAPIDeleteReservationWithResponse(ctx context.Context, organizationId string, reservationId string, reqEditors ...RequestEditorFn) (*InventoryAPIDeleteReservationResponse, error) {
+	rsp, err := c.InventoryAPIDeleteReservation(ctx, organizationId, reservationId, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
@@ -8362,17 +10610,69 @@ func (c *ClientWithResponses) InventoryAPIDeleteReservationWithResponse(ctx cont
 }
 
 // InventoryAPIGetResourceUsageWithResponse request returning *InventoryAPIGetResourceUsageResponse
-func (c *ClientWithResponses) InventoryAPIGetResourceUsageWithResponse(ctx context.Context, organizationId string) (*InventoryAPIGetResourceUsageResponse, error) {
-	rsp, err := c.InventoryAPIGetResourceUsage(ctx, organizationId)
+func (c *ClientWithResponses) InventoryAPIGetResourceUsageWithResponse(ctx context.Context, organizationId string, reqEditors ...RequestEditorFn) (*InventoryAPIGetResourceUsageResponse, error) {
+	rsp, err := c.InventoryAPIGetResourceUsage(ctx, organizationId, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
 	return ParseInventoryAPIGetResourceUsageResponse(rsp)
 }
 
+// UsersAPIListOrganizationUsersWithResponse request returning *UsersAPIListOrganizationUsersResponse
+func (c *ClientWithResponses) UsersAPIListOrganizationUsersWithResponse(ctx context.Context, organizationId string, reqEditors ...RequestEditorFn) (*UsersAPIListOrganizationUsersResponse, error) {
+	rsp, err := c.UsersAPIListOrganizationUsers(ctx, organizationId, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseUsersAPIListOrganizationUsersResponse(rsp)
+}
+
+// UsersAPIAddUserToOrganizationWithBodyWithResponse request with arbitrary body returning *UsersAPIAddUserToOrganizationResponse
+func (c *ClientWithResponses) UsersAPIAddUserToOrganizationWithBodyWithResponse(ctx context.Context, organizationId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UsersAPIAddUserToOrganizationResponse, error) {
+	rsp, err := c.UsersAPIAddUserToOrganizationWithBody(ctx, organizationId, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseUsersAPIAddUserToOrganizationResponse(rsp)
+}
+
+func (c *ClientWithResponses) UsersAPIAddUserToOrganizationWithResponse(ctx context.Context, organizationId string, body UsersAPIAddUserToOrganizationJSONRequestBody, reqEditors ...RequestEditorFn) (*UsersAPIAddUserToOrganizationResponse, error) {
+	rsp, err := c.UsersAPIAddUserToOrganization(ctx, organizationId, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseUsersAPIAddUserToOrganizationResponse(rsp)
+}
+
+// UsersAPIRemoveUserFromOrganizationWithResponse request returning *UsersAPIRemoveUserFromOrganizationResponse
+func (c *ClientWithResponses) UsersAPIRemoveUserFromOrganizationWithResponse(ctx context.Context, organizationId string, userId string, reqEditors ...RequestEditorFn) (*UsersAPIRemoveUserFromOrganizationResponse, error) {
+	rsp, err := c.UsersAPIRemoveUserFromOrganization(ctx, organizationId, userId, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseUsersAPIRemoveUserFromOrganizationResponse(rsp)
+}
+
+// UsersAPIUpdateOrganizationUserWithBodyWithResponse request with arbitrary body returning *UsersAPIUpdateOrganizationUserResponse
+func (c *ClientWithResponses) UsersAPIUpdateOrganizationUserWithBodyWithResponse(ctx context.Context, organizationId string, userId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*UsersAPIUpdateOrganizationUserResponse, error) {
+	rsp, err := c.UsersAPIUpdateOrganizationUserWithBody(ctx, organizationId, userId, contentType, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseUsersAPIUpdateOrganizationUserResponse(rsp)
+}
+
+func (c *ClientWithResponses) UsersAPIUpdateOrganizationUserWithResponse(ctx context.Context, organizationId string, userId string, body UsersAPIUpdateOrganizationUserJSONRequestBody, reqEditors ...RequestEditorFn) (*UsersAPIUpdateOrganizationUserResponse, error) {
+	rsp, err := c.UsersAPIUpdateOrganizationUser(ctx, organizationId, userId, body, reqEditors...)
+	if err != nil {
+		return nil, err
+	}
+	return ParseUsersAPIUpdateOrganizationUserResponse(rsp)
+}
+
 // ScheduledRebalancingAPIListRebalancingSchedulesWithResponse request returning *ScheduledRebalancingAPIListRebalancingSchedulesResponse
-func (c *ClientWithResponses) ScheduledRebalancingAPIListRebalancingSchedulesWithResponse(ctx context.Context) (*ScheduledRebalancingAPIListRebalancingSchedulesResponse, error) {
-	rsp, err := c.ScheduledRebalancingAPIListRebalancingSchedules(ctx)
+func (c *ClientWithResponses) ScheduledRebalancingAPIListRebalancingSchedulesWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*ScheduledRebalancingAPIListRebalancingSchedulesResponse, error) {
+	rsp, err := c.ScheduledRebalancingAPIListRebalancingSchedules(ctx, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
@@ -8380,16 +10680,16 @@ func (c *ClientWithResponses) ScheduledRebalancingAPIListRebalancingSchedulesWit
 }
 
 // ScheduledRebalancingAPICreateRebalancingScheduleWithBodyWithResponse request with arbitrary body returning *ScheduledRebalancingAPICreateRebalancingScheduleResponse
-func (c *ClientWithResponses) ScheduledRebalancingAPICreateRebalancingScheduleWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*ScheduledRebalancingAPICreateRebalancingScheduleResponse, error) {
-	rsp, err := c.ScheduledRebalancingAPICreateRebalancingScheduleWithBody(ctx, contentType, body)
+func (c *ClientWithResponses) ScheduledRebalancingAPICreateRebalancingScheduleWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*ScheduledRebalancingAPICreateRebalancingScheduleResponse, error) {
+	rsp, err := c.ScheduledRebalancingAPICreateRebalancingScheduleWithBody(ctx, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
 	return ParseScheduledRebalancingAPICreateRebalancingScheduleResponse(rsp)
 }
 
-func (c *ClientWithResponses) ScheduledRebalancingAPICreateRebalancingScheduleWithResponse(ctx context.Context, body ScheduledRebalancingAPICreateRebalancingScheduleJSONRequestBody) (*ScheduledRebalancingAPICreateRebalancingScheduleResponse, error) {
-	rsp, err := c.ScheduledRebalancingAPICreateRebalancingSchedule(ctx, body)
+func (c *ClientWithResponses) ScheduledRebalancingAPICreateRebalancingScheduleWithResponse(ctx context.Context, body ScheduledRebalancingAPICreateRebalancingScheduleJSONRequestBody, reqEditors ...RequestEditorFn) (*ScheduledRebalancingAPICreateRebalancingScheduleResponse, error) {
+	rsp, err := c.ScheduledRebalancingAPICreateRebalancingSchedule(ctx, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
@@ -8397,16 +10697,16 @@ func (c *ClientWithResponses) ScheduledRebalancingAPICreateRebalancingScheduleWi
 }
 
 // ScheduledRebalancingAPIUpdateRebalancingScheduleWithBodyWithResponse request with arbitrary body returning *ScheduledRebalancingAPIUpdateRebalancingScheduleResponse
-func (c *ClientWithResponses) ScheduledRebalancingAPIUpdateRebalancingScheduleWithBodyWithResponse(ctx context.Context, params *ScheduledRebalancingAPIUpdateRebalancingScheduleParams, contentType string, body io.Reader) (*ScheduledRebalancingAPIUpdateRebalancingScheduleResponse, error) {
-	rsp, err := c.ScheduledRebalancingAPIUpdateRebalancingScheduleWithBody(ctx, params, contentType, body)
+func (c *ClientWithResponses) ScheduledRebalancingAPIUpdateRebalancingScheduleWithBodyWithResponse(ctx context.Context, params *ScheduledRebalancingAPIUpdateRebalancingScheduleParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*ScheduledRebalancingAPIUpdateRebalancingScheduleResponse, error) {
+	rsp, err := c.ScheduledRebalancingAPIUpdateRebalancingScheduleWithBody(ctx, params, contentType, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
 	return ParseScheduledRebalancingAPIUpdateRebalancingScheduleResponse(rsp)
 }
 
-func (c *ClientWithResponses) ScheduledRebalancingAPIUpdateRebalancingScheduleWithResponse(ctx context.Context, params *ScheduledRebalancingAPIUpdateRebalancingScheduleParams, body ScheduledRebalancingAPIUpdateRebalancingScheduleJSONRequestBody) (*ScheduledRebalancingAPIUpdateRebalancingScheduleResponse, error) {
-	rsp, err := c.ScheduledRebalancingAPIUpdateRebalancingSchedule(ctx, params, body)
+func (c *ClientWithResponses) ScheduledRebalancingAPIUpdateRebalancingScheduleWithResponse(ctx context.Context, params *ScheduledRebalancingAPIUpdateRebalancingScheduleParams, body ScheduledRebalancingAPIUpdateRebalancingScheduleJSONRequestBody, reqEditors ...RequestEditorFn) (*ScheduledRebalancingAPIUpdateRebalancingScheduleResponse, error) {
+	rsp, err := c.ScheduledRebalancingAPIUpdateRebalancingSchedule(ctx, params, body, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
@@ -8414,8 +10714,8 @@ func (c *ClientWithResponses) ScheduledRebalancingAPIUpdateRebalancingScheduleWi
 }
 
 // ScheduledRebalancingAPIDeleteRebalancingScheduleWithResponse request returning *ScheduledRebalancingAPIDeleteRebalancingScheduleResponse
-func (c *ClientWithResponses) ScheduledRebalancingAPIDeleteRebalancingScheduleWithResponse(ctx context.Context, id string) (*ScheduledRebalancingAPIDeleteRebalancingScheduleResponse, error) {
-	rsp, err := c.ScheduledRebalancingAPIDeleteRebalancingSchedule(ctx, id)
+func (c *ClientWithResponses) ScheduledRebalancingAPIDeleteRebalancingScheduleWithResponse(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*ScheduledRebalancingAPIDeleteRebalancingScheduleResponse, error) {
+	rsp, err := c.ScheduledRebalancingAPIDeleteRebalancingSchedule(ctx, id, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
@@ -8423,8 +10723,8 @@ func (c *ClientWithResponses) ScheduledRebalancingAPIDeleteRebalancingScheduleWi
 }
 
 // ScheduledRebalancingAPIGetRebalancingScheduleWithResponse request returning *ScheduledRebalancingAPIGetRebalancingScheduleResponse
-func (c *ClientWithResponses) ScheduledRebalancingAPIGetRebalancingScheduleWithResponse(ctx context.Context, id string) (*ScheduledRebalancingAPIGetRebalancingScheduleResponse, error) {
-	rsp, err := c.ScheduledRebalancingAPIGetRebalancingSchedule(ctx, id)
+func (c *ClientWithResponses) ScheduledRebalancingAPIGetRebalancingScheduleWithResponse(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*ScheduledRebalancingAPIGetRebalancingScheduleResponse, error) {
+	rsp, err := c.ScheduledRebalancingAPIGetRebalancingSchedule(ctx, id, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
@@ -8432,8 +10732,8 @@ func (c *ClientWithResponses) ScheduledRebalancingAPIGetRebalancingScheduleWithR
 }
 
 // ExternalClusterAPIGetCleanupScriptTemplateWithResponse request returning *ExternalClusterAPIGetCleanupScriptTemplateResponse
-func (c *ClientWithResponses) ExternalClusterAPIGetCleanupScriptTemplateWithResponse(ctx context.Context, provider string) (*ExternalClusterAPIGetCleanupScriptTemplateResponse, error) {
-	rsp, err := c.ExternalClusterAPIGetCleanupScriptTemplate(ctx, provider)
+func (c *ClientWithResponses) ExternalClusterAPIGetCleanupScriptTemplateWithResponse(ctx context.Context, provider string, reqEditors ...RequestEditorFn) (*ExternalClusterAPIGetCleanupScriptTemplateResponse, error) {
+	rsp, err := c.ExternalClusterAPIGetCleanupScriptTemplate(ctx, provider, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
@@ -8441,8 +10741,8 @@ func (c *ClientWithResponses) ExternalClusterAPIGetCleanupScriptTemplateWithResp
 }
 
 // ExternalClusterAPIGetCredentialsScriptTemplateWithResponse request returning *ExternalClusterAPIGetCredentialsScriptTemplateResponse
-func (c *ClientWithResponses) ExternalClusterAPIGetCredentialsScriptTemplateWithResponse(ctx context.Context, provider string, params *ExternalClusterAPIGetCredentialsScriptTemplateParams) (*ExternalClusterAPIGetCredentialsScriptTemplateResponse, error) {
-	rsp, err := c.ExternalClusterAPIGetCredentialsScriptTemplate(ctx, provider, params)
+func (c *ClientWithResponses) ExternalClusterAPIGetCredentialsScriptTemplateWithResponse(ctx context.Context, provider string, params *ExternalClusterAPIGetCredentialsScriptTemplateParams, reqEditors ...RequestEditorFn) (*ExternalClusterAPIGetCredentialsScriptTemplateResponse, error) {
+	rsp, err := c.ExternalClusterAPIGetCredentialsScriptTemplate(ctx, provider, params, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
@@ -8450,8 +10750,8 @@ func (c *ClientWithResponses) ExternalClusterAPIGetCredentialsScriptTemplateWith
 }
 
 // ScheduledRebalancingAPIListAvailableRebalancingTZWithResponse request returning *ScheduledRebalancingAPIListAvailableRebalancingTZResponse
-func (c *ClientWithResponses) ScheduledRebalancingAPIListAvailableRebalancingTZWithResponse(ctx context.Context) (*ScheduledRebalancingAPIListAvailableRebalancingTZResponse, error) {
-	rsp, err := c.ScheduledRebalancingAPIListAvailableRebalancingTZ(ctx)
+func (c *ClientWithResponses) ScheduledRebalancingAPIListAvailableRebalancingTZWithResponse(ctx context.Context, reqEditors ...RequestEditorFn) (*ScheduledRebalancingAPIListAvailableRebalancingTZResponse, error) {
+	rsp, err := c.ScheduledRebalancingAPIListAvailableRebalancingTZ(ctx, reqEditors...)
 	if err != nil {
 		return nil, err
 	}
@@ -8461,7 +10761,7 @@ func (c *ClientWithResponses) ScheduledRebalancingAPIListAvailableRebalancingTZW
 // ParseAuthTokenAPIListAuthTokensResponse parses an HTTP response from a AuthTokenAPIListAuthTokensWithResponse call
 func ParseAuthTokenAPIListAuthTokensResponse(rsp *http.Response) (*AuthTokenAPIListAuthTokensResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
+	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
@@ -8487,7 +10787,7 @@ func ParseAuthTokenAPIListAuthTokensResponse(rsp *http.Response) (*AuthTokenAPIL
 // ParseAuthTokenAPICreateAuthTokenResponse parses an HTTP response from a AuthTokenAPICreateAuthTokenWithResponse call
 func ParseAuthTokenAPICreateAuthTokenResponse(rsp *http.Response) (*AuthTokenAPICreateAuthTokenResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
+	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
@@ -8513,7 +10813,7 @@ func ParseAuthTokenAPICreateAuthTokenResponse(rsp *http.Response) (*AuthTokenAPI
 // ParseAuthTokenAPIDeleteAuthTokenResponse parses an HTTP response from a AuthTokenAPIDeleteAuthTokenWithResponse call
 func ParseAuthTokenAPIDeleteAuthTokenResponse(rsp *http.Response) (*AuthTokenAPIDeleteAuthTokenResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
+	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
@@ -8539,7 +10839,7 @@ func ParseAuthTokenAPIDeleteAuthTokenResponse(rsp *http.Response) (*AuthTokenAPI
 // ParseAuthTokenAPIGetAuthTokenResponse parses an HTTP response from a AuthTokenAPIGetAuthTokenWithResponse call
 func ParseAuthTokenAPIGetAuthTokenResponse(rsp *http.Response) (*AuthTokenAPIGetAuthTokenResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
+	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
@@ -8565,7 +10865,7 @@ func ParseAuthTokenAPIGetAuthTokenResponse(rsp *http.Response) (*AuthTokenAPIGet
 // ParseAuthTokenAPIUpdateAuthTokenResponse parses an HTTP response from a AuthTokenAPIUpdateAuthTokenWithResponse call
 func ParseAuthTokenAPIUpdateAuthTokenResponse(rsp *http.Response) (*AuthTokenAPIUpdateAuthTokenResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
+	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
@@ -8588,22 +10888,22 @@ func ParseAuthTokenAPIUpdateAuthTokenResponse(rsp *http.Response) (*AuthTokenAPI
 	return response, nil
 }
 
-// ParseListInvitationsResponse parses an HTTP response from a ListInvitationsWithResponse call
-func ParseListInvitationsResponse(rsp *http.Response) (*ListInvitationsResponse, error) {
+// ParseUsersAPIListInvitationsResponse parses an HTTP response from a UsersAPIListInvitationsWithResponse call
+func ParseUsersAPIListInvitationsResponse(rsp *http.Response) (*UsersAPIListInvitationsResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
+	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &ListInvitationsResponse{
+	response := &UsersAPIListInvitationsResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest InvitationsList
+		var dest CastaiUsersV1beta1ListInvitationsResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -8614,22 +10914,22 @@ func ParseListInvitationsResponse(rsp *http.Response) (*ListInvitationsResponse,
 	return response, nil
 }
 
-// ParseCreateInvitationResponse parses an HTTP response from a CreateInvitationWithResponse call
-func ParseCreateInvitationResponse(rsp *http.Response) (*CreateInvitationResponse, error) {
+// ParseUsersAPICreateInvitationsResponse parses an HTTP response from a UsersAPICreateInvitationsWithResponse call
+func ParseUsersAPICreateInvitationsResponse(rsp *http.Response) (*UsersAPICreateInvitationsResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
+	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &CreateInvitationResponse{
+	response := &UsersAPICreateInvitationsResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest NewInvitationsResponse
+		var dest CastaiUsersV1beta1CreateInvitationsResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -8640,22 +10940,22 @@ func ParseCreateInvitationResponse(rsp *http.Response) (*CreateInvitationRespons
 	return response, nil
 }
 
-// ParseDeleteInvitationResponse parses an HTTP response from a DeleteInvitationWithResponse call
-func ParseDeleteInvitationResponse(rsp *http.Response) (*DeleteInvitationResponse, error) {
+// ParseUsersAPIDeleteInvitationResponse parses an HTTP response from a UsersAPIDeleteInvitationWithResponse call
+func ParseUsersAPIDeleteInvitationResponse(rsp *http.Response) (*UsersAPIDeleteInvitationResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
+	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &DeleteInvitationResponse{
+	response := &UsersAPIDeleteInvitationResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest map[string]interface{}
+		var dest CastaiUsersV1beta1DeleteInvitationResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -8666,22 +10966,22 @@ func ParseDeleteInvitationResponse(rsp *http.Response) (*DeleteInvitationRespons
 	return response, nil
 }
 
-// ParseClaimInvitationResponse parses an HTTP response from a ClaimInvitationWithResponse call
-func ParseClaimInvitationResponse(rsp *http.Response) (*ClaimInvitationResponse, error) {
+// ParseUsersAPIClaimInvitationResponse parses an HTTP response from a UsersAPIClaimInvitationWithResponse call
+func ParseUsersAPIClaimInvitationResponse(rsp *http.Response) (*UsersAPIClaimInvitationResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
+	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &ClaimInvitationResponse{
+	response := &UsersAPIClaimInvitationResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest map[string]interface{}
+		var dest CastaiUsersV1beta1ClaimInvitationResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -8695,7 +10995,7 @@ func ParseClaimInvitationResponse(rsp *http.Response) (*ClaimInvitationResponse,
 // ParseNodeTemplatesAPIFilterInstanceTypesResponse parses an HTTP response from a NodeTemplatesAPIFilterInstanceTypesWithResponse call
 func ParseNodeTemplatesAPIFilterInstanceTypesResponse(rsp *http.Response) (*NodeTemplatesAPIFilterInstanceTypesResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
+	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
@@ -8721,7 +11021,7 @@ func ParseNodeTemplatesAPIFilterInstanceTypesResponse(rsp *http.Response) (*Node
 // ParseNodeConfigurationAPIListConfigurationsResponse parses an HTTP response from a NodeConfigurationAPIListConfigurationsWithResponse call
 func ParseNodeConfigurationAPIListConfigurationsResponse(rsp *http.Response) (*NodeConfigurationAPIListConfigurationsResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
+	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
@@ -8747,7 +11047,7 @@ func ParseNodeConfigurationAPIListConfigurationsResponse(rsp *http.Response) (*N
 // ParseNodeConfigurationAPICreateConfigurationResponse parses an HTTP response from a NodeConfigurationAPICreateConfigurationWithResponse call
 func ParseNodeConfigurationAPICreateConfigurationResponse(rsp *http.Response) (*NodeConfigurationAPICreateConfigurationResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
+	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
@@ -8773,7 +11073,7 @@ func ParseNodeConfigurationAPICreateConfigurationResponse(rsp *http.Response) (*
 // ParseNodeConfigurationAPIGetSuggestedConfigurationResponse parses an HTTP response from a NodeConfigurationAPIGetSuggestedConfigurationWithResponse call
 func ParseNodeConfigurationAPIGetSuggestedConfigurationResponse(rsp *http.Response) (*NodeConfigurationAPIGetSuggestedConfigurationResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
+	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
@@ -8799,7 +11099,7 @@ func ParseNodeConfigurationAPIGetSuggestedConfigurationResponse(rsp *http.Respon
 // ParseNodeConfigurationAPIDeleteConfigurationResponse parses an HTTP response from a NodeConfigurationAPIDeleteConfigurationWithResponse call
 func ParseNodeConfigurationAPIDeleteConfigurationResponse(rsp *http.Response) (*NodeConfigurationAPIDeleteConfigurationResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
+	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
@@ -8825,7 +11125,7 @@ func ParseNodeConfigurationAPIDeleteConfigurationResponse(rsp *http.Response) (*
 // ParseNodeConfigurationAPIGetConfigurationResponse parses an HTTP response from a NodeConfigurationAPIGetConfigurationWithResponse call
 func ParseNodeConfigurationAPIGetConfigurationResponse(rsp *http.Response) (*NodeConfigurationAPIGetConfigurationResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
+	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
@@ -8851,7 +11151,7 @@ func ParseNodeConfigurationAPIGetConfigurationResponse(rsp *http.Response) (*Nod
 // ParseNodeConfigurationAPIUpdateConfigurationResponse parses an HTTP response from a NodeConfigurationAPIUpdateConfigurationWithResponse call
 func ParseNodeConfigurationAPIUpdateConfigurationResponse(rsp *http.Response) (*NodeConfigurationAPIUpdateConfigurationResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
+	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
@@ -8877,7 +11177,7 @@ func ParseNodeConfigurationAPIUpdateConfigurationResponse(rsp *http.Response) (*
 // ParseNodeConfigurationAPISetDefaultResponse parses an HTTP response from a NodeConfigurationAPISetDefaultWithResponse call
 func ParseNodeConfigurationAPISetDefaultResponse(rsp *http.Response) (*NodeConfigurationAPISetDefaultResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
+	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
@@ -8903,7 +11203,7 @@ func ParseNodeConfigurationAPISetDefaultResponse(rsp *http.Response) (*NodeConfi
 // ParsePoliciesAPIGetClusterNodeConstraintsResponse parses an HTTP response from a PoliciesAPIGetClusterNodeConstraintsWithResponse call
 func ParsePoliciesAPIGetClusterNodeConstraintsResponse(rsp *http.Response) (*PoliciesAPIGetClusterNodeConstraintsResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
+	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
@@ -8929,7 +11229,7 @@ func ParsePoliciesAPIGetClusterNodeConstraintsResponse(rsp *http.Response) (*Pol
 // ParseNodeTemplatesAPIListNodeTemplatesResponse parses an HTTP response from a NodeTemplatesAPIListNodeTemplatesWithResponse call
 func ParseNodeTemplatesAPIListNodeTemplatesResponse(rsp *http.Response) (*NodeTemplatesAPIListNodeTemplatesResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
+	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
@@ -8955,7 +11255,7 @@ func ParseNodeTemplatesAPIListNodeTemplatesResponse(rsp *http.Response) (*NodeTe
 // ParseNodeTemplatesAPICreateNodeTemplateResponse parses an HTTP response from a NodeTemplatesAPICreateNodeTemplateWithResponse call
 func ParseNodeTemplatesAPICreateNodeTemplateResponse(rsp *http.Response) (*NodeTemplatesAPICreateNodeTemplateResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
+	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
@@ -8981,7 +11281,7 @@ func ParseNodeTemplatesAPICreateNodeTemplateResponse(rsp *http.Response) (*NodeT
 // ParseNodeTemplatesAPIDeleteNodeTemplateResponse parses an HTTP response from a NodeTemplatesAPIDeleteNodeTemplateWithResponse call
 func ParseNodeTemplatesAPIDeleteNodeTemplateResponse(rsp *http.Response) (*NodeTemplatesAPIDeleteNodeTemplateResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
+	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
@@ -9007,7 +11307,7 @@ func ParseNodeTemplatesAPIDeleteNodeTemplateResponse(rsp *http.Response) (*NodeT
 // ParseNodeTemplatesAPIUpdateNodeTemplateResponse parses an HTTP response from a NodeTemplatesAPIUpdateNodeTemplateWithResponse call
 func ParseNodeTemplatesAPIUpdateNodeTemplateResponse(rsp *http.Response) (*NodeTemplatesAPIUpdateNodeTemplateResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
+	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
@@ -9033,7 +11333,7 @@ func ParseNodeTemplatesAPIUpdateNodeTemplateResponse(rsp *http.Response) (*NodeT
 // ParsePoliciesAPIGetClusterPoliciesResponse parses an HTTP response from a PoliciesAPIGetClusterPoliciesWithResponse call
 func ParsePoliciesAPIGetClusterPoliciesResponse(rsp *http.Response) (*PoliciesAPIGetClusterPoliciesResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
+	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
@@ -9059,7 +11359,7 @@ func ParsePoliciesAPIGetClusterPoliciesResponse(rsp *http.Response) (*PoliciesAP
 // ParsePoliciesAPIUpsertClusterPoliciesResponse parses an HTTP response from a PoliciesAPIUpsertClusterPoliciesWithResponse call
 func ParsePoliciesAPIUpsertClusterPoliciesResponse(rsp *http.Response) (*PoliciesAPIUpsertClusterPoliciesResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
+	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
@@ -9085,7 +11385,7 @@ func ParsePoliciesAPIUpsertClusterPoliciesResponse(rsp *http.Response) (*Policie
 // ParseScheduledRebalancingAPIListRebalancingJobsResponse parses an HTTP response from a ScheduledRebalancingAPIListRebalancingJobsWithResponse call
 func ParseScheduledRebalancingAPIListRebalancingJobsResponse(rsp *http.Response) (*ScheduledRebalancingAPIListRebalancingJobsResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
+	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
@@ -9111,7 +11411,7 @@ func ParseScheduledRebalancingAPIListRebalancingJobsResponse(rsp *http.Response)
 // ParseScheduledRebalancingAPICreateRebalancingJobResponse parses an HTTP response from a ScheduledRebalancingAPICreateRebalancingJobWithResponse call
 func ParseScheduledRebalancingAPICreateRebalancingJobResponse(rsp *http.Response) (*ScheduledRebalancingAPICreateRebalancingJobResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
+	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
@@ -9137,7 +11437,7 @@ func ParseScheduledRebalancingAPICreateRebalancingJobResponse(rsp *http.Response
 // ParseScheduledRebalancingAPIDeleteRebalancingJobResponse parses an HTTP response from a ScheduledRebalancingAPIDeleteRebalancingJobWithResponse call
 func ParseScheduledRebalancingAPIDeleteRebalancingJobResponse(rsp *http.Response) (*ScheduledRebalancingAPIDeleteRebalancingJobResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
+	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
@@ -9163,7 +11463,7 @@ func ParseScheduledRebalancingAPIDeleteRebalancingJobResponse(rsp *http.Response
 // ParseScheduledRebalancingAPIGetRebalancingJobResponse parses an HTTP response from a ScheduledRebalancingAPIGetRebalancingJobWithResponse call
 func ParseScheduledRebalancingAPIGetRebalancingJobResponse(rsp *http.Response) (*ScheduledRebalancingAPIGetRebalancingJobResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
+	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
@@ -9189,7 +11489,7 @@ func ParseScheduledRebalancingAPIGetRebalancingJobResponse(rsp *http.Response) (
 // ParseScheduledRebalancingAPIUpdateRebalancingJobResponse parses an HTTP response from a ScheduledRebalancingAPIUpdateRebalancingJobWithResponse call
 func ParseScheduledRebalancingAPIUpdateRebalancingJobResponse(rsp *http.Response) (*ScheduledRebalancingAPIUpdateRebalancingJobResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
+	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
@@ -9215,7 +11515,7 @@ func ParseScheduledRebalancingAPIUpdateRebalancingJobResponse(rsp *http.Response
 // ParseScheduledRebalancingAPIPreviewRebalancingScheduleResponse parses an HTTP response from a ScheduledRebalancingAPIPreviewRebalancingScheduleWithResponse call
 func ParseScheduledRebalancingAPIPreviewRebalancingScheduleResponse(rsp *http.Response) (*ScheduledRebalancingAPIPreviewRebalancingScheduleResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
+	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
@@ -9241,7 +11541,7 @@ func ParseScheduledRebalancingAPIPreviewRebalancingScheduleResponse(rsp *http.Re
 // ParseExternalClusterAPIListClustersResponse parses an HTTP response from a ExternalClusterAPIListClustersWithResponse call
 func ParseExternalClusterAPIListClustersResponse(rsp *http.Response) (*ExternalClusterAPIListClustersResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
+	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
@@ -9267,7 +11567,7 @@ func ParseExternalClusterAPIListClustersResponse(rsp *http.Response) (*ExternalC
 // ParseExternalClusterAPIRegisterClusterResponse parses an HTTP response from a ExternalClusterAPIRegisterClusterWithResponse call
 func ParseExternalClusterAPIRegisterClusterResponse(rsp *http.Response) (*ExternalClusterAPIRegisterClusterResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
+	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
@@ -9293,7 +11593,7 @@ func ParseExternalClusterAPIRegisterClusterResponse(rsp *http.Response) (*Extern
 // ParseOperationsAPIGetOperationResponse parses an HTTP response from a OperationsAPIGetOperationWithResponse call
 func ParseOperationsAPIGetOperationResponse(rsp *http.Response) (*OperationsAPIGetOperationResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
+	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
@@ -9319,7 +11619,7 @@ func ParseOperationsAPIGetOperationResponse(rsp *http.Response) (*OperationsAPIG
 // ParseExternalClusterAPIDeleteClusterResponse parses an HTTP response from a ExternalClusterAPIDeleteClusterWithResponse call
 func ParseExternalClusterAPIDeleteClusterResponse(rsp *http.Response) (*ExternalClusterAPIDeleteClusterResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
+	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
@@ -9335,7 +11635,7 @@ func ParseExternalClusterAPIDeleteClusterResponse(rsp *http.Response) (*External
 // ParseExternalClusterAPIGetClusterResponse parses an HTTP response from a ExternalClusterAPIGetClusterWithResponse call
 func ParseExternalClusterAPIGetClusterResponse(rsp *http.Response) (*ExternalClusterAPIGetClusterResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
+	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
@@ -9361,7 +11661,7 @@ func ParseExternalClusterAPIGetClusterResponse(rsp *http.Response) (*ExternalClu
 // ParseExternalClusterAPIUpdateClusterResponse parses an HTTP response from a ExternalClusterAPIUpdateClusterWithResponse call
 func ParseExternalClusterAPIUpdateClusterResponse(rsp *http.Response) (*ExternalClusterAPIUpdateClusterResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
+	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
@@ -9387,7 +11687,7 @@ func ParseExternalClusterAPIUpdateClusterResponse(rsp *http.Response) (*External
 // ParseExternalClusterAPIDeleteAssumeRolePrincipalResponse parses an HTTP response from a ExternalClusterAPIDeleteAssumeRolePrincipalWithResponse call
 func ParseExternalClusterAPIDeleteAssumeRolePrincipalResponse(rsp *http.Response) (*ExternalClusterAPIDeleteAssumeRolePrincipalResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
+	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
@@ -9413,7 +11713,7 @@ func ParseExternalClusterAPIDeleteAssumeRolePrincipalResponse(rsp *http.Response
 // ParseExternalClusterAPIGetAssumeRolePrincipalResponse parses an HTTP response from a ExternalClusterAPIGetAssumeRolePrincipalWithResponse call
 func ParseExternalClusterAPIGetAssumeRolePrincipalResponse(rsp *http.Response) (*ExternalClusterAPIGetAssumeRolePrincipalResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
+	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
@@ -9439,7 +11739,7 @@ func ParseExternalClusterAPIGetAssumeRolePrincipalResponse(rsp *http.Response) (
 // ParseExternalClusterAPICreateAssumeRolePrincipalResponse parses an HTTP response from a ExternalClusterAPICreateAssumeRolePrincipalWithResponse call
 func ParseExternalClusterAPICreateAssumeRolePrincipalResponse(rsp *http.Response) (*ExternalClusterAPICreateAssumeRolePrincipalResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
+	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
@@ -9465,7 +11765,7 @@ func ParseExternalClusterAPICreateAssumeRolePrincipalResponse(rsp *http.Response
 // ParseExternalClusterAPIGetAssumeRoleUserResponse parses an HTTP response from a ExternalClusterAPIGetAssumeRoleUserWithResponse call
 func ParseExternalClusterAPIGetAssumeRoleUserResponse(rsp *http.Response) (*ExternalClusterAPIGetAssumeRoleUserResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
+	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
@@ -9491,7 +11791,7 @@ func ParseExternalClusterAPIGetAssumeRoleUserResponse(rsp *http.Response) (*Exte
 // ParseExternalClusterAPIGetCleanupScriptResponse parses an HTTP response from a ExternalClusterAPIGetCleanupScriptWithResponse call
 func ParseExternalClusterAPIGetCleanupScriptResponse(rsp *http.Response) (*ExternalClusterAPIGetCleanupScriptResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
+	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
@@ -9517,7 +11817,7 @@ func ParseExternalClusterAPIGetCleanupScriptResponse(rsp *http.Response) (*Exter
 // ParseExternalClusterAPIGetCredentialsScriptResponse parses an HTTP response from a ExternalClusterAPIGetCredentialsScriptWithResponse call
 func ParseExternalClusterAPIGetCredentialsScriptResponse(rsp *http.Response) (*ExternalClusterAPIGetCredentialsScriptResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
+	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
@@ -9543,7 +11843,7 @@ func ParseExternalClusterAPIGetCredentialsScriptResponse(rsp *http.Response) (*E
 // ParseExternalClusterAPIDisconnectClusterResponse parses an HTTP response from a ExternalClusterAPIDisconnectClusterWithResponse call
 func ParseExternalClusterAPIDisconnectClusterResponse(rsp *http.Response) (*ExternalClusterAPIDisconnectClusterResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
+	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
@@ -9569,7 +11869,7 @@ func ParseExternalClusterAPIDisconnectClusterResponse(rsp *http.Response) (*Exte
 // ParseExternalClusterAPIHandleCloudEventResponse parses an HTTP response from a ExternalClusterAPIHandleCloudEventWithResponse call
 func ParseExternalClusterAPIHandleCloudEventResponse(rsp *http.Response) (*ExternalClusterAPIHandleCloudEventResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
+	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
@@ -9595,7 +11895,7 @@ func ParseExternalClusterAPIHandleCloudEventResponse(rsp *http.Response) (*Exter
 // ParseExternalClusterAPIListNodesResponse parses an HTTP response from a ExternalClusterAPIListNodesWithResponse call
 func ParseExternalClusterAPIListNodesResponse(rsp *http.Response) (*ExternalClusterAPIListNodesResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
+	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
@@ -9621,7 +11921,7 @@ func ParseExternalClusterAPIListNodesResponse(rsp *http.Response) (*ExternalClus
 // ParseExternalClusterAPIAddNodeResponse parses an HTTP response from a ExternalClusterAPIAddNodeWithResponse call
 func ParseExternalClusterAPIAddNodeResponse(rsp *http.Response) (*ExternalClusterAPIAddNodeResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
+	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
@@ -9647,7 +11947,7 @@ func ParseExternalClusterAPIAddNodeResponse(rsp *http.Response) (*ExternalCluste
 // ParseExternalClusterAPIDeleteNodeResponse parses an HTTP response from a ExternalClusterAPIDeleteNodeWithResponse call
 func ParseExternalClusterAPIDeleteNodeResponse(rsp *http.Response) (*ExternalClusterAPIDeleteNodeResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
+	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
@@ -9673,7 +11973,7 @@ func ParseExternalClusterAPIDeleteNodeResponse(rsp *http.Response) (*ExternalClu
 // ParseExternalClusterAPIGetNodeResponse parses an HTTP response from a ExternalClusterAPIGetNodeWithResponse call
 func ParseExternalClusterAPIGetNodeResponse(rsp *http.Response) (*ExternalClusterAPIGetNodeResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
+	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
@@ -9699,7 +11999,7 @@ func ParseExternalClusterAPIGetNodeResponse(rsp *http.Response) (*ExternalCluste
 // ParseExternalClusterAPIDrainNodeResponse parses an HTTP response from a ExternalClusterAPIDrainNodeWithResponse call
 func ParseExternalClusterAPIDrainNodeResponse(rsp *http.Response) (*ExternalClusterAPIDrainNodeResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
+	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
@@ -9725,7 +12025,7 @@ func ParseExternalClusterAPIDrainNodeResponse(rsp *http.Response) (*ExternalClus
 // ParseExternalClusterAPIReconcileClusterResponse parses an HTTP response from a ExternalClusterAPIReconcileClusterWithResponse call
 func ParseExternalClusterAPIReconcileClusterResponse(rsp *http.Response) (*ExternalClusterAPIReconcileClusterResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
+	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
@@ -9751,7 +12051,7 @@ func ParseExternalClusterAPIReconcileClusterResponse(rsp *http.Response) (*Exter
 // ParseExternalClusterAPICreateClusterTokenResponse parses an HTTP response from a ExternalClusterAPICreateClusterTokenWithResponse call
 func ParseExternalClusterAPICreateClusterTokenResponse(rsp *http.Response) (*ExternalClusterAPICreateClusterTokenResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
+	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
@@ -9774,22 +12074,22 @@ func ParseExternalClusterAPICreateClusterTokenResponse(rsp *http.Response) (*Ext
 	return response, nil
 }
 
-// ParseCurrentUserProfileResponse parses an HTTP response from a CurrentUserProfileWithResponse call
-func ParseCurrentUserProfileResponse(rsp *http.Response) (*CurrentUserProfileResponse, error) {
+// ParseUsersAPICurrentUserProfileResponse parses an HTTP response from a UsersAPICurrentUserProfileWithResponse call
+func ParseUsersAPICurrentUserProfileResponse(rsp *http.Response) (*UsersAPICurrentUserProfileResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
+	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &CurrentUserProfileResponse{
+	response := &UsersAPICurrentUserProfileResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest UserProfileResponse
+		var dest CastaiUsersV1beta1CurrentUserProfileResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -9800,22 +12100,22 @@ func ParseCurrentUserProfileResponse(rsp *http.Response) (*CurrentUserProfileRes
 	return response, nil
 }
 
-// ParseUpdateCurrentUserProfileResponse parses an HTTP response from a UpdateCurrentUserProfileWithResponse call
-func ParseUpdateCurrentUserProfileResponse(rsp *http.Response) (*UpdateCurrentUserProfileResponse, error) {
+// ParseUsersAPIUpdateCurrentUserProfileResponse parses an HTTP response from a UsersAPIUpdateCurrentUserProfileWithResponse call
+func ParseUsersAPIUpdateCurrentUserProfileResponse(rsp *http.Response) (*UsersAPIUpdateCurrentUserProfileResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
+	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &UpdateCurrentUserProfileResponse{
+	response := &UsersAPIUpdateCurrentUserProfileResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest UserProfile
+		var dest CastaiUsersV1beta1User
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -9826,22 +12126,22 @@ func ParseUpdateCurrentUserProfileResponse(rsp *http.Response) (*UpdateCurrentUs
 	return response, nil
 }
 
-// ParseListOrganizationsResponse parses an HTTP response from a ListOrganizationsWithResponse call
-func ParseListOrganizationsResponse(rsp *http.Response) (*ListOrganizationsResponse, error) {
+// ParseUsersAPIListOrganizationsResponse parses an HTTP response from a UsersAPIListOrganizationsWithResponse call
+func ParseUsersAPIListOrganizationsResponse(rsp *http.Response) (*UsersAPIListOrganizationsResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
+	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &ListOrganizationsResponse{
+	response := &UsersAPIListOrganizationsResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest OrganizationsList
+		var dest CastaiUsersV1beta1ListOrganizationsResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -9852,22 +12152,22 @@ func ParseListOrganizationsResponse(rsp *http.Response) (*ListOrganizationsRespo
 	return response, nil
 }
 
-// ParseCreateOrganizationResponse parses an HTTP response from a CreateOrganizationWithResponse call
-func ParseCreateOrganizationResponse(rsp *http.Response) (*CreateOrganizationResponse, error) {
+// ParseUsersAPICreateOrganizationResponse parses an HTTP response from a UsersAPICreateOrganizationWithResponse call
+func ParseUsersAPICreateOrganizationResponse(rsp *http.Response) (*UsersAPICreateOrganizationResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
+	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &CreateOrganizationResponse{
+	response := &UsersAPICreateOrganizationResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest Organization
+		var dest CastaiUsersV1beta1Organization
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -9878,22 +12178,22 @@ func ParseCreateOrganizationResponse(rsp *http.Response) (*CreateOrganizationRes
 	return response, nil
 }
 
-// ParseDeleteOrganizationResponse parses an HTTP response from a DeleteOrganizationWithResponse call
-func ParseDeleteOrganizationResponse(rsp *http.Response) (*DeleteOrganizationResponse, error) {
+// ParseUsersAPIDeleteOrganizationResponse parses an HTTP response from a UsersAPIDeleteOrganizationWithResponse call
+func ParseUsersAPIDeleteOrganizationResponse(rsp *http.Response) (*UsersAPIDeleteOrganizationResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
+	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &DeleteOrganizationResponse{
+	response := &UsersAPIDeleteOrganizationResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest Organization
+		var dest CastaiUsersV1beta1DeleteOrganizationResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -9904,22 +12204,22 @@ func ParseDeleteOrganizationResponse(rsp *http.Response) (*DeleteOrganizationRes
 	return response, nil
 }
 
-// ParseGetOrganizationResponse parses an HTTP response from a GetOrganizationWithResponse call
-func ParseGetOrganizationResponse(rsp *http.Response) (*GetOrganizationResponse, error) {
+// ParseUsersAPIGetOrganizationResponse parses an HTTP response from a UsersAPIGetOrganizationWithResponse call
+func ParseUsersAPIGetOrganizationResponse(rsp *http.Response) (*UsersAPIGetOrganizationResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
+	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &GetOrganizationResponse{
+	response := &UsersAPIGetOrganizationResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest Organization
+		var dest CastaiUsersV1beta1Organization
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -9930,126 +12230,22 @@ func ParseGetOrganizationResponse(rsp *http.Response) (*GetOrganizationResponse,
 	return response, nil
 }
 
-// ParseUpdateOrganizationResponse parses an HTTP response from a UpdateOrganizationWithResponse call
-func ParseUpdateOrganizationResponse(rsp *http.Response) (*UpdateOrganizationResponse, error) {
+// ParseUsersAPIEditOrganizationResponse parses an HTTP response from a UsersAPIEditOrganizationWithResponse call
+func ParseUsersAPIEditOrganizationResponse(rsp *http.Response) (*UsersAPIEditOrganizationResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
+	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &UpdateOrganizationResponse{
+	response := &UsersAPIEditOrganizationResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest Organization
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON200 = &dest
-
-	}
-
-	return response, nil
-}
-
-// ParseGetOrganizationUsersResponse parses an HTTP response from a GetOrganizationUsersWithResponse call
-func ParseGetOrganizationUsersResponse(rsp *http.Response) (*GetOrganizationUsersResponse, error) {
-	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
-	if err != nil {
-		return nil, err
-	}
-
-	response := &GetOrganizationUsersResponse{
-		Body:         bodyBytes,
-		HTTPResponse: rsp,
-	}
-
-	switch {
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest OrganizationUsersList
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON200 = &dest
-
-	}
-
-	return response, nil
-}
-
-// ParseCreateOrganizationUserResponse parses an HTTP response from a CreateOrganizationUserWithResponse call
-func ParseCreateOrganizationUserResponse(rsp *http.Response) (*CreateOrganizationUserResponse, error) {
-	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
-	if err != nil {
-		return nil, err
-	}
-
-	response := &CreateOrganizationUserResponse{
-		Body:         bodyBytes,
-		HTTPResponse: rsp,
-	}
-
-	switch {
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest OrganizationUser
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON200 = &dest
-
-	}
-
-	return response, nil
-}
-
-// ParseDeleteOrganizationUserResponse parses an HTTP response from a DeleteOrganizationUserWithResponse call
-func ParseDeleteOrganizationUserResponse(rsp *http.Response) (*DeleteOrganizationUserResponse, error) {
-	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
-	if err != nil {
-		return nil, err
-	}
-
-	response := &DeleteOrganizationUserResponse{
-		Body:         bodyBytes,
-		HTTPResponse: rsp,
-	}
-
-	switch {
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest map[string]interface{}
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON200 = &dest
-
-	}
-
-	return response, nil
-}
-
-// ParseUpdateOrganizationUserResponse parses an HTTP response from a UpdateOrganizationUserWithResponse call
-func ParseUpdateOrganizationUserResponse(rsp *http.Response) (*UpdateOrganizationUserResponse, error) {
-	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
-	if err != nil {
-		return nil, err
-	}
-
-	response := &UpdateOrganizationUserResponse{
-		Body:         bodyBytes,
-		HTTPResponse: rsp,
-	}
-
-	switch {
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest OrganizationUser
+		var dest CastaiUsersV1beta1Organization
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -10063,7 +12259,7 @@ func ParseUpdateOrganizationUserResponse(rsp *http.Response) (*UpdateOrganizatio
 // ParseInventoryAPISyncClusterResourcesResponse parses an HTTP response from a InventoryAPISyncClusterResourcesWithResponse call
 func ParseInventoryAPISyncClusterResourcesResponse(rsp *http.Response) (*InventoryAPISyncClusterResourcesResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
+	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
@@ -10089,7 +12285,7 @@ func ParseInventoryAPISyncClusterResourcesResponse(rsp *http.Response) (*Invento
 // ParseInventoryAPIGetReservationsResponse parses an HTTP response from a InventoryAPIGetReservationsWithResponse call
 func ParseInventoryAPIGetReservationsResponse(rsp *http.Response) (*InventoryAPIGetReservationsResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
+	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
@@ -10115,7 +12311,7 @@ func ParseInventoryAPIGetReservationsResponse(rsp *http.Response) (*InventoryAPI
 // ParseInventoryAPIAddReservationResponse parses an HTTP response from a InventoryAPIAddReservationWithResponse call
 func ParseInventoryAPIAddReservationResponse(rsp *http.Response) (*InventoryAPIAddReservationResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
+	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
@@ -10141,7 +12337,7 @@ func ParseInventoryAPIAddReservationResponse(rsp *http.Response) (*InventoryAPIA
 // ParseInventoryAPIGetReservationsBalanceResponse parses an HTTP response from a InventoryAPIGetReservationsBalanceWithResponse call
 func ParseInventoryAPIGetReservationsBalanceResponse(rsp *http.Response) (*InventoryAPIGetReservationsBalanceResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
+	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
@@ -10167,7 +12363,7 @@ func ParseInventoryAPIGetReservationsBalanceResponse(rsp *http.Response) (*Inven
 // ParseInventoryAPIOverwriteReservationsResponse parses an HTTP response from a InventoryAPIOverwriteReservationsWithResponse call
 func ParseInventoryAPIOverwriteReservationsResponse(rsp *http.Response) (*InventoryAPIOverwriteReservationsResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
+	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
@@ -10193,7 +12389,7 @@ func ParseInventoryAPIOverwriteReservationsResponse(rsp *http.Response) (*Invent
 // ParseInventoryAPIDeleteReservationResponse parses an HTTP response from a InventoryAPIDeleteReservationWithResponse call
 func ParseInventoryAPIDeleteReservationResponse(rsp *http.Response) (*InventoryAPIDeleteReservationResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
+	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
@@ -10219,7 +12415,7 @@ func ParseInventoryAPIDeleteReservationResponse(rsp *http.Response) (*InventoryA
 // ParseInventoryAPIGetResourceUsageResponse parses an HTTP response from a InventoryAPIGetResourceUsageWithResponse call
 func ParseInventoryAPIGetResourceUsageResponse(rsp *http.Response) (*InventoryAPIGetResourceUsageResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
+	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
@@ -10242,10 +12438,114 @@ func ParseInventoryAPIGetResourceUsageResponse(rsp *http.Response) (*InventoryAP
 	return response, nil
 }
 
+// ParseUsersAPIListOrganizationUsersResponse parses an HTTP response from a UsersAPIListOrganizationUsersWithResponse call
+func ParseUsersAPIListOrganizationUsersResponse(rsp *http.Response) (*UsersAPIListOrganizationUsersResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &UsersAPIListOrganizationUsersResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest CastaiUsersV1beta1ListOrganizationUsersResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseUsersAPIAddUserToOrganizationResponse parses an HTTP response from a UsersAPIAddUserToOrganizationWithResponse call
+func ParseUsersAPIAddUserToOrganizationResponse(rsp *http.Response) (*UsersAPIAddUserToOrganizationResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &UsersAPIAddUserToOrganizationResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest CastaiUsersV1beta1AddUserToOrganizationResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseUsersAPIRemoveUserFromOrganizationResponse parses an HTTP response from a UsersAPIRemoveUserFromOrganizationWithResponse call
+func ParseUsersAPIRemoveUserFromOrganizationResponse(rsp *http.Response) (*UsersAPIRemoveUserFromOrganizationResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &UsersAPIRemoveUserFromOrganizationResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest CastaiUsersV1beta1RemoveUserFromOrganizationResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseUsersAPIUpdateOrganizationUserResponse parses an HTTP response from a UsersAPIUpdateOrganizationUserWithResponse call
+func ParseUsersAPIUpdateOrganizationUserResponse(rsp *http.Response) (*UsersAPIUpdateOrganizationUserResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &UsersAPIUpdateOrganizationUserResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest CastaiUsersV1beta1Membership
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
 // ParseScheduledRebalancingAPIListRebalancingSchedulesResponse parses an HTTP response from a ScheduledRebalancingAPIListRebalancingSchedulesWithResponse call
 func ParseScheduledRebalancingAPIListRebalancingSchedulesResponse(rsp *http.Response) (*ScheduledRebalancingAPIListRebalancingSchedulesResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
+	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
@@ -10271,7 +12571,7 @@ func ParseScheduledRebalancingAPIListRebalancingSchedulesResponse(rsp *http.Resp
 // ParseScheduledRebalancingAPICreateRebalancingScheduleResponse parses an HTTP response from a ScheduledRebalancingAPICreateRebalancingScheduleWithResponse call
 func ParseScheduledRebalancingAPICreateRebalancingScheduleResponse(rsp *http.Response) (*ScheduledRebalancingAPICreateRebalancingScheduleResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
+	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
@@ -10297,7 +12597,7 @@ func ParseScheduledRebalancingAPICreateRebalancingScheduleResponse(rsp *http.Res
 // ParseScheduledRebalancingAPIUpdateRebalancingScheduleResponse parses an HTTP response from a ScheduledRebalancingAPIUpdateRebalancingScheduleWithResponse call
 func ParseScheduledRebalancingAPIUpdateRebalancingScheduleResponse(rsp *http.Response) (*ScheduledRebalancingAPIUpdateRebalancingScheduleResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
+	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
@@ -10323,7 +12623,7 @@ func ParseScheduledRebalancingAPIUpdateRebalancingScheduleResponse(rsp *http.Res
 // ParseScheduledRebalancingAPIDeleteRebalancingScheduleResponse parses an HTTP response from a ScheduledRebalancingAPIDeleteRebalancingScheduleWithResponse call
 func ParseScheduledRebalancingAPIDeleteRebalancingScheduleResponse(rsp *http.Response) (*ScheduledRebalancingAPIDeleteRebalancingScheduleResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
+	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
@@ -10349,7 +12649,7 @@ func ParseScheduledRebalancingAPIDeleteRebalancingScheduleResponse(rsp *http.Res
 // ParseScheduledRebalancingAPIGetRebalancingScheduleResponse parses an HTTP response from a ScheduledRebalancingAPIGetRebalancingScheduleWithResponse call
 func ParseScheduledRebalancingAPIGetRebalancingScheduleResponse(rsp *http.Response) (*ScheduledRebalancingAPIGetRebalancingScheduleResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
+	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
@@ -10375,7 +12675,7 @@ func ParseScheduledRebalancingAPIGetRebalancingScheduleResponse(rsp *http.Respon
 // ParseExternalClusterAPIGetCleanupScriptTemplateResponse parses an HTTP response from a ExternalClusterAPIGetCleanupScriptTemplateWithResponse call
 func ParseExternalClusterAPIGetCleanupScriptTemplateResponse(rsp *http.Response) (*ExternalClusterAPIGetCleanupScriptTemplateResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
+	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
@@ -10391,7 +12691,7 @@ func ParseExternalClusterAPIGetCleanupScriptTemplateResponse(rsp *http.Response)
 // ParseExternalClusterAPIGetCredentialsScriptTemplateResponse parses an HTTP response from a ExternalClusterAPIGetCredentialsScriptTemplateWithResponse call
 func ParseExternalClusterAPIGetCredentialsScriptTemplateResponse(rsp *http.Response) (*ExternalClusterAPIGetCredentialsScriptTemplateResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
+	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
@@ -10407,7 +12707,7 @@ func ParseExternalClusterAPIGetCredentialsScriptTemplateResponse(rsp *http.Respo
 // ParseScheduledRebalancingAPIListAvailableRebalancingTZResponse parses an HTTP response from a ScheduledRebalancingAPIListAvailableRebalancingTZWithResponse call
 func ParseScheduledRebalancingAPIListAvailableRebalancingTZResponse(rsp *http.Response) (*ScheduledRebalancingAPIListAvailableRebalancingTZResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
+	defer func() { _ = rsp.Body.Close() }()
 	if err != nil {
 		return nil, err
 	}
@@ -10428,4 +12728,441 @@ func ParseScheduledRebalancingAPIListAvailableRebalancingTZResponse(rsp *http.Re
 	}
 
 	return response, nil
+}
+
+// Base64 encoded, gzipped, json marshaled Swagger object
+var swaggerSpec = []string{
+
+	"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",
+}
+
+// GetSwagger returns the content of the embedded swagger specification file
+// or error if failed to decode
+func decodeSpec() ([]byte, error) {
+	zipped, err := base64.StdEncoding.DecodeString(strings.Join(swaggerSpec, ""))
+	if err != nil {
+		return nil, fmt.Errorf("error base64 decoding spec: %s", err)
+	}
+	zr, err := gzip.NewReader(bytes.NewReader(zipped))
+	if err != nil {
+		return nil, fmt.Errorf("error decompressing spec: %s", err)
+	}
+	var buf bytes.Buffer
+	_, err = buf.ReadFrom(zr)
+	if err != nil {
+		return nil, fmt.Errorf("error decompressing spec: %s", err)
+	}
+
+	return buf.Bytes(), nil
+}
+
+var rawSpec = decodeSpecCached()
+
+// a naive cached of a decoded swagger spec
+func decodeSpecCached() func() ([]byte, error) {
+	data, err := decodeSpec()
+	return func() ([]byte, error) {
+		return data, err
+	}
+}
+
+// Constructs a synthetic filesystem for resolving external references when loading openapi specifications.
+func PathToRawSpec(pathToFile string) map[string]func() ([]byte, error) {
+	var res = make(map[string]func() ([]byte, error))
+	if len(pathToFile) > 0 {
+		res[pathToFile] = rawSpec
+	}
+
+	return res
+}
+
+// GetSwagger returns the Swagger specification corresponding to the generated code
+// in this file. The external references of Swagger specification are resolved.
+// The logic of resolving external references is tightly connected to "import-mapping" feature.
+// Externally referenced files must be embedded in the corresponding golang packages.
+// Urls can be supported but this task was out of the scope.
+func GetSwagger() (swagger *openapi3.T, err error) {
+	var resolvePath = PathToRawSpec("")
+
+	loader := openapi3.NewLoader()
+	loader.IsExternalRefsAllowed = true
+	loader.ReadFromURIFunc = func(loader *openapi3.Loader, url *url.URL) ([]byte, error) {
+		var pathToFile = url.String()
+		pathToFile = path.Clean(pathToFile)
+		getSpec, ok := resolvePath[pathToFile]
+		if !ok {
+			err1 := fmt.Errorf("path not found: %s", pathToFile)
+			return nil, err1
+		}
+		return getSpec()
+	}
+	var specData []byte
+	specData, err = rawSpec()
+	if err != nil {
+		return
+	}
+	swagger, err = loader.LoadFromData(specData)
+	if err != nil {
+		return
+	}
+	return
 }

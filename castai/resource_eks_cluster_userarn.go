@@ -38,7 +38,7 @@ func resourceEKSUserARNRead(ctx context.Context, data *schema.ResourceData, meta
 	clusterID := data.Get(EKSClusterUserARNFieldClusterID).(string)
 
 	resp, err := client.ExternalClusterAPIGetAssumeRolePrincipalWithResponse(ctx, clusterID)
-	if checkErr := sdk.CheckOKResponse(resp, err); checkErr != nil {
+	if checkErr := sdk.CheckOKResponse(resp.HTTPResponse, err); checkErr != nil {
 		return diag.FromErr(checkErr)
 	}
 
@@ -68,7 +68,7 @@ func resourceEKSUserARNCreate(ctx context.Context, data *schema.ResourceData, me
 	clusterID := data.Get(EKSClusterUserARNFieldClusterID).(string)
 
 	resp, err := client.ExternalClusterAPICreateAssumeRolePrincipalWithResponse(ctx, clusterID)
-	if checkErr := sdk.CheckOKResponse(resp, err); checkErr != nil {
+	if checkErr := sdk.CheckOKResponse(resp.HTTPResponse, err); checkErr != nil {
 		return diag.FromErr(checkErr)
 	}
 
@@ -88,7 +88,7 @@ func resourceEKSUserARNDelete(ctx context.Context, data *schema.ResourceData, me
 	clusterID := data.Get(EKSClusterUserARNFieldClusterID).(string)
 
 	resp, err := client.ExternalClusterAPIDeleteAssumeRolePrincipalWithResponse(ctx, clusterID)
-	if checkErr := sdk.CheckOKResponse(resp, err); checkErr != nil {
+	if checkErr := sdk.CheckOKResponse(resp.HTTPResponse, err); checkErr != nil {
 		return diag.FromErr(checkErr)
 	}
 

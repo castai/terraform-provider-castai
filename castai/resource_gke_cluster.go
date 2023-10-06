@@ -115,7 +115,7 @@ func resourceCastaiGKEClusterCreate(ctx context.Context, data *schema.ResourceDa
 	log.Printf("[INFO] Registering new external cluster: %#v", req)
 
 	resp, err := client.ExternalClusterAPIRegisterClusterWithResponse(ctx, req)
-	if checkErr := sdk.CheckOKResponse(resp, err); checkErr != nil {
+	if checkErr := sdk.CheckOKResponse(resp.HTTPResponse, err); checkErr != nil {
 		return diag.FromErr(checkErr)
 	}
 
@@ -185,7 +185,7 @@ func resourceCastaiGKEClusterUpdate(ctx context.Context, data *schema.ResourceDa
 	return resourceCastaiGKEClusterRead(ctx, data, meta)
 }
 
-func updateGKEClusterSettings(ctx context.Context, data *schema.ResourceData, client *sdk.ClientWithResponses) error {
+func updateGKEClusterSettings(ctx context.Context, data *schema.ResourceData, client sdk.ClientWithResponsesInterface) error {
 	if !data.HasChanges(
 		FieldGKEClusterCredentials,
 	) {
@@ -207,7 +207,7 @@ func updateGKEClusterSettings(ctx context.Context, data *schema.ResourceData, cl
 		if err != nil {
 			return err
 		}
-		err = sdk.StatusOk(response)
+		err = sdk.StatusOk(response.HTTPResponse)
 		// In case of malformed user request return error to user right away.
 		if response.StatusCode() == 400 {
 			return backoff.Permanent(err)

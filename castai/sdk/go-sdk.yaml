@@ -1,0 +1,18 @@
+package: sdk
+output: ./client.gen.go
+generate:
+  models: true
+  client: true
+  types: true
+  embedded-spec: true
+output-options:
+  include-tags:
+  - ExternalClusterAPI
+  - PoliciesAPI
+  - NodeConfigurationAPI
+  - NodeTemplatesAPI
+  - AuthTokenAPI
+  - ScheduledRebalancingAPI
+  - InventoryAPI
+  - UsersAPI
+  - OperationsAPI

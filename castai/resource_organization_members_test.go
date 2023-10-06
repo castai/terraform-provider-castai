@@ -71,11 +71,11 @@ func TestOrganizationResourceReadContext(t *testing.T) {
   "invitations": []
 }`)))
 	mockClient.EXPECT().
-		GetOrganizationUsers(gomock.Any(), organizationID).
+		UsersAPIListOrganizationUsers(gomock.Any(), organizationID).
 		Return(&http.Response{StatusCode: 200, Body: body, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
 
 	mockClient.EXPECT().
-		ListInvitations(gomock.Any(), gomock.Any()).Return(&http.Response{StatusCode: 200, Body: listInvitationsBody, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
+		UsersAPIListInvitations(gomock.Any(), gomock.Any()).Return(&http.Response{StatusCode: 200, Body: listInvitationsBody, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
 
 	state := terraform.NewInstanceStateShimmedFromValue(cty.ObjectVal(map[string]cty.Value{}), 0)
 	state.ID = organizationID
