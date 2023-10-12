@@ -913,6 +913,7 @@ type ExternalclusterV1Node struct {
 	Network             *ExternalclusterV1NodeNetwork `json:"network,omitempty"`
 	NodeConfigurationId *string                       `json:"nodeConfigurationId"`
 	NodeInfo            *ExternalclusterV1NodeInfo    `json:"nodeInfo,omitempty"`
+	ProviderId          *string                       `json:"providerId"`
 	Resources           *ExternalclusterV1Resources   `json:"resources,omitempty"`
 
 	// NodeType defines the role of the VM when joining the Kubernetes cluster. Default value is not allowed.
