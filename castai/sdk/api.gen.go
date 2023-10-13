@@ -392,6 +392,7 @@ type CastaiInventoryV1beta1InstanceType struct {
 	// Describes the network settings for the instance type.
 	NetworkInfo *CastaiInventoryV1beta1NetworkInfo `json:"networkInfo,omitempty"`
 	Obsolete    *bool                              `json:"obsolete,omitempty"`
+	Os          *string                            `json:"os,omitempty"`
 
 	// Price of the instance type. $/hour.
 	Price *string `json:"price,omitempty"`
@@ -913,6 +914,7 @@ type ExternalclusterV1Node struct {
 	Network             *ExternalclusterV1NodeNetwork `json:"network,omitempty"`
 	NodeConfigurationId *string                       `json:"nodeConfigurationId"`
 	NodeInfo            *ExternalclusterV1NodeInfo    `json:"nodeInfo,omitempty"`
+	ProviderId          *string                       `json:"providerId"`
 	Resources           *ExternalclusterV1Resources   `json:"resources,omitempty"`
 
 	// NodeType defines the role of the VM when joining the Kubernetes cluster. Default value is not allowed.
