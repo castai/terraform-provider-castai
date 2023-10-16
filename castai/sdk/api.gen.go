@@ -268,6 +268,8 @@ type CastaiInventoryV1beta1AddReservationResponse struct {
 
 // CastaiInventoryV1beta1AttachableGPUDevice defines model for castai.inventory.v1beta1.AttachableGPUDevice.
 type CastaiInventoryV1beta1AttachableGPUDevice struct {
+	BlacklistedAt *time.Time `json:"blacklistedAt,omitempty"`
+
 	// Count of GPU to be attached.
 	Count *int32 `json:"count,omitempty"`
 
@@ -298,7 +300,8 @@ type CastaiInventoryV1beta1CountableInstanceType struct {
 
 // CastaiInventoryV1beta1GPUDevice defines model for castai.inventory.v1beta1.GPUDevice.
 type CastaiInventoryV1beta1GPUDevice struct {
-	Count *int32 `json:"count,omitempty"`
+	BlacklistedAt *time.Time `json:"blacklistedAt,omitempty"`
+	Count         *int32     `json:"count,omitempty"`
 
 	// - UNKNOWN: UNKNOWN is invalid.
 	//  - NVIDIA: NVIDIA.
@@ -392,6 +395,7 @@ type CastaiInventoryV1beta1InstanceType struct {
 	// Describes the network settings for the instance type.
 	NetworkInfo *CastaiInventoryV1beta1NetworkInfo `json:"networkInfo,omitempty"`
 	Obsolete    *bool                              `json:"obsolete,omitempty"`
+	Os          *string                            `json:"os,omitempty"`
 
 	// Price of the instance type. $/hour.
 	Price *string `json:"price,omitempty"`
@@ -913,6 +917,7 @@ type ExternalclusterV1Node struct {
 	Network             *ExternalclusterV1NodeNetwork `json:"network,omitempty"`
 	NodeConfigurationId *string                       `json:"nodeConfigurationId"`
 	NodeInfo            *ExternalclusterV1NodeInfo    `json:"nodeInfo,omitempty"`
+	ProviderId          *string                       `json:"providerId"`
 	Resources           *ExternalclusterV1Resources   `json:"resources,omitempty"`
 
 	// NodeType defines the role of the VM when joining the Kubernetes cluster. Default value is not allowed.
