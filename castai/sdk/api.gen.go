@@ -268,6 +268,8 @@ type CastaiInventoryV1beta1AddReservationResponse struct {
 
 // CastaiInventoryV1beta1AttachableGPUDevice defines model for castai.inventory.v1beta1.AttachableGPUDevice.
 type CastaiInventoryV1beta1AttachableGPUDevice struct {
+	BlacklistedAt *time.Time `json:"blacklistedAt,omitempty"`
+
 	// Count of GPU to be attached.
 	Count *int32 `json:"count,omitempty"`
 
@@ -298,7 +300,8 @@ type CastaiInventoryV1beta1CountableInstanceType struct {
 
 // CastaiInventoryV1beta1GPUDevice defines model for castai.inventory.v1beta1.GPUDevice.
 type CastaiInventoryV1beta1GPUDevice struct {
-	Count *int32 `json:"count,omitempty"`
+	BlacklistedAt *time.Time `json:"blacklistedAt,omitempty"`
+	Count         *int32     `json:"count,omitempty"`
 
 	// - UNKNOWN: UNKNOWN is invalid.
 	//  - NVIDIA: NVIDIA.
