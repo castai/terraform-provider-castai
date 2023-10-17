@@ -70,6 +70,7 @@ func TestNodeTemplateResourceReadContext(t *testing.T) {
 					]
 				  },
 	              "architectures": ["amd64", "arm64"],
+				  "os": ["linux"],
 				  "gpu": {
 					"manufacturers": [
 					  "NVIDIA"
@@ -154,6 +155,8 @@ constraints.0.max_memory = 0
 constraints.0.min_cpu = 10
 constraints.0.min_memory = 0
 constraints.0.on_demand = true
+constraints.0.os.# = 1
+constraints.0.os.0 = linux
 constraints.0.spot = false
 constraints.0.spot_diversity_price_increase_limit_percent = 20
 constraints.0.spot_interruption_predictions_enabled = true
@@ -394,6 +397,8 @@ func TestAccResourceNodeTemplate_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.on_demand", "false"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.architectures.#", "1"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.architectures.0", "amd64"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.os.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.os.0", "linux"),
 					resource.TestCheckResourceAttr(resourceName, "is_default", "false"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.enable_spot_diversity", "true"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.spot_diversity_price_increase_limit_percent", "21"),
@@ -436,6 +441,8 @@ func TestAccResourceNodeTemplate_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.use_spot_fallbacks", "true"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.architectures.#", "1"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.architectures.0", "arm64"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.os.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.os.0", "linux"),
 					resource.TestCheckResourceAttr(resourceName, "is_default", "false"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.enable_spot_diversity", "true"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.spot_diversity_price_increase_limit_percent", "22"),
