@@ -44,6 +44,7 @@ const (
 	FieldNodeTemplateMinMemory                              = "min_memory"
 	FieldNodeTemplateName                                   = "name"
 	FieldNodeTemplateOnDemand                               = "on_demand"
+	FieldNodeTemplateOs                                     = "os"
 	FieldNodeTemplateRebalancingConfigMinNodes              = "rebalancing_config_min_nodes"
 	FieldNodeTemplateShouldTaint                            = "should_taint"
 	FieldNodeTemplateSpot                                   = "spot"
@@ -62,10 +63,13 @@ const (
 const (
 	ArchAMD64 = "amd64"
 	ArchARM64 = "arm64"
+	OsLinux   = "linux"
+	OsWindows = "windows"
 )
 
 func resourceNodeTemplate() *schema.Resource {
 	supportedArchitectures := []string{ArchAMD64, ArchARM64}
+	supportedOs := []string{OsLinux, OsWindows}
 
 	return &schema.Resource{
 		CreateContext: resourceNodeTemplateCreate,
@@ -295,6 +299,21 @@ func resourceNodeTemplate() *schema.Resource {
 							},
 							Description: fmt.Sprintf("List of acceptable instance CPU architectures, the default is %s. Allowed values: %s.", ArchAMD64, strings.Join(supportedArchitectures, ", ")),
 						},
+						FieldNodeTemplateOs: {
+							Type:     schema.TypeList,
+							MaxItems: 2,
+							MinItems: 1,
+							Optional: true,
+							Computed: true,
+							Elem: &schema.Schema{
+								Type:             schema.TypeString,
+								ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(supportedOs, false)),
+							},
+							DefaultFunc: func() (interface{}, error) {
+								return []string{OsLinux}, nil
+							},
+							Description: fmt.Sprintf("List of acceptable instance Operating Systems, the default is %s. Allowed values: %s.", OsLinux, strings.Join(supportedOs, ", ")),
+						},
 					},
 				},
 			},
@@ -504,6 +523,9 @@ func flattenConstraints(c *sdk.NodetemplatesV1TemplateConstraints) ([]map[string
 	}
 	if c.Architectures != nil {
 		out[FieldNodeTemplateArchitectures] = lo.FromPtr(c.Architectures)
+	}
+	if c.Os != nil {
+		out[FieldNodeTemplateOs] = lo.FromPtr(c.Os)
 	}
 	return []map[string]any{out}, nil
 }
@@ -965,6 +987,9 @@ func toTemplateConstraints(obj map[string]any) *sdk.NodetemplatesV1TemplateConst
 	}
 	if v, ok := obj[FieldNodeTemplateArchitectures].([]any); ok {
 		out.Architectures = toPtr(toStringList(v))
+	}
+	if v, ok := obj[FieldNodeTemplateOs].([]any); ok {
+		out.Os = toPtr(toStringList(v))
 	}
 	if v, ok := obj[FieldNodeTemplateIsGpuOnly].(bool); ok {
 		out.IsGpuOnly = toPtr(v)

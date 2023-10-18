@@ -1564,7 +1564,8 @@ type NodetemplatesV1TemplateConstraints struct {
 	MinMemory *int32 `json:"minMemory"`
 
 	// Should include on-demand instances in the considered pool.
-	OnDemand *bool `json:"onDemand"`
+	OnDemand *bool     `json:"onDemand"`
+	Os       *[]string `json:"os,omitempty"`
 
 	// Should include spot instances in the considered pool.
 	// Note 1: if both spot and on-demand are false, then on-demand is assumed.
