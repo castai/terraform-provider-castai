@@ -4,14 +4,9 @@
 
 data "google_client_config" "default" {}
 
-data "google_secret_manager_secret_version" "cast_ai_services_dev_token" {
-  secret  = "rouseservice-key"
-  project = var.project_id
-}
-
 provider "castai" {
   api_url   = var.castai_api_url
-  api_token = data.google_secret_manager_secret_version.cast_ai_services_dev_token.secret_data
+  api_token = var.castai_api_token
 }
 
 data "google_container_cluster" "my_cluster" {
@@ -19,7 +14,6 @@ data "google_container_cluster" "my_cluster" {
   location = var.cluster_region
   project  = var.project_id
 }
-
 
 
 provider "helm" {
@@ -42,14 +36,14 @@ module "castai-gke-cluster" {
   source = "castai/gke-cluster/castai"
 
   api_url                = var.castai_api_url
-  castai_api_token       = data.google_secret_manager_secret_version.cast_ai_services_dev_token.secret_data
+  castai_api_token       = var.castai_api_token
   wait_for_cluster_ready = true
 
   project_id           = var.project_id
   gke_cluster_name     = var.cluster_name
   gke_cluster_location = var.cluster_region
 
-  gke_credentials            = data.google_container_cluster.my_cluster.master_auth[0].client_certificate
+  gke_credentials            = module.castai-gke-iam.private_key
   delete_nodes_on_disconnect = var.delete_nodes_on_disconnect
 
   default_node_configuration = module.castai-gke-cluster.castai_node_configurations["default"]
@@ -61,72 +55,69 @@ module "castai-gke-cluster" {
       tags           = var.tags
     }
 
-    # # Commented out for POC
-    # test_node_config = {
-    #   disk_cpu_ratio    = 10
-    #   subnets           = [module.vpc.subnets_ids[0]]
-    #   tags              = var.tags
-    #   max_pods_per_node = 40
-    #   disk_type         = "pd-ssd",
-    #   network_tags      = ["dev"]
-    # }
+    test_node_config = {
+      disk_cpu_ratio    = 10
+      subnets           = var.subnets
+      tags              = var.tags
+      max_pods_per_node = 40
+      disk_type         = "pd-ssd",
+      network_tags      = ["dev"]
+    }
 
   }
-  # # Commented out for POC
-  #   node_templates = {
-  #     default_by_castai = {
-  #       name = "default-by-castai"
-  #       configuration_id = module.castai-gke-cluster.castai_node_configurations["default"]
-  #       is_default   = true
-  #       should_taint = false
+  node_templates = {
+    default_by_castai = {
+      name = "default-by-castai"
+      configuration_id = module.castai-gke-cluster.castai_node_configurations["default"]
+      is_default   = true
+      should_taint = false
 
-  #       constraints = {
-  #         on_demand          = true
-  #         spot               = true
-  #         use_spot_fallbacks = true
+      constraints = {
+        on_demand          = true
+        spot               = true
+        use_spot_fallbacks = true
 
-  #         enable_spot_diversity                       = false
-  #         spot_diversity_price_increase_limit_percent = 20
-  #       }
-  #     }
-  #     spot_tmpl = {
-  #       configuration_id = module.castai-gke-cluster.castai_node_configurations["default"]
-  #       should_taint     = true
+        enable_spot_diversity                       = false
+        spot_diversity_price_increase_limit_percent = 20
+      }
+    }
+    spot_tmpl = {
+      configuration_id = module.castai-gke-cluster.castai_node_configurations["default"]
+      should_taint     = true
 
-  #       custom_labels = {
-  #         custom-label-key-1 = "custom-label-value-1"
-  #         custom-label-key-2 = "custom-label-value-2"
-  #       }
+      custom_labels = {
+        custom-label-key-1 = "custom-label-value-1"
+        custom-label-key-2 = "custom-label-value-2"
+      }
 
-  #       custom_taints = [
-  #         {
-  #           key = "custom-taint-key-1"
-  #           value = "custom-taint-value-1"
-  #           effect = "NoSchedule"
-  #         },
-  #         {
-  #           key = "custom-taint-key-2"
-  #           value = "custom-taint-value-2"
-  #           effect = "NoSchedule"
-  #         }
-  #       ]
+      custom_taints = [
+        {
+          key = "custom-taint-key-1"
+          value = "custom-taint-value-1"
+          effect = "NoSchedule"
+        },
+        {
+          key = "custom-taint-key-2"
+          value = "custom-taint-value-2"
+          effect = "NoSchedule"
+        }
+      ]
+      constraints = {
+        fallback_restore_rate_seconds = 1800
+        spot                          = true
+        use_spot_fallbacks            = true
+        min_cpu                       = 4
+        max_cpu                       = 100
+        instance_families             = {
+          exclude = ["e2"]
+        }
+        compute_optimized = false
+        storage_optimized = false
+      }
 
-  #       constraints = {
-  #         fallback_restore_rate_seconds = 1800
-  #         spot                          = true
-  #         use_spot_fallbacks            = true
-  #         min_cpu                       = 4
-  #         max_cpu                       = 100
-  #         instance_families             = {
-  #           exclude = ["e2"]
-  #         }
-  #         compute_optimized = false
-  #         storage_optimized = false
-  #       }
-
-  #       custom_instances_enabled = true
-  #     }
-  #   }
+      custom_instances_enabled = true
+    }
+  }
 
   // Configure Autoscaler policies as per API specification https://api.cast.ai/v1/spec/#/PoliciesAPI/PoliciesAPIUpsertClusterPolicies.
   // Here:
