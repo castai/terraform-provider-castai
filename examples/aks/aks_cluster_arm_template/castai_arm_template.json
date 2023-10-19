@@ -1,0 +1,210 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "outputs": {},
+    "parameters": {
+        "apiKey": {
+            "type": "String"
+        },
+        "clusterResourceName": {
+            "metadata": {
+                "description": "The name of the Managed Cluster resource."
+            },
+            "type": "String"
+        },
+        "createNewCluster": {
+            "defaultValue": false,
+            "metadata": {
+                "description": "When set to 'true', creates new AKS cluster. Otherwise, an existing cluster is used."
+            },
+            "type": "Bool"
+        },
+        "dnsPrefix": {
+            "defaultValue": "[concat(parameters('clusterResourceName'),'-dns')]",
+            "metadata": {
+                "description": "Optional DNS prefix to use with hosted Kubernetes API server FQDN."
+            },
+            "type": "String"
+        },
+        "enableAzurePolicy": {
+            "defaultValue": false,
+            "metadata": {
+                "description": "Boolean flag to turn on and off Azure Policy addon."
+            },
+            "type": "Bool"
+        },
+        "enableHttpApplicationRouting": {
+            "defaultValue": true,
+            "metadata": {
+                "description": "Boolean flag to turn on and off http application routing."
+            },
+            "type": "Bool"
+        },
+        "enablePrivateCluster": {
+            "defaultValue": false,
+            "metadata": {
+                "description": "Enable private network access to the Kubernetes cluster."
+            },
+            "type": "Bool"
+        },
+        "enableRBAC": {
+            "defaultValue": true,
+            "metadata": {
+                "description": "Boolean flag to turn on and off of RBAC."
+            },
+            "type": "Bool"
+        },
+        "enableSecretStoreCSIDriver": {
+            "defaultValue": false,
+            "metadata": {
+                "description": "Boolean flag to turn on and off secret store CSI driver."
+            },
+            "type": "Bool"
+        },
+        "kubernetesVersion": {
+            "defaultValue": "1.25.6",
+            "metadata": {
+                "description": "The version of Kubernetes."
+            },
+            "type": "String"
+        },
+        "location": {
+            "metadata": {
+                "description": "The location of AKS resource."
+            },
+            "type": "String"
+        },
+        "networkPlugin": {
+            "allowedValues": [
+                "azure",
+                "kubenet"
+            ],
+            "defaultValue": "kubenet",
+            "metadata": {
+                "description": "Network plugin used for building Kubernetes network."
+            },
+            "type": "String"
+        },
+        "osDiskSizeGB": {
+            "defaultValue": 0,
+            "maxValue": 1023,
+            "metadata": {
+                "description": "Disk size (in GiB) to provision for each of the agent pool nodes. This value ranges from 0 to 1023. Specifying 0 will apply the default disk size for that agentVMSize."
+            },
+            "minValue": 0,
+            "type": "Int"
+        },
+        "vmCount": {
+            "defaultValue": 3,
+            "metadata": {
+                "description": "VM count"
+            },
+            "type": "Int"
+        },
+        "vmEnableAutoScale": {
+            "defaultValue": true,
+            "metadata": {
+                "description": "enable auto scaling"
+            },
+            "type": "Bool"
+        },
+        "vmSize": {
+            "defaultValue": "Standard_DS2_v2",
+            "metadata": {
+                "description": "VM size"
+            },
+            "type": "String"
+        }
+    },
+    "resources": [
+        {
+            "apiVersion": "2022-11-01",
+            "condition": "[parameters('createNewCluster')]",
+            "dependsOn": [],
+            "identity": {
+                "type": "SystemAssigned"
+            },
+            "location": "[parameters('location')]",
+            "name": "[parameters('clusterResourceName')]",
+            "properties": {
+                "addonProfiles": {
+                    "azureKeyvaultSecretsProvider": {
+                        "enabled": "[parameters('enableSecretStoreCSIDriver')]"
+                    },
+                    "azurepolicy": {
+                        "enabled": "[parameters('enableAzurePolicy')]"
+                    },
+                    "httpApplicationRouting": {
+                        "enabled": "[parameters('enableHttpApplicationRouting')]"
+                    }
+                },
+                "agentPoolProfiles": [
+                    {
+                        "count": "[parameters('vmCount')]",
+                        "enableAutoScaling": "[parameters('vmEnableAutoScale')]",
+                        "enableNodePublicIP": false,
+                        "maxCount": 10,
+                        "maxPods": 110,
+                        "minCount": 1,
+                        "mode": "System",
+                        "name": "agentpool",
+                        "osDiskSizeGB": "[parameters('osDiskSizeGB')]",
+                        "osType": "Linux",
+                        "storageProfile": "ManagedDisks",
+                        "tags": {},
+                        "type": "VirtualMachineScaleSets",
+                        "vmSize": "[parameters('vmSize')]"
+                    }
+                ],
+                "apiServerAccessProfile": {
+                    "enablePrivateCluster": "[parameters('enablePrivateCluster')]"
+                },
+                "dnsPrefix": "[parameters('dnsPrefix')]",
+                "enableRBAC": "[parameters('enableRBAC')]",
+                "kubernetesVersion": "[parameters('kubernetesVersion')]",
+                "networkProfile": {
+                    "loadBalancerSku": "standard",
+                    "networkPlugin": "[parameters('networkPlugin')]"
+                }
+            },
+            "sku": {
+                "name": "Basic",
+                "tier": "Free"
+            },
+            "tags": {},
+            "type": "Microsoft.ContainerService/managedClusters"
+        },
+        {
+            "apiVersion": "2022-11-01",
+            "dependsOn": [
+                "[resourceId('Microsoft.ContainerService/managedClusters/', parameters('clusterResourceName'))]"
+            ],
+            "name": "[variables('extensionResourceName')]",
+            "plan": {
+                "name": "[variables('plan-name')]",
+                "product": "[variables('plan-offerID')]",
+                "publisher": "[variables('plan-publisher')]"
+            },
+            "properties": {
+                "autoUpgradeMinorVersion": true,
+                "configurationSettings": {
+                    "apiKey": "[parameters('apiKey')]",
+                    "provider": "[variables('provider')]"
+                },
+                "extensionType": "[variables('clusterExtensionTypeName')]",
+                "releaseTrain": "[variables('releaseTrain')]"
+            },
+            "scope": "[concat('Microsoft.ContainerService/managedClusters/', parameters('clusterResourceName'))]",
+            "type": "Microsoft.KubernetesConfiguration/extensions"
+        }
+    ],
+    "variables": {
+        "clusterExtensionTypeName": "castai.agent.standard",
+        "extensionResourceName": "castai-agent",
+        "plan-name": "standard",
+        "plan-offerID": "castai-agent",
+        "plan-publisher": "castaigroupinc1683643265413",
+        "provider": "aks",
+        "releaseTrain": "stable"
+    }
+}
