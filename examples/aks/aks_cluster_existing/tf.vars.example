@@ -1,0 +1,5 @@
+cluster_name                = ""
+cluster_rg                  = ""
+cluster_region              = ""
+castai_api_token            = ""
+subnets                     = [""]
