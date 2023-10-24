@@ -954,7 +954,7 @@ func toTemplateConstraints(obj map[string]any) *sdk.NodetemplatesV1TemplateConst
 	if v, ok := obj[FieldNodeTemplateGpu].([]any); ok && len(v) > 0 {
 		out.Gpu = toTemplateConstraintsGpuConstraints(v[0].(map[string]any))
 	}
-	if v, ok := obj[FieldNodeTemplateInstanceFamilies].([]any); ok && len(v) > 0 {
+	if v, ok := obj[FieldNodeTemplateInstanceFamilies].([]any); ok && len(v) > 0 && v[0] != nil {
 		out.InstanceFamilies = toTemplateConstraintsInstanceFamilies(v[0].(map[string]any))
 	}
 	if v, ok := obj[FieldNodeTemplateMaxCpu].(int); ok && v != 0 {
