@@ -5,8 +5,8 @@ default: build
 init-examples:
 	@echo "==> Creating symlinks for example/ projects to terraform-provider-castai binary"; \
 	TF_PROVIDER_FILENAME=terraform-provider-castai; \
-	GOOS=`go tool dist env | awk -F'=' '/^GOOS/ { print $$2}' | tr -d '"'`; \
-	GOARCH=`go tool dist env | awk -F'=' '/^GOARCH/ { print $$2}' | tr -d '"'`; \
+	GOOS=`go tool dist env | awk -F'=' '/^GOOS/ { print $$2}' | tr -d '";'`; \
+	GOARCH=`go tool dist env | awk -F'=' '/^GOARCH/ { print $$2}' | tr -d '";'`; \
 	for examples in examples/eks examples/gke examples/aks ; do \
 		for tfproject in $$examples/* ; do \
 			TF_PROJECT_PLUGIN_PATH="$${tfproject}/terraform.d/plugins/registry.terraform.io/castai/castai/0.0.0-local/$${GOOS}_$${GOARCH}"; \
