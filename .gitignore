@@ -8,6 +8,7 @@ examples/**/.terraform/
 examples/**/terraform.d/
 examples/**/crash.log
 examples/**/*.tfstate
+examples/**/*.tfstate.lock.info
 examples/**/*.tfstate.backup
 examples/**/.terraform.lock.hcl
 examples/**/*.tfvars
