@@ -15,16 +15,10 @@ variable "cluster_version" {
   default     = "1.23"
 }
 
-variable "cluster_network_provider" {
+variable "cluster_network_plugin" {
   type        = string
-  description = "AKS cluster network provider"
+  description = "AKS cluster network plugin"
   default     = "azure"
-}
-
-variable "cluster_network_provider_mode" {
-  type        = string
-  description = "AKS cluster network provider mode"
-  default     = ""
 }
 
 # Variables required for connecting EKS cluster to CAST AI

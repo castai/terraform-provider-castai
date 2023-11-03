@@ -16,8 +16,7 @@ resource "azurerm_kubernetes_cluster" "this" {
   }
 
   network_profile {
-    network_plugin      =  var.cluster_network_provider
-    network_plugin_mode =  var.cluster_network_provider_mode
+    network_plugin      =  var.cluster_network_plugin
   }
 
   identity {
