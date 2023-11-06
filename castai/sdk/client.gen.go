@@ -382,6 +382,25 @@ type ClientInterface interface {
 	// ExternalClusterAPIGetCredentialsScriptTemplate request
 	ExternalClusterAPIGetCredentialsScriptTemplate(ctx context.Context, provider string, params *ExternalClusterAPIGetCredentialsScriptTemplateParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// SSOAPIListSSOConnections request
+	SSOAPIListSSOConnections(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// SSOAPICreateSSOConnection request with any body
+	SSOAPICreateSSOConnectionWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	SSOAPICreateSSOConnection(ctx context.Context, body SSOAPICreateSSOConnectionJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// SSOAPIDeleteSSOConnection request
+	SSOAPIDeleteSSOConnection(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// SSOAPIGetSSOConnection request
+	SSOAPIGetSSOConnection(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// SSOAPIUpdateSSOConnection request with any body
+	SSOAPIUpdateSSOConnectionWithBody(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	SSOAPIUpdateSSOConnection(ctx context.Context, id string, body SSOAPIUpdateSSOConnectionJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// ScheduledRebalancingAPIListAvailableRebalancingTZ request
 	ScheduledRebalancingAPIListAvailableRebalancingTZ(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
 }
@@ -1660,6 +1679,90 @@ func (c *Client) ExternalClusterAPIGetCleanupScriptTemplate(ctx context.Context,
 
 func (c *Client) ExternalClusterAPIGetCredentialsScriptTemplate(ctx context.Context, provider string, params *ExternalClusterAPIGetCredentialsScriptTemplateParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewExternalClusterAPIGetCredentialsScriptTemplateRequest(c.Server, provider, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) SSOAPIListSSOConnections(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewSSOAPIListSSOConnectionsRequest(c.Server)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) SSOAPICreateSSOConnectionWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewSSOAPICreateSSOConnectionRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) SSOAPICreateSSOConnection(ctx context.Context, body SSOAPICreateSSOConnectionJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewSSOAPICreateSSOConnectionRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) SSOAPIDeleteSSOConnection(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewSSOAPIDeleteSSOConnectionRequest(c.Server, id)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) SSOAPIGetSSOConnection(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewSSOAPIGetSSOConnectionRequest(c.Server, id)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) SSOAPIUpdateSSOConnectionWithBody(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewSSOAPIUpdateSSOConnectionRequestWithBody(c.Server, id, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) SSOAPIUpdateSSOConnection(ctx context.Context, id string, body SSOAPIUpdateSSOConnectionJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewSSOAPIUpdateSSOConnectionRequest(c.Server, id, body)
 	if err != nil {
 		return nil, err
 	}
@@ -4992,6 +5095,188 @@ func NewExternalClusterAPIGetCredentialsScriptTemplateRequest(server string, pro
 	return req, nil
 }
 
+// NewSSOAPIListSSOConnectionsRequest generates requests for SSOAPIListSSOConnections
+func NewSSOAPIListSSOConnectionsRequest(server string) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/sso-connections")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewSSOAPICreateSSOConnectionRequest calls the generic SSOAPICreateSSOConnection builder with application/json body
+func NewSSOAPICreateSSOConnectionRequest(server string, body SSOAPICreateSSOConnectionJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewSSOAPICreateSSOConnectionRequestWithBody(server, "application/json", bodyReader)
+}
+
+// NewSSOAPICreateSSOConnectionRequestWithBody generates requests for SSOAPICreateSSOConnection with any type of body
+func NewSSOAPICreateSSOConnectionRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/sso-connections")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewSSOAPIDeleteSSOConnectionRequest generates requests for SSOAPIDeleteSSOConnection
+func NewSSOAPIDeleteSSOConnectionRequest(server string, id string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/sso-connections/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("DELETE", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewSSOAPIGetSSOConnectionRequest generates requests for SSOAPIGetSSOConnection
+func NewSSOAPIGetSSOConnectionRequest(server string, id string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/sso-connections/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewSSOAPIUpdateSSOConnectionRequest calls the generic SSOAPIUpdateSSOConnection builder with application/json body
+func NewSSOAPIUpdateSSOConnectionRequest(server string, id string, body SSOAPIUpdateSSOConnectionJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewSSOAPIUpdateSSOConnectionRequestWithBody(server, id, "application/json", bodyReader)
+}
+
+// NewSSOAPIUpdateSSOConnectionRequestWithBody generates requests for SSOAPIUpdateSSOConnection with any type of body
+func NewSSOAPIUpdateSSOConnectionRequestWithBody(server string, id string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/sso-connections/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
 // NewScheduledRebalancingAPIListAvailableRebalancingTZRequest generates requests for ScheduledRebalancingAPIListAvailableRebalancingTZ
 func NewScheduledRebalancingAPIListAvailableRebalancingTZRequest(server string) (*http.Request, error) {
 	var err error
@@ -5353,6 +5638,25 @@ type ClientWithResponsesInterface interface {
 
 	// ExternalClusterAPIGetCredentialsScriptTemplate request
 	ExternalClusterAPIGetCredentialsScriptTemplateWithResponse(ctx context.Context, provider string, params *ExternalClusterAPIGetCredentialsScriptTemplateParams) (*ExternalClusterAPIGetCredentialsScriptTemplateResponse, error)
+
+	// SSOAPIListSSOConnections request
+	SSOAPIListSSOConnectionsWithResponse(ctx context.Context) (*SSOAPIListSSOConnectionsResponse, error)
+
+	// SSOAPICreateSSOConnection request  with any body
+	SSOAPICreateSSOConnectionWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*SSOAPICreateSSOConnectionResponse, error)
+
+	SSOAPICreateSSOConnectionWithResponse(ctx context.Context, body SSOAPICreateSSOConnectionJSONRequestBody) (*SSOAPICreateSSOConnectionResponse, error)
+
+	// SSOAPIDeleteSSOConnection request
+	SSOAPIDeleteSSOConnectionWithResponse(ctx context.Context, id string) (*SSOAPIDeleteSSOConnectionResponse, error)
+
+	// SSOAPIGetSSOConnection request
+	SSOAPIGetSSOConnectionWithResponse(ctx context.Context, id string) (*SSOAPIGetSSOConnectionResponse, error)
+
+	// SSOAPIUpdateSSOConnection request  with any body
+	SSOAPIUpdateSSOConnectionWithBodyWithResponse(ctx context.Context, id string, contentType string, body io.Reader) (*SSOAPIUpdateSSOConnectionResponse, error)
+
+	SSOAPIUpdateSSOConnectionWithResponse(ctx context.Context, id string, body SSOAPIUpdateSSOConnectionJSONRequestBody) (*SSOAPIUpdateSSOConnectionResponse, error)
 
 	// ScheduledRebalancingAPIListAvailableRebalancingTZ request
 	ScheduledRebalancingAPIListAvailableRebalancingTZWithResponse(ctx context.Context) (*ScheduledRebalancingAPIListAvailableRebalancingTZResponse, error)
@@ -7704,6 +8008,156 @@ func (r ExternalClusterAPIGetCredentialsScriptTemplateResponse) GetBody() []byte
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
+type SSOAPIListSSOConnectionsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *CastaiSsoV1beta1ListSSOConnectionsResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r SSOAPIListSSOConnectionsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r SSOAPIListSSOConnectionsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r SSOAPIListSSOConnectionsResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type SSOAPICreateSSOConnectionResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *CastaiSsoV1beta1SSOConnection
+}
+
+// Status returns HTTPResponse.Status
+func (r SSOAPICreateSSOConnectionResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r SSOAPICreateSSOConnectionResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r SSOAPICreateSSOConnectionResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type SSOAPIDeleteSSOConnectionResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *CastaiSsoV1beta1DeleteSSOConnectionResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r SSOAPIDeleteSSOConnectionResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r SSOAPIDeleteSSOConnectionResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r SSOAPIDeleteSSOConnectionResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type SSOAPIGetSSOConnectionResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *CastaiSsoV1beta1SSOConnection
+}
+
+// Status returns HTTPResponse.Status
+func (r SSOAPIGetSSOConnectionResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r SSOAPIGetSSOConnectionResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r SSOAPIGetSSOConnectionResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type SSOAPIUpdateSSOConnectionResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *CastaiSsoV1beta1SSOConnection
+}
+
+// Status returns HTTPResponse.Status
+func (r SSOAPIUpdateSSOConnectionResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r SSOAPIUpdateSSOConnectionResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r SSOAPIUpdateSSOConnectionResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
 type ScheduledRebalancingAPIListAvailableRebalancingTZResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -8666,6 +9120,67 @@ func (c *ClientWithResponses) ExternalClusterAPIGetCredentialsScriptTemplateWith
 		return nil, err
 	}
 	return ParseExternalClusterAPIGetCredentialsScriptTemplateResponse(rsp)
+}
+
+// SSOAPIListSSOConnectionsWithResponse request returning *SSOAPIListSSOConnectionsResponse
+func (c *ClientWithResponses) SSOAPIListSSOConnectionsWithResponse(ctx context.Context) (*SSOAPIListSSOConnectionsResponse, error) {
+	rsp, err := c.SSOAPIListSSOConnections(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return ParseSSOAPIListSSOConnectionsResponse(rsp)
+}
+
+// SSOAPICreateSSOConnectionWithBodyWithResponse request with arbitrary body returning *SSOAPICreateSSOConnectionResponse
+func (c *ClientWithResponses) SSOAPICreateSSOConnectionWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*SSOAPICreateSSOConnectionResponse, error) {
+	rsp, err := c.SSOAPICreateSSOConnectionWithBody(ctx, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseSSOAPICreateSSOConnectionResponse(rsp)
+}
+
+func (c *ClientWithResponses) SSOAPICreateSSOConnectionWithResponse(ctx context.Context, body SSOAPICreateSSOConnectionJSONRequestBody) (*SSOAPICreateSSOConnectionResponse, error) {
+	rsp, err := c.SSOAPICreateSSOConnection(ctx, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseSSOAPICreateSSOConnectionResponse(rsp)
+}
+
+// SSOAPIDeleteSSOConnectionWithResponse request returning *SSOAPIDeleteSSOConnectionResponse
+func (c *ClientWithResponses) SSOAPIDeleteSSOConnectionWithResponse(ctx context.Context, id string) (*SSOAPIDeleteSSOConnectionResponse, error) {
+	rsp, err := c.SSOAPIDeleteSSOConnection(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	return ParseSSOAPIDeleteSSOConnectionResponse(rsp)
+}
+
+// SSOAPIGetSSOConnectionWithResponse request returning *SSOAPIGetSSOConnectionResponse
+func (c *ClientWithResponses) SSOAPIGetSSOConnectionWithResponse(ctx context.Context, id string) (*SSOAPIGetSSOConnectionResponse, error) {
+	rsp, err := c.SSOAPIGetSSOConnection(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	return ParseSSOAPIGetSSOConnectionResponse(rsp)
+}
+
+// SSOAPIUpdateSSOConnectionWithBodyWithResponse request with arbitrary body returning *SSOAPIUpdateSSOConnectionResponse
+func (c *ClientWithResponses) SSOAPIUpdateSSOConnectionWithBodyWithResponse(ctx context.Context, id string, contentType string, body io.Reader) (*SSOAPIUpdateSSOConnectionResponse, error) {
+	rsp, err := c.SSOAPIUpdateSSOConnectionWithBody(ctx, id, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseSSOAPIUpdateSSOConnectionResponse(rsp)
+}
+
+func (c *ClientWithResponses) SSOAPIUpdateSSOConnectionWithResponse(ctx context.Context, id string, body SSOAPIUpdateSSOConnectionJSONRequestBody) (*SSOAPIUpdateSSOConnectionResponse, error) {
+	rsp, err := c.SSOAPIUpdateSSOConnection(ctx, id, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseSSOAPIUpdateSSOConnectionResponse(rsp)
 }
 
 // ScheduledRebalancingAPIListAvailableRebalancingTZWithResponse request returning *ScheduledRebalancingAPIListAvailableRebalancingTZResponse
@@ -10670,6 +11185,136 @@ func ParseExternalClusterAPIGetCredentialsScriptTemplateResponse(rsp *http.Respo
 	response := &ExternalClusterAPIGetCredentialsScriptTemplateResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
+	}
+
+	return response, nil
+}
+
+// ParseSSOAPIListSSOConnectionsResponse parses an HTTP response from a SSOAPIListSSOConnectionsWithResponse call
+func ParseSSOAPIListSSOConnectionsResponse(rsp *http.Response) (*SSOAPIListSSOConnectionsResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &SSOAPIListSSOConnectionsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest CastaiSsoV1beta1ListSSOConnectionsResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseSSOAPICreateSSOConnectionResponse parses an HTTP response from a SSOAPICreateSSOConnectionWithResponse call
+func ParseSSOAPICreateSSOConnectionResponse(rsp *http.Response) (*SSOAPICreateSSOConnectionResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &SSOAPICreateSSOConnectionResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest CastaiSsoV1beta1SSOConnection
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseSSOAPIDeleteSSOConnectionResponse parses an HTTP response from a SSOAPIDeleteSSOConnectionWithResponse call
+func ParseSSOAPIDeleteSSOConnectionResponse(rsp *http.Response) (*SSOAPIDeleteSSOConnectionResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &SSOAPIDeleteSSOConnectionResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest CastaiSsoV1beta1DeleteSSOConnectionResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseSSOAPIGetSSOConnectionResponse parses an HTTP response from a SSOAPIGetSSOConnectionWithResponse call
+func ParseSSOAPIGetSSOConnectionResponse(rsp *http.Response) (*SSOAPIGetSSOConnectionResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &SSOAPIGetSSOConnectionResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest CastaiSsoV1beta1SSOConnection
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseSSOAPIUpdateSSOConnectionResponse parses an HTTP response from a SSOAPIUpdateSSOConnectionWithResponse call
+func ParseSSOAPIUpdateSSOConnectionResponse(rsp *http.Response) (*SSOAPIUpdateSSOConnectionResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &SSOAPIUpdateSSOConnectionResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest CastaiSsoV1beta1SSOConnection
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
 	}
 
 	return response, nil

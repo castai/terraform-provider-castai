@@ -1775,6 +1775,146 @@ func (mr *MockClientInterfaceMockRecorder) PoliciesAPIUpsertClusterPoliciesWithB
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PoliciesAPIUpsertClusterPoliciesWithBody", reflect.TypeOf((*MockClientInterface)(nil).PoliciesAPIUpsertClusterPoliciesWithBody), varargs...)
 }
 
+// SSOAPICreateSSOConnection mocks base method.
+func (m *MockClientInterface) SSOAPICreateSSOConnection(ctx context.Context, body sdk.SSOAPICreateSSOConnectionJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "SSOAPICreateSSOConnection", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SSOAPICreateSSOConnection indicates an expected call of SSOAPICreateSSOConnection.
+func (mr *MockClientInterfaceMockRecorder) SSOAPICreateSSOConnection(ctx, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SSOAPICreateSSOConnection", reflect.TypeOf((*MockClientInterface)(nil).SSOAPICreateSSOConnection), varargs...)
+}
+
+// SSOAPICreateSSOConnectionWithBody mocks base method.
+func (m *MockClientInterface) SSOAPICreateSSOConnectionWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "SSOAPICreateSSOConnectionWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SSOAPICreateSSOConnectionWithBody indicates an expected call of SSOAPICreateSSOConnectionWithBody.
+func (mr *MockClientInterfaceMockRecorder) SSOAPICreateSSOConnectionWithBody(ctx, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SSOAPICreateSSOConnectionWithBody", reflect.TypeOf((*MockClientInterface)(nil).SSOAPICreateSSOConnectionWithBody), varargs...)
+}
+
+// SSOAPIDeleteSSOConnection mocks base method.
+func (m *MockClientInterface) SSOAPIDeleteSSOConnection(ctx context.Context, id string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, id}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "SSOAPIDeleteSSOConnection", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SSOAPIDeleteSSOConnection indicates an expected call of SSOAPIDeleteSSOConnection.
+func (mr *MockClientInterfaceMockRecorder) SSOAPIDeleteSSOConnection(ctx, id interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, id}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SSOAPIDeleteSSOConnection", reflect.TypeOf((*MockClientInterface)(nil).SSOAPIDeleteSSOConnection), varargs...)
+}
+
+// SSOAPIGetSSOConnection mocks base method.
+func (m *MockClientInterface) SSOAPIGetSSOConnection(ctx context.Context, id string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, id}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "SSOAPIGetSSOConnection", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SSOAPIGetSSOConnection indicates an expected call of SSOAPIGetSSOConnection.
+func (mr *MockClientInterfaceMockRecorder) SSOAPIGetSSOConnection(ctx, id interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, id}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SSOAPIGetSSOConnection", reflect.TypeOf((*MockClientInterface)(nil).SSOAPIGetSSOConnection), varargs...)
+}
+
+// SSOAPIListSSOConnections mocks base method.
+func (m *MockClientInterface) SSOAPIListSSOConnections(ctx context.Context, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "SSOAPIListSSOConnections", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SSOAPIListSSOConnections indicates an expected call of SSOAPIListSSOConnections.
+func (mr *MockClientInterfaceMockRecorder) SSOAPIListSSOConnections(ctx interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SSOAPIListSSOConnections", reflect.TypeOf((*MockClientInterface)(nil).SSOAPIListSSOConnections), varargs...)
+}
+
+// SSOAPIUpdateSSOConnection mocks base method.
+func (m *MockClientInterface) SSOAPIUpdateSSOConnection(ctx context.Context, id string, body sdk.SSOAPIUpdateSSOConnectionJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, id, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "SSOAPIUpdateSSOConnection", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SSOAPIUpdateSSOConnection indicates an expected call of SSOAPIUpdateSSOConnection.
+func (mr *MockClientInterfaceMockRecorder) SSOAPIUpdateSSOConnection(ctx, id, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, id, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SSOAPIUpdateSSOConnection", reflect.TypeOf((*MockClientInterface)(nil).SSOAPIUpdateSSOConnection), varargs...)
+}
+
+// SSOAPIUpdateSSOConnectionWithBody mocks base method.
+func (m *MockClientInterface) SSOAPIUpdateSSOConnectionWithBody(ctx context.Context, id, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, id, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "SSOAPIUpdateSSOConnectionWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SSOAPIUpdateSSOConnectionWithBody indicates an expected call of SSOAPIUpdateSSOConnectionWithBody.
+func (mr *MockClientInterfaceMockRecorder) SSOAPIUpdateSSOConnectionWithBody(ctx, id, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, id, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SSOAPIUpdateSSOConnectionWithBody", reflect.TypeOf((*MockClientInterface)(nil).SSOAPIUpdateSSOConnectionWithBody), varargs...)
+}
+
 // ScheduledRebalancingAPICreateRebalancingJob mocks base method.
 func (m *MockClientInterface) ScheduledRebalancingAPICreateRebalancingJob(ctx context.Context, clusterId string, body sdk.ScheduledRebalancingAPICreateRebalancingJobJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
@@ -3531,6 +3671,111 @@ func (m *MockClientWithResponsesInterface) PoliciesAPIUpsertClusterPoliciesWithR
 func (mr *MockClientWithResponsesInterfaceMockRecorder) PoliciesAPIUpsertClusterPoliciesWithResponse(ctx, clusterId, body interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PoliciesAPIUpsertClusterPoliciesWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).PoliciesAPIUpsertClusterPoliciesWithResponse), ctx, clusterId, body)
+}
+
+// SSOAPICreateSSOConnectionWithBodyWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) SSOAPICreateSSOConnectionWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*sdk.SSOAPICreateSSOConnectionResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SSOAPICreateSSOConnectionWithBodyWithResponse", ctx, contentType, body)
+	ret0, _ := ret[0].(*sdk.SSOAPICreateSSOConnectionResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SSOAPICreateSSOConnectionWithBodyWithResponse indicates an expected call of SSOAPICreateSSOConnectionWithBodyWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) SSOAPICreateSSOConnectionWithBodyWithResponse(ctx, contentType, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SSOAPICreateSSOConnectionWithBodyWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).SSOAPICreateSSOConnectionWithBodyWithResponse), ctx, contentType, body)
+}
+
+// SSOAPICreateSSOConnectionWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) SSOAPICreateSSOConnectionWithResponse(ctx context.Context, body sdk.SSOAPICreateSSOConnectionJSONRequestBody) (*sdk.SSOAPICreateSSOConnectionResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SSOAPICreateSSOConnectionWithResponse", ctx, body)
+	ret0, _ := ret[0].(*sdk.SSOAPICreateSSOConnectionResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SSOAPICreateSSOConnectionWithResponse indicates an expected call of SSOAPICreateSSOConnectionWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) SSOAPICreateSSOConnectionWithResponse(ctx, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SSOAPICreateSSOConnectionWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).SSOAPICreateSSOConnectionWithResponse), ctx, body)
+}
+
+// SSOAPIDeleteSSOConnectionWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) SSOAPIDeleteSSOConnectionWithResponse(ctx context.Context, id string) (*sdk.SSOAPIDeleteSSOConnectionResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SSOAPIDeleteSSOConnectionWithResponse", ctx, id)
+	ret0, _ := ret[0].(*sdk.SSOAPIDeleteSSOConnectionResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SSOAPIDeleteSSOConnectionWithResponse indicates an expected call of SSOAPIDeleteSSOConnectionWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) SSOAPIDeleteSSOConnectionWithResponse(ctx, id interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SSOAPIDeleteSSOConnectionWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).SSOAPIDeleteSSOConnectionWithResponse), ctx, id)
+}
+
+// SSOAPIGetSSOConnectionWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) SSOAPIGetSSOConnectionWithResponse(ctx context.Context, id string) (*sdk.SSOAPIGetSSOConnectionResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SSOAPIGetSSOConnectionWithResponse", ctx, id)
+	ret0, _ := ret[0].(*sdk.SSOAPIGetSSOConnectionResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SSOAPIGetSSOConnectionWithResponse indicates an expected call of SSOAPIGetSSOConnectionWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) SSOAPIGetSSOConnectionWithResponse(ctx, id interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SSOAPIGetSSOConnectionWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).SSOAPIGetSSOConnectionWithResponse), ctx, id)
+}
+
+// SSOAPIListSSOConnectionsWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) SSOAPIListSSOConnectionsWithResponse(ctx context.Context) (*sdk.SSOAPIListSSOConnectionsResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SSOAPIListSSOConnectionsWithResponse", ctx)
+	ret0, _ := ret[0].(*sdk.SSOAPIListSSOConnectionsResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SSOAPIListSSOConnectionsWithResponse indicates an expected call of SSOAPIListSSOConnectionsWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) SSOAPIListSSOConnectionsWithResponse(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SSOAPIListSSOConnectionsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).SSOAPIListSSOConnectionsWithResponse), ctx)
+}
+
+// SSOAPIUpdateSSOConnectionWithBodyWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) SSOAPIUpdateSSOConnectionWithBodyWithResponse(ctx context.Context, id, contentType string, body io.Reader) (*sdk.SSOAPIUpdateSSOConnectionResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SSOAPIUpdateSSOConnectionWithBodyWithResponse", ctx, id, contentType, body)
+	ret0, _ := ret[0].(*sdk.SSOAPIUpdateSSOConnectionResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SSOAPIUpdateSSOConnectionWithBodyWithResponse indicates an expected call of SSOAPIUpdateSSOConnectionWithBodyWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) SSOAPIUpdateSSOConnectionWithBodyWithResponse(ctx, id, contentType, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SSOAPIUpdateSSOConnectionWithBodyWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).SSOAPIUpdateSSOConnectionWithBodyWithResponse), ctx, id, contentType, body)
+}
+
+// SSOAPIUpdateSSOConnectionWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) SSOAPIUpdateSSOConnectionWithResponse(ctx context.Context, id string, body sdk.SSOAPIUpdateSSOConnectionJSONRequestBody) (*sdk.SSOAPIUpdateSSOConnectionResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SSOAPIUpdateSSOConnectionWithResponse", ctx, id, body)
+	ret0, _ := ret[0].(*sdk.SSOAPIUpdateSSOConnectionResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SSOAPIUpdateSSOConnectionWithResponse indicates an expected call of SSOAPIUpdateSSOConnectionWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) SSOAPIUpdateSSOConnectionWithResponse(ctx, id, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SSOAPIUpdateSSOConnectionWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).SSOAPIUpdateSSOConnectionWithResponse), ctx, id, body)
 }
 
 // ScheduledRebalancingAPICreateRebalancingJobWithBodyWithResponse mocks base method.
