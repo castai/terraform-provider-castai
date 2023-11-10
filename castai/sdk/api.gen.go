@@ -60,6 +60,14 @@ const (
 	CastaiInventoryV1beta1StorageInfoDeviceTypeSsd     CastaiInventoryV1beta1StorageInfoDeviceType = "ssd"
 )
 
+// Defines values for CastaiSsoV1beta1SSOConnectionStatus.
+const (
+	STATUSACTIVE   CastaiSsoV1beta1SSOConnectionStatus = "STATUS_ACTIVE"
+	STATUSFAILED   CastaiSsoV1beta1SSOConnectionStatus = "STATUS_FAILED"
+	STATUSINACTIVE CastaiSsoV1beta1SSOConnectionStatus = "STATUS_INACTIVE"
+	STATUSUNKNOWN  CastaiSsoV1beta1SSOConnectionStatus = "STATUS_UNKNOWN"
+)
+
 // Defines values for CastaiV1Cloud.
 const (
 	CastaiV1CloudAWS     CastaiV1Cloud = "AWS"
@@ -637,6 +645,111 @@ type CastaiOperationsV1beta1OperationError struct {
 
 	// Reason is an operation specific failure code. Refer to documentation about possible outcomes.
 	Reason *string `json:"reason,omitempty"`
+}
+
+// AzureAAD represents a Azure AAD connector.
+type CastaiSsoV1beta1AzureAAD struct {
+	// ADDomain is the domain of the Azure AD.
+	AdDomain string `json:"adDomain"`
+
+	// ClientId is the client id of the Azure AD.
+	ClientId string `json:"clientId"`
+
+	// ClientSecret is the client secret of the Azure AD.
+	ClientSecret *string `json:"clientSecret,omitempty"`
+}
+
+// CreateSSOConnection represents a sso connection creation request.
+type CastaiSsoV1beta1CreateSSOConnection struct {
+	// AzureAAD represents a Azure AAD connector.
+	Aad *CastaiSsoV1beta1AzureAAD `json:"aad,omitempty"`
+
+	// EmailDomain is the email domain of the connection.
+	EmailDomain string `json:"emailDomain"`
+
+	// Name is the name of the connection.
+	Name string `json:"name"`
+
+	// Okta represents a Okta connector.
+	Okta *CastaiSsoV1beta1Okta `json:"okta,omitempty"`
+}
+
+// Defines the container for the sso delete response.
+type CastaiSsoV1beta1DeleteSSOConnectionResponse = map[string]interface{}
+
+// Defines the container for the sso list response.
+type CastaiSsoV1beta1ListSSOConnectionsResponse struct {
+	Connections []CastaiSsoV1beta1SSOConnection `json:"connections"`
+}
+
+// Okta represents a Okta connector.
+type CastaiSsoV1beta1Okta struct {
+	// ClientId is the client id of the Okta.
+	ClientId string `json:"clientId"`
+
+	// ClientSecret is the client secret of the Okta.
+	ClientSecret *string `json:"clientSecret,omitempty"`
+
+	// OktaDomain is the domain of the Okta.
+	OktaDomain string `json:"oktaDomain"`
+}
+
+// SSOConnection represents a sso connection.
+type CastaiSsoV1beta1SSOConnection struct {
+	// AzureAAD represents a Azure AAD connector.
+	Aad *CastaiSsoV1beta1AzureAAD `json:"aad,omitempty"`
+
+	// CreatedAt is the time when the connection was created.
+	CreatedAt *time.Time `json:"createdAt,omitempty"`
+
+	// EmailDomain is the email domain of the connection.
+	EmailDomain string `json:"emailDomain"`
+
+	// Error is the error message of the connection.
+	Error *string `json:"error,omitempty"`
+
+	// Id is the unique identifier of the connection.
+	Id *string `json:"id,omitempty"`
+
+	// Name is the name of the connection.
+	Name string `json:"name"`
+
+	// Okta represents a Okta connector.
+	Okta *CastaiSsoV1beta1Okta `json:"okta,omitempty"`
+
+	// Status is the status of the connection.
+	//
+	//  - STATUS_UNKNOWN: StatusUnknown is the default status.
+	//  - STATUS_ACTIVE: StatusActive is the active status.
+	//  - STATUS_INACTIVE: StatusInactive is the inactive status.
+	//  - STATUS_FAILED: StatusFailed is the failed status.
+	Status *CastaiSsoV1beta1SSOConnectionStatus `json:"status,omitempty"`
+
+	// UpdatedAt is the time when the connection was last updated.
+	UpdatedAt *time.Time `json:"updatedAt,omitempty"`
+}
+
+// Status is the status of the connection.
+//
+//   - STATUS_UNKNOWN: StatusUnknown is the default status.
+//   - STATUS_ACTIVE: StatusActive is the active status.
+//   - STATUS_INACTIVE: StatusInactive is the inactive status.
+//   - STATUS_FAILED: StatusFailed is the failed status.
+type CastaiSsoV1beta1SSOConnectionStatus string
+
+// SSOConnection represents a sso connection.
+type CastaiSsoV1beta1UpdateSSOConnection struct {
+	// AzureAAD represents a Azure AAD connector.
+	Aad *CastaiSsoV1beta1AzureAAD `json:"aad,omitempty"`
+
+	// EmailDomain is the email domain of the connection.
+	EmailDomain *string `json:"emailDomain,omitempty"`
+
+	// Name is the name of the connection.
+	Name *string `json:"name,omitempty"`
+
+	// Okta represents a Okta connector.
+	Okta *CastaiSsoV1beta1Okta `json:"okta,omitempty"`
 }
 
 // Types of cloud service providers CAST AI supports.
@@ -2245,6 +2358,12 @@ type ExternalClusterAPIGetCredentialsScriptTemplateParams struct {
 	CrossRole *bool `form:"crossRole,omitempty" json:"crossRole,omitempty"`
 }
 
+// SSOAPICreateSSOConnectionJSONBody defines parameters for SSOAPICreateSSOConnection.
+type SSOAPICreateSSOConnectionJSONBody = CastaiSsoV1beta1CreateSSOConnection
+
+// SSOAPIUpdateSSOConnectionJSONBody defines parameters for SSOAPIUpdateSSOConnection.
+type SSOAPIUpdateSSOConnectionJSONBody = CastaiSsoV1beta1UpdateSSOConnection
+
 // AuthTokenAPICreateAuthTokenJSONRequestBody defines body for AuthTokenAPICreateAuthToken for application/json ContentType.
 type AuthTokenAPICreateAuthTokenJSONRequestBody = AuthTokenAPICreateAuthTokenJSONBody
 
@@ -2331,6 +2450,12 @@ type ScheduledRebalancingAPICreateRebalancingScheduleJSONRequestBody = Scheduled
 
 // ScheduledRebalancingAPIUpdateRebalancingScheduleJSONRequestBody defines body for ScheduledRebalancingAPIUpdateRebalancingSchedule for application/json ContentType.
 type ScheduledRebalancingAPIUpdateRebalancingScheduleJSONRequestBody = ScheduledRebalancingAPIUpdateRebalancingScheduleJSONBody
+
+// SSOAPICreateSSOConnectionJSONRequestBody defines body for SSOAPICreateSSOConnection for application/json ContentType.
+type SSOAPICreateSSOConnectionJSONRequestBody = SSOAPICreateSSOConnectionJSONBody
+
+// SSOAPIUpdateSSOConnectionJSONRequestBody defines body for SSOAPIUpdateSSOConnection for application/json ContentType.
+type SSOAPIUpdateSSOConnectionJSONRequestBody = SSOAPIUpdateSSOConnectionJSONBody
 
 // Getter for additional properties for CastaiEvictorV1LabelSelector_MatchLabels. Returns the specified
 // element and whether it was found

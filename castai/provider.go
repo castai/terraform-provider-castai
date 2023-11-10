@@ -48,6 +48,7 @@ func Provider(version string) *schema.Provider {
 			"castai_eks_user_arn":               resourceEKSClusterUserARN(),
 			"castai_reservations":               resourceReservations(),
 			"castai_organization_members":       resourceOrganizationMembers(),
+			"castai_sso_connection":             resourceSSOConnection(),
 		},
 
 		DataSourcesMap: map[string]*schema.Resource{
