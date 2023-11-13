@@ -10,6 +10,8 @@ import (
 
 	"github.com/golang/mock/gomock"
 	"github.com/hashicorp/go-cty/cty"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/stretchr/testify/require"
 
@@ -70,6 +72,43 @@ credentials_id = 9b8d0456-177b-4a3d-b162-e68030d656aa
 region = westeurope
 Tainted = false
 `, data.State().String())
+}
+
+func TestAccResourceAKSCluster(t *testing.T) {
+	rName := fmt.Sprintf("%v-aks-%v", ResourcePrefix, acctest.RandString(8))
+	resourceName := "castai_aks_cluster.test"
+	clusterName := "core-tf-acc"
+	resourceGroupName := "core-tf-acc"
+	nodeResourceGroupName := "core-tf-acc-ng"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: providerFactories,
+		// Destroy of the cluster is not working properly. Cluster wasn't full onboarded and it's getting destroyed.
+		// https://castai.atlassian.net/browse/CORE-2868 should solve the issue
+		//CheckDestroy:      testAccCheckAKSClusterDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccAKSClusterConfig(rName, clusterName, resourceGroupName, nodeResourceGroupName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "name", clusterName),
+					resource.TestCheckResourceAttrSet(resourceName, "credentials_id"),
+					resource.TestCheckResourceAttr(resourceName, "region", "westeurope"),
+					resource.TestCheckResourceAttrSet(resourceName, "cluster_token"),
+				),
+			},
+		},
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"azurerm": {
+				Source:            "hashicorp/azurerm",
+				VersionConstraint: "~> 3.7.0",
+			},
+			"azuread": {
+				Source:            "hashicorp/azuread",
+				VersionConstraint: "~> 2.22.0",
+			},
+		},
+	})
 }
 
 func testAccAKSClusterConfig(rName string, clusterName string, resourceGroupName, nodeResourceGroup string) string {
