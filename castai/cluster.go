@@ -70,7 +70,7 @@ func resourceCastaiClusterDelete(ctx context.Context, data *schema.ResourceData,
 		}
 
 		if clusterStatus == sdk.ClusterStatusDeleting {
-			return retry.RetryableError(fmt.Errorf("cluster is deleting cluster status %s agent status", clusterStatus, agentStatus))
+			return retry.RetryableError(fmt.Errorf("cluster is deleting cluster status %s agent status %s", clusterStatus, agentStatus))
 		}
 
 		if toString(clusterResponse.JSON200.CredentialsId) != "" && agentStatus != sdk.ClusterAgentStatusDisconnected {
