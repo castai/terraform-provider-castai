@@ -37,7 +37,7 @@ func resourceCastaiClusterDelete(ctx context.Context, data *schema.ResourceData,
 		agentStatus := *clusterResponse.JSON200.AgentStatus
 		log.Printf("[INFO] Current cluster status=%s, agent_status=%s", clusterStatus, agentStatus)
 
-		if clusterStatus == sdk.ClusterStatusDeleted || clusterStatus == sdk.ClusterStatusArchived {
+		if clusterStatus == sdk.ClusterStatusArchived {
 			log.Printf("[INFO] Cluster is already deleted, removing from state.")
 			data.SetId("")
 			return nil
@@ -49,6 +49,10 @@ func resourceCastaiClusterDelete(ctx context.Context, data *schema.ResourceData,
 				return retry.NonRetryableError(err)
 			}
 			return retry.RetryableError(fmt.Errorf("triggered cluster deletion"))
+		}
+
+		if agentStatus == sdk.ClusterAgentStatusDisconnected {
+			return triggerDelete()
 		}
 
 		// If cluster doesn't have credentials we have to call delete cluster instead of disconnect because disconnect
@@ -86,7 +90,7 @@ func resourceCastaiClusterDelete(ctx context.Context, data *schema.ResourceData,
 			return triggerDelete()
 		}
 
-		return retry.RetryableError(fmt.Errorf("retrying"))
+		return retry.RetryableError(fmt.Errorf("retrying cluster status %s agent status %s", clusterStatus, agentStatus))
 	})
 
 	if err != nil {
