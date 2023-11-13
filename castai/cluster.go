@@ -51,7 +51,7 @@ func resourceCastaiClusterDelete(ctx context.Context, data *schema.ResourceData,
 			return retry.RetryableError(fmt.Errorf("triggered cluster deletion"))
 		}
 
-		if agentStatus == sdk.ClusterAgentStatusDisconnected {
+		if agentStatus == sdk.ClusterAgentStatusDisconnected || agentStatus == "connecting" {
 			return triggerDelete()
 		}
 
@@ -66,11 +66,11 @@ func resourceCastaiClusterDelete(ctx context.Context, data *schema.ResourceData,
 		}
 
 		if agentStatus == sdk.ClusterAgentStatusDisconnecting {
-			return retry.RetryableError(fmt.Errorf("agent is disconnecting"))
+			return retry.RetryableError(fmt.Errorf("agent is disconnecting cluster status %s agent status %s", clusterStatus, agentStatus))
 		}
 
 		if clusterStatus == sdk.ClusterStatusDeleting {
-			return retry.RetryableError(fmt.Errorf("cluster is deleting"))
+			return retry.RetryableError(fmt.Errorf("cluster is deleting cluster status %s agent status", clusterStatus, agentStatus))
 		}
 
 		if toString(clusterResponse.JSON200.CredentialsId) != "" && agentStatus != sdk.ClusterAgentStatusDisconnected {
@@ -83,7 +83,7 @@ func resourceCastaiClusterDelete(ctx context.Context, data *schema.ResourceData,
 				return retry.NonRetryableError(err)
 			}
 
-			return retry.RetryableError(fmt.Errorf("triggered agent disconnection"))
+			return retry.RetryableError(fmt.Errorf("triggered agent disconnection cluster status %s agent status %s", clusterStatus, agentStatus))
 		}
 
 		if agentStatus == sdk.ClusterAgentStatusDisconnected && clusterStatus != sdk.ClusterStatusDeleted {
