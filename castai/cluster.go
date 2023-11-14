@@ -47,7 +47,7 @@ func resourceCastaiClusterDelete(ctx context.Context, data *schema.ResourceData,
 		triggerDelete := func() *retry.RetryError {
 			log.Printf("[INFO] Deleting cluster.")
 			if err := sdk.CheckResponseNoContent(client.ExternalClusterAPIDeleteClusterWithResponse(ctx, clusterId)); err != nil {
-				return retry.NonRetryableError(err)
+				return retry.NonRetryableError(fmt.Errorf("cluster status %s agent status %s error: %w", clusterStatus, agentStatus, err))
 			}
 			return retry.RetryableError(fmt.Errorf("triggered cluster deletion"))
 		}
