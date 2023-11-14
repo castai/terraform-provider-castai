@@ -99,13 +99,6 @@ const (
 	Unspecified NodeconfigV1ContainerRuntime = "unspecified"
 )
 
-// Defines values for NodetemplatesV1AvailableInstanceTypeOs.
-const (
-	NodetemplatesV1AvailableInstanceTypeOsLinux   NodetemplatesV1AvailableInstanceTypeOs = "linux"
-	NodetemplatesV1AvailableInstanceTypeOsUnknown NodetemplatesV1AvailableInstanceTypeOs = "unknown"
-	NodetemplatesV1AvailableInstanceTypeOsWindows NodetemplatesV1AvailableInstanceTypeOs = "windows"
-)
-
 // Defines values for NodetemplatesV1AvailableInstanceTypeStorageOptimizedOption.
 const (
 	Always   NodetemplatesV1AvailableInstanceTypeStorageOptimizedOption = "Always"
@@ -121,10 +114,10 @@ const (
 
 // Defines values for PoliciesV1EvictorStatus.
 const (
-	PoliciesV1EvictorStatusCompatible   PoliciesV1EvictorStatus = "Compatible"
-	PoliciesV1EvictorStatusIncompatible PoliciesV1EvictorStatus = "Incompatible"
-	PoliciesV1EvictorStatusMissing      PoliciesV1EvictorStatus = "Missing"
-	PoliciesV1EvictorStatusUnknown      PoliciesV1EvictorStatus = "Unknown"
+	Compatible   PoliciesV1EvictorStatus = "Compatible"
+	Incompatible PoliciesV1EvictorStatus = "Incompatible"
+	Missing      PoliciesV1EvictorStatus = "Missing"
+	Unknown      PoliciesV1EvictorStatus = "Unknown"
 )
 
 // Defines values for PoliciesV1SpotInterruptionPredictionsType.
@@ -1605,7 +1598,6 @@ type NodetemplatesV1AvailableInstanceType struct {
 	IsComputeOptimized     *bool                                                       `json:"isComputeOptimized,omitempty"`
 	Memory                 *string                                                     `json:"memory,omitempty"`
 	Name                   *string                                                     `json:"name,omitempty"`
-	Os                     *NodetemplatesV1AvailableInstanceTypeOs                     `json:"os,omitempty"`
 	StorageOptimizedOption *NodetemplatesV1AvailableInstanceTypeStorageOptimizedOption `json:"storageOptimizedOption,omitempty"`
 }
 
@@ -1615,9 +1607,6 @@ type NodetemplatesV1AvailableInstanceTypeGPUDevice struct {
 	Manufacturer *string `json:"manufacturer,omitempty"`
 	Name         *string `json:"name,omitempty"`
 }
-
-// NodetemplatesV1AvailableInstanceTypeOs defines model for nodetemplates.v1.AvailableInstanceType.Os.
-type NodetemplatesV1AvailableInstanceTypeOs string
 
 // NodetemplatesV1AvailableInstanceTypeStorageOptimizedOption defines model for nodetemplates.v1.AvailableInstanceType.StorageOptimizedOption.
 type NodetemplatesV1AvailableInstanceTypeStorageOptimizedOption string
