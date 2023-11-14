@@ -26,6 +26,7 @@ func resourceCastaiClusterDelete(ctx context.Context, data *schema.ResourceData,
 	clusterId := data.Id()
 
 	log.Printf("[INFO] Checking current status of the cluster.")
+	diconnectionTriggerd := false
 
 	err := retry.RetryContext(ctx, data.Timeout(schema.TimeoutDelete), func() *retry.RetryError {
 		clusterResponse, err := client.ExternalClusterAPIGetClusterWithResponse(ctx, clusterId)
@@ -51,8 +52,25 @@ func resourceCastaiClusterDelete(ctx context.Context, data *schema.ResourceData,
 			return retry.RetryableError(fmt.Errorf("triggered cluster deletion"))
 		}
 
-		if agentStatus == sdk.ClusterAgentStatusDisconnected || agentStatus == "waiting-connection" {
+		if agentStatus == sdk.ClusterAgentStatusDisconnected {
 			return triggerDelete()
+		}
+
+		if agentStatus == "waiting-connection" {
+			response, err := client.ExternalClusterAPIDisconnectClusterWithResponse(ctx, clusterId, sdk.ExternalClusterAPIDisconnectClusterJSONRequestBody{
+				DeleteProvisionedNodes:  getOptionalBool(data, FieldDeleteNodesOnDisconnect, false),
+				KeepKubernetesResources: toPtr(true),
+			})
+
+			if checkErr := sdk.CheckOKResponse(response, err); checkErr != nil {
+				return retry.NonRetryableError(err)
+			}
+
+			if diconnectionTriggerd {
+				return triggerDelete()
+			}
+
+			diconnectionTriggerd = true
 		}
 
 		// If cluster doesn't have credentials we have to call delete cluster instead of disconnect because disconnect
