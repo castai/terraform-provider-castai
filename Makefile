@@ -37,7 +37,7 @@ test:
 
 testacc:
 	@echo "==> Running acceptance tests"
-	TF_ACC=1 go test ./castai/... '-run=^TestAcc' -v -timeout 10m
+	TF_ACC=1 go test ./castai/... '-run=^TestAcc' -v -timeout 16m
 
 validate-terraform-examples:
 	for examples in examples/eks examples/gke examples/aks ; do \
