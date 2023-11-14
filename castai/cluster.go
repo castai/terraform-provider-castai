@@ -62,7 +62,7 @@ func resourceCastaiClusterDelete(ctx context.Context, data *schema.ResourceData,
 				return triggerDisconnect()
 			}
 
-			if chekErr := sdk.CheckResponseNoContent(res, err); chekErr != nil {
+			if checkErr := sdk.CheckResponseNoContent(res, err); checkErr != nil {
 				return retry.NonRetryableError(fmt.Errorf("error when deleting cluster status %s agent status %s error: %w", clusterStatus, agentStatus, err))
 			}
 			return retry.RetryableError(fmt.Errorf("triggered cluster deletion"))
