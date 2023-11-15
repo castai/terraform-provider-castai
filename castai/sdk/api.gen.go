@@ -16,13 +16,6 @@ const (
 	BearerAuthScopes = "BearerAuth.Scopes"
 )
 
-// Defines values for OrganizationRole.
-const (
-	Member OrganizationRole = "member"
-	Owner  OrganizationRole = "owner"
-	Viewer OrganizationRole = "viewer"
-)
-
 // Defines values for CastaiEvictorV1LabelSelectorExpressionOperator.
 const (
 	CastaiEvictorV1LabelSelectorExpressionOperatorDoesNotExist CastaiEvictorV1LabelSelectorExpressionOperator = "DoesNotExist"
@@ -99,6 +92,13 @@ const (
 	Unspecified NodeconfigV1ContainerRuntime = "unspecified"
 )
 
+// Defines values for NodetemplatesV1AvailableInstanceTypeOs.
+const (
+	NodetemplatesV1AvailableInstanceTypeOsLinux   NodetemplatesV1AvailableInstanceTypeOs = "linux"
+	NodetemplatesV1AvailableInstanceTypeOsUnknown NodetemplatesV1AvailableInstanceTypeOs = "unknown"
+	NodetemplatesV1AvailableInstanceTypeOsWindows NodetemplatesV1AvailableInstanceTypeOs = "windows"
+)
+
 // Defines values for NodetemplatesV1AvailableInstanceTypeStorageOptimizedOption.
 const (
 	Always   NodetemplatesV1AvailableInstanceTypeStorageOptimizedOption = "Always"
@@ -114,10 +114,10 @@ const (
 
 // Defines values for PoliciesV1EvictorStatus.
 const (
-	Compatible   PoliciesV1EvictorStatus = "Compatible"
-	Incompatible PoliciesV1EvictorStatus = "Incompatible"
-	Missing      PoliciesV1EvictorStatus = "Missing"
-	Unknown      PoliciesV1EvictorStatus = "Unknown"
+	PoliciesV1EvictorStatusCompatible   PoliciesV1EvictorStatus = "Compatible"
+	PoliciesV1EvictorStatusIncompatible PoliciesV1EvictorStatus = "Incompatible"
+	PoliciesV1EvictorStatusMissing      PoliciesV1EvictorStatus = "Missing"
+	PoliciesV1EvictorStatusUnknown      PoliciesV1EvictorStatus = "Unknown"
 )
 
 // Defines values for PoliciesV1SpotInterruptionPredictionsType.
@@ -134,112 +134,6 @@ const (
 	JobStatusPending    ScheduledrebalancingV1JobStatus = "JobStatusPending"
 	JobStatusSkipped    ScheduledrebalancingV1JobStatus = "JobStatusSkipped"
 )
-
-// Invitation defines model for Invitation.
-type Invitation struct {
-	Id          string    `json:"id"`
-	InviteEmail string    `json:"inviteEmail"`
-	Role        string    `json:"role"`
-	ValidUntil  time.Time `json:"validUntil"`
-}
-
-// InvitationsList defines model for InvitationsList.
-type InvitationsList struct {
-	Invitations []Invitation `json:"invitations"`
-	NextCursor  string       `json:"nextCursor"`
-}
-
-// NewInvitations defines model for NewInvitations.
-type NewInvitations struct {
-	Members        []NewMembershipByEmail `json:"members"`
-	OrganizationId string                 `json:"organizationId"`
-}
-
-// NewInvitationsResponse defines model for NewInvitationsResponse.
-type NewInvitationsResponse struct {
-	InviteIds []string `json:"inviteIds"`
-}
-
-// NewMembershipByEmail defines model for NewMembershipByEmail.
-type NewMembershipByEmail struct {
-	Role      string `json:"role"`
-	UserEmail string `json:"userEmail"`
-}
-
-// NewOrganizationUser defines model for NewOrganizationUser.
-type NewOrganizationUser struct {
-	Role OrganizationRole `json:"role"`
-
-	// User ID to add to organization
-	UserId string `json:"userId"`
-}
-
-// Organization defines model for Organization.
-type Organization struct {
-	// Organization ID
-	Id *string `json:"id,omitempty"`
-
-	// Organization name
-	Name string `json:"name"`
-}
-
-// OrganizationRole defines model for OrganizationRole.
-type OrganizationRole string
-
-// OrganizationUser defines model for OrganizationUser.
-type OrganizationUser struct {
-	// User role in organization
-	Role string      `json:"role"`
-	User UserProfile `json:"user"`
-}
-
-// OrganizationUsersList defines model for OrganizationUsersList.
-type OrganizationUsersList struct {
-	Users *[]OrganizationUser `json:"users,omitempty"`
-}
-
-// OrganizationsList defines model for OrganizationsList.
-type OrganizationsList struct {
-	Organizations []Organization `json:"organizations"`
-}
-
-// UpdateOrganizationUser defines model for UpdateOrganizationUser.
-type UpdateOrganizationUser struct {
-	Role OrganizationRole `json:"role"`
-}
-
-// UserProfile defines model for UserProfile.
-type UserProfile struct {
-	// user email
-	Email string `json:"email"`
-
-	// User ID
-	Id string `json:"id"`
-
-	// full name of logged-in user, e.g. "John Doe".
-	Name string `json:"name"`
-
-	// Globally unique username (used internally).
-	Username *string `json:"username,omitempty"`
-}
-
-// UserProfileResponse defines model for UserProfileResponse.
-type UserProfileResponse struct {
-	// user email
-	Email string `json:"email"`
-
-	// Indicates user first login to the console.
-	FirstLogin *bool `json:"firstLogin,omitempty"`
-
-	// User ID
-	Id *string `json:"id,omitempty"`
-
-	// full name of logged-in user, e.g. "John Doe".
-	Name string `json:"name"`
-
-	// Globally unique username (used internally).
-	Username *string `json:"username,omitempty"`
-}
 
 // Auth token used to authenticate via api.
 type CastaiAuthtokenV1beta1AuthToken struct {
@@ -750,6 +644,210 @@ type CastaiSsoV1beta1UpdateSSOConnection struct {
 
 	// Okta represents a Okta connector.
 	Okta *CastaiSsoV1beta1Okta `json:"okta,omitempty"`
+}
+
+// CastaiUsersV1beta1AWSMarketplaceUser defines model for castai.users.v1beta1.AWSMarketplaceUser.
+type CastaiUsersV1beta1AWSMarketplaceUser struct {
+	// CustomerAWSAccountId is Resolved using Registration token.
+	CustomerAwsAccountId *string `json:"customerAwsAccountId,omitempty"`
+
+	// CustomerIdentifier is Resolved using Registration token.
+	CustomerIdentifier *string `json:"customerIdentifier,omitempty"`
+
+	// ProductCode is Resolved using Registration token.
+	ProductCode *string `json:"productCode,omitempty"`
+
+	// When a buyer visits your website during the registration process, the buyer
+	// submits a registration token through the browser.
+	RegistrationToken *string `json:"registrationToken,omitempty"`
+}
+
+// Defines the response for adding a user to an organization.
+type CastaiUsersV1beta1AddUserToOrganizationResponse = map[string]interface{}
+
+// CastaiUsersV1beta1ClaimInvitationResponse defines model for castai.users.v1beta1.ClaimInvitationResponse.
+type CastaiUsersV1beta1ClaimInvitationResponse struct {
+	// Membership describes user-organization membership details.
+	Membership *CastaiUsersV1beta1Membership `json:"membership,omitempty"`
+
+	// Organization ID.
+	OrganizationId string `json:"organizationId"`
+}
+
+// CastaiUsersV1beta1CreateInvitationsRequest defines model for castai.users.v1beta1.CreateInvitationsRequest.
+type CastaiUsersV1beta1CreateInvitationsRequest struct {
+	// Memberships to create.
+	Members *[]CastaiUsersV1beta1NewMembershipByEmail `json:"members,omitempty"`
+}
+
+// CastaiUsersV1beta1CreateInvitationsResponse defines model for castai.users.v1beta1.CreateInvitationsResponse.
+type CastaiUsersV1beta1CreateInvitationsResponse struct {
+	// Invitation IDs.
+	InvitationIds *[]string `json:"invitationIds,omitempty"`
+}
+
+// CastaiUsersV1beta1CurrentUserProfileResponse defines model for castai.users.v1beta1.CurrentUserProfileResponse.
+type CastaiUsersV1beta1CurrentUserProfileResponse struct {
+	// User email.
+	Email *string `json:"email,omitempty"`
+
+	// User first login.
+	FirstLogin *bool `json:"firstLogin,omitempty"`
+
+	// User ID.
+	Id *string `json:"id,omitempty"`
+
+	// User name.
+	Name *string `json:"name,omitempty"`
+
+	// User username.
+	Username *string `json:"username,omitempty"`
+}
+
+// Defines the empty response to invitation deletion.
+type CastaiUsersV1beta1DeleteInvitationResponse = map[string]interface{}
+
+// Defines the empty response to organization deletion.
+type CastaiUsersV1beta1DeleteOrganizationResponse = map[string]interface{}
+
+// CastaiUsersV1beta1GCPMarketplaceUser defines model for castai.users.v1beta1.GCPMarketplaceUser.
+type CastaiUsersV1beta1GCPMarketplaceUser struct {
+	// Google procurement account ID.
+	AccountId *string `json:"accountId,omitempty"`
+
+	// Roles is an array of strings representing the user's roles.
+	// Right now, it can be either: account_admin, which indicates that the user is a Billing Account Administrator of the billing account that purchased the product,
+	// or ** project_editor, which indicates that the user is a Project Editor, but not a Billing Administrator, of the project under that billing account.
+	Roles *[]string `json:"roles,omitempty"`
+
+	// User identity is the user's obfuscated GAIA ID, which can be used to initiate Open ID Connect.
+	UserIdentity *string `json:"userIdentity,omitempty"`
+}
+
+// Defines container for the organization's pending invitations.
+type CastaiUsersV1beta1ListInvitationsResponse struct {
+	// Array of organization's pending invitations.
+	Invitations []CastaiUsersV1beta1PendingInvitation `json:"invitations"`
+	NextCursor  string                                `json:"nextCursor"`
+}
+
+// Defines the container for organization users.
+type CastaiUsersV1beta1ListOrganizationUsersResponse struct {
+	// Array of organization users.
+	Users *[]CastaiUsersV1beta1Membership `json:"users,omitempty"`
+}
+
+// Defines container for the user's organizations.
+type CastaiUsersV1beta1ListOrganizationsResponse struct {
+	// Array of user's organizations.
+	Organizations []CastaiUsersV1beta1UserOrganization `json:"organizations"`
+}
+
+// Membership describes user-organization membership details.
+type CastaiUsersV1beta1Membership struct {
+	Role string `json:"role"`
+
+	// User represents a single system user.
+	User CastaiUsersV1beta1User `json:"user"`
+}
+
+// NewMembership contains data needed to create new membership in organization.
+type CastaiUsersV1beta1NewMembership struct {
+	// role of the new member.
+	Role string `json:"role"`
+
+	// id of the user.
+	UserId string `json:"userId"`
+}
+
+// CastaiUsersV1beta1NewMembershipByEmail defines model for castai.users.v1beta1.NewMembershipByEmail.
+type CastaiUsersV1beta1NewMembershipByEmail struct {
+	// role of the invited person.
+	Role string `json:"role"`
+
+	// email of the invited person.
+	UserEmail string `json:"userEmail"`
+}
+
+// Organization which is the top level tenant in our system.
+type CastaiUsersV1beta1Organization struct {
+	// billing type of the organization.
+	BillingType *string `json:"billingType,omitempty"`
+
+	// organization creation date.
+	CreatedAt *time.Time `json:"createdAt,omitempty"`
+
+	// id of the organization.
+	Id *string `json:"id,omitempty"`
+
+	// OrganizationMetadata describes organization metadata.
+	Metadata *CastaiUsersV1beta1OrganizationMetadata `json:"metadata,omitempty"`
+
+	// name of the organization.
+	Name string `json:"name"`
+}
+
+// OrganizationMetadata describes organization metadata.
+type CastaiUsersV1beta1OrganizationMetadata struct {
+	// parent organization id.
+	ParentOrganizationId *string `json:"parentOrganizationId"`
+
+	// partner tenant id on partner system.
+	PartnerTenantId *string `json:"partnerTenantId"`
+}
+
+// CastaiUsersV1beta1PendingInvitation defines model for castai.users.v1beta1.PendingInvitation.
+type CastaiUsersV1beta1PendingInvitation struct {
+	// id of the invitation.
+	Id *string `json:"id,omitempty"`
+
+	// email of the invited person.
+	InviteEmail string `json:"inviteEmail"`
+
+	// role of the invited person.
+	Role string `json:"role"`
+
+	// invitation expiration date.
+	ValidUntil *time.Time `json:"validUntil,omitempty"`
+}
+
+// Defines the response for removing a user from an organization.
+type CastaiUsersV1beta1RemoveUserFromOrganizationResponse = map[string]interface{}
+
+// CastaiUsersV1beta1Request defines model for castai.users.v1beta1.Request.
+type CastaiUsersV1beta1Request = map[string]interface{}
+
+// User represents a single system user.
+type CastaiUsersV1beta1User struct {
+	// (optional) whether SSO auth provider label was provided as a separate JWT claim; used when login handler calls users service.
+	AuthProvider       *string                               `json:"authProvider"`
+	AwsMarketplaceUser *CastaiUsersV1beta1AWSMarketplaceUser `json:"awsMarketplaceUser,omitempty"`
+
+	// (required) user email.
+	Email              string                                `json:"email"`
+	GcpMarketplaceUser *CastaiUsersV1beta1GCPMarketplaceUser `json:"gcpMarketplaceUser,omitempty"`
+
+	// id of the user.
+	Id *string `json:"id,omitempty"`
+
+	// (required) readable user name, e.g. "John Doe".
+	Name string `json:"name"`
+
+	// (required) username, corresponds to auth0 user id.
+	Username string `json:"username"`
+}
+
+// UserOrganization describes organization user belongs to.
+type CastaiUsersV1beta1UserOrganization struct {
+	// organization creation date.
+	CreatedAt *time.Time `json:"createdAt,omitempty"`
+
+	// id of the organization.
+	Id *string `json:"id,omitempty"`
+
+	// name of the organization.
+	Name string `json:"name"`
+	Role string `json:"role"`
 }
 
 // Types of cloud service providers CAST AI supports.
@@ -1339,6 +1437,11 @@ type ExternalclusterV1Zone struct {
 	Name *string `json:"name,omitempty"`
 }
 
+// InlineObject1 defines model for inline_object_1.
+type InlineObject1 struct {
+	Role *string `json:"role,omitempty"`
+}
+
 // NodeconfigV1AKSConfig defines model for nodeconfig.v1.AKSConfig.
 type NodeconfigV1AKSConfig struct {
 	// Maximum number of pods that can be run on a node, which affects how many IP addresses you will need for each node.
@@ -1598,6 +1701,7 @@ type NodetemplatesV1AvailableInstanceType struct {
 	IsComputeOptimized     *bool                                                       `json:"isComputeOptimized,omitempty"`
 	Memory                 *string                                                     `json:"memory,omitempty"`
 	Name                   *string                                                     `json:"name,omitempty"`
+	Os                     *NodetemplatesV1AvailableInstanceTypeOs                     `json:"os,omitempty"`
 	StorageOptimizedOption *NodetemplatesV1AvailableInstanceTypeStorageOptimizedOption `json:"storageOptimizedOption,omitempty"`
 }
 
@@ -1607,6 +1711,9 @@ type NodetemplatesV1AvailableInstanceTypeGPUDevice struct {
 	Manufacturer *string `json:"manufacturer,omitempty"`
 	Name         *string `json:"name,omitempty"`
 }
+
+// NodetemplatesV1AvailableInstanceTypeOs defines model for nodetemplates.v1.AvailableInstanceType.Os.
+type NodetemplatesV1AvailableInstanceTypeOs string
 
 // NodetemplatesV1AvailableInstanceTypeStorageOptimizedOption defines model for nodetemplates.v1.AvailableInstanceType.StorageOptimizedOption.
 type NodetemplatesV1AvailableInstanceTypeStorageOptimizedOption string
@@ -2216,8 +2323,8 @@ type AuthTokenAPICreateAuthTokenJSONBody = CastaiAuthtokenV1beta1AuthToken
 // AuthTokenAPIUpdateAuthTokenJSONBody defines parameters for AuthTokenAPIUpdateAuthToken.
 type AuthTokenAPIUpdateAuthTokenJSONBody = CastaiAuthtokenV1beta1AuthTokenUpdate
 
-// ListInvitationsParams defines parameters for ListInvitations.
-type ListInvitationsParams struct {
+// UsersAPIListInvitationsParams defines parameters for UsersAPIListInvitations.
+type UsersAPIListInvitationsParams struct {
 	PageLimit *string `form:"page.limit,omitempty" json:"page.limit,omitempty"`
 
 	// Cursor that defines token indicating where to start the next page.
@@ -2225,11 +2332,11 @@ type ListInvitationsParams struct {
 	PageCursor *string `form:"page.cursor,omitempty" json:"page.cursor,omitempty"`
 }
 
-// CreateInvitationJSONBody defines parameters for CreateInvitation.
-type CreateInvitationJSONBody = NewInvitations
+// UsersAPICreateInvitationsJSONBody defines parameters for UsersAPICreateInvitations.
+type UsersAPICreateInvitationsJSONBody = CastaiUsersV1beta1CreateInvitationsRequest
 
-// ClaimInvitationJSONBody defines parameters for ClaimInvitation.
-type ClaimInvitationJSONBody = map[string]interface{}
+// UsersAPIClaimInvitationJSONBody defines parameters for UsersAPIClaimInvitation.
+type UsersAPIClaimInvitationJSONBody = CastaiUsersV1beta1Request
 
 // EvictorAPIUpsertAdvancedConfigJSONBody defines parameters for EvictorAPIUpsertAdvancedConfig.
 type EvictorAPIUpsertAdvancedConfigJSONBody = CastaiEvictorV1AdvancedConfig
@@ -2321,26 +2428,32 @@ type ExternalClusterAPIDeleteNodeParams struct {
 // ExternalClusterAPIDrainNodeJSONBody defines parameters for ExternalClusterAPIDrainNode.
 type ExternalClusterAPIDrainNodeJSONBody = ExternalclusterV1DrainConfig
 
-// UpdateCurrentUserProfileJSONBody defines parameters for UpdateCurrentUserProfile.
-type UpdateCurrentUserProfileJSONBody = UserProfile
+// UsersAPIUpdateCurrentUserProfileJSONBody defines parameters for UsersAPIUpdateCurrentUserProfile.
+type UsersAPIUpdateCurrentUserProfileJSONBody = CastaiUsersV1beta1User
 
-// CreateOrganizationJSONBody defines parameters for CreateOrganization.
-type CreateOrganizationJSONBody = Organization
+// UsersAPIListOrganizationsParams defines parameters for UsersAPIListOrganizations.
+type UsersAPIListOrganizationsParams struct {
+	// Filter organizations by user id.
+	UserId *string `form:"userId,omitempty" json:"userId,omitempty"`
 
-// UpdateOrganizationJSONBody defines parameters for UpdateOrganization.
-type UpdateOrganizationJSONBody = Organization
+	// Filter organizations by username.
+	Username *string `form:"username,omitempty" json:"username,omitempty"`
+}
 
-// CreateOrganizationUserJSONBody defines parameters for CreateOrganizationUser.
-type CreateOrganizationUserJSONBody = NewOrganizationUser
+// UsersAPICreateOrganizationJSONBody defines parameters for UsersAPICreateOrganization.
+type UsersAPICreateOrganizationJSONBody = CastaiUsersV1beta1Organization
 
-// UpdateOrganizationUserJSONBody defines parameters for UpdateOrganizationUser.
-type UpdateOrganizationUserJSONBody = UpdateOrganizationUser
+// UsersAPIEditOrganizationJSONBody defines parameters for UsersAPIEditOrganization.
+type UsersAPIEditOrganizationJSONBody = CastaiUsersV1beta1Organization
 
 // InventoryAPIAddReservationJSONBody defines parameters for InventoryAPIAddReservation.
 type InventoryAPIAddReservationJSONBody = CastaiInventoryV1beta1GenericReservation
 
 // InventoryAPIOverwriteReservationsJSONBody defines parameters for InventoryAPIOverwriteReservations.
 type InventoryAPIOverwriteReservationsJSONBody = CastaiInventoryV1beta1GenericReservationsList
+
+// UsersAPIAddUserToOrganizationJSONBody defines parameters for UsersAPIAddUserToOrganization.
+type UsersAPIAddUserToOrganizationJSONBody = CastaiUsersV1beta1NewMembership
 
 // ScheduledRebalancingAPICreateRebalancingScheduleJSONBody defines parameters for ScheduledRebalancingAPICreateRebalancingSchedule.
 type ScheduledRebalancingAPICreateRebalancingScheduleJSONBody = ScheduledrebalancingV1RebalancingSchedule
@@ -2370,11 +2483,11 @@ type AuthTokenAPICreateAuthTokenJSONRequestBody = AuthTokenAPICreateAuthTokenJSO
 // AuthTokenAPIUpdateAuthTokenJSONRequestBody defines body for AuthTokenAPIUpdateAuthToken for application/json ContentType.
 type AuthTokenAPIUpdateAuthTokenJSONRequestBody = AuthTokenAPIUpdateAuthTokenJSONBody
 
-// CreateInvitationJSONRequestBody defines body for CreateInvitation for application/json ContentType.
-type CreateInvitationJSONRequestBody = CreateInvitationJSONBody
+// UsersAPICreateInvitationsJSONRequestBody defines body for UsersAPICreateInvitations for application/json ContentType.
+type UsersAPICreateInvitationsJSONRequestBody = UsersAPICreateInvitationsJSONBody
 
-// ClaimInvitationJSONRequestBody defines body for ClaimInvitation for application/json ContentType.
-type ClaimInvitationJSONRequestBody = ClaimInvitationJSONBody
+// UsersAPIClaimInvitationJSONRequestBody defines body for UsersAPIClaimInvitation for application/json ContentType.
+type UsersAPIClaimInvitationJSONRequestBody = UsersAPIClaimInvitationJSONBody
 
 // EvictorAPIUpsertAdvancedConfigJSONRequestBody defines body for EvictorAPIUpsertAdvancedConfig for application/json ContentType.
 type EvictorAPIUpsertAdvancedConfigJSONRequestBody = EvictorAPIUpsertAdvancedConfigJSONBody
@@ -2424,26 +2537,26 @@ type ExternalClusterAPIAddNodeJSONRequestBody = ExternalClusterAPIAddNodeJSONBod
 // ExternalClusterAPIDrainNodeJSONRequestBody defines body for ExternalClusterAPIDrainNode for application/json ContentType.
 type ExternalClusterAPIDrainNodeJSONRequestBody = ExternalClusterAPIDrainNodeJSONBody
 
-// UpdateCurrentUserProfileJSONRequestBody defines body for UpdateCurrentUserProfile for application/json ContentType.
-type UpdateCurrentUserProfileJSONRequestBody = UpdateCurrentUserProfileJSONBody
+// UsersAPIUpdateCurrentUserProfileJSONRequestBody defines body for UsersAPIUpdateCurrentUserProfile for application/json ContentType.
+type UsersAPIUpdateCurrentUserProfileJSONRequestBody = UsersAPIUpdateCurrentUserProfileJSONBody
 
-// CreateOrganizationJSONRequestBody defines body for CreateOrganization for application/json ContentType.
-type CreateOrganizationJSONRequestBody = CreateOrganizationJSONBody
+// UsersAPICreateOrganizationJSONRequestBody defines body for UsersAPICreateOrganization for application/json ContentType.
+type UsersAPICreateOrganizationJSONRequestBody = UsersAPICreateOrganizationJSONBody
 
-// UpdateOrganizationJSONRequestBody defines body for UpdateOrganization for application/json ContentType.
-type UpdateOrganizationJSONRequestBody = UpdateOrganizationJSONBody
-
-// CreateOrganizationUserJSONRequestBody defines body for CreateOrganizationUser for application/json ContentType.
-type CreateOrganizationUserJSONRequestBody = CreateOrganizationUserJSONBody
-
-// UpdateOrganizationUserJSONRequestBody defines body for UpdateOrganizationUser for application/json ContentType.
-type UpdateOrganizationUserJSONRequestBody = UpdateOrganizationUserJSONBody
+// UsersAPIEditOrganizationJSONRequestBody defines body for UsersAPIEditOrganization for application/json ContentType.
+type UsersAPIEditOrganizationJSONRequestBody = UsersAPIEditOrganizationJSONBody
 
 // InventoryAPIAddReservationJSONRequestBody defines body for InventoryAPIAddReservation for application/json ContentType.
 type InventoryAPIAddReservationJSONRequestBody = InventoryAPIAddReservationJSONBody
 
 // InventoryAPIOverwriteReservationsJSONRequestBody defines body for InventoryAPIOverwriteReservations for application/json ContentType.
 type InventoryAPIOverwriteReservationsJSONRequestBody = InventoryAPIOverwriteReservationsJSONBody
+
+// UsersAPIAddUserToOrganizationJSONRequestBody defines body for UsersAPIAddUserToOrganization for application/json ContentType.
+type UsersAPIAddUserToOrganizationJSONRequestBody = UsersAPIAddUserToOrganizationJSONBody
+
+// UsersAPIUpdateOrganizationUserJSONRequestBody defines body for UsersAPIUpdateOrganizationUser for application/json ContentType.
+type UsersAPIUpdateOrganizationUserJSONRequestBody = InlineObject1
 
 // ScheduledRebalancingAPICreateRebalancingScheduleJSONRequestBody defines body for ScheduledRebalancingAPICreateRebalancingSchedule for application/json ContentType.
 type ScheduledRebalancingAPICreateRebalancingScheduleJSONRequestBody = ScheduledRebalancingAPICreateRebalancingScheduleJSONBody
