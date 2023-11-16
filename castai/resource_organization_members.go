@@ -8,6 +8,7 @@ import (
 	"github.com/castai/terraform-provider-castai/castai/sdk"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/samber/lo"
 )
 
 const (
@@ -90,7 +91,7 @@ func resourceOrganizationMembersCreate(ctx context.Context, data *schema.Resourc
 			// Person that creates a new organization is automatically the owner
 			// of it. That's why when creating this resource we would like to skip
 			// re-creating that user because it would fail.
-			if *currentUserResp.JSON200.Email == email {
+			if lo.FromPtr(currentUserResp.JSON200.Email) == email {
 				continue
 			}
 
@@ -214,7 +215,7 @@ func resourceOrganizationMembersUpdate(ctx context.Context, data *schema.Resourc
 
 	userIDByEmail := make(map[string]string)
 	for _, user := range *usersResp.JSON200.Users {
-		userIDByEmail[user.User.Email] = *user.User.Id
+		userIDByEmail[user.User.Email] = lo.FromPtr(user.User.Id)
 	}
 
 	invitationIDByEmail := make(map[string]string)
@@ -229,7 +230,7 @@ func resourceOrganizationMembersUpdate(ctx context.Context, data *schema.Resourc
 		}
 
 		for _, invitation := range invitationsResp.JSON200.Invitations {
-			invitationIDByEmail[invitation.InviteEmail] = *invitation.Id
+			invitationIDByEmail[invitation.InviteEmail] = lo.FromPtr(invitation.Id)
 		}
 
 		nextCursor = invitationsResp.JSON200.NextCursor
@@ -252,7 +253,7 @@ func resourceOrganizationMembersUpdate(ctx context.Context, data *schema.Resourc
 	}
 	if contains(manipulations.membersToDelete, *currentUserResp.JSON200.Id) {
 		return diag.FromErr(
-			fmt.Errorf("can't delete user that is currently managing this organization: %s", *currentUserResp.JSON200.Email),
+			fmt.Errorf("can't delete user that is currently managing this organization: %s", lo.FromPtr(currentUserResp.JSON200.Email)),
 		)
 	}
 
@@ -318,11 +319,11 @@ func resourceOrganizationMembersDelete(ctx context.Context, data *schema.Resourc
 		// user that is currently managing this organization.
 		// Otherwise, if we have deleted all the members, the organization would
 		// get deleted too.
-		if *user.User.Id == *currentUserResp.JSON200.Id {
+		if lo.FromPtr(user.User.Id) == lo.FromPtr(currentUserResp.JSON200.Id) {
 			continue
 		}
 
-		usersIDsToDelete = append(usersIDsToDelete, *user.User.Id)
+		usersIDsToDelete = append(usersIDsToDelete, lo.FromPtr(user.User.Id))
 	}
 
 	var invitationIDsToDelete []string
@@ -336,7 +337,7 @@ func resourceOrganizationMembersDelete(ctx context.Context, data *schema.Resourc
 		}
 
 		for _, invitation := range invitationsResp.JSON200.Invitations {
-			invitationIDsToDelete = append(invitationIDsToDelete, *invitation.Id)
+			invitationIDsToDelete = append(invitationIDsToDelete, lo.FromPtr(invitation.Id))
 		}
 
 		nextCursor = invitationsResp.JSON200.NextCursor
