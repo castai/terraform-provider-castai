@@ -4,15 +4,16 @@ import (
 	"context"
 	"encoding/csv"
 	"fmt"
+	"log"
+	"strings"
+	"time"
+
 	"github.com/castai/terraform-provider-castai/castai/reservations"
 	"github.com/castai/terraform-provider-castai/castai/sdk"
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/samber/lo"
-	"log"
-	"strings"
-	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
@@ -273,7 +274,7 @@ func getOrganizationId(ctx context.Context, d *schema.ResourceData, meta any) (s
 		return organizationId.String(), nil
 	}
 
-	response, err := client.ListOrganizationsWithResponse(ctx)
+	response, err := client.UsersAPIListOrganizationsWithResponse(ctx, &sdk.UsersAPIListOrganizationsParams{})
 	if checkErr := sdk.CheckOKResponse(response, err); checkErr != nil {
 		return "", fmt.Errorf("fetching organizations: %w", checkErr)
 	}

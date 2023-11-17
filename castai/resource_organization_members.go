@@ -8,6 +8,7 @@ import (
 	"github.com/castai/terraform-provider-castai/castai/sdk"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/samber/lo"
 )
 
 const (
@@ -76,12 +77,12 @@ func resourceOrganizationMembers() *schema.Resource {
 func resourceOrganizationMembersCreate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*ProviderConfig).api
 
-	currentUserResp, err := client.CurrentUserProfileWithResponse(ctx)
+	currentUserResp, err := client.UsersAPICurrentUserProfileWithResponse(ctx)
 	if err := sdk.CheckOKResponse(currentUserResp, err); err != nil {
 		return diag.FromErr(fmt.Errorf("retrieving current user profile: %w", err))
 	}
 
-	var newMemberships []sdk.NewMembershipByEmail
+	var newMemberships []sdk.CastaiUsersV1beta1NewMembershipByEmail
 
 	if owners, ok := data.GetOk(FieldOrganizationMembersOwners); ok {
 		emails := toStringList(owners.([]interface{}))
@@ -90,11 +91,11 @@ func resourceOrganizationMembersCreate(ctx context.Context, data *schema.Resourc
 			// Person that creates a new organization is automatically the owner
 			// of it. That's why when creating this resource we would like to skip
 			// re-creating that user because it would fail.
-			if currentUserResp.JSON200.Email == email {
+			if lo.FromPtr(currentUserResp.JSON200.Email) == email {
 				continue
 			}
 
-			newMemberships = append(newMemberships, sdk.NewMembershipByEmail{
+			newMemberships = append(newMemberships, sdk.CastaiUsersV1beta1NewMembershipByEmail{
 				Role:      ownerRole,
 				UserEmail: email,
 			})
@@ -105,7 +106,7 @@ func resourceOrganizationMembersCreate(ctx context.Context, data *schema.Resourc
 		emails := toStringList(viewers.([]interface{}))
 
 		for _, email := range emails {
-			newMemberships = append(newMemberships, sdk.NewMembershipByEmail{
+			newMemberships = append(newMemberships, sdk.CastaiUsersV1beta1NewMembershipByEmail{
 				Role:      viewerRole,
 				UserEmail: email,
 			})
@@ -116,7 +117,7 @@ func resourceOrganizationMembersCreate(ctx context.Context, data *schema.Resourc
 		emails := toStringList(members.([]interface{}))
 
 		for _, email := range emails {
-			newMemberships = append(newMemberships, sdk.NewMembershipByEmail{
+			newMemberships = append(newMemberships, sdk.CastaiUsersV1beta1NewMembershipByEmail{
 				Role:      memberRole,
 				UserEmail: email,
 			})
@@ -125,9 +126,8 @@ func resourceOrganizationMembersCreate(ctx context.Context, data *schema.Resourc
 
 	organizationID := data.Get(FieldOrganizationMembersOrganizationID).(string)
 
-	resp, err := client.CreateInvitationWithResponse(ctx, sdk.CreateInvitationJSONRequestBody{
-		OrganizationId: organizationID,
-		Members:        newMemberships,
+	resp, err := client.UsersAPICreateInvitationsWithResponse(ctx, sdk.UsersAPICreateInvitationsJSONRequestBody{
+		Members: &newMemberships,
 	})
 	if err := sdk.CheckOKResponse(resp, err); err != nil {
 		return diag.FromErr(fmt.Errorf("creating invitations: %w", err))
@@ -142,7 +142,7 @@ func resourceOrganizationMembersRead(ctx context.Context, data *schema.ResourceD
 	client := meta.(*ProviderConfig).api
 
 	organizationID := data.Id()
-	usersResp, err := client.GetOrganizationUsersWithResponse(ctx, organizationID)
+	usersResp, err := client.UsersAPIListOrganizationUsersWithResponse(ctx, organizationID)
 	if err := sdk.CheckOKResponse(usersResp, err); err != nil {
 		return diag.FromErr(fmt.Errorf("retrieving users: %w", err))
 	}
@@ -161,7 +161,7 @@ func resourceOrganizationMembersRead(ctx context.Context, data *schema.ResourceD
 
 	var nextCursor string
 	for {
-		invitationsResp, err := client.ListInvitationsWithResponse(ctx, &sdk.ListInvitationsParams{
+		invitationsResp, err := client.UsersAPIListInvitationsWithResponse(ctx, &sdk.UsersAPIListInvitationsParams{
 			PageCursor: &nextCursor,
 		})
 		if err := sdk.CheckOKResponse(usersResp, err); err != nil {
@@ -208,21 +208,21 @@ func resourceOrganizationMembersUpdate(ctx context.Context, data *schema.Resourc
 	client := meta.(*ProviderConfig).api
 	organizationID := data.Id()
 
-	usersResp, err := client.GetOrganizationUsersWithResponse(ctx, organizationID)
+	usersResp, err := client.UsersAPIListOrganizationUsersWithResponse(ctx, organizationID)
 	if err := sdk.CheckOKResponse(usersResp, err); err != nil {
 		return diag.FromErr(fmt.Errorf("retrieving users: %w", err))
 	}
 
 	userIDByEmail := make(map[string]string)
 	for _, user := range *usersResp.JSON200.Users {
-		userIDByEmail[user.User.Email] = user.User.Id
+		userIDByEmail[user.User.Email] = lo.FromPtr(user.User.Id)
 	}
 
 	invitationIDByEmail := make(map[string]string)
 
 	var nextCursor string
 	for {
-		invitationsResp, err := client.ListInvitationsWithResponse(ctx, &sdk.ListInvitationsParams{
+		invitationsResp, err := client.UsersAPIListInvitationsWithResponse(ctx, &sdk.UsersAPIListInvitationsParams{
 			PageCursor: &nextCursor,
 		})
 		if err := sdk.CheckOKResponse(usersResp, err); err != nil {
@@ -230,7 +230,7 @@ func resourceOrganizationMembersUpdate(ctx context.Context, data *schema.Resourc
 		}
 
 		for _, invitation := range invitationsResp.JSON200.Invitations {
-			invitationIDByEmail[invitation.InviteEmail] = invitation.Id
+			invitationIDByEmail[invitation.InviteEmail] = lo.FromPtr(invitation.Id)
 		}
 
 		nextCursor = invitationsResp.JSON200.NextCursor
@@ -247,19 +247,20 @@ func resourceOrganizationMembersUpdate(ctx context.Context, data *schema.Resourc
 
 	manipulations := getPendingManipulations(diff, userIDByEmail, invitationIDByEmail)
 
-	currentUserResp, err := client.CurrentUserProfileWithResponse(ctx)
+	currentUserResp, err := client.UsersAPICurrentUserProfileWithResponse(ctx)
 	if err := sdk.CheckOKResponse(currentUserResp, err); err != nil {
 		return diag.FromErr(fmt.Errorf("retrieving current user profile: %w", err))
 	}
 	if contains(manipulations.membersToDelete, *currentUserResp.JSON200.Id) {
 		return diag.FromErr(
-			fmt.Errorf("can't delete user that is currently managing this organization: %s", currentUserResp.JSON200.Email),
+			fmt.Errorf("can't delete user that is currently managing this organization: %s", lo.FromPtr(currentUserResp.JSON200.Email)),
 		)
 	}
 
 	for userID, role := range manipulations.membersToUpdate {
-		resp, err := client.UpdateOrganizationUserWithResponse(ctx, organizationID, userID, sdk.UpdateOrganizationUser{
-			Role: sdk.OrganizationRole(role),
+		role := role
+		resp, err := client.UsersAPIUpdateOrganizationUserWithResponse(ctx, organizationID, userID, sdk.UsersAPIUpdateOrganizationUserJSONRequestBody{
+			Role: &role,
 		})
 		if err := sdk.CheckOKResponse(resp, err); err != nil {
 			return diag.FromErr(fmt.Errorf("updating user: %w", err))
@@ -267,30 +268,29 @@ func resourceOrganizationMembersUpdate(ctx context.Context, data *schema.Resourc
 	}
 
 	for _, userID := range manipulations.membersToDelete {
-		resp, err := client.DeleteOrganizationUserWithResponse(ctx, organizationID, userID)
+		resp, err := client.UsersAPIRemoveUserFromOrganizationWithResponse(ctx, organizationID, userID)
 		if err := sdk.CheckOKResponse(resp, err); err != nil {
 			return diag.FromErr(fmt.Errorf("deleting user: %w", err))
 		}
 	}
 
 	for _, invitationID := range manipulations.invitationsToDelete {
-		resp, err := client.DeleteInvitationWithResponse(ctx, invitationID)
+		resp, err := client.UsersAPIDeleteInvitationWithResponse(ctx, invitationID)
 		if err := sdk.CheckOKResponse(resp, err); err != nil {
 			return diag.FromErr(fmt.Errorf("deleting invitation: %w", err))
 		}
 	}
 
-	newMemberships := make([]sdk.NewMembershipByEmail, 0, len(manipulations.membersToAdd))
+	newMemberships := make([]sdk.CastaiUsersV1beta1NewMembershipByEmail, 0, len(manipulations.membersToAdd))
 	for user, role := range manipulations.membersToAdd {
-		newMemberships = append(newMemberships, sdk.NewMembershipByEmail{
+		newMemberships = append(newMemberships, sdk.CastaiUsersV1beta1NewMembershipByEmail{
 			Role:      role,
 			UserEmail: user,
 		})
 	}
 
-	resp, err := client.CreateInvitationWithResponse(ctx, sdk.CreateInvitationJSONBody{
-		Members:        newMemberships,
-		OrganizationId: organizationID,
+	resp, err := client.UsersAPICreateInvitationsWithResponse(ctx, sdk.UsersAPICreateInvitationsJSONBody{
+		Members: &newMemberships,
 	})
 	if err := sdk.CheckOKResponse(resp, err); err != nil {
 		return diag.FromErr(fmt.Errorf("creating invitations: %w", err))
@@ -303,12 +303,12 @@ func resourceOrganizationMembersDelete(ctx context.Context, data *schema.Resourc
 	client := meta.(*ProviderConfig).api
 	organizationID := data.Id()
 
-	currentUserResp, err := client.CurrentUserProfileWithResponse(ctx)
+	currentUserResp, err := client.UsersAPICurrentUserProfileWithResponse(ctx)
 	if err := sdk.CheckOKResponse(currentUserResp, err); err != nil {
 		return diag.FromErr(fmt.Errorf("retrieving current user profile: %w", err))
 	}
 
-	usersResp, err := client.GetOrganizationUsersWithResponse(ctx, organizationID)
+	usersResp, err := client.UsersAPIListOrganizationUsersWithResponse(ctx, organizationID)
 	if err := sdk.CheckOKResponse(usersResp, err); err != nil {
 		return diag.FromErr(fmt.Errorf("retrieving users: %w", err))
 	}
@@ -319,17 +319,17 @@ func resourceOrganizationMembersDelete(ctx context.Context, data *schema.Resourc
 		// user that is currently managing this organization.
 		// Otherwise, if we have deleted all the members, the organization would
 		// get deleted too.
-		if user.User.Id == *currentUserResp.JSON200.Id {
+		if lo.FromPtr(user.User.Id) == lo.FromPtr(currentUserResp.JSON200.Id) {
 			continue
 		}
 
-		usersIDsToDelete = append(usersIDsToDelete, user.User.Id)
+		usersIDsToDelete = append(usersIDsToDelete, lo.FromPtr(user.User.Id))
 	}
 
 	var invitationIDsToDelete []string
 	var nextCursor string
 	for {
-		invitationsResp, err := client.ListInvitationsWithResponse(ctx, &sdk.ListInvitationsParams{
+		invitationsResp, err := client.UsersAPIListInvitationsWithResponse(ctx, &sdk.UsersAPIListInvitationsParams{
 			PageCursor: &nextCursor,
 		})
 		if err != nil {
@@ -337,7 +337,7 @@ func resourceOrganizationMembersDelete(ctx context.Context, data *schema.Resourc
 		}
 
 		for _, invitation := range invitationsResp.JSON200.Invitations {
-			invitationIDsToDelete = append(invitationIDsToDelete, invitation.Id)
+			invitationIDsToDelete = append(invitationIDsToDelete, lo.FromPtr(invitation.Id))
 		}
 
 		nextCursor = invitationsResp.JSON200.NextCursor
@@ -347,14 +347,14 @@ func resourceOrganizationMembersDelete(ctx context.Context, data *schema.Resourc
 	}
 
 	for _, invitationID := range invitationIDsToDelete {
-		resp, err := client.DeleteInvitationWithResponse(ctx, invitationID)
+		resp, err := client.UsersAPIDeleteInvitationWithResponse(ctx, invitationID)
 		if err := sdk.CheckOKResponse(resp, err); err != nil {
 			return diag.FromErr(fmt.Errorf("deleting invitation: %w", err))
 		}
 	}
 
 	for _, userID := range usersIDsToDelete {
-		resp, err := client.DeleteOrganizationUserWithResponse(ctx, organizationID, userID)
+		resp, err := client.UsersAPIRemoveUserFromOrganizationWithResponse(ctx, organizationID, userID)
 		if err := sdk.CheckOKResponse(resp, err); err != nil {
 			return diag.FromErr(fmt.Errorf("deleting user: %w", err))
 		}

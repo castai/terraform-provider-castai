@@ -109,21 +109,21 @@ type ClientInterface interface {
 
 	AuthTokenAPIUpdateAuthToken(ctx context.Context, id string, body AuthTokenAPIUpdateAuthTokenJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// ListInvitations request
-	ListInvitations(ctx context.Context, params *ListInvitationsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// UsersAPIListInvitations request
+	UsersAPIListInvitations(ctx context.Context, params *UsersAPIListInvitationsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// CreateInvitation request with any body
-	CreateInvitationWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// UsersAPICreateInvitations request with any body
+	UsersAPICreateInvitationsWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	CreateInvitation(ctx context.Context, body CreateInvitationJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+	UsersAPICreateInvitations(ctx context.Context, body UsersAPICreateInvitationsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// DeleteInvitation request
-	DeleteInvitation(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// UsersAPIDeleteInvitation request
+	UsersAPIDeleteInvitation(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// ClaimInvitation request with any body
-	ClaimInvitationWithBody(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// UsersAPIClaimInvitation request with any body
+	UsersAPIClaimInvitationWithBody(ctx context.Context, invitationId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	ClaimInvitation(ctx context.Context, id string, body ClaimInvitationJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+	UsersAPIClaimInvitation(ctx context.Context, invitationId string, body UsersAPIClaimInvitationJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// EvictorAPIGetAdvancedConfig request
 	EvictorAPIGetAdvancedConfig(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -289,48 +289,32 @@ type ClientInterface interface {
 	// ExternalClusterAPICreateClusterToken request
 	ExternalClusterAPICreateClusterToken(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// CurrentUserProfile request
-	CurrentUserProfile(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// UsersAPICurrentUserProfile request
+	UsersAPICurrentUserProfile(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// UpdateCurrentUserProfile request with any body
-	UpdateCurrentUserProfileWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// UsersAPIUpdateCurrentUserProfile request with any body
+	UsersAPIUpdateCurrentUserProfileWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	UpdateCurrentUserProfile(ctx context.Context, body UpdateCurrentUserProfileJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+	UsersAPIUpdateCurrentUserProfile(ctx context.Context, body UsersAPIUpdateCurrentUserProfileJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// ListOrganizations request
-	ListOrganizations(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// UsersAPIListOrganizations request
+	UsersAPIListOrganizations(ctx context.Context, params *UsersAPIListOrganizationsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// CreateOrganization request with any body
-	CreateOrganizationWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// UsersAPICreateOrganization request with any body
+	UsersAPICreateOrganizationWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	CreateOrganization(ctx context.Context, body CreateOrganizationJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+	UsersAPICreateOrganization(ctx context.Context, body UsersAPICreateOrganizationJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// DeleteOrganization request
-	DeleteOrganization(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// UsersAPIDeleteOrganization request
+	UsersAPIDeleteOrganization(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// GetOrganization request
-	GetOrganization(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// UsersAPIGetOrganization request
+	UsersAPIGetOrganization(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// UpdateOrganization request with any body
-	UpdateOrganizationWithBody(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+	// UsersAPIEditOrganization request with any body
+	UsersAPIEditOrganizationWithBody(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	UpdateOrganization(ctx context.Context, id string, body UpdateOrganizationJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
-
-	// GetOrganizationUsers request
-	GetOrganizationUsers(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
-
-	// CreateOrganizationUser request with any body
-	CreateOrganizationUserWithBody(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
-
-	CreateOrganizationUser(ctx context.Context, id string, body CreateOrganizationUserJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
-
-	// DeleteOrganizationUser request
-	DeleteOrganizationUser(ctx context.Context, id string, userId string, reqEditors ...RequestEditorFn) (*http.Response, error)
-
-	// UpdateOrganizationUser request with any body
-	UpdateOrganizationUserWithBody(ctx context.Context, id string, userId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
-
-	UpdateOrganizationUser(ctx context.Context, id string, userId string, body UpdateOrganizationUserJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+	UsersAPIEditOrganization(ctx context.Context, id string, body UsersAPIEditOrganizationJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// InventoryAPISyncClusterResources request
 	InventoryAPISyncClusterResources(ctx context.Context, organizationId string, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -356,6 +340,22 @@ type ClientInterface interface {
 
 	// InventoryAPIGetResourceUsage request
 	InventoryAPIGetResourceUsage(ctx context.Context, organizationId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// UsersAPIListOrganizationUsers request
+	UsersAPIListOrganizationUsers(ctx context.Context, organizationId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// UsersAPIAddUserToOrganization request with any body
+	UsersAPIAddUserToOrganizationWithBody(ctx context.Context, organizationId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	UsersAPIAddUserToOrganization(ctx context.Context, organizationId string, body UsersAPIAddUserToOrganizationJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// UsersAPIRemoveUserFromOrganization request
+	UsersAPIRemoveUserFromOrganization(ctx context.Context, organizationId string, userId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// UsersAPIUpdateOrganizationUser request with any body
+	UsersAPIUpdateOrganizationUserWithBody(ctx context.Context, organizationId string, userId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	UsersAPIUpdateOrganizationUser(ctx context.Context, organizationId string, userId string, body UsersAPIUpdateOrganizationUserJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// ScheduledRebalancingAPIListRebalancingSchedules request
 	ScheduledRebalancingAPIListRebalancingSchedules(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -489,8 +489,8 @@ func (c *Client) AuthTokenAPIUpdateAuthToken(ctx context.Context, id string, bod
 	return c.Client.Do(req)
 }
 
-func (c *Client) ListInvitations(ctx context.Context, params *ListInvitationsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewListInvitationsRequest(c.Server, params)
+func (c *Client) UsersAPIListInvitations(ctx context.Context, params *UsersAPIListInvitationsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUsersAPIListInvitationsRequest(c.Server, params)
 	if err != nil {
 		return nil, err
 	}
@@ -501,8 +501,8 @@ func (c *Client) ListInvitations(ctx context.Context, params *ListInvitationsPar
 	return c.Client.Do(req)
 }
 
-func (c *Client) CreateInvitationWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewCreateInvitationRequestWithBody(c.Server, contentType, body)
+func (c *Client) UsersAPICreateInvitationsWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUsersAPICreateInvitationsRequestWithBody(c.Server, contentType, body)
 	if err != nil {
 		return nil, err
 	}
@@ -513,8 +513,8 @@ func (c *Client) CreateInvitationWithBody(ctx context.Context, contentType strin
 	return c.Client.Do(req)
 }
 
-func (c *Client) CreateInvitation(ctx context.Context, body CreateInvitationJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewCreateInvitationRequest(c.Server, body)
+func (c *Client) UsersAPICreateInvitations(ctx context.Context, body UsersAPICreateInvitationsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUsersAPICreateInvitationsRequest(c.Server, body)
 	if err != nil {
 		return nil, err
 	}
@@ -525,8 +525,8 @@ func (c *Client) CreateInvitation(ctx context.Context, body CreateInvitationJSON
 	return c.Client.Do(req)
 }
 
-func (c *Client) DeleteInvitation(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewDeleteInvitationRequest(c.Server, id)
+func (c *Client) UsersAPIDeleteInvitation(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUsersAPIDeleteInvitationRequest(c.Server, id)
 	if err != nil {
 		return nil, err
 	}
@@ -537,8 +537,8 @@ func (c *Client) DeleteInvitation(ctx context.Context, id string, reqEditors ...
 	return c.Client.Do(req)
 }
 
-func (c *Client) ClaimInvitationWithBody(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewClaimInvitationRequestWithBody(c.Server, id, contentType, body)
+func (c *Client) UsersAPIClaimInvitationWithBody(ctx context.Context, invitationId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUsersAPIClaimInvitationRequestWithBody(c.Server, invitationId, contentType, body)
 	if err != nil {
 		return nil, err
 	}
@@ -549,8 +549,8 @@ func (c *Client) ClaimInvitationWithBody(ctx context.Context, id string, content
 	return c.Client.Do(req)
 }
 
-func (c *Client) ClaimInvitation(ctx context.Context, id string, body ClaimInvitationJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewClaimInvitationRequest(c.Server, id, body)
+func (c *Client) UsersAPIClaimInvitation(ctx context.Context, invitationId string, body UsersAPIClaimInvitationJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUsersAPIClaimInvitationRequest(c.Server, invitationId, body)
 	if err != nil {
 		return nil, err
 	}
@@ -1281,8 +1281,8 @@ func (c *Client) ExternalClusterAPICreateClusterToken(ctx context.Context, clust
 	return c.Client.Do(req)
 }
 
-func (c *Client) CurrentUserProfile(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewCurrentUserProfileRequest(c.Server)
+func (c *Client) UsersAPICurrentUserProfile(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUsersAPICurrentUserProfileRequest(c.Server)
 	if err != nil {
 		return nil, err
 	}
@@ -1293,8 +1293,8 @@ func (c *Client) CurrentUserProfile(ctx context.Context, reqEditors ...RequestEd
 	return c.Client.Do(req)
 }
 
-func (c *Client) UpdateCurrentUserProfileWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewUpdateCurrentUserProfileRequestWithBody(c.Server, contentType, body)
+func (c *Client) UsersAPIUpdateCurrentUserProfileWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUsersAPIUpdateCurrentUserProfileRequestWithBody(c.Server, contentType, body)
 	if err != nil {
 		return nil, err
 	}
@@ -1305,8 +1305,8 @@ func (c *Client) UpdateCurrentUserProfileWithBody(ctx context.Context, contentTy
 	return c.Client.Do(req)
 }
 
-func (c *Client) UpdateCurrentUserProfile(ctx context.Context, body UpdateCurrentUserProfileJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewUpdateCurrentUserProfileRequest(c.Server, body)
+func (c *Client) UsersAPIUpdateCurrentUserProfile(ctx context.Context, body UsersAPIUpdateCurrentUserProfileJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUsersAPIUpdateCurrentUserProfileRequest(c.Server, body)
 	if err != nil {
 		return nil, err
 	}
@@ -1317,8 +1317,8 @@ func (c *Client) UpdateCurrentUserProfile(ctx context.Context, body UpdateCurren
 	return c.Client.Do(req)
 }
 
-func (c *Client) ListOrganizations(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewListOrganizationsRequest(c.Server)
+func (c *Client) UsersAPIListOrganizations(ctx context.Context, params *UsersAPIListOrganizationsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUsersAPIListOrganizationsRequest(c.Server, params)
 	if err != nil {
 		return nil, err
 	}
@@ -1329,8 +1329,8 @@ func (c *Client) ListOrganizations(ctx context.Context, reqEditors ...RequestEdi
 	return c.Client.Do(req)
 }
 
-func (c *Client) CreateOrganizationWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewCreateOrganizationRequestWithBody(c.Server, contentType, body)
+func (c *Client) UsersAPICreateOrganizationWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUsersAPICreateOrganizationRequestWithBody(c.Server, contentType, body)
 	if err != nil {
 		return nil, err
 	}
@@ -1341,8 +1341,8 @@ func (c *Client) CreateOrganizationWithBody(ctx context.Context, contentType str
 	return c.Client.Do(req)
 }
 
-func (c *Client) CreateOrganization(ctx context.Context, body CreateOrganizationJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewCreateOrganizationRequest(c.Server, body)
+func (c *Client) UsersAPICreateOrganization(ctx context.Context, body UsersAPICreateOrganizationJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUsersAPICreateOrganizationRequest(c.Server, body)
 	if err != nil {
 		return nil, err
 	}
@@ -1353,8 +1353,8 @@ func (c *Client) CreateOrganization(ctx context.Context, body CreateOrganization
 	return c.Client.Do(req)
 }
 
-func (c *Client) DeleteOrganization(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewDeleteOrganizationRequest(c.Server, id)
+func (c *Client) UsersAPIDeleteOrganization(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUsersAPIDeleteOrganizationRequest(c.Server, id)
 	if err != nil {
 		return nil, err
 	}
@@ -1365,8 +1365,8 @@ func (c *Client) DeleteOrganization(ctx context.Context, id string, reqEditors .
 	return c.Client.Do(req)
 }
 
-func (c *Client) GetOrganization(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewGetOrganizationRequest(c.Server, id)
+func (c *Client) UsersAPIGetOrganization(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUsersAPIGetOrganizationRequest(c.Server, id)
 	if err != nil {
 		return nil, err
 	}
@@ -1377,8 +1377,8 @@ func (c *Client) GetOrganization(ctx context.Context, id string, reqEditors ...R
 	return c.Client.Do(req)
 }
 
-func (c *Client) UpdateOrganizationWithBody(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewUpdateOrganizationRequestWithBody(c.Server, id, contentType, body)
+func (c *Client) UsersAPIEditOrganizationWithBody(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUsersAPIEditOrganizationRequestWithBody(c.Server, id, contentType, body)
 	if err != nil {
 		return nil, err
 	}
@@ -1389,80 +1389,8 @@ func (c *Client) UpdateOrganizationWithBody(ctx context.Context, id string, cont
 	return c.Client.Do(req)
 }
 
-func (c *Client) UpdateOrganization(ctx context.Context, id string, body UpdateOrganizationJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewUpdateOrganizationRequest(c.Server, id, body)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
-func (c *Client) GetOrganizationUsers(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewGetOrganizationUsersRequest(c.Server, id)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
-func (c *Client) CreateOrganizationUserWithBody(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewCreateOrganizationUserRequestWithBody(c.Server, id, contentType, body)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
-func (c *Client) CreateOrganizationUser(ctx context.Context, id string, body CreateOrganizationUserJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewCreateOrganizationUserRequest(c.Server, id, body)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
-func (c *Client) DeleteOrganizationUser(ctx context.Context, id string, userId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewDeleteOrganizationUserRequest(c.Server, id, userId)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
-func (c *Client) UpdateOrganizationUserWithBody(ctx context.Context, id string, userId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewUpdateOrganizationUserRequestWithBody(c.Server, id, userId, contentType, body)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
-func (c *Client) UpdateOrganizationUser(ctx context.Context, id string, userId string, body UpdateOrganizationUserJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewUpdateOrganizationUserRequest(c.Server, id, userId, body)
+func (c *Client) UsersAPIEditOrganization(ctx context.Context, id string, body UsersAPIEditOrganizationJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUsersAPIEditOrganizationRequest(c.Server, id, body)
 	if err != nil {
 		return nil, err
 	}
@@ -1571,6 +1499,78 @@ func (c *Client) InventoryAPIDeleteReservation(ctx context.Context, organization
 
 func (c *Client) InventoryAPIGetResourceUsage(ctx context.Context, organizationId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewInventoryAPIGetResourceUsageRequest(c.Server, organizationId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) UsersAPIListOrganizationUsers(ctx context.Context, organizationId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUsersAPIListOrganizationUsersRequest(c.Server, organizationId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) UsersAPIAddUserToOrganizationWithBody(ctx context.Context, organizationId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUsersAPIAddUserToOrganizationRequestWithBody(c.Server, organizationId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) UsersAPIAddUserToOrganization(ctx context.Context, organizationId string, body UsersAPIAddUserToOrganizationJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUsersAPIAddUserToOrganizationRequest(c.Server, organizationId, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) UsersAPIRemoveUserFromOrganization(ctx context.Context, organizationId string, userId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUsersAPIRemoveUserFromOrganizationRequest(c.Server, organizationId, userId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) UsersAPIUpdateOrganizationUserWithBody(ctx context.Context, organizationId string, userId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUsersAPIUpdateOrganizationUserRequestWithBody(c.Server, organizationId, userId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) UsersAPIUpdateOrganizationUser(ctx context.Context, organizationId string, userId string, body UsersAPIUpdateOrganizationUserJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUsersAPIUpdateOrganizationUserRequest(c.Server, organizationId, userId, body)
 	if err != nil {
 		return nil, err
 	}
@@ -1987,8 +1987,8 @@ func NewAuthTokenAPIUpdateAuthTokenRequestWithBody(server string, id string, con
 	return req, nil
 }
 
-// NewListInvitationsRequest generates requests for ListInvitations
-func NewListInvitationsRequest(server string, params *ListInvitationsParams) (*http.Request, error) {
+// NewUsersAPIListInvitationsRequest generates requests for UsersAPIListInvitations
+func NewUsersAPIListInvitationsRequest(server string, params *UsersAPIListInvitationsParams) (*http.Request, error) {
 	var err error
 
 	serverURL, err := url.Parse(server)
@@ -2050,19 +2050,19 @@ func NewListInvitationsRequest(server string, params *ListInvitationsParams) (*h
 	return req, nil
 }
 
-// NewCreateInvitationRequest calls the generic CreateInvitation builder with application/json body
-func NewCreateInvitationRequest(server string, body CreateInvitationJSONRequestBody) (*http.Request, error) {
+// NewUsersAPICreateInvitationsRequest calls the generic UsersAPICreateInvitations builder with application/json body
+func NewUsersAPICreateInvitationsRequest(server string, body UsersAPICreateInvitationsJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
 	buf, err := json.Marshal(body)
 	if err != nil {
 		return nil, err
 	}
 	bodyReader = bytes.NewReader(buf)
-	return NewCreateInvitationRequestWithBody(server, "application/json", bodyReader)
+	return NewUsersAPICreateInvitationsRequestWithBody(server, "application/json", bodyReader)
 }
 
-// NewCreateInvitationRequestWithBody generates requests for CreateInvitation with any type of body
-func NewCreateInvitationRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+// NewUsersAPICreateInvitationsRequestWithBody generates requests for UsersAPICreateInvitations with any type of body
+func NewUsersAPICreateInvitationsRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
 	var err error
 
 	serverURL, err := url.Parse(server)
@@ -2090,8 +2090,8 @@ func NewCreateInvitationRequestWithBody(server string, contentType string, body 
 	return req, nil
 }
 
-// NewDeleteInvitationRequest generates requests for DeleteInvitation
-func NewDeleteInvitationRequest(server string, id string) (*http.Request, error) {
+// NewUsersAPIDeleteInvitationRequest generates requests for UsersAPIDeleteInvitation
+func NewUsersAPIDeleteInvitationRequest(server string, id string) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -2124,24 +2124,24 @@ func NewDeleteInvitationRequest(server string, id string) (*http.Request, error)
 	return req, nil
 }
 
-// NewClaimInvitationRequest calls the generic ClaimInvitation builder with application/json body
-func NewClaimInvitationRequest(server string, id string, body ClaimInvitationJSONRequestBody) (*http.Request, error) {
+// NewUsersAPIClaimInvitationRequest calls the generic UsersAPIClaimInvitation builder with application/json body
+func NewUsersAPIClaimInvitationRequest(server string, invitationId string, body UsersAPIClaimInvitationJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
 	buf, err := json.Marshal(body)
 	if err != nil {
 		return nil, err
 	}
 	bodyReader = bytes.NewReader(buf)
-	return NewClaimInvitationRequestWithBody(server, id, "application/json", bodyReader)
+	return NewUsersAPIClaimInvitationRequestWithBody(server, invitationId, "application/json", bodyReader)
 }
 
-// NewClaimInvitationRequestWithBody generates requests for ClaimInvitation with any type of body
-func NewClaimInvitationRequestWithBody(server string, id string, contentType string, body io.Reader) (*http.Request, error) {
+// NewUsersAPIClaimInvitationRequestWithBody generates requests for UsersAPIClaimInvitation with any type of body
+func NewUsersAPIClaimInvitationRequestWithBody(server string, invitationId string, contentType string, body io.Reader) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
 
-	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "invitationId", runtime.ParamLocationPath, invitationId)
 	if err != nil {
 		return nil, err
 	}
@@ -4109,8 +4109,8 @@ func NewExternalClusterAPICreateClusterTokenRequest(server string, clusterId str
 	return req, nil
 }
 
-// NewCurrentUserProfileRequest generates requests for CurrentUserProfile
-func NewCurrentUserProfileRequest(server string) (*http.Request, error) {
+// NewUsersAPICurrentUserProfileRequest generates requests for UsersAPICurrentUserProfile
+func NewUsersAPICurrentUserProfileRequest(server string) (*http.Request, error) {
 	var err error
 
 	serverURL, err := url.Parse(server)
@@ -4136,19 +4136,19 @@ func NewCurrentUserProfileRequest(server string) (*http.Request, error) {
 	return req, nil
 }
 
-// NewUpdateCurrentUserProfileRequest calls the generic UpdateCurrentUserProfile builder with application/json body
-func NewUpdateCurrentUserProfileRequest(server string, body UpdateCurrentUserProfileJSONRequestBody) (*http.Request, error) {
+// NewUsersAPIUpdateCurrentUserProfileRequest calls the generic UsersAPIUpdateCurrentUserProfile builder with application/json body
+func NewUsersAPIUpdateCurrentUserProfileRequest(server string, body UsersAPIUpdateCurrentUserProfileJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
 	buf, err := json.Marshal(body)
 	if err != nil {
 		return nil, err
 	}
 	bodyReader = bytes.NewReader(buf)
-	return NewUpdateCurrentUserProfileRequestWithBody(server, "application/json", bodyReader)
+	return NewUsersAPIUpdateCurrentUserProfileRequestWithBody(server, "application/json", bodyReader)
 }
 
-// NewUpdateCurrentUserProfileRequestWithBody generates requests for UpdateCurrentUserProfile with any type of body
-func NewUpdateCurrentUserProfileRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+// NewUsersAPIUpdateCurrentUserProfileRequestWithBody generates requests for UsersAPIUpdateCurrentUserProfile with any type of body
+func NewUsersAPIUpdateCurrentUserProfileRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
 	var err error
 
 	serverURL, err := url.Parse(server)
@@ -4176,8 +4176,8 @@ func NewUpdateCurrentUserProfileRequestWithBody(server string, contentType strin
 	return req, nil
 }
 
-// NewListOrganizationsRequest generates requests for ListOrganizations
-func NewListOrganizationsRequest(server string) (*http.Request, error) {
+// NewUsersAPIListOrganizationsRequest generates requests for UsersAPIListOrganizations
+func NewUsersAPIListOrganizationsRequest(server string, params *UsersAPIListOrganizationsParams) (*http.Request, error) {
 	var err error
 
 	serverURL, err := url.Parse(server)
@@ -4195,6 +4195,42 @@ func NewListOrganizationsRequest(server string) (*http.Request, error) {
 		return nil, err
 	}
 
+	queryValues := queryURL.Query()
+
+	if params.UserId != nil {
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "userId", runtime.ParamLocationQuery, *params.UserId); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.Username != nil {
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "username", runtime.ParamLocationQuery, *params.Username); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	queryURL.RawQuery = queryValues.Encode()
+
 	req, err := http.NewRequest("GET", queryURL.String(), nil)
 	if err != nil {
 		return nil, err
@@ -4203,19 +4239,19 @@ func NewListOrganizationsRequest(server string) (*http.Request, error) {
 	return req, nil
 }
 
-// NewCreateOrganizationRequest calls the generic CreateOrganization builder with application/json body
-func NewCreateOrganizationRequest(server string, body CreateOrganizationJSONRequestBody) (*http.Request, error) {
+// NewUsersAPICreateOrganizationRequest calls the generic UsersAPICreateOrganization builder with application/json body
+func NewUsersAPICreateOrganizationRequest(server string, body UsersAPICreateOrganizationJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
 	buf, err := json.Marshal(body)
 	if err != nil {
 		return nil, err
 	}
 	bodyReader = bytes.NewReader(buf)
-	return NewCreateOrganizationRequestWithBody(server, "application/json", bodyReader)
+	return NewUsersAPICreateOrganizationRequestWithBody(server, "application/json", bodyReader)
 }
 
-// NewCreateOrganizationRequestWithBody generates requests for CreateOrganization with any type of body
-func NewCreateOrganizationRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+// NewUsersAPICreateOrganizationRequestWithBody generates requests for UsersAPICreateOrganization with any type of body
+func NewUsersAPICreateOrganizationRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
 	var err error
 
 	serverURL, err := url.Parse(server)
@@ -4243,8 +4279,8 @@ func NewCreateOrganizationRequestWithBody(server string, contentType string, bod
 	return req, nil
 }
 
-// NewDeleteOrganizationRequest generates requests for DeleteOrganization
-func NewDeleteOrganizationRequest(server string, id string) (*http.Request, error) {
+// NewUsersAPIDeleteOrganizationRequest generates requests for UsersAPIDeleteOrganization
+func NewUsersAPIDeleteOrganizationRequest(server string, id string) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -4277,8 +4313,8 @@ func NewDeleteOrganizationRequest(server string, id string) (*http.Request, erro
 	return req, nil
 }
 
-// NewGetOrganizationRequest generates requests for GetOrganization
-func NewGetOrganizationRequest(server string, id string) (*http.Request, error) {
+// NewUsersAPIGetOrganizationRequest generates requests for UsersAPIGetOrganization
+func NewUsersAPIGetOrganizationRequest(server string, id string) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -4311,19 +4347,19 @@ func NewGetOrganizationRequest(server string, id string) (*http.Request, error) 
 	return req, nil
 }
 
-// NewUpdateOrganizationRequest calls the generic UpdateOrganization builder with application/json body
-func NewUpdateOrganizationRequest(server string, id string, body UpdateOrganizationJSONRequestBody) (*http.Request, error) {
+// NewUsersAPIEditOrganizationRequest calls the generic UsersAPIEditOrganization builder with application/json body
+func NewUsersAPIEditOrganizationRequest(server string, id string, body UsersAPIEditOrganizationJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
 	buf, err := json.Marshal(body)
 	if err != nil {
 		return nil, err
 	}
 	bodyReader = bytes.NewReader(buf)
-	return NewUpdateOrganizationRequestWithBody(server, id, "application/json", bodyReader)
+	return NewUsersAPIEditOrganizationRequestWithBody(server, id, "application/json", bodyReader)
 }
 
-// NewUpdateOrganizationRequestWithBody generates requests for UpdateOrganization with any type of body
-func NewUpdateOrganizationRequestWithBody(server string, id string, contentType string, body io.Reader) (*http.Request, error) {
+// NewUsersAPIEditOrganizationRequestWithBody generates requests for UsersAPIEditOrganization with any type of body
+func NewUsersAPIEditOrganizationRequestWithBody(server string, id string, contentType string, body io.Reader) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -4349,182 +4385,6 @@ func NewUpdateOrganizationRequestWithBody(server string, id string, contentType 
 	}
 
 	req, err := http.NewRequest("POST", queryURL.String(), body)
-	if err != nil {
-		return nil, err
-	}
-
-	req.Header.Add("Content-Type", contentType)
-
-	return req, nil
-}
-
-// NewGetOrganizationUsersRequest generates requests for GetOrganizationUsers
-func NewGetOrganizationUsersRequest(server string, id string) (*http.Request, error) {
-	var err error
-
-	var pathParam0 string
-
-	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
-	if err != nil {
-		return nil, err
-	}
-
-	serverURL, err := url.Parse(server)
-	if err != nil {
-		return nil, err
-	}
-
-	operationPath := fmt.Sprintf("/v1/organizations/%s/users", pathParam0)
-	if operationPath[0] == '/' {
-		operationPath = "." + operationPath
-	}
-
-	queryURL, err := serverURL.Parse(operationPath)
-	if err != nil {
-		return nil, err
-	}
-
-	req, err := http.NewRequest("GET", queryURL.String(), nil)
-	if err != nil {
-		return nil, err
-	}
-
-	return req, nil
-}
-
-// NewCreateOrganizationUserRequest calls the generic CreateOrganizationUser builder with application/json body
-func NewCreateOrganizationUserRequest(server string, id string, body CreateOrganizationUserJSONRequestBody) (*http.Request, error) {
-	var bodyReader io.Reader
-	buf, err := json.Marshal(body)
-	if err != nil {
-		return nil, err
-	}
-	bodyReader = bytes.NewReader(buf)
-	return NewCreateOrganizationUserRequestWithBody(server, id, "application/json", bodyReader)
-}
-
-// NewCreateOrganizationUserRequestWithBody generates requests for CreateOrganizationUser with any type of body
-func NewCreateOrganizationUserRequestWithBody(server string, id string, contentType string, body io.Reader) (*http.Request, error) {
-	var err error
-
-	var pathParam0 string
-
-	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
-	if err != nil {
-		return nil, err
-	}
-
-	serverURL, err := url.Parse(server)
-	if err != nil {
-		return nil, err
-	}
-
-	operationPath := fmt.Sprintf("/v1/organizations/%s/users", pathParam0)
-	if operationPath[0] == '/' {
-		operationPath = "." + operationPath
-	}
-
-	queryURL, err := serverURL.Parse(operationPath)
-	if err != nil {
-		return nil, err
-	}
-
-	req, err := http.NewRequest("POST", queryURL.String(), body)
-	if err != nil {
-		return nil, err
-	}
-
-	req.Header.Add("Content-Type", contentType)
-
-	return req, nil
-}
-
-// NewDeleteOrganizationUserRequest generates requests for DeleteOrganizationUser
-func NewDeleteOrganizationUserRequest(server string, id string, userId string) (*http.Request, error) {
-	var err error
-
-	var pathParam0 string
-
-	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
-	if err != nil {
-		return nil, err
-	}
-
-	var pathParam1 string
-
-	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "userId", runtime.ParamLocationPath, userId)
-	if err != nil {
-		return nil, err
-	}
-
-	serverURL, err := url.Parse(server)
-	if err != nil {
-		return nil, err
-	}
-
-	operationPath := fmt.Sprintf("/v1/organizations/%s/users/%s", pathParam0, pathParam1)
-	if operationPath[0] == '/' {
-		operationPath = "." + operationPath
-	}
-
-	queryURL, err := serverURL.Parse(operationPath)
-	if err != nil {
-		return nil, err
-	}
-
-	req, err := http.NewRequest("DELETE", queryURL.String(), nil)
-	if err != nil {
-		return nil, err
-	}
-
-	return req, nil
-}
-
-// NewUpdateOrganizationUserRequest calls the generic UpdateOrganizationUser builder with application/json body
-func NewUpdateOrganizationUserRequest(server string, id string, userId string, body UpdateOrganizationUserJSONRequestBody) (*http.Request, error) {
-	var bodyReader io.Reader
-	buf, err := json.Marshal(body)
-	if err != nil {
-		return nil, err
-	}
-	bodyReader = bytes.NewReader(buf)
-	return NewUpdateOrganizationUserRequestWithBody(server, id, userId, "application/json", bodyReader)
-}
-
-// NewUpdateOrganizationUserRequestWithBody generates requests for UpdateOrganizationUser with any type of body
-func NewUpdateOrganizationUserRequestWithBody(server string, id string, userId string, contentType string, body io.Reader) (*http.Request, error) {
-	var err error
-
-	var pathParam0 string
-
-	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
-	if err != nil {
-		return nil, err
-	}
-
-	var pathParam1 string
-
-	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "userId", runtime.ParamLocationPath, userId)
-	if err != nil {
-		return nil, err
-	}
-
-	serverURL, err := url.Parse(server)
-	if err != nil {
-		return nil, err
-	}
-
-	operationPath := fmt.Sprintf("/v1/organizations/%s/users/%s", pathParam0, pathParam1)
-	if operationPath[0] == '/' {
-		operationPath = "." + operationPath
-	}
-
-	queryURL, err := serverURL.Parse(operationPath)
-	if err != nil {
-		return nil, err
-	}
-
-	req, err := http.NewRequest("PUT", queryURL.String(), body)
 	if err != nil {
 		return nil, err
 	}
@@ -4808,6 +4668,182 @@ func NewInventoryAPIGetResourceUsageRequest(server string, organizationId string
 	if err != nil {
 		return nil, err
 	}
+
+	return req, nil
+}
+
+// NewUsersAPIListOrganizationUsersRequest generates requests for UsersAPIListOrganizationUsers
+func NewUsersAPIListOrganizationUsersRequest(server string, organizationId string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "organizationId", runtime.ParamLocationPath, organizationId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/organizations/%s/users", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewUsersAPIAddUserToOrganizationRequest calls the generic UsersAPIAddUserToOrganization builder with application/json body
+func NewUsersAPIAddUserToOrganizationRequest(server string, organizationId string, body UsersAPIAddUserToOrganizationJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewUsersAPIAddUserToOrganizationRequestWithBody(server, organizationId, "application/json", bodyReader)
+}
+
+// NewUsersAPIAddUserToOrganizationRequestWithBody generates requests for UsersAPIAddUserToOrganization with any type of body
+func NewUsersAPIAddUserToOrganizationRequestWithBody(server string, organizationId string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "organizationId", runtime.ParamLocationPath, organizationId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/organizations/%s/users", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewUsersAPIRemoveUserFromOrganizationRequest generates requests for UsersAPIRemoveUserFromOrganization
+func NewUsersAPIRemoveUserFromOrganizationRequest(server string, organizationId string, userId string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "organizationId", runtime.ParamLocationPath, organizationId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "userId", runtime.ParamLocationPath, userId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/organizations/%s/users/%s", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("DELETE", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewUsersAPIUpdateOrganizationUserRequest calls the generic UsersAPIUpdateOrganizationUser builder with application/json body
+func NewUsersAPIUpdateOrganizationUserRequest(server string, organizationId string, userId string, body UsersAPIUpdateOrganizationUserJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewUsersAPIUpdateOrganizationUserRequestWithBody(server, organizationId, userId, "application/json", bodyReader)
+}
+
+// NewUsersAPIUpdateOrganizationUserRequestWithBody generates requests for UsersAPIUpdateOrganizationUser with any type of body
+func NewUsersAPIUpdateOrganizationUserRequestWithBody(server string, organizationId string, userId string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "organizationId", runtime.ParamLocationPath, organizationId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "userId", runtime.ParamLocationPath, userId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/organizations/%s/users/%s", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("PUT", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
 
 	return req, nil
 }
@@ -5366,21 +5402,21 @@ type ClientWithResponsesInterface interface {
 
 	AuthTokenAPIUpdateAuthTokenWithResponse(ctx context.Context, id string, body AuthTokenAPIUpdateAuthTokenJSONRequestBody) (*AuthTokenAPIUpdateAuthTokenResponse, error)
 
-	// ListInvitations request
-	ListInvitationsWithResponse(ctx context.Context, params *ListInvitationsParams) (*ListInvitationsResponse, error)
+	// UsersAPIListInvitations request
+	UsersAPIListInvitationsWithResponse(ctx context.Context, params *UsersAPIListInvitationsParams) (*UsersAPIListInvitationsResponse, error)
 
-	// CreateInvitation request  with any body
-	CreateInvitationWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*CreateInvitationResponse, error)
+	// UsersAPICreateInvitations request  with any body
+	UsersAPICreateInvitationsWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*UsersAPICreateInvitationsResponse, error)
 
-	CreateInvitationWithResponse(ctx context.Context, body CreateInvitationJSONRequestBody) (*CreateInvitationResponse, error)
+	UsersAPICreateInvitationsWithResponse(ctx context.Context, body UsersAPICreateInvitationsJSONRequestBody) (*UsersAPICreateInvitationsResponse, error)
 
-	// DeleteInvitation request
-	DeleteInvitationWithResponse(ctx context.Context, id string) (*DeleteInvitationResponse, error)
+	// UsersAPIDeleteInvitation request
+	UsersAPIDeleteInvitationWithResponse(ctx context.Context, id string) (*UsersAPIDeleteInvitationResponse, error)
 
-	// ClaimInvitation request  with any body
-	ClaimInvitationWithBodyWithResponse(ctx context.Context, id string, contentType string, body io.Reader) (*ClaimInvitationResponse, error)
+	// UsersAPIClaimInvitation request  with any body
+	UsersAPIClaimInvitationWithBodyWithResponse(ctx context.Context, invitationId string, contentType string, body io.Reader) (*UsersAPIClaimInvitationResponse, error)
 
-	ClaimInvitationWithResponse(ctx context.Context, id string, body ClaimInvitationJSONRequestBody) (*ClaimInvitationResponse, error)
+	UsersAPIClaimInvitationWithResponse(ctx context.Context, invitationId string, body UsersAPIClaimInvitationJSONRequestBody) (*UsersAPIClaimInvitationResponse, error)
 
 	// EvictorAPIGetAdvancedConfig request
 	EvictorAPIGetAdvancedConfigWithResponse(ctx context.Context, clusterId string) (*EvictorAPIGetAdvancedConfigResponse, error)
@@ -5546,48 +5582,32 @@ type ClientWithResponsesInterface interface {
 	// ExternalClusterAPICreateClusterToken request
 	ExternalClusterAPICreateClusterTokenWithResponse(ctx context.Context, clusterId string) (*ExternalClusterAPICreateClusterTokenResponse, error)
 
-	// CurrentUserProfile request
-	CurrentUserProfileWithResponse(ctx context.Context) (*CurrentUserProfileResponse, error)
+	// UsersAPICurrentUserProfile request
+	UsersAPICurrentUserProfileWithResponse(ctx context.Context) (*UsersAPICurrentUserProfileResponse, error)
 
-	// UpdateCurrentUserProfile request  with any body
-	UpdateCurrentUserProfileWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*UpdateCurrentUserProfileResponse, error)
+	// UsersAPIUpdateCurrentUserProfile request  with any body
+	UsersAPIUpdateCurrentUserProfileWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*UsersAPIUpdateCurrentUserProfileResponse, error)
 
-	UpdateCurrentUserProfileWithResponse(ctx context.Context, body UpdateCurrentUserProfileJSONRequestBody) (*UpdateCurrentUserProfileResponse, error)
+	UsersAPIUpdateCurrentUserProfileWithResponse(ctx context.Context, body UsersAPIUpdateCurrentUserProfileJSONRequestBody) (*UsersAPIUpdateCurrentUserProfileResponse, error)
 
-	// ListOrganizations request
-	ListOrganizationsWithResponse(ctx context.Context) (*ListOrganizationsResponse, error)
+	// UsersAPIListOrganizations request
+	UsersAPIListOrganizationsWithResponse(ctx context.Context, params *UsersAPIListOrganizationsParams) (*UsersAPIListOrganizationsResponse, error)
 
-	// CreateOrganization request  with any body
-	CreateOrganizationWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*CreateOrganizationResponse, error)
+	// UsersAPICreateOrganization request  with any body
+	UsersAPICreateOrganizationWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*UsersAPICreateOrganizationResponse, error)
 
-	CreateOrganizationWithResponse(ctx context.Context, body CreateOrganizationJSONRequestBody) (*CreateOrganizationResponse, error)
+	UsersAPICreateOrganizationWithResponse(ctx context.Context, body UsersAPICreateOrganizationJSONRequestBody) (*UsersAPICreateOrganizationResponse, error)
 
-	// DeleteOrganization request
-	DeleteOrganizationWithResponse(ctx context.Context, id string) (*DeleteOrganizationResponse, error)
+	// UsersAPIDeleteOrganization request
+	UsersAPIDeleteOrganizationWithResponse(ctx context.Context, id string) (*UsersAPIDeleteOrganizationResponse, error)
 
-	// GetOrganization request
-	GetOrganizationWithResponse(ctx context.Context, id string) (*GetOrganizationResponse, error)
+	// UsersAPIGetOrganization request
+	UsersAPIGetOrganizationWithResponse(ctx context.Context, id string) (*UsersAPIGetOrganizationResponse, error)
 
-	// UpdateOrganization request  with any body
-	UpdateOrganizationWithBodyWithResponse(ctx context.Context, id string, contentType string, body io.Reader) (*UpdateOrganizationResponse, error)
+	// UsersAPIEditOrganization request  with any body
+	UsersAPIEditOrganizationWithBodyWithResponse(ctx context.Context, id string, contentType string, body io.Reader) (*UsersAPIEditOrganizationResponse, error)
 
-	UpdateOrganizationWithResponse(ctx context.Context, id string, body UpdateOrganizationJSONRequestBody) (*UpdateOrganizationResponse, error)
-
-	// GetOrganizationUsers request
-	GetOrganizationUsersWithResponse(ctx context.Context, id string) (*GetOrganizationUsersResponse, error)
-
-	// CreateOrganizationUser request  with any body
-	CreateOrganizationUserWithBodyWithResponse(ctx context.Context, id string, contentType string, body io.Reader) (*CreateOrganizationUserResponse, error)
-
-	CreateOrganizationUserWithResponse(ctx context.Context, id string, body CreateOrganizationUserJSONRequestBody) (*CreateOrganizationUserResponse, error)
-
-	// DeleteOrganizationUser request
-	DeleteOrganizationUserWithResponse(ctx context.Context, id string, userId string) (*DeleteOrganizationUserResponse, error)
-
-	// UpdateOrganizationUser request  with any body
-	UpdateOrganizationUserWithBodyWithResponse(ctx context.Context, id string, userId string, contentType string, body io.Reader) (*UpdateOrganizationUserResponse, error)
-
-	UpdateOrganizationUserWithResponse(ctx context.Context, id string, userId string, body UpdateOrganizationUserJSONRequestBody) (*UpdateOrganizationUserResponse, error)
+	UsersAPIEditOrganizationWithResponse(ctx context.Context, id string, body UsersAPIEditOrganizationJSONRequestBody) (*UsersAPIEditOrganizationResponse, error)
 
 	// InventoryAPISyncClusterResources request
 	InventoryAPISyncClusterResourcesWithResponse(ctx context.Context, organizationId string, clusterId string) (*InventoryAPISyncClusterResourcesResponse, error)
@@ -5613,6 +5633,22 @@ type ClientWithResponsesInterface interface {
 
 	// InventoryAPIGetResourceUsage request
 	InventoryAPIGetResourceUsageWithResponse(ctx context.Context, organizationId string) (*InventoryAPIGetResourceUsageResponse, error)
+
+	// UsersAPIListOrganizationUsers request
+	UsersAPIListOrganizationUsersWithResponse(ctx context.Context, organizationId string) (*UsersAPIListOrganizationUsersResponse, error)
+
+	// UsersAPIAddUserToOrganization request  with any body
+	UsersAPIAddUserToOrganizationWithBodyWithResponse(ctx context.Context, organizationId string, contentType string, body io.Reader) (*UsersAPIAddUserToOrganizationResponse, error)
+
+	UsersAPIAddUserToOrganizationWithResponse(ctx context.Context, organizationId string, body UsersAPIAddUserToOrganizationJSONRequestBody) (*UsersAPIAddUserToOrganizationResponse, error)
+
+	// UsersAPIRemoveUserFromOrganization request
+	UsersAPIRemoveUserFromOrganizationWithResponse(ctx context.Context, organizationId string, userId string) (*UsersAPIRemoveUserFromOrganizationResponse, error)
+
+	// UsersAPIUpdateOrganizationUser request  with any body
+	UsersAPIUpdateOrganizationUserWithBodyWithResponse(ctx context.Context, organizationId string, userId string, contentType string, body io.Reader) (*UsersAPIUpdateOrganizationUserResponse, error)
+
+	UsersAPIUpdateOrganizationUserWithResponse(ctx context.Context, organizationId string, userId string, body UsersAPIUpdateOrganizationUserJSONRequestBody) (*UsersAPIUpdateOrganizationUserResponse, error)
 
 	// ScheduledRebalancingAPIListRebalancingSchedules request
 	ScheduledRebalancingAPIListRebalancingSchedulesWithResponse(ctx context.Context) (*ScheduledRebalancingAPIListRebalancingSchedulesResponse, error)
@@ -5821,14 +5857,14 @@ func (r AuthTokenAPIUpdateAuthTokenResponse) GetBody() []byte {
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
-type ListInvitationsResponse struct {
+type UsersAPIListInvitationsResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *InvitationsList
+	JSON200      *CastaiUsersV1beta1ListInvitationsResponse
 }
 
 // Status returns HTTPResponse.Status
-func (r ListInvitationsResponse) Status() string {
+func (r UsersAPIListInvitationsResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -5836,7 +5872,7 @@ func (r ListInvitationsResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r ListInvitationsResponse) StatusCode() int {
+func (r UsersAPIListInvitationsResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -5845,20 +5881,20 @@ func (r ListInvitationsResponse) StatusCode() int {
 
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
-func (r ListInvitationsResponse) GetBody() []byte {
+func (r UsersAPIListInvitationsResponse) GetBody() []byte {
 	return r.Body
 }
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
-type CreateInvitationResponse struct {
+type UsersAPICreateInvitationsResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *NewInvitationsResponse
+	JSON200      *CastaiUsersV1beta1CreateInvitationsResponse
 }
 
 // Status returns HTTPResponse.Status
-func (r CreateInvitationResponse) Status() string {
+func (r UsersAPICreateInvitationsResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -5866,7 +5902,7 @@ func (r CreateInvitationResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r CreateInvitationResponse) StatusCode() int {
+func (r UsersAPICreateInvitationsResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -5875,20 +5911,20 @@ func (r CreateInvitationResponse) StatusCode() int {
 
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
-func (r CreateInvitationResponse) GetBody() []byte {
+func (r UsersAPICreateInvitationsResponse) GetBody() []byte {
 	return r.Body
 }
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
-type DeleteInvitationResponse struct {
+type UsersAPIDeleteInvitationResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *map[string]interface{}
+	JSON200      *CastaiUsersV1beta1DeleteInvitationResponse
 }
 
 // Status returns HTTPResponse.Status
-func (r DeleteInvitationResponse) Status() string {
+func (r UsersAPIDeleteInvitationResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -5896,7 +5932,7 @@ func (r DeleteInvitationResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r DeleteInvitationResponse) StatusCode() int {
+func (r UsersAPIDeleteInvitationResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -5905,20 +5941,20 @@ func (r DeleteInvitationResponse) StatusCode() int {
 
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
-func (r DeleteInvitationResponse) GetBody() []byte {
+func (r UsersAPIDeleteInvitationResponse) GetBody() []byte {
 	return r.Body
 }
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
-type ClaimInvitationResponse struct {
+type UsersAPIClaimInvitationResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *map[string]interface{}
+	JSON200      *CastaiUsersV1beta1ClaimInvitationResponse
 }
 
 // Status returns HTTPResponse.Status
-func (r ClaimInvitationResponse) Status() string {
+func (r UsersAPIClaimInvitationResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -5926,7 +5962,7 @@ func (r ClaimInvitationResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r ClaimInvitationResponse) StatusCode() int {
+func (r UsersAPIClaimInvitationResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -5935,7 +5971,7 @@ func (r ClaimInvitationResponse) StatusCode() int {
 
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
-func (r ClaimInvitationResponse) GetBody() []byte {
+func (r UsersAPIClaimInvitationResponse) GetBody() []byte {
 	return r.Body
 }
 
@@ -7260,14 +7296,14 @@ func (r ExternalClusterAPICreateClusterTokenResponse) GetBody() []byte {
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
-type CurrentUserProfileResponse struct {
+type UsersAPICurrentUserProfileResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *UserProfileResponse
+	JSON200      *CastaiUsersV1beta1CurrentUserProfileResponse
 }
 
 // Status returns HTTPResponse.Status
-func (r CurrentUserProfileResponse) Status() string {
+func (r UsersAPICurrentUserProfileResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -7275,7 +7311,7 @@ func (r CurrentUserProfileResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r CurrentUserProfileResponse) StatusCode() int {
+func (r UsersAPICurrentUserProfileResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -7284,20 +7320,20 @@ func (r CurrentUserProfileResponse) StatusCode() int {
 
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
-func (r CurrentUserProfileResponse) GetBody() []byte {
+func (r UsersAPICurrentUserProfileResponse) GetBody() []byte {
 	return r.Body
 }
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
-type UpdateCurrentUserProfileResponse struct {
+type UsersAPIUpdateCurrentUserProfileResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *UserProfile
+	JSON200      *CastaiUsersV1beta1User
 }
 
 // Status returns HTTPResponse.Status
-func (r UpdateCurrentUserProfileResponse) Status() string {
+func (r UsersAPIUpdateCurrentUserProfileResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -7305,7 +7341,7 @@ func (r UpdateCurrentUserProfileResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r UpdateCurrentUserProfileResponse) StatusCode() int {
+func (r UsersAPIUpdateCurrentUserProfileResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -7314,20 +7350,20 @@ func (r UpdateCurrentUserProfileResponse) StatusCode() int {
 
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
-func (r UpdateCurrentUserProfileResponse) GetBody() []byte {
+func (r UsersAPIUpdateCurrentUserProfileResponse) GetBody() []byte {
 	return r.Body
 }
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
-type ListOrganizationsResponse struct {
+type UsersAPIListOrganizationsResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *OrganizationsList
+	JSON200      *CastaiUsersV1beta1ListOrganizationsResponse
 }
 
 // Status returns HTTPResponse.Status
-func (r ListOrganizationsResponse) Status() string {
+func (r UsersAPIListOrganizationsResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -7335,7 +7371,7 @@ func (r ListOrganizationsResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r ListOrganizationsResponse) StatusCode() int {
+func (r UsersAPIListOrganizationsResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -7344,20 +7380,20 @@ func (r ListOrganizationsResponse) StatusCode() int {
 
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
-func (r ListOrganizationsResponse) GetBody() []byte {
+func (r UsersAPIListOrganizationsResponse) GetBody() []byte {
 	return r.Body
 }
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
-type CreateOrganizationResponse struct {
+type UsersAPICreateOrganizationResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *Organization
+	JSON200      *CastaiUsersV1beta1Organization
 }
 
 // Status returns HTTPResponse.Status
-func (r CreateOrganizationResponse) Status() string {
+func (r UsersAPICreateOrganizationResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -7365,7 +7401,7 @@ func (r CreateOrganizationResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r CreateOrganizationResponse) StatusCode() int {
+func (r UsersAPICreateOrganizationResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -7374,20 +7410,20 @@ func (r CreateOrganizationResponse) StatusCode() int {
 
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
-func (r CreateOrganizationResponse) GetBody() []byte {
+func (r UsersAPICreateOrganizationResponse) GetBody() []byte {
 	return r.Body
 }
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
-type DeleteOrganizationResponse struct {
+type UsersAPIDeleteOrganizationResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *Organization
+	JSON200      *CastaiUsersV1beta1DeleteOrganizationResponse
 }
 
 // Status returns HTTPResponse.Status
-func (r DeleteOrganizationResponse) Status() string {
+func (r UsersAPIDeleteOrganizationResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -7395,7 +7431,7 @@ func (r DeleteOrganizationResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r DeleteOrganizationResponse) StatusCode() int {
+func (r UsersAPIDeleteOrganizationResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -7404,20 +7440,20 @@ func (r DeleteOrganizationResponse) StatusCode() int {
 
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
-func (r DeleteOrganizationResponse) GetBody() []byte {
+func (r UsersAPIDeleteOrganizationResponse) GetBody() []byte {
 	return r.Body
 }
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
-type GetOrganizationResponse struct {
+type UsersAPIGetOrganizationResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *Organization
+	JSON200      *CastaiUsersV1beta1Organization
 }
 
 // Status returns HTTPResponse.Status
-func (r GetOrganizationResponse) Status() string {
+func (r UsersAPIGetOrganizationResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -7425,7 +7461,7 @@ func (r GetOrganizationResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r GetOrganizationResponse) StatusCode() int {
+func (r UsersAPIGetOrganizationResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -7434,20 +7470,20 @@ func (r GetOrganizationResponse) StatusCode() int {
 
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
-func (r GetOrganizationResponse) GetBody() []byte {
+func (r UsersAPIGetOrganizationResponse) GetBody() []byte {
 	return r.Body
 }
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
-type UpdateOrganizationResponse struct {
+type UsersAPIEditOrganizationResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *Organization
+	JSON200      *CastaiUsersV1beta1Organization
 }
 
 // Status returns HTTPResponse.Status
-func (r UpdateOrganizationResponse) Status() string {
+func (r UsersAPIEditOrganizationResponse) Status() string {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.Status
 	}
@@ -7455,7 +7491,7 @@ func (r UpdateOrganizationResponse) Status() string {
 }
 
 // StatusCode returns HTTPResponse.StatusCode
-func (r UpdateOrganizationResponse) StatusCode() int {
+func (r UsersAPIEditOrganizationResponse) StatusCode() int {
 	if r.HTTPResponse != nil {
 		return r.HTTPResponse.StatusCode
 	}
@@ -7464,127 +7500,7 @@ func (r UpdateOrganizationResponse) StatusCode() int {
 
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
-func (r UpdateOrganizationResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-
-type GetOrganizationUsersResponse struct {
-	Body         []byte
-	HTTPResponse *http.Response
-	JSON200      *OrganizationUsersList
-}
-
-// Status returns HTTPResponse.Status
-func (r GetOrganizationUsersResponse) Status() string {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.Status
-	}
-	return http.StatusText(0)
-}
-
-// StatusCode returns HTTPResponse.StatusCode
-func (r GetOrganizationUsersResponse) StatusCode() int {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.StatusCode
-	}
-	return 0
-}
-
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r GetOrganizationUsersResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-
-type CreateOrganizationUserResponse struct {
-	Body         []byte
-	HTTPResponse *http.Response
-	JSON200      *OrganizationUser
-}
-
-// Status returns HTTPResponse.Status
-func (r CreateOrganizationUserResponse) Status() string {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.Status
-	}
-	return http.StatusText(0)
-}
-
-// StatusCode returns HTTPResponse.StatusCode
-func (r CreateOrganizationUserResponse) StatusCode() int {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.StatusCode
-	}
-	return 0
-}
-
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r CreateOrganizationUserResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-
-type DeleteOrganizationUserResponse struct {
-	Body         []byte
-	HTTPResponse *http.Response
-	JSON200      *map[string]interface{}
-}
-
-// Status returns HTTPResponse.Status
-func (r DeleteOrganizationUserResponse) Status() string {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.Status
-	}
-	return http.StatusText(0)
-}
-
-// StatusCode returns HTTPResponse.StatusCode
-func (r DeleteOrganizationUserResponse) StatusCode() int {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.StatusCode
-	}
-	return 0
-}
-
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r DeleteOrganizationUserResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-
-type UpdateOrganizationUserResponse struct {
-	Body         []byte
-	HTTPResponse *http.Response
-	JSON200      *OrganizationUser
-}
-
-// Status returns HTTPResponse.Status
-func (r UpdateOrganizationUserResponse) Status() string {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.Status
-	}
-	return http.StatusText(0)
-}
-
-// StatusCode returns HTTPResponse.StatusCode
-func (r UpdateOrganizationUserResponse) StatusCode() int {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.StatusCode
-	}
-	return 0
-}
-
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r UpdateOrganizationUserResponse) GetBody() []byte {
+func (r UsersAPIEditOrganizationResponse) GetBody() []byte {
 	return r.Body
 }
 
@@ -7795,6 +7711,126 @@ func (r InventoryAPIGetResourceUsageResponse) StatusCode() int {
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
 func (r InventoryAPIGetResourceUsageResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type UsersAPIListOrganizationUsersResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *CastaiUsersV1beta1ListOrganizationUsersResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r UsersAPIListOrganizationUsersResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r UsersAPIListOrganizationUsersResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r UsersAPIListOrganizationUsersResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type UsersAPIAddUserToOrganizationResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *CastaiUsersV1beta1AddUserToOrganizationResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r UsersAPIAddUserToOrganizationResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r UsersAPIAddUserToOrganizationResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r UsersAPIAddUserToOrganizationResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type UsersAPIRemoveUserFromOrganizationResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *CastaiUsersV1beta1RemoveUserFromOrganizationResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r UsersAPIRemoveUserFromOrganizationResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r UsersAPIRemoveUserFromOrganizationResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r UsersAPIRemoveUserFromOrganizationResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type UsersAPIUpdateOrganizationUserResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *CastaiUsersV1beta1Membership
+}
+
+// Status returns HTTPResponse.Status
+func (r UsersAPIUpdateOrganizationUserResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r UsersAPIUpdateOrganizationUserResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r UsersAPIUpdateOrganizationUserResponse) GetBody() []byte {
 	return r.Body
 }
 
@@ -8249,56 +8285,56 @@ func (c *ClientWithResponses) AuthTokenAPIUpdateAuthTokenWithResponse(ctx contex
 	return ParseAuthTokenAPIUpdateAuthTokenResponse(rsp)
 }
 
-// ListInvitationsWithResponse request returning *ListInvitationsResponse
-func (c *ClientWithResponses) ListInvitationsWithResponse(ctx context.Context, params *ListInvitationsParams) (*ListInvitationsResponse, error) {
-	rsp, err := c.ListInvitations(ctx, params)
+// UsersAPIListInvitationsWithResponse request returning *UsersAPIListInvitationsResponse
+func (c *ClientWithResponses) UsersAPIListInvitationsWithResponse(ctx context.Context, params *UsersAPIListInvitationsParams) (*UsersAPIListInvitationsResponse, error) {
+	rsp, err := c.UsersAPIListInvitations(ctx, params)
 	if err != nil {
 		return nil, err
 	}
-	return ParseListInvitationsResponse(rsp)
+	return ParseUsersAPIListInvitationsResponse(rsp)
 }
 
-// CreateInvitationWithBodyWithResponse request with arbitrary body returning *CreateInvitationResponse
-func (c *ClientWithResponses) CreateInvitationWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*CreateInvitationResponse, error) {
-	rsp, err := c.CreateInvitationWithBody(ctx, contentType, body)
+// UsersAPICreateInvitationsWithBodyWithResponse request with arbitrary body returning *UsersAPICreateInvitationsResponse
+func (c *ClientWithResponses) UsersAPICreateInvitationsWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*UsersAPICreateInvitationsResponse, error) {
+	rsp, err := c.UsersAPICreateInvitationsWithBody(ctx, contentType, body)
 	if err != nil {
 		return nil, err
 	}
-	return ParseCreateInvitationResponse(rsp)
+	return ParseUsersAPICreateInvitationsResponse(rsp)
 }
 
-func (c *ClientWithResponses) CreateInvitationWithResponse(ctx context.Context, body CreateInvitationJSONRequestBody) (*CreateInvitationResponse, error) {
-	rsp, err := c.CreateInvitation(ctx, body)
+func (c *ClientWithResponses) UsersAPICreateInvitationsWithResponse(ctx context.Context, body UsersAPICreateInvitationsJSONRequestBody) (*UsersAPICreateInvitationsResponse, error) {
+	rsp, err := c.UsersAPICreateInvitations(ctx, body)
 	if err != nil {
 		return nil, err
 	}
-	return ParseCreateInvitationResponse(rsp)
+	return ParseUsersAPICreateInvitationsResponse(rsp)
 }
 
-// DeleteInvitationWithResponse request returning *DeleteInvitationResponse
-func (c *ClientWithResponses) DeleteInvitationWithResponse(ctx context.Context, id string) (*DeleteInvitationResponse, error) {
-	rsp, err := c.DeleteInvitation(ctx, id)
+// UsersAPIDeleteInvitationWithResponse request returning *UsersAPIDeleteInvitationResponse
+func (c *ClientWithResponses) UsersAPIDeleteInvitationWithResponse(ctx context.Context, id string) (*UsersAPIDeleteInvitationResponse, error) {
+	rsp, err := c.UsersAPIDeleteInvitation(ctx, id)
 	if err != nil {
 		return nil, err
 	}
-	return ParseDeleteInvitationResponse(rsp)
+	return ParseUsersAPIDeleteInvitationResponse(rsp)
 }
 
-// ClaimInvitationWithBodyWithResponse request with arbitrary body returning *ClaimInvitationResponse
-func (c *ClientWithResponses) ClaimInvitationWithBodyWithResponse(ctx context.Context, id string, contentType string, body io.Reader) (*ClaimInvitationResponse, error) {
-	rsp, err := c.ClaimInvitationWithBody(ctx, id, contentType, body)
+// UsersAPIClaimInvitationWithBodyWithResponse request with arbitrary body returning *UsersAPIClaimInvitationResponse
+func (c *ClientWithResponses) UsersAPIClaimInvitationWithBodyWithResponse(ctx context.Context, invitationId string, contentType string, body io.Reader) (*UsersAPIClaimInvitationResponse, error) {
+	rsp, err := c.UsersAPIClaimInvitationWithBody(ctx, invitationId, contentType, body)
 	if err != nil {
 		return nil, err
 	}
-	return ParseClaimInvitationResponse(rsp)
+	return ParseUsersAPIClaimInvitationResponse(rsp)
 }
 
-func (c *ClientWithResponses) ClaimInvitationWithResponse(ctx context.Context, id string, body ClaimInvitationJSONRequestBody) (*ClaimInvitationResponse, error) {
-	rsp, err := c.ClaimInvitation(ctx, id, body)
+func (c *ClientWithResponses) UsersAPIClaimInvitationWithResponse(ctx context.Context, invitationId string, body UsersAPIClaimInvitationJSONRequestBody) (*UsersAPIClaimInvitationResponse, error) {
+	rsp, err := c.UsersAPIClaimInvitation(ctx, invitationId, body)
 	if err != nil {
 		return nil, err
 	}
-	return ParseClaimInvitationResponse(rsp)
+	return ParseUsersAPIClaimInvitationResponse(rsp)
 }
 
 // EvictorAPIGetAdvancedConfigWithResponse request returning *EvictorAPIGetAdvancedConfigResponse
@@ -8825,143 +8861,91 @@ func (c *ClientWithResponses) ExternalClusterAPICreateClusterTokenWithResponse(c
 	return ParseExternalClusterAPICreateClusterTokenResponse(rsp)
 }
 
-// CurrentUserProfileWithResponse request returning *CurrentUserProfileResponse
-func (c *ClientWithResponses) CurrentUserProfileWithResponse(ctx context.Context) (*CurrentUserProfileResponse, error) {
-	rsp, err := c.CurrentUserProfile(ctx)
+// UsersAPICurrentUserProfileWithResponse request returning *UsersAPICurrentUserProfileResponse
+func (c *ClientWithResponses) UsersAPICurrentUserProfileWithResponse(ctx context.Context) (*UsersAPICurrentUserProfileResponse, error) {
+	rsp, err := c.UsersAPICurrentUserProfile(ctx)
 	if err != nil {
 		return nil, err
 	}
-	return ParseCurrentUserProfileResponse(rsp)
+	return ParseUsersAPICurrentUserProfileResponse(rsp)
 }
 
-// UpdateCurrentUserProfileWithBodyWithResponse request with arbitrary body returning *UpdateCurrentUserProfileResponse
-func (c *ClientWithResponses) UpdateCurrentUserProfileWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*UpdateCurrentUserProfileResponse, error) {
-	rsp, err := c.UpdateCurrentUserProfileWithBody(ctx, contentType, body)
+// UsersAPIUpdateCurrentUserProfileWithBodyWithResponse request with arbitrary body returning *UsersAPIUpdateCurrentUserProfileResponse
+func (c *ClientWithResponses) UsersAPIUpdateCurrentUserProfileWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*UsersAPIUpdateCurrentUserProfileResponse, error) {
+	rsp, err := c.UsersAPIUpdateCurrentUserProfileWithBody(ctx, contentType, body)
 	if err != nil {
 		return nil, err
 	}
-	return ParseUpdateCurrentUserProfileResponse(rsp)
+	return ParseUsersAPIUpdateCurrentUserProfileResponse(rsp)
 }
 
-func (c *ClientWithResponses) UpdateCurrentUserProfileWithResponse(ctx context.Context, body UpdateCurrentUserProfileJSONRequestBody) (*UpdateCurrentUserProfileResponse, error) {
-	rsp, err := c.UpdateCurrentUserProfile(ctx, body)
+func (c *ClientWithResponses) UsersAPIUpdateCurrentUserProfileWithResponse(ctx context.Context, body UsersAPIUpdateCurrentUserProfileJSONRequestBody) (*UsersAPIUpdateCurrentUserProfileResponse, error) {
+	rsp, err := c.UsersAPIUpdateCurrentUserProfile(ctx, body)
 	if err != nil {
 		return nil, err
 	}
-	return ParseUpdateCurrentUserProfileResponse(rsp)
+	return ParseUsersAPIUpdateCurrentUserProfileResponse(rsp)
 }
 
-// ListOrganizationsWithResponse request returning *ListOrganizationsResponse
-func (c *ClientWithResponses) ListOrganizationsWithResponse(ctx context.Context) (*ListOrganizationsResponse, error) {
-	rsp, err := c.ListOrganizations(ctx)
+// UsersAPIListOrganizationsWithResponse request returning *UsersAPIListOrganizationsResponse
+func (c *ClientWithResponses) UsersAPIListOrganizationsWithResponse(ctx context.Context, params *UsersAPIListOrganizationsParams) (*UsersAPIListOrganizationsResponse, error) {
+	rsp, err := c.UsersAPIListOrganizations(ctx, params)
 	if err != nil {
 		return nil, err
 	}
-	return ParseListOrganizationsResponse(rsp)
+	return ParseUsersAPIListOrganizationsResponse(rsp)
 }
 
-// CreateOrganizationWithBodyWithResponse request with arbitrary body returning *CreateOrganizationResponse
-func (c *ClientWithResponses) CreateOrganizationWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*CreateOrganizationResponse, error) {
-	rsp, err := c.CreateOrganizationWithBody(ctx, contentType, body)
+// UsersAPICreateOrganizationWithBodyWithResponse request with arbitrary body returning *UsersAPICreateOrganizationResponse
+func (c *ClientWithResponses) UsersAPICreateOrganizationWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*UsersAPICreateOrganizationResponse, error) {
+	rsp, err := c.UsersAPICreateOrganizationWithBody(ctx, contentType, body)
 	if err != nil {
 		return nil, err
 	}
-	return ParseCreateOrganizationResponse(rsp)
+	return ParseUsersAPICreateOrganizationResponse(rsp)
 }
 
-func (c *ClientWithResponses) CreateOrganizationWithResponse(ctx context.Context, body CreateOrganizationJSONRequestBody) (*CreateOrganizationResponse, error) {
-	rsp, err := c.CreateOrganization(ctx, body)
+func (c *ClientWithResponses) UsersAPICreateOrganizationWithResponse(ctx context.Context, body UsersAPICreateOrganizationJSONRequestBody) (*UsersAPICreateOrganizationResponse, error) {
+	rsp, err := c.UsersAPICreateOrganization(ctx, body)
 	if err != nil {
 		return nil, err
 	}
-	return ParseCreateOrganizationResponse(rsp)
+	return ParseUsersAPICreateOrganizationResponse(rsp)
 }
 
-// DeleteOrganizationWithResponse request returning *DeleteOrganizationResponse
-func (c *ClientWithResponses) DeleteOrganizationWithResponse(ctx context.Context, id string) (*DeleteOrganizationResponse, error) {
-	rsp, err := c.DeleteOrganization(ctx, id)
+// UsersAPIDeleteOrganizationWithResponse request returning *UsersAPIDeleteOrganizationResponse
+func (c *ClientWithResponses) UsersAPIDeleteOrganizationWithResponse(ctx context.Context, id string) (*UsersAPIDeleteOrganizationResponse, error) {
+	rsp, err := c.UsersAPIDeleteOrganization(ctx, id)
 	if err != nil {
 		return nil, err
 	}
-	return ParseDeleteOrganizationResponse(rsp)
+	return ParseUsersAPIDeleteOrganizationResponse(rsp)
 }
 
-// GetOrganizationWithResponse request returning *GetOrganizationResponse
-func (c *ClientWithResponses) GetOrganizationWithResponse(ctx context.Context, id string) (*GetOrganizationResponse, error) {
-	rsp, err := c.GetOrganization(ctx, id)
+// UsersAPIGetOrganizationWithResponse request returning *UsersAPIGetOrganizationResponse
+func (c *ClientWithResponses) UsersAPIGetOrganizationWithResponse(ctx context.Context, id string) (*UsersAPIGetOrganizationResponse, error) {
+	rsp, err := c.UsersAPIGetOrganization(ctx, id)
 	if err != nil {
 		return nil, err
 	}
-	return ParseGetOrganizationResponse(rsp)
+	return ParseUsersAPIGetOrganizationResponse(rsp)
 }
 
-// UpdateOrganizationWithBodyWithResponse request with arbitrary body returning *UpdateOrganizationResponse
-func (c *ClientWithResponses) UpdateOrganizationWithBodyWithResponse(ctx context.Context, id string, contentType string, body io.Reader) (*UpdateOrganizationResponse, error) {
-	rsp, err := c.UpdateOrganizationWithBody(ctx, id, contentType, body)
+// UsersAPIEditOrganizationWithBodyWithResponse request with arbitrary body returning *UsersAPIEditOrganizationResponse
+func (c *ClientWithResponses) UsersAPIEditOrganizationWithBodyWithResponse(ctx context.Context, id string, contentType string, body io.Reader) (*UsersAPIEditOrganizationResponse, error) {
+	rsp, err := c.UsersAPIEditOrganizationWithBody(ctx, id, contentType, body)
 	if err != nil {
 		return nil, err
 	}
-	return ParseUpdateOrganizationResponse(rsp)
+	return ParseUsersAPIEditOrganizationResponse(rsp)
 }
 
-func (c *ClientWithResponses) UpdateOrganizationWithResponse(ctx context.Context, id string, body UpdateOrganizationJSONRequestBody) (*UpdateOrganizationResponse, error) {
-	rsp, err := c.UpdateOrganization(ctx, id, body)
+func (c *ClientWithResponses) UsersAPIEditOrganizationWithResponse(ctx context.Context, id string, body UsersAPIEditOrganizationJSONRequestBody) (*UsersAPIEditOrganizationResponse, error) {
+	rsp, err := c.UsersAPIEditOrganization(ctx, id, body)
 	if err != nil {
 		return nil, err
 	}
-	return ParseUpdateOrganizationResponse(rsp)
-}
-
-// GetOrganizationUsersWithResponse request returning *GetOrganizationUsersResponse
-func (c *ClientWithResponses) GetOrganizationUsersWithResponse(ctx context.Context, id string) (*GetOrganizationUsersResponse, error) {
-	rsp, err := c.GetOrganizationUsers(ctx, id)
-	if err != nil {
-		return nil, err
-	}
-	return ParseGetOrganizationUsersResponse(rsp)
-}
-
-// CreateOrganizationUserWithBodyWithResponse request with arbitrary body returning *CreateOrganizationUserResponse
-func (c *ClientWithResponses) CreateOrganizationUserWithBodyWithResponse(ctx context.Context, id string, contentType string, body io.Reader) (*CreateOrganizationUserResponse, error) {
-	rsp, err := c.CreateOrganizationUserWithBody(ctx, id, contentType, body)
-	if err != nil {
-		return nil, err
-	}
-	return ParseCreateOrganizationUserResponse(rsp)
-}
-
-func (c *ClientWithResponses) CreateOrganizationUserWithResponse(ctx context.Context, id string, body CreateOrganizationUserJSONRequestBody) (*CreateOrganizationUserResponse, error) {
-	rsp, err := c.CreateOrganizationUser(ctx, id, body)
-	if err != nil {
-		return nil, err
-	}
-	return ParseCreateOrganizationUserResponse(rsp)
-}
-
-// DeleteOrganizationUserWithResponse request returning *DeleteOrganizationUserResponse
-func (c *ClientWithResponses) DeleteOrganizationUserWithResponse(ctx context.Context, id string, userId string) (*DeleteOrganizationUserResponse, error) {
-	rsp, err := c.DeleteOrganizationUser(ctx, id, userId)
-	if err != nil {
-		return nil, err
-	}
-	return ParseDeleteOrganizationUserResponse(rsp)
-}
-
-// UpdateOrganizationUserWithBodyWithResponse request with arbitrary body returning *UpdateOrganizationUserResponse
-func (c *ClientWithResponses) UpdateOrganizationUserWithBodyWithResponse(ctx context.Context, id string, userId string, contentType string, body io.Reader) (*UpdateOrganizationUserResponse, error) {
-	rsp, err := c.UpdateOrganizationUserWithBody(ctx, id, userId, contentType, body)
-	if err != nil {
-		return nil, err
-	}
-	return ParseUpdateOrganizationUserResponse(rsp)
-}
-
-func (c *ClientWithResponses) UpdateOrganizationUserWithResponse(ctx context.Context, id string, userId string, body UpdateOrganizationUserJSONRequestBody) (*UpdateOrganizationUserResponse, error) {
-	rsp, err := c.UpdateOrganizationUser(ctx, id, userId, body)
-	if err != nil {
-		return nil, err
-	}
-	return ParseUpdateOrganizationUserResponse(rsp)
+	return ParseUsersAPIEditOrganizationResponse(rsp)
 }
 
 // InventoryAPISyncClusterResourcesWithResponse request returning *InventoryAPISyncClusterResourcesResponse
@@ -9041,6 +9025,58 @@ func (c *ClientWithResponses) InventoryAPIGetResourceUsageWithResponse(ctx conte
 		return nil, err
 	}
 	return ParseInventoryAPIGetResourceUsageResponse(rsp)
+}
+
+// UsersAPIListOrganizationUsersWithResponse request returning *UsersAPIListOrganizationUsersResponse
+func (c *ClientWithResponses) UsersAPIListOrganizationUsersWithResponse(ctx context.Context, organizationId string) (*UsersAPIListOrganizationUsersResponse, error) {
+	rsp, err := c.UsersAPIListOrganizationUsers(ctx, organizationId)
+	if err != nil {
+		return nil, err
+	}
+	return ParseUsersAPIListOrganizationUsersResponse(rsp)
+}
+
+// UsersAPIAddUserToOrganizationWithBodyWithResponse request with arbitrary body returning *UsersAPIAddUserToOrganizationResponse
+func (c *ClientWithResponses) UsersAPIAddUserToOrganizationWithBodyWithResponse(ctx context.Context, organizationId string, contentType string, body io.Reader) (*UsersAPIAddUserToOrganizationResponse, error) {
+	rsp, err := c.UsersAPIAddUserToOrganizationWithBody(ctx, organizationId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseUsersAPIAddUserToOrganizationResponse(rsp)
+}
+
+func (c *ClientWithResponses) UsersAPIAddUserToOrganizationWithResponse(ctx context.Context, organizationId string, body UsersAPIAddUserToOrganizationJSONRequestBody) (*UsersAPIAddUserToOrganizationResponse, error) {
+	rsp, err := c.UsersAPIAddUserToOrganization(ctx, organizationId, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseUsersAPIAddUserToOrganizationResponse(rsp)
+}
+
+// UsersAPIRemoveUserFromOrganizationWithResponse request returning *UsersAPIRemoveUserFromOrganizationResponse
+func (c *ClientWithResponses) UsersAPIRemoveUserFromOrganizationWithResponse(ctx context.Context, organizationId string, userId string) (*UsersAPIRemoveUserFromOrganizationResponse, error) {
+	rsp, err := c.UsersAPIRemoveUserFromOrganization(ctx, organizationId, userId)
+	if err != nil {
+		return nil, err
+	}
+	return ParseUsersAPIRemoveUserFromOrganizationResponse(rsp)
+}
+
+// UsersAPIUpdateOrganizationUserWithBodyWithResponse request with arbitrary body returning *UsersAPIUpdateOrganizationUserResponse
+func (c *ClientWithResponses) UsersAPIUpdateOrganizationUserWithBodyWithResponse(ctx context.Context, organizationId string, userId string, contentType string, body io.Reader) (*UsersAPIUpdateOrganizationUserResponse, error) {
+	rsp, err := c.UsersAPIUpdateOrganizationUserWithBody(ctx, organizationId, userId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseUsersAPIUpdateOrganizationUserResponse(rsp)
+}
+
+func (c *ClientWithResponses) UsersAPIUpdateOrganizationUserWithResponse(ctx context.Context, organizationId string, userId string, body UsersAPIUpdateOrganizationUserJSONRequestBody) (*UsersAPIUpdateOrganizationUserResponse, error) {
+	rsp, err := c.UsersAPIUpdateOrganizationUser(ctx, organizationId, userId, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseUsersAPIUpdateOrganizationUserResponse(rsp)
 }
 
 // ScheduledRebalancingAPIListRebalancingSchedulesWithResponse request returning *ScheduledRebalancingAPIListRebalancingSchedulesResponse
@@ -9322,22 +9358,22 @@ func ParseAuthTokenAPIUpdateAuthTokenResponse(rsp *http.Response) (*AuthTokenAPI
 	return response, nil
 }
 
-// ParseListInvitationsResponse parses an HTTP response from a ListInvitationsWithResponse call
-func ParseListInvitationsResponse(rsp *http.Response) (*ListInvitationsResponse, error) {
+// ParseUsersAPIListInvitationsResponse parses an HTTP response from a UsersAPIListInvitationsWithResponse call
+func ParseUsersAPIListInvitationsResponse(rsp *http.Response) (*UsersAPIListInvitationsResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
 	defer rsp.Body.Close()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &ListInvitationsResponse{
+	response := &UsersAPIListInvitationsResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest InvitationsList
+		var dest CastaiUsersV1beta1ListInvitationsResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -9348,22 +9384,22 @@ func ParseListInvitationsResponse(rsp *http.Response) (*ListInvitationsResponse,
 	return response, nil
 }
 
-// ParseCreateInvitationResponse parses an HTTP response from a CreateInvitationWithResponse call
-func ParseCreateInvitationResponse(rsp *http.Response) (*CreateInvitationResponse, error) {
+// ParseUsersAPICreateInvitationsResponse parses an HTTP response from a UsersAPICreateInvitationsWithResponse call
+func ParseUsersAPICreateInvitationsResponse(rsp *http.Response) (*UsersAPICreateInvitationsResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
 	defer rsp.Body.Close()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &CreateInvitationResponse{
+	response := &UsersAPICreateInvitationsResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest NewInvitationsResponse
+		var dest CastaiUsersV1beta1CreateInvitationsResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -9374,22 +9410,22 @@ func ParseCreateInvitationResponse(rsp *http.Response) (*CreateInvitationRespons
 	return response, nil
 }
 
-// ParseDeleteInvitationResponse parses an HTTP response from a DeleteInvitationWithResponse call
-func ParseDeleteInvitationResponse(rsp *http.Response) (*DeleteInvitationResponse, error) {
+// ParseUsersAPIDeleteInvitationResponse parses an HTTP response from a UsersAPIDeleteInvitationWithResponse call
+func ParseUsersAPIDeleteInvitationResponse(rsp *http.Response) (*UsersAPIDeleteInvitationResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
 	defer rsp.Body.Close()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &DeleteInvitationResponse{
+	response := &UsersAPIDeleteInvitationResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest map[string]interface{}
+		var dest CastaiUsersV1beta1DeleteInvitationResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -9400,22 +9436,22 @@ func ParseDeleteInvitationResponse(rsp *http.Response) (*DeleteInvitationRespons
 	return response, nil
 }
 
-// ParseClaimInvitationResponse parses an HTTP response from a ClaimInvitationWithResponse call
-func ParseClaimInvitationResponse(rsp *http.Response) (*ClaimInvitationResponse, error) {
+// ParseUsersAPIClaimInvitationResponse parses an HTTP response from a UsersAPIClaimInvitationWithResponse call
+func ParseUsersAPIClaimInvitationResponse(rsp *http.Response) (*UsersAPIClaimInvitationResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
 	defer rsp.Body.Close()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &ClaimInvitationResponse{
+	response := &UsersAPIClaimInvitationResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest map[string]interface{}
+		var dest CastaiUsersV1beta1ClaimInvitationResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -10560,22 +10596,22 @@ func ParseExternalClusterAPICreateClusterTokenResponse(rsp *http.Response) (*Ext
 	return response, nil
 }
 
-// ParseCurrentUserProfileResponse parses an HTTP response from a CurrentUserProfileWithResponse call
-func ParseCurrentUserProfileResponse(rsp *http.Response) (*CurrentUserProfileResponse, error) {
+// ParseUsersAPICurrentUserProfileResponse parses an HTTP response from a UsersAPICurrentUserProfileWithResponse call
+func ParseUsersAPICurrentUserProfileResponse(rsp *http.Response) (*UsersAPICurrentUserProfileResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
 	defer rsp.Body.Close()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &CurrentUserProfileResponse{
+	response := &UsersAPICurrentUserProfileResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest UserProfileResponse
+		var dest CastaiUsersV1beta1CurrentUserProfileResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -10586,22 +10622,22 @@ func ParseCurrentUserProfileResponse(rsp *http.Response) (*CurrentUserProfileRes
 	return response, nil
 }
 
-// ParseUpdateCurrentUserProfileResponse parses an HTTP response from a UpdateCurrentUserProfileWithResponse call
-func ParseUpdateCurrentUserProfileResponse(rsp *http.Response) (*UpdateCurrentUserProfileResponse, error) {
+// ParseUsersAPIUpdateCurrentUserProfileResponse parses an HTTP response from a UsersAPIUpdateCurrentUserProfileWithResponse call
+func ParseUsersAPIUpdateCurrentUserProfileResponse(rsp *http.Response) (*UsersAPIUpdateCurrentUserProfileResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
 	defer rsp.Body.Close()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &UpdateCurrentUserProfileResponse{
+	response := &UsersAPIUpdateCurrentUserProfileResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest UserProfile
+		var dest CastaiUsersV1beta1User
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -10612,22 +10648,22 @@ func ParseUpdateCurrentUserProfileResponse(rsp *http.Response) (*UpdateCurrentUs
 	return response, nil
 }
 
-// ParseListOrganizationsResponse parses an HTTP response from a ListOrganizationsWithResponse call
-func ParseListOrganizationsResponse(rsp *http.Response) (*ListOrganizationsResponse, error) {
+// ParseUsersAPIListOrganizationsResponse parses an HTTP response from a UsersAPIListOrganizationsWithResponse call
+func ParseUsersAPIListOrganizationsResponse(rsp *http.Response) (*UsersAPIListOrganizationsResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
 	defer rsp.Body.Close()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &ListOrganizationsResponse{
+	response := &UsersAPIListOrganizationsResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest OrganizationsList
+		var dest CastaiUsersV1beta1ListOrganizationsResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -10638,22 +10674,22 @@ func ParseListOrganizationsResponse(rsp *http.Response) (*ListOrganizationsRespo
 	return response, nil
 }
 
-// ParseCreateOrganizationResponse parses an HTTP response from a CreateOrganizationWithResponse call
-func ParseCreateOrganizationResponse(rsp *http.Response) (*CreateOrganizationResponse, error) {
+// ParseUsersAPICreateOrganizationResponse parses an HTTP response from a UsersAPICreateOrganizationWithResponse call
+func ParseUsersAPICreateOrganizationResponse(rsp *http.Response) (*UsersAPICreateOrganizationResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
 	defer rsp.Body.Close()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &CreateOrganizationResponse{
+	response := &UsersAPICreateOrganizationResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest Organization
+		var dest CastaiUsersV1beta1Organization
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -10664,22 +10700,22 @@ func ParseCreateOrganizationResponse(rsp *http.Response) (*CreateOrganizationRes
 	return response, nil
 }
 
-// ParseDeleteOrganizationResponse parses an HTTP response from a DeleteOrganizationWithResponse call
-func ParseDeleteOrganizationResponse(rsp *http.Response) (*DeleteOrganizationResponse, error) {
+// ParseUsersAPIDeleteOrganizationResponse parses an HTTP response from a UsersAPIDeleteOrganizationWithResponse call
+func ParseUsersAPIDeleteOrganizationResponse(rsp *http.Response) (*UsersAPIDeleteOrganizationResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
 	defer rsp.Body.Close()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &DeleteOrganizationResponse{
+	response := &UsersAPIDeleteOrganizationResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest Organization
+		var dest CastaiUsersV1beta1DeleteOrganizationResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -10690,22 +10726,22 @@ func ParseDeleteOrganizationResponse(rsp *http.Response) (*DeleteOrganizationRes
 	return response, nil
 }
 
-// ParseGetOrganizationResponse parses an HTTP response from a GetOrganizationWithResponse call
-func ParseGetOrganizationResponse(rsp *http.Response) (*GetOrganizationResponse, error) {
+// ParseUsersAPIGetOrganizationResponse parses an HTTP response from a UsersAPIGetOrganizationWithResponse call
+func ParseUsersAPIGetOrganizationResponse(rsp *http.Response) (*UsersAPIGetOrganizationResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
 	defer rsp.Body.Close()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &GetOrganizationResponse{
+	response := &UsersAPIGetOrganizationResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest Organization
+		var dest CastaiUsersV1beta1Organization
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -10716,126 +10752,22 @@ func ParseGetOrganizationResponse(rsp *http.Response) (*GetOrganizationResponse,
 	return response, nil
 }
 
-// ParseUpdateOrganizationResponse parses an HTTP response from a UpdateOrganizationWithResponse call
-func ParseUpdateOrganizationResponse(rsp *http.Response) (*UpdateOrganizationResponse, error) {
+// ParseUsersAPIEditOrganizationResponse parses an HTTP response from a UsersAPIEditOrganizationWithResponse call
+func ParseUsersAPIEditOrganizationResponse(rsp *http.Response) (*UsersAPIEditOrganizationResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
 	defer rsp.Body.Close()
 	if err != nil {
 		return nil, err
 	}
 
-	response := &UpdateOrganizationResponse{
+	response := &UsersAPIEditOrganizationResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest Organization
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON200 = &dest
-
-	}
-
-	return response, nil
-}
-
-// ParseGetOrganizationUsersResponse parses an HTTP response from a GetOrganizationUsersWithResponse call
-func ParseGetOrganizationUsersResponse(rsp *http.Response) (*GetOrganizationUsersResponse, error) {
-	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
-	if err != nil {
-		return nil, err
-	}
-
-	response := &GetOrganizationUsersResponse{
-		Body:         bodyBytes,
-		HTTPResponse: rsp,
-	}
-
-	switch {
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest OrganizationUsersList
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON200 = &dest
-
-	}
-
-	return response, nil
-}
-
-// ParseCreateOrganizationUserResponse parses an HTTP response from a CreateOrganizationUserWithResponse call
-func ParseCreateOrganizationUserResponse(rsp *http.Response) (*CreateOrganizationUserResponse, error) {
-	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
-	if err != nil {
-		return nil, err
-	}
-
-	response := &CreateOrganizationUserResponse{
-		Body:         bodyBytes,
-		HTTPResponse: rsp,
-	}
-
-	switch {
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest OrganizationUser
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON200 = &dest
-
-	}
-
-	return response, nil
-}
-
-// ParseDeleteOrganizationUserResponse parses an HTTP response from a DeleteOrganizationUserWithResponse call
-func ParseDeleteOrganizationUserResponse(rsp *http.Response) (*DeleteOrganizationUserResponse, error) {
-	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
-	if err != nil {
-		return nil, err
-	}
-
-	response := &DeleteOrganizationUserResponse{
-		Body:         bodyBytes,
-		HTTPResponse: rsp,
-	}
-
-	switch {
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest map[string]interface{}
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON200 = &dest
-
-	}
-
-	return response, nil
-}
-
-// ParseUpdateOrganizationUserResponse parses an HTTP response from a UpdateOrganizationUserWithResponse call
-func ParseUpdateOrganizationUserResponse(rsp *http.Response) (*UpdateOrganizationUserResponse, error) {
-	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
-	if err != nil {
-		return nil, err
-	}
-
-	response := &UpdateOrganizationUserResponse{
-		Body:         bodyBytes,
-		HTTPResponse: rsp,
-	}
-
-	switch {
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest OrganizationUser
+		var dest CastaiUsersV1beta1Organization
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -11018,6 +10950,110 @@ func ParseInventoryAPIGetResourceUsageResponse(rsp *http.Response) (*InventoryAP
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest CastaiInventoryV1beta1GetResourceUsageResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseUsersAPIListOrganizationUsersResponse parses an HTTP response from a UsersAPIListOrganizationUsersWithResponse call
+func ParseUsersAPIListOrganizationUsersResponse(rsp *http.Response) (*UsersAPIListOrganizationUsersResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &UsersAPIListOrganizationUsersResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest CastaiUsersV1beta1ListOrganizationUsersResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseUsersAPIAddUserToOrganizationResponse parses an HTTP response from a UsersAPIAddUserToOrganizationWithResponse call
+func ParseUsersAPIAddUserToOrganizationResponse(rsp *http.Response) (*UsersAPIAddUserToOrganizationResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &UsersAPIAddUserToOrganizationResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest CastaiUsersV1beta1AddUserToOrganizationResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseUsersAPIRemoveUserFromOrganizationResponse parses an HTTP response from a UsersAPIRemoveUserFromOrganizationWithResponse call
+func ParseUsersAPIRemoveUserFromOrganizationResponse(rsp *http.Response) (*UsersAPIRemoveUserFromOrganizationResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &UsersAPIRemoveUserFromOrganizationResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest CastaiUsersV1beta1RemoveUserFromOrganizationResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseUsersAPIUpdateOrganizationUserResponse parses an HTTP response from a UsersAPIUpdateOrganizationUserWithResponse call
+func ParseUsersAPIUpdateOrganizationUserResponse(rsp *http.Response) (*UsersAPIUpdateOrganizationUserResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &UsersAPIUpdateOrganizationUserResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest CastaiUsersV1beta1Membership
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}

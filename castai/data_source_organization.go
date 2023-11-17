@@ -32,7 +32,7 @@ func dataSourceOrganization() *schema.Resource {
 func dataSourceOrganizationRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*ProviderConfig).api
 
-	resp, err := client.ListOrganizationsWithResponse(ctx)
+	resp, err := client.UsersAPIListOrganizationsWithResponse(ctx, &sdk.UsersAPIListOrganizationsParams{})
 	if err := sdk.CheckOKResponse(resp, err); err != nil {
 		return diag.FromErr(fmt.Errorf("retrieving organizations: %w", err))
 	}

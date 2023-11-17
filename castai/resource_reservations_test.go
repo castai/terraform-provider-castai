@@ -4,6 +4,10 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"io"
+	"net/http"
+	"testing"
+
 	"github.com/castai/terraform-provider-castai/castai/reservations"
 	"github.com/castai/terraform-provider-castai/castai/sdk"
 	mock_sdk "github.com/castai/terraform-provider-castai/castai/sdk/mock"
@@ -12,9 +16,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/require"
-	"io"
-	"net/http"
-	"testing"
 )
 
 func TestReservations_Azure_BasicReservationsCSV(t *testing.T) {
@@ -159,7 +160,7 @@ func Test_getOrganizationId(t *testing.T) {
 
 	type args struct {
 		organizationIdAttribute *string
-		organizationsResponse   *sdk.OrganizationsList
+		organizationsResponse   *sdk.CastaiUsersV1beta1ListOrganizationsResponse
 	}
 	tests := map[string]struct {
 		args                     args
@@ -174,27 +175,16 @@ func Test_getOrganizationId(t *testing.T) {
 		},
 		"should use organization id from organizations list when organization is found": {
 			args: args{
-				organizationsResponse: &sdk.OrganizationsList{
-					Organizations: []sdk.Organization{
-						{
-							Id: lo.ToPtr(organizationId2),
-						},
-					},
+				organizationsResponse: &sdk.CastaiUsersV1beta1ListOrganizationsResponse{
+					Organizations: []sdk.CastaiUsersV1beta1UserOrganization{{Id: &organizationId2}},
 				},
 			},
 			want: lo.ToPtr(organizationId2),
 		},
 		"should return an error when organization id is not provided and more than one organization is found": {
 			args: args{
-				organizationsResponse: &sdk.OrganizationsList{
-					Organizations: []sdk.Organization{
-						{
-							Id: lo.ToPtr(organizationId1),
-						},
-						{
-							Id: lo.ToPtr(organizationId2),
-						},
-					},
+				organizationsResponse: &sdk.CastaiUsersV1beta1ListOrganizationsResponse{
+					Organizations: []sdk.CastaiUsersV1beta1UserOrganization{{Id: &organizationId2}, {Id: &organizationId1}},
 				},
 			},
 			expectErrMessageContains: lo.ToPtr("found more than 1 organization, you can specify exact organization using 'organization_id' attribute"),
@@ -221,7 +211,7 @@ func Test_getOrganizationId(t *testing.T) {
 				r.NoError(err)
 
 				mockClient.EXPECT().
-					ListOrganizations(gomock.Any()).
+					UsersAPIListOrganizations(gomock.Any(), gomock.Any()).
 					Return(&http.Response{StatusCode: 200, Body: io.NopCloser(bytes.NewBufferString(string(organizationsResponseBytes))), Header: map[string][]string{"Content-Type": {"json"}}}, nil)
 			}
 
