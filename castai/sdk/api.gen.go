@@ -1698,6 +1698,7 @@ type NodetemplatesV1AvailableInstanceType struct {
 	Cpu                    *string                                                     `json:"cpu,omitempty"`
 	CpuCost                *float64                                                    `json:"cpuCost,omitempty"`
 	Family                 *string                                                     `json:"family,omitempty"`
+	IsBareMetal            *bool                                                       `json:"isBareMetal,omitempty"`
 	IsComputeOptimized     *bool                                                       `json:"isComputeOptimized,omitempty"`
 	Memory                 *string                                                     `json:"memory,omitempty"`
 	Name                   *string                                                     `json:"name,omitempty"`
@@ -1846,6 +1847,7 @@ type NodetemplatesV1TaintWithOptionalEffect struct {
 // NodetemplatesV1TemplateConstraints defines model for nodetemplates.v1.TemplateConstraints.
 type NodetemplatesV1TemplateConstraints struct {
 	Architectures    *[]string `json:"architectures,omitempty"`
+	BareMetal        *bool     `json:"bareMetal"`
 	ComputeOptimized *bool     `json:"computeOptimized"`
 
 	// Enable/disable spot diversity policy. When enabled, autoscaler will try to balance between diverse and cost optimal instance types.
