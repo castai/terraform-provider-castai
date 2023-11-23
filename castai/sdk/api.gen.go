@@ -874,6 +874,9 @@ type ExternalclusterV1AKSClusterParams struct {
 
 	// Azure subscription ID where cluster runs.
 	SubscriptionId *string `json:"subscriptionId,omitempty"`
+
+	// Zone name pattern in the cluster.
+	ZoneNamePattern *string `json:"zoneNamePattern,omitempty"`
 }
 
 // AddNodeResponse is the result of AddNodeRequest.
@@ -1674,6 +1677,14 @@ type NodeconfigV1SecurityGroup struct {
 
 	// The name of the security group.
 	Name *string `json:"name,omitempty"`
+
+	// Tags of the security group.
+	Tags *NodeconfigV1SecurityGroup_Tags `json:"tags,omitempty"`
+}
+
+// Tags of the security group.
+type NodeconfigV1SecurityGroup_Tags struct {
+	AdditionalProperties map[string]string `json:"-"`
 }
 
 // SubnetDetails contains all subnet attributes relevant for node configuration.
@@ -1687,8 +1698,16 @@ type NodeconfigV1SubnetDetails struct {
 	// The ID of the subnet.
 	Id *string `json:"id,omitempty"`
 
+	// Tags of the subnet.
+	Tags *NodeconfigV1SubnetDetails_Tags `json:"tags,omitempty"`
+
 	// Cluster zone.
 	Zone *ExternalclusterV1Zone `json:"zone,omitempty"`
+}
+
+// Tags of the subnet.
+type NodeconfigV1SubnetDetails_Tags struct {
+	AdditionalProperties map[string]string `json:"-"`
 }
 
 // NodetemplatesV1AvailableInstanceType defines model for nodetemplates.v1.AvailableInstanceType.
@@ -3037,6 +3056,112 @@ func (a *NodeconfigV1NodeConfigurationUpdate_Tags) UnmarshalJSON(b []byte) error
 
 // Override default JSON handling for NodeconfigV1NodeConfigurationUpdate_Tags to handle AdditionalProperties
 func (a NodeconfigV1NodeConfigurationUpdate_Tags) MarshalJSON() ([]byte, error) {
+	var err error
+	object := make(map[string]json.RawMessage)
+
+	for fieldName, field := range a.AdditionalProperties {
+		object[fieldName], err = json.Marshal(field)
+		if err != nil {
+			return nil, fmt.Errorf("error marshaling '%s': %w", fieldName, err)
+		}
+	}
+	return json.Marshal(object)
+}
+
+// Getter for additional properties for NodeconfigV1SecurityGroup_Tags. Returns the specified
+// element and whether it was found
+func (a NodeconfigV1SecurityGroup_Tags) Get(fieldName string) (value string, found bool) {
+	if a.AdditionalProperties != nil {
+		value, found = a.AdditionalProperties[fieldName]
+	}
+	return
+}
+
+// Setter for additional properties for NodeconfigV1SecurityGroup_Tags
+func (a *NodeconfigV1SecurityGroup_Tags) Set(fieldName string, value string) {
+	if a.AdditionalProperties == nil {
+		a.AdditionalProperties = make(map[string]string)
+	}
+	a.AdditionalProperties[fieldName] = value
+}
+
+// Override default JSON handling for NodeconfigV1SecurityGroup_Tags to handle AdditionalProperties
+func (a *NodeconfigV1SecurityGroup_Tags) UnmarshalJSON(b []byte) error {
+	object := make(map[string]json.RawMessage)
+	err := json.Unmarshal(b, &object)
+	if err != nil {
+		return err
+	}
+
+	if len(object) != 0 {
+		a.AdditionalProperties = make(map[string]string)
+		for fieldName, fieldBuf := range object {
+			var fieldVal string
+			err := json.Unmarshal(fieldBuf, &fieldVal)
+			if err != nil {
+				return fmt.Errorf("error unmarshaling field %s: %w", fieldName, err)
+			}
+			a.AdditionalProperties[fieldName] = fieldVal
+		}
+	}
+	return nil
+}
+
+// Override default JSON handling for NodeconfigV1SecurityGroup_Tags to handle AdditionalProperties
+func (a NodeconfigV1SecurityGroup_Tags) MarshalJSON() ([]byte, error) {
+	var err error
+	object := make(map[string]json.RawMessage)
+
+	for fieldName, field := range a.AdditionalProperties {
+		object[fieldName], err = json.Marshal(field)
+		if err != nil {
+			return nil, fmt.Errorf("error marshaling '%s': %w", fieldName, err)
+		}
+	}
+	return json.Marshal(object)
+}
+
+// Getter for additional properties for NodeconfigV1SubnetDetails_Tags. Returns the specified
+// element and whether it was found
+func (a NodeconfigV1SubnetDetails_Tags) Get(fieldName string) (value string, found bool) {
+	if a.AdditionalProperties != nil {
+		value, found = a.AdditionalProperties[fieldName]
+	}
+	return
+}
+
+// Setter for additional properties for NodeconfigV1SubnetDetails_Tags
+func (a *NodeconfigV1SubnetDetails_Tags) Set(fieldName string, value string) {
+	if a.AdditionalProperties == nil {
+		a.AdditionalProperties = make(map[string]string)
+	}
+	a.AdditionalProperties[fieldName] = value
+}
+
+// Override default JSON handling for NodeconfigV1SubnetDetails_Tags to handle AdditionalProperties
+func (a *NodeconfigV1SubnetDetails_Tags) UnmarshalJSON(b []byte) error {
+	object := make(map[string]json.RawMessage)
+	err := json.Unmarshal(b, &object)
+	if err != nil {
+		return err
+	}
+
+	if len(object) != 0 {
+		a.AdditionalProperties = make(map[string]string)
+		for fieldName, fieldBuf := range object {
+			var fieldVal string
+			err := json.Unmarshal(fieldBuf, &fieldVal)
+			if err != nil {
+				return fmt.Errorf("error unmarshaling field %s: %w", fieldName, err)
+			}
+			a.AdditionalProperties[fieldName] = fieldVal
+		}
+	}
+	return nil
+}
+
+// Override default JSON handling for NodeconfigV1SubnetDetails_Tags to handle AdditionalProperties
+func (a NodeconfigV1SubnetDetails_Tags) MarshalJSON() ([]byte, error) {
 	var err error
 	object := make(map[string]json.RawMessage)
 
