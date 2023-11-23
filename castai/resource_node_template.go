@@ -820,22 +820,6 @@ func nodeTemplateStateImporter(ctx context.Context, d *schema.ResourceData, meta
 	return nil, fmt.Errorf("failed to find node template with the following name: %v", id)
 }
 
-func toCustomLabel(obj map[string]any) *sdk.NodetemplatesV1Label {
-	if obj == nil {
-		return nil
-	}
-
-	out := &sdk.NodetemplatesV1Label{}
-	if v, ok := obj[FieldKey]; ok && v != "" {
-		out.Key = toPtr(v.(string))
-	}
-	if v, ok := obj[FieldValue]; ok && v != "" {
-		out.Value = toPtr(v.(string))
-	}
-
-	return out
-}
-
 func toCustomTaintsWithOptionalEffect(objs []map[string]any) *[]sdk.NodetemplatesV1TaintWithOptionalEffect {
 	if len(objs) == 0 {
 		return nil
@@ -860,21 +844,6 @@ func toCustomTaintsWithOptionalEffect(objs []map[string]any) *[]sdk.Nodetemplate
 	}
 
 	return out
-}
-
-func flattenCustomLabel(label *sdk.NodetemplatesV1Label) []map[string]string {
-	if label == nil {
-		return nil
-	}
-
-	m := map[string]string{}
-	if v := label.Key; v != nil {
-		m[FieldKey] = toString(v)
-	}
-	if v := label.Value; v != nil {
-		m[FieldValue] = toString(v)
-	}
-	return []map[string]string{m}
 }
 
 func flattenCustomTaints(taints *[]sdk.NodetemplatesV1Taint) []map[string]string {

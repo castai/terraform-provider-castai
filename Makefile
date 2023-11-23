@@ -33,6 +33,12 @@ build:
 	@echo "==> Building terraform-provider-castai"
 	go build
 
+.PHONY: lint
+lint:
+	@echo "==> Running lint"
+	go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+	golangci-lint run
+
 .PHONY: test
 test:
 	@echo "==> Running tests"
