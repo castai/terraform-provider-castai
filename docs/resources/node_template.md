@@ -25,7 +25,6 @@ CAST AI node template resource to manage node templates
 - `configuration_id` (String) CAST AI node configuration id to be used for node template.
 - `constraints` (Block List, Max: 1) (see [below for nested schema](#nestedblock--constraints))
 - `custom_instances_enabled` (Boolean) Marks whether custom instances should be used when deciding which parts of inventory are available. Custom instances are only supported in GCP.
-- `custom_label` (Block List, Max: 1, Deprecated) Custom label key/value to be added to nodes created from this template. (see [below for nested schema](#nestedblock--custom_label))
 - `custom_labels` (Map of String) Custom labels to be added to nodes created from this template. If the field `custom_label` is present, the value of `custom_labels` will be ignored.
 - `custom_taints` (Block List) Custom taints to be added to the nodes created from this template. `shouldTaint` has to be `true` in order to create/update the node template with custom taints. If `shouldTaint` is `true`, but no custom taints are provided, the nodes will be tainted with the default node template taint. (see [below for nested schema](#nestedblock--custom_taints))
 - `is_default` (Boolean) Flag whether the node template is default.
@@ -83,15 +82,6 @@ Optional:
 - `exclude` (List of String) Instance families to include when filtering (excludes all other families).
 - `include` (List of String) Instance families to exclude when filtering (includes all other families).
 
-
-
-<a id="nestedblock--custom_label"></a>
-### Nested Schema for `custom_label`
-
-Required:
-
-- `key` (String) Label key to be added to nodes created from this template.
-- `value` (String) Label value to be added to nodes created from this template.
 
 
 <a id="nestedblock--custom_taints"></a>
