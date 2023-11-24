@@ -322,8 +322,7 @@ func resourceNodeTemplate() *schema.Resource {
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
-				Description: "Custom labels to be added to nodes created from this template. " +
-					"If the field `custom_label` is present, the value of `custom_labels` will be ignored.",
+				Description: "Custom labels to be added to nodes created from this template.",
 			},
 			FieldNodeTemplateCustomTaints: {
 				Type:     schema.TypeList,

@@ -26,6 +26,9 @@ generate-docs:
 	go install github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs@v0.14.1
 	tfplugindocs generate --rendered-provider-name "CAST AI" --ignore-deprecated
 
+.PHONY: generate-all
+generate-all: generate-sdk generate-docs
+
 .PHONY: build
 build: init-examples
 build: generate-sdk
