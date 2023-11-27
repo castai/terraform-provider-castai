@@ -55,9 +55,6 @@ func TestAutoscalerResource_PoliciesUpdateAction(t *testing.T) {
 		    },
 		    "spotInstances": {
 		        "enabled": true,
-		        "clouds": [
-		            "azure"
-		        ],
 		        "maxReclaimRate": 0,
 		        "spotBackups": {
 		            "enabled": false,
@@ -86,7 +83,6 @@ func TestAutoscalerResource_PoliciesUpdateAction(t *testing.T) {
 			}
 		},
 		"spotInstances": {
-			"clouds": ["aws"],
 			"spotBackups": {
 				"enabled": true
 			},
@@ -131,9 +127,6 @@ func TestAutoscalerResource_PoliciesUpdateAction(t *testing.T) {
 		    },
 		    "spotInstances": {
 		        "enabled": true,
-		        "clouds": [
-		            "aws"
-		        ],
 		        "maxReclaimRate": 0,
 		        "spotBackups": {
 		            "enabled": true,
@@ -237,9 +230,6 @@ func TestAutoscalerResource_PoliciesUpdateAction_Fail(t *testing.T) {
 		    },
 		    "spotInstances": {
 		        "enabled": true,
-		        "clouds": [
-		            "azure"
-		        ],
 		        "maxReclaimRate": 0,
 		        "spotBackups": {
 		            "enabled": false,
@@ -263,7 +253,6 @@ func TestAutoscalerResource_PoliciesUpdateAction_Fail(t *testing.T) {
 			}
 		},
 		"spotInstances": {
-			"clouds": ["aws"],
 			"spotBackups": {
 				"enabled": true
 			}
@@ -358,7 +347,6 @@ func Test_validateAutoscalerPolicyJSON(t *testing.T) {
 					     },
 					     "spotInstances": {
 					         "enabled": true,
-					         "clouds": ["gcp"],
 					         "spotBackups": {
 					             "enabled": true
 					         }

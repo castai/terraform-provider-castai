@@ -68,7 +68,6 @@ module "castai-gke-cluster" {
         },
         "spotInstances": {
             "enabled": true,
-            "clouds": ["gcp"],
             "spotBackups": {
                 "enabled": true
             }

@@ -99,7 +99,6 @@ module "castai-eks-cluster" {
          },
          "spotInstances": {
              "enabled": true,
-             "clouds": ["aws"],
              "spotBackups": {
                  "enabled": true
              }

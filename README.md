@@ -202,7 +202,6 @@ resource "castai_autoscaler" "castai_autoscaler_policies" {
         },
         "spotInstances": {
             "enabled": true,
-            "clouds": ["gcp"],
             "spotBackups": {
                 "enabled": true
             }
