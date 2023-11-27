@@ -294,6 +294,7 @@ Example of node template import:
 ```sh
 terraform import castai_node_template.default_by_castai 105e6fa3-20b1-424e-v589-9a64d1eeabea/default-by-castai
 ```
+
 Migrating from 5.x.x to 6.x.x
 ---------------------------
 
