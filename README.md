@@ -294,6 +294,45 @@ Example of node template import:
 ```sh
 terraform import castai_node_template.default_by_castai 105e6fa3-20b1-424e-v589-9a64d1eeabea/default-by-castai
 ```
+Migrating from 5.x.x to 6.x.x
+---------------------------
+
+Version 6.x.x changed:
+* Removed `custom_label` attribute in `castai_node_template` resource. Use `custom_labels` instead.
+
+Old configuration:
+```terraform
+module "castai-aks-cluster" {
+  node_templates = {
+    spot_tmpl = {
+      custom_label = {
+        key = "custom-label-key-1"
+        value = "custom-label-value-1"
+      }
+    }
+  }
+}
+```
+
+New configuration:
+```terraform
+module "castai-aks-cluster" {
+  node_templates = {
+    spot_tmpl = {
+      custom_labels = {
+        custom-label-key-1 = "custom-label-value-1"
+      }
+    }
+  }
+}
+```
+
+For more information for `castai-aks-cluster` module follow:
+https://github.com/castai/terraform-castai-aks/blob/main/README.md#migrating-from-2xx-to-3xx
+If you have used `castai-eks-cluster` or other modules follow:
+https://github.com/castai/terraform-castai-eks-cluster/blob/main/README.md#migrating-from-6xx-to-7xx
+If you have used `castai-gke-cluster` or other modules follow:
+https://github.com/castai/terraform-castai-gke-cluster/blob/main/README.md#migrating-from-3xx-to-4xx
 
 
 Developing the provider
