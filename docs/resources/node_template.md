@@ -90,11 +90,11 @@ Optional:
 Required:
 
 - `key` (String) Key of a taint to be added to nodes created from this template.
-- `value` (String) Value of a taint to be added to nodes created from this template.
 
 Optional:
 
 - `effect` (String) Effect of a taint to be added to nodes created from this template, the default is NoSchedule. Allowed values: NoSchedule, NoExecute.
+- `value` (String) Value of a taint to be added to nodes created from this template.
 
 
 <a id="nestedblock--timeouts"></a>
