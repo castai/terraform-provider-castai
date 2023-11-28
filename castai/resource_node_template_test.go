@@ -359,7 +359,7 @@ func TestAccResourceNodeTemplate_basic(t *testing.T) {
 	resourceName := "castai_node_template.test"
 	clusterName := "cost-terraform"
 
-	resource.Test(t, resource.TestCase{
+	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
 		ProviderFactories: providerFactories,
 		CheckDestroy:      testAccCheckNodeTemplateDestroy,
