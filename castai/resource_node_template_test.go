@@ -164,7 +164,6 @@ constraints.0.spot_interruption_predictions_type = aws-rebalance-recommendations
 constraints.0.storage_optimized = false
 constraints.0.use_spot_fallbacks = false
 custom_instances_enabled = true
-custom_label.# = 0
 custom_labels.% = 2
 custom_labels.key-1 = value-1
 custom_labels.key-2 = value-2
@@ -372,7 +371,6 @@ func TestAccResourceNodeTemplate_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "is_enabled", "true"),
 					resource.TestCheckResourceAttr(resourceName, "should_taint", "true"),
 					resource.TestCheckResourceAttr(resourceName, "custom_instances_enabled", "false"),
-					resource.TestCheckResourceAttr(resourceName, "custom_label.#", "0"),
 					resource.TestCheckResourceAttr(resourceName, "custom_labels.%", "2"),
 					resource.TestCheckResourceAttr(resourceName, "custom_labels."+rName+"-label-key-1", rName+"-label-value-1"),
 					resource.TestCheckResourceAttr(resourceName, "custom_labels."+rName+"-label-key-2", rName+"-label-value-2"),
@@ -422,7 +420,6 @@ func TestAccResourceNodeTemplate_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "is_enabled", "true"),
 					resource.TestCheckResourceAttr(resourceName, "should_taint", "true"),
 					resource.TestCheckResourceAttr(resourceName, "custom_instances_enabled", "false"),
-					resource.TestCheckResourceAttr(resourceName, "custom_label.#", "0"),
 					resource.TestCheckResourceAttr(resourceName, "custom_labels.%", "2"),
 					resource.TestCheckResourceAttr(resourceName, "custom_labels."+rName+"-label-key-1", rName+"-label-value-1"),
 					resource.TestCheckResourceAttr(resourceName, "custom_labels."+rName+"-label-key-2", rName+"-label-value-2"),

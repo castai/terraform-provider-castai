@@ -26,12 +26,21 @@ generate-docs:
 	go install github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs@v0.14.1
 	tfplugindocs generate --rendered-provider-name "CAST AI" --ignore-deprecated
 
+.PHONY: generate-all
+generate-all: generate-sdk generate-docs
+
 .PHONY: build
 build: init-examples
 build: generate-sdk
 build:
 	@echo "==> Building terraform-provider-castai"
 	go build
+
+.PHONY: lint
+lint:
+	@echo "==> Running lint"
+	go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+	golangci-lint run
 
 .PHONY: test
 test:

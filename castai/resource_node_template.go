@@ -21,7 +21,6 @@ const (
 	FieldNodeTemplateConfigurationId                        = "configuration_id"
 	FieldNodeTemplateConstraints                            = "constraints"
 	FieldNodeTemplateCustomInstancesEnabled                 = "custom_instances_enabled"
-	FieldNodeTemplateCustomLabel                            = "custom_label"
 	FieldNodeTemplateCustomLabels                           = "custom_labels"
 	FieldNodeTemplateCustomTaints                           = "custom_taints"
 	FieldNodeTemplateEnableSpotDiversity                    = "enable_spot_diversity"
@@ -317,37 +316,13 @@ func resourceNodeTemplate() *schema.Resource {
 					},
 				},
 			},
-			FieldNodeTemplateCustomLabel: {
-				Type:     schema.TypeList,
-				MaxItems: 1,
-				Optional: true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						FieldKey: {
-							Required:         true,
-							Type:             schema.TypeString,
-							ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
-							Description:      "Label key to be added to nodes created from this template.",
-						},
-						FieldValue: {
-							Required:         true,
-							Type:             schema.TypeString,
-							ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
-							Description:      "Label value to be added to nodes created from this template.",
-						},
-					},
-				},
-				Description: "Custom label key/value to be added to nodes created from this template.",
-				Deprecated:  "Remove the use of `custom_label` field. The custom labels should be set through the `custom_labels` field.",
-			},
 			FieldNodeTemplateCustomLabels: {
 				Type:     schema.TypeMap,
 				Optional: true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
-				Description: "Custom labels to be added to nodes created from this template. " +
-					"If the field `custom_label` is present, the value of `custom_labels` will be ignored.",
+				Description: "Custom labels to be added to nodes created from this template.",
 			},
 			FieldNodeTemplateCustomTaints: {
 				Type:     schema.TypeList,
@@ -447,9 +422,6 @@ func resourceNodeTemplateRead(ctx context.Context, d *schema.ResourceData, meta 
 		if err := d.Set(FieldNodeTemplateConstraints, constraints); err != nil {
 			return diag.FromErr(fmt.Errorf("setting constraints: %w", err))
 		}
-	}
-	if err := d.Set(FieldNodeTemplateCustomLabel, flattenCustomLabel(nodeTemplate.CustomLabel)); err != nil {
-		return diag.FromErr(fmt.Errorf("setting custom label: %w", err))
 	}
 	if err := d.Set(FieldNodeTemplateCustomLabels, nodeTemplate.CustomLabels.AdditionalProperties); err != nil {
 		return diag.FromErr(fmt.Errorf("setting custom labels: %w", err))
@@ -602,7 +574,6 @@ func updateNodeTemplate(ctx context.Context, d *schema.ResourceData, meta any, s
 		FieldNodeTemplateShouldTaint,
 		FieldNodeTemplateConfigurationId,
 		FieldNodeTemplateRebalancingConfigMinNodes,
-		FieldNodeTemplateCustomLabel,
 		FieldNodeTemplateCustomLabels,
 		FieldNodeTemplateCustomTaints,
 		FieldNodeTemplateCustomInstancesEnabled,
@@ -628,10 +599,6 @@ func updateNodeTemplate(ctx context.Context, d *schema.ResourceData, meta any, s
 
 	if v, ok := d.GetOk(FieldNodeTemplateConfigurationId); ok {
 		req.ConfigurationId = toPtr(v.(string))
-	}
-
-	if v, ok := d.Get(FieldNodeTemplateCustomLabel).([]any); ok && len(v) > 0 {
-		req.CustomLabel = toCustomLabel(v[0].(map[string]any))
 	}
 
 	if req.CustomLabel == nil {
@@ -713,20 +680,14 @@ func resourceNodeTemplateCreate(ctx context.Context, d *schema.ResourceData, met
 		}
 	}
 
-	if v, ok := d.Get(FieldNodeTemplateCustomLabel).([]any); ok && len(v) > 0 {
-		req.CustomLabel = toCustomLabel(v[0].(map[string]any))
-	}
+	if v, ok := d.Get(FieldNodeTemplateCustomLabels).(map[string]any); ok && len(v) > 0 {
+		customLabels := map[string]string{}
 
-	if req.CustomLabel == nil {
-		if v, ok := d.Get(FieldNodeTemplateCustomLabels).(map[string]any); ok && len(v) > 0 {
-			customLabels := map[string]string{}
-
-			for k, v := range v {
-				customLabels[k] = v.(string)
-			}
-
-			req.CustomLabels = &sdk.NodetemplatesV1NewNodeTemplate_CustomLabels{AdditionalProperties: customLabels}
+		for k, v := range v {
+			customLabels[k] = v.(string)
 		}
+
+		req.CustomLabels = &sdk.NodetemplatesV1NewNodeTemplate_CustomLabels{AdditionalProperties: customLabels}
 	}
 
 	if v, ok := d.Get(FieldNodeTemplateCustomTaints).([]any); ok && len(v) > 0 {
@@ -858,22 +819,6 @@ func nodeTemplateStateImporter(ctx context.Context, d *schema.ResourceData, meta
 	return nil, fmt.Errorf("failed to find node template with the following name: %v", id)
 }
 
-func toCustomLabel(obj map[string]any) *sdk.NodetemplatesV1Label {
-	if obj == nil {
-		return nil
-	}
-
-	out := &sdk.NodetemplatesV1Label{}
-	if v, ok := obj[FieldKey]; ok && v != "" {
-		out.Key = toPtr(v.(string))
-	}
-	if v, ok := obj[FieldValue]; ok && v != "" {
-		out.Value = toPtr(v.(string))
-	}
-
-	return out
-}
-
 func toCustomTaintsWithOptionalEffect(objs []map[string]any) *[]sdk.NodetemplatesV1TaintWithOptionalEffect {
 	if len(objs) == 0 {
 		return nil
@@ -898,21 +843,6 @@ func toCustomTaintsWithOptionalEffect(objs []map[string]any) *[]sdk.Nodetemplate
 	}
 
 	return out
-}
-
-func flattenCustomLabel(label *sdk.NodetemplatesV1Label) []map[string]string {
-	if label == nil {
-		return nil
-	}
-
-	m := map[string]string{}
-	if v := label.Key; v != nil {
-		m[FieldKey] = toString(v)
-	}
-	if v := label.Value; v != nil {
-		m[FieldValue] = toString(v)
-	}
-	return []map[string]string{m}
 }
 
 func flattenCustomTaints(taints *[]sdk.NodetemplatesV1Taint) []map[string]string {
