@@ -17,7 +17,7 @@ func TestAccResourceNodeConfiguration_eks(t *testing.T) {
 	resourceName := "castai_node_configuration.test"
 	clusterName := "core-tf-acc"
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
 		ProviderFactories: providerFactories,
 		CheckDestroy:      testAccCheckNodeConfigurationDestroy,

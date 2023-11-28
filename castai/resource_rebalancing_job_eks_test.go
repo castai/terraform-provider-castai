@@ -11,7 +11,7 @@ import (
 func TestAccResourceRebalancingJob_eks(t *testing.T) {
 	rName := fmt.Sprintf("%v-rebalancing-job-%v", ResourcePrefix, acctest.RandString(8))
 	clusterName := "core-tf-acc"
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck: func() { testAccPreCheck(t) },
 
 		ProviderFactories: providerFactories,
