@@ -336,10 +336,9 @@ func resourceNodeTemplate() *schema.Resource {
 							Description:      "Key of a taint to be added to nodes created from this template.",
 						},
 						FieldValue: {
-							Required:         true,
-							Type:             schema.TypeString,
-							ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
-							Description:      "Value of a taint to be added to nodes created from this template.",
+							Optional:    true,
+							Type:        schema.TypeString,
+							Description: "Value of a taint to be added to nodes created from this template.",
 						},
 						FieldEffect: {
 							Optional: true,
