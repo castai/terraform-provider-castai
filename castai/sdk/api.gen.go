@@ -48,9 +48,9 @@ const (
 
 // Defines values for CastaiInventoryV1beta1StorageInfoDeviceType.
 const (
-	CastaiInventoryV1beta1StorageInfoDeviceTypeHdd     CastaiInventoryV1beta1StorageInfoDeviceType = "hdd"
-	CastaiInventoryV1beta1StorageInfoDeviceTypeInvalid CastaiInventoryV1beta1StorageInfoDeviceType = "invalid"
-	CastaiInventoryV1beta1StorageInfoDeviceTypeSsd     CastaiInventoryV1beta1StorageInfoDeviceType = "ssd"
+	Hdd     CastaiInventoryV1beta1StorageInfoDeviceType = "hdd"
+	Invalid CastaiInventoryV1beta1StorageInfoDeviceType = "invalid"
+	Ssd     CastaiInventoryV1beta1StorageInfoDeviceType = "ssd"
 )
 
 // Defines values for CastaiSsoV1beta1SSOConnectionStatus.
@@ -59,18 +59,6 @@ const (
 	STATUSFAILED   CastaiSsoV1beta1SSOConnectionStatus = "STATUS_FAILED"
 	STATUSINACTIVE CastaiSsoV1beta1SSOConnectionStatus = "STATUS_INACTIVE"
 	STATUSUNKNOWN  CastaiSsoV1beta1SSOConnectionStatus = "STATUS_UNKNOWN"
-)
-
-// Defines values for CastaiV1Cloud.
-const (
-	CastaiV1CloudAWS     CastaiV1Cloud = "AWS"
-	CastaiV1CloudAZURE   CastaiV1Cloud = "AZURE"
-	CastaiV1CloudAws     CastaiV1Cloud = "aws"
-	CastaiV1CloudAzure   CastaiV1Cloud = "azure"
-	CastaiV1CloudGCP     CastaiV1Cloud = "GCP"
-	CastaiV1CloudGcp     CastaiV1Cloud = "gcp"
-	CastaiV1CloudINVALID CastaiV1Cloud = "INVALID"
-	CastaiV1CloudInvalid CastaiV1Cloud = "invalid"
 )
 
 // Defines values for ExternalclusterV1NodeType.
@@ -849,14 +837,6 @@ type CastaiUsersV1beta1UserOrganization struct {
 	Name string `json:"name"`
 	Role string `json:"role"`
 }
-
-// Types of cloud service providers CAST AI supports.
-//
-//   - invalid: Invalid.
-//   - aws: Amazon web services.
-//   - gcp: Google cloud provider.
-//   - azure: Microsoft Azure.
-type CastaiV1Cloud string
 
 // AKSClusterParams defines AKS-specific arguments.
 type ExternalclusterV1AKSClusterParams struct {
@@ -2121,9 +2101,6 @@ type PoliciesV1SpotBackups struct {
 
 // Policy defining whether autoscaler can use spot instances for provisioning additional workloads.
 type PoliciesV1SpotInstances struct {
-	// Enable spot instances for these cloud service providers.
-	Clouds *[]CastaiV1Cloud `json:"clouds,omitempty"`
-
 	// Enable/disable spot instances policy.
 	Enabled *bool `json:"enabled"`
 
