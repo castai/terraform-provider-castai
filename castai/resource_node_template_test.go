@@ -374,7 +374,7 @@ func TestAccResourceNodeTemplate_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "custom_labels.%", "2"),
 					resource.TestCheckResourceAttr(resourceName, "custom_labels."+rName+"-label-key-1", rName+"-label-value-1"),
 					resource.TestCheckResourceAttr(resourceName, "custom_labels."+rName+"-label-key-2", rName+"-label-value-2"),
-					resource.TestCheckResourceAttr(resourceName, "custom_taints.#", "3"),
+					resource.TestCheckResourceAttr(resourceName, "custom_taints.#", "4"),
 					resource.TestCheckResourceAttr(resourceName, "custom_taints.0.key", rName+"-taint-key-1"),
 					resource.TestCheckResourceAttr(resourceName, "custom_taints.0.value", rName+"-taint-value-1"),
 					resource.TestCheckResourceAttr(resourceName, "custom_taints.0.effect", "NoSchedule"),
@@ -384,6 +384,9 @@ func TestAccResourceNodeTemplate_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "custom_taints.2.key", rName+"-taint-key-3"),
 					resource.TestCheckResourceAttr(resourceName, "custom_taints.2.value", rName+"-taint-value-3"),
 					resource.TestCheckResourceAttr(resourceName, "custom_taints.2.effect", "NoSchedule"),
+					resource.TestCheckResourceAttr(resourceName, "custom_taints.3.key", rName+"-taint-key-4"),
+					resource.TestCheckResourceAttr(resourceName, "custom_taints.3.value", ""),
+					resource.TestCheckResourceAttr(resourceName, "custom_taints.3.effect", "NoSchedule"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.instance_families.0.exclude.0", "m5"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.gpu.0.manufacturers.0", "NVIDIA"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.gpu.0.include_names.#", "0"),
@@ -423,9 +426,11 @@ func TestAccResourceNodeTemplate_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "custom_labels.%", "2"),
 					resource.TestCheckResourceAttr(resourceName, "custom_labels."+rName+"-label-key-1", rName+"-label-value-1"),
 					resource.TestCheckResourceAttr(resourceName, "custom_labels."+rName+"-label-key-2", rName+"-label-value-2"),
-					resource.TestCheckResourceAttr(resourceName, "custom_taints.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "custom_taints.#", "2"),
 					resource.TestCheckResourceAttr(resourceName, "custom_taints.0.key", rName+"-taint-key-1"),
 					resource.TestCheckResourceAttr(resourceName, "custom_taints.0.value", rName+"-taint-value-1"),
+					resource.TestCheckResourceAttr(resourceName, "custom_taints.1.key", rName+"-taint-key-2"),
+					resource.TestCheckResourceAttr(resourceName, "custom_taints.1.value", ""),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.use_spot_fallbacks", "true"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.spot", "true"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.on_demand", "true"),
@@ -487,6 +492,10 @@ func testAccNodeTemplateConfig(rName, clusterName string) string {
 				value = "%[1]s-taint-value-3"
 			}
 
+			custom_taints {
+				key = "%[1]s-taint-key-4"
+			}
+
 			constraints {
 				fallback_restore_rate_seconds = 1800
 				spot = true
@@ -528,6 +537,11 @@ func testNodeTemplateUpdated(rName, clusterName string) string {
 			custom_taints {
 				key = "%[1]s-taint-key-1"
 				value = "%[1]s-taint-value-1"
+				effect = "NoSchedule"
+			}
+
+			custom_taints {
+				key = "%[1]s-taint-key-2"
 				effect = "NoSchedule"
 			}
 
