@@ -8,11 +8,11 @@ resource "castai_eks_cluster" "my_castai_cluster" {
 }
 
 resource "castai_node_configuration" "default" {
-  cluster_id        = castai_eks_cluster.my_castai_cluster.id
-  name              = "default"
-  disk_cpu_ratio    = 0
-  min_disk_size     = 100
-  subnets           = var.subnets
+  cluster_id     = castai_eks_cluster.my_castai_cluster.id
+  name           = "default"
+  disk_cpu_ratio = 0
+  min_disk_size  = 100
+  subnets        = var.subnets
   eks {
     security_groups      = var.security_groups
     instance_profile_arn = var.instance_profile

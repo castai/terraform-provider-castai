@@ -9,12 +9,12 @@ provider "helm" {
   kubernetes {
     host                   = module.eks.cluster_endpoint
     cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
-      exec {
-        api_version = "client.authentication.k8s.io/v1beta1"
-        command     = "aws"
-        # This requires the awscli to be installed locally where Terraform is executed.
-        args = ["eks", "get-token", "--cluster-name", module.eks.cluster_name, "--region", var.cluster_region]
-      }
+    exec {
+      api_version = "client.authentication.k8s.io/v1beta1"
+      command     = "aws"
+      # This requires the awscli to be installed locally where Terraform is executed.
+      args = ["eks", "get-token", "--cluster-name", module.eks.cluster_name, "--region", var.cluster_region]
+    }
   }
 }
 
@@ -24,7 +24,7 @@ resource "castai_eks_cluster" "this" {
   name       = var.cluster_name
 
   delete_nodes_on_disconnect = var.delete_nodes_on_disconnect
-  assume_role_arn            = var.readonly ? null: aws_iam_role.assume_role.arn
+  assume_role_arn            = var.readonly ? null : aws_iam_role.assume_role.arn
 }
 
 resource "castai_eks_user_arn" "castai_user_arn" {
@@ -70,15 +70,15 @@ resource "helm_release" "castai_agent" {
 }
 
 resource "castai_node_configuration" "this" {
-  count = var.readonly ? 0:1
+  count      = var.readonly ? 0 : 1
   cluster_id = castai_eks_cluster.this.id
 
-  name              = "default"
-  disk_cpu_ratio    = 0
-  min_disk_size     = 100
-  subnets           = module.vpc.private_subnets
+  name           = "default"
+  disk_cpu_ratio = 0
+  min_disk_size  = 100
+  subnets        = module.vpc.private_subnets
   eks {
-    security_groups      = [
+    security_groups = [
       module.eks.cluster_security_group_id,
       module.eks.node_security_group_id,
     ]
@@ -87,13 +87,13 @@ resource "castai_node_configuration" "this" {
 }
 
 resource "castai_node_configuration_default" "this" {
-  count = var.readonly ? 0:1
+  count            = var.readonly ? 0 : 1
   cluster_id       = castai_eks_cluster.this.id
   configuration_id = castai_node_configuration.this[0].id
 }
 
 resource "helm_release" "castai_cluster_controller" {
-  count = var.readonly ? 0:1
+  count            = var.readonly ? 0 : 1
   name             = "cluster-controller"
   repository       = "https://castai.github.io/helm-charts"
   chart            = "castai-cluster-controller"

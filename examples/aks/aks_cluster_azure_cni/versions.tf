@@ -7,7 +7,7 @@ terraform {
       source = "hashicorp/azuread"
     }
     castai = {
-      source  = "castai/castai"
+      source = "castai/castai"
     }
   }
   required_version = ">= 0.13"

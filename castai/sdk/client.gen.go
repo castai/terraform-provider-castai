@@ -215,7 +215,7 @@ type ClientInterface interface {
 	ScheduledRebalancingAPIPreviewRebalancingSchedule(ctx context.Context, clusterId string, body ScheduledRebalancingAPIPreviewRebalancingScheduleJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// ExternalClusterAPIListClusters request
-	ExternalClusterAPIListClusters(ctx context.Context, params *ExternalClusterAPIListClustersParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+	ExternalClusterAPIListClusters(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// ExternalClusterAPIRegisterCluster request with any body
 	ExternalClusterAPIRegisterClusterWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -957,8 +957,8 @@ func (c *Client) ScheduledRebalancingAPIPreviewRebalancingSchedule(ctx context.C
 	return c.Client.Do(req)
 }
 
-func (c *Client) ExternalClusterAPIListClusters(ctx context.Context, params *ExternalClusterAPIListClustersParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewExternalClusterAPIListClustersRequest(c.Server, params)
+func (c *Client) ExternalClusterAPIListClusters(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewExternalClusterAPIListClustersRequest(c.Server)
 	if err != nil {
 		return nil, err
 	}
@@ -3167,7 +3167,7 @@ func NewScheduledRebalancingAPIPreviewRebalancingScheduleRequestWithBody(server 
 }
 
 // NewExternalClusterAPIListClustersRequest generates requests for ExternalClusterAPIListClusters
-func NewExternalClusterAPIListClustersRequest(server string, params *ExternalClusterAPIListClustersParams) (*http.Request, error) {
+func NewExternalClusterAPIListClustersRequest(server string) (*http.Request, error) {
 	var err error
 
 	serverURL, err := url.Parse(server)
@@ -3184,26 +3184,6 @@ func NewExternalClusterAPIListClustersRequest(server string, params *ExternalClu
 	if err != nil {
 		return nil, err
 	}
-
-	queryValues := queryURL.Query()
-
-	if params.IncludeMetrics != nil {
-
-		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "includeMetrics", runtime.ParamLocationQuery, *params.IncludeMetrics); err != nil {
-			return nil, err
-		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
-			return nil, err
-		} else {
-			for k, v := range parsed {
-				for _, v2 := range v {
-					queryValues.Add(k, v2)
-				}
-			}
-		}
-
-	}
-
-	queryURL.RawQuery = queryValues.Encode()
 
 	req, err := http.NewRequest("GET", queryURL.String(), nil)
 	if err != nil {
@@ -5508,7 +5488,7 @@ type ClientWithResponsesInterface interface {
 	ScheduledRebalancingAPIPreviewRebalancingScheduleWithResponse(ctx context.Context, clusterId string, body ScheduledRebalancingAPIPreviewRebalancingScheduleJSONRequestBody) (*ScheduledRebalancingAPIPreviewRebalancingScheduleResponse, error)
 
 	// ExternalClusterAPIListClusters request
-	ExternalClusterAPIListClustersWithResponse(ctx context.Context, params *ExternalClusterAPIListClustersParams) (*ExternalClusterAPIListClustersResponse, error)
+	ExternalClusterAPIListClustersWithResponse(ctx context.Context) (*ExternalClusterAPIListClustersResponse, error)
 
 	// ExternalClusterAPIRegisterCluster request  with any body
 	ExternalClusterAPIRegisterClusterWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*ExternalClusterAPIRegisterClusterResponse, error)
@@ -8625,8 +8605,8 @@ func (c *ClientWithResponses) ScheduledRebalancingAPIPreviewRebalancingScheduleW
 }
 
 // ExternalClusterAPIListClustersWithResponse request returning *ExternalClusterAPIListClustersResponse
-func (c *ClientWithResponses) ExternalClusterAPIListClustersWithResponse(ctx context.Context, params *ExternalClusterAPIListClustersParams) (*ExternalClusterAPIListClustersResponse, error) {
-	rsp, err := c.ExternalClusterAPIListClusters(ctx, params)
+func (c *ClientWithResponses) ExternalClusterAPIListClustersWithResponse(ctx context.Context) (*ExternalClusterAPIListClustersResponse, error) {
+	rsp, err := c.ExternalClusterAPIListClusters(ctx)
 	if err != nil {
 		return nil, err
 	}

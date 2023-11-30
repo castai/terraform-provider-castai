@@ -138,8 +138,8 @@ locals {
   }
 
   aws_auth_roles = concat([local.aws_auth_roles_cast], var.eks_user_role_arn != null ? [{
-    rolearn = var.eks_user_role_arn,
+    rolearn  = var.eks_user_role_arn,
     username = "admin"
-    groups = ["system:masters"]
+    groups   = ["system:masters"]
   }] : [])
 }

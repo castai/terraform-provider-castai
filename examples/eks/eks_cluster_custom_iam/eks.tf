@@ -20,8 +20,8 @@ module "eks" {
     }
   }
 
-  vpc_id                   = module.vpc.vpc_id
-  subnet_ids               = module.vpc.private_subnets
+  vpc_id     = module.vpc.vpc_id
+  subnet_ids = module.vpc.private_subnets
 
   manage_aws_auth_configmap = true
   aws_auth_node_iam_role_arns_non_windows = [
@@ -31,7 +31,7 @@ module "eks" {
 
   self_managed_node_groups = {
     node_group_1 = {
-      name = "${var.cluster_name}-ng-1"
+      name          = "${var.cluster_name}-ng-1"
       instance_type = "m5.large"
       max_size      = 5
       min_size      = 2
@@ -62,9 +62,9 @@ resource "aws_security_group" "additional" {
   vpc_id      = module.vpc.vpc_id
 
   ingress {
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
+    from_port = 22
+    to_port   = 22
+    protocol  = "tcp"
     cidr_blocks = [
       "10.0.0.0/8",
     ]

@@ -1,0 +1,22 @@
+name: Terraform format
+on:
+  pull_request:
+jobs:
+  terraform_fmt:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v2
+
+      - name: Terraform format
+        run: | 
+          make format-tf
+          if [[ -n $(git status -s) ]]
+          then
+            echo "Terraform code is not formatted, format it by running 'make format-tf' and commit your changes."
+            exit 1
+          fi
+

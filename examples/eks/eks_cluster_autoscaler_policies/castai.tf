@@ -54,7 +54,7 @@ resource "castai_eks_clusterid" "cluster_id" {
 module "castai-eks-cluster" {
   source = "castai/eks-cluster/castai"
 
-  api_url = var.castai_api_url
+  api_url                = var.castai_api_url
   castai_api_token       = var.castai_api_token
   wait_for_cluster_ready = true
 
@@ -102,10 +102,10 @@ module "castai-eks-cluster" {
 
   node_templates = {
     default_by_castai = {
-      name = "default-by-castai"
+      name             = "default-by-castai"
       configuration_id = module.castai-eks-cluster.castai_node_configurations["default"]
-      is_default   = true
-      should_taint = false
+      is_default       = true
+      should_taint     = false
 
       constraints = {
         on_demand          = true
@@ -116,7 +116,7 @@ module "castai-eks-cluster" {
         spot_diversity_price_increase_limit_percent = 20
 
         spot_interruption_predictions_enabled = true
-        spot_interruption_predictions_type = "aws-rebalance-recommendations"
+        spot_interruption_predictions_type    = "aws-rebalance-recommendations"
       }
     }
     spot_tmpl = {
@@ -130,11 +130,11 @@ module "castai-eks-cluster" {
 
       custom_taints = [
         {
-          key = "custom-taint-key-1"
+          key   = "custom-taint-key-1"
           value = "custom-taint-value-1"
         },
         {
-          key = "custom-taint-key-2"
+          key   = "custom-taint-key-2"
           value = "custom-taint-value-2"
         }
       ]
@@ -150,7 +150,7 @@ module "castai-eks-cluster" {
         }
         compute_optimized = false
         storage_optimized = false
-        is_gpu_only = false
+        is_gpu_only       = false
       }
     }
   }
@@ -195,38 +195,38 @@ module "castai-eks-cluster" {
 }
 
 resource "castai_rebalancing_schedule" "spots" {
-	name = "rebalance spots at every 30th minute"
-	schedule {
-		cron = "*/30 * * * *"
-	}
-	trigger_conditions {
-		savings_percentage = 20
-	}
-	launch_configuration {
-		# only consider instances older than 5 minutes
-		node_ttl_seconds = 300
-		num_targeted_nodes = 3
-		rebalancing_min_nodes = 2
-		keep_drain_timeout_nodes = false
-		selector = jsonencode({
-			nodeSelectorTerms = [{
-				matchExpressions = [
-					{
-						key =  "scheduling.cast.ai/spot"
-						operator = "Exists"
-					}
-				]
-			}]
-		})
-		execution_conditions {
-			enabled = true
-			achieved_savings_percentage = 10
-		}
-	}
+  name = "rebalance spots at every 30th minute"
+  schedule {
+    cron = "*/30 * * * *"
+  }
+  trigger_conditions {
+    savings_percentage = 20
+  }
+  launch_configuration {
+    # only consider instances older than 5 minutes
+    node_ttl_seconds         = 300
+    num_targeted_nodes       = 3
+    rebalancing_min_nodes    = 2
+    keep_drain_timeout_nodes = false
+    selector = jsonencode({
+      nodeSelectorTerms = [{
+        matchExpressions = [
+          {
+            key      = "scheduling.cast.ai/spot"
+            operator = "Exists"
+          }
+        ]
+      }]
+    })
+    execution_conditions {
+      enabled                     = true
+      achieved_savings_percentage = 10
+    }
+  }
 }
 
 resource "castai_rebalancing_job" "spots" {
-	cluster_id = castai_eks_clusterid.cluster_id.id
-	rebalancing_schedule_id = castai_rebalancing_schedule.spots.id
-	enabled = true
+  cluster_id              = castai_eks_clusterid.cluster_id.id
+  rebalancing_schedule_id = castai_rebalancing_schedule.spots.id
+  enabled                 = true
 }

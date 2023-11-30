@@ -16,9 +16,9 @@ provider "helm" {
 
 # Configure GKE cluster connection to CAST AI in read-only mode.
 resource "castai_gke_cluster" "this" {
-  project_id                 = var.project_id
-  location                   = module.gke.location
-  name                       = var.cluster_name
+  project_id = var.project_id
+  location   = module.gke.location
+  name       = var.cluster_name
 }
 
 resource "helm_release" "castai_agent" {

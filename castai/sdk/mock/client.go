@@ -696,9 +696,9 @@ func (mr *MockClientInterfaceMockRecorder) ExternalClusterAPIHandleCloudEventWit
 }
 
 // ExternalClusterAPIListClusters mocks base method.
-func (m *MockClientInterface) ExternalClusterAPIListClusters(ctx context.Context, params *sdk.ExternalClusterAPIListClustersParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+func (m *MockClientInterface) ExternalClusterAPIListClusters(ctx context.Context, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, params}
+	varargs := []interface{}{ctx}
 	for _, a := range reqEditors {
 		varargs = append(varargs, a)
 	}
@@ -709,9 +709,9 @@ func (m *MockClientInterface) ExternalClusterAPIListClusters(ctx context.Context
 }
 
 // ExternalClusterAPIListClusters indicates an expected call of ExternalClusterAPIListClusters.
-func (mr *MockClientInterfaceMockRecorder) ExternalClusterAPIListClusters(ctx, params interface{}, reqEditors ...interface{}) *gomock.Call {
+func (mr *MockClientInterfaceMockRecorder) ExternalClusterAPIListClusters(ctx interface{}, reqEditors ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, params}, reqEditors...)
+	varargs := append([]interface{}{ctx}, reqEditors...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIListClusters", reflect.TypeOf((*MockClientInterface)(nil).ExternalClusterAPIListClusters), varargs...)
 }
 
@@ -2864,18 +2864,18 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIHandle
 }
 
 // ExternalClusterAPIListClustersWithResponse mocks base method.
-func (m *MockClientWithResponsesInterface) ExternalClusterAPIListClustersWithResponse(ctx context.Context, params *sdk.ExternalClusterAPIListClustersParams) (*sdk.ExternalClusterAPIListClustersResponse, error) {
+func (m *MockClientWithResponsesInterface) ExternalClusterAPIListClustersWithResponse(ctx context.Context) (*sdk.ExternalClusterAPIListClustersResponse, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ExternalClusterAPIListClustersWithResponse", ctx, params)
+	ret := m.ctrl.Call(m, "ExternalClusterAPIListClustersWithResponse", ctx)
 	ret0, _ := ret[0].(*sdk.ExternalClusterAPIListClustersResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // ExternalClusterAPIListClustersWithResponse indicates an expected call of ExternalClusterAPIListClustersWithResponse.
-func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIListClustersWithResponse(ctx, params interface{}) *gomock.Call {
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIListClustersWithResponse(ctx interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIListClustersWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIListClustersWithResponse), ctx, params)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIListClustersWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIListClustersWithResponse), ctx)
 }
 
 // ExternalClusterAPIListNodesWithResponse mocks base method.

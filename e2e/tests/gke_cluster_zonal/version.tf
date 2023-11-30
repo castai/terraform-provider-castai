@@ -18,7 +18,7 @@ terraform {
     organization = "CastAI"
 
     workspaces {
-     name = "e2e-tf-gke-tf-e2e-gke"
+      name = "e2e-tf-gke-tf-e2e-gke"
     }
   }
 }

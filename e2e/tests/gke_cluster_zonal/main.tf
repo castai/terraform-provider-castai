@@ -11,17 +11,17 @@ provider "helm" {
 
 provider "castai" {
   api_token = var.castai_api_token
-  api_url  = var.castai_api_url
+  api_url   = var.castai_api_url
 }
 
 provider "google" {
   credentials = base64decode(var.gcp_credentials_base64)
-  region = var.network_region
+  region      = var.network_region
 }
 
 provider "google-beta" {
   credentials = base64decode(var.gcp_credentials_base64)
-  region = var.network_region
+  region      = var.network_region
 }
 
 module "castai-gke-iam" {
@@ -35,10 +35,10 @@ module "castai-gke-iam" {
 module "castai-gke-cluster" {
   source = "castai/gke-cluster/castai"
 
-  project_id         = var.project_id
-  gke_cluster_name   = var.cluster_name
-  gke_cluster_location = var.cluster_location
-  api_url = var.castai_api_url
+  project_id                 = var.project_id
+  gke_cluster_name           = var.cluster_name
+  gke_cluster_location       = var.cluster_location
+  api_url                    = var.castai_api_url
   gke_credentials            = module.castai-gke-iam.private_key
   delete_nodes_on_disconnect = true
 
@@ -85,7 +85,7 @@ module "castai-gke-cluster" {
         use_spot_fallbacks            = true
         min_cpu                       = 4
         max_cpu                       = 100
-        instance_families             = {
+        instance_families = {
           exclude = ["e2"]
         }
         compute_optimized = false

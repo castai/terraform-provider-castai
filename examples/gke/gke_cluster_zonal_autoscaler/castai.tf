@@ -5,7 +5,7 @@
 data "google_client_config" "default" {}
 
 provider "castai" {
-  api_url = var.castai_api_url
+  api_url   = var.castai_api_url
   api_token = var.castai_api_token
 }
 
@@ -28,12 +28,12 @@ module "castai-gke-iam" {
 module "castai-gke-cluster" {
   source = "castai/gke-cluster/castai"
 
-  api_url = var.castai_api_url
+  api_url                = var.castai_api_url
   castai_api_token       = var.castai_api_token
   wait_for_cluster_ready = true
-  project_id           = var.project_id
-  gke_cluster_name     = var.cluster_name
-  gke_cluster_location = module.gke.location
+  project_id             = var.project_id
+  gke_cluster_name       = var.cluster_name
+  gke_cluster_location   = module.gke.location
 
   gke_credentials            = module.castai-gke-iam.private_key
   delete_nodes_on_disconnect = var.delete_nodes_on_disconnect
@@ -49,8 +49,8 @@ module "castai-gke-cluster" {
 
     test_node_config = {
       disk_cpu_ratio = 10
-      subnets         = [module.vpc.subnets_ids[0]]
-      tags            = var.tags
+      subnets        = [module.vpc.subnets_ids[0]]
+      tags           = var.tags
     }
 
   }
@@ -60,7 +60,7 @@ module "castai-gke-cluster" {
   //  - unschedulablePods - Unscheduled pods policy
   //  - spotInstances     - Spot instances configuration
   //  - nodeDownscaler    - Node deletion policy
-  autoscaler_policies_json   = <<-EOT
+  autoscaler_policies_json = <<-EOT
     {
         "enabled": true,
         "unschedulablePods": {

@@ -16,7 +16,7 @@ variable "cluster_version" {
 }
 
 variable "castai_api_url" {
-  type = string
+  type        = string
   description = "URL of alternative CAST AI API to be used during development or testing"
   default     = "https://api.cast.ai"
 }
