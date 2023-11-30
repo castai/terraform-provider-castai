@@ -490,17 +490,6 @@ type CastaiInventoryV1beta1StorageInfoDevice struct {
 //   - hdd: HDD.
 type CastaiInventoryV1beta1StorageInfoDeviceType string
 
-// CastaiMetricsV1beta1ClusterMetrics defines model for castai.metrics.v1beta1.ClusterMetrics.
-type CastaiMetricsV1beta1ClusterMetrics struct {
-	CpuAllocatableCores    *float32 `json:"cpuAllocatableCores,omitempty"`
-	CpuRequestedCores      *float32 `json:"cpuRequestedCores,omitempty"`
-	MemoryAllocatableGib   *float32 `json:"memoryAllocatableGib,omitempty"`
-	MemoryRequestedGib     *float32 `json:"memoryRequestedGib,omitempty"`
-	OnDemandNodesCount     *int32   `json:"onDemandNodesCount,omitempty"`
-	SpotFallbackNodesCount *int32   `json:"spotFallbackNodesCount,omitempty"`
-	SpotNodesCount         *int32   `json:"spotNodesCount,omitempty"`
-}
-
 // Operation object.
 type CastaiOperationsV1beta1Operation struct {
 	// Operation creation timestamp in RFC3339Nano format.
@@ -923,8 +912,7 @@ type ExternalclusterV1Cluster struct {
 	KubernetesVersion *string                             `json:"kubernetesVersion"`
 
 	// Method used to onboard the cluster, eg.: console, terraform.
-	ManagedBy *string                             `json:"managedBy,omitempty"`
-	Metrics   *CastaiMetricsV1beta1ClusterMetrics `json:"metrics,omitempty"`
+	ManagedBy *string `json:"managedBy,omitempty"`
 
 	// The name of the external cluster.
 	Name *string `json:"name,omitempty"`
@@ -1472,8 +1460,8 @@ type NodeconfigV1GKEConfig struct {
 	DiskType *string `json:"diskType"`
 
 	// Maximum number of pods that can be run on a node, which affects how many IP addresses you will need for each node. Defaults to 110.
-	// For Standard GKE clusters, you can run a maximum of 256 Pods on a node with a /23 range, not 512 as you might expect. This provides a buffer so that Pods don't become unschedulable due to a transient lack of IP addresses in the Pod IP range for a given node.
-	// For all ranges, at most half as many Pods can be scheduled as IP addresses in the range.
+	// For Standard GKE clusters, you can run a maximum of 256 Pods on a node with a /23 range, not 512 as you might expect. This provides a buffer so that Pods don't become unschedulable due to a
+	// transient lack of IP addresses in the Pod IP range for a given node. For all ranges, at most half as many Pods can be scheduled as IP addresses in the range.
 	MaxPodsPerNode *int32 `json:"maxPodsPerNode,omitempty"`
 
 	// Network tags to be added on a VM. Each tag must be 1-63 characters long, start with a lowercase letter and end with either a number or a lowercase letter.
@@ -1881,7 +1869,8 @@ type NodetemplatesV1TemplateConstraints struct {
 	// toleration.
 	Spot *bool `json:"spot"`
 
-	// Allowed node configuration price increase when diversifying instance types. E.g. if the value is 10%, then the overall price of diversified instance types can be 10% higher than the price of the optimal configuration.
+	// Allowed node configuration price increase when diversifying instance types. E.g. if the value is 10%, then the overall price of diversified instance types can be 10% higher than the price of the
+	// optimal configuration.
 	SpotDiversityPriceIncreaseLimitPercent *int32 `json:"spotDiversityPriceIncreaseLimitPercent"`
 
 	// Enable/disable spot interruption predictions.
@@ -2371,12 +2360,6 @@ type ScheduledRebalancingAPIUpdateRebalancingJobJSONBody = ScheduledrebalancingV
 
 // ScheduledRebalancingAPIPreviewRebalancingScheduleJSONBody defines parameters for ScheduledRebalancingAPIPreviewRebalancingSchedule.
 type ScheduledRebalancingAPIPreviewRebalancingScheduleJSONBody = ScheduledrebalancingV1RebalancingScheduleUpdate
-
-// ExternalClusterAPIListClustersParams defines parameters for ExternalClusterAPIListClusters.
-type ExternalClusterAPIListClustersParams struct {
-	// Include metrics with cluster response.
-	IncludeMetrics *bool `form:"includeMetrics,omitempty" json:"includeMetrics,omitempty"`
-}
 
 // ExternalClusterAPIRegisterClusterJSONBody defines parameters for ExternalClusterAPIRegisterCluster.
 type ExternalClusterAPIRegisterClusterJSONBody = ExternalclusterV1RegisterClusterRequest

@@ -31,7 +31,7 @@ resource "castai_node_configuration" "default" {
   min_disk_size  = 133
   subnets        = aws_subnet.test[*].id
   init_script    = base64encode(var.init_script)
-  docker_config  = jsonencode({
+  docker_config = jsonencode({
     "insecure-registries"      = ["registry.com:5000"],
     "max-concurrent-downloads" = 10
   })
@@ -40,7 +40,7 @@ resource "castai_node_configuration" "default" {
     "registryPullQPS" : 10
   })
   container_runtime = "dockerd"
-  tags              = {
+  tags = {
     env = "development"
   }
   eks {
