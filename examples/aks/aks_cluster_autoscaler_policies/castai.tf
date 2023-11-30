@@ -11,9 +11,9 @@ provider "castai" {
 provider "helm" {
   kubernetes {
     host                   = azurerm_kubernetes_cluster.this.kube_config.0.host
-    client_certificate      = base64decode(azurerm_kubernetes_cluster.this.kube_config.0.client_certificate)
+    client_certificate     = base64decode(azurerm_kubernetes_cluster.this.kube_config.0.client_certificate)
     client_key             = base64decode(azurerm_kubernetes_cluster.this.kube_config.0.client_key)
-    cluster_ca_certificate  = base64decode(azurerm_kubernetes_cluster.this.kube_config.0.cluster_ca_certificate)
+    cluster_ca_certificate = base64decode(azurerm_kubernetes_cluster.this.kube_config.0.cluster_ca_certificate)
   }
 }
 
@@ -39,25 +39,25 @@ module "castai-aks-cluster" {
 
   node_configurations = {
     default = {
-      disk_cpu_ratio  = 25
-      subnets         = [azurerm_subnet.internal.id]
-      tags            = var.tags
+      disk_cpu_ratio = 25
+      subnets        = [azurerm_subnet.internal.id]
+      tags           = var.tags
     }
 
     test_node_config = {
-      disk_cpu_ratio  = 25
-      subnets         = [azurerm_subnet.internal.id]
-      tags            = var.tags
+      disk_cpu_ratio    = 25
+      subnets           = [azurerm_subnet.internal.id]
+      tags              = var.tags
       max_pods_per_node = 40
     }
   }
 
   node_templates = {
     default_by_castai = {
-      name = "default-by-castai"
+      name             = "default-by-castai"
       configuration_id = module.castai-aks-cluster.castai_node_configurations["default"]
-      is_default   = true
-      should_taint = false
+      is_default       = true
+      should_taint     = false
 
       constraints = {
         on_demand          = true
@@ -70,7 +70,7 @@ module "castai-aks-cluster" {
     }
     spot_tmpl = {
       configuration_id = module.castai-aks-cluster.castai_node_configurations["default"]
-      should_taint = true
+      should_taint     = true
 
       custom_labels = {
         custom-label-key-1 = "custom-label-value-1"
@@ -79,21 +79,21 @@ module "castai-aks-cluster" {
 
       custom_taints = [
         {
-          key = "custom-taint-key-1"
+          key   = "custom-taint-key-1"
           value = "custom-taint-value-1"
         },
         {
-          key = "custom-taint-key-2"
+          key   = "custom-taint-key-2"
           value = "custom-taint-value-2"
         }
       ]
 
       constraints = {
         fallback_restore_rate_seconds = 1800
-        spot = true
-        use_spot_fallbacks = true
-        min_cpu = 4
-        max_cpu = 100
+        spot                          = true
+        use_spot_fallbacks            = true
+        min_cpu                       = 4
+        max_cpu                       = 100
         instance_families = {
           exclude = ["standard_DPLSv5"]
         }
@@ -107,7 +107,7 @@ module "castai-aks-cluster" {
   // Here:
   //  - unschedulablePods - Unscheduled pods policy
   //  - nodeDownscaler    - Node deletion policy
-  autoscaler_policies_json   = <<-EOT
+  autoscaler_policies_json = <<-EOT
     {
         "enabled": true,
         "unschedulablePods": {

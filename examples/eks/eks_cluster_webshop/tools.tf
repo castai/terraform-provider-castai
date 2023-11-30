@@ -30,7 +30,7 @@ resource "helm_release" "loki" {
   version          = "1.8.0"
 
   values = [
-    templatefile("./helm-values/loki.yaml.tpl", { bucket_name = var.loki_bucket_name, s3_path = "s3://${var.cluster_region}", loki_role_arn = module.eks_iam_role_s3.service_account_role_arn})
+    templatefile("./helm-values/loki.yaml.tpl", { bucket_name = var.loki_bucket_name, s3_path = "s3://${var.cluster_region}", loki_role_arn = module.eks_iam_role_s3.service_account_role_arn })
   ]
 
   depends_on = [helm_release.kube_prometheus_stack]

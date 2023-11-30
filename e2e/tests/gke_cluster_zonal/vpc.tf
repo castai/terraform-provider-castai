@@ -16,11 +16,11 @@ module "vpc" {
     (local.ip_range_nodes) = [
       {
         range_name    = local.ip_range_pods
-        ip_cidr_range =  "10.1.0.0/20"
+        ip_cidr_range = "10.1.0.0/20"
       },
       {
         range_name    = local.ip_range_services
-        ip_cidr_range =  "10.3.0.0/20"
+        ip_cidr_range = "10.3.0.0/20"
       }
     ]
   }

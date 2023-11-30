@@ -11,7 +11,7 @@ provider "helm" {
 }
 
 provider "castai" {
-  api_url = var.castai_api_url
+  api_url   = var.castai_api_url
   api_token = var.castai_api_token
 }
 
@@ -76,8 +76,8 @@ module "castai-eks-cluster" {
 
   node_configurations = {
     default = {
-      subnets         = module.vpc.private_subnets
-      tags            = var.tags
+      subnets = module.vpc.private_subnets
+      tags    = var.tags
       security_groups = [
         module.eks.cluster_security_group_id,
         module.eks.node_security_group_id,

@@ -15,19 +15,19 @@ variable "cluster_zones" {
 }
 
 variable "project_id" {
-  type = string
+  type        = string
   description = "GCP project ID in which GKE cluster would be created."
 }
 
 variable "castai_api_url" {
-  type = string
+  type        = string
   description = "URL of alternative CAST AI API to be used during development or testing"
   default     = "https://api-tiberiugal2.localenv.cast.ai"
 }
 
 # Variables required for connecting EKS cluster to CAST AI
 variable "castai_api_token" {
-  type = string
+  type        = string
   description = "CAST AI API token created in console.cast.ai API Access keys section."
 }
 

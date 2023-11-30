@@ -16,7 +16,7 @@ variable "aws_cluster_name" {
 }
 
 variable "castai_api_token" {
-  type = string
+  type        = string
   description = "CAST AI API token created in console.cast.ai API Access keys section"
 }
 
@@ -27,17 +27,17 @@ variable "aws_assume_role_arn" {
 }
 
 variable "subnets" {
-  type = list(string)
+  type        = list(string)
   description = "Subnet IDs used by CAST AI to provision nodes"
 }
 
 variable "security_groups" {
-  type = list(string)
+  type        = list(string)
   description = "Security Groups IDs used by CAST AI nodes to connect to K8s control plane, other nodes and have outbound access to Internet"
 }
 
 variable "instance_profile" {
-  type = string
+  type        = string
   description = "Instance profile ARN used by CAST AI provisioned nodes to connect to K8s control plane"
 }
 

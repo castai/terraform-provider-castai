@@ -8,7 +8,7 @@ resource "azurerm_kubernetes_cluster" "this" {
   node_resource_group = "${var.cluster_name}-ng"
 
   default_node_pool {
-    name           = "default"
+    name = "default"
     # Node count has to be > 2 to successfully deploy CAST AI controller.
     node_count     = 2
     vm_size        = "Standard_D2_v2"

@@ -20,12 +20,12 @@ provider "helm" {
   kubernetes {
     host                   = module.eks.cluster_endpoint
     cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
-      exec {
-        api_version = "client.authentication.k8s.io/v1beta1"
-        command     = "aws"
-        # This requires the awscli to be installed locally where Terraform is executed.
-        args = ["eks", "get-token", "--cluster-name", module.eks.cluster_name, "--region", var.cluster_region]
-      }
+    exec {
+      api_version = "client.authentication.k8s.io/v1beta1"
+      command     = "aws"
+      # This requires the awscli to be installed locally where Terraform is executed.
+      args = ["eks", "get-token", "--cluster-name", module.eks.cluster_name, "--region", var.cluster_region]
+    }
   }
 }
 
@@ -51,8 +51,8 @@ resource "castai_eks_clusterid" "cluster_id" {
 }
 
 module "castai-eks-cluster" {
-  source  = "castai/eks-cluster/castai"
-  api_url = var.castai_api_url
+  source                 = "castai/eks-cluster/castai"
+  api_url                = var.castai_api_url
   castai_api_token       = var.castai_api_token
   wait_for_cluster_ready = true
 
@@ -67,8 +67,8 @@ module "castai-eks-cluster" {
 
   node_configurations = {
     default = {
-      subnets         = module.vpc.private_subnets
-      tags            = var.tags
+      subnets = module.vpc.private_subnets
+      tags    = var.tags
       security_groups = [
         module.eks.cluster_security_group_id,
         module.eks.node_security_group_id,

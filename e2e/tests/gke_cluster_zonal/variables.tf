@@ -2,7 +2,7 @@ variable "cluster_name" {
   type = string
 }
 variable "cluster_location" {
-  type = string 
+  type = string
 }
 
 variable "network_region" {
@@ -10,19 +10,19 @@ variable "network_region" {
 }
 
 variable "project_id" {
-  type = string 
+  type = string
 }
 variable "castai_api_token" {
-  type = string 
+  type = string
 }
 
 variable "castai_api_url" {
-  type = string
+  type    = string
   default = "https://api.cast.ai"
 }
 
 variable "cluster_zones" {
-  type        = list(string)
+  type    = list(string)
   default = ["europe-west1-b", "europe-west1-c"]
 }
 

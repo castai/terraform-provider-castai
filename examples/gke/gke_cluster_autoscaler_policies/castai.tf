@@ -28,7 +28,7 @@ module "castai-gke-iam" {
 module "castai-gke-cluster" {
   source = "castai/gke-cluster/castai"
 
-  api_url = var.castai_api_url
+  api_url                = var.castai_api_url
   castai_api_token       = var.castai_api_token
   wait_for_cluster_ready = true
 
@@ -61,10 +61,10 @@ module "castai-gke-cluster" {
 
   node_templates = {
     default_by_castai = {
-      name = "default-by-castai"
+      name             = "default-by-castai"
       configuration_id = module.castai-gke-cluster.castai_node_configurations["default"]
-      is_default   = true
-      should_taint = false
+      is_default       = true
+      should_taint     = false
 
       constraints = {
         on_demand          = true
@@ -86,13 +86,13 @@ module "castai-gke-cluster" {
 
       custom_taints = [
         {
-          key = "custom-taint-key-1"
-          value = "custom-taint-value-1"
+          key    = "custom-taint-key-1"
+          value  = "custom-taint-value-1"
           effect = "NoSchedule"
         },
         {
-          key = "custom-taint-key-2"
-          value = "custom-taint-value-2"
+          key    = "custom-taint-key-2"
+          value  = "custom-taint-value-2"
           effect = "NoSchedule"
         }
       ]
@@ -103,7 +103,7 @@ module "castai-gke-cluster" {
         use_spot_fallbacks            = true
         min_cpu                       = 4
         max_cpu                       = 100
-        instance_families             = {
+        instance_families = {
           exclude = ["e2"]
         }
         compute_optimized = false

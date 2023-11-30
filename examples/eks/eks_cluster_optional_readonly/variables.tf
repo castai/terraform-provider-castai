@@ -5,7 +5,7 @@ variable "cluster_name" {
 }
 
 variable "cluster_region" {
-  type = string
+  type        = string
   description = "AWS Region in which EKS cluster and supporting resources will be created."
 }
 
@@ -17,7 +17,7 @@ variable "cluster_version" {
 
 # Variables required for connecting EKS cluster to CAST AI
 variable "castai_api_token" {
-  type = string
+  type        = string
   description = "CAST AI API token created in console.cast.ai API Access keys section"
 }
 

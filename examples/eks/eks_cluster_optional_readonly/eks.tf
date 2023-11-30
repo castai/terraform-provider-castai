@@ -20,8 +20,8 @@ module "eks" {
     }
   }
 
-  vpc_id                   = module.vpc.vpc_id
-  subnet_ids               = module.vpc.private_subnets
+  vpc_id     = module.vpc.vpc_id
+  subnet_ids = module.vpc.private_subnets
 
   # Self managed node groups will not automatically create the aws-auth configmap so we need to.
   create_aws_auth_configmap = true
@@ -29,7 +29,7 @@ module "eks" {
 
   self_managed_node_groups = {
     node_group_1 = {
-      name = "${var.cluster_name}-ng-1"
+      name          = "${var.cluster_name}-ng-1"
       instance_type = "m5.large"
       desired_size  = 2
     }

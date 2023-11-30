@@ -13,11 +13,11 @@ module "gke_autoscaler_evictor_advanced_config" {
   cluster_name               = var.cluster_name
   project_id                 = var.project_id
   delete_nodes_on_disconnect = var.delete_nodes_on_disconnect
-  evictor_advanced_config    = [
+  evictor_advanced_config = [
     {
       pod_selector = {
-        kind         = "Job"
-        namespace    = "castai"
+        kind      = "Job"
+        namespace = "castai"
         match_labels = {
           "app.kubernetes.io/name" = "castai-node"
         }
