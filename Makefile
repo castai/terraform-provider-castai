@@ -15,6 +15,10 @@ init-examples:
 		done \
 	done
 
+.PHONY: format-tf
+format-tf:
+	terraform fmt -recursive -list=false
+
 .PHONY: generate-sdk
 generate-sdk:
 	@echo "==> Generating castai sdk client"
