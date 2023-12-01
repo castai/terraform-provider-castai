@@ -100,7 +100,8 @@ func TestNodeTemplateResourceReadContext(t *testing.T) {
 				"rebalancingConfig": {
 				  "minNodes": 0
 				},
-				"customInstancesEnabled": true
+				"customInstancesEnabled": true,
+				"customInstancesWithExtendedMemoryEnabled": true
 			  }
 			}
 		  ]
@@ -164,6 +165,7 @@ constraints.0.spot_interruption_predictions_type = aws-rebalance-recommendations
 constraints.0.storage_optimized = false
 constraints.0.use_spot_fallbacks = false
 custom_instances_enabled = true
+custom_instances_with_extended_memory_enabled = true
 custom_labels.% = 2
 custom_labels.key-1 = value-1
 custom_labels.key-2 = value-2
@@ -253,7 +255,8 @@ func TestNodeTemplateResourceCreate_defaultNodeTemplate(t *testing.T) {
 				"rebalancingConfig": {
 				  "minNodes": 0
 				},
-				"customInstancesEnabled": true
+				"customInstancesEnabled": true,
+				"customInstancesWithExtendedMemoryEnabled": true
 			  }
 			}
 		  ]
@@ -269,10 +272,11 @@ func TestNodeTemplateResourceCreate_defaultNodeTemplate(t *testing.T) {
 
 	resource := resourceNodeTemplate()
 	val := cty.ObjectVal(map[string]cty.Value{
-		FieldClusterId:                          cty.StringVal(clusterId),
-		FieldNodeTemplateName:                   cty.StringVal("default-by-castai"),
-		FieldNodeTemplateIsDefault:              cty.BoolVal(true),
-		FieldNodeTemplateCustomInstancesEnabled: cty.BoolVal(true),
+		FieldClusterId:                                            cty.StringVal(clusterId),
+		FieldNodeTemplateName:                                     cty.StringVal("default-by-castai"),
+		FieldNodeTemplateIsDefault:                                cty.BoolVal(true),
+		FieldNodeTemplateCustomInstancesEnabled:                   cty.BoolVal(true),
+		FieldNodeTemplateCustomInstancesWithExtendedMemoryEnabled: cty.BoolVal(true),
 	})
 	state := terraform.NewInstanceStateShimmedFromValue(val, 0)
 	state.ID = "default-by-castai"
@@ -371,6 +375,7 @@ func TestAccResourceNodeTemplate_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "is_enabled", "true"),
 					resource.TestCheckResourceAttr(resourceName, "should_taint", "true"),
 					resource.TestCheckResourceAttr(resourceName, "custom_instances_enabled", "false"),
+					resource.TestCheckResourceAttr(resourceName, "custom_instances_with_extended_memory_enabled", "false"),
 					resource.TestCheckResourceAttr(resourceName, "custom_labels.%", "2"),
 					resource.TestCheckResourceAttr(resourceName, "custom_labels."+rName+"-label-key-1", rName+"-label-value-1"),
 					resource.TestCheckResourceAttr(resourceName, "custom_labels."+rName+"-label-key-2", rName+"-label-value-2"),
@@ -423,6 +428,7 @@ func TestAccResourceNodeTemplate_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "is_enabled", "true"),
 					resource.TestCheckResourceAttr(resourceName, "should_taint", "true"),
 					resource.TestCheckResourceAttr(resourceName, "custom_instances_enabled", "false"),
+					resource.TestCheckResourceAttr(resourceName, "custom_instances_with_extended_memory_enabled", "false"),
 					resource.TestCheckResourceAttr(resourceName, "custom_labels.%", "2"),
 					resource.TestCheckResourceAttr(resourceName, "custom_labels."+rName+"-label-key-1", rName+"-label-value-1"),
 					resource.TestCheckResourceAttr(resourceName, "custom_labels."+rName+"-label-key-2", rName+"-label-value-2"),

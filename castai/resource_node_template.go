@@ -16,42 +16,43 @@ import (
 )
 
 const (
-	FieldNodeTemplateArchitectures                          = "architectures"
-	FieldNodeTemplateComputeOptimized                       = "compute_optimized"
-	FieldNodeTemplateConfigurationId                        = "configuration_id"
-	FieldNodeTemplateConstraints                            = "constraints"
-	FieldNodeTemplateCustomInstancesEnabled                 = "custom_instances_enabled"
-	FieldNodeTemplateCustomLabels                           = "custom_labels"
-	FieldNodeTemplateCustomTaints                           = "custom_taints"
-	FieldNodeTemplateEnableSpotDiversity                    = "enable_spot_diversity"
-	FieldNodeTemplateExclude                                = "exclude"
-	FieldNodeTemplateExcludeNames                           = "exclude_names"
-	FieldNodeTemplateFallbackRestoreRateSeconds             = "fallback_restore_rate_seconds"
-	FieldNodeTemplateGpu                                    = "gpu"
-	FieldNodeTemplateInclude                                = "include"
-	FieldNodeTemplateIncludeNames                           = "include_names"
-	FieldNodeTemplateInstanceFamilies                       = "instance_families"
-	FieldNodeTemplateIsDefault                              = "is_default"
-	FieldNodeTemplateIsEnabled                              = "is_enabled"
-	FieldNodeTemplateIsGpuOnly                              = "is_gpu_only"
-	FieldNodeTemplateManufacturers                          = "manufacturers"
-	FieldNodeTemplateMaxCount                               = "max_count"
-	FieldNodeTemplateMaxCpu                                 = "max_cpu"
-	FieldNodeTemplateMaxMemory                              = "max_memory"
-	FieldNodeTemplateMinCount                               = "min_count"
-	FieldNodeTemplateMinCpu                                 = "min_cpu"
-	FieldNodeTemplateMinMemory                              = "min_memory"
-	FieldNodeTemplateName                                   = "name"
-	FieldNodeTemplateOnDemand                               = "on_demand"
-	FieldNodeTemplateOs                                     = "os"
-	FieldNodeTemplateRebalancingConfigMinNodes              = "rebalancing_config_min_nodes"
-	FieldNodeTemplateShouldTaint                            = "should_taint"
-	FieldNodeTemplateSpot                                   = "spot"
-	FieldNodeTemplateSpotDiversityPriceIncreaseLimitPercent = "spot_diversity_price_increase_limit_percent"
-	FieldNodeTemplateSpotInterruptionPredictionsEnabled     = "spot_interruption_predictions_enabled"
-	FieldNodeTemplateSpotInterruptionPredictionsType        = "spot_interruption_predictions_type"
-	FieldNodeTemplateStorageOptimized                       = "storage_optimized"
-	FieldNodeTemplateUseSpotFallbacks                       = "use_spot_fallbacks"
+	FieldNodeTemplateArchitectures                            = "architectures"
+	FieldNodeTemplateComputeOptimized                         = "compute_optimized"
+	FieldNodeTemplateConfigurationId                          = "configuration_id"
+	FieldNodeTemplateConstraints                              = "constraints"
+	FieldNodeTemplateCustomInstancesEnabled                   = "custom_instances_enabled"
+	FieldNodeTemplateCustomInstancesWithExtendedMemoryEnabled = "custom_instances_with_extended_memory_enabled"
+	FieldNodeTemplateCustomLabels                             = "custom_labels"
+	FieldNodeTemplateCustomTaints                             = "custom_taints"
+	FieldNodeTemplateEnableSpotDiversity                      = "enable_spot_diversity"
+	FieldNodeTemplateExclude                                  = "exclude"
+	FieldNodeTemplateExcludeNames                             = "exclude_names"
+	FieldNodeTemplateFallbackRestoreRateSeconds               = "fallback_restore_rate_seconds"
+	FieldNodeTemplateGpu                                      = "gpu"
+	FieldNodeTemplateInclude                                  = "include"
+	FieldNodeTemplateIncludeNames                             = "include_names"
+	FieldNodeTemplateInstanceFamilies                         = "instance_families"
+	FieldNodeTemplateIsDefault                                = "is_default"
+	FieldNodeTemplateIsEnabled                                = "is_enabled"
+	FieldNodeTemplateIsGpuOnly                                = "is_gpu_only"
+	FieldNodeTemplateManufacturers                            = "manufacturers"
+	FieldNodeTemplateMaxCount                                 = "max_count"
+	FieldNodeTemplateMaxCpu                                   = "max_cpu"
+	FieldNodeTemplateMaxMemory                                = "max_memory"
+	FieldNodeTemplateMinCount                                 = "min_count"
+	FieldNodeTemplateMinCpu                                   = "min_cpu"
+	FieldNodeTemplateMinMemory                                = "min_memory"
+	FieldNodeTemplateName                                     = "name"
+	FieldNodeTemplateOnDemand                                 = "on_demand"
+	FieldNodeTemplateOs                                       = "os"
+	FieldNodeTemplateRebalancingConfigMinNodes                = "rebalancing_config_min_nodes"
+	FieldNodeTemplateShouldTaint                              = "should_taint"
+	FieldNodeTemplateSpot                                     = "spot"
+	FieldNodeTemplateSpotDiversityPriceIncreaseLimitPercent   = "spot_diversity_price_increase_limit_percent"
+	FieldNodeTemplateSpotInterruptionPredictionsEnabled       = "spot_interruption_predictions_enabled"
+	FieldNodeTemplateSpotInterruptionPredictionsType          = "spot_interruption_predictions_type"
+	FieldNodeTemplateStorageOptimized                         = "storage_optimized"
+	FieldNodeTemplateUseSpotFallbacks                         = "use_spot_fallbacks"
 )
 
 const (
@@ -369,6 +370,13 @@ func resourceNodeTemplate() *schema.Resource {
 				Description: "Marks whether custom instances should be used when deciding which parts of inventory are available. " +
 					"Custom instances are only supported in GCP.",
 			},
+			FieldNodeTemplateCustomInstancesWithExtendedMemoryEnabled: {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default:  false,
+				Description: "Marks whether custom instances with extended memory should be used when deciding which parts of inventory are available. " +
+					"Custom instances are only supported in GCP.",
+			},
 		},
 	}
 }
@@ -430,6 +438,9 @@ func resourceNodeTemplateRead(ctx context.Context, d *schema.ResourceData, meta 
 	}
 	if err := d.Set(FieldNodeTemplateCustomInstancesEnabled, lo.FromPtrOr(nodeTemplate.CustomInstancesEnabled, false)); err != nil {
 		return diag.FromErr(fmt.Errorf("setting custom instances enabled: %w", err))
+	}
+	if err := d.Set(FieldNodeTemplateCustomInstancesWithExtendedMemoryEnabled, lo.FromPtrOr(nodeTemplate.CustomInstancesWithExtendedMemoryEnabled, false)); err != nil {
+		return diag.FromErr(fmt.Errorf("setting custom instances with extended memory enabled: %w", err))
 	}
 
 	return nil
@@ -576,6 +587,7 @@ func updateNodeTemplate(ctx context.Context, d *schema.ResourceData, meta any, s
 		FieldNodeTemplateCustomLabels,
 		FieldNodeTemplateCustomTaints,
 		FieldNodeTemplateCustomInstancesEnabled,
+		FieldNodeTemplateCustomInstancesWithExtendedMemoryEnabled,
 		FieldNodeTemplateConstraints,
 		FieldNodeTemplateIsEnabled,
 	) {
@@ -641,6 +653,10 @@ func updateNodeTemplate(ctx context.Context, d *schema.ResourceData, meta any, s
 
 	if v, _ := d.GetOk(FieldNodeTemplateCustomInstancesEnabled); v != nil {
 		req.CustomInstancesEnabled = lo.ToPtr(v.(bool))
+	}
+
+	if v, _ := d.GetOk(FieldNodeTemplateCustomInstancesWithExtendedMemoryEnabled); v != nil {
+		req.CustomInstancesWithExtendedMemoryEnabled = lo.ToPtr(v.(bool))
 	}
 
 	resp, err := client.NodeTemplatesAPIUpdateNodeTemplateWithResponse(ctx, clusterID, name, req)

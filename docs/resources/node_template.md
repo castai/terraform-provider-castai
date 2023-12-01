@@ -25,6 +25,7 @@ CAST AI node template resource to manage node templates
 - `configuration_id` (String) CAST AI node configuration id to be used for node template.
 - `constraints` (Block List, Max: 1) (see [below for nested schema](#nestedblock--constraints))
 - `custom_instances_enabled` (Boolean) Marks whether custom instances should be used when deciding which parts of inventory are available. Custom instances are only supported in GCP.
+- `custom_instances_with_extended_memory_enabled` (Boolean) Marks whether custom instances with extended memory should be used when deciding which parts of inventory are available. Custom instances are only supported in GCP.
 - `custom_labels` (Map of String) Custom labels to be added to nodes created from this template.
 - `custom_taints` (Block List) Custom taints to be added to the nodes created from this template. `shouldTaint` has to be `true` in order to create/update the node template with custom taints. If `shouldTaint` is `true`, but no custom taints are provided, the nodes will be tainted with the default node template taint. (see [below for nested schema](#nestedblock--custom_taints))
 - `is_default` (Boolean) Flag whether the node template is default.
