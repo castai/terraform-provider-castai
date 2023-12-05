@@ -87,6 +87,24 @@ module "castai-eks-cluster" {
     }
   }
 
+  node_templates = {
+    default_by_castai = {
+      name             = "default-by-castai"
+      configuration_id = module.castai-eks-cluster.castai_node_configurations["default"]
+      is_default       = true
+      should_taint     = false
+
+      constraints = {
+        on_demand          = true
+        spot               = true
+        use_spot_fallbacks = true
+
+        enable_spot_diversity                       = false
+        spot_diversity_price_increase_limit_percent = 20
+      }
+    }
+  }
+
   delete_nodes_on_disconnect = var.delete_nodes_on_disconnect
 
   # Full schema can be found here https://api.cast.ai/v1/spec/#/PoliciesAPI/PoliciesAPIUpsertClusterPolicies
@@ -96,13 +114,6 @@ module "castai-eks-cluster" {
          "isScopedMode": false,
          "unschedulablePods": {
              "enabled": true
-         },
-         "spotInstances": {
-             "enabled": true,
-             "clouds": ["aws"],
-             "spotBackups": {
-                 "enabled": true
-             }
          },
          "nodeDownscaler": {
              "emptyNodes": {
