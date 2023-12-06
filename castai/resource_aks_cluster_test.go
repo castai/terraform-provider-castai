@@ -81,7 +81,7 @@ func TestAccResourceAKSCluster(t *testing.T) {
 	resourceGroupName := "core-tf-acc"
 	nodeResourceGroupName := "core-tf-acc-ng"
 
-	resource.ParallelTest(t, resource.TestCase{
+	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
 		ProviderFactories: providerFactories,
 		// Destroy of the cluster is not working properly. Cluster wasn't full onboarded and it's getting destroyed.
