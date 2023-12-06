@@ -53,17 +53,6 @@ func TestAutoscalerResource_PoliciesUpdateAction(t *testing.T) {
 		            "maxCores": 20
 		        }
 		    },
-		    "spotInstances": {
-		        "enabled": true,
-		        "clouds": [
-		            "azure"
-		        ],
-		        "maxReclaimRate": 0,
-		        "spotBackups": {
-		            "enabled": false,
-		            "spotBackupRestoreRateSeconds": 1800
-		        }
-		    },
 		    "nodeDownscaler": {
 		        "emptyNodes": {
 		            "enabled": false,
@@ -83,16 +72,6 @@ func TestAutoscalerResource_PoliciesUpdateAction(t *testing.T) {
 			"nodeConstraints": {
 				"enabled": true,
 				"maxCpuCores": 96
-			}
-		},
-		"spotInstances": {
-			"clouds": ["aws"],
-			"spotBackups": {
-				"enabled": true
-			},
-			"spotInterruptionPredictions": {
-				"enabled": true,
-				"type": "AWSRebalanceRecommendations"
 			}
 		}
 	}`
@@ -127,21 +106,6 @@ func TestAutoscalerResource_PoliciesUpdateAction(t *testing.T) {
 		        "cpu": {
 		            "minCores": 1,
 		            "maxCores": 20
-		        }
-		    },
-		    "spotInstances": {
-		        "enabled": true,
-		        "clouds": [
-		            "aws"
-		        ],
-		        "maxReclaimRate": 0,
-		        "spotBackups": {
-		            "enabled": true,
-		            "spotBackupRestoreRateSeconds": 1800
-		        },
-		        "spotInterruptionPredictions": {
-		            "enabled": true,
-		            "type": "AWSRebalanceRecommendations"
 		        }
 		    },
 		    "nodeDownscaler": {
@@ -235,17 +199,6 @@ func TestAutoscalerResource_PoliciesUpdateAction_Fail(t *testing.T) {
 		            "maxCores": 20
 		        }
 		    },
-		    "spotInstances": {
-		        "enabled": true,
-		        "clouds": [
-		            "azure"
-		        ],
-		        "maxReclaimRate": 0,
-		        "spotBackups": {
-		            "enabled": false,
-		            "spotBackupRestoreRateSeconds": 1800
-		        }
-		    },
 		    "nodeDownscaler": {
 		        "emptyNodes": {
 		            "enabled": false,
@@ -260,12 +213,6 @@ func TestAutoscalerResource_PoliciesUpdateAction_Fail(t *testing.T) {
 			"nodeConstraints": {
 				"enabled": true,
 				"maxCpuCores": 96
-			}
-		},
-		"spotInstances": {
-			"clouds": ["aws"],
-			"spotBackups": {
-				"enabled": true
 			}
 		}
 	}`

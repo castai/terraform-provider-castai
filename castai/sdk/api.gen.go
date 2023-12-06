@@ -672,6 +672,9 @@ type CastaiUsersV1beta1CurrentUserProfileResponse struct {
 	// User first login.
 	FirstLogin *bool `json:"firstLogin,omitempty"`
 
+	// HasHubspotContact is true if user has Hubspot contact form submitted.
+	HasHubspotContact *bool `json:"hasHubspotContact,omitempty"`
+
 	// User ID.
 	Id *string `json:"id,omitempty"`
 
