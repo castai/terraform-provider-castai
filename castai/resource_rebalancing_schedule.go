@@ -51,7 +51,17 @@ func resourceRebalancingSchedule() *schema.Resource {
 							Type:             schema.TypeString,
 							Required:         true,
 							ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
-							Description:      "Cron expression defining when the schedule should trigger.",
+							Description:      "Cron expression defining when the schedule should trigger.\n\n"+
+											"  The `cron` expression can optionally include the `CRON_TZ` variable at the beginning to specify the timezone in which the schedule should be interpreted.\n\n"+
+											"  Example:\n"+
+											"  ```plaintext\n"+
+											"  CRON_TZ=America/New_York 0 12 * * ?\n"+
+											"  ```\n"+
+											"  In the example above, the `CRON_TZ` variable is set to \"America/New_York\" indicating that the cron expression should be interpreted in the Eastern Time (ET) timezone.\n\n"+
+											"  To retrieve a list of available timezone values, you can use the following API endpoint:\n\n"+
+											"  GET https://api.cast.ai/v1/time-zones\n\n"+
+											"  When using the `CRON_TZ` variable, ensure that the specified timezone is valid and supported by checking the list of available timezones from the API endpoint."+
+											"  If the `CRON_TZ` variable is not specified, the cron expression will be interpreted in the UTC timezone.",
 						},
 					},
 				},
