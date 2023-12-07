@@ -31,6 +31,11 @@ variable "castai_api_token" {
   description = "CAST AI API token created in console.cast.ai API Access keys section."
 }
 
+variable "castai_grpc_url" {
+  type        = string
+  description = "CAST AI gRPC URL"
+}
+
 variable "delete_nodes_on_disconnect" {
   type        = bool
   description = "Optional parameter, if set to true - CAST AI provisioned nodes will be deleted from cloud on cluster disconnection. For production use it is recommended to set it to false."

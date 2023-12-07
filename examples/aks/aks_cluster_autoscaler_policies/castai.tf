@@ -23,6 +23,7 @@ module "castai-aks-cluster" {
 
   api_url                = var.castai_api_url
   castai_api_token       = var.castai_api_token
+  grpc_url               = var.castai_grpc_url
   wait_for_cluster_ready = true
 
   aks_cluster_name    = var.cluster_name

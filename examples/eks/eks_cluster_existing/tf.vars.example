@@ -1,6 +1,7 @@
 cluster_name                = ""
 cluster_region              = ""
 castai_api_token            = ""
+grpc_url                    = ""
 vpc_id                      = ""
 cluster_security_group_id   = ""
 node_security_group_id      = ""

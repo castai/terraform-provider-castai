@@ -56,6 +56,7 @@ module "castai-eks-cluster" {
 
   api_url                = var.castai_api_url
   castai_api_token       = var.castai_api_token
+  grpc_url               = var.castai_grpc_url
   wait_for_cluster_ready = true
 
   aws_account_id     = data.aws_caller_identity.current.account_id
