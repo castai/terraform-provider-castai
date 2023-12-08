@@ -36,6 +36,7 @@ variable "castai_api_url" {
 variable "castai_grpc_url" {
   type        = string
   description = "CAST AI gRPC URL"
+  default     = "grpc.cast.ai:443"
 }
 
 variable "delete_nodes_on_disconnect" {
