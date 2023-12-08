@@ -30,6 +30,7 @@ module "castai-gke-cluster" {
 
   api_url                = var.castai_api_url
   castai_api_token       = var.castai_api_token
+  grpc_url               = var.castai_grpc_url
   wait_for_cluster_ready = true
 
   project_id           = var.project_id

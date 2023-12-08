@@ -29,6 +29,12 @@ variable "castai_api_token" {
   description = "CAST AI API token created in console.cast.ai API Access keys section."
 }
 
+variable "castai_grpc_url" {
+  type        = string
+  description = "CAST AI gRPC URL"
+  default     = "grpc.cast.ai:443"
+}
+
 # Variables required for connecting EKS cluster to CAST AI
 
 variable "delete_nodes_on_disconnect" {
