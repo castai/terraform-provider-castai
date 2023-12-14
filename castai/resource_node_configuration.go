@@ -228,6 +228,12 @@ func resourceNodeConfiguration() *schema.Resource {
 							ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(10, 250)),
 							Description:      "Maximum number of pods that can be run on a node, which affects how many IP addresses you will need for each node. Defaults to 30",
 						},
+						"os_disk_type": {
+							Type:             schema.TypeString,
+							Optional:         true,
+							Description:      "Type of managed os disk attached to the node. (See [disk types](https://learn.microsoft.com/en-us/azure/virtual-machines/disks-types)). One of: standard, standard-ssd, premium-ssd (ultra and premium-ssd-v2 are not supported for os disk)",
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"standard", "standard-ssd", "premium-ssd"}, false)),
+						},
 					},
 				},
 			},
@@ -665,6 +671,10 @@ func toAKSSConfig(obj map[string]interface{}) *sdk.NodeconfigV1AKSConfig {
 	out := &sdk.NodeconfigV1AKSConfig{}
 	if v, ok := obj["max_pods_per_node"].(int); ok {
 		out.MaxPodsPerNode = toPtr(int32(v))
+	}
+
+	if v, ok := obj["os_disk_type"].(string); ok && v != "" {
+		out.OsDiskType = toPtr(v)
 	}
 
 	return out
