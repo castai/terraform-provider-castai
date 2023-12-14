@@ -674,10 +674,27 @@ func toAKSSConfig(obj map[string]interface{}) *sdk.NodeconfigV1AKSConfig {
 	}
 
 	if v, ok := obj["os_disk_type"].(string); ok && v != "" {
-		out.OsDiskType = toPtr(v)
+		out.OsDiskType = toAKSOSDiskType(v)
 	}
 
 	return out
+}
+
+func toAKSOSDiskType(v string) *sdk.NodeconfigV1AKSConfigOsDiskType {
+	if v == "" {
+		return nil
+	}
+
+	switch v {
+	case "standard":
+		return toPtr(sdk.OSDISKTYPESTANDARD)
+	case "standard-ssd":
+		return toPtr(sdk.OSDISKTYPESTANDARDSSD)
+	case "premium-ssd":
+		return toPtr(sdk.OSDISKTYPEPREMIUMSSD)
+	default:
+		return nil
+	}
 }
 
 func flattenAKSConfig(config *sdk.NodeconfigV1AKSConfig) []map[string]interface{} {
