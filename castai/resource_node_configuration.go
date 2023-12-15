@@ -706,7 +706,27 @@ func flattenAKSConfig(config *sdk.NodeconfigV1AKSConfig) []map[string]interface{
 		m["max_pods_per_node"] = *config.MaxPodsPerNode
 	}
 
+	if v := config.MaxPodsPerNode; v != nil {
+		m["os_disk_type"] = fromAKSDiskType(config.OsDiskType)
+	}
+
 	return []map[string]interface{}{m}
+}
+
+func fromAKSDiskType(osDiskType *sdk.NodeconfigV1AKSConfigOsDiskType) string {
+	if osDiskType == nil {
+		return ""
+	}
+	switch *osDiskType {
+	case sdk.OSDISKTYPESTANDARD:
+		return "standard"
+	case sdk.OSDISKTYPESTANDARDSSD:
+		return "standard-ssd"
+	case sdk.OSDISKTYPEPREMIUMSSD:
+		return "premium-ssd"
+	default:
+		return ""
+	}
 }
 
 func toGKEConfig(obj map[string]interface{}) *sdk.NodeconfigV1GKEConfig {
