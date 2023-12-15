@@ -228,6 +228,12 @@ func resourceNodeConfiguration() *schema.Resource {
 							ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(10, 250)),
 							Description:      "Maximum number of pods that can be run on a node, which affects how many IP addresses you will need for each node. Defaults to 30",
 						},
+						"os_disk_type": {
+							Type:             schema.TypeString,
+							Optional:         true,
+							Description:      "Type of managed os disk attached to the node. (See [disk types](https://learn.microsoft.com/en-us/azure/virtual-machines/disks-types)). One of: standard, standard-ssd, premium-ssd (ultra and premium-ssd-v2 are not supported for os disk)",
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"standard", "standard-ssd", "premium-ssd"}, false)),
+						},
 					},
 				},
 			},
@@ -667,7 +673,28 @@ func toAKSSConfig(obj map[string]interface{}) *sdk.NodeconfigV1AKSConfig {
 		out.MaxPodsPerNode = toPtr(int32(v))
 	}
 
+	if v, ok := obj["os_disk_type"].(string); ok && v != "" {
+		out.OsDiskType = toAKSOSDiskType(v)
+	}
+
 	return out
+}
+
+func toAKSOSDiskType(v string) *sdk.NodeconfigV1AKSConfigOsDiskType {
+	if v == "" {
+		return nil
+	}
+
+	switch v {
+	case "standard":
+		return toPtr(sdk.OSDISKTYPESTANDARD)
+	case "standard-ssd":
+		return toPtr(sdk.OSDISKTYPESTANDARDSSD)
+	case "premium-ssd":
+		return toPtr(sdk.OSDISKTYPEPREMIUMSSD)
+	default:
+		return nil
+	}
 }
 
 func flattenAKSConfig(config *sdk.NodeconfigV1AKSConfig) []map[string]interface{} {
@@ -679,7 +706,27 @@ func flattenAKSConfig(config *sdk.NodeconfigV1AKSConfig) []map[string]interface{
 		m["max_pods_per_node"] = *config.MaxPodsPerNode
 	}
 
+	if v := config.MaxPodsPerNode; v != nil {
+		m["os_disk_type"] = fromAKSDiskType(config.OsDiskType)
+	}
+
 	return []map[string]interface{}{m}
+}
+
+func fromAKSDiskType(osDiskType *sdk.NodeconfigV1AKSConfigOsDiskType) string {
+	if osDiskType == nil {
+		return ""
+	}
+	switch *osDiskType {
+	case sdk.OSDISKTYPESTANDARD:
+		return "standard"
+	case sdk.OSDISKTYPESTANDARDSSD:
+		return "standard-ssd"
+	case sdk.OSDISKTYPEPREMIUMSSD:
+		return "premium-ssd"
+	default:
+		return ""
+	}
 }
 
 func toGKEConfig(obj map[string]interface{}) *sdk.NodeconfigV1GKEConfig {

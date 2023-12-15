@@ -70,6 +70,14 @@ const (
 	Worker          ExternalclusterV1NodeType = "worker"
 )
 
+// Defines values for NodeconfigV1AKSConfigOsDiskType.
+const (
+	OSDISKTYPEPREMIUMSSD  NodeconfigV1AKSConfigOsDiskType = "OS_DISK_TYPE_PREMIUM_SSD"
+	OSDISKTYPESTANDARD    NodeconfigV1AKSConfigOsDiskType = "OS_DISK_TYPE_STANDARD"
+	OSDISKTYPESTANDARDSSD NodeconfigV1AKSConfigOsDiskType = "OS_DISK_TYPE_STANDARD_SSD"
+	OSDISKTYPEUNSPECIFIED NodeconfigV1AKSConfigOsDiskType = "OS_DISK_TYPE_UNSPECIFIED"
+)
+
 // Defines values for NodeconfigV1ContainerRuntime.
 const (
 	CONTAINERD  NodeconfigV1ContainerRuntime = "CONTAINERD"
@@ -1423,7 +1431,13 @@ type NodeconfigV1AKSConfig struct {
 	// Defaults to 30. Values between 10 and 250 are allowed.
 	// Setting values above 110 will require specific CNI configuration. Please refer to Microsoft documentation for additional guidance.
 	MaxPodsPerNode *int32 `json:"maxPodsPerNode,omitempty"`
+
+	// OsDiskType represent possible values for AKS node os disk type(this is subset of all available Azure disk types).
+	OsDiskType *NodeconfigV1AKSConfigOsDiskType `json:"osDiskType,omitempty"`
 }
+
+// OsDiskType represent possible values for AKS node os disk type(this is subset of all available Azure disk types).
+type NodeconfigV1AKSConfigOsDiskType string
 
 // List of supported container runtimes kubelet should use.
 type NodeconfigV1ContainerRuntime string
