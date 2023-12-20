@@ -128,6 +128,7 @@ module "castai-aks-cluster" {
                 "scopedMode": false
             }
         },
+        "nodeTemplatesPartialMatchingEnabled": false,
         "clusterLimits": {
             "cpu": {
                 "maxCores": 20,

@@ -7,8 +7,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"time"
-
-	openapi_types "github.com/deepmap/oapi-codegen/pkg/types"
 )
 
 const (
@@ -1994,9 +1992,16 @@ type PoliciesV1Evictor struct {
 	// Enable/disable the Evictor policy. This will either install or uninstall the Evictor component in your cluster.
 	Enabled *bool `json:"enabled"`
 
+	// If enabled then Evictor will attempt to evict pods that have pod disruption budgets configured.
+	IgnorePodDisruptionBudgets *bool `json:"ignorePodDisruptionBudgets"`
+
 	// Configure the node grace period which controls the duration which must pass after a node has been created before
 	// Evictor starts considering that node.
 	NodeGracePeriodMinutes *int32 `json:"nodeGracePeriodMinutes"`
+
+	// Configure the pod eviction failure back off interval. If pod eviction fails then Evictor will attempt
+	// to evict it again after the amount of time specified here.
+	PodEvictionFailureBackOffInterval *string `json:"podEvictionFailureBackOffInterval"`
 
 	// Enable/disable scoped mode. By default, Evictor targets all nodes in the cluster. This mode will constrain in to
 	// just the nodes which were created by CAST AI.
@@ -2091,6 +2096,9 @@ type PoliciesV1Policies struct {
 
 	// Node Downscaler defines policies for removing nodes based on the configured conditions.
 	NodeDownscaler *PoliciesV1NodeDownscaler `json:"nodeDownscaler,omitempty"`
+
+	// Marks whether partial matching should be used when deciding which custom node template to select.
+	NodeTemplatesPartialMatchingEnabled *bool `json:"nodeTemplatesPartialMatchingEnabled"`
 
 	// Policy defining whether autoscaler can use spot instances for provisioning additional workloads.
 	SpotInstances *PoliciesV1SpotInstances `json:"spotInstances,omitempty"`
@@ -2316,9 +2324,6 @@ type ScheduledrebalancingV1TimeZone struct {
 type ScheduledrebalancingV1TriggerConditions struct {
 	SavingsPercentage *float32 `json:"savingsPercentage,omitempty"`
 }
-
-// HeaderOrganizationId defines model for headerOrganizationId.
-type HeaderOrganizationId = openapi_types.UUID
 
 // AuthTokenAPIListAuthTokensParams defines parameters for AuthTokenAPIListAuthTokens.
 type AuthTokenAPIListAuthTokensParams struct {
