@@ -180,6 +180,7 @@ module "castai-eks-cluster" {
                 "scopedMode": false
             }
         },
+        "nodeTemplatesPartialMatchingEnabled": false,
         "clusterLimits": {
             "cpu": {
                 "maxCores": 20,
