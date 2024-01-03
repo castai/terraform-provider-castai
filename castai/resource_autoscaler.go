@@ -29,6 +29,7 @@ func resourceAutoscaler() *schema.Resource {
 		CreateContext: resourceCastaiAutoscalerCreate,
 		UpdateContext: resourceCastaiAutoscalerUpdate,
 		DeleteContext: resourceCastaiAutoscalerDelete,
+		CustomizeDiff: resourceCastaiAutoscalerDiff,
 		Description:   "CAST AI autoscaler resource to manage autoscaler settings",
 
 		Timeouts: &schema.ResourceTimeout{
@@ -72,6 +73,23 @@ func resourceCastaiAutoscalerDelete(ctx context.Context, data *schema.ResourceDa
 	}
 
 	return nil
+}
+
+func resourceCastaiAutoscalerDiff(ctx context.Context, d *schema.ResourceDiff, meta interface{}) error {
+	clusterId := getClusterId(d)
+	if clusterId == "" {
+		return nil
+	}
+
+	policies, err := getChangedPolicies(ctx, d, meta, clusterId)
+	if err != nil {
+		return err
+	}
+	if policies == nil {
+		return nil
+	}
+
+	return d.SetNew(FieldAutoscalerPolicies, string(policies))
 }
 
 func resourceCastaiAutoscalerRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -119,15 +137,15 @@ func getCurrentPolicies(ctx context.Context, client *sdk.ClientWithResponses, cl
 		return nil, fmt.Errorf("cluster %s policies do not exist at CAST AI", clusterId)
 	}
 
-	bytes, err := io.ReadAll(resp.Body)
+	responseBytes, err := io.ReadAll(resp.Body)
 	defer resp.Body.Close()
 	if err != nil {
 		return nil, fmt.Errorf("reading response body: %w", err)
 	}
 
-	log.Printf("[DEBUG] Read autoscaler policies for cluster %s:\n%v\n", clusterId, string(bytes))
+	log.Printf("[DEBUG] Read autoscaler policies for cluster %s:\n%v\n", clusterId, string(responseBytes))
 
-	return bytes, nil
+	return normalizeJSON(responseBytes)
 }
 
 func updateAutoscalerPolicies(ctx context.Context, data *schema.ResourceData, meta interface{}) error {
@@ -137,18 +155,17 @@ func updateAutoscalerPolicies(ctx context.Context, data *schema.ResourceData, me
 		return nil
 	}
 
-	err := readAutoscalerPolicies(ctx, data, meta)
+	policies, err := getChangedPolicies(ctx, data, meta, clusterId)
 	if err != nil {
 		return err
 	}
 
-	changedPolicies, found := data.GetOk(FieldAutoscalerPolicies)
-	if !found {
-		log.Printf("[DEBUG] changed policies json not found. Skipping autoscaler policies changes")
+	if policies == nil {
+		log.Printf("[DEBUG] changed policies json not calculated. Skipping autoscaler policies changes")
 		return nil
 	}
 
-	changedPoliciesJSON := changedPolicies.(string)
+	changedPoliciesJSON := string(policies)
 	if changedPoliciesJSON == "" {
 		log.Printf("[DEBUG] changed policies json not found. Skipping autoscaler policies changes")
 		return nil
@@ -178,12 +195,13 @@ func readAutoscalerPolicies(ctx context.Context, data *schema.ResourceData, meta
 		return nil
 	}
 
-	policies, err := getChangedPolicies(ctx, data, meta, clusterId)
+	client := meta.(*ProviderConfig).api
+	currentPolicies, err := getCurrentPolicies(ctx, client, clusterId)
 	if err != nil {
 		return err
 	}
 
-	err = data.Set(FieldAutoscalerPolicies, string(policies))
+	err = data.Set(FieldAutoscalerPolicies, string(currentPolicies))
 	if err != nil {
 		log.Printf("[ERROR] Failed to set field: %v", err)
 		return err
@@ -192,7 +210,16 @@ func readAutoscalerPolicies(ctx context.Context, data *schema.ResourceData, meta
 	return nil
 }
 
-func getChangedPolicies(ctx context.Context, data *schema.ResourceData, meta interface{}, clusterId string) ([]byte, error) {
+func getClusterId(data resourceProvider) string {
+	value, found := data.GetOk(FieldClusterId)
+	if !found {
+		return ""
+	}
+
+	return value.(string)
+}
+
+func getChangedPolicies(ctx context.Context, data resourceProvider, meta interface{}, clusterId string) ([]byte, error) {
 	policyChangesJSON, found := data.GetOk(FieldAutoscalerPoliciesJSON)
 	if !found {
 		log.Printf("[DEBUG] policies json not provided. Skipping autoscaler policies changes")
@@ -219,16 +246,7 @@ func getChangedPolicies(ctx context.Context, data *schema.ResourceData, meta int
 		return nil, fmt.Errorf("failed to merge policies: %v", err)
 	}
 
-	return policies, nil
-}
-
-func getClusterId(data *schema.ResourceData) string {
-	value, found := data.GetOk(FieldClusterId)
-	if !found {
-		return ""
-	}
-
-	return value.(string)
+	return normalizeJSON(policies)
 }
 
 func validateAutoscalerPolicyJSON() schema.SchemaValidateDiagFunc {

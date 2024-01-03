@@ -256,17 +256,6 @@ func TestAutoscalerResource_PoliciesUpdateAction_Fail(t *testing.T) {
 	r.Equal(`expected status code 200, received: status=400 body={"message":"policies config: Evictor policy management is not allowed: Evictor installed externally. Uninstall Evictor first and try again.","fieldViolations":[]`, result[0].Summary)
 }
 
-func JSONBytesEqual(a, b []byte) (bool, error) {
-	var j, j2 interface{}
-	if err := json.Unmarshal(a, &j); err != nil {
-		return false, err
-	}
-	if err := json.Unmarshal(b, &j2); err != nil {
-		return false, err
-	}
-	return reflect.DeepEqual(j2, j), nil
-}
-
 func Test_validateAutoscalerPolicyJSON(t *testing.T) {
 	type testData struct {
 		json            string
@@ -391,4 +380,217 @@ func Test_validateAutoscalerPolicyJSON(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestAutoscalerResource_ReadPoliciesAction(t *testing.T) {
+	r := require.New(t)
+	mockctrl := gomock.NewController(t)
+	mockClient := mock_sdk.NewMockClientInterface(mockctrl)
+	ctx := context.Background()
+	provider := &ProviderConfig{
+		api: &sdk.ClientWithResponses{
+			ClientInterface: mockClient,
+		},
+	}
+
+	currentPoliciesBytes, err := normalizeJSON([]byte(`
+		{
+		    "enabled": true,
+		    "isScopedMode": false,
+		    "unschedulablePods": {
+		        "enabled": true,
+		        "headroom": {
+		            "cpuPercentage": 10,
+		            "memoryPercentage": 10,
+		            "enabled": true
+		        },
+		        "headroomSpot": {
+		            "cpuPercentage": 10,
+		            "memoryPercentage": 10,
+		            "enabled": true
+		        },
+		        "nodeConstraints": {
+		            "minCpuCores": 2,
+		            "maxCpuCores": 32,
+		            "minRamMib": 4096,
+		            "maxRamMib": 262144,
+		            "enabled": false
+		        },
+		        "diskGibToCpuRatio": 25
+		    },
+		    "clusterLimits": {
+		        "enabled": false,
+		        "cpu": {
+		            "minCores": 1,
+		            "maxCores": 20
+		        }
+		    },
+		    "nodeDownscaler": {
+		        "emptyNodes": {
+		            "enabled": false,
+		            "delaySeconds": 0
+		        }
+		    }
+		}`))
+	r.NoError(err)
+
+	currentPolicies := string(currentPoliciesBytes)
+	resource := resourceAutoscaler()
+
+	clusterId := "cluster_id"
+	val := cty.ObjectVal(map[string]cty.Value{
+		FieldClusterId: cty.StringVal(clusterId),
+	})
+	state := terraform.NewInstanceStateShimmedFromValue(val, 0)
+	data := resource.Data(state)
+
+	body := io.NopCloser(bytes.NewReader([]byte(currentPolicies)))
+	response := &http.Response{StatusCode: 200, Body: body}
+
+	mockClient.EXPECT().PoliciesAPIGetClusterPolicies(gomock.Any(), clusterId, gomock.Any()).Return(response, nil).Times(1)
+	mockClient.EXPECT().PoliciesAPIUpsertClusterPoliciesWithBody(gomock.Any(), clusterId, "application/json", gomock.Any()).
+		Times(0)
+
+	result := resource.ReadContext(ctx, data, provider)
+	r.Nil(result)
+	r.Equal(currentPolicies, data.Get(FieldAutoscalerPolicies))
+}
+
+func TestAutoscalerResource_CustomizeDiff(t *testing.T) {
+	r := require.New(t)
+	mockctrl := gomock.NewController(t)
+	mockClient := mock_sdk.NewMockClientInterface(mockctrl)
+	ctx := context.Background()
+	provider := &ProviderConfig{
+		api: &sdk.ClientWithResponses{
+			ClientInterface: mockClient,
+		},
+	}
+
+	currentPoliciesBytes, err := normalizeJSON([]byte(`
+		{
+		    "enabled": true,
+		    "isScopedMode": false,
+		    "unschedulablePods": {
+		        "enabled": true,
+		        "headroom": {
+		            "cpuPercentage": 10,
+		            "memoryPercentage": 10,
+		            "enabled": true
+		        },
+		        "headroomSpot": {
+		            "cpuPercentage": 10,
+		            "memoryPercentage": 10,
+		            "enabled": true
+		        },
+		        "nodeConstraints": {
+		            "minCpuCores": 2,
+		            "maxCpuCores": 32,
+		            "minRamMib": 4096,
+		            "maxRamMib": 262144,
+		            "enabled": false
+		        },
+		        "diskGibToCpuRatio": 25
+		    },
+		    "clusterLimits": {
+		        "enabled": false,
+		        "cpu": {
+		            "minCores": 1,
+		            "maxCores": 20
+		        }
+		    },
+		    "nodeDownscaler": {
+		        "emptyNodes": {
+		            "enabled": false,
+		            "delaySeconds": 0
+		        }
+		    }
+		}`))
+	r.NoError(err)
+
+	policyChangeBytes, err := normalizeJSON([]byte(`
+		{
+		    "enabled": false,
+		    "unschedulablePods": {
+		        "enabled": false
+			}
+		}`))
+	r.NoError(err)
+
+	expectedPoliciesBytes, err := normalizeJSON([]byte(`
+		{
+		    "enabled": false,
+		    "isScopedMode": false,
+		    "unschedulablePods": {
+		        "enabled": false,
+		        "headroom": {
+		            "cpuPercentage": 10,
+		            "memoryPercentage": 10,
+		            "enabled": true
+		        },
+		        "headroomSpot": {
+		            "cpuPercentage": 10,
+		            "memoryPercentage": 10,
+		            "enabled": true
+		        },
+		        "nodeConstraints": {
+		            "minCpuCores": 2,
+		            "maxCpuCores": 32,
+		            "minRamMib": 4096,
+		            "maxRamMib": 262144,
+		            "enabled": false
+		        },
+		        "diskGibToCpuRatio": 25
+		    },
+		    "clusterLimits": {
+		        "enabled": false,
+		        "cpu": {
+		            "minCores": 1,
+		            "maxCores": 20
+		        }
+		    },
+		    "nodeDownscaler": {
+		        "emptyNodes": {
+		            "enabled": false,
+		            "delaySeconds": 0
+		        }
+		    }
+		}`))
+	r.NoError(err)
+
+	currentPolicies := string(currentPoliciesBytes)
+	policyChanges := string(policyChangeBytes)
+	expectedPolicies := string(expectedPoliciesBytes)
+	resource := resourceAutoscaler()
+
+	clusterId := "cluster_id"
+	val := cty.ObjectVal(map[string]cty.Value{
+		FieldAutoscalerPoliciesJSON: cty.StringVal(policyChanges),
+		FieldClusterId:              cty.StringVal(clusterId),
+	})
+	state := terraform.NewInstanceStateShimmedFromValue(val, 0)
+	data := resource.Data(state)
+	r.NoError(err)
+
+	body := io.NopCloser(bytes.NewReader([]byte(currentPolicies)))
+	response := &http.Response{StatusCode: 200, Body: body}
+
+	mockClient.EXPECT().PoliciesAPIGetClusterPolicies(gomock.Any(), clusterId, gomock.Any()).Return(response, nil).Times(1)
+	mockClient.EXPECT().PoliciesAPIUpsertClusterPoliciesWithBody(gomock.Any(), clusterId, "application/json", gomock.Any()).
+		Times(0)
+
+	result, err := getChangedPolicies(ctx, data, provider, clusterId)
+	r.NoError(err)
+	r.Equal(expectedPolicies, string(result))
+}
+
+func JSONBytesEqual(a, b []byte) (bool, error) {
+	var j, j2 interface{}
+	if err := json.Unmarshal(a, &j); err != nil {
+		return false, err
+	}
+	if err := json.Unmarshal(b, &j2); err != nil {
+		return false, err
+	}
+	return reflect.DeepEqual(j2, j), nil
 }

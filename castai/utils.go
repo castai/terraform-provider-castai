@@ -7,6 +7,10 @@ import (
 	"golang.org/x/exp/constraints"
 )
 
+type resourceProvider interface {
+	GetOk(key string) (interface{}, bool)
+}
+
 func toPtr[S any](src S) *S {
 	return &src
 }
@@ -106,4 +110,13 @@ func toNilList[T any](l *[]T) *[]T {
 		return nil
 	}
 	return l
+}
+
+func normalizeJSON(bytes []byte) ([]byte, error) {
+	var output interface{}
+	err := json.Unmarshal(bytes, &output)
+	if err != nil {
+		return nil, err
+	}
+	return json.Marshal(output)
 }
