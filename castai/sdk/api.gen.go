@@ -7,6 +7,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"time"
+
+	openapi_types "github.com/deepmap/oapi-codegen/pkg/types"
 )
 
 const (
@@ -2324,6 +2326,9 @@ type ScheduledrebalancingV1TimeZone struct {
 type ScheduledrebalancingV1TriggerConditions struct {
 	SavingsPercentage *float32 `json:"savingsPercentage,omitempty"`
 }
+
+// HeaderOrganizationId defines model for headerOrganizationId.
+type HeaderOrganizationId = openapi_types.UUID
 
 // AuthTokenAPIListAuthTokensParams defines parameters for AuthTokenAPIListAuthTokens.
 type AuthTokenAPIListAuthTokensParams struct {
