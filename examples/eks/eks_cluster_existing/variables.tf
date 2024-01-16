@@ -1,4 +1,10 @@
 # EKS module variables.
+variable "profile" {
+  type        = string
+  description = "Profile used with AWS CLI"
+  default     = "default"
+}
+
 variable "cluster_name" {
   type        = string
   description = "EKS cluster name in AWS account."
