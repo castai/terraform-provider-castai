@@ -7,8 +7,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"time"
-
-	openapi_types "github.com/deepmap/oapi-codegen/pkg/types"
 )
 
 const (
@@ -236,8 +234,8 @@ type CastaiEvictorV1PodSelector struct {
 
 	// LabelSelector is a proto mirror of the metav1.LabelSelector K8s API object. Properties `match_labels` and
 	// `match_expressions` are ANDed.
-	LabelSelector CastaiEvictorV1LabelSelector `json:"labelSelector"`
-	Namespace     *string                      `json:"namespace,omitempty"`
+	LabelSelector *CastaiEvictorV1LabelSelector `json:"labelSelector,omitempty"`
+	Namespace     *string                       `json:"namespace,omitempty"`
 }
 
 // CastaiInventoryV1beta1AddReservationResponse defines model for castai.inventory.v1beta1.AddReservationResponse.
@@ -328,6 +326,16 @@ type CastaiInventoryV1beta1GenericReservationsList struct {
 	Items *[]CastaiInventoryV1beta1GenericReservation `json:"items,omitempty"`
 }
 
+// CastaiInventoryV1beta1GetOrganizationReservationsBalanceResponse defines model for castai.inventory.v1beta1.GetOrganizationReservationsBalanceResponse.
+type CastaiInventoryV1beta1GetOrganizationReservationsBalanceResponse struct {
+	Reservations *[]CastaiInventoryV1beta1ReservationBalanceV2 `json:"reservations,omitempty"`
+}
+
+// CastaiInventoryV1beta1GetOrganizationResourceUsageResponse defines model for castai.inventory.v1beta1.GetOrganizationResourceUsageResponse.
+type CastaiInventoryV1beta1GetOrganizationResourceUsageResponse struct {
+	InstanceTypes *[]CastaiInventoryV1beta1InstaceTypeAggregate `json:"instanceTypes,omitempty"`
+}
+
 // CastaiInventoryV1beta1GetReservationsBalanceResponse defines model for castai.inventory.v1beta1.GetReservationsBalanceResponse.
 type CastaiInventoryV1beta1GetReservationsBalanceResponse struct {
 	Reservations *[]CastaiInventoryV1beta1ReservationBalance `json:"reservations,omitempty"`
@@ -341,6 +349,32 @@ type CastaiInventoryV1beta1GetReservationsResponse struct {
 // CastaiInventoryV1beta1GetResourceUsageResponse defines model for castai.inventory.v1beta1.GetResourceUsageResponse.
 type CastaiInventoryV1beta1GetResourceUsageResponse struct {
 	InstanceTypes *[]CastaiInventoryV1beta1CountableInstanceType `json:"instanceTypes,omitempty"`
+}
+
+// CastaiInventoryV1beta1InstaceTypeAggregate defines model for castai.inventory.v1beta1.InstaceTypeAggregate.
+type CastaiInventoryV1beta1InstaceTypeAggregate struct {
+	AzId      *string `json:"azId,omitempty"`
+	ClusterId *string `json:"clusterId,omitempty"`
+	Count     *int32  `json:"count,omitempty"`
+
+	// InstanceType name. This value is provider specific.
+	InstanceType *string `json:"instanceType,omitempty"`
+
+	// Price of the instance type. $/hour.
+	Price *string `json:"price,omitempty"`
+
+	// Provider name of the instance type.
+	Provider *string `json:"provider,omitempty"`
+
+	// Ram (in MiB) available on the instance type.
+	Ram *string `json:"ram,omitempty"`
+
+	// Region of the instance type. This value is provider specific.
+	Region *string `json:"region,omitempty"`
+	Spot   *bool   `json:"spot,omitempty"`
+
+	// Vcpu available on the instance type.
+	Vcpu *string `json:"vcpu,omitempty"`
 }
 
 // CastaiInventoryV1beta1InstanceReliability defines model for castai.inventory.v1beta1.InstanceReliability.
@@ -435,6 +469,13 @@ type CastaiInventoryV1beta1ReservationBalance struct {
 	InstanceTypes *[]CastaiInventoryV1beta1CountableInstanceType `json:"instanceTypes,omitempty"`
 	Reservation   *CastaiInventoryV1beta1ReservationDetails      `json:"reservation,omitempty"`
 	Usage         *float64                                       `json:"usage,omitempty"`
+}
+
+// CastaiInventoryV1beta1ReservationBalanceV2 defines model for castai.inventory.v1beta1.ReservationBalanceV2.
+type CastaiInventoryV1beta1ReservationBalanceV2 struct {
+	InstanceTypes *[]CastaiInventoryV1beta1InstaceTypeAggregate `json:"instanceTypes,omitempty"`
+	Reservation   *CastaiInventoryV1beta1ReservationDetails     `json:"reservation,omitempty"`
+	Usage         *float64                                      `json:"usage,omitempty"`
 }
 
 // CastaiInventoryV1beta1ReservationDetails defines model for castai.inventory.v1beta1.ReservationDetails.
@@ -816,11 +857,20 @@ type CastaiUsersV1beta1User struct {
 	Email              string                                `json:"email"`
 	GcpMarketplaceUser *CastaiUsersV1beta1GCPMarketplaceUser `json:"gcpMarketplaceUser,omitempty"`
 
+	// has_hubspot_contact indicates whether user has a hubspot contact.
+	HasHubspotContact *bool `json:"hasHubspotContact,omitempty"`
+
 	// id of the user.
 	Id *string `json:"id,omitempty"`
 
 	// (required) readable user name, e.g. "John Doe".
 	Name string `json:"name"`
+
+	// (optional) refer_id is a unique identifier of the user in the referral partner system.
+	ReferId *int32 `json:"referId"`
+
+	// (optional) refer_visit is unique identifier of the visit in the referral partner system.
+	ReferVisit *int32 `json:"referVisit"`
 
 	// (required) username, corresponds to auth0 user id.
 	Username string `json:"username"`
@@ -906,6 +956,9 @@ type ExternalclusterV1Cluster struct {
 
 	// The cluster's credentials ID.
 	CredentialsId *string `json:"credentialsId,omitempty"`
+
+	// The date when cluster was deleted.
+	DeletedAt *time.Time `json:"deletedAt"`
 
 	// EKSClusterParams defines EKS-specific arguments.
 	Eks *ExternalclusterV1EKSClusterParams `json:"eks,omitempty"`
@@ -2326,9 +2379,6 @@ type ScheduledrebalancingV1TimeZone struct {
 type ScheduledrebalancingV1TriggerConditions struct {
 	SavingsPercentage *float32 `json:"savingsPercentage,omitempty"`
 }
-
-// HeaderOrganizationId defines model for headerOrganizationId.
-type HeaderOrganizationId = openapi_types.UUID
 
 // AuthTokenAPIListAuthTokensParams defines parameters for AuthTokenAPIListAuthTokens.
 type AuthTokenAPIListAuthTokensParams struct {

@@ -57,7 +57,7 @@ resource "castai_node_configuration" "default" {
 ### Required
 
 - `cluster_id` (String) CAST AI cluster id
-- `name` (String) Name of the node configuration
+- `name` (String) Name of the node configuration. It must be unique within the cluster. In case of cluster is reonboarded to Terraform, when previously it was onboarded with CAST AI UI, and the name corresponds to previously created node configuration this resource will override existing configuration instead of creating new.
 - `subnets` (List of String) Subnet ids to be used for provisioned nodes
 
 ### Optional
