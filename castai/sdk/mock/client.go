@@ -895,6 +895,46 @@ func (mr *MockClientInterfaceMockRecorder) InventoryAPIDeleteReservation(ctx, or
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InventoryAPIDeleteReservation", reflect.TypeOf((*MockClientInterface)(nil).InventoryAPIDeleteReservation), varargs...)
 }
 
+// InventoryAPIGetOrganizationReservationsBalance mocks base method.
+func (m *MockClientInterface) InventoryAPIGetOrganizationReservationsBalance(ctx context.Context, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "InventoryAPIGetOrganizationReservationsBalance", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// InventoryAPIGetOrganizationReservationsBalance indicates an expected call of InventoryAPIGetOrganizationReservationsBalance.
+func (mr *MockClientInterfaceMockRecorder) InventoryAPIGetOrganizationReservationsBalance(ctx interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InventoryAPIGetOrganizationReservationsBalance", reflect.TypeOf((*MockClientInterface)(nil).InventoryAPIGetOrganizationReservationsBalance), varargs...)
+}
+
+// InventoryAPIGetOrganizationResourceUsage mocks base method.
+func (m *MockClientInterface) InventoryAPIGetOrganizationResourceUsage(ctx context.Context, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "InventoryAPIGetOrganizationResourceUsage", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// InventoryAPIGetOrganizationResourceUsage indicates an expected call of InventoryAPIGetOrganizationResourceUsage.
+func (mr *MockClientInterfaceMockRecorder) InventoryAPIGetOrganizationResourceUsage(ctx interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InventoryAPIGetOrganizationResourceUsage", reflect.TypeOf((*MockClientInterface)(nil).InventoryAPIGetOrganizationResourceUsage), varargs...)
+}
+
 // InventoryAPIGetReservations mocks base method.
 func (m *MockClientInterface) InventoryAPIGetReservations(ctx context.Context, organizationId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
@@ -3011,6 +3051,36 @@ func (m *MockClientWithResponsesInterface) InventoryAPIDeleteReservationWithResp
 func (mr *MockClientWithResponsesInterfaceMockRecorder) InventoryAPIDeleteReservationWithResponse(ctx, organizationId, reservationId interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InventoryAPIDeleteReservationWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).InventoryAPIDeleteReservationWithResponse), ctx, organizationId, reservationId)
+}
+
+// InventoryAPIGetOrganizationReservationsBalanceWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) InventoryAPIGetOrganizationReservationsBalanceWithResponse(ctx context.Context) (*sdk.InventoryAPIGetOrganizationReservationsBalanceResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "InventoryAPIGetOrganizationReservationsBalanceWithResponse", ctx)
+	ret0, _ := ret[0].(*sdk.InventoryAPIGetOrganizationReservationsBalanceResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// InventoryAPIGetOrganizationReservationsBalanceWithResponse indicates an expected call of InventoryAPIGetOrganizationReservationsBalanceWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) InventoryAPIGetOrganizationReservationsBalanceWithResponse(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InventoryAPIGetOrganizationReservationsBalanceWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).InventoryAPIGetOrganizationReservationsBalanceWithResponse), ctx)
+}
+
+// InventoryAPIGetOrganizationResourceUsageWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) InventoryAPIGetOrganizationResourceUsageWithResponse(ctx context.Context) (*sdk.InventoryAPIGetOrganizationResourceUsageResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "InventoryAPIGetOrganizationResourceUsageWithResponse", ctx)
+	ret0, _ := ret[0].(*sdk.InventoryAPIGetOrganizationResourceUsageResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// InventoryAPIGetOrganizationResourceUsageWithResponse indicates an expected call of InventoryAPIGetOrganizationResourceUsageWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) InventoryAPIGetOrganizationResourceUsageWithResponse(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InventoryAPIGetOrganizationResourceUsageWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).InventoryAPIGetOrganizationResourceUsageWithResponse), ctx)
 }
 
 // InventoryAPIGetReservationsBalanceWithResponse mocks base method.

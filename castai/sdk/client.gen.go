@@ -305,6 +305,12 @@ type ClientInterface interface {
 
 	UsersAPICreateOrganization(ctx context.Context, body UsersAPICreateOrganizationJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// InventoryAPIGetOrganizationReservationsBalance request
+	InventoryAPIGetOrganizationReservationsBalance(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// InventoryAPIGetOrganizationResourceUsage request
+	InventoryAPIGetOrganizationResourceUsage(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// UsersAPIDeleteOrganization request
 	UsersAPIDeleteOrganization(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -1343,6 +1349,30 @@ func (c *Client) UsersAPICreateOrganizationWithBody(ctx context.Context, content
 
 func (c *Client) UsersAPICreateOrganization(ctx context.Context, body UsersAPICreateOrganizationJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewUsersAPICreateOrganizationRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) InventoryAPIGetOrganizationReservationsBalance(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewInventoryAPIGetOrganizationReservationsBalanceRequest(c.Server)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) InventoryAPIGetOrganizationResourceUsage(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewInventoryAPIGetOrganizationResourceUsageRequest(c.Server)
 	if err != nil {
 		return nil, err
 	}
@@ -4259,6 +4289,60 @@ func NewUsersAPICreateOrganizationRequestWithBody(server string, contentType str
 	return req, nil
 }
 
+// NewInventoryAPIGetOrganizationReservationsBalanceRequest generates requests for InventoryAPIGetOrganizationReservationsBalance
+func NewInventoryAPIGetOrganizationReservationsBalanceRequest(server string) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/organizations/reservations/balance")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewInventoryAPIGetOrganizationResourceUsageRequest generates requests for InventoryAPIGetOrganizationResourceUsage
+func NewInventoryAPIGetOrganizationResourceUsageRequest(server string) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/organizations/resource-usage")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 // NewUsersAPIDeleteOrganizationRequest generates requests for UsersAPIDeleteOrganization
 func NewUsersAPIDeleteOrganizationRequest(server string, id string) (*http.Request, error) {
 	var err error
@@ -5577,6 +5661,12 @@ type ClientWithResponsesInterface interface {
 	UsersAPICreateOrganizationWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*UsersAPICreateOrganizationResponse, error)
 
 	UsersAPICreateOrganizationWithResponse(ctx context.Context, body UsersAPICreateOrganizationJSONRequestBody) (*UsersAPICreateOrganizationResponse, error)
+
+	// InventoryAPIGetOrganizationReservationsBalance request
+	InventoryAPIGetOrganizationReservationsBalanceWithResponse(ctx context.Context) (*InventoryAPIGetOrganizationReservationsBalanceResponse, error)
+
+	// InventoryAPIGetOrganizationResourceUsage request
+	InventoryAPIGetOrganizationResourceUsageWithResponse(ctx context.Context) (*InventoryAPIGetOrganizationResourceUsageResponse, error)
 
 	// UsersAPIDeleteOrganization request
 	UsersAPIDeleteOrganizationWithResponse(ctx context.Context, id string) (*UsersAPIDeleteOrganizationResponse, error)
@@ -7396,6 +7486,66 @@ func (r UsersAPICreateOrganizationResponse) GetBody() []byte {
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
+type InventoryAPIGetOrganizationReservationsBalanceResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *CastaiInventoryV1beta1GetOrganizationReservationsBalanceResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r InventoryAPIGetOrganizationReservationsBalanceResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r InventoryAPIGetOrganizationReservationsBalanceResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r InventoryAPIGetOrganizationReservationsBalanceResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type InventoryAPIGetOrganizationResourceUsageResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *CastaiInventoryV1beta1GetOrganizationResourceUsageResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r InventoryAPIGetOrganizationResourceUsageResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r InventoryAPIGetOrganizationResourceUsageResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r InventoryAPIGetOrganizationResourceUsageResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
 type UsersAPIDeleteOrganizationResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -8891,6 +9041,24 @@ func (c *ClientWithResponses) UsersAPICreateOrganizationWithResponse(ctx context
 		return nil, err
 	}
 	return ParseUsersAPICreateOrganizationResponse(rsp)
+}
+
+// InventoryAPIGetOrganizationReservationsBalanceWithResponse request returning *InventoryAPIGetOrganizationReservationsBalanceResponse
+func (c *ClientWithResponses) InventoryAPIGetOrganizationReservationsBalanceWithResponse(ctx context.Context) (*InventoryAPIGetOrganizationReservationsBalanceResponse, error) {
+	rsp, err := c.InventoryAPIGetOrganizationReservationsBalance(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return ParseInventoryAPIGetOrganizationReservationsBalanceResponse(rsp)
+}
+
+// InventoryAPIGetOrganizationResourceUsageWithResponse request returning *InventoryAPIGetOrganizationResourceUsageResponse
+func (c *ClientWithResponses) InventoryAPIGetOrganizationResourceUsageWithResponse(ctx context.Context) (*InventoryAPIGetOrganizationResourceUsageResponse, error) {
+	rsp, err := c.InventoryAPIGetOrganizationResourceUsage(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return ParseInventoryAPIGetOrganizationResourceUsageResponse(rsp)
 }
 
 // UsersAPIDeleteOrganizationWithResponse request returning *UsersAPIDeleteOrganizationResponse
@@ -10670,6 +10838,58 @@ func ParseUsersAPICreateOrganizationResponse(rsp *http.Response) (*UsersAPICreat
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest CastaiUsersV1beta1Organization
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseInventoryAPIGetOrganizationReservationsBalanceResponse parses an HTTP response from a InventoryAPIGetOrganizationReservationsBalanceWithResponse call
+func ParseInventoryAPIGetOrganizationReservationsBalanceResponse(rsp *http.Response) (*InventoryAPIGetOrganizationReservationsBalanceResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &InventoryAPIGetOrganizationReservationsBalanceResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest CastaiInventoryV1beta1GetOrganizationReservationsBalanceResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseInventoryAPIGetOrganizationResourceUsageResponse parses an HTTP response from a InventoryAPIGetOrganizationResourceUsageWithResponse call
+func ParseInventoryAPIGetOrganizationResourceUsageResponse(rsp *http.Response) (*InventoryAPIGetOrganizationResourceUsageResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &InventoryAPIGetOrganizationResourceUsageResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest CastaiInventoryV1beta1GetOrganizationResourceUsageResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}

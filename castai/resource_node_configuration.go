@@ -69,7 +69,7 @@ func resourceNodeConfiguration() *schema.Resource {
 				Required:         true,
 				ForceNew:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
-				Description:      "Name of the node configuration",
+				Description:      "Name of the node configuration. It must be unique within the cluster. In case of cluster is reonboarded to Terraform, when previously it was onboarded with CAST AI UI, and the name corresponds to previously created node configuration this resource will override existing configuration instead of creating new.",
 			},
 			FieldNodeConfigurationDiskCpuRatio: {
 				Type:             schema.TypeInt,
