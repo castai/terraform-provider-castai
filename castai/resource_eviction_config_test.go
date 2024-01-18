@@ -298,7 +298,7 @@ func TestEvictionConfig_UpdateContext(t *testing.T) {
 		Settings: sdk.CastaiEvictorV1EvictionSettings{Aggressive: &sdk.CastaiEvictorV1EvictionSettingsSettingEnabled{Enabled: true}},
 		PodSelector: &sdk.CastaiEvictorV1PodSelector{
 			Kind: lo.ToPtr("Job"),
-			LabelSelector: sdk.CastaiEvictorV1LabelSelector{
+			LabelSelector: &sdk.CastaiEvictorV1LabelSelector{
 				MatchLabels: &sdk.CastaiEvictorV1LabelSelector_MatchLabels{AdditionalProperties: map[string]string{
 					"key1": "value1",
 				}}}}}

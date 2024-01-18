@@ -407,6 +407,10 @@ func toPodSelector(in interface{}) (*sdk.CastaiEvictorV1PodSelector, error) {
 				if len(me) < 1 {
 					continue
 				}
+
+				if out.LabelSelector == nil {
+					out.LabelSelector = &sdk.CastaiEvictorV1LabelSelector{}
+				}
 				out.LabelSelector.MatchExpressions = &me
 			} else {
 				return nil, fmt.Errorf("mapping match_expressions expecting map[string]interface, got %T, %+v", v, v)
@@ -417,6 +421,9 @@ func toPodSelector(in interface{}) (*sdk.CastaiEvictorV1PodSelector, error) {
 				return nil, err
 			}
 
+			if out.LabelSelector == nil {
+				out.LabelSelector = &sdk.CastaiEvictorV1LabelSelector{}
+			}
 			out.LabelSelector.MatchLabels = mls
 		}
 	}
