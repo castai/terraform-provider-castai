@@ -344,9 +344,6 @@ type ClientInterface interface {
 	// InventoryAPIDeleteReservation request
 	InventoryAPIDeleteReservation(ctx context.Context, organizationId string, reservationId string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// InventoryAPIGetResourceUsage request
-	InventoryAPIGetResourceUsage(ctx context.Context, organizationId string, reqEditors ...RequestEditorFn) (*http.Response, error)
-
 	// UsersAPIListOrganizationUsers request
 	UsersAPIListOrganizationUsers(ctx context.Context, organizationId string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -1517,18 +1514,6 @@ func (c *Client) InventoryAPIOverwriteReservations(ctx context.Context, organiza
 
 func (c *Client) InventoryAPIDeleteReservation(ctx context.Context, organizationId string, reservationId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewInventoryAPIDeleteReservationRequest(c.Server, organizationId, reservationId)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
-func (c *Client) InventoryAPIGetResourceUsage(ctx context.Context, organizationId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewInventoryAPIGetResourceUsageRequest(c.Server, organizationId)
 	if err != nil {
 		return nil, err
 	}
@@ -4702,40 +4687,6 @@ func NewInventoryAPIDeleteReservationRequest(server string, organizationId strin
 	return req, nil
 }
 
-// NewInventoryAPIGetResourceUsageRequest generates requests for InventoryAPIGetResourceUsage
-func NewInventoryAPIGetResourceUsageRequest(server string, organizationId string) (*http.Request, error) {
-	var err error
-
-	var pathParam0 string
-
-	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "organizationId", runtime.ParamLocationPath, organizationId)
-	if err != nil {
-		return nil, err
-	}
-
-	serverURL, err := url.Parse(server)
-	if err != nil {
-		return nil, err
-	}
-
-	operationPath := fmt.Sprintf("/v1/organizations/%s/resource-usage", pathParam0)
-	if operationPath[0] == '/' {
-		operationPath = "." + operationPath
-	}
-
-	queryURL, err := serverURL.Parse(operationPath)
-	if err != nil {
-		return nil, err
-	}
-
-	req, err := http.NewRequest("GET", queryURL.String(), nil)
-	if err != nil {
-		return nil, err
-	}
-
-	return req, nil
-}
-
 // NewUsersAPIListOrganizationUsersRequest generates requests for UsersAPIListOrganizationUsers
 func NewUsersAPIListOrganizationUsersRequest(server string, organizationId string) (*http.Request, error) {
 	var err error
@@ -5700,9 +5651,6 @@ type ClientWithResponsesInterface interface {
 
 	// InventoryAPIDeleteReservation request
 	InventoryAPIDeleteReservationWithResponse(ctx context.Context, organizationId string, reservationId string) (*InventoryAPIDeleteReservationResponse, error)
-
-	// InventoryAPIGetResourceUsage request
-	InventoryAPIGetResourceUsageWithResponse(ctx context.Context, organizationId string) (*InventoryAPIGetResourceUsageResponse, error)
 
 	// UsersAPIListOrganizationUsers request
 	UsersAPIListOrganizationUsersWithResponse(ctx context.Context, organizationId string) (*UsersAPIListOrganizationUsersResponse, error)
@@ -7816,36 +7764,6 @@ func (r InventoryAPIDeleteReservationResponse) GetBody() []byte {
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
-type InventoryAPIGetResourceUsageResponse struct {
-	Body         []byte
-	HTTPResponse *http.Response
-	JSON200      *CastaiInventoryV1beta1GetResourceUsageResponse
-}
-
-// Status returns HTTPResponse.Status
-func (r InventoryAPIGetResourceUsageResponse) Status() string {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.Status
-	}
-	return http.StatusText(0)
-}
-
-// StatusCode returns HTTPResponse.StatusCode
-func (r InventoryAPIGetResourceUsageResponse) StatusCode() int {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.StatusCode
-	}
-	return 0
-}
-
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r InventoryAPIGetResourceUsageResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-
 type UsersAPIListOrganizationUsersResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -9164,15 +9082,6 @@ func (c *ClientWithResponses) InventoryAPIDeleteReservationWithResponse(ctx cont
 		return nil, err
 	}
 	return ParseInventoryAPIDeleteReservationResponse(rsp)
-}
-
-// InventoryAPIGetResourceUsageWithResponse request returning *InventoryAPIGetResourceUsageResponse
-func (c *ClientWithResponses) InventoryAPIGetResourceUsageWithResponse(ctx context.Context, organizationId string) (*InventoryAPIGetResourceUsageResponse, error) {
-	rsp, err := c.InventoryAPIGetResourceUsage(ctx, organizationId)
-	if err != nil {
-		return nil, err
-	}
-	return ParseInventoryAPIGetResourceUsageResponse(rsp)
 }
 
 // UsersAPIListOrganizationUsersWithResponse request returning *UsersAPIListOrganizationUsersResponse
@@ -11124,32 +11033,6 @@ func ParseInventoryAPIDeleteReservationResponse(rsp *http.Response) (*InventoryA
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest map[string]interface{}
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON200 = &dest
-
-	}
-
-	return response, nil
-}
-
-// ParseInventoryAPIGetResourceUsageResponse parses an HTTP response from a InventoryAPIGetResourceUsageWithResponse call
-func ParseInventoryAPIGetResourceUsageResponse(rsp *http.Response) (*InventoryAPIGetResourceUsageResponse, error) {
-	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
-	if err != nil {
-		return nil, err
-	}
-
-	response := &InventoryAPIGetResourceUsageResponse{
-		Body:         bodyBytes,
-		HTTPResponse: rsp,
-	}
-
-	switch {
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest CastaiInventoryV1beta1GetResourceUsageResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}

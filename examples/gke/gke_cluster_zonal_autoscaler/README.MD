@@ -6,7 +6,7 @@ IAM policies required to connect the cluster to CAST AI in the example are creat
 
 Example configuration should be analysed in the following order:
 1. Create VPC - `vpc.tf`
-2. Create GKE cluster - `eks.tf`
+2. Create GKE cluster - `gke.tf`
 3. Create IAM and other CAST AI related resources to connect GKE cluster to CAST AI, configure Autoscaler and Node Configurations  - `castai.tf`
 
 # Usage

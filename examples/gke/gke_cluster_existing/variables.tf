@@ -35,7 +35,7 @@ variable "castai_grpc_url" {
   default     = "grpc.cast.ai:443"
 }
 
-# Variables required for connecting EKS cluster to CAST AI
+# Variables required for connecting GKE cluster to CAST AI
 
 variable "delete_nodes_on_disconnect" {
   type        = bool

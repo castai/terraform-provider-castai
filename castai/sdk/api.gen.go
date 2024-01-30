@@ -129,6 +129,11 @@ const (
 	JobStatusSkipped    ScheduledrebalancingV1JobStatus = "JobStatusSkipped"
 )
 
+// UsersAPIUpdateOrganizationUserRequest defines model for UsersAPI_UpdateOrganizationUser_request.
+type UsersAPIUpdateOrganizationUserRequest struct {
+	Role *string `json:"role,omitempty"`
+}
+
 // Auth token used to authenticate via api.
 type CastaiAuthtokenV1beta1AuthToken struct {
 	// (read only) Indicates whether the token is active.
@@ -333,7 +338,7 @@ type CastaiInventoryV1beta1GetOrganizationReservationsBalanceResponse struct {
 
 // CastaiInventoryV1beta1GetOrganizationResourceUsageResponse defines model for castai.inventory.v1beta1.GetOrganizationResourceUsageResponse.
 type CastaiInventoryV1beta1GetOrganizationResourceUsageResponse struct {
-	InstanceTypes *[]CastaiInventoryV1beta1InstaceTypeAggregate `json:"instanceTypes,omitempty"`
+	InstanceTypes *[]CastaiInventoryV1beta1InstanceTypeAggregate `json:"instanceTypes,omitempty"`
 }
 
 // CastaiInventoryV1beta1GetReservationsBalanceResponse defines model for castai.inventory.v1beta1.GetReservationsBalanceResponse.
@@ -344,37 +349,6 @@ type CastaiInventoryV1beta1GetReservationsBalanceResponse struct {
 // CastaiInventoryV1beta1GetReservationsResponse defines model for castai.inventory.v1beta1.GetReservationsResponse.
 type CastaiInventoryV1beta1GetReservationsResponse struct {
 	Reservations *[]CastaiInventoryV1beta1ReservationDetails `json:"reservations,omitempty"`
-}
-
-// CastaiInventoryV1beta1GetResourceUsageResponse defines model for castai.inventory.v1beta1.GetResourceUsageResponse.
-type CastaiInventoryV1beta1GetResourceUsageResponse struct {
-	InstanceTypes *[]CastaiInventoryV1beta1CountableInstanceType `json:"instanceTypes,omitempty"`
-}
-
-// CastaiInventoryV1beta1InstaceTypeAggregate defines model for castai.inventory.v1beta1.InstaceTypeAggregate.
-type CastaiInventoryV1beta1InstaceTypeAggregate struct {
-	AzId      *string `json:"azId,omitempty"`
-	ClusterId *string `json:"clusterId,omitempty"`
-	Count     *int32  `json:"count,omitempty"`
-
-	// InstanceType name. This value is provider specific.
-	InstanceType *string `json:"instanceType,omitempty"`
-
-	// Price of the instance type. $/hour.
-	Price *string `json:"price,omitempty"`
-
-	// Provider name of the instance type.
-	Provider *string `json:"provider,omitempty"`
-
-	// Ram (in MiB) available on the instance type.
-	Ram *string `json:"ram,omitempty"`
-
-	// Region of the instance type. This value is provider specific.
-	Region *string `json:"region,omitempty"`
-	Spot   *bool   `json:"spot,omitempty"`
-
-	// Vcpu available on the instance type.
-	Vcpu *string `json:"vcpu,omitempty"`
 }
 
 // CastaiInventoryV1beta1InstanceReliability defines model for castai.inventory.v1beta1.InstanceReliability.
@@ -437,6 +411,32 @@ type CastaiInventoryV1beta1InstanceType struct {
 	Zones *[]CastaiInventoryV1beta1InstanceZone `json:"zones,omitempty"`
 }
 
+// CastaiInventoryV1beta1InstanceTypeAggregate defines model for castai.inventory.v1beta1.InstanceTypeAggregate.
+type CastaiInventoryV1beta1InstanceTypeAggregate struct {
+	AzId      *string `json:"azId,omitempty"`
+	ClusterId *string `json:"clusterId,omitempty"`
+	Count     *int32  `json:"count,omitempty"`
+
+	// InstanceType name. This value is provider specific.
+	InstanceType *string `json:"instanceType,omitempty"`
+
+	// Price of the instance type. $/hour.
+	Price *string `json:"price,omitempty"`
+
+	// Provider name of the instance type.
+	Provider *string `json:"provider,omitempty"`
+
+	// Ram (in MiB) available on the instance type.
+	Ram *string `json:"ram,omitempty"`
+
+	// Region of the instance type. This value is provider specific.
+	Region *string `json:"region,omitempty"`
+	Spot   *bool   `json:"spot,omitempty"`
+
+	// Vcpu available on the instance type.
+	Vcpu *string `json:"vcpu,omitempty"`
+}
+
 // CastaiInventoryV1beta1InstanceZone defines model for castai.inventory.v1beta1.InstanceZone.
 type CastaiInventoryV1beta1InstanceZone struct {
 	AttachableGpuDevices *[]CastaiInventoryV1beta1AttachableGPUDevice `json:"attachableGpuDevices,omitempty"`
@@ -452,6 +452,12 @@ type CastaiInventoryV1beta1InstanceZone struct {
 
 // Describes the network settings for the instance type.
 type CastaiInventoryV1beta1NetworkInfo struct {
+	// Base bandwidth in Mbps.
+	BaseBandwidthMbps *int32 `json:"baseBandwidthMbps,omitempty"`
+
+	// Burst bandwidth in Mbps. It's equal to base bandwidth if not specified.
+	BurstBandwidthMbps *int32 `json:"burstBandwidthMbps,omitempty"`
+
 	// The maximum number of IPv4 addresses per network interface.
 	Ipv4AddressesPerInterface *int32 `json:"ipv4AddressesPerInterface,omitempty"`
 
@@ -473,9 +479,9 @@ type CastaiInventoryV1beta1ReservationBalance struct {
 
 // CastaiInventoryV1beta1ReservationBalanceV2 defines model for castai.inventory.v1beta1.ReservationBalanceV2.
 type CastaiInventoryV1beta1ReservationBalanceV2 struct {
-	InstanceTypes *[]CastaiInventoryV1beta1InstaceTypeAggregate `json:"instanceTypes,omitempty"`
-	Reservation   *CastaiInventoryV1beta1ReservationDetails     `json:"reservation,omitempty"`
-	Usage         *float64                                      `json:"usage,omitempty"`
+	InstanceTypes *[]CastaiInventoryV1beta1InstanceTypeAggregate `json:"instanceTypes,omitempty"`
+	Reservation   *CastaiInventoryV1beta1ReservationDetails      `json:"reservation,omitempty"`
+	Usage         *float64                                       `json:"usage,omitempty"`
 }
 
 // CastaiInventoryV1beta1ReservationDetails defines model for castai.inventory.v1beta1.ReservationDetails.
@@ -1471,11 +1477,6 @@ type ExternalclusterV1Zone struct {
 
 	// Zone name.
 	Name *string `json:"name,omitempty"`
-}
-
-// InlineObject1 defines model for inline_object_1.
-type InlineObject1 struct {
-	Role *string `json:"role,omitempty"`
 }
 
 // NodeconfigV1AKSConfig defines model for nodeconfig.v1.AKSConfig.
@@ -2517,6 +2518,9 @@ type InventoryAPIOverwriteReservationsJSONBody = CastaiInventoryV1beta1GenericRe
 // UsersAPIAddUserToOrganizationJSONBody defines parameters for UsersAPIAddUserToOrganization.
 type UsersAPIAddUserToOrganizationJSONBody = CastaiUsersV1beta1NewMembership
 
+// UsersAPIUpdateOrganizationUserJSONBody defines parameters for UsersAPIUpdateOrganizationUser.
+type UsersAPIUpdateOrganizationUserJSONBody = UsersAPIUpdateOrganizationUserRequest
+
 // ScheduledRebalancingAPICreateRebalancingScheduleJSONBody defines parameters for ScheduledRebalancingAPICreateRebalancingSchedule.
 type ScheduledRebalancingAPICreateRebalancingScheduleJSONBody = ScheduledrebalancingV1RebalancingSchedule
 
@@ -2618,7 +2622,7 @@ type InventoryAPIOverwriteReservationsJSONRequestBody = InventoryAPIOverwriteRes
 type UsersAPIAddUserToOrganizationJSONRequestBody = UsersAPIAddUserToOrganizationJSONBody
 
 // UsersAPIUpdateOrganizationUserJSONRequestBody defines body for UsersAPIUpdateOrganizationUser for application/json ContentType.
-type UsersAPIUpdateOrganizationUserJSONRequestBody = InlineObject1
+type UsersAPIUpdateOrganizationUserJSONRequestBody = UsersAPIUpdateOrganizationUserJSONBody
 
 // ScheduledRebalancingAPICreateRebalancingScheduleJSONRequestBody defines body for ScheduledRebalancingAPICreateRebalancingSchedule for application/json ContentType.
 type ScheduledRebalancingAPICreateRebalancingScheduleJSONRequestBody = ScheduledRebalancingAPICreateRebalancingScheduleJSONBody
