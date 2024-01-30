@@ -19,7 +19,7 @@ variable "project_id" {
   description = "GCP project ID in which GKE cluster would be created."
 }
 
-# Variables required for connecting EKS cluster to CAST AI
+# Variables required for connecting GKE cluster to CAST AI
 variable "castai_api_token" {
   type        = string
   description = "CAST AI API token created in console.cast.ai API Access keys section."
