@@ -4,11 +4,12 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"github.com/samber/lo"
 	"io"
 	"net/http"
 	"testing"
 	"time"
+
+	"github.com/samber/lo"
 
 	"github.com/golang/mock/gomock"
 	"github.com/hashicorp/go-cty/cty"
@@ -372,7 +373,7 @@ func TestAccResourceNodeTemplate_basic(t *testing.T) {
 				Config: testAccNodeTemplateConfig(rName, clusterName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "name", rName),
-					resource.TestCheckResourceAttr(resourceName, "is_enabled", "true"),
+					resource.TestCheckResourceAttr(resourceName, "is_enabled", "false"),
 					resource.TestCheckResourceAttr(resourceName, "should_taint", "true"),
 					resource.TestCheckResourceAttr(resourceName, "custom_instances_enabled", "false"),
 					resource.TestCheckResourceAttr(resourceName, "custom_instances_with_extended_memory_enabled", "false"),
@@ -475,6 +476,7 @@ func testAccNodeTemplateConfig(rName, clusterName string) string {
 			name = %[1]q
 			configuration_id = castai_node_configuration.test.id
 			should_taint = true
+			is_enabled = false
 
 			custom_labels = {
 				%[1]s-label-key-1 = "%[1]s-label-value-1"
