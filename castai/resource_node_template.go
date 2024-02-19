@@ -3,16 +3,18 @@ package castai
 import (
 	"context"
 	"fmt"
-	"github.com/castai/terraform-provider-castai/castai/sdk"
+	"log"
+	"strings"
+	"time"
+
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/samber/lo"
-	"log"
-	"strings"
-	"time"
+
+	"github.com/castai/terraform-provider-castai/castai/sdk"
 )
 
 const (
@@ -600,11 +602,11 @@ func updateNodeTemplate(ctx context.Context, d *schema.ResourceData, meta any, s
 	name := d.Get(FieldNodeTemplateName).(string)
 
 	req := sdk.NodeTemplatesAPIUpdateNodeTemplateJSONRequestBody{}
-	if v, ok := d.GetOk(FieldNodeTemplateIsDefault); ok {
+	if v, _ := d.GetOk(FieldNodeTemplateIsDefault); v != nil {
 		req.IsDefault = toPtr(v.(bool))
 	}
 
-	if v, ok := d.GetOk(FieldNodeTemplateIsEnabled); ok {
+	if v, _ := d.GetOk(FieldNodeTemplateIsEnabled); v != nil {
 		req.IsEnabled = toPtr(v.(bool))
 	}
 
