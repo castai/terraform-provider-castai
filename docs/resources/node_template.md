@@ -45,6 +45,7 @@ Optional:
 
 - `architectures` (List of String) List of acceptable instance CPU architectures, the default is amd64. Allowed values: amd64, arm64.
 - `compute_optimized` (Boolean) Compute optimized instance constraint - will only pick compute optimized nodes if true.
+- `custom_priority` (Block List) (see [below for nested schema](#nestedblock--constraints--custom_priority))
 - `enable_spot_diversity` (Boolean) Enable/disable spot diversity policy. When enabled, autoscaler will try to balance between diverse and cost optimal instance types.
 - `fallback_restore_rate_seconds` (Number) Fallback restore rate in seconds: defines how much time should pass before spot fallback should be attempted to be restored to real spot.
 - `gpu` (Block List, Max: 1) (see [below for nested schema](#nestedblock--constraints--gpu))
@@ -62,6 +63,16 @@ Optional:
 - `spot_interruption_predictions_type` (String) Spot interruption predictions type. Can be either "aws-rebalance-recommendations" or "interruption-predictions".
 - `storage_optimized` (Boolean) Storage optimized instance constraint - will only pick storage optimized nodes if true
 - `use_spot_fallbacks` (Boolean) Spot instance fallback constraint - when true, on-demand instances will be created, when spots are unavailable.
+
+<a id="nestedblock--constraints--custom_priority"></a>
+### Nested Schema for `constraints.custom_priority`
+
+Optional:
+
+- `instance_families` (List of String) Instance families to prioritize in this tier.
+- `on_demand` (Boolean) If true, this tier will apply to on-demand instances.
+- `spot` (Boolean) If true, this tier will apply to spot instances.
+
 
 <a id="nestedblock--constraints--gpu"></a>
 ### Nested Schema for `constraints.gpu`
