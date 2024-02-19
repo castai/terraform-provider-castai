@@ -55,6 +55,7 @@ const (
 	FieldNodeTemplateSpotInterruptionPredictionsType          = "spot_interruption_predictions_type"
 	FieldNodeTemplateStorageOptimized                         = "storage_optimized"
 	FieldNodeTemplateUseSpotFallbacks                         = "use_spot_fallbacks"
+	FieldNodeTemplateCustomPriority                           = "custom_priority"
 )
 
 const (
@@ -316,6 +317,34 @@ func resourceNodeTemplate() *schema.Resource {
 							},
 							Description: fmt.Sprintf("List of acceptable instance Operating Systems, the default is %s. Allowed values: %s.", OsLinux, strings.Join(supportedOs, ", ")),
 						},
+						FieldNodeTemplateCustomPriority: {
+							Type:     schema.TypeList,
+							Optional: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									FieldNodeTemplateInstanceFamilies: {
+										Type:     schema.TypeList,
+										Optional: true,
+										Elem: &schema.Schema{
+											Type: schema.TypeString,
+										},
+										Description: "Instance families to prioritize in this tier.",
+									},
+									FieldNodeTemplateSpot: {
+										Type:        schema.TypeBool,
+										Optional:    true,
+										Default:     false,
+										Description: "If true, this tier will apply to spot instances.",
+									},
+									FieldNodeTemplateOnDemand: {
+										Type:        schema.TypeBool,
+										Optional:    true,
+										Default:     false,
+										Description: "If true, this tier will apply to on-demand instances.",
+									},
+								},
+							},
+						},
 					},
 				},
 			},
@@ -457,6 +486,9 @@ func flattenConstraints(c *sdk.NodetemplatesV1TemplateConstraints) ([]map[string
 	if c.Gpu != nil {
 		out[FieldNodeTemplateGpu] = flattenGpu(c.Gpu)
 	}
+	if c.CustomPriority != nil && len(*c.CustomPriority) > 0 {
+		out[FieldNodeTemplateCustomPriority] = flattenCustomPriority(*c.CustomPriority)
+	}
 	if c.InstanceFamilies != nil {
 		out[FieldNodeTemplateInstanceFamilies] = flattenInstanceFamilies(c.InstanceFamilies)
 	}
@@ -549,6 +581,19 @@ func flattenGpu(gpu *sdk.NodetemplatesV1TemplateConstraintsGPUConstraints) []map
 		out[FieldNodeTemplateMaxCount] = gpu.MaxCount
 	}
 	return []map[string]any{out}
+}
+
+func flattenCustomPriority(priorities []sdk.NodetemplatesV1TemplateConstraintsCustomPriority) any {
+	return lo.Map(priorities, func(item sdk.NodetemplatesV1TemplateConstraintsCustomPriority, index int) map[string]any {
+		result := map[string]any{}
+		if item.Families != nil {
+			result[FieldNodeTemplateInstanceFamilies] = *item.Families
+		}
+
+		result[FieldNodeTemplateSpot] = lo.FromPtr(item.Spot)
+		result[FieldNodeTemplateOnDemand] = lo.FromPtr(item.OnDemand)
+		return result
+	})
 }
 
 func resourceNodeTemplateDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
@@ -959,6 +1004,21 @@ func toTemplateConstraints(obj map[string]any) *sdk.NodetemplatesV1TemplateConst
 	if v, ok := obj[FieldNodeTemplateSpotInterruptionPredictionsType].(string); ok {
 		out.SpotInterruptionPredictionsType = toPtr(v)
 	}
+	if v, ok := obj[FieldNodeTemplateCustomPriority].([]any); ok && len(v) > 0 {
+		if ok {
+			out.CustomPriority = lo.ToPtr(lo.FilterMap(v, func(item any, _ int) (sdk.NodetemplatesV1TemplateConstraintsCustomPriority, bool) {
+				val, ok := item.(map[string]any)
+				if !ok {
+					return sdk.NodetemplatesV1TemplateConstraintsCustomPriority{}, false
+				}
+				res := toTemplateConstraintsCustomPriority(val)
+				if res == nil {
+					return sdk.NodetemplatesV1TemplateConstraintsCustomPriority{}, false
+				}
+				return *res, true
+			}))
+		}
+	}
 
 	return out
 }
@@ -1003,4 +1063,23 @@ func toTemplateConstraintsGpuConstraints(o map[string]any) *sdk.NodetemplatesV1T
 	}
 
 	return out
+}
+
+func toTemplateConstraintsCustomPriority(o map[string]any) *sdk.NodetemplatesV1TemplateConstraintsCustomPriority {
+	if o == nil {
+		return nil
+	}
+
+	out := sdk.NodetemplatesV1TemplateConstraintsCustomPriority{}
+	if v, ok := o[FieldNodeTemplateInstanceFamilies].([]any); ok {
+		out.Families = toPtr(toStringList(v))
+	}
+	if v, ok := o[FieldNodeTemplateSpot].(bool); ok {
+		out.Spot = toPtr(v)
+	}
+	if v, ok := o[FieldNodeTemplateOnDemand].(bool); ok {
+		out.OnDemand = toPtr(v)
+	}
+
+	return &out
 }

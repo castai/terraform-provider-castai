@@ -4,11 +4,15 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"github.com/samber/lo"
 	"io"
 	"net/http"
+	"os"
+	"strings"
 	"testing"
 	"time"
+
+	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"github.com/samber/lo"
 
 	"github.com/golang/mock/gomock"
 	"github.com/hashicorp/go-cty/cty"
@@ -77,7 +81,14 @@ func TestNodeTemplateResourceReadContext(t *testing.T) {
 					],
 					"includeNames": [],
 					"excludeNames": []
-				  }
+				  },
+				  "customPriority": [
+				    {
+						"families": ["a","b"],
+				  		"spot": true,
+				  		"onDemand": true
+				  	}
+				  ]
 				},
 				"version": "3",
 				"shouldTaint": true,
@@ -123,7 +134,7 @@ func TestNodeTemplateResourceReadContext(t *testing.T) {
 	result := resource.ReadContext(ctx, data, provider)
 	r.Nil(result)
 	r.False(result.HasError())
-	r.Equal(`ID = gpu
+	r.ElementsMatch(strings.Split(`ID = gpu
 cluster_id = b6bfc074-a267-400f-b8f1-db0850c369b1
 configuration_id = 7dc4f922-29c9-4377-889c-0c8c5fb8d497
 constraints.# = 1
@@ -131,6 +142,12 @@ constraints.0.architectures.# = 2
 constraints.0.architectures.0 = amd64
 constraints.0.architectures.1 = arm64
 constraints.0.compute_optimized = false
+constraints.0.custom_priority.# = 1
+constraints.0.custom_priority.0.instance_families.# = 2
+constraints.0.custom_priority.0.instance_families.0 = a
+constraints.0.custom_priority.0.instance_families.1 = b
+constraints.0.custom_priority.0.spot = true
+constraints.0.custom_priority.0.on_demand = true
 constraints.0.enable_spot_diversity = false
 constraints.0.fallback_restore_rate_seconds = 0
 constraints.0.gpu.# = 1
@@ -182,7 +199,9 @@ name = gpu
 rebalancing_config_min_nodes = 0
 should_taint = true
 Tainted = false
-`, data.State().String())
+`, "\n"),
+		strings.Split(data.State().String(), "\n"),
+	)
 }
 
 func TestNodeTemplateResourceReadContextEmptyList(t *testing.T) {
@@ -359,14 +378,15 @@ func TestNodeTemplateResourceDelete_defaultNodeTemplate(t *testing.T) {
 }
 
 func TestAccResourceNodeTemplate_basic(t *testing.T) {
+	tflog.NewSubsystem(context.Background(), "node_template_test")
 	rName := fmt.Sprintf("%v-node-template-%v", ResourcePrefix, acctest.RandString(8))
 	resourceName := "castai_node_template.test"
-	clusterName := "cost-terraform"
+	clusterName, _ := lo.Coalesce(os.Getenv("CLUSTER_NAME"), "cost-terraform")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
 		ProviderFactories: providerFactories,
-		CheckDestroy:      testAccCheckNodeTemplateDestroy,
+		CheckDestroy:      testAccCheckNodeTemplateDestroy(rName),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNodeTemplateConfig(rName, clusterName),
@@ -410,6 +430,12 @@ func TestAccResourceNodeTemplate_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.spot_diversity_price_increase_limit_percent", "21"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.spot_interruption_predictions_enabled", "true"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.spot_interruption_predictions_type", "interruption-predictions"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.custom_priority.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.custom_priority.0.instance_families.#", "2"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.custom_priority.0.instance_families.0", "c"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.custom_priority.0.instance_families.1", "d"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.custom_priority.0.spot", "true"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.custom_priority.0.on_demand", "true"),
 				),
 			},
 			{
@@ -456,6 +482,17 @@ func TestAccResourceNodeTemplate_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.spot_diversity_price_increase_limit_percent", "22"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.spot_interruption_predictions_enabled", "true"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.spot_interruption_predictions_type", "interruption-predictions"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.custom_priority.#", "2"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.custom_priority.0.instance_families.#", "2"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.custom_priority.0.instance_families.0", "a"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.custom_priority.0.instance_families.1", "b"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.custom_priority.0.spot", "true"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.custom_priority.0.on_demand", "false"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.custom_priority.1.instance_families.#", "2"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.custom_priority.1.instance_families.0", "c"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.custom_priority.1.instance_families.1", "d"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.custom_priority.1.spot", "true"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.custom_priority.1.on_demand", "true"),
 				),
 			},
 		},
@@ -522,6 +559,12 @@ func testAccNodeTemplateConfig(rName, clusterName string) string {
 				}	
 				compute_optimized = false
 				storage_optimized = false
+
+				custom_priority {
+					instance_families = ["c", "d"]
+					spot = true
+					on_demand = true
+				}
 			}
 		}
 	`, rName))
@@ -563,39 +606,51 @@ func testNodeTemplateUpdated(rName, clusterName string) string {
 				storage_optimized = false
 				compute_optimized = false
 				architectures = ["arm64"]
+
+				custom_priority {
+					instance_families = ["a", "b"]
+					spot = true
+				}
+				custom_priority {
+					instance_families = ["c", "d"]
+					spot = true
+					on_demand = true
+				}
 			}
 		}
 	`, rName))
 }
 
-func testAccCheckNodeTemplateDestroy(s *terraform.State) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
+func testAccCheckNodeTemplateDestroy(templateName string) func(s *terraform.State) error {
+	return func(s *terraform.State) error {
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
 
-	client := testAccProvider.Meta().(*ProviderConfig).api
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "castai_node_template" {
-			continue
-		}
+		client := testAccProvider.Meta().(*ProviderConfig).api
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type != "castai_node_template" {
+				continue
+			}
 
-		id := rs.Primary.ID
-		clusterID := rs.Primary.Attributes["cluster_id"]
-		response, err := client.NodeTemplatesAPIListNodeTemplatesWithResponse(ctx, clusterID, &sdk.NodeTemplatesAPIListNodeTemplatesParams{IncludeDefault: lo.ToPtr(false)})
-		if err != nil {
-			return err
-		}
-		if response.StatusCode() == http.StatusNotFound {
+			id := rs.Primary.ID
+			clusterID := rs.Primary.Attributes["cluster_id"]
+			response, err := client.NodeTemplatesAPIListNodeTemplatesWithResponse(ctx, clusterID, &sdk.NodeTemplatesAPIListNodeTemplatesParams{IncludeDefault: lo.ToPtr(false)})
+			if err != nil {
+				return err
+			}
+			if response.StatusCode() == http.StatusNotFound {
+				return nil
+			}
+			if found, ok := lo.Find(*response.JSON200.Items, func(item sdk.NodetemplatesV1NodeTemplateListItem) bool {
+				return lo.FromPtr(item.Template.Name) == templateName
+			}); ok {
+				return fmt.Errorf("node template %q still exists; %+v", id, *found.Template)
+			}
 			return nil
 		}
-		if len(*response.JSON200.Items) == 0 {
-			// Should be no templates
-			return nil
-		}
 
-		return fmt.Errorf("node template %q still exists; %v", id, response)
+		return nil
 	}
-
-	return nil
 }
 
 func testAccNodeConfig(rName string) string {
@@ -621,5 +676,11 @@ resource "castai_node_configuration" "test" {
 	security_groups      = [aws_security_group.test.id]
   }
 }
+
+resource "castai_node_configuration_default" "default" {
+  cluster_id        = castai_eks_cluster.test.id
+  configuration_id  = castai_node_configuration.test.id
+}
+
 `, rName))
 }

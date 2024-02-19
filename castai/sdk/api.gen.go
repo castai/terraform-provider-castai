@@ -1918,6 +1918,9 @@ type NodetemplatesV1TemplateConstraints struct {
 	BareMetal        *bool     `json:"bareMetal"`
 	ComputeOptimized *bool     `json:"computeOptimized"`
 
+	// Custom sorting priority - instances matching defined rules will take priority over other candidates.
+	CustomPriority *[]NodetemplatesV1TemplateConstraintsCustomPriority `json:"customPriority,omitempty"`
+
 	// Enable/disable spot diversity policy. When enabled, autoscaler will try to balance between diverse and cost optimal instance types.
 	EnableSpotDiversity *bool `json:"enableSpotDiversity"`
 
@@ -1963,6 +1966,13 @@ type NodetemplatesV1TemplateConstraints struct {
 
 	// Spot instance fallback constraint - when true, on-demand instances will be created, when spots are unavailable.
 	UseSpotFallbacks *bool `json:"useSpotFallbacks"`
+}
+
+// NodetemplatesV1TemplateConstraintsCustomPriority defines model for nodetemplates.v1.TemplateConstraints.CustomPriority.
+type NodetemplatesV1TemplateConstraintsCustomPriority struct {
+	Families *[]string `json:"families,omitempty"`
+	OnDemand *bool     `json:"onDemand"`
+	Spot     *bool     `json:"spot"`
 }
 
 // NodetemplatesV1TemplateConstraintsGPUConstraints defines model for nodetemplates.v1.TemplateConstraints.GPUConstraints.
