@@ -201,9 +201,10 @@ func updateClusterSettings(ctx context.Context, data *schema.ResourceData, clien
 		}
 		err = sdk.StatusOk(response)
 		// In case of malformed user request return error to user right away.
-		if response.StatusCode() == 400 {
+		if response.StatusCode() == 400 && !sdk.IsCredentialsError(response) {
 			return backoff.Permanent(err)
 		}
+
 		return err
 	}, backoff.NewExponentialBackOff()); err != nil {
 		return fmt.Errorf("updating cluster configuration: %w", err)
