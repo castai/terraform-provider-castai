@@ -1,6 +1,7 @@
 package sdk
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 )
@@ -31,4 +32,24 @@ func checkResponse(response Response, err error, expectedStatus int) error {
 	}
 
 	return nil
+}
+
+type ErrorResponse struct {
+	Message         string `json:"message"`
+	FieldViolations []struct {
+		Field       string `json:"field"`
+		Description string `json:"description"`
+	} `json:"fieldViolations"`
+}
+
+func IsCredentialsError(response Response) bool {
+	buf := response.GetBody()
+
+	var errResponse ErrorResponse
+	err := json.Unmarshal(buf, &errResponse)
+	if err != nil {
+		return false
+	}
+
+	return errResponse.Message == "Forbidden" && len(errResponse.FieldViolations) > 0 && errResponse.FieldViolations[0].Field == "credentials"
 }

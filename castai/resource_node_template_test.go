@@ -4,11 +4,12 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"github.com/samber/lo"
 	"io"
 	"net/http"
 	"testing"
 	"time"
+
+	"github.com/samber/lo"
 
 	"github.com/golang/mock/gomock"
 	"github.com/hashicorp/go-cty/cty"
@@ -580,6 +581,7 @@ func testAccCheckNodeTemplateDestroy(s *terraform.State) error {
 
 		id := rs.Primary.ID
 		clusterID := rs.Primary.Attributes["cluster_id"]
+
 		response, err := client.NodeTemplatesAPIListNodeTemplatesWithResponse(ctx, clusterID, &sdk.NodeTemplatesAPIListNodeTemplatesParams{IncludeDefault: lo.ToPtr(false)})
 		if err != nil {
 			return err
@@ -592,7 +594,7 @@ func testAccCheckNodeTemplateDestroy(s *terraform.State) error {
 			return nil
 		}
 
-		return fmt.Errorf("node template %q still exists; %v", id, response)
+		return fmt.Errorf("node template %q still exists; %v", id, string(response.GetBody()))
 	}
 
 	return nil
