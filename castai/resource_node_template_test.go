@@ -11,7 +11,6 @@ import (
 
 	"github.com/samber/lo"
 
-	"github.com/cenkalti/backoff/v4"
 	"github.com/golang/mock/gomock"
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -583,23 +582,19 @@ func testAccCheckNodeTemplateDestroy(s *terraform.State) error {
 		id := rs.Primary.ID
 		clusterID := rs.Primary.Attributes["cluster_id"]
 
-		if err := backoff.Retry(func() error {
-			response, err := client.NodeTemplatesAPIListNodeTemplatesWithResponse(ctx, clusterID, &sdk.NodeTemplatesAPIListNodeTemplatesParams{IncludeDefault: lo.ToPtr(false)})
-			if err != nil {
-				return err
-			}
-			if response.StatusCode() == http.StatusNotFound {
-				return nil
-			}
-			if len(*response.JSON200.Items) == 0 {
-				// Should be no templates
-				return nil
-			}
-
-			return fmt.Errorf("node template %q still exists; %v", id, string(response.GetBody()))
-		}, backoff.NewExponentialBackOff()); err != nil {
+		response, err := client.NodeTemplatesAPIListNodeTemplatesWithResponse(ctx, clusterID, &sdk.NodeTemplatesAPIListNodeTemplatesParams{IncludeDefault: lo.ToPtr(false)})
+		if err != nil {
 			return err
 		}
+		if response.StatusCode() == http.StatusNotFound {
+			return nil
+		}
+		if len(*response.JSON200.Items) == 0 {
+			// Should be no templates
+			return nil
+		}
+
+		return fmt.Errorf("node template %q still exists; %v", id, string(response.GetBody()))
 	}
 
 	return nil
