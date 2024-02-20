@@ -11,7 +11,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/samber/lo"
 
 	"github.com/golang/mock/gomock"
@@ -378,7 +377,6 @@ func TestNodeTemplateResourceDelete_defaultNodeTemplate(t *testing.T) {
 }
 
 func TestAccResourceNodeTemplate_basic(t *testing.T) {
-	tflog.NewSubsystem(context.Background(), "node_template_test")
 	rName := fmt.Sprintf("%v-node-template-%v", ResourcePrefix, acctest.RandString(8))
 	resourceName := "castai_node_template.test"
 	clusterName, _ := lo.Coalesce(os.Getenv("CLUSTER_NAME"), "cost-terraform")
