@@ -14,8 +14,8 @@ variable "tags" {
 }
 
 variable "only_default" {
-  type = bool
-  default = true
+  type        = bool
+  default     = true
   description = "Enable only default node config and node template"
 }
 

@@ -12,9 +12,9 @@ locals {
 
   default_node_tmpl = {
     default_by_castai = {
-      name             = "default-by-castai"
+      name = "default-by-castai"
       configuration_id = module.castai-eks-cluster.castai_node_configurations[
-      "default"
+        "default"
       ]
       is_default   = true
       should_taint = false
@@ -39,7 +39,7 @@ locals {
       tags                 = var.tags
       security_groups      = var.security_groups
       instance_profile_arn = module.castai-eks-role-iam.instance_profile_arn
-      kubelet_config       = jsonencode({
+      kubelet_config = jsonencode({
         "registryBurst" : 20,
         "registryPullQPS" : 10
       })
@@ -51,7 +51,7 @@ locals {
     }
   })
 
-  node_templates = merge(local.default_node_tmpl, var.only_default == true ? {} :  {
+  node_templates = merge(local.default_node_tmpl, var.only_default == true ? {} : {
     spot_tmpl = {
       configuration_id = module.castai-eks-cluster.castai_node_configurations["default"]
       should_taint     = true
@@ -78,7 +78,7 @@ locals {
         use_spot_fallbacks            = true
         min_cpu                       = 4
         max_cpu                       = 100
-        instance_families             = {
+        instance_families = {
           exclude = ["m5"]
         }
         compute_optimized = false
