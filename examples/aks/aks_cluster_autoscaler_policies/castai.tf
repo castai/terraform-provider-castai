@@ -100,6 +100,23 @@ module "castai-aks-cluster" {
         }
         compute_optimized = false
         storage_optimized = false
+
+        # Optional: define custom priority for instances selection.
+        #
+        # 1. Prioritize Standard_Fs spot instances above all else, regardless of price.
+        # 2. If Standard_FS is not available, try Standard_FXMDS family.
+        custom_priority = [
+          {
+            instance_families = ["Standard_FS"]
+            spot              = true
+          },
+          {
+            instance_families = ["Standard_FXMDS"]
+            spot              = true
+          }
+          # 3. instances not matching any of custom priority groups will be tried after
+          # nothing matches from priority groups.
+        ]
       }
     }
   }
