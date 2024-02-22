@@ -160,14 +160,14 @@ module "castai-eks-cluster" {
         custom_priority = [
           {
             instance_families = ["c5a", "c5ad"]
-                spot = true
-            },
-            {
-                instance_families = ["c6a"]
-                spot = true
-            }
-            # 3. instances not matching any of custom priority groups will be tried after
-            # nothing matches from priority groups.
+            spot              = true
+          },
+          {
+            instance_families = ["c6a"]
+            spot              = true
+          }
+          # 3. instances not matching any of custom priority groups will be tried after
+          # nothing matches from priority groups.
         ]
       }
     }

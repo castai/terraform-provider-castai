@@ -107,12 +107,12 @@ module "castai-aks-cluster" {
         # 2. If Standard_FS is not available, try Standard_FXMDS family.
         custom_priority = [
           {
-              instance_families = ["Standard_FS"]
-              spot = true
+            instance_families = ["Standard_FS"]
+            spot              = true
           },
           {
-              instance_families = ["Standard_FXMDS"]
-              spot = true
+            instance_families = ["Standard_FXMDS"]
+            spot              = true
           }
           # 3. instances not matching any of custom priority groups will be tried after
           # nothing matches from priority groups.
