@@ -152,6 +152,21 @@ module "castai-eks-cluster" {
         compute_optimized = false
         storage_optimized = false
         is_gpu_only       = false
+
+        # Optional: define custom priority for instances selection.
+        #
+        # 1. Prioritize C5a and C5ad spot instances above all else, regardless of price.
+        custom_priority = {
+            instance_families = ["c5a", "c5ad"]
+            spot = true
+        }
+        # 2. If C5a is not available, try C6a family.
+        custom_priority = {
+            instance_families = ["c6a"]
+            spot = true
+        }
+        # 3. instances not matching any of custom priority groups will be tried after
+        # nothing matches from priority groups.
       }
     }
   }
