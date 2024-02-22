@@ -113,17 +113,19 @@ module "castai-gke-cluster" {
         # Optional: define custom priority for instances selection.
         #
         # 1. Prioritize C2D and C2 spot instances above all else, regardless of price.
-        custom_priority = {
-            instance_families = ["c2d", "c2"]
-            spot = true
-        }
         # 2. If C2D and C2 is not available, try C3D family.
-        custom_priority = {
-            instance_families = ["c3d"]
-            spot = true
-        }
-        # 3. instances not matching any of custom priority groups will be tried after
-        # nothing matches from priority groups.
+        custom_priority = [
+          {
+              instance_families = ["c2d", "c2"]
+              spot = true
+          },
+          custom_priority = {
+              instance_families = ["c3d"]
+              spot = true
+          }
+          # 3. instances not matching any of custom priority groups will be tried after
+          # nothing matches from priority groups.
+        ]
       }
 
       custom_instances_enabled = true
