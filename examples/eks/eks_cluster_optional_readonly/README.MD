@@ -1,4 +1,4 @@
-# Example of EKS cluster connected to CAST AI to read-only mode with ability to switch cluster to full access mode.
+# Example of EKS cluster connected to CAST AI to read-only mode (Phase1) with ability to switch cluster to full access mode(Phase 2)
 Following this example creates an EKS cluster and its supporting resources using AWS community modules.
 After EKS cluster is created, by default it is onboarded to CAST AI in Read-only mode(Phase 1).
 Read-only behaviour is controlled by bool variable "readonly" (In the varaibles.tf file).
