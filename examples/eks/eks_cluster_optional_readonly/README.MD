@@ -1,4 +1,4 @@
-# Example of EKS cluster connected to CAST AI to read-only mode with ability to switch cluster to full access mode.
+# Example of EKS cluster connected to CAST AI to read-only mode (Phase1) with ability to switch cluster to full access mode(Phase 2)
 Following this example creates an EKS cluster and its supporting resources using AWS community modules.
 After EKS cluster is created, by default it is onboarded to CAST AI in Read-only mode(Phase 1).
 Read-only behaviour is controlled by bool variable "readonly" (In the varaibles.tf file).
@@ -24,7 +24,7 @@ terraform apply -var-file=tf.vars
 terraform destroy -var-file=tf.vars
 ```
 
-# To Enable full access mode after cluster was already onboarded to read-only mode(Phase 1)
+# To Enable full access mode(Phase 2) after cluster was already onboarded to read-only mode(Phase 1)
 1. Set variable "readonly" = false`(it's true by default) and run `terraform apply -var-file=tf.vars`
 
 Note: Current provider version (v3.13.0) does not support `castai_eks_cluster` resource in-place re-creation.
