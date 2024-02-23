@@ -1,6 +1,6 @@
-# Example of EKS cluster connected to CAST AI in READ-ONLY mode
-Following example creates EKS cluster and its supporting resources using AWS community modules.
-After EKS cluster is created it is onboarded to CAST AI in Read-only mode.
+# Example of EKS cluster connected to CAST AI in READ-ONLY mode (Phase 1)
+Following this example creates EKS cluster and its supporting resources using AWS community modules.
+After EKS cluster is created it is onboarded to CAST AI in Read-only mode(Phase 1).
 Example configuration should be analysed in the following order:
 1. Create VPC - `vpc.tf`
 2. Create EKS cluster - `eks.tf`
