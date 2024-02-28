@@ -17,6 +17,7 @@ locals {
         "default"
       ]
       is_default   = true
+      is_enabled   = true
       should_taint = false
 
       constraints = {
@@ -54,6 +55,7 @@ locals {
   node_templates = merge(local.default_node_tmpl, var.only_default == true ? {} : {
     spot_tmpl = {
       configuration_id = module.castai-eks-cluster.castai_node_configurations["default"]
+      is_enabled       = true
       should_taint     = true
 
       custom_labels = {

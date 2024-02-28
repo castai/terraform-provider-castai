@@ -286,6 +286,11 @@ type ClientInterface interface {
 	// ExternalClusterAPIReconcileCluster request
 	ExternalClusterAPIReconcileCluster(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// ExternalClusterAPIUpdateClusterTags request with any body
+	ExternalClusterAPIUpdateClusterTagsWithBody(ctx context.Context, clusterId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	ExternalClusterAPIUpdateClusterTags(ctx context.Context, clusterId string, body ExternalClusterAPIUpdateClusterTagsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// ExternalClusterAPICreateClusterToken request
 	ExternalClusterAPICreateClusterToken(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -1262,6 +1267,30 @@ func (c *Client) ExternalClusterAPIDrainNode(ctx context.Context, clusterId stri
 
 func (c *Client) ExternalClusterAPIReconcileCluster(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewExternalClusterAPIReconcileClusterRequest(c.Server, clusterId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) ExternalClusterAPIUpdateClusterTagsWithBody(ctx context.Context, clusterId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewExternalClusterAPIUpdateClusterTagsRequestWithBody(c.Server, clusterId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) ExternalClusterAPIUpdateClusterTags(ctx context.Context, clusterId string, body ExternalClusterAPIUpdateClusterTagsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewExternalClusterAPIUpdateClusterTagsRequest(c.Server, clusterId, body)
 	if err != nil {
 		return nil, err
 	}
@@ -4070,6 +4099,53 @@ func NewExternalClusterAPIReconcileClusterRequest(server string, clusterId strin
 	return req, nil
 }
 
+// NewExternalClusterAPIUpdateClusterTagsRequest calls the generic ExternalClusterAPIUpdateClusterTags builder with application/json body
+func NewExternalClusterAPIUpdateClusterTagsRequest(server string, clusterId string, body ExternalClusterAPIUpdateClusterTagsJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewExternalClusterAPIUpdateClusterTagsRequestWithBody(server, clusterId, "application/json", bodyReader)
+}
+
+// NewExternalClusterAPIUpdateClusterTagsRequestWithBody generates requests for ExternalClusterAPIUpdateClusterTags with any type of body
+func NewExternalClusterAPIUpdateClusterTagsRequestWithBody(server string, clusterId string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "clusterId", runtime.ParamLocationPath, clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/kubernetes/external-clusters/%s/tags", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
 // NewExternalClusterAPICreateClusterTokenRequest generates requests for ExternalClusterAPICreateClusterToken
 func NewExternalClusterAPICreateClusterTokenRequest(server string, clusterId string) (*http.Request, error) {
 	var err error
@@ -5593,6 +5669,11 @@ type ClientWithResponsesInterface interface {
 
 	// ExternalClusterAPIReconcileCluster request
 	ExternalClusterAPIReconcileClusterWithResponse(ctx context.Context, clusterId string) (*ExternalClusterAPIReconcileClusterResponse, error)
+
+	// ExternalClusterAPIUpdateClusterTags request  with any body
+	ExternalClusterAPIUpdateClusterTagsWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader) (*ExternalClusterAPIUpdateClusterTagsResponse, error)
+
+	ExternalClusterAPIUpdateClusterTagsWithResponse(ctx context.Context, clusterId string, body ExternalClusterAPIUpdateClusterTagsJSONRequestBody) (*ExternalClusterAPIUpdateClusterTagsResponse, error)
 
 	// ExternalClusterAPICreateClusterToken request
 	ExternalClusterAPICreateClusterTokenWithResponse(ctx context.Context, clusterId string) (*ExternalClusterAPICreateClusterTokenResponse, error)
@@ -7284,6 +7365,36 @@ func (r ExternalClusterAPIReconcileClusterResponse) GetBody() []byte {
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
+type ExternalClusterAPIUpdateClusterTagsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *ExternalclusterV1UpdateClusterTagsResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r ExternalClusterAPIUpdateClusterTagsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r ExternalClusterAPIUpdateClusterTagsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r ExternalClusterAPIUpdateClusterTagsResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
 type ExternalClusterAPICreateClusterTokenResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -8898,6 +9009,23 @@ func (c *ClientWithResponses) ExternalClusterAPIReconcileClusterWithResponse(ctx
 		return nil, err
 	}
 	return ParseExternalClusterAPIReconcileClusterResponse(rsp)
+}
+
+// ExternalClusterAPIUpdateClusterTagsWithBodyWithResponse request with arbitrary body returning *ExternalClusterAPIUpdateClusterTagsResponse
+func (c *ClientWithResponses) ExternalClusterAPIUpdateClusterTagsWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader) (*ExternalClusterAPIUpdateClusterTagsResponse, error) {
+	rsp, err := c.ExternalClusterAPIUpdateClusterTagsWithBody(ctx, clusterId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseExternalClusterAPIUpdateClusterTagsResponse(rsp)
+}
+
+func (c *ClientWithResponses) ExternalClusterAPIUpdateClusterTagsWithResponse(ctx context.Context, clusterId string, body ExternalClusterAPIUpdateClusterTagsJSONRequestBody) (*ExternalClusterAPIUpdateClusterTagsResponse, error) {
+	rsp, err := c.ExternalClusterAPIUpdateClusterTags(ctx, clusterId, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseExternalClusterAPIUpdateClusterTagsResponse(rsp)
 }
 
 // ExternalClusterAPICreateClusterTokenWithResponse request returning *ExternalClusterAPICreateClusterTokenResponse
@@ -10617,6 +10745,32 @@ func ParseExternalClusterAPIReconcileClusterResponse(rsp *http.Response) (*Exter
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest ExternalclusterV1ReconcileClusterResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseExternalClusterAPIUpdateClusterTagsResponse parses an HTTP response from a ExternalClusterAPIUpdateClusterTagsWithResponse call
+func ParseExternalClusterAPIUpdateClusterTagsResponse(rsp *http.Response) (*ExternalClusterAPIUpdateClusterTagsResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &ExternalClusterAPIUpdateClusterTagsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ExternalclusterV1UpdateClusterTagsResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
