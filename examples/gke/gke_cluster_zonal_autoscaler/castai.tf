@@ -61,6 +61,7 @@ module "castai-gke-cluster" {
       name             = "default-by-castai"
       configuration_id = module.castai-gke-cluster.castai_node_configurations["default"]
       is_default       = true
+      is_enabled       = true
       should_taint     = false
 
       constraints = {
