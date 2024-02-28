@@ -815,6 +815,46 @@ func (mr *MockClientInterfaceMockRecorder) ExternalClusterAPIUpdateCluster(ctx, 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIUpdateCluster", reflect.TypeOf((*MockClientInterface)(nil).ExternalClusterAPIUpdateCluster), varargs...)
 }
 
+// ExternalClusterAPIUpdateClusterTags mocks base method.
+func (m *MockClientInterface) ExternalClusterAPIUpdateClusterTags(ctx context.Context, clusterId string, body sdk.ExternalClusterAPIUpdateClusterTagsJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ExternalClusterAPIUpdateClusterTags", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExternalClusterAPIUpdateClusterTags indicates an expected call of ExternalClusterAPIUpdateClusterTags.
+func (mr *MockClientInterfaceMockRecorder) ExternalClusterAPIUpdateClusterTags(ctx, clusterId, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIUpdateClusterTags", reflect.TypeOf((*MockClientInterface)(nil).ExternalClusterAPIUpdateClusterTags), varargs...)
+}
+
+// ExternalClusterAPIUpdateClusterTagsWithBody mocks base method.
+func (m *MockClientInterface) ExternalClusterAPIUpdateClusterTagsWithBody(ctx context.Context, clusterId, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ExternalClusterAPIUpdateClusterTagsWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExternalClusterAPIUpdateClusterTagsWithBody indicates an expected call of ExternalClusterAPIUpdateClusterTagsWithBody.
+func (mr *MockClientInterfaceMockRecorder) ExternalClusterAPIUpdateClusterTagsWithBody(ctx, clusterId, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIUpdateClusterTagsWithBody", reflect.TypeOf((*MockClientInterface)(nil).ExternalClusterAPIUpdateClusterTagsWithBody), varargs...)
+}
+
 // ExternalClusterAPIUpdateClusterWithBody mocks base method.
 func (m *MockClientInterface) ExternalClusterAPIUpdateClusterWithBody(ctx context.Context, clusterId, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
@@ -2956,6 +2996,36 @@ func (m *MockClientWithResponsesInterface) ExternalClusterAPIRegisterClusterWith
 func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIRegisterClusterWithResponse(ctx, body interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIRegisterClusterWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIRegisterClusterWithResponse), ctx, body)
+}
+
+// ExternalClusterAPIUpdateClusterTagsWithBodyWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) ExternalClusterAPIUpdateClusterTagsWithBodyWithResponse(ctx context.Context, clusterId, contentType string, body io.Reader) (*sdk.ExternalClusterAPIUpdateClusterTagsResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ExternalClusterAPIUpdateClusterTagsWithBodyWithResponse", ctx, clusterId, contentType, body)
+	ret0, _ := ret[0].(*sdk.ExternalClusterAPIUpdateClusterTagsResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExternalClusterAPIUpdateClusterTagsWithBodyWithResponse indicates an expected call of ExternalClusterAPIUpdateClusterTagsWithBodyWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIUpdateClusterTagsWithBodyWithResponse(ctx, clusterId, contentType, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIUpdateClusterTagsWithBodyWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIUpdateClusterTagsWithBodyWithResponse), ctx, clusterId, contentType, body)
+}
+
+// ExternalClusterAPIUpdateClusterTagsWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) ExternalClusterAPIUpdateClusterTagsWithResponse(ctx context.Context, clusterId string, body sdk.ExternalClusterAPIUpdateClusterTagsJSONRequestBody) (*sdk.ExternalClusterAPIUpdateClusterTagsResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ExternalClusterAPIUpdateClusterTagsWithResponse", ctx, clusterId, body)
+	ret0, _ := ret[0].(*sdk.ExternalClusterAPIUpdateClusterTagsResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExternalClusterAPIUpdateClusterTagsWithResponse indicates an expected call of ExternalClusterAPIUpdateClusterTagsWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIUpdateClusterTagsWithResponse(ctx, clusterId, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIUpdateClusterTagsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIUpdateClusterTagsWithResponse), ctx, clusterId, body)
 }
 
 // ExternalClusterAPIUpdateClusterWithBodyWithResponse mocks base method.

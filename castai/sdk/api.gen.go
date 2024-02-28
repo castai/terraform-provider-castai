@@ -51,6 +51,13 @@ const (
 	Ssd     CastaiInventoryV1beta1StorageInfoDeviceType = "ssd"
 )
 
+// Defines values for CastaiSsoV1beta1OIDCType.
+const (
+	TYPEBACKCHANNEL  CastaiSsoV1beta1OIDCType = "TYPE_BACK_CHANNEL"
+	TYPEFRONTCHANNEL CastaiSsoV1beta1OIDCType = "TYPE_FRONT_CHANNEL"
+	TYPEUNKNOWN      CastaiSsoV1beta1OIDCType = "TYPE_UNKNOWN"
+)
+
 // Defines values for CastaiSsoV1beta1SSOConnectionStatus.
 const (
 	STATUSACTIVE   CastaiSsoV1beta1SSOConnectionStatus = "STATUS_ACTIVE"
@@ -601,6 +608,9 @@ type CastaiSsoV1beta1CreateSSOConnection struct {
 	// Name is the name of the connection.
 	Name string `json:"name"`
 
+	// OIDC represents a OIDC connector.
+	Oidc *CastaiSsoV1beta1OIDC `json:"oidc,omitempty"`
+
 	// Okta represents a Okta connector.
 	Okta *CastaiSsoV1beta1Okta `json:"okta,omitempty"`
 }
@@ -612,6 +622,32 @@ type CastaiSsoV1beta1DeleteSSOConnectionResponse = map[string]interface{}
 type CastaiSsoV1beta1ListSSOConnectionsResponse struct {
 	Connections []CastaiSsoV1beta1SSOConnection `json:"connections"`
 }
+
+// OIDC represents a OIDC connector.
+type CastaiSsoV1beta1OIDC struct {
+	// ClientId is the client id of the OIDC.
+	ClientId string `json:"clientId"`
+
+	// ClientSecret is the client secret when using back_channel type of connection.
+	ClientSecret *string `json:"clientSecret"`
+
+	// IssuerUrl is the URL of the discovery document of the OpenID Connect provider you want to connect with.
+	IssuerUrl string `json:"issuerUrl"`
+
+	// Type is the type of the OIDC connection.
+	//
+	//  - TYPE_UNKNOWN: TypeUknown is the default status.
+	//  - TYPE_BACK_CHANNEL: TypeBackChannel is the back channel type of OIDC connection.
+	//  - TYPE_FRONT_CHANNEL: TypeFrontChannel is the front channel type of OIDC connection.
+	Type CastaiSsoV1beta1OIDCType `json:"type"`
+}
+
+// Type is the type of the OIDC connection.
+//
+//   - TYPE_UNKNOWN: TypeUknown is the default status.
+//   - TYPE_BACK_CHANNEL: TypeBackChannel is the back channel type of OIDC connection.
+//   - TYPE_FRONT_CHANNEL: TypeFrontChannel is the front channel type of OIDC connection.
+type CastaiSsoV1beta1OIDCType string
 
 // Okta represents a Okta connector.
 type CastaiSsoV1beta1Okta struct {
@@ -644,6 +680,9 @@ type CastaiSsoV1beta1SSOConnection struct {
 
 	// Name is the name of the connection.
 	Name string `json:"name"`
+
+	// OIDC represents a OIDC connector.
+	Oidc *CastaiSsoV1beta1OIDC `json:"oidc,omitempty"`
 
 	// Okta represents a Okta connector.
 	Okta *CastaiSsoV1beta1Okta `json:"okta,omitempty"`
@@ -678,6 +717,9 @@ type CastaiSsoV1beta1UpdateSSOConnection struct {
 
 	// Name is the name of the connection.
 	Name *string `json:"name,omitempty"`
+
+	// OIDC represents a OIDC connector.
+	Oidc *CastaiSsoV1beta1OIDC `json:"oidc,omitempty"`
 
 	// Okta represents a Okta connector.
 	Okta *CastaiSsoV1beta1Okta `json:"okta,omitempty"`
@@ -1023,10 +1065,16 @@ type ExternalclusterV1Cluster struct {
 	Status *string `json:"status,omitempty"`
 
 	// Cluster subnets.
-	Subnets *[]ExternalclusterV1Subnet `json:"subnets,omitempty"`
+	Subnets *[]ExternalclusterV1Subnet     `json:"subnets,omitempty"`
+	Tags    *ExternalclusterV1Cluster_Tags `json:"tags,omitempty"`
 
 	// Cluster zones.
 	Zones *[]ExternalclusterV1Zone `json:"zones,omitempty"`
+}
+
+// ExternalclusterV1Cluster_Tags defines model for ExternalclusterV1Cluster.Tags.
+type ExternalclusterV1Cluster_Tags struct {
+	AdditionalProperties map[string]string `json:"-"`
 }
 
 // ExternalclusterV1ClusterReconcileInfo defines model for externalcluster.v1.Cluster.ReconcileInfo.
@@ -1289,6 +1337,12 @@ type ExternalclusterV1Node_Labels struct {
 	AdditionalProperties map[string]string `json:"-"`
 }
 
+// NodeAffinity provides control over the assignment of individual nodes to dedicated host instances.
+type ExternalclusterV1NodeAffinity struct {
+	// The name of the dedicated group.
+	DedicatedGroup *string `json:"dedicatedGroup"`
+}
+
 // ExternalclusterV1NodeConfig defines model for externalcluster.v1.NodeConfig.
 type ExternalclusterV1NodeConfig struct {
 	// ID reference of Node configuration (template) to be used for node creation. Supersedes Configuration Name.
@@ -1313,6 +1367,9 @@ type ExternalclusterV1NodeConfig struct {
 
 	// Node Kubernetes taints.
 	KubernetesTaints *[]ExternalclusterV1Taint `json:"kubernetesTaints,omitempty"`
+
+	// NodeAffinity provides control over the assignment of individual nodes to dedicated host instances.
+	NodeAffinity *ExternalclusterV1NodeAffinity `json:"nodeAffinity,omitempty"`
 
 	// NodeSpotConfig defines if node should be created as spot instance, and params for creation.
 	SpotConfig *ExternalclusterV1NodeSpotConfig `json:"spotConfig,omitempty"`
@@ -1471,6 +1528,9 @@ type ExternalclusterV1Taint struct {
 	Key    string `json:"key"`
 	Value  string `json:"value"`
 }
+
+// UpdateClusterTagsResponse result of cluster tags update.
+type ExternalclusterV1UpdateClusterTagsResponse = map[string]interface{}
 
 // UpdateEKSClusterParams defines updatable EKS cluster configuration.
 type ExternalclusterV1UpdateEKSClusterParams struct {
@@ -2508,6 +2568,11 @@ type ExternalClusterAPIDeleteNodeParams struct {
 // ExternalClusterAPIDrainNodeJSONBody defines parameters for ExternalClusterAPIDrainNode.
 type ExternalClusterAPIDrainNodeJSONBody = ExternalclusterV1DrainConfig
 
+// ExternalClusterAPIUpdateClusterTagsJSONBody defines parameters for ExternalClusterAPIUpdateClusterTags.
+type ExternalClusterAPIUpdateClusterTagsJSONBody struct {
+	AdditionalProperties map[string]string `json:"-"`
+}
+
 // UsersAPIUpdateCurrentUserProfileJSONBody defines parameters for UsersAPIUpdateCurrentUserProfile.
 type UsersAPIUpdateCurrentUserProfileJSONBody = CastaiUsersV1beta1User
 
@@ -2620,6 +2685,9 @@ type ExternalClusterAPIAddNodeJSONRequestBody = ExternalClusterAPIAddNodeJSONBod
 // ExternalClusterAPIDrainNodeJSONRequestBody defines body for ExternalClusterAPIDrainNode for application/json ContentType.
 type ExternalClusterAPIDrainNodeJSONRequestBody = ExternalClusterAPIDrainNodeJSONBody
 
+// ExternalClusterAPIUpdateClusterTagsJSONRequestBody defines body for ExternalClusterAPIUpdateClusterTags for application/json ContentType.
+type ExternalClusterAPIUpdateClusterTagsJSONRequestBody ExternalClusterAPIUpdateClusterTagsJSONBody
+
 // UsersAPIUpdateCurrentUserProfileJSONRequestBody defines body for UsersAPIUpdateCurrentUserProfile for application/json ContentType.
 type UsersAPIUpdateCurrentUserProfileJSONRequestBody = UsersAPIUpdateCurrentUserProfileJSONBody
 
@@ -2652,6 +2720,59 @@ type SSOAPICreateSSOConnectionJSONRequestBody = SSOAPICreateSSOConnectionJSONBod
 
 // SSOAPIUpdateSSOConnectionJSONRequestBody defines body for SSOAPIUpdateSSOConnection for application/json ContentType.
 type SSOAPIUpdateSSOConnectionJSONRequestBody = SSOAPIUpdateSSOConnectionJSONBody
+
+// Getter for additional properties for ExternalClusterAPIUpdateClusterTagsJSONBody. Returns the specified
+// element and whether it was found
+func (a ExternalClusterAPIUpdateClusterTagsJSONBody) Get(fieldName string) (value string, found bool) {
+	if a.AdditionalProperties != nil {
+		value, found = a.AdditionalProperties[fieldName]
+	}
+	return
+}
+
+// Setter for additional properties for ExternalClusterAPIUpdateClusterTagsJSONBody
+func (a *ExternalClusterAPIUpdateClusterTagsJSONBody) Set(fieldName string, value string) {
+	if a.AdditionalProperties == nil {
+		a.AdditionalProperties = make(map[string]string)
+	}
+	a.AdditionalProperties[fieldName] = value
+}
+
+// Override default JSON handling for ExternalClusterAPIUpdateClusterTagsJSONBody to handle AdditionalProperties
+func (a *ExternalClusterAPIUpdateClusterTagsJSONBody) UnmarshalJSON(b []byte) error {
+	object := make(map[string]json.RawMessage)
+	err := json.Unmarshal(b, &object)
+	if err != nil {
+		return err
+	}
+
+	if len(object) != 0 {
+		a.AdditionalProperties = make(map[string]string)
+		for fieldName, fieldBuf := range object {
+			var fieldVal string
+			err := json.Unmarshal(fieldBuf, &fieldVal)
+			if err != nil {
+				return fmt.Errorf("error unmarshaling field %s: %w", fieldName, err)
+			}
+			a.AdditionalProperties[fieldName] = fieldVal
+		}
+	}
+	return nil
+}
+
+// Override default JSON handling for ExternalClusterAPIUpdateClusterTagsJSONBody to handle AdditionalProperties
+func (a ExternalClusterAPIUpdateClusterTagsJSONBody) MarshalJSON() ([]byte, error) {
+	var err error
+	object := make(map[string]json.RawMessage)
+
+	for fieldName, field := range a.AdditionalProperties {
+		object[fieldName], err = json.Marshal(field)
+		if err != nil {
+			return nil, fmt.Errorf("error marshaling '%s': %w", fieldName, err)
+		}
+	}
+	return json.Marshal(object)
+}
 
 // Getter for additional properties for CastaiEvictorV1LabelSelector_MatchLabels. Returns the specified
 // element and whether it was found
@@ -2694,6 +2815,59 @@ func (a *CastaiEvictorV1LabelSelector_MatchLabels) UnmarshalJSON(b []byte) error
 
 // Override default JSON handling for CastaiEvictorV1LabelSelector_MatchLabels to handle AdditionalProperties
 func (a CastaiEvictorV1LabelSelector_MatchLabels) MarshalJSON() ([]byte, error) {
+	var err error
+	object := make(map[string]json.RawMessage)
+
+	for fieldName, field := range a.AdditionalProperties {
+		object[fieldName], err = json.Marshal(field)
+		if err != nil {
+			return nil, fmt.Errorf("error marshaling '%s': %w", fieldName, err)
+		}
+	}
+	return json.Marshal(object)
+}
+
+// Getter for additional properties for ExternalclusterV1Cluster_Tags. Returns the specified
+// element and whether it was found
+func (a ExternalclusterV1Cluster_Tags) Get(fieldName string) (value string, found bool) {
+	if a.AdditionalProperties != nil {
+		value, found = a.AdditionalProperties[fieldName]
+	}
+	return
+}
+
+// Setter for additional properties for ExternalclusterV1Cluster_Tags
+func (a *ExternalclusterV1Cluster_Tags) Set(fieldName string, value string) {
+	if a.AdditionalProperties == nil {
+		a.AdditionalProperties = make(map[string]string)
+	}
+	a.AdditionalProperties[fieldName] = value
+}
+
+// Override default JSON handling for ExternalclusterV1Cluster_Tags to handle AdditionalProperties
+func (a *ExternalclusterV1Cluster_Tags) UnmarshalJSON(b []byte) error {
+	object := make(map[string]json.RawMessage)
+	err := json.Unmarshal(b, &object)
+	if err != nil {
+		return err
+	}
+
+	if len(object) != 0 {
+		a.AdditionalProperties = make(map[string]string)
+		for fieldName, fieldBuf := range object {
+			var fieldVal string
+			err := json.Unmarshal(fieldBuf, &fieldVal)
+			if err != nil {
+				return fmt.Errorf("error unmarshaling field %s: %w", fieldName, err)
+			}
+			a.AdditionalProperties[fieldName] = fieldVal
+		}
+	}
+	return nil
+}
+
+// Override default JSON handling for ExternalclusterV1Cluster_Tags to handle AdditionalProperties
+func (a ExternalclusterV1Cluster_Tags) MarshalJSON() ([]byte, error) {
 	var err error
 	object := make(map[string]json.RawMessage)
 
