@@ -21,3 +21,5 @@ terraform apply -var-file=tf.vars
 ```
 terraform destroy -var-file=tf.vars
 ```
+
+Please refer to this guide if you run into any issues https://docs.cast.ai/docs/terraform-troubleshooting
