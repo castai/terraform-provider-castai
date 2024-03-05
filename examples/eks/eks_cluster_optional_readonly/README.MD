@@ -33,3 +33,5 @@ If `castai_eks_cluster` have to be re-created follow the steps below:
 If cluster was already onboarded to full access mode, and you don't want to delete CAST AI created K8s nodes, make sure that `castai_eks_cluster` parameter is set to `delete_nodes_on_disconnect = false`.
 2. Run `terraform apply -var-file=tf.vars`
 
+
+Please refer to this guide if you run into any issues https://docs.cast.ai/docs/terraform-troubleshooting
