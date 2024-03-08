@@ -1495,12 +1495,13 @@ type ExternalclusterV1RegisterClusterRequest struct {
 
 // ExternalclusterV1Resources defines model for externalcluster.v1.Resources.
 type ExternalclusterV1Resources struct {
-	CpuAllocatableMilli *int32 `json:"cpuAllocatableMilli,omitempty"`
-	CpuCapacityMilli    *int32 `json:"cpuCapacityMilli,omitempty"`
-	CpuRequestsMilli    *int32 `json:"cpuRequestsMilli,omitempty"`
-	MemAllocatableMib   *int32 `json:"memAllocatableMib,omitempty"`
-	MemCapacityMib      *int32 `json:"memCapacityMib,omitempty"`
-	MemRequestsMib      *int32 `json:"memRequestsMib,omitempty"`
+	BandwidthCapacityMbps *int32 `json:"bandwidthCapacityMbps,omitempty"`
+	CpuAllocatableMilli   *int32 `json:"cpuAllocatableMilli,omitempty"`
+	CpuCapacityMilli      *int32 `json:"cpuCapacityMilli,omitempty"`
+	CpuRequestsMilli      *int32 `json:"cpuRequestsMilli,omitempty"`
+	MemAllocatableMib     *int32 `json:"memAllocatableMib,omitempty"`
+	MemCapacityMib        *int32 `json:"memCapacityMib,omitempty"`
+	MemRequestsMib        *int32 `json:"memRequestsMib,omitempty"`
 }
 
 // Subnet represents cluster subnet.
@@ -1991,11 +1992,12 @@ type NodetemplatesV1TemplateConstraints struct {
 
 	// This template is gpu only. Setting this to true, will result in only instances with GPUs being considered.
 	// In addition, this ensures that all of the added instances for this template won't have any nvidia taints.
-	IsGpuOnly *bool  `json:"isGpuOnly"`
-	MaxCpu    *int32 `json:"maxCpu"`
-	MaxMemory *int32 `json:"maxMemory"`
-	MinCpu    *int32 `json:"minCpu"`
-	MinMemory *int32 `json:"minMemory"`
+	IsGpuOnly    *bool                                             `json:"isGpuOnly"`
+	MaxCpu       *int32                                            `json:"maxCpu"`
+	MaxMemory    *int32                                            `json:"maxMemory"`
+	MinCpu       *int32                                            `json:"minCpu"`
+	MinMemory    *int32                                            `json:"minMemory"`
+	NodeAffinity *[]NodetemplatesV1TemplateConstraintsNodeAffinity `json:"nodeAffinity,omitempty"`
 
 	// Should include on-demand instances in the considered pool.
 	OnDemand *bool     `json:"onDemand"`
@@ -2048,6 +2050,13 @@ type NodetemplatesV1TemplateConstraintsGPUConstraints struct {
 type NodetemplatesV1TemplateConstraintsInstanceFamilyConstraints struct {
 	Exclude *[]string `json:"exclude,omitempty"`
 	Include *[]string `json:"include,omitempty"`
+}
+
+// NodetemplatesV1TemplateConstraintsNodeAffinity defines model for nodetemplates.v1.TemplateConstraints.NodeAffinity.
+type NodetemplatesV1TemplateConstraintsNodeAffinity struct {
+	AzName        *string   `json:"azName,omitempty"`
+	InstanceTypes *[]string `json:"instanceTypes,omitempty"`
+	Name          *string   `json:"name,omitempty"`
 }
 
 // NodetemplatesV1UpdateNodeTemplate defines model for nodetemplates.v1.UpdateNodeTemplate.

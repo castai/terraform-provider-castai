@@ -55,6 +55,7 @@ Optional:
 - `max_memory` (Number) Max Memory (Mib) per node.
 - `min_cpu` (Number) Min CPU cores per node.
 - `min_memory` (Number) Min Memory (Mib) per node.
+- `node_affinity` (Block List) (see [below for nested schema](#nestedblock--constraints--node_affinity))
 - `on_demand` (Boolean) Should include on-demand instances in the considered pool.
 - `os` (List of String) List of acceptable instance Operating Systems, the default is linux. Allowed values: linux, windows.
 - `spot` (Boolean) Should include spot instances in the considered pool.
@@ -93,6 +94,16 @@ Optional:
 
 - `exclude` (List of String) Instance families to include when filtering (excludes all other families).
 - `include` (List of String) Instance families to exclude when filtering (includes all other families).
+
+
+<a id="nestedblock--constraints--node_affinity"></a>
+### Nested Schema for `constraints.node_affinity`
+
+Required:
+
+- `az_name` (String) Availability zone name.
+- `instance_types` (List of String) Instance types in this node group.
+- `name` (String) Name of node group.
 
 
 
