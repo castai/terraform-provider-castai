@@ -87,6 +87,13 @@ func TestNodeTemplateResourceReadContext(t *testing.T) {
 				  		"spot": true,
 				  		"onDemand": true
 				  	}
+				  ],
+				  "nodeAffinity": [
+				    {	
+						"name": "foo",
+						"azName": "eu-central-1a",
+						"instanceTypes": ["m5.24xlarge"]
+					}
 				  ]
 				},
 				"version": "3",
@@ -171,6 +178,11 @@ constraints.0.max_cpu = 10000
 constraints.0.max_memory = 0
 constraints.0.min_cpu = 10
 constraints.0.min_memory = 0
+constraints.0.node_affinity.# = 1
+constraints.0.node_affinity.0.az_name = eu-central-1a
+constraints.0.node_affinity.0.instance_types.# = 1
+constraints.0.node_affinity.0.instance_types.0 = m5.24xlarge
+constraints.0.node_affinity.0.name = foo
 constraints.0.on_demand = true
 constraints.0.os.# = 1
 constraints.0.os.0 = linux
@@ -434,6 +446,7 @@ func TestAccResourceNodeTemplate_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.custom_priority.0.instance_families.1", "d"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.custom_priority.0.spot", "true"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.custom_priority.0.on_demand", "true"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.node_affinity.#", "0"),
 				),
 			},
 			{
@@ -491,6 +504,7 @@ func TestAccResourceNodeTemplate_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.custom_priority.1.instance_families.1", "d"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.custom_priority.1.spot", "true"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.custom_priority.1.on_demand", "true"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.node_affinity.#", "0"),
 				),
 			},
 		},

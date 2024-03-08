@@ -56,6 +56,9 @@ const (
 	FieldNodeTemplateStorageOptimized                         = "storage_optimized"
 	FieldNodeTemplateUseSpotFallbacks                         = "use_spot_fallbacks"
 	FieldNodeTemplateCustomPriority                           = "custom_priority"
+	FieldNodeTemplateNodeAffinity                             = "node_affinity"
+	FieldNodeTemplateAzName                                   = "az_name"
+	FieldNodeTemplateInstanceTypes                            = "instance_types"
 )
 
 const (
@@ -345,6 +348,32 @@ func resourceNodeTemplate() *schema.Resource {
 								},
 							},
 						},
+						FieldNodeTemplateNodeAffinity: {
+							Type:     schema.TypeList,
+							Optional: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									FieldNodeTemplateInstanceTypes: {
+										Type:     schema.TypeList,
+										Required: true,
+										Elem: &schema.Schema{
+											Type: schema.TypeString,
+										},
+										Description: "Instance types in this node group.",
+									},
+									FieldNodeTemplateAzName: {
+										Required:    true,
+										Type:        schema.TypeString,
+										Description: "Availability zone name.",
+									},
+									FieldNodeTemplateName: {
+										Required:    true,
+										Type:        schema.TypeString,
+										Description: "Name of node group.",
+									},
+								},
+							},
+						},
 					},
 				},
 			},
@@ -489,6 +518,9 @@ func flattenConstraints(c *sdk.NodetemplatesV1TemplateConstraints) ([]map[string
 	if c.CustomPriority != nil && len(*c.CustomPriority) > 0 {
 		out[FieldNodeTemplateCustomPriority] = flattenCustomPriority(*c.CustomPriority)
 	}
+	if c.NodeAffinity != nil && len(*c.NodeAffinity) > 0 {
+		out[FieldNodeTemplateNodeAffinity] = flattenNodeAffinity(*c.NodeAffinity)
+	}
 	if c.InstanceFamilies != nil {
 		out[FieldNodeTemplateInstanceFamilies] = flattenInstanceFamilies(c.InstanceFamilies)
 	}
@@ -592,6 +624,19 @@ func flattenCustomPriority(priorities []sdk.NodetemplatesV1TemplateConstraintsCu
 
 		result[FieldNodeTemplateSpot] = lo.FromPtr(item.Spot)
 		result[FieldNodeTemplateOnDemand] = lo.FromPtr(item.OnDemand)
+		return result
+	})
+}
+
+func flattenNodeAffinity(affinities []sdk.NodetemplatesV1TemplateConstraintsNodeAffinity) any {
+	return lo.Map(affinities, func(item sdk.NodetemplatesV1TemplateConstraintsNodeAffinity, index int) map[string]any {
+		result := map[string]any{}
+		if item.InstanceTypes != nil {
+			result[FieldNodeTemplateInstanceTypes] = *item.InstanceTypes
+		}
+
+		result[FieldNodeTemplateName] = lo.FromPtr(item.Name)
+		result[FieldNodeTemplateAzName] = lo.FromPtr(item.AzName)
 		return result
 	})
 }
@@ -1019,6 +1064,21 @@ func toTemplateConstraints(obj map[string]any) *sdk.NodetemplatesV1TemplateConst
 			}))
 		}
 	}
+	if v, ok := obj[FieldNodeTemplateNodeAffinity].([]any); ok && len(v) > 0 {
+		if ok {
+			out.NodeAffinity = lo.ToPtr(lo.FilterMap(v, func(item any, _ int) (sdk.NodetemplatesV1TemplateConstraintsNodeAffinity, bool) {
+				val, ok := item.(map[string]any)
+				if !ok {
+					return sdk.NodetemplatesV1TemplateConstraintsNodeAffinity{}, false
+				}
+				res := toTemplateConstraintsNodeAffinity(val)
+				if res == nil {
+					return sdk.NodetemplatesV1TemplateConstraintsNodeAffinity{}, false
+				}
+				return *res, true
+			}))
+		}
+	}
 
 	return out
 }
@@ -1079,6 +1139,25 @@ func toTemplateConstraintsCustomPriority(o map[string]any) *sdk.NodetemplatesV1T
 	}
 	if v, ok := o[FieldNodeTemplateOnDemand].(bool); ok {
 		out.OnDemand = toPtr(v)
+	}
+
+	return &out
+}
+
+func toTemplateConstraintsNodeAffinity(o map[string]any) *sdk.NodetemplatesV1TemplateConstraintsNodeAffinity {
+	if o == nil {
+		return nil
+	}
+
+	out := sdk.NodetemplatesV1TemplateConstraintsNodeAffinity{}
+	if v, ok := o[FieldNodeTemplateName].(string); ok {
+		out.Name = toPtr(v)
+	}
+	if v, ok := o[FieldNodeTemplateAzName].(string); ok {
+		out.AzName = toPtr(v)
+	}
+	if v, ok := o[FieldNodeTemplateInstanceTypes].([]any); ok {
+		out.InstanceTypes = toPtr(toStringList(v))
 	}
 
 	return &out
