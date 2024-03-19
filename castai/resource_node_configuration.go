@@ -212,6 +212,26 @@ func resourceNodeConfiguration() *schema.Resource {
 							Description:      "AWS KMS key ARN for encrypting EBS volume attached to the node",
 							ValidateDiagFunc: validation.ToDiagFunc(validation.StringMatch(regexp.MustCompile(`arn:aws:kms:.*`), "Must be a valid KMS key ARN")),
 						},
+						"target_group": {
+							Type:        schema.TypeList,
+							Optional:    true,
+							Description: "AWS target group configuration for CAST provisioned nodes",
+							MaxItems:    1,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"arn": {
+										Type:        schema.TypeString,
+										Required:    true,
+										Description: "AWS target group ARN for CAST provisioned nodes",
+									},
+									"port": {
+										Type:        schema.TypeInt,
+										Required:    true,
+										Description: "Port for AWS target group for CAST provisioned nodes",
+									},
+								},
+							},
+						},
 					},
 				},
 			},
