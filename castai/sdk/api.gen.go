@@ -2010,6 +2010,8 @@ type NodetemplatesV1TemplateConstraints struct {
 	// - Use Resource URI/FQDN of the sole tenancy node group as the name (example: /projects/test-123/zones/europe-west1b/nodeGroups/test-node-group).
 	// - The GKE cluster must use Shared VPC (https://cloud.google.com/vpc/docs/shared-vpc).
 	// - The sole tenancy node group must be shared with the GKE cluster's project or organization.
+	// - The CAST's service account must have the necessary permissions to create and operate instances
+	//   on the sole tenancy node group's project.
 	DedicatedNodeAffinity *[]NodetemplatesV1TemplateConstraintsDedicatedNodeAffinity `json:"dedicatedNodeAffinity,omitempty"`
 
 	// Enable/disable spot diversity policy. When enabled, autoscaler will try to balance between diverse and cost optimal instance types.
