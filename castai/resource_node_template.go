@@ -56,7 +56,7 @@ const (
 	FieldNodeTemplateStorageOptimized                         = "storage_optimized"
 	FieldNodeTemplateUseSpotFallbacks                         = "use_spot_fallbacks"
 	FieldNodeTemplateCustomPriority                           = "custom_priority"
-	FieldNodeTemplateNodeAffinity                             = "node_affinity"
+	FieldNodeTemplateDedicatedNodeAffinity                    = "dedicated_node_affinity"
 	FieldNodeTemplateAzName                                   = "az_name"
 	FieldNodeTemplateInstanceTypes                            = "instance_types"
 )
@@ -348,9 +348,10 @@ func resourceNodeTemplate() *schema.Resource {
 								},
 							},
 						},
-						FieldNodeTemplateNodeAffinity: {
-							Type:     schema.TypeList,
-							Optional: true,
+						FieldNodeTemplateDedicatedNodeAffinity: {
+							Type:        schema.TypeList,
+							Optional:    true,
+							Description: "Dedicated node affinity - creates preference for instances to be created on sole tenancy or dedicated nodes. This\n feature is only available for GCP clusters, requires feature flag to be enabled and sole tenancy nodes with local\n SSDs or GPUs are not supported. If the sole tenancy or dedicated nodes don't have capacity for selected instance\n type, the Autoscaler will fall back to multi-tenant instance types available for this Node Template.\n Other instance constraints are applied when the Autoscaler picks available instance types that can be created on\n the sole tenancy or dedicated node (example: setting min CPU to 16).",
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									FieldNodeTemplateInstanceTypes: {
@@ -359,7 +360,7 @@ func resourceNodeTemplate() *schema.Resource {
 										Elem: &schema.Schema{
 											Type: schema.TypeString,
 										},
-										Description: "Instance types in this node group.",
+										Description: "Instance/node types in this node group.",
 									},
 									FieldNodeTemplateAzName: {
 										Required:    true,
@@ -518,8 +519,8 @@ func flattenConstraints(c *sdk.NodetemplatesV1TemplateConstraints) ([]map[string
 	if c.CustomPriority != nil && len(*c.CustomPriority) > 0 {
 		out[FieldNodeTemplateCustomPriority] = flattenCustomPriority(*c.CustomPriority)
 	}
-	if c.NodeAffinity != nil && len(*c.NodeAffinity) > 0 {
-		out[FieldNodeTemplateNodeAffinity] = flattenNodeAffinity(*c.NodeAffinity)
+	if c.DedicatedNodeAffinity != nil && len(*c.DedicatedNodeAffinity) > 0 {
+		out[FieldNodeTemplateDedicatedNodeAffinity] = flattenNodeAffinity(*c.DedicatedNodeAffinity)
 	}
 	if c.InstanceFamilies != nil {
 		out[FieldNodeTemplateInstanceFamilies] = flattenInstanceFamilies(c.InstanceFamilies)
@@ -628,8 +629,8 @@ func flattenCustomPriority(priorities []sdk.NodetemplatesV1TemplateConstraintsCu
 	})
 }
 
-func flattenNodeAffinity(affinities []sdk.NodetemplatesV1TemplateConstraintsNodeAffinity) any {
-	return lo.Map(affinities, func(item sdk.NodetemplatesV1TemplateConstraintsNodeAffinity, index int) map[string]any {
+func flattenNodeAffinity(affinities []sdk.NodetemplatesV1TemplateConstraintsDedicatedNodeAffinity) any {
+	return lo.Map(affinities, func(item sdk.NodetemplatesV1TemplateConstraintsDedicatedNodeAffinity, index int) map[string]any {
 		result := map[string]any{}
 		if item.InstanceTypes != nil {
 			result[FieldNodeTemplateInstanceTypes] = *item.InstanceTypes
@@ -1064,16 +1065,16 @@ func toTemplateConstraints(obj map[string]any) *sdk.NodetemplatesV1TemplateConst
 			}))
 		}
 	}
-	if v, ok := obj[FieldNodeTemplateNodeAffinity].([]any); ok && len(v) > 0 {
+	if v, ok := obj[FieldNodeTemplateDedicatedNodeAffinity].([]any); ok && len(v) > 0 {
 		if ok {
-			out.NodeAffinity = lo.ToPtr(lo.FilterMap(v, func(item any, _ int) (sdk.NodetemplatesV1TemplateConstraintsNodeAffinity, bool) {
+			out.DedicatedNodeAffinity = lo.ToPtr(lo.FilterMap(v, func(item any, _ int) (sdk.NodetemplatesV1TemplateConstraintsDedicatedNodeAffinity, bool) {
 				val, ok := item.(map[string]any)
 				if !ok {
-					return sdk.NodetemplatesV1TemplateConstraintsNodeAffinity{}, false
+					return sdk.NodetemplatesV1TemplateConstraintsDedicatedNodeAffinity{}, false
 				}
 				res := toTemplateConstraintsNodeAffinity(val)
 				if res == nil {
-					return sdk.NodetemplatesV1TemplateConstraintsNodeAffinity{}, false
+					return sdk.NodetemplatesV1TemplateConstraintsDedicatedNodeAffinity{}, false
 				}
 				return *res, true
 			}))
@@ -1144,12 +1145,12 @@ func toTemplateConstraintsCustomPriority(o map[string]any) *sdk.NodetemplatesV1T
 	return &out
 }
 
-func toTemplateConstraintsNodeAffinity(o map[string]any) *sdk.NodetemplatesV1TemplateConstraintsNodeAffinity {
+func toTemplateConstraintsNodeAffinity(o map[string]any) *sdk.NodetemplatesV1TemplateConstraintsDedicatedNodeAffinity {
 	if o == nil {
 		return nil
 	}
 
-	out := sdk.NodetemplatesV1TemplateConstraintsNodeAffinity{}
+	out := sdk.NodetemplatesV1TemplateConstraintsDedicatedNodeAffinity{}
 	if v, ok := o[FieldNodeTemplateName].(string); ok {
 		out.Name = toPtr(v)
 	}

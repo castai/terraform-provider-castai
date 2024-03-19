@@ -1581,7 +1581,8 @@ type NodeconfigV1EKSConfig struct {
 	KeyPairId *string `json:"keyPairId"`
 
 	// Cluster's security groups configuration.
-	SecurityGroups *[]string `json:"securityGroups,omitempty"`
+	SecurityGroups *[]string                `json:"securityGroups,omitempty"`
+	TargetGroup    *NodeconfigV1TargetGroup `json:"targetGroup,omitempty"`
 
 	// EBS volume IOPS value to be used for provisioned nodes.
 	VolumeIops      *int32  `json:"volumeIops"`
@@ -1818,6 +1819,15 @@ type NodeconfigV1SubnetDetails_Tags struct {
 	AdditionalProperties map[string]string `json:"-"`
 }
 
+// NodeconfigV1TargetGroup defines model for nodeconfig.v1.TargetGroup.
+type NodeconfigV1TargetGroup struct {
+	// ARN of the target group.
+	Arn *string `json:"arn,omitempty"`
+
+	// Port of the target group.
+	Port *int32 `json:"port,omitempty"`
+}
+
 // NodetemplatesV1AvailableInstanceType defines model for nodetemplates.v1.AvailableInstanceType.
 type NodetemplatesV1AvailableInstanceType struct {
 	Architecture           *string                                                     `json:"architecture,omitempty"`
@@ -1852,6 +1862,11 @@ type NodetemplatesV1DeleteNodeTemplateResponse = map[string]interface{}
 // NodetemplatesV1FilterInstanceTypesResponse defines model for nodetemplates.v1.FilterInstanceTypesResponse.
 type NodetemplatesV1FilterInstanceTypesResponse struct {
 	AvailableInstanceTypes *[]NodetemplatesV1AvailableInstanceType `json:"availableInstanceTypes,omitempty"`
+}
+
+// NodetemplatesV1GenerateNodeTemplatesResponse defines model for nodetemplates.v1.GenerateNodeTemplatesResponse.
+type NodetemplatesV1GenerateNodeTemplatesResponse struct {
+	Items *[]NodetemplatesV1NodeTemplateListItem `json:"items,omitempty"`
 }
 
 // NodetemplatesV1Label defines model for nodetemplates.v1.Label.
@@ -1982,6 +1997,16 @@ type NodetemplatesV1TemplateConstraints struct {
 	// Custom sorting priority - instances matching defined rules will take priority over other candidates.
 	CustomPriority *[]NodetemplatesV1TemplateConstraintsCustomPriority `json:"customPriority,omitempty"`
 
+	// Dedicated node affinity - creates preference for instances to be created on sole tenancy or dedicated nodes.
+	//
+	// Dedicated node affinity - creates preference for instances to be created on sole tenancy or dedicated nodes. This
+	// feature is only available for GCP clusters, requires feature flag to be enabled and sole tenancy nodes with local
+	// SSDs or GPUs are not supported. If the sole tenancy or dedicated nodes don't have capacity for selected instance
+	// type, the Autoscaler will fall back to multi-tenant instance types available for this Node Template.
+	// Other instance constraints are applied when the Autoscaler picks available instance types that can be created on
+	// the sole tenancy or dedicated node (example: setting min CPU to 16).
+	DedicatedNodeAffinity *[]NodetemplatesV1TemplateConstraintsDedicatedNodeAffinity `json:"dedicatedNodeAffinity,omitempty"`
+
 	// Enable/disable spot diversity policy. When enabled, autoscaler will try to balance between diverse and cost optimal instance types.
 	EnableSpotDiversity *bool `json:"enableSpotDiversity"`
 
@@ -1992,12 +2017,11 @@ type NodetemplatesV1TemplateConstraints struct {
 
 	// This template is gpu only. Setting this to true, will result in only instances with GPUs being considered.
 	// In addition, this ensures that all of the added instances for this template won't have any nvidia taints.
-	IsGpuOnly    *bool                                             `json:"isGpuOnly"`
-	MaxCpu       *int32                                            `json:"maxCpu"`
-	MaxMemory    *int32                                            `json:"maxMemory"`
-	MinCpu       *int32                                            `json:"minCpu"`
-	MinMemory    *int32                                            `json:"minMemory"`
-	NodeAffinity *[]NodetemplatesV1TemplateConstraintsNodeAffinity `json:"nodeAffinity,omitempty"`
+	IsGpuOnly *bool  `json:"isGpuOnly"`
+	MaxCpu    *int32 `json:"maxCpu"`
+	MaxMemory *int32 `json:"maxMemory"`
+	MinCpu    *int32 `json:"minCpu"`
+	MinMemory *int32 `json:"minMemory"`
 
 	// Should include on-demand instances in the considered pool.
 	OnDemand *bool     `json:"onDemand"`
@@ -2037,6 +2061,13 @@ type NodetemplatesV1TemplateConstraintsCustomPriority struct {
 	Spot     *bool     `json:"spot"`
 }
 
+// NodetemplatesV1TemplateConstraintsDedicatedNodeAffinity defines model for nodetemplates.v1.TemplateConstraints.DedicatedNodeAffinity.
+type NodetemplatesV1TemplateConstraintsDedicatedNodeAffinity struct {
+	AzName        *string   `json:"azName,omitempty"`
+	InstanceTypes *[]string `json:"instanceTypes,omitempty"`
+	Name          *string   `json:"name,omitempty"`
+}
+
 // NodetemplatesV1TemplateConstraintsGPUConstraints defines model for nodetemplates.v1.TemplateConstraints.GPUConstraints.
 type NodetemplatesV1TemplateConstraintsGPUConstraints struct {
 	ExcludeNames  *[]string `json:"excludeNames,omitempty"`
@@ -2050,13 +2081,6 @@ type NodetemplatesV1TemplateConstraintsGPUConstraints struct {
 type NodetemplatesV1TemplateConstraintsInstanceFamilyConstraints struct {
 	Exclude *[]string `json:"exclude,omitempty"`
 	Include *[]string `json:"include,omitempty"`
-}
-
-// NodetemplatesV1TemplateConstraintsNodeAffinity defines model for nodetemplates.v1.TemplateConstraints.NodeAffinity.
-type NodetemplatesV1TemplateConstraintsNodeAffinity struct {
-	AzName        *string   `json:"azName,omitempty"`
-	InstanceTypes *[]string `json:"instanceTypes,omitempty"`
-	Name          *string   `json:"name,omitempty"`
 }
 
 // NodetemplatesV1UpdateNodeTemplate defines model for nodetemplates.v1.UpdateNodeTemplate.

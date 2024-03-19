@@ -46,6 +46,12 @@ Optional:
 - `architectures` (List of String) List of acceptable instance CPU architectures, the default is amd64. Allowed values: amd64, arm64.
 - `compute_optimized` (Boolean) Compute optimized instance constraint - will only pick compute optimized nodes if true.
 - `custom_priority` (Block List) (see [below for nested schema](#nestedblock--constraints--custom_priority))
+- `dedicated_node_affinity` (Block List) Dedicated node affinity - creates preference for instances to be created on sole tenancy or dedicated nodes. This
+ feature is only available for GCP clusters, requires feature flag to be enabled and sole tenancy nodes with local
+ SSDs or GPUs are not supported. If the sole tenancy or dedicated nodes don't have capacity for selected instance
+ type, the Autoscaler will fall back to multi-tenant instance types available for this Node Template.
+ Other instance constraints are applied when the Autoscaler picks available instance types that can be created on
+ the sole tenancy or dedicated node (example: setting min CPU to 16). (see [below for nested schema](#nestedblock--constraints--dedicated_node_affinity))
 - `enable_spot_diversity` (Boolean) Enable/disable spot diversity policy. When enabled, autoscaler will try to balance between diverse and cost optimal instance types.
 - `fallback_restore_rate_seconds` (Number) Fallback restore rate in seconds: defines how much time should pass before spot fallback should be attempted to be restored to real spot.
 - `gpu` (Block List, Max: 1) (see [below for nested schema](#nestedblock--constraints--gpu))
@@ -55,7 +61,6 @@ Optional:
 - `max_memory` (Number) Max Memory (Mib) per node.
 - `min_cpu` (Number) Min CPU cores per node.
 - `min_memory` (Number) Min Memory (Mib) per node.
-- `node_affinity` (Block List) (see [below for nested schema](#nestedblock--constraints--node_affinity))
 - `on_demand` (Boolean) Should include on-demand instances in the considered pool.
 - `os` (List of String) List of acceptable instance Operating Systems, the default is linux. Allowed values: linux, windows.
 - `spot` (Boolean) Should include spot instances in the considered pool.
@@ -73,6 +78,16 @@ Optional:
 - `instance_families` (List of String) Instance families to prioritize in this tier.
 - `on_demand` (Boolean) If true, this tier will apply to on-demand instances.
 - `spot` (Boolean) If true, this tier will apply to spot instances.
+
+
+<a id="nestedblock--constraints--dedicated_node_affinity"></a>
+### Nested Schema for `constraints.dedicated_node_affinity`
+
+Required:
+
+- `az_name` (String) Availability zone name.
+- `instance_types` (List of String) Instance/node types in this node group.
+- `name` (String) Name of node group.
 
 
 <a id="nestedblock--constraints--gpu"></a>
@@ -94,16 +109,6 @@ Optional:
 
 - `exclude` (List of String) Instance families to include when filtering (excludes all other families).
 - `include` (List of String) Instance families to exclude when filtering (includes all other families).
-
-
-<a id="nestedblock--constraints--node_affinity"></a>
-### Nested Schema for `constraints.node_affinity`
-
-Required:
-
-- `az_name` (String) Availability zone name.
-- `instance_types` (List of String) Instance types in this node group.
-- `name` (String) Name of node group.
 
 
 
