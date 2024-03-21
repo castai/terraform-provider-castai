@@ -138,6 +138,9 @@ type ClientInterface interface {
 
 	NodeTemplatesAPIFilterInstanceTypes(ctx context.Context, clusterId string, body NodeTemplatesAPIFilterInstanceTypesJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// NodeTemplatesAPIGenerateNodeTemplates request
+	NodeTemplatesAPIGenerateNodeTemplates(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// NodeConfigurationAPIListConfigurations request
 	NodeConfigurationAPIListConfigurations(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -619,6 +622,18 @@ func (c *Client) NodeTemplatesAPIFilterInstanceTypesWithBody(ctx context.Context
 
 func (c *Client) NodeTemplatesAPIFilterInstanceTypes(ctx context.Context, clusterId string, body NodeTemplatesAPIFilterInstanceTypesJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewNodeTemplatesAPIFilterInstanceTypesRequest(c.Server, clusterId, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) NodeTemplatesAPIGenerateNodeTemplates(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewNodeTemplatesAPIGenerateNodeTemplatesRequest(c.Server, clusterId)
 	if err != nil {
 		return nil, err
 	}
@@ -2339,6 +2354,40 @@ func NewNodeTemplatesAPIFilterInstanceTypesRequestWithBody(server string, cluste
 	}
 
 	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewNodeTemplatesAPIGenerateNodeTemplatesRequest generates requests for NodeTemplatesAPIGenerateNodeTemplates
+func NewNodeTemplatesAPIGenerateNodeTemplatesRequest(server string, clusterId string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "clusterId", runtime.ParamLocationPath, clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/kubernetes/clusters/%s/generate-node-templates", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
 
 	return req, nil
 }
@@ -5522,6 +5571,9 @@ type ClientWithResponsesInterface interface {
 
 	NodeTemplatesAPIFilterInstanceTypesWithResponse(ctx context.Context, clusterId string, body NodeTemplatesAPIFilterInstanceTypesJSONRequestBody) (*NodeTemplatesAPIFilterInstanceTypesResponse, error)
 
+	// NodeTemplatesAPIGenerateNodeTemplates request
+	NodeTemplatesAPIGenerateNodeTemplatesWithResponse(ctx context.Context, clusterId string) (*NodeTemplatesAPIGenerateNodeTemplatesResponse, error)
+
 	// NodeConfigurationAPIListConfigurations request
 	NodeConfigurationAPIListConfigurationsWithResponse(ctx context.Context, clusterId string) (*NodeConfigurationAPIListConfigurationsResponse, error)
 
@@ -6161,6 +6213,36 @@ func (r NodeTemplatesAPIFilterInstanceTypesResponse) StatusCode() int {
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
 func (r NodeTemplatesAPIFilterInstanceTypesResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type NodeTemplatesAPIGenerateNodeTemplatesResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *NodetemplatesV1GenerateNodeTemplatesResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r NodeTemplatesAPIGenerateNodeTemplatesResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r NodeTemplatesAPIGenerateNodeTemplatesResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r NodeTemplatesAPIGenerateNodeTemplatesResponse) GetBody() []byte {
 	return r.Body
 }
 
@@ -8539,6 +8621,15 @@ func (c *ClientWithResponses) NodeTemplatesAPIFilterInstanceTypesWithResponse(ct
 	return ParseNodeTemplatesAPIFilterInstanceTypesResponse(rsp)
 }
 
+// NodeTemplatesAPIGenerateNodeTemplatesWithResponse request returning *NodeTemplatesAPIGenerateNodeTemplatesResponse
+func (c *ClientWithResponses) NodeTemplatesAPIGenerateNodeTemplatesWithResponse(ctx context.Context, clusterId string) (*NodeTemplatesAPIGenerateNodeTemplatesResponse, error) {
+	rsp, err := c.NodeTemplatesAPIGenerateNodeTemplates(ctx, clusterId)
+	if err != nil {
+		return nil, err
+	}
+	return ParseNodeTemplatesAPIGenerateNodeTemplatesResponse(rsp)
+}
+
 // NodeConfigurationAPIListConfigurationsWithResponse request returning *NodeConfigurationAPIListConfigurationsResponse
 func (c *ClientWithResponses) NodeConfigurationAPIListConfigurationsWithResponse(ctx context.Context, clusterId string) (*NodeConfigurationAPIListConfigurationsResponse, error) {
 	rsp, err := c.NodeConfigurationAPIListConfigurations(ctx, clusterId)
@@ -9715,6 +9806,32 @@ func ParseNodeTemplatesAPIFilterInstanceTypesResponse(rsp *http.Response) (*Node
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest NodetemplatesV1FilterInstanceTypesResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseNodeTemplatesAPIGenerateNodeTemplatesResponse parses an HTTP response from a NodeTemplatesAPIGenerateNodeTemplatesWithResponse call
+func ParseNodeTemplatesAPIGenerateNodeTemplatesResponse(rsp *http.Response) (*NodeTemplatesAPIGenerateNodeTemplatesResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &NodeTemplatesAPIGenerateNodeTemplatesResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest NodetemplatesV1GenerateNodeTemplatesResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}

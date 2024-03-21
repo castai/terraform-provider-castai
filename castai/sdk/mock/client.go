@@ -1355,6 +1355,26 @@ func (mr *MockClientInterfaceMockRecorder) NodeTemplatesAPIFilterInstanceTypesWi
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NodeTemplatesAPIFilterInstanceTypesWithBody", reflect.TypeOf((*MockClientInterface)(nil).NodeTemplatesAPIFilterInstanceTypesWithBody), varargs...)
 }
 
+// NodeTemplatesAPIGenerateNodeTemplates mocks base method.
+func (m *MockClientInterface) NodeTemplatesAPIGenerateNodeTemplates(ctx context.Context, clusterId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "NodeTemplatesAPIGenerateNodeTemplates", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// NodeTemplatesAPIGenerateNodeTemplates indicates an expected call of NodeTemplatesAPIGenerateNodeTemplates.
+func (mr *MockClientInterfaceMockRecorder) NodeTemplatesAPIGenerateNodeTemplates(ctx, clusterId interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NodeTemplatesAPIGenerateNodeTemplates", reflect.TypeOf((*MockClientInterface)(nil).NodeTemplatesAPIGenerateNodeTemplates), varargs...)
+}
+
 // NodeTemplatesAPIListNodeTemplates mocks base method.
 func (m *MockClientInterface) NodeTemplatesAPIListNodeTemplates(ctx context.Context, clusterId string, params *sdk.NodeTemplatesAPIListNodeTemplatesParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
@@ -3416,6 +3436,21 @@ func (m *MockClientWithResponsesInterface) NodeTemplatesAPIFilterInstanceTypesWi
 func (mr *MockClientWithResponsesInterfaceMockRecorder) NodeTemplatesAPIFilterInstanceTypesWithResponse(ctx, clusterId, body interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NodeTemplatesAPIFilterInstanceTypesWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).NodeTemplatesAPIFilterInstanceTypesWithResponse), ctx, clusterId, body)
+}
+
+// NodeTemplatesAPIGenerateNodeTemplatesWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) NodeTemplatesAPIGenerateNodeTemplatesWithResponse(ctx context.Context, clusterId string) (*sdk.NodeTemplatesAPIGenerateNodeTemplatesResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "NodeTemplatesAPIGenerateNodeTemplatesWithResponse", ctx, clusterId)
+	ret0, _ := ret[0].(*sdk.NodeTemplatesAPIGenerateNodeTemplatesResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// NodeTemplatesAPIGenerateNodeTemplatesWithResponse indicates an expected call of NodeTemplatesAPIGenerateNodeTemplatesWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) NodeTemplatesAPIGenerateNodeTemplatesWithResponse(ctx, clusterId interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NodeTemplatesAPIGenerateNodeTemplatesWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).NodeTemplatesAPIGenerateNodeTemplatesWithResponse), ctx, clusterId)
 }
 
 // NodeTemplatesAPIListNodeTemplatesWithResponse mocks base method.
