@@ -615,15 +615,15 @@ func toEKSConfig(obj map[string]interface{}) *sdk.NodeconfigV1EKSConfig {
 		out.VolumeKmsKeyArn = toPtr(v)
 	}
 
-	//if v, ok := obj["target_group"].([]interface{}); ok && len(v) > 0 {
-	//	out.TargetGroup = &sdk.NodeconfigV1EKSConfigTargetGroup{}
-	//	if arn, ok := v[0].(map[string]interface{})["arn"].(string); ok {
-	//		out.TargetGroup.Arn = arn
-	//	}
-	//	if port, ok := v[0].(map[string]interface{})["port"].(int32); ok {
-	//		out.TargetGroup.Port = toPtr(port)
-	//	}
-	//}
+	if v, ok := obj["target_group"].([]interface{}); ok && len(v) > 0 {
+		out.TargetGroup = &sdk.NodeconfigV1TargetGroup{}
+		if arn, ok := v[0].(map[string]interface{})["arn"].(string); ok && arn != "" {
+			out.TargetGroup.Arn = toPtr(arn)
+		}
+		if port, ok := v[0].(map[string]interface{})["port"].(int32); ok && port > 0 && port < 65536 {
+			out.TargetGroup.Port = toPtr(port)
+		}
+	}
 
 	return out
 }
