@@ -47,6 +47,7 @@ func TestAccResourceNodeConfiguration_eks(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "eks.0.imds_v1", "true"),
 					resource.TestCheckResourceAttr(resourceName, "eks.0.imds_hop_limit", "3"),
 					resource.TestCheckResourceAttr(resourceName, "eks.0.volume_kms_key_arn", "arn:aws:kms:eu-central-1:012345:key/1d989ee1-59cd-4238-8018-79bae29d1109"),
+					resource.TestCheckResourceAttr(resourceName, "eks.0.target_group.#", "1"),
 					resource.TestCheckResourceAttr(resourceName, "aks.#", "0"),
 					resource.TestCheckResourceAttr(resourceName, "kops.#", "0"),
 					resource.TestCheckResourceAttr(resourceName, "gke.#", "0"),
@@ -74,6 +75,9 @@ func TestAccResourceNodeConfiguration_eks(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "tags.%", "0"),
 					resource.TestCheckResourceAttr(resourceName, "eks.0.dns_cluster_ip", ""),
 					resource.TestCheckResourceAttr(resourceName, "eks.0.security_groups.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "eks.0.target_group.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "eks.0.target_group.0.arn", "aws_lb_target_group.test.arn"),
+					resource.TestCheckResourceAttr(resourceName, "eks.0.target_group.0.port", "80"),
 				),
 			},
 		},
@@ -125,6 +129,10 @@ resource "castai_node_configuration" "test" {
     volume_kms_key_arn   = "arn:aws:kms:eu-central-1:012345:key/1d989ee1-59cd-4238-8018-79bae29d1109"
 	imds_v1				 = true
 	imds_hop_limit       = 3
+    target_group  {
+		  arn = "aws_lb_target_group.test.arn"
+		  port = 80
+	}
   }
 }
 
