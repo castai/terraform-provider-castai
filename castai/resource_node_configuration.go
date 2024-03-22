@@ -225,9 +225,10 @@ func resourceNodeConfiguration() *schema.Resource {
 										Description: "AWS target group ARN for CAST provisioned nodes",
 									},
 									"port": {
-										Type:        schema.TypeInt,
-										Required:    true,
-										Description: "Port for AWS target group for CAST provisioned nodes",
+										Type:             schema.TypeInt,
+										Optional:         true,
+										Description:      "Port for AWS target group for CAST provisioned nodes",
+										ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(1, 65535)),
 									},
 								},
 							},
