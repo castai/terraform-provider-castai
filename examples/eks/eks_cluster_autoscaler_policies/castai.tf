@@ -78,6 +78,10 @@ module "castai-eks-cluster" {
         aws_security_group.additional.id,
       ]
       instance_profile_arn = module.castai-eks-role-iam.instance_profile_arn
+      target_group = {
+        arn = "arn:aws:elasticloadbalancing:us-west-2:123456789012:targetgroup/my-targets/73e2d6bc24d8a067"
+        port = 1000
+      }
     }
 
     test_node_config = {
@@ -98,6 +102,10 @@ module "castai-eks-cluster" {
       volume_iops       = 3100
       volume_throughput = 130
       imds_v1           = true
+      target_group = {
+        arn = "arn:aws:elasticloadbalancing:us-west-2:123456789012:targetgroup/my-targets/73e2d6bc24d8a067"
+        port = 1000
+      }
     }
   }
 
