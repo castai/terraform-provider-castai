@@ -76,8 +76,8 @@ func TestAccResourceNodeConfiguration_eks(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "eks.0.dns_cluster_ip", ""),
 					resource.TestCheckResourceAttr(resourceName, "eks.0.security_groups.#", "1"),
 					resource.TestCheckResourceAttr(resourceName, "eks.0.target_group.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "eks.0.target_group.0.arn", "aws_lb_target_group.test.arn"),
-					resource.TestCheckResourceAttr(resourceName, "eks.0.target_group.0.port", "80"),
+					resource.TestCheckResourceAttr(resourceName, "eks.0.target_group.0.arn", "aws_new_target_group.test.arn"),
+					resource.TestCheckResourceAttr(resourceName, "eks.0.target_group.0.port", ""),
 				),
 			},
 		},
@@ -158,8 +158,7 @@ resource "castai_node_configuration" "test" {
 	instance_profile_arn = aws_iam_instance_profile.test.arn
     security_groups      = [aws_security_group.test.id]
     target_group  {
- 		  arn = "aws_lb_target_group.test.arn"
-		  port = 80
+ 		  arn = "aws_new_target_group.test.arn"
   }
 }`, rName))
 }
