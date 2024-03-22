@@ -157,6 +157,9 @@ resource "castai_node_configuration" "test" {
   eks {
 	instance_profile_arn = aws_iam_instance_profile.test.arn
     security_groups      = [aws_security_group.test.id]
+    target_group  {
+ 		  arn = "aws_lb_target_group.test.arn"
+		  port = 80
   }
 }`, rName))
 }
