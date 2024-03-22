@@ -116,6 +116,9 @@ Optional:
 Required:
 
 - `arn` (String) AWS target group ARN for CAST provisioned nodes
+
+Optional:
+
 - `port` (Number) Port for AWS target group for CAST provisioned nodes
 
 

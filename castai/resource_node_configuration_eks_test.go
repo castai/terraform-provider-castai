@@ -131,7 +131,6 @@ resource "castai_node_configuration" "test" {
 	imds_hop_limit       = 3
     target_group  {
 		  arn = "aws_lb_target_group.test.arn"
-		  port = 80
 	}
   }
 }
