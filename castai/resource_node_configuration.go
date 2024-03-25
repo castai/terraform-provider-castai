@@ -213,7 +213,7 @@ func resourceNodeConfiguration() *schema.Resource {
 							ValidateDiagFunc: validation.ToDiagFunc(validation.StringMatch(regexp.MustCompile(`arn:aws:kms:.*`), "Must be a valid KMS key ARN")),
 						},
 						"target_group": {
-							Type:        schema.TypeList,
+							Type:        schema.TypeSet,
 							Optional:    true,
 							Description: "AWS target group configuration for CAST provisioned nodes",
 							MaxItems:    1,
@@ -616,12 +616,12 @@ func toEKSConfig(obj map[string]interface{}) *sdk.NodeconfigV1EKSConfig {
 		out.VolumeKmsKeyArn = toPtr(v)
 	}
 
-	if v, ok := obj["target_group"].([]interface{}); ok && len(v) > 0 {
+	if v, ok := obj["target_group"].(map[string]interface{}); ok && len(v) > 0 {
 		out.TargetGroup = &sdk.NodeconfigV1TargetGroup{}
-		if arn, ok := v[0].(map[string]interface{})["arn"].(string); ok && arn != "" {
+		if arn, ok := v["arn"].(string); ok && arn != "" {
 			out.TargetGroup.Arn = toPtr(arn)
 		}
-		if port, ok := v[0].(map[string]interface{})["port"].(int32); ok && port > 0 && port < 65536 {
+		if port, ok := v["port"].(int32); ok && port > 0 && port < 65536 {
 			out.TargetGroup.Port = toPtr(port)
 		}
 	}
