@@ -667,14 +667,22 @@ func flattenEKSConfig(config *sdk.NodeconfigV1EKSConfig) []map[string]interface{
 	}
 
 	if v := config.TargetGroup; v != nil {
-		tg := map[string]interface{}{}
 		if v.Arn != nil {
-			tg["arn"] = *v.Arn
+			if v.Port != nil {
+				m["target_group"] = []map[string]interface{}{
+					{
+						"arn":  *v.Arn,
+						"port": *v.Port,
+					},
+				}
+			} else {
+				m["target_group"] = []map[string]interface{}{
+					{
+						"arn": *v.Arn,
+					},
+				}
+			}
 		}
-		if v.Port != nil {
-			tg["port"] = *v.Port
-		}
-		m["target_group"] = tg
 	}
 
 	return []map[string]interface{}{m}
