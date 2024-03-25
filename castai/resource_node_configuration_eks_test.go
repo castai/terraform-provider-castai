@@ -129,7 +129,7 @@ resource "castai_node_configuration" "test" {
     volume_kms_key_arn   = "arn:aws:kms:eu-central-1:012345:key/1d989ee1-59cd-4238-8018-79bae29d1109"
 	imds_v1				 = true
 	imds_hop_limit       = 3
-    target_group  [
+    target_group  		 = [
 		{
 		  arn = "aws_lb_target_group.test.arn"
 		}
