@@ -130,7 +130,8 @@ resource "castai_node_configuration" "test" {
 	imds_v1				 = true
 	imds_hop_limit       = 3
 	target_group {
-	  arn = "aws_new_target_group.test.arn"
+	  arn = "arn:test"
+      port = 80
     }
   }
 }
@@ -156,6 +157,7 @@ resource "castai_node_configuration" "test" {
   eks {
 	instance_profile_arn = aws_iam_instance_profile.test.arn
     security_groups      = [aws_security_group.test.id]
+  }
 }`, rName))
 }
 
