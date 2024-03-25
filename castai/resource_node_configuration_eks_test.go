@@ -129,11 +129,9 @@ resource "castai_node_configuration" "test" {
     volume_kms_key_arn   = "arn:aws:kms:eu-central-1:012345:key/1d989ee1-59cd-4238-8018-79bae29d1109"
 	imds_v1				 = true
 	imds_hop_limit       = 3
-    target_group  		 = [
-		{
-		  arn = "aws_lb_target_group.test.arn"
-		}
-	]
+	target_group {
+	  arn = "aws_new_target_group.test.arn"
+    }
   }
 }
 
@@ -158,7 +156,6 @@ resource "castai_node_configuration" "test" {
   eks {
 	instance_profile_arn = aws_iam_instance_profile.test.arn
     security_groups      = [aws_security_group.test.id]
-    target_group  		 = [{arn = "aws_new_target_group.test.arn"}]
 }`, rName))
 }
 
