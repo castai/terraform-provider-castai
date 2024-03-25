@@ -131,7 +131,7 @@ resource "castai_node_configuration" "test" {
 	imds_hop_limit       = 3
 	target_group {
 	  arn = "arn:test"
-      port = 80
+      port = 65536
     }
   }
 }
