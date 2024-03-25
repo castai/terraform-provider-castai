@@ -77,9 +77,7 @@ func TestAccResourceNodeConfiguration_eks(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "tags.%", "0"),
 					resource.TestCheckResourceAttr(resourceName, "eks.0.dns_cluster_ip", ""),
 					resource.TestCheckResourceAttr(resourceName, "eks.0.security_groups.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "eks.0.target_group.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "eks.0.target_group.0.arn", "aws_new_target_group.test.arn"),
-					resource.TestCheckResourceAttr(resourceName, "eks.0.target_group.0.port", ""),
+					resource.TestCheckResourceAttr(resourceName, "eks.0.target_group.#", "0"),
 				),
 			},
 		},
@@ -131,7 +129,7 @@ resource "castai_node_configuration" "test" {
     volume_kms_key_arn   = "arn:aws:kms:eu-central-1:012345:key/1d989ee1-59cd-4238-8018-79bae29d1109"
 	imds_v1				 = true
 	imds_hop_limit       = 3
-	target_group = {
+	target_group {
 	  arn  = "arn:test"
 	  port = 80
     }
