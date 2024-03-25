@@ -37,6 +37,7 @@ const (
 	FieldNodeConfigurationEKS              = "eks"
 	FieldNodeConfigurationKOPS             = "kops"
 	FieldNodeConfigurationGKE              = "gke"
+	FieldNodeConfigurationEKSTargetGroup   = "target_group"
 )
 
 func resourceNodeConfiguration() *schema.Resource {
@@ -212,7 +213,7 @@ func resourceNodeConfiguration() *schema.Resource {
 							Description:      "AWS KMS key ARN for encrypting EBS volume attached to the node",
 							ValidateDiagFunc: validation.ToDiagFunc(validation.StringMatch(regexp.MustCompile(`arn:aws:kms:.*`), "Must be a valid KMS key ARN")),
 						},
-						"target_group": {
+						FieldNodeConfigurationEKSTargetGroup: {
 							Type:        schema.TypeSet,
 							Optional:    true,
 							Description: "AWS target group configuration for CAST provisioned nodes",
@@ -616,7 +617,7 @@ func toEKSConfig(obj map[string]interface{}) *sdk.NodeconfigV1EKSConfig {
 		out.VolumeKmsKeyArn = toPtr(v)
 	}
 
-	if v, ok := obj["target_group"].(map[string]interface{}); ok && len(v) > 0 {
+	if v, ok := obj[FieldNodeConfigurationEKSTargetGroup].(map[string]interface{}); ok && len(v) > 0 {
 		out.TargetGroup = &sdk.NodeconfigV1TargetGroup{}
 		if arn, ok := v["arn"].(string); ok && arn != "" {
 			out.TargetGroup.Arn = toPtr(arn)
@@ -668,13 +669,14 @@ func flattenEKSConfig(config *sdk.NodeconfigV1EKSConfig) []map[string]interface{
 
 	if v := config.TargetGroup; v != nil {
 		if v.Arn != nil {
+
 			if v.Port != nil {
-				m["target_group"] = map[string]interface{}{
+				m[FieldNodeConfigurationEKSTargetGroup] = map[string]interface{}{
 					"arn":  *v.Arn,
 					"port": *v.Port,
 				}
 			} else {
-				m["target_group"] = map[string]interface{}{
+				m[FieldNodeConfigurationEKSTargetGroup] = map[string]interface{}{
 					"arn": *v.Arn,
 				}
 			}
