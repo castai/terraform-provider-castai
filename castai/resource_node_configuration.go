@@ -674,7 +674,7 @@ func flattenEKSConfig(config *sdk.NodeconfigV1EKSConfig) []map[string]interface{
 		if v.Port != nil {
 			tg["port"] = *v.Port
 		}
-		m["target_group"] = []map[string]interface{}{tg}
+		m["target_group"] = tg
 	}
 
 	return []map[string]interface{}{m}
