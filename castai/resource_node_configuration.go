@@ -666,6 +666,17 @@ func flattenEKSConfig(config *sdk.NodeconfigV1EKSConfig) []map[string]interface{
 		m["volume_kms_key_arn"] = toString(config.VolumeKmsKeyArn)
 	}
 
+	if v := config.TargetGroup; v != nil {
+		tg := map[string]interface{}{}
+		if v.Arn != nil {
+			tg["arn"] = *v.Arn
+		}
+		if v.Port != nil {
+			tg["port"] = *v.Port
+		}
+		m["target_group"] = []map[string]interface{}{tg}
+	}
+
 	return []map[string]interface{}{m}
 }
 
