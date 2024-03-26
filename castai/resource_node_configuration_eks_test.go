@@ -130,6 +130,7 @@ resource "castai_node_configuration" "test" {
 	target_group 	     {
 	   arn = "arn:aws:test"
     }
+  }
 }
 
 resource "castai_node_configuration_default" "test" {
