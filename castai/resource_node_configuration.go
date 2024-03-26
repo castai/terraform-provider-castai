@@ -617,12 +617,12 @@ func toEKSConfig(obj map[string]interface{}) *sdk.NodeconfigV1EKSConfig {
 		out.VolumeKmsKeyArn = toPtr(v)
 	}
 
-	if v, ok := obj[FieldNodeConfigurationEKSTargetGroup].(map[string]interface{}); ok && len(v) > 0 {
+	if v, ok := obj[FieldNodeConfigurationEKSTargetGroup].([]map[string]interface{}); ok && len(v) > 0 {
 		out.TargetGroup = &sdk.NodeconfigV1TargetGroup{}
-		if arn, ok := v["arn"].(string); ok && arn != "" {
+		if arn, ok := v[0]["arn"].(string); ok && arn != "" {
 			out.TargetGroup.Arn = toPtr(arn)
 		}
-		if port, ok := v["port"].(int32); ok && port > 0 && port < 65536 {
+		if port, ok := v[0]["port"].(int32); ok && port > 0 && port < 65536 {
 			out.TargetGroup.Port = toPtr(port)
 		}
 	}
@@ -669,15 +669,18 @@ func flattenEKSConfig(config *sdk.NodeconfigV1EKSConfig) []map[string]interface{
 
 	if v := config.TargetGroup; v != nil {
 		if v.Arn != nil {
-
 			if v.Port != nil {
-				m[FieldNodeConfigurationEKSTargetGroup] = map[string]interface{}{
-					"arn":  *v.Arn,
-					"port": *v.Port,
+				m[FieldNodeConfigurationEKSTargetGroup] = []map[string]interface{}{
+					{
+						"arn":  *v.Arn,
+						"port": *v.Port,
+					},
 				}
 			} else {
-				m[FieldNodeConfigurationEKSTargetGroup] = map[string]interface{}{
-					"arn": *v.Arn,
+				m[FieldNodeConfigurationEKSTargetGroup] = []map[string]interface{}{
+					{
+						"arn": *v.Arn,
+					},
 				}
 			}
 		}
