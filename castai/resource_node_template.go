@@ -351,7 +351,7 @@ func resourceNodeTemplate() *schema.Resource {
 						FieldNodeTemplateDedicatedNodeAffinity: {
 							Type:        schema.TypeList,
 							Optional:    true,
-							Description: "Dedicated node affinity - creates preference for instances to be created on sole tenancy or dedicated nodes. This\n feature is only available for GCP clusters, requires feature flag to be enabled and sole tenancy nodes with local\n SSDs or GPUs are not supported. If the sole tenancy or dedicated nodes don't have capacity for selected instance\n type, the Autoscaler will fall back to multi-tenant instance types available for this Node Template.\n Other instance constraints are applied when the Autoscaler picks available instance types that can be created on\n the sole tenancy or dedicated node (example: setting min CPU to 16).",
+							Description: "Dedicated node affinity - creates preference for instances to be created on sole tenancy or dedicated nodes. This\n feature is only available for GCP clusters and sole tenancy nodes with local\n SSDs or GPUs are not supported. If the sole tenancy or dedicated nodes don't have capacity for selected instance\n type, the Autoscaler will fall back to multi-tenant instance types available for this Node Template.\n Other instance constraints are applied when the Autoscaler picks available instance types that can be created on\n the sole tenancy or dedicated node (example: setting min CPU to 16).",
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									FieldNodeTemplateInstanceTypes: {
