@@ -2000,11 +2000,16 @@ type NodetemplatesV1TemplateConstraints struct {
 	// Dedicated node affinity - creates preference for instances to be created on sole tenancy or dedicated nodes.
 	//
 	// Dedicated node affinity - creates preference for instances to be created on sole tenancy or dedicated nodes. This
-	// feature is only available for GCP clusters, requires feature flag to be enabled and sole tenancy nodes with local
-	// SSDs or GPUs are not supported. If the sole tenancy or dedicated nodes don't have capacity for selected instance
-	// type, the Autoscaler will fall back to multi-tenant instance types available for this Node Template.
-	// Other instance constraints are applied when the Autoscaler picks available instance types that can be created on
-	// the sole tenancy or dedicated node (example: setting min CPU to 16).
+	// feature is only available for GCP clusters and sole tenancy nodes with local SSDs or GPUs are not supported. If
+	// the sole tenancy or dedicated nodes don't have capacity for selected instance type, the Autoscaler will fall back
+	// to multi-tenant instance types available for this Node Template. Other instance constraints are applied when
+	// the Autoscaler picks available instance types that can be created on the sole tenancy or dedicated
+	// node (example: setting min CPU to 16).
+	//
+	// When using dedicated node affinity, with a shared sole tenancy node group in GCP following rules and limitations apply:
+	// - Use Resource URI/FQDN of the sole tenancy node group as the name (example: /projects/test-123/zones/europe-west1b/nodeGroups/test-node-group).
+	// - The GKE cluster must use Shared VPC (https://cloud.google.com/vpc/docs/shared-vpc).
+	// - The sole tenancy node group must be shared with the GKE cluster's project or organization.
 	DedicatedNodeAffinity *[]NodetemplatesV1TemplateConstraintsDedicatedNodeAffinity `json:"dedicatedNodeAffinity,omitempty"`
 
 	// Enable/disable spot diversity policy. When enabled, autoscaler will try to balance between diverse and cost optimal instance types.

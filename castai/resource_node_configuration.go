@@ -37,6 +37,7 @@ const (
 	FieldNodeConfigurationEKS              = "eks"
 	FieldNodeConfigurationKOPS             = "kops"
 	FieldNodeConfigurationGKE              = "gke"
+	FieldNodeConfigurationEKSTargetGroup   = "target_group"
 )
 
 func resourceNodeConfiguration() *schema.Resource {
@@ -212,6 +213,27 @@ func resourceNodeConfiguration() *schema.Resource {
 							Description:      "AWS KMS key ARN for encrypting EBS volume attached to the node",
 							ValidateDiagFunc: validation.ToDiagFunc(validation.StringMatch(regexp.MustCompile(`arn:aws:kms:.*`), "Must be a valid KMS key ARN")),
 						},
+						FieldNodeConfigurationEKSTargetGroup: {
+							Type:        schema.TypeList,
+							Optional:    true,
+							Description: "AWS target group configuration for CAST provisioned nodes",
+							MaxItems:    1,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"arn": {
+										Type:        schema.TypeString,
+										Required:    true,
+										Description: "AWS target group ARN for CAST provisioned nodes",
+									},
+									"port": {
+										Type:             schema.TypeInt,
+										Optional:         true,
+										Description:      "Port for AWS target group for CAST provisioned nodes",
+										ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(1, 65535)),
+									},
+								},
+							},
+						},
 					},
 				},
 			},
@@ -336,7 +358,7 @@ func resourceNodeConfigurationCreate(ctx context.Context, d *schema.ResourceData
 	}
 
 	// Map provider specific configurations.
-	if v, ok := d.GetOk(FieldNodeConfigurationEKS); ok && len(v.([]interface{})) > 0 {
+	if v, ok := d.GetOk(FieldNodeConfigurationEKS); ok && len(v.([]interface{})) > 0 && v.([]interface{})[0] != nil {
 		req.Eks = toEKSConfig(v.([]interface{})[0].(map[string]interface{}))
 	}
 	if v, ok := d.GetOk(FieldNodeConfigurationKOPS); ok && len(v.([]interface{})) > 0 {
@@ -595,6 +617,18 @@ func toEKSConfig(obj map[string]interface{}) *sdk.NodeconfigV1EKSConfig {
 		out.VolumeKmsKeyArn = toPtr(v)
 	}
 
+	if v, ok := obj[FieldNodeConfigurationEKSTargetGroup].([]interface{}); ok && len(v) > 0 && v[0] != nil {
+		if e, ok := v[0].(map[string]interface{}); ok {
+			out.TargetGroup = &sdk.NodeconfigV1TargetGroup{}
+			if arn, ok := e["arn"].(string); ok && arn != "" {
+				out.TargetGroup.Arn = toPtr(arn)
+			}
+			if port, ok := e["port"].(int); ok && port > 0 && port < 65536 {
+				out.TargetGroup.Port = toPtr(int32(port))
+			}
+		}
+	}
+
 	return out
 }
 
@@ -633,6 +667,25 @@ func flattenEKSConfig(config *sdk.NodeconfigV1EKSConfig) []map[string]interface{
 
 	if v := config.VolumeKmsKeyArn; v != nil {
 		m["volume_kms_key_arn"] = toString(config.VolumeKmsKeyArn)
+	}
+
+	if v := config.TargetGroup; v != nil {
+		if v.Arn != nil {
+			if v.Port != nil {
+				m[FieldNodeConfigurationEKSTargetGroup] = []interface{}{
+					map[string]interface{}{
+						"arn":  *v.Arn,
+						"port": *v.Port,
+					},
+				}
+			} else {
+				m[FieldNodeConfigurationEKSTargetGroup] = []interface{}{
+					map[string]interface{}{
+						"arn": *v.Arn,
+					},
+				}
+			}
+		}
 	}
 
 	return []map[string]interface{}{m}
