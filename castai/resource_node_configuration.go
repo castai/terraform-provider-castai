@@ -214,7 +214,7 @@ func resourceNodeConfiguration() *schema.Resource {
 							ValidateDiagFunc: validation.ToDiagFunc(validation.StringMatch(regexp.MustCompile(`arn:aws:kms:.*`), "Must be a valid KMS key ARN")),
 						},
 						FieldNodeConfigurationEKSTargetGroup: {
-							Type:        schema.TypeSet,
+							Type:        schema.TypeList,
 							Optional:    true,
 							Description: "AWS target group configuration for CAST provisioned nodes",
 							MaxItems:    1,
@@ -358,7 +358,7 @@ func resourceNodeConfigurationCreate(ctx context.Context, d *schema.ResourceData
 	}
 
 	// Map provider specific configurations.
-	if v, ok := d.GetOk(FieldNodeConfigurationEKS); ok && len(v.([]interface{})) > 0 {
+	if v, ok := d.GetOk(FieldNodeConfigurationEKS); ok && len(v.([]interface{})) > 0 && v.([]interface{})[0] != nil {
 		req.Eks = toEKSConfig(v.([]interface{})[0].(map[string]interface{}))
 	}
 	if v, ok := d.GetOk(FieldNodeConfigurationKOPS); ok && len(v.([]interface{})) > 0 {
@@ -617,13 +617,15 @@ func toEKSConfig(obj map[string]interface{}) *sdk.NodeconfigV1EKSConfig {
 		out.VolumeKmsKeyArn = toPtr(v)
 	}
 
-	if v, ok := obj[FieldNodeConfigurationEKSTargetGroup].([]map[string]interface{}); ok && len(v) > 0 {
-		out.TargetGroup = &sdk.NodeconfigV1TargetGroup{}
-		if arn, ok := v[0]["arn"].(string); ok && arn != "" {
-			out.TargetGroup.Arn = toPtr(arn)
-		}
-		if port, ok := v[0]["port"].(int32); ok && port > 0 && port < 65536 {
-			out.TargetGroup.Port = toPtr(port)
+	if v, ok := obj[FieldNodeConfigurationEKSTargetGroup].([]interface{}); ok && len(v) > 0 && v[0] != nil {
+		if e, ok := v[0].(map[string]interface{}); ok {
+			out.TargetGroup = &sdk.NodeconfigV1TargetGroup{}
+			if arn, ok := e["arn"].(string); ok && arn != "" {
+				out.TargetGroup.Arn = toPtr(arn)
+			}
+			if port, ok := e["port"].(int32); ok && port > 0 && port < 65536 {
+				out.TargetGroup.Port = toPtr(port)
+			}
 		}
 	}
 
@@ -670,15 +672,15 @@ func flattenEKSConfig(config *sdk.NodeconfigV1EKSConfig) []map[string]interface{
 	if v := config.TargetGroup; v != nil {
 		if v.Arn != nil {
 			if v.Port != nil {
-				m[FieldNodeConfigurationEKSTargetGroup] = []map[string]interface{}{
-					{
+				m[FieldNodeConfigurationEKSTargetGroup] = []interface{}{
+					map[string]interface{}{
 						"arn":  *v.Arn,
 						"port": *v.Port,
 					},
 				}
 			} else {
-				m[FieldNodeConfigurationEKSTargetGroup] = []map[string]interface{}{
-					{
+				m[FieldNodeConfigurationEKSTargetGroup] = []interface{}{
+					map[string]interface{}{
 						"arn": *v.Arn,
 					},
 				}

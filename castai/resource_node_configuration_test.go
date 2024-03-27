@@ -26,18 +26,19 @@ func Test_resourceNodeConfigurationRead(t *testing.T) {
 		})
 
 		got := toEKSConfig(result[0])
-		require.Equal(t, got, &sdk.NodeconfigV1EKSConfig{
+		require.Equal(t, &sdk.NodeconfigV1EKSConfig{
 			TargetGroup: &sdk.NodeconfigV1TargetGroup{
 				Arn:  toPtr("arn:aws:iam::aws:policy/AdministratorAccess"),
 				Port: toPtr(int32(80)),
 			},
-		})
+		}, got)
 	})
 }
 
 func Test_resourceNodeConfigurationCreate(t *testing.T) {
 	type args struct {
 		tuneMock func(m *mock_sdk.MockClientInterface)
+		dataSet  map[string]interface{}
 	}
 	tests := []struct {
 		name string
@@ -46,7 +47,30 @@ func Test_resourceNodeConfigurationCreate(t *testing.T) {
 		{
 			name: "success",
 			args: args{
+				dataSet: map[string]interface{}{
+					"eks": []map[string]interface{}{
+						{
+							FieldNodeConfigurationEKSTargetGroup: []interface{}{
+								map[string]interface{}{
+									"arn": "test",
+								},
+							},
+						},
+					},
+				},
 				tuneMock: func(m *mock_sdk.MockClientInterface) {
+					//&sdk.NodeconfigV1NewNodeConfiguration{
+					//	Eks: &sdk.NodeconfigV1EKSConfig{
+					//		TargetGroup: &sdk.NodeconfigV1TargetGroup{
+					//			Arn:  toPtr("test"),
+					//			Port: nil,
+					//		},
+					//		ImdsHopLimit: toPtr(int32(0)),
+					//		ImdsV1:       toPtr(false),
+					//	},
+					//	DiskCpuRatio: toPtr(int32(0)),
+					//	MinDiskSize:  toPtr(int32(0)),
+					//}
 					m.EXPECT().NodeConfigurationAPICreateConfiguration(gomock.Any(), gomock.Any(), gomock.Any()).
 						Return(
 							&http.Response{
@@ -140,6 +164,10 @@ func Test_resourceNodeConfigurationCreate(t *testing.T) {
 			}
 
 			data := resourceNodeConfiguration().Data(terraform.NewInstanceStateShimmedFromValue(cty.ObjectVal(map[string]cty.Value{}), 0))
+			for k, v := range tt.args.dataSet {
+				require.NoError(t, data.Set(k, v))
+			}
+
 			_ = resourceNodeConfigurationCreate(context.Background(), data, provider)
 		})
 	}
