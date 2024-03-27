@@ -623,8 +623,8 @@ func toEKSConfig(obj map[string]interface{}) *sdk.NodeconfigV1EKSConfig {
 			if arn, ok := e["arn"].(string); ok && arn != "" {
 				out.TargetGroup.Arn = toPtr(arn)
 			}
-			if port, ok := e["port"].(int32); ok && port > 0 && port < 65536 {
-				out.TargetGroup.Port = toPtr(port)
+			if port, ok := e["port"].(int); ok && port > 0 && port < 65536 {
+				out.TargetGroup.Port = toPtr(int32(port))
 			}
 		}
 	}
