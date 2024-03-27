@@ -59,19 +59,18 @@ func Test_resourceNodeConfigurationCreate(t *testing.T) {
 					},
 				},
 				tuneMock: func(m *mock_sdk.MockClientInterface) {
-					//&sdk.NodeconfigV1NewNodeConfiguration{
-					//	Eks: &sdk.NodeconfigV1EKSConfig{
-					//		TargetGroup: &sdk.NodeconfigV1TargetGroup{
-					//			Arn:  toPtr("test"),
-					//			Port: nil,
-					//		},
-					//		ImdsHopLimit: toPtr(int32(0)),
-					//		ImdsV1:       toPtr(false),
-					//	},
-					//	DiskCpuRatio: toPtr(int32(0)),
-					//	MinDiskSize:  toPtr(int32(0)),
-					//}
-					m.EXPECT().NodeConfigurationAPICreateConfiguration(gomock.Any(), gomock.Any(), gomock.Any()).
+					m.EXPECT().NodeConfigurationAPICreateConfiguration(gomock.Any(), gomock.Any(), sdk.NodeconfigV1NewNodeConfiguration{
+						Eks: &sdk.NodeconfigV1EKSConfig{
+							TargetGroup: &sdk.NodeconfigV1TargetGroup{
+								Arn:  toPtr("test"),
+								Port: nil,
+							},
+							ImdsHopLimit: toPtr(int32(0)),
+							ImdsV1:       toPtr(false),
+						},
+						DiskCpuRatio: toPtr(int32(0)),
+						MinDiskSize:  toPtr(int32(0)),
+					}).
 						Return(
 							&http.Response{
 								StatusCode: 200,

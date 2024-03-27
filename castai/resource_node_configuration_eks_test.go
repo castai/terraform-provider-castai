@@ -48,6 +48,7 @@ func TestAccResourceNodeConfiguration_eks(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "eks.0.imds_hop_limit", "3"),
 					resource.TestCheckResourceAttr(resourceName, "eks.0.volume_kms_key_arn", "arn:aws:kms:eu-central-1:012345:key/1d989ee1-59cd-4238-8018-79bae29d1109"),
 					resource.TestCheckResourceAttr(resourceName, "eks.0.target_group.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "eks.0.target_group.0.arn", "arn:aws:test"),
 					resource.TestCheckResourceAttr(resourceName, "aks.#", "0"),
 					resource.TestCheckResourceAttr(resourceName, "kops.#", "0"),
 					resource.TestCheckResourceAttr(resourceName, "gke.#", "0"),
@@ -75,7 +76,9 @@ func TestAccResourceNodeConfiguration_eks(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "tags.%", "0"),
 					resource.TestCheckResourceAttr(resourceName, "eks.0.dns_cluster_ip", ""),
 					resource.TestCheckResourceAttr(resourceName, "eks.0.security_groups.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "eks.0.target_group.#", "0"),
+					resource.TestCheckResourceAttr(resourceName, "eks.0.target_group.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "eks.0.target_group.0.arn", "arn:aws:test2"),
+					resource.TestCheckResourceAttr(resourceName, "eks.0.target_group.0.port", "80"),
 				),
 			},
 		},
@@ -154,6 +157,10 @@ resource "castai_node_configuration" "test" {
   eks {
 	instance_profile_arn = aws_iam_instance_profile.test.arn
     security_groups      = [aws_security_group.test.id]
+    target_group 	     {
+	   arn = "arn:aws:test2"
+       port = 80
+    }
   }
 }`, rName))
 }
