@@ -76,6 +76,7 @@ func TestAccResourceNodeConfiguration_eks(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "tags.%", "0"),
 					resource.TestCheckResourceAttr(resourceName, "eks.0.dns_cluster_ip", ""),
 					resource.TestCheckResourceAttr(resourceName, "eks.0.security_groups.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "eks.0.volume_throughput", "130"),
 					resource.TestCheckResourceAttr(resourceName, "eks.0.target_group.#", "1"),
 					resource.TestCheckResourceAttr(resourceName, "eks.0.target_group.0.arn", "arn:aws:test2"),
 					resource.TestCheckResourceAttr(resourceName, "eks.0.target_group.0.port", "80"),
@@ -157,6 +158,7 @@ resource "castai_node_configuration" "test" {
   eks {
 	instance_profile_arn = aws_iam_instance_profile.test.arn
     security_groups      = [aws_security_group.test.id]
+    volume_throughput 	 = 130
     target_group 	     {
 	   arn = "arn:aws:test2"
        port = 80
