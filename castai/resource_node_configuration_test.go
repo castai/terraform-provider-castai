@@ -151,9 +151,8 @@ func Test_resourceNodeConfigurationCreate(t *testing.T) {
 
 func Test_NodeConfiguration_UpdateContext(t *testing.T) {
 	type args struct {
-		tuneMock       func(m *mock_sdk.MockClientInterface)
-		dataSetInitial map[string]interface{}
-		dataSetUpdate  map[string]interface{}
+		tuneMock func(m *mock_sdk.MockClientInterface)
+		updated  *sdk.NodeconfigV1EKSConfig
 	}
 	tests := []struct {
 		name string
@@ -162,6 +161,12 @@ func Test_NodeConfiguration_UpdateContext(t *testing.T) {
 		{
 			name: "success",
 			args: args{
+				updated: &sdk.NodeconfigV1EKSConfig{
+					TargetGroup: &sdk.NodeconfigV1TargetGroup{
+						Arn:  toPtr("test2"),
+						Port: toPtr(int32(80)),
+					},
+				},
 				tuneMock: func(m *mock_sdk.MockClientInterface) {
 					m.EXPECT().NodeConfigurationAPIUpdateConfiguration(gomock.Any(), "",
 						"765fdc7b-2577-4ae8-a6b8-e3b60afbc33a",
@@ -224,12 +229,7 @@ func Test_NodeConfiguration_UpdateContext(t *testing.T) {
 			resource := resourceNodeConfiguration()
 			raw := make(map[string]interface{})
 			data := schema.TestResourceDataRaw(t, resource.Schema, raw)
-			require.NoError(t, data.Set("eks", flattenEKSConfig(&sdk.NodeconfigV1EKSConfig{
-				TargetGroup: &sdk.NodeconfigV1TargetGroup{
-					Arn:  toPtr("test2"),
-					Port: toPtr(int32(80)),
-				},
-			})))
+			require.NoError(t, data.Set("eks", flattenEKSConfig(tt.args.updated)))
 			data.SetId("765fdc7b-2577-4ae8-a6b8-e3b60afbc33a")
 			updateResult := resource.UpdateContext(context.Background(), data, provider)
 			require.Nil(t, updateResult)
