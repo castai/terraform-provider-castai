@@ -1825,7 +1825,7 @@ type NodeconfigV1TargetGroup struct {
 	Arn *string `json:"arn,omitempty"`
 
 	// Port of the target group.
-	Port *int32 `json:"port,omitempty"`
+	Port *int32 `json:"port"`
 }
 
 // NodetemplatesV1AvailableInstanceType defines model for nodetemplates.v1.AvailableInstanceType.

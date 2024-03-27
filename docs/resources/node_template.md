@@ -47,7 +47,7 @@ Optional:
 - `compute_optimized` (Boolean) Compute optimized instance constraint - will only pick compute optimized nodes if true.
 - `custom_priority` (Block List) (see [below for nested schema](#nestedblock--constraints--custom_priority))
 - `dedicated_node_affinity` (Block List) Dedicated node affinity - creates preference for instances to be created on sole tenancy or dedicated nodes. This
- feature is only available for GCP clusters, requires feature flag to be enabled and sole tenancy nodes with local
+ feature is only available for GCP clusters and sole tenancy nodes with local
  SSDs or GPUs are not supported. If the sole tenancy or dedicated nodes don't have capacity for selected instance
  type, the Autoscaler will fall back to multi-tenant instance types available for this Node Template.
  Other instance constraints are applied when the Autoscaler picks available instance types that can be created on
