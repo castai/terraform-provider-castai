@@ -83,8 +83,8 @@ func resourceNodeConfiguration() *schema.Resource {
 				Type:             schema.TypeInt,
 				Optional:         true,
 				Default:          100,
-				ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(30, 1000)),
-				Description:      "Minimal disk size in GiB. Defaults to 100, min 30, max 1000",
+				ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(30, 65536)),
+				Description:      "Minimal disk size in GiB. Defaults to 100, min 30, max 65536",
 			},
 			FieldNodeConfigurationSubnets: {
 				Type:     schema.TypeList,

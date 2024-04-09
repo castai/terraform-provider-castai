@@ -75,6 +75,22 @@ const (
 	Worker          ExternalclusterV1NodeType = "worker"
 )
 
+// Defines values for K8sSelectorV1Operator.
+const (
+	DoesNotExist  K8sSelectorV1Operator = "DoesNotExist"
+	DoesNotExist1 K8sSelectorV1Operator = "doesNotExist"
+	Exists        K8sSelectorV1Operator = "Exists"
+	Exists1       K8sSelectorV1Operator = "exists"
+	Gt            K8sSelectorV1Operator = "Gt"
+	Gt1           K8sSelectorV1Operator = "gt"
+	IN            K8sSelectorV1Operator = "IN"
+	In            K8sSelectorV1Operator = "in"
+	Lt            K8sSelectorV1Operator = "Lt"
+	Lt1           K8sSelectorV1Operator = "lt"
+	NotIn         K8sSelectorV1Operator = "notIn"
+	NotInt        K8sSelectorV1Operator = "NotInt"
+)
+
 // Defines values for NodeconfigV1AKSConfigOsDiskType.
 const (
 	OSDISKTYPEPREMIUMSSD  NodeconfigV1AKSConfigOsDiskType = "OS_DISK_TYPE_PREMIUM_SSD"
@@ -149,6 +165,9 @@ type CastaiAuthtokenV1beta1AuthToken struct {
 	// (read only) Time when the token was created (unix timestamp in nanoseconds).
 	CreatedAt *time.Time `json:"createdAt,omitempty"`
 
+	// created_by is used to link this token to a user who created it.
+	CreatedBy *string `json:"createdBy"`
+
 	// (read only) ID of the token.
 	Id *string `json:"id,omitempty"`
 
@@ -156,10 +175,13 @@ type CastaiAuthtokenV1beta1AuthToken struct {
 	LastUsedAt *time.Time `json:"lastUsedAt,omitempty"`
 
 	// (required) User provided name of the token.
-	Name *string `json:"name,omitempty"`
+	Name string `json:"name"`
 
 	// whether token has readonly permissions.
-	Readonly *bool `json:"readonly,omitempty"`
+	Readonly bool `json:"readonly"`
+
+	// service_account_id is used to link this token to a service account.
+	ServiceAccountId *string `json:"serviceAccountId"`
 
 	// (read only, visible once on creation) actual token used to authenticate via api.
 	Token *string `json:"token"`
@@ -1339,6 +1361,9 @@ type ExternalclusterV1Node_Labels struct {
 
 // NodeAffinity provides control over the assignment of individual nodes to dedicated host instances.
 type ExternalclusterV1NodeAffinity struct {
+	// THe affinity rules required for choosing the group.
+	Affinity *[]K8sSelectorV1KubernetesNodeAffinity `json:"affinity,omitempty"`
+
 	// The name of the dedicated group.
 	DedicatedGroup *string `json:"dedicatedGroup"`
 }
@@ -1546,6 +1571,28 @@ type ExternalclusterV1Zone struct {
 	// Zone name.
 	Name *string `json:"name,omitempty"`
 }
+
+// K8sSelectorV1KubernetesNodeAffinity defines model for k8s_selector.v1.KubernetesNodeAffinity.
+type K8sSelectorV1KubernetesNodeAffinity struct {
+	Key string `json:"key"`
+
+	// - IN: In values
+	//  - NotInt: Not int values
+	//  - Exists: Just exist
+	//  - DoesNotExist: Values does not exist
+	//  - Gt: Greater then
+	//  - Lt: Lower then
+	Operator K8sSelectorV1Operator `json:"operator"`
+	Values   []string              `json:"values"`
+}
+
+// - IN: In values
+//   - NotInt: Not int values
+//   - Exists: Just exist
+//   - DoesNotExist: Values does not exist
+//   - Gt: Greater then
+//   - Lt: Lower then
+type K8sSelectorV1Operator string
 
 // NodeconfigV1AKSConfig defines model for nodeconfig.v1.AKSConfig.
 type NodeconfigV1AKSConfig struct {
@@ -2500,7 +2547,11 @@ type ScheduledrebalancingV1TriggerConditions struct {
 
 // AuthTokenAPIListAuthTokensParams defines parameters for AuthTokenAPIListAuthTokens.
 type AuthTokenAPIListAuthTokensParams struct {
+	// User id to filter by, if this is set we will only return tokens that have this user id.
 	UserId *string `form:"userId,omitempty" json:"userId,omitempty"`
+
+	// Service account id to filter by, if this is set we will only return tokens that have this service account id ignoring users_id.
+	ServiceAccountId *string `form:"serviceAccountId,omitempty" json:"serviceAccountId,omitempty"`
 }
 
 // AuthTokenAPICreateAuthTokenJSONBody defines parameters for AuthTokenAPICreateAuthToken.
