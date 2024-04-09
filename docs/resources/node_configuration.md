@@ -72,7 +72,7 @@ resource "castai_node_configuration" "default" {
 - `init_script` (String) Init script to be run on your instance at launch. Should not contain any sensitive data. Value should be base64 encoded
 - `kops` (Block List, Max: 1) (see [below for nested schema](#nestedblock--kops))
 - `kubelet_config` (String) Optional kubelet configuration properties in JSON format. Provide only properties that you want to override. Applicable for EKS only. [Available values](https://kubernetes.io/docs/reference/config-api/kubelet-config.v1beta1/)
-- `min_disk_size` (Number) Minimal disk size in GiB. Defaults to 100, min 30, max 1000
+- `min_disk_size` (Number) Minimal disk size in GiB. Defaults to 100, min 30, max 65536
 - `ssh_public_key` (String) SSH public key to be used for provisioned nodes
 - `tags` (Map of String) Tags to be added on cloud instances for provisioned nodes
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
