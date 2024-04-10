@@ -87,8 +87,8 @@ const (
 	In            K8sSelectorV1Operator = "in"
 	Lt            K8sSelectorV1Operator = "Lt"
 	Lt1           K8sSelectorV1Operator = "lt"
-	NotIn         K8sSelectorV1Operator = "notIn"
-	NotInt        K8sSelectorV1Operator = "NotInt"
+	NotIn         K8sSelectorV1Operator = "NotIn"
+	NotIn1        K8sSelectorV1Operator = "notIn"
 )
 
 // Defines values for NodeconfigV1AKSConfigOsDiskType.
@@ -1577,7 +1577,7 @@ type K8sSelectorV1KubernetesNodeAffinity struct {
 	Key string `json:"key"`
 
 	// - IN: In values
-	//  - NotInt: Not int values
+	//  - NotIn: Not in values
 	//  - Exists: Just exist
 	//  - DoesNotExist: Values does not exist
 	//  - Gt: Greater then
@@ -1587,7 +1587,7 @@ type K8sSelectorV1KubernetesNodeAffinity struct {
 }
 
 // - IN: In values
-//   - NotInt: Not int values
+//   - NotIn: Not in values
 //   - Exists: Just exist
 //   - DoesNotExist: Values does not exist
 //   - Gt: Greater then
@@ -2117,9 +2117,11 @@ type NodetemplatesV1TemplateConstraintsCustomPriority struct {
 
 // NodetemplatesV1TemplateConstraintsDedicatedNodeAffinity defines model for nodetemplates.v1.TemplateConstraints.DedicatedNodeAffinity.
 type NodetemplatesV1TemplateConstraintsDedicatedNodeAffinity struct {
-	AzName        *string   `json:"azName,omitempty"`
-	InstanceTypes *[]string `json:"instanceTypes,omitempty"`
-	Name          *string   `json:"name,omitempty"`
+	// The affinity rules required for choosing the node.
+	Affinity      *[]K8sSelectorV1KubernetesNodeAffinity `json:"affinity,omitempty"`
+	AzName        *string                                `json:"azName,omitempty"`
+	InstanceTypes *[]string                              `json:"instanceTypes,omitempty"`
+	Name          *string                                `json:"name,omitempty"`
 }
 
 // NodetemplatesV1TemplateConstraintsGPUConstraints defines model for nodetemplates.v1.TemplateConstraints.GPUConstraints.
