@@ -179,6 +179,7 @@ constraints.0.max_memory = 0
 constraints.0.min_cpu = 10
 constraints.0.min_memory = 0
 constraints.0.dedicated_node_affinity.# = 1
+constraints.0.dedicated_node_affinity.0.affinity.# = 0
 constraints.0.dedicated_node_affinity.0.az_name = eu-central-1a
 constraints.0.dedicated_node_affinity.0.instance_types.# = 1
 constraints.0.dedicated_node_affinity.0.instance_types.0 = m5.24xlarge

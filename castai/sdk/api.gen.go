@@ -1685,8 +1685,11 @@ type NodeconfigV1NewNodeConfiguration struct {
 
 	// Optional docker daemon configuration properties. Provide only properties that you want to override. Available values https://docs.docker.com/engine/reference/commandline/dockerd/#daemon-configuration-file
 	DockerConfig *map[string]interface{} `json:"dockerConfig,omitempty"`
-	Eks          *NodeconfigV1EKSConfig  `json:"eks,omitempty"`
-	Gke          *NodeconfigV1GKEConfig  `json:"gke,omitempty"`
+
+	// Drain timeout in seconds. Defaults to 0.
+	DrainTimeoutSec *int32                 `json:"drainTimeoutSec"`
+	Eks             *NodeconfigV1EKSConfig `json:"eks,omitempty"`
+	Gke             *NodeconfigV1GKEConfig `json:"gke,omitempty"`
 
 	// Image to be used while provisioning the node. If nothing is provided will be resolved to latest available image based on Kubernetes version if possible.
 	Image *string `json:"image"`
@@ -1737,8 +1740,11 @@ type NodeconfigV1NodeConfiguration struct {
 
 	// Optional docker daemon configuration properties. Applicable for EKS only.
 	DockerConfig *map[string]interface{} `json:"dockerConfig"`
-	Eks          *NodeconfigV1EKSConfig  `json:"eks,omitempty"`
-	Gke          *NodeconfigV1GKEConfig  `json:"gke,omitempty"`
+
+	// Drain timeout in seconds. Defaults to 0.
+	DrainTimeoutSec *int32                 `json:"drainTimeoutSec"`
+	Eks             *NodeconfigV1EKSConfig `json:"eks,omitempty"`
+	Gke             *NodeconfigV1GKEConfig `json:"gke,omitempty"`
 
 	// The node configuration ID.
 	Id *string `json:"id,omitempty"`
@@ -1792,8 +1798,11 @@ type NodeconfigV1NodeConfigurationUpdate struct {
 
 	// Optional docker daemon configuration properties. Provide only properties that you want to override. Available values https://docs.docker.com/engine/reference/commandline/dockerd/#daemon-configuration-file
 	DockerConfig *map[string]interface{} `json:"dockerConfig,omitempty"`
-	Eks          *NodeconfigV1EKSConfig  `json:"eks,omitempty"`
-	Gke          *NodeconfigV1GKEConfig  `json:"gke,omitempty"`
+
+	// Drain timeout in seconds. Defaults to 0.
+	DrainTimeoutSec *int32                 `json:"drainTimeoutSec"`
+	Eks             *NodeconfigV1EKSConfig `json:"eks,omitempty"`
+	Gke             *NodeconfigV1GKEConfig `json:"gke,omitempty"`
 
 	// Image to be used while provisioning the node. If nothing is provided will be resolved to latest available image based on Kubernetes version if possible.
 	Image *string `json:"image"`
