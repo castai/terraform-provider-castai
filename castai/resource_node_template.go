@@ -59,6 +59,10 @@ const (
 	FieldNodeTemplateDedicatedNodeAffinity                    = "dedicated_node_affinity"
 	FieldNodeTemplateAzName                                   = "az_name"
 	FieldNodeTemplateInstanceTypes                            = "instance_types"
+	FieldNodeTemplateAffinityName                             = "affinity"
+	FieldNodeTemplateAffinityKeyName                          = "key"
+	FieldNodeTemplateAffinityOperatorName                     = "operator"
+	FieldNodeTemplateAffinityValuesName                       = "values"
 )
 
 const (
@@ -73,9 +77,19 @@ const (
 	OsWindows = "windows"
 )
 
+const (
+	NodeSelectorOperationIn      = "In"
+	NodeSelectorOperationNotIn   = "NotIn"
+	NodeSelectorOperationExists  = "Exists"
+	NodeSelectorOperationDoesNot = "DoesNotExist"
+	NodeSelectorOperationGt      = "Gt"
+	NodeSelectorOperationLt      = "Lt"
+)
+
 func resourceNodeTemplate() *schema.Resource {
 	supportedArchitectures := []string{ArchAMD64, ArchARM64}
 	supportedOs := []string{OsLinux, OsWindows}
+	supportedSelectorOperations := []string{NodeSelectorOperationIn, NodeSelectorOperationNotIn, NodeSelectorOperationExists, NodeSelectorOperationDoesNot, NodeSelectorOperationGt, NodeSelectorOperationLt}
 
 	return &schema.Resource{
 		CreateContext: resourceNodeTemplateCreate,
@@ -368,9 +382,36 @@ func resourceNodeTemplate() *schema.Resource {
 										Description: "Availability zone name.",
 									},
 									FieldNodeTemplateName: {
-										Required:    true,
+										Optional:    true,
 										Type:        schema.TypeString,
 										Description: "Name of node group.",
+									},
+									FieldNodeTemplateAffinityName: {
+										Optional: true,
+										Type:     schema.TypeList,
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												FieldNodeTemplateAffinityKeyName: {
+													Required:    true,
+													Type:        schema.TypeString,
+													Description: "Key of the node affinity selector.",
+												},
+												FieldNodeTemplateAffinityOperatorName: {
+													Required:         true,
+													Type:             schema.TypeString,
+													ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(supportedSelectorOperations, false)),
+													Description:      fmt.Sprintf("Operator of the node affinity selector. Allowed values: %s.", strings.Join(supportedSelectorOperations, ", ")),
+												},
+												FieldNodeTemplateAffinityValuesName: {
+													Required: true,
+													Type:     schema.TypeList,
+													Elem: &schema.Schema{
+														Type: schema.TypeString,
+													},
+													Description: "Values of the node affinity selector.",
+												},
+											},
+										},
 									},
 								},
 							},
@@ -638,6 +679,17 @@ func flattenNodeAffinity(affinities []sdk.NodetemplatesV1TemplateConstraintsDedi
 
 		result[FieldNodeTemplateName] = lo.FromPtr(item.Name)
 		result[FieldNodeTemplateAzName] = lo.FromPtr(item.AzName)
+
+		if item.Affinity != nil && len(*item.Affinity) > 0 {
+			result[FieldNodeTemplateAffinityName] = lo.Map(*item.Affinity, func(affinity sdk.K8sSelectorV1KubernetesNodeAffinity, index int) map[string]any {
+				return map[string]any{
+					FieldNodeTemplateAffinityKeyName:      affinity.Key,
+					FieldNodeTemplateAffinityOperatorName: affinity.Operator,
+					FieldNodeTemplateAffinityValuesName:   affinity.Values,
+				}
+			})
+		}
+
 		return result
 	})
 }
@@ -1159,6 +1211,25 @@ func toTemplateConstraintsNodeAffinity(o map[string]any) *sdk.NodetemplatesV1Tem
 	}
 	if v, ok := o[FieldNodeTemplateInstanceTypes].([]any); ok {
 		out.InstanceTypes = toPtr(toStringList(v))
+	}
+	if v, ok := o[FieldNodeTemplateAffinityName].([]any); ok {
+		out.Affinity = toPtr(lo.Map(v, func(item any, _ int) sdk.K8sSelectorV1KubernetesNodeAffinity {
+			val, ok := item.(map[string]any)
+			if !ok {
+				return sdk.K8sSelectorV1KubernetesNodeAffinity{}
+			}
+			out := sdk.K8sSelectorV1KubernetesNodeAffinity{}
+			if v, ok := val[FieldNodeTemplateAffinityKeyName].(string); ok {
+				out.Key = v
+			}
+			if v, ok := val[FieldNodeTemplateAffinityOperatorName].(string); ok {
+				out.Operator = sdk.K8sSelectorV1Operator(v)
+			}
+			if v, ok := val[FieldNodeTemplateAffinityValuesName].([]any); ok {
+				out.Values = toStringList(v)
+			}
+			return out
+		}))
 	}
 
 	return &out
