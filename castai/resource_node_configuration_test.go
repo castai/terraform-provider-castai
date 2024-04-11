@@ -50,8 +50,9 @@ func Test_resourceNodeConfigurationCreate(t *testing.T) {
 							ImdsHopLimit: toPtr(int32(0)),
 							ImdsV1:       toPtr(false),
 						},
-						DiskCpuRatio: toPtr(int32(0)),
-						MinDiskSize:  toPtr(int32(0)),
+						DiskCpuRatio:    toPtr(int32(0)),
+						DrainTimeoutSec: toPtr(int32(0)),
+						MinDiskSize:     toPtr(int32(0)),
 					}).
 						Return(
 							&http.Response{
@@ -179,8 +180,9 @@ func Test_NodeConfiguration_UpdateContext(t *testing.T) {
 								ImdsHopLimit: toPtr(int32(0)),
 								ImdsV1:       toPtr(false),
 							},
-							DiskCpuRatio: toPtr(int32(0)),
-							MinDiskSize:  toPtr(int32(100)),
+							DiskCpuRatio:    toPtr(int32(0)),
+							DrainTimeoutSec: toPtr(int32(0)),
+							MinDiskSize:     toPtr(int32(100)),
 						}).
 						Return(
 							&http.Response{
