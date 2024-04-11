@@ -25,6 +25,7 @@ func TestAccResourceNodeConfiguration_gke(t *testing.T) {
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "name", rName),
 					resource.TestCheckResourceAttr(resourceName, "disk_cpu_ratio", "35"),
+					resource.TestCheckResourceAttr(resourceName, "drain_timeout_sec", "10"),
 					resource.TestCheckResourceAttr(resourceName, "min_disk_size", "122"),
 					resource.TestCheckResourceAttr(resourceName, "aks.#", "0"),
 					resource.TestCheckResourceAttr(resourceName, "eks.#", "0"),
@@ -69,6 +70,7 @@ resource "castai_node_configuration" "test" {
   name   		    = %[1]q
   cluster_id        = castai_gke_cluster.test.id
   disk_cpu_ratio    = 35
+  drain_timeout_sec = 10
   min_disk_size     = 122
   subnets   	    = [local.subnet_id]
   tags = {

@@ -66,6 +66,7 @@ resource "castai_node_configuration" "default" {
 - `container_runtime` (String) Optional container runtime to be used by kubelet. Applicable for EKS only.  Supported values include: `dockerd`, `containerd`
 - `disk_cpu_ratio` (Number) Disk to CPU ratio. Sets the number of GiBs to be added for every CPU on the node. Defaults to 0
 - `docker_config` (String) Optional docker daemon configuration properties in JSON format. Provide only properties that you want to override. Applicable for EKS only. [Available values](https://docs.docker.com/engine/reference/commandline/dockerd/#daemon-configuration-file)
+- `drain_timeout_sec` (Number) Timeout in seconds for draining the node. Defaults to 0
 - `eks` (Block List, Max: 1) (see [below for nested schema](#nestedblock--eks))
 - `gke` (Block List, Max: 1) (see [below for nested schema](#nestedblock--gke))
 - `image` (String) Image to be used while provisioning the node. If nothing is provided will be resolved to latest available image based on Kubernetes version if possible
