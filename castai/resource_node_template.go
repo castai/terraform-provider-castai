@@ -382,7 +382,7 @@ func resourceNodeTemplate() *schema.Resource {
 										Description: "Availability zone name.",
 									},
 									FieldNodeTemplateName: {
-										Optional:    true,
+										Required:    true,
 										Type:        schema.TypeString,
 										Description: "Name of node group.",
 									},
