@@ -84,7 +84,7 @@ func resourceNodeConfiguration() *schema.Resource {
 				Type:             schema.TypeInt,
 				Optional:         true,
 				Default:          0,
-				ValidateDiagFunc: validation.ToDiagFunc(validation.IntAtLeast(-1)),
+				ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(0, 3600)),
 				Description:      "Timeout in seconds for draining the node. Defaults to 0",
 			},
 			FieldNodeConfigurationMinDiskSize: {
@@ -501,8 +501,8 @@ func resourceNodeConfigurationUpdate(ctx context.Context, d *schema.ResourceData
 	clusterID := d.Get(FieldClusterID).(string)
 	req := sdk.NodeConfigurationAPIUpdateConfigurationJSONRequestBody{
 		DiskCpuRatio:    toPtr(int32(d.Get(FieldNodeConfigurationDiskCpuRatio).(int))),
-		MinDiskSize:     toPtr(int32(d.Get(FieldNodeConfigurationMinDiskSize).(int))),
 		DrainTimeoutSec: toPtr(int32(d.Get(FieldNodeConfigurationDrainTimeoutSec).(int))),
+		MinDiskSize:     toPtr(int32(d.Get(FieldNodeConfigurationMinDiskSize).(int))),
 	}
 
 	if v, ok := d.GetOk(FieldNodeConfigurationSubnets); ok {
