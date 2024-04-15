@@ -498,7 +498,7 @@ func flattenPodSelector(ps *sdk.CastaiEvictorV1PodSelector) []map[string]any {
 	if ps.Namespace != nil {
 		out[FieldPodSelectorNamespace] = *ps.Namespace
 	}
-	if ps.LabelSelector.MatchLabels != nil {
+	if ps.LabelSelector != nil && ps.LabelSelector.MatchLabels != nil {
 		out[FieldMatchLabels] = ps.LabelSelector.MatchLabels.AdditionalProperties
 	}
 	if ps.LabelSelector.MatchExpressions != nil {
