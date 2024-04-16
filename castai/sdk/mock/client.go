@@ -215,6 +215,326 @@ func (mr *MockClientInterfaceMockRecorder) AuthTokenAPIUpdateAuthTokenWithBody(c
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AuthTokenAPIUpdateAuthTokenWithBody", reflect.TypeOf((*MockClientInterface)(nil).AuthTokenAPIUpdateAuthTokenWithBody), varargs...)
 }
 
+// CommitmentsAPICreateCommitmentAssignment mocks base method.
+func (m *MockClientInterface) CommitmentsAPICreateCommitmentAssignment(ctx context.Context, params *sdk.CommitmentsAPICreateCommitmentAssignmentParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "CommitmentsAPICreateCommitmentAssignment", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CommitmentsAPICreateCommitmentAssignment indicates an expected call of CommitmentsAPICreateCommitmentAssignment.
+func (mr *MockClientInterfaceMockRecorder) CommitmentsAPICreateCommitmentAssignment(ctx, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPICreateCommitmentAssignment", reflect.TypeOf((*MockClientInterface)(nil).CommitmentsAPICreateCommitmentAssignment), varargs...)
+}
+
+// CommitmentsAPIDeleteCommitment mocks base method.
+func (m *MockClientInterface) CommitmentsAPIDeleteCommitment(ctx context.Context, commitmentId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, commitmentId}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "CommitmentsAPIDeleteCommitment", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CommitmentsAPIDeleteCommitment indicates an expected call of CommitmentsAPIDeleteCommitment.
+func (mr *MockClientInterfaceMockRecorder) CommitmentsAPIDeleteCommitment(ctx, commitmentId interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, commitmentId}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIDeleteCommitment", reflect.TypeOf((*MockClientInterface)(nil).CommitmentsAPIDeleteCommitment), varargs...)
+}
+
+// CommitmentsAPIDeleteCommitmentAssignment mocks base method.
+func (m *MockClientInterface) CommitmentsAPIDeleteCommitmentAssignment(ctx context.Context, assignmentId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, assignmentId}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "CommitmentsAPIDeleteCommitmentAssignment", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CommitmentsAPIDeleteCommitmentAssignment indicates an expected call of CommitmentsAPIDeleteCommitmentAssignment.
+func (mr *MockClientInterfaceMockRecorder) CommitmentsAPIDeleteCommitmentAssignment(ctx, assignmentId interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, assignmentId}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIDeleteCommitmentAssignment", reflect.TypeOf((*MockClientInterface)(nil).CommitmentsAPIDeleteCommitmentAssignment), varargs...)
+}
+
+// CommitmentsAPIGetCommitmentAssignments mocks base method.
+func (m *MockClientInterface) CommitmentsAPIGetCommitmentAssignments(ctx context.Context, commitmentId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, commitmentId}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "CommitmentsAPIGetCommitmentAssignments", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CommitmentsAPIGetCommitmentAssignments indicates an expected call of CommitmentsAPIGetCommitmentAssignments.
+func (mr *MockClientInterfaceMockRecorder) CommitmentsAPIGetCommitmentAssignments(ctx, commitmentId interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, commitmentId}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIGetCommitmentAssignments", reflect.TypeOf((*MockClientInterface)(nil).CommitmentsAPIGetCommitmentAssignments), varargs...)
+}
+
+// CommitmentsAPIGetCommitments mocks base method.
+func (m *MockClientInterface) CommitmentsAPIGetCommitments(ctx context.Context, params *sdk.CommitmentsAPIGetCommitmentsParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "CommitmentsAPIGetCommitments", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CommitmentsAPIGetCommitments indicates an expected call of CommitmentsAPIGetCommitments.
+func (mr *MockClientInterfaceMockRecorder) CommitmentsAPIGetCommitments(ctx, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIGetCommitments", reflect.TypeOf((*MockClientInterface)(nil).CommitmentsAPIGetCommitments), varargs...)
+}
+
+// CommitmentsAPIGetCommitmentsAssignments mocks base method.
+func (m *MockClientInterface) CommitmentsAPIGetCommitmentsAssignments(ctx context.Context, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "CommitmentsAPIGetCommitmentsAssignments", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CommitmentsAPIGetCommitmentsAssignments indicates an expected call of CommitmentsAPIGetCommitmentsAssignments.
+func (mr *MockClientInterfaceMockRecorder) CommitmentsAPIGetCommitmentsAssignments(ctx interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIGetCommitmentsAssignments", reflect.TypeOf((*MockClientInterface)(nil).CommitmentsAPIGetCommitmentsAssignments), varargs...)
+}
+
+// CommitmentsAPIGetGCPCommitmentsImportScript mocks base method.
+func (m *MockClientInterface) CommitmentsAPIGetGCPCommitmentsImportScript(ctx context.Context, params *sdk.CommitmentsAPIGetGCPCommitmentsImportScriptParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "CommitmentsAPIGetGCPCommitmentsImportScript", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CommitmentsAPIGetGCPCommitmentsImportScript indicates an expected call of CommitmentsAPIGetGCPCommitmentsImportScript.
+func (mr *MockClientInterfaceMockRecorder) CommitmentsAPIGetGCPCommitmentsImportScript(ctx, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIGetGCPCommitmentsImportScript", reflect.TypeOf((*MockClientInterface)(nil).CommitmentsAPIGetGCPCommitmentsImportScript), varargs...)
+}
+
+// CommitmentsAPIGetGCPCommitmentsScriptTemplate mocks base method.
+func (m *MockClientInterface) CommitmentsAPIGetGCPCommitmentsScriptTemplate(ctx context.Context, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "CommitmentsAPIGetGCPCommitmentsScriptTemplate", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CommitmentsAPIGetGCPCommitmentsScriptTemplate indicates an expected call of CommitmentsAPIGetGCPCommitmentsScriptTemplate.
+func (mr *MockClientInterfaceMockRecorder) CommitmentsAPIGetGCPCommitmentsScriptTemplate(ctx interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIGetGCPCommitmentsScriptTemplate", reflect.TypeOf((*MockClientInterface)(nil).CommitmentsAPIGetGCPCommitmentsScriptTemplate), varargs...)
+}
+
+// CommitmentsAPIImportAzureReservations mocks base method.
+func (m *MockClientInterface) CommitmentsAPIImportAzureReservations(ctx context.Context, params *sdk.CommitmentsAPIImportAzureReservationsParams, body sdk.CommitmentsAPIImportAzureReservationsJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, params, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "CommitmentsAPIImportAzureReservations", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CommitmentsAPIImportAzureReservations indicates an expected call of CommitmentsAPIImportAzureReservations.
+func (mr *MockClientInterfaceMockRecorder) CommitmentsAPIImportAzureReservations(ctx, params, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, params, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIImportAzureReservations", reflect.TypeOf((*MockClientInterface)(nil).CommitmentsAPIImportAzureReservations), varargs...)
+}
+
+// CommitmentsAPIImportAzureReservationsWithBody mocks base method.
+func (m *MockClientInterface) CommitmentsAPIImportAzureReservationsWithBody(ctx context.Context, params *sdk.CommitmentsAPIImportAzureReservationsParams, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, params, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "CommitmentsAPIImportAzureReservationsWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CommitmentsAPIImportAzureReservationsWithBody indicates an expected call of CommitmentsAPIImportAzureReservationsWithBody.
+func (mr *MockClientInterfaceMockRecorder) CommitmentsAPIImportAzureReservationsWithBody(ctx, params, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, params, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIImportAzureReservationsWithBody", reflect.TypeOf((*MockClientInterface)(nil).CommitmentsAPIImportAzureReservationsWithBody), varargs...)
+}
+
+// CommitmentsAPIImportGCPCommitments mocks base method.
+func (m *MockClientInterface) CommitmentsAPIImportGCPCommitments(ctx context.Context, params *sdk.CommitmentsAPIImportGCPCommitmentsParams, body sdk.CommitmentsAPIImportGCPCommitmentsJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, params, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "CommitmentsAPIImportGCPCommitments", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CommitmentsAPIImportGCPCommitments indicates an expected call of CommitmentsAPIImportGCPCommitments.
+func (mr *MockClientInterfaceMockRecorder) CommitmentsAPIImportGCPCommitments(ctx, params, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, params, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIImportGCPCommitments", reflect.TypeOf((*MockClientInterface)(nil).CommitmentsAPIImportGCPCommitments), varargs...)
+}
+
+// CommitmentsAPIImportGCPCommitmentsWithBody mocks base method.
+func (m *MockClientInterface) CommitmentsAPIImportGCPCommitmentsWithBody(ctx context.Context, params *sdk.CommitmentsAPIImportGCPCommitmentsParams, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, params, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "CommitmentsAPIImportGCPCommitmentsWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CommitmentsAPIImportGCPCommitmentsWithBody indicates an expected call of CommitmentsAPIImportGCPCommitmentsWithBody.
+func (mr *MockClientInterfaceMockRecorder) CommitmentsAPIImportGCPCommitmentsWithBody(ctx, params, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, params, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIImportGCPCommitmentsWithBody", reflect.TypeOf((*MockClientInterface)(nil).CommitmentsAPIImportGCPCommitmentsWithBody), varargs...)
+}
+
+// CommitmentsAPIReplaceCommitmentAssignments mocks base method.
+func (m *MockClientInterface) CommitmentsAPIReplaceCommitmentAssignments(ctx context.Context, commitmentId string, body sdk.CommitmentsAPIReplaceCommitmentAssignmentsJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, commitmentId, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "CommitmentsAPIReplaceCommitmentAssignments", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CommitmentsAPIReplaceCommitmentAssignments indicates an expected call of CommitmentsAPIReplaceCommitmentAssignments.
+func (mr *MockClientInterfaceMockRecorder) CommitmentsAPIReplaceCommitmentAssignments(ctx, commitmentId, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, commitmentId, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIReplaceCommitmentAssignments", reflect.TypeOf((*MockClientInterface)(nil).CommitmentsAPIReplaceCommitmentAssignments), varargs...)
+}
+
+// CommitmentsAPIReplaceCommitmentAssignmentsWithBody mocks base method.
+func (m *MockClientInterface) CommitmentsAPIReplaceCommitmentAssignmentsWithBody(ctx context.Context, commitmentId, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, commitmentId, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "CommitmentsAPIReplaceCommitmentAssignmentsWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CommitmentsAPIReplaceCommitmentAssignmentsWithBody indicates an expected call of CommitmentsAPIReplaceCommitmentAssignmentsWithBody.
+func (mr *MockClientInterfaceMockRecorder) CommitmentsAPIReplaceCommitmentAssignmentsWithBody(ctx, commitmentId, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, commitmentId, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIReplaceCommitmentAssignmentsWithBody", reflect.TypeOf((*MockClientInterface)(nil).CommitmentsAPIReplaceCommitmentAssignmentsWithBody), varargs...)
+}
+
+// CommitmentsAPIUpdateCommitment mocks base method.
+func (m *MockClientInterface) CommitmentsAPIUpdateCommitment(ctx context.Context, commitmentId string, body sdk.CommitmentsAPIUpdateCommitmentJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, commitmentId, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "CommitmentsAPIUpdateCommitment", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CommitmentsAPIUpdateCommitment indicates an expected call of CommitmentsAPIUpdateCommitment.
+func (mr *MockClientInterfaceMockRecorder) CommitmentsAPIUpdateCommitment(ctx, commitmentId, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, commitmentId, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIUpdateCommitment", reflect.TypeOf((*MockClientInterface)(nil).CommitmentsAPIUpdateCommitment), varargs...)
+}
+
+// CommitmentsAPIUpdateCommitmentWithBody mocks base method.
+func (m *MockClientInterface) CommitmentsAPIUpdateCommitmentWithBody(ctx context.Context, commitmentId, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, commitmentId, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "CommitmentsAPIUpdateCommitmentWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CommitmentsAPIUpdateCommitmentWithBody indicates an expected call of CommitmentsAPIUpdateCommitmentWithBody.
+func (mr *MockClientInterfaceMockRecorder) CommitmentsAPIUpdateCommitmentWithBody(ctx, commitmentId, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, commitmentId, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIUpdateCommitmentWithBody", reflect.TypeOf((*MockClientInterface)(nil).CommitmentsAPIUpdateCommitmentWithBody), varargs...)
+}
+
 // EvictorAPIGetAdvancedConfig mocks base method.
 func (m *MockClientInterface) EvictorAPIGetAdvancedConfig(ctx context.Context, clusterId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
@@ -2581,6 +2901,246 @@ func (m *MockClientWithResponsesInterface) AuthTokenAPIUpdateAuthTokenWithRespon
 func (mr *MockClientWithResponsesInterfaceMockRecorder) AuthTokenAPIUpdateAuthTokenWithResponse(ctx, id, body interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AuthTokenAPIUpdateAuthTokenWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).AuthTokenAPIUpdateAuthTokenWithResponse), ctx, id, body)
+}
+
+// CommitmentsAPICreateCommitmentAssignmentWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) CommitmentsAPICreateCommitmentAssignmentWithResponse(ctx context.Context, params *sdk.CommitmentsAPICreateCommitmentAssignmentParams) (*sdk.CommitmentsAPICreateCommitmentAssignmentResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CommitmentsAPICreateCommitmentAssignmentWithResponse", ctx, params)
+	ret0, _ := ret[0].(*sdk.CommitmentsAPICreateCommitmentAssignmentResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CommitmentsAPICreateCommitmentAssignmentWithResponse indicates an expected call of CommitmentsAPICreateCommitmentAssignmentWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) CommitmentsAPICreateCommitmentAssignmentWithResponse(ctx, params interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPICreateCommitmentAssignmentWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).CommitmentsAPICreateCommitmentAssignmentWithResponse), ctx, params)
+}
+
+// CommitmentsAPIDeleteCommitmentAssignmentWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) CommitmentsAPIDeleteCommitmentAssignmentWithResponse(ctx context.Context, assignmentId string) (*sdk.CommitmentsAPIDeleteCommitmentAssignmentResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CommitmentsAPIDeleteCommitmentAssignmentWithResponse", ctx, assignmentId)
+	ret0, _ := ret[0].(*sdk.CommitmentsAPIDeleteCommitmentAssignmentResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CommitmentsAPIDeleteCommitmentAssignmentWithResponse indicates an expected call of CommitmentsAPIDeleteCommitmentAssignmentWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) CommitmentsAPIDeleteCommitmentAssignmentWithResponse(ctx, assignmentId interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIDeleteCommitmentAssignmentWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).CommitmentsAPIDeleteCommitmentAssignmentWithResponse), ctx, assignmentId)
+}
+
+// CommitmentsAPIDeleteCommitmentWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) CommitmentsAPIDeleteCommitmentWithResponse(ctx context.Context, commitmentId string) (*sdk.CommitmentsAPIDeleteCommitmentResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CommitmentsAPIDeleteCommitmentWithResponse", ctx, commitmentId)
+	ret0, _ := ret[0].(*sdk.CommitmentsAPIDeleteCommitmentResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CommitmentsAPIDeleteCommitmentWithResponse indicates an expected call of CommitmentsAPIDeleteCommitmentWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) CommitmentsAPIDeleteCommitmentWithResponse(ctx, commitmentId interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIDeleteCommitmentWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).CommitmentsAPIDeleteCommitmentWithResponse), ctx, commitmentId)
+}
+
+// CommitmentsAPIGetCommitmentAssignmentsWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) CommitmentsAPIGetCommitmentAssignmentsWithResponse(ctx context.Context, commitmentId string) (*sdk.CommitmentsAPIGetCommitmentAssignmentsResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CommitmentsAPIGetCommitmentAssignmentsWithResponse", ctx, commitmentId)
+	ret0, _ := ret[0].(*sdk.CommitmentsAPIGetCommitmentAssignmentsResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CommitmentsAPIGetCommitmentAssignmentsWithResponse indicates an expected call of CommitmentsAPIGetCommitmentAssignmentsWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) CommitmentsAPIGetCommitmentAssignmentsWithResponse(ctx, commitmentId interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIGetCommitmentAssignmentsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).CommitmentsAPIGetCommitmentAssignmentsWithResponse), ctx, commitmentId)
+}
+
+// CommitmentsAPIGetCommitmentsAssignmentsWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) CommitmentsAPIGetCommitmentsAssignmentsWithResponse(ctx context.Context) (*sdk.CommitmentsAPIGetCommitmentsAssignmentsResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CommitmentsAPIGetCommitmentsAssignmentsWithResponse", ctx)
+	ret0, _ := ret[0].(*sdk.CommitmentsAPIGetCommitmentsAssignmentsResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CommitmentsAPIGetCommitmentsAssignmentsWithResponse indicates an expected call of CommitmentsAPIGetCommitmentsAssignmentsWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) CommitmentsAPIGetCommitmentsAssignmentsWithResponse(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIGetCommitmentsAssignmentsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).CommitmentsAPIGetCommitmentsAssignmentsWithResponse), ctx)
+}
+
+// CommitmentsAPIGetCommitmentsWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) CommitmentsAPIGetCommitmentsWithResponse(ctx context.Context, params *sdk.CommitmentsAPIGetCommitmentsParams) (*sdk.CommitmentsAPIGetCommitmentsResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CommitmentsAPIGetCommitmentsWithResponse", ctx, params)
+	ret0, _ := ret[0].(*sdk.CommitmentsAPIGetCommitmentsResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CommitmentsAPIGetCommitmentsWithResponse indicates an expected call of CommitmentsAPIGetCommitmentsWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) CommitmentsAPIGetCommitmentsWithResponse(ctx, params interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIGetCommitmentsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).CommitmentsAPIGetCommitmentsWithResponse), ctx, params)
+}
+
+// CommitmentsAPIGetGCPCommitmentsImportScriptWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) CommitmentsAPIGetGCPCommitmentsImportScriptWithResponse(ctx context.Context, params *sdk.CommitmentsAPIGetGCPCommitmentsImportScriptParams) (*sdk.CommitmentsAPIGetGCPCommitmentsImportScriptResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CommitmentsAPIGetGCPCommitmentsImportScriptWithResponse", ctx, params)
+	ret0, _ := ret[0].(*sdk.CommitmentsAPIGetGCPCommitmentsImportScriptResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CommitmentsAPIGetGCPCommitmentsImportScriptWithResponse indicates an expected call of CommitmentsAPIGetGCPCommitmentsImportScriptWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) CommitmentsAPIGetGCPCommitmentsImportScriptWithResponse(ctx, params interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIGetGCPCommitmentsImportScriptWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).CommitmentsAPIGetGCPCommitmentsImportScriptWithResponse), ctx, params)
+}
+
+// CommitmentsAPIGetGCPCommitmentsScriptTemplateWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) CommitmentsAPIGetGCPCommitmentsScriptTemplateWithResponse(ctx context.Context) (*sdk.CommitmentsAPIGetGCPCommitmentsScriptTemplateResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CommitmentsAPIGetGCPCommitmentsScriptTemplateWithResponse", ctx)
+	ret0, _ := ret[0].(*sdk.CommitmentsAPIGetGCPCommitmentsScriptTemplateResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CommitmentsAPIGetGCPCommitmentsScriptTemplateWithResponse indicates an expected call of CommitmentsAPIGetGCPCommitmentsScriptTemplateWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) CommitmentsAPIGetGCPCommitmentsScriptTemplateWithResponse(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIGetGCPCommitmentsScriptTemplateWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).CommitmentsAPIGetGCPCommitmentsScriptTemplateWithResponse), ctx)
+}
+
+// CommitmentsAPIImportAzureReservationsWithBodyWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) CommitmentsAPIImportAzureReservationsWithBodyWithResponse(ctx context.Context, params *sdk.CommitmentsAPIImportAzureReservationsParams, contentType string, body io.Reader) (*sdk.CommitmentsAPIImportAzureReservationsResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CommitmentsAPIImportAzureReservationsWithBodyWithResponse", ctx, params, contentType, body)
+	ret0, _ := ret[0].(*sdk.CommitmentsAPIImportAzureReservationsResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CommitmentsAPIImportAzureReservationsWithBodyWithResponse indicates an expected call of CommitmentsAPIImportAzureReservationsWithBodyWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) CommitmentsAPIImportAzureReservationsWithBodyWithResponse(ctx, params, contentType, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIImportAzureReservationsWithBodyWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).CommitmentsAPIImportAzureReservationsWithBodyWithResponse), ctx, params, contentType, body)
+}
+
+// CommitmentsAPIImportAzureReservationsWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) CommitmentsAPIImportAzureReservationsWithResponse(ctx context.Context, params *sdk.CommitmentsAPIImportAzureReservationsParams, body sdk.CommitmentsAPIImportAzureReservationsJSONRequestBody) (*sdk.CommitmentsAPIImportAzureReservationsResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CommitmentsAPIImportAzureReservationsWithResponse", ctx, params, body)
+	ret0, _ := ret[0].(*sdk.CommitmentsAPIImportAzureReservationsResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CommitmentsAPIImportAzureReservationsWithResponse indicates an expected call of CommitmentsAPIImportAzureReservationsWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) CommitmentsAPIImportAzureReservationsWithResponse(ctx, params, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIImportAzureReservationsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).CommitmentsAPIImportAzureReservationsWithResponse), ctx, params, body)
+}
+
+// CommitmentsAPIImportGCPCommitmentsWithBodyWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) CommitmentsAPIImportGCPCommitmentsWithBodyWithResponse(ctx context.Context, params *sdk.CommitmentsAPIImportGCPCommitmentsParams, contentType string, body io.Reader) (*sdk.CommitmentsAPIImportGCPCommitmentsResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CommitmentsAPIImportGCPCommitmentsWithBodyWithResponse", ctx, params, contentType, body)
+	ret0, _ := ret[0].(*sdk.CommitmentsAPIImportGCPCommitmentsResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CommitmentsAPIImportGCPCommitmentsWithBodyWithResponse indicates an expected call of CommitmentsAPIImportGCPCommitmentsWithBodyWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) CommitmentsAPIImportGCPCommitmentsWithBodyWithResponse(ctx, params, contentType, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIImportGCPCommitmentsWithBodyWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).CommitmentsAPIImportGCPCommitmentsWithBodyWithResponse), ctx, params, contentType, body)
+}
+
+// CommitmentsAPIImportGCPCommitmentsWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) CommitmentsAPIImportGCPCommitmentsWithResponse(ctx context.Context, params *sdk.CommitmentsAPIImportGCPCommitmentsParams, body sdk.CommitmentsAPIImportGCPCommitmentsJSONRequestBody) (*sdk.CommitmentsAPIImportGCPCommitmentsResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CommitmentsAPIImportGCPCommitmentsWithResponse", ctx, params, body)
+	ret0, _ := ret[0].(*sdk.CommitmentsAPIImportGCPCommitmentsResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CommitmentsAPIImportGCPCommitmentsWithResponse indicates an expected call of CommitmentsAPIImportGCPCommitmentsWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) CommitmentsAPIImportGCPCommitmentsWithResponse(ctx, params, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIImportGCPCommitmentsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).CommitmentsAPIImportGCPCommitmentsWithResponse), ctx, params, body)
+}
+
+// CommitmentsAPIReplaceCommitmentAssignmentsWithBodyWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) CommitmentsAPIReplaceCommitmentAssignmentsWithBodyWithResponse(ctx context.Context, commitmentId, contentType string, body io.Reader) (*sdk.CommitmentsAPIReplaceCommitmentAssignmentsResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CommitmentsAPIReplaceCommitmentAssignmentsWithBodyWithResponse", ctx, commitmentId, contentType, body)
+	ret0, _ := ret[0].(*sdk.CommitmentsAPIReplaceCommitmentAssignmentsResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CommitmentsAPIReplaceCommitmentAssignmentsWithBodyWithResponse indicates an expected call of CommitmentsAPIReplaceCommitmentAssignmentsWithBodyWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) CommitmentsAPIReplaceCommitmentAssignmentsWithBodyWithResponse(ctx, commitmentId, contentType, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIReplaceCommitmentAssignmentsWithBodyWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).CommitmentsAPIReplaceCommitmentAssignmentsWithBodyWithResponse), ctx, commitmentId, contentType, body)
+}
+
+// CommitmentsAPIReplaceCommitmentAssignmentsWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) CommitmentsAPIReplaceCommitmentAssignmentsWithResponse(ctx context.Context, commitmentId string, body sdk.CommitmentsAPIReplaceCommitmentAssignmentsJSONRequestBody) (*sdk.CommitmentsAPIReplaceCommitmentAssignmentsResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CommitmentsAPIReplaceCommitmentAssignmentsWithResponse", ctx, commitmentId, body)
+	ret0, _ := ret[0].(*sdk.CommitmentsAPIReplaceCommitmentAssignmentsResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CommitmentsAPIReplaceCommitmentAssignmentsWithResponse indicates an expected call of CommitmentsAPIReplaceCommitmentAssignmentsWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) CommitmentsAPIReplaceCommitmentAssignmentsWithResponse(ctx, commitmentId, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIReplaceCommitmentAssignmentsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).CommitmentsAPIReplaceCommitmentAssignmentsWithResponse), ctx, commitmentId, body)
+}
+
+// CommitmentsAPIUpdateCommitmentWithBodyWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) CommitmentsAPIUpdateCommitmentWithBodyWithResponse(ctx context.Context, commitmentId, contentType string, body io.Reader) (*sdk.CommitmentsAPIUpdateCommitmentResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CommitmentsAPIUpdateCommitmentWithBodyWithResponse", ctx, commitmentId, contentType, body)
+	ret0, _ := ret[0].(*sdk.CommitmentsAPIUpdateCommitmentResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CommitmentsAPIUpdateCommitmentWithBodyWithResponse indicates an expected call of CommitmentsAPIUpdateCommitmentWithBodyWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) CommitmentsAPIUpdateCommitmentWithBodyWithResponse(ctx, commitmentId, contentType, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIUpdateCommitmentWithBodyWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).CommitmentsAPIUpdateCommitmentWithBodyWithResponse), ctx, commitmentId, contentType, body)
+}
+
+// CommitmentsAPIUpdateCommitmentWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) CommitmentsAPIUpdateCommitmentWithResponse(ctx context.Context, commitmentId string, body sdk.CommitmentsAPIUpdateCommitmentJSONRequestBody) (*sdk.CommitmentsAPIUpdateCommitmentResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CommitmentsAPIUpdateCommitmentWithResponse", ctx, commitmentId, body)
+	ret0, _ := ret[0].(*sdk.CommitmentsAPIUpdateCommitmentResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CommitmentsAPIUpdateCommitmentWithResponse indicates an expected call of CommitmentsAPIUpdateCommitmentWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) CommitmentsAPIUpdateCommitmentWithResponse(ctx, commitmentId, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIUpdateCommitmentWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).CommitmentsAPIUpdateCommitmentWithResponse), ctx, commitmentId, body)
 }
 
 // EvictorAPIGetAdvancedConfigWithResponse mocks base method.

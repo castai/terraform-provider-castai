@@ -387,6 +387,50 @@ type ClientInterface interface {
 	// ScheduledRebalancingAPIGetRebalancingSchedule request
 	ScheduledRebalancingAPIGetRebalancingSchedule(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// CommitmentsAPIGetCommitmentsAssignments request
+	CommitmentsAPIGetCommitmentsAssignments(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// CommitmentsAPICreateCommitmentAssignment request
+	CommitmentsAPICreateCommitmentAssignment(ctx context.Context, params *CommitmentsAPICreateCommitmentAssignmentParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// CommitmentsAPIDeleteCommitmentAssignment request
+	CommitmentsAPIDeleteCommitmentAssignment(ctx context.Context, assignmentId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// CommitmentsAPIGetCommitments request
+	CommitmentsAPIGetCommitments(ctx context.Context, params *CommitmentsAPIGetCommitmentsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// CommitmentsAPIImportAzureReservations request with any body
+	CommitmentsAPIImportAzureReservationsWithBody(ctx context.Context, params *CommitmentsAPIImportAzureReservationsParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	CommitmentsAPIImportAzureReservations(ctx context.Context, params *CommitmentsAPIImportAzureReservationsParams, body CommitmentsAPIImportAzureReservationsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// CommitmentsAPIImportGCPCommitments request with any body
+	CommitmentsAPIImportGCPCommitmentsWithBody(ctx context.Context, params *CommitmentsAPIImportGCPCommitmentsParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	CommitmentsAPIImportGCPCommitments(ctx context.Context, params *CommitmentsAPIImportGCPCommitmentsParams, body CommitmentsAPIImportGCPCommitmentsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// CommitmentsAPIGetGCPCommitmentsImportScript request
+	CommitmentsAPIGetGCPCommitmentsImportScript(ctx context.Context, params *CommitmentsAPIGetGCPCommitmentsImportScriptParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// CommitmentsAPIDeleteCommitment request
+	CommitmentsAPIDeleteCommitment(ctx context.Context, commitmentId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// CommitmentsAPIUpdateCommitment request with any body
+	CommitmentsAPIUpdateCommitmentWithBody(ctx context.Context, commitmentId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	CommitmentsAPIUpdateCommitment(ctx context.Context, commitmentId string, body CommitmentsAPIUpdateCommitmentJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// CommitmentsAPIGetCommitmentAssignments request
+	CommitmentsAPIGetCommitmentAssignments(ctx context.Context, commitmentId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// CommitmentsAPIReplaceCommitmentAssignments request with any body
+	CommitmentsAPIReplaceCommitmentAssignmentsWithBody(ctx context.Context, commitmentId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	CommitmentsAPIReplaceCommitmentAssignments(ctx context.Context, commitmentId string, body CommitmentsAPIReplaceCommitmentAssignmentsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// CommitmentsAPIGetGCPCommitmentsScriptTemplate request
+	CommitmentsAPIGetGCPCommitmentsScriptTemplate(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// ExternalClusterAPIGetCleanupScriptTemplate request
 	ExternalClusterAPIGetCleanupScriptTemplate(ctx context.Context, provider string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -1714,6 +1758,198 @@ func (c *Client) ScheduledRebalancingAPIDeleteRebalancingSchedule(ctx context.Co
 
 func (c *Client) ScheduledRebalancingAPIGetRebalancingSchedule(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewScheduledRebalancingAPIGetRebalancingScheduleRequest(c.Server, id)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) CommitmentsAPIGetCommitmentsAssignments(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCommitmentsAPIGetCommitmentsAssignmentsRequest(c.Server)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) CommitmentsAPICreateCommitmentAssignment(ctx context.Context, params *CommitmentsAPICreateCommitmentAssignmentParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCommitmentsAPICreateCommitmentAssignmentRequest(c.Server, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) CommitmentsAPIDeleteCommitmentAssignment(ctx context.Context, assignmentId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCommitmentsAPIDeleteCommitmentAssignmentRequest(c.Server, assignmentId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) CommitmentsAPIGetCommitments(ctx context.Context, params *CommitmentsAPIGetCommitmentsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCommitmentsAPIGetCommitmentsRequest(c.Server, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) CommitmentsAPIImportAzureReservationsWithBody(ctx context.Context, params *CommitmentsAPIImportAzureReservationsParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCommitmentsAPIImportAzureReservationsRequestWithBody(c.Server, params, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) CommitmentsAPIImportAzureReservations(ctx context.Context, params *CommitmentsAPIImportAzureReservationsParams, body CommitmentsAPIImportAzureReservationsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCommitmentsAPIImportAzureReservationsRequest(c.Server, params, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) CommitmentsAPIImportGCPCommitmentsWithBody(ctx context.Context, params *CommitmentsAPIImportGCPCommitmentsParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCommitmentsAPIImportGCPCommitmentsRequestWithBody(c.Server, params, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) CommitmentsAPIImportGCPCommitments(ctx context.Context, params *CommitmentsAPIImportGCPCommitmentsParams, body CommitmentsAPIImportGCPCommitmentsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCommitmentsAPIImportGCPCommitmentsRequest(c.Server, params, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) CommitmentsAPIGetGCPCommitmentsImportScript(ctx context.Context, params *CommitmentsAPIGetGCPCommitmentsImportScriptParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCommitmentsAPIGetGCPCommitmentsImportScriptRequest(c.Server, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) CommitmentsAPIDeleteCommitment(ctx context.Context, commitmentId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCommitmentsAPIDeleteCommitmentRequest(c.Server, commitmentId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) CommitmentsAPIUpdateCommitmentWithBody(ctx context.Context, commitmentId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCommitmentsAPIUpdateCommitmentRequestWithBody(c.Server, commitmentId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) CommitmentsAPIUpdateCommitment(ctx context.Context, commitmentId string, body CommitmentsAPIUpdateCommitmentJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCommitmentsAPIUpdateCommitmentRequest(c.Server, commitmentId, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) CommitmentsAPIGetCommitmentAssignments(ctx context.Context, commitmentId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCommitmentsAPIGetCommitmentAssignmentsRequest(c.Server, commitmentId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) CommitmentsAPIReplaceCommitmentAssignmentsWithBody(ctx context.Context, commitmentId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCommitmentsAPIReplaceCommitmentAssignmentsRequestWithBody(c.Server, commitmentId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) CommitmentsAPIReplaceCommitmentAssignments(ctx context.Context, commitmentId string, body CommitmentsAPIReplaceCommitmentAssignmentsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCommitmentsAPIReplaceCommitmentAssignmentsRequest(c.Server, commitmentId, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) CommitmentsAPIGetGCPCommitmentsScriptTemplate(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCommitmentsAPIGetGCPCommitmentsScriptTemplateRequest(c.Server)
 	if err != nil {
 		return nil, err
 	}
@@ -5199,6 +5435,541 @@ func NewScheduledRebalancingAPIGetRebalancingScheduleRequest(server string, id s
 	return req, nil
 }
 
+// NewCommitmentsAPIGetCommitmentsAssignmentsRequest generates requests for CommitmentsAPIGetCommitmentsAssignments
+func NewCommitmentsAPIGetCommitmentsAssignmentsRequest(server string) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/savings/assignments")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewCommitmentsAPICreateCommitmentAssignmentRequest generates requests for CommitmentsAPICreateCommitmentAssignment
+func NewCommitmentsAPICreateCommitmentAssignmentRequest(server string, params *CommitmentsAPICreateCommitmentAssignmentParams) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/savings/assignments")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	queryValues := queryURL.Query()
+
+	if queryFrag, err := runtime.StyleParamWithLocation("form", true, "clusterId", runtime.ParamLocationQuery, params.ClusterId); err != nil {
+		return nil, err
+	} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+		return nil, err
+	} else {
+		for k, v := range parsed {
+			for _, v2 := range v {
+				queryValues.Add(k, v2)
+			}
+		}
+	}
+
+	if queryFrag, err := runtime.StyleParamWithLocation("form", true, "commitmentId", runtime.ParamLocationQuery, params.CommitmentId); err != nil {
+		return nil, err
+	} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+		return nil, err
+	} else {
+		for k, v := range parsed {
+			for _, v2 := range v {
+				queryValues.Add(k, v2)
+			}
+		}
+	}
+
+	queryURL.RawQuery = queryValues.Encode()
+
+	req, err := http.NewRequest("POST", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewCommitmentsAPIDeleteCommitmentAssignmentRequest generates requests for CommitmentsAPIDeleteCommitmentAssignment
+func NewCommitmentsAPIDeleteCommitmentAssignmentRequest(server string, assignmentId string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "assignmentId", runtime.ParamLocationPath, assignmentId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/savings/assignments/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("DELETE", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewCommitmentsAPIGetCommitmentsRequest generates requests for CommitmentsAPIGetCommitments
+func NewCommitmentsAPIGetCommitmentsRequest(server string, params *CommitmentsAPIGetCommitmentsParams) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/savings/commitments")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	queryValues := queryURL.Query()
+
+	if params.IncludeUsage != nil {
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "includeUsage", runtime.ParamLocationQuery, *params.IncludeUsage); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.ClusterId != nil {
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "clusterId", runtime.ParamLocationQuery, *params.ClusterId); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	queryURL.RawQuery = queryValues.Encode()
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewCommitmentsAPIImportAzureReservationsRequest calls the generic CommitmentsAPIImportAzureReservations builder with application/json body
+func NewCommitmentsAPIImportAzureReservationsRequest(server string, params *CommitmentsAPIImportAzureReservationsParams, body CommitmentsAPIImportAzureReservationsJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewCommitmentsAPIImportAzureReservationsRequestWithBody(server, params, "application/json", bodyReader)
+}
+
+// NewCommitmentsAPIImportAzureReservationsRequestWithBody generates requests for CommitmentsAPIImportAzureReservations with any type of body
+func NewCommitmentsAPIImportAzureReservationsRequestWithBody(server string, params *CommitmentsAPIImportAzureReservationsParams, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/savings/commitments/import/azure/reservation")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	queryValues := queryURL.Query()
+
+	if params.Behaviour != nil {
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "behaviour", runtime.ParamLocationQuery, *params.Behaviour); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	queryURL.RawQuery = queryValues.Encode()
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewCommitmentsAPIImportGCPCommitmentsRequest calls the generic CommitmentsAPIImportGCPCommitments builder with application/json body
+func NewCommitmentsAPIImportGCPCommitmentsRequest(server string, params *CommitmentsAPIImportGCPCommitmentsParams, body CommitmentsAPIImportGCPCommitmentsJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewCommitmentsAPIImportGCPCommitmentsRequestWithBody(server, params, "application/json", bodyReader)
+}
+
+// NewCommitmentsAPIImportGCPCommitmentsRequestWithBody generates requests for CommitmentsAPIImportGCPCommitments with any type of body
+func NewCommitmentsAPIImportGCPCommitmentsRequestWithBody(server string, params *CommitmentsAPIImportGCPCommitmentsParams, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/savings/commitments/import/gcp/cud")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	queryValues := queryURL.Query()
+
+	if params.Behaviour != nil {
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "behaviour", runtime.ParamLocationQuery, *params.Behaviour); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	queryURL.RawQuery = queryValues.Encode()
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewCommitmentsAPIGetGCPCommitmentsImportScriptRequest generates requests for CommitmentsAPIGetGCPCommitmentsImportScript
+func NewCommitmentsAPIGetGCPCommitmentsImportScriptRequest(server string, params *CommitmentsAPIGetGCPCommitmentsImportScriptParams) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/savings/commitments/import/gcp/cud/script")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	queryValues := queryURL.Query()
+
+	if params.Projects != nil {
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "projects", runtime.ParamLocationQuery, *params.Projects); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	queryURL.RawQuery = queryValues.Encode()
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewCommitmentsAPIDeleteCommitmentRequest generates requests for CommitmentsAPIDeleteCommitment
+func NewCommitmentsAPIDeleteCommitmentRequest(server string, commitmentId string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "commitmentId", runtime.ParamLocationPath, commitmentId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/savings/commitments/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("DELETE", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewCommitmentsAPIUpdateCommitmentRequest calls the generic CommitmentsAPIUpdateCommitment builder with application/json body
+func NewCommitmentsAPIUpdateCommitmentRequest(server string, commitmentId string, body CommitmentsAPIUpdateCommitmentJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewCommitmentsAPIUpdateCommitmentRequestWithBody(server, commitmentId, "application/json", bodyReader)
+}
+
+// NewCommitmentsAPIUpdateCommitmentRequestWithBody generates requests for CommitmentsAPIUpdateCommitment with any type of body
+func NewCommitmentsAPIUpdateCommitmentRequestWithBody(server string, commitmentId string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "commitmentId", runtime.ParamLocationPath, commitmentId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/savings/commitments/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("PUT", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewCommitmentsAPIGetCommitmentAssignmentsRequest generates requests for CommitmentsAPIGetCommitmentAssignments
+func NewCommitmentsAPIGetCommitmentAssignmentsRequest(server string, commitmentId string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "commitmentId", runtime.ParamLocationPath, commitmentId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/savings/commitments/%s/assignments", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewCommitmentsAPIReplaceCommitmentAssignmentsRequest calls the generic CommitmentsAPIReplaceCommitmentAssignments builder with application/json body
+func NewCommitmentsAPIReplaceCommitmentAssignmentsRequest(server string, commitmentId string, body CommitmentsAPIReplaceCommitmentAssignmentsJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewCommitmentsAPIReplaceCommitmentAssignmentsRequestWithBody(server, commitmentId, "application/json", bodyReader)
+}
+
+// NewCommitmentsAPIReplaceCommitmentAssignmentsRequestWithBody generates requests for CommitmentsAPIReplaceCommitmentAssignments with any type of body
+func NewCommitmentsAPIReplaceCommitmentAssignmentsRequestWithBody(server string, commitmentId string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "commitmentId", runtime.ParamLocationPath, commitmentId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/savings/commitments/%s/assignments", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("PUT", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewCommitmentsAPIGetGCPCommitmentsScriptTemplateRequest generates requests for CommitmentsAPIGetGCPCommitmentsScriptTemplate
+func NewCommitmentsAPIGetGCPCommitmentsScriptTemplateRequest(server string) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/scripts/commitments/gcp/cud/import.sh")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 // NewExternalClusterAPIGetCleanupScriptTemplateRequest generates requests for ExternalClusterAPIGetCleanupScriptTemplate
 func NewExternalClusterAPIGetCleanupScriptTemplateRequest(server string, provider string) (*http.Request, error) {
 	var err error
@@ -5835,6 +6606,50 @@ type ClientWithResponsesInterface interface {
 
 	// ScheduledRebalancingAPIGetRebalancingSchedule request
 	ScheduledRebalancingAPIGetRebalancingScheduleWithResponse(ctx context.Context, id string) (*ScheduledRebalancingAPIGetRebalancingScheduleResponse, error)
+
+	// CommitmentsAPIGetCommitmentsAssignments request
+	CommitmentsAPIGetCommitmentsAssignmentsWithResponse(ctx context.Context) (*CommitmentsAPIGetCommitmentsAssignmentsResponse, error)
+
+	// CommitmentsAPICreateCommitmentAssignment request
+	CommitmentsAPICreateCommitmentAssignmentWithResponse(ctx context.Context, params *CommitmentsAPICreateCommitmentAssignmentParams) (*CommitmentsAPICreateCommitmentAssignmentResponse, error)
+
+	// CommitmentsAPIDeleteCommitmentAssignment request
+	CommitmentsAPIDeleteCommitmentAssignmentWithResponse(ctx context.Context, assignmentId string) (*CommitmentsAPIDeleteCommitmentAssignmentResponse, error)
+
+	// CommitmentsAPIGetCommitments request
+	CommitmentsAPIGetCommitmentsWithResponse(ctx context.Context, params *CommitmentsAPIGetCommitmentsParams) (*CommitmentsAPIGetCommitmentsResponse, error)
+
+	// CommitmentsAPIImportAzureReservations request  with any body
+	CommitmentsAPIImportAzureReservationsWithBodyWithResponse(ctx context.Context, params *CommitmentsAPIImportAzureReservationsParams, contentType string, body io.Reader) (*CommitmentsAPIImportAzureReservationsResponse, error)
+
+	CommitmentsAPIImportAzureReservationsWithResponse(ctx context.Context, params *CommitmentsAPIImportAzureReservationsParams, body CommitmentsAPIImportAzureReservationsJSONRequestBody) (*CommitmentsAPIImportAzureReservationsResponse, error)
+
+	// CommitmentsAPIImportGCPCommitments request  with any body
+	CommitmentsAPIImportGCPCommitmentsWithBodyWithResponse(ctx context.Context, params *CommitmentsAPIImportGCPCommitmentsParams, contentType string, body io.Reader) (*CommitmentsAPIImportGCPCommitmentsResponse, error)
+
+	CommitmentsAPIImportGCPCommitmentsWithResponse(ctx context.Context, params *CommitmentsAPIImportGCPCommitmentsParams, body CommitmentsAPIImportGCPCommitmentsJSONRequestBody) (*CommitmentsAPIImportGCPCommitmentsResponse, error)
+
+	// CommitmentsAPIGetGCPCommitmentsImportScript request
+	CommitmentsAPIGetGCPCommitmentsImportScriptWithResponse(ctx context.Context, params *CommitmentsAPIGetGCPCommitmentsImportScriptParams) (*CommitmentsAPIGetGCPCommitmentsImportScriptResponse, error)
+
+	// CommitmentsAPIDeleteCommitment request
+	CommitmentsAPIDeleteCommitmentWithResponse(ctx context.Context, commitmentId string) (*CommitmentsAPIDeleteCommitmentResponse, error)
+
+	// CommitmentsAPIUpdateCommitment request  with any body
+	CommitmentsAPIUpdateCommitmentWithBodyWithResponse(ctx context.Context, commitmentId string, contentType string, body io.Reader) (*CommitmentsAPIUpdateCommitmentResponse, error)
+
+	CommitmentsAPIUpdateCommitmentWithResponse(ctx context.Context, commitmentId string, body CommitmentsAPIUpdateCommitmentJSONRequestBody) (*CommitmentsAPIUpdateCommitmentResponse, error)
+
+	// CommitmentsAPIGetCommitmentAssignments request
+	CommitmentsAPIGetCommitmentAssignmentsWithResponse(ctx context.Context, commitmentId string) (*CommitmentsAPIGetCommitmentAssignmentsResponse, error)
+
+	// CommitmentsAPIReplaceCommitmentAssignments request  with any body
+	CommitmentsAPIReplaceCommitmentAssignmentsWithBodyWithResponse(ctx context.Context, commitmentId string, contentType string, body io.Reader) (*CommitmentsAPIReplaceCommitmentAssignmentsResponse, error)
+
+	CommitmentsAPIReplaceCommitmentAssignmentsWithResponse(ctx context.Context, commitmentId string, body CommitmentsAPIReplaceCommitmentAssignmentsJSONRequestBody) (*CommitmentsAPIReplaceCommitmentAssignmentsResponse, error)
+
+	// CommitmentsAPIGetGCPCommitmentsScriptTemplate request
+	CommitmentsAPIGetGCPCommitmentsScriptTemplateWithResponse(ctx context.Context) (*CommitmentsAPIGetGCPCommitmentsScriptTemplateResponse, error)
 
 	// ExternalClusterAPIGetCleanupScriptTemplate request
 	ExternalClusterAPIGetCleanupScriptTemplateWithResponse(ctx context.Context, provider string) (*ExternalClusterAPIGetCleanupScriptTemplateResponse, error)
@@ -8243,6 +9058,365 @@ func (r ScheduledRebalancingAPIGetRebalancingScheduleResponse) GetBody() []byte 
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
+type CommitmentsAPIGetCommitmentsAssignmentsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *CastaiInventoryV1beta1GetCommitmentsAssignmentsResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r CommitmentsAPIGetCommitmentsAssignmentsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r CommitmentsAPIGetCommitmentsAssignmentsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r CommitmentsAPIGetCommitmentsAssignmentsResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type CommitmentsAPICreateCommitmentAssignmentResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *map[string]interface{}
+}
+
+// Status returns HTTPResponse.Status
+func (r CommitmentsAPICreateCommitmentAssignmentResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r CommitmentsAPICreateCommitmentAssignmentResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r CommitmentsAPICreateCommitmentAssignmentResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type CommitmentsAPIDeleteCommitmentAssignmentResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *map[string]interface{}
+}
+
+// Status returns HTTPResponse.Status
+func (r CommitmentsAPIDeleteCommitmentAssignmentResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r CommitmentsAPIDeleteCommitmentAssignmentResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r CommitmentsAPIDeleteCommitmentAssignmentResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type CommitmentsAPIGetCommitmentsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *CastaiInventoryV1beta1GetCommitmentsResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r CommitmentsAPIGetCommitmentsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r CommitmentsAPIGetCommitmentsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r CommitmentsAPIGetCommitmentsResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type CommitmentsAPIImportAzureReservationsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *map[string]interface{}
+}
+
+// Status returns HTTPResponse.Status
+func (r CommitmentsAPIImportAzureReservationsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r CommitmentsAPIImportAzureReservationsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r CommitmentsAPIImportAzureReservationsResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type CommitmentsAPIImportGCPCommitmentsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *map[string]interface{}
+}
+
+// Status returns HTTPResponse.Status
+func (r CommitmentsAPIImportGCPCommitmentsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r CommitmentsAPIImportGCPCommitmentsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r CommitmentsAPIImportGCPCommitmentsResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type CommitmentsAPIGetGCPCommitmentsImportScriptResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *CastaiInventoryV1beta1GetGCPCommitmentsImportScriptResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r CommitmentsAPIGetGCPCommitmentsImportScriptResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r CommitmentsAPIGetGCPCommitmentsImportScriptResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r CommitmentsAPIGetGCPCommitmentsImportScriptResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type CommitmentsAPIDeleteCommitmentResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *map[string]interface{}
+}
+
+// Status returns HTTPResponse.Status
+func (r CommitmentsAPIDeleteCommitmentResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r CommitmentsAPIDeleteCommitmentResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r CommitmentsAPIDeleteCommitmentResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type CommitmentsAPIUpdateCommitmentResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *CastaiInventoryV1beta1UpdateCommitmentResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r CommitmentsAPIUpdateCommitmentResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r CommitmentsAPIUpdateCommitmentResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r CommitmentsAPIUpdateCommitmentResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type CommitmentsAPIGetCommitmentAssignmentsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *CastaiInventoryV1beta1GetCommitmentAssignmentsResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r CommitmentsAPIGetCommitmentAssignmentsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r CommitmentsAPIGetCommitmentAssignmentsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r CommitmentsAPIGetCommitmentAssignmentsResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type CommitmentsAPIReplaceCommitmentAssignmentsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *CastaiInventoryV1beta1ReplaceCommitmentAssignmentsResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r CommitmentsAPIReplaceCommitmentAssignmentsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r CommitmentsAPIReplaceCommitmentAssignmentsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r CommitmentsAPIReplaceCommitmentAssignmentsResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type CommitmentsAPIGetGCPCommitmentsScriptTemplateResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+}
+
+// Status returns HTTPResponse.Status
+func (r CommitmentsAPIGetGCPCommitmentsScriptTemplateResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r CommitmentsAPIGetGCPCommitmentsScriptTemplateResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r CommitmentsAPIGetGCPCommitmentsScriptTemplateResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
 type ExternalClusterAPIGetCleanupScriptTemplateResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -9430,6 +10604,146 @@ func (c *ClientWithResponses) ScheduledRebalancingAPIGetRebalancingScheduleWithR
 		return nil, err
 	}
 	return ParseScheduledRebalancingAPIGetRebalancingScheduleResponse(rsp)
+}
+
+// CommitmentsAPIGetCommitmentsAssignmentsWithResponse request returning *CommitmentsAPIGetCommitmentsAssignmentsResponse
+func (c *ClientWithResponses) CommitmentsAPIGetCommitmentsAssignmentsWithResponse(ctx context.Context) (*CommitmentsAPIGetCommitmentsAssignmentsResponse, error) {
+	rsp, err := c.CommitmentsAPIGetCommitmentsAssignments(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCommitmentsAPIGetCommitmentsAssignmentsResponse(rsp)
+}
+
+// CommitmentsAPICreateCommitmentAssignmentWithResponse request returning *CommitmentsAPICreateCommitmentAssignmentResponse
+func (c *ClientWithResponses) CommitmentsAPICreateCommitmentAssignmentWithResponse(ctx context.Context, params *CommitmentsAPICreateCommitmentAssignmentParams) (*CommitmentsAPICreateCommitmentAssignmentResponse, error) {
+	rsp, err := c.CommitmentsAPICreateCommitmentAssignment(ctx, params)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCommitmentsAPICreateCommitmentAssignmentResponse(rsp)
+}
+
+// CommitmentsAPIDeleteCommitmentAssignmentWithResponse request returning *CommitmentsAPIDeleteCommitmentAssignmentResponse
+func (c *ClientWithResponses) CommitmentsAPIDeleteCommitmentAssignmentWithResponse(ctx context.Context, assignmentId string) (*CommitmentsAPIDeleteCommitmentAssignmentResponse, error) {
+	rsp, err := c.CommitmentsAPIDeleteCommitmentAssignment(ctx, assignmentId)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCommitmentsAPIDeleteCommitmentAssignmentResponse(rsp)
+}
+
+// CommitmentsAPIGetCommitmentsWithResponse request returning *CommitmentsAPIGetCommitmentsResponse
+func (c *ClientWithResponses) CommitmentsAPIGetCommitmentsWithResponse(ctx context.Context, params *CommitmentsAPIGetCommitmentsParams) (*CommitmentsAPIGetCommitmentsResponse, error) {
+	rsp, err := c.CommitmentsAPIGetCommitments(ctx, params)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCommitmentsAPIGetCommitmentsResponse(rsp)
+}
+
+// CommitmentsAPIImportAzureReservationsWithBodyWithResponse request with arbitrary body returning *CommitmentsAPIImportAzureReservationsResponse
+func (c *ClientWithResponses) CommitmentsAPIImportAzureReservationsWithBodyWithResponse(ctx context.Context, params *CommitmentsAPIImportAzureReservationsParams, contentType string, body io.Reader) (*CommitmentsAPIImportAzureReservationsResponse, error) {
+	rsp, err := c.CommitmentsAPIImportAzureReservationsWithBody(ctx, params, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCommitmentsAPIImportAzureReservationsResponse(rsp)
+}
+
+func (c *ClientWithResponses) CommitmentsAPIImportAzureReservationsWithResponse(ctx context.Context, params *CommitmentsAPIImportAzureReservationsParams, body CommitmentsAPIImportAzureReservationsJSONRequestBody) (*CommitmentsAPIImportAzureReservationsResponse, error) {
+	rsp, err := c.CommitmentsAPIImportAzureReservations(ctx, params, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCommitmentsAPIImportAzureReservationsResponse(rsp)
+}
+
+// CommitmentsAPIImportGCPCommitmentsWithBodyWithResponse request with arbitrary body returning *CommitmentsAPIImportGCPCommitmentsResponse
+func (c *ClientWithResponses) CommitmentsAPIImportGCPCommitmentsWithBodyWithResponse(ctx context.Context, params *CommitmentsAPIImportGCPCommitmentsParams, contentType string, body io.Reader) (*CommitmentsAPIImportGCPCommitmentsResponse, error) {
+	rsp, err := c.CommitmentsAPIImportGCPCommitmentsWithBody(ctx, params, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCommitmentsAPIImportGCPCommitmentsResponse(rsp)
+}
+
+func (c *ClientWithResponses) CommitmentsAPIImportGCPCommitmentsWithResponse(ctx context.Context, params *CommitmentsAPIImportGCPCommitmentsParams, body CommitmentsAPIImportGCPCommitmentsJSONRequestBody) (*CommitmentsAPIImportGCPCommitmentsResponse, error) {
+	rsp, err := c.CommitmentsAPIImportGCPCommitments(ctx, params, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCommitmentsAPIImportGCPCommitmentsResponse(rsp)
+}
+
+// CommitmentsAPIGetGCPCommitmentsImportScriptWithResponse request returning *CommitmentsAPIGetGCPCommitmentsImportScriptResponse
+func (c *ClientWithResponses) CommitmentsAPIGetGCPCommitmentsImportScriptWithResponse(ctx context.Context, params *CommitmentsAPIGetGCPCommitmentsImportScriptParams) (*CommitmentsAPIGetGCPCommitmentsImportScriptResponse, error) {
+	rsp, err := c.CommitmentsAPIGetGCPCommitmentsImportScript(ctx, params)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCommitmentsAPIGetGCPCommitmentsImportScriptResponse(rsp)
+}
+
+// CommitmentsAPIDeleteCommitmentWithResponse request returning *CommitmentsAPIDeleteCommitmentResponse
+func (c *ClientWithResponses) CommitmentsAPIDeleteCommitmentWithResponse(ctx context.Context, commitmentId string) (*CommitmentsAPIDeleteCommitmentResponse, error) {
+	rsp, err := c.CommitmentsAPIDeleteCommitment(ctx, commitmentId)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCommitmentsAPIDeleteCommitmentResponse(rsp)
+}
+
+// CommitmentsAPIUpdateCommitmentWithBodyWithResponse request with arbitrary body returning *CommitmentsAPIUpdateCommitmentResponse
+func (c *ClientWithResponses) CommitmentsAPIUpdateCommitmentWithBodyWithResponse(ctx context.Context, commitmentId string, contentType string, body io.Reader) (*CommitmentsAPIUpdateCommitmentResponse, error) {
+	rsp, err := c.CommitmentsAPIUpdateCommitmentWithBody(ctx, commitmentId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCommitmentsAPIUpdateCommitmentResponse(rsp)
+}
+
+func (c *ClientWithResponses) CommitmentsAPIUpdateCommitmentWithResponse(ctx context.Context, commitmentId string, body CommitmentsAPIUpdateCommitmentJSONRequestBody) (*CommitmentsAPIUpdateCommitmentResponse, error) {
+	rsp, err := c.CommitmentsAPIUpdateCommitment(ctx, commitmentId, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCommitmentsAPIUpdateCommitmentResponse(rsp)
+}
+
+// CommitmentsAPIGetCommitmentAssignmentsWithResponse request returning *CommitmentsAPIGetCommitmentAssignmentsResponse
+func (c *ClientWithResponses) CommitmentsAPIGetCommitmentAssignmentsWithResponse(ctx context.Context, commitmentId string) (*CommitmentsAPIGetCommitmentAssignmentsResponse, error) {
+	rsp, err := c.CommitmentsAPIGetCommitmentAssignments(ctx, commitmentId)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCommitmentsAPIGetCommitmentAssignmentsResponse(rsp)
+}
+
+// CommitmentsAPIReplaceCommitmentAssignmentsWithBodyWithResponse request with arbitrary body returning *CommitmentsAPIReplaceCommitmentAssignmentsResponse
+func (c *ClientWithResponses) CommitmentsAPIReplaceCommitmentAssignmentsWithBodyWithResponse(ctx context.Context, commitmentId string, contentType string, body io.Reader) (*CommitmentsAPIReplaceCommitmentAssignmentsResponse, error) {
+	rsp, err := c.CommitmentsAPIReplaceCommitmentAssignmentsWithBody(ctx, commitmentId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCommitmentsAPIReplaceCommitmentAssignmentsResponse(rsp)
+}
+
+func (c *ClientWithResponses) CommitmentsAPIReplaceCommitmentAssignmentsWithResponse(ctx context.Context, commitmentId string, body CommitmentsAPIReplaceCommitmentAssignmentsJSONRequestBody) (*CommitmentsAPIReplaceCommitmentAssignmentsResponse, error) {
+	rsp, err := c.CommitmentsAPIReplaceCommitmentAssignments(ctx, commitmentId, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCommitmentsAPIReplaceCommitmentAssignmentsResponse(rsp)
+}
+
+// CommitmentsAPIGetGCPCommitmentsScriptTemplateWithResponse request returning *CommitmentsAPIGetGCPCommitmentsScriptTemplateResponse
+func (c *ClientWithResponses) CommitmentsAPIGetGCPCommitmentsScriptTemplateWithResponse(ctx context.Context) (*CommitmentsAPIGetGCPCommitmentsScriptTemplateResponse, error) {
+	rsp, err := c.CommitmentsAPIGetGCPCommitmentsScriptTemplate(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCommitmentsAPIGetGCPCommitmentsScriptTemplateResponse(rsp)
 }
 
 // ExternalClusterAPIGetCleanupScriptTemplateWithResponse request returning *ExternalClusterAPIGetCleanupScriptTemplateResponse
@@ -11559,6 +12873,308 @@ func ParseScheduledRebalancingAPIGetRebalancingScheduleResponse(rsp *http.Respon
 		}
 		response.JSON200 = &dest
 
+	}
+
+	return response, nil
+}
+
+// ParseCommitmentsAPIGetCommitmentsAssignmentsResponse parses an HTTP response from a CommitmentsAPIGetCommitmentsAssignmentsWithResponse call
+func ParseCommitmentsAPIGetCommitmentsAssignmentsResponse(rsp *http.Response) (*CommitmentsAPIGetCommitmentsAssignmentsResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &CommitmentsAPIGetCommitmentsAssignmentsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest CastaiInventoryV1beta1GetCommitmentsAssignmentsResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseCommitmentsAPICreateCommitmentAssignmentResponse parses an HTTP response from a CommitmentsAPICreateCommitmentAssignmentWithResponse call
+func ParseCommitmentsAPICreateCommitmentAssignmentResponse(rsp *http.Response) (*CommitmentsAPICreateCommitmentAssignmentResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &CommitmentsAPICreateCommitmentAssignmentResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest map[string]interface{}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseCommitmentsAPIDeleteCommitmentAssignmentResponse parses an HTTP response from a CommitmentsAPIDeleteCommitmentAssignmentWithResponse call
+func ParseCommitmentsAPIDeleteCommitmentAssignmentResponse(rsp *http.Response) (*CommitmentsAPIDeleteCommitmentAssignmentResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &CommitmentsAPIDeleteCommitmentAssignmentResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest map[string]interface{}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseCommitmentsAPIGetCommitmentsResponse parses an HTTP response from a CommitmentsAPIGetCommitmentsWithResponse call
+func ParseCommitmentsAPIGetCommitmentsResponse(rsp *http.Response) (*CommitmentsAPIGetCommitmentsResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &CommitmentsAPIGetCommitmentsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest CastaiInventoryV1beta1GetCommitmentsResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseCommitmentsAPIImportAzureReservationsResponse parses an HTTP response from a CommitmentsAPIImportAzureReservationsWithResponse call
+func ParseCommitmentsAPIImportAzureReservationsResponse(rsp *http.Response) (*CommitmentsAPIImportAzureReservationsResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &CommitmentsAPIImportAzureReservationsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest map[string]interface{}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseCommitmentsAPIImportGCPCommitmentsResponse parses an HTTP response from a CommitmentsAPIImportGCPCommitmentsWithResponse call
+func ParseCommitmentsAPIImportGCPCommitmentsResponse(rsp *http.Response) (*CommitmentsAPIImportGCPCommitmentsResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &CommitmentsAPIImportGCPCommitmentsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest map[string]interface{}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseCommitmentsAPIGetGCPCommitmentsImportScriptResponse parses an HTTP response from a CommitmentsAPIGetGCPCommitmentsImportScriptWithResponse call
+func ParseCommitmentsAPIGetGCPCommitmentsImportScriptResponse(rsp *http.Response) (*CommitmentsAPIGetGCPCommitmentsImportScriptResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &CommitmentsAPIGetGCPCommitmentsImportScriptResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest CastaiInventoryV1beta1GetGCPCommitmentsImportScriptResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseCommitmentsAPIDeleteCommitmentResponse parses an HTTP response from a CommitmentsAPIDeleteCommitmentWithResponse call
+func ParseCommitmentsAPIDeleteCommitmentResponse(rsp *http.Response) (*CommitmentsAPIDeleteCommitmentResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &CommitmentsAPIDeleteCommitmentResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest map[string]interface{}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseCommitmentsAPIUpdateCommitmentResponse parses an HTTP response from a CommitmentsAPIUpdateCommitmentWithResponse call
+func ParseCommitmentsAPIUpdateCommitmentResponse(rsp *http.Response) (*CommitmentsAPIUpdateCommitmentResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &CommitmentsAPIUpdateCommitmentResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest CastaiInventoryV1beta1UpdateCommitmentResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseCommitmentsAPIGetCommitmentAssignmentsResponse parses an HTTP response from a CommitmentsAPIGetCommitmentAssignmentsWithResponse call
+func ParseCommitmentsAPIGetCommitmentAssignmentsResponse(rsp *http.Response) (*CommitmentsAPIGetCommitmentAssignmentsResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &CommitmentsAPIGetCommitmentAssignmentsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest CastaiInventoryV1beta1GetCommitmentAssignmentsResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseCommitmentsAPIReplaceCommitmentAssignmentsResponse parses an HTTP response from a CommitmentsAPIReplaceCommitmentAssignmentsWithResponse call
+func ParseCommitmentsAPIReplaceCommitmentAssignmentsResponse(rsp *http.Response) (*CommitmentsAPIReplaceCommitmentAssignmentsResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &CommitmentsAPIReplaceCommitmentAssignmentsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest CastaiInventoryV1beta1ReplaceCommitmentAssignmentsResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseCommitmentsAPIGetGCPCommitmentsScriptTemplateResponse parses an HTTP response from a CommitmentsAPIGetGCPCommitmentsScriptTemplateWithResponse call
+func ParseCommitmentsAPIGetGCPCommitmentsScriptTemplateResponse(rsp *http.Response) (*CommitmentsAPIGetGCPCommitmentsScriptTemplateResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &CommitmentsAPIGetGCPCommitmentsScriptTemplateResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
 	}
 
 	return response, nil
