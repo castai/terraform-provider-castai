@@ -3,19 +3,21 @@ package castai
 import (
 	"context"
 	"encoding/csv"
+	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"strings"
 	"time"
 
-	"github.com/castai/terraform-provider-castai/castai/reservations"
-	"github.com/castai/terraform-provider-castai/castai/sdk"
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/samber/lo"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/castai/terraform-provider-castai/castai/commitments"
+	"github.com/castai/terraform-provider-castai/castai/sdk"
 )
 
 func resourceCommitments() *schema.Resource {
@@ -27,7 +29,7 @@ func resourceCommitments() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: commitmentsStateImporter,
 		},
-		Description: "Reservation represents cloud service provider reserved instances that can be used by CAST AI autoscaler.",
+		Description: "Commitments represent cloud service provider reserved instances (Azure) and commited use discounts (GCP) that can be used by CAST AI autoscaler.",
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(2 * time.Minute),
@@ -35,69 +37,82 @@ func resourceCommitments() *schema.Resource {
 		},
 		CustomizeDiff: commitmentsDiff,
 		Schema: map[string]*schema.Schema{
-			reservations.FieldReservationsCSV: {
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: "csv file containing reservations",
-			},
-			reservations.FieldReservationsOrganizationId: {
+			commitments.FieldAzureReservationsCSV: {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "organization",
+				Description: "CSV file containing Azure reservations",
 			},
-			reservations.FieldReservations: {
+			commitments.FieldGCPCUDsJSON: {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "JSON file containing GCP CUDs",
+			},
+			commitments.FieldReservationsOrganizationId: {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "ID of the organization",
+			},
+			commitments.FieldGCPCUDs: {
 				Type:     schema.TypeList,
 				Computed: true,
-				Optional: false,
+				Optional: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{},
+				},
+			},
+			commitments.FieldAzureReservations: {
+				Type:     schema.TypeList,
+				Computed: true,
+				Optional: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						reservations.FieldReservationCount: {
+						commitments.FieldReservationCount: {
 							Type:        schema.TypeString,
 							Required:    true,
 							Description: "amount of reserved instances",
 						},
-						reservations.FieldReservationInstanceType: {
+						commitments.FieldReservationInstanceType: {
 							Type:        schema.TypeString,
 							Required:    true,
 							Description: "reserved instance type",
 						},
-						reservations.FieldReservationName: {
+						commitments.FieldReservationName: {
 							Type:        schema.TypeString,
 							Required:    true,
 							Description: "unique reservation name in region for specific instance type",
 						},
-						reservations.FieldReservationPrice: {
+						commitments.FieldReservationPrice: {
 							Type:        schema.TypeString,
 							Required:    true,
 							Description: "reservation price",
 						},
-						reservations.FieldReservationProvider: {
+						commitments.FieldReservationProvider: {
 							Type:        schema.TypeString,
 							Required:    true,
 							Description: "reservation cloud provider (gcp, aws, azure)",
 						},
-						reservations.FieldReservationRegion: {
+						commitments.FieldReservationRegion: {
 							Type:        schema.TypeString,
 							Required:    true,
 							Description: "reservation region",
 						},
-						reservations.FieldReservationZoneId: {
+						commitments.FieldReservationZoneId: {
 							Type:        schema.TypeString,
 							Optional:    true,
 							Description: "reservation zone id",
 						},
-						reservations.FieldReservationZoneName: {
+						commitments.FieldReservationZoneName: {
 							Type:        schema.TypeString,
 							Optional:    true,
 							Description: "reservation zone name",
 						},
-						reservations.FieldReservationStartDate: {
+						commitments.FieldReservationStartDate: {
 							Type:             schema.TypeString,
 							ValidateDiagFunc: validation.ToDiagFunc(validation.IsRFC3339Time),
 							Required:         true,
 							Description:      "start date of reservation",
 						},
-						reservations.FieldReservationEndDate: {
+						commitments.FieldReservationEndDate: {
 							Type:             schema.TypeString,
 							ValidateDiagFunc: validation.ToDiagFunc(validation.IsRFC3339Time),
 							Optional:         true,
@@ -111,13 +126,31 @@ func resourceCommitments() *schema.Resource {
 }
 
 func commitmentsDiff(_ context.Context, diff *schema.ResourceDiff, _ any) error {
-	reservationsCsv, _ := diff.GetOk(reservations.FieldReservationsCSV)
-	reservationResources, err := mapReservationsCsvToCommitmentResources(reservationsCsv.(string))
-	if err != nil {
-		return err
+	reservationsCSV, reservationsOk := diff.GetOk(commitments.FieldAzureReservationsCSV)
+	cudsJSON, cudsOk := diff.GetOk(commitments.FieldAzureReservationsCSV)
+	if !reservationsOk && !cudsOk {
+		return fmt.Errorf("one of 'azure_reservations_csv' or 'gcp_cuds_json' must be set")
+	}
+	if reservationsOk && cudsOk {
+		return fmt.Errorf("either 'azure_reservations_csv' or 'gcp_cuds_json' can be set, not both")
 	}
 
-	return diff.SetNew(reservations.FieldReservations, reservations.MapToReservationResourcesWithCommonFieldsOnly(reservationResources))
+	switch {
+	case reservationsOk:
+		reservationResources, err := mapReservationsCsvToCommitmentResources(reservationsCSV.(string))
+		if err != nil {
+			return err
+		}
+		return diff.SetNew(commitments.FieldAzureReservations, commitments.MapToCommitmentResourcesWithCommonFieldsOnly(reservationResources))
+	case cudsOk:
+		cudResources, err := mapCUDsJSONToCommitmentResources(cudsJSON.(string))
+		if err != nil {
+			return err
+		}
+		return diff.SetNew(commitments.FieldGCPCUDs, commitments.MapToCommitmentResourcesWithCommonFieldsOnly(cudResources))
+	}
+
+	return errors.New("unhandled combination of commitments input")
 }
 
 func commitmentsStateImporter(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
@@ -126,11 +159,11 @@ func commitmentsStateImporter(ctx context.Context, d *schema.ResourceData, meta 
 		return nil, err
 	}
 
-	if err := d.Set(reservations.FieldReservationsOrganizationId, organizationId.String()); err != nil {
+	if err := d.Set(commitments.FieldReservationsOrganizationId, organizationId.String()); err != nil {
 		return nil, err
 	}
 
-	if err := populateCommitmentsResourceData(ctx, d, meta, organizationId.String()); err != nil {
+	if err := populateCommitmentsResourceData(ctx, d, meta); err != nil {
 		return nil, err
 	}
 
@@ -141,12 +174,7 @@ func resourceCastaiCommitmentsRead(ctx context.Context, d *schema.ResourceData, 
 	log.Printf("[INFO] Get commitments call start")
 	defer log.Printf("[INFO] Get commitments call end")
 
-	organizationId, err := getOrganizationId(ctx, d, meta)
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	if err := populateCommitmentsResourceData(ctx, d, meta, organizationId); err != nil {
+	if err := populateCommitmentsResourceData(ctx, d, meta); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -159,9 +187,18 @@ func resourceCastaiCommitmentsDelete(ctx context.Context, data *schema.ResourceD
 		return diag.FromErr(err)
 	}
 
-	err = upsertCommitments(ctx, meta, organizationId, []*reservations.ReservationResource{})
-	if err != nil {
-		return diag.FromErr(err)
+	_, reservationsOk := data.GetOk(commitments.FieldAzureReservations)
+	_, cudsOk := data.GetOk(commitments.FieldGCPCUDs)
+
+	switch {
+	case reservationsOk:
+		if err := upsertAzureReservations(ctx, meta, []sdk.CastaiInventoryV1beta1AzureReservationImport{}); err != nil {
+			return diag.FromErr(err)
+		}
+	case cudsOk:
+		if err := upsertGCPCUDs(ctx, meta, []sdk.CastaiInventoryV1beta1GCPCommitmentImport{}); err != nil {
+			return diag.FromErr(err)
+		}
 	}
 
 	data.SetId(organizationId)
@@ -188,104 +225,142 @@ func resourceCastaiCommitmentsUpsert(ctx context.Context, data *schema.ResourceD
 		return diag.FromErr(err)
 	}
 
-	reservationsCsv, _ := data.GetOk(reservations.FieldReservationsCSV)
-	reservationResources, err := mapReservationsCsvToCommitmentResources(reservationsCsv.(string))
-	if err != nil {
-		return diag.FromErr(err)
-	}
+	reservationsCsv, reservationsOk := data.GetOk(commitments.FieldAzureReservationsCSV)
+	cudsJSON, cudsOk := data.GetOk(commitments.FieldGCPCUDsJSON)
 
-	err = upsertCommitments(ctx, meta, organizationId, reservationResources)
-	if err != nil {
-		return diag.FromErr(err)
+	switch {
+	case reservationsOk:
+		reservationResources, err := mapReservationsCsvToCommitmentResources(reservationsCsv.(string))
+		if err != nil {
+			return diag.FromErr(err)
+		}
+
+		mappedReservations := lo.Map(reservationResources, func(item *commitments.CommitmentsResource, _ int) sdk.CastaiInventoryV1beta1AzureReservationImport {
+			return commitments.MapCommitmentResourceToAzureReservationImport(*item)
+		})
+
+		if err := upsertAzureReservations(ctx, meta, mappedReservations); err != nil {
+			return diag.FromErr(err)
+		}
+	case cudsOk:
+		cuds, err := unmarshalCUDs(cudsJSON.(string))
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		if err := upsertGCPCUDs(ctx, meta, cuds); err != nil {
+			return diag.FromErr(err)
+		}
 	}
 
 	data.SetId(organizationId)
-
 	return resourceCastaiCommitmentsRead(ctx, data, meta)
 }
 
-func upsertCommitments(ctx context.Context, meta interface{}, organizationId string, reservationResources []*reservations.ReservationResource) error {
-	client := meta.(*ProviderConfig).api
-	mappedReservations := lo.Map(reservationResources, func(item *reservations.ReservationResource, _ int) sdk.CastaiInventoryV1beta1GenericReservation {
-		return reservations.MapReservationResourceToGenericReservation(*item)
-	})
-
-	response, err := client.InventoryAPIOverwriteReservationsWithResponse(ctx, organizationId, sdk.InventoryAPIOverwriteReservationsJSONRequestBody{
-		Items: &mappedReservations,
-	})
-	if checkErr := sdk.CheckOKResponse(response, err); checkErr != nil {
-		return fmt.Errorf("upserting reservations: %w", checkErr)
+func unmarshalCUDs(input string) (res []sdk.CastaiInventoryV1beta1GCPCommitmentImport, err error) {
+	if err := json.Unmarshal([]byte(input), &res); err != nil {
+		return nil, err
 	}
+	return
+}
 
+func upsertAzureReservations(ctx context.Context, meta any, cuds []sdk.CastaiInventoryV1beta1AzureReservationImport) error {
+	res, err := meta.(*ProviderConfig).api.CommitmentsAPIImportAzureReservationsWithResponse(
+		ctx,
+		&sdk.CommitmentsAPIImportAzureReservationsParams{
+			Behaviour: lo.ToPtr[sdk.CommitmentsAPIImportAzureReservationsParamsBehaviour]("OVERWRITE"),
+		},
+		cuds,
+	)
+	if checkErr := sdk.CheckOKResponse(res, err); checkErr != nil {
+		return fmt.Errorf("upserting commitments: %w", checkErr)
+	}
 	return nil
 }
 
-func populateCommitmentsResourceData(ctx context.Context, d *schema.ResourceData, meta any, organizationId string) error {
-	organizationReservations, err := getOrganizationCommitmentResources(ctx, meta, organizationId)
+func upsertGCPCUDs(ctx context.Context, meta any, cuds []sdk.CastaiInventoryV1beta1GCPCommitmentImport) error {
+	res, err := meta.(*ProviderConfig).api.CommitmentsAPIImportGCPCommitmentsWithResponse(
+		ctx,
+		&sdk.CommitmentsAPIImportGCPCommitmentsParams{
+			Behaviour: lo.ToPtr[sdk.CommitmentsAPIImportGCPCommitmentsParamsBehaviour]("OVERWRITE"),
+		},
+		cuds,
+	)
+	if checkErr := sdk.CheckOKResponse(res, err); checkErr != nil {
+		return fmt.Errorf("upserting commitments: %w", checkErr)
+	}
+	return nil
+}
+
+func populateCommitmentsResourceData(ctx context.Context, d *schema.ResourceData, meta any) error {
+	orgCommitments, err := getOrganizationCommitments(ctx, meta)
 	if err != nil {
 		return err
 	}
 
-	if err := d.Set(reservations.FieldReservations, organizationReservations); err != nil {
-		return fmt.Errorf("setting reservations: %w", err)
-	}
+	_, reservationsOk := d.GetOk(commitments.FieldAzureReservationsCSV)
+	_, cudsOk := d.GetOk(commitments.FieldGCPCUDsJSON)
 
+	switch {
+	case reservationsOk:
+		if err := d.Set(
+			commitments.FieldAzureReservations,
+			lo.Filter(orgCommitments, func(item sdk.CastaiInventoryV1beta1Commitment, index int) bool {
+				return item.AzureReservationContext != nil
+			}),
+		); err != nil {
+			return fmt.Errorf("setting azure reservations: %w", err)
+		}
+	case cudsOk:
+		if err := d.Set(
+			commitments.FieldGCPCUDs,
+			lo.Filter(orgCommitments, func(item sdk.CastaiInventoryV1beta1Commitment, index int) bool {
+				return item.GcpResourceCudContext != nil
+			}),
+		); err != nil {
+			return fmt.Errorf("setting gcp cuds: %w", err)
+		}
+	}
 	return nil
 }
 
-func mapReservationsCsvToCommitmentResources(reservationsCsv string) ([]*reservations.ReservationResource, error) {
-	csvReader := csv.NewReader(strings.NewReader(reservationsCsv))
+func mapReservationsCsvToCommitmentResources(csvStr string) ([]*commitments.CommitmentsResource, error) {
+	csvReader := csv.NewReader(strings.NewReader(csvStr))
 	csvRecords, err := csvReader.ReadAll()
 	if err != nil {
-		return nil, fmt.Errorf("parsing reservations csv: %w", err)
+		return nil, fmt.Errorf("parsing commitments csv: %w", err)
 	}
 
-	result, err := reservations.MapCsvRecordsToReservationResources(csvRecords)
+	result, err := commitments.MapCsvRecordsToReservationResources(csvRecords)
 	if err != nil {
-		return nil, fmt.Errorf("parsing reservations csv: %w", err)
+		return nil, fmt.Errorf("parsing commitments csv: %w", err)
 	}
 
 	return result, nil
 }
 
-func getOrganizationCommitmentResources(ctx context.Context, meta any, organizationId string) ([]*reservations.ReservationResource, error) {
-	client := meta.(*ProviderConfig).api
-
-	response, err := client.InventoryAPIGetReservationsWithResponse(ctx, organizationId)
-	if checkErr := sdk.CheckOKResponse(response, err); checkErr != nil {
-		return nil, fmt.Errorf("fetching reservations: %w", checkErr)
-	}
-
-	return lo.Map(*response.JSON200.Reservations, func(item sdk.CastaiInventoryV1beta1ReservationDetails, _ int) *reservations.ReservationResource {
-		return reservations.MapReservationDetailsToReservationResource(item)
-	}), nil
+func mapCUDsJSONToCommitmentResources(input string) ([]*commitments.CommitmentsResource, error) {
+	return nil, nil
 }
 
-//func getOrganizationId(ctx context.Context, d *schema.ResourceData, meta any) (string, error) {
-//	client := meta.(*ProviderConfig).api
-//
-//	organizationUid, found := d.GetOk(reservations.FieldReservationsOrganizationId)
-//	if found {
-//		organizationId, err := uuid.Parse(organizationUid.(string))
-//		if err != nil {
-//			return "", err
-//		}
-//
-//		return organizationId.String(), nil
-//	}
-//
-//	response, err := client.UsersAPIListOrganizationsWithResponse(ctx, &sdk.UsersAPIListOrganizationsParams{})
-//	if checkErr := sdk.CheckOKResponse(response, err); checkErr != nil {
-//		return "", fmt.Errorf("fetching organizations: %w", checkErr)
-//	}
-//
-//	if len(response.JSON200.Organizations) > 1 {
-//		return "", fmt.Errorf("found more than 1 organization, you can specify exact organization using 'organization_id' attribute")
-//	}
-//
-//	for _, organization := range response.JSON200.Organizations {
-//		return *organization.Id, nil
-//	}
-//
-//	return "", fmt.Errorf("no organizations found")
-//}
+func getOrganizationCommitments(ctx context.Context, meta any) ([]sdk.CastaiInventoryV1beta1Commitment, error) {
+	client := meta.(*ProviderConfig).api
+
+	response, err := client.CommitmentsAPIGetCommitmentsWithResponse(ctx, &sdk.CommitmentsAPIGetCommitmentsParams{})
+	if checkErr := sdk.CheckOKResponse(response, err); checkErr != nil {
+		return nil, fmt.Errorf("fetching commitments: %w", checkErr)
+	}
+	if response.JSON200.Commitments == nil {
+		return nil, nil
+	}
+	return *response.JSON200.Commitments, nil
+}
+
+func getOrganizationCommitmentResources(ctx context.Context, meta any) ([]*commitments.CommitmentsResource, error) {
+	cmts, err := getOrganizationCommitments(ctx, meta)
+	if err != nil {
+		return nil, err
+	}
+	return lo.Map(cmts, func(item sdk.CastaiInventoryV1beta1Commitment, _ int) *commitments.CommitmentsResource {
+		return commitments.MapCommitmentToCommitmentsResource(item)
+	}), nil
+}
