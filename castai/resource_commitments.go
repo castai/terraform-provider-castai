@@ -10,7 +10,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -37,6 +36,7 @@ func resourceCommitments() *schema.Resource {
 		},
 		CustomizeDiff: commitmentsDiff,
 		Schema: map[string]*schema.Schema{
+			// Allow either reservations or CUDs - validated in the custom diff function
 			commitments.FieldAzureReservationsCSV: {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -46,11 +46,6 @@ func resourceCommitments() *schema.Resource {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "JSON file containing GCP CUDs",
-			},
-			commitments.FieldReservationsOrganizationId: {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "ID of the organization",
 			},
 			commitments.FieldGCPCUDs: {
 				Type:     schema.TypeList,
@@ -154,19 +149,9 @@ func commitmentsDiff(_ context.Context, diff *schema.ResourceDiff, _ any) error 
 }
 
 func commitmentsStateImporter(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
-	organizationId, err := uuid.Parse(d.Id())
-	if err != nil {
-		return nil, err
-	}
-
-	if err := d.Set(commitments.FieldReservationsOrganizationId, organizationId.String()); err != nil {
-		return nil, err
-	}
-
 	if err := populateCommitmentsResourceData(ctx, d, meta); err != nil {
 		return nil, err
 	}
-
 	return []*schema.ResourceData{d}, nil
 }
 
@@ -181,12 +166,7 @@ func resourceCastaiCommitmentsRead(ctx context.Context, d *schema.ResourceData, 
 	return nil
 }
 
-func resourceCastaiCommitmentsDelete(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	organizationId, err := getOrganizationId(ctx, data, meta)
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
+func resourceCastaiCommitmentsDelete(ctx context.Context, data *schema.ResourceData, meta any) diag.Diagnostics {
 	_, reservationsOk := data.GetOk(commitments.FieldAzureReservations)
 	_, cudsOk := data.GetOk(commitments.FieldGCPCUDs)
 
@@ -200,31 +180,24 @@ func resourceCastaiCommitmentsDelete(ctx context.Context, data *schema.ResourceD
 			return diag.FromErr(err)
 		}
 	}
-
-	data.SetId(organizationId)
 	return nil
 }
 
-func resourceCastaiCommitmentsUpdate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceCastaiCommitmentsUpdate(ctx context.Context, data *schema.ResourceData, meta any) diag.Diagnostics {
 	log.Printf("[INFO] Update commitments call start")
 	defer log.Printf("[INFO] Update commitments call end")
 
 	return resourceCastaiCommitmentsUpsert(ctx, data, meta)
 }
 
-func resourceCastaiCommitmentsCreate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceCastaiCommitmentsCreate(ctx context.Context, data *schema.ResourceData, meta any) diag.Diagnostics {
 	log.Printf("[INFO] Create commitments call start")
 	defer log.Printf("[INFO] Create commitments call end")
 
 	return resourceCastaiCommitmentsUpsert(ctx, data, meta)
 }
 
-func resourceCastaiCommitmentsUpsert(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	organizationId, err := getOrganizationId(ctx, data, meta)
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
+func resourceCastaiCommitmentsUpsert(ctx context.Context, data *schema.ResourceData, meta any) diag.Diagnostics {
 	reservationsCsv, reservationsOk := data.GetOk(commitments.FieldAzureReservationsCSV)
 	cudsJSON, cudsOk := data.GetOk(commitments.FieldGCPCUDsJSON)
 
@@ -252,7 +225,6 @@ func resourceCastaiCommitmentsUpsert(ctx context.Context, data *schema.ResourceD
 		}
 	}
 
-	data.SetId(organizationId)
 	return resourceCastaiCommitmentsRead(ctx, data, meta)
 }
 
@@ -339,7 +311,13 @@ func mapReservationsCsvToCommitmentResources(csvStr string) ([]*commitments.Comm
 }
 
 func mapCUDsJSONToCommitmentResources(input string) ([]*commitments.CommitmentsResource, error) {
-	return nil, nil
+	unm, err := unmarshalCUDs(input)
+	if err != nil {
+		return nil, err
+	}
+	return lo.Map(unm, func(item sdk.CastaiInventoryV1beta1GCPCommitmentImport, _ int) *commitments.CommitmentsResource {
+		return lo.ToPtr(commitments.MapGCPCommitmentImportToCommitmentResource(item))
+	}), nil
 }
 
 func getOrganizationCommitments(ctx context.Context, meta any) ([]sdk.CastaiInventoryV1beta1Commitment, error) {

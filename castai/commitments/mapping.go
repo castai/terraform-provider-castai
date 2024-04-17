@@ -46,6 +46,10 @@ func MapCommitmentToCommitmentsResource(c sdk.CastaiInventoryV1beta1Commitment) 
 	}
 }
 
+func MapGCPCommitmentImportToCommitmentResource(resource sdk.CastaiInventoryV1beta1GCPCommitmentImport) CommitmentsResource {
+	return CommitmentsResource{}
+}
+
 func MapCommitmentResourceToGCPCommitmentImport(resource CommitmentsResource) sdk.CastaiInventoryV1beta1GCPCommitmentImport {
 	return sdk.CastaiInventoryV1beta1GCPCommitmentImport{}
 }
