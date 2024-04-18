@@ -195,13 +195,13 @@ func commitmentsDiff(_ context.Context, diff *schema.ResourceDiff, _ any) error 
 
 	switch {
 	case reservationsOk:
-		reservationResources, err := mapReservationsCsvToCommitmentResources(reservationsCSV.(string))
+		reservationResources, err := mapReservationsCSVToResources(reservationsCSV.(string))
 		if err != nil {
 			return err
 		}
 		return diff.SetNew(commitments.FieldAzureReservations, reservationResources)
 	case cudsOk:
-		cudResources, err := mapCUDsJSONToCUDResources(cudsJSON.(string))
+		cudResources, err := mapCUDsJSONToResources(cudsJSON.(string))
 		if err != nil {
 			return err
 		}
@@ -225,7 +225,6 @@ func resourceCastaiCommitmentsRead(ctx context.Context, d *schema.ResourceData, 
 	if err := populateCommitmentsResourceData(ctx, d, meta); err != nil {
 		return diag.FromErr(err)
 	}
-
 	return nil
 }
 
@@ -235,11 +234,11 @@ func resourceCastaiCommitmentsDelete(ctx context.Context, data *schema.ResourceD
 
 	switch {
 	case reservationsOk:
-		if err := upsertAzureReservations(ctx, meta, []sdk.CastaiInventoryV1beta1AzureReservationImport{}); err != nil {
+		if err := importReservations(ctx, meta, []sdk.CastaiInventoryV1beta1AzureReservationImport{}); err != nil {
 			return diag.FromErr(err)
 		}
 	case cudsOk:
-		if err := upsertGCPCUDs(ctx, meta, []sdk.CastaiInventoryV1beta1GCPCommitmentImport{}); err != nil {
+		if err := importCUDs(ctx, meta, []sdk.CastaiInventoryV1beta1GCPCommitmentImport{}); err != nil {
 			return diag.FromErr(err)
 		}
 	}
@@ -271,12 +270,12 @@ func resourceCastaiCommitmentsUpsert(ctx context.Context, data *schema.ResourceD
 			return diag.FromErr(err)
 		}
 
-		imports, err := commitments.MapAzureReservationsCSVRecordsToImports(rows)
+		imports, err := commitments.MapReservationsCSVRecordsToImports(rows)
 		if err != nil {
 			return diag.FromErr(err)
 		}
 
-		if err := upsertAzureReservations(ctx, meta, imports); err != nil {
+		if err := importReservations(ctx, meta, imports); err != nil {
 			return diag.FromErr(err)
 		}
 	case cudsOk:
@@ -284,7 +283,7 @@ func resourceCastaiCommitmentsUpsert(ctx context.Context, data *schema.ResourceD
 		if err != nil {
 			return diag.FromErr(err)
 		}
-		if err := upsertGCPCUDs(ctx, meta, cuds); err != nil {
+		if err := importCUDs(ctx, meta, cuds); err != nil {
 			return diag.FromErr(err)
 		}
 	}
@@ -299,7 +298,7 @@ func unmarshalCUDs(input string) (res []sdk.CastaiInventoryV1beta1GCPCommitmentI
 	return
 }
 
-func upsertAzureReservations(ctx context.Context, meta any, imports []sdk.CastaiInventoryV1beta1AzureReservationImport) error {
+func importReservations(ctx context.Context, meta any, imports []sdk.CastaiInventoryV1beta1AzureReservationImport) error {
 	res, err := meta.(*ProviderConfig).api.CommitmentsAPIImportAzureReservationsWithResponse(
 		ctx,
 		&sdk.CommitmentsAPIImportAzureReservationsParams{
@@ -313,7 +312,7 @@ func upsertAzureReservations(ctx context.Context, meta any, imports []sdk.Castai
 	return nil
 }
 
-func upsertGCPCUDs(ctx context.Context, meta any, imports []sdk.CastaiInventoryV1beta1GCPCommitmentImport) error {
+func importCUDs(ctx context.Context, meta any, imports []sdk.CastaiInventoryV1beta1GCPCommitmentImport) error {
 	res, err := meta.(*ProviderConfig).api.CommitmentsAPIImportGCPCommitmentsWithResponse(
 		ctx,
 		&sdk.CommitmentsAPIImportGCPCommitmentsParams{
@@ -375,19 +374,19 @@ func parseCSV(val string) ([][]string, error) {
 	return records, nil
 }
 
-func mapReservationsCsvToCommitmentResources(csvStr string) ([]*commitments.AzureReservationResource, error) {
+func mapReservationsCSVToResources(csvStr string) ([]*commitments.AzureReservationResource, error) {
 	records, err := parseCSV(csvStr)
 	if err != nil {
 		return nil, err
 	}
-	result, err := commitments.MapCsvRecordsToReservationResources(records)
+	result, err := commitments.MapReservationCSVRecordsToResources(records)
 	if err != nil {
 		return nil, fmt.Errorf("parsing commitments csv: %w", err)
 	}
 	return result, nil
 }
 
-func mapCUDsJSONToCUDResources(input string) ([]*commitments.GCPCUDResource, error) {
+func mapCUDsJSONToResources(input string) ([]*commitments.GCPCUDResource, error) {
 	cuds, err := unmarshalCUDs(input)
 	if err != nil {
 		return nil, err
@@ -395,7 +394,7 @@ func mapCUDsJSONToCUDResources(input string) ([]*commitments.GCPCUDResource, err
 
 	res := make([]*commitments.GCPCUDResource, 0, len(cuds))
 	for _, item := range cuds {
-		v, err := commitments.MapGCPCommitmentImportToCUDResource(item)
+		v, err := commitments.MapCUDImportToResource(item)
 		if err != nil {
 			return nil, err
 		}

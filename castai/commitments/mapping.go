@@ -12,6 +12,8 @@ import (
 )
 
 type (
+	// Terraform SDK's diff setter uses mapstructure under the hood
+
 	GCPCUDResource struct {
 		Id             *string `mapstructure:"id"`
 		Name           *string `mapstructure:"name"`
@@ -39,7 +41,7 @@ type (
 	}
 )
 
-func MapCsvRecordsToReservationResources(csvRecords [][]string) ([]*AzureReservationResource, error) {
+func MapReservationCSVRecordsToResources(csvRecords [][]string) ([]*AzureReservationResource, error) {
 	var csvColumns []string
 	if len(csvRecords) > 0 {
 		csvColumns = csvRecords[0]
@@ -49,11 +51,11 @@ func MapCsvRecordsToReservationResources(csvRecords [][]string) ([]*AzureReserva
 	})
 
 	reservationRecords := csvRecords[1:]
-	fieldIndexes := mapReservationsHeaderToReservationFieldIndexes(normalizedCsvColumnNames)
+	fieldIndexes := mapReservationsCSVHeaderToFieldIndexes(normalizedCsvColumnNames)
 
 	reservations := make([]*AzureReservationResource, 0, len(reservationRecords))
 	for _, record := range reservationRecords {
-		result, err := mapRecordToReservationResource(fieldIndexes, record)
+		result, err := mapReservationRecordToResource(fieldIndexes, record)
 		if err != nil {
 			return nil, err
 		}
@@ -96,7 +98,7 @@ func MapCommitmentToCUDResource(c sdk.CastaiInventoryV1beta1Commitment) (*GCPCUD
 	}, nil
 }
 
-func MapGCPCommitmentImportToCUDResource(resource sdk.CastaiInventoryV1beta1GCPCommitmentImport) (*GCPCUDResource, error) {
+func MapCUDImportToResource(resource sdk.CastaiInventoryV1beta1GCPCommitmentImport) (*GCPCUDResource, error) {
 	var cpu, memory *int
 	if resource.Resources != nil {
 		for _, res := range *resource.Resources {
@@ -131,7 +133,7 @@ func MapGCPCommitmentImportToCUDResource(resource sdk.CastaiInventoryV1beta1GCPC
 	}, nil
 }
 
-func mapReservationsHeaderToReservationFieldIndexes(columns []string) map[string]int {
+func mapReservationsCSVHeaderToFieldIndexes(columns []string) map[string]int {
 	indexes := make(map[string]int, len(reservations.ReservationResourceFields))
 	for _, field := range reservations.ReservationResourceFields {
 		index := -1
@@ -152,7 +154,7 @@ func mapReservationsHeaderToReservationFieldIndexes(columns []string) map[string
 	return indexes
 }
 
-func mapRecordToReservationResource(fieldIndexes map[string]int, record []string) (*AzureReservationResource, error) {
+func mapReservationRecordToResource(fieldIndexes map[string]int, record []string) (*AzureReservationResource, error) {
 	return &AzureReservationResource{
 		Id:             nil,
 		Name:           nil,
@@ -167,7 +169,7 @@ func mapRecordToReservationResource(fieldIndexes map[string]int, record []string
 	}, nil
 }
 
-func MapAzureReservationsCSVRecordsToImports(csvRecords [][]string) ([]sdk.CastaiInventoryV1beta1AzureReservationImport, error) {
+func MapReservationsCSVRecordsToImports(csvRecords [][]string) ([]sdk.CastaiInventoryV1beta1AzureReservationImport, error) {
 	var csvColumns []string
 	if len(csvRecords) > 0 {
 		csvColumns = csvRecords[0]
@@ -177,11 +179,11 @@ func MapAzureReservationsCSVRecordsToImports(csvRecords [][]string) ([]sdk.Casta
 	})
 
 	reservationRecords := csvRecords[1:]
-	fieldIndexes := mapReservationsHeaderToReservationFieldIndexes(normalizedCsvColumnNames)
+	fieldIndexes := mapReservationsCSVHeaderToFieldIndexes(normalizedCsvColumnNames)
 
 	res := make([]sdk.CastaiInventoryV1beta1AzureReservationImport, 0, len(reservationRecords))
 	for _, record := range reservationRecords {
-		result, err := MapRecordToReservationImport(fieldIndexes, record)
+		result, err := MapReservationRecordToImport(fieldIndexes, record)
 		if err != nil {
 			return nil, err
 		}
@@ -191,7 +193,7 @@ func MapAzureReservationsCSVRecordsToImports(csvRecords [][]string) ([]sdk.Casta
 	return res, nil
 }
 
-func MapRecordToReservationImport(fieldIndexes map[string]int, record []string) (*sdk.CastaiInventoryV1beta1AzureReservationImport, error) {
+func MapReservationRecordToImport(fieldIndexes map[string]int, record []string) (*sdk.CastaiInventoryV1beta1AzureReservationImport, error) {
 	var quantity *int32
 	if v := getRecordFieldStringValue(reservations.FieldReservationQuantity, fieldIndexes, record); v != nil {
 		parsed, err := strconv.Atoi(*v)
@@ -235,8 +237,5 @@ func timeToString(t *time.Time) *string {
 	if t == nil {
 		return nil
 	}
-
-	result := t.Format(time.RFC3339)
-
-	return &result
+	return lo.ToPtr(t.Format(time.RFC3339))
 }
