@@ -1,6 +1,7 @@
 package commitments
 
 import (
+	"errors"
 	"strconv"
 	"strings"
 	"time"
@@ -15,16 +16,23 @@ type (
 	// Terraform SDK's diff setter uses mapstructure under the hood
 
 	GCPCUDResource struct {
-		Id             *string `mapstructure:"id"`
-		Name           *string `mapstructure:"name"`
-		Type           *string `mapstructure:"type"`
+		// CAST AI only fields
+		ID             *string `mapstructure:"id"`
+		AllowedUsage   float32 `mapstructure:"allowed_usage"`
+		Prioritization bool    `mapstructure:"prioritization"`
 		Status         *string `mapstructure:"status"`
+
+		// Fields from GCP CUDs export JSON
+		CUDID          *string `mapstructure:"cud_id"`
+		CUDStatus      *string `mapstructure:"cud_status"`
 		StartTimestamp *string `mapstructure:"start_timestamp"`
 		EndTimestamp   *string `mapstructure:"end_timestamp"`
-		Plan           *string `mapstructure:"plan"`
+		Name           *string `mapstructure:"name"`
 		Region         *string `mapstructure:"region"`
 		CPU            *int    `mapstructure:"cpu"`
 		MemoryMb       *int    `mapstructure:"memory_mb"`
+		Plan           *string `mapstructure:"plan"`
+		Type           *string `mapstructure:"type"`
 	}
 
 	AzureReservationResource struct {
@@ -66,6 +74,10 @@ func MapReservationCSVRecordsToResources(csvRecords [][]string) ([]*AzureReserva
 }
 
 func MapCommitmentToCUDResource(c sdk.CastaiInventoryV1beta1Commitment) (*GCPCUDResource, error) {
+	if c.GcpResourceCudContext == nil {
+		return nil, errors.New("missing GCP resource CUD context")
+	}
+
 	var cpu, memory *int
 	if c.GcpResourceCudContext != nil {
 		if c.GcpResourceCudContext.Cpu != nil {
@@ -85,15 +97,19 @@ func MapCommitmentToCUDResource(c sdk.CastaiInventoryV1beta1Commitment) (*GCPCUD
 	}
 
 	return &GCPCUDResource{
+		ID:             c.Id,
+		AllowedUsage:   lo.FromPtr(c.AllowedUsage),
+		Prioritization: lo.FromPtr(c.Prioritization),
+		Status:         (*string)(c.Status),
+		CUDID:          c.GcpResourceCudContext.CudId,
+		CUDStatus:      c.GcpResourceCudContext.Status,
 		EndTimestamp:   timeToString(c.EndDate),
-		Id:             c.GcpResourceCudContext.CudId,
+		StartTimestamp: timeToString(c.StartDate),
 		Name:           c.Name,
-		Plan:           (*string)(c.GcpResourceCudContext.Plan),
 		Region:         c.Region,
 		CPU:            cpu,
 		MemoryMb:       memory,
-		StartTimestamp: timeToString(c.StartDate),
-		Status:         (*string)(c.Status),
+		Plan:           (*string)(c.GcpResourceCudContext.Plan),
 		Type:           c.GcpResourceCudContext.Type,
 	}, nil
 }
@@ -120,15 +136,16 @@ func MapCUDImportToResource(resource sdk.CastaiInventoryV1beta1GCPCommitmentImpo
 	}
 
 	return &GCPCUDResource{
+		CUDID:          resource.Id,
+		CUDStatus:      resource.Status,
+		Status:         resource.Status,
 		EndTimestamp:   resource.EndTimestamp,
-		Id:             resource.Id,
+		StartTimestamp: resource.StartTimestamp,
 		Name:           resource.Name,
-		Plan:           resource.Plan,
 		Region:         resource.Region,
 		CPU:            cpu,
 		MemoryMb:       memory,
-		StartTimestamp: resource.StartTimestamp,
-		Status:         resource.Status,
+		Plan:           resource.Plan,
 		Type:           resource.Type,
 	}, nil
 }

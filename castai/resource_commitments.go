@@ -54,20 +54,30 @@ func resourceCommitments() *schema.Resource {
 					Schema: map[string]*schema.Schema{
 						commitments.FieldId: {
 							Type:        schema.TypeString,
-							Required:    true,
+							Computed:    true,
 							Description: "",
 						},
-						commitments.FieldName: {
-							Type:        schema.TypeString,
-							Required:    true,
+						"allowed_usage": {
+							Type:        schema.TypeFloat,
+							Computed:    true,
 							Description: "",
 						},
-						commitments.FieldType: {
-							Type:        schema.TypeString,
-							Required:    true,
+						"prioritization": {
+							Type:        schema.TypeBool,
+							Computed:    true,
 							Description: "",
 						},
 						commitments.FieldStatus: {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "",
+						},
+						"cud_id": {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "",
+						},
+						"cud_status": {
 							Type:        schema.TypeString,
 							Required:    true,
 							Description: "",
@@ -82,7 +92,7 @@ func resourceCommitments() *schema.Resource {
 							Required:    true,
 							Description: "",
 						},
-						commitments.FieldPlan: {
+						commitments.FieldName: {
 							Type:        schema.TypeString,
 							Required:    true,
 							Description: "",
@@ -99,6 +109,16 @@ func resourceCommitments() *schema.Resource {
 						},
 						commitments.FieldMemoryMB: {
 							Type:        schema.TypeInt,
+							Required:    true,
+							Description: "",
+						},
+						commitments.FieldPlan: {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "",
+						},
+						commitments.FieldType: {
+							Type:        schema.TypeString,
 							Required:    true,
 							Description: "",
 						},
