@@ -12,7 +12,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/samber/lo"
 
 	"github.com/castai/terraform-provider-castai/castai/commitments"
@@ -52,7 +51,102 @@ func resourceCommitments() *schema.Resource {
 				Computed: true,
 				Optional: true,
 				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{},
+					Schema: map[string]*schema.Schema{
+						commitments.FieldAutoRenew: {
+							Type:        schema.TypeBool,
+							Required:    true,
+							Description: "",
+						},
+						commitments.FieldCategory: {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "",
+						},
+						commitments.FieldCreationTimestamp: {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "",
+						},
+						commitments.FieldDescription: {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "",
+						},
+						commitments.FieldEndTimestamp: {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "",
+						},
+						commitments.FieldId: {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "",
+						},
+						commitments.FieldKind: {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "",
+						},
+						commitments.FieldName: {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "",
+						},
+						commitments.FieldPlan: {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "",
+						},
+						commitments.FieldRegion: {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "",
+						},
+						commitments.FieldResources: {
+							Type:        schema.TypeList,
+							Required:    true,
+							Description: "",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									commitments.FieldAmount: {
+										Type:        schema.TypeString,
+										Required:    true,
+										Description: "",
+									},
+									commitments.FieldType: {
+										Type:        schema.TypeString,
+										Required:    true,
+										Description: "",
+									},
+								},
+							},
+						},
+						commitments.FieldSelfLink: {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "",
+						},
+						commitments.FieldStartTimestamp: {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "",
+						},
+						commitments.FieldStatus: {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "",
+						},
+						commitments.FieldStatusMessage: {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "",
+						},
+						commitments.FieldType: {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "",
+						},
+					},
 				},
 			},
 			commitments.FieldAzureReservations: {
@@ -61,57 +155,70 @@ func resourceCommitments() *schema.Resource {
 				Optional: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						commitments.FieldReservationCount: {
+						commitments.FieldExpirationDate: {
 							Type:        schema.TypeString,
 							Required:    true,
-							Description: "amount of reserved instances",
+							Description: "",
 						},
-						commitments.FieldReservationInstanceType: {
+						commitments.FieldName: {
 							Type:        schema.TypeString,
 							Required:    true,
-							Description: "reserved instance type",
+							Description: "",
 						},
-						commitments.FieldReservationName: {
+						commitments.FieldProductName: {
 							Type:        schema.TypeString,
 							Required:    true,
-							Description: "unique reservation name in region for specific instance type",
+							Description: "",
 						},
-						commitments.FieldReservationPrice: {
+						commitments.FieldPurchaseDate: {
 							Type:        schema.TypeString,
 							Required:    true,
-							Description: "reservation price",
+							Description: "",
 						},
-						commitments.FieldReservationProvider: {
+						commitments.FieldQuantity: {
 							Type:        schema.TypeString,
 							Required:    true,
-							Description: "reservation cloud provider (gcp, aws, azure)",
+							Description: "",
 						},
-						commitments.FieldReservationRegion: {
+						commitments.FieldRegion: {
 							Type:        schema.TypeString,
 							Required:    true,
-							Description: "reservation region",
+							Description: "",
 						},
-						commitments.FieldReservationZoneId: {
+						commitments.FieldReservationId: {
 							Type:        schema.TypeString,
-							Optional:    true,
-							Description: "reservation zone id",
+							Required:    true,
+							Description: "",
 						},
-						commitments.FieldReservationZoneName: {
+						commitments.FieldScope: {
 							Type:        schema.TypeString,
-							Optional:    true,
-							Description: "reservation zone name",
+							Required:    true,
+							Description: "",
 						},
-						commitments.FieldReservationStartDate: {
-							Type:             schema.TypeString,
-							ValidateDiagFunc: validation.ToDiagFunc(validation.IsRFC3339Time),
-							Required:         true,
-							Description:      "start date of reservation",
+						commitments.FieldScopeResourceGroup: {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "",
 						},
-						commitments.FieldReservationEndDate: {
-							Type:             schema.TypeString,
-							ValidateDiagFunc: validation.ToDiagFunc(validation.IsRFC3339Time),
-							Optional:         true,
-							Description:      "end date of reservation",
+						commitments.FieldScopeSubscription: {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "",
+						},
+						commitments.FieldStatus: {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "",
+						},
+						commitments.FieldTerm: {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "",
+						},
+						commitments.FieldType: {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "",
 						},
 					},
 				},
@@ -138,7 +245,7 @@ func commitmentsDiff(_ context.Context, diff *schema.ResourceDiff, _ any) error 
 		}
 		return diff.SetNew(commitments.FieldAzureReservations, commitments.MapToCommitmentResourcesWithCommonFieldsOnly(reservationResources))
 	case cudsOk:
-		cudResources, err := mapCUDsJSONToCommitmentResources(cudsJSON.(string))
+		cudResources, err := mapCUDsJSONToCUDResources(cudsJSON.(string))
 		if err != nil {
 			return err
 		}
@@ -203,16 +310,17 @@ func resourceCastaiCommitmentsUpsert(ctx context.Context, data *schema.ResourceD
 
 	switch {
 	case reservationsOk:
-		reservationResources, err := mapReservationsCsvToCommitmentResources(reservationsCsv.(string))
+		rows, err := parseCSV(reservationsCsv.(string))
 		if err != nil {
 			return diag.FromErr(err)
 		}
 
-		mappedReservations := lo.Map(reservationResources, func(item *commitments.CommitmentsResource, _ int) sdk.CastaiInventoryV1beta1AzureReservationImport {
-			return commitments.MapCommitmentResourceToAzureReservationImport(*item)
-		})
+		imports, err := commitments.MapAzureReservationsCSVRecordsToImports(rows)
+		if err != nil {
+			return diag.FromErr(err)
+		}
 
-		if err := upsertAzureReservations(ctx, meta, mappedReservations); err != nil {
+		if err := upsertAzureReservations(ctx, meta, imports); err != nil {
 			return diag.FromErr(err)
 		}
 	case cudsOk:
@@ -285,8 +393,11 @@ func populateCommitmentsResourceData(ctx context.Context, d *schema.ResourceData
 	case cudsOk:
 		if err := d.Set(
 			commitments.FieldGCPCUDs,
-			lo.Filter(orgCommitments, func(item sdk.CastaiInventoryV1beta1Commitment, index int) bool {
-				return item.GcpResourceCudContext != nil
+			lo.FilterMap(orgCommitments, func(item sdk.CastaiInventoryV1beta1Commitment, index int) (*commitments.GCPCUDResource, bool) {
+				if item.GcpResourceCudContext == nil {
+					return nil, false
+				}
+				return commitments.MapCommitmentToCUDResource(item), true
 			}),
 		); err != nil {
 			return fmt.Errorf("setting gcp cuds: %w", err)
@@ -295,29 +406,42 @@ func populateCommitmentsResourceData(ctx context.Context, d *schema.ResourceData
 	return nil
 }
 
-func mapReservationsCsvToCommitmentResources(csvStr string) ([]*commitments.CommitmentsResource, error) {
-	csvReader := csv.NewReader(strings.NewReader(csvStr))
-	csvRecords, err := csvReader.ReadAll()
+func parseCSV(val string) ([][]string, error) {
+	reader := csv.NewReader(strings.NewReader(val))
+	records, err := reader.ReadAll()
 	if err != nil {
 		return nil, fmt.Errorf("parsing commitments csv: %w", err)
 	}
-
-	result, err := commitments.MapCsvRecordsToReservationResources(csvRecords)
-	if err != nil {
-		return nil, fmt.Errorf("parsing commitments csv: %w", err)
-	}
-
-	return result, nil
+	return records, nil
 }
 
-func mapCUDsJSONToCommitmentResources(input string) ([]*commitments.CommitmentsResource, error) {
-	unm, err := unmarshalCUDs(input)
+func mapReservationsCsvToCommitmentResources(csvStr string) ([]*commitments.AzureReservationResource, error) {
+	records, err := parseCSV(csvStr)
 	if err != nil {
 		return nil, err
 	}
-	return lo.Map(unm, func(item sdk.CastaiInventoryV1beta1GCPCommitmentImport, _ int) *commitments.CommitmentsResource {
-		return lo.ToPtr(commitments.MapGCPCommitmentImportToCommitmentResource(item))
-	}), nil
+	result, err := commitments.MapCsvRecordsToReservationResources(records)
+	if err != nil {
+		return nil, fmt.Errorf("parsing commitments csv: %w", err)
+	}
+	return result, nil
+}
+
+func mapCUDsJSONToCUDResources(input string) ([]*commitments.GCPCUDResource, error) {
+	cuds, err := unmarshalCUDs(input)
+	if err != nil {
+		return nil, err
+	}
+
+	res := make([]*commitments.GCPCUDResource, 0, len(cuds))
+	for _, item := range cuds {
+		v, err := commitments.MapGCPCommitmentImportToCUDResource(item)
+		if err != nil {
+			return nil, err
+		}
+		res = append(res, v)
+	}
+	return res, nil
 }
 
 func getOrganizationCommitments(ctx context.Context, meta any) ([]sdk.CastaiInventoryV1beta1Commitment, error) {
@@ -331,14 +455,4 @@ func getOrganizationCommitments(ctx context.Context, meta any) ([]sdk.CastaiInve
 		return nil, nil
 	}
 	return *response.JSON200.Commitments, nil
-}
-
-func getOrganizationCommitmentResources(ctx context.Context, meta any) ([]*commitments.CommitmentsResource, error) {
-	cmts, err := getOrganizationCommitments(ctx, meta)
-	if err != nil {
-		return nil, err
-	}
-	return lo.Map(cmts, func(item sdk.CastaiInventoryV1beta1Commitment, _ int) *commitments.CommitmentsResource {
-		return commitments.MapCommitmentToCommitmentsResource(item)
-	}), nil
 }
