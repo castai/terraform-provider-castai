@@ -1,7 +1,6 @@
 package commitments
 
 import (
-	"fmt"
 	"strconv"
 	"strings"
 	"time"
@@ -106,23 +105,6 @@ func MapGCPCommitmentImportToCUDResource(resource sdk.CastaiInventoryV1beta1GCPC
 	}, nil
 }
 
-func MapToCommitmentResourcesWithCommonFieldsOnly(reservationResources []*CommitmentsResource) []*CommitmentsResource {
-	return lo.Map(reservationResources, func(item *CommitmentsResource, _ int) *CommitmentsResource {
-		return &CommitmentsResource{
-			FieldReservationName:         (*item)[FieldReservationName],
-			FieldReservationProvider:     (*item)[FieldReservationProvider],
-			FieldReservationRegion:       (*item)[FieldReservationRegion],
-			FieldReservationInstanceType: (*item)[FieldReservationInstanceType],
-			FieldReservationPrice:        (*item)[FieldReservationPrice],
-			FieldReservationCount:        (*item)[FieldReservationCount],
-			FieldReservationStartDate:    (*item)[FieldReservationStartDate],
-			FieldReservationEndDate:      (*item)[FieldReservationEndDate],
-			FieldReservationZoneId:       (*item)[FieldReservationZoneId],
-			FieldReservationZoneName:     (*item)[FieldReservationZoneName],
-		}
-	})
-}
-
 func mapReservationsHeaderToReservationFieldIndexes(columns []string) map[string]int {
 	indexes := make(map[string]int, len(reservations.ReservationResourceFields))
 	for _, field := range reservations.ReservationResourceFields {
@@ -145,11 +127,6 @@ func mapReservationsHeaderToReservationFieldIndexes(columns []string) map[string
 }
 
 func mapRecordToReservationResource(fieldIndexes map[string]int, record []string) (*AzureReservationResource, error) {
-	provider, err := getRecordReservationProvider(fieldIndexes, record)
-	if err != nil {
-		return nil, err
-	}
-
 	return &AzureReservationResource{
 		Id:             nil,
 		Name:           nil,
@@ -215,20 +192,6 @@ func MapRecordToReservationImport(fieldIndexes map[string]int, record []string) 
 	}, nil
 }
 
-func getRecordReservationProvider(fieldIndexes map[string]int, record []string) (*string, error) {
-	provider := getRecordFieldStringValue(FieldReservationProvider, fieldIndexes, record)
-	if provider != nil && *provider != "" {
-		return provider, nil
-	}
-
-	deepLinkToReservation := getRecordFieldStringValue(FieldReservationDeepLinkToReservation, fieldIndexes, record)
-	if deepLinkToReservation != nil && strings.Contains(*deepLinkToReservation, "azure") {
-		return lo.ToPtr("azure"), nil
-	}
-
-	return nil, fmt.Errorf("reservation provider could not be determined: %v", record)
-}
-
 func getRecordFieldStringValue(field string, fieldIndexes map[string]int, record []string) *string {
 	index, found := fieldIndexes[field]
 	if !found || index == -1 {
@@ -248,43 +211,6 @@ func timeToString(t *time.Time) *string {
 	}
 
 	result := t.Format(time.RFC3339)
-
-	return &result
-}
-
-func stringToInt32(t *string) *int32 {
-	if t == nil || *t == "" {
-		return nil
-	}
-
-	parsed, err := strconv.Atoi(*t)
-	if err != nil {
-		return nil
-	}
-	result := int32(parsed)
-
-	return &result
-}
-
-func int32ToString(t *int32) *string {
-	if t == nil {
-		return nil
-	}
-
-	result := strconv.Itoa(int(*t))
-
-	return &result
-}
-
-func stringToTime(t *string) *time.Time {
-	if t == nil || *t == "" {
-		return nil
-	}
-
-	result, err := time.Parse(time.RFC3339, *t)
-	if err != nil {
-		return nil
-	}
 
 	return &result
 }

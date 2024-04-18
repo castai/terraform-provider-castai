@@ -243,13 +243,13 @@ func commitmentsDiff(_ context.Context, diff *schema.ResourceDiff, _ any) error 
 		if err != nil {
 			return err
 		}
-		return diff.SetNew(commitments.FieldAzureReservations, commitments.MapToCommitmentResourcesWithCommonFieldsOnly(reservationResources))
+		return diff.SetNew(commitments.FieldAzureReservations, reservationResources)
 	case cudsOk:
 		cudResources, err := mapCUDsJSONToCUDResources(cudsJSON.(string))
 		if err != nil {
 			return err
 		}
-		return diff.SetNew(commitments.FieldGCPCUDs, commitments.MapToCommitmentResourcesWithCommonFieldsOnly(cudResources))
+		return diff.SetNew(commitments.FieldGCPCUDs, cudResources)
 	}
 
 	return errors.New("unhandled combination of commitments input")
@@ -343,13 +343,13 @@ func unmarshalCUDs(input string) (res []sdk.CastaiInventoryV1beta1GCPCommitmentI
 	return
 }
 
-func upsertAzureReservations(ctx context.Context, meta any, cuds []sdk.CastaiInventoryV1beta1AzureReservationImport) error {
+func upsertAzureReservations(ctx context.Context, meta any, imports []sdk.CastaiInventoryV1beta1AzureReservationImport) error {
 	res, err := meta.(*ProviderConfig).api.CommitmentsAPIImportAzureReservationsWithResponse(
 		ctx,
 		&sdk.CommitmentsAPIImportAzureReservationsParams{
 			Behaviour: lo.ToPtr[sdk.CommitmentsAPIImportAzureReservationsParamsBehaviour]("OVERWRITE"),
 		},
-		cuds,
+		imports,
 	)
 	if checkErr := sdk.CheckOKResponse(res, err); checkErr != nil {
 		return fmt.Errorf("upserting commitments: %w", checkErr)
@@ -357,13 +357,13 @@ func upsertAzureReservations(ctx context.Context, meta any, cuds []sdk.CastaiInv
 	return nil
 }
 
-func upsertGCPCUDs(ctx context.Context, meta any, cuds []sdk.CastaiInventoryV1beta1GCPCommitmentImport) error {
+func upsertGCPCUDs(ctx context.Context, meta any, imports []sdk.CastaiInventoryV1beta1GCPCommitmentImport) error {
 	res, err := meta.(*ProviderConfig).api.CommitmentsAPIImportGCPCommitmentsWithResponse(
 		ctx,
 		&sdk.CommitmentsAPIImportGCPCommitmentsParams{
 			Behaviour: lo.ToPtr[sdk.CommitmentsAPIImportGCPCommitmentsParamsBehaviour]("OVERWRITE"),
 		},
-		cuds,
+		imports,
 	)
 	if checkErr := sdk.CheckOKResponse(res, err); checkErr != nil {
 		return fmt.Errorf("upserting commitments: %w", checkErr)
