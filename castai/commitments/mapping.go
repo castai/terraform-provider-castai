@@ -2,6 +2,7 @@ package commitments
 
 import (
 	"errors"
+	"path"
 	"strconv"
 	"strings"
 	"time"
@@ -18,10 +19,10 @@ type (
 
 	GCPCUDResource struct {
 		// CAST AI only fields
-		ID             *string  `mapstructure:"id"`
-		AllowedUsage   *float32 `mapstructure:"allowed_usage"`
-		Prioritization *bool    `mapstructure:"prioritization"`
-		Status         *string  `mapstructure:"status"`
+		ID             *string  `mapstructure:"id,omitempty"`
+		AllowedUsage   *float32 `mapstructure:"allowed_usage,omitempty"`
+		Prioritization *bool    `mapstructure:"prioritization,omitempty"`
+		Status         *string  `mapstructure:"status,omitempty"`
 
 		// Fields from GCP CUDs export JSON
 		CUDID          string `mapstructure:"cud_id"`
@@ -214,14 +215,21 @@ func MapCUDImportToResource(resource sdk.CastaiInventoryV1beta1GCPCommitmentImpo
 		}
 	}
 
+	// GCP's exports contain the full path of the region, we only need the region name. CAST AI's API does the same
+	// thing so we need to do it here too in order to avoid Terraform diff mismatches.
+	// Example region value: https://www.googleapis.com/compute/v1/projects/{PROJECT}/regions/{REGION}
+	var region string
+	if resource.Region != nil {
+		_, region = path.Split(*resource.Region)
+	}
+
 	return &GCPCUDResource{
 		CUDID:          lo.FromPtr(resource.Id),
 		CUDStatus:      lo.FromPtr(resource.Status),
-		Status:         resource.Status,
 		EndTimestamp:   lo.FromPtr(resource.EndTimestamp),
 		StartTimestamp: lo.FromPtr(resource.StartTimestamp),
 		Name:           lo.FromPtr(resource.Name),
-		Region:         lo.FromPtr(resource.Region),
+		Region:         region,
 		CPU:            cpu,
 		MemoryMb:       memory,
 		Plan:           lo.FromPtr(resource.Plan),
