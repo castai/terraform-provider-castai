@@ -51,78 +51,7 @@ func resourceCommitments() *schema.Resource {
 				Computed: true,
 				Optional: true,
 				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						commitments.FieldId: {
-							Type:        schema.TypeString,
-							Computed:    true,
-							Description: "",
-						},
-						"allowed_usage": {
-							Type:        schema.TypeFloat,
-							Computed:    true,
-							Description: "",
-						},
-						"prioritization": {
-							Type:        schema.TypeBool,
-							Computed:    true,
-							Description: "",
-						},
-						commitments.FieldStatus: {
-							Type:        schema.TypeString,
-							Computed:    true,
-							Description: "",
-						},
-						"cud_id": {
-							Type:        schema.TypeString,
-							Required:    true,
-							Description: "",
-						},
-						"cud_status": {
-							Type:        schema.TypeString,
-							Required:    true,
-							Description: "",
-						},
-						commitments.FieldStartTimestamp: {
-							Type:        schema.TypeString,
-							Required:    true,
-							Description: "",
-						},
-						commitments.FieldEndTimestamp: {
-							Type:        schema.TypeString,
-							Required:    true,
-							Description: "",
-						},
-						commitments.FieldName: {
-							Type:        schema.TypeString,
-							Required:    true,
-							Description: "",
-						},
-						commitments.FieldRegion: {
-							Type:        schema.TypeString,
-							Required:    true,
-							Description: "",
-						},
-						commitments.FieldCPU: {
-							Type:        schema.TypeInt,
-							Required:    true,
-							Description: "",
-						},
-						commitments.FieldMemoryMB: {
-							Type:        schema.TypeInt,
-							Required:    true,
-							Description: "",
-						},
-						commitments.FieldPlan: {
-							Type:        schema.TypeString,
-							Required:    true,
-							Description: "",
-						},
-						commitments.FieldType: {
-							Type:        schema.TypeString,
-							Required:    true,
-							Description: "",
-						},
-					},
+					Schema: commitments.GCPCUDResourceSchema,
 				},
 			},
 			commitments.FieldAzureReservations: {
@@ -130,73 +59,7 @@ func resourceCommitments() *schema.Resource {
 				Computed: true,
 				Optional: true,
 				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						commitments.FieldExpirationDate: {
-							Type:        schema.TypeString,
-							Required:    true,
-							Description: "",
-						},
-						commitments.FieldName: {
-							Type:        schema.TypeString,
-							Required:    true,
-							Description: "",
-						},
-						commitments.FieldProductName: {
-							Type:        schema.TypeString,
-							Required:    true,
-							Description: "",
-						},
-						commitments.FieldPurchaseDate: {
-							Type:        schema.TypeString,
-							Required:    true,
-							Description: "",
-						},
-						commitments.FieldQuantity: {
-							Type:        schema.TypeString,
-							Required:    true,
-							Description: "",
-						},
-						commitments.FieldRegion: {
-							Type:        schema.TypeString,
-							Required:    true,
-							Description: "",
-						},
-						commitments.FieldReservationId: {
-							Type:        schema.TypeString,
-							Required:    true,
-							Description: "",
-						},
-						commitments.FieldScope: {
-							Type:        schema.TypeString,
-							Required:    true,
-							Description: "",
-						},
-						commitments.FieldScopeResourceGroup: {
-							Type:        schema.TypeString,
-							Required:    true,
-							Description: "",
-						},
-						commitments.FieldScopeSubscription: {
-							Type:        schema.TypeString,
-							Required:    true,
-							Description: "",
-						},
-						commitments.FieldStatus: {
-							Type:        schema.TypeString,
-							Required:    true,
-							Description: "",
-						},
-						commitments.FieldTerm: {
-							Type:        schema.TypeString,
-							Required:    true,
-							Description: "",
-						},
-						commitments.FieldType: {
-							Type:        schema.TypeString,
-							Required:    true,
-							Description: "",
-						},
-					},
+					Schema: commitments.AzureReservationResourceSchema,
 				},
 			},
 		},

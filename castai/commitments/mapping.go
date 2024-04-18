@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/samber/lo"
 
 	"github.com/castai/terraform-provider-castai/castai/reservations"
@@ -17,22 +18,22 @@ type (
 
 	GCPCUDResource struct {
 		// CAST AI only fields
-		ID             *string `mapstructure:"id"`
-		AllowedUsage   float32 `mapstructure:"allowed_usage"`
-		Prioritization bool    `mapstructure:"prioritization"`
-		Status         *string `mapstructure:"status"`
+		ID             *string  `mapstructure:"id"`
+		AllowedUsage   *float32 `mapstructure:"allowed_usage"`
+		Prioritization *bool    `mapstructure:"prioritization"`
+		Status         *string  `mapstructure:"status"`
 
 		// Fields from GCP CUDs export JSON
-		CUDID          *string `mapstructure:"cud_id"`
-		CUDStatus      *string `mapstructure:"cud_status"`
-		StartTimestamp *string `mapstructure:"start_timestamp"`
-		EndTimestamp   *string `mapstructure:"end_timestamp"`
-		Name           *string `mapstructure:"name"`
-		Region         *string `mapstructure:"region"`
-		CPU            *int    `mapstructure:"cpu"`
-		MemoryMb       *int    `mapstructure:"memory_mb"`
-		Plan           *string `mapstructure:"plan"`
-		Type           *string `mapstructure:"type"`
+		CUDID          string `mapstructure:"cud_id"`
+		CUDStatus      string `mapstructure:"cud_status"`
+		StartTimestamp string `mapstructure:"start_timestamp"`
+		EndTimestamp   string `mapstructure:"end_timestamp"`
+		Name           string `mapstructure:"name"`
+		Region         string `mapstructure:"region"`
+		CPU            int    `mapstructure:"cpu"`
+		MemoryMb       int    `mapstructure:"memory_mb"`
+		Plan           string `mapstructure:"plan"`
+		Type           string `mapstructure:"type"`
 	}
 
 	AzureReservationResource struct {
@@ -47,6 +48,84 @@ type (
 		CPU            *string `mapstructure:"cpu"`
 		MemoryMb       *string `mapstructure:"memory_mb"`
 	}
+)
+
+var (
+	// GCPCUDResourceSchema should align with the fields of GCPCUDResource struct
+	GCPCUDResourceSchema = map[string]*schema.Schema{
+		"id": {
+			Type:        schema.TypeString,
+			Computed:    true,
+			Description: "",
+		},
+		"allowed_usage": {
+			Type:        schema.TypeFloat,
+			Computed:    true,
+			Description: "",
+		},
+		"prioritization": {
+			Type:        schema.TypeBool,
+			Computed:    true,
+			Description: "",
+		},
+		"status": {
+			Type:        schema.TypeString,
+			Computed:    true,
+			Description: "",
+		},
+		"cud_id": {
+			Type:        schema.TypeString,
+			Required:    true,
+			Description: "",
+		},
+		"cud_status": {
+			Type:        schema.TypeString,
+			Required:    true,
+			Description: "",
+		},
+		"start_timestamp": {
+			Type:        schema.TypeString,
+			Required:    true,
+			Description: "",
+		},
+		"end_timestamp": {
+			Type:        schema.TypeString,
+			Required:    true,
+			Description: "",
+		},
+		"name": {
+			Type:        schema.TypeString,
+			Required:    true,
+			Description: "",
+		},
+		"region": {
+			Type:        schema.TypeString,
+			Required:    true,
+			Description: "",
+		},
+		"cpu": {
+			Type:        schema.TypeInt,
+			Required:    true,
+			Description: "",
+		},
+		"memory_mb": {
+			Type:        schema.TypeInt,
+			Required:    true,
+			Description: "",
+		},
+		"plan": {
+			Type:        schema.TypeString,
+			Required:    true,
+			Description: "",
+		},
+		"type": {
+			Type:        schema.TypeString,
+			Required:    true,
+			Description: "",
+		},
+	}
+
+	AzureReservationResourceSchema = map[string]*schema.Schema{}
 )
 
 func MapReservationCSVRecordsToResources(csvRecords [][]string) ([]*AzureReservationResource, error) {
@@ -78,44 +157,44 @@ func MapCommitmentToCUDResource(c sdk.CastaiInventoryV1beta1Commitment) (*GCPCUD
 		return nil, errors.New("missing GCP resource CUD context")
 	}
 
-	var cpu, memory *int
+	var cpu, memory int
 	if c.GcpResourceCudContext != nil {
 		if c.GcpResourceCudContext.Cpu != nil {
 			parsedCPU, err := strconv.Atoi(*c.GcpResourceCudContext.Cpu)
 			if err != nil {
 				return nil, err
 			}
-			cpu = &parsedCPU
+			cpu = parsedCPU
 		}
 		if c.GcpResourceCudContext.MemoryMb != nil {
 			parsedMemory, err := strconv.Atoi(*c.GcpResourceCudContext.MemoryMb)
 			if err != nil {
 				return nil, err
 			}
-			memory = &parsedMemory
+			memory = parsedMemory
 		}
 	}
 
 	return &GCPCUDResource{
 		ID:             c.Id,
-		AllowedUsage:   lo.FromPtr(c.AllowedUsage),
-		Prioritization: lo.FromPtr(c.Prioritization),
+		AllowedUsage:   c.AllowedUsage,
+		Prioritization: c.Prioritization,
 		Status:         (*string)(c.Status),
-		CUDID:          c.GcpResourceCudContext.CudId,
-		CUDStatus:      c.GcpResourceCudContext.Status,
+		CUDID:          lo.FromPtr(c.GcpResourceCudContext.CudId),
+		CUDStatus:      lo.FromPtr(c.GcpResourceCudContext.Status),
 		EndTimestamp:   timeToString(c.EndDate),
 		StartTimestamp: timeToString(c.StartDate),
-		Name:           c.Name,
-		Region:         c.Region,
+		Name:           lo.FromPtr(c.Name),
+		Region:         lo.FromPtr(c.Region),
 		CPU:            cpu,
 		MemoryMb:       memory,
-		Plan:           (*string)(c.GcpResourceCudContext.Plan),
-		Type:           c.GcpResourceCudContext.Type,
+		Plan:           lo.FromPtr((*string)(c.GcpResourceCudContext.Plan)),
+		Type:           lo.FromPtr(c.GcpResourceCudContext.Type),
 	}, nil
 }
 
 func MapCUDImportToResource(resource sdk.CastaiInventoryV1beta1GCPCommitmentImport) (*GCPCUDResource, error) {
-	var cpu, memory *int
+	var cpu, memory int
 	if resource.Resources != nil {
 		for _, res := range *resource.Resources {
 			switch *res.Type {
@@ -124,29 +203,29 @@ func MapCUDImportToResource(resource sdk.CastaiInventoryV1beta1GCPCommitmentImpo
 				if err != nil {
 					return nil, err
 				}
-				cpu = &parsedCPU
+				cpu = parsedCPU
 			case "MEMORY":
 				parsedMemory, err := strconv.Atoi(*res.Amount)
 				if err != nil {
 					return nil, err
 				}
-				memory = &parsedMemory
+				memory = parsedMemory
 			}
 		}
 	}
 
 	return &GCPCUDResource{
-		CUDID:          resource.Id,
-		CUDStatus:      resource.Status,
+		CUDID:          lo.FromPtr(resource.Id),
+		CUDStatus:      lo.FromPtr(resource.Status),
 		Status:         resource.Status,
-		EndTimestamp:   resource.EndTimestamp,
-		StartTimestamp: resource.StartTimestamp,
-		Name:           resource.Name,
-		Region:         resource.Region,
+		EndTimestamp:   lo.FromPtr(resource.EndTimestamp),
+		StartTimestamp: lo.FromPtr(resource.StartTimestamp),
+		Name:           lo.FromPtr(resource.Name),
+		Region:         lo.FromPtr(resource.Region),
 		CPU:            cpu,
 		MemoryMb:       memory,
-		Plan:           resource.Plan,
-		Type:           resource.Type,
+		Plan:           lo.FromPtr(resource.Plan),
+		Type:           lo.FromPtr(resource.Type),
 	}, nil
 }
 
@@ -250,9 +329,9 @@ func getRecordFieldStringValue(field string, fieldIndexes map[string]int, record
 	return &value
 }
 
-func timeToString(t *time.Time) *string {
+func timeToString(t *time.Time) string {
 	if t == nil {
-		return nil
+		return ""
 	}
-	return lo.ToPtr(t.Format(time.RFC3339))
+	return t.Format(time.RFC3339)
 }
