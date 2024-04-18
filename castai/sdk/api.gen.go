@@ -1087,8 +1087,9 @@ type ExternalclusterV1Cluster struct {
 	Status *string `json:"status,omitempty"`
 
 	// Cluster subnets.
-	Subnets *[]ExternalclusterV1Subnet     `json:"subnets,omitempty"`
-	Tags    *ExternalclusterV1Cluster_Tags `json:"tags,omitempty"`
+	Subnets     *[]ExternalclusterV1Subnet     `json:"subnets,omitempty"`
+	Tags        *ExternalclusterV1Cluster_Tags `json:"tags,omitempty"`
+	WorkspaceId *string                        `json:"workspaceId,omitempty"`
 
 	// Cluster zones.
 	Zones *[]ExternalclusterV1Zone `json:"zones,omitempty"`
@@ -1516,6 +1517,9 @@ type ExternalclusterV1RegisterClusterRequest struct {
 
 	// Organization of the cluster.
 	OrganizationId *string `json:"organizationId,omitempty"`
+
+	// Workspace id of the cluster.
+	WorkspaceId *string `json:"workspaceId,omitempty"`
 }
 
 // ExternalclusterV1Resources defines model for externalcluster.v1.Resources.
