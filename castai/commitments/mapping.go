@@ -13,29 +13,29 @@ import (
 
 type (
 	GCPCUDResource struct {
-		Id             *string `json:"id"`
-		Name           *string `json:"name"`
-		Type           *string `json:"type"`
-		Status         *string `json:"status"`
-		StartTimestamp *string `json:"start_timestamp"`
-		EndTimestamp   *string `json:"end_timestamp"`
-		Plan           *string `json:"plan"`
-		Region         *string `json:"region"`
-		CPU            *string `json:"cpu"`
-		MemoryMb       *string `json:"memory_mb"`
+		Id             *string `mapstructure:"id"`
+		Name           *string `mapstructure:"name"`
+		Type           *string `mapstructure:"type"`
+		Status         *string `mapstructure:"status"`
+		StartTimestamp *string `mapstructure:"start_timestamp"`
+		EndTimestamp   *string `mapstructure:"end_timestamp"`
+		Plan           *string `mapstructure:"plan"`
+		Region         *string `mapstructure:"region"`
+		CPU            *int    `mapstructure:"cpu"`
+		MemoryMb       *int    `mapstructure:"memory_mb"`
 	}
 
 	AzureReservationResource struct {
-		Id             *string `json:"id"`
-		Name           *string `json:"name"`
-		Status         *string `json:"status"`
-		StartTimestamp *string `json:"start_timestamp"`
-		EndTimestamp   *string `json:"end_timestamp"`
-		Region         *string `json:"region"`
-		Count          *string `json:"count"`
-		InstanceType   *string `json:"instance_type"`
-		CPU            *string `json:"cpu"`
-		MemoryMb       *string `json:"memory_mb"`
+		Id             *string `mapstructure:"id"`
+		Name           *string `mapstructure:"name"`
+		Status         *string `mapstructure:"status"`
+		StartTimestamp *string `mapstructure:"start_timestamp"`
+		EndTimestamp   *string `mapstructure:"end_timestamp"`
+		Region         *string `mapstructure:"region"`
+		Count          *string `mapstructure:"count"`
+		InstanceType   *string `mapstructure:"instance_type"`
+		CPU            *string `mapstructure:"cpu"`
+		MemoryMb       *string `mapstructure:"memory_mb"`
 	}
 )
 
@@ -63,30 +63,56 @@ func MapCsvRecordsToReservationResources(csvRecords [][]string) ([]*AzureReserva
 	return reservations, nil
 }
 
-func MapCommitmentToCUDResource(c sdk.CastaiInventoryV1beta1Commitment) *GCPCUDResource {
+func MapCommitmentToCUDResource(c sdk.CastaiInventoryV1beta1Commitment) (*GCPCUDResource, error) {
+	var cpu, memory *int
+	if c.GcpResourceCudContext != nil {
+		if c.GcpResourceCudContext.Cpu != nil {
+			parsedCPU, err := strconv.Atoi(*c.GcpResourceCudContext.Cpu)
+			if err != nil {
+				return nil, err
+			}
+			cpu = &parsedCPU
+		}
+		if c.GcpResourceCudContext.MemoryMb != nil {
+			parsedMemory, err := strconv.Atoi(*c.GcpResourceCudContext.MemoryMb)
+			if err != nil {
+				return nil, err
+			}
+			memory = &parsedMemory
+		}
+	}
+
 	return &GCPCUDResource{
 		EndTimestamp:   timeToString(c.EndDate),
 		Id:             c.GcpResourceCudContext.CudId,
 		Name:           c.Name,
 		Plan:           (*string)(c.GcpResourceCudContext.Plan),
 		Region:         c.Region,
-		CPU:            c.GcpResourceCudContext.Cpu,
-		MemoryMb:       c.GcpResourceCudContext.MemoryMb,
+		CPU:            cpu,
+		MemoryMb:       memory,
 		StartTimestamp: timeToString(c.StartDate),
 		Status:         (*string)(c.Status),
 		Type:           c.GcpResourceCudContext.Type,
-	}
+	}, nil
 }
 
 func MapGCPCommitmentImportToCUDResource(resource sdk.CastaiInventoryV1beta1GCPCommitmentImport) (*GCPCUDResource, error) {
-	var cpu, memory *string
+	var cpu, memory *int
 	if resource.Resources != nil {
 		for _, res := range *resource.Resources {
 			switch *res.Type {
 			case "VCPU":
-				cpu = res.Amount
+				parsedCPU, err := strconv.Atoi(*res.Amount)
+				if err != nil {
+					return nil, err
+				}
+				cpu = &parsedCPU
 			case "MEMORY":
-				memory = res.Amount
+				parsedMemory, err := strconv.Atoi(*res.Amount)
+				if err != nil {
+					return nil, err
+				}
+				memory = &parsedMemory
 			}
 		}
 	}

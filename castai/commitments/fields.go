@@ -9,10 +9,12 @@ const (
 
 	// Common fields
 
-	FieldName   = "name"
-	FieldRegion = "region"
-	FieldStatus = "status"
-	FieldType   = "type"
+	FieldName     = "name"
+	FieldRegion   = "region"
+	FieldStatus   = "status"
+	FieldType     = "type"
+	FieldCPU      = "cpu"
+	FieldMemoryMB = "memory_mb"
 
 	// GCP CUD fields
 
@@ -32,13 +34,13 @@ const (
 
 	// Azure Reservation fields
 
-	FieldExpirationDate     = "expirationDate"
-	FieldProductName        = "productName"
-	FieldPurchaseDate       = "purchaseDate"
+	FieldExpirationDate     = "expiration_date"
+	FieldProductName        = "product_name"
+	FieldPurchaseDate       = "purchase_date"
 	FieldQuantity           = "quantity"
-	FieldReservationId      = "reservationId"
+	FieldReservationId      = "reservation_id"
 	FieldScope              = "scope"
-	FieldScopeResourceGroup = "scopeResourceGroup"
-	FieldScopeSubscription  = "scopeSubscription"
+	FieldScopeResourceGroup = "scope_resource_group"
+	FieldScopeSubscription  = "scope_subscription"
 	FieldTerm               = "term"
 )

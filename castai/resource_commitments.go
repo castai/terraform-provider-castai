@@ -52,42 +52,32 @@ func resourceCommitments() *schema.Resource {
 				Optional: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						commitments.FieldAutoRenew: {
-							Type:        schema.TypeBool,
-							Required:    true,
-							Description: "",
-						},
-						commitments.FieldCategory: {
-							Type:        schema.TypeString,
-							Required:    true,
-							Description: "",
-						},
-						commitments.FieldCreationTimestamp: {
-							Type:        schema.TypeString,
-							Required:    true,
-							Description: "",
-						},
-						commitments.FieldDescription: {
-							Type:        schema.TypeString,
-							Required:    true,
-							Description: "",
-						},
-						commitments.FieldEndTimestamp: {
-							Type:        schema.TypeString,
-							Required:    true,
-							Description: "",
-						},
 						commitments.FieldId: {
 							Type:        schema.TypeString,
 							Required:    true,
 							Description: "",
 						},
-						commitments.FieldKind: {
+						commitments.FieldName: {
 							Type:        schema.TypeString,
 							Required:    true,
 							Description: "",
 						},
-						commitments.FieldName: {
+						commitments.FieldType: {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "",
+						},
+						commitments.FieldStatus: {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "",
+						},
+						commitments.FieldStartTimestamp: {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "",
+						},
+						commitments.FieldEndTimestamp: {
 							Type:        schema.TypeString,
 							Required:    true,
 							Description: "",
@@ -102,47 +92,13 @@ func resourceCommitments() *schema.Resource {
 							Required:    true,
 							Description: "",
 						},
-						commitments.FieldResources: {
-							Type:        schema.TypeList,
-							Required:    true,
-							Description: "",
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									commitments.FieldAmount: {
-										Type:        schema.TypeString,
-										Required:    true,
-										Description: "",
-									},
-									commitments.FieldType: {
-										Type:        schema.TypeString,
-										Required:    true,
-										Description: "",
-									},
-								},
-							},
-						},
-						commitments.FieldSelfLink: {
-							Type:        schema.TypeString,
+						commitments.FieldCPU: {
+							Type:        schema.TypeInt,
 							Required:    true,
 							Description: "",
 						},
-						commitments.FieldStartTimestamp: {
-							Type:        schema.TypeString,
-							Required:    true,
-							Description: "",
-						},
-						commitments.FieldStatus: {
-							Type:        schema.TypeString,
-							Required:    true,
-							Description: "",
-						},
-						commitments.FieldStatusMessage: {
-							Type:        schema.TypeString,
-							Required:    true,
-							Description: "",
-						},
-						commitments.FieldType: {
-							Type:        schema.TypeString,
+						commitments.FieldMemoryMB: {
+							Type:        schema.TypeInt,
 							Required:    true,
 							Description: "",
 						},
@@ -229,7 +185,7 @@ func resourceCommitments() *schema.Resource {
 
 func commitmentsDiff(_ context.Context, diff *schema.ResourceDiff, _ any) error {
 	reservationsCSV, reservationsOk := diff.GetOk(commitments.FieldAzureReservationsCSV)
-	cudsJSON, cudsOk := diff.GetOk(commitments.FieldAzureReservationsCSV)
+	cudsJSON, cudsOk := diff.GetOk(commitments.FieldGCPCUDsJSON)
 	if !reservationsOk && !cudsOk {
 		return fmt.Errorf("one of 'azure_reservations_csv' or 'gcp_cuds_json' must be set")
 	}
@@ -391,15 +347,19 @@ func populateCommitmentsResourceData(ctx context.Context, d *schema.ResourceData
 			return fmt.Errorf("setting azure reservations: %w", err)
 		}
 	case cudsOk:
-		if err := d.Set(
-			commitments.FieldGCPCUDs,
-			lo.FilterMap(orgCommitments, func(item sdk.CastaiInventoryV1beta1Commitment, index int) (*commitments.GCPCUDResource, bool) {
-				if item.GcpResourceCudContext == nil {
-					return nil, false
-				}
-				return commitments.MapCommitmentToCUDResource(item), true
-			}),
-		); err != nil {
+		var resources []*commitments.GCPCUDResource
+		for _, c := range orgCommitments {
+			if c.GcpResourceCudContext == nil {
+				continue
+			}
+
+			resource, err := commitments.MapCommitmentToCUDResource(c)
+			if err != nil {
+				return err
+			}
+			resources = append(resources, resource)
+		}
+		if err := d.Set(commitments.FieldGCPCUDs, resources); err != nil {
 			return fmt.Errorf("setting gcp cuds: %w", err)
 		}
 	}
