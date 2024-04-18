@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/csv"
 	"fmt"
-	"log"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"strings"
 	"time"
 
@@ -138,8 +138,8 @@ func reservationsStateImporter(ctx context.Context, d *schema.ResourceData, meta
 }
 
 func resourceCastaiReservationsRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
-	log.Printf("[INFO] Get reservations call start")
-	defer log.Printf("[INFO] Get reservations call end")
+	tflog.Info(ctx, "Get reservations call start")
+	defer tflog.Info(ctx, "Get reservations call end")
 
 	organizationId, err := getOrganizationId(ctx, d, meta)
 	if err != nil {
@@ -169,15 +169,15 @@ func resourceCastaiReservationsDelete(ctx context.Context, data *schema.Resource
 }
 
 func resourceCastaiReservationsUpdate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	log.Printf("[INFO] Update reservations call start")
-	defer log.Printf("[INFO] Update reservations call end")
+	tflog.Info(ctx, "Update reservations call start")
+	defer tflog.Info(ctx, "Update reservations call end")
 
 	return resourceCastaiReservationsUpsert(ctx, data, meta)
 }
 
 func resourceCastaiReservationsCreate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	log.Printf("[INFO] Create reservations call start")
-	defer log.Printf("[INFO] Create reservations call end")
+	tflog.Info(ctx, "Create reservations call start")
+	defer tflog.Info(ctx, "Create reservations call end")
 
 	return resourceCastaiReservationsUpsert(ctx, data, meta)
 }
