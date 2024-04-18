@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/mitchellh/mapstructure"
+	"slices"
 	"strings"
 	"time"
 
@@ -29,7 +30,6 @@ func resourceCommitments() *schema.Resource {
 			StateContext: commitmentsStateImporter,
 		},
 		Description: "Commitments represent cloud service provider reserved instances (Azure) and commited use discounts (GCP) that can be used by CAST AI autoscaler.",
-
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(2 * time.Minute),
 			Update: schema.DefaultTimeout(2 * time.Minute),
@@ -257,7 +257,7 @@ func populateCommitmentsResourceData(ctx context.Context, d *schema.ResourceData
 	}
 
 	_, reservationsOk := d.GetOk(commitments.FieldAzureReservationsCSV)
-	_, cudsOk := d.GetOk(commitments.FieldGCPCUDsJSON)
+	cuds, cudsOk := d.GetOk(commitments.FieldGCPCUDsJSON)
 
 	switch {
 	case reservationsOk:
@@ -270,6 +270,10 @@ func populateCommitmentsResourceData(ctx context.Context, d *schema.ResourceData
 			return fmt.Errorf("setting azure reservations: %w", err)
 		}
 	case cudsOk:
+		inputCUDs, err := mapCUDsJSONToResources(cuds.(string))
+		if err != nil {
+			return err
+		}
 		var resources []*commitments.GCPCUDResource
 		for _, c := range orgCommitments {
 			if c.GcpResourceCudContext == nil {
@@ -282,6 +286,7 @@ func populateCommitmentsResourceData(ctx context.Context, d *schema.ResourceData
 			}
 			resources = append(resources, resource)
 		}
+		sortResources(resources, inputCUDs)
 		if err := d.Set(commitments.FieldGCPCUDs, resources); err != nil {
 			return fmt.Errorf("setting gcp cuds: %w", err)
 		}
@@ -338,4 +343,33 @@ func getOrganizationCommitments(ctx context.Context, meta any) ([]sdk.CastaiInve
 		return nil, nil
 	}
 	return *response.JSON200.Commitments, nil
+}
+
+func sortResources(toSort, targetOrder []*commitments.GCPCUDResource) {
+	orderMap := make(map[string]int)
+	for index, value := range targetOrder {
+		orderMap[value.CUDID] = index
+	}
+
+	slices.SortStableFunc(toSort, func(a, b *commitments.GCPCUDResource) int {
+		indexI, foundI := orderMap[a.CUDID]
+		indexJ, foundJ := orderMap[b.CUDID]
+
+		if !foundI && !foundJ {
+			if a.CUDID < b.CUDID {
+				return -1
+			}
+			return 1
+		}
+		if !foundI {
+			return 1
+		}
+		if !foundJ {
+			return -1
+		}
+		if indexI < indexJ {
+			return -1
+		}
+		return 1
+	})
 }
