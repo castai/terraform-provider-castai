@@ -35,6 +35,11 @@ type (
 		Plan           string `mapstructure:"plan"`
 		Type           string `mapstructure:"type"`
 	}
+	GCPCUDConfigResource struct {
+		Prioritization *bool    `mapstructure:"prioritization,omitempty"`
+		Status         *string  `mapstructure:"status,omitempty"`
+		AllowedUsage   *float32 `mapstructure:"allowed_usage,omitempty"`
+	}
 
 	AzureReservationResource struct {
 		ID            *string `mapstructure:"id,omitempty"`   // ID of the commitment
@@ -184,7 +189,10 @@ func MapCommitmentToCUDResource(c sdk.CastaiInventoryV1beta1Commitment) (*GCPCUD
 	}, nil
 }
 
-func MapCUDImportToResource(resource sdk.CastaiInventoryV1beta1GCPCommitmentImport) (*GCPCUDResource, error) {
+func MapCUDImportToResource(
+	resource sdk.CastaiInventoryV1beta1GCPCommitmentImport,
+	config *GCPCUDConfigResource,
+) (*GCPCUDResource, error) {
 	var cpu, memory int
 	if resource.Resources != nil {
 		for _, res := range *resource.Resources {
@@ -213,7 +221,7 @@ func MapCUDImportToResource(resource sdk.CastaiInventoryV1beta1GCPCommitmentImpo
 		_, region = path.Split(*resource.Region)
 	}
 
-	return &GCPCUDResource{
+	res := &GCPCUDResource{
 		CUDID:          lo.FromPtr(resource.Id),
 		CUDStatus:      lo.FromPtr(resource.Status),
 		EndTimestamp:   lo.FromPtr(resource.EndTimestamp),
@@ -224,7 +232,13 @@ func MapCUDImportToResource(resource sdk.CastaiInventoryV1beta1GCPCommitmentImpo
 		MemoryMb:       memory,
 		Plan:           lo.FromPtr(resource.Plan),
 		Type:           lo.FromPtr(resource.Type),
-	}, nil
+	}
+	if config != nil {
+		res.AllowedUsage = config.AllowedUsage
+		res.Prioritization = config.Prioritization
+		res.Status = config.Status
+	}
+	return res, nil
 }
 
 // SortResources sorts the toSort slice based on the order of the targetOrder slice
