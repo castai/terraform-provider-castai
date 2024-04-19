@@ -36,9 +36,15 @@ type (
 		Type           string `mapstructure:"type"`
 	}
 	GCPCUDConfigResource struct {
-		Prioritization *bool    `mapstructure:"prioritization,omitempty"`
-		Status         *string  `mapstructure:"status,omitempty"`
-		AllowedUsage   *float32 `mapstructure:"allowed_usage,omitempty"`
+		Matcher        GCPCUDConfigMatcherResource `mapstructure:"matcher"`
+		Prioritization *bool                       `mapstructure:"prioritization,omitempty"`
+		Status         *string                     `mapstructure:"status,omitempty"`
+		AllowedUsage   *float32                    `mapstructure:"allowed_usage,omitempty"`
+	}
+	GCPCUDConfigMatcherResource struct {
+		Name   string  `mapstructure:"name"`
+		Type   *string `mapstructure:"type,omitempty"`
+		Region *string `mapstructure:"region,omitempty"`
 	}
 
 	AzureReservationResource struct {
@@ -46,21 +52,36 @@ type (
 		ReservationID string  `mapstructure:"reservation_id"` // ID of the reservation in Azure
 	}
 
-	resource interface {
+	Resource interface {
+		GetCommitmentID() string
 		GetIDInCloud() string
 	}
 )
 
 var (
-	_ resource = (*GCPCUDResource)(nil)
-	_ resource = (*AzureReservationResource)(nil)
+	_ Resource = (*GCPCUDResource)(nil)
+	_ Resource = (*AzureReservationResource)(nil)
 )
+
+func (r *GCPCUDResource) GetCommitmentID() string {
+	if r == nil || r.ID == nil {
+		return ""
+	}
+	return *r.ID
+}
 
 func (r *GCPCUDResource) GetIDInCloud() string {
 	if r == nil {
 		return ""
 	}
 	return r.CUDID
+}
+
+func (r *AzureReservationResource) GetCommitmentID() string {
+	if r == nil || r.ID == nil {
+		return ""
+	}
+	return *r.ID
 }
 
 func (r *AzureReservationResource) GetIDInCloud() string {
@@ -242,13 +263,13 @@ func MapCUDImportToResource(
 }
 
 // SortResources sorts the toSort slice based on the order of the targetOrder slice
-func SortResources[Resource resource](toSort, targetOrder []Resource) {
+func SortResources[R Resource](toSort, targetOrder []R) {
 	orderMap := make(map[string]int)
 	for index, value := range targetOrder {
 		orderMap[value.GetIDInCloud()] = index
 	}
 
-	slices.SortStableFunc(toSort, func(a, b Resource) int {
+	slices.SortStableFunc(toSort, func(a, b R) int {
 		indexI, foundI := orderMap[a.GetIDInCloud()]
 		indexJ, foundJ := orderMap[b.GetIDInCloud()]
 

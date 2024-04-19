@@ -58,17 +58,25 @@ func resourceCommitments() *schema.Resource {
 				Description: "List of GCP CUD configurations.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
+						"matcher": {
+							Type:        schema.TypeMap,
+							Required:    true,
+							Description: "",
+						},
 						"prioritization": {
-							Type:     schema.TypeBool,
-							Optional: true,
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Description: "",
 						},
 						"status": {
-							Type:     schema.TypeString,
-							Optional: true,
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: "",
 						},
 						"allowed_usage": {
-							Type:     schema.TypeFloat,
-							Optional: true,
+							Type:        schema.TypeFloat,
+							Optional:    true,
+							Description: "",
 						},
 					},
 				},
@@ -86,11 +94,16 @@ func resourceCommitments() *schema.Resource {
 }
 
 func commitmentsDiff(_ context.Context, diff *schema.ResourceDiff, _ any) error {
-	_, reservationsOk := diff.GetOk(commitments.FieldAzureReservationsCSV)
+	_, reservationsOk, err := getReservationResources(diff)
+	if err != nil {
+		return err
+	}
+
 	cudResources, cudsOk, err := getCUDResources(diff)
 	if err != nil {
 		return err
 	}
+
 	if !reservationsOk && !cudsOk {
 		return fmt.Errorf("one of 'azure_reservations_csv' or 'gcp_cuds_json' must be set")
 	}
@@ -109,8 +122,7 @@ func commitmentsDiff(_ context.Context, diff *schema.ResourceDiff, _ any) error 
 	return errors.New("unhandled combination of commitments input")
 }
 
-func getCUDResources(tfData resourceProvider) ([]*commitments.GCPCUDResource, bool, error) {
-	// Get the CUD JSON input and unmarshal it into a slice of CUD imports
+func getCUDImports(tfData resourceProvider) ([]sdk.CastaiInventoryV1beta1GCPCommitmentImport, bool, error) {
 	cudsIface, ok := tfData.GetOk(commitments.FieldGCPCUDsJSON)
 	if !ok {
 		return nil, false, nil
@@ -122,6 +134,18 @@ func getCUDResources(tfData resourceProvider) ([]*commitments.GCPCUDResource, bo
 	cuds, err := unmarshalCUDs(cudsJSONStr)
 	if err != nil {
 		return nil, true, err
+	}
+	return cuds, true, nil
+}
+
+func getCUDResources(tfData resourceProvider) ([]*commitments.GCPCUDResource, bool, error) {
+	// Get the CUD JSON input and unmarshal it into a slice of CUD imports
+	cuds, cudsOk, err := getCUDImports(tfData)
+	if err != nil {
+		return nil, cudsOk, err
+	}
+	if !cudsOk {
+		return nil, false, nil
 	}
 
 	// Get the CUD configurations and map them to resources
@@ -138,6 +162,12 @@ func getCUDResources(tfData resourceProvider) ([]*commitments.GCPCUDResource, bo
 		return nil, true, err
 	}
 	return res, true, nil
+}
+
+func getReservationResources(tfData resourceProvider) ([]*commitments.AzureReservationResource, bool, error) {
+	// TEMPORARY: support for Azure reservations will be added in one of the upcoming PRs
+	_, ok := tfData.GetOk(commitments.FieldAzureReservationsCSV)
+	return nil, ok, nil
 }
 
 func commitmentsStateImporter(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
@@ -163,39 +193,36 @@ func resourceCastaiCommitmentsDelete(ctx context.Context, data *schema.ResourceD
 		return diag.FromErr(err)
 	}
 
-	reservationsIface, reservationsOk := data.GetOk(commitments.FieldAzureReservations)
-	cudsIface, cudsOk := data.GetOk(commitments.FieldGCPCUDs)
+	reservations, reservationsOk, err := getReservationResources(data)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	cuds, cudsOk, err := getCUDResources(data)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	switch {
 	case reservationsOk:
-		var reservations []*commitments.AzureReservationResource
-		if err := mapstructure.Decode(reservationsIface, &reservations); err != nil {
+		if err := deleteCommitments(ctx, meta, reservations); err != nil {
 			return diag.FromErr(err)
-		}
-		for _, c := range reservations {
-			if c.ID == nil {
-				return diag.Errorf("missing ID for Azure reservation")
-			}
-			if err := deleteCommitment(ctx, meta, *c.ID); err != nil {
-				return diag.FromErr(err)
-			}
 		}
 	case cudsOk:
-		var cuds []*commitments.GCPCUDResource
-		if err := mapstructure.Decode(cudsIface, &cuds); err != nil {
+		if err := deleteCommitments(ctx, meta, cuds); err != nil {
 			return diag.FromErr(err)
-		}
-		for _, c := range cuds {
-			if c.ID == nil {
-				return diag.Errorf("missing ID for GCP CUD")
-			}
-			if err := deleteCommitment(ctx, meta, *c.ID); err != nil {
-				return diag.FromErr(err)
-			}
 		}
 	}
 
 	data.SetId(organizationId)
+	return nil
+}
+
+func deleteCommitments[R commitments.Resource](ctx context.Context, meta any, resources []R) error {
+	for _, r := range resources {
+		if err := deleteCommitment(ctx, meta, r.GetCommitmentID()); err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
@@ -220,16 +247,12 @@ func resourceCastaiCommitmentsUpsert(ctx context.Context, data *schema.ResourceD
 	}
 
 	_, reservationsOk := data.GetOk(commitments.FieldAzureReservationsCSV)
-	cudsJSON, cudsOk := data.GetOk(commitments.FieldGCPCUDsJSON)
+	cuds, cudsOk, err := getCUDImports(data)
 
 	switch {
 	case reservationsOk:
 		return diag.Errorf("azure reservations are currently not supported")
 	case cudsOk:
-		cuds, err := unmarshalCUDs(cudsJSON.(string))
-		if err != nil {
-			return diag.FromErr(err)
-		}
 		if err := importCUDs(ctx, meta, cuds); err != nil {
 			return diag.FromErr(err)
 		}
