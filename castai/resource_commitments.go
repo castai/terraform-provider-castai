@@ -290,8 +290,8 @@ func resourceCastaiCommitmentsUpsert(ctx context.Context, data *schema.ResourceD
 		}
 
 		cudsWithConfigs, err := commitments.MapConfigsToCUDs(
-			lo.Map(gcpCommitments, func(item sdk.CastaiInventoryV1beta1Commitment, _ int) commitments.CUD {
-				return commitments.CUD{CastaiInventoryV1beta1Commitment: item}
+			lo.Map(gcpCommitments, func(item sdk.CastaiInventoryV1beta1Commitment, _ int) commitments.CastaiCommitment {
+				return commitments.CastaiCommitment{CastaiInventoryV1beta1Commitment: item}
 			}),
 			configs,
 		)
@@ -303,7 +303,7 @@ func resourceCastaiCommitmentsUpsert(ctx context.Context, data *schema.ResourceD
 			res, err := meta.(*ProviderConfig).api.CommitmentsAPIUpdateCommitmentWithResponse(
 				ctx,
 				lo.FromPtr(c.CUD.Id),
-				commitments.CUDWithConfigToUpdateCommitmentRequest(c),
+				commitments.MapCUDImportWithConfigToUpdateRequest(c),
 			)
 			if err := sdk.CheckOKResponse(res, err); err != nil {
 				return diag.Errorf("updating commitment: %w", err)
