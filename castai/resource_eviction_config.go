@@ -421,6 +421,10 @@ func toPodSelector(in interface{}) (*sdk.CastaiEvictorV1PodSelector, error) {
 				return nil, err
 			}
 
+			if mls == nil || len(mls.AdditionalProperties) == 0 {
+				continue
+			}
+
 			if out.LabelSelector == nil {
 				out.LabelSelector = &sdk.CastaiEvictorV1LabelSelector{}
 			}

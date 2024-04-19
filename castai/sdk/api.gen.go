@@ -2617,6 +2617,11 @@ type NodeTemplatesAPIUpdateNodeTemplateJSONBody = NodetemplatesV1UpdateNodeTempl
 // PoliciesAPIUpsertClusterPoliciesJSONBody defines parameters for PoliciesAPIUpsertClusterPolicies.
 type PoliciesAPIUpsertClusterPoliciesJSONBody = PoliciesV1Policies
 
+// ScheduledRebalancingAPIListRebalancingJobsParams defines parameters for ScheduledRebalancingAPIListRebalancingJobs.
+type ScheduledRebalancingAPIListRebalancingJobsParams struct {
+	RebalancingScheduleId *string `form:"rebalancingScheduleId,omitempty" json:"rebalancingScheduleId,omitempty"`
+}
+
 // ScheduledRebalancingAPICreateRebalancingJobJSONBody defines parameters for ScheduledRebalancingAPICreateRebalancingJob.
 type ScheduledRebalancingAPICreateRebalancingJobJSONBody = ScheduledrebalancingV1RebalancingJob
 

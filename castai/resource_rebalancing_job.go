@@ -189,7 +189,7 @@ func getRebalancingJobByScheduleName(ctx context.Context, client *sdk.ClientWith
 		return nil, fmt.Errorf("getting schedule: %w", err)
 	}
 
-	resp, err := client.ScheduledRebalancingAPIListRebalancingJobsWithResponse(ctx, clusterID)
+	resp, err := client.ScheduledRebalancingAPIListRebalancingJobsWithResponse(ctx, clusterID, &sdk.ScheduledRebalancingAPIListRebalancingJobsParams{})
 	if checkErr := sdk.CheckOKResponse(resp, err); checkErr != nil {
 		return nil, checkErr
 	}
