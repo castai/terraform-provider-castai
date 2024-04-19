@@ -38,16 +38,7 @@ type (
 	}
 
 	AzureReservationResource struct {
-		Id             *string `mapstructure:"id"`
-		Name           *string `mapstructure:"name"`
-		Status         *string `mapstructure:"status"`
-		StartTimestamp *string `mapstructure:"start_timestamp"`
-		EndTimestamp   *string `mapstructure:"end_timestamp"`
-		Region         *string `mapstructure:"region"`
-		Count          *string `mapstructure:"count"`
-		InstanceType   *string `mapstructure:"instance_type"`
-		CPU            *string `mapstructure:"cpu"`
-		MemoryMb       *string `mapstructure:"memory_mb"`
+		Id *string `mapstructure:"id"`
 	}
 )
 
@@ -128,30 +119,6 @@ var (
 
 	AzureReservationResourceSchema = map[string]*schema.Schema{}
 )
-
-func MapReservationCSVRecordsToResources(csvRecords [][]string) ([]*AzureReservationResource, error) {
-	var csvColumns []string
-	if len(csvRecords) > 0 {
-		csvColumns = csvRecords[0]
-	}
-	normalizedCsvColumnNames := lo.Map(csvColumns, func(column string, _ int) string {
-		return strings.ToLower(strings.ReplaceAll(column, " ", "_"))
-	})
-
-	reservationRecords := csvRecords[1:]
-	fieldIndexes := mapReservationsCSVHeaderToFieldIndexes(normalizedCsvColumnNames)
-
-	reservations := make([]*AzureReservationResource, 0, len(reservationRecords))
-	for _, record := range reservationRecords {
-		result, err := mapReservationRecordToResource(fieldIndexes, record)
-		if err != nil {
-			return nil, err
-		}
-
-		reservations = append(reservations, result)
-	}
-	return reservations, nil
-}
 
 func MapCommitmentToCUDResource(c sdk.CastaiInventoryV1beta1Commitment) (*GCPCUDResource, error) {
 	if c.GcpResourceCudContext == nil {
@@ -256,85 +223,6 @@ func mapReservationsCSVHeaderToFieldIndexes(columns []string) map[string]int {
 		indexes[field] = index
 	}
 	return indexes
-}
-
-func mapReservationRecordToResource(fieldIndexes map[string]int, record []string) (*AzureReservationResource, error) {
-	return &AzureReservationResource{
-		Id:             nil,
-		Name:           nil,
-		Status:         nil,
-		StartTimestamp: nil,
-		EndTimestamp:   nil,
-		Region:         getRecordFieldStringValue(reservations.FieldReservationRegion, fieldIndexes, record),
-		Count:          nil,
-		InstanceType:   nil,
-		CPU:            nil,
-		MemoryMb:       nil,
-	}, nil
-}
-
-func MapReservationsCSVRecordsToImports(csvRecords [][]string) ([]sdk.CastaiInventoryV1beta1AzureReservationImport, error) {
-	var csvColumns []string
-	if len(csvRecords) > 0 {
-		csvColumns = csvRecords[0]
-	}
-	normalizedCsvColumnNames := lo.Map(csvColumns, func(column string, _ int) string {
-		return strings.ToLower(strings.ReplaceAll(column, " ", "_"))
-	})
-
-	reservationRecords := csvRecords[1:]
-	fieldIndexes := mapReservationsCSVHeaderToFieldIndexes(normalizedCsvColumnNames)
-
-	res := make([]sdk.CastaiInventoryV1beta1AzureReservationImport, 0, len(reservationRecords))
-	for _, record := range reservationRecords {
-		result, err := MapReservationRecordToImport(fieldIndexes, record)
-		if err != nil {
-			return nil, err
-		}
-
-		res = append(res, *result)
-	}
-	return res, nil
-}
-
-func MapReservationRecordToImport(fieldIndexes map[string]int, record []string) (*sdk.CastaiInventoryV1beta1AzureReservationImport, error) {
-	var quantity *int32
-	if v := getRecordFieldStringValue(reservations.FieldReservationQuantity, fieldIndexes, record); v != nil {
-		parsed, err := strconv.Atoi(*v)
-		if err != nil {
-			return nil, err
-		}
-		quantity = lo.ToPtr(int32(parsed))
-	}
-
-	return &sdk.CastaiInventoryV1beta1AzureReservationImport{
-		ExpirationDate: getRecordFieldStringValue(reservations.FieldReservationExpirationDate, fieldIndexes, record),
-		Name:           getRecordFieldStringValue(reservations.FieldReservationName, fieldIndexes, record),
-		ProductName:    getRecordFieldStringValue(reservations.FieldReservationProductName, fieldIndexes, record),
-		PurchaseDate:   getRecordFieldStringValue(reservations.FieldReservationPurchaseDate, fieldIndexes, record),
-		Quantity:       quantity,
-		Region:         getRecordFieldStringValue(reservations.FieldReservationRegion, fieldIndexes, record),
-		//ReservationId:      getRecordFieldStringValue(reservations.FieldReservationPurchaseDate, fieldIndexes, record),
-		//Scope:              getRecordFieldStringValue(reservations.FieldReservationPurchaseDate, fieldIndexes, record),
-		ScopeResourceGroup: nil,
-		ScopeSubscription:  nil,
-		//Status:             getRecordFieldStringValue(reservations.FieldReservationPurchaseDate, fieldIndexes, record),
-		//Term:               getRecordFieldStringValue(reservations.FieldReservationPurchaseDate, fieldIndexes, record),
-		Type: getRecordFieldStringValue(reservations.FieldReservationType, fieldIndexes, record),
-	}, nil
-}
-
-func getRecordFieldStringValue(field string, fieldIndexes map[string]int, record []string) *string {
-	index, found := fieldIndexes[field]
-	if !found || index == -1 {
-		return nil
-	}
-	value := record[index]
-	if value == "" {
-		return nil
-	}
-
-	return &value
 }
 
 func timeToString(t *time.Time) string {

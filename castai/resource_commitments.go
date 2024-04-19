@@ -2,13 +2,11 @@ package castai
 
 import (
 	"context"
-	"encoding/csv"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/mitchellh/mapstructure"
 	"slices"
-	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-log/tflog"
@@ -66,7 +64,7 @@ func resourceCommitments() *schema.Resource {
 }
 
 func commitmentsDiff(_ context.Context, diff *schema.ResourceDiff, _ any) error {
-	reservationsCSV, reservationsOk := diff.GetOk(commitments.FieldAzureReservationsCSV)
+	_, reservationsOk := diff.GetOk(commitments.FieldAzureReservationsCSV)
 	cudsJSON, cudsOk := diff.GetOk(commitments.FieldGCPCUDsJSON)
 	if !reservationsOk && !cudsOk {
 		return fmt.Errorf("one of 'azure_reservations_csv' or 'gcp_cuds_json' must be set")
@@ -77,11 +75,8 @@ func commitmentsDiff(_ context.Context, diff *schema.ResourceDiff, _ any) error 
 
 	switch {
 	case reservationsOk:
-		reservationResources, err := mapReservationsCSVToResources(reservationsCSV.(string))
-		if err != nil {
-			return err
-		}
-		return diff.SetNew(commitments.FieldAzureReservations, reservationResources)
+		// TEMPORARY: support for Azure reservations will be added in one of the upcoming PRs
+		return fmt.Errorf("azure reservations are currently not supported")
 	case cudsOk:
 		cudResources, err := mapCUDsJSONToResources(cudsJSON.(string))
 		if err != nil {
@@ -172,24 +167,12 @@ func resourceCastaiCommitmentsUpsert(ctx context.Context, data *schema.ResourceD
 		return diag.FromErr(err)
 	}
 
-	reservationsCsv, reservationsOk := data.GetOk(commitments.FieldAzureReservationsCSV)
+	_, reservationsOk := data.GetOk(commitments.FieldAzureReservationsCSV)
 	cudsJSON, cudsOk := data.GetOk(commitments.FieldGCPCUDsJSON)
 
 	switch {
 	case reservationsOk:
-		rows, err := parseCSV(reservationsCsv.(string))
-		if err != nil {
-			return diag.FromErr(err)
-		}
-
-		imports, err := commitments.MapReservationsCSVRecordsToImports(rows)
-		if err != nil {
-			return diag.FromErr(err)
-		}
-
-		if err := importReservations(ctx, meta, imports); err != nil {
-			return diag.FromErr(err)
-		}
+		return diag.Errorf("azure reservations are currently not supported")
 	case cudsOk:
 		cuds, err := unmarshalCUDs(cudsJSON.(string))
 		if err != nil {
@@ -209,20 +192,6 @@ func unmarshalCUDs(input string) (res []sdk.CastaiInventoryV1beta1GCPCommitmentI
 		return nil, err
 	}
 	return
-}
-
-func importReservations(ctx context.Context, meta any, imports []sdk.CastaiInventoryV1beta1AzureReservationImport) error {
-	res, err := meta.(*ProviderConfig).api.CommitmentsAPIImportAzureReservationsWithResponse(
-		ctx,
-		&sdk.CommitmentsAPIImportAzureReservationsParams{
-			Behaviour: lo.ToPtr[sdk.CommitmentsAPIImportAzureReservationsParamsBehaviour]("OVERWRITE"),
-		},
-		imports,
-	)
-	if checkErr := sdk.CheckOKResponse(res, err); checkErr != nil {
-		return fmt.Errorf("upserting commitments: %w", checkErr)
-	}
-	return nil
 }
 
 func importCUDs(ctx context.Context, meta any, imports []sdk.CastaiInventoryV1beta1GCPCommitmentImport) error {
@@ -261,14 +230,7 @@ func populateCommitmentsResourceData(ctx context.Context, d *schema.ResourceData
 
 	switch {
 	case reservationsOk:
-		if err := d.Set(
-			commitments.FieldAzureReservations,
-			lo.Filter(orgCommitments, func(item sdk.CastaiInventoryV1beta1Commitment, index int) bool {
-				return item.AzureReservationContext != nil
-			}),
-		); err != nil {
-			return fmt.Errorf("setting azure reservations: %w", err)
-		}
+		return fmt.Errorf("azure reservations are currently not supported")
 	case cudsOk:
 		inputCUDs, err := mapCUDsJSONToResources(cuds.(string))
 		if err != nil {
@@ -292,27 +254,6 @@ func populateCommitmentsResourceData(ctx context.Context, d *schema.ResourceData
 		}
 	}
 	return nil
-}
-
-func parseCSV(val string) ([][]string, error) {
-	reader := csv.NewReader(strings.NewReader(val))
-	records, err := reader.ReadAll()
-	if err != nil {
-		return nil, fmt.Errorf("parsing commitments csv: %w", err)
-	}
-	return records, nil
-}
-
-func mapReservationsCSVToResources(csvStr string) ([]*commitments.AzureReservationResource, error) {
-	records, err := parseCSV(csvStr)
-	if err != nil {
-		return nil, err
-	}
-	result, err := commitments.MapReservationCSVRecordsToResources(records)
-	if err != nil {
-		return nil, fmt.Errorf("parsing commitments csv: %w", err)
-	}
-	return result, nil
 }
 
 func mapCUDsJSONToResources(input string) ([]*commitments.GCPCUDResource, error) {
