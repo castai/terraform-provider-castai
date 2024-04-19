@@ -155,9 +155,17 @@ func getCUDResources(tfData resourceProvider) ([]*commitments.GCPCUDResource, bo
 			return nil, true, err
 		}
 	}
+	if len(configs) > len(cuds) {
+		return nil, true, fmt.Errorf("more configurations than CUDs")
+	}
+	for _, c := range configs {
+		if err := c.Matcher.Validate(); err != nil {
+			return nil, true, fmt.Errorf("invalid CUD matcher: %w", err)
+		}
+	}
 
 	// Finally map the CUD imports to resources and combine them with the configurations
-	res, err := mapConfiguredCUDImportsToResources(cuds, configs)
+	res, err := commitments.MapConfiguredCUDImportsToResources(cuds, configs)
 	if err != nil {
 		return nil, true, err
 	}
@@ -328,29 +336,6 @@ func populateCommitmentsResourceData(ctx context.Context, d *schema.ResourceData
 		}
 	}
 	return nil
-}
-
-func mapConfiguredCUDImportsToResources(
-	cuds []sdk.CastaiInventoryV1beta1GCPCommitmentImport,
-	configs []*commitments.GCPCUDConfigResource,
-) ([]*commitments.GCPCUDResource, error) {
-	if len(configs) > len(cuds) {
-		return nil, fmt.Errorf("more CUD configurations than CUDs")
-	}
-
-	res := make([]*commitments.GCPCUDResource, 0, len(cuds))
-	for i, item := range cuds {
-		var config *commitments.GCPCUDConfigResource
-		if i < len(configs) {
-			config = configs[i]
-		}
-		v, err := commitments.MapCUDImportToResource(item, config)
-		if err != nil {
-			return nil, err
-		}
-		res = append(res, v)
-	}
-	return res, nil
 }
 
 func getOrganizationCommitments(ctx context.Context, meta any) ([]sdk.CastaiInventoryV1beta1Commitment, error) {

@@ -2,6 +2,7 @@ package commitments
 
 import (
 	"errors"
+	"fmt"
 	"path"
 	"slices"
 	"strconv"
@@ -89,6 +90,13 @@ func (r *AzureReservationResource) GetIDInCloud() string {
 		return ""
 	}
 	return r.ReservationID
+}
+
+func (m GCPCUDConfigMatcherResource) Validate() error {
+	if m.Name == "" {
+		return errors.New("matcher name is required")
+	}
+	return nil
 }
 
 var (
@@ -211,12 +219,11 @@ func MapCommitmentToCUDResource(c sdk.CastaiInventoryV1beta1Commitment) (*GCPCUD
 }
 
 func MapCUDImportToResource(
-	resource sdk.CastaiInventoryV1beta1GCPCommitmentImport,
-	config *GCPCUDConfigResource,
+	cud *cudImportWithConfig,
 ) (*GCPCUDResource, error) {
 	var cpu, memory int
-	if resource.Resources != nil {
-		for _, res := range *resource.Resources {
+	if cud.Resources != nil {
+		for _, res := range *cud.Resources {
 			switch *res.Type {
 			case "VCPU":
 				parsedCPU, err := strconv.Atoi(*res.Amount)
@@ -238,26 +245,26 @@ func MapCUDImportToResource(
 	// thing so we need to do it here too in order to avoid Terraform diff mismatches.
 	// Example region value: https://www.googleapis.com/compute/v1/projects/{PROJECT}/regions/{REGION}
 	var region string
-	if resource.Region != nil {
-		_, region = path.Split(*resource.Region)
+	if cud.Region != nil {
+		_, region = path.Split(*cud.Region)
 	}
 
 	res := &GCPCUDResource{
-		CUDID:          lo.FromPtr(resource.Id),
-		CUDStatus:      lo.FromPtr(resource.Status),
-		EndTimestamp:   lo.FromPtr(resource.EndTimestamp),
-		StartTimestamp: lo.FromPtr(resource.StartTimestamp),
-		Name:           lo.FromPtr(resource.Name),
+		CUDID:          lo.FromPtr(cud.Id),
+		CUDStatus:      lo.FromPtr(cud.Status),
+		EndTimestamp:   lo.FromPtr(cud.EndTimestamp),
+		StartTimestamp: lo.FromPtr(cud.StartTimestamp),
+		Name:           lo.FromPtr(cud.Name),
 		Region:         region,
 		CPU:            cpu,
 		MemoryMb:       memory,
-		Plan:           lo.FromPtr(resource.Plan),
-		Type:           lo.FromPtr(resource.Type),
+		Plan:           lo.FromPtr(cud.Plan),
+		Type:           lo.FromPtr(cud.Type),
 	}
-	if config != nil {
-		res.AllowedUsage = config.AllowedUsage
-		res.Prioritization = config.Prioritization
-		res.Status = config.Status
+	if cud.config != nil {
+		res.AllowedUsage = cud.config.AllowedUsage
+		res.Prioritization = cud.config.Prioritization
+		res.Status = cud.config.Status
 	}
 	return res, nil
 }
@@ -297,4 +304,87 @@ func timeToString(t *time.Time) string {
 		return ""
 	}
 	return t.Format(time.RFC3339)
+}
+
+type cudConfigMatcherKey struct {
+	name, region, typ string
+}
+
+func (k cudConfigMatcherKey) String() string {
+	return fmt.Sprintf("%s-%s-%s", k.name, k.region, k.typ)
+}
+
+type cudImportWithConfig struct {
+	sdk.CastaiInventoryV1beta1GCPCommitmentImport
+	config *GCPCUDConfigResource
+}
+
+func MapConfigsToCUDs(
+	cuds []sdk.CastaiInventoryV1beta1GCPCommitmentImport,
+	configs []*GCPCUDConfigResource,
+) ([]*cudImportWithConfig, error) {
+	res := make([]*cudImportWithConfig, 0, len(cuds))
+	configsByKey := map[cudConfigMatcherKey]*GCPCUDConfigResource{}
+	for _, c := range configs {
+		key := cudConfigMatcherKey{
+			name:   c.Matcher.Name,
+			region: lo.FromPtr(c.Matcher.Region),
+			typ:    lo.FromPtr(c.Matcher.Type),
+		}
+		if _, ok := configsByKey[key]; ok { // Make sure each config matcher is unique
+			return nil, fmt.Errorf("duplicate CUD configuration for %s", key.String())
+		}
+		configsByKey[key] = c
+	}
+
+	var mappedConfigs int
+	processedCUDKeys := map[cudConfigMatcherKey]struct{}{}
+	for _, cud := range cuds {
+		key := cudConfigMatcherKey{
+			name:   lo.FromPtr(cud.Name),
+			region: lo.FromPtr(cud.Region),
+			typ:    lo.FromPtr(cud.Type),
+		}
+		if _, ok := processedCUDKeys[key]; ok { // Make sure each CUD is unique
+			return nil, fmt.Errorf("duplicate CUD import for %s", key.String())
+		}
+		processedCUDKeys[key] = struct{}{}
+
+		config, hasConfig := configsByKey[key]
+		if hasConfig {
+			mappedConfigs++
+		}
+		res = append(res, &cudImportWithConfig{
+			CastaiInventoryV1beta1GCPCommitmentImport: cud,
+			config: config,
+		})
+	}
+	if mappedConfigs != len(configs) { // Make sure all configs were mapped
+		return nil, fmt.Errorf("not all CUD configurations were mapped")
+	}
+	return res, nil
+}
+
+func MapConfiguredCUDImportsToResources(
+	cuds []sdk.CastaiInventoryV1beta1GCPCommitmentImport,
+	configs []*GCPCUDConfigResource,
+) ([]*GCPCUDResource, error) {
+	if len(configs) > len(cuds) {
+		return nil, fmt.Errorf("more CUD configurations than CUDs")
+	}
+
+	cudsWithConfigs, err := MapConfigsToCUDs(cuds, configs)
+	if err != nil {
+		return nil, err
+	}
+
+	res := make([]*GCPCUDResource, 0, len(cudsWithConfigs))
+	for _, item := range cudsWithConfigs {
+		v, err := MapCUDImportToResource(item)
+		if err != nil {
+			return nil, err
+		}
+		res = append(res, v)
+	}
+	return res, nil
 }
