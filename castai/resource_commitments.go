@@ -37,23 +37,25 @@ func resourceCommitments() *schema.Resource {
 			commitments.FieldAzureReservationsCSV: {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "CSV file containing Azure reservations",
+				Description: "CSV file containing reservations exported from Azure.",
 			},
 			commitments.FieldGCPCUDsJSON: {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "JSON file containing GCP CUDs",
+				Description: "JSON file containing CUDs exported from GCP.",
 			},
 			commitments.FieldGCPCUDs: {
-				Type:     schema.TypeList,
-				Computed: true,
+				Type:        schema.TypeList,
+				Computed:    true,
+				Description: "List of GCP CUDs.",
 				Elem: &schema.Resource{
 					Schema: commitments.GCPCUDResourceSchema,
 				},
 			},
 			commitments.FieldAzureReservations: {
-				Type:     schema.TypeList,
-				Computed: true,
+				Type:        schema.TypeList,
+				Computed:    true,
+				Description: "List of Azure reservations.",
 				Elem: &schema.Resource{
 					Schema: commitments.AzureReservationResourceSchema,
 				},
