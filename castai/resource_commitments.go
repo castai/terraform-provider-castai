@@ -138,6 +138,16 @@ func getCUDImports(tfData resourceProvider) ([]sdk.CastaiInventoryV1beta1GCPComm
 	return cuds, true, nil
 }
 
+func getCUDConfigs(tfData resourceProvider) ([]*commitments.GCPCUDConfigResource, error) {
+	var configs []*commitments.GCPCUDConfigResource
+	if configsIface, ok := tfData.GetOk(commitments.FieldGCPCUDConfigs); ok {
+		if err := mapstructure.Decode(configsIface, &configs); err != nil {
+			return nil, err
+		}
+	}
+	return configs, nil
+}
+
 func getCUDResources(tfData resourceProvider) ([]*commitments.GCPCUDResource, bool, error) {
 	// Get the CUD JSON input and unmarshal it into a slice of CUD imports
 	cuds, cudsOk, err := getCUDImports(tfData)
@@ -149,11 +159,9 @@ func getCUDResources(tfData resourceProvider) ([]*commitments.GCPCUDResource, bo
 	}
 
 	// Get the CUD configurations and map them to resources
-	var configs []*commitments.GCPCUDConfigResource
-	if configsIface, ok := tfData.GetOk(commitments.FieldGCPCUDConfigs); ok {
-		if err := mapstructure.Decode(configsIface, &configs); err != nil {
-			return nil, true, err
-		}
+	configs, err := getCUDConfigs(tfData)
+	if err != nil {
+		return nil, true, err
 	}
 	if len(configs) > len(cuds) {
 		return nil, true, fmt.Errorf("more configurations than CUDs")
@@ -264,6 +272,43 @@ func resourceCastaiCommitmentsUpsert(ctx context.Context, data *schema.ResourceD
 		if err := importCUDs(ctx, meta, cuds); err != nil {
 			return diag.FromErr(err)
 		}
+
+		orgCommitments, err := getOrganizationCommitments(ctx, meta)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		gcpCommitments := lo.Filter(orgCommitments, func(c sdk.CastaiInventoryV1beta1Commitment, _ int) bool {
+			return c.GcpResourceCudContext != nil
+		})
+		if len(gcpCommitments) != len(cuds) {
+			return diag.Errorf("expected %d GCP commitments, got %d", len(cuds), len(gcpCommitments))
+		}
+
+		configs, err := getCUDConfigs(data)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+
+		cudsWithConfigs, err := commitments.MapConfigsToCUDs(
+			lo.Map(gcpCommitments, func(item sdk.CastaiInventoryV1beta1Commitment, _ int) commitments.CUD {
+				return commitments.CUD{CastaiInventoryV1beta1Commitment: item}
+			}),
+			configs,
+		)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+
+		for _, c := range cudsWithConfigs {
+			res, err := meta.(*ProviderConfig).api.CommitmentsAPIUpdateCommitmentWithResponse(
+				ctx,
+				lo.FromPtr(c.CUD.Id),
+				commitments.CUDWithConfigToUpdateCommitmentRequest(c),
+			)
+			if err := sdk.CheckOKResponse(res, err); err != nil {
+				return diag.Errorf("updating commitment: %w", err)
+			}
+		}
 	}
 
 	data.SetId(organizationId)
@@ -340,7 +385,6 @@ func populateCommitmentsResourceData(ctx context.Context, d *schema.ResourceData
 
 func getOrganizationCommitments(ctx context.Context, meta any) ([]sdk.CastaiInventoryV1beta1Commitment, error) {
 	client := meta.(*ProviderConfig).api
-
 	response, err := client.CommitmentsAPIGetCommitmentsWithResponse(ctx, &sdk.CommitmentsAPIGetCommitmentsParams{})
 	if checkErr := sdk.CheckOKResponse(response, err); checkErr != nil {
 		return nil, fmt.Errorf("fetching commitments: %w", checkErr)

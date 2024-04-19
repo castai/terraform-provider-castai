@@ -218,12 +218,43 @@ func MapCommitmentToCUDResource(c sdk.CastaiInventoryV1beta1Commitment) (*GCPCUD
 	}, nil
 }
 
+type CUDImport struct {
+	sdk.CastaiInventoryV1beta1GCPCommitmentImport
+}
+
+func (c CUDImport) getCUDKey() cudConfigMatcherKey {
+	return cudConfigMatcherKey{
+		name:   lo.FromPtr(c.Name),
+		region: lo.FromPtr(c.Region),
+		typ:    lo.FromPtr(c.Type),
+	}
+}
+
+var _ cud = CUDImport{}
+
+type CUD struct {
+	sdk.CastaiInventoryV1beta1Commitment
+}
+
+func (c CUD) getCUDKey() cudConfigMatcherKey {
+	res := cudConfigMatcherKey{
+		name:   lo.FromPtr(c.Name),
+		region: lo.FromPtr(c.Region),
+	}
+	if c.GcpResourceCudContext != nil {
+		res.typ = *c.GcpResourceCudContext.Type
+	}
+	return res
+}
+
+var _ cud = CUD{}
+
 func MapCUDImportToResource(
-	cud *cudImportWithConfig,
+	cudWithCfg *cudImportWithConfig[CUDImport],
 ) (*GCPCUDResource, error) {
 	var cpu, memory int
-	if cud.Resources != nil {
-		for _, res := range *cud.Resources {
+	if cudWithCfg.CUD.Resources != nil {
+		for _, res := range *cudWithCfg.CUD.Resources {
 			switch *res.Type {
 			case "VCPU":
 				parsedCPU, err := strconv.Atoi(*res.Amount)
@@ -245,26 +276,26 @@ func MapCUDImportToResource(
 	// thing so we need to do it here too in order to avoid Terraform diff mismatches.
 	// Example region value: https://www.googleapis.com/compute/v1/projects/{PROJECT}/regions/{REGION}
 	var region string
-	if cud.Region != nil {
-		_, region = path.Split(*cud.Region)
+	if cudWithCfg.CUD.Region != nil {
+		_, region = path.Split(*cudWithCfg.CUD.Region)
 	}
 
 	res := &GCPCUDResource{
-		CUDID:          lo.FromPtr(cud.Id),
-		CUDStatus:      lo.FromPtr(cud.Status),
-		EndTimestamp:   lo.FromPtr(cud.EndTimestamp),
-		StartTimestamp: lo.FromPtr(cud.StartTimestamp),
-		Name:           lo.FromPtr(cud.Name),
+		CUDID:          lo.FromPtr(cudWithCfg.CUD.Id),
+		CUDStatus:      lo.FromPtr(cudWithCfg.CUD.Status),
+		EndTimestamp:   lo.FromPtr(cudWithCfg.CUD.EndTimestamp),
+		StartTimestamp: lo.FromPtr(cudWithCfg.CUD.StartTimestamp),
+		Name:           lo.FromPtr(cudWithCfg.CUD.Name),
 		Region:         region,
 		CPU:            cpu,
 		MemoryMb:       memory,
-		Plan:           lo.FromPtr(cud.Plan),
-		Type:           lo.FromPtr(cud.Type),
+		Plan:           lo.FromPtr(cudWithCfg.CUD.Plan),
+		Type:           lo.FromPtr(cudWithCfg.CUD.Type),
 	}
-	if cud.config != nil {
-		res.AllowedUsage = cud.config.AllowedUsage
-		res.Prioritization = cud.config.Prioritization
-		res.Status = cud.config.Status
+	if cudWithCfg.Config != nil {
+		res.AllowedUsage = cudWithCfg.Config.AllowedUsage
+		res.Prioritization = cudWithCfg.Config.Prioritization
+		res.Status = cudWithCfg.Config.Status
 	}
 	return res, nil
 }
@@ -314,16 +345,20 @@ func (k cudConfigMatcherKey) String() string {
 	return fmt.Sprintf("%s-%s-%s", k.name, k.region, k.typ)
 }
 
-type cudImportWithConfig struct {
-	sdk.CastaiInventoryV1beta1GCPCommitmentImport
-	config *GCPCUDConfigResource
+type cud interface {
+	getCUDKey() cudConfigMatcherKey
 }
 
-func MapConfigsToCUDs(
-	cuds []sdk.CastaiInventoryV1beta1GCPCommitmentImport,
+type cudImportWithConfig[C cud] struct {
+	CUD    C
+	Config *GCPCUDConfigResource
+}
+
+func MapConfigsToCUDs[C cud](
+	cuds []C,
 	configs []*GCPCUDConfigResource,
-) ([]*cudImportWithConfig, error) {
-	res := make([]*cudImportWithConfig, 0, len(cuds))
+) ([]*cudImportWithConfig[C], error) {
+	res := make([]*cudImportWithConfig[C], 0, len(cuds))
 	configsByKey := map[cudConfigMatcherKey]*GCPCUDConfigResource{}
 	for _, c := range configs {
 		key := cudConfigMatcherKey{
@@ -340,11 +375,7 @@ func MapConfigsToCUDs(
 	var mappedConfigs int
 	processedCUDKeys := map[cudConfigMatcherKey]struct{}{}
 	for _, cud := range cuds {
-		key := cudConfigMatcherKey{
-			name:   lo.FromPtr(cud.Name),
-			region: lo.FromPtr(cud.Region),
-			typ:    lo.FromPtr(cud.Type),
-		}
+		key := cud.getCUDKey()
 		if _, ok := processedCUDKeys[key]; ok { // Make sure each CUD is unique
 			return nil, fmt.Errorf("duplicate CUD import for %s", key.String())
 		}
@@ -354,9 +385,9 @@ func MapConfigsToCUDs(
 		if hasConfig {
 			mappedConfigs++
 		}
-		res = append(res, &cudImportWithConfig{
-			CastaiInventoryV1beta1GCPCommitmentImport: cud,
-			config: config,
+		res = append(res, &cudImportWithConfig[C]{
+			CUD:    cud,
+			Config: config,
 		})
 	}
 	if mappedConfigs != len(configs) { // Make sure all configs were mapped
@@ -365,15 +396,28 @@ func MapConfigsToCUDs(
 	return res, nil
 }
 
-func MapConfiguredCUDImportsToResources(
-	cuds []sdk.CastaiInventoryV1beta1GCPCommitmentImport,
+func MapConfiguredCUDImportsToResources[C interface {
+	CUDImport | sdk.CastaiInventoryV1beta1GCPCommitmentImport
+}](
+	cuds []C,
 	configs []*GCPCUDConfigResource,
 ) ([]*GCPCUDResource, error) {
 	if len(configs) > len(cuds) {
 		return nil, fmt.Errorf("more CUD configurations than CUDs")
 	}
 
-	cudsWithConfigs, err := MapConfigsToCUDs(cuds, configs)
+	var cudImports []CUDImport
+	switch v := any(cuds).(type) {
+	case []CUDImport:
+		cudImports = v
+	case []sdk.CastaiInventoryV1beta1GCPCommitmentImport:
+		cudImports = make([]CUDImport, 0, len(v))
+		for _, item := range v {
+			cudImports = append(cudImports, CUDImport{CastaiInventoryV1beta1GCPCommitmentImport: item})
+		}
+	}
+
+	cudsWithConfigs, err := MapConfigsToCUDs(cudImports, configs)
 	if err != nil {
 		return nil, err
 	}
@@ -387,4 +431,32 @@ func MapConfiguredCUDImportsToResources(
 		res = append(res, v)
 	}
 	return res, nil
+}
+
+func CUDWithConfigToUpdateCommitmentRequest(
+	c *cudImportWithConfig[CUD],
+) sdk.CommitmentsAPIUpdateCommitmentJSONRequestBody {
+	req := sdk.CommitmentsAPIUpdateCommitmentJSONRequestBody{
+		AllowedUsage:          c.CUD.AllowedUsage,
+		EndDate:               c.CUD.EndDate,
+		GcpResourceCudContext: c.CUD.GcpResourceCudContext,
+		Id:                    c.CUD.Id,
+		Name:                  c.CUD.Name,
+		Prioritization:        c.CUD.Prioritization,
+		Region:                c.CUD.Region,
+		StartDate:             c.CUD.StartDate,
+		Status:                c.CUD.Status,
+	}
+	if c.Config != nil {
+		if c.Config.AllowedUsage != nil {
+			req.AllowedUsage = c.Config.AllowedUsage
+		}
+		if c.Config.Prioritization != nil {
+			req.Prioritization = c.Config.Prioritization
+		}
+		if c.Config.Status != nil {
+			req.Status = (*sdk.CastaiInventoryV1beta1CommitmentStatus)(c.Config.Status)
+		}
+	}
+	return req
 }
