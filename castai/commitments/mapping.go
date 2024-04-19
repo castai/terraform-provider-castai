@@ -3,14 +3,13 @@ package commitments
 import (
 	"errors"
 	"path"
+	"slices"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/samber/lo"
 
-	"github.com/castai/terraform-provider-castai/castai/reservations"
 	"github.com/castai/terraform-provider-castai/castai/sdk"
 )
 
@@ -19,13 +18,13 @@ type (
 
 	GCPCUDResource struct {
 		// CAST AI only fields
-		ID             *string  `mapstructure:"id,omitempty"`
+		ID             *string  `mapstructure:"id,omitempty"` // ID of the commitment
 		AllowedUsage   *float32 `mapstructure:"allowed_usage,omitempty"`
 		Prioritization *bool    `mapstructure:"prioritization,omitempty"`
 		Status         *string  `mapstructure:"status,omitempty"`
 
 		// Fields from GCP CUDs export JSON
-		CUDID          string `mapstructure:"cud_id"`
+		CUDID          string `mapstructure:"cud_id"` // ID of the CUD in GCP
 		CUDStatus      string `mapstructure:"cud_status"`
 		StartTimestamp string `mapstructure:"start_timestamp"`
 		EndTimestamp   string `mapstructure:"end_timestamp"`
@@ -38,9 +37,33 @@ type (
 	}
 
 	AzureReservationResource struct {
-		Id *string `mapstructure:"id"`
+		ID            *string `mapstructure:"id,omitempty"`   // ID of the commitment
+		ReservationID string  `mapstructure:"reservation_id"` // ID of the reservation in Azure
+	}
+
+	resource interface {
+		GetIDInCloud() string
 	}
 )
+
+var (
+	_ resource = (*GCPCUDResource)(nil)
+	_ resource = (*AzureReservationResource)(nil)
+)
+
+func (r *GCPCUDResource) GetIDInCloud() string {
+	if r == nil {
+		return ""
+	}
+	return r.CUDID
+}
+
+func (r *AzureReservationResource) GetIDInCloud() string {
+	if r == nil {
+		return ""
+	}
+	return r.ReservationID
+}
 
 var (
 	// GCPCUDResourceSchema should align with the fields of GCPCUDResource struct
@@ -204,25 +227,34 @@ func MapCUDImportToResource(resource sdk.CastaiInventoryV1beta1GCPCommitmentImpo
 	}, nil
 }
 
-func mapReservationsCSVHeaderToFieldIndexes(columns []string) map[string]int {
-	indexes := make(map[string]int, len(reservations.ReservationResourceFields))
-	for _, field := range reservations.ReservationResourceFields {
-		index := -1
-		aliases := reservations.CSVColumnAlias[field]
-		for _, alias := range aliases {
-			_, fieldIdx, found := lo.FindIndexOf(columns, func(item string) bool {
-				return strings.ToLower(item) == alias
-			})
-
-			if found {
-				index = fieldIdx
-				break
-			}
-		}
-
-		indexes[field] = index
+// SortResources sorts the toSort slice based on the order of the targetOrder slice
+func SortResources[Resource resource](toSort, targetOrder []Resource) {
+	orderMap := make(map[string]int)
+	for index, value := range targetOrder {
+		orderMap[value.GetIDInCloud()] = index
 	}
-	return indexes
+
+	slices.SortStableFunc(toSort, func(a, b Resource) int {
+		indexI, foundI := orderMap[a.GetIDInCloud()]
+		indexJ, foundJ := orderMap[b.GetIDInCloud()]
+
+		if !foundI && !foundJ {
+			if a.GetIDInCloud() < b.GetIDInCloud() {
+				return -1
+			}
+			return 1
+		}
+		if !foundI {
+			return 1
+		}
+		if !foundJ {
+			return -1
+		}
+		if indexI < indexJ {
+			return -1
+		}
+		return 1
+	})
 }
 
 func timeToString(t *time.Time) string {

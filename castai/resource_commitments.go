@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/mitchellh/mapstructure"
-	"slices"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-log/tflog"
@@ -121,10 +120,10 @@ func resourceCastaiCommitmentsDelete(ctx context.Context, data *schema.ResourceD
 			return diag.FromErr(err)
 		}
 		for _, c := range reservations {
-			if c.Id == nil {
+			if c.ID == nil {
 				return diag.Errorf("missing ID for Azure reservation")
 			}
-			if err := deleteCommitment(ctx, meta, *c.Id); err != nil {
+			if err := deleteCommitment(ctx, meta, *c.ID); err != nil {
 				return diag.FromErr(err)
 			}
 		}
@@ -248,7 +247,7 @@ func populateCommitmentsResourceData(ctx context.Context, d *schema.ResourceData
 			}
 			resources = append(resources, resource)
 		}
-		sortResources(resources, inputCUDs)
+		commitments.SortResources(resources, inputCUDs)
 		if err := d.Set(commitments.FieldGCPCUDs, resources); err != nil {
 			return fmt.Errorf("setting gcp cuds: %w", err)
 		}
@@ -284,33 +283,4 @@ func getOrganizationCommitments(ctx context.Context, meta any) ([]sdk.CastaiInve
 		return nil, nil
 	}
 	return *response.JSON200.Commitments, nil
-}
-
-func sortResources(toSort, targetOrder []*commitments.GCPCUDResource) {
-	orderMap := make(map[string]int)
-	for index, value := range targetOrder {
-		orderMap[value.CUDID] = index
-	}
-
-	slices.SortStableFunc(toSort, func(a, b *commitments.GCPCUDResource) int {
-		indexI, foundI := orderMap[a.CUDID]
-		indexJ, foundJ := orderMap[b.CUDID]
-
-		if !foundI && !foundJ {
-			if a.CUDID < b.CUDID {
-				return -1
-			}
-			return 1
-		}
-		if !foundI {
-			return 1
-		}
-		if !foundJ {
-			return -1
-		}
-		if indexI < indexJ {
-			return -1
-		}
-		return 1
-	})
 }
