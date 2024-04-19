@@ -388,6 +388,60 @@ func TestNodeTemplateResourceDelete_defaultNodeTemplate(t *testing.T) {
 		" false).", result[0].Detail)
 }
 
+func TestToTemplateConstraints_HandleTriStateValues(t *testing.T) {
+	tests := map[string]struct {
+		val        cty.Value
+		assertions func(*require.Assertions, *sdk.NodetemplatesV1TemplateConstraints)
+	}{
+		"all values empty except one": {
+			val: cty.ObjectVal(map[string]cty.Value{
+				FieldNodeTemplateConstraints: cty.ListVal([]cty.Value{
+					cty.ObjectVal(map[string]cty.Value{
+						FieldNodeTemplateMaxCpu: cty.NumberIntVal(100),
+					}),
+				}),
+			}),
+			assertions: func(r *require.Assertions, constraints *sdk.NodetemplatesV1TemplateConstraints) {
+				r.NotNil(constraints)
+				r.Nil(constraints.ComputeOptimized)
+				r.Nil(constraints.StorageOptimized)
+				r.Nil(constraints.Gpu)
+				r.Nil(constraints.InstanceFamilies)
+				r.Nil(constraints.MaxMemory)
+				r.Nil(constraints.MinMemory)
+				r.Nil(constraints.MinCpu)
+				r.Nil(constraints.Spot)
+				r.Nil(constraints.OnDemand)
+				r.Nil(constraints.UseSpotFallbacks)
+				r.Nil(constraints.EnableSpotDiversity)
+				r.Nil(constraints.SpotDiversityPriceIncreaseLimitPercent)
+				r.Nil(constraints.SpotInterruptionPredictionsEnabled)
+				r.Nil(constraints.SpotInterruptionPredictionsType)
+				r.Nil(constraints.CustomPriority)
+				r.Nil(constraints.DedicatedNodeAffinity)
+				r.Nil(constraints.Architectures)
+				r.Nil(constraints.Os)
+				r.Nil(constraints.IsGpuOnly)
+			},
+		},
+	}
+
+	for name, td := range tests {
+		t.Run(name, func(t *testing.T) {
+			r := require.New(t)
+			resource := resourceNodeTemplate()
+			state := terraform.NewInstanceStateShimmedFromValue(td.val, 0)
+			state.ID = "testing-template"
+
+			data := resource.Data(state)
+			constraintsArray := data.Get(FieldNodeTemplateConstraints).([]any)
+			constraintsMap := constraintsArray[0].(map[string]any)
+			result := toTemplateConstraints(constraintsMap, data)
+			td.assertions(r, result)
+		})
+	}
+}
+
 func TestAccResourceNodeTemplate_basic(t *testing.T) {
 	rName := fmt.Sprintf("%v-node-template-%v", ResourcePrefix, acctest.RandString(8))
 	resourceName := "castai_node_template.test"
