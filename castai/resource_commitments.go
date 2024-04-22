@@ -57,28 +57,7 @@ func resourceCommitments() *schema.Resource {
 				Optional:    true,
 				Description: "List of GCP CUD configurations.",
 				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"matcher": {
-							Type:        schema.TypeMap,
-							Required:    true,
-							Description: "",
-						},
-						"prioritization": {
-							Type:        schema.TypeBool,
-							Optional:    true,
-							Description: "",
-						},
-						"status": {
-							Type:        schema.TypeString,
-							Optional:    true,
-							Description: "",
-						},
-						"allowed_usage": {
-							Type:        schema.TypeFloat,
-							Optional:    true,
-							Description: "",
-						},
-					},
+					Schema: commitments.GCPCUDConfigsSchema,
 				},
 			},
 			commitments.FieldAzureReservations: {

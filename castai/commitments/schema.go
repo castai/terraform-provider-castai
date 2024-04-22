@@ -76,6 +76,28 @@ var (
 			Description: "Type of the CUD, e.g. determines the covered resource type e.g. 'COMPUTE_OPTIMIZED_C2D'.",
 		},
 	}
+	GCPCUDConfigsSchema = map[string]*schema.Schema{
+		"matcher": {
+			Type:        schema.TypeMap,
+			Required:    true,
+			Description: "Matcher for the configuration to map it to a CUD.",
+		},
+		"prioritization": {
+			Type:        schema.TypeBool,
+			Optional:    true,
+			Description: GCPCUDResourceSchema["prioritization"].Description,
+		},
+		"status": {
+			Type:        schema.TypeString,
+			Optional:    true,
+			Description: GCPCUDResourceSchema["status"].Description,
+		},
+		"allowed_usage": {
+			Type:        schema.TypeFloat,
+			Optional:    true,
+			Description: GCPCUDResourceSchema["allowed_usage"].Description,
+		},
+	}
 
 	AzureReservationResourceSchema = map[string]*schema.Schema{}
 )
