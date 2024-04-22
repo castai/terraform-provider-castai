@@ -322,3 +322,130 @@ func TestMapCUDImportToResource(t *testing.T) {
 		})
 	}
 }
+
+func TestMapConfigsToCUDs(t *testing.T) {
+	var (
+		import1 = sdk.CastaiInventoryV1beta1GCPCommitmentImport{
+			Id:     lo.ToPtr("1"),
+			Name:   lo.ToPtr("test-cud-1"),
+			Type:   lo.ToPtr("COMPUTE_OPTIMIZED_C2D"),
+			Region: lo.ToPtr("us-central1"),
+		}
+		import2 = sdk.CastaiInventoryV1beta1GCPCommitmentImport{
+			Id:     lo.ToPtr("2"),
+			Name:   lo.ToPtr("test-cud-2"),
+			Type:   lo.ToPtr("COMPUTE_OPTIMIZED_N2D"),
+			Region: lo.ToPtr("us-central1"),
+		}
+		import3 = sdk.CastaiInventoryV1beta1GCPCommitmentImport{
+			Id:     lo.ToPtr("3"),
+			Name:   lo.ToPtr("test-cud-3"),
+			Type:   lo.ToPtr("COMPUTE_OPTIMIZED_E2"),
+			Region: lo.ToPtr("eu-central1"),
+		}
+
+		cfg1 = &GCPCUDConfigResource{
+			Matcher: GCPCUDConfigMatcherResource{
+				Name:   "test-cud-1",
+				Type:   lo.ToPtr("COMPUTE_OPTIMIZED_C2D"),
+				Region: lo.ToPtr("us-central1"),
+			},
+			Prioritization: lo.ToPtr(true),
+			Status:         lo.ToPtr("ACTIVE"),
+			AllowedUsage:   lo.ToPtr[float32](0.5),
+		}
+		cfg2 = &GCPCUDConfigResource{
+			Matcher: GCPCUDConfigMatcherResource{
+				Name:   "test-cud-2",
+				Type:   lo.ToPtr("COMPUTE_OPTIMIZED_N2D"),
+				Region: lo.ToPtr("us-central1"),
+			},
+			Prioritization: lo.ToPtr(false),
+			Status:         lo.ToPtr("INACTIVE"),
+			AllowedUsage:   lo.ToPtr[float32](0.7),
+		}
+		cfg3 = &GCPCUDConfigResource{
+			Matcher: GCPCUDConfigMatcherResource{
+				Name:   "test-cud-3",
+				Type:   lo.ToPtr("COMPUTE_OPTIMIZED_E2"),
+				Region: lo.ToPtr("eu-central1"),
+			},
+			Prioritization: lo.ToPtr(true),
+			Status:         lo.ToPtr("ACTIVE"),
+			AllowedUsage:   lo.ToPtr[float32](1),
+		}
+	)
+
+	tests := map[string]struct {
+		cuds     []CastaiGCPCommitmentImport
+		configs  []*GCPCUDConfigResource
+		expected []*cudWithConfig[CastaiGCPCommitmentImport]
+		err      error
+	}{
+		"should successfully map all the configs": {
+			cuds: []CastaiGCPCommitmentImport{
+				{CastaiInventoryV1beta1GCPCommitmentImport: import2},
+				{CastaiInventoryV1beta1GCPCommitmentImport: import3},
+				{CastaiInventoryV1beta1GCPCommitmentImport: import1},
+			},
+			configs: []*GCPCUDConfigResource{cfg1, cfg2, cfg3}, // make sure the order doesn't match the CUDs
+			expected: []*cudWithConfig[CastaiGCPCommitmentImport]{
+				{
+					CUD:    CastaiGCPCommitmentImport{CastaiInventoryV1beta1GCPCommitmentImport: import2},
+					Config: cfg2,
+				},
+				{
+					CUD:    CastaiGCPCommitmentImport{CastaiInventoryV1beta1GCPCommitmentImport: import3},
+					Config: cfg3,
+				},
+				{
+					CUD:    CastaiGCPCommitmentImport{CastaiInventoryV1beta1GCPCommitmentImport: import1},
+					Config: cfg1,
+				},
+			},
+		},
+		"should fail as there's one additional config that doesn't match any CUD": {
+			cuds:    []CastaiGCPCommitmentImport{{CastaiInventoryV1beta1GCPCommitmentImport: import1}},
+			configs: []*GCPCUDConfigResource{cfg1, cfg2},
+			err:     errors.New("not all CUD configurations were mapped"),
+		},
+		"should fail as one of the configs cannot be mapped": {
+			cuds: []CastaiGCPCommitmentImport{
+				{CastaiInventoryV1beta1GCPCommitmentImport: import1},
+				{CastaiInventoryV1beta1GCPCommitmentImport: import2},
+			},
+			configs: []*GCPCUDConfigResource{cfg1, cfg3},
+			err:     errors.New("not all CUD configurations were mapped"),
+		},
+		"should fail as one import can be mapped to multiple configs": {
+			cuds: []CastaiGCPCommitmentImport{
+				{CastaiInventoryV1beta1GCPCommitmentImport: import1},
+				{CastaiInventoryV1beta1GCPCommitmentImport: import1},
+			},
+			configs: []*GCPCUDConfigResource{cfg1, cfg3},
+			err:     errors.New("duplicate CUD import for test-cud-1-us-central1-COMPUTE_OPTIMIZED_C2D"),
+		},
+		"should fail as duplicate configs are passed": {
+			cuds: []CastaiGCPCommitmentImport{
+				{CastaiInventoryV1beta1GCPCommitmentImport: import1},
+			},
+			configs: []*GCPCUDConfigResource{cfg1, cfg1},
+			err:     errors.New("duplicate CUD configuration for test-cud-1-us-central1-COMPUTE_OPTIMIZED_C2D"),
+		},
+	}
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			r := require.New(t)
+			actual, err := MapConfigsToCUDs(tt.cuds, tt.configs)
+			if tt.err == nil {
+				r.NoError(err)
+				r.NotNil(actual)
+				r.Equal(tt.expected, actual)
+			} else {
+				r.Error(err)
+				r.Nil(actual)
+				r.Equal(tt.err.Error(), err.Error())
+			}
+		})
+	}
+}
