@@ -153,33 +153,7 @@ func TestMapCUDImportToResource(t *testing.T) {
 	makeInput := func() *cudWithConfig[CastaiGCPCommitmentImport] {
 		return &cudWithConfig[CastaiGCPCommitmentImport]{
 			CUD: CastaiGCPCommitmentImport{
-				CastaiInventoryV1beta1GCPCommitmentImport: sdk.CastaiInventoryV1beta1GCPCommitmentImport{
-					AutoRenew:         lo.ToPtr(true),
-					Category:          lo.ToPtr("MACHINE"),
-					CreationTimestamp: lo.ToPtr("2023-01-01T00:00:00.000-07:00"),
-					EndTimestamp:      lo.ToPtr("2024-01-01T00:00:00.000-07:00"),
-					Id:                lo.ToPtr("123456"),
-					Kind:              lo.ToPtr("compute#commitment"),
-					Name:              lo.ToPtr("test-cud"),
-					Plan:              lo.ToPtr("TWELVE_MONTHS"),
-					// Remember to pass the region as a URL!
-					Region: lo.ToPtr("https://www.googleapis.com/compute/v1/projects/test-project/regions/us-central1"),
-					Resources: &[]sdk.CastaiInventoryV1beta1GCPResource{
-						{
-							Amount: lo.ToPtr("10"),
-							Type:   lo.ToPtr("VCPU"),
-						},
-						{
-							Amount: lo.ToPtr("20480"),
-							Type:   lo.ToPtr("MEMORY"),
-						},
-					},
-					SelfLink:       lo.ToPtr("https://www.googleapis.com/compute/v1/projects/test-project/zones/us-central1/commitments/123456"),
-					StartTimestamp: lo.ToPtr("2023-01-01T00:00:00.000-07:00"),
-					Status:         lo.ToPtr("ACTIVE"),
-					StatusMessage:  lo.ToPtr("The commitment is active, and so will apply to current resource usage."),
-					Type:           lo.ToPtr("COMPUTE_OPTIMIZED_C2D"),
-				},
+				CastaiInventoryV1beta1GCPCommitmentImport: testGCPCommitmentImport,
 			},
 		}
 	}
@@ -450,54 +424,94 @@ func TestMapConfigsToCUDs(t *testing.T) {
 	}
 }
 
-//func TestMapConfiguredCUDImportsToResources(t *testing.T) {
-//	tests := map[string]struct {
-//		cuds     []sdk.CastaiInventoryV1beta1GCPCommitmentImport
-//		configs  []*GCPCUDConfigResource
-//		expected []*GCPCUDResource
-//		err      error
-//	}{
-//		"": {
-//			cuds: []sdk.CastaiInventoryV1beta1GCPCommitmentImport{
-//				{
-//					AutoRenew:         nil,
-//					Category:          nil,
-//					CreationTimestamp: nil,
-//					Description:       nil,
-//					EndTimestamp:      nil,
-//					Id:                nil,
-//					Kind:              nil,
-//					Name:              nil,
-//					Plan:              nil,
-//					Region:            nil,
-//					Resources:         nil,
-//					SelfLink:          nil,
-//					StartTimestamp:    nil,
-//					Status:            nil,
-//					StatusMessage:     nil,
-//					Type:              nil,
-//				},
-//			},
-//			configs:  nil,
-//			expected: nil,
-//		},
-//	}
-//	for name, tt := range tests {
-//		t.Run(name, func(t *testing.T) {
-//			r := require.New(t)
-//			actual, err := MapConfiguredCUDImportsToResources(tt.cuds, tt.configs)
-//			if tt.err == nil {
-//				r.NoError(err)
-//				r.NotNil(actual)
-//				r.Equal(tt.expected, actual)
-//			} else {
-//				r.Error(err)
-//				r.Nil(actual)
-//				r.Equal(tt.err.Error(), err.Error())
-//			}
-//		})
-//	}
-//}
+func TestMapConfiguredCUDImportsToResources(t *testing.T) {
+	tests := map[string]struct {
+		cuds     []sdk.CastaiInventoryV1beta1GCPCommitmentImport
+		configs  []*GCPCUDConfigResource
+		expected []*GCPCUDResource
+		err      error
+	}{
+		"should fail as there are more configs than cuds": {
+			configs: []*GCPCUDConfigResource{
+				{
+					Matcher: GCPCUDConfigMatcherResource{
+						Name: "test-cud",
+					},
+					Prioritization: lo.ToPtr(true),
+				},
+				{
+					Matcher: GCPCUDConfigMatcherResource{
+						Name: "test-cud-2",
+					},
+					AllowedUsage: lo.ToPtr[float32](0.45),
+				},
+			},
+			cuds: []sdk.CastaiInventoryV1beta1GCPCommitmentImport{
+				{
+					Name: lo.ToPtr("test-cud"),
+				},
+			},
+			err: errors.New("more CUD configurations than CUDs"),
+		},
+		"should successfully map cuds with configs to resources": {
+			cuds: []sdk.CastaiInventoryV1beta1GCPCommitmentImport{testGCPCommitmentImport},
+			configs: []*GCPCUDConfigResource{
+				{
+					Matcher: GCPCUDConfigMatcherResource{
+						Name:   lo.FromPtr(testGCPCommitmentImport.Name),
+						Type:   testGCPCommitmentImport.Type,
+						Region: testGCPCommitmentImport.Region,
+					},
+					Prioritization: lo.ToPtr(true),
+					Status:         lo.ToPtr("ACTIVE"),
+					AllowedUsage:   lo.ToPtr[float32](0.5),
+				},
+			},
+			expected: []*GCPCUDResource{
+				{
+					AllowedUsage:   lo.ToPtr[float32](0.5),
+					Prioritization: lo.ToPtr(true),
+					Status:         lo.ToPtr("ACTIVE"),
+					CUDID:          lo.FromPtr(testGCPCommitmentImport.Id),
+					CUDStatus:      lo.FromPtr(testGCPCommitmentImport.Status),
+					StartTimestamp: lo.FromPtr(testGCPCommitmentImport.StartTimestamp),
+					EndTimestamp:   lo.FromPtr(testGCPCommitmentImport.EndTimestamp),
+					Name:           lo.FromPtr(testGCPCommitmentImport.Name),
+					Region:         "us-central1",
+					CPU:            10,
+					MemoryMb:       20480,
+					Plan:           lo.FromPtr(testGCPCommitmentImport.Plan),
+					Type:           lo.FromPtr(testGCPCommitmentImport.Type),
+				},
+			},
+		},
+	}
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			r := require.New(t)
+			actual, err := MapConfiguredCUDImportsToResources(tt.cuds, tt.configs)
+			if tt.err == nil {
+				r.NoError(err)
+				r.NotNil(actual)
+				r.Equal(tt.expected, actual)
+
+				// Do the same test but for wrapped CUDs
+				wrappedCUDs := make([]CastaiGCPCommitmentImport, len(tt.cuds))
+				for i, cud := range tt.cuds {
+					wrappedCUDs[i] = CastaiGCPCommitmentImport{CastaiInventoryV1beta1GCPCommitmentImport: cud}
+				}
+				actual, err = MapConfiguredCUDImportsToResources(wrappedCUDs, tt.configs)
+				r.NoError(err)
+				r.NotNil(actual)
+				r.Equal(tt.expected, actual)
+			} else {
+				r.Error(err)
+				r.Nil(actual)
+				r.Equal(tt.err.Error(), err.Error())
+			}
+		})
+	}
+}
 
 func TestMapCUDImportWithConfigToUpdateRequest(t *testing.T) {
 	id := uuid.New()
@@ -648,4 +662,32 @@ func TestSortResources(t *testing.T) {
 			require.Equal(t, tt.targetOrder, tt.toSort)
 		})
 	}
+}
+
+var testGCPCommitmentImport = sdk.CastaiInventoryV1beta1GCPCommitmentImport{
+	AutoRenew:         lo.ToPtr(true),
+	Category:          lo.ToPtr("MACHINE"),
+	CreationTimestamp: lo.ToPtr("2023-01-01T00:00:00.000-07:00"),
+	EndTimestamp:      lo.ToPtr("2024-01-01T00:00:00.000-07:00"),
+	Id:                lo.ToPtr("123456"),
+	Kind:              lo.ToPtr("compute#commitment"),
+	Name:              lo.ToPtr("test-cud"),
+	Plan:              lo.ToPtr("TWELVE_MONTHS"),
+	// Remember to pass the region as a URL!
+	Region: lo.ToPtr("https://www.googleapis.com/compute/v1/projects/test-project/regions/us-central1"),
+	Resources: &[]sdk.CastaiInventoryV1beta1GCPResource{
+		{
+			Amount: lo.ToPtr("10"),
+			Type:   lo.ToPtr("VCPU"),
+		},
+		{
+			Amount: lo.ToPtr("20480"),
+			Type:   lo.ToPtr("MEMORY"),
+		},
+	},
+	SelfLink:       lo.ToPtr("https://www.googleapis.com/compute/v1/projects/test-project/zones/us-central1/commitments/123456"),
+	StartTimestamp: lo.ToPtr("2023-01-01T00:00:00.000-07:00"),
+	Status:         lo.ToPtr("ACTIVE"),
+	StatusMessage:  lo.ToPtr("The commitment is active, and so will apply to current resource usage."),
+	Type:           lo.ToPtr("COMPUTE_OPTIMIZED_C2D"),
 }
