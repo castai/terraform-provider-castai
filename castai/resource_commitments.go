@@ -35,14 +35,16 @@ func resourceCommitments() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			// Allow either reservations or CUDs - validated in the custom diff function
 			commitments.FieldAzureReservationsCSV: {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "CSV file containing reservations exported from Azure.",
+				Type:         schema.TypeString,
+				Optional:     true,
+				Description:  "CSV file containing reservations exported from Azure.",
+				ExactlyOneOf: []string{commitments.FieldAzureReservationsCSV, commitments.FieldGCPCUDsJSON},
 			},
 			commitments.FieldGCPCUDsJSON: {
-				Type:        schema.TypeString,
-				Optional:    true,
-				Description: "JSON file containing CUDs exported from GCP.",
+				Type:         schema.TypeString,
+				Optional:     true,
+				Description:  "JSON file containing CUDs exported from GCP.",
+				ExactlyOneOf: []string{commitments.FieldAzureReservationsCSV, commitments.FieldGCPCUDsJSON},
 			},
 			commitments.FieldGCPCUDs: {
 				Type:        schema.TypeList,
@@ -93,8 +95,14 @@ func commitmentsDiff(_ context.Context, diff *schema.ResourceDiff, _ any) error 
 	switch {
 	case reservationsOk:
 		// TEMPORARY: support for Azure reservations will be added in one of the upcoming PRs
+		if err := diff.SetNew(commitments.FieldGCPCUDs, nil); err != nil {
+			return fmt.Errorf("setting gcp cuds field to nil: %w", err)
+		}
 		return fmt.Errorf("azure reservations are currently not supported")
 	case cudsOk:
+		if err := diff.SetNew(commitments.FieldAzureReservations, nil); err != nil {
+			return fmt.Errorf("setting azure reservations field to nil: %w", err)
+		}
 		return diff.SetNew(commitments.FieldGCPCUDs, cudResources)
 	}
 
@@ -299,7 +307,7 @@ func resourceCastaiCommitmentsUpsert(ctx context.Context, data *schema.ResourceD
 				commitments.MapCUDImportWithConfigToUpdateRequest(c),
 			)
 			if err := sdk.CheckOKResponse(res, err); err != nil {
-				return diag.Errorf("updating commitment: %w", err)
+				return diag.Errorf("updating commitment: %v", err)
 			}
 		}
 	}
