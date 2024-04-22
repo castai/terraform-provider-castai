@@ -5,12 +5,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/mitchellh/mapstructure"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/mitchellh/mapstructure"
 	"github.com/samber/lo"
 
 	"github.com/castai/terraform-provider-castai/castai/commitments"
@@ -99,7 +99,7 @@ func commitmentsDiff(_ context.Context, diff *schema.ResourceDiff, _ any) error 
 		return err
 	}
 
-	cudResources, cudsOk, err := getCUDResources(diff)
+	cudResources, cudsOk, err := getCUDImportResources(diff)
 	if err != nil {
 		return err
 	}
@@ -148,7 +148,8 @@ func getCUDConfigs(tfData resourceProvider) ([]*commitments.GCPCUDConfigResource
 	return configs, nil
 }
 
-func getCUDResources(tfData resourceProvider) ([]*commitments.GCPCUDResource, bool, error) {
+// getCUDImportResources returns a slice of GCP CUD resources obtained from the input JSON.
+func getCUDImportResources(tfData resourceProvider) ([]*commitments.GCPCUDResource, bool, error) {
 	// Get the CUD JSON input and unmarshal it into a slice of CUD imports
 	cuds, cudsOk, err := getCUDImports(tfData)
 	if err != nil {
@@ -175,6 +176,19 @@ func getCUDResources(tfData resourceProvider) ([]*commitments.GCPCUDResource, bo
 	// Finally map the CUD imports to resources and combine them with the configurations
 	res, err := commitments.MapConfiguredCUDImportsToResources(cuds, configs)
 	if err != nil {
+		return nil, true, err
+	}
+	return res, true, nil
+}
+
+// getCUDResources returns a slice of GCP CUD resources obtained from the state obtained from the API.
+func getCUDResources(tfData resourceProvider) ([]*commitments.GCPCUDResource, bool, error) {
+	cudsIface, ok := tfData.GetOk(commitments.FieldGCPCUDs)
+	if !ok {
+		return nil, false, nil
+	}
+	var res []*commitments.GCPCUDResource
+	if err := mapstructure.Decode(cudsIface, &res); err != nil {
 		return nil, true, err
 	}
 	return res, true, nil
@@ -354,7 +368,7 @@ func populateCommitmentsResourceData(ctx context.Context, d *schema.ResourceData
 	}
 
 	_, reservationsOk := d.GetOk(commitments.FieldAzureReservationsCSV)
-	cuds, cudsOk, err := getCUDResources(d)
+	cuds, cudsOk, err := getCUDImportResources(d)
 	if err != nil {
 		return err
 	}
