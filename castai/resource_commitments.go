@@ -354,33 +354,31 @@ func populateCommitmentsResourceData(ctx context.Context, d *schema.ResourceData
 		return err
 	}
 
-	_, reservationsOk := d.GetOk(commitments.FieldAzureReservationsCSV)
 	cuds, cudsOk, err := getCUDImportResources(d)
 	if err != nil {
 		return err
 	}
 
-	switch {
-	case reservationsOk:
-		return fmt.Errorf("azure reservations are currently not supported")
-	case cudsOk:
-		var resources []*commitments.GCPCUDResource
-		for _, c := range orgCommitments {
-			if c.GcpResourceCudContext == nil {
-				continue
-			}
+	var resources []*commitments.GCPCUDResource
+	for _, c := range orgCommitments {
+		c := c
+		if c.GcpResourceCudContext == nil {
+			continue
+		}
 
-			resource, err := commitments.MapCommitmentToCUDResource(c)
-			if err != nil {
-				return err
-			}
-			resources = append(resources, resource)
+		resource, err := commitments.MapCommitmentToCUDResource(c)
+		if err != nil {
+			return err
 		}
-		commitments.SortResources(resources, cuds)
-		if err := d.Set(commitments.FieldGCPCUDs, resources); err != nil {
-			return fmt.Errorf("setting gcp cuds: %w", err)
-		}
+		resources = append(resources, resource)
 	}
+	if cudsOk {
+		commitments.SortResources(resources, cuds)
+	}
+	if err := d.Set(commitments.FieldGCPCUDs, resources); err != nil {
+		return fmt.Errorf("setting gcp cuds: %w", err)
+	}
+
 	return nil
 }
 
