@@ -506,7 +506,7 @@ func TestMapCUDImportWithConfigToUpdateRequest(t *testing.T) {
 		input    *cudWithConfig[CastaiCommitment]
 		expected sdk.CommitmentsAPIUpdateCommitmentJSONRequestBody
 	}{
-		"should map cud import with config": {
+		"should map gcp cud import with config": {
 			input: &cudWithConfig[CastaiCommitment]{
 				CUD: CastaiCommitment{
 					CastaiInventoryV1beta1Commitment: sdk.CastaiInventoryV1beta1Commitment{
@@ -558,7 +558,7 @@ func TestMapCUDImportWithConfigToUpdateRequest(t *testing.T) {
 				Status:         lo.ToPtr[sdk.CastaiInventoryV1beta1CommitmentStatus]("INACTIVE"),
 			},
 		},
-		"should map cud import without config": {
+		"should map gcp cud import without config": {
 			input: &cudWithConfig[CastaiCommitment]{
 				CUD: CastaiCommitment{
 					CastaiInventoryV1beta1Commitment: sdk.CastaiInventoryV1beta1Commitment{
@@ -605,20 +605,47 @@ func TestMapCUDImportWithConfigToUpdateRequest(t *testing.T) {
 }
 
 func TestSortResources(t *testing.T) {
-	toSort := []Resource{
-		&GCPCUDResource{CUDID: "1"},
-		&GCPCUDResource{CUDID: "2"},
-		&GCPCUDResource{CUDID: "3"},
-		&GCPCUDResource{CUDID: "4"},
-		&GCPCUDResource{CUDID: "5"},
+	tests := map[string]struct {
+		toSort, targetOrder []Resource
+	}{
+		"should sort gcp cud resources": {
+			toSort: []Resource{
+				&GCPCUDResource{CUDID: "1"},
+				&GCPCUDResource{CUDID: "2"},
+				&GCPCUDResource{CUDID: "3"},
+				&GCPCUDResource{CUDID: "4"},
+				&GCPCUDResource{CUDID: "5"},
+			},
+			targetOrder: []Resource{
+				&GCPCUDResource{CUDID: "3"},
+				&GCPCUDResource{CUDID: "1"},
+				&GCPCUDResource{CUDID: "4"},
+				&GCPCUDResource{CUDID: "2"},
+				&GCPCUDResource{CUDID: "5"},
+			},
+		},
+		"should sort azure reservation resources": {
+			toSort: []Resource{
+				&AzureReservationResource{ReservationID: "a"},
+				&AzureReservationResource{ReservationID: "b"},
+				&AzureReservationResource{ReservationID: "c"},
+				&AzureReservationResource{ReservationID: "d"},
+				&AzureReservationResource{ReservationID: "e"},
+			},
+			targetOrder: []Resource{
+				&AzureReservationResource{ReservationID: "e"},
+				&AzureReservationResource{ReservationID: "a"},
+				&AzureReservationResource{ReservationID: "c"},
+				&AzureReservationResource{ReservationID: "d"},
+				&AzureReservationResource{ReservationID: "b"},
+			},
+		},
 	}
-	targetOrder := []Resource{
-		&GCPCUDResource{CUDID: "3"},
-		&GCPCUDResource{CUDID: "1"},
-		&GCPCUDResource{CUDID: "4"},
-		&GCPCUDResource{CUDID: "2"},
-		&GCPCUDResource{CUDID: "5"},
+
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			SortResources(tt.toSort, tt.targetOrder)
+			require.Equal(t, tt.targetOrder, tt.toSort)
+		})
 	}
-	SortResources(toSort, targetOrder)
-	require.Equal(t, targetOrder, toSort)
 }
