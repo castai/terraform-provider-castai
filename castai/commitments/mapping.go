@@ -107,21 +107,19 @@ func MapCommitmentToCUDResource(c sdk.CastaiInventoryV1beta1Commitment) (*GCPCUD
 	}
 
 	var cpu, memory int
-	if c.GcpResourceCudContext != nil {
-		if c.GcpResourceCudContext.Cpu != nil {
-			parsedCPU, err := strconv.Atoi(*c.GcpResourceCudContext.Cpu)
-			if err != nil {
-				return nil, err
-			}
-			cpu = parsedCPU
+	if c.GcpResourceCudContext.Cpu != nil {
+		parsedCPU, err := strconv.Atoi(*c.GcpResourceCudContext.Cpu)
+		if err != nil {
+			return nil, err
 		}
-		if c.GcpResourceCudContext.MemoryMb != nil {
-			parsedMemory, err := strconv.Atoi(*c.GcpResourceCudContext.MemoryMb)
-			if err != nil {
-				return nil, err
-			}
-			memory = parsedMemory
+		cpu = parsedCPU
+	}
+	if c.GcpResourceCudContext.MemoryMb != nil {
+		parsedMemory, err := strconv.Atoi(*c.GcpResourceCudContext.MemoryMb)
+		if err != nil {
+			return nil, err
 		}
+		memory = parsedMemory
 	}
 
 	var endDate, startDate string
