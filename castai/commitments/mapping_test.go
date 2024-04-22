@@ -40,13 +40,13 @@ func TestMapCommitmentToCUDResource(t *testing.T) {
 	}
 
 	tests := map[string]struct {
-		input  sdk.CastaiInventoryV1beta1Commitment
-		output *GCPCUDResource
-		err    error
+		input    sdk.CastaiInventoryV1beta1Commitment
+		expected *GCPCUDResource
+		err      error
 	}{
 		"should succeed as all the fields are set": {
 			input: makeCommitment(),
-			output: &GCPCUDResource{
+			expected: &GCPCUDResource{
 				ID:             lo.ToPtr(id1.String()),
 				AllowedUsage:   lo.ToPtr[float32](0.5),
 				Prioritization: lo.ToPtr(true),
@@ -77,7 +77,7 @@ func TestMapCommitmentToCUDResource(t *testing.T) {
 				c.GcpResourceCudContext.Cpu = nil
 				return c
 			}(),
-			output: &GCPCUDResource{
+			expected: &GCPCUDResource{
 				ID:             lo.ToPtr(id1.String()),
 				AllowedUsage:   lo.ToPtr[float32](0.5),
 				Prioritization: lo.ToPtr(true),
@@ -99,7 +99,7 @@ func TestMapCommitmentToCUDResource(t *testing.T) {
 				c.GcpResourceCudContext.MemoryMb = nil
 				return c
 			}(),
-			output: &GCPCUDResource{
+			expected: &GCPCUDResource{
 				ID:             lo.ToPtr(id1.String()),
 				AllowedUsage:   lo.ToPtr[float32](0.5),
 				Prioritization: lo.ToPtr(true),
@@ -139,7 +139,7 @@ func TestMapCommitmentToCUDResource(t *testing.T) {
 			if tt.err == nil {
 				r.NoError(err)
 				r.NotNil(actual)
-				r.Equal(tt.output, actual)
+				r.Equal(tt.expected, actual)
 			} else {
 				r.Nil(actual)
 				r.Error(err)
@@ -185,13 +185,13 @@ func TestMapCUDImportToResource(t *testing.T) {
 	}
 
 	tests := map[string]struct {
-		input  *cudWithConfig[CastaiGCPCommitmentImport]
-		output *GCPCUDResource
-		err    error
+		input    *cudWithConfig[CastaiGCPCommitmentImport]
+		expected *GCPCUDResource
+		err      error
 	}{
 		"should succeed, no config passed": {
 			input: makeInput(),
-			output: &GCPCUDResource{
+			expected: &GCPCUDResource{
 				CUDID:          "123456",
 				CUDStatus:      "ACTIVE",
 				StartTimestamp: "2023-01-01T00:00:00.000-07:00",
@@ -210,7 +210,7 @@ func TestMapCUDImportToResource(t *testing.T) {
 				c.CUD.Resources = nil
 				return c
 			}(),
-			output: &GCPCUDResource{
+			expected: &GCPCUDResource{
 				CUDID:          "123456",
 				CUDStatus:      "ACTIVE",
 				StartTimestamp: "2023-01-01T00:00:00.000-07:00",
@@ -236,7 +236,7 @@ func TestMapCUDImportToResource(t *testing.T) {
 				}
 				return c
 			}(),
-			output: &GCPCUDResource{
+			expected: &GCPCUDResource{
 				CUDID:          "123456",
 				CUDStatus:      "ACTIVE",
 				StartTimestamp: "2023-01-01T00:00:00.000-07:00",
@@ -275,7 +275,7 @@ func TestMapCUDImportToResource(t *testing.T) {
 				c.CUD.Resources = &[]sdk.CastaiInventoryV1beta1GCPResource{(*c.CUD.Resources)[1]}
 				return c
 			}(),
-			output: &GCPCUDResource{
+			expected: &GCPCUDResource{
 				CUDID:          "123456",
 				CUDStatus:      "ACTIVE",
 				StartTimestamp: "2023-01-01T00:00:00.000-07:00",
@@ -293,7 +293,7 @@ func TestMapCUDImportToResource(t *testing.T) {
 				c.CUD.Resources = &[]sdk.CastaiInventoryV1beta1GCPResource{(*c.CUD.Resources)[0]}
 				return c
 			}(),
-			output: &GCPCUDResource{
+			expected: &GCPCUDResource{
 				CUDID:          "123456",
 				CUDStatus:      "ACTIVE",
 				StartTimestamp: "2023-01-01T00:00:00.000-07:00",
@@ -313,7 +313,7 @@ func TestMapCUDImportToResource(t *testing.T) {
 			if tt.err == nil {
 				r.NoError(err)
 				r.NotNil(actual)
-				r.Equal(tt.output, actual)
+				r.Equal(tt.expected, actual)
 			} else {
 				r.Nil(actual)
 				r.Error(err)
@@ -448,4 +448,72 @@ func TestMapConfigsToCUDs(t *testing.T) {
 			}
 		})
 	}
+}
+
+//func TestMapConfiguredCUDImportsToResources(t *testing.T) {
+//	tests := map[string]struct {
+//		cuds     []sdk.CastaiInventoryV1beta1GCPCommitmentImport
+//		configs  []*GCPCUDConfigResource
+//		expected []*GCPCUDResource
+//		err      error
+//	}{
+//		"": {
+//			cuds: []sdk.CastaiInventoryV1beta1GCPCommitmentImport{
+//				{
+//					AutoRenew:         nil,
+//					Category:          nil,
+//					CreationTimestamp: nil,
+//					Description:       nil,
+//					EndTimestamp:      nil,
+//					Id:                nil,
+//					Kind:              nil,
+//					Name:              nil,
+//					Plan:              nil,
+//					Region:            nil,
+//					Resources:         nil,
+//					SelfLink:          nil,
+//					StartTimestamp:    nil,
+//					Status:            nil,
+//					StatusMessage:     nil,
+//					Type:              nil,
+//				},
+//			},
+//			configs:  nil,
+//			expected: nil,
+//		},
+//	}
+//	for name, tt := range tests {
+//		t.Run(name, func(t *testing.T) {
+//			r := require.New(t)
+//			actual, err := MapConfiguredCUDImportsToResources(tt.cuds, tt.configs)
+//			if tt.err == nil {
+//				r.NoError(err)
+//				r.NotNil(actual)
+//				r.Equal(tt.expected, actual)
+//			} else {
+//				r.Error(err)
+//				r.Nil(actual)
+//				r.Equal(tt.err.Error(), err.Error())
+//			}
+//		})
+//	}
+//}
+
+func TestSortResources(t *testing.T) {
+	toSort := []Resource{
+		&GCPCUDResource{CUDID: "1"},
+		&GCPCUDResource{CUDID: "2"},
+		&GCPCUDResource{CUDID: "3"},
+		&GCPCUDResource{CUDID: "4"},
+		&GCPCUDResource{CUDID: "5"},
+	}
+	targetOrder := []Resource{
+		&GCPCUDResource{CUDID: "3"},
+		&GCPCUDResource{CUDID: "1"},
+		&GCPCUDResource{CUDID: "4"},
+		&GCPCUDResource{CUDID: "2"},
+		&GCPCUDResource{CUDID: "5"},
+	}
+	SortResources(toSort, targetOrder)
+	require.Equal(t, targetOrder, toSort)
 }
