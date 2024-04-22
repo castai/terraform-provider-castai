@@ -216,7 +216,7 @@ func upsertEvictionConfigs(ctx context.Context, data *schema.ResourceData, meta 
 	)
 	if checkErr := sdk.CheckOKResponse(resp, err); checkErr != nil {
 		log.Printf("[ERROR] Failed to upsert evictor advanced config: %v", err)
-		return err
+		return checkErr
 	}
 	err = data.Set(FieldEvictorAdvancedConfig, flattenEvictionConfig(resp.JSON200.EvictionConfig))
 	if err != nil {
