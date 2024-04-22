@@ -499,6 +499,111 @@ func TestMapConfigsToCUDs(t *testing.T) {
 //	}
 //}
 
+func TestMapCUDImportWithConfigToUpdateRequest(t *testing.T) {
+	id := uuid.New()
+	now := time.Now()
+	tests := map[string]struct {
+		input    *cudWithConfig[CastaiCommitment]
+		expected sdk.CommitmentsAPIUpdateCommitmentJSONRequestBody
+	}{
+		"should map cud import with config": {
+			input: &cudWithConfig[CastaiCommitment]{
+				CUD: CastaiCommitment{
+					CastaiInventoryV1beta1Commitment: sdk.CastaiInventoryV1beta1Commitment{
+						AllowedUsage: lo.ToPtr[float32](0.75),
+						EndDate:      lo.ToPtr(now.Add(365 * 24 * time.Hour)),
+						GcpResourceCudContext: &sdk.CastaiInventoryV1beta1GCPResourceCUD{
+							Cpu:      lo.ToPtr("8"),
+							CudId:    lo.ToPtr("123456"),
+							MemoryMb: lo.ToPtr("1024"),
+							Plan:     lo.ToPtr[sdk.CastaiInventoryV1beta1GCPResourceCUDCUDPlan]("TWELVE_MONTHS"),
+							Status:   lo.ToPtr("ACTIVE"),
+							Type:     lo.ToPtr("COMPUTE_OPTIMIZED_C2D"),
+						},
+						Id:             lo.ToPtr(id.String()),
+						Name:           lo.ToPtr("test-cud-1"),
+						Prioritization: lo.ToPtr(true),
+						Region:         lo.ToPtr("us-central1"),
+						StartDate:      lo.ToPtr(now.Add(-24 * time.Hour)),
+						Status:         lo.ToPtr[sdk.CastaiInventoryV1beta1CommitmentStatus]("ACTIVE"),
+					},
+				},
+				Config: &GCPCUDConfigResource{
+					Matcher: GCPCUDConfigMatcherResource{
+						Name:   "test-cud-1",
+						Type:   lo.ToPtr("COMPUTE_OPTIMIZED_N2D"),
+						Region: lo.ToPtr("us-central1"),
+					},
+					Prioritization: lo.ToPtr(false),
+					Status:         lo.ToPtr("INACTIVE"),
+					AllowedUsage:   lo.ToPtr[float32](0.7),
+				},
+			},
+			expected: sdk.CommitmentsAPIUpdateCommitmentJSONRequestBody{
+				AllowedUsage: lo.ToPtr[float32](0.7),
+				EndDate:      lo.ToPtr(now.Add(365 * 24 * time.Hour)),
+				GcpResourceCudContext: &sdk.CastaiInventoryV1beta1GCPResourceCUD{
+					Cpu:      lo.ToPtr("8"),
+					CudId:    lo.ToPtr("123456"),
+					MemoryMb: lo.ToPtr("1024"),
+					Plan:     lo.ToPtr[sdk.CastaiInventoryV1beta1GCPResourceCUDCUDPlan]("TWELVE_MONTHS"),
+					Status:   lo.ToPtr("ACTIVE"),
+					Type:     lo.ToPtr("COMPUTE_OPTIMIZED_C2D"),
+				},
+				Id:             lo.ToPtr(id.String()),
+				Name:           lo.ToPtr("test-cud-1"),
+				Prioritization: lo.ToPtr(false),
+				Region:         lo.ToPtr("us-central1"),
+				StartDate:      lo.ToPtr(now.Add(-24 * time.Hour)),
+				Status:         lo.ToPtr[sdk.CastaiInventoryV1beta1CommitmentStatus]("INACTIVE"),
+			},
+		},
+		"should map cud import without config": {
+			input: &cudWithConfig[CastaiCommitment]{
+				CUD: CastaiCommitment{
+					CastaiInventoryV1beta1Commitment: sdk.CastaiInventoryV1beta1Commitment{
+						EndDate: lo.ToPtr(now.Add(365 * 24 * time.Hour)),
+						GcpResourceCudContext: &sdk.CastaiInventoryV1beta1GCPResourceCUD{
+							Cpu:      lo.ToPtr("8"),
+							CudId:    lo.ToPtr("123456"),
+							MemoryMb: lo.ToPtr("1024"),
+							Plan:     lo.ToPtr[sdk.CastaiInventoryV1beta1GCPResourceCUDCUDPlan]("TWELVE_MONTHS"),
+							Status:   lo.ToPtr("ACTIVE"),
+							Type:     lo.ToPtr("COMPUTE_OPTIMIZED_C2D"),
+						},
+						Id:        lo.ToPtr(id.String()),
+						Name:      lo.ToPtr("test-cud-1"),
+						Region:    lo.ToPtr("us-central1"),
+						StartDate: lo.ToPtr(now.Add(-24 * time.Hour)),
+					},
+				},
+			},
+			expected: sdk.CommitmentsAPIUpdateCommitmentJSONRequestBody{
+				EndDate: lo.ToPtr(now.Add(365 * 24 * time.Hour)),
+				GcpResourceCudContext: &sdk.CastaiInventoryV1beta1GCPResourceCUD{
+					Cpu:      lo.ToPtr("8"),
+					CudId:    lo.ToPtr("123456"),
+					MemoryMb: lo.ToPtr("1024"),
+					Plan:     lo.ToPtr[sdk.CastaiInventoryV1beta1GCPResourceCUDCUDPlan]("TWELVE_MONTHS"),
+					Status:   lo.ToPtr("ACTIVE"),
+					Type:     lo.ToPtr("COMPUTE_OPTIMIZED_C2D"),
+				},
+				Id:        lo.ToPtr(id.String()),
+				Name:      lo.ToPtr("test-cud-1"),
+				Region:    lo.ToPtr("us-central1"),
+				StartDate: lo.ToPtr(now.Add(-24 * time.Hour)),
+			},
+		},
+	}
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			r := require.New(t)
+			actual := MapCUDImportWithConfigToUpdateRequest(tt.input)
+			r.Equal(tt.expected, actual)
+		})
+	}
+}
+
 func TestSortResources(t *testing.T) {
 	toSort := []Resource{
 		&GCPCUDResource{CUDID: "1"},
