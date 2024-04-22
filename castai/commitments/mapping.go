@@ -154,6 +154,9 @@ func MapCUDImportToResource(
 	var cpu, memory int
 	if cudWithCfg.CUD.Resources != nil {
 		for _, res := range *cudWithCfg.CUD.Resources {
+			if res.Type == nil || res.Amount == nil {
+				continue
+			}
 			switch *res.Type {
 			case "VCPU":
 				parsedCPU, err := strconv.Atoi(*res.Amount)
