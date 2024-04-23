@@ -1,9 +1,14 @@
 package castai
 
 import (
+	"errors"
+	"fmt"
+	"math"
+	"strconv"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
 	"github.com/castai/terraform-provider-castai/castai/commitments"
 )
@@ -12,10 +17,32 @@ func TestCommitments_GCP_BasicCUDs(t *testing.T) {
 	checkAttr := func(path, val string) resource.TestCheckFunc {
 		return resource.TestCheckResourceAttr("castai_commitments.test_gcp", path, val)
 	}
+	// checkFloatAttr is a helper function to check float attributes with a precision of 3 decimal places.
+	// The attributes map is a map[string]string, so floats in there may be affected by the rounding errors.
+	checkFloatAttr := func(path string, val float64) func(state *terraform.State) error {
+		return func(state *terraform.State) error {
+			res, ok := state.RootModule().Resources["castai_commitments.test_gcp"]
+			if !ok {
+				return errors.New("resource not found")
+			}
+			v, ok := res.Primary.Attributes[path]
+			if !ok {
+				return errors.New("attribute not found")
+			}
+			parsed, err := strconv.ParseFloat(v, 64)
+			if err != nil {
+				return err
+			}
+			parsed = math.Round(parsed*1000) / 1000
+			if parsed != val {
+				return fmt.Errorf("expected %f, got %f", val, parsed)
+			}
+			return nil
+		}
+	}
 
 	resource.Test(t, resource.TestCase{
-		PreCheck: func() { testAccPreCheck(t) },
-
+		PreCheck:          func() { testAccPreCheck(t) },
 		ProviderFactories: providerFactories,
 		Steps: []resource.TestStep{
 			{
@@ -56,7 +83,7 @@ func TestCommitments_GCP_BasicCUDs(t *testing.T) {
 					checkAttr("gcp_cuds.0.plan", "TWELVE_MONTH"),
 					checkAttr("gcp_cuds.0.type", "COMPUTE_OPTIMIZED_C2D"),
 					checkAttr("gcp_cuds.0.prioritization", "false"),
-					//checkAttr("gcp_cuds.0.allowed_usage", "1"),
+					checkFloatAttr("gcp_cuds.0.allowed_usage", 1),
 					checkAttr("gcp_cuds.0.status", "Active"),
 					// "test-2" CUD
 					checkAttr("gcp_cuds.1.cud_id", "987654321"),
@@ -70,7 +97,7 @@ func TestCommitments_GCP_BasicCUDs(t *testing.T) {
 					checkAttr("gcp_cuds.1.plan", "TWELVE_MONTH"),
 					checkAttr("gcp_cuds.1.type", "GENERAL_PURPOSE_E2"),
 					checkAttr("gcp_cuds.1.prioritization", "true"),
-					//checkAttr("gcp_cuds.1.allowed_usage", "0.7"),
+					checkFloatAttr("gcp_cuds.1.allowed_usage", 0.7),
 					checkAttr("gcp_cuds.1.status", "Active"),
 				),
 			},

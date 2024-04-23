@@ -1,9 +1,8 @@
 package commitments
 
 import (
-	"github.com/hashicorp/go-cty/cty"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 var (
@@ -92,37 +91,18 @@ var (
 			Description: GCPCUDResourceSchema["prioritization"].Description,
 		},
 		"status": {
-			Type:        schema.TypeString,
-			Optional:    true,
-			Description: GCPCUDResourceSchema["status"].Description,
-			ValidateDiagFunc: func(i any, path cty.Path) diag.Diagnostics {
-				v, ok := i.(string)
-				if !ok {
-					return diag.Errorf("expected string, got %T", i)
-				}
-				if _, ok := allowedStatusValues[v]; !ok {
-					return diag.Errorf("value must be one of %s", allowedStatusValuesStr)
-				}
-				return nil
-			},
+			Type:             schema.TypeString,
+			Optional:         true,
+			Description:      GCPCUDResourceSchema["status"].Description,
+			ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"Active", "Inactive"}, false)),
 		},
 		"allowed_usage": {
-			Type:        schema.TypeFloat,
-			Optional:    true,
-			Description: GCPCUDResourceSchema["allowed_usage"].Description,
+			Type:             schema.TypeFloat,
+			Optional:         true,
+			Description:      GCPCUDResourceSchema["allowed_usage"].Description,
+			ValidateDiagFunc: validation.ToDiagFunc(validation.FloatBetween(0, 1)),
 		},
 	}
 
 	AzureReservationResourceSchema = map[string]*schema.Schema{}
-
-	allowedStatusValues = map[string]struct{}{
-		"Active":   {},
-		"Inactive": {},
-	}
-	allowedStatusValuesStr = func() (res string) {
-		for k := range allowedStatusValues {
-			res += k + ", "
-		}
-		return
-	}()
 )
