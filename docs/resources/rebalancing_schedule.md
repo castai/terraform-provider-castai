@@ -74,6 +74,7 @@ Optional:
 - `num_targeted_nodes` (Number) Maximum number of nodes that will be selected for rebalancing.
 - `rebalancing_min_nodes` (Number) Minimum number of nodes that should be kept in the cluster after rebalancing.
 - `selector` (String) Node selector in JSON format.
+- `target_node_selection_algorithm` (String) Defines the algorithm used to select the target nodes for rebalancing.
 
 <a id="nestedblock--launch_configuration--execution_conditions"></a>
 ### Nested Schema for `launch_configuration.execution_conditions`
