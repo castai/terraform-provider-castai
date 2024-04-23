@@ -194,7 +194,7 @@ type ClientInterface interface {
 	PoliciesAPIUpsertClusterPolicies(ctx context.Context, clusterId string, body PoliciesAPIUpsertClusterPoliciesJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// ScheduledRebalancingAPIListRebalancingJobs request
-	ScheduledRebalancingAPIListRebalancingJobs(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+	ScheduledRebalancingAPIListRebalancingJobs(ctx context.Context, clusterId string, params *ScheduledRebalancingAPIListRebalancingJobsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// ScheduledRebalancingAPICreateRebalancingJob request with any body
 	ScheduledRebalancingAPICreateRebalancingJobWithBody(ctx context.Context, clusterId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -916,8 +916,8 @@ func (c *Client) PoliciesAPIUpsertClusterPolicies(ctx context.Context, clusterId
 	return c.Client.Do(req)
 }
 
-func (c *Client) ScheduledRebalancingAPIListRebalancingJobs(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewScheduledRebalancingAPIListRebalancingJobsRequest(c.Server, clusterId)
+func (c *Client) ScheduledRebalancingAPIListRebalancingJobs(ctx context.Context, clusterId string, params *ScheduledRebalancingAPIListRebalancingJobsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewScheduledRebalancingAPIListRebalancingJobsRequest(c.Server, clusterId, params)
 	if err != nil {
 		return nil, err
 	}
@@ -3248,7 +3248,7 @@ func NewPoliciesAPIUpsertClusterPoliciesRequestWithBody(server string, clusterId
 }
 
 // NewScheduledRebalancingAPIListRebalancingJobsRequest generates requests for ScheduledRebalancingAPIListRebalancingJobs
-func NewScheduledRebalancingAPIListRebalancingJobsRequest(server string, clusterId string) (*http.Request, error) {
+func NewScheduledRebalancingAPIListRebalancingJobsRequest(server string, clusterId string, params *ScheduledRebalancingAPIListRebalancingJobsParams) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -3272,6 +3272,26 @@ func NewScheduledRebalancingAPIListRebalancingJobsRequest(server string, cluster
 	if err != nil {
 		return nil, err
 	}
+
+	queryValues := queryURL.Query()
+
+	if params.RebalancingScheduleId != nil {
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "rebalancingScheduleId", runtime.ParamLocationQuery, *params.RebalancingScheduleId); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	queryURL.RawQuery = queryValues.Encode()
 
 	req, err := http.NewRequest("GET", queryURL.String(), nil)
 	if err != nil {
@@ -6414,7 +6434,7 @@ type ClientWithResponsesInterface interface {
 	PoliciesAPIUpsertClusterPoliciesWithResponse(ctx context.Context, clusterId string, body PoliciesAPIUpsertClusterPoliciesJSONRequestBody) (*PoliciesAPIUpsertClusterPoliciesResponse, error)
 
 	// ScheduledRebalancingAPIListRebalancingJobs request
-	ScheduledRebalancingAPIListRebalancingJobsWithResponse(ctx context.Context, clusterId string) (*ScheduledRebalancingAPIListRebalancingJobsResponse, error)
+	ScheduledRebalancingAPIListRebalancingJobsWithResponse(ctx context.Context, clusterId string, params *ScheduledRebalancingAPIListRebalancingJobsParams) (*ScheduledRebalancingAPIListRebalancingJobsResponse, error)
 
 	// ScheduledRebalancingAPICreateRebalancingJob request  with any body
 	ScheduledRebalancingAPICreateRebalancingJobWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader) (*ScheduledRebalancingAPICreateRebalancingJobResponse, error)
@@ -9987,8 +10007,8 @@ func (c *ClientWithResponses) PoliciesAPIUpsertClusterPoliciesWithResponse(ctx c
 }
 
 // ScheduledRebalancingAPIListRebalancingJobsWithResponse request returning *ScheduledRebalancingAPIListRebalancingJobsResponse
-func (c *ClientWithResponses) ScheduledRebalancingAPIListRebalancingJobsWithResponse(ctx context.Context, clusterId string) (*ScheduledRebalancingAPIListRebalancingJobsResponse, error) {
-	rsp, err := c.ScheduledRebalancingAPIListRebalancingJobs(ctx, clusterId)
+func (c *ClientWithResponses) ScheduledRebalancingAPIListRebalancingJobsWithResponse(ctx context.Context, clusterId string, params *ScheduledRebalancingAPIListRebalancingJobsParams) (*ScheduledRebalancingAPIListRebalancingJobsResponse, error) {
+	rsp, err := c.ScheduledRebalancingAPIListRebalancingJobs(ctx, clusterId, params)
 	if err != nil {
 		return nil, err
 	}
