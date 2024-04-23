@@ -1,8 +1,9 @@
 package commitments
 
 import (
-	"github.com/samber/lo"
 	"path"
+
+	"github.com/samber/lo"
 
 	"github.com/castai/terraform-provider-castai/castai/sdk"
 )
