@@ -4,11 +4,11 @@ import (
 	"errors"
 	"fmt"
 	"path"
-	"slices"
 	"strconv"
 	"time"
 
 	"github.com/samber/lo"
+	"golang.org/x/exp/slices"
 
 	"github.com/castai/terraform-provider-castai/castai/sdk"
 )
@@ -336,25 +336,19 @@ func SortResources[R Resource](toSort, targetOrder []R) {
 		orderMap[value.GetIDInCloud()] = index
 	}
 
-	slices.SortStableFunc(toSort, func(a, b R) int {
+	slices.SortStableFunc(toSort, func(a, b R) bool {
 		indexI, foundI := orderMap[a.GetIDInCloud()]
 		indexJ, foundJ := orderMap[b.GetIDInCloud()]
 
 		if !foundI && !foundJ {
-			if a.GetIDInCloud() < b.GetIDInCloud() {
-				return -1
-			}
-			return 1
+			return a.GetIDInCloud() < b.GetIDInCloud()
 		}
 		if !foundI {
-			return 1
+			return true
 		}
 		if !foundJ {
-			return -1
+			return false
 		}
-		if indexI < indexJ {
-			return -1
-		}
-		return 1
+		return indexI < indexJ
 	})
 }
