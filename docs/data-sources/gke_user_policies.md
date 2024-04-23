@@ -19,5 +19,3 @@ description: |-
 
 - `id` (String) The ID of this resource.
 - `policy` (List of String)
-
-
