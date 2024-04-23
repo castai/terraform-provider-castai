@@ -33,7 +33,6 @@ func resourceCommitments() *schema.Resource {
 		},
 		CustomizeDiff: commitmentsDiff,
 		Schema: map[string]*schema.Schema{
-			// Allow either reservations or CUDs - validated in the custom diff function
 			commitments.FieldAzureReservationsCSV: {
 				Type:         schema.TypeString,
 				Optional:     true,
