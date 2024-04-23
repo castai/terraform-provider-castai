@@ -214,9 +214,9 @@ func upsertEvictionConfigs(ctx context.Context, data *schema.ResourceData, meta 
 		"application/json",
 		bytes.NewReader(evictorAdvancedConfigJson),
 	)
-	if err != nil || resp.JSON200 == nil {
+	if checkErr := sdk.CheckOKResponse(resp, err); checkErr != nil {
 		log.Printf("[ERROR] Failed to upsert evictor advanced config: %v", err)
-		return err
+		return checkErr
 	}
 	err = data.Set(FieldEvictorAdvancedConfig, flattenEvictionConfig(resp.JSON200.EvictionConfig))
 	if err != nil {
@@ -419,6 +419,10 @@ func toPodSelector(in interface{}) (*sdk.CastaiEvictorV1PodSelector, error) {
 			mls, err := toMatchLabels(v)
 			if err != nil {
 				return nil, err
+			}
+
+			if mls == nil || len(mls.AdditionalProperties) == 0 {
+				continue
 			}
 
 			if out.LabelSelector == nil {

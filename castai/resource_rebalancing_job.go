@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"net/http"
 	"strings"
 	"time"
 
@@ -64,6 +65,15 @@ func resourceRebalancingJobCreate(ctx context.Context, d *schema.ResourceData, m
 		return diag.FromErr(err)
 	}
 
+	jobByScheduleId, found, err := getRebalancingJobByScheduleId(ctx, client, *job.ClusterId, *job.RebalancingScheduleId)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	if found {
+		d.SetId(*jobByScheduleId.Id)
+		return resourceRebalancingJobUpdate(ctx, d, meta)
+	}
+
 	req := sdk.ScheduledRebalancingAPICreateRebalancingJobJSONRequestBody{
 		Id:                    job.Id,
 		ClusterId:             job.ClusterId,
@@ -82,12 +92,25 @@ func resourceRebalancingJobCreate(ctx context.Context, d *schema.ResourceData, m
 }
 
 func resourceRebalancingJobRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
+	client := meta.(*ProviderConfig).api
 	clusterID := d.Get("cluster_id").(string)
-	job, err := getRebalancingJobById(ctx, meta.(*ProviderConfig).api, clusterID, d.Id())
+	job, found, err := getRebalancingJobById(ctx, client, clusterID, d.Id())
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	if !d.IsNewResource() && job == nil {
+	if !d.IsNewResource() && !found {
+		rebalancingScheduleID := d.Get("rebalancing_schedule_id").(string)
+		jobByScheduleId, found, err := getRebalancingJobByScheduleId(ctx, client, clusterID, rebalancingScheduleID)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		if found {
+			if err := rebalancingJobToState(jobByScheduleId, d); err != nil {
+				return diag.FromErr(err)
+			}
+			return nil
+		}
+
 		tflog.Warn(ctx, "Rebalancing job not found, removing from state", map[string]any{"id": d.Id()})
 		d.SetId("")
 		return nil
@@ -188,7 +211,10 @@ func getRebalancingJobByScheduleName(ctx context.Context, client *sdk.ClientWith
 		return nil, fmt.Errorf("getting schedule: %w", err)
 	}
 
-	resp, err := client.ScheduledRebalancingAPIListRebalancingJobsWithResponse(ctx, clusterID, nil)
+	params := sdk.ScheduledRebalancingAPIListRebalancingJobsParams{
+		RebalancingScheduleId: schedule.Id,
+	}
+	resp, err := client.ScheduledRebalancingAPIListRebalancingJobsWithResponse(ctx, clusterID, &params)
 	if checkErr := sdk.CheckOKResponse(resp, err); checkErr != nil {
 		return nil, checkErr
 	}
@@ -208,14 +234,33 @@ func getRebalancingJobByScheduleName(ctx context.Context, client *sdk.ClientWith
 	return nil, fmt.Errorf("rebalancing job for schedule %q was not found", scheduleName)
 }
 
-func getRebalancingJobById(ctx context.Context, client *sdk.ClientWithResponses, clusterID string, id string) (*sdk.ScheduledrebalancingV1RebalancingJob, error) {
+func getRebalancingJobById(ctx context.Context, client *sdk.ClientWithResponses, clusterID string, id string) (*sdk.ScheduledrebalancingV1RebalancingJob, bool, error) {
 	resp, err := client.ScheduledRebalancingAPIGetRebalancingJobWithResponse(ctx, clusterID, id)
 	if err != nil {
-		return nil, err
+		return nil, false, err
+	}
+	if resp.StatusCode() == http.StatusNotFound {
+		return nil, false, nil
 	}
 	if err := sdk.CheckOKResponse(resp, err); err != nil {
-		return nil, err
+		return nil, false, err
 	}
 
-	return resp.JSON200, nil
+	return resp.JSON200, true, nil
+}
+
+func getRebalancingJobByScheduleId(ctx context.Context, client *sdk.ClientWithResponses, clusterID, scheduleID string) (*sdk.ScheduledrebalancingV1RebalancingJob, bool, error) {
+	params := &sdk.ScheduledRebalancingAPIListRebalancingJobsParams{
+		RebalancingScheduleId: lo.ToPtr(scheduleID),
+	}
+	listResp, err := client.ScheduledRebalancingAPIListRebalancingJobsWithResponse(ctx, clusterID, params)
+	if checkErr := sdk.CheckOKResponse(listResp, err); checkErr != nil {
+		return nil, false, checkErr
+	}
+	for _, j := range *listResp.JSON200.Jobs {
+		if *j.RebalancingScheduleId == scheduleID {
+			return &j, true, nil
+		}
+	}
+	return nil, false, nil
 }
