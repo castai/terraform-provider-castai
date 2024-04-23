@@ -4,8 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/castai/terraform-provider-castai/castai/sdk"
-	"github.com/samber/lo"
 	"math"
 	"strconv"
 	"testing"
@@ -13,8 +11,10 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/samber/lo"
 
 	"github.com/castai/terraform-provider-castai/castai/commitments"
+	"github.com/castai/terraform-provider-castai/castai/sdk"
 )
 
 func TestCommitments_GCP_BasicCUDs(t *testing.T) {
