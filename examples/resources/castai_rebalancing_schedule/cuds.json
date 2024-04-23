@@ -1,0 +1,29 @@
+[
+  {
+    "autoRenew": false,
+    "category": "MACHINE",
+    "creationTimestamp": "2023-01-01T00:00:00Z",
+    "description": "",
+    "endTimestamp": "2024-01-01T00:00:00Z",
+    "id": "123456789",
+    "kind": "compute#commitment",
+    "name": "test",
+    "plan": "TWELVE_MONTH",
+    "region": "https://www.googleapis.com/compute/v1/projects/test/regions/us-east4",
+    "resources": [
+      {
+        "amount": "100",
+        "type": "VCPU"
+      },
+      {
+        "amount": "20480",
+        "type": "MEMORY"
+      }
+    ],
+    "selfLink": "https://www.googleapis.com/compute/v1/projects/test/regions/us-east4/commitments/test",
+    "startTimestamp": "2023-01-01T00:00:00Z",
+    "status": "ACTIVE",
+    "statusMessage": "The commitment is active, and so will apply to current resource usage.",
+    "type": "COMPUTE_OPTIMIZED_C2D"
+  }
+]
