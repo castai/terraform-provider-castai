@@ -152,6 +152,13 @@ const (
 	JobStatusSkipped    ScheduledrebalancingV1JobStatus = "JobStatusSkipped"
 )
 
+// Defines values for ScheduledrebalancingV1TargetNodeSelectionAlgorithm.
+const (
+	TargetNodeSelectionAlgorithmNormalizedPrice ScheduledrebalancingV1TargetNodeSelectionAlgorithm = "TargetNodeSelectionAlgorithmNormalizedPrice"
+	TargetNodeSelectionAlgorithmUtilization     ScheduledrebalancingV1TargetNodeSelectionAlgorithm = "TargetNodeSelectionAlgorithmUtilization"
+	TargetNodeSelectionAlgorithmUtilizedPrice   ScheduledrebalancingV1TargetNodeSelectionAlgorithm = "TargetNodeSelectionAlgorithmUtilizedPrice"
+)
+
 // UsersAPIUpdateOrganizationUserRequest defines model for UsersAPI_UpdateOrganizationUser_request.
 type UsersAPIUpdateOrganizationUserRequest struct {
 	Role *string `json:"role,omitempty"`
@@ -2439,9 +2446,10 @@ type ScheduledrebalancingV1LaunchConfiguration struct {
 	NodeTtlSeconds *int32 `json:"nodeTtlSeconds,omitempty"`
 
 	// Maximum number of nodes that will be selected for rebalancing.
-	NumTargetedNodes   *int32                                    `json:"numTargetedNodes,omitempty"`
-	RebalancingOptions *ScheduledrebalancingV1RebalancingOptions `json:"rebalancingOptions,omitempty"`
-	Selector           *ScheduledrebalancingV1NodeSelector       `json:"selector,omitempty"`
+	NumTargetedNodes             *int32                                              `json:"numTargetedNodes,omitempty"`
+	RebalancingOptions           *ScheduledrebalancingV1RebalancingOptions           `json:"rebalancingOptions,omitempty"`
+	Selector                     *ScheduledrebalancingV1NodeSelector                 `json:"selector,omitempty"`
+	TargetNodeSelectionAlgorithm *ScheduledrebalancingV1TargetNodeSelectionAlgorithm `json:"targetNodeSelectionAlgorithm,omitempty"`
 }
 
 // ScheduledrebalancingV1ListAvailableRebalancingTZResponse defines model for scheduledrebalancing.v1.ListAvailableRebalancingTZResponse.
@@ -2548,6 +2556,9 @@ type ScheduledrebalancingV1RebalancingScheduleUpdate struct {
 type ScheduledrebalancingV1Schedule struct {
 	Cron string `json:"cron"`
 }
+
+// ScheduledrebalancingV1TargetNodeSelectionAlgorithm defines model for scheduledrebalancing.v1.TargetNodeSelectionAlgorithm.
+type ScheduledrebalancingV1TargetNodeSelectionAlgorithm string
 
 // ScheduledrebalancingV1TimeZone defines model for scheduledrebalancing.v1.TimeZone.
 type ScheduledrebalancingV1TimeZone struct {

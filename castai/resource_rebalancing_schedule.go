@@ -7,13 +7,14 @@ import (
 	"math"
 	"time"
 
-	"github.com/castai/terraform-provider-castai/castai/sdk"
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/samber/lo"
+
+	"github.com/castai/terraform-provider-castai/castai/sdk"
 )
 
 func resourceRebalancingSchedule() *schema.Resource {
@@ -51,17 +52,17 @@ func resourceRebalancingSchedule() *schema.Resource {
 							Type:             schema.TypeString,
 							Required:         true,
 							ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
-							Description:      "Cron expression defining when the schedule should trigger.\n\n"+
-											"  The `cron` expression can optionally include the `CRON_TZ` variable at the beginning to specify the timezone in which the schedule should be interpreted.\n\n"+
-											"  Example:\n"+
-											"  ```plaintext\n"+
-											"  CRON_TZ=America/New_York 0 12 * * ?\n"+
-											"  ```\n"+
-											"  In the example above, the `CRON_TZ` variable is set to \"America/New_York\" indicating that the cron expression should be interpreted in the Eastern Time (ET) timezone.\n\n"+
-											"  To retrieve a list of available timezone values, you can use the following API endpoint:\n\n"+
-											"  GET https://api.cast.ai/v1/time-zones\n\n"+
-											"  When using the `CRON_TZ` variable, ensure that the specified timezone is valid and supported by checking the list of available timezones from the API endpoint."+
-											"  If the `CRON_TZ` variable is not specified, the cron expression will be interpreted in the UTC timezone.",
+							Description: "Cron expression defining when the schedule should trigger.\n\n" +
+								"  The `cron` expression can optionally include the `CRON_TZ` variable at the beginning to specify the timezone in which the schedule should be interpreted.\n\n" +
+								"  Example:\n" +
+								"  ```plaintext\n" +
+								"  CRON_TZ=America/New_York 0 12 * * ?\n" +
+								"  ```\n" +
+								"  In the example above, the `CRON_TZ` variable is set to \"America/New_York\" indicating that the cron expression should be interpreted in the Eastern Time (ET) timezone.\n\n" +
+								"  To retrieve a list of available timezone values, you can use the following API endpoint:\n\n" +
+								"  GET https://api.cast.ai/v1/time-zones\n\n" +
+								"  When using the `CRON_TZ` variable, ensure that the specified timezone is valid and supported by checking the list of available timezones from the API endpoint." +
+								"  If the `CRON_TZ` variable is not specified, the cron expression will be interpreted in the UTC timezone.",
 						},
 					},
 				},
@@ -137,6 +138,17 @@ func resourceRebalancingSchedule() *schema.Resource {
 							Optional:         true,
 							Description:      "Node selector in JSON format.",
 							ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsJSON),
+						},
+						"target_node_selection_algorithm": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: "Defines the algorithm used to select the target nodes for rebalancing.",
+							Default:     "TargetNodeSelectionAlgorithmNormalizedPrice",
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{
+								"TargetNodeSelectionAlgorithmNormalizedPrice",
+								"TargetNodeSelectionAlgorithmUtilizedPrice",
+								"TargetNodeSelectionAlgorithmUtilization",
+							}, false)),
 						},
 					},
 				},
@@ -269,6 +281,7 @@ func stateToSchedule(d *schema.ResourceData) (*sdk.ScheduledrebalancingV1Rebalan
 			}
 		}
 
+		targetAlgorithm := sdk.ScheduledrebalancingV1TargetNodeSelectionAlgorithm(*readOptionalValue[string](launchConfigurationData, "target_node_selection_algorithm"))
 		result.LaunchConfiguration = sdk.ScheduledrebalancingV1LaunchConfiguration{
 			NodeTtlSeconds:   readOptionalNumber[int, int32](launchConfigurationData, "node_ttl_seconds"),
 			NumTargetedNodes: readOptionalNumber[int, int32](launchConfigurationData, "num_targeted_nodes"),
@@ -277,7 +290,8 @@ func stateToSchedule(d *schema.ResourceData) (*sdk.ScheduledrebalancingV1Rebalan
 				KeepDrainTimeoutNodes: keepDrainTimeoutNodes,
 				ExecutionConditions:   executionConditions,
 			},
-			Selector: selector,
+			Selector:                     selector,
+			TargetNodeSelectionAlgorithm: &targetAlgorithm,
 		}
 	}
 
@@ -305,6 +319,7 @@ func scheduleToState(schedule *sdk.ScheduledrebalancingV1RebalancingSchedule, d 
 	if schedule.LaunchConfiguration.RebalancingOptions != nil {
 		launchConfig["rebalancing_min_nodes"] = schedule.LaunchConfiguration.RebalancingOptions.MinNodes
 		launchConfig["keep_drain_timeout_nodes"] = schedule.LaunchConfiguration.RebalancingOptions.KeepDrainTimeoutNodes
+		launchConfig["target_node_selection_algorithm"] = schedule.LaunchConfiguration.TargetNodeSelectionAlgorithm
 
 		executionConditions := schedule.LaunchConfiguration.RebalancingOptions.ExecutionConditions
 		if executionConditions != nil {
