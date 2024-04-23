@@ -230,7 +230,9 @@ func TestMapCUDImportToResource(t *testing.T) {
 		"should fail as cpu amount is invalid": {
 			input: func() *cudWithConfig[CastaiGCPCommitmentImport] {
 				c := makeInput()
-				(*(c.CUD.Resources))[0].Amount = lo.ToPtr("invalid")
+				inv := (*c.CUD.Resources)[0]
+				inv.Amount = lo.ToPtr("invalid")
+				c.CUD.Resources = &[]sdk.CastaiInventoryV1beta1GCPResource{inv, (*c.CUD.Resources)[1]}
 				return c
 			}(),
 			err: errors.New("strconv.Atoi: parsing \"invalid\": invalid syntax"),
@@ -238,7 +240,9 @@ func TestMapCUDImportToResource(t *testing.T) {
 		"should fail as memory amount is invalid": {
 			input: func() *cudWithConfig[CastaiGCPCommitmentImport] {
 				c := makeInput()
-				(*(c.CUD.Resources))[1].Amount = lo.ToPtr("invalid")
+				inv := (*c.CUD.Resources)[1]
+				inv.Amount = lo.ToPtr("invalid")
+				c.CUD.Resources = &[]sdk.CastaiInventoryV1beta1GCPResource{(*c.CUD.Resources)[0], inv}
 				return c
 			}(),
 			err: errors.New("strconv.Atoi: parsing \"invalid\": invalid syntax"),
