@@ -265,6 +265,9 @@ func resourceCastaiCommitmentsUpsert(ctx context.Context, data *schema.ResourceD
 
 	_, reservationsOk := data.GetOk(commitments.FieldAzureReservationsCSV)
 	cuds, cudsOk, err := getCUDImports(data)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	switch {
 	case reservationsOk:
