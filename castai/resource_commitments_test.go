@@ -1,11 +1,15 @@
 package castai
 
 import (
+	"context"
 	"errors"
 	"fmt"
+	"github.com/castai/terraform-provider-castai/castai/sdk"
+	"github.com/samber/lo"
 	"math"
 	"strconv"
 	"testing"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -44,6 +48,22 @@ func TestCommitments_GCP_BasicCUDs(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
 		ProviderFactories: providerFactories,
+		CheckDestroy: func(state *terraform.State) error {
+			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+			defer cancel()
+
+			res, err := getOrganizationCommitments(ctx, testAccProvider.Meta())
+			if err != nil {
+				return err
+			}
+			res = lo.Filter(res, func(c sdk.CastaiInventoryV1beta1Commitment, _ int) bool {
+				return c.GcpResourceCudContext != nil
+			})
+			if len(res) > 0 {
+				return errors.New("gcp commitments still exist")
+			}
+			return nil
+		},
 		Steps: []resource.TestStep{
 			{
 				Config: initialGCPConfig,
