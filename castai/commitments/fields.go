@@ -6,5 +6,5 @@ const (
 
 	FieldAzureReservations = "azure_reservations"
 	FieldGCPCUDs           = "gcp_cuds"
-	FieldGCPCUDConfigs     = "gcp_cud_configs"
+	FieldCommitmentConfigs = "commitment_configs"
 )

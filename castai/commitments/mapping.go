@@ -35,21 +35,27 @@ type (
 		Plan           string `mapstructure:"plan"`
 		Type           string `mapstructure:"type"`
 	}
-	GCPCUDConfigResource struct {
-		Matcher        GCPCUDConfigMatcherResource `mapstructure:"matcher"`
-		Prioritization *bool                       `mapstructure:"prioritization,omitempty"`
-		Status         *string                     `mapstructure:"status,omitempty"`
-		AllowedUsage   *float32                    `mapstructure:"allowed_usage,omitempty"`
-	}
-	GCPCUDConfigMatcherResource struct {
-		Name   string  `mapstructure:"name"`
-		Type   *string `mapstructure:"type,omitempty"`
-		Region *string `mapstructure:"region,omitempty"`
-	}
 
 	AzureReservationResource struct {
-		ID            *string `mapstructure:"id,omitempty"`   // ID of the commitment
-		ReservationID string  `mapstructure:"reservation_id"` // ID of the reservation in Azure
+		// CAST AI only fields
+		ID             *string  `mapstructure:"id,omitempty"` // ID of the commitment
+		AllowedUsage   *float32 `mapstructure:"allowed_usage,omitempty"`
+		Prioritization *bool    `mapstructure:"prioritization,omitempty"`
+		Status         *string  `mapstructure:"status,omitempty"`
+
+		// Fields from Azure reservations export CSV
+		Count              int    `mapstructure:"count"`
+		ReservationID      string `mapstructure:"reservation_id"` // ID of the reservation in Azure
+		ReservationStatus  string `mapstructure:"reservation_status"`
+		StartTimestamp     string `mapstructure:"start_timestamp"`
+		EndTimestamp       string `mapstructure:"end_timestamp"`
+		Name               string `mapstructure:"name"`
+		Region             string `mapstructure:"region"`
+		InstanceType       string `mapstructure:"instance_type"`
+		Plan               string `mapstructure:"plan"`
+		Scope              string `mapstructure:"scope"`
+		ScopeResourceGroup string `mapstructure:"scope_resource_group"`
+		ScopeSubscription  string `mapstructure:"scope_subscription"`
 	}
 
 	// Resource is an interface for common management of GCP (GCPCUDResource) and Azure (AzureReservationResource) resources
@@ -58,6 +64,18 @@ type (
 		GetCommitmentID() string
 		// GetIDInCloud returns the ID of the resource in the cloud provider
 		GetIDInCloud() string
+	}
+
+	CommitmentConfigResource struct {
+		Matcher        CommitmentConfigMatcherResource `mapstructure:"matcher"`
+		Prioritization *bool                           `mapstructure:"prioritization,omitempty"`
+		Status         *string                         `mapstructure:"status,omitempty"`
+		AllowedUsage   *float32                        `mapstructure:"allowed_usage,omitempty"`
+	}
+	CommitmentConfigMatcherResource struct {
+		Name   string  `mapstructure:"name"`
+		Type   *string `mapstructure:"type,omitempty"`
+		Region *string `mapstructure:"region,omitempty"`
 	}
 )
 
@@ -94,7 +112,7 @@ func (r *AzureReservationResource) GetIDInCloud() string {
 	return r.ReservationID
 }
 
-func (m GCPCUDConfigMatcherResource) Validate() error {
+func (m CommitmentConfigMatcherResource) Validate() error {
 	if m.Name == "" {
 		return errors.New("matcher name is required")
 	}
@@ -218,12 +236,12 @@ type cud interface {
 
 type cudWithConfig[C cud] struct {
 	CUD    C
-	Config *GCPCUDConfigResource
+	Config *CommitmentConfigResource
 }
 
-func MapConfigsToCUDs[C cud](cuds []C, configs []*GCPCUDConfigResource) ([]*cudWithConfig[C], error) {
+func MapConfigsToCUDs[C cud](cuds []C, configs []*CommitmentConfigResource) ([]*cudWithConfig[C], error) {
 	res := make([]*cudWithConfig[C], 0, len(cuds))
-	configsByKey := map[cudConfigMatcherKey]*GCPCUDConfigResource{}
+	configsByKey := map[cudConfigMatcherKey]*CommitmentConfigResource{}
 	for _, c := range configs {
 		var region string
 		if c.Matcher.Region != nil {
@@ -268,7 +286,7 @@ func MapConfiguredCUDImportsToResources[C interface {
 	CastaiGCPCommitmentImport | sdk.CastaiInventoryV1beta1GCPCommitmentImport
 }](
 	cuds []C,
-	configs []*GCPCUDConfigResource,
+	configs []*CommitmentConfigResource,
 ) ([]*GCPCUDResource, error) {
 	if len(configs) > len(cuds) {
 		return nil, fmt.Errorf("more CUD configurations than CUDs")

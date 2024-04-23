@@ -33,6 +33,7 @@ func resourceCommitments() *schema.Resource {
 		},
 		CustomizeDiff: commitmentsDiff,
 		Schema: map[string]*schema.Schema{
+			// Input files
 			commitments.FieldAzureReservationsCSV: {
 				Type:         schema.TypeString,
 				Optional:     true,
@@ -45,6 +46,17 @@ func resourceCommitments() *schema.Resource {
 				Description:  "JSON file containing CUDs exported from GCP.",
 				ExactlyOneOf: []string{commitments.FieldAzureReservationsCSV, commitments.FieldGCPCUDsJSON},
 			},
+			// Input configurations
+			commitments.FieldCommitmentConfigs: {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: "List of commitment configurations.",
+				Elem: &schema.Resource{
+					Schema: commitments.CommitmentConfigSchema,
+				},
+				ConfigMode: schema.SchemaConfigModeAttr,
+			},
+			// Computed fields
 			commitments.FieldGCPCUDs: {
 				Type:        schema.TypeList,
 				Computed:    true,
@@ -52,15 +64,6 @@ func resourceCommitments() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: commitments.GCPCUDResourceSchema,
 				},
-			},
-			commitments.FieldGCPCUDConfigs: {
-				Type:        schema.TypeList,
-				Optional:    true,
-				Description: "List of GCP CUD configurations.",
-				Elem: &schema.Resource{
-					Schema: commitments.GCPCUDConfigsSchema,
-				},
-				ConfigMode: schema.SchemaConfigModeAttr,
 			},
 			commitments.FieldAzureReservations: {
 				Type:        schema.TypeList,
@@ -125,9 +128,9 @@ func getCUDImports(tfData resourceProvider) ([]sdk.CastaiInventoryV1beta1GCPComm
 	return cuds, true, nil
 }
 
-func getCUDConfigs(tfData resourceProvider) ([]*commitments.GCPCUDConfigResource, error) {
-	var configs []*commitments.GCPCUDConfigResource
-	if configsIface, ok := tfData.GetOk(commitments.FieldGCPCUDConfigs); ok {
+func getCUDConfigs(tfData resourceProvider) ([]*commitments.CommitmentConfigResource, error) {
+	var configs []*commitments.CommitmentConfigResource
+	if configsIface, ok := tfData.GetOk(commitments.FieldCommitmentConfigs); ok {
 		if err := mapstructure.Decode(configsIface, &configs); err != nil {
 			return nil, err
 		}

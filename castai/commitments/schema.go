@@ -3,11 +3,11 @@ package commitments
 import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/samber/lo"
 )
 
 var (
-	// GCPCUDResourceSchema should align with the fields of GCPCUDResource struct
-	GCPCUDResourceSchema = map[string]*schema.Schema{
+	SharedCommitmentResourceSchema = map[string]*schema.Schema{
 		"id": {
 			Type:        schema.TypeString,
 			Computed:    true,
@@ -27,16 +27,6 @@ var (
 			Type:        schema.TypeString,
 			Computed:    true,
 			Description: "Status of the commitment in CAST AI.",
-		},
-		"cud_id": {
-			Type:        schema.TypeString,
-			Required:    true,
-			Description: "ID of the CUD in GCP.",
-		},
-		"cud_status": {
-			Type:        schema.TypeString,
-			Required:    true,
-			Description: "Status of the CUD in GCP.",
 		},
 		"start_timestamp": {
 			Type:        schema.TypeString,
@@ -58,6 +48,20 @@ var (
 			Required:    true,
 			Description: "Region in which the CUD is available.",
 		},
+	}
+
+	// GCPCUDResourceSchema should align with the fields of GCPCUDResource struct
+	GCPCUDResourceSchema = lo.Assign(SharedCommitmentResourceSchema, map[string]*schema.Schema{
+		"cud_id": {
+			Type:        schema.TypeString,
+			Required:    true,
+			Description: "ID of the CUD in GCP.",
+		},
+		"cud_status": {
+			Type:        schema.TypeString,
+			Required:    true,
+			Description: "Status of the CUD in GCP.",
+		},
 		"cpu": {
 			Type:        schema.TypeInt,
 			Required:    true,
@@ -78,8 +82,8 @@ var (
 			Required:    true,
 			Description: "Type of the CUD, e.g. determines the covered resource type e.g. 'COMPUTE_OPTIMIZED_C2D'.",
 		},
-	}
-	GCPCUDConfigsSchema = map[string]*schema.Schema{
+	})
+	CommitmentConfigSchema = map[string]*schema.Schema{
 		"matcher": {
 			Type:        schema.TypeMap,
 			Required:    true,
@@ -104,5 +108,46 @@ var (
 		},
 	}
 
-	AzureReservationResourceSchema = map[string]*schema.Schema{}
+	AzureReservationResourceSchema = lo.Assign(SharedCommitmentResourceSchema, map[string]*schema.Schema{
+		"count": {
+			Type:        schema.TypeInt,
+			Required:    true,
+			Description: "",
+		},
+		"reservation_id": {
+			Type:        schema.TypeString,
+			Required:    true,
+			Description: "",
+		},
+		"instance_type": {
+			Type:        schema.TypeString,
+			Required:    true,
+			Description: "",
+		},
+		"plan": {
+			Type:        schema.TypeString,
+			Required:    true,
+			Description: "",
+		},
+		"scope": {
+			Type:        schema.TypeString,
+			Required:    true,
+			Description: "",
+		},
+		"scope_resource_group": {
+			Type:        schema.TypeString,
+			Required:    true,
+			Description: "",
+		},
+		"scope_subscription": {
+			Type:        schema.TypeString,
+			Required:    true,
+			Description: "",
+		},
+		"reservation_status": {
+			Type:        schema.TypeString,
+			Required:    true,
+			Description: "",
+		},
+	})
 )
