@@ -61,6 +61,7 @@ func resourceCommitments() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: commitments.GCPCUDConfigsSchema,
 				},
+				ConfigMode: schema.SchemaConfigModeAttr,
 			},
 			commitments.FieldAzureReservations: {
 				Type:        schema.TypeList,
