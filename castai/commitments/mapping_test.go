@@ -382,6 +382,60 @@ func TestMapConfigsToCUDs(t *testing.T) {
 				},
 			},
 		},
+		"should successfully map all the configs to imports with url-based regions": {
+			cuds: func() []CastaiGCPCommitmentImport {
+				import2.Region = lo.ToPtr("https://www.googleapis.com/compute/v1/projects/test-project/zones/" + *import2.Region)
+				import3.Region = lo.ToPtr("https://www.googleapis.com/compute/v1/projects/test-project/zones/" + *import3.Region)
+				import1.Region = lo.ToPtr("https://www.googleapis.com/compute/v1/projects/test-project/zones/" + *import1.Region)
+				return []CastaiGCPCommitmentImport{
+					{CastaiInventoryV1beta1GCPCommitmentImport: import2},
+					{CastaiInventoryV1beta1GCPCommitmentImport: import3},
+					{CastaiInventoryV1beta1GCPCommitmentImport: import1},
+				}
+			}(),
+			configs: []*GCPCUDConfigResource{cfg1, cfg2, cfg3}, // make sure the order doesn't match the CUDs
+			expected: []*cudWithConfig[CastaiGCPCommitmentImport]{
+				{
+					CUD:    CastaiGCPCommitmentImport{CastaiInventoryV1beta1GCPCommitmentImport: import2},
+					Config: cfg2,
+				},
+				{
+					CUD:    CastaiGCPCommitmentImport{CastaiInventoryV1beta1GCPCommitmentImport: import3},
+					Config: cfg3,
+				},
+				{
+					CUD:    CastaiGCPCommitmentImport{CastaiInventoryV1beta1GCPCommitmentImport: import1},
+					Config: cfg1,
+				},
+			},
+		},
+		"should successfully map all the configs with url-based regions": {
+			cuds: []CastaiGCPCommitmentImport{
+				{CastaiInventoryV1beta1GCPCommitmentImport: import2},
+				{CastaiInventoryV1beta1GCPCommitmentImport: import3},
+				{CastaiInventoryV1beta1GCPCommitmentImport: import1},
+			},
+			configs: func() []*GCPCUDConfigResource {
+				cfg1.Matcher.Region = lo.ToPtr("https://www.googleapis.com/compute/v1/projects/test-project/zones/" + *cfg1.Matcher.Region)
+				cfg2.Matcher.Region = lo.ToPtr("https://www.googleapis.com/compute/v1/projects/test-project/zones/" + *cfg2.Matcher.Region)
+				cfg3.Matcher.Region = lo.ToPtr("https://www.googleapis.com/compute/v1/projects/test-project/zones/" + *cfg3.Matcher.Region)
+				return []*GCPCUDConfigResource{cfg1, cfg2, cfg3} // make sure the order doesn't match the CUDs
+			}(),
+			expected: []*cudWithConfig[CastaiGCPCommitmentImport]{
+				{
+					CUD:    CastaiGCPCommitmentImport{CastaiInventoryV1beta1GCPCommitmentImport: import2},
+					Config: cfg2,
+				},
+				{
+					CUD:    CastaiGCPCommitmentImport{CastaiInventoryV1beta1GCPCommitmentImport: import3},
+					Config: cfg3,
+				},
+				{
+					CUD:    CastaiGCPCommitmentImport{CastaiInventoryV1beta1GCPCommitmentImport: import1},
+					Config: cfg1,
+				},
+			},
+		},
 		"should fail as there's one additional config that doesn't match any CUD": {
 			cuds:    []CastaiGCPCommitmentImport{{CastaiInventoryV1beta1GCPCommitmentImport: import1}},
 			configs: []*GCPCUDConfigResource{cfg1, cfg2},

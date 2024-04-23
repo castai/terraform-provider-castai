@@ -2,6 +2,7 @@ package commitments
 
 import (
 	"github.com/samber/lo"
+	"path"
 
 	"github.com/castai/terraform-provider-castai/castai/sdk"
 )
@@ -14,9 +15,13 @@ type CastaiGCPCommitmentImport struct {
 var _ cud = CastaiGCPCommitmentImport{}
 
 func (c CastaiGCPCommitmentImport) getCUDKey() cudConfigMatcherKey {
+	var region string
+	if c.Region != nil {
+		_, region = path.Split(*c.Region)
+	}
 	return cudConfigMatcherKey{
 		name:   lo.FromPtr(c.Name),
-		region: lo.FromPtr(c.Region),
+		region: region,
 		typ:    lo.FromPtr(c.Type),
 	}
 }
@@ -29,9 +34,13 @@ type CastaiCommitment struct {
 var _ cud = CastaiCommitment{}
 
 func (c CastaiCommitment) getCUDKey() cudConfigMatcherKey {
+	var region string
+	if c.Region != nil {
+		_, region = path.Split(*c.Region)
+	}
 	res := cudConfigMatcherKey{
 		name:   lo.FromPtr(c.Name),
-		region: lo.FromPtr(c.Region),
+		region: region,
 	}
 	if c.GcpResourceCudContext != nil {
 		res.typ = *c.GcpResourceCudContext.Type

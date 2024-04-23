@@ -225,9 +225,13 @@ func MapConfigsToCUDs[C cud](cuds []C, configs []*GCPCUDConfigResource) ([]*cudW
 	res := make([]*cudWithConfig[C], 0, len(cuds))
 	configsByKey := map[cudConfigMatcherKey]*GCPCUDConfigResource{}
 	for _, c := range configs {
+		var region string
+		if c.Matcher.Region != nil {
+			_, region = path.Split(*c.Matcher.Region)
+		}
 		key := cudConfigMatcherKey{
 			name:   c.Matcher.Name,
-			region: lo.FromPtr(c.Matcher.Region),
+			region: region,
 			typ:    lo.FromPtr(c.Matcher.Type),
 		}
 		if _, ok := configsByKey[key]; ok { // Make sure each config matcher is unique
