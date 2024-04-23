@@ -24,7 +24,7 @@ const (
 	FieldReservationDeepLinkToReservation = "deep_link_to_reservation"
 )
 
-var ReservationResourceFields = []string{
+var reservationResourceFields = []string{
 	FieldReservationName,
 	FieldReservationProvider,
 	FieldReservationRegion,
@@ -43,7 +43,7 @@ var ReservationResourceFields = []string{
 	FieldReservationDeepLinkToReservation,
 }
 
-var CSVColumnAlias = map[string][]string{
+var csvColumnAlias = map[string][]string{
 	FieldReservationName:                  {FieldReservationName},
 	FieldReservationProvider:              {FieldReservationProvider},
 	FieldReservationRegion:                {FieldReservationRegion},
