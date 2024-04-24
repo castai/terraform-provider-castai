@@ -205,7 +205,9 @@ func resourceCastaiCommitmentsRead(ctx context.Context, d *schema.ResourceData, 
 }
 
 func resourceCastaiCommitmentsDelete(ctx context.Context, data *schema.ResourceData, meta any) diag.Diagnostics {
-	organizationId, err := getOrganizationId(ctx, data, meta)
+	// The commitments API doesn't take organization ID as a parameter, so we always use the default one associated
+	// with the used auth token
+	organizationId, err := getDefaultOrganizationId(ctx, meta)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -258,7 +260,9 @@ func resourceCastaiCommitmentsCreate(ctx context.Context, data *schema.ResourceD
 }
 
 func resourceCastaiCommitmentsUpsert(ctx context.Context, data *schema.ResourceData, meta any) diag.Diagnostics {
-	organizationId, err := getOrganizationId(ctx, data, meta)
+	// The commitments API doesn't take organization ID as a parameter, so we always use the default one associated
+	// with the used auth token
+	organizationId, err := getDefaultOrganizationId(ctx, meta)
 	if err != nil {
 		return diag.FromErr(err)
 	}
