@@ -2,9 +2,11 @@ package castai
 
 import (
 	"context"
+	"encoding/csv"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-log/tflog"
@@ -78,7 +80,7 @@ func resourceCommitments() *schema.Resource {
 }
 
 func commitmentsDiff(_ context.Context, diff *schema.ResourceDiff, _ any) error {
-	_, reservationsOk, err := getReservationResources(diff)
+	reservationResources, reservationsOk, err := getReservationImportResources(diff)
 	if err != nil {
 		return err
 	}
@@ -101,14 +103,13 @@ func commitmentsDiff(_ context.Context, diff *schema.ResourceDiff, _ any) error 
 		if err := diff.SetNew(commitments.FieldGCPCUDs, nil); err != nil {
 			return fmt.Errorf("setting gcp cuds field to nil: %w", err)
 		}
-		return fmt.Errorf("azure reservations are currently not supported")
+		return diff.SetNew(commitments.FieldAzureReservations, reservationResources)
 	case cudsOk:
 		if err := diff.SetNew(commitments.FieldAzureReservations, nil); err != nil {
 			return fmt.Errorf("setting azure reservations field to nil: %w", err)
 		}
 		return diff.SetNew(commitments.FieldGCPCUDs, cudResources)
 	}
-
 	return errors.New("unhandled combination of commitments input")
 }
 
@@ -128,7 +129,30 @@ func getCUDImports(tfData resourceProvider) ([]sdk.CastaiInventoryV1beta1GCPComm
 	return cuds, true, nil
 }
 
-func getCUDConfigs(tfData resourceProvider) ([]*commitments.CommitmentConfigResource, error) {
+func getReservationImports(tfData resourceProvider) ([]sdk.CastaiInventoryV1beta1AzureReservationImport, bool, error) {
+	reservationsIface, ok := tfData.GetOk(commitments.FieldAzureReservationsCSV)
+	if !ok {
+		return nil, false, nil
+	}
+	reservationsCSVStr, ok := reservationsIface.(string)
+	if !ok {
+		return nil, true, errors.New("expected 'azure_reservations_csv' to be a string")
+	}
+
+	csvReader := csv.NewReader(strings.NewReader(reservationsCSVStr))
+	csvRecords, err := csvReader.ReadAll()
+	if err != nil {
+		return nil, true, fmt.Errorf("parsing reservations csv: %w", err)
+	}
+
+	resources, err := commitments.MapReservationCSVRowsToImports(csvRecords)
+	if err != nil {
+		return nil, true, err
+	}
+	return resources, true, nil
+}
+
+func getCommitmentConfigs(tfData resourceProvider) ([]*commitments.CommitmentConfigResource, error) {
 	var configs []*commitments.CommitmentConfigResource
 	if configsIface, ok := tfData.GetOk(commitments.FieldCommitmentConfigs); ok {
 		if err := mapstructure.Decode(configsIface, &configs); err != nil {
@@ -149,8 +173,8 @@ func getCUDImportResources(tfData resourceProvider) ([]*commitments.GCPCUDResour
 		return nil, false, nil
 	}
 
-	// Get the CUD configurations and map them to resources
-	configs, err := getCUDConfigs(tfData)
+	// Get the configurations and map them to resources
+	configs, err := getCommitmentConfigs(tfData)
 	if err != nil {
 		return nil, true, err
 	}
@@ -171,6 +195,37 @@ func getCUDImportResources(tfData resourceProvider) ([]*commitments.GCPCUDResour
 	return res, true, nil
 }
 
+func getReservationImportResources(tfData resourceProvider) ([]*commitments.AzureReservationResource, bool, error) {
+	reservations, reservationsOk, err := getReservationImports(tfData)
+	if err != nil {
+		return nil, reservationsOk, err
+	}
+	if !reservationsOk {
+		return nil, false, nil
+	}
+
+	// Get the configurations and map them to resources
+	configs, err := getCommitmentConfigs(tfData)
+	if err != nil {
+		return nil, true, err
+	}
+	if len(configs) > len(reservations) {
+		return nil, true, fmt.Errorf("more configurations than reservations")
+	}
+	for _, c := range configs {
+		if err := c.Matcher.Validate(); err != nil {
+			return nil, true, fmt.Errorf("invalid CUD matcher: %w", err)
+		}
+	}
+
+	// Finally map the reservation imports to resources and combine them with the configurations
+	res, err := commitments.MapConfiguredReservationImportsToResources(reservations, configs)
+	if err != nil {
+		return nil, true, err
+	}
+	return res, true, nil
+}
+
 // getCUDResources returns a slice of GCP CUD resources obtained from the state obtained from the API.
 func getCUDResources(tfData resourceProvider) ([]*commitments.GCPCUDResource, bool, error) {
 	cudsIface, ok := tfData.GetOk(commitments.FieldGCPCUDs)
@@ -185,9 +240,15 @@ func getCUDResources(tfData resourceProvider) ([]*commitments.GCPCUDResource, bo
 }
 
 func getReservationResources(tfData resourceProvider) ([]*commitments.AzureReservationResource, bool, error) {
-	// TEMPORARY: support for Azure reservations will be added in one of the upcoming PRs
-	_, ok := tfData.GetOk(commitments.FieldAzureReservationsCSV)
-	return nil, ok, nil
+	reservationsIface, ok := tfData.GetOk(commitments.FieldAzureReservationsCSV)
+	if !ok {
+		return nil, false, nil
+	}
+	var res []*commitments.AzureReservationResource
+	if err := mapstructure.Decode(reservationsIface, &res); err != nil {
+		return nil, true, err
+	}
+	return res, true, nil
 }
 
 func commitmentsStateImporter(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
@@ -266,7 +327,10 @@ func resourceCastaiCommitmentsUpsert(ctx context.Context, data *schema.ResourceD
 		return diag.FromErr(err)
 	}
 
-	_, reservationsOk := data.GetOk(commitments.FieldAzureReservationsCSV)
+	reservations, reservationsOk, err := getReservationImports(data)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 	cuds, cudsOk, err := getCUDImports(data)
 	if err != nil {
 		return diag.FromErr(err)
@@ -274,7 +338,46 @@ func resourceCastaiCommitmentsUpsert(ctx context.Context, data *schema.ResourceD
 
 	switch {
 	case reservationsOk:
-		return diag.Errorf("azure reservations are currently not supported")
+		if err := importReservations(ctx, meta, reservations); err != nil {
+			return diag.FromErr(err)
+		}
+
+		orgCommitments, err := getOrganizationCommitments(ctx, meta)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		azureCommitments := lo.Filter(orgCommitments, func(c sdk.CastaiInventoryV1beta1Commitment, _ int) bool {
+			return c.AzureReservationContext != nil
+		})
+		if len(azureCommitments) != len(reservations) {
+			return diag.Errorf("expected %d Azure commitments, got %d", len(reservations), len(azureCommitments))
+		}
+
+		configs, err := getCommitmentConfigs(data)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+
+		cudsWithConfigs, err := commitments.MapConfigsToCUDs(
+			lo.Map(azureCommitments, func(item sdk.CastaiInventoryV1beta1Commitment, _ int) commitments.CastaiCommitment {
+				return commitments.CastaiCommitment{CastaiInventoryV1beta1Commitment: item}
+			}),
+			configs,
+		)
+		if err != nil {
+			return diag.FromErr(err)
+		}
+
+		for _, c := range cudsWithConfigs {
+			res, err := meta.(*ProviderConfig).api.CommitmentsAPIUpdateCommitmentWithResponse(
+				ctx,
+				lo.FromPtr(c.Commitment.Id),
+				commitments.MapCUDImportWithConfigToUpdateRequest(c),
+			)
+			if err := sdk.CheckOKResponse(res, err); err != nil {
+				return diag.Errorf("updating commitment: %v", err)
+			}
+		}
 	case cudsOk:
 		if err := importCUDs(ctx, meta, cuds); err != nil {
 			return diag.FromErr(err)
@@ -291,7 +394,7 @@ func resourceCastaiCommitmentsUpsert(ctx context.Context, data *schema.ResourceD
 			return diag.Errorf("expected %d GCP commitments, got %d", len(cuds), len(gcpCommitments))
 		}
 
-		configs, err := getCUDConfigs(data)
+		configs, err := getCommitmentConfigs(data)
 		if err != nil {
 			return diag.FromErr(err)
 		}
@@ -309,7 +412,7 @@ func resourceCastaiCommitmentsUpsert(ctx context.Context, data *schema.ResourceD
 		for _, c := range cudsWithConfigs {
 			res, err := meta.(*ProviderConfig).api.CommitmentsAPIUpdateCommitmentWithResponse(
 				ctx,
-				lo.FromPtr(c.CUD.Id),
+				lo.FromPtr(c.Commitment.Id),
 				commitments.MapCUDImportWithConfigToUpdateRequest(c),
 			)
 			if err := sdk.CheckOKResponse(res, err); err != nil {
@@ -338,7 +441,21 @@ func importCUDs(ctx context.Context, meta any, imports []sdk.CastaiInventoryV1be
 		imports,
 	)
 	if checkErr := sdk.CheckOKResponse(res, err); checkErr != nil {
-		return fmt.Errorf("upserting commitments: %w", checkErr)
+		return fmt.Errorf("importing gcp cuds: %w", checkErr)
+	}
+	return nil
+}
+
+func importReservations(ctx context.Context, meta any, imports []sdk.CastaiInventoryV1beta1AzureReservationImport) error {
+	res, err := meta.(*ProviderConfig).api.CommitmentsAPIImportAzureReservationsWithResponse(
+		ctx,
+		&sdk.CommitmentsAPIImportAzureReservationsParams{
+			Behaviour: lo.ToPtr[sdk.CommitmentsAPIImportAzureReservationsParamsBehaviour]("OVERWRITE"),
+		},
+		imports,
+	)
+	if checkErr := sdk.CheckOKResponse(res, err); checkErr != nil {
+		return fmt.Errorf("importing azure reservations: %w", checkErr)
 	}
 	return nil
 }
@@ -365,26 +482,47 @@ func populateCommitmentsResourceData(ctx context.Context, d *schema.ResourceData
 		return err
 	}
 
-	var resources []*commitments.GCPCUDResource
+	reservations, reservationsOk, err := getReservationImportResources(d)
+	if err != nil {
+		return err
+	}
+
+	var gcpResources []*commitments.GCPCUDResource
+	var azureResources []*commitments.AzureReservationResource
 	for _, c := range orgCommitments {
 		c := c
-		if c.GcpResourceCudContext == nil {
-			continue
+		switch {
+		case c.GcpResourceCudContext != nil:
+			resource, err := commitments.MapCommitmentToCUDResource(c)
+			if err != nil {
+				return err
+			}
+			gcpResources = append(gcpResources, resource)
+		case c.AzureReservationContext != nil:
+			resource, err := commitments.MapCommitmentToReservationResource(c)
+			if err != nil {
+				return err
+			}
+			azureResources = append(azureResources, resource)
 		}
+	}
 
-		resource, err := commitments.MapCommitmentToCUDResource(c)
-		if err != nil {
-			return err
+	if len(azureResources) > 0 {
+		if reservationsOk {
+			commitments.SortResources(azureResources, reservations)
 		}
-		resources = append(resources, resource)
+		if err := d.Set(commitments.FieldAzureReservations, azureResources); err != nil {
+			return fmt.Errorf("setting azure reservations: %w", err)
+		}
 	}
-	if cudsOk {
-		commitments.SortResources(resources, cuds)
+	if len(gcpResources) > 0 {
+		if cudsOk {
+			commitments.SortResources(gcpResources, cuds)
+		}
+		if err := d.Set(commitments.FieldGCPCUDs, gcpResources); err != nil {
+			return fmt.Errorf("setting gcp cuds: %w", err)
+		}
 	}
-	if err := d.Set(commitments.FieldGCPCUDs, resources); err != nil {
-		return fmt.Errorf("setting gcp cuds: %w", err)
-	}
-
 	return nil
 }
 

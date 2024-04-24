@@ -150,16 +150,16 @@ func TestMapCommitmentToCUDResource(t *testing.T) {
 }
 
 func TestMapCUDImportToResource(t *testing.T) {
-	makeInput := func() *cudWithConfig[CastaiGCPCommitmentImport] {
-		return &cudWithConfig[CastaiGCPCommitmentImport]{
-			CUD: CastaiGCPCommitmentImport{
+	makeInput := func() *commitmentWithConfig[CastaiGCPCommitmentImport] {
+		return &commitmentWithConfig[CastaiGCPCommitmentImport]{
+			Commitment: CastaiGCPCommitmentImport{
 				CastaiInventoryV1beta1GCPCommitmentImport: testGCPCommitmentImport,
 			},
 		}
 	}
 
 	tests := map[string]struct {
-		input    *cudWithConfig[CastaiGCPCommitmentImport]
+		input    *commitmentWithConfig[CastaiGCPCommitmentImport]
 		expected *GCPCUDResource
 		err      error
 	}{
@@ -179,9 +179,9 @@ func TestMapCUDImportToResource(t *testing.T) {
 			},
 		},
 		"should succeed, nil cud resources": {
-			input: func() *cudWithConfig[CastaiGCPCommitmentImport] {
+			input: func() *commitmentWithConfig[CastaiGCPCommitmentImport] {
 				c := makeInput()
-				c.CUD.Resources = nil
+				c.Commitment.Resources = nil
 				return c
 			}(),
 			expected: &GCPCUDResource{
@@ -196,7 +196,7 @@ func TestMapCUDImportToResource(t *testing.T) {
 			},
 		},
 		"should succeed, with a config passed": {
-			input: func() *cudWithConfig[CastaiGCPCommitmentImport] {
+			input: func() *commitmentWithConfig[CastaiGCPCommitmentImport] {
 				c := makeInput()
 				c.Config = &CommitmentConfigResource{
 					Matcher: CommitmentConfigMatcherResource{
@@ -228,29 +228,29 @@ func TestMapCUDImportToResource(t *testing.T) {
 			},
 		},
 		"should fail as cpu amount is invalid": {
-			input: func() *cudWithConfig[CastaiGCPCommitmentImport] {
+			input: func() *commitmentWithConfig[CastaiGCPCommitmentImport] {
 				c := makeInput()
-				inv := (*c.CUD.Resources)[0]
+				inv := (*c.Commitment.Resources)[0]
 				inv.Amount = lo.ToPtr("invalid")
-				c.CUD.Resources = &[]sdk.CastaiInventoryV1beta1GCPResource{inv, (*c.CUD.Resources)[1]}
+				c.Commitment.Resources = &[]sdk.CastaiInventoryV1beta1GCPResource{inv, (*c.Commitment.Resources)[1]}
 				return c
 			}(),
 			err: errors.New("strconv.Atoi: parsing \"invalid\": invalid syntax"),
 		},
 		"should fail as memory amount is invalid": {
-			input: func() *cudWithConfig[CastaiGCPCommitmentImport] {
+			input: func() *commitmentWithConfig[CastaiGCPCommitmentImport] {
 				c := makeInput()
-				inv := (*c.CUD.Resources)[1]
+				inv := (*c.Commitment.Resources)[1]
 				inv.Amount = lo.ToPtr("invalid")
-				c.CUD.Resources = &[]sdk.CastaiInventoryV1beta1GCPResource{(*c.CUD.Resources)[0], inv}
+				c.Commitment.Resources = &[]sdk.CastaiInventoryV1beta1GCPResource{(*c.Commitment.Resources)[0], inv}
 				return c
 			}(),
 			err: errors.New("strconv.Atoi: parsing \"invalid\": invalid syntax"),
 		},
 		"should succeed with zeroed out cpu as its resource is not contained by the resources": {
-			input: func() *cudWithConfig[CastaiGCPCommitmentImport] {
+			input: func() *commitmentWithConfig[CastaiGCPCommitmentImport] {
 				c := makeInput()
-				c.CUD.Resources = &[]sdk.CastaiInventoryV1beta1GCPResource{(*c.CUD.Resources)[1]}
+				c.Commitment.Resources = &[]sdk.CastaiInventoryV1beta1GCPResource{(*c.Commitment.Resources)[1]}
 				return c
 			}(),
 			expected: &GCPCUDResource{
@@ -266,9 +266,9 @@ func TestMapCUDImportToResource(t *testing.T) {
 			},
 		},
 		"should succeed with zeroed out memory as its resource is not contained by the resources": {
-			input: func() *cudWithConfig[CastaiGCPCommitmentImport] {
+			input: func() *commitmentWithConfig[CastaiGCPCommitmentImport] {
 				c := makeInput()
-				c.CUD.Resources = &[]sdk.CastaiInventoryV1beta1GCPResource{(*c.CUD.Resources)[0]}
+				c.Commitment.Resources = &[]sdk.CastaiInventoryV1beta1GCPResource{(*c.Commitment.Resources)[0]}
 				return c
 			}(),
 			expected: &GCPCUDResource{
@@ -357,7 +357,7 @@ func TestMapConfigsToCUDs(t *testing.T) {
 	tests := map[string]struct {
 		cuds     []CastaiGCPCommitmentImport
 		configs  []*CommitmentConfigResource
-		expected []*cudWithConfig[CastaiGCPCommitmentImport]
+		expected []*commitmentWithConfig[CastaiGCPCommitmentImport]
 		err      error
 	}{
 		"should successfully map all the configs": {
@@ -367,18 +367,18 @@ func TestMapConfigsToCUDs(t *testing.T) {
 				{CastaiInventoryV1beta1GCPCommitmentImport: import1},
 			},
 			configs: []*CommitmentConfigResource{cfg1, cfg2, cfg3}, // make sure the order doesn't match the CUDs
-			expected: []*cudWithConfig[CastaiGCPCommitmentImport]{
+			expected: []*commitmentWithConfig[CastaiGCPCommitmentImport]{
 				{
-					CUD:    CastaiGCPCommitmentImport{CastaiInventoryV1beta1GCPCommitmentImport: import2},
-					Config: cfg2,
+					Commitment: CastaiGCPCommitmentImport{CastaiInventoryV1beta1GCPCommitmentImport: import2},
+					Config:     cfg2,
 				},
 				{
-					CUD:    CastaiGCPCommitmentImport{CastaiInventoryV1beta1GCPCommitmentImport: import3},
-					Config: cfg3,
+					Commitment: CastaiGCPCommitmentImport{CastaiInventoryV1beta1GCPCommitmentImport: import3},
+					Config:     cfg3,
 				},
 				{
-					CUD:    CastaiGCPCommitmentImport{CastaiInventoryV1beta1GCPCommitmentImport: import1},
-					Config: cfg1,
+					Commitment: CastaiGCPCommitmentImport{CastaiInventoryV1beta1GCPCommitmentImport: import1},
+					Config:     cfg1,
 				},
 			},
 		},
@@ -394,18 +394,18 @@ func TestMapConfigsToCUDs(t *testing.T) {
 				}
 			}(),
 			configs: []*CommitmentConfigResource{cfg1, cfg2, cfg3}, // make sure the order doesn't match the CUDs
-			expected: []*cudWithConfig[CastaiGCPCommitmentImport]{
+			expected: []*commitmentWithConfig[CastaiGCPCommitmentImport]{
 				{
-					CUD:    CastaiGCPCommitmentImport{CastaiInventoryV1beta1GCPCommitmentImport: import2},
-					Config: cfg2,
+					Commitment: CastaiGCPCommitmentImport{CastaiInventoryV1beta1GCPCommitmentImport: import2},
+					Config:     cfg2,
 				},
 				{
-					CUD:    CastaiGCPCommitmentImport{CastaiInventoryV1beta1GCPCommitmentImport: import3},
-					Config: cfg3,
+					Commitment: CastaiGCPCommitmentImport{CastaiInventoryV1beta1GCPCommitmentImport: import3},
+					Config:     cfg3,
 				},
 				{
-					CUD:    CastaiGCPCommitmentImport{CastaiInventoryV1beta1GCPCommitmentImport: import1},
-					Config: cfg1,
+					Commitment: CastaiGCPCommitmentImport{CastaiInventoryV1beta1GCPCommitmentImport: import1},
+					Config:     cfg1,
 				},
 			},
 		},
@@ -421,18 +421,18 @@ func TestMapConfigsToCUDs(t *testing.T) {
 				cfg3.Matcher.Region = lo.ToPtr("https://www.googleapis.com/compute/v1/projects/test-project/zones/" + *cfg3.Matcher.Region)
 				return []*CommitmentConfigResource{cfg1, cfg2, cfg3} // make sure the order doesn't match the CUDs
 			}(),
-			expected: []*cudWithConfig[CastaiGCPCommitmentImport]{
+			expected: []*commitmentWithConfig[CastaiGCPCommitmentImport]{
 				{
-					CUD:    CastaiGCPCommitmentImport{CastaiInventoryV1beta1GCPCommitmentImport: import2},
-					Config: cfg2,
+					Commitment: CastaiGCPCommitmentImport{CastaiInventoryV1beta1GCPCommitmentImport: import2},
+					Config:     cfg2,
 				},
 				{
-					CUD:    CastaiGCPCommitmentImport{CastaiInventoryV1beta1GCPCommitmentImport: import3},
-					Config: cfg3,
+					Commitment: CastaiGCPCommitmentImport{CastaiInventoryV1beta1GCPCommitmentImport: import3},
+					Config:     cfg3,
 				},
 				{
-					CUD:    CastaiGCPCommitmentImport{CastaiInventoryV1beta1GCPCommitmentImport: import1},
-					Config: cfg1,
+					Commitment: CastaiGCPCommitmentImport{CastaiInventoryV1beta1GCPCommitmentImport: import1},
+					Config:     cfg1,
 				},
 			},
 		},
@@ -575,12 +575,12 @@ func TestMapCUDImportWithConfigToUpdateRequest(t *testing.T) {
 	id := uuid.New()
 	now := time.Now()
 	tests := map[string]struct {
-		input    *cudWithConfig[CastaiCommitment]
+		input    *commitmentWithConfig[CastaiCommitment]
 		expected sdk.CommitmentsAPIUpdateCommitmentJSONRequestBody
 	}{
 		"should map gcp cud import with config": {
-			input: &cudWithConfig[CastaiCommitment]{
-				CUD: CastaiCommitment{
+			input: &commitmentWithConfig[CastaiCommitment]{
+				Commitment: CastaiCommitment{
 					CastaiInventoryV1beta1Commitment: sdk.CastaiInventoryV1beta1Commitment{
 						AllowedUsage: lo.ToPtr[float32](0.75),
 						EndDate:      lo.ToPtr(now.Add(365 * 24 * time.Hour)),
@@ -631,8 +631,8 @@ func TestMapCUDImportWithConfigToUpdateRequest(t *testing.T) {
 			},
 		},
 		"should map gcp cud import without config": {
-			input: &cudWithConfig[CastaiCommitment]{
-				CUD: CastaiCommitment{
+			input: &commitmentWithConfig[CastaiCommitment]{
+				Commitment: CastaiCommitment{
 					CastaiInventoryV1beta1Commitment: sdk.CastaiInventoryV1beta1Commitment{
 						EndDate: lo.ToPtr(now.Add(365 * 24 * time.Hour)),
 						GcpResourceCudContext: &sdk.CastaiInventoryV1beta1GCPResourceCUD{

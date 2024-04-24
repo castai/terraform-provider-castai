@@ -13,16 +13,31 @@ type CastaiGCPCommitmentImport struct {
 	sdk.CastaiInventoryV1beta1GCPCommitmentImport
 }
 
-var _ cud = CastaiGCPCommitmentImport{}
+var _ commitment = CastaiGCPCommitmentImport{}
 
-func (c CastaiGCPCommitmentImport) getCUDKey() cudConfigMatcherKey {
+func (c CastaiGCPCommitmentImport) getKey() commitmentConfigMatcherKey {
 	var region string
 	if c.Region != nil {
 		_, region = path.Split(*c.Region)
 	}
-	return cudConfigMatcherKey{
+	return commitmentConfigMatcherKey{
 		name:   lo.FromPtr(c.Name),
 		region: region,
+		typ:    lo.FromPtr(c.Type),
+	}
+}
+
+// CastaiAzureReservationImport is a wrapper around sdk.CastaiInventoryV1beta1AzureReservationImport implementing the cud interface
+type CastaiAzureReservationImport struct {
+	sdk.CastaiInventoryV1beta1AzureReservationImport
+}
+
+var _ commitment = CastaiAzureReservationImport{}
+
+func (c CastaiAzureReservationImport) getKey() commitmentConfigMatcherKey {
+	return commitmentConfigMatcherKey{
+		name:   lo.FromPtr(c.Name),
+		region: lo.FromPtr(c.Region),
 		typ:    lo.FromPtr(c.Type),
 	}
 }
@@ -32,14 +47,14 @@ type CastaiCommitment struct {
 	sdk.CastaiInventoryV1beta1Commitment
 }
 
-var _ cud = CastaiCommitment{}
+var _ commitment = CastaiCommitment{}
 
-func (c CastaiCommitment) getCUDKey() cudConfigMatcherKey {
+func (c CastaiCommitment) getKey() commitmentConfigMatcherKey {
 	var region string
 	if c.Region != nil {
 		_, region = path.Split(*c.Region)
 	}
-	res := cudConfigMatcherKey{
+	res := commitmentConfigMatcherKey{
 		name:   lo.FromPtr(c.Name),
 		region: region,
 	}

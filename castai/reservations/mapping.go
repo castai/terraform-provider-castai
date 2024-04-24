@@ -2,11 +2,13 @@ package reservations
 
 import (
 	"fmt"
-	"github.com/castai/terraform-provider-castai/castai/sdk"
-	"github.com/samber/lo"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/samber/lo"
+
+	"github.com/castai/terraform-provider-castai/castai/sdk"
 )
 
 type ReservationResource map[string]*string
@@ -21,7 +23,7 @@ func MapCsvRecordsToReservationResources(csvRecords [][]string) ([]*ReservationR
 	})
 
 	reservationRecords := csvRecords[1:]
-	fieldIndexes := mapReservationsHeaderToReservationFieldIndexes(normalizedCsvColumnNames)
+	fieldIndexes := MapReservationsHeaderToReservationFieldIndexes(normalizedCsvColumnNames)
 
 	reservations := make([]*ReservationResource, 0, len(reservationRecords))
 	for _, record := range reservationRecords {
@@ -88,7 +90,7 @@ func MapToReservationResourcesWithCommonFieldsOnly(reservationResources []*Reser
 	})
 }
 
-func mapReservationsHeaderToReservationFieldIndexes(columns []string) map[string]int {
+func MapReservationsHeaderToReservationFieldIndexes(columns []string) map[string]int {
 	indexes := make(map[string]int, len(reservationResourceFields))
 	for _, field := range reservationResourceFields {
 		index := -1
@@ -110,38 +112,38 @@ func mapReservationsHeaderToReservationFieldIndexes(columns []string) map[string
 }
 
 func mapRecordToReservationResource(fieldIndexes map[string]int, record []string) (*ReservationResource, error) {
-	provider, err := getRecordReservationProvider(fieldIndexes, record)
+	provider, err := GetRecordReservationProvider(fieldIndexes, record)
 	if err != nil {
 		return nil, err
 	}
 
 	return &ReservationResource{
-		FieldReservationName:                  getRecordFieldStringValue(FieldReservationName, fieldIndexes, record),
+		FieldReservationName:                  GetRecordFieldStringValue(FieldReservationName, fieldIndexes, record),
 		FieldReservationProvider:              provider,
-		FieldReservationRegion:                getRecordFieldStringValue(FieldReservationRegion, fieldIndexes, record),
-		FieldReservationInstanceType:          getRecordFieldStringValue(FieldReservationInstanceType, fieldIndexes, record),
-		FieldReservationPrice:                 getRecordFieldStringValue(FieldReservationPrice, fieldIndexes, record),
-		FieldReservationCount:                 getRecordFieldStringValue(FieldReservationCount, fieldIndexes, record),
-		FieldReservationStartDate:             getRecordFieldStringValue(FieldReservationStartDate, fieldIndexes, record),
-		FieldReservationEndDate:               getRecordFieldStringValue(FieldReservationEndDate, fieldIndexes, record),
-		FieldReservationZoneId:                getRecordFieldStringValue(FieldReservationZoneId, fieldIndexes, record),
-		FieldReservationZoneName:              getRecordFieldStringValue(FieldReservationZoneName, fieldIndexes, record),
-		FieldReservationProductName:           getRecordFieldStringValue(FieldReservationProductName, fieldIndexes, record),
-		FieldReservationQuantity:              getRecordFieldStringValue(FieldReservationQuantity, fieldIndexes, record),
-		FieldReservationPurchaseDate:          getRecordFieldStringValue(FieldReservationPurchaseDate, fieldIndexes, record),
-		FieldReservationExpirationDate:        getRecordFieldStringValue(FieldReservationExpirationDate, fieldIndexes, record),
-		FieldReservationType:                  getRecordFieldStringValue(FieldReservationType, fieldIndexes, record),
-		FieldReservationDeepLinkToReservation: getRecordFieldStringValue(FieldReservationDeepLinkToReservation, fieldIndexes, record),
+		FieldReservationRegion:                GetRecordFieldStringValue(FieldReservationRegion, fieldIndexes, record),
+		FieldReservationInstanceType:          GetRecordFieldStringValue(FieldReservationInstanceType, fieldIndexes, record),
+		FieldReservationPrice:                 GetRecordFieldStringValue(FieldReservationPrice, fieldIndexes, record),
+		FieldReservationCount:                 GetRecordFieldStringValue(FieldReservationCount, fieldIndexes, record),
+		FieldReservationStartDate:             GetRecordFieldStringValue(FieldReservationStartDate, fieldIndexes, record),
+		FieldReservationEndDate:               GetRecordFieldStringValue(FieldReservationEndDate, fieldIndexes, record),
+		FieldReservationZoneId:                GetRecordFieldStringValue(FieldReservationZoneId, fieldIndexes, record),
+		FieldReservationZoneName:              GetRecordFieldStringValue(FieldReservationZoneName, fieldIndexes, record),
+		FieldReservationProductName:           GetRecordFieldStringValue(FieldReservationProductName, fieldIndexes, record),
+		FieldReservationQuantity:              GetRecordFieldStringValue(FieldReservationQuantity, fieldIndexes, record),
+		FieldReservationPurchaseDate:          GetRecordFieldStringValue(FieldReservationPurchaseDate, fieldIndexes, record),
+		FieldReservationExpirationDate:        GetRecordFieldStringValue(FieldReservationExpirationDate, fieldIndexes, record),
+		FieldReservationType:                  GetRecordFieldStringValue(FieldReservationType, fieldIndexes, record),
+		FieldReservationDeepLinkToReservation: GetRecordFieldStringValue(FieldReservationDeepLinkToReservation, fieldIndexes, record),
 	}, nil
 }
 
-func getRecordReservationProvider(fieldIndexes map[string]int, record []string) (*string, error) {
-	provider := getRecordFieldStringValue(FieldReservationProvider, fieldIndexes, record)
+func GetRecordReservationProvider(fieldIndexes map[string]int, record []string) (*string, error) {
+	provider := GetRecordFieldStringValue(FieldReservationProvider, fieldIndexes, record)
 	if provider != nil && *provider != "" {
 		return provider, nil
 	}
 
-	deepLinkToReservation := getRecordFieldStringValue(FieldReservationDeepLinkToReservation, fieldIndexes, record)
+	deepLinkToReservation := GetRecordFieldStringValue(FieldReservationDeepLinkToReservation, fieldIndexes, record)
 	if deepLinkToReservation != nil && strings.Contains(*deepLinkToReservation, "azure") {
 		return lo.ToPtr("azure"), nil
 	}
@@ -149,7 +151,7 @@ func getRecordReservationProvider(fieldIndexes map[string]int, record []string) 
 	return nil, fmt.Errorf("reservation provider could not be determined: %v", record)
 }
 
-func getRecordFieldStringValue(field string, fieldIndexes map[string]int, record []string) *string {
+func GetRecordFieldStringValue(field string, fieldIndexes map[string]int, record []string) *string {
 	index, found := fieldIndexes[field]
 	if !found || index == -1 {
 		return nil

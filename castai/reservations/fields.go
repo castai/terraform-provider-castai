@@ -22,6 +22,11 @@ const (
 	FieldReservationExpirationDate        = "expiration_date"
 	FieldReservationType                  = "type"
 	FieldReservationDeepLinkToReservation = "deep_link_to_reservation"
+	FieldReservationID                    = "reservation_id"
+	FieldReservationScopeResourceGroup    = "scope_resource_group"
+	FieldReservationScopeSubscription     = "scope_subscription"
+	FieldReservationScopeStatus           = "scope_status"
+	FieldReservationScopeTerm             = "scope_term"
 )
 
 var reservationResourceFields = []string{
