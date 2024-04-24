@@ -205,9 +205,7 @@ func resourceCastaiCommitmentsRead(ctx context.Context, d *schema.ResourceData, 
 }
 
 func resourceCastaiCommitmentsDelete(ctx context.Context, data *schema.ResourceData, meta any) diag.Diagnostics {
-	// The commitments API doesn't take organization ID as a parameter, so we always use the default one associated
-	// with the used auth token
-	organizationId, err := getDefaultOrganizationId(ctx, meta)
+	importID, err := getCommitmentsImportID(ctx, data, meta)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -232,7 +230,7 @@ func resourceCastaiCommitmentsDelete(ctx context.Context, data *schema.ResourceD
 		}
 	}
 
-	data.SetId(organizationId)
+	data.SetId(importID)
 	return nil
 }
 
@@ -260,9 +258,7 @@ func resourceCastaiCommitmentsCreate(ctx context.Context, data *schema.ResourceD
 }
 
 func resourceCastaiCommitmentsUpsert(ctx context.Context, data *schema.ResourceData, meta any) diag.Diagnostics {
-	// The commitments API doesn't take organization ID as a parameter, so we always use the default one associated
-	// with the used auth token
-	organizationId, err := getDefaultOrganizationId(ctx, meta)
+	importID, err := getCommitmentsImportID(ctx, data, meta)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -319,7 +315,7 @@ func resourceCastaiCommitmentsUpsert(ctx context.Context, data *schema.ResourceD
 		}
 	}
 
-	data.SetId(organizationId)
+	data.SetId(importID)
 	return resourceCastaiCommitmentsRead(ctx, data, meta)
 }
 
@@ -399,4 +395,22 @@ func getOrganizationCommitments(ctx context.Context, meta any) ([]sdk.CastaiInve
 		return nil, nil
 	}
 	return *response.JSON200.Commitments, nil
+}
+
+func getCommitmentsImportID(ctx context.Context, data *schema.ResourceData, meta any) (string, error) {
+	// The commitments API doesn't take organization ID as a parameter, so we always use the default one associated
+	// with the used auth token
+	defOrgID, err := getDefaultOrganizationId(ctx, meta)
+	if err != nil {
+		return "", err
+	}
+
+	var cloud string
+	if _, ok := data.GetOk(commitments.FieldAzureReservationsCSV); ok {
+		cloud = "azure"
+	}
+	if _, ok := data.GetOk(commitments.FieldGCPCUDsJSON); ok {
+		cloud = "gcp"
+	}
+	return defOrgID + ":" + cloud, nil
 }
