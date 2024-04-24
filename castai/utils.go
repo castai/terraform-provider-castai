@@ -1,10 +1,15 @@
 package castai
 
 import (
+	"context"
 	"encoding/json"
+	"fmt"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/samber/lo"
 	"golang.org/x/exp/constraints"
+
+	"github.com/castai/terraform-provider-castai/castai/sdk"
 )
 
 type resourceProvider interface {
@@ -119,4 +124,21 @@ func normalizeJSON(bytes []byte) ([]byte, error) {
 		return nil, err
 	}
 	return json.Marshal(output)
+}
+
+func getDefaultOrganizationId(ctx context.Context, meta any) (string, error) {
+	response, err := meta.(*ProviderConfig).api.UsersAPIListOrganizationsWithResponse(ctx, &sdk.UsersAPIListOrganizationsParams{})
+	if checkErr := sdk.CheckOKResponse(response, err); checkErr != nil {
+		return "", fmt.Errorf("fetching organizations: %w", checkErr)
+	}
+	if len(response.JSON200.Organizations) == 0 {
+		return "", fmt.Errorf("no organizations found")
+	}
+
+	// The first organization is the default one
+	id := response.JSON200.Organizations[0].Id
+	if id == nil {
+		return "", fmt.Errorf("organization id is nil")
+	}
+	return *id, nil
 }
