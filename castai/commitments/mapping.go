@@ -258,6 +258,20 @@ func MapCUDImportToResource(
 func MapReservationImportToResource(
 	cudWithCfg *commitmentWithConfig[CastaiAzureReservationImport],
 ) *AzureReservationResource {
+	var plan string
+	if cudWithCfg.Commitment.Term != nil {
+		switch *cudWithCfg.Commitment.Term { // normalize the values just like CAST AI's API does
+		case "P1Y":
+			plan = "ONE_YEAR"
+		case "P3Y":
+			plan = "THREE_YEAR"
+		case "ONE_YEAR":
+		case "THREE_YEAR":
+		default:
+			plan = "ONE_YEAR"
+		}
+	}
+
 	return &AzureReservationResource{
 		Count:              int(lo.FromPtr(cudWithCfg.Commitment.Quantity)),
 		ReservationID:      lo.FromPtr(cudWithCfg.Commitment.ReservationId),
@@ -267,7 +281,7 @@ func MapReservationImportToResource(
 		Name:               lo.FromPtr(cudWithCfg.Commitment.Name),
 		Region:             lo.FromPtr(cudWithCfg.Commitment.Region),
 		InstanceType:       lo.FromPtr(cudWithCfg.Commitment.ProductName),
-		Plan:               lo.FromPtr(cudWithCfg.Commitment.Term),
+		Plan:               plan,
 		Scope:              lo.FromPtr(cudWithCfg.Commitment.Scope),
 		ScopeResourceGroup: lo.FromPtr(cudWithCfg.Commitment.ScopeResourceGroup),
 		ScopeSubscription:  lo.FromPtr(cudWithCfg.Commitment.ScopeSubscription),
@@ -421,34 +435,6 @@ func MapCommitmentImportWithConfigToUpdateRequest(
 		Region:                  c.Commitment.Region,
 		StartDate:               c.Commitment.StartDate,
 		Status:                  c.Commitment.Status,
-	}
-	if c.Config != nil {
-		if c.Config.AllowedUsage != nil {
-			req.AllowedUsage = c.Config.AllowedUsage
-		}
-		if c.Config.Prioritization != nil {
-			req.Prioritization = c.Config.Prioritization
-		}
-		if c.Config.Status != nil {
-			req.Status = (*sdk.CastaiInventoryV1beta1CommitmentStatus)(c.Config.Status)
-		}
-	}
-	return req
-}
-
-func MapReservationImportWithConfigToUpdateRequest(
-	c *commitmentWithConfig[CastaiCommitment],
-) sdk.CommitmentsAPIUpdateCommitmentJSONRequestBody {
-	req := sdk.CommitmentsAPIUpdateCommitmentJSONRequestBody{
-		AllowedUsage:          c.Commitment.AllowedUsage,
-		EndDate:               c.Commitment.EndDate,
-		GcpResourceCudContext: c.Commitment.GcpResourceCudContext,
-		Id:                    c.Commitment.Id,
-		Name:                  c.Commitment.Name,
-		Prioritization:        c.Commitment.Prioritization,
-		Region:                c.Commitment.Region,
-		StartDate:             c.Commitment.StartDate,
-		Status:                c.Commitment.Status,
 	}
 	if c.Config != nil {
 		if c.Config.AllowedUsage != nil {
