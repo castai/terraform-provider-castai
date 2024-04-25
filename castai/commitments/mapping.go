@@ -221,44 +221,55 @@ type cudWithConfig[C cud] struct {
 }
 
 func MapConfigsToCUDs[C cud](cuds []C, configs []*GCPCUDConfigResource) ([]*cudWithConfig[C], error) {
-	res := make([]*cudWithConfig[C], 0, len(cuds))
-	configsByKey := map[cudConfigMatcherKey]*GCPCUDConfigResource{}
-	for _, c := range configs {
-		var region string
-		if c.MatchRegion != nil {
-			_, region = path.Split(*c.MatchRegion)
+	res := make([]*cudWithConfig[C], len(cuds))
+	cfgKeys := map[cudConfigMatcherKey]struct{}{}
+	for _, cfg := range configs {
+		cfgKey := cudConfigMatcherKey{name: cfg.MatchName} // Name matcher is required, other fields are optional
+		if cfg.MatchRegion != nil {
+			_, cfgKey.region = path.Split(*cfg.MatchRegion)
 		}
-		key := cudConfigMatcherKey{
-			name:   c.MatchName,
-			region: region,
-			typ:    lo.FromPtr(c.MatchType),
+		if cfg.MatchType != nil {
+			cfgKey.typ = *cfg.MatchType
 		}
-		if _, ok := configsByKey[key]; ok { // Make sure each config matcher is unique
-			return nil, fmt.Errorf("duplicate CUD configuration for %s", key.String())
+		if _, ok := cfgKeys[cfgKey]; ok {
+			return nil, fmt.Errorf("duplicate CUD configuration for %s", cfgKey)
 		}
-		configsByKey[key] = c
+
+		cfgKeys[cfgKey] = struct{}{}
+
+		var assigned bool
+		for i, cud := range cuds {
+			cudKey := cud.getCUDKey()
+			// If the configuration doesn't have a field set, it should match any value of that field
+			if cfgKey.region == "" {
+				cudKey.region = ""
+			}
+			if cfgKey.typ == "" {
+				cudKey.typ = ""
+			}
+			if cudKey != cfgKey {
+				continue
+			}
+
+			if assigned {
+				return nil, fmt.Errorf("duplicate CUD import for %s", cfgKey.String())
+			}
+			if res[i] != nil {
+				return nil, fmt.Errorf("CUD already assigned to a configuration")
+			}
+			res[i] = &cudWithConfig[C]{CUD: cud, Config: cfg}
+			assigned = true
+		}
+		if !assigned {
+			return nil, errors.New("not all CUD configurations were mapped")
+		}
 	}
 
-	var mappedConfigs int
-	processedCUDKeys := map[cudConfigMatcherKey]struct{}{}
-	for _, cud := range cuds {
-		key := cud.getCUDKey()
-		if _, ok := processedCUDKeys[key]; ok { // Make sure each CUD is unique
-			return nil, fmt.Errorf("duplicate CUD import for %s", key.String())
+	// Make sure we don't ignore commitments without configurations
+	for i, cud := range cuds {
+		if res[i] == nil {
+			res[i] = &cudWithConfig[C]{CUD: cud}
 		}
-		processedCUDKeys[key] = struct{}{}
-
-		config, hasConfig := configsByKey[key]
-		if hasConfig {
-			mappedConfigs++
-		}
-		res = append(res, &cudWithConfig[C]{
-			CUD:    cud,
-			Config: config,
-		})
-	}
-	if mappedConfigs != len(configs) { // Make sure all configs were mapped
-		return nil, fmt.Errorf("not all CUD configurations were mapped")
 	}
 	return res, nil
 }
