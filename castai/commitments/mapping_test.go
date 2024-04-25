@@ -384,7 +384,7 @@ func TestMapCUDImportToResource(t *testing.T) {
 	}
 }
 
-func TestMapConfigsToCUDs(t *testing.T) {
+func TestMapConfigsToCommitments(t *testing.T) {
 	var (
 		cudImport1 = sdk.CastaiInventoryV1beta1GCPCommitmentImport{
 			Id:     lo.ToPtr("1"),
