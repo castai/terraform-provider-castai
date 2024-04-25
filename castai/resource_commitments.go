@@ -240,7 +240,7 @@ func getCUDResources(tfData resourceProvider) ([]*commitments.GCPCUDResource, bo
 }
 
 func getReservationResources(tfData resourceProvider) ([]*commitments.AzureReservationResource, bool, error) {
-	reservationsIface, ok := tfData.GetOk(commitments.FieldAzureReservationsCSV)
+	reservationsIface, ok := tfData.GetOk(commitments.FieldAzureReservations)
 	if !ok {
 		return nil, false, nil
 	}
