@@ -3,9 +3,13 @@ package castai
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"math"
+	"strconv"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/samber/lo"
 	"golang.org/x/exp/constraints"
 
@@ -141,4 +145,28 @@ func getDefaultOrganizationId(ctx context.Context, meta any) (string, error) {
 		return "", fmt.Errorf("organization id is nil")
 	}
 	return *id, nil
+}
+
+// checkFloatAttr is a helper function for Terraform acceptance tests to check float attributes with a precision of 3
+// decimal places. The attributes map is a map[string]string, so floats in there may be affected by the rounding errors.
+func checkFloatAttr(resource, path string, val float64) func(state *terraform.State) error {
+	return func(state *terraform.State) error {
+		res, ok := state.RootModule().Resources[resource]
+		if !ok {
+			return errors.New("resource not found")
+		}
+		v, ok := res.Primary.Attributes[path]
+		if !ok {
+			return errors.New("attribute not found")
+		}
+		parsed, err := strconv.ParseFloat(v, 64)
+		if err != nil {
+			return err
+		}
+		parsed = math.Round(parsed*1000) / 1000
+		if parsed != val {
+			return fmt.Errorf("expected %f, got %f", val, parsed)
+		}
+		return nil
+	}
 }
