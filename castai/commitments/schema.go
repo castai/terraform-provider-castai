@@ -124,42 +124,39 @@ var (
 		"count": {
 			Type:        schema.TypeInt,
 			Required:    true,
-			Description: "",
+			Description: "Number of instances covered by the reservation.",
 		},
 		"reservation_id": {
 			Type:        schema.TypeString,
 			Required:    true,
-			Description: "",
+			Description: "ID of the reservation in Azure.",
 		},
 		"instance_type": {
 			Type:        schema.TypeString,
 			Required:    true,
-			Description: "",
+			Description: "Type of the instance covered by the reservation.",
 		},
 		"plan": {
 			Type:        schema.TypeString,
 			Required:    true,
-			Description: "",
+			Description: "Plan of the reservation.",
 		},
 		"scope": {
-			Type:        schema.TypeString,
-			Required:    true,
-			Description: "",
+			Type:     schema.TypeString,
+			Required: true,
 		},
 		"scope_resource_group": {
-			Type:        schema.TypeString,
-			Required:    true,
-			Description: "",
+			Type:     schema.TypeString,
+			Required: true,
 		},
 		"scope_subscription": {
-			Type:        schema.TypeString,
-			Required:    true,
-			Description: "",
+			Type:     schema.TypeString,
+			Required: true,
 		},
 		"reservation_status": {
 			Type:        schema.TypeString,
 			Required:    true,
-			Description: "",
+			Description: "Status of the reservation in Azure.",
 		},
 	})
 )
