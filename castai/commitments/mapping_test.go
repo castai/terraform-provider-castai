@@ -149,6 +149,89 @@ func TestMapCommitmentToCUDResource(t *testing.T) {
 	}
 }
 
+func TestMapCommitmentToReservationResource(t *testing.T) {
+	id1 := uuid.New()
+	now := time.Now()
+	startTs, endTs := now.Add(365*24*time.Hour), now.Add(-24*time.Hour)
+
+	reservationID, scopeSubscription := uuid.New(), uuid.New()
+
+	makeCommitment := func() sdk.CastaiInventoryV1beta1Commitment {
+		return sdk.CastaiInventoryV1beta1Commitment{
+			AllowedUsage: lo.ToPtr[float32](0.5),
+			EndDate:      lo.ToPtr(startTs),
+			AzureReservationContext: &sdk.CastaiInventoryV1beta1AzureReservation{
+				Count:              lo.ToPtr[int32](2),
+				Id:                 lo.ToPtr(reservationID.String()),
+				InstanceType:       lo.ToPtr("Standard_D32as_v4"),
+				Plan:               lo.ToPtr[sdk.CastaiInventoryV1beta1AzureReservationReservationPlan]("THREE_YEAR"),
+				Scope:              lo.ToPtr("Single subscription"),
+				ScopeResourceGroup: lo.ToPtr("All resource groups"),
+				ScopeSubscription:  lo.ToPtr(scopeSubscription.String()),
+				Status:             lo.ToPtr("Succeeded"),
+			},
+			Id:             lo.ToPtr(id1.String()),
+			Name:           lo.ToPtr("test-reservation"),
+			Prioritization: lo.ToPtr(true),
+			Region:         lo.ToPtr("eastus"),
+			StartDate:      lo.ToPtr(endTs),
+			Status:         lo.ToPtr[sdk.CastaiInventoryV1beta1CommitmentStatus]("ACTIVE"),
+			UpdatedAt:      lo.ToPtr(now),
+		}
+	}
+
+	tests := map[string]struct {
+		input    sdk.CastaiInventoryV1beta1Commitment
+		expected *AzureReservationResource
+		err      error
+	}{
+		"should succeed as all the fields are set": {
+			input: makeCommitment(),
+			expected: &AzureReservationResource{
+				ID:                 lo.ToPtr(id1.String()),
+				AllowedUsage:       lo.ToPtr[float32](0.5),
+				Prioritization:     lo.ToPtr(true),
+				Status:             lo.ToPtr("ACTIVE"),
+				Count:              2,
+				ReservationID:      reservationID.String(),
+				ReservationStatus:  "Succeeded",
+				StartTimestamp:     endTs.Format(time.RFC3339),
+				EndTimestamp:       startTs.Format(time.RFC3339),
+				Name:               "test-reservation",
+				Region:             "eastus",
+				InstanceType:       "Standard_D32as_v4",
+				Plan:               "THREE_YEAR",
+				Scope:              "Single subscription",
+				ScopeResourceGroup: "All resource groups",
+				ScopeSubscription:  scopeSubscription.String(),
+			},
+		},
+		"should fail as azure reservation context is nil": {
+			input: func() sdk.CastaiInventoryV1beta1Commitment {
+				c := makeCommitment()
+				c.AzureReservationContext = nil
+				return c
+			}(),
+			err: errors.New("missing azure resource reservation context"),
+		},
+	}
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			r := require.New(t)
+			actual, err := MapCommitmentToReservationResource(tt.input)
+			if tt.err == nil {
+				r.NoError(err)
+				r.NotNil(actual)
+				r.Equal(tt.expected, actual)
+			} else {
+				r.Nil(actual)
+				r.Error(err)
+				r.Equal(tt.err.Error(), err.Error())
+			}
+		})
+	}
+}
+
 func TestMapCUDImportToResource(t *testing.T) {
 	makeInput := func() *commitmentWithConfig[CastaiGCPCommitmentImport] {
 		return &commitmentWithConfig[CastaiGCPCommitmentImport]{
