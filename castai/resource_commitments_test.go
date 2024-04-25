@@ -134,7 +134,22 @@ func TestCommitments_Azure_BasicReservations(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
 		ProviderFactories: providerFactories,
-		//CheckDestroy: TODO
+		CheckDestroy: func(state *terraform.State) error {
+			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+			defer cancel()
+
+			res, err := getOrganizationCommitments(ctx, testAccProvider.Meta())
+			if err != nil {
+				return err
+			}
+			res = lo.Filter(res, func(c sdk.CastaiInventoryV1beta1Commitment, _ int) bool {
+				return c.AzureReservationContext != nil
+			})
+			if len(res) > 0 {
+				return errors.New("azure reservations still exist")
+			}
+			return nil
+		},
 		Steps: []resource.TestStep{
 			{
 				Config: initialAzureConfig,
