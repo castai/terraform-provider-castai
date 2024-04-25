@@ -75,10 +75,9 @@ type (
 		AllowedUsage   *float32                        `mapstructure:"allowed_usage,omitempty"`
 	}
 	CommitmentConfigMatcherResource struct {
-		Name        string  `mapstructure:"name"`
-		Type        *string `mapstructure:"type,omitempty"`
-		ProductName *string `mapstructure:"product_name,omitempty"` // basically Type but for Azure
-		Region      *string `mapstructure:"region,omitempty"`
+		Name   string  `mapstructure:"name"`
+		Type   *string `mapstructure:"type,omitempty"`
+		Region *string `mapstructure:"region,omitempty"`
 	}
 )
 
