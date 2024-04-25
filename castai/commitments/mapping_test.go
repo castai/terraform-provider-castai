@@ -583,7 +583,7 @@ func TestMapConfiguredCUDImportsToResources(t *testing.T) {
 					Name: lo.ToPtr("test-cud"),
 				},
 			},
-			err: errors.New("more CUD configurations than CUDs"),
+			err: errors.New("more configurations than CUDs"),
 		},
 		"should successfully map cuds with configs to resources": {
 			cuds: []sdk.CastaiInventoryV1beta1GCPCommitmentImport{testGCPCommitmentImport},
