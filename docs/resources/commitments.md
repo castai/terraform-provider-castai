@@ -15,16 +15,28 @@ Commitments represent cloud service provider reserved instances (Azure) and comm
 ```terraform
 resource "castai_commitments" "gcp_test" {
   gcp_cuds_json = file("./cuds.json")
-  gcp_cud_configs = [
+  commitment_configs = [
     {
-      matcher = {
-        region = "us-east4"
-        type = "COMPUTE_OPTIMIZED_C2D"
-        name = "test"
-      }
+      match_region = "us-east4"
+      match_type = "COMPUTE_OPTIMIZED_C2D"
+      match_name = "test"
       prioritization = true
       allowed_usage = 0.6
       status = "Inactive"
+    }
+  ]
+}
+
+resource "castai_commitments" "azure_test" {
+  azure_reservations_csv = file("./reservations.csv")
+  commitment_configs = [
+    {
+      match_region = "eastus"
+      match_type = "Standard_D32as_v4"
+      match_name = "test-res-1"
+      prioritization = false
+      allowed_usage = 0.9
+      status = "Active"
     }
   ]
 }
@@ -36,7 +48,7 @@ resource "castai_commitments" "gcp_test" {
 ### Optional
 
 - `azure_reservations_csv` (String) CSV file containing reservations exported from Azure.
-- `gcp_cud_configs` (List of Object) List of GCP CUD configurations. (see [below for nested schema](#nestedatt--gcp_cud_configs))
+- `commitment_configs` (List of Object) List of commitment configurations. (see [below for nested schema](#nestedatt--commitment_configs))
 - `gcp_cuds_json` (String) JSON file containing CUDs exported from GCP.
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
@@ -46,13 +58,15 @@ resource "castai_commitments" "gcp_test" {
 - `gcp_cuds` (List of Object) List of GCP CUDs. (see [below for nested schema](#nestedatt--gcp_cuds))
 - `id` (String) The ID of this resource.
 
-<a id="nestedatt--gcp_cud_configs"></a>
-### Nested Schema for `gcp_cud_configs`
+<a id="nestedatt--commitment_configs"></a>
+### Nested Schema for `commitment_configs`
 
 Optional:
 
 - `allowed_usage` (Number)
-- `matcher` (Map of String)
+- `match_name` (String)
+- `match_region` (String)
+- `match_type` (String)
 - `prioritization` (Boolean)
 - `status` (String)
 
@@ -71,6 +85,22 @@ Optional:
 
 Read-Only:
 
+- `allowed_usage` (Number)
+- `count` (Number)
+- `end_timestamp` (String)
+- `id` (String)
+- `instance_type` (String)
+- `name` (String)
+- `plan` (String)
+- `prioritization` (Boolean)
+- `region` (String)
+- `reservation_id` (String)
+- `reservation_status` (String)
+- `scope` (String)
+- `scope_resource_group` (String)
+- `scope_subscription` (String)
+- `start_timestamp` (String)
+- `status` (String)
 
 
 <a id="nestedatt--gcp_cuds"></a>
