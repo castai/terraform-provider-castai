@@ -1515,6 +1515,26 @@ func (mr *MockClientInterfaceMockRecorder) NodeConfigurationAPIListConfiguration
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NodeConfigurationAPIListConfigurations", reflect.TypeOf((*MockClientInterface)(nil).NodeConfigurationAPIListConfigurations), varargs...)
 }
 
+// NodeConfigurationAPIListMaxPodsPresets mocks base method.
+func (m *MockClientInterface) NodeConfigurationAPIListMaxPodsPresets(ctx context.Context, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "NodeConfigurationAPIListMaxPodsPresets", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// NodeConfigurationAPIListMaxPodsPresets indicates an expected call of NodeConfigurationAPIListMaxPodsPresets.
+func (mr *MockClientInterfaceMockRecorder) NodeConfigurationAPIListMaxPodsPresets(ctx interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NodeConfigurationAPIListMaxPodsPresets", reflect.TypeOf((*MockClientInterface)(nil).NodeConfigurationAPIListMaxPodsPresets), varargs...)
+}
+
 // NodeConfigurationAPISetDefault mocks base method.
 func (m *MockClientInterface) NodeConfigurationAPISetDefault(ctx context.Context, clusterId, id string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
@@ -3876,6 +3896,21 @@ func (m *MockClientWithResponsesInterface) NodeConfigurationAPIListConfiguration
 func (mr *MockClientWithResponsesInterfaceMockRecorder) NodeConfigurationAPIListConfigurationsWithResponse(ctx, clusterId interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NodeConfigurationAPIListConfigurationsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).NodeConfigurationAPIListConfigurationsWithResponse), ctx, clusterId)
+}
+
+// NodeConfigurationAPIListMaxPodsPresetsWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) NodeConfigurationAPIListMaxPodsPresetsWithResponse(ctx context.Context) (*sdk.NodeConfigurationAPIListMaxPodsPresetsResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "NodeConfigurationAPIListMaxPodsPresetsWithResponse", ctx)
+	ret0, _ := ret[0].(*sdk.NodeConfigurationAPIListMaxPodsPresetsResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// NodeConfigurationAPIListMaxPodsPresetsWithResponse indicates an expected call of NodeConfigurationAPIListMaxPodsPresetsWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) NodeConfigurationAPIListMaxPodsPresetsWithResponse(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NodeConfigurationAPIListMaxPodsPresetsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).NodeConfigurationAPIListMaxPodsPresetsWithResponse), ctx)
 }
 
 // NodeConfigurationAPISetDefaultWithResponse mocks base method.
