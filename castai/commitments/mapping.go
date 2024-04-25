@@ -498,7 +498,7 @@ func mapReservationCSVRowToImport(fieldIndexes map[string]int, record []string) 
 		Quantity:           count,
 		Region:             reservations.GetRecordFieldStringValue(reservations.FieldReservationRegion, fieldIndexes, record),
 		ReservationId:      reservations.GetRecordFieldStringValue(reservations.FieldReservationID, fieldIndexes, record),
-		Scope:              reservations.GetRecordFieldStringValue(reservations.FieldReservationPurchaseDate, fieldIndexes, record),
+		Scope:              reservations.GetRecordFieldStringValue(reservations.FieldReservationScope, fieldIndexes, record),
 		ScopeResourceGroup: reservations.GetRecordFieldStringValue(reservations.FieldReservationScopeResourceGroup, fieldIndexes, record),
 		ScopeSubscription:  reservations.GetRecordFieldStringValue(reservations.FieldReservationScopeSubscription, fieldIndexes, record),
 		Status:             reservations.GetRecordFieldStringValue(reservations.FieldReservationStatus, fieldIndexes, record),

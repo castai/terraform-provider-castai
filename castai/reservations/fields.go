@@ -26,6 +26,7 @@ const (
 	FieldReservationScopeResourceGroup    = "scope_resource_group"
 	FieldReservationScopeSubscription     = "scope_subscription"
 	FieldReservationScopeStatus           = "scope_status"
+	FieldReservationScope                 = "scope"
 	FieldReservationTerm                  = "term"
 	FieldReservationStatus                = "status"
 )
@@ -53,4 +54,5 @@ var csvColumnAlias = map[string][]string{
 	FieldReservationScopeStatus:           {},
 	FieldReservationTerm:                  {},
 	FieldReservationStatus:                {},
+	FieldReservationScope:                 {},
 }
