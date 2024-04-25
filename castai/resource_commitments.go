@@ -358,7 +358,7 @@ func resourceCastaiCommitmentsUpsert(ctx context.Context, data *schema.ResourceD
 			return diag.FromErr(err)
 		}
 
-		cudsWithConfigs, err := commitments.MapConfigsToCUDs(
+		cudsWithConfigs, err := commitments.MapConfigsToCommitments(
 			lo.Map(azureCommitments, func(item sdk.CastaiInventoryV1beta1Commitment, _ int) commitments.CastaiCommitment {
 				return commitments.CastaiCommitment{CastaiInventoryV1beta1Commitment: item}
 			}),
@@ -372,7 +372,7 @@ func resourceCastaiCommitmentsUpsert(ctx context.Context, data *schema.ResourceD
 			res, err := meta.(*ProviderConfig).api.CommitmentsAPIUpdateCommitmentWithResponse(
 				ctx,
 				lo.FromPtr(c.Commitment.Id),
-				commitments.MapCUDImportWithConfigToUpdateRequest(c),
+				commitments.MapCommitmentImportWithConfigToUpdateRequest(c),
 			)
 			if err := sdk.CheckOKResponse(res, err); err != nil {
 				return diag.Errorf("updating commitment: %v", err)
@@ -399,7 +399,7 @@ func resourceCastaiCommitmentsUpsert(ctx context.Context, data *schema.ResourceD
 			return diag.FromErr(err)
 		}
 
-		cudsWithConfigs, err := commitments.MapConfigsToCUDs(
+		cudsWithConfigs, err := commitments.MapConfigsToCommitments(
 			lo.Map(gcpCommitments, func(item sdk.CastaiInventoryV1beta1Commitment, _ int) commitments.CastaiCommitment {
 				return commitments.CastaiCommitment{CastaiInventoryV1beta1Commitment: item}
 			}),
@@ -413,7 +413,7 @@ func resourceCastaiCommitmentsUpsert(ctx context.Context, data *schema.ResourceD
 			res, err := meta.(*ProviderConfig).api.CommitmentsAPIUpdateCommitmentWithResponse(
 				ctx,
 				lo.FromPtr(c.Commitment.Id),
-				commitments.MapCUDImportWithConfigToUpdateRequest(c),
+				commitments.MapCommitmentImportWithConfigToUpdateRequest(c),
 			)
 			if err := sdk.CheckOKResponse(res, err); err != nil {
 				return diag.Errorf("updating commitment: %v", err)

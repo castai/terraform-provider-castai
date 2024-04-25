@@ -303,26 +303,26 @@ func TestMapCUDImportToResource(t *testing.T) {
 
 func TestMapConfigsToCUDs(t *testing.T) {
 	var (
-		import1 = sdk.CastaiInventoryV1beta1GCPCommitmentImport{
+		cudImport1 = sdk.CastaiInventoryV1beta1GCPCommitmentImport{
 			Id:     lo.ToPtr("1"),
 			Name:   lo.ToPtr("test-cud-1"),
 			Type:   lo.ToPtr("COMPUTE_OPTIMIZED_C2D"),
 			Region: lo.ToPtr("us-central1"),
 		}
-		import2 = sdk.CastaiInventoryV1beta1GCPCommitmentImport{
+		cudImport2 = sdk.CastaiInventoryV1beta1GCPCommitmentImport{
 			Id:     lo.ToPtr("2"),
 			Name:   lo.ToPtr("test-cud-2"),
 			Type:   lo.ToPtr("COMPUTE_OPTIMIZED_N2D"),
 			Region: lo.ToPtr("us-central1"),
 		}
-		import3 = sdk.CastaiInventoryV1beta1GCPCommitmentImport{
+		cudImport3 = sdk.CastaiInventoryV1beta1GCPCommitmentImport{
 			Id:     lo.ToPtr("3"),
 			Name:   lo.ToPtr("test-cud-3"),
 			Type:   lo.ToPtr("COMPUTE_OPTIMIZED_E2"),
 			Region: lo.ToPtr("eu-central1"),
 		}
 
-		cfg1 = &CommitmentConfigResource{
+		cudCfg1 = &CommitmentConfigResource{
 			Matcher: CommitmentConfigMatcherResource{
 				Name:   "test-cud-1",
 				Type:   lo.ToPtr("COMPUTE_OPTIMIZED_C2D"),
@@ -332,7 +332,7 @@ func TestMapConfigsToCUDs(t *testing.T) {
 			Status:         lo.ToPtr("ACTIVE"),
 			AllowedUsage:   lo.ToPtr[float32](0.5),
 		}
-		cfg2 = &CommitmentConfigResource{
+		cudCfg2 = &CommitmentConfigResource{
 			Matcher: CommitmentConfigMatcherResource{
 				Name:   "test-cud-2",
 				Type:   lo.ToPtr("COMPUTE_OPTIMIZED_N2D"),
@@ -342,7 +342,7 @@ func TestMapConfigsToCUDs(t *testing.T) {
 			Status:         lo.ToPtr("INACTIVE"),
 			AllowedUsage:   lo.ToPtr[float32](0.7),
 		}
-		cfg3 = &CommitmentConfigResource{
+		cudCfg3 = &CommitmentConfigResource{
 			Matcher: CommitmentConfigMatcherResource{
 				Name:   "test-cud-3",
 				Type:   lo.ToPtr("COMPUTE_OPTIMIZED_E2"),
@@ -352,123 +352,197 @@ func TestMapConfigsToCUDs(t *testing.T) {
 			Status:         lo.ToPtr("ACTIVE"),
 			AllowedUsage:   lo.ToPtr[float32](1),
 		}
+
+		reservationImport1 = sdk.CastaiInventoryV1beta1AzureReservationImport{
+			ReservationId: lo.ToPtr("1"),
+			Name:          lo.ToPtr("test-reservation-1"),
+			ProductName:   lo.ToPtr("Standard_D32as_v4"),
+			Region:        lo.ToPtr("eastus"),
+		}
+		reservationImport2 = sdk.CastaiInventoryV1beta1AzureReservationImport{
+			ReservationId: lo.ToPtr("2"),
+			Name:          lo.ToPtr("test-reservation-2"),
+			ProductName:   lo.ToPtr("Standard_B1s"),
+			Region:        lo.ToPtr("eastus"),
+		}
+		reservationImport3 = sdk.CastaiInventoryV1beta1AzureReservationImport{
+			ReservationId: lo.ToPtr("3"),
+			Name:          lo.ToPtr("test-reservation-3"),
+			ProductName:   lo.ToPtr("Standard_A2_v2"),
+			Region:        lo.ToPtr("westus"),
+		}
+
+		reservationCfg1 = &CommitmentConfigResource{
+			Matcher: CommitmentConfigMatcherResource{
+				Name:   "test-reservation-1",
+				Type:   lo.ToPtr("Standard_D32as_v4"),
+				Region: lo.ToPtr("eastus"),
+			},
+			Prioritization: lo.ToPtr(true),
+			Status:         lo.ToPtr("ACTIVE"),
+			AllowedUsage:   lo.ToPtr[float32](0.5),
+		}
+		reservationCfg2 = &CommitmentConfigResource{
+			Matcher: CommitmentConfigMatcherResource{
+				Name:   "test-reservation-2",
+				Type:   lo.ToPtr("Standard_B1s"),
+				Region: lo.ToPtr("eastus"),
+			},
+			Prioritization: lo.ToPtr(false),
+			Status:         lo.ToPtr("INACTIVE"),
+			AllowedUsage:   lo.ToPtr[float32](0.7),
+		}
+		reservationCfg3 = &CommitmentConfigResource{
+			Matcher: CommitmentConfigMatcherResource{
+				Name:   "test-reservation-3",
+				Type:   lo.ToPtr("Standard_A2_v2"),
+				Region: lo.ToPtr("westus"),
+			},
+			Prioritization: lo.ToPtr(true),
+			Status:         lo.ToPtr("ACTIVE"),
+			AllowedUsage:   lo.ToPtr[float32](1),
+		}
 	)
 
 	tests := map[string]struct {
-		cuds     []CastaiGCPCommitmentImport
+		cuds     []commitment
 		configs  []*CommitmentConfigResource
-		expected []*commitmentWithConfig[CastaiGCPCommitmentImport]
+		expected []*commitmentWithConfig[commitment]
 		err      error
 	}{
-		"should successfully map all the configs": {
-			cuds: []CastaiGCPCommitmentImport{
-				{CastaiInventoryV1beta1GCPCommitmentImport: import2},
-				{CastaiInventoryV1beta1GCPCommitmentImport: import3},
-				{CastaiInventoryV1beta1GCPCommitmentImport: import1},
+		"should successfully map all the configs to cuds": {
+			cuds: []commitment{
+				CastaiGCPCommitmentImport{CastaiInventoryV1beta1GCPCommitmentImport: cudImport2},
+				CastaiGCPCommitmentImport{CastaiInventoryV1beta1GCPCommitmentImport: cudImport3},
+				CastaiGCPCommitmentImport{CastaiInventoryV1beta1GCPCommitmentImport: cudImport1},
 			},
-			configs: []*CommitmentConfigResource{cfg1, cfg2, cfg3}, // make sure the order doesn't match the CUDs
-			expected: []*commitmentWithConfig[CastaiGCPCommitmentImport]{
+			configs: []*CommitmentConfigResource{cudCfg1, cudCfg2, cudCfg3}, // make sure the order doesn't match the CUDs
+			expected: []*commitmentWithConfig[commitment]{
 				{
-					Commitment: CastaiGCPCommitmentImport{CastaiInventoryV1beta1GCPCommitmentImport: import2},
-					Config:     cfg2,
+					Commitment: CastaiGCPCommitmentImport{CastaiInventoryV1beta1GCPCommitmentImport: cudImport2},
+					Config:     cudCfg2,
 				},
 				{
-					Commitment: CastaiGCPCommitmentImport{CastaiInventoryV1beta1GCPCommitmentImport: import3},
-					Config:     cfg3,
+					Commitment: CastaiGCPCommitmentImport{CastaiInventoryV1beta1GCPCommitmentImport: cudImport3},
+					Config:     cudCfg3,
 				},
 				{
-					Commitment: CastaiGCPCommitmentImport{CastaiInventoryV1beta1GCPCommitmentImport: import1},
-					Config:     cfg1,
+					Commitment: CastaiGCPCommitmentImport{CastaiInventoryV1beta1GCPCommitmentImport: cudImport1},
+					Config:     cudCfg1,
 				},
 			},
 		},
-		"should successfully map all the configs to imports with url-based regions": {
-			cuds: func() []CastaiGCPCommitmentImport {
-				import2.Region = lo.ToPtr("https://www.googleapis.com/compute/v1/projects/test-project/zones/" + *import2.Region)
-				import3.Region = lo.ToPtr("https://www.googleapis.com/compute/v1/projects/test-project/zones/" + *import3.Region)
-				import1.Region = lo.ToPtr("https://www.googleapis.com/compute/v1/projects/test-project/zones/" + *import1.Region)
-				return []CastaiGCPCommitmentImport{
-					{CastaiInventoryV1beta1GCPCommitmentImport: import2},
-					{CastaiInventoryV1beta1GCPCommitmentImport: import3},
-					{CastaiInventoryV1beta1GCPCommitmentImport: import1},
+		"should successfully map all the configs to reservations": {
+			cuds: []commitment{
+				CastaiAzureReservationImport{CastaiInventoryV1beta1AzureReservationImport: reservationImport2},
+				CastaiAzureReservationImport{CastaiInventoryV1beta1AzureReservationImport: reservationImport3},
+				CastaiAzureReservationImport{CastaiInventoryV1beta1AzureReservationImport: reservationImport1},
+			},
+			configs: []*CommitmentConfigResource{reservationCfg1, reservationCfg2, reservationCfg3}, // make sure the order doesn't match the CUDs
+			expected: []*commitmentWithConfig[commitment]{
+				{
+					Commitment: CastaiAzureReservationImport{CastaiInventoryV1beta1AzureReservationImport: reservationImport2},
+					Config:     reservationCfg2,
+				},
+				{
+					Commitment: CastaiAzureReservationImport{CastaiInventoryV1beta1AzureReservationImport: reservationImport3},
+					Config:     reservationCfg3,
+				},
+				{
+					Commitment: CastaiAzureReservationImport{CastaiInventoryV1beta1AzureReservationImport: reservationImport1},
+					Config:     reservationCfg1,
+				},
+			},
+		},
+		"should successfully map all the configs to cud imports with url-based regions": {
+			cuds: func() []commitment {
+				cudImport2.Region = lo.ToPtr("https://www.googleapis.com/compute/v1/projects/test-project/zones/" + *cudImport2.Region)
+				cudImport3.Region = lo.ToPtr("https://www.googleapis.com/compute/v1/projects/test-project/zones/" + *cudImport3.Region)
+				cudImport1.Region = lo.ToPtr("https://www.googleapis.com/compute/v1/projects/test-project/zones/" + *cudImport1.Region)
+				return []commitment{
+					CastaiGCPCommitmentImport{CastaiInventoryV1beta1GCPCommitmentImport: cudImport2},
+					CastaiGCPCommitmentImport{CastaiInventoryV1beta1GCPCommitmentImport: cudImport3},
+					CastaiGCPCommitmentImport{CastaiInventoryV1beta1GCPCommitmentImport: cudImport1},
 				}
 			}(),
-			configs: []*CommitmentConfigResource{cfg1, cfg2, cfg3}, // make sure the order doesn't match the CUDs
-			expected: []*commitmentWithConfig[CastaiGCPCommitmentImport]{
+			configs: []*CommitmentConfigResource{cudCfg1, cudCfg2, cudCfg3}, // make sure the order doesn't match the CUDs
+			expected: []*commitmentWithConfig[commitment]{
 				{
-					Commitment: CastaiGCPCommitmentImport{CastaiInventoryV1beta1GCPCommitmentImport: import2},
-					Config:     cfg2,
+					Commitment: CastaiGCPCommitmentImport{CastaiInventoryV1beta1GCPCommitmentImport: cudImport2},
+					Config:     cudCfg2,
 				},
 				{
-					Commitment: CastaiGCPCommitmentImport{CastaiInventoryV1beta1GCPCommitmentImport: import3},
-					Config:     cfg3,
+					Commitment: CastaiGCPCommitmentImport{CastaiInventoryV1beta1GCPCommitmentImport: cudImport3},
+					Config:     cudCfg3,
 				},
 				{
-					Commitment: CastaiGCPCommitmentImport{CastaiInventoryV1beta1GCPCommitmentImport: import1},
-					Config:     cfg1,
+					Commitment: CastaiGCPCommitmentImport{CastaiInventoryV1beta1GCPCommitmentImport: cudImport1},
+					Config:     cudCfg1,
 				},
 			},
 		},
-		"should successfully map all the configs with url-based regions": {
-			cuds: []CastaiGCPCommitmentImport{
-				{CastaiInventoryV1beta1GCPCommitmentImport: import2},
-				{CastaiInventoryV1beta1GCPCommitmentImport: import3},
-				{CastaiInventoryV1beta1GCPCommitmentImport: import1},
+		"should successfully map all the configs with url-based regions to cud imports": {
+			cuds: []commitment{
+				CastaiGCPCommitmentImport{CastaiInventoryV1beta1GCPCommitmentImport: cudImport2},
+				CastaiGCPCommitmentImport{CastaiInventoryV1beta1GCPCommitmentImport: cudImport3},
+				CastaiGCPCommitmentImport{CastaiInventoryV1beta1GCPCommitmentImport: cudImport1},
 			},
 			configs: func() []*CommitmentConfigResource {
-				cfg1.Matcher.Region = lo.ToPtr("https://www.googleapis.com/compute/v1/projects/test-project/zones/" + *cfg1.Matcher.Region)
-				cfg2.Matcher.Region = lo.ToPtr("https://www.googleapis.com/compute/v1/projects/test-project/zones/" + *cfg2.Matcher.Region)
-				cfg3.Matcher.Region = lo.ToPtr("https://www.googleapis.com/compute/v1/projects/test-project/zones/" + *cfg3.Matcher.Region)
-				return []*CommitmentConfigResource{cfg1, cfg2, cfg3} // make sure the order doesn't match the CUDs
+				cudCfg1.Matcher.Region = lo.ToPtr("https://www.googleapis.com/compute/v1/projects/test-project/zones/" + *cudCfg1.Matcher.Region)
+				cudCfg2.Matcher.Region = lo.ToPtr("https://www.googleapis.com/compute/v1/projects/test-project/zones/" + *cudCfg2.Matcher.Region)
+				cudCfg3.Matcher.Region = lo.ToPtr("https://www.googleapis.com/compute/v1/projects/test-project/zones/" + *cudCfg3.Matcher.Region)
+				return []*CommitmentConfigResource{cudCfg1, cudCfg2, cudCfg3} // make sure the order doesn't match the CUDs
 			}(),
-			expected: []*commitmentWithConfig[CastaiGCPCommitmentImport]{
+			expected: []*commitmentWithConfig[commitment]{
 				{
-					Commitment: CastaiGCPCommitmentImport{CastaiInventoryV1beta1GCPCommitmentImport: import2},
-					Config:     cfg2,
+					Commitment: CastaiGCPCommitmentImport{CastaiInventoryV1beta1GCPCommitmentImport: cudImport2},
+					Config:     cudCfg2,
 				},
 				{
-					Commitment: CastaiGCPCommitmentImport{CastaiInventoryV1beta1GCPCommitmentImport: import3},
-					Config:     cfg3,
+					Commitment: CastaiGCPCommitmentImport{CastaiInventoryV1beta1GCPCommitmentImport: cudImport3},
+					Config:     cudCfg3,
 				},
 				{
-					Commitment: CastaiGCPCommitmentImport{CastaiInventoryV1beta1GCPCommitmentImport: import1},
-					Config:     cfg1,
+					Commitment: CastaiGCPCommitmentImport{CastaiInventoryV1beta1GCPCommitmentImport: cudImport1},
+					Config:     cudCfg1,
 				},
 			},
 		},
-		"should fail as there's one additional config that doesn't match any CUD": {
-			cuds:    []CastaiGCPCommitmentImport{{CastaiInventoryV1beta1GCPCommitmentImport: import1}},
-			configs: []*CommitmentConfigResource{cfg1, cfg2},
-			err:     errors.New("not all CUD configurations were mapped"),
+		"should fail as there's one additional config that doesn't match any cud": {
+			cuds: []commitment{
+				CastaiGCPCommitmentImport{CastaiInventoryV1beta1GCPCommitmentImport: cudImport1},
+			},
+			configs: []*CommitmentConfigResource{cudCfg1, cudCfg2},
+			err:     errors.New("not all commitment configurations were mapped"),
 		},
 		"should fail as one of the configs cannot be mapped": {
-			cuds: []CastaiGCPCommitmentImport{
-				{CastaiInventoryV1beta1GCPCommitmentImport: import1},
-				{CastaiInventoryV1beta1GCPCommitmentImport: import2},
+			cuds: []commitment{
+				CastaiGCPCommitmentImport{CastaiInventoryV1beta1GCPCommitmentImport: cudImport1},
+				CastaiGCPCommitmentImport{CastaiInventoryV1beta1GCPCommitmentImport: cudImport2},
 			},
-			configs: []*CommitmentConfigResource{cfg1, cfg3},
-			err:     errors.New("not all CUD configurations were mapped"),
+			configs: []*CommitmentConfigResource{cudCfg1, cudCfg3},
+			err:     errors.New("not all commitment configurations were mapped"),
 		},
 		"should fail as one import can be mapped to multiple configs": {
-			cuds: []CastaiGCPCommitmentImport{
-				{CastaiInventoryV1beta1GCPCommitmentImport: import1},
-				{CastaiInventoryV1beta1GCPCommitmentImport: import1},
+			cuds: []commitment{
+				CastaiGCPCommitmentImport{CastaiInventoryV1beta1GCPCommitmentImport: cudImport1},
+				CastaiGCPCommitmentImport{CastaiInventoryV1beta1GCPCommitmentImport: cudImport1},
 			},
-			configs: []*CommitmentConfigResource{cfg1, cfg3},
-			err:     errors.New("duplicate CUD import for test-cud-1-us-central1-COMPUTE_OPTIMIZED_C2D"),
+			configs: []*CommitmentConfigResource{cudCfg1, cudCfg3},
+			err:     errors.New("duplicate import for test-cud-1-us-central1-COMPUTE_OPTIMIZED_C2D"),
 		},
 		"should fail as duplicate configs are passed": {
-			cuds: []CastaiGCPCommitmentImport{
-				{CastaiInventoryV1beta1GCPCommitmentImport: import1},
+			cuds: []commitment{
+				CastaiGCPCommitmentImport{CastaiInventoryV1beta1GCPCommitmentImport: cudImport1},
 			},
-			configs: []*CommitmentConfigResource{cfg1, cfg1},
-			err:     errors.New("duplicate CUD configuration for test-cud-1-us-central1-COMPUTE_OPTIMIZED_C2D"),
+			configs: []*CommitmentConfigResource{cudCfg1, cudCfg1},
+			err:     errors.New("duplicate configuration for test-cud-1-us-central1-COMPUTE_OPTIMIZED_C2D"),
 		},
 	}
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
 			r := require.New(t)
-			actual, err := MapConfigsToCUDs(tt.cuds, tt.configs)
+			actual, err := MapConfigsToCommitments(tt.cuds, tt.configs)
 			if tt.err == nil {
 				r.NoError(err)
 				r.NotNil(actual)
@@ -670,7 +744,7 @@ func TestMapCUDImportWithConfigToUpdateRequest(t *testing.T) {
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
 			r := require.New(t)
-			actual := MapCUDImportWithConfigToUpdateRequest(tt.input)
+			actual := MapCommitmentImportWithConfigToUpdateRequest(tt.input)
 			r.Equal(tt.expected, actual)
 		})
 	}

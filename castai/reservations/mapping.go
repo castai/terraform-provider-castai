@@ -91,11 +91,10 @@ func MapToReservationResourcesWithCommonFieldsOnly(reservationResources []*Reser
 }
 
 func MapReservationsHeaderToReservationFieldIndexes(columns []string) map[string]int {
-	indexes := make(map[string]int, len(reservationResourceFields))
-	for _, field := range reservationResourceFields {
+	indexes := make(map[string]int, len(csvColumnAlias))
+	for field, aliases := range csvColumnAlias {
 		index := -1
-		aliases := csvColumnAlias[field]
-		for _, alias := range aliases {
+		for _, alias := range append([]string{field}, aliases...) {
 			_, fieldIdx, found := lo.FindIndexOf(columns, func(item string) bool {
 				return strings.ToLower(item) == alias
 			})

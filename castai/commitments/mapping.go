@@ -75,9 +75,10 @@ type (
 		AllowedUsage   *float32                        `mapstructure:"allowed_usage,omitempty"`
 	}
 	CommitmentConfigMatcherResource struct {
-		Name   string  `mapstructure:"name"`
-		Type   *string `mapstructure:"type,omitempty"`
-		Region *string `mapstructure:"region,omitempty"`
+		Name        string  `mapstructure:"name"`
+		Type        *string `mapstructure:"type,omitempty"`
+		ProductName *string `mapstructure:"product_name,omitempty"` // basically Type but for Azure
+		Region      *string `mapstructure:"region,omitempty"`
 	}
 )
 
@@ -292,7 +293,10 @@ type commitmentWithConfig[C commitment] struct {
 	Config     *CommitmentConfigResource
 }
 
-func MapConfigsToCUDs[C commitment](cmts []C, configs []*CommitmentConfigResource) ([]*commitmentWithConfig[C], error) {
+func MapConfigsToCommitments[C commitment](
+	cmts []C,
+	configs []*CommitmentConfigResource,
+) ([]*commitmentWithConfig[C], error) {
 	res := make([]*commitmentWithConfig[C], 0, len(cmts))
 	configsByKey := map[commitmentConfigMatcherKey]*CommitmentConfigResource{}
 	for _, c := range configs {
@@ -306,19 +310,19 @@ func MapConfigsToCUDs[C commitment](cmts []C, configs []*CommitmentConfigResourc
 			typ:    lo.FromPtr(c.Matcher.Type),
 		}
 		if _, ok := configsByKey[key]; ok { // Make sure each config matcher is unique
-			return nil, fmt.Errorf("duplicate CUD configuration for %s", key.String())
+			return nil, fmt.Errorf("duplicate configuration for %s", key.String())
 		}
 		configsByKey[key] = c
 	}
 
 	var mappedConfigs int
-	processedCUDKeys := map[commitmentConfigMatcherKey]struct{}{}
+	processedKeys := map[commitmentConfigMatcherKey]struct{}{}
 	for _, cmt := range cmts {
 		key := cmt.getKey()
-		if _, ok := processedCUDKeys[key]; ok { // Make sure each CUD is unique
-			return nil, fmt.Errorf("duplicate CUD import for %s", key.String())
+		if _, ok := processedKeys[key]; ok { // Make sure each CUD is unique
+			return nil, fmt.Errorf("duplicate import for %s", key.String())
 		}
-		processedCUDKeys[key] = struct{}{}
+		processedKeys[key] = struct{}{}
 
 		config, hasConfig := configsByKey[key]
 		if hasConfig {
@@ -330,7 +334,7 @@ func MapConfigsToCUDs[C commitment](cmts []C, configs []*CommitmentConfigResourc
 		})
 	}
 	if mappedConfigs != len(configs) { // Make sure all configs were mapped
-		return nil, fmt.Errorf("not all CUD configurations were mapped")
+		return nil, fmt.Errorf("not all commitment configurations were mapped")
 	}
 	return res, nil
 }
@@ -356,7 +360,7 @@ func MapConfiguredCUDImportsToResources[C interface {
 		}
 	}
 
-	cudsWithConfigs, err := MapConfigsToCUDs(cudImports, configs)
+	cudsWithConfigs, err := MapConfigsToCommitments(cudImports, configs)
 	if err != nil {
 		return nil, err
 	}
@@ -393,7 +397,7 @@ func MapConfiguredReservationImportsToResources[C interface {
 		}
 	}
 
-	cudsWithConfigs, err := MapConfigsToCUDs(cudImports, configs)
+	cudsWithConfigs, err := MapConfigsToCommitments(cudImports, configs)
 	if err != nil {
 		return nil, err
 	}
@@ -403,7 +407,36 @@ func MapConfiguredReservationImportsToResources[C interface {
 	}), nil
 }
 
-func MapCUDImportWithConfigToUpdateRequest(
+func MapCommitmentImportWithConfigToUpdateRequest(
+	c *commitmentWithConfig[CastaiCommitment],
+) sdk.CommitmentsAPIUpdateCommitmentJSONRequestBody {
+	req := sdk.CommitmentsAPIUpdateCommitmentJSONRequestBody{
+		AllowedUsage:            c.Commitment.AllowedUsage,
+		EndDate:                 c.Commitment.EndDate,
+		GcpResourceCudContext:   c.Commitment.GcpResourceCudContext,
+		AzureReservationContext: c.Commitment.AzureReservationContext,
+		Id:                      c.Commitment.Id,
+		Name:                    c.Commitment.Name,
+		Prioritization:          c.Commitment.Prioritization,
+		Region:                  c.Commitment.Region,
+		StartDate:               c.Commitment.StartDate,
+		Status:                  c.Commitment.Status,
+	}
+	if c.Config != nil {
+		if c.Config.AllowedUsage != nil {
+			req.AllowedUsage = c.Config.AllowedUsage
+		}
+		if c.Config.Prioritization != nil {
+			req.Prioritization = c.Config.Prioritization
+		}
+		if c.Config.Status != nil {
+			req.Status = (*sdk.CastaiInventoryV1beta1CommitmentStatus)(c.Config.Status)
+		}
+	}
+	return req
+}
+
+func MapReservationImportWithConfigToUpdateRequest(
 	c *commitmentWithConfig[CastaiCommitment],
 ) sdk.CommitmentsAPIUpdateCommitmentJSONRequestBody {
 	req := sdk.CommitmentsAPIUpdateCommitmentJSONRequestBody{
@@ -477,8 +510,8 @@ func mapReservationCSVRowToImport(fieldIndexes map[string]int, record []string) 
 		Scope:              reservations.GetRecordFieldStringValue(reservations.FieldReservationPurchaseDate, fieldIndexes, record),
 		ScopeResourceGroup: reservations.GetRecordFieldStringValue(reservations.FieldReservationScopeResourceGroup, fieldIndexes, record),
 		ScopeSubscription:  reservations.GetRecordFieldStringValue(reservations.FieldReservationScopeSubscription, fieldIndexes, record),
-		Status:             reservations.GetRecordFieldStringValue(reservations.FieldReservationScopeStatus, fieldIndexes, record),
-		Term:               reservations.GetRecordFieldStringValue(reservations.FieldReservationScopeTerm, fieldIndexes, record),
+		Status:             reservations.GetRecordFieldStringValue(reservations.FieldReservationStatus, fieldIndexes, record),
+		Term:               reservations.GetRecordFieldStringValue(reservations.FieldReservationTerm, fieldIndexes, record),
 		Type:               reservations.GetRecordFieldStringValue(reservations.FieldReservationType, fieldIndexes, record),
 	}, nil
 }

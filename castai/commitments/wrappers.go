@@ -38,7 +38,7 @@ func (c CastaiAzureReservationImport) getKey() commitmentConfigMatcherKey {
 	return commitmentConfigMatcherKey{
 		name:   lo.FromPtr(c.Name),
 		region: lo.FromPtr(c.Region),
-		typ:    lo.FromPtr(c.Type),
+		typ:    lo.FromPtr(c.ProductName),
 	}
 }
 
@@ -60,6 +60,9 @@ func (c CastaiCommitment) getKey() commitmentConfigMatcherKey {
 	}
 	if c.GcpResourceCudContext != nil {
 		res.typ = *c.GcpResourceCudContext.Type
+	}
+	if c.AzureReservationContext != nil {
+		res.typ = *c.AzureReservationContext.InstanceType
 	}
 	return res
 }
