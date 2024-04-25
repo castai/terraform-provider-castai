@@ -312,44 +312,55 @@ func MapConfigsToCommitments[C commitment](
 	cmts []C,
 	configs []*CommitmentConfigResource,
 ) ([]*commitmentWithConfig[C], error) {
-	res := make([]*commitmentWithConfig[C], 0, len(cmts))
-	configsByKey := map[commitmentConfigMatcherKey]*CommitmentConfigResource{}
-	for _, c := range configs {
-		var region string
-		if c.MatchRegion != nil {
-			_, region = path.Split(*c.MatchRegion)
+	res := make([]*commitmentWithConfig[C], len(cmts))
+	cfgKeys := map[commitmentConfigMatcherKey]struct{}{}
+	for _, cfg := range configs {
+		cfgKey := commitmentConfigMatcherKey{name: cfg.MatchName} // Name matcher is required, other fields are optional
+		if cfg.MatchRegion != nil {
+			_, cfgKey.region = path.Split(*cfg.MatchRegion)
 		}
-		key := commitmentConfigMatcherKey{
-			name:   c.MatchName,
-			region: region,
-			typ:    lo.FromPtr(c.MatchType),
+		if cfg.MatchType != nil {
+			cfgKey.typ = *cfg.MatchType
 		}
-		if _, ok := configsByKey[key]; ok { // Make sure each config matcher is unique
-			return nil, fmt.Errorf("duplicate configuration for %s", key.String())
+		if _, ok := cfgKeys[cfgKey]; ok {
+			return nil, fmt.Errorf("duplicate configuration for %s", cfgKey)
 		}
-		configsByKey[key] = c
+
+		cfgKeys[cfgKey] = struct{}{}
+
+		var assigned bool
+		for i, cud := range cmts {
+			cudKey := cud.getKey()
+			// If the configuration doesn't have a field set, it should match any value of that field
+			if cfgKey.region == "" {
+				cudKey.region = ""
+			}
+			if cfgKey.typ == "" {
+				cudKey.typ = ""
+			}
+			if cudKey != cfgKey {
+				continue
+			}
+
+			if assigned {
+				return nil, fmt.Errorf("duplicate import for %s", cfgKey.String())
+			}
+			if res[i] != nil {
+				return nil, fmt.Errorf("commitment already assigned to a configuration")
+			}
+			res[i] = &commitmentWithConfig[C]{Commitment: cud, Config: cfg}
+			assigned = true
+		}
+		if !assigned {
+			return nil, errors.New("not all commitment configurations were mapped")
+		}
 	}
 
-	var mappedConfigs int
-	processedKeys := map[commitmentConfigMatcherKey]struct{}{}
-	for _, cmt := range cmts {
-		key := cmt.getKey()
-		if _, ok := processedKeys[key]; ok { // Make sure each CUD is unique
-			return nil, fmt.Errorf("duplicate import for %s", key.String())
+	// Make sure we don't ignore commitments without configurations
+	for i, cud := range cmts {
+		if res[i] == nil {
+			res[i] = &commitmentWithConfig[C]{Commitment: cud}
 		}
-		processedKeys[key] = struct{}{}
-
-		config, hasConfig := configsByKey[key]
-		if hasConfig {
-			mappedConfigs++
-		}
-		res = append(res, &commitmentWithConfig[C]{
-			Commitment: cmt,
-			Config:     config,
-		})
-	}
-	if mappedConfigs != len(configs) { // Make sure all configs were mapped
-		return nil, fmt.Errorf("not all commitment configurations were mapped")
 	}
 	return res, nil
 }

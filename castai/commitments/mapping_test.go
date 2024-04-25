@@ -747,6 +747,26 @@ func TestMapConfigsToCommitments(t *testing.T) {
 			configs: []*CommitmentConfigResource{cudCfg1, cudCfg1},
 			err:     errors.New("duplicate configuration for test-cud-1-us-central1-COMPUTE_OPTIMIZED_C2D"),
 		},
+		"should successfully map a config when more commitments are passed": {
+			cuds: []commitment{
+				CastaiGCPCommitmentImport{CastaiInventoryV1beta1GCPCommitmentImport: cudImport2},
+				CastaiGCPCommitmentImport{CastaiInventoryV1beta1GCPCommitmentImport: cudImport3},
+				CastaiGCPCommitmentImport{CastaiInventoryV1beta1GCPCommitmentImport: cudImport1},
+			},
+			configs: []*CommitmentConfigResource{cudCfg2},
+			expected: []*commitmentWithConfig[commitment]{
+				{
+					Commitment: CastaiGCPCommitmentImport{CastaiInventoryV1beta1GCPCommitmentImport: cudImport2},
+					Config:     cudCfg2,
+				},
+				{
+					Commitment: CastaiGCPCommitmentImport{CastaiInventoryV1beta1GCPCommitmentImport: cudImport3},
+				},
+				{
+					Commitment: CastaiGCPCommitmentImport{CastaiInventoryV1beta1GCPCommitmentImport: cudImport1},
+				},
+			},
+		},
 	}
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
