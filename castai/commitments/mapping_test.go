@@ -384,6 +384,140 @@ func TestMapCUDImportToResource(t *testing.T) {
 	}
 }
 
+func TestMapReservationImportToResource(t *testing.T) {
+	makeInput := func() *commitmentWithConfig[CastaiAzureReservationImport] {
+		return &commitmentWithConfig[CastaiAzureReservationImport]{
+			Commitment: CastaiAzureReservationImport{
+				CastaiInventoryV1beta1AzureReservationImport: testAzureCommitmentImport,
+			},
+		}
+	}
+
+	tests := map[string]struct {
+		input    *commitmentWithConfig[CastaiAzureReservationImport]
+		expected *AzureReservationResource
+	}{
+		"should succeed, no config passed": {
+			input: makeInput(),
+			expected: &AzureReservationResource{
+				Count:              2,
+				ReservationID:      lo.FromPtr(testAzureCommitmentImport.ReservationId),
+				ReservationStatus:  lo.FromPtr(testAzureCommitmentImport.Status),
+				StartTimestamp:     lo.FromPtr(testAzureCommitmentImport.PurchaseDate),
+				EndTimestamp:       lo.FromPtr(testAzureCommitmentImport.ExpirationDate),
+				Name:               lo.FromPtr(testAzureCommitmentImport.Name),
+				Region:             lo.FromPtr(testAzureCommitmentImport.Region),
+				InstanceType:       lo.FromPtr(testAzureCommitmentImport.ProductName),
+				Plan:               "THREE_YEAR",
+				Scope:              lo.FromPtr(testAzureCommitmentImport.Scope),
+				ScopeResourceGroup: lo.FromPtr(testAzureCommitmentImport.ScopeResourceGroup),
+				ScopeSubscription:  lo.FromPtr(testAzureCommitmentImport.ScopeSubscription),
+			},
+		},
+		"should succeed, with a config passed": {
+			input: func() *commitmentWithConfig[CastaiAzureReservationImport] {
+				c := makeInput()
+				c.Config = &CommitmentConfigResource{
+					Matcher: CommitmentConfigMatcherResource{
+						Name:   lo.FromPtr(testAzureCommitmentImport.Name),
+						Type:   testAzureCommitmentImport.ProductName,
+						Region: testAzureCommitmentImport.Region,
+					},
+					Prioritization: lo.ToPtr(true),
+					Status:         lo.ToPtr("ACTIVE"),
+					AllowedUsage:   lo.ToPtr[float32](0.7),
+				}
+				return c
+			}(),
+			expected: &AzureReservationResource{
+				AllowedUsage:       lo.ToPtr[float32](0.7),
+				Prioritization:     lo.ToPtr(true),
+				Status:             lo.ToPtr("ACTIVE"),
+				Count:              2,
+				ReservationID:      lo.FromPtr(testAzureCommitmentImport.ReservationId),
+				ReservationStatus:  lo.FromPtr(testAzureCommitmentImport.Status),
+				StartTimestamp:     lo.FromPtr(testAzureCommitmentImport.PurchaseDate),
+				EndTimestamp:       lo.FromPtr(testAzureCommitmentImport.ExpirationDate),
+				Name:               lo.FromPtr(testAzureCommitmentImport.Name),
+				Region:             lo.FromPtr(testAzureCommitmentImport.Region),
+				InstanceType:       lo.FromPtr(testAzureCommitmentImport.ProductName),
+				Plan:               "THREE_YEAR",
+				Scope:              lo.FromPtr(testAzureCommitmentImport.Scope),
+				ScopeResourceGroup: lo.FromPtr(testAzureCommitmentImport.ScopeResourceGroup),
+				ScopeSubscription:  lo.FromPtr(testAzureCommitmentImport.ScopeSubscription),
+			},
+		},
+		"should map P1Y term to ONE_YEAR plan": {
+			input: &commitmentWithConfig[CastaiAzureReservationImport]{
+				Commitment: CastaiAzureReservationImport{
+					CastaiInventoryV1beta1AzureReservationImport: sdk.CastaiInventoryV1beta1AzureReservationImport{
+						Term: lo.ToPtr("P1Y"),
+					},
+				},
+			},
+			expected: &AzureReservationResource{
+				Plan: "ONE_YEAR",
+			},
+		},
+		"should map P3Y term to THREE_YEAR plan": {
+			input: &commitmentWithConfig[CastaiAzureReservationImport]{
+				Commitment: CastaiAzureReservationImport{
+					CastaiInventoryV1beta1AzureReservationImport: sdk.CastaiInventoryV1beta1AzureReservationImport{
+						Term: lo.ToPtr("P3Y"),
+					},
+				},
+			},
+			expected: &AzureReservationResource{
+				Plan: "THREE_YEAR",
+			},
+		},
+		"should map ONE_YEAR term to ONE_YEAR plan": {
+			input: &commitmentWithConfig[CastaiAzureReservationImport]{
+				Commitment: CastaiAzureReservationImport{
+					CastaiInventoryV1beta1AzureReservationImport: sdk.CastaiInventoryV1beta1AzureReservationImport{
+						Term: lo.ToPtr("ONE_YEAR"),
+					},
+				},
+			},
+			expected: &AzureReservationResource{
+				Plan: "ONE_YEAR",
+			},
+		},
+		"should map ONE_YEAR term to THREE_YEAR plan": {
+			input: &commitmentWithConfig[CastaiAzureReservationImport]{
+				Commitment: CastaiAzureReservationImport{
+					CastaiInventoryV1beta1AzureReservationImport: sdk.CastaiInventoryV1beta1AzureReservationImport{
+						Term: lo.ToPtr("THREE_YEAR"),
+					},
+				},
+			},
+			expected: &AzureReservationResource{
+				Plan: "THREE_YEAR",
+			},
+		},
+		"should map term to ONE_YEAR by default": {
+			input: &commitmentWithConfig[CastaiAzureReservationImport]{
+				Commitment: CastaiAzureReservationImport{
+					CastaiInventoryV1beta1AzureReservationImport: sdk.CastaiInventoryV1beta1AzureReservationImport{
+						Term: lo.ToPtr("SOME_OTHER_TERM"),
+					},
+				},
+			},
+			expected: &AzureReservationResource{
+				Plan: "ONE_YEAR",
+			},
+		},
+	}
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			r := require.New(t)
+			actual := MapReservationImportToResource(tt.input)
+			r.NotNil(actual)
+			r.Equal(tt.expected, actual)
+		})
+	}
+}
+
 func TestMapConfigsToCommitments(t *testing.T) {
 	var (
 		cudImport1 = sdk.CastaiInventoryV1beta1GCPCommitmentImport{
@@ -606,13 +740,21 @@ func TestMapConfigsToCommitments(t *testing.T) {
 			configs: []*CommitmentConfigResource{cudCfg1, cudCfg3},
 			err:     errors.New("not all commitment configurations were mapped"),
 		},
-		"should fail as one import can be mapped to multiple configs": {
+		"should fail as one config can be mapped to multiple cud imports": {
 			cuds: []commitment{
 				CastaiGCPCommitmentImport{CastaiInventoryV1beta1GCPCommitmentImport: cudImport1},
 				CastaiGCPCommitmentImport{CastaiInventoryV1beta1GCPCommitmentImport: cudImport1},
 			},
 			configs: []*CommitmentConfigResource{cudCfg1, cudCfg3},
 			err:     errors.New("duplicate import for test-cud-1-us-central1-COMPUTE_OPTIMIZED_C2D"),
+		},
+		"should fail as one config can be mapped to multiple reservation imports": {
+			cuds: []commitment{
+				CastaiAzureReservationImport{CastaiInventoryV1beta1AzureReservationImport: reservationImport1},
+				CastaiAzureReservationImport{CastaiInventoryV1beta1AzureReservationImport: reservationImport1},
+			},
+			configs: []*CommitmentConfigResource{reservationCfg1, reservationCfg3},
+			err:     errors.New("duplicate import for test-reservation-1-eastus-Standard_D32as_v4"),
 		},
 		"should fail as duplicate configs are passed": {
 			cuds: []commitment{
@@ -728,7 +870,98 @@ func TestMapConfiguredCUDImportsToResources(t *testing.T) {
 	}
 }
 
-func TestMapCUDImportWithConfigToUpdateRequest(t *testing.T) {
+func TestMapConfiguredReservationImportsToResources(t *testing.T) {
+	tests := map[string]struct {
+		cuds     []sdk.CastaiInventoryV1beta1AzureReservationImport
+		configs  []*CommitmentConfigResource
+		expected []*AzureReservationResource
+		err      error
+	}{
+		"should fail as there are more configs than reservations": {
+			configs: []*CommitmentConfigResource{
+				{
+					Matcher: CommitmentConfigMatcherResource{
+						Name: "test-reservation",
+					},
+					Prioritization: lo.ToPtr(true),
+				},
+				{
+					Matcher: CommitmentConfigMatcherResource{
+						Name: "test-reservation-2",
+					},
+					AllowedUsage: lo.ToPtr[float32](0.45),
+				},
+			},
+			cuds: []sdk.CastaiInventoryV1beta1AzureReservationImport{
+				{
+					Name: lo.ToPtr("test-reservation"),
+				},
+			},
+			err: errors.New("more configurations than reservations"),
+		},
+		"should successfully map reservations with configs to resources": {
+			cuds: []sdk.CastaiInventoryV1beta1AzureReservationImport{testAzureCommitmentImport},
+			configs: []*CommitmentConfigResource{
+				{
+					Matcher: CommitmentConfigMatcherResource{
+						Name:   lo.FromPtr(testAzureCommitmentImport.Name),
+						Type:   testAzureCommitmentImport.ProductName,
+						Region: testAzureCommitmentImport.Region,
+					},
+					Prioritization: lo.ToPtr(true),
+					Status:         lo.ToPtr("ACTIVE"),
+					AllowedUsage:   lo.ToPtr[float32](0.5),
+				},
+			},
+			expected: []*AzureReservationResource{
+				{
+					AllowedUsage:       lo.ToPtr[float32](0.5),
+					Prioritization:     lo.ToPtr(true),
+					Status:             lo.ToPtr("ACTIVE"),
+					Count:              int(lo.FromPtr(testAzureCommitmentImport.Quantity)),
+					ReservationID:      lo.FromPtr(testAzureCommitmentImport.ReservationId),
+					ReservationStatus:  lo.FromPtr(testAzureCommitmentImport.Status),
+					StartTimestamp:     lo.FromPtr(testAzureCommitmentImport.PurchaseDate),
+					EndTimestamp:       lo.FromPtr(testAzureCommitmentImport.ExpirationDate),
+					Name:               lo.FromPtr(testAzureCommitmentImport.Name),
+					Region:             lo.FromPtr(testAzureCommitmentImport.Region),
+					InstanceType:       lo.FromPtr(testAzureCommitmentImport.ProductName),
+					Plan:               "THREE_YEAR",
+					Scope:              lo.FromPtr(testAzureCommitmentImport.Scope),
+					ScopeResourceGroup: lo.FromPtr(testAzureCommitmentImport.ScopeResourceGroup),
+					ScopeSubscription:  lo.FromPtr(testAzureCommitmentImport.ScopeSubscription),
+				},
+			},
+		},
+	}
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			r := require.New(t)
+			actual, err := MapConfiguredReservationImportsToResources(tt.cuds, tt.configs)
+			if tt.err == nil {
+				r.NoError(err)
+				r.NotNil(actual)
+				r.Equal(tt.expected, actual)
+
+				// Do the same test but for wrapped reservations
+				wrappedReservations := make([]CastaiAzureReservationImport, len(tt.cuds))
+				for i, cud := range tt.cuds {
+					wrappedReservations[i] = CastaiAzureReservationImport{CastaiInventoryV1beta1AzureReservationImport: cud}
+				}
+				actual, err = MapConfiguredReservationImportsToResources(wrappedReservations, tt.configs)
+				r.NoError(err)
+				r.NotNil(actual)
+				r.Equal(tt.expected, actual)
+			} else {
+				r.Error(err)
+				r.Nil(actual)
+				r.Equal(tt.err.Error(), err.Error())
+			}
+		})
+	}
+}
+
+func TestMapCommitmentImportWithConfigToUpdateRequest(t *testing.T) {
 	id := uuid.New()
 	now := time.Now()
 	tests := map[string]struct {
@@ -739,22 +972,15 @@ func TestMapCUDImportWithConfigToUpdateRequest(t *testing.T) {
 			input: &commitmentWithConfig[CastaiCommitment]{
 				Commitment: CastaiCommitment{
 					CastaiInventoryV1beta1Commitment: sdk.CastaiInventoryV1beta1Commitment{
-						AllowedUsage: lo.ToPtr[float32](0.75),
-						EndDate:      lo.ToPtr(now.Add(365 * 24 * time.Hour)),
-						GcpResourceCudContext: &sdk.CastaiInventoryV1beta1GCPResourceCUD{
-							Cpu:      lo.ToPtr("8"),
-							CudId:    lo.ToPtr("123456"),
-							MemoryMb: lo.ToPtr("1024"),
-							Plan:     lo.ToPtr[sdk.CastaiInventoryV1beta1GCPResourceCUDCUDPlan]("TWELVE_MONTHS"),
-							Status:   lo.ToPtr("ACTIVE"),
-							Type:     lo.ToPtr("COMPUTE_OPTIMIZED_C2D"),
-						},
-						Id:             lo.ToPtr(id.String()),
-						Name:           lo.ToPtr("test-cud-1"),
-						Prioritization: lo.ToPtr(true),
-						Region:         lo.ToPtr("us-central1"),
-						StartDate:      lo.ToPtr(now.Add(-24 * time.Hour)),
-						Status:         lo.ToPtr[sdk.CastaiInventoryV1beta1CommitmentStatus]("ACTIVE"),
+						AllowedUsage:          lo.ToPtr[float32](0.75),
+						EndDate:               lo.ToPtr(now.Add(365 * 24 * time.Hour)),
+						GcpResourceCudContext: testGCPCUDContext,
+						Id:                    lo.ToPtr(id.String()),
+						Name:                  lo.ToPtr("test-cud-1"),
+						Prioritization:        lo.ToPtr(true),
+						Region:                lo.ToPtr("us-central1"),
+						StartDate:             lo.ToPtr(now.Add(-24 * time.Hour)),
+						Status:                lo.ToPtr[sdk.CastaiInventoryV1beta1CommitmentStatus]("ACTIVE"),
 					},
 				},
 				Config: &CommitmentConfigResource{
@@ -791,19 +1017,12 @@ func TestMapCUDImportWithConfigToUpdateRequest(t *testing.T) {
 			input: &commitmentWithConfig[CastaiCommitment]{
 				Commitment: CastaiCommitment{
 					CastaiInventoryV1beta1Commitment: sdk.CastaiInventoryV1beta1Commitment{
-						EndDate: lo.ToPtr(now.Add(365 * 24 * time.Hour)),
-						GcpResourceCudContext: &sdk.CastaiInventoryV1beta1GCPResourceCUD{
-							Cpu:      lo.ToPtr("8"),
-							CudId:    lo.ToPtr("123456"),
-							MemoryMb: lo.ToPtr("1024"),
-							Plan:     lo.ToPtr[sdk.CastaiInventoryV1beta1GCPResourceCUDCUDPlan]("TWELVE_MONTHS"),
-							Status:   lo.ToPtr("ACTIVE"),
-							Type:     lo.ToPtr("COMPUTE_OPTIMIZED_C2D"),
-						},
-						Id:        lo.ToPtr(id.String()),
-						Name:      lo.ToPtr("test-cud-1"),
-						Region:    lo.ToPtr("us-central1"),
-						StartDate: lo.ToPtr(now.Add(-24 * time.Hour)),
+						EndDate:               lo.ToPtr(now.Add(365 * 24 * time.Hour)),
+						GcpResourceCudContext: testGCPCUDContext,
+						Id:                    lo.ToPtr(id.String()),
+						Name:                  lo.ToPtr("test-cud-1"),
+						Region:                lo.ToPtr("us-central1"),
+						StartDate:             lo.ToPtr(now.Add(-24 * time.Hour)),
 					},
 				},
 			},
@@ -821,6 +1040,66 @@ func TestMapCUDImportWithConfigToUpdateRequest(t *testing.T) {
 				Name:      lo.ToPtr("test-cud-1"),
 				Region:    lo.ToPtr("us-central1"),
 				StartDate: lo.ToPtr(now.Add(-24 * time.Hour)),
+			},
+		},
+		"should map azure reservation import with config": {
+			input: &commitmentWithConfig[CastaiCommitment]{
+				Commitment: CastaiCommitment{
+					CastaiInventoryV1beta1Commitment: sdk.CastaiInventoryV1beta1Commitment{
+						AllowedUsage:            lo.ToPtr[float32](0.75),
+						EndDate:                 lo.ToPtr(now.Add(365 * 24 * time.Hour)),
+						AzureReservationContext: testAzureReservationContext,
+						Id:                      lo.ToPtr(id.String()),
+						Name:                    lo.ToPtr("test-reservation-1"),
+						Prioritization:          lo.ToPtr(true),
+						Region:                  lo.ToPtr("eastus"),
+						StartDate:               lo.ToPtr(now.Add(-24 * time.Hour)),
+						Status:                  lo.ToPtr[sdk.CastaiInventoryV1beta1CommitmentStatus]("ACTIVE"),
+					},
+				},
+				Config: &CommitmentConfigResource{
+					Matcher: CommitmentConfigMatcherResource{
+						Name:   "test-reservation-1",
+						Type:   testAzureReservationContext.InstanceType,
+						Region: lo.ToPtr("eastus"),
+					},
+					Prioritization: lo.ToPtr(false),
+					Status:         lo.ToPtr("INACTIVE"),
+					AllowedUsage:   lo.ToPtr[float32](0.7),
+				},
+			},
+			expected: sdk.CommitmentsAPIUpdateCommitmentJSONRequestBody{
+				AllowedUsage:            lo.ToPtr[float32](0.7),
+				EndDate:                 lo.ToPtr(now.Add(365 * 24 * time.Hour)),
+				AzureReservationContext: testAzureReservationContext,
+				Id:                      lo.ToPtr(id.String()),
+				Name:                    lo.ToPtr("test-reservation-1"),
+				Prioritization:          lo.ToPtr(false),
+				Region:                  lo.ToPtr("eastus"),
+				StartDate:               lo.ToPtr(now.Add(-24 * time.Hour)),
+				Status:                  lo.ToPtr[sdk.CastaiInventoryV1beta1CommitmentStatus]("INACTIVE"),
+			},
+		},
+		"should map azure reservation import without config": {
+			input: &commitmentWithConfig[CastaiCommitment]{
+				Commitment: CastaiCommitment{
+					CastaiInventoryV1beta1Commitment: sdk.CastaiInventoryV1beta1Commitment{
+						EndDate:                 lo.ToPtr(now.Add(365 * 24 * time.Hour)),
+						AzureReservationContext: testAzureReservationContext,
+						Id:                      lo.ToPtr(id.String()),
+						Name:                    lo.ToPtr("test-reservation-1"),
+						Region:                  lo.ToPtr("eastus"),
+						StartDate:               lo.ToPtr(now.Add(-24 * time.Hour)),
+					},
+				},
+			},
+			expected: sdk.CommitmentsAPIUpdateCommitmentJSONRequestBody{
+				EndDate:                 lo.ToPtr(now.Add(365 * 24 * time.Hour)),
+				AzureReservationContext: testAzureReservationContext,
+				Id:                      lo.ToPtr(id.String()),
+				Name:                    lo.ToPtr("test-reservation-1"),
+				Region:                  lo.ToPtr("eastus"),
+				StartDate:               lo.ToPtr(now.Add(-24 * time.Hour)),
 			},
 		},
 	}
@@ -879,30 +1158,68 @@ func TestSortResources(t *testing.T) {
 	}
 }
 
-var testGCPCommitmentImport = sdk.CastaiInventoryV1beta1GCPCommitmentImport{
-	AutoRenew:         lo.ToPtr(true),
-	Category:          lo.ToPtr("MACHINE"),
-	CreationTimestamp: lo.ToPtr("2023-01-01T00:00:00.000-07:00"),
-	EndTimestamp:      lo.ToPtr("2024-01-01T00:00:00.000-07:00"),
-	Id:                lo.ToPtr("123456"),
-	Kind:              lo.ToPtr("compute#commitment"),
-	Name:              lo.ToPtr("test-cud"),
-	Plan:              lo.ToPtr("TWELVE_MONTHS"),
-	// Remember to pass the region as a URL!
-	Region: lo.ToPtr("https://www.googleapis.com/compute/v1/projects/test-project/regions/us-central1"),
-	Resources: &[]sdk.CastaiInventoryV1beta1GCPResource{
-		{
-			Amount: lo.ToPtr("10"),
-			Type:   lo.ToPtr("VCPU"),
+var (
+	testGCPCommitmentImport = sdk.CastaiInventoryV1beta1GCPCommitmentImport{
+		AutoRenew:         lo.ToPtr(true),
+		Category:          lo.ToPtr("MACHINE"),
+		CreationTimestamp: lo.ToPtr("2023-01-01T00:00:00.000-07:00"),
+		EndTimestamp:      lo.ToPtr("2024-01-01T00:00:00.000-07:00"),
+		Id:                lo.ToPtr("123456"),
+		Kind:              lo.ToPtr("compute#commitment"),
+		Name:              lo.ToPtr("test-cud"),
+		Plan:              lo.ToPtr("TWELVE_MONTHS"),
+		// Remember to pass the region as a URL!
+		Region: lo.ToPtr("https://www.googleapis.com/compute/v1/projects/test-project/regions/us-central1"),
+		Resources: &[]sdk.CastaiInventoryV1beta1GCPResource{
+			{
+				Amount: lo.ToPtr("10"),
+				Type:   lo.ToPtr("VCPU"),
+			},
+			{
+				Amount: lo.ToPtr("20480"),
+				Type:   lo.ToPtr("MEMORY"),
+			},
 		},
-		{
-			Amount: lo.ToPtr("20480"),
-			Type:   lo.ToPtr("MEMORY"),
-		},
-	},
-	SelfLink:       lo.ToPtr("https://www.googleapis.com/compute/v1/projects/test-project/zones/us-central1/commitments/123456"),
-	StartTimestamp: lo.ToPtr("2023-01-01T00:00:00.000-07:00"),
-	Status:         lo.ToPtr("ACTIVE"),
-	StatusMessage:  lo.ToPtr("The commitment is active, and so will apply to current resource usage."),
-	Type:           lo.ToPtr("COMPUTE_OPTIMIZED_C2D"),
-}
+		SelfLink:       lo.ToPtr("https://www.googleapis.com/compute/v1/projects/test-project/zones/us-central1/commitments/123456"),
+		StartTimestamp: lo.ToPtr("2023-01-01T00:00:00.000-07:00"),
+		Status:         lo.ToPtr("ACTIVE"),
+		StatusMessage:  lo.ToPtr("The commitment is active, and so will apply to current resource usage."),
+		Type:           lo.ToPtr("COMPUTE_OPTIMIZED_C2D"),
+	}
+
+	testAzureCommitmentImport = sdk.CastaiInventoryV1beta1AzureReservationImport{
+		ExpirationDate:     lo.ToPtr("2024-01-01T00:00:00.000-07:00"),
+		Name:               lo.ToPtr("test-reservation"),
+		ProductName:        lo.ToPtr("Standard_D32as_v4"),
+		PurchaseDate:       lo.ToPtr("2023-01-01T00:00:00.000-07:00"),
+		Quantity:           lo.ToPtr[int32](2),
+		Region:             lo.ToPtr("eastus"),
+		ReservationId:      lo.ToPtr(uuid.New().String()),
+		Scope:              lo.ToPtr("Single subscription"),
+		ScopeResourceGroup: lo.ToPtr("All resource groups"),
+		ScopeSubscription:  lo.ToPtr(uuid.New().String()),
+		Status:             lo.ToPtr("Succeeded"),
+		Term:               lo.ToPtr("P3Y"),
+		Type:               lo.ToPtr("VirtualMachines"),
+	}
+
+	testGCPCUDContext = &sdk.CastaiInventoryV1beta1GCPResourceCUD{
+		Cpu:      lo.ToPtr("8"),
+		CudId:    lo.ToPtr("123456"),
+		MemoryMb: lo.ToPtr("1024"),
+		Plan:     lo.ToPtr[sdk.CastaiInventoryV1beta1GCPResourceCUDCUDPlan]("TWELVE_MONTHS"),
+		Status:   lo.ToPtr("ACTIVE"),
+		Type:     lo.ToPtr("COMPUTE_OPTIMIZED_C2D"),
+	}
+
+	testAzureReservationContext = &sdk.CastaiInventoryV1beta1AzureReservation{
+		Count:              lo.ToPtr[int32](2),
+		Id:                 lo.ToPtr("123456"),
+		InstanceType:       lo.ToPtr("Standard_D32as_v4"),
+		Plan:               lo.ToPtr[sdk.CastaiInventoryV1beta1AzureReservationReservationPlan]("THREE_YEAR"),
+		Scope:              lo.ToPtr("Single subscription"),
+		ScopeResourceGroup: lo.ToPtr("All resource groups"),
+		ScopeSubscription:  lo.ToPtr("scope-subscription"),
+		Status:             lo.ToPtr("Succeeded"),
+	}
+)

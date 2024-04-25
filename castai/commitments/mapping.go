@@ -258,21 +258,7 @@ func MapCUDImportToResource(
 func MapReservationImportToResource(
 	cudWithCfg *commitmentWithConfig[CastaiAzureReservationImport],
 ) *AzureReservationResource {
-	var plan string
-	if cudWithCfg.Commitment.Term != nil {
-		switch *cudWithCfg.Commitment.Term { // normalize the values just like CAST AI's API does
-		case "P1Y":
-			plan = "ONE_YEAR"
-		case "P3Y":
-			plan = "THREE_YEAR"
-		case "ONE_YEAR":
-		case "THREE_YEAR":
-		default:
-			plan = "ONE_YEAR"
-		}
-	}
-
-	return &AzureReservationResource{
+	res := &AzureReservationResource{
 		Count:              int(lo.FromPtr(cudWithCfg.Commitment.Quantity)),
 		ReservationID:      lo.FromPtr(cudWithCfg.Commitment.ReservationId),
 		ReservationStatus:  lo.FromPtr(cudWithCfg.Commitment.Status),
@@ -281,11 +267,30 @@ func MapReservationImportToResource(
 		Name:               lo.FromPtr(cudWithCfg.Commitment.Name),
 		Region:             lo.FromPtr(cudWithCfg.Commitment.Region),
 		InstanceType:       lo.FromPtr(cudWithCfg.Commitment.ProductName),
-		Plan:               plan,
+		Plan:               lo.FromPtr(cudWithCfg.Commitment.Term),
 		Scope:              lo.FromPtr(cudWithCfg.Commitment.Scope),
 		ScopeResourceGroup: lo.FromPtr(cudWithCfg.Commitment.ScopeResourceGroup),
 		ScopeSubscription:  lo.FromPtr(cudWithCfg.Commitment.ScopeSubscription),
 	}
+
+	switch res.Plan { // normalize the values just like CAST AI's API does
+	case "P1Y":
+		res.Plan = "ONE_YEAR"
+	case "P3Y":
+		res.Plan = "THREE_YEAR"
+	case "ONE_YEAR":
+	case "THREE_YEAR":
+	default:
+		res.Plan = "ONE_YEAR"
+	}
+
+	if cudWithCfg.Config != nil {
+		res.AllowedUsage = cudWithCfg.Config.AllowedUsage
+		res.Prioritization = cudWithCfg.Config.Prioritization
+		res.Status = cudWithCfg.Config.Status
+	}
+
+	return res
 }
 
 // commitmentConfigMatcherKey is a utility type for mapping CUDs to their configurations
