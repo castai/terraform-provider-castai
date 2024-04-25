@@ -23,7 +23,6 @@ resource "castai_commitments" "gcp_test" {
       prioritization = true
       allowed_usage  = 0.6
       status         = "Inactive"
-<<<<<<< HEAD
     }
   ]
 }
@@ -38,8 +37,6 @@ resource "castai_commitments" "azure_test" {
       prioritization = false
       allowed_usage  = 0.9
       status         = "Active"
-=======
->>>>>>> max/PRICE-32/commitments
     }
   ]
 }
