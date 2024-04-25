@@ -472,23 +472,22 @@ func deleteCommitment(ctx context.Context, meta any, id string) error {
 }
 
 func populateCommitmentsResourceData(ctx context.Context, d *schema.ResourceData, meta any) error {
+	// schema.ResourceData contains a blank state instance when the function is called by the state importer, so
+	// we need to figure the CSP using the import ID
+	csp := getCspFromImportID(d.Id())
+	if csp == "" {
+		return errors.New("failed to get csp from import id")
+	}
+
 	orgCommitments, err := getOrganizationCommitments(ctx, meta)
 	if err != nil {
 		return err
 	}
 
-	cuds, cudsOk, err := getCUDImportResources(d)
-	if err != nil {
-		return err
-	}
-
-	reservations, reservationsOk, err := getReservationImportResources(d)
-	if err != nil {
-		return err
-	}
-
-	var gcpResources []*commitments.GCPCUDResource
-	var azureResources []*commitments.AzureReservationResource
+	var (
+		gcpResources   []*commitments.GCPCUDResource
+		azureResources []*commitments.AzureReservationResource
+	)
 	for _, c := range orgCommitments {
 		c := c
 		switch {
@@ -507,15 +506,23 @@ func populateCommitmentsResourceData(ctx context.Context, d *schema.ResourceData
 		}
 	}
 
-	if len(azureResources) > 0 {
+	switch csp {
+	case "azure":
+		reservations, reservationsOk, err := getReservationImportResources(d)
+		if err != nil {
+			return err
+		}
 		if reservationsOk {
 			commitments.SortResources(azureResources, reservations)
 		}
 		if err := d.Set(commitments.FieldAzureReservations, azureResources); err != nil {
 			return fmt.Errorf("setting azure reservations: %w", err)
 		}
-	}
-	if len(gcpResources) > 0 {
+	case "gcp":
+		cuds, cudsOk, err := getCUDImportResources(d)
+		if err != nil {
+			return err
+		}
 		if cudsOk {
 			commitments.SortResources(gcpResources, cuds)
 		}
@@ -554,4 +561,12 @@ func getCommitmentsImportID(ctx context.Context, data *schema.ResourceData, meta
 		cloud = "gcp"
 	}
 	return defOrgID + ":" + cloud, nil
+}
+
+func getCspFromImportID(id string) string {
+	parts := strings.Split(id, ":")
+	if len(parts) != 2 {
+		return ""
+	}
+	return parts[1]
 }
