@@ -169,6 +169,12 @@ func TestCommitments_Azure_BasicReservations(t *testing.T) {
 					checkAttr("azure_reservations.0.scope_resource_group", "All resource groups"),
 				),
 			},
+			{
+				ResourceName:            "castai_commitments.test_azure",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{commitments.FieldAzureReservationsCSV},
+			},
 		},
 	})
 }
