@@ -36,15 +36,14 @@ type (
 		Type           string `mapstructure:"type"`
 	}
 	GCPCUDConfigResource struct {
-		Matcher        GCPCUDConfigMatcherResource `mapstructure:"matcher"`
-		Prioritization *bool                       `mapstructure:"prioritization,omitempty"`
-		Status         *string                     `mapstructure:"status,omitempty"`
-		AllowedUsage   *float32                    `mapstructure:"allowed_usage,omitempty"`
-	}
-	GCPCUDConfigMatcherResource struct {
-		Name   string  `mapstructure:"name"`
-		Type   *string `mapstructure:"type,omitempty"`
-		Region *string `mapstructure:"region,omitempty"`
+		// Matcher fields - normally we'd use a struct but Terraform poorly handles nested objects
+		MatchName   string  `mapstructure:"match_name"`
+		MatchType   *string `mapstructure:"match_type,omitempty"`
+		MatchRegion *string `mapstructure:"match_region,omitempty"`
+		// Actual config fields
+		Prioritization *bool    `mapstructure:"prioritization,omitempty"`
+		Status         *string  `mapstructure:"status,omitempty"`
+		AllowedUsage   *float32 `mapstructure:"allowed_usage,omitempty"`
 	}
 
 	AzureReservationResource struct {
@@ -94,8 +93,8 @@ func (r *AzureReservationResource) GetIDInCloud() string {
 	return r.ReservationID
 }
 
-func (m GCPCUDConfigMatcherResource) Validate() error {
-	if m.Name == "" {
+func (m GCPCUDConfigResource) Validate() error {
+	if m.MatchName == "" {
 		return errors.New("matcher name is required")
 	}
 	return nil
@@ -226,13 +225,13 @@ func MapConfigsToCUDs[C cud](cuds []C, configs []*GCPCUDConfigResource) ([]*cudW
 	configsByKey := map[cudConfigMatcherKey]*GCPCUDConfigResource{}
 	for _, c := range configs {
 		var region string
-		if c.Matcher.Region != nil {
-			_, region = path.Split(*c.Matcher.Region)
+		if c.MatchRegion != nil {
+			_, region = path.Split(*c.MatchRegion)
 		}
 		key := cudConfigMatcherKey{
-			name:   c.Matcher.Name,
+			name:   c.MatchName,
 			region: region,
-			typ:    lo.FromPtr(c.Matcher.Type),
+			typ:    lo.FromPtr(c.MatchType),
 		}
 		if _, ok := configsByKey[key]; ok { // Make sure each config matcher is unique
 			return nil, fmt.Errorf("duplicate CUD configuration for %s", key.String())

@@ -199,11 +199,9 @@ func TestMapCUDImportToResource(t *testing.T) {
 			input: func() *cudWithConfig[CastaiGCPCommitmentImport] {
 				c := makeInput()
 				c.Config = &GCPCUDConfigResource{
-					Matcher: GCPCUDConfigMatcherResource{
-						Name:   "test-cud",
-						Type:   lo.ToPtr("COMPUTE_OPTIMIZED_C2D"),
-						Region: lo.ToPtr("us-central1"),
-					},
+					MatchName:      "test-cud",
+					MatchType:      lo.ToPtr("COMPUTE_OPTIMIZED_C2D"),
+					MatchRegion:    lo.ToPtr("us-central1"),
 					Prioritization: lo.ToPtr(true),
 					Status:         lo.ToPtr("ACTIVE"),
 					AllowedUsage:   lo.ToPtr[float32](0.7),
@@ -323,31 +321,25 @@ func TestMapConfigsToCUDs(t *testing.T) {
 		}
 
 		cfg1 = &GCPCUDConfigResource{
-			Matcher: GCPCUDConfigMatcherResource{
-				Name:   "test-cud-1",
-				Type:   lo.ToPtr("COMPUTE_OPTIMIZED_C2D"),
-				Region: lo.ToPtr("us-central1"),
-			},
+			MatchName:      "test-cud-1",
+			MatchType:      lo.ToPtr("COMPUTE_OPTIMIZED_C2D"),
+			MatchRegion:    lo.ToPtr("us-central1"),
 			Prioritization: lo.ToPtr(true),
 			Status:         lo.ToPtr("ACTIVE"),
 			AllowedUsage:   lo.ToPtr[float32](0.5),
 		}
 		cfg2 = &GCPCUDConfigResource{
-			Matcher: GCPCUDConfigMatcherResource{
-				Name:   "test-cud-2",
-				Type:   lo.ToPtr("COMPUTE_OPTIMIZED_N2D"),
-				Region: lo.ToPtr("us-central1"),
-			},
+			MatchName:      "test-cud-2",
+			MatchType:      lo.ToPtr("COMPUTE_OPTIMIZED_N2D"),
+			MatchRegion:    lo.ToPtr("us-central1"),
 			Prioritization: lo.ToPtr(false),
 			Status:         lo.ToPtr("INACTIVE"),
 			AllowedUsage:   lo.ToPtr[float32](0.7),
 		}
 		cfg3 = &GCPCUDConfigResource{
-			Matcher: GCPCUDConfigMatcherResource{
-				Name:   "test-cud-3",
-				Type:   lo.ToPtr("COMPUTE_OPTIMIZED_E2"),
-				Region: lo.ToPtr("eu-central1"),
-			},
+			MatchName:      "test-cud-3",
+			MatchType:      lo.ToPtr("COMPUTE_OPTIMIZED_E2"),
+			MatchRegion:    lo.ToPtr("eu-central1"),
 			Prioritization: lo.ToPtr(true),
 			Status:         lo.ToPtr("ACTIVE"),
 			AllowedUsage:   lo.ToPtr[float32](1),
@@ -416,9 +408,9 @@ func TestMapConfigsToCUDs(t *testing.T) {
 				{CastaiInventoryV1beta1GCPCommitmentImport: import1},
 			},
 			configs: func() []*GCPCUDConfigResource {
-				cfg1.Matcher.Region = lo.ToPtr("https://www.googleapis.com/compute/v1/projects/test-project/zones/" + *cfg1.Matcher.Region)
-				cfg2.Matcher.Region = lo.ToPtr("https://www.googleapis.com/compute/v1/projects/test-project/zones/" + *cfg2.Matcher.Region)
-				cfg3.Matcher.Region = lo.ToPtr("https://www.googleapis.com/compute/v1/projects/test-project/zones/" + *cfg3.Matcher.Region)
+				cfg1.MatchRegion = lo.ToPtr("https://www.googleapis.com/compute/v1/projects/test-project/zones/" + *cfg1.MatchRegion)
+				cfg2.MatchRegion = lo.ToPtr("https://www.googleapis.com/compute/v1/projects/test-project/zones/" + *cfg2.MatchRegion)
+				cfg3.MatchRegion = lo.ToPtr("https://www.googleapis.com/compute/v1/projects/test-project/zones/" + *cfg3.MatchRegion)
 				return []*GCPCUDConfigResource{cfg1, cfg2, cfg3} // make sure the order doesn't match the CUDs
 			}(),
 			expected: []*cudWithConfig[CastaiGCPCommitmentImport]{
@@ -492,15 +484,11 @@ func TestMapConfiguredCUDImportsToResources(t *testing.T) {
 		"should fail as there are more configs than cuds": {
 			configs: []*GCPCUDConfigResource{
 				{
-					Matcher: GCPCUDConfigMatcherResource{
-						Name: "test-cud",
-					},
+					MatchName:      "test-cud",
 					Prioritization: lo.ToPtr(true),
 				},
 				{
-					Matcher: GCPCUDConfigMatcherResource{
-						Name: "test-cud-2",
-					},
+					MatchName:    "test-cud-2",
 					AllowedUsage: lo.ToPtr[float32](0.45),
 				},
 			},
@@ -515,11 +503,9 @@ func TestMapConfiguredCUDImportsToResources(t *testing.T) {
 			cuds: []sdk.CastaiInventoryV1beta1GCPCommitmentImport{testGCPCommitmentImport},
 			configs: []*GCPCUDConfigResource{
 				{
-					Matcher: GCPCUDConfigMatcherResource{
-						Name:   lo.FromPtr(testGCPCommitmentImport.Name),
-						Type:   testGCPCommitmentImport.Type,
-						Region: testGCPCommitmentImport.Region,
-					},
+					MatchName:      lo.FromPtr(testGCPCommitmentImport.Name),
+					MatchType:      testGCPCommitmentImport.Type,
+					MatchRegion:    testGCPCommitmentImport.Region,
 					Prioritization: lo.ToPtr(true),
 					Status:         lo.ToPtr("ACTIVE"),
 					AllowedUsage:   lo.ToPtr[float32](0.5),
@@ -601,11 +587,9 @@ func TestMapCUDImportWithConfigToUpdateRequest(t *testing.T) {
 					},
 				},
 				Config: &GCPCUDConfigResource{
-					Matcher: GCPCUDConfigMatcherResource{
-						Name:   "test-cud-1",
-						Type:   lo.ToPtr("COMPUTE_OPTIMIZED_N2D"),
-						Region: lo.ToPtr("us-central1"),
-					},
+					MatchName:      "test-cud-1",
+					MatchType:      lo.ToPtr("COMPUTE_OPTIMIZED_N2D"),
+					MatchRegion:    lo.ToPtr("us-central1"),
 					Prioritization: lo.ToPtr(false),
 					Status:         lo.ToPtr("INACTIVE"),
 					AllowedUsage:   lo.ToPtr[float32](0.7),
