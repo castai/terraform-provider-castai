@@ -182,8 +182,8 @@ func getCUDImportResources(tfData resourceProvider) ([]*commitments.GCPCUDResour
 		return nil, true, fmt.Errorf("more configurations than CUDs")
 	}
 	for _, c := range configs {
-		if err := c.Matcher.Validate(); err != nil {
-			return nil, true, fmt.Errorf("invalid CUD matcher: %w", err)
+		if err := c.Validate(); err != nil {
+			return nil, true, fmt.Errorf("invalid config: %w", err)
 		}
 	}
 
@@ -213,8 +213,8 @@ func getReservationImportResources(tfData resourceProvider) ([]*commitments.Azur
 		return nil, true, fmt.Errorf("more configurations than reservations")
 	}
 	for _, c := range configs {
-		if err := c.Matcher.Validate(); err != nil {
-			return nil, true, fmt.Errorf("invalid CUD matcher: %w", err)
+		if err := c.Validate(); err != nil {
+			return nil, true, fmt.Errorf("invalid config: %w", err)
 		}
 	}
 

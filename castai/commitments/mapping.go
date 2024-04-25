@@ -69,15 +69,12 @@ type (
 	}
 
 	CommitmentConfigResource struct {
-		Matcher        CommitmentConfigMatcherResource `mapstructure:"matcher"`
-		Prioritization *bool                           `mapstructure:"prioritization,omitempty"`
-		Status         *string                         `mapstructure:"status,omitempty"`
-		AllowedUsage   *float32                        `mapstructure:"allowed_usage,omitempty"`
-	}
-	CommitmentConfigMatcherResource struct {
-		Name   string  `mapstructure:"name"`
-		Type   *string `mapstructure:"type,omitempty"`
-		Region *string `mapstructure:"region,omitempty"`
+		MatchName      string   `mapstructure:"match_name"`
+		MatchType      *string  `mapstructure:"match_type,omitempty"`
+		MatchRegion    *string  `mapstructure:"match_region,omitempty"`
+		Prioritization *bool    `mapstructure:"prioritization,omitempty"`
+		Status         *string  `mapstructure:"status,omitempty"`
+		AllowedUsage   *float32 `mapstructure:"allowed_usage,omitempty"`
 	}
 )
 
@@ -114,8 +111,8 @@ func (r *AzureReservationResource) GetIDInCloud() string {
 	return r.ReservationID
 }
 
-func (m CommitmentConfigMatcherResource) Validate() error {
-	if m.Name == "" {
+func (m CommitmentConfigResource) Validate() error {
+	if m.MatchName == "" {
 		return errors.New("matcher name is required")
 	}
 	return nil
@@ -319,13 +316,13 @@ func MapConfigsToCommitments[C commitment](
 	configsByKey := map[commitmentConfigMatcherKey]*CommitmentConfigResource{}
 	for _, c := range configs {
 		var region string
-		if c.Matcher.Region != nil {
-			_, region = path.Split(*c.Matcher.Region)
+		if c.MatchRegion != nil {
+			_, region = path.Split(*c.MatchRegion)
 		}
 		key := commitmentConfigMatcherKey{
-			name:   c.Matcher.Name,
+			name:   c.MatchName,
 			region: region,
-			typ:    lo.FromPtr(c.Matcher.Type),
+			typ:    lo.FromPtr(c.MatchType),
 		}
 		if _, ok := configsByKey[key]; ok { // Make sure each config matcher is unique
 			return nil, fmt.Errorf("duplicate configuration for %s", key.String())

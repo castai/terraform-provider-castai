@@ -340,21 +340,17 @@ resource "castai_commitments" "test_gcp" {
 
   commitment_configs = [
     {
-      matcher = {
-        name = "test-2"
-        type = "GENERAL_PURPOSE_E2"
-        region = "us-east4"
-      }
+      match_name = "test-2"
+      match_type = "GENERAL_PURPOSE_E2"
+      match_region = "us-east4"
       prioritization = true
 	  allowed_usage = 0.7
 	  status = "Active"
     },
     {
-      matcher = {
- 	    name = "test"
-        type = "COMPUTE_OPTIMIZED_C2D"
-        region = "us-east4"
-      }
+	  match_name = "test"
+	  match_type = "COMPUTE_OPTIMIZED_C2D"
+	  match_region = "us-east4"
       prioritization = false
       allowed_usage = 1
       status = "Active"
@@ -381,21 +377,17 @@ resource "castai_commitments" "test_gcp" {
 
   commitment_configs = [
     {
-      matcher = {
-        name = "test-2"
-        type = "GENERAL_PURPOSE_E2"
-        region = "us-east4"
-      }
+	  match_name = "test-2"
+	  match_type = "GENERAL_PURPOSE_E2"
+	  match_region = "us-east4"
       prioritization = true
 	  allowed_usage = 0.7
 	  status = "Active"
     },
     {
-      matcher = {
- 	    name = "test"
-        type = "COMPUTE_OPTIMIZED_C2D"
-        region = "us-east4"
-      }
+ 	  match_name = "test"
+      match_type = "COMPUTE_OPTIMIZED_C2D"
+      match_region = "us-east4"
       prioritization = false
       allowed_usage = 1
       status = "Active"
@@ -412,21 +404,17 @@ test-res-2,3b3de39c-bc44-4d69-be2d-69527dfe9959,630226bb-5170-4b95-90b0-f2227571
 
 	commitment_configs = [
         {
-            matcher = {
-                name = "test-res-1"
-                region = "eastus"
-                type = "Standard_D32as_v4"
-            }
+			match_name = "test-res-1"
+			match_region = "eastus"
+			match_type = "Standard_D32as_v4"
             prioritization = false
             allowed_usage = 0.6
             status = "Active"
         },
         {
-            matcher = {
-                name = "test-res-2"
-                region = "eastus"
-                type = "Standard_B1s"
-            }
+			match_name = "test-res-2"
+			match_region = "eastus"
+			match_type = "Standard_B1s"
             prioritization = true
             allowed_usage = 0.9
             status = "Active"
@@ -446,21 +434,17 @@ resource "castai_commitments" "test_gcp" {
 
   commitment_configs = [
     {
-      matcher = {
-        name = "test-2"
-        type = "GENERAL_PURPOSE_E2"
-        region = "us-east4"
-      }
+	  match_name = "test-2"
+	  match_type = "GENERAL_PURPOSE_E2"
+	  match_region = "us-east4"
       prioritization = true
 	  allowed_usage = 0.7
 	  status = "Active"
     },
     {
-      matcher = {
- 	    name = "test"
-        type = "COMPUTE_OPTIMIZED_C2D"
-        region = "us-east4"
-      }
+	  match_name = "test"
+	  match_type = "COMPUTE_OPTIMIZED_C2D"
+	  match_region = "us-east4"
       prioritization = false
       allowed_usage = 1
       status = "Active"
@@ -479,11 +463,9 @@ resource "castai_commitments" "test_gcp" {
 
   commitment_configs = [
     {
-      matcher = {
-        name = "test-2"
-        type = "GENERAL_PURPOSE_E2"
-        region = "us-east4"
-      }
+      match_name = "test-2"
+	  match_type = "GENERAL_PURPOSE_E2"
+	  match_region = "us-east4"
       prioritization = true
 	  allowed_usage = 0.7
 	  status = "Active"

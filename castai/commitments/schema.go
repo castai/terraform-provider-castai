@@ -84,11 +84,23 @@ var (
 		},
 	})
 	CommitmentConfigSchema = map[string]*schema.Schema{
-		"matcher": {
-			Type:        schema.TypeMap,
+		// Matcher fields
+		"match_name": {
+			Type:        schema.TypeString,
 			Required:    true,
-			Description: "Matcher for the configuration to map it to a CUD.",
+			Description: "Name of the commitment to match.",
 		},
+		"match_type": {
+			Type:        schema.TypeString,
+			Optional:    true,
+			Description: "Type of the commitment to match. For compute resources, it's the type of the machine.",
+		},
+		"match_region": {
+			Type:        schema.TypeString,
+			Required:    true,
+			Description: "Region of the commitment to match.",
+		},
+		// Actual config fields
 		"prioritization": {
 			Type:        schema.TypeBool,
 			Optional:    true,
