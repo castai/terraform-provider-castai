@@ -3,17 +3,14 @@ package castai
 import (
 	"context"
 	"errors"
-	"fmt"
 	"testing"
 	"time"
 
+	"github.com/castai/terraform-provider-castai/castai/commitments"
+	"github.com/castai/terraform-provider-castai/castai/sdk"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/samber/lo"
-	"github.com/stretchr/testify/require"
-
-	"github.com/castai/terraform-provider-castai/castai/commitments"
-	"github.com/castai/terraform-provider-castai/castai/sdk"
 )
 
 func TestCommitments_GCP_BasicCUDs(t *testing.T) {
@@ -362,29 +359,4 @@ test-res-2,3b3de39c-bc44-4d69-be2d-69527dfe9959,630226bb-5170-4b95-90b0-f2227571
 	]
 }
 `
-
-	reservationsCSV = `Name,Reservation Id,Reservation order Id,Status,Expiration date,Purchase date,Term,Scope,Scope subscription,Scope resource group,Type,Product name,Region,Quantity,Utilization % 1 Day,Utilization % 7 Day,Utilization % 30 Day,Deep link to reservation
-test-res-1,3b3de39c-bc44-4d69-be2d-69527dfe9958,630226bb-5170-4b95-90b0-f222757130c1,Succeeded,2050-01-01T00:00:00Z,2023-01-11T00:00:00Z,P3Y,Single subscription,8faa0959-093b-4612-8686-a996ac19db00,All resource groups,VirtualMachines,Standard_D32as_v4,eastus,3,100,100,100,https://portal.azure.com#resource/providers/microsoft.capacity/reservationOrders/59791a62-264b-4b9f-aa3a-5eeb761e4583/reservations/883afd52-54c8-4bc6-a0f2-ccbaf7b84bda/overview
-test-res-2,3b3de39c-bc44-4d69-be2d-69527dfe9957,630226bb-5170-4b95-90b0-f222757130c1,Succeeded,2050-01-01T00:00:00Z,2023-01-11T00:00:01Z,P3Y,Single subscription,8faa0959-093b-4612-8686-a996ac19db00,All resource groups,VirtualMachines,Standard_D32as_v4,eastus,2,100,100,100,https://portal.azure.com#resource/providers/microsoft.capacity/reservationOrders/59791a62-264b-4b9f-aa3a-5eeb761e4583/reservations/25b95bdb-b78b-4973-a60c-71e70f158eca/overview
-test-res-3,3b3de39c-bc44-4d69-be2d-69527dfe9956,630226bb-5170-4b95-90b0-f222757130c1,Succeeded,2050-01-01T00:00:00Z,2023-01-11T00:00:02Z,P3Y,Single subscription,8faa0959-093b-4612-8686-a996ac19db00,All resource groups,VirtualMachines,Standard_D32as_v4,eastus,1,100,100,100,https://portal.azure.com#resource/providers/microsoft.capacity/reservationOrders/59791a62-264b-4b9f-aa3a-5eeb761e4583/reservations/1745741b-f3c6-46a9-ad16-b93775a1bc38/overview`
 )
-
-type fakeReservationsProvider struct{}
-
-func (p *fakeReservationsProvider) GetOk(_ string) (any, bool) {
-	return reservationsCSV, true
-}
-
-func Test_getReservationImports(t *testing.T) {
-	r := require.New(t)
-	imports, ok, err := getReservationImports(&fakeReservationsProvider{})
-	r.True(ok)
-	r.NoError(err)
-	r.Len(imports, 3)
-
-	fmt.Println("----------")
-	for _, imp := range imports {
-		fmt.Printf("%+v\n", imp)
-	}
-	fmt.Println("----------")
-}
