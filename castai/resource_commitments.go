@@ -336,88 +336,77 @@ func resourceCastaiCommitmentsUpsert(ctx context.Context, data *schema.ResourceD
 		return diag.FromErr(err)
 	}
 
+	var imported []sdk.CastaiInventoryV1beta1Commitment
 	switch {
 	case reservationsOk:
 		if err := importReservations(ctx, meta, reservations); err != nil {
 			return diag.FromErr(err)
 		}
-
 		orgCommitments, err := getOrganizationCommitments(ctx, meta)
 		if err != nil {
 			return diag.FromErr(err)
 		}
-		azureCommitments := lo.Filter(orgCommitments, func(c sdk.CastaiInventoryV1beta1Commitment, _ int) bool {
+		imported = lo.Filter(orgCommitments, func(c sdk.CastaiInventoryV1beta1Commitment, _ int) bool {
 			return c.AzureReservationContext != nil
 		})
-		if len(azureCommitments) != len(reservations) {
-			return diag.Errorf("expected %d Azure commitments, got %d", len(reservations), len(azureCommitments))
-		}
-
-		configs, err := getCommitmentConfigs(data)
-		if err != nil {
-			return diag.FromErr(err)
-		}
-
-		cudsWithConfigs, err := commitments.MapConfigsToCommitments(
-			lo.Map(azureCommitments, func(item sdk.CastaiInventoryV1beta1Commitment, _ int) commitments.CastaiCommitment {
-				return commitments.CastaiCommitment{CastaiInventoryV1beta1Commitment: item}
-			}),
-			configs,
-		)
-		if err != nil {
-			return diag.FromErr(err)
-		}
-
-		for _, c := range cudsWithConfigs {
-			res, err := meta.(*ProviderConfig).api.CommitmentsAPIUpdateCommitmentWithResponse(
-				ctx,
-				lo.FromPtr(c.Commitment.Id),
-				commitments.MapCommitmentImportWithConfigToUpdateRequest(c),
-			)
-			if err := sdk.CheckOKResponse(res, err); err != nil {
-				return diag.Errorf("updating commitment: %v", err)
-			}
+		if len(imported) != len(reservations) {
+			return diag.Errorf("expected %d Azure commitments, got %d", len(reservations), len(imported))
 		}
 	case cudsOk:
 		if err := importCUDs(ctx, meta, cuds); err != nil {
 			return diag.FromErr(err)
 		}
-
 		orgCommitments, err := getOrganizationCommitments(ctx, meta)
 		if err != nil {
 			return diag.FromErr(err)
 		}
-		gcpCommitments := lo.Filter(orgCommitments, func(c sdk.CastaiInventoryV1beta1Commitment, _ int) bool {
+		imported = lo.Filter(orgCommitments, func(c sdk.CastaiInventoryV1beta1Commitment, _ int) bool {
 			return c.GcpResourceCudContext != nil
 		})
-		if len(gcpCommitments) != len(cuds) {
-			return diag.Errorf("expected %d GCP commitments, got %d", len(cuds), len(gcpCommitments))
+		if len(imported) != len(cuds) {
+			return diag.Errorf("expected %d GCP commitments, got %d", len(cuds), len(imported))
 		}
+	}
 
-		configs, err := getCommitmentConfigs(data)
-		if err != nil {
-			return diag.FromErr(err)
-		}
+	configs, err := getCommitmentConfigs(data)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
-		cudsWithConfigs, err := commitments.MapConfigsToCommitments(
-			lo.Map(gcpCommitments, func(item sdk.CastaiInventoryV1beta1Commitment, _ int) commitments.CastaiCommitment {
-				return commitments.CastaiCommitment{CastaiInventoryV1beta1Commitment: item}
-			}),
-			configs,
+	cudsWithConfigs, err := commitments.MapConfigsToCommitments(
+		lo.Map(imported, func(item sdk.CastaiInventoryV1beta1Commitment, _ int) commitments.CastaiCommitment {
+			return commitments.CastaiCommitment{CastaiInventoryV1beta1Commitment: item}
+		}),
+		configs,
+	)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	client := meta.(*ProviderConfig).api
+	for _, c := range cudsWithConfigs {
+		commitmentID := lo.FromPtr(c.Commitment.Id)
+		res, err := client.CommitmentsAPIUpdateCommitmentWithResponse(
+			ctx,
+			commitmentID,
+			commitments.MapCommitmentImportWithConfigToUpdateRequest(c),
 		)
-		if err != nil {
-			return diag.FromErr(err)
+		if err := sdk.CheckOKResponse(res, err); err != nil {
+			return diag.Errorf("updating commitment: %v", err)
+		}
+		if len(c.Config.Assignments) == 0 {
+			continue
 		}
 
-		for _, c := range cudsWithConfigs {
-			res, err := meta.(*ProviderConfig).api.CommitmentsAPIUpdateCommitmentWithResponse(
-				ctx,
-				lo.FromPtr(c.Commitment.Id),
-				commitments.MapCommitmentImportWithConfigToUpdateRequest(c),
-			)
-			if err := sdk.CheckOKResponse(res, err); err != nil {
-				return diag.Errorf("updating commitment: %v", err)
-			}
+		asRes, err := client.CommitmentsAPIReplaceCommitmentAssignmentsWithResponse(
+			ctx,
+			commitmentID,
+			lo.Map(c.Config.Assignments, func(a *commitments.CommitmentAssignmentResource, _ int) string {
+				return a.ClusterID
+			}),
+		)
+		if err := sdk.CheckOKResponse(asRes, err); err != nil {
+			return diag.Errorf("replacing commitment assignments: %v", err)
 		}
 	}
 
@@ -483,6 +472,13 @@ func populateCommitmentsResourceData(ctx context.Context, d *schema.ResourceData
 	if err != nil {
 		return err
 	}
+	assignments, err := getOrganizationCommitmentAssignments(ctx, meta)
+	if err != nil {
+		return err
+	}
+	assignmentsByCommitmentID := lo.GroupBy(assignments, func(a sdk.CastaiInventoryV1beta1CommitmentAssignment) string {
+		return lo.FromPtr(a.CommitmentId)
+	})
 
 	var (
 		gcpResources   []*commitments.GCPCUDResource
@@ -490,15 +486,16 @@ func populateCommitmentsResourceData(ctx context.Context, d *schema.ResourceData
 	)
 	for _, c := range orgCommitments {
 		c := c
+		as := assignmentsByCommitmentID[lo.FromPtr(c.Id)]
 		switch {
 		case c.GcpResourceCudContext != nil:
-			resource, err := commitments.MapCommitmentToCUDResource(c)
+			resource, err := commitments.MapCommitmentToCUDResource(c, as)
 			if err != nil {
 				return err
 			}
 			gcpResources = append(gcpResources, resource)
 		case c.AzureReservationContext != nil:
-			resource, err := commitments.MapCommitmentToReservationResource(c)
+			resource, err := commitments.MapCommitmentToReservationResource(c, as)
 			if err != nil {
 				return err
 			}
@@ -543,6 +540,21 @@ func getOrganizationCommitments(ctx context.Context, meta any) ([]sdk.CastaiInve
 		return nil, nil
 	}
 	return *response.JSON200.Commitments, nil
+}
+
+func getOrganizationCommitmentAssignments(
+	ctx context.Context,
+	meta any,
+) ([]sdk.CastaiInventoryV1beta1CommitmentAssignment, error) {
+	client := meta.(*ProviderConfig).api
+	response, err := client.CommitmentsAPIGetCommitmentsAssignmentsWithResponse(ctx)
+	if checkErr := sdk.CheckOKResponse(response, err); checkErr != nil {
+		return nil, fmt.Errorf("fetching commitments: %w", checkErr)
+	}
+	if response.JSON200.CommitmentsAssignments == nil {
+		return nil, nil
+	}
+	return *response.JSON200.CommitmentsAssignments, nil
 }
 
 func getCommitmentsImportID(ctx context.Context, data *schema.ResourceData, meta any) (string, error) {

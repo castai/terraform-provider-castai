@@ -7,7 +7,7 @@ import (
 )
 
 var (
-	SharedCommitmentResourceSchema = map[string]*schema.Schema{
+	SharedCommitmentResourceSchema = lo.Assign(assignmentsSchema, map[string]*schema.Schema{
 		"id": {
 			Type:        schema.TypeString,
 			Computed:    true,
@@ -48,7 +48,7 @@ var (
 			Required:    true,
 			Description: "Region in which the CUD is available.",
 		},
-	}
+	})
 
 	// GCPCUDResourceSchema should align with the fields of GCPCUDResource struct
 	GCPCUDResourceSchema = lo.Assign(SharedCommitmentResourceSchema, map[string]*schema.Schema{
@@ -83,7 +83,7 @@ var (
 			Description: "Type of the CUD, e.g. determines the covered resource type e.g. 'COMPUTE_OPTIMIZED_C2D'.",
 		},
 	})
-	CommitmentConfigSchema = map[string]*schema.Schema{
+	CommitmentConfigSchema = lo.Assign(assignmentsSchema, map[string]*schema.Schema{
 		// Matcher fields
 		"match_name": {
 			Type:        schema.TypeString,
@@ -117,6 +117,30 @@ var (
 			Optional:         true,
 			Description:      GCPCUDResourceSchema["allowed_usage"].Description,
 			ValidateDiagFunc: validation.ToDiagFunc(validation.FloatBetween(0, 1)),
+		},
+	})
+
+	assignmentsSchema = map[string]*schema.Schema{
+		"assignments": {
+			Type:        schema.TypeList,
+			Optional:    true,
+			Description: "List of assigned clusters for the commitment. If prioritization is enabled, the order of the assignments indicates the priority. The first assignment has the highest priority.",
+			ConfigMode:  schema.SchemaConfigModeAttr,
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"cluster_id": {
+						Type:        schema.TypeString,
+						Required:    true,
+						Description: "ID of the cluster to assign the commitment to.",
+					},
+					// TODO: Add priority field. Currently Terraform SDK has some bug with nested lists and the
+					// Computed attribute is lost, forcing the user to provide the value.
+					//"priority": {
+					//	Type:        schema.TypeString,
+					//	Computed:    true,
+					//},
+				},
+			},
 		},
 	}
 

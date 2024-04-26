@@ -135,7 +135,8 @@ func TestMapCommitmentToCUDResource(t *testing.T) {
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
 			r := require.New(t)
-			actual, err := MapCommitmentToCUDResource(tt.input)
+			// TODO: test assignments!
+			actual, err := MapCommitmentToCUDResource(tt.input, nil)
 			if tt.err == nil {
 				r.NoError(err)
 				r.NotNil(actual)
@@ -218,7 +219,8 @@ func TestMapCommitmentToReservationResource(t *testing.T) {
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
 			r := require.New(t)
-			actual, err := MapCommitmentToReservationResource(tt.input)
+			// TODO: test assignments!
+			actual, err := MapCommitmentToReservationResource(tt.input, nil)
 			if tt.err == nil {
 				r.NoError(err)
 				r.NotNil(actual)
@@ -233,8 +235,8 @@ func TestMapCommitmentToReservationResource(t *testing.T) {
 }
 
 func TestMapCUDImportToResource(t *testing.T) {
-	makeInput := func() *commitmentWithConfig[CastaiGCPCommitmentImport] {
-		return &commitmentWithConfig[CastaiGCPCommitmentImport]{
+	makeInput := func() *CommitmentWithConfig[CastaiGCPCommitmentImport] {
+		return &CommitmentWithConfig[CastaiGCPCommitmentImport]{
 			Commitment: CastaiGCPCommitmentImport{
 				CastaiInventoryV1beta1GCPCommitmentImport: testGCPCommitmentImport,
 			},
@@ -242,7 +244,7 @@ func TestMapCUDImportToResource(t *testing.T) {
 	}
 
 	tests := map[string]struct {
-		input    *commitmentWithConfig[CastaiGCPCommitmentImport]
+		input    *CommitmentWithConfig[CastaiGCPCommitmentImport]
 		expected *GCPCUDResource
 		err      error
 	}{
@@ -262,7 +264,7 @@ func TestMapCUDImportToResource(t *testing.T) {
 			},
 		},
 		"should succeed, nil cud resources": {
-			input: func() *commitmentWithConfig[CastaiGCPCommitmentImport] {
+			input: func() *CommitmentWithConfig[CastaiGCPCommitmentImport] {
 				c := makeInput()
 				c.Commitment.Resources = nil
 				return c
@@ -279,7 +281,7 @@ func TestMapCUDImportToResource(t *testing.T) {
 			},
 		},
 		"should succeed, with a config passed": {
-			input: func() *commitmentWithConfig[CastaiGCPCommitmentImport] {
+			input: func() *CommitmentWithConfig[CastaiGCPCommitmentImport] {
 				c := makeInput()
 				c.Config = &CommitmentConfigResource{
 					MatchName:      "test-cud",
@@ -309,7 +311,7 @@ func TestMapCUDImportToResource(t *testing.T) {
 			},
 		},
 		"should fail as cpu amount is invalid": {
-			input: func() *commitmentWithConfig[CastaiGCPCommitmentImport] {
+			input: func() *CommitmentWithConfig[CastaiGCPCommitmentImport] {
 				c := makeInput()
 				inv := (*c.Commitment.Resources)[0]
 				inv.Amount = lo.ToPtr("invalid")
@@ -319,7 +321,7 @@ func TestMapCUDImportToResource(t *testing.T) {
 			err: errors.New("strconv.Atoi: parsing \"invalid\": invalid syntax"),
 		},
 		"should fail as memory amount is invalid": {
-			input: func() *commitmentWithConfig[CastaiGCPCommitmentImport] {
+			input: func() *CommitmentWithConfig[CastaiGCPCommitmentImport] {
 				c := makeInput()
 				inv := (*c.Commitment.Resources)[1]
 				inv.Amount = lo.ToPtr("invalid")
@@ -329,7 +331,7 @@ func TestMapCUDImportToResource(t *testing.T) {
 			err: errors.New("strconv.Atoi: parsing \"invalid\": invalid syntax"),
 		},
 		"should succeed with zeroed out cpu as its resource is not contained by the resources": {
-			input: func() *commitmentWithConfig[CastaiGCPCommitmentImport] {
+			input: func() *CommitmentWithConfig[CastaiGCPCommitmentImport] {
 				c := makeInput()
 				c.Commitment.Resources = &[]sdk.CastaiInventoryV1beta1GCPResource{(*c.Commitment.Resources)[1]}
 				return c
@@ -347,7 +349,7 @@ func TestMapCUDImportToResource(t *testing.T) {
 			},
 		},
 		"should succeed with zeroed out memory as its resource is not contained by the resources": {
-			input: func() *commitmentWithConfig[CastaiGCPCommitmentImport] {
+			input: func() *CommitmentWithConfig[CastaiGCPCommitmentImport] {
 				c := makeInput()
 				c.Commitment.Resources = &[]sdk.CastaiInventoryV1beta1GCPResource{(*c.Commitment.Resources)[0]}
 				return c
@@ -383,8 +385,8 @@ func TestMapCUDImportToResource(t *testing.T) {
 }
 
 func TestMapReservationImportToResource(t *testing.T) {
-	makeInput := func() *commitmentWithConfig[CastaiAzureReservationImport] {
-		return &commitmentWithConfig[CastaiAzureReservationImport]{
+	makeInput := func() *CommitmentWithConfig[CastaiAzureReservationImport] {
+		return &CommitmentWithConfig[CastaiAzureReservationImport]{
 			Commitment: CastaiAzureReservationImport{
 				CastaiInventoryV1beta1AzureReservationImport: testAzureCommitmentImport,
 			},
@@ -392,7 +394,7 @@ func TestMapReservationImportToResource(t *testing.T) {
 	}
 
 	tests := map[string]struct {
-		input    *commitmentWithConfig[CastaiAzureReservationImport]
+		input    *CommitmentWithConfig[CastaiAzureReservationImport]
 		expected *AzureReservationResource
 		err      error
 	}{
@@ -414,7 +416,7 @@ func TestMapReservationImportToResource(t *testing.T) {
 			},
 		},
 		"should succeed, with a config passed": {
-			input: func() *commitmentWithConfig[CastaiAzureReservationImport] {
+			input: func() *CommitmentWithConfig[CastaiAzureReservationImport] {
 				c := makeInput()
 				c.Config = &CommitmentConfigResource{
 					MatchName:      lo.FromPtr(testAzureCommitmentImport.Name),
@@ -445,7 +447,7 @@ func TestMapReservationImportToResource(t *testing.T) {
 			},
 		},
 		"should map P1Y term to ONE_YEAR plan": {
-			input: &commitmentWithConfig[CastaiAzureReservationImport]{
+			input: &CommitmentWithConfig[CastaiAzureReservationImport]{
 				Commitment: CastaiAzureReservationImport{
 					CastaiInventoryV1beta1AzureReservationImport: sdk.CastaiInventoryV1beta1AzureReservationImport{
 						Term: lo.ToPtr("P1Y"),
@@ -457,7 +459,7 @@ func TestMapReservationImportToResource(t *testing.T) {
 			},
 		},
 		"should map P3Y term to THREE_YEAR plan": {
-			input: &commitmentWithConfig[CastaiAzureReservationImport]{
+			input: &CommitmentWithConfig[CastaiAzureReservationImport]{
 				Commitment: CastaiAzureReservationImport{
 					CastaiInventoryV1beta1AzureReservationImport: sdk.CastaiInventoryV1beta1AzureReservationImport{
 						Term: lo.ToPtr("P3Y"),
@@ -469,7 +471,7 @@ func TestMapReservationImportToResource(t *testing.T) {
 			},
 		},
 		"should map ONE_YEAR term to ONE_YEAR plan": {
-			input: &commitmentWithConfig[CastaiAzureReservationImport]{
+			input: &CommitmentWithConfig[CastaiAzureReservationImport]{
 				Commitment: CastaiAzureReservationImport{
 					CastaiInventoryV1beta1AzureReservationImport: sdk.CastaiInventoryV1beta1AzureReservationImport{
 						Term: lo.ToPtr("ONE_YEAR"),
@@ -481,7 +483,7 @@ func TestMapReservationImportToResource(t *testing.T) {
 			},
 		},
 		"should map ONE_YEAR term to THREE_YEAR plan": {
-			input: &commitmentWithConfig[CastaiAzureReservationImport]{
+			input: &CommitmentWithConfig[CastaiAzureReservationImport]{
 				Commitment: CastaiAzureReservationImport{
 					CastaiInventoryV1beta1AzureReservationImport: sdk.CastaiInventoryV1beta1AzureReservationImport{
 						Term: lo.ToPtr("THREE_YEAR"),
@@ -493,7 +495,7 @@ func TestMapReservationImportToResource(t *testing.T) {
 			},
 		},
 		"should fail when invalid term is passed": {
-			input: &commitmentWithConfig[CastaiAzureReservationImport]{
+			input: &CommitmentWithConfig[CastaiAzureReservationImport]{
 				Commitment: CastaiAzureReservationImport{
 					CastaiInventoryV1beta1AzureReservationImport: sdk.CastaiInventoryV1beta1AzureReservationImport{
 						Term: lo.ToPtr("invalid"),
@@ -614,7 +616,7 @@ func TestMapConfigsToCommitments(t *testing.T) {
 	tests := map[string]struct {
 		cuds     []commitment
 		configs  []*CommitmentConfigResource
-		expected []*commitmentWithConfig[commitment]
+		expected []*CommitmentWithConfig[commitment]
 		err      error
 	}{
 		"should successfully map all the configs to cuds": {
@@ -624,7 +626,7 @@ func TestMapConfigsToCommitments(t *testing.T) {
 				CastaiGCPCommitmentImport{CastaiInventoryV1beta1GCPCommitmentImport: cudImport1},
 			},
 			configs: []*CommitmentConfigResource{cudCfg1, cudCfg2, cudCfg3}, // make sure the order doesn't match the CUDs
-			expected: []*commitmentWithConfig[commitment]{
+			expected: []*CommitmentWithConfig[commitment]{
 				{
 					Commitment: CastaiGCPCommitmentImport{CastaiInventoryV1beta1GCPCommitmentImport: cudImport2},
 					Config:     cudCfg2,
@@ -646,7 +648,7 @@ func TestMapConfigsToCommitments(t *testing.T) {
 				CastaiAzureReservationImport{CastaiInventoryV1beta1AzureReservationImport: reservationImport1},
 			},
 			configs: []*CommitmentConfigResource{reservationCfg1, reservationCfg2, reservationCfg3}, // make sure the order doesn't match the CUDs
-			expected: []*commitmentWithConfig[commitment]{
+			expected: []*CommitmentWithConfig[commitment]{
 				{
 					Commitment: CastaiAzureReservationImport{CastaiInventoryV1beta1AzureReservationImport: reservationImport2},
 					Config:     reservationCfg2,
@@ -673,7 +675,7 @@ func TestMapConfigsToCommitments(t *testing.T) {
 				}
 			}(),
 			configs: []*CommitmentConfigResource{cudCfg1, cudCfg2, cudCfg3}, // make sure the order doesn't match the CUDs
-			expected: []*commitmentWithConfig[commitment]{
+			expected: []*CommitmentWithConfig[commitment]{
 				{
 					Commitment: CastaiGCPCommitmentImport{CastaiInventoryV1beta1GCPCommitmentImport: cudImport2},
 					Config:     cudCfg2,
@@ -700,7 +702,7 @@ func TestMapConfigsToCommitments(t *testing.T) {
 				cudCfg3.MatchRegion = lo.ToPtr("https://www.googleapis.com/compute/v1/projects/test-project/zones/" + *cudCfg3.MatchRegion)
 				return []*CommitmentConfigResource{cudCfg1, cudCfg2, cudCfg3} // make sure the order doesn't match the CUDs
 			}(),
-			expected: []*commitmentWithConfig[commitment]{
+			expected: []*CommitmentWithConfig[commitment]{
 				{
 					Commitment: CastaiGCPCommitmentImport{CastaiInventoryV1beta1GCPCommitmentImport: cudImport2},
 					Config:     cudCfg2,
@@ -760,7 +762,7 @@ func TestMapConfigsToCommitments(t *testing.T) {
 				CastaiGCPCommitmentImport{CastaiInventoryV1beta1GCPCommitmentImport: cudImport1},
 			},
 			configs: []*CommitmentConfigResource{cudCfg2},
-			expected: []*commitmentWithConfig[commitment]{
+			expected: []*CommitmentWithConfig[commitment]{
 				{
 					Commitment: CastaiGCPCommitmentImport{CastaiInventoryV1beta1GCPCommitmentImport: cudImport2},
 					Config:     cudCfg2,
@@ -963,11 +965,11 @@ func TestMapCommitmentImportWithConfigToUpdateRequest(t *testing.T) {
 	id := uuid.New()
 	now := time.Now()
 	tests := map[string]struct {
-		input    *commitmentWithConfig[CastaiCommitment]
+		input    *CommitmentWithConfig[CastaiCommitment]
 		expected sdk.CommitmentsAPIUpdateCommitmentJSONRequestBody
 	}{
 		"should map gcp cud import with config": {
-			input: &commitmentWithConfig[CastaiCommitment]{
+			input: &CommitmentWithConfig[CastaiCommitment]{
 				Commitment: CastaiCommitment{
 					CastaiInventoryV1beta1Commitment: sdk.CastaiInventoryV1beta1Commitment{
 						AllowedUsage:          lo.ToPtr[float32](0.75),
@@ -1010,7 +1012,7 @@ func TestMapCommitmentImportWithConfigToUpdateRequest(t *testing.T) {
 			},
 		},
 		"should map gcp cud import without config": {
-			input: &commitmentWithConfig[CastaiCommitment]{
+			input: &CommitmentWithConfig[CastaiCommitment]{
 				Commitment: CastaiCommitment{
 					CastaiInventoryV1beta1Commitment: sdk.CastaiInventoryV1beta1Commitment{
 						EndDate:               lo.ToPtr(now.Add(365 * 24 * time.Hour)),
@@ -1039,7 +1041,7 @@ func TestMapCommitmentImportWithConfigToUpdateRequest(t *testing.T) {
 			},
 		},
 		"should map azure reservation import with config": {
-			input: &commitmentWithConfig[CastaiCommitment]{
+			input: &CommitmentWithConfig[CastaiCommitment]{
 				Commitment: CastaiCommitment{
 					CastaiInventoryV1beta1Commitment: sdk.CastaiInventoryV1beta1Commitment{
 						AllowedUsage:            lo.ToPtr[float32](0.75),
@@ -1075,7 +1077,7 @@ func TestMapCommitmentImportWithConfigToUpdateRequest(t *testing.T) {
 			},
 		},
 		"should map azure reservation import without config": {
-			input: &commitmentWithConfig[CastaiCommitment]{
+			input: &CommitmentWithConfig[CastaiCommitment]{
 				Commitment: CastaiCommitment{
 					CastaiInventoryV1beta1Commitment: sdk.CastaiInventoryV1beta1Commitment{
 						EndDate:                 lo.ToPtr(now.Add(365 * 24 * time.Hour)),
