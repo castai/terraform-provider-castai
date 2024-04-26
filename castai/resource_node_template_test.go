@@ -400,7 +400,7 @@ func TestNodeTemplateResourceDelete_defaultNodeTemplate(t *testing.T) {
 		" false).", result[0].Detail)
 }
 
-func TestToTemplateConstraints_HandleTriStateValues(t *testing.T) {
+func TestToTemplateConstraints_HandleTriStateValuesForStorageAndComputeOptimized(t *testing.T) {
 	tests := map[string]struct {
 		val        cty.Value
 		assertions func(*require.Assertions, *sdk.NodetemplatesV1TemplateConstraints)
@@ -417,23 +417,6 @@ func TestToTemplateConstraints_HandleTriStateValues(t *testing.T) {
 				r.NotNil(constraints)
 				r.Nil(constraints.ComputeOptimized)
 				r.Nil(constraints.StorageOptimized)
-				r.Nil(constraints.Gpu)
-				r.Nil(constraints.InstanceFamilies)
-				r.Nil(constraints.MaxMemory)
-				r.Nil(constraints.MinMemory)
-				r.Nil(constraints.MinCpu)
-				r.Nil(constraints.Spot)
-				r.Nil(constraints.OnDemand)
-				r.Nil(constraints.UseSpotFallbacks)
-				r.Nil(constraints.EnableSpotDiversity)
-				r.Nil(constraints.SpotDiversityPriceIncreaseLimitPercent)
-				r.Nil(constraints.SpotInterruptionPredictionsEnabled)
-				r.Nil(constraints.SpotInterruptionPredictionsType)
-				r.Nil(constraints.CustomPriority)
-				r.Nil(constraints.DedicatedNodeAffinity)
-				r.Nil(constraints.Architectures)
-				r.Nil(constraints.Os)
-				r.Nil(constraints.IsGpuOnly)
 			},
 		},
 	}

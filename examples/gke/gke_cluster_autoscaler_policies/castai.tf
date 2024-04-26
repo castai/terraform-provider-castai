@@ -105,9 +105,12 @@ module "castai-gke-cluster" {
         spot                          = true
         use_spot_fallbacks            = true
         min_cpu                       = 4
+        max_cpu                       = 100
         instance_families = {
           exclude = ["e2"]
         }
+        compute_optimized = false
+        storage_optimized = false
 
         # Optional: define custom priority for instances selection.
         #
