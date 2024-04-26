@@ -40,12 +40,17 @@ func TestMapCommitmentToCUDResource(t *testing.T) {
 	}
 
 	tests := map[string]struct {
-		input    sdk.CastaiInventoryV1beta1Commitment
-		expected *GCPCUDResource
-		err      error
+		input       sdk.CastaiInventoryV1beta1Commitment
+		assignments []sdk.CastaiInventoryV1beta1CommitmentAssignment
+		expected    *GCPCUDResource
+		err         error
 	}{
 		"should succeed as all the fields are set": {
 			input: makeCommitment(),
+			assignments: []sdk.CastaiInventoryV1beta1CommitmentAssignment{
+				{ClusterId: lo.ToPtr("cluster-id-1")},
+				{ClusterId: lo.ToPtr("cluster-id-2")},
+			},
 			expected: &GCPCUDResource{
 				ID:             lo.ToPtr(id1.String()),
 				AllowedUsage:   lo.ToPtr[float32](0.5),
@@ -61,6 +66,10 @@ func TestMapCommitmentToCUDResource(t *testing.T) {
 				MemoryMb:       1024,
 				Plan:           "TWELVE_MONTHS",
 				Type:           "COMPUTE_OPTIMIZED_C2D",
+				Assignments: []*CommitmentAssignmentResource{
+					{ClusterID: "cluster-id-1"},
+					{ClusterID: "cluster-id-2"},
+				},
 			},
 		},
 		"should fail as gcp cud context is nil": {
@@ -77,6 +86,10 @@ func TestMapCommitmentToCUDResource(t *testing.T) {
 				c.GcpResourceCudContext.Cpu = nil
 				return c
 			}(),
+			assignments: []sdk.CastaiInventoryV1beta1CommitmentAssignment{
+				{ClusterId: lo.ToPtr("cluster-id-1")},
+				{ClusterId: lo.ToPtr("cluster-id-2")},
+			},
 			expected: &GCPCUDResource{
 				ID:             lo.ToPtr(id1.String()),
 				AllowedUsage:   lo.ToPtr[float32](0.5),
@@ -91,6 +104,10 @@ func TestMapCommitmentToCUDResource(t *testing.T) {
 				MemoryMb:       1024,
 				Plan:           "TWELVE_MONTHS",
 				Type:           "COMPUTE_OPTIMIZED_C2D",
+				Assignments: []*CommitmentAssignmentResource{
+					{ClusterID: "cluster-id-1"},
+					{ClusterID: "cluster-id-2"},
+				},
 			},
 		},
 		"should succeed with nil memory": {
@@ -99,6 +116,10 @@ func TestMapCommitmentToCUDResource(t *testing.T) {
 				c.GcpResourceCudContext.MemoryMb = nil
 				return c
 			}(),
+			assignments: []sdk.CastaiInventoryV1beta1CommitmentAssignment{
+				{ClusterId: lo.ToPtr("cluster-id-1")},
+				{ClusterId: lo.ToPtr("cluster-id-2")},
+			},
 			expected: &GCPCUDResource{
 				ID:             lo.ToPtr(id1.String()),
 				AllowedUsage:   lo.ToPtr[float32](0.5),
@@ -113,6 +134,10 @@ func TestMapCommitmentToCUDResource(t *testing.T) {
 				CPU:            8,
 				Plan:           "TWELVE_MONTHS",
 				Type:           "COMPUTE_OPTIMIZED_C2D",
+				Assignments: []*CommitmentAssignmentResource{
+					{ClusterID: "cluster-id-1"},
+					{ClusterID: "cluster-id-2"},
+				},
 			},
 		},
 		"should fail as cpu is an invalid string": {
@@ -135,8 +160,7 @@ func TestMapCommitmentToCUDResource(t *testing.T) {
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
 			r := require.New(t)
-			// TODO: test assignments!
-			actual, err := MapCommitmentToCUDResource(tt.input, nil)
+			actual, err := MapCommitmentToCUDResource(tt.input, tt.assignments)
 			if tt.err == nil {
 				r.NoError(err)
 				r.NotNil(actual)
@@ -182,12 +206,17 @@ func TestMapCommitmentToReservationResource(t *testing.T) {
 	}
 
 	tests := map[string]struct {
-		input    sdk.CastaiInventoryV1beta1Commitment
-		expected *AzureReservationResource
-		err      error
+		input       sdk.CastaiInventoryV1beta1Commitment
+		expected    *AzureReservationResource
+		assignments []sdk.CastaiInventoryV1beta1CommitmentAssignment
+		err         error
 	}{
 		"should succeed as all the fields are set": {
 			input: makeCommitment(),
+			assignments: []sdk.CastaiInventoryV1beta1CommitmentAssignment{
+				{ClusterId: lo.ToPtr("cluster-id-1")},
+				{ClusterId: lo.ToPtr("cluster-id-2")},
+			},
 			expected: &AzureReservationResource{
 				ID:                 lo.ToPtr(id1.String()),
 				AllowedUsage:       lo.ToPtr[float32](0.5),
@@ -205,6 +234,10 @@ func TestMapCommitmentToReservationResource(t *testing.T) {
 				Scope:              "Single subscription",
 				ScopeResourceGroup: "All resource groups",
 				ScopeSubscription:  scopeSubscription.String(),
+				Assignments: []*CommitmentAssignmentResource{
+					{ClusterID: "cluster-id-1"},
+					{ClusterID: "cluster-id-2"},
+				},
 			},
 		},
 		"should fail as azure reservation context is nil": {
@@ -219,8 +252,7 @@ func TestMapCommitmentToReservationResource(t *testing.T) {
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
 			r := require.New(t)
-			// TODO: test assignments!
-			actual, err := MapCommitmentToReservationResource(tt.input, nil)
+			actual, err := MapCommitmentToReservationResource(tt.input, tt.assignments)
 			if tt.err == nil {
 				r.NoError(err)
 				r.NotNil(actual)
