@@ -3,9 +3,12 @@ package castai
 import (
 	"context"
 	"errors"
+	"fmt"
+	"os"
 	"testing"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 
@@ -42,6 +45,16 @@ func TestCommitments(t *testing.T) {
 			}
 			return nil
 		},
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"google": {
+				Source:            "hashicorp/google",
+				VersionConstraint: "> 4.75.0",
+			},
+			"google-beta": {
+				Source:            "hashicorp/google-beta",
+				VersionConstraint: "> 4.75.0",
+			},
+		},
 		Steps: []resource.TestStep{
 			{ // Import 2 commitments - one GCP CUD and one Azure reservations, both without configs
 				Config: commitmentsConfig1,
@@ -53,7 +66,7 @@ func TestCommitments(t *testing.T) {
 					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.0.start_timestamp", "2023-01-01T00:00:00Z"),
 					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.0.end_timestamp", "2024-01-01T00:00:00Z"),
 					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.0.name", "test"),
-					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.0.region", "us-east4"),
+					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.0.region", "us-central1"),
 					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.0.cpu", "10"),
 					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.0.memory_mb", "20480"),
 					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.0.plan", "TWELVE_MONTH"),
@@ -86,7 +99,7 @@ func TestCommitments(t *testing.T) {
 					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.0.start_timestamp", "2023-01-01T00:00:00Z"),
 					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.0.end_timestamp", "2024-01-01T00:00:00Z"),
 					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.0.name", "test"),
-					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.0.region", "us-east4"),
+					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.0.region", "us-central1"),
 					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.0.cpu", "10"),
 					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.0.memory_mb", "20480"),
 					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.0.plan", "TWELVE_MONTH"),
@@ -100,7 +113,7 @@ func TestCommitments(t *testing.T) {
 					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.1.start_timestamp", "2023-06-01T00:00:00Z"),
 					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.1.end_timestamp", "2024-06-01T00:00:00Z"),
 					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.1.name", "test-2"),
-					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.1.region", "us-east4"),
+					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.1.region", "us-central1"),
 					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.1.cpu", "5"),
 					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.1.memory_mb", "10240"),
 					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.1.plan", "TWELVE_MONTH"),
@@ -136,7 +149,7 @@ func TestCommitments(t *testing.T) {
 					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.0.start_timestamp", "2023-01-01T00:00:00Z"),
 					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.0.end_timestamp", "2024-01-01T00:00:00Z"),
 					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.0.name", "test"),
-					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.0.region", "us-east4"),
+					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.0.region", "us-central1"),
 					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.0.cpu", "10"),
 					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.0.memory_mb", "20480"),
 					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.0.plan", "TWELVE_MONTH"),
@@ -150,7 +163,7 @@ func TestCommitments(t *testing.T) {
 					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.1.start_timestamp", "2023-06-01T00:00:00Z"),
 					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.1.end_timestamp", "2024-06-01T00:00:00Z"),
 					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.1.name", "test-2"),
-					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.1.region", "us-east4"),
+					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.1.region", "us-central1"),
 					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.1.cpu", "5"),
 					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.1.memory_mb", "10240"),
 					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.1.plan", "TWELVE_MONTH"),
@@ -206,7 +219,7 @@ func TestCommitments(t *testing.T) {
 					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.0.start_timestamp", "2023-01-01T00:00:00Z"),
 					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.0.end_timestamp", "2024-01-01T00:00:00Z"),
 					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.0.name", "test"),
-					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.0.region", "us-east4"),
+					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.0.region", "us-central1"),
 					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.0.cpu", "10"),
 					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.0.memory_mb", "20480"),
 					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.0.plan", "TWELVE_MONTH"),
@@ -220,7 +233,7 @@ func TestCommitments(t *testing.T) {
 					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.1.start_timestamp", "2023-06-01T00:00:00Z"),
 					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.1.end_timestamp", "2024-06-01T00:00:00Z"),
 					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.1.name", "test-2"),
-					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.1.region", "us-east4"),
+					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.1.region", "us-central1"),
 					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.1.cpu", "5"),
 					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.1.memory_mb", "10240"),
 					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.1.plan", "TWELVE_MONTH"),
@@ -241,7 +254,7 @@ func TestCommitments(t *testing.T) {
 					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.0.start_timestamp", "2023-06-01T00:00:00Z"),
 					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.0.end_timestamp", "2024-06-01T00:00:00Z"),
 					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.0.name", "test-2"),
-					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.0.region", "us-east4"),
+					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.0.region", "us-central1"),
 					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.0.cpu", "5"),
 					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.0.memory_mb", "10240"),
 					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.0.plan", "TWELVE_MONTH"),
@@ -266,7 +279,7 @@ var (
     "kind": "compute#commitment",
     "name": "test",
     "plan": "TWELVE_MONTH",
-    "region": "https://www.googleapis.com/compute/v1/projects/test-project/regions/us-east4",
+    "region": "https://www.googleapis.com/compute/v1/projects/test-project/regions/us-central1",
     "resources": [
       {
         "amount": "10",
@@ -277,7 +290,7 @@ var (
         "type": "MEMORY"
       }
     ],
-    "selfLink": "https://www.googleapis.com/compute/v1/projects/test-project/regions/us-east4/commitments/test",
+    "selfLink": "https://www.googleapis.com/compute/v1/projects/test-project/regions/us-central1/commitments/test",
     "startTimestamp": "2023-01-01T00:00:00Z",
     "status": "ACTIVE",
     "statusMessage": "The commitment is active, and so will apply to current resource usage.",
@@ -294,7 +307,7 @@ var (
     "kind": "compute#commitment",
     "name": "test-2",
     "plan": "TWELVE_MONTH",
-    "region": "https://www.googleapis.com/compute/v1/projects/test-project/regions/us-east4",
+    "region": "https://www.googleapis.com/compute/v1/projects/test-project/regions/us-central1",
     "resources": [
       {
         "amount": "5",
@@ -305,18 +318,22 @@ var (
         "type": "MEMORY"
       }
     ],
-    "selfLink": "https://www.googleapis.com/compute/v1/projects/test-project/regions/us-east4/commitments/test-2",
+    "selfLink": "https://www.googleapis.com/compute/v1/projects/test-project/regions/us-central1/commitments/test-2",
     "startTimestamp": "2023-06-01T00:00:00Z",
     "status": "ACTIVE",
     "statusMessage": "The commitment is active, and so will apply to current resource usage.",
     "type": "GENERAL_PURPOSE_E2"
   }`
 
-	commitmentsConfig1 = `
+	rName       = fmt.Sprintf("%v-node-cfg-%v", ResourcePrefix, acctest.RandString(8))
+	clusterName = "max-04-26"
+	projectID   = os.Getenv("GOOGLE_PROJECT_ID")
+
+	commitmentsConfig1 = ConfigCompose(testAccGKEClusterConfig(rName, clusterName, projectID), `
 resource "castai_commitments" "test_gcp" {
 	gcp_cuds_json = <<EOF
 [
-  ` + commitment1Obj + `
+  `+commitment1Obj+`
 ]
 	EOF
 }
@@ -327,14 +344,14 @@ Name,Reservation Id,Reservation order Id,Status,Expiration date,Purchase date,Te
 test-res-1,3b3de39c-bc44-4d69-be2d-69527dfe9958,630226bb-5170-4b95-90b0-f222757130c1,Succeeded,2050-01-01T00:00:00Z,2023-01-11T00:00:00Z,P3Y,Single subscription,8faa0959-093b-4612-8686-a996ac19db00,All resource groups,VirtualMachines,Standard_D32as_v4,eastus,3,100,100,100,https://portal.azure.com#resource/providers/microsoft.capacity/reservationOrders/59791a62-264b-4b9f-aa3a-5eeb761e4583/reservations/883afd52-54c8-4bc6-a0f2-ccbaf7b84bda/overview
 	EOF
 }
-`
+`)
 
-	commitmentsConfig2 = `
+	commitmentsConfig2 = ConfigCompose(testAccGKEClusterConfig(rName, clusterName, projectID), `
 resource "castai_commitments" "test_gcp" {
 	gcp_cuds_json = <<EOF
 [
-   ` + commitment1Obj + `,
-   ` + commitment2Obj + `
+   `+commitment1Obj+`,
+   `+commitment2Obj+`
 ]
 	EOF
 
@@ -342,18 +359,21 @@ resource "castai_commitments" "test_gcp" {
 		matcher {
 		  name = "test-2"
 		  type = "GENERAL_PURPOSE_E2"
-		  region = "us-east4"
+		  region = "us-central1"
 		}
 		prioritization = true
 		allowed_usage = 0.7
 		status = "Active"
+		assignments {
+			cluster_id = castai_gke_cluster.test.id
+		}
 	}
 
 	commitment_configs {
 		matcher {
 			name = "test"
 			type = "COMPUTE_OPTIMIZED_C2D"
-			region = "us-east4"
+			region = "us-central1"
 		}
 		prioritization = false
 		allowed_usage = 1
@@ -367,14 +387,14 @@ Name,Reservation Id,Reservation order Id,Status,Expiration date,Purchase date,Te
 test-res-1,3b3de39c-bc44-4d69-be2d-69527dfe9958,630226bb-5170-4b95-90b0-f222757130c1,Succeeded,2050-01-01T00:00:00Z,2023-01-11T00:00:00Z,P3Y,Single subscription,8faa0959-093b-4612-8686-a996ac19db00,All resource groups,VirtualMachines,Standard_D32as_v4,eastus,3,100,100,100,https://portal.azure.com#resource/providers/microsoft.capacity/reservationOrders/59791a62-264b-4b9f-aa3a-5eeb761e4583/reservations/883afd52-54c8-4bc6-a0f2-ccbaf7b84bda/overview
 	EOF
 }
-`
+`)
 
-	commitmentsConfig3 = `
+	commitmentsConfig3 = ConfigCompose(testAccGKEClusterConfig(rName, clusterName, projectID), `
 resource "castai_commitments" "test_gcp" {
 	gcp_cuds_json = <<EOF
 [
-   ` + commitment1Obj + `,
-   ` + commitment2Obj + `
+   `+commitment1Obj+`,
+   `+commitment2Obj+`
 ]
 	EOF
 
@@ -382,22 +402,28 @@ resource "castai_commitments" "test_gcp" {
 	  matcher {
 		  name = "test-2"
 		  type = "GENERAL_PURPOSE_E2"
-		  region = "us-east4"
+		  region = "us-central1"
 	  }	
       prioritization = true
 	  allowed_usage = 0.7
 	  status = "Active"
+	  assignments {
+		cluster_id = castai_gke_cluster.test.id
+	  }
     }
 
 	commitment_configs {
 		matcher {
  			name = "test"
 			type = "COMPUTE_OPTIMIZED_C2D"
-			region = "us-east4"
+			region = "us-central1"
 		}
 		prioritization = false
 		allowed_usage = 1
 		status = "Active"
+		assignments {
+			cluster_id = castai_gke_cluster.test.id
+	  	}
 	}
 }
 
@@ -430,14 +456,14 @@ test-res-2,3b3de39c-bc44-4d69-be2d-69527dfe9959,630226bb-5170-4b95-90b0-f2227571
 		status = "Active"
 	}
 }
-`
+`)
 
-	commitmentsConfig4 = `
+	commitmentsConfig4 = ConfigCompose(testAccGKEClusterConfig(rName, clusterName, projectID), `
 resource "castai_commitments" "test_gcp" {
 	gcp_cuds_json = <<EOF
 [
-   ` + commitment1Obj + `,
-   ` + commitment2Obj + `
+   `+commitment1Obj+`,
+   `+commitment2Obj+`
 ]
 	EOF
 
@@ -445,31 +471,37 @@ resource "castai_commitments" "test_gcp" {
   	matcher {
 	  name = "test-2"
 	  type = "GENERAL_PURPOSE_E2"
-	  region = "us-east4"
+	  region = "us-central1"
     }
     prioritization = true
     allowed_usage = 0.7
     status = "Active"
+	assignments {
+		cluster_id = castai_gke_cluster.test.id
+	}
   }
 
   commitment_configs {
   	matcher {
 	  name = "test"
 	  type = "COMPUTE_OPTIMIZED_C2D"
-	  region = "us-east4"
+	  region = "us-central1"
 	}
     prioritization = false
     allowed_usage = 1
     status = "Active"
+	assignments {
+		cluster_id = castai_gke_cluster.test.id
+  	}
   }
 }
-`
+`)
 
-	commitmentsConfig5 = `
+	commitmentsConfig5 = ConfigCompose(testAccGKEClusterConfig(rName, clusterName, projectID), `
 resource "castai_commitments" "test_gcp" {
 	gcp_cuds_json = <<EOF
 [
-    ` + commitment2Obj + `
+    `+commitment2Obj+`
 ]
 	EOF
 
@@ -477,12 +509,12 @@ resource "castai_commitments" "test_gcp" {
 	matcher {
 	  name = "test-2"
 	  type = "GENERAL_PURPOSE_E2"
-	  region = "us-east4"
+	  region = "us-central1"
 	}
 	prioritization = true
 	allowed_usage = 0.7
 	status = "Active"
   }
 }
-`
+`)
 )
