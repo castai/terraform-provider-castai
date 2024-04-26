@@ -393,17 +393,14 @@ func resourceCastaiCommitmentsUpsert(ctx context.Context, data *schema.ResourceD
 		if err := sdk.CheckOKResponse(res, err); err != nil {
 			return diag.Errorf("updating commitment: %v", err)
 		}
-		if c.Config == nil || len(c.Config.Assignments) == 0 {
-			continue
-		}
 
-		asRes, err := client.CommitmentsAPIReplaceCommitmentAssignmentsWithResponse(
-			ctx,
-			commitmentID,
-			lo.Map(c.Config.Assignments, func(a *commitments.CommitmentAssignmentResource, _ int) string {
+		var clusterIDs []string
+		if c.Config != nil {
+			clusterIDs = lo.Map(c.Config.Assignments, func(a *commitments.CommitmentAssignmentResource, _ int) string {
 				return a.ClusterID
-			}),
-		)
+			})
+		}
+		asRes, err := client.CommitmentsAPIReplaceCommitmentAssignmentsWithResponse(ctx, commitmentID, clusterIDs)
 		if err := sdk.CheckOKResponse(asRes, err); err != nil {
 			return diag.Errorf("replacing commitment assignments: %v", err)
 		}
