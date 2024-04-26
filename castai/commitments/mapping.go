@@ -84,6 +84,7 @@ type (
 	}
 	CommitmentAssignmentResource struct {
 		ClusterID string `mapstructure:"cluster_id"`
+		Priority  *int   `mapstructure:"priority,omitempty"`
 	}
 )
 
@@ -137,11 +138,16 @@ func (m *CommitmentConfigMatcherResource) Validate() error {
 	return nil
 }
 
-func MapCommitmentAssignmentsToResources(input []sdk.CastaiInventoryV1beta1CommitmentAssignment) []*CommitmentAssignmentResource {
+func MapCommitmentAssignmentsToResources(
+	input []sdk.CastaiInventoryV1beta1CommitmentAssignment,
+	prioritizationEnabled bool,
+) []*CommitmentAssignmentResource {
 	return lo.Map(input, func(a sdk.CastaiInventoryV1beta1CommitmentAssignment, _ int) *CommitmentAssignmentResource {
-		return &CommitmentAssignmentResource{
-			ClusterID: lo.FromPtr(a.ClusterId),
+		res := &CommitmentAssignmentResource{ClusterID: lo.FromPtr(a.ClusterId)}
+		if prioritizationEnabled && a.Priority != nil {
+			res.Priority = lo.ToPtr(int(*a.Priority))
 		}
+		return res
 	})
 }
 
@@ -192,7 +198,7 @@ func MapCommitmentToCUDResource(
 		MemoryMb:       memory,
 		Plan:           lo.FromPtr((*string)(c.GcpResourceCudContext.Plan)),
 		Type:           lo.FromPtr(c.GcpResourceCudContext.Type),
-		Assignments:    MapCommitmentAssignmentsToResources(as),
+		Assignments:    MapCommitmentAssignmentsToResources(as, lo.FromPtr(c.Prioritization)),
 	}, nil
 }
 
@@ -228,7 +234,7 @@ func MapCommitmentToReservationResource(
 		Scope:              lo.FromPtr(c.AzureReservationContext.Scope),
 		ScopeResourceGroup: lo.FromPtr(c.AzureReservationContext.ScopeResourceGroup),
 		ScopeSubscription:  lo.FromPtr(c.AzureReservationContext.ScopeSubscription),
-		Assignments:        MapCommitmentAssignmentsToResources(as),
+		Assignments:        MapCommitmentAssignmentsToResources(as, lo.FromPtr(c.Prioritization)),
 	}, nil
 }
 
@@ -283,6 +289,9 @@ func MapCUDImportToResource(
 		res.Prioritization = cudWithCfg.Config.Prioritization
 		res.Status = cudWithCfg.Config.Status
 		res.Assignments = cudWithCfg.Config.Assignments
+		if lo.FromPtr(cudWithCfg.Config.Prioritization) {
+			assignPrioritiesToAssignments(res.Assignments)
+		}
 	}
 	return res, nil
 }
@@ -321,6 +330,9 @@ func MapReservationImportToResource(
 		res.Prioritization = cudWithCfg.Config.Prioritization
 		res.Status = cudWithCfg.Config.Status
 		res.Assignments = cudWithCfg.Config.Assignments
+		if lo.FromPtr(cudWithCfg.Config.Prioritization) {
+			assignPrioritiesToAssignments(res.Assignments)
+		}
 	}
 
 	return res, nil
@@ -580,4 +592,10 @@ func SortResources[R Resource](toSort, targetOrder []R) {
 		}
 		return indexI < indexJ
 	})
+}
+
+func assignPrioritiesToAssignments(assignments []*CommitmentAssignmentResource) {
+	for i, a := range assignments {
+		a.Priority = lo.ToPtr(i + 1)
+	}
 }

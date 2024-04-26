@@ -136,7 +136,6 @@ var (
 			Type:        schema.TypeList,
 			Optional:    true,
 			Description: "List of assigned clusters for the commitment. If prioritization is enabled, the order of the assignments indicates the priority. The first assignment has the highest priority.",
-			ConfigMode:  schema.SchemaConfigModeAttr,
 			Elem: &schema.Resource{
 				Schema: map[string]*schema.Schema{
 					"cluster_id": {
@@ -144,12 +143,11 @@ var (
 						Required:    true,
 						Description: "ID of the cluster to assign the commitment to.",
 					},
-					// TODO: Add priority field. Currently Terraform SDK has some bug with nested lists and the
-					// Computed attribute is lost, forcing the user to provide the value.
-					//"priority": {
-					//	Type:        schema.TypeString,
-					//	Computed:    true,
-					//},
+					"priority": {
+						Type:        schema.TypeInt,
+						Computed:    true,
+						Description: "Priority of the assignment. The lower the value, the higher the priority. 1 is the highest priority.",
+					},
 				},
 			},
 		},
