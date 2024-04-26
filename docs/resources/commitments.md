@@ -82,7 +82,7 @@ Required:
 Optional:
 
 - `allowed_usage` (Number) Allowed usage of the commitment. The value is between 0 (0%) and 1 (100%).
-- `assignments` (List of Object) List of assigned clusters for the commitment. If prioritization is enabled, the order of the assignments indicates the priority. The first assignment has the highest priority. (see [below for nested schema](#nestedatt--commitment_configs--assignments))
+- `assignments` (Block List) List of assigned clusters for the commitment. If prioritization is enabled, the order of the assignments indicates the priority. The first assignment has the highest priority. (see [below for nested schema](#nestedblock--commitment_configs--assignments))
 - `prioritization` (Boolean) If enabled, it's possible to assign priorities to the assigned clusters.
 - `status` (String) Status of the commitment in CAST AI.
 
@@ -99,12 +99,16 @@ Optional:
 - `type` (String) Type of the commitment to match. For compute resources, it's the type of the machine.
 
 
-<a id="nestedatt--commitment_configs--assignments"></a>
+<a id="nestedblock--commitment_configs--assignments"></a>
 ### Nested Schema for `commitment_configs.assignments`
 
-Optional:
+Required:
 
-- `cluster_id` (String)
+- `cluster_id` (String) ID of the cluster to assign the commitment to.
+
+Read-Only:
+
+- `priority` (Number) Priority of the assignment. The lower the value, the higher the priority. 1 is the highest priority.
 
 
 
@@ -146,6 +150,7 @@ Read-Only:
 Read-Only:
 
 - `cluster_id` (String)
+- `priority` (Number)
 
 
 
@@ -176,5 +181,6 @@ Read-Only:
 Read-Only:
 
 - `cluster_id` (String)
+- `priority` (Number)
 
 
