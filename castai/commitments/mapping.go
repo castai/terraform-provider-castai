@@ -253,7 +253,7 @@ func MapCUDImportToResource(
 
 func MapReservationImportToResource(
 	cudWithCfg *commitmentWithConfig[CastaiAzureReservationImport],
-) *AzureReservationResource {
+) (*AzureReservationResource, error) {
 	res := &AzureReservationResource{
 		Count:              int(lo.FromPtr(cudWithCfg.Commitment.Quantity)),
 		ReservationID:      lo.FromPtr(cudWithCfg.Commitment.ReservationId),
@@ -277,7 +277,7 @@ func MapReservationImportToResource(
 	case "ONE_YEAR":
 	case "THREE_YEAR":
 	default:
-		res.Plan = "ONE_YEAR"
+		return nil, fmt.Errorf("invalid plan value: %s", res.Plan)
 	}
 
 	if cudWithCfg.Config != nil {
@@ -286,7 +286,7 @@ func MapReservationImportToResource(
 		res.Status = cudWithCfg.Config.Status
 	}
 
-	return res
+	return res, nil
 }
 
 // commitmentConfigMatcherKey is a utility type for mapping CUDs to their configurations
@@ -428,9 +428,16 @@ func MapConfiguredReservationImportsToResources[C interface {
 		return nil, err
 	}
 
-	return lo.Map(cudsWithConfigs, func(c *commitmentWithConfig[CastaiAzureReservationImport], _ int) *AzureReservationResource {
-		return MapReservationImportToResource(c)
-	}), nil
+	res := make([]*AzureReservationResource, 0, len(cudsWithConfigs))
+	for _, item := range cudsWithConfigs {
+		v, err := MapReservationImportToResource(item)
+		if err != nil {
+			return nil, err
+		}
+		res = append(res, v)
+
+	}
+	return res, nil
 }
 
 func MapCommitmentImportWithConfigToUpdateRequest(

@@ -394,6 +394,7 @@ func TestMapReservationImportToResource(t *testing.T) {
 	tests := map[string]struct {
 		input    *commitmentWithConfig[CastaiAzureReservationImport]
 		expected *AzureReservationResource
+		err      error
 	}{
 		"should succeed, no config passed": {
 			input: makeInput(),
@@ -491,25 +492,30 @@ func TestMapReservationImportToResource(t *testing.T) {
 				Plan: "THREE_YEAR",
 			},
 		},
-		"should map term to ONE_YEAR by default": {
+		"should fail when invalid term is passed": {
 			input: &commitmentWithConfig[CastaiAzureReservationImport]{
 				Commitment: CastaiAzureReservationImport{
 					CastaiInventoryV1beta1AzureReservationImport: sdk.CastaiInventoryV1beta1AzureReservationImport{
-						Term: lo.ToPtr("SOME_OTHER_TERM"),
+						Term: lo.ToPtr("invalid"),
 					},
 				},
 			},
-			expected: &AzureReservationResource{
-				Plan: "ONE_YEAR",
-			},
+			err: errors.New("invalid plan value: invalid"),
 		},
 	}
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
 			r := require.New(t)
-			actual := MapReservationImportToResource(tt.input)
-			r.NotNil(actual)
-			r.Equal(tt.expected, actual)
+			actual, err := MapReservationImportToResource(tt.input)
+			if tt.err == nil {
+				r.NoError(err)
+				r.NotNil(actual)
+				r.Equal(tt.expected, actual)
+			} else {
+				r.Nil(actual)
+				r.Error(err)
+				r.Equal(tt.err.Error(), err.Error())
+			}
 		})
 	}
 }
