@@ -60,7 +60,6 @@ func resourceCommitments() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: commitments.GCPCUDConfigsSchema,
 				},
-				ConfigMode: schema.SchemaConfigModeAttr,
 			},
 			commitments.FieldAzureReservations: {
 				Type:        schema.TypeList,
@@ -155,7 +154,7 @@ func getCUDImportResources(tfData resourceProvider) ([]*commitments.GCPCUDResour
 		return nil, true, fmt.Errorf("more configurations than CUDs")
 	}
 	for _, c := range configs {
-		if err := c.Validate(); err != nil {
+		if err := c.GetMatcher().Validate(); err != nil {
 			return nil, true, fmt.Errorf("invalid config: %w", err)
 		}
 	}

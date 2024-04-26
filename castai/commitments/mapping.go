@@ -36,14 +36,15 @@ type (
 		Type           string `mapstructure:"type"`
 	}
 	GCPCUDConfigResource struct {
-		// Matcher fields - normally we'd use a struct but Terraform poorly handles nested objects
-		MatchName   string  `mapstructure:"match_name"`
-		MatchType   *string `mapstructure:"match_type,omitempty"`
-		MatchRegion *string `mapstructure:"match_region,omitempty"`
-		// Actual config fields
-		Prioritization *bool    `mapstructure:"prioritization,omitempty"`
-		Status         *string  `mapstructure:"status,omitempty"`
-		AllowedUsage   *float32 `mapstructure:"allowed_usage,omitempty"`
+		Matcher        []*GCPCUDConfigMatcherResource `mapstructure:"matcher,omitempty"`
+		Prioritization *bool                          `mapstructure:"prioritization,omitempty"`
+		Status         *string                        `mapstructure:"status,omitempty"`
+		AllowedUsage   *float32                       `mapstructure:"allowed_usage,omitempty"`
+	}
+	GCPCUDConfigMatcherResource struct {
+		Name   string  `mapstructure:"name"`
+		Type   *string `mapstructure:"type,omitempty"`
+		Region *string `mapstructure:"region,omitempty"`
 	}
 
 	AzureReservationResource struct {
@@ -59,6 +60,13 @@ type (
 		GetIDInCloud() string
 	}
 )
+
+func (r *GCPCUDConfigResource) GetMatcher() *GCPCUDConfigMatcherResource {
+	if r == nil || len(r.Matcher) == 0 {
+		return nil
+	}
+	return r.Matcher[0]
+}
 
 var (
 	_ Resource = (*GCPCUDResource)(nil)
@@ -93,9 +101,12 @@ func (r *AzureReservationResource) GetIDInCloud() string {
 	return r.ReservationID
 }
 
-func (m GCPCUDConfigResource) Validate() error {
-	if m.MatchName == "" {
-		return errors.New("matcher name is required")
+func (m *GCPCUDConfigMatcherResource) Validate() error {
+	if m == nil {
+		return errors.New("matcher is required")
+	}
+	if m.Name == "" {
+		return errors.New("name is required")
 	}
 	return nil
 }
@@ -224,12 +235,12 @@ func MapConfigsToCUDs[C cud](cuds []C, configs []*GCPCUDConfigResource) ([]*cudW
 	res := make([]*cudWithConfig[C], len(cuds))
 	cfgKeys := map[cudConfigMatcherKey]struct{}{}
 	for _, cfg := range configs {
-		cfgKey := cudConfigMatcherKey{name: cfg.MatchName} // Name matcher is required, other fields are optional
-		if cfg.MatchRegion != nil {
-			_, cfgKey.region = path.Split(*cfg.MatchRegion)
+		cfgKey := cudConfigMatcherKey{name: cfg.GetMatcher().Name} // Name matcher is required, other fields are optional
+		if cfg.GetMatcher().Region != nil {
+			_, cfgKey.region = path.Split(*cfg.GetMatcher().Region)
 		}
-		if cfg.MatchType != nil {
-			cfgKey.typ = *cfg.MatchType
+		if cfg.GetMatcher().Type != nil {
+			cfgKey.typ = *cfg.GetMatcher().Type
 		}
 		if _, ok := cfgKeys[cfgKey]; ok {
 			return nil, fmt.Errorf("duplicate CUD configuration for %s", cfgKey)

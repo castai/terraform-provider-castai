@@ -223,24 +223,27 @@ resource "castai_commitments" "test_gcp" {
 ]
 	EOF
 
-  gcp_cud_configs = [
-    {
-	  match_name = "test-2"
-	  match_type = "GENERAL_PURPOSE_E2"
-	  match_region = "us-east4"
-      prioritization = true
-	  allowed_usage = 0.7
-	  status = "Active"
-    },
-    {
-	  match_name = "test"
-	  match_type = "COMPUTE_OPTIMIZED_C2D"
-	  match_region = "us-east4"
-      prioritization = false
-      allowed_usage = 1
-      status = "Active"
-    }
-  ]
+  gcp_cud_configs {
+	matcher {
+	  name = "test-2"
+	  type = "GENERAL_PURPOSE_E2"
+	  region = "us-east4"
+	}
+	prioritization = true
+	allowed_usage = 0.7
+	status = "Active"
+  }
+
+  gcp_cud_configs {
+	matcher {
+	  name = "test"
+	  type = "COMPUTE_OPTIMIZED_C2D"
+	  region = "us-east4"
+	}
+    prioritization = false
+    allowed_usage = 1
+    status = "Active"
+  }
 }
 `
 )
