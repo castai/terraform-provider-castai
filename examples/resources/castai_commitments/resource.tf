@@ -8,6 +8,14 @@ resource "castai_commitments" "gcp_test" {
       prioritization = true
       allowed_usage  = 0.6
       status         = "Inactive"
+      assignments = [
+        {
+          cluster_id = "cluster-id-1" # priority 1 cluster - prioritization is enabled
+        },
+        {
+          cluster_id = "cluster-id-2" # priority 2 cluster - prioritization is enabled
+        }
+      ]
     }
   ]
 }
@@ -22,6 +30,14 @@ resource "castai_commitments" "azure_test" {
       prioritization = false
       allowed_usage  = 0.9
       status         = "Active"
+      assignments = [
+        {
+          cluster_id = "cluster-id-3"
+        },
+        {
+          cluster_id = "cluster-id-4"
+        }
+      ]
     }
   ]
 }

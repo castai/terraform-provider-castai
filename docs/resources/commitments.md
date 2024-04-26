@@ -23,6 +23,14 @@ resource "castai_commitments" "gcp_test" {
       prioritization = true
       allowed_usage  = 0.6
       status         = "Inactive"
+      assignments = [
+        {
+          cluster_id = "cluster-id-1" # priority 1 cluster - prioritization is enabled
+        },
+        {
+          cluster_id = "cluster-id-2" # priority 2 cluster - prioritization is enabled
+        }
+      ]
     }
   ]
 }
@@ -37,6 +45,14 @@ resource "castai_commitments" "azure_test" {
       prioritization = false
       allowed_usage  = 0.9
       status         = "Active"
+      assignments = [
+        {
+          cluster_id = "cluster-id-3"
+        },
+        {
+          cluster_id = "cluster-id-4"
+        }
+      ]
     }
   ]
 }
@@ -64,11 +80,20 @@ resource "castai_commitments" "azure_test" {
 Optional:
 
 - `allowed_usage` (Number)
+- `assignments` (List of Object) (see [below for nested schema](#nestedobjatt--commitment_configs--assignments))
 - `match_name` (String)
 - `match_region` (String)
 - `match_type` (String)
 - `prioritization` (Boolean)
 - `status` (String)
+
+<a id="nestedobjatt--commitment_configs--assignments"></a>
+### Nested Schema for `commitment_configs.assignments`
+
+Optional:
+
+- `cluster_id` (String)
+
 
 
 <a id="nestedblock--timeouts"></a>
@@ -86,6 +111,7 @@ Optional:
 Read-Only:
 
 - `allowed_usage` (Number)
+- `assignments` (List of Object) (see [below for nested schema](#nestedobjatt--azure_reservations--assignments))
 - `count` (Number)
 - `end_timestamp` (String)
 - `id` (String)
@@ -102,6 +128,14 @@ Read-Only:
 - `start_timestamp` (String)
 - `status` (String)
 
+<a id="nestedobjatt--azure_reservations--assignments"></a>
+### Nested Schema for `azure_reservations.assignments`
+
+Read-Only:
+
+- `cluster_id` (String)
+
+
 
 <a id="nestedatt--gcp_cuds"></a>
 ### Nested Schema for `gcp_cuds`
@@ -109,6 +143,7 @@ Read-Only:
 Read-Only:
 
 - `allowed_usage` (Number)
+- `assignments` (List of Object) (see [below for nested schema](#nestedobjatt--gcp_cuds--assignments))
 - `cpu` (Number)
 - `cud_id` (String)
 - `cud_status` (String)
@@ -122,5 +157,12 @@ Read-Only:
 - `start_timestamp` (String)
 - `status` (String)
 - `type` (String)
+
+<a id="nestedobjatt--gcp_cuds--assignments"></a>
+### Nested Schema for `gcp_cuds.assignments`
+
+Read-Only:
+
+- `cluster_id` (String)
 
 
