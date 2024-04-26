@@ -860,6 +860,10 @@ func TestMapConfiguredCUDImportsToResources(t *testing.T) {
 					Prioritization: lo.ToPtr(true),
 					Status:         lo.ToPtr("ACTIVE"),
 					AllowedUsage:   lo.ToPtr[float32](0.5),
+					Assignments: []*CommitmentAssignmentResource{
+						{ClusterID: "cluster-1"},
+						{ClusterID: "cluster-2"},
+					},
 				},
 			},
 			expected: []*GCPCUDResource{
@@ -877,6 +881,10 @@ func TestMapConfiguredCUDImportsToResources(t *testing.T) {
 					MemoryMb:       20480,
 					Plan:           lo.FromPtr(testGCPCommitmentImport.Plan),
 					Type:           lo.FromPtr(testGCPCommitmentImport.Type),
+					Assignments: []*CommitmentAssignmentResource{
+						{ClusterID: "cluster-1"},
+						{ClusterID: "cluster-2"},
+					},
 				},
 			},
 		},
@@ -943,6 +951,10 @@ func TestMapConfiguredReservationImportsToResources(t *testing.T) {
 					Prioritization: lo.ToPtr(true),
 					Status:         lo.ToPtr("ACTIVE"),
 					AllowedUsage:   lo.ToPtr[float32](0.5),
+					Assignments: []*CommitmentAssignmentResource{
+						{ClusterID: "cluster-1"},
+						{ClusterID: "cluster-2"},
+					},
 				},
 			},
 			expected: []*AzureReservationResource{
@@ -962,6 +974,10 @@ func TestMapConfiguredReservationImportsToResources(t *testing.T) {
 					Scope:              lo.FromPtr(testAzureCommitmentImport.Scope),
 					ScopeResourceGroup: lo.FromPtr(testAzureCommitmentImport.ScopeResourceGroup),
 					ScopeSubscription:  lo.FromPtr(testAzureCommitmentImport.ScopeSubscription),
+					Assignments: []*CommitmentAssignmentResource{
+						{ClusterID: "cluster-1"},
+						{ClusterID: "cluster-2"},
+					},
 				},
 			},
 		},
