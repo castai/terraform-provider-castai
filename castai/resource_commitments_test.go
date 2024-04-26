@@ -71,6 +71,7 @@ func TestCommitments(t *testing.T) {
 					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.0.memory_mb", "20480"),
 					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.0.plan", "TWELVE_MONTH"),
 					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.0.type", "COMPUTE_OPTIMIZED_C2D"),
+					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.0.assignments.#", "0"),
 					// Azure
 					resource.TestCheckResourceAttr("castai_commitments.test_azure", "azure_reservations.#", "1"),
 					resource.TestCheckResourceAttr("castai_commitments.test_azure", "azure_reservations.0.reservation_id", "3b3de39c-bc44-4d69-be2d-69527dfe9958"),
@@ -107,6 +108,7 @@ func TestCommitments(t *testing.T) {
 					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.0.prioritization", "false"),
 					checkFloatAttr("castai_commitments.test_gcp", "gcp_cuds.0.allowed_usage", 1),
 					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.0.status", "Active"),
+					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.0.assignments.#", "0"),
 					// GCP - "test-2" CUD, added in the update with config
 					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.1.cud_id", "987654321"),
 					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.1.cud_status", "ACTIVE"),
@@ -121,6 +123,7 @@ func TestCommitments(t *testing.T) {
 					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.1.prioritization", "true"),
 					checkFloatAttr("castai_commitments.test_gcp", "gcp_cuds.1.allowed_usage", 0.7),
 					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.1.status", "Active"),
+					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.1.assignments.#", "1"),
 					// Azure - unchanged
 					resource.TestCheckResourceAttr("castai_commitments.test_azure", "azure_reservations.#", "1"),
 					resource.TestCheckResourceAttr("castai_commitments.test_azure", "azure_reservations.0.reservation_id", "3b3de39c-bc44-4d69-be2d-69527dfe9958"),
@@ -157,6 +160,7 @@ func TestCommitments(t *testing.T) {
 					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.0.prioritization", "false"),
 					checkFloatAttr("castai_commitments.test_gcp", "gcp_cuds.0.allowed_usage", 1),
 					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.0.status", "Active"),
+					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.0.assignments.#", "1"),
 					// GCP - "test-2" CUD, unchanged
 					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.1.cud_id", "987654321"),
 					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.1.cud_status", "ACTIVE"),
@@ -171,6 +175,7 @@ func TestCommitments(t *testing.T) {
 					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.1.prioritization", "true"),
 					checkFloatAttr("castai_commitments.test_gcp", "gcp_cuds.1.allowed_usage", 0.7),
 					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.1.status", "Active"),
+					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.1.assignments.#", "1"),
 
 					resource.TestCheckResourceAttr("castai_commitments.test_azure", "azure_reservations.#", "2"),
 					// Azure - "test-res-1", added config
@@ -227,6 +232,7 @@ func TestCommitments(t *testing.T) {
 					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.0.prioritization", "false"),
 					checkFloatAttr("castai_commitments.test_gcp", "gcp_cuds.0.allowed_usage", 1),
 					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.0.status", "Active"),
+					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.0.assignments.#", "1"),
 					// GCP - "test-2" CUD, unchanged
 					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.1.cud_id", "987654321"),
 					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.1.cud_status", "ACTIVE"),
@@ -241,6 +247,7 @@ func TestCommitments(t *testing.T) {
 					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.1.prioritization", "true"),
 					checkFloatAttr("castai_commitments.test_gcp", "gcp_cuds.1.allowed_usage", 0.7),
 					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.1.status", "Active"),
+					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.1.assignments.#", "1"),
 				),
 			},
 			importCUDsStateStep,
@@ -262,6 +269,7 @@ func TestCommitments(t *testing.T) {
 					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.0.prioritization", "true"),
 					checkFloatAttr("castai_commitments.test_gcp", "gcp_cuds.0.allowed_usage", 0.7),
 					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.0.status", "Active"),
+					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.0.assignments.#", "0"),
 				),
 			},
 		},
