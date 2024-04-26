@@ -15,30 +15,30 @@ Commitments represent cloud service provider reserved instances (Azure) and comm
 ```terraform
 resource "castai_commitments" "gcp_test" {
   gcp_cuds_json = file("./cuds.json")
-  commitment_configs = [
-    {
-      match_region   = "us-east4"
-      match_type     = "COMPUTE_OPTIMIZED_C2D"
-      match_name     = "test"
-      prioritization = true
-      allowed_usage  = 0.6
-      status         = "Inactive"
+  commitment_configs {
+    matcher {
+      region = "us-east4"
+      type   = "COMPUTE_OPTIMIZED_C2D"
+      name   = "test"
     }
-  ]
+    prioritization = true
+    allowed_usage  = 0.6
+    status         = "Inactive"
+  }
 }
 
 resource "castai_commitments" "azure_test" {
   azure_reservations_csv = file("./reservations.csv")
-  commitment_configs = [
-    {
-      match_region   = "eastus"
-      match_type     = "Standard_D32as_v4"
-      match_name     = "test-res-1"
-      prioritization = false
-      allowed_usage  = 0.9
-      status         = "Active"
+  commitment_configs {
+    matcher {
+      region = "eastus"
+      type   = "Standard_D32as_v4"
+      name   = "test-res-1"
     }
-  ]
+    prioritization = false
+    allowed_usage  = 0.9
+    status         = "Active"
+  }
 }
 ```
 
@@ -48,7 +48,7 @@ resource "castai_commitments" "azure_test" {
 ### Optional
 
 - `azure_reservations_csv` (String) CSV file containing reservations exported from Azure.
-- `commitment_configs` (List of Object) List of commitment configurations. (see [below for nested schema](#nestedatt--commitment_configs))
+- `commitment_configs` (Block List) List of commitment configurations. (see [below for nested schema](#nestedblock--commitment_configs))
 - `gcp_cuds_json` (String) JSON file containing CUDs exported from GCP.
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
@@ -58,17 +58,31 @@ resource "castai_commitments" "azure_test" {
 - `gcp_cuds` (List of Object) List of GCP CUDs. (see [below for nested schema](#nestedatt--gcp_cuds))
 - `id` (String) The ID of this resource.
 
-<a id="nestedatt--commitment_configs"></a>
+<a id="nestedblock--commitment_configs"></a>
 ### Nested Schema for `commitment_configs`
+
+Required:
+
+- `matcher` (Block List, Min: 1, Max: 1) Matcher used to map config to a commitment. (see [below for nested schema](#nestedblock--commitment_configs--matcher))
 
 Optional:
 
-- `allowed_usage` (Number)
-- `match_name` (String)
-- `match_region` (String)
-- `match_type` (String)
-- `prioritization` (Boolean)
-- `status` (String)
+- `allowed_usage` (Number) Allowed usage of the commitment. The value is between 0 (0%) and 1 (100%).
+- `prioritization` (Boolean) If enabled, it's possible to assign priorities to the assigned clusters.
+- `status` (String) Status of the commitment in CAST AI.
+
+<a id="nestedblock--commitment_configs--matcher"></a>
+### Nested Schema for `commitment_configs.matcher`
+
+Required:
+
+- `name` (String) Name of the commitment to match.
+- `region` (String) Region of the commitment to match.
+
+Optional:
+
+- `type` (String) Type of the commitment to match. For compute resources, it's the type of the machine.
+
 
 
 <a id="nestedblock--timeouts"></a>

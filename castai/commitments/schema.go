@@ -85,20 +85,31 @@ var (
 	})
 	CommitmentConfigSchema = map[string]*schema.Schema{
 		// Matcher fields
-		"match_name": {
-			Type:        schema.TypeString,
+		"matcher": {
+			Type:        schema.TypeList,
 			Required:    true,
-			Description: "Name of the commitment to match.",
-		},
-		"match_type": {
-			Type:        schema.TypeString,
-			Optional:    true,
-			Description: "Type of the commitment to match. For compute resources, it's the type of the machine.",
-		},
-		"match_region": {
-			Type:        schema.TypeString,
-			Required:    true,
-			Description: "Region of the commitment to match.",
+			Description: "Matcher used to map config to a commitment.",
+			MinItems:    1,
+			MaxItems:    1,
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"name": {
+						Type:        schema.TypeString,
+						Required:    true,
+						Description: "Name of the commitment to match.",
+					},
+					"type": {
+						Type:        schema.TypeString,
+						Optional:    true,
+						Description: "Type of the commitment to match. For compute resources, it's the type of the machine.",
+					},
+					"region": {
+						Type:        schema.TypeString,
+						Required:    true,
+						Description: "Region of the commitment to match.",
+					},
+				},
+			},
 		},
 		// Actual config fields
 		"prioritization": {

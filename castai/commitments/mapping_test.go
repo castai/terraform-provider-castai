@@ -282,9 +282,13 @@ func TestMapCUDImportToResource(t *testing.T) {
 			input: func() *commitmentWithConfig[CastaiGCPCommitmentImport] {
 				c := makeInput()
 				c.Config = &CommitmentConfigResource{
-					MatchName:      "test-cud",
-					MatchType:      lo.ToPtr("COMPUTE_OPTIMIZED_C2D"),
-					MatchRegion:    lo.ToPtr("us-central1"),
+					Matcher: []*CommitmentConfigMatcherResource{
+						{
+							Name:   "test-cud",
+							Type:   lo.ToPtr("COMPUTE_OPTIMIZED_C2D"),
+							Region: lo.ToPtr("us-central1"),
+						},
+					},
 					Prioritization: lo.ToPtr(true),
 					Status:         lo.ToPtr("ACTIVE"),
 					AllowedUsage:   lo.ToPtr[float32](0.7),
@@ -417,9 +421,13 @@ func TestMapReservationImportToResource(t *testing.T) {
 			input: func() *commitmentWithConfig[CastaiAzureReservationImport] {
 				c := makeInput()
 				c.Config = &CommitmentConfigResource{
-					MatchName:      lo.FromPtr(testAzureCommitmentImport.Name),
-					MatchType:      testAzureCommitmentImport.ProductName,
-					MatchRegion:    testAzureCommitmentImport.Region,
+					Matcher: []*CommitmentConfigMatcherResource{
+						{
+							Name:   lo.FromPtr(testAzureCommitmentImport.Name),
+							Type:   testAzureCommitmentImport.ProductName,
+							Region: testAzureCommitmentImport.Region,
+						},
+					},
 					Prioritization: lo.ToPtr(true),
 					Status:         lo.ToPtr("ACTIVE"),
 					AllowedUsage:   lo.ToPtr[float32](0.7),
@@ -542,25 +550,37 @@ func TestMapConfigsToCommitments(t *testing.T) {
 		}
 
 		cudCfg1 = &CommitmentConfigResource{
-			MatchName:      "test-cud-1",
-			MatchType:      lo.ToPtr("COMPUTE_OPTIMIZED_C2D"),
-			MatchRegion:    lo.ToPtr("us-central1"),
+			Matcher: []*CommitmentConfigMatcherResource{
+				{
+					Name:   "test-cud-1",
+					Type:   lo.ToPtr("COMPUTE_OPTIMIZED_C2D"),
+					Region: lo.ToPtr("us-central1"),
+				},
+			},
 			Prioritization: lo.ToPtr(true),
 			Status:         lo.ToPtr("ACTIVE"),
 			AllowedUsage:   lo.ToPtr[float32](0.5),
 		}
 		cudCfg2 = &CommitmentConfigResource{
-			MatchName:      "test-cud-2",
-			MatchType:      lo.ToPtr("COMPUTE_OPTIMIZED_N2D"),
-			MatchRegion:    lo.ToPtr("us-central1"),
+			Matcher: []*CommitmentConfigMatcherResource{
+				{
+					Name:   "test-cud-2",
+					Type:   lo.ToPtr("COMPUTE_OPTIMIZED_N2D"),
+					Region: lo.ToPtr("us-central1"),
+				},
+			},
 			Prioritization: lo.ToPtr(false),
 			Status:         lo.ToPtr("INACTIVE"),
 			AllowedUsage:   lo.ToPtr[float32](0.7),
 		}
 		cudCfg3 = &CommitmentConfigResource{
-			MatchName:      "test-cud-3",
-			MatchType:      lo.ToPtr("COMPUTE_OPTIMIZED_E2"),
-			MatchRegion:    lo.ToPtr("eu-central1"),
+			Matcher: []*CommitmentConfigMatcherResource{
+				{
+					Name:   "test-cud-3",
+					Type:   lo.ToPtr("COMPUTE_OPTIMIZED_E2"),
+					Region: lo.ToPtr("eu-central1"),
+				},
+			},
 			Prioritization: lo.ToPtr(true),
 			Status:         lo.ToPtr("ACTIVE"),
 			AllowedUsage:   lo.ToPtr[float32](1),
@@ -586,25 +606,37 @@ func TestMapConfigsToCommitments(t *testing.T) {
 		}
 
 		reservationCfg1 = &CommitmentConfigResource{
-			MatchName:      "test-reservation-1",
-			MatchType:      lo.ToPtr("Standard_D32as_v4"),
-			MatchRegion:    lo.ToPtr("eastus"),
+			Matcher: []*CommitmentConfigMatcherResource{
+				{
+					Name:   "test-reservation-1",
+					Type:   lo.ToPtr("Standard_D32as_v4"),
+					Region: lo.ToPtr("eastus"),
+				},
+			},
 			Prioritization: lo.ToPtr(true),
 			Status:         lo.ToPtr("ACTIVE"),
 			AllowedUsage:   lo.ToPtr[float32](0.5),
 		}
 		reservationCfg2 = &CommitmentConfigResource{
-			MatchName:      "test-reservation-2",
-			MatchType:      lo.ToPtr("Standard_B1s"),
-			MatchRegion:    lo.ToPtr("eastus"),
+			Matcher: []*CommitmentConfigMatcherResource{
+				{
+					Name:   "test-reservation-2",
+					Type:   lo.ToPtr("Standard_B1s"),
+					Region: lo.ToPtr("eastus"),
+				},
+			},
 			Prioritization: lo.ToPtr(false),
 			Status:         lo.ToPtr("INACTIVE"),
 			AllowedUsage:   lo.ToPtr[float32](0.7),
 		}
 		reservationCfg3 = &CommitmentConfigResource{
-			MatchName:      "test-reservation-3",
-			MatchType:      lo.ToPtr("Standard_A2_v2"),
-			MatchRegion:    lo.ToPtr("westus"),
+			Matcher: []*CommitmentConfigMatcherResource{
+				{
+					Name:   "test-reservation-3",
+					Type:   lo.ToPtr("Standard_A2_v2"),
+					Region: lo.ToPtr("westus"),
+				},
+			},
 			Prioritization: lo.ToPtr(true),
 			Status:         lo.ToPtr("ACTIVE"),
 			AllowedUsage:   lo.ToPtr[float32](1),
@@ -695,9 +727,9 @@ func TestMapConfigsToCommitments(t *testing.T) {
 				CastaiGCPCommitmentImport{CastaiInventoryV1beta1GCPCommitmentImport: cudImport1},
 			},
 			configs: func() []*CommitmentConfigResource {
-				cudCfg1.MatchRegion = lo.ToPtr("https://www.googleapis.com/compute/v1/projects/test-project/zones/" + *cudCfg1.MatchRegion)
-				cudCfg2.MatchRegion = lo.ToPtr("https://www.googleapis.com/compute/v1/projects/test-project/zones/" + *cudCfg2.MatchRegion)
-				cudCfg3.MatchRegion = lo.ToPtr("https://www.googleapis.com/compute/v1/projects/test-project/zones/" + *cudCfg3.MatchRegion)
+				cudCfg1.GetMatcher().Region = lo.ToPtr("https://www.googleapis.com/compute/v1/projects/test-project/zones/" + *cudCfg1.GetMatcher().Region)
+				cudCfg2.GetMatcher().Region = lo.ToPtr("https://www.googleapis.com/compute/v1/projects/test-project/zones/" + *cudCfg2.GetMatcher().Region)
+				cudCfg3.GetMatcher().Region = lo.ToPtr("https://www.googleapis.com/compute/v1/projects/test-project/zones/" + *cudCfg3.GetMatcher().Region)
 				return []*CommitmentConfigResource{cudCfg1, cudCfg2, cudCfg3} // make sure the order doesn't match the CUDs
 			}(),
 			expected: []*commitmentWithConfig[commitment]{
@@ -801,11 +833,19 @@ func TestMapConfiguredCUDImportsToResources(t *testing.T) {
 		"should fail as there are more configs than cuds": {
 			configs: []*CommitmentConfigResource{
 				{
-					MatchName:      "test-cud",
+					Matcher: []*CommitmentConfigMatcherResource{
+						{
+							Name: "test-cud",
+						},
+					},
 					Prioritization: lo.ToPtr(true),
 				},
 				{
-					MatchName:    "test-cud-2",
+					Matcher: []*CommitmentConfigMatcherResource{
+						{
+							Name: "test-cud-2",
+						},
+					},
 					AllowedUsage: lo.ToPtr[float32](0.45),
 				},
 			},
@@ -820,9 +860,13 @@ func TestMapConfiguredCUDImportsToResources(t *testing.T) {
 			cuds: []sdk.CastaiInventoryV1beta1GCPCommitmentImport{testGCPCommitmentImport},
 			configs: []*CommitmentConfigResource{
 				{
-					MatchName:      lo.FromPtr(testGCPCommitmentImport.Name),
-					MatchType:      testGCPCommitmentImport.Type,
-					MatchRegion:    testGCPCommitmentImport.Region,
+					Matcher: []*CommitmentConfigMatcherResource{
+						{
+							Name:   lo.FromPtr(testGCPCommitmentImport.Name),
+							Type:   testGCPCommitmentImport.Type,
+							Region: testGCPCommitmentImport.Region,
+						},
+					},
 					Prioritization: lo.ToPtr(true),
 					Status:         lo.ToPtr("ACTIVE"),
 					AllowedUsage:   lo.ToPtr[float32](0.5),
@@ -884,11 +928,19 @@ func TestMapConfiguredReservationImportsToResources(t *testing.T) {
 		"should fail as there are more configs than reservations": {
 			configs: []*CommitmentConfigResource{
 				{
-					MatchName:      "test-reservation",
+					Matcher: []*CommitmentConfigMatcherResource{
+						{
+							Name: "test-reservation",
+						},
+					},
 					Prioritization: lo.ToPtr(true),
 				},
 				{
-					MatchName:    "test-reservation-2",
+					Matcher: []*CommitmentConfigMatcherResource{
+						{
+							Name: "test-reservation-2",
+						},
+					},
 					AllowedUsage: lo.ToPtr[float32](0.45),
 				},
 			},
@@ -903,9 +955,13 @@ func TestMapConfiguredReservationImportsToResources(t *testing.T) {
 			cuds: []sdk.CastaiInventoryV1beta1AzureReservationImport{testAzureCommitmentImport},
 			configs: []*CommitmentConfigResource{
 				{
-					MatchName:      lo.FromPtr(testAzureCommitmentImport.Name),
-					MatchType:      testAzureCommitmentImport.ProductName,
-					MatchRegion:    testAzureCommitmentImport.Region,
+					Matcher: []*CommitmentConfigMatcherResource{
+						{
+							Name:   lo.FromPtr(testAzureCommitmentImport.Name),
+							Type:   testAzureCommitmentImport.ProductName,
+							Region: testAzureCommitmentImport.Region,
+						},
+					},
 					Prioritization: lo.ToPtr(true),
 					Status:         lo.ToPtr("ACTIVE"),
 					AllowedUsage:   lo.ToPtr[float32](0.5),
@@ -982,9 +1038,13 @@ func TestMapCommitmentImportWithConfigToUpdateRequest(t *testing.T) {
 					},
 				},
 				Config: &CommitmentConfigResource{
-					MatchName:      "test-cud-1",
-					MatchType:      lo.ToPtr("COMPUTE_OPTIMIZED_N2D"),
-					MatchRegion:    lo.ToPtr("us-central1"),
+					Matcher: []*CommitmentConfigMatcherResource{
+						{
+							Name:   "test-cud-1",
+							Type:   lo.ToPtr("COMPUTE_OPTIMIZED_N2D"),
+							Region: lo.ToPtr("us-central1"),
+						},
+					},
 					Prioritization: lo.ToPtr(false),
 					Status:         lo.ToPtr("INACTIVE"),
 					AllowedUsage:   lo.ToPtr[float32](0.7),
@@ -1054,9 +1114,13 @@ func TestMapCommitmentImportWithConfigToUpdateRequest(t *testing.T) {
 					},
 				},
 				Config: &CommitmentConfigResource{
-					MatchName:      "test-reservation-1",
-					MatchType:      testAzureReservationContext.InstanceType,
-					MatchRegion:    lo.ToPtr("eastus"),
+					Matcher: []*CommitmentConfigMatcherResource{
+						{
+							Name:   "test-reservation-1",
+							Type:   testAzureReservationContext.InstanceType,
+							Region: lo.ToPtr("eastus"),
+						},
+					},
 					Prioritization: lo.ToPtr(false),
 					Status:         lo.ToPtr("INACTIVE"),
 					AllowedUsage:   lo.ToPtr[float32](0.7),

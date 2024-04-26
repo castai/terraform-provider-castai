@@ -338,24 +338,27 @@ resource "castai_commitments" "test_gcp" {
 ]
 	EOF
 
-  commitment_configs = [
-    {
-      match_name = "test-2"
-      match_type = "GENERAL_PURPOSE_E2"
-      match_region = "us-east4"
-      prioritization = true
-	  allowed_usage = 0.7
-	  status = "Active"
-    },
-    {
-	  match_name = "test"
-	  match_type = "COMPUTE_OPTIMIZED_C2D"
-	  match_region = "us-east4"
-      prioritization = false
-      allowed_usage = 1
-      status = "Active"
-    }
-  ]
+	commitment_configs {
+		matcher {
+		  name = "test-2"
+		  type = "GENERAL_PURPOSE_E2"
+		  region = "us-east4"
+		}
+		prioritization = true
+		allowed_usage = 0.7
+		status = "Active"
+	}
+
+	commitment_configs {
+		matcher {
+			name = "test"
+			type = "COMPUTE_OPTIMIZED_C2D"
+			region = "us-east4"
+		}
+		prioritization = false
+		allowed_usage = 1
+		status = "Active"
+	}
 }
 
 resource "castai_commitments" "test_azure" {
@@ -375,24 +378,27 @@ resource "castai_commitments" "test_gcp" {
 ]
 	EOF
 
-  commitment_configs = [
-    {
-	  match_name = "test-2"
-	  match_type = "GENERAL_PURPOSE_E2"
-	  match_region = "us-east4"
+  commitment_configs {
+	  matcher {
+		  name = "test-2"
+		  type = "GENERAL_PURPOSE_E2"
+		  region = "us-east4"
+	  }	
       prioritization = true
 	  allowed_usage = 0.7
 	  status = "Active"
-    },
-    {
- 	  match_name = "test"
-      match_type = "COMPUTE_OPTIMIZED_C2D"
-      match_region = "us-east4"
-      prioritization = false
-      allowed_usage = 1
-      status = "Active"
     }
-  ]
+
+	commitment_configs {
+		matcher {
+ 			name = "test"
+			type = "COMPUTE_OPTIMIZED_C2D"
+			region = "us-east4"
+		}
+		prioritization = false
+		allowed_usage = 1
+		status = "Active"
+	}
 }
 
 resource "castai_commitments" "test_azure" {
@@ -402,24 +408,27 @@ test-res-1,3b3de39c-bc44-4d69-be2d-69527dfe9958,630226bb-5170-4b95-90b0-f2227571
 test-res-2,3b3de39c-bc44-4d69-be2d-69527dfe9959,630226bb-5170-4b95-90b0-f222757130c1,Succeeded,2040-01-01T00:00:00Z,2023-01-12T00:00:00Z,P1Y,Single subscription,8faa0959-093b-4612-8686-a996ac19db00,All resource groups,VirtualMachines,Standard_B1s,eastus,2,100,100,100,https://portal.azure.com#resource/providers/microsoft.capacity/reservationOrders/59791a62-264b-4b9f-aa3a-5eeb761e4583/reservations/883afd52-54c8-4bc6-a0f2-ccbaf7b84bda/overview
 	EOF
 
-	commitment_configs = [
-        {
-			match_name = "test-res-1"
-			match_region = "eastus"
-			match_type = "Standard_D32as_v4"
-            prioritization = false
-            allowed_usage = 0.6
-            status = "Active"
-        },
-        {
-			match_name = "test-res-2"
-			match_region = "eastus"
-			match_type = "Standard_B1s"
-            prioritization = true
-            allowed_usage = 0.9
-            status = "Active"
-        }
-	]
+	commitment_configs {
+		matcher {
+			name = "test-res-1"
+			region = "eastus"
+			type = "Standard_D32as_v4"
+		}
+		prioritization = false
+		allowed_usage = 0.6
+		status = "Active"
+	}
+
+	commitment_configs {
+		matcher {
+			name = "test-res-2"
+			region = "eastus"
+			type = "Standard_B1s"
+		}
+		prioritization = true
+		allowed_usage = 0.9
+		status = "Active"
+	}
 }
 `
 
@@ -432,24 +441,27 @@ resource "castai_commitments" "test_gcp" {
 ]
 	EOF
 
-  commitment_configs = [
-    {
-	  match_name = "test-2"
-	  match_type = "GENERAL_PURPOSE_E2"
-	  match_region = "us-east4"
-      prioritization = true
-	  allowed_usage = 0.7
-	  status = "Active"
-    },
-    {
-	  match_name = "test"
-	  match_type = "COMPUTE_OPTIMIZED_C2D"
-	  match_region = "us-east4"
-      prioritization = false
-      allowed_usage = 1
-      status = "Active"
+  commitment_configs {
+  	matcher {
+	  name = "test-2"
+	  type = "GENERAL_PURPOSE_E2"
+	  region = "us-east4"
     }
-  ]
+    prioritization = true
+    allowed_usage = 0.7
+    status = "Active"
+  }
+
+  commitment_configs {
+  	matcher {
+	  name = "test"
+	  type = "COMPUTE_OPTIMIZED_C2D"
+	  region = "us-east4"
+	}
+    prioritization = false
+    allowed_usage = 1
+    status = "Active"
+  }
 }
 `
 
@@ -461,16 +473,16 @@ resource "castai_commitments" "test_gcp" {
 ]
 	EOF
 
-  commitment_configs = [
-    {
-      match_name = "test-2"
-	  match_type = "GENERAL_PURPOSE_E2"
-	  match_region = "us-east4"
-      prioritization = true
-	  allowed_usage = 0.7
-	  status = "Active"
-    }
-  ]
+  commitment_configs {
+	matcher {
+	  name = "test-2"
+	  type = "GENERAL_PURPOSE_E2"
+	  region = "us-east4"
+	}
+	prioritization = true
+	allowed_usage = 0.7
+	status = "Active"
+  }
 }
 `
 )

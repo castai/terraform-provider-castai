@@ -56,7 +56,6 @@ func resourceCommitments() *schema.Resource {
 				Elem: &schema.Resource{
 					Schema: commitments.CommitmentConfigSchema,
 				},
-				ConfigMode: schema.SchemaConfigModeAttr,
 			},
 			// Computed fields
 			commitments.FieldGCPCUDs: {
@@ -182,7 +181,7 @@ func getCUDImportResources(tfData resourceProvider) ([]*commitments.GCPCUDResour
 		return nil, true, fmt.Errorf("more configurations than CUDs")
 	}
 	for _, c := range configs {
-		if err := c.Validate(); err != nil {
+		if err := c.GetMatcher().Validate(); err != nil {
 			return nil, true, fmt.Errorf("invalid config: %w", err)
 		}
 	}
@@ -213,7 +212,7 @@ func getReservationImportResources(tfData resourceProvider) ([]*commitments.Azur
 		return nil, true, fmt.Errorf("more configurations than reservations")
 	}
 	for _, c := range configs {
-		if err := c.Validate(); err != nil {
+		if err := c.GetMatcher().Validate(); err != nil {
 			return nil, true, fmt.Errorf("invalid config: %w", err)
 		}
 	}

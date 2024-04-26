@@ -69,14 +69,24 @@ type (
 	}
 
 	CommitmentConfigResource struct {
-		MatchName      string   `mapstructure:"match_name"`
-		MatchType      *string  `mapstructure:"match_type,omitempty"`
-		MatchRegion    *string  `mapstructure:"match_region,omitempty"`
-		Prioritization *bool    `mapstructure:"prioritization,omitempty"`
-		Status         *string  `mapstructure:"status,omitempty"`
-		AllowedUsage   *float32 `mapstructure:"allowed_usage,omitempty"`
+		Matcher        []*CommitmentConfigMatcherResource `mapstructure:"matcher,omitempty"`
+		Prioritization *bool                              `mapstructure:"prioritization,omitempty"`
+		Status         *string                            `mapstructure:"status,omitempty"`
+		AllowedUsage   *float32                           `mapstructure:"allowed_usage,omitempty"`
+	}
+	CommitmentConfigMatcherResource struct {
+		Name   string  `mapstructure:"name"`
+		Type   *string `mapstructure:"type,omitempty"`
+		Region *string `mapstructure:"region,omitempty"`
 	}
 )
+
+func (r *CommitmentConfigResource) GetMatcher() *CommitmentConfigMatcherResource {
+	if r == nil || len(r.Matcher) == 0 {
+		return nil
+	}
+	return r.Matcher[0]
+}
 
 var (
 	_ Resource = (*GCPCUDResource)(nil)
@@ -111,9 +121,12 @@ func (r *AzureReservationResource) GetIDInCloud() string {
 	return r.ReservationID
 }
 
-func (m CommitmentConfigResource) Validate() error {
-	if m.MatchName == "" {
-		return errors.New("matcher name is required")
+func (m *CommitmentConfigMatcherResource) Validate() error {
+	if m == nil {
+		return errors.New("matcher is required")
+	}
+	if m.Name == "" {
+		return errors.New("name is required")
 	}
 	return nil
 }
@@ -315,12 +328,12 @@ func MapConfigsToCommitments[C commitment](
 	res := make([]*commitmentWithConfig[C], len(cmts))
 	cfgKeys := map[commitmentConfigMatcherKey]struct{}{}
 	for _, cfg := range configs {
-		cfgKey := commitmentConfigMatcherKey{name: cfg.MatchName} // Name matcher is required, other fields are optional
-		if cfg.MatchRegion != nil {
-			_, cfgKey.region = path.Split(*cfg.MatchRegion)
+		cfgKey := commitmentConfigMatcherKey{name: cfg.GetMatcher().Name} // Name matcher is required, other fields are optional
+		if cfg.GetMatcher().Region != nil {
+			_, cfgKey.region = path.Split(*cfg.GetMatcher().Region)
 		}
-		if cfg.MatchType != nil {
-			cfgKey.typ = *cfg.MatchType
+		if cfg.GetMatcher().Type != nil {
+			cfgKey.typ = *cfg.GetMatcher().Type
 		}
 		if _, ok := cfgKeys[cfgKey]; ok {
 			return nil, fmt.Errorf("duplicate configuration for %s", cfgKey)
