@@ -67,6 +67,7 @@ func TestAccResourceNodeConfiguration_eks(t *testing.T) {
 				Config: testAccEKSNodeConfigurationUpdated(rName, clusterName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "disk_cpu_ratio", "0"),
+					resource.TestCheckResourceAttr(resourceName, "drain_timeout_sec", "120"),
 					resource.TestCheckResourceAttr(resourceName, "min_disk_size", "100"),
 					resource.TestCheckResourceAttr(resourceName, "image", "amazon-eks-node-1.23-v20220824"),
 					resource.TestCheckResourceAttr(resourceName, "init_script", ""),
@@ -149,6 +150,7 @@ func testAccEKSNodeConfigurationUpdated(rName, clusterName string) string {
 resource "castai_node_configuration" "test" {
   name   		    = %[1]q
   cluster_id        = castai_eks_cluster.test.id
+  drain_timeout_sec = 120
   subnets   	    = data.aws_subnets.core.ids
   image             = "amazon-eks-node-1.23-v20220824" 
   container_runtime = "containerd"

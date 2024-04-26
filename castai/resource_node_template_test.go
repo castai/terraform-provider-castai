@@ -92,7 +92,14 @@ func TestNodeTemplateResourceReadContext(t *testing.T) {
 				    {	
 						"name": "foo",
 						"azName": "eu-central-1a",
-						"instanceTypes": ["m5.24xlarge"]
+						"instanceTypes": ["m5.24xlarge"],
+						"affinity": [
+                          {
+							"key": "gke.io/gcp-nodepool",
+							"operator": "In",	
+							"values": ["foo"]
+						  }
+						]
 					}
 				  ]
 				},
@@ -179,6 +186,11 @@ constraints.0.max_memory = 0
 constraints.0.min_cpu = 10
 constraints.0.min_memory = 0
 constraints.0.dedicated_node_affinity.# = 1
+constraints.0.dedicated_node_affinity.0.affinity.# = 1
+constraints.0.dedicated_node_affinity.0.affinity.0.key = gke.io/gcp-nodepool
+constraints.0.dedicated_node_affinity.0.affinity.0.operator = In
+constraints.0.dedicated_node_affinity.0.affinity.0.values.# = 1
+constraints.0.dedicated_node_affinity.0.affinity.0.values.0 = foo
 constraints.0.dedicated_node_affinity.0.az_name = eu-central-1a
 constraints.0.dedicated_node_affinity.0.instance_types.# = 1
 constraints.0.dedicated_node_affinity.0.instance_types.0 = m5.24xlarge

@@ -214,9 +214,9 @@ func upsertEvictionConfigs(ctx context.Context, data *schema.ResourceData, meta 
 		"application/json",
 		bytes.NewReader(evictorAdvancedConfigJson),
 	)
-	if err != nil || resp.JSON200 == nil {
+	if checkErr := sdk.CheckOKResponse(resp, err); checkErr != nil {
 		log.Printf("[ERROR] Failed to upsert evictor advanced config: %v", err)
-		return err
+		return checkErr
 	}
 	err = data.Set(FieldEvictorAdvancedConfig, flattenEvictionConfig(resp.JSON200.EvictionConfig))
 	if err != nil {
@@ -421,6 +421,10 @@ func toPodSelector(in interface{}) (*sdk.CastaiEvictorV1PodSelector, error) {
 				return nil, err
 			}
 
+			if mls == nil || len(mls.AdditionalProperties) == 0 {
+				continue
+			}
+
 			if out.LabelSelector == nil {
 				out.LabelSelector = &sdk.CastaiEvictorV1LabelSelector{}
 			}
@@ -498,11 +502,13 @@ func flattenPodSelector(ps *sdk.CastaiEvictorV1PodSelector) []map[string]any {
 	if ps.Namespace != nil {
 		out[FieldPodSelectorNamespace] = *ps.Namespace
 	}
-	if ps.LabelSelector.MatchLabels != nil {
-		out[FieldMatchLabels] = ps.LabelSelector.MatchLabels.AdditionalProperties
-	}
-	if ps.LabelSelector.MatchExpressions != nil {
-		out[FieldMatchExpressions] = flattenMatchExpressions(*ps.LabelSelector.MatchExpressions)
+	if ps.LabelSelector != nil {
+		if ps.LabelSelector.MatchLabels != nil {
+			out[FieldMatchLabels] = ps.LabelSelector.MatchLabels.AdditionalProperties
+		}
+		if ps.LabelSelector.MatchExpressions != nil {
+			out[FieldMatchExpressions] = flattenMatchExpressions(*ps.LabelSelector.MatchExpressions)
+		}
 	}
 	return []map[string]any{out}
 }

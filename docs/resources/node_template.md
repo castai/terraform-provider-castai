@@ -89,6 +89,20 @@ Required:
 - `instance_types` (List of String) Instance/node types in this node group.
 - `name` (String) Name of node group.
 
+Optional:
+
+- `affinity` (Block List) (see [below for nested schema](#nestedblock--constraints--dedicated_node_affinity--affinity))
+
+<a id="nestedblock--constraints--dedicated_node_affinity--affinity"></a>
+### Nested Schema for `constraints.dedicated_node_affinity.affinity`
+
+Required:
+
+- `key` (String) Key of the node affinity selector.
+- `operator` (String) Operator of the node affinity selector. Allowed values: In, NotIn, Exists, DoesNotExist, Gt, Lt.
+- `values` (List of String) Values of the node affinity selector.
+
+
 
 <a id="nestedblock--constraints--gpu"></a>
 ### Nested Schema for `constraints.gpu`

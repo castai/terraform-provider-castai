@@ -25,6 +25,7 @@ const (
 	FieldNodeConfigurationName             = "name"
 	FieldNodeConfigurationDiskCpuRatio     = "disk_cpu_ratio"
 	FieldNodeConfigurationMinDiskSize      = "min_disk_size"
+	FieldNodeConfigurationDrainTimeoutSec  = "drain_timeout_sec"
 	FieldNodeConfigurationSubnets          = "subnets"
 	FieldNodeConfigurationSSHPublicKey     = "ssh_public_key"
 	FieldNodeConfigurationImage            = "image"
@@ -78,6 +79,13 @@ func resourceNodeConfiguration() *schema.Resource {
 				Default:          0,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.IntAtLeast(0)),
 				Description:      "Disk to CPU ratio. Sets the number of GiBs to be added for every CPU on the node. Defaults to 0",
+			},
+			FieldNodeConfigurationDrainTimeoutSec: {
+				Type:             schema.TypeInt,
+				Optional:         true,
+				Default:          0,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(0, 3600)),
+				Description:      "Timeout in seconds for draining the node. Defaults to 0",
 			},
 			FieldNodeConfigurationMinDiskSize: {
 				Type:             schema.TypeInt,
@@ -317,9 +325,10 @@ func resourceNodeConfigurationCreate(ctx context.Context, d *schema.ResourceData
 
 	clusterID := d.Get(FieldClusterID).(string)
 	req := sdk.NodeConfigurationAPICreateConfigurationJSONRequestBody{
-		Name:         d.Get(FieldNodeConfigurationName).(string),
-		DiskCpuRatio: toPtr(int32(d.Get(FieldNodeConfigurationDiskCpuRatio).(int))),
-		MinDiskSize:  toPtr(int32(d.Get(FieldNodeConfigurationMinDiskSize).(int))),
+		Name:            d.Get(FieldNodeConfigurationName).(string),
+		DiskCpuRatio:    toPtr(int32(d.Get(FieldNodeConfigurationDiskCpuRatio).(int))),
+		DrainTimeoutSec: toPtr(int32(d.Get(FieldNodeConfigurationDrainTimeoutSec).(int))),
+		MinDiskSize:     toPtr(int32(d.Get(FieldNodeConfigurationMinDiskSize).(int))),
 	}
 
 	if v, ok := d.GetOk(FieldNodeConfigurationSubnets); ok {
@@ -406,6 +415,9 @@ func resourceNodeConfigurationRead(ctx context.Context, d *schema.ResourceData, 
 	if err := d.Set(FieldNodeConfigurationDiskCpuRatio, nodeConfig.DiskCpuRatio); err != nil {
 		return diag.FromErr(fmt.Errorf("setting disk cpu ratio: %w", err))
 	}
+	if err := d.Set(FieldNodeConfigurationDrainTimeoutSec, nodeConfig.DrainTimeoutSec); err != nil {
+		return diag.FromErr(fmt.Errorf("setting drain timeout: %w", err))
+	}
 	if err := d.Set(FieldNodeConfigurationMinDiskSize, nodeConfig.MinDiskSize); err != nil {
 		return diag.FromErr(fmt.Errorf("setting min disk size: %w", err))
 	}
@@ -466,6 +478,7 @@ func resourceNodeConfigurationRead(ctx context.Context, d *schema.ResourceData, 
 func resourceNodeConfigurationUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	if !d.HasChanges(
 		FieldNodeConfigurationDiskCpuRatio,
+		FieldNodeConfigurationDrainTimeoutSec,
 		FieldNodeConfigurationMinDiskSize,
 		FieldNodeConfigurationSubnets,
 		FieldNodeConfigurationSSHPublicKey,
@@ -487,8 +500,9 @@ func resourceNodeConfigurationUpdate(ctx context.Context, d *schema.ResourceData
 	client := meta.(*ProviderConfig).api
 	clusterID := d.Get(FieldClusterID).(string)
 	req := sdk.NodeConfigurationAPIUpdateConfigurationJSONRequestBody{
-		DiskCpuRatio: toPtr(int32(d.Get(FieldNodeConfigurationDiskCpuRatio).(int))),
-		MinDiskSize:  toPtr(int32(d.Get(FieldNodeConfigurationMinDiskSize).(int))),
+		DiskCpuRatio:    toPtr(int32(d.Get(FieldNodeConfigurationDiskCpuRatio).(int))),
+		DrainTimeoutSec: toPtr(int32(d.Get(FieldNodeConfigurationDrainTimeoutSec).(int))),
+		MinDiskSize:     toPtr(int32(d.Get(FieldNodeConfigurationMinDiskSize).(int))),
 	}
 
 	if v, ok := d.GetOk(FieldNodeConfigurationSubnets); ok {
