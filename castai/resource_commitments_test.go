@@ -16,6 +16,17 @@ import (
 )
 
 func TestCommitments(t *testing.T) {
+	var (
+		gcpServiceAccountID = fmt.Sprintf("%v-node-cfg-%v", ResourcePrefix, acctest.RandString(8))
+		gkeClusterName      = "tf-core-acc-20230723"
+		gcpProjectID        = os.Getenv("GOOGLE_PROJECT_ID")
+
+		azureRoleName              = fmt.Sprintf("%v-aks-%v", ResourcePrefix, acctest.RandString(8))
+		azureClusterName           = "core-tf-acc"
+		azureResourceGroupName     = "core-tf-acc"
+		azureNodeResourceGroupName = "core-tf-acc-ng"
+	)
+
 	importCUDsStateStep := resource.TestStep{
 		ResourceName:            "castai_commitments.test_gcp",
 		ImportState:             true,
@@ -65,7 +76,7 @@ func TestCommitments(t *testing.T) {
 		},
 		Steps: []resource.TestStep{
 			{ // Import 2 commitments - one GCP CUD and one Azure reservations, both without configs
-				Config: commitmentsConfig1,
+				Config: getCommitmentsConfig1(gcpServiceAccountID, gkeClusterName, gcpProjectID),
 				Check: resource.ComposeTestCheckFunc(
 					// GCP
 					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.#", "1"),
@@ -99,7 +110,7 @@ func TestCommitments(t *testing.T) {
 			importCUDsStateStep,
 			importReservationsStateStep,
 			{ // Add config to the first GCP CUD, add another GCP CUD, Azure reservation remains unchanged
-				Config: commitmentsConfig2,
+				Config: getCommitmentsConfig2(gcpServiceAccountID, gkeClusterName, gcpProjectID, azureRoleName, azureClusterName, azureResourceGroupName, azureNodeResourceGroupName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.#", "2"),
 					// GCP - "test" CUD, added config
@@ -151,7 +162,7 @@ func TestCommitments(t *testing.T) {
 			importCUDsStateStep,
 			importReservationsStateStep,
 			{ // CUDs are unchanged, add config to the first Azure reservation and add another Azure reservation
-				Config: commitmentsConfig3,
+				Config: getCommitmentsConfig3(gcpServiceAccountID, gkeClusterName, gcpProjectID, azureRoleName, azureClusterName, azureResourceGroupName, azureNodeResourceGroupName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.#", "2"),
 					// GCP - "test" CUD, unchanged
@@ -225,7 +236,7 @@ func TestCommitments(t *testing.T) {
 			importCUDsStateStep,
 			importReservationsStateStep,
 			{ // CUDs are unchanged, destroy the Azure import
-				Config: commitmentsConfig4,
+				Config: getCommitmentsConfig4(gcpServiceAccountID, gkeClusterName, gcpProjectID),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.#", "2"),
 					// GCP - "test" CUD, unchanged
@@ -262,7 +273,7 @@ func TestCommitments(t *testing.T) {
 			},
 			importCUDsStateStep,
 			{ // Remove the first GCP CUD so that the second one remains
-				Config: commitmentsConfig5,
+				Config: getCommitmentsConfig5(gcpServiceAccountID, gkeClusterName, gcpProjectID),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.#", "1"),
 					// GCP - "test-2" CUD, unchanged
@@ -342,17 +353,10 @@ var (
     "statusMessage": "The commitment is active, and so will apply to current resource usage.",
     "type": "GENERAL_PURPOSE_E2"
   }`
+)
 
-	rName       = fmt.Sprintf("%v-node-cfg-%v", ResourcePrefix, acctest.RandString(8))
-	clusterName = "max-04-26"
-	projectID   = os.Getenv("GOOGLE_PROJECT_ID")
-
-	rNameAzure            = fmt.Sprintf("%v-aks-%v", ResourcePrefix, acctest.RandString(8))
-	clusterNameAzure      = "core-tf-acc"
-	resourceGroupName     = "core-tf-acc"
-	nodeResourceGroupName = "core-tf-acc-ng"
-
-	commitmentsConfig1 = ConfigCompose(testAccGKEClusterConfig(rName, clusterName, projectID), `
+func getCommitmentsConfig1(serviceAccountID, clusterName, projectID string) string {
+	return ConfigCompose(testAccGKEClusterConfig(serviceAccountID, clusterName, projectID), `
 resource "castai_commitments" "test_gcp" {
 	gcp_cuds_json = <<EOF
 [
@@ -368,10 +372,15 @@ test-res-1,3b3de39c-bc44-4d69-be2d-69527dfe9958,630226bb-5170-4b95-90b0-f2227571
 	EOF
 }
 `)
+}
 
-	commitmentsConfig2 = ConfigCompose(
-		testAccGKEClusterConfig(rName, clusterName, projectID),
-		testAccAKSClusterConfig(rNameAzure, clusterNameAzure, resourceGroupName, nodeResourceGroupName),
+func getCommitmentsConfig2(
+	gcpServiceAccountID, gcpClusterName, gcpProjectID,
+	azureRoleName, azureClusterName, azureResourceGroupName, azureNodeResourceGroupName string,
+) string {
+	return ConfigCompose(
+		testAccGKEClusterConfig(gcpServiceAccountID, gcpClusterName, gcpProjectID),
+		testAccAKSClusterConfig(azureRoleName, azureClusterName, azureResourceGroupName, azureNodeResourceGroupName),
 		`
 resource "castai_commitments" "test_gcp" {
 	gcp_cuds_json = <<EOF
@@ -414,10 +423,15 @@ test-res-1,3b3de39c-bc44-4d69-be2d-69527dfe9958,630226bb-5170-4b95-90b0-f2227571
 	EOF
 }
 `)
+}
 
-	commitmentsConfig3 = ConfigCompose(
-		testAccGKEClusterConfig(rName, clusterName, projectID),
-		testAccAKSClusterConfig(rNameAzure, clusterNameAzure, resourceGroupName, nodeResourceGroupName),
+func getCommitmentsConfig3(
+	gcpServiceAccountID, gcpClusterName, gcpProjectID,
+	azureRoleName, azureClusterName, azureResourceGroupName, azureNodeResourceGroupName string,
+) string {
+	return ConfigCompose(
+		testAccGKEClusterConfig(gcpServiceAccountID, gcpClusterName, gcpProjectID),
+		testAccAKSClusterConfig(azureRoleName, azureClusterName, azureResourceGroupName, azureNodeResourceGroupName),
 		`
 resource "castai_commitments" "test_gcp" {
 	gcp_cuds_json = <<EOF
@@ -492,8 +506,10 @@ test-res-2,3b3de39c-bc44-4d69-be2d-69527dfe9959,630226bb-5170-4b95-90b0-f2227571
 	}
 }
 `)
+}
 
-	commitmentsConfig4 = ConfigCompose(testAccGKEClusterConfig(rName, clusterName, projectID), `
+func getCommitmentsConfig4(serviceAccountID, clusterName, projectID string) string {
+	return ConfigCompose(testAccGKEClusterConfig(serviceAccountID, clusterName, projectID), `
 provider "azurerm" {
   features {}
 }
@@ -535,8 +551,10 @@ resource "castai_commitments" "test_gcp" {
   }
 }
 `)
+}
 
-	commitmentsConfig5 = ConfigCompose(testAccGKEClusterConfig(rName, clusterName, projectID), `
+func getCommitmentsConfig5(serviceAccountID, clusterName, projectID string) string {
+	return ConfigCompose(testAccGKEClusterConfig(serviceAccountID, clusterName, projectID), `
 provider "azurerm" {
   features {}
 }
@@ -560,4 +578,4 @@ resource "castai_commitments" "test_gcp" {
   }
 }
 `)
-)
+}
