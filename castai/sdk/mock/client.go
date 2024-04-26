@@ -1195,6 +1195,26 @@ func (mr *MockClientInterfaceMockRecorder) NodeConfigurationAPIListConfiguration
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NodeConfigurationAPIListConfigurations", reflect.TypeOf((*MockClientInterface)(nil).NodeConfigurationAPIListConfigurations), varargs...)
 }
 
+// NodeConfigurationAPIListMaxPodsPresets mocks base method.
+func (m *MockClientInterface) NodeConfigurationAPIListMaxPodsPresets(ctx context.Context, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "NodeConfigurationAPIListMaxPodsPresets", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// NodeConfigurationAPIListMaxPodsPresets indicates an expected call of NodeConfigurationAPIListMaxPodsPresets.
+func (mr *MockClientInterfaceMockRecorder) NodeConfigurationAPIListMaxPodsPresets(ctx interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NodeConfigurationAPIListMaxPodsPresets", reflect.TypeOf((*MockClientInterface)(nil).NodeConfigurationAPIListMaxPodsPresets), varargs...)
+}
+
 // NodeConfigurationAPISetDefault mocks base method.
 func (m *MockClientInterface) NodeConfigurationAPISetDefault(ctx context.Context, clusterId, id string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
@@ -1856,9 +1876,9 @@ func (mr *MockClientInterfaceMockRecorder) ScheduledRebalancingAPIListAvailableR
 }
 
 // ScheduledRebalancingAPIListRebalancingJobs mocks base method.
-func (m *MockClientInterface) ScheduledRebalancingAPIListRebalancingJobs(ctx context.Context, clusterId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+func (m *MockClientInterface) ScheduledRebalancingAPIListRebalancingJobs(ctx context.Context, clusterId string, params *sdk.ScheduledRebalancingAPIListRebalancingJobsParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, clusterId}
+	varargs := []interface{}{ctx, clusterId, params}
 	for _, a := range reqEditors {
 		varargs = append(varargs, a)
 	}
@@ -1869,9 +1889,9 @@ func (m *MockClientInterface) ScheduledRebalancingAPIListRebalancingJobs(ctx con
 }
 
 // ScheduledRebalancingAPIListRebalancingJobs indicates an expected call of ScheduledRebalancingAPIListRebalancingJobs.
-func (mr *MockClientInterfaceMockRecorder) ScheduledRebalancingAPIListRebalancingJobs(ctx, clusterId interface{}, reqEditors ...interface{}) *gomock.Call {
+func (mr *MockClientInterfaceMockRecorder) ScheduledRebalancingAPIListRebalancingJobs(ctx, clusterId, params interface{}, reqEditors ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, clusterId}, reqEditors...)
+	varargs := append([]interface{}{ctx, clusterId, params}, reqEditors...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ScheduledRebalancingAPIListRebalancingJobs", reflect.TypeOf((*MockClientInterface)(nil).ScheduledRebalancingAPIListRebalancingJobs), varargs...)
 }
 
@@ -3318,6 +3338,21 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) NodeConfigurationAPIList
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NodeConfigurationAPIListConfigurationsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).NodeConfigurationAPIListConfigurationsWithResponse), ctx, clusterId)
 }
 
+// NodeConfigurationAPIListMaxPodsPresetsWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) NodeConfigurationAPIListMaxPodsPresetsWithResponse(ctx context.Context) (*sdk.NodeConfigurationAPIListMaxPodsPresetsResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "NodeConfigurationAPIListMaxPodsPresetsWithResponse", ctx)
+	ret0, _ := ret[0].(*sdk.NodeConfigurationAPIListMaxPodsPresetsResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// NodeConfigurationAPIListMaxPodsPresetsWithResponse indicates an expected call of NodeConfigurationAPIListMaxPodsPresetsWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) NodeConfigurationAPIListMaxPodsPresetsWithResponse(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NodeConfigurationAPIListMaxPodsPresetsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).NodeConfigurationAPIListMaxPodsPresetsWithResponse), ctx)
+}
+
 // NodeConfigurationAPISetDefaultWithResponse mocks base method.
 func (m *MockClientWithResponsesInterface) NodeConfigurationAPISetDefaultWithResponse(ctx context.Context, clusterId, id string) (*sdk.NodeConfigurationAPISetDefaultResponse, error) {
 	m.ctrl.T.Helper()
@@ -3814,18 +3849,18 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) ScheduledRebalancingAPIL
 }
 
 // ScheduledRebalancingAPIListRebalancingJobsWithResponse mocks base method.
-func (m *MockClientWithResponsesInterface) ScheduledRebalancingAPIListRebalancingJobsWithResponse(ctx context.Context, clusterId string) (*sdk.ScheduledRebalancingAPIListRebalancingJobsResponse, error) {
+func (m *MockClientWithResponsesInterface) ScheduledRebalancingAPIListRebalancingJobsWithResponse(ctx context.Context, clusterId string, params *sdk.ScheduledRebalancingAPIListRebalancingJobsParams) (*sdk.ScheduledRebalancingAPIListRebalancingJobsResponse, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ScheduledRebalancingAPIListRebalancingJobsWithResponse", ctx, clusterId)
+	ret := m.ctrl.Call(m, "ScheduledRebalancingAPIListRebalancingJobsWithResponse", ctx, clusterId, params)
 	ret0, _ := ret[0].(*sdk.ScheduledRebalancingAPIListRebalancingJobsResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // ScheduledRebalancingAPIListRebalancingJobsWithResponse indicates an expected call of ScheduledRebalancingAPIListRebalancingJobsWithResponse.
-func (mr *MockClientWithResponsesInterfaceMockRecorder) ScheduledRebalancingAPIListRebalancingJobsWithResponse(ctx, clusterId interface{}) *gomock.Call {
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ScheduledRebalancingAPIListRebalancingJobsWithResponse(ctx, clusterId, params interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ScheduledRebalancingAPIListRebalancingJobsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ScheduledRebalancingAPIListRebalancingJobsWithResponse), ctx, clusterId)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ScheduledRebalancingAPIListRebalancingJobsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ScheduledRebalancingAPIListRebalancingJobsWithResponse), ctx, clusterId, params)
 }
 
 // ScheduledRebalancingAPIListRebalancingSchedulesWithResponse mocks base method.

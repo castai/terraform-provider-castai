@@ -87,8 +87,8 @@ const (
 	In            K8sSelectorV1Operator = "in"
 	Lt            K8sSelectorV1Operator = "Lt"
 	Lt1           K8sSelectorV1Operator = "lt"
-	NotIn         K8sSelectorV1Operator = "notIn"
-	NotInt        K8sSelectorV1Operator = "NotInt"
+	NotIn         K8sSelectorV1Operator = "NotIn"
+	NotIn1        K8sSelectorV1Operator = "notIn"
 )
 
 // Defines values for NodeconfigV1AKSConfigOsDiskType.
@@ -150,6 +150,13 @@ const (
 	JobStatusInProgress ScheduledrebalancingV1JobStatus = "JobStatusInProgress"
 	JobStatusPending    ScheduledrebalancingV1JobStatus = "JobStatusPending"
 	JobStatusSkipped    ScheduledrebalancingV1JobStatus = "JobStatusSkipped"
+)
+
+// Defines values for ScheduledrebalancingV1TargetNodeSelectionAlgorithm.
+const (
+	TargetNodeSelectionAlgorithmNormalizedPrice ScheduledrebalancingV1TargetNodeSelectionAlgorithm = "TargetNodeSelectionAlgorithmNormalizedPrice"
+	TargetNodeSelectionAlgorithmUtilization     ScheduledrebalancingV1TargetNodeSelectionAlgorithm = "TargetNodeSelectionAlgorithmUtilization"
+	TargetNodeSelectionAlgorithmUtilizedPrice   ScheduledrebalancingV1TargetNodeSelectionAlgorithm = "TargetNodeSelectionAlgorithmUtilizedPrice"
 )
 
 // UsersAPIUpdateOrganizationUserRequest defines model for UsersAPI_UpdateOrganizationUser_request.
@@ -1087,8 +1094,9 @@ type ExternalclusterV1Cluster struct {
 	Status *string `json:"status,omitempty"`
 
 	// Cluster subnets.
-	Subnets *[]ExternalclusterV1Subnet     `json:"subnets,omitempty"`
-	Tags    *ExternalclusterV1Cluster_Tags `json:"tags,omitempty"`
+	Subnets     *[]ExternalclusterV1Subnet     `json:"subnets,omitempty"`
+	Tags        *ExternalclusterV1Cluster_Tags `json:"tags,omitempty"`
+	WorkspaceId *string                        `json:"workspaceId,omitempty"`
 
 	// Cluster zones.
 	Zones *[]ExternalclusterV1Zone `json:"zones,omitempty"`
@@ -1516,6 +1524,9 @@ type ExternalclusterV1RegisterClusterRequest struct {
 
 	// Organization of the cluster.
 	OrganizationId *string `json:"organizationId,omitempty"`
+
+	// Workspace id of the cluster.
+	WorkspaceId *string `json:"workspaceId,omitempty"`
 }
 
 // ExternalclusterV1Resources defines model for externalcluster.v1.Resources.
@@ -1577,7 +1588,7 @@ type K8sSelectorV1KubernetesNodeAffinity struct {
 	Key string `json:"key"`
 
 	// - IN: In values
-	//  - NotInt: Not int values
+	//  - NotIn: Not in values
 	//  - Exists: Just exist
 	//  - DoesNotExist: Values does not exist
 	//  - Gt: Greater then
@@ -1587,7 +1598,7 @@ type K8sSelectorV1KubernetesNodeAffinity struct {
 }
 
 // - IN: In values
-//   - NotInt: Not int values
+//   - NotIn: Not in values
 //   - Exists: Just exist
 //   - DoesNotExist: Values does not exist
 //   - Gt: Greater then
@@ -1673,6 +1684,11 @@ type NodeconfigV1ListConfigurationsResponse struct {
 	Items *[]NodeconfigV1NodeConfiguration `json:"items,omitempty"`
 }
 
+// NodeconfigV1ListMaxPodsPresetsResponse defines model for nodeconfig.v1.ListMaxPodsPresetsResponse.
+type NodeconfigV1ListMaxPodsPresetsResponse struct {
+	Presets *[]string `json:"presets,omitempty"`
+}
+
 // NodeconfigV1NewNodeConfiguration defines model for nodeconfig.v1.NewNodeConfiguration.
 type NodeconfigV1NewNodeConfiguration struct {
 	Aks *NodeconfigV1AKSConfig `json:"aks,omitempty"`
@@ -1685,8 +1701,11 @@ type NodeconfigV1NewNodeConfiguration struct {
 
 	// Optional docker daemon configuration properties. Provide only properties that you want to override. Available values https://docs.docker.com/engine/reference/commandline/dockerd/#daemon-configuration-file
 	DockerConfig *map[string]interface{} `json:"dockerConfig,omitempty"`
-	Eks          *NodeconfigV1EKSConfig  `json:"eks,omitempty"`
-	Gke          *NodeconfigV1GKEConfig  `json:"gke,omitempty"`
+
+	// Drain timeout in seconds. Defaults to 0.
+	DrainTimeoutSec *int32                 `json:"drainTimeoutSec"`
+	Eks             *NodeconfigV1EKSConfig `json:"eks,omitempty"`
+	Gke             *NodeconfigV1GKEConfig `json:"gke,omitempty"`
 
 	// Image to be used while provisioning the node. If nothing is provided will be resolved to latest available image based on Kubernetes version if possible.
 	Image *string `json:"image"`
@@ -1737,8 +1756,11 @@ type NodeconfigV1NodeConfiguration struct {
 
 	// Optional docker daemon configuration properties. Applicable for EKS only.
 	DockerConfig *map[string]interface{} `json:"dockerConfig"`
-	Eks          *NodeconfigV1EKSConfig  `json:"eks,omitempty"`
-	Gke          *NodeconfigV1GKEConfig  `json:"gke,omitempty"`
+
+	// Drain timeout in seconds. Defaults to 0.
+	DrainTimeoutSec *int32                 `json:"drainTimeoutSec"`
+	Eks             *NodeconfigV1EKSConfig `json:"eks,omitempty"`
+	Gke             *NodeconfigV1GKEConfig `json:"gke,omitempty"`
 
 	// The node configuration ID.
 	Id *string `json:"id,omitempty"`
@@ -1792,8 +1814,11 @@ type NodeconfigV1NodeConfigurationUpdate struct {
 
 	// Optional docker daemon configuration properties. Provide only properties that you want to override. Available values https://docs.docker.com/engine/reference/commandline/dockerd/#daemon-configuration-file
 	DockerConfig *map[string]interface{} `json:"dockerConfig,omitempty"`
-	Eks          *NodeconfigV1EKSConfig  `json:"eks,omitempty"`
-	Gke          *NodeconfigV1GKEConfig  `json:"gke,omitempty"`
+
+	// Drain timeout in seconds. Defaults to 0.
+	DrainTimeoutSec *int32                 `json:"drainTimeoutSec"`
+	Eks             *NodeconfigV1EKSConfig `json:"eks,omitempty"`
+	Gke             *NodeconfigV1GKEConfig `json:"gke,omitempty"`
 
 	// Image to be used while provisioning the node. If nothing is provided will be resolved to latest available image based on Kubernetes version if possible.
 	Image *string `json:"image"`
@@ -2117,9 +2142,11 @@ type NodetemplatesV1TemplateConstraintsCustomPriority struct {
 
 // NodetemplatesV1TemplateConstraintsDedicatedNodeAffinity defines model for nodetemplates.v1.TemplateConstraints.DedicatedNodeAffinity.
 type NodetemplatesV1TemplateConstraintsDedicatedNodeAffinity struct {
-	AzName        *string   `json:"azName,omitempty"`
-	InstanceTypes *[]string `json:"instanceTypes,omitempty"`
-	Name          *string   `json:"name,omitempty"`
+	// The affinity rules required for choosing the node.
+	Affinity      *[]K8sSelectorV1KubernetesNodeAffinity `json:"affinity,omitempty"`
+	AzName        *string                                `json:"azName,omitempty"`
+	InstanceTypes *[]string                              `json:"instanceTypes,omitempty"`
+	Name          *string                                `json:"name,omitempty"`
 }
 
 // NodetemplatesV1TemplateConstraintsGPUConstraints defines model for nodetemplates.v1.TemplateConstraints.GPUConstraints.
@@ -2424,9 +2451,10 @@ type ScheduledrebalancingV1LaunchConfiguration struct {
 	NodeTtlSeconds *int32 `json:"nodeTtlSeconds,omitempty"`
 
 	// Maximum number of nodes that will be selected for rebalancing.
-	NumTargetedNodes   *int32                                    `json:"numTargetedNodes,omitempty"`
-	RebalancingOptions *ScheduledrebalancingV1RebalancingOptions `json:"rebalancingOptions,omitempty"`
-	Selector           *ScheduledrebalancingV1NodeSelector       `json:"selector,omitempty"`
+	NumTargetedNodes             *int32                                              `json:"numTargetedNodes,omitempty"`
+	RebalancingOptions           *ScheduledrebalancingV1RebalancingOptions           `json:"rebalancingOptions,omitempty"`
+	Selector                     *ScheduledrebalancingV1NodeSelector                 `json:"selector,omitempty"`
+	TargetNodeSelectionAlgorithm *ScheduledrebalancingV1TargetNodeSelectionAlgorithm `json:"targetNodeSelectionAlgorithm,omitempty"`
 }
 
 // ScheduledrebalancingV1ListAvailableRebalancingTZResponse defines model for scheduledrebalancing.v1.ListAvailableRebalancingTZResponse.
@@ -2534,6 +2562,9 @@ type ScheduledrebalancingV1Schedule struct {
 	Cron string `json:"cron"`
 }
 
+// ScheduledrebalancingV1TargetNodeSelectionAlgorithm defines model for scheduledrebalancing.v1.TargetNodeSelectionAlgorithm.
+type ScheduledrebalancingV1TargetNodeSelectionAlgorithm string
+
 // ScheduledrebalancingV1TimeZone defines model for scheduledrebalancing.v1.TimeZone.
 type ScheduledrebalancingV1TimeZone struct {
 	Name   *string `json:"name,omitempty"`
@@ -2601,6 +2632,11 @@ type NodeTemplatesAPIUpdateNodeTemplateJSONBody = NodetemplatesV1UpdateNodeTempl
 
 // PoliciesAPIUpsertClusterPoliciesJSONBody defines parameters for PoliciesAPIUpsertClusterPolicies.
 type PoliciesAPIUpsertClusterPoliciesJSONBody = PoliciesV1Policies
+
+// ScheduledRebalancingAPIListRebalancingJobsParams defines parameters for ScheduledRebalancingAPIListRebalancingJobs.
+type ScheduledRebalancingAPIListRebalancingJobsParams struct {
+	RebalancingScheduleId *string `form:"rebalancingScheduleId,omitempty" json:"rebalancingScheduleId,omitempty"`
+}
 
 // ScheduledRebalancingAPICreateRebalancingJobJSONBody defines parameters for ScheduledRebalancingAPICreateRebalancingJob.
 type ScheduledRebalancingAPICreateRebalancingJobJSONBody = ScheduledrebalancingV1RebalancingJob

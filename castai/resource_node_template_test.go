@@ -436,7 +436,7 @@ func TestToTemplateConstraints_HandleTriStateValues(t *testing.T) {
 			data := resource.Data(state)
 			constraintsArray := data.Get(FieldNodeTemplateConstraints).([]any)
 			constraintsMap := constraintsArray[0].(map[string]any)
-			result := toTemplateConstraints(constraintsMap, data)
+			result := toTemplateConstraints(data, constraintsMap)
 			td.assertions(r, result)
 		})
 	}

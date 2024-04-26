@@ -194,7 +194,7 @@ type ClientInterface interface {
 	PoliciesAPIUpsertClusterPolicies(ctx context.Context, clusterId string, body PoliciesAPIUpsertClusterPoliciesJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// ScheduledRebalancingAPIListRebalancingJobs request
-	ScheduledRebalancingAPIListRebalancingJobs(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+	ScheduledRebalancingAPIListRebalancingJobs(ctx context.Context, clusterId string, params *ScheduledRebalancingAPIListRebalancingJobsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// ScheduledRebalancingAPICreateRebalancingJob request with any body
 	ScheduledRebalancingAPICreateRebalancingJobWithBody(ctx context.Context, clusterId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -296,6 +296,9 @@ type ClientInterface interface {
 
 	// ExternalClusterAPICreateClusterToken request
 	ExternalClusterAPICreateClusterToken(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// NodeConfigurationAPIListMaxPodsPresets request
+	NodeConfigurationAPIListMaxPodsPresets(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// UsersAPICurrentUserProfile request
 	UsersAPICurrentUserProfile(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -872,8 +875,8 @@ func (c *Client) PoliciesAPIUpsertClusterPolicies(ctx context.Context, clusterId
 	return c.Client.Do(req)
 }
 
-func (c *Client) ScheduledRebalancingAPIListRebalancingJobs(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewScheduledRebalancingAPIListRebalancingJobsRequest(c.Server, clusterId)
+func (c *Client) ScheduledRebalancingAPIListRebalancingJobs(ctx context.Context, clusterId string, params *ScheduledRebalancingAPIListRebalancingJobsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewScheduledRebalancingAPIListRebalancingJobsRequest(c.Server, clusterId, params)
 	if err != nil {
 		return nil, err
 	}
@@ -1318,6 +1321,18 @@ func (c *Client) ExternalClusterAPIUpdateClusterTags(ctx context.Context, cluste
 
 func (c *Client) ExternalClusterAPICreateClusterToken(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewExternalClusterAPICreateClusterTokenRequest(c.Server, clusterId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) NodeConfigurationAPIListMaxPodsPresets(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewNodeConfigurationAPIListMaxPodsPresetsRequest(c.Server)
 	if err != nil {
 		return nil, err
 	}
@@ -3012,7 +3027,7 @@ func NewPoliciesAPIUpsertClusterPoliciesRequestWithBody(server string, clusterId
 }
 
 // NewScheduledRebalancingAPIListRebalancingJobsRequest generates requests for ScheduledRebalancingAPIListRebalancingJobs
-func NewScheduledRebalancingAPIListRebalancingJobsRequest(server string, clusterId string) (*http.Request, error) {
+func NewScheduledRebalancingAPIListRebalancingJobsRequest(server string, clusterId string, params *ScheduledRebalancingAPIListRebalancingJobsParams) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -3036,6 +3051,26 @@ func NewScheduledRebalancingAPIListRebalancingJobsRequest(server string, cluster
 	if err != nil {
 		return nil, err
 	}
+
+	queryValues := queryURL.Query()
+
+	if params.RebalancingScheduleId != nil {
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "rebalancingScheduleId", runtime.ParamLocationQuery, *params.RebalancingScheduleId); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	queryURL.RawQuery = queryValues.Encode()
 
 	req, err := http.NewRequest("GET", queryURL.String(), nil)
 	if err != nil {
@@ -4238,6 +4273,33 @@ func NewExternalClusterAPICreateClusterTokenRequest(server string, clusterId str
 	}
 
 	req, err := http.NewRequest("POST", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewNodeConfigurationAPIListMaxPodsPresetsRequest generates requests for NodeConfigurationAPIListMaxPodsPresets
+func NewNodeConfigurationAPIListMaxPodsPresetsRequest(server string) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/kubernetes/maxpods-formula-presets")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -5643,7 +5705,7 @@ type ClientWithResponsesInterface interface {
 	PoliciesAPIUpsertClusterPoliciesWithResponse(ctx context.Context, clusterId string, body PoliciesAPIUpsertClusterPoliciesJSONRequestBody) (*PoliciesAPIUpsertClusterPoliciesResponse, error)
 
 	// ScheduledRebalancingAPIListRebalancingJobs request
-	ScheduledRebalancingAPIListRebalancingJobsWithResponse(ctx context.Context, clusterId string) (*ScheduledRebalancingAPIListRebalancingJobsResponse, error)
+	ScheduledRebalancingAPIListRebalancingJobsWithResponse(ctx context.Context, clusterId string, params *ScheduledRebalancingAPIListRebalancingJobsParams) (*ScheduledRebalancingAPIListRebalancingJobsResponse, error)
 
 	// ScheduledRebalancingAPICreateRebalancingJob request  with any body
 	ScheduledRebalancingAPICreateRebalancingJobWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader) (*ScheduledRebalancingAPICreateRebalancingJobResponse, error)
@@ -5745,6 +5807,9 @@ type ClientWithResponsesInterface interface {
 
 	// ExternalClusterAPICreateClusterToken request
 	ExternalClusterAPICreateClusterTokenWithResponse(ctx context.Context, clusterId string) (*ExternalClusterAPICreateClusterTokenResponse, error)
+
+	// NodeConfigurationAPIListMaxPodsPresets request
+	NodeConfigurationAPIListMaxPodsPresetsWithResponse(ctx context.Context) (*NodeConfigurationAPIListMaxPodsPresetsResponse, error)
 
 	// UsersAPICurrentUserProfile request
 	UsersAPICurrentUserProfileWithResponse(ctx context.Context) (*UsersAPICurrentUserProfileResponse, error)
@@ -7523,6 +7588,36 @@ func (r ExternalClusterAPICreateClusterTokenResponse) GetBody() []byte {
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
+type NodeConfigurationAPIListMaxPodsPresetsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *NodeconfigV1ListMaxPodsPresetsResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r NodeConfigurationAPIListMaxPodsPresetsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r NodeConfigurationAPIListMaxPodsPresetsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r NodeConfigurationAPIListMaxPodsPresetsResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
 type UsersAPICurrentUserProfileResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -8813,8 +8908,8 @@ func (c *ClientWithResponses) PoliciesAPIUpsertClusterPoliciesWithResponse(ctx c
 }
 
 // ScheduledRebalancingAPIListRebalancingJobsWithResponse request returning *ScheduledRebalancingAPIListRebalancingJobsResponse
-func (c *ClientWithResponses) ScheduledRebalancingAPIListRebalancingJobsWithResponse(ctx context.Context, clusterId string) (*ScheduledRebalancingAPIListRebalancingJobsResponse, error) {
-	rsp, err := c.ScheduledRebalancingAPIListRebalancingJobs(ctx, clusterId)
+func (c *ClientWithResponses) ScheduledRebalancingAPIListRebalancingJobsWithResponse(ctx context.Context, clusterId string, params *ScheduledRebalancingAPIListRebalancingJobsParams) (*ScheduledRebalancingAPIListRebalancingJobsResponse, error) {
+	rsp, err := c.ScheduledRebalancingAPIListRebalancingJobs(ctx, clusterId, params)
 	if err != nil {
 		return nil, err
 	}
@@ -9142,6 +9237,15 @@ func (c *ClientWithResponses) ExternalClusterAPICreateClusterTokenWithResponse(c
 		return nil, err
 	}
 	return ParseExternalClusterAPICreateClusterTokenResponse(rsp)
+}
+
+// NodeConfigurationAPIListMaxPodsPresetsWithResponse request returning *NodeConfigurationAPIListMaxPodsPresetsResponse
+func (c *ClientWithResponses) NodeConfigurationAPIListMaxPodsPresetsWithResponse(ctx context.Context) (*NodeConfigurationAPIListMaxPodsPresetsResponse, error) {
+	rsp, err := c.NodeConfigurationAPIListMaxPodsPresets(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return ParseNodeConfigurationAPIListMaxPodsPresetsResponse(rsp)
 }
 
 // UsersAPICurrentUserProfileWithResponse request returning *UsersAPICurrentUserProfileResponse
@@ -10930,6 +11034,32 @@ func ParseExternalClusterAPICreateClusterTokenResponse(rsp *http.Response) (*Ext
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest ExternalclusterV1CreateClusterTokenResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseNodeConfigurationAPIListMaxPodsPresetsResponse parses an HTTP response from a NodeConfigurationAPIListMaxPodsPresetsWithResponse call
+func ParseNodeConfigurationAPIListMaxPodsPresetsResponse(rsp *http.Response) (*NodeConfigurationAPIListMaxPodsPresetsResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &NodeConfigurationAPIListMaxPodsPresetsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest NodeconfigV1ListMaxPodsPresetsResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}

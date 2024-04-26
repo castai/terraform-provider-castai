@@ -207,7 +207,6 @@ func resourceNodeTemplate() *schema.Resource {
 						FieldNodeTemplateStorageOptimized: {
 							Type:        schema.TypeBool,
 							Optional:    true,
-							Default:     false,
 							Description: "Storage optimized instance constraint - will only pick storage optimized nodes if true",
 						},
 						FieldNodeTemplateIsGpuOnly: {
@@ -219,7 +218,6 @@ func resourceNodeTemplate() *schema.Resource {
 						FieldNodeTemplateComputeOptimized: {
 							Type:        schema.TypeBool,
 							Optional:    true,
-							Default:     false,
 							Description: "Compute optimized instance constraint - will only pick compute optimized nodes if true.",
 						},
 						FieldNodeTemplateInstanceFamilies: {
@@ -741,7 +739,7 @@ func updateNodeTemplate(ctx context.Context, d *schema.ResourceData, meta any, s
 	}
 
 	if v, ok := d.Get(FieldNodeTemplateConstraints).([]any); ok && len(v) > 0 {
-		req.Constraints = toTemplateConstraints(v[0].(map[string]any))
+		req.Constraints = toTemplateConstraints(d, v[0].(map[string]any))
 	}
 
 	if v, _ := d.GetOk(FieldNodeTemplateCustomInstancesEnabled); v != nil {
@@ -812,7 +810,7 @@ func resourceNodeTemplateCreate(ctx context.Context, d *schema.ResourceData, met
 	}
 
 	if v, ok := d.Get(FieldNodeTemplateConstraints).([]any); ok && len(v) > 0 {
-		req.Constraints = toTemplateConstraints(v[0].(map[string]any))
+		req.Constraints = toTemplateConstraints(d, v[0].(map[string]any))
 	}
 
 	if v, _ := d.GetOk(FieldNodeTemplateCustomInstancesEnabled); v != nil {
@@ -977,14 +975,15 @@ func flattenCustomTaints(taints *[]sdk.NodetemplatesV1Taint) []map[string]string
 	return ts
 }
 
-func toTemplateConstraints(obj map[string]any) *sdk.NodetemplatesV1TemplateConstraints {
+func toTemplateConstraints(d *schema.ResourceData, obj map[string]any) *sdk.NodetemplatesV1TemplateConstraints {
 	if obj == nil {
 		return nil
 	}
 
 	out := &sdk.NodetemplatesV1TemplateConstraints{}
-	if v, ok := obj[FieldNodeTemplateComputeOptimized].(bool); ok {
-		out.ComputeOptimized = toPtr(v)
+	// todo: this must be replaced with tri-state enum as GetOkExists is deprecated
+	if v, exists := d.GetOkExists(FieldNodeTemplateConstraints + "." + FieldNodeTemplateComputeOptimized); exists {
+		out.ComputeOptimized = toPtr(v.(bool))
 	}
 	if v, ok := obj[FieldNodeTemplateFallbackRestoreRateSeconds].(int); ok {
 		out.FallbackRestoreRateSeconds = toPtr(int32(v))
@@ -1023,8 +1022,9 @@ func toTemplateConstraints(obj map[string]any) *sdk.NodetemplatesV1TemplateConst
 			out.Spot = toPtr(!v)
 		}
 	}
-	if v, ok := obj[FieldNodeTemplateStorageOptimized].(bool); ok {
-		out.StorageOptimized = toPtr(v)
+	// todo: this must be replaced with tri-state enum as GetOkExists is deprecated
+	if v, exists := d.GetOkExists(FieldNodeTemplateConstraints + "." + FieldNodeTemplateStorageOptimized); exists {
+		out.StorageOptimized = toPtr(v.(bool))
 	}
 	if v, ok := obj[FieldNodeTemplateUseSpotFallbacks].(bool); ok {
 		out.UseSpotFallbacks = toPtr(v)
