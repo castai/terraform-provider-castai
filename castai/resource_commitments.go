@@ -394,7 +394,7 @@ func resourceCastaiCommitmentsUpsert(ctx context.Context, data *schema.ResourceD
 		if err := sdk.CheckOKResponse(res, err); err != nil {
 			return diag.Errorf("updating commitment: %v", err)
 		}
-		if len(c.Config.Assignments) == 0 {
+		if c.Config == nil || len(c.Config.Assignments) == 0 {
 			continue
 		}
 
