@@ -405,7 +405,7 @@ func TestToTemplateConstraints_HandleTriStateValuesForStorageAndComputeOptimized
 		val        cty.Value
 		assertions func(*require.Assertions, *sdk.NodetemplatesV1TemplateConstraints)
 	}{
-		"all values empty except one": {
+		"all values nil": {
 			val: cty.ObjectVal(map[string]cty.Value{
 				FieldNodeTemplateConstraints: cty.ListVal([]cty.Value{
 					cty.ObjectVal(map[string]cty.Value{
@@ -417,6 +417,24 @@ func TestToTemplateConstraints_HandleTriStateValuesForStorageAndComputeOptimized
 				r.NotNil(constraints)
 				r.Nil(constraints.ComputeOptimized)
 				r.Nil(constraints.StorageOptimized)
+			},
+		},
+		"values are true/false": {
+			val: cty.ObjectVal(map[string]cty.Value{
+				FieldNodeTemplateConstraints: cty.ListVal([]cty.Value{
+					cty.ObjectVal(map[string]cty.Value{
+						FieldNodeTemplateMaxCpu:           cty.NumberIntVal(100),
+						FieldNodeTemplateStorageOptimized: cty.True,
+						FieldNodeTemplateComputeOptimized: cty.False,
+					}),
+				}),
+			}),
+			assertions: func(r *require.Assertions, constraints *sdk.NodetemplatesV1TemplateConstraints) {
+				r.NotNil(constraints)
+				r.NotNil(constraints.ComputeOptimized)
+				r.NotNil(constraints.StorageOptimized)
+				r.True(lo.FromPtr(constraints.StorageOptimized))
+				r.False(lo.FromPtr(constraints.ComputeOptimized))
 			},
 		},
 	}
