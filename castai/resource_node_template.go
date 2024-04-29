@@ -1034,7 +1034,7 @@ func toTemplateConstraints(d *schema.ResourceData, obj map[string]any) *sdk.Node
 
 	out := &sdk.NodetemplatesV1TemplateConstraints{}
 	// todo: replace with tri-state enum as GetOkExists is deprecated
-	if v, exists := d.GetOkExists(FieldNodeTemplateConstraints + ".0." + FieldNodeTemplateComputeOptimized); exists {
+	if v, exists := d.GetOkExists(FieldNodeTemplateConstraints + ".0." + FieldNodeTemplateComputeOptimized); exists { //lint:ignore SA1019 this will be refactored
 		out.ComputeOptimized = toPtr(v.(bool))
 	}
 	if v, ok := obj[FieldNodeTemplateFallbackRestoreRateSeconds].(int); ok {
@@ -1075,7 +1075,7 @@ func toTemplateConstraints(d *schema.ResourceData, obj map[string]any) *sdk.Node
 		}
 	}
 	// todo: replace with tri-state enum as GetOkExists is deprecated
-	if v, exists := d.GetOkExists(FieldNodeTemplateConstraints + ".0." + FieldNodeTemplateStorageOptimized); exists {
+	if v, exists := d.GetOkExists(FieldNodeTemplateConstraints + ".0." + FieldNodeTemplateStorageOptimized); exists { //lint:ignore SA1019 this will be refactored
 		out.StorageOptimized = toPtr(v.(bool))
 	}
 	if v, ok := obj[FieldNodeTemplateUseSpotFallbacks].(bool); ok {
