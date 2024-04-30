@@ -47,10 +47,12 @@ func TestMapCommitmentToCUDResource(t *testing.T) {
 		"should succeed as all the fields are set": {
 			input: makeCommitment(),
 			expected: &GCPCUDResource{
-				ID:             lo.ToPtr(id1.String()),
-				AllowedUsage:   lo.ToPtr[float32](0.5),
-				Prioritization: lo.ToPtr(true),
-				Status:         lo.ToPtr("ACTIVE"),
+				CASTFields: CASTFields{
+					ID:             lo.ToPtr(id1.String()),
+					AllowedUsage:   lo.ToPtr[float32](0.5),
+					Prioritization: lo.ToPtr(true),
+					Status:         lo.ToPtr("ACTIVE"),
+				},
 				CUDID:          "123456",
 				CUDStatus:      "ACTIVE",
 				StartTimestamp: endTs.Format(time.RFC3339),
@@ -78,10 +80,12 @@ func TestMapCommitmentToCUDResource(t *testing.T) {
 				return c
 			}(),
 			expected: &GCPCUDResource{
-				ID:             lo.ToPtr(id1.String()),
-				AllowedUsage:   lo.ToPtr[float32](0.5),
-				Prioritization: lo.ToPtr(true),
-				Status:         lo.ToPtr("ACTIVE"),
+				CASTFields: CASTFields{
+					ID:             lo.ToPtr(id1.String()),
+					AllowedUsage:   lo.ToPtr[float32](0.5),
+					Prioritization: lo.ToPtr(true),
+					Status:         lo.ToPtr("ACTIVE"),
+				},
 				CUDID:          "123456",
 				CUDStatus:      "ACTIVE",
 				StartTimestamp: endTs.Format(time.RFC3339),
@@ -100,10 +104,12 @@ func TestMapCommitmentToCUDResource(t *testing.T) {
 				return c
 			}(),
 			expected: &GCPCUDResource{
-				ID:             lo.ToPtr(id1.String()),
-				AllowedUsage:   lo.ToPtr[float32](0.5),
-				Prioritization: lo.ToPtr(true),
-				Status:         lo.ToPtr("ACTIVE"),
+				CASTFields: CASTFields{
+					ID:             lo.ToPtr(id1.String()),
+					AllowedUsage:   lo.ToPtr[float32](0.5),
+					Prioritization: lo.ToPtr(true),
+					Status:         lo.ToPtr("ACTIVE"),
+				},
 				CUDID:          "123456",
 				CUDStatus:      "ACTIVE",
 				StartTimestamp: endTs.Format(time.RFC3339),
@@ -188,10 +194,12 @@ func TestMapCommitmentToReservationResource(t *testing.T) {
 		"should succeed as all the fields are set": {
 			input: makeCommitment(),
 			expected: &AzureReservationResource{
-				ID:                 lo.ToPtr(id1.String()),
-				AllowedUsage:       lo.ToPtr[float32](0.5),
-				Prioritization:     lo.ToPtr(true),
-				Status:             lo.ToPtr("ACTIVE"),
+				CASTFields: CASTFields{
+					ID:             lo.ToPtr(id1.String()),
+					AllowedUsage:   lo.ToPtr[float32](0.5),
+					Prioritization: lo.ToPtr(true),
+					Status:         lo.ToPtr("ACTIVE"),
+				},
 				Count:              2,
 				ReservationID:      reservationID.String(),
 				ReservationStatus:  "Succeeded",
@@ -307,9 +315,11 @@ func TestMapCUDImportToResource(t *testing.T) {
 				Plan:           "TWELVE_MONTHS",
 				Type:           "COMPUTE_OPTIMIZED_C2D",
 				// Configured fields
-				Prioritization: lo.ToPtr(true),
-				Status:         lo.ToPtr("ACTIVE"),
-				AllowedUsage:   lo.ToPtr[float32](0.7),
+				CASTFields: CASTFields{
+					Prioritization: lo.ToPtr(true),
+					Status:         lo.ToPtr("ACTIVE"),
+					AllowedUsage:   lo.ToPtr[float32](0.7),
+				},
 			},
 		},
 		"should fail as cpu amount is invalid": {
@@ -435,9 +445,11 @@ func TestMapReservationImportToResource(t *testing.T) {
 				return c
 			}(),
 			expected: &AzureReservationResource{
-				AllowedUsage:       lo.ToPtr[float32](0.7),
-				Prioritization:     lo.ToPtr(true),
-				Status:             lo.ToPtr("ACTIVE"),
+				CASTFields: CASTFields{
+					AllowedUsage:   lo.ToPtr[float32](0.7),
+					Prioritization: lo.ToPtr(true),
+					Status:         lo.ToPtr("ACTIVE"),
+				},
 				Count:              2,
 				ReservationID:      lo.FromPtr(testAzureCommitmentImport.ReservationId),
 				ReservationStatus:  lo.FromPtr(testAzureCommitmentImport.Status),
@@ -874,9 +886,11 @@ func TestMapConfiguredCUDImportsToResources(t *testing.T) {
 			},
 			expected: []*GCPCUDResource{
 				{
-					AllowedUsage:   lo.ToPtr[float32](0.5),
-					Prioritization: lo.ToPtr(true),
-					Status:         lo.ToPtr("ACTIVE"),
+					CASTFields: CASTFields{
+						AllowedUsage:   lo.ToPtr[float32](0.5),
+						Prioritization: lo.ToPtr(true),
+						Status:         lo.ToPtr("ACTIVE"),
+					},
 					CUDID:          lo.FromPtr(testGCPCommitmentImport.Id),
 					CUDStatus:      lo.FromPtr(testGCPCommitmentImport.Status),
 					StartTimestamp: lo.FromPtr(testGCPCommitmentImport.StartTimestamp),
@@ -969,9 +983,11 @@ func TestMapConfiguredReservationImportsToResources(t *testing.T) {
 			},
 			expected: []*AzureReservationResource{
 				{
-					AllowedUsage:       lo.ToPtr[float32](0.5),
-					Prioritization:     lo.ToPtr(true),
-					Status:             lo.ToPtr("ACTIVE"),
+					CASTFields: CASTFields{
+						AllowedUsage:   lo.ToPtr[float32](0.5),
+						Prioritization: lo.ToPtr(true),
+						Status:         lo.ToPtr("ACTIVE"),
+					},
 					Count:              int(lo.FromPtr(testAzureCommitmentImport.Quantity)),
 					ReservationID:      lo.FromPtr(testAzureCommitmentImport.ReservationId),
 					ReservationStatus:  lo.FromPtr(testAzureCommitmentImport.Status),
