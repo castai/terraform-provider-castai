@@ -297,6 +297,9 @@ type ClientInterface interface {
 	// ExternalClusterAPICreateClusterToken request
 	ExternalClusterAPICreateClusterToken(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// NodeConfigurationAPIListMaxPodsPresets request
+	NodeConfigurationAPIListMaxPodsPresets(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// UsersAPICurrentUserProfile request
 	UsersAPICurrentUserProfile(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -1318,6 +1321,18 @@ func (c *Client) ExternalClusterAPIUpdateClusterTags(ctx context.Context, cluste
 
 func (c *Client) ExternalClusterAPICreateClusterToken(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewExternalClusterAPICreateClusterTokenRequest(c.Server, clusterId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) NodeConfigurationAPIListMaxPodsPresets(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewNodeConfigurationAPIListMaxPodsPresetsRequest(c.Server)
 	if err != nil {
 		return nil, err
 	}
@@ -4265,6 +4280,33 @@ func NewExternalClusterAPICreateClusterTokenRequest(server string, clusterId str
 	return req, nil
 }
 
+// NewNodeConfigurationAPIListMaxPodsPresetsRequest generates requests for NodeConfigurationAPIListMaxPodsPresets
+func NewNodeConfigurationAPIListMaxPodsPresetsRequest(server string) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/kubernetes/maxpods-formula-presets")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 // NewUsersAPICurrentUserProfileRequest generates requests for UsersAPICurrentUserProfile
 func NewUsersAPICurrentUserProfileRequest(server string) (*http.Request, error) {
 	var err error
@@ -5765,6 +5807,9 @@ type ClientWithResponsesInterface interface {
 
 	// ExternalClusterAPICreateClusterToken request
 	ExternalClusterAPICreateClusterTokenWithResponse(ctx context.Context, clusterId string) (*ExternalClusterAPICreateClusterTokenResponse, error)
+
+	// NodeConfigurationAPIListMaxPodsPresets request
+	NodeConfigurationAPIListMaxPodsPresetsWithResponse(ctx context.Context) (*NodeConfigurationAPIListMaxPodsPresetsResponse, error)
 
 	// UsersAPICurrentUserProfile request
 	UsersAPICurrentUserProfileWithResponse(ctx context.Context) (*UsersAPICurrentUserProfileResponse, error)
@@ -7543,6 +7588,36 @@ func (r ExternalClusterAPICreateClusterTokenResponse) GetBody() []byte {
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
+type NodeConfigurationAPIListMaxPodsPresetsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *NodeconfigV1ListMaxPodsPresetsResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r NodeConfigurationAPIListMaxPodsPresetsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r NodeConfigurationAPIListMaxPodsPresetsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r NodeConfigurationAPIListMaxPodsPresetsResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
 type UsersAPICurrentUserProfileResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -9162,6 +9237,15 @@ func (c *ClientWithResponses) ExternalClusterAPICreateClusterTokenWithResponse(c
 		return nil, err
 	}
 	return ParseExternalClusterAPICreateClusterTokenResponse(rsp)
+}
+
+// NodeConfigurationAPIListMaxPodsPresetsWithResponse request returning *NodeConfigurationAPIListMaxPodsPresetsResponse
+func (c *ClientWithResponses) NodeConfigurationAPIListMaxPodsPresetsWithResponse(ctx context.Context) (*NodeConfigurationAPIListMaxPodsPresetsResponse, error) {
+	rsp, err := c.NodeConfigurationAPIListMaxPodsPresets(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return ParseNodeConfigurationAPIListMaxPodsPresetsResponse(rsp)
 }
 
 // UsersAPICurrentUserProfileWithResponse request returning *UsersAPICurrentUserProfileResponse
@@ -10950,6 +11034,32 @@ func ParseExternalClusterAPICreateClusterTokenResponse(rsp *http.Response) (*Ext
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest ExternalclusterV1CreateClusterTokenResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseNodeConfigurationAPIListMaxPodsPresetsResponse parses an HTTP response from a NodeConfigurationAPIListMaxPodsPresetsWithResponse call
+func ParseNodeConfigurationAPIListMaxPodsPresetsResponse(rsp *http.Response) (*NodeConfigurationAPIListMaxPodsPresetsResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &NodeConfigurationAPIListMaxPodsPresetsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest NodeconfigV1ListMaxPodsPresetsResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}

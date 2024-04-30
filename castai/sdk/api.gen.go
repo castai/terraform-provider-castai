@@ -1684,6 +1684,11 @@ type NodeconfigV1ListConfigurationsResponse struct {
 	Items *[]NodeconfigV1NodeConfiguration `json:"items,omitempty"`
 }
 
+// NodeconfigV1ListMaxPodsPresetsResponse defines model for nodeconfig.v1.ListMaxPodsPresetsResponse.
+type NodeconfigV1ListMaxPodsPresetsResponse struct {
+	Presets *[]string `json:"presets,omitempty"`
+}
+
 // NodeconfigV1NewNodeConfiguration defines model for nodeconfig.v1.NewNodeConfiguration.
 type NodeconfigV1NewNodeConfiguration struct {
 	Aks *NodeconfigV1AKSConfig `json:"aks,omitempty"`
