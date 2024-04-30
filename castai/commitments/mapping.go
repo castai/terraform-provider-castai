@@ -18,14 +18,16 @@ import (
 type (
 	// Terraform SDK's diff setter uses mapstructure under the hood
 
-	GCPCUDResource struct {
-		// CAST AI only fields
+	CASTFields struct {
 		ID             *string                         `mapstructure:"id,omitempty"` // ID of the commitment
 		AllowedUsage   *float32                        `mapstructure:"allowed_usage,omitempty"`
 		Prioritization *bool                           `mapstructure:"prioritization,omitempty"`
 		Status         *string                         `mapstructure:"status,omitempty"`
 		Assignments    []*CommitmentAssignmentResource `mapstructure:"assignments,omitempty"`
+	}
 
+	GCPCUDResource struct {
+		CASTFields `mapstructure:",squash"`
 		// Fields from GCP CUDs export JSON
 		CUDID          string `mapstructure:"cud_id"` // ID of the CUD in GCP
 		CUDStatus      string `mapstructure:"cud_status"`
@@ -40,13 +42,7 @@ type (
 	}
 
 	AzureReservationResource struct {
-		// CAST AI only fields
-		ID             *string                         `mapstructure:"id,omitempty"` // ID of the commitment
-		AllowedUsage   *float32                        `mapstructure:"allowed_usage,omitempty"`
-		Prioritization *bool                           `mapstructure:"prioritization,omitempty"`
-		Status         *string                         `mapstructure:"status,omitempty"`
-		Assignments    []*CommitmentAssignmentResource `mapstructure:"assignments,omitempty"`
-
+		CASTFields `mapstructure:",squash"`
 		// Fields from Azure reservations export CSV
 		Count              int    `mapstructure:"count"`
 		ReservationID      string `mapstructure:"reservation_id"` // ID of the reservation in Azure
@@ -184,10 +180,13 @@ func MapCommitmentToCUDResource(
 	}
 
 	return &GCPCUDResource{
-		ID:             c.Id,
-		AllowedUsage:   c.AllowedUsage,
-		Prioritization: c.Prioritization,
-		Status:         (*string)(c.Status),
+		CASTFields: CASTFields{
+			ID:             c.Id,
+			AllowedUsage:   c.AllowedUsage,
+			Prioritization: c.Prioritization,
+			Status:         (*string)(c.Status),
+			Assignments:    MapCommitmentAssignmentsToResources(as, lo.FromPtr(c.Prioritization)),
+		},
 		CUDID:          lo.FromPtr(c.GcpResourceCudContext.CudId),
 		CUDStatus:      lo.FromPtr(c.GcpResourceCudContext.Status),
 		EndTimestamp:   endDate,
@@ -198,7 +197,6 @@ func MapCommitmentToCUDResource(
 		MemoryMb:       memory,
 		Plan:           lo.FromPtr((*string)(c.GcpResourceCudContext.Plan)),
 		Type:           lo.FromPtr(c.GcpResourceCudContext.Type),
-		Assignments:    MapCommitmentAssignmentsToResources(as, lo.FromPtr(c.Prioritization)),
 	}, nil
 }
 
@@ -218,10 +216,13 @@ func MapCommitmentToReservationResource(
 		endDate = c.EndDate.Format(time.RFC3339)
 	}
 	return &AzureReservationResource{
-		ID:                 c.Id,
-		AllowedUsage:       c.AllowedUsage,
-		Prioritization:     c.Prioritization,
-		Status:             (*string)(c.Status),
+		CASTFields: CASTFields{
+			ID:             c.Id,
+			AllowedUsage:   c.AllowedUsage,
+			Prioritization: c.Prioritization,
+			Status:         (*string)(c.Status),
+			Assignments:    MapCommitmentAssignmentsToResources(as, lo.FromPtr(c.Prioritization)),
+		},
 		Count:              int(lo.FromPtr(c.AzureReservationContext.Count)),
 		ReservationID:      lo.FromPtr(c.AzureReservationContext.Id),
 		ReservationStatus:  lo.FromPtr(c.AzureReservationContext.Status),
@@ -234,7 +235,6 @@ func MapCommitmentToReservationResource(
 		Scope:              lo.FromPtr(c.AzureReservationContext.Scope),
 		ScopeResourceGroup: lo.FromPtr(c.AzureReservationContext.ScopeResourceGroup),
 		ScopeSubscription:  lo.FromPtr(c.AzureReservationContext.ScopeSubscription),
-		Assignments:        MapCommitmentAssignmentsToResources(as, lo.FromPtr(c.Prioritization)),
 	}, nil
 }
 

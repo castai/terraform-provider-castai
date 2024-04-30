@@ -52,10 +52,16 @@ func TestMapCommitmentToCUDResource(t *testing.T) {
 				{ClusterId: lo.ToPtr("cluster-id-2")},
 			},
 			expected: &GCPCUDResource{
-				ID:             lo.ToPtr(id1.String()),
-				AllowedUsage:   lo.ToPtr[float32](0.5),
-				Prioritization: lo.ToPtr(true),
-				Status:         lo.ToPtr("ACTIVE"),
+				CASTFields: CASTFields{
+					ID:             lo.ToPtr(id1.String()),
+					AllowedUsage:   lo.ToPtr[float32](0.5),
+					Prioritization: lo.ToPtr(true),
+					Status:         lo.ToPtr("ACTIVE"),
+					Assignments: []*CommitmentAssignmentResource{
+						{ClusterID: "cluster-id-1"},
+						{ClusterID: "cluster-id-2"},
+					},
+				},
 				CUDID:          "123456",
 				CUDStatus:      "ACTIVE",
 				StartTimestamp: endTs.Format(time.RFC3339),
@@ -66,10 +72,6 @@ func TestMapCommitmentToCUDResource(t *testing.T) {
 				MemoryMb:       1024,
 				Plan:           "TWELVE_MONTHS",
 				Type:           "COMPUTE_OPTIMIZED_C2D",
-				Assignments: []*CommitmentAssignmentResource{
-					{ClusterID: "cluster-id-1"},
-					{ClusterID: "cluster-id-2"},
-				},
 			},
 		},
 		"should fail as gcp cud context is nil": {
@@ -91,10 +93,16 @@ func TestMapCommitmentToCUDResource(t *testing.T) {
 				{ClusterId: lo.ToPtr("cluster-id-2")},
 			},
 			expected: &GCPCUDResource{
-				ID:             lo.ToPtr(id1.String()),
-				AllowedUsage:   lo.ToPtr[float32](0.5),
-				Prioritization: lo.ToPtr(true),
-				Status:         lo.ToPtr("ACTIVE"),
+				CASTFields: CASTFields{
+					ID:             lo.ToPtr(id1.String()),
+					AllowedUsage:   lo.ToPtr[float32](0.5),
+					Prioritization: lo.ToPtr(true),
+					Status:         lo.ToPtr("ACTIVE"),
+					Assignments: []*CommitmentAssignmentResource{
+						{ClusterID: "cluster-id-1"},
+						{ClusterID: "cluster-id-2"},
+					},
+				},
 				CUDID:          "123456",
 				CUDStatus:      "ACTIVE",
 				StartTimestamp: endTs.Format(time.RFC3339),
@@ -104,10 +112,6 @@ func TestMapCommitmentToCUDResource(t *testing.T) {
 				MemoryMb:       1024,
 				Plan:           "TWELVE_MONTHS",
 				Type:           "COMPUTE_OPTIMIZED_C2D",
-				Assignments: []*CommitmentAssignmentResource{
-					{ClusterID: "cluster-id-1"},
-					{ClusterID: "cluster-id-2"},
-				},
 			},
 		},
 		"should succeed with nil memory": {
@@ -121,10 +125,16 @@ func TestMapCommitmentToCUDResource(t *testing.T) {
 				{ClusterId: lo.ToPtr("cluster-id-2")},
 			},
 			expected: &GCPCUDResource{
-				ID:             lo.ToPtr(id1.String()),
-				AllowedUsage:   lo.ToPtr[float32](0.5),
-				Prioritization: lo.ToPtr(true),
-				Status:         lo.ToPtr("ACTIVE"),
+				CASTFields: CASTFields{
+					ID:             lo.ToPtr(id1.String()),
+					AllowedUsage:   lo.ToPtr[float32](0.5),
+					Prioritization: lo.ToPtr(true),
+					Status:         lo.ToPtr("ACTIVE"),
+					Assignments: []*CommitmentAssignmentResource{
+						{ClusterID: "cluster-id-1"},
+						{ClusterID: "cluster-id-2"},
+					},
+				},
 				CUDID:          "123456",
 				CUDStatus:      "ACTIVE",
 				StartTimestamp: endTs.Format(time.RFC3339),
@@ -134,10 +144,6 @@ func TestMapCommitmentToCUDResource(t *testing.T) {
 				CPU:            8,
 				Plan:           "TWELVE_MONTHS",
 				Type:           "COMPUTE_OPTIMIZED_C2D",
-				Assignments: []*CommitmentAssignmentResource{
-					{ClusterID: "cluster-id-1"},
-					{ClusterID: "cluster-id-2"},
-				},
 			},
 		},
 		"should fail as cpu is an invalid string": {
@@ -218,10 +224,16 @@ func TestMapCommitmentToReservationResource(t *testing.T) {
 				{ClusterId: lo.ToPtr("cluster-id-2")},
 			},
 			expected: &AzureReservationResource{
-				ID:                 lo.ToPtr(id1.String()),
-				AllowedUsage:       lo.ToPtr[float32](0.5),
-				Prioritization:     lo.ToPtr(true),
-				Status:             lo.ToPtr("ACTIVE"),
+				CASTFields: CASTFields{
+					ID:             lo.ToPtr(id1.String()),
+					AllowedUsage:   lo.ToPtr[float32](0.5),
+					Prioritization: lo.ToPtr(true),
+					Status:         lo.ToPtr("ACTIVE"),
+					Assignments: []*CommitmentAssignmentResource{
+						{ClusterID: "cluster-id-1"},
+						{ClusterID: "cluster-id-2"},
+					},
+				},
 				Count:              2,
 				ReservationID:      reservationID.String(),
 				ReservationStatus:  "Succeeded",
@@ -234,10 +246,6 @@ func TestMapCommitmentToReservationResource(t *testing.T) {
 				Scope:              "Single subscription",
 				ScopeResourceGroup: "All resource groups",
 				ScopeSubscription:  scopeSubscription.String(),
-				Assignments: []*CommitmentAssignmentResource{
-					{ClusterID: "cluster-id-1"},
-					{ClusterID: "cluster-id-2"},
-				},
 			},
 		},
 		"should fail as azure reservation context is nil": {
@@ -341,9 +349,11 @@ func TestMapCUDImportToResource(t *testing.T) {
 				Plan:           "TWELVE_MONTHS",
 				Type:           "COMPUTE_OPTIMIZED_C2D",
 				// Configured fields
-				Prioritization: lo.ToPtr(true),
-				Status:         lo.ToPtr("ACTIVE"),
-				AllowedUsage:   lo.ToPtr[float32](0.7),
+				CASTFields: CASTFields{
+					Prioritization: lo.ToPtr(true),
+					Status:         lo.ToPtr("ACTIVE"),
+					AllowedUsage:   lo.ToPtr[float32](0.7),
+				},
 			},
 		},
 		"should fail as cpu amount is invalid": {
@@ -469,9 +479,11 @@ func TestMapReservationImportToResource(t *testing.T) {
 				return c
 			}(),
 			expected: &AzureReservationResource{
-				AllowedUsage:       lo.ToPtr[float32](0.7),
-				Prioritization:     lo.ToPtr(true),
-				Status:             lo.ToPtr("ACTIVE"),
+				CASTFields: CASTFields{
+					AllowedUsage:   lo.ToPtr[float32](0.7),
+					Prioritization: lo.ToPtr(true),
+					Status:         lo.ToPtr("ACTIVE"),
+				},
 				Count:              2,
 				ReservationID:      lo.FromPtr(testAzureCommitmentImport.ReservationId),
 				ReservationStatus:  lo.FromPtr(testAzureCommitmentImport.Status),
@@ -912,9 +924,15 @@ func TestMapConfiguredCUDImportsToResources(t *testing.T) {
 			},
 			expected: []*GCPCUDResource{
 				{
-					AllowedUsage:   lo.ToPtr[float32](0.5),
-					Prioritization: lo.ToPtr(true),
-					Status:         lo.ToPtr("ACTIVE"),
+					CASTFields: CASTFields{
+						AllowedUsage:   lo.ToPtr[float32](0.5),
+						Prioritization: lo.ToPtr(true),
+						Status:         lo.ToPtr("ACTIVE"),
+						Assignments: []*CommitmentAssignmentResource{
+							{ClusterID: "cluster-1", Priority: lo.ToPtr(1)},
+							{ClusterID: "cluster-2", Priority: lo.ToPtr(2)},
+						},
+					},
 					CUDID:          lo.FromPtr(testGCPCommitmentImport.Id),
 					CUDStatus:      lo.FromPtr(testGCPCommitmentImport.Status),
 					StartTimestamp: lo.FromPtr(testGCPCommitmentImport.StartTimestamp),
@@ -925,10 +943,6 @@ func TestMapConfiguredCUDImportsToResources(t *testing.T) {
 					MemoryMb:       20480,
 					Plan:           lo.FromPtr(testGCPCommitmentImport.Plan),
 					Type:           lo.FromPtr(testGCPCommitmentImport.Type),
-					Assignments: []*CommitmentAssignmentResource{
-						{ClusterID: "cluster-1"},
-						{ClusterID: "cluster-2"},
-					},
 				},
 			},
 		},
@@ -1015,9 +1029,15 @@ func TestMapConfiguredReservationImportsToResources(t *testing.T) {
 			},
 			expected: []*AzureReservationResource{
 				{
-					AllowedUsage:       lo.ToPtr[float32](0.5),
-					Prioritization:     lo.ToPtr(true),
-					Status:             lo.ToPtr("ACTIVE"),
+					CASTFields: CASTFields{
+						AllowedUsage:   lo.ToPtr[float32](0.5),
+						Prioritization: lo.ToPtr(true),
+						Status:         lo.ToPtr("ACTIVE"),
+						Assignments: []*CommitmentAssignmentResource{
+							{ClusterID: "cluster-1", Priority: lo.ToPtr(1)},
+							{ClusterID: "cluster-2", Priority: lo.ToPtr(2)},
+						},
+					},
 					Count:              int(lo.FromPtr(testAzureCommitmentImport.Quantity)),
 					ReservationID:      lo.FromPtr(testAzureCommitmentImport.ReservationId),
 					ReservationStatus:  lo.FromPtr(testAzureCommitmentImport.Status),
@@ -1030,10 +1050,6 @@ func TestMapConfiguredReservationImportsToResources(t *testing.T) {
 					Scope:              lo.FromPtr(testAzureCommitmentImport.Scope),
 					ScopeResourceGroup: lo.FromPtr(testAzureCommitmentImport.ScopeResourceGroup),
 					ScopeSubscription:  lo.FromPtr(testAzureCommitmentImport.ScopeSubscription),
-					Assignments: []*CommitmentAssignmentResource{
-						{ClusterID: "cluster-1"},
-						{ClusterID: "cluster-2"},
-					},
 				},
 			},
 		},
