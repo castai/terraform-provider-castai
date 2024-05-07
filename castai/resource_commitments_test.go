@@ -8,8 +8,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-
-	"github.com/castai/terraform-provider-castai/castai/commitments"
 )
 
 func TestAccCommitments(t *testing.T) {
@@ -17,13 +15,13 @@ func TestAccCommitments(t *testing.T) {
 		ResourceName:            "castai_commitments.test_gcp",
 		ImportState:             true,
 		ImportStateVerify:       true,
-		ImportStateVerifyIgnore: []string{commitments.FieldGCPCUDsJSON, commitments.FieldCommitmentConfigs},
+		ImportStateVerifyIgnore: []string{FieldCommitmentsGCPCUDsJSON, FieldCommitmentsConfigs},
 	}
 	importReservationsStateStep := resource.TestStep{
 		ResourceName:            "castai_commitments.test_azure",
 		ImportState:             true,
 		ImportStateVerify:       true,
-		ImportStateVerifyIgnore: []string{commitments.FieldAzureReservationsCSV, commitments.FieldCommitmentConfigs},
+		ImportStateVerifyIgnore: []string{FieldCommitmentsAzureReservationsCSV, FieldCommitmentsConfigs},
 	}
 
 	resource.Test(t, resource.TestCase{
