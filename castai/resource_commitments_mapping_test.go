@@ -1238,17 +1238,17 @@ func TestMapCommitmentImportWithConfigToUpdateRequest(t *testing.T) {
 
 func TestSortResources(t *testing.T) {
 	tests := map[string]struct {
-		toSort, targetOrder []Resource
+		toSort, targetOrder []CommitmentResource
 	}{
 		"should sort gcp cud resources": {
-			toSort: []Resource{
+			toSort: []CommitmentResource{
 				&GCPCUDResource{CUDID: "1"},
 				&GCPCUDResource{CUDID: "2"},
 				&GCPCUDResource{CUDID: "3"},
 				&GCPCUDResource{CUDID: "4"},
 				&GCPCUDResource{CUDID: "5"},
 			},
-			targetOrder: []Resource{
+			targetOrder: []CommitmentResource{
 				&GCPCUDResource{CUDID: "3"},
 				&GCPCUDResource{CUDID: "1"},
 				&GCPCUDResource{CUDID: "4"},
@@ -1257,14 +1257,14 @@ func TestSortResources(t *testing.T) {
 			},
 		},
 		"should sort azure reservation resources": {
-			toSort: []Resource{
+			toSort: []CommitmentResource{
 				&AzureReservationResource{ReservationID: "a"},
 				&AzureReservationResource{ReservationID: "b"},
 				&AzureReservationResource{ReservationID: "c"},
 				&AzureReservationResource{ReservationID: "d"},
 				&AzureReservationResource{ReservationID: "e"},
 			},
-			targetOrder: []Resource{
+			targetOrder: []CommitmentResource{
 				&AzureReservationResource{ReservationID: "e"},
 				&AzureReservationResource{ReservationID: "a"},
 				&AzureReservationResource{ReservationID: "c"},
@@ -1276,7 +1276,7 @@ func TestSortResources(t *testing.T) {
 
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
-			SortResources(tt.toSort, tt.targetOrder)
+			SortCommitmentResources(tt.toSort, tt.targetOrder)
 			require.Equal(t, tt.targetOrder, tt.toSort)
 		})
 	}

@@ -488,7 +488,7 @@ func resourceCastaiCommitmentsDelete(ctx context.Context, data *schema.ResourceD
 	return nil
 }
 
-func deleteCommitments[R Resource](ctx context.Context, meta any, resources []R) error {
+func deleteCommitments[R CommitmentResource](ctx context.Context, meta any, resources []R) error {
 	for _, r := range resources {
 		if err := deleteCommitment(ctx, meta, r.GetCommitmentID()); err != nil {
 			return err
@@ -697,7 +697,7 @@ func populateCommitmentsResourceData(ctx context.Context, d *schema.ResourceData
 			return err
 		}
 		if reservationsOk {
-			SortResources(azureResources, reservations)
+			SortCommitmentResources(azureResources, reservations)
 		}
 		if err := d.Set(FieldCommitmentsAzureReservations, azureResources); err != nil {
 			return fmt.Errorf("setting azure reservations: %w", err)
@@ -708,7 +708,7 @@ func populateCommitmentsResourceData(ctx context.Context, d *schema.ResourceData
 			return err
 		}
 		if cudsOk {
-			SortResources(gcpResources, cuds)
+			SortCommitmentResources(gcpResources, cuds)
 		}
 		if err := d.Set(FieldCommitmentsGCPCUDs, gcpResources); err != nil {
 			return fmt.Errorf("setting gcp cuds: %w", err)
