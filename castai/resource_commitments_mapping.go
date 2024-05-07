@@ -57,8 +57,8 @@ type (
 		ScopeSubscription  string `mapstructure:"scope_subscription"`
 	}
 
-	// Resource is an interface for common management of GCP (GCPCUDResource) and Azure (AzureReservationResource) resources
-	Resource interface {
+	// CommitmentResource is an interface for common management of GCP (GCPCUDResource) and Azure (AzureReservationResource) resources
+	CommitmentResource interface {
 		// GetCommitmentID returns the ID of the commitment in CAST AI
 		GetCommitmentID() string
 		// GetIDInCloud returns the ID of the resource in the cloud provider
@@ -86,8 +86,8 @@ func (r *CommitmentConfigResource) GetMatcher() *CommitmentConfigMatcherResource
 }
 
 var (
-	_ Resource = (*GCPCUDResource)(nil)
-	_ Resource = (*AzureReservationResource)(nil)
+	_ CommitmentResource = (*GCPCUDResource)(nil)
+	_ CommitmentResource = (*AzureReservationResource)(nil)
 )
 
 func (r *GCPCUDResource) GetCommitmentID() string {
@@ -535,8 +535,8 @@ func mapReservationCSVRowToImport(fieldIndexes map[string]int, record []string) 
 	}, nil
 }
 
-// SortResources sorts the toSort slice based on the order of the targetOrder slice
-func SortResources[R Resource](toSort, targetOrder []R) {
+// SortCommitmentResources sorts the toSort slice based on the order of the targetOrder slice
+func SortCommitmentResources[R CommitmentResource](toSort, targetOrder []R) {
 	orderMap := make(map[string]int)
 	for index, value := range targetOrder {
 		orderMap[value.GetIDInCloud()] = index
@@ -557,4 +557,63 @@ func SortResources[R Resource](toSort, targetOrder []R) {
 		}
 		return indexI < indexJ
 	})
+}
+
+// CastaiGCPCommitmentImport is a wrapper around sdk.CastaiInventoryV1beta1GCPCommitmentImport implementing the cud interface
+type CastaiGCPCommitmentImport struct {
+	sdk.CastaiInventoryV1beta1GCPCommitmentImport
+}
+
+var _ commitment = CastaiGCPCommitmentImport{}
+
+func (c CastaiGCPCommitmentImport) getKey() commitmentConfigMatcherKey {
+	var region string
+	if c.Region != nil {
+		_, region = path.Split(*c.Region)
+	}
+	return commitmentConfigMatcherKey{
+		name:   lo.FromPtr(c.Name),
+		region: region,
+		typ:    lo.FromPtr(c.Type),
+	}
+}
+
+// CastaiAzureReservationImport is a wrapper around sdk.CastaiInventoryV1beta1AzureReservationImport implementing the cud interface
+type CastaiAzureReservationImport struct {
+	sdk.CastaiInventoryV1beta1AzureReservationImport
+}
+
+var _ commitment = CastaiAzureReservationImport{}
+
+func (c CastaiAzureReservationImport) getKey() commitmentConfigMatcherKey {
+	return commitmentConfigMatcherKey{
+		name:   lo.FromPtr(c.Name),
+		region: lo.FromPtr(c.Region),
+		typ:    lo.FromPtr(c.ProductName),
+	}
+}
+
+// CastaiCommitment is a wrapper around sdk.CastaiInventoryV1beta1Commitment implementing the cud interface
+type CastaiCommitment struct {
+	sdk.CastaiInventoryV1beta1Commitment
+}
+
+var _ commitment = CastaiCommitment{}
+
+func (c CastaiCommitment) getKey() commitmentConfigMatcherKey {
+	var region string
+	if c.Region != nil {
+		_, region = path.Split(*c.Region)
+	}
+	res := commitmentConfigMatcherKey{
+		name:   lo.FromPtr(c.Name),
+		region: region,
+	}
+	if c.GcpResourceCudContext != nil {
+		res.typ = *c.GcpResourceCudContext.Type
+	}
+	if c.AzureReservationContext != nil {
+		res.typ = *c.AzureReservationContext.InstanceType
+	}
+	return res
 }
