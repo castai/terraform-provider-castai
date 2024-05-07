@@ -84,7 +84,7 @@ func TestAccCommitments_GCP_BasicCUDs(t *testing.T) {
 				ResourceName:            "castai_commitments.test_gcp",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{FieldCommitmentsGCPCUDsJSON},
+				ImportStateVerifyIgnore: []string{fieldCommitmentsGCPCUDsJSON},
 			},
 			{
 				Config: updatedGCPConfig,
