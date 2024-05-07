@@ -335,7 +335,7 @@ func Test_mapReservationsHeaderToReservationFieldIndexes(t *testing.T) {
 		t.Run(testName, func(t *testing.T) {
 			r := require.New(t)
 
-			got := mapReservationsHeaderToReservationFieldIndexes(tt.args.columns)
+			got := MapReservationsHeaderToReservationFieldIndexes(tt.args.columns)
 
 			r.Equal(tt.want, got)
 		})
@@ -401,7 +401,7 @@ func Test_getRecordReservationProvider(t *testing.T) {
 		t.Run(testName, func(t *testing.T) {
 			r := require.New(t)
 
-			got, err := getRecordReservationProvider(tt.args.fieldIndexes, tt.args.record)
+			got, err := GetRecordReservationProvider(tt.args.fieldIndexes, tt.args.record)
 
 			if tt.expectErrMessageContains != nil {
 				r.Error(err)

@@ -5,24 +5,29 @@ import (
 	"fmt"
 	"path"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/samber/lo"
 	"golang.org/x/exp/slices"
 
+	"github.com/castai/terraform-provider-castai/castai/reservations"
 	"github.com/castai/terraform-provider-castai/castai/sdk"
 )
 
 type (
 	// Terraform SDK's diff setter uses mapstructure under the hood
 
-	gcpCUDResource struct {
-		// CAST AI only fields
-		ID             *string  `mapstructure:"id,omitempty"` // ID of the commitment
-		AllowedUsage   *float32 `mapstructure:"allowed_usage,omitempty"`
-		Prioritization *bool    `mapstructure:"prioritization,omitempty"`
-		Status         *string  `mapstructure:"status,omitempty"`
+	castCommitmentFields struct {
+		ID             *string                         `mapstructure:"id,omitempty"` // ID of the commitment
+		AllowedUsage   *float32                        `mapstructure:"allowed_usage,omitempty"`
+		Prioritization *bool                           `mapstructure:"prioritization,omitempty"`
+		Status         *string                         `mapstructure:"status,omitempty"`
+		Assignments    []*commitmentAssignmentResource `mapstructure:"assignments,omitempty"`
+	}
 
+	gcpCUDResource struct {
+		castCommitmentFields `mapstructure:",squash"`
 		// Fields from GCP CUDs export JSON
 		CUDID          string `mapstructure:"cud_id"` // ID of the CUD in GCP
 		CUDStatus      string `mapstructure:"cud_status"`
@@ -35,21 +40,22 @@ type (
 		Plan           string `mapstructure:"plan"`
 		Type           string `mapstructure:"type"`
 	}
-	gcpCUDConfigResource struct {
-		Matcher        []*gcpCUDConfigMatcherResource `mapstructure:"matcher,omitempty"`
-		Prioritization *bool                          `mapstructure:"prioritization,omitempty"`
-		Status         *string                        `mapstructure:"status,omitempty"`
-		AllowedUsage   *float32                       `mapstructure:"allowed_usage,omitempty"`
-	}
-	gcpCUDConfigMatcherResource struct {
-		Name   string  `mapstructure:"name"`
-		Type   *string `mapstructure:"type,omitempty"`
-		Region *string `mapstructure:"region,omitempty"`
-	}
 
 	azureReservationResource struct {
-		ID            *string `mapstructure:"id,omitempty"`   // ID of the commitment
-		ReservationID string  `mapstructure:"reservation_id"` // ID of the reservation in Azure
+		castCommitmentFields `mapstructure:",squash"`
+		// Fields from Azure reservations export CSV
+		Count              int    `mapstructure:"count"`
+		ReservationID      string `mapstructure:"reservation_id"` // ID of the reservation in Azure
+		ReservationStatus  string `mapstructure:"reservation_status"`
+		StartTimestamp     string `mapstructure:"start_timestamp"`
+		EndTimestamp       string `mapstructure:"end_timestamp"`
+		Name               string `mapstructure:"name"`
+		Region             string `mapstructure:"region"`
+		InstanceType       string `mapstructure:"instance_type"`
+		Plan               string `mapstructure:"plan"`
+		Scope              string `mapstructure:"scope"`
+		ScopeResourceGroup string `mapstructure:"scope_resource_group"`
+		ScopeSubscription  string `mapstructure:"scope_subscription"`
 	}
 
 	// commitmentResource is an interface for common management of GCP (gcpCUDResource) and Azure (azureReservationResource) resources
@@ -59,9 +65,26 @@ type (
 		// GetIDInCloud returns the ID of the resource in the cloud provider
 		GetIDInCloud() string
 	}
+
+	commitmentConfigResource struct {
+		Matcher        []*commitmentConfigMatcherResource `mapstructure:"matcher,omitempty"`
+		Prioritization *bool                              `mapstructure:"prioritization,omitempty"`
+		Status         *string                            `mapstructure:"status,omitempty"`
+		AllowedUsage   *float32                           `mapstructure:"allowed_usage,omitempty"`
+		Assignments    []*commitmentAssignmentResource    `mapstructure:"assignments,omitempty"`
+	}
+	commitmentConfigMatcherResource struct {
+		Name   string  `mapstructure:"name"`
+		Type   *string `mapstructure:"type,omitempty"`
+		Region *string `mapstructure:"region,omitempty"`
+	}
+	commitmentAssignmentResource struct {
+		ClusterID string `mapstructure:"cluster_id"`
+		Priority  *int   `mapstructure:"priority,omitempty"`
+	}
 )
 
-func (r *gcpCUDConfigResource) GetMatcher() *gcpCUDConfigMatcherResource {
+func (r *commitmentConfigResource) GetMatcher() *commitmentConfigMatcherResource {
 	if r == nil || len(r.Matcher) == 0 {
 		return nil
 	}
@@ -101,7 +124,7 @@ func (r *azureReservationResource) GetIDInCloud() string {
 	return r.ReservationID
 }
 
-func (m *gcpCUDConfigMatcherResource) Validate() error {
+func (m *commitmentConfigMatcherResource) Validate() error {
 	if m == nil {
 		return errors.New("matcher is required")
 	}
@@ -111,7 +134,23 @@ func (m *gcpCUDConfigMatcherResource) Validate() error {
 	return nil
 }
 
-func mapCommitmentToCUDResource(c sdk.CastaiInventoryV1beta1Commitment) (*gcpCUDResource, error) {
+func mapCommitmentAssignmentsToResources(
+	input []sdk.CastaiInventoryV1beta1CommitmentAssignment,
+	prioritizationEnabled bool,
+) []*commitmentAssignmentResource {
+	return lo.Map(input, func(a sdk.CastaiInventoryV1beta1CommitmentAssignment, _ int) *commitmentAssignmentResource {
+		res := &commitmentAssignmentResource{ClusterID: lo.FromPtr(a.ClusterId)}
+		if prioritizationEnabled && a.Priority != nil {
+			res.Priority = lo.ToPtr(int(*a.Priority))
+		}
+		return res
+	})
+}
+
+func mapCommitmentToCUDResource(
+	c sdk.CastaiInventoryV1beta1Commitment,
+	as []sdk.CastaiInventoryV1beta1CommitmentAssignment,
+) (*gcpCUDResource, error) {
 	if c.GcpResourceCudContext == nil {
 		return nil, errors.New("missing GCP resource CUD context")
 	}
@@ -141,10 +180,13 @@ func mapCommitmentToCUDResource(c sdk.CastaiInventoryV1beta1Commitment) (*gcpCUD
 	}
 
 	return &gcpCUDResource{
-		ID:             c.Id,
-		AllowedUsage:   c.AllowedUsage,
-		Prioritization: c.Prioritization,
-		Status:         (*string)(c.Status),
+		castCommitmentFields: castCommitmentFields{
+			ID:             c.Id,
+			AllowedUsage:   c.AllowedUsage,
+			Prioritization: c.Prioritization,
+			Status:         (*string)(c.Status),
+			Assignments:    mapCommitmentAssignmentsToResources(as, lo.FromPtr(c.Prioritization)),
+		},
 		CUDID:          lo.FromPtr(c.GcpResourceCudContext.CudId),
 		CUDStatus:      lo.FromPtr(c.GcpResourceCudContext.Status),
 		EndTimestamp:   endDate,
@@ -158,12 +200,50 @@ func mapCommitmentToCUDResource(c sdk.CastaiInventoryV1beta1Commitment) (*gcpCUD
 	}, nil
 }
 
+func mapCommitmentToReservationResource(
+	c sdk.CastaiInventoryV1beta1Commitment,
+	as []sdk.CastaiInventoryV1beta1CommitmentAssignment,
+) (*azureReservationResource, error) {
+	if c.AzureReservationContext == nil {
+		return nil, errors.New("missing azure resource reservation context")
+	}
+
+	var startDate, endDate string
+	if c.StartDate != nil {
+		startDate = c.StartDate.Format(time.RFC3339)
+	}
+	if c.EndDate != nil {
+		endDate = c.EndDate.Format(time.RFC3339)
+	}
+	return &azureReservationResource{
+		castCommitmentFields: castCommitmentFields{
+			ID:             c.Id,
+			AllowedUsage:   c.AllowedUsage,
+			Prioritization: c.Prioritization,
+			Status:         (*string)(c.Status),
+			Assignments:    mapCommitmentAssignmentsToResources(as, lo.FromPtr(c.Prioritization)),
+		},
+		Count:              int(lo.FromPtr(c.AzureReservationContext.Count)),
+		ReservationID:      lo.FromPtr(c.AzureReservationContext.Id),
+		ReservationStatus:  lo.FromPtr(c.AzureReservationContext.Status),
+		StartTimestamp:     startDate,
+		EndTimestamp:       endDate,
+		Name:               lo.FromPtr(c.Name),
+		Region:             lo.FromPtr(c.Region),
+		InstanceType:       lo.FromPtr(c.AzureReservationContext.InstanceType),
+		Plan:               string(lo.FromPtr(c.AzureReservationContext.Plan)),
+		Scope:              lo.FromPtr(c.AzureReservationContext.Scope),
+		ScopeResourceGroup: lo.FromPtr(c.AzureReservationContext.ScopeResourceGroup),
+		ScopeSubscription:  lo.FromPtr(c.AzureReservationContext.ScopeSubscription),
+	}, nil
+}
+
 func mapCUDImportToResource(
-	cudWithCfg *cudWithConfig[castaiGCPCommitmentImport],
+	cudWithCfg *commitmentWithConfig[castaiGCPCommitmentImport],
 ) (*gcpCUDResource, error) {
 	var cpu, memory int
-	if cudWithCfg.CUD.Resources != nil {
-		for _, res := range *cudWithCfg.CUD.Resources {
+	if cudWithCfg.Commitment.Resources != nil {
+		for _, res := range *cudWithCfg.Commitment.Resources {
 			if res.Type == nil || res.Amount == nil {
 				continue
 			}
@@ -188,54 +268,103 @@ func mapCUDImportToResource(
 	// thing so we need to do it here too in order to avoid Terraform diff mismatches.
 	// Example region value: https://www.googleapis.com/compute/v1/projects/{PROJECT}/regions/{REGION}
 	var region string
-	if cudWithCfg.CUD.Region != nil {
-		_, region = path.Split(*cudWithCfg.CUD.Region)
+	if cudWithCfg.Commitment.Region != nil {
+		_, region = path.Split(*cudWithCfg.Commitment.Region)
 	}
 
 	res := &gcpCUDResource{
-		CUDID:          lo.FromPtr(cudWithCfg.CUD.Id),
-		CUDStatus:      lo.FromPtr(cudWithCfg.CUD.Status),
-		EndTimestamp:   lo.FromPtr(cudWithCfg.CUD.EndTimestamp),
-		StartTimestamp: lo.FromPtr(cudWithCfg.CUD.StartTimestamp),
-		Name:           lo.FromPtr(cudWithCfg.CUD.Name),
+		CUDID:          lo.FromPtr(cudWithCfg.Commitment.Id),
+		CUDStatus:      lo.FromPtr(cudWithCfg.Commitment.Status),
+		EndTimestamp:   lo.FromPtr(cudWithCfg.Commitment.EndTimestamp),
+		StartTimestamp: lo.FromPtr(cudWithCfg.Commitment.StartTimestamp),
+		Name:           lo.FromPtr(cudWithCfg.Commitment.Name),
 		Region:         region,
 		CPU:            cpu,
 		MemoryMb:       memory,
-		Plan:           lo.FromPtr(cudWithCfg.CUD.Plan),
-		Type:           lo.FromPtr(cudWithCfg.CUD.Type),
+		Plan:           lo.FromPtr(cudWithCfg.Commitment.Plan),
+		Type:           lo.FromPtr(cudWithCfg.Commitment.Type),
 	}
 	if cudWithCfg.Config != nil {
 		res.AllowedUsage = cudWithCfg.Config.AllowedUsage
 		res.Prioritization = cudWithCfg.Config.Prioritization
 		res.Status = cudWithCfg.Config.Status
+		res.Assignments = cudWithCfg.Config.Assignments
+		if lo.FromPtr(cudWithCfg.Config.Prioritization) {
+			assignPrioritiesToAssignments(res.Assignments)
+		}
 	}
 	return res, nil
 }
 
-// cudConfigMatcherKey is a utility type for mapping CUDs to their configurations
-type cudConfigMatcherKey struct {
+func mapReservationImportToResource(
+	cudWithCfg *commitmentWithConfig[castaiAzureReservationImport],
+) (*azureReservationResource, error) {
+	res := &azureReservationResource{
+		Count:              int(lo.FromPtr(cudWithCfg.Commitment.Quantity)),
+		ReservationID:      lo.FromPtr(cudWithCfg.Commitment.ReservationId),
+		ReservationStatus:  lo.FromPtr(cudWithCfg.Commitment.Status),
+		StartTimestamp:     lo.FromPtr(cudWithCfg.Commitment.PurchaseDate),
+		EndTimestamp:       lo.FromPtr(cudWithCfg.Commitment.ExpirationDate),
+		Name:               lo.FromPtr(cudWithCfg.Commitment.Name),
+		Region:             lo.FromPtr(cudWithCfg.Commitment.Region),
+		InstanceType:       lo.FromPtr(cudWithCfg.Commitment.ProductName),
+		Plan:               lo.FromPtr(cudWithCfg.Commitment.Term),
+		Scope:              lo.FromPtr(cudWithCfg.Commitment.Scope),
+		ScopeResourceGroup: lo.FromPtr(cudWithCfg.Commitment.ScopeResourceGroup),
+		ScopeSubscription:  lo.FromPtr(cudWithCfg.Commitment.ScopeSubscription),
+	}
+
+	switch res.Plan { // normalize the values just like CAST AI's API does
+	case "P1Y":
+		res.Plan = "ONE_YEAR"
+	case "P3Y":
+		res.Plan = "THREE_YEAR"
+	case "ONE_YEAR":
+	case "THREE_YEAR":
+	default:
+		return nil, fmt.Errorf("invalid plan value: %s", res.Plan)
+	}
+
+	if cudWithCfg.Config != nil {
+		res.AllowedUsage = cudWithCfg.Config.AllowedUsage
+		res.Prioritization = cudWithCfg.Config.Prioritization
+		res.Status = cudWithCfg.Config.Status
+		res.Assignments = cudWithCfg.Config.Assignments
+		if lo.FromPtr(cudWithCfg.Config.Prioritization) {
+			assignPrioritiesToAssignments(res.Assignments)
+		}
+	}
+
+	return res, nil
+}
+
+// commitmentConfigMatcherKey is a utility type for mapping CUDs to their configurations
+type commitmentConfigMatcherKey struct {
 	name, region, typ string
 }
 
-func (k cudConfigMatcherKey) String() string {
+func (k commitmentConfigMatcherKey) String() string {
 	return fmt.Sprintf("%s-%s-%s", k.name, k.region, k.typ)
 }
 
-// cud is a common interface for castaiGCPCommitmentImport and sdk.CastaiInventoryV1beta1Commitment
-type cud interface {
-	getCUDKey() cudConfigMatcherKey
+// commitment is a common interface for castaiGCPCommitmentImport and sdk.CastaiInventoryV1beta1Commitment
+type commitment interface {
+	getKey() commitmentConfigMatcherKey
 }
 
-type cudWithConfig[C cud] struct {
-	CUD    C
-	Config *gcpCUDConfigResource
+type commitmentWithConfig[C commitment] struct {
+	Commitment C
+	Config     *commitmentConfigResource
 }
 
-func mapConfigsToCUDs[C cud](cuds []C, configs []*gcpCUDConfigResource) ([]*cudWithConfig[C], error) {
-	res := make([]*cudWithConfig[C], len(cuds))
-	cfgKeys := map[cudConfigMatcherKey]struct{}{}
+func mapConfigsToCommitments[C commitment](
+	cmts []C,
+	configs []*commitmentConfigResource,
+) ([]*commitmentWithConfig[C], error) {
+	res := make([]*commitmentWithConfig[C], len(cmts))
+	cfgKeys := map[commitmentConfigMatcherKey]struct{}{}
 	for _, cfg := range configs {
-		cfgKey := cudConfigMatcherKey{name: cfg.GetMatcher().Name} // Name matcher is required, other fields are optional
+		cfgKey := commitmentConfigMatcherKey{name: cfg.GetMatcher().Name} // Name matcher is required, other fields are optional
 		if cfg.GetMatcher().Region != nil {
 			_, cfgKey.region = path.Split(*cfg.GetMatcher().Region)
 		}
@@ -243,14 +372,14 @@ func mapConfigsToCUDs[C cud](cuds []C, configs []*gcpCUDConfigResource) ([]*cudW
 			cfgKey.typ = *cfg.GetMatcher().Type
 		}
 		if _, ok := cfgKeys[cfgKey]; ok {
-			return nil, fmt.Errorf("duplicate CUD configuration for %s", cfgKey)
+			return nil, fmt.Errorf("duplicate configuration for %s", cfgKey)
 		}
 
 		cfgKeys[cfgKey] = struct{}{}
 
 		var assigned bool
-		for i, cud := range cuds {
-			cudKey := cud.getCUDKey()
+		for i, cud := range cmts {
+			cudKey := cud.getKey()
 			// If the configuration doesn't have a field set, it should match any value of that field
 			if cfgKey.region == "" {
 				cudKey.region = ""
@@ -263,23 +392,23 @@ func mapConfigsToCUDs[C cud](cuds []C, configs []*gcpCUDConfigResource) ([]*cudW
 			}
 
 			if assigned {
-				return nil, fmt.Errorf("duplicate CUD import for %s", cfgKey.String())
+				return nil, fmt.Errorf("duplicate import for %s", cfgKey.String())
 			}
 			if res[i] != nil {
-				return nil, fmt.Errorf("CUD already assigned to a configuration")
+				return nil, fmt.Errorf("commitment already assigned to a configuration")
 			}
-			res[i] = &cudWithConfig[C]{CUD: cud, Config: cfg}
+			res[i] = &commitmentWithConfig[C]{Commitment: cud, Config: cfg}
 			assigned = true
 		}
 		if !assigned {
-			return nil, errors.New("not all CUD configurations were mapped")
+			return nil, errors.New("not all commitment configurations were mapped")
 		}
 	}
 
 	// Make sure we don't ignore commitments without configurations
-	for i, cud := range cuds {
+	for i, cud := range cmts {
 		if res[i] == nil {
-			res[i] = &cudWithConfig[C]{CUD: cud}
+			res[i] = &commitmentWithConfig[C]{Commitment: cud}
 		}
 	}
 	return res, nil
@@ -289,10 +418,10 @@ func mapConfiguredCUDImportsToResources[C interface {
 	castaiGCPCommitmentImport | sdk.CastaiInventoryV1beta1GCPCommitmentImport
 }](
 	cuds []C,
-	configs []*gcpCUDConfigResource,
+	configs []*commitmentConfigResource,
 ) ([]*gcpCUDResource, error) {
 	if len(configs) > len(cuds) {
-		return nil, fmt.Errorf("more CUD configurations than CUDs")
+		return nil, fmt.Errorf("more configurations than CUDs")
 	}
 
 	var cudImports []castaiGCPCommitmentImport
@@ -306,7 +435,7 @@ func mapConfiguredCUDImportsToResources[C interface {
 		}
 	}
 
-	cudsWithConfigs, err := mapConfigsToCUDs(cudImports, configs)
+	cudsWithConfigs, err := mapConfigsToCommitments(cudImports, configs)
 	if err != nil {
 		return nil, err
 	}
@@ -322,19 +451,58 @@ func mapConfiguredCUDImportsToResources[C interface {
 	return res, nil
 }
 
-func mapCUDImportWithConfigToUpdateRequest(
-	c *cudWithConfig[castaiCommitment],
+func mapConfiguredReservationImportsToResources[C interface {
+	castaiAzureReservationImport | sdk.CastaiInventoryV1beta1AzureReservationImport
+}](
+	reservations []C,
+	configs []*commitmentConfigResource,
+) ([]*azureReservationResource, error) {
+	if len(configs) > len(reservations) {
+		return nil, fmt.Errorf("more configurations than reservations")
+	}
+
+	var cudImports []castaiAzureReservationImport
+	switch v := any(reservations).(type) {
+	case []castaiAzureReservationImport:
+		cudImports = v
+	case []sdk.CastaiInventoryV1beta1AzureReservationImport:
+		cudImports = make([]castaiAzureReservationImport, 0, len(v))
+		for _, item := range v {
+			cudImports = append(cudImports, castaiAzureReservationImport{CastaiInventoryV1beta1AzureReservationImport: item})
+		}
+	}
+
+	cudsWithConfigs, err := mapConfigsToCommitments(cudImports, configs)
+	if err != nil {
+		return nil, err
+	}
+
+	res := make([]*azureReservationResource, 0, len(cudsWithConfigs))
+	for _, item := range cudsWithConfigs {
+		v, err := mapReservationImportToResource(item)
+		if err != nil {
+			return nil, err
+		}
+		res = append(res, v)
+
+	}
+	return res, nil
+}
+
+func mapCommitmentImportWithConfigToUpdateRequest(
+	c *commitmentWithConfig[castaiCommitment],
 ) sdk.CommitmentsAPIUpdateCommitmentJSONRequestBody {
 	req := sdk.CommitmentsAPIUpdateCommitmentJSONRequestBody{
-		AllowedUsage:          c.CUD.AllowedUsage,
-		EndDate:               c.CUD.EndDate,
-		GcpResourceCudContext: c.CUD.GcpResourceCudContext,
-		Id:                    c.CUD.Id,
-		Name:                  c.CUD.Name,
-		Prioritization:        c.CUD.Prioritization,
-		Region:                c.CUD.Region,
-		StartDate:             c.CUD.StartDate,
-		Status:                c.CUD.Status,
+		AllowedUsage:            c.Commitment.AllowedUsage,
+		EndDate:                 c.Commitment.EndDate,
+		GcpResourceCudContext:   c.Commitment.GcpResourceCudContext,
+		AzureReservationContext: c.Commitment.AzureReservationContext,
+		Id:                      c.Commitment.Id,
+		Name:                    c.Commitment.Name,
+		Prioritization:          c.Commitment.Prioritization,
+		Region:                  c.Commitment.Region,
+		StartDate:               c.Commitment.StartDate,
+		Status:                  c.Commitment.Status,
 	}
 	if c.Config != nil {
 		if c.Config.AllowedUsage != nil {
@@ -348,6 +516,58 @@ func mapCUDImportWithConfigToUpdateRequest(
 		}
 	}
 	return req
+}
+
+// Azure specific stuff
+
+func mapReservationCSVRowsToImports(csvRecords [][]string) ([]sdk.CastaiInventoryV1beta1AzureReservationImport, error) {
+	var csvColumns []string
+	if len(csvRecords) > 0 {
+		csvColumns = csvRecords[0]
+	}
+	normalizedCsvColumnNames := lo.Map(csvColumns, func(column string, _ int) string {
+		return strings.ToLower(strings.ReplaceAll(column, " ", "_"))
+	})
+
+	reservationRecords := csvRecords[1:]
+	fieldIndexes := reservations.MapReservationsHeaderToReservationFieldIndexes(normalizedCsvColumnNames)
+
+	res := make([]sdk.CastaiInventoryV1beta1AzureReservationImport, 0, len(reservationRecords))
+	for _, record := range reservationRecords {
+		result, err := mapReservationCSVRowToImport(fieldIndexes, record)
+		if err != nil {
+			return nil, err
+		}
+		res = append(res, *result)
+	}
+	return res, nil
+}
+
+func mapReservationCSVRowToImport(fieldIndexes map[string]int, record []string) (*sdk.CastaiInventoryV1beta1AzureReservationImport, error) {
+	var count *int32
+	if countStr := reservations.GetRecordFieldStringValue(reservations.FieldReservationQuantity, fieldIndexes, record); countStr != nil {
+		v, err := strconv.Atoi(*countStr)
+		if err != nil {
+			return nil, fmt.Errorf("parsing quantity: %w", err)
+		}
+		count = lo.ToPtr(int32(v))
+	}
+
+	return &sdk.CastaiInventoryV1beta1AzureReservationImport{
+		ExpirationDate:     reservations.GetRecordFieldStringValue(reservations.FieldReservationExpirationDate, fieldIndexes, record),
+		Name:               reservations.GetRecordFieldStringValue(reservations.FieldReservationName, fieldIndexes, record),
+		ProductName:        reservations.GetRecordFieldStringValue(reservations.FieldReservationProductName, fieldIndexes, record),
+		PurchaseDate:       reservations.GetRecordFieldStringValue(reservations.FieldReservationPurchaseDate, fieldIndexes, record),
+		Quantity:           count,
+		Region:             reservations.GetRecordFieldStringValue(reservations.FieldReservationRegion, fieldIndexes, record),
+		ReservationId:      reservations.GetRecordFieldStringValue(reservations.FieldReservationID, fieldIndexes, record),
+		Scope:              reservations.GetRecordFieldStringValue(reservations.FieldReservationScope, fieldIndexes, record),
+		ScopeResourceGroup: reservations.GetRecordFieldStringValue(reservations.FieldReservationScopeResourceGroup, fieldIndexes, record),
+		ScopeSubscription:  reservations.GetRecordFieldStringValue(reservations.FieldReservationScopeSubscription, fieldIndexes, record),
+		Status:             reservations.GetRecordFieldStringValue(reservations.FieldReservationStatus, fieldIndexes, record),
+		Term:               reservations.GetRecordFieldStringValue(reservations.FieldReservationTerm, fieldIndexes, record),
+		Type:               reservations.GetRecordFieldStringValue(reservations.FieldReservationType, fieldIndexes, record),
+	}, nil
 }
 
 // sortCommitmentResources sorts the toSort slice based on the order of the targetOrder slice
@@ -374,22 +594,43 @@ func sortCommitmentResources[R commitmentResource](toSort, targetOrder []R) {
 	})
 }
 
+func assignPrioritiesToAssignments(assignments []*commitmentAssignmentResource) {
+	for i, a := range assignments {
+		a.Priority = lo.ToPtr(i + 1)
+	}
+}
+
 // castaiGCPCommitmentImport is a wrapper around sdk.CastaiInventoryV1beta1GCPCommitmentImport implementing the cud interface
 type castaiGCPCommitmentImport struct {
 	sdk.CastaiInventoryV1beta1GCPCommitmentImport
 }
 
-var _ cud = castaiGCPCommitmentImport{}
+var _ commitment = castaiGCPCommitmentImport{}
 
-func (c castaiGCPCommitmentImport) getCUDKey() cudConfigMatcherKey {
+func (c castaiGCPCommitmentImport) getKey() commitmentConfigMatcherKey {
 	var region string
 	if c.Region != nil {
 		_, region = path.Split(*c.Region)
 	}
-	return cudConfigMatcherKey{
+	return commitmentConfigMatcherKey{
 		name:   lo.FromPtr(c.Name),
 		region: region,
 		typ:    lo.FromPtr(c.Type),
+	}
+}
+
+// castaiAzureReservationImport is a wrapper around sdk.CastaiInventoryV1beta1AzureReservationImport implementing the cud interface
+type castaiAzureReservationImport struct {
+	sdk.CastaiInventoryV1beta1AzureReservationImport
+}
+
+var _ commitment = castaiAzureReservationImport{}
+
+func (c castaiAzureReservationImport) getKey() commitmentConfigMatcherKey {
+	return commitmentConfigMatcherKey{
+		name:   lo.FromPtr(c.Name),
+		region: lo.FromPtr(c.Region),
+		typ:    lo.FromPtr(c.ProductName),
 	}
 }
 
@@ -398,19 +639,22 @@ type castaiCommitment struct {
 	sdk.CastaiInventoryV1beta1Commitment
 }
 
-var _ cud = castaiCommitment{}
+var _ commitment = castaiCommitment{}
 
-func (c castaiCommitment) getCUDKey() cudConfigMatcherKey {
+func (c castaiCommitment) getKey() commitmentConfigMatcherKey {
 	var region string
 	if c.Region != nil {
 		_, region = path.Split(*c.Region)
 	}
-	res := cudConfigMatcherKey{
+	res := commitmentConfigMatcherKey{
 		name:   lo.FromPtr(c.Name),
 		region: region,
 	}
 	if c.GcpResourceCudContext != nil {
 		res.typ = *c.GcpResourceCudContext.Type
+	}
+	if c.AzureReservationContext != nil {
+		res.typ = *c.AzureReservationContext.InstanceType
 	}
 	return res
 }

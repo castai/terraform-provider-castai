@@ -15,7 +15,7 @@ Commitments represent cloud service provider reserved instances (Azure) and comm
 ```terraform
 resource "castai_commitments" "gcp_test" {
   gcp_cuds_json = file("./cuds.json")
-  gcp_cud_configs {
+  commitment_configs {
     matcher {
       region = "us-east4"
       type   = "COMPUTE_OPTIMIZED_C2D"
@@ -24,6 +24,34 @@ resource "castai_commitments" "gcp_test" {
     prioritization = true
     allowed_usage  = 0.6
     status         = "Inactive"
+
+    assignments {
+      cluster_id = "cluster-id-1" # priority 1 cluster - prioritization is enabled
+    }
+    assignments {
+      cluster_id = "cluster-id-2" # priority 2 cluster - prioritization is enabled
+    }
+  }
+}
+
+resource "castai_commitments" "azure_test" {
+  azure_reservations_csv = file("./reservations.csv")
+  commitment_configs {
+    matcher {
+      region = "eastus"
+      type   = "Standard_D32as_v4"
+      name   = "test-res-1"
+    }
+    prioritization = false
+    allowed_usage  = 0.9
+    status         = "Active"
+
+    assignments {
+      cluster_id = "cluster-id-3"
+    }
+    assignments {
+      cluster_id = "cluster-id-4"
+    }
   }
 }
 ```
@@ -34,7 +62,7 @@ resource "castai_commitments" "gcp_test" {
 ### Optional
 
 - `azure_reservations_csv` (String) CSV file containing reservations exported from Azure.
-- `gcp_cud_configs` (Block List) List of GCP CUD configurations. (see [below for nested schema](#nestedblock--gcp_cud_configs))
+- `commitment_configs` (Block List) List of commitment configurations. (see [below for nested schema](#nestedblock--commitment_configs))
 - `gcp_cuds_json` (String) JSON file containing CUDs exported from GCP.
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
@@ -44,21 +72,22 @@ resource "castai_commitments" "gcp_test" {
 - `gcp_cuds` (List of Object) List of GCP CUDs. (see [below for nested schema](#nestedatt--gcp_cuds))
 - `id` (String) The ID of this resource.
 
-<a id="nestedblock--gcp_cud_configs"></a>
-### Nested Schema for `gcp_cud_configs`
+<a id="nestedblock--commitment_configs"></a>
+### Nested Schema for `commitment_configs`
 
 Required:
 
-- `matcher` (Block List, Min: 1, Max: 1) Matcher used to map config to a commitment. (see [below for nested schema](#nestedblock--gcp_cud_configs--matcher))
+- `matcher` (Block List, Min: 1, Max: 1) Matcher used to map config to a commitment. (see [below for nested schema](#nestedblock--commitment_configs--matcher))
 
 Optional:
 
 - `allowed_usage` (Number) Allowed usage of the commitment. The value is between 0 (0%) and 1 (100%).
+- `assignments` (Block List) List of assigned clusters for the commitment. If prioritization is enabled, the order of the assignments indicates the priority. The first assignment has the highest priority. (see [below for nested schema](#nestedblock--commitment_configs--assignments))
 - `prioritization` (Boolean) If enabled, it's possible to assign priorities to the assigned clusters.
 - `status` (String) Status of the commitment in CAST AI.
 
-<a id="nestedblock--gcp_cud_configs--matcher"></a>
-### Nested Schema for `gcp_cud_configs.matcher`
+<a id="nestedblock--commitment_configs--matcher"></a>
+### Nested Schema for `commitment_configs.matcher`
 
 Required:
 
@@ -68,6 +97,18 @@ Required:
 Optional:
 
 - `type` (String) Type of the commitment to match. For compute resources, it's the type of the machine.
+
+
+<a id="nestedblock--commitment_configs--assignments"></a>
+### Nested Schema for `commitment_configs.assignments`
+
+Required:
+
+- `cluster_id` (String) ID of the cluster to assign the commitment to.
+
+Read-Only:
+
+- `priority` (Number) Priority of the assignment. The lower the value, the higher the priority. 1 is the highest priority.
 
 
 
@@ -85,6 +126,32 @@ Optional:
 
 Read-Only:
 
+- `allowed_usage` (Number)
+- `assignments` (List of Object) (see [below for nested schema](#nestedobjatt--azure_reservations--assignments))
+- `count` (Number)
+- `end_timestamp` (String)
+- `id` (String)
+- `instance_type` (String)
+- `name` (String)
+- `plan` (String)
+- `prioritization` (Boolean)
+- `region` (String)
+- `reservation_id` (String)
+- `reservation_status` (String)
+- `scope` (String)
+- `scope_resource_group` (String)
+- `scope_subscription` (String)
+- `start_timestamp` (String)
+- `status` (String)
+
+<a id="nestedobjatt--azure_reservations--assignments"></a>
+### Nested Schema for `azure_reservations.assignments`
+
+Read-Only:
+
+- `cluster_id` (String)
+- `priority` (Number)
+
 
 
 <a id="nestedatt--gcp_cuds"></a>
@@ -93,6 +160,7 @@ Read-Only:
 Read-Only:
 
 - `allowed_usage` (Number)
+- `assignments` (List of Object) (see [below for nested schema](#nestedobjatt--gcp_cuds--assignments))
 - `cpu` (Number)
 - `cud_id` (String)
 - `cud_status` (String)
@@ -106,5 +174,13 @@ Read-Only:
 - `start_timestamp` (String)
 - `status` (String)
 - `type` (String)
+
+<a id="nestedobjatt--gcp_cuds--assignments"></a>
+### Nested Schema for `gcp_cuds.assignments`
+
+Read-Only:
+
+- `cluster_id` (String)
+- `priority` (Number)
 
 
