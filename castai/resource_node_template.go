@@ -222,18 +222,16 @@ func resourceNodeTemplate() *schema.Resource {
 							Description: "Max Memory (Mib) per node.",
 						},
 						FieldNodeTemplateStorageOptimized: {
-							Type:          schema.TypeBool,
-							Optional:      true,
-							Default:       false,
-							Deprecated:    "This attribute will be removed in the next major release. Use `storage_optimized_status` instead.",
-							Description:   "Storage optimized instance constraint - will only pick storage optimized nodes if true",
-							ConflictsWith: []string{FieldNodeTemplateConstraints + ".0." + FieldNodeTemplateStorageOptimizedStatus},
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Default:     false,
+							Description: "Storage optimized instance constraint - will only pick storage optimized nodes if true",
 							ValidateDiagFunc: func(i interface{}, path cty.Path) diag.Diagnostics {
 								return diag.Diagnostics{
 									{
 										Severity:      diag.Error,
 										Summary:       "Deprecated field `storage_optimized`",
-										Detail:        "Please use `storage_optimized_status` instead.",
+										Detail:        "Please use `storage_optimized_status` instead. See: https://github.com/castai/terraform-provider-castai#migrating-from-6xx-to-7xx",
 										AttributePath: path,
 									},
 								}
@@ -253,18 +251,16 @@ func resourceNodeTemplate() *schema.Resource {
 							Description: "GPU instance constraint - will only pick nodes with GPU if true",
 						},
 						FieldNodeTemplateComputeOptimized: {
-							Type:          schema.TypeBool,
-							Optional:      true,
-							Default:       false,
-							Deprecated:    "This attribute will be removed in the next major release. Use `compute_optimized_status` instead.",
-							Description:   "Compute optimized instance constraint - will only pick compute optimized nodes if true.",
-							ConflictsWith: []string{FieldNodeTemplateConstraints + ".0." + FieldNodeTemplateComputeOptimizedStatus},
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Default:     false,
+							Description: "Compute optimized instance constraint - will only pick compute optimized nodes if true.",
 							ValidateDiagFunc: func(i interface{}, path cty.Path) diag.Diagnostics {
 								return diag.Diagnostics{
 									{
 										Severity:      diag.Error,
 										Summary:       "Deprecated field `compute_optimized`",
-										Detail:        "Please use `compute_optimized_status` instead.",
+										Detail:        "Please use `compute_optimized_status` instead. See: https://github.com/castai/terraform-provider-castai#migrating-from-6xx-to-7xx",
 										AttributePath: path,
 									},
 								}
