@@ -12,7 +12,7 @@ import (
 	"github.com/castai/terraform-provider-castai/castai/commitments"
 )
 
-func TestCommitments(t *testing.T) {
+func TestAccCommitments(t *testing.T) {
 	importCUDsStateStep := resource.TestStep{
 		ResourceName:            "castai_commitments.test_gcp",
 		ImportState:             true,
