@@ -77,6 +77,7 @@ var (
 			Type:        schema.TypeList,
 			Optional:    true,
 			Description: "List of assigned clusters for the commitment. If prioritization is enabled, the order of the assignments indicates the priority. The first assignment has the highest priority.",
+			ConfigMode:  schema.SchemaConfigModeAttr,
 			Elem: &schema.Resource{
 				Schema: map[string]*schema.Schema{
 					"cluster_id": {
@@ -87,6 +88,7 @@ var (
 					"priority": {
 						Type:        schema.TypeInt,
 						Computed:    true,
+						Optional:    true,
 						Description: "Priority of the assignment. The lower the value, the higher the priority. 1 is the highest priority.",
 					},
 				},
@@ -102,7 +104,7 @@ func resourceCommitments() *schema.Resource {
 		UpdateContext: resourceCastaiCommitmentsUpdate,
 		DeleteContext: resourceCastaiCommitmentsDelete,
 		Importer: &schema.ResourceImporter{
-			StateContext: schema.ImportStatePassthroughContext,
+			StateContext: commitmentsStateImporter,
 		},
 		Description: "Commitments represent cloud service provider reserved instances (Azure) and commited use discounts (GCP) that can be used by CAST AI autoscaler.",
 		Timeouts: &schema.ResourceTimeout{
@@ -439,6 +441,13 @@ func getReservationResources(tfData resourceProvider) ([]*azureReservationResour
 		return nil, true, err
 	}
 	return res, true, nil
+}
+
+func commitmentsStateImporter(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
+	if err := populateCommitmentsResourceData(ctx, d, meta); err != nil {
+		return nil, err
+	}
+	return []*schema.ResourceData{d}, nil
 }
 
 func resourceCastaiCommitmentsRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
