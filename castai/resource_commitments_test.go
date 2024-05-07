@@ -15,7 +15,7 @@ import (
 	"github.com/castai/terraform-provider-castai/castai/commitments"
 )
 
-func TestCommitments(t *testing.T) {
+func TestAccCommitments(t *testing.T) {
 	var (
 		gcpServiceAccountID = fmt.Sprintf("%v-node-cfg-%v", ResourcePrefix, acctest.RandString(8))
 		gkeClusterName      = "tf-core-acc-20230723"
