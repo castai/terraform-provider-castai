@@ -364,6 +364,14 @@ type CastaiInventoryV1beta1AzureReservationImport struct {
 	Type               *string `json:"type,omitempty"`
 }
 
+// CastaiInventoryV1beta1ClusterAggregatedUsage defines model for castai.inventory.v1beta1.ClusterAggregatedUsage.
+type CastaiInventoryV1beta1ClusterAggregatedUsage struct {
+	ClusterId         *string                                  `json:"clusterId,omitempty"`
+	NodeIds           *[]string                                `json:"nodeIds,omitempty"`
+	Usage             *float64                                 `json:"usage"`
+	UsageDistribution *CastaiInventoryV1beta1UsageDistribution `json:"usageDistribution,omitempty"`
+}
+
 // CastaiInventoryV1beta1Commitment defines model for castai.inventory.v1beta1.Commitment.
 type CastaiInventoryV1beta1Commitment struct {
 	// Allowed usage specifies the part of the commitment that is allowed to be used. 1.0 means 100% of the commitment. Currently it's only supported for GCP CUDs.
@@ -638,9 +646,10 @@ type CastaiInventoryV1beta1InstanceTypeAggregate struct {
 
 // CastaiInventoryV1beta1InstanceTypeBasedUsage defines model for castai.inventory.v1beta1.InstanceTypeBasedUsage.
 type CastaiInventoryV1beta1InstanceTypeBasedUsage struct {
-	InstanceTypes     *[]CastaiInventoryV1beta1InstanceTypeAggregate `json:"instanceTypes,omitempty"`
-	Usage             *float64                                       `json:"usage"`
-	UsageDistribution *CastaiInventoryV1beta1UsageDistribution       `json:"usageDistribution,omitempty"`
+	Clusters          *[]CastaiInventoryV1beta1ClusterAggregatedUsage `json:"clusters,omitempty"`
+	InstanceTypes     *[]CastaiInventoryV1beta1InstanceTypeAggregate  `json:"instanceTypes,omitempty"`
+	Usage             *float64                                        `json:"usage"`
+	UsageDistribution *CastaiInventoryV1beta1UsageDistribution        `json:"usageDistribution,omitempty"`
 }
 
 // CastaiInventoryV1beta1InstanceZone defines model for castai.inventory.v1beta1.InstanceZone.
@@ -1847,6 +1856,9 @@ type NodeconfigV1GKEConfig struct {
 
 	// Network tags to be added on a VM. Each tag must be 1-63 characters long, start with a lowercase letter and end with either a number or a lowercase letter.
 	NetworkTags *[]string `json:"networkTags,omitempty"`
+
+	// Zones is a preferred list of zones to choose from when adding a node.
+	Zones *[]string `json:"zones,omitempty"`
 }
 
 // NodeconfigV1GetSuggestedConfigurationResponse defines model for nodeconfig.v1.GetSuggestedConfigurationResponse.

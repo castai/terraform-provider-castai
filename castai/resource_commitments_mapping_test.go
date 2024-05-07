@@ -1,4 +1,4 @@
-package commitments
+package castai
 
 import (
 	"errors"
