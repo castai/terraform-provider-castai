@@ -773,9 +773,9 @@ func TestMapConfigsToCommitments(t *testing.T) {
 				castaiGCPCommitmentImport{CastaiInventoryV1beta1GCPCommitmentImport: cudImport1},
 			},
 			configs: func() []*commitmentConfigResource {
-				cudCfg1.GetMatcher().Region = lo.ToPtr("https://www.googleapis.com/compute/v1/projects/test-project/zones/" + *cudCfg1.GetMatcher().Region)
-				cudCfg2.GetMatcher().Region = lo.ToPtr("https://www.googleapis.com/compute/v1/projects/test-project/zones/" + *cudCfg2.GetMatcher().Region)
-				cudCfg3.GetMatcher().Region = lo.ToPtr("https://www.googleapis.com/compute/v1/projects/test-project/zones/" + *cudCfg3.GetMatcher().Region)
+				cudCfg1.getMatcher().Region = lo.ToPtr("https://www.googleapis.com/compute/v1/projects/test-project/zones/" + *cudCfg1.getMatcher().Region)
+				cudCfg2.getMatcher().Region = lo.ToPtr("https://www.googleapis.com/compute/v1/projects/test-project/zones/" + *cudCfg2.getMatcher().Region)
+				cudCfg3.getMatcher().Region = lo.ToPtr("https://www.googleapis.com/compute/v1/projects/test-project/zones/" + *cudCfg3.getMatcher().Region)
 				return []*commitmentConfigResource{cudCfg1, cudCfg2, cudCfg3} // make sure the order doesn't match the CUDs
 			}(),
 			expected: []*commitmentWithConfig[commitment]{

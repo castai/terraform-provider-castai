@@ -372,7 +372,7 @@ func getCUDImportResources(tfData resourceProvider) ([]*gcpCUDResource, bool, er
 		return nil, true, fmt.Errorf("more configurations than CUDs")
 	}
 	for _, c := range configs {
-		if err := c.GetMatcher().Validate(); err != nil {
+		if err := c.getMatcher().validate(); err != nil {
 			return nil, true, fmt.Errorf("invalid config: %w", err)
 		}
 	}
@@ -403,7 +403,7 @@ func getReservationImportResources(tfData resourceProvider) ([]*azureReservation
 		return nil, true, fmt.Errorf("more configurations than reservations")
 	}
 	for _, c := range configs {
-		if err := c.GetMatcher().Validate(); err != nil {
+		if err := c.getMatcher().validate(); err != nil {
 			return nil, true, fmt.Errorf("invalid config: %w", err)
 		}
 	}
@@ -490,7 +490,7 @@ func resourceCastaiCommitmentsDelete(ctx context.Context, data *schema.ResourceD
 
 func deleteCommitments[R commitmentResource](ctx context.Context, meta any, resources []R) error {
 	for _, r := range resources {
-		if err := deleteCommitment(ctx, meta, r.GetCommitmentID()); err != nil {
+		if err := deleteCommitment(ctx, meta, r.getCommitmentID()); err != nil {
 			return err
 		}
 	}

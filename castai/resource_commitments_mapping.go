@@ -61,9 +61,9 @@ type (
 	// commitmentResource is an interface for common management of GCP (gcpCUDResource) and Azure (azureReservationResource) resources
 	commitmentResource interface {
 		// GetCommitmentID returns the ID of the commitment in CAST AI
-		GetCommitmentID() string
+		getCommitmentID() string
 		// GetIDInCloud returns the ID of the resource in the cloud provider
-		GetIDInCloud() string
+		getIDInCloud() string
 	}
 
 	commitmentConfigResource struct {
@@ -84,7 +84,7 @@ type (
 	}
 )
 
-func (r *commitmentConfigResource) GetMatcher() *commitmentConfigMatcherResource {
+func (r *commitmentConfigResource) getMatcher() *commitmentConfigMatcherResource {
 	if r == nil || len(r.Matcher) == 0 {
 		return nil
 	}
@@ -96,35 +96,35 @@ var (
 	_ commitmentResource = (*azureReservationResource)(nil)
 )
 
-func (r *gcpCUDResource) GetCommitmentID() string {
+func (r *gcpCUDResource) getCommitmentID() string {
 	if r == nil || r.ID == nil {
 		return ""
 	}
 	return *r.ID
 }
 
-func (r *gcpCUDResource) GetIDInCloud() string {
+func (r *gcpCUDResource) getIDInCloud() string {
 	if r == nil {
 		return ""
 	}
 	return r.CUDID
 }
 
-func (r *azureReservationResource) GetCommitmentID() string {
+func (r *azureReservationResource) getCommitmentID() string {
 	if r == nil || r.ID == nil {
 		return ""
 	}
 	return *r.ID
 }
 
-func (r *azureReservationResource) GetIDInCloud() string {
+func (r *azureReservationResource) getIDInCloud() string {
 	if r == nil {
 		return ""
 	}
 	return r.ReservationID
 }
 
-func (m *commitmentConfigMatcherResource) Validate() error {
+func (m *commitmentConfigMatcherResource) validate() error {
 	if m == nil {
 		return errors.New("matcher is required")
 	}
@@ -364,12 +364,12 @@ func mapConfigsToCommitments[C commitment](
 	res := make([]*commitmentWithConfig[C], len(cmts))
 	cfgKeys := map[commitmentConfigMatcherKey]struct{}{}
 	for _, cfg := range configs {
-		cfgKey := commitmentConfigMatcherKey{name: cfg.GetMatcher().Name} // Name matcher is required, other fields are optional
-		if cfg.GetMatcher().Region != nil {
-			_, cfgKey.region = path.Split(*cfg.GetMatcher().Region)
+		cfgKey := commitmentConfigMatcherKey{name: cfg.getMatcher().Name} // Name matcher is required, other fields are optional
+		if cfg.getMatcher().Region != nil {
+			_, cfgKey.region = path.Split(*cfg.getMatcher().Region)
 		}
-		if cfg.GetMatcher().Type != nil {
-			cfgKey.typ = *cfg.GetMatcher().Type
+		if cfg.getMatcher().Type != nil {
+			cfgKey.typ = *cfg.getMatcher().Type
 		}
 		if _, ok := cfgKeys[cfgKey]; ok {
 			return nil, fmt.Errorf("duplicate configuration for %s", cfgKey)
@@ -574,15 +574,15 @@ func mapReservationCSVRowToImport(fieldIndexes map[string]int, record []string) 
 func sortCommitmentResources[R commitmentResource](toSort, targetOrder []R) {
 	orderMap := make(map[string]int)
 	for index, value := range targetOrder {
-		orderMap[value.GetIDInCloud()] = index
+		orderMap[value.getIDInCloud()] = index
 	}
 
 	slices.SortStableFunc(toSort, func(a, b R) bool {
-		indexI, foundI := orderMap[a.GetIDInCloud()]
-		indexJ, foundJ := orderMap[b.GetIDInCloud()]
+		indexI, foundI := orderMap[a.getIDInCloud()]
+		indexJ, foundJ := orderMap[b.getIDInCloud()]
 
 		if !foundI && !foundJ {
-			return a.GetIDInCloud() < b.GetIDInCloud()
+			return a.getIDInCloud() < b.getIDInCloud()
 		}
 		if !foundI {
 			return true
