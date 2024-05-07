@@ -210,6 +210,9 @@ type CastaiAuthtokenV1beta1AuthToken struct {
 
 	// (read only, visible once on creation) actual token used to authenticate via api.
 	Token *string `json:"token"`
+
+	// token_prefix contains the first 3 characters of the generated token.
+	TokenPrefix *string `json:"tokenPrefix"`
 }
 
 // AuthTokenUpdate is used to update an existing auth token.

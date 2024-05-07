@@ -3,6 +3,7 @@ package castai
 import (
 	"context"
 	"fmt"
+	"os"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -73,6 +74,10 @@ func providerConfigure(version string) schema.ConfigureContextFunc {
 		apiToken := data.Get("api_token").(string)
 
 		agent := fmt.Sprintf("castai-terraform-provider/%v", version)
+		if addUA := os.Getenv("CASTIA_ADDITIONAL_USER_AGENT"); addUA != "" {
+			agent = fmt.Sprintf("%s %s", agent, addUA)
+		}
+
 		client, err := sdk.CreateClient(apiURL, apiToken, agent)
 		if err != nil {
 			return nil, diag.FromErr(err)
