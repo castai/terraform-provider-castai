@@ -1665,6 +1665,9 @@ type NodeconfigV1GKEConfig struct {
 
 	// Network tags to be added on a VM. Each tag must be 1-63 characters long, start with a lowercase letter and end with either a number or a lowercase letter.
 	NetworkTags *[]string `json:"networkTags,omitempty"`
+
+	// Zones is a preferred list of zones to choose from when adding a node.
+	Zones *[]string `json:"zones,omitempty"`
 }
 
 // NodeconfigV1GetSuggestedConfigurationResponse defines model for nodeconfig.v1.GetSuggestedConfigurationResponse.
