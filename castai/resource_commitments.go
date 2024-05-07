@@ -441,13 +441,6 @@ func getReservationResources(tfData resourceProvider) ([]*azureReservationResour
 	return res, true, nil
 }
 
-func commitmentsStateImporter(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
-	if err := populateCommitmentsResourceData(ctx, d, meta); err != nil {
-		return nil, err
-	}
-	return []*schema.ResourceData{d}, nil
-}
-
 func resourceCastaiCommitmentsRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	tflog.Info(ctx, "Get commitments call start")
 	defer tflog.Info(ctx, "Get commitments call end")
