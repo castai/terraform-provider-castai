@@ -17,7 +17,7 @@ import (
 	"github.com/castai/terraform-provider-castai/castai/sdk"
 )
 
-func TestCommitments_GCP_BasicCUDs(t *testing.T) {
+func TestAccCommitments_GCP_BasicCUDs(t *testing.T) {
 	checkAttr := func(path, val string) resource.TestCheckFunc {
 		return resource.TestCheckResourceAttr("castai_commitments.test_gcp", path, val)
 	}
