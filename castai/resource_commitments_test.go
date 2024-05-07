@@ -13,7 +13,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/samber/lo"
 
-	"github.com/castai/terraform-provider-castai/castai/commitments"
 	"github.com/castai/terraform-provider-castai/castai/sdk"
 )
 
@@ -85,7 +84,7 @@ func TestAccCommitments_GCP_BasicCUDs(t *testing.T) {
 				ResourceName:            "castai_commitments.test_gcp",
 				ImportState:             true,
 				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{commitments.FieldGCPCUDsJSON},
+				ImportStateVerifyIgnore: []string{FieldCommitmentsGCPCUDsJSON},
 			},
 			{
 				Config: updatedGCPConfig,

@@ -10,11 +10,20 @@ import (
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/mitchellh/mapstructure"
 	"github.com/samber/lo"
 
-	"github.com/castai/terraform-provider-castai/castai/commitments"
 	"github.com/castai/terraform-provider-castai/castai/sdk"
+)
+
+const (
+	FieldCommitmentsAzureReservationsCSV = "azure_reservations_csv"
+	FieldCommitmentsGCPCUDsJSON          = "gcp_cuds_json"
+
+	FieldCommitmentsAzureReservations = "azure_reservations"
+	FieldCommitmentsGCPCUDs           = "gcp_cuds"
+	FieldCommitmentsGCPCUDConfigs     = "gcp_cud_configs"
 )
 
 func resourceCommitments() *schema.Resource {
@@ -33,40 +42,157 @@ func resourceCommitments() *schema.Resource {
 		},
 		CustomizeDiff: commitmentsDiff,
 		Schema: map[string]*schema.Schema{
-			commitments.FieldAzureReservationsCSV: {
+			FieldCommitmentsAzureReservationsCSV: {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Description:  "CSV file containing reservations exported from Azure.",
-				ExactlyOneOf: []string{commitments.FieldAzureReservationsCSV, commitments.FieldGCPCUDsJSON},
+				ExactlyOneOf: []string{FieldCommitmentsAzureReservationsCSV, FieldCommitmentsGCPCUDsJSON},
 			},
-			commitments.FieldGCPCUDsJSON: {
+			FieldCommitmentsGCPCUDsJSON: {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Description:  "JSON file containing CUDs exported from GCP.",
-				ExactlyOneOf: []string{commitments.FieldAzureReservationsCSV, commitments.FieldGCPCUDsJSON},
+				ExactlyOneOf: []string{FieldCommitmentsAzureReservationsCSV, FieldCommitmentsGCPCUDsJSON},
 			},
-			commitments.FieldGCPCUDs: {
+			FieldCommitmentsGCPCUDs: {
 				Type:        schema.TypeList,
 				Computed:    true,
 				Description: "List of GCP CUDs.",
 				Elem: &schema.Resource{
-					Schema: commitments.GCPCUDResourceSchema,
+					Schema: map[string]*schema.Schema{
+						"id": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "ID of the commitment in CAST AI.",
+						},
+						"allowed_usage": {
+							Type:        schema.TypeFloat,
+							Computed:    true,
+							Description: "Allowed usage of the commitment. The value is between 0 (0%) and 1 (100%).",
+						},
+						"prioritization": {
+							Type:        schema.TypeBool,
+							Computed:    true,
+							Description: "If enabled, it's possible to assign priorities to the assigned clusters.",
+						},
+						"status": {
+							Type:        schema.TypeString,
+							Computed:    true,
+							Description: "Status of the commitment in CAST AI.",
+						},
+						"cud_id": {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "ID of the CUD in GCP.",
+						},
+						"cud_status": {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "Status of the CUD in GCP.",
+						},
+						"start_timestamp": {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "Start timestamp of the CUD.",
+						},
+						"end_timestamp": {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "End timestamp of the CUD.",
+						},
+						"name": {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "Name of the CUD.",
+						},
+						"region": {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "Region in which the CUD is available.",
+						},
+						"cpu": {
+							Type:        schema.TypeInt,
+							Required:    true,
+							Description: "Number of CPUs covered by the CUD.",
+						},
+						"memory_mb": {
+							Type:        schema.TypeInt,
+							Required:    true,
+							Description: "Amount of memory in MB covered by the CUD.",
+						},
+						"plan": {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "CUD plan e.g. 'TWELVE_MONTH'.",
+						},
+						"type": {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "Type of the CUD, e.g. determines the covered resource type e.g. 'COMPUTE_OPTIMIZED_C2D'.",
+						},
+					},
 				},
 			},
-			commitments.FieldGCPCUDConfigs: {
+			FieldCommitmentsGCPCUDConfigs: {
 				Type:        schema.TypeList,
 				Optional:    true,
 				Description: "List of GCP CUD configurations.",
 				Elem: &schema.Resource{
-					Schema: commitments.GCPCUDConfigsSchema,
+					Schema: map[string]*schema.Schema{
+						// Matcher fields
+						"matcher": {
+							Type:        schema.TypeList,
+							Required:    true,
+							Description: "Matcher used to map config to a commitment.",
+							MinItems:    1,
+							MaxItems:    1,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"name": {
+										Type:        schema.TypeString,
+										Required:    true,
+										Description: "Name of the commitment to match.",
+									},
+									"type": {
+										Type:        schema.TypeString,
+										Optional:    true,
+										Description: "Type of the commitment to match. For compute resources, it's the type of the machine.",
+									},
+									"region": {
+										Type:        schema.TypeString,
+										Required:    true,
+										Description: "Region of the commitment to match.",
+									},
+								},
+							},
+						},
+						// Actual config fields
+						"prioritization": {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Description: "If enabled, it's possible to assign priorities to the assigned clusters.",
+						},
+						"status": {
+							Type:             schema.TypeString,
+							Optional:         true,
+							Description:      "Status of the commitment in CAST AI.",
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"Active", "Inactive"}, false)),
+						},
+						"allowed_usage": {
+							Type:             schema.TypeFloat,
+							Optional:         true,
+							Description:      "Allowed usage of the commitment. The value is between 0 (0%) and 1 (100%).",
+							ValidateDiagFunc: validation.ToDiagFunc(validation.FloatBetween(0, 1)),
+						},
+					},
 				},
 			},
-			commitments.FieldAzureReservations: {
+			FieldCommitmentsAzureReservations: {
 				Type:        schema.TypeList,
 				Computed:    true,
 				Description: "List of Azure reservations.",
 				Elem: &schema.Resource{
-					Schema: commitments.AzureReservationResourceSchema,
+					Schema: map[string]*schema.Schema{},
 				},
 			},
 		},
@@ -94,22 +220,22 @@ func commitmentsDiff(_ context.Context, diff *schema.ResourceDiff, _ any) error 
 	switch {
 	case reservationsOk:
 		// TEMPORARY: support for Azure reservations will be added in one of the upcoming PRs
-		if err := diff.SetNew(commitments.FieldGCPCUDs, nil); err != nil {
+		if err := diff.SetNew(FieldCommitmentsGCPCUDs, nil); err != nil {
 			return fmt.Errorf("setting gcp cuds field to nil: %w", err)
 		}
 		return fmt.Errorf("azure reservations are currently not supported")
 	case cudsOk:
-		if err := diff.SetNew(commitments.FieldAzureReservations, nil); err != nil {
+		if err := diff.SetNew(FieldCommitmentsAzureReservations, nil); err != nil {
 			return fmt.Errorf("setting azure reservations field to nil: %w", err)
 		}
-		return diff.SetNew(commitments.FieldGCPCUDs, cudResources)
+		return diff.SetNew(FieldCommitmentsGCPCUDs, cudResources)
 	}
 
 	return errors.New("unhandled combination of commitments input")
 }
 
 func getCUDImports(tfData resourceProvider) ([]sdk.CastaiInventoryV1beta1GCPCommitmentImport, bool, error) {
-	cudsIface, ok := tfData.GetOk(commitments.FieldGCPCUDsJSON)
+	cudsIface, ok := tfData.GetOk(FieldCommitmentsGCPCUDsJSON)
 	if !ok {
 		return nil, false, nil
 	}
@@ -124,9 +250,9 @@ func getCUDImports(tfData resourceProvider) ([]sdk.CastaiInventoryV1beta1GCPComm
 	return cuds, true, nil
 }
 
-func getCUDConfigs(tfData resourceProvider) ([]*commitments.GCPCUDConfigResource, error) {
-	var configs []*commitments.GCPCUDConfigResource
-	if configsIface, ok := tfData.GetOk(commitments.FieldGCPCUDConfigs); ok {
+func getCUDConfigs(tfData resourceProvider) ([]*GCPCUDConfigResource, error) {
+	var configs []*GCPCUDConfigResource
+	if configsIface, ok := tfData.GetOk(FieldCommitmentsGCPCUDConfigs); ok {
 		if err := mapstructure.Decode(configsIface, &configs); err != nil {
 			return nil, err
 		}
@@ -135,7 +261,7 @@ func getCUDConfigs(tfData resourceProvider) ([]*commitments.GCPCUDConfigResource
 }
 
 // getCUDImportResources returns a slice of GCP CUD resources obtained from the input JSON.
-func getCUDImportResources(tfData resourceProvider) ([]*commitments.GCPCUDResource, bool, error) {
+func getCUDImportResources(tfData resourceProvider) ([]*GCPCUDResource, bool, error) {
 	// Get the CUD JSON input and unmarshal it into a slice of CUD imports
 	cuds, cudsOk, err := getCUDImports(tfData)
 	if err != nil {
@@ -160,7 +286,7 @@ func getCUDImportResources(tfData resourceProvider) ([]*commitments.GCPCUDResour
 	}
 
 	// Finally map the CUD imports to resources and combine them with the configurations
-	res, err := commitments.MapConfiguredCUDImportsToResources(cuds, configs)
+	res, err := MapConfiguredCUDImportsToResources(cuds, configs)
 	if err != nil {
 		return nil, true, err
 	}
@@ -168,21 +294,21 @@ func getCUDImportResources(tfData resourceProvider) ([]*commitments.GCPCUDResour
 }
 
 // getCUDResources returns a slice of GCP CUD resources obtained from the state obtained from the API.
-func getCUDResources(tfData resourceProvider) ([]*commitments.GCPCUDResource, bool, error) {
-	cudsIface, ok := tfData.GetOk(commitments.FieldGCPCUDs)
+func getCUDResources(tfData resourceProvider) ([]*GCPCUDResource, bool, error) {
+	cudsIface, ok := tfData.GetOk(FieldCommitmentsGCPCUDs)
 	if !ok {
 		return nil, false, nil
 	}
-	var res []*commitments.GCPCUDResource
+	var res []*GCPCUDResource
 	if err := mapstructure.Decode(cudsIface, &res); err != nil {
 		return nil, true, err
 	}
 	return res, true, nil
 }
 
-func getReservationResources(tfData resourceProvider) ([]*commitments.AzureReservationResource, bool, error) {
+func getReservationResources(tfData resourceProvider) ([]*AzureReservationResource, bool, error) {
 	// TEMPORARY: support for Azure reservations will be added in one of the upcoming PRs
-	_, ok := tfData.GetOk(commitments.FieldAzureReservationsCSV)
+	_, ok := tfData.GetOk(FieldCommitmentsAzureReservationsCSV)
 	return nil, ok, nil
 }
 
@@ -233,7 +359,7 @@ func resourceCastaiCommitmentsDelete(ctx context.Context, data *schema.ResourceD
 	return nil
 }
 
-func deleteCommitments[R commitments.Resource](ctx context.Context, meta any, resources []R) error {
+func deleteCommitments[R Resource](ctx context.Context, meta any, resources []R) error {
 	for _, r := range resources {
 		if err := deleteCommitment(ctx, meta, r.GetCommitmentID()); err != nil {
 			return err
@@ -262,7 +388,7 @@ func resourceCastaiCommitmentsUpsert(ctx context.Context, data *schema.ResourceD
 		return diag.FromErr(err)
 	}
 
-	_, reservationsOk := data.GetOk(commitments.FieldAzureReservationsCSV)
+	_, reservationsOk := data.GetOk(FieldCommitmentsAzureReservationsCSV)
 	cuds, cudsOk, err := getCUDImports(data)
 	if err != nil {
 		return diag.FromErr(err)
@@ -292,9 +418,9 @@ func resourceCastaiCommitmentsUpsert(ctx context.Context, data *schema.ResourceD
 			return diag.FromErr(err)
 		}
 
-		cudsWithConfigs, err := commitments.MapConfigsToCUDs(
-			lo.Map(gcpCommitments, func(item sdk.CastaiInventoryV1beta1Commitment, _ int) commitments.CastaiCommitment {
-				return commitments.CastaiCommitment{CastaiInventoryV1beta1Commitment: item}
+		cudsWithConfigs, err := MapConfigsToCUDs(
+			lo.Map(gcpCommitments, func(item sdk.CastaiInventoryV1beta1Commitment, _ int) CastaiCommitment {
+				return CastaiCommitment{CastaiInventoryV1beta1Commitment: item}
 			}),
 			configs,
 		)
@@ -306,7 +432,7 @@ func resourceCastaiCommitmentsUpsert(ctx context.Context, data *schema.ResourceD
 			res, err := meta.(*ProviderConfig).api.CommitmentsAPIUpdateCommitmentWithResponse(
 				ctx,
 				lo.FromPtr(c.CUD.Id),
-				commitments.MapCUDImportWithConfigToUpdateRequest(c),
+				MapCUDImportWithConfigToUpdateRequest(c),
 			)
 			if err := sdk.CheckOKResponse(res, err); err != nil {
 				return diag.Errorf("updating commitment: %v", err)
@@ -361,23 +487,23 @@ func populateCommitmentsResourceData(ctx context.Context, d *schema.ResourceData
 		return err
 	}
 
-	var resources []*commitments.GCPCUDResource
+	var resources []*GCPCUDResource
 	for _, c := range orgCommitments {
 		c := c
 		if c.GcpResourceCudContext == nil {
 			continue
 		}
 
-		resource, err := commitments.MapCommitmentToCUDResource(c)
+		resource, err := MapCommitmentToCUDResource(c)
 		if err != nil {
 			return err
 		}
 		resources = append(resources, resource)
 	}
 	if cudsOk {
-		commitments.SortResources(resources, cuds)
+		SortResources(resources, cuds)
 	}
-	if err := d.Set(commitments.FieldGCPCUDs, resources); err != nil {
+	if err := d.Set(FieldCommitmentsGCPCUDs, resources); err != nil {
 		return fmt.Errorf("setting gcp cuds: %w", err)
 	}
 
@@ -405,10 +531,10 @@ func getCommitmentsImportID(ctx context.Context, data *schema.ResourceData, meta
 	}
 
 	var cloud string
-	if _, ok := data.GetOk(commitments.FieldAzureReservationsCSV); ok {
+	if _, ok := data.GetOk(FieldCommitmentsAzureReservationsCSV); ok {
 		cloud = "azure"
 	}
-	if _, ok := data.GetOk(commitments.FieldGCPCUDsJSON); ok {
+	if _, ok := data.GetOk(FieldCommitmentsGCPCUDsJSON); ok {
 		cloud = "gcp"
 	}
 	return defOrgID + ":" + cloud, nil
