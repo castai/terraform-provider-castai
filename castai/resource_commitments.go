@@ -250,8 +250,8 @@ func getCUDImports(tfData resourceProvider) ([]sdk.CastaiInventoryV1beta1GCPComm
 	return cuds, true, nil
 }
 
-func getCUDConfigs(tfData resourceProvider) ([]*GCPCUDConfigResource, error) {
-	var configs []*GCPCUDConfigResource
+func getCUDConfigs(tfData resourceProvider) ([]*gcpCUDConfigResource, error) {
+	var configs []*gcpCUDConfigResource
 	if configsIface, ok := tfData.GetOk(FieldCommitmentsGCPCUDConfigs); ok {
 		if err := mapstructure.Decode(configsIface, &configs); err != nil {
 			return nil, err
@@ -261,7 +261,7 @@ func getCUDConfigs(tfData resourceProvider) ([]*GCPCUDConfigResource, error) {
 }
 
 // getCUDImportResources returns a slice of GCP CUD resources obtained from the input JSON.
-func getCUDImportResources(tfData resourceProvider) ([]*GCPCUDResource, bool, error) {
+func getCUDImportResources(tfData resourceProvider) ([]*gcpCUDResource, bool, error) {
 	// Get the CUD JSON input and unmarshal it into a slice of CUD imports
 	cuds, cudsOk, err := getCUDImports(tfData)
 	if err != nil {
@@ -286,7 +286,7 @@ func getCUDImportResources(tfData resourceProvider) ([]*GCPCUDResource, bool, er
 	}
 
 	// Finally map the CUD imports to resources and combine them with the configurations
-	res, err := MapConfiguredCUDImportsToResources(cuds, configs)
+	res, err := mapConfiguredCUDImportsToResources(cuds, configs)
 	if err != nil {
 		return nil, true, err
 	}
@@ -294,19 +294,19 @@ func getCUDImportResources(tfData resourceProvider) ([]*GCPCUDResource, bool, er
 }
 
 // getCUDResources returns a slice of GCP CUD resources obtained from the state obtained from the API.
-func getCUDResources(tfData resourceProvider) ([]*GCPCUDResource, bool, error) {
+func getCUDResources(tfData resourceProvider) ([]*gcpCUDResource, bool, error) {
 	cudsIface, ok := tfData.GetOk(FieldCommitmentsGCPCUDs)
 	if !ok {
 		return nil, false, nil
 	}
-	var res []*GCPCUDResource
+	var res []*gcpCUDResource
 	if err := mapstructure.Decode(cudsIface, &res); err != nil {
 		return nil, true, err
 	}
 	return res, true, nil
 }
 
-func getReservationResources(tfData resourceProvider) ([]*AzureReservationResource, bool, error) {
+func getReservationResources(tfData resourceProvider) ([]*azureReservationResource, bool, error) {
 	// TEMPORARY: support for Azure reservations will be added in one of the upcoming PRs
 	_, ok := tfData.GetOk(FieldCommitmentsAzureReservationsCSV)
 	return nil, ok, nil
@@ -359,7 +359,7 @@ func resourceCastaiCommitmentsDelete(ctx context.Context, data *schema.ResourceD
 	return nil
 }
 
-func deleteCommitments[R CommitmentResource](ctx context.Context, meta any, resources []R) error {
+func deleteCommitments[R commitmentResource](ctx context.Context, meta any, resources []R) error {
 	for _, r := range resources {
 		if err := deleteCommitment(ctx, meta, r.GetCommitmentID()); err != nil {
 			return err
@@ -418,9 +418,9 @@ func resourceCastaiCommitmentsUpsert(ctx context.Context, data *schema.ResourceD
 			return diag.FromErr(err)
 		}
 
-		cudsWithConfigs, err := MapConfigsToCUDs(
-			lo.Map(gcpCommitments, func(item sdk.CastaiInventoryV1beta1Commitment, _ int) CastaiCommitment {
-				return CastaiCommitment{CastaiInventoryV1beta1Commitment: item}
+		cudsWithConfigs, err := mapConfigsToCUDs(
+			lo.Map(gcpCommitments, func(item sdk.CastaiInventoryV1beta1Commitment, _ int) castaiCommitment {
+				return castaiCommitment{CastaiInventoryV1beta1Commitment: item}
 			}),
 			configs,
 		)
@@ -432,7 +432,7 @@ func resourceCastaiCommitmentsUpsert(ctx context.Context, data *schema.ResourceD
 			res, err := meta.(*ProviderConfig).api.CommitmentsAPIUpdateCommitmentWithResponse(
 				ctx,
 				lo.FromPtr(c.CUD.Id),
-				MapCUDImportWithConfigToUpdateRequest(c),
+				mapCUDImportWithConfigToUpdateRequest(c),
 			)
 			if err := sdk.CheckOKResponse(res, err); err != nil {
 				return diag.Errorf("updating commitment: %v", err)
@@ -487,21 +487,21 @@ func populateCommitmentsResourceData(ctx context.Context, d *schema.ResourceData
 		return err
 	}
 
-	var resources []*GCPCUDResource
+	var resources []*gcpCUDResource
 	for _, c := range orgCommitments {
 		c := c
 		if c.GcpResourceCudContext == nil {
 			continue
 		}
 
-		resource, err := MapCommitmentToCUDResource(c)
+		resource, err := mapCommitmentToCUDResource(c)
 		if err != nil {
 			return err
 		}
 		resources = append(resources, resource)
 	}
 	if cudsOk {
-		SortCommitmentResources(resources, cuds)
+		sortCommitmentResources(resources, cuds)
 	}
 	if err := d.Set(FieldCommitmentsGCPCUDs, resources); err != nil {
 		return fmt.Errorf("setting gcp cuds: %w", err)

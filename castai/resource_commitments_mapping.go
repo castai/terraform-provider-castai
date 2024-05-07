@@ -16,7 +16,7 @@ import (
 type (
 	// Terraform SDK's diff setter uses mapstructure under the hood
 
-	GCPCUDResource struct {
+	gcpCUDResource struct {
 		// CAST AI only fields
 		ID             *string  `mapstructure:"id,omitempty"` // ID of the commitment
 		AllowedUsage   *float32 `mapstructure:"allowed_usage,omitempty"`
@@ -35,25 +35,25 @@ type (
 		Plan           string `mapstructure:"plan"`
 		Type           string `mapstructure:"type"`
 	}
-	GCPCUDConfigResource struct {
-		Matcher        []*GCPCUDConfigMatcherResource `mapstructure:"matcher,omitempty"`
+	gcpCUDConfigResource struct {
+		Matcher        []*gcpCUDConfigMatcherResource `mapstructure:"matcher,omitempty"`
 		Prioritization *bool                          `mapstructure:"prioritization,omitempty"`
 		Status         *string                        `mapstructure:"status,omitempty"`
 		AllowedUsage   *float32                       `mapstructure:"allowed_usage,omitempty"`
 	}
-	GCPCUDConfigMatcherResource struct {
+	gcpCUDConfigMatcherResource struct {
 		Name   string  `mapstructure:"name"`
 		Type   *string `mapstructure:"type,omitempty"`
 		Region *string `mapstructure:"region,omitempty"`
 	}
 
-	AzureReservationResource struct {
+	azureReservationResource struct {
 		ID            *string `mapstructure:"id,omitempty"`   // ID of the commitment
 		ReservationID string  `mapstructure:"reservation_id"` // ID of the reservation in Azure
 	}
 
-	// CommitmentResource is an interface for common management of GCP (GCPCUDResource) and Azure (AzureReservationResource) resources
-	CommitmentResource interface {
+	// commitmentResource is an interface for common management of GCP (gcpCUDResource) and Azure (azureReservationResource) resources
+	commitmentResource interface {
 		// GetCommitmentID returns the ID of the commitment in CAST AI
 		GetCommitmentID() string
 		// GetIDInCloud returns the ID of the resource in the cloud provider
@@ -61,7 +61,7 @@ type (
 	}
 )
 
-func (r *GCPCUDConfigResource) GetMatcher() *GCPCUDConfigMatcherResource {
+func (r *gcpCUDConfigResource) GetMatcher() *gcpCUDConfigMatcherResource {
 	if r == nil || len(r.Matcher) == 0 {
 		return nil
 	}
@@ -69,39 +69,39 @@ func (r *GCPCUDConfigResource) GetMatcher() *GCPCUDConfigMatcherResource {
 }
 
 var (
-	_ CommitmentResource = (*GCPCUDResource)(nil)
-	_ CommitmentResource = (*AzureReservationResource)(nil)
+	_ commitmentResource = (*gcpCUDResource)(nil)
+	_ commitmentResource = (*azureReservationResource)(nil)
 )
 
-func (r *GCPCUDResource) GetCommitmentID() string {
+func (r *gcpCUDResource) GetCommitmentID() string {
 	if r == nil || r.ID == nil {
 		return ""
 	}
 	return *r.ID
 }
 
-func (r *GCPCUDResource) GetIDInCloud() string {
+func (r *gcpCUDResource) GetIDInCloud() string {
 	if r == nil {
 		return ""
 	}
 	return r.CUDID
 }
 
-func (r *AzureReservationResource) GetCommitmentID() string {
+func (r *azureReservationResource) GetCommitmentID() string {
 	if r == nil || r.ID == nil {
 		return ""
 	}
 	return *r.ID
 }
 
-func (r *AzureReservationResource) GetIDInCloud() string {
+func (r *azureReservationResource) GetIDInCloud() string {
 	if r == nil {
 		return ""
 	}
 	return r.ReservationID
 }
 
-func (m *GCPCUDConfigMatcherResource) Validate() error {
+func (m *gcpCUDConfigMatcherResource) Validate() error {
 	if m == nil {
 		return errors.New("matcher is required")
 	}
@@ -111,7 +111,7 @@ func (m *GCPCUDConfigMatcherResource) Validate() error {
 	return nil
 }
 
-func MapCommitmentToCUDResource(c sdk.CastaiInventoryV1beta1Commitment) (*GCPCUDResource, error) {
+func mapCommitmentToCUDResource(c sdk.CastaiInventoryV1beta1Commitment) (*gcpCUDResource, error) {
 	if c.GcpResourceCudContext == nil {
 		return nil, errors.New("missing GCP resource CUD context")
 	}
@@ -140,7 +140,7 @@ func MapCommitmentToCUDResource(c sdk.CastaiInventoryV1beta1Commitment) (*GCPCUD
 		startDate = c.StartDate.Format(time.RFC3339)
 	}
 
-	return &GCPCUDResource{
+	return &gcpCUDResource{
 		ID:             c.Id,
 		AllowedUsage:   c.AllowedUsage,
 		Prioritization: c.Prioritization,
@@ -158,9 +158,9 @@ func MapCommitmentToCUDResource(c sdk.CastaiInventoryV1beta1Commitment) (*GCPCUD
 	}, nil
 }
 
-func MapCUDImportToResource(
-	cudWithCfg *cudWithConfig[CastaiGCPCommitmentImport],
-) (*GCPCUDResource, error) {
+func mapCUDImportToResource(
+	cudWithCfg *cudWithConfig[castaiGCPCommitmentImport],
+) (*gcpCUDResource, error) {
 	var cpu, memory int
 	if cudWithCfg.CUD.Resources != nil {
 		for _, res := range *cudWithCfg.CUD.Resources {
@@ -192,7 +192,7 @@ func MapCUDImportToResource(
 		_, region = path.Split(*cudWithCfg.CUD.Region)
 	}
 
-	res := &GCPCUDResource{
+	res := &gcpCUDResource{
 		CUDID:          lo.FromPtr(cudWithCfg.CUD.Id),
 		CUDStatus:      lo.FromPtr(cudWithCfg.CUD.Status),
 		EndTimestamp:   lo.FromPtr(cudWithCfg.CUD.EndTimestamp),
@@ -221,17 +221,17 @@ func (k cudConfigMatcherKey) String() string {
 	return fmt.Sprintf("%s-%s-%s", k.name, k.region, k.typ)
 }
 
-// cud is a common interface for CastaiGCPCommitmentImport and sdk.CastaiInventoryV1beta1Commitment
+// cud is a common interface for castaiGCPCommitmentImport and sdk.CastaiInventoryV1beta1Commitment
 type cud interface {
 	getCUDKey() cudConfigMatcherKey
 }
 
 type cudWithConfig[C cud] struct {
 	CUD    C
-	Config *GCPCUDConfigResource
+	Config *gcpCUDConfigResource
 }
 
-func MapConfigsToCUDs[C cud](cuds []C, configs []*GCPCUDConfigResource) ([]*cudWithConfig[C], error) {
+func mapConfigsToCUDs[C cud](cuds []C, configs []*gcpCUDConfigResource) ([]*cudWithConfig[C], error) {
 	res := make([]*cudWithConfig[C], len(cuds))
 	cfgKeys := map[cudConfigMatcherKey]struct{}{}
 	for _, cfg := range configs {
@@ -285,35 +285,35 @@ func MapConfigsToCUDs[C cud](cuds []C, configs []*GCPCUDConfigResource) ([]*cudW
 	return res, nil
 }
 
-func MapConfiguredCUDImportsToResources[C interface {
-	CastaiGCPCommitmentImport | sdk.CastaiInventoryV1beta1GCPCommitmentImport
+func mapConfiguredCUDImportsToResources[C interface {
+	castaiGCPCommitmentImport | sdk.CastaiInventoryV1beta1GCPCommitmentImport
 }](
 	cuds []C,
-	configs []*GCPCUDConfigResource,
-) ([]*GCPCUDResource, error) {
+	configs []*gcpCUDConfigResource,
+) ([]*gcpCUDResource, error) {
 	if len(configs) > len(cuds) {
 		return nil, fmt.Errorf("more CUD configurations than CUDs")
 	}
 
-	var cudImports []CastaiGCPCommitmentImport
+	var cudImports []castaiGCPCommitmentImport
 	switch v := any(cuds).(type) {
-	case []CastaiGCPCommitmentImport:
+	case []castaiGCPCommitmentImport:
 		cudImports = v
 	case []sdk.CastaiInventoryV1beta1GCPCommitmentImport:
-		cudImports = make([]CastaiGCPCommitmentImport, 0, len(v))
+		cudImports = make([]castaiGCPCommitmentImport, 0, len(v))
 		for _, item := range v {
-			cudImports = append(cudImports, CastaiGCPCommitmentImport{CastaiInventoryV1beta1GCPCommitmentImport: item})
+			cudImports = append(cudImports, castaiGCPCommitmentImport{CastaiInventoryV1beta1GCPCommitmentImport: item})
 		}
 	}
 
-	cudsWithConfigs, err := MapConfigsToCUDs(cudImports, configs)
+	cudsWithConfigs, err := mapConfigsToCUDs(cudImports, configs)
 	if err != nil {
 		return nil, err
 	}
 
-	res := make([]*GCPCUDResource, 0, len(cudsWithConfigs))
+	res := make([]*gcpCUDResource, 0, len(cudsWithConfigs))
 	for _, item := range cudsWithConfigs {
-		v, err := MapCUDImportToResource(item)
+		v, err := mapCUDImportToResource(item)
 		if err != nil {
 			return nil, err
 		}
@@ -322,8 +322,8 @@ func MapConfiguredCUDImportsToResources[C interface {
 	return res, nil
 }
 
-func MapCUDImportWithConfigToUpdateRequest(
-	c *cudWithConfig[CastaiCommitment],
+func mapCUDImportWithConfigToUpdateRequest(
+	c *cudWithConfig[castaiCommitment],
 ) sdk.CommitmentsAPIUpdateCommitmentJSONRequestBody {
 	req := sdk.CommitmentsAPIUpdateCommitmentJSONRequestBody{
 		AllowedUsage:          c.CUD.AllowedUsage,
@@ -350,8 +350,8 @@ func MapCUDImportWithConfigToUpdateRequest(
 	return req
 }
 
-// SortCommitmentResources sorts the toSort slice based on the order of the targetOrder slice
-func SortCommitmentResources[R CommitmentResource](toSort, targetOrder []R) {
+// sortCommitmentResources sorts the toSort slice based on the order of the targetOrder slice
+func sortCommitmentResources[R commitmentResource](toSort, targetOrder []R) {
 	orderMap := make(map[string]int)
 	for index, value := range targetOrder {
 		orderMap[value.GetIDInCloud()] = index
@@ -374,14 +374,14 @@ func SortCommitmentResources[R CommitmentResource](toSort, targetOrder []R) {
 	})
 }
 
-// CastaiGCPCommitmentImport is a wrapper around sdk.CastaiInventoryV1beta1GCPCommitmentImport implementing the cud interface
-type CastaiGCPCommitmentImport struct {
+// castaiGCPCommitmentImport is a wrapper around sdk.CastaiInventoryV1beta1GCPCommitmentImport implementing the cud interface
+type castaiGCPCommitmentImport struct {
 	sdk.CastaiInventoryV1beta1GCPCommitmentImport
 }
 
-var _ cud = CastaiGCPCommitmentImport{}
+var _ cud = castaiGCPCommitmentImport{}
 
-func (c CastaiGCPCommitmentImport) getCUDKey() cudConfigMatcherKey {
+func (c castaiGCPCommitmentImport) getCUDKey() cudConfigMatcherKey {
 	var region string
 	if c.Region != nil {
 		_, region = path.Split(*c.Region)
@@ -393,14 +393,14 @@ func (c CastaiGCPCommitmentImport) getCUDKey() cudConfigMatcherKey {
 	}
 }
 
-// CastaiCommitment is a wrapper around sdk.CastaiInventoryV1beta1Commitment implementing the cud interface
-type CastaiCommitment struct {
+// castaiCommitment is a wrapper around sdk.CastaiInventoryV1beta1Commitment implementing the cud interface
+type castaiCommitment struct {
 	sdk.CastaiInventoryV1beta1Commitment
 }
 
-var _ cud = CastaiCommitment{}
+var _ cud = castaiCommitment{}
 
-func (c CastaiCommitment) getCUDKey() cudConfigMatcherKey {
+func (c castaiCommitment) getCUDKey() cudConfigMatcherKey {
 	var region string
 	if c.Region != nil {
 		_, region = path.Split(*c.Region)
