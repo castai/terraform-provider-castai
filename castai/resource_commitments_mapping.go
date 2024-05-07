@@ -52,8 +52,8 @@ type (
 		ReservationID string  `mapstructure:"reservation_id"` // ID of the reservation in Azure
 	}
 
-	// Resource is an interface for common management of GCP (GCPCUDResource) and Azure (AzureReservationResource) resources
-	Resource interface {
+	// CommitmentResource is an interface for common management of GCP (GCPCUDResource) and Azure (AzureReservationResource) resources
+	CommitmentResource interface {
 		// GetCommitmentID returns the ID of the commitment in CAST AI
 		GetCommitmentID() string
 		// GetIDInCloud returns the ID of the resource in the cloud provider
@@ -69,8 +69,8 @@ func (r *GCPCUDConfigResource) GetMatcher() *GCPCUDConfigMatcherResource {
 }
 
 var (
-	_ Resource = (*GCPCUDResource)(nil)
-	_ Resource = (*AzureReservationResource)(nil)
+	_ CommitmentResource = (*GCPCUDResource)(nil)
+	_ CommitmentResource = (*AzureReservationResource)(nil)
 )
 
 func (r *GCPCUDResource) GetCommitmentID() string {
@@ -350,8 +350,8 @@ func MapCUDImportWithConfigToUpdateRequest(
 	return req
 }
 
-// SortResources sorts the toSort slice based on the order of the targetOrder slice
-func SortResources[R Resource](toSort, targetOrder []R) {
+// SortCommitmentResources sorts the toSort slice based on the order of the targetOrder slice
+func SortCommitmentResources[R CommitmentResource](toSort, targetOrder []R) {
 	orderMap := make(map[string]int)
 	for index, value := range targetOrder {
 		orderMap[value.GetIDInCloud()] = index

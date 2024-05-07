@@ -359,7 +359,7 @@ func resourceCastaiCommitmentsDelete(ctx context.Context, data *schema.ResourceD
 	return nil
 }
 
-func deleteCommitments[R Resource](ctx context.Context, meta any, resources []R) error {
+func deleteCommitments[R CommitmentResource](ctx context.Context, meta any, resources []R) error {
 	for _, r := range resources {
 		if err := deleteCommitment(ctx, meta, r.GetCommitmentID()); err != nil {
 			return err
@@ -501,7 +501,7 @@ func populateCommitmentsResourceData(ctx context.Context, d *schema.ResourceData
 		resources = append(resources, resource)
 	}
 	if cudsOk {
-		SortResources(resources, cuds)
+		SortCommitmentResources(resources, cuds)
 	}
 	if err := d.Set(FieldCommitmentsGCPCUDs, resources); err != nil {
 		return fmt.Errorf("setting gcp cuds: %w", err)
