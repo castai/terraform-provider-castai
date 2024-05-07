@@ -15,13 +15,13 @@ func TestAccCommitments(t *testing.T) {
 		ResourceName:            "castai_commitments.test_gcp",
 		ImportState:             true,
 		ImportStateVerify:       true,
-		ImportStateVerifyIgnore: []string{FieldCommitmentsGCPCUDsJSON, FieldCommitmentsConfigs},
+		ImportStateVerifyIgnore: []string{fieldCommitmentsGCPCUDsJSON, fieldCommitmentsConfigs},
 	}
 	importReservationsStateStep := resource.TestStep{
 		ResourceName:            "castai_commitments.test_azure",
 		ImportState:             true,
 		ImportStateVerify:       true,
-		ImportStateVerifyIgnore: []string{FieldCommitmentsAzureReservationsCSV, FieldCommitmentsConfigs},
+		ImportStateVerifyIgnore: []string{fieldCommitmentsAzureReservationsCSV, fieldCommitmentsConfigs},
 	}
 
 	resource.Test(t, resource.TestCase{

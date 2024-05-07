@@ -20,12 +20,12 @@ import (
 )
 
 const (
-	FieldCommitmentsAzureReservationsCSV = "azure_reservations_csv"
-	FieldCommitmentsGCPCUDsJSON          = "gcp_cuds_json"
+	fieldCommitmentsAzureReservationsCSV = "azure_reservations_csv"
+	fieldCommitmentsGCPCUDsJSON          = "gcp_cuds_json"
 
-	FieldCommitmentsAzureReservations = "azure_reservations"
-	FieldCommitmentsGCPCUDs           = "gcp_cuds"
-	FieldCommitmentsConfigs           = "commitment_configs"
+	fieldCommitmentsAzureReservations = "azure_reservations"
+	fieldCommitmentsGCPCUDs           = "gcp_cuds"
+	fieldCommitmentsConfigs           = "commitment_configs"
 )
 
 var sharedCommitmentResourceSchema = map[string]*schema.Schema{
@@ -88,20 +88,20 @@ func resourceCommitments() *schema.Resource {
 		CustomizeDiff: commitmentsDiff,
 		Schema: map[string]*schema.Schema{
 			// Input files
-			FieldCommitmentsAzureReservationsCSV: {
+			fieldCommitmentsAzureReservationsCSV: {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Description:  "CSV file containing reservations exported from Azure.",
-				ExactlyOneOf: []string{FieldCommitmentsAzureReservationsCSV, FieldCommitmentsGCPCUDsJSON},
+				ExactlyOneOf: []string{fieldCommitmentsAzureReservationsCSV, fieldCommitmentsGCPCUDsJSON},
 			},
-			FieldCommitmentsGCPCUDsJSON: {
+			fieldCommitmentsGCPCUDsJSON: {
 				Type:         schema.TypeString,
 				Optional:     true,
 				Description:  "JSON file containing CUDs exported from GCP.",
-				ExactlyOneOf: []string{FieldCommitmentsAzureReservationsCSV, FieldCommitmentsGCPCUDsJSON},
+				ExactlyOneOf: []string{fieldCommitmentsAzureReservationsCSV, fieldCommitmentsGCPCUDsJSON},
 			},
 			// Input configurations
-			FieldCommitmentsConfigs: {
+			fieldCommitmentsConfigs: {
 				Type:        schema.TypeList,
 				Optional:    true,
 				Description: "List of commitment configurations.",
@@ -156,7 +156,7 @@ func resourceCommitments() *schema.Resource {
 				},
 			},
 			// Computed fields
-			FieldCommitmentsGCPCUDs: {
+			fieldCommitmentsGCPCUDs: {
 				Type:        schema.TypeList,
 				Computed:    true,
 				Description: "List of GCP CUDs.",
@@ -195,7 +195,7 @@ func resourceCommitments() *schema.Resource {
 					}),
 				},
 			},
-			FieldCommitmentsAzureReservations: {
+			fieldCommitmentsAzureReservations: {
 				Type:        schema.TypeList,
 				Computed:    true,
 				Description: "List of Azure reservations.",
@@ -266,21 +266,21 @@ func commitmentsDiff(_ context.Context, diff *schema.ResourceDiff, _ any) error 
 	switch {
 	case reservationsOk:
 		// TEMPORARY: support for Azure reservations will be added in one of the upcoming PRs
-		if err := diff.SetNew(FieldCommitmentsGCPCUDs, nil); err != nil {
+		if err := diff.SetNew(fieldCommitmentsGCPCUDs, nil); err != nil {
 			return fmt.Errorf("setting gcp cuds field to nil: %w", err)
 		}
-		return diff.SetNew(FieldCommitmentsAzureReservations, reservationResources)
+		return diff.SetNew(fieldCommitmentsAzureReservations, reservationResources)
 	case cudsOk:
-		if err := diff.SetNew(FieldCommitmentsAzureReservations, nil); err != nil {
+		if err := diff.SetNew(fieldCommitmentsAzureReservations, nil); err != nil {
 			return fmt.Errorf("setting azure reservations field to nil: %w", err)
 		}
-		return diff.SetNew(FieldCommitmentsGCPCUDs, cudResources)
+		return diff.SetNew(fieldCommitmentsGCPCUDs, cudResources)
 	}
 	return errors.New("unhandled combination of commitments input")
 }
 
 func getCUDImports(tfData resourceProvider) ([]sdk.CastaiInventoryV1beta1GCPCommitmentImport, bool, error) {
-	cudsIface, ok := tfData.GetOk(FieldCommitmentsGCPCUDsJSON)
+	cudsIface, ok := tfData.GetOk(fieldCommitmentsGCPCUDsJSON)
 	if !ok {
 		return nil, false, nil
 	}
@@ -296,7 +296,7 @@ func getCUDImports(tfData resourceProvider) ([]sdk.CastaiInventoryV1beta1GCPComm
 }
 
 func getReservationImports(tfData resourceProvider) ([]sdk.CastaiInventoryV1beta1AzureReservationImport, bool, error) {
-	reservationsIface, ok := tfData.GetOk(FieldCommitmentsAzureReservationsCSV)
+	reservationsIface, ok := tfData.GetOk(fieldCommitmentsAzureReservationsCSV)
 	if !ok {
 		return nil, false, nil
 	}
@@ -320,7 +320,7 @@ func getReservationImports(tfData resourceProvider) ([]sdk.CastaiInventoryV1beta
 
 func getCommitmentConfigs(tfData resourceProvider) ([]*commitmentConfigResource, error) {
 	var configs []*commitmentConfigResource
-	if configsIface, ok := tfData.GetOk(FieldCommitmentsConfigs); ok {
+	if configsIface, ok := tfData.GetOk(fieldCommitmentsConfigs); ok {
 		if err := mapstructure.Decode(configsIface, &configs); err != nil {
 			return nil, err
 		}
@@ -394,7 +394,7 @@ func getReservationImportResources(tfData resourceProvider) ([]*azureReservation
 
 // getCUDResources returns a slice of GCP CUD resources obtained from the state obtained from the API.
 func getCUDResources(tfData resourceProvider) ([]*gcpCUDResource, bool, error) {
-	cudsIface, ok := tfData.GetOk(FieldCommitmentsGCPCUDs)
+	cudsIface, ok := tfData.GetOk(fieldCommitmentsGCPCUDs)
 	if !ok {
 		return nil, false, nil
 	}
@@ -406,7 +406,7 @@ func getCUDResources(tfData resourceProvider) ([]*gcpCUDResource, bool, error) {
 }
 
 func getReservationResources(tfData resourceProvider) ([]*azureReservationResource, bool, error) {
-	reservationsIface, ok := tfData.GetOk(FieldCommitmentsAzureReservations)
+	reservationsIface, ok := tfData.GetOk(fieldCommitmentsAzureReservations)
 	if !ok {
 		return nil, false, nil
 	}
@@ -681,7 +681,7 @@ func populateCommitmentsResourceData(ctx context.Context, d *schema.ResourceData
 		if reservationsOk {
 			sortCommitmentResources(azureResources, reservations)
 		}
-		if err := d.Set(FieldCommitmentsAzureReservations, azureResources); err != nil {
+		if err := d.Set(fieldCommitmentsAzureReservations, azureResources); err != nil {
 			return fmt.Errorf("setting azure reservations: %w", err)
 		}
 	case "gcp":
@@ -692,7 +692,7 @@ func populateCommitmentsResourceData(ctx context.Context, d *schema.ResourceData
 		if cudsOk {
 			sortCommitmentResources(gcpResources, cuds)
 		}
-		if err := d.Set(FieldCommitmentsGCPCUDs, gcpResources); err != nil {
+		if err := d.Set(fieldCommitmentsGCPCUDs, gcpResources); err != nil {
 			return fmt.Errorf("setting gcp cuds: %w", err)
 		}
 	}
@@ -720,10 +720,10 @@ func getCommitmentsImportID(ctx context.Context, data *schema.ResourceData, meta
 	}
 
 	var cloud string
-	if _, ok := data.GetOk(FieldCommitmentsAzureReservationsCSV); ok {
+	if _, ok := data.GetOk(fieldCommitmentsAzureReservationsCSV); ok {
 		cloud = "azure"
 	}
-	if _, ok := data.GetOk(FieldCommitmentsGCPCUDsJSON); ok {
+	if _, ok := data.GetOk(fieldCommitmentsGCPCUDsJSON); ok {
 		cloud = "gcp"
 	}
 	return defOrgID + ":" + cloud, nil
