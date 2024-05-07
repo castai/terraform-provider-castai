@@ -18,7 +18,7 @@ import (
 type (
 	// Terraform SDK's diff setter uses mapstructure under the hood
 
-	CASTFields struct {
+	CASTCommitmentFields struct {
 		ID             *string                         `mapstructure:"id,omitempty"` // ID of the commitment
 		AllowedUsage   *float32                        `mapstructure:"allowed_usage,omitempty"`
 		Prioritization *bool                           `mapstructure:"prioritization,omitempty"`
@@ -27,7 +27,7 @@ type (
 	}
 
 	GCPCUDResource struct {
-		CASTFields `mapstructure:",squash"`
+		CASTCommitmentFields `mapstructure:",squash"`
 		// Fields from GCP CUDs export JSON
 		CUDID          string `mapstructure:"cud_id"` // ID of the CUD in GCP
 		CUDStatus      string `mapstructure:"cud_status"`
@@ -42,7 +42,7 @@ type (
 	}
 
 	AzureReservationResource struct {
-		CASTFields `mapstructure:",squash"`
+		CASTCommitmentFields `mapstructure:",squash"`
 		// Fields from Azure reservations export CSV
 		Count              int    `mapstructure:"count"`
 		ReservationID      string `mapstructure:"reservation_id"` // ID of the reservation in Azure
@@ -180,7 +180,7 @@ func MapCommitmentToCUDResource(
 	}
 
 	return &GCPCUDResource{
-		CASTFields: CASTFields{
+		CASTCommitmentFields: CASTCommitmentFields{
 			ID:             c.Id,
 			AllowedUsage:   c.AllowedUsage,
 			Prioritization: c.Prioritization,
@@ -216,7 +216,7 @@ func MapCommitmentToReservationResource(
 		endDate = c.EndDate.Format(time.RFC3339)
 	}
 	return &AzureReservationResource{
-		CASTFields: CASTFields{
+		CASTCommitmentFields: CASTCommitmentFields{
 			ID:             c.Id,
 			AllowedUsage:   c.AllowedUsage,
 			Prioritization: c.Prioritization,
