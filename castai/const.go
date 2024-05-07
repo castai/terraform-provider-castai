@@ -6,7 +6,4 @@ const (
 	FieldKey    = "key"
 	FieldValue  = "value"
 	FieldEffect = "effect"
-
-	Enabled  = "enabled"
-	Disabled = "disabled"
 )
