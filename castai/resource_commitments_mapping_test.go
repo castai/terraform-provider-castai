@@ -52,7 +52,7 @@ func TestMapCommitmentToCUDResource(t *testing.T) {
 				{ClusterId: lo.ToPtr("cluster-id-2")},
 			},
 			expected: &gcpCUDResource{
-				castCommitmentFields: castCommitmentFields{
+				CASTCommitmentFields: CASTCommitmentFields{
 					ID:             lo.ToPtr(id1.String()),
 					AllowedUsage:   lo.ToPtr[float32](0.5),
 					Prioritization: lo.ToPtr(true),
@@ -93,7 +93,7 @@ func TestMapCommitmentToCUDResource(t *testing.T) {
 				{ClusterId: lo.ToPtr("cluster-id-2")},
 			},
 			expected: &gcpCUDResource{
-				castCommitmentFields: castCommitmentFields{
+				CASTCommitmentFields: CASTCommitmentFields{
 					ID:             lo.ToPtr(id1.String()),
 					AllowedUsage:   lo.ToPtr[float32](0.5),
 					Prioritization: lo.ToPtr(true),
@@ -125,7 +125,7 @@ func TestMapCommitmentToCUDResource(t *testing.T) {
 				{ClusterId: lo.ToPtr("cluster-id-2")},
 			},
 			expected: &gcpCUDResource{
-				castCommitmentFields: castCommitmentFields{
+				CASTCommitmentFields: CASTCommitmentFields{
 					ID:             lo.ToPtr(id1.String()),
 					AllowedUsage:   lo.ToPtr[float32](0.5),
 					Prioritization: lo.ToPtr(true),
@@ -224,7 +224,7 @@ func TestMapCommitmentToReservationResource(t *testing.T) {
 				{ClusterId: lo.ToPtr("cluster-id-2")},
 			},
 			expected: &azureReservationResource{
-				castCommitmentFields: castCommitmentFields{
+				CASTCommitmentFields: CASTCommitmentFields{
 					ID:             lo.ToPtr(id1.String()),
 					AllowedUsage:   lo.ToPtr[float32](0.5),
 					Prioritization: lo.ToPtr(true),
@@ -349,7 +349,7 @@ func TestMapCUDImportToResource(t *testing.T) {
 				Plan:           "TWELVE_MONTHS",
 				Type:           "COMPUTE_OPTIMIZED_C2D",
 				// Configured fields
-				castCommitmentFields: castCommitmentFields{
+				CASTCommitmentFields: CASTCommitmentFields{
 					Prioritization: lo.ToPtr(true),
 					Status:         lo.ToPtr("ACTIVE"),
 					AllowedUsage:   lo.ToPtr[float32](0.7),
@@ -479,7 +479,7 @@ func TestMapReservationImportToResource(t *testing.T) {
 				return c
 			}(),
 			expected: &azureReservationResource{
-				castCommitmentFields: castCommitmentFields{
+				CASTCommitmentFields: CASTCommitmentFields{
 					AllowedUsage:   lo.ToPtr[float32](0.7),
 					Prioritization: lo.ToPtr(true),
 					Status:         lo.ToPtr("ACTIVE"),
@@ -924,7 +924,7 @@ func TestMapConfiguredCUDImportsToResources(t *testing.T) {
 			},
 			expected: []*gcpCUDResource{
 				{
-					castCommitmentFields: castCommitmentFields{
+					CASTCommitmentFields: CASTCommitmentFields{
 						AllowedUsage:   lo.ToPtr[float32](0.5),
 						Prioritization: lo.ToPtr(true),
 						Status:         lo.ToPtr("ACTIVE"),
@@ -1029,7 +1029,7 @@ func TestMapConfiguredReservationImportsToResources(t *testing.T) {
 			},
 			expected: []*azureReservationResource{
 				{
-					castCommitmentFields: castCommitmentFields{
+					CASTCommitmentFields: CASTCommitmentFields{
 						AllowedUsage:   lo.ToPtr[float32](0.5),
 						Prioritization: lo.ToPtr(true),
 						Status:         lo.ToPtr("ACTIVE"),
