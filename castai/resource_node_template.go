@@ -225,7 +225,7 @@ func resourceNodeTemplate() *schema.Resource {
 							Type:        schema.TypeBool,
 							Optional:    true,
 							Default:     false,
-							Description: "Storage optimized instance constraint - will only pick storage optimized nodes if true",
+							Description: "Storage optimized instance constraint (deprecated).",
 							ValidateDiagFunc: func(i interface{}, path cty.Path) diag.Diagnostics {
 								return diag.Diagnostics{
 									{
@@ -241,7 +241,7 @@ func resourceNodeTemplate() *schema.Resource {
 							Type:             schema.TypeString,
 							Optional:         true,
 							Default:          "",
-							Description:      "Storage optimized instance constraint - will only pick storage optimized nodes if enabled. Supported values include: `enabled`, `disabled` or empty string.",
+							Description:      "Storage optimized instance constraint - will only pick storage optimized nodes if enabled and won't pick if disabled. Empty value will have no effect. Supported values include: `enabled`, `disabled` or empty string.",
 							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"", Enabled, Disabled}, false)),
 						},
 						FieldNodeTemplateIsGpuOnly: {
@@ -254,7 +254,7 @@ func resourceNodeTemplate() *schema.Resource {
 							Type:        schema.TypeBool,
 							Optional:    true,
 							Default:     false,
-							Description: "Compute optimized instance constraint - will only pick compute optimized nodes if true.",
+							Description: "Compute optimized instance constraint (deprecated).",
 							ValidateDiagFunc: func(i interface{}, path cty.Path) diag.Diagnostics {
 								return diag.Diagnostics{
 									{
@@ -270,7 +270,7 @@ func resourceNodeTemplate() *schema.Resource {
 							Type:             schema.TypeString,
 							Optional:         true,
 							Default:          "",
-							Description:      "Compute optimized instance constraint - will only pick compute optimized nodes if enabled. Supported values include: `enabled`, `disabled` or empty string.",
+							Description:      "Compute optimized instance constraint - will only pick compute optimized nodes if enabled and won't pick if disabled. Empty value will have no effect. Supported values include: `enabled`, `disabled` or empty string.",
 							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"", Enabled, Disabled}, false)),
 						},
 						FieldNodeTemplateInstanceFamilies: {
