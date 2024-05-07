@@ -29,7 +29,7 @@ const (
 )
 
 var (
-	sharedCommitmentResourceSchema = lo.Assign(assignmentsSchema, map[string]*schema.Schema{
+	sharedCommitmentResourceSchema = lo.Assign(commitmentAssignmentsSchema, map[string]*schema.Schema{
 		"id": {
 			Type:        schema.TypeString,
 			Computed:    true,
@@ -72,7 +72,7 @@ var (
 		},
 	})
 
-	assignmentsSchema = map[string]*schema.Schema{
+	commitmentAssignmentsSchema = map[string]*schema.Schema{
 		"assignments": {
 			Type:        schema.TypeList,
 			Optional:    true,
@@ -130,7 +130,7 @@ func resourceCommitments() *schema.Resource {
 				Optional:    true,
 				Description: "List of commitment configurations.",
 				Elem: &schema.Resource{
-					Schema: lo.Assign(assignmentsSchema, map[string]*schema.Schema{
+					Schema: lo.Assign(commitmentAssignmentsSchema, map[string]*schema.Schema{
 						// Matcher fields
 						"matcher": {
 							Type:        schema.TypeList,
