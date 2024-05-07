@@ -102,7 +102,7 @@ func resourceCommitments() *schema.Resource {
 		UpdateContext: resourceCastaiCommitmentsUpdate,
 		DeleteContext: resourceCastaiCommitmentsDelete,
 		Importer: &schema.ResourceImporter{
-			StateContext: commitmentsStateImporter,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 		Description: "Commitments represent cloud service provider reserved instances (Azure) and commited use discounts (GCP) that can be used by CAST AI autoscaler.",
 		Timeouts: &schema.ResourceTimeout{
