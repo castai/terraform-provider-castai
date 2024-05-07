@@ -28,48 +28,72 @@ const (
 	fieldCommitmentsConfigs           = "commitment_configs"
 )
 
-var sharedCommitmentResourceSchema = map[string]*schema.Schema{
-	"id": {
-		Type:        schema.TypeString,
-		Computed:    true,
-		Description: "ID of the commitment in CAST AI.",
-	},
-	"allowed_usage": {
-		Type:        schema.TypeFloat,
-		Computed:    true,
-		Description: "Allowed usage of the commitment. The value is between 0 (0%) and 1 (100%).",
-	},
-	"prioritization": {
-		Type:        schema.TypeBool,
-		Computed:    true,
-		Description: "If enabled, it's possible to assign priorities to the assigned clusters.",
-	},
-	"status": {
-		Type:        schema.TypeString,
-		Computed:    true,
-		Description: "Status of the commitment in CAST AI.",
-	},
-	"start_timestamp": {
-		Type:        schema.TypeString,
-		Required:    true,
-		Description: "Start timestamp of the CUD.",
-	},
-	"end_timestamp": {
-		Type:        schema.TypeString,
-		Required:    true,
-		Description: "End timestamp of the CUD.",
-	},
-	"name": {
-		Type:        schema.TypeString,
-		Required:    true,
-		Description: "Name of the CUD.",
-	},
-	"region": {
-		Type:        schema.TypeString,
-		Required:    true,
-		Description: "Region in which the CUD is available.",
-	},
-}
+var (
+	sharedCommitmentResourceSchema = lo.Assign(commitmentAssignmentsSchema, map[string]*schema.Schema{
+		"id": {
+			Type:        schema.TypeString,
+			Computed:    true,
+			Description: "ID of the commitment in CAST AI.",
+		},
+		"allowed_usage": {
+			Type:        schema.TypeFloat,
+			Computed:    true,
+			Description: "Allowed usage of the commitment. The value is between 0 (0%) and 1 (100%).",
+		},
+		"prioritization": {
+			Type:        schema.TypeBool,
+			Computed:    true,
+			Description: "If enabled, it's possible to assign priorities to the assigned clusters.",
+		},
+		"status": {
+			Type:        schema.TypeString,
+			Computed:    true,
+			Description: "Status of the commitment in CAST AI.",
+		},
+		"start_timestamp": {
+			Type:        schema.TypeString,
+			Required:    true,
+			Description: "Start timestamp of the CUD.",
+		},
+		"end_timestamp": {
+			Type:        schema.TypeString,
+			Required:    true,
+			Description: "End timestamp of the CUD.",
+		},
+		"name": {
+			Type:        schema.TypeString,
+			Required:    true,
+			Description: "Name of the CUD.",
+		},
+		"region": {
+			Type:        schema.TypeString,
+			Required:    true,
+			Description: "Region in which the CUD is available.",
+		},
+	})
+
+	commitmentAssignmentsSchema = map[string]*schema.Schema{
+		"assignments": {
+			Type:        schema.TypeList,
+			Optional:    true,
+			Description: "List of assigned clusters for the commitment. If prioritization is enabled, the order of the assignments indicates the priority. The first assignment has the highest priority.",
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"cluster_id": {
+						Type:        schema.TypeString,
+						Required:    true,
+						Description: "ID of the cluster to assign the commitment to.",
+					},
+					"priority": {
+						Type:        schema.TypeInt,
+						Computed:    true,
+						Description: "Priority of the assignment. The lower the value, the higher the priority. 1 is the highest priority.",
+					},
+				},
+			},
+		},
+	}
+)
 
 func resourceCommitments() *schema.Resource {
 	return &schema.Resource{
@@ -106,7 +130,7 @@ func resourceCommitments() *schema.Resource {
 				Optional:    true,
 				Description: "List of commitment configurations.",
 				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
+					Schema: lo.Assign(commitmentAssignmentsSchema, map[string]*schema.Schema{
 						// Matcher fields
 						"matcher": {
 							Type:        schema.TypeList,
@@ -152,7 +176,7 @@ func resourceCommitments() *schema.Resource {
 							Description:      "Allowed usage of the commitment. The value is between 0 (0%) and 1 (100%).",
 							ValidateDiagFunc: validation.ToDiagFunc(validation.FloatBetween(0, 1)),
 						},
-					},
+					}),
 				},
 			},
 			// Computed fields
@@ -502,88 +526,74 @@ func resourceCastaiCommitmentsUpsert(ctx context.Context, data *schema.ResourceD
 		return diag.FromErr(err)
 	}
 
+	var imported []sdk.CastaiInventoryV1beta1Commitment
 	switch {
 	case reservationsOk:
 		if err := importReservations(ctx, meta, reservations); err != nil {
 			return diag.FromErr(err)
 		}
-
 		orgCommitments, err := getOrganizationCommitments(ctx, meta)
 		if err != nil {
 			return diag.FromErr(err)
 		}
-		azureCommitments := lo.Filter(orgCommitments, func(c sdk.CastaiInventoryV1beta1Commitment, _ int) bool {
+		imported = lo.Filter(orgCommitments, func(c sdk.CastaiInventoryV1beta1Commitment, _ int) bool {
 			return c.AzureReservationContext != nil
 		})
-		if len(azureCommitments) != len(reservations) {
-			return diag.Errorf("expected %d Azure commitments, got %d", len(reservations), len(azureCommitments))
-		}
-
-		configs, err := getCommitmentConfigs(data)
-		if err != nil {
-			return diag.FromErr(err)
-		}
-
-		cudsWithConfigs, err := mapConfigsToCommitments(
-			lo.Map(azureCommitments, func(item sdk.CastaiInventoryV1beta1Commitment, _ int) castaiCommitment {
-				return castaiCommitment{CastaiInventoryV1beta1Commitment: item}
-			}),
-			configs,
-		)
-		if err != nil {
-			return diag.FromErr(err)
-		}
-
-		for _, c := range cudsWithConfigs {
-			res, err := meta.(*ProviderConfig).api.CommitmentsAPIUpdateCommitmentWithResponse(
-				ctx,
-				lo.FromPtr(c.Commitment.Id),
-				mapCommitmentImportWithConfigToUpdateRequest(c),
-			)
-			if err := sdk.CheckOKResponse(res, err); err != nil {
-				return diag.Errorf("updating commitment: %v", err)
-			}
+		if len(imported) != len(reservations) {
+			return diag.Errorf("expected %d Azure commitments, got %d", len(reservations), len(imported))
 		}
 	case cudsOk:
 		if err := importCUDs(ctx, meta, cuds); err != nil {
 			return diag.FromErr(err)
 		}
-
 		orgCommitments, err := getOrganizationCommitments(ctx, meta)
 		if err != nil {
 			return diag.FromErr(err)
 		}
-		gcpCommitments := lo.Filter(orgCommitments, func(c sdk.CastaiInventoryV1beta1Commitment, _ int) bool {
+		imported = lo.Filter(orgCommitments, func(c sdk.CastaiInventoryV1beta1Commitment, _ int) bool {
 			return c.GcpResourceCudContext != nil
 		})
-		if len(gcpCommitments) != len(cuds) {
-			return diag.Errorf("expected %d GCP commitments, got %d", len(cuds), len(gcpCommitments))
+		if len(imported) != len(cuds) {
+			return diag.Errorf("expected %d GCP commitments, got %d", len(cuds), len(imported))
 		}
+	}
 
-		configs, err := getCommitmentConfigs(data)
-		if err != nil {
-			return diag.FromErr(err)
-		}
+	configs, err := getCommitmentConfigs(data)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
-		cudsWithConfigs, err := mapConfigsToCommitments(
-			lo.Map(gcpCommitments, func(item sdk.CastaiInventoryV1beta1Commitment, _ int) castaiCommitment {
-				return castaiCommitment{CastaiInventoryV1beta1Commitment: item}
-			}),
-			configs,
+	cudsWithConfigs, err := mapConfigsToCommitments(
+		lo.Map(imported, func(item sdk.CastaiInventoryV1beta1Commitment, _ int) castaiCommitment {
+			return castaiCommitment{CastaiInventoryV1beta1Commitment: item}
+		}),
+		configs,
+	)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	client := meta.(*ProviderConfig).api
+	for _, c := range cudsWithConfigs {
+		commitmentID := lo.FromPtr(c.Commitment.Id)
+		res, err := client.CommitmentsAPIUpdateCommitmentWithResponse(
+			ctx,
+			commitmentID,
+			mapCommitmentImportWithConfigToUpdateRequest(c),
 		)
-		if err != nil {
-			return diag.FromErr(err)
+		if err := sdk.CheckOKResponse(res, err); err != nil {
+			return diag.Errorf("updating commitment: %v", err)
 		}
 
-		for _, c := range cudsWithConfigs {
-			res, err := meta.(*ProviderConfig).api.CommitmentsAPIUpdateCommitmentWithResponse(
-				ctx,
-				lo.FromPtr(c.Commitment.Id),
-				mapCommitmentImportWithConfigToUpdateRequest(c),
-			)
-			if err := sdk.CheckOKResponse(res, err); err != nil {
-				return diag.Errorf("updating commitment: %v", err)
-			}
+		var clusterIDs []string
+		if c.Config != nil {
+			clusterIDs = lo.Map(c.Config.Assignments, func(a *commitmentAssignmentResource, _ int) string {
+				return a.ClusterID
+			})
+		}
+		asRes, err := client.CommitmentsAPIReplaceCommitmentAssignmentsWithResponse(ctx, commitmentID, clusterIDs)
+		if err := sdk.CheckOKResponse(asRes, err); err != nil {
+			return diag.Errorf("replacing commitment assignments: %v", err)
 		}
 	}
 
@@ -649,6 +659,13 @@ func populateCommitmentsResourceData(ctx context.Context, d *schema.ResourceData
 	if err != nil {
 		return err
 	}
+	assignments, err := getOrganizationCommitmentAssignments(ctx, meta)
+	if err != nil {
+		return err
+	}
+	assignmentsByCommitmentID := lo.GroupBy(assignments, func(a sdk.CastaiInventoryV1beta1CommitmentAssignment) string {
+		return lo.FromPtr(a.CommitmentId)
+	})
 
 	var (
 		gcpResources   []*gcpCUDResource
@@ -656,15 +673,16 @@ func populateCommitmentsResourceData(ctx context.Context, d *schema.ResourceData
 	)
 	for _, c := range orgCommitments {
 		c := c
+		as := assignmentsByCommitmentID[lo.FromPtr(c.Id)]
 		switch {
 		case c.GcpResourceCudContext != nil:
-			resource, err := mapCommitmentToCUDResource(c)
+			resource, err := mapCommitmentToCUDResource(c, as)
 			if err != nil {
 				return err
 			}
 			gcpResources = append(gcpResources, resource)
 		case c.AzureReservationContext != nil:
-			resource, err := mapCommitmentToReservationResource(c)
+			resource, err := mapCommitmentToReservationResource(c, as)
 			if err != nil {
 				return err
 			}
@@ -709,6 +727,21 @@ func getOrganizationCommitments(ctx context.Context, meta any) ([]sdk.CastaiInve
 		return nil, nil
 	}
 	return *response.JSON200.Commitments, nil
+}
+
+func getOrganizationCommitmentAssignments(
+	ctx context.Context,
+	meta any,
+) ([]sdk.CastaiInventoryV1beta1CommitmentAssignment, error) {
+	client := meta.(*ProviderConfig).api
+	response, err := client.CommitmentsAPIGetCommitmentsAssignmentsWithResponse(ctx)
+	if checkErr := sdk.CheckOKResponse(response, err); checkErr != nil {
+		return nil, fmt.Errorf("fetching commitments: %w", checkErr)
+	}
+	if response.JSON200.CommitmentsAssignments == nil {
+		return nil, nil
+	}
+	return *response.JSON200.CommitmentsAssignments, nil
 }
 
 func getCommitmentsImportID(ctx context.Context, data *schema.ResourceData, meta any) (string, error) {

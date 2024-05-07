@@ -24,6 +24,13 @@ resource "castai_commitments" "gcp_test" {
     prioritization = true
     allowed_usage  = 0.6
     status         = "Inactive"
+
+    assignments {
+      cluster_id = "cluster-id-1" # priority 1 cluster - prioritization is enabled
+    }
+    assignments {
+      cluster_id = "cluster-id-2" # priority 2 cluster - prioritization is enabled
+    }
   }
 }
 
@@ -38,6 +45,13 @@ resource "castai_commitments" "azure_test" {
     prioritization = false
     allowed_usage  = 0.9
     status         = "Active"
+
+    assignments {
+      cluster_id = "cluster-id-3"
+    }
+    assignments {
+      cluster_id = "cluster-id-4"
+    }
   }
 }
 ```
@@ -68,6 +82,7 @@ Required:
 Optional:
 
 - `allowed_usage` (Number) Allowed usage of the commitment. The value is between 0 (0%) and 1 (100%).
+- `assignments` (Block List) List of assigned clusters for the commitment. If prioritization is enabled, the order of the assignments indicates the priority. The first assignment has the highest priority. (see [below for nested schema](#nestedblock--commitment_configs--assignments))
 - `prioritization` (Boolean) If enabled, it's possible to assign priorities to the assigned clusters.
 - `status` (String) Status of the commitment in CAST AI.
 
@@ -82,6 +97,18 @@ Required:
 Optional:
 
 - `type` (String) Type of the commitment to match. For compute resources, it's the type of the machine.
+
+
+<a id="nestedblock--commitment_configs--assignments"></a>
+### Nested Schema for `commitment_configs.assignments`
+
+Required:
+
+- `cluster_id` (String) ID of the cluster to assign the commitment to.
+
+Read-Only:
+
+- `priority` (Number) Priority of the assignment. The lower the value, the higher the priority. 1 is the highest priority.
 
 
 
@@ -100,6 +127,7 @@ Optional:
 Read-Only:
 
 - `allowed_usage` (Number)
+- `assignments` (List of Object) (see [below for nested schema](#nestedobjatt--azure_reservations--assignments))
 - `count` (Number)
 - `end_timestamp` (String)
 - `id` (String)
@@ -116,6 +144,15 @@ Read-Only:
 - `start_timestamp` (String)
 - `status` (String)
 
+<a id="nestedobjatt--azure_reservations--assignments"></a>
+### Nested Schema for `azure_reservations.assignments`
+
+Read-Only:
+
+- `cluster_id` (String)
+- `priority` (Number)
+
+
 
 <a id="nestedatt--gcp_cuds"></a>
 ### Nested Schema for `gcp_cuds`
@@ -123,6 +160,7 @@ Read-Only:
 Read-Only:
 
 - `allowed_usage` (Number)
+- `assignments` (List of Object) (see [below for nested schema](#nestedobjatt--gcp_cuds--assignments))
 - `cpu` (Number)
 - `cud_id` (String)
 - `cud_status` (String)
@@ -136,5 +174,13 @@ Read-Only:
 - `start_timestamp` (String)
 - `status` (String)
 - `type` (String)
+
+<a id="nestedobjatt--gcp_cuds--assignments"></a>
+### Nested Schema for `gcp_cuds.assignments`
+
+Read-Only:
+
+- `cluster_id` (String)
+- `priority` (Number)
 
 

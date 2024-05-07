@@ -19,10 +19,11 @@ type (
 	// Terraform SDK's diff setter uses mapstructure under the hood
 
 	castCommitmentFields struct {
-		ID             *string  `mapstructure:"id,omitempty"` // ID of the commitment
-		AllowedUsage   *float32 `mapstructure:"allowed_usage,omitempty"`
-		Prioritization *bool    `mapstructure:"prioritization,omitempty"`
-		Status         *string  `mapstructure:"status,omitempty"`
+		ID             *string                         `mapstructure:"id,omitempty"` // ID of the commitment
+		AllowedUsage   *float32                        `mapstructure:"allowed_usage,omitempty"`
+		Prioritization *bool                           `mapstructure:"prioritization,omitempty"`
+		Status         *string                         `mapstructure:"status,omitempty"`
+		Assignments    []*commitmentAssignmentResource `mapstructure:"assignments,omitempty"`
 	}
 
 	gcpCUDResource struct {
@@ -70,11 +71,16 @@ type (
 		Prioritization *bool                              `mapstructure:"prioritization,omitempty"`
 		Status         *string                            `mapstructure:"status,omitempty"`
 		AllowedUsage   *float32                           `mapstructure:"allowed_usage,omitempty"`
+		Assignments    []*commitmentAssignmentResource    `mapstructure:"assignments,omitempty"`
 	}
 	commitmentConfigMatcherResource struct {
 		Name   string  `mapstructure:"name"`
 		Type   *string `mapstructure:"type,omitempty"`
 		Region *string `mapstructure:"region,omitempty"`
+	}
+	commitmentAssignmentResource struct {
+		ClusterID string `mapstructure:"cluster_id"`
+		Priority  *int   `mapstructure:"priority,omitempty"`
 	}
 )
 
@@ -128,7 +134,23 @@ func (m *commitmentConfigMatcherResource) Validate() error {
 	return nil
 }
 
-func mapCommitmentToCUDResource(c sdk.CastaiInventoryV1beta1Commitment) (*gcpCUDResource, error) {
+func mapCommitmentAssignmentsToResources(
+	input []sdk.CastaiInventoryV1beta1CommitmentAssignment,
+	prioritizationEnabled bool,
+) []*commitmentAssignmentResource {
+	return lo.Map(input, func(a sdk.CastaiInventoryV1beta1CommitmentAssignment, _ int) *commitmentAssignmentResource {
+		res := &commitmentAssignmentResource{ClusterID: lo.FromPtr(a.ClusterId)}
+		if prioritizationEnabled && a.Priority != nil {
+			res.Priority = lo.ToPtr(int(*a.Priority))
+		}
+		return res
+	})
+}
+
+func mapCommitmentToCUDResource(
+	c sdk.CastaiInventoryV1beta1Commitment,
+	as []sdk.CastaiInventoryV1beta1CommitmentAssignment,
+) (*gcpCUDResource, error) {
 	if c.GcpResourceCudContext == nil {
 		return nil, errors.New("missing GCP resource CUD context")
 	}
@@ -163,6 +185,7 @@ func mapCommitmentToCUDResource(c sdk.CastaiInventoryV1beta1Commitment) (*gcpCUD
 			AllowedUsage:   c.AllowedUsage,
 			Prioritization: c.Prioritization,
 			Status:         (*string)(c.Status),
+			Assignments:    mapCommitmentAssignmentsToResources(as, lo.FromPtr(c.Prioritization)),
 		},
 		CUDID:          lo.FromPtr(c.GcpResourceCudContext.CudId),
 		CUDStatus:      lo.FromPtr(c.GcpResourceCudContext.Status),
@@ -177,7 +200,10 @@ func mapCommitmentToCUDResource(c sdk.CastaiInventoryV1beta1Commitment) (*gcpCUD
 	}, nil
 }
 
-func mapCommitmentToReservationResource(c sdk.CastaiInventoryV1beta1Commitment) (*azureReservationResource, error) {
+func mapCommitmentToReservationResource(
+	c sdk.CastaiInventoryV1beta1Commitment,
+	as []sdk.CastaiInventoryV1beta1CommitmentAssignment,
+) (*azureReservationResource, error) {
 	if c.AzureReservationContext == nil {
 		return nil, errors.New("missing azure resource reservation context")
 	}
@@ -195,6 +221,7 @@ func mapCommitmentToReservationResource(c sdk.CastaiInventoryV1beta1Commitment) 
 			AllowedUsage:   c.AllowedUsage,
 			Prioritization: c.Prioritization,
 			Status:         (*string)(c.Status),
+			Assignments:    mapCommitmentAssignmentsToResources(as, lo.FromPtr(c.Prioritization)),
 		},
 		Count:              int(lo.FromPtr(c.AzureReservationContext.Count)),
 		ReservationID:      lo.FromPtr(c.AzureReservationContext.Id),
@@ -261,6 +288,10 @@ func mapCUDImportToResource(
 		res.AllowedUsage = cudWithCfg.Config.AllowedUsage
 		res.Prioritization = cudWithCfg.Config.Prioritization
 		res.Status = cudWithCfg.Config.Status
+		res.Assignments = cudWithCfg.Config.Assignments
+		if lo.FromPtr(cudWithCfg.Config.Prioritization) {
+			assignPrioritiesToAssignments(res.Assignments)
+		}
 	}
 	return res, nil
 }
@@ -298,6 +329,10 @@ func mapReservationImportToResource(
 		res.AllowedUsage = cudWithCfg.Config.AllowedUsage
 		res.Prioritization = cudWithCfg.Config.Prioritization
 		res.Status = cudWithCfg.Config.Status
+		res.Assignments = cudWithCfg.Config.Assignments
+		if lo.FromPtr(cudWithCfg.Config.Prioritization) {
+			assignPrioritiesToAssignments(res.Assignments)
+		}
 	}
 
 	return res, nil
@@ -557,6 +592,12 @@ func sortCommitmentResources[R commitmentResource](toSort, targetOrder []R) {
 		}
 		return indexI < indexJ
 	})
+}
+
+func assignPrioritiesToAssignments(assignments []*commitmentAssignmentResource) {
+	for i, a := range assignments {
+		a.Priority = lo.ToPtr(i + 1)
+	}
 }
 
 // castaiGCPCommitmentImport is a wrapper around sdk.CastaiInventoryV1beta1GCPCommitmentImport implementing the cud interface

@@ -40,18 +40,27 @@ func TestMapCommitmentToCUDResource(t *testing.T) {
 	}
 
 	tests := map[string]struct {
-		input    sdk.CastaiInventoryV1beta1Commitment
-		expected *gcpCUDResource
-		err      error
+		input       sdk.CastaiInventoryV1beta1Commitment
+		assignments []sdk.CastaiInventoryV1beta1CommitmentAssignment
+		expected    *gcpCUDResource
+		err         error
 	}{
 		"should succeed as all the fields are set": {
 			input: makeCommitment(),
+			assignments: []sdk.CastaiInventoryV1beta1CommitmentAssignment{
+				{ClusterId: lo.ToPtr("cluster-id-1")},
+				{ClusterId: lo.ToPtr("cluster-id-2")},
+			},
 			expected: &gcpCUDResource{
 				castCommitmentFields: castCommitmentFields{
 					ID:             lo.ToPtr(id1.String()),
 					AllowedUsage:   lo.ToPtr[float32](0.5),
 					Prioritization: lo.ToPtr(true),
 					Status:         lo.ToPtr("ACTIVE"),
+					Assignments: []*commitmentAssignmentResource{
+						{ClusterID: "cluster-id-1"},
+						{ClusterID: "cluster-id-2"},
+					},
 				},
 				CUDID:          "123456",
 				CUDStatus:      "ACTIVE",
@@ -79,12 +88,20 @@ func TestMapCommitmentToCUDResource(t *testing.T) {
 				c.GcpResourceCudContext.Cpu = nil
 				return c
 			}(),
+			assignments: []sdk.CastaiInventoryV1beta1CommitmentAssignment{
+				{ClusterId: lo.ToPtr("cluster-id-1")},
+				{ClusterId: lo.ToPtr("cluster-id-2")},
+			},
 			expected: &gcpCUDResource{
 				castCommitmentFields: castCommitmentFields{
 					ID:             lo.ToPtr(id1.String()),
 					AllowedUsage:   lo.ToPtr[float32](0.5),
 					Prioritization: lo.ToPtr(true),
 					Status:         lo.ToPtr("ACTIVE"),
+					Assignments: []*commitmentAssignmentResource{
+						{ClusterID: "cluster-id-1"},
+						{ClusterID: "cluster-id-2"},
+					},
 				},
 				CUDID:          "123456",
 				CUDStatus:      "ACTIVE",
@@ -103,12 +120,20 @@ func TestMapCommitmentToCUDResource(t *testing.T) {
 				c.GcpResourceCudContext.MemoryMb = nil
 				return c
 			}(),
+			assignments: []sdk.CastaiInventoryV1beta1CommitmentAssignment{
+				{ClusterId: lo.ToPtr("cluster-id-1")},
+				{ClusterId: lo.ToPtr("cluster-id-2")},
+			},
 			expected: &gcpCUDResource{
 				castCommitmentFields: castCommitmentFields{
 					ID:             lo.ToPtr(id1.String()),
 					AllowedUsage:   lo.ToPtr[float32](0.5),
 					Prioritization: lo.ToPtr(true),
 					Status:         lo.ToPtr("ACTIVE"),
+					Assignments: []*commitmentAssignmentResource{
+						{ClusterID: "cluster-id-1"},
+						{ClusterID: "cluster-id-2"},
+					},
 				},
 				CUDID:          "123456",
 				CUDStatus:      "ACTIVE",
@@ -141,7 +166,7 @@ func TestMapCommitmentToCUDResource(t *testing.T) {
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
 			r := require.New(t)
-			actual, err := mapCommitmentToCUDResource(tt.input)
+			actual, err := mapCommitmentToCUDResource(tt.input, tt.assignments)
 			if tt.err == nil {
 				r.NoError(err)
 				r.NotNil(actual)
@@ -187,18 +212,27 @@ func TestMapCommitmentToReservationResource(t *testing.T) {
 	}
 
 	tests := map[string]struct {
-		input    sdk.CastaiInventoryV1beta1Commitment
-		expected *azureReservationResource
-		err      error
+		input       sdk.CastaiInventoryV1beta1Commitment
+		expected    *azureReservationResource
+		assignments []sdk.CastaiInventoryV1beta1CommitmentAssignment
+		err         error
 	}{
 		"should succeed as all the fields are set": {
 			input: makeCommitment(),
+			assignments: []sdk.CastaiInventoryV1beta1CommitmentAssignment{
+				{ClusterId: lo.ToPtr("cluster-id-1")},
+				{ClusterId: lo.ToPtr("cluster-id-2")},
+			},
 			expected: &azureReservationResource{
 				castCommitmentFields: castCommitmentFields{
 					ID:             lo.ToPtr(id1.String()),
 					AllowedUsage:   lo.ToPtr[float32](0.5),
 					Prioritization: lo.ToPtr(true),
 					Status:         lo.ToPtr("ACTIVE"),
+					Assignments: []*commitmentAssignmentResource{
+						{ClusterID: "cluster-id-1"},
+						{ClusterID: "cluster-id-2"},
+					},
 				},
 				Count:              2,
 				ReservationID:      reservationID.String(),
@@ -226,7 +260,7 @@ func TestMapCommitmentToReservationResource(t *testing.T) {
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
 			r := require.New(t)
-			actual, err := mapCommitmentToReservationResource(tt.input)
+			actual, err := mapCommitmentToReservationResource(tt.input, tt.assignments)
 			if tt.err == nil {
 				r.NoError(err)
 				r.NotNil(actual)
@@ -882,6 +916,10 @@ func TestMapConfiguredCUDImportsToResources(t *testing.T) {
 					Prioritization: lo.ToPtr(true),
 					Status:         lo.ToPtr("ACTIVE"),
 					AllowedUsage:   lo.ToPtr[float32](0.5),
+					Assignments: []*commitmentAssignmentResource{
+						{ClusterID: "cluster-1"},
+						{ClusterID: "cluster-2"},
+					},
 				},
 			},
 			expected: []*gcpCUDResource{
@@ -890,6 +928,10 @@ func TestMapConfiguredCUDImportsToResources(t *testing.T) {
 						AllowedUsage:   lo.ToPtr[float32](0.5),
 						Prioritization: lo.ToPtr(true),
 						Status:         lo.ToPtr("ACTIVE"),
+						Assignments: []*commitmentAssignmentResource{
+							{ClusterID: "cluster-1", Priority: lo.ToPtr(1)},
+							{ClusterID: "cluster-2", Priority: lo.ToPtr(2)},
+						},
 					},
 					CUDID:          lo.FromPtr(testGCPCommitmentImport.Id),
 					CUDStatus:      lo.FromPtr(testGCPCommitmentImport.Status),
@@ -979,6 +1021,10 @@ func TestMapConfiguredReservationImportsToResources(t *testing.T) {
 					Prioritization: lo.ToPtr(true),
 					Status:         lo.ToPtr("ACTIVE"),
 					AllowedUsage:   lo.ToPtr[float32](0.5),
+					Assignments: []*commitmentAssignmentResource{
+						{ClusterID: "cluster-1"},
+						{ClusterID: "cluster-2"},
+					},
 				},
 			},
 			expected: []*azureReservationResource{
@@ -987,6 +1033,10 @@ func TestMapConfiguredReservationImportsToResources(t *testing.T) {
 						AllowedUsage:   lo.ToPtr[float32](0.5),
 						Prioritization: lo.ToPtr(true),
 						Status:         lo.ToPtr("ACTIVE"),
+						Assignments: []*commitmentAssignmentResource{
+							{ClusterID: "cluster-1", Priority: lo.ToPtr(1)},
+							{ClusterID: "cluster-2", Priority: lo.ToPtr(2)},
+						},
 					},
 					Count:              int(lo.FromPtr(testAzureCommitmentImport.Quantity)),
 					ReservationID:      lo.FromPtr(testAzureCommitmentImport.ReservationId),
