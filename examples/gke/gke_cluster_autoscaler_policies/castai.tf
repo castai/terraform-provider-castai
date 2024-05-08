@@ -109,7 +109,6 @@ module "castai-gke-cluster" {
         instance_families = {
           exclude = ["e2"]
         }
-        compute_optimized = true
         compute_optimized_status = "disabled"
         storage_optimized_status = "disabled"
         # Optional: define custom priority for instances selection.

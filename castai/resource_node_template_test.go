@@ -587,7 +587,7 @@ func testAccNodeTemplateConfig(rName, clusterName string) string {
 					include_names = []
 					exclude_names = []
 					manufacturers = ["NVIDIA"]
-				}
+				}	
 
 				custom_priority {
 					instance_families = ["c", "d"]

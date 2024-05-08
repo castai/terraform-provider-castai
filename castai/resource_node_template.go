@@ -1080,7 +1080,6 @@ func toTemplateConstraints(obj map[string]any) *sdk.NodetemplatesV1TemplateConst
 	}
 
 	out := &sdk.NodetemplatesV1TemplateConstraints{}
-
 	if v, ok := obj[FieldNodeTemplateComputeOptimizedStatus].(string); ok {
 		switch v {
 		case Enabled:
@@ -1091,7 +1090,6 @@ func toTemplateConstraints(obj map[string]any) *sdk.NodetemplatesV1TemplateConst
 			out.ComputeOptimized = nil
 		}
 	}
-
 	if v, ok := obj[FieldNodeTemplateFallbackRestoreRateSeconds].(int); ok {
 		out.FallbackRestoreRateSeconds = toPtr(int32(v))
 	}
@@ -1129,7 +1127,6 @@ func toTemplateConstraints(obj map[string]any) *sdk.NodetemplatesV1TemplateConst
 			out.Spot = toPtr(!v)
 		}
 	}
-
 	if v, ok := obj[FieldNodeTemplateStorageOptimizedStatus].(string); ok {
 		switch v {
 		case Enabled:
@@ -1140,7 +1137,6 @@ func toTemplateConstraints(obj map[string]any) *sdk.NodetemplatesV1TemplateConst
 			out.StorageOptimized = nil
 		}
 	}
-
 	if v, ok := obj[FieldNodeTemplateUseSpotFallbacks].(bool); ok {
 		out.UseSpotFallbacks = toPtr(v)
 	}
