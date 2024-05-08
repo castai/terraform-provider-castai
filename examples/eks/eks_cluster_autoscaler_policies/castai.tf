@@ -153,7 +153,7 @@ module "castai-eks-cluster" {
         }
         compute_optimized_status = "disabled"
         storage_optimized_status = "disabled"
-        is_gpu_only       = false
+        is_gpu_only              = false
 
         # Optional: define custom priority for instances selection.
         #
