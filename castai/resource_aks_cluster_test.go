@@ -142,9 +142,7 @@ data "azurerm_subnet" "internal" {
   resource_group_name  = %[2]q 
 }
 
-provider "azuread" {
-  tenant_id = data.azurerm_subscription.current.tenant_id
-}
+provider "azuread" {}
 
 // Azure RM
 resource "azurerm_role_definition" "castai" {

@@ -22,7 +22,7 @@ format-tf:
 .PHONY: generate-sdk
 generate-sdk:
 	@echo "==> Generating castai sdk client"
-	@API_TAGS=ExternalClusterAPI,PoliciesAPI,NodeConfigurationAPI,NodeTemplatesAPI,AuthTokenAPI,ScheduledRebalancingAPI,InventoryAPI,UsersAPI,OperationsAPI,EvictorAPI,SSOAPI go generate castai/sdk/generate.go
+	@API_TAGS=ExternalClusterAPI,PoliciesAPI,NodeConfigurationAPI,NodeTemplatesAPI,AuthTokenAPI,ScheduledRebalancingAPI,InventoryAPI,UsersAPI,OperationsAPI,EvictorAPI,SSOAPI,CommitmentsAPI go generate castai/sdk/generate.go
 
 # The following command also rewrites existing documentation
 .PHONY: generate-docs

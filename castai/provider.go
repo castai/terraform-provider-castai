@@ -47,6 +47,7 @@ func Provider(version string) *schema.Provider {
 			"castai_node_configuration_default": resourceNodeConfigurationDefault(),
 			"castai_eks_user_arn":               resourceEKSClusterUserARN(),
 			"castai_reservations":               resourceReservations(),
+			"castai_commitments":                resourceCommitments(),
 			"castai_organization_members":       resourceOrganizationMembers(),
 			"castai_sso_connection":             resourceSSOConnection(),
 		},
