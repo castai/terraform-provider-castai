@@ -3,6 +3,7 @@ package castai
 import (
 	"errors"
 	"fmt"
+	"math"
 	"path"
 	"strconv"
 	"strings"
@@ -21,7 +22,7 @@ type (
 	// NOTE: This type needs to be exported for mapstructure's `squash` tag to work properly
 	CASTCommitmentFields struct {
 		ID             *string                         `mapstructure:"id,omitempty"` // ID of the commitment
-		AllowedUsage   *float32                        `mapstructure:"allowed_usage,omitempty"`
+		AllowedUsage   *float64                        `mapstructure:"allowed_usage,omitempty"`
 		Prioritization *bool                           `mapstructure:"prioritization,omitempty"`
 		Status         *string                         `mapstructure:"status,omitempty"`
 		Assignments    []*commitmentAssignmentResource `mapstructure:"assignments,omitempty"`
@@ -71,7 +72,7 @@ type (
 		Matcher        []*commitmentConfigMatcherResource `mapstructure:"matcher,omitempty"`
 		Prioritization *bool                              `mapstructure:"prioritization,omitempty"`
 		Status         *string                            `mapstructure:"status,omitempty"`
-		AllowedUsage   *float32                           `mapstructure:"allowed_usage,omitempty"`
+		AllowedUsage   *float64                           `mapstructure:"allowed_usage,omitempty"`
 		Assignments    []*commitmentAssignmentResource    `mapstructure:"assignments,omitempty"`
 	}
 	commitmentConfigMatcherResource struct {
@@ -183,7 +184,7 @@ func mapCommitmentToCUDResource(
 	return &gcpCUDResource{
 		CASTCommitmentFields: CASTCommitmentFields{
 			ID:             c.Id,
-			AllowedUsage:   c.AllowedUsage,
+			AllowedUsage:   float32PtrToFloat64Ptr(c.AllowedUsage, 2),
 			Prioritization: c.Prioritization,
 			Status:         (*string)(c.Status),
 			Assignments:    mapCommitmentAssignmentsToResources(as, lo.FromPtr(c.Prioritization)),
@@ -219,7 +220,7 @@ func mapCommitmentToReservationResource(
 	return &azureReservationResource{
 		CASTCommitmentFields: CASTCommitmentFields{
 			ID:             c.Id,
-			AllowedUsage:   c.AllowedUsage,
+			AllowedUsage:   float32PtrToFloat64Ptr(c.AllowedUsage, 2),
 			Prioritization: c.Prioritization,
 			Status:         (*string)(c.Status),
 			Assignments:    mapCommitmentAssignmentsToResources(as, lo.FromPtr(c.Prioritization)),
@@ -507,7 +508,7 @@ func mapCommitmentImportWithConfigToUpdateRequest(
 	}
 	if c.Config != nil {
 		if c.Config.AllowedUsage != nil {
-			req.AllowedUsage = c.Config.AllowedUsage
+			req.AllowedUsage = lo.ToPtr(float32(*c.Config.AllowedUsage))
 		}
 		if c.Config.Prioritization != nil {
 			req.Prioritization = c.Config.Prioritization
@@ -658,4 +659,12 @@ func (c castaiCommitment) getKey() commitmentConfigMatcherKey {
 		res.typ = *c.AzureReservationContext.InstanceType
 	}
 	return res
+}
+
+func float32PtrToFloat64Ptr(f *float32, prec int) *float64 {
+	if f == nil {
+		return nil
+	}
+	mul := math.Pow10(prec)
+	return lo.ToPtr(math.Round(float64(*f)*mul) / mul)
 }

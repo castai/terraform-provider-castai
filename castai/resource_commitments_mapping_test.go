@@ -54,7 +54,7 @@ func TestMapCommitmentToCUDResource(t *testing.T) {
 			expected: &gcpCUDResource{
 				CASTCommitmentFields: CASTCommitmentFields{
 					ID:             lo.ToPtr(id1.String()),
-					AllowedUsage:   lo.ToPtr[float32](0.5),
+					AllowedUsage:   lo.ToPtr(0.5),
 					Prioritization: lo.ToPtr(true),
 					Status:         lo.ToPtr("ACTIVE"),
 					Assignments: []*commitmentAssignmentResource{
@@ -95,7 +95,7 @@ func TestMapCommitmentToCUDResource(t *testing.T) {
 			expected: &gcpCUDResource{
 				CASTCommitmentFields: CASTCommitmentFields{
 					ID:             lo.ToPtr(id1.String()),
-					AllowedUsage:   lo.ToPtr[float32](0.5),
+					AllowedUsage:   lo.ToPtr(0.5),
 					Prioritization: lo.ToPtr(true),
 					Status:         lo.ToPtr("ACTIVE"),
 					Assignments: []*commitmentAssignmentResource{
@@ -127,7 +127,7 @@ func TestMapCommitmentToCUDResource(t *testing.T) {
 			expected: &gcpCUDResource{
 				CASTCommitmentFields: CASTCommitmentFields{
 					ID:             lo.ToPtr(id1.String()),
-					AllowedUsage:   lo.ToPtr[float32](0.5),
+					AllowedUsage:   lo.ToPtr(0.5),
 					Prioritization: lo.ToPtr(true),
 					Status:         lo.ToPtr("ACTIVE"),
 					Assignments: []*commitmentAssignmentResource{
@@ -226,7 +226,7 @@ func TestMapCommitmentToReservationResource(t *testing.T) {
 			expected: &azureReservationResource{
 				CASTCommitmentFields: CASTCommitmentFields{
 					ID:             lo.ToPtr(id1.String()),
-					AllowedUsage:   lo.ToPtr[float32](0.5),
+					AllowedUsage:   lo.ToPtr(0.5),
 					Prioritization: lo.ToPtr(true),
 					Status:         lo.ToPtr("ACTIVE"),
 					Assignments: []*commitmentAssignmentResource{
@@ -333,7 +333,7 @@ func TestMapCUDImportToResource(t *testing.T) {
 					},
 					Prioritization: lo.ToPtr(true),
 					Status:         lo.ToPtr("ACTIVE"),
-					AllowedUsage:   lo.ToPtr[float32](0.7),
+					AllowedUsage:   lo.ToPtr(0.7),
 				}
 				return c
 			}(),
@@ -352,7 +352,7 @@ func TestMapCUDImportToResource(t *testing.T) {
 				CASTCommitmentFields: CASTCommitmentFields{
 					Prioritization: lo.ToPtr(true),
 					Status:         lo.ToPtr("ACTIVE"),
-					AllowedUsage:   lo.ToPtr[float32](0.7),
+					AllowedUsage:   lo.ToPtr(0.7),
 				},
 			},
 		},
@@ -474,13 +474,13 @@ func TestMapReservationImportToResource(t *testing.T) {
 					},
 					Prioritization: lo.ToPtr(true),
 					Status:         lo.ToPtr("ACTIVE"),
-					AllowedUsage:   lo.ToPtr[float32](0.7),
+					AllowedUsage:   lo.ToPtr(0.7),
 				}
 				return c
 			}(),
 			expected: &azureReservationResource{
 				CASTCommitmentFields: CASTCommitmentFields{
-					AllowedUsage:   lo.ToPtr[float32](0.7),
+					AllowedUsage:   lo.ToPtr(0.7),
 					Prioritization: lo.ToPtr(true),
 					Status:         lo.ToPtr("ACTIVE"),
 				},
@@ -605,7 +605,7 @@ func TestMapConfigsToCommitments(t *testing.T) {
 			},
 			Prioritization: lo.ToPtr(true),
 			Status:         lo.ToPtr("ACTIVE"),
-			AllowedUsage:   lo.ToPtr[float32](0.5),
+			AllowedUsage:   lo.ToPtr(0.5),
 		}
 		cudCfg2 = &commitmentConfigResource{
 			Matcher: []*commitmentConfigMatcherResource{
@@ -617,7 +617,7 @@ func TestMapConfigsToCommitments(t *testing.T) {
 			},
 			Prioritization: lo.ToPtr(false),
 			Status:         lo.ToPtr("INACTIVE"),
-			AllowedUsage:   lo.ToPtr[float32](0.7),
+			AllowedUsage:   lo.ToPtr(0.7),
 		}
 		cudCfg3 = &commitmentConfigResource{
 			Matcher: []*commitmentConfigMatcherResource{
@@ -629,7 +629,7 @@ func TestMapConfigsToCommitments(t *testing.T) {
 			},
 			Prioritization: lo.ToPtr(true),
 			Status:         lo.ToPtr("ACTIVE"),
-			AllowedUsage:   lo.ToPtr[float32](1),
+			AllowedUsage:   lo.ToPtr[float64](1),
 		}
 
 		reservationImport1 = sdk.CastaiInventoryV1beta1AzureReservationImport{
@@ -661,7 +661,7 @@ func TestMapConfigsToCommitments(t *testing.T) {
 			},
 			Prioritization: lo.ToPtr(true),
 			Status:         lo.ToPtr("ACTIVE"),
-			AllowedUsage:   lo.ToPtr[float32](0.5),
+			AllowedUsage:   lo.ToPtr(0.5),
 		}
 		reservationCfg2 = &commitmentConfigResource{
 			Matcher: []*commitmentConfigMatcherResource{
@@ -673,7 +673,7 @@ func TestMapConfigsToCommitments(t *testing.T) {
 			},
 			Prioritization: lo.ToPtr(false),
 			Status:         lo.ToPtr("INACTIVE"),
-			AllowedUsage:   lo.ToPtr[float32](0.7),
+			AllowedUsage:   lo.ToPtr(0.7),
 		}
 		reservationCfg3 = &commitmentConfigResource{
 			Matcher: []*commitmentConfigMatcherResource{
@@ -685,7 +685,7 @@ func TestMapConfigsToCommitments(t *testing.T) {
 			},
 			Prioritization: lo.ToPtr(true),
 			Status:         lo.ToPtr("ACTIVE"),
-			AllowedUsage:   lo.ToPtr[float32](1),
+			AllowedUsage:   lo.ToPtr[float64](1),
 		}
 	)
 
@@ -892,7 +892,7 @@ func TestMapConfiguredCUDImportsToResources(t *testing.T) {
 							Name: "test-cud-2",
 						},
 					},
-					AllowedUsage: lo.ToPtr[float32](0.45),
+					AllowedUsage: lo.ToPtr(0.45),
 				},
 			},
 			cuds: []sdk.CastaiInventoryV1beta1GCPCommitmentImport{
@@ -915,7 +915,7 @@ func TestMapConfiguredCUDImportsToResources(t *testing.T) {
 					},
 					Prioritization: lo.ToPtr(true),
 					Status:         lo.ToPtr("ACTIVE"),
-					AllowedUsage:   lo.ToPtr[float32](0.5),
+					AllowedUsage:   lo.ToPtr(0.5),
 					Assignments: []*commitmentAssignmentResource{
 						{ClusterID: "cluster-1"},
 						{ClusterID: "cluster-2"},
@@ -925,7 +925,7 @@ func TestMapConfiguredCUDImportsToResources(t *testing.T) {
 			expected: []*gcpCUDResource{
 				{
 					CASTCommitmentFields: CASTCommitmentFields{
-						AllowedUsage:   lo.ToPtr[float32](0.5),
+						AllowedUsage:   lo.ToPtr(0.5),
 						Prioritization: lo.ToPtr(true),
 						Status:         lo.ToPtr("ACTIVE"),
 						Assignments: []*commitmentAssignmentResource{
@@ -997,7 +997,7 @@ func TestMapConfiguredReservationImportsToResources(t *testing.T) {
 							Name: "test-reservation-2",
 						},
 					},
-					AllowedUsage: lo.ToPtr[float32](0.45),
+					AllowedUsage: lo.ToPtr(0.45),
 				},
 			},
 			cuds: []sdk.CastaiInventoryV1beta1AzureReservationImport{
@@ -1020,7 +1020,7 @@ func TestMapConfiguredReservationImportsToResources(t *testing.T) {
 					},
 					Prioritization: lo.ToPtr(true),
 					Status:         lo.ToPtr("ACTIVE"),
-					AllowedUsage:   lo.ToPtr[float32](0.5),
+					AllowedUsage:   lo.ToPtr(0.5),
 					Assignments: []*commitmentAssignmentResource{
 						{ClusterID: "cluster-1"},
 						{ClusterID: "cluster-2"},
@@ -1030,7 +1030,7 @@ func TestMapConfiguredReservationImportsToResources(t *testing.T) {
 			expected: []*azureReservationResource{
 				{
 					CASTCommitmentFields: CASTCommitmentFields{
-						AllowedUsage:   lo.ToPtr[float32](0.5),
+						AllowedUsage:   lo.ToPtr(0.5),
 						Prioritization: lo.ToPtr(true),
 						Status:         lo.ToPtr("ACTIVE"),
 						Assignments: []*commitmentAssignmentResource{
@@ -1113,7 +1113,7 @@ func TestMapCommitmentImportWithConfigToUpdateRequest(t *testing.T) {
 					},
 					Prioritization: lo.ToPtr(false),
 					Status:         lo.ToPtr("INACTIVE"),
-					AllowedUsage:   lo.ToPtr[float32](0.7),
+					AllowedUsage:   lo.ToPtr(0.7),
 				},
 			},
 			expected: sdk.CommitmentsAPIUpdateCommitmentJSONRequestBody{
@@ -1189,7 +1189,7 @@ func TestMapCommitmentImportWithConfigToUpdateRequest(t *testing.T) {
 					},
 					Prioritization: lo.ToPtr(false),
 					Status:         lo.ToPtr("INACTIVE"),
-					AllowedUsage:   lo.ToPtr[float32](0.7),
+					AllowedUsage:   lo.ToPtr(0.7),
 				},
 			},
 			expected: sdk.CommitmentsAPIUpdateCommitmentJSONRequestBody{
@@ -1347,3 +1347,33 @@ var (
 		Status:             lo.ToPtr("Succeeded"),
 	}
 )
+
+func TestFloat32PtrToFloat64Ptr(t *testing.T) {
+	tests := map[string]struct {
+		input     *float32
+		expected  *float64
+		precision int
+	}{
+		"should convert without rounding": {
+			input:     lo.ToPtr[float32](0.5),
+			expected:  lo.ToPtr[float64](0.5),
+			precision: 2,
+		},
+		"should convert and round": {
+			input:     lo.ToPtr[float32](0.5555),
+			expected:  lo.ToPtr[float64](0.56),
+			precision: 2,
+		},
+		"should convert nil to nil": {
+			input:    nil,
+			expected: nil,
+		},
+	}
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			r := require.New(t)
+			actual := float32PtrToFloat64Ptr(tt.input, tt.precision)
+			r.Equal(tt.expected, actual)
+		})
+	}
+}
