@@ -310,6 +310,14 @@ func resourceNodeConfiguration() *schema.Resource {
 							Description:      "Type of boot disk attached to the node. (See [disk types](https://cloud.google.com/compute/docs/disks#pdspecs)). One of: pd-standard, pd-balanced, pd-ssd, pd-extreme ",
 							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"pd-standard", "pd-balanced", "pd-ssd", "pd-extreme"}, false)),
 						},
+						"zones": {
+							Type:     schema.TypeList,
+							Optional: true,
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
+							Description: "List of preferred availability zones to choose from when provisioning new nodes.",
+						},
 					},
 				},
 			},
@@ -811,6 +819,9 @@ func toGKEConfig(obj map[string]interface{}) *sdk.NodeconfigV1GKEConfig {
 	if v, ok := obj["disk_type"].(string); ok && v != "" {
 		out.DiskType = toPtr(v)
 	}
+	if v, ok := obj["zones"].([]interface{}); ok {
+		out.Zones = toPtr(toStringList(v))
+	}
 
 	return out
 }
@@ -828,6 +839,9 @@ func flattenGKEConfig(config *sdk.NodeconfigV1GKEConfig) []map[string]interface{
 	}
 	if v := config.DiskType; v != nil {
 		m["disk_type"] = *v
+	}
+	if v := config.Zones; v != nil {
+		m["zones"] = *v
 	}
 
 	return []map[string]interface{}{m}
