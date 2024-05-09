@@ -6,9 +6,10 @@ resource "castai_commitments" "gcp_test" {
       type   = "COMPUTE_OPTIMIZED_C2D"
       name   = "test"
     }
-    prioritization = true
-    allowed_usage  = 0.6
-    status         = "Inactive"
+    prioritization   = true
+    allowed_usage    = 0.6
+    status           = "Inactive"
+    scaling_strategy = "Default"
 
     assignments {
       cluster_id = "cluster-id-1" # priority 1 cluster - prioritization is enabled
@@ -27,9 +28,10 @@ resource "castai_commitments" "azure_test" {
       type   = "Standard_D32as_v4"
       name   = "test-res-1"
     }
-    prioritization = false
-    allowed_usage  = 0.9
-    status         = "Active"
+    prioritization   = false
+    allowed_usage    = 0.9
+    status           = "Active"
+    scaling_strategy = "Default"
 
     assignments {
       cluster_id = "cluster-id-3"

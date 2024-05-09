@@ -21,11 +21,12 @@ type (
 
 	// NOTE: This type needs to be exported for mapstructure's `squash` tag to work properly
 	CASTCommitmentFields struct {
-		ID             *string                         `mapstructure:"id,omitempty"` // ID of the commitment
-		AllowedUsage   *float64                        `mapstructure:"allowed_usage,omitempty"`
-		Prioritization *bool                           `mapstructure:"prioritization,omitempty"`
-		Status         *string                         `mapstructure:"status,omitempty"`
-		Assignments    []*commitmentAssignmentResource `mapstructure:"assignments,omitempty"`
+		ID              *string                         `mapstructure:"id,omitempty"` // ID of the commitment
+		AllowedUsage    *float64                        `mapstructure:"allowed_usage,omitempty"`
+		Prioritization  *bool                           `mapstructure:"prioritization,omitempty"`
+		Status          *string                         `mapstructure:"status,omitempty"`
+		Assignments     []*commitmentAssignmentResource `mapstructure:"assignments,omitempty"`
+		ScalingStrategy *string                         `mapstructure:"scaling_strategy,omitempty"`
 	}
 
 	gcpCUDResource struct {
@@ -69,11 +70,12 @@ type (
 	}
 
 	commitmentConfigResource struct {
-		Matcher        []*commitmentConfigMatcherResource `mapstructure:"matcher,omitempty"`
-		Prioritization *bool                              `mapstructure:"prioritization,omitempty"`
-		Status         *string                            `mapstructure:"status,omitempty"`
-		AllowedUsage   *float64                           `mapstructure:"allowed_usage,omitempty"`
-		Assignments    []*commitmentAssignmentResource    `mapstructure:"assignments,omitempty"`
+		Matcher         []*commitmentConfigMatcherResource `mapstructure:"matcher,omitempty"`
+		Prioritization  *bool                              `mapstructure:"prioritization,omitempty"`
+		Status          *string                            `mapstructure:"status,omitempty"`
+		AllowedUsage    *float64                           `mapstructure:"allowed_usage,omitempty"`
+		Assignments     []*commitmentAssignmentResource    `mapstructure:"assignments,omitempty"`
+		ScalingStrategy *string                            `mapstructure:"scaling_strategy,omitempty"`
 	}
 	commitmentConfigMatcherResource struct {
 		Name   string  `mapstructure:"name"`
@@ -183,11 +185,12 @@ func mapCommitmentToCUDResource(
 
 	return &gcpCUDResource{
 		CASTCommitmentFields: CASTCommitmentFields{
-			ID:             c.Id,
-			AllowedUsage:   float32PtrToFloat64Ptr(c.AllowedUsage, 2),
-			Prioritization: c.Prioritization,
-			Status:         (*string)(c.Status),
-			Assignments:    mapCommitmentAssignmentsToResources(as, lo.FromPtr(c.Prioritization)),
+			ID:              c.Id,
+			AllowedUsage:    float32PtrToFloat64Ptr(c.AllowedUsage, 2),
+			Prioritization:  c.Prioritization,
+			Status:          (*string)(c.Status),
+			Assignments:     mapCommitmentAssignmentsToResources(as, lo.FromPtr(c.Prioritization)),
+			ScalingStrategy: (*string)(c.ScalingStrategy),
 		},
 		CUDID:          lo.FromPtr(c.GcpResourceCudContext.CudId),
 		CUDStatus:      lo.FromPtr(c.GcpResourceCudContext.Status),
@@ -219,11 +222,12 @@ func mapCommitmentToReservationResource(
 	}
 	return &azureReservationResource{
 		CASTCommitmentFields: CASTCommitmentFields{
-			ID:             c.Id,
-			AllowedUsage:   float32PtrToFloat64Ptr(c.AllowedUsage, 2),
-			Prioritization: c.Prioritization,
-			Status:         (*string)(c.Status),
-			Assignments:    mapCommitmentAssignmentsToResources(as, lo.FromPtr(c.Prioritization)),
+			ID:              c.Id,
+			AllowedUsage:    float32PtrToFloat64Ptr(c.AllowedUsage, 2),
+			Prioritization:  c.Prioritization,
+			Status:          (*string)(c.Status),
+			Assignments:     mapCommitmentAssignmentsToResources(as, lo.FromPtr(c.Prioritization)),
+			ScalingStrategy: (*string)(c.ScalingStrategy),
 		},
 		Count:              int(lo.FromPtr(c.AzureReservationContext.Count)),
 		ReservationID:      lo.FromPtr(c.AzureReservationContext.Id),
@@ -294,6 +298,7 @@ func mapCUDImportToResource(
 		if lo.FromPtr(cudWithCfg.Config.Prioritization) {
 			assignPrioritiesToAssignments(res.Assignments)
 		}
+		res.ScalingStrategy = cudWithCfg.Config.ScalingStrategy
 	}
 	return res, nil
 }
@@ -505,6 +510,7 @@ func mapCommitmentImportWithConfigToUpdateRequest(
 		Region:                  c.Commitment.Region,
 		StartDate:               c.Commitment.StartDate,
 		Status:                  c.Commitment.Status,
+		ScalingStrategy:         c.Commitment.ScalingStrategy,
 	}
 	if c.Config != nil {
 		if c.Config.AllowedUsage != nil {
@@ -515,6 +521,9 @@ func mapCommitmentImportWithConfigToUpdateRequest(
 		}
 		if c.Config.Status != nil {
 			req.Status = (*sdk.CastaiInventoryV1beta1CommitmentStatus)(c.Config.Status)
+		}
+		if c.Config.ScalingStrategy != nil {
+			req.ScalingStrategy = (*sdk.CastaiInventoryV1beta1CommitmentScalingStrategy)(c.Config.ScalingStrategy)
 		}
 	}
 	return req

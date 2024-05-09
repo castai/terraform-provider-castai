@@ -70,6 +70,12 @@ var (
 			Required:    true,
 			Description: "Region in which the CUD is available.",
 		},
+		"scaling_strategy": {
+			Type:             schema.TypeString,
+			Optional:         true,
+			Description:      "Scaling strategy of the commitment in CAST AI. One of: Default, CPUBased, RamBased",
+			ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"Default", "CPUBased", "RamBased"}, false)),
+		},
 	})
 
 	commitmentAssignmentsSchema = map[string]*schema.Schema{
@@ -175,6 +181,12 @@ func resourceCommitments() *schema.Resource {
 							Optional:         true,
 							Description:      "Allowed usage of the commitment. The value is between 0 (0%) and 1 (100%).",
 							ValidateDiagFunc: validation.ToDiagFunc(validation.FloatBetween(0, 1)),
+						},
+						"scaling_strategy": {
+							Type:             schema.TypeString,
+							Optional:         true,
+							Description:      "Scaling strategy of the commitment in CAST AI. One of: Default, CPUBased, RamBased",
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"Default", "CPUBased", "RamBased"}, false)),
 						},
 					}),
 				},
