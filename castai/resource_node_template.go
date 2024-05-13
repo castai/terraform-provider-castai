@@ -21,7 +21,7 @@ import (
 const (
 	FieldNodeTemplateArchitectures                            = "architectures"
 	FieldNodeTemplateComputeOptimized                         = "compute_optimized"
-	FieldNodeTemplateComputeOptimizedStatus                   = "compute_optimized_status"
+	FieldNodeTemplateComputeOptimizedState                    = "compute_optimized_state"
 	FieldNodeTemplateConfigurationId                          = "configuration_id"
 	FieldNodeTemplateConstraints                              = "constraints"
 	FieldNodeTemplateCustomInstancesEnabled                   = "custom_instances_enabled"
@@ -56,7 +56,7 @@ const (
 	FieldNodeTemplateSpotInterruptionPredictionsEnabled       = "spot_interruption_predictions_enabled"
 	FieldNodeTemplateSpotInterruptionPredictionsType          = "spot_interruption_predictions_type"
 	FieldNodeTemplateStorageOptimized                         = "storage_optimized"
-	FieldNodeTemplateStorageOptimizedStatus                   = "storage_optimized_status"
+	FieldNodeTemplateStorageOptimizedState                    = "storage_optimized_state"
 	FieldNodeTemplateUseSpotFallbacks                         = "use_spot_fallbacks"
 	FieldNodeTemplateCustomPriority                           = "custom_priority"
 	FieldNodeTemplateDedicatedNodeAffinity                    = "dedicated_node_affinity"
@@ -231,13 +231,13 @@ func resourceNodeTemplate() *schema.Resource {
 									{
 										Severity:      diag.Error,
 										Summary:       "Deprecated field `storage_optimized`",
-										Detail:        "Please use `storage_optimized_status` instead. See: https://github.com/castai/terraform-provider-castai#migrating-from-6xx-to-7xx",
+										Detail:        "Please use `storage_optimized_state` instead. See: https://github.com/castai/terraform-provider-castai#migrating-from-6xx-to-7xx",
 										AttributePath: path,
 									},
 								}
 							},
 						},
-						FieldNodeTemplateStorageOptimizedStatus: {
+						FieldNodeTemplateStorageOptimizedState: {
 							Type:             schema.TypeString,
 							Optional:         true,
 							Default:          "",
@@ -260,13 +260,13 @@ func resourceNodeTemplate() *schema.Resource {
 									{
 										Severity:      diag.Error,
 										Summary:       "Deprecated field `compute_optimized`",
-										Detail:        "Please use `compute_optimized_status` instead. See: https://github.com/castai/terraform-provider-castai#migrating-from-6xx-to-7xx",
+										Detail:        "Please use `compute_optimized_state` instead. See: https://github.com/castai/terraform-provider-castai#migrating-from-6xx-to-7xx",
 										AttributePath: path,
 									},
 								}
 							},
 						},
-						FieldNodeTemplateComputeOptimizedStatus: {
+						FieldNodeTemplateComputeOptimizedState: {
 							Type:             schema.TypeString,
 							Optional:         true,
 							Default:          "",
@@ -605,16 +605,16 @@ func flattenConstraints(c *sdk.NodetemplatesV1TemplateConstraints) ([]map[string
 	}
 	if c.ComputeOptimized != nil {
 		if lo.FromPtr(c.ComputeOptimized) {
-			out[FieldNodeTemplateComputeOptimizedStatus] = Enabled
+			out[FieldNodeTemplateComputeOptimizedState] = Enabled
 		} else {
-			out[FieldNodeTemplateComputeOptimizedStatus] = Disabled
+			out[FieldNodeTemplateComputeOptimizedState] = Disabled
 		}
 	}
 	if c.StorageOptimized != nil {
 		if lo.FromPtr(c.StorageOptimized) {
-			out[FieldNodeTemplateStorageOptimizedStatus] = Enabled
+			out[FieldNodeTemplateStorageOptimizedState] = Enabled
 		} else {
-			out[FieldNodeTemplateStorageOptimizedStatus] = Disabled
+			out[FieldNodeTemplateStorageOptimizedState] = Disabled
 		}
 	}
 	if c.Spot != nil {
@@ -1080,7 +1080,7 @@ func toTemplateConstraints(obj map[string]any) *sdk.NodetemplatesV1TemplateConst
 	}
 
 	out := &sdk.NodetemplatesV1TemplateConstraints{}
-	if v, ok := obj[FieldNodeTemplateComputeOptimizedStatus].(string); ok {
+	if v, ok := obj[FieldNodeTemplateComputeOptimizedState].(string); ok {
 		switch v {
 		case Enabled:
 			out.ComputeOptimized = toPtr(true)
@@ -1127,7 +1127,7 @@ func toTemplateConstraints(obj map[string]any) *sdk.NodetemplatesV1TemplateConst
 			out.Spot = toPtr(!v)
 		}
 	}
-	if v, ok := obj[FieldNodeTemplateStorageOptimizedStatus].(string); ok {
+	if v, ok := obj[FieldNodeTemplateStorageOptimizedState].(string); ok {
 		switch v {
 		case Enabled:
 			out.StorageOptimized = toPtr(true)

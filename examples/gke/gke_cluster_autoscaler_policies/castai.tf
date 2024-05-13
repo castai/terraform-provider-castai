@@ -109,8 +109,8 @@ module "castai-gke-cluster" {
         instance_families = {
           exclude = ["e2"]
         }
-        compute_optimized_status = "disabled"
-        storage_optimized_status = "disabled"
+        compute_optimized_state = "disabled"
+        storage_optimized_state = "disabled"
         # Optional: define custom priority for instances selection.
         #
         # 1. Prioritize C2D and C2 spot instances above all else, regardless of price.

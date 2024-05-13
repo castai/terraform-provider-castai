@@ -114,8 +114,8 @@ module "castai-gke-cluster" {
         instance_families = {
           exclude = ["e2"]
         }
-        compute_optimized_status = "disabled"
-        storage_optimized_status = "disabled"
+        compute_optimized_state = "disabled"
+        storage_optimized_state = "disabled"
       }
 
       custom_instances_enabled = true
