@@ -22,42 +22,37 @@ const (
 	FieldReservationExpirationDate        = "expiration_date"
 	FieldReservationType                  = "type"
 	FieldReservationDeepLinkToReservation = "deep_link_to_reservation"
+	FieldReservationID                    = "reservation_id"
+	FieldReservationScopeResourceGroup    = "scope_resource_group"
+	FieldReservationScopeSubscription     = "scope_subscription"
+	FieldReservationScopeStatus           = "scope_status"
+	FieldReservationScope                 = "scope"
+	FieldReservationTerm                  = "term"
+	FieldReservationStatus                = "status"
 )
 
-var reservationResourceFields = []string{
-	FieldReservationName,
-	FieldReservationProvider,
-	FieldReservationRegion,
-	FieldReservationInstanceType,
-	FieldReservationPrice,
-	FieldReservationCount,
-	FieldReservationStartDate,
-	FieldReservationEndDate,
-	FieldReservationZoneId,
-	FieldReservationZoneName,
-	FieldReservationProductName,
-	FieldReservationQuantity,
-	FieldReservationPurchaseDate,
-	FieldReservationExpirationDate,
-	FieldReservationType,
-	FieldReservationDeepLinkToReservation,
-}
-
 var csvColumnAlias = map[string][]string{
-	FieldReservationName:                  {FieldReservationName},
-	FieldReservationProvider:              {FieldReservationProvider},
-	FieldReservationRegion:                {FieldReservationRegion},
-	FieldReservationInstanceType:          {FieldReservationInstanceType, FieldReservationProductName},
-	FieldReservationPrice:                 {FieldReservationPrice},
-	FieldReservationCount:                 {FieldReservationCount, FieldReservationQuantity},
-	FieldReservationStartDate:             {FieldReservationStartDate, FieldReservationPurchaseDate},
-	FieldReservationEndDate:               {FieldReservationEndDate, FieldReservationExpirationDate},
-	FieldReservationZoneId:                {FieldReservationZoneId},
-	FieldReservationZoneName:              {FieldReservationZoneName},
-	FieldReservationProductName:           {FieldReservationProductName},
-	FieldReservationQuantity:              {FieldReservationQuantity},
-	FieldReservationPurchaseDate:          {FieldReservationPurchaseDate},
-	FieldReservationExpirationDate:        {FieldReservationExpirationDate},
-	FieldReservationType:                  {FieldReservationType},
-	FieldReservationDeepLinkToReservation: {FieldReservationDeepLinkToReservation},
+	FieldReservationName:                  {},
+	FieldReservationProvider:              {},
+	FieldReservationRegion:                {},
+	FieldReservationInstanceType:          {FieldReservationProductName},
+	FieldReservationPrice:                 {},
+	FieldReservationCount:                 {FieldReservationQuantity},
+	FieldReservationStartDate:             {FieldReservationPurchaseDate},
+	FieldReservationEndDate:               {FieldReservationExpirationDate},
+	FieldReservationZoneId:                {},
+	FieldReservationZoneName:              {},
+	FieldReservationProductName:           {},
+	FieldReservationQuantity:              {},
+	FieldReservationPurchaseDate:          {},
+	FieldReservationExpirationDate:        {},
+	FieldReservationType:                  {},
+	FieldReservationDeepLinkToReservation: {},
+	FieldReservationID:                    {},
+	FieldReservationScopeResourceGroup:    {},
+	FieldReservationScopeSubscription:     {},
+	FieldReservationScopeStatus:           {},
+	FieldReservationTerm:                  {},
+	FieldReservationStatus:                {},
+	FieldReservationScope:                 {},
 }

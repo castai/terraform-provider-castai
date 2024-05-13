@@ -30,6 +30,24 @@ const (
 	CastaiInventoryV1beta1AttachableGPUDeviceManufacturerUNKNOWN CastaiInventoryV1beta1AttachableGPUDeviceManufacturer = "UNKNOWN"
 )
 
+// Defines values for CastaiInventoryV1beta1AzureReservationReservationPlan.
+const (
+	ONEYEAR   CastaiInventoryV1beta1AzureReservationReservationPlan = "ONE_YEAR"
+	THREEYEAR CastaiInventoryV1beta1AzureReservationReservationPlan = "THREE_YEAR"
+)
+
+// Defines values for CastaiInventoryV1beta1CommitmentStatus.
+const (
+	Active   CastaiInventoryV1beta1CommitmentStatus = "Active"
+	Inactive CastaiInventoryV1beta1CommitmentStatus = "Inactive"
+)
+
+// Defines values for CastaiInventoryV1beta1GCPResourceCUDCUDPlan.
+const (
+	THIRTYSIXMONTH CastaiInventoryV1beta1GCPResourceCUDCUDPlan = "THIRTY_SIX_MONTH"
+	TWELVEMONTH    CastaiInventoryV1beta1GCPResourceCUDCUDPlan = "TWELVE_MONTH"
+)
+
 // Defines values for CastaiInventoryV1beta1GPUDeviceManufacturer.
 const (
 	CastaiInventoryV1beta1GPUDeviceManufacturerAMD     CastaiInventoryV1beta1GPUDeviceManufacturer = "AMD"
@@ -310,6 +328,84 @@ type CastaiInventoryV1beta1AttachableGPUDevice struct {
 // GPU manufacturer.
 type CastaiInventoryV1beta1AttachableGPUDeviceManufacturer string
 
+// CastaiInventoryV1beta1AzureReservation defines model for castai.inventory.v1beta1.AzureReservation.
+type CastaiInventoryV1beta1AzureReservation struct {
+	Count                 *int32                                        `json:"count,omitempty"`
+	Id                    *string                                       `json:"id,omitempty"`
+	InstanceType          *string                                       `json:"instanceType,omitempty"`
+	InstanceTypeCpu       *string                                       `json:"instanceTypeCpu,omitempty"`
+	InstanceTypeMemoryMib *string                                       `json:"instanceTypeMemoryMib,omitempty"`
+	InstanceTypesUsage    *CastaiInventoryV1beta1InstanceTypeBasedUsage `json:"instanceTypesUsage,omitempty"`
+
+	// - ONE_YEAR: 1 year commitment plan
+	//  - THREE_YEAR: 3 year commitment plan
+	Plan               *CastaiInventoryV1beta1AzureReservationReservationPlan `json:"plan,omitempty"`
+	Scope              *string                                                `json:"scope,omitempty"`
+	ScopeResourceGroup *string                                                `json:"scopeResourceGroup,omitempty"`
+	ScopeSubscription  *string                                                `json:"scopeSubscription,omitempty"`
+	Status             *string                                                `json:"status,omitempty"`
+}
+
+// - ONE_YEAR: 1 year commitment plan
+//   - THREE_YEAR: 3 year commitment plan
+type CastaiInventoryV1beta1AzureReservationReservationPlan string
+
+// CastaiInventoryV1beta1AzureReservationImport defines model for castai.inventory.v1beta1.AzureReservationImport.
+type CastaiInventoryV1beta1AzureReservationImport struct {
+	ExpirationDate     *string `json:"expirationDate,omitempty"`
+	Name               *string `json:"name,omitempty"`
+	ProductName        *string `json:"productName,omitempty"`
+	PurchaseDate       *string `json:"purchaseDate,omitempty"`
+	Quantity           *int32  `json:"quantity,omitempty"`
+	Region             *string `json:"region,omitempty"`
+	ReservationId      *string `json:"reservationId,omitempty"`
+	Scope              *string `json:"scope,omitempty"`
+	ScopeResourceGroup *string `json:"scopeResourceGroup,omitempty"`
+	ScopeSubscription  *string `json:"scopeSubscription,omitempty"`
+	Status             *string `json:"status,omitempty"`
+	Term               *string `json:"term,omitempty"`
+	Type               *string `json:"type,omitempty"`
+}
+
+// CastaiInventoryV1beta1ClusterAggregatedUsage defines model for castai.inventory.v1beta1.ClusterAggregatedUsage.
+type CastaiInventoryV1beta1ClusterAggregatedUsage struct {
+	ClusterId         *string                                  `json:"clusterId,omitempty"`
+	NodeIds           *[]string                                `json:"nodeIds,omitempty"`
+	Usage             *float64                                 `json:"usage"`
+	UsageDistribution *CastaiInventoryV1beta1UsageDistribution `json:"usageDistribution,omitempty"`
+}
+
+// CastaiInventoryV1beta1Commitment defines model for castai.inventory.v1beta1.Commitment.
+type CastaiInventoryV1beta1Commitment struct {
+	// Allowed usage specifies the part of the commitment that is allowed to be used. 1.0 means 100% of the commitment. Currently it's only supported for GCP CUDs.
+	AllowedUsage            *float32                                `json:"allowedUsage,omitempty"`
+	AzureReservationContext *CastaiInventoryV1beta1AzureReservation `json:"azureReservationContext,omitempty"`
+	EndDate                 *time.Time                              `json:"endDate"`
+	GcpResourceCudContext   *CastaiInventoryV1beta1GCPResourceCUD   `json:"gcpResourceCudContext,omitempty"`
+	Id                      *string                                 `json:"id,omitempty"`
+	Name                    *string                                 `json:"name,omitempty"`
+	Prioritization          *bool                                   `json:"prioritization,omitempty"`
+	Region                  *string                                 `json:"region,omitempty"`
+	StartDate               *time.Time                              `json:"startDate,omitempty"`
+
+	// - Inactive: Inactive commitment
+	//  - Active: Active commitment
+	Status    *CastaiInventoryV1beta1CommitmentStatus `json:"status,omitempty"`
+	UpdatedAt *time.Time                              `json:"updatedAt,omitempty"`
+}
+
+// - Inactive: Inactive commitment
+//   - Active: Active commitment
+type CastaiInventoryV1beta1CommitmentStatus string
+
+// CastaiInventoryV1beta1CommitmentAssignment defines model for castai.inventory.v1beta1.CommitmentAssignment.
+type CastaiInventoryV1beta1CommitmentAssignment struct {
+	ClusterId    *string `json:"clusterId,omitempty"`
+	CommitmentId *string `json:"commitmentId,omitempty"`
+	Id           *string `json:"id,omitempty"`
+	Priority     *int32  `json:"priority,omitempty"`
+}
+
 // CastaiInventoryV1beta1CountableInstanceType defines model for castai.inventory.v1beta1.CountableInstanceType.
 type CastaiInventoryV1beta1CountableInstanceType struct {
 	ClusterId *string `json:"clusterId,omitempty"`
@@ -317,6 +413,57 @@ type CastaiInventoryV1beta1CountableInstanceType struct {
 
 	// InstanceType is a cloud service provider specific VM type with basic data.
 	InstanceType *CastaiInventoryV1beta1InstanceType `json:"instanceType,omitempty"`
+}
+
+// CastaiInventoryV1beta1GCPCommitmentImport defines model for castai.inventory.v1beta1.GCPCommitmentImport.
+type CastaiInventoryV1beta1GCPCommitmentImport struct {
+	AutoRenew         *bool                                `json:"autoRenew,omitempty"`
+	Category          *string                              `json:"category,omitempty"`
+	CreationTimestamp *string                              `json:"creationTimestamp,omitempty"`
+	Description       *string                              `json:"description,omitempty"`
+	EndTimestamp      *string                              `json:"endTimestamp,omitempty"`
+	Id                *string                              `json:"id,omitempty"`
+	Kind              *string                              `json:"kind,omitempty"`
+	Name              *string                              `json:"name,omitempty"`
+	Plan              *string                              `json:"plan,omitempty"`
+	Region            *string                              `json:"region,omitempty"`
+	Resources         *[]CastaiInventoryV1beta1GCPResource `json:"resources,omitempty"`
+	SelfLink          *string                              `json:"selfLink,omitempty"`
+	StartTimestamp    *string                              `json:"startTimestamp,omitempty"`
+	Status            *string                              `json:"status,omitempty"`
+	StatusMessage     *string                              `json:"statusMessage,omitempty"`
+	Type              *string                              `json:"type,omitempty"`
+}
+
+// CastaiInventoryV1beta1GCPResource defines model for castai.inventory.v1beta1.GCPResource.
+type CastaiInventoryV1beta1GCPResource struct {
+	Amount *string `json:"amount,omitempty"`
+	Type   *string `json:"type,omitempty"`
+}
+
+// CastaiInventoryV1beta1GCPResourceCUD defines model for castai.inventory.v1beta1.GCPResourceCUD.
+type CastaiInventoryV1beta1GCPResourceCUD struct {
+	Cpu                *string                                       `json:"cpu,omitempty"`
+	CudId              *string                                       `json:"cudId,omitempty"`
+	InstanceTypesUsage *CastaiInventoryV1beta1InstanceTypeBasedUsage `json:"instanceTypesUsage,omitempty"`
+	MemoryMb           *string                                       `json:"memoryMb,omitempty"`
+
+	// - TWELVE_MONTH: 1 year commitment plan
+	//  - THIRTY_SIX_MONTH: 3 year commitment plan
+	Plan   *CastaiInventoryV1beta1GCPResourceCUDCUDPlan `json:"plan,omitempty"`
+	Price  *CastaiInventoryV1beta1GCPResourceCUDPrice   `json:"price,omitempty"`
+	Status *string                                      `json:"status,omitempty"`
+	Type   *string                                      `json:"type,omitempty"`
+}
+
+// - TWELVE_MONTH: 1 year commitment plan
+//   - THIRTY_SIX_MONTH: 3 year commitment plan
+type CastaiInventoryV1beta1GCPResourceCUDCUDPlan string
+
+// CastaiInventoryV1beta1GCPResourceCUDPrice defines model for castai.inventory.v1beta1.GCPResourceCUDPrice.
+type CastaiInventoryV1beta1GCPResourceCUDPrice struct {
+	Cpu      *string `json:"cpu,omitempty"`
+	MemoryGb *string `json:"memoryGb,omitempty"`
 }
 
 // CastaiInventoryV1beta1GPUDevice defines model for castai.inventory.v1beta1.GPUDevice.
@@ -368,6 +515,26 @@ type CastaiInventoryV1beta1GenericReservation struct {
 // CastaiInventoryV1beta1GenericReservationsList defines model for castai.inventory.v1beta1.GenericReservationsList.
 type CastaiInventoryV1beta1GenericReservationsList struct {
 	Items *[]CastaiInventoryV1beta1GenericReservation `json:"items,omitempty"`
+}
+
+// CastaiInventoryV1beta1GetCommitmentAssignmentsResponse defines model for castai.inventory.v1beta1.GetCommitmentAssignmentsResponse.
+type CastaiInventoryV1beta1GetCommitmentAssignmentsResponse struct {
+	Assignments *[]CastaiInventoryV1beta1CommitmentAssignment `json:"assignments,omitempty"`
+}
+
+// CastaiInventoryV1beta1GetCommitmentsAssignmentsResponse defines model for castai.inventory.v1beta1.GetCommitmentsAssignmentsResponse.
+type CastaiInventoryV1beta1GetCommitmentsAssignmentsResponse struct {
+	CommitmentsAssignments *[]CastaiInventoryV1beta1CommitmentAssignment `json:"commitmentsAssignments,omitempty"`
+}
+
+// CastaiInventoryV1beta1GetCommitmentsResponse defines model for castai.inventory.v1beta1.GetCommitmentsResponse.
+type CastaiInventoryV1beta1GetCommitmentsResponse struct {
+	Commitments *[]CastaiInventoryV1beta1Commitment `json:"commitments,omitempty"`
+}
+
+// CastaiInventoryV1beta1GetGCPCommitmentsImportScriptResponse defines model for castai.inventory.v1beta1.GetGCPCommitmentsImportScriptResponse.
+type CastaiInventoryV1beta1GetGCPCommitmentsImportScriptResponse struct {
+	Script *string `json:"script,omitempty"`
 }
 
 // CastaiInventoryV1beta1GetOrganizationReservationsBalanceResponse defines model for castai.inventory.v1beta1.GetOrganizationReservationsBalanceResponse.
@@ -480,6 +647,14 @@ type CastaiInventoryV1beta1InstanceTypeAggregate struct {
 	Vcpu *string `json:"vcpu,omitempty"`
 }
 
+// CastaiInventoryV1beta1InstanceTypeBasedUsage defines model for castai.inventory.v1beta1.InstanceTypeBasedUsage.
+type CastaiInventoryV1beta1InstanceTypeBasedUsage struct {
+	Clusters          *[]CastaiInventoryV1beta1ClusterAggregatedUsage `json:"clusters,omitempty"`
+	InstanceTypes     *[]CastaiInventoryV1beta1InstanceTypeAggregate  `json:"instanceTypes,omitempty"`
+	Usage             *float64                                        `json:"usage"`
+	UsageDistribution *CastaiInventoryV1beta1UsageDistribution        `json:"usageDistribution,omitempty"`
+}
+
 // CastaiInventoryV1beta1InstanceZone defines model for castai.inventory.v1beta1.InstanceZone.
 type CastaiInventoryV1beta1InstanceZone struct {
 	AttachableGpuDevices *[]CastaiInventoryV1beta1AttachableGPUDevice `json:"attachableGpuDevices,omitempty"`
@@ -511,6 +686,11 @@ type CastaiInventoryV1beta1NetworkInfo struct {
 // CastaiInventoryV1beta1OverwriteReservationsResponse defines model for castai.inventory.v1beta1.OverwriteReservationsResponse.
 type CastaiInventoryV1beta1OverwriteReservationsResponse struct {
 	Reservations *[]CastaiInventoryV1beta1ReservationDetails `json:"reservations,omitempty"`
+}
+
+// CastaiInventoryV1beta1ReplaceCommitmentAssignmentsResponse defines model for castai.inventory.v1beta1.ReplaceCommitmentAssignmentsResponse.
+type CastaiInventoryV1beta1ReplaceCommitmentAssignmentsResponse struct {
+	Assignments *[]CastaiInventoryV1beta1CommitmentAssignment `json:"assignments,omitempty"`
 }
 
 // CastaiInventoryV1beta1ReservationBalance defines model for castai.inventory.v1beta1.ReservationBalance.
@@ -588,6 +768,17 @@ type CastaiInventoryV1beta1StorageInfoDevice struct {
 //   - ssd: SSD.
 //   - hdd: HDD.
 type CastaiInventoryV1beta1StorageInfoDeviceType string
+
+// CastaiInventoryV1beta1UpdateCommitmentResponse defines model for castai.inventory.v1beta1.UpdateCommitmentResponse.
+type CastaiInventoryV1beta1UpdateCommitmentResponse struct {
+	Commitments *CastaiInventoryV1beta1Commitment `json:"commitments,omitempty"`
+}
+
+// CastaiInventoryV1beta1UsageDistribution defines model for castai.inventory.v1beta1.UsageDistribution.
+type CastaiInventoryV1beta1UsageDistribution struct {
+	Cpu    *float64 `json:"cpu,omitempty"`
+	Memory *float64 `json:"memory,omitempty"`
+}
 
 // Operation object.
 type CastaiOperationsV1beta1Operation struct {
@@ -2754,6 +2945,64 @@ type ScheduledRebalancingAPIUpdateRebalancingScheduleParams struct {
 	Id *string `form:"id,omitempty" json:"id,omitempty"`
 }
 
+// CommitmentsAPICreateCommitmentAssignmentParams defines parameters for CommitmentsAPICreateCommitmentAssignment.
+type CommitmentsAPICreateCommitmentAssignmentParams struct {
+	// Cluster ID
+	ClusterId string `form:"clusterId" json:"clusterId"`
+
+	// Commitment ID
+	CommitmentId string `form:"commitmentId" json:"commitmentId"`
+}
+
+// CommitmentsAPIGetCommitmentsParams defines parameters for CommitmentsAPIGetCommitments.
+type CommitmentsAPIGetCommitmentsParams struct {
+	// indicated if commitment usage should be included in a response
+	IncludeUsage *bool `form:"includeUsage,omitempty" json:"includeUsage,omitempty"`
+
+	// get commitments that are assigned to a cluster
+	ClusterId *string `form:"clusterId,omitempty" json:"clusterId,omitempty"`
+}
+
+// CommitmentsAPIImportAzureReservationsJSONBody defines parameters for CommitmentsAPIImportAzureReservations.
+type CommitmentsAPIImportAzureReservationsJSONBody = []CastaiInventoryV1beta1AzureReservationImport
+
+// CommitmentsAPIImportAzureReservationsParams defines parameters for CommitmentsAPIImportAzureReservations.
+type CommitmentsAPIImportAzureReservationsParams struct {
+	// Behaviour
+	//
+	//  - OVERWRITE: Overwrite all existing commitments
+	Behaviour *CommitmentsAPIImportAzureReservationsParamsBehaviour `form:"behaviour,omitempty" json:"behaviour,omitempty"`
+}
+
+// CommitmentsAPIImportAzureReservationsParamsBehaviour defines parameters for CommitmentsAPIImportAzureReservations.
+type CommitmentsAPIImportAzureReservationsParamsBehaviour string
+
+// CommitmentsAPIImportGCPCommitmentsJSONBody defines parameters for CommitmentsAPIImportGCPCommitments.
+type CommitmentsAPIImportGCPCommitmentsJSONBody = []CastaiInventoryV1beta1GCPCommitmentImport
+
+// CommitmentsAPIImportGCPCommitmentsParams defines parameters for CommitmentsAPIImportGCPCommitments.
+type CommitmentsAPIImportGCPCommitmentsParams struct {
+	// Behaviour
+	//
+	//  - OVERWRITE: Overwrite all existing commitments
+	Behaviour *CommitmentsAPIImportGCPCommitmentsParamsBehaviour `form:"behaviour,omitempty" json:"behaviour,omitempty"`
+}
+
+// CommitmentsAPIImportGCPCommitmentsParamsBehaviour defines parameters for CommitmentsAPIImportGCPCommitments.
+type CommitmentsAPIImportGCPCommitmentsParamsBehaviour string
+
+// CommitmentsAPIGetGCPCommitmentsImportScriptParams defines parameters for CommitmentsAPIGetGCPCommitmentsImportScript.
+type CommitmentsAPIGetGCPCommitmentsImportScriptParams struct {
+	// GCP Project ids
+	Projects *[]string `form:"projects,omitempty" json:"projects,omitempty"`
+}
+
+// CommitmentsAPIUpdateCommitmentJSONBody defines parameters for CommitmentsAPIUpdateCommitment.
+type CommitmentsAPIUpdateCommitmentJSONBody = CastaiInventoryV1beta1Commitment
+
+// CommitmentsAPIReplaceCommitmentAssignmentsJSONBody defines parameters for CommitmentsAPIReplaceCommitmentAssignments.
+type CommitmentsAPIReplaceCommitmentAssignmentsJSONBody = []string
+
 // ExternalClusterAPIGetCredentialsScriptTemplateParams defines parameters for ExternalClusterAPIGetCredentialsScriptTemplate.
 type ExternalClusterAPIGetCredentialsScriptTemplateParams struct {
 	CrossRole *bool `form:"crossRole,omitempty" json:"crossRole,omitempty"`
@@ -2854,6 +3103,18 @@ type ScheduledRebalancingAPICreateRebalancingScheduleJSONRequestBody = Scheduled
 
 // ScheduledRebalancingAPIUpdateRebalancingScheduleJSONRequestBody defines body for ScheduledRebalancingAPIUpdateRebalancingSchedule for application/json ContentType.
 type ScheduledRebalancingAPIUpdateRebalancingScheduleJSONRequestBody = ScheduledRebalancingAPIUpdateRebalancingScheduleJSONBody
+
+// CommitmentsAPIImportAzureReservationsJSONRequestBody defines body for CommitmentsAPIImportAzureReservations for application/json ContentType.
+type CommitmentsAPIImportAzureReservationsJSONRequestBody = CommitmentsAPIImportAzureReservationsJSONBody
+
+// CommitmentsAPIImportGCPCommitmentsJSONRequestBody defines body for CommitmentsAPIImportGCPCommitments for application/json ContentType.
+type CommitmentsAPIImportGCPCommitmentsJSONRequestBody = CommitmentsAPIImportGCPCommitmentsJSONBody
+
+// CommitmentsAPIUpdateCommitmentJSONRequestBody defines body for CommitmentsAPIUpdateCommitment for application/json ContentType.
+type CommitmentsAPIUpdateCommitmentJSONRequestBody = CommitmentsAPIUpdateCommitmentJSONBody
+
+// CommitmentsAPIReplaceCommitmentAssignmentsJSONRequestBody defines body for CommitmentsAPIReplaceCommitmentAssignments for application/json ContentType.
+type CommitmentsAPIReplaceCommitmentAssignmentsJSONRequestBody = CommitmentsAPIReplaceCommitmentAssignmentsJSONBody
 
 // SSOAPICreateSSOConnectionJSONRequestBody defines body for SSOAPICreateSSOConnection for application/json ContentType.
 type SSOAPICreateSSOConnectionJSONRequestBody = SSOAPICreateSSOConnectionJSONBody
