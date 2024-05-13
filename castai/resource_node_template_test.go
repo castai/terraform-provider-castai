@@ -74,6 +74,7 @@ func TestNodeTemplateResourceReadContext(t *testing.T) {
 				  },
 	              "architectures": ["amd64", "arm64"],
 				  "os": ["linux"],
+				  "azs": ["us-west-2a", "us-west-2b", "us-west-2c"],
 				  "gpu": {
 					"manufacturers": [
 					  "NVIDIA"
@@ -154,6 +155,10 @@ constraints.# = 1
 constraints.0.architectures.# = 2
 constraints.0.architectures.0 = amd64
 constraints.0.architectures.1 = arm64
+constraints.0.azs.# = 3
+constraints.0.azs.0 = us-west-2a
+constraints.0.azs.1 = us-west-2b
+constraints.0.azs.2 = us-west-2c
 constraints.0.compute_optimized = false
 constraints.0.custom_priority.# = 1
 constraints.0.custom_priority.0.instance_families.# = 2
@@ -447,6 +452,9 @@ func TestAccResourceNodeTemplate_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.architectures.0", "amd64"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.os.#", "1"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.os.0", "linux"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.azs.#", "2"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.azs.0", "eu-central-1a"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.azs.1", "eu-central-1b"),
 					resource.TestCheckResourceAttr(resourceName, "is_default", "false"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.enable_spot_diversity", "true"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.spot_diversity_price_increase_limit_percent", "21"),
@@ -500,6 +508,10 @@ func TestAccResourceNodeTemplate_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.architectures.0", "arm64"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.os.#", "1"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.os.0", "linux"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.azs.#", "3"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.azs.0", "eu-central-1a"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.azs.1", "eu-central-1b"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.azs.2", "eu-central-1c"),
 					resource.TestCheckResourceAttr(resourceName, "is_default", "false"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.enable_spot_diversity", "true"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.spot_diversity_price_increase_limit_percent", "22"),
@@ -576,6 +588,7 @@ func testAccNodeTemplateConfig(rName, clusterName string) string {
 				instance_families {
 				  exclude = ["m5"]
 				}
+				azs = ["eu-central-1a", "eu-central-1b"]
 				gpu {
 					include_names = []
 					exclude_names = []
@@ -630,6 +643,7 @@ func testNodeTemplateUpdated(rName, clusterName string) string {
 				storage_optimized = false
 				compute_optimized = false
 				architectures = ["arm64"]
+				azs = ["eu-central-1a", "eu-central-1b", "eu-central-1c"]
 
 				custom_priority {
 					instance_families = ["a", "b"]

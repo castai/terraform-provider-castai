@@ -44,6 +44,7 @@ CAST AI node template resource to manage node templates
 Optional:
 
 - `architectures` (List of String) List of acceptable instance CPU architectures, the default is amd64. Allowed values: amd64, arm64.
+- `azs` (List of String) The list of AZ names to consider for the node template, if empty or not set all AZs are considered.
 - `compute_optimized` (Boolean) Compute optimized instance constraint - will only pick compute optimized nodes if true.
 - `custom_priority` (Block List) (see [below for nested schema](#nestedblock--constraints--custom_priority))
 - `dedicated_node_affinity` (Block List) Dedicated node affinity - creates preference for instances to be created on sole tenancy or dedicated nodes. This
