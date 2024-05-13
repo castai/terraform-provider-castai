@@ -36,6 +36,13 @@ const (
 	THREEYEAR CastaiInventoryV1beta1AzureReservationReservationPlan = "THREE_YEAR"
 )
 
+// Defines values for CastaiInventoryV1beta1CommitmentScalingStrategy.
+const (
+	CPUBased CastaiInventoryV1beta1CommitmentScalingStrategy = "CPUBased"
+	Default  CastaiInventoryV1beta1CommitmentScalingStrategy = "Default"
+	RamBased CastaiInventoryV1beta1CommitmentScalingStrategy = "RamBased"
+)
+
 // Defines values for CastaiInventoryV1beta1CommitmentStatus.
 const (
 	Active   CastaiInventoryV1beta1CommitmentStatus = "Active"
@@ -210,6 +217,9 @@ type CastaiAuthtokenV1beta1AuthToken struct {
 
 	// (read only, visible once on creation) actual token used to authenticate via api.
 	Token *string `json:"token"`
+
+	// token_prefix contains the first 3 characters of the generated token.
+	TokenPrefix *string `json:"tokenPrefix"`
 }
 
 // AuthTokenUpdate is used to update an existing auth token.
@@ -383,13 +393,30 @@ type CastaiInventoryV1beta1Commitment struct {
 	Name                    *string                                 `json:"name,omitempty"`
 	Prioritization          *bool                                   `json:"prioritization,omitempty"`
 	Region                  *string                                 `json:"region,omitempty"`
-	StartDate               *time.Time                              `json:"startDate,omitempty"`
+
+	// Scaling strategy specifies how to use commitment by autoscaler.
+	//
+	//  - Default: If some commitment resource is utilised fully, only part of instance type can be covered by this commitment.
+	// In some cases not using commitment will be cheaper and cheaper option will be chosen by autoscaler.
+	//  - CPUBased: Aim to use as much CPU from commitment as possible. Even if instance is partially covered and cheaper option is available.
+	//  - RamBased: Aim to use as much RAM from commitment as possible. Even if instance is partially covered and cheaper option is available.
+	ScalingStrategy *CastaiInventoryV1beta1CommitmentScalingStrategy `json:"scalingStrategy,omitempty"`
+	StartDate       *time.Time                                       `json:"startDate,omitempty"`
 
 	// - Inactive: Inactive commitment
 	//  - Active: Active commitment
 	Status    *CastaiInventoryV1beta1CommitmentStatus `json:"status,omitempty"`
 	UpdatedAt *time.Time                              `json:"updatedAt,omitempty"`
 }
+
+// Scaling strategy specifies how to use commitment by autoscaler.
+//
+//   - Default: If some commitment resource is utilised fully, only part of instance type can be covered by this commitment.
+//
+// In some cases not using commitment will be cheaper and cheaper option will be chosen by autoscaler.
+//   - CPUBased: Aim to use as much CPU from commitment as possible. Even if instance is partially covered and cheaper option is available.
+//   - RamBased: Aim to use as much RAM from commitment as possible. Even if instance is partially covered and cheaper option is available.
+type CastaiInventoryV1beta1CommitmentScalingStrategy string
 
 // - Inactive: Inactive commitment
 //   - Active: Active commitment
@@ -2256,7 +2283,14 @@ type NodetemplatesV1TaintWithOptionalEffect struct {
 
 // NodetemplatesV1TemplateConstraints defines model for nodetemplates.v1.TemplateConstraints.
 type NodetemplatesV1TemplateConstraints struct {
-	Architectures    *[]string `json:"architectures,omitempty"`
+	Architectures *[]string `json:"architectures,omitempty"`
+
+	// AZS - The list of AZ names to consider for the node template, if empty or not set all AZs are considered.
+	//
+	// AZS - The list of AZ names to consider for the node template, if empty or not set all AZs are considered. When
+	// subnets defined in node config are zonal (AWS + Azure), the effective AZs are the intersection of the subnet AZs
+	// and the AZs in node template.
+	Azs              *[]string `json:"azs,omitempty"`
 	BareMetal        *bool     `json:"bareMetal"`
 	ComputeOptimized *bool     `json:"computeOptimized"`
 
