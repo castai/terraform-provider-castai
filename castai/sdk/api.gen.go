@@ -192,6 +192,9 @@ type CastaiAuthtokenV1beta1AuthToken struct {
 
 	// (read only, visible once on creation) actual token used to authenticate via api.
 	Token *string `json:"token"`
+
+	// token_prefix contains the first 3 characters of the generated token.
+	TokenPrefix *string `json:"tokenPrefix"`
 }
 
 // AuthTokenUpdate is used to update an existing auth token.
@@ -2065,7 +2068,14 @@ type NodetemplatesV1TaintWithOptionalEffect struct {
 
 // NodetemplatesV1TemplateConstraints defines model for nodetemplates.v1.TemplateConstraints.
 type NodetemplatesV1TemplateConstraints struct {
-	Architectures    *[]string `json:"architectures,omitempty"`
+	Architectures *[]string `json:"architectures,omitempty"`
+
+	// AZS - The list of AZ names to consider for the node template, if empty or not set all AZs are considered.
+	//
+	// AZS - The list of AZ names to consider for the node template, if empty or not set all AZs are considered. When
+	// subnets defined in node config are zonal (AWS + Azure), the effective AZs are the intersection of the subnet AZs
+	// and the AZs in node template.
+	Azs              *[]string `json:"azs,omitempty"`
 	BareMetal        *bool     `json:"bareMetal"`
 	ComputeOptimized *bool     `json:"computeOptimized"`
 

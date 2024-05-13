@@ -85,7 +85,7 @@ locals {
         }
         compute_optimized_state = "disabled"
         storage_optimized_state = "disabled"
-        is_gpu_only              = false
+        is_gpu_only             = false
       }
     }
   })
