@@ -36,6 +36,13 @@ const (
 	THREEYEAR CastaiInventoryV1beta1AzureReservationReservationPlan = "THREE_YEAR"
 )
 
+// Defines values for CastaiInventoryV1beta1CommitmentScalingStrategy.
+const (
+	CPUBased CastaiInventoryV1beta1CommitmentScalingStrategy = "CPUBased"
+	Default  CastaiInventoryV1beta1CommitmentScalingStrategy = "Default"
+	RamBased CastaiInventoryV1beta1CommitmentScalingStrategy = "RamBased"
+)
+
 // Defines values for CastaiInventoryV1beta1CommitmentStatus.
 const (
 	Active   CastaiInventoryV1beta1CommitmentStatus = "Active"
@@ -386,13 +393,30 @@ type CastaiInventoryV1beta1Commitment struct {
 	Name                    *string                                 `json:"name,omitempty"`
 	Prioritization          *bool                                   `json:"prioritization,omitempty"`
 	Region                  *string                                 `json:"region,omitempty"`
-	StartDate               *time.Time                              `json:"startDate,omitempty"`
+
+	// Scaling strategy specifies how to use commitment by autoscaler.
+	//
+	//  - Default: If some commitment resource is utilised fully, only part of instance type can be covered by this commitment.
+	// In some cases not using commitment will be cheaper and cheaper option will be chosen by autoscaler.
+	//  - CPUBased: Aim to use as much CPU from commitment as possible. Even if instance is partially covered and cheaper option is available.
+	//  - RamBased: Aim to use as much RAM from commitment as possible. Even if instance is partially covered and cheaper option is available.
+	ScalingStrategy *CastaiInventoryV1beta1CommitmentScalingStrategy `json:"scalingStrategy,omitempty"`
+	StartDate       *time.Time                                       `json:"startDate,omitempty"`
 
 	// - Inactive: Inactive commitment
 	//  - Active: Active commitment
 	Status    *CastaiInventoryV1beta1CommitmentStatus `json:"status,omitempty"`
 	UpdatedAt *time.Time                              `json:"updatedAt,omitempty"`
 }
+
+// Scaling strategy specifies how to use commitment by autoscaler.
+//
+//   - Default: If some commitment resource is utilised fully, only part of instance type can be covered by this commitment.
+//
+// In some cases not using commitment will be cheaper and cheaper option will be chosen by autoscaler.
+//   - CPUBased: Aim to use as much CPU from commitment as possible. Even if instance is partially covered and cheaper option is available.
+//   - RamBased: Aim to use as much RAM from commitment as possible. Even if instance is partially covered and cheaper option is available.
+type CastaiInventoryV1beta1CommitmentScalingStrategy string
 
 // - Inactive: Inactive commitment
 //   - Active: Active commitment
