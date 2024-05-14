@@ -240,7 +240,7 @@ func resourceNodeTemplate() *schema.Resource {
 									{
 										Severity:      diag.Error,
 										Summary:       "Deprecated field `storage_optimized`",
-										Detail:        "Please use `storage_optimized_state` instead. See: https://github.com/castai/terraform-provider-castai#migrating-from-6xx-to-7xx",
+										Detail:        "Please use `storage_optimized_state` instead, supported values: `enabled`, `disabled` or empty string. See: https://github.com/castai/terraform-provider-castai#migrating-from-6xx-to-7xx",
 										AttributePath: path,
 									},
 								}
@@ -269,7 +269,7 @@ func resourceNodeTemplate() *schema.Resource {
 									{
 										Severity:      diag.Error,
 										Summary:       "Deprecated field `compute_optimized`",
-										Detail:        "Please use `compute_optimized_state` instead. See: https://github.com/castai/terraform-provider-castai#migrating-from-6xx-to-7xx",
+										Detail:        "Please use `compute_optimized_state` instead, supported values: `enabled`, `disabled` or empty string. See: https://github.com/castai/terraform-provider-castai#migrating-from-6xx-to-7xx",
 										AttributePath: path,
 									},
 								}

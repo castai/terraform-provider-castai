@@ -44,7 +44,7 @@ CAST AI node template resource to manage node templates
 Optional:
 
 - `architectures` (List of String) List of acceptable instance CPU architectures, the default is amd64. Allowed values: amd64, arm64.
-- `compute_optimized` (Boolean) Compute optimized instance constraint (deprecated).
+- `compute_optimized` (Boolean, Deprecated) Compute optimized instance constraint - will only pick compute optimized nodes if true.
 - `compute_optimized_state` (String) Will only include compute optimized nodes when enabled and exclude compute optimized nodes when disabled. Empty value won't have effect on instances filter. Supported values: `enabled`, `disabled` or empty string.
 - `azs` (List of String) The list of AZ names to consider for the node template, if empty or not set all AZs are considered.
 - `custom_priority` (Block List) (see [below for nested schema](#nestedblock--constraints--custom_priority))
@@ -69,8 +69,12 @@ Optional:
 - `spot_diversity_price_increase_limit_percent` (Number) Allowed node configuration price increase when diversifying instance types. E.g. if the value is 10%, then the overall price of diversified instance types can be 10% higher than the price of the optimal configuration.
 - `spot_interruption_predictions_enabled` (Boolean) Enable/disable spot interruption predictions.
 - `spot_interruption_predictions_type` (String) Spot interruption predictions type. Can be either "aws-rebalance-recommendations" or "interruption-predictions".
+<<<<<<< HEAD
 - `storage_optimized` (Boolean) Storage optimized instance constraint (deprecated).
 - `storage_optimized_state` (String) Storage optimized instance constraint - will only pick storage optimized nodes if enabled and won't pick if disabled. Empty value will have no effect. Supported values: `enabled`, `disabled` or empty string.
+=======
+- `storage_optimized` (Boolean, Deprecated) Storage optimized instance constraint - will only pick storage optimized nodes if true
+>>>>>>> origin/deprecate-storage-compute-optimized-bool
 - `use_spot_fallbacks` (Boolean) Spot instance fallback constraint - when true, on-demand instances will be created, when spots are unavailable.
 
 <a id="nestedblock--constraints--custom_priority"></a>
