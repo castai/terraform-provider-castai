@@ -151,9 +151,9 @@ module "castai-eks-cluster" {
         instance_families = {
           exclude = ["m5"]
         }
-        compute_optimized = false
-        storage_optimized = false
-        is_gpu_only       = false
+        compute_optimized_state = "disabled"
+        storage_optimized_state = "disabled"
+        is_gpu_only             = false
 
         # Optional: define custom priority for instances selection.
         #

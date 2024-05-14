@@ -56,7 +56,7 @@ func TestNodeTemplateResourceReadContext(t *testing.T) {
 				  "spotDiversityPriceIncreaseLimitPercent": 20,
 				  "spotInterruptionPredictionsEnabled": true,
 				  "spotInterruptionPredictionsType": "aws-rebalance-recommendations",
-				  "storageOptimized": false,
+				  "storageOptimized": true,
 				  "computeOptimized": false,
 				  "minCpu": 10,
 				  "maxCpu": 10000,
@@ -160,6 +160,7 @@ constraints.0.azs.0 = us-west-2a
 constraints.0.azs.1 = us-west-2b
 constraints.0.azs.2 = us-west-2c
 constraints.0.compute_optimized = false
+constraints.0.compute_optimized_state = disabled
 constraints.0.custom_priority.# = 1
 constraints.0.custom_priority.0.instance_families.# = 2
 constraints.0.custom_priority.0.instance_families.0 = a
@@ -208,6 +209,7 @@ constraints.0.spot_diversity_price_increase_limit_percent = 20
 constraints.0.spot_interruption_predictions_enabled = true
 constraints.0.spot_interruption_predictions_type = aws-rebalance-recommendations
 constraints.0.storage_optimized = false
+constraints.0.storage_optimized_state = enabled
 constraints.0.use_spot_fallbacks = false
 custom_instances_enabled = true
 custom_instances_with_extended_memory_enabled = true
@@ -467,6 +469,8 @@ func TestAccResourceNodeTemplate_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.custom_priority.0.spot", "true"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.custom_priority.0.on_demand", "true"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.dedicated_node_affinity.#", "0"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.storage_optimized_state", "disabled"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.compute_optimized_state", ""),
 				),
 			},
 			{
@@ -529,6 +533,8 @@ func TestAccResourceNodeTemplate_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.custom_priority.1.spot", "true"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.custom_priority.1.on_demand", "true"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.dedicated_node_affinity.#", "0"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.storage_optimized_state", "enabled"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.compute_optimized_state", "disabled"),
 				),
 			},
 		},
@@ -583,6 +589,7 @@ func testAccNodeTemplateConfig(rName, clusterName string) string {
 				spot_interruption_predictions_enabled = true
 				spot_interruption_predictions_type = "interruption-predictions"
 				use_spot_fallbacks = true
+				storage_optimized_state = "disabled"
 				min_cpu = 4
 				max_cpu = 100
 				instance_families {
@@ -593,9 +600,7 @@ func testAccNodeTemplateConfig(rName, clusterName string) string {
 					include_names = []
 					exclude_names = []
 					manufacturers = ["NVIDIA"]
-				}	
-				compute_optimized = false
-				storage_optimized = false
+				}
 
 				custom_priority {
 					instance_families = ["c", "d"]
@@ -640,8 +645,8 @@ func testNodeTemplateUpdated(rName, clusterName string) string {
 				spot_interruption_predictions_enabled = true
 				spot_interruption_predictions_type = "interruption-predictions"
 				fallback_restore_rate_seconds = 1800
-				storage_optimized = false
-				compute_optimized = false
+				storage_optimized_state = "enabled"
+				compute_optimized_state = "disabled"
 				architectures = ["arm64"]
 				azs = ["eu-central-1a", "eu-central-1b", "eu-central-1c"]
 
