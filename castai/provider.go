@@ -74,7 +74,7 @@ func providerConfigure(version string) schema.ConfigureContextFunc {
 		apiToken := data.Get("api_token").(string)
 
 		agent := fmt.Sprintf("castai-terraform-provider/%v", version)
-		if addUA := os.Getenv("CASTIA_ADDITIONAL_USER_AGENT"); addUA != "" {
+		if addUA := os.Getenv("CASTAI_ADDITIONAL_USER_AGENT"); addUA != "" {
 			agent = fmt.Sprintf("%s %s", agent, addUA)
 		}
 
