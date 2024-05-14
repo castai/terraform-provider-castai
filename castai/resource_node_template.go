@@ -232,6 +232,7 @@ func resourceNodeTemplate() *schema.Resource {
 							Optional:    true,
 							Default:     false,
 							Description: "Storage optimized instance constraint - will only pick storage optimized nodes if true",
+							Deprecated:  "Storage optimized constraint is deprecated and will be replaced by a new argument in the next major release.",
 						},
 						FieldNodeTemplateIsGpuOnly: {
 							Type:        schema.TypeBool,
@@ -244,6 +245,7 @@ func resourceNodeTemplate() *schema.Resource {
 							Optional:    true,
 							Default:     false,
 							Description: "Compute optimized instance constraint - will only pick compute optimized nodes if true.",
+							Deprecated:  "Compute optimized constraint is deprecated and will be replaced by a new argument in the next major release.",
 						},
 						FieldNodeTemplateInstanceFamilies: {
 							Type:     schema.TypeList,
