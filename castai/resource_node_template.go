@@ -20,6 +20,7 @@ import (
 
 const (
 	FieldNodeTemplateArchitectures                            = "architectures"
+	FieldNodeTemplateAZs                                      = "azs"
 	FieldNodeTemplateComputeOptimized                         = "compute_optimized"
 	FieldNodeTemplateComputeOptimizedState                    = "compute_optimized_state"
 	FieldNodeTemplateConfigurationId                          = "configuration_id"
@@ -154,6 +155,14 @@ func resourceNodeTemplate() *schema.Resource {
 				Optional: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
+						FieldNodeTemplateAZs: {
+							Type:     schema.TypeList,
+							Optional: true,
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
+							Description: "The list of AZ names to consider for the node template, if empty or not set all AZs are considered.",
+						},
 						FieldNodeTemplateSpot: {
 							Type:        schema.TypeBool,
 							Default:     false,
@@ -662,6 +671,9 @@ func flattenConstraints(c *sdk.NodetemplatesV1TemplateConstraints) ([]map[string
 	if c.Os != nil {
 		out[FieldNodeTemplateOs] = lo.FromPtr(c.Os)
 	}
+	if c.Azs != nil {
+		out[FieldNodeTemplateAZs] = lo.FromPtr(c.Azs)
+	}
 	return []map[string]any{out}, nil
 }
 
@@ -1145,6 +1157,9 @@ func toTemplateConstraints(obj map[string]any) *sdk.NodetemplatesV1TemplateConst
 	}
 	if v, ok := obj[FieldNodeTemplateOs].([]any); ok {
 		out.Os = toPtr(toStringList(v))
+	}
+	if v, ok := obj[FieldNodeTemplateAZs].([]any); ok {
+		out.Azs = toPtr(toStringList(v))
 	}
 	if v, ok := obj[FieldNodeTemplateIsGpuOnly].(bool); ok {
 		out.IsGpuOnly = toPtr(v)
