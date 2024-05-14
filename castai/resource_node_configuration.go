@@ -317,6 +317,7 @@ func resourceNodeConfiguration() *schema.Resource {
 								Type: schema.TypeString,
 							},
 							Description: "List of preferred availability zones to choose from when provisioning new nodes.",
+							Deprecated:  "The argument will be moved into node template.",
 						},
 					},
 				},
