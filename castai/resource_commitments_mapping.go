@@ -300,6 +300,9 @@ func mapCUDImportToResource(
 		}
 		res.ScalingStrategy = cudWithCfg.Config.ScalingStrategy
 	}
+	if res.ScalingStrategy == nil {
+		res.ScalingStrategy = lo.ToPtr("Default")
+	}
 	return res, nil
 }
 
