@@ -398,6 +398,17 @@ resource "castai_commitments" "test_gcp" {
 
 	commitment_configs {
 		matcher {
+			name = "test"
+			type = "COMPUTE_OPTIMIZED_C2D"
+			region = "us-central1"
+		}
+		prioritization = false
+		allowed_usage = 1
+		status = "Active"
+	}
+
+	commitment_configs {
+		matcher {
 		  name = "test-2"
 		  type = "GENERAL_PURPOSE_E2"
 		  region = "us-central1"
@@ -408,17 +419,6 @@ resource "castai_commitments" "test_gcp" {
 		assignments {
 			cluster_id = castai_gke_cluster.test.id
 		}
-	}
-
-	commitment_configs {
-		matcher {
-			name = "test"
-			type = "COMPUTE_OPTIMIZED_C2D"
-			region = "us-central1"
-		}
-		prioritization = false
-		allowed_usage = 1
-		status = "Active"
         scaling_strategy = "CPUBased"
 	}
 }
