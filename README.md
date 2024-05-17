@@ -328,6 +328,41 @@ module "castai-aks-cluster" {
 }
 ```
 
+
+Migrating from 6.x.x to 7.x.x
+---------------------------
+
+Version 7.x.x changed:
+* Removed `compute_optimized` and `storage_optimized` attributes in `castai_node_template` resource, `constraints` object. Use `compute_optimized_state` and `storage_optimized_state` instead.
+
+Old configuration:
+```terraform
+module "castai-aks-cluster" {
+  node_templates = {
+    spot_tmpl = {
+      constraints = {
+        compute_optimized = false
+        storage_optimized = true
+      }
+    }
+  }
+}
+```
+
+New configuration:
+```terraform
+module "castai-aks-cluster" {
+  node_templates = {
+    spot_tmpl = {
+      constraints = {
+        compute_optimized_state = "disabled"
+        storage_optimized_state = "enabled"
+      }
+    }
+  }
+}
+```
+
 For more information for `castai-aks-cluster` module follow:
 https://github.com/castai/terraform-castai-aks/blob/main/README.md#migrating-from-2xx-to-3xx
 If you have used `castai-eks-cluster` or other modules follow:

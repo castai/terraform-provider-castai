@@ -100,8 +100,8 @@ module "castai-aks-cluster" {
         instance_families = {
           exclude = ["standard_DPLSv5"]
         }
-        compute_optimized = false
-        storage_optimized = false
+        compute_optimized_state = "disabled"
+        storage_optimized_state = "disabled"
       }
     }
   }

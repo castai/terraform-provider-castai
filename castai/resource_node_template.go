@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -19,7 +20,9 @@ import (
 
 const (
 	FieldNodeTemplateArchitectures                            = "architectures"
+	FieldNodeTemplateAZs                                      = "azs"
 	FieldNodeTemplateComputeOptimized                         = "compute_optimized"
+	FieldNodeTemplateComputeOptimizedState                    = "compute_optimized_state"
 	FieldNodeTemplateConfigurationId                          = "configuration_id"
 	FieldNodeTemplateConstraints                              = "constraints"
 	FieldNodeTemplateCustomInstancesEnabled                   = "custom_instances_enabled"
@@ -54,6 +57,7 @@ const (
 	FieldNodeTemplateSpotInterruptionPredictionsEnabled       = "spot_interruption_predictions_enabled"
 	FieldNodeTemplateSpotInterruptionPredictionsType          = "spot_interruption_predictions_type"
 	FieldNodeTemplateStorageOptimized                         = "storage_optimized"
+	FieldNodeTemplateStorageOptimizedState                    = "storage_optimized_state"
 	FieldNodeTemplateUseSpotFallbacks                         = "use_spot_fallbacks"
 	FieldNodeTemplateCustomPriority                           = "custom_priority"
 	FieldNodeTemplateDedicatedNodeAffinity                    = "dedicated_node_affinity"
@@ -151,6 +155,14 @@ func resourceNodeTemplate() *schema.Resource {
 				Optional: true,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
+						FieldNodeTemplateAZs: {
+							Type:     schema.TypeList,
+							Optional: true,
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
+							Description: "The list of AZ names to consider for the node template, if empty or not set all AZs are considered.",
+						},
 						FieldNodeTemplateSpot: {
 							Type:        schema.TypeBool,
 							Default:     false,
@@ -222,7 +234,24 @@ func resourceNodeTemplate() *schema.Resource {
 							Type:        schema.TypeBool,
 							Optional:    true,
 							Default:     false,
-							Description: "Storage optimized instance constraint - will only pick storage optimized nodes if true",
+							Description: "Storage optimized instance constraint (deprecated).",
+							ValidateDiagFunc: func(i interface{}, path cty.Path) diag.Diagnostics {
+								return diag.Diagnostics{
+									{
+										Severity:      diag.Error,
+										Summary:       "Deprecated field `storage_optimized`",
+										Detail:        "Please use `storage_optimized_state` instead, supported values: `enabled`, `disabled` or empty string. See: https://github.com/castai/terraform-provider-castai#migrating-from-6xx-to-7xx",
+										AttributePath: path,
+									},
+								}
+							},
+						},
+						FieldNodeTemplateStorageOptimizedState: {
+							Type:             schema.TypeString,
+							Optional:         true,
+							Default:          "",
+							Description:      "Storage optimized instance constraint - will only pick storage optimized nodes if enabled and won't pick if disabled. Empty value will have no effect. Supported values: `enabled`, `disabled` or empty string.",
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"", Enabled, Disabled}, false)),
 						},
 						FieldNodeTemplateIsGpuOnly: {
 							Type:        schema.TypeBool,
@@ -234,7 +263,24 @@ func resourceNodeTemplate() *schema.Resource {
 							Type:        schema.TypeBool,
 							Optional:    true,
 							Default:     false,
-							Description: "Compute optimized instance constraint - will only pick compute optimized nodes if true.",
+							Description: "Compute optimized instance constraint (deprecated).",
+							ValidateDiagFunc: func(i interface{}, path cty.Path) diag.Diagnostics {
+								return diag.Diagnostics{
+									{
+										Severity:      diag.Error,
+										Summary:       "Deprecated field `compute_optimized`",
+										Detail:        "Please use `compute_optimized_state` instead, supported values: `enabled`, `disabled` or empty string. See: https://github.com/castai/terraform-provider-castai#migrating-from-6xx-to-7xx",
+										AttributePath: path,
+									},
+								}
+							},
+						},
+						FieldNodeTemplateComputeOptimizedState: {
+							Type:             schema.TypeString,
+							Optional:         true,
+							Default:          "",
+							Description:      "Will only include compute optimized nodes when enabled and exclude compute optimized nodes when disabled. Empty value won't have effect on instances filter. Supported values: `enabled`, `disabled` or empty string.",
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"", Enabled, Disabled}, false)),
 						},
 						FieldNodeTemplateInstanceFamilies: {
 							Type:     schema.TypeList,
@@ -567,10 +613,18 @@ func flattenConstraints(c *sdk.NodetemplatesV1TemplateConstraints) ([]map[string
 		out[FieldNodeTemplateInstanceFamilies] = flattenInstanceFamilies(c.InstanceFamilies)
 	}
 	if c.ComputeOptimized != nil {
-		out[FieldNodeTemplateComputeOptimized] = c.ComputeOptimized
+		if lo.FromPtr(c.ComputeOptimized) {
+			out[FieldNodeTemplateComputeOptimizedState] = Enabled
+		} else {
+			out[FieldNodeTemplateComputeOptimizedState] = Disabled
+		}
 	}
 	if c.StorageOptimized != nil {
-		out[FieldNodeTemplateStorageOptimized] = c.StorageOptimized
+		if lo.FromPtr(c.StorageOptimized) {
+			out[FieldNodeTemplateStorageOptimizedState] = Enabled
+		} else {
+			out[FieldNodeTemplateStorageOptimizedState] = Disabled
+		}
 	}
 	if c.Spot != nil {
 		out[FieldNodeTemplateSpot] = c.Spot
@@ -616,6 +670,9 @@ func flattenConstraints(c *sdk.NodetemplatesV1TemplateConstraints) ([]map[string
 	}
 	if c.Os != nil {
 		out[FieldNodeTemplateOs] = lo.FromPtr(c.Os)
+	}
+	if c.Azs != nil {
+		out[FieldNodeTemplateAZs] = lo.FromPtr(c.Azs)
 	}
 	return []map[string]any{out}, nil
 }
@@ -1035,8 +1092,15 @@ func toTemplateConstraints(obj map[string]any) *sdk.NodetemplatesV1TemplateConst
 	}
 
 	out := &sdk.NodetemplatesV1TemplateConstraints{}
-	if v, ok := obj[FieldNodeTemplateComputeOptimized].(bool); ok {
-		out.ComputeOptimized = toPtr(v)
+	if v, ok := obj[FieldNodeTemplateComputeOptimizedState].(string); ok {
+		switch v {
+		case Enabled:
+			out.ComputeOptimized = toPtr(true)
+		case Disabled:
+			out.ComputeOptimized = toPtr(false)
+		default:
+			out.ComputeOptimized = nil
+		}
 	}
 	if v, ok := obj[FieldNodeTemplateFallbackRestoreRateSeconds].(int); ok {
 		out.FallbackRestoreRateSeconds = toPtr(int32(v))
@@ -1075,8 +1139,15 @@ func toTemplateConstraints(obj map[string]any) *sdk.NodetemplatesV1TemplateConst
 			out.Spot = toPtr(!v)
 		}
 	}
-	if v, ok := obj[FieldNodeTemplateStorageOptimized].(bool); ok {
-		out.StorageOptimized = toPtr(v)
+	if v, ok := obj[FieldNodeTemplateStorageOptimizedState].(string); ok {
+		switch v {
+		case Enabled:
+			out.StorageOptimized = toPtr(true)
+		case Disabled:
+			out.StorageOptimized = toPtr(false)
+		default:
+			out.StorageOptimized = nil
+		}
 	}
 	if v, ok := obj[FieldNodeTemplateUseSpotFallbacks].(bool); ok {
 		out.UseSpotFallbacks = toPtr(v)
@@ -1086,6 +1157,9 @@ func toTemplateConstraints(obj map[string]any) *sdk.NodetemplatesV1TemplateConst
 	}
 	if v, ok := obj[FieldNodeTemplateOs].([]any); ok {
 		out.Os = toPtr(toStringList(v))
+	}
+	if v, ok := obj[FieldNodeTemplateAZs].([]any); ok {
+		out.Azs = toPtr(toStringList(v))
 	}
 	if v, ok := obj[FieldNodeTemplateIsGpuOnly].(bool); ok {
 		out.IsGpuOnly = toPtr(v)
