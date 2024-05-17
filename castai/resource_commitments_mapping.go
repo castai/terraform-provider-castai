@@ -343,6 +343,10 @@ func mapReservationImportToResource(
 		if lo.FromPtr(cudWithCfg.Config.Prioritization) {
 			assignPrioritiesToAssignments(res.Assignments)
 		}
+		res.ScalingStrategy = cudWithCfg.Config.ScalingStrategy
+	}
+	if res.ScalingStrategy == nil {
+		res.ScalingStrategy = lo.ToPtr("Default")
 	}
 
 	return res, nil

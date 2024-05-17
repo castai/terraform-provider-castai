@@ -143,7 +143,7 @@ func TestAccCommitments(t *testing.T) {
 					checkFloatAttr("castai_commitments.test_gcp", "gcp_cuds.1.allowed_usage", 0.7),
 					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.1.status", "Active"),
 					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.1.assignments.#", "1"),
-					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.1.scaling_strategy", "Default"),
+					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.1.scaling_strategy", "CPUBased"),
 					// Azure - unchanged
 					resource.TestCheckResourceAttr("castai_commitments.test_azure", "azure_reservations.#", "1"),
 					resource.TestCheckResourceAttr("castai_commitments.test_azure", "azure_reservations.0.reservation_id", "3b3de39c-bc44-4d69-be2d-69527dfe9958"),
@@ -419,6 +419,7 @@ resource "castai_commitments" "test_gcp" {
 		prioritization = false
 		allowed_usage = 1
 		status = "Active"
+        scaling_strategy = "CPUBased"
 	}
 }
 
