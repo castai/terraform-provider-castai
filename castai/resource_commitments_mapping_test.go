@@ -477,6 +477,9 @@ func TestMapReservationImportToResource(t *testing.T) {
 				Scope:              lo.FromPtr(testAzureCommitmentImport.Scope),
 				ScopeResourceGroup: lo.FromPtr(testAzureCommitmentImport.ScopeResourceGroup),
 				ScopeSubscription:  lo.FromPtr(testAzureCommitmentImport.ScopeSubscription),
+				CASTCommitmentFields: CASTCommitmentFields{
+					ScalingStrategy: lo.ToPtr("Default"),
+				},
 			},
 		},
 		"should succeed, with a config passed": {
@@ -490,17 +493,19 @@ func TestMapReservationImportToResource(t *testing.T) {
 							Region: testAzureCommitmentImport.Region,
 						},
 					},
-					Prioritization: lo.ToPtr(true),
-					Status:         lo.ToPtr("ACTIVE"),
-					AllowedUsage:   lo.ToPtr(0.7),
+					Prioritization:  lo.ToPtr(true),
+					Status:          lo.ToPtr("ACTIVE"),
+					AllowedUsage:    lo.ToPtr(0.7),
+					ScalingStrategy: lo.ToPtr("CPUBased"),
 				}
 				return c
 			}(),
 			expected: &azureReservationResource{
 				CASTCommitmentFields: CASTCommitmentFields{
-					AllowedUsage:   lo.ToPtr(0.7),
-					Prioritization: lo.ToPtr(true),
-					Status:         lo.ToPtr("ACTIVE"),
+					AllowedUsage:    lo.ToPtr(0.7),
+					Prioritization:  lo.ToPtr(true),
+					Status:          lo.ToPtr("ACTIVE"),
+					ScalingStrategy: lo.ToPtr("CPUBased"),
 				},
 				Count:              2,
 				ReservationID:      lo.FromPtr(testAzureCommitmentImport.ReservationId),
@@ -526,6 +531,9 @@ func TestMapReservationImportToResource(t *testing.T) {
 			},
 			expected: &azureReservationResource{
 				Plan: "ONE_YEAR",
+				CASTCommitmentFields: CASTCommitmentFields{
+					ScalingStrategy: lo.ToPtr("Default"),
+				},
 			},
 		},
 		"should map P3Y term to THREE_YEAR plan": {
@@ -538,6 +546,9 @@ func TestMapReservationImportToResource(t *testing.T) {
 			},
 			expected: &azureReservationResource{
 				Plan: "THREE_YEAR",
+				CASTCommitmentFields: CASTCommitmentFields{
+					ScalingStrategy: lo.ToPtr("Default"),
+				},
 			},
 		},
 		"should map ONE_YEAR term to ONE_YEAR plan": {
@@ -550,6 +561,9 @@ func TestMapReservationImportToResource(t *testing.T) {
 			},
 			expected: &azureReservationResource{
 				Plan: "ONE_YEAR",
+				CASTCommitmentFields: CASTCommitmentFields{
+					ScalingStrategy: lo.ToPtr("Default"),
+				},
 			},
 		},
 		"should map ONE_YEAR term to THREE_YEAR plan": {
@@ -562,6 +576,9 @@ func TestMapReservationImportToResource(t *testing.T) {
 			},
 			expected: &azureReservationResource{
 				Plan: "THREE_YEAR",
+				CASTCommitmentFields: CASTCommitmentFields{
+					ScalingStrategy: lo.ToPtr("Default"),
+				},
 			},
 		},
 		"should fail when invalid term is passed": {
@@ -1056,6 +1073,7 @@ func TestMapConfiguredReservationImportsToResources(t *testing.T) {
 							{ClusterID: "cluster-1", Priority: lo.ToPtr(1)},
 							{ClusterID: "cluster-2", Priority: lo.ToPtr(2)},
 						},
+						ScalingStrategy: lo.ToPtr("Default"),
 					},
 					Count:              int(lo.FromPtr(testAzureCommitmentImport.Quantity)),
 					ReservationID:      lo.FromPtr(testAzureCommitmentImport.ReservationId),
