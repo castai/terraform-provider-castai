@@ -89,6 +89,7 @@ func TestAccCommitments(t *testing.T) {
 					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.0.plan", "TWELVE_MONTH"),
 					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.0.type", "COMPUTE_OPTIMIZED_C2D"),
 					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.0.assignments.#", "0"),
+					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.0.scaling_strategy", "Default"),
 					// Azure
 					resource.TestCheckResourceAttr("castai_commitments.test_azure", "azure_reservations.#", "1"),
 					resource.TestCheckResourceAttr("castai_commitments.test_azure", "azure_reservations.0.reservation_id", "3b3de39c-bc44-4d69-be2d-69527dfe9958"),
@@ -126,6 +127,7 @@ func TestAccCommitments(t *testing.T) {
 					checkFloatAttr("castai_commitments.test_gcp", "gcp_cuds.0.allowed_usage", 1),
 					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.0.status", "Active"),
 					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.0.assignments.#", "0"),
+					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.0.scaling_strategy", "Default"),
 					// GCP - "test-2" CUD, added in the update with config
 					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.1.cud_id", "987654321"),
 					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.1.cud_status", "ACTIVE"),
@@ -141,6 +143,7 @@ func TestAccCommitments(t *testing.T) {
 					checkFloatAttr("castai_commitments.test_gcp", "gcp_cuds.1.allowed_usage", 0.7),
 					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.1.status", "Active"),
 					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.1.assignments.#", "1"),
+					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.1.scaling_strategy", "CPUBased"),
 					// Azure - unchanged
 					resource.TestCheckResourceAttr("castai_commitments.test_azure", "azure_reservations.#", "1"),
 					resource.TestCheckResourceAttr("castai_commitments.test_azure", "azure_reservations.0.reservation_id", "3b3de39c-bc44-4d69-be2d-69527dfe9958"),
@@ -178,6 +181,7 @@ func TestAccCommitments(t *testing.T) {
 					checkFloatAttr("castai_commitments.test_gcp", "gcp_cuds.0.allowed_usage", 1),
 					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.0.status", "Active"),
 					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.0.assignments.#", "1"),
+					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.0.scaling_strategy", "Default"),
 					// GCP - "test-2" CUD, unchanged
 					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.1.cud_id", "987654321"),
 					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.1.cud_status", "ACTIVE"),
@@ -193,6 +197,7 @@ func TestAccCommitments(t *testing.T) {
 					checkFloatAttr("castai_commitments.test_gcp", "gcp_cuds.1.allowed_usage", 0.7),
 					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.1.status", "Active"),
 					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.1.assignments.#", "1"),
+					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.1.scaling_strategy", "CPUBased"),
 
 					resource.TestCheckResourceAttr("castai_commitments.test_azure", "azure_reservations.#", "2"),
 					// Azure - "test-res-1", added config
@@ -252,6 +257,7 @@ func TestAccCommitments(t *testing.T) {
 					checkFloatAttr("castai_commitments.test_gcp", "gcp_cuds.0.allowed_usage", 1),
 					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.0.status", "Active"),
 					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.0.assignments.#", "1"),
+					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.0.scaling_strategy", "Default"),
 					// GCP - "test-2" CUD, unchanged
 					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.1.cud_id", "987654321"),
 					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.1.cud_status", "ACTIVE"),
@@ -267,6 +273,7 @@ func TestAccCommitments(t *testing.T) {
 					checkFloatAttr("castai_commitments.test_gcp", "gcp_cuds.1.allowed_usage", 0.7),
 					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.1.status", "Active"),
 					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.1.assignments.#", "1"),
+					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.1.scaling_strategy", "CPUBased"),
 				),
 			},
 			importCUDsStateStep,
@@ -289,6 +296,7 @@ func TestAccCommitments(t *testing.T) {
 					checkFloatAttr("castai_commitments.test_gcp", "gcp_cuds.0.allowed_usage", 0.7),
 					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.0.status", "Active"),
 					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.0.assignments.#", "0"),
+					resource.TestCheckResourceAttr("castai_commitments.test_gcp", "gcp_cuds.0.scaling_strategy", "Default"),
 				),
 			},
 		},
@@ -390,6 +398,18 @@ resource "castai_commitments" "test_gcp" {
 
 	commitment_configs {
 		matcher {
+			name = "test"
+			type = "COMPUTE_OPTIMIZED_C2D"
+			region = "us-central1"
+		}
+		prioritization = false
+		allowed_usage = 1
+		status = "Active"
+        scaling_strategy = "Default"
+	}
+
+	commitment_configs {
+		matcher {
 		  name = "test-2"
 		  type = "GENERAL_PURPOSE_E2"
 		  region = "us-central1"
@@ -400,17 +420,7 @@ resource "castai_commitments" "test_gcp" {
 		assignments {
 			cluster_id = castai_gke_cluster.test.id
 		}
-	}
-
-	commitment_configs {
-		matcher {
-			name = "test"
-			type = "COMPUTE_OPTIMIZED_C2D"
-			region = "us-central1"
-		}
-		prioritization = false
-		allowed_usage = 1
-		status = "Active"
+        scaling_strategy = "CPUBased"
 	}
 }
 
@@ -439,20 +449,6 @@ resource "castai_commitments" "test_gcp" {
 ]
 	EOF
 
-  commitment_configs {
-	  matcher {
-		  name = "test-2"
-		  type = "GENERAL_PURPOSE_E2"
-		  region = "us-central1"
-	  }	
-      prioritization = true
-	  allowed_usage = 0.7
-	  status = "Active"
-	  assignments {
-		cluster_id = castai_gke_cluster.test.id
-	  }
-    }
-
 	commitment_configs {
 		matcher {
  			name = "test"
@@ -465,7 +461,23 @@ resource "castai_commitments" "test_gcp" {
 		assignments {
 			cluster_id = castai_gke_cluster.test.id
 	  	}
+		scaling_strategy = "Default"
 	}
+
+  	commitment_configs {
+		matcher {
+			name = "test-2"
+			type = "GENERAL_PURPOSE_E2"
+			region = "us-central1"
+		}	
+		prioritization = true
+		allowed_usage = 0.7
+		status = "Active"
+		assignments {
+			cluster_id = castai_gke_cluster.test.id
+		}
+		scaling_strategy = "CPUBased"
+   }
 }
 
 resource "castai_commitments" "test_azure" {
@@ -487,6 +499,7 @@ test-res-2,3b3de39c-bc44-4d69-be2d-69527dfe9959,630226bb-5170-4b95-90b0-f2227571
 		assignments {
 			cluster_id = castai_aks_cluster.test.id
 		}
+		scaling_strategy = "Default"
 	}
 
 	commitment_configs {
@@ -501,6 +514,7 @@ test-res-2,3b3de39c-bc44-4d69-be2d-69527dfe9959,630226bb-5170-4b95-90b0-f2227571
 		assignments {
 			cluster_id = castai_aks_cluster.test.id
 		}
+		scaling_strategy = "Default"
 	}
 }
 `)
@@ -522,20 +536,6 @@ resource "castai_commitments" "test_gcp" {
 
   commitment_configs {
   	matcher {
-	  name = "test-2"
-	  type = "GENERAL_PURPOSE_E2"
-	  region = "us-central1"
-    }
-    prioritization = true
-    allowed_usage = 0.7
-    status = "Active"
-	assignments {
-		cluster_id = castai_gke_cluster.test.id
-	}
-  }
-
-  commitment_configs {
-  	matcher {
 	  name = "test"
 	  type = "COMPUTE_OPTIMIZED_C2D"
 	  region = "us-central1"
@@ -546,6 +546,22 @@ resource "castai_commitments" "test_gcp" {
 	assignments {
 		cluster_id = castai_gke_cluster.test.id
   	}
+	scaling_strategy = "Default"
+  }
+
+  commitment_configs {
+  	matcher {
+	  name = "test-2"
+	  type = "GENERAL_PURPOSE_E2"
+	  region = "us-central1"
+    }
+    prioritization = true
+    allowed_usage = 0.7
+    status = "Active"
+	assignments {
+		cluster_id = castai_gke_cluster.test.id
+	}
+	scaling_strategy = "CPUBased"
   }
 }
 `)
@@ -573,6 +589,7 @@ resource "castai_commitments" "test_gcp" {
 	prioritization = true
 	allowed_usage = 0.7
 	status = "Active"
+	scaling_strategy = "Default"
   }
 }
 `)

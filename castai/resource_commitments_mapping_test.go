@@ -29,13 +29,14 @@ func TestMapCommitmentToCUDResource(t *testing.T) {
 				Status:   lo.ToPtr("ACTIVE"),
 				Type:     lo.ToPtr("COMPUTE_OPTIMIZED_C2D"),
 			},
-			Id:             lo.ToPtr(id1.String()),
-			Name:           lo.ToPtr("test-cud"),
-			Prioritization: lo.ToPtr(true),
-			Region:         lo.ToPtr("us-central1"),
-			StartDate:      lo.ToPtr(endTs),
-			Status:         lo.ToPtr[sdk.CastaiInventoryV1beta1CommitmentStatus]("ACTIVE"),
-			UpdatedAt:      lo.ToPtr(now),
+			Id:              lo.ToPtr(id1.String()),
+			Name:            lo.ToPtr("test-cud"),
+			Prioritization:  lo.ToPtr(true),
+			Region:          lo.ToPtr("us-central1"),
+			StartDate:       lo.ToPtr(endTs),
+			Status:          lo.ToPtr[sdk.CastaiInventoryV1beta1CommitmentStatus]("ACTIVE"),
+			UpdatedAt:       lo.ToPtr(now),
+			ScalingStrategy: lo.ToPtr[sdk.CastaiInventoryV1beta1CommitmentScalingStrategy]("Default"),
 		}
 	}
 
@@ -61,6 +62,7 @@ func TestMapCommitmentToCUDResource(t *testing.T) {
 						{ClusterID: "cluster-id-1"},
 						{ClusterID: "cluster-id-2"},
 					},
+					ScalingStrategy: lo.ToPtr("Default"),
 				},
 				CUDID:          "123456",
 				CUDStatus:      "ACTIVE",
@@ -102,6 +104,7 @@ func TestMapCommitmentToCUDResource(t *testing.T) {
 						{ClusterID: "cluster-id-1"},
 						{ClusterID: "cluster-id-2"},
 					},
+					ScalingStrategy: lo.ToPtr("Default"),
 				},
 				CUDID:          "123456",
 				CUDStatus:      "ACTIVE",
@@ -134,6 +137,7 @@ func TestMapCommitmentToCUDResource(t *testing.T) {
 						{ClusterID: "cluster-id-1"},
 						{ClusterID: "cluster-id-2"},
 					},
+					ScalingStrategy: lo.ToPtr("Default"),
 				},
 				CUDID:          "123456",
 				CUDStatus:      "ACTIVE",
@@ -301,6 +305,9 @@ func TestMapCUDImportToResource(t *testing.T) {
 				MemoryMb:       20480,
 				Plan:           "TWELVE_MONTHS",
 				Type:           "COMPUTE_OPTIMIZED_C2D",
+				CASTCommitmentFields: CASTCommitmentFields{
+					ScalingStrategy: lo.ToPtr("Default"),
+				},
 			},
 		},
 		"should succeed, nil cud resources": {
@@ -318,6 +325,9 @@ func TestMapCUDImportToResource(t *testing.T) {
 				Region:         "us-central1",
 				Plan:           "TWELVE_MONTHS",
 				Type:           "COMPUTE_OPTIMIZED_C2D",
+				CASTCommitmentFields: CASTCommitmentFields{
+					ScalingStrategy: lo.ToPtr("Default"),
+				},
 			},
 		},
 		"should succeed, with a config passed": {
@@ -331,9 +341,10 @@ func TestMapCUDImportToResource(t *testing.T) {
 							Region: lo.ToPtr("us-central1"),
 						},
 					},
-					Prioritization: lo.ToPtr(true),
-					Status:         lo.ToPtr("ACTIVE"),
-					AllowedUsage:   lo.ToPtr(0.7),
+					Prioritization:  lo.ToPtr(true),
+					Status:          lo.ToPtr("ACTIVE"),
+					AllowedUsage:    lo.ToPtr(0.7),
+					ScalingStrategy: lo.ToPtr("CPUBased"),
 				}
 				return c
 			}(),
@@ -350,9 +361,10 @@ func TestMapCUDImportToResource(t *testing.T) {
 				Type:           "COMPUTE_OPTIMIZED_C2D",
 				// Configured fields
 				CASTCommitmentFields: CASTCommitmentFields{
-					Prioritization: lo.ToPtr(true),
-					Status:         lo.ToPtr("ACTIVE"),
-					AllowedUsage:   lo.ToPtr(0.7),
+					Prioritization:  lo.ToPtr(true),
+					Status:          lo.ToPtr("ACTIVE"),
+					AllowedUsage:    lo.ToPtr(0.7),
+					ScalingStrategy: lo.ToPtr("CPUBased"),
 				},
 			},
 		},
@@ -392,6 +404,9 @@ func TestMapCUDImportToResource(t *testing.T) {
 				MemoryMb:       20480,
 				Plan:           "TWELVE_MONTHS",
 				Type:           "COMPUTE_OPTIMIZED_C2D",
+				CASTCommitmentFields: CASTCommitmentFields{
+					ScalingStrategy: lo.ToPtr("Default"),
+				},
 			},
 		},
 		"should succeed with zeroed out memory as its resource is not contained by the resources": {
@@ -410,6 +425,9 @@ func TestMapCUDImportToResource(t *testing.T) {
 				CPU:            10,
 				Plan:           "TWELVE_MONTHS",
 				Type:           "COMPUTE_OPTIMIZED_C2D",
+				CASTCommitmentFields: CASTCommitmentFields{
+					ScalingStrategy: lo.ToPtr("Default"),
+				},
 			},
 		},
 	}
@@ -459,6 +477,9 @@ func TestMapReservationImportToResource(t *testing.T) {
 				Scope:              lo.FromPtr(testAzureCommitmentImport.Scope),
 				ScopeResourceGroup: lo.FromPtr(testAzureCommitmentImport.ScopeResourceGroup),
 				ScopeSubscription:  lo.FromPtr(testAzureCommitmentImport.ScopeSubscription),
+				CASTCommitmentFields: CASTCommitmentFields{
+					ScalingStrategy: lo.ToPtr("Default"),
+				},
 			},
 		},
 		"should succeed, with a config passed": {
@@ -472,17 +493,19 @@ func TestMapReservationImportToResource(t *testing.T) {
 							Region: testAzureCommitmentImport.Region,
 						},
 					},
-					Prioritization: lo.ToPtr(true),
-					Status:         lo.ToPtr("ACTIVE"),
-					AllowedUsage:   lo.ToPtr(0.7),
+					Prioritization:  lo.ToPtr(true),
+					Status:          lo.ToPtr("ACTIVE"),
+					AllowedUsage:    lo.ToPtr(0.7),
+					ScalingStrategy: lo.ToPtr("CPUBased"),
 				}
 				return c
 			}(),
 			expected: &azureReservationResource{
 				CASTCommitmentFields: CASTCommitmentFields{
-					AllowedUsage:   lo.ToPtr(0.7),
-					Prioritization: lo.ToPtr(true),
-					Status:         lo.ToPtr("ACTIVE"),
+					AllowedUsage:    lo.ToPtr(0.7),
+					Prioritization:  lo.ToPtr(true),
+					Status:          lo.ToPtr("ACTIVE"),
+					ScalingStrategy: lo.ToPtr("CPUBased"),
 				},
 				Count:              2,
 				ReservationID:      lo.FromPtr(testAzureCommitmentImport.ReservationId),
@@ -508,6 +531,9 @@ func TestMapReservationImportToResource(t *testing.T) {
 			},
 			expected: &azureReservationResource{
 				Plan: "ONE_YEAR",
+				CASTCommitmentFields: CASTCommitmentFields{
+					ScalingStrategy: lo.ToPtr("Default"),
+				},
 			},
 		},
 		"should map P3Y term to THREE_YEAR plan": {
@@ -520,6 +546,9 @@ func TestMapReservationImportToResource(t *testing.T) {
 			},
 			expected: &azureReservationResource{
 				Plan: "THREE_YEAR",
+				CASTCommitmentFields: CASTCommitmentFields{
+					ScalingStrategy: lo.ToPtr("Default"),
+				},
 			},
 		},
 		"should map ONE_YEAR term to ONE_YEAR plan": {
@@ -532,6 +561,9 @@ func TestMapReservationImportToResource(t *testing.T) {
 			},
 			expected: &azureReservationResource{
 				Plan: "ONE_YEAR",
+				CASTCommitmentFields: CASTCommitmentFields{
+					ScalingStrategy: lo.ToPtr("Default"),
+				},
 			},
 		},
 		"should map ONE_YEAR term to THREE_YEAR plan": {
@@ -544,6 +576,9 @@ func TestMapReservationImportToResource(t *testing.T) {
 			},
 			expected: &azureReservationResource{
 				Plan: "THREE_YEAR",
+				CASTCommitmentFields: CASTCommitmentFields{
+					ScalingStrategy: lo.ToPtr("Default"),
+				},
 			},
 		},
 		"should fail when invalid term is passed": {
@@ -932,6 +967,7 @@ func TestMapConfiguredCUDImportsToResources(t *testing.T) {
 							{ClusterID: "cluster-1", Priority: lo.ToPtr(1)},
 							{ClusterID: "cluster-2", Priority: lo.ToPtr(2)},
 						},
+						ScalingStrategy: lo.ToPtr("Default"),
 					},
 					CUDID:          lo.FromPtr(testGCPCommitmentImport.Id),
 					CUDStatus:      lo.FromPtr(testGCPCommitmentImport.Status),
@@ -1037,6 +1073,7 @@ func TestMapConfiguredReservationImportsToResources(t *testing.T) {
 							{ClusterID: "cluster-1", Priority: lo.ToPtr(1)},
 							{ClusterID: "cluster-2", Priority: lo.ToPtr(2)},
 						},
+						ScalingStrategy: lo.ToPtr("Default"),
 					},
 					Count:              int(lo.FromPtr(testAzureCommitmentImport.Quantity)),
 					ReservationID:      lo.FromPtr(testAzureCommitmentImport.ReservationId),

@@ -21,9 +21,10 @@ resource "castai_commitments" "gcp_test" {
       type   = "COMPUTE_OPTIMIZED_C2D"
       name   = "test"
     }
-    prioritization = true
-    allowed_usage  = 0.6
-    status         = "Inactive"
+    prioritization   = true
+    allowed_usage    = 0.6
+    status           = "Inactive"
+    scaling_strategy = "Default"
 
     assignments {
       cluster_id = "cluster-id-1" # priority 1 cluster - prioritization is enabled
@@ -42,9 +43,10 @@ resource "castai_commitments" "azure_test" {
       type   = "Standard_D32as_v4"
       name   = "test-res-1"
     }
-    prioritization = false
-    allowed_usage  = 0.9
-    status         = "Active"
+    prioritization   = false
+    allowed_usage    = 0.9
+    status           = "Active"
+    scaling_strategy = "Default"
 
     assignments {
       cluster_id = "cluster-id-3"
@@ -84,6 +86,7 @@ Optional:
 - `allowed_usage` (Number) Allowed usage of the commitment. The value is between 0 (0%) and 1 (100%).
 - `assignments` (Block List) List of assigned clusters for the commitment. If prioritization is enabled, the order of the assignments indicates the priority. The first assignment has the highest priority. (see [below for nested schema](#nestedblock--commitment_configs--assignments))
 - `prioritization` (Boolean) If enabled, it's possible to assign priorities to the assigned clusters.
+- `scaling_strategy` (String) Scaling strategy of the commitment in CAST AI. One of: Default, CPUBased, RamBased
 - `status` (String) Status of the commitment in CAST AI.
 
 <a id="nestedblock--commitment_configs--matcher"></a>
@@ -138,6 +141,7 @@ Read-Only:
 - `region` (String)
 - `reservation_id` (String)
 - `reservation_status` (String)
+- `scaling_strategy` (String)
 - `scope` (String)
 - `scope_resource_group` (String)
 - `scope_subscription` (String)
@@ -171,6 +175,7 @@ Read-Only:
 - `plan` (String)
 - `prioritization` (Boolean)
 - `region` (String)
+- `scaling_strategy` (String)
 - `start_timestamp` (String)
 - `status` (String)
 - `type` (String)
