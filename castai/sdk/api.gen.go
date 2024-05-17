@@ -62,6 +62,16 @@ const (
 	CastaiInventoryV1beta1GPUDeviceManufacturerUNKNOWN CastaiInventoryV1beta1GPUDeviceManufacturer = "UNKNOWN"
 )
 
+// Defines values for CastaiInventoryV1beta1InstanceTypeCPUManufacturer.
+const (
+	AMD     CastaiInventoryV1beta1InstanceTypeCPUManufacturer = "AMD"
+	AMPERE  CastaiInventoryV1beta1InstanceTypeCPUManufacturer = "AMPERE"
+	APPLE   CastaiInventoryV1beta1InstanceTypeCPUManufacturer = "APPLE"
+	AWS     CastaiInventoryV1beta1InstanceTypeCPUManufacturer = "AWS"
+	INTEL   CastaiInventoryV1beta1InstanceTypeCPUManufacturer = "INTEL"
+	UNKNOWN CastaiInventoryV1beta1InstanceTypeCPUManufacturer = "UNKNOWN"
+)
+
 // Defines values for CastaiInventoryV1beta1StorageDriver.
 const (
 	CastaiInventoryV1beta1StorageDriverInvalid CastaiInventoryV1beta1StorageDriver = "invalid"
@@ -595,6 +605,9 @@ type CastaiInventoryV1beta1InstanceType struct {
 	CastChoice       *bool   `json:"castChoice,omitempty"`
 	ComputeOptimized *bool   `json:"computeOptimized,omitempty"`
 
+	// Describes the manufacturers of the CPUs the instance type can be equipped with.
+	CpuManufacturers *[]CastaiInventoryV1beta1InstanceTypeCPUManufacturer `json:"cpuManufacturers,omitempty"`
+
 	// CPU base price of the instance type. $/CPU hour.
 	CpuPrice *string `json:"cpuPrice,omitempty"`
 
@@ -640,6 +653,9 @@ type CastaiInventoryV1beta1InstanceType struct {
 	Vcpu  *string                               `json:"vcpu,omitempty"`
 	Zones *[]CastaiInventoryV1beta1InstanceZone `json:"zones,omitempty"`
 }
+
+// CastaiInventoryV1beta1InstanceTypeCPUManufacturer defines model for castai.inventory.v1beta1.InstanceType.CPUManufacturer.
+type CastaiInventoryV1beta1InstanceTypeCPUManufacturer string
 
 // CastaiInventoryV1beta1InstanceTypeAggregate defines model for castai.inventory.v1beta1.InstanceTypeAggregate.
 type CastaiInventoryV1beta1InstanceTypeAggregate struct {
