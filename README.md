@@ -327,6 +327,12 @@ module "castai-aks-cluster" {
   }
 }
 ```
+For more information for `castai-aks-cluster` module follow:
+https://github.com/castai/terraform-castai-aks/blob/main/README.md#migrating-from-2xx-to-3xx
+If you have used `castai-eks-cluster` or other modules follow:
+https://github.com/castai/terraform-castai-eks-cluster/blob/main/README.md#migrating-from-6xx-to-7xx
+If you have used `castai-gke-cluster` or other modules follow:
+https://github.com/castai/terraform-castai-gke-cluster/blob/main/README.md#migrating-from-3xx-to-4xx
 
 
 Migrating from 6.x.x to 7.x.x
@@ -364,11 +370,11 @@ module "castai-aks-cluster" {
 ```
 
 For more information for `castai-aks-cluster` module follow:
-https://github.com/castai/terraform-castai-aks/blob/main/README.md#migrating-from-2xx-to-3xx
+https://github.com/castai/terraform-castai-aks/blob/main/README.md#migrating-from-3xx-to-4xx
 If you have used `castai-eks-cluster` or other modules follow:
-https://github.com/castai/terraform-castai-eks-cluster/blob/main/README.md#migrating-from-6xx-to-7xx
+https://github.com/castai/terraform-castai-eks-cluster/blob/main/README.md#migrating-from-7xx-to-8xx
 If you have used `castai-gke-cluster` or other modules follow:
-https://github.com/castai/terraform-castai-gke-cluster/blob/main/README.md#migrating-from-3xx-to-4xx
+https://github.com/castai/terraform-castai-gke-cluster/blob/main/README.md#migrating-from-4xx-to-5xx
 
 
 Developing the provider
