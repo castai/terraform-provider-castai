@@ -875,14 +875,19 @@ func resourceNodeTemplateCreate(ctx context.Context, d *schema.ResourceData, met
 	client := meta.(*ProviderConfig).api
 	clusterID := d.Get(FieldClusterID).(string)
 
-	// default node template is created by default in the background, therefore we need to use PUT instead of POST
-	if d.Get(FieldNodeTemplateIsDefault).(bool) {
+	name := d.Get(FieldNodeTemplateName).(string)
+	isDefault := d.Get(FieldNodeTemplateIsDefault).(bool)
+
+	// When creating a default node template, use PUT instead of POST because a default node template is automatically created in the background.
+	// Since name of the default node template is fixed, we can use it to identify the default node template. All other
+	// requests should be treated as regular node template creation requests to avoid conflicts for validation of the request.
+	if isDefault && name == "default-by-castai" {
 		return updateDefaultNodeTemplate(ctx, d, meta)
 	}
 
 	req := sdk.NodeTemplatesAPICreateNodeTemplateJSONRequestBody{
-		Name:            lo.ToPtr(d.Get(FieldNodeTemplateName).(string)),
-		IsDefault:       lo.ToPtr(d.Get(FieldNodeTemplateIsDefault).(bool)),
+		Name:            lo.ToPtr(name),
+		IsDefault:       lo.ToPtr(isDefault),
 		ConfigurationId: lo.ToPtr(d.Get(FieldNodeTemplateConfigurationId).(string)),
 		ShouldTaint:     lo.ToPtr(d.Get(FieldNodeTemplateShouldTaint).(bool)),
 	}
