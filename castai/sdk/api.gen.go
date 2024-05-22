@@ -101,6 +101,20 @@ const (
 	STATUSUNKNOWN  CastaiSsoV1beta1SSOConnectionStatus = "STATUS_UNKNOWN"
 )
 
+// Defines values for ExternalclusterV1ClusterReconcileInfoReconcileMode.
+const (
+	Disabled ExternalclusterV1ClusterReconcileInfoReconcileMode = "disabled"
+	Enabled  ExternalclusterV1ClusterReconcileInfoReconcileMode = "enabled"
+	Paused   ExternalclusterV1ClusterReconcileInfoReconcileMode = "paused"
+)
+
+// Defines values for ExternalclusterV1ClusterReconcileInfoReconcileStatus.
+const (
+	Failed  ExternalclusterV1ClusterReconcileInfoReconcileStatus = "failed"
+	Ok      ExternalclusterV1ClusterReconcileInfoReconcileStatus = "ok"
+	Warning ExternalclusterV1ClusterReconcileInfoReconcileStatus = "warning"
+)
+
 // Defines values for ExternalclusterV1NodeType.
 const (
 	Master          ExternalclusterV1NodeType = "master"
@@ -382,6 +396,25 @@ type CastaiInventoryV1beta1AzureReservationImport struct {
 	Status             *string `json:"status,omitempty"`
 	Term               *string `json:"term,omitempty"`
 	Type               *string `json:"type,omitempty"`
+}
+
+// CPUPlatform describes the CPU platforms the instance type can be equipped with.
+type CastaiInventoryV1beta1CPUPlatform struct {
+	// All Core Turbo Frequency (GHz).
+	AllCoreTurboFrequency *float64 `json:"allCoreTurboFrequency,omitempty"`
+
+	// Base Frequency of the platform (GHz).
+	BaseFrequency *float64 `json:"baseFrequency,omitempty"`
+
+	// Generation of the platform.
+	Generation *string `json:"generation,omitempty"`
+
+	// Platform name.
+	Platform *string `json:"platform,omitempty"`
+
+	// Single Core Turbo Frequency (GHz).
+	SingleCoreTurboFrequency *float64 `json:"singleCoreTurboFrequency,omitempty"`
+	Sku                      *string  `json:"sku,omitempty"`
 }
 
 // CastaiInventoryV1beta1ClusterAggregatedUsage defines model for castai.inventory.v1beta1.ClusterAggregatedUsage.
@@ -700,12 +733,15 @@ type CastaiInventoryV1beta1InstanceZone struct {
 	AttachableGpuDevices *[]CastaiInventoryV1beta1AttachableGPUDevice `json:"attachableGpuDevices,omitempty"`
 	AttachedGpuDevices   *[]CastaiInventoryV1beta1GPUDevice           `json:"attachedGpuDevices,omitempty"`
 	AzId                 *string                                      `json:"azId,omitempty"`
-	CpuPrice             *string                                      `json:"cpuPrice,omitempty"`
-	LastUnavailableAt    *time.Time                                   `json:"lastUnavailableAt,omitempty"`
-	Price                *string                                      `json:"price,omitempty"`
-	RamPrice             *string                                      `json:"ramPrice,omitempty"`
-	Spot                 *bool                                        `json:"spot,omitempty"`
-	Unavailable          *bool                                        `json:"unavailable,omitempty"`
+
+	// Describes the CPU platforms the instance type can be equipped with.
+	CpuPlatforms      *[]CastaiInventoryV1beta1CPUPlatform `json:"cpuPlatforms,omitempty"`
+	CpuPrice          *string                              `json:"cpuPrice,omitempty"`
+	LastUnavailableAt *time.Time                           `json:"lastUnavailableAt,omitempty"`
+	Price             *string                              `json:"price,omitempty"`
+	RamPrice          *string                              `json:"ramPrice,omitempty"`
+	Spot              *bool                                `json:"spot,omitempty"`
+	Unavailable       *bool                                `json:"unavailable,omitempty"`
 }
 
 // Describes the network settings for the instance type.
@@ -1347,8 +1383,10 @@ type ExternalclusterV1ClusterReconcileInfo struct {
 	Error *string `json:"error"`
 
 	// Number of times the reconcile was retried.
-	ErrorCount *int32  `json:"errorCount,omitempty"`
-	Mode       *string `json:"mode,omitempty"`
+	ErrorCount *int32 `json:"errorCount,omitempty"`
+
+	// Reconcile mode.
+	Mode *ExternalclusterV1ClusterReconcileInfoReconcileMode `json:"mode,omitempty"`
 
 	// Timestamp when the last reconcile was performed.
 	ReconciledAt *time.Time `json:"reconciledAt"`
@@ -1360,8 +1398,14 @@ type ExternalclusterV1ClusterReconcileInfo struct {
 	StartedAt *time.Time `json:"startedAt"`
 
 	// Reconcile status.
-	Status *string `json:"status"`
+	Status *ExternalclusterV1ClusterReconcileInfoReconcileStatus `json:"status,omitempty"`
 }
+
+// Reconcile mode.
+type ExternalclusterV1ClusterReconcileInfoReconcileMode string
+
+// Reconcile status.
+type ExternalclusterV1ClusterReconcileInfoReconcileStatus string
 
 // ExternalclusterV1ClusterUpdate defines model for externalcluster.v1.ClusterUpdate.
 type ExternalclusterV1ClusterUpdate struct {
