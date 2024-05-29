@@ -14,8 +14,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/mitchellh/mapstructure"
 
 	"github.com/castai/terraform-provider-castai/castai/sdk"
+	"github.com/castai/terraform-provider-castai/castai/types"
 )
 
 const (
@@ -626,13 +628,30 @@ func getClusterId(data resourceProvider) string {
 }
 
 func getChangedPolicies(ctx context.Context, data resourceProvider, meta interface{}, clusterId string) ([]byte, error) {
-	policyChangesJSON, found := data.GetOk(FieldAutoscalerPoliciesJSON)
-	if !found {
+	policyChangesJSON, isPoliciesJSONExist := data.GetOk(FieldAutoscalerPoliciesJSON)
+	_, isPoliciesDefinitionsExist := data.GetOk(FieldAutoscalerPolicyDefinitions)
+
+	var policyChanges []byte
+
+	if isPoliciesDefinitionsExist {
+		policy, err := toAutoscalerPolicy(data)
+		if err != nil {
+			return nil, fmt.Errorf("failed to deserialize policy definitions: %v", err)
+		}
+
+		data, err := json.Marshal(policy)
+		if err != nil {
+			return nil, fmt.Errorf("failed to serialize policy definition: %v", err)
+		}
+
+		policyChanges = data
+	} else if isPoliciesJSONExist {
+		policyChanges = []byte(policyChangesJSON.(string))
+	} else {
 		log.Printf("[DEBUG] policies json not provided. Skipping autoscaler policies changes")
 		return nil, nil
 	}
 
-	policyChanges := []byte(policyChangesJSON.(string))
 	if !json.Valid(policyChanges) {
 		log.Printf("[WARN] policies JSON invalid: %v", string(policyChanges))
 		return nil, fmt.Errorf("policies JSON invalid")
@@ -690,4 +709,23 @@ func createValidationError(field, value string) error {
 		"The configuration was migrated to default node template.\n\n"+
 		"See: https://github.com/castai/terraform-provider-castai#migrating-from-4xx-to-5xx\n\n"+
 		"Policy:\n%v", field, value)
+}
+
+// toAutoscalerPolicy converts FieldAutoscalerPolicyDefinitions to types.AutoscalerPolicy for given data.
+func toAutoscalerPolicy(data types.ResourceProvider) (*types.AutoscalerPolicy, error) {
+	out, ok := extractNestedValues(data, FieldAutoscalerPolicyDefinitions, true, true)
+	if !ok {
+		return nil, nil
+	}
+
+	var policy types.AutoscalerPolicy
+
+	// This allows us to decode the map into a struct with weak type conversions
+	// like "true" string into bool true or "1" string into int 1.
+	err := mapstructure.WeakDecode(out, &policy)
+	if err != nil {
+		return nil, err
+	}
+
+	return &policy, nil
 }
