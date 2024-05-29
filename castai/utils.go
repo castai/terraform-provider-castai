@@ -8,6 +8,7 @@ import (
 	"math"
 	"strconv"
 
+	"github.com/castai/terraform-provider-castai/castai/types"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/samber/lo"
@@ -169,4 +170,86 @@ func checkFloatAttr(resource, path string, val float64) func(state *terraform.St
 		}
 		return nil
 	}
+}
+
+// extractNestedValues extracts nested values from a ResourceProvider (schema.ResourceData or schema.ResourceDiff)
+// by their full key, checking if the value is set explicitly or to the default value.
+//
+// This function helps convert nested values to a map[string]interface{} for decoding to a struct using json.Unmarshal or mapstructure.Decode.
+//
+// Parameters:
+//
+// - provider, The types.ResourceProvider to extract values from.
+//
+// - key, The full key of the value to extract. Like "foo.bar.0.baz".
+//
+// - unwrapSingleItemList, If true, unwraps single item lists to the item itself. This is useful for complex types defined as
+// *schema.TypeList with max item count 1.
+//
+// - includeZeroValues, If true, includes zero values explicitly set. This is useful to distinguish between not-set and set to the
+// default value, though its use is discouraged due to the deprecation of the underlying function.
+func extractNestedValues(provider types.ResourceProvider, key string, unwrapSingleItemList bool, includeZeroValues bool) (any, bool) {
+	var getFN func(key string) (any, bool)
+
+	// The default values is tricky to handle in terraform. `GetOk` will return not-set if the value is set the default value. explicitly.
+	// Due to this, we are not able to distinguish between not-set and set to the default value. Only way to distinguish between them is
+	// using `GetOkExists` which will return false if the value is not set explicitly.
+	//
+	// However, `GetOkExists` marked as deprecated and discouraged to use in *schema.ResourceData.GetOkExists with following note:
+	//  `Deprecated: usage is discouraged due to undefined behaviors and may be removed in a future version of the SDK`
+	//
+	// Since this is the only way to distinguish between unset and default, we have to use it here. To reduce the usage of
+	// `GetOkExists` we decided to use it only for end values. If it removed in the future, we need to return bool values even if
+	// the key does not set explicitly.
+	if includeZeroValues {
+		getFN = provider.GetOkExists
+	} else {
+		getFN = provider.GetOk
+	}
+
+	val, ok := getFN(key)
+	if !ok {
+		return nil, false
+	}
+
+	switch vt := val.(type) {
+	case map[string]any:
+		out := make(map[string]any)
+
+		for nestedKey, _ := range vt {
+			if val, ok = extractNestedValues(provider, fmt.Sprintf("%s.%s", key, nestedKey), unwrapSingleItemList, includeZeroValues); ok {
+				out[nestedKey] = val
+			}
+		}
+
+		if len(out) == 0 {
+			return nil, false
+		}
+
+		return out, true
+	case []any:
+		if unwrapSingleItemList && len(vt) == 1 {
+			if _, ok := vt[0].(map[string]any); ok {
+				return extractNestedValues(provider, fmt.Sprintf("%s.%d", key, 0), unwrapSingleItemList, includeZeroValues)
+			}
+		}
+
+		var vals []any
+
+		for i, _ := range vt {
+			nestedKey := fmt.Sprintf("%s.%d", key, i)
+
+			if val, ok = extractNestedValues(provider, nestedKey, unwrapSingleItemList, includeZeroValues); ok {
+				vals = append(vals, val)
+			}
+		}
+
+		if len(vals) == 0 {
+			return nil, false
+		}
+
+		return vals, true
+	}
+
+	return getFN(key)
 }
