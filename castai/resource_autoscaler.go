@@ -89,6 +89,7 @@ func resourceAutoscaler() *schema.Resource {
 				Description:      "autoscaler policies JSON string to override current autoscaler settings",
 				Optional:         true,
 				ValidateDiagFunc: validateAutoscalerPolicyJSON(),
+				Deprecated:       "use autoscaler_policy_definitions instead",
 			},
 			FieldAutoscalerPolicies: {
 				Type:        schema.TypeString,
