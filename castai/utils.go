@@ -17,10 +17,6 @@ import (
 	"github.com/castai/terraform-provider-castai/castai/sdk"
 )
 
-type resourceProvider interface {
-	GetOk(key string) (interface{}, bool)
-}
-
 func toPtr[S any](src S) *S {
 	return &src
 }

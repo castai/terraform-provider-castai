@@ -619,7 +619,7 @@ func readAutoscalerPolicies(ctx context.Context, data *schema.ResourceData, meta
 	return nil
 }
 
-func getClusterId(data resourceProvider) string {
+func getClusterId(data types.ResourceProvider) string {
 	value, found := data.GetOk(FieldClusterId)
 	if !found {
 		return ""
@@ -628,7 +628,7 @@ func getClusterId(data resourceProvider) string {
 	return value.(string)
 }
 
-func getChangedPolicies(ctx context.Context, data resourceProvider, meta interface{}, clusterId string) ([]byte, error) {
+func getChangedPolicies(ctx context.Context, data types.ResourceProvider, meta interface{}, clusterId string) ([]byte, error) {
 	policyChangesJSON, isPoliciesJSONExist := data.GetOk(FieldAutoscalerPoliciesJSON)
 	_, isPoliciesDefinitionsExist := data.GetOk(FieldAutoscalerPolicyDefinitions)
 
