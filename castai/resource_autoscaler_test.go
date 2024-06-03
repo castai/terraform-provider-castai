@@ -623,9 +623,9 @@ func TestAutoscalerResource_ToAutoscalerPolicy(t *testing.T) {
 				},
 			),
 			expected: &types.AutoscalerPolicy{
-				Enabled: toPtr(true),
+				Enabled: true,
 				UnschedulablePods: &types.UnschedulablePods{
-					Enabled: toPtr(true),
+					Enabled: true,
 				},
 			},
 		},
@@ -667,19 +667,21 @@ func TestAutoscalerResource_GetChangePolicies_ComparePolicyJsonAndDef(t *testing
 		policyStruct   cty.Value
 		expectedPolicy string
 	}{
+		// for list types values we can't unset primitive values. So, we need to set them to false. explicitly
+		// we can't make new and old fields %100 consistent because of this.
 		{
 			name:           "simple policy",
-			current:        `{ "enabled": true }`,
-			policyJson:     `{ "enabled": false }`,
+			current:        `{"enabled":false}`,
+			policyJson:     `{"enabled":false,"isScopedMode":false,"nodeTemplatesPartialMatchingEnabled":false}`,
 			policyStruct:   cty.ListVal([]cty.Value{cty.ObjectVal(map[string]cty.Value{"enabled": cty.BoolVal(false)})}),
-			expectedPolicy: `{"enabled": false}`,
+			expectedPolicy: `{"enabled":false,"isScopedMode":false,"nodeTemplatesPartialMatchingEnabled":false}`,
 		},
 		{
 			name:           "with empty current policy",
 			current:        `{}`,
-			policyJson:     `{ "enabled": false }`,
+			policyJson:     `{"enabled":false,"isScopedMode":false,"nodeTemplatesPartialMatchingEnabled":false}`,
 			policyStruct:   cty.ListVal([]cty.Value{cty.ObjectVal(map[string]cty.Value{"enabled": cty.BoolVal(false)})}),
-			expectedPolicy: `{"enabled": false}`,
+			expectedPolicy: `{"enabled":false,"isScopedMode":false,"nodeTemplatesPartialMatchingEnabled":false}`,
 		},
 		{
 			name: "policy with nested objects",
@@ -702,7 +704,10 @@ func TestAutoscalerResource_GetChangePolicies_ComparePolicyJsonAndDef(t *testing
 			}`,
 			policyJson: `{
 				"enabled": false,
+				"isScopedMode": false,
+				"nodeTemplatesPartialMatchingEnabled": false,
 				"unschedulablePods": {
+					"customInstancesEnabled":false,
 					"enabled": false,
 					"headroom": {
 						"cpuPercentage": 100
@@ -730,6 +735,7 @@ func TestAutoscalerResource_GetChangePolicies_ComparePolicyJsonAndDef(t *testing
 														map[string]cty.Value{
 															"cpu_percentage":    cty.NumberIntVal(100),
 															"memory_percentage": cty.NumberIntVal(10),
+															"enabled":           cty.BoolVal(true),
 														},
 													),
 												},
@@ -755,7 +761,10 @@ func TestAutoscalerResource_GetChangePolicies_ComparePolicyJsonAndDef(t *testing
 			),
 			expectedPolicy: `{
 				"enabled": false,
+				"isScopedMode": false,
+				"nodeTemplatesPartialMatchingEnabled": false,
 				"unschedulablePods": {
+					"customInstancesEnabled": false,
 					"enabled": false,
 					"headroom": {
 						"cpuPercentage": 100,
