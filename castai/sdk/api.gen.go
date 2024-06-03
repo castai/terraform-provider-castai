@@ -101,20 +101,6 @@ const (
 	STATUSUNKNOWN  CastaiSsoV1beta1SSOConnectionStatus = "STATUS_UNKNOWN"
 )
 
-// Defines values for ExternalclusterV1ClusterReconcileInfoReconcileMode.
-const (
-	Disabled ExternalclusterV1ClusterReconcileInfoReconcileMode = "disabled"
-	Enabled  ExternalclusterV1ClusterReconcileInfoReconcileMode = "enabled"
-	Paused   ExternalclusterV1ClusterReconcileInfoReconcileMode = "paused"
-)
-
-// Defines values for ExternalclusterV1ClusterReconcileInfoReconcileStatus.
-const (
-	Failed  ExternalclusterV1ClusterReconcileInfoReconcileStatus = "failed"
-	Ok      ExternalclusterV1ClusterReconcileInfoReconcileStatus = "ok"
-	Warning ExternalclusterV1ClusterReconcileInfoReconcileStatus = "warning"
-)
-
 // Defines values for ExternalclusterV1NodeType.
 const (
 	Master          ExternalclusterV1NodeType = "master"
@@ -1024,22 +1010,6 @@ type CastaiSsoV1beta1UpdateSSOConnection struct {
 	Okta *CastaiSsoV1beta1Okta `json:"okta,omitempty"`
 }
 
-// CastaiUsersV1beta1AWSMarketplaceUser defines model for castai.users.v1beta1.AWSMarketplaceUser.
-type CastaiUsersV1beta1AWSMarketplaceUser struct {
-	// CustomerAWSAccountId is Resolved using Registration token.
-	CustomerAwsAccountId *string `json:"customerAwsAccountId,omitempty"`
-
-	// CustomerIdentifier is Resolved using Registration token.
-	CustomerIdentifier *string `json:"customerIdentifier,omitempty"`
-
-	// ProductCode is Resolved using Registration token.
-	ProductCode *string `json:"productCode,omitempty"`
-
-	// When a buyer visits your website during the registration process, the buyer
-	// submits a registration token through the browser.
-	RegistrationToken *string `json:"registrationToken,omitempty"`
-}
-
 // Defines the response for adding a user to an organization.
 type CastaiUsersV1beta1AddUserToOrganizationResponse = map[string]interface{}
 
@@ -1090,20 +1060,6 @@ type CastaiUsersV1beta1DeleteInvitationResponse = map[string]interface{}
 
 // Defines the empty response to organization deletion.
 type CastaiUsersV1beta1DeleteOrganizationResponse = map[string]interface{}
-
-// CastaiUsersV1beta1GCPMarketplaceUser defines model for castai.users.v1beta1.GCPMarketplaceUser.
-type CastaiUsersV1beta1GCPMarketplaceUser struct {
-	// Google procurement account ID.
-	AccountId *string `json:"accountId,omitempty"`
-
-	// Roles is an array of strings representing the user's roles.
-	// Right now, it can be either: account_admin, which indicates that the user is a Billing Account Administrator of the billing account that purchased the product,
-	// or ** project_editor, which indicates that the user is a Project Editor, but not a Billing Administrator, of the project under that billing account.
-	Roles *[]string `json:"roles,omitempty"`
-
-	// User identity is the user's obfuscated GAIA ID, which can be used to initiate Open ID Connect.
-	UserIdentity *string `json:"userIdentity,omitempty"`
-}
 
 // Defines container for the organization's pending invitations.
 type CastaiUsersV1beta1ListInvitationsResponse struct {
@@ -1201,12 +1157,10 @@ type CastaiUsersV1beta1Request = map[string]interface{}
 // User represents a single system user.
 type CastaiUsersV1beta1User struct {
 	// (optional) whether SSO auth provider label was provided as a separate JWT claim; used when login handler calls users service.
-	AuthProvider       *string                               `json:"authProvider"`
-	AwsMarketplaceUser *CastaiUsersV1beta1AWSMarketplaceUser `json:"awsMarketplaceUser,omitempty"`
+	AuthProvider *string `json:"authProvider"`
 
 	// (required) user email.
-	Email              string                                `json:"email"`
-	GcpMarketplaceUser *CastaiUsersV1beta1GCPMarketplaceUser `json:"gcpMarketplaceUser,omitempty"`
+	Email string `json:"email"`
 
 	// has_hubspot_contact indicates whether user has a hubspot contact.
 	HasHubspotContact *bool `json:"hasHubspotContact,omitempty"`
@@ -1383,10 +1337,8 @@ type ExternalclusterV1ClusterReconcileInfo struct {
 	Error *string `json:"error"`
 
 	// Number of times the reconcile was retried.
-	ErrorCount *int32 `json:"errorCount,omitempty"`
-
-	// Reconcile mode.
-	Mode *ExternalclusterV1ClusterReconcileInfoReconcileMode `json:"mode,omitempty"`
+	ErrorCount *int32  `json:"errorCount,omitempty"`
+	Mode       *string `json:"mode,omitempty"`
 
 	// Timestamp when the last reconcile was performed.
 	ReconciledAt *time.Time `json:"reconciledAt"`
@@ -1398,14 +1350,8 @@ type ExternalclusterV1ClusterReconcileInfo struct {
 	StartedAt *time.Time `json:"startedAt"`
 
 	// Reconcile status.
-	Status *ExternalclusterV1ClusterReconcileInfoReconcileStatus `json:"status,omitempty"`
+	Status *string `json:"status"`
 }
-
-// Reconcile mode.
-type ExternalclusterV1ClusterReconcileInfoReconcileMode string
-
-// Reconcile status.
-type ExternalclusterV1ClusterReconcileInfoReconcileStatus string
 
 // ExternalclusterV1ClusterUpdate defines model for externalcluster.v1.ClusterUpdate.
 type ExternalclusterV1ClusterUpdate struct {
@@ -1943,6 +1889,9 @@ type NodeconfigV1GKEConfig struct {
 
 	// Network tags to be added on a VM. Each tag must be 1-63 characters long, start with a lowercase letter and end with either a number or a lowercase letter.
 	NetworkTags *[]string `json:"networkTags,omitempty"`
+
+	// Flag indicating whether to use local SSD storage for the node. Defaults to false.
+	UseEphemeralStorageLocalSsd *bool `json:"useEphemeralStorageLocalSsd,omitempty"`
 
 	// Zones is a preferred list of zones to choose from when adding a node.
 	Zones *[]string `json:"zones,omitempty"`

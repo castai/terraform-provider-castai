@@ -2,6 +2,7 @@ package castai
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"time"
@@ -215,10 +216,15 @@ func updateAKSClusterSettings(ctx context.Context, data *schema.ResourceData, cl
 
 	// Retries are required for newly created IAM resources to initialise on Azure side.
 	b := backoff.WithContext(backoff.WithMaxRetries(backoff.NewConstantBackOff(10*time.Second), 30), ctx)
+	var lastErr error
 	if err = backoff.Retry(func() error {
 		response, err := client.ExternalClusterAPIUpdateClusterWithResponse(ctx, data.Id(), req)
+		lastErr = err
 		return sdk.CheckOKResponse(response, err)
 	}, b); err != nil {
+		if errors.Is(err, context.DeadlineExceeded) && lastErr != nil {
+			return fmt.Errorf("updating cluster configuration: %w: %v", err, lastErr)
+		}
 		return fmt.Errorf("updating cluster configuration: %w", err)
 	}
 
