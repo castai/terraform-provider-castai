@@ -182,29 +182,12 @@ func checkFloatAttr(resource, path string, val float64) func(state *terraform.St
 // - unwrapSingleItemList, If true, unwraps single item lists to the item itself. This is useful for complex types defined as
 // *schema.TypeList with max item count 1.
 //
-// - includeZeroValues, If true, includes zero values explicitly set. This is useful to distinguish between not-set and set to the
-// default value, though its use is discouraged due to the deprecation of the underlying function.
-func extractNestedValues(provider types.ResourceProvider, key string, unwrapSingleItemList bool, includeZeroValues bool) (any, bool) {
-	var getFN func(key string) (any, bool)
+// - includeDefaultValues, If true, includes values regardless of value being set explicitly or to the default value returned by the terraform provider.
+func extractNestedValues(provider types.ResourceProvider, key string, unwrapSingleItemList bool, includeDefaultValues bool) (any, bool) {
+	val, ok := provider.GetOk(key)
 
-	// The default values is tricky to handle in terraform. `GetOk` will return not-set if the value is set the default value. explicitly.
-	// Due to this, we are not able to distinguish between not-set and set to the default value. Only way to distinguish between them is
-	// using `GetOkExists` which will return false if the value is not set explicitly.
-	//
-	// However, `GetOkExists` marked as deprecated and discouraged to use in *schema.ResourceData.GetOkExists with following note:
-	//  `Deprecated: usage is discouraged due to undefined behaviors and may be removed in a future version of the SDK`
-	//
-	// Since this is the only way to distinguish between unset and default, we have to use it here. To reduce the usage of
-	// `GetOkExists` we decided to use it only for end values. If it removed in the future, we need to return bool values even if
-	// the key does not set explicitly.
-	if includeZeroValues {
-		getFN = provider.GetOkExists
-	} else {
-		getFN = provider.GetOk
-	}
-
-	val, ok := getFN(key)
-	if !ok {
+	isValExists := includeDefaultValues || ok
+	if !isValExists {
 		return nil, false
 	}
 
@@ -213,7 +196,7 @@ func extractNestedValues(provider types.ResourceProvider, key string, unwrapSing
 		out := make(map[string]any)
 
 		for nestedKey, _ := range vt {
-			if val, ok = extractNestedValues(provider, fmt.Sprintf("%s.%s", key, nestedKey), unwrapSingleItemList, includeZeroValues); ok {
+			if val, ok = extractNestedValues(provider, fmt.Sprintf("%s.%s", key, nestedKey), unwrapSingleItemList, includeDefaultValues); ok {
 				out[nestedKey] = val
 			}
 		}
@@ -226,7 +209,7 @@ func extractNestedValues(provider types.ResourceProvider, key string, unwrapSing
 	case []any:
 		if unwrapSingleItemList && len(vt) == 1 {
 			if _, ok := vt[0].(map[string]any); ok {
-				return extractNestedValues(provider, fmt.Sprintf("%s.%d", key, 0), unwrapSingleItemList, includeZeroValues)
+				return extractNestedValues(provider, fmt.Sprintf("%s.%d", key, 0), unwrapSingleItemList, includeDefaultValues)
 			}
 		}
 
@@ -235,7 +218,7 @@ func extractNestedValues(provider types.ResourceProvider, key string, unwrapSing
 		for i, _ := range vt {
 			nestedKey := fmt.Sprintf("%s.%d", key, i)
 
-			if val, ok = extractNestedValues(provider, nestedKey, unwrapSingleItemList, includeZeroValues); ok {
+			if val, ok = extractNestedValues(provider, nestedKey, unwrapSingleItemList, includeDefaultValues); ok {
 				vals = append(vals, val)
 			}
 		}
@@ -247,5 +230,5 @@ func extractNestedValues(provider types.ResourceProvider, key string, unwrapSing
 		return vals, true
 	}
 
-	return getFN(key)
+	return val, isValExists
 }

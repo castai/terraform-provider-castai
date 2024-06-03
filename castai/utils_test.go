@@ -69,21 +69,21 @@ func Test_ExtractNestedValues(t *testing.T) {
 		key                  string    // the key to extract from the data
 		data                 cty.Value // the data for testResource() resource state
 		unwrapSingleItemList bool      // if true, single item lists will be unwrapped
-		includeZeroValues    bool      // if true, zero values will be included in the result
+		includeDefaultValues bool      // if true, the default values should be included in the result
 		shouldExist          bool      // if true, the key should exist in the data and we should get a result
 		expectedData         any       // the expected result
 	}{
 		{
-			name:              "when data is empty and includeZeroValues true, than should return exist flag false",
-			data:              cty.NilVal,
-			includeZeroValues: true,
-			shouldExist:       false,
+			name:                 "when data is empty and includeDefaultValues true, than should return exist flag false",
+			data:                 cty.NilVal,
+			includeDefaultValues: true,
+			shouldExist:          false,
 		},
 		{
-			name:              "when data is empty and includeZeroValues false, than should return exist flag false",
-			data:              cty.NilVal,
-			includeZeroValues: false,
-			shouldExist:       false,
+			name:                 "when data is empty and includeDefaultValues false, than should return exist flag false",
+			data:                 cty.NilVal,
+			includeDefaultValues: false,
+			shouldExist:          false,
 		},
 		{
 			name:        "when key is not present in data, than should return exist flag false",
@@ -99,7 +99,7 @@ func Test_ExtractNestedValues(t *testing.T) {
 			expectedData: "123",
 		},
 		{
-			name: "when target value is set to default value and includeZeroValues true, than should return exist flag true",
+			name: "when target value is set to default value and includeDefaultValues true, than should return exist flag true",
 			key:  "foo.0.enabled",
 			data: cty.ObjectVal(
 				map[string]cty.Value{
@@ -114,12 +114,12 @@ func Test_ExtractNestedValues(t *testing.T) {
 					),
 				},
 			),
-			includeZeroValues: true,
-			shouldExist:       true,
-			expectedData:      false,
+			includeDefaultValues: true,
+			shouldExist:          true,
+			expectedData:         false,
 		},
 		{
-			name: "when target value is set to default value and includeZeroValues false, than should filter the default value and return exist flag false",
+			name: "when target value is set to default value and includeDefaultValues false, than should filter the default value and return exist flag false",
 			key:  "foo.0.enabled",
 			data: cty.ObjectVal(
 				map[string]cty.Value{
@@ -134,12 +134,12 @@ func Test_ExtractNestedValues(t *testing.T) {
 					),
 				},
 			),
-			includeZeroValues: false,
-			shouldExist:       false,
-			expectedData:      nil,
+			includeDefaultValues: false,
+			shouldExist:          false,
+			expectedData:         nil,
 		},
 		{
-			name: "when target value is set to default value and includeZeroValues false, than should filter the default value and return exist flag false",
+			name: "when target value is set to default value and includeDefaultValues false, than should filter the default value and return exist flag false",
 			key:  "foo",
 			data: cty.ObjectVal(
 				map[string]cty.Value{
@@ -154,9 +154,9 @@ func Test_ExtractNestedValues(t *testing.T) {
 					),
 				},
 			),
-			includeZeroValues: false,
-			shouldExist:       false,
-			expectedData:      nil,
+			includeDefaultValues: false,
+			shouldExist:          false,
+			expectedData:         nil,
 		},
 		{
 			name: "when given key is *schema.TypeList and unwrapSingleItemList is true, than should return a map instead of list",
@@ -195,12 +195,12 @@ func Test_ExtractNestedValues(t *testing.T) {
 				},
 			),
 			unwrapSingleItemList: false,
-			includeZeroValues:    true,
+			includeDefaultValues: true,
 			shouldExist:          true,
 			expectedData:         []any{map[string]any{"enabled": true}},
 		},
 		{
-			name: "when includeZeroValues true, than should also include properties set to zero values",
+			name: "when includeDefaultValues true, than should also include properties set to zero values",
 			key:  "foo",
 			data: cty.ObjectVal(
 				map[string]cty.Value{
@@ -225,12 +225,12 @@ func Test_ExtractNestedValues(t *testing.T) {
 				},
 			),
 			unwrapSingleItemList: true,
-			includeZeroValues:    true,
+			includeDefaultValues: true,
 			shouldExist:          true,
 			expectedData:         map[string]any{"enabled": false, "bar": map[string]any{"baz": 0}},
 		},
 		{
-			name: "when includeZeroValues false, than should filter the zero values even if they are explicitly set",
+			name: "when includeDefaultValues false, than should filter the zero values even if they are explicitly set",
 			key:  "foo",
 			data: cty.ObjectVal(
 				map[string]cty.Value{
@@ -255,7 +255,7 @@ func Test_ExtractNestedValues(t *testing.T) {
 				},
 			),
 			unwrapSingleItemList: true,
-			includeZeroValues:    false,
+			includeDefaultValues: false,
 			shouldExist:          true,
 			expectedData:         map[string]any{"enabled": true},
 		},
@@ -267,7 +267,7 @@ func Test_ExtractNestedValues(t *testing.T) {
 			state := terraform.NewInstanceStateShimmedFromValue(test.data, 0)
 			resource := testResource()
 
-			result, ok := extractNestedValues(resource.Data(state), test.key, test.unwrapSingleItemList, test.includeZeroValues)
+			result, ok := extractNestedValues(resource.Data(state), test.key, test.unwrapSingleItemList, test.includeDefaultValues)
 
 			r.Equal(test.shouldExist, ok)
 			r.Equal(test.expectedData, result)
