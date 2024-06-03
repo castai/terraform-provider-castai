@@ -394,7 +394,7 @@ func resourceAutoscaler() *schema.Resource {
 												FieldDelaySeconds: {
 													Type:        schema.TypeInt,
 													Optional:    true,
-													Default:     0,
+													Default:     300,
 													Description: "period (in seconds) to wait before removing the node. Might be useful to control the aggressiveness of the downscaler.",
 												},
 											},
