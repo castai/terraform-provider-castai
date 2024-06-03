@@ -223,7 +223,7 @@ func updateAKSClusterSettings(ctx context.Context, data *schema.ResourceData, cl
 		return sdk.CheckOKResponse(response, err)
 	}, b); err != nil {
 		if errors.Is(err, context.DeadlineExceeded) && lastErr != nil {
-			return fmt.Errorf("updating cluster configuration: %w", lastErr)
+			return fmt.Errorf("updating cluster configuration: %w: %v", err, lastErr)
 		}
 		return fmt.Errorf("updating cluster configuration: %w", err)
 	}
