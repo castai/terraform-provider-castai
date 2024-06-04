@@ -2900,6 +2900,10 @@ type ExternalClusterAPIGetCredentialsScriptParams struct {
 
 	// Whether CAST AI Security Insights agent should be installed
 	InstallSecurityAgent *bool `form:"installSecurityAgent,omitempty" json:"installSecurityAgent,omitempty"`
+
+	// Whether CAST AI Autoscaler components should be installed.
+	// To enable backwards compatibility, when the field is omitted, it is defaulted to true.
+	InstallAutoscalerAgent *bool `form:"installAutoscalerAgent,omitempty" json:"installAutoscalerAgent,omitempty"`
 }
 
 // ExternalClusterAPIDisconnectClusterJSONBody defines parameters for ExternalClusterAPIDisconnectCluster.

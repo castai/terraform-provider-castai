@@ -35,6 +35,7 @@ func TestAccResourceNodeConfiguration_gke(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "gke.0.network_tags.0", "ab"),
 					resource.TestCheckResourceAttr(resourceName, "gke.0.network_tags.1", "bc"),
 					resource.TestCheckResourceAttr(resourceName, "gke.0.zones.#", "0"),
+					resource.TestCheckResourceAttr(resourceName, "gke.0.use_ephemeral_storage_local_ssd", "true"),
 				),
 			},
 			{
