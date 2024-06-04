@@ -195,7 +195,7 @@ func extractNestedValues(provider types.ResourceProvider, key string, unwrapSing
 	case map[string]any:
 		out := make(map[string]any)
 
-		for nestedKey, _ := range vt {
+		for nestedKey := range vt {
 			if val, ok = extractNestedValues(provider, fmt.Sprintf("%s.%s", key, nestedKey), unwrapSingleItemList, includeDefaultValues); ok {
 				out[nestedKey] = val
 			}
@@ -215,7 +215,7 @@ func extractNestedValues(provider types.ResourceProvider, key string, unwrapSing
 
 		var vals []any
 
-		for i, _ := range vt {
+		for i := range vt {
 			nestedKey := fmt.Sprintf("%s.%d", key, i)
 
 			if val, ok = extractNestedValues(provider, nestedKey, unwrapSingleItemList, includeDefaultValues); ok {
