@@ -35,7 +35,6 @@ func TestAccResourceNodeConfiguration_gke(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "gke.0.network_tags.0", "ab"),
 					resource.TestCheckResourceAttr(resourceName, "gke.0.network_tags.1", "bc"),
 					resource.TestCheckResourceAttr(resourceName, "gke.0.zones.#", "0"),
-					resource.TestCheckResourceAttr(resourceName, "gke.0.use_ephemeral_storage_local_ssd", "true"),
 				),
 			},
 			{
@@ -51,6 +50,7 @@ func TestAccResourceNodeConfiguration_gke(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "gke.0.network_tags.0", "bb"),
 					resource.TestCheckResourceAttr(resourceName, "gke.0.network_tags.1", "dd"),
 					resource.TestCheckResourceAttr(resourceName, "gke.0.zones.0", "us-central1-c"),
+					resource.TestCheckResourceAttr(resourceName, "gke.0.use_ephemeral_storage_local_ssd", "true"),
 				),
 			},
 		},
@@ -109,6 +109,7 @@ resource "castai_node_configuration" "test" {
     network_tags = ["bb", "dd"]
     disk_type = "pd-ssd"
     zones = ["us-central1-c"]
+    use_ephemeral_storage_local_ssd = true
   }
 }
 `, rName))
