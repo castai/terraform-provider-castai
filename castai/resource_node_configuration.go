@@ -319,6 +319,12 @@ func resourceNodeConfiguration() *schema.Resource {
 							Description: "List of preferred availability zones to choose from when provisioning new nodes.",
 							Deprecated:  "The argument will be moved into node template.",
 						},
+						"use_ephemeral_storage_local_ssd": {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Default:     nil,
+							Description: "Use ephemeral storage local SSD. Defaults to false",
+						},
 					},
 				},
 			},
@@ -824,6 +830,10 @@ func toGKEConfig(obj map[string]interface{}) *sdk.NodeconfigV1GKEConfig {
 		out.Zones = toPtr(toStringList(v))
 	}
 
+	if v, ok := obj["use_ephemeral_storage_local_ssd"].(bool); ok {
+		out.UseEphemeralStorageLocalSsd = toPtr(v)
+	}
+
 	return out
 }
 
@@ -843,6 +853,10 @@ func flattenGKEConfig(config *sdk.NodeconfigV1GKEConfig) []map[string]interface{
 	}
 	if v := config.Zones; v != nil {
 		m["zones"] = *v
+	}
+
+	if v := config.UseEphemeralStorageLocalSsd; v != nil {
+		m["use_ephemeral_storage_local_ssd"] = *v
 	}
 
 	return []map[string]interface{}{m}
