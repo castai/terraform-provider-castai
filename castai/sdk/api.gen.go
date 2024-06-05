@@ -407,6 +407,7 @@ type CastaiInventoryV1beta1CPUPlatform struct {
 type CastaiInventoryV1beta1ClusterAggregatedUsage struct {
 	ClusterId         *string                                  `json:"clusterId,omitempty"`
 	NodeIds           *[]string                                `json:"nodeIds,omitempty"`
+	Nodes             *[]CastaiInventoryV1beta1NodeUsage       `json:"nodes,omitempty"`
 	Usage             *float64                                 `json:"usage"`
 	UsageDistribution *CastaiInventoryV1beta1UsageDistribution `json:"usageDistribution,omitempty"`
 }
@@ -684,8 +685,12 @@ type CastaiInventoryV1beta1InstanceTypeAggregate struct {
 	Count     *int32  `json:"count,omitempty"`
 
 	// InstanceType name. This value is provider specific.
-	InstanceType *string   `json:"instanceType,omitempty"`
-	NodeIds      *[]string `json:"nodeIds,omitempty"`
+	InstanceType *string `json:"instanceType,omitempty"`
+
+	// NodeIds of nodes that are using this instance type
+	// Deprecated: Use nodes instead.
+	NodeIds *[]string                          `json:"nodeIds,omitempty"`
+	Nodes   *[]CastaiInventoryV1beta1NodeUsage `json:"nodes,omitempty"`
 
 	// Price of the instance type. $/hour.
 	Price *string `json:"price,omitempty"`
@@ -743,6 +748,12 @@ type CastaiInventoryV1beta1NetworkInfo struct {
 
 	// The maximum number of network interfaces for the instance type.
 	MaximumNetworkInterfaces *int32 `json:"maximumNetworkInterfaces,omitempty"`
+}
+
+// CastaiInventoryV1beta1NodeUsage defines model for castai.inventory.v1beta1.NodeUsage.
+type CastaiInventoryV1beta1NodeUsage struct {
+	NodeId            *string                                  `json:"nodeId,omitempty"`
+	UsageDistribution *CastaiInventoryV1beta1UsageDistribution `json:"usageDistribution,omitempty"`
 }
 
 // CastaiInventoryV1beta1OverwriteReservationsResponse defines model for castai.inventory.v1beta1.OverwriteReservationsResponse.
@@ -1859,8 +1870,12 @@ type NodeconfigV1EKSConfig struct {
 	// Cluster's instance profile ARN used for CAST provisioned nodes.
 	InstanceProfileArn string `json:"instanceProfileArn"`
 
+	// Number of IPs per prefix to be used for calculating max pods. Defaults to 0.
+	IpsPerPrefix *int32 `json:"ipsPerPrefix"`
+
 	// AWS key pair ID to be used for provisioned nodes. Has priority over sshPublicKey.
-	KeyPairId *string `json:"keyPairId"`
+	KeyPairId             *string `json:"keyPairId"`
+	MaxPodsPerNodeFormula *string `json:"maxPodsPerNodeFormula"`
 
 	// Cluster's security groups configuration.
 	SecurityGroups *[]string                `json:"securityGroups,omitempty"`
