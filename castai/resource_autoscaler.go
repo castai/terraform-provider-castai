@@ -89,7 +89,7 @@ func resourceAutoscaler() *schema.Resource {
 				Description:      "autoscaler policies JSON string to override current autoscaler settings",
 				Optional:         true,
 				ValidateDiagFunc: validateAutoscalerPolicyJSON(),
-				Deprecated:       "use autoscaler_policy_overrides instead",
+				Deprecated:       "use autoscaler_policy_overrides instead. See README for example: https://github.com/castai/terraform-provider-castai?tab=readme-ov-file#migrating-from-6xx-to-7xx",
 			},
 			FieldAutoscalerPolicies: {
 				Type:        schema.TypeString,
