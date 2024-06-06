@@ -229,6 +229,7 @@ func resourceNodeConfiguration() *schema.Resource {
 						"ips_per_prefix": {
 							Type:             schema.TypeInt,
 							Optional:         true,
+							Default:          nil,
 							Description:      "Number of IPs per prefix to be used for calculating max pods.",
 							ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(0, 256)),
 						},
@@ -661,7 +662,7 @@ func toEKSConfig(obj map[string]interface{}) *sdk.NodeconfigV1EKSConfig {
 		out.MaxPodsPerNodeFormula = toPtr(v)
 	}
 
-	if v, ok := obj["ips_per_prefix"].(int); ok {
+	if v, ok := obj["ips_per_prefix"].(int); ok && v != 0 {
 		out.IpsPerPrefix = toPtr(int32(v))
 	}
 
