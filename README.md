@@ -369,7 +369,7 @@ module "castai-aks-cluster" {
 }
 ```
 
-* [v7.2.X] Deprecated `autoscaler_policies_json` attribute in `castai_autoscaler` resource. Use `autoscaler_policy_definitions` instead.
+* [v7.2.X] Deprecated `autoscaler_policies_json` attribute in `castai_autoscaler` resource. Use `autoscaler_policy_overrides` instead.
 
 Old configuration:
 ```hcl
@@ -414,7 +414,7 @@ New configuration:
 resource "castai_autoscaler" "castai_autoscaler_policies" {
   cluster_id               = data.castai_eks_clusterid.cluster_id.id // or other reference
 
-  autoscaler_policy_definitions {
+  autoscaler_policy_overrides {
     enabled = true
     node_templates_partial_matching_enabled = false
 

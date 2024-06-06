@@ -23,7 +23,7 @@ import (
 const (
 	FieldAutoscalerPoliciesJSON                   = "autoscaler_policies_json"
 	FieldAutoscalerPolicies                       = "autoscaler_policies"
-	FieldAutoscalerPolicyDefinitions              = "autoscaler_policy_definitions"
+	FieldAutoscalerPolicyOverrides                = "autoscaler_policy_overrides"
 	FieldEnabled                                  = "enabled"
 	FieldIsScopedMode                             = "is_scoped_mode"
 	FieldNodeTemplatesPartialMatchingEnabled      = "node_templates_partial_matching_enabled"
@@ -89,14 +89,14 @@ func resourceAutoscaler() *schema.Resource {
 				Description:      "autoscaler policies JSON string to override current autoscaler settings",
 				Optional:         true,
 				ValidateDiagFunc: validateAutoscalerPolicyJSON(),
-				Deprecated:       "use autoscaler_policy_definitions instead",
+				Deprecated:       "use autoscaler_policy_overrides instead",
 			},
 			FieldAutoscalerPolicies: {
 				Type:        schema.TypeString,
 				Computed:    true,
 				Description: "computed value to store full policies configuration",
 			},
-			FieldAutoscalerPolicyDefinitions: {
+			FieldAutoscalerPolicyOverrides: {
 				Type:          schema.TypeList,
 				Optional:      true,
 				MaxItems:      1,
@@ -630,11 +630,11 @@ func getClusterId(data types.ResourceProvider) string {
 
 func getChangedPolicies(ctx context.Context, data types.ResourceProvider, meta interface{}, clusterId string) ([]byte, error) {
 	policyChangesJSON, isPoliciesJSONExist := data.GetOk(FieldAutoscalerPoliciesJSON)
-	_, isPoliciesDefinitionsExist := data.GetOk(FieldAutoscalerPolicyDefinitions)
+	_, isPoliciesOverridesExist := data.GetOk(FieldAutoscalerPolicyOverrides)
 
 	var policyChanges []byte
 
-	if isPoliciesDefinitionsExist {
+	if isPoliciesOverridesExist {
 		policy, err := toAutoscalerPolicy(data)
 		if err != nil {
 			return nil, fmt.Errorf("failed to deserialize policy definitions: %v", err)
@@ -712,9 +712,9 @@ func createValidationError(field, value string) error {
 		"Policy:\n%v", field, value)
 }
 
-// toAutoscalerPolicy converts FieldAutoscalerPolicyDefinitions to types.AutoscalerPolicy for given data.
+// toAutoscalerPolicy converts FieldAutoscalerPolicyOverrides to types.AutoscalerPolicy for given data.
 func toAutoscalerPolicy(data types.ResourceProvider) (*types.AutoscalerPolicy, error) {
-	out, ok := extractNestedValues(data, FieldAutoscalerPolicyDefinitions, true, true)
+	out, ok := extractNestedValues(data, FieldAutoscalerPolicyOverrides, true, true)
 	if !ok {
 		return nil, nil
 	}

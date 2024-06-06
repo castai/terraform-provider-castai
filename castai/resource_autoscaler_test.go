@@ -602,7 +602,7 @@ func TestAutoscalerResource_ToAutoscalerPolicy(t *testing.T) {
 			name: "should handle nested objects",
 			data: cty.ObjectVal(
 				map[string]cty.Value{
-					FieldAutoscalerPolicyDefinitions: cty.ListVal(
+					FieldAutoscalerPolicyOverrides: cty.ListVal(
 						[]cty.Value{
 							cty.ObjectVal(
 								map[string]cty.Value{
@@ -816,8 +816,8 @@ func TestAutoscalerResource_GetChangePolicies_ComparePolicyJsonAndDef(t *testing
 			stateWithPolicyJson := terraform.NewInstanceStateShimmedFromValue(valueWithPolicyJson, 0)
 
 			valueWithPolicyDefinition := cty.ObjectVal(map[string]cty.Value{
-				FieldClusterId:                   cty.StringVal(clusterID),
-				FieldAutoscalerPolicyDefinitions: test.policyStruct,
+				FieldClusterId:                 cty.StringVal(clusterID),
+				FieldAutoscalerPolicyOverrides: test.policyStruct,
 			})
 
 			stateWithPolicyDefinition := terraform.NewInstanceStateShimmedFromValue(valueWithPolicyDefinition, 0)

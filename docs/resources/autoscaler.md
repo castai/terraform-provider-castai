@@ -18,7 +18,7 @@ CAST AI autoscaler resource to manage autoscaler settings
 ### Optional
 
 - `autoscaler_policies_json` (String, Deprecated) autoscaler policies JSON string to override current autoscaler settings
-- `autoscaler_policy_definitions` (Block List, Max: 1) autoscaler policy definitions to override current autoscaler settings (see [below for nested schema](#nestedblock--autoscaler_policy_definitions))
+- `autoscaler_policy_overrides` (Block List, Max: 1) autoscaler policy definitions to override current autoscaler settings (see [below for nested schema](#nestedblock--autoscaler_policy_overrides))
 - `cluster_id` (String) CAST AI cluster id
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
@@ -27,29 +27,29 @@ CAST AI autoscaler resource to manage autoscaler settings
 - `autoscaler_policies` (String) computed value to store full policies configuration
 - `id` (String) The ID of this resource.
 
-<a id="nestedblock--autoscaler_policy_definitions"></a>
-### Nested Schema for `autoscaler_policy_definitions`
+<a id="nestedblock--autoscaler_policy_overrides"></a>
+### Nested Schema for `autoscaler_policy_overrides`
 
 Optional:
 
-- `cluster_limits` (Block List, Max: 1) defines minimum and maximum amount of CPU the cluster can have. (see [below for nested schema](#nestedblock--autoscaler_policy_definitions--cluster_limits))
+- `cluster_limits` (Block List, Max: 1) defines minimum and maximum amount of CPU the cluster can have. (see [below for nested schema](#nestedblock--autoscaler_policy_overrides--cluster_limits))
 - `enabled` (Boolean) enable/disable autoscaler policies
 - `is_scoped_mode` (Boolean) run autoscaler in scoped mode. Only marked pods and nodes will be considered.
-- `node_downscaler` (Block List, Max: 1) node downscaler defines policies for removing nodes based on the configured conditions. (see [below for nested schema](#nestedblock--autoscaler_policy_definitions--node_downscaler))
+- `node_downscaler` (Block List, Max: 1) node downscaler defines policies for removing nodes based on the configured conditions. (see [below for nested schema](#nestedblock--autoscaler_policy_overrides--node_downscaler))
 - `node_templates_partial_matching_enabled` (Boolean) marks whether partial matching should be used when deciding which custom node template to select.
-- `spot_instances` (Block List, Max: 1) policy defining whether autoscaler can use spot instances for provisioning additional workloads. (see [below for nested schema](#nestedblock--autoscaler_policy_definitions--spot_instances))
-- `unschedulable_pods` (Block List, Max: 1) policy defining autoscaler's behavior when unschedulable pods were detected. (see [below for nested schema](#nestedblock--autoscaler_policy_definitions--unschedulable_pods))
+- `spot_instances` (Block List, Max: 1) policy defining whether autoscaler can use spot instances for provisioning additional workloads. (see [below for nested schema](#nestedblock--autoscaler_policy_overrides--spot_instances))
+- `unschedulable_pods` (Block List, Max: 1) policy defining autoscaler's behavior when unschedulable pods were detected. (see [below for nested schema](#nestedblock--autoscaler_policy_overrides--unschedulable_pods))
 
-<a id="nestedblock--autoscaler_policy_definitions--cluster_limits"></a>
-### Nested Schema for `autoscaler_policy_definitions.cluster_limits`
+<a id="nestedblock--autoscaler_policy_overrides--cluster_limits"></a>
+### Nested Schema for `autoscaler_policy_overrides.cluster_limits`
 
 Optional:
 
-- `cpu` (Block List, Max: 1) defines the minimum and maximum amount of CPUs for cluster's worker nodes. (see [below for nested schema](#nestedblock--autoscaler_policy_definitions--cluster_limits--cpu))
+- `cpu` (Block List, Max: 1) defines the minimum and maximum amount of CPUs for cluster's worker nodes. (see [below for nested schema](#nestedblock--autoscaler_policy_overrides--cluster_limits--cpu))
 - `enabled` (Boolean) enable/disable cluster size limits policy.
 
-<a id="nestedblock--autoscaler_policy_definitions--cluster_limits--cpu"></a>
-### Nested Schema for `autoscaler_policy_definitions.cluster_limits.cpu`
+<a id="nestedblock--autoscaler_policy_overrides--cluster_limits--cpu"></a>
+### Nested Schema for `autoscaler_policy_overrides.cluster_limits.cpu`
 
 Optional:
 
@@ -58,17 +58,17 @@ Optional:
 
 
 
-<a id="nestedblock--autoscaler_policy_definitions--node_downscaler"></a>
-### Nested Schema for `autoscaler_policy_definitions.node_downscaler`
+<a id="nestedblock--autoscaler_policy_overrides--node_downscaler"></a>
+### Nested Schema for `autoscaler_policy_overrides.node_downscaler`
 
 Optional:
 
-- `empty_nodes` (Block List, Max: 1) defines whether Node Downscaler should opt in for removing empty worker nodes when possible. (see [below for nested schema](#nestedblock--autoscaler_policy_definitions--node_downscaler--empty_nodes))
+- `empty_nodes` (Block List, Max: 1) defines whether Node Downscaler should opt in for removing empty worker nodes when possible. (see [below for nested schema](#nestedblock--autoscaler_policy_overrides--node_downscaler--empty_nodes))
 - `enabled` (Boolean) enable/disable node downscaler policy.
-- `evictor` (Block List, Max: 1) defines the CAST AI Evictor component settings. Evictor watches the pods running in your cluster and looks for ways to compact them into fewer nodes, making nodes empty, which will be removed by the empty worker nodes policy. (see [below for nested schema](#nestedblock--autoscaler_policy_definitions--node_downscaler--evictor))
+- `evictor` (Block List, Max: 1) defines the CAST AI Evictor component settings. Evictor watches the pods running in your cluster and looks for ways to compact them into fewer nodes, making nodes empty, which will be removed by the empty worker nodes policy. (see [below for nested schema](#nestedblock--autoscaler_policy_overrides--node_downscaler--evictor))
 
-<a id="nestedblock--autoscaler_policy_definitions--node_downscaler--empty_nodes"></a>
-### Nested Schema for `autoscaler_policy_definitions.node_downscaler.empty_nodes`
+<a id="nestedblock--autoscaler_policy_overrides--node_downscaler--empty_nodes"></a>
+### Nested Schema for `autoscaler_policy_overrides.node_downscaler.empty_nodes`
 
 Optional:
 
@@ -76,8 +76,8 @@ Optional:
 - `enabled` (Boolean) enable/disable the empty worker nodes policy.
 
 
-<a id="nestedblock--autoscaler_policy_definitions--node_downscaler--evictor"></a>
-### Nested Schema for `autoscaler_policy_definitions.node_downscaler.evictor`
+<a id="nestedblock--autoscaler_policy_overrides--node_downscaler--evictor"></a>
+### Nested Schema for `autoscaler_policy_overrides.node_downscaler.evictor`
 
 Optional:
 
@@ -92,20 +92,20 @@ Optional:
 
 
 
-<a id="nestedblock--autoscaler_policy_definitions--spot_instances"></a>
-### Nested Schema for `autoscaler_policy_definitions.spot_instances`
+<a id="nestedblock--autoscaler_policy_overrides--spot_instances"></a>
+### Nested Schema for `autoscaler_policy_overrides.spot_instances`
 
 Optional:
 
 - `enabled` (Boolean) enable/disable spot instances policy.
 - `max_reclaim_rate` (Number) max allowed reclaim rate when choosing spot instance type. E.g. if the value is 10%, instance types having 10% or higher reclaim rate will not be considered. Set to zero to use all instance types regardless of reclaim rate.
-- `spot_backups` (Block List, Max: 1) policy defining whether autoscaler can use spot backups instead of spot instances when spot instances are not available. (see [below for nested schema](#nestedblock--autoscaler_policy_definitions--spot_instances--spot_backups))
+- `spot_backups` (Block List, Max: 1) policy defining whether autoscaler can use spot backups instead of spot instances when spot instances are not available. (see [below for nested schema](#nestedblock--autoscaler_policy_overrides--spot_instances--spot_backups))
 - `spot_diversity_enabled` (Boolean) enable/disable spot diversity policy. When enabled, autoscaler will try to balance between diverse and cost optimal instance types.
 - `spot_diversity_price_increase_limit` (Number) allowed node configuration price increase when diversifying instance types. E.g. if the value is 10%, then the overall price of diversified instance types can be 10% higher than the price of the optimal configuration.
-- `spot_interruption_predictions` (Block List, Max: 1) configure the handling of SPOT interruption predictions. (see [below for nested schema](#nestedblock--autoscaler_policy_definitions--spot_instances--spot_interruption_predictions))
+- `spot_interruption_predictions` (Block List, Max: 1) configure the handling of SPOT interruption predictions. (see [below for nested schema](#nestedblock--autoscaler_policy_overrides--spot_instances--spot_interruption_predictions))
 
-<a id="nestedblock--autoscaler_policy_definitions--spot_instances--spot_backups"></a>
-### Nested Schema for `autoscaler_policy_definitions.spot_instances.spot_backups`
+<a id="nestedblock--autoscaler_policy_overrides--spot_instances--spot_backups"></a>
+### Nested Schema for `autoscaler_policy_overrides.spot_instances.spot_backups`
 
 Optional:
 
@@ -113,8 +113,8 @@ Optional:
 - `spot_backup_restore_rate_seconds` (Number) defines interval on how often spot backups restore to real spot should occur.
 
 
-<a id="nestedblock--autoscaler_policy_definitions--spot_instances--spot_interruption_predictions"></a>
-### Nested Schema for `autoscaler_policy_definitions.spot_instances.spot_interruption_predictions`
+<a id="nestedblock--autoscaler_policy_overrides--spot_instances--spot_interruption_predictions"></a>
+### Nested Schema for `autoscaler_policy_overrides.spot_instances.spot_interruption_predictions`
 
 Optional:
 
@@ -123,19 +123,19 @@ Optional:
 
 
 
-<a id="nestedblock--autoscaler_policy_definitions--unschedulable_pods"></a>
-### Nested Schema for `autoscaler_policy_definitions.unschedulable_pods`
+<a id="nestedblock--autoscaler_policy_overrides--unschedulable_pods"></a>
+### Nested Schema for `autoscaler_policy_overrides.unschedulable_pods`
 
 Optional:
 
 - `custom_instances_enabled` (Boolean) enable/disable custom instances policy.
 - `enabled` (Boolean) enable/disable unschedulable pods detection policy.
-- `headroom` (Block List, Max: 1) additional headroom based on cluster's total available capacity for on-demand nodes. (see [below for nested schema](#nestedblock--autoscaler_policy_definitions--unschedulable_pods--headroom))
-- `headroom_spot` (Block List, Max: 1) additional headroom based on cluster's total available capacity for spot nodes. (see [below for nested schema](#nestedblock--autoscaler_policy_definitions--unschedulable_pods--headroom_spot))
-- `node_constraints` (Block List, Max: 1) defines the node constraints that will be applied when autoscaling with Unschedulable Pods policy. (see [below for nested schema](#nestedblock--autoscaler_policy_definitions--unschedulable_pods--node_constraints))
+- `headroom` (Block List, Max: 1) additional headroom based on cluster's total available capacity for on-demand nodes. (see [below for nested schema](#nestedblock--autoscaler_policy_overrides--unschedulable_pods--headroom))
+- `headroom_spot` (Block List, Max: 1) additional headroom based on cluster's total available capacity for spot nodes. (see [below for nested schema](#nestedblock--autoscaler_policy_overrides--unschedulable_pods--headroom_spot))
+- `node_constraints` (Block List, Max: 1) defines the node constraints that will be applied when autoscaling with Unschedulable Pods policy. (see [below for nested schema](#nestedblock--autoscaler_policy_overrides--unschedulable_pods--node_constraints))
 
-<a id="nestedblock--autoscaler_policy_definitions--unschedulable_pods--headroom"></a>
-### Nested Schema for `autoscaler_policy_definitions.unschedulable_pods.headroom`
+<a id="nestedblock--autoscaler_policy_overrides--unschedulable_pods--headroom"></a>
+### Nested Schema for `autoscaler_policy_overrides.unschedulable_pods.headroom`
 
 Optional:
 
@@ -144,8 +144,8 @@ Optional:
 - `memory_percentage` (Number) defines percentage of additional memory capacity to be added.
 
 
-<a id="nestedblock--autoscaler_policy_definitions--unschedulable_pods--headroom_spot"></a>
-### Nested Schema for `autoscaler_policy_definitions.unschedulable_pods.headroom_spot`
+<a id="nestedblock--autoscaler_policy_overrides--unschedulable_pods--headroom_spot"></a>
+### Nested Schema for `autoscaler_policy_overrides.unschedulable_pods.headroom_spot`
 
 Optional:
 
@@ -154,8 +154,8 @@ Optional:
 - `memory_percentage` (Number) defines percentage of additional memory capacity to be added.
 
 
-<a id="nestedblock--autoscaler_policy_definitions--unschedulable_pods--node_constraints"></a>
-### Nested Schema for `autoscaler_policy_definitions.unschedulable_pods.node_constraints`
+<a id="nestedblock--autoscaler_policy_overrides--unschedulable_pods--node_constraints"></a>
+### Nested Schema for `autoscaler_policy_overrides.unschedulable_pods.node_constraints`
 
 Optional:
 
