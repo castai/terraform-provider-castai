@@ -18,6 +18,7 @@ import (
 
 	"github.com/castai/terraform-provider-castai/castai/sdk"
 	mock_sdk "github.com/castai/terraform-provider-castai/castai/sdk/mock"
+	"github.com/castai/terraform-provider-castai/castai/types"
 )
 
 func TestAutoscalerResource_PoliciesUpdateAction(t *testing.T) {
@@ -582,6 +583,260 @@ func TestAutoscalerResource_CustomizeDiff(t *testing.T) {
 	result, err := getChangedPolicies(ctx, data, provider, clusterId)
 	r.NoError(err)
 	r.Equal(expectedPolicies, string(result))
+}
+
+func TestAutoscalerResource_ToAutoscalerPolicy(t *testing.T) {
+	tt := []struct {
+		name        string
+		data        cty.Value
+		expected    *types.AutoscalerPolicy
+		shouldFail  bool
+		expectedErr error
+	}{
+		{
+			name:     "should return nil when data is nil",
+			data:     cty.NilVal,
+			expected: nil,
+		},
+		{
+			name: "should handle nested objects",
+			data: cty.ObjectVal(
+				map[string]cty.Value{
+					FieldAutoscalerPolicyOverrides: cty.ListVal(
+						[]cty.Value{
+							cty.ObjectVal(
+								map[string]cty.Value{
+									"enabled": cty.BoolVal(true),
+									"unschedulable_pods": cty.ListVal(
+										[]cty.Value{
+											cty.ObjectVal(
+												map[string]cty.Value{
+													"enabled": cty.BoolVal(true),
+												},
+											),
+										},
+									),
+								},
+							),
+						},
+					),
+				},
+			),
+			expected: &types.AutoscalerPolicy{
+				Enabled: true,
+				UnschedulablePods: &types.UnschedulablePods{
+					Enabled: true,
+				},
+			},
+		},
+	}
+
+	for _, test := range tt {
+		r := require.New(t)
+
+		t.Run(test.name, func(t *testing.T) {
+			resource := resourceAutoscaler()
+			state := terraform.NewInstanceStateShimmedFromValue(test.data, 0)
+			actual, err := toAutoscalerPolicy(resource.Data(state))
+
+			if test.shouldFail {
+				r.Error(err)
+				r.Error(err, test.expectedErr)
+				return
+			}
+
+			r.NoError(err)
+			r.True(reflect.DeepEqual(test.expected, actual))
+		})
+	}
+}
+
+func TestAutoscalerResource_GetChangePolicies_ComparePolicyJsonAndDef(t *testing.T) {
+	mockCtrl := gomock.NewController(t)
+	mockClient := mock_sdk.NewMockClientInterface(mockCtrl)
+
+	provider := &ProviderConfig{
+		api: &sdk.ClientWithResponses{
+			ClientInterface: mockClient,
+		},
+	}
+	tt := []struct {
+		name           string
+		current        string
+		policyJson     string
+		policyStruct   cty.Value
+		expectedPolicy string
+	}{
+		// for list types values we can't unset primitive values. So, we need to set them to false. explicitly
+		// we can't make new and old fields %100 consistent because of this.
+		{
+			name:           "simple policy",
+			current:        `{"enabled":false}`,
+			policyJson:     `{"enabled":false,"isScopedMode":false,"nodeTemplatesPartialMatchingEnabled":false}`,
+			policyStruct:   cty.ListVal([]cty.Value{cty.ObjectVal(map[string]cty.Value{"enabled": cty.BoolVal(false)})}),
+			expectedPolicy: `{"enabled":false,"isScopedMode":false,"nodeTemplatesPartialMatchingEnabled":false}`,
+		},
+		{
+			name:           "with empty current policy",
+			current:        `{}`,
+			policyJson:     `{"enabled":false,"isScopedMode":false,"nodeTemplatesPartialMatchingEnabled":false}`,
+			policyStruct:   cty.ListVal([]cty.Value{cty.ObjectVal(map[string]cty.Value{"enabled": cty.BoolVal(false)})}),
+			expectedPolicy: `{"enabled":false,"isScopedMode":false,"nodeTemplatesPartialMatchingEnabled":false}`,
+		},
+		{
+			name: "policy with nested objects",
+			current: `{
+				"enabled": true,
+				"unschedulablePods": {
+					"enabled": true,
+					"headroom": {
+						"cpuPercentage": 10,
+						"memoryPercentage": 10,
+						"enabled": true
+					}
+				},
+				"nodeDownscaler": {
+					"emptyNodes": {
+						"enabled": false,
+						"delaySeconds": 0
+					}
+				}
+			}`,
+			policyJson: `{
+				"enabled": false,
+				"isScopedMode": false,
+				"nodeTemplatesPartialMatchingEnabled": false,
+				"unschedulablePods": {
+					"customInstancesEnabled":false,
+					"enabled": false,
+					"headroom": {
+						"cpuPercentage": 100
+					},
+					"headroomSpot": {
+						"cpuPercentage": 10,
+						"memoryPercentage": 10,
+						"enabled": true
+					}
+				}
+			}`,
+			policyStruct: cty.ListVal(
+				[]cty.Value{
+					cty.ObjectVal(
+						map[string]cty.Value{
+							"enabled": cty.BoolVal(false),
+							"unschedulable_pods": cty.ListVal(
+								[]cty.Value{
+									cty.ObjectVal(
+										map[string]cty.Value{
+											"enabled": cty.BoolVal(false),
+											"headroom": cty.ListVal(
+												[]cty.Value{
+													cty.ObjectVal(
+														map[string]cty.Value{
+															"cpu_percentage":    cty.NumberIntVal(100),
+															"memory_percentage": cty.NumberIntVal(10),
+															"enabled":           cty.BoolVal(true),
+														},
+													),
+												},
+											),
+											"headroom_spot": cty.ListVal(
+												[]cty.Value{
+													cty.ObjectVal(
+														map[string]cty.Value{
+															"cpu_percentage":    cty.NumberIntVal(10),
+															"memory_percentage": cty.NumberIntVal(10),
+															"enabled":           cty.BoolVal(true),
+														},
+													),
+												},
+											),
+										},
+									),
+								},
+							),
+						},
+					),
+				},
+			),
+			expectedPolicy: `{
+				"enabled": false,
+				"isScopedMode": false,
+				"nodeTemplatesPartialMatchingEnabled": false,
+				"unschedulablePods": {
+					"customInstancesEnabled": false,
+					"enabled": false,
+					"headroom": {
+						"cpuPercentage": 100,
+						"memoryPercentage": 10,
+						"enabled": true
+					},
+					"headroomSpot": {
+						"cpuPercentage": 10,
+						"memoryPercentage": 10,
+						"enabled": true
+					}
+				},
+				"nodeDownscaler": {
+					"emptyNodes": {
+						"enabled": false,
+						"delaySeconds": 0
+					}
+				}
+			}`,
+		},
+	}
+
+	for _, test := range tt {
+		r := require.New(t)
+
+		t.Run(test.name, func(t *testing.T) {
+			current, err := normalizeJSON([]byte(test.current))
+			r.NoError(err)
+
+			mockClient.EXPECT().
+				PoliciesAPIGetClusterPolicies(gomock.Any(), gomock.Any(), gomock.Any()).
+				Times(2).
+				DoAndReturn(
+					func(_ context.Context, _ string) (*http.Response, error) {
+						return &http.Response{StatusCode: 200, Body: io.NopCloser(bytes.NewReader(current))}, nil
+					},
+				)
+
+			policyJSON, err := normalizeJSON([]byte(test.policyJson))
+			r.NoError(err)
+
+			clusterID := "cluster_id"
+
+			valueWithPolicyJson := cty.ObjectVal(map[string]cty.Value{
+				FieldClusterId:              cty.StringVal(clusterID),
+				FieldAutoscalerPoliciesJSON: cty.StringVal(string(policyJSON)),
+			})
+
+			stateWithPolicyJson := terraform.NewInstanceStateShimmedFromValue(valueWithPolicyJson, 0)
+
+			valueWithPolicyDefinition := cty.ObjectVal(map[string]cty.Value{
+				FieldClusterId:                 cty.StringVal(clusterID),
+				FieldAutoscalerPolicyOverrides: test.policyStruct,
+			})
+
+			stateWithPolicyDefinition := terraform.NewInstanceStateShimmedFromValue(valueWithPolicyDefinition, 0)
+
+			resource := resourceAutoscaler()
+
+			resultPolicyJson, err := getChangedPolicies(context.Background(), resource.Data(stateWithPolicyJson), provider, clusterID)
+			r.NoError(err)
+
+			resultPolicyDefinition, err := getChangedPolicies(context.Background(), resource.Data(stateWithPolicyDefinition), provider, clusterID)
+			r.NoError(err)
+
+			expectedPolicy, err := normalizeJSON([]byte(test.expectedPolicy))
+			r.NoError(err)
+
+			r.Equal(string(expectedPolicy), string(resultPolicyDefinition))
+			r.Equal(string(expectedPolicy), string(resultPolicyJson))
+		})
+	}
 }
 
 func JSONBytesEqual(a, b []byte) (bool, error) {
