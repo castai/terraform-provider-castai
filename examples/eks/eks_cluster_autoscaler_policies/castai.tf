@@ -205,7 +205,7 @@ module "castai-eks-cluster" {
 
       evictor = {
         aggressive_mode           = false
-        cycle_interval            = "5s10s"
+        cycle_interval            = "5m10s"
         dry_run                   = false
         enabled                   = true
         node_grace_period_minutes = 10
