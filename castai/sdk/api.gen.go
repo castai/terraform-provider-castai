@@ -407,6 +407,7 @@ type CastaiInventoryV1beta1CPUPlatform struct {
 type CastaiInventoryV1beta1ClusterAggregatedUsage struct {
 	ClusterId         *string                                  `json:"clusterId,omitempty"`
 	NodeIds           *[]string                                `json:"nodeIds,omitempty"`
+	Nodes             *[]CastaiInventoryV1beta1NodeUsage       `json:"nodes,omitempty"`
 	Usage             *float64                                 `json:"usage"`
 	UsageDistribution *CastaiInventoryV1beta1UsageDistribution `json:"usageDistribution,omitempty"`
 }
@@ -684,8 +685,12 @@ type CastaiInventoryV1beta1InstanceTypeAggregate struct {
 	Count     *int32  `json:"count,omitempty"`
 
 	// InstanceType name. This value is provider specific.
-	InstanceType *string   `json:"instanceType,omitempty"`
-	NodeIds      *[]string `json:"nodeIds,omitempty"`
+	InstanceType *string `json:"instanceType,omitempty"`
+
+	// NodeIds of nodes that are using this instance type
+	// Deprecated: Use nodes instead.
+	NodeIds *[]string                          `json:"nodeIds,omitempty"`
+	Nodes   *[]CastaiInventoryV1beta1NodeUsage `json:"nodes,omitempty"`
 
 	// Price of the instance type. $/hour.
 	Price *string `json:"price,omitempty"`
@@ -743,6 +748,12 @@ type CastaiInventoryV1beta1NetworkInfo struct {
 
 	// The maximum number of network interfaces for the instance type.
 	MaximumNetworkInterfaces *int32 `json:"maximumNetworkInterfaces,omitempty"`
+}
+
+// CastaiInventoryV1beta1NodeUsage defines model for castai.inventory.v1beta1.NodeUsage.
+type CastaiInventoryV1beta1NodeUsage struct {
+	NodeId            *string                                  `json:"nodeId,omitempty"`
+	UsageDistribution *CastaiInventoryV1beta1UsageDistribution `json:"usageDistribution,omitempty"`
 }
 
 // CastaiInventoryV1beta1OverwriteReservationsResponse defines model for castai.inventory.v1beta1.OverwriteReservationsResponse.
@@ -1498,6 +1509,11 @@ type ExternalclusterV1GetCredentialsScriptResponse struct {
 	Script *string `json:"script,omitempty"`
 }
 
+// ExternalclusterV1GetListNodesFiltersResponse defines model for externalcluster.v1.GetListNodesFiltersResponse.
+type ExternalclusterV1GetListNodesFiltersResponse struct {
+	Filters *[]ExternalclusterV1NodeListFilter `json:"filters,omitempty"`
+}
+
 // HandleCloudEventResponse is the result of HandleCloudEventRequest.
 type ExternalclusterV1HandleCloudEventResponse = map[string]interface{}
 
@@ -1655,6 +1671,13 @@ type ExternalclusterV1NodeInfo struct {
 	KubeletVersion          *string `json:"kubeletVersion,omitempty"`
 	OperatingSystem         *string `json:"operatingSystem,omitempty"`
 	OsImage                 *string `json:"osImage,omitempty"`
+}
+
+// ExternalclusterV1NodeListFilter defines model for externalcluster.v1.NodeListFilter.
+type ExternalclusterV1NodeListFilter struct {
+	Name   *string   `json:"name,omitempty"`
+	Type   *string   `json:"type,omitempty"`
+	Values *[]string `json:"values,omitempty"`
 }
 
 // NodeNetwork represents node network.
@@ -1859,8 +1882,12 @@ type NodeconfigV1EKSConfig struct {
 	// Cluster's instance profile ARN used for CAST provisioned nodes.
 	InstanceProfileArn string `json:"instanceProfileArn"`
 
+	// Number of IPs per prefix to be used for calculating max pods. Defaults to 0.
+	IpsPerPrefix *int32 `json:"ipsPerPrefix"`
+
 	// AWS key pair ID to be used for provisioned nodes. Has priority over sshPublicKey.
-	KeyPairId *string `json:"keyPairId"`
+	KeyPairId             *string `json:"keyPairId"`
+	MaxPodsPerNodeFormula *string `json:"maxPodsPerNodeFormula"`
 
 	// Cluster's security groups configuration.
 	SecurityGroups *[]string                `json:"securityGroups,omitempty"`
@@ -2918,8 +2945,26 @@ type ExternalClusterAPIListNodesParams struct {
 
 	// Cursor that defines token indicating where to start the next page.
 	// Empty value indicates to start from beginning of the dataset.
-	PageCursor *string `form:"page.cursor,omitempty" json:"page.cursor,omitempty"`
+	PageCursor               *string                                         `form:"page.cursor,omitempty" json:"page.cursor,omitempty"`
+	NodeId                   *string                                         `form:"nodeId,omitempty" json:"nodeId,omitempty"`
+	NodeStatus               *ExternalClusterAPIListNodesParamsNodeStatus    `form:"nodeStatus,omitempty" json:"nodeStatus,omitempty"`
+	InstanceType             *string                                         `form:"instanceType,omitempty" json:"instanceType,omitempty"`
+	LifecycleType            *ExternalClusterAPIListNodesParamsLifecycleType `form:"lifecycleType,omitempty" json:"lifecycleType,omitempty"`
+	RemovalDisabled          *bool                                           `form:"removalDisabled,omitempty" json:"removalDisabled,omitempty"`
+	Unschedulable            *bool                                           `form:"unschedulable,omitempty" json:"unschedulable,omitempty"`
+	Zone                     *string                                         `form:"zone,omitempty" json:"zone,omitempty"`
+	NodeConfigurationName    *string                                         `form:"nodeConfigurationName,omitempty" json:"nodeConfigurationName,omitempty"`
+	NodeConfigurationVersion *string                                         `form:"nodeConfigurationVersion,omitempty" json:"nodeConfigurationVersion,omitempty"`
+	NodeTemplateName         *string                                         `form:"nodeTemplateName,omitempty" json:"nodeTemplateName,omitempty"`
+	NodeTemplateVersion      *string                                         `form:"nodeTemplateVersion,omitempty" json:"nodeTemplateVersion,omitempty"`
+	NodeName                 *string                                         `form:"nodeName,omitempty" json:"nodeName,omitempty"`
 }
+
+// ExternalClusterAPIListNodesParamsNodeStatus defines parameters for ExternalClusterAPIListNodes.
+type ExternalClusterAPIListNodesParamsNodeStatus string
+
+// ExternalClusterAPIListNodesParamsLifecycleType defines parameters for ExternalClusterAPIListNodes.
+type ExternalClusterAPIListNodesParamsLifecycleType string
 
 // ExternalClusterAPIAddNodeJSONBody defines parameters for ExternalClusterAPIAddNode.
 type ExternalClusterAPIAddNodeJSONBody = ExternalclusterV1NodeConfig
