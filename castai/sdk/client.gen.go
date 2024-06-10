@@ -225,6 +225,9 @@ type ClientInterface interface {
 
 	ExternalClusterAPIRegisterCluster(ctx context.Context, body ExternalClusterAPIRegisterClusterJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// ExternalClusterAPIGetListNodesFilters request
+	ExternalClusterAPIGetListNodesFilters(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// OperationsAPIGetOperation request
 	OperationsAPIGetOperation(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -1053,6 +1056,18 @@ func (c *Client) ExternalClusterAPIRegisterClusterWithBody(ctx context.Context, 
 
 func (c *Client) ExternalClusterAPIRegisterCluster(ctx context.Context, body ExternalClusterAPIRegisterClusterJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewExternalClusterAPIRegisterClusterRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) ExternalClusterAPIGetListNodesFilters(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewExternalClusterAPIGetListNodesFiltersRequest(c.Server)
 	if err != nil {
 		return nil, err
 	}
@@ -3613,6 +3628,33 @@ func NewExternalClusterAPIRegisterClusterRequestWithBody(server string, contentT
 	return req, nil
 }
 
+// NewExternalClusterAPIGetListNodesFiltersRequest generates requests for ExternalClusterAPIGetListNodesFilters
+func NewExternalClusterAPIGetListNodesFiltersRequest(server string) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/kubernetes/external-clusters/filters/nodes")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 // NewOperationsAPIGetOperationRequest generates requests for OperationsAPIGetOperation
 func NewOperationsAPIGetOperationRequest(server string, id string) (*http.Request, error) {
 	var err error
@@ -4175,6 +4217,198 @@ func NewExternalClusterAPIListNodesRequest(server string, clusterId string, para
 	if params.PageCursor != nil {
 
 		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "page.cursor", runtime.ParamLocationQuery, *params.PageCursor); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.NodeId != nil {
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "nodeId", runtime.ParamLocationQuery, *params.NodeId); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.NodeStatus != nil {
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "nodeStatus", runtime.ParamLocationQuery, *params.NodeStatus); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.InstanceType != nil {
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "instanceType", runtime.ParamLocationQuery, *params.InstanceType); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.LifecycleType != nil {
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "lifecycleType", runtime.ParamLocationQuery, *params.LifecycleType); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.RemovalDisabled != nil {
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "removalDisabled", runtime.ParamLocationQuery, *params.RemovalDisabled); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.Unschedulable != nil {
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "unschedulable", runtime.ParamLocationQuery, *params.Unschedulable); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.Zone != nil {
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "zone", runtime.ParamLocationQuery, *params.Zone); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.NodeConfigurationName != nil {
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "nodeConfigurationName", runtime.ParamLocationQuery, *params.NodeConfigurationName); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.NodeConfigurationVersion != nil {
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "nodeConfigurationVersion", runtime.ParamLocationQuery, *params.NodeConfigurationVersion); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.NodeTemplateName != nil {
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "nodeTemplateName", runtime.ParamLocationQuery, *params.NodeTemplateName); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.NodeTemplateVersion != nil {
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "nodeTemplateVersion", runtime.ParamLocationQuery, *params.NodeTemplateVersion); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.NodeName != nil {
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "nodeName", runtime.ParamLocationQuery, *params.NodeName); err != nil {
 			return nil, err
 		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
 			return nil, err
@@ -6523,6 +6757,9 @@ type ClientWithResponsesInterface interface {
 
 	ExternalClusterAPIRegisterClusterWithResponse(ctx context.Context, body ExternalClusterAPIRegisterClusterJSONRequestBody) (*ExternalClusterAPIRegisterClusterResponse, error)
 
+	// ExternalClusterAPIGetListNodesFilters request
+	ExternalClusterAPIGetListNodesFiltersWithResponse(ctx context.Context) (*ExternalClusterAPIGetListNodesFiltersResponse, error)
+
 	// OperationsAPIGetOperation request
 	OperationsAPIGetOperationWithResponse(ctx context.Context, id string) (*OperationsAPIGetOperationResponse, error)
 
@@ -7815,6 +8052,36 @@ func (r ExternalClusterAPIRegisterClusterResponse) StatusCode() int {
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
 func (r ExternalClusterAPIRegisterClusterResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type ExternalClusterAPIGetListNodesFiltersResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *ExternalclusterV1GetListNodesFiltersResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r ExternalClusterAPIGetListNodesFiltersResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r ExternalClusterAPIGetListNodesFiltersResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r ExternalClusterAPIGetListNodesFiltersResponse) GetBody() []byte {
 	return r.Body
 }
 
@@ -10201,6 +10468,15 @@ func (c *ClientWithResponses) ExternalClusterAPIRegisterClusterWithResponse(ctx 
 	return ParseExternalClusterAPIRegisterClusterResponse(rsp)
 }
 
+// ExternalClusterAPIGetListNodesFiltersWithResponse request returning *ExternalClusterAPIGetListNodesFiltersResponse
+func (c *ClientWithResponses) ExternalClusterAPIGetListNodesFiltersWithResponse(ctx context.Context) (*ExternalClusterAPIGetListNodesFiltersResponse, error) {
+	rsp, err := c.ExternalClusterAPIGetListNodesFilters(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return ParseExternalClusterAPIGetListNodesFiltersResponse(rsp)
+}
+
 // OperationsAPIGetOperationWithResponse request returning *OperationsAPIGetOperationResponse
 func (c *ClientWithResponses) OperationsAPIGetOperationWithResponse(ctx context.Context, id string) (*OperationsAPIGetOperationResponse, error) {
 	rsp, err := c.OperationsAPIGetOperation(ctx, id)
@@ -11854,6 +12130,32 @@ func ParseExternalClusterAPIRegisterClusterResponse(rsp *http.Response) (*Extern
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest ExternalclusterV1Cluster
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseExternalClusterAPIGetListNodesFiltersResponse parses an HTTP response from a ExternalClusterAPIGetListNodesFiltersWithResponse call
+func ParseExternalClusterAPIGetListNodesFiltersResponse(rsp *http.Response) (*ExternalClusterAPIGetListNodesFiltersResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &ExternalClusterAPIGetListNodesFiltersResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ExternalclusterV1GetListNodesFiltersResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
