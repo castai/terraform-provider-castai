@@ -70,53 +70,39 @@ module "castai-aks-cluster" {
     }
   }
 
-  autoscaler_policy_overrides = {
-    enabled                                 = true
-    is_scoped_mode                          = false
-    node_templates_partial_matching_enabled = false
-
-    unschedulable_pods = {
-      enabled = true
-
-      headroom = {
-        enabled           = true
-        cpu_percentage    = 10
-        memory_percentage = 10
-      }
-
-      headroom_spot = {
-        enabled           = true
-        cpu_percentage    = 10
-        memory_percentage = 10
-      }
+  // Configure Autoscaler policies as per API specification https://api.cast.ai/v1/spec/#/PoliciesAPI/PoliciesAPIUpsertClusterPolicies.
+  // Here:
+  //  - unschedulablePods - Unscheduled pods policy
+  //  - nodeDownscaler    - Node deletion policy
+  autoscaler_policies_json = <<-EOT
+    {
+        "enabled": true,
+        "unschedulablePods": {
+            "enabled": true
+        },
+        "nodeDownscaler": {
+            "enabled": true,
+            "emptyNodes": {
+                "enabled": true
+            },
+            "evictor": {
+                "aggressiveMode": false,
+                "cycleInterval": "5m10s",
+                "dryRun": false,
+                "enabled": true,
+                "nodeGracePeriodMinutes": 5,
+                "scopedMode": false
+            }
+        },
+        "clusterLimits": {
+            "cpu": {
+                "maxCores": 100,
+                "minCores": 1
+            },
+            "enabled": false
+        }
     }
-
-    node_downscaler = {
-      enabled = true
-
-      empty_nodes = {
-        enabled = true
-      }
-
-      evictor = {
-        aggressive_mode           = false
-        cycle_interval            = "5m10s"
-        dry_run                   = false
-        enabled                   = true
-        node_grace_period_minutes = 10
-        scoped_mode               = false
-      }
-    }
-
-    cluster_limits = {
-      enabled = true
-
-      cpu = {
-        max_cores = 20
-        min_cores = 1
-      }
-    }
-  }
+  EOT
 
 }
 
