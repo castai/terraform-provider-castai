@@ -36,6 +36,7 @@ generate-all: generate-sdk generate-docs
 .PHONY: build
 build: init-examples
 build: generate-sdk
+build: generate-docs
 build:
 	@echo "==> Building terraform-provider-castai"
 	go build

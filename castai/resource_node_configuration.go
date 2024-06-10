@@ -221,6 +221,18 @@ func resourceNodeConfiguration() *schema.Resource {
 							Description:      "AWS KMS key ARN for encrypting EBS volume attached to the node",
 							ValidateDiagFunc: validation.ToDiagFunc(validation.StringMatch(regexp.MustCompile(`arn:aws:kms:.*`), "Must be a valid KMS key ARN")),
 						},
+						"max_pods_per_node_formula": {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: "Formula to calculate the maximum number of pods that can be run on a node.",
+						},
+						"ips_per_prefix": {
+							Type:             schema.TypeInt,
+							Optional:         true,
+							Default:          nil,
+							Description:      "Number of IPs per prefix to be used for calculating max pods.",
+							ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(0, 256)),
+						},
 						FieldNodeConfigurationEKSTargetGroup: {
 							Type:        schema.TypeList,
 							Optional:    true,
@@ -646,6 +658,14 @@ func toEKSConfig(obj map[string]interface{}) *sdk.NodeconfigV1EKSConfig {
 		out.VolumeKmsKeyArn = toPtr(v)
 	}
 
+	if v, ok := obj["max_pods_per_node_formula"].(string); ok && v != "" {
+		out.MaxPodsPerNodeFormula = toPtr(v)
+	}
+
+	if v, ok := obj["ips_per_prefix"].(int); ok && v != 0 {
+		out.IpsPerPrefix = toPtr(int32(v))
+	}
+
 	if v, ok := obj[FieldNodeConfigurationEKSTargetGroup].([]interface{}); ok && len(v) > 0 && v[0] != nil {
 		if e, ok := v[0].(map[string]interface{}); ok {
 			out.TargetGroup = &sdk.NodeconfigV1TargetGroup{}
@@ -696,6 +716,14 @@ func flattenEKSConfig(config *sdk.NodeconfigV1EKSConfig) []map[string]interface{
 
 	if v := config.VolumeKmsKeyArn; v != nil {
 		m["volume_kms_key_arn"] = toString(config.VolumeKmsKeyArn)
+	}
+
+	if v := config.MaxPodsPerNodeFormula; v != nil {
+		m["max_pods_per_node_formula"] = toString(config.MaxPodsPerNodeFormula)
+	}
+
+	if v := config.IpsPerPrefix; v != nil {
+		m["ips_per_prefix"] = *config.IpsPerPrefix
 	}
 
 	if v := config.TargetGroup; v != nil {
