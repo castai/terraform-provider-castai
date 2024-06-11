@@ -842,25 +842,6 @@ type CastaiInventoryV1beta1StorageInfoDevice struct {
 //   - hdd: HDD.
 type CastaiInventoryV1beta1StorageInfoDeviceType string
 
-// CastaiInventoryV1beta1UpdateCommitmentInput defines model for castai.inventory.v1beta1.UpdateCommitmentInput.
-type CastaiInventoryV1beta1UpdateCommitmentInput struct {
-	// Allowed usage specifies the part of the commitment that is allowed to be used. 1.0 means 100% of the commitment. Currently it's only supported for GCP CUDs.
-	AllowedUsage   *float32 `json:"allowedUsage"`
-	Prioritization *bool    `json:"prioritization"`
-
-	// Scaling strategy specifies how to use commitment by autoscaler.
-	//
-	//  - Default: If some commitment resource is utilised fully, only part of instance type can be covered by this commitment.
-	// In some cases not using commitment will be cheaper and cheaper option will be chosen by autoscaler.
-	//  - CPUBased: Aim to use as much CPU from commitment as possible. Even if instance is partially covered and cheaper option is available.
-	//  - RamBased: Aim to use as much RAM from commitment as possible. Even if instance is partially covered and cheaper option is available.
-	ScalingStrategy *CastaiInventoryV1beta1CommitmentScalingStrategy `json:"scalingStrategy,omitempty"`
-
-	// - Inactive: Inactive commitment
-	//  - Active: Active commitment
-	Status *CastaiInventoryV1beta1CommitmentStatus `json:"status,omitempty"`
-}
-
 // CastaiInventoryV1beta1UpdateCommitmentResponse defines model for castai.inventory.v1beta1.UpdateCommitmentResponse.
 type CastaiInventoryV1beta1UpdateCommitmentResponse struct {
 	Commitments *CastaiInventoryV1beta1Commitment `json:"commitments,omitempty"`
@@ -3099,7 +3080,7 @@ type CommitmentsAPIGetGCPCommitmentsImportScriptParams struct {
 }
 
 // CommitmentsAPIUpdateCommitmentJSONBody defines parameters for CommitmentsAPIUpdateCommitment.
-type CommitmentsAPIUpdateCommitmentJSONBody = CastaiInventoryV1beta1UpdateCommitmentInput
+type CommitmentsAPIUpdateCommitmentJSONBody = CastaiInventoryV1beta1Commitment
 
 // CommitmentsAPIReplaceCommitmentAssignmentsJSONBody defines parameters for CommitmentsAPIReplaceCommitmentAssignments.
 type CommitmentsAPIReplaceCommitmentAssignmentsJSONBody = []string
