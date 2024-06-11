@@ -369,7 +369,7 @@ module "castai-aks-cluster" {
 }
 ```
 
-* [v7.2.X] Deprecated `autoscaler_policies_json` attribute in `castai_autoscaler` resource. Use `autoscaler_settings` instead.
+* [v7.4.X] Deprecated `autoscaler_policies_json` attribute in `castai_autoscaler` resource. Use `autoscaler_settings` instead.
 
 Old configuration:
 ```hcl
