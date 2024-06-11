@@ -1163,6 +1163,7 @@ func TestMapCommitmentImportWithConfigToUpdateRequest(t *testing.T) {
 			input: &commitmentWithConfig[castaiCommitment]{
 				Commitment: castaiCommitment{
 					CastaiInventoryV1beta1Commitment: sdk.CastaiInventoryV1beta1Commitment{
+						AllowedUsage:          lo.ToPtr[float32](0.7),
 						EndDate:               lo.ToPtr(now.Add(365 * 24 * time.Hour)),
 						GcpResourceCudContext: testGCPCUDContext,
 						Id:                    lo.ToPtr(id.String()),
@@ -1172,7 +1173,9 @@ func TestMapCommitmentImportWithConfigToUpdateRequest(t *testing.T) {
 					},
 				},
 			},
-			expected: sdk.CommitmentsAPIUpdateCommitmentJSONRequestBody{},
+			expected: sdk.CommitmentsAPIUpdateCommitmentJSONRequestBody{
+				AllowedUsage: lo.ToPtr[float32](0.7),
+			},
 		},
 		"should map azure reservation import with config": {
 			input: &commitmentWithConfig[castaiCommitment]{
@@ -1212,6 +1215,7 @@ func TestMapCommitmentImportWithConfigToUpdateRequest(t *testing.T) {
 			input: &commitmentWithConfig[castaiCommitment]{
 				Commitment: castaiCommitment{
 					CastaiInventoryV1beta1Commitment: sdk.CastaiInventoryV1beta1Commitment{
+						AllowedUsage:            lo.ToPtr[float32](0.77),
 						EndDate:                 lo.ToPtr(now.Add(365 * 24 * time.Hour)),
 						AzureReservationContext: testAzureReservationContext,
 						Id:                      lo.ToPtr(id.String()),
@@ -1221,7 +1225,9 @@ func TestMapCommitmentImportWithConfigToUpdateRequest(t *testing.T) {
 					},
 				},
 			},
-			expected: sdk.CommitmentsAPIUpdateCommitmentJSONRequestBody{},
+			expected: sdk.CommitmentsAPIUpdateCommitmentJSONRequestBody{
+				AllowedUsage: lo.ToPtr[float32](0.77),
+			},
 		},
 	}
 	for name, tt := range tests {
