@@ -64,12 +64,19 @@ const (
 
 // Defines values for CastaiInventoryV1beta1InstanceTypeCPUManufacturer.
 const (
-	AMD     CastaiInventoryV1beta1InstanceTypeCPUManufacturer = "AMD"
-	AMPERE  CastaiInventoryV1beta1InstanceTypeCPUManufacturer = "AMPERE"
-	APPLE   CastaiInventoryV1beta1InstanceTypeCPUManufacturer = "APPLE"
-	AWS     CastaiInventoryV1beta1InstanceTypeCPUManufacturer = "AWS"
-	INTEL   CastaiInventoryV1beta1InstanceTypeCPUManufacturer = "INTEL"
-	UNKNOWN CastaiInventoryV1beta1InstanceTypeCPUManufacturer = "UNKNOWN"
+	CastaiInventoryV1beta1InstanceTypeCPUManufacturerAMD     CastaiInventoryV1beta1InstanceTypeCPUManufacturer = "AMD"
+	CastaiInventoryV1beta1InstanceTypeCPUManufacturerAMPERE  CastaiInventoryV1beta1InstanceTypeCPUManufacturer = "AMPERE"
+	CastaiInventoryV1beta1InstanceTypeCPUManufacturerAPPLE   CastaiInventoryV1beta1InstanceTypeCPUManufacturer = "APPLE"
+	CastaiInventoryV1beta1InstanceTypeCPUManufacturerAWS     CastaiInventoryV1beta1InstanceTypeCPUManufacturer = "AWS"
+	CastaiInventoryV1beta1InstanceTypeCPUManufacturerINTEL   CastaiInventoryV1beta1InstanceTypeCPUManufacturer = "INTEL"
+	CastaiInventoryV1beta1InstanceTypeCPUManufacturerUNKNOWN CastaiInventoryV1beta1InstanceTypeCPUManufacturer = "UNKNOWN"
+)
+
+// Defines values for CastaiInventoryV1beta1InstanceTypeAvailabilityType.
+const (
+	CastaiInventoryV1beta1InstanceTypeAvailabilityTypePRIVATE CastaiInventoryV1beta1InstanceTypeAvailabilityType = "PRIVATE"
+	CastaiInventoryV1beta1InstanceTypeAvailabilityTypePUBLIC  CastaiInventoryV1beta1InstanceTypeAvailabilityType = "PUBLIC"
+	CastaiInventoryV1beta1InstanceTypeAvailabilityTypeUNKNOWN CastaiInventoryV1beta1InstanceTypeAvailabilityType = "UNKNOWN"
 )
 
 // Defines values for CastaiInventoryV1beta1StorageDriver.
@@ -663,11 +670,12 @@ type CastaiInventoryV1beta1InstanceType struct {
 	Architecture *string `json:"architecture,omitempty"`
 
 	// Contains a list of possible attachable disk types for the given instance types. Currently supported for GCP only.
-	AttachableDisks  *[]CastaiInventoryV1beta1AttachableDisk `json:"attachableDisks,omitempty"`
-	BareMetal        *bool                                   `json:"bareMetal,omitempty"`
-	Burstable        *bool                                   `json:"burstable,omitempty"`
-	CastChoice       *bool                                   `json:"castChoice,omitempty"`
-	ComputeOptimized *bool                                   `json:"computeOptimized,omitempty"`
+	AttachableDisks  *[]CastaiInventoryV1beta1AttachableDisk         `json:"attachableDisks,omitempty"`
+	Availability     *CastaiInventoryV1beta1InstanceTypeAvailability `json:"availability,omitempty"`
+	BareMetal        *bool                                           `json:"bareMetal,omitempty"`
+	Burstable        *bool                                           `json:"burstable,omitempty"`
+	CastChoice       *bool                                           `json:"castChoice,omitempty"`
+	ComputeOptimized *bool                                           `json:"computeOptimized,omitempty"`
 
 	// Describes the manufacturers of the CPUs the instance type can be equipped with.
 	CpuManufacturers *[]CastaiInventoryV1beta1InstanceTypeCPUManufacturer `json:"cpuManufacturers,omitempty"`
@@ -754,6 +762,15 @@ type CastaiInventoryV1beta1InstanceTypeAggregate struct {
 	// Vcpu available on the instance type.
 	Vcpu *string `json:"vcpu,omitempty"`
 }
+
+// CastaiInventoryV1beta1InstanceTypeAvailability defines model for castai.inventory.v1beta1.InstanceTypeAvailability.
+type CastaiInventoryV1beta1InstanceTypeAvailability struct {
+	// Type of the instance type availability.
+	Type *CastaiInventoryV1beta1InstanceTypeAvailabilityType `json:"type,omitempty"`
+}
+
+// Type of the instance type availability.
+type CastaiInventoryV1beta1InstanceTypeAvailabilityType string
 
 // CastaiInventoryV1beta1InstanceTypeBasedUsage defines model for castai.inventory.v1beta1.InstanceTypeBasedUsage.
 type CastaiInventoryV1beta1InstanceTypeBasedUsage struct {

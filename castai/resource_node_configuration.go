@@ -231,7 +231,7 @@ func resourceNodeConfiguration() *schema.Resource {
 						"max_pods_per_node_formula": {
 							Type:        schema.TypeString,
 							Optional:    true,
-							Description: "Formula to calculate the maximum number of pods that can be run on a node.",
+							Description: "Formula to calculate the maximum number of pods that can be run on a node. The following list of variables will be bound to a number before evaluating and can be used in the formula: NUM_MAX_NET_INTERFACES, NUM_IPV4_PER_INTERFACE, NUM_IP_PER_PREFIX, NUM_CPU, NUM_RAM_GB .",
 						},
 						"ips_per_prefix": {
 							Type:             schema.TypeInt,
