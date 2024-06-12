@@ -75,40 +75,40 @@ module "castai-gke-cluster" {
     }
   }
 
-  // Configure Autoscaler policies as per API specification https://api.cast.ai/v1/spec/#/PoliciesAPI/PoliciesAPIUpsertClusterPolicies.
-  // Here:
-  //  - unschedulablePods - Unscheduled pods policy
-  //  - nodeDownscaler    - Node deletion policy
-  autoscaler_policies_json = <<-EOT
-    {
-        "enabled": true,
-        "unschedulablePods": {
-            "enabled": true
-        },
-        "nodeDownscaler": {
-            "enabled": true,
-            "emptyNodes": {
-                "enabled": true
-            },
-            "evictor": {
-                "aggressiveMode": false,
-                "cycleInterval": "5m10s",
-                "dryRun": false,
-                "enabled": true,
-                "nodeGracePeriodMinutes": 10,
-                "scopedMode": false
-            }
-        },
-        "clusterLimits": {
-            "cpu": {
-                "maxCores": 20,
-                "minCores": 1
-            },
-            "enabled": true
-        }
-    }
-  EOT
+  autoscaler_settings = {
+    enabled                                 = true
+    node_templates_partial_matching_enabled = false
 
+    unschedulable_pods = {
+      enabled = true
+    }
+
+    node_downscaler = {
+      enabled = true
+
+      empty_nodes = {
+        enabled = true
+      }
+
+      evictor = {
+        aggressive_mode           = false
+        cycle_interval            = "5m10s"
+        dry_run                   = false
+        enabled                   = true
+        node_grace_period_minutes = 10
+        scoped_mode               = false
+      }
+    }
+
+    cluster_limits = {
+      enabled = true
+
+      cpu = {
+        max_cores = 20
+        min_cores = 1
+      }
+    }
+  }
   // depends_on helps terraform with creating proper dependencies graph in case of resource creation and in this case destroy
   // module "castai-gke-cluster" has to be destroyed before module "castai-gke-iam" and "module.gke"
   depends_on = [module.gke, module.castai-gke-iam]

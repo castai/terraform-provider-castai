@@ -507,17 +507,10 @@ func mapCommitmentImportWithConfigToUpdateRequest(
 	c *commitmentWithConfig[castaiCommitment],
 ) sdk.CommitmentsAPIUpdateCommitmentJSONRequestBody {
 	req := sdk.CommitmentsAPIUpdateCommitmentJSONRequestBody{
-		AllowedUsage:            c.Commitment.AllowedUsage,
-		EndDate:                 c.Commitment.EndDate,
-		GcpResourceCudContext:   c.Commitment.GcpResourceCudContext,
-		AzureReservationContext: c.Commitment.AzureReservationContext,
-		Id:                      c.Commitment.Id,
-		Name:                    c.Commitment.Name,
-		Prioritization:          c.Commitment.Prioritization,
-		Region:                  c.Commitment.Region,
-		StartDate:               c.Commitment.StartDate,
-		Status:                  c.Commitment.Status,
-		ScalingStrategy:         c.Commitment.ScalingStrategy,
+		AllowedUsage:    c.Commitment.AllowedUsage,
+		Prioritization:  c.Commitment.Prioritization,
+		Status:          c.Commitment.Status,
+		ScalingStrategy: c.Commitment.ScalingStrategy,
 	}
 	if c.Config != nil {
 		if c.Config.AllowedUsage != nil {

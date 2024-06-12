@@ -101,35 +101,46 @@ module "castai-eks-cluster" {
     }
   }
 
-  # Configure Autoscaler policies as per API specification https://api.cast.ai/v1/spec/#/PoliciesAPI/PoliciesAPIUpsertClusterPolicies.
-  # Here:
-  #  - unschedulablePods - Unscheduled pods policy
-  #  - nodeDownscaler    - Node deletion policy
-  autoscaler_policies_json = <<-EOT
-  {
-  "enabled" : false,
-  "isScopedMode" : false,
-  "unschedulablePods" : {
-    "enabled" : false
-  },
-  "clusterLimits" : {
-    "enabled" : false
-  },
-  "nodeDownscaler" : {
-    "enabled" : false,
-    "emptyNodes" : {
-      "enabled" : false,
-      "delaySeconds" : 300
-    },
-    "evictor" : {
-      "enabled" : false,
-      "aggressiveMode" : false,
-      "nodeGracePeriodMinutes" : 5
+  autoscaler_settings = {
+    enabled                                 = false
+    is_scoped_mode                          = false
+    node_templates_partial_matching_enabled = false
+
+    unschedulable_pods = {
+      enabled = false
+    }
+
+    node_downscaler = {
+      enabled = false
+
+      empty_nodes = {
+        enabled = false
+      }
+
+      evictor = {
+        aggressive_mode           = false
+        cycle_interval            = "5m10s"
+        dry_run                   = false
+        enabled                   = false
+        node_grace_period_minutes = 10
+        scoped_mode               = false
+      }
+    }
+
+    cluster_limits = {
+      enabled = false
+
+      cpu = {
+        max_cores = 20
+        min_cores = 1
+      }
+
+      spot_backups = {
+        enabled                          = false
+        spot_backup_restore_rate_seconds = 1800
+      }
     }
   }
-}
-
-  EOT
 
   # depends_on helps Terraform with creating proper dependencies graph in case of resource creation and in this case destroy.
   # module "castai-eks-cluster" has to be destroyed before module "castai-eks-role-iam".

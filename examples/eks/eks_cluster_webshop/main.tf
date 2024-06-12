@@ -108,21 +108,22 @@ module "castai-eks-cluster" {
 
   delete_nodes_on_disconnect = var.delete_nodes_on_disconnect
 
-  # Full schema can be found here https://api.cast.ai/v1/spec/#/PoliciesAPI/PoliciesAPIUpsertClusterPolicies
-  autoscaler_policies_json = <<-EOT
-     {
-         "enabled": true,
-         "isScopedMode": false,
-         "unschedulablePods": {
-             "enabled": true
-         },
-         "nodeDownscaler": {
-             "emptyNodes": {
-                 "enabled": true
-             }
-         }
-     }
-   EOT
+
+  autoscaler_settings = {
+    enabled                                 = true
+    is_scoped_mode                          = false
+    node_templates_partial_matching_enabled = false
+
+    unschedulable_pods = {
+      enabled = true
+    }
+
+    node_downscaler = {
+      empty_nodes = {
+        enabled = true
+      }
+    }
+  }
 
   // depends_on helps terraform with creating proper dependencies graph in case of resource creation and in this case destroy
   // module "castai-eks-cluster" has to be destroyed before module "castai-eks-role-iam"

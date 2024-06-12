@@ -8,6 +8,7 @@ import (
 	"math"
 	"strconv"
 
+	"github.com/castai/terraform-provider-castai/castai/types"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/samber/lo"
@@ -15,10 +16,6 @@ import (
 
 	"github.com/castai/terraform-provider-castai/castai/sdk"
 )
-
-type resourceProvider interface {
-	GetOk(key string) (interface{}, bool)
-}
 
 func toPtr[S any](src S) *S {
 	return &src
@@ -169,4 +166,69 @@ func checkFloatAttr(resource, path string, val float64) func(state *terraform.St
 		}
 		return nil
 	}
+}
+
+// extractNestedValues extracts nested values from a ResourceProvider (schema.ResourceData or schema.ResourceDiff)
+// by their full key, checking if the value is set explicitly or to the default value.
+//
+// This function helps convert nested values to a map[string]interface{} for decoding to a struct using json.Unmarshal or mapstructure.Decode.
+//
+// Parameters:
+//
+// - provider, The types.ResourceProvider to extract values from.
+//
+// - key, The full key of the value to extract. Like "foo.bar.0.baz".
+//
+// - unwrapSingleItemList, If true, unwraps single item lists to the item itself. This is useful for complex types defined as
+// *schema.TypeList with max item count 1.
+//
+// - includeDefaultValues, If true, includes values regardless of value being set explicitly or to the default value returned by the terraform provider.
+func extractNestedValues(provider types.ResourceProvider, key string, unwrapSingleItemList bool, includeDefaultValues bool) (any, bool) {
+	val, ok := provider.GetOk(key)
+
+	isValExists := includeDefaultValues || ok
+	if !isValExists {
+		return nil, false
+	}
+
+	switch vt := val.(type) {
+	case map[string]any:
+		out := make(map[string]any)
+
+		for nestedKey := range vt {
+			if val, ok = extractNestedValues(provider, fmt.Sprintf("%s.%s", key, nestedKey), unwrapSingleItemList, includeDefaultValues); ok {
+				out[nestedKey] = val
+			}
+		}
+
+		if len(out) == 0 {
+			return nil, false
+		}
+
+		return out, true
+	case []any:
+		if unwrapSingleItemList && len(vt) == 1 {
+			if _, ok := vt[0].(map[string]any); ok {
+				return extractNestedValues(provider, fmt.Sprintf("%s.%d", key, 0), unwrapSingleItemList, includeDefaultValues)
+			}
+		}
+
+		var vals []any
+
+		for i := range vt {
+			nestedKey := fmt.Sprintf("%s.%d", key, i)
+
+			if val, ok = extractNestedValues(provider, nestedKey, unwrapSingleItemList, includeDefaultValues); ok {
+				vals = append(vals, val)
+			}
+		}
+
+		if len(vals) == 0 {
+			return nil, false
+		}
+
+		return vals, true
+	}
+
+	return val, isValExists
 }

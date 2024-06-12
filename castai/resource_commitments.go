@@ -17,6 +17,7 @@ import (
 	"github.com/samber/lo"
 
 	"github.com/castai/terraform-provider-castai/castai/sdk"
+	"github.com/castai/terraform-provider-castai/castai/types"
 )
 
 const (
@@ -315,7 +316,7 @@ func commitmentsDiff(_ context.Context, diff *schema.ResourceDiff, _ any) error 
 	return errors.New("unhandled combination of commitments input")
 }
 
-func getCUDImports(tfData resourceProvider) ([]sdk.CastaiInventoryV1beta1GCPCommitmentImport, bool, error) {
+func getCUDImports(tfData types.ResourceProvider) ([]sdk.CastaiInventoryV1beta1GCPCommitmentImport, bool, error) {
 	cudsIface, ok := tfData.GetOk(fieldCommitmentsGCPCUDsJSON)
 	if !ok {
 		return nil, false, nil
@@ -331,7 +332,7 @@ func getCUDImports(tfData resourceProvider) ([]sdk.CastaiInventoryV1beta1GCPComm
 	return cuds, true, nil
 }
 
-func getReservationImports(tfData resourceProvider) ([]sdk.CastaiInventoryV1beta1AzureReservationImport, bool, error) {
+func getReservationImports(tfData types.ResourceProvider) ([]sdk.CastaiInventoryV1beta1AzureReservationImport, bool, error) {
 	reservationsIface, ok := tfData.GetOk(fieldCommitmentsAzureReservationsCSV)
 	if !ok {
 		return nil, false, nil
@@ -354,7 +355,7 @@ func getReservationImports(tfData resourceProvider) ([]sdk.CastaiInventoryV1beta
 	return resources, true, nil
 }
 
-func getCommitmentConfigs(tfData resourceProvider) ([]*commitmentConfigResource, error) {
+func getCommitmentConfigs(tfData types.ResourceProvider) ([]*commitmentConfigResource, error) {
 	var configs []*commitmentConfigResource
 	if configsIface, ok := tfData.GetOk(fieldCommitmentsConfigs); ok {
 		if err := mapstructure.Decode(configsIface, &configs); err != nil {
@@ -365,7 +366,7 @@ func getCommitmentConfigs(tfData resourceProvider) ([]*commitmentConfigResource,
 }
 
 // getCUDImportResources returns a slice of GCP CUD resources obtained from the input JSON.
-func getCUDImportResources(tfData resourceProvider) ([]*gcpCUDResource, bool, error) {
+func getCUDImportResources(tfData types.ResourceProvider) ([]*gcpCUDResource, bool, error) {
 	// Get the CUD JSON input and unmarshal it into a slice of CUD imports
 	cuds, cudsOk, err := getCUDImports(tfData)
 	if err != nil {
@@ -397,7 +398,7 @@ func getCUDImportResources(tfData resourceProvider) ([]*gcpCUDResource, bool, er
 	return res, true, nil
 }
 
-func getReservationImportResources(tfData resourceProvider) ([]*azureReservationResource, bool, error) {
+func getReservationImportResources(tfData types.ResourceProvider) ([]*azureReservationResource, bool, error) {
 	reservations, reservationsOk, err := getReservationImports(tfData)
 	if err != nil {
 		return nil, reservationsOk, err
@@ -429,7 +430,7 @@ func getReservationImportResources(tfData resourceProvider) ([]*azureReservation
 }
 
 // getCUDResources returns a slice of GCP CUD resources obtained from the state obtained from the API.
-func getCUDResources(tfData resourceProvider) ([]*gcpCUDResource, bool, error) {
+func getCUDResources(tfData types.ResourceProvider) ([]*gcpCUDResource, bool, error) {
 	cudsIface, ok := tfData.GetOk(fieldCommitmentsGCPCUDs)
 	if !ok {
 		return nil, false, nil
@@ -441,7 +442,7 @@ func getCUDResources(tfData resourceProvider) ([]*gcpCUDResource, bool, error) {
 	return res, true, nil
 }
 
-func getReservationResources(tfData resourceProvider) ([]*azureReservationResource, bool, error) {
+func getReservationResources(tfData types.ResourceProvider) ([]*azureReservationResource, bool, error) {
 	reservationsIface, ok := tfData.GetOk(fieldCommitmentsAzureReservations)
 	if !ok {
 		return nil, false, nil

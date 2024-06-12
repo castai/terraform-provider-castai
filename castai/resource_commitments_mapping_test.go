@@ -1154,21 +1154,8 @@ func TestMapCommitmentImportWithConfigToUpdateRequest(t *testing.T) {
 				},
 			},
 			expected: sdk.CommitmentsAPIUpdateCommitmentJSONRequestBody{
-				AllowedUsage: lo.ToPtr[float32](0.7),
-				EndDate:      lo.ToPtr(now.Add(365 * 24 * time.Hour)),
-				GcpResourceCudContext: &sdk.CastaiInventoryV1beta1GCPResourceCUD{
-					Cpu:      lo.ToPtr("8"),
-					CudId:    lo.ToPtr("123456"),
-					MemoryMb: lo.ToPtr("1024"),
-					Plan:     lo.ToPtr[sdk.CastaiInventoryV1beta1GCPResourceCUDCUDPlan]("TWELVE_MONTHS"),
-					Status:   lo.ToPtr("ACTIVE"),
-					Type:     lo.ToPtr("COMPUTE_OPTIMIZED_C2D"),
-				},
-				Id:             lo.ToPtr(id.String()),
-				Name:           lo.ToPtr("test-cud-1"),
+				AllowedUsage:   lo.ToPtr[float32](0.7),
 				Prioritization: lo.ToPtr(false),
-				Region:         lo.ToPtr("us-central1"),
-				StartDate:      lo.ToPtr(now.Add(-24 * time.Hour)),
 				Status:         lo.ToPtr[sdk.CastaiInventoryV1beta1CommitmentStatus]("INACTIVE"),
 			},
 		},
@@ -1176,6 +1163,7 @@ func TestMapCommitmentImportWithConfigToUpdateRequest(t *testing.T) {
 			input: &commitmentWithConfig[castaiCommitment]{
 				Commitment: castaiCommitment{
 					CastaiInventoryV1beta1Commitment: sdk.CastaiInventoryV1beta1Commitment{
+						AllowedUsage:          lo.ToPtr[float32](0.7),
 						EndDate:               lo.ToPtr(now.Add(365 * 24 * time.Hour)),
 						GcpResourceCudContext: testGCPCUDContext,
 						Id:                    lo.ToPtr(id.String()),
@@ -1186,19 +1174,7 @@ func TestMapCommitmentImportWithConfigToUpdateRequest(t *testing.T) {
 				},
 			},
 			expected: sdk.CommitmentsAPIUpdateCommitmentJSONRequestBody{
-				EndDate: lo.ToPtr(now.Add(365 * 24 * time.Hour)),
-				GcpResourceCudContext: &sdk.CastaiInventoryV1beta1GCPResourceCUD{
-					Cpu:      lo.ToPtr("8"),
-					CudId:    lo.ToPtr("123456"),
-					MemoryMb: lo.ToPtr("1024"),
-					Plan:     lo.ToPtr[sdk.CastaiInventoryV1beta1GCPResourceCUDCUDPlan]("TWELVE_MONTHS"),
-					Status:   lo.ToPtr("ACTIVE"),
-					Type:     lo.ToPtr("COMPUTE_OPTIMIZED_C2D"),
-				},
-				Id:        lo.ToPtr(id.String()),
-				Name:      lo.ToPtr("test-cud-1"),
-				Region:    lo.ToPtr("us-central1"),
-				StartDate: lo.ToPtr(now.Add(-24 * time.Hour)),
+				AllowedUsage: lo.ToPtr[float32](0.7),
 			},
 		},
 		"should map azure reservation import with config": {
@@ -1230,21 +1206,16 @@ func TestMapCommitmentImportWithConfigToUpdateRequest(t *testing.T) {
 				},
 			},
 			expected: sdk.CommitmentsAPIUpdateCommitmentJSONRequestBody{
-				AllowedUsage:            lo.ToPtr[float32](0.7),
-				EndDate:                 lo.ToPtr(now.Add(365 * 24 * time.Hour)),
-				AzureReservationContext: testAzureReservationContext,
-				Id:                      lo.ToPtr(id.String()),
-				Name:                    lo.ToPtr("test-reservation-1"),
-				Prioritization:          lo.ToPtr(false),
-				Region:                  lo.ToPtr("eastus"),
-				StartDate:               lo.ToPtr(now.Add(-24 * time.Hour)),
-				Status:                  lo.ToPtr[sdk.CastaiInventoryV1beta1CommitmentStatus]("INACTIVE"),
+				AllowedUsage:   lo.ToPtr[float32](0.7),
+				Prioritization: lo.ToPtr(false),
+				Status:         lo.ToPtr[sdk.CastaiInventoryV1beta1CommitmentStatus]("INACTIVE"),
 			},
 		},
 		"should map azure reservation import without config": {
 			input: &commitmentWithConfig[castaiCommitment]{
 				Commitment: castaiCommitment{
 					CastaiInventoryV1beta1Commitment: sdk.CastaiInventoryV1beta1Commitment{
+						AllowedUsage:            lo.ToPtr[float32](0.77),
 						EndDate:                 lo.ToPtr(now.Add(365 * 24 * time.Hour)),
 						AzureReservationContext: testAzureReservationContext,
 						Id:                      lo.ToPtr(id.String()),
@@ -1255,12 +1226,7 @@ func TestMapCommitmentImportWithConfigToUpdateRequest(t *testing.T) {
 				},
 			},
 			expected: sdk.CommitmentsAPIUpdateCommitmentJSONRequestBody{
-				EndDate:                 lo.ToPtr(now.Add(365 * 24 * time.Hour)),
-				AzureReservationContext: testAzureReservationContext,
-				Id:                      lo.ToPtr(id.String()),
-				Name:                    lo.ToPtr("test-reservation-1"),
-				Region:                  lo.ToPtr("eastus"),
-				StartDate:               lo.ToPtr(now.Add(-24 * time.Hour)),
+				AllowedUsage: lo.ToPtr[float32](0.77),
 			},
 		},
 	}
