@@ -27,3 +27,19 @@ jobs:
       - name: Validate Terraform examples
         id: validate_examples
         run: make validate-terraform-examples
+      
+      - name: Plan to ensure modules compatible
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_TF_ACCEPTANCE_TEST_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_TF_ACCEPTANCE_TEST_SECRET_KEY_ID }}
+          ARM_CLIENT_ID: ${{ secrets.AZURE_TF_ACCEPTANCE_TEST_ARM_CLIENT_ID }}
+          ARM_CLIENT_SECRET: ${{ secrets.AZURE_TF_ACCEPTANCE_TEST_ARM_CLIENT_SECRET }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_TF_ACCEPTANCE_TEST_ARM_SUBSCRIPTION_ID }}
+          ARM_TENANT_ID: ${{ secrets.AZURE_TF_ACCEPTANCE_TEST_ARM_TENANT_ID }}
+          GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_TF_ACCEPTANCE_TEST_CREDENTIALS }}
+          GOOGLE_PROJECT_ID: ${{ secrets.GOOGLE_TF_ACCEPTANCE_PROJECT_ID }}
+          TF_VAR_cluster_name: gh-eks
+          TF_VAR_cluster_region: us-east-1
+          TF_VAR_castai_api_token: ${{ secrets.CASTAI_TOKEN }}
+        id: plan_examples
+        run: cd examples/eks/eks_clusters && TF_VAR_cluster_name=gh-eks TF_VAR_cluster_region=us-east-1 TF_VAR_castai_api_token=$CASTAI_TOKEN terraform plan
