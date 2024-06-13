@@ -187,8 +187,8 @@ func resourceNodeConfiguration() *schema.Resource {
 						"volume_type": {
 							Type:             schema.TypeString,
 							Optional:         true,
-							Description:      "AWS EBS volume type to be used for CAST provisioned nodes. One of: gp3, io1, io2",
-							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"gp3", "io1", "io2"}, true)),
+							Description:      "AWS EBS volume type to be used for CAST provisioned nodes. One of: gp3, gp2, io1, io2",
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"gp3", "gp2", "io1", "io2"}, true)),
 						},
 						"volume_iops": {
 							Type:             schema.TypeInt,

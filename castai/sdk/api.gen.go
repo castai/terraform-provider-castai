@@ -2375,6 +2375,7 @@ type NodetemplatesV1TemplateConstraints struct {
 	// Fallback restore rate in seconds: defines how much time should pass before spot fallback should be attempted to be restored to real spot.
 	FallbackRestoreRateSeconds *int32                                                       `json:"fallbackRestoreRateSeconds"`
 	Gpu                        *NodetemplatesV1TemplateConstraintsGPUConstraints            `json:"gpu,omitempty"`
+	IncludeBurstableInstances  *bool                                                        `json:"includeBurstableInstances"`
 	InstanceFamilies           *NodetemplatesV1TemplateConstraintsInstanceFamilyConstraints `json:"instanceFamilies,omitempty"`
 
 	// This template is gpu only. Setting this to true, will result in only instances with GPUs being considered.
@@ -2977,6 +2978,7 @@ type ExternalClusterAPIListNodesParams struct {
 	NodeTemplateName         *string                                         `form:"nodeTemplateName,omitempty" json:"nodeTemplateName,omitempty"`
 	NodeTemplateVersion      *string                                         `form:"nodeTemplateVersion,omitempty" json:"nodeTemplateVersion,omitempty"`
 	NodeName                 *string                                         `form:"nodeName,omitempty" json:"nodeName,omitempty"`
+	ExcludeDeleting          *bool                                           `form:"excludeDeleting,omitempty" json:"excludeDeleting,omitempty"`
 }
 
 // ExternalClusterAPIListNodesParamsNodeStatus defines parameters for ExternalClusterAPIListNodes.
