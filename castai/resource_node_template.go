@@ -67,6 +67,7 @@ const (
 	FieldNodeTemplateAffinityKeyName                          = "key"
 	FieldNodeTemplateAffinityOperatorName                     = "operator"
 	FieldNodeTemplateAffinityValuesName                       = "values"
+	FieldNodeTemplateIncludeBurstableInstances                = "include_burstable_instances"
 )
 
 const (
@@ -462,6 +463,13 @@ func resourceNodeTemplate() *schema.Resource {
 								},
 							},
 						},
+						FieldNodeTemplateIncludeBurstableInstances: {
+							Type:             schema.TypeString,
+							Optional:         true,
+							Default:          NotSet,
+							Description:      "Will only include burstable instances when enabled otherwise they will be excluded. Supported values: `enabled`, `disabled` or `notset`.",
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{NotSet, Enabled, Disabled}, false)),
+						},
 					},
 				},
 			},
@@ -673,6 +681,9 @@ func flattenConstraints(c *sdk.NodetemplatesV1TemplateConstraints) ([]map[string
 	}
 	if c.Azs != nil {
 		out[FieldNodeTemplateAZs] = lo.FromPtr(c.Azs)
+	}
+	if c.IncludeBurstableInstances != nil {
+		out[FieldNodeTemplateIncludeBurstableInstances] = string(lo.FromPtr(c.IncludeBurstableInstances))
 	}
 	return []map[string]any{out}, nil
 }
@@ -1210,6 +1221,9 @@ func toTemplateConstraints(obj map[string]any) *sdk.NodetemplatesV1TemplateConst
 				return *res, true
 			}))
 		}
+	}
+	if v, ok := obj[FieldNodeTemplateIncludeBurstableInstances].(string); ok {
+		out.IncludeBurstableInstances = toPtr(sdk.NodetemplatesV1TemplateConstraintsConstraintState(v))
 	}
 
 	return out

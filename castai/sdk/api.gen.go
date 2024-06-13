@@ -164,6 +164,13 @@ const (
 	NoSchedule NodetemplatesV1TaintEffect = "NoSchedule"
 )
 
+// Defines values for NodetemplatesV1TemplateConstraintsConstraintState.
+const (
+	Disabled NodetemplatesV1TemplateConstraintsConstraintState = "disabled"
+	Enabled  NodetemplatesV1TemplateConstraintsConstraintState = "enabled"
+	Notset   NodetemplatesV1TemplateConstraintsConstraintState = "notset"
+)
+
 // Defines values for PoliciesV1EvictorStatus.
 const (
 	PoliciesV1EvictorStatusCompatible   PoliciesV1EvictorStatus = "Compatible"
@@ -2416,6 +2423,10 @@ type NodetemplatesV1TemplateConstraints struct {
 	// Spot instance fallback constraint - when true, on-demand instances will be created, when spots are unavailable.
 	UseSpotFallbacks *bool `json:"useSpotFallbacks"`
 }
+
+// - disabled: The constraint is disabled
+//   - enabled: The constraint is enabled
+type NodetemplatesV1TemplateConstraintsConstraintState string
 
 // NodetemplatesV1TemplateConstraintsCustomPriority defines model for nodetemplates.v1.TemplateConstraints.CustomPriority.
 type NodetemplatesV1TemplateConstraintsCustomPriority struct {
