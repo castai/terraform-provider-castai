@@ -111,7 +111,7 @@ Optional:
 - `volume_iops` (Number) AWS EBS volume IOPS to be used for CAST provisioned nodes
 - `volume_kms_key_arn` (String) AWS KMS key ARN for encrypting EBS volume attached to the node
 - `volume_throughput` (Number) AWS EBS volume throughput in MiB/s to be used for CAST provisioned nodes
-- `volume_type` (String) AWS EBS volume type to be used for CAST provisioned nodes. One of: gp3, io1, io2
+- `volume_type` (String) AWS EBS volume type to be used for CAST provisioned nodes. One of: gp3, gp2, io1, io2
 
 <a id="nestedblock--eks--target_group"></a>
 ### Nested Schema for `eks.target_group`
