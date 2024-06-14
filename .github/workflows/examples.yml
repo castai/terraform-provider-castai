@@ -2,9 +2,8 @@ name: Terraform Examples Validation
 on:
   pull_request:
     branches: [ '*' ]
-    paths:
-      - '**.md'
-      - 'examples/**'
+    paths-ignore:
+      - '**.md.tmpl'
 jobs:
   terraform_validation:
     strategy:
