@@ -5,8 +5,11 @@ init-examples:
 	@echo "==> Creating symlinks for example/ projects to terraform-provider-castai binary"; \
 	TF_PROVIDER_FILENAME=terraform-provider-castai; \
 	GOOS=`go env GOOS`; \
+	echo "GOOS:$${GOOS}"; \
 	GOARCH=`go env GOARCH`; \
+	echo "GOARCH:$${GOARCH}"; \
 	NEXT_MINOR=`git tag --list 'v*'|sort|tail -n 1| awk -F. -v OFS=. '{$$NF += 1 ; print}'`; \
+	echo "Next minor version: $${NEXT_MINOR}"; \
 	for examples in examples/eks examples/gke examples/aks ; do \
 		for tfproject in $$examples/* ; do \
 			TF_PROJECT_PLUGIN_PATH="$${tfproject}/terraform.d/plugins/registry.terraform.io/castai/castai/$${NEXT_MINOR:1}/$${GOOS}_$${GOARCH}"; \
