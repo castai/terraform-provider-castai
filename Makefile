@@ -9,7 +9,7 @@ init-examples:
 	NEXT_MINOR=`git tag --list 'v*'|sort|tail -n 1| awk -F. -v OFS=. '{$$NF += 1 ; print}'`; \
 	for examples in examples/eks examples/gke examples/aks ; do \
 		for tfproject in $$examples/* ; do \
-		TF_PROJECT_PLUGIN_PATH="$${tfproject}/terraform.d/plugins/registry.terraform.io/castai/castai/$${NEXT_MINOR:1}/$${GOOS}_$${GOARCH}"; \
+			TF_PROJECT_PLUGIN_PATH="$${tfproject}/terraform.d/plugins/registry.terraform.io/castai/castai/$${NEXT_MINOR:1}/$${GOOS}_$${GOARCH}"; \
 			echo "creating $${TF_PROVIDER_FILENAME} symlink to $${TF_PROJECT_PLUGIN_PATH}/$${TF_PROVIDER_FILENAME}"; \
 			mkdir -p "${PWD}/$${TF_PROJECT_PLUGIN_PATH}"; \
 			ln -sf "${PWD}/terraform-provider-castai" "$${TF_PROJECT_PLUGIN_PATH}"; \
