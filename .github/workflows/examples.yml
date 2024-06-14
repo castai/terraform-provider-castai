@@ -40,5 +40,6 @@ jobs:
           TF_VAR_cluster_name: gh-eks
           TF_VAR_cluster_region: us-east-1
           TF_VAR_castai_api_token: ${{ secrets.CASTAI_TOKEN }}
+          TF_VAR_castai_api_url:  ${{ secrets.CASTAI_URL }}
         id: plan_examples
         run: cd examples/eks/eks_clusters && terraform plan
