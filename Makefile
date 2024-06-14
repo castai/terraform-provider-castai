@@ -8,8 +8,7 @@ init-examples:
 	GOARCH=`go env GOARCH`; \
 	git fetch --tags > /dev/null; \
 	NEXT_MINOR=`git tag --list 'v*'|sort|tail -n 1| awk -F. -v OFS=. '{$$NF += 1 ; print}'`; \
-	echo "using next possible minor version without 'v' prefix: $${NEXT_MINOR}"; \
-	git tag --list 'v*'|sort|tail -n 1; \
+	echo "using next possible minor version without 'v' prefix: $${NEXT_MINOR:1}"; \
 	for examples in examples/eks examples/gke examples/aks ; do \
 		for tfproject in $$examples/* ; do \
 			TF_PROJECT_PLUGIN_PATH="$${tfproject}/terraform.d/plugins/registry.terraform.io/castai/castai/$${NEXT_MINOR:1}/$${GOOS}_$${GOARCH}"; \
