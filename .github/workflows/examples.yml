@@ -26,7 +26,7 @@ jobs:
 
       - name: Validate Terraform examples
         id: validate_examples
-        run: make validate-terraform-examples
+        run: git st && make validate-terraform-examples
       
       - name: Plan to ensure modules compatible
         env:
@@ -42,4 +42,4 @@ jobs:
           TF_VAR_cluster_region: us-east-1
           TF_VAR_castai_api_token: ${{ secrets.CASTAI_TOKEN }}
         id: plan_examples
-        run: cd examples/eks/eks_clusters && TF_VAR_cluster_name=gh-eks TF_VAR_cluster_region=us-east-1 TF_VAR_castai_api_token=$CASTAI_TOKEN terraform plan
+        run: cd examples/eks/eks_clusters && terraform plan
