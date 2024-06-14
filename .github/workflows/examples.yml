@@ -26,7 +26,7 @@ jobs:
 
       - name: Validate Terraform examples
         id: validate_examples
-        run: git st && make validate-terraform-examples
+        run: make validate-terraform-examples
       
       - name: Plan to ensure modules compatible
         env:

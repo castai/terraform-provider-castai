@@ -33,9 +33,6 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-build-
 
-      - name: git are u there
-        run: git pull --tags && git tag|sort|tail -n 4
-
       - name: Build
         run: make build
 
