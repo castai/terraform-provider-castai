@@ -34,7 +34,7 @@ jobs:
             ${{ runner.os }}-build-
 
       - name: Build
-        run: make build
+        run: git tag --list 'v*' && make build
 
       - name: Test
         run: make test
