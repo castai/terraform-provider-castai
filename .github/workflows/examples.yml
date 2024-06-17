@@ -36,7 +36,7 @@ jobs:
           TF_VAR_castai_api_token: ${{ secrets.CASTAI_TOKEN }}
           TF_VAR_castai_api_url:  ${{ secrets.CASTAI_URL }}
         id: eks_plan_examples
-        run: cd examples/eks/eks_clusters && terraform plan -out /dev/null
+        run: cd examples/eks/eks_clusters && terraform plan 1> /dev/null
 
       - name: Ensure GKE module compatible
         env:
@@ -47,5 +47,16 @@ jobs:
           TF_VAR_castai_api_token: ${{ secrets.CASTAI_TOKEN }}
           TF_VAR_castai_api_url:  ${{ secrets.CASTAI_URL }}
         id: gke_plan_examples
-        run: cd examples/gke/gke_castai_iam && terraform plan -out /dev/null
+        run: cd examples/gke/gke_castai_iam && terraform plan 1> /dev/null
 
+      - name: Ensure AKS module compatible
+        env:
+          ARM_CLIENT_ID: ${{ secrets.AZURE_TF_ACCEPTANCE_TEST_ARM_CLIENT_ID }}
+          ARM_CLIENT_SECRET: ${{ secrets.AZURE_TF_ACCEPTANCE_TEST_ARM_CLIENT_SECRET }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_TF_ACCEPTANCE_TEST_ARM_SUBSCRIPTION_ID }}
+          ARM_TENANT_ID: ${{ secrets.AZURE_TF_ACCEPTANCE_TEST_ARM_TENANT_ID }}
+          TF_VAR_castai_api_token: ${{ secrets.CASTAI_TOKEN }}
+          TF_VAR_castai_api_url:  ${{ secrets.CASTAI_URL }}
+          TF_VAR_cluster_region: "germanywestcentral"
+        id: aks_plan_examples
+        run: cd examples/aks/aks_cluster && terraform plan 1> /dev/null
