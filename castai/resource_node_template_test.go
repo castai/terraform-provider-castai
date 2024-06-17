@@ -651,6 +651,7 @@ func testNodeTemplateUpdated(rName, clusterName string) string {
 				storage_optimized_state = "enabled"
 				compute_optimized_state = "disabled"
 				architectures = ["arm64"]
+				burstable_instances = "enabled"
 				azs = ["eu-central-1a", "eu-central-1b", "eu-central-1c"]
 
 				custom_priority {
