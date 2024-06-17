@@ -9,5 +9,4 @@ const (
 
 	Enabled  = "enabled"
 	Disabled = "disabled"
-	NotSet   = "notset"
 )

@@ -67,7 +67,7 @@ const (
 	FieldNodeTemplateAffinityKeyName                          = "key"
 	FieldNodeTemplateAffinityOperatorName                     = "operator"
 	FieldNodeTemplateAffinityValuesName                       = "values"
-	FieldNodeTemplateIncludeBurstableInstances                = "include_burstable_instances"
+	FieldNodeTemplateBurstableInstances                       = "burstable_instances"
 )
 
 const (
@@ -463,12 +463,12 @@ func resourceNodeTemplate() *schema.Resource {
 								},
 							},
 						},
-						FieldNodeTemplateIncludeBurstableInstances: {
+						FieldNodeTemplateBurstableInstances: {
 							Type:             schema.TypeString,
 							Optional:         true,
-							Default:          NotSet,
-							Description:      "Will only include burstable instances when enabled otherwise they will be excluded. Supported values: `enabled`, `disabled` or `notset`.",
-							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{NotSet, Enabled, Disabled}, false)),
+							Default:          "",
+							Description:      "Will only include burstable instances when enabled otherwise they will be excluded. Supported values: `enabled`, `disabled` or ``.",
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"", Enabled, Disabled}, false)),
 						},
 					},
 				},
@@ -682,8 +682,13 @@ func flattenConstraints(c *sdk.NodetemplatesV1TemplateConstraints) ([]map[string
 	if c.Azs != nil {
 		out[FieldNodeTemplateAZs] = lo.FromPtr(c.Azs)
 	}
-	if c.IncludeBurstableInstances != nil {
-		out[FieldNodeTemplateIncludeBurstableInstances] = string(lo.FromPtr(c.IncludeBurstableInstances))
+	if c.Burstable != nil {
+		switch lo.FromPtr(c.Burstable) {
+		case sdk.ENABLED:
+			out[FieldNodeTemplateBurstableInstances] = Enabled
+		case sdk.DISABLED:
+			out[FieldNodeTemplateBurstableInstances] = Disabled
+		}
 	}
 	return []map[string]any{out}, nil
 }
@@ -1222,8 +1227,13 @@ func toTemplateConstraints(obj map[string]any) *sdk.NodetemplatesV1TemplateConst
 			}))
 		}
 	}
-	if v, ok := obj[FieldNodeTemplateIncludeBurstableInstances].(string); ok {
-		out.IncludeBurstableInstances = toPtr(sdk.NodetemplatesV1TemplateConstraintsConstraintState(v))
+	if v, ok := obj[FieldNodeTemplateBurstableInstances].(string); ok {
+		switch v {
+		case Enabled:
+			out.Burstable = toPtr(sdk.ENABLED)
+		case Disabled:
+			out.Burstable = toPtr(sdk.DISABLED)
+		}
 	}
 
 	return out

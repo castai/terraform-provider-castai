@@ -45,6 +45,7 @@ Optional:
 
 - `architectures` (List of String) List of acceptable instance CPU architectures, the default is amd64. Allowed values: amd64, arm64.
 - `azs` (List of String) The list of AZ names to consider for the node template, if empty or not set all AZs are considered.
+- `burstable_instances` (String) Will only include burstable instances when enabled otherwise they will be excluded. Supported values: `enabled`, `disabled` or ``.
 - `compute_optimized` (Boolean) Compute optimized instance constraint (deprecated).
 - `compute_optimized_state` (String) Will only include compute optimized nodes when enabled and exclude compute optimized nodes when disabled. Empty value won't have effect on instances filter. Supported values: `enabled`, `disabled` or empty string.
 - `custom_priority` (Block List) (see [below for nested schema](#nestedblock--constraints--custom_priority))
