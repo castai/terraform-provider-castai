@@ -35,7 +35,7 @@ jobs:
           TF_VAR_cluster_region: us-east-1
           TF_VAR_castai_api_token: ${{ secrets.CASTAI_TOKEN }}
           TF_VAR_castai_api_url:  ${{ secrets.CASTAI_URL }}
-        id: plan_examples
+        id: eks_plan_examples
         run: cd examples/eks/eks_clusters && terraform plan -out /dev/null
 
       - name: Ensure GKE module compatible
@@ -46,6 +46,6 @@ jobs:
           TF_VAR_cluster_name: gh-gke
           TF_VAR_castai_api_token: ${{ secrets.CASTAI_TOKEN }}
           TF_VAR_castai_api_url:  ${{ secrets.CASTAI_URL }}
-        id: plan_examples
+        id: gke_plan_examples
         run: cd examples/gke/gke_castai_iam && terraform plan -out /dev/null
 
