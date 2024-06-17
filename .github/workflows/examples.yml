@@ -27,19 +27,25 @@ jobs:
         id: validate_examples
         run: make validate-terraform-examples
       
-      - name: Plan to ensure modules compatible
+      - name: Ensure EKS module compatible
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_TF_ACCEPTANCE_TEST_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_TF_ACCEPTANCE_TEST_SECRET_KEY_ID }}
-          ARM_CLIENT_ID: ${{ secrets.AZURE_TF_ACCEPTANCE_TEST_ARM_CLIENT_ID }}
-          ARM_CLIENT_SECRET: ${{ secrets.AZURE_TF_ACCEPTANCE_TEST_ARM_CLIENT_SECRET }}
-          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_TF_ACCEPTANCE_TEST_ARM_SUBSCRIPTION_ID }}
-          ARM_TENANT_ID: ${{ secrets.AZURE_TF_ACCEPTANCE_TEST_ARM_TENANT_ID }}
-          GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_TF_ACCEPTANCE_TEST_CREDENTIALS }}
-          GOOGLE_PROJECT_ID: ${{ secrets.GOOGLE_TF_ACCEPTANCE_PROJECT_ID }}
           TF_VAR_cluster_name: gh-eks
           TF_VAR_cluster_region: us-east-1
           TF_VAR_castai_api_token: ${{ secrets.CASTAI_TOKEN }}
           TF_VAR_castai_api_url:  ${{ secrets.CASTAI_URL }}
         id: plan_examples
-        run: cd examples/eks/eks_clusters && terraform plan
+        run: cd examples/eks/eks_clusters && terraform plan -out /dev/null
+
+      - name: Ensure GKE module compatible
+        env:
+          GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_TF_ACCEPTANCE_TEST_CREDENTIALS }}
+          GOOGLE_PROJECT_ID: ${{ secrets.GOOGLE_TF_ACCEPTANCE_PROJECT_ID }}
+          TF_VAR_project_id: ${{ secrets.GOOGLE_TF_ACCEPTANCE_PROJECT_ID }}
+          TF_VAR_cluster_name: gh-gke
+          TF_VAR_castai_api_token: ${{ secrets.CASTAI_TOKEN }}
+          TF_VAR_castai_api_url:  ${{ secrets.CASTAI_URL }}
+        id: plan_examples
+        run: cd examples/gke/gke_castai_iam && terraform plan -out /dev/null
+
