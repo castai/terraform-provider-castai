@@ -101,6 +101,22 @@ const (
 	STATUSUNKNOWN  CastaiSsoV1beta1SSOConnectionStatus = "STATUS_UNKNOWN"
 )
 
+// Defines values for ExternalclusterV1ClusterReconcileInfoReconcileMode.
+const (
+	ExternalclusterV1ClusterReconcileInfoReconcileModeDisabled    ExternalclusterV1ClusterReconcileInfoReconcileMode = "disabled"
+	ExternalclusterV1ClusterReconcileInfoReconcileModeEnabled     ExternalclusterV1ClusterReconcileInfoReconcileMode = "enabled"
+	ExternalclusterV1ClusterReconcileInfoReconcileModePaused      ExternalclusterV1ClusterReconcileInfoReconcileMode = "paused"
+	ExternalclusterV1ClusterReconcileInfoReconcileModeUnspecified ExternalclusterV1ClusterReconcileInfoReconcileMode = "unspecified"
+)
+
+// Defines values for ExternalclusterV1ClusterReconcileInfoReconcileStatus.
+const (
+	ExternalclusterV1ClusterReconcileInfoReconcileStatusFailed  ExternalclusterV1ClusterReconcileInfoReconcileStatus = "failed"
+	ExternalclusterV1ClusterReconcileInfoReconcileStatusOk      ExternalclusterV1ClusterReconcileInfoReconcileStatus = "ok"
+	ExternalclusterV1ClusterReconcileInfoReconcileStatusUnknown ExternalclusterV1ClusterReconcileInfoReconcileStatus = "unknown"
+	ExternalclusterV1ClusterReconcileInfoReconcileStatusWarning ExternalclusterV1ClusterReconcileInfoReconcileStatus = "warning"
+)
+
 // Defines values for ExternalclusterV1NodeType.
 const (
 	Master          ExternalclusterV1NodeType = "master"
@@ -136,12 +152,12 @@ const (
 
 // Defines values for NodeconfigV1ContainerRuntime.
 const (
-	CONTAINERD  NodeconfigV1ContainerRuntime = "CONTAINERD"
-	Containerd  NodeconfigV1ContainerRuntime = "containerd"
-	DOCKERD     NodeconfigV1ContainerRuntime = "DOCKERD"
-	Dockerd     NodeconfigV1ContainerRuntime = "dockerd"
-	UNSPECIFIED NodeconfigV1ContainerRuntime = "UNSPECIFIED"
-	Unspecified NodeconfigV1ContainerRuntime = "unspecified"
+	NodeconfigV1ContainerRuntimeCONTAINERD  NodeconfigV1ContainerRuntime = "CONTAINERD"
+	NodeconfigV1ContainerRuntimeContainerd  NodeconfigV1ContainerRuntime = "containerd"
+	NodeconfigV1ContainerRuntimeDOCKERD     NodeconfigV1ContainerRuntime = "DOCKERD"
+	NodeconfigV1ContainerRuntimeDockerd     NodeconfigV1ContainerRuntime = "dockerd"
+	NodeconfigV1ContainerRuntimeUNSPECIFIED NodeconfigV1ContainerRuntime = "UNSPECIFIED"
+	NodeconfigV1ContainerRuntimeUnspecified NodeconfigV1ContainerRuntime = "unspecified"
 )
 
 // Defines values for NodetemplatesV1AvailableInstanceTypeOs.
@@ -164,12 +180,19 @@ const (
 	NoSchedule NodetemplatesV1TaintEffect = "NoSchedule"
 )
 
+// Defines values for NodetemplatesV1TemplateConstraintsConstraintState.
+const (
+	DISABLED NodetemplatesV1TemplateConstraintsConstraintState = "DISABLED"
+	ENABLED  NodetemplatesV1TemplateConstraintsConstraintState = "ENABLED"
+	NOTSET   NodetemplatesV1TemplateConstraintsConstraintState = "NOT_SET"
+)
+
 // Defines values for PoliciesV1EvictorStatus.
 const (
-	PoliciesV1EvictorStatusCompatible   PoliciesV1EvictorStatus = "Compatible"
-	PoliciesV1EvictorStatusIncompatible PoliciesV1EvictorStatus = "Incompatible"
-	PoliciesV1EvictorStatusMissing      PoliciesV1EvictorStatus = "Missing"
-	PoliciesV1EvictorStatusUnknown      PoliciesV1EvictorStatus = "Unknown"
+	Compatible   PoliciesV1EvictorStatus = "Compatible"
+	Incompatible PoliciesV1EvictorStatus = "Incompatible"
+	Missing      PoliciesV1EvictorStatus = "Missing"
+	Unknown      PoliciesV1EvictorStatus = "Unknown"
 )
 
 // Defines values for PoliciesV1SpotInterruptionPredictionsType.
@@ -1367,8 +1390,10 @@ type ExternalclusterV1ClusterReconcileInfo struct {
 	Error *string `json:"error"`
 
 	// Number of times the reconcile was retried.
-	ErrorCount *int32  `json:"errorCount,omitempty"`
-	Mode       *string `json:"mode,omitempty"`
+	ErrorCount *int32 `json:"errorCount,omitempty"`
+
+	// Reconcile mode.
+	Mode *ExternalclusterV1ClusterReconcileInfoReconcileMode `json:"mode,omitempty"`
 
 	// Timestamp when the last reconcile was performed.
 	ReconciledAt *time.Time `json:"reconciledAt"`
@@ -1380,8 +1405,14 @@ type ExternalclusterV1ClusterReconcileInfo struct {
 	StartedAt *time.Time `json:"startedAt"`
 
 	// Reconcile status.
-	Status *string `json:"status"`
+	Status *ExternalclusterV1ClusterReconcileInfoReconcileStatus `json:"status,omitempty"`
 }
+
+// Reconcile mode.
+type ExternalclusterV1ClusterReconcileInfoReconcileMode string
+
+// Reconcile status.
+type ExternalclusterV1ClusterReconcileInfoReconcileStatus string
 
 // ExternalclusterV1ClusterUpdate defines model for externalcluster.v1.ClusterUpdate.
 type ExternalclusterV1ClusterUpdate struct {
@@ -2180,6 +2211,7 @@ type NodeconfigV1TargetGroup struct {
 type NodetemplatesV1AvailableInstanceType struct {
 	Architecture           *string                                                     `json:"architecture,omitempty"`
 	AvailableGpuDevices    *[]NodetemplatesV1AvailableInstanceTypeGPUDevice            `json:"availableGpuDevices,omitempty"`
+	Burstable              *bool                                                       `json:"burstable,omitempty"`
 	Cpu                    *string                                                     `json:"cpu,omitempty"`
 	CpuCost                *float64                                                    `json:"cpuCost,omitempty"`
 	Family                 *string                                                     `json:"family,omitempty"`
@@ -2345,9 +2377,13 @@ type NodetemplatesV1TemplateConstraints struct {
 	// AZS - The list of AZ names to consider for the node template, if empty or not set all AZs are considered. When
 	// subnets defined in node config are zonal (AWS + Azure), the effective AZs are the intersection of the subnet AZs
 	// and the AZs in node template.
-	Azs              *[]string `json:"azs,omitempty"`
-	BareMetal        *bool     `json:"bareMetal"`
-	ComputeOptimized *bool     `json:"computeOptimized"`
+	Azs       *[]string `json:"azs,omitempty"`
+	BareMetal *bool     `json:"bareMetal"`
+
+	// - DISABLED: The constraint is disabled
+	//  - ENABLED: The constraint is enabled
+	Burstable        *NodetemplatesV1TemplateConstraintsConstraintState `json:"burstable,omitempty"`
+	ComputeOptimized *bool                                              `json:"computeOptimized"`
 
 	// Custom sorting priority - instances matching defined rules will take priority over other candidates.
 	CustomPriority *[]NodetemplatesV1TemplateConstraintsCustomPriority `json:"customPriority,omitempty"`
@@ -2375,7 +2411,6 @@ type NodetemplatesV1TemplateConstraints struct {
 	// Fallback restore rate in seconds: defines how much time should pass before spot fallback should be attempted to be restored to real spot.
 	FallbackRestoreRateSeconds *int32                                                       `json:"fallbackRestoreRateSeconds"`
 	Gpu                        *NodetemplatesV1TemplateConstraintsGPUConstraints            `json:"gpu,omitempty"`
-	IncludeBurstableInstances  *bool                                                        `json:"includeBurstableInstances"`
 	InstanceFamilies           *NodetemplatesV1TemplateConstraintsInstanceFamilyConstraints `json:"instanceFamilies,omitempty"`
 
 	// This template is gpu only. Setting this to true, will result in only instances with GPUs being considered.
@@ -2416,6 +2451,10 @@ type NodetemplatesV1TemplateConstraints struct {
 	// Spot instance fallback constraint - when true, on-demand instances will be created, when spots are unavailable.
 	UseSpotFallbacks *bool `json:"useSpotFallbacks"`
 }
+
+// - DISABLED: The constraint is disabled
+//   - ENABLED: The constraint is enabled
+type NodetemplatesV1TemplateConstraintsConstraintState string
 
 // NodetemplatesV1TemplateConstraintsCustomPriority defines model for nodetemplates.v1.TemplateConstraints.CustomPriority.
 type NodetemplatesV1TemplateConstraintsCustomPriority struct {

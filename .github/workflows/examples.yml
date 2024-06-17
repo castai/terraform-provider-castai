@@ -60,4 +60,4 @@ jobs:
           TF_VAR_castai_api_url:  ${{ secrets.CASTAI_URL }}
           TF_VAR_cluster_region: "germanywestcentral"
         id: aks_plan_examples
-        run: cd examples/aks/aks_cluster && terraform plan 
+        run: cd examples/aks/aks_cluster && terraform plan  1> /dev/null

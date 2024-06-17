@@ -45,19 +45,19 @@ jobs:
           terraform_version: '1.2.*'
           terraform_wrapper: false
 
-          #- name: Acceptance test
-          #  env:
-          #    CASTAI_API_TOKEN: ${{ secrets.CASTAI_DEV_MASTER_TOKEN }}
-          #    AWS_ACCESS_KEY_ID: ${{ secrets.AWS_TF_ACCEPTANCE_TEST_KEY_ID }}
-          #    AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_TF_ACCEPTANCE_TEST_SECRET_KEY_ID }}
-          #    ARM_CLIENT_ID: ${{ secrets.AZURE_TF_ACCEPTANCE_TEST_ARM_CLIENT_ID }}
-          #    ARM_CLIENT_SECRET: ${{ secrets.AZURE_TF_ACCEPTANCE_TEST_ARM_CLIENT_SECRET }}
-          #    ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_TF_ACCEPTANCE_TEST_ARM_SUBSCRIPTION_ID }}
-          #    ARM_TENANT_ID: ${{ secrets.AZURE_TF_ACCEPTANCE_TEST_ARM_TENANT_ID }}
-          #    GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_TF_ACCEPTANCE_TEST_CREDENTIALS }}
-          #    GOOGLE_PROJECT_ID: ${{ secrets.GOOGLE_TF_ACCEPTANCE_PROJECT_ID }}
-          #    SSO_CLIENT_ID: ${{ secrets.SSO_CLIENT_ID }}
-          #    SSO_CLIENT_SECRET: ${{ secrets.SSO_CLIENT_SECRET }}
-          #    SSO_DOMAIN: ${{ secrets.SSO_DOMAIN }}
-          #  run: make testacc
+      - name: Acceptance test
+        env:
+          CASTAI_API_TOKEN: ${{ secrets.CASTAI_DEV_MASTER_TOKEN }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_TF_ACCEPTANCE_TEST_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_TF_ACCEPTANCE_TEST_SECRET_KEY_ID }}
+          ARM_CLIENT_ID: ${{ secrets.AZURE_TF_ACCEPTANCE_TEST_ARM_CLIENT_ID }}
+          ARM_CLIENT_SECRET: ${{ secrets.AZURE_TF_ACCEPTANCE_TEST_ARM_CLIENT_SECRET }}
+          ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_TF_ACCEPTANCE_TEST_ARM_SUBSCRIPTION_ID }}
+          ARM_TENANT_ID: ${{ secrets.AZURE_TF_ACCEPTANCE_TEST_ARM_TENANT_ID }}
+          GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_TF_ACCEPTANCE_TEST_CREDENTIALS }}
+          GOOGLE_PROJECT_ID: ${{ secrets.GOOGLE_TF_ACCEPTANCE_PROJECT_ID }}
+          SSO_CLIENT_ID: ${{ secrets.SSO_CLIENT_ID }}
+          SSO_CLIENT_SECRET: ${{ secrets.SSO_CLIENT_SECRET }}
+          SSO_DOMAIN: ${{ secrets.SSO_DOMAIN }}
+        run: make testacc
 
