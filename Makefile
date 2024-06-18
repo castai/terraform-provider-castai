@@ -1,14 +1,19 @@
+SHELL := /bin/bash
+
 default: build
 
 .PHONY: init-examples
 init-examples:
 	@echo "==> Creating symlinks for example/ projects to terraform-provider-castai binary"; \
 	TF_PROVIDER_FILENAME=terraform-provider-castai; \
-	GOOS=`go tool dist env | awk -F'=' '/^GOOS/ { print $$2}' | tr -d '";'`; \
-	GOARCH=`go tool dist env | awk -F'=' '/^GOARCH/ { print $$2}' | tr -d '";'`; \
+	GOOS=`go env GOOS`; \
+	GOARCH=`go env GOARCH`; \
+	git fetch --tags > /dev/null; \
+	NEXT_MINOR=`git tag --list 'v*'|sort|tail -n 1| awk -F. -v OFS=. '{$$NF += 1 ; print}'`; \
+	echo "using next possible minor version without 'v' prefix: $${NEXT_MINOR:1}"; \
 	for examples in examples/eks examples/gke examples/aks ; do \
 		for tfproject in $$examples/* ; do \
-			TF_PROJECT_PLUGIN_PATH="$${tfproject}/terraform.d/plugins/registry.terraform.io/castai/castai/0.0.0-local/$${GOOS}_$${GOARCH}"; \
+			TF_PROJECT_PLUGIN_PATH="$${tfproject}/terraform.d/plugins/registry.terraform.io/castai/castai/$${NEXT_MINOR:1}/$${GOOS}_$${GOARCH}"; \
 			echo "creating $${TF_PROVIDER_FILENAME} symlink to $${TF_PROJECT_PLUGIN_PATH}/$${TF_PROVIDER_FILENAME}"; \
 			mkdir -p "${PWD}/$${TF_PROJECT_PLUGIN_PATH}"; \
 			ln -sf "${PWD}/terraform-provider-castai" "$${TF_PROJECT_PLUGIN_PATH}"; \
