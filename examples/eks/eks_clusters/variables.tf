@@ -12,7 +12,7 @@ variable "cluster_region" {
 variable "cluster_version" {
   type        = string
   description = "EKS cluster version."
-  default     = "1.27"
+  default     = "1.29"
 }
 
 variable "castai_api_url" {
