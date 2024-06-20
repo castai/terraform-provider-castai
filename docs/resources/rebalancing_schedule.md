@@ -118,6 +118,10 @@ Required:
 
 - `savings_percentage` (Number) Defines the minimum percentage of savings expected.
 
+Optional:
+
+- `ignore_savings` (Boolean) If true, the savings percentage will be ignored and the rebalancing will be triggered regardless of the savings percentage.
+
 
 <a id="nestedblock--timeouts"></a>
 ### Nested Schema for `timeouts`
