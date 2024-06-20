@@ -2896,6 +2896,8 @@ type ScheduledrebalancingV1TimeZone struct {
 
 // ScheduledrebalancingV1TriggerConditions defines model for scheduledrebalancing.v1.TriggerConditions.
 type ScheduledrebalancingV1TriggerConditions struct {
+	// When true, the rebalancing job will be triggered regardless of the expected savings.
+	IgnoreSavings     *bool    `json:"ignoreSavings,omitempty"`
 	SavingsPercentage *float32 `json:"savingsPercentage,omitempty"`
 }
 

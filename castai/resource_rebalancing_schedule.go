@@ -79,6 +79,12 @@ func resourceRebalancingSchedule() *schema.Resource {
 							ValidateDiagFunc: validation.ToDiagFunc(validation.FloatAtLeast(0.0)),
 							Description:      "Defines the minimum percentage of savings expected.",
 						},
+						"ignore_savings": {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Default:     false,
+							Description: "If true, the savings percentage will be ignored and the rebalancing will be triggered regardless of the savings percentage.",
+						},
 					},
 				},
 			},
@@ -261,6 +267,7 @@ func stateToSchedule(d *schema.ResourceData) (*sdk.ScheduledrebalancingV1Rebalan
 	if triggerConditions := toSection(d, "trigger_conditions"); triggerConditions != nil {
 		result.TriggerConditions = sdk.ScheduledrebalancingV1TriggerConditions{
 			SavingsPercentage: readOptionalNumber[float64, float32](triggerConditions, "savings_percentage"),
+			IgnoreSavings:     readOptionalValue[bool](triggerConditions, "ignore_savings"),
 		}
 	}
 
@@ -348,6 +355,7 @@ func scheduleToState(schedule *sdk.ScheduledrebalancingV1RebalancingSchedule, d 
 
 	triggerConditions := map[string]any{
 		"savings_percentage": toFloat64PtrTruncated(schedule.TriggerConditions.SavingsPercentage),
+		"ignore_savings":     schedule.TriggerConditions.IgnoreSavings,
 	}
 	if err := d.Set("trigger_conditions", []map[string]any{triggerConditions}); err != nil {
 		return err
