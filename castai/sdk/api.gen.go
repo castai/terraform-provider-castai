@@ -409,21 +409,23 @@ type CastaiInventoryV1beta1AzureReservationImport struct {
 
 // CPUPlatform describes the CPU platforms the instance type can be equipped with.
 type CastaiInventoryV1beta1CPUPlatform struct {
-	// All Core Turbo Frequency (GHz).
+	// All Core Turbo Frequency (GHz). Only available for GCP.
 	AllCoreTurboFrequency *float64 `json:"allCoreTurboFrequency,omitempty"`
 
 	// Base Frequency of the platform (GHz).
 	BaseFrequency *float64 `json:"baseFrequency,omitempty"`
 
-	// Generation of the platform.
+	// Generation of the platform. Only available for GCP.
 	Generation *string `json:"generation,omitempty"`
 
-	// Platform name.
+	// Platform name. Only available for GCP.
 	Platform *string `json:"platform,omitempty"`
 
-	// Single Core Turbo Frequency (GHz).
+	// Processor name.
+	ProcessorName *string `json:"processorName,omitempty"`
+
+	// Single Core Turbo Frequency (GHz). Only available for GCP.
 	SingleCoreTurboFrequency *float64 `json:"singleCoreTurboFrequency,omitempty"`
-	Sku                      *string  `json:"sku,omitempty"`
 }
 
 // CastaiInventoryV1beta1ClusterAggregatedUsage defines model for castai.inventory.v1beta1.ClusterAggregatedUsage.
@@ -940,6 +942,9 @@ type CastaiSsoV1beta1CreateSSOConnection struct {
 	// AzureAAD represents a Azure AAD connector.
 	Aad *CastaiSsoV1beta1AzureAAD `json:"aad,omitempty"`
 
+	// Additional list of email domains assigned to SSO connection.
+	AdditionalEmailDomains *[]string `json:"additionalEmailDomains,omitempty"`
+
 	// EmailDomain is the email domain of the connection.
 	EmailDomain string `json:"emailDomain"`
 
@@ -1002,7 +1007,8 @@ type CastaiSsoV1beta1Okta struct {
 // SSOConnection represents a sso connection.
 type CastaiSsoV1beta1SSOConnection struct {
 	// AzureAAD represents a Azure AAD connector.
-	Aad *CastaiSsoV1beta1AzureAAD `json:"aad,omitempty"`
+	Aad                    *CastaiSsoV1beta1AzureAAD `json:"aad,omitempty"`
+	AdditionalEmailDomains *[]string                 `json:"additionalEmailDomains,omitempty"`
 
 	// CreatedAt is the time when the connection was created.
 	CreatedAt *time.Time `json:"createdAt,omitempty"`
@@ -1049,6 +1055,9 @@ type CastaiSsoV1beta1SSOConnectionStatus string
 type CastaiSsoV1beta1UpdateSSOConnection struct {
 	// AzureAAD represents a Azure AAD connector.
 	Aad *CastaiSsoV1beta1AzureAAD `json:"aad,omitempty"`
+
+	// Additional list of email domains assigned to SSO connection.
+	AdditionalEmailDomains *[]string `json:"additionalEmailDomains,omitempty"`
 
 	// EmailDomain is the email domain of the connection.
 	EmailDomain *string `json:"emailDomain,omitempty"`
@@ -2896,6 +2905,8 @@ type ScheduledrebalancingV1TimeZone struct {
 
 // ScheduledrebalancingV1TriggerConditions defines model for scheduledrebalancing.v1.TriggerConditions.
 type ScheduledrebalancingV1TriggerConditions struct {
+	// When true, the rebalancing job will be triggered regardless of the expected savings.
+	IgnoreSavings     *bool    `json:"ignoreSavings"`
 	SavingsPercentage *float32 `json:"savingsPercentage,omitempty"`
 }
 
