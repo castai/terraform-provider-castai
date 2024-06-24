@@ -309,9 +309,10 @@ func resourceNodeTemplate() *schema.Resource {
 							},
 						},
 						FieldNodeTemplateGpu: {
-							Type:     schema.TypeList,
-							MaxItems: 1,
-							Optional: true,
+							Type:             schema.TypeList,
+							MaxItems:         1,
+							Optional:         true,
+							DiffSuppressFunc: resourceNodeTemplateGpuDiffSuppress,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									FieldNodeTemplateManufacturers: {
@@ -1336,4 +1337,50 @@ func toTemplateConstraintsNodeAffinity(o map[string]any) *sdk.NodetemplatesV1Tem
 	}
 
 	return &out
+}
+
+// FIXME: it is only applied to `gpu` constraint to reduce impact space if unexpected
+//  behaviour occurs. After ensuring that it works as expected, it should be applied to
+//  all constraints who need this suppression.
+
+func resourceNodeTemplateGpuDiffSuppress(k, o, n string, d *schema.ResourceData) bool {
+	if d.Id() == "" {
+		return false
+	}
+
+	key := FieldNodeTemplateConstraints + ".0." + FieldNodeTemplateGpu
+
+	// skip all other subkeys except for the gpu field which is the only field that needs diff suppression
+	if k != key+".#" {
+		log.Printf("ignoring %s subkey diff suppression for: %v -> %v", k, o, n)
+
+		return false
+	}
+
+	// log the key and values that are being checked. This is useful for debugging purposes
+	log.Printf("%s value diff suppression called for: %v -> %v", k, o, n)
+
+	// get the old and new values for the gpu field to compare diffs.
+	oldValue, newValue := d.GetChange(key)
+
+	// log original values before doing any normalization
+	log.Printf("%s value diff suppression before normalization: %v -> %v", key, oldValue, newValue)
+
+	if oldValue == nil {
+		oldValue = []any{}
+	}
+
+	if newValue == nil {
+		newValue = []any{}
+	}
+
+	// filter out nil values from the list to avoid empty block definition in the plan
+	oldValue = lo.Filter(oldValue.([]any), func(i any, _ int) bool { return i != nil })
+	newValue = lo.Filter(newValue.([]any), func(i any, _ int) bool { return i != nil })
+
+	// log normalized values after filtering out nil values
+	log.Printf("%s value diff suppression after normalization: %v -> %v", key, oldValue, newValue)
+
+	// only suppress diff both of the lists are empty after filtering out nil values. Otherwise, let the diff happen
+	return len(oldValue.([]any)) == 0 && len(newValue.([]any)) == 0
 }
