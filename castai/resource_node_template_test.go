@@ -443,6 +443,7 @@ func TestAccResourceNodeTemplate_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "custom_taints.3.value", ""),
 					resource.TestCheckResourceAttr(resourceName, "custom_taints.3.effect", "NoSchedule"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.instance_families.0.exclude.0", "m5"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.gpu.0.manufacturers.#", "1"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.gpu.0.manufacturers.0", "NVIDIA"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.gpu.0.include_names.#", "0"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.gpu.0.exclude_names.#", "0"),
