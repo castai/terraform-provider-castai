@@ -69,7 +69,8 @@ resource "castai_node_configuration" "default" {
 - `drain_timeout_sec` (Number) Timeout in seconds for draining the node. Defaults to 0
 - `eks` (Block List, Max: 1) (see [below for nested schema](#nestedblock--eks))
 - `gke` (Block List, Max: 1) (see [below for nested schema](#nestedblock--gke))
-- `image` (String) Image to be used while provisioning the node. If nothing is provided will be resolved to latest available image based on Kubernetes version if possible
+- `image` (String) Image to be used while provisioning the node. If nothing is provided will be resolved to latest available image based on Image family, Kubernetes version and node architecture if possible. See Cast.ai documentation for details.
+- `image_family` (String) Image OS Family to use when provisioning node. If both image and family are provided, the system will use provided image and provisioning logic for given family. If only image family is provided, the system will attempt to resolve the latest image from that family based on kubernetes version and node architecture. If image family is omitted, a default family (based on cloud provider) will be used. See Cast.ai documentation for details.
 - `init_script` (String) Init script to be run on your instance at launch. Should not contain any sensitive data. Value should be base64 encoded
 - `kops` (Block List, Max: 1) (see [below for nested schema](#nestedblock--kops))
 - `kubelet_config` (String) Optional kubelet configuration properties in JSON format. Provide only properties that you want to override. Applicable for EKS only. [Available values](https://kubernetes.io/docs/reference/config-api/kubelet-config.v1beta1/)

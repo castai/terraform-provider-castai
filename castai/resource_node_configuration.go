@@ -29,6 +29,7 @@ const (
 	FieldNodeConfigurationSubnets          = "subnets"
 	FieldNodeConfigurationSSHPublicKey     = "ssh_public_key"
 	FieldNodeConfigurationImage            = "image"
+	FieldNodeConfigurationImageFamily      = "image_family"
 	FieldNodeConfigurationTags             = "tags"
 	FieldNodeConfigurationInitScript       = "init_script"
 	FieldNodeConfigurationContainerRuntime = "container_runtime"
@@ -111,7 +112,13 @@ func resourceNodeConfiguration() *schema.Resource {
 			FieldNodeConfigurationImage: {
 				Type:             schema.TypeString,
 				Optional:         true,
-				Description:      "Image to be used while provisioning the node. If nothing is provided will be resolved to latest available image based on Kubernetes version if possible ",
+				Description:      "Image to be used while provisioning the node. If nothing is provided will be resolved to latest available image based on Image family, Kubernetes version and node architecture if possible. See Cast.ai documentation for details.",
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+			},
+			FieldNodeConfigurationImageFamily: {
+				Type:             schema.TypeString,
+				Optional:         true,
+				Description:      "Image OS Family to use when provisioning node. If both image and family are provided, the system will use provided image and provisioning logic for given family. If only image family is provided, the system will attempt to resolve the latest image from that family based on kubernetes version and node architecture. If image family is omitted, a default family (based on cloud provider) will be used. See Cast.ai documentation for details.",
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 			FieldNodeConfigurationTags: {
@@ -364,6 +371,9 @@ func resourceNodeConfigurationCreate(ctx context.Context, d *schema.ResourceData
 	if v, ok := d.GetOk(FieldNodeConfigurationImage); ok {
 		req.Image = toPtr(v.(string))
 	}
+	if v, ok := d.GetOk(FieldNodeConfigurationImageFamily); ok {
+		req.ImageFamily = toPtr(sdk.NodeconfigV1ImageFamily(v.(string)))
+	}
 	if v, ok := d.GetOk(FieldNodeConfigurationSSHPublicKey); ok {
 		req.SshPublicKey = toPtr(v.(string))
 	}
@@ -457,6 +467,9 @@ func resourceNodeConfigurationRead(ctx context.Context, d *schema.ResourceData, 
 	if err := d.Set(FieldNodeConfigurationImage, nodeConfig.Image); err != nil {
 		return diag.FromErr(fmt.Errorf("setting image: %w", err))
 	}
+	if err := d.Set(FieldNodeConfigurationImageFamily, nodeConfig.ImageFamily); err != nil {
+		return diag.FromErr(fmt.Errorf("setting image family: %w", err))
+	}
 	if err := d.Set(FieldNodeConfigurationInitScript, nodeConfig.InitScript); err != nil {
 		return diag.FromErr(fmt.Errorf("setting init script: %w", err))
 	}
@@ -510,6 +523,7 @@ func resourceNodeConfigurationUpdate(ctx context.Context, d *schema.ResourceData
 		FieldNodeConfigurationSubnets,
 		FieldNodeConfigurationSSHPublicKey,
 		FieldNodeConfigurationImage,
+		FieldNodeConfigurationImageFamily,
 		FieldNodeConfigurationInitScript,
 		FieldNodeConfigurationContainerRuntime,
 		FieldNodeConfigurationDockerConfig,
@@ -537,6 +551,9 @@ func resourceNodeConfigurationUpdate(ctx context.Context, d *schema.ResourceData
 	}
 	if v, ok := d.GetOk(FieldNodeConfigurationImage); ok {
 		req.Image = toPtr(v.(string))
+	}
+	if v, ok := d.GetOk(FieldNodeConfigurationImageFamily); ok {
+		req.ImageFamily = toPtr(sdk.NodeconfigV1ImageFamily(v.(string)))
 	}
 	if v, ok := d.GetOk(FieldNodeConfigurationSSHPublicKey); ok {
 		req.SshPublicKey = toPtr(v.(string))
