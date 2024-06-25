@@ -727,6 +727,9 @@ func flattenGpu(gpu *sdk.NodetemplatesV1TemplateConstraintsGPUConstraints) []map
 	if gpu.MaxCount != nil {
 		out[FieldNodeTemplateMaxCount] = gpu.MaxCount
 	}
+	if len(out) == 0 {
+		return nil
+	}
 	return []map[string]any{out}
 }
 
