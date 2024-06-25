@@ -160,6 +160,18 @@ const (
 	NodeconfigV1ContainerRuntimeUnspecified NodeconfigV1ContainerRuntime = "unspecified"
 )
 
+// Defines values for NodeconfigV1ImageFamily.
+const (
+	AL2               NodeconfigV1ImageFamily = "AL2"
+	AL2023            NodeconfigV1ImageFamily = "AL2023"
+	Al2               NodeconfigV1ImageFamily = "al2"
+	Al2023            NodeconfigV1ImageFamily = "al2023"
+	BOTTLEROCKET      NodeconfigV1ImageFamily = "BOTTLEROCKET"
+	Bottlerocket      NodeconfigV1ImageFamily = "bottlerocket"
+	FAMILYUNSPECIFIED NodeconfigV1ImageFamily = "FAMILY_UNSPECIFIED"
+	FamilyUnspecified NodeconfigV1ImageFamily = "family_unspecified"
+)
+
 // Defines values for NodetemplatesV1AvailableInstanceTypeOs.
 const (
 	NodetemplatesV1AvailableInstanceTypeOsLinux   NodetemplatesV1AvailableInstanceTypeOs = "linux"
@@ -343,6 +355,11 @@ type CastaiEvictorV1PodSelector struct {
 // CastaiInventoryV1beta1AddReservationResponse defines model for castai.inventory.v1beta1.AddReservationResponse.
 type CastaiInventoryV1beta1AddReservationResponse struct {
 	Reservation *CastaiInventoryV1beta1ReservationDetails `json:"reservation,omitempty"`
+}
+
+// CastaiInventoryV1beta1AttachableDisk defines model for castai.inventory.v1beta1.AttachableDisk.
+type CastaiInventoryV1beta1AttachableDisk struct {
+	Name *string `json:"name,omitempty"`
 }
 
 // CastaiInventoryV1beta1AttachableGPUDevice defines model for castai.inventory.v1beta1.AttachableGPUDevice.
@@ -644,11 +661,14 @@ type CastaiInventoryV1beta1InstanceReliability struct {
 
 // InstanceType is a cloud service provider specific VM type with basic data.
 type CastaiInventoryV1beta1InstanceType struct {
-	Architecture     *string `json:"architecture,omitempty"`
-	BareMetal        *bool   `json:"bareMetal,omitempty"`
-	Burstable        *bool   `json:"burstable,omitempty"`
-	CastChoice       *bool   `json:"castChoice,omitempty"`
-	ComputeOptimized *bool   `json:"computeOptimized,omitempty"`
+	Architecture *string `json:"architecture,omitempty"`
+
+	// Contains a list of possible attachable disk types for the given instance types. Currently supported for GCP only.
+	AttachableDisks  *[]CastaiInventoryV1beta1AttachableDisk `json:"attachableDisks,omitempty"`
+	BareMetal        *bool                                   `json:"bareMetal,omitempty"`
+	Burstable        *bool                                   `json:"burstable,omitempty"`
+	CastChoice       *bool                                   `json:"castChoice,omitempty"`
+	ComputeOptimized *bool                                   `json:"computeOptimized,omitempty"`
 
 	// Describes the manufacturers of the CPUs the instance type can be equipped with.
 	CpuManufacturers *[]CastaiInventoryV1beta1InstanceTypeCPUManufacturer `json:"cpuManufacturers,omitempty"`
@@ -1989,6 +2009,13 @@ type NodeconfigV1GetSuggestedConfigurationResponse struct {
 	Subnets        *[]NodeconfigV1SubnetDetails `json:"subnets,omitempty"`
 }
 
+// List of supported image families to choose from. Values might be applicable to a specific cloud provider and will be rejected if the value is not supported.
+//
+//   - AL2: Amazon Linux 2 (https://aws.amazon.com/amazon-linux-2/), EKS-specific.
+//   - AL2023: Amazon Linux 2023 (https://aws.amazon.com/linux/amazon-linux-2023/), EKS-specific.
+//   - BOTTLEROCKET: Bottlerocket (https://aws.amazon.com/bottlerocket/), EKS-specific.
+type NodeconfigV1ImageFamily string
+
 // NodeconfigV1KOPSConfig defines model for nodeconfig.v1.KOPSConfig.
 type NodeconfigV1KOPSConfig struct {
 	// AWS key pair ID to be used for provisioned nodes. Has priority over sshPublicKey.
@@ -2023,8 +2050,17 @@ type NodeconfigV1NewNodeConfiguration struct {
 	Eks             *NodeconfigV1EKSConfig `json:"eks,omitempty"`
 	Gke             *NodeconfigV1GKEConfig `json:"gke,omitempty"`
 
-	// Image to be used while provisioning the node. If nothing is provided will be resolved to latest available image based on Kubernetes version if possible.
+	// Image to be used while provisioning the node.
+	// Image setting takes precedence over image family.
+	// If both image and image family are empty, the latest image from a default family will be used, depending on the cloud provider.
 	Image *string `json:"image"`
+
+	// List of supported image families to choose from. Values might be applicable to a specific cloud provider and will be rejected if the value is not supported.
+	//
+	//  - AL2: Amazon Linux 2 (https://aws.amazon.com/amazon-linux-2/), EKS-specific.
+	//  - AL2023: Amazon Linux 2023 (https://aws.amazon.com/linux/amazon-linux-2023/), EKS-specific.
+	//  - BOTTLEROCKET: Bottlerocket (https://aws.amazon.com/bottlerocket/), EKS-specific.
+	ImageFamily *NodeconfigV1ImageFamily `json:"imageFamily,omitempty"`
 
 	// Init script to be run on your instance at launch. Should not contain any sensitive data. Value should be base64 encoded.
 	InitScript *string                 `json:"initScript"`
@@ -2081,8 +2117,17 @@ type NodeconfigV1NodeConfiguration struct {
 	// The node configuration ID.
 	Id *string `json:"id,omitempty"`
 
-	// Image to be used while provisioning the node. If nothing is provided will be resolved to latest available image based on Kubernetes version if possible.
+	// Image to be used while provisioning the node.
+	// Image setting takes precedence over image family.
+	// If both image and image family are empty, the latest image from a default family will be used, depending on the cloud provider.
 	Image *string `json:"image"`
+
+	// List of supported image families to choose from. Values might be applicable to a specific cloud provider and will be rejected if the value is not supported.
+	//
+	//  - AL2: Amazon Linux 2 (https://aws.amazon.com/amazon-linux-2/), EKS-specific.
+	//  - AL2023: Amazon Linux 2023 (https://aws.amazon.com/linux/amazon-linux-2023/), EKS-specific.
+	//  - BOTTLEROCKET: Bottlerocket (https://aws.amazon.com/bottlerocket/), EKS-specific.
+	ImageFamily *NodeconfigV1ImageFamily `json:"imageFamily,omitempty"`
 
 	// Base64 encoded init script to be run on your instance at launch.
 	InitScript *string                 `json:"initScript"`
@@ -2136,8 +2181,17 @@ type NodeconfigV1NodeConfigurationUpdate struct {
 	Eks             *NodeconfigV1EKSConfig `json:"eks,omitempty"`
 	Gke             *NodeconfigV1GKEConfig `json:"gke,omitempty"`
 
-	// Image to be used while provisioning the node. If nothing is provided will be resolved to latest available image based on Kubernetes version if possible.
+	// Image to be used while provisioning the node.
+	// Image setting takes precedence over image family.
+	// If both image and image family are empty, the latest image from a default family will be used, depending on the cloud provider.
 	Image *string `json:"image"`
+
+	// List of supported image families to choose from. Values might be applicable to a specific cloud provider and will be rejected if the value is not supported.
+	//
+	//  - AL2: Amazon Linux 2 (https://aws.amazon.com/amazon-linux-2/), EKS-specific.
+	//  - AL2023: Amazon Linux 2023 (https://aws.amazon.com/linux/amazon-linux-2023/), EKS-specific.
+	//  - BOTTLEROCKET: Bottlerocket (https://aws.amazon.com/bottlerocket/), EKS-specific.
+	ImageFamily *NodeconfigV1ImageFamily `json:"imageFamily,omitempty"`
 
 	// Init script to be run on your instance at launch. Should not contain any sensitive data. Value should be base64 encoded.
 	InitScript *string                 `json:"initScript"`
@@ -3001,6 +3055,9 @@ type ExternalClusterAPIGetCredentialsScriptParams struct {
 	// Whether CAST AI Autoscaler components should be installed.
 	// To enable backwards compatibility, when the field is omitted, it is defaulted to true.
 	InstallAutoscalerAgent *bool `form:"installAutoscalerAgent,omitempty" json:"installAutoscalerAgent,omitempty"`
+
+	// Whether CAST AI GPU metrics exporter should be installed
+	InstallGpuMetricsExporter *bool `form:"installGpuMetricsExporter,omitempty" json:"installGpuMetricsExporter,omitempty"`
 }
 
 // ExternalClusterAPIDisconnectClusterJSONBody defines parameters for ExternalClusterAPIDisconnectCluster.
