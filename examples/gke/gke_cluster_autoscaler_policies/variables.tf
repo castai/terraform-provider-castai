@@ -48,3 +48,18 @@ variable "tags" {
   description = "Optional tags for new cluster nodes. This parameter applies only to new nodes - tags for old nodes are not reconciled."
   default     = {}
 }
+
+variable "node_templates" {
+  type = object(
+    {
+      gpu = optional(object({
+        exclude_names = optional(list(string))
+        include_names = optional(list(string))
+        manufacturers = optional(list(string))
+        max_count     = optional(number)
+        min_count     = optional(number)
+      }), {})
+    }
+  )
+  default = {}
+}

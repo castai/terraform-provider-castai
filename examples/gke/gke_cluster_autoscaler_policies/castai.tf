@@ -75,6 +75,8 @@ module "castai-gke-cluster" {
 
         enable_spot_diversity                       = false
         spot_diversity_price_increase_limit_percent = 20
+
+        gpu = try(var.node_templates.gpu, null)
       }
     }
     spot_tmpl = {
@@ -111,6 +113,7 @@ module "castai-gke-cluster" {
         }
         compute_optimized_state = "disabled"
         storage_optimized_state = "disabled"
+        gpu                     = try(var.node_templates.gpu, null)
         # Optional: define custom priority for instances selection.
         #
         # 1. Prioritize C2D and C2 spot instances above all else, regardless of price.

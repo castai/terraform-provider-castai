@@ -13,7 +13,7 @@ init-examples:
 	echo "using next possible minor version without 'v' prefix: $${NEXT_MINOR:1}"; \
 	for examples in examples/eks examples/gke examples/aks ; do \
 		for tfproject in $$examples/* ; do \
-			TF_PROJECT_PLUGIN_PATH="$${tfproject}/terraform.d/plugins/registry.terraform.io/castai/castai/$${NEXT_MINOR:1}/$${GOOS}_$${GOARCH}"; \
+			TF_PROJECT_PLUGIN_PATH="$${tfproject}/terraform.d/plugins/registry.terraform.io/castai/castai/7.4.0/$${GOOS}_$${GOARCH}"; \
 			echo "creating $${TF_PROVIDER_FILENAME} symlink to $${TF_PROJECT_PLUGIN_PATH}/$${TF_PROVIDER_FILENAME}"; \
 			mkdir -p "${PWD}/$${TF_PROJECT_PLUGIN_PATH}"; \
 			ln -sf "${PWD}/terraform-provider-castai" "$${TF_PROJECT_PLUGIN_PATH}"; \
