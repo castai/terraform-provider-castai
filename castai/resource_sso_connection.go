@@ -7,16 +7,18 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/castai/terraform-provider-castai/castai/sdk"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"golang.org/x/crypto/bcrypt"
+
+	"github.com/castai/terraform-provider-castai/castai/sdk"
 )
 
 const (
-	FieldSSOConnectionName        = "name"
-	FieldSSOConnectionEmailDomain = "email_domain"
+	FieldSSOConnectionName                   = "name"
+	FieldSSOConnectionEmailDomain            = "email_domain"
+	FieldSSOConnectionAdditionalEmailDomains = "additional_email_domains"
 
 	FieldSSOConnectionAAD            = "aad"
 	FieldSSOConnectionADDomain       = "ad_domain"
@@ -54,6 +56,17 @@ func resourceSSOConnection() *schema.Resource {
 				Required:         true,
 				Description:      "Email domain of the connection",
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+			},
+			FieldSSOConnectionAdditionalEmailDomains: {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: "Additional email domains that will be allowed to sign in via the connection",
+				MinItems:    1,
+				Elem: &schema.Schema{
+					Required:         false,
+					Type:             schema.TypeString,
+					ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+				},
 			},
 			FieldSSOConnectionAAD: {
 				Type:        schema.TypeList,
@@ -141,6 +154,14 @@ func resourceCastaiSSOConnectionCreate(ctx context.Context, data *schema.Resourc
 		EmailDomain: data.Get(FieldSSOConnectionEmailDomain).(string),
 	}
 
+	if v, ok := data.Get(FieldSSOConnectionAdditionalEmailDomains).([]any); ok && len(v) > 0 {
+		var domains []string
+		for _, v := range v {
+			domains = append(domains, v.(string))
+		}
+		req.AdditionalEmailDomains = toPtr(domains)
+	}
+
 	if v, ok := data.Get(FieldSSOConnectionAAD).([]any); ok && len(v) > 0 {
 		req.Aad = toADConnector(v[0].(map[string]any))
 	}
@@ -182,6 +203,9 @@ func resourceCastaiSSOConnectionRead(ctx context.Context, data *schema.ResourceD
 	if err := data.Set(FieldSSOConnectionEmailDomain, connection.EmailDomain); err != nil {
 		return diag.Errorf("setting email domain: %v", err)
 	}
+	if err := data.Set(FieldSSOConnectionAdditionalEmailDomains, connection.AdditionalEmailDomains); err != nil {
+		return diag.Errorf("setting additional email domains: %v", err)
+	}
 
 	return nil
 }
@@ -190,6 +214,7 @@ func resourceCastaiSSOConnectionUpdate(ctx context.Context, data *schema.Resourc
 	if !data.HasChanges(
 		FieldSSOConnectionName,
 		FieldSSOConnectionEmailDomain,
+		FieldSSOConnectionAdditionalEmailDomains,
 		FieldSSOConnectionAAD,
 		FieldSSOConnectionOkta,
 	) {
@@ -204,6 +229,14 @@ func resourceCastaiSSOConnectionUpdate(ctx context.Context, data *schema.Resourc
 	}
 	if v, ok := data.GetOk(FieldSSOConnectionEmailDomain); ok {
 		req.EmailDomain = toPtr(v.(string))
+	}
+
+	if v, ok := data.Get(FieldSSOConnectionAdditionalEmailDomains).([]any); ok && len(v) > 0 {
+		var domains []string
+		for _, v := range v {
+			domains = append(domains, v.(string))
+		}
+		req.AdditionalEmailDomains = toPtr(domains)
 	}
 
 	if v, ok := data.Get(FieldSSOConnectionAAD).([]any); ok && len(v) > 0 {

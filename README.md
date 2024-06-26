@@ -473,6 +473,16 @@ $ cd terraform-provider-castai
 $ make build
 ```
 
+After you build the provider, you have to set the `~/.terraformrc` configuration to let terraform know you want to use local provider:
+```terraform
+provider_installation {
+  dev_overrides {
+    "castai/castai" = "<path-to-terraform-provider-castai-repository>"
+  }
+  direct {}
+}
+```
+
 _`make build` builds the provider and install symlinks to that build for all terraform projects in `examples/*` dir.
 Now you can work on `examples/localdev`._
 

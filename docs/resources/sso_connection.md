@@ -34,6 +34,7 @@ resource "castai_sso_connection" "sso" {
 ### Optional
 
 - `aad` (Block List, Max: 1) Azure AD connector (see [below for nested schema](#nestedblock--aad))
+- `additional_email_domains` (List of String) Additional email domains that will be allowed to sign in via the connection
 - `okta` (Block List, Max: 1) Okta connector (see [below for nested schema](#nestedblock--okta))
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
