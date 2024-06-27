@@ -160,16 +160,15 @@ const (
 	NodeconfigV1ContainerRuntimeUnspecified NodeconfigV1ContainerRuntime = "unspecified"
 )
 
-// Defines values for NodeconfigV1ImageFamily.
+// Defines values for NodeconfigV1EKSConfigImageFamily.
 const (
-	AL2               NodeconfigV1ImageFamily = "AL2"
-	AL2023            NodeconfigV1ImageFamily = "AL2023"
-	Al2               NodeconfigV1ImageFamily = "al2"
-	Al2023            NodeconfigV1ImageFamily = "al2023"
-	BOTTLEROCKET      NodeconfigV1ImageFamily = "BOTTLEROCKET"
-	Bottlerocket      NodeconfigV1ImageFamily = "bottlerocket"
-	FAMILYUNSPECIFIED NodeconfigV1ImageFamily = "FAMILY_UNSPECIFIED"
-	FamilyUnspecified NodeconfigV1ImageFamily = "family_unspecified"
+	FAMILYAL2          NodeconfigV1EKSConfigImageFamily = "FAMILY_AL2"
+	FAMILYAL2023       NodeconfigV1EKSConfigImageFamily = "FAMILY_AL2023"
+	FAMILYBOTTLEROCKET NodeconfigV1EKSConfigImageFamily = "FAMILY_BOTTLEROCKET"
+	FAMILYUNSPECIFIED  NodeconfigV1EKSConfigImageFamily = "FAMILY_UNSPECIFIED"
+	FamilyAl2          NodeconfigV1EKSConfigImageFamily = "family_al2"
+	FamilyAl2023       NodeconfigV1EKSConfigImageFamily = "family_al2023"
+	FamilyBottlerocket NodeconfigV1EKSConfigImageFamily = "family_bottlerocket"
 )
 
 // Defines values for NodetemplatesV1AvailableInstanceTypeOs.
@@ -1955,8 +1954,15 @@ type NodeconfigV1DeleteConfigurationResponse = map[string]interface{}
 type NodeconfigV1EKSConfig struct {
 	// IP address to use for DNS queries within the cluster. Defaults to 10.100.0.10 or 172.20.0.10 based on the IP address of the primary interface.
 	DnsClusterIp *string `json:"dnsClusterIp"`
-	ImdsHopLimit *int32  `json:"imdsHopLimit"`
-	ImdsV1       *bool   `json:"imdsV1"`
+
+	// List of supported image families (OSes) for EKS.
+	//
+	//  - FAMILY_AL2: Amazon Linux 2 (https://aws.amazon.com/amazon-linux-2/), EKS-specific.
+	//  - FAMILY_AL2023: Amazon Linux 2023 (https://aws.amazon.com/linux/amazon-linux-2023/), EKS-specific.
+	//  - FAMILY_BOTTLEROCKET: Bottlerocket (https://aws.amazon.com/bottlerocket/), EKS-specific.
+	ImageFamily  *NodeconfigV1EKSConfigImageFamily `json:"imageFamily,omitempty"`
+	ImdsHopLimit *int32                            `json:"imdsHopLimit"`
+	ImdsV1       *bool                             `json:"imdsV1"`
 
 	// Cluster's instance profile ARN used for CAST provisioned nodes.
 	InstanceProfileArn string `json:"instanceProfileArn"`
@@ -1983,6 +1989,13 @@ type NodeconfigV1EKSConfig struct {
 	VolumeType *string `json:"volumeType"`
 }
 
+// List of supported image families (OSes) for EKS.
+//
+//   - FAMILY_AL2: Amazon Linux 2 (https://aws.amazon.com/amazon-linux-2/), EKS-specific.
+//   - FAMILY_AL2023: Amazon Linux 2023 (https://aws.amazon.com/linux/amazon-linux-2023/), EKS-specific.
+//   - FAMILY_BOTTLEROCKET: Bottlerocket (https://aws.amazon.com/bottlerocket/), EKS-specific.
+type NodeconfigV1EKSConfigImageFamily string
+
 // NodeconfigV1GKEConfig defines model for nodeconfig.v1.GKEConfig.
 type NodeconfigV1GKEConfig struct {
 	// Type of boot disk attached to the node. For available types please read official GCP docs(https://cloud.google.com/compute/docs/disks#pdspecs).
@@ -2008,13 +2021,6 @@ type NodeconfigV1GetSuggestedConfigurationResponse struct {
 	SecurityGroups *[]NodeconfigV1SecurityGroup `json:"securityGroups,omitempty"`
 	Subnets        *[]NodeconfigV1SubnetDetails `json:"subnets,omitempty"`
 }
-
-// List of supported image families to choose from. Values might be applicable to a specific cloud provider and will be rejected if the value is not supported.
-//
-//   - AL2: Amazon Linux 2 (https://aws.amazon.com/amazon-linux-2/), EKS-specific.
-//   - AL2023: Amazon Linux 2023 (https://aws.amazon.com/linux/amazon-linux-2023/), EKS-specific.
-//   - BOTTLEROCKET: Bottlerocket (https://aws.amazon.com/bottlerocket/), EKS-specific.
-type NodeconfigV1ImageFamily string
 
 // NodeconfigV1KOPSConfig defines model for nodeconfig.v1.KOPSConfig.
 type NodeconfigV1KOPSConfig struct {
@@ -2054,13 +2060,6 @@ type NodeconfigV1NewNodeConfiguration struct {
 	// Image setting takes precedence over image family.
 	// If both image and image family are empty, the latest image from a default family will be used, depending on the cloud provider.
 	Image *string `json:"image"`
-
-	// List of supported image families to choose from. Values might be applicable to a specific cloud provider and will be rejected if the value is not supported.
-	//
-	//  - AL2: Amazon Linux 2 (https://aws.amazon.com/amazon-linux-2/), EKS-specific.
-	//  - AL2023: Amazon Linux 2023 (https://aws.amazon.com/linux/amazon-linux-2023/), EKS-specific.
-	//  - BOTTLEROCKET: Bottlerocket (https://aws.amazon.com/bottlerocket/), EKS-specific.
-	ImageFamily *NodeconfigV1ImageFamily `json:"imageFamily,omitempty"`
 
 	// Init script to be run on your instance at launch. Should not contain any sensitive data. Value should be base64 encoded.
 	InitScript *string                 `json:"initScript"`
@@ -2122,13 +2121,6 @@ type NodeconfigV1NodeConfiguration struct {
 	// If both image and image family are empty, the latest image from a default family will be used, depending on the cloud provider.
 	Image *string `json:"image"`
 
-	// List of supported image families to choose from. Values might be applicable to a specific cloud provider and will be rejected if the value is not supported.
-	//
-	//  - AL2: Amazon Linux 2 (https://aws.amazon.com/amazon-linux-2/), EKS-specific.
-	//  - AL2023: Amazon Linux 2023 (https://aws.amazon.com/linux/amazon-linux-2023/), EKS-specific.
-	//  - BOTTLEROCKET: Bottlerocket (https://aws.amazon.com/bottlerocket/), EKS-specific.
-	ImageFamily *NodeconfigV1ImageFamily `json:"imageFamily,omitempty"`
-
 	// Base64 encoded init script to be run on your instance at launch.
 	InitScript *string                 `json:"initScript"`
 	Kops       *NodeconfigV1KOPSConfig `json:"kops,omitempty"`
@@ -2185,13 +2177,6 @@ type NodeconfigV1NodeConfigurationUpdate struct {
 	// Image setting takes precedence over image family.
 	// If both image and image family are empty, the latest image from a default family will be used, depending on the cloud provider.
 	Image *string `json:"image"`
-
-	// List of supported image families to choose from. Values might be applicable to a specific cloud provider and will be rejected if the value is not supported.
-	//
-	//  - AL2: Amazon Linux 2 (https://aws.amazon.com/amazon-linux-2/), EKS-specific.
-	//  - AL2023: Amazon Linux 2023 (https://aws.amazon.com/linux/amazon-linux-2023/), EKS-specific.
-	//  - BOTTLEROCKET: Bottlerocket (https://aws.amazon.com/bottlerocket/), EKS-specific.
-	ImageFamily *NodeconfigV1ImageFamily `json:"imageFamily,omitempty"`
 
 	// Init script to be run on your instance at launch. Should not contain any sensitive data. Value should be base64 encoded.
 	InitScript *string                 `json:"initScript"`
