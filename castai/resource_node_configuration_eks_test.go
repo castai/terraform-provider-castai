@@ -50,6 +50,7 @@ func TestAccResourceNodeConfiguration_eks(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "eks.0.target_group.#", "1"),
 					resource.TestCheckResourceAttr(resourceName, "eks.0.max_pods_per_node_formula", "NUM_IP_PER_PREFIX-NUM_MAX_NET_INTERFACES"),
 					resource.TestCheckResourceAttr(resourceName, "eks.0.ips_per_prefix", "4"),
+					resource.TestCheckResourceAttr(resourceName, "eks.0.image_family", "al2023"),
 					resource.TestCheckResourceAttr(resourceName, "eks.0.target_group.0.arn", "arn:aws:test"),
 					resource.TestCheckResourceAttr(resourceName, "aks.#", "0"),
 					resource.TestCheckResourceAttr(resourceName, "kops.#", "0"),
@@ -138,6 +139,7 @@ resource "castai_node_configuration" "test" {
 	imds_hop_limit       = 3
     max_pods_per_node_formula = "NUM_IP_PER_PREFIX-NUM_MAX_NET_INTERFACES"
 	ips_per_prefix = 4
+	eks_image_family = al2023
 	target_group 	     {
 	   arn = "arn:aws:test"
     }
