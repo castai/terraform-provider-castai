@@ -816,7 +816,7 @@ func flattenAKSConfig(config *sdk.NodeconfigV1AKSConfig) []map[string]interface{
 		m["max_pods_per_node"] = *config.MaxPodsPerNode
 	}
 
-	if v := config.MaxPodsPerNode; v != nil {
+	if v := config.OsDiskType; v != nil {
 		m["os_disk_type"] = fromAKSDiskType(config.OsDiskType)
 	}
 
