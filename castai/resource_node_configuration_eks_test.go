@@ -50,6 +50,7 @@ func TestAccResourceNodeConfiguration_eks(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "eks.0.target_group.#", "1"),
 					resource.TestCheckResourceAttr(resourceName, "eks.0.max_pods_per_node_formula", "NUM_IP_PER_PREFIX-NUM_MAX_NET_INTERFACES"),
 					resource.TestCheckResourceAttr(resourceName, "eks.0.ips_per_prefix", "4"),
+					resource.TestCheckResourceAttr(resourceName, "eks.0.eks_image_family", "al2023"),
 					resource.TestCheckResourceAttr(resourceName, "eks.0.target_group.0.arn", "arn:aws:test"),
 					resource.TestCheckResourceAttr(resourceName, "aks.#", "0"),
 					resource.TestCheckResourceAttr(resourceName, "kops.#", "0"),
@@ -82,6 +83,7 @@ func TestAccResourceNodeConfiguration_eks(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "eks.0.volume_throughput", "130"),
 					resource.TestCheckResourceAttr(resourceName, "eks.0.max_pods_per_node_formula", "NUM_IP_PER_PREFIX+NUM_MAX_NET_INTERFACES"),
 					resource.TestCheckResourceAttr(resourceName, "eks.0.ips_per_prefix", "3"),
+					resource.TestCheckResourceAttr(resourceName, "eks.0.eks_image_family", "al2"),
 					resource.TestCheckResourceAttr(resourceName, "eks.0.target_group.#", "1"),
 					resource.TestCheckResourceAttr(resourceName, "eks.0.target_group.0.arn", "arn:aws:test2"),
 					resource.TestCheckResourceAttr(resourceName, "eks.0.target_group.0.port", "80"),
@@ -138,6 +140,7 @@ resource "castai_node_configuration" "test" {
 	imds_hop_limit       = 3
     max_pods_per_node_formula = "NUM_IP_PER_PREFIX-NUM_MAX_NET_INTERFACES"
 	ips_per_prefix = 4
+	eks_image_family = "al2023"
 	target_group 	     {
 	   arn = "arn:aws:test"
     }
@@ -169,6 +172,7 @@ resource "castai_node_configuration" "test" {
     volume_throughput 	 = 130
     max_pods_per_node_formula = "NUM_IP_PER_PREFIX+NUM_MAX_NET_INTERFACES"
 	ips_per_prefix = 3
+	eks_image_family = "al2"
     target_group 	     {
 	   arn = "arn:aws:test2"
        port = 80

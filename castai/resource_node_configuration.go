@@ -39,6 +39,13 @@ const (
 	FieldNodeConfigurationKOPS             = "kops"
 	FieldNodeConfigurationGKE              = "gke"
 	FieldNodeConfigurationEKSTargetGroup   = "target_group"
+	FieldNodeConfigurationEKSImageFamily   = "eks_image_family"
+)
+
+const (
+	eksImageFamilyAL2          = "al2"
+	eksImageFamilyAL2023       = "al2023"
+	eksImageFamilyBottlerocket = "bottlerocket"
 )
 
 func resourceNodeConfiguration() *schema.Resource {
@@ -111,7 +118,7 @@ func resourceNodeConfiguration() *schema.Resource {
 			FieldNodeConfigurationImage: {
 				Type:             schema.TypeString,
 				Optional:         true,
-				Description:      "Image to be used while provisioning the node. If nothing is provided will be resolved to latest available image based on Kubernetes version if possible ",
+				Description:      "Image to be used while provisioning the node. If nothing is provided will be resolved to latest available image based on Image family, Kubernetes version and node architecture if possible. See Cast.ai documentation for details.",
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 			FieldNodeConfigurationTags: {
@@ -232,6 +239,15 @@ func resourceNodeConfiguration() *schema.Resource {
 							Default:          nil,
 							Description:      "Number of IPs per prefix to be used for calculating max pods.",
 							ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(0, 256)),
+						},
+						FieldNodeConfigurationEKSImageFamily: {
+							Type:             schema.TypeString,
+							Optional:         true,
+							Description:      "Image OS Family to use when provisioning node. If both image and family are provided, the system will use provided image and provisioning logic for given family. If only image family is provided, the system will attempt to resolve the latest image from that family based on kubernetes version and node architecture. If image family is omitted, a default family (based on cloud provider) will be used. See Cast.ai documentation for details.",
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{eksImageFamilyAL2, eksImageFamilyAL2023, eksImageFamilyBottlerocket}, true)),
+							DiffSuppressFunc: func(k, oldValue, newValue string, d *schema.ResourceData) bool {
+								return strings.EqualFold(oldValue, newValue)
+							},
 						},
 						FieldNodeConfigurationEKSTargetGroup: {
 							Type:        schema.TypeList,
@@ -678,7 +694,28 @@ func toEKSConfig(obj map[string]interface{}) *sdk.NodeconfigV1EKSConfig {
 		}
 	}
 
+	if v, ok := obj[FieldNodeConfigurationEKSImageFamily].(string); ok {
+		out.ImageFamily = toEKSImageFamily(v)
+	}
+
 	return out
+}
+
+func toEKSImageFamily(v string) *sdk.NodeconfigV1EKSConfigImageFamily {
+	if v == "" {
+		return nil
+	}
+
+	switch strings.ToLower(v) {
+	case eksImageFamilyAL2:
+		return lo.ToPtr(sdk.FAMILYAL2)
+	case eksImageFamilyAL2023:
+		return lo.ToPtr(sdk.FAMILYAL2023)
+	case eksImageFamilyBottlerocket:
+		return lo.ToPtr(sdk.FAMILYBOTTLEROCKET)
+	default:
+		return nil
+	}
 }
 
 func flattenEKSConfig(config *sdk.NodeconfigV1EKSConfig) []map[string]interface{} {
@@ -745,7 +782,24 @@ func flattenEKSConfig(config *sdk.NodeconfigV1EKSConfig) []map[string]interface{
 		}
 	}
 
+	if v := config.ImageFamily; v != nil {
+		m[FieldNodeConfigurationEKSImageFamily] = fromEKSImageFamily(*v)
+	}
+
 	return []map[string]interface{}{m}
+}
+
+func fromEKSImageFamily(family sdk.NodeconfigV1EKSConfigImageFamily) string {
+	switch family {
+	case sdk.FAMILYBOTTLEROCKET, sdk.FamilyBottlerocket:
+		return eksImageFamilyBottlerocket
+	case sdk.FAMILYAL2, sdk.FamilyAl2:
+		return eksImageFamilyAL2
+	case sdk.FAMILYAL2023, sdk.FamilyAl2023:
+		return eksImageFamilyAL2023
+	default:
+		return ""
+	}
 }
 
 func toKOPSConfig(obj map[string]interface{}) *sdk.NodeconfigV1KOPSConfig {
