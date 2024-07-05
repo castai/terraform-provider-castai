@@ -102,7 +102,6 @@ Optional:
 - `spot_backups` (Block List, Max: 1) policy defining whether autoscaler can use spot backups instead of spot instances when spot instances are not available. (see [below for nested schema](#nestedblock--autoscaler_settings--spot_instances--spot_backups))
 - `spot_diversity_enabled` (Boolean) enable/disable spot diversity policy. When enabled, autoscaler will try to balance between diverse and cost optimal instance types.
 - `spot_diversity_price_increase_limit` (Number) allowed node configuration price increase when diversifying instance types. E.g. if the value is 10%, then the overall price of diversified instance types can be 10% higher than the price of the optimal configuration.
-- `spot_interruption_predictions` (Block List, Max: 1) configure the handling of SPOT interruption predictions. (see [below for nested schema](#nestedblock--autoscaler_settings--spot_instances--spot_interruption_predictions))
 
 <a id="nestedblock--autoscaler_settings--spot_instances--spot_backups"></a>
 ### Nested Schema for `autoscaler_settings.spot_instances.spot_backups`
@@ -111,17 +110,6 @@ Optional:
 
 - `enabled` (Boolean) enable/disable spot backups policy.
 - `spot_backup_restore_rate_seconds` (Number) defines interval on how often spot backups restore to real spot should occur.
-
-
-<a id="nestedblock--autoscaler_settings--spot_instances--spot_interruption_predictions"></a>
-### Nested Schema for `autoscaler_settings.spot_instances.spot_interruption_predictions`
-
-Optional:
-
-- `enabled` (Boolean) enable/disable spot interruption predictions.
-- `spot_interruption_predictions_type` (String) define the type of the spot interruption prediction to handle. Allowed values are AWSRebalanceRecommendations, CASTAIInterruptionPredictions.
-
-
 
 <a id="nestedblock--autoscaler_settings--unschedulable_pods"></a>
 ### Nested Schema for `autoscaler_settings.unschedulable_pods`
