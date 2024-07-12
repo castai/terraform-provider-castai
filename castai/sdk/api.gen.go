@@ -787,6 +787,9 @@ type CastaiInventoryV1beta1NetworkInfo struct {
 	// Burst bandwidth in Mbps. It's equal to base bandwidth if not specified.
 	BurstBandwidthMbps *int32 `json:"burstBandwidthMbps,omitempty"`
 
+	// Indicates if the AWS instance type supports EFA (Elastic Fabric Adapter).
+	EfaSupported *bool `json:"efaSupported,omitempty"`
+
 	// The maximum number of IPv4 addresses per network interface.
 	Ipv4AddressesPerInterface *int32 `json:"ipv4AddressesPerInterface,omitempty"`
 
@@ -1399,9 +1402,8 @@ type ExternalclusterV1Cluster struct {
 	Status *string `json:"status,omitempty"`
 
 	// Cluster subnets.
-	Subnets     *[]ExternalclusterV1Subnet     `json:"subnets,omitempty"`
-	Tags        *ExternalclusterV1Cluster_Tags `json:"tags,omitempty"`
-	WorkspaceId *string                        `json:"workspaceId,omitempty"`
+	Subnets *[]ExternalclusterV1Subnet     `json:"subnets,omitempty"`
+	Tags    *ExternalclusterV1Cluster_Tags `json:"tags,omitempty"`
 
 	// Cluster zones.
 	Zones *[]ExternalclusterV1Zone `json:"zones,omitempty"`
@@ -1849,9 +1851,6 @@ type ExternalclusterV1RegisterClusterRequest struct {
 
 	// Organization of the cluster.
 	OrganizationId *string `json:"organizationId,omitempty"`
-
-	// Workspace id of the cluster.
-	WorkspaceId *string `json:"workspaceId,omitempty"`
 }
 
 // ExternalclusterV1Resources defines model for externalcluster.v1.Resources.
@@ -1977,6 +1976,9 @@ type NodeconfigV1EKSConfig struct {
 	// Cluster's security groups configuration.
 	SecurityGroups *[]string                `json:"securityGroups,omitempty"`
 	TargetGroup    *NodeconfigV1TargetGroup `json:"targetGroup,omitempty"`
+
+	// TargetGroups defines a list of load balancer target groups to register cluster instances into.
+	TargetGroups *[]NodeconfigV1TargetGroup `json:"targetGroups,omitempty"`
 
 	// EBS volume IOPS value to be used for provisioned nodes.
 	VolumeIops      *int32  `json:"volumeIops"`
