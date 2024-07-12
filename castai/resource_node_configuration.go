@@ -252,8 +252,7 @@ func resourceNodeConfiguration() *schema.Resource {
 						FieldNodeConfigurationEKSTargetGroup: {
 							Type:        schema.TypeList,
 							Optional:    true,
-							Description: "AWS target group configuration for CAST provisioned nodes",
-							MaxItems:    1,
+							Description: "AWS target groups configuration for CAST provisioned nodes",
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"arn": {
@@ -682,16 +681,21 @@ func toEKSConfig(obj map[string]interface{}) *sdk.NodeconfigV1EKSConfig {
 		out.IpsPerPrefix = toPtr(int32(v))
 	}
 
-	if v, ok := obj[FieldNodeConfigurationEKSTargetGroup].([]interface{}); ok && len(v) > 0 && v[0] != nil {
-		if e, ok := v[0].(map[string]interface{}); ok {
-			out.TargetGroup = &sdk.NodeconfigV1TargetGroup{}
-			if arn, ok := e["arn"].(string); ok && arn != "" {
-				out.TargetGroup.Arn = toPtr(arn)
-			}
-			if port, ok := e["port"].(int); ok && port > 0 && port < 65536 {
-				out.TargetGroup.Port = toPtr(int32(port))
+	if v, ok := obj[FieldNodeConfigurationEKSTargetGroup].([]any); ok && len(v) > 0 {
+		resultTGs := make([]sdk.NodeconfigV1TargetGroup, 0, len(v))
+		for _, tgRaw := range v {
+			if tg, ok := tgRaw.(map[string]any); ok {
+				sdkTG := sdk.NodeconfigV1TargetGroup{}
+				if arn, ok := tg["arn"].(string); ok && arn != "" {
+					sdkTG.Arn = toPtr(arn)
+				}
+				if port, ok := tg["port"].(int); ok && port > 0 && port < 65536 {
+					sdkTG.Port = toPtr(int32(port))
+				}
+				resultTGs = append(resultTGs, sdkTG)
 			}
 		}
+		out.TargetGroups = &resultTGs
 	}
 
 	if v, ok := obj[FieldNodeConfigurationEKSImageFamily].(string); ok {
@@ -763,23 +767,24 @@ func flattenEKSConfig(config *sdk.NodeconfigV1EKSConfig) []map[string]interface{
 		m["ips_per_prefix"] = *config.IpsPerPrefix
 	}
 
-	if v := config.TargetGroup; v != nil {
-		if v.Arn != nil {
-			if v.Port != nil {
-				m[FieldNodeConfigurationEKSTargetGroup] = []interface{}{
-					map[string]interface{}{
-						"arn":  *v.Arn,
-						"port": *v.Port,
-					},
-				}
-			} else {
-				m[FieldNodeConfigurationEKSTargetGroup] = []interface{}{
-					map[string]interface{}{
-						"arn": *v.Arn,
-					},
-				}
+	if v := config.TargetGroups; v != nil && len(*v) > 0 {
+		tgs := make([]any, 0, len(*v))
+		for _, tg := range *v {
+			if tg.Arn == nil {
+				// Empty arn is invalid, ignore the entry
+				continue
 			}
+
+			val := map[string]any{
+				"arn": *tg.Arn,
+			}
+			if tg.Port != nil {
+				val["port"] = *tg.Port
+			}
+			tgs = append(tgs, val)
 		}
+
+		m[FieldNodeConfigurationEKSTargetGroup] = tgs
 	}
 
 	if v := config.ImageFamily; v != nil {

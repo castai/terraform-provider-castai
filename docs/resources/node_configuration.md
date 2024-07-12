@@ -108,7 +108,7 @@ Optional:
 - `ips_per_prefix` (Number) Number of IPs per prefix to be used for calculating max pods.
 - `key_pair_id` (String) AWS key pair ID to be used for CAST provisioned nodes. Has priority over ssh_public_key
 - `max_pods_per_node_formula` (String) Formula to calculate the maximum number of pods that can be run on a node.
-- `target_group` (Block List, Max: 1) AWS target group configuration for CAST provisioned nodes (see [below for nested schema](#nestedblock--eks--target_group))
+- `target_group` (Block List) AWS target groups configuration for CAST provisioned nodes (see [below for nested schema](#nestedblock--eks--target_group))
 - `volume_iops` (Number) AWS EBS volume IOPS to be used for CAST provisioned nodes
 - `volume_kms_key_arn` (String) AWS KMS key ARN for encrypting EBS volume attached to the node
 - `volume_throughput` (Number) AWS EBS volume throughput in MiB/s to be used for CAST provisioned nodes

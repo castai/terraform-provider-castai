@@ -36,6 +36,10 @@ func Test_resourceNodeConfigurationCreate(t *testing.T) {
 								map[string]interface{}{
 									"arn": "test",
 								},
+								map[string]interface{}{
+									"arn":  "test2",
+									"port": 80,
+								},
 							},
 						},
 					},
@@ -43,9 +47,15 @@ func Test_resourceNodeConfigurationCreate(t *testing.T) {
 				tuneMock: func(m *mock_sdk.MockClientInterface) {
 					m.EXPECT().NodeConfigurationAPICreateConfiguration(gomock.Any(), gomock.Any(), sdk.NodeconfigV1NewNodeConfiguration{
 						Eks: &sdk.NodeconfigV1EKSConfig{
-							TargetGroup: &sdk.NodeconfigV1TargetGroup{
-								Arn:  toPtr("test"),
-								Port: nil,
+							TargetGroups: &[]sdk.NodeconfigV1TargetGroup{
+								{
+									Arn:  toPtr("test"),
+									Port: nil,
+								},
+								{
+									Arn:  toPtr("test2"),
+									Port: toPtr(int32(80)),
+								},
 							},
 							ImdsHopLimit: toPtr(int32(0)),
 							ImdsV1:       toPtr(false),
@@ -163,9 +173,14 @@ func Test_NodeConfiguration_UpdateContext(t *testing.T) {
 			name: "success",
 			args: args{
 				updated: &sdk.NodeconfigV1EKSConfig{
-					TargetGroup: &sdk.NodeconfigV1TargetGroup{
-						Arn:  toPtr("test2"),
-						Port: toPtr(int32(80)),
+					TargetGroups: &[]sdk.NodeconfigV1TargetGroup{
+						{
+							Arn:  toPtr("test2"),
+							Port: toPtr(int32(80)),
+						},
+						{
+							Arn: toPtr("test"),
+						},
 					},
 				},
 				tuneMock: func(m *mock_sdk.MockClientInterface) {
@@ -173,9 +188,14 @@ func Test_NodeConfiguration_UpdateContext(t *testing.T) {
 						"765fdc7b-2577-4ae8-a6b8-e3b60afbc33a",
 						sdk.NodeconfigV1NodeConfigurationUpdate{
 							Eks: &sdk.NodeconfigV1EKSConfig{
-								TargetGroup: &sdk.NodeconfigV1TargetGroup{
-									Arn:  toPtr("test2"),
-									Port: toPtr(int32(80)),
+								TargetGroups: &[]sdk.NodeconfigV1TargetGroup{
+									{
+										Arn:  toPtr("test2"),
+										Port: toPtr(int32(80)),
+									},
+									{
+										Arn: toPtr("test"),
+									},
 								},
 								ImdsHopLimit: toPtr(int32(0)),
 								ImdsV1:       toPtr(false),
@@ -189,28 +209,31 @@ func Test_NodeConfiguration_UpdateContext(t *testing.T) {
 								StatusCode: 200,
 								Header:     map[string][]string{"Content-Type": {"json"}},
 								Body: io.NopCloser(bytes.NewReader([]byte(`{
-  "id": "765fdc7b-2577-4ae8-a6b8-e3b60afbc33a",
-  "name": "test4"
-}
-`))),
+						  "id": "765fdc7b-2577-4ae8-a6b8-e3b60afbc33a",
+						  "name": "test4"
+						}
+						`))),
 							}, nil)
+
 					m.EXPECT().NodeConfigurationAPIGetConfiguration(gomock.Any(), gomock.Any(), gomock.Any()).
 						Return(
 							&http.Response{
 								StatusCode: 200,
 								Header:     map[string][]string{"Content-Type": {"json"}},
 								Body: io.NopCloser(bytes.NewReader([]byte(`{
-  "id": "765fdc7b-2577-4ae8-a6b8-e3b60afbc33a",
-  "name": "test4",
-  "tags": {},
-  "eks": {
-    "targetGroup": {
-      "arn": "test2",
-      "port": 80
-    }
-  }
-}
-`))),
+						  "id": "765fdc7b-2577-4ae8-a6b8-e3b60afbc33a",
+						  "name": "test4",
+						  "tags": {},
+						  "eks": {
+							"targetGroups": [
+							{
+							  "arn": "test2",
+							  "port": 80
+							}
+							]
+						  }
+						}
+						`))),
 							}, nil)
 				},
 			},
