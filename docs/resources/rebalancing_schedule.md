@@ -68,6 +68,7 @@ resource "castai_rebalancing_schedule" "spots" {
 
 Optional:
 
+- `aggressive_mode` (Boolean) When enabled rebalancing will also consider problematic pods (pods without controller, job pods, pods with removal-disabled annotation) as not-problematic.
 - `execution_conditions` (Block List, Max: 1) (see [below for nested schema](#nestedblock--launch_configuration--execution_conditions))
 - `keep_drain_timeout_nodes` (Boolean) Defines whether the nodes that failed to get drained until a predefined timeout, will be kept with a rebalancing.cast.ai/status=drain-failed annotation instead of forcefully drained.
 - `node_ttl_seconds` (Number) Specifies amount of time since node creation before the node is allowed to be considered for automated rebalancing.

@@ -117,6 +117,11 @@ func resourceRebalancingSchedule() *schema.Resource {
 							Optional:    true,
 							Description: "Defines whether the nodes that failed to get drained until a predefined timeout, will be kept with a rebalancing.cast.ai/status=drain-failed annotation instead of forcefully drained.",
 						},
+						"aggressive_mode": {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Description: "When enabled rebalancing will also consider problematic pods (pods without controller, job pods, pods with removal-disabled annotation) as not-problematic.",
+						},
 						"execution_conditions": {
 							Type:     schema.TypeList,
 							MaxItems: 1,
@@ -288,6 +293,8 @@ func stateToSchedule(d *schema.ResourceData) (*sdk.ScheduledrebalancingV1Rebalan
 			}
 		}
 
+		aggresiveMode := readOptionalValue[bool](launchConfigurationData, "aggressive_mode")
+
 		targetAlgorithm := sdk.ScheduledrebalancingV1TargetNodeSelectionAlgorithm(*readOptionalValue[string](launchConfigurationData, "target_node_selection_algorithm"))
 		result.LaunchConfiguration = sdk.ScheduledrebalancingV1LaunchConfiguration{
 			NodeTtlSeconds:   readOptionalNumber[int, int32](launchConfigurationData, "node_ttl_seconds"),
@@ -296,6 +303,7 @@ func stateToSchedule(d *schema.ResourceData) (*sdk.ScheduledrebalancingV1Rebalan
 				MinNodes:              readOptionalNumber[int, int32](launchConfigurationData, "rebalancing_min_nodes"),
 				KeepDrainTimeoutNodes: keepDrainTimeoutNodes,
 				ExecutionConditions:   executionConditions,
+				AggressiveMode:        aggresiveMode,
 			},
 			Selector:                     selector,
 			TargetNodeSelectionAlgorithm: &targetAlgorithm,
@@ -326,6 +334,7 @@ func scheduleToState(schedule *sdk.ScheduledrebalancingV1RebalancingSchedule, d 
 	if schedule.LaunchConfiguration.RebalancingOptions != nil {
 		launchConfig["rebalancing_min_nodes"] = schedule.LaunchConfiguration.RebalancingOptions.MinNodes
 		launchConfig["keep_drain_timeout_nodes"] = schedule.LaunchConfiguration.RebalancingOptions.KeepDrainTimeoutNodes
+		launchConfig["aggressive_mode"] = schedule.LaunchConfiguration.RebalancingOptions.AggressiveMode
 		launchConfig["target_node_selection_algorithm"] = schedule.LaunchConfiguration.TargetNodeSelectionAlgorithm
 
 		executionConditions := schedule.LaunchConfiguration.RebalancingOptions.ExecutionConditions
