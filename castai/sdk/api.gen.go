@@ -2915,6 +2915,9 @@ type ScheduledrebalancingV1RebalancingJob struct {
 
 // ScheduledrebalancingV1RebalancingOptions defines model for scheduledrebalancing.v1.RebalancingOptions.
 type ScheduledrebalancingV1RebalancingOptions struct {
+	// When enabled will also consider rebalancing problematic pods (pods without controller, job pods, pods with removal-disabled annotation).
+	AggressiveMode *bool `json:"aggressiveMode"`
+
 	// Defines whether the nodes that failed to get drained until a predefined timeout, will be kept with a
 	// rebalancing.cast.ai/status=drain-failed annotation instead of forcefully drained.
 	EvictGracefully *bool `json:"evictGracefully"`
