@@ -68,7 +68,7 @@ const (
 	FieldNodeTemplateAffinityOperatorName                     = "operator"
 	FieldNodeTemplateAffinityValuesName                       = "values"
 	FieldNodeTemplateBurstableInstances                       = "burstable_instances"
-	FieldNodeTemplatePreviewInstances                         = "preview_instances"
+	FieldNodeTemplateCustomerSpecific                         = "customer_specific"
 )
 
 const (
@@ -471,7 +471,7 @@ func resourceNodeTemplate() *schema.Resource {
 							Description:      "Will include burstable instances when enabled otherwise they will be excluded. Supported values: `enabled`, `disabled` or ``.",
 							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"", Enabled, Disabled}, false)),
 						},
-						FieldNodeTemplatePreviewInstances: {
+						FieldNodeTemplateCustomerSpecific: {
 							Type:             schema.TypeString,
 							Optional:         true,
 							Default:          "",
@@ -691,6 +691,7 @@ func flattenConstraints(c *sdk.NodetemplatesV1TemplateConstraints) ([]map[string
 		out[FieldNodeTemplateAZs] = lo.FromPtr(c.Azs)
 	}
 	setStateConstraintValue(c.Burstable, FieldNodeTemplateBurstableInstances, out)
+	setStateConstraintValue(c.CustomerSpecific, FieldNodeTemplateCustomerSpecific, out)
 	return []map[string]any{out}, nil
 }
 
@@ -1249,14 +1250,14 @@ func toTemplateConstraints(obj map[string]any) *sdk.NodetemplatesV1TemplateConst
 		}
 	}
 
-	//if v, ok := obj[FieldNodeTemplatePreviewInstances].(string); ok {
-	//	switch v {
-	//	case Enabled:
-	//		out.Burstable = toPtr(sdk.ENABLED)
-	//	case Disabled:
-	//		out.Burstable = toPtr(sdk.DISABLED)
-	//	}
-	//}
+	if v, ok := obj[FieldNodeTemplateCustomerSpecific].(string); ok {
+		switch v {
+		case Enabled:
+			out.CustomerSpecific = toPtr(sdk.ENABLED)
+		case Disabled:
+			out.CustomerSpecific = toPtr(sdk.DISABLED)
+		}
+	}
 
 	return out
 }

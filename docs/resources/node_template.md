@@ -66,7 +66,7 @@ Optional:
 - `min_memory` (Number) Min Memory (Mib) per node.
 - `on_demand` (Boolean) Should include on-demand instances in the considered pool.
 - `os` (List of String) List of acceptable instance Operating Systems, the default is linux. Allowed values: linux, windows.
-- `preview_instances` (String) Will include preview instances when enabled otherwise they will be excluded. Supported values: `enabled`, `disabled` or ``.
+- `customer_specific` (String) Will include preview instances when enabled otherwise they will be excluded. Supported values: `enabled`, `disabled` or ``.
 - `spot` (Boolean) Should include spot instances in the considered pool.
 - `spot_diversity_price_increase_limit_percent` (Number) Allowed node configuration price increase when diversifying instance types. E.g. if the value is 10%, then the overall price of diversified instance types can be 10% higher than the price of the optimal configuration.
 - `spot_interruption_predictions_enabled` (Boolean) Enable/disable spot interruption predictions.
