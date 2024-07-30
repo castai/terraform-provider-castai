@@ -475,7 +475,7 @@ func resourceNodeTemplate() *schema.Resource {
 							Type:             schema.TypeString,
 							Optional:         true,
 							Default:          "",
-							Description:      "Will include preview instances when enabled otherwise they will be excluded. Supported values: `enabled`, `disabled` or ``.",
+							Description:      "Will include customer specific (preview) instances when enabled otherwise they will be excluded. Supported values: `enabled`, `disabled` or ``.",
 							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"", Enabled, Disabled}, false)),
 						},
 					},
