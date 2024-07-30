@@ -45,7 +45,7 @@ Optional:
 
 - `architectures` (List of String) List of acceptable instance CPU architectures, the default is amd64. Allowed values: amd64, arm64.
 - `azs` (List of String) The list of AZ names to consider for the node template, if empty or not set all AZs are considered.
-- `burstable_instances` (String) Will only include burstable instances when enabled otherwise they will be excluded. Supported values: `enabled`, `disabled` or ``.
+- `burstable_instances` (String) Will include burstable instances when enabled otherwise they will be excluded. Supported values: `enabled`, `disabled` or ``.
 - `compute_optimized` (Boolean) Compute optimized instance constraint (deprecated).
 - `compute_optimized_state` (String) Will only include compute optimized nodes when enabled and exclude compute optimized nodes when disabled. Empty value won't have effect on instances filter. Supported values: `enabled`, `disabled` or empty string.
 - `custom_priority` (Block List) (see [below for nested schema](#nestedblock--constraints--custom_priority))
@@ -66,6 +66,7 @@ Optional:
 - `min_memory` (Number) Min Memory (Mib) per node.
 - `on_demand` (Boolean) Should include on-demand instances in the considered pool.
 - `os` (List of String) List of acceptable instance Operating Systems, the default is linux. Allowed values: linux, windows.
+- `preview_instances` (String) Will include preview instances when enabled otherwise they will be excluded. Supported values: `enabled`, `disabled` or ``.
 - `spot` (Boolean) Should include spot instances in the considered pool.
 - `spot_diversity_price_increase_limit_percent` (Number) Allowed node configuration price increase when diversifying instance types. E.g. if the value is 10%, then the overall price of diversified instance types can be 10% higher than the price of the optimal configuration.
 - `spot_interruption_predictions_enabled` (Boolean) Enable/disable spot interruption predictions.
