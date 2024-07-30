@@ -68,6 +68,7 @@ const (
 	FieldNodeTemplateAffinityOperatorName                     = "operator"
 	FieldNodeTemplateAffinityValuesName                       = "values"
 	FieldNodeTemplateBurstableInstances                       = "burstable_instances"
+	FieldNodeTemplatePreviewInstances                         = "preview_instances"
 )
 
 const (
@@ -467,7 +468,14 @@ func resourceNodeTemplate() *schema.Resource {
 							Type:             schema.TypeString,
 							Optional:         true,
 							Default:          "",
-							Description:      "Will only include burstable instances when enabled otherwise they will be excluded. Supported values: `enabled`, `disabled` or ``.",
+							Description:      "Will include burstable instances when enabled otherwise they will be excluded. Supported values: `enabled`, `disabled` or ``.",
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"", Enabled, Disabled}, false)),
+						},
+						FieldNodeTemplatePreviewInstances: {
+							Type:             schema.TypeString,
+							Optional:         true,
+							Default:          "",
+							Description:      "Will include preview instances when enabled otherwise they will be excluded. Supported values: `enabled`, `disabled` or ``.",
 							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"", Enabled, Disabled}, false)),
 						},
 					},
@@ -682,15 +690,20 @@ func flattenConstraints(c *sdk.NodetemplatesV1TemplateConstraints) ([]map[string
 	if c.Azs != nil {
 		out[FieldNodeTemplateAZs] = lo.FromPtr(c.Azs)
 	}
-	if c.Burstable != nil {
-		switch lo.FromPtr(c.Burstable) {
+	setStateConstraintValue(c.Burstable, FieldNodeTemplateBurstableInstances, out)
+	return []map[string]any{out}, nil
+}
+
+func setStateConstraintValue(value *sdk.NodetemplatesV1TemplateConstraintsConstraintState, key string, values map[string]any) map[string]any {
+	if value != nil {
+		switch lo.FromPtr(value) {
 		case sdk.ENABLED:
-			out[FieldNodeTemplateBurstableInstances] = Enabled
+			values[key] = Enabled
 		case sdk.DISABLED:
-			out[FieldNodeTemplateBurstableInstances] = Disabled
+			values[key] = Disabled
 		}
 	}
-	return []map[string]any{out}, nil
+	return values
 }
 
 func flattenInstanceFamilies(families *sdk.NodetemplatesV1TemplateConstraintsInstanceFamilyConstraints) []map[string][]string {
@@ -1235,6 +1248,15 @@ func toTemplateConstraints(obj map[string]any) *sdk.NodetemplatesV1TemplateConst
 			out.Burstable = toPtr(sdk.DISABLED)
 		}
 	}
+
+	//if v, ok := obj[FieldNodeTemplatePreviewInstances].(string); ok {
+	//	switch v {
+	//	case Enabled:
+	//		out.Burstable = toPtr(sdk.ENABLED)
+	//	case Disabled:
+	//		out.Burstable = toPtr(sdk.DISABLED)
+	//	}
+	//}
 
 	return out
 }

@@ -76,59 +76,6 @@ module "castai-gke-cluster" {
         enable_spot_diversity                       = false
         spot_diversity_price_increase_limit_percent = 20
       }
-    }
-    spot_tmpl = {
-      configuration_id = module.castai-gke-cluster.castai_node_configurations["default"]
-      is_enabled       = true
-      should_taint     = true
-
-      custom_labels = {
-        custom-label-key-1 = "custom-label-value-1"
-        custom-label-key-2 = "custom-label-value-2"
-      }
-
-      custom_taints = [
-        {
-          key    = "custom-taint-key-1"
-          value  = "custom-taint-value-1"
-          effect = "NoSchedule"
-        },
-        {
-          key    = "custom-taint-key-2"
-          value  = "custom-taint-value-2"
-          effect = "NoSchedule"
-        }
-      ]
-
-      constraints = {
-        fallback_restore_rate_seconds = 1800
-        spot                          = true
-        use_spot_fallbacks            = true
-        min_cpu                       = 4
-        max_cpu                       = 100
-        instance_families = {
-          exclude = ["e2"]
-        }
-        compute_optimized_state = "disabled"
-        storage_optimized_state = "disabled"
-        # Optional: define custom priority for instances selection.
-        #
-        # 1. Prioritize C2D and C2 spot instances above all else, regardless of price.
-        # 2. If C2D and C2 is not available, try C3D family.
-        custom_priority = [
-          {
-            instance_families = ["c2d", "c2"]
-            spot              = true
-          },
-          {
-            instance_families = ["c3d"]
-            spot              = true
-          }
-          # 3. instances not matching any of custom priority groups will be tried after
-          # nothing matches from priority groups.
-        ]
-      }
-
       custom_instances_enabled = true
     }
   }

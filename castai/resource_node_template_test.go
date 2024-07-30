@@ -176,7 +176,8 @@ constraints.0.gpu.0.manufacturers.# = 1
 constraints.0.gpu.0.manufacturers.0 = NVIDIA
 constraints.0.gpu.0.max_count = 0
 constraints.0.gpu.0.min_count = 0
-constraints.0.burstable_instances = 
+constraints.0.burstable_instances = disabled
+constraints.0.preview_instances = disabled
 constraints.0.instance_families.# = 1
 constraints.0.instance_families.0.exclude.# = 7
 constraints.0.instance_families.0.exclude.0 = p4d
@@ -537,6 +538,7 @@ func TestAccResourceNodeTemplate_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.storage_optimized_state", "enabled"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.compute_optimized_state", "disabled"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.burstable_instances", "enabled"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.preview_instances", "enabled"),
 				),
 			},
 		},
@@ -593,6 +595,7 @@ func testAccNodeTemplateConfig(rName, clusterName string) string {
 				use_spot_fallbacks = true
 				storage_optimized_state = "disabled"
 				burstable_instances = "enabled"
+				preview_instances = "enabled"
 				min_cpu = 4
 				max_cpu = 100
 				instance_families {
@@ -652,6 +655,7 @@ func testNodeTemplateUpdated(rName, clusterName string) string {
 				compute_optimized_state = "disabled"
 				architectures = ["arm64"]
 				burstable_instances = "enabled"
+				preview_instances = "enabled"
 				azs = ["eu-central-1a", "eu-central-1b", "eu-central-1c"]
 
 				custom_priority {
