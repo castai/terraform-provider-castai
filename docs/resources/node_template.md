@@ -45,10 +45,11 @@ Optional:
 
 - `architectures` (List of String) List of acceptable instance CPU architectures, the default is amd64. Allowed values: amd64, arm64.
 - `azs` (List of String) The list of AZ names to consider for the node template, if empty or not set all AZs are considered.
-- `burstable_instances` (String) Will only include burstable instances when enabled otherwise they will be excluded. Supported values: `enabled`, `disabled` or ``.
+- `burstable_instances` (String) Will include burstable instances when enabled otherwise they will be excluded. Supported values: `enabled`, `disabled` or ``.
 - `compute_optimized` (Boolean) Compute optimized instance constraint (deprecated).
 - `compute_optimized_state` (String) Will only include compute optimized nodes when enabled and exclude compute optimized nodes when disabled. Empty value won't have effect on instances filter. Supported values: `enabled`, `disabled` or empty string.
 - `custom_priority` (Block List) (see [below for nested schema](#nestedblock--constraints--custom_priority))
+- `customer_specific` (String) Will include customer specific (preview) instances when enabled otherwise they will be excluded. Supported values: `enabled`, `disabled` or ``.
 - `dedicated_node_affinity` (Block List) Dedicated node affinity - creates preference for instances to be created on sole tenancy or dedicated nodes. This
  feature is only available for GCP clusters and sole tenancy nodes with local
  SSDs or GPUs are not supported. If the sole tenancy or dedicated nodes don't have capacity for selected instance

@@ -77,6 +77,7 @@ module "castai-gke-cluster" {
         spot_diversity_price_increase_limit_percent = 20
       }
     }
+
     spot_tmpl = {
       configuration_id = module.castai-gke-cluster.castai_node_configurations["default"]
       is_enabled       = true
@@ -128,7 +129,6 @@ module "castai-gke-cluster" {
           # nothing matches from priority groups.
         ]
       }
-
       custom_instances_enabled = true
     }
   }

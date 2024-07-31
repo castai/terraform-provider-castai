@@ -2455,6 +2455,10 @@ type NodetemplatesV1TemplateConstraints struct {
 	// Custom sorting priority - instances matching defined rules will take priority over other candidates.
 	CustomPriority *[]NodetemplatesV1TemplateConstraintsCustomPriority `json:"customPriority,omitempty"`
 
+	// - DISABLED: The constraint is disabled
+	//  - ENABLED: The constraint is enabled
+	CustomerSpecific *NodetemplatesV1TemplateConstraintsConstraintState `json:"customerSpecific,omitempty"`
+
 	// Dedicated node affinity - creates preference for instances to be created on sole tenancy or dedicated nodes.
 	//
 	// Dedicated node affinity - creates preference for instances to be created on sole tenancy or dedicated nodes. This
