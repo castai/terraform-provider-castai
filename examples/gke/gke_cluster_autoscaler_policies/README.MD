@@ -1,6 +1,6 @@
 ## GKE and CAST AI example with CAST AI Autoscaler policies and additional Node Configurations
 
-Following example shows how to onboard GKE cluster to CAST AI, configure [Autoscaler policies](https://docs.cast.ai/reference/policiesapi_upsertclusterpolicies) and additional [Node Configurations](https://docs.cast.ai/docs/node-configuration/).
+Following example shows how to onboard GKE cluster to CAST AI, configure [Autoscaler policies](Phase 2)(https://docs.cast.ai/reference/policiesapi_upsertclusterpolicies) and additional [Node Configurations](https://docs.cast.ai/docs/node-configuration/).
 
 IAM policies required to connect the cluster to CAST AI in the example are created by [castai/gke-role-iam/castai module](https://github.com/castai/terraform-castai-gke-iam).
 
@@ -12,6 +12,14 @@ Example configuration should be analysed in the following order:
 # Usage
 1. Rename `tf.vars.example` to `tf.vars`
 2. Update `tf.vars` file with your project name, cluster name, cluster region and CAST AI API token.
+
+| Variable | Description |
+| --- | --- |
+| project_name                = "" | Name of GCP project |
+| cluster_name                = "" | Name of cluster |
+| cluster_region              = "" | Name of Cluster Region |
+| castai_api_token            = "" | Cast api token |
+
 3. Initialize Terraform. Under example root folder run:
 ```
 terraform init
