@@ -1,6 +1,6 @@
 # Example of GKE cluster connected to CAST AI in READ-ONLY mode
 Following example creates GKE cluster and its supporting resources using GKE community modules.
-After GKE cluster is created it is onboarded to CAST AI in Read-only mode.
+After GKE cluster is created it is onboarded to CAST AI in Read-only mode.(Phase 1)
 Example configuration should be analysed in the following order:
 1. Create VPC - `vpc.tf`
 2. Create GKE cluster - `gke.tf`
@@ -9,6 +9,14 @@ Example configuration should be analysed in the following order:
 # Usage
 1. Rename `tf.vars.example` to `tf.vars`
 2. Update `tf.vars` file with your project name, cluster name, cluster region and CAST AI API token.
+
+| Variable | Description |
+| --- | --- |
+| project_name                = "" | Name of GCP project |
+| cluster_name                = "" | Name of cluster |
+| cluster_region              = "" | Name of Cluster Region |
+| castai_api_token            = "" | Cast api token |
+
 3. Initialize Terraform. Under example root folder run:
 ```
 terraform init
