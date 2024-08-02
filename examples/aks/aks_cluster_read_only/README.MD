@@ -1,5 +1,5 @@
 # AKS and CAST AI example with CAST AI Autoscaler policies and additional Node Configurations
-Following example shows how to onboard AKS cluster to CAST AI, configure [Autoscaler policies](https://docs.cast.ai/reference/policiesapi_upsertclusterpolicies) and additional [Node Configurations](https://docs.cast.ai/docs/node-configuration/).
+Following example shows how to onboard AKS cluster to CAST AI, configure [Autoscaler policies](Phase 1)(https://docs.cast.ai/reference/policiesapi_upsertclusterpolicies) and additional [Node Configurations](https://docs.cast.ai/docs/node-configuration/).
 
 Example configuration should be analysed in the following order:
 1. Create Virtual network - `vnet.tf`
@@ -9,6 +9,13 @@ Example configuration should be analysed in the following order:
 # Usage
 1. Rename `tf.vars.example` to `tf.vars`
 2. Update `tf.vars` file with your cluster name, cluster region and CAST AI API token.
+
+| Variable | Description |
+| --- | --- |
+| cluster_name                = "" | Name of cluster |
+| cluster_region              = "" | Name of the Cluster Region|
+| castai_api_token            = "" | Cast api token |
+
 3. Initialize Terraform. Under example root folder run:
 ```
 terraform init
