@@ -1,6 +1,6 @@
 ## GKE and CAST AI example with CAST AI Autoscaler evictor advanced config
 
-Following example shows how to onboard GKE cluster to CAST AI, configure [Autoscaler evictor advanced config](https://docs.cast.ai/docs/evictor-advanced-configuration) 
+Following example shows how to onboard GKE cluster to CAST AI, configure [Autoscaler evictor advanced config](https://docs.cast.ai/docs/evictor-advanced-configuration) (Phase 2)
 
 IAM policies required to connect the cluster to CAST AI in the example are created by [castai/gke-role-iam/castai module](https://github.com/castai/terraform-castai-gke-iam).
 
@@ -14,6 +14,14 @@ Example configuration should be analysed in the following order:
 # Usage
 1. Rename `tf.vars.example` to `tf.vars`
 2. Update `tf.vars` file with your project name, cluster name, cluster region and CAST AI API token.
+
+| Variable | Description |
+| --- | --- |
+| project_name                = "" | Name of GCP project |
+| cluster_name                = "" | Name of cluster |
+| cluster_region              = "" | Name of region of cluster |
+| castai_api_token            = "" | Cast api token |
+
 3. Initialize Terraform. Under example root folder run:
 ```
 terraform init
