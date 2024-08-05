@@ -1,6 +1,6 @@
 ## Example of creating GCP IAM resources
 
-Following example shows how to create GCP IAM resources required to connect GKE with CAST AI using [castai_gke_iam](https://registry.terraform.io/modules/castai/gke-iam/castai/latest) module.
+Following example shows how to create GCP IAM resources required to connect GKE with CAST AI using [castai_gke_iam](Phase 2)(https://registry.terraform.io/modules/castai/gke-iam/castai/latest) module.
 
 When creating a service account you can enforce conditional, attribute-based access on `iam.serviceAccountUser` role.
 It can access and act as all other service accounts or be scoped to the ones used by node pools in the GKE cluster, which is more secure and therefore recommended.
@@ -17,7 +17,16 @@ Prerequisites:
 PROJECT_ID=<PLACEHOLDER> LOCATION=<PLACEHOLDER> CLUSTER_NAME=<PLACEHOLDER> ./script.sh
 ```
 3. Update `tf.vars` file with your project name, cluster name, cluster region, service accounts unique ids and CAST AI API token.
-4. Initialize Terraform. Under example root folder run:
+   
+| Variable | Description |
+| --- | --- |
+| project_name                = "" | Name of GCP project |
+| cluster_name                = "" | Name of cluster |
+| cluster_region              = "" | Name of Cluster Region |
+| service_account_unique_ids  = "" | Service accounts unique IDs |
+| castai_api_token            = "" | Cast api token |
+
+5. Initialize Terraform. Under example root folder run:
 ```
 terraform init
 ```
