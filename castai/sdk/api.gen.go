@@ -235,9 +235,68 @@ const (
 	TargetNodeSelectionAlgorithmUtilizedPrice   ScheduledrebalancingV1TargetNodeSelectionAlgorithm = "TargetNodeSelectionAlgorithmUtilizedPrice"
 )
 
+// Defines values for WorkloadoptimizationV1ApplyType.
+const (
+	DEFERRED  WorkloadoptimizationV1ApplyType = "DEFERRED"
+	IMMEDIATE WorkloadoptimizationV1ApplyType = "IMMEDIATE"
+	UNKNOWN   WorkloadoptimizationV1ApplyType = "UNKNOWN"
+)
+
+// Defines values for WorkloadoptimizationV1EventType.
+const (
+	EVENTTYPECONFIGURATIONCHANGED  WorkloadoptimizationV1EventType = "EVENT_TYPE_CONFIGURATION_CHANGED"
+	EVENTTYPEINVALID               WorkloadoptimizationV1EventType = "EVENT_TYPE_INVALID"
+	EVENTTYPEOOMKILL               WorkloadoptimizationV1EventType = "EVENT_TYPE_OOM_KILL"
+	EVENTTYPERECOMMENDATIONAPPLIED WorkloadoptimizationV1EventType = "EVENT_TYPE_RECOMMENDATION_APPLIED"
+	EVENTTYPESURGE                 WorkloadoptimizationV1EventType = "EVENT_TYPE_SURGE"
+)
+
+// Defines values for WorkloadoptimizationV1GetAgentStatusResponseAgentStatus.
+const (
+	AGENTSTATUSINVALID WorkloadoptimizationV1GetAgentStatusResponseAgentStatus = "AGENT_STATUS_INVALID"
+	AGENTSTATUSRUNNING WorkloadoptimizationV1GetAgentStatusResponseAgentStatus = "AGENT_STATUS_RUNNING"
+	AGENTSTATUSUNKNOWN WorkloadoptimizationV1GetAgentStatusResponseAgentStatus = "AGENT_STATUS_UNKNOWN"
+)
+
+// Defines values for WorkloadoptimizationV1ManagedBy.
+const (
+	ANNOTATIONS WorkloadoptimizationV1ManagedBy = "ANNOTATIONS"
+	API         WorkloadoptimizationV1ManagedBy = "API"
+)
+
+// Defines values for WorkloadoptimizationV1ManagementOption.
+const (
+	MANAGED   WorkloadoptimizationV1ManagementOption = "MANAGED"
+	READONLY  WorkloadoptimizationV1ManagementOption = "READ_ONLY"
+	UNDEFINED WorkloadoptimizationV1ManagementOption = "UNDEFINED"
+)
+
+// Defines values for WorkloadoptimizationV1RecommendationEventType.
+const (
+	RECOMMENDATIONEVENTTYPEINVALID WorkloadoptimizationV1RecommendationEventType = "RECOMMENDATION_EVENT_TYPE_INVALID"
+	RECOMMENDATIONEVENTTYPEREVERT  WorkloadoptimizationV1RecommendationEventType = "RECOMMENDATION_EVENT_TYPE_REVERT"
+)
+
+// Defines values for WorkloadoptimizationV1ResourceConfigFunction.
+const (
+	WorkloadoptimizationV1ResourceConfigFunctionMAX      WorkloadoptimizationV1ResourceConfigFunction = "MAX"
+	WorkloadoptimizationV1ResourceConfigFunctionQUANTILE WorkloadoptimizationV1ResourceConfigFunction = "QUANTILE"
+)
+
+// Defines values for WorkloadoptimizationV1ResourcePoliciesFunction.
+const (
+	WorkloadoptimizationV1ResourcePoliciesFunctionMAX      WorkloadoptimizationV1ResourcePoliciesFunction = "MAX"
+	WorkloadoptimizationV1ResourcePoliciesFunctionQUANTILE WorkloadoptimizationV1ResourcePoliciesFunction = "QUANTILE"
+)
+
 // UsersAPIUpdateOrganizationUserRequest defines model for UsersAPI_UpdateOrganizationUser_request.
 type UsersAPIUpdateOrganizationUserRequest struct {
 	Role *string `json:"role,omitempty"`
+}
+
+// WorkloadOptimizationAPIAssignScalingPolicyWorkloadsRequest defines model for WorkloadOptimizationAPI_AssignScalingPolicyWorkloads_request.
+type WorkloadOptimizationAPIAssignScalingPolicyWorkloadsRequest struct {
+	WorkloadIds *[]string `json:"workloadIds,omitempty"`
 }
 
 // Auth token used to authenticate via api.
@@ -1983,7 +2042,7 @@ type NodeconfigV1EKSConfig struct {
 	// Cluster's instance profile ARN used for CAST provisioned nodes.
 	InstanceProfileArn string `json:"instanceProfileArn"`
 
-	// Number of IPs per prefix to be used for calculating max pods. Defaults to 0.
+	// Number of IPs per prefix to be used for calculating max pods.
 	IpsPerPrefix *int32 `json:"ipsPerPrefix"`
 
 	// AWS key pair ID to be used for provisioned nodes. Has priority over sshPublicKey.
@@ -2281,6 +2340,7 @@ type NodetemplatesV1AvailableInstanceType struct {
 	Burstable              *bool                                                       `json:"burstable,omitempty"`
 	Cpu                    *string                                                     `json:"cpu,omitempty"`
 	CpuCost                *float64                                                    `json:"cpuCost,omitempty"`
+	CustomerSpecific       *bool                                                       `json:"customerSpecific,omitempty"`
 	Family                 *string                                                     `json:"family,omitempty"`
 	IsBareMetal            *bool                                                       `json:"isBareMetal,omitempty"`
 	IsComputeOptimized     *bool                                                       `json:"isComputeOptimized,omitempty"`
@@ -2975,6 +3035,585 @@ type ScheduledrebalancingV1TriggerConditions struct {
 	SavingsPercentage *float32 `json:"savingsPercentage,omitempty"`
 }
 
+// WorkloadoptimizationV1AggregatedMetrics defines model for workloadoptimization.v1.AggregatedMetrics.
+type WorkloadoptimizationV1AggregatedMetrics struct {
+	Max float64 `json:"max"`
+	Min float64 `json:"min"`
+	P25 float64 `json:"p25"`
+	P50 float64 `json:"p50"`
+	P75 float64 `json:"p75"`
+}
+
+// WorkloadoptimizationV1ApplyType defines model for workloadoptimization.v1.ApplyType.
+type WorkloadoptimizationV1ApplyType string
+
+// WorkloadoptimizationV1AssignScalingPolicyWorkloadsResponse defines model for workloadoptimization.v1.AssignScalingPolicyWorkloadsResponse.
+type WorkloadoptimizationV1AssignScalingPolicyWorkloadsResponse = map[string]interface{}
+
+// WorkloadoptimizationV1ConfigurationChangedEvent defines model for workloadoptimization.v1.ConfigurationChangedEvent.
+type WorkloadoptimizationV1ConfigurationChangedEvent struct {
+	// Defines possible options for workload management.
+	// READ_ONLY - workload watched (metrics collected), but no actions may be performed by CAST AI.
+	// MANAGED - workload watched (metrics collected), CAST AI may perform actions on the workload.
+	ManagementOption     WorkloadoptimizationV1ManagementOption     `json:"managementOption"`
+	RecommendationConfig WorkloadoptimizationV1RecommendationConfig `json:"recommendationConfig"`
+}
+
+// WorkloadoptimizationV1Container defines model for workloadoptimization.v1.Container.
+type WorkloadoptimizationV1Container struct {
+	// Name of the container.
+	Name           string                           `json:"name"`
+	Recommendation *WorkloadoptimizationV1Resources `json:"recommendation,omitempty"`
+	Resources      *WorkloadoptimizationV1Resources `json:"resources,omitempty"`
+}
+
+// WorkloadoptimizationV1ContainerConfigUpdate defines model for workloadoptimization.v1.ContainerConfigUpdate.
+type WorkloadoptimizationV1ContainerConfigUpdate struct {
+	ContainerName string                                      `json:"containerName"`
+	Cpu           *WorkloadoptimizationV1ResourceConfigUpdate `json:"cpu,omitempty"`
+	Memory        *WorkloadoptimizationV1ResourceConfigUpdate `json:"memory,omitempty"`
+}
+
+// WorkloadoptimizationV1ContainerConstraints defines model for workloadoptimization.v1.ContainerConstraints.
+type WorkloadoptimizationV1ContainerConstraints struct {
+	ContainerName string                                `json:"containerName"`
+	Cpu           *WorkloadoptimizationV1ResourceConfig `json:"cpu,omitempty"`
+	Memory        *WorkloadoptimizationV1ResourceConfig `json:"memory,omitempty"`
+}
+
+// WorkloadoptimizationV1CpuMetrics defines model for workloadoptimization.v1.CpuMetrics.
+type WorkloadoptimizationV1CpuMetrics struct {
+	TotalCpuCores    []WorkloadoptimizationV1TimeSeriesMetric `json:"totalCpuCores"`
+	TotalCpuCoresMax float64                                  `json:"totalCpuCoresMax"`
+	TotalCpuCoresMin float64                                  `json:"totalCpuCoresMin"`
+}
+
+// WorkloadoptimizationV1DeleteWorkloadScalingPolicyResponse defines model for workloadoptimization.v1.DeleteWorkloadScalingPolicyResponse.
+type WorkloadoptimizationV1DeleteWorkloadScalingPolicyResponse = map[string]interface{}
+
+// WorkloadoptimizationV1Event defines model for workloadoptimization.v1.Event.
+type WorkloadoptimizationV1Event struct {
+	ConfigurationChanged  *WorkloadoptimizationV1ConfigurationChangedEvent  `json:"configurationChanged,omitempty"`
+	OomKill               *WorkloadoptimizationV1OOMKillEvent               `json:"oomKill,omitempty"`
+	RecommendationApplied *WorkloadoptimizationV1RecommendationAppliedEvent `json:"recommendationApplied,omitempty"`
+	Surge                 *WorkloadoptimizationV1SurgeEvent                 `json:"surge,omitempty"`
+}
+
+// WorkloadoptimizationV1EventContainer defines model for workloadoptimization.v1.EventContainer.
+type WorkloadoptimizationV1EventContainer struct {
+	Name      string                          `json:"name"`
+	Resources WorkloadoptimizationV1Resources `json:"resources"`
+}
+
+// EventType defines possible types for workload events.
+type WorkloadoptimizationV1EventType string
+
+// WorkloadoptimizationV1GetAgentStatusResponse defines model for workloadoptimization.v1.GetAgentStatusResponse.
+type WorkloadoptimizationV1GetAgentStatusResponse struct {
+	CastAgentCurrentVersion          *string `json:"castAgentCurrentVersion"`
+	CurrentVersion                   *string `json:"currentVersion"`
+	HpaSupportedFromCastAgentVersion *string `json:"hpaSupportedFromCastAgentVersion"`
+	LatestVersion                    *string `json:"latestVersion"`
+
+	// AgentStatus defines the status of workload-autoscaler.
+	Status WorkloadoptimizationV1GetAgentStatusResponseAgentStatus `json:"status"`
+}
+
+// AgentStatus defines the status of workload-autoscaler.
+type WorkloadoptimizationV1GetAgentStatusResponseAgentStatus string
+
+// WorkloadoptimizationV1GetInstallCmdResponse defines model for workloadoptimization.v1.GetInstallCmdResponse.
+type WorkloadoptimizationV1GetInstallCmdResponse struct {
+	Script string `json:"script"`
+}
+
+// WorkloadoptimizationV1GetWorkloadResponse defines model for workloadoptimization.v1.GetWorkloadResponse.
+type WorkloadoptimizationV1GetWorkloadResponse struct {
+	Metrics  *WorkloadoptimizationV1WorkloadMetrics `json:"metrics,omitempty"`
+	Workload WorkloadoptimizationV1Workload         `json:"workload"`
+}
+
+// WorkloadoptimizationV1GetWorkloadsSummaryResponse defines model for workloadoptimization.v1.GetWorkloadsSummaryResponse.
+type WorkloadoptimizationV1GetWorkloadsSummaryResponse struct {
+	// Number of workloads that are managed by annotations.
+	AnnotationManagedCount int32 `json:"annotationManagedCount"`
+
+	// Number of workloads that are managed by API.
+	ApiManagedCount int32 `json:"apiManagedCount"`
+
+	// Difference between recommended and requested CPU cores.
+	CpuCoresDifference float64 `json:"cpuCoresDifference"`
+
+	// Number of workloads with horizontal optimization enabled.
+	HpaOptimizedCount int32 `json:"hpaOptimizedCount"`
+
+	// Number of workloads with vertical and horizontal optimization enabled.
+	HpaVpaOptimizedCount int32 `json:"hpaVpaOptimizedCount"`
+
+	// Difference between recommended and actually used memory.
+	MemoryDifference float64 `json:"memoryDifference"`
+
+	// Number of all optimized workloads.
+	OptimizedCount int32 `json:"optimizedCount"`
+
+	// Number of recommended CPU cores.
+	RecommendedCpuCores float64 `json:"recommendedCpuCores"`
+
+	// Recommended memory in Gi.
+	RecommendedMemory float64 `json:"recommendedMemory"`
+
+	// Number of requested CPU cores.
+	RequestedCpuCores float64 `json:"requestedCpuCores"`
+
+	// Requested memory in Gi.
+	RequestedMemory float64 `json:"requestedMemory"`
+
+	// Total number of workloads.
+	TotalCount int32 `json:"totalCount"`
+
+	// Number of workloads with vertical optimization enabled.
+	VpaOptimizedCount int32 `json:"vpaOptimizedCount"`
+}
+
+// WorkloadoptimizationV1HPAConfig defines model for workloadoptimization.v1.HPAConfig.
+type WorkloadoptimizationV1HPAConfig struct {
+	// Defines possible options for workload management.
+	// READ_ONLY - workload watched (metrics collected), but no actions may be performed by CAST AI.
+	// MANAGED - workload watched (metrics collected), CAST AI may perform actions on the workload.
+	ManagementOption WorkloadoptimizationV1ManagementOption `json:"managementOption"`
+
+	// Max replicas a workload can have.
+	MaxReplicas *int32 `json:"maxReplicas"`
+
+	// Min replicas a workload can have.
+	MinReplicas *int32 `json:"minReplicas"`
+}
+
+// WorkloadoptimizationV1HPAConfigUpdate defines model for workloadoptimization.v1.HPAConfigUpdate.
+type WorkloadoptimizationV1HPAConfigUpdate struct {
+	// Defines possible options for workload management.
+	// READ_ONLY - workload watched (metrics collected), but no actions may be performed by CAST AI.
+	// MANAGED - workload watched (metrics collected), CAST AI may perform actions on the workload.
+	ManagementOption *WorkloadoptimizationV1ManagementOption `json:"managementOption,omitempty"`
+	MaxReplicas      *int32                                  `json:"maxReplicas"`
+	MinReplicas      *int32                                  `json:"minReplicas"`
+}
+
+// WorkloadoptimizationV1InitiatedBy defines model for workloadoptimization.v1.InitiatedBy.
+type WorkloadoptimizationV1InitiatedBy struct {
+	Email *string `json:"email"`
+	Id    string  `json:"id"`
+	Name  *string `json:"name"`
+}
+
+// WorkloadoptimizationV1KeyValuePair defines model for workloadoptimization.v1.KeyValuePair.
+type WorkloadoptimizationV1KeyValuePair struct {
+	Key   string `json:"key"`
+	Value string `json:"value"`
+}
+
+// WorkloadoptimizationV1ListWorkloadEventsResponse defines model for workloadoptimization.v1.ListWorkloadEventsResponse.
+type WorkloadoptimizationV1ListWorkloadEventsResponse struct {
+	Items []WorkloadoptimizationV1WorkloadEvent `json:"items"`
+
+	// The token to request the next page of results.
+	NextCursor *string `json:"nextCursor"`
+}
+
+// WorkloadoptimizationV1ListWorkloadScalingPoliciesResponse defines model for workloadoptimization.v1.ListWorkloadScalingPoliciesResponse.
+type WorkloadoptimizationV1ListWorkloadScalingPoliciesResponse struct {
+	Items []WorkloadoptimizationV1WorkloadScalingPolicy `json:"items"`
+}
+
+// WorkloadoptimizationV1ListWorkloadsResponse defines model for workloadoptimization.v1.ListWorkloadsResponse.
+type WorkloadoptimizationV1ListWorkloadsResponse struct {
+	Workloads []WorkloadoptimizationV1Workload `json:"workloads"`
+}
+
+// Defines sources that can manage the workload.
+// API - workload is managed by Cast API.
+// Annotations - workload is managed by annotations.
+type WorkloadoptimizationV1ManagedBy string
+
+// Defines possible options for workload management.
+// READ_ONLY - workload watched (metrics collected), but no actions may be performed by CAST AI.
+// MANAGED - workload watched (metrics collected), CAST AI may perform actions on the workload.
+type WorkloadoptimizationV1ManagementOption string
+
+// WorkloadoptimizationV1NewWorkloadScalingPolicy defines model for workloadoptimization.v1.NewWorkloadScalingPolicy.
+type WorkloadoptimizationV1NewWorkloadScalingPolicy struct {
+	ApplyType WorkloadoptimizationV1ApplyType `json:"applyType"`
+
+	// Confidence threshold used for evaluation if the recommendation should be applied. If not set, the default value(0.9) will be used.
+	ConfidenceThreshold    *float64                                     `json:"confidenceThreshold"`
+	Name                   string                                       `json:"name"`
+	RecommendationPolicies WorkloadoptimizationV1RecommendationPolicies `json:"recommendationPolicies"`
+}
+
+// WorkloadoptimizationV1OOMKillEvent defines model for workloadoptimization.v1.OOMKillEvent.
+type WorkloadoptimizationV1OOMKillEvent struct {
+	Containers []WorkloadoptimizationV1EventContainer `json:"containers"`
+}
+
+// WorkloadoptimizationV1PodMetrics defines model for workloadoptimization.v1.PodMetrics.
+type WorkloadoptimizationV1PodMetrics struct {
+	PodCount    []WorkloadoptimizationV1TimeSeriesMetric `json:"podCount"`
+	PodCountMax float64                                  `json:"podCountMax"`
+	PodCountMin float64                                  `json:"podCountMin"`
+}
+
+// WorkloadoptimizationV1RecommendationAppliedEvent defines model for workloadoptimization.v1.RecommendationAppliedEvent.
+type WorkloadoptimizationV1RecommendationAppliedEvent struct {
+	Current  WorkloadoptimizationV1RecommendationAppliedEventChange `json:"current"`
+	Previous WorkloadoptimizationV1RecommendationAppliedEventChange `json:"previous"`
+}
+
+// WorkloadoptimizationV1RecommendationAppliedEventChange defines model for workloadoptimization.v1.RecommendationAppliedEvent.Change.
+type WorkloadoptimizationV1RecommendationAppliedEventChange struct {
+	Containers *[]WorkloadoptimizationV1EventContainer `json:"containers,omitempty"`
+}
+
+// WorkloadoptimizationV1RecommendationConfig defines model for workloadoptimization.v1.RecommendationConfig.
+type WorkloadoptimizationV1RecommendationConfig struct {
+	Cpu    WorkloadoptimizationV1ResourceConfig `json:"cpu"`
+	Memory WorkloadoptimizationV1ResourceConfig `json:"memory"`
+}
+
+// WorkloadoptimizationV1RecommendationEvent defines model for workloadoptimization.v1.RecommendationEvent.
+type WorkloadoptimizationV1RecommendationEvent struct {
+	// Defines possible options for recommendation events.
+	//
+	//  - RECOMMENDATION_EVENT_TYPE_REVERT: RECOMMENDATION_EVENT_TYPE_REVERT - recommendation replicas were reverted.
+	Type WorkloadoptimizationV1RecommendationEventType `json:"type"`
+}
+
+// Defines possible options for recommendation events.
+//
+//   - RECOMMENDATION_EVENT_TYPE_REVERT: RECOMMENDATION_EVENT_TYPE_REVERT - recommendation replicas were reverted.
+type WorkloadoptimizationV1RecommendationEventType string
+
+// WorkloadoptimizationV1RecommendationPolicies defines model for workloadoptimization.v1.RecommendationPolicies.
+type WorkloadoptimizationV1RecommendationPolicies struct {
+	Cpu WorkloadoptimizationV1ResourcePolicies `json:"cpu"`
+
+	// Defines possible options for workload management.
+	// READ_ONLY - workload watched (metrics collected), but no actions may be performed by CAST AI.
+	// MANAGED - workload watched (metrics collected), CAST AI may perform actions on the workload.
+	ManagementOption WorkloadoptimizationV1ManagementOption `json:"managementOption"`
+	Memory           WorkloadoptimizationV1ResourcePolicies `json:"memory"`
+}
+
+// WorkloadoptimizationV1ResourceConfig defines model for workloadoptimization.v1.ResourceConfig.
+type WorkloadoptimizationV1ResourceConfig struct {
+	// The threshold of when to apply the recommendation - when diff of current requests and recommendation is greater than this, apply the recommendation.
+	ApplyThreshold *float64 `json:"applyThreshold"`
+
+	// The arguments for the function - i.e. for a quantile, this should be a [0, 1] float.
+	Args []string `json:"args"`
+
+	// The function which to use when calculating the resource recommendation.
+	// QUANTILE - the quantile function.
+	// MAX - the max function.
+	Function WorkloadoptimizationV1ResourceConfigFunction `json:"function"`
+
+	// Max values for the recommendation. For memory - this is in MiB, for CPU - this is in cores.
+	// If not set, there will be no upper bound for the recommendation (default behaviour).
+	Max *float64 `json:"max"`
+
+	// Min values for the recommendation. For memory - this is in MiB, for CPU - this is in cores.
+	// If not set, there will be no lower bound for the recommendation (default behaviour).
+	Min *float64 `json:"min"`
+
+	// The overhead for the recommendation, the formula is: (1 + overhead) * function(args).
+	Overhead float64 `json:"overhead"`
+}
+
+// The function which to use when calculating the resource recommendation.
+// QUANTILE - the quantile function.
+// MAX - the max function.
+type WorkloadoptimizationV1ResourceConfigFunction string
+
+// WorkloadoptimizationV1ResourceConfigUpdate defines model for workloadoptimization.v1.ResourceConfigUpdate.
+type WorkloadoptimizationV1ResourceConfigUpdate struct {
+	// Max values for the recommendation. For memory - this is in MiB, for CPU - this is in cores.
+	// If not set, there will be no upper bound for the recommendation (default behaviour).
+	Max *float64 `json:"max"`
+
+	// Min values for the recommendation. For memory - this is in MiB, for CPU - this is in cores.
+	// If not set, there will be no lower bound for the recommendation (default behaviour).
+	Min *float64 `json:"min"`
+}
+
+// WorkloadoptimizationV1ResourceMetrics defines model for workloadoptimization.v1.ResourceMetrics.
+type WorkloadoptimizationV1ResourceMetrics struct {
+	Max       float64   `json:"max"`
+	Min       float64   `json:"min"`
+	P25       float64   `json:"p25"`
+	P50       float64   `json:"p50"`
+	P75       float64   `json:"p75"`
+	Rec       float64   `json:"rec"`
+	Req       float64   `json:"req"`
+	Timestamp time.Time `json:"timestamp"`
+}
+
+// WorkloadoptimizationV1ResourcePolicies defines model for workloadoptimization.v1.ResourcePolicies.
+type WorkloadoptimizationV1ResourcePolicies struct {
+	// The threshold of when to apply the recommendation - when diff of current requests and recommendation is greater than this, apply the recommendation.
+	ApplyThreshold float64 `json:"applyThreshold"`
+
+	// The arguments for the function - i.e. for a quantile, this should be a [0, 1] float.
+	Args []string `json:"args"`
+
+	// The function which to use when calculating the resource recommendation.
+	// QUANTILE - the quantile function.
+	// MAX - the max function.
+	Function WorkloadoptimizationV1ResourcePoliciesFunction `json:"function"`
+
+	// The overhead for the recommendation, the formula is: (1 + overhead) * function(args).
+	Overhead float64 `json:"overhead"`
+}
+
+// The function which to use when calculating the resource recommendation.
+// QUANTILE - the quantile function.
+// MAX - the max function.
+type WorkloadoptimizationV1ResourcePoliciesFunction string
+
+// WorkloadoptimizationV1ResourceQuantity defines model for workloadoptimization.v1.ResourceQuantity.
+type WorkloadoptimizationV1ResourceQuantity struct {
+	CpuCores  *float64 `json:"cpuCores"`
+	MemoryGib *float64 `json:"memoryGib"`
+}
+
+// WorkloadoptimizationV1Resources defines model for workloadoptimization.v1.Resources.
+type WorkloadoptimizationV1Resources struct {
+	Limits   *WorkloadoptimizationV1ResourceQuantity `json:"limits,omitempty"`
+	Requests *WorkloadoptimizationV1ResourceQuantity `json:"requests,omitempty"`
+}
+
+// WorkloadoptimizationV1SurgeContainer defines model for workloadoptimization.v1.SurgeContainer.
+type WorkloadoptimizationV1SurgeContainer struct {
+	Name  string                                 `json:"name"`
+	Surge WorkloadoptimizationV1ResourceQuantity `json:"surge"`
+}
+
+// WorkloadoptimizationV1SurgeEvent defines model for workloadoptimization.v1.SurgeEvent.
+type WorkloadoptimizationV1SurgeEvent struct {
+	Containers []WorkloadoptimizationV1SurgeContainer `json:"containers"`
+}
+
+// WorkloadoptimizationV1TimeSeriesMetric defines model for workloadoptimization.v1.TimeSeriesMetric.
+type WorkloadoptimizationV1TimeSeriesMetric struct {
+	Timestamp time.Time `json:"timestamp"`
+	Value     float64   `json:"value"`
+}
+
+// WorkloadoptimizationV1UpdateWorkload defines model for workloadoptimization.v1.UpdateWorkload.
+type WorkloadoptimizationV1UpdateWorkload struct {
+	// Defines the scaling policy ID assigned to the workload.
+	ScalingPolicyId string                                      `json:"scalingPolicyId"`
+	WorkloadConfig  *WorkloadoptimizationV1WorkloadConfigUpdate `json:"workloadConfig,omitempty"`
+}
+
+// WorkloadoptimizationV1UpdateWorkloadResponse defines model for workloadoptimization.v1.UpdateWorkloadResponse.
+type WorkloadoptimizationV1UpdateWorkloadResponse struct {
+	Workload *WorkloadoptimizationV1Workload `json:"workload,omitempty"`
+}
+
+// WorkloadoptimizationV1UpdateWorkloadResponseV2 defines model for workloadoptimization.v1.UpdateWorkloadResponseV2.
+type WorkloadoptimizationV1UpdateWorkloadResponseV2 struct {
+	Workload *WorkloadoptimizationV1Workload `json:"workload,omitempty"`
+}
+
+// WorkloadoptimizationV1UpdateWorkloadScalingPolicy defines model for workloadoptimization.v1.UpdateWorkloadScalingPolicy.
+type WorkloadoptimizationV1UpdateWorkloadScalingPolicy struct {
+	ApplyType WorkloadoptimizationV1ApplyType `json:"applyType"`
+
+	// Confidence threshold used for evaluation if the recommendation should be applied. If not set, the default value(0.9) will be used.
+	ConfidenceThreshold    *float64                                     `json:"confidenceThreshold"`
+	Name                   string                                       `json:"name"`
+	RecommendationPolicies WorkloadoptimizationV1RecommendationPolicies `json:"recommendationPolicies"`
+}
+
+// WorkloadoptimizationV1UpdateWorkloadV2 defines model for workloadoptimization.v1.UpdateWorkloadV2.
+type WorkloadoptimizationV1UpdateWorkloadV2 struct {
+	// Defines the scaling policy ID assigned to the workload.
+	ScalingPolicyId string                                        `json:"scalingPolicyId"`
+	WorkloadConfig  *WorkloadoptimizationV1WorkloadConfigUpdateV2 `json:"workloadConfig,omitempty"`
+}
+
+// WorkloadoptimizationV1VPAConfig defines model for workloadoptimization.v1.VPAConfig.
+type WorkloadoptimizationV1VPAConfig struct {
+	ContainerConstraints []WorkloadoptimizationV1ContainerConstraints `json:"containerConstraints"`
+	Cpu                  WorkloadoptimizationV1ResourceConfig         `json:"cpu"`
+
+	// Defines possible options for workload management.
+	// READ_ONLY - workload watched (metrics collected), but no actions may be performed by CAST AI.
+	// MANAGED - workload watched (metrics collected), CAST AI may perform actions on the workload.
+	ManagementOption WorkloadoptimizationV1ManagementOption `json:"managementOption"`
+	Memory           WorkloadoptimizationV1ResourceConfig   `json:"memory"`
+}
+
+// WorkloadoptimizationV1VPAConfigUpdate defines model for workloadoptimization.v1.VPAConfigUpdate.
+type WorkloadoptimizationV1VPAConfigUpdate struct {
+	ContainerConfig *[]WorkloadoptimizationV1ContainerConfigUpdate `json:"containerConfig,omitempty"`
+	Cpu             *WorkloadoptimizationV1ResourceConfigUpdate    `json:"cpu,omitempty"`
+
+	// Defines possible options for workload management.
+	// READ_ONLY - workload watched (metrics collected), but no actions may be performed by CAST AI.
+	// MANAGED - workload watched (metrics collected), CAST AI may perform actions on the workload.
+	ManagementOption *WorkloadoptimizationV1ManagementOption     `json:"managementOption,omitempty"`
+	Memory           *WorkloadoptimizationV1ResourceConfigUpdate `json:"memory,omitempty"`
+}
+
+// WorkloadoptimizationV1Workload defines model for workloadoptimization.v1.Workload.
+type WorkloadoptimizationV1Workload struct {
+	// Annotations as defined on the workload manifest. These are annotations from the controller meta, not the pod meta.
+	Annotations []WorkloadoptimizationV1KeyValuePair `json:"annotations"`
+	ClusterId   string                               `json:"clusterId"`
+
+	// Workload containers.
+	Containers []WorkloadoptimizationV1Container `json:"containers"`
+	CreatedAt  time.Time                         `json:"createdAt"`
+
+	// Workload error message (if any).
+	Error *string `json:"error"`
+
+	// Workload error title (if any).
+	// Different titles signify different actions being taken.
+	ErrorTitle *string `json:"errorTitle"`
+	Group      string  `json:"group"`
+
+	// Whether workload has native HPA configured.
+	HasNativeHpa *bool  `json:"hasNativeHpa"`
+	Id           string `json:"id"`
+	Kind         string `json:"kind"`
+
+	// Labels as defined on the workload manifest. These are labels from the controller meta, not the pod meta.
+	Labels []WorkloadoptimizationV1KeyValuePair `json:"labels"`
+
+	// Defines sources that can manage the workload.
+	// API - workload is managed by Cast API.
+	// Annotations - workload is managed by annotations.
+	ManagedBy      WorkloadoptimizationV1ManagedBy `json:"managedBy"`
+	Name           string                          `json:"name"`
+	Namespace      string                          `json:"namespace"`
+	OrganizationId string                          `json:"organizationId"`
+
+	// Pod count stores the *running* count of pods of the workload.
+	PodCount       int32                                         `json:"podCount"`
+	Recommendation *WorkloadoptimizationV1WorkloadRecommendation `json:"recommendation,omitempty"`
+
+	// The number of replicas the workload should have, as defined on the workload spec.
+	Replicas         int32                                  `json:"replicas"`
+	ScalingPolicyId  string                                 `json:"scalingPolicyId"`
+	UpdatedAt        time.Time                              `json:"updatedAt"`
+	Version          string                                 `json:"version"`
+	WorkloadConfig   WorkloadoptimizationV1WorkloadConfig   `json:"workloadConfig"`
+	WorkloadConfigV2 WorkloadoptimizationV1WorkloadConfigV2 `json:"workloadConfigV2"`
+}
+
+// WorkloadoptimizationV1WorkloadConfig defines model for workloadoptimization.v1.WorkloadConfig.
+type WorkloadoptimizationV1WorkloadConfig struct {
+	ContainerConstraints []WorkloadoptimizationV1ContainerConstraints `json:"containerConstraints"`
+	Cpu                  WorkloadoptimizationV1ResourceConfig         `json:"cpu"`
+
+	// Defines possible options for workload management.
+	// READ_ONLY - workload watched (metrics collected), but no actions may be performed by CAST AI.
+	// MANAGED - workload watched (metrics collected), CAST AI may perform actions on the workload.
+	ManagementOption WorkloadoptimizationV1ManagementOption `json:"managementOption"`
+	Memory           WorkloadoptimizationV1ResourceConfig   `json:"memory"`
+}
+
+// WorkloadoptimizationV1WorkloadConfigUpdate defines model for workloadoptimization.v1.WorkloadConfigUpdate.
+type WorkloadoptimizationV1WorkloadConfigUpdate struct {
+	ContainerConfig *[]WorkloadoptimizationV1ContainerConfigUpdate `json:"containerConfig,omitempty"`
+	Cpu             *WorkloadoptimizationV1ResourceConfigUpdate    `json:"cpu,omitempty"`
+
+	// Defines possible options for workload management.
+	// READ_ONLY - workload watched (metrics collected), but no actions may be performed by CAST AI.
+	// MANAGED - workload watched (metrics collected), CAST AI may perform actions on the workload.
+	ManagementOption *WorkloadoptimizationV1ManagementOption     `json:"managementOption,omitempty"`
+	Memory           *WorkloadoptimizationV1ResourceConfigUpdate `json:"memory,omitempty"`
+}
+
+// WorkloadoptimizationV1WorkloadConfigUpdateV2 defines model for workloadoptimization.v1.WorkloadConfigUpdateV2.
+type WorkloadoptimizationV1WorkloadConfigUpdateV2 struct {
+	HpaConfig *WorkloadoptimizationV1HPAConfigUpdate `json:"hpaConfig,omitempty"`
+	VpaConfig *WorkloadoptimizationV1VPAConfigUpdate `json:"vpaConfig,omitempty"`
+}
+
+// WorkloadoptimizationV1WorkloadConfigV2 defines model for workloadoptimization.v1.WorkloadConfigV2.
+type WorkloadoptimizationV1WorkloadConfigV2 struct {
+	HpaConfig WorkloadoptimizationV1HPAConfig `json:"hpaConfig"`
+	VpaConfig WorkloadoptimizationV1VPAConfig `json:"vpaConfig"`
+}
+
+// WorkloadoptimizationV1WorkloadEvent defines model for workloadoptimization.v1.WorkloadEvent.
+type WorkloadoptimizationV1WorkloadEvent struct {
+	ClusterId      string                             `json:"clusterId"`
+	CreatedAt      time.Time                          `json:"createdAt"`
+	Event          WorkloadoptimizationV1Event        `json:"event"`
+	Id             string                             `json:"id"`
+	InitiatedBy    *WorkloadoptimizationV1InitiatedBy `json:"initiatedBy,omitempty"`
+	OrganizationId string                             `json:"organizationId"`
+
+	// EventType defines possible types for workload events.
+	Type     WorkloadoptimizationV1EventType             `json:"type"`
+	Workload WorkloadoptimizationV1WorkloadEventWorkload `json:"workload"`
+}
+
+// WorkloadoptimizationV1WorkloadEventWorkload defines model for workloadoptimization.v1.WorkloadEvent.Workload.
+type WorkloadoptimizationV1WorkloadEventWorkload struct {
+	Id        string `json:"id"`
+	Kind      string `json:"kind"`
+	Name      string `json:"name"`
+	Namespace string `json:"namespace"`
+}
+
+// WorkloadoptimizationV1WorkloadMetricContainer defines model for workloadoptimization.v1.WorkloadMetricContainer.
+type WorkloadoptimizationV1WorkloadMetricContainer struct {
+	CpuCores            []WorkloadoptimizationV1ResourceMetrics `json:"cpuCores"`
+	CpuCoresAggregated  WorkloadoptimizationV1AggregatedMetrics `json:"cpuCoresAggregated"`
+	MemoryGib           []WorkloadoptimizationV1ResourceMetrics `json:"memoryGib"`
+	MemoryGibAggregated WorkloadoptimizationV1AggregatedMetrics `json:"memoryGibAggregated"`
+	Name                string                                  `json:"name"`
+}
+
+// WorkloadoptimizationV1WorkloadMetrics defines model for workloadoptimization.v1.WorkloadMetrics.
+type WorkloadoptimizationV1WorkloadMetrics struct {
+	Containers []WorkloadoptimizationV1WorkloadMetricContainer `json:"containers"`
+	Cpu        WorkloadoptimizationV1CpuMetrics                `json:"cpu"`
+	Pods       WorkloadoptimizationV1PodMetrics                `json:"pods"`
+}
+
+// WorkloadoptimizationV1WorkloadRecommendation defines model for workloadoptimization.v1.WorkloadRecommendation.
+type WorkloadoptimizationV1WorkloadRecommendation struct {
+	// Defines the confidence of the recommendation. Value between 0 and 1. 1 means max confidence, 0 means no confidence.
+	// This value indicates how many metrics were collected versus expected for the workload, given the recommendation configuration.
+	Confidence float64 `json:"confidence"`
+
+	// Recommendation events.
+	Events []WorkloadoptimizationV1RecommendationEvent `json:"events"`
+
+	// Number of recommended replicas. Available only when workload horizontal scaling is enabled.
+	Replicas *int32 `json:"replicas"`
+}
+
+// WorkloadoptimizationV1WorkloadScalingPolicy defines model for workloadoptimization.v1.WorkloadScalingPolicy.
+type WorkloadoptimizationV1WorkloadScalingPolicy struct {
+	ApplyType              WorkloadoptimizationV1ApplyType              `json:"applyType"`
+	ClusterId              string                                       `json:"clusterId"`
+	ConfidenceThreshold    float64                                      `json:"confidenceThreshold"`
+	CreatedAt              time.Time                                    `json:"createdAt"`
+	Id                     string                                       `json:"id"`
+	IsDefault              bool                                         `json:"isDefault"`
+	IsReadonly             bool                                         `json:"isReadonly"`
+	Name                   string                                       `json:"name"`
+	OrganizationId         string                                       `json:"organizationId"`
+	RecommendationPolicies WorkloadoptimizationV1RecommendationPolicies `json:"recommendationPolicies"`
+	UpdatedAt              time.Time                                    `json:"updatedAt"`
+}
+
 // AuthTokenAPIListAuthTokensParams defines parameters for AuthTokenAPIListAuthTokens.
 type AuthTokenAPIListAuthTokensParams struct {
 	// User id to filter by, if this is set we will only return tokens that have this user id.
@@ -3235,6 +3874,50 @@ type SSOAPICreateSSOConnectionJSONBody = CastaiSsoV1beta1CreateSSOConnection
 // SSOAPIUpdateSSOConnectionJSONBody defines parameters for SSOAPIUpdateSSOConnection.
 type SSOAPIUpdateSSOConnectionJSONBody = CastaiSsoV1beta1UpdateSSOConnection
 
+// WorkloadOptimizationAPICreateWorkloadScalingPolicyJSONBody defines parameters for WorkloadOptimizationAPICreateWorkloadScalingPolicy.
+type WorkloadOptimizationAPICreateWorkloadScalingPolicyJSONBody = WorkloadoptimizationV1NewWorkloadScalingPolicy
+
+// WorkloadOptimizationAPIUpdateWorkloadScalingPolicyJSONBody defines parameters for WorkloadOptimizationAPIUpdateWorkloadScalingPolicy.
+type WorkloadOptimizationAPIUpdateWorkloadScalingPolicyJSONBody = WorkloadoptimizationV1UpdateWorkloadScalingPolicy
+
+// WorkloadOptimizationAPIAssignScalingPolicyWorkloadsJSONBody defines parameters for WorkloadOptimizationAPIAssignScalingPolicyWorkloads.
+type WorkloadOptimizationAPIAssignScalingPolicyWorkloadsJSONBody = WorkloadOptimizationAPIAssignScalingPolicyWorkloadsRequest
+
+// WorkloadOptimizationAPIListWorkloadEventsParams defines parameters for WorkloadOptimizationAPIListWorkloadEvents.
+type WorkloadOptimizationAPIListWorkloadEventsParams struct {
+	WorkloadId *string `form:"workloadId,omitempty" json:"workloadId,omitempty"`
+	PageLimit  *string `form:"page.limit,omitempty" json:"page.limit,omitempty"`
+
+	// Cursor that defines token indicating where to start the next page.
+	// Empty value indicates to start from beginning of the dataset.
+	PageCursor   *string                                                `form:"page.cursor,omitempty" json:"page.cursor,omitempty"`
+	FromDate     *time.Time                                             `form:"fromDate,omitempty" json:"fromDate,omitempty"`
+	ToDate       *time.Time                                             `form:"toDate,omitempty" json:"toDate,omitempty"`
+	WorkloadName *string                                                `form:"workloadName,omitempty" json:"workloadName,omitempty"`
+	Type         *[]WorkloadOptimizationAPIListWorkloadEventsParamsType `form:"type,omitempty" json:"type,omitempty"`
+}
+
+// WorkloadOptimizationAPIListWorkloadEventsParamsType defines parameters for WorkloadOptimizationAPIListWorkloadEvents.
+type WorkloadOptimizationAPIListWorkloadEventsParamsType string
+
+// WorkloadOptimizationAPIGetWorkloadParams defines parameters for WorkloadOptimizationAPIGetWorkload.
+type WorkloadOptimizationAPIGetWorkloadParams struct {
+	IncludeMetrics *bool      `form:"includeMetrics,omitempty" json:"includeMetrics,omitempty"`
+	FromTime       *time.Time `form:"fromTime,omitempty" json:"fromTime,omitempty"`
+	ToTime         *time.Time `form:"toTime,omitempty" json:"toTime,omitempty"`
+}
+
+// WorkloadOptimizationAPIUpdateWorkloadJSONBody defines parameters for WorkloadOptimizationAPIUpdateWorkload.
+type WorkloadOptimizationAPIUpdateWorkloadJSONBody = WorkloadoptimizationV1UpdateWorkload
+
+// WorkloadOptimizationAPIGetInstallCmdParams defines parameters for WorkloadOptimizationAPIGetInstallCmd.
+type WorkloadOptimizationAPIGetInstallCmdParams struct {
+	ClusterId string `form:"clusterId" json:"clusterId"`
+}
+
+// WorkloadOptimizationAPIUpdateWorkloadV2JSONBody defines parameters for WorkloadOptimizationAPIUpdateWorkloadV2.
+type WorkloadOptimizationAPIUpdateWorkloadV2JSONBody = WorkloadoptimizationV1UpdateWorkloadV2
+
 // AuthTokenAPICreateAuthTokenJSONRequestBody defines body for AuthTokenAPICreateAuthToken for application/json ContentType.
 type AuthTokenAPICreateAuthTokenJSONRequestBody = AuthTokenAPICreateAuthTokenJSONBody
 
@@ -3342,6 +4025,21 @@ type SSOAPICreateSSOConnectionJSONRequestBody = SSOAPICreateSSOConnectionJSONBod
 
 // SSOAPIUpdateSSOConnectionJSONRequestBody defines body for SSOAPIUpdateSSOConnection for application/json ContentType.
 type SSOAPIUpdateSSOConnectionJSONRequestBody = SSOAPIUpdateSSOConnectionJSONBody
+
+// WorkloadOptimizationAPICreateWorkloadScalingPolicyJSONRequestBody defines body for WorkloadOptimizationAPICreateWorkloadScalingPolicy for application/json ContentType.
+type WorkloadOptimizationAPICreateWorkloadScalingPolicyJSONRequestBody = WorkloadOptimizationAPICreateWorkloadScalingPolicyJSONBody
+
+// WorkloadOptimizationAPIUpdateWorkloadScalingPolicyJSONRequestBody defines body for WorkloadOptimizationAPIUpdateWorkloadScalingPolicy for application/json ContentType.
+type WorkloadOptimizationAPIUpdateWorkloadScalingPolicyJSONRequestBody = WorkloadOptimizationAPIUpdateWorkloadScalingPolicyJSONBody
+
+// WorkloadOptimizationAPIAssignScalingPolicyWorkloadsJSONRequestBody defines body for WorkloadOptimizationAPIAssignScalingPolicyWorkloads for application/json ContentType.
+type WorkloadOptimizationAPIAssignScalingPolicyWorkloadsJSONRequestBody = WorkloadOptimizationAPIAssignScalingPolicyWorkloadsJSONBody
+
+// WorkloadOptimizationAPIUpdateWorkloadJSONRequestBody defines body for WorkloadOptimizationAPIUpdateWorkload for application/json ContentType.
+type WorkloadOptimizationAPIUpdateWorkloadJSONRequestBody = WorkloadOptimizationAPIUpdateWorkloadJSONBody
+
+// WorkloadOptimizationAPIUpdateWorkloadV2JSONRequestBody defines body for WorkloadOptimizationAPIUpdateWorkloadV2 for application/json ContentType.
+type WorkloadOptimizationAPIUpdateWorkloadV2JSONRequestBody = WorkloadOptimizationAPIUpdateWorkloadV2JSONBody
 
 // Getter for additional properties for ExternalClusterAPIUpdateClusterTagsJSONBody. Returns the specified
 // element and whether it was found

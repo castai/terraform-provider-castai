@@ -51,6 +51,7 @@ func Provider(version string) *schema.Provider {
 			"castai_commitments":                resourceCommitments(),
 			"castai_organization_members":       resourceOrganizationMembers(),
 			"castai_sso_connection":             resourceSSOConnection(),
+			"castai_workload_scaling_policy":    resourceWorkloadScalingPolicy(),
 		},
 
 		DataSourcesMap: map[string]*schema.Resource{
