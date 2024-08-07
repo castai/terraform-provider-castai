@@ -18,10 +18,10 @@ CAST AI node template resource to manage node templates
 ### Required
 
 - `name` (String) Name of the node template.
+- `cluster_id` (String) CAST AI cluster id.
 
 ### Optional
 
-- `cluster_id` (String) CAST AI cluster id.
 - `configuration_id` (String) CAST AI node configuration id to be used for node template.
 - `constraints` (Block List, Max: 1) (see [below for nested schema](#nestedblock--constraints))
 - `custom_instances_enabled` (Boolean) Marks whether custom instances should be used when deciding which parts of inventory are available. Custom instances are only supported in GCP.
