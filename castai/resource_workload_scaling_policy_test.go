@@ -43,7 +43,7 @@ func TestAccResourceWorkloadScalingPolicy(t *testing.T) {
 			{
 				Config: scalingPolicyConfigUpdated(clusterName, projectID, rName),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "name", rName),
+					resource.TestCheckResourceAttr(resourceName, "name", rName+"-updated"),
 					resource.TestCheckResourceAttr(resourceName, "apply_type", "IMMEDIATE"),
 					resource.TestCheckResourceAttr(resourceName, "management_option", "MANAGED"),
 					resource.TestCheckResourceAttr(resourceName, "cpu.0.function", "QUANTILE"),
@@ -94,6 +94,7 @@ func scalingPolicyConfig(clusterName, projectID, name string) string {
 }
 
 func scalingPolicyConfigUpdated(clusterName, projectID, name string) string {
+	updatedName := name + "-updated"
 	cfg := fmt.Sprintf(`
 	resource "castai_workload_scaling_policy" "test" {
 		name 				= %[1]q
@@ -112,7 +113,7 @@ func scalingPolicyConfigUpdated(clusterName, projectID, name string) string {
 			apply_threshold = 0.2
 			args 			= ["0.9"]
 		}
-	}`, name)
+	}`, updatedName)
 
 	return ConfigCompose(testAccGKEClusterConfig(name, clusterName, projectID), cfg)
 }
