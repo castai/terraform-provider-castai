@@ -39,10 +39,14 @@ castai_workload_scaling_policy "services" {
 
 ### Required
 
-- `apply_type` (String) Recommendation apply type. IMMEDIATE - pods are restarted immediately when new recommendation is generated. DEFERRED - pods are not restarted and recommendation values are applied during natural restarts only (new deployment, etc.)
+- `apply_type` (String) Recommendation apply type. 
+	- IMMEDIATE - pods are restarted immediately when new recommendation is generated.
+	- DEFERRED - pods are not restarted and recommendation values are applied during natural restarts only (new deployment, etc.)
 - `cluster_id` (String) CAST AI cluster id
 - `cpu` (Block List, Min: 1, Max: 1) (see [below for nested schema](#nestedblock--cpu))
-- `management_option` (String) Defines possible options for workload management. READ_ONLY - workload watched (metrics collected), but no actions performed by CAST AI. MANAGED - workload watched (metrics collected), CAST AI may perform actions on the workload.
+- `management_option` (String) Defines possible options for workload management.
+	- READ_ONLY - workload watched (metrics collected), but no actions performed by CAST AI.
+	- MANAGED - workload watched (metrics collected), CAST AI may perform actions on the workload.
 - `memory` (Block List, Min: 1, Max: 1) (see [below for nested schema](#nestedblock--memory))
 - `name` (String) Scaling policy name
 
@@ -59,10 +63,10 @@ castai_workload_scaling_policy "services" {
 
 Optional:
 
-- `apply_threshold` (Number) The threshold of when to apply the recommendation. Recommendation will be applied when diff of current requests and recommendation is greater than set value
-- `args` (List of String)
-- `function` (String) The function used to calculate the resource recommendation
-- `overhead` (Number) Overhead for the recommendation, the formula is: (1 + overhead) * function(args).
+- `apply_threshold` (Number) The threshold of when to apply the recommendation. Recommendation will be applied when diff of current requests and new recommendation is greater than set value
+- `args` (List of String) The arguments for the function - i.e. for `QUANTILE` this should be a [0, 1] float. `MAX` doesn't accept any args
+- `function` (String) The function used to calculate the resource recommendation. Supported values: `QUANTILE`, `MAX`
+- `overhead` (Number) Overhead for the recommendation, e.g. `0.1` will result in 10% higher recommendation
 
 
 <a id="nestedblock--memory"></a>
@@ -70,10 +74,10 @@ Optional:
 
 Optional:
 
-- `apply_threshold` (Number) The threshold of when to apply the recommendation. Recommendation will be applied when diff of current requests and recommendation is greater than set value
-- `args` (List of String)
-- `function` (String) The function used to calculate the resource recommendation
-- `overhead` (Number) Overhead for the recommendation, the formula is: (1 + overhead) * function(args).
+- `apply_threshold` (Number) The threshold of when to apply the recommendation. Recommendation will be applied when diff of current requests and new recommendation is greater than set value
+- `args` (List of String) The arguments for the function - i.e. for `QUANTILE` this should be a [0, 1] float. `MAX` doesn't accept any args
+- `function` (String) The function used to calculate the resource recommendation. Supported values: `QUANTILE`, `MAX`
+- `overhead` (Number) Overhead for the recommendation, e.g. `0.1` will result in 10% higher recommendation
 
 
 <a id="nestedblock--timeouts"></a>

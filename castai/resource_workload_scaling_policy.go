@@ -49,17 +49,17 @@ func resourceWorkloadScalingPolicy() *schema.Resource {
 			"apply_type": {
 				Type:     schema.TypeString,
 				Required: true,
-				Description: "Recommendation apply type. " +
-					"IMMEDIATE - pods are restarted immediately when new recommendation is generated. " +
-					"DEFERRED - pods are not restarted and recommendation values are applied during natural restarts only (new deployment, etc.)",
+				Description: `Recommendation apply type. 
+	- IMMEDIATE - pods are restarted immediately when new recommendation is generated.
+	- DEFERRED - pods are not restarted and recommendation values are applied during natural restarts only (new deployment, etc.)`,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"IMMEDIATE", "DEFERRED"}, false)),
 			},
 			"management_option": {
 				Type:     schema.TypeString,
 				Required: true,
-				Description: "Defines possible options for workload management. " +
-					"READ_ONLY - workload watched (metrics collected), but no actions performed by CAST AI. " +
-					"MANAGED - workload watched (metrics collected), CAST AI may perform actions on the workload.",
+				Description: `Defines possible options for workload management.
+	- READ_ONLY - workload watched (metrics collected), but no actions performed by CAST AI.
+	- MANAGED - workload watched (metrics collected), CAST AI may perform actions on the workload.`,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"READ_ONLY", "MANAGED"}, false)),
 			},
 			"cpu": {
@@ -90,7 +90,7 @@ func resourceSchema(function string, overhead float64, args []string) *schema.Re
 			"function": {
 				Type:             schema.TypeString,
 				Optional:         true,
-				Description:      "The function used to calculate the resource recommendation",
+				Description:      "The function used to calculate the resource recommendation. Supported values: `QUANTILE`, `MAX`",
 				Default:          function,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"QUANTILE", "MAX"}, false)),
 			},
@@ -99,6 +99,8 @@ func resourceSchema(function string, overhead float64, args []string) *schema.Re
 				Optional: true,
 				MinItems: 1,
 				MaxItems: 1,
+				Description: "The arguments for the function - i.e. for `QUANTILE` this should be a [0, 1] float. " +
+					"`MAX` doesn't accept any args",
 				Elem: &schema.Schema{
 					Type:    schema.TypeString,
 					Default: args,
@@ -107,14 +109,15 @@ func resourceSchema(function string, overhead float64, args []string) *schema.Re
 			"overhead": {
 				Type:             schema.TypeFloat,
 				Optional:         true,
-				Description:      "Overhead for the recommendation, the formula is: (1 + overhead) * function(args).",
+				Description:      "Overhead for the recommendation, e.g. `0.1` will result in 10% higher recommendation",
 				Default:          overhead,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.FloatBetween(0, 1)),
 			},
 			"apply_threshold": {
-				Type:             schema.TypeFloat,
-				Optional:         true,
-				Description:      "The threshold of when to apply the recommendation. Recommendation will be applied when diff of current requests and recommendation is greater than set value",
+				Type:     schema.TypeFloat,
+				Optional: true,
+				Description: "The threshold of when to apply the recommendation. Recommendation will be applied when " +
+					"diff of current requests and new recommendation is greater than set value",
 				Default:          0.1,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.FloatBetween(0.01, 1)),
 			},
