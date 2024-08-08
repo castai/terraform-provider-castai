@@ -27,6 +27,7 @@ func resourceWorkloadScalingPolicy() *schema.Resource {
 		ReadContext:   resourceWorkloadScalingPolicyRead,
 		UpdateContext: resourceWorkloadScalingPolicyUpdate,
 		DeleteContext: resourceWorkloadScalingPolicyDelete,
+		CustomizeDiff: resourceWorkloadScalingPolicyDiff,
 		Importer: &schema.ResourceImporter{
 			StateContext: workloadScalingPolicyImporter,
 		},
@@ -66,13 +67,13 @@ func resourceWorkloadScalingPolicy() *schema.Resource {
 				Type:     schema.TypeList,
 				Required: true,
 				MaxItems: 1,
-				Elem:     resourceSchema("QUANTILE", 0, []string{"0.8"}),
+				Elem:     resourceSchema("QUANTILE", 0),
 			},
 			"memory": {
 				Type:     schema.TypeList,
 				Required: true,
 				MaxItems: 1,
-				Elem:     resourceSchema("MAX", 0.1, []string{}),
+				Elem:     resourceSchema("MAX", 0.1),
 			},
 		},
 		Timeouts: &schema.ResourceTimeout{
@@ -84,7 +85,7 @@ func resourceWorkloadScalingPolicy() *schema.Resource {
 	}
 }
 
-func resourceSchema(function string, overhead float64, args []string) *schema.Resource {
+func resourceSchema(function string, overhead float64) *schema.Resource {
 	return &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"function": {
@@ -97,13 +98,11 @@ func resourceSchema(function string, overhead float64, args []string) *schema.Re
 			"args": {
 				Type:     schema.TypeList,
 				Optional: true,
-				MinItems: 1,
 				MaxItems: 1,
 				Description: "The arguments for the function - i.e. for `QUANTILE` this should be a [0, 1] float. " +
 					"`MAX` doesn't accept any args",
 				Elem: &schema.Schema{
-					Type:    schema.TypeString,
-					Default: args,
+					Type: schema.TypeString,
 				},
 			},
 			"overhead": {
@@ -254,6 +253,27 @@ func resourceWorkloadScalingPolicyDelete(ctx context.Context, d *schema.Resource
 		return diag.FromErr(err)
 	}
 
+	return nil
+}
+
+func resourceWorkloadScalingPolicyDiff(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
+	// Since tf doesn't support cross field validation, doing it here.
+	cpu := toResourcePolicies(d.Get("cpu").([]interface{})[0].(map[string]interface{}))
+	memory := toResourcePolicies(d.Get("memory").([]interface{})[0].(map[string]interface{}))
+
+	if err := validateArgs(cpu, "cpu"); err != nil {
+		return err
+	}
+	return validateArgs(memory, "memory")
+}
+
+func validateArgs(r sdk.WorkloadoptimizationV1ResourcePolicies, res string) error {
+	if r.Function == "QUANTILE" && len(r.Args) == 0 {
+		return fmt.Errorf("field %q: QUANTILE function requires args to be provided", res)
+	}
+	if r.Function == "MAX" && len(r.Args) > 0 {
+		return fmt.Errorf("field %q: MAX function doesn't accept any args", res)
+	}
 	return nil
 }
 
