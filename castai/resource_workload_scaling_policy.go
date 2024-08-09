@@ -285,14 +285,14 @@ func workloadScalingPolicyImporter(ctx context.Context, d *schema.ResourceData, 
 		return nil, fmt.Errorf("expected import id with format: <cluster_id>/<scaling_policy name or id>, got: %q", d.Id())
 	}
 
-	clusterID, id := ids[0], ids[1]
+	clusterID, nameOrID := ids[0], ids[1]
 	if err := d.Set(FieldClusterID, clusterID); err != nil {
-		return nil, fmt.Errorf("setting cluster id: %w", err)
+		return nil, fmt.Errorf("setting cluster nameOrID: %w", err)
 	}
-	d.SetId(id)
+	d.SetId(nameOrID)
 
 	// Return if scaling policy ID provided.
-	if _, err := uuid.Parse(id); err == nil {
+	if _, err := uuid.Parse(nameOrID); err == nil {
 		return []*schema.ResourceData{d}, nil
 	}
 
@@ -304,13 +304,13 @@ func workloadScalingPolicyImporter(ctx context.Context, d *schema.ResourceData, 
 	}
 
 	for _, sp := range resp.JSON200.Items {
-		if sp.Name == id {
+		if sp.Name == nameOrID {
 			d.SetId(sp.Id)
 			return []*schema.ResourceData{d}, nil
 		}
 	}
 
-	return nil, fmt.Errorf("failed to find workload scaling policy with the following name: %v", id)
+	return nil, fmt.Errorf("failed to find workload scaling policy with the following name: %v", nameOrID)
 }
 
 func toWorkloadScalingPolicies(obj map[string]interface{}) sdk.WorkloadoptimizationV1ResourcePolicies {
