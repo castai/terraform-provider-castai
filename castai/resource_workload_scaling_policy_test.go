@@ -43,6 +43,15 @@ func TestAccResourceWorkloadScalingPolicy(t *testing.T) {
 				),
 			},
 			{
+				ResourceName: resourceName,
+				ImportStateIdFunc: func(s *terraform.State) (string, error) {
+					clusterID := s.RootModule().Resources["castai_gke_cluster.test"].Primary.ID
+					return fmt.Sprintf("%v/%v", clusterID, rName), nil
+				},
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+			{
 				Config: scalingPolicyConfigUpdated(clusterName, projectID, rName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "name", rName+"-updated"),
