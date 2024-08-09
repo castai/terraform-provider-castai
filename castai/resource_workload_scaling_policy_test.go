@@ -11,6 +11,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+
+	"github.com/castai/terraform-provider-castai/castai/sdk"
 )
 
 func TestAccResourceWorkloadScalingPolicy(t *testing.T) {
@@ -142,4 +144,38 @@ func testAccCheckScalingPolicyDestroy(s *terraform.State) error {
 	}
 
 	return nil
+}
+
+func Test_validateArgs(t *testing.T) {
+	tests := map[string]struct {
+		args    sdk.WorkloadoptimizationV1ResourcePolicies
+		wantErr bool
+	}{
+		"should not return error when QUANTILE has args provided": {
+			args: sdk.WorkloadoptimizationV1ResourcePolicies{
+				Function: "QUANTILE",
+				Args:     []string{"0.5"},
+			},
+		},
+		"should return error when QUANTILE has not args provided": {
+			args: sdk.WorkloadoptimizationV1ResourcePolicies{
+				Function: "QUANTILE",
+			},
+			wantErr: true,
+		},
+		"should return error when MAX has args provided": {
+			args: sdk.WorkloadoptimizationV1ResourcePolicies{
+				Function: "MAX",
+				Args:     []string{"0.5"},
+			},
+			wantErr: true,
+		},
+	}
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			if err := validateArgs(tt.args, ""); (err != nil) != tt.wantErr {
+				t.Errorf("validateArgs() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
 }

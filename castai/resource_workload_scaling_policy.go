@@ -240,13 +240,14 @@ func resourceWorkloadScalingPolicyDelete(ctx context.Context, d *schema.Resource
 		return diag.FromErr(err)
 	}
 
+	if resp.JSON200.IsReadonly || resp.JSON200.IsDefault {
+		log.Printf("[WARN] Default/readonly scaling policy (%s) can't be deleted, removing from state", d.Id())
+		return nil
+	}
+
 	delResp, err := client.WorkloadOptimizationAPIDeleteWorkloadScalingPolicyWithResponse(ctx, clusterID, d.Id())
 	if err != nil {
 		return diag.FromErr(err)
-	}
-	if delResp.StatusCode() == http.StatusBadRequest {
-		log.Printf("[WARN] Scaling policy has active workloads (%s) and can't be deleted, removing from state", d.Id())
-		return nil
 	}
 	if err := sdk.StatusOk(delResp); err != nil {
 		return diag.FromErr(err)
