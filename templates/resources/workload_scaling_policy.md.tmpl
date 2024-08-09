@@ -1,0 +1,41 @@
+---
+page_title: "{{.Name}} {{.Type}} - {{.ProviderName}}"
+subcategory: ""
+description: |-
+{{ .Description | plainmarkdown | trimspace | prefixlines "  " }}
+---
+
+# {{.Name}} ({{.Type}})
+
+{{ .Description | trimspace }}
+
+Scaling policies allow you to manage all your workloads centrally. You can apply the same settings to multiple workloads
+simultaneously or create custom policies with different settings and apply them to multiple workloads.
+
+## Example Usage
+
+{{ tffile .ExampleFile }}
+
+{{ .SchemaMarkdown | trimspace }}
+
+
+## Importing
+You can use the `terraform import` command to import existing scaling policy to Terraform state.
+
+To import a resource, first write a resource block for it in your configuration, establishing the name by which
+it will be known to Terraform:
+```hcl
+resource "castai_workload_scaling_policy" "services" {
+  # ...
+}
+```
+
+Now terraform import can be run to attach an existing scaling policy to this resource:
+```shell
+$ terraform import castai_workload_scaling_policy.services <cluster_id>/services
+```
+
+If you are using CAST AI Terraform modules, import command will be slightly different:
+```shell
+$ terraform import 'module.castai-eks-cluster.castai_workload_scaling_policy.this["services"]' <cluster_id>/services
+```
