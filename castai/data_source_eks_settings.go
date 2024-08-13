@@ -21,7 +21,8 @@ const (
 	EKSSettingsFieldIamUserPolicyJson  = "iam_user_policy_json"
 	EKSSettingsFieldIamManagedPolicies = "iam_managed_policies"
 
-	GovCloudPrefix = "us-gov"
+	GovCloudPrefix    = "us-gov"
+	ChinaRegionPrefix = "cn-"
 )
 
 func dataSourceEKSSettings() *schema.Resource {
@@ -101,6 +102,8 @@ func getPartition(region string) string {
 	switch {
 	case strings.Contains(region, GovCloudPrefix):
 		return "aws-us-gov"
+	case strings.HasPrefix(region, ChinaRegionPrefix):
+		return "aws-cn"
 	default:
 		return "aws"
 	}
