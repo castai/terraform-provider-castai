@@ -62,11 +62,11 @@ module "castai-gke-cluster" {
 
   node_templates = {
     default_by_castai = {
-      name             = "default-by-castai"
+      name               = "default-by-castai"
       configuration_name = "default"
-      is_default       = true
-      is_enabled       = true
-      should_taint     = false
+      is_default         = true
+      is_enabled         = true
+      should_taint       = false
 
       constraints = {
         on_demand          = true

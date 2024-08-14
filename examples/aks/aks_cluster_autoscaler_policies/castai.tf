@@ -57,9 +57,9 @@ module "castai-aks-cluster" {
     default_by_castai = {
       name               = "default-by-castai"
       configuration_name = "default"
-      is_default       = true
-      is_enabled       = true
-      should_taint     = false
+      is_default         = true
+      is_enabled         = true
+      should_taint       = false
 
       constraints = {
         on_demand          = true
@@ -72,8 +72,8 @@ module "castai-aks-cluster" {
     }
     spot_tmpl = {
       configuration_name = "default"
-      is_enabled       = true
-      should_taint     = true
+      is_enabled         = true
+      should_taint       = true
 
       custom_labels = {
         custom-label-key-1 = "custom-label-value-1"
