@@ -134,7 +134,7 @@ locals {
   cluster_name = %[1]q
   service_account_email = "${local.service_account_id}@$%[2]s.iam.gserviceaccount.com"
   custom_role_id        = "castai.tfAcc.${substr(sha1(local.service_account_id),0,8)}.tf"
-  subnet_id = "projects/%[2]s/regions/us-central1/subnetworks/%[1]s-ip-range-nodes"
+  subnet_id = "projects/%[2]s/regions/us-central1/subnetworks/ext-prov-e2e-shared-ip-range-nodes"
 }
 
 resource "google_service_account" "castai_service_account" {
