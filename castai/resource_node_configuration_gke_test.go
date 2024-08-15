@@ -12,7 +12,7 @@ import (
 const (
 	// acceptanceTestClusterSubnetworkName points to the subnet that the acceptance test cluster uses.
 	// Actual value (should) be managed by our IaC repository and could be shared with other clusters as well.
-	acceptanceTestClusterSubnetworkName = "ext-prov-e2e-shared-ip-range-nodes'"
+	acceptanceTestClusterSubnetworkName = "ext-prov-e2e-shared-ip-range-nodes"
 )
 
 func TestAccResourceNodeConfiguration_gke(t *testing.T) {
