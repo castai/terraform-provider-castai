@@ -9,6 +9,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
+const (
+	// acceptanceTestClusterSubnetworkName points to the subnet that the acceptance test cluster uses.
+	// Actual value (should) be managed by our IaC repository and could be shared with other clusters as well.
+	acceptanceTestClusterSubnetworkName = "ext-prov-e2e-shared-ip-range-nodes"
+)
+
 func TestAccResourceNodeConfiguration_gke(t *testing.T) {
 	rName := fmt.Sprintf("%v-node-cfg-%v", ResourcePrefix, acctest.RandString(8))
 	resourceName := "castai_node_configuration.test"
@@ -127,6 +133,7 @@ resource "castai_gke_cluster" "test" {
 }
 
 func testAccGCPConfig(rName, clusterName, projectID string) string {
+
 	return fmt.Sprintf(`
 
 locals {
@@ -134,7 +141,7 @@ locals {
   cluster_name = %[1]q
   service_account_email = "${local.service_account_id}@$%[2]s.iam.gserviceaccount.com"
   custom_role_id        = "castai.tfAcc.${substr(sha1(local.service_account_id),0,8)}.tf"
-  subnet_id = "projects/%[2]s/regions/us-central1/subnetworks/%[1]s-ip-range-nodes"
+  subnet_id = "projects/%[2]s/regions/us-central1/subnetworks/%[4]s"
 }
 
 resource "google_service_account" "castai_service_account" {
@@ -177,5 +184,5 @@ resource "google_service_account_key" "castai_key" {
   public_key_type    = "TYPE_X509_PEM_FILE"
 }
 
-`, clusterName, projectID, rName)
+`, clusterName, projectID, rName, acceptanceTestClusterSubnetworkName)
 }
