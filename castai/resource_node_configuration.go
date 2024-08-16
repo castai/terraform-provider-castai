@@ -241,9 +241,14 @@ func resourceNodeConfiguration() *schema.Resource {
 							ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(0, 256)),
 						},
 						FieldNodeConfigurationEKSImageFamily: {
-							Type:             schema.TypeString,
-							Optional:         true,
-							Description:      "Image OS Family to use when provisioning node. If both image and family are provided, the system will use provided image and provisioning logic for given family. If only image family is provided, the system will attempt to resolve the latest image from that family based on kubernetes version and node architecture. If image family is omitted, a default family (based on cloud provider) will be used. See Cast.ai documentation for details.",
+							Type:     schema.TypeString,
+							Optional: true,
+							Description: fmt.Sprintf(
+								"Image OS Family to use when provisioning node in EKS. "+
+									"If both image and family are provided, the system will use provided image and provisioning logic for given family. "+
+									"If only image family is provided, the system will attempt to resolve the latest image from that family based on kubernetes version and node architecture. "+
+									"If image family is omitted, a default family (based on cloud provider) will be used. "+
+									"See Cast.ai documentation for details. Possible values: (%v)", strings.Join([]string{eksImageFamilyAL2, eksImageFamilyAL2023, eksImageFamilyBottlerocket}, ",")),
 							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{eksImageFamilyAL2, eksImageFamilyAL2023, eksImageFamilyBottlerocket}, true)),
 							DiffSuppressFunc: func(k, oldValue, newValue string, d *schema.ResourceData) bool {
 								return strings.EqualFold(oldValue, newValue)
