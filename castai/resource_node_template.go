@@ -984,9 +984,9 @@ func updateDefaultNodeTemplate(ctx context.Context, d *schema.ResourceData, meta
 		for _, d := range diagnostics {
 			if d.Severity == diag.Error {
 				if strings.Contains(d.Summary, "node template not found") {
-					return retry.RetryableError(fmt.Errorf(d.Summary))
+					return retry.RetryableError(fmt.Errorf("%s", d.Summary))
 				}
-				return retry.NonRetryableError(fmt.Errorf(d.Summary))
+				return retry.NonRetryableError(fmt.Errorf("%s", d.Summary))
 			}
 		}
 		return nil
