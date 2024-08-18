@@ -3301,6 +3301,7 @@ type WorkloadoptimizationV1RecommendationPolicies struct {
 	// MANAGED - workload watched (metrics collected), CAST AI may perform actions on the workload.
 	ManagementOption WorkloadoptimizationV1ManagementOption `json:"managementOption"`
 	Memory           WorkloadoptimizationV1ResourcePolicies `json:"memory"`
+	Startup          *WorkloadoptimizationV1StartupSettings `json:"startup,omitempty"`
 }
 
 // WorkloadoptimizationV1ResourceConfig defines model for workloadoptimization.v1.ResourceConfig.
@@ -3388,6 +3389,13 @@ type WorkloadoptimizationV1ResourceQuantity struct {
 type WorkloadoptimizationV1Resources struct {
 	Limits   *WorkloadoptimizationV1ResourceQuantity `json:"limits,omitempty"`
 	Requests *WorkloadoptimizationV1ResourceQuantity `json:"requests,omitempty"`
+}
+
+// WorkloadoptimizationV1StartupSettings defines model for workloadoptimization.v1.StartupSettings.
+type WorkloadoptimizationV1StartupSettings struct {
+	// Startup period defines the duration of increased resource usage during startup.
+	// Recommendations will be adjusted to ignore the spikes during regular execution. If not set workload will get usual recommendations.
+	PeriodSeconds *int32 `json:"periodSeconds"`
 }
 
 // WorkloadoptimizationV1SurgeContainer defines model for workloadoptimization.v1.SurgeContainer.
