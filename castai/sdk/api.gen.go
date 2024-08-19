@@ -683,6 +683,11 @@ type CastaiInventoryV1beta1GetCommitmentAssignmentsResponse struct {
 	Assignments *[]CastaiInventoryV1beta1CommitmentAssignment `json:"assignments,omitempty"`
 }
 
+// CastaiInventoryV1beta1GetCommitmentResponse defines model for castai.inventory.v1beta1.GetCommitmentResponse.
+type CastaiInventoryV1beta1GetCommitmentResponse struct {
+	Commitment *CastaiInventoryV1beta1Commitment `json:"commitment,omitempty"`
+}
+
 // CastaiInventoryV1beta1GetCommitmentsAssignmentsResponse defines model for castai.inventory.v1beta1.GetCommitmentsAssignmentsResponse.
 type CastaiInventoryV1beta1GetCommitmentsAssignmentsResponse struct {
 	CommitmentsAssignments *[]CastaiInventoryV1beta1CommitmentAssignment `json:"commitmentsAssignments,omitempty"`
@@ -1221,6 +1226,12 @@ type CastaiUsersV1beta1DeleteInvitationResponse = map[string]interface{}
 // Defines the empty response to organization deletion.
 type CastaiUsersV1beta1DeleteOrganizationResponse = map[string]interface{}
 
+// CastaiUsersV1beta1GroupRef defines model for castai.users.v1beta1.GroupRef.
+type CastaiUsersV1beta1GroupRef struct {
+	Id   string `json:"id"`
+	Name string `json:"name"`
+}
+
 // Defines container for the organization's pending invitations.
 type CastaiUsersV1beta1ListInvitationsResponse struct {
 	// Array of organization's pending invitations.
@@ -1242,7 +1253,8 @@ type CastaiUsersV1beta1ListOrganizationsResponse struct {
 
 // Membership describes user-organization membership details.
 type CastaiUsersV1beta1Membership struct {
-	Role string `json:"role"`
+	Groups *[]CastaiUsersV1beta1GroupRef `json:"groups,omitempty"`
+	Role   string                        `json:"role"`
 
 	// User represents a single system user.
 	User CastaiUsersV1beta1User `json:"user"`
@@ -1307,6 +1319,9 @@ type CastaiUsersV1beta1PendingInvitation struct {
 	// invitation expiration date.
 	ValidUntil *time.Time `json:"validUntil,omitempty"`
 }
+
+// Defines the response for removing users from an organization.
+type CastaiUsersV1beta1RemoveOrganizationUsersResponse = map[string]interface{}
 
 // Defines the response for removing a user from an organization.
 type CastaiUsersV1beta1RemoveUserFromOrganizationResponse = map[string]interface{}
@@ -3301,6 +3316,7 @@ type WorkloadoptimizationV1RecommendationPolicies struct {
 	// MANAGED - workload watched (metrics collected), CAST AI may perform actions on the workload.
 	ManagementOption WorkloadoptimizationV1ManagementOption `json:"managementOption"`
 	Memory           WorkloadoptimizationV1ResourcePolicies `json:"memory"`
+	Startup          *WorkloadoptimizationV1StartupSettings `json:"startup,omitempty"`
 }
 
 // WorkloadoptimizationV1ResourceConfig defines model for workloadoptimization.v1.ResourceConfig.
@@ -3388,6 +3404,13 @@ type WorkloadoptimizationV1ResourceQuantity struct {
 type WorkloadoptimizationV1Resources struct {
 	Limits   *WorkloadoptimizationV1ResourceQuantity `json:"limits,omitempty"`
 	Requests *WorkloadoptimizationV1ResourceQuantity `json:"requests,omitempty"`
+}
+
+// WorkloadoptimizationV1StartupSettings defines model for workloadoptimization.v1.StartupSettings.
+type WorkloadoptimizationV1StartupSettings struct {
+	// Startup period defines the duration of increased resource usage during startup.
+	// Recommendations will be adjusted to ignore the spikes during regular execution. If not set workload will get usual recommendations.
+	PeriodSeconds *int32 `json:"periodSeconds"`
 }
 
 // WorkloadoptimizationV1SurgeContainer defines model for workloadoptimization.v1.SurgeContainer.
@@ -3788,6 +3811,12 @@ type InventoryAPIAddReservationJSONBody = CastaiInventoryV1beta1GenericReservati
 // InventoryAPIOverwriteReservationsJSONBody defines parameters for InventoryAPIOverwriteReservations.
 type InventoryAPIOverwriteReservationsJSONBody = CastaiInventoryV1beta1GenericReservationsList
 
+// UsersAPIRemoveOrganizationUsersParams defines parameters for UsersAPIRemoveOrganizationUsers.
+type UsersAPIRemoveOrganizationUsersParams struct {
+	// Users is the list of user ids to remove.
+	Users []string `form:"users" json:"users"`
+}
+
 // UsersAPIAddUserToOrganizationJSONBody defines parameters for UsersAPIAddUserToOrganization.
 type UsersAPIAddUserToOrganizationJSONBody = CastaiUsersV1beta1NewMembership
 
@@ -3855,6 +3884,15 @@ type CommitmentsAPIImportGCPCommitmentsParamsBehaviour string
 type CommitmentsAPIGetGCPCommitmentsImportScriptParams struct {
 	// GCP Project ids
 	Projects *[]string `form:"projects,omitempty" json:"projects,omitempty"`
+}
+
+// CommitmentsAPIGetCommitmentParams defines parameters for CommitmentsAPIGetCommitment.
+type CommitmentsAPIGetCommitmentParams struct {
+	// get commitments that are assigned to a cluster
+	ClusterId *string `form:"clusterId,omitempty" json:"clusterId,omitempty"`
+
+	// indicated if commitment usage should be included in a response
+	IncludeUsage *bool `form:"includeUsage,omitempty" json:"includeUsage,omitempty"`
 }
 
 // CommitmentsAPIUpdateCommitmentJSONBody defines parameters for CommitmentsAPIUpdateCommitment.

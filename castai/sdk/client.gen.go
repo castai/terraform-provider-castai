@@ -358,6 +358,9 @@ type ClientInterface interface {
 	// InventoryAPIDeleteReservation request
 	InventoryAPIDeleteReservation(ctx context.Context, organizationId string, reservationId string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// UsersAPIRemoveOrganizationUsers request
+	UsersAPIRemoveOrganizationUsers(ctx context.Context, organizationId string, params *UsersAPIRemoveOrganizationUsersParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// UsersAPIListOrganizationUsers request
 	UsersAPIListOrganizationUsers(ctx context.Context, organizationId string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -420,6 +423,9 @@ type ClientInterface interface {
 
 	// CommitmentsAPIDeleteCommitment request
 	CommitmentsAPIDeleteCommitment(ctx context.Context, commitmentId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// CommitmentsAPIGetCommitment request
+	CommitmentsAPIGetCommitment(ctx context.Context, commitmentId string, params *CommitmentsAPIGetCommitmentParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// CommitmentsAPIUpdateCommitment request with any body
 	CommitmentsAPIUpdateCommitmentWithBody(ctx context.Context, commitmentId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -1697,6 +1703,18 @@ func (c *Client) InventoryAPIDeleteReservation(ctx context.Context, organization
 	return c.Client.Do(req)
 }
 
+func (c *Client) UsersAPIRemoveOrganizationUsers(ctx context.Context, organizationId string, params *UsersAPIRemoveOrganizationUsersParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUsersAPIRemoveOrganizationUsersRequest(c.Server, organizationId, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
 func (c *Client) UsersAPIListOrganizationUsers(ctx context.Context, organizationId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewUsersAPIListOrganizationUsersRequest(c.Server, organizationId)
 	if err != nil {
@@ -1963,6 +1981,18 @@ func (c *Client) CommitmentsAPIGetGCPCommitmentsImportScript(ctx context.Context
 
 func (c *Client) CommitmentsAPIDeleteCommitment(ctx context.Context, commitmentId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewCommitmentsAPIDeleteCommitmentRequest(c.Server, commitmentId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) CommitmentsAPIGetCommitment(ctx context.Context, commitmentId string, params *CommitmentsAPIGetCommitmentParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCommitmentsAPIGetCommitmentRequest(c.Server, commitmentId, params)
 	if err != nil {
 		return nil, err
 	}
@@ -5703,6 +5733,56 @@ func NewInventoryAPIDeleteReservationRequest(server string, organizationId strin
 	return req, nil
 }
 
+// NewUsersAPIRemoveOrganizationUsersRequest generates requests for UsersAPIRemoveOrganizationUsers
+func NewUsersAPIRemoveOrganizationUsersRequest(server string, organizationId string, params *UsersAPIRemoveOrganizationUsersParams) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "organizationId", runtime.ParamLocationPath, organizationId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/organizations/%s/users", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	queryValues := queryURL.Query()
+
+	if queryFrag, err := runtime.StyleParamWithLocation("form", true, "users", runtime.ParamLocationQuery, params.Users); err != nil {
+		return nil, err
+	} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+		return nil, err
+	} else {
+		for k, v := range parsed {
+			for _, v2 := range v {
+				queryValues.Add(k, v2)
+			}
+		}
+	}
+
+	queryURL.RawQuery = queryValues.Encode()
+
+	req, err := http.NewRequest("DELETE", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 // NewUsersAPIListOrganizationUsersRequest generates requests for UsersAPIListOrganizationUsers
 func NewUsersAPIListOrganizationUsersRequest(server string, organizationId string) (*http.Request, error) {
 	var err error
@@ -6447,6 +6527,76 @@ func NewCommitmentsAPIDeleteCommitmentRequest(server string, commitmentId string
 	}
 
 	req, err := http.NewRequest("DELETE", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewCommitmentsAPIGetCommitmentRequest generates requests for CommitmentsAPIGetCommitment
+func NewCommitmentsAPIGetCommitmentRequest(server string, commitmentId string, params *CommitmentsAPIGetCommitmentParams) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "commitmentId", runtime.ParamLocationPath, commitmentId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/savings/commitments/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	queryValues := queryURL.Query()
+
+	if params.ClusterId != nil {
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "clusterId", runtime.ParamLocationQuery, *params.ClusterId); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.IncludeUsage != nil {
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "includeUsage", runtime.ParamLocationQuery, *params.IncludeUsage); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	queryURL.RawQuery = queryValues.Encode()
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -8011,6 +8161,9 @@ type ClientWithResponsesInterface interface {
 	// InventoryAPIDeleteReservation request
 	InventoryAPIDeleteReservationWithResponse(ctx context.Context, organizationId string, reservationId string) (*InventoryAPIDeleteReservationResponse, error)
 
+	// UsersAPIRemoveOrganizationUsers request
+	UsersAPIRemoveOrganizationUsersWithResponse(ctx context.Context, organizationId string, params *UsersAPIRemoveOrganizationUsersParams) (*UsersAPIRemoveOrganizationUsersResponse, error)
+
 	// UsersAPIListOrganizationUsers request
 	UsersAPIListOrganizationUsersWithResponse(ctx context.Context, organizationId string) (*UsersAPIListOrganizationUsersResponse, error)
 
@@ -8073,6 +8226,9 @@ type ClientWithResponsesInterface interface {
 
 	// CommitmentsAPIDeleteCommitment request
 	CommitmentsAPIDeleteCommitmentWithResponse(ctx context.Context, commitmentId string) (*CommitmentsAPIDeleteCommitmentResponse, error)
+
+	// CommitmentsAPIGetCommitment request
+	CommitmentsAPIGetCommitmentWithResponse(ctx context.Context, commitmentId string, params *CommitmentsAPIGetCommitmentParams) (*CommitmentsAPIGetCommitmentResponse, error)
 
 	// CommitmentsAPIUpdateCommitment request  with any body
 	CommitmentsAPIUpdateCommitmentWithBodyWithResponse(ctx context.Context, commitmentId string, contentType string, body io.Reader) (*CommitmentsAPIUpdateCommitmentResponse, error)
@@ -10342,6 +10498,36 @@ func (r InventoryAPIDeleteReservationResponse) GetBody() []byte {
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
+type UsersAPIRemoveOrganizationUsersResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *CastaiUsersV1beta1RemoveOrganizationUsersResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r UsersAPIRemoveOrganizationUsersResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r UsersAPIRemoveOrganizationUsersResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r UsersAPIRemoveOrganizationUsersResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
 type UsersAPIListOrganizationUsersResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -10847,6 +11033,36 @@ func (r CommitmentsAPIDeleteCommitmentResponse) StatusCode() int {
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
 func (r CommitmentsAPIDeleteCommitmentResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type CommitmentsAPIGetCommitmentResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *CastaiInventoryV1beta1GetCommitmentResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r CommitmentsAPIGetCommitmentResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r CommitmentsAPIGetCommitmentResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r CommitmentsAPIGetCommitmentResponse) GetBody() []byte {
 	return r.Body
 }
 
@@ -12514,6 +12730,15 @@ func (c *ClientWithResponses) InventoryAPIDeleteReservationWithResponse(ctx cont
 	return ParseInventoryAPIDeleteReservationResponse(rsp)
 }
 
+// UsersAPIRemoveOrganizationUsersWithResponse request returning *UsersAPIRemoveOrganizationUsersResponse
+func (c *ClientWithResponses) UsersAPIRemoveOrganizationUsersWithResponse(ctx context.Context, organizationId string, params *UsersAPIRemoveOrganizationUsersParams) (*UsersAPIRemoveOrganizationUsersResponse, error) {
+	rsp, err := c.UsersAPIRemoveOrganizationUsers(ctx, organizationId, params)
+	if err != nil {
+		return nil, err
+	}
+	return ParseUsersAPIRemoveOrganizationUsersResponse(rsp)
+}
+
 // UsersAPIListOrganizationUsersWithResponse request returning *UsersAPIListOrganizationUsersResponse
 func (c *ClientWithResponses) UsersAPIListOrganizationUsersWithResponse(ctx context.Context, organizationId string) (*UsersAPIListOrganizationUsersResponse, error) {
 	rsp, err := c.UsersAPIListOrganizationUsers(ctx, organizationId)
@@ -12713,6 +12938,15 @@ func (c *ClientWithResponses) CommitmentsAPIDeleteCommitmentWithResponse(ctx con
 		return nil, err
 	}
 	return ParseCommitmentsAPIDeleteCommitmentResponse(rsp)
+}
+
+// CommitmentsAPIGetCommitmentWithResponse request returning *CommitmentsAPIGetCommitmentResponse
+func (c *ClientWithResponses) CommitmentsAPIGetCommitmentWithResponse(ctx context.Context, commitmentId string, params *CommitmentsAPIGetCommitmentParams) (*CommitmentsAPIGetCommitmentResponse, error) {
+	rsp, err := c.CommitmentsAPIGetCommitment(ctx, commitmentId, params)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCommitmentsAPIGetCommitmentResponse(rsp)
 }
 
 // CommitmentsAPIUpdateCommitmentWithBodyWithResponse request with arbitrary body returning *CommitmentsAPIUpdateCommitmentResponse
@@ -14892,6 +15126,32 @@ func ParseInventoryAPIDeleteReservationResponse(rsp *http.Response) (*InventoryA
 	return response, nil
 }
 
+// ParseUsersAPIRemoveOrganizationUsersResponse parses an HTTP response from a UsersAPIRemoveOrganizationUsersWithResponse call
+func ParseUsersAPIRemoveOrganizationUsersResponse(rsp *http.Response) (*UsersAPIRemoveOrganizationUsersResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &UsersAPIRemoveOrganizationUsersResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest CastaiUsersV1beta1RemoveOrganizationUsersResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
 // ParseUsersAPIListOrganizationUsersResponse parses an HTTP response from a UsersAPIListOrganizationUsersWithResponse call
 func ParseUsersAPIListOrganizationUsersResponse(rsp *http.Response) (*UsersAPIListOrganizationUsersResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
@@ -15324,6 +15584,32 @@ func ParseCommitmentsAPIDeleteCommitmentResponse(rsp *http.Response) (*Commitmen
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest map[string]interface{}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseCommitmentsAPIGetCommitmentResponse parses an HTTP response from a CommitmentsAPIGetCommitmentWithResponse call
+func ParseCommitmentsAPIGetCommitmentResponse(rsp *http.Response) (*CommitmentsAPIGetCommitmentResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &CommitmentsAPIGetCommitmentResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest CastaiInventoryV1beta1GetCommitmentResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
