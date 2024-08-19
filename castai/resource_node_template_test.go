@@ -236,6 +236,56 @@ Tainted = false
 	)
 }
 
+func Test_flattenNodeAffinity(t *testing.T) {
+	makeSDKNodeAffinityWithOperator := func(op string) []sdk.NodetemplatesV1TemplateConstraintsDedicatedNodeAffinity {
+		return []sdk.NodetemplatesV1TemplateConstraintsDedicatedNodeAffinity{
+			{
+				Affinity: &[]sdk.K8sSelectorV1KubernetesNodeAffinity{{
+					Key:      "kubernetes.io/os",
+					Operator: sdk.K8sSelectorV1Operator(op),
+					Values:   []string{"linux"},
+				}},
+				AzName:        lo.ToPtr("us-central1-c"),
+				InstanceTypes: &[]string{"e2"},
+				Name:          lo.ToPtr("linux-only"),
+			},
+		}
+	}
+
+	makeMappedNodeAffinityWithOperator := func(op string) []map[string]any {
+		wantNA := []map[string]any{
+			{
+				FieldNodeTemplateInstanceTypes: []string{"e2"},
+				FieldNodeTemplateAzName:        "us-central1-c",
+				FieldNodeTemplateName:          "linux-only",
+				FieldNodeTemplateAffinityName: []map[string]any{
+					{
+						FieldNodeTemplateAffinityKeyName:      "kubernetes.io/os",
+						FieldNodeTemplateAffinityOperatorName: op,
+						FieldNodeTemplateAffinityValuesName:   []string{"linux"},
+					},
+				},
+			},
+		}
+		return wantNA
+	}
+
+	for _, canonical := range nodeSelectorOperators {
+		testedVariants := []string{canonical, strings.ToLower(canonical), strings.ToUpper(canonical)}
+		for _, variant := range testedVariants {
+			name := fmt.Sprintf("should map %q to %q", variant, canonical)
+			t.Run(name, func(t *testing.T) {
+				r := require.New(t)
+				input := makeSDKNodeAffinityWithOperator(variant)
+				want := makeMappedNodeAffinityWithOperator(canonical)
+
+				got, _ := flattenNodeAffinity(input)
+				r.Equal(want, got)
+			})
+		}
+	}
+}
+
 func TestNodeTemplateResourceReadContextEmptyList(t *testing.T) {
 	r := require.New(t)
 	mockctrl := gomock.NewController(t)

@@ -92,10 +92,30 @@ const (
 	NodeSelectorOperationLt      = "Lt"
 )
 
+type nodeSelectorOperatorsSlice []string
+
+var nodeSelectorOperators = nodeSelectorOperatorsSlice{NodeSelectorOperationIn,
+	NodeSelectorOperationNotIn,
+	NodeSelectorOperationExists,
+	NodeSelectorOperationDoesNot,
+	NodeSelectorOperationGt,
+	NodeSelectorOperationLt,
+}
+
+// Get returns the provider-specific representation of a given K8s selector
+func (m nodeSelectorOperatorsSlice) Get(k sdk.K8sSelectorV1Operator) (string, bool) {
+	for _, v := range m {
+		if strings.EqualFold(string(k), v) {
+			return v, true
+		}
+	}
+	return "", false
+}
+
 func resourceNodeTemplate() *schema.Resource {
 	supportedArchitectures := []string{ArchAMD64, ArchARM64}
 	supportedOs := []string{OsLinux, OsWindows}
-	supportedSelectorOperations := []string{NodeSelectorOperationIn, NodeSelectorOperationNotIn, NodeSelectorOperationExists, NodeSelectorOperationDoesNot, NodeSelectorOperationGt, NodeSelectorOperationLt}
+	supportedSelectorOperations := nodeSelectorOperators
 
 	return &schema.Resource{
 		CreateContext: resourceNodeTemplateCreate,
@@ -623,7 +643,11 @@ func flattenConstraints(c *sdk.NodetemplatesV1TemplateConstraints) ([]map[string
 		out[FieldNodeTemplateCustomPriority] = flattenCustomPriority(*c.CustomPriority)
 	}
 	if c.DedicatedNodeAffinity != nil && len(*c.DedicatedNodeAffinity) > 0 {
-		out[FieldNodeTemplateDedicatedNodeAffinity] = flattenNodeAffinity(*c.DedicatedNodeAffinity)
+		flatNodeAffinity, err := flattenNodeAffinity(*c.DedicatedNodeAffinity)
+		if err != nil {
+			return []map[string]any{}, err
+		}
+		out[FieldNodeTemplateDedicatedNodeAffinity] = flatNodeAffinity
 	}
 	if c.InstanceFamilies != nil {
 		out[FieldNodeTemplateInstanceFamilies] = flattenInstanceFamilies(c.InstanceFamilies)
@@ -757,7 +781,8 @@ func flattenCustomPriority(priorities []sdk.NodetemplatesV1TemplateConstraintsCu
 	})
 }
 
-func flattenNodeAffinity(affinities []sdk.NodetemplatesV1TemplateConstraintsDedicatedNodeAffinity) any {
+func flattenNodeAffinity(affinities []sdk.NodetemplatesV1TemplateConstraintsDedicatedNodeAffinity) (any, error) {
+	var err error
 	return lo.Map(affinities, func(item sdk.NodetemplatesV1TemplateConstraintsDedicatedNodeAffinity, index int) map[string]any {
 		result := map[string]any{}
 		if item.InstanceTypes != nil {
@@ -768,17 +793,22 @@ func flattenNodeAffinity(affinities []sdk.NodetemplatesV1TemplateConstraintsDedi
 		result[FieldNodeTemplateAzName] = lo.FromPtr(item.AzName)
 
 		if item.Affinity != nil && len(*item.Affinity) > 0 {
+
 			result[FieldNodeTemplateAffinityName] = lo.Map(*item.Affinity, func(affinity sdk.K8sSelectorV1KubernetesNodeAffinity, index int) map[string]any {
+				affinityOperator, ok := nodeSelectorOperators.Get(affinity.Operator)
+				if !ok {
+					err = fmt.Errorf("found unknown node selector operator: %q", affinity.Operator)
+				}
 				return map[string]any{
 					FieldNodeTemplateAffinityKeyName:      affinity.Key,
-					FieldNodeTemplateAffinityOperatorName: affinity.Operator,
+					FieldNodeTemplateAffinityOperatorName: affinityOperator,
 					FieldNodeTemplateAffinityValuesName:   affinity.Values,
 				}
 			})
 		}
 
 		return result
-	})
+	}), err
 }
 
 func resourceNodeTemplateDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
