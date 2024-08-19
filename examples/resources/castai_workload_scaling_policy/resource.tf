@@ -1,6 +1,6 @@
 castai_workload_scaling_policy "services" {
   name              = "services"
-  cluster_id        = castai_gke_cluster.dev.id
+  cluster_id        = castai_eks_cluster.dev.id
   apply_type        = "IMMEDIATE"
   management_option = "MANAGED"
   cpu {
