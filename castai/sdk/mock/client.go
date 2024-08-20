@@ -275,6 +275,26 @@ func (mr *MockClientInterfaceMockRecorder) CommitmentsAPIDeleteCommitmentAssignm
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIDeleteCommitmentAssignment", reflect.TypeOf((*MockClientInterface)(nil).CommitmentsAPIDeleteCommitmentAssignment), varargs...)
 }
 
+// CommitmentsAPIGetCommitment mocks base method.
+func (m *MockClientInterface) CommitmentsAPIGetCommitment(ctx context.Context, commitmentId string, params *sdk.CommitmentsAPIGetCommitmentParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, commitmentId, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "CommitmentsAPIGetCommitment", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CommitmentsAPIGetCommitment indicates an expected call of CommitmentsAPIGetCommitment.
+func (mr *MockClientInterfaceMockRecorder) CommitmentsAPIGetCommitment(ctx, commitmentId, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, commitmentId, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIGetCommitment", reflect.TypeOf((*MockClientInterface)(nil).CommitmentsAPIGetCommitment), varargs...)
+}
+
 // CommitmentsAPIGetCommitmentAssignments mocks base method.
 func (m *MockClientInterface) CommitmentsAPIGetCommitmentAssignments(ctx context.Context, commitmentId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
@@ -2715,6 +2735,26 @@ func (mr *MockClientInterfaceMockRecorder) UsersAPIListOrganizations(ctx, params
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UsersAPIListOrganizations", reflect.TypeOf((*MockClientInterface)(nil).UsersAPIListOrganizations), varargs...)
 }
 
+// UsersAPIRemoveOrganizationUsers mocks base method.
+func (m *MockClientInterface) UsersAPIRemoveOrganizationUsers(ctx context.Context, organizationId string, params *sdk.UsersAPIRemoveOrganizationUsersParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "UsersAPIRemoveOrganizationUsers", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UsersAPIRemoveOrganizationUsers indicates an expected call of UsersAPIRemoveOrganizationUsers.
+func (mr *MockClientInterfaceMockRecorder) UsersAPIRemoveOrganizationUsers(ctx, organizationId, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UsersAPIRemoveOrganizationUsers", reflect.TypeOf((*MockClientInterface)(nil).UsersAPIRemoveOrganizationUsers), varargs...)
+}
+
 // UsersAPIRemoveUserFromOrganization mocks base method.
 func (m *MockClientInterface) UsersAPIRemoveUserFromOrganization(ctx context.Context, organizationId, userId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
@@ -3401,6 +3441,21 @@ func (m *MockClientWithResponsesInterface) CommitmentsAPIGetCommitmentAssignment
 func (mr *MockClientWithResponsesInterfaceMockRecorder) CommitmentsAPIGetCommitmentAssignmentsWithResponse(ctx, commitmentId interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIGetCommitmentAssignmentsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).CommitmentsAPIGetCommitmentAssignmentsWithResponse), ctx, commitmentId)
+}
+
+// CommitmentsAPIGetCommitmentWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) CommitmentsAPIGetCommitmentWithResponse(ctx context.Context, commitmentId string, params *sdk.CommitmentsAPIGetCommitmentParams) (*sdk.CommitmentsAPIGetCommitmentResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CommitmentsAPIGetCommitmentWithResponse", ctx, commitmentId, params)
+	ret0, _ := ret[0].(*sdk.CommitmentsAPIGetCommitmentResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CommitmentsAPIGetCommitmentWithResponse indicates an expected call of CommitmentsAPIGetCommitmentWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) CommitmentsAPIGetCommitmentWithResponse(ctx, commitmentId, params interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIGetCommitmentWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).CommitmentsAPIGetCommitmentWithResponse), ctx, commitmentId, params)
 }
 
 // CommitmentsAPIGetCommitmentsAssignmentsWithResponse mocks base method.
@@ -5216,6 +5271,21 @@ func (m *MockClientWithResponsesInterface) UsersAPIListOrganizationsWithResponse
 func (mr *MockClientWithResponsesInterfaceMockRecorder) UsersAPIListOrganizationsWithResponse(ctx, params interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UsersAPIListOrganizationsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).UsersAPIListOrganizationsWithResponse), ctx, params)
+}
+
+// UsersAPIRemoveOrganizationUsersWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) UsersAPIRemoveOrganizationUsersWithResponse(ctx context.Context, organizationId string, params *sdk.UsersAPIRemoveOrganizationUsersParams) (*sdk.UsersAPIRemoveOrganizationUsersResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UsersAPIRemoveOrganizationUsersWithResponse", ctx, organizationId, params)
+	ret0, _ := ret[0].(*sdk.UsersAPIRemoveOrganizationUsersResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UsersAPIRemoveOrganizationUsersWithResponse indicates an expected call of UsersAPIRemoveOrganizationUsersWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) UsersAPIRemoveOrganizationUsersWithResponse(ctx, organizationId, params interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UsersAPIRemoveOrganizationUsersWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).UsersAPIRemoveOrganizationUsersWithResponse), ctx, organizationId, params)
 }
 
 // UsersAPIRemoveUserFromOrganizationWithResponse mocks base method.

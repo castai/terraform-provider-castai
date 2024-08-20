@@ -66,7 +66,7 @@ module "castai-eks-cluster" {
   aws_assume_role_arn        = module.castai-eks-role-iam.role_arn
   delete_nodes_on_disconnect = var.delete_nodes_on_disconnect
 
-  default_node_configuration = module.castai-eks-cluster.castai_node_configurations["default"]
+  default_node_configuration_name = "default"
 
   node_configurations = {
     default = {
@@ -103,11 +103,11 @@ module "castai-eks-cluster" {
 
   node_templates = {
     default_by_castai = {
-      name             = "default-by-castai"
-      configuration_id = module.castai-eks-cluster.castai_node_configurations["default"]
-      is_default       = true
-      is_enabled       = true
-      should_taint     = false
+      name               = "default-by-castai"
+      configuration_name = "default"
+      is_default         = true
+      is_enabled         = true
+      should_taint       = false
 
       constraints = {
         on_demand          = true
@@ -122,9 +122,9 @@ module "castai-eks-cluster" {
       }
     }
     spot_tmpl = {
-      configuration_id = module.castai-eks-cluster.castai_node_configurations["default"]
-      is_enabled       = true
-      should_taint     = true
+      configuration_name = "default"
+      is_enabled         = true
+      should_taint       = true
 
       custom_labels = {
         custom-label-key-1 = "custom-label-value-1"
