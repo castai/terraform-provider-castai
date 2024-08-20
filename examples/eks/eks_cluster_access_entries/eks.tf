@@ -7,6 +7,13 @@ module "eks" {
   cluster_name                   = var.cluster_name
   cluster_version                = var.cluster_version
   cluster_endpoint_public_access = true
+  enable_cluster_creator_admin_permissions = true
+  access_entries = {
+    CASTAI = {
+      principal_arn = module.castai-eks-role-iam.instance_profile_role_arn
+      type = "EC2_LINUX"
+    }
+  }
 
   cluster_addons = {
     coredns = {
@@ -65,10 +72,4 @@ resource "aws_security_group" "additional" {
       "10.0.0.0/8",
     ]
   }
-}
-
-resource "aws_eks_access_entry" "access_entry" {
-  cluster_name  = var.cluster_name
-  principal_arn = module.castai-eks-role-iam.instance_profile_role_arn
-  type          = "EC2_LINUX"
 }
