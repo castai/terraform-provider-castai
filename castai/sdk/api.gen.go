@@ -244,11 +244,12 @@ const (
 
 // Defines values for WorkloadoptimizationV1EventType.
 const (
-	EVENTTYPECONFIGURATIONCHANGED  WorkloadoptimizationV1EventType = "EVENT_TYPE_CONFIGURATION_CHANGED"
-	EVENTTYPEINVALID               WorkloadoptimizationV1EventType = "EVENT_TYPE_INVALID"
-	EVENTTYPEOOMKILL               WorkloadoptimizationV1EventType = "EVENT_TYPE_OOM_KILL"
-	EVENTTYPERECOMMENDATIONAPPLIED WorkloadoptimizationV1EventType = "EVENT_TYPE_RECOMMENDATION_APPLIED"
-	EVENTTYPESURGE                 WorkloadoptimizationV1EventType = "EVENT_TYPE_SURGE"
+	EVENTTYPECONFIGURATIONCHANGED   WorkloadoptimizationV1EventType = "EVENT_TYPE_CONFIGURATION_CHANGED"
+	EVENTTYPECONFIGURATIONCHANGEDV2 WorkloadoptimizationV1EventType = "EVENT_TYPE_CONFIGURATION_CHANGEDV2"
+	EVENTTYPEINVALID                WorkloadoptimizationV1EventType = "EVENT_TYPE_INVALID"
+	EVENTTYPEOOMKILL                WorkloadoptimizationV1EventType = "EVENT_TYPE_OOM_KILL"
+	EVENTTYPERECOMMENDATIONAPPLIED  WorkloadoptimizationV1EventType = "EVENT_TYPE_RECOMMENDATION_APPLIED"
+	EVENTTYPESURGE                  WorkloadoptimizationV1EventType = "EVENT_TYPE_SURGE"
 )
 
 // Defines values for WorkloadoptimizationV1GetAgentStatusResponseAgentStatus.
@@ -3074,6 +3075,18 @@ type WorkloadoptimizationV1ConfigurationChangedEvent struct {
 	RecommendationConfig WorkloadoptimizationV1RecommendationConfig `json:"recommendationConfig"`
 }
 
+// WorkloadoptimizationV1ConfigurationChangedEventV2 defines model for workloadoptimization.v1.ConfigurationChangedEventV2.
+type WorkloadoptimizationV1ConfigurationChangedEventV2 struct {
+	Current  WorkloadoptimizationV1ConfigurationChangedV2 `json:"current"`
+	Previous WorkloadoptimizationV1ConfigurationChangedV2 `json:"previous"`
+}
+
+// WorkloadoptimizationV1ConfigurationChangedV2 defines model for workloadoptimization.v1.ConfigurationChangedV2.
+type WorkloadoptimizationV1ConfigurationChangedV2 struct {
+	ScalingPolicyConfig WorkloadoptimizationV1ScalingPolicyConfig `json:"scalingPolicyConfig"`
+	WorkloadConfig      WorkloadoptimizationV1WorkloadConfigV2    `json:"workloadConfig"`
+}
+
 // WorkloadoptimizationV1Container defines model for workloadoptimization.v1.Container.
 type WorkloadoptimizationV1Container struct {
 	// Name of the container.
@@ -3108,10 +3121,11 @@ type WorkloadoptimizationV1DeleteWorkloadScalingPolicyResponse = map[string]inte
 
 // WorkloadoptimizationV1Event defines model for workloadoptimization.v1.Event.
 type WorkloadoptimizationV1Event struct {
-	ConfigurationChanged  *WorkloadoptimizationV1ConfigurationChangedEvent  `json:"configurationChanged,omitempty"`
-	OomKill               *WorkloadoptimizationV1OOMKillEvent               `json:"oomKill,omitempty"`
-	RecommendationApplied *WorkloadoptimizationV1RecommendationAppliedEvent `json:"recommendationApplied,omitempty"`
-	Surge                 *WorkloadoptimizationV1SurgeEvent                 `json:"surge,omitempty"`
+	ConfigurationChanged   *WorkloadoptimizationV1ConfigurationChangedEvent   `json:"configurationChanged,omitempty"`
+	ConfigurationChangedV2 *WorkloadoptimizationV1ConfigurationChangedEventV2 `json:"configurationChangedV2,omitempty"`
+	OomKill                *WorkloadoptimizationV1OOMKillEvent                `json:"oomKill,omitempty"`
+	RecommendationApplied  *WorkloadoptimizationV1RecommendationAppliedEvent  `json:"recommendationApplied,omitempty"`
+	Surge                  *WorkloadoptimizationV1SurgeEvent                  `json:"surge,omitempty"`
 }
 
 // WorkloadoptimizationV1EventContainer defines model for workloadoptimization.v1.EventContainer.
@@ -3404,6 +3418,12 @@ type WorkloadoptimizationV1ResourceQuantity struct {
 type WorkloadoptimizationV1Resources struct {
 	Limits   *WorkloadoptimizationV1ResourceQuantity `json:"limits,omitempty"`
 	Requests *WorkloadoptimizationV1ResourceQuantity `json:"requests,omitempty"`
+}
+
+// WorkloadoptimizationV1ScalingPolicyConfig defines model for workloadoptimization.v1.ScalingPolicyConfig.
+type WorkloadoptimizationV1ScalingPolicyConfig struct {
+	Id   string `json:"id"`
+	Name string `json:"name"`
 }
 
 // WorkloadoptimizationV1StartupSettings defines model for workloadoptimization.v1.StartupSettings.
