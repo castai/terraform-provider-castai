@@ -270,19 +270,52 @@ func Test_flattenNodeAffinity(t *testing.T) {
 		return wantNA
 	}
 
+	tt := []struct {
+		name              string
+		inputNodeAffinity []sdk.NodetemplatesV1TemplateConstraintsDedicatedNodeAffinity
+		wantNodeAffinity  []map[string]any
+		wantErr           bool
+	}{
+		{
+			name:              "should produce an error for an unknown operator",
+			inputNodeAffinity: makeSDKNodeAffinityWithOperator("UNKNOWN"),
+			wantNodeAffinity:  makeMappedNodeAffinityWithOperator(""),
+			wantErr:           true,
+		},
+	}
+
 	for _, canonical := range nodeSelectorOperators {
 		testedVariants := []string{canonical, strings.ToLower(canonical), strings.ToUpper(canonical)}
 		for _, variant := range testedVariants {
-			name := fmt.Sprintf("should map %q to %q", variant, canonical)
-			t.Run(name, func(t *testing.T) {
-				r := require.New(t)
-				input := makeSDKNodeAffinityWithOperator(variant)
-				want := makeMappedNodeAffinityWithOperator(canonical)
+			tcName := fmt.Sprintf("should map %q to %q", variant, canonical)
+			input := makeSDKNodeAffinityWithOperator(variant)
+			want := makeMappedNodeAffinityWithOperator(canonical)
 
-				got, _ := flattenNodeAffinity(input)
-				r.Equal(want, got)
-			})
+			tc := struct {
+				name              string
+				inputNodeAffinity []sdk.NodetemplatesV1TemplateConstraintsDedicatedNodeAffinity
+				wantNodeAffinity  []map[string]any
+				wantErr           bool
+			}{
+				name:              tcName,
+				inputNodeAffinity: input,
+				wantNodeAffinity:  want,
+				wantErr:           false,
+			}
+
+			tt = append(tt, tc)
 		}
+	}
+
+	for _, tc := range tt {
+		t.Run(tc.name, func(t *testing.T) {
+			r := require.New(t)
+			got, err := flattenNodeAffinity(tc.inputNodeAffinity)
+			r.Equal(tc.wantNodeAffinity, got)
+			if tc.wantErr {
+				r.Error(err)
+			}
+		})
 	}
 }
 
