@@ -48,6 +48,7 @@ Optional:
 - `burstable_instances` (String) Will include burstable instances when enabled otherwise they will be excluded. Supported values: `enabled`, `disabled` or ``.
 - `compute_optimized` (Boolean) Compute optimized instance constraint (deprecated).
 - `compute_optimized_state` (String) Will only include compute optimized nodes when enabled and exclude compute optimized nodes when disabled. Empty value won't have effect on instances filter. Supported values: `enabled`, `disabled` or empty string.
+- `cpu_manufacturers` (List of String) List of acceptable CPU manufacturers. Allowed values: AMD, AMPERE, APPLE, AWS, INTEL.
 - `custom_priority` (Block List) (see [below for nested schema](#nestedblock--constraints--custom_priority))
 - `customer_specific` (String) Will include customer specific (preview) instances when enabled otherwise they will be excluded. Supported values: `enabled`, `disabled` or ``.
 - `dedicated_node_affinity` (Block List) Dedicated node affinity - creates preference for instances to be created on sole tenancy or dedicated nodes. This

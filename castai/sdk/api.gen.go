@@ -198,6 +198,15 @@ const (
 	NoSchedule NodetemplatesV1TaintEffect = "NoSchedule"
 )
 
+// Defines values for NodetemplatesV1TemplateConstraintsCPUManufacturer.
+const (
+	AMD    NodetemplatesV1TemplateConstraintsCPUManufacturer = "AMD"
+	AMPERE NodetemplatesV1TemplateConstraintsCPUManufacturer = "AMPERE"
+	APPLE  NodetemplatesV1TemplateConstraintsCPUManufacturer = "APPLE"
+	AWS    NodetemplatesV1TemplateConstraintsCPUManufacturer = "AWS"
+	INTEL  NodetemplatesV1TemplateConstraintsCPUManufacturer = "INTEL"
+)
+
 // Defines values for NodetemplatesV1TemplateConstraintsConstraintState.
 const (
 	DISABLED NodetemplatesV1TemplateConstraintsConstraintState = "DISABLED"
@@ -2356,6 +2365,7 @@ type NodetemplatesV1AvailableInstanceType struct {
 	Burstable              *bool                                                       `json:"burstable,omitempty"`
 	Cpu                    *string                                                     `json:"cpu,omitempty"`
 	CpuCost                *float64                                                    `json:"cpuCost,omitempty"`
+	CpuManufacturers       *[]string                                                   `json:"cpuManufacturers,omitempty"`
 	CustomerSpecific       *bool                                                       `json:"customerSpecific,omitempty"`
 	Family                 *string                                                     `json:"family,omitempty"`
 	IsBareMetal            *bool                                                       `json:"isBareMetal,omitempty"`
@@ -2528,6 +2538,9 @@ type NodetemplatesV1TemplateConstraints struct {
 	Burstable        *NodetemplatesV1TemplateConstraintsConstraintState `json:"burstable,omitempty"`
 	ComputeOptimized *bool                                              `json:"computeOptimized"`
 
+	// Describes the manufacturers of the CPUs the instance type can be equipped with.
+	CpuManufacturers *[]NodetemplatesV1TemplateConstraintsCPUManufacturer `json:"cpuManufacturers,omitempty"`
+
 	// Custom sorting priority - instances matching defined rules will take priority over other candidates.
 	CustomPriority *[]NodetemplatesV1TemplateConstraintsCustomPriority `json:"customPriority,omitempty"`
 
@@ -2598,6 +2611,9 @@ type NodetemplatesV1TemplateConstraints struct {
 	// Spot instance fallback constraint - when true, on-demand instances will be created, when spots are unavailable.
 	UseSpotFallbacks *bool `json:"useSpotFallbacks"`
 }
+
+// NodetemplatesV1TemplateConstraintsCPUManufacturer defines model for nodetemplates.v1.TemplateConstraints.CPUManufacturer.
+type NodetemplatesV1TemplateConstraintsCPUManufacturer string
 
 // - DISABLED: The constraint is disabled
 //   - ENABLED: The constraint is enabled
