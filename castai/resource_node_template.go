@@ -206,10 +206,11 @@ func resourceNodeTemplate() *schema.Resource {
 							Description: "Spot instance fallback constraint - when true, on-demand instances will be created, when spots are unavailable.",
 						},
 						FieldNodeTemplateFallbackRestoreRateSeconds: {
-							Type:        schema.TypeInt,
-							Default:     0,
-							Optional:    true,
-							Description: "Fallback restore rate in seconds: defines how much time should pass before spot fallback should be attempted to be restored to real spot.",
+							Type:             schema.TypeInt,
+							Default:          1800,
+							Optional:         true,
+							Description:      "Fallback restore rate in seconds: defines how much time should pass before spot fallback should be attempted to be restored to real spot.",
+							ValidateDiagFunc: validation.ToDiagFunc(validation.IntAtLeast(60)),
 						},
 						FieldNodeTemplateEnableSpotDiversity: {
 							Type:        schema.TypeBool,
@@ -218,9 +219,11 @@ func resourceNodeTemplate() *schema.Resource {
 							Description: "Enable/disable spot diversity policy. When enabled, autoscaler will try to balance between diverse and cost optimal instance types.",
 						},
 						FieldNodeTemplateSpotDiversityPriceIncreaseLimitPercent: {
-							Type:        schema.TypeInt,
-							Optional:    true,
-							Description: "Allowed node configuration price increase when diversifying instance types. E.g. if the value is 10%, then the overall price of diversified instance types can be 10% higher than the price of the optimal configuration.",
+							Type:             schema.TypeInt,
+							Optional:         true,
+							Default:          20,
+							Description:      "Allowed node configuration price increase when diversifying instance types. E.g. if the value is 10%, then the overall price of diversified instance types can be 10% higher than the price of the optimal configuration.",
+							ValidateDiagFunc: validation.ToDiagFunc(validation.IntAtLeast(1)),
 						},
 						FieldNodeTemplateSpotInterruptionPredictionsEnabled: {
 							Type:        schema.TypeBool,
