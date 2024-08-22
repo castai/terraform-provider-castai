@@ -2696,9 +2696,9 @@ func (mr *MockClientInterfaceMockRecorder) UsersAPIListInvitations(ctx, params i
 }
 
 // UsersAPIListOrganizationUsers mocks base method.
-func (m *MockClientInterface) UsersAPIListOrganizationUsers(ctx context.Context, organizationId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+func (m *MockClientInterface) UsersAPIListOrganizationUsers(ctx context.Context, organizationId string, params *sdk.UsersAPIListOrganizationUsersParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, organizationId}
+	varargs := []interface{}{ctx, organizationId, params}
 	for _, a := range reqEditors {
 		varargs = append(varargs, a)
 	}
@@ -2709,9 +2709,9 @@ func (m *MockClientInterface) UsersAPIListOrganizationUsers(ctx context.Context,
 }
 
 // UsersAPIListOrganizationUsers indicates an expected call of UsersAPIListOrganizationUsers.
-func (mr *MockClientInterfaceMockRecorder) UsersAPIListOrganizationUsers(ctx, organizationId interface{}, reqEditors ...interface{}) *gomock.Call {
+func (mr *MockClientInterfaceMockRecorder) UsersAPIListOrganizationUsers(ctx, organizationId, params interface{}, reqEditors ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, organizationId}, reqEditors...)
+	varargs := append([]interface{}{ctx, organizationId, params}, reqEditors...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UsersAPIListOrganizationUsers", reflect.TypeOf((*MockClientInterface)(nil).UsersAPIListOrganizationUsers), varargs...)
 }
 
@@ -2733,6 +2733,26 @@ func (mr *MockClientInterfaceMockRecorder) UsersAPIListOrganizations(ctx, params
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{ctx, params}, reqEditors...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UsersAPIListOrganizations", reflect.TypeOf((*MockClientInterface)(nil).UsersAPIListOrganizations), varargs...)
+}
+
+// UsersAPIListUserGroups mocks base method.
+func (m *MockClientInterface) UsersAPIListUserGroups(ctx context.Context, organizationId, userId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, userId}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "UsersAPIListUserGroups", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UsersAPIListUserGroups indicates an expected call of UsersAPIListUserGroups.
+func (mr *MockClientInterfaceMockRecorder) UsersAPIListUserGroups(ctx, organizationId, userId interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, userId}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UsersAPIListUserGroups", reflect.TypeOf((*MockClientInterface)(nil).UsersAPIListUserGroups), varargs...)
 }
 
 // UsersAPIRemoveOrganizationUsers mocks base method.
@@ -5244,18 +5264,18 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) UsersAPIListInvitationsW
 }
 
 // UsersAPIListOrganizationUsersWithResponse mocks base method.
-func (m *MockClientWithResponsesInterface) UsersAPIListOrganizationUsersWithResponse(ctx context.Context, organizationId string) (*sdk.UsersAPIListOrganizationUsersResponse, error) {
+func (m *MockClientWithResponsesInterface) UsersAPIListOrganizationUsersWithResponse(ctx context.Context, organizationId string, params *sdk.UsersAPIListOrganizationUsersParams) (*sdk.UsersAPIListOrganizationUsersResponse, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UsersAPIListOrganizationUsersWithResponse", ctx, organizationId)
+	ret := m.ctrl.Call(m, "UsersAPIListOrganizationUsersWithResponse", ctx, organizationId, params)
 	ret0, _ := ret[0].(*sdk.UsersAPIListOrganizationUsersResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // UsersAPIListOrganizationUsersWithResponse indicates an expected call of UsersAPIListOrganizationUsersWithResponse.
-func (mr *MockClientWithResponsesInterfaceMockRecorder) UsersAPIListOrganizationUsersWithResponse(ctx, organizationId interface{}) *gomock.Call {
+func (mr *MockClientWithResponsesInterfaceMockRecorder) UsersAPIListOrganizationUsersWithResponse(ctx, organizationId, params interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UsersAPIListOrganizationUsersWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).UsersAPIListOrganizationUsersWithResponse), ctx, organizationId)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UsersAPIListOrganizationUsersWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).UsersAPIListOrganizationUsersWithResponse), ctx, organizationId, params)
 }
 
 // UsersAPIListOrganizationsWithResponse mocks base method.
@@ -5271,6 +5291,21 @@ func (m *MockClientWithResponsesInterface) UsersAPIListOrganizationsWithResponse
 func (mr *MockClientWithResponsesInterfaceMockRecorder) UsersAPIListOrganizationsWithResponse(ctx, params interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UsersAPIListOrganizationsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).UsersAPIListOrganizationsWithResponse), ctx, params)
+}
+
+// UsersAPIListUserGroupsWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) UsersAPIListUserGroupsWithResponse(ctx context.Context, organizationId, userId string) (*sdk.UsersAPIListUserGroupsResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UsersAPIListUserGroupsWithResponse", ctx, organizationId, userId)
+	ret0, _ := ret[0].(*sdk.UsersAPIListUserGroupsResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UsersAPIListUserGroupsWithResponse indicates an expected call of UsersAPIListUserGroupsWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) UsersAPIListUserGroupsWithResponse(ctx, organizationId, userId interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UsersAPIListUserGroupsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).UsersAPIListUserGroupsWithResponse), ctx, organizationId, userId)
 }
 
 // UsersAPIRemoveOrganizationUsersWithResponse mocks base method.

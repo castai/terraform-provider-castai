@@ -5,10 +5,11 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/castai/terraform-provider-castai/castai/sdk"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/samber/lo"
+
+	"github.com/castai/terraform-provider-castai/castai/sdk"
 )
 
 const (
@@ -142,7 +143,7 @@ func resourceOrganizationMembersRead(ctx context.Context, data *schema.ResourceD
 	client := meta.(*ProviderConfig).api
 
 	organizationID := data.Id()
-	usersResp, err := client.UsersAPIListOrganizationUsersWithResponse(ctx, organizationID)
+	usersResp, err := client.UsersAPIListOrganizationUsersWithResponse(ctx, organizationID, &sdk.UsersAPIListOrganizationUsersParams{})
 	if err := sdk.CheckOKResponse(usersResp, err); err != nil {
 		return diag.FromErr(fmt.Errorf("retrieving users: %w", err))
 	}
@@ -208,7 +209,7 @@ func resourceOrganizationMembersUpdate(ctx context.Context, data *schema.Resourc
 	client := meta.(*ProviderConfig).api
 	organizationID := data.Id()
 
-	usersResp, err := client.UsersAPIListOrganizationUsersWithResponse(ctx, organizationID)
+	usersResp, err := client.UsersAPIListOrganizationUsersWithResponse(ctx, organizationID, &sdk.UsersAPIListOrganizationUsersParams{})
 	if err := sdk.CheckOKResponse(usersResp, err); err != nil {
 		return diag.FromErr(fmt.Errorf("retrieving users: %w", err))
 	}
@@ -308,7 +309,7 @@ func resourceOrganizationMembersDelete(ctx context.Context, data *schema.Resourc
 		return diag.FromErr(fmt.Errorf("retrieving current user profile: %w", err))
 	}
 
-	usersResp, err := client.UsersAPIListOrganizationUsersWithResponse(ctx, organizationID)
+	usersResp, err := client.UsersAPIListOrganizationUsersWithResponse(ctx, organizationID, &sdk.UsersAPIListOrganizationUsersParams{})
 	if err := sdk.CheckOKResponse(usersResp, err); err != nil {
 		return diag.FromErr(fmt.Errorf("retrieving users: %w", err))
 	}

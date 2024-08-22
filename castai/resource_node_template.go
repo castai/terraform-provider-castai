@@ -69,6 +69,7 @@ const (
 	FieldNodeTemplateAffinityValuesName                       = "values"
 	FieldNodeTemplateBurstableInstances                       = "burstable_instances"
 	FieldNodeTemplateCustomerSpecific                         = "customer_specific"
+	FieldNodeTemplateCPUManufacturers                         = "cpu_manufacturers"
 )
 
 const (
@@ -116,6 +117,7 @@ func resourceNodeTemplate() *schema.Resource {
 	supportedArchitectures := []string{ArchAMD64, ArchARM64}
 	supportedOs := []string{OsLinux, OsWindows}
 	supportedSelectorOperations := nodeSelectorOperators
+	supportedCPUManufacturers := []string{string(sdk.AMD), string(sdk.AMPERE), string(sdk.APPLE), string(sdk.AWS), string(sdk.INTEL)}
 
 	return &schema.Resource{
 		CreateContext: resourceNodeTemplateCreate,
@@ -498,6 +500,16 @@ func resourceNodeTemplate() *schema.Resource {
 							Description:      "Will include customer specific (preview) instances when enabled otherwise they will be excluded. Supported values: `enabled`, `disabled` or ``.",
 							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"", Enabled, Disabled}, false)),
 						},
+						FieldNodeTemplateCPUManufacturers: {
+							Type:     schema.TypeList,
+							MinItems: 1,
+							Optional: true,
+							Elem: &schema.Schema{
+								Type:             schema.TypeString,
+								ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(supportedCPUManufacturers, false)),
+							},
+							Description: fmt.Sprintf("List of acceptable CPU manufacturers. Allowed values: %s.", strings.Join(supportedCPUManufacturers, ", ")),
+						},
 					},
 				},
 			},
@@ -713,6 +725,9 @@ func flattenConstraints(c *sdk.NodetemplatesV1TemplateConstraints) ([]map[string
 	}
 	if c.Azs != nil {
 		out[FieldNodeTemplateAZs] = lo.FromPtr(c.Azs)
+	}
+	if c.CpuManufacturers != nil {
+		out[FieldNodeTemplateCPUManufacturers] = lo.FromPtr(c.CpuManufacturers)
 	}
 	setStateConstraintValue(c.Burstable, FieldNodeTemplateBurstableInstances, out)
 	setStateConstraintValue(c.CustomerSpecific, FieldNodeTemplateCustomerSpecific, out)
@@ -1287,6 +1302,12 @@ func toTemplateConstraints(obj map[string]any) *sdk.NodetemplatesV1TemplateConst
 		case Disabled:
 			out.CustomerSpecific = toPtr(sdk.DISABLED)
 		}
+	}
+
+	if v, ok := obj[FieldNodeTemplateCPUManufacturers].([]any); ok {
+		out.CpuManufacturers = toPtr(lo.Map(v, func(item any, _ int) sdk.NodetemplatesV1TemplateConstraintsCPUManufacturer {
+			return sdk.NodetemplatesV1TemplateConstraintsCPUManufacturer(item.(string))
+		}))
 	}
 
 	return out

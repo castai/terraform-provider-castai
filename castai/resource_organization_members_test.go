@@ -71,7 +71,7 @@ func TestOrganizationResourceReadContext(t *testing.T) {
   "invitations": []
 }`)))
 	mockClient.EXPECT().
-		UsersAPIListOrganizationUsers(gomock.Any(), organizationID).
+		UsersAPIListOrganizationUsers(gomock.Any(), organizationID, &sdk.UsersAPIListOrganizationUsersParams{}).
 		Return(&http.Response{StatusCode: 200, Body: body, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
 
 	mockClient.EXPECT().

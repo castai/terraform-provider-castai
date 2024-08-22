@@ -102,7 +102,8 @@ func TestNodeTemplateResourceReadContext(t *testing.T) {
 						  }
 						]
 					}
-				  ]
+				  ],
+				  "cpuManufacturers": ["INTEL", "AMD"]
 				},
 				"version": "3",
 				"shouldTaint": true,
@@ -161,6 +162,9 @@ constraints.0.azs.1 = us-west-2b
 constraints.0.azs.2 = us-west-2c
 constraints.0.compute_optimized = false
 constraints.0.compute_optimized_state = disabled
+constraints.0.cpu_manufacturers.# = 2
+constraints.0.cpu_manufacturers.0 = INTEL
+constraints.0.cpu_manufacturers.1 = AMD
 constraints.0.custom_priority.# = 1
 constraints.0.custom_priority.0.instance_families.# = 2
 constraints.0.custom_priority.0.instance_families.0 = a
@@ -556,6 +560,9 @@ func TestAccResourceNodeTemplate_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.dedicated_node_affinity.#", "0"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.storage_optimized_state", "disabled"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.compute_optimized_state", ""),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.cpu_manufacturers.#", "2"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.cpu_manufacturers.0", "INTEL"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.cpu_manufacturers.1", "AMD"),
 				),
 			},
 			{
@@ -622,6 +629,9 @@ func TestAccResourceNodeTemplate_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.compute_optimized_state", "disabled"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.burstable_instances", "enabled"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.customer_specific", "enabled"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.cpu_manufacturers.#", "2"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.cpu_manufacturers.0", "INTEL"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.cpu_manufacturers.1", "AMD"),
 				),
 			},
 		},
@@ -696,6 +706,8 @@ func testAccNodeTemplateConfig(rName, clusterName string) string {
 					spot = true
 					on_demand = true
 				}
+
+				cpu_manufacturers = ["INTEL", "AMD"]
 			}
 		}
 	`, rName))
@@ -750,6 +762,8 @@ func testNodeTemplateUpdated(rName, clusterName string) string {
 					spot = true
 					on_demand = true
 				}
+
+				cpu_manufacturers = ["INTEL", "AMD"]
 			}
 		}
 	`, rName))

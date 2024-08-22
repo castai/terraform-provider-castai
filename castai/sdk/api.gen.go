@@ -149,6 +149,19 @@ const (
 	NotIn1        K8sSelectorV1Operator = "notIn"
 )
 
+// Defines values for NodeconfigV1AKSConfigImageFamily.
+const (
+	NodeconfigV1AKSConfigImageFamilyFAMILYAZURELINUX  NodeconfigV1AKSConfigImageFamily = "FAMILY_AZURE_LINUX"
+	NodeconfigV1AKSConfigImageFamilyFAMILYUBUNTU      NodeconfigV1AKSConfigImageFamily = "FAMILY_UBUNTU"
+	NodeconfigV1AKSConfigImageFamilyFAMILYUNSPECIFIED NodeconfigV1AKSConfigImageFamily = "FAMILY_UNSPECIFIED"
+	NodeconfigV1AKSConfigImageFamilyFAMILYWINDOWS2019 NodeconfigV1AKSConfigImageFamily = "FAMILY_WINDOWS_2019"
+	NodeconfigV1AKSConfigImageFamilyFAMILYWINDOWS2022 NodeconfigV1AKSConfigImageFamily = "FAMILY_WINDOWS_2022"
+	NodeconfigV1AKSConfigImageFamilyFamilyAzureLinux  NodeconfigV1AKSConfigImageFamily = "family_azure_linux"
+	NodeconfigV1AKSConfigImageFamilyFamilyUbuntu      NodeconfigV1AKSConfigImageFamily = "family_ubuntu"
+	NodeconfigV1AKSConfigImageFamilyFamilyWindows2019 NodeconfigV1AKSConfigImageFamily = "family_windows_2019"
+	NodeconfigV1AKSConfigImageFamilyFamilyWindows2022 NodeconfigV1AKSConfigImageFamily = "family_windows_2022"
+)
+
 // Defines values for NodeconfigV1AKSConfigOsDiskType.
 const (
 	OSDISKTYPEPREMIUMSSD  NodeconfigV1AKSConfigOsDiskType = "OS_DISK_TYPE_PREMIUM_SSD"
@@ -169,13 +182,13 @@ const (
 
 // Defines values for NodeconfigV1EKSConfigImageFamily.
 const (
-	FAMILYAL2          NodeconfigV1EKSConfigImageFamily = "FAMILY_AL2"
-	FAMILYAL2023       NodeconfigV1EKSConfigImageFamily = "FAMILY_AL2023"
-	FAMILYBOTTLEROCKET NodeconfigV1EKSConfigImageFamily = "FAMILY_BOTTLEROCKET"
-	FAMILYUNSPECIFIED  NodeconfigV1EKSConfigImageFamily = "FAMILY_UNSPECIFIED"
-	FamilyAl2          NodeconfigV1EKSConfigImageFamily = "family_al2"
-	FamilyAl2023       NodeconfigV1EKSConfigImageFamily = "family_al2023"
-	FamilyBottlerocket NodeconfigV1EKSConfigImageFamily = "family_bottlerocket"
+	NodeconfigV1EKSConfigImageFamilyFAMILYAL2          NodeconfigV1EKSConfigImageFamily = "FAMILY_AL2"
+	NodeconfigV1EKSConfigImageFamilyFAMILYAL2023       NodeconfigV1EKSConfigImageFamily = "FAMILY_AL2023"
+	NodeconfigV1EKSConfigImageFamilyFAMILYBOTTLEROCKET NodeconfigV1EKSConfigImageFamily = "FAMILY_BOTTLEROCKET"
+	NodeconfigV1EKSConfigImageFamilyFAMILYUNSPECIFIED  NodeconfigV1EKSConfigImageFamily = "FAMILY_UNSPECIFIED"
+	NodeconfigV1EKSConfigImageFamilyFamilyAl2          NodeconfigV1EKSConfigImageFamily = "family_al2"
+	NodeconfigV1EKSConfigImageFamilyFamilyAl2023       NodeconfigV1EKSConfigImageFamily = "family_al2023"
+	NodeconfigV1EKSConfigImageFamilyFamilyBottlerocket NodeconfigV1EKSConfigImageFamily = "family_bottlerocket"
 )
 
 // Defines values for NodetemplatesV1AvailableInstanceTypeOs.
@@ -196,6 +209,15 @@ const (
 const (
 	NoExecute  NodetemplatesV1TaintEffect = "NoExecute"
 	NoSchedule NodetemplatesV1TaintEffect = "NoSchedule"
+)
+
+// Defines values for NodetemplatesV1TemplateConstraintsCPUManufacturer.
+const (
+	AMD    NodetemplatesV1TemplateConstraintsCPUManufacturer = "AMD"
+	AMPERE NodetemplatesV1TemplateConstraintsCPUManufacturer = "AMPERE"
+	APPLE  NodetemplatesV1TemplateConstraintsCPUManufacturer = "APPLE"
+	AWS    NodetemplatesV1TemplateConstraintsCPUManufacturer = "AWS"
+	INTEL  NodetemplatesV1TemplateConstraintsCPUManufacturer = "INTEL"
 )
 
 // Defines values for NodetemplatesV1TemplateConstraintsConstraintState.
@@ -1254,8 +1276,9 @@ type CastaiUsersV1beta1ListOrganizationsResponse struct {
 
 // Membership describes user-organization membership details.
 type CastaiUsersV1beta1Membership struct {
-	Groups *[]CastaiUsersV1beta1GroupRef `json:"groups,omitempty"`
-	Role   string                        `json:"role"`
+	CreatedAt *time.Time                    `json:"createdAt,omitempty"`
+	Groups    *[]CastaiUsersV1beta1GroupRef `json:"groups,omitempty"`
+	Role      string                        `json:"role"`
 
 	// User represents a single system user.
 	User CastaiUsersV1beta1User `json:"user"`
@@ -2023,6 +2046,9 @@ type K8sSelectorV1Operator string
 
 // NodeconfigV1AKSConfig defines model for nodeconfig.v1.AKSConfig.
 type NodeconfigV1AKSConfig struct {
+	// List of supported image families (OSes) for AKS.
+	ImageFamily *NodeconfigV1AKSConfigImageFamily `json:"imageFamily,omitempty"`
+
 	// Maximum number of pods that can be run on a node, which affects how many IP addresses you will need for each node.
 	// Defaults to 30. Values between 10 and 250 are allowed.
 	// Setting values above 110 will require specific CNI configuration. Please refer to Microsoft documentation for additional guidance.
@@ -2031,6 +2057,9 @@ type NodeconfigV1AKSConfig struct {
 	// OsDiskType represent possible values for AKS node os disk type(this is subset of all available Azure disk types).
 	OsDiskType *NodeconfigV1AKSConfigOsDiskType `json:"osDiskType,omitempty"`
 }
+
+// List of supported image families (OSes) for AKS.
+type NodeconfigV1AKSConfigImageFamily string
 
 // OsDiskType represent possible values for AKS node os disk type(this is subset of all available Azure disk types).
 type NodeconfigV1AKSConfigOsDiskType string
@@ -2356,6 +2385,7 @@ type NodetemplatesV1AvailableInstanceType struct {
 	Burstable              *bool                                                       `json:"burstable,omitempty"`
 	Cpu                    *string                                                     `json:"cpu,omitempty"`
 	CpuCost                *float64                                                    `json:"cpuCost,omitempty"`
+	CpuManufacturers       *[]string                                                   `json:"cpuManufacturers,omitempty"`
 	CustomerSpecific       *bool                                                       `json:"customerSpecific,omitempty"`
 	Family                 *string                                                     `json:"family,omitempty"`
 	IsBareMetal            *bool                                                       `json:"isBareMetal,omitempty"`
@@ -2528,6 +2558,9 @@ type NodetemplatesV1TemplateConstraints struct {
 	Burstable        *NodetemplatesV1TemplateConstraintsConstraintState `json:"burstable,omitempty"`
 	ComputeOptimized *bool                                              `json:"computeOptimized"`
 
+	// Describes the manufacturers of the CPUs the instance type can be equipped with.
+	CpuManufacturers *[]NodetemplatesV1TemplateConstraintsCPUManufacturer `json:"cpuManufacturers,omitempty"`
+
 	// Custom sorting priority - instances matching defined rules will take priority over other candidates.
 	CustomPriority *[]NodetemplatesV1TemplateConstraintsCustomPriority `json:"customPriority,omitempty"`
 
@@ -2598,6 +2631,9 @@ type NodetemplatesV1TemplateConstraints struct {
 	// Spot instance fallback constraint - when true, on-demand instances will be created, when spots are unavailable.
 	UseSpotFallbacks *bool `json:"useSpotFallbacks"`
 }
+
+// NodetemplatesV1TemplateConstraintsCPUManufacturer defines model for nodetemplates.v1.TemplateConstraints.CPUManufacturer.
+type NodetemplatesV1TemplateConstraintsCPUManufacturer string
 
 // - DISABLED: The constraint is disabled
 //   - ENABLED: The constraint is enabled
@@ -3293,8 +3329,9 @@ type WorkloadoptimizationV1PodMetrics struct {
 
 // WorkloadoptimizationV1RecommendationAppliedEvent defines model for workloadoptimization.v1.RecommendationAppliedEvent.
 type WorkloadoptimizationV1RecommendationAppliedEvent struct {
-	Current  WorkloadoptimizationV1RecommendationAppliedEventChange `json:"current"`
-	Previous WorkloadoptimizationV1RecommendationAppliedEventChange `json:"previous"`
+	ApplyType WorkloadoptimizationV1ApplyType                        `json:"applyType"`
+	Current   WorkloadoptimizationV1RecommendationAppliedEventChange `json:"current"`
+	Previous  WorkloadoptimizationV1RecommendationAppliedEventChange `json:"previous"`
 }
 
 // WorkloadoptimizationV1RecommendationAppliedEventChange defines model for workloadoptimization.v1.RecommendationAppliedEvent.Change.
@@ -3644,17 +3681,18 @@ type WorkloadoptimizationV1WorkloadRecommendation struct {
 
 // WorkloadoptimizationV1WorkloadScalingPolicy defines model for workloadoptimization.v1.WorkloadScalingPolicy.
 type WorkloadoptimizationV1WorkloadScalingPolicy struct {
-	ApplyType              WorkloadoptimizationV1ApplyType              `json:"applyType"`
-	ClusterId              string                                       `json:"clusterId"`
-	ConfidenceThreshold    float64                                      `json:"confidenceThreshold"`
-	CreatedAt              time.Time                                    `json:"createdAt"`
-	Id                     string                                       `json:"id"`
-	IsDefault              bool                                         `json:"isDefault"`
-	IsReadonly             bool                                         `json:"isReadonly"`
-	Name                   string                                       `json:"name"`
-	OrganizationId         string                                       `json:"organizationId"`
-	RecommendationPolicies WorkloadoptimizationV1RecommendationPolicies `json:"recommendationPolicies"`
-	UpdatedAt              time.Time                                    `json:"updatedAt"`
+	ApplyType                           WorkloadoptimizationV1ApplyType              `json:"applyType"`
+	ClusterId                           string                                       `json:"clusterId"`
+	ConfidenceThreshold                 float64                                      `json:"confidenceThreshold"`
+	CreatedAt                           time.Time                                    `json:"createdAt"`
+	HasWorkloadsConfiguredByAnnotations bool                                         `json:"hasWorkloadsConfiguredByAnnotations"`
+	Id                                  string                                       `json:"id"`
+	IsDefault                           bool                                         `json:"isDefault"`
+	IsReadonly                          bool                                         `json:"isReadonly"`
+	Name                                string                                       `json:"name"`
+	OrganizationId                      string                                       `json:"organizationId"`
+	RecommendationPolicies              WorkloadoptimizationV1RecommendationPolicies `json:"recommendationPolicies"`
+	UpdatedAt                           time.Time                                    `json:"updatedAt"`
 }
 
 // AuthTokenAPIListAuthTokensParams defines parameters for AuthTokenAPIListAuthTokens.
@@ -3835,6 +3873,12 @@ type InventoryAPIOverwriteReservationsJSONBody = CastaiInventoryV1beta1GenericRe
 type UsersAPIRemoveOrganizationUsersParams struct {
 	// Users is the list of user ids to remove.
 	Users []string `form:"users" json:"users"`
+}
+
+// UsersAPIListOrganizationUsersParams defines parameters for UsersAPIListOrganizationUsers.
+type UsersAPIListOrganizationUsersParams struct {
+	// IncludeGroups is the flag to include group membership in the response.
+	IncludeGroups *bool `form:"includeGroups,omitempty" json:"includeGroups,omitempty"`
 }
 
 // UsersAPIAddUserToOrganizationJSONBody defines parameters for UsersAPIAddUserToOrganization.

@@ -362,7 +362,7 @@ type ClientInterface interface {
 	UsersAPIRemoveOrganizationUsers(ctx context.Context, organizationId string, params *UsersAPIRemoveOrganizationUsersParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// UsersAPIListOrganizationUsers request
-	UsersAPIListOrganizationUsers(ctx context.Context, organizationId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+	UsersAPIListOrganizationUsers(ctx context.Context, organizationId string, params *UsersAPIListOrganizationUsersParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// UsersAPIAddUserToOrganization request with any body
 	UsersAPIAddUserToOrganizationWithBody(ctx context.Context, organizationId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -376,6 +376,9 @@ type ClientInterface interface {
 	UsersAPIUpdateOrganizationUserWithBody(ctx context.Context, organizationId string, userId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	UsersAPIUpdateOrganizationUser(ctx context.Context, organizationId string, userId string, body UsersAPIUpdateOrganizationUserJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// UsersAPIListUserGroups request
+	UsersAPIListUserGroups(ctx context.Context, organizationId string, userId string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// ScheduledRebalancingAPIListRebalancingSchedules request
 	ScheduledRebalancingAPIListRebalancingSchedules(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -1715,8 +1718,8 @@ func (c *Client) UsersAPIRemoveOrganizationUsers(ctx context.Context, organizati
 	return c.Client.Do(req)
 }
 
-func (c *Client) UsersAPIListOrganizationUsers(ctx context.Context, organizationId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewUsersAPIListOrganizationUsersRequest(c.Server, organizationId)
+func (c *Client) UsersAPIListOrganizationUsers(ctx context.Context, organizationId string, params *UsersAPIListOrganizationUsersParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUsersAPIListOrganizationUsersRequest(c.Server, organizationId, params)
 	if err != nil {
 		return nil, err
 	}
@@ -1777,6 +1780,18 @@ func (c *Client) UsersAPIUpdateOrganizationUserWithBody(ctx context.Context, org
 
 func (c *Client) UsersAPIUpdateOrganizationUser(ctx context.Context, organizationId string, userId string, body UsersAPIUpdateOrganizationUserJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewUsersAPIUpdateOrganizationUserRequest(c.Server, organizationId, userId, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) UsersAPIListUserGroups(ctx context.Context, organizationId string, userId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUsersAPIListUserGroupsRequest(c.Server, organizationId, userId)
 	if err != nil {
 		return nil, err
 	}
@@ -5784,7 +5799,7 @@ func NewUsersAPIRemoveOrganizationUsersRequest(server string, organizationId str
 }
 
 // NewUsersAPIListOrganizationUsersRequest generates requests for UsersAPIListOrganizationUsers
-func NewUsersAPIListOrganizationUsersRequest(server string, organizationId string) (*http.Request, error) {
+func NewUsersAPIListOrganizationUsersRequest(server string, organizationId string, params *UsersAPIListOrganizationUsersParams) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -5808,6 +5823,26 @@ func NewUsersAPIListOrganizationUsersRequest(server string, organizationId strin
 	if err != nil {
 		return nil, err
 	}
+
+	queryValues := queryURL.Query()
+
+	if params.IncludeGroups != nil {
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "includeGroups", runtime.ParamLocationQuery, *params.IncludeGroups); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	queryURL.RawQuery = queryValues.Encode()
 
 	req, err := http.NewRequest("GET", queryURL.String(), nil)
 	if err != nil {
@@ -5955,6 +5990,47 @@ func NewUsersAPIUpdateOrganizationUserRequestWithBody(server string, organizatio
 	}
 
 	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewUsersAPIListUserGroupsRequest generates requests for UsersAPIListUserGroups
+func NewUsersAPIListUserGroupsRequest(server string, organizationId string, userId string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "organizationId", runtime.ParamLocationPath, organizationId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "userId", runtime.ParamLocationPath, userId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/organizations/%s/users/%s/groups", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
 
 	return req, nil
 }
@@ -8165,7 +8241,7 @@ type ClientWithResponsesInterface interface {
 	UsersAPIRemoveOrganizationUsersWithResponse(ctx context.Context, organizationId string, params *UsersAPIRemoveOrganizationUsersParams) (*UsersAPIRemoveOrganizationUsersResponse, error)
 
 	// UsersAPIListOrganizationUsers request
-	UsersAPIListOrganizationUsersWithResponse(ctx context.Context, organizationId string) (*UsersAPIListOrganizationUsersResponse, error)
+	UsersAPIListOrganizationUsersWithResponse(ctx context.Context, organizationId string, params *UsersAPIListOrganizationUsersParams) (*UsersAPIListOrganizationUsersResponse, error)
 
 	// UsersAPIAddUserToOrganization request  with any body
 	UsersAPIAddUserToOrganizationWithBodyWithResponse(ctx context.Context, organizationId string, contentType string, body io.Reader) (*UsersAPIAddUserToOrganizationResponse, error)
@@ -8179,6 +8255,9 @@ type ClientWithResponsesInterface interface {
 	UsersAPIUpdateOrganizationUserWithBodyWithResponse(ctx context.Context, organizationId string, userId string, contentType string, body io.Reader) (*UsersAPIUpdateOrganizationUserResponse, error)
 
 	UsersAPIUpdateOrganizationUserWithResponse(ctx context.Context, organizationId string, userId string, body UsersAPIUpdateOrganizationUserJSONRequestBody) (*UsersAPIUpdateOrganizationUserResponse, error)
+
+	// UsersAPIListUserGroups request
+	UsersAPIListUserGroupsWithResponse(ctx context.Context, organizationId string, userId string) (*UsersAPIListUserGroupsResponse, error)
 
 	// ScheduledRebalancingAPIListRebalancingSchedules request
 	ScheduledRebalancingAPIListRebalancingSchedulesWithResponse(ctx context.Context) (*ScheduledRebalancingAPIListRebalancingSchedulesResponse, error)
@@ -10648,6 +10727,36 @@ func (r UsersAPIUpdateOrganizationUserResponse) GetBody() []byte {
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
+type UsersAPIListUserGroupsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *[]CastaiUsersV1beta1GroupRef
+}
+
+// Status returns HTTPResponse.Status
+func (r UsersAPIListUserGroupsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r UsersAPIListUserGroupsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r UsersAPIListUserGroupsResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
 type ScheduledRebalancingAPIListRebalancingSchedulesResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -12740,8 +12849,8 @@ func (c *ClientWithResponses) UsersAPIRemoveOrganizationUsersWithResponse(ctx co
 }
 
 // UsersAPIListOrganizationUsersWithResponse request returning *UsersAPIListOrganizationUsersResponse
-func (c *ClientWithResponses) UsersAPIListOrganizationUsersWithResponse(ctx context.Context, organizationId string) (*UsersAPIListOrganizationUsersResponse, error) {
-	rsp, err := c.UsersAPIListOrganizationUsers(ctx, organizationId)
+func (c *ClientWithResponses) UsersAPIListOrganizationUsersWithResponse(ctx context.Context, organizationId string, params *UsersAPIListOrganizationUsersParams) (*UsersAPIListOrganizationUsersResponse, error) {
+	rsp, err := c.UsersAPIListOrganizationUsers(ctx, organizationId, params)
 	if err != nil {
 		return nil, err
 	}
@@ -12789,6 +12898,15 @@ func (c *ClientWithResponses) UsersAPIUpdateOrganizationUserWithResponse(ctx con
 		return nil, err
 	}
 	return ParseUsersAPIUpdateOrganizationUserResponse(rsp)
+}
+
+// UsersAPIListUserGroupsWithResponse request returning *UsersAPIListUserGroupsResponse
+func (c *ClientWithResponses) UsersAPIListUserGroupsWithResponse(ctx context.Context, organizationId string, userId string) (*UsersAPIListUserGroupsResponse, error) {
+	rsp, err := c.UsersAPIListUserGroups(ctx, organizationId, userId)
+	if err != nil {
+		return nil, err
+	}
+	return ParseUsersAPIListUserGroupsResponse(rsp)
 }
 
 // ScheduledRebalancingAPIListRebalancingSchedulesWithResponse request returning *ScheduledRebalancingAPIListRebalancingSchedulesResponse
@@ -15246,6 +15364,32 @@ func ParseUsersAPIUpdateOrganizationUserResponse(rsp *http.Response) (*UsersAPIU
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest CastaiUsersV1beta1Membership
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseUsersAPIListUserGroupsResponse parses an HTTP response from a UsersAPIListUserGroupsWithResponse call
+func ParseUsersAPIListUserGroupsResponse(rsp *http.Response) (*UsersAPIListUserGroupsResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &UsersAPIListUserGroupsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest []CastaiUsersV1beta1GroupRef
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}

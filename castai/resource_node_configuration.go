@@ -717,11 +717,11 @@ func toEKSImageFamily(v string) *sdk.NodeconfigV1EKSConfigImageFamily {
 
 	switch strings.ToLower(v) {
 	case eksImageFamilyAL2:
-		return lo.ToPtr(sdk.FAMILYAL2)
+		return lo.ToPtr(sdk.NodeconfigV1EKSConfigImageFamilyFamilyAl2)
 	case eksImageFamilyAL2023:
-		return lo.ToPtr(sdk.FAMILYAL2023)
+		return lo.ToPtr(sdk.NodeconfigV1EKSConfigImageFamilyFAMILYAL2023)
 	case eksImageFamilyBottlerocket:
-		return lo.ToPtr(sdk.FAMILYBOTTLEROCKET)
+		return lo.ToPtr(sdk.NodeconfigV1EKSConfigImageFamilyFAMILYBOTTLEROCKET)
 	default:
 		return nil
 	}
@@ -801,11 +801,11 @@ func flattenEKSConfig(config *sdk.NodeconfigV1EKSConfig) []map[string]interface{
 
 func fromEKSImageFamily(family sdk.NodeconfigV1EKSConfigImageFamily) string {
 	switch family {
-	case sdk.FAMILYBOTTLEROCKET, sdk.FamilyBottlerocket:
+	case sdk.NodeconfigV1EKSConfigImageFamilyFAMILYBOTTLEROCKET, sdk.NodeconfigV1EKSConfigImageFamilyFamilyBottlerocket:
 		return eksImageFamilyBottlerocket
-	case sdk.FAMILYAL2, sdk.FamilyAl2:
+	case sdk.NodeconfigV1EKSConfigImageFamilyFAMILYAL2, sdk.NodeconfigV1EKSConfigImageFamilyFamilyAl2:
 		return eksImageFamilyAL2
-	case sdk.FAMILYAL2023, sdk.FamilyAl2023:
+	case sdk.NodeconfigV1EKSConfigImageFamilyFAMILYAL2023, sdk.NodeconfigV1EKSConfigImageFamilyFamilyAl2023:
 		return eksImageFamilyAL2023
 	default:
 		return ""
