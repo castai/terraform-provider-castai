@@ -762,6 +762,8 @@ func testNodeTemplateUpdated(rName, clusterName string) string {
 					spot = true
 					on_demand = true
 				}
+
+				cpu_manufacturers = ["INTEL", "AMD"]
 			}
 		}
 	`, rName))
