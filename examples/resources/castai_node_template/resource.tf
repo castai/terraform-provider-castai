@@ -1,7 +1,7 @@
-resource "castai_node_template" "default" {
+resource "castai_node_template" "default_by_castai" {
   cluster_id = castai_eks_cluster.test.id
 
-  name             = "my-node-template"
+  name             = "default-by-castai"
   is_default       = true
   is_enabled       = true
   configuration_id = castai_node_configuration.default.id
@@ -36,7 +36,7 @@ resource "castai_node_template" "default" {
     architectures                               = ["amd64"]
     azs                                         = ["us-east-2a", "us-east-2b"]
     burstable_instances                         = "disabled"
-    customer_specific                           = "enabled"
+    customer_specific                           = "disabled"
 
     instance_families {
       include = ["c5"]
