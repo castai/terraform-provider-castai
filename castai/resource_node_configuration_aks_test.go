@@ -29,6 +29,7 @@ func TestAccResourceNodeConfiguration_aks(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "disk_cpu_ratio", "35"),
 					resource.TestCheckResourceAttr(resourceName, "min_disk_size", "122"),
 					resource.TestCheckResourceAttr(resourceName, "aks.0.max_pods_per_node", "31"),
+					resource.TestCheckResourceAttr(resourceName, "aks.0.aks_image_family", "ubuntu"),
 					resource.TestCheckResourceAttr(resourceName, "eks.#", "0"),
 					resource.TestCheckResourceAttr(resourceName, "kops.#", "0"),
 					resource.TestCheckResourceAttr(resourceName, "gke.#", "0"),
@@ -41,6 +42,7 @@ func TestAccResourceNodeConfiguration_aks(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "disk_cpu_ratio", "0"),
 					resource.TestCheckResourceAttr(resourceName, "min_disk_size", "121"),
 					resource.TestCheckResourceAttr(resourceName, "aks.0.max_pods_per_node", "32"),
+					resource.TestCheckResourceAttr(resourceName, "aks.0.aks_image_family", "azure-linux"),
 					resource.TestCheckResourceAttr(resourceName, "eks.#", "0"),
 					resource.TestCheckResourceAttr(resourceName, "kops.#", "0"),
 					resource.TestCheckResourceAttr(resourceName, "gke.#", "0"),
@@ -73,6 +75,7 @@ resource "castai_node_configuration" "test" {
   }
   aks {
 	max_pods_per_node = 31
+    aks_image_family = "ubuntu"
   }
 }
 
@@ -96,6 +99,7 @@ resource "castai_node_configuration" "test" {
   }
   aks {
 	max_pods_per_node = 32
+    aks_image_family = "azure-linux"
   }
 }
 `, rgName, rName))
