@@ -33,11 +33,11 @@ resource "castai_evictor_advanced_config" "config" {
 
 ### Required
 
+- `cluster_id` (String) CAST AI cluster id.
 - `evictor_advanced_config` (Block List, Min: 1) evictor advanced configuration to target specific node/pod (see [below for nested schema](#nestedblock--evictor_advanced_config))
 
 ### Optional
 
-- `cluster_id` (String) CAST AI cluster id.
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only
