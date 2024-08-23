@@ -3887,6 +3887,9 @@ type UsersAPIAddUserToOrganizationJSONBody = CastaiUsersV1beta1NewMembership
 // UsersAPIUpdateOrganizationUserJSONBody defines parameters for UsersAPIUpdateOrganizationUser.
 type UsersAPIUpdateOrganizationUserJSONBody = UsersAPIUpdateOrganizationUserRequest
 
+// UsersAPIListUserGroupsJSONBody defines parameters for UsersAPIListUserGroups.
+type UsersAPIListUserGroupsJSONBody = map[string]interface{}
+
 // ScheduledRebalancingAPICreateRebalancingScheduleJSONBody defines parameters for ScheduledRebalancingAPICreateRebalancingSchedule.
 type ScheduledRebalancingAPICreateRebalancingScheduleJSONBody = ScheduledrebalancingV1RebalancingSchedule
 
@@ -4103,6 +4106,9 @@ type UsersAPIAddUserToOrganizationJSONRequestBody = UsersAPIAddUserToOrganizatio
 
 // UsersAPIUpdateOrganizationUserJSONRequestBody defines body for UsersAPIUpdateOrganizationUser for application/json ContentType.
 type UsersAPIUpdateOrganizationUserJSONRequestBody = UsersAPIUpdateOrganizationUserJSONBody
+
+// UsersAPIListUserGroupsJSONRequestBody defines body for UsersAPIListUserGroups for application/json ContentType.
+type UsersAPIListUserGroupsJSONRequestBody = UsersAPIListUserGroupsJSONBody
 
 // ScheduledRebalancingAPICreateRebalancingScheduleJSONRequestBody defines body for ScheduledRebalancingAPICreateRebalancingSchedule for application/json ContentType.
 type ScheduledRebalancingAPICreateRebalancingScheduleJSONRequestBody = ScheduledRebalancingAPICreateRebalancingScheduleJSONBody
