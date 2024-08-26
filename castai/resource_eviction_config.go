@@ -126,14 +126,17 @@ func resourceEvictionConfig() *schema.Resource {
 						FieldEvictionOptionDisabled: {
 							Type:     schema.TypeBool,
 							Optional: true,
+							Description: "Mark pods as removal disabled",
 						},
 						FieldEvictionOptionAggressive: {
 							Type:     schema.TypeBool,
 							Optional: true,
+							Description: "Apply Aggressive mode to Evictor",
 						},
 						FieldEvictionOptionDisposable: {
 							Type:     schema.TypeBool,
 							Optional: true,
+							Description: "Mark node as disposable",
 						},
 					},
 				},

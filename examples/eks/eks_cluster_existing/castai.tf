@@ -182,4 +182,5 @@ resource "castai_rebalancing_job" "spots" {
   cluster_id              = castai_eks_clusterid.cluster_id.id
   rebalancing_schedule_id = castai_rebalancing_schedule.spots.id
   enabled                 = true
+  depends_on              = [module.castai-eks-cluster]
 }
