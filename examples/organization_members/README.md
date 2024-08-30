@@ -9,7 +9,7 @@ Prerequisites:
 1. Rename `tf.vars.example` to `tf.vars`
 2. Update `tf.vars` file.
 3. Run `terraform init`
-4. Run `terraform apply apply -var-file=tf.vars`
+4. Run `terraform apply -var-file=tf.vars`
 
 ## Importing already existing organization
 
