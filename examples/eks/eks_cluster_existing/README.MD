@@ -10,6 +10,17 @@ Example configuration should be analysed in the following order:
 # Usage
 1. Rename `tf.vars.example` to `tf.vars`
 2. Update `tf.vars` file with your cluster name, cluster region, vpc_id, cluster_security_group_id, node_security_group_id, subnets and CAST AI API token.
+
+| Variable | Description |
+| --- | --- |
+| cluster_name                = "" | Name of cluster |
+| cluster_region              = "" | Name of region of cluster |
+| castai_api_token            = "" | Cast api token |
+| vpc_id                      = "" | Virtual Private Cloud(VPC) id |
+| cluster_security_group_id   = "" | Cluster security group id |
+| node_security_group_id      = "" | Node security group id |
+| subnets                     = ["", ""] | Public subnets of cluster |
+
 3. Initialize Terraform. Under example root folder run:
 ```
 terraform init

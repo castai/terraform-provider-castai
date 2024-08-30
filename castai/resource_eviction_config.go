@@ -47,7 +47,7 @@ func resourceEvictionConfig() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			FieldClusterId: {
 				Type:             schema.TypeString,
-				Optional:         true,
+				Required:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
 				Description:      "CAST AI cluster id.",
 			},

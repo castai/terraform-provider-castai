@@ -18,7 +18,7 @@ examples/**/**/tf.vars
 examples/localdev/*
 !examples/localdev/main.tf.sample
 !examples/localdev/versions.tf
-e2e/**/.env
 e2e/**/local.auto.tfvars
+.env
 terraform.tfstate
 .DS_Store

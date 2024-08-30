@@ -39,6 +39,7 @@ const (
 	FieldNodeConfigurationKOPS             = "kops"
 	FieldNodeConfigurationGKE              = "gke"
 	FieldNodeConfigurationEKSTargetGroup   = "target_group"
+	FieldNodeConfigurationAKSImageFamily   = "aks_image_family"
 	FieldNodeConfigurationEKSImageFamily   = "eks_image_family"
 )
 
@@ -46,6 +47,10 @@ const (
 	eksImageFamilyAL2          = "al2"
 	eksImageFamilyAL2023       = "al2023"
 	eksImageFamilyBottlerocket = "bottlerocket"
+)
+const (
+	aksImageFamilyUbuntu     = "ubuntu"
+	aksImageFamilyAzureLinux = "azure-linux"
 )
 
 func resourceNodeConfiguration() *schema.Resource {
@@ -241,9 +246,14 @@ func resourceNodeConfiguration() *schema.Resource {
 							ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(0, 256)),
 						},
 						FieldNodeConfigurationEKSImageFamily: {
-							Type:             schema.TypeString,
-							Optional:         true,
-							Description:      "Image OS Family to use when provisioning node. If both image and family are provided, the system will use provided image and provisioning logic for given family. If only image family is provided, the system will attempt to resolve the latest image from that family based on kubernetes version and node architecture. If image family is omitted, a default family (based on cloud provider) will be used. See Cast.ai documentation for details.",
+							Type:     schema.TypeString,
+							Optional: true,
+							Description: fmt.Sprintf(
+								"Image OS Family to use when provisioning node in EKS. "+
+									"If both image and family are provided, the system will use provided image and provisioning logic for given family. "+
+									"If only image family is provided, the system will attempt to resolve the latest image from that family based on kubernetes version and node architecture. "+
+									"If image family is omitted, a default family (based on cloud provider) will be used. "+
+									"See Cast.ai documentation for details. Possible values: (%v)", strings.Join([]string{eksImageFamilyAL2, eksImageFamilyAL2023, eksImageFamilyBottlerocket}, ",")),
 							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{eksImageFamilyAL2, eksImageFamilyAL2023, eksImageFamilyBottlerocket}, true)),
 							DiffSuppressFunc: func(k, oldValue, newValue string, d *schema.ResourceData) bool {
 								return strings.EqualFold(oldValue, newValue)
@@ -290,6 +300,20 @@ func resourceNodeConfiguration() *schema.Resource {
 							Optional:         true,
 							Description:      "Type of managed os disk attached to the node. (See [disk types](https://learn.microsoft.com/en-us/azure/virtual-machines/disks-types)). One of: standard, standard-ssd, premium-ssd (ultra and premium-ssd-v2 are not supported for os disk)",
 							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"standard", "standard-ssd", "premium-ssd"}, false)),
+						},
+						FieldNodeConfigurationAKSImageFamily: {
+							Type:     schema.TypeString,
+							Optional: true,
+							Description: fmt.Sprintf(
+								"Image OS Family to use when provisioning node in AKS. "+
+									"If both image and family are provided, the system will use provided image and provisioning logic for given family. "+
+									"If only image family is provided, the system will attempt to resolve the latest image from that family based on kubernetes version and node architecture. "+
+									"If image family is omitted, a default family (based on cloud provider) will be used. "+
+									"See Cast.ai documentation for details. Possible values: (%v)", strings.Join([]string{aksImageFamilyUbuntu, aksImageFamilyAzureLinux}, ",")),
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{aksImageFamilyUbuntu, aksImageFamilyAzureLinux}, true)),
+							DiffSuppressFunc: func(k, oldValue, newValue string, d *schema.ResourceData) bool {
+								return strings.EqualFold(oldValue, newValue)
+							},
 						},
 					},
 				},
@@ -712,11 +736,11 @@ func toEKSImageFamily(v string) *sdk.NodeconfigV1EKSConfigImageFamily {
 
 	switch strings.ToLower(v) {
 	case eksImageFamilyAL2:
-		return lo.ToPtr(sdk.FAMILYAL2)
+		return lo.ToPtr(sdk.NodeconfigV1EKSConfigImageFamilyFamilyAl2)
 	case eksImageFamilyAL2023:
-		return lo.ToPtr(sdk.FAMILYAL2023)
+		return lo.ToPtr(sdk.NodeconfigV1EKSConfigImageFamilyFAMILYAL2023)
 	case eksImageFamilyBottlerocket:
-		return lo.ToPtr(sdk.FAMILYBOTTLEROCKET)
+		return lo.ToPtr(sdk.NodeconfigV1EKSConfigImageFamilyFAMILYBOTTLEROCKET)
 	default:
 		return nil
 	}
@@ -796,11 +820,11 @@ func flattenEKSConfig(config *sdk.NodeconfigV1EKSConfig) []map[string]interface{
 
 func fromEKSImageFamily(family sdk.NodeconfigV1EKSConfigImageFamily) string {
 	switch family {
-	case sdk.FAMILYBOTTLEROCKET, sdk.FamilyBottlerocket:
+	case sdk.NodeconfigV1EKSConfigImageFamilyFAMILYBOTTLEROCKET, sdk.NodeconfigV1EKSConfigImageFamilyFamilyBottlerocket:
 		return eksImageFamilyBottlerocket
-	case sdk.FAMILYAL2, sdk.FamilyAl2:
+	case sdk.NodeconfigV1EKSConfigImageFamilyFAMILYAL2, sdk.NodeconfigV1EKSConfigImageFamilyFamilyAl2:
 		return eksImageFamilyAL2
-	case sdk.FAMILYAL2023, sdk.FamilyAl2023:
+	case sdk.NodeconfigV1EKSConfigImageFamilyFAMILYAL2023, sdk.NodeconfigV1EKSConfigImageFamilyFamilyAl2023:
 		return eksImageFamilyAL2023
 	default:
 		return ""
@@ -846,6 +870,10 @@ func toAKSSConfig(obj map[string]interface{}) *sdk.NodeconfigV1AKSConfig {
 		out.OsDiskType = toAKSOSDiskType(v)
 	}
 
+	if v, ok := obj[FieldNodeConfigurationAKSImageFamily].(string); ok {
+		out.ImageFamily = toAKSImageFamily(v)
+	}
+
 	return out
 }
 
@@ -866,6 +894,21 @@ func toAKSOSDiskType(v string) *sdk.NodeconfigV1AKSConfigOsDiskType {
 	}
 }
 
+func toAKSImageFamily(v string) *sdk.NodeconfigV1AKSConfigImageFamily {
+	if v == "" {
+		return nil
+	}
+
+	switch strings.ToLower(v) {
+	case aksImageFamilyUbuntu:
+		return lo.ToPtr(sdk.NodeconfigV1AKSConfigImageFamilyFAMILYUBUNTU)
+	case aksImageFamilyAzureLinux:
+		return lo.ToPtr(sdk.NodeconfigV1AKSConfigImageFamilyFAMILYAZURELINUX)
+	default:
+		return nil
+	}
+}
+
 func flattenAKSConfig(config *sdk.NodeconfigV1AKSConfig) []map[string]interface{} {
 	if config == nil {
 		return nil
@@ -877,6 +920,10 @@ func flattenAKSConfig(config *sdk.NodeconfigV1AKSConfig) []map[string]interface{
 
 	if v := config.OsDiskType; v != nil {
 		m["os_disk_type"] = fromAKSDiskType(config.OsDiskType)
+	}
+
+	if v := config.ImageFamily; v != nil {
+		m[FieldNodeConfigurationAKSImageFamily] = fromAKSImageFamily(*v)
 	}
 
 	return []map[string]interface{}{m}
@@ -898,6 +945,16 @@ func fromAKSDiskType(osDiskType *sdk.NodeconfigV1AKSConfigOsDiskType) string {
 	}
 }
 
+func fromAKSImageFamily(family sdk.NodeconfigV1AKSConfigImageFamily) string {
+	switch family {
+	case sdk.NodeconfigV1AKSConfigImageFamilyFAMILYAZURELINUX, sdk.NodeconfigV1AKSConfigImageFamilyFamilyAzureLinux:
+		return aksImageFamilyAzureLinux
+	case sdk.NodeconfigV1AKSConfigImageFamilyFAMILYUBUNTU, sdk.NodeconfigV1AKSConfigImageFamilyFamilyUbuntu:
+		return aksImageFamilyUbuntu
+	default:
+		return ""
+	}
+}
 func toGKEConfig(obj map[string]interface{}) *sdk.NodeconfigV1GKEConfig {
 	if obj == nil {
 		return nil
