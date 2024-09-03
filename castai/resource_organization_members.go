@@ -19,7 +19,7 @@ const (
 	FieldOrganizationMembersMembers        = "members"
 )
 
-const (
+var (
 	ownerRole  = "owner"
 	viewerRole = "viewer"
 	memberRole = "member"
@@ -97,7 +97,7 @@ func resourceOrganizationMembersCreate(ctx context.Context, data *schema.Resourc
 			}
 
 			newMemberships = append(newMemberships, sdk.CastaiUsersV1beta1NewMembershipByEmail{
-				Role:      ownerRole,
+				Role:      &ownerRole,
 				UserEmail: email,
 			})
 		}
@@ -108,7 +108,7 @@ func resourceOrganizationMembersCreate(ctx context.Context, data *schema.Resourc
 
 		for _, email := range emails {
 			newMemberships = append(newMemberships, sdk.CastaiUsersV1beta1NewMembershipByEmail{
-				Role:      viewerRole,
+				Role:      &viewerRole,
 				UserEmail: email,
 			})
 		}
@@ -119,7 +119,7 @@ func resourceOrganizationMembersCreate(ctx context.Context, data *schema.Resourc
 
 		for _, email := range emails {
 			newMemberships = append(newMemberships, sdk.CastaiUsersV1beta1NewMembershipByEmail{
-				Role:      memberRole,
+				Role:      &memberRole,
 				UserEmail: email,
 			})
 		}
@@ -285,7 +285,7 @@ func resourceOrganizationMembersUpdate(ctx context.Context, data *schema.Resourc
 	newMemberships := make([]sdk.CastaiUsersV1beta1NewMembershipByEmail, 0, len(manipulations.membersToAdd))
 	for user, role := range manipulations.membersToAdd {
 		newMemberships = append(newMemberships, sdk.CastaiUsersV1beta1NewMembershipByEmail{
-			Role:      role,
+			Role:      &role,
 			UserEmail: user,
 		})
 	}
