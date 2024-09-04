@@ -3,12 +3,12 @@
 page_title: "castai_eks_clusterid Resource - terraform-provider-castai"
 subcategory: ""
 description: |-
-  
+  Retrieve CAST AI clusterid
 ---
 
 # castai_eks_clusterid (Resource)
 
-
+Retrieve CAST AI clusterid
 
 ## Example Usage
 

@@ -17,6 +17,7 @@ func resourceEKSClusterUserARN() *schema.Resource {
 		ReadContext:   resourceEKSUserARNRead,
 		CreateContext: resourceEKSUserARNCreate,
 		DeleteContext: resourceEKSUserARNDelete,
+		Description: "Retrieve EKS Cluster User ARN",
 		Schema: map[string]*schema.Schema{
 			EKSClusterUserARNFieldClusterID: {
 				Type:             schema.TypeString,

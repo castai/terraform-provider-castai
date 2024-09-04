@@ -3,12 +3,12 @@
 page_title: "castai_eks_user_arn Resource - terraform-provider-castai"
 subcategory: ""
 description: |-
-  
+  Retrieve EKS Cluster User ARN
 ---
 
 # castai_eks_user_arn (Resource)
 
-
+Retrieve EKS Cluster User ARN
 
 ## Example Usage
 

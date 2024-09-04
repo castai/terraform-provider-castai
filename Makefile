@@ -1,5 +1,8 @@
 SHELL := /bin/bash
 
+export API_TAGS ?= ExternalClusterAPI,PoliciesAPI,NodeConfigurationAPI,NodeTemplatesAPI,AuthTokenAPI,ScheduledRebalancingAPI,InventoryAPI,UsersAPI,OperationsAPI,EvictorAPI,SSOAPI,CommitmentsAPI,WorkloadOptimizationAPI
+export SWAGGER_LOCATION ?= https://api.cast.ai/v1/spec/openapi.json
+
 default: build
 
 .PHONY: init-examples
@@ -26,8 +29,8 @@ format-tf:
 
 .PHONY: generate-sdk
 generate-sdk:
-	@echo "==> Generating castai sdk client"
-	@API_TAGS=ExternalClusterAPI,PoliciesAPI,NodeConfigurationAPI,NodeTemplatesAPI,AuthTokenAPI,ScheduledRebalancingAPI,InventoryAPI,UsersAPI,OperationsAPI,EvictorAPI,SSOAPI,CommitmentsAPI,WorkloadOptimizationAPI go generate castai/sdk/generate.go
+	echo "==> Generating castai sdk client"
+	go generate castai/sdk/generate.go
 
 # The following command also rewrites existing documentation
 .PHONY: generate-docs

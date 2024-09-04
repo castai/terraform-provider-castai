@@ -49,6 +49,13 @@ const (
 	Inactive CastaiInventoryV1beta1CommitmentStatus = "Inactive"
 )
 
+// Defines values for CastaiInventoryV1beta1DiscountPricingType.
+const (
+	CastaiInventoryV1beta1DiscountPricingTypeTYPEFIXED      CastaiInventoryV1beta1DiscountPricingType = "TYPE_FIXED"
+	CastaiInventoryV1beta1DiscountPricingTypeTYPEPERCENTAGE CastaiInventoryV1beta1DiscountPricingType = "TYPE_PERCENTAGE"
+	CastaiInventoryV1beta1DiscountPricingTypeTYPEUNKNOWN    CastaiInventoryV1beta1DiscountPricingType = "TYPE_UNKNOWN"
+)
+
 // Defines values for CastaiInventoryV1beta1GCPResourceCUDCUDPlan.
 const (
 	THIRTYSIXMONTH CastaiInventoryV1beta1GCPResourceCUDCUDPlan = "THIRTY_SIX_MONTH"
@@ -95,9 +102,9 @@ const (
 
 // Defines values for CastaiSsoV1beta1OIDCType.
 const (
-	TYPEBACKCHANNEL  CastaiSsoV1beta1OIDCType = "TYPE_BACK_CHANNEL"
-	TYPEFRONTCHANNEL CastaiSsoV1beta1OIDCType = "TYPE_FRONT_CHANNEL"
-	TYPEUNKNOWN      CastaiSsoV1beta1OIDCType = "TYPE_UNKNOWN"
+	CastaiSsoV1beta1OIDCTypeTYPEBACKCHANNEL  CastaiSsoV1beta1OIDCType = "TYPE_BACK_CHANNEL"
+	CastaiSsoV1beta1OIDCTypeTYPEFRONTCHANNEL CastaiSsoV1beta1OIDCType = "TYPE_FRONT_CHANNEL"
+	CastaiSsoV1beta1OIDCTypeTYPEUNKNOWN      CastaiSsoV1beta1OIDCType = "TYPE_UNKNOWN"
 )
 
 // Defines values for CastaiSsoV1beta1SSOConnectionStatus.
@@ -266,12 +273,14 @@ const (
 
 // Defines values for WorkloadoptimizationV1EventType.
 const (
-	EVENTTYPECONFIGURATIONCHANGED   WorkloadoptimizationV1EventType = "EVENT_TYPE_CONFIGURATION_CHANGED"
-	EVENTTYPECONFIGURATIONCHANGEDV2 WorkloadoptimizationV1EventType = "EVENT_TYPE_CONFIGURATION_CHANGEDV2"
-	EVENTTYPEINVALID                WorkloadoptimizationV1EventType = "EVENT_TYPE_INVALID"
-	EVENTTYPEOOMKILL                WorkloadoptimizationV1EventType = "EVENT_TYPE_OOM_KILL"
-	EVENTTYPERECOMMENDATIONAPPLIED  WorkloadoptimizationV1EventType = "EVENT_TYPE_RECOMMENDATION_APPLIED"
-	EVENTTYPESURGE                  WorkloadoptimizationV1EventType = "EVENT_TYPE_SURGE"
+	EVENTTYPECONFIGURATIONCHANGED       WorkloadoptimizationV1EventType = "EVENT_TYPE_CONFIGURATION_CHANGED"
+	EVENTTYPECONFIGURATIONCHANGEDV2     WorkloadoptimizationV1EventType = "EVENT_TYPE_CONFIGURATION_CHANGEDV2"
+	EVENTTYPEINVALID                    WorkloadoptimizationV1EventType = "EVENT_TYPE_INVALID"
+	EVENTTYPEOOMKILL                    WorkloadoptimizationV1EventType = "EVENT_TYPE_OOM_KILL"
+	EVENTTYPERECOMMENDATIONAPPLIED      WorkloadoptimizationV1EventType = "EVENT_TYPE_RECOMMENDATION_APPLIED"
+	EVENTTYPERECOMMENDEDPODCOUNTCHANGED WorkloadoptimizationV1EventType = "EVENT_TYPE_RECOMMENDED_POD_COUNT_CHANGED"
+	EVENTTYPERECOMMENDEDREQUESTSCHANGED WorkloadoptimizationV1EventType = "EVENT_TYPE_RECOMMENDED_REQUESTS_CHANGED"
+	EVENTTYPESURGE                      WorkloadoptimizationV1EventType = "EVENT_TYPE_SURGE"
 )
 
 // Defines values for WorkloadoptimizationV1GetAgentStatusResponseAgentStatus.
@@ -445,6 +454,12 @@ type CastaiInventoryV1beta1AddReservationResponse struct {
 	Reservation *CastaiInventoryV1beta1ReservationDetails `json:"reservation,omitempty"`
 }
 
+// AppliedDiscount represents a discount applied to the instance type.
+type CastaiInventoryV1beta1AppliedDiscount struct {
+	Id      *string                                  `json:"id,omitempty"`
+	Pricing *[]CastaiInventoryV1beta1DiscountPricing `json:"pricing,omitempty"`
+}
+
 // CastaiInventoryV1beta1AttachableDisk defines model for castai.inventory.v1beta1.AttachableDisk.
 type CastaiInventoryV1beta1AttachableDisk struct {
 	Name *string `json:"name,omitempty"`
@@ -598,6 +613,17 @@ type CastaiInventoryV1beta1CountableInstanceType struct {
 	// InstanceType is a cloud service provider specific VM type with basic data.
 	InstanceType *CastaiInventoryV1beta1InstanceType `json:"instanceType,omitempty"`
 }
+
+// CastaiInventoryV1beta1DiscountPricing defines model for castai.inventory.v1beta1.DiscountPricing.
+type CastaiInventoryV1beta1DiscountPricing struct {
+	From  *int32                                     `json:"from"`
+	To    *int32                                     `json:"to"`
+	Type  *CastaiInventoryV1beta1DiscountPricingType `json:"type,omitempty"`
+	Value *string                                    `json:"value,omitempty"`
+}
+
+// CastaiInventoryV1beta1DiscountPricingType defines model for castai.inventory.v1beta1.DiscountPricing.Type.
+type CastaiInventoryV1beta1DiscountPricingType string
 
 // CastaiInventoryV1beta1GCPCommitmentImport defines model for castai.inventory.v1beta1.GCPCommitmentImport.
 type CastaiInventoryV1beta1GCPCommitmentImport struct {
@@ -754,7 +780,9 @@ type CastaiInventoryV1beta1InstanceReliability struct {
 
 // InstanceType is a cloud service provider specific VM type with basic data.
 type CastaiInventoryV1beta1InstanceType struct {
-	Architecture *string `json:"architecture,omitempty"`
+	// Specifies the applied discounts on the instance type.
+	AppliedDiscounts *[]CastaiInventoryV1beta1AppliedDiscount `json:"appliedDiscounts,omitempty"`
+	Architecture     *string                                  `json:"architecture,omitempty"`
 
 	// Contains a list of possible attachable disk types for the given instance types. Currently supported for GCP only.
 	AttachableDisks  *[]CastaiInventoryV1beta1AttachableDisk         `json:"attachableDisks,omitempty"`
@@ -869,6 +897,8 @@ type CastaiInventoryV1beta1InstanceTypeBasedUsage struct {
 
 // CastaiInventoryV1beta1InstanceZone defines model for castai.inventory.v1beta1.InstanceZone.
 type CastaiInventoryV1beta1InstanceZone struct {
+	// Specifies the applied discounts on the instance zone.
+	AppliedDiscounts     *[]CastaiInventoryV1beta1AppliedDiscount     `json:"appliedDiscounts,omitempty"`
 	AttachableGpuDevices *[]CastaiInventoryV1beta1AttachableGPUDevice `json:"attachableGpuDevices,omitempty"`
 	AttachedGpuDevices   *[]CastaiInventoryV1beta1GPUDevice           `json:"attachedGpuDevices,omitempty"`
 	AzId                 *string                                      `json:"azId,omitempty"`
@@ -1278,6 +1308,7 @@ type CastaiUsersV1beta1ListOrganizationsResponse struct {
 type CastaiUsersV1beta1Membership struct {
 	CreatedAt *time.Time                    `json:"createdAt,omitempty"`
 	Groups    *[]CastaiUsersV1beta1GroupRef `json:"groups,omitempty"`
+	LoginAt   *time.Time                    `json:"loginAt,omitempty"`
 	Role      string                        `json:"role"`
 
 	// User represents a single system user.
@@ -1296,7 +1327,8 @@ type CastaiUsersV1beta1NewMembership struct {
 // CastaiUsersV1beta1NewMembershipByEmail defines model for castai.users.v1beta1.NewMembershipByEmail.
 type CastaiUsersV1beta1NewMembershipByEmail struct {
 	// role of the invited person.
-	Role string `json:"role"`
+	Role   *string `json:"role,omitempty"`
+	RoleId *string `json:"roleId,omitempty"`
 
 	// email of the invited person.
 	UserEmail string `json:"userEmail"`
@@ -2141,8 +2173,23 @@ type NodeconfigV1GKEConfig struct {
 
 // NodeconfigV1GetSuggestedConfigurationResponse defines model for nodeconfig.v1.GetSuggestedConfigurationResponse.
 type NodeconfigV1GetSuggestedConfigurationResponse struct {
+	// All instance profile ARNs available in the AWS account.
+	InstanceProfiles *[]NodeconfigV1InstanceProfile `json:"instanceProfiles,omitempty"`
+
+	// All clusters Security Groups in the cluster VPC.
 	SecurityGroups *[]NodeconfigV1SecurityGroup `json:"securityGroups,omitempty"`
-	Subnets        *[]NodeconfigV1SubnetDetails `json:"subnets,omitempty"`
+
+	// All cluster routable subnets.
+	Subnets *[]NodeconfigV1SubnetDetails `json:"subnets,omitempty"`
+}
+
+// NodeconfigV1InstanceProfile defines model for nodeconfig.v1.InstanceProfile.
+type NodeconfigV1InstanceProfile struct {
+	// ARN of the instance profile.
+	Arn *string `json:"arn,omitempty"`
+
+	// Name of the instance profile.
+	Name *string `json:"name,omitempty"`
 }
 
 // NodeconfigV1KOPSConfig defines model for nodeconfig.v1.KOPSConfig.
@@ -3160,8 +3207,12 @@ type WorkloadoptimizationV1Event struct {
 	ConfigurationChanged   *WorkloadoptimizationV1ConfigurationChangedEvent   `json:"configurationChanged,omitempty"`
 	ConfigurationChangedV2 *WorkloadoptimizationV1ConfigurationChangedEventV2 `json:"configurationChangedV2,omitempty"`
 	OomKill                *WorkloadoptimizationV1OOMKillEvent                `json:"oomKill,omitempty"`
-	RecommendationApplied  *WorkloadoptimizationV1RecommendationAppliedEvent  `json:"recommendationApplied,omitempty"`
-	Surge                  *WorkloadoptimizationV1SurgeEvent                  `json:"surge,omitempty"`
+
+	// TODO: WOOP-424, cleanup legacy event after UI switches to RecommendedRequestsChangedEvent.
+	RecommendationApplied      *WorkloadoptimizationV1RecommendationAppliedEvent      `json:"recommendationApplied,omitempty"`
+	RecommendedPodCountChanged *WorkloadoptimizationV1RecommendedPodCountChangedEvent `json:"recommendedPodCountChanged,omitempty"`
+	RecommendedRequestsChanged *WorkloadoptimizationV1RecommendedRequestsChangedEvent `json:"recommendedRequestsChanged,omitempty"`
+	Surge                      *WorkloadoptimizationV1SurgeEvent                      `json:"surge,omitempty"`
 }
 
 // WorkloadoptimizationV1EventContainer defines model for workloadoptimization.v1.EventContainer.
@@ -3327,7 +3378,7 @@ type WorkloadoptimizationV1PodMetrics struct {
 	PodCountMin float64                                  `json:"podCountMin"`
 }
 
-// WorkloadoptimizationV1RecommendationAppliedEvent defines model for workloadoptimization.v1.RecommendationAppliedEvent.
+// TODO: WOOP-424, cleanup legacy event after UI switches to RecommendedRequestsChangedEvent.
 type WorkloadoptimizationV1RecommendationAppliedEvent struct {
 	ApplyType WorkloadoptimizationV1ApplyType                        `json:"applyType"`
 	Current   WorkloadoptimizationV1RecommendationAppliedEventChange `json:"current"`
@@ -3368,6 +3419,24 @@ type WorkloadoptimizationV1RecommendationPolicies struct {
 	ManagementOption WorkloadoptimizationV1ManagementOption `json:"managementOption"`
 	Memory           WorkloadoptimizationV1ResourcePolicies `json:"memory"`
 	Startup          *WorkloadoptimizationV1StartupSettings `json:"startup,omitempty"`
+}
+
+// WorkloadoptimizationV1RecommendedPodCountChangedEvent defines model for workloadoptimization.v1.RecommendedPodCountChangedEvent.
+type WorkloadoptimizationV1RecommendedPodCountChangedEvent struct {
+	Current  int32 `json:"current"`
+	Previous int32 `json:"previous"`
+}
+
+// WorkloadoptimizationV1RecommendedRequestsChangedEvent defines model for workloadoptimization.v1.RecommendedRequestsChangedEvent.
+type WorkloadoptimizationV1RecommendedRequestsChangedEvent struct {
+	ApplyType WorkloadoptimizationV1ApplyType                             `json:"applyType"`
+	Current   WorkloadoptimizationV1RecommendedRequestsChangedEventChange `json:"current"`
+	Previous  WorkloadoptimizationV1RecommendedRequestsChangedEventChange `json:"previous"`
+}
+
+// WorkloadoptimizationV1RecommendedRequestsChangedEventChange defines model for workloadoptimization.v1.RecommendedRequestsChangedEvent.Change.
+type WorkloadoptimizationV1RecommendedRequestsChangedEventChange struct {
+	Containers *[]WorkloadoptimizationV1EventContainer `json:"containers,omitempty"`
 }
 
 // WorkloadoptimizationV1ResourceConfig defines model for workloadoptimization.v1.ResourceConfig.

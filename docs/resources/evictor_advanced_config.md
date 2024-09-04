@@ -49,11 +49,11 @@ resource "castai_evictor_advanced_config" "config" {
 
 Optional:
 
-- `aggressive` (Boolean)
-- `disposable` (Boolean)
+- `aggressive` (Boolean) Apply Aggressive mode to Evictor
+- `disposable` (Boolean) Mark node as disposable
 - `node_selector` (Block List) node selector (see [below for nested schema](#nestedblock--evictor_advanced_config--node_selector))
 - `pod_selector` (Block List) pod selector (see [below for nested schema](#nestedblock--evictor_advanced_config--pod_selector))
-- `removal_disabled` (Boolean)
+- `removal_disabled` (Boolean) Mark pods as removal disabled
 
 <a id="nestedblock--evictor_advanced_config--node_selector"></a>
 ### Nested Schema for `evictor_advanced_config.node_selector`
