@@ -27,7 +27,8 @@ func resourceReservations() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: reservationsStateImporter,
 		},
-		Description: "Reservation represents cloud service provider reserved instances that can be used by CAST AI autoscaler.",
+		Description:        "Reservation represents cloud service provider reserved instances that can be used by CAST AI autoscaler.",
+		DeprecationMessage: "Use castai_commitments resource instead.",
 
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(2 * time.Minute),
