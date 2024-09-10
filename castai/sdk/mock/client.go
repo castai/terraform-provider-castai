@@ -1375,6 +1375,46 @@ func (mr *MockClientInterfaceMockRecorder) InventoryAPIGetReservationsBalance(ct
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InventoryAPIGetReservationsBalance", reflect.TypeOf((*MockClientInterface)(nil).InventoryAPIGetReservationsBalance), varargs...)
 }
 
+// InventoryAPIListRegions mocks base method.
+func (m *MockClientInterface) InventoryAPIListRegions(ctx context.Context, params *sdk.InventoryAPIListRegionsParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "InventoryAPIListRegions", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// InventoryAPIListRegions indicates an expected call of InventoryAPIListRegions.
+func (mr *MockClientInterfaceMockRecorder) InventoryAPIListRegions(ctx, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InventoryAPIListRegions", reflect.TypeOf((*MockClientInterface)(nil).InventoryAPIListRegions), varargs...)
+}
+
+// InventoryAPIListZones mocks base method.
+func (m *MockClientInterface) InventoryAPIListZones(ctx context.Context, params *sdk.InventoryAPIListZonesParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "InventoryAPIListZones", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// InventoryAPIListZones indicates an expected call of InventoryAPIListZones.
+func (mr *MockClientInterfaceMockRecorder) InventoryAPIListZones(ctx, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InventoryAPIListZones", reflect.TypeOf((*MockClientInterface)(nil).InventoryAPIListZones), varargs...)
+}
+
 // InventoryAPIOverwriteReservations mocks base method.
 func (m *MockClientInterface) InventoryAPIOverwriteReservations(ctx context.Context, organizationId string, body sdk.InventoryAPIOverwriteReservationsJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
@@ -4271,6 +4311,36 @@ func (m *MockClientWithResponsesInterface) InventoryAPIGetReservationsWithRespon
 func (mr *MockClientWithResponsesInterfaceMockRecorder) InventoryAPIGetReservationsWithResponse(ctx, organizationId interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InventoryAPIGetReservationsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).InventoryAPIGetReservationsWithResponse), ctx, organizationId)
+}
+
+// InventoryAPIListRegionsWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) InventoryAPIListRegionsWithResponse(ctx context.Context, params *sdk.InventoryAPIListRegionsParams) (*sdk.InventoryAPIListRegionsResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "InventoryAPIListRegionsWithResponse", ctx, params)
+	ret0, _ := ret[0].(*sdk.InventoryAPIListRegionsResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// InventoryAPIListRegionsWithResponse indicates an expected call of InventoryAPIListRegionsWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) InventoryAPIListRegionsWithResponse(ctx, params interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InventoryAPIListRegionsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).InventoryAPIListRegionsWithResponse), ctx, params)
+}
+
+// InventoryAPIListZonesWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) InventoryAPIListZonesWithResponse(ctx context.Context, params *sdk.InventoryAPIListZonesParams) (*sdk.InventoryAPIListZonesResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "InventoryAPIListZonesWithResponse", ctx, params)
+	ret0, _ := ret[0].(*sdk.InventoryAPIListZonesResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// InventoryAPIListZonesWithResponse indicates an expected call of InventoryAPIListZonesWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) InventoryAPIListZonesWithResponse(ctx, params interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InventoryAPIListZonesWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).InventoryAPIListZonesWithResponse), ctx, params)
 }
 
 // InventoryAPIOverwriteReservationsWithBodyWithResponse mocks base method.
