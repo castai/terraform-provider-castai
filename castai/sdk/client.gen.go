@@ -399,6 +399,9 @@ type ClientInterface interface {
 	// ScheduledRebalancingAPIGetRebalancingSchedule request
 	ScheduledRebalancingAPIGetRebalancingSchedule(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// InventoryAPIListRegions request
+	InventoryAPIListRegions(ctx context.Context, params *InventoryAPIListRegionsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// CommitmentsAPIGetCommitmentsAssignments request
 	CommitmentsAPIGetCommitmentsAssignments(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -523,6 +526,9 @@ type ClientInterface interface {
 
 	// WorkloadOptimizationAPIGetInstallScript request
 	WorkloadOptimizationAPIGetInstallScript(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// InventoryAPIListZones request
+	InventoryAPIListZones(ctx context.Context, params *InventoryAPIListZonesParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// WorkloadOptimizationAPIUpdateWorkloadV2 request with any body
 	WorkloadOptimizationAPIUpdateWorkloadV2WithBody(ctx context.Context, clusterId string, workloadId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -1886,6 +1892,18 @@ func (c *Client) ScheduledRebalancingAPIGetRebalancingSchedule(ctx context.Conte
 	return c.Client.Do(req)
 }
 
+func (c *Client) InventoryAPIListRegions(ctx context.Context, params *InventoryAPIListRegionsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewInventoryAPIListRegionsRequest(c.Server, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
 func (c *Client) CommitmentsAPIGetCommitmentsAssignments(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewCommitmentsAPIGetCommitmentsAssignmentsRequest(c.Server)
 	if err != nil {
@@ -2416,6 +2434,18 @@ func (c *Client) WorkloadOptimizationAPIGetInstallCmd(ctx context.Context, param
 
 func (c *Client) WorkloadOptimizationAPIGetInstallScript(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewWorkloadOptimizationAPIGetInstallScriptRequest(c.Server)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) InventoryAPIListZones(ctx context.Context, params *InventoryAPIListZonesParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewInventoryAPIListZonesRequest(c.Server, params)
 	if err != nil {
 		return nil, err
 	}
@@ -6230,6 +6260,69 @@ func NewScheduledRebalancingAPIGetRebalancingScheduleRequest(server string, id s
 	return req, nil
 }
 
+// NewInventoryAPIListRegionsRequest generates requests for InventoryAPIListRegions
+func NewInventoryAPIListRegionsRequest(server string, params *InventoryAPIListRegionsParams) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/regions")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	queryValues := queryURL.Query()
+
+	if params.PageSize != nil {
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "pageSize", runtime.ParamLocationQuery, *params.PageSize); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.PageToken != nil {
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "pageToken", runtime.ParamLocationQuery, *params.PageToken); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	queryURL.RawQuery = queryValues.Encode()
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 // NewCommitmentsAPIGetCommitmentsAssignmentsRequest generates requests for CommitmentsAPIGetCommitmentsAssignments
 func NewCommitmentsAPIGetCommitmentsAssignmentsRequest(server string) (*http.Request, error) {
 	var err error
@@ -7872,6 +7965,69 @@ func NewWorkloadOptimizationAPIGetInstallScriptRequest(server string) (*http.Req
 	return req, nil
 }
 
+// NewInventoryAPIListZonesRequest generates requests for InventoryAPIListZones
+func NewInventoryAPIListZonesRequest(server string, params *InventoryAPIListZonesParams) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/zones")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	queryValues := queryURL.Query()
+
+	if params.PageSize != nil {
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "pageSize", runtime.ParamLocationQuery, *params.PageSize); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.PageToken != nil {
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "pageToken", runtime.ParamLocationQuery, *params.PageToken); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	queryURL.RawQuery = queryValues.Encode()
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 // NewWorkloadOptimizationAPIUpdateWorkloadV2Request calls the generic WorkloadOptimizationAPIUpdateWorkloadV2 builder with application/json body
 func NewWorkloadOptimizationAPIUpdateWorkloadV2Request(server string, clusterId string, workloadId string, body WorkloadOptimizationAPIUpdateWorkloadV2JSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
@@ -8278,6 +8434,9 @@ type ClientWithResponsesInterface interface {
 	// ScheduledRebalancingAPIGetRebalancingSchedule request
 	ScheduledRebalancingAPIGetRebalancingScheduleWithResponse(ctx context.Context, id string) (*ScheduledRebalancingAPIGetRebalancingScheduleResponse, error)
 
+	// InventoryAPIListRegions request
+	InventoryAPIListRegionsWithResponse(ctx context.Context, params *InventoryAPIListRegionsParams) (*InventoryAPIListRegionsResponse, error)
+
 	// CommitmentsAPIGetCommitmentsAssignments request
 	CommitmentsAPIGetCommitmentsAssignmentsWithResponse(ctx context.Context) (*CommitmentsAPIGetCommitmentsAssignmentsResponse, error)
 
@@ -8402,6 +8561,9 @@ type ClientWithResponsesInterface interface {
 
 	// WorkloadOptimizationAPIGetInstallScript request
 	WorkloadOptimizationAPIGetInstallScriptWithResponse(ctx context.Context) (*WorkloadOptimizationAPIGetInstallScriptResponse, error)
+
+	// InventoryAPIListZones request
+	InventoryAPIListZonesWithResponse(ctx context.Context, params *InventoryAPIListZonesParams) (*InventoryAPIListZonesResponse, error)
 
 	// WorkloadOptimizationAPIUpdateWorkloadV2 request  with any body
 	WorkloadOptimizationAPIUpdateWorkloadV2WithBodyWithResponse(ctx context.Context, clusterId string, workloadId string, contentType string, body io.Reader) (*WorkloadOptimizationAPIUpdateWorkloadV2Response, error)
@@ -10907,6 +11069,36 @@ func (r ScheduledRebalancingAPIGetRebalancingScheduleResponse) GetBody() []byte 
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
+type InventoryAPIListRegionsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *CastaiInventoryV1beta1ListRegionsResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r InventoryAPIListRegionsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r InventoryAPIListRegionsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r InventoryAPIListRegionsResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
 type CommitmentsAPIGetCommitmentsAssignmentsResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -11953,6 +12145,36 @@ func (r WorkloadOptimizationAPIGetInstallScriptResponse) GetBody() []byte {
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
+type InventoryAPIListZonesResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *CastaiInventoryV1beta1ListZonesResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r InventoryAPIListZonesResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r InventoryAPIListZonesResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r InventoryAPIListZonesResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
 type WorkloadOptimizationAPIUpdateWorkloadV2Response struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -12970,6 +13192,15 @@ func (c *ClientWithResponses) ScheduledRebalancingAPIGetRebalancingScheduleWithR
 	return ParseScheduledRebalancingAPIGetRebalancingScheduleResponse(rsp)
 }
 
+// InventoryAPIListRegionsWithResponse request returning *InventoryAPIListRegionsResponse
+func (c *ClientWithResponses) InventoryAPIListRegionsWithResponse(ctx context.Context, params *InventoryAPIListRegionsParams) (*InventoryAPIListRegionsResponse, error) {
+	rsp, err := c.InventoryAPIListRegions(ctx, params)
+	if err != nil {
+		return nil, err
+	}
+	return ParseInventoryAPIListRegionsResponse(rsp)
+}
+
 // CommitmentsAPIGetCommitmentsAssignmentsWithResponse request returning *CommitmentsAPIGetCommitmentsAssignmentsResponse
 func (c *ClientWithResponses) CommitmentsAPIGetCommitmentsAssignmentsWithResponse(ctx context.Context) (*CommitmentsAPIGetCommitmentsAssignmentsResponse, error) {
 	rsp, err := c.CommitmentsAPIGetCommitmentsAssignments(ctx)
@@ -13363,6 +13594,15 @@ func (c *ClientWithResponses) WorkloadOptimizationAPIGetInstallScriptWithRespons
 		return nil, err
 	}
 	return ParseWorkloadOptimizationAPIGetInstallScriptResponse(rsp)
+}
+
+// InventoryAPIListZonesWithResponse request returning *InventoryAPIListZonesResponse
+func (c *ClientWithResponses) InventoryAPIListZonesWithResponse(ctx context.Context, params *InventoryAPIListZonesParams) (*InventoryAPIListZonesResponse, error) {
+	rsp, err := c.InventoryAPIListZones(ctx, params)
+	if err != nil {
+		return nil, err
+	}
+	return ParseInventoryAPIListZonesResponse(rsp)
 }
 
 // WorkloadOptimizationAPIUpdateWorkloadV2WithBodyWithResponse request with arbitrary body returning *WorkloadOptimizationAPIUpdateWorkloadV2Response
@@ -15530,6 +15770,32 @@ func ParseScheduledRebalancingAPIGetRebalancingScheduleResponse(rsp *http.Respon
 	return response, nil
 }
 
+// ParseInventoryAPIListRegionsResponse parses an HTTP response from a InventoryAPIListRegionsWithResponse call
+func ParseInventoryAPIListRegionsResponse(rsp *http.Response) (*InventoryAPIListRegionsResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &InventoryAPIListRegionsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest CastaiInventoryV1beta1ListRegionsResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
 // ParseCommitmentsAPIGetCommitmentsAssignmentsResponse parses an HTTP response from a CommitmentsAPIGetCommitmentsAssignmentsWithResponse call
 func ParseCommitmentsAPIGetCommitmentsAssignmentsResponse(rsp *http.Response) (*CommitmentsAPIGetCommitmentsAssignmentsResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
@@ -16395,6 +16661,32 @@ func ParseWorkloadOptimizationAPIGetInstallScriptResponse(rsp *http.Response) (*
 	response := &WorkloadOptimizationAPIGetInstallScriptResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
+	}
+
+	return response, nil
+}
+
+// ParseInventoryAPIListZonesResponse parses an HTTP response from a InventoryAPIListZonesWithResponse call
+func ParseInventoryAPIListZonesResponse(rsp *http.Response) (*InventoryAPIListZonesResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &InventoryAPIListZonesResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest CastaiInventoryV1beta1ListZonesResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
 	}
 
 	return response, nil

@@ -872,7 +872,8 @@ type CastaiInventoryV1beta1InstanceTypeAggregate struct {
 	Region *string `json:"region,omitempty"`
 
 	// Spot defines if the instance type is a spot instance.
-	Spot *bool `json:"spot,omitempty"`
+	Spot              *bool                                    `json:"spot,omitempty"`
+	UsageDistribution *CastaiInventoryV1beta1UsageDistribution `json:"usageDistribution,omitempty"`
 
 	// Vcpu available on the instance type.
 	Vcpu *string `json:"vcpu,omitempty"`
@@ -913,6 +914,18 @@ type CastaiInventoryV1beta1InstanceZone struct {
 	Unavailable       *bool                                `json:"unavailable,omitempty"`
 }
 
+// CastaiInventoryV1beta1ListRegionsResponse defines model for castai.inventory.v1beta1.ListRegionsResponse.
+type CastaiInventoryV1beta1ListRegionsResponse struct {
+	NextPageToken *string                         `json:"nextPageToken,omitempty"`
+	Regions       *[]CastaiInventoryV1beta1Region `json:"regions,omitempty"`
+}
+
+// CastaiInventoryV1beta1ListZonesResponse defines model for castai.inventory.v1beta1.ListZonesResponse.
+type CastaiInventoryV1beta1ListZonesResponse struct {
+	NextPageToken *string                       `json:"nextPageToken,omitempty"`
+	Zones         *[]CastaiInventoryV1beta1Zone `json:"zones,omitempty"`
+}
+
 // Describes the network settings for the instance type.
 type CastaiInventoryV1beta1NetworkInfo struct {
 	// Base bandwidth in Mbps.
@@ -940,6 +953,29 @@ type CastaiInventoryV1beta1NodeUsage struct {
 // CastaiInventoryV1beta1OverwriteReservationsResponse defines model for castai.inventory.v1beta1.OverwriteReservationsResponse.
 type CastaiInventoryV1beta1OverwriteReservationsResponse struct {
 	Reservations *[]CastaiInventoryV1beta1ReservationDetails `json:"reservations,omitempty"`
+}
+
+// CastaiInventoryV1beta1Region defines model for castai.inventory.v1beta1.Region.
+type CastaiInventoryV1beta1Region struct {
+	Category           *string                             `json:"category,omitempty"`
+	CreateTime         *time.Time                          `json:"createTime,omitempty"`
+	Csp                *string                             `json:"csp,omitempty"`
+	DisplayName        *string                             `json:"displayName,omitempty"`
+	Id                 *string                             `json:"id,omitempty"`
+	Name               *string                             `json:"name,omitempty"`
+	UnavailabilityTime *time.Time                          `json:"unavailabilityTime"`
+	UpdateTime         *time.Time                          `json:"updateTime,omitempty"`
+	Zones              *[]CastaiInventoryV1beta1RegionZone `json:"zones,omitempty"`
+}
+
+// CastaiInventoryV1beta1RegionZone defines model for castai.inventory.v1beta1.Region.Zone.
+type CastaiInventoryV1beta1RegionZone struct {
+	CreateTime         *time.Time `json:"createTime,omitempty"`
+	Id                 *string    `json:"id,omitempty"`
+	Name               *string    `json:"name,omitempty"`
+	UnavailabilityTime *time.Time `json:"unavailabilityTime"`
+	UpdateTime         *time.Time `json:"updateTime,omitempty"`
+	ZoneId             *string    `json:"zoneId,omitempty"`
 }
 
 // CastaiInventoryV1beta1ReplaceCommitmentAssignmentsResponse defines model for castai.inventory.v1beta1.ReplaceCommitmentAssignmentsResponse.
@@ -1051,6 +1087,17 @@ type CastaiInventoryV1beta1UpdateCommitmentResponse struct {
 type CastaiInventoryV1beta1UsageDistribution struct {
 	Cpu    *float64 `json:"cpu,omitempty"`
 	Memory *float64 `json:"memory,omitempty"`
+}
+
+// CastaiInventoryV1beta1Zone defines model for castai.inventory.v1beta1.Zone.
+type CastaiInventoryV1beta1Zone struct {
+	CreateTime         *time.Time `json:"createTime,omitempty"`
+	Id                 *string    `json:"id,omitempty"`
+	Name               *string    `json:"name,omitempty"`
+	Region             *string    `json:"region,omitempty"`
+	UnavailabilityTime *time.Time `json:"unavailabilityTime"`
+	UpdateTime         *time.Time `json:"updateTime,omitempty"`
+	ZoneId             *string    `json:"zoneId,omitempty"`
 }
 
 // Operation object.
@@ -1326,8 +1373,13 @@ type CastaiUsersV1beta1NewMembership struct {
 
 // CastaiUsersV1beta1NewMembershipByEmail defines model for castai.users.v1beta1.NewMembershipByEmail.
 type CastaiUsersV1beta1NewMembershipByEmail struct {
+	// list of the group IDs for which new user should be added.
+	GroupIds *[]string `json:"groupIds,omitempty"`
+
 	// role of the invited person.
-	Role   *string `json:"role,omitempty"`
+	Role *string `json:"role,omitempty"`
+
+	// string roleID.
 	RoleId *string `json:"roleId,omitempty"`
 
 	// email of the invited person.
@@ -1400,7 +1452,8 @@ type CastaiUsersV1beta1User struct {
 	Id *string `json:"id,omitempty"`
 
 	// (required) readable user name, e.g. "John Doe".
-	Name string `json:"name"`
+	Name string  `json:"name"`
+	Oid  *string `json:"oid"`
 
 	// (optional) refer_id is a unique identifier of the user in the referral partner system.
 	ReferId *int32 `json:"referId"`
@@ -2081,6 +2134,9 @@ type NodeconfigV1AKSConfig struct {
 	// List of supported image families (OSes) for AKS.
 	ImageFamily *NodeconfigV1AKSConfigImageFamily `json:"imageFamily,omitempty"`
 
+	// List of load balancers to be used for the cluster.
+	LoadBalancers *[]NodeconfigV1AKSConfigLoadBalancers `json:"loadBalancers,omitempty"`
+
 	// Maximum number of pods that can be run on a node, which affects how many IP addresses you will need for each node.
 	// Defaults to 30. Values between 10 and 250 are allowed.
 	// Setting values above 110 will require specific CNI configuration. Please refer to Microsoft documentation for additional guidance.
@@ -2092,6 +2148,20 @@ type NodeconfigV1AKSConfig struct {
 
 // List of supported image families (OSes) for AKS.
 type NodeconfigV1AKSConfigImageFamily string
+
+// NodeconfigV1AKSConfigLoadBalancers defines model for nodeconfig.v1.AKSConfig.LoadBalancers.
+type NodeconfigV1AKSConfigLoadBalancers struct {
+	// List of backend pools to be used for the load balancer.
+	IpBasedBackendPools *[]NodeconfigV1AKSConfigLoadBalancersIPBasedBackendPool `json:"ipBasedBackendPools,omitempty"`
+
+	// Name of the load balancer.
+	Name *string `json:"name,omitempty"`
+}
+
+// NodeconfigV1AKSConfigLoadBalancersIPBasedBackendPool defines model for nodeconfig.v1.AKSConfig.LoadBalancers.IPBasedBackendPool.
+type NodeconfigV1AKSConfigLoadBalancersIPBasedBackendPool struct {
+	Name *string `json:"name,omitempty"`
+}
 
 // OsDiskType represent possible values for AKS node os disk type(this is subset of all available Azure disk types).
 type NodeconfigV1AKSConfigOsDiskType string
@@ -3204,11 +3274,9 @@ type WorkloadoptimizationV1DeleteWorkloadScalingPolicyResponse = map[string]inte
 
 // WorkloadoptimizationV1Event defines model for workloadoptimization.v1.Event.
 type WorkloadoptimizationV1Event struct {
-	ConfigurationChanged   *WorkloadoptimizationV1ConfigurationChangedEvent   `json:"configurationChanged,omitempty"`
-	ConfigurationChangedV2 *WorkloadoptimizationV1ConfigurationChangedEventV2 `json:"configurationChangedV2,omitempty"`
-	OomKill                *WorkloadoptimizationV1OOMKillEvent                `json:"oomKill,omitempty"`
-
-	// TODO: WOOP-424, cleanup legacy event after UI switches to RecommendedRequestsChangedEvent.
+	ConfigurationChanged       *WorkloadoptimizationV1ConfigurationChangedEvent       `json:"configurationChanged,omitempty"`
+	ConfigurationChangedV2     *WorkloadoptimizationV1ConfigurationChangedEventV2     `json:"configurationChangedV2,omitempty"`
+	OomKill                    *WorkloadoptimizationV1OOMKillEvent                    `json:"oomKill,omitempty"`
 	RecommendationApplied      *WorkloadoptimizationV1RecommendationAppliedEvent      `json:"recommendationApplied,omitempty"`
 	RecommendedPodCountChanged *WorkloadoptimizationV1RecommendedPodCountChangedEvent `json:"recommendedPodCountChanged,omitempty"`
 	RecommendedRequestsChanged *WorkloadoptimizationV1RecommendedRequestsChangedEvent `json:"recommendedRequestsChanged,omitempty"`
@@ -3378,7 +3446,7 @@ type WorkloadoptimizationV1PodMetrics struct {
 	PodCountMin float64                                  `json:"podCountMin"`
 }
 
-// TODO: WOOP-424, cleanup legacy event after UI switches to RecommendedRequestsChangedEvent.
+// WorkloadoptimizationV1RecommendationAppliedEvent defines model for workloadoptimization.v1.RecommendationAppliedEvent.
 type WorkloadoptimizationV1RecommendationAppliedEvent struct {
 	ApplyType WorkloadoptimizationV1ApplyType                        `json:"applyType"`
 	Current   WorkloadoptimizationV1RecommendationAppliedEventChange `json:"current"`
@@ -3967,6 +4035,12 @@ type ScheduledRebalancingAPIUpdateRebalancingScheduleParams struct {
 	Id *string `form:"id,omitempty" json:"id,omitempty"`
 }
 
+// InventoryAPIListRegionsParams defines parameters for InventoryAPIListRegions.
+type InventoryAPIListRegionsParams struct {
+	PageSize  *int32  `form:"pageSize,omitempty" json:"pageSize,omitempty"`
+	PageToken *string `form:"pageToken,omitempty" json:"pageToken,omitempty"`
+}
+
 // CommitmentsAPICreateCommitmentAssignmentParams defines parameters for CommitmentsAPICreateCommitmentAssignment.
 type CommitmentsAPICreateCommitmentAssignmentParams struct {
 	// Cluster ID
@@ -4084,6 +4158,12 @@ type WorkloadOptimizationAPIUpdateWorkloadJSONBody = WorkloadoptimizationV1Updat
 // WorkloadOptimizationAPIGetInstallCmdParams defines parameters for WorkloadOptimizationAPIGetInstallCmd.
 type WorkloadOptimizationAPIGetInstallCmdParams struct {
 	ClusterId string `form:"clusterId" json:"clusterId"`
+}
+
+// InventoryAPIListZonesParams defines parameters for InventoryAPIListZones.
+type InventoryAPIListZonesParams struct {
+	PageSize  *int32  `form:"pageSize,omitempty" json:"pageSize,omitempty"`
+	PageToken *string `form:"pageToken,omitempty" json:"pageToken,omitempty"`
 }
 
 // WorkloadOptimizationAPIUpdateWorkloadV2JSONBody defines parameters for WorkloadOptimizationAPIUpdateWorkloadV2.
