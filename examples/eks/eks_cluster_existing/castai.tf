@@ -161,8 +161,7 @@ module "castai-eks-cluster" {
       evictor = {
         enabled                   = false
         aggressive_mode           = false
-        cycle_interval            = "5m10s"
-        dry_run                   = false
+        cycle_interval            = "60s"
         node_grace_period_minutes = 10
         scoped_mode               = false
       }
@@ -195,7 +194,7 @@ module "castai-eks-cluster" {
 resource "castai_rebalancing_schedule" "spots" {
   name = "rebalance spots at every 30th minute"
   schedule {
-    cron = "*/120 * * * *"
+    cron = "*/30 * * * *"
   }
   trigger_conditions {
     savings_percentage = 20
