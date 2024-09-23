@@ -61,6 +61,7 @@ const (
 	FieldEvictorNodeGracePeriodMinutes            = "node_grace_period_minutes"
 	FieldEvictorPodEvictionFailureBackOffInterval = "pod_eviction_failure_back_off_interval"
 	FieldEvictorIgnorePodDisruptionBudgets        = "ignore_pod_disruption_budgets"
+	FieldPodPinner                                = "pod_pinner"
 )
 
 func resourceAutoscaler() *schema.Resource {
@@ -231,6 +232,22 @@ func resourceAutoscaler() *schema.Resource {
 													Optional:    true,
 													Default:     false,
 													Description: "enable/disable node constraints policy.",
+												},
+											},
+										},
+									},
+									FieldPodPinner: {
+										Type:        schema.TypeList,
+										Optional:    true,
+										MaxItems:    1,
+										Description: "defines the Cast AI Pod Pinner components settings.",
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												FieldEnabled: {
+													Type:        schema.TypeBool,
+													Default:     true,
+													Optional:    true,
+													Description: "enable/disable the Pod Pinner component's automatic management in your cluster. Default: enabled.",
 												},
 											},
 										},
