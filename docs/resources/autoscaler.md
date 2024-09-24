@@ -178,6 +178,7 @@ Optional:
 - `headroom` (Block List, Max: 1) additional headroom based on cluster's total available capacity for on-demand nodes. (see [below for nested schema](#nestedblock--autoscaler_settings--unschedulable_pods--headroom))
 - `headroom_spot` (Block List, Max: 1) additional headroom based on cluster's total available capacity for spot nodes. (see [below for nested schema](#nestedblock--autoscaler_settings--unschedulable_pods--headroom_spot))
 - `node_constraints` (Block List, Max: 1) defines the node constraints that will be applied when autoscaling with Unschedulable Pods policy. (see [below for nested schema](#nestedblock--autoscaler_settings--unschedulable_pods--node_constraints))
+- `pod_pinner` (Block List, Max: 1) defines the Cast AI Pod Pinner components settings. (see [below for nested schema](#nestedblock--autoscaler_settings--unschedulable_pods--pod_pinner))
 
 <a id="nestedblock--autoscaler_settings--unschedulable_pods--headroom"></a>
 ### Nested Schema for `autoscaler_settings.unschedulable_pods.headroom`
@@ -209,6 +210,14 @@ Optional:
 - `max_ram_mib` (Number) defines max RAM in MiB for the node to pick.
 - `min_cpu_cores` (Number) defines min CPU cores for the node to pick.
 - `min_ram_mib` (Number) defines min RAM in MiB for the node to pick.
+
+
+<a id="nestedblock--autoscaler_settings--unschedulable_pods--pod_pinner"></a>
+### Nested Schema for `autoscaler_settings.unschedulable_pods.pod_pinner`
+
+Optional:
+
+- `enabled` (Boolean) enable/disable the Pod Pinner component's automatic management in your cluster. Default: enabled.
 
 
 

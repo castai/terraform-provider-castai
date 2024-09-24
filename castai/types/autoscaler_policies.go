@@ -16,6 +16,7 @@ type UnschedulablePods struct {
 	HeadroomSpot    *Headroom        `mapstructure:"headroom_spot" json:"headroomSpot,omitempty"`
 	NodeConstraints *NodeConstraints `mapstructure:"node_constraints" json:"nodeConstraints,omitempty"`
 	CustomInstances bool             `mapstructure:"custom_instances_enabled" json:"customInstancesEnabled"`
+	PodPinner       *PodPinner       `mapstructure:"pod_pinner" json:"podPinner,omitempty"`
 }
 
 type Headroom struct {
@@ -30,6 +31,10 @@ type NodeConstraints struct {
 	MinRAMMiB   int  `mapstructure:"min_ram_mib" json:"minRamMiB"`
 	MaxRAMMiB   int  `mapstructure:"max_ram_mib" json:"maxRamMiB"`
 	Enabled     bool `mapstructure:"enabled" json:"enabled"`
+}
+
+type PodPinner struct {
+	Enabled bool `mapstructure:"enabled" json:"enabled"`
 }
 
 type ClusterLimits struct {

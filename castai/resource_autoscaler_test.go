@@ -73,6 +73,9 @@ func TestAutoscalerResource_PoliciesUpdateAction(t *testing.T) {
 			"nodeConstraints": {
 				"enabled": true,
 				"maxCpuCores": 96
+			},
+			"podPinner": {
+				"enabled": false
 			}
 		}
 	}`
@@ -100,7 +103,10 @@ func TestAutoscalerResource_PoliciesUpdateAction(t *testing.T) {
 		            "maxRamMib": 262144,
 		            "enabled": true
 		        },
-		        "diskGibToCpuRatio": 25
+		        "diskGibToCpuRatio": 25,
+				"podPinner": {
+					"enabled": false
+				}
 		    },
 		    "clusterLimits": {
 		        "enabled": false,
@@ -612,6 +618,15 @@ func TestAutoscalerResource_ToAutoscalerPolicy(t *testing.T) {
 											cty.ObjectVal(
 												map[string]cty.Value{
 													"enabled": cty.BoolVal(true),
+													"pod_pinner": cty.ListVal(
+														[]cty.Value{
+															cty.ObjectVal(
+																map[string]cty.Value{
+																	"enabled": cty.BoolVal(true),
+																},
+															),
+														},
+													),
 												},
 											),
 										},
@@ -626,6 +641,9 @@ func TestAutoscalerResource_ToAutoscalerPolicy(t *testing.T) {
 				Enabled: true,
 				UnschedulablePods: &types.UnschedulablePods{
 					Enabled: true,
+					PodPinner: &types.PodPinner{
+						Enabled: true,
+					},
 				},
 			},
 		},
@@ -646,7 +664,7 @@ func TestAutoscalerResource_ToAutoscalerPolicy(t *testing.T) {
 			}
 
 			r.NoError(err)
-			r.True(reflect.DeepEqual(test.expected, actual))
+			r.Equal(test.expected, actual)
 		})
 	}
 }
