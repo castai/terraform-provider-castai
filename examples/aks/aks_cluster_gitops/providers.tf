@@ -1,5 +1,6 @@
 provider "azurerm" {
   features {}
+  subscription_id = var.subscription_id # From Azure version 4.0, Specifying Subscription ID is Mandatory
 }
 
 provider "azuread" {
