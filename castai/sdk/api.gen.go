@@ -280,6 +280,8 @@ const (
 	EVENTTYPERECOMMENDATIONAPPLIED      WorkloadoptimizationV1EventType = "EVENT_TYPE_RECOMMENDATION_APPLIED"
 	EVENTTYPERECOMMENDEDPODCOUNTCHANGED WorkloadoptimizationV1EventType = "EVENT_TYPE_RECOMMENDED_POD_COUNT_CHANGED"
 	EVENTTYPERECOMMENDEDREQUESTSCHANGED WorkloadoptimizationV1EventType = "EVENT_TYPE_RECOMMENDED_REQUESTS_CHANGED"
+	EVENTTYPESCALINGPOLICYCREATED       WorkloadoptimizationV1EventType = "EVENT_TYPE_SCALING_POLICY_CREATED"
+	EVENTTYPESCALINGPOLICYDELETED       WorkloadoptimizationV1EventType = "EVENT_TYPE_SCALING_POLICY_DELETED"
 	EVENTTYPESURGE                      WorkloadoptimizationV1EventType = "EVENT_TYPE_SURGE"
 )
 
@@ -616,13 +618,25 @@ type CastaiInventoryV1beta1CountableInstanceType struct {
 
 // CastaiInventoryV1beta1DiscountPricing defines model for castai.inventory.v1beta1.DiscountPricing.
 type CastaiInventoryV1beta1DiscountPricing struct {
-	From  *int32                                     `json:"from"`
-	To    *int32                                     `json:"to"`
+	// Resource usage lower bound for multi-tiered discounts. Currently unsupported as only single-tiered discounts are supported.
+	From *int32 `json:"from"`
+
+	// Resource usage upper bound for multi-tiered discounts. Currently unsupported as only single-tiered discounts are supported.
+	To *int32 `json:"to"`
+
+	// - TYPE_FIXED: Specifies a fixed price discount. If set, the price will be overridden with the value of the discount. For example if the public price is $3 and the discount is "1" ($1), the final price will
+	// be $1.
+	//  - TYPE_PERCENTAGE: Specifies a percentage discount. If set, the price will be reduced by the percentage value. For example if the public price is $5 and the discount value is "0.1" (10%), the final price will be
+	// $4.
 	Type  *CastaiInventoryV1beta1DiscountPricingType `json:"type,omitempty"`
 	Value *string                                    `json:"value,omitempty"`
 }
 
-// CastaiInventoryV1beta1DiscountPricingType defines model for castai.inventory.v1beta1.DiscountPricing.Type.
+// - TYPE_FIXED: Specifies a fixed price discount. If set, the price will be overridden with the value of the discount. For example if the public price is $3 and the discount is "1" ($1), the final price will
+// be $1.
+//   - TYPE_PERCENTAGE: Specifies a percentage discount. If set, the price will be reduced by the percentage value. For example if the public price is $5 and the discount value is "0.1" (10%), the final price will be
+//
+// $4.
 type CastaiInventoryV1beta1DiscountPricingType string
 
 // CastaiInventoryV1beta1GCPCommitmentImport defines model for castai.inventory.v1beta1.GCPCommitmentImport.
@@ -1424,6 +1438,9 @@ type CastaiUsersV1beta1PendingInvitation struct {
 	// role of the invited person.
 	Role string `json:"role"`
 
+	// role_id is the role ID of the invited person.
+	RoleId *string `json:"roleId,omitempty"`
+
 	// invitation expiration date.
 	ValidUntil *time.Time `json:"validUntil,omitempty"`
 }
@@ -2189,7 +2206,7 @@ type NodeconfigV1EKSConfig struct {
 	// Cluster's instance profile ARN used for CAST provisioned nodes.
 	InstanceProfileArn string `json:"instanceProfileArn"`
 
-	// Number of IPs per prefix to be used for calculating max pods.
+	// Number of IPs per prefix to be used for calculating max pods. Defaults to 1.
 	IpsPerPrefix *int32 `json:"ipsPerPrefix"`
 
 	// AWS key pair ID to be used for provisioned nodes. Has priority over sshPublicKey.
@@ -2952,6 +2969,12 @@ type PoliciesV1NodeDownscalerEmptyNodes struct {
 	Enabled *bool `json:"enabled"`
 }
 
+// Defines the CAST AI Pod Pinner component settings.
+type PoliciesV1PodPinner struct {
+	// Enable/disable the Pod Pinner policy. This will either enable or disable the Pod Pinner component's automatic management in your cluster.
+	Enabled *bool `json:"enabled"`
+}
+
 // Defines the autoscaling policies details.
 type PoliciesV1Policies struct {
 	// Defines minimum and maximum amount of CPU the cluster can have.
@@ -3047,6 +3070,9 @@ type PoliciesV1UnschedulablePodsPolicy struct {
 
 	// Defines the NodeConstraints that will be applied when autoscaling with UnschedulablePodsPolicy.
 	NodeConstraints *PoliciesV1NodeConstraints `json:"nodeConstraints,omitempty"`
+
+	// Defines the CAST AI Pod Pinner component settings.
+	PodPinner *PoliciesV1PodPinner `json:"podPinner,omitempty"`
 }
 
 // ScheduledrebalancingV1DeleteRebalancingJobResponse defines model for scheduledrebalancing.v1.DeleteRebalancingJobResponse.
@@ -3280,6 +3306,8 @@ type WorkloadoptimizationV1Event struct {
 	RecommendationApplied      *WorkloadoptimizationV1RecommendationAppliedEvent      `json:"recommendationApplied,omitempty"`
 	RecommendedPodCountChanged *WorkloadoptimizationV1RecommendedPodCountChangedEvent `json:"recommendedPodCountChanged,omitempty"`
 	RecommendedRequestsChanged *WorkloadoptimizationV1RecommendedRequestsChangedEvent `json:"recommendedRequestsChanged,omitempty"`
+	ScalingPolicyCreated       *WorkloadoptimizationV1ScalingPolicyCreated            `json:"scalingPolicyCreated,omitempty"`
+	ScalingPolicyDeleted       *WorkloadoptimizationV1ScalingPolicyDeleted            `json:"scalingPolicyDeleted,omitempty"`
 	Surge                      *WorkloadoptimizationV1SurgeEvent                      `json:"surge,omitempty"`
 }
 
@@ -3520,6 +3548,9 @@ type WorkloadoptimizationV1ResourceConfig struct {
 	// MAX - the max function.
 	Function WorkloadoptimizationV1ResourceConfigFunction `json:"function"`
 
+	// Period of time over which the resource recommendation is calculated (default value is 24 hours).
+	LookBackPeriodSeconds *int32 `json:"lookBackPeriodSeconds"`
+
 	// Max values for the recommendation. For memory - this is in MiB, for CPU - this is in cores.
 	// If not set, there will be no upper bound for the recommendation (default behaviour).
 	Max *float64 `json:"max"`
@@ -3573,6 +3604,9 @@ type WorkloadoptimizationV1ResourcePolicies struct {
 	// MAX - the max function.
 	Function WorkloadoptimizationV1ResourcePoliciesFunction `json:"function"`
 
+	// Period of time over which the resource recommendation is calculated (default value is 24 hours).
+	LookBackPeriodSeconds *int32 `json:"lookBackPeriodSeconds"`
+
 	// The overhead for the recommendation, the formula is: (1 + overhead) * function(args).
 	Overhead float64 `json:"overhead"`
 }
@@ -3600,17 +3634,29 @@ type WorkloadoptimizationV1ScalingPolicyConfig struct {
 	Name string `json:"name"`
 }
 
+// WorkloadoptimizationV1ScalingPolicyCreated defines model for workloadoptimization.v1.ScalingPolicyCreated.
+type WorkloadoptimizationV1ScalingPolicyCreated struct {
+	Policy WorkloadoptimizationV1WorkloadScalingPolicy `json:"policy"`
+}
+
+// WorkloadoptimizationV1ScalingPolicyDeleted defines model for workloadoptimization.v1.ScalingPolicyDeleted.
+type WorkloadoptimizationV1ScalingPolicyDeleted struct {
+	Policy WorkloadoptimizationV1WorkloadScalingPolicy `json:"policy"`
+}
+
 // WorkloadoptimizationV1StartupSettings defines model for workloadoptimization.v1.StartupSettings.
 type WorkloadoptimizationV1StartupSettings struct {
-	// Startup period defines the duration of increased resource usage during startup.
-	// Recommendations will be adjusted to ignore the spikes during regular execution. If not set workload will get usual recommendations.
+	// Defines the duration (in seconds) during which elevated resource usage is expected at startup.
+	// When set, recommendations will be adjusted to disregard resource spikes within this period.
+	// If not specified, the workload will receive standard recommendations without startup considerations.
 	PeriodSeconds *int32 `json:"periodSeconds"`
 }
 
 // WorkloadoptimizationV1SurgeContainer defines model for workloadoptimization.v1.SurgeContainer.
 type WorkloadoptimizationV1SurgeContainer struct {
-	Name  string                                 `json:"name"`
-	Surge WorkloadoptimizationV1ResourceQuantity `json:"surge"`
+	Name              string                                 `json:"name"`
+	RecommendedBefore WorkloadoptimizationV1ResourceQuantity `json:"recommendedBefore"`
+	Surge             WorkloadoptimizationV1ResourceQuantity `json:"surge"`
 }
 
 // WorkloadoptimizationV1SurgeEvent defines model for workloadoptimization.v1.SurgeEvent.
@@ -3672,14 +3718,14 @@ type WorkloadoptimizationV1VPAConfig struct {
 
 // WorkloadoptimizationV1VPAConfigUpdate defines model for workloadoptimization.v1.VPAConfigUpdate.
 type WorkloadoptimizationV1VPAConfigUpdate struct {
-	ContainerConfig *[]WorkloadoptimizationV1ContainerConfigUpdate `json:"containerConfig,omitempty"`
-	Cpu             *WorkloadoptimizationV1ResourceConfigUpdate    `json:"cpu,omitempty"`
+	ContainerConfig *[]WorkloadoptimizationV1ContainerConfigUpdate      `json:"containerConfig,omitempty"`
+	Cpu             *WorkloadoptimizationV1WorkloadResourceConfigUpdate `json:"cpu,omitempty"`
 
 	// Defines possible options for workload management.
 	// READ_ONLY - workload watched (metrics collected), but no actions may be performed by CAST AI.
 	// MANAGED - workload watched (metrics collected), CAST AI may perform actions on the workload.
-	ManagementOption *WorkloadoptimizationV1ManagementOption     `json:"managementOption,omitempty"`
-	Memory           *WorkloadoptimizationV1ResourceConfigUpdate `json:"memory,omitempty"`
+	ManagementOption *WorkloadoptimizationV1ManagementOption             `json:"managementOption,omitempty"`
+	Memory           *WorkloadoptimizationV1WorkloadResourceConfigUpdate `json:"memory,omitempty"`
 }
 
 // WorkloadoptimizationV1Workload defines model for workloadoptimization.v1.Workload.
@@ -3743,14 +3789,14 @@ type WorkloadoptimizationV1WorkloadConfig struct {
 
 // WorkloadoptimizationV1WorkloadConfigUpdate defines model for workloadoptimization.v1.WorkloadConfigUpdate.
 type WorkloadoptimizationV1WorkloadConfigUpdate struct {
-	ContainerConfig *[]WorkloadoptimizationV1ContainerConfigUpdate `json:"containerConfig,omitempty"`
-	Cpu             *WorkloadoptimizationV1ResourceConfigUpdate    `json:"cpu,omitempty"`
+	ContainerConfig *[]WorkloadoptimizationV1ContainerConfigUpdate      `json:"containerConfig,omitempty"`
+	Cpu             *WorkloadoptimizationV1WorkloadResourceConfigUpdate `json:"cpu,omitempty"`
 
 	// Defines possible options for workload management.
 	// READ_ONLY - workload watched (metrics collected), but no actions may be performed by CAST AI.
 	// MANAGED - workload watched (metrics collected), CAST AI may perform actions on the workload.
-	ManagementOption *WorkloadoptimizationV1ManagementOption     `json:"managementOption,omitempty"`
-	Memory           *WorkloadoptimizationV1ResourceConfigUpdate `json:"memory,omitempty"`
+	ManagementOption *WorkloadoptimizationV1ManagementOption             `json:"managementOption,omitempty"`
+	Memory           *WorkloadoptimizationV1WorkloadResourceConfigUpdate `json:"memory,omitempty"`
 }
 
 // WorkloadoptimizationV1WorkloadConfigUpdateV2 defines model for workloadoptimization.v1.WorkloadConfigUpdateV2.
@@ -3775,8 +3821,8 @@ type WorkloadoptimizationV1WorkloadEvent struct {
 	OrganizationId string                             `json:"organizationId"`
 
 	// EventType defines possible types for workload events.
-	Type     WorkloadoptimizationV1EventType             `json:"type"`
-	Workload WorkloadoptimizationV1WorkloadEventWorkload `json:"workload"`
+	Type     WorkloadoptimizationV1EventType              `json:"type"`
+	Workload *WorkloadoptimizationV1WorkloadEventWorkload `json:"workload,omitempty"`
 }
 
 // WorkloadoptimizationV1WorkloadEventWorkload defines model for workloadoptimization.v1.WorkloadEvent.Workload.
@@ -3814,6 +3860,20 @@ type WorkloadoptimizationV1WorkloadRecommendation struct {
 
 	// Number of recommended replicas. Available only when workload horizontal scaling is enabled.
 	Replicas *int32 `json:"replicas"`
+}
+
+// WorkloadoptimizationV1WorkloadResourceConfigUpdate defines model for workloadoptimization.v1.WorkloadResourceConfigUpdate.
+type WorkloadoptimizationV1WorkloadResourceConfigUpdate struct {
+	// Period of time over which the resource recommendation is calculated (default value is 24 hours).
+	LookBackPeriodSeconds *int32 `json:"lookBackPeriodSeconds"`
+
+	// Max values for the recommendation. For memory - this is in MiB, for CPU - this is in cores.
+	// If not set, there will be no upper bound for the recommendation (default behaviour).
+	Max *float64 `json:"max"`
+
+	// Min values for the recommendation. For memory - this is in MiB, for CPU - this is in cores.
+	// If not set, there will be no lower bound for the recommendation (default behaviour).
+	Min *float64 `json:"min"`
 }
 
 // WorkloadoptimizationV1WorkloadScalingPolicy defines model for workloadoptimization.v1.WorkloadScalingPolicy.

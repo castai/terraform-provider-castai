@@ -3,6 +3,7 @@ package castai
 import (
 	"context"
 	"fmt"
+	"github.com/samber/lo"
 	"net/http"
 	"regexp"
 	"strings"
@@ -118,6 +119,12 @@ func workloadScalingPolicyResourceSchema(function string, overhead float64) *sch
 					"diff of current requests and new recommendation is greater than set value",
 				Default:          0.1,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.FloatBetween(0.01, 1)),
+			},
+			"look_back_period_seconds": {
+				Type:             schema.TypeInt,
+				Optional:         true,
+				Description:      "The look back period in seconds for the recommendation.",
+				ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(24*60*60, 7*24*60*60)),
 			},
 		},
 	}
@@ -328,6 +335,9 @@ func toWorkloadScalingPolicies(obj map[string]interface{}) sdk.Workloadoptimizat
 	if v, ok := obj["apply_threshold"].(float64); ok {
 		out.ApplyThreshold = v
 	}
+	if v, ok := obj["look_back_period_seconds"].(int); ok && v > 0 {
+		out.LookBackPeriodSeconds = lo.ToPtr(int32(v))
+	}
 
 	return out
 }
@@ -338,6 +348,10 @@ func toWorkloadScalingPoliciesMap(p sdk.WorkloadoptimizationV1ResourcePolicies) 
 		"args":            p.Args,
 		"overhead":        p.Overhead,
 		"apply_threshold": p.ApplyThreshold,
+	}
+
+	if p.LookBackPeriodSeconds != nil {
+		m["look_back_period_seconds"] = int(*p.LookBackPeriodSeconds)
 	}
 
 	return []map[string]interface{}{m}
