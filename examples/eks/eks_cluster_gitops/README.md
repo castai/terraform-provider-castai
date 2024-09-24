@@ -53,9 +53,9 @@ Prerequisites:
 
 
 ### Step 1: Get EKS cluster authentication mode
-CLUSTER_NAME="" \
-REGION="" 
 ```
+CLUSTER_NAME=""
+REGION="" 
 current_auth_mode=$(aws eks describe-cluster --name $CLUSTER_NAME --region $REGION | grep authenticationMode | awk '{print $2}') 
 echo "Authentication mode is $current_auth_mode"
 ```
@@ -85,11 +85,11 @@ Note generated 'CASTAI_CLUSTER_ID' from outputs
 Coponents: `castai-cluster-controller`,`castai-evictor`, `castai-spot-handler`, `castai-kvisor`, `castai-workload-autoscaler`, `castai-pod-pinner` \
 After all CAST AI components are installed in the cluster its status in CAST AI console would change from `Connecting` to `Connected` which means that cluster onboarding process completed successfully.
 
+```
 CASTAI_API_KEY="" \
 CASTAI_CLUSTER_ID=""
 
 #### Mandatory Component: Castai-agent
-```
 helm upgrade -i castai-agent castai-helm/castai-agent -n castai-agent \
   --set apiKey=$CASTAI_API_KEY \
   --set provider=eks \
