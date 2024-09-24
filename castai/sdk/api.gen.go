@@ -3548,6 +3548,9 @@ type WorkloadoptimizationV1ResourceConfig struct {
 	// MAX - the max function.
 	Function WorkloadoptimizationV1ResourceConfigFunction `json:"function"`
 
+	// Period of time over which the resource recommendation is calculated (default value is 24 hours).
+	LookBackPeriodSeconds *int32 `json:"lookBackPeriodSeconds"`
+
 	// Max values for the recommendation. For memory - this is in MiB, for CPU - this is in cores.
 	// If not set, there will be no upper bound for the recommendation (default behaviour).
 	Max *float64 `json:"max"`
@@ -3600,6 +3603,9 @@ type WorkloadoptimizationV1ResourcePolicies struct {
 	// QUANTILE - the quantile function.
 	// MAX - the max function.
 	Function WorkloadoptimizationV1ResourcePoliciesFunction `json:"function"`
+
+	// Period of time over which the resource recommendation is calculated (default value is 24 hours).
+	LookBackPeriodSeconds *int32 `json:"lookBackPeriodSeconds"`
 
 	// The overhead for the recommendation, the formula is: (1 + overhead) * function(args).
 	Overhead float64 `json:"overhead"`
@@ -3712,14 +3718,14 @@ type WorkloadoptimizationV1VPAConfig struct {
 
 // WorkloadoptimizationV1VPAConfigUpdate defines model for workloadoptimization.v1.VPAConfigUpdate.
 type WorkloadoptimizationV1VPAConfigUpdate struct {
-	ContainerConfig *[]WorkloadoptimizationV1ContainerConfigUpdate `json:"containerConfig,omitempty"`
-	Cpu             *WorkloadoptimizationV1ResourceConfigUpdate    `json:"cpu,omitempty"`
+	ContainerConfig *[]WorkloadoptimizationV1ContainerConfigUpdate      `json:"containerConfig,omitempty"`
+	Cpu             *WorkloadoptimizationV1WorkloadResourceConfigUpdate `json:"cpu,omitempty"`
 
 	// Defines possible options for workload management.
 	// READ_ONLY - workload watched (metrics collected), but no actions may be performed by CAST AI.
 	// MANAGED - workload watched (metrics collected), CAST AI may perform actions on the workload.
-	ManagementOption *WorkloadoptimizationV1ManagementOption     `json:"managementOption,omitempty"`
-	Memory           *WorkloadoptimizationV1ResourceConfigUpdate `json:"memory,omitempty"`
+	ManagementOption *WorkloadoptimizationV1ManagementOption             `json:"managementOption,omitempty"`
+	Memory           *WorkloadoptimizationV1WorkloadResourceConfigUpdate `json:"memory,omitempty"`
 }
 
 // WorkloadoptimizationV1Workload defines model for workloadoptimization.v1.Workload.
@@ -3783,14 +3789,14 @@ type WorkloadoptimizationV1WorkloadConfig struct {
 
 // WorkloadoptimizationV1WorkloadConfigUpdate defines model for workloadoptimization.v1.WorkloadConfigUpdate.
 type WorkloadoptimizationV1WorkloadConfigUpdate struct {
-	ContainerConfig *[]WorkloadoptimizationV1ContainerConfigUpdate `json:"containerConfig,omitempty"`
-	Cpu             *WorkloadoptimizationV1ResourceConfigUpdate    `json:"cpu,omitempty"`
+	ContainerConfig *[]WorkloadoptimizationV1ContainerConfigUpdate      `json:"containerConfig,omitempty"`
+	Cpu             *WorkloadoptimizationV1WorkloadResourceConfigUpdate `json:"cpu,omitempty"`
 
 	// Defines possible options for workload management.
 	// READ_ONLY - workload watched (metrics collected), but no actions may be performed by CAST AI.
 	// MANAGED - workload watched (metrics collected), CAST AI may perform actions on the workload.
-	ManagementOption *WorkloadoptimizationV1ManagementOption     `json:"managementOption,omitempty"`
-	Memory           *WorkloadoptimizationV1ResourceConfigUpdate `json:"memory,omitempty"`
+	ManagementOption *WorkloadoptimizationV1ManagementOption             `json:"managementOption,omitempty"`
+	Memory           *WorkloadoptimizationV1WorkloadResourceConfigUpdate `json:"memory,omitempty"`
 }
 
 // WorkloadoptimizationV1WorkloadConfigUpdateV2 defines model for workloadoptimization.v1.WorkloadConfigUpdateV2.
@@ -3854,6 +3860,20 @@ type WorkloadoptimizationV1WorkloadRecommendation struct {
 
 	// Number of recommended replicas. Available only when workload horizontal scaling is enabled.
 	Replicas *int32 `json:"replicas"`
+}
+
+// WorkloadoptimizationV1WorkloadResourceConfigUpdate defines model for workloadoptimization.v1.WorkloadResourceConfigUpdate.
+type WorkloadoptimizationV1WorkloadResourceConfigUpdate struct {
+	// Period of time over which the resource recommendation is calculated (default value is 24 hours).
+	LookBackPeriodSeconds *int32 `json:"lookBackPeriodSeconds"`
+
+	// Max values for the recommendation. For memory - this is in MiB, for CPU - this is in cores.
+	// If not set, there will be no upper bound for the recommendation (default behaviour).
+	Max *float64 `json:"max"`
+
+	// Min values for the recommendation. For memory - this is in MiB, for CPU - this is in cores.
+	// If not set, there will be no lower bound for the recommendation (default behaviour).
+	Min *float64 `json:"min"`
 }
 
 // WorkloadoptimizationV1WorkloadScalingPolicy defines model for workloadoptimization.v1.WorkloadScalingPolicy.

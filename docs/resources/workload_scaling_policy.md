@@ -15,16 +15,17 @@ simultaneously or create custom policies with different settings and apply them 
 ## Example Usage
 
 ```terraform
-castai_workload_scaling_policy "services" {
+resource "castai_workload_scaling_policy" "services" {
   name              = "services"
   cluster_id        = castai_gke_cluster.dev.id
   apply_type        = "IMMEDIATE"
   management_option = "MANAGED"
   cpu {
-    function        = "QUANTILE"
-    overhead        = 0.15
-    apply_threshold = 0.1
-    args            = ["0.9"]
+    function                 = "QUANTILE"
+    overhead                 = 0.15
+    apply_threshold          = 0.1
+    args                     = ["0.9"]
+    look_back_period_seconds = 172800
   }
   memory {
     function        = "MAX"
@@ -66,6 +67,7 @@ Optional:
 - `apply_threshold` (Number) The threshold of when to apply the recommendation. Recommendation will be applied when diff of current requests and new recommendation is greater than set value
 - `args` (List of String) The arguments for the function - i.e. for `QUANTILE` this should be a [0, 1] float. `MAX` doesn't accept any args
 - `function` (String) The function used to calculate the resource recommendation. Supported values: `QUANTILE`, `MAX`
+- `look_back_period_seconds` (Number) The look back period in seconds for the recommendation.
 - `overhead` (Number) Overhead for the recommendation, e.g. `0.1` will result in 10% higher recommendation
 
 
@@ -77,6 +79,7 @@ Optional:
 - `apply_threshold` (Number) The threshold of when to apply the recommendation. Recommendation will be applied when diff of current requests and new recommendation is greater than set value
 - `args` (List of String) The arguments for the function - i.e. for `QUANTILE` this should be a [0, 1] float. `MAX` doesn't accept any args
 - `function` (String) The function used to calculate the resource recommendation. Supported values: `QUANTILE`, `MAX`
+- `look_back_period_seconds` (Number) The look back period in seconds for the recommendation.
 - `overhead` (Number) Overhead for the recommendation, e.g. `0.1` will result in 10% higher recommendation
 
 
