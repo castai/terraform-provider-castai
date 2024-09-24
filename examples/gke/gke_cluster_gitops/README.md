@@ -1,4 +1,4 @@
-## EKS and CAST AI example for GitOps onboarding flow
+## GKE and CAST AI example for GitOps onboarding flow
 
 ## GitOps flow 
 
