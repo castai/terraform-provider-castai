@@ -78,16 +78,18 @@ metadata:
 ```
 
 ### Step 3 & 4: Update TF vars & TF Init, plan & apply
-After successful apply, CAST Console UI will be in `Connecting` state. 
+After successful apply, CAST Console UI will be in `Connecting` state. \
 Note generated 'CASTAI_CLUSTER_ID' from outputs
 
-### Step 5: Deploy Helm chart of castai-cluster-controller`, `castai-evictor`, `castai-spot-handler`, `castai-kvisor`, `castai-workload-autoscaler`, `castai-pod-pinner`
+### Step 5: Deploy Helm chart of CAST Components
+Coponents: `castai-cluster-controller`,`castai-evictor`, `castai-spot-handler`, `castai-kvisor`, `castai-workload-autoscaler`, `castai-pod-pinner` \
 After all CAST AI components are installed in the cluster its status in CAST AI console would change from `Connecting` to `Connected` which means that cluster onboarding process completed successfully.
 
 CASTAI_API_KEY="" \
 CASTAI_CLUSTER_ID=""
 
 #### Mandatory Component: Castai-agent
+```
 helm upgrade -i castai-agent castai-helm/castai-agent -n castai-agent \
   --set apiKey=$CASTAI_API_KEY \
   --set provider=eks \
@@ -121,7 +123,7 @@ helm upgrade -i castai-kvisor castai-helm/castai-kvisor -n castai-agent \
 --set controller.extraArgs.image-scan-enabled=true \
 --set controller.extraArgs.kube-bench-enabled=true \
 --set controller.extraArgs.kube-bench-cloud-provider=eks
-
+```
 
 ## Steps Overview
 
