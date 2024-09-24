@@ -91,6 +91,7 @@ After all CAST AI components are installed in the cluster its status in CAST AI 
 ```
 CASTAI_API_KEY=""
 CASTAI_CLUSTER_ID=""
+CAST_CONFIG_SOURCE="castai-cluster-controller"
 
 #### Mandatory Component: Castai-agent
 helm upgrade -i castai-agent castai-helm/castai-agent -n castai-agent \
@@ -117,6 +118,11 @@ helm upgrade -i castai-pod-pinner castai-helm/castai-pod-pinner -n castai-agent 
 --set castai.apiKey=$CASTAI_API_KEY \
 --set castai.clusterID=$CASTAI_CLUSTER_ID \
 --set replicaCount=0
+
+#### castai-workload-autoscaler
+helm upgrade -i castai-workload-autoscaler castai-helm/castai-workload-autoscaler -n castai-agent \
+--set castai.apiKeySecretRef=$CAST_CONFIG_SOURCE \
+--set castai.configMapRef=$CAST_CONFIG_SOURCE \
 
 #### castai-kvisor
 helm upgrade -i castai-kvisor castai-helm/castai-kvisor -n castai-agent \
