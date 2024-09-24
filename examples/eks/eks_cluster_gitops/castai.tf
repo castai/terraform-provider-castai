@@ -93,11 +93,7 @@ resource "castai_node_template" "default_by_castai" {
   is_default       = true
   is_enabled       = true
   configuration_id = castai_node_configuration.default.id
-  should_taint     = true
-
-  custom_labels = {
-    env = "production"
-  }
+  should_taint     = false
 
   constraints {
     on_demand = true
@@ -109,24 +105,23 @@ resource "castai_node_template" "example_spot_template" {
   cluster_id = castai_eks_cluster.my_castai_cluster.id
 
   name             = "example_spot_template"
-  is_default       = true
+  is_default       = false
   is_enabled       = true
   configuration_id = castai_node_configuration.default.id
   should_taint     = true
 
   custom_labels = {
-    env = "production"
+    type = "spot"
   }
 
   custom_taints {
     key    = "dedicated"
-    value  = "backend"
+    value  = "spot"
     effect = "NoSchedule"
   }
 
   constraints {
-    on_demand                                   = true
-    spot                                        = false
+    spot                                        = true
     use_spot_fallbacks                          = true
     fallback_restore_rate_seconds               = 300
     enable_spot_diversity                       = true
@@ -171,11 +166,11 @@ resource "castai_autoscaler" "castai_autoscaler_policy" {
     }
 
     cluster_limits {
-      enabled = true
+      enabled = false
 
       cpu {
         min_cores = 1
-        max_cores = 10
+        max_cores = 200
       }
     }
 
@@ -183,19 +178,17 @@ resource "castai_autoscaler" "castai_autoscaler_policy" {
       enabled = true
 
       empty_nodes {
-        enabled       = true
-        delay_seconds = 90
+        enabled = true
       }
 
       evictor {
-        enabled                                = true
-        dry_run                                = false
-        aggressive_mode                        = false
-        scoped_mode                            = false
-        cycle_interval                         = "60s"
-        node_grace_period_minutes              = 10
-        pod_eviction_failure_back_off_interval = "30s"
-        ignore_pod_disruption_budgets          = false
+        enabled         = true
+        aggressive_mode = false
+        cycle_interval  = "60s"
+        dry_run         = false
+
+        node_grace_period_minutes = 10
+        scoped_mode               = false
       }
     }
   }
