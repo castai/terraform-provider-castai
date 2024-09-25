@@ -75,6 +75,21 @@ func resourceWorkloadScalingPolicy() *schema.Resource {
 				MaxItems: 1,
 				Elem:     workloadScalingPolicyResourceSchema("MAX", 0.1),
 			},
+			"startup": {
+				Type:     schema.TypeList,
+				Optional: true,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"period_seconds": {
+							Type:             schema.TypeInt,
+							Optional:         true,
+							Description:      "Defines the duration (in seconds) during which elevated resource usage is expected at startup.\nWhen set, recommendations will be adjusted to disregard resource spikes within this period.\nIf not specified, the workload will receive standard recommendations without startup considerations.",
+							ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(120, 3600)),
+						},
+					},
+				},
+			},
 		},
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(15 * time.Second),
@@ -150,6 +165,8 @@ func resourceWorkloadScalingPolicyCreate(ctx context.Context, d *schema.Resource
 		req.RecommendationPolicies.Memory = toWorkloadScalingPolicies(v.([]interface{})[0].(map[string]interface{}))
 	}
 
+	req.RecommendationPolicies.Startup = toStartup(toSection(d, "startup"))
+
 	resp, err := client.WorkloadOptimizationAPICreateWorkloadScalingPolicyWithResponse(ctx, clusterID, req)
 	if checkErr := sdk.CheckOKResponse(resp, err); checkErr != nil {
 		return diag.FromErr(checkErr)
@@ -196,6 +213,10 @@ func resourceWorkloadScalingPolicyRead(ctx context.Context, d *schema.ResourceDa
 		return diag.FromErr(fmt.Errorf("setting memory: %w", err))
 	}
 
+	if err := d.Set("startup", toStartupMap(sp.RecommendationPolicies.Startup)); err != nil {
+		return diag.FromErr(fmt.Errorf("setting startup: %w", err))
+	}
+
 	return nil
 }
 
@@ -206,6 +227,7 @@ func resourceWorkloadScalingPolicyUpdate(ctx context.Context, d *schema.Resource
 		"management_option",
 		"cpu",
 		"memory",
+		"startup",
 	) {
 		tflog.Info(ctx, "scaling policy up to date")
 		return nil
@@ -220,6 +242,7 @@ func resourceWorkloadScalingPolicyUpdate(ctx context.Context, d *schema.Resource
 			ManagementOption: sdk.WorkloadoptimizationV1ManagementOption(d.Get("management_option").(string)),
 			Cpu:              toWorkloadScalingPolicies(d.Get("cpu").([]interface{})[0].(map[string]interface{})),
 			Memory:           toWorkloadScalingPolicies(d.Get("memory").([]interface{})[0].(map[string]interface{})),
+			Startup:          toStartup(toSection(d, "startup")),
 		},
 	}
 
@@ -352,6 +375,37 @@ func toWorkloadScalingPoliciesMap(p sdk.WorkloadoptimizationV1ResourcePolicies) 
 
 	if p.LookBackPeriodSeconds != nil {
 		m["look_back_period_seconds"] = int(*p.LookBackPeriodSeconds)
+	}
+
+	return []map[string]interface{}{m}
+}
+
+func toStartup(startup map[string]interface{}) *sdk.WorkloadoptimizationV1StartupSettings {
+	if len(startup) == 0 {
+		return nil
+	}
+	result := &sdk.WorkloadoptimizationV1StartupSettings{}
+
+	if v, ok := startup["period_seconds"].(int); ok && v > 0 {
+		result.PeriodSeconds = lo.ToPtr(int32(v))
+	}
+
+	return result
+}
+
+func toStartupMap(s *sdk.WorkloadoptimizationV1StartupSettings) []map[string]interface{} {
+	if s == nil {
+		return nil
+	}
+
+	m := map[string]interface{}{}
+
+	if s.PeriodSeconds != nil {
+		m["period_seconds"] = int(*s.PeriodSeconds)
+	}
+
+	if len(m) == 0 {
+		return nil
 	}
 
 	return []map[string]interface{}{m}
