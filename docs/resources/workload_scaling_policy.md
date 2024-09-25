@@ -32,6 +32,9 @@ resource "castai_workload_scaling_policy" "services" {
     overhead        = 0.35
     apply_threshold = 0.2
   }
+  startup {
+    period_seconds = 240
+  }
 }
 ```
 
@@ -53,6 +56,7 @@ resource "castai_workload_scaling_policy" "services" {
 
 ### Optional
 
+- `startup` (Block List, Max: 1) (see [below for nested schema](#nestedblock--startup))
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only
@@ -81,6 +85,16 @@ Optional:
 - `function` (String) The function used to calculate the resource recommendation. Supported values: `QUANTILE`, `MAX`
 - `look_back_period_seconds` (Number) The look back period in seconds for the recommendation.
 - `overhead` (Number) Overhead for the recommendation, e.g. `0.1` will result in 10% higher recommendation
+
+
+<a id="nestedblock--startup"></a>
+### Nested Schema for `startup`
+
+Optional:
+
+- `period_seconds` (Number) Defines the duration (in seconds) during which elevated resource usage is expected at startup.
+When set, recommendations will be adjusted to disregard resource spikes within this period.
+If not specified, the workload will receive standard recommendations without startup considerations.
 
 
 <a id="nestedblock--timeouts"></a>
