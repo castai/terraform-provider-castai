@@ -123,31 +123,27 @@ resource "castai_node_template" "example_spot_template" {
   constraints {
     spot                                        = true
     use_spot_fallbacks                          = true
-    fallback_restore_rate_seconds               = 300
+    fallback_restore_rate_seconds               = 1800
     enable_spot_diversity                       = true
     spot_diversity_price_increase_limit_percent = 20
     spot_interruption_predictions_enabled       = true
     spot_interruption_predictions_type          = "aws-rebalance-recommendations"
-    compute_optimized_state                     = "disabled"
-    storage_optimized_state                     = "disabled"
     is_gpu_only                                 = false
     min_cpu                                     = 2
-    max_cpu                                     = 8
+    max_cpu                                     = 16
     min_memory                                  = 4096
-    max_memory                                  = 16384
+    max_memory                                  = 24576
     architectures                               = ["amd64"]
     azs                                         = ["eu-central-1a", "eu-central-1b"]
-    burstable_instances                         = "disabled"
     customer_specific                           = "disabled"
 
     instance_families {
-      include = ["c5"]
+      exclude = ["m5"]
     }
 
     custom_priority {
       instance_families = ["c5"]
-      spot              = false
-      on_demand         = true
+      spot              = true
     }
   }
 
