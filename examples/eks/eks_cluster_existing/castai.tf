@@ -9,23 +9,15 @@ resource "castai_eks_user_arn" "castai_user_arn" {
   cluster_id = castai_eks_clusterid.cluster_id.id
 }
 
-
-provider "castai" {
-  api_url   = var.castai_api_url
-  api_token = var.castai_api_token
+locals {
+  access_entry = can(regex("API", data.aws_eks_cluster.existing_cluster.access_config[0].authentication_mode))
 }
 
-provider "helm" {
-  kubernetes {
-    host                   = data.aws_eks_cluster.existing_cluster.endpoint
-    cluster_ca_certificate = base64decode(data.aws_eks_cluster.existing_cluster.certificate_authority.0.data)
-    exec {
-      api_version = "client.authentication.k8s.io/v1beta1"
-      command     = "aws"
-      # This requires the awscli to be installed locally where Terraform is executed.
-      args = ["eks", "get-token", "--cluster-name", var.cluster_name, "--region", var.cluster_region, "--profile", var.profile]
-    }
-  }
+resource "aws_eks_access_entry" "access_entry" {
+  count         = local.access_entry ? 1 : 0
+  cluster_name  = var.cluster_name
+  principal_arn = module.castai-eks-role-iam.instance_profile_role_arn
+  type          = "EC2_LINUX"
 }
 
 # Create AWS IAM policies and a user to connect to CAST AI.
@@ -65,7 +57,6 @@ module "castai-eks-cluster" {
   delete_nodes_on_disconnect = var.delete_nodes_on_disconnect
 
   default_node_configuration = module.castai-eks-cluster.castai_node_configurations["default"]
-
   node_configurations = {
     default = {
       subnets = var.subnets
@@ -99,8 +90,58 @@ module "castai-eks-cluster" {
         spot_interruption_predictions_type    = "aws-rebalance-recommendations"
       }
     }
-  }
+    example_spot_template = {
+      configuration_id = module.castai-eks-cluster.castai_node_configurations["default"]
+      is_enabled       = true
+      should_taint     = true
 
+      custom_labels = {
+        custom-label-key-1 = "custom-label-value-1",
+        custom-label-key-2 = "custom-label-value-2"
+      }
+
+      custom_taints = [
+        {
+          key   = "custom-taint-key-1"
+          value = "custom-taint-value-1"
+        },
+        {
+          key   = "custom-taint-key-2"
+          value = "custom-taint-value-2"
+        }
+      ]
+
+      constraints = {
+        fallback_restore_rate_seconds = 1800
+        spot                          = true
+        use_spot_fallbacks            = true
+        min_cpu                       = 4
+        max_cpu                       = 100
+        instance_families = {
+          exclude = ["m5"]
+        }
+        is_gpu_only = false
+
+        # Optional: define custom priority for instances selection.
+        #
+        # 1. Prioritize C5a and C5ad spot instances above all else, regardless of price.
+        # 2. If C5a is not available, try C6a family.
+        custom_priority = [
+          {
+            instance_families = ["c5a", "c5ad"]
+            spot              = true
+          },
+          {
+            instance_families = ["c6a"]
+            spot              = true
+          }
+          # 3. instances not matching any of custom priority groups will be tried after
+          # nothing matches from priority groups.
+        ]
+      }
+    }
+  }
+  # Autoscaling & evictor setting
   autoscaler_settings = {
     enabled                                 = false
     is_scoped_mode                          = false
@@ -118,10 +159,9 @@ module "castai-eks-cluster" {
       }
 
       evictor = {
-        aggressive_mode           = false
-        cycle_interval            = "5m10s"
-        dry_run                   = false
         enabled                   = false
+        aggressive_mode           = false
+        cycle_interval            = "60s"
         node_grace_period_minutes = 10
         scoped_mode               = false
       }
@@ -141,6 +181,10 @@ module "castai-eks-cluster" {
       }
     }
   }
+  # Installs Workload autoscaler
+  install_workload_autoscaler = true
+  # Installs network monitor
+  install_egressd = true
 
   # depends_on helps Terraform with creating proper dependencies graph in case of resource creation and in this case destroy.
   # module "castai-eks-cluster" has to be destroyed before module "castai-eks-role-iam".
