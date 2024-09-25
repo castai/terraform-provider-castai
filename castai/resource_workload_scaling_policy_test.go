@@ -67,6 +67,7 @@ func TestAccResourceWorkloadScalingPolicy(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "memory.0.overhead", "0.35"),
 					resource.TestCheckResourceAttr(resourceName, "memory.0.apply_threshold", "0.2"),
 					resource.TestCheckResourceAttr(resourceName, "memory.0.args.0", "0.9"),
+					resource.TestCheckResourceAttr(resourceName, "startup.0.period_seconds", "123"),
 				),
 			},
 		},
@@ -127,6 +128,9 @@ func scalingPolicyConfigUpdated(clusterName, projectID, name string) string {
 			overhead 		= 0.35
 			apply_threshold = 0.2
 			args 			= ["0.9"]
+		}
+		startup {
+			period_seconds = 123
 		}
 	}`, updatedName)
 

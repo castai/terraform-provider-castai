@@ -15,4 +15,7 @@ resource "castai_workload_scaling_policy" "services" {
     overhead        = 0.35
     apply_threshold = 0.2
   }
+  startup {
+    period_seconds = 240
+  }
 }
