@@ -31,17 +31,26 @@ variable "subnets" {
   description = "Subnet IDs used by CAST AI to provision nodes"
 }
 
-variable "security_groups" {
-  type        = list(string)
-  description = "Security Groups IDs used by CAST AI nodes to connect to K8s control plane, other nodes and have outbound access to Internet"
-}
-
-variable "instance_profile" {
+variable "cluster_security_group_id" {
   type        = string
-  description = "Instance profile ARN used by CAST AI provisioned nodes to connect to K8s control plane"
+  description = "EKS cluster security group ID"
 }
 
+variable "node_security_group_id" {
+  type        = string
+  description = "EKS cluster node security group ID"
+}
 
+variable "vpc_id" {
+  type        = string
+  description = "EKS cluster VPC ID"
+}
+
+variable "profile" {
+  type        = string
+  description = "Profile used with AWS CLI"
+  default     = "default"
+}
 
 ## Optional variables.
 
