@@ -4,7 +4,7 @@ resource "castai_aks_cluster" "this" {
   region          = var.cluster_region
   subscription_id = data.azurerm_subscription.current.subscription_id
   tenant_id       = data.azurerm_subscription.current.tenant_id
-  client_id       = azuread_application.castai.client_id
+  client_id       = azuread_application.castai.application_id
   client_secret   = azuread_application_password.castai.value
 
 
@@ -36,7 +36,7 @@ resource "castai_node_template" "default_by_castai" {
   is_default       = true
   is_enabled       = true
   configuration_id = castai_node_configuration.default.id
-  should_taint     = false
+  should_taint     = true
 
   constraints {
     on_demand = true
@@ -58,14 +58,14 @@ resource "castai_node_template" "example_spot_template" {
 
   custom_taints {
     key    = "dedicated"
-    value  = "spot"
+    value  = "backend"
     effect = "NoSchedule"
   }
 
   constraints {
     spot                                        = true
     use_spot_fallbacks                          = true
-    fallback_restore_rate_seconds               = 1800
+    fallback_restore_rate_seconds               = 300
     enable_spot_diversity                       = true
     spot_diversity_price_increase_limit_percent = 20
     is_gpu_only                                 = false
