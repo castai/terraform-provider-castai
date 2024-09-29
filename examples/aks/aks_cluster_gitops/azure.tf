@@ -69,14 +69,14 @@ resource "azurerm_role_definition" "castai" {
 
 
 resource "azurerm_role_assignment" "castai_resource_group" {
-  principal_id       = azuread_service_principal.castai.id
+  principal_id       = azuread_service_principal.castai.object_id
   role_definition_id = azurerm_role_definition.castai.role_definition_resource_id
 
   scope = "/subscriptions/${var.subscription_id}/resourceGroups/${var.resource_group}"
 }
 
 resource "azurerm_role_assignment" "castai_node_resource_group" {
-  principal_id       = azuread_service_principal.castai.id
+  principal_id       = azuread_service_principal.castai.object_id
   role_definition_id = azurerm_role_definition.castai.role_definition_resource_id
 
   scope = "/subscriptions/${var.subscription_id}/resourceGroups/${data.azurerm_kubernetes_cluster.example.node_resource_group}"
@@ -84,7 +84,7 @@ resource "azurerm_role_assignment" "castai_node_resource_group" {
 
 resource "azurerm_role_assignment" "castai_additional_resource_groups" {
   for_each           = toset(var.additional_resource_groups)
-  principal_id       = azuread_service_principal.castai.id
+  principal_id       = azuread_service_principal.castai.object_id
   role_definition_id = azurerm_role_definition.castai.role_definition_resource_id
   scope              = each.key
 }
@@ -95,11 +95,11 @@ resource "azuread_application" "castai" {
 }
 
 resource "azuread_application_password" "castai" {
-  application_object_id = azuread_application.castai.object_id
+  application_id = azuread_application.castai.id
 }
 
 resource "azuread_service_principal" "castai" {
-  application_id               = azuread_application.castai.application_id
+  client_id                    = azuread_application.castai.client_id
   app_role_assignment_required = false
   owners                       = [data.azuread_client_config.current.object_id]
 }
