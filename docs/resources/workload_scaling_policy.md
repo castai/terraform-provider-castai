@@ -56,6 +56,7 @@ resource "castai_workload_scaling_policy" "services" {
 
 ### Optional
 
+- `downscaling` (Block List, Max: 1) (see [below for nested schema](#nestedblock--downscaling))
 - `startup` (Block List, Max: 1) (see [below for nested schema](#nestedblock--startup))
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
@@ -85,6 +86,16 @@ Optional:
 - `function` (String) The function used to calculate the resource recommendation. Supported values: `QUANTILE`, `MAX`
 - `look_back_period_seconds` (Number) The look back period in seconds for the recommendation.
 - `overhead` (Number) Overhead for the recommendation, e.g. `0.1` will result in 10% higher recommendation
+
+
+<a id="nestedblock--downscaling"></a>
+### Nested Schema for `downscaling`
+
+Optional:
+
+- `apply_type` (String) Defines the apply type to be used when downscaling.
+	- READ_ONLY - workload watched (metrics collected), but no actions performed by CAST AI.
+	- MANAGED - workload watched (metrics collected), CAST AI may perform actions on the workload.
 
 
 <a id="nestedblock--startup"></a>

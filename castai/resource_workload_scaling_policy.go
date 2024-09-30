@@ -90,6 +90,23 @@ func resourceWorkloadScalingPolicy() *schema.Resource {
 					},
 				},
 			},
+			"downscaling": {
+				Type:     schema.TypeList,
+				Optional: true,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"apply_type": {
+							Type:     schema.TypeString,
+							Optional: true,
+							Description: `Defines the apply type to be used when downscaling.
+	- READ_ONLY - workload watched (metrics collected), but no actions performed by CAST AI.
+	- MANAGED - workload watched (metrics collected), CAST AI may perform actions on the workload.`,
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"IMMEDIATE", "DEFERRED"}, false)),
+						},
+					},
+				},
+			},
 		},
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(15 * time.Second),
@@ -167,6 +184,8 @@ func resourceWorkloadScalingPolicyCreate(ctx context.Context, d *schema.Resource
 
 	req.RecommendationPolicies.Startup = toStartup(toSection(d, "startup"))
 
+	req.RecommendationPolicies.Downscaling = toDownscaling(toSection(d, "downscaling"))
+
 	resp, err := client.WorkloadOptimizationAPICreateWorkloadScalingPolicyWithResponse(ctx, clusterID, req)
 	if checkErr := sdk.CheckOKResponse(resp, err); checkErr != nil {
 		return diag.FromErr(checkErr)
@@ -212,9 +231,11 @@ func resourceWorkloadScalingPolicyRead(ctx context.Context, d *schema.ResourceDa
 	if err := d.Set("memory", toWorkloadScalingPoliciesMap(sp.RecommendationPolicies.Memory)); err != nil {
 		return diag.FromErr(fmt.Errorf("setting memory: %w", err))
 	}
-
 	if err := d.Set("startup", toStartupMap(sp.RecommendationPolicies.Startup)); err != nil {
 		return diag.FromErr(fmt.Errorf("setting startup: %w", err))
+	}
+	if err := d.Set("downscaling", toDownscalingMap(sp.RecommendationPolicies.Downscaling)); err != nil {
+		return diag.FromErr(fmt.Errorf("setting downscaling: %w", err))
 	}
 
 	return nil
@@ -409,4 +430,36 @@ func toStartupMap(s *sdk.WorkloadoptimizationV1StartupSettings) []map[string]int
 	}
 
 	return []map[string]interface{}{m}
+}
+
+func toDownscaling(downscaling map[string]any) *sdk.WorkloadoptimizationV1DownscalingSettings {
+	if len(downscaling) == 0 {
+		return nil
+	}
+
+	result := &sdk.WorkloadoptimizationV1DownscalingSettings{}
+
+	if v, ok := downscaling["apply_type"].(string); ok && v != "" {
+		result.ApplyType = lo.ToPtr(sdk.WorkloadoptimizationV1ApplyType(v))
+	}
+
+	return result
+}
+
+func toDownscalingMap(s *sdk.WorkloadoptimizationV1DownscalingSettings) []map[string]any {
+	if s == nil {
+		return nil
+	}
+
+	m := map[string]any{}
+
+	if s.ApplyType != nil {
+		m["apply_type"] = string(*s.ApplyType)
+	}
+
+	if len(m) == 0 {
+		return nil
+	}
+
+	return []map[string]any{m}
 }
