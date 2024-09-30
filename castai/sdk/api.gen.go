@@ -1668,6 +1668,9 @@ type ExternalclusterV1ClusterUpdate struct {
 
 	// UpdateEKSClusterParams defines updatable EKS cluster configuration.
 	Eks *ExternalclusterV1UpdateEKSClusterParams `json:"eks,omitempty"`
+
+	// UpdateGKEClusterParams defines updatable GKE cluster configuration.
+	Gke *ExternalclusterV1UpdateGKEClusterParams `json:"gke,omitempty"`
 }
 
 // ExternalclusterV1CreateAssumeRolePrincipalResponse defines model for externalcluster.v1.CreateAssumeRolePrincipalResponse.
@@ -2113,6 +2116,15 @@ type ExternalclusterV1UpdateClusterTagsResponse = map[string]interface{}
 // UpdateEKSClusterParams defines updatable EKS cluster configuration.
 type ExternalclusterV1UpdateEKSClusterParams struct {
 	AssumeRoleArn *string `json:"assumeRoleArn,omitempty"`
+}
+
+// UpdateGKEClusterParams defines updatable GKE cluster configuration.
+type ExternalclusterV1UpdateGKEClusterParams struct {
+	// service account email to impersonate.
+	GkeSaImpersonate *string `json:"gkeSaImpersonate,omitempty"`
+
+	// GCP target project where cluster runs.
+	ProjectId *string `json:"projectId,omitempty"`
 }
 
 // Cluster zone.
@@ -3298,6 +3310,11 @@ type WorkloadoptimizationV1CpuMetrics struct {
 // WorkloadoptimizationV1DeleteWorkloadScalingPolicyResponse defines model for workloadoptimization.v1.DeleteWorkloadScalingPolicyResponse.
 type WorkloadoptimizationV1DeleteWorkloadScalingPolicyResponse = map[string]interface{}
 
+// WorkloadoptimizationV1DownscalingSettings defines model for workloadoptimization.v1.DownscalingSettings.
+type WorkloadoptimizationV1DownscalingSettings struct {
+	ApplyType *WorkloadoptimizationV1ApplyType `json:"applyType,omitempty"`
+}
+
 // WorkloadoptimizationV1Event defines model for workloadoptimization.v1.Event.
 type WorkloadoptimizationV1Event struct {
 	ConfigurationChanged       *WorkloadoptimizationV1ConfigurationChangedEvent       `json:"configurationChanged,omitempty"`
@@ -3507,7 +3524,8 @@ type WorkloadoptimizationV1RecommendationEventType string
 
 // WorkloadoptimizationV1RecommendationPolicies defines model for workloadoptimization.v1.RecommendationPolicies.
 type WorkloadoptimizationV1RecommendationPolicies struct {
-	Cpu WorkloadoptimizationV1ResourcePolicies `json:"cpu"`
+	Cpu         WorkloadoptimizationV1ResourcePolicies     `json:"cpu"`
+	Downscaling *WorkloadoptimizationV1DownscalingSettings `json:"downscaling,omitempty"`
 
 	// Defines possible options for workload management.
 	// READ_ONLY - workload watched (metrics collected), but no actions may be performed by CAST AI.
