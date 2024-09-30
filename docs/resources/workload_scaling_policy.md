@@ -97,8 +97,8 @@ Optional:
 Optional:
 
 - `apply_type` (String) Defines the apply type to be used when downscaling.
-	- READ_ONLY - workload watched (metrics collected), but no actions performed by CAST AI.
-	- MANAGED - workload watched (metrics collected), CAST AI may perform actions on the workload.
+	- IMMEDIATE - pods are restarted immediately when new recommendation is generated.
+	- DEFERRED - pods are not restarted and recommendation values are applied during natural restarts only (new deployment, etc.)
 
 
 <a id="nestedblock--startup"></a>
