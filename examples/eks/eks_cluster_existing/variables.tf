@@ -65,3 +65,8 @@ variable "subnets" {
   type        = list(string)
   description = "Subnet IDs used by CAST AI to provision nodes"
 }
+
+variable "create_rebalancing_schedule" {
+  type    = bool
+  default = true
+}
