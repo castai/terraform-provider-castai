@@ -249,6 +249,7 @@ func resourceWorkloadScalingPolicyUpdate(ctx context.Context, d *schema.Resource
 		"cpu",
 		"memory",
 		"startup",
+		"downscaling",
 	) {
 		tflog.Info(ctx, "scaling policy up to date")
 		return nil
@@ -264,6 +265,7 @@ func resourceWorkloadScalingPolicyUpdate(ctx context.Context, d *schema.Resource
 			Cpu:              toWorkloadScalingPolicies(d.Get("cpu").([]interface{})[0].(map[string]interface{})),
 			Memory:           toWorkloadScalingPolicies(d.Get("memory").([]interface{})[0].(map[string]interface{})),
 			Startup:          toStartup(toSection(d, "startup")),
+			Downscaling:      toDownscaling(toSection(d, "downscaling")),
 		},
 	}
 

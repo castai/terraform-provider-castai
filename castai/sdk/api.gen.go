@@ -242,6 +242,15 @@ const (
 	Unknown      PoliciesV1EvictorStatus = "Unknown"
 )
 
+// Defines values for PoliciesV1PodPinnerStatus.
+const (
+	PodPinnerStatusCompatible          PoliciesV1PodPinnerStatus = "PodPinnerStatus_Compatible"
+	PodPinnerStatusIncompatible        PoliciesV1PodPinnerStatus = "PodPinnerStatus_Incompatible"
+	PodPinnerStatusIncompatibleVersion PoliciesV1PodPinnerStatus = "PodPinnerStatus_IncompatibleVersion"
+	PodPinnerStatusMissing             PoliciesV1PodPinnerStatus = "PodPinnerStatus_Missing"
+	PodPinnerStatusUnknown             PoliciesV1PodPinnerStatus = "PodPinnerStatus_Unknown"
+)
+
 // Defines values for PoliciesV1SpotInterruptionPredictionsType.
 const (
 	AWSRebalanceRecommendations   PoliciesV1SpotInterruptionPredictionsType = "AWSRebalanceRecommendations"
@@ -2984,8 +2993,12 @@ type PoliciesV1NodeDownscalerEmptyNodes struct {
 // Defines the CAST AI Pod Pinner component settings.
 type PoliciesV1PodPinner struct {
 	// Enable/disable the Pod Pinner policy. This will either enable or disable the Pod Pinner component's automatic management in your cluster.
-	Enabled *bool `json:"enabled"`
+	Enabled *bool                      `json:"enabled"`
+	Status  *PoliciesV1PodPinnerStatus `json:"status,omitempty"`
 }
+
+// PoliciesV1PodPinnerStatus defines model for policies.v1.PodPinnerStatus.
+type PoliciesV1PodPinnerStatus string
 
 // Defines the autoscaling policies details.
 type PoliciesV1Policies struct {
