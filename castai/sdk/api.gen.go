@@ -242,6 +242,15 @@ const (
 	Unknown      PoliciesV1EvictorStatus = "Unknown"
 )
 
+// Defines values for PoliciesV1PodPinnerStatus.
+const (
+	PodPinnerStatusCompatible          PoliciesV1PodPinnerStatus = "PodPinnerStatus_Compatible"
+	PodPinnerStatusIncompatible        PoliciesV1PodPinnerStatus = "PodPinnerStatus_Incompatible"
+	PodPinnerStatusIncompatibleVersion PoliciesV1PodPinnerStatus = "PodPinnerStatus_IncompatibleVersion"
+	PodPinnerStatusMissing             PoliciesV1PodPinnerStatus = "PodPinnerStatus_Missing"
+	PodPinnerStatusUnknown             PoliciesV1PodPinnerStatus = "PodPinnerStatus_Unknown"
+)
+
 // Defines values for PoliciesV1SpotInterruptionPredictionsType.
 const (
 	AWSRebalanceRecommendations   PoliciesV1SpotInterruptionPredictionsType = "AWSRebalanceRecommendations"
@@ -1668,6 +1677,9 @@ type ExternalclusterV1ClusterUpdate struct {
 
 	// UpdateEKSClusterParams defines updatable EKS cluster configuration.
 	Eks *ExternalclusterV1UpdateEKSClusterParams `json:"eks,omitempty"`
+
+	// UpdateGKEClusterParams defines updatable GKE cluster configuration.
+	Gke *ExternalclusterV1UpdateGKEClusterParams `json:"gke,omitempty"`
 }
 
 // ExternalclusterV1CreateAssumeRolePrincipalResponse defines model for externalcluster.v1.CreateAssumeRolePrincipalResponse.
@@ -2113,6 +2125,15 @@ type ExternalclusterV1UpdateClusterTagsResponse = map[string]interface{}
 // UpdateEKSClusterParams defines updatable EKS cluster configuration.
 type ExternalclusterV1UpdateEKSClusterParams struct {
 	AssumeRoleArn *string `json:"assumeRoleArn,omitempty"`
+}
+
+// UpdateGKEClusterParams defines updatable GKE cluster configuration.
+type ExternalclusterV1UpdateGKEClusterParams struct {
+	// service account email to impersonate.
+	GkeSaImpersonate *string `json:"gkeSaImpersonate,omitempty"`
+
+	// GCP target project where cluster runs.
+	ProjectId *string `json:"projectId,omitempty"`
 }
 
 // Cluster zone.
@@ -2972,8 +2993,12 @@ type PoliciesV1NodeDownscalerEmptyNodes struct {
 // Defines the CAST AI Pod Pinner component settings.
 type PoliciesV1PodPinner struct {
 	// Enable/disable the Pod Pinner policy. This will either enable or disable the Pod Pinner component's automatic management in your cluster.
-	Enabled *bool `json:"enabled"`
+	Enabled *bool                      `json:"enabled"`
+	Status  *PoliciesV1PodPinnerStatus `json:"status,omitempty"`
 }
+
+// PoliciesV1PodPinnerStatus defines model for policies.v1.PodPinnerStatus.
+type PoliciesV1PodPinnerStatus string
 
 // Defines the autoscaling policies details.
 type PoliciesV1Policies struct {
@@ -3298,6 +3323,11 @@ type WorkloadoptimizationV1CpuMetrics struct {
 // WorkloadoptimizationV1DeleteWorkloadScalingPolicyResponse defines model for workloadoptimization.v1.DeleteWorkloadScalingPolicyResponse.
 type WorkloadoptimizationV1DeleteWorkloadScalingPolicyResponse = map[string]interface{}
 
+// WorkloadoptimizationV1DownscalingSettings defines model for workloadoptimization.v1.DownscalingSettings.
+type WorkloadoptimizationV1DownscalingSettings struct {
+	ApplyType *WorkloadoptimizationV1ApplyType `json:"applyType,omitempty"`
+}
+
 // WorkloadoptimizationV1Event defines model for workloadoptimization.v1.Event.
 type WorkloadoptimizationV1Event struct {
 	ConfigurationChanged       *WorkloadoptimizationV1ConfigurationChangedEvent       `json:"configurationChanged,omitempty"`
@@ -3507,7 +3537,8 @@ type WorkloadoptimizationV1RecommendationEventType string
 
 // WorkloadoptimizationV1RecommendationPolicies defines model for workloadoptimization.v1.RecommendationPolicies.
 type WorkloadoptimizationV1RecommendationPolicies struct {
-	Cpu WorkloadoptimizationV1ResourcePolicies `json:"cpu"`
+	Cpu         WorkloadoptimizationV1ResourcePolicies     `json:"cpu"`
+	Downscaling *WorkloadoptimizationV1DownscalingSettings `json:"downscaling,omitempty"`
 
 	// Defines possible options for workload management.
 	// READ_ONLY - workload watched (metrics collected), but no actions may be performed by CAST AI.
