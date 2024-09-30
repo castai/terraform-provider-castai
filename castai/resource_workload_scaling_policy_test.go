@@ -36,6 +36,7 @@ func TestAccResourceWorkloadScalingPolicy(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "cpu.0.overhead", "0.05"),
 					resource.TestCheckResourceAttr(resourceName, "cpu.0.apply_threshold", "0.06"),
 					resource.TestCheckResourceAttr(resourceName, "cpu.0.args.0", "0.86"),
+					resource.TestCheckResourceAttr(resourceName, "cpu.0.look_back_period_seconds", "86401"),
 					resource.TestCheckResourceAttr(resourceName, "memory.0.function", "MAX"),
 					resource.TestCheckResourceAttr(resourceName, "memory.0.overhead", "0.25"),
 					resource.TestCheckResourceAttr(resourceName, "memory.0.apply_threshold", "0.1"),
@@ -61,10 +62,13 @@ func TestAccResourceWorkloadScalingPolicy(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "cpu.0.overhead", "0.15"),
 					resource.TestCheckResourceAttr(resourceName, "cpu.0.apply_threshold", "0.1"),
 					resource.TestCheckResourceAttr(resourceName, "cpu.0.args.0", "0.9"),
+					resource.TestCheckResourceAttr(resourceName, "cpu.0.look_back_period_seconds", "86402"),
 					resource.TestCheckResourceAttr(resourceName, "memory.0.function", "QUANTILE"),
 					resource.TestCheckResourceAttr(resourceName, "memory.0.overhead", "0.35"),
 					resource.TestCheckResourceAttr(resourceName, "memory.0.apply_threshold", "0.2"),
 					resource.TestCheckResourceAttr(resourceName, "memory.0.args.0", "0.9"),
+					resource.TestCheckResourceAttr(resourceName, "startup.0.period_seconds", "123"),
+					resource.TestCheckResourceAttr(resourceName, "downscaling.0.apply_type", "DEFERRED"),
 				),
 			},
 		},
@@ -93,6 +97,7 @@ func scalingPolicyConfig(clusterName, projectID, name string) string {
 			overhead 		= 0.05
 			apply_threshold = 0.06
 			args 			= ["0.86"]
+			look_back_period_seconds = 86401
 		}
 		memory {
 			function 		= "MAX"
@@ -117,6 +122,7 @@ func scalingPolicyConfigUpdated(clusterName, projectID, name string) string {
 			overhead 		= 0.15
 			apply_threshold = 0.1
 			args 			= ["0.9"]
+			look_back_period_seconds = 86402
 		}
 		memory {
 			function 		= "QUANTILE"
@@ -124,6 +130,12 @@ func scalingPolicyConfigUpdated(clusterName, projectID, name string) string {
 			apply_threshold = 0.2
 			args 			= ["0.9"]
 		}
+		startup {
+			period_seconds = 123
+		}
+	    downscaling {
+		    apply_type = "DEFERRED"
+	    }
 	}`, updatedName)
 
 	return ConfigCompose(testAccGKEClusterConfig(name, clusterName, projectID), cfg)

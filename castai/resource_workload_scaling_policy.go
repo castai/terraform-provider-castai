@@ -3,6 +3,7 @@ package castai
 import (
 	"context"
 	"fmt"
+	"github.com/samber/lo"
 	"net/http"
 	"regexp"
 	"strings"
@@ -74,6 +75,38 @@ func resourceWorkloadScalingPolicy() *schema.Resource {
 				MaxItems: 1,
 				Elem:     workloadScalingPolicyResourceSchema("MAX", 0.1),
 			},
+			"startup": {
+				Type:     schema.TypeList,
+				Optional: true,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"period_seconds": {
+							Type:             schema.TypeInt,
+							Optional:         true,
+							Description:      "Defines the duration (in seconds) during which elevated resource usage is expected at startup.\nWhen set, recommendations will be adjusted to disregard resource spikes within this period.\nIf not specified, the workload will receive standard recommendations without startup considerations.",
+							ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(120, 3600)),
+						},
+					},
+				},
+			},
+			"downscaling": {
+				Type:     schema.TypeList,
+				Optional: true,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"apply_type": {
+							Type:     schema.TypeString,
+							Optional: true,
+							Description: `Defines the apply type to be used when downscaling.
+	- IMMEDIATE - pods are restarted immediately when new recommendation is generated.
+	- DEFERRED - pods are not restarted and recommendation values are applied during natural restarts only (new deployment, etc.)`,
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"IMMEDIATE", "DEFERRED"}, false)),
+						},
+					},
+				},
+			},
 		},
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(15 * time.Second),
@@ -119,6 +152,12 @@ func workloadScalingPolicyResourceSchema(function string, overhead float64) *sch
 				Default:          0.1,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.FloatBetween(0.01, 1)),
 			},
+			"look_back_period_seconds": {
+				Type:             schema.TypeInt,
+				Optional:         true,
+				Description:      "The look back period in seconds for the recommendation.",
+				ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(24*60*60, 7*24*60*60)),
+			},
 		},
 	}
 }
@@ -142,6 +181,10 @@ func resourceWorkloadScalingPolicyCreate(ctx context.Context, d *schema.Resource
 	if v, ok := d.GetOk("memory"); ok {
 		req.RecommendationPolicies.Memory = toWorkloadScalingPolicies(v.([]interface{})[0].(map[string]interface{}))
 	}
+
+	req.RecommendationPolicies.Startup = toStartup(toSection(d, "startup"))
+
+	req.RecommendationPolicies.Downscaling = toDownscaling(toSection(d, "downscaling"))
 
 	resp, err := client.WorkloadOptimizationAPICreateWorkloadScalingPolicyWithResponse(ctx, clusterID, req)
 	if checkErr := sdk.CheckOKResponse(resp, err); checkErr != nil {
@@ -188,6 +231,12 @@ func resourceWorkloadScalingPolicyRead(ctx context.Context, d *schema.ResourceDa
 	if err := d.Set("memory", toWorkloadScalingPoliciesMap(sp.RecommendationPolicies.Memory)); err != nil {
 		return diag.FromErr(fmt.Errorf("setting memory: %w", err))
 	}
+	if err := d.Set("startup", toStartupMap(sp.RecommendationPolicies.Startup)); err != nil {
+		return diag.FromErr(fmt.Errorf("setting startup: %w", err))
+	}
+	if err := d.Set("downscaling", toDownscalingMap(sp.RecommendationPolicies.Downscaling)); err != nil {
+		return diag.FromErr(fmt.Errorf("setting downscaling: %w", err))
+	}
 
 	return nil
 }
@@ -199,6 +248,8 @@ func resourceWorkloadScalingPolicyUpdate(ctx context.Context, d *schema.Resource
 		"management_option",
 		"cpu",
 		"memory",
+		"startup",
+		"downscaling",
 	) {
 		tflog.Info(ctx, "scaling policy up to date")
 		return nil
@@ -213,6 +264,8 @@ func resourceWorkloadScalingPolicyUpdate(ctx context.Context, d *schema.Resource
 			ManagementOption: sdk.WorkloadoptimizationV1ManagementOption(d.Get("management_option").(string)),
 			Cpu:              toWorkloadScalingPolicies(d.Get("cpu").([]interface{})[0].(map[string]interface{})),
 			Memory:           toWorkloadScalingPolicies(d.Get("memory").([]interface{})[0].(map[string]interface{})),
+			Startup:          toStartup(toSection(d, "startup")),
+			Downscaling:      toDownscaling(toSection(d, "downscaling")),
 		},
 	}
 
@@ -328,6 +381,9 @@ func toWorkloadScalingPolicies(obj map[string]interface{}) sdk.Workloadoptimizat
 	if v, ok := obj["apply_threshold"].(float64); ok {
 		out.ApplyThreshold = v
 	}
+	if v, ok := obj["look_back_period_seconds"].(int); ok && v > 0 {
+		out.LookBackPeriodSeconds = lo.ToPtr(int32(v))
+	}
 
 	return out
 }
@@ -340,5 +396,72 @@ func toWorkloadScalingPoliciesMap(p sdk.WorkloadoptimizationV1ResourcePolicies) 
 		"apply_threshold": p.ApplyThreshold,
 	}
 
+	if p.LookBackPeriodSeconds != nil {
+		m["look_back_period_seconds"] = int(*p.LookBackPeriodSeconds)
+	}
+
 	return []map[string]interface{}{m}
+}
+
+func toStartup(startup map[string]interface{}) *sdk.WorkloadoptimizationV1StartupSettings {
+	if len(startup) == 0 {
+		return nil
+	}
+	result := &sdk.WorkloadoptimizationV1StartupSettings{}
+
+	if v, ok := startup["period_seconds"].(int); ok && v > 0 {
+		result.PeriodSeconds = lo.ToPtr(int32(v))
+	}
+
+	return result
+}
+
+func toStartupMap(s *sdk.WorkloadoptimizationV1StartupSettings) []map[string]interface{} {
+	if s == nil {
+		return nil
+	}
+
+	m := map[string]interface{}{}
+
+	if s.PeriodSeconds != nil {
+		m["period_seconds"] = int(*s.PeriodSeconds)
+	}
+
+	if len(m) == 0 {
+		return nil
+	}
+
+	return []map[string]interface{}{m}
+}
+
+func toDownscaling(downscaling map[string]any) *sdk.WorkloadoptimizationV1DownscalingSettings {
+	if len(downscaling) == 0 {
+		return nil
+	}
+
+	result := &sdk.WorkloadoptimizationV1DownscalingSettings{}
+
+	if v, ok := downscaling["apply_type"].(string); ok && v != "" {
+		result.ApplyType = lo.ToPtr(sdk.WorkloadoptimizationV1ApplyType(v))
+	}
+
+	return result
+}
+
+func toDownscalingMap(s *sdk.WorkloadoptimizationV1DownscalingSettings) []map[string]any {
+	if s == nil {
+		return nil
+	}
+
+	m := map[string]any{}
+
+	if s.ApplyType != nil {
+		m["apply_type"] = string(*s.ApplyType)
+	}
+
+	if len(m) == 0 {
+		return nil
+	}
+
+	return []map[string]any{m}
 }

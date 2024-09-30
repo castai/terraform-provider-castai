@@ -1,4 +1,4 @@
-## Existing EKS cluster and CAST AI example with CAST AI Autoscaler policies and additional Node Configurations for 
+## Existing EKS cluster and CAST AI example with CAST AI Autoscaler policies and additional Node Configurations
 
 Following example shows how to onboard existing EKS cluster to CAST AI, configure [Autoscaler policies](https://docs.cast.ai/reference/policiesapi_upsertclusterpolicies) and additional [Node Configurations](https://docs.cast.ai/docs/node-configuration/).
 
@@ -36,7 +36,9 @@ terraform destroy -var-file=tf.vars
 
 > **Note**
 >
-> If you are onboarding existing cluster to CAST AI you need to also update [aws-auth](https://docs.aws.amazon.com/eks/latest/userguide/add-user-role.html) configmap. In the configmap instance profile
+> If you are onboarding existing cluster to CAST AI 
+1. If your eks cluster authentication mode is API/API_CONFIGMAP - TF will update role in IAM access entries (No user action needed)
+2. If your eks cluster authentication mode is CONFIGMAP - you need to also update [aws-auth](https://docs.aws.amazon.com/eks/latest/userguide/add-user-role.html) configmap. In the configmap instance profile
 > used by CAST AI has to be present. Example of entry can be found [here](https://github.com/castai/terraform-provider-castai/blob/157babd57b0977f499eb162e9bee27bee51d292a/examples/eks/eks_cluster_autoscaler_polices/eks.tf#L28-L38).
 
 

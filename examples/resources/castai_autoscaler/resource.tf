@@ -32,7 +32,7 @@ resource "castai_autoscaler" "castai_autoscaler_policy" {
         dry_run                                = false
         aggressive_mode                        = false
         scoped_mode                            = false
-        cycle_interval                         = "300s"
+        cycle_interval                         = "60s"
         node_grace_period_minutes              = 10
         pod_eviction_failure_back_off_interval = "30s"
         ignore_pod_disruption_budgets          = false

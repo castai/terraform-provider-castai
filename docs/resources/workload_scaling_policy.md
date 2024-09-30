@@ -15,21 +15,28 @@ simultaneously or create custom policies with different settings and apply them 
 ## Example Usage
 
 ```terraform
-castai_workload_scaling_policy "services" {
+resource "castai_workload_scaling_policy" "services" {
   name              = "services"
   cluster_id        = castai_gke_cluster.dev.id
   apply_type        = "IMMEDIATE"
   management_option = "MANAGED"
   cpu {
-    function        = "QUANTILE"
-    overhead        = 0.15
-    apply_threshold = 0.1
-    args            = ["0.9"]
+    function                 = "QUANTILE"
+    overhead                 = 0.15
+    apply_threshold          = 0.1
+    args                     = ["0.9"]
+    look_back_period_seconds = 172800
   }
   memory {
     function        = "MAX"
     overhead        = 0.35
     apply_threshold = 0.2
+  }
+  startup {
+    period_seconds = 240
+  }
+  downscaling {
+    apply_type = "DEFERRED"
   }
 }
 ```
@@ -52,6 +59,8 @@ castai_workload_scaling_policy "services" {
 
 ### Optional
 
+- `downscaling` (Block List, Max: 1) (see [below for nested schema](#nestedblock--downscaling))
+- `startup` (Block List, Max: 1) (see [below for nested schema](#nestedblock--startup))
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only
@@ -66,6 +75,7 @@ Optional:
 - `apply_threshold` (Number) The threshold of when to apply the recommendation. Recommendation will be applied when diff of current requests and new recommendation is greater than set value
 - `args` (List of String) The arguments for the function - i.e. for `QUANTILE` this should be a [0, 1] float. `MAX` doesn't accept any args
 - `function` (String) The function used to calculate the resource recommendation. Supported values: `QUANTILE`, `MAX`
+- `look_back_period_seconds` (Number) The look back period in seconds for the recommendation.
 - `overhead` (Number) Overhead for the recommendation, e.g. `0.1` will result in 10% higher recommendation
 
 
@@ -77,7 +87,28 @@ Optional:
 - `apply_threshold` (Number) The threshold of when to apply the recommendation. Recommendation will be applied when diff of current requests and new recommendation is greater than set value
 - `args` (List of String) The arguments for the function - i.e. for `QUANTILE` this should be a [0, 1] float. `MAX` doesn't accept any args
 - `function` (String) The function used to calculate the resource recommendation. Supported values: `QUANTILE`, `MAX`
+- `look_back_period_seconds` (Number) The look back period in seconds for the recommendation.
 - `overhead` (Number) Overhead for the recommendation, e.g. `0.1` will result in 10% higher recommendation
+
+
+<a id="nestedblock--downscaling"></a>
+### Nested Schema for `downscaling`
+
+Optional:
+
+- `apply_type` (String) Defines the apply type to be used when downscaling.
+	- IMMEDIATE - pods are restarted immediately when new recommendation is generated.
+	- DEFERRED - pods are not restarted and recommendation values are applied during natural restarts only (new deployment, etc.)
+
+
+<a id="nestedblock--startup"></a>
+### Nested Schema for `startup`
+
+Optional:
+
+- `period_seconds` (Number) Defines the duration (in seconds) during which elevated resource usage is expected at startup.
+When set, recommendations will be adjusted to disregard resource spikes within this period.
+If not specified, the workload will receive standard recommendations without startup considerations.
 
 
 <a id="nestedblock--timeouts"></a>

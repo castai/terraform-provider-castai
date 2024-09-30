@@ -10,12 +10,11 @@ import (
 	"strings"
 	"time"
 
-	"github.com/samber/lo"
-
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/samber/lo"
 
 	"github.com/castai/terraform-provider-castai/castai/sdk"
 	castval "github.com/castai/terraform-provider-castai/castai/validation"
@@ -244,6 +243,13 @@ func resourceNodeConfiguration() *schema.Resource {
 							Default:          nil,
 							Description:      "Number of IPs per prefix to be used for calculating max pods.",
 							ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(0, 256)),
+							DiffSuppressFunc: func(k, oldValue, newValue string, d *schema.ResourceData) bool {
+								log.Printf("[DEBUG] changing 'ips_per_prefix' attribute for eks: old=%s, new=%s", oldValue, newValue)
+								if oldValue == "1" && newValue == "0" {
+									return true
+								}
+								return oldValue == newValue
+							},
 						},
 						FieldNodeConfigurationEKSImageFamily: {
 							Type:     schema.TypeString,
