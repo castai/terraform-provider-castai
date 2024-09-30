@@ -35,6 +35,9 @@ resource "castai_workload_scaling_policy" "services" {
   startup {
     period_seconds = 240
   }
+  downscaling {
+    apply_type = "DEFERRED"
+  }
 }
 ```
 
