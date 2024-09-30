@@ -194,7 +194,6 @@ module "castai-eks-cluster" {
 resource "castai_rebalancing_schedule" "spots" {
   count = var.create_rebalancing_schedule ? 1 : 0
 
-  
   name = "rebalance spots at every 30th minute"   
   schedule {
     cron = "*/30 * * * *"
