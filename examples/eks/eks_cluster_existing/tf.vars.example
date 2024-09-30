@@ -5,4 +5,4 @@ grpc_url                    = ""
 vpc_id                      = ""
 cluster_security_group_id   = ""
 node_security_group_id      = ""
-subnets                     = ["", ""] #Only Publics Subnets
+subnets                     = ["", ""]
