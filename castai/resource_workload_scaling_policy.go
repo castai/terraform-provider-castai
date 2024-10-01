@@ -68,13 +68,13 @@ func resourceWorkloadScalingPolicy() *schema.Resource {
 				Type:     schema.TypeList,
 				Required: true,
 				MaxItems: 1,
-				Elem:     workloadScalingPolicyResourceSchema("QUANTILE", 0),
+				Elem:     workloadScalingPolicyResourceSchema("QUANTILE", 0, 0.01),
 			},
 			"memory": {
 				Type:     schema.TypeList,
 				Required: true,
 				MaxItems: 1,
-				Elem:     workloadScalingPolicyResourceSchema("MAX", 0.1),
+				Elem:     workloadScalingPolicyResourceSchema("MAX", 0.1, 10),
 			},
 			"startup": {
 				Type:     schema.TypeList,
@@ -118,7 +118,7 @@ func resourceWorkloadScalingPolicy() *schema.Resource {
 	}
 }
 
-func workloadScalingPolicyResourceSchema(function string, overhead float64) *schema.Resource {
+func workloadScalingPolicyResourceSchema(function string, overhead, minRecommended float64) *schema.Resource {
 	return &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"function": {
@@ -160,9 +160,8 @@ func workloadScalingPolicyResourceSchema(function string, overhead float64) *sch
 				ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(24*60*60, 7*24*60*60)),
 			},
 			"min": {
-				Type: schema.TypeFloat,
-				// TODO: cannot assign default here as default values are different for memory and cpu,
-				// need to check if it will cause state drift if assigned in the API
+				Type:        schema.TypeFloat,
+				Default:     minRecommended,
 				Optional:    true,
 				Description: "Min values for the recommendation, applies to every container. For memory - this is in MiB, for CPU - this is in cores.",
 			},

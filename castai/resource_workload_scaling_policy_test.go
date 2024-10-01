@@ -43,6 +43,7 @@ func TestAccResourceWorkloadScalingPolicy(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "memory.0.overhead", "0.25"),
 					resource.TestCheckResourceAttr(resourceName, "memory.0.apply_threshold", "0.1"),
 					resource.TestCheckResourceAttr(resourceName, "memory.0.args.#", "0"),
+					resource.TestCheckResourceAttr(resourceName, "memory.0.min", "100"),
 				),
 			},
 			{
@@ -65,6 +66,7 @@ func TestAccResourceWorkloadScalingPolicy(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "cpu.0.apply_threshold", "0.1"),
 					resource.TestCheckResourceAttr(resourceName, "cpu.0.args.0", "0.9"),
 					resource.TestCheckResourceAttr(resourceName, "cpu.0.look_back_period_seconds", "86402"),
+					resource.TestCheckResourceAttr(resourceName, "cpu.0.min", "0.1"),
 					resource.TestCheckResourceAttr(resourceName, "memory.0.function", "QUANTILE"),
 					resource.TestCheckResourceAttr(resourceName, "memory.0.overhead", "0.35"),
 					resource.TestCheckResourceAttr(resourceName, "memory.0.apply_threshold", "0.2"),
@@ -109,6 +111,7 @@ func scalingPolicyConfig(clusterName, projectID, name string) string {
 			function 		= "MAX"
 			overhead 		= 0.25
 			apply_threshold = 0.1
+            min             = 100
 		}
 	}`, name)
 
@@ -129,6 +132,7 @@ func scalingPolicyConfigUpdated(clusterName, projectID, name string) string {
 			apply_threshold = 0.1
 			args 			= ["0.9"]
 			look_back_period_seconds = 86402
+            min             = 0.1
 		}
 		memory {
 			function 		= "QUANTILE"
