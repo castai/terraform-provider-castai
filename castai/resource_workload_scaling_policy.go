@@ -166,8 +166,8 @@ func workloadScalingPolicyResourceSchema(function string, overhead float64) *sch
 			},
 			"min": {
 				Type: schema.TypeFloat,
-				// TODO: I'm not sure if it's a TF way to assign default values in the code.
-				// but cannot assign here as default values are different for memory and cpu :(
+				// TODO: cannot assign default here as default values are different for memory and cpu,
+				// need to check if it will cause state drift if assigned in the API
 				Optional:    true,
 				Description: "Min values for the recommendation, applies to every container. For memory - this is in MiB, for CPU - this is in cores.",
 			},
@@ -193,11 +193,11 @@ func resourceWorkloadScalingPolicyCreate(ctx context.Context, d *schema.Resource
 	}
 
 	if v, ok := d.GetOk("cpu"); ok {
-		req.RecommendationPolicies.Cpu = toWorkloadScalingPolicies(v.([]interface{})[0].(map[string]interface{}), defaultMinCPU)
+		req.RecommendationPolicies.Cpu = toWorkloadScalingPolicies(v.([]interface{})[0].(map[string]interface{}))
 	}
 
 	if v, ok := d.GetOk("memory"); ok {
-		req.RecommendationPolicies.Memory = toWorkloadScalingPolicies(v.([]interface{})[0].(map[string]interface{}), defaultMinMemory)
+		req.RecommendationPolicies.Memory = toWorkloadScalingPolicies(v.([]interface{})[0].(map[string]interface{}))
 	}
 
 	req.RecommendationPolicies.Startup = toStartup(toSection(d, "startup"))
@@ -280,8 +280,8 @@ func resourceWorkloadScalingPolicyUpdate(ctx context.Context, d *schema.Resource
 		ApplyType: sdk.WorkloadoptimizationV1ApplyType(d.Get("apply_type").(string)),
 		RecommendationPolicies: sdk.WorkloadoptimizationV1RecommendationPolicies{
 			ManagementOption: sdk.WorkloadoptimizationV1ManagementOption(d.Get("management_option").(string)),
-			Cpu:              toWorkloadScalingPolicies(d.Get("cpu").([]interface{})[0].(map[string]interface{}), defaultMinCPU),
-			Memory:           toWorkloadScalingPolicies(d.Get("memory").([]interface{})[0].(map[string]interface{}), defaultMinMemory),
+			Cpu:              toWorkloadScalingPolicies(d.Get("cpu").([]interface{})[0].(map[string]interface{})),
+			Memory:           toWorkloadScalingPolicies(d.Get("memory").([]interface{})[0].(map[string]interface{})),
 			Startup:          toStartup(toSection(d, "startup")),
 			Downscaling:      toDownscaling(toSection(d, "downscaling")),
 		},
@@ -331,8 +331,8 @@ func resourceWorkloadScalingPolicyDelete(ctx context.Context, d *schema.Resource
 
 func resourceWorkloadScalingPolicyDiff(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
 	// Since tf doesn't support cross field validation, doing it here.
-	cpu := toWorkloadScalingPolicies(d.Get("cpu").([]interface{})[0].(map[string]interface{}), defaultMinCPU)
-	memory := toWorkloadScalingPolicies(d.Get("memory").([]interface{})[0].(map[string]interface{}), defaultMinMemory)
+	cpu := toWorkloadScalingPolicies(d.Get("cpu").([]interface{})[0].(map[string]interface{}))
+	memory := toWorkloadScalingPolicies(d.Get("memory").([]interface{})[0].(map[string]interface{}))
 
 	if err := validateArgs(cpu, "cpu"); err != nil {
 		return err
@@ -384,7 +384,7 @@ func workloadScalingPolicyImporter(ctx context.Context, d *schema.ResourceData, 
 	return nil, fmt.Errorf("failed to find workload scaling policy with the following name: %v", nameOrID)
 }
 
-func toWorkloadScalingPolicies(obj map[string]interface{}, defaultMin float64) sdk.WorkloadoptimizationV1ResourcePolicies {
+func toWorkloadScalingPolicies(obj map[string]interface{}) sdk.WorkloadoptimizationV1ResourcePolicies {
 	out := sdk.WorkloadoptimizationV1ResourcePolicies{}
 
 	if v, ok := obj["function"].(string); ok {
@@ -404,8 +404,6 @@ func toWorkloadScalingPolicies(obj map[string]interface{}, defaultMin float64) s
 	}
 	if v, ok := obj["min"].(float64); ok {
 		out.Min = lo.ToPtr(v)
-	} else {
-		out.Min = lo.ToPtr(defaultMin)
 	}
 	if v, ok := obj["max"].(float64); ok {
 		out.Max = lo.ToPtr(v)
