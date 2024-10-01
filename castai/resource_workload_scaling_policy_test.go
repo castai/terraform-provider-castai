@@ -36,7 +36,7 @@ func TestAccResourceWorkloadScalingPolicy(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "cpu.0.overhead", "0.05"),
 					resource.TestCheckResourceAttr(resourceName, "cpu.0.apply_threshold", "0.06"),
 					resource.TestCheckResourceAttr(resourceName, "cpu.0.args.0", "0.86"),
-					resource.TestCheckResourceAttr(resourceName, "cpu.0.look_back_period_seconds", "0.1"),
+					resource.TestCheckResourceAttr(resourceName, "cpu.0.look_back_period_seconds", "86401"),
 					resource.TestCheckResourceAttr(resourceName, "cpu.0.min", "0.1"),
 					resource.TestCheckResourceAttr(resourceName, "cpu.0.max", "1"),
 					resource.TestCheckResourceAttr(resourceName, "memory.0.function", "MAX"),
