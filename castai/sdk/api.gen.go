@@ -3638,6 +3638,14 @@ type WorkloadoptimizationV1ResourcePolicies struct {
 	// Period of time over which the resource recommendation is calculated (default value is 24 hours).
 	LookBackPeriodSeconds *int32 `json:"lookBackPeriodSeconds"`
 
+	// Max values for the recommendation, applies to every container. For memory - this is in MiB, for CPU - this is in cores.
+	// If not set, there will be no upper bound for the recommendation (default behaviour). This value will be overridden if configured on workload level.
+	Max *float64 `json:"max"`
+
+	// Min values for the recommendation, applies to every container. For memory - this is in MiB, for CPU - this is in cores.
+	// If not set, the default value will be 10m for CPU and 10MiB for memory. This value will be overridden if configured on workload level.
+	Min *float64 `json:"min"`
+
 	// The overhead for the recommendation, the formula is: (1 + overhead) * function(args).
 	Overhead float64 `json:"overhead"`
 }

@@ -3,11 +3,12 @@ package castai
 import (
 	"context"
 	"fmt"
-	"github.com/samber/lo"
 	"net/http"
 	"regexp"
 	"strings"
 	"time"
+
+	"github.com/samber/lo"
 
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
@@ -20,6 +21,11 @@ import (
 
 var (
 	k8sNameRegex = regexp.MustCompile("^[a-z0-9A-Z][a-z0-9A-Z._-]{0,61}[a-z0-9A-Z]$")
+)
+
+const (
+	defaultMinCPU    = 0.01
+	defaultMinMemory = 10.0
 )
 
 func resourceWorkloadScalingPolicy() *schema.Resource {
@@ -153,10 +159,21 @@ func workloadScalingPolicyResourceSchema(function string, overhead float64) *sch
 				ValidateDiagFunc: validation.ToDiagFunc(validation.FloatBetween(0.01, 1)),
 			},
 			"look_back_period_seconds": {
-				Type:             schema.TypeInt,
+				Type:             schema.TypeFloat,
 				Optional:         true,
 				Description:      "The look back period in seconds for the recommendation.",
 				ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(24*60*60, 7*24*60*60)),
+			},
+			"min": {
+				Type:        schema.TypeFloat,
+				Optional:    true,
+				Description: "Min values for the recommendation, applies to every container. For memory - this is in MiB, for CPU - this is in cores.",
+			},
+			"max": {
+				Type: schema.TypeFloat,
+				// TODO: I'm not sure if it's a TF way to assign default values in the code
+				Optional:    true,
+				Description: "Max values for the recommendation, applies to every container. For memory - this is in MiB, for CPU - this is in cores.",
 			},
 		},
 	}
@@ -175,11 +192,11 @@ func resourceWorkloadScalingPolicyCreate(ctx context.Context, d *schema.Resource
 	}
 
 	if v, ok := d.GetOk("cpu"); ok {
-		req.RecommendationPolicies.Cpu = toWorkloadScalingPolicies(v.([]interface{})[0].(map[string]interface{}))
+		req.RecommendationPolicies.Cpu = toWorkloadScalingPolicies(v.([]interface{})[0].(map[string]interface{}), defaultMinCPU)
 	}
 
 	if v, ok := d.GetOk("memory"); ok {
-		req.RecommendationPolicies.Memory = toWorkloadScalingPolicies(v.([]interface{})[0].(map[string]interface{}))
+		req.RecommendationPolicies.Memory = toWorkloadScalingPolicies(v.([]interface{})[0].(map[string]interface{}), defaultMinMemory)
 	}
 
 	req.RecommendationPolicies.Startup = toStartup(toSection(d, "startup"))
@@ -262,8 +279,8 @@ func resourceWorkloadScalingPolicyUpdate(ctx context.Context, d *schema.Resource
 		ApplyType: sdk.WorkloadoptimizationV1ApplyType(d.Get("apply_type").(string)),
 		RecommendationPolicies: sdk.WorkloadoptimizationV1RecommendationPolicies{
 			ManagementOption: sdk.WorkloadoptimizationV1ManagementOption(d.Get("management_option").(string)),
-			Cpu:              toWorkloadScalingPolicies(d.Get("cpu").([]interface{})[0].(map[string]interface{})),
-			Memory:           toWorkloadScalingPolicies(d.Get("memory").([]interface{})[0].(map[string]interface{})),
+			Cpu:              toWorkloadScalingPolicies(d.Get("cpu").([]interface{})[0].(map[string]interface{}), defaultMinCPU),
+			Memory:           toWorkloadScalingPolicies(d.Get("memory").([]interface{})[0].(map[string]interface{}), defaultMinMemory),
 			Startup:          toStartup(toSection(d, "startup")),
 			Downscaling:      toDownscaling(toSection(d, "downscaling")),
 		},
@@ -313,8 +330,8 @@ func resourceWorkloadScalingPolicyDelete(ctx context.Context, d *schema.Resource
 
 func resourceWorkloadScalingPolicyDiff(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
 	// Since tf doesn't support cross field validation, doing it here.
-	cpu := toWorkloadScalingPolicies(d.Get("cpu").([]interface{})[0].(map[string]interface{}))
-	memory := toWorkloadScalingPolicies(d.Get("memory").([]interface{})[0].(map[string]interface{}))
+	cpu := toWorkloadScalingPolicies(d.Get("cpu").([]interface{})[0].(map[string]interface{}), defaultMinCPU)
+	memory := toWorkloadScalingPolicies(d.Get("memory").([]interface{})[0].(map[string]interface{}), defaultMinMemory)
 
 	if err := validateArgs(cpu, "cpu"); err != nil {
 		return err
@@ -366,7 +383,7 @@ func workloadScalingPolicyImporter(ctx context.Context, d *schema.ResourceData, 
 	return nil, fmt.Errorf("failed to find workload scaling policy with the following name: %v", nameOrID)
 }
 
-func toWorkloadScalingPolicies(obj map[string]interface{}) sdk.WorkloadoptimizationV1ResourcePolicies {
+func toWorkloadScalingPolicies(obj map[string]interface{}, defaultMin float64) sdk.WorkloadoptimizationV1ResourcePolicies {
 	out := sdk.WorkloadoptimizationV1ResourcePolicies{}
 
 	if v, ok := obj["function"].(string); ok {
@@ -384,6 +401,14 @@ func toWorkloadScalingPolicies(obj map[string]interface{}) sdk.Workloadoptimizat
 	if v, ok := obj["look_back_period_seconds"].(int); ok && v > 0 {
 		out.LookBackPeriodSeconds = lo.ToPtr(int32(v))
 	}
+	if v, ok := obj["min"].(float64); ok {
+		out.Min = lo.ToPtr(v)
+	} else {
+		out.Min = lo.ToPtr(defaultMin)
+	}
+	if v, ok := obj["max"].(float64); ok {
+		out.Max = lo.ToPtr(v)
+	}
 
 	return out
 }
@@ -394,6 +419,8 @@ func toWorkloadScalingPoliciesMap(p sdk.WorkloadoptimizationV1ResourcePolicies) 
 		"args":            p.Args,
 		"overhead":        p.Overhead,
 		"apply_threshold": p.ApplyThreshold,
+		"min":             p.Min,
+		"max":             p.Max,
 	}
 
 	if p.LookBackPeriodSeconds != nil {
