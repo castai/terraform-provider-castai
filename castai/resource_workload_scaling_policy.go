@@ -399,7 +399,7 @@ func toWorkloadScalingPolicies(obj map[string]interface{}) sdk.Workloadoptimizat
 	if v, ok := obj["min"].(float64); ok {
 		out.Min = lo.ToPtr(v)
 	}
-	if v, ok := obj["max"].(float64); ok {
+	if v, ok := obj["max"].(float64); ok && v > 0 {
 		out.Max = lo.ToPtr(v)
 	}
 
