@@ -165,13 +165,14 @@ func workloadScalingPolicyResourceSchema(function string, overhead float64) *sch
 				ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(24*60*60, 7*24*60*60)),
 			},
 			"min": {
-				Type:        schema.TypeFloat,
+				Type: schema.TypeFloat,
+				// TODO: I'm not sure if it's a TF way to assign default values in the code.
+				// but cannot assign here as default values are different for memory and cpu :(
 				Optional:    true,
 				Description: "Min values for the recommendation, applies to every container. For memory - this is in MiB, for CPU - this is in cores.",
 			},
 			"max": {
-				Type: schema.TypeFloat,
-				// TODO: I'm not sure if it's a TF way to assign default values in the code
+				Type:        schema.TypeFloat,
 				Optional:    true,
 				Description: "Max values for the recommendation, applies to every container. For memory - this is in MiB, for CPU - this is in cores.",
 			},
