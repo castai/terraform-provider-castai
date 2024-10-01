@@ -78,7 +78,7 @@ resource "helm_release" "castai_agent" {
   }
   set_sensitive {
     name  = "apiKey"
-    value = castai_eks_cluster.this.cluster_token
+    value = var.castai_api_token
   }
 
   # Required until https://github.com/castai/helm-charts/issues/135 is fixed.
