@@ -23,11 +23,6 @@ var (
 	k8sNameRegex = regexp.MustCompile("^[a-z0-9A-Z][a-z0-9A-Z._-]{0,61}[a-z0-9A-Z]$")
 )
 
-const (
-	defaultMinCPU    = 0.01
-	defaultMinMemory = 10.0
-)
-
 func resourceWorkloadScalingPolicy() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceWorkloadScalingPolicyCreate,
