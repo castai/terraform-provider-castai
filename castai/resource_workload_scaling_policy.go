@@ -3,11 +3,12 @@ package castai
 import (
 	"context"
 	"fmt"
-	"github.com/samber/lo"
 	"net/http"
 	"regexp"
 	"strings"
 	"time"
+
+	"github.com/samber/lo"
 
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
@@ -67,13 +68,13 @@ func resourceWorkloadScalingPolicy() *schema.Resource {
 				Type:     schema.TypeList,
 				Required: true,
 				MaxItems: 1,
-				Elem:     workloadScalingPolicyResourceSchema("QUANTILE", 0),
+				Elem:     workloadScalingPolicyResourceSchema("QUANTILE", 0, 0.01),
 			},
 			"memory": {
 				Type:     schema.TypeList,
 				Required: true,
 				MaxItems: 1,
-				Elem:     workloadScalingPolicyResourceSchema("MAX", 0.1),
+				Elem:     workloadScalingPolicyResourceSchema("MAX", 0.1, 10),
 			},
 			"startup": {
 				Type:     schema.TypeList,
@@ -117,7 +118,7 @@ func resourceWorkloadScalingPolicy() *schema.Resource {
 	}
 }
 
-func workloadScalingPolicyResourceSchema(function string, overhead float64) *schema.Resource {
+func workloadScalingPolicyResourceSchema(function string, overhead, minRecommended float64) *schema.Resource {
 	return &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"function": {
@@ -157,6 +158,18 @@ func workloadScalingPolicyResourceSchema(function string, overhead float64) *sch
 				Optional:         true,
 				Description:      "The look back period in seconds for the recommendation.",
 				ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(24*60*60, 7*24*60*60)),
+			},
+			"min": {
+				Type:             schema.TypeFloat,
+				Default:          minRecommended,
+				Optional:         true,
+				Description:      "Min values for the recommendation, applies to every container. For memory - this is in MiB, for CPU - this is in cores.",
+				ValidateDiagFunc: validation.ToDiagFunc(validation.FloatAtLeast(minRecommended)),
+			},
+			"max": {
+				Type:        schema.TypeFloat,
+				Optional:    true,
+				Description: "Max values for the recommendation, applies to every container. For memory - this is in MiB, for CPU - this is in cores.",
 			},
 		},
 	}
@@ -384,6 +397,12 @@ func toWorkloadScalingPolicies(obj map[string]interface{}) sdk.Workloadoptimizat
 	if v, ok := obj["look_back_period_seconds"].(int); ok && v > 0 {
 		out.LookBackPeriodSeconds = lo.ToPtr(int32(v))
 	}
+	if v, ok := obj["min"].(float64); ok {
+		out.Min = lo.ToPtr(v)
+	}
+	if v, ok := obj["max"].(float64); ok && v > 0 {
+		out.Max = lo.ToPtr(v)
+	}
 
 	return out
 }
@@ -394,6 +413,8 @@ func toWorkloadScalingPoliciesMap(p sdk.WorkloadoptimizationV1ResourcePolicies) 
 		"args":            p.Args,
 		"overhead":        p.Overhead,
 		"apply_threshold": p.ApplyThreshold,
+		"min":             p.Min,
+		"max":             p.Max,
 	}
 
 	if p.LookBackPeriodSeconds != nil {
