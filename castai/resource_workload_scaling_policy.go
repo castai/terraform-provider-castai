@@ -160,10 +160,11 @@ func workloadScalingPolicyResourceSchema(function string, overhead, minRecommend
 				ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(24*60*60, 7*24*60*60)),
 			},
 			"min": {
-				Type:        schema.TypeFloat,
-				Default:     minRecommended,
-				Optional:    true,
-				Description: "Min values for the recommendation, applies to every container. For memory - this is in MiB, for CPU - this is in cores.",
+				Type:             schema.TypeFloat,
+				Default:          minRecommended,
+				Optional:         true,
+				Description:      "Min values for the recommendation, applies to every container. For memory - this is in MiB, for CPU - this is in cores.",
+				ValidateDiagFunc: validation.ToDiagFunc(validation.FloatAtLeast(minRecommended)),
 			},
 			"max": {
 				Type:        schema.TypeFloat,
