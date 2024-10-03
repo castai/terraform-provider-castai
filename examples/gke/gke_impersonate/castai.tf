@@ -1,3 +1,16 @@
+locals {
+  service_account_id = "castai-gke-tf-${substr(sha1(var.cluster_name), 0, 8)}"
+}
+
+module "iam-impersonate" {
+  source             = "castai/iam-impersonate/gke"
+  version            = "1.0.0"
+  service_account_id = local.service_account_id
+  cluster_region     = var.cluster_region
+  cluster_name       = var.cluster_name
+  project_id         = var.project_id
+}
+
 module "castai-gke-cluster" {
   source = "castai/gke-cluster/castai"
 
