@@ -835,6 +835,46 @@ func (mr *MockClientInterfaceMockRecorder) ExternalClusterAPIDrainNodeWithBody(c
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIDrainNodeWithBody", reflect.TypeOf((*MockClientInterface)(nil).ExternalClusterAPIDrainNodeWithBody), varargs...)
 }
 
+// ExternalClusterAPIGKECreateSA mocks base method.
+func (m *MockClientInterface) ExternalClusterAPIGKECreateSA(ctx context.Context, clusterId string, body sdk.ExternalClusterAPIGKECreateSAJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ExternalClusterAPIGKECreateSA", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExternalClusterAPIGKECreateSA indicates an expected call of ExternalClusterAPIGKECreateSA.
+func (mr *MockClientInterfaceMockRecorder) ExternalClusterAPIGKECreateSA(ctx, clusterId, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIGKECreateSA", reflect.TypeOf((*MockClientInterface)(nil).ExternalClusterAPIGKECreateSA), varargs...)
+}
+
+// ExternalClusterAPIGKECreateSAWithBody mocks base method.
+func (m *MockClientInterface) ExternalClusterAPIGKECreateSAWithBody(ctx context.Context, clusterId, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ExternalClusterAPIGKECreateSAWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExternalClusterAPIGKECreateSAWithBody indicates an expected call of ExternalClusterAPIGKECreateSAWithBody.
+func (mr *MockClientInterfaceMockRecorder) ExternalClusterAPIGKECreateSAWithBody(ctx, clusterId, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIGKECreateSAWithBody", reflect.TypeOf((*MockClientInterface)(nil).ExternalClusterAPIGKECreateSAWithBody), varargs...)
+}
+
 // ExternalClusterAPIGetAssumeRolePrincipal mocks base method.
 func (m *MockClientInterface) ExternalClusterAPIGetAssumeRolePrincipal(ctx context.Context, clusterId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
@@ -3906,6 +3946,36 @@ func (m *MockClientWithResponsesInterface) ExternalClusterAPIDrainNodeWithRespon
 func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIDrainNodeWithResponse(ctx, clusterId, nodeId, body interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIDrainNodeWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIDrainNodeWithResponse), ctx, clusterId, nodeId, body)
+}
+
+// ExternalClusterAPIGKECreateSAWithBodyWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) ExternalClusterAPIGKECreateSAWithBodyWithResponse(ctx context.Context, clusterId, contentType string, body io.Reader) (*sdk.ExternalClusterAPIGKECreateSAResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ExternalClusterAPIGKECreateSAWithBodyWithResponse", ctx, clusterId, contentType, body)
+	ret0, _ := ret[0].(*sdk.ExternalClusterAPIGKECreateSAResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExternalClusterAPIGKECreateSAWithBodyWithResponse indicates an expected call of ExternalClusterAPIGKECreateSAWithBodyWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIGKECreateSAWithBodyWithResponse(ctx, clusterId, contentType, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIGKECreateSAWithBodyWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIGKECreateSAWithBodyWithResponse), ctx, clusterId, contentType, body)
+}
+
+// ExternalClusterAPIGKECreateSAWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) ExternalClusterAPIGKECreateSAWithResponse(ctx context.Context, clusterId string, body sdk.ExternalClusterAPIGKECreateSAJSONRequestBody) (*sdk.ExternalClusterAPIGKECreateSAResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ExternalClusterAPIGKECreateSAWithResponse", ctx, clusterId, body)
+	ret0, _ := ret[0].(*sdk.ExternalClusterAPIGKECreateSAResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExternalClusterAPIGKECreateSAWithResponse indicates an expected call of ExternalClusterAPIGKECreateSAWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIGKECreateSAWithResponse(ctx, clusterId, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIGKECreateSAWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIGKECreateSAWithResponse), ctx, clusterId, body)
 }
 
 // ExternalClusterAPIGetAssumeRolePrincipalWithResponse mocks base method.

@@ -332,6 +332,12 @@ const (
 	WorkloadoptimizationV1ResourcePoliciesFunctionQUANTILE WorkloadoptimizationV1ResourcePoliciesFunction = "QUANTILE"
 )
 
+// ExternalClusterAPIGKECreateSARequest defines model for ExternalClusterAPI_GKECreateSA_request.
+type ExternalClusterAPIGKECreateSARequest struct {
+	// UpdateGKEClusterParams defines updatable GKE cluster configuration.
+	Gke *ExternalclusterV1UpdateGKEClusterParams `json:"gke,omitempty"`
+}
+
 // UsersAPIUpdateOrganizationUserRequest defines model for UsersAPI_UpdateOrganizationUser_request.
 type UsersAPIUpdateOrganizationUserRequest struct {
 	Role *string `json:"role,omitempty"`
@@ -1589,6 +1595,9 @@ type ExternalclusterV1Cluster struct {
 	// The cluster's ID.
 	Id *string `json:"id,omitempty"`
 
+	// Indicates if the cluster is in phase 2.
+	IsPhase2 *bool `json:"isPhase2,omitempty"`
+
 	// KOPSClusterParams defines KOPS-specific arguments.
 	Kops              *ExternalclusterV1KOPSClusterParams `json:"kops,omitempty"`
 	KubernetesVersion *string                             `json:"kubernetesVersion"`
@@ -1758,6 +1767,9 @@ type ExternalclusterV1EKSClusterParams_Tags struct {
 
 // GKEClusterParams defines GKE-specific arguments.
 type ExternalclusterV1GKEClusterParams struct {
+	CastServiceAccount   *string `json:"castServiceAccount,omitempty"`
+	ClientServiceAccount *string `json:"clientServiceAccount,omitempty"`
+
 	// Name of the cluster.
 	ClusterName *string `json:"clusterName,omitempty"`
 
@@ -1772,6 +1784,11 @@ type ExternalclusterV1GKEClusterParams struct {
 
 	// Region of the cluster.
 	Region *string `json:"region,omitempty"`
+}
+
+// ExternalclusterV1GKECreateSAResponse defines model for externalcluster.v1.GKECreateSAResponse.
+type ExternalclusterV1GKECreateSAResponse struct {
+	ServiceAccount *string `json:"serviceAccount,omitempty"`
 }
 
 // GPUConfig describes instance GPU configuration.
@@ -3644,6 +3661,7 @@ type WorkloadoptimizationV1ResourcePolicies struct {
 
 	// Min values for the recommendation, applies to every container. For memory - this is in MiB, for CPU - this is in cores.
 	// If not set, the default value will be 10m for CPU and 10MiB for memory. This value will be overridden if configured on workload level.
+	// Value cannot be lower than 10m for CPU and 10MiB for memory.
 	Min *float64 `json:"min"`
 
 	// The overhead for the recommendation, the formula is: (1 + overhead) * function(args).
@@ -4033,6 +4051,9 @@ type ExternalClusterAPIDisconnectClusterJSONBody = ExternalclusterV1DisconnectCo
 // ExternalClusterAPIHandleCloudEventJSONBody defines parameters for ExternalClusterAPIHandleCloudEvent.
 type ExternalClusterAPIHandleCloudEventJSONBody = ExternalclusterV1CloudEvent
 
+// ExternalClusterAPIGKECreateSAJSONBody defines parameters for ExternalClusterAPIGKECreateSA.
+type ExternalClusterAPIGKECreateSAJSONBody = ExternalClusterAPIGKECreateSARequest
+
 // ExternalClusterAPIListNodesParams defines parameters for ExternalClusterAPIListNodes.
 type ExternalClusterAPIListNodesParams struct {
 	PageLimit *string `form:"page.limit,omitempty" json:"page.limit,omitempty"`
@@ -4321,6 +4342,9 @@ type ExternalClusterAPIDisconnectClusterJSONRequestBody = ExternalClusterAPIDisc
 
 // ExternalClusterAPIHandleCloudEventJSONRequestBody defines body for ExternalClusterAPIHandleCloudEvent for application/json ContentType.
 type ExternalClusterAPIHandleCloudEventJSONRequestBody = ExternalClusterAPIHandleCloudEventJSONBody
+
+// ExternalClusterAPIGKECreateSAJSONRequestBody defines body for ExternalClusterAPIGKECreateSA for application/json ContentType.
+type ExternalClusterAPIGKECreateSAJSONRequestBody = ExternalClusterAPIGKECreateSAJSONBody
 
 // ExternalClusterAPIAddNodeJSONRequestBody defines body for ExternalClusterAPIAddNode for application/json ContentType.
 type ExternalClusterAPIAddNodeJSONRequestBody = ExternalClusterAPIAddNodeJSONBody

@@ -7,7 +7,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/cenkalti/backoff/v4"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -16,19 +15,19 @@ import (
 )
 
 const (
-	FieldGKEClusterName          = "name"
-	FieldGKEClusterProjectId     = "project_id"
-	FieldGKEClusterLocation      = "location"
-	FieldGKEClusterCredentialsId = "credentials_id"
-	FieldGKEClusterCredentials   = "credentials_json"
+	FieldGKEClusterIdName      = "name"
+	FieldGKEClusterIdProjectId = "project_id"
+	FieldGKEClusterIdLocation  = "location"
+	FieldGKEClientSA           = "client_service_account"
+	FieldGKECastSA             = "cast_service_account"
 )
 
-func resourceGKECluster() *schema.Resource {
+func resourceGKEClusterId() *schema.Resource {
 	return &schema.Resource{
-		CreateContext: resourceCastaiGKEClusterCreate,
-		ReadContext:   resourceCastaiGKEClusterRead,
-		UpdateContext: resourceCastaiGKEClusterUpdate,
-		DeleteContext: resourceCastaiClusterDelete,
+		CreateContext: resourceCastaiGKEClusterIdCreate,
+		ReadContext:   resourceCastaiGKEClusterIdRead,
+		UpdateContext: resourceCastaiGKEClusterIdUpdate,
+		DeleteContext: resourceCastaiGKEClusterIdDelete,
 		CustomizeDiff: clusterTokenDiff,
 		Description:   "GKE cluster resource allows connecting an existing GKE cluster to CAST AI.",
 
@@ -39,26 +38,21 @@ func resourceGKECluster() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			FieldGKEClusterName: {
+			FieldGKEClusterIdName: {
 				Type:             schema.TypeString,
 				Required:         true,
 				ForceNew:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 				Description:      "GKE cluster name",
 			},
-			FieldGKEClusterCredentialsId: {
-				Type:        schema.TypeString,
-				Computed:    true,
-				Description: "CAST AI credentials id for cluster",
-			},
-			FieldGKEClusterProjectId: {
+			FieldGKEClusterIdProjectId: {
 				Type:             schema.TypeString,
 				Required:         true,
 				ForceNew:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 				Description:      "GCP project id",
 			},
-			FieldGKEClusterLocation: {
+			FieldGKEClusterIdLocation: {
 				Type:             schema.TypeString,
 				Required:         true,
 				ForceNew:         true,
@@ -71,23 +65,22 @@ func resourceGKECluster() *schema.Resource {
 				Sensitive:   true,
 				Description: "CAST.AI agent cluster token",
 			},
-			FieldGKEClusterCredentials: {
-				Type:             schema.TypeString,
-				Sensitive:        true,
-				Optional:         true,
-				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
-				Description:      "GCP credentials.json from ServiceAccount with credentials for CAST AI",
-			},
-			FieldDeleteNodesOnDisconnect: {
-				Type:        schema.TypeBool,
+			FieldGKEClientSA: {
+				Type:        schema.TypeString,
 				Optional:    true,
-				Description: "Should CAST AI remove nodes managed by CAST.AI on disconnect",
+				Description: "Service account email in client project",
+			},
+			FieldGKECastSA: {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Computed:    true,
+				Description: "Service account email in cast project",
 			},
 		},
 	}
 }
 
-func resourceCastaiGKEClusterCreate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceCastaiGKEClusterIdCreate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*ProviderConfig).api
 
 	req := sdk.ExternalClusterAPIRegisterClusterJSONRequestBody{
@@ -111,6 +104,8 @@ func resourceCastaiGKEClusterCreate(ctx context.Context, data *schema.ResourceDa
 		Location:    &location,
 		ClusterName: toPtr(data.Get(FieldGKEClusterName).(string)),
 	}
+
+	log.Printf("[INFO] Registering new external cluster: %#v", req)
 	resp, err := client.ExternalClusterAPIRegisterClusterWithResponse(ctx, req)
 	if checkErr := sdk.CheckOKResponse(resp, err); checkErr != nil {
 		return diag.FromErr(checkErr)
@@ -125,15 +120,28 @@ func resourceCastaiGKEClusterCreate(ctx context.Context, data *schema.ResourceDa
 		return diag.FromErr(fmt.Errorf("setting cluster token: %w", err))
 	}
 	data.SetId(clusterID)
-	if err := updateGKEClusterSettings(ctx, data, client); err != nil {
-		return diag.FromErr(err)
+	// If client service account is set, create service account on cast side.
+	if len(data.Get(FieldGKEClientSA).(string)) > 0 {
+		resp, err := client.ExternalClusterAPIGKECreateSAWithResponse(ctx, data.Id(), sdk.ExternalClusterAPIGKECreateSARequest{
+			Gke: &sdk.ExternalclusterV1UpdateGKEClusterParams{
+				GkeSaImpersonate: toPtr(data.Get(FieldGKEClientSA).(string)),
+				ProjectId:        toPtr(data.Get(FieldGKEClusterProjectId).(string)),
+			},
+		})
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		if resp.JSON200 == nil || resp.JSON200.ServiceAccount == nil {
+			return diag.FromErr(fmt.Errorf("service account not returned"))
+		}
+		if err := data.Set(FieldGKECastSA, toString(resp.JSON200.ServiceAccount)); err != nil {
+			return diag.FromErr(fmt.Errorf("service account id: %w", err))
+		}
 	}
-	log.Printf("[INFO] Cluster with id %q has been registered, don't forget to install castai-agent helm chart", data.Id())
-
-	return resourceCastaiGKEClusterRead(ctx, data, meta)
+	return nil
 }
 
-func resourceCastaiGKEClusterRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceCastaiGKEClusterIdRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*ProviderConfig).api
 
 	if data.Id() == "" {
@@ -142,7 +150,6 @@ func resourceCastaiGKEClusterRead(ctx context.Context, data *schema.ResourceData
 	}
 
 	log.Printf("[INFO] Getting cluster information.")
-
 	resp, err := fetchClusterData(ctx, client, data.Id())
 	if err != nil {
 		return diag.FromErr(err)
@@ -151,10 +158,6 @@ func resourceCastaiGKEClusterRead(ctx context.Context, data *schema.ResourceData
 	if resp == nil {
 		data.SetId("")
 		return nil
-	}
-
-	if err := data.Set(FieldGKEClusterCredentialsId, toString(resp.JSON200.CredentialsId)); err != nil {
-		return diag.FromErr(fmt.Errorf("setting credentials id: %w", err))
 	}
 	if GKE := resp.JSON200.Gke; GKE != nil {
 		if err := data.Set(FieldGKEClusterProjectId, toString(GKE.ProjectId)); err != nil {
@@ -166,52 +169,20 @@ func resourceCastaiGKEClusterRead(ctx context.Context, data *schema.ResourceData
 		if err := data.Set(FieldGKEClusterName, toString(GKE.ClusterName)); err != nil {
 			return diag.FromErr(fmt.Errorf("setting cluster name: %w", err))
 		}
+		if err := data.Set(FieldGKEClientSA, toString(GKE.ClientServiceAccount)); err != nil {
+			return diag.FromErr(fmt.Errorf("setting cluster client sa email: %w", err))
+		}
+		if err := data.Set(FieldGKECastSA, toString(GKE.CastServiceAccount)); err != nil {
+			return diag.FromErr(fmt.Errorf("setting cluster cast sa email: %w", err))
+		}
 	}
-
 	return nil
 }
 
-func resourceCastaiGKEClusterUpdate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ProviderConfig).api
-
-	if err := updateGKEClusterSettings(ctx, data, client); err != nil {
-		return diag.FromErr(err)
-	}
-
-	return resourceCastaiGKEClusterRead(ctx, data, meta)
+func resourceCastaiGKEClusterIdUpdate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	return resourceCastaiGKEClusterIdRead(ctx, data, meta)
 }
 
-func updateGKEClusterSettings(ctx context.Context, data *schema.ResourceData, client *sdk.ClientWithResponses) error {
-	if !data.HasChanges(
-		FieldGKEClusterCredentials,
-	) {
-		log.Printf("[INFO] Nothing to update in cluster setttings.")
-		return nil
-	}
-
-	log.Printf("[INFO] Updating cluster settings.")
-
-	req := sdk.ExternalClusterAPIUpdateClusterJSONRequestBody{}
-
-	credentialsJSON, ok := data.GetOk(FieldGKEClusterCredentials)
-	if ok {
-		req.Credentials = toPtr(credentialsJSON.(string))
-	}
-
-	if err := backoff.Retry(func() error {
-		response, err := client.ExternalClusterAPIUpdateClusterWithResponse(ctx, data.Id(), req)
-		if err != nil {
-			return err
-		}
-		err = sdk.StatusOk(response)
-		// In case of malformed user request return error to user right away.
-		if response.StatusCode() == 400 && !sdk.IsCredentialsError(response) {
-			return backoff.Permanent(err)
-		}
-		return err
-	}, backoff.NewExponentialBackOff()); err != nil {
-		return fmt.Errorf("updating cluster configuration: %w", err)
-	}
-
-	return nil
+func resourceCastaiGKEClusterIdDelete(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	return resourceCastaiClusterDelete(ctx, data, meta)
 }
