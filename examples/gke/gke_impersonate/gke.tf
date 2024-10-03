@@ -14,7 +14,7 @@ module "gke" {
   horizontal_pod_autoscaling = true
   filestore_csi_driver       = false
   create_service_account     = false
-  service_account            = google_service_account.client_service_account.email
+  service_account            = module.iam-impersonate.client_service_account_email
 
   node_pools = [
     {
@@ -32,5 +32,5 @@ module "gke" {
       initial_node_count = 2 # has to be >=2 to successfully deploy CAST AI controller
     },
   ]
-  depends_on = [time_sleep.wait_3_minutes]
+  depends_on = [module.iam-impersonate]
 }
