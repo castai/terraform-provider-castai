@@ -98,6 +98,7 @@ resource "castai_node_template" "default_by_castai" {
 
 Optional:
 
+- `architecture_priority` (List of String) Priority ordering of architectures, specifying no priority will pick cheapest. Allowed values: amd64, arm64.
 - `architectures` (List of String) List of acceptable instance CPU architectures, the default is amd64. Allowed values: amd64, arm64.
 - `azs` (List of String) The list of AZ names to consider for the node template, if empty or not set all AZs are considered.
 - `burstable_instances` (String) Will include burstable instances when enabled otherwise they will be excluded. Supported values: `enabled`, `disabled` or ``.
