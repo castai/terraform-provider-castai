@@ -3500,6 +3500,11 @@ type WorkloadoptimizationV1ManagedBy string
 // MANAGED - workload watched (metrics collected), CAST AI may perform actions on the workload.
 type WorkloadoptimizationV1ManagementOption string
 
+// WorkloadoptimizationV1MemoryEventSettings defines model for workloadoptimization.v1.MemoryEventSettings.
+type WorkloadoptimizationV1MemoryEventSettings struct {
+	ApplyType *WorkloadoptimizationV1ApplyType `json:"applyType,omitempty"`
+}
+
 // WorkloadoptimizationV1NewWorkloadScalingPolicy defines model for workloadoptimization.v1.NewWorkloadScalingPolicy.
 type WorkloadoptimizationV1NewWorkloadScalingPolicy struct {
 	ApplyType WorkloadoptimizationV1ApplyType `json:"applyType"`
@@ -3561,9 +3566,10 @@ type WorkloadoptimizationV1RecommendationPolicies struct {
 	// Defines possible options for workload management.
 	// READ_ONLY - workload watched (metrics collected), but no actions may be performed by CAST AI.
 	// MANAGED - workload watched (metrics collected), CAST AI may perform actions on the workload.
-	ManagementOption WorkloadoptimizationV1ManagementOption `json:"managementOption"`
-	Memory           WorkloadoptimizationV1ResourcePolicies `json:"memory"`
-	Startup          *WorkloadoptimizationV1StartupSettings `json:"startup,omitempty"`
+	ManagementOption WorkloadoptimizationV1ManagementOption     `json:"managementOption"`
+	Memory           WorkloadoptimizationV1ResourcePolicies     `json:"memory"`
+	MemoryEvent      *WorkloadoptimizationV1MemoryEventSettings `json:"memoryEvent,omitempty"`
+	Startup          *WorkloadoptimizationV1StartupSettings     `json:"startup,omitempty"`
 }
 
 // WorkloadoptimizationV1RecommendedPodCountChangedEvent defines model for workloadoptimization.v1.RecommendedPodCountChangedEvent.
@@ -3770,8 +3776,9 @@ type WorkloadoptimizationV1VPAConfig struct {
 	// Defines possible options for workload management.
 	// READ_ONLY - workload watched (metrics collected), but no actions may be performed by CAST AI.
 	// MANAGED - workload watched (metrics collected), CAST AI may perform actions on the workload.
-	ManagementOption WorkloadoptimizationV1ManagementOption `json:"managementOption"`
-	Memory           WorkloadoptimizationV1ResourceConfig   `json:"memory"`
+	ManagementOption WorkloadoptimizationV1ManagementOption     `json:"managementOption"`
+	Memory           WorkloadoptimizationV1ResourceConfig       `json:"memory"`
+	MemoryEvent      *WorkloadoptimizationV1MemoryEventSettings `json:"memoryEvent,omitempty"`
 }
 
 // WorkloadoptimizationV1VPAConfigUpdate defines model for workloadoptimization.v1.VPAConfigUpdate.
@@ -3784,6 +3791,7 @@ type WorkloadoptimizationV1VPAConfigUpdate struct {
 	// MANAGED - workload watched (metrics collected), CAST AI may perform actions on the workload.
 	ManagementOption *WorkloadoptimizationV1ManagementOption             `json:"managementOption,omitempty"`
 	Memory           *WorkloadoptimizationV1WorkloadResourceConfigUpdate `json:"memory,omitempty"`
+	MemoryEvent      *WorkloadoptimizationV1MemoryEventSettings          `json:"memoryEvent,omitempty"`
 }
 
 // WorkloadoptimizationV1Workload defines model for workloadoptimization.v1.Workload.
@@ -3841,8 +3849,9 @@ type WorkloadoptimizationV1WorkloadConfig struct {
 	// Defines possible options for workload management.
 	// READ_ONLY - workload watched (metrics collected), but no actions may be performed by CAST AI.
 	// MANAGED - workload watched (metrics collected), CAST AI may perform actions on the workload.
-	ManagementOption WorkloadoptimizationV1ManagementOption `json:"managementOption"`
-	Memory           WorkloadoptimizationV1ResourceConfig   `json:"memory"`
+	ManagementOption WorkloadoptimizationV1ManagementOption     `json:"managementOption"`
+	Memory           WorkloadoptimizationV1ResourceConfig       `json:"memory"`
+	MemoryEvent      *WorkloadoptimizationV1MemoryEventSettings `json:"memoryEvent,omitempty"`
 }
 
 // WorkloadoptimizationV1WorkloadConfigUpdate defines model for workloadoptimization.v1.WorkloadConfigUpdate.
@@ -3855,6 +3864,7 @@ type WorkloadoptimizationV1WorkloadConfigUpdate struct {
 	// MANAGED - workload watched (metrics collected), CAST AI may perform actions on the workload.
 	ManagementOption *WorkloadoptimizationV1ManagementOption             `json:"managementOption,omitempty"`
 	Memory           *WorkloadoptimizationV1WorkloadResourceConfigUpdate `json:"memory,omitempty"`
+	MemoryEvent      *WorkloadoptimizationV1MemoryEventSettings          `json:"memoryEvent,omitempty"`
 }
 
 // WorkloadoptimizationV1WorkloadConfigUpdateV2 defines model for workloadoptimization.v1.WorkloadConfigUpdateV2.
