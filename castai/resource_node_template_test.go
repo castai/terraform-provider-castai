@@ -103,7 +103,8 @@ func TestNodeTemplateResourceReadContext(t *testing.T) {
 						]
 					}
 				  ],
-				  "cpuManufacturers": ["INTEL", "AMD"]
+				  "cpuManufacturers": ["INTEL", "AMD"],
+	              "architecturePriority": ["amd64", "arm64"]
 				},
 				"version": "3",
 				"shouldTaint": true,
@@ -153,6 +154,9 @@ func TestNodeTemplateResourceReadContext(t *testing.T) {
 cluster_id = b6bfc074-a267-400f-b8f1-db0850c369b1
 configuration_id = 7dc4f922-29c9-4377-889c-0c8c5fb8d497
 constraints.# = 1
+constraints.0.architecture_priority.# = 2
+constraints.0.architecture_priority.0 = amd64
+constraints.0.architecture_priority.1 = arm64
 constraints.0.architectures.# = 2
 constraints.0.architectures.0 = amd64
 constraints.0.architectures.1 = arm64
@@ -541,6 +545,8 @@ func TestAccResourceNodeTemplate_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.on_demand", "false"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.architectures.#", "1"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.architectures.0", "amd64"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.architecture_priority.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.architecture_priority.0", "amd64"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.os.#", "1"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.os.0", "linux"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.azs.#", "2"),
@@ -602,6 +608,8 @@ func TestAccResourceNodeTemplate_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.use_spot_fallbacks", "true"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.architectures.#", "1"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.architectures.0", "arm64"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.architecture_priority.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.architecture_priority.0", "arm64"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.os.#", "1"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.os.0", "linux"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.azs.#", "3"),
@@ -708,6 +716,7 @@ func testAccNodeTemplateConfig(rName, clusterName string) string {
 				}
 
 				cpu_manufacturers = ["INTEL", "AMD"]
+				architecture_priority = ["amd64"]
 			}
 		}
 	`, rName))
@@ -764,6 +773,7 @@ func testNodeTemplateUpdated(rName, clusterName string) string {
 				}
 
 				cpu_manufacturers = ["INTEL", "AMD"]
+				architecture_priority = ["arm64"]
 			}
 		}
 	`, rName))

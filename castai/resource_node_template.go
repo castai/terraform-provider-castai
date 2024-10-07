@@ -70,6 +70,7 @@ const (
 	FieldNodeTemplateBurstableInstances                       = "burstable_instances"
 	FieldNodeTemplateCustomerSpecific                         = "customer_specific"
 	FieldNodeTemplateCPUManufacturers                         = "cpu_manufacturers"
+	FieldNodeTemplateArchitecturePriority                     = "architecture_priority"
 )
 
 const (
@@ -510,6 +511,21 @@ func resourceNodeTemplate() *schema.Resource {
 							},
 							Description: fmt.Sprintf("List of acceptable CPU manufacturers. Allowed values: %s.", strings.Join(supportedCPUManufacturers, ", ")),
 						},
+						FieldNodeTemplateArchitecturePriority: {
+							Type:     schema.TypeList,
+							MaxItems: 2,
+							MinItems: 0,
+							Optional: true,
+							Computed: true,
+							Elem: &schema.Schema{
+								Type:             schema.TypeString,
+								ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(supportedArchitectures, false)),
+							},
+							DefaultFunc: func() (interface{}, error) {
+								return []string{}, nil
+							},
+							Description: fmt.Sprintf("Priority ordering of architectures, specifying no priority will pick cheapest. Allowed values: %s.", strings.Join(supportedArchitectures, ", ")),
+						},
 					},
 				},
 			},
@@ -728,6 +744,9 @@ func flattenConstraints(c *sdk.NodetemplatesV1TemplateConstraints) ([]map[string
 	}
 	if c.CpuManufacturers != nil {
 		out[FieldNodeTemplateCPUManufacturers] = lo.FromPtr(c.CpuManufacturers)
+	}
+	if c.ArchitecturePriority != nil {
+		out[FieldNodeTemplateArchitecturePriority] = lo.FromPtr(c.ArchitecturePriority)
 	}
 	setStateConstraintValue(c.Burstable, FieldNodeTemplateBurstableInstances, out)
 	setStateConstraintValue(c.CustomerSpecific, FieldNodeTemplateCustomerSpecific, out)
@@ -1308,6 +1327,10 @@ func toTemplateConstraints(obj map[string]any) *sdk.NodetemplatesV1TemplateConst
 		out.CpuManufacturers = toPtr(lo.Map(v, func(item any, _ int) sdk.NodetemplatesV1TemplateConstraintsCPUManufacturer {
 			return sdk.NodetemplatesV1TemplateConstraintsCPUManufacturer(item.(string))
 		}))
+	}
+
+	if v, ok := obj[FieldNodeTemplateArchitecturePriority].([]any); ok {
+		out.ArchitecturePriority = toPtr(toStringList(v))
 	}
 
 	return out
