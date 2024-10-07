@@ -23,4 +23,7 @@ resource "castai_workload_scaling_policy" "services" {
   downscaling {
     apply_type = "DEFERRED"
   }
+  downscaling {
+    apply_type = "IMMEDIATE"
+  }
 }

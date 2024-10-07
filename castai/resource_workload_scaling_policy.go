@@ -108,6 +108,23 @@ func resourceWorkloadScalingPolicy() *schema.Resource {
 					},
 				},
 			},
+			"memory_event": {
+				Type:     schema.TypeList,
+				Optional: true,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"apply_type": {
+							Type:     schema.TypeString,
+							Optional: true,
+							Description: `Defines the apply type to be used when applying recommendation for memory related event.
+	- IMMEDIATE - pods are restarted immediately when new recommendation is generated.
+	- DEFERRED - pods are not restarted and recommendation values are applied during natural restarts only (new deployment, etc.)`,
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"IMMEDIATE", "DEFERRED"}, false)),
+						},
+					},
+				},
+			},
 		},
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(15 * time.Second),
@@ -199,6 +216,8 @@ func resourceWorkloadScalingPolicyCreate(ctx context.Context, d *schema.Resource
 
 	req.RecommendationPolicies.Downscaling = toDownscaling(toSection(d, "downscaling"))
 
+	req.RecommendationPolicies.MemoryEvent = toMemoryEvent(toSection(d, "memory_event"))
+
 	resp, err := client.WorkloadOptimizationAPICreateWorkloadScalingPolicyWithResponse(ctx, clusterID, req)
 	if checkErr := sdk.CheckOKResponse(resp, err); checkErr != nil {
 		return diag.FromErr(checkErr)
@@ -250,6 +269,9 @@ func resourceWorkloadScalingPolicyRead(ctx context.Context, d *schema.ResourceDa
 	if err := d.Set("downscaling", toDownscalingMap(sp.RecommendationPolicies.Downscaling)); err != nil {
 		return diag.FromErr(fmt.Errorf("setting downscaling: %w", err))
 	}
+	if err := d.Set("memory_event", toMemoryEventMap(sp.RecommendationPolicies.MemoryEvent)); err != nil {
+		return diag.FromErr(fmt.Errorf("setting memory event: %w", err))
+	}
 
 	return nil
 }
@@ -263,6 +285,7 @@ func resourceWorkloadScalingPolicyUpdate(ctx context.Context, d *schema.Resource
 		"memory",
 		"startup",
 		"downscaling",
+		"memory_event",
 	) {
 		tflog.Info(ctx, "scaling policy up to date")
 		return nil
@@ -279,6 +302,7 @@ func resourceWorkloadScalingPolicyUpdate(ctx context.Context, d *schema.Resource
 			Memory:           toWorkloadScalingPolicies(d.Get("memory").([]interface{})[0].(map[string]interface{})),
 			Startup:          toStartup(toSection(d, "startup")),
 			Downscaling:      toDownscaling(toSection(d, "downscaling")),
+			MemoryEvent:      toMemoryEvent(toSection(d, "memory_event")),
 		},
 	}
 
@@ -470,6 +494,38 @@ func toDownscaling(downscaling map[string]any) *sdk.WorkloadoptimizationV1Downsc
 }
 
 func toDownscalingMap(s *sdk.WorkloadoptimizationV1DownscalingSettings) []map[string]any {
+	if s == nil {
+		return nil
+	}
+
+	m := map[string]any{}
+
+	if s.ApplyType != nil {
+		m["apply_type"] = string(*s.ApplyType)
+	}
+
+	if len(m) == 0 {
+		return nil
+	}
+
+	return []map[string]any{m}
+}
+
+func toMemoryEvent(memoryEvent map[string]any) *sdk.WorkloadoptimizationV1MemoryEventSettings {
+	if len(memoryEvent) == 0 {
+		return nil
+	}
+
+	result := &sdk.WorkloadoptimizationV1MemoryEventSettings{}
+
+	if v, ok := memoryEvent["apply_type"].(string); ok && v != "" {
+		result.ApplyType = lo.ToPtr(sdk.WorkloadoptimizationV1ApplyType(v))
+	}
+
+	return result
+}
+
+func toMemoryEventMap(s *sdk.WorkloadoptimizationV1MemoryEventSettings) []map[string]any {
 	if s == nil {
 		return nil
 	}
