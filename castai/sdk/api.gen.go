@@ -2715,7 +2715,8 @@ type NodetemplatesV1TaintWithOptionalEffect struct {
 
 // NodetemplatesV1TemplateConstraints defines model for nodetemplates.v1.TemplateConstraints.
 type NodetemplatesV1TemplateConstraints struct {
-	Architectures *[]string `json:"architectures,omitempty"`
+	ArchitecturePriority *[]string `json:"architecturePriority,omitempty"`
+	Architectures        *[]string `json:"architectures,omitempty"`
 
 	// AZS - The list of AZ names to consider for the node template, if empty or not set all AZs are considered.
 	//
