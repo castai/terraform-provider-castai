@@ -40,6 +40,9 @@ resource "castai_workload_scaling_policy" "services" {
   downscaling {
     apply_type = "DEFERRED"
   }
+  downscaling {
+    apply_type = "IMMEDIATE"
+  }
 }
 ```
 
@@ -62,6 +65,7 @@ resource "castai_workload_scaling_policy" "services" {
 ### Optional
 
 - `downscaling` (Block List, Max: 1) (see [below for nested schema](#nestedblock--downscaling))
+- `memory_event` (Block List, Max: 1) (see [below for nested schema](#nestedblock--memory_event))
 - `startup` (Block List, Max: 1) (see [below for nested schema](#nestedblock--startup))
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
@@ -103,6 +107,16 @@ Optional:
 Optional:
 
 - `apply_type` (String) Defines the apply type to be used when downscaling.
+	- IMMEDIATE - pods are restarted immediately when new recommendation is generated.
+	- DEFERRED - pods are not restarted and recommendation values are applied during natural restarts only (new deployment, etc.)
+
+
+<a id="nestedblock--memory_event"></a>
+### Nested Schema for `memory_event`
+
+Optional:
+
+- `apply_type` (String) Defines the apply type to be used when applying recommendation for memory related event.
 	- IMMEDIATE - pods are restarted immediately when new recommendation is generated.
 	- DEFERRED - pods are not restarted and recommendation values are applied during natural restarts only (new deployment, etc.)
 

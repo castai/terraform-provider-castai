@@ -75,6 +75,7 @@ func TestAccResourceWorkloadScalingPolicy(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "memory.0.max", "512"),
 					resource.TestCheckResourceAttr(resourceName, "startup.0.period_seconds", "123"),
 					resource.TestCheckResourceAttr(resourceName, "downscaling.0.apply_type", "DEFERRED"),
+					resource.TestCheckResourceAttr(resourceName, "memory_event.0.apply_type", "DEFERRED"),
 				),
 			},
 		},
@@ -148,6 +149,9 @@ func scalingPolicyConfigUpdated(clusterName, projectID, name string) string {
 	    downscaling {
 		    apply_type = "DEFERRED"
 	    }
+		memory_event {
+			apply_type = "DEFERRED"
+		}
 	}`, updatedName)
 
 	return ConfigCompose(testAccGKEClusterConfig(name, clusterName, projectID), cfg)
