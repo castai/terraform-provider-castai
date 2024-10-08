@@ -100,6 +100,11 @@ resource "castai_node_configuration" "test" {
   aks {
 	max_pods_per_node = 32
     aks_image_family = "azure-linux"
+	loadbalancers {
+		name = "test"
+		ip_based_backend_pools {
+			name = "test"
+		}
   }
 }
 `, rgName, rName))
