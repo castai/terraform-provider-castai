@@ -40,6 +40,7 @@ const (
 	FieldNodeConfigurationEKSTargetGroup   = "target_group"
 	FieldNodeConfigurationAKSImageFamily   = "aks_image_family"
 	FieldNodeConfigurationEKSImageFamily   = "eks_image_family"
+	FieldNodeConfigurationAKSLoadbalaners  = "loadbalancers"
 )
 
 const (
@@ -319,6 +320,34 @@ func resourceNodeConfiguration() *schema.Resource {
 							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{aksImageFamilyUbuntu, aksImageFamilyAzureLinux}, true)),
 							DiffSuppressFunc: func(k, oldValue, newValue string, d *schema.ResourceData) bool {
 								return strings.EqualFold(oldValue, newValue)
+							},
+						},
+						FieldNodeConfigurationAKSLoadbalaners: {
+							Type:        schema.TypeList,
+							Optional:    true,
+							Description: "Loadboalancertconfiguration for CAST provisioned nodes",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"name": {
+										Type:        schema.TypeString,
+										Required:    true,
+										Description: "Name of loadbalancer",
+									},
+									"ip_based_backend_pools": {
+										Type:        schema.TypeList,
+										Optional:    true,
+										Description: "IP based backend pools configuration for CAST provisioned nodes",
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"name": {
+													Type:        schema.TypeString,
+													Required:    true,
+													Description: "Name of the ip based backend pool",
+												},
+											},
+										},
+									},
+								},
 							},
 						},
 					},
@@ -880,7 +909,52 @@ func toAKSSConfig(obj map[string]interface{}) *sdk.NodeconfigV1AKSConfig {
 		out.ImageFamily = toAKSImageFamily(v)
 	}
 
+	if v, ok := obj[FieldNodeConfigurationAKSLoadbalaners].([]interface{}); ok && len(v) > 0 {
+		out.LoadBalancers = toAksLoadBalancers(v)
+	}
+
 	return out
+}
+
+func toAksLoadBalancers(obj []interface{}) *[]sdk.NodeconfigV1AKSConfigLoadBalancers {
+	if obj == nil {
+		return nil
+	}
+
+	out := make([]sdk.NodeconfigV1AKSConfigLoadBalancers, 0, len(obj))
+	for _, lbRaw := range obj {
+		if lb, ok := lbRaw.(map[string]interface{}); ok {
+			sdkLB := sdk.NodeconfigV1AKSConfigLoadBalancers{}
+			if name, ok := lb["name"].(string); ok && name != "" {
+				sdkLB.Name = lo.ToPtr(name)
+			}
+			if ipBasedBackendPools, ok := lb["ip_based_backend_pools"].([]interface{}); ok && len(ipBasedBackendPools) > 0 {
+				sdkLB.IpBasedBackendPools = toAksIpBasedBackendPools(ipBasedBackendPools)
+			}
+			out = append(out, sdkLB)
+		}
+	}
+
+	return &out
+}
+
+func toAksIpBasedBackendPools(obj []interface{}) *[]sdk.NodeconfigV1AKSConfigLoadBalancersIPBasedBackendPool {
+	if obj == nil {
+		return nil
+	}
+
+	out := make([]sdk.NodeconfigV1AKSConfigLoadBalancersIPBasedBackendPool, 0, len(obj))
+	for _, poolRaw := range obj {
+		if pool, ok := poolRaw.(map[string]interface{}); ok {
+			sdkPool := sdk.NodeconfigV1AKSConfigLoadBalancersIPBasedBackendPool{}
+			if name, ok := pool["name"].(string); ok && name != "" {
+				sdkPool.Name = lo.ToPtr(name)
+			}
+			out = append(out, sdkPool)
+		}
+	}
+
+	return &out
 }
 
 func toAKSOSDiskType(v string) *sdk.NodeconfigV1AKSConfigOsDiskType {
@@ -932,7 +1006,48 @@ func flattenAKSConfig(config *sdk.NodeconfigV1AKSConfig) []map[string]interface{
 		m[FieldNodeConfigurationAKSImageFamily] = fromAKSImageFamily(*v)
 	}
 
+	if v := config.LoadBalancers; v != nil && len(*v) > 0 {
+		m[FieldNodeConfigurationAKSLoadbalaners] = fromAksLoadBalancers(*v)
+	}
+
 	return []map[string]interface{}{m}
+}
+
+func fromAksLoadBalancers(lbs []sdk.NodeconfigV1AKSConfigLoadBalancers) []map[string]interface{} {
+	if lbs == nil {
+		return nil
+	}
+
+	out := make([]map[string]interface{}, 0, len(lbs))
+	for _, lb := range lbs {
+		m := map[string]interface{}{}
+		if lb.Name != nil {
+			m["name"] = *lb.Name
+		}
+		if lb.IpBasedBackendPools != nil && len(*lb.IpBasedBackendPools) > 0 {
+			m["ip_based_backend_pools"] = fromAksIpBasedBackendPools(*lb.IpBasedBackendPools)
+		}
+		out = append(out, m)
+	}
+
+	return out
+}
+
+func fromAksIpBasedBackendPools(pools []sdk.NodeconfigV1AKSConfigLoadBalancersIPBasedBackendPool) []map[string]interface{} {
+	if pools == nil {
+		return nil
+	}
+
+	out := make([]map[string]interface{}, 0, len(pools))
+	for _, pool := range pools {
+		m := map[string]interface{}{}
+		if pool.Name != nil {
+			m["name"] = *pool.Name
+		}
+		out = append(out, m)
+	}
+
+	return out
 }
 
 func fromAKSDiskType(osDiskType *sdk.NodeconfigV1AKSConfigOsDiskType) string {

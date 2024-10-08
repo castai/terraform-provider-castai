@@ -1429,7 +1429,9 @@ type CastaiUsersV1beta1Organization struct {
 	// OrganizationMetadata describes organization metadata.
 	Metadata *CastaiUsersV1beta1OrganizationMetadata `json:"metadata,omitempty"`
 
-	// name of the organization.
+	// name of the organization. Name of the organization must start with a
+	// letter or a number, followed by letters, numbers, underscores, hyphens,
+	// spaces and periods. The name must end with a letter or a number.
 	Name string `json:"name"`
 }
 
@@ -3282,6 +3284,13 @@ type WorkloadoptimizationV1AggregatedMetrics struct {
 	P75 float64 `json:"p75"`
 }
 
+// WorkloadoptimizationV1AntiAffinitySettings defines model for workloadoptimization.v1.AntiAffinitySettings.
+type WorkloadoptimizationV1AntiAffinitySettings struct {
+	// Defines if anti-affinity should be considered when scaling the workload.
+	// When true, requiring host ports, or having anti-affinity on hostname will force all recommendations to be deferred.
+	ConsiderAntiAffinity *bool `json:"considerAntiAffinity"`
+}
+
 // WorkloadoptimizationV1ApplyType defines model for workloadoptimization.v1.ApplyType.
 type WorkloadoptimizationV1ApplyType string
 
@@ -3560,8 +3569,9 @@ type WorkloadoptimizationV1RecommendationEventType string
 
 // WorkloadoptimizationV1RecommendationPolicies defines model for workloadoptimization.v1.RecommendationPolicies.
 type WorkloadoptimizationV1RecommendationPolicies struct {
-	Cpu         WorkloadoptimizationV1ResourcePolicies     `json:"cpu"`
-	Downscaling *WorkloadoptimizationV1DownscalingSettings `json:"downscaling,omitempty"`
+	AntiAffinity *WorkloadoptimizationV1AntiAffinitySettings `json:"antiAffinity,omitempty"`
+	Cpu          WorkloadoptimizationV1ResourcePolicies      `json:"cpu"`
+	Downscaling  *WorkloadoptimizationV1DownscalingSettings  `json:"downscaling,omitempty"`
 
 	// Defines possible options for workload management.
 	// READ_ONLY - workload watched (metrics collected), but no actions may be performed by CAST AI.
@@ -3770,6 +3780,7 @@ type WorkloadoptimizationV1UpdateWorkloadV2 struct {
 
 // WorkloadoptimizationV1VPAConfig defines model for workloadoptimization.v1.VPAConfig.
 type WorkloadoptimizationV1VPAConfig struct {
+	AntiAffinity         WorkloadoptimizationV1AntiAffinitySettings   `json:"antiAffinity"`
 	ContainerConstraints []WorkloadoptimizationV1ContainerConstraints `json:"containerConstraints"`
 	Cpu                  WorkloadoptimizationV1ResourceConfig         `json:"cpu"`
 
@@ -3783,6 +3794,7 @@ type WorkloadoptimizationV1VPAConfig struct {
 
 // WorkloadoptimizationV1VPAConfigUpdate defines model for workloadoptimization.v1.VPAConfigUpdate.
 type WorkloadoptimizationV1VPAConfigUpdate struct {
+	AntiAffinity    *WorkloadoptimizationV1AntiAffinitySettings         `json:"antiAffinity,omitempty"`
 	ContainerConfig *[]WorkloadoptimizationV1ContainerConfigUpdate      `json:"containerConfig,omitempty"`
 	Cpu             *WorkloadoptimizationV1WorkloadResourceConfigUpdate `json:"cpu,omitempty"`
 
@@ -3843,6 +3855,7 @@ type WorkloadoptimizationV1Workload struct {
 
 // WorkloadoptimizationV1WorkloadConfig defines model for workloadoptimization.v1.WorkloadConfig.
 type WorkloadoptimizationV1WorkloadConfig struct {
+	AntiAffinity         WorkloadoptimizationV1AntiAffinitySettings   `json:"antiAffinity"`
 	ContainerConstraints []WorkloadoptimizationV1ContainerConstraints `json:"containerConstraints"`
 	Cpu                  WorkloadoptimizationV1ResourceConfig         `json:"cpu"`
 
@@ -3856,6 +3869,7 @@ type WorkloadoptimizationV1WorkloadConfig struct {
 
 // WorkloadoptimizationV1WorkloadConfigUpdate defines model for workloadoptimization.v1.WorkloadConfigUpdate.
 type WorkloadoptimizationV1WorkloadConfigUpdate struct {
+	AntiAffinity    *WorkloadoptimizationV1AntiAffinitySettings         `json:"antiAffinity,omitempty"`
 	ContainerConfig *[]WorkloadoptimizationV1ContainerConfigUpdate      `json:"containerConfig,omitempty"`
 	Cpu             *WorkloadoptimizationV1WorkloadResourceConfigUpdate `json:"cpu,omitempty"`
 
