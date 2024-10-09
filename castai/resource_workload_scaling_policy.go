@@ -125,6 +125,21 @@ func resourceWorkloadScalingPolicy() *schema.Resource {
 					},
 				},
 			},
+			"anti_affinity": {
+				Type:     schema.TypeList,
+				Optional: true,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"consider_anti_affinity": {
+							Type:     schema.TypeBool,
+							Optional: true,
+							Description: `Defines if anti-affinity should be considered when scaling the workload.
+	If enabled, requiring host ports, or having anti-affinity on hostname will force all recommendations to be deferred.`,
+						},
+					},
+				},
+			},
 		},
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(15 * time.Second),
@@ -218,6 +233,8 @@ func resourceWorkloadScalingPolicyCreate(ctx context.Context, d *schema.Resource
 
 	req.RecommendationPolicies.MemoryEvent = toMemoryEvent(toSection(d, "memory_event"))
 
+	req.RecommendationPolicies.AntiAffinity = toAntiAffinity(toSection(d, "anti_affinity"))
+
 	resp, err := client.WorkloadOptimizationAPICreateWorkloadScalingPolicyWithResponse(ctx, clusterID, req)
 	if checkErr := sdk.CheckOKResponse(resp, err); checkErr != nil {
 		return diag.FromErr(checkErr)
@@ -272,6 +289,9 @@ func resourceWorkloadScalingPolicyRead(ctx context.Context, d *schema.ResourceDa
 	if err := d.Set("memory_event", toMemoryEventMap(sp.RecommendationPolicies.MemoryEvent)); err != nil {
 		return diag.FromErr(fmt.Errorf("setting memory event: %w", err))
 	}
+	if err := d.Set("anti_affinity", toAntiAffinityMap(sp.RecommendationPolicies.AntiAffinity)); err != nil {
+		return diag.FromErr(fmt.Errorf("setting anti-affinity: %w", err))
+	}
 
 	return nil
 }
@@ -286,6 +306,7 @@ func resourceWorkloadScalingPolicyUpdate(ctx context.Context, d *schema.Resource
 		"startup",
 		"downscaling",
 		"memory_event",
+		"anti_affinity",
 	) {
 		tflog.Info(ctx, "scaling policy up to date")
 		return nil
@@ -303,6 +324,7 @@ func resourceWorkloadScalingPolicyUpdate(ctx context.Context, d *schema.Resource
 			Startup:          toStartup(toSection(d, "startup")),
 			Downscaling:      toDownscaling(toSection(d, "downscaling")),
 			MemoryEvent:      toMemoryEvent(toSection(d, "memory_event")),
+			AntiAffinity:     toAntiAffinity(toSection(d, "anti_affinity")),
 		},
 	}
 
@@ -534,6 +556,38 @@ func toMemoryEventMap(s *sdk.WorkloadoptimizationV1MemoryEventSettings) []map[st
 
 	if s.ApplyType != nil {
 		m["apply_type"] = string(*s.ApplyType)
+	}
+
+	if len(m) == 0 {
+		return nil
+	}
+
+	return []map[string]any{m}
+}
+
+func toAntiAffinity(antiAffinity map[string]any) *sdk.WorkloadoptimizationV1AntiAffinitySettings {
+	if len(antiAffinity) == 0 {
+		return nil
+	}
+
+	result := &sdk.WorkloadoptimizationV1AntiAffinitySettings{}
+
+	if v, ok := antiAffinity["consider_anti_affinity"].(bool); ok {
+		result.ConsiderAntiAffinity = lo.ToPtr(v)
+	}
+
+	return result
+}
+
+func toAntiAffinityMap(s *sdk.WorkloadoptimizationV1AntiAffinitySettings) []map[string]any {
+	if s == nil {
+		return nil
+	}
+
+	m := map[string]any{}
+
+	if s.ConsiderAntiAffinity != nil {
+		m["consider_anti_affinity"] = *s.ConsiderAntiAffinity
 	}
 
 	if len(m) == 0 {
