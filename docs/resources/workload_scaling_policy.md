@@ -40,8 +40,11 @@ resource "castai_workload_scaling_policy" "services" {
   downscaling {
     apply_type = "DEFERRED"
   }
-  downscaling {
+  memory_event {
     apply_type = "IMMEDIATE"
+  }
+  anti_affinity {
+    consider_anti_affinity = false
   }
 }
 ```
@@ -64,6 +67,7 @@ resource "castai_workload_scaling_policy" "services" {
 
 ### Optional
 
+- `anti_affinity` (Block List, Max: 1) (see [below for nested schema](#nestedblock--anti_affinity))
 - `downscaling` (Block List, Max: 1) (see [below for nested schema](#nestedblock--downscaling))
 - `memory_event` (Block List, Max: 1) (see [below for nested schema](#nestedblock--memory_event))
 - `startup` (Block List, Max: 1) (see [below for nested schema](#nestedblock--startup))
@@ -99,6 +103,15 @@ Optional:
 - `max` (Number) Max values for the recommendation, applies to every container. For memory - this is in MiB, for CPU - this is in cores.
 - `min` (Number) Min values for the recommendation, applies to every container. For memory - this is in MiB, for CPU - this is in cores.
 - `overhead` (Number) Overhead for the recommendation, e.g. `0.1` will result in 10% higher recommendation
+
+
+<a id="nestedblock--anti_affinity"></a>
+### Nested Schema for `anti_affinity`
+
+Optional:
+
+- `consider_anti_affinity` (Boolean) Defines if anti-affinity should be considered when scaling the workload.
+	If enabled, requiring host ports, or having anti-affinity on hostname will force all recommendations to be deferred.
 
 
 <a id="nestedblock--downscaling"></a>

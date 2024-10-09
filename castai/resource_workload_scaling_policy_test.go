@@ -76,6 +76,7 @@ func TestAccResourceWorkloadScalingPolicy(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "startup.0.period_seconds", "123"),
 					resource.TestCheckResourceAttr(resourceName, "downscaling.0.apply_type", "DEFERRED"),
 					resource.TestCheckResourceAttr(resourceName, "memory_event.0.apply_type", "DEFERRED"),
+					resource.TestCheckResourceAttr(resourceName, "anti_affinity.0.consider_anti_affinity", "true"),
 				),
 			},
 		},
@@ -151,6 +152,9 @@ func scalingPolicyConfigUpdated(clusterName, projectID, name string) string {
 	    }
 		memory_event {
 			apply_type = "DEFERRED"
+		}		
+		anti_affinity {
+			consider_anti_affinity = true
 		}
 	}`, updatedName)
 

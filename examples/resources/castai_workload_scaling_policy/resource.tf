@@ -23,7 +23,10 @@ resource "castai_workload_scaling_policy" "services" {
   downscaling {
     apply_type = "DEFERRED"
   }
-  downscaling {
+  memory_event {
     apply_type = "IMMEDIATE"
+  }
+  anti_affinity {
+    consider_anti_affinity = false
   }
 }
