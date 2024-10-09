@@ -1,0 +1,6 @@
+project_id       = "<place-holder>"
+cluster_name     = "<place-holder>"
+cluster_region   = "<place-holder>"
+cluster_read_only = true
+castai_api_token = "<place-holder>"
+
