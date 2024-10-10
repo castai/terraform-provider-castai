@@ -325,7 +325,7 @@ func resourceNodeConfiguration() *schema.Resource {
 						FieldNodeConfigurationAKSLoadbalaners: {
 							Type:        schema.TypeList,
 							Optional:    true,
-							Description: "Loadboalancertconfiguration for CAST provisioned nodes",
+							Description: "Loadboalancer configuration for CAST provisioned nodes",
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"name": {
