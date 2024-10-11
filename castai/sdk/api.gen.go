@@ -3978,9 +3978,6 @@ type WorkloadoptimizationV1WorkloadScalingPolicy struct {
 type AuthTokenAPIListAuthTokensParams struct {
 	// User id to filter by, if this is set we will only return tokens that have this user id.
 	UserId *string `form:"userId,omitempty" json:"userId,omitempty"`
-
-	// Service account id to filter by, if this is set we will only return tokens that have this service account id ignoring users_id.
-	ServiceAccountId *string `form:"serviceAccountId,omitempty" json:"serviceAccountId,omitempty"`
 }
 
 // AuthTokenAPICreateAuthTokenJSONBody defines parameters for AuthTokenAPICreateAuthToken.

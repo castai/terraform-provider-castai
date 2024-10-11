@@ -10,7 +10,7 @@ This example configuration should be analysed in the following order:
 ## Usage
 
 > [!NOTE]  
-> You can also ask CAST AI support to enable the GKE API Proxy feature for the whole organization. In this case, you can ignore steps 3-5 and set `cluster_read_only = false` for the first `terraform apply`.
+> You can also ask CAST AI support to enable the GKE API Proxy feature for the whole organization before. In this case, you can ignore steps 3-5 and set `cluster_read_only = false` for the first `terraform apply`.
 
 1. Rename `tf.vars.example` to `tf.vars`
 2. Update `tf.vars` file with your project name, cluster name, cluster region and CAST AI API token.
@@ -23,7 +23,7 @@ This example configuration should be analysed in the following order:
     terraform apply -var-file=tf.vars
     ```
 
-5. Ask CAST AI support to enable the GKE API Proxy feature for this cluster.
+5. Ask CAST AI support to enable the GKE API Proxy feature for this cluster or organization.
 6. Update `tf.vars` file and set `cluster_read_only = false`, after the GKE API Proxy feature was enabled for the cluster.
 7. Rerun Terraform apply:
     ```
