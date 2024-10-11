@@ -23,7 +23,7 @@ variable "project_id" {
 variable "castai_api_url" {
   type        = string
   description = "URL of alternative CAST AI API to be used during development or testing"
-  default     = "https://api.cast.ai"
+  default     = "https://api.cast.a"
 }
 
 variable "castai_api_token" {
@@ -31,10 +31,23 @@ variable "castai_api_token" {
   description = "CAST AI API token created in console.cast.ai API Access keys section."
 }
 
-variable "castai_grpc_url" {
+variable "cloud_proxy_grpc_url" {
   type        = string
-  description = "CAST AI gRPC URL"
+  description = "gRPC URL for the cloud-proxy"
   default     = "api-grpc.cast.ai:443"
+}
+
+variable "cloud_proxy_version" {
+  type        = string
+  description = "Version of the cloud-proxy Helm chart"
+  default     = ""
+}
+
+
+variable "cloud_proxy_values" {
+  type        = list(string)
+  description = "List of values in raw YAML format passed to the cloud-proxy Helm chart"
+  default     = []
 }
 
 variable "tags" {

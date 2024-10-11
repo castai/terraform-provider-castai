@@ -24,12 +24,49 @@ module "castai-gke-iam" {
   setup_cloud_proxy_workload_identity = true
 }
 
+resource "castai_gke_cluster_id" "this" {
+  project_id = var.project_id
+  name       = var.cluster_name
+  location   = module.gke.location
+}
+
+resource "helm_release" "castai_cloud_proxy" {
+  name             = "castai-cloud-proxy"
+  repository       = "https://castai.github.io/helm-charts"
+  chart            = "castai-cloud-proxy"
+  version          = var.cloud_proxy_version
+  namespace        = "castai-agent"
+  create_namespace = true
+  cleanup_on_fail  = true
+  wait             = true
+
+  values = var.cloud_proxy_values
+
+  set {
+    name  = "castai.clusterID"
+    value = castai_gke_cluster_id.this.id
+  }
+
+  set_sensitive {
+    name  = "castai.apiKey"
+    value = castai_gke_cluster_id.this.cluster_token
+  }
+
+  set {
+    name  = "castai.grpcURL"
+    value = var.cloud_proxy_grpc_url
+  }
+
+  depends_on = [module.gke, module.castai-gke-iam]
+}
+
 module "castai-gke-cluster" {
+  count = var.cluster_read_only ? 0 : 1
+
   source = "castai/gke-cluster/castai"
 
   api_url                = var.castai_api_url
   castai_api_token       = var.castai_api_token
-  grpc_url               = var.castai_grpc_url
   wait_for_cluster_ready = true
 
   project_id           = var.project_id
@@ -38,8 +75,6 @@ module "castai-gke-cluster" {
 
   gke_credentials                 = var.cluster_read_only ? null : "{}"
   default_node_configuration_name = "default"
-
-  install_cloud_proxy = true
 
   node_configurations = {
     default = {
@@ -67,6 +102,6 @@ module "castai-gke-cluster" {
     }
   }
 
-  depends_on = [module.gke, module.castai-gke-iam]
+  depends_on = [module.gke, module.castai-gke-iam, helm_release.castai_cloud_proxy]
 }
 

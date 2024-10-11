@@ -14,7 +14,6 @@ module "gke" {
   horizontal_pod_autoscaling = true
   filestore_csi_driver       = false
 
-  // TODO: remove this, just for local dev
   deletion_protection = false
 
   node_pools = [

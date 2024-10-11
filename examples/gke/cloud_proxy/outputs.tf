@@ -1,5 +1,5 @@
 
 output "castai_cluster_id" {
   description = "ID of the CAST AI cluster"
-  value       = module.castai-gke-cluster.cluster_id
+  value       = castai_gke_cluster_id.this.id
 }
