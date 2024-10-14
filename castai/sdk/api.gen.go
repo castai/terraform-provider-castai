@@ -242,6 +242,15 @@ const (
 	Unknown      PoliciesV1EvictorStatus = "Unknown"
 )
 
+// Defines values for PoliciesV1PodPinnerStatus.
+const (
+	PodPinnerStatusCompatible          PoliciesV1PodPinnerStatus = "PodPinnerStatus_Compatible"
+	PodPinnerStatusIncompatible        PoliciesV1PodPinnerStatus = "PodPinnerStatus_Incompatible"
+	PodPinnerStatusIncompatibleVersion PoliciesV1PodPinnerStatus = "PodPinnerStatus_IncompatibleVersion"
+	PodPinnerStatusMissing             PoliciesV1PodPinnerStatus = "PodPinnerStatus_Missing"
+	PodPinnerStatusUnknown             PoliciesV1PodPinnerStatus = "PodPinnerStatus_Unknown"
+)
+
 // Defines values for PoliciesV1SpotInterruptionPredictionsType.
 const (
 	AWSRebalanceRecommendations   PoliciesV1SpotInterruptionPredictionsType = "AWSRebalanceRecommendations"
@@ -322,6 +331,12 @@ const (
 	WorkloadoptimizationV1ResourcePoliciesFunctionMAX      WorkloadoptimizationV1ResourcePoliciesFunction = "MAX"
 	WorkloadoptimizationV1ResourcePoliciesFunctionQUANTILE WorkloadoptimizationV1ResourcePoliciesFunction = "QUANTILE"
 )
+
+// ExternalClusterAPIGKECreateSARequest defines model for ExternalClusterAPI_GKECreateSA_request.
+type ExternalClusterAPIGKECreateSARequest struct {
+	// UpdateGKEClusterParams defines updatable GKE cluster configuration.
+	Gke *ExternalclusterV1UpdateGKEClusterParams `json:"gke,omitempty"`
+}
 
 // UsersAPIUpdateOrganizationUserRequest defines model for UsersAPI_UpdateOrganizationUser_request.
 type UsersAPIUpdateOrganizationUserRequest struct {
@@ -1414,7 +1429,9 @@ type CastaiUsersV1beta1Organization struct {
 	// OrganizationMetadata describes organization metadata.
 	Metadata *CastaiUsersV1beta1OrganizationMetadata `json:"metadata,omitempty"`
 
-	// name of the organization.
+	// name of the organization. Name of the organization must start with a
+	// letter or a number, followed by letters, numbers, underscores, hyphens,
+	// spaces and periods. The name must end with a letter or a number.
 	Name string `json:"name"`
 }
 
@@ -1580,6 +1597,9 @@ type ExternalclusterV1Cluster struct {
 	// The cluster's ID.
 	Id *string `json:"id,omitempty"`
 
+	// Indicates if the cluster is in phase 2.
+	IsPhase2 *bool `json:"isPhase2,omitempty"`
+
 	// KOPSClusterParams defines KOPS-specific arguments.
 	Kops              *ExternalclusterV1KOPSClusterParams `json:"kops,omitempty"`
 	KubernetesVersion *string                             `json:"kubernetesVersion"`
@@ -1668,6 +1688,9 @@ type ExternalclusterV1ClusterUpdate struct {
 
 	// UpdateEKSClusterParams defines updatable EKS cluster configuration.
 	Eks *ExternalclusterV1UpdateEKSClusterParams `json:"eks,omitempty"`
+
+	// UpdateGKEClusterParams defines updatable GKE cluster configuration.
+	Gke *ExternalclusterV1UpdateGKEClusterParams `json:"gke,omitempty"`
 }
 
 // ExternalclusterV1CreateAssumeRolePrincipalResponse defines model for externalcluster.v1.CreateAssumeRolePrincipalResponse.
@@ -1746,6 +1769,9 @@ type ExternalclusterV1EKSClusterParams_Tags struct {
 
 // GKEClusterParams defines GKE-specific arguments.
 type ExternalclusterV1GKEClusterParams struct {
+	CastServiceAccount   *string `json:"castServiceAccount,omitempty"`
+	ClientServiceAccount *string `json:"clientServiceAccount,omitempty"`
+
 	// Name of the cluster.
 	ClusterName *string `json:"clusterName,omitempty"`
 
@@ -1760,6 +1786,11 @@ type ExternalclusterV1GKEClusterParams struct {
 
 	// Region of the cluster.
 	Region *string `json:"region,omitempty"`
+}
+
+// ExternalclusterV1GKECreateSAResponse defines model for externalcluster.v1.GKECreateSAResponse.
+type ExternalclusterV1GKECreateSAResponse struct {
+	ServiceAccount *string `json:"serviceAccount,omitempty"`
 }
 
 // GPUConfig describes instance GPU configuration.
@@ -2113,6 +2144,15 @@ type ExternalclusterV1UpdateClusterTagsResponse = map[string]interface{}
 // UpdateEKSClusterParams defines updatable EKS cluster configuration.
 type ExternalclusterV1UpdateEKSClusterParams struct {
 	AssumeRoleArn *string `json:"assumeRoleArn,omitempty"`
+}
+
+// UpdateGKEClusterParams defines updatable GKE cluster configuration.
+type ExternalclusterV1UpdateGKEClusterParams struct {
+	// service account email to impersonate.
+	GkeSaImpersonate *string `json:"gkeSaImpersonate,omitempty"`
+
+	// GCP target project where cluster runs.
+	ProjectId *string `json:"projectId,omitempty"`
 }
 
 // Cluster zone.
@@ -2677,7 +2717,8 @@ type NodetemplatesV1TaintWithOptionalEffect struct {
 
 // NodetemplatesV1TemplateConstraints defines model for nodetemplates.v1.TemplateConstraints.
 type NodetemplatesV1TemplateConstraints struct {
-	Architectures *[]string `json:"architectures,omitempty"`
+	ArchitecturePriority *[]string `json:"architecturePriority,omitempty"`
+	Architectures        *[]string `json:"architectures,omitempty"`
 
 	// AZS - The list of AZ names to consider for the node template, if empty or not set all AZs are considered.
 	//
@@ -2972,8 +3013,12 @@ type PoliciesV1NodeDownscalerEmptyNodes struct {
 // Defines the CAST AI Pod Pinner component settings.
 type PoliciesV1PodPinner struct {
 	// Enable/disable the Pod Pinner policy. This will either enable or disable the Pod Pinner component's automatic management in your cluster.
-	Enabled *bool `json:"enabled"`
+	Enabled *bool                      `json:"enabled"`
+	Status  *PoliciesV1PodPinnerStatus `json:"status,omitempty"`
 }
+
+// PoliciesV1PodPinnerStatus defines model for policies.v1.PodPinnerStatus.
+type PoliciesV1PodPinnerStatus string
 
 // Defines the autoscaling policies details.
 type PoliciesV1Policies struct {
@@ -3239,6 +3284,13 @@ type WorkloadoptimizationV1AggregatedMetrics struct {
 	P75 float64 `json:"p75"`
 }
 
+// WorkloadoptimizationV1AntiAffinitySettings defines model for workloadoptimization.v1.AntiAffinitySettings.
+type WorkloadoptimizationV1AntiAffinitySettings struct {
+	// Defines if anti-affinity should be considered when scaling the workload.
+	// When true, requiring host ports, or having anti-affinity on hostname will force all recommendations to be deferred.
+	ConsiderAntiAffinity *bool `json:"considerAntiAffinity"`
+}
+
 // WorkloadoptimizationV1ApplyType defines model for workloadoptimization.v1.ApplyType.
 type WorkloadoptimizationV1ApplyType string
 
@@ -3297,6 +3349,11 @@ type WorkloadoptimizationV1CpuMetrics struct {
 
 // WorkloadoptimizationV1DeleteWorkloadScalingPolicyResponse defines model for workloadoptimization.v1.DeleteWorkloadScalingPolicyResponse.
 type WorkloadoptimizationV1DeleteWorkloadScalingPolicyResponse = map[string]interface{}
+
+// WorkloadoptimizationV1DownscalingSettings defines model for workloadoptimization.v1.DownscalingSettings.
+type WorkloadoptimizationV1DownscalingSettings struct {
+	ApplyType *WorkloadoptimizationV1ApplyType `json:"applyType,omitempty"`
+}
 
 // WorkloadoptimizationV1Event defines model for workloadoptimization.v1.Event.
 type WorkloadoptimizationV1Event struct {
@@ -3452,6 +3509,11 @@ type WorkloadoptimizationV1ManagedBy string
 // MANAGED - workload watched (metrics collected), CAST AI may perform actions on the workload.
 type WorkloadoptimizationV1ManagementOption string
 
+// WorkloadoptimizationV1MemoryEventSettings defines model for workloadoptimization.v1.MemoryEventSettings.
+type WorkloadoptimizationV1MemoryEventSettings struct {
+	ApplyType *WorkloadoptimizationV1ApplyType `json:"applyType,omitempty"`
+}
+
 // WorkloadoptimizationV1NewWorkloadScalingPolicy defines model for workloadoptimization.v1.NewWorkloadScalingPolicy.
 type WorkloadoptimizationV1NewWorkloadScalingPolicy struct {
 	ApplyType WorkloadoptimizationV1ApplyType `json:"applyType"`
@@ -3507,14 +3569,17 @@ type WorkloadoptimizationV1RecommendationEventType string
 
 // WorkloadoptimizationV1RecommendationPolicies defines model for workloadoptimization.v1.RecommendationPolicies.
 type WorkloadoptimizationV1RecommendationPolicies struct {
-	Cpu WorkloadoptimizationV1ResourcePolicies `json:"cpu"`
+	AntiAffinity *WorkloadoptimizationV1AntiAffinitySettings `json:"antiAffinity,omitempty"`
+	Cpu          WorkloadoptimizationV1ResourcePolicies      `json:"cpu"`
+	Downscaling  *WorkloadoptimizationV1DownscalingSettings  `json:"downscaling,omitempty"`
 
 	// Defines possible options for workload management.
 	// READ_ONLY - workload watched (metrics collected), but no actions may be performed by CAST AI.
 	// MANAGED - workload watched (metrics collected), CAST AI may perform actions on the workload.
-	ManagementOption WorkloadoptimizationV1ManagementOption `json:"managementOption"`
-	Memory           WorkloadoptimizationV1ResourcePolicies `json:"memory"`
-	Startup          *WorkloadoptimizationV1StartupSettings `json:"startup,omitempty"`
+	ManagementOption WorkloadoptimizationV1ManagementOption     `json:"managementOption"`
+	Memory           WorkloadoptimizationV1ResourcePolicies     `json:"memory"`
+	MemoryEvent      *WorkloadoptimizationV1MemoryEventSettings `json:"memoryEvent,omitempty"`
+	Startup          *WorkloadoptimizationV1StartupSettings     `json:"startup,omitempty"`
 }
 
 // WorkloadoptimizationV1RecommendedPodCountChangedEvent defines model for workloadoptimization.v1.RecommendedPodCountChangedEvent.
@@ -3606,6 +3671,15 @@ type WorkloadoptimizationV1ResourcePolicies struct {
 
 	// Period of time over which the resource recommendation is calculated (default value is 24 hours).
 	LookBackPeriodSeconds *int32 `json:"lookBackPeriodSeconds"`
+
+	// Max values for the recommendation, applies to every container. For memory - this is in MiB, for CPU - this is in cores.
+	// If not set, there will be no upper bound for the recommendation (default behaviour). This value will be overridden if configured on workload level.
+	Max *float64 `json:"max"`
+
+	// Min values for the recommendation, applies to every container. For memory - this is in MiB, for CPU - this is in cores.
+	// If not set, the default value will be 10m for CPU and 10MiB for memory. This value will be overridden if configured on workload level.
+	// Value cannot be lower than 10m for CPU and 10MiB for memory.
+	Min *float64 `json:"min"`
 
 	// The overhead for the recommendation, the formula is: (1 + overhead) * function(args).
 	Overhead float64 `json:"overhead"`
@@ -3706,18 +3780,21 @@ type WorkloadoptimizationV1UpdateWorkloadV2 struct {
 
 // WorkloadoptimizationV1VPAConfig defines model for workloadoptimization.v1.VPAConfig.
 type WorkloadoptimizationV1VPAConfig struct {
+	AntiAffinity         WorkloadoptimizationV1AntiAffinitySettings   `json:"antiAffinity"`
 	ContainerConstraints []WorkloadoptimizationV1ContainerConstraints `json:"containerConstraints"`
 	Cpu                  WorkloadoptimizationV1ResourceConfig         `json:"cpu"`
 
 	// Defines possible options for workload management.
 	// READ_ONLY - workload watched (metrics collected), but no actions may be performed by CAST AI.
 	// MANAGED - workload watched (metrics collected), CAST AI may perform actions on the workload.
-	ManagementOption WorkloadoptimizationV1ManagementOption `json:"managementOption"`
-	Memory           WorkloadoptimizationV1ResourceConfig   `json:"memory"`
+	ManagementOption WorkloadoptimizationV1ManagementOption     `json:"managementOption"`
+	Memory           WorkloadoptimizationV1ResourceConfig       `json:"memory"`
+	MemoryEvent      *WorkloadoptimizationV1MemoryEventSettings `json:"memoryEvent,omitempty"`
 }
 
 // WorkloadoptimizationV1VPAConfigUpdate defines model for workloadoptimization.v1.VPAConfigUpdate.
 type WorkloadoptimizationV1VPAConfigUpdate struct {
+	AntiAffinity    *WorkloadoptimizationV1AntiAffinitySettings         `json:"antiAffinity,omitempty"`
 	ContainerConfig *[]WorkloadoptimizationV1ContainerConfigUpdate      `json:"containerConfig,omitempty"`
 	Cpu             *WorkloadoptimizationV1WorkloadResourceConfigUpdate `json:"cpu,omitempty"`
 
@@ -3726,6 +3803,7 @@ type WorkloadoptimizationV1VPAConfigUpdate struct {
 	// MANAGED - workload watched (metrics collected), CAST AI may perform actions on the workload.
 	ManagementOption *WorkloadoptimizationV1ManagementOption             `json:"managementOption,omitempty"`
 	Memory           *WorkloadoptimizationV1WorkloadResourceConfigUpdate `json:"memory,omitempty"`
+	MemoryEvent      *WorkloadoptimizationV1MemoryEventSettings          `json:"memoryEvent,omitempty"`
 }
 
 // WorkloadoptimizationV1Workload defines model for workloadoptimization.v1.Workload.
@@ -3777,18 +3855,21 @@ type WorkloadoptimizationV1Workload struct {
 
 // WorkloadoptimizationV1WorkloadConfig defines model for workloadoptimization.v1.WorkloadConfig.
 type WorkloadoptimizationV1WorkloadConfig struct {
+	AntiAffinity         WorkloadoptimizationV1AntiAffinitySettings   `json:"antiAffinity"`
 	ContainerConstraints []WorkloadoptimizationV1ContainerConstraints `json:"containerConstraints"`
 	Cpu                  WorkloadoptimizationV1ResourceConfig         `json:"cpu"`
 
 	// Defines possible options for workload management.
 	// READ_ONLY - workload watched (metrics collected), but no actions may be performed by CAST AI.
 	// MANAGED - workload watched (metrics collected), CAST AI may perform actions on the workload.
-	ManagementOption WorkloadoptimizationV1ManagementOption `json:"managementOption"`
-	Memory           WorkloadoptimizationV1ResourceConfig   `json:"memory"`
+	ManagementOption WorkloadoptimizationV1ManagementOption     `json:"managementOption"`
+	Memory           WorkloadoptimizationV1ResourceConfig       `json:"memory"`
+	MemoryEvent      *WorkloadoptimizationV1MemoryEventSettings `json:"memoryEvent,omitempty"`
 }
 
 // WorkloadoptimizationV1WorkloadConfigUpdate defines model for workloadoptimization.v1.WorkloadConfigUpdate.
 type WorkloadoptimizationV1WorkloadConfigUpdate struct {
+	AntiAffinity    *WorkloadoptimizationV1AntiAffinitySettings         `json:"antiAffinity,omitempty"`
 	ContainerConfig *[]WorkloadoptimizationV1ContainerConfigUpdate      `json:"containerConfig,omitempty"`
 	Cpu             *WorkloadoptimizationV1WorkloadResourceConfigUpdate `json:"cpu,omitempty"`
 
@@ -3797,6 +3878,7 @@ type WorkloadoptimizationV1WorkloadConfigUpdate struct {
 	// MANAGED - workload watched (metrics collected), CAST AI may perform actions on the workload.
 	ManagementOption *WorkloadoptimizationV1ManagementOption             `json:"managementOption,omitempty"`
 	Memory           *WorkloadoptimizationV1WorkloadResourceConfigUpdate `json:"memory,omitempty"`
+	MemoryEvent      *WorkloadoptimizationV1MemoryEventSettings          `json:"memoryEvent,omitempty"`
 }
 
 // WorkloadoptimizationV1WorkloadConfigUpdateV2 defines model for workloadoptimization.v1.WorkloadConfigUpdateV2.
@@ -3993,6 +4075,9 @@ type ExternalClusterAPIDisconnectClusterJSONBody = ExternalclusterV1DisconnectCo
 
 // ExternalClusterAPIHandleCloudEventJSONBody defines parameters for ExternalClusterAPIHandleCloudEvent.
 type ExternalClusterAPIHandleCloudEventJSONBody = ExternalclusterV1CloudEvent
+
+// ExternalClusterAPIGKECreateSAJSONBody defines parameters for ExternalClusterAPIGKECreateSA.
+type ExternalClusterAPIGKECreateSAJSONBody = ExternalClusterAPIGKECreateSARequest
 
 // ExternalClusterAPIListNodesParams defines parameters for ExternalClusterAPIListNodes.
 type ExternalClusterAPIListNodesParams struct {
@@ -4282,6 +4367,9 @@ type ExternalClusterAPIDisconnectClusterJSONRequestBody = ExternalClusterAPIDisc
 
 // ExternalClusterAPIHandleCloudEventJSONRequestBody defines body for ExternalClusterAPIHandleCloudEvent for application/json ContentType.
 type ExternalClusterAPIHandleCloudEventJSONRequestBody = ExternalClusterAPIHandleCloudEventJSONBody
+
+// ExternalClusterAPIGKECreateSAJSONRequestBody defines body for ExternalClusterAPIGKECreateSA for application/json ContentType.
+type ExternalClusterAPIGKECreateSAJSONRequestBody = ExternalClusterAPIGKECreateSAJSONBody
 
 // ExternalClusterAPIAddNodeJSONRequestBody defines body for ExternalClusterAPIAddNode for application/json ContentType.
 type ExternalClusterAPIAddNodeJSONRequestBody = ExternalClusterAPIAddNodeJSONBody

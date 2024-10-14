@@ -37,10 +37,13 @@ func TestAccResourceWorkloadScalingPolicy(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "cpu.0.apply_threshold", "0.06"),
 					resource.TestCheckResourceAttr(resourceName, "cpu.0.args.0", "0.86"),
 					resource.TestCheckResourceAttr(resourceName, "cpu.0.look_back_period_seconds", "86401"),
+					resource.TestCheckResourceAttr(resourceName, "cpu.0.min", "0.1"),
+					resource.TestCheckResourceAttr(resourceName, "cpu.0.max", "1"),
 					resource.TestCheckResourceAttr(resourceName, "memory.0.function", "MAX"),
 					resource.TestCheckResourceAttr(resourceName, "memory.0.overhead", "0.25"),
 					resource.TestCheckResourceAttr(resourceName, "memory.0.apply_threshold", "0.1"),
 					resource.TestCheckResourceAttr(resourceName, "memory.0.args.#", "0"),
+					resource.TestCheckResourceAttr(resourceName, "memory.0.min", "100"),
 				),
 			},
 			{
@@ -63,11 +66,17 @@ func TestAccResourceWorkloadScalingPolicy(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "cpu.0.apply_threshold", "0.1"),
 					resource.TestCheckResourceAttr(resourceName, "cpu.0.args.0", "0.9"),
 					resource.TestCheckResourceAttr(resourceName, "cpu.0.look_back_period_seconds", "86402"),
+					resource.TestCheckResourceAttr(resourceName, "cpu.0.min", "0.1"),
 					resource.TestCheckResourceAttr(resourceName, "memory.0.function", "QUANTILE"),
 					resource.TestCheckResourceAttr(resourceName, "memory.0.overhead", "0.35"),
 					resource.TestCheckResourceAttr(resourceName, "memory.0.apply_threshold", "0.2"),
 					resource.TestCheckResourceAttr(resourceName, "memory.0.args.0", "0.9"),
+					resource.TestCheckResourceAttr(resourceName, "memory.0.min", "100"),
+					resource.TestCheckResourceAttr(resourceName, "memory.0.max", "512"),
 					resource.TestCheckResourceAttr(resourceName, "startup.0.period_seconds", "123"),
+					resource.TestCheckResourceAttr(resourceName, "downscaling.0.apply_type", "DEFERRED"),
+					resource.TestCheckResourceAttr(resourceName, "memory_event.0.apply_type", "DEFERRED"),
+					resource.TestCheckResourceAttr(resourceName, "anti_affinity.0.consider_anti_affinity", "true"),
 				),
 			},
 		},
@@ -96,12 +105,15 @@ func scalingPolicyConfig(clusterName, projectID, name string) string {
 			overhead 		= 0.05
 			apply_threshold = 0.06
 			args 			= ["0.86"]
+            min             = 0.1
+            max             = 1
 			look_back_period_seconds = 86401
 		}
 		memory {
 			function 		= "MAX"
 			overhead 		= 0.25
 			apply_threshold = 0.1
+            min             = 100
 		}
 	}`, name)
 
@@ -122,15 +134,27 @@ func scalingPolicyConfigUpdated(clusterName, projectID, name string) string {
 			apply_threshold = 0.1
 			args 			= ["0.9"]
 			look_back_period_seconds = 86402
+            min             = 0.1
 		}
 		memory {
 			function 		= "QUANTILE"
 			overhead 		= 0.35
 			apply_threshold = 0.2
 			args 			= ["0.9"]
+            min             = 100
+            max             = 512
 		}
 		startup {
 			period_seconds = 123
+		}
+	    downscaling {
+		    apply_type = "DEFERRED"
+	    }
+		memory_event {
+			apply_type = "DEFERRED"
+		}		
+		anti_affinity {
+			consider_anti_affinity = true
 		}
 	}`, updatedName)
 

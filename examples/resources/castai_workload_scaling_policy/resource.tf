@@ -9,6 +9,8 @@ resource "castai_workload_scaling_policy" "services" {
     apply_threshold          = 0.1
     args                     = ["0.9"]
     look_back_period_seconds = 172800
+    min                      = 0.1
+    max                      = 1
   }
   memory {
     function        = "MAX"
@@ -17,5 +19,14 @@ resource "castai_workload_scaling_policy" "services" {
   }
   startup {
     period_seconds = 240
+  }
+  downscaling {
+    apply_type = "DEFERRED"
+  }
+  memory_event {
+    apply_type = "IMMEDIATE"
+  }
+  anti_affinity {
+    consider_anti_affinity = false
   }
 }

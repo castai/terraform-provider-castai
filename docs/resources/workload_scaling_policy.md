@@ -26,6 +26,8 @@ resource "castai_workload_scaling_policy" "services" {
     apply_threshold          = 0.1
     args                     = ["0.9"]
     look_back_period_seconds = 172800
+    min                      = 0.1
+    max                      = 1
   }
   memory {
     function        = "MAX"
@@ -34,6 +36,15 @@ resource "castai_workload_scaling_policy" "services" {
   }
   startup {
     period_seconds = 240
+  }
+  downscaling {
+    apply_type = "DEFERRED"
+  }
+  memory_event {
+    apply_type = "IMMEDIATE"
+  }
+  anti_affinity {
+    consider_anti_affinity = false
   }
 }
 ```
@@ -56,6 +67,9 @@ resource "castai_workload_scaling_policy" "services" {
 
 ### Optional
 
+- `anti_affinity` (Block List, Max: 1) (see [below for nested schema](#nestedblock--anti_affinity))
+- `downscaling` (Block List, Max: 1) (see [below for nested schema](#nestedblock--downscaling))
+- `memory_event` (Block List, Max: 1) (see [below for nested schema](#nestedblock--memory_event))
 - `startup` (Block List, Max: 1) (see [below for nested schema](#nestedblock--startup))
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
@@ -72,6 +86,8 @@ Optional:
 - `args` (List of String) The arguments for the function - i.e. for `QUANTILE` this should be a [0, 1] float. `MAX` doesn't accept any args
 - `function` (String) The function used to calculate the resource recommendation. Supported values: `QUANTILE`, `MAX`
 - `look_back_period_seconds` (Number) The look back period in seconds for the recommendation.
+- `max` (Number) Max values for the recommendation, applies to every container. For memory - this is in MiB, for CPU - this is in cores.
+- `min` (Number) Min values for the recommendation, applies to every container. For memory - this is in MiB, for CPU - this is in cores.
 - `overhead` (Number) Overhead for the recommendation, e.g. `0.1` will result in 10% higher recommendation
 
 
@@ -84,7 +100,38 @@ Optional:
 - `args` (List of String) The arguments for the function - i.e. for `QUANTILE` this should be a [0, 1] float. `MAX` doesn't accept any args
 - `function` (String) The function used to calculate the resource recommendation. Supported values: `QUANTILE`, `MAX`
 - `look_back_period_seconds` (Number) The look back period in seconds for the recommendation.
+- `max` (Number) Max values for the recommendation, applies to every container. For memory - this is in MiB, for CPU - this is in cores.
+- `min` (Number) Min values for the recommendation, applies to every container. For memory - this is in MiB, for CPU - this is in cores.
 - `overhead` (Number) Overhead for the recommendation, e.g. `0.1` will result in 10% higher recommendation
+
+
+<a id="nestedblock--anti_affinity"></a>
+### Nested Schema for `anti_affinity`
+
+Optional:
+
+- `consider_anti_affinity` (Boolean) Defines if anti-affinity should be considered when scaling the workload.
+	If enabled, requiring host ports, or having anti-affinity on hostname will force all recommendations to be deferred.
+
+
+<a id="nestedblock--downscaling"></a>
+### Nested Schema for `downscaling`
+
+Optional:
+
+- `apply_type` (String) Defines the apply type to be used when downscaling.
+	- IMMEDIATE - pods are restarted immediately when new recommendation is generated.
+	- DEFERRED - pods are not restarted and recommendation values are applied during natural restarts only (new deployment, etc.)
+
+
+<a id="nestedblock--memory_event"></a>
+### Nested Schema for `memory_event`
+
+Optional:
+
+- `apply_type` (String) Defines the apply type to be used when applying recommendation for memory related event.
+	- IMMEDIATE - pods are restarted immediately when new recommendation is generated.
+	- DEFERRED - pods are not restarted and recommendation values are applied during natural restarts only (new deployment, etc.)
 
 
 <a id="nestedblock--startup"></a>

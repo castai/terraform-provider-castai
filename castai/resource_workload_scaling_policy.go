@@ -3,11 +3,12 @@ package castai
 import (
 	"context"
 	"fmt"
-	"github.com/samber/lo"
 	"net/http"
 	"regexp"
 	"strings"
 	"time"
+
+	"github.com/samber/lo"
 
 	"github.com/google/uuid"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
@@ -67,13 +68,13 @@ func resourceWorkloadScalingPolicy() *schema.Resource {
 				Type:     schema.TypeList,
 				Required: true,
 				MaxItems: 1,
-				Elem:     workloadScalingPolicyResourceSchema("QUANTILE", 0),
+				Elem:     workloadScalingPolicyResourceSchema("QUANTILE", 0, 0.01),
 			},
 			"memory": {
 				Type:     schema.TypeList,
 				Required: true,
 				MaxItems: 1,
-				Elem:     workloadScalingPolicyResourceSchema("MAX", 0.1),
+				Elem:     workloadScalingPolicyResourceSchema("MAX", 0.1, 10),
 			},
 			"startup": {
 				Type:     schema.TypeList,
@@ -90,6 +91,55 @@ func resourceWorkloadScalingPolicy() *schema.Resource {
 					},
 				},
 			},
+			"downscaling": {
+				Type:     schema.TypeList,
+				Optional: true,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"apply_type": {
+							Type:     schema.TypeString,
+							Optional: true,
+							Description: `Defines the apply type to be used when downscaling.
+	- IMMEDIATE - pods are restarted immediately when new recommendation is generated.
+	- DEFERRED - pods are not restarted and recommendation values are applied during natural restarts only (new deployment, etc.)`,
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"IMMEDIATE", "DEFERRED"}, false)),
+						},
+					},
+				},
+			},
+			"memory_event": {
+				Type:     schema.TypeList,
+				Optional: true,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"apply_type": {
+							Type:     schema.TypeString,
+							Optional: true,
+							Description: `Defines the apply type to be used when applying recommendation for memory related event.
+	- IMMEDIATE - pods are restarted immediately when new recommendation is generated.
+	- DEFERRED - pods are not restarted and recommendation values are applied during natural restarts only (new deployment, etc.)`,
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"IMMEDIATE", "DEFERRED"}, false)),
+						},
+					},
+				},
+			},
+			"anti_affinity": {
+				Type:     schema.TypeList,
+				Optional: true,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"consider_anti_affinity": {
+							Type:     schema.TypeBool,
+							Optional: true,
+							Description: `Defines if anti-affinity should be considered when scaling the workload.
+	If enabled, requiring host ports, or having anti-affinity on hostname will force all recommendations to be deferred.`,
+						},
+					},
+				},
+			},
 		},
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(15 * time.Second),
@@ -100,7 +150,7 @@ func resourceWorkloadScalingPolicy() *schema.Resource {
 	}
 }
 
-func workloadScalingPolicyResourceSchema(function string, overhead float64) *schema.Resource {
+func workloadScalingPolicyResourceSchema(function string, overhead, minRecommended float64) *schema.Resource {
 	return &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"function": {
@@ -141,6 +191,18 @@ func workloadScalingPolicyResourceSchema(function string, overhead float64) *sch
 				Description:      "The look back period in seconds for the recommendation.",
 				ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(24*60*60, 7*24*60*60)),
 			},
+			"min": {
+				Type:             schema.TypeFloat,
+				Default:          minRecommended,
+				Optional:         true,
+				Description:      "Min values for the recommendation, applies to every container. For memory - this is in MiB, for CPU - this is in cores.",
+				ValidateDiagFunc: validation.ToDiagFunc(validation.FloatAtLeast(minRecommended)),
+			},
+			"max": {
+				Type:        schema.TypeFloat,
+				Optional:    true,
+				Description: "Max values for the recommendation, applies to every container. For memory - this is in MiB, for CPU - this is in cores.",
+			},
 		},
 	}
 }
@@ -166,6 +228,12 @@ func resourceWorkloadScalingPolicyCreate(ctx context.Context, d *schema.Resource
 	}
 
 	req.RecommendationPolicies.Startup = toStartup(toSection(d, "startup"))
+
+	req.RecommendationPolicies.Downscaling = toDownscaling(toSection(d, "downscaling"))
+
+	req.RecommendationPolicies.MemoryEvent = toMemoryEvent(toSection(d, "memory_event"))
+
+	req.RecommendationPolicies.AntiAffinity = toAntiAffinity(toSection(d, "anti_affinity"))
 
 	resp, err := client.WorkloadOptimizationAPICreateWorkloadScalingPolicyWithResponse(ctx, clusterID, req)
 	if checkErr := sdk.CheckOKResponse(resp, err); checkErr != nil {
@@ -212,9 +280,17 @@ func resourceWorkloadScalingPolicyRead(ctx context.Context, d *schema.ResourceDa
 	if err := d.Set("memory", toWorkloadScalingPoliciesMap(sp.RecommendationPolicies.Memory)); err != nil {
 		return diag.FromErr(fmt.Errorf("setting memory: %w", err))
 	}
-
 	if err := d.Set("startup", toStartupMap(sp.RecommendationPolicies.Startup)); err != nil {
 		return diag.FromErr(fmt.Errorf("setting startup: %w", err))
+	}
+	if err := d.Set("downscaling", toDownscalingMap(sp.RecommendationPolicies.Downscaling)); err != nil {
+		return diag.FromErr(fmt.Errorf("setting downscaling: %w", err))
+	}
+	if err := d.Set("memory_event", toMemoryEventMap(sp.RecommendationPolicies.MemoryEvent)); err != nil {
+		return diag.FromErr(fmt.Errorf("setting memory event: %w", err))
+	}
+	if err := d.Set("anti_affinity", toAntiAffinityMap(sp.RecommendationPolicies.AntiAffinity)); err != nil {
+		return diag.FromErr(fmt.Errorf("setting anti-affinity: %w", err))
 	}
 
 	return nil
@@ -228,6 +304,9 @@ func resourceWorkloadScalingPolicyUpdate(ctx context.Context, d *schema.Resource
 		"cpu",
 		"memory",
 		"startup",
+		"downscaling",
+		"memory_event",
+		"anti_affinity",
 	) {
 		tflog.Info(ctx, "scaling policy up to date")
 		return nil
@@ -243,6 +322,9 @@ func resourceWorkloadScalingPolicyUpdate(ctx context.Context, d *schema.Resource
 			Cpu:              toWorkloadScalingPolicies(d.Get("cpu").([]interface{})[0].(map[string]interface{})),
 			Memory:           toWorkloadScalingPolicies(d.Get("memory").([]interface{})[0].(map[string]interface{})),
 			Startup:          toStartup(toSection(d, "startup")),
+			Downscaling:      toDownscaling(toSection(d, "downscaling")),
+			MemoryEvent:      toMemoryEvent(toSection(d, "memory_event")),
+			AntiAffinity:     toAntiAffinity(toSection(d, "anti_affinity")),
 		},
 	}
 
@@ -361,6 +443,12 @@ func toWorkloadScalingPolicies(obj map[string]interface{}) sdk.Workloadoptimizat
 	if v, ok := obj["look_back_period_seconds"].(int); ok && v > 0 {
 		out.LookBackPeriodSeconds = lo.ToPtr(int32(v))
 	}
+	if v, ok := obj["min"].(float64); ok {
+		out.Min = lo.ToPtr(v)
+	}
+	if v, ok := obj["max"].(float64); ok && v > 0 {
+		out.Max = lo.ToPtr(v)
+	}
 
 	return out
 }
@@ -371,6 +459,8 @@ func toWorkloadScalingPoliciesMap(p sdk.WorkloadoptimizationV1ResourcePolicies) 
 		"args":            p.Args,
 		"overhead":        p.Overhead,
 		"apply_threshold": p.ApplyThreshold,
+		"min":             p.Min,
+		"max":             p.Max,
 	}
 
 	if p.LookBackPeriodSeconds != nil {
@@ -409,4 +499,100 @@ func toStartupMap(s *sdk.WorkloadoptimizationV1StartupSettings) []map[string]int
 	}
 
 	return []map[string]interface{}{m}
+}
+
+func toDownscaling(downscaling map[string]any) *sdk.WorkloadoptimizationV1DownscalingSettings {
+	if len(downscaling) == 0 {
+		return nil
+	}
+
+	result := &sdk.WorkloadoptimizationV1DownscalingSettings{}
+
+	if v, ok := downscaling["apply_type"].(string); ok && v != "" {
+		result.ApplyType = lo.ToPtr(sdk.WorkloadoptimizationV1ApplyType(v))
+	}
+
+	return result
+}
+
+func toDownscalingMap(s *sdk.WorkloadoptimizationV1DownscalingSettings) []map[string]any {
+	if s == nil {
+		return nil
+	}
+
+	m := map[string]any{}
+
+	if s.ApplyType != nil {
+		m["apply_type"] = string(*s.ApplyType)
+	}
+
+	if len(m) == 0 {
+		return nil
+	}
+
+	return []map[string]any{m}
+}
+
+func toMemoryEvent(memoryEvent map[string]any) *sdk.WorkloadoptimizationV1MemoryEventSettings {
+	if len(memoryEvent) == 0 {
+		return nil
+	}
+
+	result := &sdk.WorkloadoptimizationV1MemoryEventSettings{}
+
+	if v, ok := memoryEvent["apply_type"].(string); ok && v != "" {
+		result.ApplyType = lo.ToPtr(sdk.WorkloadoptimizationV1ApplyType(v))
+	}
+
+	return result
+}
+
+func toMemoryEventMap(s *sdk.WorkloadoptimizationV1MemoryEventSettings) []map[string]any {
+	if s == nil {
+		return nil
+	}
+
+	m := map[string]any{}
+
+	if s.ApplyType != nil {
+		m["apply_type"] = string(*s.ApplyType)
+	}
+
+	if len(m) == 0 {
+		return nil
+	}
+
+	return []map[string]any{m}
+}
+
+func toAntiAffinity(antiAffinity map[string]any) *sdk.WorkloadoptimizationV1AntiAffinitySettings {
+	if len(antiAffinity) == 0 {
+		return nil
+	}
+
+	result := &sdk.WorkloadoptimizationV1AntiAffinitySettings{}
+
+	if v, ok := antiAffinity["consider_anti_affinity"].(bool); ok {
+		result.ConsiderAntiAffinity = lo.ToPtr(v)
+	}
+
+	return result
+}
+
+func toAntiAffinityMap(s *sdk.WorkloadoptimizationV1AntiAffinitySettings) []map[string]any {
+	if s == nil {
+		return nil
+	}
+
+	m := map[string]any{}
+
+	if s.ConsiderAntiAffinity != nil {
+		m["consider_anti_affinity"] = *s.ConsiderAntiAffinity
+	}
+
+	if len(m) == 0 {
+		return nil
+	}
+
+	return []map[string]any{m}
 }

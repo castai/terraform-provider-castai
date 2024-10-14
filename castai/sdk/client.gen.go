@@ -270,6 +270,11 @@ type ClientInterface interface {
 
 	ExternalClusterAPIHandleCloudEvent(ctx context.Context, clusterId string, body ExternalClusterAPIHandleCloudEventJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// ExternalClusterAPIGKECreateSA request with any body
+	ExternalClusterAPIGKECreateSAWithBody(ctx context.Context, clusterId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	ExternalClusterAPIGKECreateSA(ctx context.Context, clusterId string, body ExternalClusterAPIGKECreateSAJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// ExternalClusterAPIListNodes request
 	ExternalClusterAPIListNodes(ctx context.Context, clusterId string, params *ExternalClusterAPIListNodesParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -1318,6 +1323,30 @@ func (c *Client) ExternalClusterAPIHandleCloudEventWithBody(ctx context.Context,
 
 func (c *Client) ExternalClusterAPIHandleCloudEvent(ctx context.Context, clusterId string, body ExternalClusterAPIHandleCloudEventJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewExternalClusterAPIHandleCloudEventRequest(c.Server, clusterId, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) ExternalClusterAPIGKECreateSAWithBody(ctx context.Context, clusterId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewExternalClusterAPIGKECreateSARequestWithBody(c.Server, clusterId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) ExternalClusterAPIGKECreateSA(ctx context.Context, clusterId string, body ExternalClusterAPIGKECreateSAJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewExternalClusterAPIGKECreateSARequest(c.Server, clusterId, body)
 	if err != nil {
 		return nil, err
 	}
@@ -4537,6 +4566,53 @@ func NewExternalClusterAPIHandleCloudEventRequestWithBody(server string, cluster
 	}
 
 	operationPath := fmt.Sprintf("/v1/kubernetes/external-clusters/%s/events", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewExternalClusterAPIGKECreateSARequest calls the generic ExternalClusterAPIGKECreateSA builder with application/json body
+func NewExternalClusterAPIGKECreateSARequest(server string, clusterId string, body ExternalClusterAPIGKECreateSAJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewExternalClusterAPIGKECreateSARequestWithBody(server, clusterId, "application/json", bodyReader)
+}
+
+// NewExternalClusterAPIGKECreateSARequestWithBody generates requests for ExternalClusterAPIGKECreateSA with any type of body
+func NewExternalClusterAPIGKECreateSARequestWithBody(server string, clusterId string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "clusterId", runtime.ParamLocationPath, clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/kubernetes/external-clusters/%s/gke-create-sa", pathParam0)
 	if operationPath[0] == '/' {
 		operationPath = "." + operationPath
 	}
@@ -8305,6 +8381,11 @@ type ClientWithResponsesInterface interface {
 
 	ExternalClusterAPIHandleCloudEventWithResponse(ctx context.Context, clusterId string, body ExternalClusterAPIHandleCloudEventJSONRequestBody) (*ExternalClusterAPIHandleCloudEventResponse, error)
 
+	// ExternalClusterAPIGKECreateSA request  with any body
+	ExternalClusterAPIGKECreateSAWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader) (*ExternalClusterAPIGKECreateSAResponse, error)
+
+	ExternalClusterAPIGKECreateSAWithResponse(ctx context.Context, clusterId string, body ExternalClusterAPIGKECreateSAJSONRequestBody) (*ExternalClusterAPIGKECreateSAResponse, error)
+
 	// ExternalClusterAPIListNodes request
 	ExternalClusterAPIListNodesWithResponse(ctx context.Context, clusterId string, params *ExternalClusterAPIListNodesParams) (*ExternalClusterAPIListNodesResponse, error)
 
@@ -10014,6 +10095,36 @@ func (r ExternalClusterAPIHandleCloudEventResponse) StatusCode() int {
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
 func (r ExternalClusterAPIHandleCloudEventResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type ExternalClusterAPIGKECreateSAResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *ExternalclusterV1GKECreateSAResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r ExternalClusterAPIGKECreateSAResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r ExternalClusterAPIGKECreateSAResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r ExternalClusterAPIGKECreateSAResponse) GetBody() []byte {
 	return r.Body
 }
 
@@ -12781,6 +12892,23 @@ func (c *ClientWithResponses) ExternalClusterAPIHandleCloudEventWithResponse(ctx
 	return ParseExternalClusterAPIHandleCloudEventResponse(rsp)
 }
 
+// ExternalClusterAPIGKECreateSAWithBodyWithResponse request with arbitrary body returning *ExternalClusterAPIGKECreateSAResponse
+func (c *ClientWithResponses) ExternalClusterAPIGKECreateSAWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader) (*ExternalClusterAPIGKECreateSAResponse, error) {
+	rsp, err := c.ExternalClusterAPIGKECreateSAWithBody(ctx, clusterId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseExternalClusterAPIGKECreateSAResponse(rsp)
+}
+
+func (c *ClientWithResponses) ExternalClusterAPIGKECreateSAWithResponse(ctx context.Context, clusterId string, body ExternalClusterAPIGKECreateSAJSONRequestBody) (*ExternalClusterAPIGKECreateSAResponse, error) {
+	rsp, err := c.ExternalClusterAPIGKECreateSA(ctx, clusterId, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseExternalClusterAPIGKECreateSAResponse(rsp)
+}
+
 // ExternalClusterAPIListNodesWithResponse request returning *ExternalClusterAPIListNodesResponse
 func (c *ClientWithResponses) ExternalClusterAPIListNodesWithResponse(ctx context.Context, clusterId string, params *ExternalClusterAPIListNodesParams) (*ExternalClusterAPIListNodesResponse, error) {
 	rsp, err := c.ExternalClusterAPIListNodes(ctx, clusterId, params)
@@ -14850,6 +14978,32 @@ func ParseExternalClusterAPIHandleCloudEventResponse(rsp *http.Response) (*Exter
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest ExternalclusterV1HandleCloudEventResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseExternalClusterAPIGKECreateSAResponse parses an HTTP response from a ExternalClusterAPIGKECreateSAWithResponse call
+func ParseExternalClusterAPIGKECreateSAResponse(rsp *http.Response) (*ExternalClusterAPIGKECreateSAResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &ExternalClusterAPIGKECreateSAResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ExternalclusterV1GKECreateSAResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
