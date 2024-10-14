@@ -117,7 +117,7 @@ helm upgrade -i castai-evictor castai-helm/castai-evictor -n castai-agent --set 
 helm upgrade -i castai-pod-pinner castai-helm/castai-pod-pinner -n castai-agent \
 --set castai.apiKey=$CASTAI_API_KEY \
 --set castai.clusterID=$CASTAI_CLUSTER_ID \
---set replicaCount=1
+--set replicaCount=0
 
 #### castai-workload-autoscaler
 helm upgrade -i castai-workload-autoscaler castai-helm/castai-workload-autoscaler -n castai-agent \
