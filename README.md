@@ -28,6 +28,7 @@ terraform {
   required_providers {
     castai = {
       source  = "castai/castai"
+      version = "2.0.0" # can be omitted for the latest version
     }
   }
   required_version = ">= 0.13"
