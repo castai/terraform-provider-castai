@@ -4,9 +4,14 @@ variable "cluster_name" {
   description = "Name of the AKS cluster, resources will be created for."
 }
 
-variable "cluster_rg" {
+variable "resource_group" {
   type        = string
   description = "Resource Group of the AKS cluster, resources will be created for."
+}
+
+variable "subscription_id" {
+  type        = string
+  description = "subscription id"
 }
 
 variable "cluster_region" {
