@@ -319,7 +319,7 @@ func resourceNodeTemplate() *schema.Resource {
 										Elem: &schema.Schema{
 											Type: schema.TypeString,
 										},
-										Description: "Instance families to exclude when filtering (includes all other families).",
+										Description: "Instance families to include when filtering (excludes all other families).",
 									},
 									FieldNodeTemplateExclude: {
 										Type:     schema.TypeList,
@@ -327,7 +327,7 @@ func resourceNodeTemplate() *schema.Resource {
 										Elem: &schema.Schema{
 											Type: schema.TypeString,
 										},
-										Description: "Instance families to include when filtering (excludes all other families).",
+										Description: "Instance families to exclude when filtering (includes all other families).",
 									},
 								},
 							},
