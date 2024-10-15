@@ -2138,6 +2138,24 @@ type ExternalclusterV1Taint struct {
 	Value  string `json:"value"`
 }
 
+// TriggerHibernateClusterResponse is the result of HibernateClusterRequest.
+type ExternalclusterV1TriggerHibernateClusterResponse struct {
+	// The ID of the node.
+	ClusterId string `json:"clusterId"`
+
+	// Add node operation ID.
+	OperationId string `json:"operationId"`
+}
+
+// TriggerResumeClusterResponse is the result of ResumeClusterRequest.
+type ExternalclusterV1TriggerResumeClusterResponse struct {
+	// The ID of the node.
+	ClusterId string `json:"clusterId"`
+
+	// Add node operation ID.
+	OperationId string `json:"operationId"`
+}
+
 // UpdateClusterTagsResponse result of cluster tags update.
 type ExternalclusterV1UpdateClusterTagsResponse = map[string]interface{}
 
@@ -2252,6 +2270,9 @@ type NodeconfigV1EKSConfig struct {
 	// AWS key pair ID to be used for provisioned nodes. Has priority over sshPublicKey.
 	KeyPairId             *string `json:"keyPairId"`
 	MaxPodsPerNodeFormula *string `json:"maxPodsPerNodeFormula"`
+
+	// Is used to create temporary cloud native pools.
+	NodeGroupArn *string `json:"nodeGroupArn"`
 
 	// Cluster's security groups configuration.
 	SecurityGroups *[]string                `json:"securityGroups,omitempty"`
@@ -3978,9 +3999,6 @@ type WorkloadoptimizationV1WorkloadScalingPolicy struct {
 type AuthTokenAPIListAuthTokensParams struct {
 	// User id to filter by, if this is set we will only return tokens that have this user id.
 	UserId *string `form:"userId,omitempty" json:"userId,omitempty"`
-
-	// Service account id to filter by, if this is set we will only return tokens that have this service account id ignoring users_id.
-	ServiceAccountId *string `form:"serviceAccountId,omitempty" json:"serviceAccountId,omitempty"`
 }
 
 // AuthTokenAPICreateAuthTokenJSONBody defines parameters for AuthTokenAPICreateAuthToken.
@@ -4121,6 +4139,9 @@ type ExternalClusterAPIDeleteNodeParams struct {
 
 // ExternalClusterAPIDrainNodeJSONBody defines parameters for ExternalClusterAPIDrainNode.
 type ExternalClusterAPIDrainNodeJSONBody = ExternalclusterV1DrainConfig
+
+// ExternalClusterAPITriggerResumeClusterJSONBody defines parameters for ExternalClusterAPITriggerResumeCluster.
+type ExternalClusterAPITriggerResumeClusterJSONBody = ExternalclusterV1NodeConfig
 
 // ExternalClusterAPIUpdateClusterTagsJSONBody defines parameters for ExternalClusterAPIUpdateClusterTags.
 type ExternalClusterAPIUpdateClusterTagsJSONBody struct {
@@ -4376,6 +4397,9 @@ type ExternalClusterAPIAddNodeJSONRequestBody = ExternalClusterAPIAddNodeJSONBod
 
 // ExternalClusterAPIDrainNodeJSONRequestBody defines body for ExternalClusterAPIDrainNode for application/json ContentType.
 type ExternalClusterAPIDrainNodeJSONRequestBody = ExternalClusterAPIDrainNodeJSONBody
+
+// ExternalClusterAPITriggerResumeClusterJSONRequestBody defines body for ExternalClusterAPITriggerResumeCluster for application/json ContentType.
+type ExternalClusterAPITriggerResumeClusterJSONRequestBody = ExternalClusterAPITriggerResumeClusterJSONBody
 
 // ExternalClusterAPIUpdateClusterTagsJSONRequestBody defines body for ExternalClusterAPIUpdateClusterTags for application/json ContentType.
 type ExternalClusterAPIUpdateClusterTagsJSONRequestBody ExternalClusterAPIUpdateClusterTagsJSONBody
