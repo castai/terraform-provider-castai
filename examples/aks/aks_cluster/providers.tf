@@ -1,6 +1,5 @@
 # Following providers required by AKS and Vnet resources.
 provider "azurerm" {
-  subscription_id = var.subscription_id
   features {}
 }
 
