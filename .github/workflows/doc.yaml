@@ -1,6 +1,9 @@
 name: Generate SDK and Docs
 on:
   pull_request:
+    branches: [ '*' ]
+    paths-ignore:
+      - 'examples/**'
 jobs:
   generate-sdk:
     name: Check if SDK is up to date
