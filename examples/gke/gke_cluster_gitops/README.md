@@ -48,10 +48,10 @@ CASTAI_CLUSTER_ID=""
 CAST_CONFIG_SOURCE="castai-cluster-controller"
 
 #### Mandatory Component: Castai-agent
-helm upgrade -i castai-agent castai-helm/castai-agent -n castai-agent \
+helm upgrade -i castai-agent castai-helm/castai-agent -n castai-agent --create-namespace \
   --set apiKey=$CASTAI_API_KEY \
   --set provider=gke \
-  --create-namespace
+  --set createNamespace=false
 
 #### Mandatory Component: castai-cluster-controller
 helm upgrade -i cluster-controller castai-helm/castai-cluster-controller -n castai-agent \
@@ -65,7 +65,7 @@ helm upgrade -i castai-spot-handler castai-helm/castai-spot-handler -n castai-ag
 --set castai.provider=gcp
 
 #### castai-evictor
-helm upgrade -i castai-evictor castai-helm/castai-evictor -n castai-agent --set replicaCount=0
+helm upgrade -i castai-evictor castai-helm/castai-evictor -n castai-agent --set replicaCount=1
 
 #### castai-pod-pinner
 helm upgrade -i castai-pod-pinner castai-helm/castai-pod-pinner -n castai-agent \
