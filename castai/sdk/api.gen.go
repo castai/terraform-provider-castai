@@ -289,8 +289,10 @@ const (
 	EVENTTYPERECOMMENDATIONAPPLIED      WorkloadoptimizationV1EventType = "EVENT_TYPE_RECOMMENDATION_APPLIED"
 	EVENTTYPERECOMMENDEDPODCOUNTCHANGED WorkloadoptimizationV1EventType = "EVENT_TYPE_RECOMMENDED_POD_COUNT_CHANGED"
 	EVENTTYPERECOMMENDEDREQUESTSCHANGED WorkloadoptimizationV1EventType = "EVENT_TYPE_RECOMMENDED_REQUESTS_CHANGED"
+	EVENTTYPESCALINGPOLICYASSIGNED      WorkloadoptimizationV1EventType = "EVENT_TYPE_SCALING_POLICY_ASSIGNED"
 	EVENTTYPESCALINGPOLICYCREATED       WorkloadoptimizationV1EventType = "EVENT_TYPE_SCALING_POLICY_CREATED"
 	EVENTTYPESCALINGPOLICYDELETED       WorkloadoptimizationV1EventType = "EVENT_TYPE_SCALING_POLICY_DELETED"
+	EVENTTYPESCALINGPOLICYUPDATED       WorkloadoptimizationV1EventType = "EVENT_TYPE_SCALING_POLICY_UPDATED"
 	EVENTTYPESURGE                      WorkloadoptimizationV1EventType = "EVENT_TYPE_SURGE"
 )
 
@@ -925,6 +927,13 @@ type CastaiInventoryV1beta1InstanceTypeBasedUsage struct {
 	UsageDistribution *CastaiInventoryV1beta1UsageDistribution        `json:"usageDistribution,omitempty"`
 }
 
+// CastaiInventoryV1beta1InstanceTypeWithFamily defines model for castai.inventory.v1beta1.InstanceTypeWithFamily.
+type CastaiInventoryV1beta1InstanceTypeWithFamily struct {
+	CloudServiceProvider *string `json:"cloudServiceProvider,omitempty"`
+	Family               *string `json:"family,omitempty"`
+	InstanceType         *string `json:"instanceType,omitempty"`
+}
+
 // CastaiInventoryV1beta1InstanceZone defines model for castai.inventory.v1beta1.InstanceZone.
 type CastaiInventoryV1beta1InstanceZone struct {
 	// Specifies the applied discounts on the instance zone.
@@ -941,6 +950,12 @@ type CastaiInventoryV1beta1InstanceZone struct {
 	RamPrice          *string                              `json:"ramPrice,omitempty"`
 	Spot              *bool                                `json:"spot,omitempty"`
 	Unavailable       *bool                                `json:"unavailable,omitempty"`
+}
+
+// CastaiInventoryV1beta1ListInstanceTypeNamesResponse defines model for castai.inventory.v1beta1.ListInstanceTypeNamesResponse.
+type CastaiInventoryV1beta1ListInstanceTypeNamesResponse struct {
+	Items          *[]CastaiInventoryV1beta1InstanceTypeWithFamily `json:"items,omitempty"`
+	NextPageCursor *string                                         `json:"nextPageCursor,omitempty"`
 }
 
 // CastaiInventoryV1beta1ListRegionsResponse defines model for castai.inventory.v1beta1.ListRegionsResponse.
@@ -2138,6 +2153,24 @@ type ExternalclusterV1Taint struct {
 	Value  string `json:"value"`
 }
 
+// TriggerHibernateClusterResponse is the result of HibernateClusterRequest.
+type ExternalclusterV1TriggerHibernateClusterResponse struct {
+	// The ID of the node.
+	ClusterId string `json:"clusterId"`
+
+	// Add node operation ID.
+	OperationId string `json:"operationId"`
+}
+
+// TriggerResumeClusterResponse is the result of ResumeClusterRequest.
+type ExternalclusterV1TriggerResumeClusterResponse struct {
+	// The ID of the node.
+	ClusterId string `json:"clusterId"`
+
+	// Add node operation ID.
+	OperationId string `json:"operationId"`
+}
+
 // UpdateClusterTagsResponse result of cluster tags update.
 type ExternalclusterV1UpdateClusterTagsResponse = map[string]interface{}
 
@@ -2252,6 +2285,9 @@ type NodeconfigV1EKSConfig struct {
 	// AWS key pair ID to be used for provisioned nodes. Has priority over sshPublicKey.
 	KeyPairId             *string `json:"keyPairId"`
 	MaxPodsPerNodeFormula *string `json:"maxPodsPerNodeFormula"`
+
+	// Is used to create temporary cloud native pools.
+	NodeGroupArn *string `json:"nodeGroupArn"`
 
 	// Cluster's security groups configuration.
 	SecurityGroups *[]string                `json:"securityGroups,omitempty"`
@@ -3363,8 +3399,10 @@ type WorkloadoptimizationV1Event struct {
 	RecommendationApplied      *WorkloadoptimizationV1RecommendationAppliedEvent      `json:"recommendationApplied,omitempty"`
 	RecommendedPodCountChanged *WorkloadoptimizationV1RecommendedPodCountChangedEvent `json:"recommendedPodCountChanged,omitempty"`
 	RecommendedRequestsChanged *WorkloadoptimizationV1RecommendedRequestsChangedEvent `json:"recommendedRequestsChanged,omitempty"`
+	ScalingPolicyAssigned      *WorkloadoptimizationV1ScalingPolicyAssigned           `json:"scalingPolicyAssigned,omitempty"`
 	ScalingPolicyCreated       *WorkloadoptimizationV1ScalingPolicyCreated            `json:"scalingPolicyCreated,omitempty"`
 	ScalingPolicyDeleted       *WorkloadoptimizationV1ScalingPolicyDeleted            `json:"scalingPolicyDeleted,omitempty"`
+	ScalingPolicyUpdated       *WorkloadoptimizationV1ScalingPolicyUpdated            `json:"scalingPolicyUpdated,omitempty"`
 	Surge                      *WorkloadoptimizationV1SurgeEvent                      `json:"surge,omitempty"`
 }
 
@@ -3702,6 +3740,11 @@ type WorkloadoptimizationV1Resources struct {
 	Requests *WorkloadoptimizationV1ResourceQuantity `json:"requests,omitempty"`
 }
 
+// WorkloadoptimizationV1ScalingPolicyAssigned defines model for workloadoptimization.v1.ScalingPolicyAssigned.
+type WorkloadoptimizationV1ScalingPolicyAssigned struct {
+	Policy WorkloadoptimizationV1WorkloadScalingPolicy `json:"policy"`
+}
+
 // WorkloadoptimizationV1ScalingPolicyConfig defines model for workloadoptimization.v1.ScalingPolicyConfig.
 type WorkloadoptimizationV1ScalingPolicyConfig struct {
 	Id   string `json:"id"`
@@ -3716,6 +3759,12 @@ type WorkloadoptimizationV1ScalingPolicyCreated struct {
 // WorkloadoptimizationV1ScalingPolicyDeleted defines model for workloadoptimization.v1.ScalingPolicyDeleted.
 type WorkloadoptimizationV1ScalingPolicyDeleted struct {
 	Policy WorkloadoptimizationV1WorkloadScalingPolicy `json:"policy"`
+}
+
+// WorkloadoptimizationV1ScalingPolicyUpdated defines model for workloadoptimization.v1.ScalingPolicyUpdated.
+type WorkloadoptimizationV1ScalingPolicyUpdated struct {
+	Current  WorkloadoptimizationV1WorkloadScalingPolicy `json:"current"`
+	Previous WorkloadoptimizationV1WorkloadScalingPolicy `json:"previous"`
 }
 
 // WorkloadoptimizationV1StartupSettings defines model for workloadoptimization.v1.StartupSettings.
@@ -3903,8 +3952,9 @@ type WorkloadoptimizationV1WorkloadEvent struct {
 	OrganizationId string                             `json:"organizationId"`
 
 	// EventType defines possible types for workload events.
-	Type     WorkloadoptimizationV1EventType              `json:"type"`
-	Workload *WorkloadoptimizationV1WorkloadEventWorkload `json:"workload,omitempty"`
+	Type      WorkloadoptimizationV1EventType                `json:"type"`
+	Workload  *WorkloadoptimizationV1WorkloadEventWorkload   `json:"workload,omitempty"`
+	Workloads *[]WorkloadoptimizationV1WorkloadEventWorkload `json:"workloads,omitempty"`
 }
 
 // WorkloadoptimizationV1WorkloadEventWorkload defines model for workloadoptimization.v1.WorkloadEvent.Workload.
@@ -3978,9 +4028,6 @@ type WorkloadoptimizationV1WorkloadScalingPolicy struct {
 type AuthTokenAPIListAuthTokensParams struct {
 	// User id to filter by, if this is set we will only return tokens that have this user id.
 	UserId *string `form:"userId,omitempty" json:"userId,omitempty"`
-
-	// Service account id to filter by, if this is set we will only return tokens that have this service account id ignoring users_id.
-	ServiceAccountId *string `form:"serviceAccountId,omitempty" json:"serviceAccountId,omitempty"`
 }
 
 // AuthTokenAPICreateAuthTokenJSONBody defines parameters for AuthTokenAPICreateAuthToken.
@@ -3988,6 +4035,16 @@ type AuthTokenAPICreateAuthTokenJSONBody = CastaiAuthtokenV1beta1AuthToken
 
 // AuthTokenAPIUpdateAuthTokenJSONBody defines parameters for AuthTokenAPIUpdateAuthToken.
 type AuthTokenAPIUpdateAuthTokenJSONBody = CastaiAuthtokenV1beta1AuthTokenUpdate
+
+// InventoryAPIListInstanceTypeNamesParams defines parameters for InventoryAPIListInstanceTypeNames.
+type InventoryAPIListInstanceTypeNamesParams struct {
+	CloudServiceProviders *[]string `form:"cloudServiceProviders,omitempty" json:"cloudServiceProviders,omitempty"`
+	PageLimit             *string   `form:"page.limit,omitempty" json:"page.limit,omitempty"`
+
+	// Cursor that defines token indicating where to start the next page.
+	// Empty value indicates to start from beginning of the dataset.
+	PageCursor *string `form:"page.cursor,omitempty" json:"page.cursor,omitempty"`
+}
 
 // UsersAPIListInvitationsParams defines parameters for UsersAPIListInvitations.
 type UsersAPIListInvitationsParams struct {
@@ -4121,6 +4178,9 @@ type ExternalClusterAPIDeleteNodeParams struct {
 
 // ExternalClusterAPIDrainNodeJSONBody defines parameters for ExternalClusterAPIDrainNode.
 type ExternalClusterAPIDrainNodeJSONBody = ExternalclusterV1DrainConfig
+
+// ExternalClusterAPITriggerResumeClusterJSONBody defines parameters for ExternalClusterAPITriggerResumeCluster.
+type ExternalClusterAPITriggerResumeClusterJSONBody = ExternalclusterV1NodeConfig
 
 // ExternalClusterAPIUpdateClusterTagsJSONBody defines parameters for ExternalClusterAPIUpdateClusterTags.
 type ExternalClusterAPIUpdateClusterTagsJSONBody struct {
@@ -4376,6 +4436,9 @@ type ExternalClusterAPIAddNodeJSONRequestBody = ExternalClusterAPIAddNodeJSONBod
 
 // ExternalClusterAPIDrainNodeJSONRequestBody defines body for ExternalClusterAPIDrainNode for application/json ContentType.
 type ExternalClusterAPIDrainNodeJSONRequestBody = ExternalClusterAPIDrainNodeJSONBody
+
+// ExternalClusterAPITriggerResumeClusterJSONRequestBody defines body for ExternalClusterAPITriggerResumeCluster for application/json ContentType.
+type ExternalClusterAPITriggerResumeClusterJSONRequestBody = ExternalClusterAPITriggerResumeClusterJSONBody
 
 // ExternalClusterAPIUpdateClusterTagsJSONRequestBody defines body for ExternalClusterAPIUpdateClusterTags for application/json ContentType.
 type ExternalClusterAPIUpdateClusterTagsJSONRequestBody ExternalClusterAPIUpdateClusterTagsJSONBody
