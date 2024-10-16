@@ -48,6 +48,7 @@ const (
 	eksImageFamilyAL2023       = "al2023"
 	eksImageFamilyBottlerocket = "bottlerocket"
 )
+
 const (
 	aksImageFamilyUbuntu     = "ubuntu"
 	aksImageFamilyAzureLinux = "azure-linux"
@@ -285,6 +286,12 @@ func resourceNodeConfiguration() *schema.Resource {
 									},
 								},
 							},
+						},
+						"node_group_arn": {
+							Type:             schema.TypeString,
+							Optional:         true,
+							Description:      "Cluster's node group ARN used for CAST provisioned node pools",
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 						},
 					},
 				},
@@ -706,6 +713,9 @@ func toEKSConfig(obj map[string]interface{}) *sdk.NodeconfigV1EKSConfig {
 	if v, ok := obj["instance_profile_arn"].(string); ok {
 		out.InstanceProfileArn = v
 	}
+	if v, ok := obj["node_group_arn"].(string); ok && v != "" {
+		out.NodeGroupArn = toPtr(v)
+	}
 	if v, ok := obj["key_pair_id"].(string); ok && v != "" {
 		out.KeyPairId = toPtr(v)
 	}
@@ -791,6 +801,9 @@ func flattenEKSConfig(config *sdk.NodeconfigV1EKSConfig) []map[string]interface{
 	}
 	if v := config.KeyPairId; v != nil {
 		m["key_pair_id"] = toString(v)
+	}
+	if v := config.NodeGroupArn; v != nil {
+		m["node_group_arn"] = toString(v)
 	}
 	if v := config.DnsClusterIp; v != nil {
 		m["dns_cluster_ip"] = toString(v)
@@ -1076,6 +1089,7 @@ func fromAKSImageFamily(family sdk.NodeconfigV1AKSConfigImageFamily) string {
 		return ""
 	}
 }
+
 func toGKEConfig(obj map[string]interface{}) *sdk.NodeconfigV1GKEConfig {
 	if obj == nil {
 		return nil

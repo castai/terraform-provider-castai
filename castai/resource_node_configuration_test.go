@@ -137,6 +137,120 @@ func Test_resourceNodeConfigurationCreate(t *testing.T) {
 				},
 			},
 		},
+		{
+			name: "success with node group arn",
+			args: args{
+				dataSet: map[string]interface{}{
+					"eks": []map[string]interface{}{
+						{
+							FieldNodeConfigurationEKSTargetGroup: []interface{}{
+								map[string]interface{}{
+									"arn": "test",
+								},
+								map[string]interface{}{
+									"arn":  "test2",
+									"port": 80,
+								},
+							},
+							"node_group_arn": "node_group_arn",
+						},
+					},
+				},
+				tuneMock: func(m *mock_sdk.MockClientInterface) {
+					m.EXPECT().NodeConfigurationAPICreateConfiguration(gomock.Any(), gomock.Any(), sdk.NodeconfigV1NewNodeConfiguration{
+						Eks: &sdk.NodeconfigV1EKSConfig{
+							TargetGroups: &[]sdk.NodeconfigV1TargetGroup{
+								{
+									Arn:  toPtr("test"),
+									Port: nil,
+								},
+								{
+									Arn:  toPtr("test2"),
+									Port: toPtr(int32(80)),
+								},
+							},
+							NodeGroupArn: toPtr("node_group_arn"),
+							ImdsHopLimit: toPtr(int32(0)),
+							ImdsV1:       toPtr(false),
+						},
+						DiskCpuRatio:    toPtr(int32(0)),
+						DrainTimeoutSec: toPtr(int32(0)),
+						MinDiskSize:     toPtr(int32(0)),
+					}).
+						Return(
+							&http.Response{
+								StatusCode: 200,
+								Header:     map[string][]string{"Content-Type": {"json"}},
+								Body:       io.NopCloser(bytes.NewReader([]byte(`{"id": "id-1"}`))),
+							}, nil)
+					m.EXPECT().NodeConfigurationAPIGetConfiguration(gomock.Any(), gomock.Any(), gomock.Any()).
+						Return(
+							&http.Response{
+								StatusCode: 200,
+								Header:     map[string][]string{"Content-Type": {"json"}},
+								Body: io.NopCloser(bytes.NewReader([]byte(`{
+  "id": "765fdc7b-2577-4ae8-a6b8-e3b60afbc33a",
+  "name": "test4",
+  "version": 1,
+  "createdAt": "2024-03-26T12:23:57.501529Z",
+  "updatedAt": "2024-03-26T12:23:57.503428Z",
+  "default": false,
+  "diskCpuRatio": 0,
+  "subnets": [
+    "subnet-0beea7ca69ceb165b"
+  ],
+  "tags": {
+    "k8s.io/cluster/valentyna-0326-1": "owned"
+  },
+  "eks": {
+    "securityGroups": [
+      "sg-04dffb0bec1821a92",
+      "sg-084e6537aff751bd6"
+    ],
+    "instanceProfileArn": "arn:aws:iam::028075177508:instance-profile/cast-valentyna-0326-1-eks-0626f5c2",
+    "imdsV1": true,
+    "imdsHopLimit": 2,
+    "targetGroup": {
+      "arn": "test"
+    },
+    "NodeGroupArn": "node_group_arn"
+  },
+  "subnetDetails": [
+    {
+      "id": "subnet-0ede99883f8d65813",
+      "cidr": "10.0.1.0/24",
+      "zone": {
+        "id": "euc1-az2",
+        "name": "eu-central-1a"
+      },
+      "tags": {}
+    },
+    {
+      "id": "subnet-0f7cb7d2702533af0",
+      "cidr": "10.0.2.0/24",
+      "zone": {
+        "id": "euc1-az3",
+        "name": "eu-central-1b"
+      },
+      "tags": {}
+    },
+    {
+      "id": "subnet-0beea7ca69ceb165b",
+      "cidr": "10.0.3.0/24",
+      "zone": {
+        "id": "euc1-az1",
+        "name": "eu-central-1c"
+      },
+      "tags": {}
+    }
+  ],
+  "minDiskSize": 100
+}
+`))),
+							}, nil)
+				},
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
