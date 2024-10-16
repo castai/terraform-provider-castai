@@ -213,7 +213,7 @@ func Test_resourceNodeConfigurationCreate(t *testing.T) {
     "targetGroup": {
       "arn": "test"
     },
-    "NodeGroupArn": "node_group_arn"
+    "nodeGroupArn": "node_group_arn"
   },
   "subnetDetails": [
     {
