@@ -179,6 +179,13 @@ func resourceNodeConfiguration() *schema.Resource {
 							},
 							Description: "Cluster's security groups configuration for CAST provisioned nodes",
 						},
+						"node_group_arn": {
+							Type:             schema.TypeString,
+							Optional:         true,
+							Description:      "Cluster's node group ARN used for CAST provisioned node pools. Required for hibernate/resume functionality",
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+						},
+
 						"dns_cluster_ip": {
 							Type:             schema.TypeString,
 							Optional:         true,
@@ -286,12 +293,6 @@ func resourceNodeConfiguration() *schema.Resource {
 									},
 								},
 							},
-						},
-						"node_group_arn": {
-							Type:             schema.TypeString,
-							Optional:         true,
-							Description:      "Cluster's node group ARN used for CAST provisioned node pools",
-							ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 						},
 					},
 				},
