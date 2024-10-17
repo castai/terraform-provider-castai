@@ -57,7 +57,7 @@ resource "castai_node_template" "example_spot_template" {
 
   custom_taints {
     key    = "dedicated"
-    value  = "backend"
+    value  = "spot"
     effect = "NoSchedule"
   }
 

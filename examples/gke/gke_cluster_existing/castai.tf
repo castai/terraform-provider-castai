@@ -46,11 +46,12 @@ module "castai-gke-cluster" {
   }
   node_templates = {
     default_by_castai = {
-      name             = "default-by-castai"
-      configuration_id = module.castai-gke-cluster.castai_node_configurations["default"]
-      is_default       = true
-      is_enabled       = true
-      should_taint     = false
+      name                     = "default-by-castai"
+      configuration_id         = module.castai-gke-cluster.castai_node_configurations["default"]
+      is_default               = true
+      is_enabled               = true
+      should_taint             = false
+      custom_instances_enabled = true
 
       constraints = {
         on_demand = true
@@ -58,9 +59,10 @@ module "castai-gke-cluster" {
     }
 
     example_spot_template = {
-      configuration_id = module.castai-gke-cluster.castai_node_configurations["default"]
-      is_enabled       = true
-      should_taint     = true
+      configuration_id         = module.castai-gke-cluster.castai_node_configurations["default"]
+      is_enabled               = true
+      should_taint             = true
+      custom_instances_enabled = true
 
       custom_labels = {
         custom-label-key-1 = "custom-label-value-1"
@@ -92,7 +94,6 @@ module "castai-gke-cluster" {
           instance_families = ["c5"]
           spot              = true
         }
-        custom_instances_enabled = true
       }
     }
   }
