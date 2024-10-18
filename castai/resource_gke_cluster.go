@@ -28,7 +28,7 @@ func resourceGKECluster() *schema.Resource {
 		CreateContext: resourceCastaiGKEClusterCreate,
 		ReadContext:   resourceCastaiGKEClusterRead,
 		UpdateContext: resourceCastaiGKEClusterUpdate,
-		DeleteContext: resourceCastaiClusterDelete,
+		DeleteContext: resourceCastaiGKEClusterDelete,
 		CustomizeDiff: clusterTokenDiff,
 		Description:   "GKE cluster resource allows connecting an existing GKE cluster to CAST AI.",
 
@@ -214,4 +214,15 @@ func updateGKEClusterSettings(ctx context.Context, data *schema.ResourceData, cl
 	}
 
 	return nil
+}
+
+func resourceCastaiGKEClusterDelete(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	// Disable service account used for impersonation.
+	client := meta.(*ProviderConfig).api
+	log.Printf("[INFO] Disabling service account.")
+	_, err := client.ExternalClusterAPIDisableGKESA(ctx, data.Id())
+	if err != nil {
+		log.Printf("[ERROR] Failed to disable service account: %v", err)
+	}
+	return resourceCastaiClusterDelete(ctx, data, meta)
 }
