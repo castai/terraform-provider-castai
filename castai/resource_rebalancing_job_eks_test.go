@@ -1,11 +1,14 @@
 package castai
 
 import (
+	"context"
 	"fmt"
+	"testing"
+	"time"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"testing"
 )
 
 func TestAccResourceRebalancingJob_eks(t *testing.T) {
@@ -80,4 +83,114 @@ func makeInitialRebalancingJobConfig(rName, clusterName string) string {
 
 func makeUpdatedRebalancingJobConfig(rName, clusterName string) string {
 	return ConfigCompose(testAccEKSClusterConfig(rName, clusterName), makeRebalancingJobConfig(rName, "enabled=false"))
+}
+
+func TestAccResourceRebalancingJobWithDataSource_eks(t *testing.T) {
+	rName := fmt.Sprintf("%v-rebalancing-job-with-data-source-%v", ResourcePrefix, acctest.RandString(8))
+	clusterName := "core-tf-acc"
+	resource.Test(t, resource.TestCase{
+		PreCheck: func() { testAccPreCheck(t) },
+
+		ProviderFactories: providerFactories,
+		Steps: []resource.TestStep{
+			{
+				Config: makeRebalancingScheduleConfig(rName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("castai_rebalancing_schedule.test-with-data-source", "name", rName),
+				),
+			},
+			{
+				PreConfig: func() { waitForRebalancingSchedule(t, rName) },
+				Config:    makeInitialRebalancingJobWithDataSourceConfig(rName, clusterName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("data.castai_rebalancing_schedule.data-source-for-rebalancing-schedule", "name", rName),
+				),
+			},
+		},
+		ExternalProviders: map[string]resource.ExternalProvider{
+			"aws": {
+				Source:            "hashicorp/aws",
+				VersionConstraint: "~> 4.0",
+			},
+		},
+	})
+}
+
+func waitForRebalancingSchedule(t *testing.T, rebalancingScheduleName string) {
+	client := testAccProvider.Meta().(*ProviderConfig).api
+	ctx := context.Background()
+	timeout := 120 * time.Second // Total wait time
+	interval := 5 * time.Second  // Wait time between checks
+	startTime := time.Now()
+
+	for {
+		if time.Since(startTime) > timeout {
+			fmt.Println("Rebalancing schedule was not found, name: ", rebalancingScheduleName)
+			t.Error("Rebalancing schedule was not found, name: ", rebalancingScheduleName)
+			return
+		}
+
+		_, err := getRebalancingScheduleByName(ctx, client, rebalancingScheduleName)
+		if err == nil {
+			fmt.Println("Rebalancing schedule found, name: ", rebalancingScheduleName)
+			t.Log("Rebalancing schedule found, name: ", rebalancingScheduleName)
+			return
+		}
+		time.Sleep(interval)
+	}
+}
+
+func makeRebalancingScheduleConfig(rName string) string {
+	template := `
+resource "castai_rebalancing_schedule" "test-with-data-source" {
+	name = %[1]q
+	schedule {
+		cron = "5 4 * * *"
+	}
+	trigger_conditions {
+		savings_percentage = 15.25
+	}
+	launch_configuration {
+		execution_conditions {
+			enabled = false
+			achieved_savings_percentage = 0
+		}
+	}
+}
+`
+	return fmt.Sprintf(template, rName)
+}
+
+func makeRebalancingJobWithDataSourceConfig(rName string) string {
+	template := `
+resource "castai_rebalancing_schedule" "test-with-data-source" {
+	name = %[1]q
+	schedule {
+		cron = "5 4 * * *"
+	}
+	trigger_conditions {
+		savings_percentage = 15.25
+	}
+	launch_configuration {
+		execution_conditions {
+			enabled = false
+			achieved_savings_percentage = 0
+		}
+	}
+}
+
+data "castai_rebalancing_schedule" "data-source-for-rebalancing-schedule" {
+  name = %[1]q
+}
+
+resource "castai_rebalancing_job" "test-with-data-source" {
+	cluster_id = castai_eks_cluster.test.id
+	rebalancing_schedule_id = data.castai_rebalancing_schedule.data-source-for-rebalancing-schedule.id
+}
+`
+	return fmt.Sprintf(template, rName)
+}
+
+func makeInitialRebalancingJobWithDataSourceConfig(rName, clusterName string) string {
+	return ConfigCompose(testAccEKSClusterConfig(rName, clusterName), makeRebalancingJobWithDataSourceConfig(rName))
 }

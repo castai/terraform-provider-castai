@@ -1,0 +1,12 @@
+gke_cluster_location = ""
+gke_cluster_name = ""
+gke_subnets = []
+gke_project_id = ""
+# service_accounts_unique_ids = []
+
+castai_api_token = ""
+# castai_api_url = ""
+
+kube_config_context = ""
+
+org_workspace = ""

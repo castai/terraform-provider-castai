@@ -283,6 +283,7 @@ const (
 // Defines values for WorkloadoptimizationV1EventType.
 const (
 	EVENTTYPECONFIGURATIONCHANGEDV2     WorkloadoptimizationV1EventType = "EVENT_TYPE_CONFIGURATION_CHANGEDV2"
+	EVENTTYPEFAILEDHELMTESTHOOK         WorkloadoptimizationV1EventType = "EVENT_TYPE_FAILED_HELM_TEST_HOOK"
 	EVENTTYPEINVALID                    WorkloadoptimizationV1EventType = "EVENT_TYPE_INVALID"
 	EVENTTYPEOOMKILL                    WorkloadoptimizationV1EventType = "EVENT_TYPE_OOM_KILL"
 	EVENTTYPERECOMMENDEDPODCOUNTCHANGED WorkloadoptimizationV1EventType = "EVENT_TYPE_RECOMMENDED_POD_COUNT_CHANGED"
@@ -1543,6 +1544,9 @@ type ExternalclusterV1AKSClusterParams struct {
 
 	// Azure subscription ID where cluster runs.
 	SubscriptionId *string `json:"subscriptionId,omitempty"`
+
+	// Azure tenant id.
+	TenantId *string `json:"tenantId,omitempty"`
 
 	// Zone name pattern in the cluster.
 	ZoneNamePattern *string `json:"zoneNamePattern,omitempty"`
@@ -3386,6 +3390,7 @@ type WorkloadoptimizationV1DownscalingSettings struct {
 // WorkloadoptimizationV1Event defines model for workloadoptimization.v1.Event.
 type WorkloadoptimizationV1Event struct {
 	ConfigurationChangedV2     *WorkloadoptimizationV1ConfigurationChangedEventV2     `json:"configurationChangedV2,omitempty"`
+	FailedHook                 *WorkloadoptimizationV1FailedHookEvent                 `json:"failedHook,omitempty"`
 	OomKill                    *WorkloadoptimizationV1OOMKillEvent                    `json:"oomKill,omitempty"`
 	RecommendedPodCountChanged *WorkloadoptimizationV1RecommendedPodCountChangedEvent `json:"recommendedPodCountChanged,omitempty"`
 	RecommendedRequestsChanged *WorkloadoptimizationV1RecommendedRequestsChangedEvent `json:"recommendedRequestsChanged,omitempty"`
@@ -3404,6 +3409,12 @@ type WorkloadoptimizationV1EventContainer struct {
 
 // EventType defines possible types for workload events.
 type WorkloadoptimizationV1EventType string
+
+// WorkloadoptimizationV1FailedHookEvent defines model for workloadoptimization.v1.FailedHookEvent.
+type WorkloadoptimizationV1FailedHookEvent struct {
+	Message string    `json:"message"`
+	Time    time.Time `json:"time"`
+}
 
 // WorkloadoptimizationV1GetAgentStatusResponse defines model for workloadoptimization.v1.GetAgentStatusResponse.
 type WorkloadoptimizationV1GetAgentStatusResponse struct {
@@ -4156,6 +4167,12 @@ type ExternalClusterAPIDeleteNodeParams struct {
 
 // ExternalClusterAPIDrainNodeJSONBody defines parameters for ExternalClusterAPIDrainNode.
 type ExternalClusterAPIDrainNodeJSONBody = ExternalclusterV1DrainConfig
+
+// ExternalClusterAPIReconcileClusterParams defines parameters for ExternalClusterAPIReconcileCluster.
+type ExternalClusterAPIReconcileClusterParams struct {
+	// Whether to skip AKS refresh of instance-template.
+	SkipAksInitData *bool `form:"skipAksInitData,omitempty" json:"skipAksInitData,omitempty"`
+}
 
 // ExternalClusterAPITriggerResumeClusterJSONBody defines parameters for ExternalClusterAPITriggerResumeCluster.
 type ExternalClusterAPITriggerResumeClusterJSONBody = ExternalclusterV1NodeConfig
