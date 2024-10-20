@@ -56,9 +56,10 @@ func Provider(version string) *schema.Provider {
 		},
 
 		DataSourcesMap: map[string]*schema.Resource{
-			"castai_eks_settings":      dataSourceEKSSettings(),
-			"castai_gke_user_policies": dataSourceGKEPolicies(),
-			"castai_organization":      dataSourceOrganization(),
+			"castai_eks_settings":         dataSourceEKSSettings(),
+			"castai_gke_user_policies":    dataSourceGKEPolicies(),
+			"castai_organization":         dataSourceOrganization(),
+			"castai_rebalancing_schedule": dataSourceRebalancingSchedule(),
 
 			// TODO: remove in next major release
 			"castai_eks_user_arn": dataSourceEKSClusterUserARN(),
