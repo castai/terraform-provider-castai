@@ -21,7 +21,7 @@ module "gke" {
       name               = "default-node-pool"
       machine_type       = "e2-standard-2"
       min_count          = 0
-      max_count          = 1
+      max_count          = 10
       local_ssd_count    = 0
       disk_size_gb       = 100
       disk_type          = "pd-standard"
@@ -29,7 +29,7 @@ module "gke" {
       auto_repair        = true
       auto_upgrade       = true
       preemptible        = false
-      initial_node_count = 1 # has to be >=2 to successfully deploy CAST AI controller
+      initial_node_count = 2 # has to be >=2 to successfully deploy CAST AI controller
     },
   ]
 }
