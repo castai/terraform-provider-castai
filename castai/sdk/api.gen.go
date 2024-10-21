@@ -4100,6 +4100,9 @@ type ExternalClusterAPIGetCredentialsScriptParams struct {
 
 	// Whether CAST AI AI-Optimizer Proxy should be installed.
 	InstallAiOptimizerProxy *bool `form:"installAiOptimizerProxy,omitempty" json:"installAiOptimizerProxy,omitempty"`
+
+	// Whether GCP SA Impersonate feature should be enabled.
+	GcpSaImpersonate *bool `form:"gcpSaImpersonate,omitempty" json:"gcpSaImpersonate,omitempty"`
 }
 
 // ExternalClusterAPIDisconnectClusterJSONBody defines parameters for ExternalClusterAPIDisconnectCluster.
