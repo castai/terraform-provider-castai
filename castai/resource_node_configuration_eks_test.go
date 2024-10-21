@@ -130,21 +130,21 @@ resource "castai_node_configuration" "test" {
     env = "development"
   }
   eks {
-	instance_profile_arn = aws_iam_instance_profile.test.arn
-  node_group_arn = arn:aws:iam::000000000000:role/aws_node_group
+	  instance_profile_arn = aws_iam_instance_profile.test.arn
+    node_group_arn = "arn:aws:iam::000000000000:role/aws_node_group"
     dns_cluster_ip       = "10.100.0.10"
-	security_groups      = [aws_security_group.test.id]
-	volume_type 		 = "gp3"
+	  security_groups      = [aws_security_group.test.id]
+	  volume_type 		 = "gp3"
     volume_iops		     = 3100
-	volume_throughput 	 = 131
+	  volume_throughput 	 = 131
     volume_kms_key_arn   = "arn:aws:kms:eu-central-1:012345:key/1d989ee1-59cd-4238-8018-79bae29d1109"
-	imds_v1				 = true
-	imds_hop_limit       = 3
+	  imds_v1				 = true
+	  imds_hop_limit       = 3
     max_pods_per_node_formula = "NUM_IP_PER_PREFIX-NUM_MAX_NET_INTERFACES"
-	ips_per_prefix = 4
-	eks_image_family = "al2023"
-	target_group 	     {
-	   arn = "arn:aws:test"
+	  ips_per_prefix = 4
+	  eks_image_family = "al2023"
+	  target_group {
+	    arn = "arn:aws:test"
     }
   }
 }
