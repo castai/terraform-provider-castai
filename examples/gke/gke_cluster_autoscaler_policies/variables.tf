@@ -12,6 +12,7 @@ variable "cluster_region" {
 variable "cluster_zones" {
   type        = list(string)
   description = "The zones to create the cluster."
+  default     = []
 }
 
 variable "project_id" {
