@@ -165,7 +165,8 @@ func resourceOrganizationMembersRead(ctx context.Context, data *schema.ResourceD
 		invitationsResp, err := client.UsersAPIListInvitationsWithResponse(ctx, &sdk.UsersAPIListInvitationsParams{
 			PageCursor: &nextCursor,
 		})
-		if err := sdk.CheckOKResponse(usersResp, err); err != nil {
+
+		if err := sdk.CheckOKResponse(invitationsResp, err); err != nil {
 			return diag.FromErr(fmt.Errorf("retrieving pending invitations: %w", err))
 		}
 
