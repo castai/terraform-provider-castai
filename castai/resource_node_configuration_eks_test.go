@@ -55,6 +55,7 @@ func TestAccResourceNodeConfiguration_eks(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "aks.#", "0"),
 					resource.TestCheckResourceAttr(resourceName, "kops.#", "0"),
 					resource.TestCheckResourceAttr(resourceName, "gke.#", "0"),
+          resource.TestCheckResourceAttr(resourceName, "eks.0.node_group_arn", "arn:aws:iam::000000000000:role/aws_node_group"),
 				),
 			},
 			{
@@ -130,6 +131,7 @@ resource "castai_node_configuration" "test" {
   }
   eks {
 	instance_profile_arn = aws_iam_instance_profile.test.arn
+  node_group_arn = arn:aws:iam::000000000000:role/aws_node_group
     dns_cluster_ip       = "10.100.0.10"
 	security_groups      = [aws_security_group.test.id]
 	volume_type 		 = "gp3"
