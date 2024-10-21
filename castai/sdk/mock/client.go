@@ -755,6 +755,26 @@ func (mr *MockClientInterfaceMockRecorder) ExternalClusterAPIDeleteNode(ctx, clu
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIDeleteNode", reflect.TypeOf((*MockClientInterface)(nil).ExternalClusterAPIDeleteNode), varargs...)
 }
 
+// ExternalClusterAPIDisableGKESA mocks base method.
+func (m *MockClientInterface) ExternalClusterAPIDisableGKESA(ctx context.Context, clusterId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ExternalClusterAPIDisableGKESA", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExternalClusterAPIDisableGKESA indicates an expected call of ExternalClusterAPIDisableGKESA.
+func (mr *MockClientInterfaceMockRecorder) ExternalClusterAPIDisableGKESA(ctx, clusterId interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIDisableGKESA", reflect.TypeOf((*MockClientInterface)(nil).ExternalClusterAPIDisableGKESA), varargs...)
+}
+
 // ExternalClusterAPIDisconnectCluster mocks base method.
 func (m *MockClientInterface) ExternalClusterAPIDisconnectCluster(ctx context.Context, clusterId string, body sdk.ExternalClusterAPIDisconnectClusterJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
@@ -3966,6 +3986,21 @@ func (m *MockClientWithResponsesInterface) ExternalClusterAPIDeleteNodeWithRespo
 func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIDeleteNodeWithResponse(ctx, clusterId, nodeId, params interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIDeleteNodeWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIDeleteNodeWithResponse), ctx, clusterId, nodeId, params)
+}
+
+// ExternalClusterAPIDisableGKESAWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) ExternalClusterAPIDisableGKESAWithResponse(ctx context.Context, clusterId string) (*sdk.ExternalClusterAPIDisableGKESAResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ExternalClusterAPIDisableGKESAWithResponse", ctx, clusterId)
+	ret0, _ := ret[0].(*sdk.ExternalClusterAPIDisableGKESAResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExternalClusterAPIDisableGKESAWithResponse indicates an expected call of ExternalClusterAPIDisableGKESAWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIDisableGKESAWithResponse(ctx, clusterId interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIDisableGKESAWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIDisableGKESAWithResponse), ctx, clusterId)
 }
 
 // ExternalClusterAPIDisconnectClusterWithBodyWithResponse mocks base method.

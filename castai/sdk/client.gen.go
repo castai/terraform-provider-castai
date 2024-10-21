@@ -278,6 +278,9 @@ type ClientInterface interface {
 
 	ExternalClusterAPIGKECreateSA(ctx context.Context, clusterId string, body ExternalClusterAPIGKECreateSAJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// ExternalClusterAPIDisableGKESA request
+	ExternalClusterAPIDisableGKESA(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// ExternalClusterAPITriggerHibernateCluster request
 	ExternalClusterAPITriggerHibernateCluster(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -1370,6 +1373,18 @@ func (c *Client) ExternalClusterAPIGKECreateSAWithBody(ctx context.Context, clus
 
 func (c *Client) ExternalClusterAPIGKECreateSA(ctx context.Context, clusterId string, body ExternalClusterAPIGKECreateSAJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewExternalClusterAPIGKECreateSARequest(c.Server, clusterId, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) ExternalClusterAPIDisableGKESA(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewExternalClusterAPIDisableGKESARequest(c.Server, clusterId)
 	if err != nil {
 		return nil, err
 	}
@@ -4603,6 +4618,22 @@ func NewExternalClusterAPIGetCredentialsScriptRequest(server string, clusterId s
 
 	}
 
+	if params.InstallAiOptimizerProxy != nil {
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "installAiOptimizerProxy", runtime.ParamLocationQuery, *params.InstallAiOptimizerProxy); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
 	queryURL.RawQuery = queryValues.Encode()
 
 	req, err := http.NewRequest("GET", queryURL.String(), nil)
@@ -4750,6 +4781,40 @@ func NewExternalClusterAPIGKECreateSARequestWithBody(server string, clusterId st
 	}
 
 	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewExternalClusterAPIDisableGKESARequest generates requests for ExternalClusterAPIDisableGKESA
+func NewExternalClusterAPIDisableGKESARequest(server string, clusterId string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "clusterId", runtime.ParamLocationPath, clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/kubernetes/external-clusters/%s/gke-disable-sa", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
 
 	return req, nil
 }
@@ -8592,6 +8657,9 @@ type ClientWithResponsesInterface interface {
 
 	ExternalClusterAPIGKECreateSAWithResponse(ctx context.Context, clusterId string, body ExternalClusterAPIGKECreateSAJSONRequestBody) (*ExternalClusterAPIGKECreateSAResponse, error)
 
+	// ExternalClusterAPIDisableGKESA request
+	ExternalClusterAPIDisableGKESAWithResponse(ctx context.Context, clusterId string) (*ExternalClusterAPIDisableGKESAResponse, error)
+
 	// ExternalClusterAPITriggerHibernateCluster request
 	ExternalClusterAPITriggerHibernateClusterWithResponse(ctx context.Context, clusterId string) (*ExternalClusterAPITriggerHibernateClusterResponse, error)
 
@@ -10369,6 +10437,36 @@ func (r ExternalClusterAPIGKECreateSAResponse) StatusCode() int {
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
 func (r ExternalClusterAPIGKECreateSAResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type ExternalClusterAPIDisableGKESAResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *ExternalclusterV1DisableGKESAResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r ExternalClusterAPIDisableGKESAResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r ExternalClusterAPIDisableGKESAResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r ExternalClusterAPIDisableGKESAResponse) GetBody() []byte {
 	return r.Body
 }
 
@@ -13222,6 +13320,15 @@ func (c *ClientWithResponses) ExternalClusterAPIGKECreateSAWithResponse(ctx cont
 	return ParseExternalClusterAPIGKECreateSAResponse(rsp)
 }
 
+// ExternalClusterAPIDisableGKESAWithResponse request returning *ExternalClusterAPIDisableGKESAResponse
+func (c *ClientWithResponses) ExternalClusterAPIDisableGKESAWithResponse(ctx context.Context, clusterId string) (*ExternalClusterAPIDisableGKESAResponse, error) {
+	rsp, err := c.ExternalClusterAPIDisableGKESA(ctx, clusterId)
+	if err != nil {
+		return nil, err
+	}
+	return ParseExternalClusterAPIDisableGKESAResponse(rsp)
+}
+
 // ExternalClusterAPITriggerHibernateClusterWithResponse request returning *ExternalClusterAPITriggerHibernateClusterResponse
 func (c *ClientWithResponses) ExternalClusterAPITriggerHibernateClusterWithResponse(ctx context.Context, clusterId string) (*ExternalClusterAPITriggerHibernateClusterResponse, error) {
 	rsp, err := c.ExternalClusterAPITriggerHibernateCluster(ctx, clusterId)
@@ -15369,6 +15476,32 @@ func ParseExternalClusterAPIGKECreateSAResponse(rsp *http.Response) (*ExternalCl
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest ExternalclusterV1GKECreateSAResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseExternalClusterAPIDisableGKESAResponse parses an HTTP response from a ExternalClusterAPIDisableGKESAWithResponse call
+func ParseExternalClusterAPIDisableGKESAResponse(rsp *http.Response) (*ExternalClusterAPIDisableGKESAResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &ExternalClusterAPIDisableGKESAResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ExternalclusterV1DisableGKESAResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}

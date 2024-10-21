@@ -282,11 +282,9 @@ const (
 
 // Defines values for WorkloadoptimizationV1EventType.
 const (
-	EVENTTYPECONFIGURATIONCHANGED       WorkloadoptimizationV1EventType = "EVENT_TYPE_CONFIGURATION_CHANGED"
 	EVENTTYPECONFIGURATIONCHANGEDV2     WorkloadoptimizationV1EventType = "EVENT_TYPE_CONFIGURATION_CHANGEDV2"
 	EVENTTYPEINVALID                    WorkloadoptimizationV1EventType = "EVENT_TYPE_INVALID"
 	EVENTTYPEOOMKILL                    WorkloadoptimizationV1EventType = "EVENT_TYPE_OOM_KILL"
-	EVENTTYPERECOMMENDATIONAPPLIED      WorkloadoptimizationV1EventType = "EVENT_TYPE_RECOMMENDATION_APPLIED"
 	EVENTTYPERECOMMENDEDPODCOUNTCHANGED WorkloadoptimizationV1EventType = "EVENT_TYPE_RECOMMENDED_POD_COUNT_CHANGED"
 	EVENTTYPERECOMMENDEDREQUESTSCHANGED WorkloadoptimizationV1EventType = "EVENT_TYPE_RECOMMENDED_REQUESTS_CHANGED"
 	EVENTTYPESCALINGPOLICYASSIGNED      WorkloadoptimizationV1EventType = "EVENT_TYPE_SCALING_POLICY_ASSIGNED"
@@ -1726,6 +1724,9 @@ type ExternalclusterV1DeleteNodeResponse struct {
 	// Node delete operation ID.
 	OperationId *string `json:"operationId,omitempty"`
 }
+
+// ExternalclusterV1DisableGKESAResponse defines model for externalcluster.v1.DisableGKESAResponse.
+type ExternalclusterV1DisableGKESAResponse = map[string]interface{}
 
 // ExternalclusterV1DisconnectConfig defines model for externalcluster.v1.DisconnectConfig.
 type ExternalclusterV1DisconnectConfig struct {
@@ -3333,15 +3334,6 @@ type WorkloadoptimizationV1ApplyType string
 // WorkloadoptimizationV1AssignScalingPolicyWorkloadsResponse defines model for workloadoptimization.v1.AssignScalingPolicyWorkloadsResponse.
 type WorkloadoptimizationV1AssignScalingPolicyWorkloadsResponse = map[string]interface{}
 
-// WorkloadoptimizationV1ConfigurationChangedEvent defines model for workloadoptimization.v1.ConfigurationChangedEvent.
-type WorkloadoptimizationV1ConfigurationChangedEvent struct {
-	// Defines possible options for workload management.
-	// READ_ONLY - workload watched (metrics collected), but no actions may be performed by CAST AI.
-	// MANAGED - workload watched (metrics collected), CAST AI may perform actions on the workload.
-	ManagementOption     WorkloadoptimizationV1ManagementOption     `json:"managementOption"`
-	RecommendationConfig WorkloadoptimizationV1RecommendationConfig `json:"recommendationConfig"`
-}
-
 // WorkloadoptimizationV1ConfigurationChangedEventV2 defines model for workloadoptimization.v1.ConfigurationChangedEventV2.
 type WorkloadoptimizationV1ConfigurationChangedEventV2 struct {
 	Current  WorkloadoptimizationV1ConfigurationChangedV2 `json:"current"`
@@ -3393,10 +3385,8 @@ type WorkloadoptimizationV1DownscalingSettings struct {
 
 // WorkloadoptimizationV1Event defines model for workloadoptimization.v1.Event.
 type WorkloadoptimizationV1Event struct {
-	ConfigurationChanged       *WorkloadoptimizationV1ConfigurationChangedEvent       `json:"configurationChanged,omitempty"`
 	ConfigurationChangedV2     *WorkloadoptimizationV1ConfigurationChangedEventV2     `json:"configurationChangedV2,omitempty"`
 	OomKill                    *WorkloadoptimizationV1OOMKillEvent                    `json:"oomKill,omitempty"`
-	RecommendationApplied      *WorkloadoptimizationV1RecommendationAppliedEvent      `json:"recommendationApplied,omitempty"`
 	RecommendedPodCountChanged *WorkloadoptimizationV1RecommendedPodCountChangedEvent `json:"recommendedPodCountChanged,omitempty"`
 	RecommendedRequestsChanged *WorkloadoptimizationV1RecommendedRequestsChangedEvent `json:"recommendedRequestsChanged,omitempty"`
 	ScalingPolicyAssigned      *WorkloadoptimizationV1ScalingPolicyAssigned           `json:"scalingPolicyAssigned,omitempty"`
@@ -3572,24 +3562,6 @@ type WorkloadoptimizationV1PodMetrics struct {
 	PodCount    []WorkloadoptimizationV1TimeSeriesMetric `json:"podCount"`
 	PodCountMax float64                                  `json:"podCountMax"`
 	PodCountMin float64                                  `json:"podCountMin"`
-}
-
-// WorkloadoptimizationV1RecommendationAppliedEvent defines model for workloadoptimization.v1.RecommendationAppliedEvent.
-type WorkloadoptimizationV1RecommendationAppliedEvent struct {
-	ApplyType WorkloadoptimizationV1ApplyType                        `json:"applyType"`
-	Current   WorkloadoptimizationV1RecommendationAppliedEventChange `json:"current"`
-	Previous  WorkloadoptimizationV1RecommendationAppliedEventChange `json:"previous"`
-}
-
-// WorkloadoptimizationV1RecommendationAppliedEventChange defines model for workloadoptimization.v1.RecommendationAppliedEvent.Change.
-type WorkloadoptimizationV1RecommendationAppliedEventChange struct {
-	Containers *[]WorkloadoptimizationV1EventContainer `json:"containers,omitempty"`
-}
-
-// WorkloadoptimizationV1RecommendationConfig defines model for workloadoptimization.v1.RecommendationConfig.
-type WorkloadoptimizationV1RecommendationConfig struct {
-	Cpu    WorkloadoptimizationV1ResourceConfig `json:"cpu"`
-	Memory WorkloadoptimizationV1ResourceConfig `json:"memory"`
 }
 
 // WorkloadoptimizationV1RecommendationEvent defines model for workloadoptimization.v1.RecommendationEvent.
@@ -4116,15 +4088,18 @@ type ExternalClusterAPIGetCredentialsScriptParams struct {
 	// Whether NVIDIA device plugin DaemonSet should be installed during Phase 2 on-boarding.
 	NvidiaDevicePlugin *bool `form:"nvidiaDevicePlugin,omitempty" json:"nvidiaDevicePlugin,omitempty"`
 
-	// Whether CAST AI Security Insights agent should be installed
+	// Whether CAST AI Security Insights agent should be installed.
 	InstallSecurityAgent *bool `form:"installSecurityAgent,omitempty" json:"installSecurityAgent,omitempty"`
 
 	// Whether CAST AI Autoscaler components should be installed.
 	// To enable backwards compatibility, when the field is omitted, it is defaulted to true.
 	InstallAutoscalerAgent *bool `form:"installAutoscalerAgent,omitempty" json:"installAutoscalerAgent,omitempty"`
 
-	// Whether CAST AI GPU metrics exporter should be installed
+	// Whether CAST AI GPU metrics exporter should be installed.
 	InstallGpuMetricsExporter *bool `form:"installGpuMetricsExporter,omitempty" json:"installGpuMetricsExporter,omitempty"`
+
+	// Whether CAST AI AI-Optimizer Proxy should be installed.
+	InstallAiOptimizerProxy *bool `form:"installAiOptimizerProxy,omitempty" json:"installAiOptimizerProxy,omitempty"`
 }
 
 // ExternalClusterAPIDisconnectClusterJSONBody defines parameters for ExternalClusterAPIDisconnectCluster.
