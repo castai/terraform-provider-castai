@@ -103,7 +103,8 @@ module "castai-gke-cluster" {
     node_templates_partial_matching_enabled = false
 
     unschedulable_pods = {
-      enabled = false
+      enabled                  = false
+      custom_instances_enabled = true
     }
 
     node_downscaler = {

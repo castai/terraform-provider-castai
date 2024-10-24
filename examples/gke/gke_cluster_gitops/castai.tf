@@ -95,7 +95,8 @@ resource "castai_autoscaler" "castai_autoscaler_policy" {
     node_templates_partial_matching_enabled = false
 
     unschedulable_pods {
-      enabled = true
+      enabled                  = true
+      custom_instances_enabled = true
     }
 
     cluster_limits {
