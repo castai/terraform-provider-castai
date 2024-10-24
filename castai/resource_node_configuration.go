@@ -16,8 +16,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/samber/lo"
 
-	"github.com/castai/terraform-provider-castai/castai/sdk"
-	castval "github.com/castai/terraform-provider-castai/castai/validation"
+	"github.com/castai/terraform-provider-castai/v7/castai/sdk"
+	castval "github.com/castai/terraform-provider-castai/v7/castai/validation"
 )
 
 const (

@@ -8,13 +8,13 @@ import (
 	"math"
 	"strconv"
 
-	"github.com/castai/terraform-provider-castai/castai/types"
+	"github.com/castai/terraform-provider-castai/v7/castai/types"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/samber/lo"
 	"golang.org/x/exp/constraints"
 
-	"github.com/castai/terraform-provider-castai/castai/sdk"
+	"github.com/castai/terraform-provider-castai/v7/castai/sdk"
 )
 
 func toPtr[S any](src S) *S {

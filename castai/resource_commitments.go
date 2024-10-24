@@ -16,8 +16,8 @@ import (
 	"github.com/mitchellh/mapstructure"
 	"github.com/samber/lo"
 
-	"github.com/castai/terraform-provider-castai/castai/sdk"
-	"github.com/castai/terraform-provider-castai/castai/types"
+	"github.com/castai/terraform-provider-castai/v7/castai/sdk"
+	"github.com/castai/terraform-provider-castai/v7/castai/types"
 )
 
 const (

@@ -7,7 +7,7 @@ import (
 
 	"github.com/joho/godotenv"
 
-	"github.com/castai/terraform-provider-castai/e2e/config"
+	"github.com/castai/terraform-provider-castai/v7/e2e/config"
 )
 
 var (

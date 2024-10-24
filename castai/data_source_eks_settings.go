@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/castai/terraform-provider-castai/castai/policies"
+	"github.com/castai/terraform-provider-castai/v7/castai/policies"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
