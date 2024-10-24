@@ -67,7 +67,7 @@ echo "Authentication mode is $current_auth_mode"
 apiVersion: v1
 data:
   mapRoles: |
-    - rolearn: arn:aws:iam::028075177508:role/castai-eks-<clustername>
+    - rolearn: arn:aws:iam::028075177508:role/castai-eks-instance-<clustername>
       username: system:node:{{EC2PrivateDNSName}}
       groups:
       - system:bootstrappers

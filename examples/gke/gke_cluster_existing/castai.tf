@@ -46,12 +46,11 @@ module "castai-gke-cluster" {
   }
   node_templates = {
     default_by_castai = {
-      name                     = "default-by-castai"
-      configuration_id         = module.castai-gke-cluster.castai_node_configurations["default"]
-      is_default               = true
-      is_enabled               = true
-      should_taint             = false
-      custom_instances_enabled = true
+      name             = "default-by-castai"
+      configuration_id = module.castai-gke-cluster.castai_node_configurations["default"]
+      is_default       = true
+      is_enabled       = true
+      should_taint     = false
 
       constraints = {
         on_demand = true
@@ -62,7 +61,7 @@ module "castai-gke-cluster" {
       configuration_id         = module.castai-gke-cluster.castai_node_configurations["default"]
       is_enabled               = true
       should_taint             = true
-      custom_instances_enabled = true
+      custom_instances_enabled = false # custom_instances_enabled should be set to same value(true or false) at Node templates & unschedulable_pods policy for backward compatability
 
       custom_labels = {
         custom-label-key-1 = "custom-label-value-1"
@@ -103,7 +102,8 @@ module "castai-gke-cluster" {
     node_templates_partial_matching_enabled = false
 
     unschedulable_pods = {
-      enabled = false
+      enabled                  = false
+      custom_instances_enabled = false # custom_instances_enabled should be set to same value(true or false) at Node templates & unschedulable_pods policy for backward compatability
     }
 
     node_downscaler = {
