@@ -1,4 +1,4 @@
-module github.com/castai/terraform-provider-castai
+module github.com/castai/terraform-provider-castai/v7
 
 go 1.19
 

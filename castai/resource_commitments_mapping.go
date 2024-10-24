@@ -12,8 +12,8 @@ import (
 	"github.com/samber/lo"
 	"golang.org/x/exp/slices"
 
-	"github.com/castai/terraform-provider-castai/castai/reservations"
-	"github.com/castai/terraform-provider-castai/castai/sdk"
+	"github.com/castai/terraform-provider-castai/v7/castai/reservations"
+	"github.com/castai/terraform-provider-castai/v7/castai/sdk"
 )
 
 type (

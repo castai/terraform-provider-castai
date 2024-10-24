@@ -1,7 +1,7 @@
 package reservations
 
 import (
-	"github.com/castai/terraform-provider-castai/castai/sdk"
+	"github.com/castai/terraform-provider-castai/v7/castai/sdk"
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/require"
 	"testing"

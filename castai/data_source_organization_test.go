@@ -9,8 +9,8 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 
-	"github.com/castai/terraform-provider-castai/castai/sdk"
-	mock_sdk "github.com/castai/terraform-provider-castai/castai/sdk/mock"
+	"github.com/castai/terraform-provider-castai/v7/castai/sdk"
+	mock_sdk "github.com/castai/terraform-provider-castai/v7/castai/sdk/mock"
 	"github.com/golang/mock/gomock"
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"

@@ -16,8 +16,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/mitchellh/mapstructure"
 
-	"github.com/castai/terraform-provider-castai/castai/sdk"
-	"github.com/castai/terraform-provider-castai/castai/types"
+	"github.com/castai/terraform-provider-castai/v7/castai/sdk"
+	"github.com/castai/terraform-provider-castai/v7/castai/types"
 )
 
 const (
@@ -90,7 +90,7 @@ func resourceAutoscaler() *schema.Resource {
 				Description:      "autoscaler policies JSON string to override current autoscaler settings",
 				Optional:         true,
 				ValidateDiagFunc: validateAutoscalerPolicyJSON(),
-				Deprecated:       "use autoscaler_settings instead. See README for example: https://github.com/castai/terraform-provider-castai?tab=readme-ov-file#migrating-from-6xx-to-7xx",
+				Deprecated:       "use autoscaler_settings instead. See README for example: https://github.com/castai/terraform-provider-castai/v7?tab=readme-ov-file#migrating-from-6xx-to-7xx",
 			},
 			FieldAutoscalerPolicies: {
 				Type:        schema.TypeString,
@@ -725,7 +725,7 @@ func validateAutoscalerPolicyJSON() schema.SchemaValidateDiagFunc {
 func createValidationError(field, value string) error {
 	return fmt.Errorf("'%s' field was removed from policies JSON in 5.0.0. "+
 		"The configuration was migrated to default node template.\n\n"+
-		"See: https://github.com/castai/terraform-provider-castai#migrating-from-4xx-to-5xx\n\n"+
+		"See: https://github.com/castai/terraform-provider-castai/v7#migrating-from-4xx-to-5xx\n\n"+
 		"Policy:\n%v", field, value)
 }
 

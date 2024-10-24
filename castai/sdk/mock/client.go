@@ -10,7 +10,7 @@ import (
 	http "net/http"
 	reflect "reflect"
 
-	sdk "github.com/castai/terraform-provider-castai/castai/sdk"
+	sdk "github.com/castai/terraform-provider-castai/v7/castai/sdk"
 	gomock "github.com/golang/mock/gomock"
 )
 

@@ -8,9 +8,9 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/castai/terraform-provider-castai/castai/reservations"
-	"github.com/castai/terraform-provider-castai/castai/sdk"
-	mock_sdk "github.com/castai/terraform-provider-castai/castai/sdk/mock"
+	"github.com/castai/terraform-provider-castai/v7/castai/reservations"
+	"github.com/castai/terraform-provider-castai/v7/castai/sdk"
+	mock_sdk "github.com/castai/terraform-provider-castai/v7/castai/sdk/mock"
 	"github.com/golang/mock/gomock"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"

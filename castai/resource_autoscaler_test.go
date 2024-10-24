@@ -16,9 +16,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/stretchr/testify/require"
 
-	"github.com/castai/terraform-provider-castai/castai/sdk"
-	mock_sdk "github.com/castai/terraform-provider-castai/castai/sdk/mock"
-	"github.com/castai/terraform-provider-castai/castai/types"
+	"github.com/castai/terraform-provider-castai/v7/castai/sdk"
+	mock_sdk "github.com/castai/terraform-provider-castai/v7/castai/sdk/mock"
+	"github.com/castai/terraform-provider-castai/v7/castai/types"
 )
 
 func TestAutoscalerResource_PoliciesUpdateAction(t *testing.T) {
