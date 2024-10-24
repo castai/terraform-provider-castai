@@ -49,7 +49,7 @@ resource "castai_node_template" "example_spot_template" {
   is_enabled               = true
   configuration_id         = castai_node_configuration.default.id
   should_taint             = true
-  custom_instances_enabled = true # gke specific
+  custom_instances_enabled = false # custom_instances_enabled should be set to same value(true or false) at Node templates & unschedulable_pods policy for backward compatability
 
   custom_labels = {
     type = "spot"
@@ -96,7 +96,7 @@ resource "castai_autoscaler" "castai_autoscaler_policy" {
 
     unschedulable_pods {
       enabled                  = true
-      custom_instances_enabled = true
+      custom_instances_enabled = false # custom_instances_enabled should be set to same value(true or false) at Node templates & unschedulable_pods policy for backward compatability
     }
 
     cluster_limits {
