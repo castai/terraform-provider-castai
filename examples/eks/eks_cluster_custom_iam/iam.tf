@@ -46,6 +46,7 @@ resource "aws_iam_role_policy_attachment" "instance_profile_policy" {
     "arn:${local.partition}:iam::aws:policy/AmazonEKSWorkerNodePolicy",
     "arn:${local.partition}:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly",
     "arn:${local.partition}:iam::aws:policy/AmazonEKS_CNI_Policy",
+    "arn:${local.partition}:iam::aws:policy/service-role/AmazonEBSCSIDriverPolicy",
   ])
 
   role       = aws_iam_instance_profile.castai_instance_profile.role
