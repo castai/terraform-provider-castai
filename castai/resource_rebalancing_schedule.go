@@ -153,7 +153,10 @@ func resourceRebalancingSchedule() *schema.Resource {
 						"target_node_selection_algorithm": {
 							Type:        schema.TypeString,
 							Optional:    true,
-							Description: "Defines the algorithm used to select the target nodes for rebalancing.",
+              Description: "Defines the algorithm used to select the target nodes for rebalancing. Supported values:\n" +
+                      "  - `TargetNodeSelectionAlgorithmNormalizedPrice` (Default): Most expensive nodes based on price of Normalized CPU ( node cost / CPU count)\n" +
+                      "  - `TargetNodeSelectionAlgorithmUtilizedPrice`: Most expensive nodes based on price of Requested CPU price (node cost / requested CPU count)\n" +
+                      "  - `TargetNodeSelectionAlgorithmUtilization`: Least utilized nodes first",
 							Default:     "TargetNodeSelectionAlgorithmNormalizedPrice",
 							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{
 								"TargetNodeSelectionAlgorithmNormalizedPrice",
