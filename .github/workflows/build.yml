@@ -8,10 +8,10 @@ concurrency:
 on:
   pull_request:
     branches: [ '*' ]
-    paths-ignore:
-      - '**.md'
-      - '**.md.tmpl'
-      - 'examples/**'
+#    paths-ignore:
+#      - '**.md'
+#      - '**.md.tmpl'
+#      - 'examples/**'
 jobs:
   build:
     name: Build
