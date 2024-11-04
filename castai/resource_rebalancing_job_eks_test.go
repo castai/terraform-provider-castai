@@ -1,10 +1,8 @@
 package castai
 
 import (
-	"context"
 	"fmt"
 	"testing"
-	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -100,8 +98,7 @@ func TestAccResourceRebalancingJobWithDataSource_eks(t *testing.T) {
 				),
 			},
 			{
-				PreConfig: func() { waitForRebalancingSchedule(t, rName) },
-				Config:    makeInitialRebalancingJobWithDataSourceConfig(rName, clusterName),
+				Config: makeInitialRebalancingJobWithDataSourceConfig(rName, clusterName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("data.castai_rebalancing_schedule.data-source-for-rebalancing-schedule", "name", rName),
 				),
@@ -114,30 +111,6 @@ func TestAccResourceRebalancingJobWithDataSource_eks(t *testing.T) {
 			},
 		},
 	})
-}
-
-func waitForRebalancingSchedule(t *testing.T, rebalancingScheduleName string) {
-	client := testAccProvider.Meta().(*ProviderConfig).api
-	ctx := context.Background()
-	timeout := 120 * time.Second // Total wait time
-	interval := 5 * time.Second  // Wait time between checks
-	startTime := time.Now()
-
-	for {
-		if time.Since(startTime) > timeout {
-			fmt.Println("Rebalancing schedule was not found, name: ", rebalancingScheduleName)
-			t.Error("Rebalancing schedule was not found, name: ", rebalancingScheduleName)
-			return
-		}
-
-		_, err := getRebalancingScheduleByName(ctx, client, rebalancingScheduleName)
-		if err == nil {
-			fmt.Println("Rebalancing schedule found, name: ", rebalancingScheduleName)
-			t.Log("Rebalancing schedule found, name: ", rebalancingScheduleName)
-			return
-		}
-		time.Sleep(interval)
-	}
 }
 
 func makeRebalancingScheduleConfig(rName string) string {
