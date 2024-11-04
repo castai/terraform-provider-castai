@@ -10,7 +10,13 @@ Helm Managed ==>  All Castware components such as `castai-agent`, `castai-cluste
                                                 +-------------------------+
                                                 |         Start           |
                                                 +-------------------------+
-                                                            |
+                                                            | Set Profile in AWS CLI
+                                                            | 
+                                                +-------------------------+
+                                                | 0. AWS CLI profile is already set to default,override if only required
+                                                | 
+                                                +-------------------------+
+                                                            | 
                                                             | AWS CLI
                                                 +-------------------------+
                                                 | 1.Check EKS Auth Mode is API/API_CONFIGMAP
@@ -50,6 +56,10 @@ Helm Managed ==>  All Castware components such as `castai-agent`, `castai-cluste
 Prerequisites:
 - CAST AI account
 - Obtained CAST AI [API Access key](https://docs.cast.ai/docs/authentication#obtaining-api-access-key) with Full Access
+
+
+### Step 0: Set Profile in AWS CLI
+AWS CLI profile is already set to default, override if only required.
 
 
 ### Step 1: Get EKS cluster authentication mode

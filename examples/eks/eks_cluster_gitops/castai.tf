@@ -1,15 +1,4 @@
 # Create IAM resources required for connecting cluster to CAST AI.
-locals {
-  resource_name_postfix = var.aws_cluster_name
-  account_id            = data.aws_caller_identity.current.account_id
-  partition             = data.aws_partition.current.partition
-
-  instance_profile_role_name = "castai-eks-${local.resource_name_postfix}-node-role"
-  iam_role_name              = "castai-eks-${local.resource_name_postfix}-cluster-role"
-  iam_inline_policy_name     = "CastEKSRestrictedAccess"
-  role_name                  = "castai-eks-role"
-}
-
 data "aws_caller_identity" "current" {}
 
 data "aws_partition" "current" {}
@@ -49,7 +38,7 @@ locals {
 
 resource "aws_eks_access_entry" "access_entry" {
   count         = local.access_entry ? 1 : 0
-  cluster_name  = local.resource_name_postfix
+  cluster_name  = var.aws_cluster_name
   principal_arn = module.castai-eks-role-iam.instance_profile_role_arn
   type          = "EC2_LINUX"
 }
@@ -58,7 +47,7 @@ resource "aws_eks_access_entry" "access_entry" {
 resource "castai_eks_cluster" "my_castai_cluster" {
   account_id                 = var.aws_account_id
   region                     = var.aws_cluster_region
-  name                       = local.resource_name_postfix
+  name                       = var.aws_cluster_name
   delete_nodes_on_disconnect = var.delete_nodes_on_disconnect
   assume_role_arn            = module.castai-eks-role-iam.role_arn
 }
