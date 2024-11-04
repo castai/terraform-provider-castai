@@ -304,7 +304,7 @@ type ClientInterface interface {
 	ExternalClusterAPIDrainNode(ctx context.Context, clusterId string, nodeId string, body ExternalClusterAPIDrainNodeJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// ExternalClusterAPIReconcileCluster request
-	ExternalClusterAPIReconcileCluster(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+	ExternalClusterAPIReconcileCluster(ctx context.Context, clusterId string, params *ExternalClusterAPIReconcileClusterParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// ExternalClusterAPITriggerResumeCluster request with any body
 	ExternalClusterAPITriggerResumeClusterWithBody(ctx context.Context, clusterId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -1491,8 +1491,8 @@ func (c *Client) ExternalClusterAPIDrainNode(ctx context.Context, clusterId stri
 	return c.Client.Do(req)
 }
 
-func (c *Client) ExternalClusterAPIReconcileCluster(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewExternalClusterAPIReconcileClusterRequest(c.Server, clusterId)
+func (c *Client) ExternalClusterAPIReconcileCluster(ctx context.Context, clusterId string, params *ExternalClusterAPIReconcileClusterParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewExternalClusterAPIReconcileClusterRequest(c.Server, clusterId, params)
 	if err != nil {
 		return nil, err
 	}
@@ -5367,7 +5367,7 @@ func NewExternalClusterAPIDrainNodeRequestWithBody(server string, clusterId stri
 }
 
 // NewExternalClusterAPIReconcileClusterRequest generates requests for ExternalClusterAPIReconcileCluster
-func NewExternalClusterAPIReconcileClusterRequest(server string, clusterId string) (*http.Request, error) {
+func NewExternalClusterAPIReconcileClusterRequest(server string, clusterId string, params *ExternalClusterAPIReconcileClusterParams) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -5391,6 +5391,26 @@ func NewExternalClusterAPIReconcileClusterRequest(server string, clusterId strin
 	if err != nil {
 		return nil, err
 	}
+
+	queryValues := queryURL.Query()
+
+	if params.SkipAksInitData != nil {
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "skipAksInitData", runtime.ParamLocationQuery, *params.SkipAksInitData); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	queryURL.RawQuery = queryValues.Encode()
 
 	req, err := http.NewRequest("POST", queryURL.String(), nil)
 	if err != nil {
@@ -8699,7 +8719,7 @@ type ClientWithResponsesInterface interface {
 	ExternalClusterAPIDrainNodeWithResponse(ctx context.Context, clusterId string, nodeId string, body ExternalClusterAPIDrainNodeJSONRequestBody) (*ExternalClusterAPIDrainNodeResponse, error)
 
 	// ExternalClusterAPIReconcileCluster request
-	ExternalClusterAPIReconcileClusterWithResponse(ctx context.Context, clusterId string) (*ExternalClusterAPIReconcileClusterResponse, error)
+	ExternalClusterAPIReconcileClusterWithResponse(ctx context.Context, clusterId string, params *ExternalClusterAPIReconcileClusterParams) (*ExternalClusterAPIReconcileClusterResponse, error)
 
 	// ExternalClusterAPITriggerResumeCluster request  with any body
 	ExternalClusterAPITriggerResumeClusterWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader) (*ExternalClusterAPITriggerResumeClusterResponse, error)
@@ -13416,8 +13436,8 @@ func (c *ClientWithResponses) ExternalClusterAPIDrainNodeWithResponse(ctx contex
 }
 
 // ExternalClusterAPIReconcileClusterWithResponse request returning *ExternalClusterAPIReconcileClusterResponse
-func (c *ClientWithResponses) ExternalClusterAPIReconcileClusterWithResponse(ctx context.Context, clusterId string) (*ExternalClusterAPIReconcileClusterResponse, error) {
-	rsp, err := c.ExternalClusterAPIReconcileCluster(ctx, clusterId)
+func (c *ClientWithResponses) ExternalClusterAPIReconcileClusterWithResponse(ctx context.Context, clusterId string, params *ExternalClusterAPIReconcileClusterParams) (*ExternalClusterAPIReconcileClusterResponse, error) {
+	rsp, err := c.ExternalClusterAPIReconcileCluster(ctx, clusterId, params)
 	if err != nil {
 		return nil, err
 	}

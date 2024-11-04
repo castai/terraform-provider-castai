@@ -1544,6 +1544,9 @@ type ExternalclusterV1AKSClusterParams struct {
 	// Azure subscription ID where cluster runs.
 	SubscriptionId *string `json:"subscriptionId,omitempty"`
 
+	// Azure tenant id.
+	TenantId *string `json:"tenantId,omitempty"`
+
 	// Zone name pattern in the cluster.
 	ZoneNamePattern *string `json:"zoneNamePattern,omitempty"`
 }
@@ -4156,6 +4159,12 @@ type ExternalClusterAPIDeleteNodeParams struct {
 
 // ExternalClusterAPIDrainNodeJSONBody defines parameters for ExternalClusterAPIDrainNode.
 type ExternalClusterAPIDrainNodeJSONBody = ExternalclusterV1DrainConfig
+
+// ExternalClusterAPIReconcileClusterParams defines parameters for ExternalClusterAPIReconcileCluster.
+type ExternalClusterAPIReconcileClusterParams struct {
+	// Whether to skip AKS refresh of instance-template.
+	SkipAksInitData *bool `form:"skipAksInitData,omitempty" json:"skipAksInitData,omitempty"`
+}
 
 // ExternalClusterAPITriggerResumeClusterJSONBody defines parameters for ExternalClusterAPITriggerResumeCluster.
 type ExternalClusterAPITriggerResumeClusterJSONBody = ExternalclusterV1NodeConfig
