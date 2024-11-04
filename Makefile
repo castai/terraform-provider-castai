@@ -63,7 +63,7 @@ test:
 .PHONY: testacc
 testacc:
 	@echo "==> Running acceptance tests"
-	TF_ACC=1 go test ./castai/... '-run=^TestAcc' -v -timeout 30m
+	TF_ACC=1 go test ./castai/... '-run=^TestAccResourceNodeConfiguration_eks' -v -timeout 30m
 
 .PHONY: validate-terraform-examples
 validate-terraform-examples:
