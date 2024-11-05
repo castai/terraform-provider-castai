@@ -360,6 +360,10 @@ type CastaiAuthtokenV1beta1AuthToken struct {
 	// created_by is used to link this token to a user who created it.
 	CreatedBy *string `json:"createdBy"`
 
+	// (read only) Time when the token will expire (unix timestamp in nanoseconds).
+	// A null value means that the key will never expire.
+	ExpiresAt *time.Time `json:"expiresAt,omitempty"`
+
 	// (read only) ID of the token.
 	Id *string `json:"id,omitempty"`
 
