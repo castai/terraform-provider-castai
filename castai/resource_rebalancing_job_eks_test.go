@@ -98,7 +98,7 @@ func TestAccResourceRebalancingJobWithDataSource_eks(t *testing.T) {
 				),
 			},
 			{
-				Config: makeInitialRebalancingJobWithDataSourceConfig(rName, clusterName),
+				Config: makeRebalancingJobWithDataSource(rName, clusterName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("data.castai_rebalancing_schedule.data-source-for-rebalancing-schedule", "name", rName),
 				),
@@ -164,6 +164,6 @@ resource "castai_rebalancing_job" "test-with-data-source" {
 	return fmt.Sprintf(template, rName)
 }
 
-func makeInitialRebalancingJobWithDataSourceConfig(rName, clusterName string) string {
+func makeRebalancingJobWithDataSource(rName, clusterName string) string {
 	return ConfigCompose(testAccEKSClusterConfig(rName, clusterName), makeRebalancingJobWithDataSourceConfig(rName))
 }
