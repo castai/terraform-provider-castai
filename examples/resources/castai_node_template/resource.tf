@@ -42,11 +42,13 @@ resource "castai_node_template" "default_by_castai" {
       include = ["c5"]
     }
 
-    custom_priority {
-      instance_families = ["c5"]
-      spot              = false
-      on_demand         = true
-    }
+    custom_priority = [
+      {
+        instance_families = ["c5"]
+        spot              = false
+        on_demand         = true
+      }
+    ]
   }
 
 }

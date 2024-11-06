@@ -141,10 +141,12 @@ resource "castai_node_template" "example_spot_template" {
       exclude = ["m5"]
     }
 
-    custom_priority {
-      instance_families = ["c5"]
-      spot              = true
-    }
+    custom_priority = [
+      {
+        instance_families = ["c5"]
+        spot              = true
+      }
+    ]
   }
 
 }

@@ -709,11 +709,13 @@ func testAccNodeTemplateConfig(rName, clusterName string) string {
 					manufacturers = ["NVIDIA"]
 				}
 
-				custom_priority {
-					instance_families = ["c", "d"]
-					spot = true
-					on_demand = true
-				}
+				custom_priority = [
+      				{
+						instance_families = ["c", "d"]
+						spot = true
+						on_demand = true
+					}
+				]
 
 				cpu_manufacturers = ["INTEL", "AMD"]
 				architecture_priority = ["amd64"]
@@ -762,16 +764,19 @@ func testNodeTemplateUpdated(rName, clusterName string) string {
 				customer_specific = "enabled"
 				azs = ["eu-central-1a", "eu-central-1b", "eu-central-1c"]
 
-				custom_priority {
-					instance_families = ["a", "b"]
-					spot = true
-				}
-				custom_priority {
-					instance_families = ["c", "d"]
-					spot = true
-					on_demand = true
-				}
-
+				custom_priority = [
+      				{
+						instance_families = ["a", "b"]
+						spot = true
+					}
+				]
+				custom_priority = [
+      				{
+						instance_families = ["c", "d"]
+						spot = true
+						on_demand = true
+					}
+				]
 				cpu_manufacturers = ["INTEL", "AMD"]
 				architecture_priority = ["arm64"]
 			}

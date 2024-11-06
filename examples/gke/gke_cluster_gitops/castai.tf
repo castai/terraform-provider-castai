@@ -78,10 +78,12 @@ resource "castai_node_template" "example_spot_template" {
     instance_families {
       exclude = ["e2"]
     }
-    custom_priority {
-      instance_families = ["c4"]
-      spot              = true
-    }
+    custom_priority = [
+      {
+        instance_families = ["c4"]
+        spot              = true
+      }
+    ]
   }
 
 }
