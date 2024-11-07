@@ -1156,9 +1156,9 @@ func (mr *MockClientInterfaceMockRecorder) ExternalClusterAPIListNodes(ctx, clus
 }
 
 // ExternalClusterAPIReconcileCluster mocks base method.
-func (m *MockClientInterface) ExternalClusterAPIReconcileCluster(ctx context.Context, clusterId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+func (m *MockClientInterface) ExternalClusterAPIReconcileCluster(ctx context.Context, clusterId string, params *sdk.ExternalClusterAPIReconcileClusterParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, clusterId}
+	varargs := []interface{}{ctx, clusterId, params}
 	for _, a := range reqEditors {
 		varargs = append(varargs, a)
 	}
@@ -1169,9 +1169,9 @@ func (m *MockClientInterface) ExternalClusterAPIReconcileCluster(ctx context.Con
 }
 
 // ExternalClusterAPIReconcileCluster indicates an expected call of ExternalClusterAPIReconcileCluster.
-func (mr *MockClientInterfaceMockRecorder) ExternalClusterAPIReconcileCluster(ctx, clusterId interface{}, reqEditors ...interface{}) *gomock.Call {
+func (mr *MockClientInterfaceMockRecorder) ExternalClusterAPIReconcileCluster(ctx, clusterId, params interface{}, reqEditors ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, clusterId}, reqEditors...)
+	varargs := append([]interface{}{ctx, clusterId, params}, reqEditors...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIReconcileCluster", reflect.TypeOf((*MockClientInterface)(nil).ExternalClusterAPIReconcileCluster), varargs...)
 }
 
@@ -4289,18 +4289,18 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIListNo
 }
 
 // ExternalClusterAPIReconcileClusterWithResponse mocks base method.
-func (m *MockClientWithResponsesInterface) ExternalClusterAPIReconcileClusterWithResponse(ctx context.Context, clusterId string) (*sdk.ExternalClusterAPIReconcileClusterResponse, error) {
+func (m *MockClientWithResponsesInterface) ExternalClusterAPIReconcileClusterWithResponse(ctx context.Context, clusterId string, params *sdk.ExternalClusterAPIReconcileClusterParams) (*sdk.ExternalClusterAPIReconcileClusterResponse, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ExternalClusterAPIReconcileClusterWithResponse", ctx, clusterId)
+	ret := m.ctrl.Call(m, "ExternalClusterAPIReconcileClusterWithResponse", ctx, clusterId, params)
 	ret0, _ := ret[0].(*sdk.ExternalClusterAPIReconcileClusterResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // ExternalClusterAPIReconcileClusterWithResponse indicates an expected call of ExternalClusterAPIReconcileClusterWithResponse.
-func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIReconcileClusterWithResponse(ctx, clusterId interface{}) *gomock.Call {
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIReconcileClusterWithResponse(ctx, clusterId, params interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIReconcileClusterWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIReconcileClusterWithResponse), ctx, clusterId)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIReconcileClusterWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIReconcileClusterWithResponse), ctx, clusterId, params)
 }
 
 // ExternalClusterAPIRegisterClusterWithBodyWithResponse mocks base method.
