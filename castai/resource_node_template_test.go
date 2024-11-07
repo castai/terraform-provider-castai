@@ -710,7 +710,7 @@ func testAccNodeTemplateConfig(rName, clusterName string) string {
 				}
 
 				custom_priority = [
-      				{
+					{
 						instance_families = ["c", "d"]
 						spot = true
 						on_demand = true
@@ -768,9 +768,7 @@ func testNodeTemplateUpdated(rName, clusterName string) string {
       				{
 						instance_families = ["a", "b"]
 						spot = true
-					}
-				]
-				custom_priority = [
+					},
       				{
 						instance_families = ["c", "d"]
 						spot = true
