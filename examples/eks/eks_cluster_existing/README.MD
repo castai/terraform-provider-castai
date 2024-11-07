@@ -36,7 +36,9 @@ terraform destroy -var-file=tf.vars
 
 > **Note**
 >
-> If you are onboarding existing cluster to CAST AI 
+> If you are onboarding existing eks cluster to CAST AI 
+0. Set Profile in AWS CLI
+AWS CLI profile is already set to default, override if only required.
 1. If your eks cluster authentication mode is API/API_CONFIGMAP - TF will update role in IAM access entries (No user action needed)
 2. If your eks cluster authentication mode is CONFIGMAP - you need to also update [aws-auth](https://docs.aws.amazon.com/eks/latest/userguide/add-user-role.html) configmap. In the configmap instance profile
 > used by CAST AI has to be present. Example of entry can be found [here](https://github.com/castai/terraform-provider-castai/blob/157babd57b0977f499eb162e9bee27bee51d292a/examples/eks/eks_cluster_autoscaler_polices/eks.tf#L28-L38).

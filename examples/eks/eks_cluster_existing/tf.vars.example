@@ -6,3 +6,4 @@ vpc_id                      = ""
 cluster_security_group_id   = ""
 node_security_group_id      = ""
 subnets                     = ["", ""]
+profile                     = "default" # default aws cli profile is used, override if needed.
