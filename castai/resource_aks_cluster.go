@@ -193,6 +193,7 @@ func updateAKSClusterSettings(ctx context.Context, data *schema.ResourceData, cl
 		FieldAKSClusterClientSecret,
 		FieldAKSClusterTenantID,
 		FieldAKSClusterSubscriptionID,
+		FieldClusterCredentialsId,
 	) {
 		log.Printf("[INFO] Nothing to update in cluster setttings.")
 		return nil
