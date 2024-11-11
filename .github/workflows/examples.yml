@@ -59,5 +59,6 @@ jobs:
           TF_VAR_castai_api_token: ${{ secrets.CASTAI_TOKEN }}
           TF_VAR_castai_api_url:  ${{ secrets.CASTAI_URL }}
           TF_VAR_cluster_region: "germanywestcentral"
+          TF_VAR_subscription_id: ${{ secrets.AZURE_TF_ACCEPTANCE_TEST_ARM_SUBSCRIPTION_ID }}
         id: aks_plan_examples
         run: cd examples/aks/aks_cluster && terraform plan  1> /dev/null
