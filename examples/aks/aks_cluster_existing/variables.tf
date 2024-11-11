@@ -11,7 +11,7 @@ variable "resource_group" {
 
 variable "subscription_id" {
   type        = string
-  description = "subscription id"
+  description = "Azure subscription ID"
 }
 
 variable "cluster_region" {
