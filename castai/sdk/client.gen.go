@@ -4650,6 +4650,22 @@ func NewExternalClusterAPIGetCredentialsScriptRequest(server string, clusterId s
 
 	}
 
+	if params.InstallNetflowExporter != nil {
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "installNetflowExporter", runtime.ParamLocationQuery, *params.InstallNetflowExporter); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
 	queryURL.RawQuery = queryValues.Encode()
 
 	req, err := http.NewRequest("GET", queryURL.String(), nil)

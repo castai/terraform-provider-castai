@@ -4119,6 +4119,9 @@ type ExternalClusterAPIGetCredentialsScriptParams struct {
 
 	// Whether GCP SA Impersonate feature should be enabled.
 	GcpSaImpersonate *bool `form:"gcpSaImpersonate,omitempty" json:"gcpSaImpersonate,omitempty"`
+
+	// Whether Netflow network exporter should be installed.
+	InstallNetflowExporter *bool `form:"installNetflowExporter,omitempty" json:"installNetflowExporter,omitempty"`
 }
 
 // ExternalClusterAPIDisconnectClusterJSONBody defines parameters for ExternalClusterAPIDisconnectCluster.
