@@ -23,6 +23,8 @@ func dataSourceRebalancingSchedule() *schema.Resource {
 			// other parameters are "computed" from existing rebalancing schedule
 			dataSourceRebalancingSchedule.Schema[key].Computed = true
 			dataSourceRebalancingSchedule.Schema[key].Required = false
+			//  MaxItems is for configurable attributes, there's nothing to configure on computed-only field
+			dataSourceRebalancingSchedule.Schema[key].MaxItems = 0
 		}
 	}
 	return dataSourceRebalancingSchedule
