@@ -1542,6 +1542,7 @@ type ExternalclusterV1AKSClusterParams struct {
 
 	// Node resource group of the cluster.
 	NodeResourceGroup *string `json:"nodeResourceGroup,omitempty"`
+	PodCidr           *string `json:"podCidr"`
 
 	// Region of the cluster.
 	Region *string `json:"region,omitempty"`

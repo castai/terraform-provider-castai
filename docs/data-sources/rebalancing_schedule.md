@@ -17,7 +17,7 @@ Retrieve Rebalancing Schedule
 
 ### Required
 
-- `name` (String) Name of the Rebalancing schedule
+- `name` (String) Name of the schedule.
 
 ### Read-Only
 
