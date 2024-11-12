@@ -45,15 +45,7 @@ terraform plan -var-file=tf_clusterA.vars
 terraform apply -var-file=tf_clusterA.vars
 ```
 
-6. Create workspace for the first cluster and create resources in this workspace
-
-```
-terraform workspace new clusterA
-terraform plan -var-file=tf_clusterA.vars
-terraform apply -var-file=tf_clusterA.vars
-```
-
-7. Create workspace for the second cluster and create resources in this workspace
+6. Create workspace for the second cluster and create resources in this workspace
 
 ```
 terraform workspace new clusterB
@@ -61,9 +53,9 @@ terraform plan -var-file=tf_clusterB.vars
 terraform apply -var-file=tf_clusterB.vars
 ```
 
-8. Open CAST AI console and check that clusters are using the same configuration for Rebalancing Schedule
+7. Open CAST AI console and check that clusters are using the same configuration for Rebalancing Schedule
 
-9. To destroy resources created by this example:
+8. To destroy resources created by this example:
 ```
 terraform workspace select org-workspace
 terraform destroy -var-file=tf.vars
