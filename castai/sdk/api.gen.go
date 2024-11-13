@@ -4190,15 +4190,6 @@ type ExternalClusterAPIUpdateClusterTagsJSONBody struct {
 // UsersAPIUpdateCurrentUserProfileJSONBody defines parameters for UsersAPIUpdateCurrentUserProfile.
 type UsersAPIUpdateCurrentUserProfileJSONBody = CastaiUsersV1beta1User
 
-// UsersAPIListOrganizationsParams defines parameters for UsersAPIListOrganizations.
-type UsersAPIListOrganizationsParams struct {
-	// Filter organizations by user id.
-	UserId *string `form:"userId,omitempty" json:"userId,omitempty"`
-
-	// Filter organizations by username.
-	Username *string `form:"username,omitempty" json:"username,omitempty"`
-}
-
 // UsersAPICreateOrganizationJSONBody defines parameters for UsersAPICreateOrganization.
 type UsersAPICreateOrganizationJSONBody = CastaiUsersV1beta1Organization
 

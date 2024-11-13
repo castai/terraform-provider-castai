@@ -331,7 +331,7 @@ type ClientInterface interface {
 	UsersAPIUpdateCurrentUserProfile(ctx context.Context, body UsersAPIUpdateCurrentUserProfileJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// UsersAPIListOrganizations request
-	UsersAPIListOrganizations(ctx context.Context, params *UsersAPIListOrganizationsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+	UsersAPIListOrganizations(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// UsersAPICreateOrganization request with any body
 	UsersAPICreateOrganizationWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -1611,8 +1611,8 @@ func (c *Client) UsersAPIUpdateCurrentUserProfile(ctx context.Context, body User
 	return c.Client.Do(req)
 }
 
-func (c *Client) UsersAPIListOrganizations(ctx context.Context, params *UsersAPIListOrganizationsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewUsersAPIListOrganizationsRequest(c.Server, params)
+func (c *Client) UsersAPIListOrganizations(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewUsersAPIListOrganizationsRequest(c.Server)
 	if err != nil {
 		return nil, err
 	}
@@ -5643,7 +5643,7 @@ func NewUsersAPIUpdateCurrentUserProfileRequestWithBody(server string, contentTy
 }
 
 // NewUsersAPIListOrganizationsRequest generates requests for UsersAPIListOrganizations
-func NewUsersAPIListOrganizationsRequest(server string, params *UsersAPIListOrganizationsParams) (*http.Request, error) {
+func NewUsersAPIListOrganizationsRequest(server string) (*http.Request, error) {
 	var err error
 
 	serverURL, err := url.Parse(server)
@@ -5660,42 +5660,6 @@ func NewUsersAPIListOrganizationsRequest(server string, params *UsersAPIListOrga
 	if err != nil {
 		return nil, err
 	}
-
-	queryValues := queryURL.Query()
-
-	if params.UserId != nil {
-
-		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "userId", runtime.ParamLocationQuery, *params.UserId); err != nil {
-			return nil, err
-		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
-			return nil, err
-		} else {
-			for k, v := range parsed {
-				for _, v2 := range v {
-					queryValues.Add(k, v2)
-				}
-			}
-		}
-
-	}
-
-	if params.Username != nil {
-
-		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "username", runtime.ParamLocationQuery, *params.Username); err != nil {
-			return nil, err
-		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
-			return nil, err
-		} else {
-			for k, v := range parsed {
-				for _, v2 := range v {
-					queryValues.Add(k, v2)
-				}
-			}
-		}
-
-	}
-
-	queryURL.RawQuery = queryValues.Encode()
 
 	req, err := http.NewRequest("GET", queryURL.String(), nil)
 	if err != nil {
@@ -8746,7 +8710,7 @@ type ClientWithResponsesInterface interface {
 	UsersAPIUpdateCurrentUserProfileWithResponse(ctx context.Context, body UsersAPIUpdateCurrentUserProfileJSONRequestBody) (*UsersAPIUpdateCurrentUserProfileResponse, error)
 
 	// UsersAPIListOrganizations request
-	UsersAPIListOrganizationsWithResponse(ctx context.Context, params *UsersAPIListOrganizationsParams) (*UsersAPIListOrganizationsResponse, error)
+	UsersAPIListOrganizationsWithResponse(ctx context.Context) (*UsersAPIListOrganizationsResponse, error)
 
 	// UsersAPICreateOrganization request  with any body
 	UsersAPICreateOrganizationWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*UsersAPICreateOrganizationResponse, error)
@@ -13523,8 +13487,8 @@ func (c *ClientWithResponses) UsersAPIUpdateCurrentUserProfileWithResponse(ctx c
 }
 
 // UsersAPIListOrganizationsWithResponse request returning *UsersAPIListOrganizationsResponse
-func (c *ClientWithResponses) UsersAPIListOrganizationsWithResponse(ctx context.Context, params *UsersAPIListOrganizationsParams) (*UsersAPIListOrganizationsResponse, error) {
-	rsp, err := c.UsersAPIListOrganizations(ctx, params)
+func (c *ClientWithResponses) UsersAPIListOrganizationsWithResponse(ctx context.Context) (*UsersAPIListOrganizationsResponse, error) {
+	rsp, err := c.UsersAPIListOrganizations(ctx)
 	if err != nil {
 		return nil, err
 	}
