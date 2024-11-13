@@ -217,14 +217,10 @@ func updateAKSClusterSettings(ctx context.Context, data *schema.ResourceData, cl
 	// Retries are required for newly created IAM resources to initialise on Azure side.
 	b := backoff.WithContext(backoff.WithMaxRetries(backoff.NewConstantBackOff(10*time.Second), 30), ctx)
 	var lastErr error
-	if err = backoff.Retry(func() error {
+	if err = backoff.RetryNotify(func() error {
 		response, err := client.ExternalClusterAPIUpdateClusterWithResponse(ctx, data.Id(), req)
 		if err != nil {
-			// Only store non-context errors so we can surface the last *real* error encountered at the end
-			if !errors.Is(err, context.DeadlineExceeded) && !errors.Is(err, context.Canceled) {
-				lastErr = err
-			}
-			return err
+			return fmt.Errorf("error when calling update cluster API: %w", err)
 		}
 
 		err = sdk.StatusOk(response)
@@ -236,12 +232,10 @@ func updateAKSClusterSettings(ctx context.Context, data *schema.ResourceData, cl
 				return backoff.Permanent(err)
 			}
 
-			if sdk.IsCredentialsError(response) {
+			if response.StatusCode() == 400 && sdk.IsCredentialsError(response) {
 				log.Printf("[WARN] Received credentials error from backend, will retry in case the issue is caused by IAM eventual consistency.")
-			} else {
-				log.Printf("[WARN] Received unexpected response from backend, will retry: %v", err)
 			}
-			return err
+			return fmt.Errorf("error in update cluster response: %w", err)
 		}
 
 		//if err == nil {
@@ -252,9 +246,15 @@ func updateAKSClusterSettings(ctx context.Context, data *schema.ResourceData, cl
 		//	}
 		//}
 		return nil
-	}, b); err != nil {
-		if errors.Is(err, context.DeadlineExceeded) && lastErr != nil {
-			return fmt.Errorf("updating cluster configuration: %w: %v", err, lastErr)
+	}, b, func(err error, _ time.Duration) {
+		// Only store non-context errors so we can surface the last "real" error to the user at the end
+		if !errors.Is(err, context.DeadlineExceeded) && !errors.Is(err, context.Canceled) {
+			lastErr = err
+		}
+		log.Printf("[WARN] Encountered error while updating cluster settings, will retry: %v", err)
+	}); err != nil {
+		if errors.Is(err, context.DeadlineExceeded) || errors.Is(err, context.Canceled) {
+			return fmt.Errorf("updating cluster configuration failed due to context: %w; last observed error was: %v", err, lastErr)
 		}
 		return fmt.Errorf("updating cluster configuration: %w", err)
 	}
