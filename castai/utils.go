@@ -8,13 +8,13 @@ import (
 	"math"
 	"strconv"
 
-	"github.com/castai/terraform-provider-castai/castai/types"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/samber/lo"
 	"golang.org/x/exp/constraints"
 
 	"github.com/castai/terraform-provider-castai/castai/sdk"
+	"github.com/castai/terraform-provider-castai/castai/types"
 )
 
 func toPtr[S any](src S) *S {
@@ -128,7 +128,7 @@ func normalizeJSON(bytes []byte) ([]byte, error) {
 }
 
 func getDefaultOrganizationId(ctx context.Context, meta any) (string, error) {
-	response, err := meta.(*ProviderConfig).api.UsersAPIListOrganizationsWithResponse(ctx, &sdk.UsersAPIListOrganizationsParams{})
+	response, err := meta.(*ProviderConfig).api.UsersAPIListOrganizationsWithResponse(ctx)
 	if checkErr := sdk.CheckOKResponse(response, err); checkErr != nil {
 		return "", fmt.Errorf("fetching organizations: %w", checkErr)
 	}

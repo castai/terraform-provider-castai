@@ -3864,6 +3864,7 @@ type WorkloadoptimizationV1Workload struct {
 	// Whether workload has native HPA configured.
 	HasNativeHpa *bool  `json:"hasNativeHpa"`
 	Id           string `json:"id"`
+	IsCustom     bool   `json:"isCustom"`
 	Kind         string `json:"kind"`
 
 	// Labels as defined on the workload manifest. These are labels from the controller meta, not the pod meta.
@@ -4119,6 +4120,9 @@ type ExternalClusterAPIGetCredentialsScriptParams struct {
 
 	// Whether GCP SA Impersonate feature should be enabled.
 	GcpSaImpersonate *bool `form:"gcpSaImpersonate,omitempty" json:"gcpSaImpersonate,omitempty"`
+
+	// Whether Netflow network exporter should be installed.
+	InstallNetflowExporter *bool `form:"installNetflowExporter,omitempty" json:"installNetflowExporter,omitempty"`
 }
 
 // ExternalClusterAPIDisconnectClusterJSONBody defines parameters for ExternalClusterAPIDisconnectCluster.
@@ -4189,15 +4193,6 @@ type ExternalClusterAPIUpdateClusterTagsJSONBody struct {
 
 // UsersAPIUpdateCurrentUserProfileJSONBody defines parameters for UsersAPIUpdateCurrentUserProfile.
 type UsersAPIUpdateCurrentUserProfileJSONBody = CastaiUsersV1beta1User
-
-// UsersAPIListOrganizationsParams defines parameters for UsersAPIListOrganizations.
-type UsersAPIListOrganizationsParams struct {
-	// Filter organizations by user id.
-	UserId *string `form:"userId,omitempty" json:"userId,omitempty"`
-
-	// Filter organizations by username.
-	Username *string `form:"username,omitempty" json:"username,omitempty"`
-}
 
 // UsersAPICreateOrganizationJSONBody defines parameters for UsersAPICreateOrganization.
 type UsersAPICreateOrganizationJSONBody = CastaiUsersV1beta1Organization

@@ -4,10 +4,11 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/castai/terraform-provider-castai/castai/sdk"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+
+	"github.com/castai/terraform-provider-castai/castai/sdk"
 )
 
 const (
@@ -32,7 +33,7 @@ func dataSourceOrganization() *schema.Resource {
 func dataSourceOrganizationRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*ProviderConfig).api
 
-	resp, err := client.UsersAPIListOrganizationsWithResponse(ctx, &sdk.UsersAPIListOrganizationsParams{})
+	resp, err := client.UsersAPIListOrganizationsWithResponse(ctx)
 	if err := sdk.CheckOKResponse(resp, err); err != nil {
 		return diag.FromErr(fmt.Errorf("retrieving organizations: %w", err))
 	}
