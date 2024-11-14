@@ -126,6 +126,14 @@ func resourceCastaiAKSClusterRead(ctx context.Context, data *schema.ResourceData
 		return nil
 	}
 
+	if resp.JSON200.CredentialsId != nil && *resp.JSON200.CredentialsId != data.Get(FieldClusterCredentialsId) {
+		log.Printf("[WARN] Drift in credentials from state (%q) and in API (%q), resetting client ID to force re-applying credentials from configuration",
+			data.Get(FieldClusterCredentialsId), *resp.JSON200.CredentialsId)
+		if err := data.Set(FieldAKSClusterClientID, "credentials-drift-detected-force-apply"); err != nil {
+			return diag.FromErr(fmt.Errorf("setting client ID: %w", err))
+		}
+	}
+
 	if err := data.Set(FieldClusterCredentialsId, *resp.JSON200.CredentialsId); err != nil {
 		return diag.FromErr(fmt.Errorf("setting credentials: %w", err))
 	}
@@ -193,6 +201,7 @@ func updateAKSClusterSettings(ctx context.Context, data *schema.ResourceData, cl
 		FieldAKSClusterClientSecret,
 		FieldAKSClusterTenantID,
 		FieldAKSClusterSubscriptionID,
+		FieldClusterCredentialsId,
 	) {
 		log.Printf("[INFO] Nothing to update in cluster setttings.")
 		return nil
@@ -217,15 +226,58 @@ func updateAKSClusterSettings(ctx context.Context, data *schema.ResourceData, cl
 	// Retries are required for newly created IAM resources to initialise on Azure side.
 	b := backoff.WithContext(backoff.WithMaxRetries(backoff.NewConstantBackOff(10*time.Second), 30), ctx)
 	var lastErr error
-	if err = backoff.Retry(func() error {
+	var credentialsID string
+	if err = backoff.RetryNotify(func() error {
 		response, err := client.ExternalClusterAPIUpdateClusterWithResponse(ctx, data.Id(), req)
-		lastErr = err
-		return sdk.CheckOKResponse(response, err)
-	}, b); err != nil {
-		if errors.Is(err, context.DeadlineExceeded) && lastErr != nil {
-			return fmt.Errorf("updating cluster configuration: %w: %v", err, lastErr)
+		if err != nil {
+			return fmt.Errorf("error when calling update cluster API: %w", err)
+		}
+
+		err = sdk.StatusOk(response)
+
+		if err != nil {
+			// In case of malformed user request return error to user right away.
+			// Credentials error is omitted as permissions propagate eventually and sometimes aren't visible immediately.
+			if response.StatusCode() == 400 && !sdk.IsCredentialsError(response) {
+				return backoff.Permanent(err)
+			}
+
+			if response.StatusCode() == 400 && sdk.IsCredentialsError(response) {
+				log.Printf("[WARN] Received credentials error from backend, will retry in case the issue is caused by IAM eventual consistency.")
+			}
+			return fmt.Errorf("error in update cluster response: %w", err)
+		}
+
+		credentialsID = *response.JSON200.CredentialsId
+		return nil
+	}, b, func(err error, _ time.Duration) {
+		// Only store non-context errors so we can surface the last "real" error to the user at the end
+		if !errors.Is(err, context.DeadlineExceeded) && !errors.Is(err, context.Canceled) {
+			lastErr = err
+		}
+		log.Printf("[WARN] Encountered error while updating cluster settings, will retry: %v", err)
+	}); err != nil {
+		// Reset CredentialsID in state in case of failed updates.
+		// This is because TF will save the raw credentials in state even on failed updates.
+		// Since the raw values are not exposed via API, TF cannot see drift and will not try to re-apply them next time, leaving the caller stuck.
+		// Resetting this value here will trigger our credentialsID drift detection on Read() and force re-apply to fix the drift.
+		// Note: cannot use empty string; if first update failed then credentials will also be empty on remote => no drift on Read.
+		// Src: https://developer.hashicorp.com/terraform/plugin/framework/diagnostics#returning-errors-and-warnings
+		if err := data.Set(FieldClusterCredentialsId, "drift-protection-failed-update"); err != nil {
+			log.Printf("[ERROR] Failed to reset cluster credentials ID after failed update: %v", err)
+		}
+
+		if errors.Is(err, context.DeadlineExceeded) || errors.Is(err, context.Canceled) {
+			return fmt.Errorf("updating cluster configuration failed due to context: %w; last observed error was: %v", err, lastErr)
 		}
 		return fmt.Errorf("updating cluster configuration: %w", err)
+	}
+
+	// In case the update succeeded, we must update the state with the *generated* credentials_id before re-reading.
+	// This is because on update, the credentials_id always changes => read drift detection would see that and trigger infinite drift
+	err = data.Set(FieldClusterCredentialsId, credentialsID)
+	if err != nil {
+		return fmt.Errorf("failed to update credentials ID after successful update: %w", err)
 	}
 
 	return nil
