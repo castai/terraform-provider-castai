@@ -20,58 +20,180 @@ import (
 )
 
 func TestAKSClusterResourceReadContext(t *testing.T) {
-	r := require.New(t)
-	mockctrl := gomock.NewController(t)
-	mockClient := mock_sdk.NewMockClientInterface(mockctrl)
-
 	ctx := context.Background()
-	provider := &ProviderConfig{
-		api: &sdk.ClientWithResponses{
-			ClientInterface: mockClient,
-		},
-	}
 
 	clusterId := "b6bfc074-a267-400f-b8f1-db0850c369b1"
 
-	body := io.NopCloser(bytes.NewReader([]byte(`{
-  "id": "b6bfc074-a267-400f-b8f1-db0850c369b1",
-  "name": "aks-cluster",
-  "organizationId": "2836f775-aaaa-eeee-bbbb-3d3c29512692",
-  "credentialsId": "9b8d0456-177b-4a3d-b162-e68030d656aa",
-  "createdAt": "2022-01-27T19:03:31.570829Z",
-  "status": "ready",
-  "agentSnapshotReceivedAt": "2022-03-21T10:33:56.192020Z",
-  "agentStatus": "online",
-  "providerType": "aks",
-  "aks": {
-	"maxPodsPerNode": 100,
-    "networkPlugin": "calico",
-    "nodeResourceGroup": "ng",
-    "region": "westeurope",
-    "subscriptionId": "subID"
-  },
-  "clusterNameId": "aks-cluster-b6bfc074",
-  "private": true
-}`)))
-	mockClient.EXPECT().
-		ExternalClusterAPIGetCluster(gomock.Any(), clusterId).
-		Return(&http.Response{StatusCode: 200, Body: body, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
+	t.Run("read should populate data correctly", func(t *testing.T) {
+		r := require.New(t)
+		mockctrl := gomock.NewController(t)
+		mockClient := mock_sdk.NewMockClientInterface(mockctrl)
+		provider := &ProviderConfig{
+			api: &sdk.ClientWithResponses{
+				ClientInterface: mockClient,
+			},
+		}
 
-	aksResource := resourceAKSCluster()
+		body := io.NopCloser(bytes.NewReader([]byte(`{
+				  "id": "b6bfc074-a267-400f-b8f1-db0850c369b1",
+				  "name": "aks-cluster",
+				  "organizationId": "2836f775-aaaa-eeee-bbbb-3d3c29512692",
+				  "credentialsId": "9b8d0456-177b-4a3d-b162-e68030d656aa",
+				  "createdAt": "2022-01-27T19:03:31.570829Z",
+				  "status": "ready",
+				  "agentSnapshotReceivedAt": "2022-03-21T10:33:56.192020Z",
+				  "agentStatus": "online",
+				  "providerType": "aks",
+				  "aks": {
+					"maxPodsPerNode": 100,
+					"networkPlugin": "calico",
+					"nodeResourceGroup": "ng",
+					"region": "westeurope",
+					"subscriptionId": "subID"
+				  },
+				  "clusterNameId": "aks-cluster-b6bfc074",
+				  "private": true
+				}`)))
+		mockClient.EXPECT().
+			ExternalClusterAPIGetCluster(gomock.Any(), clusterId).
+			Return(&http.Response{StatusCode: 200, Body: body, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
 
-	val := cty.ObjectVal(map[string]cty.Value{})
-	state := terraform.NewInstanceStateShimmedFromValue(val, 0)
-	state.ID = clusterId
+		aksResource := resourceAKSCluster()
 
-	data := aksResource.Data(state)
-	result := aksResource.ReadContext(ctx, data, provider)
-	r.Nil(result)
-	r.False(result.HasError())
-	r.Equal(`ID = b6bfc074-a267-400f-b8f1-db0850c369b1
+		val := cty.ObjectVal(map[string]cty.Value{})
+		state := terraform.NewInstanceStateShimmedFromValue(val, 0)
+		state.ID = clusterId
+		// If local credentials don't match remote, drift detection would trigger.
+		// If local state has no credentials but remote has them, then the drift does exist so - there is separate test for that.
+		state.Attributes[FieldClusterCredentialsId] = "9b8d0456-177b-4a3d-b162-e68030d656aa"
+
+		data := aksResource.Data(state)
+		result := aksResource.ReadContext(ctx, data, provider)
+		r.Nil(result)
+		r.False(result.HasError())
+		r.Equal(`ID = b6bfc074-a267-400f-b8f1-db0850c369b1
 credentials_id = 9b8d0456-177b-4a3d-b162-e68030d656aa
 region = westeurope
 Tainted = false
 `, data.State().String())
+	})
+
+	t.Run("on credentials drift, changes client_id to trigger drift and re-apply", func(t *testing.T) {
+		testCase := []struct {
+			name       string
+			stateValue string
+			apiValue   string
+		}{
+			{
+				name:       "empty credentials in remote",
+				stateValue: "credentials-id-local",
+				apiValue:   "",
+			},
+			{
+				name:       "different credentials in remote",
+				stateValue: "credentials-id-local",
+				apiValue:   "credentials-id-remote",
+			},
+			{
+				name:       "empty credentials in local but exist in remote",
+				stateValue: "",
+				apiValue:   "credentials-id-remote",
+			},
+		}
+
+		for _, tc := range testCase {
+			t.Run(tc.name, func(t *testing.T) {
+				r := require.New(t)
+				mockctrl := gomock.NewController(t)
+				mockClient := mock_sdk.NewMockClientInterface(mockctrl)
+				provider := &ProviderConfig{
+					api: &sdk.ClientWithResponses{
+						ClientInterface: mockClient,
+					},
+				}
+				clientIDBeforeRead := "dummy-client-id"
+
+				body := io.NopCloser(bytes.NewReader([]byte(fmt.Sprintf(`{"credentialsId": "%s"}`, tc.apiValue))))
+				mockClient.EXPECT().
+					ExternalClusterAPIGetCluster(gomock.Any(), clusterId).
+					Return(&http.Response{StatusCode: 200, Body: body, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
+
+				aksResource := resourceAKSCluster()
+
+				val := cty.ObjectVal(map[string]cty.Value{})
+				state := terraform.NewInstanceStateShimmedFromValue(val, 0)
+				state.ID = clusterId
+				state.Attributes[FieldClusterCredentialsId] = tc.stateValue
+				state.Attributes[FieldAKSClusterClientID] = clientIDBeforeRead
+
+				data := aksResource.Data(state)
+				result := aksResource.ReadContext(ctx, data, provider)
+				r.Nil(result)
+				r.False(result.HasError())
+
+				clientIDAfterRead := data.Get(FieldAKSClusterClientID)
+
+				r.NotEqual(clientIDBeforeRead, clientIDAfterRead)
+				r.NotEmpty(clientIDAfterRead)
+			})
+		}
+	})
+
+	t.Run("when credentials match, no drift should be triggered", func(t *testing.T) {
+		testCase := []struct {
+			name       string
+			stateValue string
+			apiValue   string
+		}{
+			{
+				name:       "empty credentials in both",
+				stateValue: "",
+				apiValue:   "",
+			},
+			{
+				name:       "matching credentials",
+				stateValue: "credentials-id",
+				apiValue:   "credentials-id",
+			},
+		}
+
+		for _, tc := range testCase {
+			t.Run(tc.name, func(t *testing.T) {
+				r := require.New(t)
+				mockctrl := gomock.NewController(t)
+				mockClient := mock_sdk.NewMockClientInterface(mockctrl)
+				provider := &ProviderConfig{
+					api: &sdk.ClientWithResponses{
+						ClientInterface: mockClient,
+					},
+				}
+				clientIDBeforeRead := "dummy-client-id"
+
+				body := io.NopCloser(bytes.NewReader([]byte(fmt.Sprintf(`{"credentialsId": "%s"}`, tc.apiValue))))
+				mockClient.EXPECT().
+					ExternalClusterAPIGetCluster(gomock.Any(), clusterId).
+					Return(&http.Response{StatusCode: 200, Body: body, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
+
+				aksResource := resourceAKSCluster()
+
+				val := cty.ObjectVal(map[string]cty.Value{})
+				state := terraform.NewInstanceStateShimmedFromValue(val, 0)
+				state.ID = clusterId
+				state.Attributes[FieldClusterCredentialsId] = tc.stateValue
+				state.Attributes[FieldAKSClusterClientID] = clientIDBeforeRead
+
+				data := aksResource.Data(state)
+				result := aksResource.ReadContext(ctx, data, provider)
+				r.Nil(result)
+				r.False(result.HasError())
+
+				clientIDAfterRead := data.Get(FieldAKSClusterClientID)
+
+				r.Equal(clientIDBeforeRead, clientIDAfterRead)
+				r.NotEmpty(clientIDAfterRead)
+			})
+		}
+	})
 }
 
 func TestAccResourceAKSCluster(t *testing.T) {
