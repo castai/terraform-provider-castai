@@ -276,6 +276,9 @@ func updateAKSClusterSettings(ctx context.Context, data *schema.ResourceData, cl
 	// In case the update succeeded, we must update the state with the *generated* credentials_id before re-reading.
 	// This is because on update, the credentials_id always changes => read drift detection would see that and trigger infinite drift
 	err = data.Set(FieldClusterCredentialsId, credentialsID)
+	if err != nil {
+		return fmt.Errorf("failed to update credentials ID after successful update: %w", err)
+	}
 
 	return nil
 }
