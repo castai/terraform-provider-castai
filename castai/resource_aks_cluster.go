@@ -126,6 +126,14 @@ func resourceCastaiAKSClusterRead(ctx context.Context, data *schema.ResourceData
 		return nil
 	}
 
+	if resp.JSON200.CredentialsId != nil && *resp.JSON200.CredentialsId != data.Get(FieldClusterCredentialsId) {
+		log.Printf("[WARN] Drift in credentials from state (%q) and in API (%q), resetting client ID to force re-applying credentials from configuration",
+			data.Get(FieldClusterCredentialsId), *resp.JSON200.CredentialsId)
+		if err := data.Set(FieldAKSClusterClientID, "credentials-drift-detected-force-apply"); err != nil {
+			return diag.FromErr(fmt.Errorf("setting client ID: %w", err))
+		}
+	}
+
 	if err := data.Set(FieldClusterCredentialsId, *resp.JSON200.CredentialsId); err != nil {
 		return diag.FromErr(fmt.Errorf("setting credentials: %w", err))
 	}
@@ -193,6 +201,7 @@ func updateAKSClusterSettings(ctx context.Context, data *schema.ResourceData, cl
 		FieldAKSClusterClientSecret,
 		FieldAKSClusterTenantID,
 		FieldAKSClusterSubscriptionID,
+		FieldClusterCredentialsId,
 	) {
 		log.Printf("[INFO] Nothing to update in cluster setttings.")
 		return nil
@@ -253,6 +262,16 @@ func updateAKSClusterSettings(ctx context.Context, data *schema.ResourceData, cl
 		}
 		log.Printf("[WARN] Encountered error while updating cluster settings, will retry: %v", err)
 	}); err != nil {
+		// Reset CredentialsID in state in case of failed updates.
+		// This is because TF will save the raw credentials in state even on failed updates.
+		// Since the raw values are not exposed via API, TF cannot see drift and will not try to re-apply them next time, leaving the caller stuck.
+		// Resetting this value here will trigger our credentialsID drift detection on Read() and force re-apply to fix the drift.
+		// Note: cannot use empty string; if first update failed then credentials will also be empty on remote => no drift on Read.
+		// Src: https://developer.hashicorp.com/terraform/plugin/framework/diagnostics#returning-errors-and-warnings
+		if err := data.Set(FieldClusterCredentialsId, "drift-protection-failed-update"); err != nil {
+			log.Printf("[ERROR] Failed to reset cluster credentials ID after failed update: %v", err)
+		}
+
 		if errors.Is(err, context.DeadlineExceeded) || errors.Is(err, context.Canceled) {
 			return fmt.Errorf("updating cluster configuration failed due to context: %w; last observed error was: %v", err, lastErr)
 		}
