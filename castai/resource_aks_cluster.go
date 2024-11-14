@@ -226,6 +226,7 @@ func updateAKSClusterSettings(ctx context.Context, data *schema.ResourceData, cl
 	// Retries are required for newly created IAM resources to initialise on Azure side.
 	b := backoff.WithContext(backoff.WithMaxRetries(backoff.NewConstantBackOff(10*time.Second), 30), ctx)
 	var lastErr error
+	var credentialsID string
 	if err = backoff.RetryNotify(func() error {
 		response, err := client.ExternalClusterAPIUpdateClusterWithResponse(ctx, data.Id(), req)
 		if err != nil {
@@ -247,13 +248,7 @@ func updateAKSClusterSettings(ctx context.Context, data *schema.ResourceData, cl
 			return fmt.Errorf("error in update cluster response: %w", err)
 		}
 
-		//if err == nil {
-		//	log.Printf("======after updating in API the credentials are (%v), existing (%v)", *response.JSON200.CredentialsId, data.Get(FieldClusterCredentialsId))
-		//	err = data.Set(FieldClusterCredentialsId, *response.JSON200.CredentialsId)
-		//	if err != nil {
-		//		panic(err) // TODO
-		//	}
-		//}
+		credentialsID = *response.JSON200.CredentialsId
 		return nil
 	}, b, func(err error, _ time.Duration) {
 		// Only store non-context errors so we can surface the last "real" error to the user at the end
@@ -277,6 +272,10 @@ func updateAKSClusterSettings(ctx context.Context, data *schema.ResourceData, cl
 		}
 		return fmt.Errorf("updating cluster configuration: %w", err)
 	}
+
+	// In case the update succeeded, we must update the state with the *generated* credentials_id before re-reading.
+	// This is because on update, the credentials_id always changes => read drift detection would see that and trigger infinite drift
+	err = data.Set(FieldClusterCredentialsId, credentialsID)
 
 	return nil
 }
