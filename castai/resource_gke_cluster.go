@@ -7,7 +7,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/cenkalti/backoff/v4"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -16,11 +15,10 @@ import (
 )
 
 const (
-	FieldGKEClusterName          = "name"
-	FieldGKEClusterProjectId     = "project_id"
-	FieldGKEClusterLocation      = "location"
-	FieldGKEClusterCredentialsId = "credentials_id"
-	FieldGKEClusterCredentials   = "credentials_json"
+	FieldGKEClusterName        = "name"
+	FieldGKEClusterProjectId   = "project_id"
+	FieldGKEClusterLocation    = "location"
+	FieldGKEClusterCredentials = "credentials_json"
 )
 
 func resourceGKECluster() *schema.Resource {
@@ -46,7 +44,7 @@ func resourceGKECluster() *schema.Resource {
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 				Description:      "GKE cluster name",
 			},
-			FieldGKEClusterCredentialsId: {
+			FieldClusterCredentialsId: {
 				Type:        schema.TypeString,
 				Computed:    true,
 				Description: "CAST AI credentials id for cluster",
@@ -153,7 +151,15 @@ func resourceCastaiGKEClusterRead(ctx context.Context, data *schema.ResourceData
 		return nil
 	}
 
-	if err := data.Set(FieldGKEClusterCredentialsId, toString(resp.JSON200.CredentialsId)); err != nil {
+	if resp.JSON200.CredentialsId != nil && *resp.JSON200.CredentialsId != data.Get(FieldClusterCredentialsId) {
+		log.Printf("[WARN] Drift in credentials from state (%q) and in API (%q), resetting credentials JSON to force re-applying credentials from configuration",
+			data.Get(FieldClusterCredentialsId), *resp.JSON200.CredentialsId)
+		if err := data.Set(FieldGKEClusterCredentials, "credentials-drift-detected-force-apply"); err != nil {
+			return diag.FromErr(fmt.Errorf("setting client ID: %w", err))
+		}
+	}
+
+	if err := data.Set(FieldClusterCredentialsId, toString(resp.JSON200.CredentialsId)); err != nil {
 		return diag.FromErr(fmt.Errorf("setting credentials id: %w", err))
 	}
 	if GKE := resp.JSON200.Gke; GKE != nil {
@@ -184,6 +190,7 @@ func resourceCastaiGKEClusterUpdate(ctx context.Context, data *schema.ResourceDa
 func updateGKEClusterSettings(ctx context.Context, data *schema.ResourceData, client *sdk.ClientWithResponses) error {
 	if !data.HasChanges(
 		FieldGKEClusterCredentials,
+		FieldClusterCredentialsId,
 	) {
 		log.Printf("[INFO] Nothing to update in cluster setttings.")
 		return nil
@@ -198,22 +205,8 @@ func updateGKEClusterSettings(ctx context.Context, data *schema.ResourceData, cl
 		req.Credentials = toPtr(credentialsJSON.(string))
 	}
 
-	if err := backoff.Retry(func() error {
-		response, err := client.ExternalClusterAPIUpdateClusterWithResponse(ctx, data.Id(), req)
-		if err != nil {
-			return err
-		}
-		err = sdk.StatusOk(response)
-		// In case of malformed user request return error to user right away.
-		if response.StatusCode() == 400 && !sdk.IsCredentialsError(response) {
-			return backoff.Permanent(err)
-		}
-		return err
-	}, backoff.NewExponentialBackOff()); err != nil {
-		return fmt.Errorf("updating cluster configuration: %w", err)
-	}
-
-	return nil
+	// todo backoff.NewExponentialBackOff()
+	return resourceCastaiClusterUpdate(ctx, client, data, &req)
 }
 
 func resourceCastaiGKEClusterDelete(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
