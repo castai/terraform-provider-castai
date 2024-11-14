@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/stretchr/testify/require"
 
@@ -22,7 +23,7 @@ import (
 func TestAKSClusterResourceReadContext(t *testing.T) {
 	ctx := context.Background()
 
-	clusterId := "b6bfc074-a267-400f-b8f1-db0850c369b1"
+	clusterID := "b6bfc074-a267-400f-b8f1-db0850c369b1"
 
 	t.Run("read should populate data correctly", func(t *testing.T) {
 		r := require.New(t)
@@ -55,14 +56,14 @@ func TestAKSClusterResourceReadContext(t *testing.T) {
 				  "private": true
 				}`)))
 		mockClient.EXPECT().
-			ExternalClusterAPIGetCluster(gomock.Any(), clusterId).
+			ExternalClusterAPIGetCluster(gomock.Any(), clusterID).
 			Return(&http.Response{StatusCode: 200, Body: body, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
 
 		aksResource := resourceAKSCluster()
 
 		val := cty.ObjectVal(map[string]cty.Value{})
 		state := terraform.NewInstanceStateShimmedFromValue(val, 0)
-		state.ID = clusterId
+		state.ID = clusterID
 		// If local credentials don't match remote, drift detection would trigger.
 		// If local state has no credentials but remote has them, then the drift does exist so - there is separate test for that.
 		state.Attributes[FieldClusterCredentialsId] = "9b8d0456-177b-4a3d-b162-e68030d656aa"
@@ -115,14 +116,14 @@ Tainted = false
 
 				body := io.NopCloser(bytes.NewReader([]byte(fmt.Sprintf(`{"credentialsId": "%s"}`, tc.apiValue))))
 				mockClient.EXPECT().
-					ExternalClusterAPIGetCluster(gomock.Any(), clusterId).
+					ExternalClusterAPIGetCluster(gomock.Any(), clusterID).
 					Return(&http.Response{StatusCode: 200, Body: body, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
 
 				aksResource := resourceAKSCluster()
 
 				val := cty.ObjectVal(map[string]cty.Value{})
 				state := terraform.NewInstanceStateShimmedFromValue(val, 0)
-				state.ID = clusterId
+				state.ID = clusterID
 				state.Attributes[FieldClusterCredentialsId] = tc.stateValue
 				state.Attributes[FieldAKSClusterClientID] = clientIDBeforeRead
 
@@ -171,14 +172,14 @@ Tainted = false
 
 				body := io.NopCloser(bytes.NewReader([]byte(fmt.Sprintf(`{"credentialsId": "%s"}`, tc.apiValue))))
 				mockClient.EXPECT().
-					ExternalClusterAPIGetCluster(gomock.Any(), clusterId).
+					ExternalClusterAPIGetCluster(gomock.Any(), clusterID).
 					Return(&http.Response{StatusCode: 200, Body: body, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
 
 				aksResource := resourceAKSCluster()
 
 				val := cty.ObjectVal(map[string]cty.Value{})
 				state := terraform.NewInstanceStateShimmedFromValue(val, 0)
-				state.ID = clusterId
+				state.ID = clusterID
 				state.Attributes[FieldClusterCredentialsId] = tc.stateValue
 				state.Attributes[FieldAKSClusterClientID] = clientIDBeforeRead
 
@@ -193,6 +194,81 @@ Tainted = false
 				r.NotEmpty(clientIDAfterRead)
 			})
 		}
+	})
+}
+
+func TestAKSClusterResourceUpdateContext(t *testing.T) {
+	clusterID := "b6bfc074-a267-400f-b8f1-db0850c369b1"
+	ctx := context.Background()
+
+	t.Run("credentials_id special handling", func(t *testing.T) {
+		t.Run("on successful update, should avoid drift on the read", func(t *testing.T) {
+			r := require.New(t)
+			mockctrl := gomock.NewController(t)
+			mockClient := mock_sdk.NewMockClientInterface(mockctrl)
+			provider := &ProviderConfig{
+				api: &sdk.ClientWithResponses{
+					ClientInterface: mockClient,
+				},
+			}
+
+			credentialsIDAfterUpdate := "after-update-credentialsid"
+			clientID := "clientID"
+			updateResponse := io.NopCloser(bytes.NewReader([]byte(fmt.Sprintf(`{"credentialsId": "%s"}`, credentialsIDAfterUpdate))))
+			readResponse := io.NopCloser(bytes.NewReader([]byte(fmt.Sprintf(`{"credentialsId": "%s"}`, credentialsIDAfterUpdate))))
+			mockClient.EXPECT().
+				ExternalClusterAPIGetCluster(gomock.Any(), clusterID).
+				Return(&http.Response{StatusCode: 200, Body: readResponse, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
+			mockClient.EXPECT().
+				ExternalClusterAPIUpdateCluster(gomock.Any(), clusterID, gomock.Any()).
+				Return(&http.Response{StatusCode: 200, Body: updateResponse, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
+
+			aksResource := resourceAKSCluster()
+
+			diff := map[string]any{
+				FieldAKSClusterClientID:   clientID,
+				FieldClusterCredentialsId: "before-update-credentialsid",
+			}
+			data := schema.TestResourceDataRaw(t, aksResource.Schema, diff)
+			data.SetId(clusterID)
+			diagnostics := aksResource.UpdateContext(ctx, data, provider)
+
+			r.Empty(diagnostics)
+
+			r.Equal(credentialsIDAfterUpdate, data.Get(FieldClusterCredentialsId))
+			r.Equal(clientID, data.Get(FieldAKSClusterClientID))
+		})
+
+		t.Run("on failed update, should overwrite credentialsID to force drift on next read", func(t *testing.T) {
+			r := require.New(t)
+			mockctrl := gomock.NewController(t)
+			mockClient := mock_sdk.NewMockClientInterface(mockctrl)
+			provider := &ProviderConfig{
+				api: &sdk.ClientWithResponses{
+					ClientInterface: mockClient,
+				},
+			}
+
+			mockClient.EXPECT().
+				ExternalClusterAPIUpdateCluster(gomock.Any(), clusterID, gomock.Any()).
+				Return(&http.Response{StatusCode: 400, Body: http.NoBody}, nil)
+
+			aksResource := resourceAKSCluster()
+
+			credentialsID := "credentialsID-before-updates"
+			diff := map[string]any{
+				FieldClusterCredentialsId: credentialsID,
+			}
+			data := schema.TestResourceDataRaw(t, aksResource.Schema, diff)
+			data.SetId(clusterID)
+			diagnostics := aksResource.UpdateContext(ctx, data, provider)
+
+			r.NotEmpty(diagnostics)
+
+			valueAfter := data.Get(FieldClusterCredentialsId)
+			r.NotEqual(credentialsID, valueAfter)
+			r.Contains(valueAfter, "drift")
+		})
 	})
 }
 
