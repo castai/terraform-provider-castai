@@ -205,7 +205,6 @@ func updateGKEClusterSettings(ctx context.Context, data *schema.ResourceData, cl
 		req.Credentials = toPtr(credentialsJSON.(string))
 	}
 
-	// todo backoff.NewExponentialBackOff()
 	return resourceCastaiClusterUpdate(ctx, client, data, &req)
 }
 
