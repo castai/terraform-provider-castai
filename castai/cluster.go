@@ -138,7 +138,12 @@ func fetchClusterData(ctx context.Context, client *sdk.ClientWithResponses, clus
 // resourceCastaiClusterUpdate performs the update call to Cast API for a given cluster.
 // Handles backoffs and data drift for fields that are not provider-specific.
 // Caller is responsible to populate data and request parameters with all data.
-func resourceCastaiClusterUpdate(ctx context.Context, client *sdk.ClientWithResponses, data *schema.ResourceData, request *sdk.ExternalClusterAPIUpdateClusterJSONRequestBody) error {
+func resourceCastaiClusterUpdate(
+	ctx context.Context,
+	client *sdk.ClientWithResponses,
+	data *schema.ResourceData,
+	request *sdk.ExternalClusterAPIUpdateClusterJSONRequestBody,
+) error {
 	b := backoff.WithContext(backoff.NewExponentialBackOff(), ctx)
 
 	var lastErr error

@@ -6,7 +6,6 @@ import (
 	"log"
 	"time"
 
-	"github.com/cenkalti/backoff/v4"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -194,23 +193,7 @@ func updateClusterSettings(ctx context.Context, data *schema.ResourceData, clien
 		req.Eks.AssumeRoleArn = toPtr(assumeRoleARN.(string))
 	}
 
-	if err := backoff.Retry(func() error {
-		response, err := client.ExternalClusterAPIUpdateClusterWithResponse(ctx, data.Id(), req)
-		if err != nil {
-			return err
-		}
-		err = sdk.StatusOk(response)
-		// In case of malformed user request return error to user right away.
-		if response.StatusCode() == 400 && !sdk.IsCredentialsError(response) {
-			return backoff.Permanent(err)
-		}
-
-		return err
-	}, backoff.NewExponentialBackOff()); err != nil {
-		return fmt.Errorf("updating cluster configuration: %w", err)
-	}
-
-	return nil
+	return resourceCastaiClusterUpdate(ctx, client, data, &req)
 }
 
 func getOptionalBool(data *schema.ResourceData, field string, defaultValue bool) *bool {
