@@ -3334,6 +3334,7 @@ type WorkloadoptimizationV1AggregatedMetrics struct {
 type WorkloadoptimizationV1AntiAffinitySettings struct {
 	// Defines if anti-affinity should be considered when scaling the workload.
 	// When true, requiring host ports, or having anti-affinity on hostname will force all recommendations to be deferred.
+	// When not set or missing the default value is true.
 	ConsiderAntiAffinity *bool `json:"considerAntiAffinity"`
 }
 
