@@ -141,6 +141,8 @@ func resourceCastaiEKSClusterRead(ctx context.Context, data *schema.ResourceData
 		return nil
 	}
 
+	// Note: EKS does not have drift detection like AKS/GKE because the role is already exposed in the API
+	// => There is no need to "force" drift here; it'll be detected by TF; we simply update the value.
 	if err := data.Set(FieldClusterCredentialsId, *resp.JSON200.CredentialsId); err != nil {
 		return diag.FromErr(fmt.Errorf("setting credentials id: %w", err))
 	}
