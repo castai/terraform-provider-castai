@@ -141,12 +141,6 @@ func resourceCastaiEKSClusterRead(ctx context.Context, data *schema.ResourceData
 		return nil
 	}
 
-	// Note: EKS does not have drift detection like AKS/GKE because the role is already exposed in the API
-	// => There is no need to "force" drift here; it'll be detected by TF; we simply update the value.
-	if err := data.Set(FieldClusterCredentialsId, *resp.JSON200.CredentialsId); err != nil {
-		return diag.FromErr(fmt.Errorf("setting credentials id: %w", err))
-	}
-
 	if eks := resp.JSON200.Eks; eks != nil {
 		if err := data.Set(FieldEKSClusterAccountId, toString(eks.AccountId)); err != nil {
 			return diag.FromErr(fmt.Errorf("setting account id: %w", err))
@@ -160,6 +154,20 @@ func resourceCastaiEKSClusterRead(ctx context.Context, data *schema.ResourceData
 		if err := data.Set(FieldEKSClusterAssumeRoleArn, toString(eks.AssumeRoleArn)); err != nil {
 			return diag.FromErr(fmt.Errorf("setting assume role arn: %w", err))
 		}
+	}
+
+	// Catch if credentials_id ever gets reset on cast side (since it holds credentials to access the role used for cross-account access).
+	// Drift in role is already caught above, but we want to force TF to update and regenerate the credentials ID.
+	if resp.JSON200.CredentialsId != nil && *resp.JSON200.CredentialsId != data.Get(FieldClusterCredentialsId) {
+		log.Printf("[WARN] Drift in credentials from state (%q) and in API (%q), resetting credentials JSON to force re-applying credentials from configuration",
+			data.Get(FieldClusterCredentialsId), *resp.JSON200.CredentialsId)
+		if err := data.Set(FieldEKSClusterAssumeRoleArn, "credentials-drift-detected-force-apply"); err != nil {
+			return diag.FromErr(fmt.Errorf("setting client ID: %w", err))
+		}
+	}
+
+	if err := data.Set(FieldClusterCredentialsId, *resp.JSON200.CredentialsId); err != nil {
+		return diag.FromErr(fmt.Errorf("setting credentials id: %w", err))
 	}
 
 	return nil

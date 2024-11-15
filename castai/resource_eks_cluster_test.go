@@ -19,20 +19,22 @@ import (
 )
 
 func TestEKSClusterResourceReadContext(t *testing.T) {
-	r := require.New(t)
-	mockctrl := gomock.NewController(t)
-	mockClient := mock_sdk.NewMockClientInterface(mockctrl)
-
 	ctx := context.Background()
-	provider := &ProviderConfig{
-		api: &sdk.ClientWithResponses{
-			ClientInterface: mockClient,
-		},
-	}
 
-	clusterId := "b6bfc074-a267-400f-b8f1-db0850c369b1"
+	clusterID := "b6bfc074-a267-400f-b8f1-db0850c369b1"
 
-	body := io.NopCloser(bytes.NewReader([]byte(`{
+	t.Run("read should populate data correctly", func(t *testing.T) {
+		r := require.New(t)
+		mockctrl := gomock.NewController(t)
+		mockClient := mock_sdk.NewMockClientInterface(mockctrl)
+
+		provider := &ProviderConfig{
+			api: &sdk.ClientWithResponses{
+				ClientInterface: mockClient,
+			},
+		}
+
+		body := io.NopCloser(bytes.NewReader([]byte(`{
   "id": "b6bfc074-a267-400f-b8f1-db0850c369b1",
   "name": "eks-cluster",
   "organizationId": "2836f775-aaaa-eeee-bbbb-3d3c29512692",
@@ -61,21 +63,22 @@ func TestEKSClusterResourceReadContext(t *testing.T) {
   "clusterNameId": "eks-cluster-b6bfc074",
   "private": true
 }`)))
-	mockClient.EXPECT().
-		ExternalClusterAPIGetCluster(gomock.Any(), clusterId).
-		Return(&http.Response{StatusCode: 200, Body: body, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
+		mockClient.EXPECT().
+			ExternalClusterAPIGetCluster(gomock.Any(), clusterID).
+			Return(&http.Response{StatusCode: 200, Body: body, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
 
-	resource := resourceEKSCluster()
+		resource := resourceEKSCluster()
 
-	val := cty.ObjectVal(map[string]cty.Value{})
-	state := terraform.NewInstanceStateShimmedFromValue(val, 0)
-	state.ID = clusterId
+		val := cty.ObjectVal(map[string]cty.Value{})
+		state := terraform.NewInstanceStateShimmedFromValue(val, 0)
+		state.ID = clusterID
+		state.Attributes[FieldClusterCredentialsId] = "9b8d0456-177b-4a3d-b162-e68030d656aa"
 
-	data := resource.Data(state)
-	result := resource.ReadContext(ctx, data, provider)
-	r.Nil(result)
-	r.False(result.HasError())
-	r.Equal(`ID = b6bfc074-a267-400f-b8f1-db0850c369b1
+		data := resource.Data(state)
+		result := resource.ReadContext(ctx, data, provider)
+		r.Nil(result)
+		r.False(result.HasError())
+		r.Equal(`ID = b6bfc074-a267-400f-b8f1-db0850c369b1
 account_id = 487609000000
 assume_role_arn = 
 credentials_id = 9b8d0456-177b-4a3d-b162-e68030d656aa
@@ -83,6 +86,125 @@ name = eks-cluster
 region = eu-central-1
 Tainted = false
 `, data.State().String())
+	})
+
+	t.Run("on credentials drift, changes role_arn to trigger drift and re-apply", func(t *testing.T) {
+		testCase := []struct {
+			name       string
+			stateValue string
+			apiValue   string
+		}{
+			{
+				name:       "empty credentials in remote",
+				stateValue: "credentials-id-local",
+				apiValue:   "",
+			},
+			{
+				name:       "different credentials in remote",
+				stateValue: "credentials-id-local",
+				apiValue:   "credentials-id-remote",
+			},
+			{
+				name:       "empty credentials in local but exist in remote",
+				stateValue: "",
+				apiValue:   "credentials-id-remote",
+			},
+		}
+
+		for _, tc := range testCase {
+			t.Run(tc.name, func(t *testing.T) {
+				r := require.New(t)
+				mockctrl := gomock.NewController(t)
+				mockClient := mock_sdk.NewMockClientInterface(mockctrl)
+				provider := &ProviderConfig{
+					api: &sdk.ClientWithResponses{
+						ClientInterface: mockClient,
+					},
+				}
+				roleARNBeforeRead := "dummy-rolearn"
+
+				body := io.NopCloser(bytes.NewReader([]byte(fmt.Sprintf(`{"credentialsId": "%s"}`, tc.apiValue))))
+				mockClient.EXPECT().
+					ExternalClusterAPIGetCluster(gomock.Any(), clusterID).
+					Return(&http.Response{StatusCode: 200, Body: body, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
+
+				resource := resourceEKSCluster()
+
+				val := cty.ObjectVal(map[string]cty.Value{})
+				state := terraform.NewInstanceStateShimmedFromValue(val, 0)
+				state.ID = clusterID
+				state.Attributes[FieldClusterCredentialsId] = tc.stateValue
+				state.Attributes[FieldEKSClusterAssumeRoleArn] = roleARNBeforeRead
+
+				data := resource.Data(state)
+				result := resource.ReadContext(ctx, data, provider)
+				r.Nil(result)
+				r.False(result.HasError())
+
+				roleARNAfter := data.Get(FieldEKSClusterAssumeRoleArn)
+
+				r.NotEqual(roleARNBeforeRead, roleARNAfter)
+				r.NotEmpty(roleARNAfter)
+			})
+		}
+	})
+
+	t.Run("when credentials match, no drift should be triggered", func(t *testing.T) {
+		testCase := []struct {
+			name       string
+			stateValue string
+			apiValue   string
+		}{
+			{
+				name:       "empty credentials in both",
+				stateValue: "",
+				apiValue:   "",
+			},
+			{
+				name:       "matching credentials",
+				stateValue: "credentials-id",
+				apiValue:   "credentials-id",
+			},
+		}
+
+		for _, tc := range testCase {
+			t.Run(tc.name, func(t *testing.T) {
+				r := require.New(t)
+				mockctrl := gomock.NewController(t)
+				mockClient := mock_sdk.NewMockClientInterface(mockctrl)
+				provider := &ProviderConfig{
+					api: &sdk.ClientWithResponses{
+						ClientInterface: mockClient,
+					},
+				}
+				roleARNBefore := "dummy-roleARN"
+
+				body := io.NopCloser(bytes.NewReader([]byte(fmt.Sprintf(`{"credentialsId": "%s"}`, tc.apiValue))))
+				mockClient.EXPECT().
+					ExternalClusterAPIGetCluster(gomock.Any(), clusterID).
+					Return(&http.Response{StatusCode: 200, Body: body, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
+
+				resource := resourceEKSCluster()
+
+				val := cty.ObjectVal(map[string]cty.Value{})
+				state := terraform.NewInstanceStateShimmedFromValue(val, 0)
+				state.ID = clusterID
+				state.Attributes[FieldClusterCredentialsId] = tc.stateValue
+				state.Attributes[FieldEKSClusterAssumeRoleArn] = roleARNBefore
+
+				data := resource.Data(state)
+				result := resource.ReadContext(ctx, data, provider)
+				r.Nil(result)
+				r.False(result.HasError())
+
+				roleARNAfter := data.Get(FieldEKSClusterAssumeRoleArn)
+
+				r.Equal(roleARNBefore, roleARNAfter)
+				r.NotEmpty(roleARNAfter)
+			})
+		}
+	})
+
 }
 
 func TestEKSClusterResourceReadContextArchived(t *testing.T) {
