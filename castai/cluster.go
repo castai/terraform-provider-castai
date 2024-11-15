@@ -169,7 +169,9 @@ func resourceCastaiClusterUpdate(
 			return fmt.Errorf("error in update cluster response: %w", err)
 		}
 
-		credentialsID = *response.JSON200.CredentialsId
+		if response.JSON200.CredentialsId != nil {
+			credentialsID = *response.JSON200.CredentialsId
+		}
 		return nil
 	}, b, func(err error, _ time.Duration) {
 		// Only store non-context errors so we can surface the last "real" error to the user at the end

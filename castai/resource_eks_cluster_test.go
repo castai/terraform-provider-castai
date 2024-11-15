@@ -3,6 +3,7 @@ package castai
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"io"
 	"net/http"
 	"testing"
@@ -145,34 +146,108 @@ func TestEKSClusterResourceReadContextArchived(t *testing.T) {
 }
 
 func TestEKSClusterResourceUpdateError(t *testing.T) {
-	r := require.New(t)
-	mockctrl := gomock.NewController(t)
-	mockClient := mock_sdk.NewMockClientInterface(mockctrl)
-
+	clusterID := "b6bfc074-a267-400f-b8f1-db0850c36gk3d"
 	ctx := context.Background()
-	provider := &ProviderConfig{
-		api: &sdk.ClientWithResponses{
-			ClientInterface: mockClient,
-		},
-	}
 
-	clusterId := "b6bfc074-a267-400f-b8f1-db0850c36gk3d"
-	mockClient.EXPECT().
-		ExternalClusterAPIUpdateCluster(gomock.Any(), clusterId, gomock.Any(), gomock.Any()).
-		Return(&http.Response{StatusCode: 400, Body: io.NopCloser(bytes.NewBufferString(`{"message":"Bad Request", "fieldViolations":[{"field":"credentials","description":"error"}]}`)), Header: map[string][]string{"Content-Type": {"json"}}}, nil)
+	t.Run("resource update error generic propagated", func(t *testing.T) {
+		r := require.New(t)
+		mockctrl := gomock.NewController(t)
+		mockClient := mock_sdk.NewMockClientInterface(mockctrl)
 
-	resource := resourceEKSCluster()
+		provider := &ProviderConfig{
+			api: &sdk.ClientWithResponses{
+				ClientInterface: mockClient,
+			},
+		}
 
-	raw := make(map[string]interface{})
-	raw[FieldEKSClusterAssumeRoleArn] = "something"
+		mockClient.EXPECT().
+			ExternalClusterAPIUpdateCluster(gomock.Any(), clusterID, gomock.Any(), gomock.Any()).
+			Return(&http.Response{StatusCode: 400, Body: io.NopCloser(bytes.NewBufferString(`{"message":"Bad Request", "fieldViolations":[{"field":"credentials","description":"error"}]}`)), Header: map[string][]string{"Content-Type": {"json"}}}, nil)
 
-	data := schema.TestResourceDataRaw(t, resource.Schema, raw)
-	_ = data.Set(FieldEKSClusterAssumeRoleArn, "creds")
-	data.SetId(clusterId)
-	result := resource.UpdateContext(ctx, data, provider)
-	r.NotNil(result)
-	r.True(result.HasError())
-	r.Equal("updating cluster configuration: expected status code 200, received: status=400 body={\"message\":\"Bad Request\", \"fieldViolations\":[{\"field\":\"credentials\",\"description\":\"error\"}]}", result[0].Summary)
+		resource := resourceEKSCluster()
+
+		raw := make(map[string]interface{})
+		raw[FieldEKSClusterAssumeRoleArn] = "something"
+
+		data := schema.TestResourceDataRaw(t, resource.Schema, raw)
+		_ = data.Set(FieldEKSClusterAssumeRoleArn, "creds")
+		data.SetId(clusterID)
+		result := resource.UpdateContext(ctx, data, provider)
+		r.NotNil(result)
+		r.True(result.HasError())
+		r.Equal("updating cluster configuration: expected status code 200, received: status=400 body={\"message\":\"Bad Request\", \"fieldViolations\":[{\"field\":\"credentials\",\"description\":\"error\"}]}", result[0].Summary)
+	})
+
+	t.Run("credentials_id special handling", func(t *testing.T) {
+		t.Run("on successful update, should avoid drift on the read", func(t *testing.T) {
+			r := require.New(t)
+			mockctrl := gomock.NewController(t)
+			mockClient := mock_sdk.NewMockClientInterface(mockctrl)
+			provider := &ProviderConfig{
+				api: &sdk.ClientWithResponses{
+					ClientInterface: mockClient,
+				},
+			}
+
+			credentialsIDAfterUpdate := "after-update-credentialsid"
+			roleARN := "aws-role"
+			updateResponse := io.NopCloser(bytes.NewReader([]byte(fmt.Sprintf(`{"credentialsId": "%s"}`, credentialsIDAfterUpdate))))
+			readResponse := io.NopCloser(bytes.NewReader([]byte(fmt.Sprintf(`{"credentialsId": "%s"}`, credentialsIDAfterUpdate))))
+			mockClient.EXPECT().
+				ExternalClusterAPIGetCluster(gomock.Any(), clusterID).
+				Return(&http.Response{StatusCode: 200, Body: readResponse, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
+			mockClient.EXPECT().
+				ExternalClusterAPIUpdateCluster(gomock.Any(), clusterID, gomock.Any()).
+				Return(&http.Response{StatusCode: 200, Body: updateResponse, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
+
+			awsResource := resourceEKSCluster()
+
+			diff := map[string]any{
+				FieldEKSClusterAssumeRoleArn: roleARN,
+				FieldClusterCredentialsId:    "before-update-credentialsid",
+			}
+			data := schema.TestResourceDataRaw(t, awsResource.Schema, diff)
+			data.SetId(clusterID)
+			diagnostics := awsResource.UpdateContext(ctx, data, provider)
+
+			r.Empty(diagnostics)
+
+			r.Equal(credentialsIDAfterUpdate, data.Get(FieldClusterCredentialsId))
+			r.Equal(roleARN, data.Get(FieldEKSClusterAssumeRoleArn))
+		})
+
+		t.Run("on failed update, should overwrite credentialsID", func(t *testing.T) {
+			r := require.New(t)
+			mockctrl := gomock.NewController(t)
+			mockClient := mock_sdk.NewMockClientInterface(mockctrl)
+			provider := &ProviderConfig{
+				api: &sdk.ClientWithResponses{
+					ClientInterface: mockClient,
+				},
+			}
+
+			mockClient.EXPECT().
+				ExternalClusterAPIUpdateCluster(gomock.Any(), clusterID, gomock.Any()).
+				Return(&http.Response{StatusCode: 400, Body: http.NoBody}, nil)
+
+			awsResource := resourceEKSCluster()
+
+			credentialsID := "credentialsID-before-updates"
+			diff := map[string]any{
+				FieldClusterCredentialsId: credentialsID,
+			}
+			data := schema.TestResourceDataRaw(t, awsResource.Schema, diff)
+			data.SetId(clusterID)
+			diagnostics := awsResource.UpdateContext(ctx, data, provider)
+
+			r.NotEmpty(diagnostics)
+
+			valueAfter := data.Get(FieldClusterCredentialsId)
+			r.NotEqual(credentialsID, valueAfter)
+			r.Contains(valueAfter, "drift")
+		})
+	})
+
 }
 
 func TestEKSClusterResourceUpdateRetry(t *testing.T) {
