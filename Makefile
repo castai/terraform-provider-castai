@@ -36,7 +36,7 @@ generate-sdk:
 .PHONY: generate-docs
 generate-docs:
 	go install github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs@v0.14.1
-	tfplugindocs generate --rendered-provider-name "CAST AI" --ignore-deprecated
+	tfplugindocs generate --rendered-provider-name "CAST AI" --ignore-deprecated --provider-name terraform-provider-castai
 
 .PHONY: generate-all
 generate-all: generate-sdk generate-docs
@@ -63,7 +63,7 @@ test:
 .PHONY: testacc
 testacc:
 	@echo "==> Running acceptance tests"
-	TF_ACC=1 go test ./castai/... '-run=^TestAcc' -v -timeout 40m
+	TF_ACC=1 go test ./castai/... '-run=^TestAcc' -v -timeout 50m
 
 .PHONY: validate-terraform-examples
 validate-terraform-examples:
