@@ -17,9 +17,16 @@ Helm Managed ==>  All Castware components such as `castai-agent`, `castai-cluste
                                                   2. Terraform Init & Apply| 
                                                 +-------------------------+
                                                             | 
+                                                            | TERRAFORM OUTPUT
+                                                +-------------------------+
+                                                |  3. Execute terraform output command
+                                                | terraform output cluster_id  
+                                                  terraform output cluster_token
+                                                +-------------------------+
+                                                            | 
                                                             |GITOPS
                                                 +-------------------------+
-                                                | 3. Deploy Helm chart of castai-agent castai-cluster-controller`, `castai-evictor`, `castai-spot-handler`, `castai-kvisor`, `castai-workload-autoscaler`, `castai-pod-pinner`
+                                                | 4. Deploy Helm chart of castai-agent castai-cluster-controller`, `castai-evictor`, `castai-spot-handler`, `castai-kvisor`, `castai-workload-autoscaler`, `castai-pod-pinner`
                                                 +-------------------------+         
                                                             | 
                                                             | 
@@ -37,25 +44,30 @@ Prerequisites:
 After successful apply, CAST Console UI will be in `Connecting` state. \
 Note generated 'CASTAI_CLUSTER_ID' from outputs
 
+### Step 3: Execute TF output command & save the below output values
+terraform output cluster_id  
+terraform output cluster_token
 
-### Step 3: Deploy Helm chart of CAST Components
+Obtained values are needed for next step
+
+### Step 4: Deploy Helm chart of CAST Components
 Coponents: `castai-cluster-controller`,`castai-evictor`, `castai-spot-handler`, `castai-kvisor`, `castai-workload-autoscaler`, `castai-pod-pinner` \
 After all CAST AI components are installed in the cluster its status in CAST AI console would change from `Connecting` to `Connected` which means that cluster onboarding process completed successfully.
 
 ```
-CASTAI_API_KEY=""
-CASTAI_CLUSTER_ID=""
+CASTAI_CLUSTER_ID="<Replace cluster_id>"
+CASTAI_CLUSTER_API_TOKEN="<Replace cluster_token>"
 CAST_CONFIG_SOURCE="castai-cluster-controller"
 
 #### Mandatory Component: Castai-agent
 helm upgrade -i castai-agent castai-helm/castai-agent -n castai-agent --create-namespace \
-  --set apiKey=$CASTAI_API_KEY \
+  --set apiKey=$CASTAI_CLUSTER_API_TOKEN \
   --set provider=gke \
   --set createNamespace=false
 
 #### Mandatory Component: castai-cluster-controller
 helm upgrade -i cluster-controller castai-helm/castai-cluster-controller -n castai-agent \
---set castai.apiKey=$CASTAI_API_KEY \
+--set castai.apiKey=$CASTAI_CLUSTER_API_TOKEN \
 --set castai.clusterID=$CASTAI_CLUSTER_ID \
 --set autoscaling.enabled=true
 
@@ -69,7 +81,7 @@ helm upgrade -i castai-evictor castai-helm/castai-evictor -n castai-agent --set 
 
 #### castai-pod-pinner
 helm upgrade -i castai-pod-pinner castai-helm/castai-pod-pinner -n castai-agent \
---set castai.apiKey=$CASTAI_API_KEY \
+--set castai.apiKey=$CASTAI_CLUSTER_API_TOKEN \
 --set castai.clusterID=$CASTAI_CLUSTER_ID \
 --set replicaCount=0
 
@@ -80,7 +92,7 @@ helm upgrade -i castai-workload-autoscaler castai-helm/castai-workload-autoscale
 
 #### castai-kvisor
 helm upgrade -i castai-kvisor castai-helm/castai-kvisor -n castai-agent \
---set castai.apiKey=$CASTAI_API_KEY \
+--set castai.apiKey=$CASTAI_CLUSTER_API_TOKEN \
 --set castai.clusterID=$CASTAI_CLUSTER_ID \
 --set controller.extraArgs.kube-linter-enabled=true \
 --set controller.extraArgs.image-scan-enabled=true \
@@ -104,3 +116,9 @@ helm upgrade -i castai-kvisor castai-helm/castai-kvisor -n castai-agent \
 This example can also be used to import GKE cluster to Terraform which is already onboarded to CAST AI console through [script](https://docs.cast.ai/docs/cluster-onboarding#how-it-works).   
 For importing existing cluster follow steps 1-3 above and change `castai_node_configuration.default` Node Configuration name.
 This would allow to manage already onboarded clusters' CAST AI Node Configurations and Node Templates through IaC.
+
+## Note: Difference between CAST API key & CAST Cluster API Token
+API Key - API key has all clusters access.
+Cluster API Token - API Token is cluster specific access.
+
+Security best practice to use Cluster API Token which has granular access.
