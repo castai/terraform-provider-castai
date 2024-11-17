@@ -24,9 +24,9 @@ variable "castai_api_url" {
   default     = "https://api.cast.ai"
 }
 
-variable "castai_api_token" {
+variable "castai_api_key" {
   type        = string
-  description = "CAST AI API token created in console.cast.ai API Access keys section."
+  description = "CAST AI API Key created in console.cast.ai API Access keys section."
 }
 
 variable "castai_grpc_url" {
