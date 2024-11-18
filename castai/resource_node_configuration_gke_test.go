@@ -122,7 +122,7 @@ resource "castai_node_configuration" "test" {
     disk_type = "pd-ssd"
     zones = ["us-central1-c"]
     use_ephemeral_storage_local_ssd = true
-	load_balancers {
+	loadbalancers {
 		target_backend_pools {
 			name = "tg-1"
 		}
@@ -135,7 +135,7 @@ resource "castai_node_configuration" "test" {
 			zone = "us-central1-b"
      	}
 	}
-	load_balancers {
+	loadbalancers {
 		target_backend_pools {
 			name = "tg-2"
 		}
