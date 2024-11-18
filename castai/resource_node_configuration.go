@@ -1263,7 +1263,7 @@ func fromGkeLoadBalancers(objs []sdk.NodeconfigV1GKEConfigLoadBalancers) []map[s
 	for _, obj := range objs {
 		result := make(map[string]interface{})
 		if obj.TargetBackendPools != nil && len(*obj.TargetBackendPools) > 0 {
-			tbp := []interface{}{}
+			tbp := []map[string]interface{}{}
 			for _, pool := range *obj.TargetBackendPools {
 				tbp = append(tbp, map[string]interface{}{
 					"name": *pool.Name,
@@ -1273,7 +1273,7 @@ func fromGkeLoadBalancers(objs []sdk.NodeconfigV1GKEConfigLoadBalancers) []map[s
 		}
 
 		if obj.UnmanagedInstanceGroups != nil && len(*obj.UnmanagedInstanceGroups) > 0 {
-			uig := []interface{}{}
+			uig := []map[string]interface{}{}
 			for _, group := range *obj.UnmanagedInstanceGroups {
 				uig = append(uig, map[string]interface{}{
 					"name": *group.Name,
