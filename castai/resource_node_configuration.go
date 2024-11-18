@@ -1261,7 +1261,7 @@ func flattenGKEConfig(config *sdk.NodeconfigV1GKEConfig) []map[string]interface{
 func fromGkeLoadBalancers(objs []sdk.NodeconfigV1GKEConfigLoadBalancers) []map[string]interface{} {
 	var results []map[string]interface{}
 	for _, obj := range objs {
-		var result map[string]interface{}
+		result := make(map[string]interface{})
 		if obj.TargetBackendPools != nil && len(*obj.TargetBackendPools) > 0 {
 			tbp := []interface{}{}
 			for _, pool := range *obj.TargetBackendPools {
@@ -1282,7 +1282,9 @@ func fromGkeLoadBalancers(objs []sdk.NodeconfigV1GKEConfigLoadBalancers) []map[s
 			}
 			result["unmanaged_instance_groups"] = uig
 		}
-		results = append(results, result)
+		if len(result) > 0 {
+			results = append(results, result)
+		}
 	}
 
 	return results
