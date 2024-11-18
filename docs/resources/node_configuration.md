@@ -156,10 +156,37 @@ Optional:
 Optional:
 
 - `disk_type` (String) Type of boot disk attached to the node. (See [disk types](https://cloud.google.com/compute/docs/disks#pdspecs)). One of: pd-standard, pd-balanced, pd-ssd, pd-extreme
+- `loadbalancers` (Block List) Loadboalancer configuration for CAST provisioned nodes (see [below for nested schema](#nestedblock--gke--loadbalancers))
 - `max_pods_per_node` (Number) Maximum number of pods that can be run on a node, which affects how many IP addresses you will need for each node. Defaults to 110
 - `network_tags` (List of String) Network tags to be added on a VM. (See [network tags](https://cloud.google.com/vpc/docs/add-remove-network-tags))
 - `use_ephemeral_storage_local_ssd` (Boolean) Use ephemeral storage local SSD. Defaults to false
 - `zones` (List of String, Deprecated) List of preferred availability zones to choose from when provisioning new nodes.
+
+<a id="nestedblock--gke--loadbalancers"></a>
+### Nested Schema for `gke.loadbalancers`
+
+Optional:
+
+- `target_backend_pools` (Block List) Target backend pools configuration for CAST provisioned nodes (see [below for nested schema](#nestedblock--gke--loadbalancers--target_backend_pools))
+- `unmanaged_instance_groups` (Block List) Unmanaged instance groups configuration for CAST provisioned nodes (see [below for nested schema](#nestedblock--gke--loadbalancers--unmanaged_instance_groups))
+
+<a id="nestedblock--gke--loadbalancers--target_backend_pools"></a>
+### Nested Schema for `gke.loadbalancers.target_backend_pools`
+
+Required:
+
+- `name` (String) Name of the target group
+
+
+<a id="nestedblock--gke--loadbalancers--unmanaged_instance_groups"></a>
+### Nested Schema for `gke.loadbalancers.unmanaged_instance_groups`
+
+Required:
+
+- `name` (String) Name of the instance group
+- `zone` (String) Zone of the instance group
+
+
 
 
 <a id="nestedblock--kops"></a>

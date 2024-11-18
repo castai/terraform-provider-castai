@@ -134,12 +134,13 @@ resource "castai_node_configuration" "test" {
 			name = "ig-2"
 			zone = "us-central1-b"
      	}
-  	}
+	}
 	load_balancers {
 		target_backend_pools {
 			name = "tg-2"
 		}
   	}
+  }
 }
 `, rName))
 }
