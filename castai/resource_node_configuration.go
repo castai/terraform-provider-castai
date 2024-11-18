@@ -40,7 +40,7 @@ const (
 	FieldNodeConfigurationEKSTargetGroup   = "target_group"
 	FieldNodeConfigurationAKSImageFamily   = "aks_image_family"
 	FieldNodeConfigurationEKSImageFamily   = "eks_image_family"
-	FieldNodeConfigurationAKSLoadbalaners  = "loadbalancers"
+	FieldNodeConfigurationLoadbalancers    = "loadbalancers"
 )
 
 const (
@@ -330,7 +330,7 @@ func resourceNodeConfiguration() *schema.Resource {
 								return strings.EqualFold(oldValue, newValue)
 							},
 						},
-						FieldNodeConfigurationAKSLoadbalaners: {
+						FieldNodeConfigurationLoadbalancers: {
 							Type:        schema.TypeList,
 							Optional:    true,
 							Description: "Loadboalancer configuration for CAST provisioned nodes",
@@ -418,6 +418,48 @@ func resourceNodeConfiguration() *schema.Resource {
 							Optional:    true,
 							Default:     nil,
 							Description: "Use ephemeral storage local SSD. Defaults to false",
+						},
+						FieldNodeConfigurationLoadbalancers: {
+							Type:        schema.TypeList,
+							Optional:    true,
+							Description: "Loadboalancer configuration for CAST provisioned nodes",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"target_backend_pools": {
+										Type:        schema.TypeList,
+										Optional:    true,
+										Description: "Target backend pools configuration for CAST provisioned nodes",
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"name": {
+													Type:        schema.TypeString,
+													Required:    true,
+													Description: "Name of the target group",
+												},
+											},
+										},
+									},
+									"unmanaged_instance_groups": {
+										Type:        schema.TypeList,
+										Optional:    true,
+										Description: "Unmanaged instance groups configuration for CAST provisioned nodes",
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"name": {
+													Type:        schema.TypeString,
+													Required:    true,
+													Description: "Name of the instance group",
+												},
+												"zone": {
+													Type:        schema.TypeString,
+													Required:    true,
+													Description: "Zone of the instance group",
+												},
+											},
+										},
+									},
+								},
+							},
 						},
 					},
 				},
@@ -923,7 +965,7 @@ func toAKSSConfig(obj map[string]interface{}) *sdk.NodeconfigV1AKSConfig {
 		out.ImageFamily = toAKSImageFamily(v)
 	}
 
-	if v, ok := obj[FieldNodeConfigurationAKSLoadbalaners].([]interface{}); ok && len(v) > 0 {
+	if v, ok := obj[FieldNodeConfigurationLoadbalancers].([]interface{}); ok && len(v) > 0 {
 		out.LoadBalancers = toAksLoadBalancers(v)
 	}
 
@@ -1021,7 +1063,7 @@ func flattenAKSConfig(config *sdk.NodeconfigV1AKSConfig) []map[string]interface{
 	}
 
 	if v := config.LoadBalancers; v != nil && len(*v) > 0 {
-		m[FieldNodeConfigurationAKSLoadbalaners] = fromAksLoadBalancers(*v)
+		m[FieldNodeConfigurationLoadbalancers] = fromAksLoadBalancers(*v)
 	}
 
 	return []map[string]interface{}{m}
@@ -1114,7 +1156,77 @@ func toGKEConfig(obj map[string]interface{}) *sdk.NodeconfigV1GKEConfig {
 		out.UseEphemeralStorageLocalSsd = toPtr(v)
 	}
 
+	if v, ok := obj[FieldNodeConfigurationLoadbalancers].([]interface{}); ok && len(v) > 0 {
+		out.LoadBalancers = toGkeLoadBalancers(v)
+	}
+
 	return out
+}
+
+func toGkeLoadBalancers(obj []interface{}) *[]sdk.NodeconfigV1GKEConfigLoadBalancers {
+	if obj == nil {
+		return nil
+	}
+
+	out := make([]sdk.NodeconfigV1GKEConfigLoadBalancers, 0, len(obj))
+	for _, lbRaw := range obj {
+		if lb, ok := lbRaw.(map[string]interface{}); ok {
+			if targetBackendPools, ok := lb["target_backend_pools"].([]interface{}); ok && len(targetBackendPools) > 0 {
+				sdkLB := sdk.NodeconfigV1GKEConfigLoadBalancers{}
+				sdkLB.TargetBackendPools = toGkeTargetBackendPools(targetBackendPools)
+				out = append(out, sdkLB)
+			}
+			if unmanagedInstanceGroups, ok := lb["unmanaged_instance_groups"].([]interface{}); ok && len(unmanagedInstanceGroups) > 0 {
+				sdkLB := sdk.NodeconfigV1GKEConfigLoadBalancers{}
+				sdkLB.UnmanagedInstanceGroups = toGkeUnmanagedInstanceGroups(unmanagedInstanceGroups)
+				out = append(out, sdkLB)
+			}
+		}
+	}
+
+	return &out
+}
+
+func toGkeTargetBackendPools(obj []interface{}) *[]sdk.NodeconfigV1GKEConfigLoadBalancersTargetBackendPools {
+	if obj == nil {
+		return nil
+	}
+
+	out := make([]sdk.NodeconfigV1GKEConfigLoadBalancersTargetBackendPools, 0, len(obj))
+	for _, poolRaw := range obj {
+		if pool, ok := poolRaw.(map[string]interface{}); ok {
+			sdkPool := sdk.NodeconfigV1GKEConfigLoadBalancersTargetBackendPools{}
+			if name, ok := pool["name"].(string); ok && name != "" {
+				sdkPool.Name = lo.ToPtr(name)
+			}
+			out = append(out, sdkPool)
+		}
+	}
+
+	return &out
+}
+
+func toGkeUnmanagedInstanceGroups(obj []interface{}) *[]sdk.NodeconfigV1GKEConfigLoadBalancersUnmanagedInstanceGroups {
+	if obj == nil {
+		return nil
+	}
+
+	out := make([]sdk.NodeconfigV1GKEConfigLoadBalancersUnmanagedInstanceGroups, 0, len(obj))
+	for _, groupRaw := range obj {
+		if group, ok := groupRaw.(map[string]interface{}); ok {
+			sdkGroup := sdk.NodeconfigV1GKEConfigLoadBalancersUnmanagedInstanceGroups{}
+			if name, ok := group["name"].(string); ok && name != "" {
+				sdkGroup.Name = lo.ToPtr(name)
+			}
+			if zone, ok := group["zone"].(string); ok && zone != "" {
+				sdkGroup.Zone = lo.ToPtr(zone)
+			}
+			out = append(out, sdkGroup)
+		}
+	}
+
+	return &out
+
 }
 
 func flattenGKEConfig(config *sdk.NodeconfigV1GKEConfig) []map[string]interface{} {
@@ -1139,7 +1251,41 @@ func flattenGKEConfig(config *sdk.NodeconfigV1GKEConfig) []map[string]interface{
 		m["use_ephemeral_storage_local_ssd"] = *v
 	}
 
+	if v := config.LoadBalancers; v != nil && len(*v) > 0 {
+		m[FieldNodeConfigurationLoadbalancers] = fromGkeLoadBalancers(*v)
+	}
+
 	return []map[string]interface{}{m}
+}
+
+func fromGkeLoadBalancers(objs []sdk.NodeconfigV1GKEConfigLoadBalancers) []map[string]interface{} {
+	var results []map[string]interface{}
+	for _, obj := range objs {
+		var result map[string]interface{}
+		if obj.TargetBackendPools != nil && len(*obj.TargetBackendPools) > 0 {
+			tbp := []interface{}{}
+			for _, pool := range *obj.TargetBackendPools {
+				tbp = append(tbp, map[string]interface{}{
+					"name": *pool.Name,
+				})
+			}
+			result["target_backend_pools"] = tbp
+		}
+
+		if obj.UnmanagedInstanceGroups != nil && len(*obj.UnmanagedInstanceGroups) > 0 {
+			uig := []interface{}{}
+			for _, group := range *obj.UnmanagedInstanceGroups {
+				uig = append(uig, map[string]interface{}{
+					"name": *group.Name,
+					"zone": *group.Zone,
+				})
+			}
+			result["unmanaged_instance_groups"] = uig
+		}
+		results = append(results, result)
+	}
+
+	return results
 }
 
 func nodeConfigStateImporter(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {

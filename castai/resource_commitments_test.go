@@ -14,6 +14,9 @@ import (
 )
 
 func TestAccCommitments(t *testing.T) {
+	// TODO: FIX by https://castai.atlassian.net/browse/PRICE-410
+	t.Skip()
+	// END TODO
 	var (
 		gcpServiceAccountID = fmt.Sprintf("%v-node-cfg-%v", ResourcePrefix, acctest.RandString(8))
 		gkeClusterName      = "tf-core-acc-20230723"

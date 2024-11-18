@@ -2329,6 +2329,9 @@ type NodeconfigV1GKEConfig struct {
 	// Type of boot disk attached to the node. For available types please read official GCP docs(https://cloud.google.com/compute/docs/disks#pdspecs).
 	DiskType *string `json:"diskType"`
 
+	// List of load balancers to be used for the cluster.
+	LoadBalancers *[]NodeconfigV1GKEConfigLoadBalancers `json:"loadBalancers,omitempty"`
+
 	// Maximum number of pods that can be run on a node, which affects how many IP addresses you will need for each node. Defaults to 110.
 	// For Standard GKE clusters, you can run a maximum of 256 Pods on a node with a /23 range, not 512 as you might expect. This provides a buffer so that Pods don't become unschedulable due to a
 	// transient lack of IP addresses in the Pod IP range for a given node. For all ranges, at most half as many Pods can be scheduled as IP addresses in the range.
@@ -2342,6 +2345,27 @@ type NodeconfigV1GKEConfig struct {
 
 	// Zones is a preferred list of zones to choose from when adding a node.
 	Zones *[]string `json:"zones,omitempty"`
+}
+
+// NodeconfigV1GKEConfigLoadBalancers defines model for nodeconfig.v1.GKEConfig.LoadBalancers.
+type NodeconfigV1GKEConfigLoadBalancers struct {
+	TargetBackendPools      *[]NodeconfigV1GKEConfigLoadBalancersTargetBackendPools      `json:"targetBackendPools,omitempty"`
+	UnmanagedInstanceGroups *[]NodeconfigV1GKEConfigLoadBalancersUnmanagedInstanceGroups `json:"unmanagedInstanceGroups,omitempty"`
+}
+
+// NodeconfigV1GKEConfigLoadBalancersTargetBackendPools defines model for nodeconfig.v1.GKEConfig.LoadBalancers.TargetBackendPools.
+type NodeconfigV1GKEConfigLoadBalancersTargetBackendPools struct {
+	// Name of the target backend pool.
+	Name *string `json:"name,omitempty"`
+}
+
+// NodeconfigV1GKEConfigLoadBalancersUnmanagedInstanceGroups defines model for nodeconfig.v1.GKEConfig.LoadBalancers.UnmanagedInstanceGroups.
+type NodeconfigV1GKEConfigLoadBalancersUnmanagedInstanceGroups struct {
+	// Name of the unmanaged instance group.
+	Name *string `json:"name,omitempty"`
+
+	// Zone of the unmanaged instance group.
+	Zone *string `json:"zone,omitempty"`
 }
 
 // NodeconfigV1GetSuggestedConfigurationResponse defines model for nodeconfig.v1.GetSuggestedConfigurationResponse.
