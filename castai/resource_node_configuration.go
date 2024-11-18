@@ -531,7 +531,6 @@ func resourceNodeConfigurationCreate(ctx context.Context, d *schema.ResourceData
 		req.Gke = toGKEConfig(v.([]interface{})[0].(map[string]interface{}))
 	}
 
-	fmt.Printf("AAA req %+v load %+v \n", *req.Gke, *req.Gke.LoadBalancers)
 	resp, err := client.NodeConfigurationAPICreateConfigurationWithResponse(ctx, clusterID, req)
 	if checkErr := sdk.CheckOKResponse(resp, err); checkErr != nil {
 		return diag.FromErr(checkErr)
