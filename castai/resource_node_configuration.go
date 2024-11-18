@@ -531,6 +531,7 @@ func resourceNodeConfigurationCreate(ctx context.Context, d *schema.ResourceData
 		req.Gke = toGKEConfig(v.([]interface{})[0].(map[string]interface{}))
 	}
 
+	fmt.Printf("AAA req %+v load %+v \n", *req.Gke, *req.Gke.LoadBalancers)
 	resp, err := client.NodeConfigurationAPICreateConfigurationWithResponse(ctx, clusterID, req)
 	if checkErr := sdk.CheckOKResponse(resp, err); checkErr != nil {
 		return diag.FromErr(checkErr)
@@ -1171,14 +1172,15 @@ func toGkeLoadBalancers(obj []interface{}) *[]sdk.NodeconfigV1GKEConfigLoadBalan
 	out := make([]sdk.NodeconfigV1GKEConfigLoadBalancers, 0, len(obj))
 	for _, lbRaw := range obj {
 		if lb, ok := lbRaw.(map[string]interface{}); ok {
+			sdkLB := sdk.NodeconfigV1GKEConfigLoadBalancers{}
 			if targetBackendPools, ok := lb["target_backend_pools"].([]interface{}); ok && len(targetBackendPools) > 0 {
-				sdkLB := sdk.NodeconfigV1GKEConfigLoadBalancers{}
 				sdkLB.TargetBackendPools = toGkeTargetBackendPools(targetBackendPools)
-				out = append(out, sdkLB)
 			}
 			if unmanagedInstanceGroups, ok := lb["unmanaged_instance_groups"].([]interface{}); ok && len(unmanagedInstanceGroups) > 0 {
-				sdkLB := sdk.NodeconfigV1GKEConfigLoadBalancers{}
 				sdkLB.UnmanagedInstanceGroups = toGkeUnmanagedInstanceGroups(unmanagedInstanceGroups)
+			}
+
+			if sdkLB.UnmanagedInstanceGroups != nil || sdkLB.TargetBackendPools != nil {
 				out = append(out, sdkLB)
 			}
 		}
