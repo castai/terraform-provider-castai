@@ -57,6 +57,12 @@ func TestAccResourceNodeConfiguration_gke(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "gke.0.network_tags.1", "dd"),
 					resource.TestCheckResourceAttr(resourceName, "gke.0.zones.0", "us-central1-c"),
 					resource.TestCheckResourceAttr(resourceName, "gke.0.use_ephemeral_storage_local_ssd", "true"),
+					resource.TestCheckResourceAttr(resourceName, "gke.0.loadbalancers.0.target_backend_pools.0.name", "tg-1"),
+					resource.TestCheckResourceAttr(resourceName, "gke.0.loadbalancers.0.unmanaged_instance_groups.0.name", "ig-1"),
+					resource.TestCheckResourceAttr(resourceName, "gke.0.loadbalancers.0.unmanaged_instance_groups.0.zone", "us-central1-c"),
+					resource.TestCheckResourceAttr(resourceName, "gke.0.loadbalancers.0.unmanaged_instance_groups.1.name", "ig-2"),
+					resource.TestCheckResourceAttr(resourceName, "gke.0.loadbalancers.0.unmanaged_instance_groups.1.zone", "us-central1-b"),
+					resource.TestCheckResourceAttr(resourceName, "gke.0.loadbalancers.1.target_backend_pools.0.name", "tg-2"),
 				),
 			},
 		},
@@ -116,6 +122,24 @@ resource "castai_node_configuration" "test" {
     disk_type = "pd-ssd"
     zones = ["us-central1-c"]
     use_ephemeral_storage_local_ssd = true
+	loadbalancers {
+		target_backend_pools {
+			name = "tg-1"
+		}
+		unmanaged_instance_groups {
+			name = "ig-1"
+			zone = "us-central1-c"
+     	}
+		unmanaged_instance_groups {
+			name = "ig-2"
+			zone = "us-central1-b"
+     	}
+	}
+	loadbalancers {
+		target_backend_pools {
+			name = "tg-2"
+		}
+  	}
   }
 }
 `, rName))
