@@ -23,6 +23,28 @@ const (
 	CastaiEvictorV1LabelSelectorExpressionOperatorNotIn        CastaiEvictorV1LabelSelectorExpressionOperator = "NotIn"
 )
 
+// Defines values for CastaiFeaturesV1EntityType.
+const (
+	ClusterId      CastaiFeaturesV1EntityType = "clusterId"
+	Environment    CastaiFeaturesV1EntityType = "environment"
+	OrganizationId CastaiFeaturesV1EntityType = "organizationId"
+	UserId         CastaiFeaturesV1EntityType = "userId"
+)
+
+// Defines values for CastaiFeaturesV1LogicalOperator.
+const (
+	And                CastaiFeaturesV1LogicalOperator = "and"
+	LogicalUnspecified CastaiFeaturesV1LogicalOperator = "logical_unspecified"
+	Or                 CastaiFeaturesV1LogicalOperator = "or"
+)
+
+// Defines values for CastaiFeaturesV1Operator.
+const (
+	Equals              CastaiFeaturesV1Operator = "equals"
+	NotEquals           CastaiFeaturesV1Operator = "not_equals"
+	OperatorUnspecified CastaiFeaturesV1Operator = "operator_unspecified"
+)
+
 // Defines values for CastaiInventoryV1beta1AttachableGPUDeviceManufacturer.
 const (
 	CastaiInventoryV1beta1AttachableGPUDeviceManufacturerAMD     CastaiInventoryV1beta1AttachableGPUDeviceManufacturer = "AMD"
@@ -339,6 +361,18 @@ type ExternalClusterAPIGKECreateSARequest struct {
 	Gke *ExternalclusterV1UpdateGKEClusterParams `json:"gke,omitempty"`
 }
 
+// CreateServiceAccountKeyRequest is the request for creating a service account key.
+type ServiceAccountsAPICreateServiceAccountKeyRequest struct {
+	// Key is the readable version of the service account key.
+	Key CastaiServiceaccountsV1beta1CreateServiceAccountKeyRequestKey `json:"key"`
+}
+
+// CreateServiceAccountRequest is the request for creating a service account.
+type ServiceAccountsAPICreateServiceAccountRequest struct {
+	// ServiceAccounts is the readable version of the service accounts.
+	ServiceAccount CastaiServiceaccountsV1beta1CreateServiceAccountRequestServiceAccount `json:"serviceAccount"`
+}
+
 // UsersAPIUpdateOrganizationUserRequest defines model for UsersAPI_UpdateOrganizationUser_request.
 type UsersAPIUpdateOrganizationUserRequest struct {
 	Role *string `json:"role,omitempty"`
@@ -469,6 +503,63 @@ type CastaiEvictorV1PodSelector struct {
 	// `match_expressions` are ANDed.
 	LabelSelector *CastaiEvictorV1LabelSelector `json:"labelSelector,omitempty"`
 	Namespace     *string                       `json:"namespace,omitempty"`
+}
+
+// Comparison represents a entity to entity ID comparison.
+type CastaiFeaturesV1Comparison struct {
+	// The entity ID to compare against (e.g., "da7a9f8d-ed18-40c3-89a7-93a81283af62").
+	EntityId *string `json:"entityId,omitempty"`
+
+	// EntityType defines available entity types for feature flag enablement.
+	//
+	//  - organizationId: Represents the main identifier(organization_id) for organization in Cast AI.
+	//  - clusterId: Represents the main identifier(cluster_id) for cluster in Cast AI.
+	//  - userId: Represents the user identifier(username) which is used to identify a user in users service.
+	//  - environment: Represents the identifier which is used to identify an environment in Cast AI.
+	EntityType *CastaiFeaturesV1EntityType `json:"entityType,omitempty"`
+
+	// Operator defines available operators for targeting rules.
+	//
+	//  - operator_unspecified: unspecified operator.
+	//  - equals: Represents the equals operator, ==.
+	//  - not_equals: Represents the not equals operator, !=.
+	Operator *CastaiFeaturesV1Operator `json:"operator,omitempty"`
+}
+
+// Represents a condition, which can be a comparison or a nested query.
+type CastaiFeaturesV1Condition struct {
+	// Comparison represents a entity to entity ID comparison.
+	Comparison *CastaiFeaturesV1Comparison `json:"comparison,omitempty"`
+
+	// QueryExpression represents a logical operation with conditions.
+	NestedQuery *CastaiFeaturesV1QueryExpression `json:"nestedQuery,omitempty"`
+}
+
+// EntityType defines available entity types for feature flag enablement.
+//
+//   - organizationId: Represents the main identifier(organization_id) for organization in Cast AI.
+//   - clusterId: Represents the main identifier(cluster_id) for cluster in Cast AI.
+//   - userId: Represents the user identifier(username) which is used to identify a user in users service.
+//   - environment: Represents the identifier which is used to identify an environment in Cast AI.
+type CastaiFeaturesV1EntityType string
+
+// LogicalOperator defines available logical operators for targeting rules.
+type CastaiFeaturesV1LogicalOperator string
+
+// Operator defines available operators for targeting rules.
+//
+//   - operator_unspecified: unspecified operator.
+//   - equals: Represents the equals operator, ==.
+//   - not_equals: Represents the not equals operator, !=.
+type CastaiFeaturesV1Operator string
+
+// QueryExpression represents a logical operation with conditions.
+type CastaiFeaturesV1QueryExpression struct {
+	// Represents evaluation conditions.
+	Conditions []CastaiFeaturesV1Condition `json:"conditions"`
+
+	// LogicalOperator defines available logical operators for targeting rules.
+	LogicalOperator CastaiFeaturesV1LogicalOperator `json:"logicalOperator"`
 }
 
 // CastaiInventoryV1beta1AddReservationResponse defines model for castai.inventory.v1beta1.AddReservationResponse.
@@ -1173,6 +1264,186 @@ type CastaiOperationsV1beta1OperationError struct {
 
 	// Reason is an operation specific failure code. Refer to documentation about possible outcomes.
 	Reason *string `json:"reason,omitempty"`
+}
+
+// Page defines how many and which fields should be returned.
+type CastaiPaginationV1beta1Page struct {
+	// Cursor that defines token indicating where to start the next page.
+	// Empty value indicates to start from beginning of the dataset.
+	Cursor *string `json:"cursor,omitempty"`
+	Limit  *string `json:"limit,omitempty"`
+}
+
+// Key is the readable version of the service account key.
+type CastaiServiceaccountsV1beta1CreateServiceAccountKeyRequestKey struct {
+	// ExpiresAt is the expiration time of the key.
+	// A null value means that the key will never expire.
+	ExpiresAt *time.Time `json:"expiresAt,omitempty"`
+
+	// Name is the name of the service account key.
+	Name string `json:"name"`
+}
+
+// CreateServiceAccountKeyResponse is the response for creating a service account key.
+type CastaiServiceaccountsV1beta1CreateServiceAccountKeyResponse struct {
+	// Active determines if the key is active.
+	Active *bool `json:"active,omitempty"`
+
+	// CreatedAt is the creation time of the key.
+	CreatedAt *time.Time `json:"createdAt,omitempty"`
+
+	// ExpiresAt is the expiration time of the key.
+	ExpiresAt *time.Time `json:"expiresAt,omitempty"`
+
+	// ID is the unique identifier of the key.
+	Id *string `json:"id,omitempty"`
+
+	// Name is the name of the key.
+	Name *string `json:"name,omitempty"`
+
+	// Token is the full secret key.
+	Token *string `json:"token,omitempty"`
+}
+
+// ServiceAccounts is the readable version of the service accounts.
+type CastaiServiceaccountsV1beta1CreateServiceAccountRequestServiceAccount struct {
+	// Description is the description of the role binding.
+	Description *string `json:"description,omitempty"`
+
+	// Name is the name of the service account.
+	Name string `json:"name"`
+}
+
+// CreateServiceAccountResponse is the response for creating a service account.
+type CastaiServiceaccountsV1beta1CreateServiceAccountResponse struct {
+	Author      *CastaiServiceaccountsV1beta1CreateServiceAccountResponseAuthor `json:"author,omitempty"`
+	CreatedAt   *time.Time                                                      `json:"createdAt,omitempty"`
+	Description *string                                                         `json:"description,omitempty"`
+	Id          *string                                                         `json:"id,omitempty"`
+	Name        *string                                                         `json:"name,omitempty"`
+}
+
+// CastaiServiceaccountsV1beta1CreateServiceAccountResponseAuthor defines model for castai.serviceaccounts.v1beta1.CreateServiceAccountResponse.Author.
+type CastaiServiceaccountsV1beta1CreateServiceAccountResponseAuthor struct {
+	Email *string `json:"email,omitempty"`
+	Id    *string `json:"id,omitempty"`
+}
+
+// DeleteServiceAccountKeyResponse is the response for deleting a service account key.
+type CastaiServiceaccountsV1beta1DeleteServiceAccountKeyResponse = map[string]interface{}
+
+// DeleteServiceAccountResponse is the response for deleting a service account.
+type CastaiServiceaccountsV1beta1DeleteServiceAccountResponse = map[string]interface{}
+
+// GetServiceAccountResponse is the response for getting a service account.
+type CastaiServiceaccountsV1beta1GetServiceAccountResponse struct {
+	// ServiceAccount represents a service account.
+	ServiceAccount CastaiServiceaccountsV1beta1ServiceAccount `json:"serviceAccount"`
+}
+
+// ListServiceAccountsResponse is the response for listing service accounts.
+type CastaiServiceaccountsV1beta1ListServiceAccountsResponse struct {
+	// Page defines how many and which fields should be returned.
+	NextPage CastaiPaginationV1beta1Page `json:"nextPage"`
+
+	// ServiceAccounts is the list of service accounts.
+	ServiceAccounts *[]CastaiServiceaccountsV1beta1ListServiceAccountsResponseServiceAccount `json:"serviceAccounts,omitempty"`
+
+	// TotalCount is the total number of service accounts in the dataset.
+	TotalCount *string `json:"totalCount,omitempty"`
+}
+
+// ServiceAccounts is the readable version of the service accounts.
+type CastaiServiceaccountsV1beta1ListServiceAccountsResponseServiceAccount struct {
+	// Author is the author of the service account.
+	Author *CastaiServiceaccountsV1beta1ListServiceAccountsResponseServiceAccountAuthor `json:"author,omitempty"`
+
+	// CreatedAt is the timestamp when the service account was created.
+	CreatedAt *time.Time `json:"createdAt,omitempty"`
+
+	// Description is the description of the role binding.
+	Description *string `json:"description,omitempty"`
+
+	// ID is the unique identifier of the service account.
+	Id *string `json:"id,omitempty"`
+
+	// Keys is the list of keys associated with the service account.
+	Keys *[]CastaiServiceaccountsV1beta1ListServiceAccountsResponseServiceAccountKey `json:"keys,omitempty"`
+
+	// Name is the name of the service account.
+	Name *string `json:"name,omitempty"`
+}
+
+// Author is the author of the service account.
+type CastaiServiceaccountsV1beta1ListServiceAccountsResponseServiceAccountAuthor struct {
+	// Email is the email of the author.
+	Email *string `json:"email,omitempty"`
+
+	// ID is the unique identifier of the author.
+	Id *string `json:"id,omitempty"`
+
+	// Kind is the kind of the author.
+	Kind *string `json:"kind,omitempty"`
+}
+
+// Key is the key for the service account.
+type CastaiServiceaccountsV1beta1ListServiceAccountsResponseServiceAccountKey struct {
+	// Active determines if the key is active.
+	Active *bool `json:"active,omitempty"`
+
+	// ExpiresAt is the expiration time of the key.
+	ExpiresAt *time.Time `json:"expiresAt,omitempty"`
+
+	// ID is the unique identifier of the key.
+	Id *string `json:"id,omitempty"`
+
+	// LastUsedAt is the last time the key was used.
+	LastUsedAt *time.Time `json:"lastUsedAt,omitempty"`
+
+	// Name is the name of the key.
+	Name *string `json:"name,omitempty"`
+
+	// Prefix is the prefix of the key.
+	Prefix *string `json:"prefix,omitempty"`
+}
+
+// ServiceAccount represents a service account.
+type CastaiServiceaccountsV1beta1ServiceAccount struct {
+	// CreatedAt is the timestamp when the service account was created.
+	CreatedAt *time.Time `json:"createdAt,omitempty"`
+
+	// CreatedBy is the user who created the service account.
+	CreatedBy *string `json:"createdBy,omitempty"`
+
+	// Description is the description of the service account.
+	Description *string `json:"description,omitempty"`
+
+	// ID is the unique identifier of the service account.
+	Id *string `json:"id,omitempty"`
+
+	// Name is the name of the service account.
+	Name string `json:"name"`
+}
+
+// UpdateServiceAccountKeyResponse is the response for updating a service account key.
+type CastaiServiceaccountsV1beta1UpdateServiceAccountKeyResponse struct {
+	// Active determines if the key is active.
+	Active *bool `json:"active,omitempty"`
+
+	// ExpiresAt is the expiration time of the key.
+	ExpiresAt *time.Time `json:"expiresAt,omitempty"`
+
+	// ID is the unique identifier of the key.
+	Id *string `json:"id,omitempty"`
+
+	// LastUsedAt is the last time the key was used.
+	LastUsedAt *time.Time `json:"lastUsedAt,omitempty"`
+
+	// Name is the name of the key.
+	Name *string `json:"name,omitempty"`
+
+	// Prefix is the prefix of the key.
+	Prefix *string `json:"prefix,omitempty"`
 }
 
 // AzureAAD represents a Azure AAD connector.
@@ -4231,6 +4502,26 @@ type InventoryAPIAddReservationJSONBody = CastaiInventoryV1beta1GenericReservati
 // InventoryAPIOverwriteReservationsJSONBody defines parameters for InventoryAPIOverwriteReservations.
 type InventoryAPIOverwriteReservationsJSONBody = CastaiInventoryV1beta1GenericReservationsList
 
+// ServiceAccountsAPIListServiceAccountsParams defines parameters for ServiceAccountsAPIListServiceAccounts.
+type ServiceAccountsAPIListServiceAccountsParams struct {
+	PageLimit *string `form:"page.limit,omitempty" json:"page.limit,omitempty"`
+
+	// Cursor that defines token indicating where to start the next page.
+	// Empty value indicates to start from beginning of the dataset.
+	PageCursor *string `form:"page.cursor,omitempty" json:"page.cursor,omitempty"`
+}
+
+// ServiceAccountsAPICreateServiceAccountJSONBody defines parameters for ServiceAccountsAPICreateServiceAccount.
+type ServiceAccountsAPICreateServiceAccountJSONBody = ServiceAccountsAPICreateServiceAccountRequest
+
+// ServiceAccountsAPICreateServiceAccountKeyJSONBody defines parameters for ServiceAccountsAPICreateServiceAccountKey.
+type ServiceAccountsAPICreateServiceAccountKeyJSONBody = ServiceAccountsAPICreateServiceAccountKeyRequest
+
+// ServiceAccountsAPIUpdateServiceAccountKeyParams defines parameters for ServiceAccountsAPIUpdateServiceAccountKey.
+type ServiceAccountsAPIUpdateServiceAccountKeyParams struct {
+	KeyActive bool `form:"key.active" json:"key.active"`
+}
+
 // UsersAPIRemoveOrganizationUsersParams defines parameters for UsersAPIRemoveOrganizationUsers.
 type UsersAPIRemoveOrganizationUsersParams struct {
 	// Users is the list of user ids to remove.
@@ -4477,6 +4768,12 @@ type InventoryAPIAddReservationJSONRequestBody = InventoryAPIAddReservationJSONB
 
 // InventoryAPIOverwriteReservationsJSONRequestBody defines body for InventoryAPIOverwriteReservations for application/json ContentType.
 type InventoryAPIOverwriteReservationsJSONRequestBody = InventoryAPIOverwriteReservationsJSONBody
+
+// ServiceAccountsAPICreateServiceAccountJSONRequestBody defines body for ServiceAccountsAPICreateServiceAccount for application/json ContentType.
+type ServiceAccountsAPICreateServiceAccountJSONRequestBody = ServiceAccountsAPICreateServiceAccountJSONBody
+
+// ServiceAccountsAPICreateServiceAccountKeyJSONRequestBody defines body for ServiceAccountsAPICreateServiceAccountKey for application/json ContentType.
+type ServiceAccountsAPICreateServiceAccountKeyJSONRequestBody = ServiceAccountsAPICreateServiceAccountKeyJSONBody
 
 // UsersAPIAddUserToOrganizationJSONRequestBody defines body for UsersAPIAddUserToOrganization for application/json ContentType.
 type UsersAPIAddUserToOrganizationJSONRequestBody = UsersAPIAddUserToOrganizationJSONBody

@@ -377,6 +377,28 @@ type ClientInterface interface {
 	// InventoryAPIDeleteReservation request
 	InventoryAPIDeleteReservation(ctx context.Context, organizationId string, reservationId string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// ServiceAccountsAPIListServiceAccounts request
+	ServiceAccountsAPIListServiceAccounts(ctx context.Context, organizationId string, params *ServiceAccountsAPIListServiceAccountsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// ServiceAccountsAPICreateServiceAccount request with any body
+	ServiceAccountsAPICreateServiceAccountWithBody(ctx context.Context, organizationId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	ServiceAccountsAPICreateServiceAccount(ctx context.Context, organizationId string, body ServiceAccountsAPICreateServiceAccountJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// ServiceAccountsAPIDeleteServiceAccount request
+	ServiceAccountsAPIDeleteServiceAccount(ctx context.Context, organizationId string, serviceAccountId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// ServiceAccountsAPICreateServiceAccountKey request with any body
+	ServiceAccountsAPICreateServiceAccountKeyWithBody(ctx context.Context, organizationId string, serviceAccountId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	ServiceAccountsAPICreateServiceAccountKey(ctx context.Context, organizationId string, serviceAccountId string, body ServiceAccountsAPICreateServiceAccountKeyJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// ServiceAccountsAPIUpdateServiceAccountKey request
+	ServiceAccountsAPIUpdateServiceAccountKey(ctx context.Context, organizationId string, serviceAccountId string, keyId string, params *ServiceAccountsAPIUpdateServiceAccountKeyParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// ServiceAccountsAPIDeleteServiceAccountKey request
+	ServiceAccountsAPIDeleteServiceAccountKey(ctx context.Context, organizationId string, serviceAccountId string, keyId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// UsersAPIRemoveOrganizationUsers request
 	UsersAPIRemoveOrganizationUsers(ctx context.Context, organizationId string, params *UsersAPIRemoveOrganizationUsersParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -473,6 +495,9 @@ type ClientInterface interface {
 
 	// ExternalClusterAPIGetCredentialsScriptTemplate request
 	ExternalClusterAPIGetCredentialsScriptTemplate(ctx context.Context, provider string, params *ExternalClusterAPIGetCredentialsScriptTemplateParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// ServiceAccountsAPIGetServiceAccount request
+	ServiceAccountsAPIGetServiceAccount(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// SSOAPIListSSOConnections request
 	SSOAPIListSSOConnections(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -1815,6 +1840,102 @@ func (c *Client) InventoryAPIDeleteReservation(ctx context.Context, organization
 	return c.Client.Do(req)
 }
 
+func (c *Client) ServiceAccountsAPIListServiceAccounts(ctx context.Context, organizationId string, params *ServiceAccountsAPIListServiceAccountsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewServiceAccountsAPIListServiceAccountsRequest(c.Server, organizationId, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) ServiceAccountsAPICreateServiceAccountWithBody(ctx context.Context, organizationId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewServiceAccountsAPICreateServiceAccountRequestWithBody(c.Server, organizationId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) ServiceAccountsAPICreateServiceAccount(ctx context.Context, organizationId string, body ServiceAccountsAPICreateServiceAccountJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewServiceAccountsAPICreateServiceAccountRequest(c.Server, organizationId, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) ServiceAccountsAPIDeleteServiceAccount(ctx context.Context, organizationId string, serviceAccountId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewServiceAccountsAPIDeleteServiceAccountRequest(c.Server, organizationId, serviceAccountId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) ServiceAccountsAPICreateServiceAccountKeyWithBody(ctx context.Context, organizationId string, serviceAccountId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewServiceAccountsAPICreateServiceAccountKeyRequestWithBody(c.Server, organizationId, serviceAccountId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) ServiceAccountsAPICreateServiceAccountKey(ctx context.Context, organizationId string, serviceAccountId string, body ServiceAccountsAPICreateServiceAccountKeyJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewServiceAccountsAPICreateServiceAccountKeyRequest(c.Server, organizationId, serviceAccountId, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) ServiceAccountsAPIUpdateServiceAccountKey(ctx context.Context, organizationId string, serviceAccountId string, keyId string, params *ServiceAccountsAPIUpdateServiceAccountKeyParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewServiceAccountsAPIUpdateServiceAccountKeyRequest(c.Server, organizationId, serviceAccountId, keyId, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) ServiceAccountsAPIDeleteServiceAccountKey(ctx context.Context, organizationId string, serviceAccountId string, keyId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewServiceAccountsAPIDeleteServiceAccountKeyRequest(c.Server, organizationId, serviceAccountId, keyId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
 func (c *Client) UsersAPIRemoveOrganizationUsers(ctx context.Context, organizationId string, params *UsersAPIRemoveOrganizationUsersParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewUsersAPIRemoveOrganizationUsersRequest(c.Server, organizationId, params)
 	if err != nil {
@@ -2225,6 +2346,18 @@ func (c *Client) ExternalClusterAPIGetCleanupScriptTemplate(ctx context.Context,
 
 func (c *Client) ExternalClusterAPIGetCredentialsScriptTemplate(ctx context.Context, provider string, params *ExternalClusterAPIGetCredentialsScriptTemplateParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewExternalClusterAPIGetCredentialsScriptTemplateRequest(c.Server, provider, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) ServiceAccountsAPIGetServiceAccount(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewServiceAccountsAPIGetServiceAccountRequest(c.Server, id)
 	if err != nil {
 		return nil, err
 	}
@@ -6138,6 +6271,330 @@ func NewInventoryAPIDeleteReservationRequest(server string, organizationId strin
 	return req, nil
 }
 
+// NewServiceAccountsAPIListServiceAccountsRequest generates requests for ServiceAccountsAPIListServiceAccounts
+func NewServiceAccountsAPIListServiceAccountsRequest(server string, organizationId string, params *ServiceAccountsAPIListServiceAccountsParams) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "organizationId", runtime.ParamLocationPath, organizationId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/organizations/%s/service-accounts", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	queryValues := queryURL.Query()
+
+	if params.PageLimit != nil {
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "page.limit", runtime.ParamLocationQuery, *params.PageLimit); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.PageCursor != nil {
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "page.cursor", runtime.ParamLocationQuery, *params.PageCursor); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	queryURL.RawQuery = queryValues.Encode()
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewServiceAccountsAPICreateServiceAccountRequest calls the generic ServiceAccountsAPICreateServiceAccount builder with application/json body
+func NewServiceAccountsAPICreateServiceAccountRequest(server string, organizationId string, body ServiceAccountsAPICreateServiceAccountJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewServiceAccountsAPICreateServiceAccountRequestWithBody(server, organizationId, "application/json", bodyReader)
+}
+
+// NewServiceAccountsAPICreateServiceAccountRequestWithBody generates requests for ServiceAccountsAPICreateServiceAccount with any type of body
+func NewServiceAccountsAPICreateServiceAccountRequestWithBody(server string, organizationId string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "organizationId", runtime.ParamLocationPath, organizationId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/organizations/%s/service-accounts", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewServiceAccountsAPIDeleteServiceAccountRequest generates requests for ServiceAccountsAPIDeleteServiceAccount
+func NewServiceAccountsAPIDeleteServiceAccountRequest(server string, organizationId string, serviceAccountId string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "organizationId", runtime.ParamLocationPath, organizationId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "serviceAccountId", runtime.ParamLocationPath, serviceAccountId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/organizations/%s/service-accounts/%s", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("DELETE", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewServiceAccountsAPICreateServiceAccountKeyRequest calls the generic ServiceAccountsAPICreateServiceAccountKey builder with application/json body
+func NewServiceAccountsAPICreateServiceAccountKeyRequest(server string, organizationId string, serviceAccountId string, body ServiceAccountsAPICreateServiceAccountKeyJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewServiceAccountsAPICreateServiceAccountKeyRequestWithBody(server, organizationId, serviceAccountId, "application/json", bodyReader)
+}
+
+// NewServiceAccountsAPICreateServiceAccountKeyRequestWithBody generates requests for ServiceAccountsAPICreateServiceAccountKey with any type of body
+func NewServiceAccountsAPICreateServiceAccountKeyRequestWithBody(server string, organizationId string, serviceAccountId string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "organizationId", runtime.ParamLocationPath, organizationId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "serviceAccountId", runtime.ParamLocationPath, serviceAccountId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/organizations/%s/service-accounts/%s/keys", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewServiceAccountsAPIUpdateServiceAccountKeyRequest generates requests for ServiceAccountsAPIUpdateServiceAccountKey
+func NewServiceAccountsAPIUpdateServiceAccountKeyRequest(server string, organizationId string, serviceAccountId string, keyId string, params *ServiceAccountsAPIUpdateServiceAccountKeyParams) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "organizationId", runtime.ParamLocationPath, organizationId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "serviceAccountId", runtime.ParamLocationPath, serviceAccountId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam2 string
+
+	pathParam2, err = runtime.StyleParamWithLocation("simple", false, "key.id", runtime.ParamLocationPath, keyId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/organizations/%s/service-accounts/%s/keys/%s", pathParam0, pathParam1, pathParam2)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	queryValues := queryURL.Query()
+
+	if queryFrag, err := runtime.StyleParamWithLocation("form", true, "key.active", runtime.ParamLocationQuery, params.KeyActive); err != nil {
+		return nil, err
+	} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+		return nil, err
+	} else {
+		for k, v := range parsed {
+			for _, v2 := range v {
+				queryValues.Add(k, v2)
+			}
+		}
+	}
+
+	queryURL.RawQuery = queryValues.Encode()
+
+	req, err := http.NewRequest("PATCH", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewServiceAccountsAPIDeleteServiceAccountKeyRequest generates requests for ServiceAccountsAPIDeleteServiceAccountKey
+func NewServiceAccountsAPIDeleteServiceAccountKeyRequest(server string, organizationId string, serviceAccountId string, keyId string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "organizationId", runtime.ParamLocationPath, organizationId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "serviceAccountId", runtime.ParamLocationPath, serviceAccountId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam2 string
+
+	pathParam2, err = runtime.StyleParamWithLocation("simple", false, "keyId", runtime.ParamLocationPath, keyId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/organizations/%s/service-accounts/%s/keys/%s", pathParam0, pathParam1, pathParam2)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("DELETE", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 // NewUsersAPIRemoveOrganizationUsersRequest generates requests for UsersAPIRemoveOrganizationUsers
 func NewUsersAPIRemoveOrganizationUsersRequest(server string, organizationId string, params *UsersAPIRemoveOrganizationUsersParams) (*http.Request, error) {
 	var err error
@@ -7367,6 +7824,40 @@ func NewExternalClusterAPIGetCredentialsScriptTemplateRequest(server string, pro
 	}
 
 	queryURL.RawQuery = queryValues.Encode()
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewServiceAccountsAPIGetServiceAccountRequest generates requests for ServiceAccountsAPIGetServiceAccount
+func NewServiceAccountsAPIGetServiceAccountRequest(server string, id string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/service-accounts/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
 
 	req, err := http.NewRequest("GET", queryURL.String(), nil)
 	if err != nil {
@@ -8772,6 +9263,28 @@ type ClientWithResponsesInterface interface {
 	// InventoryAPIDeleteReservation request
 	InventoryAPIDeleteReservationWithResponse(ctx context.Context, organizationId string, reservationId string) (*InventoryAPIDeleteReservationResponse, error)
 
+	// ServiceAccountsAPIListServiceAccounts request
+	ServiceAccountsAPIListServiceAccountsWithResponse(ctx context.Context, organizationId string, params *ServiceAccountsAPIListServiceAccountsParams) (*ServiceAccountsAPIListServiceAccountsResponse, error)
+
+	// ServiceAccountsAPICreateServiceAccount request  with any body
+	ServiceAccountsAPICreateServiceAccountWithBodyWithResponse(ctx context.Context, organizationId string, contentType string, body io.Reader) (*ServiceAccountsAPICreateServiceAccountResponse, error)
+
+	ServiceAccountsAPICreateServiceAccountWithResponse(ctx context.Context, organizationId string, body ServiceAccountsAPICreateServiceAccountJSONRequestBody) (*ServiceAccountsAPICreateServiceAccountResponse, error)
+
+	// ServiceAccountsAPIDeleteServiceAccount request
+	ServiceAccountsAPIDeleteServiceAccountWithResponse(ctx context.Context, organizationId string, serviceAccountId string) (*ServiceAccountsAPIDeleteServiceAccountResponse, error)
+
+	// ServiceAccountsAPICreateServiceAccountKey request  with any body
+	ServiceAccountsAPICreateServiceAccountKeyWithBodyWithResponse(ctx context.Context, organizationId string, serviceAccountId string, contentType string, body io.Reader) (*ServiceAccountsAPICreateServiceAccountKeyResponse, error)
+
+	ServiceAccountsAPICreateServiceAccountKeyWithResponse(ctx context.Context, organizationId string, serviceAccountId string, body ServiceAccountsAPICreateServiceAccountKeyJSONRequestBody) (*ServiceAccountsAPICreateServiceAccountKeyResponse, error)
+
+	// ServiceAccountsAPIUpdateServiceAccountKey request
+	ServiceAccountsAPIUpdateServiceAccountKeyWithResponse(ctx context.Context, organizationId string, serviceAccountId string, keyId string, params *ServiceAccountsAPIUpdateServiceAccountKeyParams) (*ServiceAccountsAPIUpdateServiceAccountKeyResponse, error)
+
+	// ServiceAccountsAPIDeleteServiceAccountKey request
+	ServiceAccountsAPIDeleteServiceAccountKeyWithResponse(ctx context.Context, organizationId string, serviceAccountId string, keyId string) (*ServiceAccountsAPIDeleteServiceAccountKeyResponse, error)
+
 	// UsersAPIRemoveOrganizationUsers request
 	UsersAPIRemoveOrganizationUsersWithResponse(ctx context.Context, organizationId string, params *UsersAPIRemoveOrganizationUsersParams) (*UsersAPIRemoveOrganizationUsersResponse, error)
 
@@ -8868,6 +9381,9 @@ type ClientWithResponsesInterface interface {
 
 	// ExternalClusterAPIGetCredentialsScriptTemplate request
 	ExternalClusterAPIGetCredentialsScriptTemplateWithResponse(ctx context.Context, provider string, params *ExternalClusterAPIGetCredentialsScriptTemplateParams) (*ExternalClusterAPIGetCredentialsScriptTemplateResponse, error)
+
+	// ServiceAccountsAPIGetServiceAccount request
+	ServiceAccountsAPIGetServiceAccountWithResponse(ctx context.Context, id string) (*ServiceAccountsAPIGetServiceAccountResponse, error)
 
 	// SSOAPIListSSOConnections request
 	SSOAPIListSSOConnectionsWithResponse(ctx context.Context) (*SSOAPIListSSOConnectionsResponse, error)
@@ -11268,6 +11784,188 @@ func (r InventoryAPIDeleteReservationResponse) GetBody() []byte {
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
+type ServiceAccountsAPIListServiceAccountsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *CastaiServiceaccountsV1beta1ListServiceAccountsResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r ServiceAccountsAPIListServiceAccountsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r ServiceAccountsAPIListServiceAccountsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r ServiceAccountsAPIListServiceAccountsResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type ServiceAccountsAPICreateServiceAccountResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON201      *CastaiServiceaccountsV1beta1CreateServiceAccountResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r ServiceAccountsAPICreateServiceAccountResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r ServiceAccountsAPICreateServiceAccountResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r ServiceAccountsAPICreateServiceAccountResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type ServiceAccountsAPIDeleteServiceAccountResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *CastaiServiceaccountsV1beta1DeleteServiceAccountResponse
+	JSON204      *map[string]interface{}
+}
+
+// Status returns HTTPResponse.Status
+func (r ServiceAccountsAPIDeleteServiceAccountResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r ServiceAccountsAPIDeleteServiceAccountResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r ServiceAccountsAPIDeleteServiceAccountResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type ServiceAccountsAPICreateServiceAccountKeyResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *CastaiServiceaccountsV1beta1CreateServiceAccountKeyResponse
+	JSON201      *map[string]interface{}
+}
+
+// Status returns HTTPResponse.Status
+func (r ServiceAccountsAPICreateServiceAccountKeyResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r ServiceAccountsAPICreateServiceAccountKeyResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r ServiceAccountsAPICreateServiceAccountKeyResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type ServiceAccountsAPIUpdateServiceAccountKeyResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *CastaiServiceaccountsV1beta1UpdateServiceAccountKeyResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r ServiceAccountsAPIUpdateServiceAccountKeyResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r ServiceAccountsAPIUpdateServiceAccountKeyResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r ServiceAccountsAPIUpdateServiceAccountKeyResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type ServiceAccountsAPIDeleteServiceAccountKeyResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *CastaiServiceaccountsV1beta1DeleteServiceAccountKeyResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r ServiceAccountsAPIDeleteServiceAccountKeyResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r ServiceAccountsAPIDeleteServiceAccountKeyResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r ServiceAccountsAPIDeleteServiceAccountKeyResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
 type UsersAPIRemoveOrganizationUsersResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -12070,6 +12768,36 @@ func (r ExternalClusterAPIGetCredentialsScriptTemplateResponse) StatusCode() int
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
 func (r ExternalClusterAPIGetCredentialsScriptTemplateResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type ServiceAccountsAPIGetServiceAccountResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *CastaiServiceaccountsV1beta1GetServiceAccountResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r ServiceAccountsAPIGetServiceAccountResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r ServiceAccountsAPIGetServiceAccountResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r ServiceAccountsAPIGetServiceAccountResponse) GetBody() []byte {
 	return r.Body
 }
 
@@ -13651,6 +14379,76 @@ func (c *ClientWithResponses) InventoryAPIDeleteReservationWithResponse(ctx cont
 	return ParseInventoryAPIDeleteReservationResponse(rsp)
 }
 
+// ServiceAccountsAPIListServiceAccountsWithResponse request returning *ServiceAccountsAPIListServiceAccountsResponse
+func (c *ClientWithResponses) ServiceAccountsAPIListServiceAccountsWithResponse(ctx context.Context, organizationId string, params *ServiceAccountsAPIListServiceAccountsParams) (*ServiceAccountsAPIListServiceAccountsResponse, error) {
+	rsp, err := c.ServiceAccountsAPIListServiceAccounts(ctx, organizationId, params)
+	if err != nil {
+		return nil, err
+	}
+	return ParseServiceAccountsAPIListServiceAccountsResponse(rsp)
+}
+
+// ServiceAccountsAPICreateServiceAccountWithBodyWithResponse request with arbitrary body returning *ServiceAccountsAPICreateServiceAccountResponse
+func (c *ClientWithResponses) ServiceAccountsAPICreateServiceAccountWithBodyWithResponse(ctx context.Context, organizationId string, contentType string, body io.Reader) (*ServiceAccountsAPICreateServiceAccountResponse, error) {
+	rsp, err := c.ServiceAccountsAPICreateServiceAccountWithBody(ctx, organizationId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseServiceAccountsAPICreateServiceAccountResponse(rsp)
+}
+
+func (c *ClientWithResponses) ServiceAccountsAPICreateServiceAccountWithResponse(ctx context.Context, organizationId string, body ServiceAccountsAPICreateServiceAccountJSONRequestBody) (*ServiceAccountsAPICreateServiceAccountResponse, error) {
+	rsp, err := c.ServiceAccountsAPICreateServiceAccount(ctx, organizationId, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseServiceAccountsAPICreateServiceAccountResponse(rsp)
+}
+
+// ServiceAccountsAPIDeleteServiceAccountWithResponse request returning *ServiceAccountsAPIDeleteServiceAccountResponse
+func (c *ClientWithResponses) ServiceAccountsAPIDeleteServiceAccountWithResponse(ctx context.Context, organizationId string, serviceAccountId string) (*ServiceAccountsAPIDeleteServiceAccountResponse, error) {
+	rsp, err := c.ServiceAccountsAPIDeleteServiceAccount(ctx, organizationId, serviceAccountId)
+	if err != nil {
+		return nil, err
+	}
+	return ParseServiceAccountsAPIDeleteServiceAccountResponse(rsp)
+}
+
+// ServiceAccountsAPICreateServiceAccountKeyWithBodyWithResponse request with arbitrary body returning *ServiceAccountsAPICreateServiceAccountKeyResponse
+func (c *ClientWithResponses) ServiceAccountsAPICreateServiceAccountKeyWithBodyWithResponse(ctx context.Context, organizationId string, serviceAccountId string, contentType string, body io.Reader) (*ServiceAccountsAPICreateServiceAccountKeyResponse, error) {
+	rsp, err := c.ServiceAccountsAPICreateServiceAccountKeyWithBody(ctx, organizationId, serviceAccountId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseServiceAccountsAPICreateServiceAccountKeyResponse(rsp)
+}
+
+func (c *ClientWithResponses) ServiceAccountsAPICreateServiceAccountKeyWithResponse(ctx context.Context, organizationId string, serviceAccountId string, body ServiceAccountsAPICreateServiceAccountKeyJSONRequestBody) (*ServiceAccountsAPICreateServiceAccountKeyResponse, error) {
+	rsp, err := c.ServiceAccountsAPICreateServiceAccountKey(ctx, organizationId, serviceAccountId, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseServiceAccountsAPICreateServiceAccountKeyResponse(rsp)
+}
+
+// ServiceAccountsAPIUpdateServiceAccountKeyWithResponse request returning *ServiceAccountsAPIUpdateServiceAccountKeyResponse
+func (c *ClientWithResponses) ServiceAccountsAPIUpdateServiceAccountKeyWithResponse(ctx context.Context, organizationId string, serviceAccountId string, keyId string, params *ServiceAccountsAPIUpdateServiceAccountKeyParams) (*ServiceAccountsAPIUpdateServiceAccountKeyResponse, error) {
+	rsp, err := c.ServiceAccountsAPIUpdateServiceAccountKey(ctx, organizationId, serviceAccountId, keyId, params)
+	if err != nil {
+		return nil, err
+	}
+	return ParseServiceAccountsAPIUpdateServiceAccountKeyResponse(rsp)
+}
+
+// ServiceAccountsAPIDeleteServiceAccountKeyWithResponse request returning *ServiceAccountsAPIDeleteServiceAccountKeyResponse
+func (c *ClientWithResponses) ServiceAccountsAPIDeleteServiceAccountKeyWithResponse(ctx context.Context, organizationId string, serviceAccountId string, keyId string) (*ServiceAccountsAPIDeleteServiceAccountKeyResponse, error) {
+	rsp, err := c.ServiceAccountsAPIDeleteServiceAccountKey(ctx, organizationId, serviceAccountId, keyId)
+	if err != nil {
+		return nil, err
+	}
+	return ParseServiceAccountsAPIDeleteServiceAccountKeyResponse(rsp)
+}
+
 // UsersAPIRemoveOrganizationUsersWithResponse request returning *UsersAPIRemoveOrganizationUsersResponse
 func (c *ClientWithResponses) UsersAPIRemoveOrganizationUsersWithResponse(ctx context.Context, organizationId string, params *UsersAPIRemoveOrganizationUsersParams) (*UsersAPIRemoveOrganizationUsersResponse, error) {
 	rsp, err := c.UsersAPIRemoveOrganizationUsers(ctx, organizationId, params)
@@ -13956,6 +14754,15 @@ func (c *ClientWithResponses) ExternalClusterAPIGetCredentialsScriptTemplateWith
 		return nil, err
 	}
 	return ParseExternalClusterAPIGetCredentialsScriptTemplateResponse(rsp)
+}
+
+// ServiceAccountsAPIGetServiceAccountWithResponse request returning *ServiceAccountsAPIGetServiceAccountResponse
+func (c *ClientWithResponses) ServiceAccountsAPIGetServiceAccountWithResponse(ctx context.Context, id string) (*ServiceAccountsAPIGetServiceAccountResponse, error) {
+	rsp, err := c.ServiceAccountsAPIGetServiceAccount(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	return ParseServiceAccountsAPIGetServiceAccountResponse(rsp)
 }
 
 // SSOAPIListSSOConnectionsWithResponse request returning *SSOAPIListSSOConnectionsResponse
@@ -16204,6 +17011,176 @@ func ParseInventoryAPIDeleteReservationResponse(rsp *http.Response) (*InventoryA
 	return response, nil
 }
 
+// ParseServiceAccountsAPIListServiceAccountsResponse parses an HTTP response from a ServiceAccountsAPIListServiceAccountsWithResponse call
+func ParseServiceAccountsAPIListServiceAccountsResponse(rsp *http.Response) (*ServiceAccountsAPIListServiceAccountsResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &ServiceAccountsAPIListServiceAccountsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest CastaiServiceaccountsV1beta1ListServiceAccountsResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseServiceAccountsAPICreateServiceAccountResponse parses an HTTP response from a ServiceAccountsAPICreateServiceAccountWithResponse call
+func ParseServiceAccountsAPICreateServiceAccountResponse(rsp *http.Response) (*ServiceAccountsAPICreateServiceAccountResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &ServiceAccountsAPICreateServiceAccountResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 201:
+		var dest CastaiServiceaccountsV1beta1CreateServiceAccountResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON201 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseServiceAccountsAPIDeleteServiceAccountResponse parses an HTTP response from a ServiceAccountsAPIDeleteServiceAccountWithResponse call
+func ParseServiceAccountsAPIDeleteServiceAccountResponse(rsp *http.Response) (*ServiceAccountsAPIDeleteServiceAccountResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &ServiceAccountsAPIDeleteServiceAccountResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest CastaiServiceaccountsV1beta1DeleteServiceAccountResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 204:
+		var dest map[string]interface{}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON204 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseServiceAccountsAPICreateServiceAccountKeyResponse parses an HTTP response from a ServiceAccountsAPICreateServiceAccountKeyWithResponse call
+func ParseServiceAccountsAPICreateServiceAccountKeyResponse(rsp *http.Response) (*ServiceAccountsAPICreateServiceAccountKeyResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &ServiceAccountsAPICreateServiceAccountKeyResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest CastaiServiceaccountsV1beta1CreateServiceAccountKeyResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 201:
+		var dest map[string]interface{}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON201 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseServiceAccountsAPIUpdateServiceAccountKeyResponse parses an HTTP response from a ServiceAccountsAPIUpdateServiceAccountKeyWithResponse call
+func ParseServiceAccountsAPIUpdateServiceAccountKeyResponse(rsp *http.Response) (*ServiceAccountsAPIUpdateServiceAccountKeyResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &ServiceAccountsAPIUpdateServiceAccountKeyResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest CastaiServiceaccountsV1beta1UpdateServiceAccountKeyResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseServiceAccountsAPIDeleteServiceAccountKeyResponse parses an HTTP response from a ServiceAccountsAPIDeleteServiceAccountKeyWithResponse call
+func ParseServiceAccountsAPIDeleteServiceAccountKeyResponse(rsp *http.Response) (*ServiceAccountsAPIDeleteServiceAccountKeyResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &ServiceAccountsAPIDeleteServiceAccountKeyResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest CastaiServiceaccountsV1beta1DeleteServiceAccountKeyResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
 // ParseUsersAPIRemoveOrganizationUsersResponse parses an HTTP response from a UsersAPIRemoveOrganizationUsersWithResponse call
 func ParseUsersAPIRemoveOrganizationUsersResponse(rsp *http.Response) (*UsersAPIRemoveOrganizationUsersResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
@@ -16871,6 +17848,32 @@ func ParseExternalClusterAPIGetCredentialsScriptTemplateResponse(rsp *http.Respo
 	response := &ExternalClusterAPIGetCredentialsScriptTemplateResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
+	}
+
+	return response, nil
+}
+
+// ParseServiceAccountsAPIGetServiceAccountResponse parses an HTTP response from a ServiceAccountsAPIGetServiceAccountWithResponse call
+func ParseServiceAccountsAPIGetServiceAccountResponse(rsp *http.Response) (*ServiceAccountsAPIGetServiceAccountResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &ServiceAccountsAPIGetServiceAccountResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest CastaiServiceaccountsV1beta1GetServiceAccountResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
 	}
 
 	return response, nil
