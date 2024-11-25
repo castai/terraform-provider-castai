@@ -102,6 +102,15 @@ func resourceServiceAccountCreate(ctx context.Context, data *schema.ResourceData
 }
 
 func resourceServiceAccountDelete(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client := meta.(*ProviderConfig).api
+	organizationID := data.Get(FieldServiceAccountOrganizationID).(string)
+	serviceAccountID := data.Id()
+
+
+	resp, err := client.ServiceAccountsAPIDeleteServiceAccountWithResponse(ctx, organizationID, serviceAccountID)
+	if err := sdk.CheckResponseNoContent(resp, err); err != nil {
+		return diag.Errorf("deleteting service account: %v", err)
+	}
 	return nil
 }
 
