@@ -90,6 +90,9 @@ func WithRequestEditorFn(fn RequestEditorFn) ClientOption {
 
 // The interface specification for the client above.
 type ClientInterface interface {
+	// CommitmentsAPIGetCommitmentUsageHistory request
+	CommitmentsAPIGetCommitmentUsageHistory(ctx context.Context, organizationId string, commitmentId string, params *CommitmentsAPIGetCommitmentUsageHistoryParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// AuthTokenAPIListAuthTokens request
 	AuthTokenAPIListAuthTokens(ctx context.Context, params *AuthTokenAPIListAuthTokensParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -388,6 +391,9 @@ type ClientInterface interface {
 	// ServiceAccountsAPIDeleteServiceAccount request
 	ServiceAccountsAPIDeleteServiceAccount(ctx context.Context, organizationId string, serviceAccountId string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// ServiceAccountsAPIGetServiceAccount request
+	ServiceAccountsAPIGetServiceAccount(ctx context.Context, organizationId string, serviceAccountId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// ServiceAccountsAPICreateServiceAccountKey request with any body
 	ServiceAccountsAPICreateServiceAccountKeyWithBody(ctx context.Context, organizationId string, serviceAccountId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -496,9 +502,6 @@ type ClientInterface interface {
 	// ExternalClusterAPIGetCredentialsScriptTemplate request
 	ExternalClusterAPIGetCredentialsScriptTemplate(ctx context.Context, provider string, params *ExternalClusterAPIGetCredentialsScriptTemplateParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// ServiceAccountsAPIGetServiceAccount request
-	ServiceAccountsAPIGetServiceAccount(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
-
 	// SSOAPIListSSOConnections request
 	SSOAPIListSSOConnections(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -578,6 +581,18 @@ type ClientInterface interface {
 	WorkloadOptimizationAPIUpdateWorkloadV2WithBody(ctx context.Context, clusterId string, workloadId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	WorkloadOptimizationAPIUpdateWorkloadV2(ctx context.Context, clusterId string, workloadId string, body WorkloadOptimizationAPIUpdateWorkloadV2JSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+}
+
+func (c *Client) CommitmentsAPIGetCommitmentUsageHistory(ctx context.Context, organizationId string, commitmentId string, params *CommitmentsAPIGetCommitmentUsageHistoryParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCommitmentsAPIGetCommitmentUsageHistoryRequest(c.Server, organizationId, commitmentId, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
 }
 
 func (c *Client) AuthTokenAPIListAuthTokens(ctx context.Context, params *AuthTokenAPIListAuthTokensParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
@@ -1888,6 +1903,18 @@ func (c *Client) ServiceAccountsAPIDeleteServiceAccount(ctx context.Context, org
 	return c.Client.Do(req)
 }
 
+func (c *Client) ServiceAccountsAPIGetServiceAccount(ctx context.Context, organizationId string, serviceAccountId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewServiceAccountsAPIGetServiceAccountRequest(c.Server, organizationId, serviceAccountId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
 func (c *Client) ServiceAccountsAPICreateServiceAccountKeyWithBody(ctx context.Context, organizationId string, serviceAccountId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewServiceAccountsAPICreateServiceAccountKeyRequestWithBody(c.Server, organizationId, serviceAccountId, contentType, body)
 	if err != nil {
@@ -2356,18 +2383,6 @@ func (c *Client) ExternalClusterAPIGetCredentialsScriptTemplate(ctx context.Cont
 	return c.Client.Do(req)
 }
 
-func (c *Client) ServiceAccountsAPIGetServiceAccount(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewServiceAccountsAPIGetServiceAccountRequest(c.Server, id)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
 func (c *Client) SSOAPIListSSOConnections(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewSSOAPIListSSOConnectionsRequest(c.Server)
 	if err != nil {
@@ -2714,6 +2729,87 @@ func (c *Client) WorkloadOptimizationAPIUpdateWorkloadV2(ctx context.Context, cl
 		return nil, err
 	}
 	return c.Client.Do(req)
+}
+
+// NewCommitmentsAPIGetCommitmentUsageHistoryRequest generates requests for CommitmentsAPIGetCommitmentUsageHistory
+func NewCommitmentsAPIGetCommitmentUsageHistoryRequest(server string, organizationId string, commitmentId string, params *CommitmentsAPIGetCommitmentUsageHistoryParams) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "organizationId", runtime.ParamLocationPath, organizationId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "commitmentId", runtime.ParamLocationPath, commitmentId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/savings/v1beta/organizations/%s/commitments/%s:getUsageHistory", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	queryValues := queryURL.Query()
+
+	if queryFrag, err := runtime.StyleParamWithLocation("form", true, "startTime", runtime.ParamLocationQuery, params.StartTime); err != nil {
+		return nil, err
+	} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+		return nil, err
+	} else {
+		for k, v := range parsed {
+			for _, v2 := range v {
+				queryValues.Add(k, v2)
+			}
+		}
+	}
+
+	if queryFrag, err := runtime.StyleParamWithLocation("form", true, "endTime", runtime.ParamLocationQuery, params.EndTime); err != nil {
+		return nil, err
+	} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+		return nil, err
+	} else {
+		for k, v := range parsed {
+			for _, v2 := range v {
+				queryValues.Add(k, v2)
+			}
+		}
+	}
+
+	if queryFrag, err := runtime.StyleParamWithLocation("form", true, "aggregationInterval", runtime.ParamLocationQuery, params.AggregationInterval); err != nil {
+		return nil, err
+	} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+		return nil, err
+	} else {
+		for k, v := range parsed {
+			for _, v2 := range v {
+				queryValues.Add(k, v2)
+			}
+		}
+	}
+
+	queryURL.RawQuery = queryValues.Encode()
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
 }
 
 // NewAuthTokenAPIListAuthTokensRequest generates requests for AuthTokenAPIListAuthTokens
@@ -6429,6 +6525,47 @@ func NewServiceAccountsAPIDeleteServiceAccountRequest(server string, organizatio
 	return req, nil
 }
 
+// NewServiceAccountsAPIGetServiceAccountRequest generates requests for ServiceAccountsAPIGetServiceAccount
+func NewServiceAccountsAPIGetServiceAccountRequest(server string, organizationId string, serviceAccountId string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "organizationId", runtime.ParamLocationPath, organizationId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "serviceAccountId", runtime.ParamLocationPath, serviceAccountId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/organizations/%s/service-accounts/%s", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 // NewServiceAccountsAPICreateServiceAccountKeyRequest calls the generic ServiceAccountsAPICreateServiceAccountKey builder with application/json body
 func NewServiceAccountsAPICreateServiceAccountKeyRequest(server string, organizationId string, serviceAccountId string, body ServiceAccountsAPICreateServiceAccountKeyJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
@@ -7833,40 +7970,6 @@ func NewExternalClusterAPIGetCredentialsScriptTemplateRequest(server string, pro
 	return req, nil
 }
 
-// NewServiceAccountsAPIGetServiceAccountRequest generates requests for ServiceAccountsAPIGetServiceAccount
-func NewServiceAccountsAPIGetServiceAccountRequest(server string, id string) (*http.Request, error) {
-	var err error
-
-	var pathParam0 string
-
-	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
-	if err != nil {
-		return nil, err
-	}
-
-	serverURL, err := url.Parse(server)
-	if err != nil {
-		return nil, err
-	}
-
-	operationPath := fmt.Sprintf("/v1/service-accounts/%s", pathParam0)
-	if operationPath[0] == '/' {
-		operationPath = "." + operationPath
-	}
-
-	queryURL, err := serverURL.Parse(operationPath)
-	if err != nil {
-		return nil, err
-	}
-
-	req, err := http.NewRequest("GET", queryURL.String(), nil)
-	if err != nil {
-		return nil, err
-	}
-
-	return req, nil
-}
-
 // NewSSOAPIListSSOConnectionsRequest generates requests for SSOAPIListSSOConnections
 func NewSSOAPIListSSOConnectionsRequest(server string) (*http.Request, error) {
 	var err error
@@ -8976,6 +9079,9 @@ func WithBaseURL(baseURL string) ClientOption {
 
 // ClientWithResponsesInterface is the interface specification for the client with responses above.
 type ClientWithResponsesInterface interface {
+	// CommitmentsAPIGetCommitmentUsageHistory request
+	CommitmentsAPIGetCommitmentUsageHistoryWithResponse(ctx context.Context, organizationId string, commitmentId string, params *CommitmentsAPIGetCommitmentUsageHistoryParams) (*CommitmentsAPIGetCommitmentUsageHistoryResponse, error)
+
 	// AuthTokenAPIListAuthTokens request
 	AuthTokenAPIListAuthTokensWithResponse(ctx context.Context, params *AuthTokenAPIListAuthTokensParams) (*AuthTokenAPIListAuthTokensResponse, error)
 
@@ -9274,6 +9380,9 @@ type ClientWithResponsesInterface interface {
 	// ServiceAccountsAPIDeleteServiceAccount request
 	ServiceAccountsAPIDeleteServiceAccountWithResponse(ctx context.Context, organizationId string, serviceAccountId string) (*ServiceAccountsAPIDeleteServiceAccountResponse, error)
 
+	// ServiceAccountsAPIGetServiceAccount request
+	ServiceAccountsAPIGetServiceAccountWithResponse(ctx context.Context, organizationId string, serviceAccountId string) (*ServiceAccountsAPIGetServiceAccountResponse, error)
+
 	// ServiceAccountsAPICreateServiceAccountKey request  with any body
 	ServiceAccountsAPICreateServiceAccountKeyWithBodyWithResponse(ctx context.Context, organizationId string, serviceAccountId string, contentType string, body io.Reader) (*ServiceAccountsAPICreateServiceAccountKeyResponse, error)
 
@@ -9382,9 +9491,6 @@ type ClientWithResponsesInterface interface {
 	// ExternalClusterAPIGetCredentialsScriptTemplate request
 	ExternalClusterAPIGetCredentialsScriptTemplateWithResponse(ctx context.Context, provider string, params *ExternalClusterAPIGetCredentialsScriptTemplateParams) (*ExternalClusterAPIGetCredentialsScriptTemplateResponse, error)
 
-	// ServiceAccountsAPIGetServiceAccount request
-	ServiceAccountsAPIGetServiceAccountWithResponse(ctx context.Context, id string) (*ServiceAccountsAPIGetServiceAccountResponse, error)
-
 	// SSOAPIListSSOConnections request
 	SSOAPIListSSOConnectionsWithResponse(ctx context.Context) (*SSOAPIListSSOConnectionsResponse, error)
 
@@ -9471,6 +9577,36 @@ type Response interface {
 	Status() string
 	StatusCode() int
 	GetBody() []byte
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type CommitmentsAPIGetCommitmentUsageHistoryResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *CastaiInventoryV1beta1GetCommitmentUsageHistoryResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r CommitmentsAPIGetCommitmentUsageHistoryResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r CommitmentsAPIGetCommitmentUsageHistoryResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r CommitmentsAPIGetCommitmentUsageHistoryResponse) GetBody() []byte {
+	return r.Body
 }
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
@@ -11875,6 +12011,36 @@ func (r ServiceAccountsAPIDeleteServiceAccountResponse) GetBody() []byte {
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
+type ServiceAccountsAPIGetServiceAccountResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *CastaiServiceaccountsV1beta1GetServiceAccountResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r ServiceAccountsAPIGetServiceAccountResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r ServiceAccountsAPIGetServiceAccountResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r ServiceAccountsAPIGetServiceAccountResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
 type ServiceAccountsAPICreateServiceAccountKeyResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -12773,36 +12939,6 @@ func (r ExternalClusterAPIGetCredentialsScriptTemplateResponse) GetBody() []byte
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
-type ServiceAccountsAPIGetServiceAccountResponse struct {
-	Body         []byte
-	HTTPResponse *http.Response
-	JSON200      *CastaiServiceaccountsV1beta1GetServiceAccountResponse
-}
-
-// Status returns HTTPResponse.Status
-func (r ServiceAccountsAPIGetServiceAccountResponse) Status() string {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.Status
-	}
-	return http.StatusText(0)
-}
-
-// StatusCode returns HTTPResponse.StatusCode
-func (r ServiceAccountsAPIGetServiceAccountResponse) StatusCode() int {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.StatusCode
-	}
-	return 0
-}
-
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r ServiceAccountsAPIGetServiceAccountResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-
 type SSOAPIListSSOConnectionsResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -13461,6 +13597,15 @@ func (r WorkloadOptimizationAPIUpdateWorkloadV2Response) GetBody() []byte {
 }
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+// CommitmentsAPIGetCommitmentUsageHistoryWithResponse request returning *CommitmentsAPIGetCommitmentUsageHistoryResponse
+func (c *ClientWithResponses) CommitmentsAPIGetCommitmentUsageHistoryWithResponse(ctx context.Context, organizationId string, commitmentId string, params *CommitmentsAPIGetCommitmentUsageHistoryParams) (*CommitmentsAPIGetCommitmentUsageHistoryResponse, error) {
+	rsp, err := c.CommitmentsAPIGetCommitmentUsageHistory(ctx, organizationId, commitmentId, params)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCommitmentsAPIGetCommitmentUsageHistoryResponse(rsp)
+}
 
 // AuthTokenAPIListAuthTokensWithResponse request returning *AuthTokenAPIListAuthTokensResponse
 func (c *ClientWithResponses) AuthTokenAPIListAuthTokensWithResponse(ctx context.Context, params *AuthTokenAPIListAuthTokensParams) (*AuthTokenAPIListAuthTokensResponse, error) {
@@ -14414,6 +14559,15 @@ func (c *ClientWithResponses) ServiceAccountsAPIDeleteServiceAccountWithResponse
 	return ParseServiceAccountsAPIDeleteServiceAccountResponse(rsp)
 }
 
+// ServiceAccountsAPIGetServiceAccountWithResponse request returning *ServiceAccountsAPIGetServiceAccountResponse
+func (c *ClientWithResponses) ServiceAccountsAPIGetServiceAccountWithResponse(ctx context.Context, organizationId string, serviceAccountId string) (*ServiceAccountsAPIGetServiceAccountResponse, error) {
+	rsp, err := c.ServiceAccountsAPIGetServiceAccount(ctx, organizationId, serviceAccountId)
+	if err != nil {
+		return nil, err
+	}
+	return ParseServiceAccountsAPIGetServiceAccountResponse(rsp)
+}
+
 // ServiceAccountsAPICreateServiceAccountKeyWithBodyWithResponse request with arbitrary body returning *ServiceAccountsAPICreateServiceAccountKeyResponse
 func (c *ClientWithResponses) ServiceAccountsAPICreateServiceAccountKeyWithBodyWithResponse(ctx context.Context, organizationId string, serviceAccountId string, contentType string, body io.Reader) (*ServiceAccountsAPICreateServiceAccountKeyResponse, error) {
 	rsp, err := c.ServiceAccountsAPICreateServiceAccountKeyWithBody(ctx, organizationId, serviceAccountId, contentType, body)
@@ -14756,15 +14910,6 @@ func (c *ClientWithResponses) ExternalClusterAPIGetCredentialsScriptTemplateWith
 	return ParseExternalClusterAPIGetCredentialsScriptTemplateResponse(rsp)
 }
 
-// ServiceAccountsAPIGetServiceAccountWithResponse request returning *ServiceAccountsAPIGetServiceAccountResponse
-func (c *ClientWithResponses) ServiceAccountsAPIGetServiceAccountWithResponse(ctx context.Context, id string) (*ServiceAccountsAPIGetServiceAccountResponse, error) {
-	rsp, err := c.ServiceAccountsAPIGetServiceAccount(ctx, id)
-	if err != nil {
-		return nil, err
-	}
-	return ParseServiceAccountsAPIGetServiceAccountResponse(rsp)
-}
-
 // SSOAPIListSSOConnectionsWithResponse request returning *SSOAPIListSSOConnectionsResponse
 func (c *ClientWithResponses) SSOAPIListSSOConnectionsWithResponse(ctx context.Context) (*SSOAPIListSSOConnectionsResponse, error) {
 	rsp, err := c.SSOAPIListSSOConnections(ctx)
@@ -15017,6 +15162,32 @@ func (c *ClientWithResponses) WorkloadOptimizationAPIUpdateWorkloadV2WithRespons
 		return nil, err
 	}
 	return ParseWorkloadOptimizationAPIUpdateWorkloadV2Response(rsp)
+}
+
+// ParseCommitmentsAPIGetCommitmentUsageHistoryResponse parses an HTTP response from a CommitmentsAPIGetCommitmentUsageHistoryWithResponse call
+func ParseCommitmentsAPIGetCommitmentUsageHistoryResponse(rsp *http.Response) (*CommitmentsAPIGetCommitmentUsageHistoryResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &CommitmentsAPIGetCommitmentUsageHistoryResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest CastaiInventoryV1beta1GetCommitmentUsageHistoryResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
 }
 
 // ParseAuthTokenAPIListAuthTokensResponse parses an HTTP response from a AuthTokenAPIListAuthTokensWithResponse call
@@ -17096,6 +17267,32 @@ func ParseServiceAccountsAPIDeleteServiceAccountResponse(rsp *http.Response) (*S
 	return response, nil
 }
 
+// ParseServiceAccountsAPIGetServiceAccountResponse parses an HTTP response from a ServiceAccountsAPIGetServiceAccountWithResponse call
+func ParseServiceAccountsAPIGetServiceAccountResponse(rsp *http.Response) (*ServiceAccountsAPIGetServiceAccountResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &ServiceAccountsAPIGetServiceAccountResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest CastaiServiceaccountsV1beta1GetServiceAccountResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
 // ParseServiceAccountsAPICreateServiceAccountKeyResponse parses an HTTP response from a ServiceAccountsAPICreateServiceAccountKeyWithResponse call
 func ParseServiceAccountsAPICreateServiceAccountKeyResponse(rsp *http.Response) (*ServiceAccountsAPICreateServiceAccountKeyResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
@@ -17848,32 +18045,6 @@ func ParseExternalClusterAPIGetCredentialsScriptTemplateResponse(rsp *http.Respo
 	response := &ExternalClusterAPIGetCredentialsScriptTemplateResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
-	}
-
-	return response, nil
-}
-
-// ParseServiceAccountsAPIGetServiceAccountResponse parses an HTTP response from a ServiceAccountsAPIGetServiceAccountWithResponse call
-func ParseServiceAccountsAPIGetServiceAccountResponse(rsp *http.Response) (*ServiceAccountsAPIGetServiceAccountResponse, error) {
-	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
-	if err != nil {
-		return nil, err
-	}
-
-	response := &ServiceAccountsAPIGetServiceAccountResponse{
-		Body:         bodyBytes,
-		HTTPResponse: rsp,
-	}
-
-	switch {
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest CastaiServiceaccountsV1beta1GetServiceAccountResponse
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON200 = &dest
-
 	}
 
 	return response, nil

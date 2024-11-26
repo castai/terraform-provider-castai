@@ -862,6 +862,12 @@ type CastaiInventoryV1beta1GetCommitmentResponse struct {
 	Commitment *CastaiInventoryV1beta1Commitment `json:"commitment,omitempty"`
 }
 
+// CastaiInventoryV1beta1GetCommitmentUsageHistoryResponse defines model for castai.inventory.v1beta1.GetCommitmentUsageHistoryResponse.
+type CastaiInventoryV1beta1GetCommitmentUsageHistoryResponse struct {
+	Items   *[]CastaiInventoryV1beta1UsageAtTime `json:"items,omitempty"`
+	Summary *CastaiInventoryV1beta1Usage         `json:"summary,omitempty"`
+}
+
 // CastaiInventoryV1beta1GetCommitmentsAssignmentsResponse defines model for castai.inventory.v1beta1.GetCommitmentsAssignmentsResponse.
 type CastaiInventoryV1beta1GetCommitmentsAssignmentsResponse struct {
 	CommitmentsAssignments *[]CastaiInventoryV1beta1CommitmentAssignment `json:"commitmentsAssignments,omitempty"`
@@ -1221,6 +1227,22 @@ type CastaiInventoryV1beta1UpdateCommitmentResponse struct {
 	Commitments *CastaiInventoryV1beta1Commitment `json:"commitments,omitempty"`
 }
 
+// CastaiInventoryV1beta1Usage defines model for castai.inventory.v1beta1.Usage.
+type CastaiInventoryV1beta1Usage struct {
+	CpuCommitted       *float64 `json:"cpuCommitted,omitempty"`
+	CpuUsed            *float64 `json:"cpuUsed,omitempty"`
+	CpuUsedPercent     *float64 `json:"cpuUsedPercent,omitempty"`
+	MemoryCommittedMib *float64 `json:"memoryCommittedMib,omitempty"`
+	MemoryUsedMib      *float64 `json:"memoryUsedMib,omitempty"`
+	MemoryUsedPercent  *float64 `json:"memoryUsedPercent,omitempty"`
+}
+
+// CastaiInventoryV1beta1UsageAtTime defines model for castai.inventory.v1beta1.UsageAtTime.
+type CastaiInventoryV1beta1UsageAtTime struct {
+	Usage     *CastaiInventoryV1beta1Usage `json:"usage,omitempty"`
+	UsageTime *time.Time                   `json:"usageTime,omitempty"`
+}
+
 // CastaiInventoryV1beta1UsageDistribution defines model for castai.inventory.v1beta1.UsageDistribution.
 type CastaiInventoryV1beta1UsageDistribution struct {
 	Cpu    *float64 `json:"cpu,omitempty"`
@@ -1319,6 +1341,7 @@ type CastaiServiceaccountsV1beta1CreateServiceAccountResponse struct {
 	Author      *CastaiServiceaccountsV1beta1CreateServiceAccountResponseAuthor `json:"author,omitempty"`
 	CreatedAt   *time.Time                                                      `json:"createdAt,omitempty"`
 	Description *string                                                         `json:"description,omitempty"`
+	Email       *string                                                         `json:"email,omitempty"`
 	Id          *string                                                         `json:"id,omitempty"`
 	Name        *string                                                         `json:"name,omitempty"`
 }
@@ -1337,7 +1360,7 @@ type CastaiServiceaccountsV1beta1DeleteServiceAccountResponse = map[string]inter
 
 // GetServiceAccountResponse is the response for getting a service account.
 type CastaiServiceaccountsV1beta1GetServiceAccountResponse struct {
-	// ServiceAccount represents a service account.
+	// ServiceAccounts is the readable version of the service accounts.
 	ServiceAccount CastaiServiceaccountsV1beta1ServiceAccount `json:"serviceAccount"`
 }
 
@@ -1347,16 +1370,16 @@ type CastaiServiceaccountsV1beta1ListServiceAccountsResponse struct {
 	NextPage CastaiPaginationV1beta1Page `json:"nextPage"`
 
 	// ServiceAccounts is the list of service accounts.
-	ServiceAccounts *[]CastaiServiceaccountsV1beta1ListServiceAccountsResponseServiceAccount `json:"serviceAccounts,omitempty"`
+	ServiceAccounts *[]CastaiServiceaccountsV1beta1ServiceAccount `json:"serviceAccounts,omitempty"`
 
 	// TotalCount is the total number of service accounts in the dataset.
 	TotalCount *string `json:"totalCount,omitempty"`
 }
 
 // ServiceAccounts is the readable version of the service accounts.
-type CastaiServiceaccountsV1beta1ListServiceAccountsResponseServiceAccount struct {
+type CastaiServiceaccountsV1beta1ServiceAccount struct {
 	// Author is the author of the service account.
-	Author *CastaiServiceaccountsV1beta1ListServiceAccountsResponseServiceAccountAuthor `json:"author,omitempty"`
+	Author *CastaiServiceaccountsV1beta1ServiceAccountAuthor `json:"author,omitempty"`
 
 	// CreatedAt is the timestamp when the service account was created.
 	CreatedAt *time.Time `json:"createdAt,omitempty"`
@@ -1364,18 +1387,21 @@ type CastaiServiceaccountsV1beta1ListServiceAccountsResponseServiceAccount struc
 	// Description is the description of the role binding.
 	Description *string `json:"description,omitempty"`
 
+	// Email is the email of the service account.
+	Email *string `json:"email,omitempty"`
+
 	// ID is the unique identifier of the service account.
 	Id *string `json:"id,omitempty"`
 
 	// Keys is the list of keys associated with the service account.
-	Keys *[]CastaiServiceaccountsV1beta1ListServiceAccountsResponseServiceAccountKey `json:"keys,omitempty"`
+	Keys *[]CastaiServiceaccountsV1beta1ServiceAccountKey `json:"keys,omitempty"`
 
 	// Name is the name of the service account.
 	Name *string `json:"name,omitempty"`
 }
 
 // Author is the author of the service account.
-type CastaiServiceaccountsV1beta1ListServiceAccountsResponseServiceAccountAuthor struct {
+type CastaiServiceaccountsV1beta1ServiceAccountAuthor struct {
 	// Email is the email of the author.
 	Email *string `json:"email,omitempty"`
 
@@ -1387,7 +1413,7 @@ type CastaiServiceaccountsV1beta1ListServiceAccountsResponseServiceAccountAuthor
 }
 
 // Key is the key for the service account.
-type CastaiServiceaccountsV1beta1ListServiceAccountsResponseServiceAccountKey struct {
+type CastaiServiceaccountsV1beta1ServiceAccountKey struct {
 	// Active determines if the key is active.
 	Active *bool `json:"active,omitempty"`
 
@@ -1405,24 +1431,6 @@ type CastaiServiceaccountsV1beta1ListServiceAccountsResponseServiceAccountKey st
 
 	// Prefix is the prefix of the key.
 	Prefix *string `json:"prefix,omitempty"`
-}
-
-// ServiceAccount represents a service account.
-type CastaiServiceaccountsV1beta1ServiceAccount struct {
-	// CreatedAt is the timestamp when the service account was created.
-	CreatedAt *time.Time `json:"createdAt,omitempty"`
-
-	// CreatedBy is the user who created the service account.
-	CreatedBy *string `json:"createdBy,omitempty"`
-
-	// Description is the description of the service account.
-	Description *string `json:"description,omitempty"`
-
-	// ID is the unique identifier of the service account.
-	Id *string `json:"id,omitempty"`
-
-	// Name is the name of the service account.
-	Name string `json:"name"`
 }
 
 // UpdateServiceAccountKeyResponse is the response for updating a service account key.
@@ -3914,6 +3922,7 @@ type WorkloadoptimizationV1RecommendedPodCountChangedEvent struct {
 type WorkloadoptimizationV1RecommendedRequestsChangedEvent struct {
 	ApplyType WorkloadoptimizationV1ApplyType                             `json:"applyType"`
 	Current   WorkloadoptimizationV1RecommendedRequestsChangedEventChange `json:"current"`
+	DebugData *map[string]interface{}                                     `json:"debugData,omitempty"`
 	Previous  WorkloadoptimizationV1RecommendedRequestsChangedEventChange `json:"previous"`
 }
 
@@ -4308,6 +4317,16 @@ type WorkloadoptimizationV1WorkloadScalingPolicy struct {
 	RecommendationPolicies              WorkloadoptimizationV1RecommendationPolicies `json:"recommendationPolicies"`
 	UpdatedAt                           time.Time                                    `json:"updatedAt"`
 }
+
+// CommitmentsAPIGetCommitmentUsageHistoryParams defines parameters for CommitmentsAPIGetCommitmentUsageHistory.
+type CommitmentsAPIGetCommitmentUsageHistoryParams struct {
+	StartTime           time.Time                                                        `form:"startTime" json:"startTime"`
+	EndTime             time.Time                                                        `form:"endTime" json:"endTime"`
+	AggregationInterval CommitmentsAPIGetCommitmentUsageHistoryParamsAggregationInterval `form:"aggregationInterval" json:"aggregationInterval"`
+}
+
+// CommitmentsAPIGetCommitmentUsageHistoryParamsAggregationInterval defines parameters for CommitmentsAPIGetCommitmentUsageHistory.
+type CommitmentsAPIGetCommitmentUsageHistoryParamsAggregationInterval string
 
 // AuthTokenAPIListAuthTokensParams defines parameters for AuthTokenAPIListAuthTokens.
 type AuthTokenAPIListAuthTokensParams struct {

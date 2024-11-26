@@ -315,6 +315,26 @@ func (mr *MockClientInterfaceMockRecorder) CommitmentsAPIGetCommitmentAssignment
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIGetCommitmentAssignments", reflect.TypeOf((*MockClientInterface)(nil).CommitmentsAPIGetCommitmentAssignments), varargs...)
 }
 
+// CommitmentsAPIGetCommitmentUsageHistory mocks base method.
+func (m *MockClientInterface) CommitmentsAPIGetCommitmentUsageHistory(ctx context.Context, organizationId, commitmentId string, params *sdk.CommitmentsAPIGetCommitmentUsageHistoryParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, commitmentId, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "CommitmentsAPIGetCommitmentUsageHistory", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CommitmentsAPIGetCommitmentUsageHistory indicates an expected call of CommitmentsAPIGetCommitmentUsageHistory.
+func (mr *MockClientInterfaceMockRecorder) CommitmentsAPIGetCommitmentUsageHistory(ctx, organizationId, commitmentId, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, commitmentId, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIGetCommitmentUsageHistory", reflect.TypeOf((*MockClientInterface)(nil).CommitmentsAPIGetCommitmentUsageHistory), varargs...)
+}
+
 // CommitmentsAPIGetCommitments mocks base method.
 func (m *MockClientInterface) CommitmentsAPIGetCommitments(ctx context.Context, params *sdk.CommitmentsAPIGetCommitmentsParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
@@ -2696,9 +2716,9 @@ func (mr *MockClientInterfaceMockRecorder) ServiceAccountsAPIDeleteServiceAccoun
 }
 
 // ServiceAccountsAPIGetServiceAccount mocks base method.
-func (m *MockClientInterface) ServiceAccountsAPIGetServiceAccount(ctx context.Context, id string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+func (m *MockClientInterface) ServiceAccountsAPIGetServiceAccount(ctx context.Context, organizationId, serviceAccountId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, id}
+	varargs := []interface{}{ctx, organizationId, serviceAccountId}
 	for _, a := range reqEditors {
 		varargs = append(varargs, a)
 	}
@@ -2709,9 +2729,9 @@ func (m *MockClientInterface) ServiceAccountsAPIGetServiceAccount(ctx context.Co
 }
 
 // ServiceAccountsAPIGetServiceAccount indicates an expected call of ServiceAccountsAPIGetServiceAccount.
-func (mr *MockClientInterfaceMockRecorder) ServiceAccountsAPIGetServiceAccount(ctx, id interface{}, reqEditors ...interface{}) *gomock.Call {
+func (mr *MockClientInterfaceMockRecorder) ServiceAccountsAPIGetServiceAccount(ctx, organizationId, serviceAccountId interface{}, reqEditors ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, id}, reqEditors...)
+	varargs := append([]interface{}{ctx, organizationId, serviceAccountId}, reqEditors...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ServiceAccountsAPIGetServiceAccount", reflect.TypeOf((*MockClientInterface)(nil).ServiceAccountsAPIGetServiceAccount), varargs...)
 }
 
@@ -3821,6 +3841,21 @@ func (m *MockClientWithResponsesInterface) CommitmentsAPIGetCommitmentAssignment
 func (mr *MockClientWithResponsesInterfaceMockRecorder) CommitmentsAPIGetCommitmentAssignmentsWithResponse(ctx, commitmentId interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIGetCommitmentAssignmentsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).CommitmentsAPIGetCommitmentAssignmentsWithResponse), ctx, commitmentId)
+}
+
+// CommitmentsAPIGetCommitmentUsageHistoryWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) CommitmentsAPIGetCommitmentUsageHistoryWithResponse(ctx context.Context, organizationId, commitmentId string, params *sdk.CommitmentsAPIGetCommitmentUsageHistoryParams) (*sdk.CommitmentsAPIGetCommitmentUsageHistoryResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CommitmentsAPIGetCommitmentUsageHistoryWithResponse", ctx, organizationId, commitmentId, params)
+	ret0, _ := ret[0].(*sdk.CommitmentsAPIGetCommitmentUsageHistoryResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CommitmentsAPIGetCommitmentUsageHistoryWithResponse indicates an expected call of CommitmentsAPIGetCommitmentUsageHistoryWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) CommitmentsAPIGetCommitmentUsageHistoryWithResponse(ctx, organizationId, commitmentId, params interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIGetCommitmentUsageHistoryWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).CommitmentsAPIGetCommitmentUsageHistoryWithResponse), ctx, organizationId, commitmentId, params)
 }
 
 // CommitmentsAPIGetCommitmentWithResponse mocks base method.
@@ -5624,18 +5659,18 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) ServiceAccountsAPIDelete
 }
 
 // ServiceAccountsAPIGetServiceAccountWithResponse mocks base method.
-func (m *MockClientWithResponsesInterface) ServiceAccountsAPIGetServiceAccountWithResponse(ctx context.Context, id string) (*sdk.ServiceAccountsAPIGetServiceAccountResponse, error) {
+func (m *MockClientWithResponsesInterface) ServiceAccountsAPIGetServiceAccountWithResponse(ctx context.Context, organizationId, serviceAccountId string) (*sdk.ServiceAccountsAPIGetServiceAccountResponse, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ServiceAccountsAPIGetServiceAccountWithResponse", ctx, id)
+	ret := m.ctrl.Call(m, "ServiceAccountsAPIGetServiceAccountWithResponse", ctx, organizationId, serviceAccountId)
 	ret0, _ := ret[0].(*sdk.ServiceAccountsAPIGetServiceAccountResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // ServiceAccountsAPIGetServiceAccountWithResponse indicates an expected call of ServiceAccountsAPIGetServiceAccountWithResponse.
-func (mr *MockClientWithResponsesInterfaceMockRecorder) ServiceAccountsAPIGetServiceAccountWithResponse(ctx, id interface{}) *gomock.Call {
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ServiceAccountsAPIGetServiceAccountWithResponse(ctx, organizationId, serviceAccountId interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ServiceAccountsAPIGetServiceAccountWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ServiceAccountsAPIGetServiceAccountWithResponse), ctx, id)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ServiceAccountsAPIGetServiceAccountWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ServiceAccountsAPIGetServiceAccountWithResponse), ctx, organizationId, serviceAccountId)
 }
 
 // ServiceAccountsAPIListServiceAccountsWithResponse mocks base method.

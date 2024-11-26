@@ -34,6 +34,7 @@ func resourceServiceAccount() *schema.Resource {
 			Update: schema.DefaultTimeout(3 * time.Minute),
 			Delete: schema.DefaultTimeout(3 * time.Minute),
 		},
+		
 		Schema: map[string]*schema.Schema{
 			FieldServiceAccountOrganizationID: {
 				Type:        schema.TypeString,
@@ -48,7 +49,7 @@ func resourceServiceAccount() *schema.Resource {
 			},
 			FieldServiceAccountDescription: {
 				Type:        schema.TypeString,
-				Required:    false,
+				Optional:    true,
 				Description: "Description of the service account.",
 			},
 		},
@@ -60,20 +61,20 @@ func resourceServiceAccountRead(ctx context.Context, data *schema.ResourceData, 
 		return nil
 	}
 
-	client := meta.(*ProviderConfig).api
-	resp, err := client.ServiceAccountsAPIGetServiceAccountWithResponse(ctx, data.Id())
-	if err := sdk.CheckOKResponse(resp, err); err != nil {
-		return diag.Errorf("getting service account: %v", err)
-	}
-
-	serviceAccount := resp.JSON200
-
-	if err := data.Set(FieldServiceAccountName, serviceAccount.ServiceAccount.Name); err != nil {
-		return diag.Errorf("setting service account name: %v", err)
-	}
-	if err := data.Set(FieldServiceAccountDescription, serviceAccount.ServiceAccount.Description); err != nil {
-		return diag.Errorf("setting service account description: %v", err)
-	}
+	// client := meta.(*ProviderConfig).api
+	// resp, err := client.ServiceAccountsAPIGetServiceAccountWithResponse(ctx, data.Id())
+	// if err := sdk.CheckOKResponse(resp, err); err != nil {
+	// 	return diag.Errorf("getting service account: %v", err)
+	// }
+	//
+	// serviceAccount := resp.JSON200
+	//
+	// if err := data.Set(FieldServiceAccountName, serviceAccount.ServiceAccount.Name); err != nil {
+	// 	return diag.Errorf("setting service account name: %v", err)
+	// }
+	// if err := data.Set(FieldServiceAccountDescription, serviceAccount.ServiceAccount.Description); err != nil {
+	// 	return diag.Errorf("setting service account description: %v", err)
+	// }
 
 	return nil
 }
@@ -158,6 +159,17 @@ func resourceServiceAccountKey() *schema.Resource {
 }
 
 func resourceServiceAccountKeyRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	// client := meta.(*ProviderConfig).api
+	// serviceAccountID := data.Get(FieldServiceAccountID).(string)
+	// // organizationID := data.Get(FieldServiceAccountKeyOrganizationID)
+	//
+	// resp, err := client.ServiceAccountsAPIGetServiceAccountWithResponse(ctx,serviceAccountID)
+	//
+	// if err := sdk.CheckGetResponse(resp, err); err != nil{
+	// 	return diag.Errorf("getting service account: %v", err)
+	// }
+	//
+	// resp.JSON200.ServiceAccount
 	return nil
 }
 
