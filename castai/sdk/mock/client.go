@@ -215,6 +215,86 @@ func (mr *MockClientInterfaceMockRecorder) AuthTokenAPIUpdateAuthTokenWithBody(c
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AuthTokenAPIUpdateAuthTokenWithBody", reflect.TypeOf((*MockClientInterface)(nil).AuthTokenAPIUpdateAuthTokenWithBody), varargs...)
 }
 
+// CommitmentsAPIBatchDeleteCommitments mocks base method.
+func (m *MockClientInterface) CommitmentsAPIBatchDeleteCommitments(ctx context.Context, organizationId string, body sdk.CommitmentsAPIBatchDeleteCommitmentsJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "CommitmentsAPIBatchDeleteCommitments", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CommitmentsAPIBatchDeleteCommitments indicates an expected call of CommitmentsAPIBatchDeleteCommitments.
+func (mr *MockClientInterfaceMockRecorder) CommitmentsAPIBatchDeleteCommitments(ctx, organizationId, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIBatchDeleteCommitments", reflect.TypeOf((*MockClientInterface)(nil).CommitmentsAPIBatchDeleteCommitments), varargs...)
+}
+
+// CommitmentsAPIBatchDeleteCommitmentsWithBody mocks base method.
+func (m *MockClientInterface) CommitmentsAPIBatchDeleteCommitmentsWithBody(ctx context.Context, organizationId, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "CommitmentsAPIBatchDeleteCommitmentsWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CommitmentsAPIBatchDeleteCommitmentsWithBody indicates an expected call of CommitmentsAPIBatchDeleteCommitmentsWithBody.
+func (mr *MockClientInterfaceMockRecorder) CommitmentsAPIBatchDeleteCommitmentsWithBody(ctx, organizationId, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIBatchDeleteCommitmentsWithBody", reflect.TypeOf((*MockClientInterface)(nil).CommitmentsAPIBatchDeleteCommitmentsWithBody), varargs...)
+}
+
+// CommitmentsAPIBatchUpdateCommitments mocks base method.
+func (m *MockClientInterface) CommitmentsAPIBatchUpdateCommitments(ctx context.Context, organizationId string, body sdk.CommitmentsAPIBatchUpdateCommitmentsJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "CommitmentsAPIBatchUpdateCommitments", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CommitmentsAPIBatchUpdateCommitments indicates an expected call of CommitmentsAPIBatchUpdateCommitments.
+func (mr *MockClientInterfaceMockRecorder) CommitmentsAPIBatchUpdateCommitments(ctx, organizationId, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIBatchUpdateCommitments", reflect.TypeOf((*MockClientInterface)(nil).CommitmentsAPIBatchUpdateCommitments), varargs...)
+}
+
+// CommitmentsAPIBatchUpdateCommitmentsWithBody mocks base method.
+func (m *MockClientInterface) CommitmentsAPIBatchUpdateCommitmentsWithBody(ctx context.Context, organizationId, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "CommitmentsAPIBatchUpdateCommitmentsWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CommitmentsAPIBatchUpdateCommitmentsWithBody indicates an expected call of CommitmentsAPIBatchUpdateCommitmentsWithBody.
+func (mr *MockClientInterfaceMockRecorder) CommitmentsAPIBatchUpdateCommitmentsWithBody(ctx, organizationId, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIBatchUpdateCommitmentsWithBody", reflect.TypeOf((*MockClientInterface)(nil).CommitmentsAPIBatchUpdateCommitmentsWithBody), varargs...)
+}
+
 // CommitmentsAPICreateCommitmentAssignment mocks base method.
 func (m *MockClientInterface) CommitmentsAPICreateCommitmentAssignment(ctx context.Context, params *sdk.CommitmentsAPICreateCommitmentAssignmentParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
@@ -313,6 +393,26 @@ func (mr *MockClientInterfaceMockRecorder) CommitmentsAPIGetCommitmentAssignment
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{ctx, commitmentId}, reqEditors...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIGetCommitmentAssignments", reflect.TypeOf((*MockClientInterface)(nil).CommitmentsAPIGetCommitmentAssignments), varargs...)
+}
+
+// CommitmentsAPIGetCommitmentUsageHistory mocks base method.
+func (m *MockClientInterface) CommitmentsAPIGetCommitmentUsageHistory(ctx context.Context, organizationId, commitmentId string, params *sdk.CommitmentsAPIGetCommitmentUsageHistoryParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, commitmentId, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "CommitmentsAPIGetCommitmentUsageHistory", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CommitmentsAPIGetCommitmentUsageHistory indicates an expected call of CommitmentsAPIGetCommitmentUsageHistory.
+func (mr *MockClientInterfaceMockRecorder) CommitmentsAPIGetCommitmentUsageHistory(ctx, organizationId, commitmentId, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, commitmentId, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIGetCommitmentUsageHistory", reflect.TypeOf((*MockClientInterface)(nil).CommitmentsAPIGetCommitmentUsageHistory), varargs...)
 }
 
 // CommitmentsAPIGetCommitments mocks base method.
@@ -2095,6 +2195,126 @@ func (mr *MockClientInterfaceMockRecorder) PoliciesAPIUpsertClusterPoliciesWithB
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PoliciesAPIUpsertClusterPoliciesWithBody", reflect.TypeOf((*MockClientInterface)(nil).PoliciesAPIUpsertClusterPoliciesWithBody), varargs...)
 }
 
+// RbacServiceAPICreateGroup mocks base method.
+func (m *MockClientInterface) RbacServiceAPICreateGroup(ctx context.Context, organizationId string, body sdk.RbacServiceAPICreateGroupJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RbacServiceAPICreateGroup", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RbacServiceAPICreateGroup indicates an expected call of RbacServiceAPICreateGroup.
+func (mr *MockClientInterfaceMockRecorder) RbacServiceAPICreateGroup(ctx, organizationId, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RbacServiceAPICreateGroup", reflect.TypeOf((*MockClientInterface)(nil).RbacServiceAPICreateGroup), varargs...)
+}
+
+// RbacServiceAPICreateGroupWithBody mocks base method.
+func (m *MockClientInterface) RbacServiceAPICreateGroupWithBody(ctx context.Context, organizationId, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RbacServiceAPICreateGroupWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RbacServiceAPICreateGroupWithBody indicates an expected call of RbacServiceAPICreateGroupWithBody.
+func (mr *MockClientInterfaceMockRecorder) RbacServiceAPICreateGroupWithBody(ctx, organizationId, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RbacServiceAPICreateGroupWithBody", reflect.TypeOf((*MockClientInterface)(nil).RbacServiceAPICreateGroupWithBody), varargs...)
+}
+
+// RbacServiceAPIDeleteGroup mocks base method.
+func (m *MockClientInterface) RbacServiceAPIDeleteGroup(ctx context.Context, organizationId, id string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, id}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RbacServiceAPIDeleteGroup", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RbacServiceAPIDeleteGroup indicates an expected call of RbacServiceAPIDeleteGroup.
+func (mr *MockClientInterfaceMockRecorder) RbacServiceAPIDeleteGroup(ctx, organizationId, id interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, id}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RbacServiceAPIDeleteGroup", reflect.TypeOf((*MockClientInterface)(nil).RbacServiceAPIDeleteGroup), varargs...)
+}
+
+// RbacServiceAPIGetGroup mocks base method.
+func (m *MockClientInterface) RbacServiceAPIGetGroup(ctx context.Context, organizationId, id string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, id}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RbacServiceAPIGetGroup", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RbacServiceAPIGetGroup indicates an expected call of RbacServiceAPIGetGroup.
+func (mr *MockClientInterfaceMockRecorder) RbacServiceAPIGetGroup(ctx, organizationId, id interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, id}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RbacServiceAPIGetGroup", reflect.TypeOf((*MockClientInterface)(nil).RbacServiceAPIGetGroup), varargs...)
+}
+
+// RbacServiceAPIUpdateGroup mocks base method.
+func (m *MockClientInterface) RbacServiceAPIUpdateGroup(ctx context.Context, organizationId, groupId string, body sdk.RbacServiceAPIUpdateGroupJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, groupId, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RbacServiceAPIUpdateGroup", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RbacServiceAPIUpdateGroup indicates an expected call of RbacServiceAPIUpdateGroup.
+func (mr *MockClientInterfaceMockRecorder) RbacServiceAPIUpdateGroup(ctx, organizationId, groupId, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, groupId, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RbacServiceAPIUpdateGroup", reflect.TypeOf((*MockClientInterface)(nil).RbacServiceAPIUpdateGroup), varargs...)
+}
+
+// RbacServiceAPIUpdateGroupWithBody mocks base method.
+func (m *MockClientInterface) RbacServiceAPIUpdateGroupWithBody(ctx context.Context, organizationId, groupId, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, groupId, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RbacServiceAPIUpdateGroupWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RbacServiceAPIUpdateGroupWithBody indicates an expected call of RbacServiceAPIUpdateGroupWithBody.
+func (mr *MockClientInterfaceMockRecorder) RbacServiceAPIUpdateGroupWithBody(ctx, organizationId, groupId, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, groupId, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RbacServiceAPIUpdateGroupWithBody", reflect.TypeOf((*MockClientInterface)(nil).RbacServiceAPIUpdateGroupWithBody), varargs...)
+}
+
 // SSOAPICreateSSOConnection mocks base method.
 func (m *MockClientInterface) SSOAPICreateSSOConnection(ctx context.Context, body sdk.SSOAPICreateSSOConnectionJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
@@ -3583,6 +3803,66 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) AuthTokenAPIUpdateAuthTo
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AuthTokenAPIUpdateAuthTokenWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).AuthTokenAPIUpdateAuthTokenWithResponse), ctx, id, body)
 }
 
+// CommitmentsAPIBatchDeleteCommitmentsWithBodyWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) CommitmentsAPIBatchDeleteCommitmentsWithBodyWithResponse(ctx context.Context, organizationId, contentType string, body io.Reader) (*sdk.CommitmentsAPIBatchDeleteCommitmentsResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CommitmentsAPIBatchDeleteCommitmentsWithBodyWithResponse", ctx, organizationId, contentType, body)
+	ret0, _ := ret[0].(*sdk.CommitmentsAPIBatchDeleteCommitmentsResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CommitmentsAPIBatchDeleteCommitmentsWithBodyWithResponse indicates an expected call of CommitmentsAPIBatchDeleteCommitmentsWithBodyWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) CommitmentsAPIBatchDeleteCommitmentsWithBodyWithResponse(ctx, organizationId, contentType, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIBatchDeleteCommitmentsWithBodyWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).CommitmentsAPIBatchDeleteCommitmentsWithBodyWithResponse), ctx, organizationId, contentType, body)
+}
+
+// CommitmentsAPIBatchDeleteCommitmentsWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) CommitmentsAPIBatchDeleteCommitmentsWithResponse(ctx context.Context, organizationId string, body sdk.CommitmentsAPIBatchDeleteCommitmentsJSONRequestBody) (*sdk.CommitmentsAPIBatchDeleteCommitmentsResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CommitmentsAPIBatchDeleteCommitmentsWithResponse", ctx, organizationId, body)
+	ret0, _ := ret[0].(*sdk.CommitmentsAPIBatchDeleteCommitmentsResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CommitmentsAPIBatchDeleteCommitmentsWithResponse indicates an expected call of CommitmentsAPIBatchDeleteCommitmentsWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) CommitmentsAPIBatchDeleteCommitmentsWithResponse(ctx, organizationId, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIBatchDeleteCommitmentsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).CommitmentsAPIBatchDeleteCommitmentsWithResponse), ctx, organizationId, body)
+}
+
+// CommitmentsAPIBatchUpdateCommitmentsWithBodyWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) CommitmentsAPIBatchUpdateCommitmentsWithBodyWithResponse(ctx context.Context, organizationId, contentType string, body io.Reader) (*sdk.CommitmentsAPIBatchUpdateCommitmentsResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CommitmentsAPIBatchUpdateCommitmentsWithBodyWithResponse", ctx, organizationId, contentType, body)
+	ret0, _ := ret[0].(*sdk.CommitmentsAPIBatchUpdateCommitmentsResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CommitmentsAPIBatchUpdateCommitmentsWithBodyWithResponse indicates an expected call of CommitmentsAPIBatchUpdateCommitmentsWithBodyWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) CommitmentsAPIBatchUpdateCommitmentsWithBodyWithResponse(ctx, organizationId, contentType, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIBatchUpdateCommitmentsWithBodyWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).CommitmentsAPIBatchUpdateCommitmentsWithBodyWithResponse), ctx, organizationId, contentType, body)
+}
+
+// CommitmentsAPIBatchUpdateCommitmentsWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) CommitmentsAPIBatchUpdateCommitmentsWithResponse(ctx context.Context, organizationId string, body sdk.CommitmentsAPIBatchUpdateCommitmentsJSONRequestBody) (*sdk.CommitmentsAPIBatchUpdateCommitmentsResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CommitmentsAPIBatchUpdateCommitmentsWithResponse", ctx, organizationId, body)
+	ret0, _ := ret[0].(*sdk.CommitmentsAPIBatchUpdateCommitmentsResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CommitmentsAPIBatchUpdateCommitmentsWithResponse indicates an expected call of CommitmentsAPIBatchUpdateCommitmentsWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) CommitmentsAPIBatchUpdateCommitmentsWithResponse(ctx, organizationId, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIBatchUpdateCommitmentsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).CommitmentsAPIBatchUpdateCommitmentsWithResponse), ctx, organizationId, body)
+}
+
 // CommitmentsAPICreateCommitmentAssignmentWithResponse mocks base method.
 func (m *MockClientWithResponsesInterface) CommitmentsAPICreateCommitmentAssignmentWithResponse(ctx context.Context, params *sdk.CommitmentsAPICreateCommitmentAssignmentParams) (*sdk.CommitmentsAPICreateCommitmentAssignmentResponse, error) {
 	m.ctrl.T.Helper()
@@ -3641,6 +3921,21 @@ func (m *MockClientWithResponsesInterface) CommitmentsAPIGetCommitmentAssignment
 func (mr *MockClientWithResponsesInterfaceMockRecorder) CommitmentsAPIGetCommitmentAssignmentsWithResponse(ctx, commitmentId interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIGetCommitmentAssignmentsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).CommitmentsAPIGetCommitmentAssignmentsWithResponse), ctx, commitmentId)
+}
+
+// CommitmentsAPIGetCommitmentUsageHistoryWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) CommitmentsAPIGetCommitmentUsageHistoryWithResponse(ctx context.Context, organizationId, commitmentId string, params *sdk.CommitmentsAPIGetCommitmentUsageHistoryParams) (*sdk.CommitmentsAPIGetCommitmentUsageHistoryResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CommitmentsAPIGetCommitmentUsageHistoryWithResponse", ctx, organizationId, commitmentId, params)
+	ret0, _ := ret[0].(*sdk.CommitmentsAPIGetCommitmentUsageHistoryResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CommitmentsAPIGetCommitmentUsageHistoryWithResponse indicates an expected call of CommitmentsAPIGetCommitmentUsageHistoryWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) CommitmentsAPIGetCommitmentUsageHistoryWithResponse(ctx, organizationId, commitmentId, params interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIGetCommitmentUsageHistoryWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).CommitmentsAPIGetCommitmentUsageHistoryWithResponse), ctx, organizationId, commitmentId, params)
 }
 
 // CommitmentsAPIGetCommitmentWithResponse mocks base method.
@@ -4991,6 +5286,96 @@ func (m *MockClientWithResponsesInterface) PoliciesAPIUpsertClusterPoliciesWithR
 func (mr *MockClientWithResponsesInterfaceMockRecorder) PoliciesAPIUpsertClusterPoliciesWithResponse(ctx, clusterId, body interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PoliciesAPIUpsertClusterPoliciesWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).PoliciesAPIUpsertClusterPoliciesWithResponse), ctx, clusterId, body)
+}
+
+// RbacServiceAPICreateGroupWithBodyWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) RbacServiceAPICreateGroupWithBodyWithResponse(ctx context.Context, organizationId, contentType string, body io.Reader) (*sdk.RbacServiceAPICreateGroupResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RbacServiceAPICreateGroupWithBodyWithResponse", ctx, organizationId, contentType, body)
+	ret0, _ := ret[0].(*sdk.RbacServiceAPICreateGroupResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RbacServiceAPICreateGroupWithBodyWithResponse indicates an expected call of RbacServiceAPICreateGroupWithBodyWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RbacServiceAPICreateGroupWithBodyWithResponse(ctx, organizationId, contentType, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RbacServiceAPICreateGroupWithBodyWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RbacServiceAPICreateGroupWithBodyWithResponse), ctx, organizationId, contentType, body)
+}
+
+// RbacServiceAPICreateGroupWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) RbacServiceAPICreateGroupWithResponse(ctx context.Context, organizationId string, body sdk.RbacServiceAPICreateGroupJSONRequestBody) (*sdk.RbacServiceAPICreateGroupResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RbacServiceAPICreateGroupWithResponse", ctx, organizationId, body)
+	ret0, _ := ret[0].(*sdk.RbacServiceAPICreateGroupResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RbacServiceAPICreateGroupWithResponse indicates an expected call of RbacServiceAPICreateGroupWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RbacServiceAPICreateGroupWithResponse(ctx, organizationId, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RbacServiceAPICreateGroupWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RbacServiceAPICreateGroupWithResponse), ctx, organizationId, body)
+}
+
+// RbacServiceAPIDeleteGroupWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) RbacServiceAPIDeleteGroupWithResponse(ctx context.Context, organizationId, id string) (*sdk.RbacServiceAPIDeleteGroupResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RbacServiceAPIDeleteGroupWithResponse", ctx, organizationId, id)
+	ret0, _ := ret[0].(*sdk.RbacServiceAPIDeleteGroupResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RbacServiceAPIDeleteGroupWithResponse indicates an expected call of RbacServiceAPIDeleteGroupWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RbacServiceAPIDeleteGroupWithResponse(ctx, organizationId, id interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RbacServiceAPIDeleteGroupWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RbacServiceAPIDeleteGroupWithResponse), ctx, organizationId, id)
+}
+
+// RbacServiceAPIGetGroupWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) RbacServiceAPIGetGroupWithResponse(ctx context.Context, organizationId, id string) (*sdk.RbacServiceAPIGetGroupResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RbacServiceAPIGetGroupWithResponse", ctx, organizationId, id)
+	ret0, _ := ret[0].(*sdk.RbacServiceAPIGetGroupResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RbacServiceAPIGetGroupWithResponse indicates an expected call of RbacServiceAPIGetGroupWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RbacServiceAPIGetGroupWithResponse(ctx, organizationId, id interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RbacServiceAPIGetGroupWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RbacServiceAPIGetGroupWithResponse), ctx, organizationId, id)
+}
+
+// RbacServiceAPIUpdateGroupWithBodyWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) RbacServiceAPIUpdateGroupWithBodyWithResponse(ctx context.Context, organizationId, groupId, contentType string, body io.Reader) (*sdk.RbacServiceAPIUpdateGroupResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RbacServiceAPIUpdateGroupWithBodyWithResponse", ctx, organizationId, groupId, contentType, body)
+	ret0, _ := ret[0].(*sdk.RbacServiceAPIUpdateGroupResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RbacServiceAPIUpdateGroupWithBodyWithResponse indicates an expected call of RbacServiceAPIUpdateGroupWithBodyWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RbacServiceAPIUpdateGroupWithBodyWithResponse(ctx, organizationId, groupId, contentType, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RbacServiceAPIUpdateGroupWithBodyWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RbacServiceAPIUpdateGroupWithBodyWithResponse), ctx, organizationId, groupId, contentType, body)
+}
+
+// RbacServiceAPIUpdateGroupWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) RbacServiceAPIUpdateGroupWithResponse(ctx context.Context, organizationId, groupId string, body sdk.RbacServiceAPIUpdateGroupJSONRequestBody) (*sdk.RbacServiceAPIUpdateGroupResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RbacServiceAPIUpdateGroupWithResponse", ctx, organizationId, groupId, body)
+	ret0, _ := ret[0].(*sdk.RbacServiceAPIUpdateGroupResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RbacServiceAPIUpdateGroupWithResponse indicates an expected call of RbacServiceAPIUpdateGroupWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RbacServiceAPIUpdateGroupWithResponse(ctx, organizationId, groupId, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RbacServiceAPIUpdateGroupWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RbacServiceAPIUpdateGroupWithResponse), ctx, organizationId, groupId, body)
 }
 
 // SSOAPICreateSSOConnectionWithBodyWithResponse mocks base method.
