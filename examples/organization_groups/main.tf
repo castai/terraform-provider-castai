@@ -1,14 +1,14 @@
 terraform {
   required_providers {
     castai = {
-      source  = "castai/castai"
+      source = "castai/castai"
     }
   }
   required_version = ">= 0.13"
 }
 
 data "castai_organization" "test" {
-  name     = "My test organization name"
+  name = "My test organization name"
 }
 
 resource "castai_organization_group" "first_group" {
