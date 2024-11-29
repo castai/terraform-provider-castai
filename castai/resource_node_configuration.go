@@ -21,26 +21,28 @@ import (
 )
 
 const (
-	FieldNodeConfigurationName             = "name"
-	FieldNodeConfigurationDiskCpuRatio     = "disk_cpu_ratio"
-	FieldNodeConfigurationMinDiskSize      = "min_disk_size"
-	FieldNodeConfigurationDrainTimeoutSec  = "drain_timeout_sec"
-	FieldNodeConfigurationSubnets          = "subnets"
-	FieldNodeConfigurationSSHPublicKey     = "ssh_public_key"
-	FieldNodeConfigurationImage            = "image"
-	FieldNodeConfigurationTags             = "tags"
-	FieldNodeConfigurationInitScript       = "init_script"
-	FieldNodeConfigurationContainerRuntime = "container_runtime"
-	FieldNodeConfigurationDockerConfig     = "docker_config"
-	FieldNodeConfigurationKubeletConfig    = "kubelet_config"
-	FieldNodeConfigurationAKS              = "aks"
-	FieldNodeConfigurationEKS              = "eks"
-	FieldNodeConfigurationKOPS             = "kops"
-	FieldNodeConfigurationGKE              = "gke"
-	FieldNodeConfigurationEKSTargetGroup   = "target_group"
-	FieldNodeConfigurationAKSImageFamily   = "aks_image_family"
-	FieldNodeConfigurationEKSImageFamily   = "eks_image_family"
-	FieldNodeConfigurationLoadbalancers    = "loadbalancers"
+	FieldNodeConfigurationName                    = "name"
+	FieldNodeConfigurationDiskCpuRatio            = "disk_cpu_ratio"
+	FieldNodeConfigurationMinDiskSize             = "min_disk_size"
+	FieldNodeConfigurationDrainTimeoutSec         = "drain_timeout_sec"
+	FieldNodeConfigurationSubnets                 = "subnets"
+	FieldNodeConfigurationSSHPublicKey            = "ssh_public_key"
+	FieldNodeConfigurationImage                   = "image"
+	FieldNodeConfigurationTags                    = "tags"
+	FieldNodeConfigurationInitScript              = "init_script"
+	FieldNodeConfigurationContainerRuntime        = "container_runtime"
+	FieldNodeConfigurationDockerConfig            = "docker_config"
+	FieldNodeConfigurationKubeletConfig           = "kubelet_config"
+	FieldNodeConfigurationAKS                     = "aks"
+	FieldNodeConfigurationEKS                     = "eks"
+	FieldNodeConfigurationKOPS                    = "kops"
+	FieldNodeConfigurationGKE                     = "gke"
+	FieldNodeConfigurationEKSTargetGroup          = "target_group"
+	FieldNodeConfigurationAKSImageFamily          = "aks_image_family"
+	FieldNodeConfigurationEKSImageFamily          = "eks_image_family"
+	FieldNodeConfigurationLoadbalancers           = "loadbalancers"
+	FieldNodeConfigurationAKSLoadbalancerIPPools  = "ip_based_backend_pools"
+	FieldNodeConfigurationAKSLoadbalancerNICPools = "nic_based_backend_pools"
 )
 
 const (
@@ -333,15 +335,21 @@ func resourceNodeConfiguration() *schema.Resource {
 						FieldNodeConfigurationLoadbalancers: {
 							Type:        schema.TypeList,
 							Optional:    true,
-							Description: "Loadboalancer configuration for CAST provisioned nodes",
+							Description: "Load balancer configuration for CAST provisioned nodes",
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
+									"id": {
+										Type:        schema.TypeString,
+										Description: "The full ID of the load balancer in azure.",
+										Optional:    true, // Can't make it required as it was added after `name` so it'd be a breaking change.
+									},
 									"name": {
 										Type:        schema.TypeString,
-										Required:    true,
-										Description: "Name of loadbalancer",
+										Description: "Name of load balancer",
+										Optional:    true,
+										Deprecated:  "name field is deprecated, use ID instead. Will be removed in future versions.",
 									},
-									"ip_based_backend_pools": {
+									FieldNodeConfigurationAKSLoadbalancerIPPools: {
 										Type:        schema.TypeList,
 										Optional:    true,
 										Description: "IP based backend pools configuration for CAST provisioned nodes",
@@ -351,6 +359,20 @@ func resourceNodeConfiguration() *schema.Resource {
 													Type:        schema.TypeString,
 													Required:    true,
 													Description: "Name of the ip based backend pool",
+												},
+											},
+										},
+									},
+									FieldNodeConfigurationAKSLoadbalancerNICPools: {
+										Type:        schema.TypeList,
+										Optional:    true,
+										Description: "NIC based backend pools configuration for CAST provisioned nodes.",
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"name": {
+													Type:        schema.TypeString,
+													Required:    true,
+													Description: "Name of the NIC based backend pool",
 												},
 											},
 										},
@@ -981,11 +1003,18 @@ func toAksLoadBalancers(obj []interface{}) *[]sdk.NodeconfigV1AKSConfigLoadBalan
 	for _, lbRaw := range obj {
 		if lb, ok := lbRaw.(map[string]interface{}); ok {
 			sdkLB := sdk.NodeconfigV1AKSConfigLoadBalancers{}
+			if id, ok := lb["id"].(string); ok && id != "" {
+				sdkLB.Id = lo.ToPtr(id)
+			}
 			if name, ok := lb["name"].(string); ok && name != "" {
+				//nolint:staticcheck //We have to do this until we drop the field in TF major provider version.
 				sdkLB.Name = lo.ToPtr(name)
 			}
-			if ipBasedBackendPools, ok := lb["ip_based_backend_pools"].([]interface{}); ok && len(ipBasedBackendPools) > 0 {
+			if ipBasedBackendPools, ok := lb[FieldNodeConfigurationAKSLoadbalancerIPPools].([]interface{}); ok && len(ipBasedBackendPools) > 0 {
 				sdkLB.IpBasedBackendPools = toAksIpBasedBackendPools(ipBasedBackendPools)
+			}
+			if nicBasedBackendPools, ok := lb[FieldNodeConfigurationAKSLoadbalancerNICPools].([]interface{}); ok && len(nicBasedBackendPools) > 0 {
+				sdkLB.NicBasedBackendPools = toAksNICBasedBackendPools(nicBasedBackendPools)
 			}
 			out = append(out, sdkLB)
 		}
@@ -999,18 +1028,33 @@ func toAksIpBasedBackendPools(obj []interface{}) *[]sdk.NodeconfigV1AKSConfigLoa
 		return nil
 	}
 
-	out := make([]sdk.NodeconfigV1AKSConfigLoadBalancersIPBasedBackendPool, 0, len(obj))
-	for _, poolRaw := range obj {
-		if pool, ok := poolRaw.(map[string]interface{}); ok {
-			sdkPool := sdk.NodeconfigV1AKSConfigLoadBalancersIPBasedBackendPool{}
-			if name, ok := pool["name"].(string); ok && name != "" {
-				sdkPool.Name = lo.ToPtr(name)
-			}
-			out = append(out, sdkPool)
-		}
+	pools := lo.Map(extractAksBackendPoolNames(obj), func(name string, _ int) sdk.NodeconfigV1AKSConfigLoadBalancersIPBasedBackendPool {
+		return sdk.NodeconfigV1AKSConfigLoadBalancersIPBasedBackendPool{Name: lo.ToPtr(name)}
+	})
+	return &pools
+}
+
+func toAksNICBasedBackendPools(obj []any) *[]sdk.NodeconfigV1AKSConfigLoadBalancersNICBasedBackendPool {
+	if obj == nil {
+		return nil
 	}
 
-	return &out
+	pools := lo.Map(extractAksBackendPoolNames(obj), func(name string, _ int) sdk.NodeconfigV1AKSConfigLoadBalancersNICBasedBackendPool {
+		return sdk.NodeconfigV1AKSConfigLoadBalancersNICBasedBackendPool{Name: lo.ToPtr(name)}
+	})
+	return &pools
+}
+
+func extractAksBackendPoolNames(pools []any) []string {
+	return lo.Reduce(pools, func(names []string, poolRaw any, _ int) []string {
+		if pool, ok := poolRaw.(map[string]interface{}); ok {
+			if name, ok := pool["name"].(string); ok && name != "" {
+				names = append(names, name)
+			}
+		}
+
+		return names
+	}, make([]string, 0))
 }
 
 func toAKSOSDiskType(v string) *sdk.NodeconfigV1AKSConfigOsDiskType {
@@ -1077,11 +1121,29 @@ func fromAksLoadBalancers(lbs []sdk.NodeconfigV1AKSConfigLoadBalancers) []map[st
 	out := make([]map[string]interface{}, 0, len(lbs))
 	for _, lb := range lbs {
 		m := map[string]interface{}{}
+		if lb.Id != nil {
+			m["id"] = *lb.Id
+		}
+		//nolint:staticcheck //We have to do this until we drop the field in TF major provider version.
 		if lb.Name != nil {
+			//nolint:staticcheck //We have to do this until we drop the field in TF major provider version.
 			m["name"] = *lb.Name
 		}
 		if lb.IpBasedBackendPools != nil && len(*lb.IpBasedBackendPools) > 0 {
-			m["ip_based_backend_pools"] = fromAksIpBasedBackendPools(*lb.IpBasedBackendPools)
+			m[FieldNodeConfigurationAKSLoadbalancerIPPools] = fromAksIpBasedBackendPoolNames(lo.FilterMap(*lb.IpBasedBackendPools, func(pool sdk.NodeconfigV1AKSConfigLoadBalancersIPBasedBackendPool, _ int) (string, bool) {
+				if pool.Name != nil {
+					return *pool.Name, true
+				}
+				return "", false
+			}))
+		}
+		if lb.NicBasedBackendPools != nil && len(*lb.NicBasedBackendPools) > 0 {
+			m[FieldNodeConfigurationAKSLoadbalancerNICPools] = fromAksIpBasedBackendPoolNames(lo.FilterMap(*lb.NicBasedBackendPools, func(pool sdk.NodeconfigV1AKSConfigLoadBalancersNICBasedBackendPool, _ int) (string, bool) {
+				if pool.Name != nil {
+					return *pool.Name, true
+				}
+				return "", false
+			}))
 		}
 		out = append(out, m)
 	}
@@ -1089,17 +1151,15 @@ func fromAksLoadBalancers(lbs []sdk.NodeconfigV1AKSConfigLoadBalancers) []map[st
 	return out
 }
 
-func fromAksIpBasedBackendPools(pools []sdk.NodeconfigV1AKSConfigLoadBalancersIPBasedBackendPool) []map[string]interface{} {
-	if pools == nil {
+func fromAksIpBasedBackendPoolNames(names []string) []map[string]interface{} {
+	if names == nil {
 		return nil
 	}
 
-	out := make([]map[string]interface{}, 0, len(pools))
-	for _, pool := range pools {
+	out := make([]map[string]interface{}, 0, len(names))
+	for _, name := range names {
 		m := map[string]interface{}{}
-		if pool.Name != nil {
-			m["name"] = *pool.Name
-		}
+		m["name"] = name
 		out = append(out, m)
 	}
 
