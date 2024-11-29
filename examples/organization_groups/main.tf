@@ -18,17 +18,17 @@ resource "castai_organization_group" "first_group" {
 
   members {
     member {
-      kind = "user"
+      kind  = "user"
       id    = "21c133e2-a899-4f51-b297-830bc62e51d6"
       email = "first-user@cast.ai"
     }
     member {
-      kind = "user"
+      kind  = "user"
       id    = "21c133e2-a899-4f51-b297-830bc62e51d7"
       email = "second-user@cast.ai"
     }
     member {
-      kind = "service_account"
+      kind  = "service_account"
       id    = "21c133e2-a899-4f51-b297-830bc62e51d9"
       email = "service_account-2@cast.ai"
     }
@@ -42,7 +42,7 @@ resource "castai_organization_group" "second_group" {
 
   members {
     member {
-      kind = "user"
+      kind  = "user"
       id    = "21c133e2-a899-4f51-b297-830bc62e51d6"
       email = "first-user@cast.ai"
     }
