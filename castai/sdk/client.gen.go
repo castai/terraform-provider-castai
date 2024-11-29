@@ -90,6 +90,19 @@ func WithRequestEditorFn(fn RequestEditorFn) ClientOption {
 
 // The interface specification for the client above.
 type ClientInterface interface {
+	// CommitmentsAPIBatchDeleteCommitments request with any body
+	CommitmentsAPIBatchDeleteCommitmentsWithBody(ctx context.Context, organizationId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	CommitmentsAPIBatchDeleteCommitments(ctx context.Context, organizationId string, body CommitmentsAPIBatchDeleteCommitmentsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// CommitmentsAPIBatchUpdateCommitments request with any body
+	CommitmentsAPIBatchUpdateCommitmentsWithBody(ctx context.Context, organizationId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	CommitmentsAPIBatchUpdateCommitments(ctx context.Context, organizationId string, body CommitmentsAPIBatchUpdateCommitmentsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// CommitmentsAPIGetCommitmentUsageHistory request
+	CommitmentsAPIGetCommitmentUsageHistory(ctx context.Context, organizationId string, commitmentId string, params *CommitmentsAPIGetCommitmentUsageHistoryParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// AuthTokenAPIListAuthTokens request
 	AuthTokenAPIListAuthTokens(ctx context.Context, params *AuthTokenAPIListAuthTokensParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -358,6 +371,22 @@ type ClientInterface interface {
 	// InventoryAPISyncClusterResources request
 	InventoryAPISyncClusterResources(ctx context.Context, organizationId string, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// RbacServiceAPICreateGroup request with any body
+	RbacServiceAPICreateGroupWithBody(ctx context.Context, organizationId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	RbacServiceAPICreateGroup(ctx context.Context, organizationId string, body RbacServiceAPICreateGroupJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// RbacServiceAPIUpdateGroup request with any body
+	RbacServiceAPIUpdateGroupWithBody(ctx context.Context, organizationId string, groupId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	RbacServiceAPIUpdateGroup(ctx context.Context, organizationId string, groupId string, body RbacServiceAPIUpdateGroupJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// RbacServiceAPIDeleteGroup request
+	RbacServiceAPIDeleteGroup(ctx context.Context, organizationId string, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// RbacServiceAPIGetGroup request
+	RbacServiceAPIGetGroup(ctx context.Context, organizationId string, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// InventoryAPIGetReservations request
 	InventoryAPIGetReservations(ctx context.Context, organizationId string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -376,6 +405,22 @@ type ClientInterface interface {
 
 	// InventoryAPIDeleteReservation request
 	InventoryAPIDeleteReservation(ctx context.Context, organizationId string, reservationId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// RbacServiceAPICreateRoleBindings request with any body
+	RbacServiceAPICreateRoleBindingsWithBody(ctx context.Context, organizationId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	RbacServiceAPICreateRoleBindings(ctx context.Context, organizationId string, body RbacServiceAPICreateRoleBindingsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// RbacServiceAPIDeleteRoleBinding request
+	RbacServiceAPIDeleteRoleBinding(ctx context.Context, organizationId string, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// RbacServiceAPIGetRoleBinding request
+	RbacServiceAPIGetRoleBinding(ctx context.Context, organizationId string, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// RbacServiceAPIUpdateRoleBinding request with any body
+	RbacServiceAPIUpdateRoleBindingWithBody(ctx context.Context, organizationId string, roleBindingId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	RbacServiceAPIUpdateRoleBinding(ctx context.Context, organizationId string, roleBindingId string, body RbacServiceAPIUpdateRoleBindingJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// UsersAPIRemoveOrganizationUsers request
 	UsersAPIRemoveOrganizationUsers(ctx context.Context, organizationId string, params *UsersAPIRemoveOrganizationUsersParams, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -553,6 +598,66 @@ type ClientInterface interface {
 	WorkloadOptimizationAPIUpdateWorkloadV2WithBody(ctx context.Context, clusterId string, workloadId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	WorkloadOptimizationAPIUpdateWorkloadV2(ctx context.Context, clusterId string, workloadId string, body WorkloadOptimizationAPIUpdateWorkloadV2JSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+}
+
+func (c *Client) CommitmentsAPIBatchDeleteCommitmentsWithBody(ctx context.Context, organizationId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCommitmentsAPIBatchDeleteCommitmentsRequestWithBody(c.Server, organizationId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) CommitmentsAPIBatchDeleteCommitments(ctx context.Context, organizationId string, body CommitmentsAPIBatchDeleteCommitmentsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCommitmentsAPIBatchDeleteCommitmentsRequest(c.Server, organizationId, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) CommitmentsAPIBatchUpdateCommitmentsWithBody(ctx context.Context, organizationId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCommitmentsAPIBatchUpdateCommitmentsRequestWithBody(c.Server, organizationId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) CommitmentsAPIBatchUpdateCommitments(ctx context.Context, organizationId string, body CommitmentsAPIBatchUpdateCommitmentsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCommitmentsAPIBatchUpdateCommitmentsRequest(c.Server, organizationId, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) CommitmentsAPIGetCommitmentUsageHistory(ctx context.Context, organizationId string, commitmentId string, params *CommitmentsAPIGetCommitmentUsageHistoryParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCommitmentsAPIGetCommitmentUsageHistoryRequest(c.Server, organizationId, commitmentId, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
 }
 
 func (c *Client) AuthTokenAPIListAuthTokens(ctx context.Context, params *AuthTokenAPIListAuthTokensParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
@@ -1731,6 +1836,78 @@ func (c *Client) InventoryAPISyncClusterResources(ctx context.Context, organizat
 	return c.Client.Do(req)
 }
 
+func (c *Client) RbacServiceAPICreateGroupWithBody(ctx context.Context, organizationId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewRbacServiceAPICreateGroupRequestWithBody(c.Server, organizationId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) RbacServiceAPICreateGroup(ctx context.Context, organizationId string, body RbacServiceAPICreateGroupJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewRbacServiceAPICreateGroupRequest(c.Server, organizationId, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) RbacServiceAPIUpdateGroupWithBody(ctx context.Context, organizationId string, groupId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewRbacServiceAPIUpdateGroupRequestWithBody(c.Server, organizationId, groupId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) RbacServiceAPIUpdateGroup(ctx context.Context, organizationId string, groupId string, body RbacServiceAPIUpdateGroupJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewRbacServiceAPIUpdateGroupRequest(c.Server, organizationId, groupId, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) RbacServiceAPIDeleteGroup(ctx context.Context, organizationId string, id string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewRbacServiceAPIDeleteGroupRequest(c.Server, organizationId, id)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) RbacServiceAPIGetGroup(ctx context.Context, organizationId string, id string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewRbacServiceAPIGetGroupRequest(c.Server, organizationId, id)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
 func (c *Client) InventoryAPIGetReservations(ctx context.Context, organizationId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewInventoryAPIGetReservationsRequest(c.Server, organizationId)
 	if err != nil {
@@ -1805,6 +1982,78 @@ func (c *Client) InventoryAPIOverwriteReservations(ctx context.Context, organiza
 
 func (c *Client) InventoryAPIDeleteReservation(ctx context.Context, organizationId string, reservationId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewInventoryAPIDeleteReservationRequest(c.Server, organizationId, reservationId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) RbacServiceAPICreateRoleBindingsWithBody(ctx context.Context, organizationId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewRbacServiceAPICreateRoleBindingsRequestWithBody(c.Server, organizationId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) RbacServiceAPICreateRoleBindings(ctx context.Context, organizationId string, body RbacServiceAPICreateRoleBindingsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewRbacServiceAPICreateRoleBindingsRequest(c.Server, organizationId, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) RbacServiceAPIDeleteRoleBinding(ctx context.Context, organizationId string, id string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewRbacServiceAPIDeleteRoleBindingRequest(c.Server, organizationId, id)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) RbacServiceAPIGetRoleBinding(ctx context.Context, organizationId string, id string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewRbacServiceAPIGetRoleBindingRequest(c.Server, organizationId, id)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) RbacServiceAPIUpdateRoleBindingWithBody(ctx context.Context, organizationId string, roleBindingId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewRbacServiceAPIUpdateRoleBindingRequestWithBody(c.Server, organizationId, roleBindingId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) RbacServiceAPIUpdateRoleBinding(ctx context.Context, organizationId string, roleBindingId string, body RbacServiceAPIUpdateRoleBindingJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewRbacServiceAPIUpdateRoleBindingRequest(c.Server, organizationId, roleBindingId, body)
 	if err != nil {
 		return nil, err
 	}
@@ -2581,6 +2830,181 @@ func (c *Client) WorkloadOptimizationAPIUpdateWorkloadV2(ctx context.Context, cl
 		return nil, err
 	}
 	return c.Client.Do(req)
+}
+
+// NewCommitmentsAPIBatchDeleteCommitmentsRequest calls the generic CommitmentsAPIBatchDeleteCommitments builder with application/json body
+func NewCommitmentsAPIBatchDeleteCommitmentsRequest(server string, organizationId string, body CommitmentsAPIBatchDeleteCommitmentsJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewCommitmentsAPIBatchDeleteCommitmentsRequestWithBody(server, organizationId, "application/json", bodyReader)
+}
+
+// NewCommitmentsAPIBatchDeleteCommitmentsRequestWithBody generates requests for CommitmentsAPIBatchDeleteCommitments with any type of body
+func NewCommitmentsAPIBatchDeleteCommitmentsRequestWithBody(server string, organizationId string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "organizationId", runtime.ParamLocationPath, organizationId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/savings/v1/organizations/%s/commitments:batchDelete", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewCommitmentsAPIBatchUpdateCommitmentsRequest calls the generic CommitmentsAPIBatchUpdateCommitments builder with application/json body
+func NewCommitmentsAPIBatchUpdateCommitmentsRequest(server string, organizationId string, body CommitmentsAPIBatchUpdateCommitmentsJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewCommitmentsAPIBatchUpdateCommitmentsRequestWithBody(server, organizationId, "application/json", bodyReader)
+}
+
+// NewCommitmentsAPIBatchUpdateCommitmentsRequestWithBody generates requests for CommitmentsAPIBatchUpdateCommitments with any type of body
+func NewCommitmentsAPIBatchUpdateCommitmentsRequestWithBody(server string, organizationId string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "organizationId", runtime.ParamLocationPath, organizationId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/savings/v1/organizations/%s/commitments:batchUpdate", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewCommitmentsAPIGetCommitmentUsageHistoryRequest generates requests for CommitmentsAPIGetCommitmentUsageHistory
+func NewCommitmentsAPIGetCommitmentUsageHistoryRequest(server string, organizationId string, commitmentId string, params *CommitmentsAPIGetCommitmentUsageHistoryParams) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "organizationId", runtime.ParamLocationPath, organizationId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "commitmentId", runtime.ParamLocationPath, commitmentId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/savings/v1beta/organizations/%s/commitments/%s:getUsageHistory", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	queryValues := queryURL.Query()
+
+	if queryFrag, err := runtime.StyleParamWithLocation("form", true, "startTime", runtime.ParamLocationQuery, params.StartTime); err != nil {
+		return nil, err
+	} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+		return nil, err
+	} else {
+		for k, v := range parsed {
+			for _, v2 := range v {
+				queryValues.Add(k, v2)
+			}
+		}
+	}
+
+	if queryFrag, err := runtime.StyleParamWithLocation("form", true, "endTime", runtime.ParamLocationQuery, params.EndTime); err != nil {
+		return nil, err
+	} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+		return nil, err
+	} else {
+		for k, v := range parsed {
+			for _, v2 := range v {
+				queryValues.Add(k, v2)
+			}
+		}
+	}
+
+	if queryFrag, err := runtime.StyleParamWithLocation("form", true, "aggregationInterval", runtime.ParamLocationQuery, params.AggregationInterval); err != nil {
+		return nil, err
+	} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+		return nil, err
+	} else {
+		for k, v := range parsed {
+			for _, v2 := range v {
+				queryValues.Add(k, v2)
+			}
+		}
+	}
+
+	queryURL.RawQuery = queryValues.Encode()
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
 }
 
 // NewAuthTokenAPIListAuthTokensRequest generates requests for AuthTokenAPIListAuthTokens
@@ -5935,6 +6359,189 @@ func NewInventoryAPISyncClusterResourcesRequest(server string, organizationId st
 	return req, nil
 }
 
+// NewRbacServiceAPICreateGroupRequest calls the generic RbacServiceAPICreateGroup builder with application/json body
+func NewRbacServiceAPICreateGroupRequest(server string, organizationId string, body RbacServiceAPICreateGroupJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewRbacServiceAPICreateGroupRequestWithBody(server, organizationId, "application/json", bodyReader)
+}
+
+// NewRbacServiceAPICreateGroupRequestWithBody generates requests for RbacServiceAPICreateGroup with any type of body
+func NewRbacServiceAPICreateGroupRequestWithBody(server string, organizationId string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "organizationId", runtime.ParamLocationPath, organizationId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/organizations/%s/groups", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewRbacServiceAPIUpdateGroupRequest calls the generic RbacServiceAPIUpdateGroup builder with application/json body
+func NewRbacServiceAPIUpdateGroupRequest(server string, organizationId string, groupId string, body RbacServiceAPIUpdateGroupJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewRbacServiceAPIUpdateGroupRequestWithBody(server, organizationId, groupId, "application/json", bodyReader)
+}
+
+// NewRbacServiceAPIUpdateGroupRequestWithBody generates requests for RbacServiceAPIUpdateGroup with any type of body
+func NewRbacServiceAPIUpdateGroupRequestWithBody(server string, organizationId string, groupId string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "organizationId", runtime.ParamLocationPath, organizationId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "group.id", runtime.ParamLocationPath, groupId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/organizations/%s/groups/%s", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("PATCH", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewRbacServiceAPIDeleteGroupRequest generates requests for RbacServiceAPIDeleteGroup
+func NewRbacServiceAPIDeleteGroupRequest(server string, organizationId string, id string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "organizationId", runtime.ParamLocationPath, organizationId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/organizations/%s/groups/%s", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("DELETE", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewRbacServiceAPIGetGroupRequest generates requests for RbacServiceAPIGetGroup
+func NewRbacServiceAPIGetGroupRequest(server string, organizationId string, id string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "organizationId", runtime.ParamLocationPath, organizationId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/organizations/%s/groups/%s", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 // NewInventoryAPIGetReservationsRequest generates requests for InventoryAPIGetReservations
 func NewInventoryAPIGetReservationsRequest(server string, organizationId string) (*http.Request, error) {
 	var err error
@@ -6134,6 +6741,189 @@ func NewInventoryAPIDeleteReservationRequest(server string, organizationId strin
 	if err != nil {
 		return nil, err
 	}
+
+	return req, nil
+}
+
+// NewRbacServiceAPICreateRoleBindingsRequest calls the generic RbacServiceAPICreateRoleBindings builder with application/json body
+func NewRbacServiceAPICreateRoleBindingsRequest(server string, organizationId string, body RbacServiceAPICreateRoleBindingsJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewRbacServiceAPICreateRoleBindingsRequestWithBody(server, organizationId, "application/json", bodyReader)
+}
+
+// NewRbacServiceAPICreateRoleBindingsRequestWithBody generates requests for RbacServiceAPICreateRoleBindings with any type of body
+func NewRbacServiceAPICreateRoleBindingsRequestWithBody(server string, organizationId string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "organizationId", runtime.ParamLocationPath, organizationId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/organizations/%s/role-bindings", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewRbacServiceAPIDeleteRoleBindingRequest generates requests for RbacServiceAPIDeleteRoleBinding
+func NewRbacServiceAPIDeleteRoleBindingRequest(server string, organizationId string, id string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "organizationId", runtime.ParamLocationPath, organizationId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/organizations/%s/role-bindings/%s", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("DELETE", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewRbacServiceAPIGetRoleBindingRequest generates requests for RbacServiceAPIGetRoleBinding
+func NewRbacServiceAPIGetRoleBindingRequest(server string, organizationId string, id string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "organizationId", runtime.ParamLocationPath, organizationId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/organizations/%s/role-bindings/%s", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewRbacServiceAPIUpdateRoleBindingRequest calls the generic RbacServiceAPIUpdateRoleBinding builder with application/json body
+func NewRbacServiceAPIUpdateRoleBindingRequest(server string, organizationId string, roleBindingId string, body RbacServiceAPIUpdateRoleBindingJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewRbacServiceAPIUpdateRoleBindingRequestWithBody(server, organizationId, roleBindingId, "application/json", bodyReader)
+}
+
+// NewRbacServiceAPIUpdateRoleBindingRequestWithBody generates requests for RbacServiceAPIUpdateRoleBinding with any type of body
+func NewRbacServiceAPIUpdateRoleBindingRequestWithBody(server string, organizationId string, roleBindingId string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "organizationId", runtime.ParamLocationPath, organizationId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "roleBinding.id", runtime.ParamLocationPath, roleBindingId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/organizations/%s/role-bindings/%s", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("PATCH", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
 
 	return req, nil
 }
@@ -8485,6 +9275,19 @@ func WithBaseURL(baseURL string) ClientOption {
 
 // ClientWithResponsesInterface is the interface specification for the client with responses above.
 type ClientWithResponsesInterface interface {
+	// CommitmentsAPIBatchDeleteCommitments request  with any body
+	CommitmentsAPIBatchDeleteCommitmentsWithBodyWithResponse(ctx context.Context, organizationId string, contentType string, body io.Reader) (*CommitmentsAPIBatchDeleteCommitmentsResponse, error)
+
+	CommitmentsAPIBatchDeleteCommitmentsWithResponse(ctx context.Context, organizationId string, body CommitmentsAPIBatchDeleteCommitmentsJSONRequestBody) (*CommitmentsAPIBatchDeleteCommitmentsResponse, error)
+
+	// CommitmentsAPIBatchUpdateCommitments request  with any body
+	CommitmentsAPIBatchUpdateCommitmentsWithBodyWithResponse(ctx context.Context, organizationId string, contentType string, body io.Reader) (*CommitmentsAPIBatchUpdateCommitmentsResponse, error)
+
+	CommitmentsAPIBatchUpdateCommitmentsWithResponse(ctx context.Context, organizationId string, body CommitmentsAPIBatchUpdateCommitmentsJSONRequestBody) (*CommitmentsAPIBatchUpdateCommitmentsResponse, error)
+
+	// CommitmentsAPIGetCommitmentUsageHistory request
+	CommitmentsAPIGetCommitmentUsageHistoryWithResponse(ctx context.Context, organizationId string, commitmentId string, params *CommitmentsAPIGetCommitmentUsageHistoryParams) (*CommitmentsAPIGetCommitmentUsageHistoryResponse, error)
+
 	// AuthTokenAPIListAuthTokens request
 	AuthTokenAPIListAuthTokensWithResponse(ctx context.Context, params *AuthTokenAPIListAuthTokensParams) (*AuthTokenAPIListAuthTokensResponse, error)
 
@@ -8753,6 +9556,22 @@ type ClientWithResponsesInterface interface {
 	// InventoryAPISyncClusterResources request
 	InventoryAPISyncClusterResourcesWithResponse(ctx context.Context, organizationId string, clusterId string) (*InventoryAPISyncClusterResourcesResponse, error)
 
+	// RbacServiceAPICreateGroup request  with any body
+	RbacServiceAPICreateGroupWithBodyWithResponse(ctx context.Context, organizationId string, contentType string, body io.Reader) (*RbacServiceAPICreateGroupResponse, error)
+
+	RbacServiceAPICreateGroupWithResponse(ctx context.Context, organizationId string, body RbacServiceAPICreateGroupJSONRequestBody) (*RbacServiceAPICreateGroupResponse, error)
+
+	// RbacServiceAPIUpdateGroup request  with any body
+	RbacServiceAPIUpdateGroupWithBodyWithResponse(ctx context.Context, organizationId string, groupId string, contentType string, body io.Reader) (*RbacServiceAPIUpdateGroupResponse, error)
+
+	RbacServiceAPIUpdateGroupWithResponse(ctx context.Context, organizationId string, groupId string, body RbacServiceAPIUpdateGroupJSONRequestBody) (*RbacServiceAPIUpdateGroupResponse, error)
+
+	// RbacServiceAPIDeleteGroup request
+	RbacServiceAPIDeleteGroupWithResponse(ctx context.Context, organizationId string, id string) (*RbacServiceAPIDeleteGroupResponse, error)
+
+	// RbacServiceAPIGetGroup request
+	RbacServiceAPIGetGroupWithResponse(ctx context.Context, organizationId string, id string) (*RbacServiceAPIGetGroupResponse, error)
+
 	// InventoryAPIGetReservations request
 	InventoryAPIGetReservationsWithResponse(ctx context.Context, organizationId string) (*InventoryAPIGetReservationsResponse, error)
 
@@ -8771,6 +9590,22 @@ type ClientWithResponsesInterface interface {
 
 	// InventoryAPIDeleteReservation request
 	InventoryAPIDeleteReservationWithResponse(ctx context.Context, organizationId string, reservationId string) (*InventoryAPIDeleteReservationResponse, error)
+
+	// RbacServiceAPICreateRoleBindings request  with any body
+	RbacServiceAPICreateRoleBindingsWithBodyWithResponse(ctx context.Context, organizationId string, contentType string, body io.Reader) (*RbacServiceAPICreateRoleBindingsResponse, error)
+
+	RbacServiceAPICreateRoleBindingsWithResponse(ctx context.Context, organizationId string, body RbacServiceAPICreateRoleBindingsJSONRequestBody) (*RbacServiceAPICreateRoleBindingsResponse, error)
+
+	// RbacServiceAPIDeleteRoleBinding request
+	RbacServiceAPIDeleteRoleBindingWithResponse(ctx context.Context, organizationId string, id string) (*RbacServiceAPIDeleteRoleBindingResponse, error)
+
+	// RbacServiceAPIGetRoleBinding request
+	RbacServiceAPIGetRoleBindingWithResponse(ctx context.Context, organizationId string, id string) (*RbacServiceAPIGetRoleBindingResponse, error)
+
+	// RbacServiceAPIUpdateRoleBinding request  with any body
+	RbacServiceAPIUpdateRoleBindingWithBodyWithResponse(ctx context.Context, organizationId string, roleBindingId string, contentType string, body io.Reader) (*RbacServiceAPIUpdateRoleBindingResponse, error)
+
+	RbacServiceAPIUpdateRoleBindingWithResponse(ctx context.Context, organizationId string, roleBindingId string, body RbacServiceAPIUpdateRoleBindingJSONRequestBody) (*RbacServiceAPIUpdateRoleBindingResponse, error)
 
 	// UsersAPIRemoveOrganizationUsers request
 	UsersAPIRemoveOrganizationUsersWithResponse(ctx context.Context, organizationId string, params *UsersAPIRemoveOrganizationUsersParams) (*UsersAPIRemoveOrganizationUsersResponse, error)
@@ -8955,6 +9790,96 @@ type Response interface {
 	Status() string
 	StatusCode() int
 	GetBody() []byte
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type CommitmentsAPIBatchDeleteCommitmentsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *map[string]interface{}
+}
+
+// Status returns HTTPResponse.Status
+func (r CommitmentsAPIBatchDeleteCommitmentsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r CommitmentsAPIBatchDeleteCommitmentsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r CommitmentsAPIBatchDeleteCommitmentsResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type CommitmentsAPIBatchUpdateCommitmentsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *CastaiInventoryV1beta1BatchUpdateCommitmentsResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r CommitmentsAPIBatchUpdateCommitmentsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r CommitmentsAPIBatchUpdateCommitmentsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r CommitmentsAPIBatchUpdateCommitmentsResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type CommitmentsAPIGetCommitmentUsageHistoryResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *CastaiInventoryV1beta1GetCommitmentUsageHistoryResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r CommitmentsAPIGetCommitmentUsageHistoryResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r CommitmentsAPIGetCommitmentUsageHistoryResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r CommitmentsAPIGetCommitmentUsageHistoryResponse) GetBody() []byte {
+	return r.Body
 }
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
@@ -11118,6 +12043,126 @@ func (r InventoryAPISyncClusterResourcesResponse) GetBody() []byte {
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
+type RbacServiceAPICreateGroupResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *CastaiRbacV1beta1Group
+}
+
+// Status returns HTTPResponse.Status
+func (r RbacServiceAPICreateGroupResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r RbacServiceAPICreateGroupResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r RbacServiceAPICreateGroupResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type RbacServiceAPIUpdateGroupResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *CastaiRbacV1beta1Group
+}
+
+// Status returns HTTPResponse.Status
+func (r RbacServiceAPIUpdateGroupResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r RbacServiceAPIUpdateGroupResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r RbacServiceAPIUpdateGroupResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type RbacServiceAPIDeleteGroupResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *CastaiRbacV1beta1DeleteGroupResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r RbacServiceAPIDeleteGroupResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r RbacServiceAPIDeleteGroupResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r RbacServiceAPIDeleteGroupResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type RbacServiceAPIGetGroupResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *CastaiRbacV1beta1Group
+}
+
+// Status returns HTTPResponse.Status
+func (r RbacServiceAPIGetGroupResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r RbacServiceAPIGetGroupResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r RbacServiceAPIGetGroupResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
 type InventoryAPIGetReservationsResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -11263,6 +12308,126 @@ func (r InventoryAPIDeleteReservationResponse) StatusCode() int {
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
 func (r InventoryAPIDeleteReservationResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type RbacServiceAPICreateRoleBindingsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *[]CastaiRbacV1beta1RoleBinding
+}
+
+// Status returns HTTPResponse.Status
+func (r RbacServiceAPICreateRoleBindingsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r RbacServiceAPICreateRoleBindingsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r RbacServiceAPICreateRoleBindingsResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type RbacServiceAPIDeleteRoleBindingResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *CastaiRbacV1beta1DeleteRoleBindingResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r RbacServiceAPIDeleteRoleBindingResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r RbacServiceAPIDeleteRoleBindingResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r RbacServiceAPIDeleteRoleBindingResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type RbacServiceAPIGetRoleBindingResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *CastaiRbacV1beta1RoleBinding
+}
+
+// Status returns HTTPResponse.Status
+func (r RbacServiceAPIGetRoleBindingResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r RbacServiceAPIGetRoleBindingResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r RbacServiceAPIGetRoleBindingResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type RbacServiceAPIUpdateRoleBindingResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *CastaiRbacV1beta1RoleBinding
+}
+
+// Status returns HTTPResponse.Status
+func (r RbacServiceAPIUpdateRoleBindingResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r RbacServiceAPIUpdateRoleBindingResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r RbacServiceAPIUpdateRoleBindingResponse) GetBody() []byte {
 	return r.Body
 }
 
@@ -12734,6 +13899,49 @@ func (r WorkloadOptimizationAPIUpdateWorkloadV2Response) GetBody() []byte {
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
+// CommitmentsAPIBatchDeleteCommitmentsWithBodyWithResponse request with arbitrary body returning *CommitmentsAPIBatchDeleteCommitmentsResponse
+func (c *ClientWithResponses) CommitmentsAPIBatchDeleteCommitmentsWithBodyWithResponse(ctx context.Context, organizationId string, contentType string, body io.Reader) (*CommitmentsAPIBatchDeleteCommitmentsResponse, error) {
+	rsp, err := c.CommitmentsAPIBatchDeleteCommitmentsWithBody(ctx, organizationId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCommitmentsAPIBatchDeleteCommitmentsResponse(rsp)
+}
+
+func (c *ClientWithResponses) CommitmentsAPIBatchDeleteCommitmentsWithResponse(ctx context.Context, organizationId string, body CommitmentsAPIBatchDeleteCommitmentsJSONRequestBody) (*CommitmentsAPIBatchDeleteCommitmentsResponse, error) {
+	rsp, err := c.CommitmentsAPIBatchDeleteCommitments(ctx, organizationId, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCommitmentsAPIBatchDeleteCommitmentsResponse(rsp)
+}
+
+// CommitmentsAPIBatchUpdateCommitmentsWithBodyWithResponse request with arbitrary body returning *CommitmentsAPIBatchUpdateCommitmentsResponse
+func (c *ClientWithResponses) CommitmentsAPIBatchUpdateCommitmentsWithBodyWithResponse(ctx context.Context, organizationId string, contentType string, body io.Reader) (*CommitmentsAPIBatchUpdateCommitmentsResponse, error) {
+	rsp, err := c.CommitmentsAPIBatchUpdateCommitmentsWithBody(ctx, organizationId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCommitmentsAPIBatchUpdateCommitmentsResponse(rsp)
+}
+
+func (c *ClientWithResponses) CommitmentsAPIBatchUpdateCommitmentsWithResponse(ctx context.Context, organizationId string, body CommitmentsAPIBatchUpdateCommitmentsJSONRequestBody) (*CommitmentsAPIBatchUpdateCommitmentsResponse, error) {
+	rsp, err := c.CommitmentsAPIBatchUpdateCommitments(ctx, organizationId, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCommitmentsAPIBatchUpdateCommitmentsResponse(rsp)
+}
+
+// CommitmentsAPIGetCommitmentUsageHistoryWithResponse request returning *CommitmentsAPIGetCommitmentUsageHistoryResponse
+func (c *ClientWithResponses) CommitmentsAPIGetCommitmentUsageHistoryWithResponse(ctx context.Context, organizationId string, commitmentId string, params *CommitmentsAPIGetCommitmentUsageHistoryParams) (*CommitmentsAPIGetCommitmentUsageHistoryResponse, error) {
+	rsp, err := c.CommitmentsAPIGetCommitmentUsageHistory(ctx, organizationId, commitmentId, params)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCommitmentsAPIGetCommitmentUsageHistoryResponse(rsp)
+}
+
 // AuthTokenAPIListAuthTokensWithResponse request returning *AuthTokenAPIListAuthTokensResponse
 func (c *ClientWithResponses) AuthTokenAPIListAuthTokensWithResponse(ctx context.Context, params *AuthTokenAPIListAuthTokensParams) (*AuthTokenAPIListAuthTokensResponse, error) {
 	rsp, err := c.AuthTokenAPIListAuthTokens(ctx, params)
@@ -13590,6 +14798,58 @@ func (c *ClientWithResponses) InventoryAPISyncClusterResourcesWithResponse(ctx c
 	return ParseInventoryAPISyncClusterResourcesResponse(rsp)
 }
 
+// RbacServiceAPICreateGroupWithBodyWithResponse request with arbitrary body returning *RbacServiceAPICreateGroupResponse
+func (c *ClientWithResponses) RbacServiceAPICreateGroupWithBodyWithResponse(ctx context.Context, organizationId string, contentType string, body io.Reader) (*RbacServiceAPICreateGroupResponse, error) {
+	rsp, err := c.RbacServiceAPICreateGroupWithBody(ctx, organizationId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseRbacServiceAPICreateGroupResponse(rsp)
+}
+
+func (c *ClientWithResponses) RbacServiceAPICreateGroupWithResponse(ctx context.Context, organizationId string, body RbacServiceAPICreateGroupJSONRequestBody) (*RbacServiceAPICreateGroupResponse, error) {
+	rsp, err := c.RbacServiceAPICreateGroup(ctx, organizationId, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseRbacServiceAPICreateGroupResponse(rsp)
+}
+
+// RbacServiceAPIUpdateGroupWithBodyWithResponse request with arbitrary body returning *RbacServiceAPIUpdateGroupResponse
+func (c *ClientWithResponses) RbacServiceAPIUpdateGroupWithBodyWithResponse(ctx context.Context, organizationId string, groupId string, contentType string, body io.Reader) (*RbacServiceAPIUpdateGroupResponse, error) {
+	rsp, err := c.RbacServiceAPIUpdateGroupWithBody(ctx, organizationId, groupId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseRbacServiceAPIUpdateGroupResponse(rsp)
+}
+
+func (c *ClientWithResponses) RbacServiceAPIUpdateGroupWithResponse(ctx context.Context, organizationId string, groupId string, body RbacServiceAPIUpdateGroupJSONRequestBody) (*RbacServiceAPIUpdateGroupResponse, error) {
+	rsp, err := c.RbacServiceAPIUpdateGroup(ctx, organizationId, groupId, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseRbacServiceAPIUpdateGroupResponse(rsp)
+}
+
+// RbacServiceAPIDeleteGroupWithResponse request returning *RbacServiceAPIDeleteGroupResponse
+func (c *ClientWithResponses) RbacServiceAPIDeleteGroupWithResponse(ctx context.Context, organizationId string, id string) (*RbacServiceAPIDeleteGroupResponse, error) {
+	rsp, err := c.RbacServiceAPIDeleteGroup(ctx, organizationId, id)
+	if err != nil {
+		return nil, err
+	}
+	return ParseRbacServiceAPIDeleteGroupResponse(rsp)
+}
+
+// RbacServiceAPIGetGroupWithResponse request returning *RbacServiceAPIGetGroupResponse
+func (c *ClientWithResponses) RbacServiceAPIGetGroupWithResponse(ctx context.Context, organizationId string, id string) (*RbacServiceAPIGetGroupResponse, error) {
+	rsp, err := c.RbacServiceAPIGetGroup(ctx, organizationId, id)
+	if err != nil {
+		return nil, err
+	}
+	return ParseRbacServiceAPIGetGroupResponse(rsp)
+}
+
 // InventoryAPIGetReservationsWithResponse request returning *InventoryAPIGetReservationsResponse
 func (c *ClientWithResponses) InventoryAPIGetReservationsWithResponse(ctx context.Context, organizationId string) (*InventoryAPIGetReservationsResponse, error) {
 	rsp, err := c.InventoryAPIGetReservations(ctx, organizationId)
@@ -13649,6 +14909,58 @@ func (c *ClientWithResponses) InventoryAPIDeleteReservationWithResponse(ctx cont
 		return nil, err
 	}
 	return ParseInventoryAPIDeleteReservationResponse(rsp)
+}
+
+// RbacServiceAPICreateRoleBindingsWithBodyWithResponse request with arbitrary body returning *RbacServiceAPICreateRoleBindingsResponse
+func (c *ClientWithResponses) RbacServiceAPICreateRoleBindingsWithBodyWithResponse(ctx context.Context, organizationId string, contentType string, body io.Reader) (*RbacServiceAPICreateRoleBindingsResponse, error) {
+	rsp, err := c.RbacServiceAPICreateRoleBindingsWithBody(ctx, organizationId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseRbacServiceAPICreateRoleBindingsResponse(rsp)
+}
+
+func (c *ClientWithResponses) RbacServiceAPICreateRoleBindingsWithResponse(ctx context.Context, organizationId string, body RbacServiceAPICreateRoleBindingsJSONRequestBody) (*RbacServiceAPICreateRoleBindingsResponse, error) {
+	rsp, err := c.RbacServiceAPICreateRoleBindings(ctx, organizationId, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseRbacServiceAPICreateRoleBindingsResponse(rsp)
+}
+
+// RbacServiceAPIDeleteRoleBindingWithResponse request returning *RbacServiceAPIDeleteRoleBindingResponse
+func (c *ClientWithResponses) RbacServiceAPIDeleteRoleBindingWithResponse(ctx context.Context, organizationId string, id string) (*RbacServiceAPIDeleteRoleBindingResponse, error) {
+	rsp, err := c.RbacServiceAPIDeleteRoleBinding(ctx, organizationId, id)
+	if err != nil {
+		return nil, err
+	}
+	return ParseRbacServiceAPIDeleteRoleBindingResponse(rsp)
+}
+
+// RbacServiceAPIGetRoleBindingWithResponse request returning *RbacServiceAPIGetRoleBindingResponse
+func (c *ClientWithResponses) RbacServiceAPIGetRoleBindingWithResponse(ctx context.Context, organizationId string, id string) (*RbacServiceAPIGetRoleBindingResponse, error) {
+	rsp, err := c.RbacServiceAPIGetRoleBinding(ctx, organizationId, id)
+	if err != nil {
+		return nil, err
+	}
+	return ParseRbacServiceAPIGetRoleBindingResponse(rsp)
+}
+
+// RbacServiceAPIUpdateRoleBindingWithBodyWithResponse request with arbitrary body returning *RbacServiceAPIUpdateRoleBindingResponse
+func (c *ClientWithResponses) RbacServiceAPIUpdateRoleBindingWithBodyWithResponse(ctx context.Context, organizationId string, roleBindingId string, contentType string, body io.Reader) (*RbacServiceAPIUpdateRoleBindingResponse, error) {
+	rsp, err := c.RbacServiceAPIUpdateRoleBindingWithBody(ctx, organizationId, roleBindingId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseRbacServiceAPIUpdateRoleBindingResponse(rsp)
+}
+
+func (c *ClientWithResponses) RbacServiceAPIUpdateRoleBindingWithResponse(ctx context.Context, organizationId string, roleBindingId string, body RbacServiceAPIUpdateRoleBindingJSONRequestBody) (*RbacServiceAPIUpdateRoleBindingResponse, error) {
+	rsp, err := c.RbacServiceAPIUpdateRoleBinding(ctx, organizationId, roleBindingId, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseRbacServiceAPIUpdateRoleBindingResponse(rsp)
 }
 
 // UsersAPIRemoveOrganizationUsersWithResponse request returning *UsersAPIRemoveOrganizationUsersResponse
@@ -14210,6 +15522,84 @@ func (c *ClientWithResponses) WorkloadOptimizationAPIUpdateWorkloadV2WithRespons
 		return nil, err
 	}
 	return ParseWorkloadOptimizationAPIUpdateWorkloadV2Response(rsp)
+}
+
+// ParseCommitmentsAPIBatchDeleteCommitmentsResponse parses an HTTP response from a CommitmentsAPIBatchDeleteCommitmentsWithResponse call
+func ParseCommitmentsAPIBatchDeleteCommitmentsResponse(rsp *http.Response) (*CommitmentsAPIBatchDeleteCommitmentsResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &CommitmentsAPIBatchDeleteCommitmentsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest map[string]interface{}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseCommitmentsAPIBatchUpdateCommitmentsResponse parses an HTTP response from a CommitmentsAPIBatchUpdateCommitmentsWithResponse call
+func ParseCommitmentsAPIBatchUpdateCommitmentsResponse(rsp *http.Response) (*CommitmentsAPIBatchUpdateCommitmentsResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &CommitmentsAPIBatchUpdateCommitmentsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest CastaiInventoryV1beta1BatchUpdateCommitmentsResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseCommitmentsAPIGetCommitmentUsageHistoryResponse parses an HTTP response from a CommitmentsAPIGetCommitmentUsageHistoryWithResponse call
+func ParseCommitmentsAPIGetCommitmentUsageHistoryResponse(rsp *http.Response) (*CommitmentsAPIGetCommitmentUsageHistoryResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &CommitmentsAPIGetCommitmentUsageHistoryResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest CastaiInventoryV1beta1GetCommitmentUsageHistoryResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
 }
 
 // ParseAuthTokenAPIListAuthTokensResponse parses an HTTP response from a AuthTokenAPIListAuthTokensWithResponse call
@@ -16074,6 +17464,110 @@ func ParseInventoryAPISyncClusterResourcesResponse(rsp *http.Response) (*Invento
 	return response, nil
 }
 
+// ParseRbacServiceAPICreateGroupResponse parses an HTTP response from a RbacServiceAPICreateGroupWithResponse call
+func ParseRbacServiceAPICreateGroupResponse(rsp *http.Response) (*RbacServiceAPICreateGroupResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &RbacServiceAPICreateGroupResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest CastaiRbacV1beta1Group
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseRbacServiceAPIUpdateGroupResponse parses an HTTP response from a RbacServiceAPIUpdateGroupWithResponse call
+func ParseRbacServiceAPIUpdateGroupResponse(rsp *http.Response) (*RbacServiceAPIUpdateGroupResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &RbacServiceAPIUpdateGroupResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest CastaiRbacV1beta1Group
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseRbacServiceAPIDeleteGroupResponse parses an HTTP response from a RbacServiceAPIDeleteGroupWithResponse call
+func ParseRbacServiceAPIDeleteGroupResponse(rsp *http.Response) (*RbacServiceAPIDeleteGroupResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &RbacServiceAPIDeleteGroupResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest CastaiRbacV1beta1DeleteGroupResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseRbacServiceAPIGetGroupResponse parses an HTTP response from a RbacServiceAPIGetGroupWithResponse call
+func ParseRbacServiceAPIGetGroupResponse(rsp *http.Response) (*RbacServiceAPIGetGroupResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &RbacServiceAPIGetGroupResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest CastaiRbacV1beta1Group
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
 // ParseInventoryAPIGetReservationsResponse parses an HTTP response from a InventoryAPIGetReservationsWithResponse call
 func ParseInventoryAPIGetReservationsResponse(rsp *http.Response) (*InventoryAPIGetReservationsResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
@@ -16194,6 +17688,110 @@ func ParseInventoryAPIDeleteReservationResponse(rsp *http.Response) (*InventoryA
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest map[string]interface{}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseRbacServiceAPICreateRoleBindingsResponse parses an HTTP response from a RbacServiceAPICreateRoleBindingsWithResponse call
+func ParseRbacServiceAPICreateRoleBindingsResponse(rsp *http.Response) (*RbacServiceAPICreateRoleBindingsResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &RbacServiceAPICreateRoleBindingsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest []CastaiRbacV1beta1RoleBinding
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseRbacServiceAPIDeleteRoleBindingResponse parses an HTTP response from a RbacServiceAPIDeleteRoleBindingWithResponse call
+func ParseRbacServiceAPIDeleteRoleBindingResponse(rsp *http.Response) (*RbacServiceAPIDeleteRoleBindingResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &RbacServiceAPIDeleteRoleBindingResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest CastaiRbacV1beta1DeleteRoleBindingResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseRbacServiceAPIGetRoleBindingResponse parses an HTTP response from a RbacServiceAPIGetRoleBindingWithResponse call
+func ParseRbacServiceAPIGetRoleBindingResponse(rsp *http.Response) (*RbacServiceAPIGetRoleBindingResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &RbacServiceAPIGetRoleBindingResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest CastaiRbacV1beta1RoleBinding
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseRbacServiceAPIUpdateRoleBindingResponse parses an HTTP response from a RbacServiceAPIUpdateRoleBindingWithResponse call
+func ParseRbacServiceAPIUpdateRoleBindingResponse(rsp *http.Response) (*RbacServiceAPIUpdateRoleBindingResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &RbacServiceAPIUpdateRoleBindingResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest CastaiRbacV1beta1RoleBinding
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
