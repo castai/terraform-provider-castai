@@ -43,6 +43,7 @@ Optional:
 Required:
 
 - `email` (String)
+- `kind` (String) Kind of the member. Supported values include: user, service_account.
 
 Read-Only:
 

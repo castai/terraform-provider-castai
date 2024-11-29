@@ -4,10 +4,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/samber/lo"
 
 	"github.com/castai/terraform-provider-castai/castai/sdk"
@@ -19,8 +21,16 @@ const (
 	FieldOrganizationGroupDescription    = "description"
 	FieldOrganizationGroupMembers        = "members"
 	FieldOrganizationGroupMember         = "member"
+	FieldOrganizationGroupMemberKind     = "kind"
 	FieldOrganizationGroupMemberID       = "id"
 	FieldOrganizationGroupMemberEmail    = "email"
+
+	GroupMemberKindUser           = "user"
+	GroupMemberKindServiceAccount = "service_account"
+)
+
+var (
+	supportedMemberKinds = []string{GroupMemberKindUser, GroupMemberKindServiceAccount}
 )
 
 func resourceOrganizationGroup() *schema.Resource {
@@ -66,6 +76,15 @@ func resourceOrganizationGroup() *schema.Resource {
 							Optional: true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
+									FieldOrganizationGroupMemberKind: {
+										Type:             schema.TypeString,
+										Required:         true,
+										Description:      fmt.Sprintf("Kind of the member. Supported values include: %s.", strings.Join(supportedMemberKinds, ", ")),
+										ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(supportedMemberKinds, true)),
+										DiffSuppressFunc: func(k, oldValue, newValue string, d *schema.ResourceData) bool {
+											return strings.EqualFold(oldValue, newValue)
+										},
+									},
 									FieldOrganizationGroupMemberID: {
 										Type:     schema.TypeString,
 										Required: true,
@@ -126,8 +145,7 @@ func resourceOrganizationGroupRead(ctx context.Context, data *schema.ResourceDat
 		return diag.FromErr(fmt.Errorf("getting group for read: %w", err))
 	}
 
-	err = assignGroupData(group, data)
-	if err != nil {
+	if err := assignGroupData(group, data); err != nil {
 		return diag.FromErr(fmt.Errorf("assigning group data for read: %w", err))
 	}
 
@@ -195,7 +213,15 @@ func assignGroupData(group *sdk.CastaiRbacV1beta1Group, data *schema.ResourceDat
 	if group.Definition.Members != nil {
 		var members []map[string]string
 		for _, member := range *group.Definition.Members {
+			var kind string
+			switch member.Kind {
+			case sdk.USER:
+				kind = GroupMemberKindUser
+			case sdk.SERVICEACCOUNT:
+				kind = GroupMemberKindServiceAccount
+			}
 			members = append(members, map[string]string{
+				FieldOrganizationGroupMemberKind:  kind,
 				FieldOrganizationGroupMemberID:    member.Id,
 				FieldOrganizationGroupMemberEmail: member.Email,
 			})
@@ -218,7 +244,15 @@ func convertMembersToSDK(data *schema.ResourceData) []sdk.CastaiRbacV1beta1Membe
 
 	for _, dataMembersDef := range data.Get(FieldOrganizationGroupMembers).([]any) {
 		for _, dataMember := range dataMembersDef.(map[string]any)[FieldOrganizationGroupMember].([]any) {
+			var kind sdk.CastaiRbacV1beta1MemberKind
+			switch dataMember.(map[string]any)[FieldOrganizationGroupMemberKind].(string) {
+			case GroupMemberKindUser:
+				kind = sdk.USER
+			case GroupMemberKindServiceAccount:
+				kind = sdk.SERVICEACCOUNT
+			}
 			members = append(members, sdk.CastaiRbacV1beta1Member{
+				Kind:  kind,
 				Email: dataMember.(map[string]any)[FieldOrganizationGroupMemberEmail].(string),
 				Id:    dataMember.(map[string]any)[FieldOrganizationGroupMemberID].(string),
 			})

@@ -122,6 +122,20 @@ const (
 	Ssd     CastaiInventoryV1beta1StorageInfoDeviceType = "ssd"
 )
 
+// Defines values for CastaiRbacV1beta1MemberKind.
+const (
+	SERVICEACCOUNT CastaiRbacV1beta1MemberKind = "SERVICE_ACCOUNT"
+	USER           CastaiRbacV1beta1MemberKind = "USER"
+)
+
+// Defines values for CastaiRbacV1beta1PoliciesState.
+const (
+	CastaiRbacV1beta1PoliciesStateACCEPTED CastaiRbacV1beta1PoliciesState = "ACCEPTED"
+	CastaiRbacV1beta1PoliciesStateCREATED  CastaiRbacV1beta1PoliciesState = "CREATED"
+	CastaiRbacV1beta1PoliciesStateFAILED   CastaiRbacV1beta1PoliciesState = "FAILED"
+	CastaiRbacV1beta1PoliciesStateUNKNOWN  CastaiRbacV1beta1PoliciesState = "UNKNOWN"
+)
+
 // Defines values for CastaiSsoV1beta1OIDCType.
 const (
 	CastaiSsoV1beta1OIDCTypeTYPEBACKCHANNEL  CastaiSsoV1beta1OIDCType = "TYPE_BACK_CHANNEL"
@@ -297,9 +311,9 @@ const (
 
 // Defines values for WorkloadoptimizationV1ApplyType.
 const (
-	DEFERRED  WorkloadoptimizationV1ApplyType = "DEFERRED"
-	IMMEDIATE WorkloadoptimizationV1ApplyType = "IMMEDIATE"
-	UNKNOWN   WorkloadoptimizationV1ApplyType = "UNKNOWN"
+	WorkloadoptimizationV1ApplyTypeDEFERRED  WorkloadoptimizationV1ApplyType = "DEFERRED"
+	WorkloadoptimizationV1ApplyTypeIMMEDIATE WorkloadoptimizationV1ApplyType = "IMMEDIATE"
+	WorkloadoptimizationV1ApplyTypeUNKNOWN   WorkloadoptimizationV1ApplyType = "UNKNOWN"
 )
 
 // Defines values for WorkloadoptimizationV1EventType.
@@ -381,6 +395,18 @@ type GroupsIsTheGroupsToBeUpdated struct {
 	Description *string `json:"description,omitempty"`
 
 	// Name is the name of the group.
+	Name string `json:"name"`
+}
+
+// RoleBindingIsTheRoleBindingToBeUpdated defines model for RoleBinding_is_the_role_binding_to_be_updated_.
+type RoleBindingIsTheRoleBindingToBeUpdated struct {
+	// Definition represents the role binding definition.
+	Definition CastaiRbacV1beta1RoleBindingDefinition `json:"definition"`
+
+	// Description is the description of the role binding.
+	Description *string `json:"description,omitempty"`
+
+	// Name is the name of the role binding.
 	Name string `json:"name"`
 }
 
@@ -689,7 +715,10 @@ type CastaiInventoryV1beta1ClusterAggregatedUsage struct {
 // CastaiInventoryV1beta1Commitment defines model for castai.inventory.v1beta1.Commitment.
 type CastaiInventoryV1beta1Commitment struct {
 	// Allowed usage specifies the part of the commitment that is allowed to be used. 1.0 means 100% of the commitment. Currently it's only supported for GCP CUDs.
-	AllowedUsage            *float32                                `json:"allowedUsage,omitempty"`
+	AllowedUsage *float32 `json:"allowedUsage,omitempty"`
+
+	// Assign commitment to all existing and future clusters that fall within the region of this commitment.
+	AutoAssignment          *bool                                   `json:"autoAssignment,omitempty"`
 	AzureReservationContext *CastaiInventoryV1beta1AzureReservation `json:"azureReservationContext,omitempty"`
 	EndDate                 *time.Time                              `json:"endDate"`
 	GcpResourceCudContext   *CastaiInventoryV1beta1GCPResourceCUD   `json:"gcpResourceCudContext,omitempty"`
@@ -1222,8 +1251,11 @@ type CastaiInventoryV1beta1StorageInfoDeviceType string
 // CastaiInventoryV1beta1UpdateCommitmentInput defines model for castai.inventory.v1beta1.UpdateCommitmentInput.
 type CastaiInventoryV1beta1UpdateCommitmentInput struct {
 	// Allowed usage specifies the part of the commitment that is allowed to be used. 1.0 means 100% of the commitment. Currently it's only supported for GCP CUDs.
-	AllowedUsage   *float32 `json:"allowedUsage"`
-	Prioritization *bool    `json:"prioritization"`
+	AllowedUsage *float32 `json:"allowedUsage"`
+
+	// Assign commitment to all existing and future clusters that fall within the region of this commitment.
+	AutoAssignment *bool `json:"autoAssignment"`
+	Prioritization *bool `json:"prioritization"`
 
 	// Scaling strategy specifies how to use commitment by autoscaler.
 	//
@@ -1319,6 +1351,13 @@ type CastaiRbacV1beta1Author struct {
 	Id *string `json:"id,omitempty"`
 }
 
+// ClusterScope represents the resource scope of the cluster.
+// Resource can be any resources inside the organization.
+type CastaiRbacV1beta1ClusterScope struct {
+	// ID is the unique identifier of the resource.
+	Id string `json:"id"`
+}
+
 // CastaiRbacV1beta1CreateGroupRequestGroup defines model for castai.rbac.v1beta1.CreateGroupRequest.Group.
 type CastaiRbacV1beta1CreateGroupRequestGroup struct {
 	Definition CastaiRbacV1beta1CreateGroupRequestGroupDefinition `json:"definition"`
@@ -1336,8 +1375,23 @@ type CastaiRbacV1beta1CreateGroupRequestGroupDefinition struct {
 	Members *[]CastaiRbacV1beta1Member `json:"members,omitempty"`
 }
 
+// CastaiRbacV1beta1CreateRoleBindingsRequestRoleBinding defines model for castai.rbac.v1beta1.CreateRoleBindingsRequest.RoleBinding.
+type CastaiRbacV1beta1CreateRoleBindingsRequestRoleBinding struct {
+	// Definition represents the role binding definition.
+	Definition CastaiRbacV1beta1RoleBindingDefinition `json:"definition"`
+
+	// Description is the description of the role binding.
+	Description *string `json:"description,omitempty"`
+
+	// Name is the name of the role binding.
+	Name string `json:"name"`
+}
+
 // CastaiRbacV1beta1DeleteGroupResponse defines model for castai.rbac.v1beta1.DeleteGroupResponse.
 type CastaiRbacV1beta1DeleteGroupResponse = map[string]interface{}
+
+// CastaiRbacV1beta1DeleteRoleBindingResponse defines model for castai.rbac.v1beta1.DeleteRoleBindingResponse.
+type CastaiRbacV1beta1DeleteRoleBindingResponse = map[string]interface{}
 
 // CastaiRbacV1beta1Group defines model for castai.rbac.v1beta1.Group.
 type CastaiRbacV1beta1Group struct {
@@ -1369,6 +1423,15 @@ type CastaiRbacV1beta1GroupDefinition struct {
 	Members *[]CastaiRbacV1beta1Member `json:"members,omitempty"`
 }
 
+// GroupSubject represents the group subject.
+type CastaiRbacV1beta1GroupSubject struct {
+	// ID is the unique identifier of the group.
+	Id string `json:"id"`
+
+	// Name is the name of the group.
+	Name *string `json:"name,omitempty"`
+}
+
 // CastaiRbacV1beta1Member defines model for castai.rbac.v1beta1.Member.
 type CastaiRbacV1beta1Member struct {
 	// AddedAt is the timestamp when the user has been added to the group.
@@ -1380,14 +1443,148 @@ type CastaiRbacV1beta1Member struct {
 	// ID is the internal unique identifier of the member.
 	Id string `json:"id"`
 
+	// Kind represents the type of the member.
+	Kind CastaiRbacV1beta1MemberKind `json:"kind"`
+
 	// LastLoginAt is the timestamp of the time when the user last time logged in.
 	LastLoginAt *time.Time `json:"lastLoginAt,omitempty"`
+}
+
+// Kind represents the type of the member.
+type CastaiRbacV1beta1MemberKind string
+
+// OrganizationScope represents the organization scope.
+type CastaiRbacV1beta1OrganizationScope struct {
+	// ID is the unique identifier of the organization.
+	Id string `json:"id"`
+}
+
+// PoliciesState represents the state of the policies generation.
+//
+//   - ACCEPTED: ACCEPTED is the state when the policies async generation is ongoing.
+//   - CREATED: CREATED is the state when the policies have been generated.
+//   - FAILED: FAILED is the state when the policies generation failed.
+type CastaiRbacV1beta1PoliciesState string
+
+// CastaiRbacV1beta1PolicyID defines model for castai.rbac.v1beta1.PolicyID.
+type CastaiRbacV1beta1PolicyID struct {
+	Id string `json:"id"`
+}
+
+// ResourceScope represents the resource scope.
+// Resource can be any resources inside the organization.
+type CastaiRbacV1beta1ResourceScope struct {
+	// ID is the unique identifier of the resource.
+	Id string `json:"id"`
+}
+
+// CastaiRbacV1beta1RoleBinding defines model for castai.rbac.v1beta1.RoleBinding.
+type CastaiRbacV1beta1RoleBinding struct {
+	// CreatedAt is the timestamp when the role binding was created.
+	CreatedAt *time.Time `json:"createdAt,omitempty"`
+
+	// Definition represents the role binding definition.
+	Definition CastaiRbacV1beta1RoleBindingDefinition `json:"definition"`
+
+	// Description is the description of the role binding.
+	Description *string `json:"description,omitempty"`
+
+	// ID is the unique identifier of the role binding.
+	Id *string `json:"id,omitempty"`
+
+	// Name is the name of the role binding.
+	Name           *string `json:"name,omitempty"`
+	OrganizationId *string `json:"organizationId,omitempty"`
+
+	// Status is the status of the role binding, reflecting the state of the related policies generation.
+	Status *[]CastaiRbacV1beta1RoleBindingStatus `json:"status,omitempty"`
+
+	// UpdatedAt is the timestamp when the role binding was last updated.
+	UpdatedAt *time.Time `json:"updatedAt,omitempty"`
+}
+
+// Definition represents the role binding definition.
+type CastaiRbacV1beta1RoleBindingDefinition struct {
+	// RoleID is the unique identifier of the role.
+	RoleId string `json:"roleId"`
+
+	// Scope represents the scope of the role binding.
+	Scope CastaiRbacV1beta1Scope `json:"scope"`
+
+	// Subjects is a list of subjects.
+	Subjects *[]CastaiRbacV1beta1Subject `json:"subjects,omitempty"`
+}
+
+// RoleBindingStatus is the status of the role binding, reflecting the state of the related policies generation.
+type CastaiRbacV1beta1RoleBindingStatus struct {
+	// Message is providing more information about the state.
+	Message *string `json:"message,omitempty"`
+
+	// Policies are the unique identifiers of the related policies.
+	Policies *[]CastaiRbacV1beta1PolicyID `json:"policies,omitempty"`
+
+	// PoliciesState represents the state of the policies generation.
+	//
+	//  - ACCEPTED: ACCEPTED is the state when the policies async generation is ongoing.
+	//  - CREATED: CREATED is the state when the policies have been generated.
+	//  - FAILED: FAILED is the state when the policies generation failed.
+	State CastaiRbacV1beta1PoliciesState `json:"state"`
+
+	// UpdatedAt is the timestamp when the status was last updated.
+	UpdatedAt *time.Time `json:"updatedAt,omitempty"`
+}
+
+// Scope represents the scope of the role binding.
+type CastaiRbacV1beta1Scope struct {
+	// ClusterScope represents the resource scope of the cluster.
+	// Resource can be any resources inside the organization.
+	Cluster *CastaiRbacV1beta1ClusterScope `json:"cluster,omitempty"`
+
+	// OrganizationScope represents the organization scope.
+	Organization *CastaiRbacV1beta1OrganizationScope `json:"organization,omitempty"`
+
+	// ResourceScope represents the resource scope.
+	// Resource can be any resources inside the organization.
+	Resource *CastaiRbacV1beta1ResourceScope `json:"resource,omitempty"`
+}
+
+// ServiceAccountSubject represents the service account subject.
+type CastaiRbacV1beta1ServiceAccountSubject struct {
+	// ID is the unique identifier of the service account.
+	Id string `json:"id"`
+
+	// Name is the name of the service account.
+	Name *string `json:"name,omitempty"`
+}
+
+// Subject represents the subject of the role binding.
+type CastaiRbacV1beta1Subject struct {
+	// GroupSubject represents the group subject.
+	Group *CastaiRbacV1beta1GroupSubject `json:"group,omitempty"`
+
+	// ServiceAccountSubject represents the service account subject.
+	ServiceAccount *CastaiRbacV1beta1ServiceAccountSubject `json:"serviceAccount,omitempty"`
+
+	// UserSubject represents the user subject.
+	User *CastaiRbacV1beta1UserSubject `json:"user,omitempty"`
 }
 
 // CastaiRbacV1beta1UpdateGroupRequestGroupDefinition defines model for castai.rbac.v1beta1.UpdateGroupRequest.GroupDefinition.
 type CastaiRbacV1beta1UpdateGroupRequestGroupDefinition struct {
 	// Members is a list of members.
 	Members []CastaiRbacV1beta1Member `json:"members"`
+}
+
+// UserSubject represents the user subject.
+type CastaiRbacV1beta1UserSubject struct {
+	// Email is the email of the user.
+	Email *string `json:"email,omitempty"`
+
+	// ID is the unique identifier of the user.
+	Id string `json:"id"`
+
+	// Name is the name of the user.
+	Name *string `json:"name,omitempty"`
 }
 
 // AzureAAD represents a Azure AAD connector.
@@ -2464,7 +2661,7 @@ type NodeconfigV1AKSConfig struct {
 	// List of supported image families (OSes) for AKS.
 	ImageFamily *NodeconfigV1AKSConfigImageFamily `json:"imageFamily,omitempty"`
 
-	// List of load balancers to be used for the cluster.
+	// List of load balancers to attach nodes to. Populating this field disables Cast's default load balancer autodiscovery mechanism.
 	LoadBalancers *[]NodeconfigV1AKSConfigLoadBalancers `json:"loadBalancers,omitempty"`
 
 	// Maximum number of pods that can be run on a node, which affects how many IP addresses you will need for each node.
@@ -2481,15 +2678,31 @@ type NodeconfigV1AKSConfigImageFamily string
 
 // NodeconfigV1AKSConfigLoadBalancers defines model for nodeconfig.v1.AKSConfig.LoadBalancers.
 type NodeconfigV1AKSConfigLoadBalancers struct {
-	// List of backend pools to be used for the load balancer.
+	// The full ID of the load balancer in Azure.
+	// For backwards compatibility, the field is not required but it should be treated as required for any new clients.
+	Id *string `json:"id,omitempty"`
+
+	// List of IP-based backend pools to attach each node's IP to.
 	IpBasedBackendPools *[]NodeconfigV1AKSConfigLoadBalancersIPBasedBackendPool `json:"ipBasedBackendPools,omitempty"`
 
-	// Name of the load balancer.
+	// Deprecated: Use ID instead
+	// Name of the load balancer. It is assumed to reside in the cluster's infrastructure resource group.
+	// Only available for backwards compatibility and only accounted for in IP-based backend pools.
 	Name *string `json:"name,omitempty"`
+
+	// List of NIC-based backend pools to attach each node's NIC to.
+	NicBasedBackendPools *[]NodeconfigV1AKSConfigLoadBalancersNICBasedBackendPool `json:"nicBasedBackendPools,omitempty"`
 }
 
 // NodeconfigV1AKSConfigLoadBalancersIPBasedBackendPool defines model for nodeconfig.v1.AKSConfig.LoadBalancers.IPBasedBackendPool.
 type NodeconfigV1AKSConfigLoadBalancersIPBasedBackendPool struct {
+	// Name of the backend pool as defined in Azure. Backend pools must have unique names within the load balancer.
+	Name *string `json:"name,omitempty"`
+}
+
+// NodeconfigV1AKSConfigLoadBalancersNICBasedBackendPool defines model for nodeconfig.v1.AKSConfig.LoadBalancers.NICBasedBackendPool.
+type NodeconfigV1AKSConfigLoadBalancersNICBasedBackendPool struct {
+	// Name of the backend pool as defined in Azure. Backend pools must have unique names within the load balancer.
 	Name *string `json:"name,omitempty"`
 }
 
@@ -4484,6 +4697,12 @@ type InventoryAPIAddReservationJSONBody = CastaiInventoryV1beta1GenericReservati
 // InventoryAPIOverwriteReservationsJSONBody defines parameters for InventoryAPIOverwriteReservations.
 type InventoryAPIOverwriteReservationsJSONBody = CastaiInventoryV1beta1GenericReservationsList
 
+// RbacServiceAPICreateRoleBindingsJSONBody defines parameters for RbacServiceAPICreateRoleBindings.
+type RbacServiceAPICreateRoleBindingsJSONBody = []CastaiRbacV1beta1CreateRoleBindingsRequestRoleBinding
+
+// RbacServiceAPIUpdateRoleBindingJSONBody defines parameters for RbacServiceAPIUpdateRoleBinding.
+type RbacServiceAPIUpdateRoleBindingJSONBody = RoleBindingIsTheRoleBindingToBeUpdated
+
 // UsersAPIRemoveOrganizationUsersParams defines parameters for UsersAPIRemoveOrganizationUsers.
 type UsersAPIRemoveOrganizationUsersParams struct {
 	// Users is the list of user ids to remove.
@@ -4742,6 +4961,12 @@ type InventoryAPIAddReservationJSONRequestBody = InventoryAPIAddReservationJSONB
 
 // InventoryAPIOverwriteReservationsJSONRequestBody defines body for InventoryAPIOverwriteReservations for application/json ContentType.
 type InventoryAPIOverwriteReservationsJSONRequestBody = InventoryAPIOverwriteReservationsJSONBody
+
+// RbacServiceAPICreateRoleBindingsJSONRequestBody defines body for RbacServiceAPICreateRoleBindings for application/json ContentType.
+type RbacServiceAPICreateRoleBindingsJSONRequestBody = RbacServiceAPICreateRoleBindingsJSONBody
+
+// RbacServiceAPIUpdateRoleBindingJSONRequestBody defines body for RbacServiceAPIUpdateRoleBinding for application/json ContentType.
+type RbacServiceAPIUpdateRoleBindingJSONRequestBody = RbacServiceAPIUpdateRoleBindingJSONBody
 
 // UsersAPIAddUserToOrganizationJSONRequestBody defines body for UsersAPIAddUserToOrganization for application/json ContentType.
 type UsersAPIAddUserToOrganizationJSONRequestBody = UsersAPIAddUserToOrganizationJSONBody
