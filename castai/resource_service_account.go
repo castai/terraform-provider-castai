@@ -2,6 +2,7 @@ package castai
 
 import (
 	"context"
+	"net/http"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -31,7 +32,6 @@ func resourceServiceAccount() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceServiceAccountCreate,
 		ReadContext:   resourceServiceAccountRead,
-		UpdateContext: resourceServiceAccountUpdate,
 		DeleteContext: resourceServiceAccountDelete,
 
 		Description: "Service Account resource allows managing CAST AI service accounts.",
@@ -51,11 +51,13 @@ func resourceServiceAccount() *schema.Resource {
 			FieldServiceAccountName: {
 				Type:        schema.TypeString,
 				Required:    true,
+				ForceNew:    true,
 				Description: "Name of the service account.",
 			},
 			FieldServiceAccountDescription: {
 				Type:        schema.TypeString,
 				Optional:    true,
+				ForceNew:    true,
 				Description: "Description of the service account.",
 			},
 			FieldServiceAccountEmail: {
@@ -89,6 +91,9 @@ func resourceServiceAccountRead(ctx context.Context, data *schema.ResourceData, 
 	organizationID := data.Get(FieldServiceAccountOrganizationID).(string)
 
 	resp, err := client.ServiceAccountsAPIGetServiceAccountWithResponse(ctx, organizationID, data.Id())
+	if resp.StatusCode() == http.StatusNotFound {
+		return diag.Errorf("getting service account: service account [%s] not found", data.Id())
+	}
 	if err := sdk.CheckOKResponse(resp, err); err != nil {
 		return diag.Errorf("getting service account: %v", err)
 	}
@@ -107,14 +112,10 @@ func resourceServiceAccountRead(ctx context.Context, data *schema.ResourceData, 
 		return diag.Errorf("setting service account description: %v", err)
 	}
 
-
-	// TODO: how to set a struct into terraform slice of struct.
-	if err := data.Set(FieldServiceAccountAuthor, []*sdk.CastaiServiceaccountsV1beta1ServiceAccountAuthor{
-		serviceAccount.ServiceAccount.Author,
-	}); err != nil {
+	authorData := flattenServiceAccountAuthor(serviceAccount.ServiceAccount.Author)
+	if err := data.Set(FieldServiceAccountAuthor, authorData); err != nil {
 		return diag.Errorf("setting service account author: %v", err)
 	}
-
 	return nil
 }
 
@@ -146,14 +147,13 @@ func resourceServiceAccountDelete(ctx context.Context, data *schema.ResourceData
 	organizationID := data.Get(FieldServiceAccountOrganizationID).(string)
 	serviceAccountID := data.Id()
 
-	resp, err := client.ServiceAccountsAPIDeleteServiceAccountWithResponse(ctx, organizationID, serviceAccountID)
-	if err := sdk.CheckResponseNoContent(resp, err); err != nil {
+	resp, err := client.ServiceAccountsAPIDeleteServiceAccount(ctx, organizationID, serviceAccountID)
+	if err != nil {
 		return diag.Errorf("deleteting service account: %v", err)
 	}
-	return nil
-}
-
-func resourceServiceAccountUpdate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	if resp.StatusCode != http.StatusNoContent {
+		return diag.Errorf("deleteting service account: expected status: [204], received status: [%d]", resp.StatusCode)
+	}
 	return nil
 }
 
@@ -221,4 +221,26 @@ func resourceServiceAccountKeyDelete(ctx context.Context, data *schema.ResourceD
 
 func resourceServiceAccountKeyUpdate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	return nil
+}
+
+func flattenServiceAccountAuthor(author *sdk.CastaiServiceaccountsV1beta1ServiceAccountAuthor) []map[string]interface{} {
+	if author == nil {
+		return []map[string]interface{}{}
+	}
+
+	return []map[string]interface{}{
+		{
+			FieldServiceAccountAuthorID:    stringValue(author.Id),
+			FieldServiceAccountAuthorEmail: stringValue(author.Email),
+			FieldServiceAccountAuthorKind:  stringValue(author.Kind),
+		},
+	}
+}
+
+// Helper function to handle nil pointers
+func stringValue(value *string) string {
+	if value == nil {
+		return ""
+	}
+	return *value
 }

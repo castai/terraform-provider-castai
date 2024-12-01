@@ -90,6 +90,16 @@ func WithRequestEditorFn(fn RequestEditorFn) ClientOption {
 
 // The interface specification for the client above.
 type ClientInterface interface {
+	// CommitmentsAPIBatchDeleteCommitments request with any body
+	CommitmentsAPIBatchDeleteCommitmentsWithBody(ctx context.Context, organizationId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	CommitmentsAPIBatchDeleteCommitments(ctx context.Context, organizationId string, body CommitmentsAPIBatchDeleteCommitmentsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// CommitmentsAPIBatchUpdateCommitments request with any body
+	CommitmentsAPIBatchUpdateCommitmentsWithBody(ctx context.Context, organizationId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	CommitmentsAPIBatchUpdateCommitments(ctx context.Context, organizationId string, body CommitmentsAPIBatchUpdateCommitmentsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// CommitmentsAPIGetCommitmentUsageHistory request
 	CommitmentsAPIGetCommitmentUsageHistory(ctx context.Context, organizationId string, commitmentId string, params *CommitmentsAPIGetCommitmentUsageHistoryParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -581,6 +591,54 @@ type ClientInterface interface {
 	WorkloadOptimizationAPIUpdateWorkloadV2WithBody(ctx context.Context, clusterId string, workloadId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	WorkloadOptimizationAPIUpdateWorkloadV2(ctx context.Context, clusterId string, workloadId string, body WorkloadOptimizationAPIUpdateWorkloadV2JSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+}
+
+func (c *Client) CommitmentsAPIBatchDeleteCommitmentsWithBody(ctx context.Context, organizationId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCommitmentsAPIBatchDeleteCommitmentsRequestWithBody(c.Server, organizationId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) CommitmentsAPIBatchDeleteCommitments(ctx context.Context, organizationId string, body CommitmentsAPIBatchDeleteCommitmentsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCommitmentsAPIBatchDeleteCommitmentsRequest(c.Server, organizationId, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) CommitmentsAPIBatchUpdateCommitmentsWithBody(ctx context.Context, organizationId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCommitmentsAPIBatchUpdateCommitmentsRequestWithBody(c.Server, organizationId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) CommitmentsAPIBatchUpdateCommitments(ctx context.Context, organizationId string, body CommitmentsAPIBatchUpdateCommitmentsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCommitmentsAPIBatchUpdateCommitmentsRequest(c.Server, organizationId, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
 }
 
 func (c *Client) CommitmentsAPIGetCommitmentUsageHistory(ctx context.Context, organizationId string, commitmentId string, params *CommitmentsAPIGetCommitmentUsageHistoryParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
@@ -2729,6 +2787,100 @@ func (c *Client) WorkloadOptimizationAPIUpdateWorkloadV2(ctx context.Context, cl
 		return nil, err
 	}
 	return c.Client.Do(req)
+}
+
+// NewCommitmentsAPIBatchDeleteCommitmentsRequest calls the generic CommitmentsAPIBatchDeleteCommitments builder with application/json body
+func NewCommitmentsAPIBatchDeleteCommitmentsRequest(server string, organizationId string, body CommitmentsAPIBatchDeleteCommitmentsJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewCommitmentsAPIBatchDeleteCommitmentsRequestWithBody(server, organizationId, "application/json", bodyReader)
+}
+
+// NewCommitmentsAPIBatchDeleteCommitmentsRequestWithBody generates requests for CommitmentsAPIBatchDeleteCommitments with any type of body
+func NewCommitmentsAPIBatchDeleteCommitmentsRequestWithBody(server string, organizationId string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "organizationId", runtime.ParamLocationPath, organizationId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/savings/v1/organizations/%s/commitments:batchDelete", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewCommitmentsAPIBatchUpdateCommitmentsRequest calls the generic CommitmentsAPIBatchUpdateCommitments builder with application/json body
+func NewCommitmentsAPIBatchUpdateCommitmentsRequest(server string, organizationId string, body CommitmentsAPIBatchUpdateCommitmentsJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewCommitmentsAPIBatchUpdateCommitmentsRequestWithBody(server, organizationId, "application/json", bodyReader)
+}
+
+// NewCommitmentsAPIBatchUpdateCommitmentsRequestWithBody generates requests for CommitmentsAPIBatchUpdateCommitments with any type of body
+func NewCommitmentsAPIBatchUpdateCommitmentsRequestWithBody(server string, organizationId string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "organizationId", runtime.ParamLocationPath, organizationId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/savings/v1/organizations/%s/commitments:batchUpdate", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
 }
 
 // NewCommitmentsAPIGetCommitmentUsageHistoryRequest generates requests for CommitmentsAPIGetCommitmentUsageHistory
@@ -9079,6 +9231,16 @@ func WithBaseURL(baseURL string) ClientOption {
 
 // ClientWithResponsesInterface is the interface specification for the client with responses above.
 type ClientWithResponsesInterface interface {
+	// CommitmentsAPIBatchDeleteCommitments request  with any body
+	CommitmentsAPIBatchDeleteCommitmentsWithBodyWithResponse(ctx context.Context, organizationId string, contentType string, body io.Reader) (*CommitmentsAPIBatchDeleteCommitmentsResponse, error)
+
+	CommitmentsAPIBatchDeleteCommitmentsWithResponse(ctx context.Context, organizationId string, body CommitmentsAPIBatchDeleteCommitmentsJSONRequestBody) (*CommitmentsAPIBatchDeleteCommitmentsResponse, error)
+
+	// CommitmentsAPIBatchUpdateCommitments request  with any body
+	CommitmentsAPIBatchUpdateCommitmentsWithBodyWithResponse(ctx context.Context, organizationId string, contentType string, body io.Reader) (*CommitmentsAPIBatchUpdateCommitmentsResponse, error)
+
+	CommitmentsAPIBatchUpdateCommitmentsWithResponse(ctx context.Context, organizationId string, body CommitmentsAPIBatchUpdateCommitmentsJSONRequestBody) (*CommitmentsAPIBatchUpdateCommitmentsResponse, error)
+
 	// CommitmentsAPIGetCommitmentUsageHistory request
 	CommitmentsAPIGetCommitmentUsageHistoryWithResponse(ctx context.Context, organizationId string, commitmentId string, params *CommitmentsAPIGetCommitmentUsageHistoryParams) (*CommitmentsAPIGetCommitmentUsageHistoryResponse, error)
 
@@ -9577,6 +9739,66 @@ type Response interface {
 	Status() string
 	StatusCode() int
 	GetBody() []byte
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type CommitmentsAPIBatchDeleteCommitmentsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *map[string]interface{}
+}
+
+// Status returns HTTPResponse.Status
+func (r CommitmentsAPIBatchDeleteCommitmentsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r CommitmentsAPIBatchDeleteCommitmentsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r CommitmentsAPIBatchDeleteCommitmentsResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type CommitmentsAPIBatchUpdateCommitmentsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *CastaiInventoryV1beta1BatchUpdateCommitmentsResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r CommitmentsAPIBatchUpdateCommitmentsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r CommitmentsAPIBatchUpdateCommitmentsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r CommitmentsAPIBatchUpdateCommitmentsResponse) GetBody() []byte {
+	return r.Body
 }
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
@@ -13598,6 +13820,40 @@ func (r WorkloadOptimizationAPIUpdateWorkloadV2Response) GetBody() []byte {
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
+// CommitmentsAPIBatchDeleteCommitmentsWithBodyWithResponse request with arbitrary body returning *CommitmentsAPIBatchDeleteCommitmentsResponse
+func (c *ClientWithResponses) CommitmentsAPIBatchDeleteCommitmentsWithBodyWithResponse(ctx context.Context, organizationId string, contentType string, body io.Reader) (*CommitmentsAPIBatchDeleteCommitmentsResponse, error) {
+	rsp, err := c.CommitmentsAPIBatchDeleteCommitmentsWithBody(ctx, organizationId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCommitmentsAPIBatchDeleteCommitmentsResponse(rsp)
+}
+
+func (c *ClientWithResponses) CommitmentsAPIBatchDeleteCommitmentsWithResponse(ctx context.Context, organizationId string, body CommitmentsAPIBatchDeleteCommitmentsJSONRequestBody) (*CommitmentsAPIBatchDeleteCommitmentsResponse, error) {
+	rsp, err := c.CommitmentsAPIBatchDeleteCommitments(ctx, organizationId, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCommitmentsAPIBatchDeleteCommitmentsResponse(rsp)
+}
+
+// CommitmentsAPIBatchUpdateCommitmentsWithBodyWithResponse request with arbitrary body returning *CommitmentsAPIBatchUpdateCommitmentsResponse
+func (c *ClientWithResponses) CommitmentsAPIBatchUpdateCommitmentsWithBodyWithResponse(ctx context.Context, organizationId string, contentType string, body io.Reader) (*CommitmentsAPIBatchUpdateCommitmentsResponse, error) {
+	rsp, err := c.CommitmentsAPIBatchUpdateCommitmentsWithBody(ctx, organizationId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCommitmentsAPIBatchUpdateCommitmentsResponse(rsp)
+}
+
+func (c *ClientWithResponses) CommitmentsAPIBatchUpdateCommitmentsWithResponse(ctx context.Context, organizationId string, body CommitmentsAPIBatchUpdateCommitmentsJSONRequestBody) (*CommitmentsAPIBatchUpdateCommitmentsResponse, error) {
+	rsp, err := c.CommitmentsAPIBatchUpdateCommitments(ctx, organizationId, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCommitmentsAPIBatchUpdateCommitmentsResponse(rsp)
+}
+
 // CommitmentsAPIGetCommitmentUsageHistoryWithResponse request returning *CommitmentsAPIGetCommitmentUsageHistoryResponse
 func (c *ClientWithResponses) CommitmentsAPIGetCommitmentUsageHistoryWithResponse(ctx context.Context, organizationId string, commitmentId string, params *CommitmentsAPIGetCommitmentUsageHistoryParams) (*CommitmentsAPIGetCommitmentUsageHistoryResponse, error) {
 	rsp, err := c.CommitmentsAPIGetCommitmentUsageHistory(ctx, organizationId, commitmentId, params)
@@ -15162,6 +15418,58 @@ func (c *ClientWithResponses) WorkloadOptimizationAPIUpdateWorkloadV2WithRespons
 		return nil, err
 	}
 	return ParseWorkloadOptimizationAPIUpdateWorkloadV2Response(rsp)
+}
+
+// ParseCommitmentsAPIBatchDeleteCommitmentsResponse parses an HTTP response from a CommitmentsAPIBatchDeleteCommitmentsWithResponse call
+func ParseCommitmentsAPIBatchDeleteCommitmentsResponse(rsp *http.Response) (*CommitmentsAPIBatchDeleteCommitmentsResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &CommitmentsAPIBatchDeleteCommitmentsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest map[string]interface{}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseCommitmentsAPIBatchUpdateCommitmentsResponse parses an HTTP response from a CommitmentsAPIBatchUpdateCommitmentsWithResponse call
+func ParseCommitmentsAPIBatchUpdateCommitmentsResponse(rsp *http.Response) (*CommitmentsAPIBatchUpdateCommitmentsResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &CommitmentsAPIBatchUpdateCommitmentsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest CastaiInventoryV1beta1BatchUpdateCommitmentsResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
 }
 
 // ParseCommitmentsAPIGetCommitmentUsageHistoryResponse parses an HTTP response from a CommitmentsAPIGetCommitmentUsageHistoryWithResponse call

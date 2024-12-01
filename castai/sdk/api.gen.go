@@ -355,6 +355,18 @@ const (
 	WorkloadoptimizationV1ResourcePoliciesFunctionQUANTILE WorkloadoptimizationV1ResourcePoliciesFunction = "QUANTILE"
 )
 
+// CommitmentsAPIBatchDeleteCommitmentsRequest defines model for CommitmentsAPI_BatchDeleteCommitments_request.
+type CommitmentsAPIBatchDeleteCommitmentsRequest struct {
+	// IDs of commitments to delete.  A maximum of 1000 commitments can be deleted in a batch.
+	CommitmentIds []string `json:"commitmentIds"`
+}
+
+// CommitmentsAPIBatchUpdateCommitmentsRequest defines model for CommitmentsAPI_BatchUpdateCommitments_request.
+type CommitmentsAPIBatchUpdateCommitmentsRequest struct {
+	// Commitments to update. A maximum of 1000 commitments can be modified in a batch.
+	Requests []CastaiInventoryV1beta1UpdateCommitmentRequest `json:"requests"`
+}
+
 // ExternalClusterAPIGKECreateSARequest defines model for ExternalClusterAPI_GKECreateSA_request.
 type ExternalClusterAPIGKECreateSARequest struct {
 	// UpdateGKEClusterParams defines updatable GKE cluster configuration.
@@ -640,6 +652,11 @@ type CastaiInventoryV1beta1AzureReservationImport struct {
 	Type               *string `json:"type,omitempty"`
 }
 
+// CastaiInventoryV1beta1BatchUpdateCommitmentsResponse defines model for castai.inventory.v1beta1.BatchUpdateCommitmentsResponse.
+type CastaiInventoryV1beta1BatchUpdateCommitmentsResponse struct {
+	Commitments *[]CastaiInventoryV1beta1Commitment `json:"commitments,omitempty"`
+}
+
 // CPUPlatform describes the CPU platforms the instance type can be equipped with.
 type CastaiInventoryV1beta1CPUPlatform struct {
 	// All Core Turbo Frequency (GHz). Only available for GCP.
@@ -673,7 +690,10 @@ type CastaiInventoryV1beta1ClusterAggregatedUsage struct {
 // CastaiInventoryV1beta1Commitment defines model for castai.inventory.v1beta1.Commitment.
 type CastaiInventoryV1beta1Commitment struct {
 	// Allowed usage specifies the part of the commitment that is allowed to be used. 1.0 means 100% of the commitment. Currently it's only supported for GCP CUDs.
-	AllowedUsage            *float32                                `json:"allowedUsage,omitempty"`
+	AllowedUsage *float32 `json:"allowedUsage,omitempty"`
+
+	// Assign commitment to all existing and future clusters that fall within the region of this commitment.
+	AutoAssignment          *bool                                   `json:"autoAssignment,omitempty"`
 	AzureReservationContext *CastaiInventoryV1beta1AzureReservation `json:"azureReservationContext,omitempty"`
 	EndDate                 *time.Time                              `json:"endDate"`
 	GcpResourceCudContext   *CastaiInventoryV1beta1GCPResourceCUD   `json:"gcpResourceCudContext,omitempty"`
@@ -1206,8 +1226,11 @@ type CastaiInventoryV1beta1StorageInfoDeviceType string
 // CastaiInventoryV1beta1UpdateCommitmentInput defines model for castai.inventory.v1beta1.UpdateCommitmentInput.
 type CastaiInventoryV1beta1UpdateCommitmentInput struct {
 	// Allowed usage specifies the part of the commitment that is allowed to be used. 1.0 means 100% of the commitment. Currently it's only supported for GCP CUDs.
-	AllowedUsage   *float32 `json:"allowedUsage"`
-	Prioritization *bool    `json:"prioritization"`
+	AllowedUsage *float32 `json:"allowedUsage"`
+
+	// Assign commitment to all existing and future clusters that fall within the region of this commitment.
+	AutoAssignment *bool `json:"autoAssignment"`
+	Prioritization *bool `json:"prioritization"`
 
 	// Scaling strategy specifies how to use commitment by autoscaler.
 	//
@@ -1220,6 +1243,12 @@ type CastaiInventoryV1beta1UpdateCommitmentInput struct {
 	// - Inactive: Inactive commitment
 	//  - Active: Active commitment
 	Status *CastaiInventoryV1beta1CommitmentStatus `json:"status,omitempty"`
+}
+
+// CastaiInventoryV1beta1UpdateCommitmentRequest defines model for castai.inventory.v1beta1.UpdateCommitmentRequest.
+type CastaiInventoryV1beta1UpdateCommitmentRequest struct {
+	Commitment   *CastaiInventoryV1beta1UpdateCommitmentInput `json:"commitment,omitempty"`
+	CommitmentId string                                       `json:"commitmentId"`
 }
 
 // CastaiInventoryV1beta1UpdateCommitmentResponse defines model for castai.inventory.v1beta1.UpdateCommitmentResponse.
@@ -1845,6 +1874,15 @@ type ExternalclusterV1AddNodeResponse struct {
 	OperationId string `json:"operationId"`
 }
 
+// AnywhereClusterParams defines Anywhere-specific arguments.
+type ExternalclusterV1AnywhereClusterParams struct {
+	// Name of the cluster.
+	ClusterName *string `json:"clusterName,omitempty"`
+
+	// NamespaceID as unique identifier for the cluster.
+	KubeSystemNamespaceId string `json:"kubeSystemNamespaceId"`
+}
+
 // CloudEvent represents a remote event that happened in the cloud, e.g. "node added".
 type ExternalclusterV1CloudEvent struct {
 	// Event type.
@@ -1873,6 +1911,9 @@ type ExternalclusterV1Cluster struct {
 
 	// All available zones in cluster's region.
 	AllRegionZones *[]ExternalclusterV1Zone `json:"allRegionZones,omitempty"`
+
+	// AnywhereClusterParams defines Anywhere-specific arguments.
+	Anywhere *ExternalclusterV1AnywhereClusterParams `json:"anywhere,omitempty"`
 
 	// User friendly unique cluster identifier.
 	ClusterNameId *string `json:"clusterNameId,omitempty"`
@@ -2383,6 +2424,9 @@ type ExternalclusterV1RegisterClusterRequest struct {
 	// AKSClusterParams defines AKS-specific arguments.
 	Aks *ExternalclusterV1AKSClusterParams `json:"aks,omitempty"`
 
+	// AnywhereClusterParams defines Anywhere-specific arguments.
+	Anywhere *ExternalclusterV1AnywhereClusterParams `json:"anywhere,omitempty"`
+
 	// EKSClusterParams defines EKS-specific arguments.
 	Eks *ExternalclusterV1EKSClusterParams `json:"eks,omitempty"`
 
@@ -2513,7 +2557,7 @@ type NodeconfigV1AKSConfig struct {
 	// List of supported image families (OSes) for AKS.
 	ImageFamily *NodeconfigV1AKSConfigImageFamily `json:"imageFamily,omitempty"`
 
-	// List of load balancers to be used for the cluster.
+	// List of load balancers to attach nodes to. Populating this field disables Cast's default load balancer autodiscovery mechanism.
 	LoadBalancers *[]NodeconfigV1AKSConfigLoadBalancers `json:"loadBalancers,omitempty"`
 
 	// Maximum number of pods that can be run on a node, which affects how many IP addresses you will need for each node.
@@ -2530,15 +2574,31 @@ type NodeconfigV1AKSConfigImageFamily string
 
 // NodeconfigV1AKSConfigLoadBalancers defines model for nodeconfig.v1.AKSConfig.LoadBalancers.
 type NodeconfigV1AKSConfigLoadBalancers struct {
-	// List of backend pools to be used for the load balancer.
+	// The full ID of the load balancer in Azure.
+	// For backwards compatibility, the field is not required but it should be treated as required for any new clients.
+	Id *string `json:"id,omitempty"`
+
+	// List of IP-based backend pools to attach each node's IP to.
 	IpBasedBackendPools *[]NodeconfigV1AKSConfigLoadBalancersIPBasedBackendPool `json:"ipBasedBackendPools,omitempty"`
 
-	// Name of the load balancer.
+	// Deprecated: Use ID instead
+	// Name of the load balancer. It is assumed to reside in the cluster's infrastructure resource group.
+	// Only available for backwards compatibility and only accounted for in IP-based backend pools.
 	Name *string `json:"name,omitempty"`
+
+	// List of NIC-based backend pools to attach each node's NIC to.
+	NicBasedBackendPools *[]NodeconfigV1AKSConfigLoadBalancersNICBasedBackendPool `json:"nicBasedBackendPools,omitempty"`
 }
 
 // NodeconfigV1AKSConfigLoadBalancersIPBasedBackendPool defines model for nodeconfig.v1.AKSConfig.LoadBalancers.IPBasedBackendPool.
 type NodeconfigV1AKSConfigLoadBalancersIPBasedBackendPool struct {
+	// Name of the backend pool as defined in Azure. Backend pools must have unique names within the load balancer.
+	Name *string `json:"name,omitempty"`
+}
+
+// NodeconfigV1AKSConfigLoadBalancersNICBasedBackendPool defines model for nodeconfig.v1.AKSConfig.LoadBalancers.NICBasedBackendPool.
+type NodeconfigV1AKSConfigLoadBalancersNICBasedBackendPool struct {
+	// Name of the backend pool as defined in Azure. Backend pools must have unique names within the load balancer.
 	Name *string `json:"name,omitempty"`
 }
 
@@ -4318,6 +4378,12 @@ type WorkloadoptimizationV1WorkloadScalingPolicy struct {
 	UpdatedAt                           time.Time                                    `json:"updatedAt"`
 }
 
+// CommitmentsAPIBatchDeleteCommitmentsJSONBody defines parameters for CommitmentsAPIBatchDeleteCommitments.
+type CommitmentsAPIBatchDeleteCommitmentsJSONBody = CommitmentsAPIBatchDeleteCommitmentsRequest
+
+// CommitmentsAPIBatchUpdateCommitmentsJSONBody defines parameters for CommitmentsAPIBatchUpdateCommitments.
+type CommitmentsAPIBatchUpdateCommitmentsJSONBody = CommitmentsAPIBatchUpdateCommitmentsRequest
+
 // CommitmentsAPIGetCommitmentUsageHistoryParams defines parameters for CommitmentsAPIGetCommitmentUsageHistory.
 type CommitmentsAPIGetCommitmentUsageHistoryParams struct {
 	StartTime           time.Time                                                        `form:"startTime" json:"startTime"`
@@ -4703,6 +4769,12 @@ type InventoryAPIListZonesParams struct {
 
 // WorkloadOptimizationAPIUpdateWorkloadV2JSONBody defines parameters for WorkloadOptimizationAPIUpdateWorkloadV2.
 type WorkloadOptimizationAPIUpdateWorkloadV2JSONBody = WorkloadoptimizationV1UpdateWorkloadV2
+
+// CommitmentsAPIBatchDeleteCommitmentsJSONRequestBody defines body for CommitmentsAPIBatchDeleteCommitments for application/json ContentType.
+type CommitmentsAPIBatchDeleteCommitmentsJSONRequestBody = CommitmentsAPIBatchDeleteCommitmentsJSONBody
+
+// CommitmentsAPIBatchUpdateCommitmentsJSONRequestBody defines body for CommitmentsAPIBatchUpdateCommitments for application/json ContentType.
+type CommitmentsAPIBatchUpdateCommitmentsJSONRequestBody = CommitmentsAPIBatchUpdateCommitmentsJSONBody
 
 // AuthTokenAPICreateAuthTokenJSONRequestBody defines body for AuthTokenAPICreateAuthToken for application/json ContentType.
 type AuthTokenAPICreateAuthTokenJSONRequestBody = AuthTokenAPICreateAuthTokenJSONBody
