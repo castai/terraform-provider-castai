@@ -22,10 +22,6 @@ const (
 	FieldServiceAccountAuthorID    = "id"
 	FieldServiceAccountAuthorEmail = "email"
 	FieldServiceAccountAuthorKind  = "kind"
-
-	FieldServiceAccountKeyOrganizationID = "organization_id"
-	FieldServiceAccountKeyName           = "name"
-	FieldServiceAccountKeyDescription    = "description"
 )
 
 func resourceServiceAccount() *schema.Resource {
@@ -85,7 +81,7 @@ func resourceServiceAccountRead(ctx context.Context, data *schema.ResourceData, 
 	client := meta.(*ProviderConfig).api
 
 	if data.Id() == "" {
-		return nil
+		return diag.Errorf("service account ID is not set")
 	}
 
 	organizationID := data.Get(FieldServiceAccountOrganizationID).(string)
@@ -128,8 +124,8 @@ func resourceServiceAccountCreate(ctx context.Context, data *schema.ResourceData
 
 	resp, err := client.ServiceAccountsAPICreateServiceAccountWithResponse(ctx, organizationID, sdk.ServiceAccountsAPICreateServiceAccountRequest{
 		ServiceAccount: sdk.CastaiServiceaccountsV1beta1CreateServiceAccountRequestServiceAccount{
-			Description: &description,
 			Name:        name,
+			Description: &description,
 		},
 	})
 
@@ -149,77 +145,11 @@ func resourceServiceAccountDelete(ctx context.Context, data *schema.ResourceData
 
 	resp, err := client.ServiceAccountsAPIDeleteServiceAccount(ctx, organizationID, serviceAccountID)
 	if err != nil {
-		return diag.Errorf("deleteting service account: %v", err)
+		return diag.Errorf("deleting service account: %v", err)
 	}
 	if resp.StatusCode != http.StatusNoContent {
 		return diag.Errorf("deleteting service account: expected status: [204], received status: [%d]", resp.StatusCode)
 	}
-	return nil
-}
-
-func resourceServiceAccountKey() *schema.Resource {
-	return &schema.Resource{
-		ReadContext:   resourceServiceAccountKeyRead,
-		CreateContext: resourceServiceAccountKeyCreate,
-		UpdateContext: resourceServiceAccountKeyUpdate,
-		DeleteContext: resourceServiceAccountKeyDelete,
-		Description:   "Service Account Key resource allows managing CAST AI service account keys.",
-		Timeouts: &schema.ResourceTimeout{
-			Create: schema.DefaultTimeout(3 * time.Minute),
-			Update: schema.DefaultTimeout(3 * time.Minute),
-			Delete: schema.DefaultTimeout(3 * time.Minute),
-		},
-		Schema: map[string]*schema.Schema{
-			FieldServiceAccountKeyOrganizationID: {
-				Type:        schema.TypeString,
-				Required:    true,
-				ForceNew:    true,
-				Description: "ID of the organization.",
-			},
-			FieldServiceAccountID: {
-				Type:        schema.TypeString,
-				Required:    true,
-				ForceNew:    true,
-				Description: "ID of the service account.",
-			},
-			FieldServiceAccountKeyName: {
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: "Name of the service account key.",
-			},
-			FieldServiceAccountKeyDescription: {
-				Type:        schema.TypeString,
-				Required:    false,
-				Description: "Description of the service account key.",
-			},
-		},
-	}
-}
-
-func resourceServiceAccountKeyRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	// client := meta.(*ProviderConfig).api
-	// serviceAccountID := data.Get(FieldServiceAccountID).(string)
-	// // organizationID := data.Get(FieldServiceAccountKeyOrganizationID)
-	//
-	// resp, err := client.ServiceAccountsAPIGetServiceAccountWithResponse(ctx,serviceAccountID)
-	//
-	// if err := sdk.CheckGetResponse(resp, err); err != nil{
-	// 	return diag.Errorf("getting service account: %v", err)
-	// }
-	//
-	// resp.JSON200.ServiceAccount
-	return nil
-}
-
-func resourceServiceAccountKeyCreate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	return nil
-}
-
-func resourceServiceAccountKeyDelete(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	return nil
-}
-
-func resourceServiceAccountKeyUpdate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	return nil
 }
 
@@ -237,7 +167,6 @@ func flattenServiceAccountAuthor(author *sdk.CastaiServiceaccountsV1beta1Service
 	}
 }
 
-// Helper function to handle nil pointers
 func stringValue(value *string) string {
 	if value == nil {
 		return ""
