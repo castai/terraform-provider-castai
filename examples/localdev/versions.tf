@@ -1,14 +1,9 @@
 terraform {
   required_providers {
     castai = {
-      source = "castai/castai"
+      source  = "castai/castai"
+      version = "0.0.0-local"
     }
-
   }
   required_version = ">= 0.13"
-}
-
-provider "castai" {
-  api_url   = var.castai_api_url
-  api_token = var.castai_api_token
 }
