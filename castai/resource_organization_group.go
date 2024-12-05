@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/http"
 	"strings"
 	"time"
 
@@ -105,6 +106,13 @@ func resourceOrganizationGroup() *schema.Resource {
 
 func resourceOrganizationGroupCreate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	organizationID := data.Get(FieldOrganizationGroupOrganizationID).(string)
+	if organizationID == "" {
+		var err error
+		organizationID, err = getDefaultOrganizationId(ctx, meta)
+		if err != nil {
+			return diag.FromErr(fmt.Errorf("getting default organization: %w", err))
+		}
+	}
 
 	client := meta.(*ProviderConfig).api
 
@@ -128,6 +136,11 @@ func resourceOrganizationGroupCreate(ctx context.Context, data *schema.ResourceD
 }
 
 func resourceOrganizationGroupRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	groupID := data.Id()
+	if groupID == "" {
+		return diag.Errorf("group ID is not set")
+	}
+
 	organizationID := data.Get(FieldOrganizationGroupOrganizationID).(string)
 	if organizationID == "" {
 		var err error
@@ -136,7 +149,6 @@ func resourceOrganizationGroupRead(ctx context.Context, data *schema.ResourceDat
 			return diag.FromErr(fmt.Errorf("getting default organization: %w", err))
 		}
 	}
-	groupID := data.Id()
 
 	client := meta.(*ProviderConfig).api
 
@@ -153,8 +165,19 @@ func resourceOrganizationGroupRead(ctx context.Context, data *schema.ResourceDat
 }
 
 func resourceOrganizationGroupUpdate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	organizationID := data.Get(FieldOrganizationGroupOrganizationID).(string)
 	groupID := data.Id()
+	if groupID == "" {
+		return diag.Errorf("group ID is not set")
+	}
+
+	organizationID := data.Get(FieldOrganizationGroupOrganizationID).(string)
+	if organizationID == "" {
+		var err error
+		organizationID, err = getDefaultOrganizationId(ctx, meta)
+		if err != nil {
+			return diag.FromErr(fmt.Errorf("getting default organization: %w", err))
+		}
+	}
 
 	client := meta.(*ProviderConfig).api
 
@@ -175,8 +198,19 @@ func resourceOrganizationGroupUpdate(ctx context.Context, data *schema.ResourceD
 }
 
 func resourceOrganizationGroupDelete(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	organizationID := data.Get(FieldOrganizationGroupOrganizationID).(string)
 	groupID := data.Id()
+	if groupID == "" {
+		return diag.Errorf("group ID is not set")
+	}
+
+	organizationID := data.Get(FieldOrganizationGroupOrganizationID).(string)
+	if organizationID == "" {
+		var err error
+		organizationID, err = getDefaultOrganizationId(ctx, meta)
+		if err != nil {
+			return diag.FromErr(fmt.Errorf("getting default organization: %w", err))
+		}
+	}
 
 	client := meta.(*ProviderConfig).api
 
@@ -190,6 +224,13 @@ func resourceOrganizationGroupDelete(ctx context.Context, data *schema.ResourceD
 
 func getGroup(client *sdk.ClientWithResponses, ctx context.Context, organizationID, groupID string) (*sdk.CastaiRbacV1beta1Group, error) {
 	groupsResp, err := client.RbacServiceAPIGetGroupWithResponse(ctx, organizationID, groupID)
+	if err != nil {
+		return nil, fmt.Errorf("fetching group: %w", err)
+	}
+
+	if groupsResp.StatusCode() == http.StatusNotFound {
+		return nil, fmt.Errorf("group %s not found", groupID)
+	}
 	if err := sdk.CheckOKResponse(groupsResp, err); err != nil {
 		return nil, fmt.Errorf("retrieving group: %w", err)
 	}

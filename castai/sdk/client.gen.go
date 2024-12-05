@@ -580,11 +580,6 @@ type ClientInterface interface {
 	// WorkloadOptimizationAPIGetWorkload request
 	WorkloadOptimizationAPIGetWorkload(ctx context.Context, clusterId string, workloadId string, params *WorkloadOptimizationAPIGetWorkloadParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// WorkloadOptimizationAPIUpdateWorkload request with any body
-	WorkloadOptimizationAPIUpdateWorkloadWithBody(ctx context.Context, clusterId string, workloadId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
-
-	WorkloadOptimizationAPIUpdateWorkload(ctx context.Context, clusterId string, workloadId string, body WorkloadOptimizationAPIUpdateWorkloadJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
-
 	// WorkloadOptimizationAPIGetInstallCmd request
 	WorkloadOptimizationAPIGetInstallCmd(ctx context.Context, params *WorkloadOptimizationAPIGetInstallCmdParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -2738,30 +2733,6 @@ func (c *Client) WorkloadOptimizationAPIGetWorkloadsSummary(ctx context.Context,
 
 func (c *Client) WorkloadOptimizationAPIGetWorkload(ctx context.Context, clusterId string, workloadId string, params *WorkloadOptimizationAPIGetWorkloadParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewWorkloadOptimizationAPIGetWorkloadRequest(c.Server, clusterId, workloadId, params)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
-func (c *Client) WorkloadOptimizationAPIUpdateWorkloadWithBody(ctx context.Context, clusterId string, workloadId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewWorkloadOptimizationAPIUpdateWorkloadRequestWithBody(c.Server, clusterId, workloadId, contentType, body)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
-func (c *Client) WorkloadOptimizationAPIUpdateWorkload(ctx context.Context, clusterId string, workloadId string, body WorkloadOptimizationAPIUpdateWorkloadJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewWorkloadOptimizationAPIUpdateWorkloadRequest(c.Server, clusterId, workloadId, body)
 	if err != nil {
 		return nil, err
 	}
@@ -8991,60 +8962,6 @@ func NewWorkloadOptimizationAPIGetWorkloadRequest(server string, clusterId strin
 	return req, nil
 }
 
-// NewWorkloadOptimizationAPIUpdateWorkloadRequest calls the generic WorkloadOptimizationAPIUpdateWorkload builder with application/json body
-func NewWorkloadOptimizationAPIUpdateWorkloadRequest(server string, clusterId string, workloadId string, body WorkloadOptimizationAPIUpdateWorkloadJSONRequestBody) (*http.Request, error) {
-	var bodyReader io.Reader
-	buf, err := json.Marshal(body)
-	if err != nil {
-		return nil, err
-	}
-	bodyReader = bytes.NewReader(buf)
-	return NewWorkloadOptimizationAPIUpdateWorkloadRequestWithBody(server, clusterId, workloadId, "application/json", bodyReader)
-}
-
-// NewWorkloadOptimizationAPIUpdateWorkloadRequestWithBody generates requests for WorkloadOptimizationAPIUpdateWorkload with any type of body
-func NewWorkloadOptimizationAPIUpdateWorkloadRequestWithBody(server string, clusterId string, workloadId string, contentType string, body io.Reader) (*http.Request, error) {
-	var err error
-
-	var pathParam0 string
-
-	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "clusterId", runtime.ParamLocationPath, clusterId)
-	if err != nil {
-		return nil, err
-	}
-
-	var pathParam1 string
-
-	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "workloadId", runtime.ParamLocationPath, workloadId)
-	if err != nil {
-		return nil, err
-	}
-
-	serverURL, err := url.Parse(server)
-	if err != nil {
-		return nil, err
-	}
-
-	operationPath := fmt.Sprintf("/v1/workload-autoscaling/clusters/%s/workloads/%s", pathParam0, pathParam1)
-	if operationPath[0] == '/' {
-		operationPath = "." + operationPath
-	}
-
-	queryURL, err := serverURL.Parse(operationPath)
-	if err != nil {
-		return nil, err
-	}
-
-	req, err := http.NewRequest("PUT", queryURL.String(), body)
-	if err != nil {
-		return nil, err
-	}
-
-	req.Header.Add("Content-Type", contentType)
-
-	return req, nil
-}
-
 // NewWorkloadOptimizationAPIGetInstallCmdRequest generates requests for WorkloadOptimizationAPIGetInstallCmd
 func NewWorkloadOptimizationAPIGetInstallCmdRequest(server string, params *WorkloadOptimizationAPIGetInstallCmdParams) (*http.Request, error) {
 	var err error
@@ -9764,11 +9681,6 @@ type ClientWithResponsesInterface interface {
 
 	// WorkloadOptimizationAPIGetWorkload request
 	WorkloadOptimizationAPIGetWorkloadWithResponse(ctx context.Context, clusterId string, workloadId string, params *WorkloadOptimizationAPIGetWorkloadParams) (*WorkloadOptimizationAPIGetWorkloadResponse, error)
-
-	// WorkloadOptimizationAPIUpdateWorkload request  with any body
-	WorkloadOptimizationAPIUpdateWorkloadWithBodyWithResponse(ctx context.Context, clusterId string, workloadId string, contentType string, body io.Reader) (*WorkloadOptimizationAPIUpdateWorkloadResponse, error)
-
-	WorkloadOptimizationAPIUpdateWorkloadWithResponse(ctx context.Context, clusterId string, workloadId string, body WorkloadOptimizationAPIUpdateWorkloadJSONRequestBody) (*WorkloadOptimizationAPIUpdateWorkloadResponse, error)
 
 	// WorkloadOptimizationAPIGetInstallCmd request
 	WorkloadOptimizationAPIGetInstallCmdWithResponse(ctx context.Context, params *WorkloadOptimizationAPIGetInstallCmdParams) (*WorkloadOptimizationAPIGetInstallCmdResponse, error)
@@ -13750,36 +13662,6 @@ func (r WorkloadOptimizationAPIGetWorkloadResponse) GetBody() []byte {
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
-type WorkloadOptimizationAPIUpdateWorkloadResponse struct {
-	Body         []byte
-	HTTPResponse *http.Response
-	JSON200      *WorkloadoptimizationV1UpdateWorkloadResponse
-}
-
-// Status returns HTTPResponse.Status
-func (r WorkloadOptimizationAPIUpdateWorkloadResponse) Status() string {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.Status
-	}
-	return http.StatusText(0)
-}
-
-// StatusCode returns HTTPResponse.StatusCode
-func (r WorkloadOptimizationAPIUpdateWorkloadResponse) StatusCode() int {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.StatusCode
-	}
-	return 0
-}
-
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r WorkloadOptimizationAPIUpdateWorkloadResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-
 type WorkloadOptimizationAPIGetInstallCmdResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -15461,23 +15343,6 @@ func (c *ClientWithResponses) WorkloadOptimizationAPIGetWorkloadWithResponse(ctx
 		return nil, err
 	}
 	return ParseWorkloadOptimizationAPIGetWorkloadResponse(rsp)
-}
-
-// WorkloadOptimizationAPIUpdateWorkloadWithBodyWithResponse request with arbitrary body returning *WorkloadOptimizationAPIUpdateWorkloadResponse
-func (c *ClientWithResponses) WorkloadOptimizationAPIUpdateWorkloadWithBodyWithResponse(ctx context.Context, clusterId string, workloadId string, contentType string, body io.Reader) (*WorkloadOptimizationAPIUpdateWorkloadResponse, error) {
-	rsp, err := c.WorkloadOptimizationAPIUpdateWorkloadWithBody(ctx, clusterId, workloadId, contentType, body)
-	if err != nil {
-		return nil, err
-	}
-	return ParseWorkloadOptimizationAPIUpdateWorkloadResponse(rsp)
-}
-
-func (c *ClientWithResponses) WorkloadOptimizationAPIUpdateWorkloadWithResponse(ctx context.Context, clusterId string, workloadId string, body WorkloadOptimizationAPIUpdateWorkloadJSONRequestBody) (*WorkloadOptimizationAPIUpdateWorkloadResponse, error) {
-	rsp, err := c.WorkloadOptimizationAPIUpdateWorkload(ctx, clusterId, workloadId, body)
-	if err != nil {
-		return nil, err
-	}
-	return ParseWorkloadOptimizationAPIUpdateWorkloadResponse(rsp)
 }
 
 // WorkloadOptimizationAPIGetInstallCmdWithResponse request returning *WorkloadOptimizationAPIGetInstallCmdResponse
@@ -18906,32 +18771,6 @@ func ParseWorkloadOptimizationAPIGetWorkloadResponse(rsp *http.Response) (*Workl
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest WorkloadoptimizationV1GetWorkloadResponse
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON200 = &dest
-
-	}
-
-	return response, nil
-}
-
-// ParseWorkloadOptimizationAPIUpdateWorkloadResponse parses an HTTP response from a WorkloadOptimizationAPIUpdateWorkloadWithResponse call
-func ParseWorkloadOptimizationAPIUpdateWorkloadResponse(rsp *http.Response) (*WorkloadOptimizationAPIUpdateWorkloadResponse, error) {
-	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
-	if err != nil {
-		return nil, err
-	}
-
-	response := &WorkloadOptimizationAPIUpdateWorkloadResponse{
-		Body:         bodyBytes,
-		HTTPResponse: rsp,
-	}
-
-	switch {
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest WorkloadoptimizationV1UpdateWorkloadResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
