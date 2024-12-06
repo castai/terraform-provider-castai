@@ -24,6 +24,7 @@ func TestOrganizationGroupReadContext(t *testing.T) {
 	t.Parallel()
 
 	t.Run("when state is missing group ID then return error", func(t *testing.T) {
+		t.Parallel()
 		r := require.New(t)
 
 		ctx := context.Background()
@@ -43,7 +44,8 @@ func TestOrganizationGroupReadContext(t *testing.T) {
 		r.Equal("group ID is not set", result[0].Summary)
 	})
 
-	t.Run("when ServiceAccountAPI respond with 404 then return error", func(t *testing.T) {
+	t.Run("when RbacServiceAPI respond with 404 then return error", func(t *testing.T) {
+		t.Parallel()
 		r := require.New(t)
 		mockClient := mock_sdk.NewMockClientInterface(gomock.NewController(t))
 
@@ -79,7 +81,8 @@ func TestOrganizationGroupReadContext(t *testing.T) {
 		r.Equal("getting group for read: group "+groupID+" not found", result[0].Summary)
 	})
 
-	t.Run("when ServiceAccountAPI respond with 500 then return error", func(t *testing.T) {
+	t.Run("when RbacServiceAPI respond with 500 then return error", func(t *testing.T) {
+		t.Parallel()
 		r := require.New(t)
 		mockClient := mock_sdk.NewMockClientInterface(gomock.NewController(t))
 
@@ -115,7 +118,8 @@ func TestOrganizationGroupReadContext(t *testing.T) {
 		r.Equal("getting group for read: retrieving group: expected status code 200, received: status=500 body=internal error", result[0].Summary)
 	})
 
-	t.Run("when calling ServiceAccountAPI throws error then return error", func(t *testing.T) {
+	t.Run("when calling RbacServiceAPI throws error then return error", func(t *testing.T) {
+		t.Parallel()
 		r := require.New(t)
 		mockClient := mock_sdk.NewMockClientInterface(gomock.NewController(t))
 
@@ -150,6 +154,7 @@ func TestOrganizationGroupReadContext(t *testing.T) {
 	})
 
 	t.Run("when RbacServiceAPI respond with 200 then populate the state", func(t *testing.T) {
+		t.Parallel()
 		r := require.New(t)
 		mockClient := mock_sdk.NewMockClientInterface(gomock.NewController(t))
 
@@ -219,8 +224,8 @@ Tainted = false
 
 	t.Run("when organization is not defined, use default one for the token", func(t *testing.T) {
 		t.Parallel()
-
 		r := require.New(t)
+
 		mockClient := mock_sdk.NewMockClientInterface(gomock.NewController(t))
 
 		ctx := context.Background()
@@ -303,6 +308,7 @@ func TestOrganizationGroupUpdateContext(t *testing.T) {
 	t.Parallel()
 
 	t.Run("when state is missing group ID then return error", func(t *testing.T) {
+		t.Parallel()
 		r := require.New(t)
 
 		ctx := context.Background()
@@ -323,6 +329,7 @@ func TestOrganizationGroupUpdateContext(t *testing.T) {
 	})
 
 	t.Run("when RbacServiceAPI UpdateGroup respond with 500 then throw error", func(t *testing.T) {
+		t.Parallel()
 		r := require.New(t)
 		mockClient := mock_sdk.NewMockClientInterface(gomock.NewController(t))
 
@@ -366,6 +373,7 @@ func TestOrganizationGroupUpdateContext(t *testing.T) {
 	})
 
 	t.Run("when RbacServiceAPI UpdateGroup respond with 200 then no errors", func(t *testing.T) {
+		t.Parallel()
 		r := require.New(t)
 		mockClient := mock_sdk.NewMockClientInterface(gomock.NewController(t))
 
@@ -437,6 +445,7 @@ func TestOrganizationGroupCreateContext(t *testing.T) {
 	t.Parallel()
 
 	t.Run("when RbacServiceAPI CreateGroup respond with 500 then throw error", func(t *testing.T) {
+		t.Parallel()
 		r := require.New(t)
 		mockClient := mock_sdk.NewMockClientInterface(gomock.NewController(t))
 
@@ -477,6 +486,7 @@ func TestOrganizationGroupCreateContext(t *testing.T) {
 	})
 
 	t.Run("when RbacServiceAPI CreateGroup respond with 200 then assume group was created", func(t *testing.T) {
+		t.Parallel()
 		r := require.New(t)
 		mockClient := mock_sdk.NewMockClientInterface(gomock.NewController(t))
 
@@ -549,6 +559,7 @@ func TestOrganizationGroupDeleteContext(t *testing.T) {
 	t.Parallel()
 
 	t.Run("when state is missing group ID then return error", func(t *testing.T) {
+		t.Parallel()
 		r := require.New(t)
 
 		ctx := context.Background()
@@ -569,6 +580,7 @@ func TestOrganizationGroupDeleteContext(t *testing.T) {
 	})
 
 	t.Run("when RbacServiceAPI DeleteGroup respond with 500 then throw error", func(t *testing.T) {
+		t.Parallel()
 		r := require.New(t)
 		mockClient := mock_sdk.NewMockClientInterface(gomock.NewController(t))
 
@@ -612,6 +624,7 @@ func TestOrganizationGroupDeleteContext(t *testing.T) {
 	})
 
 	t.Run("when RbacServiceAPI DeleteGroup respond with 200 then no errors", func(t *testing.T) {
+		t.Parallel()
 		r := require.New(t)
 		mockClient := mock_sdk.NewMockClientInterface(gomock.NewController(t))
 
