@@ -3675,26 +3675,6 @@ func (mr *MockClientInterfaceMockRecorder) WorkloadOptimizationAPIListWorkloads(
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIListWorkloads", reflect.TypeOf((*MockClientInterface)(nil).WorkloadOptimizationAPIListWorkloads), varargs...)
 }
 
-// WorkloadOptimizationAPIUpdateWorkload mocks base method.
-func (m *MockClientInterface) WorkloadOptimizationAPIUpdateWorkload(ctx context.Context, clusterId, workloadId string, body sdk.WorkloadOptimizationAPIUpdateWorkloadJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
-	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, clusterId, workloadId, body}
-	for _, a := range reqEditors {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "WorkloadOptimizationAPIUpdateWorkload", varargs...)
-	ret0, _ := ret[0].(*http.Response)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// WorkloadOptimizationAPIUpdateWorkload indicates an expected call of WorkloadOptimizationAPIUpdateWorkload.
-func (mr *MockClientInterfaceMockRecorder) WorkloadOptimizationAPIUpdateWorkload(ctx, clusterId, workloadId, body interface{}, reqEditors ...interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, clusterId, workloadId, body}, reqEditors...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIUpdateWorkload", reflect.TypeOf((*MockClientInterface)(nil).WorkloadOptimizationAPIUpdateWorkload), varargs...)
-}
-
 // WorkloadOptimizationAPIUpdateWorkloadScalingPolicy mocks base method.
 func (m *MockClientInterface) WorkloadOptimizationAPIUpdateWorkloadScalingPolicy(ctx context.Context, clusterId, policyId string, body sdk.WorkloadOptimizationAPIUpdateWorkloadScalingPolicyJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
@@ -3773,26 +3753,6 @@ func (mr *MockClientInterfaceMockRecorder) WorkloadOptimizationAPIUpdateWorkload
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{ctx, clusterId, workloadId, contentType, body}, reqEditors...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIUpdateWorkloadV2WithBody", reflect.TypeOf((*MockClientInterface)(nil).WorkloadOptimizationAPIUpdateWorkloadV2WithBody), varargs...)
-}
-
-// WorkloadOptimizationAPIUpdateWorkloadWithBody mocks base method.
-func (m *MockClientInterface) WorkloadOptimizationAPIUpdateWorkloadWithBody(ctx context.Context, clusterId, workloadId, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
-	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, clusterId, workloadId, contentType, body}
-	for _, a := range reqEditors {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "WorkloadOptimizationAPIUpdateWorkloadWithBody", varargs...)
-	ret0, _ := ret[0].(*http.Response)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// WorkloadOptimizationAPIUpdateWorkloadWithBody indicates an expected call of WorkloadOptimizationAPIUpdateWorkloadWithBody.
-func (mr *MockClientInterfaceMockRecorder) WorkloadOptimizationAPIUpdateWorkloadWithBody(ctx, clusterId, workloadId, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, clusterId, workloadId, contentType, body}, reqEditors...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIUpdateWorkloadWithBody", reflect.TypeOf((*MockClientInterface)(nil).WorkloadOptimizationAPIUpdateWorkloadWithBody), varargs...)
 }
 
 // MockClientWithResponsesInterface is a mock of ClientWithResponsesInterface interface.
@@ -6576,36 +6536,6 @@ func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPIUpdateWorkload
 func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPIUpdateWorkloadV2WithResponse(ctx, clusterId, workloadId, body interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIUpdateWorkloadV2WithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPIUpdateWorkloadV2WithResponse), ctx, clusterId, workloadId, body)
-}
-
-// WorkloadOptimizationAPIUpdateWorkloadWithBodyWithResponse mocks base method.
-func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPIUpdateWorkloadWithBodyWithResponse(ctx context.Context, clusterId, workloadId, contentType string, body io.Reader) (*sdk.WorkloadOptimizationAPIUpdateWorkloadResponse, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "WorkloadOptimizationAPIUpdateWorkloadWithBodyWithResponse", ctx, clusterId, workloadId, contentType, body)
-	ret0, _ := ret[0].(*sdk.WorkloadOptimizationAPIUpdateWorkloadResponse)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// WorkloadOptimizationAPIUpdateWorkloadWithBodyWithResponse indicates an expected call of WorkloadOptimizationAPIUpdateWorkloadWithBodyWithResponse.
-func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPIUpdateWorkloadWithBodyWithResponse(ctx, clusterId, workloadId, contentType, body interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIUpdateWorkloadWithBodyWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPIUpdateWorkloadWithBodyWithResponse), ctx, clusterId, workloadId, contentType, body)
-}
-
-// WorkloadOptimizationAPIUpdateWorkloadWithResponse mocks base method.
-func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPIUpdateWorkloadWithResponse(ctx context.Context, clusterId, workloadId string, body sdk.WorkloadOptimizationAPIUpdateWorkloadJSONRequestBody) (*sdk.WorkloadOptimizationAPIUpdateWorkloadResponse, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "WorkloadOptimizationAPIUpdateWorkloadWithResponse", ctx, clusterId, workloadId, body)
-	ret0, _ := ret[0].(*sdk.WorkloadOptimizationAPIUpdateWorkloadResponse)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// WorkloadOptimizationAPIUpdateWorkloadWithResponse indicates an expected call of WorkloadOptimizationAPIUpdateWorkloadWithResponse.
-func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPIUpdateWorkloadWithResponse(ctx, clusterId, workloadId, body interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIUpdateWorkloadWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPIUpdateWorkloadWithResponse), ctx, clusterId, workloadId, body)
 }
 
 // MockResponse is a mock of Response interface.
