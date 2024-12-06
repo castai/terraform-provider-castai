@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/http"
 	"strings"
 	"time"
 
@@ -153,6 +154,11 @@ func resourceRoleBindings() *schema.Resource {
 }
 
 func resourceRoleBindingsRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	roleBindingID := data.Id()
+	if roleBindingID == "" {
+		return diag.Errorf("role binding ID is not set")
+	}
+
 	organizationID := data.Get(FieldRoleBindingsOrganizationID).(string)
 	if organizationID == "" {
 		var err error
@@ -161,7 +167,6 @@ func resourceRoleBindingsRead(ctx context.Context, data *schema.ResourceData, me
 			return diag.FromErr(fmt.Errorf("getting default organization: %w", err))
 		}
 	}
-	roleBindingID := data.Id()
 
 	client := meta.(*ProviderConfig).api
 
@@ -179,6 +184,13 @@ func resourceRoleBindingsRead(ctx context.Context, data *schema.ResourceData, me
 
 func resourceRoleBindingsCreate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	organizationID := data.Get(FieldRoleBindingsOrganizationID).(string)
+	if organizationID == "" {
+		var err error
+		organizationID, err = getDefaultOrganizationId(ctx, meta)
+		if err != nil {
+			return diag.FromErr(fmt.Errorf("getting default organization: %w", err))
+		}
+	}
 
 	client := meta.(*ProviderConfig).api
 
@@ -214,8 +226,19 @@ func resourceRoleBindingsCreate(ctx context.Context, data *schema.ResourceData, 
 }
 
 func resourceRoleBindingsUpdate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	organizationID := data.Get(FieldRoleBindingsOrganizationID).(string)
 	roleBindingID := data.Id()
+	if roleBindingID == "" {
+		return diag.Errorf("role binding ID is not set")
+	}
+
+	organizationID := data.Get(FieldRoleBindingsOrganizationID).(string)
+	if organizationID == "" {
+		var err error
+		organizationID, err = getDefaultOrganizationId(ctx, meta)
+		if err != nil {
+			return diag.FromErr(fmt.Errorf("getting default organization: %w", err))
+		}
+	}
 
 	client := meta.(*ProviderConfig).api
 
@@ -243,8 +266,19 @@ func resourceRoleBindingsUpdate(ctx context.Context, data *schema.ResourceData, 
 }
 
 func resourceRoleBindingsDelete(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	organizationID := data.Get(FieldRoleBindingsOrganizationID).(string)
 	roleBindingID := data.Id()
+	if roleBindingID == "" {
+		return diag.Errorf("role binding ID is not set")
+	}
+
+	organizationID := data.Get(FieldRoleBindingsOrganizationID).(string)
+	if organizationID == "" {
+		var err error
+		organizationID, err = getDefaultOrganizationId(ctx, meta)
+		if err != nil {
+			return diag.FromErr(fmt.Errorf("getting default organization: %w", err))
+		}
+	}
 
 	client := meta.(*ProviderConfig).api
 
@@ -258,11 +292,17 @@ func resourceRoleBindingsDelete(ctx context.Context, data *schema.ResourceData, 
 
 func getRoleBinding(client *sdk.ClientWithResponses, ctx context.Context, organizationID, roleBindingID string) (*sdk.CastaiRbacV1beta1RoleBinding, error) {
 	resp, err := client.RbacServiceAPIGetRoleBindingWithResponse(ctx, organizationID, roleBindingID)
+	if err != nil {
+		return nil, fmt.Errorf("fetching role binding: %w", err)
+	}
+	if resp.StatusCode() == http.StatusNotFound {
+		return nil, fmt.Errorf("role binding %s not found", roleBindingID)
+	}
 	if err := sdk.CheckOKResponse(resp, err); err != nil {
 		return nil, fmt.Errorf("retrieving role binding: %w", err)
 	}
 	if resp.JSON200 == nil {
-		return nil, errors.New("role binding not found")
+		return nil, fmt.Errorf("role binding %s not found", roleBindingID)
 	}
 	return resp.JSON200, nil
 }
