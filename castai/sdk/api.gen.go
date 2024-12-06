@@ -122,6 +122,20 @@ const (
 	Ssd     CastaiInventoryV1beta1StorageInfoDeviceType = "ssd"
 )
 
+// Defines values for CastaiRbacV1beta1MemberKind.
+const (
+	SERVICEACCOUNT CastaiRbacV1beta1MemberKind = "SERVICE_ACCOUNT"
+	USER           CastaiRbacV1beta1MemberKind = "USER"
+)
+
+// Defines values for CastaiRbacV1beta1PoliciesState.
+const (
+	CastaiRbacV1beta1PoliciesStateACCEPTED CastaiRbacV1beta1PoliciesState = "ACCEPTED"
+	CastaiRbacV1beta1PoliciesStateCREATED  CastaiRbacV1beta1PoliciesState = "CREATED"
+	CastaiRbacV1beta1PoliciesStateFAILED   CastaiRbacV1beta1PoliciesState = "FAILED"
+	CastaiRbacV1beta1PoliciesStateUNKNOWN  CastaiRbacV1beta1PoliciesState = "UNKNOWN"
+)
+
 // Defines values for CastaiSsoV1beta1OIDCType.
 const (
 	CastaiSsoV1beta1OIDCTypeTYPEBACKCHANNEL  CastaiSsoV1beta1OIDCType = "TYPE_BACK_CHANNEL"
@@ -297,9 +311,9 @@ const (
 
 // Defines values for WorkloadoptimizationV1ApplyType.
 const (
-	DEFERRED  WorkloadoptimizationV1ApplyType = "DEFERRED"
-	IMMEDIATE WorkloadoptimizationV1ApplyType = "IMMEDIATE"
-	UNKNOWN   WorkloadoptimizationV1ApplyType = "UNKNOWN"
+	WorkloadoptimizationV1ApplyTypeDEFERRED  WorkloadoptimizationV1ApplyType = "DEFERRED"
+	WorkloadoptimizationV1ApplyTypeIMMEDIATE WorkloadoptimizationV1ApplyType = "IMMEDIATE"
+	WorkloadoptimizationV1ApplyTypeUNKNOWN   WorkloadoptimizationV1ApplyType = "UNKNOWN"
 )
 
 // Defines values for WorkloadoptimizationV1EventType.
@@ -371,6 +385,29 @@ type CommitmentsAPIBatchUpdateCommitmentsRequest struct {
 type ExternalClusterAPIGKECreateSARequest struct {
 	// UpdateGKEClusterParams defines updatable GKE cluster configuration.
 	Gke *ExternalclusterV1UpdateGKEClusterParams `json:"gke,omitempty"`
+}
+
+// GroupsIsTheGroupsToBeUpdated defines model for Groups_is_the_groups_to_be_updated_.
+type GroupsIsTheGroupsToBeUpdated struct {
+	Definition CastaiRbacV1beta1UpdateGroupRequestGroupDefinition `json:"definition"`
+
+	// Description is the description of the group.
+	Description *string `json:"description,omitempty"`
+
+	// Name is the name of the group.
+	Name string `json:"name"`
+}
+
+// RoleBindingIsTheRoleBindingToBeUpdated defines model for RoleBinding_is_the_role_binding_to_be_updated_.
+type RoleBindingIsTheRoleBindingToBeUpdated struct {
+	// Definition represents the role binding definition.
+	Definition CastaiRbacV1beta1RoleBindingDefinition `json:"definition"`
+
+	// Description is the description of the role binding.
+	Description *string `json:"description,omitempty"`
+
+	// Name is the name of the role binding.
+	Name string `json:"name"`
 }
 
 // UsersAPIUpdateOrganizationUserRequest defines model for UsersAPI_UpdateOrganizationUser_request.
@@ -1303,6 +1340,251 @@ type CastaiOperationsV1beta1OperationError struct {
 
 	// Reason is an operation specific failure code. Refer to documentation about possible outcomes.
 	Reason *string `json:"reason,omitempty"`
+}
+
+// CastaiRbacV1beta1Author defines model for castai.rbac.v1beta1.Author.
+type CastaiRbacV1beta1Author struct {
+	// Email is the email of the author.
+	Email *string `json:"email,omitempty"`
+
+	// ID is the unique identifier of the author.
+	Id *string `json:"id,omitempty"`
+}
+
+// ClusterScope represents the resource scope of the cluster.
+// Resource can be any resources inside the organization.
+type CastaiRbacV1beta1ClusterScope struct {
+	// ID is the unique identifier of the resource.
+	Id string `json:"id"`
+}
+
+// CastaiRbacV1beta1CreateGroupRequestGroup defines model for castai.rbac.v1beta1.CreateGroupRequest.Group.
+type CastaiRbacV1beta1CreateGroupRequestGroup struct {
+	Definition CastaiRbacV1beta1CreateGroupRequestGroupDefinition `json:"definition"`
+
+	// Description is the description of the group.
+	Description *string `json:"description,omitempty"`
+
+	// Name is the name of the group.
+	Name string `json:"name"`
+}
+
+// CastaiRbacV1beta1CreateGroupRequestGroupDefinition defines model for castai.rbac.v1beta1.CreateGroupRequest.GroupDefinition.
+type CastaiRbacV1beta1CreateGroupRequestGroupDefinition struct {
+	// Members is a list of members.
+	Members *[]CastaiRbacV1beta1Member `json:"members,omitempty"`
+}
+
+// CastaiRbacV1beta1CreateRoleBindingsRequestRoleBinding defines model for castai.rbac.v1beta1.CreateRoleBindingsRequest.RoleBinding.
+type CastaiRbacV1beta1CreateRoleBindingsRequestRoleBinding struct {
+	// Definition represents the role binding definition.
+	Definition CastaiRbacV1beta1RoleBindingDefinition `json:"definition"`
+
+	// Description is the description of the role binding.
+	Description *string `json:"description,omitempty"`
+
+	// Name is the name of the role binding.
+	Name string `json:"name"`
+}
+
+// CastaiRbacV1beta1DeleteGroupResponse defines model for castai.rbac.v1beta1.DeleteGroupResponse.
+type CastaiRbacV1beta1DeleteGroupResponse = map[string]interface{}
+
+// CastaiRbacV1beta1DeleteRoleBindingResponse defines model for castai.rbac.v1beta1.DeleteRoleBindingResponse.
+type CastaiRbacV1beta1DeleteRoleBindingResponse = map[string]interface{}
+
+// CastaiRbacV1beta1Group defines model for castai.rbac.v1beta1.Group.
+type CastaiRbacV1beta1Group struct {
+	// CreatedAt is the timestamp when the group was created.
+	CreatedAt  *time.Time                       `json:"createdAt,omitempty"`
+	Definition CastaiRbacV1beta1GroupDefinition `json:"definition"`
+
+	// Description is the description of the group.
+	Description *string `json:"description,omitempty"`
+
+	// ID is the unique identifier of the group.
+	Id *string `json:"id,omitempty"`
+
+	// Name is the name of the group.
+	Name *string `json:"name,omitempty"`
+
+	// OrganizationID is the unique identifier of the organization.
+	OrganizationId *string `json:"organizationId,omitempty"`
+
+	// UpdatedAt is the timestamp when the group was last updated.
+	UpdatedAt *time.Time `json:"updatedAt,omitempty"`
+}
+
+// CastaiRbacV1beta1GroupDefinition defines model for castai.rbac.v1beta1.GroupDefinition.
+type CastaiRbacV1beta1GroupDefinition struct {
+	Author CastaiRbacV1beta1Author `json:"author"`
+
+	// Members is a list of members.
+	Members *[]CastaiRbacV1beta1Member `json:"members,omitempty"`
+}
+
+// GroupSubject represents the group subject.
+type CastaiRbacV1beta1GroupSubject struct {
+	// ID is the unique identifier of the group.
+	Id string `json:"id"`
+
+	// Name is the name of the group.
+	Name *string `json:"name,omitempty"`
+}
+
+// CastaiRbacV1beta1Member defines model for castai.rbac.v1beta1.Member.
+type CastaiRbacV1beta1Member struct {
+	// AddedAt is the timestamp when the user has been added to the group.
+	AddedAt *time.Time `json:"addedAt,omitempty"`
+
+	// Email is the email of the member.
+	Email string `json:"email"`
+
+	// ID is the internal unique identifier of the member.
+	Id string `json:"id"`
+
+	// Kind represents the type of the member.
+	Kind CastaiRbacV1beta1MemberKind `json:"kind"`
+
+	// LastLoginAt is the timestamp of the time when the user last time logged in.
+	LastLoginAt *time.Time `json:"lastLoginAt,omitempty"`
+}
+
+// Kind represents the type of the member.
+type CastaiRbacV1beta1MemberKind string
+
+// OrganizationScope represents the organization scope.
+type CastaiRbacV1beta1OrganizationScope struct {
+	// ID is the unique identifier of the organization.
+	Id string `json:"id"`
+}
+
+// PoliciesState represents the state of the policies generation.
+//
+//   - ACCEPTED: ACCEPTED is the state when the policies async generation is ongoing.
+//   - CREATED: CREATED is the state when the policies have been generated.
+//   - FAILED: FAILED is the state when the policies generation failed.
+type CastaiRbacV1beta1PoliciesState string
+
+// CastaiRbacV1beta1PolicyID defines model for castai.rbac.v1beta1.PolicyID.
+type CastaiRbacV1beta1PolicyID struct {
+	Id string `json:"id"`
+}
+
+// ResourceScope represents the resource scope.
+// Resource can be any resources inside the organization.
+type CastaiRbacV1beta1ResourceScope struct {
+	// ID is the unique identifier of the resource.
+	Id string `json:"id"`
+}
+
+// CastaiRbacV1beta1RoleBinding defines model for castai.rbac.v1beta1.RoleBinding.
+type CastaiRbacV1beta1RoleBinding struct {
+	// CreatedAt is the timestamp when the role binding was created.
+	CreatedAt *time.Time `json:"createdAt,omitempty"`
+
+	// Definition represents the role binding definition.
+	Definition CastaiRbacV1beta1RoleBindingDefinition `json:"definition"`
+
+	// Description is the description of the role binding.
+	Description *string `json:"description,omitempty"`
+
+	// ID is the unique identifier of the role binding.
+	Id *string `json:"id,omitempty"`
+
+	// Name is the name of the role binding.
+	Name           *string `json:"name,omitempty"`
+	OrganizationId *string `json:"organizationId,omitempty"`
+
+	// Status is the status of the role binding, reflecting the state of the related policies generation.
+	Status *[]CastaiRbacV1beta1RoleBindingStatus `json:"status,omitempty"`
+
+	// UpdatedAt is the timestamp when the role binding was last updated.
+	UpdatedAt *time.Time `json:"updatedAt,omitempty"`
+}
+
+// Definition represents the role binding definition.
+type CastaiRbacV1beta1RoleBindingDefinition struct {
+	// RoleID is the unique identifier of the role.
+	RoleId string `json:"roleId"`
+
+	// Scope represents the scope of the role binding.
+	Scope CastaiRbacV1beta1Scope `json:"scope"`
+
+	// Subjects is a list of subjects.
+	Subjects *[]CastaiRbacV1beta1Subject `json:"subjects,omitempty"`
+}
+
+// RoleBindingStatus is the status of the role binding, reflecting the state of the related policies generation.
+type CastaiRbacV1beta1RoleBindingStatus struct {
+	// Message is providing more information about the state.
+	Message *string `json:"message,omitempty"`
+
+	// Policies are the unique identifiers of the related policies.
+	Policies *[]CastaiRbacV1beta1PolicyID `json:"policies,omitempty"`
+
+	// PoliciesState represents the state of the policies generation.
+	//
+	//  - ACCEPTED: ACCEPTED is the state when the policies async generation is ongoing.
+	//  - CREATED: CREATED is the state when the policies have been generated.
+	//  - FAILED: FAILED is the state when the policies generation failed.
+	State CastaiRbacV1beta1PoliciesState `json:"state"`
+
+	// UpdatedAt is the timestamp when the status was last updated.
+	UpdatedAt *time.Time `json:"updatedAt,omitempty"`
+}
+
+// Scope represents the scope of the role binding.
+type CastaiRbacV1beta1Scope struct {
+	// ClusterScope represents the resource scope of the cluster.
+	// Resource can be any resources inside the organization.
+	Cluster *CastaiRbacV1beta1ClusterScope `json:"cluster,omitempty"`
+
+	// OrganizationScope represents the organization scope.
+	Organization *CastaiRbacV1beta1OrganizationScope `json:"organization,omitempty"`
+
+	// ResourceScope represents the resource scope.
+	// Resource can be any resources inside the organization.
+	Resource *CastaiRbacV1beta1ResourceScope `json:"resource,omitempty"`
+}
+
+// ServiceAccountSubject represents the service account subject.
+type CastaiRbacV1beta1ServiceAccountSubject struct {
+	// ID is the unique identifier of the service account.
+	Id string `json:"id"`
+
+	// Name is the name of the service account.
+	Name *string `json:"name,omitempty"`
+}
+
+// Subject represents the subject of the role binding.
+type CastaiRbacV1beta1Subject struct {
+	// GroupSubject represents the group subject.
+	Group *CastaiRbacV1beta1GroupSubject `json:"group,omitempty"`
+
+	// ServiceAccountSubject represents the service account subject.
+	ServiceAccount *CastaiRbacV1beta1ServiceAccountSubject `json:"serviceAccount,omitempty"`
+
+	// UserSubject represents the user subject.
+	User *CastaiRbacV1beta1UserSubject `json:"user,omitempty"`
+}
+
+// CastaiRbacV1beta1UpdateGroupRequestGroupDefinition defines model for castai.rbac.v1beta1.UpdateGroupRequest.GroupDefinition.
+type CastaiRbacV1beta1UpdateGroupRequestGroupDefinition struct {
+	// Members is a list of members.
+	Members []CastaiRbacV1beta1Member `json:"members"`
+}
+
+// UserSubject represents the user subject.
+type CastaiRbacV1beta1UserSubject struct {
+	// Email is the email of the user.
+	Email *string `json:"email,omitempty"`
+
+	// ID is the unique identifier of the user.
+	Id string `json:"id"`
+
+	// Name is the name of the user.
+	Name *string `json:"name,omitempty"`
 }
 
 // AzureAAD represents a Azure AAD connector.
@@ -3968,18 +4250,6 @@ type WorkloadoptimizationV1TimeSeriesMetric struct {
 	Value     float64   `json:"value"`
 }
 
-// WorkloadoptimizationV1UpdateWorkload defines model for workloadoptimization.v1.UpdateWorkload.
-type WorkloadoptimizationV1UpdateWorkload struct {
-	// Defines the scaling policy ID assigned to the workload.
-	ScalingPolicyId string                                      `json:"scalingPolicyId"`
-	WorkloadConfig  *WorkloadoptimizationV1WorkloadConfigUpdate `json:"workloadConfig,omitempty"`
-}
-
-// WorkloadoptimizationV1UpdateWorkloadResponse defines model for workloadoptimization.v1.UpdateWorkloadResponse.
-type WorkloadoptimizationV1UpdateWorkloadResponse struct {
-	Workload *WorkloadoptimizationV1Workload `json:"workload,omitempty"`
-}
-
 // WorkloadoptimizationV1UpdateWorkloadResponseV2 defines model for workloadoptimization.v1.UpdateWorkloadResponseV2.
 type WorkloadoptimizationV1UpdateWorkloadResponseV2 struct {
 	Workload *WorkloadoptimizationV1Workload `json:"workload,omitempty"`
@@ -4074,36 +4344,7 @@ type WorkloadoptimizationV1Workload struct {
 	ScalingPolicyId  string                                 `json:"scalingPolicyId"`
 	UpdatedAt        time.Time                              `json:"updatedAt"`
 	Version          string                                 `json:"version"`
-	WorkloadConfig   WorkloadoptimizationV1WorkloadConfig   `json:"workloadConfig"`
 	WorkloadConfigV2 WorkloadoptimizationV1WorkloadConfigV2 `json:"workloadConfigV2"`
-}
-
-// WorkloadoptimizationV1WorkloadConfig defines model for workloadoptimization.v1.WorkloadConfig.
-type WorkloadoptimizationV1WorkloadConfig struct {
-	AntiAffinity         WorkloadoptimizationV1AntiAffinitySettings   `json:"antiAffinity"`
-	ContainerConstraints []WorkloadoptimizationV1ContainerConstraints `json:"containerConstraints"`
-	Cpu                  WorkloadoptimizationV1ResourceConfig         `json:"cpu"`
-
-	// Defines possible options for workload management.
-	// READ_ONLY - workload watched (metrics collected), but no actions may be performed by CAST AI.
-	// MANAGED - workload watched (metrics collected), CAST AI may perform actions on the workload.
-	ManagementOption WorkloadoptimizationV1ManagementOption     `json:"managementOption"`
-	Memory           WorkloadoptimizationV1ResourceConfig       `json:"memory"`
-	MemoryEvent      *WorkloadoptimizationV1MemoryEventSettings `json:"memoryEvent,omitempty"`
-}
-
-// WorkloadoptimizationV1WorkloadConfigUpdate defines model for workloadoptimization.v1.WorkloadConfigUpdate.
-type WorkloadoptimizationV1WorkloadConfigUpdate struct {
-	AntiAffinity    *WorkloadoptimizationV1AntiAffinitySettings         `json:"antiAffinity,omitempty"`
-	ContainerConfig *[]WorkloadoptimizationV1ContainerConfigUpdate      `json:"containerConfig,omitempty"`
-	Cpu             *WorkloadoptimizationV1WorkloadResourceConfigUpdate `json:"cpu,omitempty"`
-
-	// Defines possible options for workload management.
-	// READ_ONLY - workload watched (metrics collected), but no actions may be performed by CAST AI.
-	// MANAGED - workload watched (metrics collected), CAST AI may perform actions on the workload.
-	ManagementOption *WorkloadoptimizationV1ManagementOption             `json:"managementOption,omitempty"`
-	Memory           *WorkloadoptimizationV1WorkloadResourceConfigUpdate `json:"memory,omitempty"`
-	MemoryEvent      *WorkloadoptimizationV1MemoryEventSettings          `json:"memoryEvent,omitempty"`
 }
 
 // WorkloadoptimizationV1WorkloadConfigUpdateV2 defines model for workloadoptimization.v1.WorkloadConfigUpdateV2.
@@ -4403,11 +4644,23 @@ type UsersAPICreateOrganizationJSONBody = CastaiUsersV1beta1Organization
 // UsersAPIEditOrganizationJSONBody defines parameters for UsersAPIEditOrganization.
 type UsersAPIEditOrganizationJSONBody = CastaiUsersV1beta1Organization
 
+// RbacServiceAPICreateGroupJSONBody defines parameters for RbacServiceAPICreateGroup.
+type RbacServiceAPICreateGroupJSONBody = CastaiRbacV1beta1CreateGroupRequestGroup
+
+// RbacServiceAPIUpdateGroupJSONBody defines parameters for RbacServiceAPIUpdateGroup.
+type RbacServiceAPIUpdateGroupJSONBody = GroupsIsTheGroupsToBeUpdated
+
 // InventoryAPIAddReservationJSONBody defines parameters for InventoryAPIAddReservation.
 type InventoryAPIAddReservationJSONBody = CastaiInventoryV1beta1GenericReservation
 
 // InventoryAPIOverwriteReservationsJSONBody defines parameters for InventoryAPIOverwriteReservations.
 type InventoryAPIOverwriteReservationsJSONBody = CastaiInventoryV1beta1GenericReservationsList
+
+// RbacServiceAPICreateRoleBindingsJSONBody defines parameters for RbacServiceAPICreateRoleBindings.
+type RbacServiceAPICreateRoleBindingsJSONBody = []CastaiRbacV1beta1CreateRoleBindingsRequestRoleBinding
+
+// RbacServiceAPIUpdateRoleBindingJSONBody defines parameters for RbacServiceAPIUpdateRoleBinding.
+type RbacServiceAPIUpdateRoleBindingJSONBody = RoleBindingIsTheRoleBindingToBeUpdated
 
 // UsersAPIRemoveOrganizationUsersParams defines parameters for UsersAPIRemoveOrganizationUsers.
 type UsersAPIRemoveOrganizationUsersParams struct {
@@ -4555,9 +4808,6 @@ type WorkloadOptimizationAPIGetWorkloadParams struct {
 	ToTime         *time.Time `form:"toTime,omitempty" json:"toTime,omitempty"`
 }
 
-// WorkloadOptimizationAPIUpdateWorkloadJSONBody defines parameters for WorkloadOptimizationAPIUpdateWorkload.
-type WorkloadOptimizationAPIUpdateWorkloadJSONBody = WorkloadoptimizationV1UpdateWorkload
-
 // WorkloadOptimizationAPIGetInstallCmdParams defines parameters for WorkloadOptimizationAPIGetInstallCmd.
 type WorkloadOptimizationAPIGetInstallCmdParams struct {
 	ClusterId string `form:"clusterId" json:"clusterId"`
@@ -4656,11 +4906,23 @@ type UsersAPICreateOrganizationJSONRequestBody = UsersAPICreateOrganizationJSONB
 // UsersAPIEditOrganizationJSONRequestBody defines body for UsersAPIEditOrganization for application/json ContentType.
 type UsersAPIEditOrganizationJSONRequestBody = UsersAPIEditOrganizationJSONBody
 
+// RbacServiceAPICreateGroupJSONRequestBody defines body for RbacServiceAPICreateGroup for application/json ContentType.
+type RbacServiceAPICreateGroupJSONRequestBody = RbacServiceAPICreateGroupJSONBody
+
+// RbacServiceAPIUpdateGroupJSONRequestBody defines body for RbacServiceAPIUpdateGroup for application/json ContentType.
+type RbacServiceAPIUpdateGroupJSONRequestBody = RbacServiceAPIUpdateGroupJSONBody
+
 // InventoryAPIAddReservationJSONRequestBody defines body for InventoryAPIAddReservation for application/json ContentType.
 type InventoryAPIAddReservationJSONRequestBody = InventoryAPIAddReservationJSONBody
 
 // InventoryAPIOverwriteReservationsJSONRequestBody defines body for InventoryAPIOverwriteReservations for application/json ContentType.
 type InventoryAPIOverwriteReservationsJSONRequestBody = InventoryAPIOverwriteReservationsJSONBody
+
+// RbacServiceAPICreateRoleBindingsJSONRequestBody defines body for RbacServiceAPICreateRoleBindings for application/json ContentType.
+type RbacServiceAPICreateRoleBindingsJSONRequestBody = RbacServiceAPICreateRoleBindingsJSONBody
+
+// RbacServiceAPIUpdateRoleBindingJSONRequestBody defines body for RbacServiceAPIUpdateRoleBinding for application/json ContentType.
+type RbacServiceAPIUpdateRoleBindingJSONRequestBody = RbacServiceAPIUpdateRoleBindingJSONBody
 
 // UsersAPIAddUserToOrganizationJSONRequestBody defines body for UsersAPIAddUserToOrganization for application/json ContentType.
 type UsersAPIAddUserToOrganizationJSONRequestBody = UsersAPIAddUserToOrganizationJSONBody
@@ -4700,9 +4962,6 @@ type WorkloadOptimizationAPIUpdateWorkloadScalingPolicyJSONRequestBody = Workloa
 
 // WorkloadOptimizationAPIAssignScalingPolicyWorkloadsJSONRequestBody defines body for WorkloadOptimizationAPIAssignScalingPolicyWorkloads for application/json ContentType.
 type WorkloadOptimizationAPIAssignScalingPolicyWorkloadsJSONRequestBody = WorkloadOptimizationAPIAssignScalingPolicyWorkloadsJSONBody
-
-// WorkloadOptimizationAPIUpdateWorkloadJSONRequestBody defines body for WorkloadOptimizationAPIUpdateWorkload for application/json ContentType.
-type WorkloadOptimizationAPIUpdateWorkloadJSONRequestBody = WorkloadOptimizationAPIUpdateWorkloadJSONBody
 
 // WorkloadOptimizationAPIUpdateWorkloadV2JSONRequestBody defines body for WorkloadOptimizationAPIUpdateWorkloadV2 for application/json ContentType.
 type WorkloadOptimizationAPIUpdateWorkloadV2JSONRequestBody = WorkloadOptimizationAPIUpdateWorkloadV2JSONBody
