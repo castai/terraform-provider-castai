@@ -81,10 +81,12 @@ resource "castai_node_template" "example_spot_template" {
       exclude = ["standard_FSv2"]
     }
 
-    custom_priority {
-      instance_families = ["standard_Dv4"]
-      spot              = true
-    }
+    custom_priority = [
+      {
+        instance_families = ["standard_Dv4"]
+        spot              = true
+      }
+    ]
   }
 
 }
