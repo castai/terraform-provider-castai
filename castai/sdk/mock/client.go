@@ -2195,6 +2195,246 @@ func (mr *MockClientInterfaceMockRecorder) PoliciesAPIUpsertClusterPoliciesWithB
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PoliciesAPIUpsertClusterPoliciesWithBody", reflect.TypeOf((*MockClientInterface)(nil).PoliciesAPIUpsertClusterPoliciesWithBody), varargs...)
 }
 
+// RbacServiceAPICreateGroup mocks base method.
+func (m *MockClientInterface) RbacServiceAPICreateGroup(ctx context.Context, organizationId string, body sdk.RbacServiceAPICreateGroupJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RbacServiceAPICreateGroup", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RbacServiceAPICreateGroup indicates an expected call of RbacServiceAPICreateGroup.
+func (mr *MockClientInterfaceMockRecorder) RbacServiceAPICreateGroup(ctx, organizationId, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RbacServiceAPICreateGroup", reflect.TypeOf((*MockClientInterface)(nil).RbacServiceAPICreateGroup), varargs...)
+}
+
+// RbacServiceAPICreateGroupWithBody mocks base method.
+func (m *MockClientInterface) RbacServiceAPICreateGroupWithBody(ctx context.Context, organizationId, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RbacServiceAPICreateGroupWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RbacServiceAPICreateGroupWithBody indicates an expected call of RbacServiceAPICreateGroupWithBody.
+func (mr *MockClientInterfaceMockRecorder) RbacServiceAPICreateGroupWithBody(ctx, organizationId, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RbacServiceAPICreateGroupWithBody", reflect.TypeOf((*MockClientInterface)(nil).RbacServiceAPICreateGroupWithBody), varargs...)
+}
+
+// RbacServiceAPICreateRoleBindings mocks base method.
+func (m *MockClientInterface) RbacServiceAPICreateRoleBindings(ctx context.Context, organizationId string, body sdk.RbacServiceAPICreateRoleBindingsJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RbacServiceAPICreateRoleBindings", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RbacServiceAPICreateRoleBindings indicates an expected call of RbacServiceAPICreateRoleBindings.
+func (mr *MockClientInterfaceMockRecorder) RbacServiceAPICreateRoleBindings(ctx, organizationId, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RbacServiceAPICreateRoleBindings", reflect.TypeOf((*MockClientInterface)(nil).RbacServiceAPICreateRoleBindings), varargs...)
+}
+
+// RbacServiceAPICreateRoleBindingsWithBody mocks base method.
+func (m *MockClientInterface) RbacServiceAPICreateRoleBindingsWithBody(ctx context.Context, organizationId, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RbacServiceAPICreateRoleBindingsWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RbacServiceAPICreateRoleBindingsWithBody indicates an expected call of RbacServiceAPICreateRoleBindingsWithBody.
+func (mr *MockClientInterfaceMockRecorder) RbacServiceAPICreateRoleBindingsWithBody(ctx, organizationId, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RbacServiceAPICreateRoleBindingsWithBody", reflect.TypeOf((*MockClientInterface)(nil).RbacServiceAPICreateRoleBindingsWithBody), varargs...)
+}
+
+// RbacServiceAPIDeleteGroup mocks base method.
+func (m *MockClientInterface) RbacServiceAPIDeleteGroup(ctx context.Context, organizationId, id string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, id}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RbacServiceAPIDeleteGroup", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RbacServiceAPIDeleteGroup indicates an expected call of RbacServiceAPIDeleteGroup.
+func (mr *MockClientInterfaceMockRecorder) RbacServiceAPIDeleteGroup(ctx, organizationId, id interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, id}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RbacServiceAPIDeleteGroup", reflect.TypeOf((*MockClientInterface)(nil).RbacServiceAPIDeleteGroup), varargs...)
+}
+
+// RbacServiceAPIDeleteRoleBinding mocks base method.
+func (m *MockClientInterface) RbacServiceAPIDeleteRoleBinding(ctx context.Context, organizationId, id string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, id}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RbacServiceAPIDeleteRoleBinding", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RbacServiceAPIDeleteRoleBinding indicates an expected call of RbacServiceAPIDeleteRoleBinding.
+func (mr *MockClientInterfaceMockRecorder) RbacServiceAPIDeleteRoleBinding(ctx, organizationId, id interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, id}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RbacServiceAPIDeleteRoleBinding", reflect.TypeOf((*MockClientInterface)(nil).RbacServiceAPIDeleteRoleBinding), varargs...)
+}
+
+// RbacServiceAPIGetGroup mocks base method.
+func (m *MockClientInterface) RbacServiceAPIGetGroup(ctx context.Context, organizationId, id string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, id}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RbacServiceAPIGetGroup", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RbacServiceAPIGetGroup indicates an expected call of RbacServiceAPIGetGroup.
+func (mr *MockClientInterfaceMockRecorder) RbacServiceAPIGetGroup(ctx, organizationId, id interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, id}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RbacServiceAPIGetGroup", reflect.TypeOf((*MockClientInterface)(nil).RbacServiceAPIGetGroup), varargs...)
+}
+
+// RbacServiceAPIGetRoleBinding mocks base method.
+func (m *MockClientInterface) RbacServiceAPIGetRoleBinding(ctx context.Context, organizationId, id string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, id}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RbacServiceAPIGetRoleBinding", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RbacServiceAPIGetRoleBinding indicates an expected call of RbacServiceAPIGetRoleBinding.
+func (mr *MockClientInterfaceMockRecorder) RbacServiceAPIGetRoleBinding(ctx, organizationId, id interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, id}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RbacServiceAPIGetRoleBinding", reflect.TypeOf((*MockClientInterface)(nil).RbacServiceAPIGetRoleBinding), varargs...)
+}
+
+// RbacServiceAPIUpdateGroup mocks base method.
+func (m *MockClientInterface) RbacServiceAPIUpdateGroup(ctx context.Context, organizationId, groupId string, body sdk.RbacServiceAPIUpdateGroupJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, groupId, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RbacServiceAPIUpdateGroup", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RbacServiceAPIUpdateGroup indicates an expected call of RbacServiceAPIUpdateGroup.
+func (mr *MockClientInterfaceMockRecorder) RbacServiceAPIUpdateGroup(ctx, organizationId, groupId, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, groupId, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RbacServiceAPIUpdateGroup", reflect.TypeOf((*MockClientInterface)(nil).RbacServiceAPIUpdateGroup), varargs...)
+}
+
+// RbacServiceAPIUpdateGroupWithBody mocks base method.
+func (m *MockClientInterface) RbacServiceAPIUpdateGroupWithBody(ctx context.Context, organizationId, groupId, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, groupId, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RbacServiceAPIUpdateGroupWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RbacServiceAPIUpdateGroupWithBody indicates an expected call of RbacServiceAPIUpdateGroupWithBody.
+func (mr *MockClientInterfaceMockRecorder) RbacServiceAPIUpdateGroupWithBody(ctx, organizationId, groupId, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, groupId, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RbacServiceAPIUpdateGroupWithBody", reflect.TypeOf((*MockClientInterface)(nil).RbacServiceAPIUpdateGroupWithBody), varargs...)
+}
+
+// RbacServiceAPIUpdateRoleBinding mocks base method.
+func (m *MockClientInterface) RbacServiceAPIUpdateRoleBinding(ctx context.Context, organizationId, roleBindingId string, body sdk.RbacServiceAPIUpdateRoleBindingJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, roleBindingId, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RbacServiceAPIUpdateRoleBinding", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RbacServiceAPIUpdateRoleBinding indicates an expected call of RbacServiceAPIUpdateRoleBinding.
+func (mr *MockClientInterfaceMockRecorder) RbacServiceAPIUpdateRoleBinding(ctx, organizationId, roleBindingId, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, roleBindingId, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RbacServiceAPIUpdateRoleBinding", reflect.TypeOf((*MockClientInterface)(nil).RbacServiceAPIUpdateRoleBinding), varargs...)
+}
+
+// RbacServiceAPIUpdateRoleBindingWithBody mocks base method.
+func (m *MockClientInterface) RbacServiceAPIUpdateRoleBindingWithBody(ctx context.Context, organizationId, roleBindingId, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, roleBindingId, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RbacServiceAPIUpdateRoleBindingWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RbacServiceAPIUpdateRoleBindingWithBody indicates an expected call of RbacServiceAPIUpdateRoleBindingWithBody.
+func (mr *MockClientInterfaceMockRecorder) RbacServiceAPIUpdateRoleBindingWithBody(ctx, organizationId, roleBindingId, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, roleBindingId, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RbacServiceAPIUpdateRoleBindingWithBody", reflect.TypeOf((*MockClientInterface)(nil).RbacServiceAPIUpdateRoleBindingWithBody), varargs...)
+}
+
 // SSOAPICreateSSOConnection mocks base method.
 func (m *MockClientInterface) SSOAPICreateSSOConnection(ctx context.Context, body sdk.SSOAPICreateSSOConnectionJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
@@ -3435,26 +3675,6 @@ func (mr *MockClientInterfaceMockRecorder) WorkloadOptimizationAPIListWorkloads(
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIListWorkloads", reflect.TypeOf((*MockClientInterface)(nil).WorkloadOptimizationAPIListWorkloads), varargs...)
 }
 
-// WorkloadOptimizationAPIUpdateWorkload mocks base method.
-func (m *MockClientInterface) WorkloadOptimizationAPIUpdateWorkload(ctx context.Context, clusterId, workloadId string, body sdk.WorkloadOptimizationAPIUpdateWorkloadJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
-	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, clusterId, workloadId, body}
-	for _, a := range reqEditors {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "WorkloadOptimizationAPIUpdateWorkload", varargs...)
-	ret0, _ := ret[0].(*http.Response)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// WorkloadOptimizationAPIUpdateWorkload indicates an expected call of WorkloadOptimizationAPIUpdateWorkload.
-func (mr *MockClientInterfaceMockRecorder) WorkloadOptimizationAPIUpdateWorkload(ctx, clusterId, workloadId, body interface{}, reqEditors ...interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, clusterId, workloadId, body}, reqEditors...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIUpdateWorkload", reflect.TypeOf((*MockClientInterface)(nil).WorkloadOptimizationAPIUpdateWorkload), varargs...)
-}
-
 // WorkloadOptimizationAPIUpdateWorkloadScalingPolicy mocks base method.
 func (m *MockClientInterface) WorkloadOptimizationAPIUpdateWorkloadScalingPolicy(ctx context.Context, clusterId, policyId string, body sdk.WorkloadOptimizationAPIUpdateWorkloadScalingPolicyJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
@@ -3533,26 +3753,6 @@ func (mr *MockClientInterfaceMockRecorder) WorkloadOptimizationAPIUpdateWorkload
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{ctx, clusterId, workloadId, contentType, body}, reqEditors...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIUpdateWorkloadV2WithBody", reflect.TypeOf((*MockClientInterface)(nil).WorkloadOptimizationAPIUpdateWorkloadV2WithBody), varargs...)
-}
-
-// WorkloadOptimizationAPIUpdateWorkloadWithBody mocks base method.
-func (m *MockClientInterface) WorkloadOptimizationAPIUpdateWorkloadWithBody(ctx context.Context, clusterId, workloadId, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
-	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, clusterId, workloadId, contentType, body}
-	for _, a := range reqEditors {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "WorkloadOptimizationAPIUpdateWorkloadWithBody", varargs...)
-	ret0, _ := ret[0].(*http.Response)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// WorkloadOptimizationAPIUpdateWorkloadWithBody indicates an expected call of WorkloadOptimizationAPIUpdateWorkloadWithBody.
-func (mr *MockClientInterfaceMockRecorder) WorkloadOptimizationAPIUpdateWorkloadWithBody(ctx, clusterId, workloadId, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, clusterId, workloadId, contentType, body}, reqEditors...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIUpdateWorkloadWithBody", reflect.TypeOf((*MockClientInterface)(nil).WorkloadOptimizationAPIUpdateWorkloadWithBody), varargs...)
 }
 
 // MockClientWithResponsesInterface is a mock of ClientWithResponsesInterface interface.
@@ -5168,6 +5368,186 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) PoliciesAPIUpsertCluster
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PoliciesAPIUpsertClusterPoliciesWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).PoliciesAPIUpsertClusterPoliciesWithResponse), ctx, clusterId, body)
 }
 
+// RbacServiceAPICreateGroupWithBodyWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) RbacServiceAPICreateGroupWithBodyWithResponse(ctx context.Context, organizationId, contentType string, body io.Reader) (*sdk.RbacServiceAPICreateGroupResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RbacServiceAPICreateGroupWithBodyWithResponse", ctx, organizationId, contentType, body)
+	ret0, _ := ret[0].(*sdk.RbacServiceAPICreateGroupResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RbacServiceAPICreateGroupWithBodyWithResponse indicates an expected call of RbacServiceAPICreateGroupWithBodyWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RbacServiceAPICreateGroupWithBodyWithResponse(ctx, organizationId, contentType, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RbacServiceAPICreateGroupWithBodyWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RbacServiceAPICreateGroupWithBodyWithResponse), ctx, organizationId, contentType, body)
+}
+
+// RbacServiceAPICreateGroupWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) RbacServiceAPICreateGroupWithResponse(ctx context.Context, organizationId string, body sdk.RbacServiceAPICreateGroupJSONRequestBody) (*sdk.RbacServiceAPICreateGroupResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RbacServiceAPICreateGroupWithResponse", ctx, organizationId, body)
+	ret0, _ := ret[0].(*sdk.RbacServiceAPICreateGroupResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RbacServiceAPICreateGroupWithResponse indicates an expected call of RbacServiceAPICreateGroupWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RbacServiceAPICreateGroupWithResponse(ctx, organizationId, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RbacServiceAPICreateGroupWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RbacServiceAPICreateGroupWithResponse), ctx, organizationId, body)
+}
+
+// RbacServiceAPICreateRoleBindingsWithBodyWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) RbacServiceAPICreateRoleBindingsWithBodyWithResponse(ctx context.Context, organizationId, contentType string, body io.Reader) (*sdk.RbacServiceAPICreateRoleBindingsResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RbacServiceAPICreateRoleBindingsWithBodyWithResponse", ctx, organizationId, contentType, body)
+	ret0, _ := ret[0].(*sdk.RbacServiceAPICreateRoleBindingsResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RbacServiceAPICreateRoleBindingsWithBodyWithResponse indicates an expected call of RbacServiceAPICreateRoleBindingsWithBodyWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RbacServiceAPICreateRoleBindingsWithBodyWithResponse(ctx, organizationId, contentType, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RbacServiceAPICreateRoleBindingsWithBodyWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RbacServiceAPICreateRoleBindingsWithBodyWithResponse), ctx, organizationId, contentType, body)
+}
+
+// RbacServiceAPICreateRoleBindingsWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) RbacServiceAPICreateRoleBindingsWithResponse(ctx context.Context, organizationId string, body sdk.RbacServiceAPICreateRoleBindingsJSONRequestBody) (*sdk.RbacServiceAPICreateRoleBindingsResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RbacServiceAPICreateRoleBindingsWithResponse", ctx, organizationId, body)
+	ret0, _ := ret[0].(*sdk.RbacServiceAPICreateRoleBindingsResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RbacServiceAPICreateRoleBindingsWithResponse indicates an expected call of RbacServiceAPICreateRoleBindingsWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RbacServiceAPICreateRoleBindingsWithResponse(ctx, organizationId, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RbacServiceAPICreateRoleBindingsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RbacServiceAPICreateRoleBindingsWithResponse), ctx, organizationId, body)
+}
+
+// RbacServiceAPIDeleteGroupWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) RbacServiceAPIDeleteGroupWithResponse(ctx context.Context, organizationId, id string) (*sdk.RbacServiceAPIDeleteGroupResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RbacServiceAPIDeleteGroupWithResponse", ctx, organizationId, id)
+	ret0, _ := ret[0].(*sdk.RbacServiceAPIDeleteGroupResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RbacServiceAPIDeleteGroupWithResponse indicates an expected call of RbacServiceAPIDeleteGroupWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RbacServiceAPIDeleteGroupWithResponse(ctx, organizationId, id interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RbacServiceAPIDeleteGroupWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RbacServiceAPIDeleteGroupWithResponse), ctx, organizationId, id)
+}
+
+// RbacServiceAPIDeleteRoleBindingWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) RbacServiceAPIDeleteRoleBindingWithResponse(ctx context.Context, organizationId, id string) (*sdk.RbacServiceAPIDeleteRoleBindingResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RbacServiceAPIDeleteRoleBindingWithResponse", ctx, organizationId, id)
+	ret0, _ := ret[0].(*sdk.RbacServiceAPIDeleteRoleBindingResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RbacServiceAPIDeleteRoleBindingWithResponse indicates an expected call of RbacServiceAPIDeleteRoleBindingWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RbacServiceAPIDeleteRoleBindingWithResponse(ctx, organizationId, id interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RbacServiceAPIDeleteRoleBindingWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RbacServiceAPIDeleteRoleBindingWithResponse), ctx, organizationId, id)
+}
+
+// RbacServiceAPIGetGroupWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) RbacServiceAPIGetGroupWithResponse(ctx context.Context, organizationId, id string) (*sdk.RbacServiceAPIGetGroupResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RbacServiceAPIGetGroupWithResponse", ctx, organizationId, id)
+	ret0, _ := ret[0].(*sdk.RbacServiceAPIGetGroupResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RbacServiceAPIGetGroupWithResponse indicates an expected call of RbacServiceAPIGetGroupWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RbacServiceAPIGetGroupWithResponse(ctx, organizationId, id interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RbacServiceAPIGetGroupWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RbacServiceAPIGetGroupWithResponse), ctx, organizationId, id)
+}
+
+// RbacServiceAPIGetRoleBindingWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) RbacServiceAPIGetRoleBindingWithResponse(ctx context.Context, organizationId, id string) (*sdk.RbacServiceAPIGetRoleBindingResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RbacServiceAPIGetRoleBindingWithResponse", ctx, organizationId, id)
+	ret0, _ := ret[0].(*sdk.RbacServiceAPIGetRoleBindingResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RbacServiceAPIGetRoleBindingWithResponse indicates an expected call of RbacServiceAPIGetRoleBindingWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RbacServiceAPIGetRoleBindingWithResponse(ctx, organizationId, id interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RbacServiceAPIGetRoleBindingWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RbacServiceAPIGetRoleBindingWithResponse), ctx, organizationId, id)
+}
+
+// RbacServiceAPIUpdateGroupWithBodyWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) RbacServiceAPIUpdateGroupWithBodyWithResponse(ctx context.Context, organizationId, groupId, contentType string, body io.Reader) (*sdk.RbacServiceAPIUpdateGroupResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RbacServiceAPIUpdateGroupWithBodyWithResponse", ctx, organizationId, groupId, contentType, body)
+	ret0, _ := ret[0].(*sdk.RbacServiceAPIUpdateGroupResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RbacServiceAPIUpdateGroupWithBodyWithResponse indicates an expected call of RbacServiceAPIUpdateGroupWithBodyWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RbacServiceAPIUpdateGroupWithBodyWithResponse(ctx, organizationId, groupId, contentType, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RbacServiceAPIUpdateGroupWithBodyWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RbacServiceAPIUpdateGroupWithBodyWithResponse), ctx, organizationId, groupId, contentType, body)
+}
+
+// RbacServiceAPIUpdateGroupWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) RbacServiceAPIUpdateGroupWithResponse(ctx context.Context, organizationId, groupId string, body sdk.RbacServiceAPIUpdateGroupJSONRequestBody) (*sdk.RbacServiceAPIUpdateGroupResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RbacServiceAPIUpdateGroupWithResponse", ctx, organizationId, groupId, body)
+	ret0, _ := ret[0].(*sdk.RbacServiceAPIUpdateGroupResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RbacServiceAPIUpdateGroupWithResponse indicates an expected call of RbacServiceAPIUpdateGroupWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RbacServiceAPIUpdateGroupWithResponse(ctx, organizationId, groupId, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RbacServiceAPIUpdateGroupWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RbacServiceAPIUpdateGroupWithResponse), ctx, organizationId, groupId, body)
+}
+
+// RbacServiceAPIUpdateRoleBindingWithBodyWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) RbacServiceAPIUpdateRoleBindingWithBodyWithResponse(ctx context.Context, organizationId, roleBindingId, contentType string, body io.Reader) (*sdk.RbacServiceAPIUpdateRoleBindingResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RbacServiceAPIUpdateRoleBindingWithBodyWithResponse", ctx, organizationId, roleBindingId, contentType, body)
+	ret0, _ := ret[0].(*sdk.RbacServiceAPIUpdateRoleBindingResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RbacServiceAPIUpdateRoleBindingWithBodyWithResponse indicates an expected call of RbacServiceAPIUpdateRoleBindingWithBodyWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RbacServiceAPIUpdateRoleBindingWithBodyWithResponse(ctx, organizationId, roleBindingId, contentType, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RbacServiceAPIUpdateRoleBindingWithBodyWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RbacServiceAPIUpdateRoleBindingWithBodyWithResponse), ctx, organizationId, roleBindingId, contentType, body)
+}
+
+// RbacServiceAPIUpdateRoleBindingWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) RbacServiceAPIUpdateRoleBindingWithResponse(ctx context.Context, organizationId, roleBindingId string, body sdk.RbacServiceAPIUpdateRoleBindingJSONRequestBody) (*sdk.RbacServiceAPIUpdateRoleBindingResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RbacServiceAPIUpdateRoleBindingWithResponse", ctx, organizationId, roleBindingId, body)
+	ret0, _ := ret[0].(*sdk.RbacServiceAPIUpdateRoleBindingResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RbacServiceAPIUpdateRoleBindingWithResponse indicates an expected call of RbacServiceAPIUpdateRoleBindingWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RbacServiceAPIUpdateRoleBindingWithResponse(ctx, organizationId, roleBindingId, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RbacServiceAPIUpdateRoleBindingWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RbacServiceAPIUpdateRoleBindingWithResponse), ctx, organizationId, roleBindingId, body)
+}
+
 // SSOAPICreateSSOConnectionWithBodyWithResponse mocks base method.
 func (m *MockClientWithResponsesInterface) SSOAPICreateSSOConnectionWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*sdk.SSOAPICreateSSOConnectionResponse, error) {
 	m.ctrl.T.Helper()
@@ -6156,36 +6536,6 @@ func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPIUpdateWorkload
 func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPIUpdateWorkloadV2WithResponse(ctx, clusterId, workloadId, body interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIUpdateWorkloadV2WithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPIUpdateWorkloadV2WithResponse), ctx, clusterId, workloadId, body)
-}
-
-// WorkloadOptimizationAPIUpdateWorkloadWithBodyWithResponse mocks base method.
-func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPIUpdateWorkloadWithBodyWithResponse(ctx context.Context, clusterId, workloadId, contentType string, body io.Reader) (*sdk.WorkloadOptimizationAPIUpdateWorkloadResponse, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "WorkloadOptimizationAPIUpdateWorkloadWithBodyWithResponse", ctx, clusterId, workloadId, contentType, body)
-	ret0, _ := ret[0].(*sdk.WorkloadOptimizationAPIUpdateWorkloadResponse)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// WorkloadOptimizationAPIUpdateWorkloadWithBodyWithResponse indicates an expected call of WorkloadOptimizationAPIUpdateWorkloadWithBodyWithResponse.
-func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPIUpdateWorkloadWithBodyWithResponse(ctx, clusterId, workloadId, contentType, body interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIUpdateWorkloadWithBodyWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPIUpdateWorkloadWithBodyWithResponse), ctx, clusterId, workloadId, contentType, body)
-}
-
-// WorkloadOptimizationAPIUpdateWorkloadWithResponse mocks base method.
-func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPIUpdateWorkloadWithResponse(ctx context.Context, clusterId, workloadId string, body sdk.WorkloadOptimizationAPIUpdateWorkloadJSONRequestBody) (*sdk.WorkloadOptimizationAPIUpdateWorkloadResponse, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "WorkloadOptimizationAPIUpdateWorkloadWithResponse", ctx, clusterId, workloadId, body)
-	ret0, _ := ret[0].(*sdk.WorkloadOptimizationAPIUpdateWorkloadResponse)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// WorkloadOptimizationAPIUpdateWorkloadWithResponse indicates an expected call of WorkloadOptimizationAPIUpdateWorkloadWithResponse.
-func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPIUpdateWorkloadWithResponse(ctx, clusterId, workloadId, body interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIUpdateWorkloadWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPIUpdateWorkloadWithResponse), ctx, clusterId, workloadId, body)
 }
 
 // MockResponse is a mock of Response interface.
