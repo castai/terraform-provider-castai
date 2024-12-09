@@ -18,6 +18,10 @@ func CheckResponseNoContent(response Response, err error) error {
 	return checkResponse(response, err, http.StatusNoContent)
 }
 
+func CheckResponseCreated(response Response, err error) error {
+  return checkResponse(response, err, http.StatusCreated)
+}
+
 func StatusOk(resp Response) error {
 	return checkResponse(resp, nil, http.StatusOK)
 }
