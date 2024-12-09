@@ -2,6 +2,7 @@ package castai
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -84,7 +85,10 @@ func resourceServiceAccountRead(ctx context.Context, data *schema.ResourceData, 
 		return diag.Errorf("service account ID is not set")
 	}
 
-	organizationID := data.Get(FieldServiceAccountOrganizationID).(string)
+	organizationID, err := getOrganizationID(ctx, data, meta)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 
 	tflog.Info(ctx, "reading service account", map[string]interface{}{
 		"resource_id":     data.Id(),
@@ -132,7 +136,11 @@ func resourceServiceAccountRead(ctx context.Context, data *schema.ResourceData, 
 func resourceServiceAccountCreate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*ProviderConfig).api
 
-	organizationID := data.Get(FieldServiceAccountOrganizationID).(string)
+	organizationID, err := getOrganizationID(ctx, data, meta)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
 	name := data.Get(FieldServiceAccountName).(string)
 	description := data.Get(FieldServiceAccountDescription).(string)
 
@@ -164,8 +172,12 @@ func resourceServiceAccountCreate(ctx context.Context, data *schema.ResourceData
 func resourceServiceAccountUpdate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*ProviderConfig).api
 
+	organizationID, err := getOrganizationID(ctx, data, meta)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
 	serviceAccountID := data.Id()
-	organizationID := data.Get(FieldServiceAccountOrganizationID).(string)
 	name := data.Get(FieldServiceAccountName).(string)
 	description := data.Get(FieldServiceAccountDescription).(string)
 
@@ -204,7 +216,10 @@ func resourceServiceAccountUpdate(ctx context.Context, data *schema.ResourceData
 
 func resourceServiceAccountDelete(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*ProviderConfig).api
-	organizationID := data.Get(FieldServiceAccountOrganizationID).(string)
+	organizationID, err := getOrganizationID(ctx, data, meta)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 	serviceAccountID := data.Id()
 
 	tflog.Info(ctx, "deleting service account", map[string]interface{}{
@@ -247,4 +262,19 @@ func stringValue(value *string) string {
 		return ""
 	}
 	return *value
+}
+
+func getOrganizationID(ctx context.Context, data *schema.ResourceData, meta interface{}) (string, error) {
+	var organizationID string
+	var err error
+
+	organizationID = data.Get(FieldServiceAccountOrganizationID).(string)
+	if organizationID == "" {
+		organizationID, err = getDefaultOrganizationId(ctx, meta)
+		if err != nil {
+			return "", fmt.Errorf("getting organization ID: %w", err)
+		}
+	}
+
+	return organizationID, nil
 }
