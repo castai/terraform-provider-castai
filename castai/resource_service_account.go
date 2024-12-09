@@ -29,6 +29,7 @@ func resourceServiceAccount() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceServiceAccountCreate,
 		ReadContext:   resourceServiceAccountRead,
+		UpdateContext: resourceServiceAccountUpdate,
 		DeleteContext: resourceServiceAccountDelete,
 
 		Description: "Service Account resource allows managing CAST AI service accounts.",
@@ -48,13 +49,11 @@ func resourceServiceAccount() *schema.Resource {
 			FieldServiceAccountName: {
 				Type:        schema.TypeString,
 				Required:    true,
-				ForceNew:    true,
 				Description: "Name of the service account.",
 			},
 			FieldServiceAccountDescription: {
 				Type:        schema.TypeString,
 				Optional:    true,
-				ForceNew:    true,
 				Description: "Description of the service account.",
 			},
 			FieldServiceAccountEmail: {
@@ -158,6 +157,47 @@ func resourceServiceAccountCreate(ctx context.Context, data *schema.ResourceData
 		"organization_id": organizationID,
 	})
 	data.SetId(*resp.JSON201.Id)
+
+	return resourceServiceAccountRead(ctx, data, meta)
+}
+
+func resourceServiceAccountUpdate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client := meta.(*ProviderConfig).api
+
+	serviceAccountID := data.Id()
+	organizationID := data.Get(FieldServiceAccountOrganizationID).(string)
+	name := data.Get(FieldServiceAccountName).(string)
+	description := data.Get(FieldServiceAccountDescription).(string)
+
+	tflog.Info(ctx, "updating service account", map[string]interface{}{
+		"resource_id":     serviceAccountID,
+		"name":            name,
+		"description":     description,
+		"organization_id": organizationID,
+	})
+
+	resp, err := client.ServiceAccountsAPIUpdateServiceAccountWithResponse(
+		ctx,
+		organizationID,
+		serviceAccountID,
+		sdk.ServiceAccountsAPIUpdateServiceAccountRequest{
+			ServiceAccount: sdk.CastaiServiceaccountsV1beta1UpdateServiceAccountRequestServiceAccount{
+				Name:        name,
+				Description: &description,
+			},
+		},
+	)
+
+	if err := sdk.CheckOKResponse(resp, err); err != nil {
+		return diag.Errorf("updating service account: %v", err)
+	}
+
+	tflog.Info(ctx, "created service account", map[string]interface{}{
+		"resource_id":     serviceAccountID,
+		"organization_id": organizationID,
+		"name":            name,
+		"description":     description,
+	})
 
 	return resourceServiceAccountRead(ctx, data, meta)
 }

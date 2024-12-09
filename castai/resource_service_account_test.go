@@ -42,7 +42,7 @@ func TestServiceAccountReadContext(t *testing.T) {
 		r.Equal("service account ID is not set", result[0].Summary)
 	})
 
-	t.Run("when ServiceAccountAPI respond with 404 then return error", func(t *testing.T) {
+	t.Run("when ServiceAccountAPI respond with 404 then remove form the state gracefully", func(t *testing.T) {
 		r := require.New(t)
 		mockClient := mock_sdk.NewMockClientInterface(gomock.NewController(t))
 
@@ -72,10 +72,9 @@ func TestServiceAccountReadContext(t *testing.T) {
 
 		result := resource.ReadContext(ctx, data, provider)
 
-		r.NotNil(result)
-		r.True(result.HasError())
-		r.Len(result, 1)
-		r.Equal("getting service account: service account [b11f5945-22ca-4101-a86e-d6e37f44a415] not found", result[0].Summary)
+		r.Nil(result)
+		r.False(result.HasError())
+		r.Empty(data.Id())
 	})
 
 	t.Run("when ServiceAccountAPI respond with 500 then return error", func(t *testing.T) {
@@ -212,8 +211,8 @@ func TestServiceAccountCreateContext(t *testing.T) {
 			ServiceAccountsAPICreateServiceAccount(gomock.Any(), organizationID, gomock.Any()).
 			DoAndReturn(func(_ context.Context, orgID string, req sdk.ServiceAccountsAPICreateServiceAccountJSONRequestBody) (*http.Response, error) {
 				r.Equal(organizationID, orgID)
-				r.Equal(name, req.ServiceAccount.Name)
-				r.Equal(description, *req.ServiceAccount.Description)
+				r.Equal(name, req.Name)
+				r.Equal(description, *req.Description)
 
 				resp := &sdk.CastaiServiceaccountsV1beta1CreateServiceAccountResponse{
 					Id:          &serviceAccountID,
