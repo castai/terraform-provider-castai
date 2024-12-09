@@ -110,7 +110,7 @@ func resourceOrganizationGroupCreate(ctx context.Context, data *schema.ResourceD
 		var err error
 		organizationID, err = getDefaultOrganizationId(ctx, meta)
 		if err != nil {
-			return diag.Errorf("getting default organization: %w", err)
+			return diag.Errorf("getting default organization: %v", err)
 		}
 	}
 
