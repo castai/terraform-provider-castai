@@ -438,13 +438,10 @@ func TestServiceAccountDeleteContext(t *testing.T) {
 		organizationID := "4e4cd9eb-82eb-407e-a926-e5fef81cab50"
 		serviceAccountID := "4e4cd9eb-82eb-407e-a926-e5fef81cab51"
 
-		body := io.NopCloser(bytes.NewReader([]byte("mock error response")))
-
 		mockClient.EXPECT().
 			ServiceAccountsAPIDeleteServiceAccount(gomock.Any(), organizationID, gomock.Any()).
 			Return(&http.Response{
 				StatusCode: http.StatusNoContent,
-				Body:       body,
 			}, nil)
 
 		resource := resourceServiceAccount()
@@ -465,5 +462,88 @@ func TestServiceAccountDeleteContext(t *testing.T) {
 		r.Empty(data.Get(FieldServiceAccountName))
 		r.Empty(data.Get(FieldServiceAccountDescription))
 		r.Empty(data.Get(FieldServiceAccountAuthor))
+	})
+}
+
+func TestServiceAccountUpdateContext(t *testing.T) {
+	t.Run("when ServiceAccountsAPI responds with an error then return error", func(t *testing.T) {
+		r := require.New(t)
+		mockClient := mock_sdk.NewMockClientInterface(gomock.NewController(t))
+		ctx := context.Background()
+		provider := &ProviderConfig{
+			api: &sdk.ClientWithResponses{
+				ClientInterface: mockClient,
+			},
+		}
+
+		organizationID := "4e4cd9eb-82eb-407e-a926-e5fef81cab50"
+		serviceAccountID := "4e4cd9eb-82eb-407e-a926-e5fef81cab51"
+
+
+		mockClient.EXPECT().
+			ServiceAccountsAPIUpdateServiceAccount(gomock.Any(), organizationID, serviceAccountID, gomock.Any()).
+			Return(nil, fmt.Errorf("mock network error"))
+
+		resource := resourceServiceAccount()
+		stateValue := cty.ObjectVal(map[string]cty.Value{
+			"organization_id": cty.StringVal(organizationID),
+			"name":            cty.StringVal("new name"),
+			"description":     cty.StringVal("new description"),
+		})
+		state := terraform.NewInstanceStateShimmedFromValue(stateValue, 0)
+		state.ID = serviceAccountID
+		data := resource.Data(state)
+
+		result := resource.UpdateContext(ctx, data, provider)
+
+		r.NotNil(result)
+		r.True(result.HasError())
+		r.Len(result, 1)
+		r.Equal("updating service account: mock network error", result[0].Summary)
+	})
+
+	t.Run("when ServiceAccountsAPI responds with non-200 status then return error", func(t *testing.T) {
+		r := require.New(t)
+		mockClient := mock_sdk.NewMockClientInterface(gomock.NewController(t))
+		ctx := context.Background()
+		provider := &ProviderConfig{
+			api: &sdk.ClientWithResponses{
+				ClientInterface: mockClient,
+			},
+		}
+
+		organizationID := "4e4cd9eb-82eb-407e-a926-e5fef81cab50"
+		serviceAccountID := "4e4cd9eb-82eb-407e-a926-e5fef81cab51"
+
+		body := io.NopCloser(bytes.NewReader([]byte("mock error response")))
+
+		mockClient.EXPECT().
+			ServiceAccountsAPIUpdateServiceAccount(gomock.Any(), organizationID, serviceAccountID, gomock.Any()).
+			Return(&http.Response{
+				StatusCode: http.StatusInternalServerError,
+				Body:       body,
+			}, nil)
+
+		resource := resourceServiceAccount()
+		stateValue := cty.ObjectVal(map[string]cty.Value{
+			"organization_id": cty.StringVal(organizationID),
+			"name":            cty.StringVal("new name"),
+			"description":     cty.StringVal("new description"),
+		})
+		state := terraform.NewInstanceStateShimmedFromValue(stateValue, 0)
+		state.ID = serviceAccountID
+		data := resource.Data(state)
+
+		result := resource.UpdateContext(ctx, data, provider)
+
+		r.NotNil(result)
+		r.True(result.HasError())
+		r.Len(result, 1)
+		r.Equal("updating service account: expected status code 200, received: status=500 body=mock error response", result[0].Summary)
+	})
+
+	t.Run("when ServiceAccountsAPI responds with 200 then return nil", func(t *testing.T) {
+		// r := require.New(t)
+		// mockClient := mock_sdk.NewMockClientInterface(gomock.NewController(t))
 	})
 }
