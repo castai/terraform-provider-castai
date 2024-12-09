@@ -379,10 +379,9 @@ type ServiceAccountsAPICreateServiceAccountKeyRequest struct {
 	Key CastaiServiceaccountsV1beta1CreateServiceAccountKeyRequestKey `json:"key"`
 }
 
-// CreateServiceAccountRequest is the request for creating a service account.
-type ServiceAccountsAPICreateServiceAccountRequest struct {
-	// ServiceAccounts is the readable version of the service accounts.
-	ServiceAccount CastaiServiceaccountsV1beta1CreateServiceAccountRequestServiceAccount `json:"serviceAccount"`
+// UpdateServiceAccountRequest is the request for updating a service account.
+type ServiceAccountsAPIUpdateServiceAccountRequest struct {
+	ServiceAccount CastaiServiceaccountsV1beta1UpdateServiceAccountRequestServiceAccount `json:"serviceAccount"`
 }
 
 // UsersAPIUpdateOrganizationUserRequest defines model for UsersAPI_UpdateOrganizationUser_request.
@@ -1481,6 +1480,18 @@ type CastaiServiceaccountsV1beta1UpdateServiceAccountKeyResponse struct {
 
 	// Prefix is the prefix of the key.
 	Prefix *string `json:"prefix,omitempty"`
+}
+
+// CastaiServiceaccountsV1beta1UpdateServiceAccountRequestServiceAccount defines model for castai.serviceaccounts.v1beta1.UpdateServiceAccountRequest.ServiceAccount.
+type CastaiServiceaccountsV1beta1UpdateServiceAccountRequestServiceAccount struct {
+	Description *string `json:"description,omitempty"`
+	Name        string  `json:"name"`
+}
+
+// UpdateServiceAccountResponse is the response for updating a service account.
+type CastaiServiceaccountsV1beta1UpdateServiceAccountResponse struct {
+	// ServiceAccounts is the readable version of the service accounts.
+	ServiceAccount CastaiServiceaccountsV1beta1ServiceAccount `json:"serviceAccount"`
 }
 
 // AzureAAD represents a Azure AAD connector.
@@ -4146,18 +4157,6 @@ type WorkloadoptimizationV1TimeSeriesMetric struct {
 	Value     float64   `json:"value"`
 }
 
-// WorkloadoptimizationV1UpdateWorkload defines model for workloadoptimization.v1.UpdateWorkload.
-type WorkloadoptimizationV1UpdateWorkload struct {
-	// Defines the scaling policy ID assigned to the workload.
-	ScalingPolicyId string                                      `json:"scalingPolicyId"`
-	WorkloadConfig  *WorkloadoptimizationV1WorkloadConfigUpdate `json:"workloadConfig,omitempty"`
-}
-
-// WorkloadoptimizationV1UpdateWorkloadResponse defines model for workloadoptimization.v1.UpdateWorkloadResponse.
-type WorkloadoptimizationV1UpdateWorkloadResponse struct {
-	Workload *WorkloadoptimizationV1Workload `json:"workload,omitempty"`
-}
-
 // WorkloadoptimizationV1UpdateWorkloadResponseV2 defines model for workloadoptimization.v1.UpdateWorkloadResponseV2.
 type WorkloadoptimizationV1UpdateWorkloadResponseV2 struct {
 	Workload *WorkloadoptimizationV1Workload `json:"workload,omitempty"`
@@ -4252,36 +4251,7 @@ type WorkloadoptimizationV1Workload struct {
 	ScalingPolicyId  string                                 `json:"scalingPolicyId"`
 	UpdatedAt        time.Time                              `json:"updatedAt"`
 	Version          string                                 `json:"version"`
-	WorkloadConfig   WorkloadoptimizationV1WorkloadConfig   `json:"workloadConfig"`
 	WorkloadConfigV2 WorkloadoptimizationV1WorkloadConfigV2 `json:"workloadConfigV2"`
-}
-
-// WorkloadoptimizationV1WorkloadConfig defines model for workloadoptimization.v1.WorkloadConfig.
-type WorkloadoptimizationV1WorkloadConfig struct {
-	AntiAffinity         WorkloadoptimizationV1AntiAffinitySettings   `json:"antiAffinity"`
-	ContainerConstraints []WorkloadoptimizationV1ContainerConstraints `json:"containerConstraints"`
-	Cpu                  WorkloadoptimizationV1ResourceConfig         `json:"cpu"`
-
-	// Defines possible options for workload management.
-	// READ_ONLY - workload watched (metrics collected), but no actions may be performed by CAST AI.
-	// MANAGED - workload watched (metrics collected), CAST AI may perform actions on the workload.
-	ManagementOption WorkloadoptimizationV1ManagementOption     `json:"managementOption"`
-	Memory           WorkloadoptimizationV1ResourceConfig       `json:"memory"`
-	MemoryEvent      *WorkloadoptimizationV1MemoryEventSettings `json:"memoryEvent,omitempty"`
-}
-
-// WorkloadoptimizationV1WorkloadConfigUpdate defines model for workloadoptimization.v1.WorkloadConfigUpdate.
-type WorkloadoptimizationV1WorkloadConfigUpdate struct {
-	AntiAffinity    *WorkloadoptimizationV1AntiAffinitySettings         `json:"antiAffinity,omitempty"`
-	ContainerConfig *[]WorkloadoptimizationV1ContainerConfigUpdate      `json:"containerConfig,omitempty"`
-	Cpu             *WorkloadoptimizationV1WorkloadResourceConfigUpdate `json:"cpu,omitempty"`
-
-	// Defines possible options for workload management.
-	// READ_ONLY - workload watched (metrics collected), but no actions may be performed by CAST AI.
-	// MANAGED - workload watched (metrics collected), CAST AI may perform actions on the workload.
-	ManagementOption *WorkloadoptimizationV1ManagementOption             `json:"managementOption,omitempty"`
-	Memory           *WorkloadoptimizationV1WorkloadResourceConfigUpdate `json:"memory,omitempty"`
-	MemoryEvent      *WorkloadoptimizationV1MemoryEventSettings          `json:"memoryEvent,omitempty"`
 }
 
 // WorkloadoptimizationV1WorkloadConfigUpdateV2 defines model for workloadoptimization.v1.WorkloadConfigUpdateV2.
@@ -4597,7 +4567,10 @@ type ServiceAccountsAPIListServiceAccountsParams struct {
 }
 
 // ServiceAccountsAPICreateServiceAccountJSONBody defines parameters for ServiceAccountsAPICreateServiceAccount.
-type ServiceAccountsAPICreateServiceAccountJSONBody = ServiceAccountsAPICreateServiceAccountRequest
+type ServiceAccountsAPICreateServiceAccountJSONBody = CastaiServiceaccountsV1beta1CreateServiceAccountRequestServiceAccount
+
+// ServiceAccountsAPIUpdateServiceAccountJSONBody defines parameters for ServiceAccountsAPIUpdateServiceAccount.
+type ServiceAccountsAPIUpdateServiceAccountJSONBody = ServiceAccountsAPIUpdateServiceAccountRequest
 
 // ServiceAccountsAPICreateServiceAccountKeyJSONBody defines parameters for ServiceAccountsAPICreateServiceAccountKey.
 type ServiceAccountsAPICreateServiceAccountKeyJSONBody = ServiceAccountsAPICreateServiceAccountKeyRequest
@@ -4753,9 +4726,6 @@ type WorkloadOptimizationAPIGetWorkloadParams struct {
 	ToTime         *time.Time `form:"toTime,omitempty" json:"toTime,omitempty"`
 }
 
-// WorkloadOptimizationAPIUpdateWorkloadJSONBody defines parameters for WorkloadOptimizationAPIUpdateWorkload.
-type WorkloadOptimizationAPIUpdateWorkloadJSONBody = WorkloadoptimizationV1UpdateWorkload
-
 // WorkloadOptimizationAPIGetInstallCmdParams defines parameters for WorkloadOptimizationAPIGetInstallCmd.
 type WorkloadOptimizationAPIGetInstallCmdParams struct {
 	ClusterId string `form:"clusterId" json:"clusterId"`
@@ -4863,6 +4833,9 @@ type InventoryAPIOverwriteReservationsJSONRequestBody = InventoryAPIOverwriteRes
 // ServiceAccountsAPICreateServiceAccountJSONRequestBody defines body for ServiceAccountsAPICreateServiceAccount for application/json ContentType.
 type ServiceAccountsAPICreateServiceAccountJSONRequestBody = ServiceAccountsAPICreateServiceAccountJSONBody
 
+// ServiceAccountsAPIUpdateServiceAccountJSONRequestBody defines body for ServiceAccountsAPIUpdateServiceAccount for application/json ContentType.
+type ServiceAccountsAPIUpdateServiceAccountJSONRequestBody = ServiceAccountsAPIUpdateServiceAccountJSONBody
+
 // ServiceAccountsAPICreateServiceAccountKeyJSONRequestBody defines body for ServiceAccountsAPICreateServiceAccountKey for application/json ContentType.
 type ServiceAccountsAPICreateServiceAccountKeyJSONRequestBody = ServiceAccountsAPICreateServiceAccountKeyJSONBody
 
@@ -4904,9 +4877,6 @@ type WorkloadOptimizationAPIUpdateWorkloadScalingPolicyJSONRequestBody = Workloa
 
 // WorkloadOptimizationAPIAssignScalingPolicyWorkloadsJSONRequestBody defines body for WorkloadOptimizationAPIAssignScalingPolicyWorkloads for application/json ContentType.
 type WorkloadOptimizationAPIAssignScalingPolicyWorkloadsJSONRequestBody = WorkloadOptimizationAPIAssignScalingPolicyWorkloadsJSONBody
-
-// WorkloadOptimizationAPIUpdateWorkloadJSONRequestBody defines body for WorkloadOptimizationAPIUpdateWorkload for application/json ContentType.
-type WorkloadOptimizationAPIUpdateWorkloadJSONRequestBody = WorkloadOptimizationAPIUpdateWorkloadJSONBody
 
 // WorkloadOptimizationAPIUpdateWorkloadV2JSONRequestBody defines body for WorkloadOptimizationAPIUpdateWorkloadV2 for application/json ContentType.
 type WorkloadOptimizationAPIUpdateWorkloadV2JSONRequestBody = WorkloadOptimizationAPIUpdateWorkloadV2JSONBody

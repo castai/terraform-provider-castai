@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
@@ -86,14 +87,28 @@ func resourceServiceAccountRead(ctx context.Context, data *schema.ResourceData, 
 
 	organizationID := data.Get(FieldServiceAccountOrganizationID).(string)
 
+	tflog.Info(ctx, "reading service account", map[string]interface{}{
+		"resource_id":     data.Id(),
+		"organization_id": organizationID,
+	})
+
 	resp, err := client.ServiceAccountsAPIGetServiceAccountWithResponse(ctx, organizationID, data.Id())
 	if resp.StatusCode() == http.StatusNotFound {
-		return diag.Errorf("getting service account: service account [%s] not found", data.Id())
+		tflog.Warn(ctx, "resource is not found, removing from state", map[string]interface{}{
+			"resource_id":     data.Id(),
+			"organization_id": organizationID,
+		})
+		data.SetId("") // Mark resource as deleted
+		return nil
 	}
 	if err := sdk.CheckOKResponse(resp, err); err != nil {
 		return diag.Errorf("getting service account: %v", err)
 	}
 
+	tflog.Info(ctx, "found service account", map[string]interface{}{
+		"resource_id":     data.Id(),
+		"organization_id": organizationID,
+	})
 	serviceAccount := resp.JSON200
 
 	if err := data.Set(FieldServiceAccountName, serviceAccount.ServiceAccount.Name); err != nil {
@@ -122,17 +137,26 @@ func resourceServiceAccountCreate(ctx context.Context, data *schema.ResourceData
 	name := data.Get(FieldServiceAccountName).(string)
 	description := data.Get(FieldServiceAccountDescription).(string)
 
-	resp, err := client.ServiceAccountsAPICreateServiceAccountWithResponse(ctx, organizationID, sdk.ServiceAccountsAPICreateServiceAccountRequest{
-		ServiceAccount: sdk.CastaiServiceaccountsV1beta1CreateServiceAccountRequestServiceAccount{
-			Name:        name,
-			Description: &description,
-		},
+	tflog.Info(ctx, "creating service account", map[string]interface{}{
+		"name":            name,
+		"description":     description,
+		"organization_id": organizationID,
 	})
+
+	resp, err := client.ServiceAccountsAPICreateServiceAccountWithResponse(ctx, organizationID, sdk.CastaiServiceaccountsV1beta1CreateServiceAccountRequestServiceAccount{
+		Name:        name,
+		Description: &description,
+	},
+	)
 
 	if err := sdk.CheckResponseCreated(resp, err); err != nil {
 		return diag.Errorf("creating service account: %v", err)
 	}
 
+	tflog.Info(ctx, "created service account", map[string]interface{}{
+		"resource_id":     *resp.JSON201.Id,
+		"organization_id": organizationID,
+	})
 	data.SetId(*resp.JSON201.Id)
 
 	return resourceServiceAccountRead(ctx, data, meta)
@@ -143,6 +167,11 @@ func resourceServiceAccountDelete(ctx context.Context, data *schema.ResourceData
 	organizationID := data.Get(FieldServiceAccountOrganizationID).(string)
 	serviceAccountID := data.Id()
 
+	tflog.Info(ctx, "deleting service account", map[string]interface{}{
+		"resource_id":     serviceAccountID,
+		"organization_id": organizationID,
+	})
+
 	resp, err := client.ServiceAccountsAPIDeleteServiceAccount(ctx, organizationID, serviceAccountID)
 	if err != nil {
 		return diag.Errorf("deleting service account: %v", err)
@@ -150,6 +179,12 @@ func resourceServiceAccountDelete(ctx context.Context, data *schema.ResourceData
 	if resp.StatusCode != http.StatusNoContent {
 		return diag.Errorf("deleteting service account: expected status: [204], received status: [%d]", resp.StatusCode)
 	}
+
+	tflog.Info(ctx, "deleted service account", map[string]interface{}{
+		"resource_id":     serviceAccountID,
+		"organization_id": organizationID,
+	})
+
 	return nil
 }
 
