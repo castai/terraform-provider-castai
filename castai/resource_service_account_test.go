@@ -479,7 +479,6 @@ func TestServiceAccountUpdateContext(t *testing.T) {
 		organizationID := "4e4cd9eb-82eb-407e-a926-e5fef81cab50"
 		serviceAccountID := "4e4cd9eb-82eb-407e-a926-e5fef81cab51"
 
-
 		mockClient.EXPECT().
 			ServiceAccountsAPIUpdateServiceAccount(gomock.Any(), organizationID, serviceAccountID, gomock.Any()).
 			Return(nil, fmt.Errorf("mock network error"))
@@ -543,7 +542,69 @@ func TestServiceAccountUpdateContext(t *testing.T) {
 	})
 
 	t.Run("when ServiceAccountsAPI responds with 200 then return nil", func(t *testing.T) {
-		// r := require.New(t)
-		// mockClient := mock_sdk.NewMockClientInterface(gomock.NewController(t))
+		r := require.New(t)
+		mockClient := mock_sdk.NewMockClientInterface(gomock.NewController(t))
+		ctx := context.Background()
+		provider := &ProviderConfig{
+			api: &sdk.ClientWithResponses{
+				ClientInterface: mockClient,
+			},
+		}
+
+		userID := "4e4cd9eb-82eb-407e-a926-e5fef81cab49"
+		organizationID := "4e4cd9eb-82eb-407e-a926-e5fef81cab50"
+		serviceAccountID := "4e4cd9eb-82eb-407e-a926-e5fef81cab51"
+		name := "name"
+		description := "description"
+
+		body := io.NopCloser(bytes.NewReader([]byte(`{
+  "serviceAccount": {
+    "name": "new",
+    "description": "new description"
+  }}`)))
+		readBody := io.NopCloser(bytes.NewReader([]byte(fmt.Sprintf(`{
+  "serviceAccount": {
+    "id": %q,
+    "name": "new",
+    "email": "service-account-email",
+    "description": "new description",
+    "createdAt": "2024-12-01T15:19:40.384Z",
+    "author": {
+      "id": %q,
+      "kind": "user",
+      "email": "user-email"
+    },
+    "keys": []
+  }}`, serviceAccountID,userID))))
+
+		mockClient.EXPECT().
+			ServiceAccountsAPIUpdateServiceAccount(gomock.Any(), organizationID, serviceAccountID, gomock.Any()).
+			Return(&http.Response{
+				StatusCode: http.StatusOK,
+				Body:       body,
+			}, nil)
+		mockClient.EXPECT().
+			ServiceAccountsAPIGetServiceAccount(gomock.Any(), organizationID, serviceAccountID).
+			Return(&http.Response{
+				StatusCode: http.StatusOK,
+				Body:       readBody,
+				Header: map[string][]string{"Content-Type": {"json"}},
+			}, nil)
+
+		resource := resourceServiceAccount()
+		stateValue := cty.ObjectVal(map[string]cty.Value{
+			"organization_id": cty.StringVal(organizationID),
+			"name":            cty.StringVal(name),
+			"description":     cty.StringVal(description),
+		})
+		state := terraform.NewInstanceStateShimmedFromValue(stateValue, 0)
+		state.ID = serviceAccountID
+		data := resource.Data(state)
+
+		result := resource.UpdateContext(ctx, data, provider)
+
+		r.Nil(result)
+		r.Equal("new", data.Get("name"))
+		r.Equal("new description", data.Get("description"))
 	})
 }
