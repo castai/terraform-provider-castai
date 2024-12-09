@@ -15,8 +15,8 @@ Service Account resource allows managing CAST AI service accounts.
 ```terraform
 resource "castai_service_account" "service_account" {
   organization_id = organization.id
-  name = "service-account-name"
-  description = "service account description"
+  name            = "service-account-name"
+  description     = "service account description"
 }
 ```
 
