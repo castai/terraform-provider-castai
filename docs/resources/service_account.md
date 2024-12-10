@@ -3,12 +3,12 @@
 page_title: "castai_service_account Resource - terraform-provider-castai"
 subcategory: ""
 description: |-
-  Service Account resource allows managing CAST AI service accounts.
+  Service account resource allows managing CAST AI service accounts.
 ---
 
 # castai_service_account (Resource)
 
-Service Account resource allows managing CAST AI service accounts.
+Service account resource allows managing CAST AI service accounts.
 
 ## Example Usage
 
@@ -46,6 +46,7 @@ Optional:
 
 - `create` (String)
 - `delete` (String)
+- `read` (String)
 - `update` (String)
 
 

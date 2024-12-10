@@ -4464,6 +4464,7 @@ type WorkloadoptimizationV1UpdateWorkloadV2 struct {
 // WorkloadoptimizationV1VPAConfig defines model for workloadoptimization.v1.VPAConfig.
 type WorkloadoptimizationV1VPAConfig struct {
 	AntiAffinity         WorkloadoptimizationV1AntiAffinitySettings   `json:"antiAffinity"`
+	ApplyType            WorkloadoptimizationV1ApplyType              `json:"applyType"`
 	ContainerConstraints []WorkloadoptimizationV1ContainerConstraints `json:"containerConstraints"`
 	Cpu                  WorkloadoptimizationV1ResourceConfig         `json:"cpu"`
 

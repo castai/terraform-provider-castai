@@ -24,6 +24,15 @@ const (
 	FieldServiceAccountAuthorID    = "id"
 	FieldServiceAccountAuthorEmail = "email"
 	FieldServiceAccountAuthorKind  = "kind"
+
+	FieldServiceAccountKeyID               = "id"
+	FieldServiceAccountKeyOrganizationID   = "organization_id"
+	FieldServiceAccountKeyServiceAccountID = "service_account_id"
+	FieldServiceAccountKeyName             = "name"
+	FieldServiceAccountKeyPrefix           = "prefix"
+	FieldServiceAccountKeyLastUsedAt       = "last_used_at"
+	FieldServiceAccountKeyExpiresAt        = "expires_at"
+	FieldServiceAccountKeyActive           = "active"
 )
 
 func resourceServiceAccount() *schema.Resource {
@@ -33,9 +42,10 @@ func resourceServiceAccount() *schema.Resource {
 		UpdateContext: resourceServiceAccountUpdate,
 		DeleteContext: resourceServiceAccountDelete,
 
-		Description: "Service Account resource allows managing CAST AI service accounts.",
+		Description: "Service account resource allows managing CAST AI service accounts.",
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(3 * time.Minute),
+			Read:   schema.DefaultTimeout(3 * time.Minute),
 			Update: schema.DefaultTimeout(3 * time.Minute),
 			Delete: schema.DefaultTimeout(3 * time.Minute),
 		},
@@ -277,4 +287,74 @@ func getOrganizationID(ctx context.Context, data *schema.ResourceData, meta inte
 	}
 
 	return organizationID, nil
+}
+
+func resourceServiceAccountKey() *schema.Resource {
+	return &schema.Resource{
+		Description:   "Service account key resource allows managing CAST AI service account keys.",
+		CreateContext: resourceServiceAccountKeyCreate,
+		ReadContext:   resourceServiceAccountKeyRead,
+		UpdateContext: resourceServiceAccountKeyUpdate,
+		DeleteContext: resourceServiceAccountKeyDelete,
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(3 * time.Minute),
+			Read:   schema.DefaultTimeout(3 * time.Minute),
+			Update: schema.DefaultTimeout(3 * time.Minute),
+			Delete: schema.DefaultTimeout(3 * time.Minute),
+		},
+		Schema: map[string]*schema.Schema{
+			FieldServiceAccountKeyOrganizationID: {
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "ID of the organization.",
+			},
+			FieldServiceAccountKeyServiceAccountID: {
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "ID of the service account.",
+			},
+			FieldServiceAccountKeyName: {
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "Name of the service account key.",
+			},
+			FieldServiceAccountKeyPrefix: {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Prefix of the service account key.",
+			},
+			FieldServiceAccountKeyLastUsedAt: {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Last time the service account key was used.",
+			},
+			FieldServiceAccountKeyExpiresAt: {
+				Type:        schema.TypeString,
+				Required:    true,
+				ForceNew:    true,
+				Description: "Expiration date of the service account key.",
+			},
+			FieldServiceAccountKeyActive: {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Active status of the service account key.",
+			},
+		},
+	}
+}
+
+func resourceServiceAccountKeyRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	return diag.Errorf("not implemented")
+}
+
+func resourceServiceAccountKeyCreate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	return diag.Errorf("not implemented")
+}
+
+func resourceServiceAccountKeyUpdate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	return diag.Errorf("not implemented")
+}
+
+func resourceServiceAccountKeyDelete(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	return diag.Errorf("not implemented")
 }
