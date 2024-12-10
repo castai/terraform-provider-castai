@@ -54,6 +54,8 @@ func Provider(version string) *schema.Provider {
 			"castai_sso_connection":             resourceSSOConnection(),
 			"castai_service_account":            resourceServiceAccount(),
 			"castai_workload_scaling_policy":    resourceWorkloadScalingPolicy(),
+			"castai_organization_group":         resourceOrganizationGroup(),
+			"castai_role_bindings":              resourceRoleBindings(),
 		},
 
 		DataSourcesMap: map[string]*schema.Resource{

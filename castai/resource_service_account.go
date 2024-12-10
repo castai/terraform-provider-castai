@@ -2,9 +2,11 @@ package castai
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 
@@ -22,16 +24,13 @@ const (
 	FieldServiceAccountAuthorID    = "id"
 	FieldServiceAccountAuthorEmail = "email"
 	FieldServiceAccountAuthorKind  = "kind"
-
-	FieldServiceAccountKeyOrganizationID = "organization_id"
-	FieldServiceAccountKeyName           = "name"
-	FieldServiceAccountKeyDescription    = "description"
 )
 
 func resourceServiceAccount() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceServiceAccountCreate,
 		ReadContext:   resourceServiceAccountRead,
+		UpdateContext: resourceServiceAccountUpdate,
 		DeleteContext: resourceServiceAccountDelete,
 
 		Description: "Service Account resource allows managing CAST AI service accounts.",
@@ -51,13 +50,11 @@ func resourceServiceAccount() *schema.Resource {
 			FieldServiceAccountName: {
 				Type:        schema.TypeString,
 				Required:    true,
-				ForceNew:    true,
 				Description: "Name of the service account.",
 			},
 			FieldServiceAccountDescription: {
 				Type:        schema.TypeString,
 				Optional:    true,
-				ForceNew:    true,
 				Description: "Description of the service account.",
 			},
 			FieldServiceAccountEmail: {
@@ -85,19 +82,36 @@ func resourceServiceAccountRead(ctx context.Context, data *schema.ResourceData, 
 	client := meta.(*ProviderConfig).api
 
 	if data.Id() == "" {
-		return nil
+		return diag.Errorf("service account ID is not set")
 	}
 
-	organizationID := data.Get(FieldServiceAccountOrganizationID).(string)
+	organizationID, err := getOrganizationID(ctx, data, meta)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	tflog.Info(ctx, "reading service account", map[string]interface{}{
+		"resource_id":     data.Id(),
+		"organization_id": organizationID,
+	})
 
 	resp, err := client.ServiceAccountsAPIGetServiceAccountWithResponse(ctx, organizationID, data.Id())
 	if resp.StatusCode() == http.StatusNotFound {
-		return diag.Errorf("getting service account: service account [%s] not found", data.Id())
+		tflog.Warn(ctx, "resource is not found, removing from state", map[string]interface{}{
+			"resource_id":     data.Id(),
+			"organization_id": organizationID,
+		})
+		data.SetId("") // Mark resource as deleted
+		return nil
 	}
 	if err := sdk.CheckOKResponse(resp, err); err != nil {
 		return diag.Errorf("getting service account: %v", err)
 	}
 
+	tflog.Info(ctx, "found service account", map[string]interface{}{
+		"resource_id":     data.Id(),
+		"organization_id": organizationID,
+	})
 	serviceAccount := resp.JSON200
 
 	if err := data.Set(FieldServiceAccountName, serviceAccount.ServiceAccount.Name); err != nil {
@@ -122,104 +136,110 @@ func resourceServiceAccountRead(ctx context.Context, data *schema.ResourceData, 
 func resourceServiceAccountCreate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*ProviderConfig).api
 
-	organizationID := data.Get(FieldServiceAccountOrganizationID).(string)
+	organizationID, err := getOrganizationID(ctx, data, meta)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
 	name := data.Get(FieldServiceAccountName).(string)
 	description := data.Get(FieldServiceAccountDescription).(string)
 
-	resp, err := client.ServiceAccountsAPICreateServiceAccountWithResponse(ctx, organizationID, sdk.ServiceAccountsAPICreateServiceAccountRequest{
-		ServiceAccount: sdk.CastaiServiceaccountsV1beta1CreateServiceAccountRequestServiceAccount{
-			Description: &description,
-			Name:        name,
-		},
+	tflog.Info(ctx, "creating service account", map[string]interface{}{
+		"name":            name,
+		"description":     description,
+		"organization_id": organizationID,
 	})
+
+	resp, err := client.ServiceAccountsAPICreateServiceAccountWithResponse(ctx, organizationID, sdk.CastaiServiceaccountsV1beta1CreateServiceAccountRequestServiceAccount{
+		Name:        name,
+		Description: &description,
+	},
+	)
 
 	if err := sdk.CheckResponseCreated(resp, err); err != nil {
 		return diag.Errorf("creating service account: %v", err)
 	}
 
+	tflog.Info(ctx, "created service account", map[string]interface{}{
+		"resource_id":     *resp.JSON201.Id,
+		"organization_id": organizationID,
+	})
 	data.SetId(*resp.JSON201.Id)
+
+	return resourceServiceAccountRead(ctx, data, meta)
+}
+
+func resourceServiceAccountUpdate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client := meta.(*ProviderConfig).api
+
+	organizationID, err := getOrganizationID(ctx, data, meta)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	serviceAccountID := data.Id()
+	name := data.Get(FieldServiceAccountName).(string)
+	description := data.Get(FieldServiceAccountDescription).(string)
+
+	tflog.Info(ctx, "updating service account", map[string]interface{}{
+		"resource_id":     serviceAccountID,
+		"name":            name,
+		"description":     description,
+		"organization_id": organizationID,
+	})
+
+	resp, err := client.ServiceAccountsAPIUpdateServiceAccountWithResponse(
+		ctx,
+		organizationID,
+		serviceAccountID,
+		sdk.ServiceAccountsAPIUpdateServiceAccountRequest{
+			ServiceAccount: sdk.CastaiServiceaccountsV1beta1UpdateServiceAccountRequestServiceAccount{
+				Name:        name,
+				Description: &description,
+			},
+		},
+	)
+
+	if err := sdk.CheckOKResponse(resp, err); err != nil {
+		return diag.Errorf("updating service account: %v", err)
+	}
+
+	tflog.Info(ctx, "created service account", map[string]interface{}{
+		"resource_id":     serviceAccountID,
+		"organization_id": organizationID,
+		"name":            name,
+		"description":     description,
+	})
 
 	return resourceServiceAccountRead(ctx, data, meta)
 }
 
 func resourceServiceAccountDelete(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*ProviderConfig).api
-	organizationID := data.Get(FieldServiceAccountOrganizationID).(string)
+	organizationID, err := getOrganizationID(ctx, data, meta)
+	if err != nil {
+		return diag.FromErr(err)
+	}
 	serviceAccountID := data.Id()
+
+	tflog.Info(ctx, "deleting service account", map[string]interface{}{
+		"resource_id":     serviceAccountID,
+		"organization_id": organizationID,
+	})
 
 	resp, err := client.ServiceAccountsAPIDeleteServiceAccount(ctx, organizationID, serviceAccountID)
 	if err != nil {
-		return diag.Errorf("deleteting service account: %v", err)
+		return diag.Errorf("deleting service account: %v", err)
 	}
 	if resp.StatusCode != http.StatusNoContent {
 		return diag.Errorf("deleteting service account: expected status: [204], received status: [%d]", resp.StatusCode)
 	}
-	return nil
-}
 
-func resourceServiceAccountKey() *schema.Resource {
-	return &schema.Resource{
-		ReadContext:   resourceServiceAccountKeyRead,
-		CreateContext: resourceServiceAccountKeyCreate,
-		UpdateContext: resourceServiceAccountKeyUpdate,
-		DeleteContext: resourceServiceAccountKeyDelete,
-		Description:   "Service Account Key resource allows managing CAST AI service account keys.",
-		Timeouts: &schema.ResourceTimeout{
-			Create: schema.DefaultTimeout(3 * time.Minute),
-			Update: schema.DefaultTimeout(3 * time.Minute),
-			Delete: schema.DefaultTimeout(3 * time.Minute),
-		},
-		Schema: map[string]*schema.Schema{
-			FieldServiceAccountKeyOrganizationID: {
-				Type:        schema.TypeString,
-				Required:    true,
-				ForceNew:    true,
-				Description: "ID of the organization.",
-			},
-			FieldServiceAccountID: {
-				Type:        schema.TypeString,
-				Required:    true,
-				ForceNew:    true,
-				Description: "ID of the service account.",
-			},
-			FieldServiceAccountKeyName: {
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: "Name of the service account key.",
-			},
-			FieldServiceAccountKeyDescription: {
-				Type:        schema.TypeString,
-				Required:    false,
-				Description: "Description of the service account key.",
-			},
-		},
-	}
-}
+	tflog.Info(ctx, "deleted service account", map[string]interface{}{
+		"resource_id":     serviceAccountID,
+		"organization_id": organizationID,
+	})
 
-func resourceServiceAccountKeyRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	// client := meta.(*ProviderConfig).api
-	// serviceAccountID := data.Get(FieldServiceAccountID).(string)
-	// // organizationID := data.Get(FieldServiceAccountKeyOrganizationID)
-	//
-	// resp, err := client.ServiceAccountsAPIGetServiceAccountWithResponse(ctx,serviceAccountID)
-	//
-	// if err := sdk.CheckGetResponse(resp, err); err != nil{
-	// 	return diag.Errorf("getting service account: %v", err)
-	// }
-	//
-	// resp.JSON200.ServiceAccount
-	return nil
-}
-
-func resourceServiceAccountKeyCreate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	return nil
-}
-
-func resourceServiceAccountKeyDelete(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	return nil
-}
-
-func resourceServiceAccountKeyUpdate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	return nil
 }
 
@@ -237,10 +257,24 @@ func flattenServiceAccountAuthor(author *sdk.CastaiServiceaccountsV1beta1Service
 	}
 }
 
-// Helper function to handle nil pointers
 func stringValue(value *string) string {
 	if value == nil {
 		return ""
 	}
 	return *value
+}
+
+func getOrganizationID(ctx context.Context, data *schema.ResourceData, meta interface{}) (string, error) {
+	var organizationID string
+	var err error
+
+	organizationID = data.Get(FieldServiceAccountOrganizationID).(string)
+	if organizationID == "" {
+		organizationID, err = getDefaultOrganizationId(ctx, meta)
+		if err != nil {
+			return "", fmt.Errorf("getting organization ID: %w", err)
+		}
+	}
+
+	return organizationID, nil
 }
