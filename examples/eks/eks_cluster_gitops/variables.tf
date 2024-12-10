@@ -5,19 +5,19 @@ variable "aws_account_id" {
   description = "ID of AWS account the cluster is located in."
 }
 
-variable "aws_cluster_region" {
+variable "cluster_region" {
   type        = string
   description = "Region of the cluster to be connected to CAST AI."
 }
 
-variable "aws_cluster_name" {
+variable "cluster_name" {
   type        = string
   description = "Name of the cluster to be connected to CAST AI."
 }
 
-variable "castai_api_token" {
+variable "castai_api_key" {
   type        = string
-  description = "CAST AI API token created in console.cast.ai API Access keys section"
+  description = "CAST AI API Key created in console.cast.ai API Access keys section"
 }
 
 variable "aws_assume_role_arn" {
