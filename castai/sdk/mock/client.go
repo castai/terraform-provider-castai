@@ -3055,6 +3055,26 @@ func (mr *MockClientInterfaceMockRecorder) ServiceAccountsAPIGetServiceAccount(c
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ServiceAccountsAPIGetServiceAccount", reflect.TypeOf((*MockClientInterface)(nil).ServiceAccountsAPIGetServiceAccount), varargs...)
 }
 
+// ServiceAccountsAPIGetServiceAccountKey mocks base method.
+func (m *MockClientInterface) ServiceAccountsAPIGetServiceAccountKey(ctx context.Context, organizationId, serviceAccountId, keyId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, serviceAccountId, keyId}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ServiceAccountsAPIGetServiceAccountKey", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ServiceAccountsAPIGetServiceAccountKey indicates an expected call of ServiceAccountsAPIGetServiceAccountKey.
+func (mr *MockClientInterfaceMockRecorder) ServiceAccountsAPIGetServiceAccountKey(ctx, organizationId, serviceAccountId, keyId interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, serviceAccountId, keyId}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ServiceAccountsAPIGetServiceAccountKey", reflect.TypeOf((*MockClientInterface)(nil).ServiceAccountsAPIGetServiceAccountKey), varargs...)
+}
+
 // ServiceAccountsAPIListServiceAccounts mocks base method.
 func (m *MockClientInterface) ServiceAccountsAPIListServiceAccounts(ctx context.Context, organizationId string, params *sdk.ServiceAccountsAPIListServiceAccountsParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
@@ -6216,6 +6236,21 @@ func (m *MockClientWithResponsesInterface) ServiceAccountsAPIDeleteServiceAccoun
 func (mr *MockClientWithResponsesInterfaceMockRecorder) ServiceAccountsAPIDeleteServiceAccountWithResponse(ctx, organizationId, serviceAccountId interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ServiceAccountsAPIDeleteServiceAccountWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ServiceAccountsAPIDeleteServiceAccountWithResponse), ctx, organizationId, serviceAccountId)
+}
+
+// ServiceAccountsAPIGetServiceAccountKeyWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) ServiceAccountsAPIGetServiceAccountKeyWithResponse(ctx context.Context, organizationId, serviceAccountId, keyId string) (*sdk.ServiceAccountsAPIGetServiceAccountKeyResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ServiceAccountsAPIGetServiceAccountKeyWithResponse", ctx, organizationId, serviceAccountId, keyId)
+	ret0, _ := ret[0].(*sdk.ServiceAccountsAPIGetServiceAccountKeyResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ServiceAccountsAPIGetServiceAccountKeyWithResponse indicates an expected call of ServiceAccountsAPIGetServiceAccountKeyWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ServiceAccountsAPIGetServiceAccountKeyWithResponse(ctx, organizationId, serviceAccountId, keyId interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ServiceAccountsAPIGetServiceAccountKeyWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ServiceAccountsAPIGetServiceAccountKeyWithResponse), ctx, organizationId, serviceAccountId, keyId)
 }
 
 // ServiceAccountsAPIGetServiceAccountWithResponse mocks base method.

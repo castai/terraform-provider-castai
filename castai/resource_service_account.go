@@ -106,6 +106,10 @@ func resourceServiceAccountRead(ctx context.Context, data *schema.ResourceData, 
 	})
 
 	resp, err := client.ServiceAccountsAPIGetServiceAccountWithResponse(ctx, organizationID, data.Id())
+	if err != nil {
+		return diag.Errorf("getting service account: %v", err)
+	}
+
 	if resp.StatusCode() == http.StatusNotFound {
 		tflog.Warn(ctx, "resource is not found, removing from state", map[string]interface{}{
 			"resource_id":     data.Id(),
@@ -344,11 +348,125 @@ func resourceServiceAccountKey() *schema.Resource {
 }
 
 func resourceServiceAccountKeyRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	return diag.Errorf("not implemented")
+	client := meta.(*ProviderConfig).api
+
+	if data.Id() == "" {
+		return diag.Errorf("service account key ID is not set")
+	}
+
+	organizationID, err := getOrganizationID(ctx, data, meta)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	serviceAccountID := data.Get(FieldServiceAccountKeyServiceAccountID).(string)
+	if serviceAccountID == "" {
+		return diag.Errorf("service account ID is not set")
+	}
+	serviceAccountKeyID := data.Id()
+
+	logKeys := map[string]interface{}{
+		"resource_id":        serviceAccountKeyID,
+		"organization_id":    organizationID,
+		"service_account_id": serviceAccountID,
+	}
+
+	tflog.Info(ctx, "reading service account key", logKeys)
+
+	resp, err := client.ServiceAccountsAPIGetServiceAccountKeyWithResponse(ctx, organizationID, serviceAccountID, serviceAccountKeyID)
+	if err != nil {
+		return diag.Errorf("reading service account key: %v", err)
+	}
+	if resp.StatusCode() == http.StatusNotFound {
+		tflog.Warn(ctx, "resource is not found, removing from state", logKeys)
+		data.SetId("")
+		return nil
+	}
+
+	if err := sdk.CheckOKResponse(resp, err); err != nil {
+		return diag.Errorf("reading service account key: %v", err)
+	}
+
+	tflog.Info(ctx, "found service account key", logKeys)
+
+	serviceAccountKey := resp.JSON200
+
+	if err := data.Set(FieldServiceAccountKeyOrganizationID, organizationID); err != nil {
+		return diag.Errorf("setting field %s: %v", FieldServiceAccountKeyOrganizationID, err)
+	}
+
+	if err := data.Set(FieldServiceAccountKeyServiceAccountID, serviceAccountID); err != nil {
+		return diag.Errorf("setting field %s: %v", FieldServiceAccountKeyServiceAccountID, err)
+	}
+
+	if err := data.Set(FieldServiceAccountKeyName, serviceAccountKey.Key.Name); err != nil {
+		return diag.Errorf("setting field %s: %v", FieldServiceAccountKeyName, err)
+	}
+
+	if err := data.Set(FieldServiceAccountKeyPrefix, serviceAccountKey.Key.Prefix); err != nil {
+		return diag.Errorf("setting field %s: %v", FieldServiceAccountKeyPrefix, err)
+	}
+
+	if err := data.Set(FieldServiceAccountKeyLastUsedAt, serviceAccountKey.Key.LastUsedAt); err != nil {
+		return diag.Errorf("setting field %s: %v", FieldServiceAccountKeyLastUsedAt, err)
+	}
+
+	if err := data.Set(FieldServiceAccountKeyExpiresAt, serviceAccountKey.Key.ExpiresAt); err != nil {
+		return diag.Errorf("setting field %s: %v", FieldServiceAccountKeyExpiresAt, err)
+	}
+
+	if err := data.Set(FieldServiceAccountKeyActive, serviceAccountKey.Key.Active); err != nil {
+		return diag.Errorf("setting field %s: %v", FieldServiceAccountKeyActive, err)
+	}
+	return nil
 }
 
 func resourceServiceAccountKeyCreate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	return diag.Errorf("not implemented")
+	client := meta.(*ProviderConfig).api
+
+	organizationID, err := getOrganizationID(ctx, data, meta)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	serviceAccountID := data.Get(FieldServiceAccountKeyServiceAccountID).(string)
+	name := data.Get(FieldServiceAccountKeyName).(string)
+	expiresAt := data.Get(FieldServiceAccountKeyExpiresAt).(string)
+	active := data.Get(FieldServiceAccountKeyActive).(bool)
+
+	expiresAtParsed, err := time.Parse(time.RFC3339, expiresAt)
+	if err != nil {
+		return diag.Errorf("parsing expires_at date: %v", err)
+	}
+
+	logKeys := map[string]interface{}{
+		"name":               name,
+		"organization_id":    organizationID,
+		"service_account_id": serviceAccountID,
+	}
+
+	tflog.Info(ctx, "creating service account key", logKeys)
+
+	resp, err := client.ServiceAccountsAPICreateServiceAccountKeyWithResponse(
+		ctx,
+		organizationID,
+		serviceAccountID,
+		sdk.ServiceAccountsAPICreateServiceAccountKeyRequest{
+			Key: sdk.CastaiServiceaccountsV1beta1CreateServiceAccountKeyRequestKey{
+				Active:    &active,
+				ExpiresAt: &expiresAtParsed,
+				Name:      name,
+			},
+		},
+	)
+	if err := sdk.CheckOKResponse(resp, err); err != nil {
+		return diag.Errorf("creating service account key: %v", err)
+	}
+
+	logKeys["resource_id"] = *resp.JSON200.Id
+	tflog.Info(ctx, "created service account key", logKeys)
+
+	data.SetId(*resp.JSON200.Id)
+	return resourceServiceAccountKeyRead(ctx, data, meta)
 }
 
 func resourceServiceAccountKeyUpdate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {

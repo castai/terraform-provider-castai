@@ -1424,6 +1424,9 @@ type CastaiRbacV1beta1Group struct {
 	// ID is the unique identifier of the group.
 	Id *string `json:"id,omitempty"`
 
+	// Method used to create group, eg.: console, terraform.
+	ManagedBy *string `json:"managedBy,omitempty"`
+
 	// Name is the name of the group.
 	Name *string `json:"name,omitempty"`
 
@@ -1510,6 +1513,9 @@ type CastaiRbacV1beta1RoleBinding struct {
 
 	// ID is the unique identifier of the role binding.
 	Id *string `json:"id,omitempty"`
+
+	// Method used to create role binding, eg.: console, terraform.
+	ManagedBy *string `json:"managedBy,omitempty"`
 
 	// Name is the name of the role binding.
 	Name           *string `json:"name,omitempty"`
@@ -1608,6 +1614,9 @@ type CastaiRbacV1beta1UserSubject struct {
 
 // Key is the readable version of the service account key.
 type CastaiServiceaccountsV1beta1CreateServiceAccountKeyRequestKey struct {
+	// Active is the active state of the key.
+	Active *bool `json:"active,omitempty"`
+
 	// ExpiresAt is the expiration time of the key.
 	// A null value means that the key will never expire.
 	ExpiresAt *time.Time `json:"expiresAt,omitempty"`
@@ -1668,6 +1677,12 @@ type CastaiServiceaccountsV1beta1DeleteServiceAccountKeyResponse = map[string]in
 // DeleteServiceAccountResponse is the response for deleting a service account.
 type CastaiServiceaccountsV1beta1DeleteServiceAccountResponse = map[string]interface{}
 
+// GetServiceAccountKeyResponse is the response for getting a service account key.
+type CastaiServiceaccountsV1beta1GetServiceAccountKeyResponse struct {
+	// Key is the key for the service account.
+	Key CastaiServiceaccountsV1beta1ServiceAccountKey `json:"key"`
+}
+
 // GetServiceAccountResponse is the response for getting a service account.
 type CastaiServiceaccountsV1beta1GetServiceAccountResponse struct {
 	// ServiceAccounts is the readable version of the service accounts.
@@ -1705,6 +1720,9 @@ type CastaiServiceaccountsV1beta1ServiceAccount struct {
 
 	// Keys is the list of keys associated with the service account.
 	Keys *[]CastaiServiceaccountsV1beta1ServiceAccountKey `json:"keys,omitempty"`
+
+	// Method used to create role binding, eg.: console, terraform.
+	ManagedBy *string `json:"managedBy,omitempty"`
 
 	// Name is the name of the service account.
 	Name *string `json:"name,omitempty"`
