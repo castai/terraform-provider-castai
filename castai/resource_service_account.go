@@ -344,7 +344,7 @@ func resourceServiceAccountKey() *schema.Resource {
 				Default:     "",
 				ForceNew:    true,
 				Description: "The expiration time of the service account key in RFC3339 format. Defaults to an empty string.",
-				// ValidateDiagFunc: validateRFC3339TimeOrEmpty,
+				ValidateDiagFunc: validateRFC3339TimeOrEmpty,
 			},
 			FieldServiceAccountKeyActive: {
 				Type:        schema.TypeBool,
