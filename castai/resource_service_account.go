@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/castai/terraform-provider-castai/castai/sdk"
 )
@@ -52,15 +53,17 @@ func resourceServiceAccount() *schema.Resource {
 
 		Schema: map[string]*schema.Schema{
 			FieldServiceAccountOrganizationID: {
-				Type:        schema.TypeString,
-				Required:    true,
-				ForceNew:    true,
-				Description: "ID of the organization.",
+				Type:             schema.TypeString,
+				Required:         true,
+				ForceNew:         true,
+				Description:      "ID of the organization.",
+				ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
 			},
 			FieldServiceAccountName: {
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: "Name of the service account.",
+				Type:             schema.TypeString,
+				Required:         true,
+				Description:      "Name of the service account.",
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 			FieldServiceAccountDescription: {
 				Type:        schema.TypeString,
@@ -241,12 +244,9 @@ func resourceServiceAccountDelete(ctx context.Context, data *schema.ResourceData
 		"organization_id": organizationID,
 	})
 
-	resp, err := client.ServiceAccountsAPIDeleteServiceAccount(ctx, organizationID, serviceAccountID)
-	if err != nil {
+	resp, err := client.ServiceAccountsAPIDeleteServiceAccountWithResponse(ctx, organizationID, serviceAccountID)
+	if err := sdk.CheckResponseNoContent(resp, err); err != nil {
 		return diag.Errorf("deleting service account: %v", err)
-	}
-	if resp.StatusCode != http.StatusNoContent {
-		return diag.Errorf("deleteting service account: expected status: [204], received status: [%d]", resp.StatusCode)
 	}
 
 	tflog.Info(ctx, "deleted service account", map[string]interface{}{
@@ -308,19 +308,22 @@ func resourceServiceAccountKey() *schema.Resource {
 		},
 		Schema: map[string]*schema.Schema{
 			FieldServiceAccountKeyOrganizationID: {
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: "ID of the organization.",
+				Type:             schema.TypeString,
+				Required:         true,
+				Description:      "ID of the organization.",
+				ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
 			},
 			FieldServiceAccountKeyServiceAccountID: {
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: "ID of the service account.",
+				Type:             schema.TypeString,
+				Required:         true,
+				Description:      "ID of the service account.",
+				ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
 			},
 			FieldServiceAccountKeyName: {
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: "Name of the service account key.",
+				Type:             schema.TypeString,
+				Required:         true,
+				Description:      "Name of the service account key.",
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 			FieldServiceAccountKeyPrefix: {
 				Type:        schema.TypeString,
@@ -333,10 +336,11 @@ func resourceServiceAccountKey() *schema.Resource {
 				Description: "Last time the service account key was used.",
 			},
 			FieldServiceAccountKeyExpiresAt: {
-				Type:        schema.TypeString,
-				Required:    true,
-				ForceNew:    true,
-				Description: "Expiration date of the service account key.",
+				Type:             schema.TypeString,
+				Required:         true,
+				ForceNew:         true,
+				Description:      "Expiration date of the service account key.",
+				ValidateDiagFunc: validation.ToDiagFunc(validation.IsRFC3339Time),
 			},
 			FieldServiceAccountKeyActive: {
 				Type:        schema.TypeBool,
@@ -411,8 +415,10 @@ func resourceServiceAccountKeyRead(ctx context.Context, data *schema.ResourceDat
 		return diag.Errorf("setting field %s: %v", FieldServiceAccountKeyLastUsedAt, err)
 	}
 
-	if err := data.Set(FieldServiceAccountKeyExpiresAt, serviceAccountKey.Key.ExpiresAt); err != nil {
-		return diag.Errorf("setting field %s: %v", FieldServiceAccountKeyExpiresAt, err)
+	if serviceAccountKey.Key.ExpiresAt != nil {
+		if err := data.Set(FieldServiceAccountKeyExpiresAt, serviceAccountKey.Key.ExpiresAt.String()); err != nil {
+			return diag.Errorf("setting field %s: %v", FieldServiceAccountKeyExpiresAt, err)
+		}
 	}
 
 	if err := data.Set(FieldServiceAccountKeyActive, serviceAccountKey.Key.Active); err != nil {
@@ -462,18 +468,68 @@ func resourceServiceAccountKeyCreate(ctx context.Context, data *schema.ResourceD
 		return diag.Errorf("creating service account key: %v", err)
 	}
 
-	// FIXME: panic here
-	logKeys["resource_id"] = *resp.JSON201
+	serviceAccountKeyID := *resp.JSON201.Id
+	logKeys["resource_id"] = serviceAccountKeyID
 	tflog.Info(ctx, "created service account key", logKeys)
 
-	data.SetId(*resp.JSON200.Id)
+	data.SetId(serviceAccountKeyID)
 	return resourceServiceAccountKeyRead(ctx, data, meta)
 }
 
 func resourceServiceAccountKeyUpdate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	return diag.Errorf("not implemented")
+	client := meta.(*ProviderConfig).api
+	organizationID, err := getOrganizationID(ctx, data, meta)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	serviceAccountID := data.Get(FieldServiceAccountKeyServiceAccountID).(string)
+	keyID := data.Id()
+	active := data.Get(FieldServiceAccountKeyActive).(bool)
+
+	logKeys := map[string]interface{}{
+		"organization_id":    organizationID,
+		"service_account_id": serviceAccountID,
+		"resource_id":        keyID,
+	}
+
+	tflog.Info(ctx, "updating service account key", logKeys)
+
+	resp, err := client.ServiceAccountsAPIUpdateServiceAccountKeyWithResponse(ctx, organizationID, serviceAccountID, keyID, &sdk.ServiceAccountsAPIUpdateServiceAccountKeyParams{
+		KeyActive: active,
+	})
+
+	if err := sdk.CheckOKResponse(resp, err); err != nil {
+		return diag.Errorf("updating service account key: %v", err)
+	}
+
+	tflog.Info(ctx, "updated service account key", logKeys)
+
+	return resourceServiceAccountKeyRead(ctx, data, meta)
 }
 
 func resourceServiceAccountKeyDelete(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	return diag.Errorf("not implemented")
+	client := meta.(*ProviderConfig).api
+	organizationID, err := getOrganizationID(ctx, data, meta)
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	serviceAccountID := data.Get(FieldServiceAccountKeyServiceAccountID).(string)
+	keyID := data.Id()
+
+	logKeys := map[string]interface{}{
+		"organization_id":    organizationID,
+		"service_account_id": serviceAccountID,
+		"resource_id":        keyID,
+	}
+
+	tflog.Info(ctx, "deleting service account key", logKeys)
+
+	resp, err := client.ServiceAccountsAPIDeleteServiceAccountKeyWithResponse(ctx, organizationID, serviceAccountID, keyID)
+	if err := sdk.CheckResponseNoContent(resp, err); err != nil {
+		return diag.Errorf("deleting service account key: %v", err)
+	}
+
+	tflog.Info(ctx, "deleted service account key", logKeys)
+
+	return nil
 }

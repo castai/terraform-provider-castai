@@ -13176,8 +13176,7 @@ func (r ServiceAccountsAPIUpdateServiceAccountResponse) GetBody() []byte {
 type ServiceAccountsAPICreateServiceAccountKeyResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *CastaiServiceaccountsV1beta1CreateServiceAccountKeyResponse
-	JSON201      *map[string]interface{}
+	JSON201      *CastaiServiceaccountsV1beta1CreateServiceAccountKeyResponse
 }
 
 // Status returns HTTPResponse.Status
@@ -13238,6 +13237,7 @@ type ServiceAccountsAPIDeleteServiceAccountKeyResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *CastaiServiceaccountsV1beta1DeleteServiceAccountKeyResponse
+	JSON204      *map[string]interface{}
 }
 
 // Status returns HTTPResponse.Status
@@ -18872,15 +18872,8 @@ func ParseServiceAccountsAPICreateServiceAccountKeyResponse(rsp *http.Response) 
 	}
 
 	switch {
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest CastaiServiceaccountsV1beta1CreateServiceAccountKeyResponse
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON200 = &dest
-
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 201:
-		var dest map[string]interface{}
+		var dest CastaiServiceaccountsV1beta1CreateServiceAccountKeyResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -18937,6 +18930,13 @@ func ParseServiceAccountsAPIDeleteServiceAccountKeyResponse(rsp *http.Response) 
 			return nil, err
 		}
 		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 204:
+		var dest map[string]interface{}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON204 = &dest
 
 	}
 
