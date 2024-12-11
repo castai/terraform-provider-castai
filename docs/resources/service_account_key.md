@@ -17,7 +17,6 @@ Service account key resource allows managing CAST AI service account keys.
 
 ### Required
 
-- `expires_at` (String) Expiration date of the service account key.
 - `name` (String) Name of the service account key.
 - `organization_id` (String) ID of the organization.
 - `service_account_id` (String) ID of the service account.
@@ -25,6 +24,7 @@ Service account key resource allows managing CAST AI service account keys.
 ### Optional
 
 - `active` (Boolean) Active status of the service account key.
+- `expires_at` (String) Expiration date of the service account key.
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only

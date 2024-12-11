@@ -254,6 +254,8 @@ func resourceServiceAccountDelete(ctx context.Context, data *schema.ResourceData
 		"organization_id": organizationID,
 	})
 
+	data.SetId("")
+
 	return nil
 }
 
@@ -337,7 +339,8 @@ func resourceServiceAccountKey() *schema.Resource {
 			},
 			FieldServiceAccountKeyExpiresAt: {
 				Type:             schema.TypeString,
-				Required:         true,
+				Optional:         true,
+				Computed:         true,
 				ForceNew:         true,
 				Description:      "Expiration date of the service account key.",
 				ValidateDiagFunc: validation.ToDiagFunc(validation.IsRFC3339Time),
@@ -345,6 +348,7 @@ func resourceServiceAccountKey() *schema.Resource {
 			FieldServiceAccountKeyActive: {
 				Type:        schema.TypeBool,
 				Optional:    true,
+				Computed:    true,
 				Description: "Active status of the service account key.",
 			},
 		},
@@ -411,8 +415,10 @@ func resourceServiceAccountKeyRead(ctx context.Context, data *schema.ResourceDat
 		return diag.Errorf("setting field %s: %v", FieldServiceAccountKeyPrefix, err)
 	}
 
-	if err := data.Set(FieldServiceAccountKeyLastUsedAt, serviceAccountKey.Key.LastUsedAt); err != nil {
-		return diag.Errorf("setting field %s: %v", FieldServiceAccountKeyLastUsedAt, err)
+	if serviceAccountKey.Key.LastUsedAt != nil {
+		if err := data.Set(FieldServiceAccountKeyLastUsedAt, serviceAccountKey.Key.LastUsedAt.String()); err != nil {
+			return diag.Errorf("setting field %s: %v", FieldServiceAccountKeyLastUsedAt, err)
+		}
 	}
 
 	if serviceAccountKey.Key.ExpiresAt != nil {
@@ -469,6 +475,7 @@ func resourceServiceAccountKeyCreate(ctx context.Context, data *schema.ResourceD
 	}
 
 	serviceAccountKeyID := *resp.JSON201.Id
+
 	logKeys["resource_id"] = serviceAccountKeyID
 	tflog.Info(ctx, "created service account key", logKeys)
 
@@ -530,6 +537,8 @@ func resourceServiceAccountKeyDelete(ctx context.Context, data *schema.ResourceD
 	}
 
 	tflog.Info(ctx, "deleted service account key", logKeys)
+
+	data.SetId("")
 
 	return nil
 }
