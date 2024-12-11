@@ -398,6 +398,11 @@ type GroupsIsTheGroupsToBeUpdated struct {
 	Name string `json:"name"`
 }
 
+// KeyIsTheServiceAccountKeyToUpdate defines model for Key_is_the_service_account_key_to_update_.
+type KeyIsTheServiceAccountKeyToUpdate struct {
+	Active bool `json:"active"`
+}
+
 // RoleBindingIsTheRoleBindingToBeUpdated defines model for RoleBinding_is_the_role_binding_to_be_updated_.
 type RoleBindingIsTheRoleBindingToBeUpdated struct {
 	// Definition represents the role binding definition.
@@ -4888,10 +4893,8 @@ type ServiceAccountsAPIUpdateServiceAccountJSONBody = ServiceAccountsAPIUpdateSe
 // ServiceAccountsAPICreateServiceAccountKeyJSONBody defines parameters for ServiceAccountsAPICreateServiceAccountKey.
 type ServiceAccountsAPICreateServiceAccountKeyJSONBody = ServiceAccountsAPICreateServiceAccountKeyRequest
 
-// ServiceAccountsAPIUpdateServiceAccountKeyParams defines parameters for ServiceAccountsAPIUpdateServiceAccountKey.
-type ServiceAccountsAPIUpdateServiceAccountKeyParams struct {
-	KeyActive bool `form:"key.active" json:"key.active"`
-}
+// ServiceAccountsAPIUpdateServiceAccountKeyJSONBody defines parameters for ServiceAccountsAPIUpdateServiceAccountKey.
+type ServiceAccountsAPIUpdateServiceAccountKeyJSONBody = KeyIsTheServiceAccountKeyToUpdate
 
 // UsersAPIRemoveOrganizationUsersParams defines parameters for UsersAPIRemoveOrganizationUsers.
 type UsersAPIRemoveOrganizationUsersParams struct {
@@ -5163,6 +5166,9 @@ type ServiceAccountsAPIUpdateServiceAccountJSONRequestBody = ServiceAccountsAPIU
 
 // ServiceAccountsAPICreateServiceAccountKeyJSONRequestBody defines body for ServiceAccountsAPICreateServiceAccountKey for application/json ContentType.
 type ServiceAccountsAPICreateServiceAccountKeyJSONRequestBody = ServiceAccountsAPICreateServiceAccountKeyJSONBody
+
+// ServiceAccountsAPIUpdateServiceAccountKeyJSONRequestBody defines body for ServiceAccountsAPIUpdateServiceAccountKey for application/json ContentType.
+type ServiceAccountsAPIUpdateServiceAccountKeyJSONRequestBody = ServiceAccountsAPIUpdateServiceAccountKeyJSONBody
 
 // UsersAPIAddUserToOrganizationJSONRequestBody defines body for UsersAPIAddUserToOrganization for application/json ContentType.
 type UsersAPIAddUserToOrganizationJSONRequestBody = UsersAPIAddUserToOrganizationJSONBody

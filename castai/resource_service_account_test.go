@@ -19,7 +19,7 @@ import (
 	mock_sdk "github.com/castai/terraform-provider-castai/castai/sdk/mock"
 )
 
-func TestServiceAccountReadContext(t *testing.T) {
+func TestServiceAccount_ReadContext(t *testing.T) {
 	t.Parallel()
 
 	t.Run("when state is missing service account ID then return error", func(t *testing.T) {
@@ -184,7 +184,7 @@ Tainted = false
 	})
 }
 
-func TestServiceAccountCreateContext(t *testing.T) {
+func TestServiceAccount_CreateContext(t *testing.T) {
 	t.Parallel()
 
 	t.Run("when ServiceAccountsAPI responds with 201 then populate the state", func(t *testing.T) {
@@ -348,7 +348,7 @@ func TestServiceAccountCreateContext(t *testing.T) {
 	})
 }
 
-func TestServiceAccountDeleteContext(t *testing.T) {
+func TestServiceAccount_DeleteContext(t *testing.T) {
 	t.Run("when ServiceAccountsAPI responds with an error then return error", func(t *testing.T) {
 		r := require.New(t)
 		mockClient := mock_sdk.NewMockClientInterface(gomock.NewController(t))
@@ -421,7 +421,7 @@ func TestServiceAccountDeleteContext(t *testing.T) {
 		r.NotNil(result)
 		r.True(result.HasError())
 		r.Len(result, 1)
-		r.Equal("deleteting service account: expected status: [204], received status: [500]", result[0].Summary)
+		r.Equal("deleting service account: expected status code 204, received: status=500 body=mock error response", result[0].Summary)
 	})
 
 	t.Run("when ServiceAccountsAPI responds with 204 then return nil", func(t *testing.T) {
@@ -465,7 +465,7 @@ func TestServiceAccountDeleteContext(t *testing.T) {
 	})
 }
 
-func TestServiceAccountUpdateContext(t *testing.T) {
+func TestServiceAccount_UpdateContext(t *testing.T) {
 	t.Run("when ServiceAccountsAPI responds with an error then return error", func(t *testing.T) {
 		r := require.New(t)
 		mockClient := mock_sdk.NewMockClientInterface(gomock.NewController(t))
@@ -575,7 +575,7 @@ func TestServiceAccountUpdateContext(t *testing.T) {
       "email": "user-email"
     },
     "keys": []
-  }}`, serviceAccountID,userID))))
+  }}`, serviceAccountID, userID))))
 
 		mockClient.EXPECT().
 			ServiceAccountsAPIUpdateServiceAccount(gomock.Any(), organizationID, serviceAccountID, gomock.Any()).
@@ -588,7 +588,7 @@ func TestServiceAccountUpdateContext(t *testing.T) {
 			Return(&http.Response{
 				StatusCode: http.StatusOK,
 				Body:       readBody,
-				Header: map[string][]string{"Content-Type": {"json"}},
+				Header:     map[string][]string{"Content-Type": {"json"}},
 			}, nil)
 
 		resource := resourceServiceAccount()
@@ -607,4 +607,155 @@ func TestServiceAccountUpdateContext(t *testing.T) {
 		r.Equal("new", data.Get("name"))
 		r.Equal("new description", data.Get("description"))
 	})
+}
+
+// TODO: test me! :(
+func TestServiceAccountKey_CreateContext(t *testing.T) {
+	t.Parallel()
+
+	t.Run("when ServiceAccountAPI respond with 404 then remove form the state gracefully", func(t *testing.T) {
+		r := require.New(t)
+		mockClient := mock_sdk.NewMockClientInterface(gomock.NewController(t))
+
+		ctx := context.Background()
+		provider := &ProviderConfig{
+			api: &sdk.ClientWithResponses{
+				ClientInterface: mockClient,
+			},
+		}
+		body := io.NopCloser(bytes.NewReader([]byte("")))
+
+		organizationID := "4e4cd9eb-82eb-407e-a926-e5fef81cab50"
+		serviceAccountID := "b11f5945-22ca-4101-a86e-d6e37f44a415"
+		keyID := "da5664b3-87bf-4e03-9d1c-ec26049991b7"
+
+		mockClient.EXPECT().
+			ServiceAccountsAPIGetServiceAccountKey(gomock.Any(), organizationID, serviceAccountID, keyID).
+			Return(&http.Response{StatusCode: http.StatusNotFound, Body: body, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
+
+		stateValue := cty.ObjectVal(map[string]cty.Value{
+			"organization_id":    cty.StringVal(organizationID),
+			"service_account_id": cty.StringVal(serviceAccountID),
+		})
+		state := terraform.NewInstanceStateShimmedFromValue(stateValue, 0)
+		state.ID = serviceAccountID
+
+		resource := resourceServiceAccountKey()
+		data := resource.Data(state)
+
+		result := resource.ReadContext(ctx, data, provider)
+
+		r.Nil(result)
+		r.False(result.HasError())
+		r.Empty(data.Id())
+	})
+
+	t.Run("when ServiceAccountAPI respond with 500 then return error", func(t *testing.T) {
+		r := require.New(t)
+		mockClient := mock_sdk.NewMockClientInterface(gomock.NewController(t))
+
+		ctx := context.Background()
+		provider := &ProviderConfig{
+			api: &sdk.ClientWithResponses{
+				ClientInterface: mockClient,
+			},
+		}
+		body := io.NopCloser(bytes.NewReader([]byte("panic")))
+
+		organizationID := "4e4cd9eb-82eb-407e-a926-e5fef81cab50"
+		serviceAccountID := "b11f5945-22ca-4101-a86e-d6e37f44a415"
+		keyID := "da5664b3-87bf-4e03-9d1c-ec26049991b7"
+
+		mockClient.EXPECT().
+			ServiceAccountsAPIGetServiceAccountKey(gomock.Any(), organizationID, serviceAccountID, keyID).
+			Return(&http.Response{StatusCode: http.StatusInternalServerError, Body: body, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
+
+		stateValue := cty.ObjectVal(map[string]cty.Value{
+			"organization_id": cty.StringVal(organizationID),
+			"service_account_id": cty.StringVal(serviceAccountID),
+		})
+		state := terraform.NewInstanceStateShimmedFromValue(stateValue, 0)
+		state.ID = serviceAccountID
+
+		resource := resourceServiceAccountKey()
+		data := resource.Data(state)
+
+		result := resource.ReadContext(ctx, data, provider)
+
+		r.NotNil(result)
+		r.True(result.HasError())
+		r.Len(result, 1)
+		r.Equal("getting service account key: expected status code 200, received: status=500 body=panic", result[0].Summary)
+	})
+
+		t.Run("when ServiceAccountAPI respond with 200 then populate the state", func(t *testing.T) {
+		r := require.New(t)
+		mockClient := mock_sdk.NewMockClientInterface(gomock.NewController(t))
+
+		ctx := context.Background()
+		provider := &ProviderConfig{
+			api: &sdk.ClientWithResponses{
+				ClientInterface: mockClient,
+			},
+		}
+
+		organizationID := "4e4cd9eb-82eb-407e-a926-e5fef81cab50"
+		serviceAccountID := "b11f5945-22ca-4101-a86e-d6e37f44a415"
+		userID := "671b2ebb-f361-42f0-aa2f-3049de93f8c1"
+		keyID := "da5664b3-87bf-4e03-9d1c-ec26049991b7"
+
+		body := io.NopCloser(bytes.NewReader([]byte(fmt.Sprintf(`{
+  "key": {
+    "id": %q,
+    "name": "test-key",
+    "prefix": "123q",
+    "lastUsedAt": "2024-12-11T13:47:20.927Z",
+    "expiresAt": "2024-12-11T13:47:20.927Z",
+    "active": true
+  }
+}`, keyID))))
+
+		mockClient.EXPECT().
+			ServiceAccountsAPIGetServiceAccountKey(gomock.Any(), organizationID, serviceAccountID, keyID).
+			Return(&http.Response{StatusCode: http.StatusOK, Body: body, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
+
+		stateValue := cty.ObjectVal(map[string]cty.Value{
+			"organization_id": cty.StringVal(organizationID),
+			"service_account_id": cty.StringVal(serviceAccountID),
+		})
+		state := terraform.NewInstanceStateShimmedFromValue(stateValue, 0)
+		state.ID = serviceAccountID
+
+		resource := resourceServiceAccountKey()
+		data := resource.Data(state)
+
+		result := resource.ReadContext(ctx, data, provider)
+
+		r.Nil(result)
+		r.False(result.HasError())
+		r.Equal(fmt.Sprintf(`ID = %s
+author.# = 1
+author.0.email = user-email
+author.0.id = %s
+author.0.kind = user
+description = service-account-description
+email = service-account-email
+name = service-account-name
+organization_id = %s
+Tainted = false
+`, serviceAccountID, userID, organizationID), data.State().String())
+	})
+
+}
+
+func TestServiceAccountKey_ReadContext(t *testing.T) {
+	t.Parallel()
+}
+
+func TestServiceAccountKey_DeleteContext(t *testing.T) {
+	t.Parallel()
+}
+
+func TestServiceAccountKey_UpdateContext(t *testing.T) {
+	t.Parallel()
 }

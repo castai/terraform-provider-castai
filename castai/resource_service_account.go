@@ -244,8 +244,8 @@ func resourceServiceAccountDelete(ctx context.Context, data *schema.ResourceData
 		"organization_id": organizationID,
 	})
 
-	resp, err := client.ServiceAccountsAPIDeleteServiceAccountWithResponse(ctx, organizationID, serviceAccountID)
-	if err := sdk.CheckResponseNoContent(resp, err); err != nil {
+	resp, err := client.ServiceAccountsAPIDeleteServiceAccount(ctx, organizationID, serviceAccountID)
+	if err := sdk.CheckRawResponseNoContent(resp, err); err != nil {
 		return diag.Errorf("deleting service account: %v", err)
 	}
 
@@ -494,8 +494,8 @@ func resourceServiceAccountKeyUpdate(ctx context.Context, data *schema.ResourceD
 
 	tflog.Info(ctx, "updating service account key", logKeys)
 
-	resp, err := client.ServiceAccountsAPIUpdateServiceAccountKeyWithResponse(ctx, organizationID, serviceAccountID, keyID, &sdk.ServiceAccountsAPIUpdateServiceAccountKeyParams{
-		KeyActive: active,
+	resp, err := client.ServiceAccountsAPIUpdateServiceAccountKeyWithResponse(ctx, organizationID, serviceAccountID, keyID, sdk.KeyIsTheServiceAccountKeyToUpdate{
+		Active: active,
 	})
 
 	if err := sdk.CheckOKResponse(resp, err); err != nil {
@@ -524,8 +524,8 @@ func resourceServiceAccountKeyDelete(ctx context.Context, data *schema.ResourceD
 
 	tflog.Info(ctx, "deleting service account key", logKeys)
 
-	resp, err := client.ServiceAccountsAPIDeleteServiceAccountKeyWithResponse(ctx, organizationID, serviceAccountID, keyID)
-	if err := sdk.CheckResponseNoContent(resp, err); err != nil {
+	resp, err := client.ServiceAccountsAPIDeleteServiceAccountKey(ctx, organizationID, serviceAccountID, keyID)
+	if err := sdk.CheckRawResponseNoContent(resp, err); err != nil {
 		return diag.Errorf("deleting service account key: %v", err)
 	}
 
