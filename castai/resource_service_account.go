@@ -458,11 +458,12 @@ func resourceServiceAccountKeyCreate(ctx context.Context, data *schema.ResourceD
 			},
 		},
 	)
-	if err := sdk.CheckOKResponse(resp, err); err != nil {
+	if err := sdk.CheckResponseCreated(resp, err); err != nil {
 		return diag.Errorf("creating service account key: %v", err)
 	}
 
-	logKeys["resource_id"] = *resp.JSON200.Id
+	// FIXME: panic here
+	logKeys["resource_id"] = *resp.JSON201
 	tflog.Info(ctx, "created service account key", logKeys)
 
 	data.SetId(*resp.JSON200.Id)
