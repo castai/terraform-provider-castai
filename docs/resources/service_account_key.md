@@ -23,8 +23,8 @@ Service account key resource allows managing CAST AI service account keys.
 
 ### Optional
 
-- `active` (Boolean) Active status of the service account key.
-- `expires_at` (String) Expiration date of the service account key.
+- `active` (Boolean) Whether the service account key is active. Defaults to true
+- `expires_at` (String) The expiration time of the service account key in RFC3339 format. Defaults to an empty string.
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only

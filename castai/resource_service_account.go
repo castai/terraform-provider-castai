@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -338,18 +339,18 @@ func resourceServiceAccountKey() *schema.Resource {
 				Description: "Last time the service account key was used.",
 			},
 			FieldServiceAccountKeyExpiresAt: {
-				Type:             schema.TypeString,
-				Optional:         true,
-				Computed:         true,
-				ForceNew:         true,
-				Description:      "Expiration date of the service account key.",
-				ValidateDiagFunc: validation.ToDiagFunc(validation.IsRFC3339Time),
+				Type:        schema.TypeString,
+				Optional:    true,
+				Default:     "",
+				ForceNew:    true,
+				Description: "The expiration time of the service account key in RFC3339 format. Defaults to an empty string.",
+				// ValidateDiagFunc: validateRFC3339TimeOrEmpty,
 			},
 			FieldServiceAccountKeyActive: {
 				Type:        schema.TypeBool,
 				Optional:    true,
-				Computed:    true,
-				Description: "Active status of the service account key.",
+				Default:     true,
+				Description: "Whether the service account key is active. Defaults to true",
 			},
 		},
 	}
@@ -416,13 +417,13 @@ func resourceServiceAccountKeyRead(ctx context.Context, data *schema.ResourceDat
 	}
 
 	if serviceAccountKey.Key.LastUsedAt != nil {
-		if err := data.Set(FieldServiceAccountKeyLastUsedAt, serviceAccountKey.Key.LastUsedAt.String()); err != nil {
+		if err := data.Set(FieldServiceAccountKeyLastUsedAt, serviceAccountKey.Key.LastUsedAt.Format(time.RFC3339)); err != nil {
 			return diag.Errorf("setting field %s: %v", FieldServiceAccountKeyLastUsedAt, err)
 		}
 	}
 
 	if serviceAccountKey.Key.ExpiresAt != nil {
-		if err := data.Set(FieldServiceAccountKeyExpiresAt, serviceAccountKey.Key.ExpiresAt.String()); err != nil {
+		if err := data.Set(FieldServiceAccountKeyExpiresAt, serviceAccountKey.Key.ExpiresAt.Format(time.RFC3339)); err != nil {
 			return diag.Errorf("setting field %s: %v", FieldServiceAccountKeyExpiresAt, err)
 		}
 	}
@@ -434,6 +435,8 @@ func resourceServiceAccountKeyRead(ctx context.Context, data *schema.ResourceDat
 }
 
 func resourceServiceAccountKeyCreate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	var expiresAtTime *time.Time
+
 	client := meta.(*ProviderConfig).api
 
 	organizationID, err := getOrganizationID(ctx, data, meta)
@@ -445,9 +448,12 @@ func resourceServiceAccountKeyCreate(ctx context.Context, data *schema.ResourceD
 	expiresAt := data.Get(FieldServiceAccountKeyExpiresAt).(string)
 	active := data.Get(FieldServiceAccountKeyActive).(bool)
 
-	expiresAtParsed, err := time.Parse(time.RFC3339, expiresAt)
-	if err != nil {
-		return diag.Errorf("parsing expires_at date: %v", err)
+	if expiresAt != "" {
+		expiresAtParsed, err := time.Parse(time.RFC3339, expiresAt)
+		if err != nil {
+			return diag.Errorf("parsing expires_at date: %v", err)
+		}
+		expiresAtTime = &expiresAtParsed
 	}
 
 	logKeys := map[string]interface{}{
@@ -465,7 +471,7 @@ func resourceServiceAccountKeyCreate(ctx context.Context, data *schema.ResourceD
 		sdk.ServiceAccountsAPICreateServiceAccountKeyRequest{
 			Key: sdk.CastaiServiceaccountsV1beta1CreateServiceAccountKeyRequestKey{
 				Active:    &active,
-				ExpiresAt: &expiresAtParsed,
+				ExpiresAt: expiresAtTime,
 				Name:      name,
 			},
 		},
@@ -539,6 +545,26 @@ func resourceServiceAccountKeyDelete(ctx context.Context, data *schema.ResourceD
 	tflog.Info(ctx, "deleted service account key", logKeys)
 
 	data.SetId("")
+
+	return nil
+}
+
+func validateRFC3339TimeOrEmpty(i interface{}, path cty.Path) diag.Diagnostics {
+	v, ok := i.(string)
+	if !ok || v == "" {
+		return nil // Allow empty strings without error
+	}
+
+	_, err := time.Parse(time.RFC3339, v)
+	if err != nil {
+		return diag.Diagnostics{
+			diag.Diagnostic{
+				Severity: diag.Error,
+				Summary:  "Invalid expires_at format",
+				Detail:   "The expires_at field must be in RFC3339 format or an empty string.",
+			},
+		}
+	}
 
 	return nil
 }

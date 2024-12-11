@@ -753,8 +753,8 @@ func TestServiceAccountKey_CreateContext(t *testing.T) {
 		r.False(result.HasError())
 		r.Equal(`ID = da5664b3-87bf-4e03-9d1c-ec26049991b7
 active = true
-expires_at = 2024-12-01 15:19:40.384 +0000 UTC
-last_used_at = 2024-12-11 13:47:20.927 +0000 UTC
+expires_at = 2024-12-01T15:19:40Z
+last_used_at = 2024-12-11T13:47:20Z
 name = test-key
 organization_id = 4e4cd9eb-82eb-407e-a926-e5fef81cab50
 prefix = 123q
@@ -890,8 +890,8 @@ func TestServiceAccountKey_ReadContext(t *testing.T) {
 		r.False(result.HasError())
 		r.Equal(`ID = da5664b3-87bf-4e03-9d1c-ec26049991b7
 active = true
-expires_at = 2024-12-11 13:47:20.927 +0000 UTC
-last_used_at = 2024-12-11 13:47:20.927 +0000 UTC
+expires_at = 2024-12-11T13:47:20Z
+last_used_at = 2024-12-11T13:47:20Z
 name = test-key
 organization_id = 4e4cd9eb-82eb-407e-a926-e5fef81cab50
 prefix = 123q
@@ -1167,8 +1167,8 @@ func TestServiceAccountKey_UpdateContext(t *testing.T) {
 		r.Nil(result)
 		r.Equal(`ID = da5664b3-87bf-4e03-9d1c-ec26049991b7
 active = false
-expires_at = 2024-12-11 13:47:20.927 +0000 UTC
-last_used_at = 2024-12-11 13:47:20.927 +0000 UTC
+expires_at = 2024-12-11T13:47:20Z
+last_used_at = 2024-12-11T13:47:20Z
 name = test-key
 organization_id = 4e4cd9eb-82eb-407e-a926-e5fef81cab50
 prefix = 123q

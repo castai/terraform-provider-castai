@@ -4319,6 +4319,7 @@ type WorkloadoptimizationV1ResourceConfig struct {
 	// QUANTILE - the quantile function.
 	// MAX - the max function.
 	Function WorkloadoptimizationV1ResourceConfigFunction `json:"function"`
+	Limit    *WorkloadoptimizationV1ResourceLimitStrategy `json:"limit,omitempty"`
 
 	// Period of time over which the resource recommendation is calculated (default value is 24 hours).
 	LookBackPeriodSeconds *int32 `json:"lookBackPeriodSeconds"`
@@ -4351,6 +4352,12 @@ type WorkloadoptimizationV1ResourceConfigUpdate struct {
 	Min *float64 `json:"min"`
 }
 
+// WorkloadoptimizationV1ResourceLimitStrategy defines model for workloadoptimization.v1.ResourceLimitStrategy.
+type WorkloadoptimizationV1ResourceLimitStrategy struct {
+	Multiplier *float64 `json:"multiplier,omitempty"`
+	None       *bool    `json:"none,omitempty"`
+}
+
 // WorkloadoptimizationV1ResourceMetrics defines model for workloadoptimization.v1.ResourceMetrics.
 type WorkloadoptimizationV1ResourceMetrics struct {
 	Max       float64   `json:"max"`
@@ -4375,6 +4382,7 @@ type WorkloadoptimizationV1ResourcePolicies struct {
 	// QUANTILE - the quantile function.
 	// MAX - the max function.
 	Function WorkloadoptimizationV1ResourcePoliciesFunction `json:"function"`
+	Limit    *WorkloadoptimizationV1ResourceLimitStrategy   `json:"limit,omitempty"`
 
 	// Period of time over which the resource recommendation is calculated (default value is 24 hours).
 	LookBackPeriodSeconds *int32 `json:"lookBackPeriodSeconds"`
@@ -4626,6 +4634,8 @@ type WorkloadoptimizationV1WorkloadRecommendation struct {
 
 // WorkloadoptimizationV1WorkloadResourceConfigUpdate defines model for workloadoptimization.v1.WorkloadResourceConfigUpdate.
 type WorkloadoptimizationV1WorkloadResourceConfigUpdate struct {
+	Limit *WorkloadoptimizationV1ResourceLimitStrategy `json:"limit,omitempty"`
+
 	// Period of time over which the resource recommendation is calculated (default value is 24 hours).
 	LookBackPeriodSeconds *int32 `json:"lookBackPeriodSeconds"`
 
