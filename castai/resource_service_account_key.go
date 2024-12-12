@@ -42,18 +42,21 @@ func resourceServiceAccountKey() *schema.Resource {
 			FieldServiceAccountKeyOrganizationID: {
 				Type:             schema.TypeString,
 				Required:         true,
+				ForceNew:         true,
 				Description:      "ID of the organization.",
 				ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
 			},
 			FieldServiceAccountKeyServiceAccountID: {
 				Type:             schema.TypeString,
 				Required:         true,
+				ForceNew:         true,
 				Description:      "ID of the service account.",
 				ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
 			},
 			FieldServiceAccountKeyName: {
 				Type:             schema.TypeString,
 				Required:         true,
+				ForceNew:         true,
 				Description:      "Name of the service account key.",
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
