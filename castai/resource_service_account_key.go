@@ -84,7 +84,6 @@ func resourceServiceAccountKey() *schema.Resource {
 			FieldServiceAccountKeyToken: {
 				Type:        schema.TypeString,
 				Computed:    true,
-				Sensitive:   true,
 				Description: "The token of the service account key used for authentication.",
 			},
 		},
