@@ -23,7 +23,7 @@ Service account key resource allows managing CAST AI service account keys.
 
 ### Optional
 
-- `active` (Boolean) Whether the service account key is active. Defaults to true
+- `active` (Boolean) Whether the service account key is active. Defaults to true.
 - `expires_at` (String) The expiration time of the service account key in RFC3339 format. Defaults to an empty string.
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
@@ -32,6 +32,7 @@ Service account key resource allows managing CAST AI service account keys.
 - `id` (String) The ID of this resource.
 - `last_used_at` (String) Last time the service account key was used.
 - `prefix` (String) Prefix of the service account key.
+- `token` (String, Sensitive) The token of the service account key used for authentication.
 
 <a id="nestedblock--timeouts"></a>
 ### Nested Schema for `timeouts`
