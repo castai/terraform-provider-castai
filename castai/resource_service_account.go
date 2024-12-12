@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/castai/terraform-provider-castai/castai/sdk"
 )
@@ -24,6 +25,7 @@ const (
 	FieldServiceAccountAuthorID    = "id"
 	FieldServiceAccountAuthorEmail = "email"
 	FieldServiceAccountAuthorKind  = "kind"
+
 )
 
 func resourceServiceAccount() *schema.Resource {
@@ -33,24 +35,27 @@ func resourceServiceAccount() *schema.Resource {
 		UpdateContext: resourceServiceAccountUpdate,
 		DeleteContext: resourceServiceAccountDelete,
 
-		Description: "Service Account resource allows managing CAST AI service accounts.",
+		Description: "Service account resource allows managing CAST AI service accounts.",
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(3 * time.Minute),
+			Read:   schema.DefaultTimeout(3 * time.Minute),
 			Update: schema.DefaultTimeout(3 * time.Minute),
 			Delete: schema.DefaultTimeout(3 * time.Minute),
 		},
 
 		Schema: map[string]*schema.Schema{
 			FieldServiceAccountOrganizationID: {
-				Type:        schema.TypeString,
-				Required:    true,
-				ForceNew:    true,
-				Description: "ID of the organization.",
+				Type:             schema.TypeString,
+				Required:         true,
+				ForceNew:         true,
+				Description:      "ID of the organization.",
+				ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
 			},
 			FieldServiceAccountName: {
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: "Name of the service account.",
+				Type:             schema.TypeString,
+				Required:         true,
+				Description:      "Name of the service account.",
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
 			FieldServiceAccountDescription: {
 				Type:        schema.TypeString,
@@ -96,6 +101,10 @@ func resourceServiceAccountRead(ctx context.Context, data *schema.ResourceData, 
 	})
 
 	resp, err := client.ServiceAccountsAPIGetServiceAccountWithResponse(ctx, organizationID, data.Id())
+	if err != nil {
+		return diag.Errorf("getting service account: %v", err)
+	}
+
 	if resp.StatusCode() == http.StatusNotFound {
 		tflog.Warn(ctx, "resource is not found, removing from state", map[string]interface{}{
 			"resource_id":     data.Id(),
@@ -228,17 +237,16 @@ func resourceServiceAccountDelete(ctx context.Context, data *schema.ResourceData
 	})
 
 	resp, err := client.ServiceAccountsAPIDeleteServiceAccount(ctx, organizationID, serviceAccountID)
-	if err != nil {
+	if err := sdk.CheckRawResponseNoContent(resp, err); err != nil {
 		return diag.Errorf("deleting service account: %v", err)
-	}
-	if resp.StatusCode != http.StatusNoContent {
-		return diag.Errorf("deleteting service account: expected status: [204], received status: [%d]", resp.StatusCode)
 	}
 
 	tflog.Info(ctx, "deleted service account", map[string]interface{}{
 		"resource_id":     serviceAccountID,
 		"organization_id": organizationID,
 	})
+
+	data.SetId("")
 
 	return nil
 }

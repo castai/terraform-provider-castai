@@ -19,7 +19,7 @@ import (
 	mock_sdk "github.com/castai/terraform-provider-castai/castai/sdk/mock"
 )
 
-func TestServiceAccountReadContext(t *testing.T) {
+func TestServiceAccount_ReadContext(t *testing.T) {
 	t.Parallel()
 
 	t.Run("when state is missing service account ID then return error", func(t *testing.T) {
@@ -184,7 +184,7 @@ Tainted = false
 	})
 }
 
-func TestServiceAccountCreateContext(t *testing.T) {
+func TestServiceAccount_CreateContext(t *testing.T) {
 	t.Parallel()
 
 	t.Run("when ServiceAccountsAPI responds with 201 then populate the state", func(t *testing.T) {
@@ -348,7 +348,7 @@ func TestServiceAccountCreateContext(t *testing.T) {
 	})
 }
 
-func TestServiceAccountDeleteContext(t *testing.T) {
+func TestServiceAccount_DeleteContext(t *testing.T) {
 	t.Run("when ServiceAccountsAPI responds with an error then return error", func(t *testing.T) {
 		r := require.New(t)
 		mockClient := mock_sdk.NewMockClientInterface(gomock.NewController(t))
@@ -421,7 +421,7 @@ func TestServiceAccountDeleteContext(t *testing.T) {
 		r.NotNil(result)
 		r.True(result.HasError())
 		r.Len(result, 1)
-		r.Equal("deleteting service account: expected status: [204], received status: [500]", result[0].Summary)
+		r.Equal("deleting service account: expected status code 204, received: status=500 body=mock error response", result[0].Summary)
 	})
 
 	t.Run("when ServiceAccountsAPI responds with 204 then return nil", func(t *testing.T) {
@@ -457,15 +457,11 @@ func TestServiceAccountDeleteContext(t *testing.T) {
 
 		r.Nil(result)
 		r.False(result.HasError())
-		r.Empty(data.Get(FieldServiceAccountID))
-		r.Empty(data.Get(FieldServiceAccountEmail))
-		r.Empty(data.Get(FieldServiceAccountName))
-		r.Empty(data.Get(FieldServiceAccountDescription))
-		r.Empty(data.Get(FieldServiceAccountAuthor))
+		r.True(data.State().Empty())
 	})
 }
 
-func TestServiceAccountUpdateContext(t *testing.T) {
+func TestServiceAccount_UpdateContext(t *testing.T) {
 	t.Run("when ServiceAccountsAPI responds with an error then return error", func(t *testing.T) {
 		r := require.New(t)
 		mockClient := mock_sdk.NewMockClientInterface(gomock.NewController(t))
@@ -575,7 +571,7 @@ func TestServiceAccountUpdateContext(t *testing.T) {
       "email": "user-email"
     },
     "keys": []
-  }}`, serviceAccountID,userID))))
+  }}`, serviceAccountID, userID))))
 
 		mockClient.EXPECT().
 			ServiceAccountsAPIUpdateServiceAccount(gomock.Any(), organizationID, serviceAccountID, gomock.Any()).
@@ -588,7 +584,7 @@ func TestServiceAccountUpdateContext(t *testing.T) {
 			Return(&http.Response{
 				StatusCode: http.StatusOK,
 				Body:       readBody,
-				Header: map[string][]string{"Content-Type": {"json"}},
+				Header:     map[string][]string{"Content-Type": {"json"}},
 			}, nil)
 
 		resource := resourceServiceAccount()
