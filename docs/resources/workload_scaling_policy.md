@@ -33,6 +33,10 @@ resource "castai_workload_scaling_policy" "services" {
     function        = "MAX"
     overhead        = 0.35
     apply_threshold = 0.2
+    limit {
+      type       = "MULTIPLIER"
+      multiplier = 1.5
+    }
   }
   startup {
     period_seconds = 240
@@ -54,7 +58,7 @@ resource "castai_workload_scaling_policy" "services" {
 
 ### Required
 
-- `apply_type` (String) Recommendation apply type. 
+- `apply_type` (String) Recommendation apply type.
 	- IMMEDIATE - pods are restarted immediately when new recommendation is generated.
 	- DEFERRED - pods are not restarted and recommendation values are applied during natural restarts only (new deployment, etc.)
 - `cluster_id` (String) CAST AI cluster id
@@ -85,10 +89,25 @@ Optional:
 - `apply_threshold` (Number) The threshold of when to apply the recommendation. Recommendation will be applied when diff of current requests and new recommendation is greater than set value
 - `args` (List of String) The arguments for the function - i.e. for `QUANTILE` this should be a [0, 1] float. `MAX` doesn't accept any args
 - `function` (String) The function used to calculate the resource recommendation. Supported values: `QUANTILE`, `MAX`
+- `limit` (Block List, Max: 1) Resource limit settings (see [below for nested schema](#nestedblock--cpu--limit))
 - `look_back_period_seconds` (Number) The look back period in seconds for the recommendation.
 - `max` (Number) Max values for the recommendation, applies to every container. For memory - this is in MiB, for CPU - this is in cores.
 - `min` (Number) Min values for the recommendation, applies to every container. For memory - this is in MiB, for CPU - this is in cores.
 - `overhead` (Number) Overhead for the recommendation, e.g. `0.1` will result in 10% higher recommendation
+
+<a id="nestedblock--cpu--limit"></a>
+### Nested Schema for `cpu.limit`
+
+Required:
+
+- `type` (String) Defines limit strategy type.
+	- NONE - removes the resource limit even if it was specified in the workload spec.
+	- MULTIPLIER - used to calculate the resource limit. The final value is determined by multiplying the resource request by the specified factor.
+
+Optional:
+
+- `multiplier` (Number) Multiplier used to calculate the resource limit. It must be defined for the MULTIPLIER strategy.
+
 
 
 <a id="nestedblock--memory"></a>
@@ -99,10 +118,25 @@ Optional:
 - `apply_threshold` (Number) The threshold of when to apply the recommendation. Recommendation will be applied when diff of current requests and new recommendation is greater than set value
 - `args` (List of String) The arguments for the function - i.e. for `QUANTILE` this should be a [0, 1] float. `MAX` doesn't accept any args
 - `function` (String) The function used to calculate the resource recommendation. Supported values: `QUANTILE`, `MAX`
+- `limit` (Block List, Max: 1) Resource limit settings (see [below for nested schema](#nestedblock--memory--limit))
 - `look_back_period_seconds` (Number) The look back period in seconds for the recommendation.
 - `max` (Number) Max values for the recommendation, applies to every container. For memory - this is in MiB, for CPU - this is in cores.
 - `min` (Number) Min values for the recommendation, applies to every container. For memory - this is in MiB, for CPU - this is in cores.
 - `overhead` (Number) Overhead for the recommendation, e.g. `0.1` will result in 10% higher recommendation
+
+<a id="nestedblock--memory--limit"></a>
+### Nested Schema for `memory.limit`
+
+Required:
+
+- `type` (String) Defines limit strategy type.
+	- NONE - removes the resource limit even if it was specified in the workload spec.
+	- MULTIPLIER - used to calculate the resource limit. The final value is determined by multiplying the resource request by the specified factor.
+
+Optional:
+
+- `multiplier` (Number) Multiplier used to calculate the resource limit. It must be defined for the MULTIPLIER strategy.
+
 
 
 <a id="nestedblock--anti_affinity"></a>

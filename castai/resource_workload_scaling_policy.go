@@ -19,6 +19,8 @@ import (
 	"github.com/castai/terraform-provider-castai/castai/sdk"
 )
 
+const minResourceMultiplierValue = 1.0
+
 var (
 	k8sNameRegex = regexp.MustCompile("^[a-z0-9A-Z][a-z0-9A-Z._-]{0,61}[a-z0-9A-Z]$")
 )
@@ -51,7 +53,7 @@ func resourceWorkloadScalingPolicy() *schema.Resource {
 			"apply_type": {
 				Type:     schema.TypeString,
 				Required: true,
-				Description: `Recommendation apply type. 
+				Description: `Recommendation apply type.
 	- IMMEDIATE - pods are restarted immediately when new recommendation is generated.
 	- DEFERRED - pods are not restarted and recommendation values are applied during natural restarts only (new deployment, etc.)`,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"IMMEDIATE", "DEFERRED"}, false)),
@@ -202,6 +204,37 @@ func workloadScalingPolicyResourceSchema(function string, overhead, minRecommend
 				Type:        schema.TypeFloat,
 				Optional:    true,
 				Description: "Max values for the recommendation, applies to every container. For memory - this is in MiB, for CPU - this is in cores.",
+			},
+			"limit": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				MaxItems:    1,
+				Description: "Resource limit settings",
+				Elem:        workloadScalingPolicyResourceLimitSchema(),
+			},
+		},
+	}
+}
+
+func workloadScalingPolicyResourceLimitSchema() *schema.Resource {
+	return &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			"type": {
+				Type:     schema.TypeString,
+				Required: true,
+				Description: `Defines limit strategy type.
+	- NONE - removes the resource limit even if it was specified in the workload spec.
+	- MULTIPLIER - used to calculate the resource limit. The final value is determined by multiplying the resource request by the specified factor.`,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"NONE", "MULTIPLIER"}, true)), // FIXME: any reason to be strict about it?
+				DiffSuppressFunc: func(k, oldValue, newValue string, d *schema.ResourceData) bool { // FIXME:
+					return strings.EqualFold(oldValue, newValue)
+				},
+			},
+			"multiplier": {
+				Type:             schema.TypeFloat,
+				Optional:         true,
+				Description:      "Multiplier used to calculate the resource limit. It must be defined for the MULTIPLIER strategy.",
+				ValidateDiagFunc: validation.ToDiagFunc(validation.FloatAtLeast(minResourceMultiplierValue)),
 			},
 		},
 	}
@@ -375,19 +408,22 @@ func resourceWorkloadScalingPolicyDiff(_ context.Context, d *schema.ResourceDiff
 	cpu := toWorkloadScalingPolicies(d.Get("cpu").([]interface{})[0].(map[string]interface{}))
 	memory := toWorkloadScalingPolicies(d.Get("memory").([]interface{})[0].(map[string]interface{}))
 
-	if err := validateArgs(cpu, "cpu"); err != nil {
+	if err := validateResourcePolicy(cpu, "cpu"); err != nil {
 		return err
 	}
-	return validateArgs(memory, "memory")
+	return validateResourcePolicy(memory, "memory")
 }
 
-func validateArgs(r sdk.WorkloadoptimizationV1ResourcePolicies, res string) error {
+func validateResourcePolicy(r sdk.WorkloadoptimizationV1ResourcePolicies, res string) error {
 	if r.Function == "QUANTILE" && len(r.Args) == 0 {
 		return fmt.Errorf("field %q: QUANTILE function requires args to be provided", res)
 	}
 	if r.Function == "MAX" && len(r.Args) > 0 {
 		return fmt.Errorf("field %q: MAX function doesn't accept any args", res)
 	}
+
+	// TODO: validate type and multiplier, once API is updated
+
 	return nil
 }
 
@@ -449,7 +485,30 @@ func toWorkloadScalingPolicies(obj map[string]interface{}) sdk.Workloadoptimizat
 	if v, ok := obj["max"].(float64); ok && v > 0 {
 		out.Max = lo.ToPtr(v)
 	}
+	if v, ok := obj["limit"].([]any); ok {
+		out.Limit = toWorkloadResourceLimit(v[0].(map[string]any))
+	}
 
+	return out
+}
+
+func toWorkloadResourceLimit(obj map[string]any) *sdk.WorkloadoptimizationV1ResourceLimitStrategy {
+	if len(obj) == 0 {
+		return nil
+	}
+
+	out := &sdk.WorkloadoptimizationV1ResourceLimitStrategy{}
+	// TODO: validate type and multiplier, once API is updated
+	if v, ok := obj["type"].(string); ok {
+		switch v {
+		case "NONE":
+			out.None = lo.ToPtr(true)
+		case "MULTIPLIER":
+			if v, ok := obj["multiplier"].(float64); ok && v > 0 {
+				out.Multiplier = lo.ToPtr(v)
+			}
+		}
+	}
 	return out
 }
 
@@ -465,6 +524,22 @@ func toWorkloadScalingPoliciesMap(p sdk.WorkloadoptimizationV1ResourcePolicies) 
 
 	if p.LookBackPeriodSeconds != nil {
 		m["look_back_period_seconds"] = int(*p.LookBackPeriodSeconds)
+	}
+
+	// TODO: change casting, once API is updated
+	if p.Limit != nil {
+		if p.Limit.None != nil {
+			m["limit"] = []map[string]any{
+				{"type": "NONE"},
+			}
+		} else if p.Limit.Multiplier != nil {
+			m["limit"] = []map[string]any{
+				{
+					"type":       "MULTIPLIER",
+					"multiplier": *p.Limit.Multiplier,
+				},
+			}
+		}
 	}
 
 	return []map[string]interface{}{m}

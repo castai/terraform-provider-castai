@@ -152,7 +152,7 @@ func scalingPolicyConfigUpdated(clusterName, projectID, name string) string {
 	    }
 		memory_event {
 			apply_type = "DEFERRED"
-		}		
+		}
 		anti_affinity {
 			consider_anti_affinity = true
 		}
@@ -187,7 +187,7 @@ func testAccCheckScalingPolicyDestroy(s *terraform.State) error {
 	return nil
 }
 
-func Test_validateArgs(t *testing.T) {
+func Test_validateResourcePolicy(t *testing.T) {
 	tests := map[string]struct {
 		args    sdk.WorkloadoptimizationV1ResourcePolicies
 		wantErr bool
@@ -211,11 +211,14 @@ func Test_validateArgs(t *testing.T) {
 			},
 			wantErr: true,
 		},
+		"should return error when no value is specified for the multiplier strategy":     {},
+		"should return error when the value is lower than 1 for the multiplier strategy": {},
+		"should return error when a value is specified for the none strategy":            {},
 	}
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
-			if err := validateArgs(tt.args, ""); (err != nil) != tt.wantErr {
-				t.Errorf("validateArgs() error = %v, wantErr %v", err, tt.wantErr)
+			if err := validateResourcePolicy(tt.args, ""); (err != nil) != tt.wantErr {
+				t.Errorf("validateResourcePolicy() error = %v, wantErr %v", err, tt.wantErr)
 			}
 		})
 	}
