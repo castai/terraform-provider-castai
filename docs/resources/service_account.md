@@ -3,20 +3,32 @@
 page_title: "castai_service_account Resource - terraform-provider-castai"
 subcategory: ""
 description: |-
-  Service Account resource allows managing CAST AI service accounts.
+  Service account resource allows managing CAST AI service accounts.
 ---
 
 # castai_service_account (Resource)
 
-Service Account resource allows managing CAST AI service accounts.
+Service account resource allows managing CAST AI service accounts.
 
 ## Example Usage
 
 ```terraform
 resource "castai_service_account" "service_account" {
   organization_id = organization.id
-  name            = "service-account-name"
+  name            = "example-service-account"
   description     = "service account description"
+}
+
+resource "castai_service_account_key" "service_account_key" {
+  organization_id    = data.castai_organization.test.id
+  service_account_id = castai_service_account.service_account.id
+  name               = "example-key"
+  active             = true
+  expires_at         = "2025-01-01T00:00:00Z"
+}
+
+output "service_account_key" {
+  value = castai_service_account_key.service_account_key.token
 }
 ```
 
@@ -46,6 +58,7 @@ Optional:
 
 - `create` (String)
 - `delete` (String)
+- `read` (String)
 - `update` (String)
 
 
