@@ -369,6 +369,13 @@ const (
 	WorkloadoptimizationV1ResourceConfigOverridesFunctionQUANTILE WorkloadoptimizationV1ResourceConfigOverridesFunction = "QUANTILE"
 )
 
+// Defines values for WorkloadoptimizationV1ResourceLimitStrategyType.
+const (
+	MULTIPLIER WorkloadoptimizationV1ResourceLimitStrategyType = "MULTIPLIER"
+	NOLIMIT    WorkloadoptimizationV1ResourceLimitStrategyType = "NO_LIMIT"
+	UNKNOWN    WorkloadoptimizationV1ResourceLimitStrategyType = "UNKNOWN"
+)
+
 // Defines values for WorkloadoptimizationV1ResourcePoliciesFunction.
 const (
 	MAX      WorkloadoptimizationV1ResourcePoliciesFunction = "MAX"
@@ -4152,6 +4159,11 @@ type WorkloadoptimizationV1GetInstallCmdResponse struct {
 	Script string `json:"script"`
 }
 
+// WorkloadoptimizationV1GetWorkloadEventResponse defines model for workloadoptimization.v1.GetWorkloadEventResponse.
+type WorkloadoptimizationV1GetWorkloadEventResponse struct {
+	Event WorkloadoptimizationV1WorkloadEvent `json:"event"`
+}
+
 // WorkloadoptimizationV1GetWorkloadResponse defines model for workloadoptimization.v1.GetWorkloadResponse.
 type WorkloadoptimizationV1GetWorkloadResponse struct {
 	Metrics  *WorkloadoptimizationV1WorkloadMetrics `json:"metrics,omitempty"`
@@ -4436,8 +4448,19 @@ type WorkloadoptimizationV1ResourceConfigUpdate struct {
 // WorkloadoptimizationV1ResourceLimitStrategy defines model for workloadoptimization.v1.ResourceLimitStrategy.
 type WorkloadoptimizationV1ResourceLimitStrategy struct {
 	Multiplier *float64 `json:"multiplier,omitempty"`
-	None       *bool    `json:"none,omitempty"`
+
+	// Type is the type of the limit strategy.
+	//
+	//  - NO_LIMIT: No limit removes the resource limit even if it was specified in the workload spec.
+	//  - MULTIPLIER: Multiplier used to calculate the resource limit. The final value is determined by multiplying the resource request by the specified factor.
+	Type WorkloadoptimizationV1ResourceLimitStrategyType `json:"type"`
 }
+
+// Type is the type of the limit strategy.
+//
+//   - NO_LIMIT: No limit removes the resource limit even if it was specified in the workload spec.
+//   - MULTIPLIER: Multiplier used to calculate the resource limit. The final value is determined by multiplying the resource request by the specified factor.
+type WorkloadoptimizationV1ResourceLimitStrategyType string
 
 // WorkloadoptimizationV1ResourceMetrics defines model for workloadoptimization.v1.ResourceMetrics.
 type WorkloadoptimizationV1ResourceMetrics struct {
@@ -5155,6 +5178,12 @@ type WorkloadOptimizationAPIListWorkloadEventsParams struct {
 
 // WorkloadOptimizationAPIListWorkloadEventsParamsType defines parameters for WorkloadOptimizationAPIListWorkloadEvents.
 type WorkloadOptimizationAPIListWorkloadEventsParamsType string
+
+// WorkloadOptimizationAPIGetWorkloadEventParams defines parameters for WorkloadOptimizationAPIGetWorkloadEvent.
+type WorkloadOptimizationAPIGetWorkloadEventParams struct {
+	// The creation time of the event.
+	CreatedAt time.Time `form:"createdAt" json:"createdAt"`
+}
 
 // WorkloadOptimizationAPIGetWorkloadParams defines parameters for WorkloadOptimizationAPIGetWorkload.
 type WorkloadOptimizationAPIGetWorkloadParams struct {

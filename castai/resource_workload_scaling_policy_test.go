@@ -11,6 +11,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/samber/lo"
+	"github.com/stretchr/testify/require"
 
 	"github.com/castai/terraform-provider-castai/castai/sdk"
 )
@@ -189,8 +191,8 @@ func testAccCheckScalingPolicyDestroy(s *terraform.State) error {
 
 func Test_validateResourcePolicy(t *testing.T) {
 	tests := map[string]struct {
-		args    sdk.WorkloadoptimizationV1ResourcePolicies
-		wantErr bool
+		args   sdk.WorkloadoptimizationV1ResourcePolicies
+		errMsg string
 	}{
 		"should not return error when QUANTILE has args provided": {
 			args: sdk.WorkloadoptimizationV1ResourcePolicies{
@@ -202,23 +204,40 @@ func Test_validateResourcePolicy(t *testing.T) {
 			args: sdk.WorkloadoptimizationV1ResourcePolicies{
 				Function: "QUANTILE",
 			},
-			wantErr: true,
+			errMsg: `field "cpu": QUANTILE function requires args to be provided`,
 		},
 		"should return error when MAX has args provided": {
 			args: sdk.WorkloadoptimizationV1ResourcePolicies{
 				Function: "MAX",
 				Args:     []string{"0.5"},
 			},
-			wantErr: true,
+			errMsg: `field "cpu": MAX function doesn't accept any args`,
 		},
-		"should return error when no value is specified for the multiplier strategy":     {},
-		"should return error when the value is lower than 1 for the multiplier strategy": {},
-		"should return error when a value is specified for the none strategy":            {},
+		"should return error when no value is specified for the multiplier strategy": {
+			args: sdk.WorkloadoptimizationV1ResourcePolicies{
+				Limit: &sdk.WorkloadoptimizationV1ResourceLimitStrategy{
+					Type: sdk.MULTIPLIER,
+				},
+			},
+			errMsg: `field "cpu": field "limit": "MULTIPLIER" limit type requires multiplier value to be provided`,
+		},
+		"should return error when a value is specified for the no limit strategy": {
+			args: sdk.WorkloadoptimizationV1ResourcePolicies{
+				Limit: &sdk.WorkloadoptimizationV1ResourceLimitStrategy{
+					Type:       sdk.NOLIMIT,
+					Multiplier: lo.ToPtr(4.2),
+				},
+			},
+			errMsg: `field "cpu": field "limit": "NO_LIMIT" limit type doesn't accept multiplier value`,
+		},
 	}
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
-			if err := validateResourcePolicy(tt.args, ""); (err != nil) != tt.wantErr {
-				t.Errorf("validateResourcePolicy() error = %v, wantErr %v", err, tt.wantErr)
+			err := validateResourcePolicy(tt.args, "cpu")
+			if tt.errMsg == "" {
+				require.NoError(t, err)
+			} else {
+				require.EqualError(t, err, tt.errMsg)
 			}
 		})
 	}

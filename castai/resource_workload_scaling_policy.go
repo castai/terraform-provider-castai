@@ -21,6 +21,12 @@ import (
 
 const minResourceMultiplierValue = 1.0
 
+const (
+	FieldLimitStrategy           = "limit"
+	FieldLimitStrategyType       = "type"
+	FieldLimitStrategyMultiplier = "multiplier"
+)
+
 var (
 	k8sNameRegex = regexp.MustCompile("^[a-z0-9A-Z][a-z0-9A-Z._-]{0,61}[a-z0-9A-Z]$")
 )
@@ -205,7 +211,7 @@ func workloadScalingPolicyResourceSchema(function string, overhead, minRecommend
 				Optional:    true,
 				Description: "Max values for the recommendation, applies to every container. For memory - this is in MiB, for CPU - this is in cores.",
 			},
-			"limit": {
+			FieldLimitStrategy: {
 				Type:        schema.TypeList,
 				Optional:    true,
 				MaxItems:    1,
@@ -219,7 +225,7 @@ func workloadScalingPolicyResourceSchema(function string, overhead, minRecommend
 func workloadScalingPolicyResourceLimitSchema() *schema.Resource {
 	return &schema.Resource{
 		Schema: map[string]*schema.Schema{
-			"type": {
+			FieldLimitStrategyType: {
 				Type:     schema.TypeString,
 				Required: true,
 				Description: `Defines limit strategy type.
@@ -230,7 +236,7 @@ func workloadScalingPolicyResourceLimitSchema() *schema.Resource {
 					return strings.EqualFold(oldValue, newValue)
 				},
 			},
-			"multiplier": {
+			FieldLimitStrategyMultiplier: {
 				Type:             schema.TypeFloat,
 				Optional:         true,
 				Description:      "Multiplier used to calculate the resource limit. It must be defined for the MULTIPLIER strategy.",
@@ -422,8 +428,30 @@ func validateResourcePolicy(r sdk.WorkloadoptimizationV1ResourcePolicies, res st
 		return fmt.Errorf("field %q: MAX function doesn't accept any args", res)
 	}
 
-	// TODO: validate type and multiplier, once API is updated
+	err := validateResourceLimit(r)
+	if err != nil {
+		return fmt.Errorf("field %q: %w", res, err)
+	}
+	return nil
+}
 
+func validateResourceLimit(r sdk.WorkloadoptimizationV1ResourcePolicies) error {
+	if r.Limit == nil {
+		return nil
+	}
+
+	switch r.Limit.Type {
+	case sdk.NOLIMIT:
+		if r.Limit.Multiplier != nil {
+			return fmt.Errorf(`field %q: "NO_LIMIT" limit type doesn't accept multiplier value`, FieldLimitStrategy)
+		}
+	case sdk.MULTIPLIER:
+		if r.Limit.Multiplier == nil {
+			return fmt.Errorf(`field %q: "MULTIPLIER" limit type requires multiplier value to be provided`, FieldLimitStrategy)
+		}
+	default:
+		return fmt.Errorf(`field %q: unknown limit type %q`, FieldLimitStrategy, r.Limit.Type)
+	}
 	return nil
 }
 
@@ -485,7 +513,7 @@ func toWorkloadScalingPolicies(obj map[string]interface{}) sdk.Workloadoptimizat
 	if v, ok := obj["max"].(float64); ok && v > 0 {
 		out.Max = lo.ToPtr(v)
 	}
-	if v, ok := obj["limit"].([]any); ok {
+	if v, ok := obj["limit"].([]any); ok && len(v) > 0 {
 		out.Limit = toWorkloadResourceLimit(v[0].(map[string]any))
 	}
 
@@ -498,16 +526,11 @@ func toWorkloadResourceLimit(obj map[string]any) *sdk.WorkloadoptimizationV1Reso
 	}
 
 	out := &sdk.WorkloadoptimizationV1ResourceLimitStrategy{}
-	// TODO: validate type and multiplier, once API is updated
-	if v, ok := obj["type"].(string); ok {
-		switch v {
-		case "NONE":
-			out.None = lo.ToPtr(true)
-		case "MULTIPLIER":
-			if v, ok := obj["multiplier"].(float64); ok && v > 0 {
-				out.Multiplier = lo.ToPtr(v)
-			}
-		}
+	if v, ok := obj[FieldLimitStrategyType].(string); ok {
+		out.Type = sdk.WorkloadoptimizationV1ResourceLimitStrategyType(v)
+	}
+	if v, ok := obj[FieldLimitStrategyMultiplier].(float64); ok && v > 0 {
+		out.Multiplier = lo.ToPtr(v)
 	}
 	return out
 }
@@ -526,19 +549,10 @@ func toWorkloadScalingPoliciesMap(p sdk.WorkloadoptimizationV1ResourcePolicies) 
 		m["look_back_period_seconds"] = int(*p.LookBackPeriodSeconds)
 	}
 
-	// TODO: change casting, once API is updated
 	if p.Limit != nil {
-		if p.Limit.None != nil {
-			m["limit"] = []map[string]any{
-				{"type": "NONE"},
-			}
-		} else if p.Limit.Multiplier != nil {
-			m["limit"] = []map[string]any{
-				{
-					"type":       "MULTIPLIER",
-					"multiplier": *p.Limit.Multiplier,
-				},
-			}
+		m[FieldLimitStrategyType] = p.Limit.Type
+		if p.Limit.Multiplier != nil {
+			m[FieldLimitStrategyMultiplier] = *p.Limit.Multiplier
 		}
 	}
 
