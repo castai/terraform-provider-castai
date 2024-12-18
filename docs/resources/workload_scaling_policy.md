@@ -101,7 +101,7 @@ Optional:
 Required:
 
 - `type` (String) Defines limit strategy type.
-	- NONE - removes the resource limit even if it was specified in the workload spec.
+	- NO_LIMIT - removes the resource limit even if it was specified in the workload spec.
 	- MULTIPLIER - used to calculate the resource limit. The final value is determined by multiplying the resource request by the specified factor.
 
 Optional:
@@ -130,7 +130,7 @@ Optional:
 Required:
 
 - `type` (String) Defines limit strategy type.
-	- NONE - removes the resource limit even if it was specified in the workload spec.
+	- NO_LIMIT - removes the resource limit even if it was specified in the workload spec.
 	- MULTIPLIER - used to calculate the resource limit. The final value is determined by multiplying the resource request by the specified factor.
 
 Optional:

@@ -228,11 +228,11 @@ func workloadScalingPolicyResourceLimitSchema() *schema.Resource {
 			FieldLimitStrategyType: {
 				Type:     schema.TypeString,
 				Required: true,
-				Description: `Defines limit strategy type.
-	- NONE - removes the resource limit even if it was specified in the workload spec.
-	- MULTIPLIER - used to calculate the resource limit. The final value is determined by multiplying the resource request by the specified factor.`,
-				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{string(sdk.MULTIPLIER), string(sdk.NOLIMIT)}, true)), // FIXME: any reason to be strict about it?
-				DiffSuppressFunc: func(k, oldValue, newValue string, d *schema.ResourceData) bool { // FIXME:
+				Description: fmt.Sprintf(`Defines limit strategy type.
+	- %s - removes the resource limit even if it was specified in the workload spec.
+	- %s - used to calculate the resource limit. The final value is determined by multiplying the resource request by the specified factor.`, sdk.NOLIMIT, sdk.MULTIPLIER),
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{string(sdk.MULTIPLIER), string(sdk.NOLIMIT)}, true)),
+				DiffSuppressFunc: func(k, oldValue, newValue string, d *schema.ResourceData) bool {
 					return strings.EqualFold(oldValue, newValue)
 				},
 			},
@@ -443,11 +443,11 @@ func validateResourceLimit(r sdk.WorkloadoptimizationV1ResourcePolicies) error {
 	switch r.Limit.Type {
 	case sdk.NOLIMIT:
 		if r.Limit.Multiplier != nil {
-			return fmt.Errorf(`field %q: "NO_LIMIT" limit type doesn't accept multiplier value`, FieldLimitStrategy)
+			return fmt.Errorf(`field %q: %q limit type doesn't accept multiplier value`, FieldLimitStrategy, sdk.NOLIMIT)
 		}
 	case sdk.MULTIPLIER:
 		if r.Limit.Multiplier == nil {
-			return fmt.Errorf(`field %q: "MULTIPLIER" limit type requires multiplier value to be provided`, FieldLimitStrategy)
+			return fmt.Errorf(`field %q: %q limit type requires multiplier value to be provided`, FieldLimitStrategy, sdk.MULTIPLIER)
 		}
 	default:
 		return fmt.Errorf(`field %q: unknown limit type %q`, FieldLimitStrategy, r.Limit.Type)
@@ -513,7 +513,7 @@ func toWorkloadScalingPolicies(obj map[string]interface{}) sdk.Workloadoptimizat
 	if v, ok := obj["max"].(float64); ok && v > 0 {
 		out.Max = lo.ToPtr(v)
 	}
-	if v, ok := obj["limit"].([]any); ok && len(v) > 0 {
+	if v, ok := obj[FieldLimitStrategy].([]any); ok && len(v) > 0 {
 		out.Limit = toWorkloadResourceLimit(v[0].(map[string]any))
 	}
 
