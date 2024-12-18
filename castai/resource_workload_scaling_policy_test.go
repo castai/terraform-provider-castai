@@ -41,11 +41,15 @@ func TestAccResourceWorkloadScalingPolicy(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "cpu.0.look_back_period_seconds", "86401"),
 					resource.TestCheckResourceAttr(resourceName, "cpu.0.min", "0.1"),
 					resource.TestCheckResourceAttr(resourceName, "cpu.0.max", "1"),
+					resource.TestCheckResourceAttr(resourceName, "cpu.0.limit.0.type", "MULTIPLIER"),
+					resource.TestCheckResourceAttr(resourceName, "cpu.0.limit.0.multiplier", "1.2"),
 					resource.TestCheckResourceAttr(resourceName, "memory.0.function", "MAX"),
 					resource.TestCheckResourceAttr(resourceName, "memory.0.overhead", "0.25"),
 					resource.TestCheckResourceAttr(resourceName, "memory.0.apply_threshold", "0.1"),
 					resource.TestCheckResourceAttr(resourceName, "memory.0.args.#", "0"),
 					resource.TestCheckResourceAttr(resourceName, "memory.0.min", "100"),
+					resource.TestCheckResourceAttr(resourceName, "memory.0.limit.0.type", "MULTIPLIER"),
+					resource.TestCheckResourceAttr(resourceName, "memory.0.limit.0.multiplier", "1.8"),
 				),
 			},
 			{
@@ -69,12 +73,14 @@ func TestAccResourceWorkloadScalingPolicy(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "cpu.0.args.0", "0.9"),
 					resource.TestCheckResourceAttr(resourceName, "cpu.0.look_back_period_seconds", "86402"),
 					resource.TestCheckResourceAttr(resourceName, "cpu.0.min", "0.1"),
+					resource.TestCheckResourceAttr(resourceName, "cpu.0.limit.0.type", "NO_LIMIT"),
 					resource.TestCheckResourceAttr(resourceName, "memory.0.function", "QUANTILE"),
 					resource.TestCheckResourceAttr(resourceName, "memory.0.overhead", "0.35"),
 					resource.TestCheckResourceAttr(resourceName, "memory.0.apply_threshold", "0.2"),
 					resource.TestCheckResourceAttr(resourceName, "memory.0.args.0", "0.9"),
 					resource.TestCheckResourceAttr(resourceName, "memory.0.min", "100"),
 					resource.TestCheckResourceAttr(resourceName, "memory.0.max", "512"),
+					resource.TestCheckResourceAttr(resourceName, "memory.0.limit.0.type", "NO_LIMIT"),
 					resource.TestCheckResourceAttr(resourceName, "startup.0.period_seconds", "123"),
 					resource.TestCheckResourceAttr(resourceName, "downscaling.0.apply_type", "DEFERRED"),
 					resource.TestCheckResourceAttr(resourceName, "memory_event.0.apply_type", "DEFERRED"),
@@ -110,12 +116,20 @@ func scalingPolicyConfig(clusterName, projectID, name string) string {
             min             = 0.1
             max             = 1
 			look_back_period_seconds = 86401
+			limit {
+				type 		    = "MULTIPLIER"
+				multiplier 	= 1.2
+			}
 		}
 		memory {
 			function 		= "MAX"
 			overhead 		= 0.25
 			apply_threshold = 0.1
             min             = 100
+			limit {
+				type 		    = "MULTIPLIER"
+				multiplier 	= 1.8
+			}
 		}
 	}`, name)
 
@@ -137,6 +151,9 @@ func scalingPolicyConfigUpdated(clusterName, projectID, name string) string {
 			args 			= ["0.9"]
 			look_back_period_seconds = 86402
             min             = 0.1
+			limit {
+				type 		    = "NO_LIMIT"
+			}
 		}
 		memory {
 			function 		= "QUANTILE"
@@ -145,6 +162,9 @@ func scalingPolicyConfigUpdated(clusterName, projectID, name string) string {
 			args 			= ["0.9"]
             min             = 100
             max             = 512
+			limit {
+				type 		    = "NO_LIMIT"
+			}
 		}
 		startup {
 			period_seconds = 123

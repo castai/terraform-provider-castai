@@ -231,7 +231,7 @@ func workloadScalingPolicyResourceLimitSchema() *schema.Resource {
 				Description: `Defines limit strategy type.
 	- NONE - removes the resource limit even if it was specified in the workload spec.
 	- MULTIPLIER - used to calculate the resource limit. The final value is determined by multiplying the resource request by the specified factor.`,
-				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"NONE", "MULTIPLIER"}, true)), // FIXME: any reason to be strict about it?
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{string(sdk.MULTIPLIER), string(sdk.NOLIMIT)}, true)), // FIXME: any reason to be strict about it?
 				DiffSuppressFunc: func(k, oldValue, newValue string, d *schema.ResourceData) bool { // FIXME:
 					return strings.EqualFold(oldValue, newValue)
 				},
@@ -550,10 +550,13 @@ func toWorkloadScalingPoliciesMap(p sdk.WorkloadoptimizationV1ResourcePolicies) 
 	}
 
 	if p.Limit != nil {
-		m[FieldLimitStrategyType] = p.Limit.Type
+		limit := map[string]any{}
+
+		limit[FieldLimitStrategyType] = p.Limit.Type
 		if p.Limit.Multiplier != nil {
-			m[FieldLimitStrategyMultiplier] = *p.Limit.Multiplier
+			limit[FieldLimitStrategyMultiplier] = *p.Limit.Multiplier
 		}
+		m[FieldLimitStrategy] = []map[string]any{limit}
 	}
 
 	return []map[string]interface{}{m}
