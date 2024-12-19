@@ -11,6 +11,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/samber/lo"
+	"github.com/stretchr/testify/require"
 
 	"github.com/castai/terraform-provider-castai/castai/sdk"
 )
@@ -39,11 +41,15 @@ func TestAccResourceWorkloadScalingPolicy(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "cpu.0.look_back_period_seconds", "86401"),
 					resource.TestCheckResourceAttr(resourceName, "cpu.0.min", "0.1"),
 					resource.TestCheckResourceAttr(resourceName, "cpu.0.max", "1"),
+					resource.TestCheckResourceAttr(resourceName, "cpu.0.limit.0.type", "MULTIPLIER"),
+					resource.TestCheckResourceAttr(resourceName, "cpu.0.limit.0.multiplier", "1.2"),
 					resource.TestCheckResourceAttr(resourceName, "memory.0.function", "MAX"),
 					resource.TestCheckResourceAttr(resourceName, "memory.0.overhead", "0.25"),
 					resource.TestCheckResourceAttr(resourceName, "memory.0.apply_threshold", "0.1"),
 					resource.TestCheckResourceAttr(resourceName, "memory.0.args.#", "0"),
 					resource.TestCheckResourceAttr(resourceName, "memory.0.min", "100"),
+					resource.TestCheckResourceAttr(resourceName, "memory.0.limit.0.type", "MULTIPLIER"),
+					resource.TestCheckResourceAttr(resourceName, "memory.0.limit.0.multiplier", "1.8"),
 				),
 			},
 			{
@@ -67,12 +73,14 @@ func TestAccResourceWorkloadScalingPolicy(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "cpu.0.args.0", "0.9"),
 					resource.TestCheckResourceAttr(resourceName, "cpu.0.look_back_period_seconds", "86402"),
 					resource.TestCheckResourceAttr(resourceName, "cpu.0.min", "0.1"),
+					resource.TestCheckResourceAttr(resourceName, "cpu.0.limit.0.type", "NO_LIMIT"),
 					resource.TestCheckResourceAttr(resourceName, "memory.0.function", "QUANTILE"),
 					resource.TestCheckResourceAttr(resourceName, "memory.0.overhead", "0.35"),
 					resource.TestCheckResourceAttr(resourceName, "memory.0.apply_threshold", "0.2"),
 					resource.TestCheckResourceAttr(resourceName, "memory.0.args.0", "0.9"),
 					resource.TestCheckResourceAttr(resourceName, "memory.0.min", "100"),
 					resource.TestCheckResourceAttr(resourceName, "memory.0.max", "512"),
+					resource.TestCheckResourceAttr(resourceName, "memory.0.limit.0.type", "NO_LIMIT"),
 					resource.TestCheckResourceAttr(resourceName, "startup.0.period_seconds", "123"),
 					resource.TestCheckResourceAttr(resourceName, "downscaling.0.apply_type", "DEFERRED"),
 					resource.TestCheckResourceAttr(resourceName, "memory_event.0.apply_type", "DEFERRED"),
@@ -108,12 +116,20 @@ func scalingPolicyConfig(clusterName, projectID, name string) string {
             min             = 0.1
             max             = 1
 			look_back_period_seconds = 86401
+			limit {
+				type 		    = "MULTIPLIER"
+				multiplier 	= 1.2
+			}
 		}
 		memory {
 			function 		= "MAX"
 			overhead 		= 0.25
 			apply_threshold = 0.1
             min             = 100
+			limit {
+				type 		    = "MULTIPLIER"
+				multiplier 	= 1.8
+			}
 		}
 	}`, name)
 
@@ -135,6 +151,9 @@ func scalingPolicyConfigUpdated(clusterName, projectID, name string) string {
 			args 			= ["0.9"]
 			look_back_period_seconds = 86402
             min             = 0.1
+			limit {
+				type 		    = "NO_LIMIT"
+			}
 		}
 		memory {
 			function 		= "QUANTILE"
@@ -143,6 +162,9 @@ func scalingPolicyConfigUpdated(clusterName, projectID, name string) string {
 			args 			= ["0.9"]
             min             = 100
             max             = 512
+			limit {
+				type 		    = "NO_LIMIT"
+			}
 		}
 		startup {
 			period_seconds = 123
@@ -152,7 +174,7 @@ func scalingPolicyConfigUpdated(clusterName, projectID, name string) string {
 	    }
 		memory_event {
 			apply_type = "DEFERRED"
-		}		
+		}
 		anti_affinity {
 			consider_anti_affinity = true
 		}
@@ -187,10 +209,10 @@ func testAccCheckScalingPolicyDestroy(s *terraform.State) error {
 	return nil
 }
 
-func Test_validateArgs(t *testing.T) {
+func Test_validateResourcePolicy(t *testing.T) {
 	tests := map[string]struct {
-		args    sdk.WorkloadoptimizationV1ResourcePolicies
-		wantErr bool
+		args   sdk.WorkloadoptimizationV1ResourcePolicies
+		errMsg string
 	}{
 		"should not return error when QUANTILE has args provided": {
 			args: sdk.WorkloadoptimizationV1ResourcePolicies{
@@ -202,20 +224,40 @@ func Test_validateArgs(t *testing.T) {
 			args: sdk.WorkloadoptimizationV1ResourcePolicies{
 				Function: "QUANTILE",
 			},
-			wantErr: true,
+			errMsg: `field "cpu": QUANTILE function requires args to be provided`,
 		},
 		"should return error when MAX has args provided": {
 			args: sdk.WorkloadoptimizationV1ResourcePolicies{
 				Function: "MAX",
 				Args:     []string{"0.5"},
 			},
-			wantErr: true,
+			errMsg: `field "cpu": MAX function doesn't accept any args`,
+		},
+		"should return error when no value is specified for the multiplier strategy": {
+			args: sdk.WorkloadoptimizationV1ResourcePolicies{
+				Limit: &sdk.WorkloadoptimizationV1ResourceLimitStrategy{
+					Type: sdk.MULTIPLIER,
+				},
+			},
+			errMsg: `field "cpu": field "limit": "MULTIPLIER" limit type requires multiplier value to be provided`,
+		},
+		"should return error when a value is specified for the no limit strategy": {
+			args: sdk.WorkloadoptimizationV1ResourcePolicies{
+				Limit: &sdk.WorkloadoptimizationV1ResourceLimitStrategy{
+					Type:       sdk.NOLIMIT,
+					Multiplier: lo.ToPtr(4.2),
+				},
+			},
+			errMsg: `field "cpu": field "limit": "NO_LIMIT" limit type doesn't accept multiplier value`,
 		},
 	}
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
-			if err := validateArgs(tt.args, ""); (err != nil) != tt.wantErr {
-				t.Errorf("validateArgs() error = %v, wantErr %v", err, tt.wantErr)
+			err := validateResourcePolicy(tt.args, "cpu")
+			if tt.errMsg == "" {
+				require.NoError(t, err)
+			} else {
+				require.EqualError(t, err, tt.errMsg)
 			}
 		})
 	}

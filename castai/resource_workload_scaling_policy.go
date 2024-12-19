@@ -19,6 +19,14 @@ import (
 	"github.com/castai/terraform-provider-castai/castai/sdk"
 )
 
+const minResourceMultiplierValue = 1.0
+
+const (
+	FieldLimitStrategy           = "limit"
+	FieldLimitStrategyType       = "type"
+	FieldLimitStrategyMultiplier = "multiplier"
+)
+
 var (
 	k8sNameRegex = regexp.MustCompile("^[a-z0-9A-Z][a-z0-9A-Z._-]{0,61}[a-z0-9A-Z]$")
 )
@@ -51,7 +59,7 @@ func resourceWorkloadScalingPolicy() *schema.Resource {
 			"apply_type": {
 				Type:     schema.TypeString,
 				Required: true,
-				Description: `Recommendation apply type. 
+				Description: `Recommendation apply type.
 	- IMMEDIATE - pods are restarted immediately when new recommendation is generated.
 	- DEFERRED - pods are not restarted and recommendation values are applied during natural restarts only (new deployment, etc.)`,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"IMMEDIATE", "DEFERRED"}, false)),
@@ -202,6 +210,34 @@ func workloadScalingPolicyResourceSchema(function string, overhead, minRecommend
 				Type:        schema.TypeFloat,
 				Optional:    true,
 				Description: "Max values for the recommendation, applies to every container. For memory - this is in MiB, for CPU - this is in cores.",
+			},
+			FieldLimitStrategy: {
+				Type:        schema.TypeList,
+				Optional:    true,
+				MaxItems:    1,
+				Description: "Resource limit settings",
+				Elem:        workloadScalingPolicyResourceLimitSchema(),
+			},
+		},
+	}
+}
+
+func workloadScalingPolicyResourceLimitSchema() *schema.Resource {
+	return &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			FieldLimitStrategyType: {
+				Type:     schema.TypeString,
+				Required: true,
+				Description: fmt.Sprintf(`Defines limit strategy type.
+	- %s - removes the resource limit even if it was specified in the workload spec.
+	- %s - used to calculate the resource limit. The final value is determined by multiplying the resource request by the specified factor.`, sdk.NOLIMIT, sdk.MULTIPLIER),
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{string(sdk.MULTIPLIER), string(sdk.NOLIMIT)}, false)),
+			},
+			FieldLimitStrategyMultiplier: {
+				Type:             schema.TypeFloat,
+				Optional:         true,
+				Description:      "Multiplier used to calculate the resource limit. It must be defined for the MULTIPLIER strategy.",
+				ValidateDiagFunc: validation.ToDiagFunc(validation.FloatAtLeast(minResourceMultiplierValue)),
 			},
 		},
 	}
@@ -375,18 +411,43 @@ func resourceWorkloadScalingPolicyDiff(_ context.Context, d *schema.ResourceDiff
 	cpu := toWorkloadScalingPolicies(d.Get("cpu").([]interface{})[0].(map[string]interface{}))
 	memory := toWorkloadScalingPolicies(d.Get("memory").([]interface{})[0].(map[string]interface{}))
 
-	if err := validateArgs(cpu, "cpu"); err != nil {
+	if err := validateResourcePolicy(cpu, "cpu"); err != nil {
 		return err
 	}
-	return validateArgs(memory, "memory")
+	return validateResourcePolicy(memory, "memory")
 }
 
-func validateArgs(r sdk.WorkloadoptimizationV1ResourcePolicies, res string) error {
+func validateResourcePolicy(r sdk.WorkloadoptimizationV1ResourcePolicies, res string) error {
 	if r.Function == "QUANTILE" && len(r.Args) == 0 {
 		return fmt.Errorf("field %q: QUANTILE function requires args to be provided", res)
 	}
 	if r.Function == "MAX" && len(r.Args) > 0 {
 		return fmt.Errorf("field %q: MAX function doesn't accept any args", res)
+	}
+
+	err := validateResourceLimit(r)
+	if err != nil {
+		return fmt.Errorf("field %q: %w", res, err)
+	}
+	return nil
+}
+
+func validateResourceLimit(r sdk.WorkloadoptimizationV1ResourcePolicies) error {
+	if r.Limit == nil {
+		return nil
+	}
+
+	switch r.Limit.Type {
+	case sdk.NOLIMIT:
+		if r.Limit.Multiplier != nil {
+			return fmt.Errorf(`field %q: %q limit type doesn't accept multiplier value`, FieldLimitStrategy, sdk.NOLIMIT)
+		}
+	case sdk.MULTIPLIER:
+		if r.Limit.Multiplier == nil {
+			return fmt.Errorf(`field %q: %q limit type requires multiplier value to be provided`, FieldLimitStrategy, sdk.MULTIPLIER)
+		}
+	default:
+		return fmt.Errorf(`field %q: unknown limit type %q`, FieldLimitStrategy, r.Limit.Type)
 	}
 	return nil
 }
@@ -449,7 +510,25 @@ func toWorkloadScalingPolicies(obj map[string]interface{}) sdk.Workloadoptimizat
 	if v, ok := obj["max"].(float64); ok && v > 0 {
 		out.Max = lo.ToPtr(v)
 	}
+	if v, ok := obj[FieldLimitStrategy].([]any); ok && len(v) > 0 {
+		out.Limit = toWorkloadResourceLimit(v[0].(map[string]any))
+	}
 
+	return out
+}
+
+func toWorkloadResourceLimit(obj map[string]any) *sdk.WorkloadoptimizationV1ResourceLimitStrategy {
+	if len(obj) == 0 {
+		return nil
+	}
+
+	out := &sdk.WorkloadoptimizationV1ResourceLimitStrategy{}
+	if v, ok := obj[FieldLimitStrategyType].(string); ok {
+		out.Type = sdk.WorkloadoptimizationV1ResourceLimitStrategyType(v)
+	}
+	if v, ok := obj[FieldLimitStrategyMultiplier].(float64); ok && v > 0 {
+		out.Multiplier = lo.ToPtr(v)
+	}
 	return out
 }
 
@@ -465,6 +544,16 @@ func toWorkloadScalingPoliciesMap(p sdk.WorkloadoptimizationV1ResourcePolicies) 
 
 	if p.LookBackPeriodSeconds != nil {
 		m["look_back_period_seconds"] = int(*p.LookBackPeriodSeconds)
+	}
+
+	if p.Limit != nil {
+		limit := map[string]any{}
+
+		limit[FieldLimitStrategyType] = p.Limit.Type
+		if p.Limit.Multiplier != nil {
+			limit[FieldLimitStrategyMultiplier] = *p.Limit.Multiplier
+		}
+		m[FieldLimitStrategy] = []map[string]any{limit}
 	}
 
 	return []map[string]interface{}{m}
