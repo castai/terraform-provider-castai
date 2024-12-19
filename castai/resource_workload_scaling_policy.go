@@ -231,10 +231,7 @@ func workloadScalingPolicyResourceLimitSchema() *schema.Resource {
 				Description: fmt.Sprintf(`Defines limit strategy type.
 	- %s - removes the resource limit even if it was specified in the workload spec.
 	- %s - used to calculate the resource limit. The final value is determined by multiplying the resource request by the specified factor.`, sdk.NOLIMIT, sdk.MULTIPLIER),
-				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{string(sdk.MULTIPLIER), string(sdk.NOLIMIT)}, true)),
-				DiffSuppressFunc: func(k, oldValue, newValue string, d *schema.ResourceData) bool {
-					return strings.EqualFold(oldValue, newValue)
-				},
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{string(sdk.MULTIPLIER), string(sdk.NOLIMIT)}, false)),
 			},
 			FieldLimitStrategyMultiplier: {
 				Type:             schema.TypeFloat,

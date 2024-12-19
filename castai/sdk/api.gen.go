@@ -74,6 +74,7 @@ const (
 // Defines values for CastaiInventoryV1beta1DiscountPricingType.
 const (
 	CastaiInventoryV1beta1DiscountPricingTypeTYPEFIXED      CastaiInventoryV1beta1DiscountPricingType = "TYPE_FIXED"
+	CastaiInventoryV1beta1DiscountPricingTypeTYPEFLAT       CastaiInventoryV1beta1DiscountPricingType = "TYPE_FLAT"
 	CastaiInventoryV1beta1DiscountPricingTypeTYPEPERCENTAGE CastaiInventoryV1beta1DiscountPricingType = "TYPE_PERCENTAGE"
 	CastaiInventoryV1beta1DiscountPricingTypeTYPEUNKNOWN    CastaiInventoryV1beta1DiscountPricingType = "TYPE_UNKNOWN"
 )
@@ -814,6 +815,8 @@ type CastaiInventoryV1beta1DiscountPricing struct {
 	// be $1.
 	//  - TYPE_PERCENTAGE: Specifies a percentage discount. If set, the price will be reduced by the percentage value. For example if the public price is $5 and the discount value is "0.1" (10%), the final price will be
 	// $4.
+	//  - TYPE_FLAT: Specifies a flat discount. If set, the price will be reduced by the specified value. For example if the public price is $5 and the discount value is "1", the final price will be
+	// $4. Same if discount value is "-1", the final price will be $6.
 	Type  *CastaiInventoryV1beta1DiscountPricingType `json:"type,omitempty"`
 	Value *string                                    `json:"value,omitempty"`
 }
@@ -823,6 +826,9 @@ type CastaiInventoryV1beta1DiscountPricing struct {
 //   - TYPE_PERCENTAGE: Specifies a percentage discount. If set, the price will be reduced by the percentage value. For example if the public price is $5 and the discount value is "0.1" (10%), the final price will be
 //
 // $4.
+//   - TYPE_FLAT: Specifies a flat discount. If set, the price will be reduced by the specified value. For example if the public price is $5 and the discount value is "1", the final price will be
+//
+// $4. Same if discount value is "-1", the final price will be $6.
 type CastaiInventoryV1beta1DiscountPricingType string
 
 // CastaiInventoryV1beta1GCPCommitmentImport defines model for castai.inventory.v1beta1.GCPCommitmentImport.
