@@ -11,7 +11,7 @@ module "castai-aks-cluster" {
   source = "castai/aks/castai"
 
   api_url                = var.castai_api_url
-  castai_api_token       = var.castai_api_token
+  castai_api_token       = var.castai_api_key
   grpc_url               = var.castai_grpc_url
   wait_for_cluster_ready = true
 
