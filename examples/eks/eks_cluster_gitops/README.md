@@ -42,9 +42,16 @@ Helm Managed ==>  All Castware components such as `castai-agent`, `castai-cluste
                                                   4. Terraform Init & Apply| 
                                                 +-------------------------+
                                                             | 
+                                                            | TERRAFORM OUTPUT
+                                                +-------------------------+
+                                                |  5. Execute terraform output command
+                                                | terraform output cluster_id  
+                                                  terraform output cluster_token
+                                                +-------------------------+
+                                                            | 
                                                             |GITOPS
                                                 +-------------------------+
-                                                | 5. Deploy Helm chart of castai-agent castai-cluster-controller`, `castai-evictor`, `castai-spot-handler`, `castai-kvisor`, `castai-workload-autoscaler`, `castai-pod-pinner`
+                                                | 6. Deploy Helm chart of castai-agent castai-cluster-controller`, `castai-evictor`, `castai-spot-handler`, `castai-kvisor`, `castai-workload-autoscaler`, `castai-pod-pinner`
                                                 +-------------------------+         
                                                             | 
                                                             | 
@@ -55,7 +62,7 @@ Helm Managed ==>  All Castware components such as `castai-agent`, `castai-cluste
 
 Prerequisites:
 - CAST AI account
-- Obtained CAST AI [API Access key](https://docs.cast.ai/docs/authentication#obtaining-api-access-key) with Full Access
+- Obtained CAST AI Key [API Access key](https://docs.cast.ai/docs/authentication#obtaining-api-access-key) with Full Access
 
 
 ### Step 0: Set Profile in AWS CLI
@@ -93,14 +100,19 @@ metadata:
 After successful apply, CAST Console UI will be in `Connecting` state. \
 Note generated 'CASTAI_CLUSTER_ID' from outputs
 
+### Step 5: Execute TF output command & save the below output values
+terraform output cluster_id  
+terraform output cluster_token
 
-### Step 5: Deploy Helm chart of CAST Components
+Obtained values are needed for next step
+
+### Step 6: Deploy Helm chart of CAST Components
 Coponents: `castai-cluster-controller`,`castai-evictor`, `castai-spot-handler`, `castai-kvisor`, `castai-workload-autoscaler`, `castai-pod-pinner` \
 After all CAST AI components are installed in the cluster its status in CAST AI console would change from `Connecting` to `Connected` which means that cluster onboarding process completed successfully.
 
 ```
-CASTAI_API_KEY=""
-CASTAI_CLUSTER_ID=""
+CASTAI_API_KEY="<Replace cluster_token>"
+CASTAI_CLUSTER_ID="<Replace cluster_id>"
 CAST_CONFIG_SOURCE="castai-cluster-controller"
 
 #### Mandatory Component: Castai-agent
