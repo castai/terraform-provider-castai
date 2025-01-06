@@ -37,6 +37,7 @@ resource "castai_workload_scaling_policy" "services" {
       type       = "MULTIPLIER"
       multiplier = 1.5
     }
+    management_option = "READ_ONLY"
   }
   startup {
     period_seconds = 240
@@ -91,6 +92,7 @@ Optional:
 - `function` (String) The function used to calculate the resource recommendation. Supported values: `QUANTILE`, `MAX`
 - `limit` (Block List, Max: 1) Resource limit settings (see [below for nested schema](#nestedblock--cpu--limit))
 - `look_back_period_seconds` (Number) The look back period in seconds for the recommendation.
+- `management_option` (String) Disables management for a single resource when set to `READ_ONLY`. The resource will use its original workload template requests and limits. Currently, the only supported value is `READ_ONLY`.
 - `max` (Number) Max values for the recommendation, applies to every container. For memory - this is in MiB, for CPU - this is in cores.
 - `min` (Number) Min values for the recommendation, applies to every container. For memory - this is in MiB, for CPU - this is in cores.
 - `overhead` (Number) Overhead for the recommendation, e.g. `0.1` will result in 10% higher recommendation
@@ -120,6 +122,7 @@ Optional:
 - `function` (String) The function used to calculate the resource recommendation. Supported values: `QUANTILE`, `MAX`
 - `limit` (Block List, Max: 1) Resource limit settings (see [below for nested schema](#nestedblock--memory--limit))
 - `look_back_period_seconds` (Number) The look back period in seconds for the recommendation.
+- `management_option` (String) Disables management for a single resource when set to `READ_ONLY`. The resource will use its original workload template requests and limits. Currently, the only supported value is `READ_ONLY`.
 - `max` (Number) Max values for the recommendation, applies to every container. For memory - this is in MiB, for CPU - this is in cores.
 - `min` (Number) Min values for the recommendation, applies to every container. For memory - this is in MiB, for CPU - this is in cores.
 - `overhead` (Number) Overhead for the recommendation, e.g. `0.1` will result in 10% higher recommendation
