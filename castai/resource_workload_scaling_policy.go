@@ -223,7 +223,7 @@ func workloadScalingPolicyResourceSchema(function string, overhead, minRecommend
 				Optional: true,
 				Description: "Disables management for a single resource when set to `READ_ONLY`. " +
 					"The resource will use its original workload template requests and limits. " +
-					"Currently, the only supported value is `READ_ONLY`.",
+					"Supported value: `READ_ONLY`. Minimum required workload-autoscaler version: `v0.23.1`.",
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"READ_ONLY"}, false)),
 			},
 		},
