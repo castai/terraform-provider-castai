@@ -20,6 +20,7 @@ resource "castai_workload_scaling_policy" "services" {
       type       = "MULTIPLIER"
       multiplier = 1.5
     }
+    management_option = "READ_ONLY"
   }
   startup {
     period_seconds = 240

@@ -50,6 +50,7 @@ func TestAccResourceWorkloadScalingPolicy(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "memory.0.min", "100"),
 					resource.TestCheckResourceAttr(resourceName, "memory.0.limit.0.type", "MULTIPLIER"),
 					resource.TestCheckResourceAttr(resourceName, "memory.0.limit.0.multiplier", "1.8"),
+					resource.TestCheckResourceAttr(resourceName, "memory.0.management_option", "READ_ONLY"),
 				),
 			},
 			{
@@ -81,6 +82,7 @@ func TestAccResourceWorkloadScalingPolicy(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "memory.0.min", "100"),
 					resource.TestCheckResourceAttr(resourceName, "memory.0.max", "512"),
 					resource.TestCheckResourceAttr(resourceName, "memory.0.limit.0.type", "NO_LIMIT"),
+					resource.TestCheckResourceAttr(resourceName, "memory.0.management_option", "READ_ONLY"),
 					resource.TestCheckResourceAttr(resourceName, "startup.0.period_seconds", "123"),
 					resource.TestCheckResourceAttr(resourceName, "downscaling.0.apply_type", "DEFERRED"),
 					resource.TestCheckResourceAttr(resourceName, "memory_event.0.apply_type", "DEFERRED"),
@@ -130,6 +132,7 @@ func scalingPolicyConfig(clusterName, projectID, name string) string {
 				type 		    = "MULTIPLIER"
 				multiplier 	= 1.8
 			}
+            management_option	= "READ_ONLY"
 		}
 	}`, name)
 
@@ -165,6 +168,7 @@ func scalingPolicyConfigUpdated(clusterName, projectID, name string) string {
 			limit {
 				type 		    = "NO_LIMIT"
 			}
+            management_option = "READ_ONLY"
 		}
 		startup {
 			period_seconds = 123
