@@ -355,6 +355,46 @@ func (mr *MockClientInterfaceMockRecorder) CommitmentsAPIDeleteCommitmentAssignm
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIDeleteCommitmentAssignment", reflect.TypeOf((*MockClientInterface)(nil).CommitmentsAPIDeleteCommitmentAssignment), varargs...)
 }
 
+// CommitmentsAPIGetAWSReservedInstancesImportCMD mocks base method.
+func (m *MockClientInterface) CommitmentsAPIGetAWSReservedInstancesImportCMD(ctx context.Context, organizationId string, params *sdk.CommitmentsAPIGetAWSReservedInstancesImportCMDParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "CommitmentsAPIGetAWSReservedInstancesImportCMD", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CommitmentsAPIGetAWSReservedInstancesImportCMD indicates an expected call of CommitmentsAPIGetAWSReservedInstancesImportCMD.
+func (mr *MockClientInterfaceMockRecorder) CommitmentsAPIGetAWSReservedInstancesImportCMD(ctx, organizationId, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIGetAWSReservedInstancesImportCMD", reflect.TypeOf((*MockClientInterface)(nil).CommitmentsAPIGetAWSReservedInstancesImportCMD), varargs...)
+}
+
+// CommitmentsAPIGetAWSReservedInstancesImportScript mocks base method.
+func (m *MockClientInterface) CommitmentsAPIGetAWSReservedInstancesImportScript(ctx context.Context, organizationId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "CommitmentsAPIGetAWSReservedInstancesImportScript", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CommitmentsAPIGetAWSReservedInstancesImportScript indicates an expected call of CommitmentsAPIGetAWSReservedInstancesImportScript.
+func (mr *MockClientInterfaceMockRecorder) CommitmentsAPIGetAWSReservedInstancesImportScript(ctx, organizationId interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIGetAWSReservedInstancesImportScript", reflect.TypeOf((*MockClientInterface)(nil).CommitmentsAPIGetAWSReservedInstancesImportScript), varargs...)
+}
+
 // CommitmentsAPIGetCommitment mocks base method.
 func (m *MockClientInterface) CommitmentsAPIGetCommitment(ctx context.Context, commitmentId string, params *sdk.CommitmentsAPIGetCommitmentParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
@@ -493,6 +533,46 @@ func (mr *MockClientInterfaceMockRecorder) CommitmentsAPIGetGCPCommitmentsScript
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{ctx}, reqEditors...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIGetGCPCommitmentsScriptTemplate", reflect.TypeOf((*MockClientInterface)(nil).CommitmentsAPIGetGCPCommitmentsScriptTemplate), varargs...)
+}
+
+// CommitmentsAPIImportAWSReservedInstances mocks base method.
+func (m *MockClientInterface) CommitmentsAPIImportAWSReservedInstances(ctx context.Context, organizationId string, params *sdk.CommitmentsAPIImportAWSReservedInstancesParams, body sdk.CommitmentsAPIImportAWSReservedInstancesJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, params, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "CommitmentsAPIImportAWSReservedInstances", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CommitmentsAPIImportAWSReservedInstances indicates an expected call of CommitmentsAPIImportAWSReservedInstances.
+func (mr *MockClientInterfaceMockRecorder) CommitmentsAPIImportAWSReservedInstances(ctx, organizationId, params, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, params, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIImportAWSReservedInstances", reflect.TypeOf((*MockClientInterface)(nil).CommitmentsAPIImportAWSReservedInstances), varargs...)
+}
+
+// CommitmentsAPIImportAWSReservedInstancesWithBody mocks base method.
+func (m *MockClientInterface) CommitmentsAPIImportAWSReservedInstancesWithBody(ctx context.Context, organizationId string, params *sdk.CommitmentsAPIImportAWSReservedInstancesParams, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, params, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "CommitmentsAPIImportAWSReservedInstancesWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CommitmentsAPIImportAWSReservedInstancesWithBody indicates an expected call of CommitmentsAPIImportAWSReservedInstancesWithBody.
+func (mr *MockClientInterfaceMockRecorder) CommitmentsAPIImportAWSReservedInstancesWithBody(ctx, organizationId, params, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, params, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIImportAWSReservedInstancesWithBody", reflect.TypeOf((*MockClientInterface)(nil).CommitmentsAPIImportAWSReservedInstancesWithBody), varargs...)
 }
 
 // CommitmentsAPIImportAzureReservations mocks base method.
@@ -4268,6 +4348,36 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) CommitmentsAPIDeleteComm
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIDeleteCommitmentWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).CommitmentsAPIDeleteCommitmentWithResponse), ctx, commitmentId)
 }
 
+// CommitmentsAPIGetAWSReservedInstancesImportCMDWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) CommitmentsAPIGetAWSReservedInstancesImportCMDWithResponse(ctx context.Context, organizationId string, params *sdk.CommitmentsAPIGetAWSReservedInstancesImportCMDParams) (*sdk.CommitmentsAPIGetAWSReservedInstancesImportCMDResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CommitmentsAPIGetAWSReservedInstancesImportCMDWithResponse", ctx, organizationId, params)
+	ret0, _ := ret[0].(*sdk.CommitmentsAPIGetAWSReservedInstancesImportCMDResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CommitmentsAPIGetAWSReservedInstancesImportCMDWithResponse indicates an expected call of CommitmentsAPIGetAWSReservedInstancesImportCMDWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) CommitmentsAPIGetAWSReservedInstancesImportCMDWithResponse(ctx, organizationId, params interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIGetAWSReservedInstancesImportCMDWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).CommitmentsAPIGetAWSReservedInstancesImportCMDWithResponse), ctx, organizationId, params)
+}
+
+// CommitmentsAPIGetAWSReservedInstancesImportScriptWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) CommitmentsAPIGetAWSReservedInstancesImportScriptWithResponse(ctx context.Context, organizationId string) (*sdk.CommitmentsAPIGetAWSReservedInstancesImportScriptResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CommitmentsAPIGetAWSReservedInstancesImportScriptWithResponse", ctx, organizationId)
+	ret0, _ := ret[0].(*sdk.CommitmentsAPIGetAWSReservedInstancesImportScriptResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CommitmentsAPIGetAWSReservedInstancesImportScriptWithResponse indicates an expected call of CommitmentsAPIGetAWSReservedInstancesImportScriptWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) CommitmentsAPIGetAWSReservedInstancesImportScriptWithResponse(ctx, organizationId interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIGetAWSReservedInstancesImportScriptWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).CommitmentsAPIGetAWSReservedInstancesImportScriptWithResponse), ctx, organizationId)
+}
+
 // CommitmentsAPIGetCommitmentAssignmentsWithResponse mocks base method.
 func (m *MockClientWithResponsesInterface) CommitmentsAPIGetCommitmentAssignmentsWithResponse(ctx context.Context, commitmentId string) (*sdk.CommitmentsAPIGetCommitmentAssignmentsResponse, error) {
 	m.ctrl.T.Helper()
@@ -4371,6 +4481,36 @@ func (m *MockClientWithResponsesInterface) CommitmentsAPIGetGCPCommitmentsScript
 func (mr *MockClientWithResponsesInterfaceMockRecorder) CommitmentsAPIGetGCPCommitmentsScriptTemplateWithResponse(ctx interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIGetGCPCommitmentsScriptTemplateWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).CommitmentsAPIGetGCPCommitmentsScriptTemplateWithResponse), ctx)
+}
+
+// CommitmentsAPIImportAWSReservedInstancesWithBodyWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) CommitmentsAPIImportAWSReservedInstancesWithBodyWithResponse(ctx context.Context, organizationId string, params *sdk.CommitmentsAPIImportAWSReservedInstancesParams, contentType string, body io.Reader) (*sdk.CommitmentsAPIImportAWSReservedInstancesResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CommitmentsAPIImportAWSReservedInstancesWithBodyWithResponse", ctx, organizationId, params, contentType, body)
+	ret0, _ := ret[0].(*sdk.CommitmentsAPIImportAWSReservedInstancesResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CommitmentsAPIImportAWSReservedInstancesWithBodyWithResponse indicates an expected call of CommitmentsAPIImportAWSReservedInstancesWithBodyWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) CommitmentsAPIImportAWSReservedInstancesWithBodyWithResponse(ctx, organizationId, params, contentType, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIImportAWSReservedInstancesWithBodyWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).CommitmentsAPIImportAWSReservedInstancesWithBodyWithResponse), ctx, organizationId, params, contentType, body)
+}
+
+// CommitmentsAPIImportAWSReservedInstancesWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) CommitmentsAPIImportAWSReservedInstancesWithResponse(ctx context.Context, organizationId string, params *sdk.CommitmentsAPIImportAWSReservedInstancesParams, body sdk.CommitmentsAPIImportAWSReservedInstancesJSONRequestBody) (*sdk.CommitmentsAPIImportAWSReservedInstancesResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CommitmentsAPIImportAWSReservedInstancesWithResponse", ctx, organizationId, params, body)
+	ret0, _ := ret[0].(*sdk.CommitmentsAPIImportAWSReservedInstancesResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CommitmentsAPIImportAWSReservedInstancesWithResponse indicates an expected call of CommitmentsAPIImportAWSReservedInstancesWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) CommitmentsAPIImportAWSReservedInstancesWithResponse(ctx, organizationId, params, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIImportAWSReservedInstancesWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).CommitmentsAPIImportAWSReservedInstancesWithResponse), ctx, organizationId, params, body)
 }
 
 // CommitmentsAPIImportAzureReservationsWithBodyWithResponse mocks base method.
