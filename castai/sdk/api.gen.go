@@ -630,6 +630,59 @@ type CastaiFeaturesV1QueryExpression struct {
 	LogicalOperator CastaiFeaturesV1LogicalOperator `json:"logicalOperator"`
 }
 
+// CastaiInventoryV1beta1AWSAvailabilityZoneMapping defines model for castai.inventory.v1beta1.AWSAvailabilityZoneMapping.
+type CastaiInventoryV1beta1AWSAvailabilityZoneMapping struct {
+	ZoneId   *string `json:"ZoneId,omitempty"`
+	ZoneName *string `json:"ZoneName,omitempty"`
+}
+
+// CastaiInventoryV1beta1AWSRecurringCharges defines model for castai.inventory.v1beta1.AWSRecurringCharges.
+type CastaiInventoryV1beta1AWSRecurringCharges struct {
+	Amount    *float64 `json:"Amount"`
+	Frequency *string  `json:"Frequency"`
+}
+
+// CastaiInventoryV1beta1AWSRegionReservedInstances defines model for castai.inventory.v1beta1.AWSRegionReservedInstances.
+type CastaiInventoryV1beta1AWSRegionReservedInstances struct {
+	AvailabilityZoneMappings *[]CastaiInventoryV1beta1AWSAvailabilityZoneMapping `json:"availabilityZoneMappings,omitempty"`
+	Region                   *string                                             `json:"region,omitempty"`
+	ReservedInstances        *[]CastaiInventoryV1beta1AWSReservedInstances       `json:"reservedInstances,omitempty"`
+}
+
+// CastaiInventoryV1beta1AWSReservedInstances defines model for castai.inventory.v1beta1.AWSReservedInstances.
+type CastaiInventoryV1beta1AWSReservedInstances struct {
+	AvailabilityZone    *string                                      `json:"AvailabilityZone"`
+	CurrencyCode        *string                                      `json:"CurrencyCode,omitempty"`
+	Duration            *string                                      `json:"Duration,omitempty"`
+	End                 *string                                      `json:"End,omitempty"`
+	FixedPrice          *float64                                     `json:"FixedPrice,omitempty"`
+	InstanceCount       *string                                      `json:"InstanceCount,omitempty"`
+	InstanceTenancy     *string                                      `json:"InstanceTenancy,omitempty"`
+	InstanceType        *string                                      `json:"InstanceType,omitempty"`
+	OfferingType        *string                                      `json:"OfferingType,omitempty"`
+	ProductDescription  *string                                      `json:"ProductDescription,omitempty"`
+	RecurringCharges    *[]CastaiInventoryV1beta1AWSRecurringCharges `json:"RecurringCharges,omitempty"`
+	ReservedInstancesId *string                                      `json:"ReservedInstancesId,omitempty"`
+	Scope               *string                                      `json:"Scope,omitempty"`
+	Start               *string                                      `json:"Start,omitempty"`
+	State               *string                                      `json:"State,omitempty"`
+	UsagePrice          *float64                                     `json:"UsagePrice,omitempty"`
+}
+
+// CastaiInventoryV1beta1AWSReservedInstancesContext defines model for castai.inventory.v1beta1.AWSReservedInstancesContext.
+type CastaiInventoryV1beta1AWSReservedInstancesContext struct {
+	AvailabilityZoneId    *string                                       `json:"availabilityZoneId"`
+	AvailabilityZoneName  *string                                       `json:"availabilityZoneName"`
+	Id                    *string                                       `json:"id,omitempty"`
+	InstanceCount         *string                                       `json:"instanceCount,omitempty"`
+	InstanceType          *string                                       `json:"instanceType,omitempty"`
+	InstanceTypeCpu       *string                                       `json:"instanceTypeCpu,omitempty"`
+	InstanceTypeMemoryMib *string                                       `json:"instanceTypeMemoryMib,omitempty"`
+	InstanceTypesUsage    *CastaiInventoryV1beta1InstanceTypeBasedUsage `json:"instanceTypesUsage,omitempty"`
+	Scope                 *string                                       `json:"scope,omitempty"`
+	State                 *string                                       `json:"state,omitempty"`
+}
+
 // CastaiInventoryV1beta1AddReservationResponse defines model for castai.inventory.v1beta1.AddReservationResponse.
 type CastaiInventoryV1beta1AddReservationResponse struct {
 	Reservation *CastaiInventoryV1beta1ReservationDetails `json:"reservation,omitempty"`
@@ -749,14 +802,15 @@ type CastaiInventoryV1beta1Commitment struct {
 	AllowedUsage *float32 `json:"allowedUsage,omitempty"`
 
 	// Assign commitment to all existing and future clusters that fall within the region of this commitment.
-	AutoAssignment          *bool                                   `json:"autoAssignment,omitempty"`
-	AzureReservationContext *CastaiInventoryV1beta1AzureReservation `json:"azureReservationContext,omitempty"`
-	EndDate                 *time.Time                              `json:"endDate"`
-	GcpResourceCudContext   *CastaiInventoryV1beta1GCPResourceCUD   `json:"gcpResourceCudContext,omitempty"`
-	Id                      *string                                 `json:"id,omitempty"`
-	Name                    *string                                 `json:"name,omitempty"`
-	Prioritization          *bool                                   `json:"prioritization,omitempty"`
-	Region                  *string                                 `json:"region,omitempty"`
+	AutoAssignment              *bool                                              `json:"autoAssignment,omitempty"`
+	AwsReservedInstancesContext *CastaiInventoryV1beta1AWSReservedInstancesContext `json:"awsReservedInstancesContext,omitempty"`
+	AzureReservationContext     *CastaiInventoryV1beta1AzureReservation            `json:"azureReservationContext,omitempty"`
+	EndDate                     *time.Time                                         `json:"endDate"`
+	GcpResourceCudContext       *CastaiInventoryV1beta1GCPResourceCUD              `json:"gcpResourceCudContext,omitempty"`
+	Id                          *string                                            `json:"id,omitempty"`
+	Name                        *string                                            `json:"name,omitempty"`
+	Prioritization              *bool                                              `json:"prioritization,omitempty"`
+	Region                      *string                                            `json:"region,omitempty"`
 
 	// Scaling strategy specifies how to use commitment by autoscaler.
 	//
@@ -931,6 +985,11 @@ type CastaiInventoryV1beta1GenericReservation struct {
 // CastaiInventoryV1beta1GenericReservationsList defines model for castai.inventory.v1beta1.GenericReservationsList.
 type CastaiInventoryV1beta1GenericReservationsList struct {
 	Items *[]CastaiInventoryV1beta1GenericReservation `json:"items,omitempty"`
+}
+
+// CastaiInventoryV1beta1GetAWSReservedInstancesImportCMDResponse defines model for castai.inventory.v1beta1.GetAWSReservedInstancesImportCMDResponse.
+type CastaiInventoryV1beta1GetAWSReservedInstancesImportCMDResponse struct {
+	Cmd *string `json:"cmd,omitempty"`
 }
 
 // CastaiInventoryV1beta1GetCommitmentAssignmentsResponse defines model for castai.inventory.v1beta1.GetCommitmentAssignmentsResponse.
@@ -2955,9 +3014,9 @@ type NodeconfigV1EKSConfig struct {
 
 	// List of supported image families (OSes) for EKS.
 	//
-	//  - FAMILY_AL2: Amazon Linux 2 (https://aws.amazon.com/amazon-linux-2/), EKS-specific.
-	//  - FAMILY_AL2023: Amazon Linux 2023 (https://aws.amazon.com/linux/amazon-linux-2023/), EKS-specific.
-	//  - FAMILY_BOTTLEROCKET: Bottlerocket (https://aws.amazon.com/bottlerocket/), EKS-specific.
+	//  - FAMILY_AL2: Amazon Linux 2 (https://aws.amazon.com/amazon-linux-2/).
+	//  - FAMILY_AL2023: Amazon Linux 2023 (https://aws.amazon.com/linux/amazon-linux-2023/).
+	//  - FAMILY_BOTTLEROCKET: Bottlerocket (https://aws.amazon.com/bottlerocket/).
 	ImageFamily  *NodeconfigV1EKSConfigImageFamily `json:"imageFamily,omitempty"`
 	ImdsHopLimit *int32                            `json:"imdsHopLimit"`
 	ImdsV1       *bool                             `json:"imdsV1"`
@@ -2995,9 +3054,9 @@ type NodeconfigV1EKSConfig struct {
 
 // List of supported image families (OSes) for EKS.
 //
-//   - FAMILY_AL2: Amazon Linux 2 (https://aws.amazon.com/amazon-linux-2/), EKS-specific.
-//   - FAMILY_AL2023: Amazon Linux 2023 (https://aws.amazon.com/linux/amazon-linux-2023/), EKS-specific.
-//   - FAMILY_BOTTLEROCKET: Bottlerocket (https://aws.amazon.com/bottlerocket/), EKS-specific.
+//   - FAMILY_AL2: Amazon Linux 2 (https://aws.amazon.com/amazon-linux-2/).
+//   - FAMILY_AL2023: Amazon Linux 2023 (https://aws.amazon.com/linux/amazon-linux-2023/).
+//   - FAMILY_BOTTLEROCKET: Bottlerocket (https://aws.amazon.com/bottlerocket/).
 type NodeconfigV1EKSConfigImageFamily string
 
 // NodeconfigV1GKEConfig defines model for nodeconfig.v1.GKEConfig.
@@ -3771,6 +3830,9 @@ type PoliciesV1Policies struct {
 	// Defines minimum and maximum amount of CPU the cluster can have.
 	ClusterLimits *PoliciesV1ClusterLimitsPolicy `json:"clusterLimits,omitempty"`
 
+	// Version of the default node template at the time when the policies were retrieved.
+	DefaultNodeTemplateVersion *string `json:"defaultNodeTemplateVersion"`
+
 	// Enable/disable all policies.
 	Enabled *bool `json:"enabled"`
 
@@ -4391,6 +4453,11 @@ type WorkloadoptimizationV1ResourceConfig struct {
 	// Period of time over which the resource recommendation is calculated (default value is 24 hours).
 	LookBackPeriodSeconds *int32 `json:"lookBackPeriodSeconds"`
 
+	// Defines possible options for workload management.
+	// READ_ONLY - workload watched (metrics collected), but no actions may be performed by CAST AI.
+	// MANAGED - workload watched (metrics collected), CAST AI may perform actions on the workload.
+	ManagementOption *WorkloadoptimizationV1ManagementOption `json:"managementOption,omitempty"`
+
 	// Max values for the recommendation. For memory - this is in MiB, for CPU - this is in cores.
 	// If not set, there will be no upper bound for the recommendation (default behaviour).
 	Max *float64 `json:"max"`
@@ -4424,6 +4491,11 @@ type WorkloadoptimizationV1ResourceConfigOverrides struct {
 
 	// Period of time over which the resource recommendation is calculated.
 	LookBackPeriodSeconds *int32 `json:"lookBackPeriodSeconds"`
+
+	// Defines possible options for workload management.
+	// READ_ONLY - workload watched (metrics collected), but no actions may be performed by CAST AI.
+	// MANAGED - workload watched (metrics collected), CAST AI may perform actions on the workload.
+	ManagementOption *WorkloadoptimizationV1ManagementOption `json:"managementOption,omitempty"`
 
 	// Max values for the recommendation. For memory - this is in MiB, for CPU - this is in cores.
 	Max *float64 `json:"max"`
@@ -4496,6 +4568,11 @@ type WorkloadoptimizationV1ResourcePolicies struct {
 
 	// Period of time over which the resource recommendation is calculated (default value is 24 hours).
 	LookBackPeriodSeconds *int32 `json:"lookBackPeriodSeconds"`
+
+	// Defines possible options for workload management.
+	// READ_ONLY - workload watched (metrics collected), but no actions may be performed by CAST AI.
+	// MANAGED - workload watched (metrics collected), CAST AI may perform actions on the workload.
+	ManagementOption *WorkloadoptimizationV1ManagementOption `json:"managementOption,omitempty"`
 
 	// Max values for the recommendation, applies to every container. For memory - this is in MiB, for CPU - this is in cores.
 	// If not set, there will be no upper bound for the recommendation (default behaviour). This value will be overridden if configured on workload level.
@@ -4780,6 +4857,11 @@ type WorkloadoptimizationV1WorkloadResourceConfigUpdate struct {
 	// Period of time over which the resource recommendation is calculated (default value is 24 hours).
 	LookBackPeriodSeconds *int32 `json:"lookBackPeriodSeconds"`
 
+	// Defines possible options for workload management.
+	// READ_ONLY - workload watched (metrics collected), but no actions may be performed by CAST AI.
+	// MANAGED - workload watched (metrics collected), CAST AI may perform actions on the workload.
+	ManagementOption *WorkloadoptimizationV1ManagementOption `json:"managementOption,omitempty"`
+
 	// Max values for the recommendation. For memory - this is in MiB, for CPU - this is in cores.
 	// If not set, there will be no upper bound for the recommendation (default behaviour).
 	Max *float64 `json:"max"`
@@ -4819,6 +4901,26 @@ type CommitmentsAPIGetCommitmentUsageHistoryParams struct {
 
 // CommitmentsAPIGetCommitmentUsageHistoryParamsAggregationInterval defines parameters for CommitmentsAPIGetCommitmentUsageHistory.
 type CommitmentsAPIGetCommitmentUsageHistoryParamsAggregationInterval string
+
+// CommitmentsAPIGetAWSReservedInstancesImportCMDParams defines parameters for CommitmentsAPIGetAWSReservedInstancesImportCMD.
+type CommitmentsAPIGetAWSReservedInstancesImportCMDParams struct {
+	// AWS region IDs
+	RegionIds *[]string `form:"regionIds,omitempty" json:"regionIds,omitempty"`
+}
+
+// CommitmentsAPIImportAWSReservedInstancesJSONBody defines parameters for CommitmentsAPIImportAWSReservedInstances.
+type CommitmentsAPIImportAWSReservedInstancesJSONBody = []CastaiInventoryV1beta1AWSRegionReservedInstances
+
+// CommitmentsAPIImportAWSReservedInstancesParams defines parameters for CommitmentsAPIImportAWSReservedInstances.
+type CommitmentsAPIImportAWSReservedInstancesParams struct {
+	// Behaviour
+	//
+	//  - OVERWRITE: Overwrite all existing commitments
+	Behaviour *CommitmentsAPIImportAWSReservedInstancesParamsBehaviour `form:"behaviour,omitempty" json:"behaviour,omitempty"`
+}
+
+// CommitmentsAPIImportAWSReservedInstancesParamsBehaviour defines parameters for CommitmentsAPIImportAWSReservedInstances.
+type CommitmentsAPIImportAWSReservedInstancesParamsBehaviour string
 
 // AuthTokenAPIListAuthTokensParams defines parameters for AuthTokenAPIListAuthTokens.
 type AuthTokenAPIListAuthTokensParams struct {
@@ -4873,6 +4975,9 @@ type NodeConfigurationAPIUpdateConfigurationJSONBody = NodeconfigV1NodeConfigura
 type NodeTemplatesAPIListNodeTemplatesParams struct {
 	// Flag whether to include the default template
 	IncludeDefault *bool `form:"includeDefault,omitempty" json:"includeDefault,omitempty"`
+
+	// Flag whether to exclude stats about template nodes.
+	ExcludeStats *bool `form:"excludeStats,omitempty" json:"excludeStats,omitempty"`
 }
 
 // NodeTemplatesAPICreateNodeTemplateJSONBody defines parameters for NodeTemplatesAPICreateNodeTemplate.
@@ -5217,6 +5322,9 @@ type CommitmentsAPIBatchDeleteCommitmentsJSONRequestBody = CommitmentsAPIBatchDe
 
 // CommitmentsAPIBatchUpdateCommitmentsJSONRequestBody defines body for CommitmentsAPIBatchUpdateCommitments for application/json ContentType.
 type CommitmentsAPIBatchUpdateCommitmentsJSONRequestBody = CommitmentsAPIBatchUpdateCommitmentsJSONBody
+
+// CommitmentsAPIImportAWSReservedInstancesJSONRequestBody defines body for CommitmentsAPIImportAWSReservedInstances for application/json ContentType.
+type CommitmentsAPIImportAWSReservedInstancesJSONRequestBody = CommitmentsAPIImportAWSReservedInstancesJSONBody
 
 // AuthTokenAPICreateAuthTokenJSONRequestBody defines body for AuthTokenAPICreateAuthToken for application/json ContentType.
 type AuthTokenAPICreateAuthTokenJSONRequestBody = AuthTokenAPICreateAuthTokenJSONBody

@@ -218,6 +218,14 @@ func workloadScalingPolicyResourceSchema(function string, overhead, minRecommend
 				Description: "Resource limit settings",
 				Elem:        workloadScalingPolicyResourceLimitSchema(),
 			},
+			"management_option": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Description: "Disables management for a single resource when set to `READ_ONLY`. " +
+					"The resource will use its original workload template requests and limits. " +
+					"Supported value: `READ_ONLY`. Minimum required workload-autoscaler version: `v0.23.1`.",
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"READ_ONLY"}, false)),
+			},
 		},
 	}
 }
@@ -513,6 +521,9 @@ func toWorkloadScalingPolicies(obj map[string]interface{}) sdk.Workloadoptimizat
 	if v, ok := obj[FieldLimitStrategy].([]any); ok && len(v) > 0 {
 		out.Limit = toWorkloadResourceLimit(v[0].(map[string]any))
 	}
+	if v, ok := obj["management_option"].(string); ok && v != "" {
+		out.ManagementOption = lo.ToPtr(sdk.WorkloadoptimizationV1ManagementOption(v))
+	}
 
 	return out
 }
@@ -554,6 +565,10 @@ func toWorkloadScalingPoliciesMap(p sdk.WorkloadoptimizationV1ResourcePolicies) 
 			limit[FieldLimitStrategyMultiplier] = *p.Limit.Multiplier
 		}
 		m[FieldLimitStrategy] = []map[string]any{limit}
+	}
+
+	if p.ManagementOption != nil {
+		m["management_option"] = string(*p.ManagementOption)
 	}
 
 	return []map[string]interface{}{m}
