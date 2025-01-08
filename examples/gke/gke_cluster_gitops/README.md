@@ -17,6 +17,13 @@ Helm Managed ==>  All Castware components such as `castai-agent`, `castai-cluste
                                                   2. Terraform Init & Apply| 
                                                 +-------------------------+
                                                             | 
+                                                            | TERRAFORM OUTPUT
+                                                +-------------------------+
+                                                |  3. Execute terraform output command
+                                                | terraform output cluster_id  
+                                                  terraform output cluster_token
+                                                +-------------------------+
+                                                            | 
                                                             |GITOPS
                                                 +-------------------------+
                                                 | 3. Deploy Helm chart of castai-agent castai-cluster-controller`, `castai-evictor`, `castai-spot-handler`, `castai-kvisor`, `castai-workload-autoscaler`, `castai-pod-pinner`
@@ -37,14 +44,19 @@ Prerequisites:
 After successful apply, CAST Console UI will be in `Connecting` state. \
 Note generated 'CASTAI_CLUSTER_ID' from outputs
 
+### Step 3: Execute TF output command & save the below output values
+terraform output cluster_id  
+terraform output cluster_token
 
-### Step 3: Deploy Helm chart of CAST Components
+Obtained values are needed for next step
+
+### Step 4: Deploy Helm chart of CAST Components
 Coponents: `castai-cluster-controller`,`castai-evictor`, `castai-spot-handler`, `castai-kvisor`, `castai-workload-autoscaler`, `castai-pod-pinner` \
 After all CAST AI components are installed in the cluster its status in CAST AI console would change from `Connecting` to `Connected` which means that cluster onboarding process completed successfully.
 
 ```
-CASTAI_API_KEY=""
-CASTAI_CLUSTER_ID=""
+CASTAI_API_KEY="<Replace cluster_token>"
+CASTAI_CLUSTER_ID="<Replace cluster_id>"
 CAST_CONFIG_SOURCE="castai-cluster-controller"
 
 #### Mandatory Component: Castai-agent
