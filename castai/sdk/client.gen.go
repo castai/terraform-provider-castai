@@ -10149,6 +10149,7 @@ func WithBaseURL(baseURL string) ClientOption {
 
 // ClientWithResponsesInterface is the interface specification for the client with responses above.
 type ClientWithResponsesInterface interface {
+	ClientInterface
 	// CommitmentsAPIBatchDeleteCommitments request  with any body
 	CommitmentsAPIBatchDeleteCommitmentsWithBodyWithResponse(ctx context.Context, organizationId string, contentType string, body io.Reader) (*CommitmentsAPIBatchDeleteCommitmentsResponse, error)
 

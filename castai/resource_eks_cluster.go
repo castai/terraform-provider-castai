@@ -183,7 +183,7 @@ func resourceCastaiEKSClusterUpdate(ctx context.Context, data *schema.ResourceDa
 	return resourceCastaiEKSClusterRead(ctx, data, meta)
 }
 
-func updateClusterSettings(ctx context.Context, data *schema.ResourceData, client *sdk.ClientWithResponses) error {
+func updateClusterSettings(ctx context.Context, data *schema.ResourceData, client sdk.ClientWithResponsesInterface) error {
 	if !data.HasChanges(
 		FieldEKSClusterAssumeRoleArn,
 		FieldClusterCredentialsId,

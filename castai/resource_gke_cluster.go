@@ -187,7 +187,7 @@ func resourceCastaiGKEClusterUpdate(ctx context.Context, data *schema.ResourceDa
 	return resourceCastaiGKEClusterRead(ctx, data, meta)
 }
 
-func updateGKEClusterSettings(ctx context.Context, data *schema.ResourceData, client *sdk.ClientWithResponses) error {
+func updateGKEClusterSettings(ctx context.Context, data *schema.ResourceData, client sdk.ClientWithResponsesInterface) error {
 	if !data.HasChanges(
 		FieldGKEClusterCredentials,
 		FieldClusterCredentialsId,

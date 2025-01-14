@@ -205,7 +205,7 @@ func rebalancingJobToState(job *sdk.ScheduledrebalancingV1RebalancingJob, d *sch
 	return nil
 }
 
-func getRebalancingJobByScheduleName(ctx context.Context, client *sdk.ClientWithResponses, clusterID string, scheduleName string) (*sdk.ScheduledrebalancingV1RebalancingJob, error) {
+func getRebalancingJobByScheduleName(ctx context.Context, client sdk.ClientWithResponsesInterface, clusterID string, scheduleName string) (*sdk.ScheduledrebalancingV1RebalancingJob, error) {
 	schedule, err := getRebalancingScheduleByName(ctx, client, scheduleName)
 	if err != nil {
 		return nil, fmt.Errorf("getting schedule: %w", err)
@@ -234,7 +234,7 @@ func getRebalancingJobByScheduleName(ctx context.Context, client *sdk.ClientWith
 	return nil, fmt.Errorf("rebalancing job for schedule %q was not found", scheduleName)
 }
 
-func getRebalancingJobById(ctx context.Context, client *sdk.ClientWithResponses, clusterID string, id string) (*sdk.ScheduledrebalancingV1RebalancingJob, bool, error) {
+func getRebalancingJobById(ctx context.Context, client sdk.ClientWithResponsesInterface, clusterID string, id string) (*sdk.ScheduledrebalancingV1RebalancingJob, bool, error) {
 	resp, err := client.ScheduledRebalancingAPIGetRebalancingJobWithResponse(ctx, clusterID, id)
 	if err != nil {
 		return nil, false, err
@@ -249,7 +249,7 @@ func getRebalancingJobById(ctx context.Context, client *sdk.ClientWithResponses,
 	return resp.JSON200, true, nil
 }
 
-func getRebalancingJobByScheduleId(ctx context.Context, client *sdk.ClientWithResponses, clusterID, scheduleID string) (*sdk.ScheduledrebalancingV1RebalancingJob, bool, error) {
+func getRebalancingJobByScheduleId(ctx context.Context, client sdk.ClientWithResponsesInterface, clusterID, scheduleID string) (*sdk.ScheduledrebalancingV1RebalancingJob, bool, error) {
 	params := &sdk.ScheduledRebalancingAPIListRebalancingJobsParams{
 		RebalancingScheduleId: lo.ToPtr(scheduleID),
 	}

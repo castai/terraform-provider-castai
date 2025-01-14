@@ -4138,6 +4138,46 @@ func (m *MockClientWithResponsesInterface) EXPECT() *MockClientWithResponsesInte
 	return m.recorder
 }
 
+// AuthTokenAPICreateAuthToken mocks base method.
+func (m *MockClientWithResponsesInterface) AuthTokenAPICreateAuthToken(ctx context.Context, body sdk.AuthTokenAPICreateAuthTokenJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "AuthTokenAPICreateAuthToken", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// AuthTokenAPICreateAuthToken indicates an expected call of AuthTokenAPICreateAuthToken.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) AuthTokenAPICreateAuthToken(ctx, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AuthTokenAPICreateAuthToken", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).AuthTokenAPICreateAuthToken), varargs...)
+}
+
+// AuthTokenAPICreateAuthTokenWithBody mocks base method.
+func (m *MockClientWithResponsesInterface) AuthTokenAPICreateAuthTokenWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "AuthTokenAPICreateAuthTokenWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// AuthTokenAPICreateAuthTokenWithBody indicates an expected call of AuthTokenAPICreateAuthTokenWithBody.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) AuthTokenAPICreateAuthTokenWithBody(ctx, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AuthTokenAPICreateAuthTokenWithBody", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).AuthTokenAPICreateAuthTokenWithBody), varargs...)
+}
+
 // AuthTokenAPICreateAuthTokenWithBodyWithResponse mocks base method.
 func (m *MockClientWithResponsesInterface) AuthTokenAPICreateAuthTokenWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*sdk.AuthTokenAPICreateAuthTokenResponse, error) {
 	m.ctrl.T.Helper()
@@ -4168,6 +4208,26 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) AuthTokenAPICreateAuthTo
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AuthTokenAPICreateAuthTokenWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).AuthTokenAPICreateAuthTokenWithResponse), ctx, body)
 }
 
+// AuthTokenAPIDeleteAuthToken mocks base method.
+func (m *MockClientWithResponsesInterface) AuthTokenAPIDeleteAuthToken(ctx context.Context, id string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, id}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "AuthTokenAPIDeleteAuthToken", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// AuthTokenAPIDeleteAuthToken indicates an expected call of AuthTokenAPIDeleteAuthToken.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) AuthTokenAPIDeleteAuthToken(ctx, id interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, id}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AuthTokenAPIDeleteAuthToken", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).AuthTokenAPIDeleteAuthToken), varargs...)
+}
+
 // AuthTokenAPIDeleteAuthTokenWithResponse mocks base method.
 func (m *MockClientWithResponsesInterface) AuthTokenAPIDeleteAuthTokenWithResponse(ctx context.Context, id string) (*sdk.AuthTokenAPIDeleteAuthTokenResponse, error) {
 	m.ctrl.T.Helper()
@@ -4181,6 +4241,26 @@ func (m *MockClientWithResponsesInterface) AuthTokenAPIDeleteAuthTokenWithRespon
 func (mr *MockClientWithResponsesInterfaceMockRecorder) AuthTokenAPIDeleteAuthTokenWithResponse(ctx, id interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AuthTokenAPIDeleteAuthTokenWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).AuthTokenAPIDeleteAuthTokenWithResponse), ctx, id)
+}
+
+// AuthTokenAPIGetAuthToken mocks base method.
+func (m *MockClientWithResponsesInterface) AuthTokenAPIGetAuthToken(ctx context.Context, id string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, id}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "AuthTokenAPIGetAuthToken", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// AuthTokenAPIGetAuthToken indicates an expected call of AuthTokenAPIGetAuthToken.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) AuthTokenAPIGetAuthToken(ctx, id interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, id}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AuthTokenAPIGetAuthToken", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).AuthTokenAPIGetAuthToken), varargs...)
 }
 
 // AuthTokenAPIGetAuthTokenWithResponse mocks base method.
@@ -4198,6 +4278,26 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) AuthTokenAPIGetAuthToken
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AuthTokenAPIGetAuthTokenWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).AuthTokenAPIGetAuthTokenWithResponse), ctx, id)
 }
 
+// AuthTokenAPIListAuthTokens mocks base method.
+func (m *MockClientWithResponsesInterface) AuthTokenAPIListAuthTokens(ctx context.Context, params *sdk.AuthTokenAPIListAuthTokensParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "AuthTokenAPIListAuthTokens", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// AuthTokenAPIListAuthTokens indicates an expected call of AuthTokenAPIListAuthTokens.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) AuthTokenAPIListAuthTokens(ctx, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AuthTokenAPIListAuthTokens", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).AuthTokenAPIListAuthTokens), varargs...)
+}
+
 // AuthTokenAPIListAuthTokensWithResponse mocks base method.
 func (m *MockClientWithResponsesInterface) AuthTokenAPIListAuthTokensWithResponse(ctx context.Context, params *sdk.AuthTokenAPIListAuthTokensParams) (*sdk.AuthTokenAPIListAuthTokensResponse, error) {
 	m.ctrl.T.Helper()
@@ -4211,6 +4311,46 @@ func (m *MockClientWithResponsesInterface) AuthTokenAPIListAuthTokensWithRespons
 func (mr *MockClientWithResponsesInterfaceMockRecorder) AuthTokenAPIListAuthTokensWithResponse(ctx, params interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AuthTokenAPIListAuthTokensWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).AuthTokenAPIListAuthTokensWithResponse), ctx, params)
+}
+
+// AuthTokenAPIUpdateAuthToken mocks base method.
+func (m *MockClientWithResponsesInterface) AuthTokenAPIUpdateAuthToken(ctx context.Context, id string, body sdk.AuthTokenAPIUpdateAuthTokenJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, id, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "AuthTokenAPIUpdateAuthToken", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// AuthTokenAPIUpdateAuthToken indicates an expected call of AuthTokenAPIUpdateAuthToken.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) AuthTokenAPIUpdateAuthToken(ctx, id, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, id, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AuthTokenAPIUpdateAuthToken", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).AuthTokenAPIUpdateAuthToken), varargs...)
+}
+
+// AuthTokenAPIUpdateAuthTokenWithBody mocks base method.
+func (m *MockClientWithResponsesInterface) AuthTokenAPIUpdateAuthTokenWithBody(ctx context.Context, id, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, id, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "AuthTokenAPIUpdateAuthTokenWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// AuthTokenAPIUpdateAuthTokenWithBody indicates an expected call of AuthTokenAPIUpdateAuthTokenWithBody.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) AuthTokenAPIUpdateAuthTokenWithBody(ctx, id, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, id, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AuthTokenAPIUpdateAuthTokenWithBody", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).AuthTokenAPIUpdateAuthTokenWithBody), varargs...)
 }
 
 // AuthTokenAPIUpdateAuthTokenWithBodyWithResponse mocks base method.
@@ -4243,6 +4383,46 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) AuthTokenAPIUpdateAuthTo
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AuthTokenAPIUpdateAuthTokenWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).AuthTokenAPIUpdateAuthTokenWithResponse), ctx, id, body)
 }
 
+// CommitmentsAPIBatchDeleteCommitments mocks base method.
+func (m *MockClientWithResponsesInterface) CommitmentsAPIBatchDeleteCommitments(ctx context.Context, organizationId string, body sdk.CommitmentsAPIBatchDeleteCommitmentsJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "CommitmentsAPIBatchDeleteCommitments", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CommitmentsAPIBatchDeleteCommitments indicates an expected call of CommitmentsAPIBatchDeleteCommitments.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) CommitmentsAPIBatchDeleteCommitments(ctx, organizationId, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIBatchDeleteCommitments", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).CommitmentsAPIBatchDeleteCommitments), varargs...)
+}
+
+// CommitmentsAPIBatchDeleteCommitmentsWithBody mocks base method.
+func (m *MockClientWithResponsesInterface) CommitmentsAPIBatchDeleteCommitmentsWithBody(ctx context.Context, organizationId, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "CommitmentsAPIBatchDeleteCommitmentsWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CommitmentsAPIBatchDeleteCommitmentsWithBody indicates an expected call of CommitmentsAPIBatchDeleteCommitmentsWithBody.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) CommitmentsAPIBatchDeleteCommitmentsWithBody(ctx, organizationId, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIBatchDeleteCommitmentsWithBody", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).CommitmentsAPIBatchDeleteCommitmentsWithBody), varargs...)
+}
+
 // CommitmentsAPIBatchDeleteCommitmentsWithBodyWithResponse mocks base method.
 func (m *MockClientWithResponsesInterface) CommitmentsAPIBatchDeleteCommitmentsWithBodyWithResponse(ctx context.Context, organizationId, contentType string, body io.Reader) (*sdk.CommitmentsAPIBatchDeleteCommitmentsResponse, error) {
 	m.ctrl.T.Helper()
@@ -4271,6 +4451,46 @@ func (m *MockClientWithResponsesInterface) CommitmentsAPIBatchDeleteCommitmentsW
 func (mr *MockClientWithResponsesInterfaceMockRecorder) CommitmentsAPIBatchDeleteCommitmentsWithResponse(ctx, organizationId, body interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIBatchDeleteCommitmentsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).CommitmentsAPIBatchDeleteCommitmentsWithResponse), ctx, organizationId, body)
+}
+
+// CommitmentsAPIBatchUpdateCommitments mocks base method.
+func (m *MockClientWithResponsesInterface) CommitmentsAPIBatchUpdateCommitments(ctx context.Context, organizationId string, body sdk.CommitmentsAPIBatchUpdateCommitmentsJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "CommitmentsAPIBatchUpdateCommitments", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CommitmentsAPIBatchUpdateCommitments indicates an expected call of CommitmentsAPIBatchUpdateCommitments.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) CommitmentsAPIBatchUpdateCommitments(ctx, organizationId, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIBatchUpdateCommitments", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).CommitmentsAPIBatchUpdateCommitments), varargs...)
+}
+
+// CommitmentsAPIBatchUpdateCommitmentsWithBody mocks base method.
+func (m *MockClientWithResponsesInterface) CommitmentsAPIBatchUpdateCommitmentsWithBody(ctx context.Context, organizationId, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "CommitmentsAPIBatchUpdateCommitmentsWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CommitmentsAPIBatchUpdateCommitmentsWithBody indicates an expected call of CommitmentsAPIBatchUpdateCommitmentsWithBody.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) CommitmentsAPIBatchUpdateCommitmentsWithBody(ctx, organizationId, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIBatchUpdateCommitmentsWithBody", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).CommitmentsAPIBatchUpdateCommitmentsWithBody), varargs...)
 }
 
 // CommitmentsAPIBatchUpdateCommitmentsWithBodyWithResponse mocks base method.
@@ -4303,6 +4523,26 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) CommitmentsAPIBatchUpdat
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIBatchUpdateCommitmentsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).CommitmentsAPIBatchUpdateCommitmentsWithResponse), ctx, organizationId, body)
 }
 
+// CommitmentsAPICreateCommitmentAssignment mocks base method.
+func (m *MockClientWithResponsesInterface) CommitmentsAPICreateCommitmentAssignment(ctx context.Context, params *sdk.CommitmentsAPICreateCommitmentAssignmentParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "CommitmentsAPICreateCommitmentAssignment", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CommitmentsAPICreateCommitmentAssignment indicates an expected call of CommitmentsAPICreateCommitmentAssignment.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) CommitmentsAPICreateCommitmentAssignment(ctx, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPICreateCommitmentAssignment", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).CommitmentsAPICreateCommitmentAssignment), varargs...)
+}
+
 // CommitmentsAPICreateCommitmentAssignmentWithResponse mocks base method.
 func (m *MockClientWithResponsesInterface) CommitmentsAPICreateCommitmentAssignmentWithResponse(ctx context.Context, params *sdk.CommitmentsAPICreateCommitmentAssignmentParams) (*sdk.CommitmentsAPICreateCommitmentAssignmentResponse, error) {
 	m.ctrl.T.Helper()
@@ -4316,6 +4556,46 @@ func (m *MockClientWithResponsesInterface) CommitmentsAPICreateCommitmentAssignm
 func (mr *MockClientWithResponsesInterfaceMockRecorder) CommitmentsAPICreateCommitmentAssignmentWithResponse(ctx, params interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPICreateCommitmentAssignmentWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).CommitmentsAPICreateCommitmentAssignmentWithResponse), ctx, params)
+}
+
+// CommitmentsAPIDeleteCommitment mocks base method.
+func (m *MockClientWithResponsesInterface) CommitmentsAPIDeleteCommitment(ctx context.Context, commitmentId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, commitmentId}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "CommitmentsAPIDeleteCommitment", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CommitmentsAPIDeleteCommitment indicates an expected call of CommitmentsAPIDeleteCommitment.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) CommitmentsAPIDeleteCommitment(ctx, commitmentId interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, commitmentId}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIDeleteCommitment", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).CommitmentsAPIDeleteCommitment), varargs...)
+}
+
+// CommitmentsAPIDeleteCommitmentAssignment mocks base method.
+func (m *MockClientWithResponsesInterface) CommitmentsAPIDeleteCommitmentAssignment(ctx context.Context, assignmentId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, assignmentId}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "CommitmentsAPIDeleteCommitmentAssignment", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CommitmentsAPIDeleteCommitmentAssignment indicates an expected call of CommitmentsAPIDeleteCommitmentAssignment.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) CommitmentsAPIDeleteCommitmentAssignment(ctx, assignmentId interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, assignmentId}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIDeleteCommitmentAssignment", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).CommitmentsAPIDeleteCommitmentAssignment), varargs...)
 }
 
 // CommitmentsAPIDeleteCommitmentAssignmentWithResponse mocks base method.
@@ -4348,6 +4628,26 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) CommitmentsAPIDeleteComm
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIDeleteCommitmentWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).CommitmentsAPIDeleteCommitmentWithResponse), ctx, commitmentId)
 }
 
+// CommitmentsAPIGetAWSReservedInstancesImportCMD mocks base method.
+func (m *MockClientWithResponsesInterface) CommitmentsAPIGetAWSReservedInstancesImportCMD(ctx context.Context, organizationId string, params *sdk.CommitmentsAPIGetAWSReservedInstancesImportCMDParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "CommitmentsAPIGetAWSReservedInstancesImportCMD", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CommitmentsAPIGetAWSReservedInstancesImportCMD indicates an expected call of CommitmentsAPIGetAWSReservedInstancesImportCMD.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) CommitmentsAPIGetAWSReservedInstancesImportCMD(ctx, organizationId, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIGetAWSReservedInstancesImportCMD", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).CommitmentsAPIGetAWSReservedInstancesImportCMD), varargs...)
+}
+
 // CommitmentsAPIGetAWSReservedInstancesImportCMDWithResponse mocks base method.
 func (m *MockClientWithResponsesInterface) CommitmentsAPIGetAWSReservedInstancesImportCMDWithResponse(ctx context.Context, organizationId string, params *sdk.CommitmentsAPIGetAWSReservedInstancesImportCMDParams) (*sdk.CommitmentsAPIGetAWSReservedInstancesImportCMDResponse, error) {
 	m.ctrl.T.Helper()
@@ -4361,6 +4661,26 @@ func (m *MockClientWithResponsesInterface) CommitmentsAPIGetAWSReservedInstances
 func (mr *MockClientWithResponsesInterfaceMockRecorder) CommitmentsAPIGetAWSReservedInstancesImportCMDWithResponse(ctx, organizationId, params interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIGetAWSReservedInstancesImportCMDWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).CommitmentsAPIGetAWSReservedInstancesImportCMDWithResponse), ctx, organizationId, params)
+}
+
+// CommitmentsAPIGetAWSReservedInstancesImportScript mocks base method.
+func (m *MockClientWithResponsesInterface) CommitmentsAPIGetAWSReservedInstancesImportScript(ctx context.Context, organizationId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "CommitmentsAPIGetAWSReservedInstancesImportScript", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CommitmentsAPIGetAWSReservedInstancesImportScript indicates an expected call of CommitmentsAPIGetAWSReservedInstancesImportScript.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) CommitmentsAPIGetAWSReservedInstancesImportScript(ctx, organizationId interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIGetAWSReservedInstancesImportScript", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).CommitmentsAPIGetAWSReservedInstancesImportScript), varargs...)
 }
 
 // CommitmentsAPIGetAWSReservedInstancesImportScriptWithResponse mocks base method.
@@ -4378,6 +4698,46 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) CommitmentsAPIGetAWSRese
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIGetAWSReservedInstancesImportScriptWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).CommitmentsAPIGetAWSReservedInstancesImportScriptWithResponse), ctx, organizationId)
 }
 
+// CommitmentsAPIGetCommitment mocks base method.
+func (m *MockClientWithResponsesInterface) CommitmentsAPIGetCommitment(ctx context.Context, commitmentId string, params *sdk.CommitmentsAPIGetCommitmentParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, commitmentId, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "CommitmentsAPIGetCommitment", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CommitmentsAPIGetCommitment indicates an expected call of CommitmentsAPIGetCommitment.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) CommitmentsAPIGetCommitment(ctx, commitmentId, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, commitmentId, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIGetCommitment", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).CommitmentsAPIGetCommitment), varargs...)
+}
+
+// CommitmentsAPIGetCommitmentAssignments mocks base method.
+func (m *MockClientWithResponsesInterface) CommitmentsAPIGetCommitmentAssignments(ctx context.Context, commitmentId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, commitmentId}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "CommitmentsAPIGetCommitmentAssignments", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CommitmentsAPIGetCommitmentAssignments indicates an expected call of CommitmentsAPIGetCommitmentAssignments.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) CommitmentsAPIGetCommitmentAssignments(ctx, commitmentId interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, commitmentId}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIGetCommitmentAssignments", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).CommitmentsAPIGetCommitmentAssignments), varargs...)
+}
+
 // CommitmentsAPIGetCommitmentAssignmentsWithResponse mocks base method.
 func (m *MockClientWithResponsesInterface) CommitmentsAPIGetCommitmentAssignmentsWithResponse(ctx context.Context, commitmentId string) (*sdk.CommitmentsAPIGetCommitmentAssignmentsResponse, error) {
 	m.ctrl.T.Helper()
@@ -4391,6 +4751,26 @@ func (m *MockClientWithResponsesInterface) CommitmentsAPIGetCommitmentAssignment
 func (mr *MockClientWithResponsesInterfaceMockRecorder) CommitmentsAPIGetCommitmentAssignmentsWithResponse(ctx, commitmentId interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIGetCommitmentAssignmentsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).CommitmentsAPIGetCommitmentAssignmentsWithResponse), ctx, commitmentId)
+}
+
+// CommitmentsAPIGetCommitmentUsageHistory mocks base method.
+func (m *MockClientWithResponsesInterface) CommitmentsAPIGetCommitmentUsageHistory(ctx context.Context, organizationId, commitmentId string, params *sdk.CommitmentsAPIGetCommitmentUsageHistoryParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, commitmentId, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "CommitmentsAPIGetCommitmentUsageHistory", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CommitmentsAPIGetCommitmentUsageHistory indicates an expected call of CommitmentsAPIGetCommitmentUsageHistory.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) CommitmentsAPIGetCommitmentUsageHistory(ctx, organizationId, commitmentId, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, commitmentId, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIGetCommitmentUsageHistory", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).CommitmentsAPIGetCommitmentUsageHistory), varargs...)
 }
 
 // CommitmentsAPIGetCommitmentUsageHistoryWithResponse mocks base method.
@@ -4423,6 +4803,46 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) CommitmentsAPIGetCommitm
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIGetCommitmentWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).CommitmentsAPIGetCommitmentWithResponse), ctx, commitmentId, params)
 }
 
+// CommitmentsAPIGetCommitments mocks base method.
+func (m *MockClientWithResponsesInterface) CommitmentsAPIGetCommitments(ctx context.Context, params *sdk.CommitmentsAPIGetCommitmentsParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "CommitmentsAPIGetCommitments", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CommitmentsAPIGetCommitments indicates an expected call of CommitmentsAPIGetCommitments.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) CommitmentsAPIGetCommitments(ctx, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIGetCommitments", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).CommitmentsAPIGetCommitments), varargs...)
+}
+
+// CommitmentsAPIGetCommitmentsAssignments mocks base method.
+func (m *MockClientWithResponsesInterface) CommitmentsAPIGetCommitmentsAssignments(ctx context.Context, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "CommitmentsAPIGetCommitmentsAssignments", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CommitmentsAPIGetCommitmentsAssignments indicates an expected call of CommitmentsAPIGetCommitmentsAssignments.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) CommitmentsAPIGetCommitmentsAssignments(ctx interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIGetCommitmentsAssignments", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).CommitmentsAPIGetCommitmentsAssignments), varargs...)
+}
+
 // CommitmentsAPIGetCommitmentsAssignmentsWithResponse mocks base method.
 func (m *MockClientWithResponsesInterface) CommitmentsAPIGetCommitmentsAssignmentsWithResponse(ctx context.Context) (*sdk.CommitmentsAPIGetCommitmentsAssignmentsResponse, error) {
 	m.ctrl.T.Helper()
@@ -4453,6 +4873,26 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) CommitmentsAPIGetCommitm
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIGetCommitmentsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).CommitmentsAPIGetCommitmentsWithResponse), ctx, params)
 }
 
+// CommitmentsAPIGetGCPCommitmentsImportScript mocks base method.
+func (m *MockClientWithResponsesInterface) CommitmentsAPIGetGCPCommitmentsImportScript(ctx context.Context, params *sdk.CommitmentsAPIGetGCPCommitmentsImportScriptParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "CommitmentsAPIGetGCPCommitmentsImportScript", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CommitmentsAPIGetGCPCommitmentsImportScript indicates an expected call of CommitmentsAPIGetGCPCommitmentsImportScript.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) CommitmentsAPIGetGCPCommitmentsImportScript(ctx, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIGetGCPCommitmentsImportScript", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).CommitmentsAPIGetGCPCommitmentsImportScript), varargs...)
+}
+
 // CommitmentsAPIGetGCPCommitmentsImportScriptWithResponse mocks base method.
 func (m *MockClientWithResponsesInterface) CommitmentsAPIGetGCPCommitmentsImportScriptWithResponse(ctx context.Context, params *sdk.CommitmentsAPIGetGCPCommitmentsImportScriptParams) (*sdk.CommitmentsAPIGetGCPCommitmentsImportScriptResponse, error) {
 	m.ctrl.T.Helper()
@@ -4468,6 +4908,26 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) CommitmentsAPIGetGCPComm
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIGetGCPCommitmentsImportScriptWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).CommitmentsAPIGetGCPCommitmentsImportScriptWithResponse), ctx, params)
 }
 
+// CommitmentsAPIGetGCPCommitmentsScriptTemplate mocks base method.
+func (m *MockClientWithResponsesInterface) CommitmentsAPIGetGCPCommitmentsScriptTemplate(ctx context.Context, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "CommitmentsAPIGetGCPCommitmentsScriptTemplate", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CommitmentsAPIGetGCPCommitmentsScriptTemplate indicates an expected call of CommitmentsAPIGetGCPCommitmentsScriptTemplate.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) CommitmentsAPIGetGCPCommitmentsScriptTemplate(ctx interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIGetGCPCommitmentsScriptTemplate", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).CommitmentsAPIGetGCPCommitmentsScriptTemplate), varargs...)
+}
+
 // CommitmentsAPIGetGCPCommitmentsScriptTemplateWithResponse mocks base method.
 func (m *MockClientWithResponsesInterface) CommitmentsAPIGetGCPCommitmentsScriptTemplateWithResponse(ctx context.Context) (*sdk.CommitmentsAPIGetGCPCommitmentsScriptTemplateResponse, error) {
 	m.ctrl.T.Helper()
@@ -4481,6 +4941,46 @@ func (m *MockClientWithResponsesInterface) CommitmentsAPIGetGCPCommitmentsScript
 func (mr *MockClientWithResponsesInterfaceMockRecorder) CommitmentsAPIGetGCPCommitmentsScriptTemplateWithResponse(ctx interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIGetGCPCommitmentsScriptTemplateWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).CommitmentsAPIGetGCPCommitmentsScriptTemplateWithResponse), ctx)
+}
+
+// CommitmentsAPIImportAWSReservedInstances mocks base method.
+func (m *MockClientWithResponsesInterface) CommitmentsAPIImportAWSReservedInstances(ctx context.Context, organizationId string, params *sdk.CommitmentsAPIImportAWSReservedInstancesParams, body sdk.CommitmentsAPIImportAWSReservedInstancesJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, params, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "CommitmentsAPIImportAWSReservedInstances", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CommitmentsAPIImportAWSReservedInstances indicates an expected call of CommitmentsAPIImportAWSReservedInstances.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) CommitmentsAPIImportAWSReservedInstances(ctx, organizationId, params, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, params, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIImportAWSReservedInstances", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).CommitmentsAPIImportAWSReservedInstances), varargs...)
+}
+
+// CommitmentsAPIImportAWSReservedInstancesWithBody mocks base method.
+func (m *MockClientWithResponsesInterface) CommitmentsAPIImportAWSReservedInstancesWithBody(ctx context.Context, organizationId string, params *sdk.CommitmentsAPIImportAWSReservedInstancesParams, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, params, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "CommitmentsAPIImportAWSReservedInstancesWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CommitmentsAPIImportAWSReservedInstancesWithBody indicates an expected call of CommitmentsAPIImportAWSReservedInstancesWithBody.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) CommitmentsAPIImportAWSReservedInstancesWithBody(ctx, organizationId, params, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, params, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIImportAWSReservedInstancesWithBody", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).CommitmentsAPIImportAWSReservedInstancesWithBody), varargs...)
 }
 
 // CommitmentsAPIImportAWSReservedInstancesWithBodyWithResponse mocks base method.
@@ -4513,6 +5013,46 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) CommitmentsAPIImportAWSR
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIImportAWSReservedInstancesWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).CommitmentsAPIImportAWSReservedInstancesWithResponse), ctx, organizationId, params, body)
 }
 
+// CommitmentsAPIImportAzureReservations mocks base method.
+func (m *MockClientWithResponsesInterface) CommitmentsAPIImportAzureReservations(ctx context.Context, params *sdk.CommitmentsAPIImportAzureReservationsParams, body sdk.CommitmentsAPIImportAzureReservationsJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, params, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "CommitmentsAPIImportAzureReservations", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CommitmentsAPIImportAzureReservations indicates an expected call of CommitmentsAPIImportAzureReservations.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) CommitmentsAPIImportAzureReservations(ctx, params, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, params, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIImportAzureReservations", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).CommitmentsAPIImportAzureReservations), varargs...)
+}
+
+// CommitmentsAPIImportAzureReservationsWithBody mocks base method.
+func (m *MockClientWithResponsesInterface) CommitmentsAPIImportAzureReservationsWithBody(ctx context.Context, params *sdk.CommitmentsAPIImportAzureReservationsParams, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, params, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "CommitmentsAPIImportAzureReservationsWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CommitmentsAPIImportAzureReservationsWithBody indicates an expected call of CommitmentsAPIImportAzureReservationsWithBody.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) CommitmentsAPIImportAzureReservationsWithBody(ctx, params, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, params, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIImportAzureReservationsWithBody", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).CommitmentsAPIImportAzureReservationsWithBody), varargs...)
+}
+
 // CommitmentsAPIImportAzureReservationsWithBodyWithResponse mocks base method.
 func (m *MockClientWithResponsesInterface) CommitmentsAPIImportAzureReservationsWithBodyWithResponse(ctx context.Context, params *sdk.CommitmentsAPIImportAzureReservationsParams, contentType string, body io.Reader) (*sdk.CommitmentsAPIImportAzureReservationsResponse, error) {
 	m.ctrl.T.Helper()
@@ -4541,6 +5081,46 @@ func (m *MockClientWithResponsesInterface) CommitmentsAPIImportAzureReservations
 func (mr *MockClientWithResponsesInterfaceMockRecorder) CommitmentsAPIImportAzureReservationsWithResponse(ctx, params, body interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIImportAzureReservationsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).CommitmentsAPIImportAzureReservationsWithResponse), ctx, params, body)
+}
+
+// CommitmentsAPIImportGCPCommitments mocks base method.
+func (m *MockClientWithResponsesInterface) CommitmentsAPIImportGCPCommitments(ctx context.Context, params *sdk.CommitmentsAPIImportGCPCommitmentsParams, body sdk.CommitmentsAPIImportGCPCommitmentsJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, params, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "CommitmentsAPIImportGCPCommitments", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CommitmentsAPIImportGCPCommitments indicates an expected call of CommitmentsAPIImportGCPCommitments.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) CommitmentsAPIImportGCPCommitments(ctx, params, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, params, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIImportGCPCommitments", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).CommitmentsAPIImportGCPCommitments), varargs...)
+}
+
+// CommitmentsAPIImportGCPCommitmentsWithBody mocks base method.
+func (m *MockClientWithResponsesInterface) CommitmentsAPIImportGCPCommitmentsWithBody(ctx context.Context, params *sdk.CommitmentsAPIImportGCPCommitmentsParams, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, params, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "CommitmentsAPIImportGCPCommitmentsWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CommitmentsAPIImportGCPCommitmentsWithBody indicates an expected call of CommitmentsAPIImportGCPCommitmentsWithBody.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) CommitmentsAPIImportGCPCommitmentsWithBody(ctx, params, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, params, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIImportGCPCommitmentsWithBody", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).CommitmentsAPIImportGCPCommitmentsWithBody), varargs...)
 }
 
 // CommitmentsAPIImportGCPCommitmentsWithBodyWithResponse mocks base method.
@@ -4573,6 +5153,46 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) CommitmentsAPIImportGCPC
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIImportGCPCommitmentsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).CommitmentsAPIImportGCPCommitmentsWithResponse), ctx, params, body)
 }
 
+// CommitmentsAPIReplaceCommitmentAssignments mocks base method.
+func (m *MockClientWithResponsesInterface) CommitmentsAPIReplaceCommitmentAssignments(ctx context.Context, commitmentId string, body sdk.CommitmentsAPIReplaceCommitmentAssignmentsJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, commitmentId, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "CommitmentsAPIReplaceCommitmentAssignments", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CommitmentsAPIReplaceCommitmentAssignments indicates an expected call of CommitmentsAPIReplaceCommitmentAssignments.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) CommitmentsAPIReplaceCommitmentAssignments(ctx, commitmentId, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, commitmentId, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIReplaceCommitmentAssignments", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).CommitmentsAPIReplaceCommitmentAssignments), varargs...)
+}
+
+// CommitmentsAPIReplaceCommitmentAssignmentsWithBody mocks base method.
+func (m *MockClientWithResponsesInterface) CommitmentsAPIReplaceCommitmentAssignmentsWithBody(ctx context.Context, commitmentId, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, commitmentId, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "CommitmentsAPIReplaceCommitmentAssignmentsWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CommitmentsAPIReplaceCommitmentAssignmentsWithBody indicates an expected call of CommitmentsAPIReplaceCommitmentAssignmentsWithBody.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) CommitmentsAPIReplaceCommitmentAssignmentsWithBody(ctx, commitmentId, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, commitmentId, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIReplaceCommitmentAssignmentsWithBody", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).CommitmentsAPIReplaceCommitmentAssignmentsWithBody), varargs...)
+}
+
 // CommitmentsAPIReplaceCommitmentAssignmentsWithBodyWithResponse mocks base method.
 func (m *MockClientWithResponsesInterface) CommitmentsAPIReplaceCommitmentAssignmentsWithBodyWithResponse(ctx context.Context, commitmentId, contentType string, body io.Reader) (*sdk.CommitmentsAPIReplaceCommitmentAssignmentsResponse, error) {
 	m.ctrl.T.Helper()
@@ -4601,6 +5221,46 @@ func (m *MockClientWithResponsesInterface) CommitmentsAPIReplaceCommitmentAssign
 func (mr *MockClientWithResponsesInterfaceMockRecorder) CommitmentsAPIReplaceCommitmentAssignmentsWithResponse(ctx, commitmentId, body interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIReplaceCommitmentAssignmentsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).CommitmentsAPIReplaceCommitmentAssignmentsWithResponse), ctx, commitmentId, body)
+}
+
+// CommitmentsAPIUpdateCommitment mocks base method.
+func (m *MockClientWithResponsesInterface) CommitmentsAPIUpdateCommitment(ctx context.Context, commitmentId string, body sdk.CommitmentsAPIUpdateCommitmentJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, commitmentId, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "CommitmentsAPIUpdateCommitment", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CommitmentsAPIUpdateCommitment indicates an expected call of CommitmentsAPIUpdateCommitment.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) CommitmentsAPIUpdateCommitment(ctx, commitmentId, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, commitmentId, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIUpdateCommitment", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).CommitmentsAPIUpdateCommitment), varargs...)
+}
+
+// CommitmentsAPIUpdateCommitmentWithBody mocks base method.
+func (m *MockClientWithResponsesInterface) CommitmentsAPIUpdateCommitmentWithBody(ctx context.Context, commitmentId, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, commitmentId, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "CommitmentsAPIUpdateCommitmentWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CommitmentsAPIUpdateCommitmentWithBody indicates an expected call of CommitmentsAPIUpdateCommitmentWithBody.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) CommitmentsAPIUpdateCommitmentWithBody(ctx, commitmentId, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, commitmentId, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIUpdateCommitmentWithBody", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).CommitmentsAPIUpdateCommitmentWithBody), varargs...)
 }
 
 // CommitmentsAPIUpdateCommitmentWithBodyWithResponse mocks base method.
@@ -4633,6 +5293,26 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) CommitmentsAPIUpdateComm
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIUpdateCommitmentWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).CommitmentsAPIUpdateCommitmentWithResponse), ctx, commitmentId, body)
 }
 
+// EvictorAPIGetAdvancedConfig mocks base method.
+func (m *MockClientWithResponsesInterface) EvictorAPIGetAdvancedConfig(ctx context.Context, clusterId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "EvictorAPIGetAdvancedConfig", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// EvictorAPIGetAdvancedConfig indicates an expected call of EvictorAPIGetAdvancedConfig.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) EvictorAPIGetAdvancedConfig(ctx, clusterId interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EvictorAPIGetAdvancedConfig", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).EvictorAPIGetAdvancedConfig), varargs...)
+}
+
 // EvictorAPIGetAdvancedConfigWithResponse mocks base method.
 func (m *MockClientWithResponsesInterface) EvictorAPIGetAdvancedConfigWithResponse(ctx context.Context, clusterId string) (*sdk.EvictorAPIGetAdvancedConfigResponse, error) {
 	m.ctrl.T.Helper()
@@ -4646,6 +5326,46 @@ func (m *MockClientWithResponsesInterface) EvictorAPIGetAdvancedConfigWithRespon
 func (mr *MockClientWithResponsesInterfaceMockRecorder) EvictorAPIGetAdvancedConfigWithResponse(ctx, clusterId interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EvictorAPIGetAdvancedConfigWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).EvictorAPIGetAdvancedConfigWithResponse), ctx, clusterId)
+}
+
+// EvictorAPIUpsertAdvancedConfig mocks base method.
+func (m *MockClientWithResponsesInterface) EvictorAPIUpsertAdvancedConfig(ctx context.Context, clusterId string, body sdk.EvictorAPIUpsertAdvancedConfigJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "EvictorAPIUpsertAdvancedConfig", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// EvictorAPIUpsertAdvancedConfig indicates an expected call of EvictorAPIUpsertAdvancedConfig.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) EvictorAPIUpsertAdvancedConfig(ctx, clusterId, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EvictorAPIUpsertAdvancedConfig", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).EvictorAPIUpsertAdvancedConfig), varargs...)
+}
+
+// EvictorAPIUpsertAdvancedConfigWithBody mocks base method.
+func (m *MockClientWithResponsesInterface) EvictorAPIUpsertAdvancedConfigWithBody(ctx context.Context, clusterId, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "EvictorAPIUpsertAdvancedConfigWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// EvictorAPIUpsertAdvancedConfigWithBody indicates an expected call of EvictorAPIUpsertAdvancedConfigWithBody.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) EvictorAPIUpsertAdvancedConfigWithBody(ctx, clusterId, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EvictorAPIUpsertAdvancedConfigWithBody", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).EvictorAPIUpsertAdvancedConfigWithBody), varargs...)
 }
 
 // EvictorAPIUpsertAdvancedConfigWithBodyWithResponse mocks base method.
@@ -4678,6 +5398,46 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) EvictorAPIUpsertAdvanced
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EvictorAPIUpsertAdvancedConfigWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).EvictorAPIUpsertAdvancedConfigWithResponse), ctx, clusterId, body)
 }
 
+// ExternalClusterAPIAddNode mocks base method.
+func (m *MockClientWithResponsesInterface) ExternalClusterAPIAddNode(ctx context.Context, clusterId string, body sdk.ExternalClusterAPIAddNodeJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ExternalClusterAPIAddNode", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExternalClusterAPIAddNode indicates an expected call of ExternalClusterAPIAddNode.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIAddNode(ctx, clusterId, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIAddNode", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIAddNode), varargs...)
+}
+
+// ExternalClusterAPIAddNodeWithBody mocks base method.
+func (m *MockClientWithResponsesInterface) ExternalClusterAPIAddNodeWithBody(ctx context.Context, clusterId, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ExternalClusterAPIAddNodeWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExternalClusterAPIAddNodeWithBody indicates an expected call of ExternalClusterAPIAddNodeWithBody.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIAddNodeWithBody(ctx, clusterId, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIAddNodeWithBody", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIAddNodeWithBody), varargs...)
+}
+
 // ExternalClusterAPIAddNodeWithBodyWithResponse mocks base method.
 func (m *MockClientWithResponsesInterface) ExternalClusterAPIAddNodeWithBodyWithResponse(ctx context.Context, clusterId, contentType string, body io.Reader) (*sdk.ExternalClusterAPIAddNodeResponse, error) {
 	m.ctrl.T.Helper()
@@ -4708,6 +5468,26 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIAddNod
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIAddNodeWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIAddNodeWithResponse), ctx, clusterId, body)
 }
 
+// ExternalClusterAPICreateAssumeRolePrincipal mocks base method.
+func (m *MockClientWithResponsesInterface) ExternalClusterAPICreateAssumeRolePrincipal(ctx context.Context, clusterId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ExternalClusterAPICreateAssumeRolePrincipal", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExternalClusterAPICreateAssumeRolePrincipal indicates an expected call of ExternalClusterAPICreateAssumeRolePrincipal.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPICreateAssumeRolePrincipal(ctx, clusterId interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPICreateAssumeRolePrincipal", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPICreateAssumeRolePrincipal), varargs...)
+}
+
 // ExternalClusterAPICreateAssumeRolePrincipalWithResponse mocks base method.
 func (m *MockClientWithResponsesInterface) ExternalClusterAPICreateAssumeRolePrincipalWithResponse(ctx context.Context, clusterId string) (*sdk.ExternalClusterAPICreateAssumeRolePrincipalResponse, error) {
 	m.ctrl.T.Helper()
@@ -4721,6 +5501,26 @@ func (m *MockClientWithResponsesInterface) ExternalClusterAPICreateAssumeRolePri
 func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPICreateAssumeRolePrincipalWithResponse(ctx, clusterId interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPICreateAssumeRolePrincipalWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPICreateAssumeRolePrincipalWithResponse), ctx, clusterId)
+}
+
+// ExternalClusterAPICreateClusterToken mocks base method.
+func (m *MockClientWithResponsesInterface) ExternalClusterAPICreateClusterToken(ctx context.Context, clusterId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ExternalClusterAPICreateClusterToken", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExternalClusterAPICreateClusterToken indicates an expected call of ExternalClusterAPICreateClusterToken.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPICreateClusterToken(ctx, clusterId interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPICreateClusterToken", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPICreateClusterToken), varargs...)
 }
 
 // ExternalClusterAPICreateClusterTokenWithResponse mocks base method.
@@ -4738,6 +5538,26 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPICreate
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPICreateClusterTokenWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPICreateClusterTokenWithResponse), ctx, clusterId)
 }
 
+// ExternalClusterAPIDeleteAssumeRolePrincipal mocks base method.
+func (m *MockClientWithResponsesInterface) ExternalClusterAPIDeleteAssumeRolePrincipal(ctx context.Context, clusterId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ExternalClusterAPIDeleteAssumeRolePrincipal", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExternalClusterAPIDeleteAssumeRolePrincipal indicates an expected call of ExternalClusterAPIDeleteAssumeRolePrincipal.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIDeleteAssumeRolePrincipal(ctx, clusterId interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIDeleteAssumeRolePrincipal", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIDeleteAssumeRolePrincipal), varargs...)
+}
+
 // ExternalClusterAPIDeleteAssumeRolePrincipalWithResponse mocks base method.
 func (m *MockClientWithResponsesInterface) ExternalClusterAPIDeleteAssumeRolePrincipalWithResponse(ctx context.Context, clusterId string) (*sdk.ExternalClusterAPIDeleteAssumeRolePrincipalResponse, error) {
 	m.ctrl.T.Helper()
@@ -4751,6 +5571,26 @@ func (m *MockClientWithResponsesInterface) ExternalClusterAPIDeleteAssumeRolePri
 func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIDeleteAssumeRolePrincipalWithResponse(ctx, clusterId interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIDeleteAssumeRolePrincipalWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIDeleteAssumeRolePrincipalWithResponse), ctx, clusterId)
+}
+
+// ExternalClusterAPIDeleteCluster mocks base method.
+func (m *MockClientWithResponsesInterface) ExternalClusterAPIDeleteCluster(ctx context.Context, clusterId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ExternalClusterAPIDeleteCluster", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExternalClusterAPIDeleteCluster indicates an expected call of ExternalClusterAPIDeleteCluster.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIDeleteCluster(ctx, clusterId interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIDeleteCluster", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIDeleteCluster), varargs...)
 }
 
 // ExternalClusterAPIDeleteClusterWithResponse mocks base method.
@@ -4768,6 +5608,26 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIDelete
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIDeleteClusterWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIDeleteClusterWithResponse), ctx, clusterId)
 }
 
+// ExternalClusterAPIDeleteNode mocks base method.
+func (m *MockClientWithResponsesInterface) ExternalClusterAPIDeleteNode(ctx context.Context, clusterId, nodeId string, params *sdk.ExternalClusterAPIDeleteNodeParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, nodeId, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ExternalClusterAPIDeleteNode", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExternalClusterAPIDeleteNode indicates an expected call of ExternalClusterAPIDeleteNode.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIDeleteNode(ctx, clusterId, nodeId, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, nodeId, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIDeleteNode", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIDeleteNode), varargs...)
+}
+
 // ExternalClusterAPIDeleteNodeWithResponse mocks base method.
 func (m *MockClientWithResponsesInterface) ExternalClusterAPIDeleteNodeWithResponse(ctx context.Context, clusterId, nodeId string, params *sdk.ExternalClusterAPIDeleteNodeParams) (*sdk.ExternalClusterAPIDeleteNodeResponse, error) {
 	m.ctrl.T.Helper()
@@ -4783,6 +5643,26 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIDelete
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIDeleteNodeWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIDeleteNodeWithResponse), ctx, clusterId, nodeId, params)
 }
 
+// ExternalClusterAPIDisableGKESA mocks base method.
+func (m *MockClientWithResponsesInterface) ExternalClusterAPIDisableGKESA(ctx context.Context, clusterId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ExternalClusterAPIDisableGKESA", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExternalClusterAPIDisableGKESA indicates an expected call of ExternalClusterAPIDisableGKESA.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIDisableGKESA(ctx, clusterId interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIDisableGKESA", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIDisableGKESA), varargs...)
+}
+
 // ExternalClusterAPIDisableGKESAWithResponse mocks base method.
 func (m *MockClientWithResponsesInterface) ExternalClusterAPIDisableGKESAWithResponse(ctx context.Context, clusterId string) (*sdk.ExternalClusterAPIDisableGKESAResponse, error) {
 	m.ctrl.T.Helper()
@@ -4796,6 +5676,46 @@ func (m *MockClientWithResponsesInterface) ExternalClusterAPIDisableGKESAWithRes
 func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIDisableGKESAWithResponse(ctx, clusterId interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIDisableGKESAWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIDisableGKESAWithResponse), ctx, clusterId)
+}
+
+// ExternalClusterAPIDisconnectCluster mocks base method.
+func (m *MockClientWithResponsesInterface) ExternalClusterAPIDisconnectCluster(ctx context.Context, clusterId string, body sdk.ExternalClusterAPIDisconnectClusterJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ExternalClusterAPIDisconnectCluster", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExternalClusterAPIDisconnectCluster indicates an expected call of ExternalClusterAPIDisconnectCluster.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIDisconnectCluster(ctx, clusterId, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIDisconnectCluster", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIDisconnectCluster), varargs...)
+}
+
+// ExternalClusterAPIDisconnectClusterWithBody mocks base method.
+func (m *MockClientWithResponsesInterface) ExternalClusterAPIDisconnectClusterWithBody(ctx context.Context, clusterId, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ExternalClusterAPIDisconnectClusterWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExternalClusterAPIDisconnectClusterWithBody indicates an expected call of ExternalClusterAPIDisconnectClusterWithBody.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIDisconnectClusterWithBody(ctx, clusterId, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIDisconnectClusterWithBody", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIDisconnectClusterWithBody), varargs...)
 }
 
 // ExternalClusterAPIDisconnectClusterWithBodyWithResponse mocks base method.
@@ -4828,6 +5748,46 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIDiscon
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIDisconnectClusterWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIDisconnectClusterWithResponse), ctx, clusterId, body)
 }
 
+// ExternalClusterAPIDrainNode mocks base method.
+func (m *MockClientWithResponsesInterface) ExternalClusterAPIDrainNode(ctx context.Context, clusterId, nodeId string, body sdk.ExternalClusterAPIDrainNodeJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, nodeId, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ExternalClusterAPIDrainNode", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExternalClusterAPIDrainNode indicates an expected call of ExternalClusterAPIDrainNode.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIDrainNode(ctx, clusterId, nodeId, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, nodeId, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIDrainNode", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIDrainNode), varargs...)
+}
+
+// ExternalClusterAPIDrainNodeWithBody mocks base method.
+func (m *MockClientWithResponsesInterface) ExternalClusterAPIDrainNodeWithBody(ctx context.Context, clusterId, nodeId, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, nodeId, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ExternalClusterAPIDrainNodeWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExternalClusterAPIDrainNodeWithBody indicates an expected call of ExternalClusterAPIDrainNodeWithBody.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIDrainNodeWithBody(ctx, clusterId, nodeId, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, nodeId, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIDrainNodeWithBody", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIDrainNodeWithBody), varargs...)
+}
+
 // ExternalClusterAPIDrainNodeWithBodyWithResponse mocks base method.
 func (m *MockClientWithResponsesInterface) ExternalClusterAPIDrainNodeWithBodyWithResponse(ctx context.Context, clusterId, nodeId, contentType string, body io.Reader) (*sdk.ExternalClusterAPIDrainNodeResponse, error) {
 	m.ctrl.T.Helper()
@@ -4856,6 +5816,46 @@ func (m *MockClientWithResponsesInterface) ExternalClusterAPIDrainNodeWithRespon
 func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIDrainNodeWithResponse(ctx, clusterId, nodeId, body interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIDrainNodeWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIDrainNodeWithResponse), ctx, clusterId, nodeId, body)
+}
+
+// ExternalClusterAPIGKECreateSA mocks base method.
+func (m *MockClientWithResponsesInterface) ExternalClusterAPIGKECreateSA(ctx context.Context, clusterId string, body sdk.ExternalClusterAPIGKECreateSAJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ExternalClusterAPIGKECreateSA", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExternalClusterAPIGKECreateSA indicates an expected call of ExternalClusterAPIGKECreateSA.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIGKECreateSA(ctx, clusterId, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIGKECreateSA", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIGKECreateSA), varargs...)
+}
+
+// ExternalClusterAPIGKECreateSAWithBody mocks base method.
+func (m *MockClientWithResponsesInterface) ExternalClusterAPIGKECreateSAWithBody(ctx context.Context, clusterId, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ExternalClusterAPIGKECreateSAWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExternalClusterAPIGKECreateSAWithBody indicates an expected call of ExternalClusterAPIGKECreateSAWithBody.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIGKECreateSAWithBody(ctx, clusterId, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIGKECreateSAWithBody", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIGKECreateSAWithBody), varargs...)
 }
 
 // ExternalClusterAPIGKECreateSAWithBodyWithResponse mocks base method.
@@ -4888,6 +5888,26 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIGKECre
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIGKECreateSAWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIGKECreateSAWithResponse), ctx, clusterId, body)
 }
 
+// ExternalClusterAPIGetAssumeRolePrincipal mocks base method.
+func (m *MockClientWithResponsesInterface) ExternalClusterAPIGetAssumeRolePrincipal(ctx context.Context, clusterId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ExternalClusterAPIGetAssumeRolePrincipal", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExternalClusterAPIGetAssumeRolePrincipal indicates an expected call of ExternalClusterAPIGetAssumeRolePrincipal.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIGetAssumeRolePrincipal(ctx, clusterId interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIGetAssumeRolePrincipal", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIGetAssumeRolePrincipal), varargs...)
+}
+
 // ExternalClusterAPIGetAssumeRolePrincipalWithResponse mocks base method.
 func (m *MockClientWithResponsesInterface) ExternalClusterAPIGetAssumeRolePrincipalWithResponse(ctx context.Context, clusterId string) (*sdk.ExternalClusterAPIGetAssumeRolePrincipalResponse, error) {
 	m.ctrl.T.Helper()
@@ -4903,6 +5923,26 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIGetAss
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIGetAssumeRolePrincipalWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIGetAssumeRolePrincipalWithResponse), ctx, clusterId)
 }
 
+// ExternalClusterAPIGetAssumeRoleUser mocks base method.
+func (m *MockClientWithResponsesInterface) ExternalClusterAPIGetAssumeRoleUser(ctx context.Context, clusterId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ExternalClusterAPIGetAssumeRoleUser", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExternalClusterAPIGetAssumeRoleUser indicates an expected call of ExternalClusterAPIGetAssumeRoleUser.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIGetAssumeRoleUser(ctx, clusterId interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIGetAssumeRoleUser", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIGetAssumeRoleUser), varargs...)
+}
+
 // ExternalClusterAPIGetAssumeRoleUserWithResponse mocks base method.
 func (m *MockClientWithResponsesInterface) ExternalClusterAPIGetAssumeRoleUserWithResponse(ctx context.Context, clusterId string) (*sdk.ExternalClusterAPIGetAssumeRoleUserResponse, error) {
 	m.ctrl.T.Helper()
@@ -4916,6 +5956,46 @@ func (m *MockClientWithResponsesInterface) ExternalClusterAPIGetAssumeRoleUserWi
 func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIGetAssumeRoleUserWithResponse(ctx, clusterId interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIGetAssumeRoleUserWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIGetAssumeRoleUserWithResponse), ctx, clusterId)
+}
+
+// ExternalClusterAPIGetCleanupScript mocks base method.
+func (m *MockClientWithResponsesInterface) ExternalClusterAPIGetCleanupScript(ctx context.Context, clusterId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ExternalClusterAPIGetCleanupScript", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExternalClusterAPIGetCleanupScript indicates an expected call of ExternalClusterAPIGetCleanupScript.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIGetCleanupScript(ctx, clusterId interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIGetCleanupScript", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIGetCleanupScript), varargs...)
+}
+
+// ExternalClusterAPIGetCleanupScriptTemplate mocks base method.
+func (m *MockClientWithResponsesInterface) ExternalClusterAPIGetCleanupScriptTemplate(ctx context.Context, provider string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, provider}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ExternalClusterAPIGetCleanupScriptTemplate", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExternalClusterAPIGetCleanupScriptTemplate indicates an expected call of ExternalClusterAPIGetCleanupScriptTemplate.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIGetCleanupScriptTemplate(ctx, provider interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, provider}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIGetCleanupScriptTemplate", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIGetCleanupScriptTemplate), varargs...)
 }
 
 // ExternalClusterAPIGetCleanupScriptTemplateWithResponse mocks base method.
@@ -4948,6 +6028,26 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIGetCle
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIGetCleanupScriptWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIGetCleanupScriptWithResponse), ctx, clusterId)
 }
 
+// ExternalClusterAPIGetCluster mocks base method.
+func (m *MockClientWithResponsesInterface) ExternalClusterAPIGetCluster(ctx context.Context, clusterId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ExternalClusterAPIGetCluster", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExternalClusterAPIGetCluster indicates an expected call of ExternalClusterAPIGetCluster.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIGetCluster(ctx, clusterId interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIGetCluster", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIGetCluster), varargs...)
+}
+
 // ExternalClusterAPIGetClusterWithResponse mocks base method.
 func (m *MockClientWithResponsesInterface) ExternalClusterAPIGetClusterWithResponse(ctx context.Context, clusterId string) (*sdk.ExternalClusterAPIGetClusterResponse, error) {
 	m.ctrl.T.Helper()
@@ -4961,6 +6061,46 @@ func (m *MockClientWithResponsesInterface) ExternalClusterAPIGetClusterWithRespo
 func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIGetClusterWithResponse(ctx, clusterId interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIGetClusterWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIGetClusterWithResponse), ctx, clusterId)
+}
+
+// ExternalClusterAPIGetCredentialsScript mocks base method.
+func (m *MockClientWithResponsesInterface) ExternalClusterAPIGetCredentialsScript(ctx context.Context, clusterId string, params *sdk.ExternalClusterAPIGetCredentialsScriptParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ExternalClusterAPIGetCredentialsScript", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExternalClusterAPIGetCredentialsScript indicates an expected call of ExternalClusterAPIGetCredentialsScript.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIGetCredentialsScript(ctx, clusterId, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIGetCredentialsScript", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIGetCredentialsScript), varargs...)
+}
+
+// ExternalClusterAPIGetCredentialsScriptTemplate mocks base method.
+func (m *MockClientWithResponsesInterface) ExternalClusterAPIGetCredentialsScriptTemplate(ctx context.Context, provider string, params *sdk.ExternalClusterAPIGetCredentialsScriptTemplateParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, provider, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ExternalClusterAPIGetCredentialsScriptTemplate", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExternalClusterAPIGetCredentialsScriptTemplate indicates an expected call of ExternalClusterAPIGetCredentialsScriptTemplate.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIGetCredentialsScriptTemplate(ctx, provider, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, provider, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIGetCredentialsScriptTemplate", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIGetCredentialsScriptTemplate), varargs...)
 }
 
 // ExternalClusterAPIGetCredentialsScriptTemplateWithResponse mocks base method.
@@ -4993,6 +6133,26 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIGetCre
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIGetCredentialsScriptWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIGetCredentialsScriptWithResponse), ctx, clusterId, params)
 }
 
+// ExternalClusterAPIGetListNodesFilters mocks base method.
+func (m *MockClientWithResponsesInterface) ExternalClusterAPIGetListNodesFilters(ctx context.Context, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ExternalClusterAPIGetListNodesFilters", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExternalClusterAPIGetListNodesFilters indicates an expected call of ExternalClusterAPIGetListNodesFilters.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIGetListNodesFilters(ctx interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIGetListNodesFilters", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIGetListNodesFilters), varargs...)
+}
+
 // ExternalClusterAPIGetListNodesFiltersWithResponse mocks base method.
 func (m *MockClientWithResponsesInterface) ExternalClusterAPIGetListNodesFiltersWithResponse(ctx context.Context) (*sdk.ExternalClusterAPIGetListNodesFiltersResponse, error) {
 	m.ctrl.T.Helper()
@@ -5008,6 +6168,26 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIGetLis
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIGetListNodesFiltersWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIGetListNodesFiltersWithResponse), ctx)
 }
 
+// ExternalClusterAPIGetNode mocks base method.
+func (m *MockClientWithResponsesInterface) ExternalClusterAPIGetNode(ctx context.Context, clusterId, nodeId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, nodeId}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ExternalClusterAPIGetNode", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExternalClusterAPIGetNode indicates an expected call of ExternalClusterAPIGetNode.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIGetNode(ctx, clusterId, nodeId interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, nodeId}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIGetNode", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIGetNode), varargs...)
+}
+
 // ExternalClusterAPIGetNodeWithResponse mocks base method.
 func (m *MockClientWithResponsesInterface) ExternalClusterAPIGetNodeWithResponse(ctx context.Context, clusterId, nodeId string) (*sdk.ExternalClusterAPIGetNodeResponse, error) {
 	m.ctrl.T.Helper()
@@ -5021,6 +6201,46 @@ func (m *MockClientWithResponsesInterface) ExternalClusterAPIGetNodeWithResponse
 func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIGetNodeWithResponse(ctx, clusterId, nodeId interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIGetNodeWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIGetNodeWithResponse), ctx, clusterId, nodeId)
+}
+
+// ExternalClusterAPIHandleCloudEvent mocks base method.
+func (m *MockClientWithResponsesInterface) ExternalClusterAPIHandleCloudEvent(ctx context.Context, clusterId string, body sdk.ExternalClusterAPIHandleCloudEventJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ExternalClusterAPIHandleCloudEvent", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExternalClusterAPIHandleCloudEvent indicates an expected call of ExternalClusterAPIHandleCloudEvent.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIHandleCloudEvent(ctx, clusterId, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIHandleCloudEvent", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIHandleCloudEvent), varargs...)
+}
+
+// ExternalClusterAPIHandleCloudEventWithBody mocks base method.
+func (m *MockClientWithResponsesInterface) ExternalClusterAPIHandleCloudEventWithBody(ctx context.Context, clusterId, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ExternalClusterAPIHandleCloudEventWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExternalClusterAPIHandleCloudEventWithBody indicates an expected call of ExternalClusterAPIHandleCloudEventWithBody.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIHandleCloudEventWithBody(ctx, clusterId, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIHandleCloudEventWithBody", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIHandleCloudEventWithBody), varargs...)
 }
 
 // ExternalClusterAPIHandleCloudEventWithBodyWithResponse mocks base method.
@@ -5053,6 +6273,26 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIHandle
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIHandleCloudEventWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIHandleCloudEventWithResponse), ctx, clusterId, body)
 }
 
+// ExternalClusterAPIListClusters mocks base method.
+func (m *MockClientWithResponsesInterface) ExternalClusterAPIListClusters(ctx context.Context, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ExternalClusterAPIListClusters", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExternalClusterAPIListClusters indicates an expected call of ExternalClusterAPIListClusters.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIListClusters(ctx interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIListClusters", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIListClusters), varargs...)
+}
+
 // ExternalClusterAPIListClustersWithResponse mocks base method.
 func (m *MockClientWithResponsesInterface) ExternalClusterAPIListClustersWithResponse(ctx context.Context) (*sdk.ExternalClusterAPIListClustersResponse, error) {
 	m.ctrl.T.Helper()
@@ -5066,6 +6306,26 @@ func (m *MockClientWithResponsesInterface) ExternalClusterAPIListClustersWithRes
 func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIListClustersWithResponse(ctx interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIListClustersWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIListClustersWithResponse), ctx)
+}
+
+// ExternalClusterAPIListNodes mocks base method.
+func (m *MockClientWithResponsesInterface) ExternalClusterAPIListNodes(ctx context.Context, clusterId string, params *sdk.ExternalClusterAPIListNodesParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ExternalClusterAPIListNodes", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExternalClusterAPIListNodes indicates an expected call of ExternalClusterAPIListNodes.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIListNodes(ctx, clusterId, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIListNodes", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIListNodes), varargs...)
 }
 
 // ExternalClusterAPIListNodesWithResponse mocks base method.
@@ -5083,6 +6343,26 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIListNo
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIListNodesWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIListNodesWithResponse), ctx, clusterId, params)
 }
 
+// ExternalClusterAPIReconcileCluster mocks base method.
+func (m *MockClientWithResponsesInterface) ExternalClusterAPIReconcileCluster(ctx context.Context, clusterId string, params *sdk.ExternalClusterAPIReconcileClusterParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ExternalClusterAPIReconcileCluster", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExternalClusterAPIReconcileCluster indicates an expected call of ExternalClusterAPIReconcileCluster.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIReconcileCluster(ctx, clusterId, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIReconcileCluster", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIReconcileCluster), varargs...)
+}
+
 // ExternalClusterAPIReconcileClusterWithResponse mocks base method.
 func (m *MockClientWithResponsesInterface) ExternalClusterAPIReconcileClusterWithResponse(ctx context.Context, clusterId string, params *sdk.ExternalClusterAPIReconcileClusterParams) (*sdk.ExternalClusterAPIReconcileClusterResponse, error) {
 	m.ctrl.T.Helper()
@@ -5096,6 +6376,46 @@ func (m *MockClientWithResponsesInterface) ExternalClusterAPIReconcileClusterWit
 func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIReconcileClusterWithResponse(ctx, clusterId, params interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIReconcileClusterWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIReconcileClusterWithResponse), ctx, clusterId, params)
+}
+
+// ExternalClusterAPIRegisterCluster mocks base method.
+func (m *MockClientWithResponsesInterface) ExternalClusterAPIRegisterCluster(ctx context.Context, body sdk.ExternalClusterAPIRegisterClusterJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ExternalClusterAPIRegisterCluster", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExternalClusterAPIRegisterCluster indicates an expected call of ExternalClusterAPIRegisterCluster.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIRegisterCluster(ctx, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIRegisterCluster", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIRegisterCluster), varargs...)
+}
+
+// ExternalClusterAPIRegisterClusterWithBody mocks base method.
+func (m *MockClientWithResponsesInterface) ExternalClusterAPIRegisterClusterWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ExternalClusterAPIRegisterClusterWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExternalClusterAPIRegisterClusterWithBody indicates an expected call of ExternalClusterAPIRegisterClusterWithBody.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIRegisterClusterWithBody(ctx, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIRegisterClusterWithBody", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIRegisterClusterWithBody), varargs...)
 }
 
 // ExternalClusterAPIRegisterClusterWithBodyWithResponse mocks base method.
@@ -5128,6 +6448,26 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIRegist
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIRegisterClusterWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIRegisterClusterWithResponse), ctx, body)
 }
 
+// ExternalClusterAPITriggerHibernateCluster mocks base method.
+func (m *MockClientWithResponsesInterface) ExternalClusterAPITriggerHibernateCluster(ctx context.Context, clusterId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ExternalClusterAPITriggerHibernateCluster", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExternalClusterAPITriggerHibernateCluster indicates an expected call of ExternalClusterAPITriggerHibernateCluster.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPITriggerHibernateCluster(ctx, clusterId interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPITriggerHibernateCluster", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPITriggerHibernateCluster), varargs...)
+}
+
 // ExternalClusterAPITriggerHibernateClusterWithResponse mocks base method.
 func (m *MockClientWithResponsesInterface) ExternalClusterAPITriggerHibernateClusterWithResponse(ctx context.Context, clusterId string) (*sdk.ExternalClusterAPITriggerHibernateClusterResponse, error) {
 	m.ctrl.T.Helper()
@@ -5141,6 +6481,46 @@ func (m *MockClientWithResponsesInterface) ExternalClusterAPITriggerHibernateClu
 func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPITriggerHibernateClusterWithResponse(ctx, clusterId interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPITriggerHibernateClusterWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPITriggerHibernateClusterWithResponse), ctx, clusterId)
+}
+
+// ExternalClusterAPITriggerResumeCluster mocks base method.
+func (m *MockClientWithResponsesInterface) ExternalClusterAPITriggerResumeCluster(ctx context.Context, clusterId string, body sdk.ExternalClusterAPITriggerResumeClusterJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ExternalClusterAPITriggerResumeCluster", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExternalClusterAPITriggerResumeCluster indicates an expected call of ExternalClusterAPITriggerResumeCluster.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPITriggerResumeCluster(ctx, clusterId, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPITriggerResumeCluster", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPITriggerResumeCluster), varargs...)
+}
+
+// ExternalClusterAPITriggerResumeClusterWithBody mocks base method.
+func (m *MockClientWithResponsesInterface) ExternalClusterAPITriggerResumeClusterWithBody(ctx context.Context, clusterId, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ExternalClusterAPITriggerResumeClusterWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExternalClusterAPITriggerResumeClusterWithBody indicates an expected call of ExternalClusterAPITriggerResumeClusterWithBody.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPITriggerResumeClusterWithBody(ctx, clusterId, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPITriggerResumeClusterWithBody", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPITriggerResumeClusterWithBody), varargs...)
 }
 
 // ExternalClusterAPITriggerResumeClusterWithBodyWithResponse mocks base method.
@@ -5173,6 +6553,66 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPITrigge
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPITriggerResumeClusterWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPITriggerResumeClusterWithResponse), ctx, clusterId, body)
 }
 
+// ExternalClusterAPIUpdateCluster mocks base method.
+func (m *MockClientWithResponsesInterface) ExternalClusterAPIUpdateCluster(ctx context.Context, clusterId string, body sdk.ExternalClusterAPIUpdateClusterJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ExternalClusterAPIUpdateCluster", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExternalClusterAPIUpdateCluster indicates an expected call of ExternalClusterAPIUpdateCluster.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIUpdateCluster(ctx, clusterId, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIUpdateCluster", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIUpdateCluster), varargs...)
+}
+
+// ExternalClusterAPIUpdateClusterTags mocks base method.
+func (m *MockClientWithResponsesInterface) ExternalClusterAPIUpdateClusterTags(ctx context.Context, clusterId string, body sdk.ExternalClusterAPIUpdateClusterTagsJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ExternalClusterAPIUpdateClusterTags", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExternalClusterAPIUpdateClusterTags indicates an expected call of ExternalClusterAPIUpdateClusterTags.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIUpdateClusterTags(ctx, clusterId, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIUpdateClusterTags", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIUpdateClusterTags), varargs...)
+}
+
+// ExternalClusterAPIUpdateClusterTagsWithBody mocks base method.
+func (m *MockClientWithResponsesInterface) ExternalClusterAPIUpdateClusterTagsWithBody(ctx context.Context, clusterId, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ExternalClusterAPIUpdateClusterTagsWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExternalClusterAPIUpdateClusterTagsWithBody indicates an expected call of ExternalClusterAPIUpdateClusterTagsWithBody.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIUpdateClusterTagsWithBody(ctx, clusterId, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIUpdateClusterTagsWithBody", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIUpdateClusterTagsWithBody), varargs...)
+}
+
 // ExternalClusterAPIUpdateClusterTagsWithBodyWithResponse mocks base method.
 func (m *MockClientWithResponsesInterface) ExternalClusterAPIUpdateClusterTagsWithBodyWithResponse(ctx context.Context, clusterId, contentType string, body io.Reader) (*sdk.ExternalClusterAPIUpdateClusterTagsResponse, error) {
 	m.ctrl.T.Helper()
@@ -5201,6 +6641,26 @@ func (m *MockClientWithResponsesInterface) ExternalClusterAPIUpdateClusterTagsWi
 func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIUpdateClusterTagsWithResponse(ctx, clusterId, body interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIUpdateClusterTagsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIUpdateClusterTagsWithResponse), ctx, clusterId, body)
+}
+
+// ExternalClusterAPIUpdateClusterWithBody mocks base method.
+func (m *MockClientWithResponsesInterface) ExternalClusterAPIUpdateClusterWithBody(ctx context.Context, clusterId, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ExternalClusterAPIUpdateClusterWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExternalClusterAPIUpdateClusterWithBody indicates an expected call of ExternalClusterAPIUpdateClusterWithBody.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIUpdateClusterWithBody(ctx, clusterId, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIUpdateClusterWithBody", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIUpdateClusterWithBody), varargs...)
 }
 
 // ExternalClusterAPIUpdateClusterWithBodyWithResponse mocks base method.
@@ -5233,6 +6693,46 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIUpdate
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIUpdateClusterWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIUpdateClusterWithResponse), ctx, clusterId, body)
 }
 
+// InventoryAPIAddReservation mocks base method.
+func (m *MockClientWithResponsesInterface) InventoryAPIAddReservation(ctx context.Context, organizationId string, body sdk.InventoryAPIAddReservationJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "InventoryAPIAddReservation", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// InventoryAPIAddReservation indicates an expected call of InventoryAPIAddReservation.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) InventoryAPIAddReservation(ctx, organizationId, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InventoryAPIAddReservation", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).InventoryAPIAddReservation), varargs...)
+}
+
+// InventoryAPIAddReservationWithBody mocks base method.
+func (m *MockClientWithResponsesInterface) InventoryAPIAddReservationWithBody(ctx context.Context, organizationId, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "InventoryAPIAddReservationWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// InventoryAPIAddReservationWithBody indicates an expected call of InventoryAPIAddReservationWithBody.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) InventoryAPIAddReservationWithBody(ctx, organizationId, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InventoryAPIAddReservationWithBody", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).InventoryAPIAddReservationWithBody), varargs...)
+}
+
 // InventoryAPIAddReservationWithBodyWithResponse mocks base method.
 func (m *MockClientWithResponsesInterface) InventoryAPIAddReservationWithBodyWithResponse(ctx context.Context, organizationId, contentType string, body io.Reader) (*sdk.InventoryAPIAddReservationResponse, error) {
 	m.ctrl.T.Helper()
@@ -5263,6 +6763,26 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) InventoryAPIAddReservati
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InventoryAPIAddReservationWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).InventoryAPIAddReservationWithResponse), ctx, organizationId, body)
 }
 
+// InventoryAPIDeleteReservation mocks base method.
+func (m *MockClientWithResponsesInterface) InventoryAPIDeleteReservation(ctx context.Context, organizationId, reservationId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, reservationId}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "InventoryAPIDeleteReservation", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// InventoryAPIDeleteReservation indicates an expected call of InventoryAPIDeleteReservation.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) InventoryAPIDeleteReservation(ctx, organizationId, reservationId interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, reservationId}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InventoryAPIDeleteReservation", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).InventoryAPIDeleteReservation), varargs...)
+}
+
 // InventoryAPIDeleteReservationWithResponse mocks base method.
 func (m *MockClientWithResponsesInterface) InventoryAPIDeleteReservationWithResponse(ctx context.Context, organizationId, reservationId string) (*sdk.InventoryAPIDeleteReservationResponse, error) {
 	m.ctrl.T.Helper()
@@ -5276,6 +6796,26 @@ func (m *MockClientWithResponsesInterface) InventoryAPIDeleteReservationWithResp
 func (mr *MockClientWithResponsesInterfaceMockRecorder) InventoryAPIDeleteReservationWithResponse(ctx, organizationId, reservationId interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InventoryAPIDeleteReservationWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).InventoryAPIDeleteReservationWithResponse), ctx, organizationId, reservationId)
+}
+
+// InventoryAPIGetOrganizationReservationsBalance mocks base method.
+func (m *MockClientWithResponsesInterface) InventoryAPIGetOrganizationReservationsBalance(ctx context.Context, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "InventoryAPIGetOrganizationReservationsBalance", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// InventoryAPIGetOrganizationReservationsBalance indicates an expected call of InventoryAPIGetOrganizationReservationsBalance.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) InventoryAPIGetOrganizationReservationsBalance(ctx interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InventoryAPIGetOrganizationReservationsBalance", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).InventoryAPIGetOrganizationReservationsBalance), varargs...)
 }
 
 // InventoryAPIGetOrganizationReservationsBalanceWithResponse mocks base method.
@@ -5293,6 +6833,26 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) InventoryAPIGetOrganizat
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InventoryAPIGetOrganizationReservationsBalanceWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).InventoryAPIGetOrganizationReservationsBalanceWithResponse), ctx)
 }
 
+// InventoryAPIGetOrganizationResourceUsage mocks base method.
+func (m *MockClientWithResponsesInterface) InventoryAPIGetOrganizationResourceUsage(ctx context.Context, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "InventoryAPIGetOrganizationResourceUsage", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// InventoryAPIGetOrganizationResourceUsage indicates an expected call of InventoryAPIGetOrganizationResourceUsage.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) InventoryAPIGetOrganizationResourceUsage(ctx interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InventoryAPIGetOrganizationResourceUsage", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).InventoryAPIGetOrganizationResourceUsage), varargs...)
+}
+
 // InventoryAPIGetOrganizationResourceUsageWithResponse mocks base method.
 func (m *MockClientWithResponsesInterface) InventoryAPIGetOrganizationResourceUsageWithResponse(ctx context.Context) (*sdk.InventoryAPIGetOrganizationResourceUsageResponse, error) {
 	m.ctrl.T.Helper()
@@ -5306,6 +6866,46 @@ func (m *MockClientWithResponsesInterface) InventoryAPIGetOrganizationResourceUs
 func (mr *MockClientWithResponsesInterfaceMockRecorder) InventoryAPIGetOrganizationResourceUsageWithResponse(ctx interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InventoryAPIGetOrganizationResourceUsageWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).InventoryAPIGetOrganizationResourceUsageWithResponse), ctx)
+}
+
+// InventoryAPIGetReservations mocks base method.
+func (m *MockClientWithResponsesInterface) InventoryAPIGetReservations(ctx context.Context, organizationId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "InventoryAPIGetReservations", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// InventoryAPIGetReservations indicates an expected call of InventoryAPIGetReservations.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) InventoryAPIGetReservations(ctx, organizationId interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InventoryAPIGetReservations", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).InventoryAPIGetReservations), varargs...)
+}
+
+// InventoryAPIGetReservationsBalance mocks base method.
+func (m *MockClientWithResponsesInterface) InventoryAPIGetReservationsBalance(ctx context.Context, organizationId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "InventoryAPIGetReservationsBalance", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// InventoryAPIGetReservationsBalance indicates an expected call of InventoryAPIGetReservationsBalance.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) InventoryAPIGetReservationsBalance(ctx, organizationId interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InventoryAPIGetReservationsBalance", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).InventoryAPIGetReservationsBalance), varargs...)
 }
 
 // InventoryAPIGetReservationsBalanceWithResponse mocks base method.
@@ -5338,6 +6938,26 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) InventoryAPIGetReservati
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InventoryAPIGetReservationsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).InventoryAPIGetReservationsWithResponse), ctx, organizationId)
 }
 
+// InventoryAPIListInstanceTypeNames mocks base method.
+func (m *MockClientWithResponsesInterface) InventoryAPIListInstanceTypeNames(ctx context.Context, params *sdk.InventoryAPIListInstanceTypeNamesParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "InventoryAPIListInstanceTypeNames", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// InventoryAPIListInstanceTypeNames indicates an expected call of InventoryAPIListInstanceTypeNames.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) InventoryAPIListInstanceTypeNames(ctx, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InventoryAPIListInstanceTypeNames", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).InventoryAPIListInstanceTypeNames), varargs...)
+}
+
 // InventoryAPIListInstanceTypeNamesWithResponse mocks base method.
 func (m *MockClientWithResponsesInterface) InventoryAPIListInstanceTypeNamesWithResponse(ctx context.Context, params *sdk.InventoryAPIListInstanceTypeNamesParams) (*sdk.InventoryAPIListInstanceTypeNamesResponse, error) {
 	m.ctrl.T.Helper()
@@ -5351,6 +6971,26 @@ func (m *MockClientWithResponsesInterface) InventoryAPIListInstanceTypeNamesWith
 func (mr *MockClientWithResponsesInterfaceMockRecorder) InventoryAPIListInstanceTypeNamesWithResponse(ctx, params interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InventoryAPIListInstanceTypeNamesWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).InventoryAPIListInstanceTypeNamesWithResponse), ctx, params)
+}
+
+// InventoryAPIListRegions mocks base method.
+func (m *MockClientWithResponsesInterface) InventoryAPIListRegions(ctx context.Context, params *sdk.InventoryAPIListRegionsParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "InventoryAPIListRegions", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// InventoryAPIListRegions indicates an expected call of InventoryAPIListRegions.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) InventoryAPIListRegions(ctx, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InventoryAPIListRegions", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).InventoryAPIListRegions), varargs...)
 }
 
 // InventoryAPIListRegionsWithResponse mocks base method.
@@ -5368,6 +7008,26 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) InventoryAPIListRegionsW
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InventoryAPIListRegionsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).InventoryAPIListRegionsWithResponse), ctx, params)
 }
 
+// InventoryAPIListZones mocks base method.
+func (m *MockClientWithResponsesInterface) InventoryAPIListZones(ctx context.Context, params *sdk.InventoryAPIListZonesParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "InventoryAPIListZones", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// InventoryAPIListZones indicates an expected call of InventoryAPIListZones.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) InventoryAPIListZones(ctx, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InventoryAPIListZones", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).InventoryAPIListZones), varargs...)
+}
+
 // InventoryAPIListZonesWithResponse mocks base method.
 func (m *MockClientWithResponsesInterface) InventoryAPIListZonesWithResponse(ctx context.Context, params *sdk.InventoryAPIListZonesParams) (*sdk.InventoryAPIListZonesResponse, error) {
 	m.ctrl.T.Helper()
@@ -5381,6 +7041,46 @@ func (m *MockClientWithResponsesInterface) InventoryAPIListZonesWithResponse(ctx
 func (mr *MockClientWithResponsesInterfaceMockRecorder) InventoryAPIListZonesWithResponse(ctx, params interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InventoryAPIListZonesWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).InventoryAPIListZonesWithResponse), ctx, params)
+}
+
+// InventoryAPIOverwriteReservations mocks base method.
+func (m *MockClientWithResponsesInterface) InventoryAPIOverwriteReservations(ctx context.Context, organizationId string, body sdk.InventoryAPIOverwriteReservationsJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "InventoryAPIOverwriteReservations", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// InventoryAPIOverwriteReservations indicates an expected call of InventoryAPIOverwriteReservations.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) InventoryAPIOverwriteReservations(ctx, organizationId, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InventoryAPIOverwriteReservations", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).InventoryAPIOverwriteReservations), varargs...)
+}
+
+// InventoryAPIOverwriteReservationsWithBody mocks base method.
+func (m *MockClientWithResponsesInterface) InventoryAPIOverwriteReservationsWithBody(ctx context.Context, organizationId, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "InventoryAPIOverwriteReservationsWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// InventoryAPIOverwriteReservationsWithBody indicates an expected call of InventoryAPIOverwriteReservationsWithBody.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) InventoryAPIOverwriteReservationsWithBody(ctx, organizationId, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InventoryAPIOverwriteReservationsWithBody", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).InventoryAPIOverwriteReservationsWithBody), varargs...)
 }
 
 // InventoryAPIOverwriteReservationsWithBodyWithResponse mocks base method.
@@ -5413,6 +7113,26 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) InventoryAPIOverwriteRes
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InventoryAPIOverwriteReservationsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).InventoryAPIOverwriteReservationsWithResponse), ctx, organizationId, body)
 }
 
+// InventoryAPISyncClusterResources mocks base method.
+func (m *MockClientWithResponsesInterface) InventoryAPISyncClusterResources(ctx context.Context, organizationId, clusterId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, clusterId}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "InventoryAPISyncClusterResources", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// InventoryAPISyncClusterResources indicates an expected call of InventoryAPISyncClusterResources.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) InventoryAPISyncClusterResources(ctx, organizationId, clusterId interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, clusterId}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InventoryAPISyncClusterResources", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).InventoryAPISyncClusterResources), varargs...)
+}
+
 // InventoryAPISyncClusterResourcesWithResponse mocks base method.
 func (m *MockClientWithResponsesInterface) InventoryAPISyncClusterResourcesWithResponse(ctx context.Context, organizationId, clusterId string) (*sdk.InventoryAPISyncClusterResourcesResponse, error) {
 	m.ctrl.T.Helper()
@@ -5426,6 +7146,46 @@ func (m *MockClientWithResponsesInterface) InventoryAPISyncClusterResourcesWithR
 func (mr *MockClientWithResponsesInterfaceMockRecorder) InventoryAPISyncClusterResourcesWithResponse(ctx, organizationId, clusterId interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InventoryAPISyncClusterResourcesWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).InventoryAPISyncClusterResourcesWithResponse), ctx, organizationId, clusterId)
+}
+
+// NodeConfigurationAPICreateConfiguration mocks base method.
+func (m *MockClientWithResponsesInterface) NodeConfigurationAPICreateConfiguration(ctx context.Context, clusterId string, body sdk.NodeConfigurationAPICreateConfigurationJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "NodeConfigurationAPICreateConfiguration", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// NodeConfigurationAPICreateConfiguration indicates an expected call of NodeConfigurationAPICreateConfiguration.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) NodeConfigurationAPICreateConfiguration(ctx, clusterId, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NodeConfigurationAPICreateConfiguration", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).NodeConfigurationAPICreateConfiguration), varargs...)
+}
+
+// NodeConfigurationAPICreateConfigurationWithBody mocks base method.
+func (m *MockClientWithResponsesInterface) NodeConfigurationAPICreateConfigurationWithBody(ctx context.Context, clusterId, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "NodeConfigurationAPICreateConfigurationWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// NodeConfigurationAPICreateConfigurationWithBody indicates an expected call of NodeConfigurationAPICreateConfigurationWithBody.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) NodeConfigurationAPICreateConfigurationWithBody(ctx, clusterId, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NodeConfigurationAPICreateConfigurationWithBody", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).NodeConfigurationAPICreateConfigurationWithBody), varargs...)
 }
 
 // NodeConfigurationAPICreateConfigurationWithBodyWithResponse mocks base method.
@@ -5458,6 +7218,26 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) NodeConfigurationAPICrea
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NodeConfigurationAPICreateConfigurationWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).NodeConfigurationAPICreateConfigurationWithResponse), ctx, clusterId, body)
 }
 
+// NodeConfigurationAPIDeleteConfiguration mocks base method.
+func (m *MockClientWithResponsesInterface) NodeConfigurationAPIDeleteConfiguration(ctx context.Context, clusterId, id string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, id}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "NodeConfigurationAPIDeleteConfiguration", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// NodeConfigurationAPIDeleteConfiguration indicates an expected call of NodeConfigurationAPIDeleteConfiguration.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) NodeConfigurationAPIDeleteConfiguration(ctx, clusterId, id interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, id}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NodeConfigurationAPIDeleteConfiguration", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).NodeConfigurationAPIDeleteConfiguration), varargs...)
+}
+
 // NodeConfigurationAPIDeleteConfigurationWithResponse mocks base method.
 func (m *MockClientWithResponsesInterface) NodeConfigurationAPIDeleteConfigurationWithResponse(ctx context.Context, clusterId, id string) (*sdk.NodeConfigurationAPIDeleteConfigurationResponse, error) {
 	m.ctrl.T.Helper()
@@ -5471,6 +7251,26 @@ func (m *MockClientWithResponsesInterface) NodeConfigurationAPIDeleteConfigurati
 func (mr *MockClientWithResponsesInterfaceMockRecorder) NodeConfigurationAPIDeleteConfigurationWithResponse(ctx, clusterId, id interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NodeConfigurationAPIDeleteConfigurationWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).NodeConfigurationAPIDeleteConfigurationWithResponse), ctx, clusterId, id)
+}
+
+// NodeConfigurationAPIGetConfiguration mocks base method.
+func (m *MockClientWithResponsesInterface) NodeConfigurationAPIGetConfiguration(ctx context.Context, clusterId, id string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, id}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "NodeConfigurationAPIGetConfiguration", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// NodeConfigurationAPIGetConfiguration indicates an expected call of NodeConfigurationAPIGetConfiguration.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) NodeConfigurationAPIGetConfiguration(ctx, clusterId, id interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, id}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NodeConfigurationAPIGetConfiguration", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).NodeConfigurationAPIGetConfiguration), varargs...)
 }
 
 // NodeConfigurationAPIGetConfigurationWithResponse mocks base method.
@@ -5488,6 +7288,26 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) NodeConfigurationAPIGetC
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NodeConfigurationAPIGetConfigurationWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).NodeConfigurationAPIGetConfigurationWithResponse), ctx, clusterId, id)
 }
 
+// NodeConfigurationAPIGetSuggestedConfiguration mocks base method.
+func (m *MockClientWithResponsesInterface) NodeConfigurationAPIGetSuggestedConfiguration(ctx context.Context, clusterId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "NodeConfigurationAPIGetSuggestedConfiguration", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// NodeConfigurationAPIGetSuggestedConfiguration indicates an expected call of NodeConfigurationAPIGetSuggestedConfiguration.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) NodeConfigurationAPIGetSuggestedConfiguration(ctx, clusterId interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NodeConfigurationAPIGetSuggestedConfiguration", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).NodeConfigurationAPIGetSuggestedConfiguration), varargs...)
+}
+
 // NodeConfigurationAPIGetSuggestedConfigurationWithResponse mocks base method.
 func (m *MockClientWithResponsesInterface) NodeConfigurationAPIGetSuggestedConfigurationWithResponse(ctx context.Context, clusterId string) (*sdk.NodeConfigurationAPIGetSuggestedConfigurationResponse, error) {
 	m.ctrl.T.Helper()
@@ -5501,6 +7321,26 @@ func (m *MockClientWithResponsesInterface) NodeConfigurationAPIGetSuggestedConfi
 func (mr *MockClientWithResponsesInterfaceMockRecorder) NodeConfigurationAPIGetSuggestedConfigurationWithResponse(ctx, clusterId interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NodeConfigurationAPIGetSuggestedConfigurationWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).NodeConfigurationAPIGetSuggestedConfigurationWithResponse), ctx, clusterId)
+}
+
+// NodeConfigurationAPIListConfigurations mocks base method.
+func (m *MockClientWithResponsesInterface) NodeConfigurationAPIListConfigurations(ctx context.Context, clusterId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "NodeConfigurationAPIListConfigurations", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// NodeConfigurationAPIListConfigurations indicates an expected call of NodeConfigurationAPIListConfigurations.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) NodeConfigurationAPIListConfigurations(ctx, clusterId interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NodeConfigurationAPIListConfigurations", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).NodeConfigurationAPIListConfigurations), varargs...)
 }
 
 // NodeConfigurationAPIListConfigurationsWithResponse mocks base method.
@@ -5518,6 +7358,26 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) NodeConfigurationAPIList
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NodeConfigurationAPIListConfigurationsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).NodeConfigurationAPIListConfigurationsWithResponse), ctx, clusterId)
 }
 
+// NodeConfigurationAPIListMaxPodsPresets mocks base method.
+func (m *MockClientWithResponsesInterface) NodeConfigurationAPIListMaxPodsPresets(ctx context.Context, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "NodeConfigurationAPIListMaxPodsPresets", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// NodeConfigurationAPIListMaxPodsPresets indicates an expected call of NodeConfigurationAPIListMaxPodsPresets.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) NodeConfigurationAPIListMaxPodsPresets(ctx interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NodeConfigurationAPIListMaxPodsPresets", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).NodeConfigurationAPIListMaxPodsPresets), varargs...)
+}
+
 // NodeConfigurationAPIListMaxPodsPresetsWithResponse mocks base method.
 func (m *MockClientWithResponsesInterface) NodeConfigurationAPIListMaxPodsPresetsWithResponse(ctx context.Context) (*sdk.NodeConfigurationAPIListMaxPodsPresetsResponse, error) {
 	m.ctrl.T.Helper()
@@ -5533,6 +7393,26 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) NodeConfigurationAPIList
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NodeConfigurationAPIListMaxPodsPresetsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).NodeConfigurationAPIListMaxPodsPresetsWithResponse), ctx)
 }
 
+// NodeConfigurationAPISetDefault mocks base method.
+func (m *MockClientWithResponsesInterface) NodeConfigurationAPISetDefault(ctx context.Context, clusterId, id string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, id}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "NodeConfigurationAPISetDefault", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// NodeConfigurationAPISetDefault indicates an expected call of NodeConfigurationAPISetDefault.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) NodeConfigurationAPISetDefault(ctx, clusterId, id interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, id}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NodeConfigurationAPISetDefault", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).NodeConfigurationAPISetDefault), varargs...)
+}
+
 // NodeConfigurationAPISetDefaultWithResponse mocks base method.
 func (m *MockClientWithResponsesInterface) NodeConfigurationAPISetDefaultWithResponse(ctx context.Context, clusterId, id string) (*sdk.NodeConfigurationAPISetDefaultResponse, error) {
 	m.ctrl.T.Helper()
@@ -5546,6 +7426,46 @@ func (m *MockClientWithResponsesInterface) NodeConfigurationAPISetDefaultWithRes
 func (mr *MockClientWithResponsesInterfaceMockRecorder) NodeConfigurationAPISetDefaultWithResponse(ctx, clusterId, id interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NodeConfigurationAPISetDefaultWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).NodeConfigurationAPISetDefaultWithResponse), ctx, clusterId, id)
+}
+
+// NodeConfigurationAPIUpdateConfiguration mocks base method.
+func (m *MockClientWithResponsesInterface) NodeConfigurationAPIUpdateConfiguration(ctx context.Context, clusterId, id string, body sdk.NodeConfigurationAPIUpdateConfigurationJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, id, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "NodeConfigurationAPIUpdateConfiguration", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// NodeConfigurationAPIUpdateConfiguration indicates an expected call of NodeConfigurationAPIUpdateConfiguration.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) NodeConfigurationAPIUpdateConfiguration(ctx, clusterId, id, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, id, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NodeConfigurationAPIUpdateConfiguration", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).NodeConfigurationAPIUpdateConfiguration), varargs...)
+}
+
+// NodeConfigurationAPIUpdateConfigurationWithBody mocks base method.
+func (m *MockClientWithResponsesInterface) NodeConfigurationAPIUpdateConfigurationWithBody(ctx context.Context, clusterId, id, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, id, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "NodeConfigurationAPIUpdateConfigurationWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// NodeConfigurationAPIUpdateConfigurationWithBody indicates an expected call of NodeConfigurationAPIUpdateConfigurationWithBody.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) NodeConfigurationAPIUpdateConfigurationWithBody(ctx, clusterId, id, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, id, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NodeConfigurationAPIUpdateConfigurationWithBody", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).NodeConfigurationAPIUpdateConfigurationWithBody), varargs...)
 }
 
 // NodeConfigurationAPIUpdateConfigurationWithBodyWithResponse mocks base method.
@@ -5578,6 +7498,46 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) NodeConfigurationAPIUpda
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NodeConfigurationAPIUpdateConfigurationWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).NodeConfigurationAPIUpdateConfigurationWithResponse), ctx, clusterId, id, body)
 }
 
+// NodeTemplatesAPICreateNodeTemplate mocks base method.
+func (m *MockClientWithResponsesInterface) NodeTemplatesAPICreateNodeTemplate(ctx context.Context, clusterId string, body sdk.NodeTemplatesAPICreateNodeTemplateJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "NodeTemplatesAPICreateNodeTemplate", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// NodeTemplatesAPICreateNodeTemplate indicates an expected call of NodeTemplatesAPICreateNodeTemplate.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) NodeTemplatesAPICreateNodeTemplate(ctx, clusterId, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NodeTemplatesAPICreateNodeTemplate", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).NodeTemplatesAPICreateNodeTemplate), varargs...)
+}
+
+// NodeTemplatesAPICreateNodeTemplateWithBody mocks base method.
+func (m *MockClientWithResponsesInterface) NodeTemplatesAPICreateNodeTemplateWithBody(ctx context.Context, clusterId, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "NodeTemplatesAPICreateNodeTemplateWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// NodeTemplatesAPICreateNodeTemplateWithBody indicates an expected call of NodeTemplatesAPICreateNodeTemplateWithBody.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) NodeTemplatesAPICreateNodeTemplateWithBody(ctx, clusterId, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NodeTemplatesAPICreateNodeTemplateWithBody", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).NodeTemplatesAPICreateNodeTemplateWithBody), varargs...)
+}
+
 // NodeTemplatesAPICreateNodeTemplateWithBodyWithResponse mocks base method.
 func (m *MockClientWithResponsesInterface) NodeTemplatesAPICreateNodeTemplateWithBodyWithResponse(ctx context.Context, clusterId, contentType string, body io.Reader) (*sdk.NodeTemplatesAPICreateNodeTemplateResponse, error) {
 	m.ctrl.T.Helper()
@@ -5608,6 +7568,26 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) NodeTemplatesAPICreateNo
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NodeTemplatesAPICreateNodeTemplateWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).NodeTemplatesAPICreateNodeTemplateWithResponse), ctx, clusterId, body)
 }
 
+// NodeTemplatesAPIDeleteNodeTemplate mocks base method.
+func (m *MockClientWithResponsesInterface) NodeTemplatesAPIDeleteNodeTemplate(ctx context.Context, clusterId, nodeTemplateName string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, nodeTemplateName}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "NodeTemplatesAPIDeleteNodeTemplate", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// NodeTemplatesAPIDeleteNodeTemplate indicates an expected call of NodeTemplatesAPIDeleteNodeTemplate.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) NodeTemplatesAPIDeleteNodeTemplate(ctx, clusterId, nodeTemplateName interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, nodeTemplateName}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NodeTemplatesAPIDeleteNodeTemplate", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).NodeTemplatesAPIDeleteNodeTemplate), varargs...)
+}
+
 // NodeTemplatesAPIDeleteNodeTemplateWithResponse mocks base method.
 func (m *MockClientWithResponsesInterface) NodeTemplatesAPIDeleteNodeTemplateWithResponse(ctx context.Context, clusterId, nodeTemplateName string) (*sdk.NodeTemplatesAPIDeleteNodeTemplateResponse, error) {
 	m.ctrl.T.Helper()
@@ -5621,6 +7601,46 @@ func (m *MockClientWithResponsesInterface) NodeTemplatesAPIDeleteNodeTemplateWit
 func (mr *MockClientWithResponsesInterfaceMockRecorder) NodeTemplatesAPIDeleteNodeTemplateWithResponse(ctx, clusterId, nodeTemplateName interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NodeTemplatesAPIDeleteNodeTemplateWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).NodeTemplatesAPIDeleteNodeTemplateWithResponse), ctx, clusterId, nodeTemplateName)
+}
+
+// NodeTemplatesAPIFilterInstanceTypes mocks base method.
+func (m *MockClientWithResponsesInterface) NodeTemplatesAPIFilterInstanceTypes(ctx context.Context, clusterId string, body sdk.NodeTemplatesAPIFilterInstanceTypesJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "NodeTemplatesAPIFilterInstanceTypes", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// NodeTemplatesAPIFilterInstanceTypes indicates an expected call of NodeTemplatesAPIFilterInstanceTypes.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) NodeTemplatesAPIFilterInstanceTypes(ctx, clusterId, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NodeTemplatesAPIFilterInstanceTypes", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).NodeTemplatesAPIFilterInstanceTypes), varargs...)
+}
+
+// NodeTemplatesAPIFilterInstanceTypesWithBody mocks base method.
+func (m *MockClientWithResponsesInterface) NodeTemplatesAPIFilterInstanceTypesWithBody(ctx context.Context, clusterId, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "NodeTemplatesAPIFilterInstanceTypesWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// NodeTemplatesAPIFilterInstanceTypesWithBody indicates an expected call of NodeTemplatesAPIFilterInstanceTypesWithBody.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) NodeTemplatesAPIFilterInstanceTypesWithBody(ctx, clusterId, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NodeTemplatesAPIFilterInstanceTypesWithBody", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).NodeTemplatesAPIFilterInstanceTypesWithBody), varargs...)
 }
 
 // NodeTemplatesAPIFilterInstanceTypesWithBodyWithResponse mocks base method.
@@ -5653,6 +7673,26 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) NodeTemplatesAPIFilterIn
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NodeTemplatesAPIFilterInstanceTypesWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).NodeTemplatesAPIFilterInstanceTypesWithResponse), ctx, clusterId, body)
 }
 
+// NodeTemplatesAPIGenerateNodeTemplates mocks base method.
+func (m *MockClientWithResponsesInterface) NodeTemplatesAPIGenerateNodeTemplates(ctx context.Context, clusterId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "NodeTemplatesAPIGenerateNodeTemplates", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// NodeTemplatesAPIGenerateNodeTemplates indicates an expected call of NodeTemplatesAPIGenerateNodeTemplates.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) NodeTemplatesAPIGenerateNodeTemplates(ctx, clusterId interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NodeTemplatesAPIGenerateNodeTemplates", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).NodeTemplatesAPIGenerateNodeTemplates), varargs...)
+}
+
 // NodeTemplatesAPIGenerateNodeTemplatesWithResponse mocks base method.
 func (m *MockClientWithResponsesInterface) NodeTemplatesAPIGenerateNodeTemplatesWithResponse(ctx context.Context, clusterId string) (*sdk.NodeTemplatesAPIGenerateNodeTemplatesResponse, error) {
 	m.ctrl.T.Helper()
@@ -5668,6 +7708,26 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) NodeTemplatesAPIGenerate
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NodeTemplatesAPIGenerateNodeTemplatesWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).NodeTemplatesAPIGenerateNodeTemplatesWithResponse), ctx, clusterId)
 }
 
+// NodeTemplatesAPIListNodeTemplates mocks base method.
+func (m *MockClientWithResponsesInterface) NodeTemplatesAPIListNodeTemplates(ctx context.Context, clusterId string, params *sdk.NodeTemplatesAPIListNodeTemplatesParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "NodeTemplatesAPIListNodeTemplates", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// NodeTemplatesAPIListNodeTemplates indicates an expected call of NodeTemplatesAPIListNodeTemplates.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) NodeTemplatesAPIListNodeTemplates(ctx, clusterId, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NodeTemplatesAPIListNodeTemplates", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).NodeTemplatesAPIListNodeTemplates), varargs...)
+}
+
 // NodeTemplatesAPIListNodeTemplatesWithResponse mocks base method.
 func (m *MockClientWithResponsesInterface) NodeTemplatesAPIListNodeTemplatesWithResponse(ctx context.Context, clusterId string, params *sdk.NodeTemplatesAPIListNodeTemplatesParams) (*sdk.NodeTemplatesAPIListNodeTemplatesResponse, error) {
 	m.ctrl.T.Helper()
@@ -5681,6 +7741,46 @@ func (m *MockClientWithResponsesInterface) NodeTemplatesAPIListNodeTemplatesWith
 func (mr *MockClientWithResponsesInterfaceMockRecorder) NodeTemplatesAPIListNodeTemplatesWithResponse(ctx, clusterId, params interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NodeTemplatesAPIListNodeTemplatesWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).NodeTemplatesAPIListNodeTemplatesWithResponse), ctx, clusterId, params)
+}
+
+// NodeTemplatesAPIUpdateNodeTemplate mocks base method.
+func (m *MockClientWithResponsesInterface) NodeTemplatesAPIUpdateNodeTemplate(ctx context.Context, clusterId, nodeTemplateName string, body sdk.NodeTemplatesAPIUpdateNodeTemplateJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, nodeTemplateName, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "NodeTemplatesAPIUpdateNodeTemplate", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// NodeTemplatesAPIUpdateNodeTemplate indicates an expected call of NodeTemplatesAPIUpdateNodeTemplate.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) NodeTemplatesAPIUpdateNodeTemplate(ctx, clusterId, nodeTemplateName, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, nodeTemplateName, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NodeTemplatesAPIUpdateNodeTemplate", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).NodeTemplatesAPIUpdateNodeTemplate), varargs...)
+}
+
+// NodeTemplatesAPIUpdateNodeTemplateWithBody mocks base method.
+func (m *MockClientWithResponsesInterface) NodeTemplatesAPIUpdateNodeTemplateWithBody(ctx context.Context, clusterId, nodeTemplateName, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, nodeTemplateName, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "NodeTemplatesAPIUpdateNodeTemplateWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// NodeTemplatesAPIUpdateNodeTemplateWithBody indicates an expected call of NodeTemplatesAPIUpdateNodeTemplateWithBody.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) NodeTemplatesAPIUpdateNodeTemplateWithBody(ctx, clusterId, nodeTemplateName, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, nodeTemplateName, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NodeTemplatesAPIUpdateNodeTemplateWithBody", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).NodeTemplatesAPIUpdateNodeTemplateWithBody), varargs...)
 }
 
 // NodeTemplatesAPIUpdateNodeTemplateWithBodyWithResponse mocks base method.
@@ -5713,6 +7813,26 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) NodeTemplatesAPIUpdateNo
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NodeTemplatesAPIUpdateNodeTemplateWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).NodeTemplatesAPIUpdateNodeTemplateWithResponse), ctx, clusterId, nodeTemplateName, body)
 }
 
+// OperationsAPIGetOperation mocks base method.
+func (m *MockClientWithResponsesInterface) OperationsAPIGetOperation(ctx context.Context, id string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, id}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "OperationsAPIGetOperation", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// OperationsAPIGetOperation indicates an expected call of OperationsAPIGetOperation.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) OperationsAPIGetOperation(ctx, id interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, id}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "OperationsAPIGetOperation", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).OperationsAPIGetOperation), varargs...)
+}
+
 // OperationsAPIGetOperationWithResponse mocks base method.
 func (m *MockClientWithResponsesInterface) OperationsAPIGetOperationWithResponse(ctx context.Context, id string) (*sdk.OperationsAPIGetOperationResponse, error) {
 	m.ctrl.T.Helper()
@@ -5726,6 +7846,26 @@ func (m *MockClientWithResponsesInterface) OperationsAPIGetOperationWithResponse
 func (mr *MockClientWithResponsesInterfaceMockRecorder) OperationsAPIGetOperationWithResponse(ctx, id interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "OperationsAPIGetOperationWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).OperationsAPIGetOperationWithResponse), ctx, id)
+}
+
+// PoliciesAPIGetClusterNodeConstraints mocks base method.
+func (m *MockClientWithResponsesInterface) PoliciesAPIGetClusterNodeConstraints(ctx context.Context, clusterId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "PoliciesAPIGetClusterNodeConstraints", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// PoliciesAPIGetClusterNodeConstraints indicates an expected call of PoliciesAPIGetClusterNodeConstraints.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) PoliciesAPIGetClusterNodeConstraints(ctx, clusterId interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PoliciesAPIGetClusterNodeConstraints", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).PoliciesAPIGetClusterNodeConstraints), varargs...)
 }
 
 // PoliciesAPIGetClusterNodeConstraintsWithResponse mocks base method.
@@ -5743,6 +7883,26 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) PoliciesAPIGetClusterNod
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PoliciesAPIGetClusterNodeConstraintsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).PoliciesAPIGetClusterNodeConstraintsWithResponse), ctx, clusterId)
 }
 
+// PoliciesAPIGetClusterPolicies mocks base method.
+func (m *MockClientWithResponsesInterface) PoliciesAPIGetClusterPolicies(ctx context.Context, clusterId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "PoliciesAPIGetClusterPolicies", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// PoliciesAPIGetClusterPolicies indicates an expected call of PoliciesAPIGetClusterPolicies.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) PoliciesAPIGetClusterPolicies(ctx, clusterId interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PoliciesAPIGetClusterPolicies", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).PoliciesAPIGetClusterPolicies), varargs...)
+}
+
 // PoliciesAPIGetClusterPoliciesWithResponse mocks base method.
 func (m *MockClientWithResponsesInterface) PoliciesAPIGetClusterPoliciesWithResponse(ctx context.Context, clusterId string) (*sdk.PoliciesAPIGetClusterPoliciesResponse, error) {
 	m.ctrl.T.Helper()
@@ -5756,6 +7916,46 @@ func (m *MockClientWithResponsesInterface) PoliciesAPIGetClusterPoliciesWithResp
 func (mr *MockClientWithResponsesInterfaceMockRecorder) PoliciesAPIGetClusterPoliciesWithResponse(ctx, clusterId interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PoliciesAPIGetClusterPoliciesWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).PoliciesAPIGetClusterPoliciesWithResponse), ctx, clusterId)
+}
+
+// PoliciesAPIUpsertClusterPolicies mocks base method.
+func (m *MockClientWithResponsesInterface) PoliciesAPIUpsertClusterPolicies(ctx context.Context, clusterId string, body sdk.PoliciesAPIUpsertClusterPoliciesJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "PoliciesAPIUpsertClusterPolicies", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// PoliciesAPIUpsertClusterPolicies indicates an expected call of PoliciesAPIUpsertClusterPolicies.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) PoliciesAPIUpsertClusterPolicies(ctx, clusterId, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PoliciesAPIUpsertClusterPolicies", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).PoliciesAPIUpsertClusterPolicies), varargs...)
+}
+
+// PoliciesAPIUpsertClusterPoliciesWithBody mocks base method.
+func (m *MockClientWithResponsesInterface) PoliciesAPIUpsertClusterPoliciesWithBody(ctx context.Context, clusterId, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "PoliciesAPIUpsertClusterPoliciesWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// PoliciesAPIUpsertClusterPoliciesWithBody indicates an expected call of PoliciesAPIUpsertClusterPoliciesWithBody.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) PoliciesAPIUpsertClusterPoliciesWithBody(ctx, clusterId, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PoliciesAPIUpsertClusterPoliciesWithBody", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).PoliciesAPIUpsertClusterPoliciesWithBody), varargs...)
 }
 
 // PoliciesAPIUpsertClusterPoliciesWithBodyWithResponse mocks base method.
@@ -5788,6 +7988,46 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) PoliciesAPIUpsertCluster
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "PoliciesAPIUpsertClusterPoliciesWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).PoliciesAPIUpsertClusterPoliciesWithResponse), ctx, clusterId, body)
 }
 
+// RbacServiceAPICreateGroup mocks base method.
+func (m *MockClientWithResponsesInterface) RbacServiceAPICreateGroup(ctx context.Context, organizationId string, body sdk.RbacServiceAPICreateGroupJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RbacServiceAPICreateGroup", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RbacServiceAPICreateGroup indicates an expected call of RbacServiceAPICreateGroup.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RbacServiceAPICreateGroup(ctx, organizationId, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RbacServiceAPICreateGroup", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RbacServiceAPICreateGroup), varargs...)
+}
+
+// RbacServiceAPICreateGroupWithBody mocks base method.
+func (m *MockClientWithResponsesInterface) RbacServiceAPICreateGroupWithBody(ctx context.Context, organizationId, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RbacServiceAPICreateGroupWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RbacServiceAPICreateGroupWithBody indicates an expected call of RbacServiceAPICreateGroupWithBody.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RbacServiceAPICreateGroupWithBody(ctx, organizationId, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RbacServiceAPICreateGroupWithBody", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RbacServiceAPICreateGroupWithBody), varargs...)
+}
+
 // RbacServiceAPICreateGroupWithBodyWithResponse mocks base method.
 func (m *MockClientWithResponsesInterface) RbacServiceAPICreateGroupWithBodyWithResponse(ctx context.Context, organizationId, contentType string, body io.Reader) (*sdk.RbacServiceAPICreateGroupResponse, error) {
 	m.ctrl.T.Helper()
@@ -5816,6 +8056,46 @@ func (m *MockClientWithResponsesInterface) RbacServiceAPICreateGroupWithResponse
 func (mr *MockClientWithResponsesInterfaceMockRecorder) RbacServiceAPICreateGroupWithResponse(ctx, organizationId, body interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RbacServiceAPICreateGroupWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RbacServiceAPICreateGroupWithResponse), ctx, organizationId, body)
+}
+
+// RbacServiceAPICreateRoleBindings mocks base method.
+func (m *MockClientWithResponsesInterface) RbacServiceAPICreateRoleBindings(ctx context.Context, organizationId string, body sdk.RbacServiceAPICreateRoleBindingsJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RbacServiceAPICreateRoleBindings", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RbacServiceAPICreateRoleBindings indicates an expected call of RbacServiceAPICreateRoleBindings.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RbacServiceAPICreateRoleBindings(ctx, organizationId, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RbacServiceAPICreateRoleBindings", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RbacServiceAPICreateRoleBindings), varargs...)
+}
+
+// RbacServiceAPICreateRoleBindingsWithBody mocks base method.
+func (m *MockClientWithResponsesInterface) RbacServiceAPICreateRoleBindingsWithBody(ctx context.Context, organizationId, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RbacServiceAPICreateRoleBindingsWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RbacServiceAPICreateRoleBindingsWithBody indicates an expected call of RbacServiceAPICreateRoleBindingsWithBody.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RbacServiceAPICreateRoleBindingsWithBody(ctx, organizationId, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RbacServiceAPICreateRoleBindingsWithBody", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RbacServiceAPICreateRoleBindingsWithBody), varargs...)
 }
 
 // RbacServiceAPICreateRoleBindingsWithBodyWithResponse mocks base method.
@@ -5848,6 +8128,26 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) RbacServiceAPICreateRole
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RbacServiceAPICreateRoleBindingsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RbacServiceAPICreateRoleBindingsWithResponse), ctx, organizationId, body)
 }
 
+// RbacServiceAPIDeleteGroup mocks base method.
+func (m *MockClientWithResponsesInterface) RbacServiceAPIDeleteGroup(ctx context.Context, organizationId, id string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, id}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RbacServiceAPIDeleteGroup", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RbacServiceAPIDeleteGroup indicates an expected call of RbacServiceAPIDeleteGroup.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RbacServiceAPIDeleteGroup(ctx, organizationId, id interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, id}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RbacServiceAPIDeleteGroup", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RbacServiceAPIDeleteGroup), varargs...)
+}
+
 // RbacServiceAPIDeleteGroupWithResponse mocks base method.
 func (m *MockClientWithResponsesInterface) RbacServiceAPIDeleteGroupWithResponse(ctx context.Context, organizationId, id string) (*sdk.RbacServiceAPIDeleteGroupResponse, error) {
 	m.ctrl.T.Helper()
@@ -5861,6 +8161,26 @@ func (m *MockClientWithResponsesInterface) RbacServiceAPIDeleteGroupWithResponse
 func (mr *MockClientWithResponsesInterfaceMockRecorder) RbacServiceAPIDeleteGroupWithResponse(ctx, organizationId, id interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RbacServiceAPIDeleteGroupWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RbacServiceAPIDeleteGroupWithResponse), ctx, organizationId, id)
+}
+
+// RbacServiceAPIDeleteRoleBinding mocks base method.
+func (m *MockClientWithResponsesInterface) RbacServiceAPIDeleteRoleBinding(ctx context.Context, organizationId, id string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, id}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RbacServiceAPIDeleteRoleBinding", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RbacServiceAPIDeleteRoleBinding indicates an expected call of RbacServiceAPIDeleteRoleBinding.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RbacServiceAPIDeleteRoleBinding(ctx, organizationId, id interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, id}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RbacServiceAPIDeleteRoleBinding", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RbacServiceAPIDeleteRoleBinding), varargs...)
 }
 
 // RbacServiceAPIDeleteRoleBindingWithResponse mocks base method.
@@ -5878,6 +8198,26 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) RbacServiceAPIDeleteRole
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RbacServiceAPIDeleteRoleBindingWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RbacServiceAPIDeleteRoleBindingWithResponse), ctx, organizationId, id)
 }
 
+// RbacServiceAPIGetGroup mocks base method.
+func (m *MockClientWithResponsesInterface) RbacServiceAPIGetGroup(ctx context.Context, organizationId, id string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, id}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RbacServiceAPIGetGroup", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RbacServiceAPIGetGroup indicates an expected call of RbacServiceAPIGetGroup.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RbacServiceAPIGetGroup(ctx, organizationId, id interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, id}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RbacServiceAPIGetGroup", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RbacServiceAPIGetGroup), varargs...)
+}
+
 // RbacServiceAPIGetGroupWithResponse mocks base method.
 func (m *MockClientWithResponsesInterface) RbacServiceAPIGetGroupWithResponse(ctx context.Context, organizationId, id string) (*sdk.RbacServiceAPIGetGroupResponse, error) {
 	m.ctrl.T.Helper()
@@ -5893,6 +8233,26 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) RbacServiceAPIGetGroupWi
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RbacServiceAPIGetGroupWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RbacServiceAPIGetGroupWithResponse), ctx, organizationId, id)
 }
 
+// RbacServiceAPIGetRoleBinding mocks base method.
+func (m *MockClientWithResponsesInterface) RbacServiceAPIGetRoleBinding(ctx context.Context, organizationId, id string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, id}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RbacServiceAPIGetRoleBinding", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RbacServiceAPIGetRoleBinding indicates an expected call of RbacServiceAPIGetRoleBinding.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RbacServiceAPIGetRoleBinding(ctx, organizationId, id interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, id}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RbacServiceAPIGetRoleBinding", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RbacServiceAPIGetRoleBinding), varargs...)
+}
+
 // RbacServiceAPIGetRoleBindingWithResponse mocks base method.
 func (m *MockClientWithResponsesInterface) RbacServiceAPIGetRoleBindingWithResponse(ctx context.Context, organizationId, id string) (*sdk.RbacServiceAPIGetRoleBindingResponse, error) {
 	m.ctrl.T.Helper()
@@ -5906,6 +8266,46 @@ func (m *MockClientWithResponsesInterface) RbacServiceAPIGetRoleBindingWithRespo
 func (mr *MockClientWithResponsesInterfaceMockRecorder) RbacServiceAPIGetRoleBindingWithResponse(ctx, organizationId, id interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RbacServiceAPIGetRoleBindingWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RbacServiceAPIGetRoleBindingWithResponse), ctx, organizationId, id)
+}
+
+// RbacServiceAPIUpdateGroup mocks base method.
+func (m *MockClientWithResponsesInterface) RbacServiceAPIUpdateGroup(ctx context.Context, organizationId, groupId string, body sdk.RbacServiceAPIUpdateGroupJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, groupId, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RbacServiceAPIUpdateGroup", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RbacServiceAPIUpdateGroup indicates an expected call of RbacServiceAPIUpdateGroup.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RbacServiceAPIUpdateGroup(ctx, organizationId, groupId, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, groupId, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RbacServiceAPIUpdateGroup", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RbacServiceAPIUpdateGroup), varargs...)
+}
+
+// RbacServiceAPIUpdateGroupWithBody mocks base method.
+func (m *MockClientWithResponsesInterface) RbacServiceAPIUpdateGroupWithBody(ctx context.Context, organizationId, groupId, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, groupId, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RbacServiceAPIUpdateGroupWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RbacServiceAPIUpdateGroupWithBody indicates an expected call of RbacServiceAPIUpdateGroupWithBody.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RbacServiceAPIUpdateGroupWithBody(ctx, organizationId, groupId, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, groupId, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RbacServiceAPIUpdateGroupWithBody", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RbacServiceAPIUpdateGroupWithBody), varargs...)
 }
 
 // RbacServiceAPIUpdateGroupWithBodyWithResponse mocks base method.
@@ -5938,6 +8338,46 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) RbacServiceAPIUpdateGrou
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RbacServiceAPIUpdateGroupWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RbacServiceAPIUpdateGroupWithResponse), ctx, organizationId, groupId, body)
 }
 
+// RbacServiceAPIUpdateRoleBinding mocks base method.
+func (m *MockClientWithResponsesInterface) RbacServiceAPIUpdateRoleBinding(ctx context.Context, organizationId, roleBindingId string, body sdk.RbacServiceAPIUpdateRoleBindingJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, roleBindingId, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RbacServiceAPIUpdateRoleBinding", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RbacServiceAPIUpdateRoleBinding indicates an expected call of RbacServiceAPIUpdateRoleBinding.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RbacServiceAPIUpdateRoleBinding(ctx, organizationId, roleBindingId, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, roleBindingId, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RbacServiceAPIUpdateRoleBinding", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RbacServiceAPIUpdateRoleBinding), varargs...)
+}
+
+// RbacServiceAPIUpdateRoleBindingWithBody mocks base method.
+func (m *MockClientWithResponsesInterface) RbacServiceAPIUpdateRoleBindingWithBody(ctx context.Context, organizationId, roleBindingId, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, roleBindingId, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RbacServiceAPIUpdateRoleBindingWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RbacServiceAPIUpdateRoleBindingWithBody indicates an expected call of RbacServiceAPIUpdateRoleBindingWithBody.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RbacServiceAPIUpdateRoleBindingWithBody(ctx, organizationId, roleBindingId, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, roleBindingId, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RbacServiceAPIUpdateRoleBindingWithBody", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RbacServiceAPIUpdateRoleBindingWithBody), varargs...)
+}
+
 // RbacServiceAPIUpdateRoleBindingWithBodyWithResponse mocks base method.
 func (m *MockClientWithResponsesInterface) RbacServiceAPIUpdateRoleBindingWithBodyWithResponse(ctx context.Context, organizationId, roleBindingId, contentType string, body io.Reader) (*sdk.RbacServiceAPIUpdateRoleBindingResponse, error) {
 	m.ctrl.T.Helper()
@@ -5966,6 +8406,46 @@ func (m *MockClientWithResponsesInterface) RbacServiceAPIUpdateRoleBindingWithRe
 func (mr *MockClientWithResponsesInterfaceMockRecorder) RbacServiceAPIUpdateRoleBindingWithResponse(ctx, organizationId, roleBindingId, body interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RbacServiceAPIUpdateRoleBindingWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RbacServiceAPIUpdateRoleBindingWithResponse), ctx, organizationId, roleBindingId, body)
+}
+
+// SSOAPICreateSSOConnection mocks base method.
+func (m *MockClientWithResponsesInterface) SSOAPICreateSSOConnection(ctx context.Context, body sdk.SSOAPICreateSSOConnectionJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "SSOAPICreateSSOConnection", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SSOAPICreateSSOConnection indicates an expected call of SSOAPICreateSSOConnection.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) SSOAPICreateSSOConnection(ctx, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SSOAPICreateSSOConnection", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).SSOAPICreateSSOConnection), varargs...)
+}
+
+// SSOAPICreateSSOConnectionWithBody mocks base method.
+func (m *MockClientWithResponsesInterface) SSOAPICreateSSOConnectionWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "SSOAPICreateSSOConnectionWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SSOAPICreateSSOConnectionWithBody indicates an expected call of SSOAPICreateSSOConnectionWithBody.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) SSOAPICreateSSOConnectionWithBody(ctx, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SSOAPICreateSSOConnectionWithBody", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).SSOAPICreateSSOConnectionWithBody), varargs...)
 }
 
 // SSOAPICreateSSOConnectionWithBodyWithResponse mocks base method.
@@ -5998,6 +8478,26 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) SSOAPICreateSSOConnectio
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SSOAPICreateSSOConnectionWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).SSOAPICreateSSOConnectionWithResponse), ctx, body)
 }
 
+// SSOAPIDeleteSSOConnection mocks base method.
+func (m *MockClientWithResponsesInterface) SSOAPIDeleteSSOConnection(ctx context.Context, id string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, id}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "SSOAPIDeleteSSOConnection", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SSOAPIDeleteSSOConnection indicates an expected call of SSOAPIDeleteSSOConnection.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) SSOAPIDeleteSSOConnection(ctx, id interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, id}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SSOAPIDeleteSSOConnection", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).SSOAPIDeleteSSOConnection), varargs...)
+}
+
 // SSOAPIDeleteSSOConnectionWithResponse mocks base method.
 func (m *MockClientWithResponsesInterface) SSOAPIDeleteSSOConnectionWithResponse(ctx context.Context, id string) (*sdk.SSOAPIDeleteSSOConnectionResponse, error) {
 	m.ctrl.T.Helper()
@@ -6011,6 +8511,26 @@ func (m *MockClientWithResponsesInterface) SSOAPIDeleteSSOConnectionWithResponse
 func (mr *MockClientWithResponsesInterfaceMockRecorder) SSOAPIDeleteSSOConnectionWithResponse(ctx, id interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SSOAPIDeleteSSOConnectionWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).SSOAPIDeleteSSOConnectionWithResponse), ctx, id)
+}
+
+// SSOAPIGetSSOConnection mocks base method.
+func (m *MockClientWithResponsesInterface) SSOAPIGetSSOConnection(ctx context.Context, id string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, id}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "SSOAPIGetSSOConnection", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SSOAPIGetSSOConnection indicates an expected call of SSOAPIGetSSOConnection.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) SSOAPIGetSSOConnection(ctx, id interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, id}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SSOAPIGetSSOConnection", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).SSOAPIGetSSOConnection), varargs...)
 }
 
 // SSOAPIGetSSOConnectionWithResponse mocks base method.
@@ -6028,6 +8548,26 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) SSOAPIGetSSOConnectionWi
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SSOAPIGetSSOConnectionWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).SSOAPIGetSSOConnectionWithResponse), ctx, id)
 }
 
+// SSOAPIListSSOConnections mocks base method.
+func (m *MockClientWithResponsesInterface) SSOAPIListSSOConnections(ctx context.Context, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "SSOAPIListSSOConnections", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SSOAPIListSSOConnections indicates an expected call of SSOAPIListSSOConnections.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) SSOAPIListSSOConnections(ctx interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SSOAPIListSSOConnections", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).SSOAPIListSSOConnections), varargs...)
+}
+
 // SSOAPIListSSOConnectionsWithResponse mocks base method.
 func (m *MockClientWithResponsesInterface) SSOAPIListSSOConnectionsWithResponse(ctx context.Context) (*sdk.SSOAPIListSSOConnectionsResponse, error) {
 	m.ctrl.T.Helper()
@@ -6041,6 +8581,46 @@ func (m *MockClientWithResponsesInterface) SSOAPIListSSOConnectionsWithResponse(
 func (mr *MockClientWithResponsesInterfaceMockRecorder) SSOAPIListSSOConnectionsWithResponse(ctx interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SSOAPIListSSOConnectionsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).SSOAPIListSSOConnectionsWithResponse), ctx)
+}
+
+// SSOAPIUpdateSSOConnection mocks base method.
+func (m *MockClientWithResponsesInterface) SSOAPIUpdateSSOConnection(ctx context.Context, id string, body sdk.SSOAPIUpdateSSOConnectionJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, id, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "SSOAPIUpdateSSOConnection", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SSOAPIUpdateSSOConnection indicates an expected call of SSOAPIUpdateSSOConnection.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) SSOAPIUpdateSSOConnection(ctx, id, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, id, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SSOAPIUpdateSSOConnection", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).SSOAPIUpdateSSOConnection), varargs...)
+}
+
+// SSOAPIUpdateSSOConnectionWithBody mocks base method.
+func (m *MockClientWithResponsesInterface) SSOAPIUpdateSSOConnectionWithBody(ctx context.Context, id, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, id, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "SSOAPIUpdateSSOConnectionWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SSOAPIUpdateSSOConnectionWithBody indicates an expected call of SSOAPIUpdateSSOConnectionWithBody.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) SSOAPIUpdateSSOConnectionWithBody(ctx, id, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, id, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SSOAPIUpdateSSOConnectionWithBody", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).SSOAPIUpdateSSOConnectionWithBody), varargs...)
 }
 
 // SSOAPIUpdateSSOConnectionWithBodyWithResponse mocks base method.
@@ -6073,6 +8653,46 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) SSOAPIUpdateSSOConnectio
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SSOAPIUpdateSSOConnectionWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).SSOAPIUpdateSSOConnectionWithResponse), ctx, id, body)
 }
 
+// ScheduledRebalancingAPICreateRebalancingJob mocks base method.
+func (m *MockClientWithResponsesInterface) ScheduledRebalancingAPICreateRebalancingJob(ctx context.Context, clusterId string, body sdk.ScheduledRebalancingAPICreateRebalancingJobJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ScheduledRebalancingAPICreateRebalancingJob", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ScheduledRebalancingAPICreateRebalancingJob indicates an expected call of ScheduledRebalancingAPICreateRebalancingJob.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ScheduledRebalancingAPICreateRebalancingJob(ctx, clusterId, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ScheduledRebalancingAPICreateRebalancingJob", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ScheduledRebalancingAPICreateRebalancingJob), varargs...)
+}
+
+// ScheduledRebalancingAPICreateRebalancingJobWithBody mocks base method.
+func (m *MockClientWithResponsesInterface) ScheduledRebalancingAPICreateRebalancingJobWithBody(ctx context.Context, clusterId, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ScheduledRebalancingAPICreateRebalancingJobWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ScheduledRebalancingAPICreateRebalancingJobWithBody indicates an expected call of ScheduledRebalancingAPICreateRebalancingJobWithBody.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ScheduledRebalancingAPICreateRebalancingJobWithBody(ctx, clusterId, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ScheduledRebalancingAPICreateRebalancingJobWithBody", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ScheduledRebalancingAPICreateRebalancingJobWithBody), varargs...)
+}
+
 // ScheduledRebalancingAPICreateRebalancingJobWithBodyWithResponse mocks base method.
 func (m *MockClientWithResponsesInterface) ScheduledRebalancingAPICreateRebalancingJobWithBodyWithResponse(ctx context.Context, clusterId, contentType string, body io.Reader) (*sdk.ScheduledRebalancingAPICreateRebalancingJobResponse, error) {
 	m.ctrl.T.Helper()
@@ -6101,6 +8721,46 @@ func (m *MockClientWithResponsesInterface) ScheduledRebalancingAPICreateRebalanc
 func (mr *MockClientWithResponsesInterfaceMockRecorder) ScheduledRebalancingAPICreateRebalancingJobWithResponse(ctx, clusterId, body interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ScheduledRebalancingAPICreateRebalancingJobWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ScheduledRebalancingAPICreateRebalancingJobWithResponse), ctx, clusterId, body)
+}
+
+// ScheduledRebalancingAPICreateRebalancingSchedule mocks base method.
+func (m *MockClientWithResponsesInterface) ScheduledRebalancingAPICreateRebalancingSchedule(ctx context.Context, body sdk.ScheduledRebalancingAPICreateRebalancingScheduleJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ScheduledRebalancingAPICreateRebalancingSchedule", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ScheduledRebalancingAPICreateRebalancingSchedule indicates an expected call of ScheduledRebalancingAPICreateRebalancingSchedule.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ScheduledRebalancingAPICreateRebalancingSchedule(ctx, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ScheduledRebalancingAPICreateRebalancingSchedule", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ScheduledRebalancingAPICreateRebalancingSchedule), varargs...)
+}
+
+// ScheduledRebalancingAPICreateRebalancingScheduleWithBody mocks base method.
+func (m *MockClientWithResponsesInterface) ScheduledRebalancingAPICreateRebalancingScheduleWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ScheduledRebalancingAPICreateRebalancingScheduleWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ScheduledRebalancingAPICreateRebalancingScheduleWithBody indicates an expected call of ScheduledRebalancingAPICreateRebalancingScheduleWithBody.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ScheduledRebalancingAPICreateRebalancingScheduleWithBody(ctx, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ScheduledRebalancingAPICreateRebalancingScheduleWithBody", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ScheduledRebalancingAPICreateRebalancingScheduleWithBody), varargs...)
 }
 
 // ScheduledRebalancingAPICreateRebalancingScheduleWithBodyWithResponse mocks base method.
@@ -6133,6 +8793,26 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) ScheduledRebalancingAPIC
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ScheduledRebalancingAPICreateRebalancingScheduleWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ScheduledRebalancingAPICreateRebalancingScheduleWithResponse), ctx, body)
 }
 
+// ScheduledRebalancingAPIDeleteRebalancingJob mocks base method.
+func (m *MockClientWithResponsesInterface) ScheduledRebalancingAPIDeleteRebalancingJob(ctx context.Context, clusterId, id string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, id}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ScheduledRebalancingAPIDeleteRebalancingJob", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ScheduledRebalancingAPIDeleteRebalancingJob indicates an expected call of ScheduledRebalancingAPIDeleteRebalancingJob.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ScheduledRebalancingAPIDeleteRebalancingJob(ctx, clusterId, id interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, id}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ScheduledRebalancingAPIDeleteRebalancingJob", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ScheduledRebalancingAPIDeleteRebalancingJob), varargs...)
+}
+
 // ScheduledRebalancingAPIDeleteRebalancingJobWithResponse mocks base method.
 func (m *MockClientWithResponsesInterface) ScheduledRebalancingAPIDeleteRebalancingJobWithResponse(ctx context.Context, clusterId, id string) (*sdk.ScheduledRebalancingAPIDeleteRebalancingJobResponse, error) {
 	m.ctrl.T.Helper()
@@ -6146,6 +8826,26 @@ func (m *MockClientWithResponsesInterface) ScheduledRebalancingAPIDeleteRebalanc
 func (mr *MockClientWithResponsesInterfaceMockRecorder) ScheduledRebalancingAPIDeleteRebalancingJobWithResponse(ctx, clusterId, id interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ScheduledRebalancingAPIDeleteRebalancingJobWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ScheduledRebalancingAPIDeleteRebalancingJobWithResponse), ctx, clusterId, id)
+}
+
+// ScheduledRebalancingAPIDeleteRebalancingSchedule mocks base method.
+func (m *MockClientWithResponsesInterface) ScheduledRebalancingAPIDeleteRebalancingSchedule(ctx context.Context, id string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, id}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ScheduledRebalancingAPIDeleteRebalancingSchedule", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ScheduledRebalancingAPIDeleteRebalancingSchedule indicates an expected call of ScheduledRebalancingAPIDeleteRebalancingSchedule.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ScheduledRebalancingAPIDeleteRebalancingSchedule(ctx, id interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, id}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ScheduledRebalancingAPIDeleteRebalancingSchedule", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ScheduledRebalancingAPIDeleteRebalancingSchedule), varargs...)
 }
 
 // ScheduledRebalancingAPIDeleteRebalancingScheduleWithResponse mocks base method.
@@ -6163,6 +8863,26 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) ScheduledRebalancingAPID
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ScheduledRebalancingAPIDeleteRebalancingScheduleWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ScheduledRebalancingAPIDeleteRebalancingScheduleWithResponse), ctx, id)
 }
 
+// ScheduledRebalancingAPIGetRebalancingJob mocks base method.
+func (m *MockClientWithResponsesInterface) ScheduledRebalancingAPIGetRebalancingJob(ctx context.Context, clusterId, id string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, id}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ScheduledRebalancingAPIGetRebalancingJob", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ScheduledRebalancingAPIGetRebalancingJob indicates an expected call of ScheduledRebalancingAPIGetRebalancingJob.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ScheduledRebalancingAPIGetRebalancingJob(ctx, clusterId, id interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, id}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ScheduledRebalancingAPIGetRebalancingJob", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ScheduledRebalancingAPIGetRebalancingJob), varargs...)
+}
+
 // ScheduledRebalancingAPIGetRebalancingJobWithResponse mocks base method.
 func (m *MockClientWithResponsesInterface) ScheduledRebalancingAPIGetRebalancingJobWithResponse(ctx context.Context, clusterId, id string) (*sdk.ScheduledRebalancingAPIGetRebalancingJobResponse, error) {
 	m.ctrl.T.Helper()
@@ -6176,6 +8896,26 @@ func (m *MockClientWithResponsesInterface) ScheduledRebalancingAPIGetRebalancing
 func (mr *MockClientWithResponsesInterfaceMockRecorder) ScheduledRebalancingAPIGetRebalancingJobWithResponse(ctx, clusterId, id interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ScheduledRebalancingAPIGetRebalancingJobWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ScheduledRebalancingAPIGetRebalancingJobWithResponse), ctx, clusterId, id)
+}
+
+// ScheduledRebalancingAPIGetRebalancingSchedule mocks base method.
+func (m *MockClientWithResponsesInterface) ScheduledRebalancingAPIGetRebalancingSchedule(ctx context.Context, id string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, id}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ScheduledRebalancingAPIGetRebalancingSchedule", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ScheduledRebalancingAPIGetRebalancingSchedule indicates an expected call of ScheduledRebalancingAPIGetRebalancingSchedule.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ScheduledRebalancingAPIGetRebalancingSchedule(ctx, id interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, id}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ScheduledRebalancingAPIGetRebalancingSchedule", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ScheduledRebalancingAPIGetRebalancingSchedule), varargs...)
 }
 
 // ScheduledRebalancingAPIGetRebalancingScheduleWithResponse mocks base method.
@@ -6193,6 +8933,26 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) ScheduledRebalancingAPIG
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ScheduledRebalancingAPIGetRebalancingScheduleWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ScheduledRebalancingAPIGetRebalancingScheduleWithResponse), ctx, id)
 }
 
+// ScheduledRebalancingAPIListAvailableRebalancingTZ mocks base method.
+func (m *MockClientWithResponsesInterface) ScheduledRebalancingAPIListAvailableRebalancingTZ(ctx context.Context, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ScheduledRebalancingAPIListAvailableRebalancingTZ", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ScheduledRebalancingAPIListAvailableRebalancingTZ indicates an expected call of ScheduledRebalancingAPIListAvailableRebalancingTZ.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ScheduledRebalancingAPIListAvailableRebalancingTZ(ctx interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ScheduledRebalancingAPIListAvailableRebalancingTZ", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ScheduledRebalancingAPIListAvailableRebalancingTZ), varargs...)
+}
+
 // ScheduledRebalancingAPIListAvailableRebalancingTZWithResponse mocks base method.
 func (m *MockClientWithResponsesInterface) ScheduledRebalancingAPIListAvailableRebalancingTZWithResponse(ctx context.Context) (*sdk.ScheduledRebalancingAPIListAvailableRebalancingTZResponse, error) {
 	m.ctrl.T.Helper()
@@ -6206,6 +8966,26 @@ func (m *MockClientWithResponsesInterface) ScheduledRebalancingAPIListAvailableR
 func (mr *MockClientWithResponsesInterfaceMockRecorder) ScheduledRebalancingAPIListAvailableRebalancingTZWithResponse(ctx interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ScheduledRebalancingAPIListAvailableRebalancingTZWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ScheduledRebalancingAPIListAvailableRebalancingTZWithResponse), ctx)
+}
+
+// ScheduledRebalancingAPIListRebalancingJobs mocks base method.
+func (m *MockClientWithResponsesInterface) ScheduledRebalancingAPIListRebalancingJobs(ctx context.Context, clusterId string, params *sdk.ScheduledRebalancingAPIListRebalancingJobsParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ScheduledRebalancingAPIListRebalancingJobs", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ScheduledRebalancingAPIListRebalancingJobs indicates an expected call of ScheduledRebalancingAPIListRebalancingJobs.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ScheduledRebalancingAPIListRebalancingJobs(ctx, clusterId, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ScheduledRebalancingAPIListRebalancingJobs", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ScheduledRebalancingAPIListRebalancingJobs), varargs...)
 }
 
 // ScheduledRebalancingAPIListRebalancingJobsWithResponse mocks base method.
@@ -6223,6 +9003,26 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) ScheduledRebalancingAPIL
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ScheduledRebalancingAPIListRebalancingJobsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ScheduledRebalancingAPIListRebalancingJobsWithResponse), ctx, clusterId, params)
 }
 
+// ScheduledRebalancingAPIListRebalancingSchedules mocks base method.
+func (m *MockClientWithResponsesInterface) ScheduledRebalancingAPIListRebalancingSchedules(ctx context.Context, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ScheduledRebalancingAPIListRebalancingSchedules", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ScheduledRebalancingAPIListRebalancingSchedules indicates an expected call of ScheduledRebalancingAPIListRebalancingSchedules.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ScheduledRebalancingAPIListRebalancingSchedules(ctx interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ScheduledRebalancingAPIListRebalancingSchedules", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ScheduledRebalancingAPIListRebalancingSchedules), varargs...)
+}
+
 // ScheduledRebalancingAPIListRebalancingSchedulesWithResponse mocks base method.
 func (m *MockClientWithResponsesInterface) ScheduledRebalancingAPIListRebalancingSchedulesWithResponse(ctx context.Context) (*sdk.ScheduledRebalancingAPIListRebalancingSchedulesResponse, error) {
 	m.ctrl.T.Helper()
@@ -6236,6 +9036,46 @@ func (m *MockClientWithResponsesInterface) ScheduledRebalancingAPIListRebalancin
 func (mr *MockClientWithResponsesInterfaceMockRecorder) ScheduledRebalancingAPIListRebalancingSchedulesWithResponse(ctx interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ScheduledRebalancingAPIListRebalancingSchedulesWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ScheduledRebalancingAPIListRebalancingSchedulesWithResponse), ctx)
+}
+
+// ScheduledRebalancingAPIPreviewRebalancingSchedule mocks base method.
+func (m *MockClientWithResponsesInterface) ScheduledRebalancingAPIPreviewRebalancingSchedule(ctx context.Context, clusterId string, body sdk.ScheduledRebalancingAPIPreviewRebalancingScheduleJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ScheduledRebalancingAPIPreviewRebalancingSchedule", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ScheduledRebalancingAPIPreviewRebalancingSchedule indicates an expected call of ScheduledRebalancingAPIPreviewRebalancingSchedule.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ScheduledRebalancingAPIPreviewRebalancingSchedule(ctx, clusterId, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ScheduledRebalancingAPIPreviewRebalancingSchedule", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ScheduledRebalancingAPIPreviewRebalancingSchedule), varargs...)
+}
+
+// ScheduledRebalancingAPIPreviewRebalancingScheduleWithBody mocks base method.
+func (m *MockClientWithResponsesInterface) ScheduledRebalancingAPIPreviewRebalancingScheduleWithBody(ctx context.Context, clusterId, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ScheduledRebalancingAPIPreviewRebalancingScheduleWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ScheduledRebalancingAPIPreviewRebalancingScheduleWithBody indicates an expected call of ScheduledRebalancingAPIPreviewRebalancingScheduleWithBody.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ScheduledRebalancingAPIPreviewRebalancingScheduleWithBody(ctx, clusterId, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ScheduledRebalancingAPIPreviewRebalancingScheduleWithBody", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ScheduledRebalancingAPIPreviewRebalancingScheduleWithBody), varargs...)
 }
 
 // ScheduledRebalancingAPIPreviewRebalancingScheduleWithBodyWithResponse mocks base method.
@@ -6268,6 +9108,46 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) ScheduledRebalancingAPIP
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ScheduledRebalancingAPIPreviewRebalancingScheduleWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ScheduledRebalancingAPIPreviewRebalancingScheduleWithResponse), ctx, clusterId, body)
 }
 
+// ScheduledRebalancingAPIUpdateRebalancingJob mocks base method.
+func (m *MockClientWithResponsesInterface) ScheduledRebalancingAPIUpdateRebalancingJob(ctx context.Context, clusterId, id string, body sdk.ScheduledRebalancingAPIUpdateRebalancingJobJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, id, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ScheduledRebalancingAPIUpdateRebalancingJob", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ScheduledRebalancingAPIUpdateRebalancingJob indicates an expected call of ScheduledRebalancingAPIUpdateRebalancingJob.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ScheduledRebalancingAPIUpdateRebalancingJob(ctx, clusterId, id, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, id, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ScheduledRebalancingAPIUpdateRebalancingJob", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ScheduledRebalancingAPIUpdateRebalancingJob), varargs...)
+}
+
+// ScheduledRebalancingAPIUpdateRebalancingJobWithBody mocks base method.
+func (m *MockClientWithResponsesInterface) ScheduledRebalancingAPIUpdateRebalancingJobWithBody(ctx context.Context, clusterId, id, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, id, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ScheduledRebalancingAPIUpdateRebalancingJobWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ScheduledRebalancingAPIUpdateRebalancingJobWithBody indicates an expected call of ScheduledRebalancingAPIUpdateRebalancingJobWithBody.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ScheduledRebalancingAPIUpdateRebalancingJobWithBody(ctx, clusterId, id, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, id, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ScheduledRebalancingAPIUpdateRebalancingJobWithBody", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ScheduledRebalancingAPIUpdateRebalancingJobWithBody), varargs...)
+}
+
 // ScheduledRebalancingAPIUpdateRebalancingJobWithBodyWithResponse mocks base method.
 func (m *MockClientWithResponsesInterface) ScheduledRebalancingAPIUpdateRebalancingJobWithBodyWithResponse(ctx context.Context, clusterId, id, contentType string, body io.Reader) (*sdk.ScheduledRebalancingAPIUpdateRebalancingJobResponse, error) {
 	m.ctrl.T.Helper()
@@ -6296,6 +9176,46 @@ func (m *MockClientWithResponsesInterface) ScheduledRebalancingAPIUpdateRebalanc
 func (mr *MockClientWithResponsesInterfaceMockRecorder) ScheduledRebalancingAPIUpdateRebalancingJobWithResponse(ctx, clusterId, id, body interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ScheduledRebalancingAPIUpdateRebalancingJobWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ScheduledRebalancingAPIUpdateRebalancingJobWithResponse), ctx, clusterId, id, body)
+}
+
+// ScheduledRebalancingAPIUpdateRebalancingSchedule mocks base method.
+func (m *MockClientWithResponsesInterface) ScheduledRebalancingAPIUpdateRebalancingSchedule(ctx context.Context, params *sdk.ScheduledRebalancingAPIUpdateRebalancingScheduleParams, body sdk.ScheduledRebalancingAPIUpdateRebalancingScheduleJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, params, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ScheduledRebalancingAPIUpdateRebalancingSchedule", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ScheduledRebalancingAPIUpdateRebalancingSchedule indicates an expected call of ScheduledRebalancingAPIUpdateRebalancingSchedule.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ScheduledRebalancingAPIUpdateRebalancingSchedule(ctx, params, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, params, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ScheduledRebalancingAPIUpdateRebalancingSchedule", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ScheduledRebalancingAPIUpdateRebalancingSchedule), varargs...)
+}
+
+// ScheduledRebalancingAPIUpdateRebalancingScheduleWithBody mocks base method.
+func (m *MockClientWithResponsesInterface) ScheduledRebalancingAPIUpdateRebalancingScheduleWithBody(ctx context.Context, params *sdk.ScheduledRebalancingAPIUpdateRebalancingScheduleParams, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, params, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ScheduledRebalancingAPIUpdateRebalancingScheduleWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ScheduledRebalancingAPIUpdateRebalancingScheduleWithBody indicates an expected call of ScheduledRebalancingAPIUpdateRebalancingScheduleWithBody.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ScheduledRebalancingAPIUpdateRebalancingScheduleWithBody(ctx, params, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, params, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ScheduledRebalancingAPIUpdateRebalancingScheduleWithBody", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ScheduledRebalancingAPIUpdateRebalancingScheduleWithBody), varargs...)
 }
 
 // ScheduledRebalancingAPIUpdateRebalancingScheduleWithBodyWithResponse mocks base method.
@@ -6328,6 +9248,66 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) ScheduledRebalancingAPIU
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ScheduledRebalancingAPIUpdateRebalancingScheduleWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ScheduledRebalancingAPIUpdateRebalancingScheduleWithResponse), ctx, params, body)
 }
 
+// ServiceAccountsAPICreateServiceAccount mocks base method.
+func (m *MockClientWithResponsesInterface) ServiceAccountsAPICreateServiceAccount(ctx context.Context, organizationId string, body sdk.ServiceAccountsAPICreateServiceAccountJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ServiceAccountsAPICreateServiceAccount", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ServiceAccountsAPICreateServiceAccount indicates an expected call of ServiceAccountsAPICreateServiceAccount.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ServiceAccountsAPICreateServiceAccount(ctx, organizationId, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ServiceAccountsAPICreateServiceAccount", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ServiceAccountsAPICreateServiceAccount), varargs...)
+}
+
+// ServiceAccountsAPICreateServiceAccountKey mocks base method.
+func (m *MockClientWithResponsesInterface) ServiceAccountsAPICreateServiceAccountKey(ctx context.Context, organizationId, serviceAccountId string, body sdk.ServiceAccountsAPICreateServiceAccountKeyJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, serviceAccountId, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ServiceAccountsAPICreateServiceAccountKey", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ServiceAccountsAPICreateServiceAccountKey indicates an expected call of ServiceAccountsAPICreateServiceAccountKey.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ServiceAccountsAPICreateServiceAccountKey(ctx, organizationId, serviceAccountId, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, serviceAccountId, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ServiceAccountsAPICreateServiceAccountKey", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ServiceAccountsAPICreateServiceAccountKey), varargs...)
+}
+
+// ServiceAccountsAPICreateServiceAccountKeyWithBody mocks base method.
+func (m *MockClientWithResponsesInterface) ServiceAccountsAPICreateServiceAccountKeyWithBody(ctx context.Context, organizationId, serviceAccountId, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, serviceAccountId, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ServiceAccountsAPICreateServiceAccountKeyWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ServiceAccountsAPICreateServiceAccountKeyWithBody indicates an expected call of ServiceAccountsAPICreateServiceAccountKeyWithBody.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ServiceAccountsAPICreateServiceAccountKeyWithBody(ctx, organizationId, serviceAccountId, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, serviceAccountId, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ServiceAccountsAPICreateServiceAccountKeyWithBody", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ServiceAccountsAPICreateServiceAccountKeyWithBody), varargs...)
+}
+
 // ServiceAccountsAPICreateServiceAccountKeyWithBodyWithResponse mocks base method.
 func (m *MockClientWithResponsesInterface) ServiceAccountsAPICreateServiceAccountKeyWithBodyWithResponse(ctx context.Context, organizationId, serviceAccountId, contentType string, body io.Reader) (*sdk.ServiceAccountsAPICreateServiceAccountKeyResponse, error) {
 	m.ctrl.T.Helper()
@@ -6356,6 +9336,26 @@ func (m *MockClientWithResponsesInterface) ServiceAccountsAPICreateServiceAccoun
 func (mr *MockClientWithResponsesInterfaceMockRecorder) ServiceAccountsAPICreateServiceAccountKeyWithResponse(ctx, organizationId, serviceAccountId, body interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ServiceAccountsAPICreateServiceAccountKeyWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ServiceAccountsAPICreateServiceAccountKeyWithResponse), ctx, organizationId, serviceAccountId, body)
+}
+
+// ServiceAccountsAPICreateServiceAccountWithBody mocks base method.
+func (m *MockClientWithResponsesInterface) ServiceAccountsAPICreateServiceAccountWithBody(ctx context.Context, organizationId, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ServiceAccountsAPICreateServiceAccountWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ServiceAccountsAPICreateServiceAccountWithBody indicates an expected call of ServiceAccountsAPICreateServiceAccountWithBody.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ServiceAccountsAPICreateServiceAccountWithBody(ctx, organizationId, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ServiceAccountsAPICreateServiceAccountWithBody", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ServiceAccountsAPICreateServiceAccountWithBody), varargs...)
 }
 
 // ServiceAccountsAPICreateServiceAccountWithBodyWithResponse mocks base method.
@@ -6388,6 +9388,46 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) ServiceAccountsAPICreate
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ServiceAccountsAPICreateServiceAccountWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ServiceAccountsAPICreateServiceAccountWithResponse), ctx, organizationId, body)
 }
 
+// ServiceAccountsAPIDeleteServiceAccount mocks base method.
+func (m *MockClientWithResponsesInterface) ServiceAccountsAPIDeleteServiceAccount(ctx context.Context, organizationId, serviceAccountId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, serviceAccountId}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ServiceAccountsAPIDeleteServiceAccount", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ServiceAccountsAPIDeleteServiceAccount indicates an expected call of ServiceAccountsAPIDeleteServiceAccount.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ServiceAccountsAPIDeleteServiceAccount(ctx, organizationId, serviceAccountId interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, serviceAccountId}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ServiceAccountsAPIDeleteServiceAccount", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ServiceAccountsAPIDeleteServiceAccount), varargs...)
+}
+
+// ServiceAccountsAPIDeleteServiceAccountKey mocks base method.
+func (m *MockClientWithResponsesInterface) ServiceAccountsAPIDeleteServiceAccountKey(ctx context.Context, organizationId, serviceAccountId, keyId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, serviceAccountId, keyId}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ServiceAccountsAPIDeleteServiceAccountKey", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ServiceAccountsAPIDeleteServiceAccountKey indicates an expected call of ServiceAccountsAPIDeleteServiceAccountKey.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ServiceAccountsAPIDeleteServiceAccountKey(ctx, organizationId, serviceAccountId, keyId interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, serviceAccountId, keyId}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ServiceAccountsAPIDeleteServiceAccountKey", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ServiceAccountsAPIDeleteServiceAccountKey), varargs...)
+}
+
 // ServiceAccountsAPIDeleteServiceAccountKeyWithResponse mocks base method.
 func (m *MockClientWithResponsesInterface) ServiceAccountsAPIDeleteServiceAccountKeyWithResponse(ctx context.Context, organizationId, serviceAccountId, keyId string) (*sdk.ServiceAccountsAPIDeleteServiceAccountKeyResponse, error) {
 	m.ctrl.T.Helper()
@@ -6416,6 +9456,46 @@ func (m *MockClientWithResponsesInterface) ServiceAccountsAPIDeleteServiceAccoun
 func (mr *MockClientWithResponsesInterfaceMockRecorder) ServiceAccountsAPIDeleteServiceAccountWithResponse(ctx, organizationId, serviceAccountId interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ServiceAccountsAPIDeleteServiceAccountWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ServiceAccountsAPIDeleteServiceAccountWithResponse), ctx, organizationId, serviceAccountId)
+}
+
+// ServiceAccountsAPIGetServiceAccount mocks base method.
+func (m *MockClientWithResponsesInterface) ServiceAccountsAPIGetServiceAccount(ctx context.Context, organizationId, serviceAccountId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, serviceAccountId}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ServiceAccountsAPIGetServiceAccount", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ServiceAccountsAPIGetServiceAccount indicates an expected call of ServiceAccountsAPIGetServiceAccount.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ServiceAccountsAPIGetServiceAccount(ctx, organizationId, serviceAccountId interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, serviceAccountId}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ServiceAccountsAPIGetServiceAccount", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ServiceAccountsAPIGetServiceAccount), varargs...)
+}
+
+// ServiceAccountsAPIGetServiceAccountKey mocks base method.
+func (m *MockClientWithResponsesInterface) ServiceAccountsAPIGetServiceAccountKey(ctx context.Context, organizationId, serviceAccountId, keyId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, serviceAccountId, keyId}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ServiceAccountsAPIGetServiceAccountKey", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ServiceAccountsAPIGetServiceAccountKey indicates an expected call of ServiceAccountsAPIGetServiceAccountKey.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ServiceAccountsAPIGetServiceAccountKey(ctx, organizationId, serviceAccountId, keyId interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, serviceAccountId, keyId}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ServiceAccountsAPIGetServiceAccountKey", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ServiceAccountsAPIGetServiceAccountKey), varargs...)
 }
 
 // ServiceAccountsAPIGetServiceAccountKeyWithResponse mocks base method.
@@ -6448,6 +9528,26 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) ServiceAccountsAPIGetSer
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ServiceAccountsAPIGetServiceAccountWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ServiceAccountsAPIGetServiceAccountWithResponse), ctx, organizationId, serviceAccountId)
 }
 
+// ServiceAccountsAPIListServiceAccounts mocks base method.
+func (m *MockClientWithResponsesInterface) ServiceAccountsAPIListServiceAccounts(ctx context.Context, organizationId string, params *sdk.ServiceAccountsAPIListServiceAccountsParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ServiceAccountsAPIListServiceAccounts", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ServiceAccountsAPIListServiceAccounts indicates an expected call of ServiceAccountsAPIListServiceAccounts.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ServiceAccountsAPIListServiceAccounts(ctx, organizationId, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ServiceAccountsAPIListServiceAccounts", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ServiceAccountsAPIListServiceAccounts), varargs...)
+}
+
 // ServiceAccountsAPIListServiceAccountsWithResponse mocks base method.
 func (m *MockClientWithResponsesInterface) ServiceAccountsAPIListServiceAccountsWithResponse(ctx context.Context, organizationId string, params *sdk.ServiceAccountsAPIListServiceAccountsParams) (*sdk.ServiceAccountsAPIListServiceAccountsResponse, error) {
 	m.ctrl.T.Helper()
@@ -6461,6 +9561,66 @@ func (m *MockClientWithResponsesInterface) ServiceAccountsAPIListServiceAccounts
 func (mr *MockClientWithResponsesInterfaceMockRecorder) ServiceAccountsAPIListServiceAccountsWithResponse(ctx, organizationId, params interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ServiceAccountsAPIListServiceAccountsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ServiceAccountsAPIListServiceAccountsWithResponse), ctx, organizationId, params)
+}
+
+// ServiceAccountsAPIUpdateServiceAccount mocks base method.
+func (m *MockClientWithResponsesInterface) ServiceAccountsAPIUpdateServiceAccount(ctx context.Context, organizationId, serviceAccountId string, body sdk.ServiceAccountsAPIUpdateServiceAccountJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, serviceAccountId, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ServiceAccountsAPIUpdateServiceAccount", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ServiceAccountsAPIUpdateServiceAccount indicates an expected call of ServiceAccountsAPIUpdateServiceAccount.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ServiceAccountsAPIUpdateServiceAccount(ctx, organizationId, serviceAccountId, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, serviceAccountId, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ServiceAccountsAPIUpdateServiceAccount", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ServiceAccountsAPIUpdateServiceAccount), varargs...)
+}
+
+// ServiceAccountsAPIUpdateServiceAccountKey mocks base method.
+func (m *MockClientWithResponsesInterface) ServiceAccountsAPIUpdateServiceAccountKey(ctx context.Context, organizationId, serviceAccountId, keyId string, body sdk.ServiceAccountsAPIUpdateServiceAccountKeyJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, serviceAccountId, keyId, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ServiceAccountsAPIUpdateServiceAccountKey", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ServiceAccountsAPIUpdateServiceAccountKey indicates an expected call of ServiceAccountsAPIUpdateServiceAccountKey.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ServiceAccountsAPIUpdateServiceAccountKey(ctx, organizationId, serviceAccountId, keyId, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, serviceAccountId, keyId, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ServiceAccountsAPIUpdateServiceAccountKey", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ServiceAccountsAPIUpdateServiceAccountKey), varargs...)
+}
+
+// ServiceAccountsAPIUpdateServiceAccountKeyWithBody mocks base method.
+func (m *MockClientWithResponsesInterface) ServiceAccountsAPIUpdateServiceAccountKeyWithBody(ctx context.Context, organizationId, serviceAccountId, keyId, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, serviceAccountId, keyId, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ServiceAccountsAPIUpdateServiceAccountKeyWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ServiceAccountsAPIUpdateServiceAccountKeyWithBody indicates an expected call of ServiceAccountsAPIUpdateServiceAccountKeyWithBody.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ServiceAccountsAPIUpdateServiceAccountKeyWithBody(ctx, organizationId, serviceAccountId, keyId, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, serviceAccountId, keyId, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ServiceAccountsAPIUpdateServiceAccountKeyWithBody", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ServiceAccountsAPIUpdateServiceAccountKeyWithBody), varargs...)
 }
 
 // ServiceAccountsAPIUpdateServiceAccountKeyWithBodyWithResponse mocks base method.
@@ -6493,6 +9653,26 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) ServiceAccountsAPIUpdate
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ServiceAccountsAPIUpdateServiceAccountKeyWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ServiceAccountsAPIUpdateServiceAccountKeyWithResponse), ctx, organizationId, serviceAccountId, keyId, body)
 }
 
+// ServiceAccountsAPIUpdateServiceAccountWithBody mocks base method.
+func (m *MockClientWithResponsesInterface) ServiceAccountsAPIUpdateServiceAccountWithBody(ctx context.Context, organizationId, serviceAccountId, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, serviceAccountId, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ServiceAccountsAPIUpdateServiceAccountWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ServiceAccountsAPIUpdateServiceAccountWithBody indicates an expected call of ServiceAccountsAPIUpdateServiceAccountWithBody.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ServiceAccountsAPIUpdateServiceAccountWithBody(ctx, organizationId, serviceAccountId, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, serviceAccountId, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ServiceAccountsAPIUpdateServiceAccountWithBody", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ServiceAccountsAPIUpdateServiceAccountWithBody), varargs...)
+}
+
 // ServiceAccountsAPIUpdateServiceAccountWithBodyWithResponse mocks base method.
 func (m *MockClientWithResponsesInterface) ServiceAccountsAPIUpdateServiceAccountWithBodyWithResponse(ctx context.Context, organizationId, serviceAccountId, contentType string, body io.Reader) (*sdk.ServiceAccountsAPIUpdateServiceAccountResponse, error) {
 	m.ctrl.T.Helper()
@@ -6521,6 +9701,46 @@ func (m *MockClientWithResponsesInterface) ServiceAccountsAPIUpdateServiceAccoun
 func (mr *MockClientWithResponsesInterfaceMockRecorder) ServiceAccountsAPIUpdateServiceAccountWithResponse(ctx, organizationId, serviceAccountId, body interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ServiceAccountsAPIUpdateServiceAccountWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ServiceAccountsAPIUpdateServiceAccountWithResponse), ctx, organizationId, serviceAccountId, body)
+}
+
+// UsersAPIAddUserToOrganization mocks base method.
+func (m *MockClientWithResponsesInterface) UsersAPIAddUserToOrganization(ctx context.Context, organizationId string, body sdk.UsersAPIAddUserToOrganizationJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "UsersAPIAddUserToOrganization", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UsersAPIAddUserToOrganization indicates an expected call of UsersAPIAddUserToOrganization.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) UsersAPIAddUserToOrganization(ctx, organizationId, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UsersAPIAddUserToOrganization", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).UsersAPIAddUserToOrganization), varargs...)
+}
+
+// UsersAPIAddUserToOrganizationWithBody mocks base method.
+func (m *MockClientWithResponsesInterface) UsersAPIAddUserToOrganizationWithBody(ctx context.Context, organizationId, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "UsersAPIAddUserToOrganizationWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UsersAPIAddUserToOrganizationWithBody indicates an expected call of UsersAPIAddUserToOrganizationWithBody.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) UsersAPIAddUserToOrganizationWithBody(ctx, organizationId, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UsersAPIAddUserToOrganizationWithBody", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).UsersAPIAddUserToOrganizationWithBody), varargs...)
 }
 
 // UsersAPIAddUserToOrganizationWithBodyWithResponse mocks base method.
@@ -6553,6 +9773,46 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) UsersAPIAddUserToOrganiz
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UsersAPIAddUserToOrganizationWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).UsersAPIAddUserToOrganizationWithResponse), ctx, organizationId, body)
 }
 
+// UsersAPIClaimInvitation mocks base method.
+func (m *MockClientWithResponsesInterface) UsersAPIClaimInvitation(ctx context.Context, invitationId string, body sdk.UsersAPIClaimInvitationJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, invitationId, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "UsersAPIClaimInvitation", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UsersAPIClaimInvitation indicates an expected call of UsersAPIClaimInvitation.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) UsersAPIClaimInvitation(ctx, invitationId, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, invitationId, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UsersAPIClaimInvitation", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).UsersAPIClaimInvitation), varargs...)
+}
+
+// UsersAPIClaimInvitationWithBody mocks base method.
+func (m *MockClientWithResponsesInterface) UsersAPIClaimInvitationWithBody(ctx context.Context, invitationId, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, invitationId, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "UsersAPIClaimInvitationWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UsersAPIClaimInvitationWithBody indicates an expected call of UsersAPIClaimInvitationWithBody.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) UsersAPIClaimInvitationWithBody(ctx, invitationId, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, invitationId, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UsersAPIClaimInvitationWithBody", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).UsersAPIClaimInvitationWithBody), varargs...)
+}
+
 // UsersAPIClaimInvitationWithBodyWithResponse mocks base method.
 func (m *MockClientWithResponsesInterface) UsersAPIClaimInvitationWithBodyWithResponse(ctx context.Context, invitationId, contentType string, body io.Reader) (*sdk.UsersAPIClaimInvitationResponse, error) {
 	m.ctrl.T.Helper()
@@ -6581,6 +9841,46 @@ func (m *MockClientWithResponsesInterface) UsersAPIClaimInvitationWithResponse(c
 func (mr *MockClientWithResponsesInterfaceMockRecorder) UsersAPIClaimInvitationWithResponse(ctx, invitationId, body interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UsersAPIClaimInvitationWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).UsersAPIClaimInvitationWithResponse), ctx, invitationId, body)
+}
+
+// UsersAPICreateInvitations mocks base method.
+func (m *MockClientWithResponsesInterface) UsersAPICreateInvitations(ctx context.Context, body sdk.UsersAPICreateInvitationsJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "UsersAPICreateInvitations", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UsersAPICreateInvitations indicates an expected call of UsersAPICreateInvitations.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) UsersAPICreateInvitations(ctx, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UsersAPICreateInvitations", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).UsersAPICreateInvitations), varargs...)
+}
+
+// UsersAPICreateInvitationsWithBody mocks base method.
+func (m *MockClientWithResponsesInterface) UsersAPICreateInvitationsWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "UsersAPICreateInvitationsWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UsersAPICreateInvitationsWithBody indicates an expected call of UsersAPICreateInvitationsWithBody.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) UsersAPICreateInvitationsWithBody(ctx, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UsersAPICreateInvitationsWithBody", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).UsersAPICreateInvitationsWithBody), varargs...)
 }
 
 // UsersAPICreateInvitationsWithBodyWithResponse mocks base method.
@@ -6613,6 +9913,46 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) UsersAPICreateInvitation
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UsersAPICreateInvitationsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).UsersAPICreateInvitationsWithResponse), ctx, body)
 }
 
+// UsersAPICreateOrganization mocks base method.
+func (m *MockClientWithResponsesInterface) UsersAPICreateOrganization(ctx context.Context, body sdk.UsersAPICreateOrganizationJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "UsersAPICreateOrganization", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UsersAPICreateOrganization indicates an expected call of UsersAPICreateOrganization.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) UsersAPICreateOrganization(ctx, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UsersAPICreateOrganization", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).UsersAPICreateOrganization), varargs...)
+}
+
+// UsersAPICreateOrganizationWithBody mocks base method.
+func (m *MockClientWithResponsesInterface) UsersAPICreateOrganizationWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "UsersAPICreateOrganizationWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UsersAPICreateOrganizationWithBody indicates an expected call of UsersAPICreateOrganizationWithBody.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) UsersAPICreateOrganizationWithBody(ctx, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UsersAPICreateOrganizationWithBody", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).UsersAPICreateOrganizationWithBody), varargs...)
+}
+
 // UsersAPICreateOrganizationWithBodyWithResponse mocks base method.
 func (m *MockClientWithResponsesInterface) UsersAPICreateOrganizationWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*sdk.UsersAPICreateOrganizationResponse, error) {
 	m.ctrl.T.Helper()
@@ -6643,6 +9983,26 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) UsersAPICreateOrganizati
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UsersAPICreateOrganizationWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).UsersAPICreateOrganizationWithResponse), ctx, body)
 }
 
+// UsersAPICurrentUserProfile mocks base method.
+func (m *MockClientWithResponsesInterface) UsersAPICurrentUserProfile(ctx context.Context, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "UsersAPICurrentUserProfile", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UsersAPICurrentUserProfile indicates an expected call of UsersAPICurrentUserProfile.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) UsersAPICurrentUserProfile(ctx interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UsersAPICurrentUserProfile", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).UsersAPICurrentUserProfile), varargs...)
+}
+
 // UsersAPICurrentUserProfileWithResponse mocks base method.
 func (m *MockClientWithResponsesInterface) UsersAPICurrentUserProfileWithResponse(ctx context.Context) (*sdk.UsersAPICurrentUserProfileResponse, error) {
 	m.ctrl.T.Helper()
@@ -6656,6 +10016,26 @@ func (m *MockClientWithResponsesInterface) UsersAPICurrentUserProfileWithRespons
 func (mr *MockClientWithResponsesInterfaceMockRecorder) UsersAPICurrentUserProfileWithResponse(ctx interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UsersAPICurrentUserProfileWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).UsersAPICurrentUserProfileWithResponse), ctx)
+}
+
+// UsersAPIDeleteInvitation mocks base method.
+func (m *MockClientWithResponsesInterface) UsersAPIDeleteInvitation(ctx context.Context, id string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, id}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "UsersAPIDeleteInvitation", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UsersAPIDeleteInvitation indicates an expected call of UsersAPIDeleteInvitation.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) UsersAPIDeleteInvitation(ctx, id interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, id}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UsersAPIDeleteInvitation", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).UsersAPIDeleteInvitation), varargs...)
 }
 
 // UsersAPIDeleteInvitationWithResponse mocks base method.
@@ -6673,6 +10053,26 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) UsersAPIDeleteInvitation
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UsersAPIDeleteInvitationWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).UsersAPIDeleteInvitationWithResponse), ctx, id)
 }
 
+// UsersAPIDeleteOrganization mocks base method.
+func (m *MockClientWithResponsesInterface) UsersAPIDeleteOrganization(ctx context.Context, id string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, id}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "UsersAPIDeleteOrganization", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UsersAPIDeleteOrganization indicates an expected call of UsersAPIDeleteOrganization.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) UsersAPIDeleteOrganization(ctx, id interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, id}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UsersAPIDeleteOrganization", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).UsersAPIDeleteOrganization), varargs...)
+}
+
 // UsersAPIDeleteOrganizationWithResponse mocks base method.
 func (m *MockClientWithResponsesInterface) UsersAPIDeleteOrganizationWithResponse(ctx context.Context, id string) (*sdk.UsersAPIDeleteOrganizationResponse, error) {
 	m.ctrl.T.Helper()
@@ -6686,6 +10086,46 @@ func (m *MockClientWithResponsesInterface) UsersAPIDeleteOrganizationWithRespons
 func (mr *MockClientWithResponsesInterfaceMockRecorder) UsersAPIDeleteOrganizationWithResponse(ctx, id interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UsersAPIDeleteOrganizationWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).UsersAPIDeleteOrganizationWithResponse), ctx, id)
+}
+
+// UsersAPIEditOrganization mocks base method.
+func (m *MockClientWithResponsesInterface) UsersAPIEditOrganization(ctx context.Context, id string, body sdk.UsersAPIEditOrganizationJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, id, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "UsersAPIEditOrganization", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UsersAPIEditOrganization indicates an expected call of UsersAPIEditOrganization.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) UsersAPIEditOrganization(ctx, id, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, id, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UsersAPIEditOrganization", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).UsersAPIEditOrganization), varargs...)
+}
+
+// UsersAPIEditOrganizationWithBody mocks base method.
+func (m *MockClientWithResponsesInterface) UsersAPIEditOrganizationWithBody(ctx context.Context, id, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, id, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "UsersAPIEditOrganizationWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UsersAPIEditOrganizationWithBody indicates an expected call of UsersAPIEditOrganizationWithBody.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) UsersAPIEditOrganizationWithBody(ctx, id, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, id, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UsersAPIEditOrganizationWithBody", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).UsersAPIEditOrganizationWithBody), varargs...)
 }
 
 // UsersAPIEditOrganizationWithBodyWithResponse mocks base method.
@@ -6718,6 +10158,26 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) UsersAPIEditOrganization
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UsersAPIEditOrganizationWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).UsersAPIEditOrganizationWithResponse), ctx, id, body)
 }
 
+// UsersAPIGetOrganization mocks base method.
+func (m *MockClientWithResponsesInterface) UsersAPIGetOrganization(ctx context.Context, id string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, id}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "UsersAPIGetOrganization", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UsersAPIGetOrganization indicates an expected call of UsersAPIGetOrganization.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) UsersAPIGetOrganization(ctx, id interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, id}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UsersAPIGetOrganization", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).UsersAPIGetOrganization), varargs...)
+}
+
 // UsersAPIGetOrganizationWithResponse mocks base method.
 func (m *MockClientWithResponsesInterface) UsersAPIGetOrganizationWithResponse(ctx context.Context, id string) (*sdk.UsersAPIGetOrganizationResponse, error) {
 	m.ctrl.T.Helper()
@@ -6731,6 +10191,26 @@ func (m *MockClientWithResponsesInterface) UsersAPIGetOrganizationWithResponse(c
 func (mr *MockClientWithResponsesInterfaceMockRecorder) UsersAPIGetOrganizationWithResponse(ctx, id interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UsersAPIGetOrganizationWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).UsersAPIGetOrganizationWithResponse), ctx, id)
+}
+
+// UsersAPIListInvitations mocks base method.
+func (m *MockClientWithResponsesInterface) UsersAPIListInvitations(ctx context.Context, params *sdk.UsersAPIListInvitationsParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "UsersAPIListInvitations", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UsersAPIListInvitations indicates an expected call of UsersAPIListInvitations.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) UsersAPIListInvitations(ctx, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UsersAPIListInvitations", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).UsersAPIListInvitations), varargs...)
 }
 
 // UsersAPIListInvitationsWithResponse mocks base method.
@@ -6748,6 +10228,26 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) UsersAPIListInvitationsW
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UsersAPIListInvitationsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).UsersAPIListInvitationsWithResponse), ctx, params)
 }
 
+// UsersAPIListOrganizationUsers mocks base method.
+func (m *MockClientWithResponsesInterface) UsersAPIListOrganizationUsers(ctx context.Context, organizationId string, params *sdk.UsersAPIListOrganizationUsersParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "UsersAPIListOrganizationUsers", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UsersAPIListOrganizationUsers indicates an expected call of UsersAPIListOrganizationUsers.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) UsersAPIListOrganizationUsers(ctx, organizationId, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UsersAPIListOrganizationUsers", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).UsersAPIListOrganizationUsers), varargs...)
+}
+
 // UsersAPIListOrganizationUsersWithResponse mocks base method.
 func (m *MockClientWithResponsesInterface) UsersAPIListOrganizationUsersWithResponse(ctx context.Context, organizationId string, params *sdk.UsersAPIListOrganizationUsersParams) (*sdk.UsersAPIListOrganizationUsersResponse, error) {
 	m.ctrl.T.Helper()
@@ -6761,6 +10261,26 @@ func (m *MockClientWithResponsesInterface) UsersAPIListOrganizationUsersWithResp
 func (mr *MockClientWithResponsesInterfaceMockRecorder) UsersAPIListOrganizationUsersWithResponse(ctx, organizationId, params interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UsersAPIListOrganizationUsersWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).UsersAPIListOrganizationUsersWithResponse), ctx, organizationId, params)
+}
+
+// UsersAPIListOrganizations mocks base method.
+func (m *MockClientWithResponsesInterface) UsersAPIListOrganizations(ctx context.Context, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "UsersAPIListOrganizations", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UsersAPIListOrganizations indicates an expected call of UsersAPIListOrganizations.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) UsersAPIListOrganizations(ctx interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UsersAPIListOrganizations", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).UsersAPIListOrganizations), varargs...)
 }
 
 // UsersAPIListOrganizationsWithResponse mocks base method.
@@ -6778,6 +10298,26 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) UsersAPIListOrganization
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UsersAPIListOrganizationsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).UsersAPIListOrganizationsWithResponse), ctx)
 }
 
+// UsersAPIListUserGroups mocks base method.
+func (m *MockClientWithResponsesInterface) UsersAPIListUserGroups(ctx context.Context, organizationId, userId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, userId}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "UsersAPIListUserGroups", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UsersAPIListUserGroups indicates an expected call of UsersAPIListUserGroups.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) UsersAPIListUserGroups(ctx, organizationId, userId interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, userId}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UsersAPIListUserGroups", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).UsersAPIListUserGroups), varargs...)
+}
+
 // UsersAPIListUserGroupsWithResponse mocks base method.
 func (m *MockClientWithResponsesInterface) UsersAPIListUserGroupsWithResponse(ctx context.Context, organizationId, userId string) (*sdk.UsersAPIListUserGroupsResponse, error) {
 	m.ctrl.T.Helper()
@@ -6791,6 +10331,26 @@ func (m *MockClientWithResponsesInterface) UsersAPIListUserGroupsWithResponse(ct
 func (mr *MockClientWithResponsesInterfaceMockRecorder) UsersAPIListUserGroupsWithResponse(ctx, organizationId, userId interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UsersAPIListUserGroupsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).UsersAPIListUserGroupsWithResponse), ctx, organizationId, userId)
+}
+
+// UsersAPIRemoveOrganizationUsers mocks base method.
+func (m *MockClientWithResponsesInterface) UsersAPIRemoveOrganizationUsers(ctx context.Context, organizationId string, params *sdk.UsersAPIRemoveOrganizationUsersParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "UsersAPIRemoveOrganizationUsers", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UsersAPIRemoveOrganizationUsers indicates an expected call of UsersAPIRemoveOrganizationUsers.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) UsersAPIRemoveOrganizationUsers(ctx, organizationId, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UsersAPIRemoveOrganizationUsers", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).UsersAPIRemoveOrganizationUsers), varargs...)
 }
 
 // UsersAPIRemoveOrganizationUsersWithResponse mocks base method.
@@ -6808,6 +10368,26 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) UsersAPIRemoveOrganizati
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UsersAPIRemoveOrganizationUsersWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).UsersAPIRemoveOrganizationUsersWithResponse), ctx, organizationId, params)
 }
 
+// UsersAPIRemoveUserFromOrganization mocks base method.
+func (m *MockClientWithResponsesInterface) UsersAPIRemoveUserFromOrganization(ctx context.Context, organizationId, userId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, userId}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "UsersAPIRemoveUserFromOrganization", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UsersAPIRemoveUserFromOrganization indicates an expected call of UsersAPIRemoveUserFromOrganization.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) UsersAPIRemoveUserFromOrganization(ctx, organizationId, userId interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, userId}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UsersAPIRemoveUserFromOrganization", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).UsersAPIRemoveUserFromOrganization), varargs...)
+}
+
 // UsersAPIRemoveUserFromOrganizationWithResponse mocks base method.
 func (m *MockClientWithResponsesInterface) UsersAPIRemoveUserFromOrganizationWithResponse(ctx context.Context, organizationId, userId string) (*sdk.UsersAPIRemoveUserFromOrganizationResponse, error) {
 	m.ctrl.T.Helper()
@@ -6821,6 +10401,46 @@ func (m *MockClientWithResponsesInterface) UsersAPIRemoveUserFromOrganizationWit
 func (mr *MockClientWithResponsesInterfaceMockRecorder) UsersAPIRemoveUserFromOrganizationWithResponse(ctx, organizationId, userId interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UsersAPIRemoveUserFromOrganizationWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).UsersAPIRemoveUserFromOrganizationWithResponse), ctx, organizationId, userId)
+}
+
+// UsersAPIUpdateCurrentUserProfile mocks base method.
+func (m *MockClientWithResponsesInterface) UsersAPIUpdateCurrentUserProfile(ctx context.Context, body sdk.UsersAPIUpdateCurrentUserProfileJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "UsersAPIUpdateCurrentUserProfile", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UsersAPIUpdateCurrentUserProfile indicates an expected call of UsersAPIUpdateCurrentUserProfile.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) UsersAPIUpdateCurrentUserProfile(ctx, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UsersAPIUpdateCurrentUserProfile", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).UsersAPIUpdateCurrentUserProfile), varargs...)
+}
+
+// UsersAPIUpdateCurrentUserProfileWithBody mocks base method.
+func (m *MockClientWithResponsesInterface) UsersAPIUpdateCurrentUserProfileWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "UsersAPIUpdateCurrentUserProfileWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UsersAPIUpdateCurrentUserProfileWithBody indicates an expected call of UsersAPIUpdateCurrentUserProfileWithBody.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) UsersAPIUpdateCurrentUserProfileWithBody(ctx, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UsersAPIUpdateCurrentUserProfileWithBody", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).UsersAPIUpdateCurrentUserProfileWithBody), varargs...)
 }
 
 // UsersAPIUpdateCurrentUserProfileWithBodyWithResponse mocks base method.
@@ -6853,6 +10473,46 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) UsersAPIUpdateCurrentUse
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UsersAPIUpdateCurrentUserProfileWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).UsersAPIUpdateCurrentUserProfileWithResponse), ctx, body)
 }
 
+// UsersAPIUpdateOrganizationUser mocks base method.
+func (m *MockClientWithResponsesInterface) UsersAPIUpdateOrganizationUser(ctx context.Context, organizationId, userId string, body sdk.UsersAPIUpdateOrganizationUserJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, userId, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "UsersAPIUpdateOrganizationUser", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UsersAPIUpdateOrganizationUser indicates an expected call of UsersAPIUpdateOrganizationUser.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) UsersAPIUpdateOrganizationUser(ctx, organizationId, userId, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, userId, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UsersAPIUpdateOrganizationUser", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).UsersAPIUpdateOrganizationUser), varargs...)
+}
+
+// UsersAPIUpdateOrganizationUserWithBody mocks base method.
+func (m *MockClientWithResponsesInterface) UsersAPIUpdateOrganizationUserWithBody(ctx context.Context, organizationId, userId, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, userId, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "UsersAPIUpdateOrganizationUserWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// UsersAPIUpdateOrganizationUserWithBody indicates an expected call of UsersAPIUpdateOrganizationUserWithBody.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) UsersAPIUpdateOrganizationUserWithBody(ctx, organizationId, userId, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, userId, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UsersAPIUpdateOrganizationUserWithBody", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).UsersAPIUpdateOrganizationUserWithBody), varargs...)
+}
+
 // UsersAPIUpdateOrganizationUserWithBodyWithResponse mocks base method.
 func (m *MockClientWithResponsesInterface) UsersAPIUpdateOrganizationUserWithBodyWithResponse(ctx context.Context, organizationId, userId, contentType string, body io.Reader) (*sdk.UsersAPIUpdateOrganizationUserResponse, error) {
 	m.ctrl.T.Helper()
@@ -6881,6 +10541,46 @@ func (m *MockClientWithResponsesInterface) UsersAPIUpdateOrganizationUserWithRes
 func (mr *MockClientWithResponsesInterfaceMockRecorder) UsersAPIUpdateOrganizationUserWithResponse(ctx, organizationId, userId, body interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UsersAPIUpdateOrganizationUserWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).UsersAPIUpdateOrganizationUserWithResponse), ctx, organizationId, userId, body)
+}
+
+// WorkloadOptimizationAPIAssignScalingPolicyWorkloads mocks base method.
+func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPIAssignScalingPolicyWorkloads(ctx context.Context, clusterId, policyId string, body sdk.WorkloadOptimizationAPIAssignScalingPolicyWorkloadsJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, policyId, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "WorkloadOptimizationAPIAssignScalingPolicyWorkloads", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// WorkloadOptimizationAPIAssignScalingPolicyWorkloads indicates an expected call of WorkloadOptimizationAPIAssignScalingPolicyWorkloads.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPIAssignScalingPolicyWorkloads(ctx, clusterId, policyId, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, policyId, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIAssignScalingPolicyWorkloads", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPIAssignScalingPolicyWorkloads), varargs...)
+}
+
+// WorkloadOptimizationAPIAssignScalingPolicyWorkloadsWithBody mocks base method.
+func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPIAssignScalingPolicyWorkloadsWithBody(ctx context.Context, clusterId, policyId, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, policyId, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "WorkloadOptimizationAPIAssignScalingPolicyWorkloadsWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// WorkloadOptimizationAPIAssignScalingPolicyWorkloadsWithBody indicates an expected call of WorkloadOptimizationAPIAssignScalingPolicyWorkloadsWithBody.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPIAssignScalingPolicyWorkloadsWithBody(ctx, clusterId, policyId, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, policyId, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIAssignScalingPolicyWorkloadsWithBody", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPIAssignScalingPolicyWorkloadsWithBody), varargs...)
 }
 
 // WorkloadOptimizationAPIAssignScalingPolicyWorkloadsWithBodyWithResponse mocks base method.
@@ -6913,6 +10613,46 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPIA
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIAssignScalingPolicyWorkloadsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPIAssignScalingPolicyWorkloadsWithResponse), ctx, clusterId, policyId, body)
 }
 
+// WorkloadOptimizationAPICreateWorkloadScalingPolicy mocks base method.
+func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPICreateWorkloadScalingPolicy(ctx context.Context, clusterId string, body sdk.WorkloadOptimizationAPICreateWorkloadScalingPolicyJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "WorkloadOptimizationAPICreateWorkloadScalingPolicy", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// WorkloadOptimizationAPICreateWorkloadScalingPolicy indicates an expected call of WorkloadOptimizationAPICreateWorkloadScalingPolicy.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPICreateWorkloadScalingPolicy(ctx, clusterId, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPICreateWorkloadScalingPolicy", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPICreateWorkloadScalingPolicy), varargs...)
+}
+
+// WorkloadOptimizationAPICreateWorkloadScalingPolicyWithBody mocks base method.
+func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPICreateWorkloadScalingPolicyWithBody(ctx context.Context, clusterId, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "WorkloadOptimizationAPICreateWorkloadScalingPolicyWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// WorkloadOptimizationAPICreateWorkloadScalingPolicyWithBody indicates an expected call of WorkloadOptimizationAPICreateWorkloadScalingPolicyWithBody.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPICreateWorkloadScalingPolicyWithBody(ctx, clusterId, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPICreateWorkloadScalingPolicyWithBody", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPICreateWorkloadScalingPolicyWithBody), varargs...)
+}
+
 // WorkloadOptimizationAPICreateWorkloadScalingPolicyWithBodyWithResponse mocks base method.
 func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPICreateWorkloadScalingPolicyWithBodyWithResponse(ctx context.Context, clusterId, contentType string, body io.Reader) (*sdk.WorkloadOptimizationAPICreateWorkloadScalingPolicyResponse, error) {
 	m.ctrl.T.Helper()
@@ -6943,6 +10683,26 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPIC
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPICreateWorkloadScalingPolicyWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPICreateWorkloadScalingPolicyWithResponse), ctx, clusterId, body)
 }
 
+// WorkloadOptimizationAPIDeleteWorkloadScalingPolicy mocks base method.
+func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPIDeleteWorkloadScalingPolicy(ctx context.Context, clusterId, policyId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, policyId}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "WorkloadOptimizationAPIDeleteWorkloadScalingPolicy", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// WorkloadOptimizationAPIDeleteWorkloadScalingPolicy indicates an expected call of WorkloadOptimizationAPIDeleteWorkloadScalingPolicy.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPIDeleteWorkloadScalingPolicy(ctx, clusterId, policyId interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, policyId}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIDeleteWorkloadScalingPolicy", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPIDeleteWorkloadScalingPolicy), varargs...)
+}
+
 // WorkloadOptimizationAPIDeleteWorkloadScalingPolicyWithResponse mocks base method.
 func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPIDeleteWorkloadScalingPolicyWithResponse(ctx context.Context, clusterId, policyId string) (*sdk.WorkloadOptimizationAPIDeleteWorkloadScalingPolicyResponse, error) {
 	m.ctrl.T.Helper()
@@ -6956,6 +10716,26 @@ func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPIDeleteWorkload
 func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPIDeleteWorkloadScalingPolicyWithResponse(ctx, clusterId, policyId interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIDeleteWorkloadScalingPolicyWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPIDeleteWorkloadScalingPolicyWithResponse), ctx, clusterId, policyId)
+}
+
+// WorkloadOptimizationAPIGetAgentStatus mocks base method.
+func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPIGetAgentStatus(ctx context.Context, clusterId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "WorkloadOptimizationAPIGetAgentStatus", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// WorkloadOptimizationAPIGetAgentStatus indicates an expected call of WorkloadOptimizationAPIGetAgentStatus.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPIGetAgentStatus(ctx, clusterId interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIGetAgentStatus", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPIGetAgentStatus), varargs...)
 }
 
 // WorkloadOptimizationAPIGetAgentStatusWithResponse mocks base method.
@@ -6973,6 +10753,26 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPIG
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIGetAgentStatusWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPIGetAgentStatusWithResponse), ctx, clusterId)
 }
 
+// WorkloadOptimizationAPIGetInstallCmd mocks base method.
+func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPIGetInstallCmd(ctx context.Context, params *sdk.WorkloadOptimizationAPIGetInstallCmdParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "WorkloadOptimizationAPIGetInstallCmd", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// WorkloadOptimizationAPIGetInstallCmd indicates an expected call of WorkloadOptimizationAPIGetInstallCmd.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPIGetInstallCmd(ctx, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIGetInstallCmd", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPIGetInstallCmd), varargs...)
+}
+
 // WorkloadOptimizationAPIGetInstallCmdWithResponse mocks base method.
 func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPIGetInstallCmdWithResponse(ctx context.Context, params *sdk.WorkloadOptimizationAPIGetInstallCmdParams) (*sdk.WorkloadOptimizationAPIGetInstallCmdResponse, error) {
 	m.ctrl.T.Helper()
@@ -6986,6 +10786,26 @@ func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPIGetInstallCmdW
 func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPIGetInstallCmdWithResponse(ctx, params interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIGetInstallCmdWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPIGetInstallCmdWithResponse), ctx, params)
+}
+
+// WorkloadOptimizationAPIGetInstallScript mocks base method.
+func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPIGetInstallScript(ctx context.Context, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "WorkloadOptimizationAPIGetInstallScript", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// WorkloadOptimizationAPIGetInstallScript indicates an expected call of WorkloadOptimizationAPIGetInstallScript.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPIGetInstallScript(ctx interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIGetInstallScript", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPIGetInstallScript), varargs...)
 }
 
 // WorkloadOptimizationAPIGetInstallScriptWithResponse mocks base method.
@@ -7003,6 +10823,46 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPIG
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIGetInstallScriptWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPIGetInstallScriptWithResponse), ctx)
 }
 
+// WorkloadOptimizationAPIGetWorkload mocks base method.
+func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPIGetWorkload(ctx context.Context, clusterId, workloadId string, params *sdk.WorkloadOptimizationAPIGetWorkloadParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, workloadId, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "WorkloadOptimizationAPIGetWorkload", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// WorkloadOptimizationAPIGetWorkload indicates an expected call of WorkloadOptimizationAPIGetWorkload.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPIGetWorkload(ctx, clusterId, workloadId, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, workloadId, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIGetWorkload", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPIGetWorkload), varargs...)
+}
+
+// WorkloadOptimizationAPIGetWorkloadEvent mocks base method.
+func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPIGetWorkloadEvent(ctx context.Context, clusterId, eventId string, params *sdk.WorkloadOptimizationAPIGetWorkloadEventParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, eventId, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "WorkloadOptimizationAPIGetWorkloadEvent", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// WorkloadOptimizationAPIGetWorkloadEvent indicates an expected call of WorkloadOptimizationAPIGetWorkloadEvent.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPIGetWorkloadEvent(ctx, clusterId, eventId, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, eventId, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIGetWorkloadEvent", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPIGetWorkloadEvent), varargs...)
+}
+
 // WorkloadOptimizationAPIGetWorkloadEventWithResponse mocks base method.
 func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPIGetWorkloadEventWithResponse(ctx context.Context, clusterId, eventId string, params *sdk.WorkloadOptimizationAPIGetWorkloadEventParams) (*sdk.WorkloadOptimizationAPIGetWorkloadEventResponse, error) {
 	m.ctrl.T.Helper()
@@ -7016,6 +10876,26 @@ func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPIGetWorkloadEve
 func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPIGetWorkloadEventWithResponse(ctx, clusterId, eventId, params interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIGetWorkloadEventWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPIGetWorkloadEventWithResponse), ctx, clusterId, eventId, params)
+}
+
+// WorkloadOptimizationAPIGetWorkloadScalingPolicy mocks base method.
+func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPIGetWorkloadScalingPolicy(ctx context.Context, clusterId, policyId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, policyId}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "WorkloadOptimizationAPIGetWorkloadScalingPolicy", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// WorkloadOptimizationAPIGetWorkloadScalingPolicy indicates an expected call of WorkloadOptimizationAPIGetWorkloadScalingPolicy.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPIGetWorkloadScalingPolicy(ctx, clusterId, policyId interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, policyId}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIGetWorkloadScalingPolicy", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPIGetWorkloadScalingPolicy), varargs...)
 }
 
 // WorkloadOptimizationAPIGetWorkloadScalingPolicyWithResponse mocks base method.
@@ -7048,6 +10928,26 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPIG
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIGetWorkloadWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPIGetWorkloadWithResponse), ctx, clusterId, workloadId, params)
 }
 
+// WorkloadOptimizationAPIGetWorkloadsSummary mocks base method.
+func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPIGetWorkloadsSummary(ctx context.Context, clusterId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "WorkloadOptimizationAPIGetWorkloadsSummary", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// WorkloadOptimizationAPIGetWorkloadsSummary indicates an expected call of WorkloadOptimizationAPIGetWorkloadsSummary.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPIGetWorkloadsSummary(ctx, clusterId interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIGetWorkloadsSummary", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPIGetWorkloadsSummary), varargs...)
+}
+
 // WorkloadOptimizationAPIGetWorkloadsSummaryWithResponse mocks base method.
 func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPIGetWorkloadsSummaryWithResponse(ctx context.Context, clusterId string) (*sdk.WorkloadOptimizationAPIGetWorkloadsSummaryResponse, error) {
 	m.ctrl.T.Helper()
@@ -7061,6 +10961,26 @@ func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPIGetWorkloadsSu
 func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPIGetWorkloadsSummaryWithResponse(ctx, clusterId interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIGetWorkloadsSummaryWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPIGetWorkloadsSummaryWithResponse), ctx, clusterId)
+}
+
+// WorkloadOptimizationAPIListWorkloadEvents mocks base method.
+func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPIListWorkloadEvents(ctx context.Context, clusterId string, params *sdk.WorkloadOptimizationAPIListWorkloadEventsParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "WorkloadOptimizationAPIListWorkloadEvents", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// WorkloadOptimizationAPIListWorkloadEvents indicates an expected call of WorkloadOptimizationAPIListWorkloadEvents.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPIListWorkloadEvents(ctx, clusterId, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIListWorkloadEvents", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPIListWorkloadEvents), varargs...)
 }
 
 // WorkloadOptimizationAPIListWorkloadEventsWithResponse mocks base method.
@@ -7078,6 +10998,26 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPIL
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIListWorkloadEventsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPIListWorkloadEventsWithResponse), ctx, clusterId, params)
 }
 
+// WorkloadOptimizationAPIListWorkloadScalingPolicies mocks base method.
+func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPIListWorkloadScalingPolicies(ctx context.Context, clusterId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "WorkloadOptimizationAPIListWorkloadScalingPolicies", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// WorkloadOptimizationAPIListWorkloadScalingPolicies indicates an expected call of WorkloadOptimizationAPIListWorkloadScalingPolicies.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPIListWorkloadScalingPolicies(ctx, clusterId interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIListWorkloadScalingPolicies", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPIListWorkloadScalingPolicies), varargs...)
+}
+
 // WorkloadOptimizationAPIListWorkloadScalingPoliciesWithResponse mocks base method.
 func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPIListWorkloadScalingPoliciesWithResponse(ctx context.Context, clusterId string) (*sdk.WorkloadOptimizationAPIListWorkloadScalingPoliciesResponse, error) {
 	m.ctrl.T.Helper()
@@ -7093,6 +11033,26 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPIL
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIListWorkloadScalingPoliciesWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPIListWorkloadScalingPoliciesWithResponse), ctx, clusterId)
 }
 
+// WorkloadOptimizationAPIListWorkloads mocks base method.
+func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPIListWorkloads(ctx context.Context, clusterId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "WorkloadOptimizationAPIListWorkloads", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// WorkloadOptimizationAPIListWorkloads indicates an expected call of WorkloadOptimizationAPIListWorkloads.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPIListWorkloads(ctx, clusterId interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIListWorkloads", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPIListWorkloads), varargs...)
+}
+
 // WorkloadOptimizationAPIListWorkloadsWithResponse mocks base method.
 func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPIListWorkloadsWithResponse(ctx context.Context, clusterId string) (*sdk.WorkloadOptimizationAPIListWorkloadsResponse, error) {
 	m.ctrl.T.Helper()
@@ -7106,6 +11066,46 @@ func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPIListWorkloadsW
 func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPIListWorkloadsWithResponse(ctx, clusterId interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIListWorkloadsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPIListWorkloadsWithResponse), ctx, clusterId)
+}
+
+// WorkloadOptimizationAPIUpdateWorkloadScalingPolicy mocks base method.
+func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPIUpdateWorkloadScalingPolicy(ctx context.Context, clusterId, policyId string, body sdk.WorkloadOptimizationAPIUpdateWorkloadScalingPolicyJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, policyId, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "WorkloadOptimizationAPIUpdateWorkloadScalingPolicy", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// WorkloadOptimizationAPIUpdateWorkloadScalingPolicy indicates an expected call of WorkloadOptimizationAPIUpdateWorkloadScalingPolicy.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPIUpdateWorkloadScalingPolicy(ctx, clusterId, policyId, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, policyId, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIUpdateWorkloadScalingPolicy", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPIUpdateWorkloadScalingPolicy), varargs...)
+}
+
+// WorkloadOptimizationAPIUpdateWorkloadScalingPolicyWithBody mocks base method.
+func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPIUpdateWorkloadScalingPolicyWithBody(ctx context.Context, clusterId, policyId, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, policyId, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "WorkloadOptimizationAPIUpdateWorkloadScalingPolicyWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// WorkloadOptimizationAPIUpdateWorkloadScalingPolicyWithBody indicates an expected call of WorkloadOptimizationAPIUpdateWorkloadScalingPolicyWithBody.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPIUpdateWorkloadScalingPolicyWithBody(ctx, clusterId, policyId, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, policyId, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIUpdateWorkloadScalingPolicyWithBody", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPIUpdateWorkloadScalingPolicyWithBody), varargs...)
 }
 
 // WorkloadOptimizationAPIUpdateWorkloadScalingPolicyWithBodyWithResponse mocks base method.
@@ -7136,6 +11136,46 @@ func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPIUpdateWorkload
 func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPIUpdateWorkloadScalingPolicyWithResponse(ctx, clusterId, policyId, body interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIUpdateWorkloadScalingPolicyWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPIUpdateWorkloadScalingPolicyWithResponse), ctx, clusterId, policyId, body)
+}
+
+// WorkloadOptimizationAPIUpdateWorkloadV2 mocks base method.
+func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPIUpdateWorkloadV2(ctx context.Context, clusterId, workloadId string, body sdk.WorkloadOptimizationAPIUpdateWorkloadV2JSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, workloadId, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "WorkloadOptimizationAPIUpdateWorkloadV2", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// WorkloadOptimizationAPIUpdateWorkloadV2 indicates an expected call of WorkloadOptimizationAPIUpdateWorkloadV2.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPIUpdateWorkloadV2(ctx, clusterId, workloadId, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, workloadId, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIUpdateWorkloadV2", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPIUpdateWorkloadV2), varargs...)
+}
+
+// WorkloadOptimizationAPIUpdateWorkloadV2WithBody mocks base method.
+func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPIUpdateWorkloadV2WithBody(ctx context.Context, clusterId, workloadId, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, workloadId, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "WorkloadOptimizationAPIUpdateWorkloadV2WithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// WorkloadOptimizationAPIUpdateWorkloadV2WithBody indicates an expected call of WorkloadOptimizationAPIUpdateWorkloadV2WithBody.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPIUpdateWorkloadV2WithBody(ctx, clusterId, workloadId, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, workloadId, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIUpdateWorkloadV2WithBody", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPIUpdateWorkloadV2WithBody), varargs...)
 }
 
 // WorkloadOptimizationAPIUpdateWorkloadV2WithBodyWithResponse mocks base method.
