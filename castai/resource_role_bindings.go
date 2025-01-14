@@ -290,7 +290,7 @@ func resourceRoleBindingsDelete(ctx context.Context, data *schema.ResourceData, 
 	return nil
 }
 
-func getRoleBinding(client *sdk.ClientWithResponses, ctx context.Context, organizationID, roleBindingID string) (*sdk.CastaiRbacV1beta1RoleBinding, error) {
+func getRoleBinding(client sdk.ClientWithResponsesInterface, ctx context.Context, organizationID, roleBindingID string) (*sdk.CastaiRbacV1beta1RoleBinding, error) {
 	resp, err := client.RbacServiceAPIGetRoleBindingWithResponse(ctx, organizationID, roleBindingID)
 	if err != nil {
 		return nil, fmt.Errorf("fetching role binding: %w", err)

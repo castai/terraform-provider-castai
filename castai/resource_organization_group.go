@@ -222,7 +222,7 @@ func resourceOrganizationGroupDelete(ctx context.Context, data *schema.ResourceD
 	return nil
 }
 
-func getGroup(client *sdk.ClientWithResponses, ctx context.Context, organizationID, groupID string) (*sdk.CastaiRbacV1beta1Group, error) {
+func getGroup(client sdk.ClientWithResponsesInterface, ctx context.Context, organizationID, groupID string) (*sdk.CastaiRbacV1beta1Group, error) {
 	groupsResp, err := client.RbacServiceAPIGetGroupWithResponse(ctx, organizationID, groupID)
 	if err != nil {
 		return nil, fmt.Errorf("fetching group: %w", err)

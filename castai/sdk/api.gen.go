@@ -4100,6 +4100,17 @@ type WorkloadoptimizationV1AntiAffinitySettings struct {
 	ConsiderAntiAffinity *bool `json:"considerAntiAffinity"`
 }
 
+// WorkloadoptimizationV1ApplyThresholdStrategy defines model for workloadoptimization.v1.ApplyThresholdStrategy.
+type WorkloadoptimizationV1ApplyThresholdStrategy struct {
+	// PercentageThreshold is the percentage for the apply threshold strategy.
+	PercentageThreshold *WorkloadoptimizationV1ApplyThresholdStrategyPercentageThreshold `json:"percentageThreshold,omitempty"`
+}
+
+// PercentageThreshold is the percentage for the apply threshold strategy.
+type WorkloadoptimizationV1ApplyThresholdStrategyPercentageThreshold struct {
+	Percentage float64 `json:"percentage"`
+}
+
 // WorkloadoptimizationV1ApplyType defines model for workloadoptimization.v1.ApplyType.
 type WorkloadoptimizationV1ApplyType string
 
@@ -4555,7 +4566,8 @@ type WorkloadoptimizationV1ResourceMetrics struct {
 // WorkloadoptimizationV1ResourcePolicies defines model for workloadoptimization.v1.ResourcePolicies.
 type WorkloadoptimizationV1ResourcePolicies struct {
 	// The threshold of when to apply the recommendation - when diff of current requests and recommendation is greater than this, apply the recommendation.
-	ApplyThreshold float64 `json:"applyThreshold"`
+	ApplyThreshold         float64                                       `json:"applyThreshold"`
+	ApplyThresholdStrategy *WorkloadoptimizationV1ApplyThresholdStrategy `json:"applyThresholdStrategy,omitempty"`
 
 	// The arguments for the function - i.e. for a quantile, this should be a [0, 1] float.
 	Args []string `json:"args"`
