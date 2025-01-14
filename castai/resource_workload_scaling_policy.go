@@ -3,6 +3,7 @@ package castai
 import (
 	"context"
 	"fmt"
+	"github.com/pkg/errors"
 	"net/http"
 	"regexp"
 	"strings"
@@ -19,12 +20,21 @@ import (
 	"github.com/castai/terraform-provider-castai/castai/sdk"
 )
 
-const minResourceMultiplierValue = 1.0
+const (
+	minResourceMultiplierValue = 1.0
+	minApplyThresholdValue     = 0.01
+	maxApplyThresholdValue     = 2.5
+)
 
 const (
 	FieldLimitStrategy           = "limit"
 	FieldLimitStrategyType       = "type"
 	FieldLimitStrategyMultiplier = "multiplier"
+
+	FieldApplyThresholdStrategy               = "apply_threshold_strategy"
+	FieldApplyThresholdStrategyType           = "type"
+	FieldApplyThresholdStrategyPercentage     = "percentage"
+	FieldApplyThresholdStrategyPercentageType = "PERCENTAGE"
 )
 
 var (
@@ -76,13 +86,13 @@ func resourceWorkloadScalingPolicy() *schema.Resource {
 				Type:     schema.TypeList,
 				Required: true,
 				MaxItems: 1,
-				Elem:     workloadScalingPolicyResourceSchema("QUANTILE", 0, 0.01),
+				Elem:     workloadScalingPolicyResourceSchema("cpu", "QUANTILE", 0, 0.01),
 			},
 			"memory": {
 				Type:     schema.TypeList,
 				Required: true,
 				MaxItems: 1,
-				Elem:     workloadScalingPolicyResourceSchema("MAX", 0.1, 10),
+				Elem:     workloadScalingPolicyResourceSchema("memory", "MAX", 0.1, 10),
 			},
 			"startup": {
 				Type:     schema.TypeList,
@@ -158,7 +168,7 @@ func resourceWorkloadScalingPolicy() *schema.Resource {
 	}
 }
 
-func workloadScalingPolicyResourceSchema(function string, overhead, minRecommended float64) *schema.Resource {
+func workloadScalingPolicyResourceSchema(resource, function string, overhead, minRecommended float64) *schema.Resource {
 	return &schema.Resource{
 		Schema: map[string]*schema.Schema{
 			"function": {
@@ -192,6 +202,14 @@ func workloadScalingPolicyResourceSchema(function string, overhead, minRecommend
 					"diff of current requests and new recommendation is greater than set value",
 				Default:          0.1,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.FloatBetween(0.01, 1)),
+			},
+			FieldApplyThresholdStrategy: {
+				Type:          schema.TypeList,
+				Optional:      true,
+				MaxItems:      1,
+				Description:   "Resource apply threshold strategy settings",
+				Elem:          workloadScalingPolicyResourceApplyThresholdStrategySchema(),
+				ConflictsWith: []string{fmt.Sprintf("%s.0.apply_threshold", resource)},
 			},
 			"look_back_period_seconds": {
 				Type:             schema.TypeInt,
@@ -246,6 +264,27 @@ func workloadScalingPolicyResourceLimitSchema() *schema.Resource {
 				Optional:         true,
 				Description:      "Multiplier used to calculate the resource limit. It must be defined for the MULTIPLIER strategy.",
 				ValidateDiagFunc: validation.ToDiagFunc(validation.FloatAtLeast(minResourceMultiplierValue)),
+			},
+		},
+	}
+}
+
+func workloadScalingPolicyResourceApplyThresholdStrategySchema() *schema.Resource {
+	return &schema.Resource{
+		Schema: map[string]*schema.Schema{
+			FieldApplyThresholdStrategyType: {
+				Type:     schema.TypeString,
+				Required: true,
+				Description: fmt.Sprintf(`Defines apply theshold strategy type.
+	- %s - recommendation will be applied when diff of current requests and new recommendation is greater than set value`, FieldApplyThresholdStrategyPercentageType),
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{FieldApplyThresholdStrategyPercentageType}, false)),
+			},
+			FieldApplyThresholdStrategyPercentage: {
+				Type:     schema.TypeFloat,
+				Optional: true,
+				Description: fmt.Sprintf("Percentage of a how much difference should there be between the current pod requests and the new recommendation. "+
+					"It must be defined for the %s strategy.", FieldApplyThresholdStrategyPercentageType),
+				ValidateDiagFunc: validation.ToDiagFunc(validation.FloatBetween(minApplyThresholdValue, maxApplyThresholdValue)),
 			},
 		},
 	}
@@ -437,6 +476,32 @@ func validateResourcePolicy(r sdk.WorkloadoptimizationV1ResourcePolicies, res st
 	if err != nil {
 		return fmt.Errorf("field %q: %w", res, err)
 	}
+
+	err = validateResourceApplyThresholdStrategy(r.ApplyThresholdStrategy)
+	if err != nil {
+		return fmt.Errorf("field %q: %w", res, err)
+	}
+	return nil
+}
+
+func validateResourceApplyThresholdStrategy(r *sdk.WorkloadoptimizationV1ApplyThresholdStrategy) error {
+	if r == nil {
+		return nil
+	}
+
+	if r.PercentageThreshold != nil {
+		return errors.Wrap(validatePercentageThresholdStrategy(r.PercentageThreshold), fmt.Sprintf(`field %q`, FieldApplyThresholdStrategy))
+	}
+
+	return fmt.Errorf(`field %q: field %q: unknown apply threshold strategy type`, FieldApplyThresholdStrategy, FieldApplyThresholdStrategyType)
+}
+
+func validatePercentageThresholdStrategy(r *sdk.WorkloadoptimizationV1ApplyThresholdStrategyPercentageThreshold) error {
+	if r.Percentage < minApplyThresholdValue || r.Percentage > maxApplyThresholdValue {
+		return fmt.Errorf(
+			`field %q: value must be between %v and %v`,
+			FieldApplyThresholdStrategyPercentage, minApplyThresholdValue, maxApplyThresholdValue)
+	}
 	return nil
 }
 
@@ -509,6 +574,9 @@ func toWorkloadScalingPolicies(obj map[string]interface{}) sdk.Workloadoptimizat
 	if v, ok := obj["apply_threshold"].(float64); ok {
 		out.ApplyThreshold = v
 	}
+	if v, ok := obj[FieldApplyThresholdStrategy].([]any); ok && len(v) > 0 {
+		out.ApplyThresholdStrategy = toWorkloadResourceApplyThresholdStrategy(v[0].(map[string]any))
+	}
 	if v, ok := obj["look_back_period_seconds"].(int); ok && v > 0 {
 		out.LookBackPeriodSeconds = lo.ToPtr(int32(v))
 	}
@@ -543,6 +611,24 @@ func toWorkloadResourceLimit(obj map[string]any) *sdk.WorkloadoptimizationV1Reso
 	return out
 }
 
+func toWorkloadResourceApplyThresholdStrategy(obj map[string]any) *sdk.WorkloadoptimizationV1ApplyThresholdStrategy {
+	if len(obj) == 0 {
+		return nil
+	}
+
+	out := &sdk.WorkloadoptimizationV1ApplyThresholdStrategy{}
+	strategy, _ := obj[FieldApplyThresholdStrategyType].(string)
+	switch strategy {
+	case FieldApplyThresholdStrategyPercentageType:
+		if percentage, ok := obj[FieldApplyThresholdStrategyPercentage].(float64); ok {
+			out.PercentageThreshold = &sdk.WorkloadoptimizationV1ApplyThresholdStrategyPercentageThreshold{
+				Percentage: percentage,
+			}
+		}
+	}
+	return out
+}
+
 func toWorkloadScalingPoliciesMap(p sdk.WorkloadoptimizationV1ResourcePolicies) []map[string]interface{} {
 	m := map[string]interface{}{
 		"function":        p.Function,
@@ -567,11 +653,33 @@ func toWorkloadScalingPoliciesMap(p sdk.WorkloadoptimizationV1ResourcePolicies) 
 		m[FieldLimitStrategy] = []map[string]any{limit}
 	}
 
+	if p.ApplyThresholdStrategy != nil {
+		strategy := applyThresholdStrategyToMap(*p.ApplyThresholdStrategy)
+		if strategy != nil {
+			m[FieldApplyThresholdStrategy] = strategy
+		}
+	}
+
 	if p.ManagementOption != nil {
 		m["management_option"] = string(*p.ManagementOption)
 	}
 
 	return []map[string]interface{}{m}
+}
+
+func applyThresholdStrategyToMap(s sdk.WorkloadoptimizationV1ApplyThresholdStrategy) []map[string]any {
+	m := map[string]any{}
+
+	if s.PercentageThreshold != nil {
+		m[FieldApplyThresholdStrategyType] = FieldApplyThresholdStrategyPercentageType
+		m[FieldApplyThresholdStrategyPercentage] = s.PercentageThreshold.Percentage
+	}
+
+	if len(m) == 0 {
+		return nil
+	}
+
+	return []map[string]any{m}
 }
 
 func toStartup(startup map[string]interface{}) *sdk.WorkloadoptimizationV1StartupSettings {
