@@ -754,7 +754,7 @@ func TestResourceCreate(t *testing.T) {
 			).Return(&sdk.CommitmentsAPIReplaceCommitmentAssignmentsResponse{
 				HTTPResponse: &http.Response{StatusCode: http.StatusOK},
 				JSON200:      &sdk.CastaiInventoryV1beta1ReplaceCommitmentAssignmentsResponse{},
-			}, nil)
+			}, nil).Times(1)
 
 			mockClient.EXPECT().CommitmentsAPIGetCommitmentsAssignmentsWithResponse(gomock.Any()).
 				Return(&sdk.CommitmentsAPIGetCommitmentsAssignmentsResponse{
