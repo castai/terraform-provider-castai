@@ -539,8 +539,6 @@ func resourceCastaiCommitmentsUpsert(ctx context.Context, data *schema.ResourceD
 		return diag.FromErr(err)
 	}
 
-	fmt.Println("OK: ", reservationsOk, cudsOk)
-
 	var imported []sdk.CastaiInventoryV1beta1Commitment
 	switch {
 	case reservationsOk:
