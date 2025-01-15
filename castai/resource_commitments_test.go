@@ -665,9 +665,11 @@ func TestResourceCreate(t *testing.T) {
 						"region": "us-central1",
 					},
 				},
-				"assignments": map[string]any{
-					"cluster_id": clusterID.String(),
-					"priority":   1,
+				"assignments": []any{
+					map[string]any{
+						"cluster_id": clusterID.String(),
+						"priority":   1,
+					},
 				},
 				"prioritization":   true,
 				"status":           "Active",
@@ -734,7 +736,10 @@ func TestResourceCreate(t *testing.T) {
 		gomock.Any(),
 		commitmentID.String(),
 		sdk.CommitmentsAPIReplaceCommitmentAssignmentsJSONRequestBody{clusterID.String()},
-	).Return()
+	).Return(&sdk.CommitmentsAPIReplaceCommitmentAssignmentsResponse{
+		HTTPResponse: &http.Response{StatusCode: http.StatusOK},
+		JSON200:      &sdk.CastaiInventoryV1beta1ReplaceCommitmentAssignmentsResponse{},
+	}, nil)
 
 	mockClient.EXPECT().CommitmentsAPIGetCommitmentsAssignmentsWithResponse(gomock.Any()).
 		Return(&sdk.CommitmentsAPIGetCommitmentsAssignmentsResponse{
