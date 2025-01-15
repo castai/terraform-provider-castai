@@ -4450,7 +4450,8 @@ type WorkloadoptimizationV1RecommendedRequestsChangedEventChange struct {
 // WorkloadoptimizationV1ResourceConfig defines model for workloadoptimization.v1.ResourceConfig.
 type WorkloadoptimizationV1ResourceConfig struct {
 	// The threshold of when to apply the recommendation - when diff of current requests and recommendation is greater than this, apply the recommendation.
-	ApplyThreshold *float64 `json:"applyThreshold"`
+	ApplyThreshold         *float64                                      `json:"applyThreshold"`
+	ApplyThresholdStrategy *WorkloadoptimizationV1ApplyThresholdStrategy `json:"applyThresholdStrategy,omitempty"`
 
 	// The arguments for the function - i.e. for a quantile, this should be a [0, 1] float.
 	Args []string `json:"args"`
@@ -4489,7 +4490,8 @@ type WorkloadoptimizationV1ResourceConfigFunction string
 // WorkloadoptimizationV1ResourceConfigOverrides defines model for workloadoptimization.v1.ResourceConfigOverrides.
 type WorkloadoptimizationV1ResourceConfigOverrides struct {
 	// The threshold of when to apply the recommendation - when diff of current requests and recommendation is greater than this, apply the recommendation.
-	ApplyThreshold *float64 `json:"applyThreshold"`
+	ApplyThreshold         *float64                                      `json:"applyThreshold"`
+	ApplyThresholdStrategy *WorkloadoptimizationV1ApplyThresholdStrategy `json:"applyThresholdStrategy,omitempty"`
 
 	// The arguments for the function - i.e. for a quantile, this should be a [0, 1] float.
 	Args *[]string `json:"args,omitempty"`

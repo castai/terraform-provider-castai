@@ -7,8 +7,8 @@ resource "castai_workload_scaling_policy" "services" {
     function = "QUANTILE"
     overhead = 0.15
     apply_threshold_strategy {
-      type        = "PERCENTAGE"
-      percentrage = 0.1
+      type       = "PERCENTAGE"
+      percentage = 0.1
     }
     args                     = ["0.9"]
     look_back_period_seconds = 172800
@@ -19,8 +19,8 @@ resource "castai_workload_scaling_policy" "services" {
     function = "MAX"
     overhead = 0.35
     apply_threshold_strategy {
-      type        = "PERCENTAGE"
-      percentrage = 0.2
+      type       = "PERCENTAGE"
+      percentage = 0.2
     }
     limit {
       type       = "MULTIPLIER"

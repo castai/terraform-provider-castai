@@ -46,7 +46,8 @@ func TestAccResourceWorkloadScalingPolicy(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "cpu.0.limit.0.multiplier", "1.2"),
 					resource.TestCheckResourceAttr(resourceName, "memory.0.function", "MAX"),
 					resource.TestCheckResourceAttr(resourceName, "memory.0.overhead", "0.25"),
-					resource.TestCheckResourceAttr(resourceName, "memory.0.apply_threshold", "0.1"),
+					resource.TestCheckResourceAttr(resourceName, "memory.0.apply_threshold_strategy.0.type", "PERCENTAGE"),
+					resource.TestCheckResourceAttr(resourceName, "memory.0.apply_threshold_strategy.0.percentage", "0.1"),
 					resource.TestCheckResourceAttr(resourceName, "memory.0.args.#", "0"),
 					resource.TestCheckResourceAttr(resourceName, "memory.0.min", "100"),
 					resource.TestCheckResourceAttr(resourceName, "memory.0.limit.0.type", "MULTIPLIER"),
@@ -131,7 +132,10 @@ func scalingPolicyConfig(clusterName, projectID, name string) string {
 		memory {
 			function 		= "MAX"
 			overhead 		= 0.25
-			apply_threshold = 0.1
+			apply_threshold_strategy {
+				type = "PERCENTAGE"
+				percentage = 0.1
+			}
             min             = 100
 			limit {
 				type 		    = "MULTIPLIER"
@@ -268,13 +272,22 @@ func Test_validateResourcePolicy(t *testing.T) {
 					PercentageThreshold: &sdk.WorkloadoptimizationV1ApplyThresholdStrategyPercentageThreshold{},
 				},
 			},
-			errMsg: `field "cpu": field "apply_threshold_strategy": field "percentage": value must be between 0.01 and 2.5`,
+			errMsg: `field "cpu": field "apply_threshold_strategy": field "apply_threshold_strategy": field "percentage": value must be set for strategy type PERCENTAGE`,
 		},
 		"should return error when no strategy is specified": {
 			args: sdk.WorkloadoptimizationV1ResourcePolicies{
 				ApplyThresholdStrategy: &sdk.WorkloadoptimizationV1ApplyThresholdStrategy{},
 			},
 			errMsg: `field "cpu": field "apply_threshold_strategy": field "type": unknown apply threshold strategy type`,
+		},
+		"should not return error when strategy is valid": {
+			args: sdk.WorkloadoptimizationV1ResourcePolicies{
+				ApplyThresholdStrategy: &sdk.WorkloadoptimizationV1ApplyThresholdStrategy{
+					PercentageThreshold: &sdk.WorkloadoptimizationV1ApplyThresholdStrategyPercentageThreshold{
+						Percentage: 0.5,
+					},
+				},
+			},
 		},
 	}
 	for name, tt := range tests {
