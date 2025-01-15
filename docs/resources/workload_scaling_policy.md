@@ -24,7 +24,7 @@ resource "castai_workload_scaling_policy" "services" {
     function = "QUANTILE"
     overhead = 0.15
     apply_threshold_strategy {
-      type        = "PERCENTAGE"
+      type       = "PERCENTAGE"
       percentage = 0.1
     }
     args                     = ["0.9"]
@@ -36,7 +36,7 @@ resource "castai_workload_scaling_policy" "services" {
     function = "MAX"
     overhead = 0.35
     apply_threshold_strategy {
-      type        = "PERCENTAGE"
+      type       = "PERCENTAGE"
       percentage = 0.2
     }
     limit {
