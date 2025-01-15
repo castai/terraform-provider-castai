@@ -2,15 +2,25 @@ package castai
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"net/http"
 	"os"
 	"testing"
 	"time"
 
+	"github.com/castai/terraform-provider-castai/castai/sdk"
+	mock_sdk "github.com/castai/terraform-provider-castai/castai/sdk/mock"
+	"github.com/golang/mock/gomock"
+	"github.com/google/uuid"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/samber/lo"
+	"github.com/stretchr/testify/require"
 )
 
 func TestAccCommitments(t *testing.T) {
@@ -596,4 +606,152 @@ resource "castai_commitments" "test_gcp" {
   }
 }
 `)
+}
+func TestResourceCreate(t *testing.T) {
+	ctx := context.Background()
+	resource := resourceCommitments()
+	r := require.New(t)
+
+	ctrl := gomock.NewController(t)
+	mockClient := mock_sdk.NewMockClientWithResponsesInterface(ctrl)
+	provider := &ProviderConfig{api: mockClient}
+
+	orgID, clusterID := uuid.New(), uuid.New()
+
+	mockClient.EXPECT().UsersAPIListOrganizationsWithResponse(gomock.Any()).Return(&sdk.UsersAPIListOrganizationsResponse{
+		JSON200: &sdk.CastaiUsersV1beta1ListOrganizationsResponse{
+			Organizations: []sdk.CastaiUsersV1beta1UserOrganization{
+				{Id: lo.ToPtr(orgID.String())}, // the first org is the default one so everything else should be ignored
+				{Id: lo.ToPtr(uuid.New().String())},
+			},
+		},
+		HTTPResponse: &http.Response{StatusCode: http.StatusOK},
+	}, nil).Times(1)
+
+	commitment := sdk.CastaiInventoryV1beta1GCPCommitmentImport{
+		AutoRenew:         lo.ToPtr(true),
+		Category:          lo.ToPtr("MACHINE"),
+		CreationTimestamp: lo.ToPtr("2023-01-01T00:00:00Z"),
+		Description:       lo.ToPtr("some description"),
+		EndTimestamp:      lo.ToPtr("2024-01-01T00:00:00Z"),
+		Id:                lo.ToPtr("123456789"),
+		Kind:              lo.ToPtr("compute#commitment"),
+		Name:              lo.ToPtr("test"),
+		Plan:              lo.ToPtr("TWELVE_MONTH"),
+		Region:            lo.ToPtr("https://www.googleapis.com/compute/v1/projects/test-project/regions/us-central1"),
+		Resources: &[]sdk.CastaiInventoryV1beta1GCPResource{
+			{Amount: lo.ToPtr("10"), Type: lo.ToPtr("VCPU")},
+			{Amount: lo.ToPtr("20480"), Type: lo.ToPtr("MEMORY")},
+		},
+		SelfLink:       lo.ToPtr("https://www.googleapis.com/compute/v1/projects/test-project/regions/us-central1/commitments/test"),
+		StartTimestamp: lo.ToPtr("2023-01-01T00:00:00Z"),
+		Status:         lo.ToPtr("ACTIVE"),
+		StatusMessage:  lo.ToPtr("The commitment is active, and so will apply to current resource usage."),
+		Type:           lo.ToPtr("COMPUTE_OPTIMIZED_C2D"),
+	}
+
+	data := schema.TestResourceDataRaw(t, resource.Schema, map[string]any{
+		fieldCommitmentsGCPCUDsJSON: func() string {
+			raw, err := json.Marshal([]sdk.CastaiInventoryV1beta1GCPCommitmentImport{commitment})
+			r.NoError(err)
+			return string(raw)
+		}(),
+		fieldCommitmentsConfigs: []any{
+			map[string]any{
+				"matcher": []any{
+					map[string]any{
+						"name":   "test",
+						"type":   "COMPUTE_OPTIMIZED_C2D",
+						"region": "us-central1",
+					},
+				},
+				"assignments": map[string]any{
+					"cluster_id": clusterID.String(),
+					"priority":   1,
+				},
+				"prioritization":   true,
+				"status":           "Active",
+				"allowed_usage":    0.6,
+				"scaling_strategy": "CPUBased",
+			},
+		},
+	})
+
+	mockClient.EXPECT().CommitmentsAPIImportGCPCommitmentsWithResponse(
+		gomock.Any(),
+		&sdk.CommitmentsAPIImportGCPCommitmentsParams{
+			Behaviour: lo.ToPtr[sdk.CommitmentsAPIImportGCPCommitmentsParamsBehaviour]("OVERWRITE"),
+		},
+		[]sdk.CastaiInventoryV1beta1GCPCommitmentImport{commitment},
+	).Return(&sdk.CommitmentsAPIImportGCPCommitmentsResponse{
+		HTTPResponse: &http.Response{StatusCode: http.StatusOK},
+	}, nil).Times(1)
+
+	commitmentID := uuid.New()
+
+	mockClient.EXPECT().CommitmentsAPIGetCommitmentsWithResponse(
+		gomock.Any(), &sdk.CommitmentsAPIGetCommitmentsParams{},
+	).Return(&sdk.CommitmentsAPIGetCommitmentsResponse{
+		JSON200: &sdk.CastaiInventoryV1beta1GetCommitmentsResponse{
+			Commitments: &[]sdk.CastaiInventoryV1beta1Commitment{
+				{
+					EndDate: lo.ToPtr(time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)),
+					Id:      lo.ToPtr(commitmentID.String()),
+					Name:    lo.ToPtr("test"),
+					GcpResourceCudContext: &sdk.CastaiInventoryV1beta1GCPResourceCUD{
+						Cpu:      lo.ToPtr("10"),
+						CudId:    lo.ToPtr("123456789"),
+						MemoryMb: lo.ToPtr("20480"),
+						Plan:     lo.ToPtr(sdk.TWELVEMONTH),
+						Status:   lo.ToPtr("Active"),
+						Type:     lo.ToPtr("COMPUTE_OPTIMIZED_C2D"),
+					},
+					Region:       lo.ToPtr("https://www.googleapis.com/compute/v1/projects/test-project/regions/us-central1"),
+					StartDate:    lo.ToPtr(time.Date(2023, 1, 1, 0, 0, 0, 0, time.UTC)),
+					Status:       lo.ToPtr(sdk.Active),
+					AllowedUsage: lo.ToPtr[float32](1),
+				},
+			},
+		},
+		HTTPResponse: &http.Response{StatusCode: http.StatusOK},
+	}, nil).Times(2)
+
+	mockClient.EXPECT().CommitmentsAPIUpdateCommitmentWithResponse(
+		gomock.Any(),
+		commitmentID.String(),
+		sdk.CommitmentsAPIUpdateCommitmentJSONRequestBody{
+			AllowedUsage:    lo.ToPtr[float32](0.6),
+			Prioritization:  lo.ToPtr(true),
+			ScalingStrategy: lo.ToPtr(sdk.CPUBased),
+			Status:          lo.ToPtr(sdk.Active),
+		},
+	).Return(&sdk.CommitmentsAPIUpdateCommitmentResponse{
+		HTTPResponse: &http.Response{StatusCode: http.StatusOK},
+		JSON200:      &sdk.CastaiInventoryV1beta1UpdateCommitmentResponse{},
+	}, nil).Times(1)
+
+	mockClient.EXPECT().CommitmentsAPIReplaceCommitmentAssignmentsWithResponse(
+		gomock.Any(),
+		commitmentID.String(),
+		sdk.CommitmentsAPIReplaceCommitmentAssignmentsJSONRequestBody{clusterID.String()},
+	).Return()
+
+	mockClient.EXPECT().CommitmentsAPIGetCommitmentsAssignmentsWithResponse(gomock.Any()).
+		Return(&sdk.CommitmentsAPIGetCommitmentsAssignmentsResponse{
+			JSON200: &sdk.CastaiInventoryV1beta1GetCommitmentsAssignmentsResponse{
+				CommitmentsAssignments: &[]sdk.CastaiInventoryV1beta1CommitmentAssignment{},
+			},
+			HTTPResponse: &http.Response{StatusCode: http.StatusOK},
+		}, nil).Times(1)
+
+	diag := resource.CreateContext(ctx, data, provider)
+	noErrInDiagnostics(r, diag)
+}
+
+func noErrInDiagnostics(r *require.Assertions, diags diag.Diagnostics) {
+	for _, d := range diags {
+		if d.Severity == diag.Error {
+			r.Failf("unexpected error: %s", d.Summary)
+		}
+	}
 }
