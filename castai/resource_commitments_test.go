@@ -607,55 +607,67 @@ resource "castai_commitments" "test_gcp" {
 }
 `)
 }
-func TestResourceCreate(t *testing.T) {
-	ctx := context.Background()
-	resource := resourceCommitments()
-	r := require.New(t)
 
-	ctrl := gomock.NewController(t)
-	mockClient := mock_sdk.NewMockClientWithResponsesInterface(ctrl)
-	provider := &ProviderConfig{api: mockClient}
+// Both create and update use the same "upsert" handler under the hood so we test them together
+func TestResourceCreateAndUpdate(t *testing.T) {
+	ctx := context.Background()
+	r := require.New(t)
 
 	orgID, clusterID, commitmentID := uuid.New(), uuid.New(), uuid.New()
 
 	type test struct {
-		resource               map[string]any
-		commitmentImport       any // CastaiInventoryV1beta1GCPCommitmentImport | CastaiInventoryV1beta1AzureReservationImport
-		expectCommitmentUpdate sdk.CommitmentsAPIUpdateCommitmentJSONRequestBody
-		mockImportedCommitment sdk.CastaiInventoryV1beta1Commitment
+		resource                   map[string]any
+		commitmentImport           any // CastaiInventoryV1beta1GCPCommitmentImport | CastaiInventoryV1beta1AzureReservationImport
+		expectCommitmentUpdate     sdk.CommitmentsAPIUpdateCommitmentJSONRequestBody
+		mockImportedCommitment     sdk.CastaiInventoryV1beta1Commitment
+		expectUpdateAndAssignments bool
+	}
+
+	gcpImport := sdk.CastaiInventoryV1beta1GCPCommitmentImport{
+		AutoRenew:         lo.ToPtr(true),
+		Category:          lo.ToPtr("MACHINE"),
+		CreationTimestamp: lo.ToPtr("2023-01-01T00:00:00Z"),
+		Description:       lo.ToPtr("some description"),
+		EndTimestamp:      lo.ToPtr("2024-01-01T00:00:00Z"),
+		Id:                lo.ToPtr("123456789"),
+		Kind:              lo.ToPtr("compute#commitment"),
+		Name:              lo.ToPtr("test"),
+		Plan:              lo.ToPtr("TWELVE_MONTH"),
+		Region:            lo.ToPtr("https://www.googleapis.com/compute/v1/projects/test-project/regions/us-central1"),
+		Resources: &[]sdk.CastaiInventoryV1beta1GCPResource{
+			{Amount: lo.ToPtr("10"), Type: lo.ToPtr("VCPU")},
+			{Amount: lo.ToPtr("20480"), Type: lo.ToPtr("MEMORY")},
+		},
+		SelfLink:       lo.ToPtr("https://www.googleapis.com/compute/v1/projects/test-project/regions/us-central1/commitments/test"),
+		StartTimestamp: lo.ToPtr("2023-01-01T00:00:00Z"),
+		Status:         lo.ToPtr("ACTIVE"),
+		StatusMessage:  lo.ToPtr("The commitment is active, and so will apply to current resource usage."),
+		Type:           lo.ToPtr("COMPUTE_OPTIMIZED_C2D"),
+	}
+
+	mockImportedGCPCommitment := sdk.CastaiInventoryV1beta1Commitment{
+		EndDate: lo.ToPtr(time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)),
+		Id:      lo.ToPtr(commitmentID.String()),
+		Name:    lo.ToPtr("test"),
+		GcpResourceCudContext: &sdk.CastaiInventoryV1beta1GCPResourceCUD{
+			Cpu:      lo.ToPtr("10"),
+			CudId:    lo.ToPtr("123456789"),
+			MemoryMb: lo.ToPtr("20480"),
+			Plan:     lo.ToPtr(sdk.TWELVEMONTH),
+			Status:   lo.ToPtr("Active"),
+			Type:     lo.ToPtr("COMPUTE_OPTIMIZED_C2D"),
+		},
+		Region:       lo.ToPtr("https://www.googleapis.com/compute/v1/projects/test-project/regions/us-central1"),
+		StartDate:    lo.ToPtr(time.Date(2023, 1, 1, 0, 0, 0, 0, time.UTC)),
+		Status:       lo.ToPtr(sdk.Active),
+		AllowedUsage: lo.ToPtr[float32](1),
 	}
 
 	tests := map[string]test{
 		"should create a gcp commitment": func() test {
-			commitmentImport := sdk.CastaiInventoryV1beta1GCPCommitmentImport{
-				AutoRenew:         lo.ToPtr(true),
-				Category:          lo.ToPtr("MACHINE"),
-				CreationTimestamp: lo.ToPtr("2023-01-01T00:00:00Z"),
-				Description:       lo.ToPtr("some description"),
-				EndTimestamp:      lo.ToPtr("2024-01-01T00:00:00Z"),
-				Id:                lo.ToPtr("123456789"),
-				Kind:              lo.ToPtr("compute#commitment"),
-				Name:              lo.ToPtr("test"),
-				Plan:              lo.ToPtr("TWELVE_MONTH"),
-				Region:            lo.ToPtr("https://www.googleapis.com/compute/v1/projects/test-project/regions/us-central1"),
-				Resources: &[]sdk.CastaiInventoryV1beta1GCPResource{
-					{Amount: lo.ToPtr("10"), Type: lo.ToPtr("VCPU")},
-					{Amount: lo.ToPtr("20480"), Type: lo.ToPtr("MEMORY")},
-				},
-				SelfLink:       lo.ToPtr("https://www.googleapis.com/compute/v1/projects/test-project/regions/us-central1/commitments/test"),
-				StartTimestamp: lo.ToPtr("2023-01-01T00:00:00Z"),
-				Status:         lo.ToPtr("ACTIVE"),
-				StatusMessage:  lo.ToPtr("The commitment is active, and so will apply to current resource usage."),
-				Type:           lo.ToPtr("COMPUTE_OPTIMIZED_C2D"),
-			}
-
 			return test{
 				resource: map[string]any{
-					fieldCommitmentsGCPCUDsJSON: func() string {
-						raw, err := json.Marshal([]sdk.CastaiInventoryV1beta1GCPCommitmentImport{commitmentImport})
-						r.NoError(err)
-						return string(raw)
-					}(),
+					fieldCommitmentsGCPCUDsJSON: toJSONString(r, []sdk.CastaiInventoryV1beta1GCPCommitmentImport{gcpImport}),
 					fieldCommitmentsConfigs: []any{
 						map[string]any{
 							"matcher": []any{
@@ -678,7 +690,7 @@ func TestResourceCreate(t *testing.T) {
 						},
 					},
 				},
-				commitmentImport: commitmentImport,
+				commitmentImport: gcpImport,
 				expectCommitmentUpdate: sdk.CommitmentsAPIUpdateCommitmentJSONRequestBody{
 					AllowedUsage:    lo.ToPtr[float32](0.6),
 					Prioritization:  lo.ToPtr(true),
@@ -702,6 +714,18 @@ func TestResourceCreate(t *testing.T) {
 					Status:       lo.ToPtr(sdk.Active),
 					AllowedUsage: lo.ToPtr[float32](1),
 				},
+				expectUpdateAndAssignments: true,
+			}
+		}(),
+		"should not update commitment or create assignments when no config is provided": func() test {
+			return test{
+				resource: map[string]any{
+					fieldCommitmentsGCPCUDsJSON: toJSONString(r, []sdk.CastaiInventoryV1beta1GCPCommitmentImport{gcpImport}),
+					fieldCommitmentsConfigs:     []any{},
+				},
+				commitmentImport:           gcpImport,
+				mockImportedCommitment:     mockImportedGCPCommitment,
+				expectUpdateAndAssignments: false,
 			}
 		}(),
 		"should create an azure commitment": func() test {
@@ -772,90 +796,120 @@ test,3b3de39c-bc44-4d69-be2d-69527dfe9958,630226bb-5170-4b95-90b0-f222757130c1,S
 						Status:                lo.ToPtr("Succeeded"),
 					},
 				},
+				expectUpdateAndAssignments: true,
 			}
 		}(),
 	}
-	for name, tt := range tests {
-		t.Run(name, func(t *testing.T) {
-			r := require.New(t)
 
-			// Fetches the default organization ID
-			mockClient.EXPECT().UsersAPIListOrganizationsWithResponse(gomock.Any()).Return(&sdk.UsersAPIListOrganizationsResponse{
-				JSON200: &sdk.CastaiUsersV1beta1ListOrganizationsResponse{
-					Organizations: []sdk.CastaiUsersV1beta1UserOrganization{
-						{Id: lo.ToPtr(orgID.String())}, // the first org is the default one so everything else should be ignored
-						{Id: lo.ToPtr(uuid.New().String())},
-					},
-				},
-				HTTPResponse: &http.Response{StatusCode: http.StatusOK},
-			}, nil).Times(1)
+	type testedFn string
+	const (
+		testedFnCreate testedFn = "create"
+		testedFnUpdate testedFn = "update"
+	)
+	for _, testedFn := range []testedFn{testedFnCreate, testedFnUpdate} {
+		t.Run(string(testedFn), func(t *testing.T) {
+			for name, tt := range tests {
+				t.Run(name, func(t *testing.T) {
+					r := require.New(t)
 
-			data := schema.TestResourceDataRaw(t, resource.Schema, tt.resource)
+					ctrl := gomock.NewController(t)
+					defer ctrl.Finish()
 
-			// Actual commitments import call
-			switch v := tt.commitmentImport.(type) {
-			case sdk.CastaiInventoryV1beta1GCPCommitmentImport:
-				mockClient.EXPECT().CommitmentsAPIImportGCPCommitmentsWithResponse(
-					gomock.Any(),
-					&sdk.CommitmentsAPIImportGCPCommitmentsParams{
-						Behaviour: lo.ToPtr[sdk.CommitmentsAPIImportGCPCommitmentsParamsBehaviour]("OVERWRITE"),
-					},
-					[]sdk.CastaiInventoryV1beta1GCPCommitmentImport{v},
-				).Return(&sdk.CommitmentsAPIImportGCPCommitmentsResponse{
-					HTTPResponse: &http.Response{StatusCode: http.StatusOK},
-				}, nil).Times(1)
-			case sdk.CastaiInventoryV1beta1AzureReservationImport:
-				mockClient.EXPECT().CommitmentsAPIImportAzureReservationsWithResponse(
-					gomock.Any(),
-					&sdk.CommitmentsAPIImportAzureReservationsParams{
-						Behaviour: lo.ToPtr[sdk.CommitmentsAPIImportAzureReservationsParamsBehaviour]("OVERWRITE"),
-					},
-					[]sdk.CastaiInventoryV1beta1AzureReservationImport{v},
-				).Return(&sdk.CommitmentsAPIImportAzureReservationsResponse{
-					HTTPResponse: &http.Response{StatusCode: http.StatusOK},
-				}, nil).Times(1)
+					resource := resourceCommitments()
+					mockClient := mock_sdk.NewMockClientWithResponsesInterface(ctrl)
+					provider := &ProviderConfig{api: mockClient}
+
+					// Fetches the default organization ID
+					mockClient.EXPECT().UsersAPIListOrganizationsWithResponse(gomock.Any()).Return(&sdk.UsersAPIListOrganizationsResponse{
+						JSON200: &sdk.CastaiUsersV1beta1ListOrganizationsResponse{
+							Organizations: []sdk.CastaiUsersV1beta1UserOrganization{
+								{Id: lo.ToPtr(orgID.String())}, // the first org is the default one so everything else should be ignored
+								{Id: lo.ToPtr(uuid.New().String())},
+							},
+						},
+						HTTPResponse: &http.Response{StatusCode: http.StatusOK},
+					}, nil).Times(1)
+
+					data := schema.TestResourceDataRaw(t, resource.Schema, tt.resource)
+
+					// Actual commitments import call
+					switch v := tt.commitmentImport.(type) {
+					case sdk.CastaiInventoryV1beta1GCPCommitmentImport:
+						mockClient.EXPECT().CommitmentsAPIImportGCPCommitmentsWithResponse(
+							gomock.Any(),
+							&sdk.CommitmentsAPIImportGCPCommitmentsParams{
+								Behaviour: lo.ToPtr[sdk.CommitmentsAPIImportGCPCommitmentsParamsBehaviour]("OVERWRITE"),
+							},
+							[]sdk.CastaiInventoryV1beta1GCPCommitmentImport{v},
+						).Return(&sdk.CommitmentsAPIImportGCPCommitmentsResponse{
+							HTTPResponse: &http.Response{StatusCode: http.StatusOK},
+						}, nil).Times(1)
+					case sdk.CastaiInventoryV1beta1AzureReservationImport:
+						mockClient.EXPECT().CommitmentsAPIImportAzureReservationsWithResponse(
+							gomock.Any(),
+							&sdk.CommitmentsAPIImportAzureReservationsParams{
+								Behaviour: lo.ToPtr[sdk.CommitmentsAPIImportAzureReservationsParamsBehaviour]("OVERWRITE"),
+							},
+							[]sdk.CastaiInventoryV1beta1AzureReservationImport{v},
+						).Return(&sdk.CommitmentsAPIImportAzureReservationsResponse{
+							HTTPResponse: &http.Response{StatusCode: http.StatusOK},
+						}, nil).Times(1)
+					}
+
+					// There are 2 get commitments calls: one during the creation and one by the state importer
+					mockClient.EXPECT().CommitmentsAPIGetCommitmentsWithResponse(
+						gomock.Any(), &sdk.CommitmentsAPIGetCommitmentsParams{},
+					).Return(&sdk.CommitmentsAPIGetCommitmentsResponse{
+						JSON200: &sdk.CastaiInventoryV1beta1GetCommitmentsResponse{
+							Commitments: &[]sdk.CastaiInventoryV1beta1Commitment{tt.mockImportedCommitment},
+						},
+						HTTPResponse: &http.Response{StatusCode: http.StatusOK},
+					}, nil).Times(2)
+
+					if tt.expectUpdateAndAssignments {
+						// Update is called after importing the commitments to set fields such as status,
+						// allowed usage, etc. specified in the config
+						mockClient.EXPECT().CommitmentsAPIUpdateCommitmentWithResponse(
+							gomock.Any(), commitmentID.String(), tt.expectCommitmentUpdate,
+						).Return(&sdk.CommitmentsAPIUpdateCommitmentResponse{
+							HTTPResponse: &http.Response{StatusCode: http.StatusOK},
+							JSON200:      &sdk.CastaiInventoryV1beta1UpdateCommitmentResponse{},
+						}, nil).Times(1)
+
+						// Assignments replace is called to assign the commitment to clusters specified in the config
+						mockClient.EXPECT().CommitmentsAPIReplaceCommitmentAssignmentsWithResponse(
+							gomock.Any(),
+							commitmentID.String(),
+							sdk.CommitmentsAPIReplaceCommitmentAssignmentsJSONRequestBody{clusterID.String()},
+						).Return(&sdk.CommitmentsAPIReplaceCommitmentAssignmentsResponse{
+							HTTPResponse: &http.Response{StatusCode: http.StatusOK},
+							JSON200:      &sdk.CastaiInventoryV1beta1ReplaceCommitmentAssignmentsResponse{},
+						}, nil).Times(1)
+					}
+
+					// Commitment assignments are fetched by the state importer
+					mockClient.EXPECT().CommitmentsAPIGetCommitmentsAssignmentsWithResponse(gomock.Any()).
+						Return(&sdk.CommitmentsAPIGetCommitmentsAssignmentsResponse{
+							JSON200: &sdk.CastaiInventoryV1beta1GetCommitmentsAssignmentsResponse{
+								CommitmentsAssignments: &[]sdk.CastaiInventoryV1beta1CommitmentAssignment{},
+							},
+							HTTPResponse: &http.Response{StatusCode: http.StatusOK},
+						}, nil).Times(1)
+
+					var fn func(context.Context, *schema.ResourceData, interface{}) diag.Diagnostics
+					switch testedFn {
+					case testedFnCreate:
+						fn = resource.CreateContext
+					case testedFnUpdate:
+						fn = resource.UpdateContext
+					default:
+						r.Failf("unexpected tested function: %s", string(testedFn))
+					}
+
+					diag := fn(ctx, data, provider)
+					noErrInDiagnostics(r, diag)
+				})
 			}
-
-			// There are 2 get commitments calls: one during the creation and one by the state importer
-			mockClient.EXPECT().CommitmentsAPIGetCommitmentsWithResponse(
-				gomock.Any(), &sdk.CommitmentsAPIGetCommitmentsParams{},
-			).Return(&sdk.CommitmentsAPIGetCommitmentsResponse{
-				JSON200: &sdk.CastaiInventoryV1beta1GetCommitmentsResponse{
-					Commitments: &[]sdk.CastaiInventoryV1beta1Commitment{tt.mockImportedCommitment},
-				},
-				HTTPResponse: &http.Response{StatusCode: http.StatusOK},
-			}, nil).Times(2)
-
-			// Update is called after importing the commitments to set fields such as status,
-			// allowed usage, etc. specified in the config
-			mockClient.EXPECT().CommitmentsAPIUpdateCommitmentWithResponse(
-				gomock.Any(), commitmentID.String(), tt.expectCommitmentUpdate,
-			).Return(&sdk.CommitmentsAPIUpdateCommitmentResponse{
-				HTTPResponse: &http.Response{StatusCode: http.StatusOK},
-				JSON200:      &sdk.CastaiInventoryV1beta1UpdateCommitmentResponse{},
-			}, nil).Times(1)
-
-			// Assignments replace is called to assign the commitment to clusters specified in the config
-			mockClient.EXPECT().CommitmentsAPIReplaceCommitmentAssignmentsWithResponse(
-				gomock.Any(),
-				commitmentID.String(),
-				sdk.CommitmentsAPIReplaceCommitmentAssignmentsJSONRequestBody{clusterID.String()},
-			).Return(&sdk.CommitmentsAPIReplaceCommitmentAssignmentsResponse{
-				HTTPResponse: &http.Response{StatusCode: http.StatusOK},
-				JSON200:      &sdk.CastaiInventoryV1beta1ReplaceCommitmentAssignmentsResponse{},
-			}, nil).Times(1)
-
-			// Commitment assignments are fetched by the state importer
-			mockClient.EXPECT().CommitmentsAPIGetCommitmentsAssignmentsWithResponse(gomock.Any()).
-				Return(&sdk.CommitmentsAPIGetCommitmentsAssignmentsResponse{
-					JSON200: &sdk.CastaiInventoryV1beta1GetCommitmentsAssignmentsResponse{
-						CommitmentsAssignments: &[]sdk.CastaiInventoryV1beta1CommitmentAssignment{},
-					},
-					HTTPResponse: &http.Response{StatusCode: http.StatusOK},
-				}, nil).Times(1)
-
-			diag := resource.CreateContext(ctx, data, provider)
-			noErrInDiagnostics(r, diag)
 		})
 	}
 }
@@ -866,4 +920,10 @@ func noErrInDiagnostics(r *require.Assertions, diags diag.Diagnostics) {
 			r.Failf("unexpected error: %s", d.Summary)
 		}
 	}
+}
+
+func toJSONString(r *require.Assertions, v any) string {
+	raw, err := json.Marshal(v)
+	r.NoError(err)
+	return string(raw)
 }

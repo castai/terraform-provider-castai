@@ -588,6 +588,11 @@ func resourceCastaiCommitmentsUpsert(ctx context.Context, data *schema.ResourceD
 
 	client := meta.(*ProviderConfig).api
 	for _, c := range cudsWithConfigs {
+		// Both additional settings and assignments are specified in the config, so if it's nil - there's nothing to do
+		if c.Config == nil {
+			continue
+		}
+
 		commitmentID := lo.FromPtr(c.Commitment.Id)
 		res, err := client.CommitmentsAPIUpdateCommitmentWithResponse(
 			ctx,
