@@ -272,7 +272,7 @@ func Test_validateResourcePolicy(t *testing.T) {
 					PercentageThreshold: &sdk.WorkloadoptimizationV1ApplyThresholdStrategyPercentageThreshold{},
 				},
 			},
-			errMsg: `field "cpu": field "apply_threshold_strategy": field "apply_threshold_strategy": field "percentage": value must be set for strategy type PERCENTAGE`,
+			errMsg: `field "cpu": field "apply_threshold_strategy": field "percentage": value must be set for strategy type PERCENTAGE`,
 		},
 		"should return error when no strategy is specified": {
 			args: sdk.WorkloadoptimizationV1ResourcePolicies{

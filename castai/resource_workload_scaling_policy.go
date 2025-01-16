@@ -31,6 +31,7 @@ const (
 	FieldLimitStrategyType       = "type"
 	FieldLimitStrategyMultiplier = "multiplier"
 
+	DeprecatedFieldApplyThreshold             = "apply_threshold"
 	FieldApplyThresholdStrategy               = "apply_threshold_strategy"
 	FieldApplyThresholdStrategyType           = "type"
 	FieldApplyThresholdStrategyPercentage     = "percentage"
@@ -195,7 +196,7 @@ func workloadScalingPolicyResourceSchema(resource, function string, overhead, mi
 				Default:          overhead,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.FloatBetween(0, 1)),
 			},
-			"apply_threshold": {
+			DeprecatedFieldApplyThreshold: {
 				Type:     schema.TypeFloat,
 				Optional: true,
 				Description: "The threshold of when to apply the recommendation. Recommendation will be applied when " +
@@ -204,12 +205,13 @@ func workloadScalingPolicyResourceSchema(resource, function string, overhead, mi
 				Deprecated:       "Use apply_threshold_strategy instead",
 			},
 			FieldApplyThresholdStrategy: {
-				Type:          schema.TypeList,
-				Optional:      true,
-				MaxItems:      1,
-				Description:   "Resource apply threshold strategy settings",
+				Type:     schema.TypeList,
+				Optional: true,
+				MaxItems: 1,
+				Description: "Resource apply threshold strategy settings. " +
+					"The default strategy is `PERCENTAGE` with percentage value set to 0.1.",
 				Elem:          workloadScalingPolicyResourceApplyThresholdStrategySchema(),
-				ConflictsWith: []string{fmt.Sprintf("%s.0.apply_threshold", resource)},
+				ConflictsWith: []string{fmt.Sprintf("%s.0.%s", resource, DeprecatedFieldApplyThreshold)},
 			},
 			"look_back_period_seconds": {
 				Type:             schema.TypeInt,
@@ -379,11 +381,11 @@ func resourceWorkloadScalingPolicyRead(ctx context.Context, d *schema.ResourceDa
 	return nil
 }
 
-func getResourceFrom(d *schema.ResourceData, resource string) map[string]interface{} {
+func getResourceFrom(d *schema.ResourceData, resource string) map[string]any {
 	if v, ok := d.GetOk(resource); ok {
-		return v.([]interface{})[0].(map[string]interface{})
+		return v.([]any)[0].(map[string]any)
 	}
-	return map[string]interface{}{}
+	return map[string]any{}
 }
 
 func resourceWorkloadScalingPolicyUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -508,8 +510,7 @@ func validateResourceApplyThresholdStrategy(r *sdk.WorkloadoptimizationV1ApplyTh
 func validatePercentageThresholdStrategy(r *sdk.WorkloadoptimizationV1ApplyThresholdStrategyPercentageThreshold) error {
 	if r.Percentage == 0 {
 		return fmt.Errorf(
-			`field %q: field %q: value must be set for strategy type %s`,
-			FieldApplyThresholdStrategy,
+			`field %q: value must be set for strategy type %s`,
 			FieldApplyThresholdStrategyPercentage,
 			FieldApplyThresholdStrategyPercentageType,
 		)
@@ -598,13 +599,13 @@ func toWorkloadScalingPolicies(obj map[string]interface{}) sdk.Workloadoptimizat
 	if v, ok := obj["management_option"].(string); ok && v != "" {
 		out.ManagementOption = lo.ToPtr(sdk.WorkloadoptimizationV1ManagementOption(v))
 	}
-	out.ApplyThresholdStrategy = resolveApplyThresholdStrategy(obj)
+	out.ApplyThresholdStrategy = toApplyThresholdStrategy(obj)
 
 	return out
 }
 
-func resolveApplyThresholdStrategy(obj map[string]interface{}) *sdk.WorkloadoptimizationV1ApplyThresholdStrategy {
-	if v, ok := obj["apply_threshold"].(float64); ok && v > 0 {
+func toApplyThresholdStrategy(obj map[string]interface{}) *sdk.WorkloadoptimizationV1ApplyThresholdStrategy {
+	if v, ok := obj[DeprecatedFieldApplyThreshold].(float64); ok && v > 0 {
 		return &sdk.WorkloadoptimizationV1ApplyThresholdStrategy{
 			PercentageThreshold: &sdk.WorkloadoptimizationV1ApplyThresholdStrategyPercentageThreshold{
 				Percentage: v,
@@ -680,10 +681,10 @@ func toWorkloadScalingPoliciesMap(previousCfg map[string]interface{}, p sdk.Work
 		m[FieldLimitStrategy] = []map[string]any{limit}
 	}
 
-	if v, ok := previousCfg["apply_threshold"].(float64); ok && v > 0 {
-		m["apply_threshold"] = p.ApplyThreshold
-	} else {
-		strategy := applyThresholdStrategyToMap(*p.ApplyThresholdStrategy)
+	if v, ok := previousCfg[DeprecatedFieldApplyThreshold].(float64); ok && v > 0 {
+		m[DeprecatedFieldApplyThreshold] = p.ApplyThreshold
+	} else if v, ok := previousCfg[FieldApplyThresholdStrategy].([]interface{}); ok && len(v) > 0 {
+		strategy := applyThresholdStrategyToMap(p.ApplyThresholdStrategy)
 		if strategy != nil {
 			m[FieldApplyThresholdStrategy] = strategy
 		}
@@ -696,7 +697,10 @@ func toWorkloadScalingPoliciesMap(previousCfg map[string]interface{}, p sdk.Work
 	return []map[string]interface{}{m}
 }
 
-func applyThresholdStrategyToMap(s sdk.WorkloadoptimizationV1ApplyThresholdStrategy) []map[string]any {
+func applyThresholdStrategyToMap(s *sdk.WorkloadoptimizationV1ApplyThresholdStrategy) []map[string]any {
+	if s == nil {
+		return nil
+	}
 	m := map[string]any{}
 
 	if s.PercentageThreshold != nil {

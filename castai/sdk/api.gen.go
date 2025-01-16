@@ -462,7 +462,7 @@ type CastaiAuthtokenV1beta1AuthToken struct {
 	// created_by is used to link this token to a user who created it.
 	CreatedBy *string `json:"createdBy"`
 
-	// (read only) Time when the token will expire (unix timestamp in nanoseconds).
+	// Time when the token will expire (unix timestamp in nanoseconds).
 	// A null value means that the key will never expire.
 	ExpiresAt *time.Time `json:"expiresAt,omitempty"`
 
@@ -475,11 +475,9 @@ type CastaiAuthtokenV1beta1AuthToken struct {
 	// (required) User provided name of the token.
 	Name string `json:"name"`
 
+	// TODO: we need to think how to migrate away from this flag.
 	// whether token has readonly permissions.
 	Readonly bool `json:"readonly"`
-
-	// service_account_id is used to link this token to a service account.
-	ServiceAccountId *string `json:"serviceAccountId"`
 
 	// (read only, visible once on creation) actual token used to authenticate via api.
 	Token *string `json:"token"`
