@@ -779,6 +779,7 @@ test,3b3de39c-bc44-4d69-be2d-69527dfe9958,630226bb-5170-4b95-90b0-f222757130c1,S
 		t.Run(name, func(t *testing.T) {
 			r := require.New(t)
 
+			// Fetches the default organization ID
 			mockClient.EXPECT().UsersAPIListOrganizationsWithResponse(gomock.Any()).Return(&sdk.UsersAPIListOrganizationsResponse{
 				JSON200: &sdk.CastaiUsersV1beta1ListOrganizationsResponse{
 					Organizations: []sdk.CastaiUsersV1beta1UserOrganization{
@@ -791,6 +792,7 @@ test,3b3de39c-bc44-4d69-be2d-69527dfe9958,630226bb-5170-4b95-90b0-f222757130c1,S
 
 			data := schema.TestResourceDataRaw(t, resource.Schema, tt.resource)
 
+			// Actual commitments import call
 			switch v := tt.commitmentImport.(type) {
 			case sdk.CastaiInventoryV1beta1GCPCommitmentImport:
 				mockClient.EXPECT().CommitmentsAPIImportGCPCommitmentsWithResponse(
@@ -814,6 +816,7 @@ test,3b3de39c-bc44-4d69-be2d-69527dfe9958,630226bb-5170-4b95-90b0-f222757130c1,S
 				}, nil).Times(1)
 			}
 
+			// There are 2 get commitments calls: one during the creation and one by the state importer
 			mockClient.EXPECT().CommitmentsAPIGetCommitmentsWithResponse(
 				gomock.Any(), &sdk.CommitmentsAPIGetCommitmentsParams{},
 			).Return(&sdk.CommitmentsAPIGetCommitmentsResponse{
@@ -823,6 +826,8 @@ test,3b3de39c-bc44-4d69-be2d-69527dfe9958,630226bb-5170-4b95-90b0-f222757130c1,S
 				HTTPResponse: &http.Response{StatusCode: http.StatusOK},
 			}, nil).Times(2)
 
+			// Update is called after importing the commitments to set fields such as status,
+			// allowed usage, etc. specified in the config
 			mockClient.EXPECT().CommitmentsAPIUpdateCommitmentWithResponse(
 				gomock.Any(), commitmentID.String(), tt.expectCommitmentUpdate,
 			).Return(&sdk.CommitmentsAPIUpdateCommitmentResponse{
@@ -830,6 +835,7 @@ test,3b3de39c-bc44-4d69-be2d-69527dfe9958,630226bb-5170-4b95-90b0-f222757130c1,S
 				JSON200:      &sdk.CastaiInventoryV1beta1UpdateCommitmentResponse{},
 			}, nil).Times(1)
 
+			// Assignments replace is called to assign the commitment to clusters specified in the config
 			mockClient.EXPECT().CommitmentsAPIReplaceCommitmentAssignmentsWithResponse(
 				gomock.Any(),
 				commitmentID.String(),
@@ -839,6 +845,7 @@ test,3b3de39c-bc44-4d69-be2d-69527dfe9958,630226bb-5170-4b95-90b0-f222757130c1,S
 				JSON200:      &sdk.CastaiInventoryV1beta1ReplaceCommitmentAssignmentsResponse{},
 			}, nil).Times(1)
 
+			// Commitment assignments are fetched by the state importer
 			mockClient.EXPECT().CommitmentsAPIGetCommitmentsAssignmentsWithResponse(gomock.Any()).
 				Return(&sdk.CommitmentsAPIGetCommitmentsAssignmentsResponse{
 					JSON200: &sdk.CastaiInventoryV1beta1GetCommitmentsAssignmentsResponse{
@@ -849,7 +856,6 @@ test,3b3de39c-bc44-4d69-be2d-69527dfe9958,630226bb-5170-4b95-90b0-f222757130c1,S
 
 			diag := resource.CreateContext(ctx, data, provider)
 			noErrInDiagnostics(r, diag)
-
 		})
 	}
 }
