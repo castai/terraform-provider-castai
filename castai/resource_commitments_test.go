@@ -620,7 +620,7 @@ func TestResourceCreate(t *testing.T) {
 
 	type test struct {
 		resource               map[string]any
-		commitmentImport       sdk.CastaiInventoryV1beta1GCPCommitmentImport
+		commitmentImport       any // CastaiInventoryV1beta1GCPCommitmentImport | CastaiInventoryV1beta1AzureReservationImport
 		expectCommitmentUpdate sdk.CommitmentsAPIUpdateCommitmentJSONRequestBody
 		mockImportedCommitment sdk.CastaiInventoryV1beta1Commitment
 	}
@@ -704,6 +704,76 @@ func TestResourceCreate(t *testing.T) {
 				},
 			}
 		}(),
+		"should create an azure commitment": func() test {
+			commitmentImport := sdk.CastaiInventoryV1beta1AzureReservationImport{
+				ExpirationDate:     lo.ToPtr("2050-01-01T00:00:00Z"),
+				Name:               lo.ToPtr("test"),
+				ProductName:        lo.ToPtr("Standard_D32as_v4"),
+				PurchaseDate:       lo.ToPtr("2023-01-11T00:00:00Z"),
+				Quantity:           lo.ToPtr[int32](3),
+				Region:             lo.ToPtr("eastus"),
+				ReservationId:      lo.ToPtr("3b3de39c-bc44-4d69-be2d-69527dfe9958"),
+				Scope:              lo.ToPtr("Single subscription"),
+				ScopeResourceGroup: lo.ToPtr("All resource groups"),
+				ScopeSubscription:  lo.ToPtr("8faa0959-093b-4612-8686-a996ac19db00"),
+				Status:             lo.ToPtr("Succeeded"),
+				Term:               lo.ToPtr("P3Y"),
+				Type:               lo.ToPtr("VirtualMachines"),
+			}
+
+			return test{
+				resource: map[string]any{
+					fieldCommitmentsAzureReservationsCSV: `Name,Reservation Id,Reservation order Id,Status,Expiration date,Purchase date,Term,Scope,Scope subscription,Scope resource group,Type,Product name,Region,Quantity,Utilization % 1 Day,Utilization % 7 Day,Utilization % 30 Day,Deep link to reservation
+test,3b3de39c-bc44-4d69-be2d-69527dfe9958,630226bb-5170-4b95-90b0-f222757130c1,Succeeded,2050-01-01T00:00:00Z,2023-01-11T00:00:00Z,P3Y,Single subscription,8faa0959-093b-4612-8686-a996ac19db00,All resource groups,VirtualMachines,Standard_D32as_v4,eastus,3,100,100,100,https://portal.azure.com#resource/providers/microsoft.capacity/reservationOrders/59791a62-264b-4b9f-aa3a-5eeb761e4583/reservations/883afd52-54c8-4bc6-a0f2-ccbaf7b84bda/overview`,
+					fieldCommitmentsConfigs: []any{
+						map[string]any{
+							"matcher": []any{
+								map[string]any{
+									"name":   "test",
+									"type":   "Standard_D32as_v4",
+									"region": "eastus",
+								},
+							},
+							"assignments": []any{
+								map[string]any{
+									"cluster_id": clusterID.String(),
+									"priority":   1,
+								},
+							},
+							"prioritization":   true,
+							"status":           "Active",
+							"allowed_usage":    0.7,
+							"scaling_strategy": "Default",
+						},
+					},
+				},
+				commitmentImport: commitmentImport,
+				expectCommitmentUpdate: sdk.CommitmentsAPIUpdateCommitmentJSONRequestBody{
+					AllowedUsage:    lo.ToPtr[float32](0.7),
+					Prioritization:  lo.ToPtr(true),
+					ScalingStrategy: lo.ToPtr(sdk.Default),
+					Status:          lo.ToPtr(sdk.Active),
+				},
+				mockImportedCommitment: sdk.CastaiInventoryV1beta1Commitment{
+					EndDate: lo.ToPtr(time.Date(2050, 1, 1, 0, 0, 0, 0, time.UTC)),
+					Id:      lo.ToPtr(commitmentID.String()),
+					Name:    lo.ToPtr("test"),
+					Region:  lo.ToPtr("eastus"),
+					AzureReservationContext: &sdk.CastaiInventoryV1beta1AzureReservation{
+						Count:                 lo.ToPtr[int32](3),
+						Id:                    lo.ToPtr("3b3de39c-bc44-4d69-be2d-69527dfe9958"),
+						InstanceType:          lo.ToPtr("Standard_D32as_v4"),
+						InstanceTypeCpu:       lo.ToPtr("32"),
+						InstanceTypeMemoryMib: lo.ToPtr("131072"),
+						Plan:                  lo.ToPtr(sdk.THREEYEAR),
+						Scope:                 lo.ToPtr("Single subscription"),
+						ScopeResourceGroup:    lo.ToPtr("All resource groups"),
+						ScopeSubscription:     lo.ToPtr("8faa0959-093b-4612-8686-a996ac19db00"),
+						Status:                lo.ToPtr("Succeeded"),
+					},
+				},
+			}
+		}(),
 	}
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
@@ -721,15 +791,28 @@ func TestResourceCreate(t *testing.T) {
 
 			data := schema.TestResourceDataRaw(t, resource.Schema, tt.resource)
 
-			mockClient.EXPECT().CommitmentsAPIImportGCPCommitmentsWithResponse(
-				gomock.Any(),
-				&sdk.CommitmentsAPIImportGCPCommitmentsParams{
-					Behaviour: lo.ToPtr[sdk.CommitmentsAPIImportGCPCommitmentsParamsBehaviour]("OVERWRITE"),
-				},
-				[]sdk.CastaiInventoryV1beta1GCPCommitmentImport{tt.commitmentImport},
-			).Return(&sdk.CommitmentsAPIImportGCPCommitmentsResponse{
-				HTTPResponse: &http.Response{StatusCode: http.StatusOK},
-			}, nil).Times(1)
+			switch v := tt.commitmentImport.(type) {
+			case sdk.CastaiInventoryV1beta1GCPCommitmentImport:
+				mockClient.EXPECT().CommitmentsAPIImportGCPCommitmentsWithResponse(
+					gomock.Any(),
+					&sdk.CommitmentsAPIImportGCPCommitmentsParams{
+						Behaviour: lo.ToPtr[sdk.CommitmentsAPIImportGCPCommitmentsParamsBehaviour]("OVERWRITE"),
+					},
+					[]sdk.CastaiInventoryV1beta1GCPCommitmentImport{v},
+				).Return(&sdk.CommitmentsAPIImportGCPCommitmentsResponse{
+					HTTPResponse: &http.Response{StatusCode: http.StatusOK},
+				}, nil).Times(1)
+			case sdk.CastaiInventoryV1beta1AzureReservationImport:
+				mockClient.EXPECT().CommitmentsAPIImportAzureReservationsWithResponse(
+					gomock.Any(),
+					&sdk.CommitmentsAPIImportAzureReservationsParams{
+						Behaviour: lo.ToPtr[sdk.CommitmentsAPIImportAzureReservationsParamsBehaviour]("OVERWRITE"),
+					},
+					[]sdk.CastaiInventoryV1beta1AzureReservationImport{v},
+				).Return(&sdk.CommitmentsAPIImportAzureReservationsResponse{
+					HTTPResponse: &http.Response{StatusCode: http.StatusOK},
+				}, nil).Times(1)
+			}
 
 			mockClient.EXPECT().CommitmentsAPIGetCommitmentsWithResponse(
 				gomock.Any(), &sdk.CommitmentsAPIGetCommitmentsParams{},
