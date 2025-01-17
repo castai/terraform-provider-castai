@@ -123,10 +123,10 @@ const (
 	Ssd     CastaiInventoryV1beta1StorageInfoDeviceType = "ssd"
 )
 
-// Defines values for CastaiRbacV1beta1MemberKind.
+// Defines values for CastaiRbacV1beta1Kind.
 const (
-	SERVICEACCOUNT CastaiRbacV1beta1MemberKind = "SERVICE_ACCOUNT"
-	USER           CastaiRbacV1beta1MemberKind = "USER"
+	SERVICEACCOUNT CastaiRbacV1beta1Kind = "SERVICE_ACCOUNT"
+	USER           CastaiRbacV1beta1Kind = "USER"
 )
 
 // Defines values for CastaiRbacV1beta1PoliciesState.
@@ -462,7 +462,7 @@ type CastaiAuthtokenV1beta1AuthToken struct {
 	// created_by is used to link this token to a user who created it.
 	CreatedBy *string `json:"createdBy"`
 
-	// (read only) Time when the token will expire (unix timestamp in nanoseconds).
+	// Time when the token will expire (unix timestamp in nanoseconds).
 	// A null value means that the key will never expire.
 	ExpiresAt *time.Time `json:"expiresAt,omitempty"`
 
@@ -475,11 +475,9 @@ type CastaiAuthtokenV1beta1AuthToken struct {
 	// (required) User provided name of the token.
 	Name string `json:"name"`
 
+	// TODO: we need to think how to migrate away from this flag.
 	// whether token has readonly permissions.
 	Readonly bool `json:"readonly"`
-
-	// service_account_id is used to link this token to a service account.
-	ServiceAccountId *string `json:"serviceAccountId"`
 
 	// (read only, visible once on creation) actual token used to authenticate via api.
 	Token *string `json:"token"`
@@ -1538,6 +1536,9 @@ type CastaiRbacV1beta1GroupSubject struct {
 	Name *string `json:"name,omitempty"`
 }
 
+// Kind represents the type of the member.
+type CastaiRbacV1beta1Kind string
+
 // CastaiRbacV1beta1Member defines model for castai.rbac.v1beta1.Member.
 type CastaiRbacV1beta1Member struct {
 	// AddedAt is the timestamp when the user has been added to the group.
@@ -1550,14 +1551,11 @@ type CastaiRbacV1beta1Member struct {
 	Id string `json:"id"`
 
 	// Kind represents the type of the member.
-	Kind CastaiRbacV1beta1MemberKind `json:"kind"`
+	Kind CastaiRbacV1beta1Kind `json:"kind"`
 
 	// LastLoginAt is the timestamp of the time when the user last time logged in.
 	LastLoginAt *time.Time `json:"lastLoginAt,omitempty"`
 }
-
-// Kind represents the type of the member.
-type CastaiRbacV1beta1MemberKind string
 
 // OrganizationScope represents the organization scope.
 type CastaiRbacV1beta1OrganizationScope struct {
@@ -4450,7 +4448,8 @@ type WorkloadoptimizationV1RecommendedRequestsChangedEventChange struct {
 // WorkloadoptimizationV1ResourceConfig defines model for workloadoptimization.v1.ResourceConfig.
 type WorkloadoptimizationV1ResourceConfig struct {
 	// The threshold of when to apply the recommendation - when diff of current requests and recommendation is greater than this, apply the recommendation.
-	ApplyThreshold *float64 `json:"applyThreshold"`
+	ApplyThreshold         *float64                                      `json:"applyThreshold"`
+	ApplyThresholdStrategy *WorkloadoptimizationV1ApplyThresholdStrategy `json:"applyThresholdStrategy,omitempty"`
 
 	// The arguments for the function - i.e. for a quantile, this should be a [0, 1] float.
 	Args []string `json:"args"`
@@ -4489,7 +4488,8 @@ type WorkloadoptimizationV1ResourceConfigFunction string
 // WorkloadoptimizationV1ResourceConfigOverrides defines model for workloadoptimization.v1.ResourceConfigOverrides.
 type WorkloadoptimizationV1ResourceConfigOverrides struct {
 	// The threshold of when to apply the recommendation - when diff of current requests and recommendation is greater than this, apply the recommendation.
-	ApplyThreshold *float64 `json:"applyThreshold"`
+	ApplyThreshold         *float64                                      `json:"applyThreshold"`
+	ApplyThresholdStrategy *WorkloadoptimizationV1ApplyThresholdStrategy `json:"applyThresholdStrategy,omitempty"`
 
 	// The arguments for the function - i.e. for a quantile, this should be a [0, 1] float.
 	Args *[]string `json:"args,omitempty"`
