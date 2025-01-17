@@ -3,6 +3,7 @@ package castai
 import (
 	"context"
 	"fmt"
+	"maps"
 	"net/http"
 	"regexp"
 	"strings"
@@ -210,7 +211,10 @@ func workloadScalingPolicyResourceSchema(resource, function string, overhead, mi
 				MaxItems: 1,
 				Description: "Resource apply threshold strategy settings. " +
 					"The default strategy is `PERCENTAGE` with percentage value set to 0.1.",
-				Elem:          workloadScalingPolicyResourceApplyThresholdStrategySchema(),
+				Elem: workloadScalingPolicyResourceApplyThresholdStrategySchema(),
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					return supressDefaultValueDiff(resource, old, new, d)
+				},
 				ConflictsWith: []string{fmt.Sprintf("%s.0.%s", resource, DeprecatedFieldApplyThreshold)},
 			},
 			"look_back_period_seconds": {
@@ -599,12 +603,12 @@ func toWorkloadScalingPolicies(obj map[string]interface{}) sdk.Workloadoptimizat
 	if v, ok := obj["management_option"].(string); ok && v != "" {
 		out.ManagementOption = lo.ToPtr(sdk.WorkloadoptimizationV1ManagementOption(v))
 	}
-	out.ApplyThresholdStrategy = toApplyThresholdStrategy(obj)
+	out.ApplyThresholdStrategy = resolveApplyThresholdStrategy(obj)
 
 	return out
 }
 
-func toApplyThresholdStrategy(obj map[string]interface{}) *sdk.WorkloadoptimizationV1ApplyThresholdStrategy {
+func resolveApplyThresholdStrategy(obj map[string]interface{}) *sdk.WorkloadoptimizationV1ApplyThresholdStrategy {
 	if v, ok := obj[DeprecatedFieldApplyThreshold].(float64); ok && v > 0 {
 		return &sdk.WorkloadoptimizationV1ApplyThresholdStrategy{
 			PercentageThreshold: &sdk.WorkloadoptimizationV1ApplyThresholdStrategyPercentageThreshold{
@@ -619,21 +623,6 @@ func toApplyThresholdStrategy(obj map[string]interface{}) *sdk.Workloadoptimizat
 	return toWorkloadResourcePercentageThresholdStrategy(defaultApplyThresholdPercentage)
 }
 
-func toWorkloadResourceLimit(obj map[string]any) *sdk.WorkloadoptimizationV1ResourceLimitStrategy {
-	if len(obj) == 0 {
-		return nil
-	}
-
-	out := &sdk.WorkloadoptimizationV1ResourceLimitStrategy{}
-	if v, ok := obj[FieldLimitStrategyType].(string); ok {
-		out.Type = sdk.WorkloadoptimizationV1ResourceLimitStrategyType(v)
-	}
-	if v, ok := obj[FieldLimitStrategyMultiplier].(float64); ok && v > 0 {
-		out.Multiplier = lo.ToPtr(v)
-	}
-	return out
-}
-
 func toWorkloadResourceApplyThresholdStrategy(obj map[string]any) *sdk.WorkloadoptimizationV1ApplyThresholdStrategy {
 	if len(obj) == 0 {
 		return nil
@@ -646,6 +635,55 @@ func toWorkloadResourceApplyThresholdStrategy(obj map[string]any) *sdk.Workloado
 		if percentage, ok := obj[FieldApplyThresholdStrategyPercentage].(float64); ok {
 			out = toWorkloadResourcePercentageThresholdStrategy(percentage)
 		}
+	}
+	return out
+}
+
+// To prevent terraform detecting changes, when there none, we want to set only the field that was set in previous
+// configuration. If previous configuration is empty(during import), we use FieldApplyThresholdStrategy.
+func mapApplyStrategyBasedOnPreviousConfig(
+	p sdk.WorkloadoptimizationV1ResourcePolicies, previousCfg map[string]any) map[string]any {
+	m := map[string]any{}
+	if v, ok := previousCfg[DeprecatedFieldApplyThreshold].(float64); ok && v > 0 {
+		m[DeprecatedFieldApplyThreshold] = p.ApplyThreshold
+		return m
+	}
+
+	strategy := applyThresholdStrategyToMap(p.ApplyThresholdStrategy)
+	if strategy != nil {
+		m[FieldApplyThresholdStrategy] = strategy
+	}
+	return m
+}
+
+// When both DeprecatedFieldApplyThreshold and FieldApplyThresholdStrategy are unset in client configuration
+// FieldApplyThresholdStrategy will be used with default value. It is not possible to set default in Schema, only when
+// DeprecatedFieldApplyThreshold is missing. If configuration saved from API correspond with default value,
+// we will supress diff.
+func supressDefaultValueDiff(resource, oldValue, newValue string, d *schema.ResourceData) bool {
+	resourcePath := fmt.Sprintf("%s.0", resource)
+	isApplyThresholdStrategyUnset := newValue == "0" || newValue == ""
+	isApplyThresholdUnset := d.Get(fmt.Sprintf("%s.%s", resourcePath, DeprecatedFieldApplyThreshold)) == 0.
+	if isApplyThresholdStrategyUnset && isApplyThresholdUnset {
+		applyThresholdFromStrategy := d.Get(fmt.Sprintf("%s.%s.0.%s", resourcePath, FieldApplyThresholdStrategy, FieldApplyThresholdStrategyPercentage))
+		// Suppress diff if configuration saved from API equals to default
+		return applyThresholdFromStrategy == defaultApplyThresholdPercentage
+	}
+
+	return oldValue == newValue
+}
+
+func toWorkloadResourceLimit(obj map[string]any) *sdk.WorkloadoptimizationV1ResourceLimitStrategy {
+	if len(obj) == 0 {
+		return nil
+	}
+
+	out := &sdk.WorkloadoptimizationV1ResourceLimitStrategy{}
+	if v, ok := obj[FieldLimitStrategyType].(string); ok {
+		out.Type = sdk.WorkloadoptimizationV1ResourceLimitStrategyType(v)
+	}
+	if v, ok := obj[FieldLimitStrategyMultiplier].(float64); ok && v > 0 {
+		out.Multiplier = lo.ToPtr(v)
 	}
 	return out
 }
@@ -681,14 +719,7 @@ func toWorkloadScalingPoliciesMap(previousCfg map[string]interface{}, p sdk.Work
 		m[FieldLimitStrategy] = []map[string]any{limit}
 	}
 
-	if v, ok := previousCfg[DeprecatedFieldApplyThreshold].(float64); ok && v > 0 {
-		m[DeprecatedFieldApplyThreshold] = p.ApplyThreshold
-	} else if v, ok := previousCfg[FieldApplyThresholdStrategy].([]interface{}); ok && len(v) > 0 {
-		strategy := applyThresholdStrategyToMap(p.ApplyThresholdStrategy)
-		if strategy != nil {
-			m[FieldApplyThresholdStrategy] = strategy
-		}
-	}
+	maps.Copy(m, mapApplyStrategyBasedOnPreviousConfig(p, previousCfg))
 
 	if p.ManagementOption != nil {
 		m["management_option"] = string(*p.ManagementOption)
