@@ -123,10 +123,10 @@ const (
 	Ssd     CastaiInventoryV1beta1StorageInfoDeviceType = "ssd"
 )
 
-// Defines values for CastaiRbacV1beta1MemberKind.
+// Defines values for CastaiRbacV1beta1Kind.
 const (
-	SERVICEACCOUNT CastaiRbacV1beta1MemberKind = "SERVICE_ACCOUNT"
-	USER           CastaiRbacV1beta1MemberKind = "USER"
+	SERVICEACCOUNT CastaiRbacV1beta1Kind = "SERVICE_ACCOUNT"
+	USER           CastaiRbacV1beta1Kind = "USER"
 )
 
 // Defines values for CastaiRbacV1beta1PoliciesState.
@@ -1536,6 +1536,9 @@ type CastaiRbacV1beta1GroupSubject struct {
 	Name *string `json:"name,omitempty"`
 }
 
+// Kind represents the type of the member.
+type CastaiRbacV1beta1Kind string
+
 // CastaiRbacV1beta1Member defines model for castai.rbac.v1beta1.Member.
 type CastaiRbacV1beta1Member struct {
 	// AddedAt is the timestamp when the user has been added to the group.
@@ -1548,14 +1551,11 @@ type CastaiRbacV1beta1Member struct {
 	Id string `json:"id"`
 
 	// Kind represents the type of the member.
-	Kind CastaiRbacV1beta1MemberKind `json:"kind"`
+	Kind CastaiRbacV1beta1Kind `json:"kind"`
 
 	// LastLoginAt is the timestamp of the time when the user last time logged in.
 	LastLoginAt *time.Time `json:"lastLoginAt,omitempty"`
 }
-
-// Kind represents the type of the member.
-type CastaiRbacV1beta1MemberKind string
 
 // OrganizationScope represents the organization scope.
 type CastaiRbacV1beta1OrganizationScope struct {

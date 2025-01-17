@@ -285,7 +285,7 @@ func convertMembersToSDK(data *schema.ResourceData) []sdk.CastaiRbacV1beta1Membe
 
 	for _, dataMembersDef := range data.Get(FieldOrganizationGroupMembers).([]any) {
 		for _, dataMember := range dataMembersDef.(map[string]any)[FieldOrganizationGroupMember].([]any) {
-			var kind sdk.CastaiRbacV1beta1MemberKind
+			var kind sdk.CastaiRbacV1beta1Kind
 			switch dataMember.(map[string]any)[FieldOrganizationGroupMemberKind].(string) {
 			case GroupMemberKindUser:
 				kind = sdk.USER
