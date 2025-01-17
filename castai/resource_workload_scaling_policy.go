@@ -3,7 +3,6 @@ package castai
 import (
 	"context"
 	"fmt"
-	"maps"
 	"net/http"
 	"regexp"
 	"strings"
@@ -213,7 +212,7 @@ func workloadScalingPolicyResourceSchema(resource, function string, overhead, mi
 					"The default strategy is `PERCENTAGE` with percentage value set to 0.1.",
 				Elem: workloadScalingPolicyResourceApplyThresholdStrategySchema(),
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-					return supressDefaultValueDiff(resource, old, new, d)
+					return suppressThresholdStrategyDefaultValueDiff(resource, old, new, d)
 				},
 				ConflictsWith: []string{fmt.Sprintf("%s.0.%s", resource, DeprecatedFieldApplyThreshold)},
 			},
@@ -660,7 +659,7 @@ func mapApplyStrategyBasedOnPreviousConfig(
 // FieldApplyThresholdStrategy will be used with default value. It is not possible to set default in Schema, only when
 // DeprecatedFieldApplyThreshold is missing. If configuration saved from API correspond with default value,
 // we will supress diff.
-func supressDefaultValueDiff(resource, oldValue, newValue string, d *schema.ResourceData) bool {
+func suppressThresholdStrategyDefaultValueDiff(resource, oldValue, newValue string, d *schema.ResourceData) bool {
 	resourcePath := fmt.Sprintf("%s.0", resource)
 	isApplyThresholdStrategyUnset := newValue == "0" || newValue == ""
 	isApplyThresholdUnset := d.Get(fmt.Sprintf("%s.%s", resourcePath, DeprecatedFieldApplyThreshold)) == 0.
@@ -719,7 +718,7 @@ func toWorkloadScalingPoliciesMap(previousCfg map[string]interface{}, p sdk.Work
 		m[FieldLimitStrategy] = []map[string]any{limit}
 	}
 
-	maps.Copy(m, mapApplyStrategyBasedOnPreviousConfig(p, previousCfg))
+	m = lo.Assign(m, mapApplyStrategyBasedOnPreviousConfig(p, previousCfg))
 
 	if p.ManagementOption != nil {
 		m["management_option"] = string(*p.ManagementOption)
