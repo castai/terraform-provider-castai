@@ -609,7 +609,7 @@ resource "castai_commitments" "test_gcp" {
 }
 
 // Both create and update use the same "upsert" handler under the hood so we test them together
-func TestResourceCreateAndUpdate(t *testing.T) {
+func TestCommitmentsResourceCreateAndUpdate(t *testing.T) {
 	ctx := context.Background()
 	r := require.New(t)
 
@@ -910,6 +910,70 @@ test,3b3de39c-bc44-4d69-be2d-69527dfe9958,630226bb-5170-4b95-90b0-f222757130c1,S
 					noErrInDiagnostics(r, diag)
 				})
 			}
+		})
+	}
+}
+
+func TestCommitmentsResourceDelete(t *testing.T) {
+	ctx := context.Background()
+	orgID, commitmentID := uuid.New(), uuid.New()
+
+	tests := map[string]struct {
+		resource map[string]any
+	}{
+		"should delete gcp commitments resource": {
+			resource: map[string]any{
+				fieldCommitmentsGCPCUDs: []any{
+					map[string]any{
+						"id": commitmentID.String(),
+					},
+				},
+			},
+		},
+		"should delete azure commitments resource": {
+			resource: map[string]any{
+				fieldCommitmentsAzureReservations: []any{
+					map[string]any{
+						"id": commitmentID.String(),
+					},
+				},
+			},
+		},
+	}
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			r := require.New(t)
+
+			ctrl := gomock.NewController(t)
+			defer ctrl.Finish()
+
+			resource := resourceCommitments()
+			mockClient := mock_sdk.NewMockClientWithResponsesInterface(ctrl)
+			provider := &ProviderConfig{api: mockClient}
+
+			data := schema.TestResourceDataRaw(t, resource.Schema, tt.resource)
+
+			// Fetches the default organization ID to get commitments import ID
+			mockClient.EXPECT().UsersAPIListOrganizationsWithResponse(gomock.Any()).Return(&sdk.UsersAPIListOrganizationsResponse{
+				JSON200: &sdk.CastaiUsersV1beta1ListOrganizationsResponse{
+					Organizations: []sdk.CastaiUsersV1beta1UserOrganization{
+						{Id: lo.ToPtr(orgID.String())}, // the first org is the default one so everything else should be ignored
+						{Id: lo.ToPtr(uuid.New().String())},
+					},
+				},
+				HTTPResponse: &http.Response{StatusCode: http.StatusOK},
+			}, nil).Times(1)
+
+			mockClient.EXPECT().
+				CommitmentsAPIDeleteCommitmentWithResponse(gomock.Any(), commitmentID.String()).
+				Return(&sdk.CommitmentsAPIDeleteCommitmentResponse{
+					JSON200:      &map[string]any{},
+					HTTPResponse: &http.Response{StatusCode: http.StatusOK},
+				}, nil).
+				Times(1)
+
+			diag := resource.DeleteContext(ctx, data, provider)
+			noErrInDiagnostics(r, diag)
 		})
 	}
 }
