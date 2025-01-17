@@ -302,7 +302,6 @@ func commitmentsDiff(_ context.Context, diff *schema.ResourceDiff, _ any) error 
 
 	switch {
 	case reservationsOk:
-		// TEMPORARY: support for Azure reservations will be added in one of the upcoming PRs
 		if err := diff.SetNew(fieldCommitmentsGCPCUDs, nil); err != nil {
 			return fmt.Errorf("setting gcp cuds field to nil: %w", err)
 		}
