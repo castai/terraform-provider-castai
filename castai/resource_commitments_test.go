@@ -346,6 +346,9 @@ func TestCommitmentsResourceCreateAndUpdate(t *testing.T) {
 		Type:           lo.ToPtr("COMPUTE_OPTIMIZED_C2D"),
 	}
 
+	// Note that the import endpoints are called in "overwrite" mode. This means that we don't need to test scenarios
+	// where certain commitments already exist and some of them need to be deleted because they don't exist anymore
+	// in the new plan.
 	tests := map[string]test{
 		"should create a gcp commitment": func() test {
 			return test{
