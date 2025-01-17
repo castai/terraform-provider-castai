@@ -598,7 +598,7 @@ test,3b3de39c-bc44-4d69-be2d-69527dfe9958,630226bb-5170-4b95-90b0-f222757130c1,S
 							HTTPResponse: &http.Response{StatusCode: http.StatusOK},
 						}, nil).Times(1)
 
-					var fn func(context.Context, *schema.ResourceData, interface{}) diag.Diagnostics
+					var fn func(context.Context, *schema.ResourceData, any) diag.Diagnostics
 					switch testedFn {
 					case testedFnCreate:
 						fn = resource.CreateContext
