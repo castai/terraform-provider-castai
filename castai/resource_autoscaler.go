@@ -553,7 +553,7 @@ func resourceCastaiAutoscalerUpdate(ctx context.Context, data *schema.ResourceDa
 	return nil
 }
 
-func getCurrentPolicies(ctx context.Context, client *sdk.ClientWithResponses, clusterId string) ([]byte, error) {
+func getCurrentPolicies(ctx context.Context, client sdk.ClientWithResponsesInterface, clusterId string) ([]byte, error) {
 	log.Printf("[INFO] Getting cluster autoscaler information.")
 
 	resp, err := client.PoliciesAPIGetClusterPolicies(ctx, clusterId)

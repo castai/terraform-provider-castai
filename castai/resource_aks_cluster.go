@@ -193,7 +193,7 @@ func resourceCastaiAKSClusterUpdate(ctx context.Context, data *schema.ResourceDa
 	return resourceCastaiAKSClusterRead(ctx, data, meta)
 }
 
-func updateAKSClusterSettings(ctx context.Context, data *schema.ResourceData, client *sdk.ClientWithResponses) error {
+func updateAKSClusterSettings(ctx context.Context, data *schema.ResourceData, client sdk.ClientWithResponsesInterface) error {
 	if !data.HasChanges(
 		FieldAKSClusterClientID,
 		FieldAKSClusterClientSecret,

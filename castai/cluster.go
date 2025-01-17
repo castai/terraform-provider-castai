@@ -112,7 +112,7 @@ func resourceCastaiClusterDelete(ctx context.Context, data *schema.ResourceData,
 	return nil
 }
 
-func fetchClusterData(ctx context.Context, client *sdk.ClientWithResponses, clusterID string) (*sdk.ExternalClusterAPIGetClusterResponse, error) {
+func fetchClusterData(ctx context.Context, client sdk.ClientWithResponsesInterface, clusterID string) (*sdk.ExternalClusterAPIGetClusterResponse, error) {
 	resp, err := client.ExternalClusterAPIGetClusterWithResponse(ctx, clusterID)
 	if err != nil {
 		return nil, err
@@ -140,7 +140,7 @@ func fetchClusterData(ctx context.Context, client *sdk.ClientWithResponses, clus
 // Caller is responsible to populate data and request parameters with all data.
 func resourceCastaiClusterUpdate(
 	ctx context.Context,
-	client *sdk.ClientWithResponses,
+	client sdk.ClientWithResponsesInterface,
 	data *schema.ResourceData,
 	request *sdk.ExternalClusterAPIUpdateClusterJSONRequestBody,
 ) error {
@@ -206,7 +206,7 @@ func resourceCastaiClusterUpdate(
 	return nil
 }
 
-func createClusterToken(ctx context.Context, client *sdk.ClientWithResponses, clusterID string) (string, error) {
+func createClusterToken(ctx context.Context, client sdk.ClientWithResponsesInterface, clusterID string) (string, error) {
 	resp, err := client.ExternalClusterAPICreateClusterTokenWithResponse(ctx, clusterID)
 	if err != nil {
 		return "", fmt.Errorf("creating cluster token: %w", err)

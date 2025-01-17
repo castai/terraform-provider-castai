@@ -409,7 +409,7 @@ func nullifySelectorRequirements(requirements *[]sdk.ScheduledrebalancingV1NodeS
 	}
 }
 
-func getRebalancingScheduleByName(ctx context.Context, client *sdk.ClientWithResponses, name string) (*sdk.ScheduledrebalancingV1RebalancingSchedule, error) {
+func getRebalancingScheduleByName(ctx context.Context, client sdk.ClientWithResponsesInterface, name string) (*sdk.ScheduledrebalancingV1RebalancingSchedule, error) {
 	resp, err := client.ScheduledRebalancingAPIListRebalancingSchedulesWithResponse(ctx)
 	if checkErr := sdk.CheckOKResponse(resp, err); checkErr != nil {
 		return nil, checkErr
@@ -424,7 +424,7 @@ func getRebalancingScheduleByName(ctx context.Context, client *sdk.ClientWithRes
 	return nil, fmt.Errorf("rebalancing schedule %q was not found", name)
 }
 
-func getRebalancingScheduleById(ctx context.Context, client *sdk.ClientWithResponses, id string) (*sdk.ScheduledrebalancingV1RebalancingSchedule, error) {
+func getRebalancingScheduleById(ctx context.Context, client sdk.ClientWithResponsesInterface, id string) (*sdk.ScheduledrebalancingV1RebalancingSchedule, error) {
 	resp, err := client.ScheduledRebalancingAPIGetRebalancingScheduleWithResponse(ctx, id)
 	if err != nil {
 		return nil, err
