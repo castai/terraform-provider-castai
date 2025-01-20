@@ -37,19 +37,6 @@ func TestAccCommitments(t *testing.T) {
 		azureNodeResourceGroupName = "core-tf-acc-ng"
 	)
 
-	importCUDsStateStep := resource.TestStep{
-		ResourceName:            "castai_commitments.test_gcp",
-		ImportState:             true,
-		ImportStateVerify:       true,
-		ImportStateVerifyIgnore: []string{fieldCommitmentsGCPCUDsJSON, fieldCommitmentsConfigs},
-	}
-	importReservationsStateStep := resource.TestStep{
-		ResourceName:            "castai_commitments.test_azure",
-		ImportState:             true,
-		ImportStateVerify:       true,
-		ImportStateVerifyIgnore: []string{fieldCommitmentsAzureReservationsCSV, fieldCommitmentsConfigs},
-	}
-
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
 		ProviderFactories: providerFactories,
@@ -159,8 +146,18 @@ func TestAccCommitments(t *testing.T) {
 					resource.TestCheckResourceAttr("castai_commitments.test_azure", "azure_reservations.1.assignments.#", "1"),
 				),
 			},
-			importCUDsStateStep,
-			importReservationsStateStep,
+			{
+				ResourceName:            "castai_commitments.test_gcp",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{fieldCommitmentsGCPCUDsJSON, fieldCommitmentsConfigs},
+			},
+			{
+				ResourceName:            "castai_commitments.test_azure",
+				ImportState:             true,
+				ImportStateVerify:       true,
+				ImportStateVerifyIgnore: []string{fieldCommitmentsAzureReservationsCSV, fieldCommitmentsConfigs},
+			},
 		},
 	})
 }
