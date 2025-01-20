@@ -21,18 +21,24 @@ resource "castai_workload_scaling_policy" "services" {
   apply_type        = "IMMEDIATE"
   management_option = "MANAGED"
   cpu {
-    function                 = "QUANTILE"
-    overhead                 = 0.15
-    apply_threshold          = 0.1
+    function = "QUANTILE"
+    overhead = 0.15
+    apply_threshold_strategy {
+      type       = "PERCENTAGE"
+      percentage = 0.1
+    }
     args                     = ["0.9"]
     look_back_period_seconds = 172800
     min                      = 0.1
     max                      = 1
   }
   memory {
-    function        = "MAX"
-    overhead        = 0.35
-    apply_threshold = 0.2
+    function = "MAX"
+    overhead = 0.35
+    apply_threshold_strategy {
+      type       = "PERCENTAGE"
+      percentage = 0.2
+    }
     limit {
       type       = "MULTIPLIER"
       multiplier = 1.5
@@ -87,7 +93,8 @@ resource "castai_workload_scaling_policy" "services" {
 
 Optional:
 
-- `apply_threshold` (Number) The threshold of when to apply the recommendation. Recommendation will be applied when diff of current requests and new recommendation is greater than set value
+- `apply_threshold` (Number, Deprecated) The threshold of when to apply the recommendation. Recommendation will be applied when diff of current requests and new recommendation is greater than set value
+- `apply_threshold_strategy` (Block List, Max: 1) Resource apply threshold strategy settings. The default strategy is `PERCENTAGE` with percentage value set to 0.1. (see [below for nested schema](#nestedblock--cpu--apply_threshold_strategy))
 - `args` (List of String) The arguments for the function - i.e. for `QUANTILE` this should be a [0, 1] float. `MAX` doesn't accept any args
 - `function` (String) The function used to calculate the resource recommendation. Supported values: `QUANTILE`, `MAX`
 - `limit` (Block List, Max: 1) Resource limit settings (see [below for nested schema](#nestedblock--cpu--limit))
@@ -96,6 +103,19 @@ Optional:
 - `max` (Number) Max values for the recommendation, applies to every container. For memory - this is in MiB, for CPU - this is in cores.
 - `min` (Number) Min values for the recommendation, applies to every container. For memory - this is in MiB, for CPU - this is in cores.
 - `overhead` (Number) Overhead for the recommendation, e.g. `0.1` will result in 10% higher recommendation
+
+<a id="nestedblock--cpu--apply_threshold_strategy"></a>
+### Nested Schema for `cpu.apply_threshold_strategy`
+
+Required:
+
+- `type` (String) Defines apply theshold strategy type.
+	- PERCENTAGE - recommendation will be applied when diff of current requests and new recommendation is greater than set value
+
+Optional:
+
+- `percentage` (Number) Percentage of a how much difference should there be between the current pod requests and the new recommendation. It must be defined for the PERCENTAGE strategy.
+
 
 <a id="nestedblock--cpu--limit"></a>
 ### Nested Schema for `cpu.limit`
@@ -117,7 +137,8 @@ Optional:
 
 Optional:
 
-- `apply_threshold` (Number) The threshold of when to apply the recommendation. Recommendation will be applied when diff of current requests and new recommendation is greater than set value
+- `apply_threshold` (Number, Deprecated) The threshold of when to apply the recommendation. Recommendation will be applied when diff of current requests and new recommendation is greater than set value
+- `apply_threshold_strategy` (Block List, Max: 1) Resource apply threshold strategy settings. The default strategy is `PERCENTAGE` with percentage value set to 0.1. (see [below for nested schema](#nestedblock--memory--apply_threshold_strategy))
 - `args` (List of String) The arguments for the function - i.e. for `QUANTILE` this should be a [0, 1] float. `MAX` doesn't accept any args
 - `function` (String) The function used to calculate the resource recommendation. Supported values: `QUANTILE`, `MAX`
 - `limit` (Block List, Max: 1) Resource limit settings (see [below for nested schema](#nestedblock--memory--limit))
@@ -126,6 +147,19 @@ Optional:
 - `max` (Number) Max values for the recommendation, applies to every container. For memory - this is in MiB, for CPU - this is in cores.
 - `min` (Number) Min values for the recommendation, applies to every container. For memory - this is in MiB, for CPU - this is in cores.
 - `overhead` (Number) Overhead for the recommendation, e.g. `0.1` will result in 10% higher recommendation
+
+<a id="nestedblock--memory--apply_threshold_strategy"></a>
+### Nested Schema for `memory.apply_threshold_strategy`
+
+Required:
+
+- `type` (String) Defines apply theshold strategy type.
+	- PERCENTAGE - recommendation will be applied when diff of current requests and new recommendation is greater than set value
+
+Optional:
+
+- `percentage` (Number) Percentage of a how much difference should there be between the current pod requests and the new recommendation. It must be defined for the PERCENTAGE strategy.
+
 
 <a id="nestedblock--memory--limit"></a>
 ### Nested Schema for `memory.limit`
