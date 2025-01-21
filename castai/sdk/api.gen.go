@@ -2229,8 +2229,6 @@ type CastaiUsersV1beta1UserOrganization struct {
 
 	// name of the organization.
 	Name string `json:"name"`
-
-	// user role in the organization.
 	Role string `json:"role"`
 }
 

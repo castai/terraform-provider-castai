@@ -191,24 +191,104 @@ Optional:
 - `read` (String)
 - `update` (String)
 
-
 ## Importing
-You can use the `terraform import` command to import existing scaling policy to Terraform state.
 
-To import a resource, first write a resource block for it in your configuration, establishing the name by which
-it will be known to Terraform:
-```hcl
-resource "castai_workload_scaling_policy" "services" {
-  # ...
-}
-```
+For each connected cluster, a default scaling policy is created. An existing scaling policy can be imported into the
+Terraform state using the `terraform import` command or the [`import`](https://developer.hashicorp.com/terraform/language/import#syntax) block.
 
-Now terraform import can be run to attach an existing scaling policy to this resource:
-```shell
-$ terraform import castai_workload_scaling_policy.services <cluster_id>/services
-```
+This section describes how to import a scaling policy using the `import` block, as it is a simpler and more convenient
+way of importing resources.
 
-If you are using CAST AI Terraform modules, import command will be slightly different:
-```shell
-$ terraform import 'module.castai-eks-cluster.castai_workload_scaling_policy.this["services"]' <cluster_id>/services
-```
+### Import a single scaling policy
+
+1. Create an `import.tf` file with the following content:
+   ```tf
+   import {
+   	 to       = castai_workload_scaling_policy.default
+   	 id       = "<cluster_id>/<policy_id_or_name>" # e.g. "ff4c2211-3511-4d95-b6de-2919fc3287a3/default"
+   }
+   ```
+
+2. Run the `terraform import` command:
+
+   ```shell
+   terraform plan -out=import.plan -var-file=tf.vars -generate-config-out=generated.tf
+   ```
+
+3. Review the `generated.tf` file and ensure that the imported scaling policy is correct.
+
+4. Apply the import plan:
+
+   ```shell
+   terraform apply "import.plan"
+   ```
+
+### Import multiple scaling policies
+
+To import multiple scaling policies, you need to know the cluster IDs and the policy names. The `for_each` cannot be
+used when generating configuration. As a result, you need to define the policy properties yourself, or you
+can [import a single policy](#import-a-single-scaling-policy) and then use it as a template for other policies.
+
+> [!NOTE]
+> The below example assumes that you want to import the "default" scaling policy for multiple clusters. If you want to
+> import
+> scaling policies with different names, you need to adjust the `id` parameter in the `import` block accordingly.
+
+1. Create the `import.tf` file with the following content:
+
+   ```tf
+   locals {
+   	 policies = {
+   		 "<cluster_name>" = "<cluster_id>"
+   		 "<cluster_name>" = "<cluster_id>"
+   		 "<cluster_name>" = "<cluster_id>"
+   	 }
+   }
+
+   import {
+   	 for_each = local.policies
+   	 to       = castai_workload_scaling_policy.default[each.key]
+   	 id       = "${each.value}/default"
+   }
+
+   resource "castai_workload_scaling_policy" "default" {
+   	 for_each          = local.policies
+   	 cluster_id        = each.value
+   	 apply_type        = "IMMEDIATE"
+   	 management_option = "READ_ONLY"
+   	 name              = "default"
+   	 cpu {
+   		 apply_threshold          = 0.1
+   		 args = ["0.80"]
+   		 function                 = "QUANTILE"
+   		 look_back_period_seconds = 86400
+   		 min                      = 0.01
+   	 }
+   	 memory {
+   		 apply_threshold          = 0.1
+   		 args = []
+   		 function                 = "MAX"
+   		 look_back_period_seconds = 86400
+   		 min                      = 10
+   		 overhead                 = 0.1
+   	 }
+   }
+   ```
+
+2. Run the `terraform import` command and review the import plan:
+
+   ```shell
+   terraform plan -out=import.plan -var-file=tf.vars
+   ```
+
+3. Apply the import plan:
+
+   ```shell
+   terraform apply "import.plan"
+   ```
+
+### Upsert scaling policy
+
+The recommended way is to use the `import` block to import the scaling policy and then apply the changes to the policy.
+However, if that’s not possible, you can define the default policy resource yourself. The CAST AI Terraform provider,
+will update the existing policy instead of returning an error.
