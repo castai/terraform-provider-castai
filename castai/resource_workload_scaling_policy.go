@@ -323,14 +323,32 @@ func resourceWorkloadScalingPolicyCreate(ctx context.Context, d *schema.Resource
 
 	req.RecommendationPolicies.AntiAffinity = toAntiAffinity(toSection(d, "anti_affinity"))
 
-	resp, err := client.WorkloadOptimizationAPICreateWorkloadScalingPolicyWithResponse(ctx, clusterID, req)
-	if checkErr := sdk.CheckOKResponse(resp, err); checkErr != nil {
-		return diag.FromErr(checkErr)
+	create, err := client.WorkloadOptimizationAPICreateWorkloadScalingPolicyWithResponse(ctx, clusterID, req)
+	if err != nil {
+		return diag.FromErr(err)
 	}
 
-	d.SetId(resp.JSON200.Id)
+	switch create.StatusCode() {
+	case http.StatusOK:
+		d.SetId(create.JSON200.Id)
+		return resourceWorkloadScalingPolicyRead(ctx, d, meta)
+	case http.StatusConflict:
+		list, err := client.WorkloadOptimizationAPIListWorkloadScalingPoliciesWithResponse(ctx, clusterID)
+		if checkErr := sdk.CheckOKResponse(list, err); checkErr != nil {
+			return diag.FromErr(checkErr)
+		}
 
-	return resourceWorkloadScalingPolicyRead(ctx, d, meta)
+		for _, sp := range list.JSON200.Items {
+			if sp.Name == req.Name && sp.IsDefault {
+				d.SetId(sp.Id)
+				return resourceWorkloadScalingPolicyUpdate(ctx, d, meta)
+			}
+		}
+		return diag.Errorf("scaling policy with name %q already exists", req.Name)
+	default:
+		return diag.Errorf("expected status code %d, received: status=%d body=%s", http.StatusOK, create.StatusCode(), string(create.GetBody()))
+	}
+
 }
 
 func resourceWorkloadScalingPolicyRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -542,12 +560,11 @@ func validateResourceLimit(r sdk.WorkloadoptimizationV1ResourcePolicies) error {
 }
 
 func workloadScalingPolicyImporter(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	ids := strings.Split(d.Id(), "/")
-	if len(ids) != 2 || ids[0] == "" || ids[1] == "" {
+	clusterID, nameOrID, found := strings.Cut(d.Id(), "/")
+	if !found {
 		return nil, fmt.Errorf("expected import id with format: <cluster_id>/<scaling_policy name or id>, got: %q", d.Id())
 	}
 
-	clusterID, nameOrID := ids[0], ids[1]
 	if err := d.Set(FieldClusterID, clusterID); err != nil {
 		return nil, fmt.Errorf("setting cluster nameOrID: %w", err)
 	}
