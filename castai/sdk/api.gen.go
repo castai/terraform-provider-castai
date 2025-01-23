@@ -206,20 +206,6 @@ const (
 	NodeconfigV1AKSConfigImageFamilyFamilyWindows2022 NodeconfigV1AKSConfigImageFamily = "family_windows_2022"
 )
 
-// Defines values for NodeconfigV1AKSConfigOsDiskEphemeralCacheType.
-const (
-	NodeconfigV1AKSConfigOsDiskEphemeralCacheTypeREADONLY    NodeconfigV1AKSConfigOsDiskEphemeralCacheType = "READ_ONLY"
-	NodeconfigV1AKSConfigOsDiskEphemeralCacheTypeREADWRITE   NodeconfigV1AKSConfigOsDiskEphemeralCacheType = "READ_WRITE"
-	NodeconfigV1AKSConfigOsDiskEphemeralCacheTypeUNSPECIFIED NodeconfigV1AKSConfigOsDiskEphemeralCacheType = "UNSPECIFIED"
-)
-
-// Defines values for NodeconfigV1AKSConfigOsDiskEphemeralPlacement.
-const (
-	PLACEMENTCACHEDISK    NodeconfigV1AKSConfigOsDiskEphemeralPlacement = "PLACEMENT_CACHE_DISK"
-	PLACEMENTRESOURCEDISK NodeconfigV1AKSConfigOsDiskEphemeralPlacement = "PLACEMENT_RESOURCE_DISK"
-	PLACEMENTUNSPECIFIED  NodeconfigV1AKSConfigOsDiskEphemeralPlacement = "PLACEMENT_UNSPECIFIED"
-)
-
 // Defines values for NodeconfigV1AKSConfigOsDiskType.
 const (
 	OSDISKTYPEPREMIUMSSD  NodeconfigV1AKSConfigOsDiskType = "OS_DISK_TYPE_PREMIUM_SSD"
@@ -361,9 +347,9 @@ const (
 
 // Defines values for WorkloadoptimizationV1ManagementOption.
 const (
-	WorkloadoptimizationV1ManagementOptionMANAGED   WorkloadoptimizationV1ManagementOption = "MANAGED"
-	WorkloadoptimizationV1ManagementOptionREADONLY  WorkloadoptimizationV1ManagementOption = "READ_ONLY"
-	WorkloadoptimizationV1ManagementOptionUNDEFINED WorkloadoptimizationV1ManagementOption = "UNDEFINED"
+	MANAGED   WorkloadoptimizationV1ManagementOption = "MANAGED"
+	READONLY  WorkloadoptimizationV1ManagementOption = "READ_ONLY"
+	UNDEFINED WorkloadoptimizationV1ManagementOption = "UNDEFINED"
 )
 
 // Defines values for WorkloadoptimizationV1RecommendationEventType.
@@ -2255,14 +2241,13 @@ type CastaiUsersV1beta1UserOrganization struct {
 
 	// name of the organization.
 	Name string `json:"name"`
+
+	// user role in the organization.
 	Role string `json:"role"`
 }
 
 // AKSClusterParams defines AKS-specific arguments.
 type ExternalclusterV1AKSClusterParams struct {
-	// HttpProxyConfig holds settings when HTTP/S communication is required.
-	HttpProxyConfig *ExternalclusterV1HttpProxyConfig `json:"httpProxyConfig,omitempty"`
-
 	// Deprecated. This field is no longer updatable and node configuration equivalent should be used.
 	MaxPodsPerNode *int32 `json:"maxPodsPerNode,omitempty"`
 
@@ -2446,9 +2431,6 @@ type ExternalclusterV1ClusterReconcileInfoReconcileStatus string
 
 // ExternalclusterV1ClusterUpdate defines model for externalcluster.v1.ClusterUpdate.
 type ExternalclusterV1ClusterUpdate struct {
-	// UpdateAKSClusterParams defines updatable AKS cluster configuration.
-	Aks *ExternalclusterV1UpdateAKSClusterParams `json:"aks,omitempty"`
-
 	// JSON encoded cluster credentials string.
 	Credentials *string `json:"credentials,omitempty"`
 
@@ -2613,13 +2595,6 @@ type ExternalclusterV1GetListNodesFiltersResponse struct {
 
 // HandleCloudEventResponse is the result of HandleCloudEventRequest.
 type ExternalclusterV1HandleCloudEventResponse = map[string]interface{}
-
-// HttpProxyConfig holds settings when HTTP/S communication is required.
-type ExternalclusterV1HttpProxyConfig struct {
-	HttpProxy  *string   `json:"httpProxy,omitempty"`
-	HttpsProxy *string   `json:"httpsProxy,omitempty"`
-	NoProxy    *[]string `json:"noProxy,omitempty"`
-}
 
 // KOPSClusterParams defines KOPS-specific arguments.
 type ExternalclusterV1KOPSClusterParams struct {
@@ -2935,12 +2910,6 @@ type ExternalclusterV1TriggerResumeClusterResponse struct {
 	OperationId string `json:"operationId"`
 }
 
-// UpdateAKSClusterParams defines updatable AKS cluster configuration.
-type ExternalclusterV1UpdateAKSClusterParams struct {
-	// HttpProxyConfig holds settings when HTTP/S communication is required.
-	HttpProxyConfig *ExternalclusterV1HttpProxyConfig `json:"httpProxyConfig,omitempty"`
-}
-
 // UpdateClusterTagsResponse result of cluster tags update.
 type ExternalclusterV1UpdateClusterTagsResponse = map[string]interface{}
 
@@ -3000,8 +2969,7 @@ type NodeconfigV1AKSConfig struct {
 	// Maximum number of pods that can be run on a node, which affects how many IP addresses you will need for each node.
 	// Defaults to 30. Values between 10 and 250 are allowed.
 	// Setting values above 110 will require specific CNI configuration. Please refer to Microsoft documentation for additional guidance.
-	MaxPodsPerNode  *int32                                `json:"maxPodsPerNode,omitempty"`
-	OsDiskEphemeral *NodeconfigV1AKSConfigOsDiskEphemeral `json:"osDiskEphemeral,omitempty"`
+	MaxPodsPerNode *int32 `json:"maxPodsPerNode,omitempty"`
 
 	// OsDiskType represent possible values for AKS node os disk type(this is subset of all available Azure disk types).
 	OsDiskType *NodeconfigV1AKSConfigOsDiskType `json:"osDiskType,omitempty"`
@@ -3039,21 +3007,6 @@ type NodeconfigV1AKSConfigLoadBalancersNICBasedBackendPool struct {
 	// Name of the backend pool as defined in Azure. Backend pools must have unique names within the load balancer.
 	Name *string `json:"name,omitempty"`
 }
-
-// NodeconfigV1AKSConfigOsDiskEphemeral defines model for nodeconfig.v1.AKSConfig.OsDiskEphemeral.
-type NodeconfigV1AKSConfigOsDiskEphemeral struct {
-	// Type of cache to use for the ephemeral OS disk. Default is READ_ONLY.
-	CacheType *NodeconfigV1AKSConfigOsDiskEphemeralCacheType `json:"cacheType,omitempty"`
-
-	// Placement of the ephemeral OS disk. Default is PLACEMENT_CACHE_DISk.
-	Placement *NodeconfigV1AKSConfigOsDiskEphemeralPlacement `json:"placement,omitempty"`
-}
-
-// Type of cache to use for the ephemeral OS disk. Default is READ_ONLY.
-type NodeconfigV1AKSConfigOsDiskEphemeralCacheType string
-
-// Placement of the ephemeral OS disk. Default is PLACEMENT_CACHE_DISk.
-type NodeconfigV1AKSConfigOsDiskEphemeralPlacement string
 
 // OsDiskType represent possible values for AKS node os disk type(this is subset of all available Azure disk types).
 type NodeconfigV1AKSConfigOsDiskType string
@@ -3985,12 +3938,6 @@ type PoliciesV1UnschedulablePodsPolicy struct {
 	PodPinner *PoliciesV1PodPinner `json:"podPinner,omitempty"`
 }
 
-// ScheduledrebalancingV1AggressiveModeConfig defines model for scheduledrebalancing.v1.AggressiveModeConfig.
-type ScheduledrebalancingV1AggressiveModeConfig struct {
-	// Rebalance workloads using local-path Persistent Volumes. THIS WILL RESULT IN DATA LOSS.
-	IgnoreLocalPersistentVolumes *bool `json:"ignoreLocalPersistentVolumes,omitempty"`
-}
-
 // ScheduledrebalancingV1DeleteRebalancingJobResponse defines model for scheduledrebalancing.v1.DeleteRebalancingJobResponse.
 type ScheduledrebalancingV1DeleteRebalancingJobResponse = map[string]interface{}
 
@@ -4091,8 +4038,7 @@ type ScheduledrebalancingV1RebalancingJob struct {
 // ScheduledrebalancingV1RebalancingOptions defines model for scheduledrebalancing.v1.RebalancingOptions.
 type ScheduledrebalancingV1RebalancingOptions struct {
 	// When enabled will also consider rebalancing problematic pods (pods without controller, job pods, pods with removal-disabled annotation).
-	AggressiveMode       *bool                                       `json:"aggressiveMode"`
-	AggressiveModeConfig *ScheduledrebalancingV1AggressiveModeConfig `json:"aggressiveModeConfig,omitempty"`
+	AggressiveMode *bool `json:"aggressiveMode"`
 
 	// Defines whether the nodes that failed to get drained until a predefined timeout, will be kept with a
 	// rebalancing.cast.ai/status=drain-failed annotation instead of forcefully drained.
@@ -4494,9 +4440,8 @@ type WorkloadoptimizationV1RecommendationPolicies struct {
 
 // WorkloadoptimizationV1RecommendedPodCountChangedEvent defines model for workloadoptimization.v1.RecommendedPodCountChangedEvent.
 type WorkloadoptimizationV1RecommendedPodCountChangedEvent struct {
-	Current   int32                   `json:"current"`
-	DebugData *map[string]interface{} `json:"debugData,omitempty"`
-	Previous  int32                   `json:"previous"`
+	Current  int32 `json:"current"`
+	Previous int32 `json:"previous"`
 }
 
 // WorkloadoptimizationV1RecommendedRequestsChangedEvent defines model for workloadoptimization.v1.RecommendedRequestsChangedEvent.
