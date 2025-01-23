@@ -333,22 +333,18 @@ func resourceWorkloadScalingPolicyCreate(ctx context.Context, d *schema.Resource
 		d.SetId(create.JSON200.Id)
 		return resourceWorkloadScalingPolicyRead(ctx, d, meta)
 	case http.StatusConflict:
-		list, err := client.WorkloadOptimizationAPIListWorkloadScalingPoliciesWithResponse(ctx, clusterID)
-		if checkErr := sdk.CheckOKResponse(list, err); checkErr != nil {
-			return diag.FromErr(checkErr)
+		policy, err := getWorkloadScalingPolicyByName(ctx, client, clusterID, req.Name)
+		if err != nil {
+			return diag.FromErr(err)
 		}
-
-		for _, sp := range list.JSON200.Items {
-			if sp.Name == req.Name && sp.IsDefault {
-				d.SetId(sp.Id)
-				return resourceWorkloadScalingPolicyUpdate(ctx, d, meta)
-			}
+		if policy.IsDefault {
+			d.SetId(policy.Id)
+			return resourceWorkloadScalingPolicyUpdate(ctx, d, meta)
 		}
 		return diag.Errorf("scaling policy with name %q already exists", req.Name)
 	default:
 		return diag.Errorf("expected status code %d, received: status=%d body=%s", http.StatusOK, create.StatusCode(), string(create.GetBody()))
 	}
-
 }
 
 func resourceWorkloadScalingPolicyRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -566,30 +562,24 @@ func workloadScalingPolicyImporter(ctx context.Context, d *schema.ResourceData, 
 	}
 
 	if err := d.Set(FieldClusterID, clusterID); err != nil {
-		return nil, fmt.Errorf("setting cluster nameOrID: %w", err)
+		return nil, fmt.Errorf("setting cluster ID: %w", err)
 	}
-	d.SetId(nameOrID)
 
 	// Return if scaling policy ID provided.
 	if _, err := uuid.Parse(nameOrID); err == nil {
+		d.SetId(nameOrID)
 		return []*schema.ResourceData{d}, nil
 	}
 
 	// Find scaling policy ID by name.
 	client := meta.(*ProviderConfig).api
-	resp, err := client.WorkloadOptimizationAPIListWorkloadScalingPoliciesWithResponse(ctx, clusterID)
-	if err := sdk.CheckOKResponse(resp, err); err != nil {
+	policy, err := getWorkloadScalingPolicyByName(ctx, client, clusterID, nameOrID)
+	if err != nil {
 		return nil, err
 	}
 
-	for _, sp := range resp.JSON200.Items {
-		if sp.Name == nameOrID {
-			d.SetId(sp.Id)
-			return []*schema.ResourceData{d}, nil
-		}
-	}
-
-	return nil, fmt.Errorf("failed to find workload scaling policy with the following name: %v", nameOrID)
+	d.SetId(policy.Id)
+	return []*schema.ResourceData{d}, nil
 }
 
 func toWorkloadScalingPolicies(obj map[string]interface{}) sdk.WorkloadoptimizationV1ResourcePolicies {
@@ -887,4 +877,18 @@ func toAntiAffinityMap(s *sdk.WorkloadoptimizationV1AntiAffinitySettings) []map[
 	}
 
 	return []map[string]any{m}
+}
+
+func getWorkloadScalingPolicyByName(ctx context.Context, client sdk.ClientWithResponsesInterface, clusterID, name string) (*sdk.WorkloadoptimizationV1WorkloadScalingPolicy, error) {
+	list, err := client.WorkloadOptimizationAPIListWorkloadScalingPoliciesWithResponse(ctx, clusterID)
+	if checkErr := sdk.CheckOKResponse(list, err); checkErr != nil {
+		return nil, checkErr
+	}
+
+	for _, sp := range list.JSON200.Items {
+		if sp.Name == name {
+			return &sp, nil
+		}
+	}
+	return nil, fmt.Errorf("policy with name %q not found", name)
 }
