@@ -48,7 +48,10 @@ func TestRebalancingScheduleDataSourceRead(t *testing.T) {
                     },
                     "keepDrainTimeoutNodes": false,
                     "evictGracefully": false,
-                    "aggressiveMode": false
+                    "aggressiveMode": false,
+                    "aggressiveModeConfig": {
+                        "ignoreLocalPersistentVolumes": true	
+                    }
                 },
                 "numTargetedNodes": 20,
                 "nodeTtlSeconds": 350,
@@ -126,6 +129,8 @@ func TestRebalancingScheduleDataSourceRead(t *testing.T) {
 	expectedState := `ID = 9302fdac-4922-4b09-afa6-0a12be99f112
 launch_configuration.# = 1
 launch_configuration.0.aggressive_mode = false
+launch_configuration.0.aggressive_mode_config.# = 1
+launch_configuration.0.aggressive_mode_config.0.ignore_local_persistent_volumes = true
 launch_configuration.0.execution_conditions.# = 1
 launch_configuration.0.execution_conditions.0.achieved_savings_percentage = 15
 launch_configuration.0.execution_conditions.0.enabled = true

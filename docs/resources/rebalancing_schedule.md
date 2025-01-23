@@ -69,6 +69,7 @@ resource "castai_rebalancing_schedule" "spots" {
 Optional:
 
 - `aggressive_mode` (Boolean) When enabled rebalancing will also consider problematic pods (pods without controller, job pods, pods with removal-disabled annotation) as not-problematic.
+- `aggressive_mode_config` (Block List, Max: 1) Advanced configuration for aggressive rebalancing mode. (see [below for nested schema](#nestedblock--launch_configuration--aggressive_mode_config))
 - `execution_conditions` (Block List, Max: 1) (see [below for nested schema](#nestedblock--launch_configuration--execution_conditions))
 - `keep_drain_timeout_nodes` (Boolean) Defines whether the nodes that failed to get drained until a predefined timeout, will be kept with a rebalancing.cast.ai/status=drain-failed annotation instead of forcefully drained.
 - `node_ttl_seconds` (Number) Specifies amount of time since node creation before the node is allowed to be considered for automated rebalancing.
@@ -76,6 +77,14 @@ Optional:
 - `rebalancing_min_nodes` (Number) Minimum number of nodes that should be kept in the cluster after rebalancing.
 - `selector` (String) Node selector in JSON format.
 - `target_node_selection_algorithm` (String) Defines the algorithm used to select the target nodes for rebalancing.
+
+<a id="nestedblock--launch_configuration--aggressive_mode_config"></a>
+### Nested Schema for `launch_configuration.aggressive_mode_config`
+
+Required:
+
+- `ignore_local_persistent_volumes` (Boolean) Rebalance workloads using local-path Persistent Volumes. THIS WILL RESULT IN DATA LOSS.
+
 
 <a id="nestedblock--launch_configuration--execution_conditions"></a>
 ### Nested Schema for `launch_configuration.execution_conditions`
