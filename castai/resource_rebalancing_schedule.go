@@ -122,6 +122,21 @@ func resourceRebalancingSchedule() *schema.Resource {
 							Optional:    true,
 							Description: "When enabled rebalancing will also consider problematic pods (pods without controller, job pods, pods with removal-disabled annotation) as not-problematic.",
 						},
+						"aggressive_mode_config": {
+							Type:     schema.TypeList,
+							MaxItems: 1,
+							Optional: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"ignore_local_persistent_volumes": {
+										Type:        schema.TypeBool,
+										Required:    true,
+										Description: "Rebalance workloads using local-path Persistent Volumes. THIS WILL RESULT IN DATA LOSS.",
+									},
+								},
+							},
+							Description: "Advanced configuration for aggressive rebalancing mode.",
+						},
 						"execution_conditions": {
 							Type:     schema.TypeList,
 							MaxItems: 1,
@@ -294,6 +309,12 @@ func stateToSchedule(d *schema.ResourceData) (*sdk.ScheduledrebalancingV1Rebalan
 		}
 
 		aggresiveMode := readOptionalValue[bool](launchConfigurationData, "aggressive_mode")
+		var aggressiveModeConfig *sdk.ScheduledrebalancingV1AggressiveModeConfig
+		if aggressiveModeConfigSection := toSection(d, "aggressive_mode_config"); aggressiveModeConfigSection != nil {
+			aggressiveModeConfig = &sdk.ScheduledrebalancingV1AggressiveModeConfig{
+				IgnoreLocalPersistentVolumes: readOptionalValue[bool](aggressiveModeConfigSection, "ignore_local_persistent_volumes"),
+			}
+		}
 
 		targetAlgorithm := sdk.ScheduledrebalancingV1TargetNodeSelectionAlgorithm(*readOptionalValue[string](launchConfigurationData, "target_node_selection_algorithm"))
 		result.LaunchConfiguration = sdk.ScheduledrebalancingV1LaunchConfiguration{
@@ -304,6 +325,7 @@ func stateToSchedule(d *schema.ResourceData) (*sdk.ScheduledrebalancingV1Rebalan
 				KeepDrainTimeoutNodes: keepDrainTimeoutNodes,
 				ExecutionConditions:   executionConditions,
 				AggressiveMode:        aggresiveMode,
+				AggressiveModeConfig:  aggressiveModeConfig,
 			},
 			Selector:                     selector,
 			TargetNodeSelectionAlgorithm: &targetAlgorithm,
@@ -336,6 +358,13 @@ func scheduleToState(schedule *sdk.ScheduledrebalancingV1RebalancingSchedule, d 
 		launchConfig["keep_drain_timeout_nodes"] = schedule.LaunchConfiguration.RebalancingOptions.KeepDrainTimeoutNodes
 		launchConfig["aggressive_mode"] = schedule.LaunchConfiguration.RebalancingOptions.AggressiveMode
 		launchConfig["target_node_selection_algorithm"] = schedule.LaunchConfiguration.TargetNodeSelectionAlgorithm
+		if schedule.LaunchConfiguration.RebalancingOptions.AggressiveModeConfig != nil {
+			launchConfig["aggressive_mode_config"] = []map[string]any{
+				{
+					"ignore_local_persistent_volumes": schedule.LaunchConfiguration.RebalancingOptions.AggressiveModeConfig.IgnoreLocalPersistentVolumes,
+				},
+			}
+		}
 
 		executionConditions := schedule.LaunchConfiguration.RebalancingOptions.ExecutionConditions
 		if executionConditions != nil {

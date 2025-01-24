@@ -32,6 +32,7 @@ Retrieve Rebalancing Schedule
 Read-Only:
 
 - `aggressive_mode` (Boolean)
+- `aggressive_mode_config` (List of Object) (see [below for nested schema](#nestedobjatt--launch_configuration--aggressive_mode_config))
 - `execution_conditions` (List of Object) (see [below for nested schema](#nestedobjatt--launch_configuration--execution_conditions))
 - `keep_drain_timeout_nodes` (Boolean)
 - `node_ttl_seconds` (Number)
@@ -39,6 +40,14 @@ Read-Only:
 - `rebalancing_min_nodes` (Number)
 - `selector` (String)
 - `target_node_selection_algorithm` (String)
+
+<a id="nestedobjatt--launch_configuration--aggressive_mode_config"></a>
+### Nested Schema for `launch_configuration.aggressive_mode_config`
+
+Read-Only:
+
+- `ignore_local_persistent_volumes` (Boolean)
+
 
 <a id="nestedobjatt--launch_configuration--execution_conditions"></a>
 ### Nested Schema for `launch_configuration.execution_conditions`
