@@ -113,6 +113,7 @@ resource "castai_node_configuration" "test" {
 		ip_based_backend_pools {
 			name = "test"
 		}
+    }
   }
 }
 `, rgName, rName))
