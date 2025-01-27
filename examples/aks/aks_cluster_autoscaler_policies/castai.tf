@@ -50,9 +50,6 @@ module "castai-aks-cluster" {
       subnets           = [azurerm_subnet.internal.id]
       tags              = var.tags
       max_pods_per_node = 40
-      aks_ephemeral_os_disk = {
-        placement = "cacheDisk"
-      }
     }
   }
 
