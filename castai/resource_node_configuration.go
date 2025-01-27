@@ -1182,7 +1182,7 @@ func flattenAKSConfig(config *sdk.NodeconfigV1AKSConfig) []map[string]interface{
 	return []map[string]interface{}{m}
 }
 
-func fromAKSEphemeralOSDisk(sdkEph *sdk.NodeconfigV1AKSConfigOsDiskEphemeral) map[string]interface{} {
+func fromAKSEphemeralOSDisk(sdkEph *sdk.NodeconfigV1AKSConfigOsDiskEphemeral) []map[string]interface{} {
 	if sdkEph == nil {
 		return nil
 	}
@@ -1206,7 +1206,7 @@ func fromAKSEphemeralOSDisk(sdkEph *sdk.NodeconfigV1AKSConfigOsDiskEphemeral) ma
 		}
 	}
 
-	return m
+	return []map[string]interface{}{m}
 }
 
 func fromAksLoadBalancers(lbs []sdk.NodeconfigV1AKSConfigLoadBalancers) []map[string]interface{} {

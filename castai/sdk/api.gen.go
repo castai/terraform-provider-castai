@@ -1911,6 +1911,9 @@ type CastaiSsoV1beta1CreateSSOConnection struct {
 	// Additional list of email domains assigned to SSO connection.
 	AdditionalEmailDomains *[]string `json:"additionalEmailDomains,omitempty"`
 
+	// ID of default role for new users signing up with SSO.
+	DefaultRoleId *string `json:"defaultRoleId"`
+
 	// EmailDomain is the email domain of the connection.
 	EmailDomain string `json:"emailDomain"`
 
@@ -1979,6 +1982,9 @@ type CastaiSsoV1beta1SSOConnection struct {
 	// CreatedAt is the time when the connection was created.
 	CreatedAt *time.Time `json:"createdAt,omitempty"`
 
+	// ID of default role for new users signing up with SSO.
+	DefaultRoleId *string `json:"defaultRoleId,omitempty"`
+
 	// EmailDomain is the email domain of the connection.
 	EmailDomain string `json:"emailDomain"`
 
@@ -2024,6 +2030,9 @@ type CastaiSsoV1beta1UpdateSSOConnection struct {
 
 	// Additional list of email domains assigned to SSO connection.
 	AdditionalEmailDomains *[]string `json:"additionalEmailDomains,omitempty"`
+
+	// ID of default role for new users signing up with SSO.
+	DefaultRoleId *string `json:"defaultRoleId"`
 
 	// EmailDomain is the email domain of the connection.
 	EmailDomain *string `json:"emailDomain,omitempty"`
