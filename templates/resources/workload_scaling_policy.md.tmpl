@@ -43,9 +43,9 @@ Using the `import` block is a simpler and more convenient way of importing resou
    terraform plan -out=import.plan -var-file=tf.vars -generate-config-out=generated.tf
    ```
 
-3. Review the `generated.tf` file and ensure the imported scaling policy is correct. Terraform will generate this file by setting values equal to zero for certain configuration parameters. 
+3. Review the `generated.tf` file and ensure the imported scaling policy is correct. Terraform will generate this file by setting values equal to zero for certain configuration parameters.
 
-For example:
+   For example:
 
    ```hcl
    cpu {

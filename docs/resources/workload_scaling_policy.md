@@ -228,7 +228,7 @@ Optional:
 ## Importing
 
 For each connected cluster, a default scaling policy is created. An existing scaling policy can be imported into the
-Terraform state using the `terraform import` command or the [`import`](https://developer.hashicorp.com/terraform/language/import#syntax) block.
+Terraform state using the `terraform import` command or the [`import`](https://developer.hashicorp.com/terraform/language/import#syntax) block (recommended for Terraform 1.5.0+).
 
 Using the `import` block is a simpler and more convenient way of importing resources.
 
@@ -250,8 +250,14 @@ Using the `import` block is a simpler and more convenient way of importing resou
    terraform plan -out=import.plan -var-file=tf.vars -generate-config-out=generated.tf
    ```
 
-3. Review the `generated.tf` file and ensure that the imported scaling policy is correct. Terraform sets zero values,
-	 e.g., for `look_back_period_seconds`. All such properties can be removed to use the defaults.
+3. Review the `generated.tf` file and ensure the imported scaling policy is correct. Terraform will generate this file by setting values equal to zero for certain configuration parameters.
+
+   For example:
+
+   ```hcl
+   cpu {
+     look_back_period_seconds = 0
+   }
 
 4. Apply the import plan:
 
@@ -323,7 +329,7 @@ can [import a single policy](#import-a-single-scaling-policy) and then use it as
    terraform apply "import.plan"
    ```
 
-### Import using `terraform import` command
+### Import using the `terraform import` command
 
 You can use the `terraform import` command to import existing scaling policy to Terraform state.
 
@@ -349,5 +355,5 @@ $ terraform import 'module.castai-eks-cluster.castai_workload_scaling_policy.thi
 ## Upsert scaling policy
 
 The recommended way is to [import](#importing) the scaling policy and then apply the changes to the policy.
-However, if that’s not possible, you can define the default policy resource yourself. The CAST AI Terraform provider,
+However, if that’s not possible, you can define the default policy resource yourself. The CAST AI Terraform provider
 will update the existing policy instead of returning an error.
