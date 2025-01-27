@@ -341,6 +341,7 @@ func resourceNodeConfiguration() *schema.Resource {
 							Type:        schema.TypeList,
 							Optional:    true,
 							Description: "Ephemeral OS disk configuration for CAST provisioned nodes",
+							MaxItems:    1,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"placement": {
@@ -1015,7 +1016,7 @@ func toAKSSConfig(obj map[string]interface{}) *sdk.NodeconfigV1AKSConfig {
 		out.OsDiskType = toAKSOSDiskType(v)
 	}
 
-	if v, ok := obj[FieldNodeConfigurationAKSEphemeralOSDisk].(string); ok {
+	if v, ok := obj[FieldNodeConfigurationAKSEphemeralOSDisk].([]any); ok {
 		out.OsDiskEphemeral = toAKSEphemeralOSDisk(v)
 	}
 
@@ -1030,11 +1031,16 @@ func toAKSSConfig(obj map[string]interface{}) *sdk.NodeconfigV1AKSConfig {
 	return out
 }
 
-func toAKSEphemeralOSDisk(obj any) *sdk.NodeconfigV1AKSConfigOsDiskEphemeral {
-	if obj == nil {
+func toAKSEphemeralOSDisk(objs []any) *sdk.NodeconfigV1AKSConfigOsDiskEphemeral {
+	if objs == nil {
 		return nil
 	}
 
+	if len(objs) != 1 {
+		return nil
+	}
+
+	obj := objs[0]
 	osDisk := &sdk.NodeconfigV1AKSConfigOsDiskEphemeral{}
 
 	if v, ok := obj.(map[string]any)["placement"].(string); ok && v != "" {
