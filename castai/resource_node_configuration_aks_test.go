@@ -43,6 +43,8 @@ func TestAccResourceNodeConfiguration_aks(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "min_disk_size", "121"),
 					resource.TestCheckResourceAttr(resourceName, "aks.0.max_pods_per_node", "32"),
 					resource.TestCheckResourceAttr(resourceName, "aks.0.aks_image_family", "azure-linux"),
+					resource.TestCheckResourceAttr(resourceName, "aks.0.ephemeral_os_disk.0.placement", "cacheDisk"),
+					resource.TestCheckResourceAttr(resourceName, "aks.0.ephemeral_os_disk.0.cache", "ReadOnly"),
 					resource.TestCheckResourceAttr(resourceName, "aks.0.loadbalancers.0.name", "test-lb"),
 					resource.TestCheckResourceAttr(resourceName, "aks.0.loadbalancers.0.ip_based_backend_pools.0.name", "test"),
 					resource.TestCheckResourceAttr(resourceName, "eks.#", "0"),
@@ -102,6 +104,10 @@ resource "castai_node_configuration" "test" {
   aks {
 	max_pods_per_node = 32
     aks_image_family = "azure-linux"
+	ephemeral_os_disk {
+    	placement = "cacheDisk"
+    	cache = "ReadOnly"
+	}
 	loadbalancers {
 		name = "test-lb"
 		ip_based_backend_pools {

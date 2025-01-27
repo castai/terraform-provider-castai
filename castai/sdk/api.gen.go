@@ -1774,6 +1774,9 @@ type CastaiServiceaccountsV1beta1DeleteServiceAccountKeyResponse = map[string]in
 // DeleteServiceAccountResponse is the response for deleting a service account.
 type CastaiServiceaccountsV1beta1DeleteServiceAccountResponse = map[string]interface{}
 
+// DeleteServiceAccountsResponse is the response for batch deleting service accounts.
+type CastaiServiceaccountsV1beta1DeleteServiceAccountsResponse = map[string]interface{}
+
 // GetServiceAccountKeyResponse is the response for getting a service account key.
 type CastaiServiceaccountsV1beta1GetServiceAccountKeyResponse struct {
 	// Key is the key for the service account.
@@ -1911,6 +1914,9 @@ type CastaiSsoV1beta1CreateSSOConnection struct {
 	// Additional list of email domains assigned to SSO connection.
 	AdditionalEmailDomains *[]string `json:"additionalEmailDomains,omitempty"`
 
+	// ID of default role for new users signing up with SSO.
+	DefaultRoleId *string `json:"defaultRoleId"`
+
 	// EmailDomain is the email domain of the connection.
 	EmailDomain string `json:"emailDomain"`
 
@@ -1979,6 +1985,9 @@ type CastaiSsoV1beta1SSOConnection struct {
 	// CreatedAt is the time when the connection was created.
 	CreatedAt *time.Time `json:"createdAt,omitempty"`
 
+	// ID of default role for new users signing up with SSO.
+	DefaultRoleId *string `json:"defaultRoleId,omitempty"`
+
 	// EmailDomain is the email domain of the connection.
 	EmailDomain string `json:"emailDomain"`
 
@@ -2024,6 +2033,9 @@ type CastaiSsoV1beta1UpdateSSOConnection struct {
 
 	// Additional list of email domains assigned to SSO connection.
 	AdditionalEmailDomains *[]string `json:"additionalEmailDomains,omitempty"`
+
+	// ID of default role for new users signing up with SSO.
+	DefaultRoleId *string `json:"defaultRoleId"`
 
 	// EmailDomain is the email domain of the connection.
 	EmailDomain *string `json:"emailDomain,omitempty"`
@@ -5196,6 +5208,12 @@ type RbacServiceAPICreateRoleBindingsJSONBody = []CastaiRbacV1beta1CreateRoleBin
 
 // RbacServiceAPIUpdateRoleBindingJSONBody defines parameters for RbacServiceAPIUpdateRoleBinding.
 type RbacServiceAPIUpdateRoleBindingJSONBody = RoleBindingIsTheRoleBindingToBeUpdated
+
+// ServiceAccountsAPIDeleteServiceAccountsParams defines parameters for ServiceAccountsAPIDeleteServiceAccounts.
+type ServiceAccountsAPIDeleteServiceAccountsParams struct {
+	// ServiceAccountIDs is the list of service account ids to be deleted.
+	ServiceAccountIds []string `form:"serviceAccountIds" json:"serviceAccountIds"`
+}
 
 // ServiceAccountsAPIListServiceAccountsParams defines parameters for ServiceAccountsAPIListServiceAccounts.
 type ServiceAccountsAPIListServiceAccountsParams struct {

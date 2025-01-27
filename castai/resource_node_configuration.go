@@ -39,6 +39,7 @@ const (
 	FieldNodeConfigurationGKE                     = "gke"
 	FieldNodeConfigurationEKSTargetGroup          = "target_group"
 	FieldNodeConfigurationAKSImageFamily          = "aks_image_family"
+	FieldNodeConfigurationAKSEphemeralOSDisk      = "ephemeral_os_disk"
 	FieldNodeConfigurationEKSImageFamily          = "eks_image_family"
 	FieldNodeConfigurationLoadbalancers           = "loadbalancers"
 	FieldNodeConfigurationAKSLoadbalancerIPPools  = "ip_based_backend_pools"
@@ -52,8 +53,12 @@ const (
 )
 
 const (
-	aksImageFamilyUbuntu     = "ubuntu"
-	aksImageFamilyAzureLinux = "azure-linux"
+	aksImageFamilyUbuntu                  = "ubuntu"
+	aksImageFamilyAzureLinux              = "azure-linux"
+	aksEphemeralDiskPlacementCacheDisk    = "cacheDisk"
+	aksEphemeralDiskPlacementResourceDisk = "resourceDisk"
+	aksDiskCacheReadOnly                  = "ReadOnly"
+	aksDiskCacheReadWrite                 = "ReadWrite"
 )
 
 func resourceNodeConfiguration() *schema.Resource {
@@ -330,6 +335,34 @@ func resourceNodeConfiguration() *schema.Resource {
 							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{aksImageFamilyUbuntu, aksImageFamilyAzureLinux}, true)),
 							DiffSuppressFunc: func(k, oldValue, newValue string, d *schema.ResourceData) bool {
 								return strings.EqualFold(oldValue, newValue)
+							},
+						},
+						FieldNodeConfigurationAKSEphemeralOSDisk: {
+							Type:        schema.TypeList,
+							Optional:    true,
+							Description: "Ephemeral OS disk configuration for CAST provisioned nodes",
+							MaxItems:    1,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"placement": {
+										Type:             schema.TypeString,
+										Required:         true,
+										Description:      "Placement of the ephemeral OS disk. One of: cacheDisk, resourceDisk",
+										ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{aksEphemeralDiskPlacementCacheDisk, aksEphemeralDiskPlacementResourceDisk}, true)),
+										DiffSuppressFunc: func(k, oldValue, newValue string, d *schema.ResourceData) bool {
+											return strings.EqualFold(oldValue, newValue)
+										},
+									},
+									"cache": {
+										Type:             schema.TypeString,
+										Optional:         true,
+										Description:      "Cache type for the ephemeral OS disk. One of: ReadOnly, ReadWrite",
+										ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{aksDiskCacheReadOnly, aksDiskCacheReadWrite}, true)),
+										DiffSuppressFunc: func(k, oldValue, newValue string, d *schema.ResourceData) bool {
+											return strings.EqualFold(oldValue, newValue)
+										},
+									},
+								},
 							},
 						},
 						FieldNodeConfigurationLoadbalancers: {
@@ -983,6 +1016,10 @@ func toAKSSConfig(obj map[string]interface{}) *sdk.NodeconfigV1AKSConfig {
 		out.OsDiskType = toAKSOSDiskType(v)
 	}
 
+	if v, ok := obj[FieldNodeConfigurationAKSEphemeralOSDisk].([]any); ok && len(v) > 0 {
+		out.OsDiskEphemeral = toAKSEphemeralOSDisk(v[0])
+	}
+
 	if v, ok := obj[FieldNodeConfigurationAKSImageFamily].(string); ok {
 		out.ImageFamily = toAKSImageFamily(v)
 	}
@@ -992,6 +1029,34 @@ func toAKSSConfig(obj map[string]interface{}) *sdk.NodeconfigV1AKSConfig {
 	}
 
 	return out
+}
+
+func toAKSEphemeralOSDisk(obj any) *sdk.NodeconfigV1AKSConfigOsDiskEphemeral {
+	if obj == nil {
+		return nil
+	}
+
+	osDisk := &sdk.NodeconfigV1AKSConfigOsDiskEphemeral{}
+
+	if v, ok := obj.(map[string]any)["placement"].(string); ok && v != "" {
+		switch v {
+		case aksEphemeralDiskPlacementResourceDisk:
+			osDisk.Placement = lo.ToPtr(sdk.PLACEMENTRESOURCEDISK)
+		case aksEphemeralDiskPlacementCacheDisk:
+			osDisk.Placement = lo.ToPtr(sdk.PLACEMENTCACHEDISK)
+		}
+	}
+
+	if v, ok := obj.(map[string]any)["cache"].(string); ok && v != "" {
+		switch v {
+		case aksDiskCacheReadWrite:
+			osDisk.CacheType = lo.ToPtr(sdk.NodeconfigV1AKSConfigOsDiskEphemeralCacheTypeREADWRITE)
+		case aksDiskCacheReadOnly:
+			osDisk.CacheType = lo.ToPtr(sdk.NodeconfigV1AKSConfigOsDiskEphemeralCacheTypeREADONLY)
+		}
+	}
+
+	return osDisk
 }
 
 func toAksLoadBalancers(obj []interface{}) *[]sdk.NodeconfigV1AKSConfigLoadBalancers {
@@ -1108,6 +1173,37 @@ func flattenAKSConfig(config *sdk.NodeconfigV1AKSConfig) []map[string]interface{
 
 	if v := config.LoadBalancers; v != nil && len(*v) > 0 {
 		m[FieldNodeConfigurationLoadbalancers] = fromAksLoadBalancers(*v)
+	}
+
+	if v := config.OsDiskEphemeral; v != nil {
+		m[FieldNodeConfigurationAKSEphemeralOSDisk] = fromAKSEphemeralOSDisk(v)
+	}
+
+	return []map[string]interface{}{m}
+}
+
+func fromAKSEphemeralOSDisk(sdkEph *sdk.NodeconfigV1AKSConfigOsDiskEphemeral) []map[string]interface{} {
+	if sdkEph == nil {
+		return nil
+	}
+
+	m := map[string]interface{}{}
+	if sdkEph.Placement != nil {
+		switch *sdkEph.Placement {
+		case sdk.PLACEMENTRESOURCEDISK:
+			m["placement"] = aksEphemeralDiskPlacementResourceDisk
+		case sdk.PLACEMENTCACHEDISK:
+			m["placement"] = aksEphemeralDiskPlacementCacheDisk
+		}
+	}
+
+	if sdkEph.CacheType != nil {
+		switch *sdkEph.CacheType {
+		case sdk.NodeconfigV1AKSConfigOsDiskEphemeralCacheTypeREADWRITE:
+			m["cache"] = aksDiskCacheReadWrite
+		case sdk.NodeconfigV1AKSConfigOsDiskEphemeralCacheTypeREADONLY:
+			m["cache"] = aksDiskCacheReadOnly
+		}
 	}
 
 	return []map[string]interface{}{m}

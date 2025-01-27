@@ -136,6 +136,7 @@ func TestSSOConnection_CreateADDConnector(t *testing.T) {
     "clientSecret": "test_secret"
   },
   "emailDomain": "test_email",
+  "defaultRoleId": null,
   "name": "test_sso"
 }
 `)
@@ -213,6 +214,7 @@ func TestSSOConnection_CreateADDConnector(t *testing.T) {
     "clientSecret": "test_secret"
   },
   "emailDomain": "test_email",
+  "defaultRoleId": null,
   "additionalEmailDomains": ["test_domain1.com", "test_domain2.com"],
   "name": "test_sso"
 }
@@ -294,6 +296,7 @@ func TestSSOConnection_CreateOktaConnector(t *testing.T) {
     "clientSecret": "test_secret"
   },
   "emailDomain": "test_email",
+  "defaultRoleId": null,
   "name": "test_sso"
 }`)
 
@@ -391,6 +394,7 @@ func TestSSOConnection_UpdateADDConnector(t *testing.T) {
     "clientId": "updated_client_id",
     "clientSecret": "updated_client_secret"
   },
+  "defaultRoleId": null,
   "name": "updated_name"
 }`)
 
@@ -452,7 +456,6 @@ func TestSSOConnection_UpdateADDConnector(t *testing.T) {
 		}
 		connectionID := "b6bfc074-a267-400f-b8f1-db0850c369b1"
 
-
 		raw := make(map[string]interface{})
 		raw[FieldSSOConnectionName] = "updated_name"
 
@@ -480,6 +483,7 @@ func TestSSOConnection_UpdateADDConnector(t *testing.T) {
     "clientSecret": "updated_client_secret"
   },
   "name": "updated_name",
+  "defaultRoleId": null,
 	"additionalEmailDomains": ["updated_domain_one", "updated_domain_two"]
 }`)
 
@@ -570,6 +574,7 @@ func TestSSOConnection_UpdateOktaConnector(t *testing.T) {
     "clientId": "updated_client_id",
     "clientSecret": "updated_client_secret"
   },
+  "defaultRoleId": null,
   "name": "updated_name"
 }`)
 
