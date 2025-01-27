@@ -1016,8 +1016,8 @@ func toAKSSConfig(obj map[string]interface{}) *sdk.NodeconfigV1AKSConfig {
 		out.OsDiskType = toAKSOSDiskType(v)
 	}
 
-	if v, ok := obj[FieldNodeConfigurationAKSEphemeralOSDisk].([]any); ok {
-		out.OsDiskEphemeral = toAKSEphemeralOSDisk(v)
+	if v, ok := obj[FieldNodeConfigurationAKSEphemeralOSDisk].([]any); ok && len(v) > 0 {
+		out.OsDiskEphemeral = toAKSEphemeralOSDisk(v[0])
 	}
 
 	if v, ok := obj[FieldNodeConfigurationAKSImageFamily].(string); ok {
@@ -1031,16 +1031,11 @@ func toAKSSConfig(obj map[string]interface{}) *sdk.NodeconfigV1AKSConfig {
 	return out
 }
 
-func toAKSEphemeralOSDisk(objs []any) *sdk.NodeconfigV1AKSConfigOsDiskEphemeral {
-	if objs == nil {
+func toAKSEphemeralOSDisk(obj any) *sdk.NodeconfigV1AKSConfigOsDiskEphemeral {
+	if obj == nil {
 		return nil
 	}
 
-	if len(objs) != 1 {
-		return nil
-	}
-
-	obj := objs[0]
 	osDisk := &sdk.NodeconfigV1AKSConfigOsDiskEphemeral{}
 
 	if v, ok := obj.(map[string]any)["placement"].(string); ok && v != "" {
