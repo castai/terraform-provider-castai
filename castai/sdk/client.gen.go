@@ -433,6 +433,9 @@ type ClientInterface interface {
 
 	RbacServiceAPIUpdateRoleBinding(ctx context.Context, organizationId string, roleBindingId string, body RbacServiceAPIUpdateRoleBindingJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// ServiceAccountsAPIDeleteServiceAccounts request
+	ServiceAccountsAPIDeleteServiceAccounts(ctx context.Context, organizationId string, params *ServiceAccountsAPIDeleteServiceAccountsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// ServiceAccountsAPIListServiceAccounts request
 	ServiceAccountsAPIListServiceAccounts(ctx context.Context, organizationId string, params *ServiceAccountsAPIListServiceAccountsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -2146,6 +2149,18 @@ func (c *Client) RbacServiceAPIUpdateRoleBindingWithBody(ctx context.Context, or
 
 func (c *Client) RbacServiceAPIUpdateRoleBinding(ctx context.Context, organizationId string, roleBindingId string, body RbacServiceAPIUpdateRoleBindingJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewRbacServiceAPIUpdateRoleBindingRequest(c.Server, organizationId, roleBindingId, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) ServiceAccountsAPIDeleteServiceAccounts(ctx context.Context, organizationId string, params *ServiceAccountsAPIDeleteServiceAccountsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewServiceAccountsAPIDeleteServiceAccountsRequest(c.Server, organizationId, params)
 	if err != nil {
 		return nil, err
 	}
@@ -7335,6 +7350,56 @@ func NewRbacServiceAPIUpdateRoleBindingRequestWithBody(server string, organizati
 	return req, nil
 }
 
+// NewServiceAccountsAPIDeleteServiceAccountsRequest generates requests for ServiceAccountsAPIDeleteServiceAccounts
+func NewServiceAccountsAPIDeleteServiceAccountsRequest(server string, organizationId string, params *ServiceAccountsAPIDeleteServiceAccountsParams) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "organizationId", runtime.ParamLocationPath, organizationId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/organizations/%s/service-accounts", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	queryValues := queryURL.Query()
+
+	if queryFrag, err := runtime.StyleParamWithLocation("form", true, "serviceAccountIds", runtime.ParamLocationQuery, params.ServiceAccountIds); err != nil {
+		return nil, err
+	} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+		return nil, err
+	} else {
+		for k, v := range parsed {
+			for _, v2 := range v {
+				queryValues.Add(k, v2)
+			}
+		}
+	}
+
+	queryURL.RawQuery = queryValues.Encode()
+
+	req, err := http.NewRequest("DELETE", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 // NewServiceAccountsAPIListServiceAccountsRequest generates requests for ServiceAccountsAPIListServiceAccounts
 func NewServiceAccountsAPIListServiceAccountsRequest(server string, organizationId string, params *ServiceAccountsAPIListServiceAccountsParams) (*http.Request, error) {
 	var err error
@@ -10493,6 +10558,9 @@ type ClientWithResponsesInterface interface {
 
 	RbacServiceAPIUpdateRoleBindingWithResponse(ctx context.Context, organizationId string, roleBindingId string, body RbacServiceAPIUpdateRoleBindingJSONRequestBody) (*RbacServiceAPIUpdateRoleBindingResponse, error)
 
+	// ServiceAccountsAPIDeleteServiceAccounts request
+	ServiceAccountsAPIDeleteServiceAccountsWithResponse(ctx context.Context, organizationId string, params *ServiceAccountsAPIDeleteServiceAccountsParams) (*ServiceAccountsAPIDeleteServiceAccountsResponse, error)
+
 	// ServiceAccountsAPIListServiceAccounts request
 	ServiceAccountsAPIListServiceAccountsWithResponse(ctx context.Context, organizationId string, params *ServiceAccountsAPIListServiceAccountsParams) (*ServiceAccountsAPIListServiceAccountsResponse, error)
 
@@ -13441,6 +13509,37 @@ func (r RbacServiceAPIUpdateRoleBindingResponse) GetBody() []byte {
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
+type ServiceAccountsAPIDeleteServiceAccountsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *CastaiServiceaccountsV1beta1DeleteServiceAccountsResponse
+	JSON204      *map[string]interface{}
+}
+
+// Status returns HTTPResponse.Status
+func (r ServiceAccountsAPIDeleteServiceAccountsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r ServiceAccountsAPIDeleteServiceAccountsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r ServiceAccountsAPIDeleteServiceAccountsResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
 type ServiceAccountsAPIListServiceAccountsResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -16276,6 +16375,15 @@ func (c *ClientWithResponses) RbacServiceAPIUpdateRoleBindingWithResponse(ctx co
 		return nil, err
 	}
 	return ParseRbacServiceAPIUpdateRoleBindingResponse(rsp)
+}
+
+// ServiceAccountsAPIDeleteServiceAccountsWithResponse request returning *ServiceAccountsAPIDeleteServiceAccountsResponse
+func (c *ClientWithResponses) ServiceAccountsAPIDeleteServiceAccountsWithResponse(ctx context.Context, organizationId string, params *ServiceAccountsAPIDeleteServiceAccountsParams) (*ServiceAccountsAPIDeleteServiceAccountsResponse, error) {
+	rsp, err := c.ServiceAccountsAPIDeleteServiceAccounts(ctx, organizationId, params)
+	if err != nil {
+		return nil, err
+	}
+	return ParseServiceAccountsAPIDeleteServiceAccountsResponse(rsp)
 }
 
 // ServiceAccountsAPIListServiceAccountsWithResponse request returning *ServiceAccountsAPIListServiceAccountsResponse
@@ -19284,6 +19392,39 @@ func ParseRbacServiceAPIUpdateRoleBindingResponse(rsp *http.Response) (*RbacServ
 			return nil, err
 		}
 		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseServiceAccountsAPIDeleteServiceAccountsResponse parses an HTTP response from a ServiceAccountsAPIDeleteServiceAccountsWithResponse call
+func ParseServiceAccountsAPIDeleteServiceAccountsResponse(rsp *http.Response) (*ServiceAccountsAPIDeleteServiceAccountsResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &ServiceAccountsAPIDeleteServiceAccountsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest CastaiServiceaccountsV1beta1DeleteServiceAccountsResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 204:
+		var dest map[string]interface{}
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON204 = &dest
 
 	}
 

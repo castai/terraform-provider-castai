@@ -1774,6 +1774,9 @@ type CastaiServiceaccountsV1beta1DeleteServiceAccountKeyResponse = map[string]in
 // DeleteServiceAccountResponse is the response for deleting a service account.
 type CastaiServiceaccountsV1beta1DeleteServiceAccountResponse = map[string]interface{}
 
+// DeleteServiceAccountsResponse is the response for batch deleting service accounts.
+type CastaiServiceaccountsV1beta1DeleteServiceAccountsResponse = map[string]interface{}
+
 // GetServiceAccountKeyResponse is the response for getting a service account key.
 type CastaiServiceaccountsV1beta1GetServiceAccountKeyResponse struct {
 	// Key is the key for the service account.
@@ -5205,6 +5208,12 @@ type RbacServiceAPICreateRoleBindingsJSONBody = []CastaiRbacV1beta1CreateRoleBin
 
 // RbacServiceAPIUpdateRoleBindingJSONBody defines parameters for RbacServiceAPIUpdateRoleBinding.
 type RbacServiceAPIUpdateRoleBindingJSONBody = RoleBindingIsTheRoleBindingToBeUpdated
+
+// ServiceAccountsAPIDeleteServiceAccountsParams defines parameters for ServiceAccountsAPIDeleteServiceAccounts.
+type ServiceAccountsAPIDeleteServiceAccountsParams struct {
+	// ServiceAccountIDs is the list of service account ids to be deleted.
+	ServiceAccountIds []string `form:"serviceAccountIds" json:"serviceAccountIds"`
+}
 
 // ServiceAccountsAPIListServiceAccountsParams defines parameters for ServiceAccountsAPIListServiceAccounts.
 type ServiceAccountsAPIListServiceAccountsParams struct {
