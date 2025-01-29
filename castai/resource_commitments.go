@@ -30,7 +30,7 @@ const (
 )
 
 var (
-	sharedCommitmentResourceSchema = lo.Assign(commitmentAssignmentsSchema, map[string]*schema.Schema{
+	sharedCommitmentResourceSchema = map[string]*schema.Schema{
 		"id": {
 			Type:        schema.TypeString,
 			Computed:    true,
@@ -77,7 +77,26 @@ var (
 			Description:      "Scaling strategy of the commitment in CAST AI. One of: Default, CPUBased, RamBased",
 			ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"Default", "CPUBased", "RamBased"}, false)),
 		},
-	})
+		"assignments": {
+			Type:        schema.TypeList,
+			Optional:    true,
+			Description: "List of assigned clusters for the commitment. If prioritization is enabled, the order of the assignments indicates the priority. The first assignment has the highest priority.",
+			Elem: &schema.Resource{
+				Schema: map[string]*schema.Schema{
+					"cluster_id": {
+						Type:        schema.TypeString,
+						Computed:    true,
+						Description: "ID of the cluster to assign the commitment to.",
+					},
+					"priority": {
+						Type:        schema.TypeInt,
+						Computed:    true,
+						Description: "Priority of the assignment. The lower the value, the higher the priority. 1 is the highest priority.",
+					},
+				},
+			},
+		},
+	}
 
 	commitmentAssignmentsSchema = map[string]*schema.Schema{
 		"assignments": {
@@ -302,7 +321,6 @@ func commitmentsDiff(_ context.Context, diff *schema.ResourceDiff, _ any) error 
 
 	switch {
 	case reservationsOk:
-		// TEMPORARY: support for Azure reservations will be added in one of the upcoming PRs
 		if err := diff.SetNew(fieldCommitmentsGCPCUDs, nil); err != nil {
 			return fmt.Errorf("setting gcp cuds field to nil: %w", err)
 		}
