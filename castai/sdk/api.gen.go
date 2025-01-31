@@ -4166,9 +4166,26 @@ type WorkloadoptimizationV1AntiAffinitySettings struct {
 
 // WorkloadoptimizationV1ApplyThresholdStrategy defines model for workloadoptimization.v1.ApplyThresholdStrategy.
 type WorkloadoptimizationV1ApplyThresholdStrategy struct {
+	CustomAdaptiveThreshold  *WorkloadoptimizationV1ApplyThresholdStrategyCustomAdaptiveThreshold  `json:"customAdaptiveThreshold,omitempty"`
+	DefaultAdaptiveThreshold *WorkloadoptimizationV1ApplyThresholdStrategyDefaultAdaptiveThreshold `json:"defaultAdaptiveThreshold,omitempty"`
+
 	// PercentageThreshold is the percentage for the apply threshold strategy.
 	PercentageThreshold *WorkloadoptimizationV1ApplyThresholdStrategyPercentageThreshold `json:"percentageThreshold,omitempty"`
 }
+
+// WorkloadoptimizationV1ApplyThresholdStrategyCustomAdaptiveThreshold defines model for workloadoptimization.v1.ApplyThresholdStrategy.CustomAdaptiveThreshold.
+type WorkloadoptimizationV1ApplyThresholdStrategyCustomAdaptiveThreshold struct {
+	// If value is close or equal to 0, the threshold will be much bigger for small values.
+	// For example when numerator, exponent is 1 and denominator is 0 the threshold for 0.5 req. CPU will be 200%.
+	Denominator float64 `json:"denominator"`
+	Exponent    float64 `json:"exponent"`
+
+	// It affects vertical stretch of function - smaller number will create smaller threshold.
+	Numerator float64 `json:"numerator"`
+}
+
+// WorkloadoptimizationV1ApplyThresholdStrategyDefaultAdaptiveThreshold defines model for workloadoptimization.v1.ApplyThresholdStrategy.DefaultAdaptiveThreshold.
+type WorkloadoptimizationV1ApplyThresholdStrategyDefaultAdaptiveThreshold = map[string]interface{}
 
 // PercentageThreshold is the percentage for the apply threshold strategy.
 type WorkloadoptimizationV1ApplyThresholdStrategyPercentageThreshold struct {
