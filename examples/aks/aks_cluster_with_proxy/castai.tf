@@ -6,8 +6,7 @@ locals {
 }
 
 module "castai-aks-cluster" {
-  # source = "castai/aks/castai"
-  source = "/Users/lachezar/Src/terraform-castai-aks"
+  source = "castai/aks/castai"
 
   api_url                = var.castai_api_url
   castai_api_token       = var.castai_api_token
