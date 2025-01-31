@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
+	"github.com/samber/lo"
 
 	"github.com/castai/terraform-provider-castai/castai/sdk"
 )
@@ -21,6 +22,10 @@ const (
 	FieldAKSClusterClientID          = "client_id"
 	FieldAKSClusterClientSecret      = "client_secret"
 	FieldAKSClusterTenantID          = "tenant_id"
+	FieldAKSHttpProxyConfig          = "http_proxy_config"
+	FieldAKSHttpProxyDestination     = "http_proxy"
+	FieldAKSHttpsProxyDestination    = "https_proxy"
+	FieldAKSNoProxyDestinations      = "no_proxy"
 )
 
 func resourceAKSCluster() *schema.Resource {
@@ -100,6 +105,37 @@ func resourceAKSCluster() *schema.Resource {
 				Computed:    true,
 				Description: "CAST AI internal credentials ID",
 			},
+			FieldAKSHttpProxyConfig: {
+				Type:        schema.TypeList,
+				Optional:    true,
+				MaxItems:    1,
+				Description: "HTTP proxy configuration for Cast nodes and node components.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						FieldAKSHttpProxyDestination: {
+							Type:             schema.TypeString,
+							Optional:         true,
+							Description:      "Address to use for proxying HTTP requests.",
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+						},
+						FieldAKSHttpsProxyDestination: {
+							Type:             schema.TypeString,
+							Optional:         true,
+							Description:      "Address to use for proxying HTTPS/TLS requests.",
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+						},
+						FieldAKSNoProxyDestinations: {
+							Type:        schema.TypeList,
+							Optional:    true,
+							Description: "List of destinations that should not go through proxy.",
+							Elem: &schema.Schema{
+								Type:             schema.TypeString,
+								ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
+							},
+						},
+					},
+				},
+			},
 		},
 	}
 }
@@ -139,6 +175,17 @@ func resourceCastaiAKSClusterRead(ctx context.Context, data *schema.ResourceData
 	if aks := resp.JSON200.Aks; aks != nil {
 		if err := data.Set(FieldAKSClusterRegion, toString(aks.Region)); err != nil {
 			return diag.FromErr(fmt.Errorf("setting region: %w", err))
+		}
+		if aks.HttpProxyConfig != nil {
+			if err := data.Set(FieldAKSHttpProxyConfig, []any{
+				map[string]any{
+					FieldAKSHttpProxyConfig:       lo.FromPtr(aks.HttpProxyConfig.HttpProxy),
+					FieldAKSHttpsProxyDestination: lo.FromPtr(aks.HttpProxyConfig.HttpsProxy),
+					FieldAKSNoProxyDestinations:   lo.FromPtr(aks.HttpProxyConfig.NoProxy),
+				},
+			}); err != nil {
+				return diag.FromErr(fmt.Errorf("setting http proxy config: %w", err))
+			}
 		}
 	}
 
@@ -200,6 +247,10 @@ func updateAKSClusterSettings(ctx context.Context, data *schema.ResourceData, cl
 		FieldAKSClusterTenantID,
 		FieldAKSClusterSubscriptionID,
 		FieldClusterCredentialsId,
+		FieldAKSHttpProxyConfig,
+		FieldAKSHttpProxyDestination,
+		FieldAKSHttpsProxyDestination,
+		FieldAKSNoProxyDestinations,
 	) {
 		log.Printf("[INFO] Nothing to update in cluster setttings.")
 		return nil
@@ -219,7 +270,25 @@ func updateAKSClusterSettings(ctx context.Context, data *schema.ResourceData, cl
 		return err
 	}
 
+	httpProxyConfigBlocks := data.Get(FieldAKSHttpProxyConfig).([]any)
+	var reqHttpProxyConfig *sdk.ExternalclusterV1HttpProxyConfig
+	if len(httpProxyConfigBlocks) > 0 {
+		proxyConfig := httpProxyConfigBlocks[0].(map[string]any)
+		noProxy := make([]string, 0)
+		for _, r := range proxyConfig[FieldAKSNoProxyDestinations].([]any) {
+			noProxy = append(noProxy, r.(string))
+		}
+		reqHttpProxyConfig = &sdk.ExternalclusterV1HttpProxyConfig{
+			HttpProxy:  lo.ToPtr(proxyConfig[FieldAKSHttpProxyDestination].(string)),
+			HttpsProxy: lo.ToPtr(proxyConfig[FieldAKSHttpsProxyDestination].(string)),
+			NoProxy:    lo.ToPtr(noProxy),
+		}
+	}
+
 	req.Credentials = &credentials
+	req.Aks = &sdk.ExternalclusterV1UpdateAKSClusterParams{
+		HttpProxyConfig: reqHttpProxyConfig,
+	}
 
 	return resourceCastaiClusterUpdate(ctx, client, data, &req)
 }
