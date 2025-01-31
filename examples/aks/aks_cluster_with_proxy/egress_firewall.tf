@@ -12,6 +12,12 @@ resource "azurerm_firewall" "egress_firewall" {
     subnet_id            = azurerm_subnet.egress_firewall_subnet.id
     public_ip_address_id = azurerm_public_ip.firewall_public_ip.id
   }
+
+  lifecycle {
+    ignore_changes = [
+      tags["CreatedAt"]
+    ]
+  }
 }
 
 resource "azurerm_public_ip" "firewall_public_ip" {

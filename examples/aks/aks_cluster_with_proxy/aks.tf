@@ -66,4 +66,10 @@ resource "azurerm_kubernetes_cluster" "aks" {
     azurerm_route_table.route_table,
     azurerm_subnet_route_table_association.route_table_association
   ]
+
+  lifecycle {
+    ignore_changes = [
+      tags["CreatedAt"]
+    ]
+  }
 }
