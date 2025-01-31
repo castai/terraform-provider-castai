@@ -58,4 +58,10 @@ module "castai-aks-cluster" {
       NO_PROXY: "${join(",", local.no_proxy_default)}"
     EOF
   ]
+
+  # Networking setup should be completed before trying to onboard cluster; otherwise components get stuck with no connectivity.
+  depends_on = [
+    azurerm_firewall.egress_firewall,
+    azurerm_firewall.explicit_firewall
+  ]
 }
