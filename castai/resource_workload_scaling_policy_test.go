@@ -46,8 +46,10 @@ func TestAccResourceWorkloadScalingPolicy(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "cpu.0.limit.0.multiplier", "1.2"),
 					resource.TestCheckResourceAttr(resourceName, "memory.0.function", "MAX"),
 					resource.TestCheckResourceAttr(resourceName, "memory.0.overhead", "0.25"),
-					resource.TestCheckResourceAttr(resourceName, "memory.0.apply_threshold_strategy.0.type", "PERCENTAGE"),
-					resource.TestCheckResourceAttr(resourceName, "memory.0.apply_threshold_strategy.0.percentage", "0.1"),
+					resource.TestCheckResourceAttr(resourceName, "memory.0.apply_threshold_strategy.0.type", "CUSTOM_ADAPTIVE"),
+					resource.TestCheckResourceAttr(resourceName, "memory.0.apply_threshold_strategy.0.numerator", "0.4"),
+					resource.TestCheckResourceAttr(resourceName, "memory.0.apply_threshold_strategy.0.denominator", "0.5"),
+					resource.TestCheckResourceAttr(resourceName, "memory.0.apply_threshold_strategy.0.exponent", "0.6"),
 					resource.TestCheckResourceAttr(resourceName, "memory.0.args.#", "0"),
 					resource.TestCheckResourceAttr(resourceName, "memory.0.min", "100"),
 					resource.TestCheckResourceAttr(resourceName, "memory.0.limit.0.type", "MULTIPLIER"),
@@ -133,8 +135,10 @@ func scalingPolicyConfig(clusterName, projectID, name string) string {
 			function 		= "MAX"
 			overhead 		= 0.25
 			apply_threshold_strategy {
-				type = "PERCENTAGE"
-				percentage = 0.1
+				type = "CUSTOM_ADAPTIVE"
+				numerator = 0.4
+				denominator = 0.5
+                exponent = 0.6
 			}
             min             = 100
 			limit {
