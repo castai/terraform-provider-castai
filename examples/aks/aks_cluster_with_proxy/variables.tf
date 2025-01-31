@@ -36,7 +36,7 @@ variable "subscription_id" {
 }
 
 variable "fqdn_without_proxy" {
-  type = list(string)
+  type        = list(string)
   description = "FQDNs that will be allowed on the AKS egress firewall and will not require proxy setup."
-  default = []
+  default     = []
 }

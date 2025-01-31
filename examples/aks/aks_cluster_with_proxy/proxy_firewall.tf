@@ -1,7 +1,7 @@
 locals {
   # Regexes from https://developer.hashicorp.com/terraform/language/functions/regex#examples
   castai_api_url_parts = regex("(?:(?P<scheme>[^:/?#]+):)?(?://(?P<authority>[^/?#]*))?(?P<path>[^?#]*)(?:\\?(?P<query>[^#]*))?(?:#(?P<fragment>.*))?", var.castai_api_url)
-  castai_api_fqdn = local.castai_api_url_parts["authority"]
+  castai_api_fqdn      = local.castai_api_url_parts["authority"]
 }
 
 resource "azurerm_public_ip" "explicit_firewall_ip" {
@@ -74,9 +74,9 @@ resource "azurerm_firewall_policy_rule_collection_group" "explicit_proxy_rules" 
   }
 
   application_rule_collection {
-    name = "allow-traffic"
-    action = "Allow"
-    priority =  200
+    name     = "allow-traffic"
+    action   = "Allow"
+    priority = 200
 
     rule {
       name = "allow-cast"

@@ -1,8 +1,8 @@
 locals {
-  http_proxy_address = "${azurerm_firewall.explicit_firewall.ip_configuration[0].private_ip_address}:${azurerm_firewall_policy.explicit_proxy_policy.explicit_proxy[0].http_port}"
+  http_proxy_address  = "${azurerm_firewall.explicit_firewall.ip_configuration[0].private_ip_address}:${azurerm_firewall_policy.explicit_proxy_policy.explicit_proxy[0].http_port}"
   https_proxy_address = "${azurerm_firewall.explicit_firewall.ip_configuration[0].private_ip_address}:${azurerm_firewall_policy.explicit_proxy_policy.explicit_proxy[0].https_port}"
-  no_proxy_default = concat([azurerm_kubernetes_cluster.aks.fqdn], var.fqdn_without_proxy)
-  no_proxy_agent = concat(local.no_proxy_default, ["169.254.169.254"])  # Agent requires access to local metadata endpoint as well
+  no_proxy_default    = concat([azurerm_kubernetes_cluster.aks.fqdn], var.fqdn_without_proxy)
+  no_proxy_agent      = concat(local.no_proxy_default, ["169.254.169.254"]) # Agent requires access to local metadata endpoint as well
 }
 
 module "castai-aks-cluster" {
@@ -18,9 +18,9 @@ module "castai-aks-cluster" {
   node_resource_group = azurerm_kubernetes_cluster.aks.node_resource_group
   resource_group      = azurerm_kubernetes_cluster.aks.resource_group_name
 
-  http_proxy = local.http_proxy_address
+  http_proxy  = local.http_proxy_address
   https_proxy = local.https_proxy_address
-  no_proxy = var.fqdn_without_proxy
+  no_proxy    = var.fqdn_without_proxy
 
   delete_nodes_on_disconnect = true
 

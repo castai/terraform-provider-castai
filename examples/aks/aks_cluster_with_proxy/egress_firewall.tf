@@ -93,9 +93,9 @@ resource "azurerm_firewall_network_rule_collection" "egress_rule" {
   dynamic "rule" {
     for_each = length(var.fqdn_without_proxy) > 0 ? [1] : []
     content {
-      name = "allowed_fqdns"
-      protocols = ["Any"]
-      source_addresses = ["10.42.1.0/24"]
+      name              = "allowed_fqdns"
+      protocols         = ["Any"]
+      source_addresses  = ["10.42.1.0/24"]
       destination_fqdns = var.fqdn_without_proxy
       destination_ports = ["80", "443"]
     }
