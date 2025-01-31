@@ -1,3 +1,9 @@
+locals {
+  # Regexes from https://developer.hashicorp.com/terraform/language/functions/regex#examples
+  castai_api_url_parts = regex("(?:(?P<scheme>[^:/?#]+):)?(?://(?P<authority>[^/?#]*))?(?P<path>[^?#]*)(?:\\?(?P<query>[^#]*))?(?:#(?P<fragment>.*))?", var.castai_api_url)
+  castai_api_fqdn = local.castai_api_url_parts["authority"]
+}
+
 resource "azurerm_public_ip" "explicit_firewall_ip" {
   name                = "explicit-firewall-public-ip"
   location            = azurerm_resource_group.rg.location
@@ -21,6 +27,12 @@ resource "azurerm_firewall" "explicit_firewall" {
   }
 
   firewall_policy_id = azurerm_firewall_policy.explicit_proxy_policy.id
+
+  lifecycle {
+    ignore_changes = [
+      tags["CreatedAt"]
+    ]
+  }
 }
 
 
@@ -77,7 +89,10 @@ resource "azurerm_firewall_policy_rule_collection_group" "explicit_proxy_rules" 
         type = "Https"
       }
       source_addresses = ["*"]
-      destination_fqdns = [ "api.cast.ai", "cast.ai", "storage.googleapis.com" ]
+      destination_fqdns = [
+        "storage.googleapis.com", # Storage required to pull custom CAST AI binaries from nodes.
+        local.castai_api_fqdn
+      ]
     }
 
     # Uncomment to allow all traffic
