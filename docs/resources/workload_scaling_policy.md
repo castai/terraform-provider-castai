@@ -36,8 +36,7 @@ resource "castai_workload_scaling_policy" "services" {
     function = "MAX"
     overhead = 0.35
     apply_threshold_strategy {
-      type       = "PERCENTAGE"
-      percentage = 0.2
+      type = "DEFAULT_ADAPTIVE"
     }
     limit {
       type       = "MULTIPLIER"
@@ -111,9 +110,17 @@ Required:
 
 - `type` (String) Defines apply theshold strategy type.
 	- PERCENTAGE - recommendation will be applied when diff of current requests and new recommendation is greater than set value
+    - DEFAULT_ADAPTIVE - will pick larger threshold percentage for small workloads and smaller percentage for large workloads.
+    - CUSTOM_ADAPTIVE - works in same way as DEFAULT_ADAPTIVE, but it allows to tweak parameters of adaptive threshold formula: percentage = numerator/(currentRequest + denominator)^exponent
 
 Optional:
 
+- `denominator` (Number) If denominator is close or equal to 0, the threshold will be much bigger for small values.For example when numerator, exponent is 1 and denominator is 0 the threshold for 0.5 req. CPU will be 200%.It must be defined for the CUSTOM_ADAPTIVE strategy.
+- `exponent` (Number) The exponent changes how fast the curve is going down. The smaller value will cause that we won’t pick extremely small number for big resources, for example:
+	- if numerator is 0, denominator is 1, and exponent is 1, for 50 CPU we will pick 2% threshold
+	- if numerator is 0, denominator is 1, and exponent is 0.8, for 50 CPU we will pick 4.3% threshold
+	It must be defined for the CUSTOM_ADAPTIVE strategy.
+- `numerator` (Number) The numerator affects vertical stretch of function used in adaptive threshold - smaller number will create smaller threshold.It must be defined for the CUSTOM_ADAPTIVE strategy.
 - `percentage` (Number) Percentage of a how much difference should there be between the current pod requests and the new recommendation. It must be defined for the PERCENTAGE strategy.
 
 
@@ -155,9 +162,17 @@ Required:
 
 - `type` (String) Defines apply theshold strategy type.
 	- PERCENTAGE - recommendation will be applied when diff of current requests and new recommendation is greater than set value
+    - DEFAULT_ADAPTIVE - will pick larger threshold percentage for small workloads and smaller percentage for large workloads.
+    - CUSTOM_ADAPTIVE - works in same way as DEFAULT_ADAPTIVE, but it allows to tweak parameters of adaptive threshold formula: percentage = numerator/(currentRequest + denominator)^exponent
 
 Optional:
 
+- `denominator` (Number) If denominator is close or equal to 0, the threshold will be much bigger for small values.For example when numerator, exponent is 1 and denominator is 0 the threshold for 0.5 req. CPU will be 200%.It must be defined for the CUSTOM_ADAPTIVE strategy.
+- `exponent` (Number) The exponent changes how fast the curve is going down. The smaller value will cause that we won’t pick extremely small number for big resources, for example:
+	- if numerator is 0, denominator is 1, and exponent is 1, for 50 CPU we will pick 2% threshold
+	- if numerator is 0, denominator is 1, and exponent is 0.8, for 50 CPU we will pick 4.3% threshold
+	It must be defined for the CUSTOM_ADAPTIVE strategy.
+- `numerator` (Number) The numerator affects vertical stretch of function used in adaptive threshold - smaller number will create smaller threshold.It must be defined for the CUSTOM_ADAPTIVE strategy.
 - `percentage` (Number) Percentage of a how much difference should there be between the current pod requests and the new recommendation. It must be defined for the PERCENTAGE strategy.
 
 

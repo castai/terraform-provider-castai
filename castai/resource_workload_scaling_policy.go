@@ -24,6 +24,10 @@ const (
 	minApplyThresholdValue          = 0.01
 	maxApplyThresholdValue          = 2.5
 	defaultApplyThresholdPercentage = 0.1
+	minNumeratorValue               = 0.0
+	minDenominatorValue             = 0.
+	maxExponentValue                = 1.
+	minExponentValue                = 0.
 )
 
 const (
@@ -31,11 +35,16 @@ const (
 	FieldLimitStrategyType       = "type"
 	FieldLimitStrategyMultiplier = "multiplier"
 
-	DeprecatedFieldApplyThreshold             = "apply_threshold"
-	FieldApplyThresholdStrategy               = "apply_threshold_strategy"
-	FieldApplyThresholdStrategyType           = "type"
-	FieldApplyThresholdStrategyPercentage     = "percentage"
-	FieldApplyThresholdStrategyPercentageType = "PERCENTAGE"
+	DeprecatedFieldApplyThreshold                  = "apply_threshold"
+	FieldApplyThresholdStrategy                    = "apply_threshold_strategy"
+	FieldApplyThresholdStrategyType                = "type"
+	FieldApplyThresholdStrategyPercentage          = "percentage"
+	FieldApplyThresholdStrategyNumerator           = "numerator"
+	FieldApplyThresholdStrategyDenominator         = "denominator"
+	FieldApplyThresholdStrategyExponent            = "exponent"
+	FieldApplyThresholdStrategyPercentageType      = "PERCENTAGE"
+	FieldApplyThresholdStrategyDefaultAdaptiveType = "DEFAULT_ADAPTIVE"
+	FieldApplyThresholdStrategyCustomAdaptiveType  = "CUSTOM_ADAPTIVE"
 )
 
 var (
@@ -281,8 +290,11 @@ func workloadScalingPolicyResourceApplyThresholdStrategySchema() *schema.Resourc
 				Type:     schema.TypeString,
 				Required: true,
 				Description: fmt.Sprintf(`Defines apply theshold strategy type.
-	- %s - recommendation will be applied when diff of current requests and new recommendation is greater than set value`, FieldApplyThresholdStrategyPercentageType),
-				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{FieldApplyThresholdStrategyPercentageType}, false)),
+	- %s - recommendation will be applied when diff of current requests and new recommendation is greater than set value
+    - %s - will pick larger threshold percentage for small workloads and smaller percentage for large workloads.
+    - %s - works in same way as %s, but it allows to tweak parameters of adaptive threshold formula: percentage = numerator/(currentRequest + denominator)^exponent
+`, FieldApplyThresholdStrategyPercentageType, FieldApplyThresholdStrategyDefaultAdaptiveType, FieldApplyThresholdStrategyCustomAdaptiveType, FieldApplyThresholdStrategyDefaultAdaptiveType),
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{FieldApplyThresholdStrategyPercentageType, FieldApplyThresholdStrategyDefaultAdaptiveType, FieldApplyThresholdStrategyCustomAdaptiveType}, false)),
 			},
 			FieldApplyThresholdStrategyPercentage: {
 				Type:     schema.TypeFloat,
@@ -290,6 +302,30 @@ func workloadScalingPolicyResourceApplyThresholdStrategySchema() *schema.Resourc
 				Description: fmt.Sprintf("Percentage of a how much difference should there be between the current pod requests and the new recommendation. "+
 					"It must be defined for the %s strategy.", FieldApplyThresholdStrategyPercentageType),
 				ValidateDiagFunc: validation.ToDiagFunc(validation.FloatBetween(minApplyThresholdValue, maxApplyThresholdValue)),
+			},
+			FieldApplyThresholdStrategyNumerator: {
+				Type:     schema.TypeFloat,
+				Optional: true,
+				Description: fmt.Sprintf("The %s affects vertical stretch of function used in adaptive threshold - smaller number will create smaller threshold."+
+					"It must be defined for the %s strategy.", FieldApplyThresholdStrategyNumerator, FieldApplyThresholdStrategyCustomAdaptiveType),
+				ValidateDiagFunc: validation.ToDiagFunc(validation.FloatAtLeast(minNumeratorValue)),
+			},
+			FieldApplyThresholdStrategyDenominator: {
+				Type:     schema.TypeFloat,
+				Optional: true,
+				Description: fmt.Sprintf("If %s is close or equal to 0, the threshold will be much bigger for small values."+
+					"For example when numerator, exponent is 1 and denominator is 0 the threshold for 0.5 req. CPU will be 200%%."+
+					"It must be defined for the %s strategy.", FieldApplyThresholdStrategyDenominator, FieldApplyThresholdStrategyCustomAdaptiveType),
+				ValidateDiagFunc: validation.ToDiagFunc(validation.FloatAtLeast(minDenominatorValue)),
+			},
+			FieldApplyThresholdStrategyExponent: {
+				Type:     schema.TypeFloat,
+				Optional: true,
+				Description: fmt.Sprintf(`The %s changes how fast the curve is going down. The smaller value will cause that we won’t pick extremely small number for big resources, for example:
+	- if numerator is 0, denominator is 1, and exponent is 1, for 50 CPU we will pick 2%% threshold
+	- if numerator is 0, denominator is 1, and exponent is 0.8, for 50 CPU we will pick 4.3%% threshold
+	It must be defined for the %s strategy.`, FieldApplyThresholdStrategyExponent, FieldApplyThresholdStrategyCustomAdaptiveType),
+				ValidateDiagFunc: validation.ToDiagFunc(validation.FloatBetween(minExponentValue, maxExponentValue)),
 			},
 		},
 	}
@@ -520,6 +556,15 @@ func validateResourceApplyThresholdStrategy(r *sdk.WorkloadoptimizationV1ApplyTh
 		}
 		return nil
 	}
+	if r.CustomAdaptiveThreshold != nil {
+		if err := validateCustomAdaptiveThresholdStrategy(r.CustomAdaptiveThreshold); err != nil {
+			return fmt.Errorf(`field %q: %w`, FieldApplyThresholdStrategy, err)
+		}
+		return nil
+	}
+	if r.DefaultAdaptiveThreshold != nil {
+		return nil
+	}
 
 	return fmt.Errorf(`field %q: field %q: unknown apply threshold strategy type`, FieldApplyThresholdStrategy, FieldApplyThresholdStrategyType)
 }
@@ -532,6 +577,25 @@ func validatePercentageThresholdStrategy(r *sdk.WorkloadoptimizationV1ApplyThres
 			FieldApplyThresholdStrategyPercentageType,
 		)
 	}
+	return nil
+}
+
+func validateCustomAdaptiveThresholdStrategy(r *sdk.WorkloadoptimizationV1ApplyThresholdStrategyCustomAdaptiveThreshold) error {
+	if r.Numerator == 0 {
+		return fmt.Errorf(
+			`field %q: value must be set for strategy type %s`,
+			FieldApplyThresholdStrategyNumerator,
+			FieldApplyThresholdStrategyCustomAdaptiveType,
+		)
+	}
+	if r.Exponent == 0 {
+		return fmt.Errorf(
+			`field %q: value must be set for strategy type %s`,
+			FieldApplyThresholdStrategyExponent,
+			FieldApplyThresholdStrategyCustomAdaptiveType,
+		)
+	}
+
 	return nil
 }
 
@@ -641,6 +705,20 @@ func toWorkloadResourceApplyThresholdStrategy(obj map[string]any) *sdk.Workloado
 		if percentage, ok := obj[FieldApplyThresholdStrategyPercentage].(float64); ok {
 			out = toWorkloadResourcePercentageThresholdStrategy(percentage)
 		}
+	case FieldApplyThresholdStrategyDefaultAdaptiveType:
+		out = toWorkloadResourceDefaultAdaptiveThresholdStrategy()
+	case FieldApplyThresholdStrategyCustomAdaptiveType:
+		var numerator, denominator, exponent float64
+		if n, ok := obj[FieldApplyThresholdStrategyNumerator].(float64); ok && n > 0 {
+			numerator = n
+		}
+		if d, ok := obj[FieldApplyThresholdStrategyDenominator].(float64); ok {
+			denominator = d
+		}
+		if e, ok := obj[FieldApplyThresholdStrategyExponent].(float64); ok && e > 0 {
+			exponent = e
+		}
+		out = toWorkloadResourceCustomAdaptiveThresholdStrategy(numerator, denominator, exponent)
 	}
 	return out
 }
@@ -702,6 +780,22 @@ func toWorkloadResourcePercentageThresholdStrategy(percentage float64) *sdk.Work
 	}
 }
 
+func toWorkloadResourceDefaultAdaptiveThresholdStrategy() *sdk.WorkloadoptimizationV1ApplyThresholdStrategy {
+	return &sdk.WorkloadoptimizationV1ApplyThresholdStrategy{
+		DefaultAdaptiveThreshold: &sdk.WorkloadoptimizationV1ApplyThresholdStrategyDefaultAdaptiveThreshold{},
+	}
+}
+
+func toWorkloadResourceCustomAdaptiveThresholdStrategy(numerator, denominator, exponent float64) *sdk.WorkloadoptimizationV1ApplyThresholdStrategy {
+	return &sdk.WorkloadoptimizationV1ApplyThresholdStrategy{
+		CustomAdaptiveThreshold: &sdk.WorkloadoptimizationV1ApplyThresholdStrategyCustomAdaptiveThreshold{
+			Numerator:   numerator,
+			Denominator: denominator,
+			Exponent:    exponent,
+		},
+	}
+}
+
 func toWorkloadScalingPoliciesMap(previousCfg map[string]interface{}, p sdk.WorkloadoptimizationV1ResourcePolicies) []map[string]interface{} {
 	m := map[string]interface{}{
 		"function": p.Function,
@@ -743,6 +837,15 @@ func applyThresholdStrategyToMap(s *sdk.WorkloadoptimizationV1ApplyThresholdStra
 	if s.PercentageThreshold != nil {
 		m[FieldApplyThresholdStrategyType] = FieldApplyThresholdStrategyPercentageType
 		m[FieldApplyThresholdStrategyPercentage] = s.PercentageThreshold.Percentage
+	}
+	if s.DefaultAdaptiveThreshold != nil {
+		m[FieldApplyThresholdStrategyType] = FieldApplyThresholdStrategyDefaultAdaptiveType
+	}
+	if s.CustomAdaptiveThreshold != nil {
+		m[FieldApplyThresholdStrategyType] = FieldApplyThresholdStrategyCustomAdaptiveType
+		m[FieldApplyThresholdStrategyNumerator] = s.CustomAdaptiveThreshold.Numerator
+		m[FieldApplyThresholdStrategyDenominator] = s.CustomAdaptiveThreshold.Denominator
+		m[FieldApplyThresholdStrategyExponent] = s.CustomAdaptiveThreshold.Exponent
 	}
 
 	if len(m) == 0 {

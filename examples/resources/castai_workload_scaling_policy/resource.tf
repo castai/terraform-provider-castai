@@ -19,8 +19,7 @@ resource "castai_workload_scaling_policy" "services" {
     function = "MAX"
     overhead = 0.35
     apply_threshold_strategy {
-      type       = "PERCENTAGE"
-      percentage = 0.2
+      type = "DEFAULT_ADAPTIVE"
     }
     limit {
       type       = "MULTIPLIER"
