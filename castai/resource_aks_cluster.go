@@ -109,7 +109,7 @@ func resourceAKSCluster() *schema.Resource {
 				Type:        schema.TypeList,
 				Optional:    true,
 				MaxItems:    1,
-				Description: "HTTP proxy configuration for Cast nodes and node components.",
+				Description: "HTTP proxy configuration for CAST AI nodes and node components.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						FieldAKSHttpProxyDestination: {
