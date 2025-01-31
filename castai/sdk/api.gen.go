@@ -123,6 +123,12 @@ const (
 	Ssd     CastaiInventoryV1beta1StorageInfoDeviceType = "ssd"
 )
 
+// Defines values for CastaiRbacV1beta1Effects.
+const (
+	ALLOW CastaiRbacV1beta1Effects = "ALLOW"
+	DENY  CastaiRbacV1beta1Effects = "DENY"
+)
+
 // Defines values for CastaiRbacV1beta1Kind.
 const (
 	SERVICEACCOUNT CastaiRbacV1beta1Kind = "SERVICE_ACCOUNT"
@@ -1508,6 +1514,9 @@ type CastaiRbacV1beta1DeleteGroupResponse = map[string]interface{}
 // CastaiRbacV1beta1DeleteRoleBindingResponse defines model for castai.rbac.v1beta1.DeleteRoleBindingResponse.
 type CastaiRbacV1beta1DeleteRoleBindingResponse = map[string]interface{}
 
+// Effects represent the effect of a permission.
+type CastaiRbacV1beta1Effects string
+
 // CastaiRbacV1beta1Group defines model for castai.rbac.v1beta1.Group.
 type CastaiRbacV1beta1Group struct {
 	// CreatedAt is the timestamp when the group was created.
@@ -1553,6 +1562,22 @@ type CastaiRbacV1beta1GroupSubject struct {
 // Kind represents the type of the member.
 type CastaiRbacV1beta1Kind string
 
+// CastaiRbacV1beta1ListRoleBindingsResponse defines model for castai.rbac.v1beta1.ListRoleBindingsResponse.
+type CastaiRbacV1beta1ListRoleBindingsResponse struct {
+	// Page defines how many and which fields should be returned.
+	NextPage     CastaiPaginationV1beta1Page     `json:"nextPage"`
+	RoleBindings *[]CastaiRbacV1beta1RoleBinding `json:"roleBindings,omitempty"`
+	TotalCount   *string                         `json:"totalCount,omitempty"`
+}
+
+// CastaiRbacV1beta1ListRolesResponse defines model for castai.rbac.v1beta1.ListRolesResponse.
+type CastaiRbacV1beta1ListRolesResponse struct {
+	// Page defines how many and which fields should be returned.
+	NextPage   *CastaiPaginationV1beta1Page `json:"nextPage,omitempty"`
+	Roles      *[]CastaiRbacV1beta1Role     `json:"roles,omitempty"`
+	TotalCount *string                      `json:"totalCount,omitempty"`
+}
+
 // CastaiRbacV1beta1Member defines model for castai.rbac.v1beta1.Member.
 type CastaiRbacV1beta1Member struct {
 	// AddedAt is the timestamp when the user has been added to the group.
@@ -1577,6 +1602,14 @@ type CastaiRbacV1beta1OrganizationScope struct {
 	Id string `json:"id"`
 }
 
+// CastaiRbacV1beta1Permissions defines model for castai.rbac.v1beta1.Permissions.
+type CastaiRbacV1beta1Permissions struct {
+	// Effects represent the effect of a permission.
+	Effect    CastaiRbacV1beta1Effects `json:"effect"`
+	Endpoints *[]string                `json:"endpoints,omitempty"`
+	Groups    *[]string                `json:"groups,omitempty"`
+}
+
 // PoliciesState represents the state of the policies generation.
 //
 //   - ACCEPTED: ACCEPTED is the state when the policies async generation is ongoing.
@@ -1594,6 +1627,35 @@ type CastaiRbacV1beta1PolicyID struct {
 type CastaiRbacV1beta1ResourceScope struct {
 	// ID is the unique identifier of the resource.
 	Id string `json:"id"`
+}
+
+// CastaiRbacV1beta1Role defines model for castai.rbac.v1beta1.Role.
+type CastaiRbacV1beta1Role struct {
+	// CreatedAt is the timestamp when the role was created.
+	CreatedAt *time.Time `json:"createdAt,omitempty"`
+
+	// Default is a flag that indicates if the role is a default role.
+	Default    *bool                           `json:"default,omitempty"`
+	Definition CastaiRbacV1beta1RoleDefinition `json:"definition"`
+
+	// Deprecated is a flag that indicates if the role is deprecated.
+	Deprecated *bool `json:"deprecated,omitempty"`
+
+	// Description is the description of the role.
+	Description *string `json:"description,omitempty"`
+	Id          *string `json:"id,omitempty"`
+
+	// Priority level of the role (higher is more important).
+	Level *int32 `json:"level,omitempty"`
+
+	// Name is the name of the role.
+	Name *string `json:"name,omitempty"`
+
+	// OrganizationID is the unique identifier of the organization.
+	OrganizationId *string `json:"organizationId,omitempty"`
+
+	// UpdatedAt is the timestamp when the role was last updated.
+	UpdatedAt *time.Time `json:"updatedAt,omitempty"`
 }
 
 // CastaiRbacV1beta1RoleBinding defines model for castai.rbac.v1beta1.RoleBinding.
@@ -1653,6 +1715,12 @@ type CastaiRbacV1beta1RoleBindingStatus struct {
 
 	// UpdatedAt is the timestamp when the status was last updated.
 	UpdatedAt *time.Time `json:"updatedAt,omitempty"`
+}
+
+// CastaiRbacV1beta1RoleDefinition defines model for castai.rbac.v1beta1.RoleDefinition.
+type CastaiRbacV1beta1RoleDefinition struct {
+	// Permissions is a list of permissions.
+	Permissions *[]CastaiRbacV1beta1Permissions `json:"permissions,omitempty"`
 }
 
 // Scope represents the scope of the role binding.
@@ -2255,6 +2323,13 @@ type CastaiUsersV1beta1UserOrganization struct {
 
 	// name of the organization.
 	Name string `json:"name"`
+
+	// Deprecated: for RBACv2 user can be bound to multiple roles.
+	// Use https://docs.cast.ai/reference/rbacserviceapi instead.
+	// user role in the organization.
+	//
+	// TODO: cleanup once all orgs are migrated to RBACv2
+	//  https://castai.atlassian.net/browse/WIRE-954
 	Role string `json:"role"`
 }
 
@@ -5220,11 +5295,30 @@ type InventoryAPIAddReservationJSONBody = CastaiInventoryV1beta1GenericReservati
 // InventoryAPIOverwriteReservationsJSONBody defines parameters for InventoryAPIOverwriteReservations.
 type InventoryAPIOverwriteReservationsJSONBody = CastaiInventoryV1beta1GenericReservationsList
 
+// RbacServiceAPIListRoleBindingsParams defines parameters for RbacServiceAPIListRoleBindings.
+type RbacServiceAPIListRoleBindingsParams struct {
+	PageLimit *string `form:"page.limit,omitempty" json:"page.limit,omitempty"`
+
+	// Cursor that defines token indicating where to start the next page.
+	// Empty value indicates to start from beginning of the dataset.
+	PageCursor *string `form:"page.cursor,omitempty" json:"page.cursor,omitempty"`
+	RoleId     *string `form:"roleId,omitempty" json:"roleId,omitempty"`
+}
+
 // RbacServiceAPICreateRoleBindingsJSONBody defines parameters for RbacServiceAPICreateRoleBindings.
 type RbacServiceAPICreateRoleBindingsJSONBody = []CastaiRbacV1beta1CreateRoleBindingsRequestRoleBinding
 
 // RbacServiceAPIUpdateRoleBindingJSONBody defines parameters for RbacServiceAPIUpdateRoleBinding.
 type RbacServiceAPIUpdateRoleBindingJSONBody = RoleBindingIsTheRoleBindingToBeUpdated
+
+// RbacServiceAPIListRolesParams defines parameters for RbacServiceAPIListRoles.
+type RbacServiceAPIListRolesParams struct {
+	PageLimit *string `form:"page.limit,omitempty" json:"page.limit,omitempty"`
+
+	// Cursor that defines token indicating where to start the next page.
+	// Empty value indicates to start from beginning of the dataset.
+	PageCursor *string `form:"page.cursor,omitempty" json:"page.cursor,omitempty"`
+}
 
 // ServiceAccountsAPIDeleteServiceAccountsParams defines parameters for ServiceAccountsAPIDeleteServiceAccounts.
 type ServiceAccountsAPIDeleteServiceAccountsParams struct {
