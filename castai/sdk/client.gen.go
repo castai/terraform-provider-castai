@@ -417,6 +417,9 @@ type ClientInterface interface {
 	// InventoryAPIDeleteReservation request
 	InventoryAPIDeleteReservation(ctx context.Context, organizationId string, reservationId string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// RbacServiceAPIListRoleBindings request
+	RbacServiceAPIListRoleBindings(ctx context.Context, organizationId string, params *RbacServiceAPIListRoleBindingsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// RbacServiceAPICreateRoleBindings request with any body
 	RbacServiceAPICreateRoleBindingsWithBody(ctx context.Context, organizationId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -432,6 +435,9 @@ type ClientInterface interface {
 	RbacServiceAPIUpdateRoleBindingWithBody(ctx context.Context, organizationId string, roleBindingId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	RbacServiceAPIUpdateRoleBinding(ctx context.Context, organizationId string, roleBindingId string, body RbacServiceAPIUpdateRoleBindingJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// RbacServiceAPIListRoles request
+	RbacServiceAPIListRoles(ctx context.Context, organizationId string, params *RbacServiceAPIListRolesParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// ServiceAccountsAPIDeleteServiceAccounts request
 	ServiceAccountsAPIDeleteServiceAccounts(ctx context.Context, organizationId string, params *ServiceAccountsAPIDeleteServiceAccountsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -2087,6 +2093,18 @@ func (c *Client) InventoryAPIDeleteReservation(ctx context.Context, organization
 	return c.Client.Do(req)
 }
 
+func (c *Client) RbacServiceAPIListRoleBindings(ctx context.Context, organizationId string, params *RbacServiceAPIListRoleBindingsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewRbacServiceAPIListRoleBindingsRequest(c.Server, organizationId, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
 func (c *Client) RbacServiceAPICreateRoleBindingsWithBody(ctx context.Context, organizationId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewRbacServiceAPICreateRoleBindingsRequestWithBody(c.Server, organizationId, contentType, body)
 	if err != nil {
@@ -2149,6 +2167,18 @@ func (c *Client) RbacServiceAPIUpdateRoleBindingWithBody(ctx context.Context, or
 
 func (c *Client) RbacServiceAPIUpdateRoleBinding(ctx context.Context, organizationId string, roleBindingId string, body RbacServiceAPIUpdateRoleBindingJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewRbacServiceAPIUpdateRoleBindingRequest(c.Server, organizationId, roleBindingId, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) RbacServiceAPIListRoles(ctx context.Context, organizationId string, params *RbacServiceAPIListRolesParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewRbacServiceAPIListRolesRequest(c.Server, organizationId, params)
 	if err != nil {
 		return nil, err
 	}
@@ -7167,6 +7197,92 @@ func NewInventoryAPIDeleteReservationRequest(server string, organizationId strin
 	return req, nil
 }
 
+// NewRbacServiceAPIListRoleBindingsRequest generates requests for RbacServiceAPIListRoleBindings
+func NewRbacServiceAPIListRoleBindingsRequest(server string, organizationId string, params *RbacServiceAPIListRoleBindingsParams) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "organizationId", runtime.ParamLocationPath, organizationId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/organizations/%s/role-bindings", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	queryValues := queryURL.Query()
+
+	if params.PageLimit != nil {
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "page.limit", runtime.ParamLocationQuery, *params.PageLimit); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.PageCursor != nil {
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "page.cursor", runtime.ParamLocationQuery, *params.PageCursor); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.RoleId != nil {
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "roleId", runtime.ParamLocationQuery, *params.RoleId); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	queryURL.RawQuery = queryValues.Encode()
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 // NewRbacServiceAPICreateRoleBindingsRequest calls the generic RbacServiceAPICreateRoleBindings builder with application/json body
 func NewRbacServiceAPICreateRoleBindingsRequest(server string, organizationId string, body RbacServiceAPICreateRoleBindingsJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
@@ -7346,6 +7462,76 @@ func NewRbacServiceAPIUpdateRoleBindingRequestWithBody(server string, organizati
 	}
 
 	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewRbacServiceAPIListRolesRequest generates requests for RbacServiceAPIListRoles
+func NewRbacServiceAPIListRolesRequest(server string, organizationId string, params *RbacServiceAPIListRolesParams) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "organizationId", runtime.ParamLocationPath, organizationId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/organizations/%s/roles", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	queryValues := queryURL.Query()
+
+	if params.PageLimit != nil {
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "page.limit", runtime.ParamLocationQuery, *params.PageLimit); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.PageCursor != nil {
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "page.cursor", runtime.ParamLocationQuery, *params.PageCursor); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	queryURL.RawQuery = queryValues.Encode()
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
 
 	return req, nil
 }
@@ -10542,6 +10728,9 @@ type ClientWithResponsesInterface interface {
 	// InventoryAPIDeleteReservation request
 	InventoryAPIDeleteReservationWithResponse(ctx context.Context, organizationId string, reservationId string) (*InventoryAPIDeleteReservationResponse, error)
 
+	// RbacServiceAPIListRoleBindings request
+	RbacServiceAPIListRoleBindingsWithResponse(ctx context.Context, organizationId string, params *RbacServiceAPIListRoleBindingsParams) (*RbacServiceAPIListRoleBindingsResponse, error)
+
 	// RbacServiceAPICreateRoleBindings request  with any body
 	RbacServiceAPICreateRoleBindingsWithBodyWithResponse(ctx context.Context, organizationId string, contentType string, body io.Reader) (*RbacServiceAPICreateRoleBindingsResponse, error)
 
@@ -10557,6 +10746,9 @@ type ClientWithResponsesInterface interface {
 	RbacServiceAPIUpdateRoleBindingWithBodyWithResponse(ctx context.Context, organizationId string, roleBindingId string, contentType string, body io.Reader) (*RbacServiceAPIUpdateRoleBindingResponse, error)
 
 	RbacServiceAPIUpdateRoleBindingWithResponse(ctx context.Context, organizationId string, roleBindingId string, body RbacServiceAPIUpdateRoleBindingJSONRequestBody) (*RbacServiceAPIUpdateRoleBindingResponse, error)
+
+	// RbacServiceAPIListRoles request
+	RbacServiceAPIListRolesWithResponse(ctx context.Context, organizationId string, params *RbacServiceAPIListRolesParams) (*RbacServiceAPIListRolesResponse, error)
 
 	// ServiceAccountsAPIDeleteServiceAccounts request
 	ServiceAccountsAPIDeleteServiceAccountsWithResponse(ctx context.Context, organizationId string, params *ServiceAccountsAPIDeleteServiceAccountsParams) (*ServiceAccountsAPIDeleteServiceAccountsResponse, error)
@@ -13389,6 +13581,36 @@ func (r InventoryAPIDeleteReservationResponse) GetBody() []byte {
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
+type RbacServiceAPIListRoleBindingsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *CastaiRbacV1beta1ListRoleBindingsResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r RbacServiceAPIListRoleBindingsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r RbacServiceAPIListRoleBindingsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r RbacServiceAPIListRoleBindingsResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
 type RbacServiceAPICreateRoleBindingsResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -13504,6 +13726,36 @@ func (r RbacServiceAPIUpdateRoleBindingResponse) StatusCode() int {
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
 func (r RbacServiceAPIUpdateRoleBindingResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type RbacServiceAPIListRolesResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *CastaiRbacV1beta1ListRolesResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r RbacServiceAPIListRolesResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r RbacServiceAPIListRolesResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r RbacServiceAPIListRolesResponse) GetBody() []byte {
 	return r.Body
 }
 
@@ -16325,6 +16577,15 @@ func (c *ClientWithResponses) InventoryAPIDeleteReservationWithResponse(ctx cont
 	return ParseInventoryAPIDeleteReservationResponse(rsp)
 }
 
+// RbacServiceAPIListRoleBindingsWithResponse request returning *RbacServiceAPIListRoleBindingsResponse
+func (c *ClientWithResponses) RbacServiceAPIListRoleBindingsWithResponse(ctx context.Context, organizationId string, params *RbacServiceAPIListRoleBindingsParams) (*RbacServiceAPIListRoleBindingsResponse, error) {
+	rsp, err := c.RbacServiceAPIListRoleBindings(ctx, organizationId, params)
+	if err != nil {
+		return nil, err
+	}
+	return ParseRbacServiceAPIListRoleBindingsResponse(rsp)
+}
+
 // RbacServiceAPICreateRoleBindingsWithBodyWithResponse request with arbitrary body returning *RbacServiceAPICreateRoleBindingsResponse
 func (c *ClientWithResponses) RbacServiceAPICreateRoleBindingsWithBodyWithResponse(ctx context.Context, organizationId string, contentType string, body io.Reader) (*RbacServiceAPICreateRoleBindingsResponse, error) {
 	rsp, err := c.RbacServiceAPICreateRoleBindingsWithBody(ctx, organizationId, contentType, body)
@@ -16375,6 +16636,15 @@ func (c *ClientWithResponses) RbacServiceAPIUpdateRoleBindingWithResponse(ctx co
 		return nil, err
 	}
 	return ParseRbacServiceAPIUpdateRoleBindingResponse(rsp)
+}
+
+// RbacServiceAPIListRolesWithResponse request returning *RbacServiceAPIListRolesResponse
+func (c *ClientWithResponses) RbacServiceAPIListRolesWithResponse(ctx context.Context, organizationId string, params *RbacServiceAPIListRolesParams) (*RbacServiceAPIListRolesResponse, error) {
+	rsp, err := c.RbacServiceAPIListRoles(ctx, organizationId, params)
+	if err != nil {
+		return nil, err
+	}
+	return ParseRbacServiceAPIListRolesResponse(rsp)
 }
 
 // ServiceAccountsAPIDeleteServiceAccountsWithResponse request returning *ServiceAccountsAPIDeleteServiceAccountsResponse
@@ -19294,6 +19564,32 @@ func ParseInventoryAPIDeleteReservationResponse(rsp *http.Response) (*InventoryA
 	return response, nil
 }
 
+// ParseRbacServiceAPIListRoleBindingsResponse parses an HTTP response from a RbacServiceAPIListRoleBindingsWithResponse call
+func ParseRbacServiceAPIListRoleBindingsResponse(rsp *http.Response) (*RbacServiceAPIListRoleBindingsResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &RbacServiceAPIListRoleBindingsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest CastaiRbacV1beta1ListRoleBindingsResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
 // ParseRbacServiceAPICreateRoleBindingsResponse parses an HTTP response from a RbacServiceAPICreateRoleBindingsWithResponse call
 func ParseRbacServiceAPICreateRoleBindingsResponse(rsp *http.Response) (*RbacServiceAPICreateRoleBindingsResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
@@ -19388,6 +19684,32 @@ func ParseRbacServiceAPIUpdateRoleBindingResponse(rsp *http.Response) (*RbacServ
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest CastaiRbacV1beta1RoleBinding
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseRbacServiceAPIListRolesResponse parses an HTTP response from a RbacServiceAPIListRolesWithResponse call
+func ParseRbacServiceAPIListRolesResponse(rsp *http.Response) (*RbacServiceAPIListRolesResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &RbacServiceAPIListRolesResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest CastaiRbacV1beta1ListRolesResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
