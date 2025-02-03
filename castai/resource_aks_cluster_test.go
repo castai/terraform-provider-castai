@@ -138,6 +138,10 @@ Tainted = false
 			}),
 		})
 		state := terraform.NewInstanceStateShimmedFromValue(val, 0)
+		state.ID = clusterID
+		// If local credentials don't match remote, drift detection would trigger.
+		// If local state has no credentials but remote has them, then the drift does exist so - there is separate test for that.
+		state.Attributes[FieldClusterCredentialsId] = "9b8d0456-177b-4a3d-b162-e68030d656aa"
 
 		data := aksResource.Data(state)
 		result := aksResource.ReadContext(ctx, data, provider)
