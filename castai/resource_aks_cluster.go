@@ -176,16 +176,20 @@ func resourceCastaiAKSClusterRead(ctx context.Context, data *schema.ResourceData
 		if err := data.Set(FieldAKSClusterRegion, toString(aks.Region)); err != nil {
 			return diag.FromErr(fmt.Errorf("setting region: %w", err))
 		}
+
+		var proxyConfig []any
 		if aks.HttpProxyConfig != nil {
-			if err := data.Set(FieldAKSHttpProxyConfig, []any{
+			proxyConfig = []any{
 				map[string]any{
-					FieldAKSHttpProxyConfig:       lo.FromPtr(aks.HttpProxyConfig.HttpProxy),
+					FieldAKSHttpProxyDestination:  lo.FromPtr(aks.HttpProxyConfig.HttpProxy),
 					FieldAKSHttpsProxyDestination: lo.FromPtr(aks.HttpProxyConfig.HttpsProxy),
 					FieldAKSNoProxyDestinations:   lo.FromPtr(aks.HttpProxyConfig.NoProxy),
 				},
-			}); err != nil {
-				return diag.FromErr(fmt.Errorf("setting http proxy config: %w", err))
 			}
+		}
+
+		if err := data.Set(FieldAKSHttpProxyConfig, proxyConfig); err != nil {
+			return diag.FromErr(fmt.Errorf("setting http proxy config: %w", err))
 		}
 	}
 
