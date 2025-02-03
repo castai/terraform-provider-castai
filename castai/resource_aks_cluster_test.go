@@ -3,6 +3,7 @@ package castai
 import (
 	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -14,6 +15,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/samber/lo"
 	"github.com/stretchr/testify/require"
 
 	"github.com/castai/terraform-provider-castai/castai/sdk"
@@ -50,7 +52,14 @@ func TestAKSClusterResourceReadContext(t *testing.T) {
 					"networkPlugin": "calico",
 					"nodeResourceGroup": "ng",
 					"region": "westeurope",
-					"subscriptionId": "subID"
+					"subscriptionId": "subID",
+					"httpProxyConfig": {
+						  "httpProxy": "http-proxy",
+						  "httpsProxy": "https-proxy",
+						  "noProxy": [
+							"domain1", "domain2"
+						  ]
+						}
 				  },
 				  "clusterNameId": "aks-cluster-b6bfc074",
 				  "private": true
@@ -74,6 +83,74 @@ func TestAKSClusterResourceReadContext(t *testing.T) {
 		r.False(result.HasError())
 		r.Equal(`ID = b6bfc074-a267-400f-b8f1-db0850c369b1
 credentials_id = 9b8d0456-177b-4a3d-b162-e68030d656aa
+http_proxy_config.# = 1
+http_proxy_config.0.http_proxy = http-proxy
+http_proxy_config.0.https_proxy = https-proxy
+http_proxy_config.0.no_proxy.# = 2
+http_proxy_config.0.no_proxy.0 = domain1
+http_proxy_config.0.no_proxy.1 = domain2
+region = westeurope
+Tainted = false
+`, data.State().String())
+	})
+
+	t.Run("when proxy config is reset remotely, shows drift", func(t *testing.T) {
+		r := require.New(t)
+		mockctrl := gomock.NewController(t)
+		mockClient := mock_sdk.NewMockClientInterface(mockctrl)
+		provider := &ProviderConfig{
+			api: &sdk.ClientWithResponses{
+				ClientInterface: mockClient,
+			},
+		}
+
+		body := io.NopCloser(bytes.NewReader([]byte(`{
+				  "id": "b6bfc074-a267-400f-b8f1-db0850c369b1",
+				  "name": "aks-cluster",
+				  "organizationId": "2836f775-aaaa-eeee-bbbb-3d3c29512692",
+				  "credentialsId": "9b8d0456-177b-4a3d-b162-e68030d656aa",
+				  "createdAt": "2022-01-27T19:03:31.570829Z",
+				  "status": "ready",
+				  "agentSnapshotReceivedAt": "2022-03-21T10:33:56.192020Z",
+				  "agentStatus": "online",
+				  "providerType": "aks",
+				  "aks": {
+					"maxPodsPerNode": 100,
+					"networkPlugin": "calico",
+					"nodeResourceGroup": "ng",
+					"region": "westeurope",
+					"subscriptionId": "subID"
+				  },
+				  "clusterNameId": "aks-cluster-b6bfc074",
+				  "private": true
+				}`)))
+		mockClient.EXPECT().
+			ExternalClusterAPIGetCluster(gomock.Any(), clusterID).
+			Return(&http.Response{StatusCode: 200, Body: body, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
+
+		aksResource := resourceAKSCluster()
+
+		val := cty.ObjectVal(map[string]cty.Value{
+			FieldAKSHttpProxyConfig: cty.ListVal([]cty.Value{
+				cty.ObjectVal(map[string]cty.Value{
+					FieldAKSHttpProxyDestination: cty.StringVal("http-proxy"),
+				}),
+			}),
+		})
+		state := terraform.NewInstanceStateShimmedFromValue(val, 0)
+		state.ID = clusterID
+		// If local credentials don't match remote, drift detection would trigger.
+		// If local state has no credentials but remote has them, then the drift does exist so - there is separate test for that.
+		state.Attributes[FieldClusterCredentialsId] = "9b8d0456-177b-4a3d-b162-e68030d656aa"
+
+		data := aksResource.Data(state)
+		result := aksResource.ReadContext(ctx, data, provider)
+		r.Nil(result)
+		r.False(result.HasError())
+		// Note: even if the array for proxy is nil, terraform saves the length so we still have _some_ state about it below.
+		r.Equal(`ID = b6bfc074-a267-400f-b8f1-db0850c369b1
+credentials_id = 9b8d0456-177b-4a3d-b162-e68030d656aa
+http_proxy_config.# = 0
 region = westeurope
 Tainted = false
 `, data.State().String())
@@ -269,6 +346,69 @@ func TestAKSClusterResourceUpdateContext(t *testing.T) {
 			r.NotEqual(credentialsID, valueAfter)
 			r.Contains(valueAfter, "drift")
 		})
+	})
+
+	t.Run("Saves proxy settings correctly", func(t *testing.T) {
+		r := require.New(t)
+		mockctrl := gomock.NewController(t)
+		mockClient := mock_sdk.NewMockClientInterface(mockctrl)
+		provider := &ProviderConfig{
+			api: &sdk.ClientWithResponses{
+				ClientInterface: mockClient,
+			},
+		}
+
+		expectedHttpProxySettings := &sdk.ExternalClusterAPIUpdateClusterJSONRequestBody{
+			Aks: &sdk.ExternalclusterV1UpdateAKSClusterParams{
+				HttpProxyConfig: &sdk.ExternalclusterV1HttpProxyConfig{
+					HttpProxy:  lo.ToPtr("http-proxy"),
+					HttpsProxy: lo.ToPtr("https-proxy"),
+					NoProxy:    lo.ToPtr([]string{"domain1", "domain2"}),
+				},
+			},
+		}
+		jsonHttpProxy, err := json.Marshal(expectedHttpProxySettings)
+		r.NoError(err)
+
+		readResponse := io.NopCloser(bytes.NewReader([]byte(`{"credentialsId": ""}`)))
+		updateResponse := io.NopCloser(bytes.NewReader(jsonHttpProxy))
+		mockClient.EXPECT().
+			ExternalClusterAPIGetCluster(gomock.Any(), clusterID).
+			Return(&http.Response{StatusCode: 200, Body: readResponse, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
+		mockClient.EXPECT().
+			ExternalClusterAPIUpdateCluster(gomock.Any(), clusterID, gomock.Any()).
+			DoAndReturn(func(_ context.Context, _ string, body sdk.ExternalClusterAPIUpdateClusterJSONRequestBody) (*http.Response, error) {
+				r.Equal(expectedHttpProxySettings.Aks.HttpProxyConfig.HttpsProxy, body.Aks.HttpProxyConfig.HttpsProxy)
+				r.Equal(expectedHttpProxySettings.Aks.HttpProxyConfig.HttpProxy, body.Aks.HttpProxyConfig.HttpProxy)
+				r.ElementsMatch(*expectedHttpProxySettings.Aks.HttpProxyConfig.NoProxy, *body.Aks.HttpProxyConfig.NoProxy)
+				return &http.Response{StatusCode: 200, Body: updateResponse, Header: map[string][]string{"Content-Type": {"json"}}}, nil
+			})
+
+		aksResource := resourceAKSCluster()
+
+		diff := map[string]any{
+			FieldAKSHttpProxyConfig: []any{
+				map[string]any{
+					FieldAKSHttpProxyDestination:  "http-proxy",
+					FieldAKSHttpsProxyDestination: "https-proxy",
+					FieldAKSNoProxyDestinations:   []any{"domain1", "domain2"},
+				},
+			},
+		}
+		data := schema.TestResourceDataRaw(t, aksResource.Schema, diff)
+		data.SetId(clusterID)
+		diagnostics := aksResource.UpdateContext(ctx, data, provider)
+
+		r.Empty(diagnostics)
+
+		// Validate that the settings are populated in state as expected.
+		stateProxyConfig := data.Get(FieldAKSHttpProxyConfig).([]any)
+		r.NotNil(stateProxyConfig)
+		r.Len(stateProxyConfig, 1)
+		proxyConfigElem := stateProxyConfig[0].(map[string]any)
+		r.Equal(proxyConfigElem[FieldAKSHttpProxyDestination], *expectedHttpProxySettings.Aks.HttpProxyConfig.HttpProxy)
+		r.Equal(proxyConfigElem[FieldAKSHttpsProxyDestination], *expectedHttpProxySettings.Aks.HttpProxyConfig.HttpsProxy)
+		r.ElementsMatch(proxyConfigElem[FieldAKSNoProxyDestinations], *expectedHttpProxySettings.Aks.HttpProxyConfig.NoProxy)
 	})
 }
 
