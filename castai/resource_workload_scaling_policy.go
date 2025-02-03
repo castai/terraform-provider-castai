@@ -354,7 +354,7 @@ func validateConvertableToNonNegativeFloat() schema.SchemaValidateDiagFunc {
 	})
 }
 
-func resourceWorkloadScalingPolicyCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceWorkloadScalingPolicyCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(*ProviderConfig).api
 
 	clusterID := d.Get(FieldClusterID).(string)
@@ -367,7 +367,7 @@ func resourceWorkloadScalingPolicyCreate(ctx context.Context, d *schema.Resource
 	}
 
 	if v, ok := d.GetOk("cpu"); ok {
-		cpu, err := toWorkloadScalingPolicies("cpu", v.([]interface{})[0].(map[string]interface{}))
+		cpu, err := toWorkloadScalingPolicies("cpu", v.([]any)[0].(map[string]any))
 		if err != nil {
 			return diag.FromErr(err)
 		}
@@ -375,7 +375,7 @@ func resourceWorkloadScalingPolicyCreate(ctx context.Context, d *schema.Resource
 	}
 
 	if v, ok := d.GetOk("memory"); ok {
-		memory, err := toWorkloadScalingPolicies("memory", v.([]interface{})[0].(map[string]interface{}))
+		memory, err := toWorkloadScalingPolicies("memory", v.([]any)[0].(map[string]any))
 		if err != nil {
 			return diag.FromErr(err)
 		}
@@ -414,7 +414,7 @@ func resourceWorkloadScalingPolicyCreate(ctx context.Context, d *schema.Resource
 	}
 }
 
-func resourceWorkloadScalingPolicyRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceWorkloadScalingPolicyRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(*ProviderConfig).api
 
 	clusterID := d.Get(FieldClusterID).(string)
@@ -424,7 +424,7 @@ func resourceWorkloadScalingPolicyRead(ctx context.Context, d *schema.ResourceDa
 	}
 
 	if !d.IsNewResource() && resp.StatusCode() == http.StatusNotFound {
-		tflog.Warn(ctx, "Scaling policy not found, removing from state", map[string]interface{}{"id": d.Id()})
+		tflog.Warn(ctx, "Scaling policy not found, removing from state", map[string]any{"id": d.Id()})
 		d.SetId("")
 		return nil
 	}
@@ -472,7 +472,7 @@ func getResourceFrom(d *schema.ResourceData, resource string) map[string]any {
 	return map[string]any{}
 }
 
-func resourceWorkloadScalingPolicyUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceWorkloadScalingPolicyUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	if !d.HasChanges(
 		"name",
 		"apply_type",
@@ -490,11 +490,11 @@ func resourceWorkloadScalingPolicyUpdate(ctx context.Context, d *schema.Resource
 
 	client := meta.(*ProviderConfig).api
 	clusterID := d.Get(FieldClusterID).(string)
-	cpu, err := toWorkloadScalingPolicies("cpu", d.Get("cpu").([]interface{})[0].(map[string]interface{}))
+	cpu, err := toWorkloadScalingPolicies("cpu", d.Get("cpu").([]any)[0].(map[string]any))
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	memory, err := toWorkloadScalingPolicies("memory", d.Get("memory").([]interface{})[0].(map[string]interface{}))
+	memory, err := toWorkloadScalingPolicies("memory", d.Get("memory").([]any)[0].(map[string]any))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -519,7 +519,7 @@ func resourceWorkloadScalingPolicyUpdate(ctx context.Context, d *schema.Resource
 	return resourceWorkloadScalingPolicyRead(ctx, d, meta)
 }
 
-func resourceWorkloadScalingPolicyDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceWorkloadScalingPolicyDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(*ProviderConfig).api
 	clusterID := d.Get(FieldClusterID).(string)
 
@@ -528,7 +528,7 @@ func resourceWorkloadScalingPolicyDelete(ctx context.Context, d *schema.Resource
 		return diag.FromErr(err)
 	}
 	if resp.StatusCode() == http.StatusNotFound {
-		tflog.Debug(ctx, "Scaling policy not found, skipping delete", map[string]interface{}{"id": d.Id()})
+		tflog.Debug(ctx, "Scaling policy not found, skipping delete", map[string]any{"id": d.Id()})
 		return nil
 	}
 	if err := sdk.StatusOk(resp); err != nil {
@@ -536,7 +536,7 @@ func resourceWorkloadScalingPolicyDelete(ctx context.Context, d *schema.Resource
 	}
 
 	if resp.JSON200.IsReadonly || resp.JSON200.IsDefault {
-		tflog.Warn(ctx, "Default/readonly scaling policy can't be deleted, removing from state", map[string]interface{}{
+		tflog.Warn(ctx, "Default/readonly scaling policy can't be deleted, removing from state", map[string]any{
 			"id": d.Id(),
 		})
 		return nil
@@ -553,20 +553,20 @@ func resourceWorkloadScalingPolicyDelete(ctx context.Context, d *schema.Resource
 	return nil
 }
 
-func resourceWorkloadScalingPolicyDiff(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
+func resourceWorkloadScalingPolicyDiff(_ context.Context, d *schema.ResourceDiff, _ any) error {
 	// Since tf doesn't support cross field validation, doing it here.
-	_, err := toWorkloadScalingPolicies("cpu", d.Get("cpu").([]interface{})[0].(map[string]interface{}))
+	_, err := toWorkloadScalingPolicies("cpu", d.Get("cpu").([]any)[0].(map[string]any))
 	if err != nil {
 		return err
 	}
-	_, err = toWorkloadScalingPolicies("memory", d.Get("memory").([]interface{})[0].(map[string]interface{}))
+	_, err = toWorkloadScalingPolicies("memory", d.Get("memory").([]any)[0].(map[string]any))
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func workloadScalingPolicyImporter(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func workloadScalingPolicyImporter(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
 	clusterID, nameOrID, found := strings.Cut(d.Id(), "/")
 	if !found {
 		return nil, fmt.Errorf("expected import id with format: <cluster_id>/<scaling_policy name or id>, got: %q", d.Id())
@@ -593,14 +593,14 @@ func workloadScalingPolicyImporter(ctx context.Context, d *schema.ResourceData, 
 	return []*schema.ResourceData{d}, nil
 }
 
-func toWorkloadScalingPolicies(resource string, obj map[string]interface{}) (sdk.WorkloadoptimizationV1ResourcePolicies, error) {
+func toWorkloadScalingPolicies(resource string, obj map[string]any) (sdk.WorkloadoptimizationV1ResourcePolicies, error) {
 	var err error
 	out := sdk.WorkloadoptimizationV1ResourcePolicies{}
 
 	if v, ok := obj["function"].(string); ok {
 		out.Function = sdk.WorkloadoptimizationV1ResourcePoliciesFunction(v)
 	}
-	if v, ok := obj["args"].([]interface{}); ok && len(v) > 0 {
+	if v, ok := obj["args"].([]any); ok && len(v) > 0 {
 		out.Args = toStringList(v)
 	}
 
@@ -641,7 +641,7 @@ func toWorkloadScalingPolicies(resource string, obj map[string]interface{}) (sdk
 	return out, err
 }
 
-func resolveApplyThresholdStrategy(obj map[string]interface{}) (*sdk.WorkloadoptimizationV1ApplyThresholdStrategy, error) {
+func resolveApplyThresholdStrategy(obj map[string]any) (*sdk.WorkloadoptimizationV1ApplyThresholdStrategy, error) {
 	if v, ok := obj[DeprecatedFieldApplyThreshold].(float64); ok && v > 0 {
 		return toWorkloadResourcePercentageThresholdStrategy(v), nil
 	}
@@ -793,8 +793,8 @@ func toWorkloadResourceCustomAdaptiveThresholdStrategy(numerator, denominator, e
 	}
 }
 
-func toWorkloadScalingPoliciesMap(previousCfg map[string]interface{}, p sdk.WorkloadoptimizationV1ResourcePolicies) []map[string]interface{} {
-	m := map[string]interface{}{
+func toWorkloadScalingPoliciesMap(previousCfg map[string]any, p sdk.WorkloadoptimizationV1ResourcePolicies) []map[string]any {
+	m := map[string]any{
 		"function": p.Function,
 		"args":     p.Args,
 		"overhead": p.Overhead,
@@ -822,7 +822,7 @@ func toWorkloadScalingPoliciesMap(previousCfg map[string]interface{}, p sdk.Work
 		m["management_option"] = string(*p.ManagementOption)
 	}
 
-	return []map[string]interface{}{m}
+	return []map[string]any{m}
 }
 
 func applyThresholdStrategyToMap(s *sdk.WorkloadoptimizationV1ApplyThresholdStrategy) []map[string]any {
@@ -852,7 +852,7 @@ func applyThresholdStrategyToMap(s *sdk.WorkloadoptimizationV1ApplyThresholdStra
 	return []map[string]any{m}
 }
 
-func toStartup(startup map[string]interface{}) *sdk.WorkloadoptimizationV1StartupSettings {
+func toStartup(startup map[string]any) *sdk.WorkloadoptimizationV1StartupSettings {
 	if len(startup) == 0 {
 		return nil
 	}
@@ -865,12 +865,12 @@ func toStartup(startup map[string]interface{}) *sdk.WorkloadoptimizationV1Startu
 	return result
 }
 
-func toStartupMap(s *sdk.WorkloadoptimizationV1StartupSettings) []map[string]interface{} {
+func toStartupMap(s *sdk.WorkloadoptimizationV1StartupSettings) []map[string]any {
 	if s == nil {
 		return nil
 	}
 
-	m := map[string]interface{}{}
+	m := map[string]any{}
 
 	if s.PeriodSeconds != nil {
 		m["period_seconds"] = int(*s.PeriodSeconds)
@@ -880,7 +880,7 @@ func toStartupMap(s *sdk.WorkloadoptimizationV1StartupSettings) []map[string]int
 		return nil
 	}
 
-	return []map[string]interface{}{m}
+	return []map[string]any{m}
 }
 
 func toDownscaling(downscaling map[string]any) *sdk.WorkloadoptimizationV1DownscalingSettings {
