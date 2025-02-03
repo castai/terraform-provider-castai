@@ -26,7 +26,6 @@ const (
 	maxApplyThresholdValue          = 2.5
 	defaultApplyThresholdPercentage = 0.1
 	minNumeratorValue               = 0.0
-	minDenominatorValue             = 0.
 	maxExponentValue                = 1.
 	minExponentValue                = 0.
 )
@@ -293,8 +292,8 @@ func workloadScalingPolicyResourceApplyThresholdStrategySchema() *schema.Resourc
 				Description: fmt.Sprintf(`Defines apply theshold strategy type.
 	- %s - recommendation will be applied when diff of current requests and new recommendation is greater than set value
     - %s - will pick larger threshold percentage for small workloads and smaller percentage for large workloads.
-    - %s - works in same way as %s, but it allows to tweak parameters of adaptive threshold formula: percentage = numerator/(currentRequest + denominator)^exponent
-`, FieldApplyThresholdStrategyPercentageType, FieldApplyThresholdStrategyDefaultAdaptiveType, FieldApplyThresholdStrategyCustomAdaptiveType, FieldApplyThresholdStrategyDefaultAdaptiveType),
+    - %s - works in same way as %s, but it allows to tweak parameters of adaptive threshold formula: percentage = numerator/(currentRequest + denominator)^exponent. This strategy is for advance use cases, we recommend to use %s strategy.
+`, FieldApplyThresholdStrategyPercentageType, FieldApplyThresholdStrategyDefaultAdaptiveType, FieldApplyThresholdStrategyCustomAdaptiveType, FieldApplyThresholdStrategyDefaultAdaptiveType, FieldApplyThresholdStrategyDefaultAdaptiveType),
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{FieldApplyThresholdStrategyPercentageType, FieldApplyThresholdStrategyDefaultAdaptiveType, FieldApplyThresholdStrategyCustomAdaptiveType}, false)),
 			},
 			FieldApplyThresholdStrategyPercentage: {
@@ -318,7 +317,7 @@ func workloadScalingPolicyResourceApplyThresholdStrategySchema() *schema.Resourc
 				Description: fmt.Sprintf("If %s is close or equal to 0, the threshold will be much bigger for small values."+
 					"For example when numerator, exponent is 1 and denominator is 0 the threshold for 0.5 req. CPU will be 200%%."+
 					"It must be defined for the %s strategy.", FieldApplyThresholdStrategyDenominator, FieldApplyThresholdStrategyCustomAdaptiveType),
-				ValidateDiagFunc: validateConvertableToFloat(),
+				ValidateDiagFunc: validateConvertableToNonNegativeFloat(),
 			},
 			FieldApplyThresholdStrategyExponent: {
 				Type:     schema.TypeFloat,
@@ -333,19 +332,22 @@ func workloadScalingPolicyResourceApplyThresholdStrategySchema() *schema.Resourc
 	}
 }
 
-func validateConvertableToFloat() schema.SchemaValidateDiagFunc {
-	return validation.ToDiagFunc(func(i interface{}, k string) ([]string, []error) {
-		v, ok := i.(string)
+func validateConvertableToNonNegativeFloat() schema.SchemaValidateDiagFunc {
+	return validation.ToDiagFunc(func(value any, key string) ([]string, []error) {
+		v, ok := value.(string)
 		if !ok {
-			return nil, []error{fmt.Errorf("expected type of %q to be string", k)}
+			return nil, []error{fmt.Errorf("expected type of %q to be string", key)}
 		}
 		if v == "" {
 			return nil, nil
 		}
 
-		_, err := strconv.ParseFloat(v, 64)
+		number, err := strconv.ParseFloat(v, 64)
 		if err != nil {
-			return nil, []error{fmt.Errorf("failed to parse %q: %w", k, err)}
+			return nil, []error{fmt.Errorf("failed to parse %q: %w", key, err)}
+		}
+		if number < 0 {
+			return nil, []error{fmt.Errorf("expected %q to be non-negative, got %g", key, number)}
 		}
 
 		return nil, nil
