@@ -44,7 +44,7 @@ resource "castai_aks_cluster" "this" {
 ### Optional
 
 - `delete_nodes_on_disconnect` (Boolean) Should CAST AI remove nodes managed by CAST.AI on disconnect.
-- `http_proxy_config` (Block List, Max: 1) HTTP proxy configuration for Cast nodes and node components. (see [below for nested schema](#nestedblock--http_proxy_config))
+- `http_proxy_config` (Block List, Max: 1) HTTP proxy configuration for CAST AI nodes and node components. (see [below for nested schema](#nestedblock--http_proxy_config))
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only
