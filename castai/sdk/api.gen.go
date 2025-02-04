@@ -3714,8 +3714,9 @@ type NodetemplatesV1TemplateConstraints struct {
 	MinMemory *int32 `json:"minMemory"`
 
 	// Should include on-demand instances in the considered pool.
-	OnDemand *bool     `json:"onDemand"`
-	Os       *[]string `json:"os,omitempty"`
+	OnDemand       *bool                                             `json:"onDemand"`
+	Os             *[]string                                         `json:"os,omitempty"`
+	ResourceLimits *NodetemplatesV1TemplateConstraintsResourceLimits `json:"resourceLimits,omitempty"`
 
 	// Should include spot instances in the considered pool.
 	// Note 1: if both spot and on-demand are false, then on-demand is assumed.
@@ -3780,6 +3781,15 @@ type NodetemplatesV1TemplateConstraintsGPUConstraints struct {
 type NodetemplatesV1TemplateConstraintsInstanceFamilyConstraints struct {
 	Exclude *[]string `json:"exclude,omitempty"`
 	Include *[]string `json:"include,omitempty"`
+}
+
+// NodetemplatesV1TemplateConstraintsResourceLimits defines model for nodetemplates.v1.TemplateConstraints.ResourceLimits.
+type NodetemplatesV1TemplateConstraintsResourceLimits struct {
+	// If set, enables CPU limits for the node template.
+	CpuLimitEnabled *bool `json:"cpuLimitEnabled,omitempty"`
+
+	// Specifies the maximum number of CPU cores that the nodes provisioned from this template can collectively have.
+	CpuLimitMaxCores *int32 `json:"cpuLimitMaxCores,omitempty"`
 }
 
 // NodetemplatesV1UpdateNodeTemplate defines model for nodetemplates.v1.UpdateNodeTemplate.
@@ -4502,6 +4512,11 @@ type WorkloadoptimizationV1KeyValuePair struct {
 	Value string `json:"value"`
 }
 
+// WorkloadoptimizationV1ListResourceQuotasResponse defines model for workloadoptimization.v1.ListResourceQuotasResponse.
+type WorkloadoptimizationV1ListResourceQuotasResponse struct {
+	Items []WorkloadoptimizationV1ResourceQuota `json:"items"`
+}
+
 // WorkloadoptimizationV1ListWorkloadEventsResponse defines model for workloadoptimization.v1.ListWorkloadEventsResponse.
 type WorkloadoptimizationV1ListWorkloadEventsResponse struct {
 	Items []WorkloadoptimizationV1WorkloadEvent `json:"items"`
@@ -4767,6 +4782,29 @@ type WorkloadoptimizationV1ResourcePoliciesFunction string
 type WorkloadoptimizationV1ResourceQuantity struct {
 	CpuCores  *float64 `json:"cpuCores"`
 	MemoryGib *float64 `json:"memoryGib"`
+}
+
+// WorkloadoptimizationV1ResourceQuota defines model for workloadoptimization.v1.ResourceQuota.
+type WorkloadoptimizationV1ResourceQuota struct {
+	ClusterId      string                                       `json:"clusterId"`
+	CpuLimits      *WorkloadoptimizationV1ResourceQuotaResource `json:"cpuLimits,omitempty"`
+	CpuRequests    *WorkloadoptimizationV1ResourceQuotaResource `json:"cpuRequests,omitempty"`
+	Id             string                                       `json:"id"`
+	MemoryLimits   *WorkloadoptimizationV1ResourceQuotaResource `json:"memoryLimits,omitempty"`
+	MemoryRequests *WorkloadoptimizationV1ResourceQuotaResource `json:"memoryRequests,omitempty"`
+	Name           string                                       `json:"name"`
+	Namespace      string                                       `json:"namespace"`
+	Object         map[string]interface{}                       `json:"object"`
+	OrganizationId string                                       `json:"organizationId"`
+}
+
+// WorkloadoptimizationV1ResourceQuotaResource defines model for workloadoptimization.v1.ResourceQuotaResource.
+type WorkloadoptimizationV1ResourceQuotaResource struct {
+	// The quota value for a resource. For memory - this is in MiB, for CPU - this is in cores.
+	Hard *float64 `json:"hard"`
+
+	// The used amount of a resource. For memory - this is in MiB, for CPU - this is in cores.
+	Used *float64 `json:"used"`
 }
 
 // WorkloadoptimizationV1Resources defines model for workloadoptimization.v1.Resources.

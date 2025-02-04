@@ -623,6 +623,9 @@ type ClientInterface interface {
 
 	WorkloadOptimizationAPIAssignScalingPolicyWorkloads(ctx context.Context, clusterId string, policyId string, body WorkloadOptimizationAPIAssignScalingPolicyWorkloadsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// WorkloadOptimizationAPIListResourceQuotas request
+	WorkloadOptimizationAPIListResourceQuotas(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// WorkloadOptimizationAPIListWorkloadEvents request
 	WorkloadOptimizationAPIListWorkloadEvents(ctx context.Context, clusterId string, params *WorkloadOptimizationAPIListWorkloadEventsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -2983,6 +2986,18 @@ func (c *Client) WorkloadOptimizationAPIAssignScalingPolicyWorkloadsWithBody(ctx
 
 func (c *Client) WorkloadOptimizationAPIAssignScalingPolicyWorkloads(ctx context.Context, clusterId string, policyId string, body WorkloadOptimizationAPIAssignScalingPolicyWorkloadsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewWorkloadOptimizationAPIAssignScalingPolicyWorkloadsRequest(c.Server, clusterId, policyId, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) WorkloadOptimizationAPIListResourceQuotas(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewWorkloadOptimizationAPIListResourceQuotasRequest(c.Server, clusterId)
 	if err != nil {
 		return nil, err
 	}
@@ -9802,6 +9817,40 @@ func NewWorkloadOptimizationAPIAssignScalingPolicyWorkloadsRequestWithBody(serve
 	return req, nil
 }
 
+// NewWorkloadOptimizationAPIListResourceQuotasRequest generates requests for WorkloadOptimizationAPIListResourceQuotas
+func NewWorkloadOptimizationAPIListResourceQuotasRequest(server string, clusterId string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "clusterId", runtime.ParamLocationPath, clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/workload-autoscaling/clusters/%s/resource-quotas", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 // NewWorkloadOptimizationAPIListWorkloadEventsRequest generates requests for WorkloadOptimizationAPIListWorkloadEvents
 func NewWorkloadOptimizationAPIListWorkloadEventsRequest(server string, clusterId string, params *WorkloadOptimizationAPIListWorkloadEventsParams) (*http.Request, error) {
 	var err error
@@ -10933,6 +10982,9 @@ type ClientWithResponsesInterface interface {
 	WorkloadOptimizationAPIAssignScalingPolicyWorkloadsWithBodyWithResponse(ctx context.Context, clusterId string, policyId string, contentType string, body io.Reader) (*WorkloadOptimizationAPIAssignScalingPolicyWorkloadsResponse, error)
 
 	WorkloadOptimizationAPIAssignScalingPolicyWorkloadsWithResponse(ctx context.Context, clusterId string, policyId string, body WorkloadOptimizationAPIAssignScalingPolicyWorkloadsJSONRequestBody) (*WorkloadOptimizationAPIAssignScalingPolicyWorkloadsResponse, error)
+
+	// WorkloadOptimizationAPIListResourceQuotas request
+	WorkloadOptimizationAPIListResourceQuotasWithResponse(ctx context.Context, clusterId string) (*WorkloadOptimizationAPIListResourceQuotasResponse, error)
 
 	// WorkloadOptimizationAPIListWorkloadEvents request
 	WorkloadOptimizationAPIListWorkloadEventsWithResponse(ctx context.Context, clusterId string, params *WorkloadOptimizationAPIListWorkloadEventsParams) (*WorkloadOptimizationAPIListWorkloadEventsResponse, error)
@@ -15261,6 +15313,36 @@ func (r WorkloadOptimizationAPIAssignScalingPolicyWorkloadsResponse) GetBody() [
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
+type WorkloadOptimizationAPIListResourceQuotasResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *WorkloadoptimizationV1ListResourceQuotasResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r WorkloadOptimizationAPIListResourceQuotasResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r WorkloadOptimizationAPIListResourceQuotasResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r WorkloadOptimizationAPIListResourceQuotasResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
 type WorkloadOptimizationAPIListWorkloadEventsResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -17231,6 +17313,15 @@ func (c *ClientWithResponses) WorkloadOptimizationAPIAssignScalingPolicyWorkload
 		return nil, err
 	}
 	return ParseWorkloadOptimizationAPIAssignScalingPolicyWorkloadsResponse(rsp)
+}
+
+// WorkloadOptimizationAPIListResourceQuotasWithResponse request returning *WorkloadOptimizationAPIListResourceQuotasResponse
+func (c *ClientWithResponses) WorkloadOptimizationAPIListResourceQuotasWithResponse(ctx context.Context, clusterId string) (*WorkloadOptimizationAPIListResourceQuotasResponse, error) {
+	rsp, err := c.WorkloadOptimizationAPIListResourceQuotas(ctx, clusterId)
+	if err != nil {
+		return nil, err
+	}
+	return ParseWorkloadOptimizationAPIListResourceQuotasResponse(rsp)
 }
 
 // WorkloadOptimizationAPIListWorkloadEventsWithResponse request returning *WorkloadOptimizationAPIListWorkloadEventsResponse
@@ -21001,6 +21092,32 @@ func ParseWorkloadOptimizationAPIAssignScalingPolicyWorkloadsResponse(rsp *http.
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest WorkloadoptimizationV1AssignScalingPolicyWorkloadsResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseWorkloadOptimizationAPIListResourceQuotasResponse parses an HTTP response from a WorkloadOptimizationAPIListResourceQuotasWithResponse call
+func ParseWorkloadOptimizationAPIListResourceQuotasResponse(rsp *http.Response) (*WorkloadOptimizationAPIListResourceQuotasResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &WorkloadOptimizationAPIListResourceQuotasResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest WorkloadoptimizationV1ListResourceQuotasResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
