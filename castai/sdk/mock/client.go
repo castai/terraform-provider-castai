@@ -4035,6 +4035,26 @@ func (mr *MockClientInterfaceMockRecorder) WorkloadOptimizationAPIGetWorkloadsSu
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIGetWorkloadsSummary", reflect.TypeOf((*MockClientInterface)(nil).WorkloadOptimizationAPIGetWorkloadsSummary), varargs...)
 }
 
+// WorkloadOptimizationAPIListResourceQuotas mocks base method.
+func (m *MockClientInterface) WorkloadOptimizationAPIListResourceQuotas(ctx context.Context, clusterId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "WorkloadOptimizationAPIListResourceQuotas", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// WorkloadOptimizationAPIListResourceQuotas indicates an expected call of WorkloadOptimizationAPIListResourceQuotas.
+func (mr *MockClientInterfaceMockRecorder) WorkloadOptimizationAPIListResourceQuotas(ctx, clusterId interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIListResourceQuotas", reflect.TypeOf((*MockClientInterface)(nil).WorkloadOptimizationAPIListResourceQuotas), varargs...)
+}
+
 // WorkloadOptimizationAPIListWorkloadEvents mocks base method.
 func (m *MockClientInterface) WorkloadOptimizationAPIListWorkloadEvents(ctx context.Context, clusterId string, params *sdk.WorkloadOptimizationAPIListWorkloadEventsParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
@@ -11126,6 +11146,41 @@ func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPIGetWorkloadsSu
 func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPIGetWorkloadsSummaryWithResponse(ctx, clusterId interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIGetWorkloadsSummaryWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPIGetWorkloadsSummaryWithResponse), ctx, clusterId)
+}
+
+// WorkloadOptimizationAPIListResourceQuotas mocks base method.
+func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPIListResourceQuotas(ctx context.Context, clusterId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "WorkloadOptimizationAPIListResourceQuotas", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// WorkloadOptimizationAPIListResourceQuotas indicates an expected call of WorkloadOptimizationAPIListResourceQuotas.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPIListResourceQuotas(ctx, clusterId interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIListResourceQuotas", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPIListResourceQuotas), varargs...)
+}
+
+// WorkloadOptimizationAPIListResourceQuotasWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPIListResourceQuotasWithResponse(ctx context.Context, clusterId string) (*sdk.WorkloadOptimizationAPIListResourceQuotasResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "WorkloadOptimizationAPIListResourceQuotasWithResponse", ctx, clusterId)
+	ret0, _ := ret[0].(*sdk.WorkloadOptimizationAPIListResourceQuotasResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// WorkloadOptimizationAPIListResourceQuotasWithResponse indicates an expected call of WorkloadOptimizationAPIListResourceQuotasWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPIListResourceQuotasWithResponse(ctx, clusterId interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIListResourceQuotasWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPIListResourceQuotasWithResponse), ctx, clusterId)
 }
 
 // WorkloadOptimizationAPIListWorkloadEvents mocks base method.
