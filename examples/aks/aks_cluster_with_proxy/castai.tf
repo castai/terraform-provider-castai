@@ -36,6 +36,7 @@ module "castai-aks-cluster" {
     }
   }
 
+  # Configure proxy and disable VPA. The VPA image source is dynamic and hard to make a static "firewall" rule for - this should make running the example easier.
   agent_values = [
     <<-EOF
     podAnnotations:
@@ -44,6 +45,8 @@ module "castai-aks-cluster" {
       HTTP_PROXY: "${local.http_proxy_address}"
       HTTPS_PROXY: "${local.https_proxy_address}"
       NO_PROXY: "${join(",", local.no_proxy_agent)}"
+    clusterVPA:
+      enabled: false
     EOF
   ]
 
@@ -61,6 +64,7 @@ module "castai-aks-cluster" {
   # Networking setup should be completed before trying to onboard cluster; otherwise components get stuck with no connectivity.
   depends_on = [
     azurerm_firewall.egress_firewall,
-    azurerm_firewall.explicit_firewall
+    azurerm_firewall.explicit_firewall,
+    azurerm_firewall_network_rule_collection.egress_rule
   ]
 }
