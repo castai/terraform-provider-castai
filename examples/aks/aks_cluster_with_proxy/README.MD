@@ -11,9 +11,10 @@ The AKS cluster has the following setup:
 The goal of this example is to show how to configure CAST AI components so http proxy is enforced when communicating with the platform. 
 
 Example configuration should be analysed in the following order:
-1. Create Virtual network - `vnet.tf`
-2. Create AKS cluster - `aks.tf`
-3. Create CAST AI related resources to connect AKS cluster to CAST AI, configure Autoscaler and Node Configurations - `castai.tf`
+1. Setup network topology - `network.tf`
+2. Setup firewalls - `egress_firewall.tf` and `proxy_firewall.tf`
+3. Create AKS cluster and configure it to use one firewall for egress - `aks.tf`
+4. Create CAST AI related resources to connect AKS cluster to CAST AI and configure basic cluster components to use egress proxy - `castai.tf`.
 
 # Usage
 1. Rename `tf.vars.example` to `tf.vars`
