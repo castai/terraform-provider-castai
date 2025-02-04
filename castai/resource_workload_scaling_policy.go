@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 
@@ -24,6 +25,9 @@ const (
 	minApplyThresholdValue          = 0.01
 	maxApplyThresholdValue          = 2.5
 	defaultApplyThresholdPercentage = 0.1
+	minNumeratorValue               = 0.0
+	maxExponentValue                = 1.
+	minExponentValue                = 0.
 )
 
 const (
@@ -31,11 +35,16 @@ const (
 	FieldLimitStrategyType       = "type"
 	FieldLimitStrategyMultiplier = "multiplier"
 
-	DeprecatedFieldApplyThreshold             = "apply_threshold"
-	FieldApplyThresholdStrategy               = "apply_threshold_strategy"
-	FieldApplyThresholdStrategyType           = "type"
-	FieldApplyThresholdStrategyPercentage     = "percentage"
-	FieldApplyThresholdStrategyPercentageType = "PERCENTAGE"
+	DeprecatedFieldApplyThreshold                  = "apply_threshold"
+	FieldApplyThresholdStrategy                    = "apply_threshold_strategy"
+	FieldApplyThresholdStrategyType                = "type"
+	FieldApplyThresholdStrategyPercentage          = "percentage"
+	FieldApplyThresholdStrategyNumerator           = "numerator"
+	FieldApplyThresholdStrategyDenominator         = "denominator"
+	FieldApplyThresholdStrategyExponent            = "exponent"
+	FieldApplyThresholdStrategyPercentageType      = "PERCENTAGE"
+	FieldApplyThresholdStrategyDefaultAdaptiveType = "DEFAULT_ADAPTIVE"
+	FieldApplyThresholdStrategyCustomAdaptiveType  = "CUSTOM_ADAPTIVE"
 )
 
 var (
@@ -281,8 +290,11 @@ func workloadScalingPolicyResourceApplyThresholdStrategySchema() *schema.Resourc
 				Type:     schema.TypeString,
 				Required: true,
 				Description: fmt.Sprintf(`Defines apply theshold strategy type.
-	- %s - recommendation will be applied when diff of current requests and new recommendation is greater than set value`, FieldApplyThresholdStrategyPercentageType),
-				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{FieldApplyThresholdStrategyPercentageType}, false)),
+	- %s - recommendation will be applied when diff of current requests and new recommendation is greater than set value
+    - %s - will pick larger threshold percentage for small workloads and smaller percentage for large workloads.
+    - %s - works in same way as %s, but it allows to tweak parameters of adaptive threshold formula: percentage = numerator/(currentRequest + denominator)^exponent. This strategy is for advance use cases, we recommend to use %s strategy.
+`, FieldApplyThresholdStrategyPercentageType, FieldApplyThresholdStrategyDefaultAdaptiveType, FieldApplyThresholdStrategyCustomAdaptiveType, FieldApplyThresholdStrategyDefaultAdaptiveType, FieldApplyThresholdStrategyDefaultAdaptiveType),
+				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{FieldApplyThresholdStrategyPercentageType, FieldApplyThresholdStrategyDefaultAdaptiveType, FieldApplyThresholdStrategyCustomAdaptiveType}, false)),
 			},
 			FieldApplyThresholdStrategyPercentage: {
 				Type:     schema.TypeFloat,
@@ -291,11 +303,58 @@ func workloadScalingPolicyResourceApplyThresholdStrategySchema() *schema.Resourc
 					"It must be defined for the %s strategy.", FieldApplyThresholdStrategyPercentageType),
 				ValidateDiagFunc: validation.ToDiagFunc(validation.FloatBetween(minApplyThresholdValue, maxApplyThresholdValue)),
 			},
+			FieldApplyThresholdStrategyNumerator: {
+				Type:     schema.TypeFloat,
+				Optional: true,
+				Description: fmt.Sprintf("The %s affects vertical stretch of function used in adaptive threshold - smaller number will create smaller threshold."+
+					"It must be defined for the %s strategy.", FieldApplyThresholdStrategyNumerator, FieldApplyThresholdStrategyCustomAdaptiveType),
+				ValidateDiagFunc: validation.ToDiagFunc(validation.FloatAtLeast(minNumeratorValue)),
+			},
+			FieldApplyThresholdStrategyDenominator: {
+				// Terraform SDK cannot distinguish between unset and 0 value, that's why it has to be string.
+				Type:     schema.TypeString,
+				Optional: true,
+				Description: fmt.Sprintf("If %s is close or equal to 0, the threshold will be much bigger for small values."+
+					"For example when numerator, exponent is 1 and denominator is 0 the threshold for 0.5 req. CPU will be 200%%."+
+					"It must be defined for the %s strategy.", FieldApplyThresholdStrategyDenominator, FieldApplyThresholdStrategyCustomAdaptiveType),
+				ValidateDiagFunc: validateConvertableToNonNegativeFloat(),
+			},
+			FieldApplyThresholdStrategyExponent: {
+				Type:     schema.TypeFloat,
+				Optional: true,
+				Description: fmt.Sprintf(`The %s changes how fast the curve is going down. The smaller value will cause that we won’t pick extremely small number for big resources, for example:
+	- if numerator is 0, denominator is 1, and exponent is 1, for 50 CPU we will pick 2%% threshold
+	- if numerator is 0, denominator is 1, and exponent is 0.8, for 50 CPU we will pick 4.3%% threshold
+	It must be defined for the %s strategy.`, FieldApplyThresholdStrategyExponent, FieldApplyThresholdStrategyCustomAdaptiveType),
+				ValidateDiagFunc: validation.ToDiagFunc(validation.FloatBetween(minExponentValue, maxExponentValue)),
+			},
 		},
 	}
 }
 
-func resourceWorkloadScalingPolicyCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func validateConvertableToNonNegativeFloat() schema.SchemaValidateDiagFunc {
+	return validation.ToDiagFunc(func(value any, key string) ([]string, []error) {
+		v, ok := value.(string)
+		if !ok {
+			return nil, []error{fmt.Errorf("expected type of %q to be string", key)}
+		}
+		if v == "" {
+			return nil, nil
+		}
+
+		number, err := strconv.ParseFloat(v, 64)
+		if err != nil {
+			return nil, []error{fmt.Errorf("failed to parse %q: %w", key, err)}
+		}
+		if number < 0 {
+			return nil, []error{fmt.Errorf("expected %q to be non-negative, got %g", key, number)}
+		}
+
+		return nil, nil
+	})
+}
+
+func resourceWorkloadScalingPolicyCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(*ProviderConfig).api
 
 	clusterID := d.Get(FieldClusterID).(string)
@@ -308,11 +367,19 @@ func resourceWorkloadScalingPolicyCreate(ctx context.Context, d *schema.Resource
 	}
 
 	if v, ok := d.GetOk("cpu"); ok {
-		req.RecommendationPolicies.Cpu = toWorkloadScalingPolicies(v.([]interface{})[0].(map[string]interface{}))
+		cpu, err := toWorkloadScalingPolicies("cpu", v.([]any)[0].(map[string]any))
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		req.RecommendationPolicies.Cpu = cpu
 	}
 
 	if v, ok := d.GetOk("memory"); ok {
-		req.RecommendationPolicies.Memory = toWorkloadScalingPolicies(v.([]interface{})[0].(map[string]interface{}))
+		memory, err := toWorkloadScalingPolicies("memory", v.([]any)[0].(map[string]any))
+		if err != nil {
+			return diag.FromErr(err)
+		}
+		req.RecommendationPolicies.Memory = memory
 	}
 
 	req.RecommendationPolicies.Startup = toStartup(toSection(d, "startup"))
@@ -347,7 +414,7 @@ func resourceWorkloadScalingPolicyCreate(ctx context.Context, d *schema.Resource
 	}
 }
 
-func resourceWorkloadScalingPolicyRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceWorkloadScalingPolicyRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(*ProviderConfig).api
 
 	clusterID := d.Get(FieldClusterID).(string)
@@ -357,7 +424,7 @@ func resourceWorkloadScalingPolicyRead(ctx context.Context, d *schema.ResourceDa
 	}
 
 	if !d.IsNewResource() && resp.StatusCode() == http.StatusNotFound {
-		tflog.Warn(ctx, "Scaling policy not found, removing from state", map[string]interface{}{"id": d.Id()})
+		tflog.Warn(ctx, "Scaling policy not found, removing from state", map[string]any{"id": d.Id()})
 		d.SetId("")
 		return nil
 	}
@@ -405,7 +472,7 @@ func getResourceFrom(d *schema.ResourceData, resource string) map[string]any {
 	return map[string]any{}
 }
 
-func resourceWorkloadScalingPolicyUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceWorkloadScalingPolicyUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	if !d.HasChanges(
 		"name",
 		"apply_type",
@@ -423,13 +490,21 @@ func resourceWorkloadScalingPolicyUpdate(ctx context.Context, d *schema.Resource
 
 	client := meta.(*ProviderConfig).api
 	clusterID := d.Get(FieldClusterID).(string)
+	cpu, err := toWorkloadScalingPolicies("cpu", d.Get("cpu").([]any)[0].(map[string]any))
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	memory, err := toWorkloadScalingPolicies("memory", d.Get("memory").([]any)[0].(map[string]any))
+	if err != nil {
+		return diag.FromErr(err)
+	}
 	req := sdk.WorkloadOptimizationAPIUpdateWorkloadScalingPolicyJSONBody{
 		Name:      d.Get("name").(string),
 		ApplyType: sdk.WorkloadoptimizationV1ApplyType(d.Get("apply_type").(string)),
 		RecommendationPolicies: sdk.WorkloadoptimizationV1RecommendationPolicies{
 			ManagementOption: sdk.WorkloadoptimizationV1ManagementOption(d.Get("management_option").(string)),
-			Cpu:              toWorkloadScalingPolicies(d.Get("cpu").([]interface{})[0].(map[string]interface{})),
-			Memory:           toWorkloadScalingPolicies(d.Get("memory").([]interface{})[0].(map[string]interface{})),
+			Cpu:              cpu,
+			Memory:           memory,
 			Startup:          toStartup(toSection(d, "startup")),
 			Downscaling:      toDownscaling(toSection(d, "downscaling")),
 			MemoryEvent:      toMemoryEvent(toSection(d, "memory_event")),
@@ -444,7 +519,7 @@ func resourceWorkloadScalingPolicyUpdate(ctx context.Context, d *schema.Resource
 	return resourceWorkloadScalingPolicyRead(ctx, d, meta)
 }
 
-func resourceWorkloadScalingPolicyDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceWorkloadScalingPolicyDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(*ProviderConfig).api
 	clusterID := d.Get(FieldClusterID).(string)
 
@@ -453,7 +528,7 @@ func resourceWorkloadScalingPolicyDelete(ctx context.Context, d *schema.Resource
 		return diag.FromErr(err)
 	}
 	if resp.StatusCode() == http.StatusNotFound {
-		tflog.Debug(ctx, "Scaling policy not found, skipping delete", map[string]interface{}{"id": d.Id()})
+		tflog.Debug(ctx, "Scaling policy not found, skipping delete", map[string]any{"id": d.Id()})
 		return nil
 	}
 	if err := sdk.StatusOk(resp); err != nil {
@@ -461,7 +536,7 @@ func resourceWorkloadScalingPolicyDelete(ctx context.Context, d *schema.Resource
 	}
 
 	if resp.JSON200.IsReadonly || resp.JSON200.IsDefault {
-		tflog.Warn(ctx, "Default/readonly scaling policy can't be deleted, removing from state", map[string]interface{}{
+		tflog.Warn(ctx, "Default/readonly scaling policy can't be deleted, removing from state", map[string]any{
 			"id": d.Id(),
 		})
 		return nil
@@ -478,84 +553,20 @@ func resourceWorkloadScalingPolicyDelete(ctx context.Context, d *schema.Resource
 	return nil
 }
 
-func resourceWorkloadScalingPolicyDiff(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
+func resourceWorkloadScalingPolicyDiff(_ context.Context, d *schema.ResourceDiff, _ any) error {
 	// Since tf doesn't support cross field validation, doing it here.
-	cpu := toWorkloadScalingPolicies(d.Get("cpu").([]interface{})[0].(map[string]interface{}))
-	memory := toWorkloadScalingPolicies(d.Get("memory").([]interface{})[0].(map[string]interface{}))
-
-	if err := validateResourcePolicy(cpu, "cpu"); err != nil {
+	_, err := toWorkloadScalingPolicies("cpu", d.Get("cpu").([]any)[0].(map[string]any))
+	if err != nil {
 		return err
 	}
-	return validateResourcePolicy(memory, "memory")
-}
-
-func validateResourcePolicy(r sdk.WorkloadoptimizationV1ResourcePolicies, res string) error {
-	if r.Function == "QUANTILE" && len(r.Args) == 0 {
-		return fmt.Errorf("field %q: QUANTILE function requires args to be provided", res)
-	}
-	if r.Function == "MAX" && len(r.Args) > 0 {
-		return fmt.Errorf("field %q: MAX function doesn't accept any args", res)
-	}
-
-	err := validateResourceLimit(r)
+	_, err = toWorkloadScalingPolicies("memory", d.Get("memory").([]any)[0].(map[string]any))
 	if err != nil {
-		return fmt.Errorf("field %q: %w", res, err)
-	}
-
-	err = validateResourceApplyThresholdStrategy(r.ApplyThresholdStrategy)
-	if err != nil {
-		return fmt.Errorf("field %q: %w", res, err)
+		return err
 	}
 	return nil
 }
 
-func validateResourceApplyThresholdStrategy(r *sdk.WorkloadoptimizationV1ApplyThresholdStrategy) error {
-	if r == nil {
-		return nil
-	}
-
-	if r.PercentageThreshold != nil {
-		if err := validatePercentageThresholdStrategy(r.PercentageThreshold); err != nil {
-			return fmt.Errorf(`field %q: %w`, FieldApplyThresholdStrategy, err)
-		}
-		return nil
-	}
-
-	return fmt.Errorf(`field %q: field %q: unknown apply threshold strategy type`, FieldApplyThresholdStrategy, FieldApplyThresholdStrategyType)
-}
-
-func validatePercentageThresholdStrategy(r *sdk.WorkloadoptimizationV1ApplyThresholdStrategyPercentageThreshold) error {
-	if r.Percentage == 0 {
-		return fmt.Errorf(
-			`field %q: value must be set for strategy type %s`,
-			FieldApplyThresholdStrategyPercentage,
-			FieldApplyThresholdStrategyPercentageType,
-		)
-	}
-	return nil
-}
-
-func validateResourceLimit(r sdk.WorkloadoptimizationV1ResourcePolicies) error {
-	if r.Limit == nil {
-		return nil
-	}
-
-	switch r.Limit.Type {
-	case sdk.NOLIMIT:
-		if r.Limit.Multiplier != nil {
-			return fmt.Errorf(`field %q: %q limit type doesn't accept multiplier value`, FieldLimitStrategy, sdk.NOLIMIT)
-		}
-	case sdk.MULTIPLIER:
-		if r.Limit.Multiplier == nil {
-			return fmt.Errorf(`field %q: %q limit type requires multiplier value to be provided`, FieldLimitStrategy, sdk.MULTIPLIER)
-		}
-	default:
-		return fmt.Errorf(`field %q: unknown limit type %q`, FieldLimitStrategy, r.Limit.Type)
-	}
-	return nil
-}
-
-func workloadScalingPolicyImporter(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+func workloadScalingPolicyImporter(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
 	clusterID, nameOrID, found := strings.Cut(d.Id(), "/")
 	if !found {
 		return nil, fmt.Errorf("expected import id with format: <cluster_id>/<scaling_policy name or id>, got: %q", d.Id())
@@ -582,15 +593,24 @@ func workloadScalingPolicyImporter(ctx context.Context, d *schema.ResourceData, 
 	return []*schema.ResourceData{d}, nil
 }
 
-func toWorkloadScalingPolicies(obj map[string]interface{}) sdk.WorkloadoptimizationV1ResourcePolicies {
+func toWorkloadScalingPolicies(resource string, obj map[string]any) (sdk.WorkloadoptimizationV1ResourcePolicies, error) {
+	var err error
 	out := sdk.WorkloadoptimizationV1ResourcePolicies{}
 
 	if v, ok := obj["function"].(string); ok {
 		out.Function = sdk.WorkloadoptimizationV1ResourcePoliciesFunction(v)
 	}
-	if v, ok := obj["args"].([]interface{}); ok && len(v) > 0 {
+	if v, ok := obj["args"].([]any); ok && len(v) > 0 {
 		out.Args = toStringList(v)
 	}
+
+	if out.Function == "QUANTILE" && len(out.Args) == 0 {
+		return out, fmt.Errorf("field %q: QUANTILE function requires args to be provided", resource)
+	}
+	if out.Function == "MAX" && len(out.Args) > 0 {
+		return out, fmt.Errorf("field %q: MAX function doesn't accept any args", resource)
+	}
+
 	if v, ok := obj["overhead"].(float64); ok {
 		out.Overhead = v
 	}
@@ -604,45 +624,86 @@ func toWorkloadScalingPolicies(obj map[string]interface{}) sdk.Workloadoptimizat
 		out.Max = lo.ToPtr(v)
 	}
 	if v, ok := obj[FieldLimitStrategy].([]any); ok && len(v) > 0 {
-		out.Limit = toWorkloadResourceLimit(v[0].(map[string]any))
+		out.Limit, err = toWorkloadResourceLimit(v[0].(map[string]any))
+		if err != nil {
+			return out, fmt.Errorf("field %q: field %q: %w", resource, FieldLimitStrategy, err)
+		}
 	}
 	if v, ok := obj["management_option"].(string); ok && v != "" {
 		out.ManagementOption = lo.ToPtr(sdk.WorkloadoptimizationV1ManagementOption(v))
 	}
-	out.ApplyThresholdStrategy = resolveApplyThresholdStrategy(obj)
 
-	return out
+	out.ApplyThresholdStrategy, err = resolveApplyThresholdStrategy(obj)
+	if err != nil {
+		return out, fmt.Errorf("field %q: %w", resource, err)
+	}
+
+	return out, err
 }
 
-func resolveApplyThresholdStrategy(obj map[string]interface{}) *sdk.WorkloadoptimizationV1ApplyThresholdStrategy {
+func resolveApplyThresholdStrategy(obj map[string]any) (*sdk.WorkloadoptimizationV1ApplyThresholdStrategy, error) {
 	if v, ok := obj[DeprecatedFieldApplyThreshold].(float64); ok && v > 0 {
-		return &sdk.WorkloadoptimizationV1ApplyThresholdStrategy{
-			PercentageThreshold: &sdk.WorkloadoptimizationV1ApplyThresholdStrategyPercentageThreshold{
-				Percentage: v,
-			},
-		}
+		return toWorkloadResourcePercentageThresholdStrategy(v), nil
 	}
 	if v, ok := obj[FieldApplyThresholdStrategy].([]any); ok && len(v) > 0 {
-		return toWorkloadResourceApplyThresholdStrategy(v[0].(map[string]any))
+		out, err := toWorkloadResourceApplyThresholdStrategy(v[0].(map[string]any))
+		if err != nil {
+			return nil, fmt.Errorf("field %q: %w", FieldApplyThresholdStrategy, err)
+		}
+		return out, nil
 	}
 
-	return toWorkloadResourcePercentageThresholdStrategy(defaultApplyThresholdPercentage)
+	return toWorkloadResourcePercentageThresholdStrategy(defaultApplyThresholdPercentage), nil
 }
 
-func toWorkloadResourceApplyThresholdStrategy(obj map[string]any) *sdk.WorkloadoptimizationV1ApplyThresholdStrategy {
+func toWorkloadResourceApplyThresholdStrategy(obj map[string]any) (*sdk.WorkloadoptimizationV1ApplyThresholdStrategy, error) {
 	if len(obj) == 0 {
-		return nil
+		return nil, nil
 	}
 
-	out := &sdk.WorkloadoptimizationV1ApplyThresholdStrategy{}
+	var out *sdk.WorkloadoptimizationV1ApplyThresholdStrategy
 	strategy, _ := obj[FieldApplyThresholdStrategyType].(string)
 	switch strategy {
 	case FieldApplyThresholdStrategyPercentageType:
-		if percentage, ok := obj[FieldApplyThresholdStrategyPercentage].(float64); ok {
-			out = toWorkloadResourcePercentageThresholdStrategy(percentage)
+		percentage, err := mustGetValue[float64](obj, FieldApplyThresholdStrategyPercentage)
+		if err != nil {
+			return nil, err
 		}
+		out = toWorkloadResourcePercentageThresholdStrategy(*percentage)
+	case FieldApplyThresholdStrategyDefaultAdaptiveType:
+		out = toWorkloadResourceDefaultAdaptiveThresholdStrategy()
+	case FieldApplyThresholdStrategyCustomAdaptiveType:
+		var err error
+		numerator, err := mustGetValue[float64](obj, FieldApplyThresholdStrategyNumerator)
+		if err != nil {
+			return nil, err
+		}
+		denominatorStr, err := mustGetValue[string](obj, FieldApplyThresholdStrategyDenominator)
+		if err != nil {
+			return nil, err
+		}
+		denominator, err := strconv.ParseFloat(*denominatorStr, 64)
+		if err != nil {
+			return nil, fmt.Errorf("invalid denominator value: %w", err)
+		}
+		exponent, err := mustGetValue[float64](obj, FieldApplyThresholdStrategyExponent)
+		if err != nil {
+			return nil, err
+		}
+		out = toWorkloadResourceCustomAdaptiveThresholdStrategy(*numerator, denominator, *exponent)
+	default:
+		return nil, fmt.Errorf(
+			"field %q: unknown apply threshold strategy type: %q", FieldApplyThresholdStrategyType, strategy)
 	}
-	return out
+	return out, nil
+}
+
+func mustGetValue[T comparable](obj map[string]any, key string) (*T, error) {
+	var zeroValue T
+	if v, ok := obj[key].(T); ok && v != zeroValue {
+		return &v, nil
+	}
+	return nil, fmt.Errorf("field %q: value must be set", key)
 }
 
 // To prevent terraform detecting changes, when there none, we want to set only the field that was set in previous
@@ -679,19 +740,33 @@ func suppressThresholdStrategyDefaultValueDiff(resource, oldValue, newValue stri
 	return oldValue == newValue
 }
 
-func toWorkloadResourceLimit(obj map[string]any) *sdk.WorkloadoptimizationV1ResourceLimitStrategy {
+func toWorkloadResourceLimit(obj map[string]any) (*sdk.WorkloadoptimizationV1ResourceLimitStrategy, error) {
 	if len(obj) == 0 {
-		return nil
+		return nil, nil
 	}
 
 	out := &sdk.WorkloadoptimizationV1ResourceLimitStrategy{}
-	if v, ok := obj[FieldLimitStrategyType].(string); ok {
-		out.Type = sdk.WorkloadoptimizationV1ResourceLimitStrategyType(v)
+	strategy, err := mustGetValue[string](obj, FieldLimitStrategyType)
+	if err != nil {
+		return nil, err
 	}
-	if v, ok := obj[FieldLimitStrategyMultiplier].(float64); ok && v > 0 {
-		out.Multiplier = lo.ToPtr(v)
+	out.Type = sdk.WorkloadoptimizationV1ResourceLimitStrategyType(*strategy)
+	switch out.Type {
+	case sdk.NOLIMIT:
+		out.Multiplier, err = mustGetValue[float64](obj, FieldLimitStrategyMultiplier)
+		if err == nil {
+			return nil, fmt.Errorf(`%q limit type doesn't accept multiplier value`, sdk.NOLIMIT)
+		}
+		return out, nil
+	case sdk.MULTIPLIER:
+		out.Multiplier, err = mustGetValue[float64](obj, FieldLimitStrategyMultiplier)
+		if err != nil {
+			return nil, err
+		}
+		return out, nil
+	default:
+		return nil, fmt.Errorf(`unknown limit type %q`, out.Type)
 	}
-	return out
 }
 
 func toWorkloadResourcePercentageThresholdStrategy(percentage float64) *sdk.WorkloadoptimizationV1ApplyThresholdStrategy {
@@ -702,8 +777,24 @@ func toWorkloadResourcePercentageThresholdStrategy(percentage float64) *sdk.Work
 	}
 }
 
-func toWorkloadScalingPoliciesMap(previousCfg map[string]interface{}, p sdk.WorkloadoptimizationV1ResourcePolicies) []map[string]interface{} {
-	m := map[string]interface{}{
+func toWorkloadResourceDefaultAdaptiveThresholdStrategy() *sdk.WorkloadoptimizationV1ApplyThresholdStrategy {
+	return &sdk.WorkloadoptimizationV1ApplyThresholdStrategy{
+		DefaultAdaptiveThreshold: &sdk.WorkloadoptimizationV1ApplyThresholdStrategyDefaultAdaptiveThreshold{},
+	}
+}
+
+func toWorkloadResourceCustomAdaptiveThresholdStrategy(numerator, denominator, exponent float64) *sdk.WorkloadoptimizationV1ApplyThresholdStrategy {
+	return &sdk.WorkloadoptimizationV1ApplyThresholdStrategy{
+		CustomAdaptiveThreshold: &sdk.WorkloadoptimizationV1ApplyThresholdStrategyCustomAdaptiveThreshold{
+			Numerator:   numerator,
+			Denominator: denominator,
+			Exponent:    exponent,
+		},
+	}
+}
+
+func toWorkloadScalingPoliciesMap(previousCfg map[string]any, p sdk.WorkloadoptimizationV1ResourcePolicies) []map[string]any {
+	m := map[string]any{
 		"function": p.Function,
 		"args":     p.Args,
 		"overhead": p.Overhead,
@@ -731,7 +822,7 @@ func toWorkloadScalingPoliciesMap(previousCfg map[string]interface{}, p sdk.Work
 		m["management_option"] = string(*p.ManagementOption)
 	}
 
-	return []map[string]interface{}{m}
+	return []map[string]any{m}
 }
 
 func applyThresholdStrategyToMap(s *sdk.WorkloadoptimizationV1ApplyThresholdStrategy) []map[string]any {
@@ -744,6 +835,15 @@ func applyThresholdStrategyToMap(s *sdk.WorkloadoptimizationV1ApplyThresholdStra
 		m[FieldApplyThresholdStrategyType] = FieldApplyThresholdStrategyPercentageType
 		m[FieldApplyThresholdStrategyPercentage] = s.PercentageThreshold.Percentage
 	}
+	if s.DefaultAdaptiveThreshold != nil {
+		m[FieldApplyThresholdStrategyType] = FieldApplyThresholdStrategyDefaultAdaptiveType
+	}
+	if s.CustomAdaptiveThreshold != nil {
+		m[FieldApplyThresholdStrategyType] = FieldApplyThresholdStrategyCustomAdaptiveType
+		m[FieldApplyThresholdStrategyNumerator] = s.CustomAdaptiveThreshold.Numerator
+		m[FieldApplyThresholdStrategyDenominator] = fmt.Sprintf("%g", s.CustomAdaptiveThreshold.Denominator)
+		m[FieldApplyThresholdStrategyExponent] = s.CustomAdaptiveThreshold.Exponent
+	}
 
 	if len(m) == 0 {
 		return nil
@@ -752,7 +852,7 @@ func applyThresholdStrategyToMap(s *sdk.WorkloadoptimizationV1ApplyThresholdStra
 	return []map[string]any{m}
 }
 
-func toStartup(startup map[string]interface{}) *sdk.WorkloadoptimizationV1StartupSettings {
+func toStartup(startup map[string]any) *sdk.WorkloadoptimizationV1StartupSettings {
 	if len(startup) == 0 {
 		return nil
 	}
@@ -765,12 +865,12 @@ func toStartup(startup map[string]interface{}) *sdk.WorkloadoptimizationV1Startu
 	return result
 }
 
-func toStartupMap(s *sdk.WorkloadoptimizationV1StartupSettings) []map[string]interface{} {
+func toStartupMap(s *sdk.WorkloadoptimizationV1StartupSettings) []map[string]any {
 	if s == nil {
 		return nil
 	}
 
-	m := map[string]interface{}{}
+	m := map[string]any{}
 
 	if s.PeriodSeconds != nil {
 		m["period_seconds"] = int(*s.PeriodSeconds)
@@ -780,7 +880,7 @@ func toStartupMap(s *sdk.WorkloadoptimizationV1StartupSettings) []map[string]int
 		return nil
 	}
 
-	return []map[string]interface{}{m}
+	return []map[string]any{m}
 }
 
 func toDownscaling(downscaling map[string]any) *sdk.WorkloadoptimizationV1DownscalingSettings {
