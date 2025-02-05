@@ -3,7 +3,7 @@ name: Build
 # Only one instance of this job can be running
 concurrency:
   group: build-and-test
-  cancel-in-progress: true
+  cancel-in-progress: false # Don't cancel other people's jobs; currently 1 job can be queued so it's still possible to "override" other people.
 
 on:
   pull_request:
