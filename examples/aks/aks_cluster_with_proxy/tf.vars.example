@@ -1,0 +1,5 @@
+cluster_name     = "EXAMPLE"
+cluster_region   = "EXAMPLE"
+castai_api_token = "EXAMPLE"
+subscription_id  = "<place-holder>"
+fqdn_without_proxy = [fqdn1", "fqdn2"]
