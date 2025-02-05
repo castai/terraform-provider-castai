@@ -104,7 +104,11 @@ func TestNodeTemplateResourceReadContext(t *testing.T) {
 					}
 				  ],
 				  "cpuManufacturers": ["INTEL", "AMD"],
-	              "architecturePriority": ["amd64", "arm64"]
+	              "architecturePriority": ["amd64", "arm64"],
+	              "resourceLimits": {
+                    "cpuLimitEnabled": true,
+                    "cpuLimitMaxCores": 20
+                  }
 				},
 				"version": "3",
 				"shouldTaint": true,
@@ -214,6 +218,9 @@ constraints.0.dedicated_node_affinity.0.name = foo
 constraints.0.on_demand = true
 constraints.0.os.# = 1
 constraints.0.os.0 = linux
+constraints.0.resource_limits.# = 1
+constraints.0.resource_limits.0.cpu_limit_enabled = true
+constraints.0.resource_limits.0.cpu_limit_max_cores = 20
 constraints.0.spot = false
 constraints.0.spot_diversity_price_increase_limit_percent = 20
 constraints.0.spot_interruption_predictions_enabled = true
@@ -388,7 +395,11 @@ func TestNodeTemplateResourceCreate_defaultNodeTemplate(t *testing.T) {
 				  "onDemand": true,
 				  "minCpu": 10,
 				  "maxCpu": 10000,
-				  "architectures": ["amd64", "arm64"]
+				  "architectures": ["amd64", "arm64"],
+	              "resourceLimits": {
+                    "cpuLimitEnabled": true,
+                    "cpuLimitMaxCores": 20
+                  }
 				},
 				"version": "3",
 				"shouldTaint": true,
@@ -569,6 +580,9 @@ func TestAccResourceNodeTemplate_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.cpu_manufacturers.#", "2"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.cpu_manufacturers.0", "INTEL"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.cpu_manufacturers.1", "AMD"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.resource_limits.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.resource_limits.0.cpu_limit_enabled", "false"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.resource_limits.0.cpu_limit_max_cores", "0"),
 				),
 			},
 			{
@@ -640,6 +654,9 @@ func TestAccResourceNodeTemplate_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.cpu_manufacturers.#", "2"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.cpu_manufacturers.0", "INTEL"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.cpu_manufacturers.1", "AMD"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.resource_limits.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.resource_limits.0.cpu_limit_enabled", "true"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.resource_limits.0.cpu_limit_max_cores", "50"),
 				),
 			},
 		},
@@ -715,6 +732,11 @@ func testAccNodeTemplateConfig(rName, clusterName string) string {
 					on_demand = true
 				}
 
+				resource_limits {
+					cpu_limit_enabled = false
+					cpu_limit_max_cores = 0
+				}
+
 				cpu_manufacturers = ["INTEL", "AMD"]
 				architecture_priority = ["amd64"]
 			}
@@ -774,6 +796,11 @@ func testNodeTemplateUpdated(rName, clusterName string) string {
 
 				cpu_manufacturers = ["INTEL", "AMD"]
 				architecture_priority = ["arm64"]
+
+				resource_limits {
+					cpu_limit_enabled   = true
+					cpu_limit_max_cores = 50
+				}
 			}
 		}
 	`, rName))

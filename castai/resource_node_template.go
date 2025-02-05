@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"reflect"
 	"strings"
 	"time"
 
@@ -71,6 +72,9 @@ const (
 	FieldNodeTemplateCustomerSpecific                         = "customer_specific"
 	FieldNodeTemplateCPUManufacturers                         = "cpu_manufacturers"
 	FieldNodeTemplateArchitecturePriority                     = "architecture_priority"
+	FieldNodeTemplateResourceLimits                           = "resource_limits"
+	FieldNodeTemplateCPULimitEnabled                          = "cpu_limit_enabled"
+	FieldNodeTemplateCPULimitMaxCores                         = "cpu_limit_max_cores"
 )
 
 const (
@@ -526,6 +530,29 @@ func resourceNodeTemplate() *schema.Resource {
 							},
 							Description: fmt.Sprintf("Priority ordering of architectures, specifying no priority will pick cheapest. Allowed values: %s.", strings.Join(supportedArchitectures, ", ")),
 						},
+						FieldNodeTemplateResourceLimits: {
+							Type:             schema.TypeList,
+							MaxItems:         1,
+							Optional:         true,
+							DiffSuppressFunc: suppressResourceLimitsDiff,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									FieldNodeTemplateCPULimitEnabled: {
+										Type:        schema.TypeBool,
+										Optional:    true,
+										Default:     false,
+										Description: "Controls CPU limit enforcement for the node template.",
+									},
+									FieldNodeTemplateCPULimitMaxCores: {
+										Type:             schema.TypeInt,
+										Optional:         true,
+										Default:          0,
+										ValidateDiagFunc: validation.ToDiagFunc(validation.IntAtLeast(0)),
+										Description:      "Specifies the maximum number of CPU cores that the nodes provisioned from this template can collectively have.",
+									},
+								},
+							},
+						},
 					},
 				},
 			},
@@ -748,6 +775,8 @@ func flattenConstraints(c *sdk.NodetemplatesV1TemplateConstraints) ([]map[string
 	if c.ArchitecturePriority != nil {
 		out[FieldNodeTemplateArchitecturePriority] = lo.FromPtr(c.ArchitecturePriority)
 	}
+	out[FieldNodeTemplateResourceLimits] = flattenResourceLimits(c.ResourceLimits)
+
 	setStateConstraintValue(c.Burstable, FieldNodeTemplateBurstableInstances, out)
 	setStateConstraintValue(c.CustomerSpecific, FieldNodeTemplateCustomerSpecific, out)
 	return []map[string]any{out}, nil
@@ -777,6 +806,20 @@ func flattenInstanceFamilies(families *sdk.NodetemplatesV1TemplateConstraintsIns
 		out[FieldNodeTemplateInclude] = lo.FromPtr(families.Include)
 	}
 	return []map[string][]string{out}
+}
+
+func flattenResourceLimits(resourceLimits *sdk.NodetemplatesV1TemplateConstraintsResourceLimits) []map[string]any {
+	if resourceLimits == nil {
+		return nil
+	}
+	out := map[string]any{}
+	if resourceLimits.CpuLimitEnabled != nil {
+		out[FieldNodeTemplateCPULimitEnabled] = resourceLimits.CpuLimitEnabled
+	}
+	if resourceLimits.CpuLimitMaxCores != nil {
+		out[FieldNodeTemplateCPULimitMaxCores] = resourceLimits.CpuLimitMaxCores
+	}
+	return []map[string]any{out}
 }
 
 func flattenGpu(gpu *sdk.NodetemplatesV1TemplateConstraintsGPUConstraints) []map[string]any {
@@ -1135,6 +1178,14 @@ func nodeTemplateStateImporter(ctx context.Context, d *schema.ResourceData, meta
 	return nil, fmt.Errorf("failed to find node template with the following name: %v", id)
 }
 
+// When resource_limits block is not specified, then Terraform detects diff, but in the state it still fills it with
+// default values. We want to avoid producing a diff in this case because it's not a real change.
+func suppressResourceLimitsDiff(_, _, _ string, d *schema.ResourceData) bool {
+	resourceLimitsPath := fmt.Sprintf("%s.0.%s.0", FieldNodeTemplateConstraints, FieldNodeTemplateResourceLimits)
+	old, new := d.GetChange(resourceLimitsPath)
+	return reflect.DeepEqual(old, new)
+}
+
 func toCustomTaintsWithOptionalEffect(objs []map[string]any) *[]sdk.NodetemplatesV1TaintWithOptionalEffect {
 	if len(objs) == 0 {
 		return nil
@@ -1332,6 +1383,11 @@ func toTemplateConstraints(obj map[string]any) *sdk.NodetemplatesV1TemplateConst
 	if v, ok := obj[FieldNodeTemplateArchitecturePriority].([]any); ok {
 		out.ArchitecturePriority = toPtr(toStringList(v))
 	}
+	if v, ok := obj[FieldNodeTemplateResourceLimits].([]any); ok && len(v) > 0 {
+		if val, ok := v[0].(map[string]any); ok {
+			out.ResourceLimits = toTemplateConstraintsResourceLimits(val)
+		}
+	}
 
 	return out
 }
@@ -1347,6 +1403,21 @@ func toTemplateConstraintsInstanceFamilies(o map[string]any) *sdk.NodetemplatesV
 	}
 	if v, ok := o[FieldNodeTemplateInclude].([]any); ok {
 		out.Include = toPtr(toStringList(v))
+	}
+	return out
+}
+
+func toTemplateConstraintsResourceLimits(o map[string]any) *sdk.NodetemplatesV1TemplateConstraintsResourceLimits {
+	if o == nil {
+		return nil
+	}
+
+	out := &sdk.NodetemplatesV1TemplateConstraintsResourceLimits{}
+	if v, ok := o[FieldNodeTemplateCPULimitEnabled].(bool); ok {
+		out.CpuLimitEnabled = toPtr(v)
+	}
+	if v, ok := o[FieldNodeTemplateCPULimitMaxCores].(int); ok {
+		out.CpuLimitMaxCores = toPtr(int32(v))
 	}
 	return out
 }
