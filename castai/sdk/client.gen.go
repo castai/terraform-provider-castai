@@ -599,6 +599,9 @@ type ClientInterface interface {
 	// WorkloadOptimizationAPIGetAgentStatus request
 	WorkloadOptimizationAPIGetAgentStatus(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// WorkloadOptimizationAPIListLimitRanges request
+	WorkloadOptimizationAPIListLimitRanges(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// WorkloadOptimizationAPIListWorkloadScalingPolicies request
 	WorkloadOptimizationAPIListWorkloadScalingPolicies(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -2878,6 +2881,18 @@ func (c *Client) ScheduledRebalancingAPIListAvailableRebalancingTZ(ctx context.C
 
 func (c *Client) WorkloadOptimizationAPIGetAgentStatus(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewWorkloadOptimizationAPIGetAgentStatusRequest(c.Server, clusterId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) WorkloadOptimizationAPIListLimitRanges(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewWorkloadOptimizationAPIListLimitRangesRequest(c.Server, clusterId)
 	if err != nil {
 		return nil, err
 	}
@@ -9546,6 +9561,40 @@ func NewWorkloadOptimizationAPIGetAgentStatusRequest(server string, clusterId st
 	return req, nil
 }
 
+// NewWorkloadOptimizationAPIListLimitRangesRequest generates requests for WorkloadOptimizationAPIListLimitRanges
+func NewWorkloadOptimizationAPIListLimitRangesRequest(server string, clusterId string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "clusterId", runtime.ParamLocationPath, clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/workload-autoscaling/clusters/%s/limit-ranges", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 // NewWorkloadOptimizationAPIListWorkloadScalingPoliciesRequest generates requests for WorkloadOptimizationAPIListWorkloadScalingPolicies
 func NewWorkloadOptimizationAPIListWorkloadScalingPoliciesRequest(server string, clusterId string) (*http.Request, error) {
 	var err error
@@ -10958,6 +11007,9 @@ type ClientWithResponsesInterface interface {
 
 	// WorkloadOptimizationAPIGetAgentStatus request
 	WorkloadOptimizationAPIGetAgentStatusWithResponse(ctx context.Context, clusterId string) (*WorkloadOptimizationAPIGetAgentStatusResponse, error)
+
+	// WorkloadOptimizationAPIListLimitRanges request
+	WorkloadOptimizationAPIListLimitRangesWithResponse(ctx context.Context, clusterId string) (*WorkloadOptimizationAPIListLimitRangesResponse, error)
 
 	// WorkloadOptimizationAPIListWorkloadScalingPolicies request
 	WorkloadOptimizationAPIListWorkloadScalingPoliciesWithResponse(ctx context.Context, clusterId string) (*WorkloadOptimizationAPIListWorkloadScalingPoliciesResponse, error)
@@ -15133,6 +15185,36 @@ func (r WorkloadOptimizationAPIGetAgentStatusResponse) GetBody() []byte {
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
+type WorkloadOptimizationAPIListLimitRangesResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *WorkloadoptimizationV1ListLimitRangesResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r WorkloadOptimizationAPIListLimitRangesResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r WorkloadOptimizationAPIListLimitRangesResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r WorkloadOptimizationAPIListLimitRangesResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
 type WorkloadOptimizationAPIListWorkloadScalingPoliciesResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -17235,6 +17317,15 @@ func (c *ClientWithResponses) WorkloadOptimizationAPIGetAgentStatusWithResponse(
 		return nil, err
 	}
 	return ParseWorkloadOptimizationAPIGetAgentStatusResponse(rsp)
+}
+
+// WorkloadOptimizationAPIListLimitRangesWithResponse request returning *WorkloadOptimizationAPIListLimitRangesResponse
+func (c *ClientWithResponses) WorkloadOptimizationAPIListLimitRangesWithResponse(ctx context.Context, clusterId string) (*WorkloadOptimizationAPIListLimitRangesResponse, error) {
+	rsp, err := c.WorkloadOptimizationAPIListLimitRanges(ctx, clusterId)
+	if err != nil {
+		return nil, err
+	}
+	return ParseWorkloadOptimizationAPIListLimitRangesResponse(rsp)
 }
 
 // WorkloadOptimizationAPIListWorkloadScalingPoliciesWithResponse request returning *WorkloadOptimizationAPIListWorkloadScalingPoliciesResponse
@@ -20936,6 +21027,32 @@ func ParseWorkloadOptimizationAPIGetAgentStatusResponse(rsp *http.Response) (*Wo
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest WorkloadoptimizationV1GetAgentStatusResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseWorkloadOptimizationAPIListLimitRangesResponse parses an HTTP response from a WorkloadOptimizationAPIListLimitRangesWithResponse call
+func ParseWorkloadOptimizationAPIListLimitRangesResponse(rsp *http.Response) (*WorkloadOptimizationAPIListLimitRangesResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &WorkloadOptimizationAPIListLimitRangesResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest WorkloadoptimizationV1ListLimitRangesResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}

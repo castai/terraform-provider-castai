@@ -463,6 +463,9 @@ type ServiceAccountsAPIUpdateServiceAccountRequest struct {
 
 // UsersAPIUpdateOrganizationUserRequest defines model for UsersAPI_UpdateOrganizationUser_request.
 type UsersAPIUpdateOrganizationUserRequest struct {
+	// Deprecated: for RBACv2 user can be bound to multiple roles.
+	// Use https://docs.cast.ai/reference/rbacserviceapi instead.
+	// user role in the organization.
 	Role *string `json:"role,omitempty"`
 }
 
@@ -2199,7 +2202,10 @@ type CastaiUsersV1beta1Membership struct {
 	CreatedAt *time.Time                    `json:"createdAt,omitempty"`
 	Groups    *[]CastaiUsersV1beta1GroupRef `json:"groups,omitempty"`
 	LoginAt   *time.Time                    `json:"loginAt,omitempty"`
-	Role      string                        `json:"role"`
+
+	// Deprecated: for RBACv2 user can be bound to multiple roles.
+	// Use https://docs.cast.ai/reference/rbacserviceapi instead.
+	Role string `json:"role"`
 
 	// User represents a single system user.
 	User CastaiUsersV1beta1User `json:"user"`
@@ -2207,6 +2213,8 @@ type CastaiUsersV1beta1Membership struct {
 
 // NewMembership contains data needed to create new membership in organization.
 type CastaiUsersV1beta1NewMembership struct {
+	// Deprecated: for RBACv2 user can be bound to multiple roles.
+	// Use https://docs.cast.ai/reference/rbacserviceapi instead.
 	// role of the new member.
 	Role string `json:"role"`
 
@@ -2219,6 +2227,8 @@ type CastaiUsersV1beta1NewMembershipByEmail struct {
 	// list of the group IDs for which new user should be added.
 	GroupIds *[]string `json:"groupIds,omitempty"`
 
+	// Deprecated: for RBACv2 user can be bound to multiple roles.
+	// Use https://docs.cast.ai/reference/rbacserviceapi instead.
 	// role of the invited person.
 	Role *string `json:"role,omitempty"`
 
@@ -2266,6 +2276,8 @@ type CastaiUsersV1beta1PendingInvitation struct {
 	// email of the invited person.
 	InviteEmail string `json:"inviteEmail"`
 
+	// Deprecated: for RBACv2 user can be bound to multiple roles.
+	// Use https://docs.cast.ai/reference/rbacserviceapi instead.
 	// role of the invited person.
 	Role string `json:"role"`
 
@@ -2327,9 +2339,6 @@ type CastaiUsersV1beta1UserOrganization struct {
 	// Deprecated: for RBACv2 user can be bound to multiple roles.
 	// Use https://docs.cast.ai/reference/rbacserviceapi instead.
 	// user role in the organization.
-	//
-	// TODO: cleanup once all orgs are migrated to RBACv2
-	//  https://castai.atlassian.net/browse/WIRE-954
 	Role string `json:"role"`
 }
 
@@ -4341,6 +4350,15 @@ type WorkloadoptimizationV1ContainerConstraintsV2 struct {
 	Memory        *WorkloadoptimizationV1Constraints `json:"memory,omitempty"`
 }
 
+// WorkloadoptimizationV1Costs defines model for workloadoptimization.v1.Costs.
+type WorkloadoptimizationV1Costs struct {
+	// Cost of recommended resources.
+	Recommended *float64 `json:"recommended"`
+
+	// Cost of requested resources.
+	Requested *float64 `json:"requested"`
+}
+
 // WorkloadoptimizationV1CpuMetrics defines model for workloadoptimization.v1.CpuMetrics.
 type WorkloadoptimizationV1CpuMetrics struct {
 	TotalCpuCores    []WorkloadoptimizationV1TimeSeriesMetric `json:"totalCpuCores"`
@@ -4481,6 +4499,18 @@ type WorkloadoptimizationV1HPAConfigUpdate struct {
 	MinReplicas      *int32                                  `json:"minReplicas"`
 }
 
+// WorkloadoptimizationV1HPASpec defines model for workloadoptimization.v1.HPASpec.
+type WorkloadoptimizationV1HPASpec struct {
+	// Max replicas a workload can have.
+	MaxReplicas int32 `json:"maxReplicas"`
+
+	// Min replicas a workload can have.
+	MinReplicas *int32 `json:"minReplicas"`
+
+	// Target CPU utilization percentage.
+	TargetCpuUtilizationPercentage *int32 `json:"targetCpuUtilizationPercentage"`
+}
+
 // WorkloadoptimizationV1HorizontalOverrides defines model for workloadoptimization.v1.HorizontalOverrides.
 type WorkloadoptimizationV1HorizontalOverrides struct {
 	// Defines possible options for workload management.
@@ -4510,6 +4540,34 @@ type WorkloadoptimizationV1InitiatedBy struct {
 type WorkloadoptimizationV1KeyValuePair struct {
 	Key   string `json:"key"`
 	Value string `json:"value"`
+}
+
+// WorkloadoptimizationV1LimitRange defines model for workloadoptimization.v1.LimitRange.
+type WorkloadoptimizationV1LimitRange struct {
+	ClusterId       string                                    `json:"clusterId"`
+	CpuContainer    *WorkloadoptimizationV1LimitRangeResource `json:"cpuContainer,omitempty"`
+	CpuPod          *WorkloadoptimizationV1LimitRangeResource `json:"cpuPod,omitempty"`
+	Id              string                                    `json:"id"`
+	MemoryContainer *WorkloadoptimizationV1LimitRangeResource `json:"memoryContainer,omitempty"`
+	MemoryPod       *WorkloadoptimizationV1LimitRangeResource `json:"memoryPod,omitempty"`
+	Name            string                                    `json:"name"`
+	Namespace       string                                    `json:"namespace"`
+	Object          map[string]interface{}                    `json:"object"`
+	OrganizationId  string                                    `json:"organizationId"`
+}
+
+// WorkloadoptimizationV1LimitRangeResource defines model for workloadoptimization.v1.LimitRangeResource.
+type WorkloadoptimizationV1LimitRangeResource struct {
+	// The quota value for a resource. For memory - this is in MiB, for CPU - this is in cores.
+	Max *float64 `json:"max"`
+
+	// The min amount of a resource. For memory - this is in MiB, for CPU - this is in cores.
+	Min *float64 `json:"min"`
+}
+
+// WorkloadoptimizationV1ListLimitRangesResponse defines model for workloadoptimization.v1.ListLimitRangesResponse.
+type WorkloadoptimizationV1ListLimitRangesResponse struct {
+	Items []WorkloadoptimizationV1LimitRange `json:"items"`
 }
 
 // WorkloadoptimizationV1ListResourceQuotasResponse defines model for workloadoptimization.v1.ListResourceQuotasResponse.
@@ -4948,6 +5006,7 @@ type WorkloadoptimizationV1Workload struct {
 
 	// Workload containers.
 	Containers []WorkloadoptimizationV1Container `json:"containers"`
+	Costs      *WorkloadoptimizationV1Costs      `json:"costs,omitempty"`
 	CreatedAt  time.Time                         `json:"createdAt"`
 
 	// Workload error message (if any).
@@ -4959,10 +5018,11 @@ type WorkloadoptimizationV1Workload struct {
 	Group      string  `json:"group"`
 
 	// Whether workload has native HPA configured.
-	HasNativeHpa *bool  `json:"hasNativeHpa"`
-	Id           string `json:"id"`
-	IsCustom     bool   `json:"isCustom"`
-	Kind         string `json:"kind"`
+	HasNativeHpa *bool                          `json:"hasNativeHpa"`
+	HpaSpec      *WorkloadoptimizationV1HPASpec `json:"hpaSpec,omitempty"`
+	Id           string                         `json:"id"`
+	IsCustom     bool                           `json:"isCustom"`
+	Kind         string                         `json:"kind"`
 
 	// Labels as defined on the workload manifest. These are labels from the controller meta, not the pod meta.
 	Labels []WorkloadoptimizationV1KeyValuePair `json:"labels"`
