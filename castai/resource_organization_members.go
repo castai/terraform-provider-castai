@@ -150,6 +150,7 @@ func resourceOrganizationMembersRead(ctx context.Context, data *schema.ResourceD
 
 	var owners, viewers, members []string
 	for _, user := range *usersResp.JSON200.Users {
+		//nolint:staticcheck // SA1019 needs to be migrated
 		switch user.Role {
 		case ownerRole:
 			owners = append(owners, user.User.Email)
@@ -171,6 +172,7 @@ func resourceOrganizationMembersRead(ctx context.Context, data *schema.ResourceD
 		}
 
 		for _, invitation := range invitationsResp.JSON200.Invitations {
+			//nolint:staticcheck // SA1019 needs to be migrated
 			switch invitation.Role {
 			case ownerRole:
 				owners = append(owners, invitation.InviteEmail)

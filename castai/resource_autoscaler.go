@@ -245,7 +245,7 @@ func resourceAutoscaler() *schema.Resource {
 											Schema: map[string]*schema.Schema{
 												FieldEnabled: {
 													Type:        schema.TypeBool,
-													Default:     true,
+													Default:     false,
 													Optional:    true,
 													Description: "enable/disable the Pod Pinner component's automatic management in your cluster. Default: enabled.",
 												},
