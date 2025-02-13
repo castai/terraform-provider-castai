@@ -4439,7 +4439,8 @@ type WorkloadoptimizationV1GetWorkloadsSummaryResponse struct {
 	AnnotationManagedCount int32 `json:"annotationManagedCount"`
 
 	// Number of workloads that are managed by API.
-	ApiManagedCount int32 `json:"apiManagedCount"`
+	ApiManagedCount int32                        `json:"apiManagedCount"`
+	CostsPerHour    *WorkloadoptimizationV1Costs `json:"costsPerHour,omitempty"`
 
 	// Difference between recommended and requested CPU cores.
 	CpuCoresDifference float64 `json:"cpuCoresDifference"`
@@ -5005,9 +5006,9 @@ type WorkloadoptimizationV1Workload struct {
 	ClusterId   string                               `json:"clusterId"`
 
 	// Workload containers.
-	Containers []WorkloadoptimizationV1Container `json:"containers"`
-	Costs      *WorkloadoptimizationV1Costs      `json:"costs,omitempty"`
-	CreatedAt  time.Time                         `json:"createdAt"`
+	Containers   []WorkloadoptimizationV1Container `json:"containers"`
+	CostsPerHour *WorkloadoptimizationV1Costs      `json:"costsPerHour,omitempty"`
+	CreatedAt    time.Time                         `json:"createdAt"`
 
 	// Workload error message (if any).
 	Error *string `json:"error"`
