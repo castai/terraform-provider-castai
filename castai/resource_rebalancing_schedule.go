@@ -309,10 +309,12 @@ func stateToSchedule(d *schema.ResourceData) (*sdk.ScheduledrebalancingV1Rebalan
 		}
 
 		aggresiveMode := readOptionalValue[bool](launchConfigurationData, "aggressive_mode")
+
 		var aggressiveModeConfig *sdk.ScheduledrebalancingV1AggressiveModeConfig
-		if aggressiveModeConfigSection := toSection(d, "aggressive_mode_config"); aggressiveModeConfigSection != nil {
+		aggressiveModeConfigSection := launchConfigurationData["aggressive_mode_config"].([]any)
+		if len(aggressiveModeConfigSection) != 0 {
 			aggressiveModeConfig = &sdk.ScheduledrebalancingV1AggressiveModeConfig{
-				IgnoreLocalPersistentVolumes: readOptionalValue[bool](aggressiveModeConfigSection, "ignore_local_persistent_volumes"),
+				IgnoreLocalPersistentVolumes: lo.ToPtr(aggressiveModeConfigSection[0].(map[string]any)["ignore_local_persistent_volumes"].(bool)),
 			}
 		}
 
