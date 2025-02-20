@@ -2257,6 +2257,9 @@ type CastaiUsersV1beta1Organization struct {
 	// letter or a number, followed by letters, numbers, underscores, hyphens,
 	// spaces and periods. The name must end with a letter or a number.
 	Name string `json:"name"`
+
+	// information whether the organization have rbacv2 enabled.
+	Rbacv2Enabled *bool `json:"rbacv2Enabled"`
 }
 
 // OrganizationMetadata describes organization metadata.
@@ -2335,6 +2338,9 @@ type CastaiUsersV1beta1UserOrganization struct {
 
 	// name of the organization.
 	Name string `json:"name"`
+
+	// information whether the organization have rbacv2 enabled.
+	Rbacv2Enabled *bool `json:"rbacv2Enabled"`
 
 	// Deprecated: for RBACv2 user can be bound to multiple roles.
 	// Use https://docs.cast.ai/reference/rbacserviceapi instead.
@@ -3214,7 +3220,8 @@ type NodeconfigV1GKEConfig struct {
 	MaxPodsPerNode *int32 `json:"maxPodsPerNode,omitempty"`
 
 	// Network tags to be added on a VM. Each tag must be 1-63 characters long, start with a lowercase letter and end with either a number or a lowercase letter.
-	NetworkTags *[]string `json:"networkTags,omitempty"`
+	NetworkTags      *[]string                     `json:"networkTags,omitempty"`
+	SecondaryIpRange *NodeconfigV1SecondaryIPRange `json:"secondaryIpRange,omitempty"`
 
 	// Flag indicating whether to use local SSD storage for the node. Defaults to false.
 	UseEphemeralStorageLocalSsd *bool `json:"useEphemeralStorageLocalSsd,omitempty"`
@@ -3444,6 +3451,11 @@ type NodeconfigV1NodeConfigurationUpdate struct {
 // Tags to be added on cloud instances for provisioned nodes.
 type NodeconfigV1NodeConfigurationUpdate_Tags struct {
 	AdditionalProperties map[string]string `json:"-"`
+}
+
+// NodeconfigV1SecondaryIPRange defines model for nodeconfig.v1.SecondaryIPRange.
+type NodeconfigV1SecondaryIPRange struct {
+	RangeName *string `json:"rangeName,omitempty"`
 }
 
 // NodeconfigV1SecurityGroup defines model for nodeconfig.v1.SecurityGroup.

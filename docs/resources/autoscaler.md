@@ -173,7 +173,7 @@ Optional:
 
 Optional:
 
-- `custom_instances_enabled` (Boolean) enable/disable custom instances policy.
+- `custom_instances_enabled` (Boolean, Deprecated) enable/disable custom instances policy.
 - `enabled` (Boolean) enable/disable unschedulable pods detection policy.
 - `headroom` (Block List, Max: 1) additional headroom based on cluster's total available capacity for on-demand nodes. (see [below for nested schema](#nestedblock--autoscaler_settings--unschedulable_pods--headroom))
 - `headroom_spot` (Block List, Max: 1) additional headroom based on cluster's total available capacity for spot nodes. (see [below for nested schema](#nestedblock--autoscaler_settings--unschedulable_pods--headroom_spot))
