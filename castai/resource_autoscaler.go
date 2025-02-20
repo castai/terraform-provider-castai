@@ -256,6 +256,7 @@ func resourceAutoscaler() *schema.Resource {
 										Type:        schema.TypeBool,
 										Optional:    true,
 										Default:     false,
+										Deprecated:  "customInstancesEnabled is deprecated. Use custom_instances_enabled field the node template resource.",
 										Description: "enable/disable custom instances policy.",
 									},
 								},
