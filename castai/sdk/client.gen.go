@@ -639,7 +639,7 @@ type ClientInterface interface {
 	WorkloadOptimizationAPIListWorkloads(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// WorkloadOptimizationAPIGetWorkloadsSummary request
-	WorkloadOptimizationAPIGetWorkloadsSummary(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+	WorkloadOptimizationAPIGetWorkloadsSummary(ctx context.Context, clusterId string, params *WorkloadOptimizationAPIGetWorkloadsSummaryParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// WorkloadOptimizationAPIGetWorkload request
 	WorkloadOptimizationAPIGetWorkload(ctx context.Context, clusterId string, workloadId string, params *WorkloadOptimizationAPIGetWorkloadParams, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -3059,8 +3059,8 @@ func (c *Client) WorkloadOptimizationAPIListWorkloads(ctx context.Context, clust
 	return c.Client.Do(req)
 }
 
-func (c *Client) WorkloadOptimizationAPIGetWorkloadsSummary(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewWorkloadOptimizationAPIGetWorkloadsSummaryRequest(c.Server, clusterId)
+func (c *Client) WorkloadOptimizationAPIGetWorkloadsSummary(ctx context.Context, clusterId string, params *WorkloadOptimizationAPIGetWorkloadsSummaryParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewWorkloadOptimizationAPIGetWorkloadsSummaryRequest(c.Server, clusterId, params)
 	if err != nil {
 		return nil, err
 	}
@@ -10142,7 +10142,7 @@ func NewWorkloadOptimizationAPIListWorkloadsRequest(server string, clusterId str
 }
 
 // NewWorkloadOptimizationAPIGetWorkloadsSummaryRequest generates requests for WorkloadOptimizationAPIGetWorkloadsSummary
-func NewWorkloadOptimizationAPIGetWorkloadsSummaryRequest(server string, clusterId string) (*http.Request, error) {
+func NewWorkloadOptimizationAPIGetWorkloadsSummaryRequest(server string, clusterId string, params *WorkloadOptimizationAPIGetWorkloadsSummaryParams) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -10166,6 +10166,26 @@ func NewWorkloadOptimizationAPIGetWorkloadsSummaryRequest(server string, cluster
 	if err != nil {
 		return nil, err
 	}
+
+	queryValues := queryURL.Query()
+
+	if params.IncludeCosts != nil {
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "includeCosts", runtime.ParamLocationQuery, *params.IncludeCosts); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	queryURL.RawQuery = queryValues.Encode()
 
 	req, err := http.NewRequest("GET", queryURL.String(), nil)
 	if err != nil {
@@ -11048,7 +11068,7 @@ type ClientWithResponsesInterface interface {
 	WorkloadOptimizationAPIListWorkloadsWithResponse(ctx context.Context, clusterId string) (*WorkloadOptimizationAPIListWorkloadsResponse, error)
 
 	// WorkloadOptimizationAPIGetWorkloadsSummary request
-	WorkloadOptimizationAPIGetWorkloadsSummaryWithResponse(ctx context.Context, clusterId string) (*WorkloadOptimizationAPIGetWorkloadsSummaryResponse, error)
+	WorkloadOptimizationAPIGetWorkloadsSummaryWithResponse(ctx context.Context, clusterId string, params *WorkloadOptimizationAPIGetWorkloadsSummaryParams) (*WorkloadOptimizationAPIGetWorkloadsSummaryResponse, error)
 
 	// WorkloadOptimizationAPIGetWorkload request
 	WorkloadOptimizationAPIGetWorkloadWithResponse(ctx context.Context, clusterId string, workloadId string, params *WorkloadOptimizationAPIGetWorkloadParams) (*WorkloadOptimizationAPIGetWorkloadResponse, error)
@@ -17443,8 +17463,8 @@ func (c *ClientWithResponses) WorkloadOptimizationAPIListWorkloadsWithResponse(c
 }
 
 // WorkloadOptimizationAPIGetWorkloadsSummaryWithResponse request returning *WorkloadOptimizationAPIGetWorkloadsSummaryResponse
-func (c *ClientWithResponses) WorkloadOptimizationAPIGetWorkloadsSummaryWithResponse(ctx context.Context, clusterId string) (*WorkloadOptimizationAPIGetWorkloadsSummaryResponse, error) {
-	rsp, err := c.WorkloadOptimizationAPIGetWorkloadsSummary(ctx, clusterId)
+func (c *ClientWithResponses) WorkloadOptimizationAPIGetWorkloadsSummaryWithResponse(ctx context.Context, clusterId string, params *WorkloadOptimizationAPIGetWorkloadsSummaryParams) (*WorkloadOptimizationAPIGetWorkloadsSummaryResponse, error) {
+	rsp, err := c.WorkloadOptimizationAPIGetWorkloadsSummary(ctx, clusterId, params)
 	if err != nil {
 		return nil, err
 	}
