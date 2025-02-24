@@ -474,6 +474,22 @@ func resourceNodeConfiguration() *schema.Resource {
 							Default:     nil,
 							Description: "Use ephemeral storage local SSD. Defaults to false",
 						},
+						"secondary_ip_range": {
+							Type:        schema.TypeList,
+							Optional:    true,
+							MaxItems:    1,
+							Description: "Secondary IP range configuration for pods in GKE nodes",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"range_name": {
+										Type:             schema.TypeString,
+										Required:         true,
+										Description:      "Name of the secondary IP range",
+										ValidateDiagFunc: validation.ToDiagFunc(validation.StringLenBetween(1, 63)),
+									},
+								},
+							},
+						},
 						FieldNodeConfigurationLoadbalancers: {
 							Type:        schema.TypeList,
 							Optional:    true,
@@ -1312,6 +1328,13 @@ func toGKEConfig(obj map[string]interface{}) *sdk.NodeconfigV1GKEConfig {
 		out.UseEphemeralStorageLocalSsd = toPtr(v)
 	}
 
+	if v, ok := obj["secondary_ip_range"].([]interface{}); ok && len(v) > 0 && v[0] != nil {
+		secondary := v[0].(map[string]interface{})
+		if rangeName, ok := secondary["range_name"].(string); ok {
+			out.SecondaryIpRange = &sdk.NodeconfigV1SecondaryIPRange{RangeName: &rangeName}
+		}
+	}
+
 	if v, ok := obj[FieldNodeConfigurationLoadbalancers].([]interface{}); ok && len(v) > 0 {
 		out.LoadBalancers = toGkeLoadBalancers(v)
 	}
@@ -1406,6 +1429,12 @@ func flattenGKEConfig(config *sdk.NodeconfigV1GKEConfig) []map[string]interface{
 
 	if v := config.UseEphemeralStorageLocalSsd; v != nil {
 		m["use_ephemeral_storage_local_ssd"] = *v
+	}
+
+	if v := config.SecondaryIpRange; v != nil {
+		m["secondary_ip_range"] = []map[string]interface{}{
+			{"range_name": v.RangeName},
+		}
 	}
 
 	if v := config.LoadBalancers; v != nil && len(*v) > 0 {

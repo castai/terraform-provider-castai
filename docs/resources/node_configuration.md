@@ -179,6 +179,7 @@ Optional:
 - `loadbalancers` (Block List) Loadboalancer configuration for CAST provisioned nodes (see [below for nested schema](#nestedblock--gke--loadbalancers))
 - `max_pods_per_node` (Number) Maximum number of pods that can be run on a node, which affects how many IP addresses you will need for each node. Defaults to 110
 - `network_tags` (List of String) Network tags to be added on a VM. (See [network tags](https://cloud.google.com/vpc/docs/add-remove-network-tags))
+- `secondary_ip_range` (Block List, Max: 1) Secondary IP range configuration for pods in GKE nodes (see [below for nested schema](#nestedblock--gke--secondary_ip_range))
 - `use_ephemeral_storage_local_ssd` (Boolean) Use ephemeral storage local SSD. Defaults to false
 - `zones` (List of String, Deprecated) List of preferred availability zones to choose from when provisioning new nodes.
 
@@ -206,6 +207,14 @@ Required:
 - `name` (String) Name of the instance group
 - `zone` (String) Zone of the instance group
 
+
+
+<a id="nestedblock--gke--secondary_ip_range"></a>
+### Nested Schema for `gke.secondary_ip_range`
+
+Required:
+
+- `range_name` (String) Name of the secondary IP range
 
 
 

@@ -5603,6 +5603,11 @@ type WorkloadOptimizationAPIGetWorkloadEventParams struct {
 	CreatedAt time.Time `form:"createdAt" json:"createdAt"`
 }
 
+// WorkloadOptimizationAPIGetWorkloadsSummaryParams defines parameters for WorkloadOptimizationAPIGetWorkloadsSummary.
+type WorkloadOptimizationAPIGetWorkloadsSummaryParams struct {
+	IncludeCosts *bool `form:"includeCosts,omitempty" json:"includeCosts,omitempty"`
+}
+
 // WorkloadOptimizationAPIGetWorkloadParams defines parameters for WorkloadOptimizationAPIGetWorkload.
 type WorkloadOptimizationAPIGetWorkloadParams struct {
 	IncludeMetrics *bool      `form:"includeMetrics,omitempty" json:"includeMetrics,omitempty"`
