@@ -4093,8 +4093,22 @@ type PoliciesV1UnschedulablePodsPolicy struct {
 
 // ScheduledrebalancingV1AggressiveModeConfig defines model for scheduledrebalancing.v1.AggressiveModeConfig.
 type ScheduledrebalancingV1AggressiveModeConfig struct {
-	// Rebalance workloads using local-path Persistent Volumes. THIS WILL RESULT IN DATA LOSS.
+	// Rebalance workloads that use local-path Persistent Volumes.
+	// WARNING: THIS WILL RESULT IN DATA LOSS.
 	IgnoreLocalPersistentVolumes *bool `json:"ignoreLocalPersistentVolumes,omitempty"`
+
+	// Pods spawned by Jobs or CronJobs will not prevent the Rebalancer from deleting a node on which they run.
+	// WARNING: When true, pods spawned by Jobs or CronJobs will be terminated if the Rebalancer picks a node that runs them.
+	// As such, they are likely to lose their progress.
+	IgnoreProblemJobPods *bool `json:"ignoreProblemJobPods,omitempty"`
+
+	// Pods that don't have a controller (bare pods) will not prevent the Rebalancer from deleting a node on which they run.
+	// WARNING: When true, such pods might not restart, since they have no controller to do it.
+	IgnoreProblemPodsWithoutController *bool `json:"ignoreProblemPodsWithoutController,omitempty"`
+
+	// Pods that are marked with "removal disabled" will not prevent the Rebalancer from deleting a node on which they run.
+	// WARNING: When true, such pods will be evicted and disrupted.
+	IgnoreProblemRemovalDisabledPods *bool `json:"ignoreProblemRemovalDisabledPods,omitempty"`
 }
 
 // ScheduledrebalancingV1DeleteRebalancingJobResponse defines model for scheduledrebalancing.v1.DeleteRebalancingJobResponse.

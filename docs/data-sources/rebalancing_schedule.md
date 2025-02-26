@@ -47,6 +47,9 @@ Read-Only:
 Read-Only:
 
 - `ignore_local_persistent_volumes` (Boolean)
+- `ignore_problem_job_pods` (Boolean)
+- `ignore_problem_pods_without_controller` (Boolean)
+- `ignore_problem_removal_disabled_pods` (Boolean)
 
 
 <a id="nestedobjatt--launch_configuration--execution_conditions"></a>
