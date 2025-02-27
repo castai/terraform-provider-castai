@@ -39,4 +39,7 @@ resource "castai_workload_scaling_policy" "services" {
   anti_affinity {
     consider_anti_affinity = false
   }
+  confidence {
+    threshold = 0.9
+  }
 }

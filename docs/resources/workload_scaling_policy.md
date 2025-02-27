@@ -56,6 +56,9 @@ resource "castai_workload_scaling_policy" "services" {
   anti_affinity {
     consider_anti_affinity = false
   }
+  confidence {
+    threshold = 0.9
+  }
 }
 ```
 
@@ -78,6 +81,7 @@ resource "castai_workload_scaling_policy" "services" {
 ### Optional
 
 - `anti_affinity` (Block List, Max: 1) (see [below for nested schema](#nestedblock--anti_affinity))
+- `confidence` (Block List, Max: 1) Defines the confidence settings for applying recommendations. (see [below for nested schema](#nestedblock--confidence))
 - `downscaling` (Block List, Max: 1) (see [below for nested schema](#nestedblock--downscaling))
 - `memory_event` (Block List, Max: 1) (see [below for nested schema](#nestedblock--memory_event))
 - `startup` (Block List, Max: 1) (see [below for nested schema](#nestedblock--startup))
@@ -198,6 +202,14 @@ Optional:
 
 - `consider_anti_affinity` (Boolean) Defines if anti-affinity should be considered when scaling the workload.
 	If enabled, requiring host ports, or having anti-affinity on hostname will force all recommendations to be deferred.
+
+
+<a id="nestedblock--confidence"></a>
+### Nested Schema for `confidence`
+
+Optional:
+
+- `threshold` (Number) Defines the confidence threshold for applying recommendations. The smaller number indicates that we require fewer metrics data points to apply recommendations.
 
 
 <a id="nestedblock--downscaling"></a>
