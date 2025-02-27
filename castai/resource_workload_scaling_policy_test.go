@@ -52,6 +52,7 @@ func TestAccResourceWorkloadScalingPolicy(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "memory.0.limit.0.type", "MULTIPLIER"),
 					resource.TestCheckResourceAttr(resourceName, "memory.0.limit.0.multiplier", "1.8"),
 					resource.TestCheckResourceAttr(resourceName, "memory.0.management_option", "READ_ONLY"),
+					resource.TestCheckResourceAttr(resourceName, "confidence.0.threshold", "0.4"),
 				),
 			},
 			{
@@ -88,6 +89,7 @@ func TestAccResourceWorkloadScalingPolicy(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "startup.0.period_seconds", "123"),
 					resource.TestCheckResourceAttr(resourceName, "downscaling.0.apply_type", "DEFERRED"),
 					resource.TestCheckResourceAttr(resourceName, "memory_event.0.apply_type", "DEFERRED"),
+					resource.TestCheckResourceAttr(resourceName, "confidence.0.threshold", "0.6"),
 					resource.TestCheckResourceAttr(resourceName, "anti_affinity.0.consider_anti_affinity", "true"),
 				),
 			},
@@ -112,6 +114,9 @@ func scalingPolicyConfig(clusterName, projectID, name string) string {
 		cluster_id			= castai_gke_cluster.test.id
 		apply_type			= "IMMEDIATE"
 		management_option	= "READ_ONLY"
+		confidence {
+			threshold = 0.4
+		}
 		cpu {
 			function 		= "QUANTILE"
 			overhead 		= 0.05
@@ -194,6 +199,9 @@ func scalingPolicyConfigUpdated(clusterName, projectID, name string) string {
 		}
 		anti_affinity {
 			consider_anti_affinity = true
+		}
+		confidence {
+			threshold = 0.6
 		}
 	}`, updatedName)
 

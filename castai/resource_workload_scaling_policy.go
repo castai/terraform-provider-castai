@@ -25,16 +25,18 @@ const (
 	minApplyThresholdValue          = 0.01
 	maxApplyThresholdValue          = 2.5
 	defaultApplyThresholdPercentage = 0.1
+	defaultConfidenceThreshold      = 0.9
 	minNumeratorValue               = 0.0
 	maxExponentValue                = 1.
 	minExponentValue                = 0.
 )
 
 const (
-	FieldLimitStrategy           = "limit"
-	FieldLimitStrategyType       = "type"
-	FieldLimitStrategyMultiplier = "multiplier"
-
+	FieldLimitStrategy                             = "limit"
+	FieldLimitStrategyType                         = "type"
+	FieldLimitStrategyMultiplier                   = "multiplier"
+	FieldConfidence                                = "confidence"
+	FieldConfidenceThreshold                       = "threshold"
 	DeprecatedFieldApplyThreshold                  = "apply_threshold"
 	FieldApplyThresholdStrategy                    = "apply_threshold_strategy"
 	FieldApplyThresholdStrategyType                = "type"
@@ -115,6 +117,26 @@ func resourceWorkloadScalingPolicy() *schema.Resource {
 							Optional:         true,
 							Description:      "Defines the duration (in seconds) during which elevated resource usage is expected at startup.\nWhen set, recommendations will be adjusted to disregard resource spikes within this period.\nIf not specified, the workload will receive standard recommendations without startup considerations.",
 							ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(120, 3600)),
+						},
+					},
+				},
+			},
+			FieldConfidence: {
+				Type:        schema.TypeList,
+				Optional:    true,
+				MaxItems:    1,
+				Description: "Defines the confidence settings for applying recommendations.",
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					return suppressConfidenceThresholdDefaultValueDiff(FieldConfidence, old, new, d)
+				},
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						FieldConfidenceThreshold: {
+							Type:             schema.TypeFloat,
+							Optional:         true,
+							Default: 		  0.9,
+							Description:      "Defines the confidence threshold for applying recommendations. The smaller number indicates that we require fewer metrics data points to apply recommendations - changing this value can cause applying less precise recommendations. Do not change the default unless you want to optimize with fewer data points (e.g., short-lived workloads).",
+							ValidateDiagFunc: validation.ToDiagFunc(validation.FloatBetween(0, 1)),
 						},
 					},
 				},
@@ -381,6 +403,8 @@ func resourceWorkloadScalingPolicyCreate(ctx context.Context, d *schema.Resource
 		}
 		req.RecommendationPolicies.Memory = memory
 	}
+	
+	req.RecommendationPolicies.Confidence = toConfidence(toSection(d, FieldConfidence))
 
 	req.RecommendationPolicies.Startup = toStartup(toSection(d, "startup"))
 
@@ -452,6 +476,9 @@ func resourceWorkloadScalingPolicyRead(ctx context.Context, d *schema.ResourceDa
 	if err := d.Set("startup", toStartupMap(sp.RecommendationPolicies.Startup)); err != nil {
 		return diag.FromErr(fmt.Errorf("setting startup: %w", err))
 	}
+	if err := d.Set(FieldConfidence, toConfidenceMap(sp.RecommendationPolicies.Confidence)); err != nil {
+		return diag.FromErr(fmt.Errorf("setting confidence: %w", err))
+	}
 	if err := d.Set("downscaling", toDownscalingMap(sp.RecommendationPolicies.Downscaling)); err != nil {
 		return diag.FromErr(fmt.Errorf("setting downscaling: %w", err))
 	}
@@ -483,6 +510,7 @@ func resourceWorkloadScalingPolicyUpdate(ctx context.Context, d *schema.Resource
 		"downscaling",
 		"memory_event",
 		"anti_affinity",
+		FieldConfidence,
 	) {
 		tflog.Info(ctx, "scaling policy up to date")
 		return nil
@@ -509,6 +537,7 @@ func resourceWorkloadScalingPolicyUpdate(ctx context.Context, d *schema.Resource
 			Downscaling:      toDownscaling(toSection(d, "downscaling")),
 			MemoryEvent:      toMemoryEvent(toSection(d, "memory_event")),
 			AntiAffinity:     toAntiAffinity(toSection(d, "anti_affinity")),
+			Confidence: 	 toConfidence(toSection(d, FieldConfidence)),
 		},
 	}
 
@@ -740,6 +769,17 @@ func suppressThresholdStrategyDefaultValueDiff(resource, oldValue, newValue stri
 	return oldValue == newValue
 }
 
+func suppressConfidenceThresholdDefaultValueDiff(resource, oldValue, newValue string, d *schema.ResourceData) bool {
+	isConfidenceUnset := newValue == "0" || newValue == ""
+	if isConfidenceUnset {
+		confidenceThreshold := d.Get(fmt.Sprintf("%s.0.%s", resource, FieldConfidenceThreshold))
+		// Suppress diff if configuration saved from API equals to default
+		return confidenceThreshold == defaultConfidenceThreshold
+	}
+
+	return oldValue == newValue
+}
+
 func toWorkloadResourceLimit(obj map[string]any) (*sdk.WorkloadoptimizationV1ResourceLimitStrategy, error) {
 	if len(obj) == 0 {
 		return nil, nil
@@ -847,6 +887,32 @@ func applyThresholdStrategyToMap(s *sdk.WorkloadoptimizationV1ApplyThresholdStra
 
 	if len(m) == 0 {
 		return nil
+	}
+
+	return []map[string]any{m}
+}
+
+func toConfidence(confidence map[string]any) *sdk.WorkloadoptimizationV1ConfidenceSettings {
+	if len(confidence) == 0 {
+		return nil
+	}
+
+	result := &sdk.WorkloadoptimizationV1ConfidenceSettings{}
+
+	if v, ok := confidence[FieldConfidenceThreshold].(float64); ok {
+		result.Threshold = &v
+	}
+
+	return result
+}
+
+func toConfidenceMap(s *sdk.WorkloadoptimizationV1ConfidenceSettings) []map[string]any {
+	if s == nil {
+		return nil
+	}
+
+	m := map[string]any{
+		FieldConfidenceThreshold: s.Threshold,
 	}
 
 	return []map[string]any{m}
