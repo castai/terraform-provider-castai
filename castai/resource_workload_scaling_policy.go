@@ -135,7 +135,7 @@ func resourceWorkloadScalingPolicy() *schema.Resource {
 							Type:             schema.TypeFloat,
 							Optional:         true,
 							Default: 		  0.9,
-							Description:      "Defines the confidence threshold for applying recommendations. The smaller number indicates that we require fewer metrics data points to apply recommendations.",
+							Description:      "Defines the confidence threshold for applying recommendations. The smaller number indicates that we require fewer metrics data points to apply recommendations - changing this value can cause applying less precise recommendations. Do not change the default unless you want to optimize with fewer data points (e.g., short-lived workloads).",
 							ValidateDiagFunc: validation.ToDiagFunc(validation.FloatBetween(0, 1)),
 						},
 					},
