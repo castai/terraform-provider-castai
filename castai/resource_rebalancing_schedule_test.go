@@ -44,6 +44,9 @@ func TestAccResourceRebalancingSchedule_basic(t *testing.T) {
 					resource.TestCheckResourceAttr("castai_rebalancing_schedule.test", "schedule.0.cron", "1 4 * * *"),
 					resource.TestCheckResourceAttr("castai_rebalancing_schedule.test", "launch_configuration.0.aggressive_mode", "true"),
 					resource.TestCheckResourceAttr("castai_rebalancing_schedule.test", "launch_configuration.0.aggressive_mode_config.0.ignore_local_persistent_volumes", "true"),
+					resource.TestCheckResourceAttr("castai_rebalancing_schedule.test", "launch_configuration.0.aggressive_mode_config.0.ignore_problem_job_pods", "true"),
+					resource.TestCheckResourceAttr("castai_rebalancing_schedule.test", "launch_configuration.0.aggressive_mode_config.0.ignore_problem_removal_disabled_pods", "true"),
+					resource.TestCheckResourceAttr("castai_rebalancing_schedule.test", "launch_configuration.0.aggressive_mode_config.0.ignore_problem_pods_without_controller", "true"),
 				),
 			},
 			{
@@ -96,6 +99,9 @@ resource "castai_rebalancing_schedule" "test" {
 		aggressive_mode = true
 		aggressive_mode_config {
       		ignore_local_persistent_volumes = true
+      		ignore_problem_job_pods = true
+      		ignore_problem_removal_disabled_pods = true
+      		ignore_problem_pods_without_controller = true
     	}
 		selector = jsonencode({
 			nodeSelectorTerms = [{

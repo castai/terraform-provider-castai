@@ -83,7 +83,10 @@ Optional:
 
 Required:
 
-- `ignore_local_persistent_volumes` (Boolean) Rebalance workloads using local-path Persistent Volumes. THIS WILL RESULT IN DATA LOSS.
+- `ignore_local_persistent_volumes` (Boolean) Rebalance workloads that use local-path Persistent Volumes. THIS WILL RESULT IN DATA LOSS.
+- `ignore_problem_job_pods` (Boolean) Pods spawned by Jobs or CronJobs will not prevent the Rebalancer from deleting a node on which they run. WARNING: When true, pods spawned by Jobs or CronJobs will be terminated if the Rebalancer picks a node that runs them. As such, they are likely to lose their progress.
+- `ignore_problem_pods_without_controller` (Boolean) Pods that don't have a controller (bare pods) will not prevent the Rebalancer from deleting a node on which they run. WARNING: When true, such pods might not restart, since they have no controller to do it.
+- `ignore_problem_removal_disabled_pods` (Boolean) Pods that are marked with "removal disabled" will not prevent the Rebalancer from deleting a node on which they run. WARNING: When true, such pods will be evicted and disrupted.
 
 
 <a id="nestedblock--launch_configuration--execution_conditions"></a>

@@ -131,7 +131,22 @@ func resourceRebalancingSchedule() *schema.Resource {
 									"ignore_local_persistent_volumes": {
 										Type:        schema.TypeBool,
 										Required:    true,
-										Description: "Rebalance workloads using local-path Persistent Volumes. THIS WILL RESULT IN DATA LOSS.",
+										Description: "Rebalance workloads that use local-path Persistent Volumes. THIS WILL RESULT IN DATA LOSS.",
+									},
+									"ignore_problem_job_pods": {
+										Type:        schema.TypeBool,
+										Required:    true,
+										Description: "Pods spawned by Jobs or CronJobs will not prevent the Rebalancer from deleting a node on which they run. WARNING: When true, pods spawned by Jobs or CronJobs will be terminated if the Rebalancer picks a node that runs them. As such, they are likely to lose their progress.",
+									},
+									"ignore_problem_removal_disabled_pods": {
+										Type:        schema.TypeBool,
+										Required:    true,
+										Description: `Pods that are marked with "removal disabled" will not prevent the Rebalancer from deleting a node on which they run. WARNING: When true, such pods will be evicted and disrupted.`,
+									},
+									"ignore_problem_pods_without_controller": {
+										Type:        schema.TypeBool,
+										Required:    true,
+										Description: "Pods that don't have a controller (bare pods) will not prevent the Rebalancer from deleting a node on which they run. WARNING: When true, such pods might not restart, since they have no controller to do it.",
 									},
 								},
 							},
@@ -314,7 +329,10 @@ func stateToSchedule(d *schema.ResourceData) (*sdk.ScheduledrebalancingV1Rebalan
 		aggressiveModeConfigSection := launchConfigurationData["aggressive_mode_config"].([]any)
 		if len(aggressiveModeConfigSection) != 0 {
 			aggressiveModeConfig = &sdk.ScheduledrebalancingV1AggressiveModeConfig{
-				IgnoreLocalPersistentVolumes: lo.ToPtr(aggressiveModeConfigSection[0].(map[string]any)["ignore_local_persistent_volumes"].(bool)),
+				IgnoreLocalPersistentVolumes:       lo.ToPtr(aggressiveModeConfigSection[0].(map[string]any)["ignore_local_persistent_volumes"].(bool)),
+				IgnoreProblemJobPods:               lo.ToPtr(aggressiveModeConfigSection[0].(map[string]any)["ignore_problem_job_pods"].(bool)),
+				IgnoreProblemRemovalDisabledPods:   lo.ToPtr(aggressiveModeConfigSection[0].(map[string]any)["ignore_problem_removal_disabled_pods"].(bool)),
+				IgnoreProblemPodsWithoutController: lo.ToPtr(aggressiveModeConfigSection[0].(map[string]any)["ignore_problem_pods_without_controller"].(bool)),
 			}
 		}
 
@@ -363,7 +381,10 @@ func scheduleToState(schedule *sdk.ScheduledrebalancingV1RebalancingSchedule, d 
 		if schedule.LaunchConfiguration.RebalancingOptions.AggressiveModeConfig != nil {
 			launchConfig["aggressive_mode_config"] = []map[string]any{
 				{
-					"ignore_local_persistent_volumes": schedule.LaunchConfiguration.RebalancingOptions.AggressiveModeConfig.IgnoreLocalPersistentVolumes,
+					"ignore_local_persistent_volumes":        schedule.LaunchConfiguration.RebalancingOptions.AggressiveModeConfig.IgnoreLocalPersistentVolumes,
+					"ignore_problem_job_pods":                schedule.LaunchConfiguration.RebalancingOptions.AggressiveModeConfig.IgnoreProblemJobPods,
+					"ignore_problem_removal_disabled_pods":   schedule.LaunchConfiguration.RebalancingOptions.AggressiveModeConfig.IgnoreProblemRemovalDisabledPods,
+					"ignore_problem_pods_without_controller": schedule.LaunchConfiguration.RebalancingOptions.AggressiveModeConfig.IgnoreProblemPodsWithoutController,
 				},
 			}
 		}
