@@ -69,7 +69,6 @@ func TestGKEClusterIdResourceReadContext(t *testing.T) {
 	r.Nil(result)
 	r.False(result.HasError())
 	r.Equal(`ID = b6bfc074-a267-400f-b8f1-db0850c36gke
-cast_service_account = cast-service-account
 client_service_account = client-service-account
 location = eu-central-1
 name = gke-cluster
