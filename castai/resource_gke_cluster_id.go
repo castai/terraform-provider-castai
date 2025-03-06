@@ -172,9 +172,6 @@ func resourceCastaiGKEClusterIdRead(ctx context.Context, data *schema.ResourceDa
 		if err := data.Set(FieldGKEClientSA, toString(GKE.ClientServiceAccount)); err != nil {
 			return diag.FromErr(fmt.Errorf("setting cluster client sa email: %w", err))
 		}
-		if err := data.Set(FieldGKECastSA, toString(GKE.CastServiceAccount)); err != nil {
-			return diag.FromErr(fmt.Errorf("setting cluster cast sa email: %w", err))
-		}
 	}
 	return nil
 }
