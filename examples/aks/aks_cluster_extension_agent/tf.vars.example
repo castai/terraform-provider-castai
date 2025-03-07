@@ -1,0 +1,6 @@
+cluster_name     = "EXAMPLE"
+cluster_region   = "EXAMPLE"
+castai_api_token = "EXAMPLE"
+resource_group   = "EXAMPLE_group"
+subscription_id  = "EXAMPLE"
+tenant_id        = "EXAMPLE"
