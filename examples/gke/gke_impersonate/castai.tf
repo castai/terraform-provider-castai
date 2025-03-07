@@ -1,7 +1,9 @@
+# Configure Data sources and providers required for CAST AI connection.
 locals {
-  service_account_id = "castai-gke-tf-${substr(sha1(var.cluster_name), 0, 8)}"
+  service_account_id = var.service_account_id != "" ? var.service_account_id : "castai-gke-tf-${substr(sha1(var.cluster_name), 0, 8)}"
 }
 
+# Configure GKE cluster connection.
 module "iam-impersonate" {
   source             = "castai/iam-impersonate/gke"
   version            = "1.0.0"
@@ -153,5 +155,8 @@ module "castai-gke-cluster" {
       }
     }
   }
+
+  // depends_on helps terraform with creating proper dependencies graph in case of resource creation and in this case destroy
+  // module "castai-gke-cluster" has to be destroyed before module "castai-gke-iam" and "module.gke"
   depends_on = [module.gke]
 }
