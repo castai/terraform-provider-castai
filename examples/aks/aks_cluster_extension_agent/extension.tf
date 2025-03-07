@@ -9,9 +9,9 @@ resource "azurerm_marketplace_agreement" "accept_terms" {
 }
 
 resource "azurerm_kubernetes_cluster_extension" "castai" {
-  name           = "castai-agent"
-  cluster_id     = azurerm_kubernetes_cluster.this.id
-  extension_type = "CASTAI.agent"
+  name              = "castai-agent"
+  cluster_id        = azurerm_kubernetes_cluster.this.id
+  extension_type    = "CASTAI.agent"
   release_namespace = "castai-agent"
   configuration_settings = {
     provider = "aks"
