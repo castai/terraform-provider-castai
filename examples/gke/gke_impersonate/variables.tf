@@ -48,3 +48,9 @@ variable "tags" {
   description = "Optional tags for new cluster nodes. This parameter applies only to new nodes - tags for old nodes are not reconciled."
   default     = {}
 }
+
+variable "service_account_id" {
+  type        = string
+  description = "Cast service account id for impersonation."
+  default     = ""
+}
