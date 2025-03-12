@@ -51,9 +51,9 @@ func TestRebalancingScheduleDataSourceRead(t *testing.T) {
                     "aggressiveMode": false,
                     "aggressiveModeConfig": {
                         "ignoreLocalPersistentVolumes": true,
-						"ignoreProblemJobPods": true,
-						"ignoreProblemRemovalDisabledPods": true,
-						"ignoreProblemPodsWithoutController": true
+                        "ignoreProblemJobPods": true,
+                        "ignoreProblemRemovalDisabledPods": true,
+                        "ignoreProblemPodsWithoutController": true
                     }
                 },
                 "numTargetedNodes": 20,
