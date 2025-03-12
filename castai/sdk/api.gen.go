@@ -123,6 +123,14 @@ const (
 	Ssd     CastaiInventoryV1beta1StorageInfoDeviceType = "ssd"
 )
 
+// Defines values for CastaiInventoryV1beta1StorageInfoEphemeralOSDisksInfoPlacement.
+const (
+	CastaiInventoryV1beta1StorageInfoEphemeralOSDisksInfoPlacementCACHEDISK            CastaiInventoryV1beta1StorageInfoEphemeralOSDisksInfoPlacement = "CACHE_DISK"
+	CastaiInventoryV1beta1StorageInfoEphemeralOSDisksInfoPlacementNVMEDISK             CastaiInventoryV1beta1StorageInfoEphemeralOSDisksInfoPlacement = "NVME_DISK"
+	CastaiInventoryV1beta1StorageInfoEphemeralOSDisksInfoPlacementPLACEMENTUNSPECIFIED CastaiInventoryV1beta1StorageInfoEphemeralOSDisksInfoPlacement = "PLACEMENT_UNSPECIFIED"
+	CastaiInventoryV1beta1StorageInfoEphemeralOSDisksInfoPlacementRESOURCEDISK         CastaiInventoryV1beta1StorageInfoEphemeralOSDisksInfoPlacement = "RESOURCE_DISK"
+)
+
 // Defines values for CastaiRbacV1beta1Effects.
 const (
 	ALLOW CastaiRbacV1beta1Effects = "ALLOW"
@@ -221,9 +229,9 @@ const (
 
 // Defines values for NodeconfigV1AKSConfigOsDiskEphemeralPlacement.
 const (
-	PLACEMENTCACHEDISK    NodeconfigV1AKSConfigOsDiskEphemeralPlacement = "PLACEMENT_CACHE_DISK"
-	PLACEMENTRESOURCEDISK NodeconfigV1AKSConfigOsDiskEphemeralPlacement = "PLACEMENT_RESOURCE_DISK"
-	PLACEMENTUNSPECIFIED  NodeconfigV1AKSConfigOsDiskEphemeralPlacement = "PLACEMENT_UNSPECIFIED"
+	NodeconfigV1AKSConfigOsDiskEphemeralPlacementPLACEMENTCACHEDISK    NodeconfigV1AKSConfigOsDiskEphemeralPlacement = "PLACEMENT_CACHE_DISK"
+	NodeconfigV1AKSConfigOsDiskEphemeralPlacementPLACEMENTRESOURCEDISK NodeconfigV1AKSConfigOsDiskEphemeralPlacement = "PLACEMENT_RESOURCE_DISK"
+	NodeconfigV1AKSConfigOsDiskEphemeralPlacementPLACEMENTUNSPECIFIED  NodeconfigV1AKSConfigOsDiskEphemeralPlacement = "PLACEMENT_UNSPECIFIED"
 )
 
 // Defines values for NodeconfigV1AKSConfigOsDiskType.
@@ -348,6 +356,7 @@ const (
 	EVENTTYPESCALINGPOLICYASSIGNED      WorkloadoptimizationV1EventType = "EVENT_TYPE_SCALING_POLICY_ASSIGNED"
 	EVENTTYPESCALINGPOLICYCREATED       WorkloadoptimizationV1EventType = "EVENT_TYPE_SCALING_POLICY_CREATED"
 	EVENTTYPESCALINGPOLICYDELETED       WorkloadoptimizationV1EventType = "EVENT_TYPE_SCALING_POLICY_DELETED"
+	EVENTTYPESCALINGPOLICYORDERUPDATED  WorkloadoptimizationV1EventType = "EVENT_TYPE_SCALING_POLICY_ORDER_UPDATED"
 	EVENTTYPESCALINGPOLICYUPDATED       WorkloadoptimizationV1EventType = "EVENT_TYPE_SCALING_POLICY_UPDATED"
 	EVENTTYPESURGE                      WorkloadoptimizationV1EventType = "EVENT_TYPE_SURGE"
 )
@@ -357,6 +366,15 @@ const (
 	AGENTSTATUSINVALID WorkloadoptimizationV1GetAgentStatusResponseAgentStatus = "AGENT_STATUS_INVALID"
 	AGENTSTATUSRUNNING WorkloadoptimizationV1GetAgentStatusResponseAgentStatus = "AGENT_STATUS_RUNNING"
 	AGENTSTATUSUNKNOWN WorkloadoptimizationV1GetAgentStatusResponseAgentStatus = "AGENT_STATUS_UNKNOWN"
+)
+
+// Defines values for WorkloadoptimizationV1KubernetesLabelSelectorOperator.
+const (
+	KUBERNETESLABELSELECTOROPDOESNOTEXIST WorkloadoptimizationV1KubernetesLabelSelectorOperator = "KUBERNETES_LABEL_SELECTOR_OP_DOES_NOT_EXIST"
+	KUBERNETESLABELSELECTOROPEXISTS       WorkloadoptimizationV1KubernetesLabelSelectorOperator = "KUBERNETES_LABEL_SELECTOR_OP_EXISTS"
+	KUBERNETESLABELSELECTOROPIN           WorkloadoptimizationV1KubernetesLabelSelectorOperator = "KUBERNETES_LABEL_SELECTOR_OP_IN"
+	KUBERNETESLABELSELECTOROPNOTIN        WorkloadoptimizationV1KubernetesLabelSelectorOperator = "KUBERNETES_LABEL_SELECTOR_OP_NOT_IN"
+	KUBERNETESLABELSELECTOROPUNSPECIFIED  WorkloadoptimizationV1KubernetesLabelSelectorOperator = "KUBERNETES_LABEL_SELECTOR_OP_UNSPECIFIED"
 )
 
 // Defines values for WorkloadoptimizationV1ManagedBy.
@@ -413,6 +431,15 @@ type CommitmentsAPIBatchDeleteCommitmentsRequest struct {
 type CommitmentsAPIBatchUpdateCommitmentsRequest struct {
 	// Commitments to update. A maximum of 1000 commitments can be modified in a batch.
 	Requests []CastaiInventoryV1beta1UpdateCommitmentRequest `json:"requests"`
+}
+
+// ExternalClusterAPIGCPCreateSARequest defines model for ExternalClusterAPI_GCPCreateSA_request.
+type ExternalClusterAPIGCPCreateSARequest struct {
+	// AKSClusterParams is a placeholder for future use.
+	Aks *ExternalclusterV1GCPCreateSARequestAKSClusterParams `json:"aks,omitempty"`
+
+	// UpdateGKEClusterParams defines updatable GKE cluster configuration.
+	Gke *ExternalclusterV1UpdateGKEClusterParams `json:"gke,omitempty"`
 }
 
 // ExternalClusterAPIGKECreateSARequest defines model for ExternalClusterAPI_GKECreateSA_request.
@@ -472,6 +499,11 @@ type UsersAPIUpdateOrganizationUserRequest struct {
 // WorkloadOptimizationAPIAssignScalingPolicyWorkloadsRequest defines model for WorkloadOptimizationAPI_AssignScalingPolicyWorkloads_request.
 type WorkloadOptimizationAPIAssignScalingPolicyWorkloadsRequest struct {
 	WorkloadIds *[]string `json:"workloadIds,omitempty"`
+}
+
+// WorkloadOptimizationAPISetScalingPoliciesOrderRequest defines model for WorkloadOptimizationAPI_SetScalingPoliciesOrder_request.
+type WorkloadOptimizationAPISetScalingPoliciesOrderRequest struct {
+	PolicyIds *[]string `json:"policyIds,omitempty"`
 }
 
 // Auth token used to authenticate via api.
@@ -1340,6 +1372,9 @@ type CastaiInventoryV1beta1StorageInfo struct {
 	//  - sata: SATA driver is designed for HDD drives with spinning technology but also supports SSD drives.
 	Driver *CastaiInventoryV1beta1StorageDriver `json:"driver,omitempty"`
 
+	// EphemeralOSDisksInfo holds information about ephemeral OS disks. Currently only supported for Azure.
+	EphemeralOsDisksInfo *CastaiInventoryV1beta1StorageInfoEphemeralOSDisksInfo `json:"ephemeralOsDisksInfo,omitempty"`
+
 	// TotalSizeGiB is a sum of all storage devices' size.
 	TotalSizeGib *int32 `json:"totalSizeGib,omitempty"`
 }
@@ -1363,6 +1398,23 @@ type CastaiInventoryV1beta1StorageInfoDevice struct {
 //   - ssd: SSD.
 //   - hdd: HDD.
 type CastaiInventoryV1beta1StorageInfoDeviceType string
+
+// EphemeralOSDisksInfo holds information about ephemeral OS disks. Currently only supported for Azure.
+type CastaiInventoryV1beta1StorageInfoEphemeralOSDisksInfo struct {
+	// Max size GiB specifies the maximum size of the disk.
+	MaxSizeGib *int32 `json:"maxSizeGib,omitempty"`
+
+	// Placements describe where an ephemeral OS disk can be stored.
+	Placements *[]CastaiInventoryV1beta1StorageInfoEphemeralOSDisksInfoPlacement `json:"placements,omitempty"`
+}
+
+// Placement specifies where the ephemeral OS disk is stored.
+//
+//   - PLACEMENT_UNSPECIFIED: Unspecified placement.
+//   - RESOURCE_DISK: Resource (temp) disk placement.
+//   - CACHE_DISK: Cache disk placement.
+//   - NVME_DISK: NVMe disk placement.
+type CastaiInventoryV1beta1StorageInfoEphemeralOSDisksInfoPlacement string
 
 // CastaiInventoryV1beta1UpdateCommitmentInput defines model for castai.inventory.v1beta1.UpdateCommitmentInput.
 type CastaiInventoryV1beta1UpdateCommitmentInput struct {
@@ -2568,6 +2620,9 @@ type ExternalclusterV1DeleteNodeResponse struct {
 	OperationId *string `json:"operationId,omitempty"`
 }
 
+// ExternalclusterV1DisableGCPSAResponse defines model for externalcluster.v1.DisableGCPSAResponse.
+type ExternalclusterV1DisableGCPSAResponse = map[string]interface{}
+
 // ExternalclusterV1DisableGKESAResponse defines model for externalcluster.v1.DisableGKESAResponse.
 type ExternalclusterV1DisableGKESAResponse = map[string]interface{}
 
@@ -2624,6 +2679,21 @@ type ExternalclusterV1EKSClusterParams struct {
 // Deprecated. Output only. CAST provisioned nodes tags configuration.
 type ExternalclusterV1EKSClusterParams_Tags struct {
 	AdditionalProperties map[string]string `json:"-"`
+}
+
+// AKSClusterParams is a placeholder for future use.
+type ExternalclusterV1GCPCreateSARequestAKSClusterParams = map[string]interface{}
+
+// ExternalclusterV1GCPCreateSAResponse defines model for externalcluster.v1.GCPCreateSAResponse.
+type ExternalclusterV1GCPCreateSAResponse struct {
+	ServiceAccountEmail *string `json:"serviceAccountEmail,omitempty"`
+
+	// service_account_id - The unique, stable numeric ID for the service
+	// account. Each service account retains its unique ID even if you delete the
+	// service account. For example, if you delete a service account, then create a
+	// new service account with the same name, the new service account has a
+	// different unique ID than the deleted service account.
+	ServiceAccountId *string `json:"serviceAccountId,omitempty"`
 }
 
 // GKEClusterParams defines GKE-specific arguments.
@@ -4410,6 +4480,7 @@ type WorkloadoptimizationV1Event struct {
 	ScalingPolicyAssigned      *WorkloadoptimizationV1ScalingPolicyAssigned           `json:"scalingPolicyAssigned,omitempty"`
 	ScalingPolicyCreated       *WorkloadoptimizationV1ScalingPolicyCreated            `json:"scalingPolicyCreated,omitempty"`
 	ScalingPolicyDeleted       *WorkloadoptimizationV1ScalingPolicyDeleted            `json:"scalingPolicyDeleted,omitempty"`
+	ScalingPolicyOrderUpdated  *WorkloadoptimizationV1ScalingPolicyOrderUpdatedEvent  `json:"scalingPolicyOrderUpdated,omitempty"`
 	ScalingPolicyUpdated       *WorkloadoptimizationV1ScalingPolicyUpdated            `json:"scalingPolicyUpdated,omitempty"`
 	Surge                      *WorkloadoptimizationV1SurgeEvent                      `json:"surge,omitempty"`
 }
@@ -4569,6 +4640,59 @@ type WorkloadoptimizationV1KeyValuePair struct {
 	Value string `json:"value"`
 }
 
+// WorkloadoptimizationV1KubernetesLabelExpressionMatcher defines model for workloadoptimization.v1.KubernetesLabelExpressionMatcher.
+type WorkloadoptimizationV1KubernetesLabelExpressionMatcher struct {
+	// Key is the label key that the selector applies to.
+	Key string `json:"key"`
+
+	// KubernetesLabelSelectorOperator defines the set of operators for a selector requirement.
+	Operator WorkloadoptimizationV1KubernetesLabelSelectorOperator `json:"operator"`
+
+	// Values is an array of string values.
+	Values []string `json:"values"`
+}
+
+// KubernetesLabelSelectorOperator defines the set of operators for a selector requirement.
+type WorkloadoptimizationV1KubernetesLabelSelectorOperator string
+
+// Represents a namespace matcher for a scaling policy. If multiple matchers are defined, the workload must match all of them.
+type WorkloadoptimizationV1KubernetesNamespaceMatcher struct {
+	// Defines matching all namespaces. Cannot be set together with other matchers.
+	All *bool `json:"all"`
+
+	// Defines matching by labels via map of {key,value} pairs.
+	Labels *WorkloadoptimizationV1KubernetesNamespaceMatcher_Labels `json:"labels,omitempty"`
+
+	// Defines matching by a list of label selector requirements.
+	LabelsExpressions *[]WorkloadoptimizationV1KubernetesLabelExpressionMatcher `json:"labelsExpressions,omitempty"`
+
+	// Defines matching by namespace names.
+	Names *[]string `json:"names,omitempty"`
+}
+
+// Defines matching by labels via map of {key,value} pairs.
+type WorkloadoptimizationV1KubernetesNamespaceMatcher_Labels struct {
+	AdditionalProperties map[string]string `json:"-"`
+}
+
+// WorkloadoptimizationV1KubernetesWorkloadMatcher defines model for workloadoptimization.v1.KubernetesWorkloadMatcher.
+type WorkloadoptimizationV1KubernetesWorkloadMatcher struct {
+	// Defines matching all namespaces. Cannot be set together with other matchers.
+	All *bool     `json:"all"`
+	Gvk *[]string `json:"gvk,omitempty"`
+
+	// Defines matching by labels via map of {key,value} pairs.
+	Labels *WorkloadoptimizationV1KubernetesWorkloadMatcher_Labels `json:"labels,omitempty"`
+
+	// Defines matching by a list of label selector requirements.
+	LabelsExpressions *[]WorkloadoptimizationV1KubernetesLabelExpressionMatcher `json:"labelsExpressions,omitempty"`
+}
+
+// Defines matching by labels via map of {key,value} pairs.
+type WorkloadoptimizationV1KubernetesWorkloadMatcher_Labels struct {
+	AdditionalProperties map[string]string `json:"-"`
+}
+
 // WorkloadoptimizationV1LimitRange defines model for workloadoptimization.v1.LimitRange.
 type WorkloadoptimizationV1LimitRange struct {
 	ClusterId       string                                    `json:"clusterId"`
@@ -4637,9 +4761,14 @@ type WorkloadoptimizationV1MemoryEventSettings struct {
 
 // WorkloadoptimizationV1NewWorkloadScalingPolicy defines model for workloadoptimization.v1.NewWorkloadScalingPolicy.
 type WorkloadoptimizationV1NewWorkloadScalingPolicy struct {
-	ApplyType              WorkloadoptimizationV1ApplyType              `json:"applyType"`
-	Name                   string                                       `json:"name"`
-	RecommendationPolicies WorkloadoptimizationV1RecommendationPolicies `json:"recommendationPolicies"`
+	ApplyType WorkloadoptimizationV1ApplyType `json:"applyType"`
+
+	// AssignmentRules defines the ordered list of matching rules.
+	// The first matching rule is selected and assigned to workload.
+	// If none are matching then the default cluster policy is assigned.
+	AssignmentRules        *[]WorkloadoptimizationV1ScalingPolicyAssignmentRule `json:"assignmentRules,omitempty"`
+	Name                   string                                               `json:"name"`
+	RecommendationPolicies WorkloadoptimizationV1RecommendationPolicies         `json:"recommendationPolicies"`
 }
 
 // WorkloadoptimizationV1OOMKillEvent defines model for workloadoptimization.v1.OOMKillEvent.
@@ -4909,6 +5038,13 @@ type WorkloadoptimizationV1ScalingPolicyAssigned struct {
 	Policy WorkloadoptimizationV1WorkloadScalingPolicy `json:"policy"`
 }
 
+// WorkloadoptimizationV1ScalingPolicyAssignmentRule defines model for workloadoptimization.v1.ScalingPolicyAssignmentRule.
+type WorkloadoptimizationV1ScalingPolicyAssignmentRule struct {
+	// Represents a namespace matcher for a scaling policy. If multiple matchers are defined, the workload must match all of them.
+	Namespace *WorkloadoptimizationV1KubernetesNamespaceMatcher `json:"namespace,omitempty"`
+	Workload  *WorkloadoptimizationV1KubernetesWorkloadMatcher  `json:"workload,omitempty"`
+}
+
 // WorkloadoptimizationV1ScalingPolicyConfig defines model for workloadoptimization.v1.ScalingPolicyConfig.
 type WorkloadoptimizationV1ScalingPolicyConfig struct {
 	Id   string `json:"id"`
@@ -4925,11 +5061,26 @@ type WorkloadoptimizationV1ScalingPolicyDeleted struct {
 	Policy WorkloadoptimizationV1WorkloadScalingPolicy `json:"policy"`
 }
 
+// WorkloadoptimizationV1ScalingPolicyOrderUpdatedEvent defines model for workloadoptimization.v1.ScalingPolicyOrderUpdatedEvent.
+type WorkloadoptimizationV1ScalingPolicyOrderUpdatedEvent struct {
+	Current  []WorkloadoptimizationV1ScalingPolicyOrderUpdatedItem `json:"current"`
+	Previous []WorkloadoptimizationV1ScalingPolicyOrderUpdatedItem `json:"previous"`
+}
+
+// WorkloadoptimizationV1ScalingPolicyOrderUpdatedItem defines model for workloadoptimization.v1.ScalingPolicyOrderUpdatedItem.
+type WorkloadoptimizationV1ScalingPolicyOrderUpdatedItem struct {
+	Id   string `json:"id"`
+	Name string `json:"name"`
+}
+
 // WorkloadoptimizationV1ScalingPolicyUpdated defines model for workloadoptimization.v1.ScalingPolicyUpdated.
 type WorkloadoptimizationV1ScalingPolicyUpdated struct {
 	Current  WorkloadoptimizationV1WorkloadScalingPolicy `json:"current"`
 	Previous WorkloadoptimizationV1WorkloadScalingPolicy `json:"previous"`
 }
+
+// WorkloadoptimizationV1SetScalingPoliciesOrderResponse defines model for workloadoptimization.v1.SetScalingPoliciesOrderResponse.
+type WorkloadoptimizationV1SetScalingPoliciesOrderResponse = map[string]interface{}
 
 // WorkloadoptimizationV1StartupSettings defines model for workloadoptimization.v1.StartupSettings.
 type WorkloadoptimizationV1StartupSettings struct {
@@ -4964,9 +5115,13 @@ type WorkloadoptimizationV1UpdateWorkloadResponseV2 struct {
 
 // WorkloadoptimizationV1UpdateWorkloadScalingPolicy defines model for workloadoptimization.v1.UpdateWorkloadScalingPolicy.
 type WorkloadoptimizationV1UpdateWorkloadScalingPolicy struct {
-	ApplyType              WorkloadoptimizationV1ApplyType              `json:"applyType"`
-	Name                   string                                       `json:"name"`
-	RecommendationPolicies WorkloadoptimizationV1RecommendationPolicies `json:"recommendationPolicies"`
+	ApplyType WorkloadoptimizationV1ApplyType `json:"applyType"`
+
+	// AssignmentRules defines the ordered list of matching rules.
+	// BEWARE: If was defined on policy and not provided on update request, the assignment rules will be removed.
+	AssignmentRules        *[]WorkloadoptimizationV1ScalingPolicyAssignmentRule `json:"assignmentRules,omitempty"`
+	Name                   string                                               `json:"name"`
+	RecommendationPolicies WorkloadoptimizationV1RecommendationPolicies         `json:"recommendationPolicies"`
 }
 
 // WorkloadoptimizationV1UpdateWorkloadV2 defines model for workloadoptimization.v1.UpdateWorkloadV2.
@@ -5169,17 +5324,25 @@ type WorkloadoptimizationV1WorkloadResourceConfigUpdate struct {
 
 // WorkloadoptimizationV1WorkloadScalingPolicy defines model for workloadoptimization.v1.WorkloadScalingPolicy.
 type WorkloadoptimizationV1WorkloadScalingPolicy struct {
-	ApplyType                           WorkloadoptimizationV1ApplyType              `json:"applyType"`
-	ClusterId                           string                                       `json:"clusterId"`
-	CreatedAt                           time.Time                                    `json:"createdAt"`
-	HasWorkloadsConfiguredByAnnotations bool                                         `json:"hasWorkloadsConfiguredByAnnotations"`
-	Id                                  string                                       `json:"id"`
-	IsDefault                           bool                                         `json:"isDefault"`
-	IsReadonly                          bool                                         `json:"isReadonly"`
-	Name                                string                                       `json:"name"`
-	OrganizationId                      string                                       `json:"organizationId"`
-	RecommendationPolicies              WorkloadoptimizationV1RecommendationPolicies `json:"recommendationPolicies"`
-	UpdatedAt                           time.Time                                    `json:"updatedAt"`
+	ApplyType WorkloadoptimizationV1ApplyType `json:"applyType"`
+
+	// AssignmentRules defines the ordered list of matching rules.
+	// The first matching rule is selected and assigned to workload.
+	// If none are matching then the default cluster policy is assigned.
+	AssignmentRules                     *[]WorkloadoptimizationV1ScalingPolicyAssignmentRule `json:"assignmentRules,omitempty"`
+	ClusterId                           string                                               `json:"clusterId"`
+	CreatedAt                           time.Time                                            `json:"createdAt"`
+	HasWorkloadsConfiguredByAnnotations bool                                                 `json:"hasWorkloadsConfiguredByAnnotations"`
+	Id                                  string                                               `json:"id"`
+
+	// Indicates if policy is only for castware workloads. Such policy cannot be updated or assigned to non cast workloads.
+	IsCastware             bool                                         `json:"isCastware"`
+	IsDefault              bool                                         `json:"isDefault"`
+	IsReadonly             bool                                         `json:"isReadonly"`
+	Name                   string                                       `json:"name"`
+	OrganizationId         string                                       `json:"organizationId"`
+	RecommendationPolicies WorkloadoptimizationV1RecommendationPolicies `json:"recommendationPolicies"`
+	UpdatedAt              time.Time                                    `json:"updatedAt"`
 }
 
 // CommitmentsAPIBatchDeleteCommitmentsJSONBody defines parameters for CommitmentsAPIBatchDeleteCommitments.
@@ -5338,6 +5501,9 @@ type ExternalClusterAPIDisconnectClusterJSONBody = ExternalclusterV1DisconnectCo
 
 // ExternalClusterAPIHandleCloudEventJSONBody defines parameters for ExternalClusterAPIHandleCloudEvent.
 type ExternalClusterAPIHandleCloudEventJSONBody = ExternalclusterV1CloudEvent
+
+// ExternalClusterAPIGCPCreateSAJSONBody defines parameters for ExternalClusterAPIGCPCreateSA.
+type ExternalClusterAPIGCPCreateSAJSONBody = ExternalClusterAPIGCPCreateSARequest
 
 // ExternalClusterAPIGKECreateSAJSONBody defines parameters for ExternalClusterAPIGKECreateSA.
 type ExternalClusterAPIGKECreateSAJSONBody = ExternalClusterAPIGKECreateSARequest
@@ -5588,6 +5754,9 @@ type SSOAPIUpdateSSOConnectionJSONBody = CastaiSsoV1beta1UpdateSSOConnection
 // WorkloadOptimizationAPICreateWorkloadScalingPolicyJSONBody defines parameters for WorkloadOptimizationAPICreateWorkloadScalingPolicy.
 type WorkloadOptimizationAPICreateWorkloadScalingPolicyJSONBody = WorkloadoptimizationV1NewWorkloadScalingPolicy
 
+// WorkloadOptimizationAPISetScalingPoliciesOrderJSONBody defines parameters for WorkloadOptimizationAPISetScalingPoliciesOrder.
+type WorkloadOptimizationAPISetScalingPoliciesOrderJSONBody = WorkloadOptimizationAPISetScalingPoliciesOrderRequest
+
 // WorkloadOptimizationAPIUpdateWorkloadScalingPolicyJSONBody defines parameters for WorkloadOptimizationAPIUpdateWorkloadScalingPolicy.
 type WorkloadOptimizationAPIUpdateWorkloadScalingPolicyJSONBody = WorkloadoptimizationV1UpdateWorkloadScalingPolicy
 
@@ -5706,6 +5875,9 @@ type ExternalClusterAPIDisconnectClusterJSONRequestBody = ExternalClusterAPIDisc
 // ExternalClusterAPIHandleCloudEventJSONRequestBody defines body for ExternalClusterAPIHandleCloudEvent for application/json ContentType.
 type ExternalClusterAPIHandleCloudEventJSONRequestBody = ExternalClusterAPIHandleCloudEventJSONBody
 
+// ExternalClusterAPIGCPCreateSAJSONRequestBody defines body for ExternalClusterAPIGCPCreateSA for application/json ContentType.
+type ExternalClusterAPIGCPCreateSAJSONRequestBody = ExternalClusterAPIGCPCreateSAJSONBody
+
 // ExternalClusterAPIGKECreateSAJSONRequestBody defines body for ExternalClusterAPIGKECreateSA for application/json ContentType.
 type ExternalClusterAPIGKECreateSAJSONRequestBody = ExternalClusterAPIGKECreateSAJSONBody
 
@@ -5792,6 +5964,9 @@ type SSOAPIUpdateSSOConnectionJSONRequestBody = SSOAPIUpdateSSOConnectionJSONBod
 
 // WorkloadOptimizationAPICreateWorkloadScalingPolicyJSONRequestBody defines body for WorkloadOptimizationAPICreateWorkloadScalingPolicy for application/json ContentType.
 type WorkloadOptimizationAPICreateWorkloadScalingPolicyJSONRequestBody = WorkloadOptimizationAPICreateWorkloadScalingPolicyJSONBody
+
+// WorkloadOptimizationAPISetScalingPoliciesOrderJSONRequestBody defines body for WorkloadOptimizationAPISetScalingPoliciesOrder for application/json ContentType.
+type WorkloadOptimizationAPISetScalingPoliciesOrderJSONRequestBody = WorkloadOptimizationAPISetScalingPoliciesOrderJSONBody
 
 // WorkloadOptimizationAPIUpdateWorkloadScalingPolicyJSONRequestBody defines body for WorkloadOptimizationAPIUpdateWorkloadScalingPolicy for application/json ContentType.
 type WorkloadOptimizationAPIUpdateWorkloadScalingPolicyJSONRequestBody = WorkloadOptimizationAPIUpdateWorkloadScalingPolicyJSONBody
@@ -6638,6 +6813,112 @@ func (a *NodetemplatesV1UpdateNodeTemplate_CustomLabels) UnmarshalJSON(b []byte)
 
 // Override default JSON handling for NodetemplatesV1UpdateNodeTemplate_CustomLabels to handle AdditionalProperties
 func (a NodetemplatesV1UpdateNodeTemplate_CustomLabels) MarshalJSON() ([]byte, error) {
+	var err error
+	object := make(map[string]json.RawMessage)
+
+	for fieldName, field := range a.AdditionalProperties {
+		object[fieldName], err = json.Marshal(field)
+		if err != nil {
+			return nil, fmt.Errorf("error marshaling '%s': %w", fieldName, err)
+		}
+	}
+	return json.Marshal(object)
+}
+
+// Getter for additional properties for WorkloadoptimizationV1KubernetesNamespaceMatcher_Labels. Returns the specified
+// element and whether it was found
+func (a WorkloadoptimizationV1KubernetesNamespaceMatcher_Labels) Get(fieldName string) (value string, found bool) {
+	if a.AdditionalProperties != nil {
+		value, found = a.AdditionalProperties[fieldName]
+	}
+	return
+}
+
+// Setter for additional properties for WorkloadoptimizationV1KubernetesNamespaceMatcher_Labels
+func (a *WorkloadoptimizationV1KubernetesNamespaceMatcher_Labels) Set(fieldName string, value string) {
+	if a.AdditionalProperties == nil {
+		a.AdditionalProperties = make(map[string]string)
+	}
+	a.AdditionalProperties[fieldName] = value
+}
+
+// Override default JSON handling for WorkloadoptimizationV1KubernetesNamespaceMatcher_Labels to handle AdditionalProperties
+func (a *WorkloadoptimizationV1KubernetesNamespaceMatcher_Labels) UnmarshalJSON(b []byte) error {
+	object := make(map[string]json.RawMessage)
+	err := json.Unmarshal(b, &object)
+	if err != nil {
+		return err
+	}
+
+	if len(object) != 0 {
+		a.AdditionalProperties = make(map[string]string)
+		for fieldName, fieldBuf := range object {
+			var fieldVal string
+			err := json.Unmarshal(fieldBuf, &fieldVal)
+			if err != nil {
+				return fmt.Errorf("error unmarshaling field %s: %w", fieldName, err)
+			}
+			a.AdditionalProperties[fieldName] = fieldVal
+		}
+	}
+	return nil
+}
+
+// Override default JSON handling for WorkloadoptimizationV1KubernetesNamespaceMatcher_Labels to handle AdditionalProperties
+func (a WorkloadoptimizationV1KubernetesNamespaceMatcher_Labels) MarshalJSON() ([]byte, error) {
+	var err error
+	object := make(map[string]json.RawMessage)
+
+	for fieldName, field := range a.AdditionalProperties {
+		object[fieldName], err = json.Marshal(field)
+		if err != nil {
+			return nil, fmt.Errorf("error marshaling '%s': %w", fieldName, err)
+		}
+	}
+	return json.Marshal(object)
+}
+
+// Getter for additional properties for WorkloadoptimizationV1KubernetesWorkloadMatcher_Labels. Returns the specified
+// element and whether it was found
+func (a WorkloadoptimizationV1KubernetesWorkloadMatcher_Labels) Get(fieldName string) (value string, found bool) {
+	if a.AdditionalProperties != nil {
+		value, found = a.AdditionalProperties[fieldName]
+	}
+	return
+}
+
+// Setter for additional properties for WorkloadoptimizationV1KubernetesWorkloadMatcher_Labels
+func (a *WorkloadoptimizationV1KubernetesWorkloadMatcher_Labels) Set(fieldName string, value string) {
+	if a.AdditionalProperties == nil {
+		a.AdditionalProperties = make(map[string]string)
+	}
+	a.AdditionalProperties[fieldName] = value
+}
+
+// Override default JSON handling for WorkloadoptimizationV1KubernetesWorkloadMatcher_Labels to handle AdditionalProperties
+func (a *WorkloadoptimizationV1KubernetesWorkloadMatcher_Labels) UnmarshalJSON(b []byte) error {
+	object := make(map[string]json.RawMessage)
+	err := json.Unmarshal(b, &object)
+	if err != nil {
+		return err
+	}
+
+	if len(object) != 0 {
+		a.AdditionalProperties = make(map[string]string)
+		for fieldName, fieldBuf := range object {
+			var fieldVal string
+			err := json.Unmarshal(fieldBuf, &fieldVal)
+			if err != nil {
+				return fmt.Errorf("error unmarshaling field %s: %w", fieldName, err)
+			}
+			a.AdditionalProperties[fieldName] = fieldVal
+		}
+	}
+	return nil
+}
+
+// Override default JSON handling for WorkloadoptimizationV1KubernetesWorkloadMatcher_Labels to handle AdditionalProperties
+func (a WorkloadoptimizationV1KubernetesWorkloadMatcher_Labels) MarshalJSON() ([]byte, error) {
 	var err error
 	object := make(map[string]json.RawMessage)
 
