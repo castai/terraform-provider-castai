@@ -935,6 +935,26 @@ func (mr *MockClientInterfaceMockRecorder) ExternalClusterAPIDeleteNode(ctx, clu
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIDeleteNode", reflect.TypeOf((*MockClientInterface)(nil).ExternalClusterAPIDeleteNode), varargs...)
 }
 
+// ExternalClusterAPIDisableGCPSA mocks base method.
+func (m *MockClientInterface) ExternalClusterAPIDisableGCPSA(ctx context.Context, clusterId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ExternalClusterAPIDisableGCPSA", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExternalClusterAPIDisableGCPSA indicates an expected call of ExternalClusterAPIDisableGCPSA.
+func (mr *MockClientInterfaceMockRecorder) ExternalClusterAPIDisableGCPSA(ctx, clusterId interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIDisableGCPSA", reflect.TypeOf((*MockClientInterface)(nil).ExternalClusterAPIDisableGCPSA), varargs...)
+}
+
 // ExternalClusterAPIDisableGKESA mocks base method.
 func (m *MockClientInterface) ExternalClusterAPIDisableGKESA(ctx context.Context, clusterId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
@@ -1033,6 +1053,46 @@ func (mr *MockClientInterfaceMockRecorder) ExternalClusterAPIDrainNodeWithBody(c
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{ctx, clusterId, nodeId, contentType, body}, reqEditors...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIDrainNodeWithBody", reflect.TypeOf((*MockClientInterface)(nil).ExternalClusterAPIDrainNodeWithBody), varargs...)
+}
+
+// ExternalClusterAPIGCPCreateSA mocks base method.
+func (m *MockClientInterface) ExternalClusterAPIGCPCreateSA(ctx context.Context, clusterId string, body sdk.ExternalClusterAPIGCPCreateSAJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ExternalClusterAPIGCPCreateSA", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExternalClusterAPIGCPCreateSA indicates an expected call of ExternalClusterAPIGCPCreateSA.
+func (mr *MockClientInterfaceMockRecorder) ExternalClusterAPIGCPCreateSA(ctx, clusterId, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIGCPCreateSA", reflect.TypeOf((*MockClientInterface)(nil).ExternalClusterAPIGCPCreateSA), varargs...)
+}
+
+// ExternalClusterAPIGCPCreateSAWithBody mocks base method.
+func (m *MockClientInterface) ExternalClusterAPIGCPCreateSAWithBody(ctx context.Context, clusterId, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ExternalClusterAPIGCPCreateSAWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExternalClusterAPIGCPCreateSAWithBody indicates an expected call of ExternalClusterAPIGCPCreateSAWithBody.
+func (mr *MockClientInterfaceMockRecorder) ExternalClusterAPIGCPCreateSAWithBody(ctx, clusterId, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIGCPCreateSAWithBody", reflect.TypeOf((*MockClientInterface)(nil).ExternalClusterAPIGCPCreateSAWithBody), varargs...)
 }
 
 // ExternalClusterAPIGKECreateSA mocks base method.
@@ -4135,6 +4195,46 @@ func (mr *MockClientInterfaceMockRecorder) WorkloadOptimizationAPIListWorkloads(
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIListWorkloads", reflect.TypeOf((*MockClientInterface)(nil).WorkloadOptimizationAPIListWorkloads), varargs...)
 }
 
+// WorkloadOptimizationAPISetScalingPoliciesOrder mocks base method.
+func (m *MockClientInterface) WorkloadOptimizationAPISetScalingPoliciesOrder(ctx context.Context, clusterId string, body sdk.WorkloadOptimizationAPISetScalingPoliciesOrderJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "WorkloadOptimizationAPISetScalingPoliciesOrder", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// WorkloadOptimizationAPISetScalingPoliciesOrder indicates an expected call of WorkloadOptimizationAPISetScalingPoliciesOrder.
+func (mr *MockClientInterfaceMockRecorder) WorkloadOptimizationAPISetScalingPoliciesOrder(ctx, clusterId, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPISetScalingPoliciesOrder", reflect.TypeOf((*MockClientInterface)(nil).WorkloadOptimizationAPISetScalingPoliciesOrder), varargs...)
+}
+
+// WorkloadOptimizationAPISetScalingPoliciesOrderWithBody mocks base method.
+func (m *MockClientInterface) WorkloadOptimizationAPISetScalingPoliciesOrderWithBody(ctx context.Context, clusterId, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "WorkloadOptimizationAPISetScalingPoliciesOrderWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// WorkloadOptimizationAPISetScalingPoliciesOrderWithBody indicates an expected call of WorkloadOptimizationAPISetScalingPoliciesOrderWithBody.
+func (mr *MockClientInterfaceMockRecorder) WorkloadOptimizationAPISetScalingPoliciesOrderWithBody(ctx, clusterId, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPISetScalingPoliciesOrderWithBody", reflect.TypeOf((*MockClientInterface)(nil).WorkloadOptimizationAPISetScalingPoliciesOrderWithBody), varargs...)
+}
+
 // WorkloadOptimizationAPIUpdateWorkloadScalingPolicy mocks base method.
 func (m *MockClientInterface) WorkloadOptimizationAPIUpdateWorkloadScalingPolicy(ctx context.Context, clusterId, policyId string, body sdk.WorkloadOptimizationAPIUpdateWorkloadScalingPolicyJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
@@ -5743,6 +5843,41 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIDelete
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIDeleteNodeWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIDeleteNodeWithResponse), ctx, clusterId, nodeId, params)
 }
 
+// ExternalClusterAPIDisableGCPSA mocks base method.
+func (m *MockClientWithResponsesInterface) ExternalClusterAPIDisableGCPSA(ctx context.Context, clusterId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ExternalClusterAPIDisableGCPSA", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExternalClusterAPIDisableGCPSA indicates an expected call of ExternalClusterAPIDisableGCPSA.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIDisableGCPSA(ctx, clusterId interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIDisableGCPSA", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIDisableGCPSA), varargs...)
+}
+
+// ExternalClusterAPIDisableGCPSAWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) ExternalClusterAPIDisableGCPSAWithResponse(ctx context.Context, clusterId string) (*sdk.ExternalClusterAPIDisableGCPSAResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ExternalClusterAPIDisableGCPSAWithResponse", ctx, clusterId)
+	ret0, _ := ret[0].(*sdk.ExternalClusterAPIDisableGCPSAResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExternalClusterAPIDisableGCPSAWithResponse indicates an expected call of ExternalClusterAPIDisableGCPSAWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIDisableGCPSAWithResponse(ctx, clusterId interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIDisableGCPSAWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIDisableGCPSAWithResponse), ctx, clusterId)
+}
+
 // ExternalClusterAPIDisableGKESA mocks base method.
 func (m *MockClientWithResponsesInterface) ExternalClusterAPIDisableGKESA(ctx context.Context, clusterId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
@@ -5916,6 +6051,76 @@ func (m *MockClientWithResponsesInterface) ExternalClusterAPIDrainNodeWithRespon
 func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIDrainNodeWithResponse(ctx, clusterId, nodeId, body interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIDrainNodeWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIDrainNodeWithResponse), ctx, clusterId, nodeId, body)
+}
+
+// ExternalClusterAPIGCPCreateSA mocks base method.
+func (m *MockClientWithResponsesInterface) ExternalClusterAPIGCPCreateSA(ctx context.Context, clusterId string, body sdk.ExternalClusterAPIGCPCreateSAJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ExternalClusterAPIGCPCreateSA", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExternalClusterAPIGCPCreateSA indicates an expected call of ExternalClusterAPIGCPCreateSA.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIGCPCreateSA(ctx, clusterId, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIGCPCreateSA", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIGCPCreateSA), varargs...)
+}
+
+// ExternalClusterAPIGCPCreateSAWithBody mocks base method.
+func (m *MockClientWithResponsesInterface) ExternalClusterAPIGCPCreateSAWithBody(ctx context.Context, clusterId, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ExternalClusterAPIGCPCreateSAWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExternalClusterAPIGCPCreateSAWithBody indicates an expected call of ExternalClusterAPIGCPCreateSAWithBody.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIGCPCreateSAWithBody(ctx, clusterId, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIGCPCreateSAWithBody", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIGCPCreateSAWithBody), varargs...)
+}
+
+// ExternalClusterAPIGCPCreateSAWithBodyWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) ExternalClusterAPIGCPCreateSAWithBodyWithResponse(ctx context.Context, clusterId, contentType string, body io.Reader) (*sdk.ExternalClusterAPIGCPCreateSAResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ExternalClusterAPIGCPCreateSAWithBodyWithResponse", ctx, clusterId, contentType, body)
+	ret0, _ := ret[0].(*sdk.ExternalClusterAPIGCPCreateSAResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExternalClusterAPIGCPCreateSAWithBodyWithResponse indicates an expected call of ExternalClusterAPIGCPCreateSAWithBodyWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIGCPCreateSAWithBodyWithResponse(ctx, clusterId, contentType, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIGCPCreateSAWithBodyWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIGCPCreateSAWithBodyWithResponse), ctx, clusterId, contentType, body)
+}
+
+// ExternalClusterAPIGCPCreateSAWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) ExternalClusterAPIGCPCreateSAWithResponse(ctx context.Context, clusterId string, body sdk.ExternalClusterAPIGCPCreateSAJSONRequestBody) (*sdk.ExternalClusterAPIGCPCreateSAResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ExternalClusterAPIGCPCreateSAWithResponse", ctx, clusterId, body)
+	ret0, _ := ret[0].(*sdk.ExternalClusterAPIGCPCreateSAResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExternalClusterAPIGCPCreateSAWithResponse indicates an expected call of ExternalClusterAPIGCPCreateSAWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIGCPCreateSAWithResponse(ctx, clusterId, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIGCPCreateSAWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIGCPCreateSAWithResponse), ctx, clusterId, body)
 }
 
 // ExternalClusterAPIGKECreateSA mocks base method.
@@ -11341,6 +11546,76 @@ func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPIListWorkloadsW
 func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPIListWorkloadsWithResponse(ctx, clusterId interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIListWorkloadsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPIListWorkloadsWithResponse), ctx, clusterId)
+}
+
+// WorkloadOptimizationAPISetScalingPoliciesOrder mocks base method.
+func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPISetScalingPoliciesOrder(ctx context.Context, clusterId string, body sdk.WorkloadOptimizationAPISetScalingPoliciesOrderJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "WorkloadOptimizationAPISetScalingPoliciesOrder", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// WorkloadOptimizationAPISetScalingPoliciesOrder indicates an expected call of WorkloadOptimizationAPISetScalingPoliciesOrder.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPISetScalingPoliciesOrder(ctx, clusterId, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPISetScalingPoliciesOrder", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPISetScalingPoliciesOrder), varargs...)
+}
+
+// WorkloadOptimizationAPISetScalingPoliciesOrderWithBody mocks base method.
+func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPISetScalingPoliciesOrderWithBody(ctx context.Context, clusterId, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "WorkloadOptimizationAPISetScalingPoliciesOrderWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// WorkloadOptimizationAPISetScalingPoliciesOrderWithBody indicates an expected call of WorkloadOptimizationAPISetScalingPoliciesOrderWithBody.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPISetScalingPoliciesOrderWithBody(ctx, clusterId, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPISetScalingPoliciesOrderWithBody", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPISetScalingPoliciesOrderWithBody), varargs...)
+}
+
+// WorkloadOptimizationAPISetScalingPoliciesOrderWithBodyWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPISetScalingPoliciesOrderWithBodyWithResponse(ctx context.Context, clusterId, contentType string, body io.Reader) (*sdk.WorkloadOptimizationAPISetScalingPoliciesOrderResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "WorkloadOptimizationAPISetScalingPoliciesOrderWithBodyWithResponse", ctx, clusterId, contentType, body)
+	ret0, _ := ret[0].(*sdk.WorkloadOptimizationAPISetScalingPoliciesOrderResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// WorkloadOptimizationAPISetScalingPoliciesOrderWithBodyWithResponse indicates an expected call of WorkloadOptimizationAPISetScalingPoliciesOrderWithBodyWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPISetScalingPoliciesOrderWithBodyWithResponse(ctx, clusterId, contentType, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPISetScalingPoliciesOrderWithBodyWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPISetScalingPoliciesOrderWithBodyWithResponse), ctx, clusterId, contentType, body)
+}
+
+// WorkloadOptimizationAPISetScalingPoliciesOrderWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPISetScalingPoliciesOrderWithResponse(ctx context.Context, clusterId string, body sdk.WorkloadOptimizationAPISetScalingPoliciesOrderJSONRequestBody) (*sdk.WorkloadOptimizationAPISetScalingPoliciesOrderResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "WorkloadOptimizationAPISetScalingPoliciesOrderWithResponse", ctx, clusterId, body)
+	ret0, _ := ret[0].(*sdk.WorkloadOptimizationAPISetScalingPoliciesOrderResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// WorkloadOptimizationAPISetScalingPoliciesOrderWithResponse indicates an expected call of WorkloadOptimizationAPISetScalingPoliciesOrderWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPISetScalingPoliciesOrderWithResponse(ctx, clusterId, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPISetScalingPoliciesOrderWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPISetScalingPoliciesOrderWithResponse), ctx, clusterId, body)
 }
 
 // WorkloadOptimizationAPIUpdateWorkloadScalingPolicy mocks base method.

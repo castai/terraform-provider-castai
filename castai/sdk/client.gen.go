@@ -297,6 +297,14 @@ type ClientInterface interface {
 
 	ExternalClusterAPIHandleCloudEvent(ctx context.Context, clusterId string, body ExternalClusterAPIHandleCloudEventJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// ExternalClusterAPIGCPCreateSA request with any body
+	ExternalClusterAPIGCPCreateSAWithBody(ctx context.Context, clusterId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	ExternalClusterAPIGCPCreateSA(ctx context.Context, clusterId string, body ExternalClusterAPIGCPCreateSAJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// ExternalClusterAPIDisableGCPSA request
+	ExternalClusterAPIDisableGCPSA(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// ExternalClusterAPIGKECreateSA request with any body
 	ExternalClusterAPIGKECreateSAWithBody(ctx context.Context, clusterId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -609,6 +617,11 @@ type ClientInterface interface {
 	WorkloadOptimizationAPICreateWorkloadScalingPolicyWithBody(ctx context.Context, clusterId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	WorkloadOptimizationAPICreateWorkloadScalingPolicy(ctx context.Context, clusterId string, body WorkloadOptimizationAPICreateWorkloadScalingPolicyJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// WorkloadOptimizationAPISetScalingPoliciesOrder request with any body
+	WorkloadOptimizationAPISetScalingPoliciesOrderWithBody(ctx context.Context, clusterId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	WorkloadOptimizationAPISetScalingPoliciesOrder(ctx context.Context, clusterId string, body WorkloadOptimizationAPISetScalingPoliciesOrderJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// WorkloadOptimizationAPIDeleteWorkloadScalingPolicy request
 	WorkloadOptimizationAPIDeleteWorkloadScalingPolicy(ctx context.Context, clusterId string, policyId string, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -1561,6 +1574,42 @@ func (c *Client) ExternalClusterAPIHandleCloudEventWithBody(ctx context.Context,
 
 func (c *Client) ExternalClusterAPIHandleCloudEvent(ctx context.Context, clusterId string, body ExternalClusterAPIHandleCloudEventJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewExternalClusterAPIHandleCloudEventRequest(c.Server, clusterId, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) ExternalClusterAPIGCPCreateSAWithBody(ctx context.Context, clusterId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewExternalClusterAPIGCPCreateSARequestWithBody(c.Server, clusterId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) ExternalClusterAPIGCPCreateSA(ctx context.Context, clusterId string, body ExternalClusterAPIGCPCreateSAJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewExternalClusterAPIGCPCreateSARequest(c.Server, clusterId, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) ExternalClusterAPIDisableGCPSA(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewExternalClusterAPIDisableGCPSARequest(c.Server, clusterId)
 	if err != nil {
 		return nil, err
 	}
@@ -2929,6 +2978,30 @@ func (c *Client) WorkloadOptimizationAPICreateWorkloadScalingPolicyWithBody(ctx 
 
 func (c *Client) WorkloadOptimizationAPICreateWorkloadScalingPolicy(ctx context.Context, clusterId string, body WorkloadOptimizationAPICreateWorkloadScalingPolicyJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewWorkloadOptimizationAPICreateWorkloadScalingPolicyRequest(c.Server, clusterId, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) WorkloadOptimizationAPISetScalingPoliciesOrderWithBody(ctx context.Context, clusterId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewWorkloadOptimizationAPISetScalingPoliciesOrderRequestWithBody(c.Server, clusterId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) WorkloadOptimizationAPISetScalingPoliciesOrder(ctx context.Context, clusterId string, body WorkloadOptimizationAPISetScalingPoliciesOrderJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewWorkloadOptimizationAPISetScalingPoliciesOrderRequest(c.Server, clusterId, body)
 	if err != nil {
 		return nil, err
 	}
@@ -5672,6 +5745,87 @@ func NewExternalClusterAPIHandleCloudEventRequestWithBody(server string, cluster
 	}
 
 	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewExternalClusterAPIGCPCreateSARequest calls the generic ExternalClusterAPIGCPCreateSA builder with application/json body
+func NewExternalClusterAPIGCPCreateSARequest(server string, clusterId string, body ExternalClusterAPIGCPCreateSAJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewExternalClusterAPIGCPCreateSARequestWithBody(server, clusterId, "application/json", bodyReader)
+}
+
+// NewExternalClusterAPIGCPCreateSARequestWithBody generates requests for ExternalClusterAPIGCPCreateSA with any type of body
+func NewExternalClusterAPIGCPCreateSARequestWithBody(server string, clusterId string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "clusterId", runtime.ParamLocationPath, clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/kubernetes/external-clusters/%s/gcp-create-sa", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewExternalClusterAPIDisableGCPSARequest generates requests for ExternalClusterAPIDisableGCPSA
+func NewExternalClusterAPIDisableGCPSARequest(server string, clusterId string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "clusterId", runtime.ParamLocationPath, clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/kubernetes/external-clusters/%s/gcp-disable-sa", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
 
 	return req, nil
 }
@@ -9676,6 +9830,53 @@ func NewWorkloadOptimizationAPICreateWorkloadScalingPolicyRequestWithBody(server
 	return req, nil
 }
 
+// NewWorkloadOptimizationAPISetScalingPoliciesOrderRequest calls the generic WorkloadOptimizationAPISetScalingPoliciesOrder builder with application/json body
+func NewWorkloadOptimizationAPISetScalingPoliciesOrderRequest(server string, clusterId string, body WorkloadOptimizationAPISetScalingPoliciesOrderJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewWorkloadOptimizationAPISetScalingPoliciesOrderRequestWithBody(server, clusterId, "application/json", bodyReader)
+}
+
+// NewWorkloadOptimizationAPISetScalingPoliciesOrderRequestWithBody generates requests for WorkloadOptimizationAPISetScalingPoliciesOrder with any type of body
+func NewWorkloadOptimizationAPISetScalingPoliciesOrderRequestWithBody(server string, clusterId string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "clusterId", runtime.ParamLocationPath, clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/workload-autoscaling/clusters/%s/policies/order", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("PUT", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
 // NewWorkloadOptimizationAPIDeleteWorkloadScalingPolicyRequest generates requests for WorkloadOptimizationAPIDeleteWorkloadScalingPolicy
 func NewWorkloadOptimizationAPIDeleteWorkloadScalingPolicyRequest(server string, clusterId string, policyId string) (*http.Request, error) {
 	var err error
@@ -10726,6 +10927,14 @@ type ClientWithResponsesInterface interface {
 
 	ExternalClusterAPIHandleCloudEventWithResponse(ctx context.Context, clusterId string, body ExternalClusterAPIHandleCloudEventJSONRequestBody) (*ExternalClusterAPIHandleCloudEventResponse, error)
 
+	// ExternalClusterAPIGCPCreateSA request  with any body
+	ExternalClusterAPIGCPCreateSAWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader) (*ExternalClusterAPIGCPCreateSAResponse, error)
+
+	ExternalClusterAPIGCPCreateSAWithResponse(ctx context.Context, clusterId string, body ExternalClusterAPIGCPCreateSAJSONRequestBody) (*ExternalClusterAPIGCPCreateSAResponse, error)
+
+	// ExternalClusterAPIDisableGCPSA request
+	ExternalClusterAPIDisableGCPSAWithResponse(ctx context.Context, clusterId string) (*ExternalClusterAPIDisableGCPSAResponse, error)
+
 	// ExternalClusterAPIGKECreateSA request  with any body
 	ExternalClusterAPIGKECreateSAWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader) (*ExternalClusterAPIGKECreateSAResponse, error)
 
@@ -11038,6 +11247,11 @@ type ClientWithResponsesInterface interface {
 	WorkloadOptimizationAPICreateWorkloadScalingPolicyWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader) (*WorkloadOptimizationAPICreateWorkloadScalingPolicyResponse, error)
 
 	WorkloadOptimizationAPICreateWorkloadScalingPolicyWithResponse(ctx context.Context, clusterId string, body WorkloadOptimizationAPICreateWorkloadScalingPolicyJSONRequestBody) (*WorkloadOptimizationAPICreateWorkloadScalingPolicyResponse, error)
+
+	// WorkloadOptimizationAPISetScalingPoliciesOrder request  with any body
+	WorkloadOptimizationAPISetScalingPoliciesOrderWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader) (*WorkloadOptimizationAPISetScalingPoliciesOrderResponse, error)
+
+	WorkloadOptimizationAPISetScalingPoliciesOrderWithResponse(ctx context.Context, clusterId string, body WorkloadOptimizationAPISetScalingPoliciesOrderJSONRequestBody) (*WorkloadOptimizationAPISetScalingPoliciesOrderResponse, error)
 
 	// WorkloadOptimizationAPIDeleteWorkloadScalingPolicy request
 	WorkloadOptimizationAPIDeleteWorkloadScalingPolicyWithResponse(ctx context.Context, clusterId string, policyId string) (*WorkloadOptimizationAPIDeleteWorkloadScalingPolicyResponse, error)
@@ -12740,6 +12954,66 @@ func (r ExternalClusterAPIHandleCloudEventResponse) StatusCode() int {
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
 func (r ExternalClusterAPIHandleCloudEventResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type ExternalClusterAPIGCPCreateSAResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *ExternalclusterV1GCPCreateSAResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r ExternalClusterAPIGCPCreateSAResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r ExternalClusterAPIGCPCreateSAResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r ExternalClusterAPIGCPCreateSAResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type ExternalClusterAPIDisableGCPSAResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *ExternalclusterV1DisableGCPSAResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r ExternalClusterAPIDisableGCPSAResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r ExternalClusterAPIDisableGCPSAResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r ExternalClusterAPIDisableGCPSAResponse) GetBody() []byte {
 	return r.Body
 }
 
@@ -15295,6 +15569,36 @@ func (r WorkloadOptimizationAPICreateWorkloadScalingPolicyResponse) GetBody() []
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
+type WorkloadOptimizationAPISetScalingPoliciesOrderResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *WorkloadoptimizationV1SetScalingPoliciesOrderResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r WorkloadOptimizationAPISetScalingPoliciesOrderResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r WorkloadOptimizationAPISetScalingPoliciesOrderResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r WorkloadOptimizationAPISetScalingPoliciesOrderResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
 type WorkloadOptimizationAPIDeleteWorkloadScalingPolicyResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -16377,6 +16681,32 @@ func (c *ClientWithResponses) ExternalClusterAPIHandleCloudEventWithResponse(ctx
 	return ParseExternalClusterAPIHandleCloudEventResponse(rsp)
 }
 
+// ExternalClusterAPIGCPCreateSAWithBodyWithResponse request with arbitrary body returning *ExternalClusterAPIGCPCreateSAResponse
+func (c *ClientWithResponses) ExternalClusterAPIGCPCreateSAWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader) (*ExternalClusterAPIGCPCreateSAResponse, error) {
+	rsp, err := c.ExternalClusterAPIGCPCreateSAWithBody(ctx, clusterId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseExternalClusterAPIGCPCreateSAResponse(rsp)
+}
+
+func (c *ClientWithResponses) ExternalClusterAPIGCPCreateSAWithResponse(ctx context.Context, clusterId string, body ExternalClusterAPIGCPCreateSAJSONRequestBody) (*ExternalClusterAPIGCPCreateSAResponse, error) {
+	rsp, err := c.ExternalClusterAPIGCPCreateSA(ctx, clusterId, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseExternalClusterAPIGCPCreateSAResponse(rsp)
+}
+
+// ExternalClusterAPIDisableGCPSAWithResponse request returning *ExternalClusterAPIDisableGCPSAResponse
+func (c *ClientWithResponses) ExternalClusterAPIDisableGCPSAWithResponse(ctx context.Context, clusterId string) (*ExternalClusterAPIDisableGCPSAResponse, error) {
+	rsp, err := c.ExternalClusterAPIDisableGCPSA(ctx, clusterId)
+	if err != nil {
+		return nil, err
+	}
+	return ParseExternalClusterAPIDisableGCPSAResponse(rsp)
+}
+
 // ExternalClusterAPIGKECreateSAWithBodyWithResponse request with arbitrary body returning *ExternalClusterAPIGKECreateSAResponse
 func (c *ClientWithResponses) ExternalClusterAPIGKECreateSAWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader) (*ExternalClusterAPIGKECreateSAResponse, error) {
 	rsp, err := c.ExternalClusterAPIGKECreateSAWithBody(ctx, clusterId, contentType, body)
@@ -17372,6 +17702,23 @@ func (c *ClientWithResponses) WorkloadOptimizationAPICreateWorkloadScalingPolicy
 		return nil, err
 	}
 	return ParseWorkloadOptimizationAPICreateWorkloadScalingPolicyResponse(rsp)
+}
+
+// WorkloadOptimizationAPISetScalingPoliciesOrderWithBodyWithResponse request with arbitrary body returning *WorkloadOptimizationAPISetScalingPoliciesOrderResponse
+func (c *ClientWithResponses) WorkloadOptimizationAPISetScalingPoliciesOrderWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader) (*WorkloadOptimizationAPISetScalingPoliciesOrderResponse, error) {
+	rsp, err := c.WorkloadOptimizationAPISetScalingPoliciesOrderWithBody(ctx, clusterId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseWorkloadOptimizationAPISetScalingPoliciesOrderResponse(rsp)
+}
+
+func (c *ClientWithResponses) WorkloadOptimizationAPISetScalingPoliciesOrderWithResponse(ctx context.Context, clusterId string, body WorkloadOptimizationAPISetScalingPoliciesOrderJSONRequestBody) (*WorkloadOptimizationAPISetScalingPoliciesOrderResponse, error) {
+	rsp, err := c.WorkloadOptimizationAPISetScalingPoliciesOrder(ctx, clusterId, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseWorkloadOptimizationAPISetScalingPoliciesOrderResponse(rsp)
 }
 
 // WorkloadOptimizationAPIDeleteWorkloadScalingPolicyWithResponse request returning *WorkloadOptimizationAPIDeleteWorkloadScalingPolicyResponse
@@ -18924,6 +19271,58 @@ func ParseExternalClusterAPIHandleCloudEventResponse(rsp *http.Response) (*Exter
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest ExternalclusterV1HandleCloudEventResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseExternalClusterAPIGCPCreateSAResponse parses an HTTP response from a ExternalClusterAPIGCPCreateSAWithResponse call
+func ParseExternalClusterAPIGCPCreateSAResponse(rsp *http.Response) (*ExternalClusterAPIGCPCreateSAResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &ExternalClusterAPIGCPCreateSAResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ExternalclusterV1GCPCreateSAResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseExternalClusterAPIDisableGCPSAResponse parses an HTTP response from a ExternalClusterAPIDisableGCPSAWithResponse call
+func ParseExternalClusterAPIDisableGCPSAResponse(rsp *http.Response) (*ExternalClusterAPIDisableGCPSAResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &ExternalClusterAPIDisableGCPSAResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ExternalclusterV1DisableGCPSAResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -21125,6 +21524,32 @@ func ParseWorkloadOptimizationAPICreateWorkloadScalingPolicyResponse(rsp *http.R
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest WorkloadoptimizationV1WorkloadScalingPolicy
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseWorkloadOptimizationAPISetScalingPoliciesOrderResponse parses an HTTP response from a WorkloadOptimizationAPISetScalingPoliciesOrderWithResponse call
+func ParseWorkloadOptimizationAPISetScalingPoliciesOrderResponse(rsp *http.Response) (*WorkloadOptimizationAPISetScalingPoliciesOrderResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &WorkloadOptimizationAPISetScalingPoliciesOrderResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest WorkloadoptimizationV1SetScalingPoliciesOrderResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
