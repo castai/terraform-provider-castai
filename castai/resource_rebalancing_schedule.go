@@ -184,7 +184,7 @@ func resourceRebalancingSchedule() *schema.Resource {
 							Type:        schema.TypeString,
 							Optional:    true,
 							Description: "Defines the algorithm used to select the target nodes for rebalancing.",
-							Default:     "TargetNodeSelectionAlgorithmNormalizedPrice",
+							Default:     "TargetNodeSelectionAlgorithmUtilizedPrice",
 							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{
 								"TargetNodeSelectionAlgorithmNormalizedPrice",
 								"TargetNodeSelectionAlgorithmUtilizedPrice",
