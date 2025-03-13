@@ -1057,9 +1057,9 @@ func toAKSEphemeralOSDisk(obj any) *sdk.NodeconfigV1AKSConfigOsDiskEphemeral {
 	if v, ok := obj.(map[string]any)["placement"].(string); ok && v != "" {
 		switch v {
 		case aksEphemeralDiskPlacementResourceDisk:
-			osDisk.Placement = lo.ToPtr(sdk.PLACEMENTRESOURCEDISK)
+			osDisk.Placement = lo.ToPtr(sdk.NodeconfigV1AKSConfigOsDiskEphemeralPlacementPLACEMENTRESOURCEDISK)
 		case aksEphemeralDiskPlacementCacheDisk:
-			osDisk.Placement = lo.ToPtr(sdk.PLACEMENTCACHEDISK)
+			osDisk.Placement = lo.ToPtr(sdk.NodeconfigV1AKSConfigOsDiskEphemeralPlacementPLACEMENTCACHEDISK)
 		}
 	}
 
@@ -1206,9 +1206,9 @@ func fromAKSEphemeralOSDisk(sdkEph *sdk.NodeconfigV1AKSConfigOsDiskEphemeral) []
 	m := map[string]interface{}{}
 	if sdkEph.Placement != nil {
 		switch *sdkEph.Placement {
-		case sdk.PLACEMENTRESOURCEDISK:
+		case sdk.NodeconfigV1AKSConfigOsDiskEphemeralPlacementPLACEMENTRESOURCEDISK:
 			m["placement"] = aksEphemeralDiskPlacementResourceDisk
-		case sdk.PLACEMENTCACHEDISK:
+		case sdk.NodeconfigV1AKSConfigOsDiskEphemeralPlacementPLACEMENTCACHEDISK:
 			m["placement"] = aksEphemeralDiskPlacementCacheDisk
 		}
 	}
