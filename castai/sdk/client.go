@@ -28,11 +28,10 @@ func CreateClient(apiURL, apiToken, userAgent string) (*ClientWithResponses, err
 		retries.RetryMax = 2
 
 		c := retries.StandardClient()
+		c.Transport = logging.NewSubsystemLoggingHTTPTransport("CAST.AI", c.Transport)
+		c.Timeout = 1 * time.Minute
 
-		client.Client = &http.Client{
-			Transport: logging.NewSubsystemLoggingHTTPTransport("CAST.AI", c.Transport),
-			Timeout:   1 * time.Minute,
-		}
+		client.Client = c
 		client.RequestEditors = append(client.RequestEditors, func(_ context.Context, req *http.Request) error {
 			req.Header.Set("user-agent", userAgent)
 			return nil
