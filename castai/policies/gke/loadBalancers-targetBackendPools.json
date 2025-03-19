@@ -1,0 +1,8 @@
+{
+    "Policies": [
+      "compute.targetPools.get",
+      "compute.targetPools.addInstance",
+      "compute.targetPools.removeInstance",
+      "compute.instances.use"
+    ]
+}
