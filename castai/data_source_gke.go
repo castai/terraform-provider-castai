@@ -12,33 +12,32 @@ import (
 )
 
 const (
-	// GKEPoliciesResourceName is the name of the resource
-	GKEPoliciesResourceName = "policy"
-	// GKEFeaturesResourceName is the name of the policies per feature
-	GKEFeaturesResourceName                        = "features"
-	GKELoadBalancersNetworkEndpointGroupFeature    = "load_balancers_network_endpoint_group"
-	GKELoadBalancersTargetBackendPoolsFeature      = "load_balancers_target_backend_pools"
-	GKELoadBalancersUnmanagedInstanceGroupsFeature = "load_balancers_unmanaged_instance_groups"
+	// policiesResourceName is the name of the resource
+	policiesResourceName = "policy"
+	// featuresResourceName is the name of the policies per feature
+	featuresResourceName                        = "features"
+	loadBalancersNetworkEndpointGroupFeature    = "load_balancers_network_endpoint_group"
+	loadBalancersTargetBackendPoolsFeature      = "load_balancers_target_backend_pools"
+	loadBalancersUnmanagedInstanceGroupsFeature = "load_balancers_unmanaged_instance_groups"
 )
 
 func dataSourceGKEPolicies() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: dataSourceGKEPoliciesRead,
 		Schema: map[string]*schema.Schema{
-			GKEFeaturesResourceName: {
+			featuresResourceName: {
 				Type:     schema.TypeList,
 				Computed: true,
-				Default:  []string{},
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 					ValidateFunc: validation.StringInSlice([]string{
-						GKELoadBalancersNetworkEndpointGroupFeature,
-						GKELoadBalancersTargetBackendPoolsFeature,
-						GKELoadBalancersUnmanagedInstanceGroupsFeature,
+						loadBalancersNetworkEndpointGroupFeature,
+						loadBalancersTargetBackendPoolsFeature,
+						loadBalancersUnmanagedInstanceGroupsFeature,
 					}, false),
 				},
 			},
-			GKEPoliciesResourceName: {
+			policiesResourceName: {
 				Type:     schema.TypeList,
 				Computed: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
@@ -49,7 +48,7 @@ func dataSourceGKEPolicies() *schema.Resource {
 
 func dataSourceGKEPoliciesRead(_ context.Context, data *schema.ResourceData, _ interface{}) diag.Diagnostics {
 	// add policies per specified features
-	features := data.Get(GKEFeaturesResourceName).([]interface{})
+	features := data.Get(featuresResourceName).([]interface{})
 	policySet := make(map[string]struct{})
 
 	for _, feature := range features {
@@ -57,11 +56,11 @@ func dataSourceGKEPoliciesRead(_ context.Context, data *schema.ResourceData, _ i
 		var policies []string
 
 		switch feature {
-		case GKELoadBalancersNetworkEndpointGroupFeature:
+		case loadBalancersNetworkEndpointGroupFeature:
 			policies, err = gke.GetLoadBalancersNetworkEndpointGroupPolicy()
-		case GKELoadBalancersTargetBackendPoolsFeature:
+		case loadBalancersTargetBackendPoolsFeature:
 			policies, err = gke.GetLoadBalancersTargetBackendPoolsPolicy()
-		case GKELoadBalancersUnmanagedInstanceGroupsFeature:
+		case loadBalancersUnmanagedInstanceGroupsFeature:
 			policies, err = gke.GetLoadBalancersUnmanagedInstanceGroupsPolicy()
 		}
 
@@ -84,8 +83,8 @@ func dataSourceGKEPoliciesRead(_ context.Context, data *schema.ResourceData, _ i
 		allPolicies = append(allPolicies, policy)
 	}
 
-	if err := data.Set(GKEPoliciesResourceName, allPolicies); err != nil {
-		return diag.FromErr(fmt.Errorf("setting %s policy: %w", GKEPoliciesResourceName, err))
+	if err := data.Set(policiesResourceName, allPolicies); err != nil {
+		return diag.FromErr(fmt.Errorf("setting %s policy: %w", policiesResourceName, err))
 	}
 
 	return nil

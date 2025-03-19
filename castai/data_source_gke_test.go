@@ -24,9 +24,9 @@ func Test_dataSourceGKEPoliciesRead(t *testing.T) {
 		{
 			name: "all features",
 			features: []interface{}{
-				GKELoadBalancersNetworkEndpointGroupFeature,
-				GKELoadBalancersTargetBackendPoolsFeature,
-				GKELoadBalancersUnmanagedInstanceGroupsFeature,
+				loadBalancersNetworkEndpointGroupFeature,
+				loadBalancersTargetBackendPoolsFeature,
+				loadBalancersUnmanagedInstanceGroupsFeature,
 			},
 			expected: len(up) + len(lbNeg) + len(lbTbp) + len(lbUig) - 1, // -1 for the duplicate policy
 			hasError: false,
@@ -54,7 +54,7 @@ func Test_dataSourceGKEPoliciesRead(t *testing.T) {
 
 			resource := dataSourceGKEPolicies()
 			data := resource.Data(state)
-			r.NoError(data.Set(GKEFeaturesResourceName, tt.features))
+			r.NoError(data.Set(featuresResourceName, tt.features))
 
 			result := resource.ReadContext(ctx, data, provider)
 			if tt.hasError {
@@ -62,7 +62,7 @@ func Test_dataSourceGKEPoliciesRead(t *testing.T) {
 			} else {
 				r.Nil(result)
 				r.False(result.HasError())
-				actualPolicies := data.Get(GKEPoliciesResourceName).([]interface{})
+				actualPolicies := data.Get(policiesResourceName).([]interface{})
 				r.Len(actualPolicies, tt.expected)
 			}
 		})
