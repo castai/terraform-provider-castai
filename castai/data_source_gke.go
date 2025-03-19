@@ -24,10 +24,12 @@ const (
 func dataSourceGKEPolicies() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: dataSourceGKEPoliciesRead,
+		Description: "Data source for retrieving GKE policies",
 		Schema: map[string]*schema.Schema{
 			featuresResourceName: {
-				Type:     schema.TypeList,
-				Computed: true,
+				Description: "Includes list of policies needed for the GCP features",
+				Type:        schema.TypeList,
+				Computed:    true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 					ValidateFunc: validation.StringInSlice([]string{
