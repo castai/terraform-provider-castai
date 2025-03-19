@@ -2209,7 +2209,8 @@ type CastaiUsersV1beta1CurrentUserProfileResponse struct {
 	HasHubspotContact *bool `json:"hasHubspotContact,omitempty"`
 
 	// User ID.
-	Id *string `json:"id,omitempty"`
+	Id    *string `json:"id,omitempty"`
+	IsPlg *bool   `json:"isPlg,omitempty"`
 
 	// User name.
 	Name *string `json:"name,omitempty"`
@@ -5765,16 +5766,18 @@ type WorkloadOptimizationAPIAssignScalingPolicyWorkloadsJSONBody = WorkloadOptim
 
 // WorkloadOptimizationAPIListWorkloadEventsParams defines parameters for WorkloadOptimizationAPIListWorkloadEvents.
 type WorkloadOptimizationAPIListWorkloadEventsParams struct {
-	WorkloadId *string `form:"workloadId,omitempty" json:"workloadId,omitempty"`
-	PageLimit  *string `form:"page.limit,omitempty" json:"page.limit,omitempty"`
+	PageLimit *string `form:"page.limit,omitempty" json:"page.limit,omitempty"`
 
 	// Cursor that defines token indicating where to start the next page.
 	// Empty value indicates to start from beginning of the dataset.
-	PageCursor   *string                                                `form:"page.cursor,omitempty" json:"page.cursor,omitempty"`
-	FromDate     *time.Time                                             `form:"fromDate,omitempty" json:"fromDate,omitempty"`
-	ToDate       *time.Time                                             `form:"toDate,omitempty" json:"toDate,omitempty"`
-	WorkloadName *string                                                `form:"workloadName,omitempty" json:"workloadName,omitempty"`
-	Type         *[]WorkloadOptimizationAPIListWorkloadEventsParamsType `form:"type,omitempty" json:"type,omitempty"`
+	PageCursor        *string                                                `form:"page.cursor,omitempty" json:"page.cursor,omitempty"`
+	FromDate          *time.Time                                             `form:"fromDate,omitempty" json:"fromDate,omitempty"`
+	ToDate            *time.Time                                             `form:"toDate,omitempty" json:"toDate,omitempty"`
+	WorkloadId        *string                                                `form:"workloadId,omitempty" json:"workloadId,omitempty"`
+	WorkloadName      *string                                                `form:"workloadName,omitempty" json:"workloadName,omitempty"`
+	WorkloadNamespace *string                                                `form:"workloadNamespace,omitempty" json:"workloadNamespace,omitempty"`
+	WorkloadKind      *string                                                `form:"workloadKind,omitempty" json:"workloadKind,omitempty"`
+	Type              *[]WorkloadOptimizationAPIListWorkloadEventsParamsType `form:"type,omitempty" json:"type,omitempty"`
 }
 
 // WorkloadOptimizationAPIListWorkloadEventsParamsType defines parameters for WorkloadOptimizationAPIListWorkloadEvents.

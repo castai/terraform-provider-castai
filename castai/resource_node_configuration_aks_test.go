@@ -105,7 +105,7 @@ resource "castai_node_configuration" "test" {
 	max_pods_per_node = 32
     aks_image_family = "azure-linux"
 	ephemeral_os_disk {
-    	placement = "cacheDisk"
+    	placement = "CacheDisk"
     	cache = "ReadOnly"
 	}
 	loadbalancers {
