@@ -3,12 +3,12 @@
 page_title: "castai_gke_user_policies Data Source - terraform-provider-castai"
 subcategory: ""
 description: |-
-  
+  Data source for retrieving GKE policies
 ---
 
 # castai_gke_user_policies (Data Source)
 
-
+Data source for retrieving GKE policies
 
 ## Example Usage
 
@@ -21,7 +21,7 @@ data "castai_gke_user_policies" "gke" {}
 
 ### Read-Only
 
-- `features` (List of String)
+- `features` (List of String) Includes list of policies needed for the GCP features
 - `id` (String) The ID of this resource.
 - `policy` (List of String)
 
