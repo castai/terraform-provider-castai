@@ -21,9 +21,7 @@ data "castai_gke_user_policies" "gke" {}
 
 ### Read-Only
 
-- `castai_gke_load_balancers_network_endpoint_group_policies` (List of String)
-- `castai_gke_load_balancers_target_backend_pools_policies` (List of String)
-- `castai_gke_load_balancers_unmanaged_instance_groups_policies` (List of String)
+- `features` (List of String)
 - `id` (String) The ID of this resource.
 - `policy` (List of String)
 
