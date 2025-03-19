@@ -50,6 +50,16 @@ func dataSourceGKEPolicies() *schema.Resource {
 }
 
 func dataSourceGKEPoliciesRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	var diags diag.Diagnostics
+	diags = append(diags, dataSourceGKEUserPoliciesRead(ctx, data, meta)...)
+	diags = append(diags, dataSourceGKELoadBalancersNetworkEndpointGroupPoliciesRead(ctx, data, meta)...)
+	diags = append(diags, dataSourceGKELoadBalancersTargetBackendPoolsPoliciesRead(ctx, data, meta)...)
+	diags = append(diags, dataSourceGKELoadBalancersUnmanagedInstanceGroupsPoliciesRead(ctx, data, meta)...)
+
+	return diags
+}
+
+func dataSourceGKEUserPoliciesRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	policies, _ := gke.GetUserPolicy()
 	data.SetId("gke")
 	if err := data.Set(GKEPoliciesResourceName, policies); err != nil {
