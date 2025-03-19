@@ -29,6 +29,7 @@ func dataSourceGKEPolicies() *schema.Resource {
 			featuresResourceName: {
 				Description: "Includes list of policies needed for the GCP features",
 				Type:        schema.TypeList,
+				Optional:    true,
 				Computed:    true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
