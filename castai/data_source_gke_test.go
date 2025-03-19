@@ -4,8 +4,6 @@ import (
 	"context"
 	"github.com/castai/terraform-provider-castai/castai/policies/gke"
 	"github.com/castai/terraform-provider-castai/castai/sdk"
-	mock_sdk "github.com/castai/terraform-provider-castai/castai/sdk/mock"
-	"github.com/golang/mock/gomock"
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/stretchr/testify/require"
@@ -43,12 +41,12 @@ func Test_dataSourceGKEPoliciesRead(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			r := require.New(t)
-			mockClient := mock_sdk.NewMockClientInterface(gomock.NewController(t))
+			//mockClient := mock_sdk.NewMockClientInterface(gomock.NewController(t))
 
 			ctx := context.Background()
 			provider := &ProviderConfig{
 				api: &sdk.ClientWithResponses{
-					ClientInterface: mockClient,
+					ClientInterface: nil,
 				},
 			}
 
