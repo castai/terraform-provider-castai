@@ -29,8 +29,8 @@ func dataSourceGKEPolicies() *schema.Resource {
 			featuresResourceName: {
 				Description: "Includes list of policies needed for the GCP features",
 				Type:        schema.TypeList,
+				ForceNew:    true,
 				Optional:    true,
-				Computed:    true,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 					ValidateFunc: validation.StringInSlice([]string{
@@ -51,9 +51,15 @@ func dataSourceGKEPolicies() *schema.Resource {
 
 func dataSourceGKEPoliciesRead(_ context.Context, data *schema.ResourceData, _ interface{}) diag.Diagnostics {
 	// add policies per specified features
-	features := data.Get(featuresResourceName).([]interface{})
+	features, ok := data.Get(featuresResourceName).([]interface{})
+	if !ok {
+		return diag.FromErr(fmt.Errorf("failed to retrieve features"))
+	}
+
+	// Initialize policy set
 	policySet := make(map[string]struct{})
 
+	// Process each feature
 	for _, feature := range features {
 		var err error
 		var policies []string
@@ -65,6 +71,8 @@ func dataSourceGKEPoliciesRead(_ context.Context, data *schema.ResourceData, _ i
 			policies, err = gke.GetLoadBalancersTargetBackendPoolsPolicy()
 		case loadBalancersUnmanagedInstanceGroupsFeature:
 			policies, err = gke.GetLoadBalancersUnmanagedInstanceGroupsPolicy()
+		default:
+			return diag.FromErr(fmt.Errorf("unknown feature: %s", feature))
 		}
 
 		if err != nil {
@@ -74,7 +82,7 @@ func dataSourceGKEPoliciesRead(_ context.Context, data *schema.ResourceData, _ i
 		policySet = appendArrayToMap(policies, policySet)
 	}
 
-	// add base user policies
+	// Add base user policies
 	userPolicy, err := gke.GetUserPolicy()
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("getting user policy: %w", err))
@@ -89,6 +97,7 @@ func dataSourceGKEPoliciesRead(_ context.Context, data *schema.ResourceData, _ i
 	if err := data.Set(policiesResourceName, allPolicies); err != nil {
 		return diag.FromErr(fmt.Errorf("setting %s policy: %w", policiesResourceName, err))
 	}
+	data.SetId("gke")
 
 	return nil
 }
