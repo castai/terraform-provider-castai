@@ -12,10 +12,10 @@ import (
 )
 
 const (
-	// policiesResourceName is the name of the resource
-	policiesResourceName = "policy"
-	// featuresResourceName is the name of the policies per feature
-	featuresResourceName                        = "features"
+	// fieldGKEPoliciesPolicy is the name of the resource
+	fieldGKEPoliciesPolicy = "policy"
+	// fieldGKEPoliciesFeatures is the name of the policies per feature
+	fieldGKEPoliciesFeatures                    = "features"
 	loadBalancersNetworkEndpointGroupFeature    = "load_balancers_network_endpoint_group"
 	loadBalancersTargetBackendPoolsFeature      = "load_balancers_target_backend_pools"
 	loadBalancersUnmanagedInstanceGroupsFeature = "load_balancers_unmanaged_instance_groups"
@@ -26,7 +26,7 @@ func dataSourceGKEPolicies() *schema.Resource {
 		ReadContext: dataSourceGKEPoliciesRead,
 		Description: "Data source for retrieving GKE policies",
 		Schema: map[string]*schema.Schema{
-			featuresResourceName: {
+			fieldGKEPoliciesFeatures: {
 				Description: "Provide a list of GCP feature names to include the necessary policies for them to work.",
 				Type:        schema.TypeList,
 				ForceNew:    true,
@@ -40,7 +40,7 @@ func dataSourceGKEPolicies() *schema.Resource {
 					}, false),
 				},
 			},
-			policiesResourceName: {
+			fieldGKEPoliciesPolicy: {
 				Type:     schema.TypeList,
 				Computed: true,
 				Elem:     &schema.Schema{Type: schema.TypeString},
@@ -51,7 +51,7 @@ func dataSourceGKEPolicies() *schema.Resource {
 
 func dataSourceGKEPoliciesRead(_ context.Context, data *schema.ResourceData, _ interface{}) diag.Diagnostics {
 	// add policies per specified features
-	features, ok := data.Get(featuresResourceName).([]interface{})
+	features, ok := data.Get(fieldGKEPoliciesFeatures).([]interface{})
 	if !ok {
 		return diag.FromErr(fmt.Errorf("failed to retrieve features"))
 	}
@@ -94,8 +94,8 @@ func dataSourceGKEPoliciesRead(_ context.Context, data *schema.ResourceData, _ i
 		allPolicies = append(allPolicies, policy)
 	}
 
-	if err := data.Set(policiesResourceName, allPolicies); err != nil {
-		return diag.FromErr(fmt.Errorf("setting %s policy: %w", policiesResourceName, err))
+	if err := data.Set(fieldGKEPoliciesPolicy, allPolicies); err != nil {
+		return diag.FromErr(fmt.Errorf("setting %s policy: %w", fieldGKEPoliciesPolicy, err))
 	}
 	data.SetId("gke")
 

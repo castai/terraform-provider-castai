@@ -21,7 +21,7 @@ data "castai_gke_user_policies" "gke" {}
 
 ### Optional
 
-- `features` (List of String) Includes list of policies needed for the GCP features
+- `features` (List of String) Provide a list of GCP feature names to include the necessary policies for them to work.
 
 ### Read-Only
 
