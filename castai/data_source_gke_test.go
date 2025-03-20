@@ -13,23 +13,23 @@ import (
 func Test_dataSourceGKEPoliciesRead(t *testing.T) {
 	tests := []struct {
 		name     string
-		features []interface{}
+		features map[string]bool
 		expected int
 		hasError bool
 	}{
 		{
 			name: "all features",
-			features: []interface{}{
-				loadBalancersTargetBackendPoolsFeature,
-				loadBalancersUnmanagedInstanceGroupsFeature,
+			features: map[string]bool{
+				loadBalancersTargetBackendPoolsFeature:      true,
+				loadBalancersUnmanagedInstanceGroupsFeature: true,
 			},
 			expected: 42, // -1 for the duplicate policy
 			hasError: false,
 		},
 		{
 			name: "loadBalancersTargetBackendPoolsFeature",
-			features: []interface{}{
-				loadBalancersTargetBackendPoolsFeature,
+			features: map[string]bool{
+				loadBalancersTargetBackendPoolsFeature: true,
 			},
 			expected: 41, // -1 for the duplicate policy
 			hasError: false,

@@ -8,7 +8,6 @@ import (
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
 
 const (
@@ -27,16 +26,13 @@ func dataSourceGKEPolicies() *schema.Resource {
 		Schema: map[string]*schema.Schema{
 			fieldGKEPoliciesFeatures: {
 				Description: "Provide a list of GCP feature names to include the necessary policies for them to work.",
-				Type:        schema.TypeList,
+				Type:        schema.TypeMap,
 				ForceNew:    true,
 				Optional:    true,
 				Elem: &schema.Schema{
-					Type: schema.TypeString,
-					ValidateFunc: validation.StringInSlice([]string{
-						loadBalancersTargetBackendPoolsFeature,
-						loadBalancersUnmanagedInstanceGroupsFeature,
-					}, false),
+					Type: schema.TypeBool,
 				},
+				ValidateFunc: validateFeatureKeys,
 			},
 			fieldGKEPoliciesPolicy: {
 				Type:     schema.TypeList,
@@ -49,7 +45,7 @@ func dataSourceGKEPolicies() *schema.Resource {
 
 func dataSourceGKEPoliciesRead(_ context.Context, data *schema.ResourceData, _ interface{}) diag.Diagnostics {
 	// add policies per specified features
-	features, ok := data.Get(fieldGKEPoliciesFeatures).([]interface{})
+	featuresMap, ok := data.Get(fieldGKEPoliciesFeatures).(map[string]interface{})
 	if !ok {
 		return diag.FromErr(fmt.Errorf("failed to retrieve features"))
 	}
@@ -58,7 +54,11 @@ func dataSourceGKEPoliciesRead(_ context.Context, data *schema.ResourceData, _ i
 	policySet := make(map[string]struct{})
 
 	// Process each feature
-	for _, feature := range features {
+	for feature, enabled := range featuresMap {
+		if !enabled.(bool) {
+			continue
+		}
+
 		var err error
 		var policies []string
 
@@ -106,4 +106,18 @@ func appendArrayToMap(arr []string, m map[string]struct{}) map[string]struct{} {
 		m[v] = struct{}{}
 	}
 	return m
+}
+
+func validateFeatureKeys(val interface{}, key string) (warns []string, errs []error) {
+	allowedFeatures := map[string]struct{}{
+		loadBalancersTargetBackendPoolsFeature:      {},
+		loadBalancersUnmanagedInstanceGroupsFeature: {},
+	}
+
+	for k := range val.(map[string]interface{}) {
+		if _, ok := allowedFeatures[k]; !ok {
+			errs = append(errs, fmt.Errorf("%q contains an invalid feature key: %s", key, k))
+		}
+	}
+	return
 }
