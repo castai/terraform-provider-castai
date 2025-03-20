@@ -98,16 +98,17 @@ func TestAccDataSourceGKEPolicies_basic(t *testing.T) {
 
 const testAccDataSourceGKEPoliciesConfig = `
 data "castai_gke_user_policies" "gke" {
-  features = [
-    "load_balancers_target_backend_pools",
-    "load_balancers_unmanaged_instance_groups"
-  ]
+  features = {
+    "load_balancers_target_backend_pools": true,
+    "load_balancers_unmanaged_instance_groups": true
+  }
 }
 `
 const testAccDataSourceGKEPoliciesConfigUpdated = `
 data "castai_gke_user_policies" "gke" {
-  features = [
-    "load_balancers_target_backend_pools"
-  ]
+  features = {
+    "load_balancers_target_backend_pools": true,
+    "load_balancers_unmanaged_instance_groups": false
+  }
 }
 `
