@@ -81,14 +81,15 @@ func TestAccDataSourceGKEPolicies_basic(t *testing.T) {
 			{
 				Config: testAccDataSourceGKEPoliciesConfig,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("data.castai_gke_user_policies.gke", "features.#", "2"),
+					resource.TestCheckResourceAttr("data.castai_gke_user_policies.gke", "features.load_balancers_target_backend_pools", "true"),
+					resource.TestCheckResourceAttr("data.castai_gke_user_policies.gke", "features.load_balancers_unmanaged_instance_groups", "true"),
 					resource.TestCheckResourceAttr("data.castai_gke_user_policies.gke", "policy.#", "42"),
 				),
 			},
 			{
 				Config: testAccDataSourceGKEPoliciesConfigUpdated,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("data.castai_gke_user_policies.gke", "features.#", "1"),
+					resource.TestCheckResourceAttr("data.castai_gke_user_policies.gke", "features.load_balancers_target_backend_pools", "true"),
 					resource.TestCheckResourceAttr("data.castai_gke_user_policies.gke", "policy.#", "41"),
 				),
 			},
@@ -107,8 +108,7 @@ data "castai_gke_user_policies" "gke" {
 const testAccDataSourceGKEPoliciesConfigUpdated = `
 data "castai_gke_user_policies" "gke" {
   features = {
-    "load_balancers_target_backend_pools": true,
-    "load_balancers_unmanaged_instance_groups": false
+    "load_balancers_target_backend_pools": true
   }
 }
 `
