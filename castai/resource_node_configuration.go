@@ -401,6 +401,21 @@ func resourceNodeConfiguration() *schema.Resource {
 										Elem: &schema.Schema{
 											Type: schema.TypeString,
 										},
+										ValidateFunc: func(v interface{}, k string) (ws []string, errors []error) {
+											allowedKeys := []string{
+												"FirstPartyUsage",
+												"NetworkDomain",
+												"RoutingPreference",
+											}
+
+											tags := v.(map[string]interface{})
+											for key := range tags {
+												if !lo.Contains(allowedKeys, key) {
+													errors = append(errors, fmt.Errorf("invalid key %q in %q, allowed keys: %v", key, k, allowedKeys))
+												}
+											}
+											return
+										},
 									},
 									"idle_timeout_in_minutes": {
 										Type:        schema.TypeInt,
