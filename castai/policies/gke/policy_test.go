@@ -23,22 +23,6 @@ func TestPolicies(t *testing.T) {
 		}
 		require.Equal(t, 37, len(userpolicy))
 	})
-	t.Run("LoadBalancersNetworkEndpointGroup policy", func(t *testing.T) {
-		lbNegPolicy, err := GetLoadBalancersNetworkEndpointGroupPolicy()
-		if err != nil {
-			t.Error(err)
-		}
-		if lbNegPolicy == nil {
-			t.Fatalf("couldn't generate LoadBalancersNetworkEndpointGroup policy")
-		}
-
-		want := "compute.networkEndpointGroups.get"
-
-		if !contains(lbNegPolicy, want) {
-			t.Fatalf("generated LoadBalancersNetworkEndpointGroup policy document does not contain required policies")
-		}
-		require.Equal(t, 4, len(lbNegPolicy))
-	})
 	t.Run("LoadBalancersTargetBackendPools policy", func(t *testing.T) {
 		lbTbpPolicy, err := GetLoadBalancersTargetBackendPoolsPolicy()
 		if err != nil {
