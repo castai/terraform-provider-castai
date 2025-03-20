@@ -16,7 +16,6 @@ const (
 	fieldGKEPoliciesPolicy = "policy"
 	// fieldGKEPoliciesFeatures is the name of the policies per feature
 	fieldGKEPoliciesFeatures                    = "features"
-	loadBalancersNetworkEndpointGroupFeature    = "load_balancers_network_endpoint_group"
 	loadBalancersTargetBackendPoolsFeature      = "load_balancers_target_backend_pools"
 	loadBalancersUnmanagedInstanceGroupsFeature = "load_balancers_unmanaged_instance_groups"
 )
@@ -34,7 +33,6 @@ func dataSourceGKEPolicies() *schema.Resource {
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 					ValidateFunc: validation.StringInSlice([]string{
-						loadBalancersNetworkEndpointGroupFeature,
 						loadBalancersTargetBackendPoolsFeature,
 						loadBalancersUnmanagedInstanceGroupsFeature,
 					}, false),
@@ -65,8 +63,6 @@ func dataSourceGKEPoliciesRead(_ context.Context, data *schema.ResourceData, _ i
 		var policies []string
 
 		switch feature {
-		case loadBalancersNetworkEndpointGroupFeature:
-			policies, err = gke.GetLoadBalancersNetworkEndpointGroupPolicy()
 		case loadBalancersTargetBackendPoolsFeature:
 			policies, err = gke.GetLoadBalancersTargetBackendPoolsPolicy()
 		case loadBalancersUnmanagedInstanceGroupsFeature:

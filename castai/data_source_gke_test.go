@@ -2,7 +2,6 @@ package castai
 
 import (
 	"context"
-	"github.com/castai/terraform-provider-castai/castai/policies/gke"
 	"github.com/castai/terraform-provider-castai/castai/sdk"
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
@@ -12,10 +11,6 @@ import (
 )
 
 func Test_dataSourceGKEPoliciesRead(t *testing.T) {
-	up, _ := gke.GetUserPolicy()
-	lbNeg, _ := gke.GetLoadBalancersNetworkEndpointGroupPolicy()
-	lbTbp, _ := gke.GetLoadBalancersTargetBackendPoolsPolicy()
-	lbUig, _ := gke.GetLoadBalancersUnmanagedInstanceGroupsPolicy()
 	tests := []struct {
 		name     string
 		features []interface{}
@@ -25,16 +20,23 @@ func Test_dataSourceGKEPoliciesRead(t *testing.T) {
 		{
 			name: "all features",
 			features: []interface{}{
-				loadBalancersNetworkEndpointGroupFeature,
 				loadBalancersTargetBackendPoolsFeature,
 				loadBalancersUnmanagedInstanceGroupsFeature,
 			},
-			expected: len(up) + len(lbNeg) + len(lbTbp) + len(lbUig) - 1, // -1 for the duplicate policy
+			expected: 42, // -1 for the duplicate policy
+			hasError: false,
+		},
+		{
+			name: "loadBalancersTargetBackendPoolsFeature",
+			features: []interface{}{
+				loadBalancersTargetBackendPoolsFeature,
+			},
+			expected: 41, // -1 for the duplicate policy
 			hasError: false,
 		},
 		{
 			name:     "empty features",
-			expected: len(up),
+			expected: 37,
 			hasError: false,
 		},
 	}
@@ -79,15 +81,15 @@ func TestAccDataSourceGKEPolicies_basic(t *testing.T) {
 			{
 				Config: testAccDataSourceGKEPoliciesConfig,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("data.castai_gke_user_policies.gke", "features.#", "3"),
-					resource.TestCheckResourceAttr("data.castai_gke_user_policies.gke", "policy.#", "46"),
+					resource.TestCheckResourceAttr("data.castai_gke_user_policies.gke", "features.#", "2"),
+					resource.TestCheckResourceAttr("data.castai_gke_user_policies.gke", "policy.#", "42"),
 				),
 			},
 			{
 				Config: testAccDataSourceGKEPoliciesConfigUpdated,
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("data.castai_gke_user_policies.gke", "features.#", "2"),
-					resource.TestCheckResourceAttr("data.castai_gke_user_policies.gke", "policy.#", "43ß"),
+					resource.TestCheckResourceAttr("data.castai_gke_user_policies.gke", "features.#", "1"),
+					resource.TestCheckResourceAttr("data.castai_gke_user_policies.gke", "policy.#", "41"),
 				),
 			},
 		},
@@ -97,7 +99,6 @@ func TestAccDataSourceGKEPolicies_basic(t *testing.T) {
 const testAccDataSourceGKEPoliciesConfig = `
 data "castai_gke_user_policies" "gke" {
   features = [
-    "load_balancers_network_endpoint_group",
     "load_balancers_target_backend_pools",
     "load_balancers_unmanaged_instance_groups"
   ]
@@ -106,7 +107,6 @@ data "castai_gke_user_policies" "gke" {
 const testAccDataSourceGKEPoliciesConfigUpdated = `
 data "castai_gke_user_policies" "gke" {
   features = [
-    "load_balancers_network_endpoint_group",
     "load_balancers_target_backend_pools"
   ]
 }

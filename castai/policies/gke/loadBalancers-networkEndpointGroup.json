@@ -1,8 +1,0 @@
-{
-    "Policies": [
-      "compute.networkEndpointGroups.get",
-      "compute.networkEndpointGroups.list",
-      "compute.networkEndpointGroups.attachNetworkEndpoints",
-      "compute.networkEndpointGroups.detachNetworkEndpoints"
-    ]
-}
