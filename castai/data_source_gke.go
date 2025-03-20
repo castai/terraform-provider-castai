@@ -24,7 +24,7 @@ const (
 func dataSourceGKEPolicies() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: dataSourceGKEPoliciesRead,
-		Description: "Data source for retrieving GKE policies",
+		Description: "Returns list of GCP policies needed for onboarding a cluster into CAST AI",
 		Schema: map[string]*schema.Schema{
 			fieldGKEPoliciesFeatures: {
 				Description: "Provide a list of GCP feature names to include the necessary policies for them to work.",
