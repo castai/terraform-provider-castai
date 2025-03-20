@@ -3,12 +3,12 @@
 page_title: "castai_gke_user_policies Data Source - terraform-provider-castai"
 subcategory: ""
 description: |-
-  Data source for retrieving GKE policies
+  Returns list of GCP policies needed for onboarding a cluster into CAST AI
 ---
 
 # castai_gke_user_policies (Data Source)
 
-Data source for retrieving GKE policies
+Returns list of GCP policies needed for onboarding a cluster into CAST AI
 
 ## Example Usage
 
