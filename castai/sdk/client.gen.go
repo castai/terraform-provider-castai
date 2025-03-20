@@ -10129,22 +10129,6 @@ func NewWorkloadOptimizationAPIListWorkloadEventsRequest(server string, clusterI
 
 	queryValues := queryURL.Query()
 
-	if params.WorkloadId != nil {
-
-		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "workloadId", runtime.ParamLocationQuery, *params.WorkloadId); err != nil {
-			return nil, err
-		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
-			return nil, err
-		} else {
-			for k, v := range parsed {
-				for _, v2 := range v {
-					queryValues.Add(k, v2)
-				}
-			}
-		}
-
-	}
-
 	if params.PageLimit != nil {
 
 		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "page.limit", runtime.ParamLocationQuery, *params.PageLimit); err != nil {
@@ -10209,9 +10193,57 @@ func NewWorkloadOptimizationAPIListWorkloadEventsRequest(server string, clusterI
 
 	}
 
+	if params.WorkloadId != nil {
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "workloadId", runtime.ParamLocationQuery, *params.WorkloadId); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
 	if params.WorkloadName != nil {
 
 		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "workloadName", runtime.ParamLocationQuery, *params.WorkloadName); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.WorkloadNamespace != nil {
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "workloadNamespace", runtime.ParamLocationQuery, *params.WorkloadNamespace); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.WorkloadKind != nil {
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "workloadKind", runtime.ParamLocationQuery, *params.WorkloadKind); err != nil {
 			return nil, err
 		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
 			return nil, err
