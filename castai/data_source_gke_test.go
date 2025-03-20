@@ -5,6 +5,7 @@ import (
 	"github.com/castai/terraform-provider-castai/castai/policies/gke"
 	"github.com/castai/terraform-provider-castai/castai/sdk"
 	"github.com/hashicorp/go-cty/cty"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/stretchr/testify/require"
 	"testing"
@@ -68,3 +69,30 @@ func Test_dataSourceGKEPoliciesRead(t *testing.T) {
 		})
 	}
 }
+
+func TestAccDataSourceGKEPolicies_basic(t *testing.T) {
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: providerFactories,
+		CheckDestroy:      nil,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccDataSourceGKEPoliciesConfig,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("data.castai_gke_user_policies.gke", "features.#", "3"),
+					resource.TestCheckResourceAttr("data.castai_gke_user_policies.gke", "policy.#", "46"),
+				),
+			},
+		},
+	})
+}
+
+const testAccDataSourceGKEPoliciesConfig = `
+data "castai_gke_user_policies" "gke" {
+  features = [
+    "load_balancers_network_endpoint_group",
+    "load_balancers_target_backend_pools",
+    "load_balancers_unmanaged_instance_groups"
+  ]
+}
+`
