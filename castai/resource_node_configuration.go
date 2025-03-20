@@ -21,29 +21,32 @@ import (
 )
 
 const (
-	FieldNodeConfigurationName                    = "name"
-	FieldNodeConfigurationDiskCpuRatio            = "disk_cpu_ratio"
-	FieldNodeConfigurationMinDiskSize             = "min_disk_size"
-	FieldNodeConfigurationDrainTimeoutSec         = "drain_timeout_sec"
-	FieldNodeConfigurationSubnets                 = "subnets"
-	FieldNodeConfigurationSSHPublicKey            = "ssh_public_key"
-	FieldNodeConfigurationImage                   = "image"
-	FieldNodeConfigurationTags                    = "tags"
-	FieldNodeConfigurationInitScript              = "init_script"
-	FieldNodeConfigurationContainerRuntime        = "container_runtime"
-	FieldNodeConfigurationDockerConfig            = "docker_config"
-	FieldNodeConfigurationKubeletConfig           = "kubelet_config"
-	FieldNodeConfigurationAKS                     = "aks"
-	FieldNodeConfigurationEKS                     = "eks"
-	FieldNodeConfigurationKOPS                    = "kops"
-	FieldNodeConfigurationGKE                     = "gke"
-	FieldNodeConfigurationEKSTargetGroup          = "target_group"
-	FieldNodeConfigurationAKSImageFamily          = "aks_image_family"
-	FieldNodeConfigurationAKSEphemeralOSDisk      = "ephemeral_os_disk"
-	FieldNodeConfigurationEKSImageFamily          = "eks_image_family"
-	FieldNodeConfigurationLoadbalancers           = "loadbalancers"
-	FieldNodeConfigurationAKSLoadbalancerIPPools  = "ip_based_backend_pools"
-	FieldNodeConfigurationAKSLoadbalancerNICPools = "nic_based_backend_pools"
+	FieldNodeConfigurationName                         = "name"
+	FieldNodeConfigurationDiskCpuRatio                 = "disk_cpu_ratio"
+	FieldNodeConfigurationMinDiskSize                  = "min_disk_size"
+	FieldNodeConfigurationDrainTimeoutSec              = "drain_timeout_sec"
+	FieldNodeConfigurationSubnets                      = "subnets"
+	FieldNodeConfigurationSSHPublicKey                 = "ssh_public_key"
+	FieldNodeConfigurationImage                        = "image"
+	FieldNodeConfigurationTags                         = "tags"
+	FieldNodeConfigurationInitScript                   = "init_script"
+	FieldNodeConfigurationContainerRuntime             = "container_runtime"
+	FieldNodeConfigurationDockerConfig                 = "docker_config"
+	FieldNodeConfigurationKubeletConfig                = "kubelet_config"
+	FieldNodeConfigurationAKS                          = "aks"
+	FieldNodeConfigurationEKS                          = "eks"
+	FieldNodeConfigurationKOPS                         = "kops"
+	FieldNodeConfigurationGKE                          = "gke"
+	FieldNodeConfigurationEKSTargetGroup               = "target_group"
+	FieldNodeConfigurationAKSImageFamily               = "aks_image_family"
+	FieldNodeConfigurationAKSEphemeralOSDisk           = "ephemeral_os_disk"
+	FieldNodeConfigurationEKSImageFamily               = "eks_image_family"
+	FieldNodeConfigurationLoadbalancers                = "loadbalancers"
+	FieldNodeConfigurationAKSLoadbalancerIPPools       = "ip_based_backend_pools"
+	FieldNodeConfigurationAKSLoadbalancerNICPools      = "nic_based_backend_pools"
+	FieldNodeConfigurationAKSNetworkSecurityGroup      = "network_security_group"
+	FieldNodeConfigurationAKSApplicationSecurityGroups = "application_security_groups"
+	FieldNodeConfigurationAKSPublicIP                  = "public_ip"
 )
 
 const (
@@ -363,6 +366,46 @@ func resourceNodeConfiguration() *schema.Resource {
 										DiffSuppressFunc: func(k, oldValue, newValue string, d *schema.ResourceData) bool {
 											return strings.EqualFold(oldValue, newValue)
 										},
+									},
+								},
+							},
+						},
+						FieldNodeConfigurationAKSNetworkSecurityGroup: {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: "Network security group to be used for provisioned nodes, if not provided default security group from `castpool` will be used",
+						},
+						FieldNodeConfigurationAKSApplicationSecurityGroups: {
+							Type:        schema.TypeList,
+							Optional:    true,
+							Description: "Application security groups to be used for provisioned nodes",
+							Elem: &schema.Schema{
+								Type: schema.TypeString,
+							},
+						},
+						FieldNodeConfigurationAKSPublicIP: {
+							Type:        schema.TypeList,
+							Optional:    true,
+							Description: "Public IP configuration for CAST AI provisioned nodes",
+							MaxItems:    1,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"public_ip_prefix": {
+										Type:        schema.TypeString,
+										Optional:    true,
+										Description: "Public IP prefix to be used for provisioned nodes",
+									},
+									"tags": {
+										Type:     schema.TypeMap,
+										Optional: true,
+										Elem: &schema.Schema{
+											Type: schema.TypeString,
+										},
+									},
+									"idle_timeout_in_minutes": {
+										Type:        schema.TypeInt,
+										Optional:    true,
+										Description: "Idle timeout in minutes for public IP",
 									},
 								},
 							},
@@ -1046,7 +1089,50 @@ func toAKSSConfig(obj map[string]interface{}) *sdk.NodeconfigV1AKSConfig {
 		out.LoadBalancers = toAksLoadBalancers(v)
 	}
 
+	if v, ok := obj[FieldNodeConfigurationAKSPublicIP].([]interface{}); ok && len(v) > 0 {
+		out.PublicIp = toAKSNodePublicIP(v[0])
+	}
+
+	if v, ok := obj[FieldNodeConfigurationAKSNetworkSecurityGroup].(string); ok && v != "" {
+		out.NetworkSecurityGroupId = toPtr(v)
+	}
+
+	if v, ok := obj[FieldNodeConfigurationAKSApplicationSecurityGroups].([]interface{}); ok && len(v) > 0 {
+		out.ApplicationSecurityGroupIds = toPtr(toStringList(v))
+	}
+
 	return out
+}
+
+func toAKSNodePublicIP(obj any) *sdk.NodeconfigV1AKSConfigPublicIP {
+	if obj == nil {
+		return nil
+	}
+
+	publicIP := &sdk.NodeconfigV1AKSConfigPublicIP{}
+
+	if v, ok := obj.(map[string]any)["public_ip_prefix"].(string); ok && v != "" {
+		publicIP.IpPrefix = lo.ToPtr(v)
+	}
+
+	if v, ok := obj.(map[string]any)["tags"].(map[string]any); ok && len(v) > 0 {
+		tagList := []sdk.NodeconfigV1AKSConfigPublicIPAKSPublicIPTags{}
+
+		for k, vv := range v {
+			tagList = append(tagList, sdk.NodeconfigV1AKSConfigPublicIPAKSPublicIPTags{
+				TagValue:  lo.ToPtr(vv.(string)),
+				IpTagType: lo.ToPtr(k),
+			})
+		}
+		publicIP.Tags = &tagList
+	}
+
+	if v, ok := obj.(map[string]any)["idle_timeout_in_minutes"].(int); ok && v > 0 {
+		publicIP.IdleTimeoutInMinutes = lo.ToPtr(int32(v))
+	}
+
+	return publicIP
+
 }
 
 func toAKSEphemeralOSDisk(obj any) *sdk.NodeconfigV1AKSConfigOsDiskEphemeral {
@@ -1197,7 +1283,45 @@ func flattenAKSConfig(config *sdk.NodeconfigV1AKSConfig) []map[string]interface{
 		m[FieldNodeConfigurationAKSEphemeralOSDisk] = fromAKSEphemeralOSDisk(v)
 	}
 
+	if v := config.PublicIp; v != nil {
+		m[FieldNodeConfigurationAKSPublicIP] = fromAKSNodePublicIP(v)
+	}
+
+	if v := config.NetworkSecurityGroupId; v != nil {
+		m[FieldNodeConfigurationAKSNetworkSecurityGroup] = *config.NetworkSecurityGroupId
+	}
+
+	if v := config.ApplicationSecurityGroupIds; v != nil {
+		m[FieldNodeConfigurationAKSApplicationSecurityGroups] = *config.ApplicationSecurityGroupIds
+	}
+
 	return []map[string]interface{}{m}
+}
+
+func fromAKSNodePublicIP(sdkPublicIp *sdk.NodeconfigV1AKSConfigPublicIP) map[string]interface{} {
+	if sdkPublicIp == nil {
+		return nil
+	}
+
+	m := map[string]interface{}{}
+	if sdkPublicIp.IpPrefix != nil {
+		m["public_ip_prefix"] = *sdkPublicIp.IpPrefix
+	}
+
+	if sdkPublicIp.Tags != nil {
+		tags := make(map[string]interface{})
+		for _, tag := range *sdkPublicIp.Tags {
+			tags[*tag.IpTagType] = *tag.TagValue
+		}
+		m["tags"] = tags
+	}
+
+	if sdkPublicIp.IdleTimeoutInMinutes != nil {
+		m["idle_timeout_in_minutes"] = *sdkPublicIp.IdleTimeoutInMinutes
+	}
+
+	return m
+
 }
 
 func fromAKSEphemeralOSDisk(sdkEph *sdk.NodeconfigV1AKSConfigOsDiskEphemeral) []map[string]interface{} {

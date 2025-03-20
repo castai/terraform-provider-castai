@@ -3152,6 +3152,9 @@ type K8sSelectorV1Operator string
 
 // NodeconfigV1AKSConfig defines model for nodeconfig.v1.AKSConfig.
 type NodeconfigV1AKSConfig struct {
+	// Specifies an array of references to application security group.
+	ApplicationSecurityGroupIds *[]string `json:"applicationSecurityGroupIds,omitempty"`
+
 	// List of supported image families (OSes) for AKS.
 	ImageFamily *NodeconfigV1AKSConfigImageFamily `json:"imageFamily,omitempty"`
 
@@ -3161,11 +3164,15 @@ type NodeconfigV1AKSConfig struct {
 	// Maximum number of pods that can be run on a node, which affects how many IP addresses you will need for each node.
 	// Defaults to 30. Values between 10 and 250 are allowed.
 	// Setting values above 110 will require specific CNI configuration. Please refer to Microsoft documentation for additional guidance.
-	MaxPodsPerNode  *int32                                `json:"maxPodsPerNode,omitempty"`
-	OsDiskEphemeral *NodeconfigV1AKSConfigOsDiskEphemeral `json:"osDiskEphemeral,omitempty"`
+	MaxPodsPerNode *int32 `json:"maxPodsPerNode,omitempty"`
+
+	// The ID of the network security group. If not provided the SG from `castpool` will be used.
+	NetworkSecurityGroupId *string                               `json:"networkSecurityGroupId"`
+	OsDiskEphemeral        *NodeconfigV1AKSConfigOsDiskEphemeral `json:"osDiskEphemeral,omitempty"`
 
 	// OsDiskType represent possible values for AKS node os disk type(this is subset of all available Azure disk types).
 	OsDiskType *NodeconfigV1AKSConfigOsDiskType `json:"osDiskType,omitempty"`
+	PublicIp   *NodeconfigV1AKSConfigPublicIP   `json:"publicIp,omitempty"`
 }
 
 // List of supported image families (OSes) for AKS.
@@ -3218,6 +3225,27 @@ type NodeconfigV1AKSConfigOsDiskEphemeralPlacement string
 
 // OsDiskType represent possible values for AKS node os disk type(this is subset of all available Azure disk types).
 type NodeconfigV1AKSConfigOsDiskType string
+
+// NodeconfigV1AKSConfigPublicIP defines model for nodeconfig.v1.AKSConfig.PublicIP.
+type NodeconfigV1AKSConfigPublicIP struct {
+	// The idle timeout of the public IP address.
+	IdleTimeoutInMinutes *int32 `json:"idleTimeoutInMinutes"`
+
+	// The ip_prefix from which to allocate publicIP addresses.
+	IpPrefix *string `json:"ipPrefix"`
+
+	// The list of IP tags associated with the public IP address.
+	Tags *[]NodeconfigV1AKSConfigPublicIPAKSPublicIPTags `json:"tags,omitempty"`
+}
+
+// NodeconfigV1AKSConfigPublicIPAKSPublicIPTags defines model for nodeconfig.v1.AKSConfig.PublicIP.AKSPublicIPTags.
+type NodeconfigV1AKSConfigPublicIPAKSPublicIPTags struct {
+	// Possible values are: 'FirstPartyUsage', 'NetworkDomain', 'RoutingPreference'.
+	IpTagType *string `json:"ipTagType,omitempty"`
+
+	// IP tag associated with the public IP. Example: SQL, Storage etc.
+	TagValue *string `json:"tagValue,omitempty"`
+}
 
 // List of supported container runtimes kubelet should use.
 type NodeconfigV1ContainerRuntime string
