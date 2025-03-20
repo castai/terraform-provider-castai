@@ -345,19 +345,21 @@ func resourceNodeConfiguration() *schema.Resource {
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"placement": {
-										Type:             schema.TypeString,
-										Required:         true,
-										Description:      "Placement of the ephemeral OS disk. One of: cacheDisk, resourceDisk",
-										ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{aksEphemeralDiskPlacementCacheDisk, aksEphemeralDiskPlacementResourceDisk}, true)),
+										Type:                  schema.TypeString,
+										Required:              true,
+										Description:           "Placement of the ephemeral OS disk. One of: cacheDisk, resourceDisk",
+										ValidateDiagFunc:      validation.ToDiagFunc(validation.StringInSlice([]string{aksEphemeralDiskPlacementCacheDisk, aksEphemeralDiskPlacementResourceDisk}, true)),
+										DiffSuppressOnRefresh: true,
 										DiffSuppressFunc: func(k, oldValue, newValue string, d *schema.ResourceData) bool {
 											return strings.EqualFold(oldValue, newValue)
 										},
 									},
 									"cache": {
-										Type:             schema.TypeString,
-										Optional:         true,
-										Description:      "Cache type for the ephemeral OS disk. One of: ReadOnly, ReadWrite",
-										ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{aksDiskCacheReadOnly, aksDiskCacheReadWrite}, true)),
+										Type:                  schema.TypeString,
+										Optional:              true,
+										Description:           "Cache type for the ephemeral OS disk. One of: ReadOnly, ReadWrite",
+										ValidateDiagFunc:      validation.ToDiagFunc(validation.StringInSlice([]string{aksDiskCacheReadOnly, aksDiskCacheReadWrite}, true)),
+										DiffSuppressOnRefresh: true,
 										DiffSuppressFunc: func(k, oldValue, newValue string, d *schema.ResourceData) bool {
 											return strings.EqualFold(oldValue, newValue)
 										},
@@ -1055,19 +1057,19 @@ func toAKSEphemeralOSDisk(obj any) *sdk.NodeconfigV1AKSConfigOsDiskEphemeral {
 	osDisk := &sdk.NodeconfigV1AKSConfigOsDiskEphemeral{}
 
 	if v, ok := obj.(map[string]any)["placement"].(string); ok && v != "" {
-		switch v {
-		case aksEphemeralDiskPlacementResourceDisk:
+		switch strings.ToLower(v) {
+		case strings.ToLower(aksEphemeralDiskPlacementResourceDisk):
 			osDisk.Placement = lo.ToPtr(sdk.NodeconfigV1AKSConfigOsDiskEphemeralPlacementPLACEMENTRESOURCEDISK)
-		case aksEphemeralDiskPlacementCacheDisk:
+		case strings.ToLower(aksEphemeralDiskPlacementCacheDisk):
 			osDisk.Placement = lo.ToPtr(sdk.NodeconfigV1AKSConfigOsDiskEphemeralPlacementPLACEMENTCACHEDISK)
 		}
 	}
 
 	if v, ok := obj.(map[string]any)["cache"].(string); ok && v != "" {
-		switch v {
-		case aksDiskCacheReadWrite:
+		switch strings.ToLower(v) {
+		case strings.ToLower(aksDiskCacheReadWrite):
 			osDisk.CacheType = lo.ToPtr(sdk.NodeconfigV1AKSConfigOsDiskEphemeralCacheTypeREADWRITE)
-		case aksDiskCacheReadOnly:
+		case strings.ToLower(aksDiskCacheReadOnly):
 			osDisk.CacheType = lo.ToPtr(sdk.NodeconfigV1AKSConfigOsDiskEphemeralCacheTypeREADONLY)
 		}
 	}
