@@ -83,6 +83,13 @@ func TestAccDataSourceGKEPolicies_basic(t *testing.T) {
 					resource.TestCheckResourceAttr("data.castai_gke_user_policies.gke", "policy.#", "46"),
 				),
 			},
+			{
+				Config: testAccDataSourceGKEPoliciesConfigUpdated,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr("data.castai_gke_user_policies.gke", "features.#", "2"),
+					resource.TestCheckResourceAttr("data.castai_gke_user_policies.gke", "policy.#", "43ß"),
+				),
+			},
 		},
 	})
 }
@@ -93,6 +100,14 @@ data "castai_gke_user_policies" "gke" {
     "load_balancers_network_endpoint_group",
     "load_balancers_target_backend_pools",
     "load_balancers_unmanaged_instance_groups"
+  ]
+}
+`
+const testAccDataSourceGKEPoliciesConfigUpdated = `
+data "castai_gke_user_policies" "gke" {
+  features = [
+    "load_balancers_network_endpoint_group",
+    "load_balancers_target_backend_pools"
   ]
 }
 `
