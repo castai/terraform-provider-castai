@@ -1326,7 +1326,7 @@ func fromAKSNodePublicIP(sdkPublicIp *sdk.NodeconfigV1AKSConfigPublicIP) []map[s
 	if sdkPublicIp.Tags != nil {
 		tags := make(map[string]interface{})
 		for _, tag := range *sdkPublicIp.Tags {
-			tags[*tag.IpTagType] = *tag.TagValue
+			tags[lo.FromPtr(tag.IpTagType)] = lo.FromPtr(tag.TagValue)
 		}
 		m["tags"] = tags
 	}
