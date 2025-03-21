@@ -127,6 +127,7 @@ resource "castai_node_configuration" "test" {
 			FirstPartyUsage = "something"
 		}
 		idle_timeout_in_minutes = 10
+    }
   }
 }
 `, rgName, rName))

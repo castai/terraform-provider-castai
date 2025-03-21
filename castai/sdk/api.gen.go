@@ -2231,6 +2231,12 @@ type CastaiUsersV1beta1GroupRef struct {
 	Name string `json:"name"`
 }
 
+// CastaiUsersV1beta1ListChildrenOrganizationsResponse defines model for castai.users.v1beta1.ListChildrenOrganizationsResponse.
+type CastaiUsersV1beta1ListChildrenOrganizationsResponse struct {
+	// Array of organizations.
+	Organizations []CastaiUsersV1beta1Organization `json:"organizations"`
+}
+
 // Defines container for the organization's pending invitations.
 type CastaiUsersV1beta1ListInvitationsResponse struct {
 	// Array of organization's pending invitations.
@@ -2310,6 +2316,9 @@ type CastaiUsersV1beta1Organization struct {
 	// letter or a number, followed by letters, numbers, underscores, hyphens,
 	// spaces and periods. The name must end with a letter or a number.
 	Name string `json:"name"`
+
+	// ID of the parent organization. This is beta feature not available for all organizations.
+	ParentId *string `json:"parentId"`
 
 	// information whether the organization have rbacv2 enabled.
 	Rbacv2Enabled *bool `json:"rbacv2Enabled"`

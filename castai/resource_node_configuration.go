@@ -1313,7 +1313,7 @@ func flattenAKSConfig(config *sdk.NodeconfigV1AKSConfig) []map[string]interface{
 	return []map[string]interface{}{m}
 }
 
-func fromAKSNodePublicIP(sdkPublicIp *sdk.NodeconfigV1AKSConfigPublicIP) map[string]interface{} {
+func fromAKSNodePublicIP(sdkPublicIp *sdk.NodeconfigV1AKSConfigPublicIP) []map[string]any {
 	if sdkPublicIp == nil {
 		return nil
 	}
@@ -1335,7 +1335,7 @@ func fromAKSNodePublicIP(sdkPublicIp *sdk.NodeconfigV1AKSConfigPublicIP) map[str
 		m["idle_timeout_in_minutes"] = *sdkPublicIp.IdleTimeoutInMinutes
 	}
 
-	return m
+	return []map[string]any{m}
 
 }
 
