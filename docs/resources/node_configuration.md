@@ -88,10 +88,13 @@ resource "castai_node_configuration" "default" {
 Optional:
 
 - `aks_image_family` (String) Image OS Family to use when provisioning node in AKS. If both image and family are provided, the system will use provided image and provisioning logic for given family. If only image family is provided, the system will attempt to resolve the latest image from that family based on kubernetes version and node architecture. If image family is omitted, a default family (based on cloud provider) will be used. See Cast.ai documentation for details. Possible values: (ubuntu,azure-linux)
+- `application_security_groups` (List of String) Application security groups to be used for provisioned nodes
 - `ephemeral_os_disk` (Block List, Max: 1) Ephemeral OS disk configuration for CAST provisioned nodes (see [below for nested schema](#nestedblock--aks--ephemeral_os_disk))
 - `loadbalancers` (Block List) Load balancer configuration for CAST provisioned nodes (see [below for nested schema](#nestedblock--aks--loadbalancers))
 - `max_pods_per_node` (Number) Maximum number of pods that can be run on a node, which affects how many IP addresses you will need for each node. Defaults to 30
+- `network_security_group` (String) Network security group to be used for provisioned nodes, if not provided default security group from `castpool` will be used
 - `os_disk_type` (String) Type of managed os disk attached to the node. (See [disk types](https://learn.microsoft.com/en-us/azure/virtual-machines/disks-types)). One of: standard, standard-ssd, premium-ssd (ultra and premium-ssd-v2 are not supported for os disk)
+- `public_ip` (Block List, Max: 1) Public IP configuration for CAST AI provisioned nodes (see [below for nested schema](#nestedblock--aks--public_ip))
 
 <a id="nestedblock--aks--ephemeral_os_disk"></a>
 ### Nested Schema for `aks.ephemeral_os_disk`
@@ -130,6 +133,16 @@ Required:
 
 - `name` (String) Name of the NIC based backend pool
 
+
+
+<a id="nestedblock--aks--public_ip"></a>
+### Nested Schema for `aks.public_ip`
+
+Optional:
+
+- `idle_timeout_in_minutes` (Number) Idle timeout in minutes for public IP
+- `public_ip_prefix` (String) Public IP prefix to be used for provisioned nodes
+- `tags` (Map of String)
 
 
 

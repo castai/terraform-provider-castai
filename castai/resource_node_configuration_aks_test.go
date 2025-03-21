@@ -47,6 +47,11 @@ func TestAccResourceNodeConfiguration_aks(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "aks.0.ephemeral_os_disk.0.cache", "ReadOnly"),
 					resource.TestCheckResourceAttr(resourceName, "aks.0.loadbalancers.0.name", "test-lb"),
 					resource.TestCheckResourceAttr(resourceName, "aks.0.loadbalancers.0.ip_based_backend_pools.0.name", "test"),
+					resource.TestCheckResourceAttr(resourceName, "aks.0.network_security_group", "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/providers/Microsoft.Network/networkSecurityGroups/test-nsg"),
+					resource.TestCheckResourceAttr(resourceName, "aks.0.application_security_groups.0", "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/providers/Microsoft.Network/applicationSecurityGroups/test-asg"),
+					resource.TestCheckResourceAttr(resourceName, "aks.0.public_ip.0.public_ip_prefix", "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/providers/Microsoft.Network/publicIPAddresses/test-ip"),
+					resource.TestCheckResourceAttr(resourceName, "aks.0.public_ip.0.tags.FirstPartyUsage", "something"),
+					resource.TestCheckResourceAttr(resourceName, "aks.0.public_ip.0.idle_timeout_in_minutes", "10"),
 					resource.TestCheckResourceAttr(resourceName, "eks.#", "0"),
 					resource.TestCheckResourceAttr(resourceName, "kops.#", "0"),
 					resource.TestCheckResourceAttr(resourceName, "gke.#", "0"),
@@ -113,6 +118,15 @@ resource "castai_node_configuration" "test" {
 		ip_based_backend_pools {
 			name = "test"
 		}
+    }
+	network_security_group = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/providers/Microsoft.Network/networkSecurityGroups/test-nsg"
+	application_security_groups = ["/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/providers/Microsoft.Network/applicationSecurityGroups/test-asg"]
+    public_ip {
+		public_ip_prefix = "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/providers/Microsoft.Network/publicIPAddresses/test-ip"
+		tags = {
+			FirstPartyUsage = "something"
+		}
+		idle_timeout_in_minutes = 10
     }
   }
 }
