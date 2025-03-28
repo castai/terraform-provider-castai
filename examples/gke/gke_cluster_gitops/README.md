@@ -63,7 +63,7 @@ CAST_SECRET_APIKEY="castai-agent"
 #### Mandatory Component: Castai-agent
 helm upgrade -i castai-agent castai-helm/castai-agent -n castai-agent --create-namespace \
   --set apiKey="$CASTAI_API_KEY" \
-  --set provider=gcp \
+  --set provider=gke \
   --set createNamespace=false
   --set metadataStore.enabled=true
 
@@ -76,7 +76,7 @@ helm upgrade -i cluster-controller castai-helm/castai-cluster-controller -n cast
 #### castai-spot-handler
 helm upgrade -i castai-spot-handler castai-helm/castai-spot-handler -n castai-agent \
 --set "envFrom[0].configMapRef.name=$CAST_CONFIG_CLUSTERID" \
---set castai.provider=aws
+--set castai.provider=gcp
 
 #### castai-evictor
 helm upgrade -i castai-evictor castai-helm/castai-evictor -n castai-agent --set replicaCount=1

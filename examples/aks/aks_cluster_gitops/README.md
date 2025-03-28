@@ -63,7 +63,7 @@ CAST_SECRET_APIKEY="castai-agent"
 #### Mandatory Component: Castai-agent
 helm upgrade -i castai-agent castai-helm/castai-agent -n castai-agent --create-namespace \
   --set apiKey="$CASTAI_API_KEY" \
-  --set provider=eks \
+  --set provider=aks \
   --set createNamespace=false
   --set metadataStore.enabled=true
 
