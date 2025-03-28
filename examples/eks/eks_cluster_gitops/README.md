@@ -112,24 +112,26 @@ After all CAST AI components are installed in the cluster its status in CAST AI 
 
 ```
 CASTAI_API_KEY="<Replace cluster_token>"
-CASTAI_CLUSTER_ID="<Replace cluster_id>"
-CAST_CONFIG_SOURCE="castai-cluster-controller"
+CAST_CONFIG_CLUSTERID="castai-agent-metadata"
+CAST_SECRET_APIKEY="castai-agent"
+
 
 #### Mandatory Component: Castai-agent
 helm upgrade -i castai-agent castai-helm/castai-agent -n castai-agent --create-namespace \
-  --set apiKey=$CASTAI_API_KEY \
+  --set apiKey="$CASTAI_API_KEY" \
   --set provider=eks \
   --set createNamespace=false
+  --set metadataStore.enabled=true
 
 #### Mandatory Component: castai-cluster-controller
 helm upgrade -i cluster-controller castai-helm/castai-cluster-controller -n castai-agent \
---set castai.apiKey=$CASTAI_API_KEY \
---set castai.clusterID=$CASTAI_CLUSTER_ID \
---set autoscaling.enabled=true
+  --set autoscaling.enabled=true \
+  --set "envFrom[0].secretRef.name=$CAST_SECRET_APIKEY" \
+  --set "envFrom[1].configMapRef.name=$CAST_CONFIG_CLUSTERID"
 
 #### castai-spot-handler
 helm upgrade -i castai-spot-handler castai-helm/castai-spot-handler -n castai-agent \
---set castai.clusterID=$CASTAI_CLUSTER_ID \
+--set "envFrom[0].configMapRef.name=$CAST_CONFIG_CLUSTERID" \
 --set castai.provider=aws
 
 #### castai-evictor
@@ -137,19 +139,19 @@ helm upgrade -i castai-evictor castai-helm/castai-evictor -n castai-agent --set 
 
 #### castai-pod-pinner
 helm upgrade -i castai-pod-pinner castai-helm/castai-pod-pinner -n castai-agent \
---set castai.apiKey=$CASTAI_API_KEY \
---set castai.clusterID=$CASTAI_CLUSTER_ID \
+--set "envFrom[0].secretRef.name=$CAST_SECRET_APIKEY" \
+--set "envFrom[1].configMapRef.name=$CAST_CONFIG_CLUSTERID" \ 
 --set replicaCount=0
 
 #### castai-workload-autoscaler
 helm upgrade -i castai-workload-autoscaler castai-helm/castai-workload-autoscaler -n castai-agent \
---set castai.apiKeySecretRef=$CAST_CONFIG_SOURCE \
---set castai.configMapRef=$CAST_CONFIG_SOURCE \
+--set "envFrom[0].secretRef.name=$CAST_SECRET_APIKEY" \
+--set "envFrom[1].configMapRef.name=$CAST_CONFIG_CLUSTERID" \ 
 
 #### castai-kvisor
 helm upgrade -i castai-kvisor castai-helm/castai-kvisor -n castai-agent \
---set castai.apiKey=$CASTAI_API_KEY \
---set castai.clusterID=$CASTAI_CLUSTER_ID \
+--set "envFrom[0].secretRef.name=$CAST_SECRET_APIKEY" \
+--set "envFrom[1].configMapRef.name=$CAST_CONFIG_CLUSTERID" \ 
 --set controller.extraArgs.kube-linter-enabled=true \
 --set controller.extraArgs.image-scan-enabled=true \
 --set controller.extraArgs.kube-bench-enabled=true \
