@@ -230,6 +230,7 @@ role_id = `+roleID+`
 scope.# = 1
 scope.0.kind = organization
 scope.0.resource_id = `+organizationID+`
+scopes.# = 0
 subjects.# = 1
 subjects.0.subject.# = 3
 subjects.0.subject.0.group_id = 
