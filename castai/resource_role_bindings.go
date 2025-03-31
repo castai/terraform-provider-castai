@@ -85,7 +85,7 @@ func resourceRoleBindings() *schema.Resource {
 			},
 			FieldRoleBindingsScope: {
 				Type:        schema.TypeList,
-				Required:    true,
+				Optional:    true,
 				MaxItems:    1,
 				Description: "Scope of the role binding.",
 				Elem: &schema.Resource{
@@ -224,7 +224,6 @@ func resourceRoleBindingsCreate(ctx context.Context, data *schema.ResourceData, 
 	}
 	scope := convertScopeToSDK(data)
 	scopes := convertScopesToSDK(data)
-	scopes = append(scopes, scope)
 
 	resp, err := client.RbacServiceAPICreateRoleBindingsWithResponse(ctx, organizationID, sdk.RbacServiceAPICreateRoleBindingsJSONRequestBody{
 		{
@@ -275,7 +274,6 @@ func resourceRoleBindingsUpdate(ctx context.Context, data *schema.ResourceData, 
 	}
 	scope := convertScopeToSDK(data)
 	scopes := convertScopesToSDK(data)
-	scopes = append(scopes, scope)
 
 	resp, err := client.RbacServiceAPIUpdateRoleBindingWithResponse(ctx, organizationID, roleBindingID, sdk.RbacServiceAPIUpdateRoleBindingJSONRequestBody{
 		Definition: sdk.CastaiRbacV1beta1RoleBindingDefinition{
@@ -432,29 +430,29 @@ func assignRoleBindingData(roleBinding *sdk.CastaiRbacV1beta1RoleBinding, data *
 	return nil
 }
 
-func convertScopeToSDK(data *schema.ResourceData) sdk.CastaiRbacV1beta1Scope {
+func convertScopeToSDK(data *schema.ResourceData) *sdk.CastaiRbacV1beta1Scope {
 	scopes := data.Get(FieldRoleBindingsScope).([]any)
 	if len(scopes) == 0 {
-		return sdk.CastaiRbacV1beta1Scope{}
+		return nil
 	}
 
 	scope := scopes[0].(map[string]any)
 
 	switch scope[FieldRoleBindingsScopeKind].(string) {
 	case RoleBindingScopeKindOrganization:
-		return sdk.CastaiRbacV1beta1Scope{
+		return &sdk.CastaiRbacV1beta1Scope{
 			Organization: &sdk.CastaiRbacV1beta1OrganizationScope{
 				Id: scope[FieldRoleBindingsScopeResourceID].(string),
 			},
 		}
 	case RoleBindingScopeKindCluster:
-		return sdk.CastaiRbacV1beta1Scope{
+		return &sdk.CastaiRbacV1beta1Scope{
 			Cluster: &sdk.CastaiRbacV1beta1ClusterScope{
 				Id: scope[FieldRoleBindingsScopeResourceID].(string),
 			},
 		}
 	default:
-		return sdk.CastaiRbacV1beta1Scope{}
+		return nil
 	}
 }
 

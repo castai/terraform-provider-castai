@@ -5606,6 +5606,12 @@ type CommitmentsAPIGetCommitmentsParams struct {
 
 	// ClusterId get commitments that are assigned to a cluster
 	ClusterId *string `form:"clusterId,omitempty" json:"clusterId,omitempty"`
+
+	// IncludeUsagePerClusters indicates if usage per clusters should be included
+	IncludeUsagePerClusters *bool `form:"includeUsagePerClusters,omitempty" json:"includeUsagePerClusters,omitempty"`
+
+	// IncludeUsagePerInstanceTypes indicates if usage per instance types should be included
+	IncludeUsagePerInstanceTypes *bool `form:"includeUsagePerInstanceTypes,omitempty" json:"includeUsagePerInstanceTypes,omitempty"`
 }
 
 // CommitmentsAPIImportAzureReservationsJSONBody defines parameters for CommitmentsAPIImportAzureReservations.
@@ -5649,6 +5655,12 @@ type CommitmentsAPIGetCommitmentParams struct {
 
 	// IncludeUsage indicated if commitment usage should be included in a response
 	IncludeUsage *bool `form:"includeUsage,omitempty" json:"includeUsage,omitempty"`
+
+	// IncludeUsagePerClusters indicates if usage per clusters should be included
+	IncludeUsagePerClusters *bool `form:"includeUsagePerClusters,omitempty" json:"includeUsagePerClusters,omitempty"`
+
+	// IncludeUsagePerInstanceTypes indicates if usage per instance types should be included
+	IncludeUsagePerInstanceTypes *bool `form:"includeUsagePerInstanceTypes,omitempty" json:"includeUsagePerInstanceTypes,omitempty"`
 }
 
 // CommitmentsAPIReplaceCommitmentAssignmentsJSONBody defines parameters for CommitmentsAPIReplaceCommitmentAssignments.
