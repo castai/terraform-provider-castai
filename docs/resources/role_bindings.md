@@ -74,26 +74,18 @@ resource "castai_role_bindings" "viewer_test" {
 - `name` (String) Name of role binding.
 - `organization_id` (String) CAST AI organization ID.
 - `role_id` (String) ID of role from role binding.
-- `scope` (Block List, Min: 1, Max: 1) Scope of the role binding. (see [below for nested schema](#nestedblock--scope))
 - `subjects` (Block List, Min: 1) (see [below for nested schema](#nestedblock--subjects))
 
 ### Optional
 
 - `description` (String) Description of the role binding.
+- `scope` (Block List, Max: 1) Scope of the role binding. (see [below for nested schema](#nestedblock--scope))
+- `scopes` (Block List) Scopes of the role binding. (see [below for nested schema](#nestedblock--scopes))
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only
 
 - `id` (String) The ID of this resource.
-
-<a id="nestedblock--scope"></a>
-### Nested Schema for `scope`
-
-Required:
-
-- `kind` (String) Scope of the role binding Supported values include: organization, cluster.
-- `resource_id` (String) ID of the scope resource.
-
 
 <a id="nestedblock--subjects"></a>
 ### Nested Schema for `subjects`
@@ -115,6 +107,24 @@ Optional:
 - `service_account_id` (String) Optional, required only if `kind` is `service_account`.
 - `user_id` (String) Optional, required only if `kind` is `user`.
 
+
+
+<a id="nestedblock--scope"></a>
+### Nested Schema for `scope`
+
+Required:
+
+- `kind` (String) Scope of the role binding Supported values include: organization, cluster.
+- `resource_id` (String) ID of the scope resource.
+
+
+<a id="nestedblock--scopes"></a>
+### Nested Schema for `scopes`
+
+Required:
+
+- `kind` (String) Scope of the role binding Supported values include: organization, cluster.
+- `resource_id` (String) ID of the scope resource.
 
 
 <a id="nestedblock--timeouts"></a>

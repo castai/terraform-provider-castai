@@ -8991,6 +8991,38 @@ func NewCommitmentsAPIGetCommitmentsRequest(server string, params *CommitmentsAP
 
 		}
 
+		if params.IncludeUsagePerClusters != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "includeUsagePerClusters", runtime.ParamLocationQuery, *params.IncludeUsagePerClusters); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.IncludeUsagePerInstanceTypes != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "includeUsagePerInstanceTypes", runtime.ParamLocationQuery, *params.IncludeUsagePerInstanceTypes); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
 		queryURL.RawQuery = queryValues.Encode()
 	}
 
@@ -9257,6 +9289,38 @@ func NewCommitmentsAPIGetCommitmentRequest(server string, commitmentId string, p
 		if params.IncludeUsage != nil {
 
 			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "includeUsage", runtime.ParamLocationQuery, *params.IncludeUsage); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.IncludeUsagePerClusters != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "includeUsagePerClusters", runtime.ParamLocationQuery, *params.IncludeUsagePerClusters); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.IncludeUsagePerInstanceTypes != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "includeUsagePerInstanceTypes", runtime.ParamLocationQuery, *params.IncludeUsagePerInstanceTypes); err != nil {
 				return nil, err
 			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
 				return nil, err
