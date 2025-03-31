@@ -87,7 +87,7 @@ resource "castai_node_configuration" "default" {
 
 Optional:
 
-- `aks_image_family` (String) Image OS Family to use when provisioning node in AKS. If both image and family are provided, the system will use provided image and provisioning logic for given family. If only image family is provided, the system will attempt to resolve the latest image from that family based on kubernetes version and node architecture. If image family is omitted, a default family (based on cloud provider) will be used. See Cast.ai documentation for details. Possible values: (ubuntu,azure-linux)
+- `aks_image_family` (String) Image OS Family to use when provisioning node in AKS. If both image and family are provided, the system will use provided image and provisioning logic for given family. If only image family is provided, the system will attempt to resolve the latest image from that family based on kubernetes version and node architecture. If image family is omitted, a default family (based on cloud provider) will be used. See Cast.ai documentation for details. Possible values: (ubuntu,azure-linux,windows2019,windows2022)
 - `application_security_groups` (List of String) Application security groups to be used for provisioned nodes
 - `ephemeral_os_disk` (Block List, Max: 1) Ephemeral OS disk configuration for CAST provisioned nodes (see [below for nested schema](#nestedblock--aks--ephemeral_os_disk))
 - `loadbalancers` (Block List) Load balancer configuration for CAST provisioned nodes (see [below for nested schema](#nestedblock--aks--loadbalancers))

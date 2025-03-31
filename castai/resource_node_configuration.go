@@ -58,6 +58,8 @@ const (
 const (
 	aksImageFamilyUbuntu                  = "ubuntu"
 	aksImageFamilyAzureLinux              = "azure-linux"
+	aksImageFamilyWindows2019             = "windows2019"
+	aksImageFamilyWindows2022             = "windows2022"
 	aksEphemeralDiskPlacementCacheDisk    = "cacheDisk"
 	aksEphemeralDiskPlacementResourceDisk = "resourceDisk"
 	aksDiskCacheReadOnly                  = "ReadOnly"
@@ -334,8 +336,8 @@ func resourceNodeConfiguration() *schema.Resource {
 									"If both image and family are provided, the system will use provided image and provisioning logic for given family. "+
 									"If only image family is provided, the system will attempt to resolve the latest image from that family based on kubernetes version and node architecture. "+
 									"If image family is omitted, a default family (based on cloud provider) will be used. "+
-									"See Cast.ai documentation for details. Possible values: (%v)", strings.Join([]string{aksImageFamilyUbuntu, aksImageFamilyAzureLinux}, ",")),
-							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{aksImageFamilyUbuntu, aksImageFamilyAzureLinux}, true)),
+									"See Cast.ai documentation for details. Possible values: (%v)", strings.Join([]string{aksImageFamilyUbuntu, aksImageFamilyAzureLinux, aksImageFamilyWindows2019, aksImageFamilyWindows2022}, ",")),
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{aksImageFamilyUbuntu, aksImageFamilyAzureLinux, aksImageFamilyWindows2019, aksImageFamilyWindows2022}, true)),
 							DiffSuppressFunc: func(k, oldValue, newValue string, d *schema.ResourceData) bool {
 								return strings.EqualFold(oldValue, newValue)
 							},
@@ -1268,6 +1270,10 @@ func toAKSImageFamily(v string) *sdk.NodeconfigV1AKSConfigImageFamily {
 		return lo.ToPtr(sdk.NodeconfigV1AKSConfigImageFamilyFAMILYUBUNTU)
 	case aksImageFamilyAzureLinux:
 		return lo.ToPtr(sdk.NodeconfigV1AKSConfigImageFamilyFAMILYAZURELINUX)
+	case aksImageFamilyWindows2019:
+		return lo.ToPtr(sdk.NodeconfigV1AKSConfigImageFamilyFAMILYWINDOWS2019)
+	case aksImageFamilyWindows2022:
+		return lo.ToPtr(sdk.NodeconfigV1AKSConfigImageFamilyFAMILYWINDOWS2022)
 	default:
 		return nil
 	}
@@ -1441,6 +1447,10 @@ func fromAKSImageFamily(family sdk.NodeconfigV1AKSConfigImageFamily) string {
 		return aksImageFamilyAzureLinux
 	case sdk.NodeconfigV1AKSConfigImageFamilyFAMILYUBUNTU, sdk.NodeconfigV1AKSConfigImageFamilyFamilyUbuntu:
 		return aksImageFamilyUbuntu
+	case sdk.NodeconfigV1AKSConfigImageFamilyFAMILYWINDOWS2019, sdk.NodeconfigV1AKSConfigImageFamilyFamilyWindows2019:
+		return aksImageFamilyWindows2019
+	case sdk.NodeconfigV1AKSConfigImageFamilyFamilyWindows2022, sdk.NodeconfigV1AKSConfigImageFamilyFAMILYWINDOWS2022:
+		return aksImageFamilyWindows2022
 	default:
 		return ""
 	}
