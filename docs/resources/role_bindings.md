@@ -80,6 +80,7 @@ resource "castai_role_bindings" "viewer_test" {
 ### Optional
 
 - `description` (String) Description of the role binding.
+- `scopes` (Block List) Scopes of the role binding. (see [below for nested schema](#nestedblock--scopes))
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
 ### Read-Only
@@ -115,6 +116,15 @@ Optional:
 - `service_account_id` (String) Optional, required only if `kind` is `service_account`.
 - `user_id` (String) Optional, required only if `kind` is `user`.
 
+
+
+<a id="nestedblock--scopes"></a>
+### Nested Schema for `scopes`
+
+Required:
+
+- `kind` (String) Scope of the role binding Supported values include: organization, cluster.
+- `resource_id` (String) ID of the scope resource.
 
 
 <a id="nestedblock--timeouts"></a>
