@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/hashicorp/go-retryablehttp"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/logging"
 )
 
@@ -23,10 +24,14 @@ const (
 
 func CreateClient(apiURL, apiToken, userAgent string) (*ClientWithResponses, error) {
 	httpClientOption := func(client *Client) error {
-		client.Client = &http.Client{
-			Transport: logging.NewSubsystemLoggingHTTPTransport("CAST.AI", http.DefaultTransport),
-			Timeout:   1 * time.Minute,
-		}
+		retries := retryablehttp.NewClient()
+		retries.RetryMax = 2
+
+		c := retries.StandardClient()
+		c.Transport = logging.NewSubsystemLoggingHTTPTransport("CAST.AI", c.Transport)
+		c.Timeout = 1 * time.Minute
+
+		client.Client = c
 		client.RequestEditors = append(client.RequestEditors, func(_ context.Context, req *http.Request) error {
 			req.Header.Set("user-agent", userAgent)
 			return nil
