@@ -166,6 +166,13 @@ const (
 	STATUSUNKNOWN  CastaiSsoV1beta1SSOConnectionStatus = "STATUS_UNKNOWN"
 )
 
+// Defines values for CastaiUsersV1beta1OrganizationType.
+const (
+	ORGANIZATIONTYPECHILD      CastaiUsersV1beta1OrganizationType = "ORGANIZATION_TYPE_CHILD"
+	ORGANIZATIONTYPEDEFAULT    CastaiUsersV1beta1OrganizationType = "ORGANIZATION_TYPE_DEFAULT"
+	ORGANIZATIONTYPEENTERPRISE CastaiUsersV1beta1OrganizationType = "ORGANIZATION_TYPE_ENTERPRISE"
+)
+
 // Defines values for ExternalclusterV1ClusterReconcileInfoReconcileMode.
 const (
 	ExternalclusterV1ClusterReconcileInfoReconcileModeDisabled    ExternalclusterV1ClusterReconcileInfoReconcileMode = "disabled"
@@ -1749,6 +1756,9 @@ type CastaiRbacV1beta1RoleBindingDefinition struct {
 	// Scope represents the scope of the role binding.
 	Scope CastaiRbacV1beta1Scope `json:"scope"`
 
+	// Scopes is a list of multiple scopes of the role binding.
+	Scopes *[]CastaiRbacV1beta1Scope `json:"scopes,omitempty"`
+
 	// Subjects is a list of subjects.
 	Subjects *[]CastaiRbacV1beta1Subject `json:"subjects,omitempty"`
 }
@@ -2209,8 +2219,7 @@ type CastaiUsersV1beta1CurrentUserProfileResponse struct {
 	HasHubspotContact *bool `json:"hasHubspotContact,omitempty"`
 
 	// User ID.
-	Id    *string `json:"id,omitempty"`
-	IsPlg *bool   `json:"isPlg,omitempty"`
+	Id *string `json:"id,omitempty"`
 
 	// User name.
 	Name *string `json:"name,omitempty"`
@@ -2322,6 +2331,11 @@ type CastaiUsersV1beta1Organization struct {
 
 	// information whether the organization have rbacv2 enabled.
 	Rbacv2Enabled *bool `json:"rbacv2Enabled"`
+
+	// OrganizationType defines possible types of organization.
+	//
+	//  - ORGANIZATION_TYPE_DEFAULT: default organization type
+	Type *CastaiUsersV1beta1OrganizationType `json:"type,omitempty"`
 }
 
 // OrganizationMetadata describes organization metadata.
@@ -2332,6 +2346,11 @@ type CastaiUsersV1beta1OrganizationMetadata struct {
 	// partner tenant id on partner system.
 	PartnerTenantId *string `json:"partnerTenantId"`
 }
+
+// OrganizationType defines possible types of organization.
+//
+//   - ORGANIZATION_TYPE_DEFAULT: default organization type
+type CastaiUsersV1beta1OrganizationType string
 
 // CastaiUsersV1beta1PendingInvitation defines model for castai.users.v1beta1.PendingInvitation.
 type CastaiUsersV1beta1PendingInvitation struct {
@@ -5175,6 +5194,7 @@ type WorkloadoptimizationV1VPAConfig struct {
 	ApplyType            WorkloadoptimizationV1ApplyType              `json:"applyType"`
 	ContainerConstraints []WorkloadoptimizationV1ContainerConstraints `json:"containerConstraints"`
 	Cpu                  WorkloadoptimizationV1ResourceConfig         `json:"cpu"`
+	Downscaling          *WorkloadoptimizationV1DownscalingSettings   `json:"downscaling,omitempty"`
 
 	// Defines possible options for workload management.
 	// READ_ONLY - workload watched (metrics collected), but no actions may be performed by CAST AI.
@@ -5182,6 +5202,7 @@ type WorkloadoptimizationV1VPAConfig struct {
 	ManagementOption WorkloadoptimizationV1ManagementOption     `json:"managementOption"`
 	Memory           WorkloadoptimizationV1ResourceConfig       `json:"memory"`
 	MemoryEvent      *WorkloadoptimizationV1MemoryEventSettings `json:"memoryEvent,omitempty"`
+	Startup          *WorkloadoptimizationV1StartupSettings     `json:"startup,omitempty"`
 }
 
 // WorkloadoptimizationV1VPAConfigUpdate defines model for workloadoptimization.v1.VPAConfigUpdate.
