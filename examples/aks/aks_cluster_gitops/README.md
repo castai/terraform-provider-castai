@@ -64,7 +64,7 @@ CAST_SECRET_APIKEY="castai-agent"
 helm upgrade -i castai-agent castai-helm/castai-agent -n castai-agent --create-namespace \
   --set apiKey="$CASTAI_API_KEY" \
   --set provider=aks \
-  --set createNamespace=false
+  --set createNamespace=false \ 
   --set metadataStore.enabled=true
 
 #### Mandatory Component: castai-cluster-controller
@@ -72,6 +72,7 @@ helm upgrade -i cluster-controller castai-helm/castai-cluster-controller -n cast
   --set autoscaling.enabled=true \
   --set "envFrom[0].secretRef.name=$CAST_SECRET_APIKEY" \
   --set "envFrom[1].configMapRef.name=$CAST_CONFIG_CLUSTERID"
+  --set aks.enabled=true 
 
 #### castai-spot-handler
 helm upgrade -i castai-spot-handler castai-helm/castai-spot-handler -n castai-agent \
