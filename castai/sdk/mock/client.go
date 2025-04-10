@@ -3655,26 +3655,6 @@ func (mr *MockClientInterfaceMockRecorder) UsersAPIGetOrganization(ctx, id inter
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UsersAPIGetOrganization", reflect.TypeOf((*MockClientInterface)(nil).UsersAPIGetOrganization), varargs...)
 }
 
-// UsersAPIListChildrenOrganizations mocks base method.
-func (m *MockClientInterface) UsersAPIListChildrenOrganizations(ctx context.Context, id string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
-	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, id}
-	for _, a := range reqEditors {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "UsersAPIListChildrenOrganizations", varargs...)
-	ret0, _ := ret[0].(*http.Response)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// UsersAPIListChildrenOrganizations indicates an expected call of UsersAPIListChildrenOrganizations.
-func (mr *MockClientInterfaceMockRecorder) UsersAPIListChildrenOrganizations(ctx, id interface{}, reqEditors ...interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, id}, reqEditors...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UsersAPIListChildrenOrganizations", reflect.TypeOf((*MockClientInterface)(nil).UsersAPIListChildrenOrganizations), varargs...)
-}
-
 // UsersAPIListInvitations mocks base method.
 func (m *MockClientInterface) UsersAPIListInvitations(ctx context.Context, params *sdk.UsersAPIListInvitationsParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
@@ -10621,41 +10601,6 @@ func (m *MockClientWithResponsesInterface) UsersAPIGetOrganizationWithResponse(c
 func (mr *MockClientWithResponsesInterfaceMockRecorder) UsersAPIGetOrganizationWithResponse(ctx, id interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UsersAPIGetOrganizationWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).UsersAPIGetOrganizationWithResponse), ctx, id)
-}
-
-// UsersAPIListChildrenOrganizations mocks base method.
-func (m *MockClientWithResponsesInterface) UsersAPIListChildrenOrganizations(ctx context.Context, id string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
-	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, id}
-	for _, a := range reqEditors {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "UsersAPIListChildrenOrganizations", varargs...)
-	ret0, _ := ret[0].(*http.Response)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// UsersAPIListChildrenOrganizations indicates an expected call of UsersAPIListChildrenOrganizations.
-func (mr *MockClientWithResponsesInterfaceMockRecorder) UsersAPIListChildrenOrganizations(ctx, id interface{}, reqEditors ...interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, id}, reqEditors...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UsersAPIListChildrenOrganizations", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).UsersAPIListChildrenOrganizations), varargs...)
-}
-
-// UsersAPIListChildrenOrganizationsWithResponse mocks base method.
-func (m *MockClientWithResponsesInterface) UsersAPIListChildrenOrganizationsWithResponse(ctx context.Context, id string) (*sdk.UsersAPIListChildrenOrganizationsResponse, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UsersAPIListChildrenOrganizationsWithResponse", ctx, id)
-	ret0, _ := ret[0].(*sdk.UsersAPIListChildrenOrganizationsResponse)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// UsersAPIListChildrenOrganizationsWithResponse indicates an expected call of UsersAPIListChildrenOrganizationsWithResponse.
-func (mr *MockClientWithResponsesInterfaceMockRecorder) UsersAPIListChildrenOrganizationsWithResponse(ctx, id interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UsersAPIListChildrenOrganizationsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).UsersAPIListChildrenOrganizationsWithResponse), ctx, id)
 }
 
 // UsersAPIListInvitations mocks base method.

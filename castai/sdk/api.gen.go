@@ -2240,12 +2240,6 @@ type CastaiUsersV1beta1GroupRef struct {
 	Name string `json:"name"`
 }
 
-// CastaiUsersV1beta1ListChildrenOrganizationsResponse defines model for castai.users.v1beta1.ListChildrenOrganizationsResponse.
-type CastaiUsersV1beta1ListChildrenOrganizationsResponse struct {
-	// Array of organizations.
-	Organizations []CastaiUsersV1beta1Organization `json:"organizations"`
-}
-
 // Defines container for the organization's pending invitations.
 type CastaiUsersV1beta1ListInvitationsResponse struct {
 	// Array of organization's pending invitations.
@@ -2420,6 +2414,9 @@ type CastaiUsersV1beta1UserOrganization struct {
 	// name of the organization.
 	Name string `json:"name"`
 
+	// ID of the parent organization. This is beta feature not available for all organizations.
+	ParentId *string `json:"parentId"`
+
 	// information whether the organization have rbacv2 enabled.
 	Rbacv2Enabled *bool `json:"rbacv2Enabled"`
 
@@ -2427,6 +2424,11 @@ type CastaiUsersV1beta1UserOrganization struct {
 	// Use https://docs.cast.ai/reference/rbacserviceapi instead.
 	// user role in the organization.
 	Role string `json:"role"`
+
+	// OrganizationType defines possible types of organization.
+	//
+	//  - ORGANIZATION_TYPE_DEFAULT: default organization type
+	Type *CastaiUsersV1beta1OrganizationType `json:"type,omitempty"`
 }
 
 // AKSClusterParams defines AKS-specific arguments.
