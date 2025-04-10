@@ -658,7 +658,7 @@ func TestAccResourceNodeTemplate_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.resource_limits.#", "1"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.resource_limits.0.cpu_limit_enabled", "true"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.resource_limits.0.cpu_limit_max_cores", "50"),
-					resource.TestCheckResourceAttr(resourceName, "constraints.0.bare_metal", "unspecified"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.bare_metal", "false"),
 				),
 			},
 		},
