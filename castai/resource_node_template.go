@@ -422,7 +422,7 @@ func resourceNodeTemplate() *schema.Resource {
 							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{Unspecified, True, False}, false)),
 							Default:          Unspecified,
 							Description: fmt.Sprintf("Bare metal constraint, will only pick bare metal nodes if set to %s."+
-								" Will only pick non-bare metal nodes if %s. Defaults to %s. Allowed values: %s.", True, False, Unspecified, strings.Join([]string{True, False, Unspecified}, ",")),
+								" Will only pick non-bare metal nodes if %s. Defaults to %s. Allowed values: %s.", True, False, Unspecified, strings.Join([]string{True, False, Unspecified}, ", ")),
 						},
 						FieldNodeTemplateCustomPriority: {
 							Type:     schema.TypeList,
