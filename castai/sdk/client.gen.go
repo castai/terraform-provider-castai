@@ -387,9 +387,6 @@ type ClientInterface interface {
 
 	UsersAPIEditOrganization(ctx context.Context, id string, body UsersAPIEditOrganizationJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// UsersAPIListChildrenOrganizations request
-	UsersAPIListChildrenOrganizations(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
-
 	// InventoryAPISyncClusterResources request
 	InventoryAPISyncClusterResources(ctx context.Context, organizationId string, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -1973,18 +1970,6 @@ func (c *Client) UsersAPIEditOrganizationWithBody(ctx context.Context, id string
 
 func (c *Client) UsersAPIEditOrganization(ctx context.Context, id string, body UsersAPIEditOrganizationJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewUsersAPIEditOrganizationRequest(c.Server, id, body)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
-func (c *Client) UsersAPIListChildrenOrganizations(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewUsersAPIListChildrenOrganizationsRequest(c.Server, id)
 	if err != nil {
 		return nil, err
 	}
@@ -6969,40 +6954,6 @@ func NewUsersAPIEditOrganizationRequestWithBody(server string, id string, conten
 	return req, nil
 }
 
-// NewUsersAPIListChildrenOrganizationsRequest generates requests for UsersAPIListChildrenOrganizations
-func NewUsersAPIListChildrenOrganizationsRequest(server string, id string) (*http.Request, error) {
-	var err error
-
-	var pathParam0 string
-
-	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
-	if err != nil {
-		return nil, err
-	}
-
-	serverURL, err := url.Parse(server)
-	if err != nil {
-		return nil, err
-	}
-
-	operationPath := fmt.Sprintf("/v1/organizations/%s/children", pathParam0)
-	if operationPath[0] == '/' {
-		operationPath = "." + operationPath
-	}
-
-	queryURL, err := serverURL.Parse(operationPath)
-	if err != nil {
-		return nil, err
-	}
-
-	req, err := http.NewRequest("GET", queryURL.String(), nil)
-	if err != nil {
-		return nil, err
-	}
-
-	return req, nil
-}
-
 // NewInventoryAPISyncClusterResourcesRequest generates requests for InventoryAPISyncClusterResources
 func NewInventoryAPISyncClusterResourcesRequest(server string, organizationId string, clusterId string) (*http.Request, error) {
 	var err error
@@ -11098,9 +11049,6 @@ type ClientWithResponsesInterface interface {
 
 	UsersAPIEditOrganizationWithResponse(ctx context.Context, id string, body UsersAPIEditOrganizationJSONRequestBody) (*UsersAPIEditOrganizationResponse, error)
 
-	// UsersAPIListChildrenOrganizations request
-	UsersAPIListChildrenOrganizationsWithResponse(ctx context.Context, id string) (*UsersAPIListChildrenOrganizationsResponse, error)
-
 	// InventoryAPISyncClusterResources request
 	InventoryAPISyncClusterResourcesWithResponse(ctx context.Context, organizationId string, clusterId string) (*InventoryAPISyncClusterResourcesResponse, error)
 
@@ -13758,36 +13706,6 @@ func (r UsersAPIEditOrganizationResponse) StatusCode() int {
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
 func (r UsersAPIEditOrganizationResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-
-type UsersAPIListChildrenOrganizationsResponse struct {
-	Body         []byte
-	HTTPResponse *http.Response
-	JSON200      *CastaiUsersV1beta1ListChildrenOrganizationsResponse
-}
-
-// Status returns HTTPResponse.Status
-func (r UsersAPIListChildrenOrganizationsResponse) Status() string {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.Status
-	}
-	return http.StatusText(0)
-}
-
-// StatusCode returns HTTPResponse.StatusCode
-func (r UsersAPIListChildrenOrganizationsResponse) StatusCode() int {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.StatusCode
-	}
-	return 0
-}
-
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r UsersAPIListChildrenOrganizationsResponse) GetBody() []byte {
 	return r.Body
 }
 
@@ -17083,15 +17001,6 @@ func (c *ClientWithResponses) UsersAPIEditOrganizationWithResponse(ctx context.C
 	return ParseUsersAPIEditOrganizationResponse(rsp)
 }
 
-// UsersAPIListChildrenOrganizationsWithResponse request returning *UsersAPIListChildrenOrganizationsResponse
-func (c *ClientWithResponses) UsersAPIListChildrenOrganizationsWithResponse(ctx context.Context, id string) (*UsersAPIListChildrenOrganizationsResponse, error) {
-	rsp, err := c.UsersAPIListChildrenOrganizations(ctx, id)
-	if err != nil {
-		return nil, err
-	}
-	return ParseUsersAPIListChildrenOrganizationsResponse(rsp)
-}
-
 // InventoryAPISyncClusterResourcesWithResponse request returning *InventoryAPISyncClusterResourcesResponse
 func (c *ClientWithResponses) InventoryAPISyncClusterResourcesWithResponse(ctx context.Context, organizationId string, clusterId string) (*InventoryAPISyncClusterResourcesResponse, error) {
 	rsp, err := c.InventoryAPISyncClusterResources(ctx, organizationId, clusterId)
@@ -20018,32 +19927,6 @@ func ParseUsersAPIEditOrganizationResponse(rsp *http.Response) (*UsersAPIEditOrg
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest CastaiUsersV1beta1Organization
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON200 = &dest
-
-	}
-
-	return response, nil
-}
-
-// ParseUsersAPIListChildrenOrganizationsResponse parses an HTTP response from a UsersAPIListChildrenOrganizationsWithResponse call
-func ParseUsersAPIListChildrenOrganizationsResponse(rsp *http.Response) (*UsersAPIListChildrenOrganizationsResponse, error) {
-	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
-	if err != nil {
-		return nil, err
-	}
-
-	response := &UsersAPIListChildrenOrganizationsResponse{
-		Body:         bodyBytes,
-		HTTPResponse: rsp,
-	}
-
-	switch {
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest CastaiUsersV1beta1ListChildrenOrganizationsResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}

@@ -3,6 +3,9 @@ SHELL := /bin/bash
 export API_TAGS ?= ExternalClusterAPI,PoliciesAPI,NodeConfigurationAPI,NodeTemplatesAPI,AuthTokenAPI,ScheduledRebalancingAPI,InventoryAPI,UsersAPI,OperationsAPI,EvictorAPI,SSOAPI,CommitmentsAPI,WorkloadOptimizationAPI,ServiceAccountsAPI,RbacServiceAPI
 export SWAGGER_LOCATION ?= https://api.cast.ai/v1/spec/openapi.json
 
+export CLUSTER_AUTOSCALER_API_TAGS ?= HibernationSchedulesAPI
+export CLUSTER_AUTOSCALER_SWAGGER_LOCATION ?= https://api.cast.ai/spec/cluster-autoscaler/openapi.yaml
+
 default: build
 
 .PHONY: init-examples

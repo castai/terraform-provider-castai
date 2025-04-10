@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"math"
 	"strconv"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -69,6 +70,10 @@ func toSection(d *schema.ResourceData, sectionName string) map[string]interface{
 	return sections[0].(map[string]interface{})
 }
 
+func toNestedSection(d *schema.ResourceData, parts ...string) map[string]interface{} {
+	return toSection(d, strings.Join(parts, "."))
+}
+
 func readOptionalValue[T any](d map[string]any, key string) *T {
 	val, ok := d[key]
 	if !ok {
@@ -76,6 +81,15 @@ func readOptionalValue[T any](d map[string]any, key string) *T {
 	}
 
 	return lo.ToPtr(val.(T))
+}
+
+func readOptionalValueOrDefault[T any](d map[string]any, key string, defaultValue T) T {
+	val, ok := d[key]
+	if !ok {
+		return defaultValue
+	}
+
+	return val.(T)
 }
 
 func readAndConvertOptionalValue[Storage any, T any](d map[string]any, key string, conversion func(v Storage) T) *T {
