@@ -669,7 +669,7 @@ func resourceNodeTemplateRead(ctx context.Context, d *schema.ResourceData, meta 
 			return diag.FromErr(fmt.Errorf("setting constraints: %w", err))
 		}
 	}
-	if err := d.Set(FieldNodeTemplateCustomLabels, nodeTemplate.CustomLabels.AdditionalProperties); err != nil {
+	if err := d.Set(FieldNodeTemplateCustomLabels, nodeTemplate.CustomLabels); err != nil {
 		return diag.FromErr(fmt.Errorf("setting custom labels: %w", err))
 	}
 	if err := d.Set(FieldNodeTemplateCustomTaints, flattenCustomTaints(nodeTemplate.CustomTaints)); err != nil {
@@ -959,7 +959,7 @@ func updateNodeTemplate(ctx context.Context, d *schema.ResourceData, meta any, s
 				customLabels[k] = v.(string)
 			}
 
-			req.CustomLabels = &sdk.NodetemplatesV1UpdateNodeTemplate_CustomLabels{AdditionalProperties: customLabels}
+			req.CustomLabels = &customLabels
 		}
 	}
 
@@ -1046,7 +1046,7 @@ func resourceNodeTemplateCreate(ctx context.Context, d *schema.ResourceData, met
 			customLabels[k] = v.(string)
 		}
 
-		req.CustomLabels = &sdk.NodetemplatesV1NewNodeTemplate_CustomLabels{AdditionalProperties: customLabels}
+		req.CustomLabels = &customLabels
 	}
 
 	if v, ok := d.Get(FieldNodeTemplateCustomTaints).([]any); ok && len(v) > 0 {

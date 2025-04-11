@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 	"testing"
 
 	"github.com/golang/mock/gomock"
@@ -227,6 +228,7 @@ func TestHibernationSchedule_CreateContext(t *testing.T) {
 func TestAccResourceHibernationSchedule_basic(t *testing.T) {
 	resourceName := fmt.Sprintf("%v-hibernation-schedule-%v", ResourcePrefix, acctest.RandString(8))
 	renamedResourceName := fmt.Sprintf("%s %s", resourceName, "renamed")
+	organizationID := os.Getenv("ACCEPTANCE_TEST_ORGANIZATION_ID")
 
 	resource.ParallelTest(t, resource.TestCase{
 		PreCheck: func() { testAccPreCheck(t) },
@@ -234,7 +236,8 @@ func TestAccResourceHibernationSchedule_basic(t *testing.T) {
 		ProviderFactories: providerFactories,
 		Steps: []resource.TestStep{
 			{
-				Config: makeInitialHibernationScheduleConfig(resourceName),
+				// Test creation
+				Config: makeInitialHibernationScheduleConfig(resourceName, organizationID),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("castai_hibernation_schedule.test_hibernation_schedule", "name", resourceName),
 					resource.TestCheckResourceAttr("castai_hibernation_schedule.test_hibernation_schedule", "enabled", "false"),
@@ -246,10 +249,10 @@ func TestAccResourceHibernationSchedule_basic(t *testing.T) {
 				),
 			},
 			{
-				// test edits
-				Config: makeUpdateHibernationScheduleConfig(renamedResourceName),
+				// Test update
+				Config: makeUpdateHibernationScheduleConfig(renamedResourceName, organizationID),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr("castai_rebalancing_schedule.test", "name", renamedResourceName),
+					resource.TestCheckResourceAttr("castai_hibernation_schedule.test_hibernation_schedule", "name", renamedResourceName),
 					resource.TestCheckResourceAttr("castai_hibernation_schedule.test_hibernation_schedule", "enabled", "true"),
 					resource.TestCheckResourceAttr("castai_hibernation_schedule.test_hibernation_schedule", "pause_config.0.enabled", "false"),
 					resource.TestCheckResourceAttr("castai_hibernation_schedule.test_hibernation_schedule", "pause_config.0.schedule.0.cron_expression", "1 0 * * *"),
@@ -258,30 +261,23 @@ func TestAccResourceHibernationSchedule_basic(t *testing.T) {
 					resource.TestCheckResourceAttr("castai_hibernation_schedule.test_hibernation_schedule", "resume_config.0.job_config.0.node_config.0.instance_type", "e2-standard-8"),
 				),
 			},
-			// We keep the ImportState test cases at the end so they will test any newly added fields.
-			// This way it will also verify that after importing the state the output of `tf plan` is empty.
 			{
-				// Import state by ID
+				// Test import
 				ImportState:       true,
 				ResourceName:      "castai_hibernation_schedule.test_hibernation_schedule",
-				ImportStateVerify: true,
-			},
-			{
-				// Import state by name
-				ImportState:       true,
-				ResourceName:      "castai_hibernation_schedule.test_hibernation_schedule",
-				ImportStateId:     renamedResourceName,
+				ImportStateId:     fmt.Sprintf("%s/%s", organizationID, renamedResourceName),
 				ImportStateVerify: true,
 			},
 		},
 	})
 }
 
-func makeInitialHibernationScheduleConfig(rName string) string {
+func makeInitialHibernationScheduleConfig(rName string, organizationID string) string {
 	template := `
 resource "castai_hibernation_schedule" "test_hibernation_schedule" {
   name    = %q
   enabled = false
+  organization_id = %q
 
   pause_config {
     enabled = true
@@ -308,14 +304,15 @@ resource "castai_hibernation_schedule" "test_hibernation_schedule" {
   cluster_assignments {}
 }
 `
-	return fmt.Sprintf(template, rName)
+	return fmt.Sprintf(template, rName, organizationID)
 }
 
-func makeUpdateHibernationScheduleConfig(rName string) string {
+func makeUpdateHibernationScheduleConfig(rName string, organizationID string) string {
 	template := `
 resource "castai_hibernation_schedule" "test_hibernation_schedule" {
   name    = %q
   enabled = true
+  organization_id = %q
 
   pause_config {
     enabled = false
@@ -342,5 +339,5 @@ resource "castai_hibernation_schedule" "test_hibernation_schedule" {
   cluster_assignments {}
 }
 `
-	return fmt.Sprintf(template, rName)
+	return fmt.Sprintf(template, rName, organizationID)
 }

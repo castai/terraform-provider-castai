@@ -50,6 +50,10 @@ func testAccPreCheck(t *testing.T) {
 			t.Fatal("CASTAI_API_TOKEN must be set for acceptance tests")
 		}
 
+		if v := os.Getenv("ACCEPTANCE_TEST_ORGANIZATION_ID"); v == "" {
+			t.Fatal("ACCEPTANCE_TEST_ORGANIZATION_ID must be set for acceptance tests")
+		}
+
 		if err := testAccProvider.Configure(context.Background(), terraform.NewResourceConfigRaw(nil)); err != nil {
 			t.Fatal(err)
 		}

@@ -110,7 +110,7 @@ func resourceHibernationSchedule() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			FieldServiceAccountOrganizationID: {
+			FieldHibernationScheduleOrganizationID: {
 				Type:             schema.TypeString,
 				Optional:         true,
 				Description:      "ID of the organization. If not provided, then will attempt to infer it using CAST AI API client.",
@@ -378,22 +378,30 @@ func resourceHibernationSchedule() *schema.Resource {
 }
 
 func hibernationScheduleStateImporter(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
-	organizationID, err := getHibernationScheduleOrganizationID(ctx, d, meta)
-	if err != nil {
-		return nil, err
+	organizationID, id := parseImportID(d)
+	if organizationID == "" {
+		stateOrganizationID, err := getHibernationScheduleOrganizationID(ctx, d, meta)
+		if err != nil {
+			return nil, err
+		}
+
+		organizationID = stateOrganizationID
 	}
 
 	// if importing by UUID, nothing to do; if importing by name, fetch schedule ID and set that as resource ID
-	if _, err := uuid.Parse(d.Id()); err != nil {
+	if _, err := uuid.Parse(id); err != nil {
 		tflog.Info(ctx, "provided schedule ID is not a UUID, will import by name")
-		schedule, err := getHibernationScheduleByName(ctx, meta, organizationID, d.Id())
+		schedule, err := getHibernationScheduleByName(ctx, meta, organizationID, id)
 		if err != nil {
 			return nil, err
 		} else if schedule == nil {
-			return nil, fmt.Errorf("could not find schedule by name: %s", d.Id())
+			return nil, fmt.Errorf("could not find schedule by name: %s", id)
 		}
 
 		d.SetId(lo.FromPtr(schedule.Id))
+		if err = d.Set(FieldHibernationScheduleOrganizationID, lo.FromPtr(schedule.OrganizationId)); err != nil {
+			return nil, err
+		}
 	}
 
 	return []*schema.ResourceData{d}, nil
@@ -422,7 +430,7 @@ func resourceHibernationScheduleUpdate(ctx context.Context, d *schema.ResourceDa
 
 	resp, err := client.HibernationSchedulesAPIUpdateHibernationScheduleWithResponse(ctx, organizationID, d.Id(), req)
 	if checkErr := sdk.CheckOKResponse(resp, err); checkErr != nil {
-		return diag.FromErr(checkErr)
+		return diag.FromErr(fmt.Errorf("could not update hibernation schedule in organization %s: %v", organizationID, checkErr))
 	}
 
 	return readHibernationScheduleIntoState(ctx, d, meta, organizationID, d.Id())
@@ -448,17 +456,17 @@ func resourceHibernationScheduleCreate(ctx context.Context, d *schema.ResourceDa
 
 	organizationID, err := getHibernationScheduleOrganizationID(ctx, d, meta)
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.FromErr(fmt.Errorf("could not determine organization id: %v", err))
 	}
 
 	schedule, err := stateToHibernationSchedule(d)
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.FromErr(fmt.Errorf("could not map state to hibernation schedule: %v", err))
 	}
 
 	resp, err := client.HibernationSchedulesAPICreateHibernationScheduleWithResponse(ctx, organizationID, *schedule)
 	if checkErr := sdk.CheckOKResponse(resp, err); checkErr != nil {
-		return diag.FromErr(checkErr)
+		return diag.FromErr(fmt.Errorf("could not create hibernation schedule in organization %s: %v", organizationID, checkErr))
 	}
 
 	d.SetId(*resp.JSON200.Id)
@@ -478,7 +486,7 @@ func resourceHibernationScheduleRead(ctx context.Context, d *schema.ResourceData
 func readHibernationScheduleIntoState(ctx context.Context, d *schema.ResourceData, meta any, organizationID, id string) diag.Diagnostics {
 	schedule, err := getHibernationScheduleById(ctx, meta, organizationID, id)
 	if err != nil {
-		return diag.FromErr(err)
+		return diag.FromErr(fmt.Errorf("could not retrieve hibernation schedule by id in organization %s: %v", organizationID, err))
 	}
 	if !d.IsNewResource() && schedule == nil {
 		tflog.Warn(ctx, "Hibernation schedule not found, removing from state", map[string]any{"id": d.Id()})
@@ -498,7 +506,7 @@ func hibernationScheduleToState(schedule *cluster_autoscaler.HibernationSchedule
 	if err := d.Set(FieldHibernationScheduleName, schedule.Name); err != nil {
 		return err
 	}
-	if err := d.Set(FieldHibernationScheduleEnabled, schedule.Enabled); err != nil {
+	if err := d.Set(FieldHibernationScheduleOrganizationID, schedule.OrganizationId); err != nil {
 		return err
 	}
 	if err := d.Set(FieldHibernationScheduleEnabled, schedule.Enabled); err != nil {
@@ -840,7 +848,7 @@ func sectionToNodeConfig(section map[string]interface{}) cluster_autoscaler.Node
 		ConfigName:       lo.Ternary(configName != "", &configName, nil),
 		SubnetId:         lo.Ternary(subnetId != "", &subnetId, nil),
 		Zone:             lo.Ternary(zone != "", &zone, nil),
-		KubernetesLabels: lo.Ternary(kubernetesLabels != nil && len(kubernetesLabels) != 0, &kubernetesLabels, nil),
+		KubernetesLabels: lo.Ternary(len(kubernetesLabels) != 0, &kubernetesLabels, nil),
 		GpuConfig:        nodeConfigSectionToGPUConfig(section),
 		NodeAffinity:     nodeConfigSectionToNodeAffinity(section),
 		KubernetesTaints: nodeConfigSectionToKubernetesTaints(section),
@@ -950,4 +958,16 @@ func getHibernationScheduleByName(ctx context.Context, meta interface{}, organiz
 	}
 
 	return nil, nil
+}
+
+func parseImportID(d *schema.ResourceData) (string, string) {
+	id := d.Id()
+
+	if strings.Contains(id, "/") {
+		if parts := strings.Split(id, "/"); len(parts) > 1 {
+			return parts[0], parts[1]
+		}
+	}
+
+	return "", id
 }

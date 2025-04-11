@@ -125,7 +125,7 @@ func TestSSOConnection_CreateADDConnector(t *testing.T) {
 
 		mockClient.EXPECT().
 			SSOAPICreateSSOConnection(gomock.Any(), gomock.Any()).
-			DoAndReturn(func(_ context.Context, body sdk.SSOAPICreateSSOConnectionJSONBody) (*http.Response, error) {
+			DoAndReturn(func(_ context.Context, body sdk.SSOAPICreateSSOConnectionJSONRequestBody) (*http.Response, error) {
 				got, err := json.Marshal(body)
 				r.NoError(err)
 
@@ -203,7 +203,7 @@ func TestSSOConnection_CreateADDConnector(t *testing.T) {
 
 		mockClient.EXPECT().
 			SSOAPICreateSSOConnection(gomock.Any(), gomock.Any()).
-			DoAndReturn(func(_ context.Context, body sdk.SSOAPICreateSSOConnectionJSONBody) (*http.Response, error) {
+			DoAndReturn(func(_ context.Context, body sdk.SSOAPICreateSSOConnectionJSONRequestBody) (*http.Response, error) {
 				got, err := json.Marshal(body)
 				r.NoError(err)
 
@@ -285,7 +285,7 @@ func TestSSOConnection_CreateOktaConnector(t *testing.T) {
 
 	mockClient.EXPECT().
 		SSOAPICreateSSOConnection(gomock.Any(), gomock.Any()).
-		DoAndReturn(func(_ context.Context, body sdk.SSOAPICreateSSOConnectionJSONBody) (*http.Response, error) {
+		DoAndReturn(func(_ context.Context, body sdk.SSOAPICreateSSOConnectionJSONRequestBody) (*http.Response, error) {
 			got, err := json.Marshal(body)
 			r.NoError(err)
 
@@ -384,7 +384,7 @@ func TestSSOConnection_UpdateADDConnector(t *testing.T) {
 		}))
 
 		mockClient.EXPECT().SSOAPIUpdateSSOConnection(gomock.Any(), gomock.Any(), gomock.Any()).
-			DoAndReturn(func(_ context.Context, _ string, body sdk.SSOAPIUpdateSSOConnectionJSONBody) (*http.Response, error) {
+			DoAndReturn(func(_ context.Context, _ string, body sdk.SSOAPIUpdateSSOConnectionJSONRequestBody) (*http.Response, error) {
 				got, err := json.Marshal(body)
 				r.NoError(err)
 
@@ -472,7 +472,7 @@ func TestSSOConnection_UpdateADDConnector(t *testing.T) {
 		r.NoError(data.Set(FieldSSOConnectionAdditionalEmailDomains, []interface{}{"updated_domain_one", "updated_domain_two"}))
 
 		mockClient.EXPECT().SSOAPIUpdateSSOConnection(gomock.Any(), gomock.Any(), gomock.Any()).
-			DoAndReturn(func(_ context.Context, _ string, body sdk.SSOAPIUpdateSSOConnectionJSONBody) (*http.Response, error) {
+			DoAndReturn(func(_ context.Context, _ string, body sdk.SSOAPIUpdateSSOConnectionJSONRequestBody) (*http.Response, error) {
 				got, err := json.Marshal(body)
 				r.NoError(err)
 
@@ -564,7 +564,7 @@ func TestSSOConnection_UpdateOktaConnector(t *testing.T) {
 	}))
 
 	mockClient.EXPECT().SSOAPIUpdateSSOConnection(gomock.Any(), gomock.Any(), gomock.Any()).
-		DoAndReturn(func(_ context.Context, _ string, body sdk.SSOAPIUpdateSSOConnectionJSONBody) (*http.Response, error) {
+		DoAndReturn(func(_ context.Context, _ string, body sdk.SSOAPIUpdateSSOConnectionJSONRequestBody) (*http.Response, error) {
 			got, err := json.Marshal(body)
 			r.NoError(err)
 

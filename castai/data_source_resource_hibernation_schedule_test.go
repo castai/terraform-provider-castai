@@ -108,6 +108,7 @@ cluster_assignments.0.assignment.# = 1
 cluster_assignments.0.assignment.0.cluster_id = 38a49ce8-e900-4a10-be89-48fb2efb1025
 enabled = false
 name = schedule
+organization_id = 0d0111f9-e5a4-4acc-85b2-4c3a8318dfc2
 pause_config.# = 1
 pause_config.0.enabled = true
 pause_config.0.schedule.# = 1

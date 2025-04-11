@@ -5,13 +5,15 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/castai/terraform-provider-castai/castai/sdk"
+	"log"
+	"time"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/samber/lo"
-	"log"
-	"time"
+
+	"github.com/castai/terraform-provider-castai/castai/sdk"
 )
 
 const (
@@ -124,18 +126,18 @@ func resourceEvictionConfig() *schema.Resource {
 							},
 						},
 						FieldEvictionOptionDisabled: {
-							Type:     schema.TypeBool,
-							Optional: true,
+							Type:        schema.TypeBool,
+							Optional:    true,
 							Description: "Mark pods as removal disabled",
 						},
 						FieldEvictionOptionAggressive: {
-							Type:     schema.TypeBool,
-							Optional: true,
+							Type:        schema.TypeBool,
+							Optional:    true,
 							Description: "Apply Aggressive mode to Evictor",
 						},
 						FieldEvictionOptionDisposable: {
-							Type:     schema.TypeBool,
-							Optional: true,
+							Type:        schema.TypeBool,
+							Optional:    true,
 							Description: "Mark node as disposable",
 						},
 					},
@@ -424,7 +426,7 @@ func toPodSelector(in interface{}) (*sdk.CastaiEvictorV1PodSelector, error) {
 				return nil, err
 			}
 
-			if mls == nil || len(mls.AdditionalProperties) == 0 {
+			if mls == nil || len(*mls) == 0 {
 				continue
 			}
 
@@ -474,7 +476,7 @@ func toNodeSelector(in interface{}) (*sdk.CastaiEvictorV1NodeSelector, error) {
 	return &out, nil
 }
 
-func toMatchLabels(in interface{}) (*sdk.CastaiEvictorV1LabelSelector_MatchLabels, error) {
+func toMatchLabels(in interface{}) (*map[string]string, error) {
 	mls, ok := in.(map[string]interface{})
 	if !ok {
 		return nil, fmt.Errorf("mapping match_labels expecting map[string]interface, got %T %+v", in, in)
@@ -482,13 +484,13 @@ func toMatchLabels(in interface{}) (*sdk.CastaiEvictorV1LabelSelector_MatchLabel
 	if len(mls) == 0 {
 		return nil, nil
 	}
-	out := sdk.CastaiEvictorV1LabelSelector_MatchLabels{AdditionalProperties: map[string]string{}}
+	out := map[string]string{}
 	for k, v := range mls {
 		value, ok := v.(string)
 		if !ok {
 			return nil, fmt.Errorf("mapping match_labels expecting string, got %T %+v", v, v)
 		}
-		out.AdditionalProperties[k] = value
+		out[k] = value
 	}
 
 	return &out, nil
@@ -507,7 +509,7 @@ func flattenPodSelector(ps *sdk.CastaiEvictorV1PodSelector) []map[string]any {
 	}
 	if ps.LabelSelector != nil {
 		if ps.LabelSelector.MatchLabels != nil {
-			out[FieldMatchLabels] = ps.LabelSelector.MatchLabels.AdditionalProperties
+			out[FieldMatchLabels] = *ps.LabelSelector.MatchLabels
 		}
 		if ps.LabelSelector.MatchExpressions != nil {
 			out[FieldMatchExpressions] = flattenMatchExpressions(*ps.LabelSelector.MatchExpressions)
@@ -522,7 +524,7 @@ func flattenNodeSelector(ns *sdk.CastaiEvictorV1NodeSelector) []map[string]any {
 	}
 	out := map[string]any{}
 	if ns.LabelSelector.MatchLabels != nil {
-		out[FieldMatchLabels] = ns.LabelSelector.MatchLabels.AdditionalProperties
+		out[FieldMatchLabels] = *ns.LabelSelector.MatchLabels
 	}
 	if ns.LabelSelector.MatchExpressions != nil {
 		out[FieldMatchExpressions] = flattenMatchExpressions(*ns.LabelSelector.MatchExpressions)

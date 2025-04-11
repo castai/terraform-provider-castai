@@ -59,5 +59,6 @@ jobs:
           SSO_CLIENT_ID: ${{ secrets.SSO_CLIENT_ID }}
           SSO_CLIENT_SECRET: ${{ secrets.SSO_CLIENT_SECRET }}
           SSO_DOMAIN: ${{ secrets.SSO_DOMAIN }}
+          ACCEPTANCE_TEST_ORGANIZATION_ID: ${{ vars.TF_ACCEPTANCE_TEST_ORGANIZATION_ID }}
         run: make testacc
 
