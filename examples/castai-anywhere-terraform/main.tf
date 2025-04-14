@@ -86,6 +86,10 @@ resource "helm_release" "castai_cluster_controller" {
     name  = "enableTopologySpreadConstraints"
     value = "true"
   }
+  set {
+    name  = "autoscaling.enabled"
+    value = "false"
+  }
 }
 
 # Install CAST AI Evictor
