@@ -22,7 +22,6 @@ variable "cluster_id" {
 variable "organization_id" {
   description = "Your CAST AI Organization ID"
   type        = string
-  default     = "" # add your Org ID ..this is required for pod mutator deployment
 }
 
 variable "managed_by_castai" {
