@@ -88,6 +88,7 @@ func resourceRoleBindings() *schema.Resource {
 				Optional:    true,
 				MaxItems:    1,
 				Description: "Scope of the role binding.",
+				Deprecated:  "this field is deprecated and will be removed in future versions, use `scopes` field instead",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						FieldRoleBindingsScopeKind: {
@@ -391,8 +392,8 @@ func assignRoleBindingData(roleBinding *sdk.CastaiRbacV1beta1RoleBinding, data *
 			}
 		}
 	}
-	err := data.Set(FieldRoleBindingsScopes, scopes)
-	if err != nil {
+
+	if err := data.Set(FieldRoleBindingsScopes, scopes); err != nil {
 		return fmt.Errorf("parsing scopes: %w", err)
 	}
 

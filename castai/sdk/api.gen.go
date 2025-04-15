@@ -2297,7 +2297,11 @@ type CastaiUsersV1beta1GroupRef struct {
 	Name string `json:"name"`
 }
 
+<<<<<<< HEAD
 // CastaiUsersV1beta1ListInvitationsResponse Defines container for the organization's pending invitations.
+=======
+// Defines container for the organization's pending invitations.
+>>>>>>> b4c8974 (Rebase on master)
 type CastaiUsersV1beta1ListInvitationsResponse struct {
 	// Invitations Array of organization's pending invitations.
 	Invitations []CastaiUsersV1beta1PendingInvitation `json:"invitations"`
@@ -2475,10 +2479,17 @@ type CastaiUsersV1beta1UserOrganization struct {
 	// Name name of the organization.
 	Name string `json:"name"`
 
+<<<<<<< HEAD
 	// ParentId ID of the parent organization. This is beta feature not available for all organizations.
 	ParentId *string `json:"parentId"`
 
 	// Rbacv2Enabled information whether the organization have rbacv2 enabled.
+=======
+	// ID of the parent organization. This is beta feature not available for all organizations.
+	ParentId *string `json:"parentId"`
+
+	// information whether the organization have rbacv2 enabled.
+>>>>>>> b4c8974 (Rebase on master)
 	Rbacv2Enabled *bool `json:"rbacv2Enabled"`
 
 	// Role Deprecated: for RBACv2 user can be bound to multiple roles.
@@ -2487,7 +2498,11 @@ type CastaiUsersV1beta1UserOrganization struct {
 	// Deprecated:
 	Role string `json:"role"`
 
+<<<<<<< HEAD
 	// Type OrganizationType defines possible types of organization.
+=======
+	// OrganizationType defines possible types of organization.
+>>>>>>> b4c8974 (Rebase on master)
 	//
 	//  - ORGANIZATION_TYPE_DEFAULT: default organization type
 	Type *CastaiUsersV1beta1OrganizationType `json:"type,omitempty"`
