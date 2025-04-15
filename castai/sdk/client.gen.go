@@ -8993,6 +8993,7 @@ func NewCommitmentsAPIGetCommitmentsRequest(server string, params *CommitmentsAP
 
 		if params.IncludeUsagePerClusters != nil {
 
+<<<<<<< HEAD
 			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "includeUsagePerClusters", runtime.ParamLocationQuery, *params.IncludeUsagePerClusters); err != nil {
 				return nil, err
 			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
@@ -9025,6 +9026,41 @@ func NewCommitmentsAPIGetCommitmentsRequest(server string, params *CommitmentsAP
 
 		queryURL.RawQuery = queryValues.Encode()
 	}
+=======
+	if params.IncludeUsagePerClusters != nil {
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "includeUsagePerClusters", runtime.ParamLocationQuery, *params.IncludeUsagePerClusters); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.IncludeUsagePerInstanceTypes != nil {
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "includeUsagePerInstanceTypes", runtime.ParamLocationQuery, *params.IncludeUsagePerInstanceTypes); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	queryURL.RawQuery = queryValues.Encode()
+>>>>>>> e7a71fe (Fix sdk generate)
 
 	req, err := http.NewRequest("GET", queryURL.String(), nil)
 	if err != nil {
@@ -9304,6 +9340,7 @@ func NewCommitmentsAPIGetCommitmentRequest(server string, commitmentId string, p
 
 		if params.IncludeUsagePerClusters != nil {
 
+<<<<<<< HEAD
 			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "includeUsagePerClusters", runtime.ParamLocationQuery, *params.IncludeUsagePerClusters); err != nil {
 				return nil, err
 			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
@@ -9336,6 +9373,41 @@ func NewCommitmentsAPIGetCommitmentRequest(server string, commitmentId string, p
 
 		queryURL.RawQuery = queryValues.Encode()
 	}
+=======
+	if params.IncludeUsagePerClusters != nil {
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "includeUsagePerClusters", runtime.ParamLocationQuery, *params.IncludeUsagePerClusters); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	if params.IncludeUsagePerInstanceTypes != nil {
+
+		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "includeUsagePerInstanceTypes", runtime.ParamLocationQuery, *params.IncludeUsagePerInstanceTypes); err != nil {
+			return nil, err
+		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+			return nil, err
+		} else {
+			for k, v := range parsed {
+				for _, v2 := range v {
+					queryValues.Add(k, v2)
+				}
+			}
+		}
+
+	}
+
+	queryURL.RawQuery = queryValues.Encode()
+>>>>>>> e7a71fe (Fix sdk generate)
 
 	req, err := http.NewRequest("GET", queryURL.String(), nil)
 	if err != nil {
