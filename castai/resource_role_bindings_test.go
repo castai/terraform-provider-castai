@@ -13,7 +13,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"github.com/samber/lo"
 	"github.com/stretchr/testify/require"
 
 	"github.com/castai/terraform-provider-castai/castai/sdk"
@@ -392,14 +391,35 @@ func TestRoleBindingsUpdateContext(t *testing.T) {
 				r.Equal(organizationID, reqOrgID)
 				r.Equal(roleBindingID, reqRoleBindingID)
 
-				body := &bytes.Buffer{}
-				err := json.NewEncoder(body).Encode(&sdk.CastaiRbacV1beta1RoleBinding{})
-				r.NoError(err)
-				return &http.Response{StatusCode: http.StatusInternalServerError, Body: io.NopCloser(body), Header: map[string][]string{"Content-Type": {"json"}}}, nil
+				body := io.NopCloser(bytes.NewReader([]byte(`{
+					"message": "Internal server error",
+					"error": "Something went wrong on the server",
+					"code": 500
+				}`)))
+				return &http.Response{StatusCode: http.StatusInternalServerError, Body: body, Header: map[string][]string{"Content-Type": {"json"}}}, nil
 			})
 
 		stateValue := cty.ObjectVal(map[string]cty.Value{
 			"organization_id": cty.StringVal(organizationID),
+			"name":            cty.StringVal("test group"),
+			"description":     cty.StringVal("test role binding description"),
+			"role_id":         cty.StringVal(uuid.NewString()),
+			"scopes": cty.ListVal([]cty.Value{
+				cty.ObjectVal(map[string]cty.Value{
+					"kind":        cty.StringVal("organization"),
+					"resource_id": cty.StringVal(organizationID),
+				}),
+			}),
+			"subjects": cty.ListVal([]cty.Value{
+				cty.ObjectVal(map[string]cty.Value{
+					"subject": cty.ListVal([]cty.Value{
+						cty.ObjectVal(map[string]cty.Value{
+							"kind":    cty.StringVal("user"),
+							"user_id": cty.StringVal(uuid.NewString()),
+						}),
+					}),
+				}),
+			}),
 		})
 		state := terraform.NewInstanceStateShimmedFromValue(stateValue, 0)
 		state.ID = roleBindingID
@@ -429,32 +449,36 @@ func TestRoleBindingsUpdateContext(t *testing.T) {
 
 		organizationID := uuid.NewString()
 		roleBindingID := uuid.NewString()
-
+		roleID := uuid.NewString()
 		firstUserID := uuid.NewString()
-		secondUserID := uuid.NewString()
-
-		body := io.NopCloser(bytes.NewReader([]byte(`{
-				"id": "` + roleBindingID + `",
-				"organizationId": "` + organizationID + `",
-				"name": "test group",
-				"description": "test role binding description changed",
-				"definition": {
-					"members": [
-						{
-							"id": "` + firstUserID + `",
-							"email": "test-user-1@test.com"
-						},
-						{
-							"id": "` + secondUserID + `",
-							"email": "test-user-2@test.com"
-						}
-					]
-				}
-			}`)))
 
 		mockClient.EXPECT().
 			RbacServiceAPIGetRoleBinding(gomock.Any(), organizationID, roleBindingID).
-			Return(&http.Response{StatusCode: http.StatusOK, Body: body, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
+			Return(&http.Response{
+				StatusCode: http.StatusOK,
+				Body: io.NopCloser(bytes.NewReader([]byte(`{
+					"id": "` + roleBindingID + `",
+					"organizationId": "` + organizationID + `",
+					"name": "test group",
+					"description": "test role binding description",
+					"definition": {
+						"roleId": "` + roleID + `",
+						"scope": {
+							"organization": {
+								"id": "` + organizationID + `"
+							}
+						},
+						"subjects": [
+							{
+								"user": {
+									"id": "` + firstUserID + `"
+								}
+							}
+						]
+					}
+				}`))),
+				Header: map[string][]string{"Content-Type": {"application/json"}},
+			}, nil)
 
 		mockClient.EXPECT().
 			RbacServiceAPIUpdateRoleBinding(gomock.Any(), organizationID, roleBindingID, gomock.Any()).
@@ -462,14 +486,48 @@ func TestRoleBindingsUpdateContext(t *testing.T) {
 				r.Equal(organizationID, reqOrgID)
 				r.Equal(roleBindingID, reqRoleBindingID)
 
-				body := &bytes.Buffer{}
-				err := json.NewEncoder(body).Encode(&sdk.CastaiRbacV1beta1RoleBinding{})
-				r.NoError(err)
-				return &http.Response{StatusCode: http.StatusOK, Body: io.NopCloser(body), Header: map[string][]string{"Content-Type": {"json"}}}, nil
+				return &http.Response{
+					StatusCode: http.StatusOK,
+					Body: io.NopCloser(bytes.NewReader([]byte(`{
+						"id": "` + roleBindingID + `",
+						"organizationId": "` + organizationID + `",
+						"name": "` + req.Name + `",
+						"description": "` + *req.Description + `",
+						"definition": {
+							"roleId": "` + req.Definition.RoleId + `",
+							"scope": {
+								"organization": {
+									"id": "` + organizationID + `"
+								}
+							}
+						}
+					}`))),
+					Header: map[string][]string{"Content-Type": {"application/json"}},
+				}, nil
 			})
 
+		// Create a resource state with all required fields
 		stateValue := cty.ObjectVal(map[string]cty.Value{
 			"organization_id": cty.StringVal(organizationID),
+			"name":            cty.StringVal("test group"),
+			"description":     cty.StringVal("test role binding description"),
+			"role_id":         cty.StringVal(roleID),
+			"scope": cty.ListVal([]cty.Value{
+				cty.ObjectVal(map[string]cty.Value{
+					"kind":        cty.StringVal("organization"),
+					"resource_id": cty.StringVal(organizationID),
+				}),
+			}),
+			"subjects": cty.ListVal([]cty.Value{
+				cty.ObjectVal(map[string]cty.Value{
+					"subject": cty.ListVal([]cty.Value{
+						cty.ObjectVal(map[string]cty.Value{
+							"kind":    cty.StringVal("user"),
+							"user_id": cty.StringVal(firstUserID),
+						}),
+					}),
+				}),
+			}),
 		})
 		state := terraform.NewInstanceStateShimmedFromValue(stateValue, 0)
 		state.ID = roleBindingID
@@ -500,20 +558,42 @@ func TestRoleBindingsCreateContext(t *testing.T) {
 		}
 
 		organizationID := uuid.NewString()
+		roleID := uuid.NewString()
+		userID := uuid.NewString()
 
 		mockClient.EXPECT().
 			RbacServiceAPICreateRoleBindings(gomock.Any(), organizationID, gomock.Any()).
 			DoAndReturn(func(ctx context.Context, reqOrgID string, req sdk.RbacServiceAPICreateRoleBindingsJSONRequestBody) (*http.Response, error) {
 				r.Equal(organizationID, reqOrgID)
 
-				body := &bytes.Buffer{}
-				err := json.NewEncoder(body).Encode(&sdk.CastaiRbacV1beta1RoleBinding{})
-				r.NoError(err)
-				return &http.Response{StatusCode: http.StatusInternalServerError, Body: io.NopCloser(body), Header: map[string][]string{"Content-Type": {"json"}}}, nil
+				return &http.Response{
+					StatusCode: http.StatusInternalServerError,
+					Body:       io.NopCloser(bytes.NewReader([]byte(`{"message":"Internal server error"}`))),
+					Header:     map[string][]string{"Content-Type": {"application/json"}},
+				}, nil
 			})
 
 		stateValue := cty.ObjectVal(map[string]cty.Value{
 			"organization_id": cty.StringVal(organizationID),
+			"name":            cty.StringVal("test role binding"),
+			"description":     cty.StringVal("test role binding description"),
+			"role_id":         cty.StringVal(roleID),
+			"scope": cty.ListVal([]cty.Value{
+				cty.ObjectVal(map[string]cty.Value{
+					"kind":        cty.StringVal("organization"),
+					"resource_id": cty.StringVal(organizationID),
+				}),
+			}),
+			"subjects": cty.ListVal([]cty.Value{
+				cty.ObjectVal(map[string]cty.Value{
+					"subject": cty.ListVal([]cty.Value{
+						cty.ObjectVal(map[string]cty.Value{
+							"kind":    cty.StringVal("user"),
+							"user_id": cty.StringVal(userID),
+						}),
+					}),
+				}),
+			}),
 		})
 		state := terraform.NewInstanceStateShimmedFromValue(stateValue, 0)
 
@@ -542,53 +622,77 @@ func TestRoleBindingsCreateContext(t *testing.T) {
 
 		organizationID := uuid.NewString()
 		roleBindingID := uuid.NewString()
-
+		roleID := uuid.NewString()
 		firstUserID := uuid.NewString()
-		secondUserID := uuid.NewString()
-
-		body := io.NopCloser(bytes.NewReader([]byte(`{
-					"id": "` + roleBindingID + `",
-					"organizationId": "` + organizationID + `",
-					"name": "test role binding",
-					"description": "test role binding description changed",
-					"definition": {
-						"members": [
-							{
-								"id": "` + firstUserID + `",
-								"email": "test-user-1@test.com"
-							},
-							{
-								"id": "` + secondUserID + `",
-								"email": "test-user-2@test.com"
-							}
-						]
-					}
-				}`)))
-
-		mockClient.EXPECT().
-			RbacServiceAPIGetRoleBinding(gomock.Any(), organizationID, roleBindingID).
-			Return(&http.Response{StatusCode: http.StatusOK, Body: body, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
 
 		mockClient.EXPECT().
 			RbacServiceAPICreateRoleBindings(gomock.Any(), organizationID, gomock.Any()).
 			DoAndReturn(func(ctx context.Context, reqOrgID string, req sdk.RbacServiceAPICreateRoleBindingsJSONRequestBody) (*http.Response, error) {
 				r.Equal(organizationID, reqOrgID)
 
-				body := bytes.NewBuffer([]byte(""))
-				err := json.NewEncoder(body).Encode(&[]sdk.CastaiRbacV1beta1RoleBinding{
-					{
-						Id: lo.ToPtr(roleBindingID),
-					},
-				})
-				r.NoError(err)
-				return &http.Response{StatusCode: http.StatusOK, Body: io.NopCloser(body), Header: map[string][]string{"Content-Type": {"json"}}}, nil
+				return &http.Response{
+					StatusCode: http.StatusOK,
+					Body: io.NopCloser(bytes.NewReader([]byte(`[{
+                        "id": "` + roleBindingID + `",
+                        "organizationId": "` + organizationID + `",
+                        "name": "test role binding",
+                        "description": "test role binding description"
+                    }]`))),
+					Header: map[string][]string{"Content-Type": {"application/json"}},
+				}, nil
 			})
+
+		mockClient.EXPECT().
+			RbacServiceAPIGetRoleBinding(gomock.Any(), organizationID, roleBindingID).
+			Return(&http.Response{
+				StatusCode: http.StatusOK,
+				Body: io.NopCloser(bytes.NewReader([]byte(`{
+                    "id": "` + roleBindingID + `",
+                    "organizationId": "` + organizationID + `",
+                    "name": "test role binding",
+                    "description": "test role binding description",
+                    "definition": {
+                        "roleId": "` + roleID + `",
+                        "scope": {
+                            "organization": {
+                                "id": "` + organizationID + `"
+                            }
+                        },
+                        "subjects": [
+                            {
+                                "user": {
+                                    "id": "` + firstUserID + `"
+                                }
+                            }
+                        ]
+                    }
+                }`))),
+				Header: map[string][]string{"Content-Type": {"application/json"}},
+			}, nil)
 
 		stateValue := cty.ObjectVal(map[string]cty.Value{
 			"organization_id": cty.StringVal(organizationID),
+			"name":            cty.StringVal("test role binding"),
+			"description":     cty.StringVal("test role binding description"),
+			"role_id":         cty.StringVal(roleID),
+			"scope": cty.ListVal([]cty.Value{
+				cty.ObjectVal(map[string]cty.Value{
+					"kind":        cty.StringVal("organization"),
+					"resource_id": cty.StringVal(organizationID),
+				}),
+			}),
+			"subjects": cty.ListVal([]cty.Value{
+				cty.ObjectVal(map[string]cty.Value{
+					"subject": cty.ListVal([]cty.Value{
+						cty.ObjectVal(map[string]cty.Value{
+							"kind":    cty.StringVal("user"),
+							"user_id": cty.StringVal(firstUserID),
+						}),
+					}),
+				}),
+			}),
 		})
 		state := terraform.NewInstanceStateShimmedFromValue(stateValue, 0)
-		state.ID = roleBindingID
 
 		resource := resourceRoleBindings()
 		data := resource.Data(state)

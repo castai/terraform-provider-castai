@@ -2297,11 +2297,7 @@ type CastaiUsersV1beta1GroupRef struct {
 	Name string `json:"name"`
 }
 
-<<<<<<< HEAD
 // CastaiUsersV1beta1ListInvitationsResponse Defines container for the organization's pending invitations.
-=======
-// Defines container for the organization's pending invitations.
->>>>>>> b4c8974 (Rebase on master)
 type CastaiUsersV1beta1ListInvitationsResponse struct {
 	// Invitations Array of organization's pending invitations.
 	Invitations []CastaiUsersV1beta1PendingInvitation `json:"invitations"`
@@ -2479,17 +2475,10 @@ type CastaiUsersV1beta1UserOrganization struct {
 	// Name name of the organization.
 	Name string `json:"name"`
 
-<<<<<<< HEAD
 	// ParentId ID of the parent organization. This is beta feature not available for all organizations.
 	ParentId *string `json:"parentId"`
 
 	// Rbacv2Enabled information whether the organization have rbacv2 enabled.
-=======
-	// ID of the parent organization. This is beta feature not available for all organizations.
-	ParentId *string `json:"parentId"`
-
-	// information whether the organization have rbacv2 enabled.
->>>>>>> b4c8974 (Rebase on master)
 	Rbacv2Enabled *bool `json:"rbacv2Enabled"`
 
 	// Role Deprecated: for RBACv2 user can be bound to multiple roles.
@@ -2498,11 +2487,7 @@ type CastaiUsersV1beta1UserOrganization struct {
 	// Deprecated:
 	Role string `json:"role"`
 
-<<<<<<< HEAD
 	// Type OrganizationType defines possible types of organization.
-=======
-	// OrganizationType defines possible types of organization.
->>>>>>> b4c8974 (Rebase on master)
 	//
 	//  - ORGANIZATION_TYPE_DEFAULT: default organization type
 	Type *CastaiUsersV1beta1OrganizationType `json:"type,omitempty"`
@@ -5622,17 +5607,10 @@ type CommitmentsAPIGetCommitmentsParams struct {
 	// ClusterId get commitments that are assigned to a cluster
 	ClusterId *string `form:"clusterId,omitempty" json:"clusterId,omitempty"`
 
-<<<<<<< HEAD
 	// IncludeUsagePerClusters indicates if usage per clusters should be included
 	IncludeUsagePerClusters *bool `form:"includeUsagePerClusters,omitempty" json:"includeUsagePerClusters,omitempty"`
 
 	// IncludeUsagePerInstanceTypes indicates if usage per instance types should be included
-=======
-	// indicates if usage per clusters should be included
-	IncludeUsagePerClusters *bool `form:"includeUsagePerClusters,omitempty" json:"includeUsagePerClusters,omitempty"`
-
-	// indicates if usage per instance types should be included
->>>>>>> e7a71fe (Fix sdk generate)
 	IncludeUsagePerInstanceTypes *bool `form:"includeUsagePerInstanceTypes,omitempty" json:"includeUsagePerInstanceTypes,omitempty"`
 }
 
@@ -5677,16 +5655,6 @@ type CommitmentsAPIGetCommitmentParams struct {
 
 	// IncludeUsage indicated if commitment usage should be included in a response
 	IncludeUsage *bool `form:"includeUsage,omitempty" json:"includeUsage,omitempty"`
-<<<<<<< HEAD
-=======
-
-	// indicates if usage per clusters should be included
-	IncludeUsagePerClusters *bool `form:"includeUsagePerClusters,omitempty" json:"includeUsagePerClusters,omitempty"`
-
-	// indicates if usage per instance types should be included
-	IncludeUsagePerInstanceTypes *bool `form:"includeUsagePerInstanceTypes,omitempty" json:"includeUsagePerInstanceTypes,omitempty"`
-}
->>>>>>> e7a71fe (Fix sdk generate)
 
 	// IncludeUsagePerClusters indicates if usage per clusters should be included
 	IncludeUsagePerClusters *bool `form:"includeUsagePerClusters,omitempty" json:"includeUsagePerClusters,omitempty"`
