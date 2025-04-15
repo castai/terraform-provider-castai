@@ -3,7 +3,7 @@ name: Build
 # Only one instance of this job can be running
 concurrency:
   group: build-and-test
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 on:
   pull_request:
