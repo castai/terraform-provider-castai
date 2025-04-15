@@ -5622,10 +5622,17 @@ type CommitmentsAPIGetCommitmentsParams struct {
 	// ClusterId get commitments that are assigned to a cluster
 	ClusterId *string `form:"clusterId,omitempty" json:"clusterId,omitempty"`
 
+<<<<<<< HEAD
 	// IncludeUsagePerClusters indicates if usage per clusters should be included
 	IncludeUsagePerClusters *bool `form:"includeUsagePerClusters,omitempty" json:"includeUsagePerClusters,omitempty"`
 
 	// IncludeUsagePerInstanceTypes indicates if usage per instance types should be included
+=======
+	// indicates if usage per clusters should be included
+	IncludeUsagePerClusters *bool `form:"includeUsagePerClusters,omitempty" json:"includeUsagePerClusters,omitempty"`
+
+	// indicates if usage per instance types should be included
+>>>>>>> e7a71fe (Fix sdk generate)
 	IncludeUsagePerInstanceTypes *bool `form:"includeUsagePerInstanceTypes,omitempty" json:"includeUsagePerInstanceTypes,omitempty"`
 }
 
@@ -5670,6 +5677,16 @@ type CommitmentsAPIGetCommitmentParams struct {
 
 	// IncludeUsage indicated if commitment usage should be included in a response
 	IncludeUsage *bool `form:"includeUsage,omitempty" json:"includeUsage,omitempty"`
+<<<<<<< HEAD
+=======
+
+	// indicates if usage per clusters should be included
+	IncludeUsagePerClusters *bool `form:"includeUsagePerClusters,omitempty" json:"includeUsagePerClusters,omitempty"`
+
+	// indicates if usage per instance types should be included
+	IncludeUsagePerInstanceTypes *bool `form:"includeUsagePerInstanceTypes,omitempty" json:"includeUsagePerInstanceTypes,omitempty"`
+}
+>>>>>>> e7a71fe (Fix sdk generate)
 
 	// IncludeUsagePerClusters indicates if usage per clusters should be included
 	IncludeUsagePerClusters *bool `form:"includeUsagePerClusters,omitempty" json:"includeUsagePerClusters,omitempty"`
