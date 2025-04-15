@@ -226,6 +226,10 @@ func resourceRoleBindingsCreate(ctx context.Context, data *schema.ResourceData, 
 	scope := convertScopeToSDK(data)
 	scopes := convertScopesToSDK(data)
 
+	if scope == nil && len(scopes) == 0 {
+		return diag.Errorf("role binding scopes were not provided")
+	}
+
 	resp, err := client.RbacServiceAPICreateRoleBindingsWithResponse(ctx, organizationID, sdk.RbacServiceAPICreateRoleBindingsJSONRequestBody{
 		{
 			Definition: sdk.CastaiRbacV1beta1RoleBindingDefinition{
@@ -275,6 +279,10 @@ func resourceRoleBindingsUpdate(ctx context.Context, data *schema.ResourceData, 
 	}
 	scope := convertScopeToSDK(data)
 	scopes := convertScopesToSDK(data)
+
+	if scope == nil && len(scopes) == 0 {
+		return diag.Errorf("role binding scopes were not provided")
+	}
 
 	resp, err := client.RbacServiceAPIUpdateRoleBindingWithResponse(ctx, organizationID, roleBindingID, sdk.RbacServiceAPIUpdateRoleBindingJSONRequestBody{
 		Definition: sdk.CastaiRbacV1beta1RoleBindingDefinition{
