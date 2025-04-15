@@ -79,7 +79,7 @@ resource "castai_role_bindings" "viewer_test" {
 ### Optional
 
 - `description` (String) Description of the role binding.
-- `scope` (Block List, Max: 1) Scope of the role binding. (see [below for nested schema](#nestedblock--scope))
+- `scope` (Block List, Max: 1, Deprecated) Scope of the role binding. (see [below for nested schema](#nestedblock--scope))
 - `scopes` (Block List) Scopes of the role binding. (see [below for nested schema](#nestedblock--scopes))
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 

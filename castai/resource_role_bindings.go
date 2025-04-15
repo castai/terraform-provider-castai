@@ -350,25 +350,27 @@ func assignRoleBindingData(roleBinding *sdk.CastaiRbacV1beta1RoleBinding, data *
 		return fmt.Errorf("setting role binding role id: %w", err)
 	}
 
-	if roleBinding.Definition.Scope != nil && roleBinding.Definition.Scope.Organization != nil {
-		err := data.Set(FieldRoleBindingsScope, []any{
-			map[string]any{
-				FieldRoleBindingsScopeKind:       RoleBindingScopeKindOrganization,
-				FieldRoleBindingsScopeResourceID: roleBinding.Definition.Scope.Organization.Id,
-			},
-		})
-		if err != nil {
-			return fmt.Errorf("parsing scope organization: %w", err)
-		}
-	} else if roleBinding.Definition.Scope != nil && roleBinding.Definition.Scope.Cluster != nil {
-		err := data.Set(FieldRoleBindingsScope, []any{
-			map[string]any{
-				FieldRoleBindingsScopeKind:       RoleBindingScopeKindCluster,
-				FieldRoleBindingsScopeResourceID: roleBinding.Definition.Scope.Cluster.Id,
-			},
-		})
-		if err != nil {
-			return fmt.Errorf("parsing scope cluster: %w", err)
+	if roleBinding.Definition.Scope != nil {
+		if roleBinding.Definition.Scope.Organization != nil {
+			err := data.Set(FieldRoleBindingsScope, []any{
+				map[string]any{
+					FieldRoleBindingsScopeKind:       RoleBindingScopeKindOrganization,
+					FieldRoleBindingsScopeResourceID: roleBinding.Definition.Scope.Organization.Id,
+				},
+			})
+			if err != nil {
+				return fmt.Errorf("parsing scope organization: %w", err)
+			}
+		} else if roleBinding.Definition.Scope.Cluster != nil {
+			err := data.Set(FieldRoleBindingsScope, []any{
+				map[string]any{
+					FieldRoleBindingsScopeKind:       RoleBindingScopeKindCluster,
+					FieldRoleBindingsScopeResourceID: roleBinding.Definition.Scope.Cluster.Id,
+				},
+			})
+			if err != nil {
+				return fmt.Errorf("parsing scope cluster: %w", err)
+			}
 		}
 	}
 
