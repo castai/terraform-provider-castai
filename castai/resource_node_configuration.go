@@ -645,9 +645,7 @@ func resourceNodeConfigurationCreate(ctx context.Context, d *schema.ResourceData
 		req.KubeletConfig = toPtr(m)
 	}
 	if v := d.Get(FieldNodeConfigurationTags).(map[string]interface{}); len(v) > 0 {
-		req.Tags = &sdk.NodeconfigV1NewNodeConfiguration_Tags{
-			AdditionalProperties: toStringMap(v),
-		}
+		req.Tags = lo.ToPtr(toStringMap(v))
 	}
 
 	// Map provider specific configurations.
@@ -720,7 +718,7 @@ func resourceNodeConfigurationRead(ctx context.Context, d *schema.ResourceData, 
 	if err := d.Set(FieldNodeConfigurationContainerRuntime, nodeConfig.ContainerRuntime); err != nil {
 		return diag.FromErr(fmt.Errorf("setting container runtime: %w", err))
 	}
-	if err := d.Set(FieldNodeConfigurationTags, nodeConfig.Tags.AdditionalProperties); err != nil {
+	if err := d.Set(FieldNodeConfigurationTags, nodeConfig.Tags); err != nil {
 		return diag.FromErr(fmt.Errorf("setting tags: %w", err))
 	}
 
@@ -819,9 +817,7 @@ func resourceNodeConfigurationUpdate(ctx context.Context, d *schema.ResourceData
 		req.KubeletConfig = toPtr(m)
 	}
 	if v := d.Get(FieldNodeConfigurationTags).(map[string]interface{}); len(v) > 0 {
-		req.Tags = &sdk.NodeconfigV1NodeConfigurationUpdate_Tags{
-			AdditionalProperties: toStringMap(v),
-		}
+		req.Tags = lo.ToPtr(toStringMap(v))
 	}
 
 	// Map provider specific configurations.

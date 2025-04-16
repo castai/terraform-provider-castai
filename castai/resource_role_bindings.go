@@ -204,7 +204,7 @@ func resourceRoleBindingsCreate(ctx context.Context, data *schema.ResourceData, 
 		{
 			Definition: sdk.CastaiRbacV1beta1RoleBindingDefinition{
 				RoleId:   data.Get(FieldRoleBindingsRoleID).(string),
-				Scope:    scope,
+				Scope:    &scope,
 				Subjects: &subjects,
 			},
 			Description: lo.ToPtr(data.Get(FieldRoleBindingsDescription).(string)),
@@ -251,7 +251,7 @@ func resourceRoleBindingsUpdate(ctx context.Context, data *schema.ResourceData, 
 	resp, err := client.RbacServiceAPIUpdateRoleBindingWithResponse(ctx, organizationID, roleBindingID, sdk.RbacServiceAPIUpdateRoleBindingJSONRequestBody{
 		Definition: sdk.CastaiRbacV1beta1RoleBindingDefinition{
 			RoleId:   data.Get(FieldRoleBindingsRoleID).(string),
-			Scope:    scope,
+			Scope:    &scope,
 			Subjects: &subjects,
 		},
 		Description: lo.ToPtr(data.Get(FieldRoleBindingsDescription).(string)),
@@ -321,7 +321,7 @@ func assignRoleBindingData(roleBinding *sdk.CastaiRbacV1beta1RoleBinding, data *
 		return fmt.Errorf("setting role binding role id: %w", err)
 	}
 
-	if roleBinding.Definition.Scope.Organization != nil {
+	if roleBinding.Definition.Scope != nil && roleBinding.Definition.Scope.Organization != nil {
 		err := data.Set(FieldRoleBindingsScope, []any{
 			map[string]any{
 				FieldRoleBindingsScopeKind:       RoleBindingScopeKindOrganization,
@@ -331,7 +331,7 @@ func assignRoleBindingData(roleBinding *sdk.CastaiRbacV1beta1RoleBinding, data *
 		if err != nil {
 			return fmt.Errorf("parsing scope organization: %w", err)
 		}
-	} else if roleBinding.Definition.Scope.Cluster != nil {
+	} else if roleBinding.Definition.Scope != nil && roleBinding.Definition.Scope.Cluster != nil {
 		err := data.Set(FieldRoleBindingsScope, []any{
 			map[string]any{
 				FieldRoleBindingsScopeKind:       RoleBindingScopeKindCluster,

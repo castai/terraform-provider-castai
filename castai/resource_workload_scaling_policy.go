@@ -134,7 +134,7 @@ func resourceWorkloadScalingPolicy() *schema.Resource {
 						FieldConfidenceThreshold: {
 							Type:             schema.TypeFloat,
 							Optional:         true,
-							Default: 		  0.9,
+							Default:          0.9,
 							Description:      "Defines the confidence threshold for applying recommendations. The smaller number indicates that we require fewer metrics data points to apply recommendations - changing this value can cause applying less precise recommendations. Do not change the default unless you want to optimize with fewer data points (e.g., short-lived workloads).",
 							ValidateDiagFunc: validation.ToDiagFunc(validation.FloatBetween(0, 1)),
 						},
@@ -403,7 +403,7 @@ func resourceWorkloadScalingPolicyCreate(ctx context.Context, d *schema.Resource
 		}
 		req.RecommendationPolicies.Memory = memory
 	}
-	
+
 	req.RecommendationPolicies.Confidence = toConfidence(toSection(d, FieldConfidence))
 
 	req.RecommendationPolicies.Startup = toStartup(toSection(d, "startup"))
@@ -526,7 +526,7 @@ func resourceWorkloadScalingPolicyUpdate(ctx context.Context, d *schema.Resource
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	req := sdk.WorkloadOptimizationAPIUpdateWorkloadScalingPolicyJSONBody{
+	req := sdk.WorkloadOptimizationAPIUpdateWorkloadScalingPolicyJSONRequestBody{
 		Name:      d.Get("name").(string),
 		ApplyType: sdk.WorkloadoptimizationV1ApplyType(d.Get("apply_type").(string)),
 		RecommendationPolicies: sdk.WorkloadoptimizationV1RecommendationPolicies{
@@ -537,7 +537,7 @@ func resourceWorkloadScalingPolicyUpdate(ctx context.Context, d *schema.Resource
 			Downscaling:      toDownscaling(toSection(d, "downscaling")),
 			MemoryEvent:      toMemoryEvent(toSection(d, "memory_event")),
 			AntiAffinity:     toAntiAffinity(toSection(d, "anti_affinity")),
-			Confidence: 	 toConfidence(toSection(d, FieldConfidence)),
+			Confidence:       toConfidence(toSection(d, FieldConfidence)),
 		},
 	}
 

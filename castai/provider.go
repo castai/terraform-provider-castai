@@ -10,10 +10,12 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/castai/terraform-provider-castai/castai/sdk"
+	"github.com/castai/terraform-provider-castai/castai/sdk/cluster_autoscaler"
 )
 
 type ProviderConfig struct {
-	api sdk.ClientWithResponsesInterface
+	api                     sdk.ClientWithResponsesInterface
+	clusterAutoscalerClient cluster_autoscaler.ClientWithResponsesInterface
 }
 
 func Provider(version string) *schema.Provider {
@@ -57,6 +59,7 @@ func Provider(version string) *schema.Provider {
 			"castai_workload_scaling_policy":    resourceWorkloadScalingPolicy(),
 			"castai_organization_group":         resourceOrganizationGroup(),
 			"castai_role_bindings":              resourceRoleBindings(),
+			"castai_hibernation_schedule":       resourceHibernationSchedule(),
 		},
 
 		DataSourcesMap: map[string]*schema.Resource{
@@ -64,6 +67,7 @@ func Provider(version string) *schema.Provider {
 			"castai_gke_user_policies":    dataSourceGKEPolicies(),
 			"castai_organization":         dataSourceOrganization(),
 			"castai_rebalancing_schedule": dataSourceRebalancingSchedule(),
+			"castai_hibernation_schedule": dataSourceHibernationSchedule(),
 
 			// TODO: remove in next major release
 			"castai_eks_user_arn": dataSourceEKSClusterUserARN(),
@@ -90,6 +94,14 @@ func providerConfigure(version string) schema.ConfigureContextFunc {
 			return nil, diag.FromErr(err)
 		}
 
-		return &ProviderConfig{api: client}, nil
+		clusterAutoscalerClient, err := cluster_autoscaler.CreateClient(apiURL, apiToken, agent)
+		if err != nil {
+			return nil, diag.FromErr(err)
+		}
+
+		return &ProviderConfig{
+			api:                     client,
+			clusterAutoscalerClient: clusterAutoscalerClient,
+		}, nil
 	}
 }

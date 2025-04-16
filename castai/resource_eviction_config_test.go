@@ -4,8 +4,10 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"github.com/castai/terraform-provider-castai/castai/sdk"
-	mock_sdk "github.com/castai/terraform-provider-castai/castai/sdk/mock"
+	"io"
+	"net/http"
+	"testing"
+
 	"github.com/golang/mock/gomock"
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
@@ -13,9 +15,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/require"
-	"io"
-	"net/http"
-	"testing"
+
+	"github.com/castai/terraform-provider-castai/castai/sdk"
+	mock_sdk "github.com/castai/terraform-provider-castai/castai/sdk/mock"
 )
 
 func TestEvictionConfig_ReadContext(t *testing.T) {
@@ -299,9 +301,9 @@ func TestEvictionConfig_UpdateContext(t *testing.T) {
 		PodSelector: &sdk.CastaiEvictorV1PodSelector{
 			Kind: lo.ToPtr("Job"),
 			LabelSelector: &sdk.CastaiEvictorV1LabelSelector{
-				MatchLabels: &sdk.CastaiEvictorV1LabelSelector_MatchLabels{AdditionalProperties: map[string]string{
+				MatchLabels: &map[string]string{
 					"key1": "value1",
-				}}}}}
+				}}}}
 
 	newConfig := sdk.CastaiEvictorV1EvictionConfig{
 		Settings: sdk.CastaiEvictorV1EvictionSettings{Disposable: &sdk.CastaiEvictorV1EvictionSettingsSettingEnabled{Enabled: true}},

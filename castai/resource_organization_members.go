@@ -293,7 +293,7 @@ func resourceOrganizationMembersUpdate(ctx context.Context, data *schema.Resourc
 		})
 	}
 
-	resp, err := client.UsersAPICreateInvitationsWithResponse(ctx, sdk.UsersAPICreateInvitationsJSONBody{
+	resp, err := client.UsersAPICreateInvitationsWithResponse(ctx, sdk.UsersAPICreateInvitationsJSONRequestBody{
 		Members: &newMemberships,
 	})
 	if err := sdk.CheckOKResponse(resp, err); err != nil {

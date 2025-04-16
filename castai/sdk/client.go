@@ -3,10 +3,8 @@ package sdk
 import (
 	"context"
 	"fmt"
-	"net/http"
-	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/logging"
+	"github.com/castai/terraform-provider-castai/castai/sdk/client"
 )
 
 // Currently, sdk doesn't have generated constants for cluster status and agent status, declaring our own.
@@ -22,24 +20,18 @@ const (
 )
 
 func CreateClient(apiURL, apiToken, userAgent string) (*ClientWithResponses, error) {
+	httpClient, editors := client.GetHttpClient(apiToken, userAgent)
 	httpClientOption := func(client *Client) error {
-		client.Client = &http.Client{
-			Transport: logging.NewSubsystemLoggingHTTPTransport("CAST.AI", http.DefaultTransport),
-			Timeout:   1 * time.Minute,
+		client.Client = httpClient
+
+		for _, editor := range editors {
+			client.RequestEditors = append(client.RequestEditors, editor)
 		}
-		client.RequestEditors = append(client.RequestEditors, func(_ context.Context, req *http.Request) error {
-			req.Header.Set("user-agent", userAgent)
-			return nil
-		})
+
 		return nil
 	}
 
-	apiTokenOption := WithRequestEditorFn(func(ctx context.Context, req *http.Request) error {
-		req.Header.Set("X-API-Key", apiToken)
-		return nil
-	})
-
-	apiClient, err := NewClientWithResponses(apiURL, httpClientOption, apiTokenOption)
+	apiClient, err := NewClientWithResponses(apiURL, httpClientOption)
 	if err != nil {
 		return nil, err
 	}
