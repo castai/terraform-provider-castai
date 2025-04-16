@@ -228,6 +228,7 @@ constraints.0.spot_interruption_predictions_type = aws-rebalance-recommendations
 constraints.0.storage_optimized = false
 constraints.0.storage_optimized_state = enabled
 constraints.0.use_spot_fallbacks = false
+constraints.0.bare_metal = unspecified
 custom_instances_enabled = true
 custom_instances_with_extended_memory_enabled = true
 custom_labels.% = 2
@@ -657,6 +658,7 @@ func TestAccResourceNodeTemplate_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.resource_limits.#", "1"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.resource_limits.0.cpu_limit_enabled", "true"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.resource_limits.0.cpu_limit_max_cores", "50"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.bare_metal", "false"),
 				),
 			},
 		},
@@ -783,6 +785,7 @@ func testNodeTemplateUpdated(rName, clusterName string) string {
 				burstable_instances = "enabled"
 				customer_specific = "enabled"
 				azs = ["eu-central-1a", "eu-central-1b", "eu-central-1c"]
+				bare_metal = false
 
 				custom_priority {
 					instance_families = ["a", "b"]

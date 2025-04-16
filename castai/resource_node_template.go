@@ -75,6 +75,7 @@ const (
 	FieldNodeTemplateResourceLimits                           = "resource_limits"
 	FieldNodeTemplateCPULimitEnabled                          = "cpu_limit_enabled"
 	FieldNodeTemplateCPULimitMaxCores                         = "cpu_limit_max_cores"
+	FieldNodeTemplateBareMetal                                = "bare_metal"
 )
 
 const (
@@ -96,6 +97,12 @@ const (
 	NodeSelectorOperationDoesNot = "DoesNotExist"
 	NodeSelectorOperationGt      = "Gt"
 	NodeSelectorOperationLt      = "Lt"
+)
+
+const (
+	True        = "true"
+	False       = "false"
+	Unspecified = "unspecified"
 )
 
 type nodeSelectorOperatorsSlice []string
@@ -408,6 +415,14 @@ func resourceNodeTemplate() *schema.Resource {
 								return []string{OsLinux}, nil
 							},
 							Description: fmt.Sprintf("List of acceptable instance Operating Systems, the default is %s. Allowed values: %s.", OsLinux, strings.Join(supportedOs, ", ")),
+						},
+						FieldNodeTemplateBareMetal: {
+							Type:             schema.TypeString,
+							Optional:         true,
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{Unspecified, True, False}, false)),
+							Default:          Unspecified,
+							Description: fmt.Sprintf("Bare metal constraint, will only pick bare metal nodes if set to %s."+
+								" Will only pick non-bare metal nodes if %s. Defaults to %s. Allowed values: %s.", True, False, Unspecified, strings.Join([]string{True, False, Unspecified}, ", ")),
 						},
 						FieldNodeTemplateCustomPriority: {
 							Type:     schema.TypeList,
@@ -776,6 +791,15 @@ func flattenConstraints(c *sdk.NodetemplatesV1TemplateConstraints) ([]map[string
 		out[FieldNodeTemplateArchitecturePriority] = lo.FromPtr(c.ArchitecturePriority)
 	}
 	out[FieldNodeTemplateResourceLimits] = flattenResourceLimits(c.ResourceLimits)
+	if c.BareMetal != nil {
+		if lo.FromPtr(c.BareMetal) {
+			out[FieldNodeTemplateBareMetal] = True
+		} else {
+			out[FieldNodeTemplateBareMetal] = False
+		}
+	} else {
+		out[FieldNodeTemplateBareMetal] = Unspecified
+	}
 
 	setStateConstraintValue(c.Burstable, FieldNodeTemplateBurstableInstances, out)
 	setStateConstraintValue(c.CustomerSpecific, FieldNodeTemplateCustomerSpecific, out)
@@ -1386,6 +1410,17 @@ func toTemplateConstraints(obj map[string]any) *sdk.NodetemplatesV1TemplateConst
 	if v, ok := obj[FieldNodeTemplateResourceLimits].([]any); ok && len(v) > 0 {
 		if val, ok := v[0].(map[string]any); ok {
 			out.ResourceLimits = toTemplateConstraintsResourceLimits(val)
+		}
+	}
+
+	if v, ok := obj[FieldNodeTemplateBareMetal].(string); ok {
+		switch v {
+		case True:
+			out.BareMetal = toPtr(true)
+		case False:
+			out.BareMetal = toPtr(false)
+		default:
+			out.BareMetal = nil
 		}
 	}
 
