@@ -123,7 +123,7 @@ resource "castai_node_template" "example_spot_template" {
     min_memory                                  = 4096
     max_memory                                  = 24576
     architectures                               = ["amd64"]
-    azs                                         = ["", ""] 
+    azs                                         = [] 
     customer_specific                           = "disabled"
 
     instance_families {
