@@ -2,11 +2,11 @@
 
 This repository contains Terraform code to deploy CAST AI components on an "anywhere" (on-prem/Minikube) Kubernetes cluster. The configuration deploys two components:
 
-- **CAST AI Agent** 
-- **CAST AI Cluster Controller**
-- **CAST AI Evictor
-- **CAST AI Pod Mutator
-- **CAST AI Workload Autoscaler
+- CAST AI Agent
+- CAST AI Cluster Controller
+- CAST AI Evictor
+- CAST AI Pod Mutator
+- CAST AI Workload Autoscaler
 
 ## Prerequisites
 
@@ -15,7 +15,10 @@ Before deploying, ensure you have the following installed and configured:
 - **Terraform** (v1.x recommended)  
   [Download Terraform](https://www.terraform.io/downloads)
 - **Minikube**  
-  [Start Minikube](https://minikube.sigs.k8s.io/docs/start/)
+  [Start Minikube](https://minikube.sigs.k8s.io/docs/start/) (start minikube with 2 or more nodes to avoid any issues with pending pods)
+```sh
+minikube start --nodes=3
+```
 - **Docker Desktop** (make sure Docker is running)  
   [Download Docker Desktop](https://www.docker.com/products/docker-desktop)
 - **kubectl**  
