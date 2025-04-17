@@ -22,6 +22,7 @@ const (
 	FieldRoleBindingsDescription             = "description"
 	FieldRoleBindingsRoleID                  = "role_id"
 	FieldRoleBindingsScope                   = "scope"
+	FieldRoleBindingsScopes                  = "scopes"
 	FieldRoleBindingsScopeKind               = "kind"
 	FieldRoleBindingsScopeResourceID         = "resource_id"
 	FieldRoleBindingsSubjects                = "subjects"
@@ -84,9 +85,33 @@ func resourceRoleBindings() *schema.Resource {
 			},
 			FieldRoleBindingsScope: {
 				Type:        schema.TypeList,
-				Required:    true,
+				Optional:    true,
 				MaxItems:    1,
 				Description: "Scope of the role binding.",
+				Deprecated:  "this field is deprecated and will be removed in future versions, use `scopes` field instead",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						FieldRoleBindingsScopeKind: {
+							Type:             schema.TypeString,
+							Required:         true,
+							Description:      fmt.Sprintf("Scope of the role binding Supported values include: %s.", strings.Join(supportedScopeKinds, ", ")),
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(supportedScopeKinds, true)),
+							DiffSuppressFunc: func(k, oldValue, newValue string, d *schema.ResourceData) bool {
+								return strings.EqualFold(oldValue, newValue)
+							},
+						},
+						FieldRoleBindingsScopeResourceID: {
+							Type:        schema.TypeString,
+							Required:    true,
+							Description: "ID of the scope resource.",
+						},
+					},
+				},
+			},
+			FieldRoleBindingsScopes: {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: "Scopes of the role binding.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						FieldRoleBindingsScopeKind: {
@@ -199,12 +224,18 @@ func resourceRoleBindingsCreate(ctx context.Context, data *schema.ResourceData, 
 		return diag.FromErr(err)
 	}
 	scope := convertScopeToSDK(data)
+	scopes := convertScopesToSDK(data)
+
+	if scope == nil && len(scopes) == 0 {
+		return diag.Errorf("role binding scopes were not provided")
+	}
 
 	resp, err := client.RbacServiceAPICreateRoleBindingsWithResponse(ctx, organizationID, sdk.RbacServiceAPICreateRoleBindingsJSONRequestBody{
 		{
 			Definition: sdk.CastaiRbacV1beta1RoleBindingDefinition{
 				RoleId:   data.Get(FieldRoleBindingsRoleID).(string),
-				Scope:    &scope,
+				Scope:    scope,
+				Scopes:   &scopes,
 				Subjects: &subjects,
 			},
 			Description: lo.ToPtr(data.Get(FieldRoleBindingsDescription).(string)),
@@ -247,11 +278,17 @@ func resourceRoleBindingsUpdate(ctx context.Context, data *schema.ResourceData, 
 		return diag.FromErr(err)
 	}
 	scope := convertScopeToSDK(data)
+	scopes := convertScopesToSDK(data)
+
+	if scope == nil && len(scopes) == 0 {
+		return diag.Errorf("role binding scopes were not provided")
+	}
 
 	resp, err := client.RbacServiceAPIUpdateRoleBindingWithResponse(ctx, organizationID, roleBindingID, sdk.RbacServiceAPIUpdateRoleBindingJSONRequestBody{
 		Definition: sdk.CastaiRbacV1beta1RoleBindingDefinition{
 			RoleId:   data.Get(FieldRoleBindingsRoleID).(string),
-			Scope:    &scope,
+			Scope:    scope,
+			Scopes:   &scopes,
 			Subjects: &subjects,
 		},
 		Description: lo.ToPtr(data.Get(FieldRoleBindingsDescription).(string)),
@@ -321,26 +358,53 @@ func assignRoleBindingData(roleBinding *sdk.CastaiRbacV1beta1RoleBinding, data *
 		return fmt.Errorf("setting role binding role id: %w", err)
 	}
 
-	if roleBinding.Definition.Scope != nil && roleBinding.Definition.Scope.Organization != nil {
-		err := data.Set(FieldRoleBindingsScope, []any{
-			map[string]any{
-				FieldRoleBindingsScopeKind:       RoleBindingScopeKindOrganization,
-				FieldRoleBindingsScopeResourceID: roleBinding.Definition.Scope.Organization.Id,
-			},
-		})
-		if err != nil {
-			return fmt.Errorf("parsing scope organization: %w", err)
+	if roleBinding.Definition.Scope != nil {
+		if roleBinding.Definition.Scope.Organization != nil {
+			err := data.Set(FieldRoleBindingsScope, []any{
+				map[string]any{
+					FieldRoleBindingsScopeKind:       RoleBindingScopeKindOrganization,
+					FieldRoleBindingsScopeResourceID: roleBinding.Definition.Scope.Organization.Id,
+				},
+			})
+			if err != nil {
+				return fmt.Errorf("parsing scope organization: %w", err)
+			}
+		} else if roleBinding.Definition.Scope.Cluster != nil {
+			err := data.Set(FieldRoleBindingsScope, []any{
+				map[string]any{
+					FieldRoleBindingsScopeKind:       RoleBindingScopeKindCluster,
+					FieldRoleBindingsScopeResourceID: roleBinding.Definition.Scope.Cluster.Id,
+				},
+			})
+			if err != nil {
+				return fmt.Errorf("parsing scope cluster: %w", err)
+			}
 		}
-	} else if roleBinding.Definition.Scope != nil && roleBinding.Definition.Scope.Cluster != nil {
-		err := data.Set(FieldRoleBindingsScope, []any{
-			map[string]any{
-				FieldRoleBindingsScopeKind:       RoleBindingScopeKindCluster,
-				FieldRoleBindingsScopeResourceID: roleBinding.Definition.Scope.Cluster.Id,
-			},
-		})
-		if err != nil {
-			return fmt.Errorf("parsing scope cluster: %w", err)
+	}
+
+	scopes := []any{}
+	if roleBinding.Definition.Scopes != nil {
+		for _, scope := range *roleBinding.Definition.Scopes {
+			if scope.Organization != nil {
+				scopes = append(scopes,
+					map[string]any{
+						FieldRoleBindingsScopeKind:       RoleBindingScopeKindOrganization,
+						FieldRoleBindingsScopeResourceID: scope.Organization.Id,
+					},
+				)
+			} else if scope.Cluster != nil {
+				scopes = append(scopes,
+					map[string]any{
+						FieldRoleBindingsScopeKind:       RoleBindingScopeKindCluster,
+						FieldRoleBindingsScopeResourceID: scope.Cluster.Id,
+					},
+				)
+			}
 		}
+	}
+
+	if err := data.Set(FieldRoleBindingsScopes, scopes); err != nil {
+		return fmt.Errorf("parsing scopes: %w", err)
 	}
 
 	if roleBinding.Definition.Subjects != nil {
@@ -377,30 +441,61 @@ func assignRoleBindingData(roleBinding *sdk.CastaiRbacV1beta1RoleBinding, data *
 	return nil
 }
 
-func convertScopeToSDK(data *schema.ResourceData) sdk.CastaiRbacV1beta1Scope {
+func convertScopeToSDK(data *schema.ResourceData) *sdk.CastaiRbacV1beta1Scope {
 	scopes := data.Get(FieldRoleBindingsScope).([]any)
 	if len(scopes) == 0 {
-		return sdk.CastaiRbacV1beta1Scope{}
+		return nil
 	}
 
 	scope := scopes[0].(map[string]any)
 
 	switch scope[FieldRoleBindingsScopeKind].(string) {
 	case RoleBindingScopeKindOrganization:
-		return sdk.CastaiRbacV1beta1Scope{
+		return &sdk.CastaiRbacV1beta1Scope{
 			Organization: &sdk.CastaiRbacV1beta1OrganizationScope{
 				Id: scope[FieldRoleBindingsScopeResourceID].(string),
 			},
 		}
 	case RoleBindingScopeKindCluster:
-		return sdk.CastaiRbacV1beta1Scope{
+		return &sdk.CastaiRbacV1beta1Scope{
 			Cluster: &sdk.CastaiRbacV1beta1ClusterScope{
 				Id: scope[FieldRoleBindingsScopeResourceID].(string),
 			},
 		}
 	default:
-		return sdk.CastaiRbacV1beta1Scope{}
+		return nil
 	}
+}
+
+func convertScopesToSDK(data *schema.ResourceData) []sdk.CastaiRbacV1beta1Scope {
+	result := []sdk.CastaiRbacV1beta1Scope{}
+
+	scopes := data.Get(FieldRoleBindingsScopes).([]any)
+	if len(scopes) == 0 {
+		return result
+	}
+
+	for _, scope := range scopes {
+		scp := scope.(map[string]any)
+
+		switch scp[FieldRoleBindingsScopeKind].(string) {
+		case RoleBindingScopeKindOrganization:
+			result = append(result, sdk.CastaiRbacV1beta1Scope{
+				Organization: &sdk.CastaiRbacV1beta1OrganizationScope{
+					Id: scp[FieldRoleBindingsScopeResourceID].(string),
+				},
+			})
+		case RoleBindingScopeKindCluster:
+			result = append(result, sdk.CastaiRbacV1beta1Scope{
+				Cluster: &sdk.CastaiRbacV1beta1ClusterScope{
+					Id: scp[FieldRoleBindingsScopeResourceID].(string),
+				},
+			})
+		default:
+			result = append(result, sdk.CastaiRbacV1beta1Scope{})
+		}
+	}
+	return result
 }
 
 func convertSubjectsToSDK(data *schema.ResourceData) ([]sdk.CastaiRbacV1beta1Subject, error) {
