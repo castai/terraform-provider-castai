@@ -34,16 +34,6 @@ module "eks" {
 
   manage_aws_auth_configmap = true
 
-  # # Given TF error unauthorized - aws_auth requires your IAM role to be added to the configmap, you can add it here.
-  # # Get the arn via `aws sts get-caller-identity`
-  # aws_auth_users = [
-  #   {
-  #     userarn  = "arn:aws:iam::123456789012:user/my-username"
-  #     username = "my-username"
-  #     groups   = ["system:masters"]
-  #   }
-  # ]
-
   aws_auth_roles = [
     # Add the CAST AI IAM role which required for CAST AI nodes to join the cluster.
     {
