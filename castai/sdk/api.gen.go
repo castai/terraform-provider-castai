@@ -355,6 +355,7 @@ const (
 	WorkloadoptimizationV1EventTypeEVENTTYPECONFIGURATIONCHANGEDV2     WorkloadoptimizationV1EventType = "EVENT_TYPE_CONFIGURATION_CHANGEDV2"
 	WorkloadoptimizationV1EventTypeEVENTTYPEFAILEDHELMTESTHOOK         WorkloadoptimizationV1EventType = "EVENT_TYPE_FAILED_HELM_TEST_HOOK"
 	WorkloadoptimizationV1EventTypeEVENTTYPEINVALID                    WorkloadoptimizationV1EventType = "EVENT_TYPE_INVALID"
+	WorkloadoptimizationV1EventTypeEVENTTYPEMEMORYPRESSUREEVICTION     WorkloadoptimizationV1EventType = "EVENT_TYPE_MEMORY_PRESSURE_EVICTION"
 	WorkloadoptimizationV1EventTypeEVENTTYPEOOMKILL                    WorkloadoptimizationV1EventType = "EVENT_TYPE_OOM_KILL"
 	WorkloadoptimizationV1EventTypeEVENTTYPERECOMMENDEDPODCOUNTCHANGED WorkloadoptimizationV1EventType = "EVENT_TYPE_RECOMMENDED_POD_COUNT_CHANGED"
 	WorkloadoptimizationV1EventTypeEVENTTYPERECOMMENDEDREQUESTSCHANGED WorkloadoptimizationV1EventType = "EVENT_TYPE_RECOMMENDED_REQUESTS_CHANGED"
@@ -477,6 +478,7 @@ const (
 	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPECONFIGURATIONCHANGEDV2     WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_CONFIGURATION_CHANGEDV2"
 	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPEFAILEDHELMTESTHOOK         WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_FAILED_HELM_TEST_HOOK"
 	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPEINVALID                    WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_INVALID"
+	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPEMEMORYPRESSUREEVICTION     WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_MEMORY_PRESSURE_EVICTION"
 	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPEOOMKILL                    WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_OOM_KILL"
 	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPERECOMMENDEDPODCOUNTCHANGED WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_RECOMMENDED_POD_COUNT_CHANGED"
 	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPERECOMMENDEDREQUESTSCHANGED WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_RECOMMENDED_REQUESTS_CHANGED"
@@ -4524,6 +4526,7 @@ type WorkloadoptimizationV1DownscalingSettings struct {
 type WorkloadoptimizationV1Event struct {
 	ConfigurationChangedV2     *WorkloadoptimizationV1ConfigurationChangedEventV2     `json:"configurationChangedV2,omitempty"`
 	FailedHook                 *WorkloadoptimizationV1FailedHookEvent                 `json:"failedHook,omitempty"`
+	MemoryPressureEviction     *WorkloadoptimizationV1MemoryPressureEvictionEvent     `json:"memoryPressureEviction,omitempty"`
 	OomKill                    *WorkloadoptimizationV1OOMKillEvent                    `json:"oomKill,omitempty"`
 	RecommendedPodCountChanged *WorkloadoptimizationV1RecommendedPodCountChangedEvent `json:"recommendedPodCountChanged,omitempty"`
 	RecommendedRequestsChanged *WorkloadoptimizationV1RecommendedRequestsChangedEvent `json:"recommendedRequestsChanged,omitempty"`
@@ -4797,6 +4800,17 @@ type WorkloadoptimizationV1ManagementOption string
 // WorkloadoptimizationV1MemoryEventSettings defines model for workloadoptimization.v1.MemoryEventSettings.
 type WorkloadoptimizationV1MemoryEventSettings struct {
 	ApplyType *WorkloadoptimizationV1ApplyType `json:"applyType,omitempty"`
+}
+
+// WorkloadoptimizationV1MemoryPressureEvictionEvent defines model for workloadoptimization.v1.MemoryPressureEvictionEvent.
+type WorkloadoptimizationV1MemoryPressureEvictionEvent struct {
+	Containers *[]WorkloadoptimizationV1MemoryPressureEvictionEventContainer `json:"containers,omitempty"`
+}
+
+// WorkloadoptimizationV1MemoryPressureEvictionEventContainer defines model for workloadoptimization.v1.MemoryPressureEvictionEvent.Container.
+type WorkloadoptimizationV1MemoryPressureEvictionEventContainer struct {
+	MemoryUsageGib *float64 `json:"memoryUsageGib"`
+	Name           *string  `json:"name,omitempty"`
 }
 
 // WorkloadoptimizationV1NewWorkloadScalingPolicy defines model for workloadoptimization.v1.NewWorkloadScalingPolicy.
@@ -5296,7 +5310,6 @@ type WorkloadoptimizationV1WorkloadEvent struct {
 
 	// Type EventType defines possible types for workload events.
 	Type      WorkloadoptimizationV1EventType                `json:"type"`
-	Workload  *WorkloadoptimizationV1WorkloadEventWorkload   `json:"workload,omitempty"`
 	Workloads *[]WorkloadoptimizationV1WorkloadEventWorkload `json:"workloads,omitempty"`
 }
 
@@ -5537,7 +5550,14 @@ type RbacServiceAPIListRoleBindingsParams struct {
 	// PageCursor Cursor that defines token indicating where to start the next page.
 	// Empty value indicates to start from beginning of the dataset.
 	PageCursor *string `form:"page.cursor,omitempty" json:"page.cursor,omitempty"`
-	RoleId     *string `form:"roleId,omitempty" json:"roleId,omitempty"`
+
+	// RoleId Filter by role ID. Multiple values can be passed as query parameters (e.g.,
+	// &role_id=x&role_id=y)
+	RoleId *[]string `form:"roleId,omitempty" json:"roleId,omitempty"`
+
+	// GroupId Filter by group ID. Multiple values can be passed as query parameters
+	// (e.g., &group_id=x&group_id=y)
+	GroupId *[]string `form:"groupId,omitempty" json:"groupId,omitempty"`
 }
 
 // RbacServiceAPICreateRoleBindingsJSONBody defines parameters for RbacServiceAPICreateRoleBindings.
@@ -5606,6 +5626,12 @@ type CommitmentsAPIGetCommitmentsParams struct {
 
 	// ClusterId get commitments that are assigned to a cluster
 	ClusterId *string `form:"clusterId,omitempty" json:"clusterId,omitempty"`
+
+	// IncludeUsagePerClusters indicates if usage per clusters should be included
+	IncludeUsagePerClusters *bool `form:"includeUsagePerClusters,omitempty" json:"includeUsagePerClusters,omitempty"`
+
+	// IncludeUsagePerInstanceTypes indicates if usage per instance types should be included
+	IncludeUsagePerInstanceTypes *bool `form:"includeUsagePerInstanceTypes,omitempty" json:"includeUsagePerInstanceTypes,omitempty"`
 }
 
 // CommitmentsAPIImportAzureReservationsJSONBody defines parameters for CommitmentsAPIImportAzureReservations.
@@ -5649,6 +5675,12 @@ type CommitmentsAPIGetCommitmentParams struct {
 
 	// IncludeUsage indicated if commitment usage should be included in a response
 	IncludeUsage *bool `form:"includeUsage,omitempty" json:"includeUsage,omitempty"`
+
+	// IncludeUsagePerClusters indicates if usage per clusters should be included
+	IncludeUsagePerClusters *bool `form:"includeUsagePerClusters,omitempty" json:"includeUsagePerClusters,omitempty"`
+
+	// IncludeUsagePerInstanceTypes indicates if usage per instance types should be included
+	IncludeUsagePerInstanceTypes *bool `form:"includeUsagePerInstanceTypes,omitempty" json:"includeUsagePerInstanceTypes,omitempty"`
 }
 
 // CommitmentsAPIReplaceCommitmentAssignmentsJSONBody defines parameters for CommitmentsAPIReplaceCommitmentAssignments.
