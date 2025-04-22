@@ -21,7 +21,7 @@ func TestPolicies(t *testing.T) {
 		if !contains(userpolicy, wantClustersGet) || !contains(userpolicy, wantZonesGet) {
 			t.Fatalf("generated User policy document does not contain required policies")
 		}
-		require.Equal(t, 37, len(userpolicy))
+		require.Equal(t, 38, len(userpolicy))
 	})
 	t.Run("LoadBalancersTargetBackendPools policy", func(t *testing.T) {
 		lbTbpPolicy, err := GetLoadBalancersTargetBackendPoolsPolicy()
