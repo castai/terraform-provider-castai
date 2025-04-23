@@ -3,6 +3,7 @@
       "container.clusters.get",
       "container.clusters.update",
       "container.certificateSigningRequests.approve",
+      "container.operations.get",
       "compute.instances.get",
       "compute.instances.list",
       "compute.instances.create",
