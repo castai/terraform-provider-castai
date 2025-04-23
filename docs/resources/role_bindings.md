@@ -24,14 +24,8 @@ resource "castai_role_bindings" "owner_test" {
 
   role_id = "3e1050c7-6593-4298-94bb-154637911d78" # Role "Owner"
   scopes {
-    scope {
-      kind        = "organization"
-      resource_id = data.castai_organization.test.id
-    }
-    scope {
-      kind        = "cluster"
-      resource_id = "a4b3c2d1-1234-5678-90ab-cdef01234567"
-    }
+    kind        = "organization"
+    resource_id = data.castai_organization.test.id
   }
   subjects {
     subject {
@@ -59,16 +53,13 @@ resource "castai_role_bindings" "viewer_test" {
   description     = "Viewer access for on of the clusters."
 
   role_id = "6fc95bd7-6049-4735-80b0-ce5ccde71cb1" # Role "Viewer"
-
   scopes {
-    scope {
-      kind        = "cluster"
-      resource_id = "7063d31c-897e-48ef-a322-bdfda6fdbcfb"
-    }
-    scope {
-      kind        = "cluster"
-      resource_id = "9872e54f-1122-33ef-b456-cdef98765432"
-    }
+    kind        = "cluster"
+    resource_id = "7063d31c-897e-48ef-a322-bdfda6fdbcfb"
+  }
+  scopes {
+    kind        = "cluster"
+    resource_id = "9872e54f-1122-33ef-b456-cdef98765432"
   }
   subjects {
     subject {
