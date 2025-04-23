@@ -90,7 +90,7 @@ func TestAccDataSourceGKEPolicies_basic(t *testing.T) {
 				Config: testAccDataSourceGKEPoliciesConfigUpdated,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr("data.castai_gke_user_policies.gke", "features.load_balancers_target_backend_pools", "true"),
-					resource.TestCheckResourceAttr("data.castai_gke_user_policies.gke", "policy.#", "41"),
+					resource.TestCheckResourceAttr("data.castai_gke_user_policies.gke", "policy.#", "42"),
 				),
 			},
 		},
