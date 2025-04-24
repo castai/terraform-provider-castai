@@ -3,19 +3,21 @@ Following example creates GKE cluster and its supporting resources using GKE com
 After GKE cluster is created it is onboarded to CAST AI.
 [Kvisor security agent](https://docs.cast.ai/docs/kvisor) is deployed to the cluster and security policies are enabled.\
 See `install_security_agent` and `kvisor_values` variables in `castai.tf` file enabling Kvisor.\
-See`castai_runtime_rule` resource defining each rule based on castai_runtime_rule.yaml file.\
+See `castai_security_runtime_rule` resource defining example [Runtime security rule](https://docs.cast.ai/docs/anomaly-rules-engine) in `castai_runtime_rules.tf` file.\
 Example configuration should be analysed in the following order:
 1. Create VPC - `vpc.tf`
 2. Create GKE cluster - `gke.tf`
-3. Create CAST AI related resources to connect GKE cluster to CAST AI with Kvisor and runtime rules - `castai.tf`\
-Note that Kvisor runtime security rules are stored in a file: `castai_runtime_rules.yaml`
-4. If needed import existing CAST AI runtime rules with `fetch_castai_runtime_rules.sh` script.\
+3. Create CAST AI related resources to connect GKE cluster to CAST AI with Kvisor and runtime rules - `castai.tf`
+4. Create CAST AI Runtime security rules - `castai_runtime_rules.tf`
+5. If needed - import existing CAST AI runtime rules with `fetch_castai_runtime_rules.sh` script.\
+   Script will generate terraform resources and will print terraform import commands to the console.\
+\
    In order to import - set your API key and optionally the base URL: 
    ```
    export CASTAI_API_KEY="your-api-key-here"
-   export CASTAI_BASE_URL="https://api.cast.ai"  # Optional if default is fine
+   export CASTAI_BASE_URL="https://api.cast.ai"  # Optional, default is https://api.cast.ai
    ```
-   Run the script (it requires yq and jq installed):
+   Run the script (it requires jq installed):
    ```
    # Fetch all rules
    ./fetch_castai_runtime_rules.sh
@@ -24,9 +26,9 @@ Note that Kvisor runtime security rules are stored in a file: `castai_runtime_ru
    ./fetch_castai_runtime_rules.sh --enabled-only
    ```
    Output:\
-   YAML saved to `castai_runtime_rule_new.yaml`\
-   Copy wanted runtime rules from `castai_runtime_rule_new.yaml` to `castai_runtime_rule.yaml` file.\
-   Terraform import commands are printed to console, you need to import newly added resources to terraform state before running any terraform commands.
+   Terraform resources are saved to `castai_runtime_rules.tf.example`\
+   Copy wanted runtime rules from `castai_runtime_rules.tf.example` to `castai_runtime_rules.tf` file.\
+   Terraform import commands are printed to console, you need to import newly added resources to terraform state before running any other commands.
 
 # Terraform Usage
 1. Rename `tf.vars.example` to `tf.vars`

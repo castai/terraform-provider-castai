@@ -8,31 +8,6 @@ module "castai-gke-iam" {
   service_accounts_unique_ids = length(var.service_accounts_unique_ids) == 0 ? [] : var.service_accounts_unique_ids
 }
 
-# Import rules file
-locals {
-  rules = yamldecode(file(var.runtime_security_rules_file)).rules
-}
-
-resource "castai_runtime_rule" "rules" {
-  for_each = {
-    for rule in local.rules : rule.name => rule
-  }
-
-  name              = each.value.name
-  type              = each.value.type
-  category          = each.value.category
-  enabled           = each.value.enabled
-  severity          = each.value.severity
-  rule_text         = each.value.ruleText
-  rule_engine_type  = each.value.ruleEngineType
-  is_builtin        = each.value.isBuiltIn
-  resource_selector = each.value.resourceSelector
-  labels            = each.value.labels
-  used_custom_lists = each.value.usedCustomLists
-
-  depends_on = [module.castai-gke-cluster]
-}
-
 # Configure GKE cluster connection to CAST AI with enabled Kvisor security agent.
 module "castai-gke-cluster" {
   source = "castai/gke-cluster/castai"

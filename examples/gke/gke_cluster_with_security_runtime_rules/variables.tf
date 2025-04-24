@@ -34,13 +34,7 @@ variable "castai_grpc_url" {
 variable "kvisor_grpc_addr" {
   type        = string
   description = "CAST AI Kvisor optimized GRPC API address"
-  default     = "kvisor.prod-master.cast.ai:443" // If your cluster is in the EU region, update the grpcAddr to: https://kvisor.prod-eu.cast.ai:443
-}
-
-variable "runtime_security_rules_file" {
-  type        = string
-  description = "Path to the YAML file containing runtime security rules"
-  default = "../runtime_security_rules.yaml"
+  default     = "kvisor.prod-master.cast.ai:443" // If your cluster is in the EU region, update the grpcAddr to: kvisor.prod-eu.cast.ai:443
 }
 
 variable "service_accounts_unique_ids" {

@@ -2615,6 +2615,806 @@ func (mr *MockClientInterfaceMockRecorder) RbacServiceAPIUpdateRoleBindingWithBo
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RbacServiceAPIUpdateRoleBindingWithBody", reflect.TypeOf((*MockClientInterface)(nil).RbacServiceAPIUpdateRoleBindingWithBody), varargs...)
 }
 
+// RuntimeSecurityAPIAckAnomalies mocks base method.
+func (m *MockClientInterface) RuntimeSecurityAPIAckAnomalies(ctx context.Context, body sdk.RuntimeSecurityAPIAckAnomaliesJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIAckAnomalies", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIAckAnomalies indicates an expected call of RuntimeSecurityAPIAckAnomalies.
+func (mr *MockClientInterfaceMockRecorder) RuntimeSecurityAPIAckAnomalies(ctx, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIAckAnomalies", reflect.TypeOf((*MockClientInterface)(nil).RuntimeSecurityAPIAckAnomalies), varargs...)
+}
+
+// RuntimeSecurityAPIAckAnomaliesWithBody mocks base method.
+func (m *MockClientInterface) RuntimeSecurityAPIAckAnomaliesWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIAckAnomaliesWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIAckAnomaliesWithBody indicates an expected call of RuntimeSecurityAPIAckAnomaliesWithBody.
+func (mr *MockClientInterfaceMockRecorder) RuntimeSecurityAPIAckAnomaliesWithBody(ctx, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIAckAnomaliesWithBody", reflect.TypeOf((*MockClientInterface)(nil).RuntimeSecurityAPIAckAnomaliesWithBody), varargs...)
+}
+
+// RuntimeSecurityAPIAddListEntries mocks base method.
+func (m *MockClientInterface) RuntimeSecurityAPIAddListEntries(ctx context.Context, id string, body sdk.RuntimeSecurityAPIAddListEntriesJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, id, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIAddListEntries", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIAddListEntries indicates an expected call of RuntimeSecurityAPIAddListEntries.
+func (mr *MockClientInterfaceMockRecorder) RuntimeSecurityAPIAddListEntries(ctx, id, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, id, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIAddListEntries", reflect.TypeOf((*MockClientInterface)(nil).RuntimeSecurityAPIAddListEntries), varargs...)
+}
+
+// RuntimeSecurityAPIAddListEntriesWithBody mocks base method.
+func (m *MockClientInterface) RuntimeSecurityAPIAddListEntriesWithBody(ctx context.Context, id, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, id, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIAddListEntriesWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIAddListEntriesWithBody indicates an expected call of RuntimeSecurityAPIAddListEntriesWithBody.
+func (mr *MockClientInterfaceMockRecorder) RuntimeSecurityAPIAddListEntriesWithBody(ctx, id, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, id, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIAddListEntriesWithBody", reflect.TypeOf((*MockClientInterface)(nil).RuntimeSecurityAPIAddListEntriesWithBody), varargs...)
+}
+
+// RuntimeSecurityAPICloseAnomalies mocks base method.
+func (m *MockClientInterface) RuntimeSecurityAPICloseAnomalies(ctx context.Context, body sdk.RuntimeSecurityAPICloseAnomaliesJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPICloseAnomalies", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPICloseAnomalies indicates an expected call of RuntimeSecurityAPICloseAnomalies.
+func (mr *MockClientInterfaceMockRecorder) RuntimeSecurityAPICloseAnomalies(ctx, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPICloseAnomalies", reflect.TypeOf((*MockClientInterface)(nil).RuntimeSecurityAPICloseAnomalies), varargs...)
+}
+
+// RuntimeSecurityAPICloseAnomaliesWithBody mocks base method.
+func (m *MockClientInterface) RuntimeSecurityAPICloseAnomaliesWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPICloseAnomaliesWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPICloseAnomaliesWithBody indicates an expected call of RuntimeSecurityAPICloseAnomaliesWithBody.
+func (mr *MockClientInterfaceMockRecorder) RuntimeSecurityAPICloseAnomaliesWithBody(ctx, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPICloseAnomaliesWithBody", reflect.TypeOf((*MockClientInterface)(nil).RuntimeSecurityAPICloseAnomaliesWithBody), varargs...)
+}
+
+// RuntimeSecurityAPICreateList mocks base method.
+func (m *MockClientInterface) RuntimeSecurityAPICreateList(ctx context.Context, body sdk.RuntimeSecurityAPICreateListJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPICreateList", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPICreateList indicates an expected call of RuntimeSecurityAPICreateList.
+func (mr *MockClientInterfaceMockRecorder) RuntimeSecurityAPICreateList(ctx, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPICreateList", reflect.TypeOf((*MockClientInterface)(nil).RuntimeSecurityAPICreateList), varargs...)
+}
+
+// RuntimeSecurityAPICreateListWithBody mocks base method.
+func (m *MockClientInterface) RuntimeSecurityAPICreateListWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPICreateListWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPICreateListWithBody indicates an expected call of RuntimeSecurityAPICreateListWithBody.
+func (mr *MockClientInterfaceMockRecorder) RuntimeSecurityAPICreateListWithBody(ctx, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPICreateListWithBody", reflect.TypeOf((*MockClientInterface)(nil).RuntimeSecurityAPICreateListWithBody), varargs...)
+}
+
+// RuntimeSecurityAPICreateRule mocks base method.
+func (m *MockClientInterface) RuntimeSecurityAPICreateRule(ctx context.Context, body sdk.RuntimeSecurityAPICreateRuleJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPICreateRule", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPICreateRule indicates an expected call of RuntimeSecurityAPICreateRule.
+func (mr *MockClientInterfaceMockRecorder) RuntimeSecurityAPICreateRule(ctx, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPICreateRule", reflect.TypeOf((*MockClientInterface)(nil).RuntimeSecurityAPICreateRule), varargs...)
+}
+
+// RuntimeSecurityAPICreateRuleWithBody mocks base method.
+func (m *MockClientInterface) RuntimeSecurityAPICreateRuleWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPICreateRuleWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPICreateRuleWithBody indicates an expected call of RuntimeSecurityAPICreateRuleWithBody.
+func (mr *MockClientInterfaceMockRecorder) RuntimeSecurityAPICreateRuleWithBody(ctx, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPICreateRuleWithBody", reflect.TypeOf((*MockClientInterface)(nil).RuntimeSecurityAPICreateRuleWithBody), varargs...)
+}
+
+// RuntimeSecurityAPIDeleteLists mocks base method.
+func (m *MockClientInterface) RuntimeSecurityAPIDeleteLists(ctx context.Context, body sdk.RuntimeSecurityAPIDeleteListsJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIDeleteLists", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIDeleteLists indicates an expected call of RuntimeSecurityAPIDeleteLists.
+func (mr *MockClientInterfaceMockRecorder) RuntimeSecurityAPIDeleteLists(ctx, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIDeleteLists", reflect.TypeOf((*MockClientInterface)(nil).RuntimeSecurityAPIDeleteLists), varargs...)
+}
+
+// RuntimeSecurityAPIDeleteListsWithBody mocks base method.
+func (m *MockClientInterface) RuntimeSecurityAPIDeleteListsWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIDeleteListsWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIDeleteListsWithBody indicates an expected call of RuntimeSecurityAPIDeleteListsWithBody.
+func (mr *MockClientInterfaceMockRecorder) RuntimeSecurityAPIDeleteListsWithBody(ctx, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIDeleteListsWithBody", reflect.TypeOf((*MockClientInterface)(nil).RuntimeSecurityAPIDeleteListsWithBody), varargs...)
+}
+
+// RuntimeSecurityAPIDeleteRules mocks base method.
+func (m *MockClientInterface) RuntimeSecurityAPIDeleteRules(ctx context.Context, body sdk.RuntimeSecurityAPIDeleteRulesJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIDeleteRules", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIDeleteRules indicates an expected call of RuntimeSecurityAPIDeleteRules.
+func (mr *MockClientInterfaceMockRecorder) RuntimeSecurityAPIDeleteRules(ctx, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIDeleteRules", reflect.TypeOf((*MockClientInterface)(nil).RuntimeSecurityAPIDeleteRules), varargs...)
+}
+
+// RuntimeSecurityAPIDeleteRulesWithBody mocks base method.
+func (m *MockClientInterface) RuntimeSecurityAPIDeleteRulesWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIDeleteRulesWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIDeleteRulesWithBody indicates an expected call of RuntimeSecurityAPIDeleteRulesWithBody.
+func (mr *MockClientInterfaceMockRecorder) RuntimeSecurityAPIDeleteRulesWithBody(ctx, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIDeleteRulesWithBody", reflect.TypeOf((*MockClientInterface)(nil).RuntimeSecurityAPIDeleteRulesWithBody), varargs...)
+}
+
+// RuntimeSecurityAPIEditRule mocks base method.
+func (m *MockClientInterface) RuntimeSecurityAPIEditRule(ctx context.Context, id string, body sdk.RuntimeSecurityAPIEditRuleJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, id, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIEditRule", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIEditRule indicates an expected call of RuntimeSecurityAPIEditRule.
+func (mr *MockClientInterfaceMockRecorder) RuntimeSecurityAPIEditRule(ctx, id, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, id, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIEditRule", reflect.TypeOf((*MockClientInterface)(nil).RuntimeSecurityAPIEditRule), varargs...)
+}
+
+// RuntimeSecurityAPIEditRuleWithBody mocks base method.
+func (m *MockClientInterface) RuntimeSecurityAPIEditRuleWithBody(ctx context.Context, id, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, id, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIEditRuleWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIEditRuleWithBody indicates an expected call of RuntimeSecurityAPIEditRuleWithBody.
+func (mr *MockClientInterfaceMockRecorder) RuntimeSecurityAPIEditRuleWithBody(ctx, id, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, id, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIEditRuleWithBody", reflect.TypeOf((*MockClientInterface)(nil).RuntimeSecurityAPIEditRuleWithBody), varargs...)
+}
+
+// RuntimeSecurityAPIGetAnomalies mocks base method.
+func (m *MockClientInterface) RuntimeSecurityAPIGetAnomalies(ctx context.Context, params *sdk.RuntimeSecurityAPIGetAnomaliesParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIGetAnomalies", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIGetAnomalies indicates an expected call of RuntimeSecurityAPIGetAnomalies.
+func (mr *MockClientInterfaceMockRecorder) RuntimeSecurityAPIGetAnomalies(ctx, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIGetAnomalies", reflect.TypeOf((*MockClientInterface)(nil).RuntimeSecurityAPIGetAnomalies), varargs...)
+}
+
+// RuntimeSecurityAPIGetAnomaliesOverview mocks base method.
+func (m *MockClientInterface) RuntimeSecurityAPIGetAnomaliesOverview(ctx context.Context, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIGetAnomaliesOverview", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIGetAnomaliesOverview indicates an expected call of RuntimeSecurityAPIGetAnomaliesOverview.
+func (mr *MockClientInterfaceMockRecorder) RuntimeSecurityAPIGetAnomaliesOverview(ctx interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIGetAnomaliesOverview", reflect.TypeOf((*MockClientInterface)(nil).RuntimeSecurityAPIGetAnomaliesOverview), varargs...)
+}
+
+// RuntimeSecurityAPIGetAnomaly mocks base method.
+func (m *MockClientInterface) RuntimeSecurityAPIGetAnomaly(ctx context.Context, id string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, id}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIGetAnomaly", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIGetAnomaly indicates an expected call of RuntimeSecurityAPIGetAnomaly.
+func (mr *MockClientInterfaceMockRecorder) RuntimeSecurityAPIGetAnomaly(ctx, id interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, id}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIGetAnomaly", reflect.TypeOf((*MockClientInterface)(nil).RuntimeSecurityAPIGetAnomaly), varargs...)
+}
+
+// RuntimeSecurityAPIGetAnomalyEvents mocks base method.
+func (m *MockClientInterface) RuntimeSecurityAPIGetAnomalyEvents(ctx context.Context, id string, params *sdk.RuntimeSecurityAPIGetAnomalyEventsParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, id, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIGetAnomalyEvents", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIGetAnomalyEvents indicates an expected call of RuntimeSecurityAPIGetAnomalyEvents.
+func (mr *MockClientInterfaceMockRecorder) RuntimeSecurityAPIGetAnomalyEvents(ctx, id, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, id, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIGetAnomalyEvents", reflect.TypeOf((*MockClientInterface)(nil).RuntimeSecurityAPIGetAnomalyEvents), varargs...)
+}
+
+// RuntimeSecurityAPIGetClusterWorkloadsNetflow mocks base method.
+func (m *MockClientInterface) RuntimeSecurityAPIGetClusterWorkloadsNetflow(ctx context.Context, clusterId string, params *sdk.RuntimeSecurityAPIGetClusterWorkloadsNetflowParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIGetClusterWorkloadsNetflow", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIGetClusterWorkloadsNetflow indicates an expected call of RuntimeSecurityAPIGetClusterWorkloadsNetflow.
+func (mr *MockClientInterfaceMockRecorder) RuntimeSecurityAPIGetClusterWorkloadsNetflow(ctx, clusterId, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIGetClusterWorkloadsNetflow", reflect.TypeOf((*MockClientInterface)(nil).RuntimeSecurityAPIGetClusterWorkloadsNetflow), varargs...)
+}
+
+// RuntimeSecurityAPIGetList mocks base method.
+func (m *MockClientInterface) RuntimeSecurityAPIGetList(ctx context.Context, id string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, id}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIGetList", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIGetList indicates an expected call of RuntimeSecurityAPIGetList.
+func (mr *MockClientInterfaceMockRecorder) RuntimeSecurityAPIGetList(ctx, id interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, id}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIGetList", reflect.TypeOf((*MockClientInterface)(nil).RuntimeSecurityAPIGetList), varargs...)
+}
+
+// RuntimeSecurityAPIGetListEntries mocks base method.
+func (m *MockClientInterface) RuntimeSecurityAPIGetListEntries(ctx context.Context, id string, params *sdk.RuntimeSecurityAPIGetListEntriesParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, id, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIGetListEntries", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIGetListEntries indicates an expected call of RuntimeSecurityAPIGetListEntries.
+func (mr *MockClientInterfaceMockRecorder) RuntimeSecurityAPIGetListEntries(ctx, id, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, id, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIGetListEntries", reflect.TypeOf((*MockClientInterface)(nil).RuntimeSecurityAPIGetListEntries), varargs...)
+}
+
+// RuntimeSecurityAPIGetLists mocks base method.
+func (m *MockClientInterface) RuntimeSecurityAPIGetLists(ctx context.Context, params *sdk.RuntimeSecurityAPIGetListsParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIGetLists", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIGetLists indicates an expected call of RuntimeSecurityAPIGetLists.
+func (mr *MockClientInterfaceMockRecorder) RuntimeSecurityAPIGetLists(ctx, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIGetLists", reflect.TypeOf((*MockClientInterface)(nil).RuntimeSecurityAPIGetLists), varargs...)
+}
+
+// RuntimeSecurityAPIGetNetflowGraph mocks base method.
+func (m *MockClientInterface) RuntimeSecurityAPIGetNetflowGraph(ctx context.Context, clusterId string, params *sdk.RuntimeSecurityAPIGetNetflowGraphParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIGetNetflowGraph", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIGetNetflowGraph indicates an expected call of RuntimeSecurityAPIGetNetflowGraph.
+func (mr *MockClientInterfaceMockRecorder) RuntimeSecurityAPIGetNetflowGraph(ctx, clusterId, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIGetNetflowGraph", reflect.TypeOf((*MockClientInterface)(nil).RuntimeSecurityAPIGetNetflowGraph), varargs...)
+}
+
+// RuntimeSecurityAPIGetNetflowList mocks base method.
+func (m *MockClientInterface) RuntimeSecurityAPIGetNetflowList(ctx context.Context, clusterId string, params *sdk.RuntimeSecurityAPIGetNetflowListParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIGetNetflowList", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIGetNetflowList indicates an expected call of RuntimeSecurityAPIGetNetflowList.
+func (mr *MockClientInterfaceMockRecorder) RuntimeSecurityAPIGetNetflowList(ctx, clusterId, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIGetNetflowList", reflect.TypeOf((*MockClientInterface)(nil).RuntimeSecurityAPIGetNetflowList), varargs...)
+}
+
+// RuntimeSecurityAPIGetNetflowTrend mocks base method.
+func (m *MockClientInterface) RuntimeSecurityAPIGetNetflowTrend(ctx context.Context, clusterId string, params *sdk.RuntimeSecurityAPIGetNetflowTrendParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIGetNetflowTrend", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIGetNetflowTrend indicates an expected call of RuntimeSecurityAPIGetNetflowTrend.
+func (mr *MockClientInterfaceMockRecorder) RuntimeSecurityAPIGetNetflowTrend(ctx, clusterId, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIGetNetflowTrend", reflect.TypeOf((*MockClientInterface)(nil).RuntimeSecurityAPIGetNetflowTrend), varargs...)
+}
+
+// RuntimeSecurityAPIGetRule mocks base method.
+func (m *MockClientInterface) RuntimeSecurityAPIGetRule(ctx context.Context, id string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, id}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIGetRule", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIGetRule indicates an expected call of RuntimeSecurityAPIGetRule.
+func (mr *MockClientInterfaceMockRecorder) RuntimeSecurityAPIGetRule(ctx, id interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, id}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIGetRule", reflect.TypeOf((*MockClientInterface)(nil).RuntimeSecurityAPIGetRule), varargs...)
+}
+
+// RuntimeSecurityAPIGetRules mocks base method.
+func (m *MockClientInterface) RuntimeSecurityAPIGetRules(ctx context.Context, params *sdk.RuntimeSecurityAPIGetRulesParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIGetRules", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIGetRules indicates an expected call of RuntimeSecurityAPIGetRules.
+func (mr *MockClientInterfaceMockRecorder) RuntimeSecurityAPIGetRules(ctx, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIGetRules", reflect.TypeOf((*MockClientInterface)(nil).RuntimeSecurityAPIGetRules), varargs...)
+}
+
+// RuntimeSecurityAPIGetRuntimeEventGroups mocks base method.
+func (m *MockClientInterface) RuntimeSecurityAPIGetRuntimeEventGroups(ctx context.Context, params *sdk.RuntimeSecurityAPIGetRuntimeEventGroupsParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIGetRuntimeEventGroups", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIGetRuntimeEventGroups indicates an expected call of RuntimeSecurityAPIGetRuntimeEventGroups.
+func (mr *MockClientInterfaceMockRecorder) RuntimeSecurityAPIGetRuntimeEventGroups(ctx, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIGetRuntimeEventGroups", reflect.TypeOf((*MockClientInterface)(nil).RuntimeSecurityAPIGetRuntimeEventGroups), varargs...)
+}
+
+// RuntimeSecurityAPIGetRuntimeEvents mocks base method.
+func (m *MockClientInterface) RuntimeSecurityAPIGetRuntimeEvents(ctx context.Context, params *sdk.RuntimeSecurityAPIGetRuntimeEventsParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIGetRuntimeEvents", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIGetRuntimeEvents indicates an expected call of RuntimeSecurityAPIGetRuntimeEvents.
+func (mr *MockClientInterfaceMockRecorder) RuntimeSecurityAPIGetRuntimeEvents(ctx, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIGetRuntimeEvents", reflect.TypeOf((*MockClientInterface)(nil).RuntimeSecurityAPIGetRuntimeEvents), varargs...)
+}
+
+// RuntimeSecurityAPIGetRuntimeEventsProcessTree mocks base method.
+func (m *MockClientInterface) RuntimeSecurityAPIGetRuntimeEventsProcessTree(ctx context.Context, clusterId string, params *sdk.RuntimeSecurityAPIGetRuntimeEventsProcessTreeParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIGetRuntimeEventsProcessTree", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIGetRuntimeEventsProcessTree indicates an expected call of RuntimeSecurityAPIGetRuntimeEventsProcessTree.
+func (mr *MockClientInterfaceMockRecorder) RuntimeSecurityAPIGetRuntimeEventsProcessTree(ctx, clusterId, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIGetRuntimeEventsProcessTree", reflect.TypeOf((*MockClientInterface)(nil).RuntimeSecurityAPIGetRuntimeEventsProcessTree), varargs...)
+}
+
+// RuntimeSecurityAPIRemoveListEntries mocks base method.
+func (m *MockClientInterface) RuntimeSecurityAPIRemoveListEntries(ctx context.Context, id string, body sdk.RuntimeSecurityAPIRemoveListEntriesJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, id, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIRemoveListEntries", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIRemoveListEntries indicates an expected call of RuntimeSecurityAPIRemoveListEntries.
+func (mr *MockClientInterfaceMockRecorder) RuntimeSecurityAPIRemoveListEntries(ctx, id, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, id, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIRemoveListEntries", reflect.TypeOf((*MockClientInterface)(nil).RuntimeSecurityAPIRemoveListEntries), varargs...)
+}
+
+// RuntimeSecurityAPIRemoveListEntriesWithBody mocks base method.
+func (m *MockClientInterface) RuntimeSecurityAPIRemoveListEntriesWithBody(ctx context.Context, id, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, id, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIRemoveListEntriesWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIRemoveListEntriesWithBody indicates an expected call of RuntimeSecurityAPIRemoveListEntriesWithBody.
+func (mr *MockClientInterfaceMockRecorder) RuntimeSecurityAPIRemoveListEntriesWithBody(ctx, id, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, id, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIRemoveListEntriesWithBody", reflect.TypeOf((*MockClientInterface)(nil).RuntimeSecurityAPIRemoveListEntriesWithBody), varargs...)
+}
+
+// RuntimeSecurityAPIToggleRules mocks base method.
+func (m *MockClientInterface) RuntimeSecurityAPIToggleRules(ctx context.Context, body sdk.RuntimeSecurityAPIToggleRulesJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIToggleRules", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIToggleRules indicates an expected call of RuntimeSecurityAPIToggleRules.
+func (mr *MockClientInterfaceMockRecorder) RuntimeSecurityAPIToggleRules(ctx, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIToggleRules", reflect.TypeOf((*MockClientInterface)(nil).RuntimeSecurityAPIToggleRules), varargs...)
+}
+
+// RuntimeSecurityAPIToggleRulesWithBody mocks base method.
+func (m *MockClientInterface) RuntimeSecurityAPIToggleRulesWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIToggleRulesWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIToggleRulesWithBody indicates an expected call of RuntimeSecurityAPIToggleRulesWithBody.
+func (mr *MockClientInterfaceMockRecorder) RuntimeSecurityAPIToggleRulesWithBody(ctx, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIToggleRulesWithBody", reflect.TypeOf((*MockClientInterface)(nil).RuntimeSecurityAPIToggleRulesWithBody), varargs...)
+}
+
+// RuntimeSecurityAPITriggerAnomalyWebhook mocks base method.
+func (m *MockClientInterface) RuntimeSecurityAPITriggerAnomalyWebhook(ctx context.Context, id string, body sdk.RuntimeSecurityAPITriggerAnomalyWebhookJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, id, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPITriggerAnomalyWebhook", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPITriggerAnomalyWebhook indicates an expected call of RuntimeSecurityAPITriggerAnomalyWebhook.
+func (mr *MockClientInterfaceMockRecorder) RuntimeSecurityAPITriggerAnomalyWebhook(ctx, id, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, id, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPITriggerAnomalyWebhook", reflect.TypeOf((*MockClientInterface)(nil).RuntimeSecurityAPITriggerAnomalyWebhook), varargs...)
+}
+
+// RuntimeSecurityAPITriggerAnomalyWebhookWithBody mocks base method.
+func (m *MockClientInterface) RuntimeSecurityAPITriggerAnomalyWebhookWithBody(ctx context.Context, id, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, id, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPITriggerAnomalyWebhookWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPITriggerAnomalyWebhookWithBody indicates an expected call of RuntimeSecurityAPITriggerAnomalyWebhookWithBody.
+func (mr *MockClientInterfaceMockRecorder) RuntimeSecurityAPITriggerAnomalyWebhookWithBody(ctx, id, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, id, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPITriggerAnomalyWebhookWithBody", reflect.TypeOf((*MockClientInterface)(nil).RuntimeSecurityAPITriggerAnomalyWebhookWithBody), varargs...)
+}
+
+// RuntimeSecurityAPIValidate mocks base method.
+func (m *MockClientInterface) RuntimeSecurityAPIValidate(ctx context.Context, body sdk.RuntimeSecurityAPIValidateJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIValidate", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIValidate indicates an expected call of RuntimeSecurityAPIValidate.
+func (mr *MockClientInterfaceMockRecorder) RuntimeSecurityAPIValidate(ctx, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIValidate", reflect.TypeOf((*MockClientInterface)(nil).RuntimeSecurityAPIValidate), varargs...)
+}
+
+// RuntimeSecurityAPIValidateWithBody mocks base method.
+func (m *MockClientInterface) RuntimeSecurityAPIValidateWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIValidateWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIValidateWithBody indicates an expected call of RuntimeSecurityAPIValidateWithBody.
+func (mr *MockClientInterfaceMockRecorder) RuntimeSecurityAPIValidateWithBody(ctx, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIValidateWithBody", reflect.TypeOf((*MockClientInterface)(nil).RuntimeSecurityAPIValidateWithBody), varargs...)
+}
+
 // SSOAPICreateSSOConnection mocks base method.
 func (m *MockClientInterface) SSOAPICreateSSOConnection(ctx context.Context, body sdk.SSOAPICreateSSOConnectionJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
@@ -8781,6 +9581,1406 @@ func (m *MockClientWithResponsesInterface) RbacServiceAPIUpdateRoleBindingWithRe
 func (mr *MockClientWithResponsesInterfaceMockRecorder) RbacServiceAPIUpdateRoleBindingWithResponse(ctx, organizationId, roleBindingId, body interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RbacServiceAPIUpdateRoleBindingWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RbacServiceAPIUpdateRoleBindingWithResponse), ctx, organizationId, roleBindingId, body)
+}
+
+// RuntimeSecurityAPIAckAnomalies mocks base method.
+func (m *MockClientWithResponsesInterface) RuntimeSecurityAPIAckAnomalies(ctx context.Context, body sdk.RuntimeSecurityAPIAckAnomaliesJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIAckAnomalies", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIAckAnomalies indicates an expected call of RuntimeSecurityAPIAckAnomalies.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RuntimeSecurityAPIAckAnomalies(ctx, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIAckAnomalies", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RuntimeSecurityAPIAckAnomalies), varargs...)
+}
+
+// RuntimeSecurityAPIAckAnomaliesWithBody mocks base method.
+func (m *MockClientWithResponsesInterface) RuntimeSecurityAPIAckAnomaliesWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIAckAnomaliesWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIAckAnomaliesWithBody indicates an expected call of RuntimeSecurityAPIAckAnomaliesWithBody.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RuntimeSecurityAPIAckAnomaliesWithBody(ctx, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIAckAnomaliesWithBody", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RuntimeSecurityAPIAckAnomaliesWithBody), varargs...)
+}
+
+// RuntimeSecurityAPIAckAnomaliesWithBodyWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) RuntimeSecurityAPIAckAnomaliesWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*sdk.RuntimeSecurityAPIAckAnomaliesResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIAckAnomaliesWithBodyWithResponse", ctx, contentType, body)
+	ret0, _ := ret[0].(*sdk.RuntimeSecurityAPIAckAnomaliesResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIAckAnomaliesWithBodyWithResponse indicates an expected call of RuntimeSecurityAPIAckAnomaliesWithBodyWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RuntimeSecurityAPIAckAnomaliesWithBodyWithResponse(ctx, contentType, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIAckAnomaliesWithBodyWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RuntimeSecurityAPIAckAnomaliesWithBodyWithResponse), ctx, contentType, body)
+}
+
+// RuntimeSecurityAPIAckAnomaliesWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) RuntimeSecurityAPIAckAnomaliesWithResponse(ctx context.Context, body sdk.RuntimeSecurityAPIAckAnomaliesJSONRequestBody) (*sdk.RuntimeSecurityAPIAckAnomaliesResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIAckAnomaliesWithResponse", ctx, body)
+	ret0, _ := ret[0].(*sdk.RuntimeSecurityAPIAckAnomaliesResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIAckAnomaliesWithResponse indicates an expected call of RuntimeSecurityAPIAckAnomaliesWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RuntimeSecurityAPIAckAnomaliesWithResponse(ctx, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIAckAnomaliesWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RuntimeSecurityAPIAckAnomaliesWithResponse), ctx, body)
+}
+
+// RuntimeSecurityAPIAddListEntries mocks base method.
+func (m *MockClientWithResponsesInterface) RuntimeSecurityAPIAddListEntries(ctx context.Context, id string, body sdk.RuntimeSecurityAPIAddListEntriesJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, id, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIAddListEntries", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIAddListEntries indicates an expected call of RuntimeSecurityAPIAddListEntries.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RuntimeSecurityAPIAddListEntries(ctx, id, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, id, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIAddListEntries", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RuntimeSecurityAPIAddListEntries), varargs...)
+}
+
+// RuntimeSecurityAPIAddListEntriesWithBody mocks base method.
+func (m *MockClientWithResponsesInterface) RuntimeSecurityAPIAddListEntriesWithBody(ctx context.Context, id, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, id, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIAddListEntriesWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIAddListEntriesWithBody indicates an expected call of RuntimeSecurityAPIAddListEntriesWithBody.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RuntimeSecurityAPIAddListEntriesWithBody(ctx, id, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, id, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIAddListEntriesWithBody", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RuntimeSecurityAPIAddListEntriesWithBody), varargs...)
+}
+
+// RuntimeSecurityAPIAddListEntriesWithBodyWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) RuntimeSecurityAPIAddListEntriesWithBodyWithResponse(ctx context.Context, id, contentType string, body io.Reader) (*sdk.RuntimeSecurityAPIAddListEntriesResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIAddListEntriesWithBodyWithResponse", ctx, id, contentType, body)
+	ret0, _ := ret[0].(*sdk.RuntimeSecurityAPIAddListEntriesResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIAddListEntriesWithBodyWithResponse indicates an expected call of RuntimeSecurityAPIAddListEntriesWithBodyWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RuntimeSecurityAPIAddListEntriesWithBodyWithResponse(ctx, id, contentType, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIAddListEntriesWithBodyWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RuntimeSecurityAPIAddListEntriesWithBodyWithResponse), ctx, id, contentType, body)
+}
+
+// RuntimeSecurityAPIAddListEntriesWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) RuntimeSecurityAPIAddListEntriesWithResponse(ctx context.Context, id string, body sdk.RuntimeSecurityAPIAddListEntriesJSONRequestBody) (*sdk.RuntimeSecurityAPIAddListEntriesResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIAddListEntriesWithResponse", ctx, id, body)
+	ret0, _ := ret[0].(*sdk.RuntimeSecurityAPIAddListEntriesResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIAddListEntriesWithResponse indicates an expected call of RuntimeSecurityAPIAddListEntriesWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RuntimeSecurityAPIAddListEntriesWithResponse(ctx, id, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIAddListEntriesWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RuntimeSecurityAPIAddListEntriesWithResponse), ctx, id, body)
+}
+
+// RuntimeSecurityAPICloseAnomalies mocks base method.
+func (m *MockClientWithResponsesInterface) RuntimeSecurityAPICloseAnomalies(ctx context.Context, body sdk.RuntimeSecurityAPICloseAnomaliesJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPICloseAnomalies", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPICloseAnomalies indicates an expected call of RuntimeSecurityAPICloseAnomalies.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RuntimeSecurityAPICloseAnomalies(ctx, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPICloseAnomalies", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RuntimeSecurityAPICloseAnomalies), varargs...)
+}
+
+// RuntimeSecurityAPICloseAnomaliesWithBody mocks base method.
+func (m *MockClientWithResponsesInterface) RuntimeSecurityAPICloseAnomaliesWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPICloseAnomaliesWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPICloseAnomaliesWithBody indicates an expected call of RuntimeSecurityAPICloseAnomaliesWithBody.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RuntimeSecurityAPICloseAnomaliesWithBody(ctx, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPICloseAnomaliesWithBody", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RuntimeSecurityAPICloseAnomaliesWithBody), varargs...)
+}
+
+// RuntimeSecurityAPICloseAnomaliesWithBodyWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) RuntimeSecurityAPICloseAnomaliesWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*sdk.RuntimeSecurityAPICloseAnomaliesResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPICloseAnomaliesWithBodyWithResponse", ctx, contentType, body)
+	ret0, _ := ret[0].(*sdk.RuntimeSecurityAPICloseAnomaliesResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPICloseAnomaliesWithBodyWithResponse indicates an expected call of RuntimeSecurityAPICloseAnomaliesWithBodyWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RuntimeSecurityAPICloseAnomaliesWithBodyWithResponse(ctx, contentType, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPICloseAnomaliesWithBodyWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RuntimeSecurityAPICloseAnomaliesWithBodyWithResponse), ctx, contentType, body)
+}
+
+// RuntimeSecurityAPICloseAnomaliesWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) RuntimeSecurityAPICloseAnomaliesWithResponse(ctx context.Context, body sdk.RuntimeSecurityAPICloseAnomaliesJSONRequestBody) (*sdk.RuntimeSecurityAPICloseAnomaliesResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPICloseAnomaliesWithResponse", ctx, body)
+	ret0, _ := ret[0].(*sdk.RuntimeSecurityAPICloseAnomaliesResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPICloseAnomaliesWithResponse indicates an expected call of RuntimeSecurityAPICloseAnomaliesWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RuntimeSecurityAPICloseAnomaliesWithResponse(ctx, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPICloseAnomaliesWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RuntimeSecurityAPICloseAnomaliesWithResponse), ctx, body)
+}
+
+// RuntimeSecurityAPICreateList mocks base method.
+func (m *MockClientWithResponsesInterface) RuntimeSecurityAPICreateList(ctx context.Context, body sdk.RuntimeSecurityAPICreateListJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPICreateList", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPICreateList indicates an expected call of RuntimeSecurityAPICreateList.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RuntimeSecurityAPICreateList(ctx, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPICreateList", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RuntimeSecurityAPICreateList), varargs...)
+}
+
+// RuntimeSecurityAPICreateListWithBody mocks base method.
+func (m *MockClientWithResponsesInterface) RuntimeSecurityAPICreateListWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPICreateListWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPICreateListWithBody indicates an expected call of RuntimeSecurityAPICreateListWithBody.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RuntimeSecurityAPICreateListWithBody(ctx, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPICreateListWithBody", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RuntimeSecurityAPICreateListWithBody), varargs...)
+}
+
+// RuntimeSecurityAPICreateListWithBodyWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) RuntimeSecurityAPICreateListWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*sdk.RuntimeSecurityAPICreateListResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPICreateListWithBodyWithResponse", ctx, contentType, body)
+	ret0, _ := ret[0].(*sdk.RuntimeSecurityAPICreateListResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPICreateListWithBodyWithResponse indicates an expected call of RuntimeSecurityAPICreateListWithBodyWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RuntimeSecurityAPICreateListWithBodyWithResponse(ctx, contentType, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPICreateListWithBodyWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RuntimeSecurityAPICreateListWithBodyWithResponse), ctx, contentType, body)
+}
+
+// RuntimeSecurityAPICreateListWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) RuntimeSecurityAPICreateListWithResponse(ctx context.Context, body sdk.RuntimeSecurityAPICreateListJSONRequestBody) (*sdk.RuntimeSecurityAPICreateListResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPICreateListWithResponse", ctx, body)
+	ret0, _ := ret[0].(*sdk.RuntimeSecurityAPICreateListResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPICreateListWithResponse indicates an expected call of RuntimeSecurityAPICreateListWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RuntimeSecurityAPICreateListWithResponse(ctx, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPICreateListWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RuntimeSecurityAPICreateListWithResponse), ctx, body)
+}
+
+// RuntimeSecurityAPICreateRule mocks base method.
+func (m *MockClientWithResponsesInterface) RuntimeSecurityAPICreateRule(ctx context.Context, body sdk.RuntimeSecurityAPICreateRuleJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPICreateRule", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPICreateRule indicates an expected call of RuntimeSecurityAPICreateRule.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RuntimeSecurityAPICreateRule(ctx, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPICreateRule", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RuntimeSecurityAPICreateRule), varargs...)
+}
+
+// RuntimeSecurityAPICreateRuleWithBody mocks base method.
+func (m *MockClientWithResponsesInterface) RuntimeSecurityAPICreateRuleWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPICreateRuleWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPICreateRuleWithBody indicates an expected call of RuntimeSecurityAPICreateRuleWithBody.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RuntimeSecurityAPICreateRuleWithBody(ctx, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPICreateRuleWithBody", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RuntimeSecurityAPICreateRuleWithBody), varargs...)
+}
+
+// RuntimeSecurityAPICreateRuleWithBodyWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) RuntimeSecurityAPICreateRuleWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*sdk.RuntimeSecurityAPICreateRuleResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPICreateRuleWithBodyWithResponse", ctx, contentType, body)
+	ret0, _ := ret[0].(*sdk.RuntimeSecurityAPICreateRuleResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPICreateRuleWithBodyWithResponse indicates an expected call of RuntimeSecurityAPICreateRuleWithBodyWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RuntimeSecurityAPICreateRuleWithBodyWithResponse(ctx, contentType, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPICreateRuleWithBodyWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RuntimeSecurityAPICreateRuleWithBodyWithResponse), ctx, contentType, body)
+}
+
+// RuntimeSecurityAPICreateRuleWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) RuntimeSecurityAPICreateRuleWithResponse(ctx context.Context, body sdk.RuntimeSecurityAPICreateRuleJSONRequestBody) (*sdk.RuntimeSecurityAPICreateRuleResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPICreateRuleWithResponse", ctx, body)
+	ret0, _ := ret[0].(*sdk.RuntimeSecurityAPICreateRuleResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPICreateRuleWithResponse indicates an expected call of RuntimeSecurityAPICreateRuleWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RuntimeSecurityAPICreateRuleWithResponse(ctx, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPICreateRuleWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RuntimeSecurityAPICreateRuleWithResponse), ctx, body)
+}
+
+// RuntimeSecurityAPIDeleteLists mocks base method.
+func (m *MockClientWithResponsesInterface) RuntimeSecurityAPIDeleteLists(ctx context.Context, body sdk.RuntimeSecurityAPIDeleteListsJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIDeleteLists", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIDeleteLists indicates an expected call of RuntimeSecurityAPIDeleteLists.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RuntimeSecurityAPIDeleteLists(ctx, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIDeleteLists", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RuntimeSecurityAPIDeleteLists), varargs...)
+}
+
+// RuntimeSecurityAPIDeleteListsWithBody mocks base method.
+func (m *MockClientWithResponsesInterface) RuntimeSecurityAPIDeleteListsWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIDeleteListsWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIDeleteListsWithBody indicates an expected call of RuntimeSecurityAPIDeleteListsWithBody.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RuntimeSecurityAPIDeleteListsWithBody(ctx, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIDeleteListsWithBody", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RuntimeSecurityAPIDeleteListsWithBody), varargs...)
+}
+
+// RuntimeSecurityAPIDeleteListsWithBodyWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) RuntimeSecurityAPIDeleteListsWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*sdk.RuntimeSecurityAPIDeleteListsResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIDeleteListsWithBodyWithResponse", ctx, contentType, body)
+	ret0, _ := ret[0].(*sdk.RuntimeSecurityAPIDeleteListsResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIDeleteListsWithBodyWithResponse indicates an expected call of RuntimeSecurityAPIDeleteListsWithBodyWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RuntimeSecurityAPIDeleteListsWithBodyWithResponse(ctx, contentType, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIDeleteListsWithBodyWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RuntimeSecurityAPIDeleteListsWithBodyWithResponse), ctx, contentType, body)
+}
+
+// RuntimeSecurityAPIDeleteListsWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) RuntimeSecurityAPIDeleteListsWithResponse(ctx context.Context, body sdk.RuntimeSecurityAPIDeleteListsJSONRequestBody) (*sdk.RuntimeSecurityAPIDeleteListsResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIDeleteListsWithResponse", ctx, body)
+	ret0, _ := ret[0].(*sdk.RuntimeSecurityAPIDeleteListsResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIDeleteListsWithResponse indicates an expected call of RuntimeSecurityAPIDeleteListsWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RuntimeSecurityAPIDeleteListsWithResponse(ctx, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIDeleteListsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RuntimeSecurityAPIDeleteListsWithResponse), ctx, body)
+}
+
+// RuntimeSecurityAPIDeleteRules mocks base method.
+func (m *MockClientWithResponsesInterface) RuntimeSecurityAPIDeleteRules(ctx context.Context, body sdk.RuntimeSecurityAPIDeleteRulesJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIDeleteRules", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIDeleteRules indicates an expected call of RuntimeSecurityAPIDeleteRules.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RuntimeSecurityAPIDeleteRules(ctx, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIDeleteRules", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RuntimeSecurityAPIDeleteRules), varargs...)
+}
+
+// RuntimeSecurityAPIDeleteRulesWithBody mocks base method.
+func (m *MockClientWithResponsesInterface) RuntimeSecurityAPIDeleteRulesWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIDeleteRulesWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIDeleteRulesWithBody indicates an expected call of RuntimeSecurityAPIDeleteRulesWithBody.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RuntimeSecurityAPIDeleteRulesWithBody(ctx, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIDeleteRulesWithBody", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RuntimeSecurityAPIDeleteRulesWithBody), varargs...)
+}
+
+// RuntimeSecurityAPIDeleteRulesWithBodyWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) RuntimeSecurityAPIDeleteRulesWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*sdk.RuntimeSecurityAPIDeleteRulesResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIDeleteRulesWithBodyWithResponse", ctx, contentType, body)
+	ret0, _ := ret[0].(*sdk.RuntimeSecurityAPIDeleteRulesResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIDeleteRulesWithBodyWithResponse indicates an expected call of RuntimeSecurityAPIDeleteRulesWithBodyWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RuntimeSecurityAPIDeleteRulesWithBodyWithResponse(ctx, contentType, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIDeleteRulesWithBodyWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RuntimeSecurityAPIDeleteRulesWithBodyWithResponse), ctx, contentType, body)
+}
+
+// RuntimeSecurityAPIDeleteRulesWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) RuntimeSecurityAPIDeleteRulesWithResponse(ctx context.Context, body sdk.RuntimeSecurityAPIDeleteRulesJSONRequestBody) (*sdk.RuntimeSecurityAPIDeleteRulesResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIDeleteRulesWithResponse", ctx, body)
+	ret0, _ := ret[0].(*sdk.RuntimeSecurityAPIDeleteRulesResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIDeleteRulesWithResponse indicates an expected call of RuntimeSecurityAPIDeleteRulesWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RuntimeSecurityAPIDeleteRulesWithResponse(ctx, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIDeleteRulesWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RuntimeSecurityAPIDeleteRulesWithResponse), ctx, body)
+}
+
+// RuntimeSecurityAPIEditRule mocks base method.
+func (m *MockClientWithResponsesInterface) RuntimeSecurityAPIEditRule(ctx context.Context, id string, body sdk.RuntimeSecurityAPIEditRuleJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, id, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIEditRule", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIEditRule indicates an expected call of RuntimeSecurityAPIEditRule.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RuntimeSecurityAPIEditRule(ctx, id, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, id, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIEditRule", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RuntimeSecurityAPIEditRule), varargs...)
+}
+
+// RuntimeSecurityAPIEditRuleWithBody mocks base method.
+func (m *MockClientWithResponsesInterface) RuntimeSecurityAPIEditRuleWithBody(ctx context.Context, id, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, id, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIEditRuleWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIEditRuleWithBody indicates an expected call of RuntimeSecurityAPIEditRuleWithBody.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RuntimeSecurityAPIEditRuleWithBody(ctx, id, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, id, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIEditRuleWithBody", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RuntimeSecurityAPIEditRuleWithBody), varargs...)
+}
+
+// RuntimeSecurityAPIEditRuleWithBodyWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) RuntimeSecurityAPIEditRuleWithBodyWithResponse(ctx context.Context, id, contentType string, body io.Reader) (*sdk.RuntimeSecurityAPIEditRuleResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIEditRuleWithBodyWithResponse", ctx, id, contentType, body)
+	ret0, _ := ret[0].(*sdk.RuntimeSecurityAPIEditRuleResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIEditRuleWithBodyWithResponse indicates an expected call of RuntimeSecurityAPIEditRuleWithBodyWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RuntimeSecurityAPIEditRuleWithBodyWithResponse(ctx, id, contentType, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIEditRuleWithBodyWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RuntimeSecurityAPIEditRuleWithBodyWithResponse), ctx, id, contentType, body)
+}
+
+// RuntimeSecurityAPIEditRuleWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) RuntimeSecurityAPIEditRuleWithResponse(ctx context.Context, id string, body sdk.RuntimeSecurityAPIEditRuleJSONRequestBody) (*sdk.RuntimeSecurityAPIEditRuleResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIEditRuleWithResponse", ctx, id, body)
+	ret0, _ := ret[0].(*sdk.RuntimeSecurityAPIEditRuleResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIEditRuleWithResponse indicates an expected call of RuntimeSecurityAPIEditRuleWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RuntimeSecurityAPIEditRuleWithResponse(ctx, id, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIEditRuleWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RuntimeSecurityAPIEditRuleWithResponse), ctx, id, body)
+}
+
+// RuntimeSecurityAPIGetAnomalies mocks base method.
+func (m *MockClientWithResponsesInterface) RuntimeSecurityAPIGetAnomalies(ctx context.Context, params *sdk.RuntimeSecurityAPIGetAnomaliesParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIGetAnomalies", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIGetAnomalies indicates an expected call of RuntimeSecurityAPIGetAnomalies.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RuntimeSecurityAPIGetAnomalies(ctx, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIGetAnomalies", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RuntimeSecurityAPIGetAnomalies), varargs...)
+}
+
+// RuntimeSecurityAPIGetAnomaliesOverview mocks base method.
+func (m *MockClientWithResponsesInterface) RuntimeSecurityAPIGetAnomaliesOverview(ctx context.Context, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIGetAnomaliesOverview", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIGetAnomaliesOverview indicates an expected call of RuntimeSecurityAPIGetAnomaliesOverview.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RuntimeSecurityAPIGetAnomaliesOverview(ctx interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIGetAnomaliesOverview", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RuntimeSecurityAPIGetAnomaliesOverview), varargs...)
+}
+
+// RuntimeSecurityAPIGetAnomaliesOverviewWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) RuntimeSecurityAPIGetAnomaliesOverviewWithResponse(ctx context.Context) (*sdk.RuntimeSecurityAPIGetAnomaliesOverviewResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIGetAnomaliesOverviewWithResponse", ctx)
+	ret0, _ := ret[0].(*sdk.RuntimeSecurityAPIGetAnomaliesOverviewResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIGetAnomaliesOverviewWithResponse indicates an expected call of RuntimeSecurityAPIGetAnomaliesOverviewWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RuntimeSecurityAPIGetAnomaliesOverviewWithResponse(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIGetAnomaliesOverviewWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RuntimeSecurityAPIGetAnomaliesOverviewWithResponse), ctx)
+}
+
+// RuntimeSecurityAPIGetAnomaliesWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) RuntimeSecurityAPIGetAnomaliesWithResponse(ctx context.Context, params *sdk.RuntimeSecurityAPIGetAnomaliesParams) (*sdk.RuntimeSecurityAPIGetAnomaliesResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIGetAnomaliesWithResponse", ctx, params)
+	ret0, _ := ret[0].(*sdk.RuntimeSecurityAPIGetAnomaliesResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIGetAnomaliesWithResponse indicates an expected call of RuntimeSecurityAPIGetAnomaliesWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RuntimeSecurityAPIGetAnomaliesWithResponse(ctx, params interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIGetAnomaliesWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RuntimeSecurityAPIGetAnomaliesWithResponse), ctx, params)
+}
+
+// RuntimeSecurityAPIGetAnomaly mocks base method.
+func (m *MockClientWithResponsesInterface) RuntimeSecurityAPIGetAnomaly(ctx context.Context, id string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, id}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIGetAnomaly", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIGetAnomaly indicates an expected call of RuntimeSecurityAPIGetAnomaly.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RuntimeSecurityAPIGetAnomaly(ctx, id interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, id}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIGetAnomaly", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RuntimeSecurityAPIGetAnomaly), varargs...)
+}
+
+// RuntimeSecurityAPIGetAnomalyEvents mocks base method.
+func (m *MockClientWithResponsesInterface) RuntimeSecurityAPIGetAnomalyEvents(ctx context.Context, id string, params *sdk.RuntimeSecurityAPIGetAnomalyEventsParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, id, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIGetAnomalyEvents", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIGetAnomalyEvents indicates an expected call of RuntimeSecurityAPIGetAnomalyEvents.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RuntimeSecurityAPIGetAnomalyEvents(ctx, id, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, id, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIGetAnomalyEvents", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RuntimeSecurityAPIGetAnomalyEvents), varargs...)
+}
+
+// RuntimeSecurityAPIGetAnomalyEventsWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) RuntimeSecurityAPIGetAnomalyEventsWithResponse(ctx context.Context, id string, params *sdk.RuntimeSecurityAPIGetAnomalyEventsParams) (*sdk.RuntimeSecurityAPIGetAnomalyEventsResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIGetAnomalyEventsWithResponse", ctx, id, params)
+	ret0, _ := ret[0].(*sdk.RuntimeSecurityAPIGetAnomalyEventsResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIGetAnomalyEventsWithResponse indicates an expected call of RuntimeSecurityAPIGetAnomalyEventsWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RuntimeSecurityAPIGetAnomalyEventsWithResponse(ctx, id, params interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIGetAnomalyEventsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RuntimeSecurityAPIGetAnomalyEventsWithResponse), ctx, id, params)
+}
+
+// RuntimeSecurityAPIGetAnomalyWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) RuntimeSecurityAPIGetAnomalyWithResponse(ctx context.Context, id string) (*sdk.RuntimeSecurityAPIGetAnomalyResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIGetAnomalyWithResponse", ctx, id)
+	ret0, _ := ret[0].(*sdk.RuntimeSecurityAPIGetAnomalyResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIGetAnomalyWithResponse indicates an expected call of RuntimeSecurityAPIGetAnomalyWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RuntimeSecurityAPIGetAnomalyWithResponse(ctx, id interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIGetAnomalyWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RuntimeSecurityAPIGetAnomalyWithResponse), ctx, id)
+}
+
+// RuntimeSecurityAPIGetClusterWorkloadsNetflow mocks base method.
+func (m *MockClientWithResponsesInterface) RuntimeSecurityAPIGetClusterWorkloadsNetflow(ctx context.Context, clusterId string, params *sdk.RuntimeSecurityAPIGetClusterWorkloadsNetflowParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIGetClusterWorkloadsNetflow", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIGetClusterWorkloadsNetflow indicates an expected call of RuntimeSecurityAPIGetClusterWorkloadsNetflow.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RuntimeSecurityAPIGetClusterWorkloadsNetflow(ctx, clusterId, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIGetClusterWorkloadsNetflow", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RuntimeSecurityAPIGetClusterWorkloadsNetflow), varargs...)
+}
+
+// RuntimeSecurityAPIGetClusterWorkloadsNetflowWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) RuntimeSecurityAPIGetClusterWorkloadsNetflowWithResponse(ctx context.Context, clusterId string, params *sdk.RuntimeSecurityAPIGetClusterWorkloadsNetflowParams) (*sdk.RuntimeSecurityAPIGetClusterWorkloadsNetflowResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIGetClusterWorkloadsNetflowWithResponse", ctx, clusterId, params)
+	ret0, _ := ret[0].(*sdk.RuntimeSecurityAPIGetClusterWorkloadsNetflowResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIGetClusterWorkloadsNetflowWithResponse indicates an expected call of RuntimeSecurityAPIGetClusterWorkloadsNetflowWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RuntimeSecurityAPIGetClusterWorkloadsNetflowWithResponse(ctx, clusterId, params interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIGetClusterWorkloadsNetflowWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RuntimeSecurityAPIGetClusterWorkloadsNetflowWithResponse), ctx, clusterId, params)
+}
+
+// RuntimeSecurityAPIGetList mocks base method.
+func (m *MockClientWithResponsesInterface) RuntimeSecurityAPIGetList(ctx context.Context, id string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, id}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIGetList", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIGetList indicates an expected call of RuntimeSecurityAPIGetList.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RuntimeSecurityAPIGetList(ctx, id interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, id}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIGetList", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RuntimeSecurityAPIGetList), varargs...)
+}
+
+// RuntimeSecurityAPIGetListEntries mocks base method.
+func (m *MockClientWithResponsesInterface) RuntimeSecurityAPIGetListEntries(ctx context.Context, id string, params *sdk.RuntimeSecurityAPIGetListEntriesParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, id, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIGetListEntries", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIGetListEntries indicates an expected call of RuntimeSecurityAPIGetListEntries.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RuntimeSecurityAPIGetListEntries(ctx, id, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, id, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIGetListEntries", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RuntimeSecurityAPIGetListEntries), varargs...)
+}
+
+// RuntimeSecurityAPIGetListEntriesWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) RuntimeSecurityAPIGetListEntriesWithResponse(ctx context.Context, id string, params *sdk.RuntimeSecurityAPIGetListEntriesParams) (*sdk.RuntimeSecurityAPIGetListEntriesResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIGetListEntriesWithResponse", ctx, id, params)
+	ret0, _ := ret[0].(*sdk.RuntimeSecurityAPIGetListEntriesResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIGetListEntriesWithResponse indicates an expected call of RuntimeSecurityAPIGetListEntriesWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RuntimeSecurityAPIGetListEntriesWithResponse(ctx, id, params interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIGetListEntriesWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RuntimeSecurityAPIGetListEntriesWithResponse), ctx, id, params)
+}
+
+// RuntimeSecurityAPIGetListWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) RuntimeSecurityAPIGetListWithResponse(ctx context.Context, id string) (*sdk.RuntimeSecurityAPIGetListResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIGetListWithResponse", ctx, id)
+	ret0, _ := ret[0].(*sdk.RuntimeSecurityAPIGetListResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIGetListWithResponse indicates an expected call of RuntimeSecurityAPIGetListWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RuntimeSecurityAPIGetListWithResponse(ctx, id interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIGetListWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RuntimeSecurityAPIGetListWithResponse), ctx, id)
+}
+
+// RuntimeSecurityAPIGetLists mocks base method.
+func (m *MockClientWithResponsesInterface) RuntimeSecurityAPIGetLists(ctx context.Context, params *sdk.RuntimeSecurityAPIGetListsParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIGetLists", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIGetLists indicates an expected call of RuntimeSecurityAPIGetLists.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RuntimeSecurityAPIGetLists(ctx, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIGetLists", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RuntimeSecurityAPIGetLists), varargs...)
+}
+
+// RuntimeSecurityAPIGetListsWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) RuntimeSecurityAPIGetListsWithResponse(ctx context.Context, params *sdk.RuntimeSecurityAPIGetListsParams) (*sdk.RuntimeSecurityAPIGetListsResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIGetListsWithResponse", ctx, params)
+	ret0, _ := ret[0].(*sdk.RuntimeSecurityAPIGetListsResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIGetListsWithResponse indicates an expected call of RuntimeSecurityAPIGetListsWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RuntimeSecurityAPIGetListsWithResponse(ctx, params interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIGetListsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RuntimeSecurityAPIGetListsWithResponse), ctx, params)
+}
+
+// RuntimeSecurityAPIGetNetflowGraph mocks base method.
+func (m *MockClientWithResponsesInterface) RuntimeSecurityAPIGetNetflowGraph(ctx context.Context, clusterId string, params *sdk.RuntimeSecurityAPIGetNetflowGraphParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIGetNetflowGraph", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIGetNetflowGraph indicates an expected call of RuntimeSecurityAPIGetNetflowGraph.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RuntimeSecurityAPIGetNetflowGraph(ctx, clusterId, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIGetNetflowGraph", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RuntimeSecurityAPIGetNetflowGraph), varargs...)
+}
+
+// RuntimeSecurityAPIGetNetflowGraphWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) RuntimeSecurityAPIGetNetflowGraphWithResponse(ctx context.Context, clusterId string, params *sdk.RuntimeSecurityAPIGetNetflowGraphParams) (*sdk.RuntimeSecurityAPIGetNetflowGraphResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIGetNetflowGraphWithResponse", ctx, clusterId, params)
+	ret0, _ := ret[0].(*sdk.RuntimeSecurityAPIGetNetflowGraphResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIGetNetflowGraphWithResponse indicates an expected call of RuntimeSecurityAPIGetNetflowGraphWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RuntimeSecurityAPIGetNetflowGraphWithResponse(ctx, clusterId, params interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIGetNetflowGraphWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RuntimeSecurityAPIGetNetflowGraphWithResponse), ctx, clusterId, params)
+}
+
+// RuntimeSecurityAPIGetNetflowList mocks base method.
+func (m *MockClientWithResponsesInterface) RuntimeSecurityAPIGetNetflowList(ctx context.Context, clusterId string, params *sdk.RuntimeSecurityAPIGetNetflowListParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIGetNetflowList", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIGetNetflowList indicates an expected call of RuntimeSecurityAPIGetNetflowList.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RuntimeSecurityAPIGetNetflowList(ctx, clusterId, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIGetNetflowList", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RuntimeSecurityAPIGetNetflowList), varargs...)
+}
+
+// RuntimeSecurityAPIGetNetflowListWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) RuntimeSecurityAPIGetNetflowListWithResponse(ctx context.Context, clusterId string, params *sdk.RuntimeSecurityAPIGetNetflowListParams) (*sdk.RuntimeSecurityAPIGetNetflowListResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIGetNetflowListWithResponse", ctx, clusterId, params)
+	ret0, _ := ret[0].(*sdk.RuntimeSecurityAPIGetNetflowListResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIGetNetflowListWithResponse indicates an expected call of RuntimeSecurityAPIGetNetflowListWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RuntimeSecurityAPIGetNetflowListWithResponse(ctx, clusterId, params interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIGetNetflowListWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RuntimeSecurityAPIGetNetflowListWithResponse), ctx, clusterId, params)
+}
+
+// RuntimeSecurityAPIGetNetflowTrend mocks base method.
+func (m *MockClientWithResponsesInterface) RuntimeSecurityAPIGetNetflowTrend(ctx context.Context, clusterId string, params *sdk.RuntimeSecurityAPIGetNetflowTrendParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIGetNetflowTrend", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIGetNetflowTrend indicates an expected call of RuntimeSecurityAPIGetNetflowTrend.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RuntimeSecurityAPIGetNetflowTrend(ctx, clusterId, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIGetNetflowTrend", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RuntimeSecurityAPIGetNetflowTrend), varargs...)
+}
+
+// RuntimeSecurityAPIGetNetflowTrendWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) RuntimeSecurityAPIGetNetflowTrendWithResponse(ctx context.Context, clusterId string, params *sdk.RuntimeSecurityAPIGetNetflowTrendParams) (*sdk.RuntimeSecurityAPIGetNetflowTrendResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIGetNetflowTrendWithResponse", ctx, clusterId, params)
+	ret0, _ := ret[0].(*sdk.RuntimeSecurityAPIGetNetflowTrendResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIGetNetflowTrendWithResponse indicates an expected call of RuntimeSecurityAPIGetNetflowTrendWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RuntimeSecurityAPIGetNetflowTrendWithResponse(ctx, clusterId, params interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIGetNetflowTrendWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RuntimeSecurityAPIGetNetflowTrendWithResponse), ctx, clusterId, params)
+}
+
+// RuntimeSecurityAPIGetRule mocks base method.
+func (m *MockClientWithResponsesInterface) RuntimeSecurityAPIGetRule(ctx context.Context, id string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, id}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIGetRule", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIGetRule indicates an expected call of RuntimeSecurityAPIGetRule.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RuntimeSecurityAPIGetRule(ctx, id interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, id}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIGetRule", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RuntimeSecurityAPIGetRule), varargs...)
+}
+
+// RuntimeSecurityAPIGetRuleWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) RuntimeSecurityAPIGetRuleWithResponse(ctx context.Context, id string) (*sdk.RuntimeSecurityAPIGetRuleResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIGetRuleWithResponse", ctx, id)
+	ret0, _ := ret[0].(*sdk.RuntimeSecurityAPIGetRuleResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIGetRuleWithResponse indicates an expected call of RuntimeSecurityAPIGetRuleWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RuntimeSecurityAPIGetRuleWithResponse(ctx, id interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIGetRuleWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RuntimeSecurityAPIGetRuleWithResponse), ctx, id)
+}
+
+// RuntimeSecurityAPIGetRules mocks base method.
+func (m *MockClientWithResponsesInterface) RuntimeSecurityAPIGetRules(ctx context.Context, params *sdk.RuntimeSecurityAPIGetRulesParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIGetRules", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIGetRules indicates an expected call of RuntimeSecurityAPIGetRules.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RuntimeSecurityAPIGetRules(ctx, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIGetRules", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RuntimeSecurityAPIGetRules), varargs...)
+}
+
+// RuntimeSecurityAPIGetRulesWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) RuntimeSecurityAPIGetRulesWithResponse(ctx context.Context, params *sdk.RuntimeSecurityAPIGetRulesParams) (*sdk.RuntimeSecurityAPIGetRulesResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIGetRulesWithResponse", ctx, params)
+	ret0, _ := ret[0].(*sdk.RuntimeSecurityAPIGetRulesResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIGetRulesWithResponse indicates an expected call of RuntimeSecurityAPIGetRulesWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RuntimeSecurityAPIGetRulesWithResponse(ctx, params interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIGetRulesWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RuntimeSecurityAPIGetRulesWithResponse), ctx, params)
+}
+
+// RuntimeSecurityAPIGetRuntimeEventGroups mocks base method.
+func (m *MockClientWithResponsesInterface) RuntimeSecurityAPIGetRuntimeEventGroups(ctx context.Context, params *sdk.RuntimeSecurityAPIGetRuntimeEventGroupsParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIGetRuntimeEventGroups", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIGetRuntimeEventGroups indicates an expected call of RuntimeSecurityAPIGetRuntimeEventGroups.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RuntimeSecurityAPIGetRuntimeEventGroups(ctx, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIGetRuntimeEventGroups", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RuntimeSecurityAPIGetRuntimeEventGroups), varargs...)
+}
+
+// RuntimeSecurityAPIGetRuntimeEventGroupsWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) RuntimeSecurityAPIGetRuntimeEventGroupsWithResponse(ctx context.Context, params *sdk.RuntimeSecurityAPIGetRuntimeEventGroupsParams) (*sdk.RuntimeSecurityAPIGetRuntimeEventGroupsResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIGetRuntimeEventGroupsWithResponse", ctx, params)
+	ret0, _ := ret[0].(*sdk.RuntimeSecurityAPIGetRuntimeEventGroupsResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIGetRuntimeEventGroupsWithResponse indicates an expected call of RuntimeSecurityAPIGetRuntimeEventGroupsWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RuntimeSecurityAPIGetRuntimeEventGroupsWithResponse(ctx, params interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIGetRuntimeEventGroupsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RuntimeSecurityAPIGetRuntimeEventGroupsWithResponse), ctx, params)
+}
+
+// RuntimeSecurityAPIGetRuntimeEvents mocks base method.
+func (m *MockClientWithResponsesInterface) RuntimeSecurityAPIGetRuntimeEvents(ctx context.Context, params *sdk.RuntimeSecurityAPIGetRuntimeEventsParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIGetRuntimeEvents", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIGetRuntimeEvents indicates an expected call of RuntimeSecurityAPIGetRuntimeEvents.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RuntimeSecurityAPIGetRuntimeEvents(ctx, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIGetRuntimeEvents", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RuntimeSecurityAPIGetRuntimeEvents), varargs...)
+}
+
+// RuntimeSecurityAPIGetRuntimeEventsProcessTree mocks base method.
+func (m *MockClientWithResponsesInterface) RuntimeSecurityAPIGetRuntimeEventsProcessTree(ctx context.Context, clusterId string, params *sdk.RuntimeSecurityAPIGetRuntimeEventsProcessTreeParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIGetRuntimeEventsProcessTree", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIGetRuntimeEventsProcessTree indicates an expected call of RuntimeSecurityAPIGetRuntimeEventsProcessTree.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RuntimeSecurityAPIGetRuntimeEventsProcessTree(ctx, clusterId, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIGetRuntimeEventsProcessTree", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RuntimeSecurityAPIGetRuntimeEventsProcessTree), varargs...)
+}
+
+// RuntimeSecurityAPIGetRuntimeEventsProcessTreeWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) RuntimeSecurityAPIGetRuntimeEventsProcessTreeWithResponse(ctx context.Context, clusterId string, params *sdk.RuntimeSecurityAPIGetRuntimeEventsProcessTreeParams) (*sdk.RuntimeSecurityAPIGetRuntimeEventsProcessTreeResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIGetRuntimeEventsProcessTreeWithResponse", ctx, clusterId, params)
+	ret0, _ := ret[0].(*sdk.RuntimeSecurityAPIGetRuntimeEventsProcessTreeResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIGetRuntimeEventsProcessTreeWithResponse indicates an expected call of RuntimeSecurityAPIGetRuntimeEventsProcessTreeWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RuntimeSecurityAPIGetRuntimeEventsProcessTreeWithResponse(ctx, clusterId, params interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIGetRuntimeEventsProcessTreeWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RuntimeSecurityAPIGetRuntimeEventsProcessTreeWithResponse), ctx, clusterId, params)
+}
+
+// RuntimeSecurityAPIGetRuntimeEventsWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) RuntimeSecurityAPIGetRuntimeEventsWithResponse(ctx context.Context, params *sdk.RuntimeSecurityAPIGetRuntimeEventsParams) (*sdk.RuntimeSecurityAPIGetRuntimeEventsResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIGetRuntimeEventsWithResponse", ctx, params)
+	ret0, _ := ret[0].(*sdk.RuntimeSecurityAPIGetRuntimeEventsResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIGetRuntimeEventsWithResponse indicates an expected call of RuntimeSecurityAPIGetRuntimeEventsWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RuntimeSecurityAPIGetRuntimeEventsWithResponse(ctx, params interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIGetRuntimeEventsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RuntimeSecurityAPIGetRuntimeEventsWithResponse), ctx, params)
+}
+
+// RuntimeSecurityAPIRemoveListEntries mocks base method.
+func (m *MockClientWithResponsesInterface) RuntimeSecurityAPIRemoveListEntries(ctx context.Context, id string, body sdk.RuntimeSecurityAPIRemoveListEntriesJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, id, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIRemoveListEntries", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIRemoveListEntries indicates an expected call of RuntimeSecurityAPIRemoveListEntries.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RuntimeSecurityAPIRemoveListEntries(ctx, id, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, id, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIRemoveListEntries", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RuntimeSecurityAPIRemoveListEntries), varargs...)
+}
+
+// RuntimeSecurityAPIRemoveListEntriesWithBody mocks base method.
+func (m *MockClientWithResponsesInterface) RuntimeSecurityAPIRemoveListEntriesWithBody(ctx context.Context, id, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, id, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIRemoveListEntriesWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIRemoveListEntriesWithBody indicates an expected call of RuntimeSecurityAPIRemoveListEntriesWithBody.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RuntimeSecurityAPIRemoveListEntriesWithBody(ctx, id, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, id, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIRemoveListEntriesWithBody", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RuntimeSecurityAPIRemoveListEntriesWithBody), varargs...)
+}
+
+// RuntimeSecurityAPIRemoveListEntriesWithBodyWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) RuntimeSecurityAPIRemoveListEntriesWithBodyWithResponse(ctx context.Context, id, contentType string, body io.Reader) (*sdk.RuntimeSecurityAPIRemoveListEntriesResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIRemoveListEntriesWithBodyWithResponse", ctx, id, contentType, body)
+	ret0, _ := ret[0].(*sdk.RuntimeSecurityAPIRemoveListEntriesResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIRemoveListEntriesWithBodyWithResponse indicates an expected call of RuntimeSecurityAPIRemoveListEntriesWithBodyWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RuntimeSecurityAPIRemoveListEntriesWithBodyWithResponse(ctx, id, contentType, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIRemoveListEntriesWithBodyWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RuntimeSecurityAPIRemoveListEntriesWithBodyWithResponse), ctx, id, contentType, body)
+}
+
+// RuntimeSecurityAPIRemoveListEntriesWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) RuntimeSecurityAPIRemoveListEntriesWithResponse(ctx context.Context, id string, body sdk.RuntimeSecurityAPIRemoveListEntriesJSONRequestBody) (*sdk.RuntimeSecurityAPIRemoveListEntriesResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIRemoveListEntriesWithResponse", ctx, id, body)
+	ret0, _ := ret[0].(*sdk.RuntimeSecurityAPIRemoveListEntriesResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIRemoveListEntriesWithResponse indicates an expected call of RuntimeSecurityAPIRemoveListEntriesWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RuntimeSecurityAPIRemoveListEntriesWithResponse(ctx, id, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIRemoveListEntriesWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RuntimeSecurityAPIRemoveListEntriesWithResponse), ctx, id, body)
+}
+
+// RuntimeSecurityAPIToggleRules mocks base method.
+func (m *MockClientWithResponsesInterface) RuntimeSecurityAPIToggleRules(ctx context.Context, body sdk.RuntimeSecurityAPIToggleRulesJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIToggleRules", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIToggleRules indicates an expected call of RuntimeSecurityAPIToggleRules.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RuntimeSecurityAPIToggleRules(ctx, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIToggleRules", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RuntimeSecurityAPIToggleRules), varargs...)
+}
+
+// RuntimeSecurityAPIToggleRulesWithBody mocks base method.
+func (m *MockClientWithResponsesInterface) RuntimeSecurityAPIToggleRulesWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIToggleRulesWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIToggleRulesWithBody indicates an expected call of RuntimeSecurityAPIToggleRulesWithBody.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RuntimeSecurityAPIToggleRulesWithBody(ctx, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIToggleRulesWithBody", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RuntimeSecurityAPIToggleRulesWithBody), varargs...)
+}
+
+// RuntimeSecurityAPIToggleRulesWithBodyWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) RuntimeSecurityAPIToggleRulesWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*sdk.RuntimeSecurityAPIToggleRulesResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIToggleRulesWithBodyWithResponse", ctx, contentType, body)
+	ret0, _ := ret[0].(*sdk.RuntimeSecurityAPIToggleRulesResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIToggleRulesWithBodyWithResponse indicates an expected call of RuntimeSecurityAPIToggleRulesWithBodyWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RuntimeSecurityAPIToggleRulesWithBodyWithResponse(ctx, contentType, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIToggleRulesWithBodyWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RuntimeSecurityAPIToggleRulesWithBodyWithResponse), ctx, contentType, body)
+}
+
+// RuntimeSecurityAPIToggleRulesWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) RuntimeSecurityAPIToggleRulesWithResponse(ctx context.Context, body sdk.RuntimeSecurityAPIToggleRulesJSONRequestBody) (*sdk.RuntimeSecurityAPIToggleRulesResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIToggleRulesWithResponse", ctx, body)
+	ret0, _ := ret[0].(*sdk.RuntimeSecurityAPIToggleRulesResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIToggleRulesWithResponse indicates an expected call of RuntimeSecurityAPIToggleRulesWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RuntimeSecurityAPIToggleRulesWithResponse(ctx, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIToggleRulesWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RuntimeSecurityAPIToggleRulesWithResponse), ctx, body)
+}
+
+// RuntimeSecurityAPITriggerAnomalyWebhook mocks base method.
+func (m *MockClientWithResponsesInterface) RuntimeSecurityAPITriggerAnomalyWebhook(ctx context.Context, id string, body sdk.RuntimeSecurityAPITriggerAnomalyWebhookJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, id, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPITriggerAnomalyWebhook", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPITriggerAnomalyWebhook indicates an expected call of RuntimeSecurityAPITriggerAnomalyWebhook.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RuntimeSecurityAPITriggerAnomalyWebhook(ctx, id, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, id, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPITriggerAnomalyWebhook", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RuntimeSecurityAPITriggerAnomalyWebhook), varargs...)
+}
+
+// RuntimeSecurityAPITriggerAnomalyWebhookWithBody mocks base method.
+func (m *MockClientWithResponsesInterface) RuntimeSecurityAPITriggerAnomalyWebhookWithBody(ctx context.Context, id, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, id, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPITriggerAnomalyWebhookWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPITriggerAnomalyWebhookWithBody indicates an expected call of RuntimeSecurityAPITriggerAnomalyWebhookWithBody.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RuntimeSecurityAPITriggerAnomalyWebhookWithBody(ctx, id, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, id, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPITriggerAnomalyWebhookWithBody", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RuntimeSecurityAPITriggerAnomalyWebhookWithBody), varargs...)
+}
+
+// RuntimeSecurityAPITriggerAnomalyWebhookWithBodyWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) RuntimeSecurityAPITriggerAnomalyWebhookWithBodyWithResponse(ctx context.Context, id, contentType string, body io.Reader) (*sdk.RuntimeSecurityAPITriggerAnomalyWebhookResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPITriggerAnomalyWebhookWithBodyWithResponse", ctx, id, contentType, body)
+	ret0, _ := ret[0].(*sdk.RuntimeSecurityAPITriggerAnomalyWebhookResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPITriggerAnomalyWebhookWithBodyWithResponse indicates an expected call of RuntimeSecurityAPITriggerAnomalyWebhookWithBodyWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RuntimeSecurityAPITriggerAnomalyWebhookWithBodyWithResponse(ctx, id, contentType, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPITriggerAnomalyWebhookWithBodyWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RuntimeSecurityAPITriggerAnomalyWebhookWithBodyWithResponse), ctx, id, contentType, body)
+}
+
+// RuntimeSecurityAPITriggerAnomalyWebhookWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) RuntimeSecurityAPITriggerAnomalyWebhookWithResponse(ctx context.Context, id string, body sdk.RuntimeSecurityAPITriggerAnomalyWebhookJSONRequestBody) (*sdk.RuntimeSecurityAPITriggerAnomalyWebhookResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPITriggerAnomalyWebhookWithResponse", ctx, id, body)
+	ret0, _ := ret[0].(*sdk.RuntimeSecurityAPITriggerAnomalyWebhookResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPITriggerAnomalyWebhookWithResponse indicates an expected call of RuntimeSecurityAPITriggerAnomalyWebhookWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RuntimeSecurityAPITriggerAnomalyWebhookWithResponse(ctx, id, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPITriggerAnomalyWebhookWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RuntimeSecurityAPITriggerAnomalyWebhookWithResponse), ctx, id, body)
+}
+
+// RuntimeSecurityAPIValidate mocks base method.
+func (m *MockClientWithResponsesInterface) RuntimeSecurityAPIValidate(ctx context.Context, body sdk.RuntimeSecurityAPIValidateJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIValidate", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIValidate indicates an expected call of RuntimeSecurityAPIValidate.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RuntimeSecurityAPIValidate(ctx, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIValidate", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RuntimeSecurityAPIValidate), varargs...)
+}
+
+// RuntimeSecurityAPIValidateWithBody mocks base method.
+func (m *MockClientWithResponsesInterface) RuntimeSecurityAPIValidateWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIValidateWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIValidateWithBody indicates an expected call of RuntimeSecurityAPIValidateWithBody.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RuntimeSecurityAPIValidateWithBody(ctx, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIValidateWithBody", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RuntimeSecurityAPIValidateWithBody), varargs...)
+}
+
+// RuntimeSecurityAPIValidateWithBodyWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) RuntimeSecurityAPIValidateWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*sdk.RuntimeSecurityAPIValidateResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIValidateWithBodyWithResponse", ctx, contentType, body)
+	ret0, _ := ret[0].(*sdk.RuntimeSecurityAPIValidateResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIValidateWithBodyWithResponse indicates an expected call of RuntimeSecurityAPIValidateWithBodyWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RuntimeSecurityAPIValidateWithBodyWithResponse(ctx, contentType, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIValidateWithBodyWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RuntimeSecurityAPIValidateWithBodyWithResponse), ctx, contentType, body)
+}
+
+// RuntimeSecurityAPIValidateWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) RuntimeSecurityAPIValidateWithResponse(ctx context.Context, body sdk.RuntimeSecurityAPIValidateJSONRequestBody) (*sdk.RuntimeSecurityAPIValidateResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIValidateWithResponse", ctx, body)
+	ret0, _ := ret[0].(*sdk.RuntimeSecurityAPIValidateResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIValidateWithResponse indicates an expected call of RuntimeSecurityAPIValidateWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RuntimeSecurityAPIValidateWithResponse(ctx, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIValidateWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RuntimeSecurityAPIValidateWithResponse), ctx, body)
 }
 
 // SSOAPICreateSSOConnection mocks base method.

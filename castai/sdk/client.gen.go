@@ -582,6 +582,114 @@ type ClientInterface interface {
 	// ExternalClusterAPIGetCredentialsScriptTemplate request
 	ExternalClusterAPIGetCredentialsScriptTemplate(ctx context.Context, provider string, params *ExternalClusterAPIGetCredentialsScriptTemplateParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// RuntimeSecurityAPIGetAnomalies request
+	RuntimeSecurityAPIGetAnomalies(ctx context.Context, params *RuntimeSecurityAPIGetAnomaliesParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// RuntimeSecurityAPIAckAnomaliesWithBody request with any body
+	RuntimeSecurityAPIAckAnomaliesWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	RuntimeSecurityAPIAckAnomalies(ctx context.Context, body RuntimeSecurityAPIAckAnomaliesJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// RuntimeSecurityAPICloseAnomaliesWithBody request with any body
+	RuntimeSecurityAPICloseAnomaliesWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	RuntimeSecurityAPICloseAnomalies(ctx context.Context, body RuntimeSecurityAPICloseAnomaliesJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// RuntimeSecurityAPIGetAnomaly request
+	RuntimeSecurityAPIGetAnomaly(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// RuntimeSecurityAPIGetAnomalyEvents request
+	RuntimeSecurityAPIGetAnomalyEvents(ctx context.Context, id string, params *RuntimeSecurityAPIGetAnomalyEventsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// RuntimeSecurityAPITriggerAnomalyWebhookWithBody request with any body
+	RuntimeSecurityAPITriggerAnomalyWebhookWithBody(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	RuntimeSecurityAPITriggerAnomalyWebhook(ctx context.Context, id string, body RuntimeSecurityAPITriggerAnomalyWebhookJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// RuntimeSecurityAPIGetRuntimeEvents request
+	RuntimeSecurityAPIGetRuntimeEvents(ctx context.Context, params *RuntimeSecurityAPIGetRuntimeEventsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// RuntimeSecurityAPIGetRuntimeEventGroups request
+	RuntimeSecurityAPIGetRuntimeEventGroups(ctx context.Context, params *RuntimeSecurityAPIGetRuntimeEventGroupsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// RuntimeSecurityAPIGetRuntimeEventsProcessTree request
+	RuntimeSecurityAPIGetRuntimeEventsProcessTree(ctx context.Context, clusterId string, params *RuntimeSecurityAPIGetRuntimeEventsProcessTreeParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// RuntimeSecurityAPIGetLists request
+	RuntimeSecurityAPIGetLists(ctx context.Context, params *RuntimeSecurityAPIGetListsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// RuntimeSecurityAPICreateListWithBody request with any body
+	RuntimeSecurityAPICreateListWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	RuntimeSecurityAPICreateList(ctx context.Context, body RuntimeSecurityAPICreateListJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// RuntimeSecurityAPIDeleteListsWithBody request with any body
+	RuntimeSecurityAPIDeleteListsWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	RuntimeSecurityAPIDeleteLists(ctx context.Context, body RuntimeSecurityAPIDeleteListsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// RuntimeSecurityAPIGetList request
+	RuntimeSecurityAPIGetList(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// RuntimeSecurityAPIAddListEntriesWithBody request with any body
+	RuntimeSecurityAPIAddListEntriesWithBody(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	RuntimeSecurityAPIAddListEntries(ctx context.Context, id string, body RuntimeSecurityAPIAddListEntriesJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// RuntimeSecurityAPIGetListEntries request
+	RuntimeSecurityAPIGetListEntries(ctx context.Context, id string, params *RuntimeSecurityAPIGetListEntriesParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// RuntimeSecurityAPIRemoveListEntriesWithBody request with any body
+	RuntimeSecurityAPIRemoveListEntriesWithBody(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	RuntimeSecurityAPIRemoveListEntries(ctx context.Context, id string, body RuntimeSecurityAPIRemoveListEntriesJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// RuntimeSecurityAPIGetNetflowGraph request
+	RuntimeSecurityAPIGetNetflowGraph(ctx context.Context, clusterId string, params *RuntimeSecurityAPIGetNetflowGraphParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// RuntimeSecurityAPIGetNetflowList request
+	RuntimeSecurityAPIGetNetflowList(ctx context.Context, clusterId string, params *RuntimeSecurityAPIGetNetflowListParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// RuntimeSecurityAPIGetNetflowTrend request
+	RuntimeSecurityAPIGetNetflowTrend(ctx context.Context, clusterId string, params *RuntimeSecurityAPIGetNetflowTrendParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// RuntimeSecurityAPIGetAnomaliesOverview request
+	RuntimeSecurityAPIGetAnomaliesOverview(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// RuntimeSecurityAPIGetRules request
+	RuntimeSecurityAPIGetRules(ctx context.Context, params *RuntimeSecurityAPIGetRulesParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// RuntimeSecurityAPICreateRuleWithBody request with any body
+	RuntimeSecurityAPICreateRuleWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	RuntimeSecurityAPICreateRule(ctx context.Context, body RuntimeSecurityAPICreateRuleJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// RuntimeSecurityAPIDeleteRulesWithBody request with any body
+	RuntimeSecurityAPIDeleteRulesWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	RuntimeSecurityAPIDeleteRules(ctx context.Context, body RuntimeSecurityAPIDeleteRulesJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// RuntimeSecurityAPIToggleRulesWithBody request with any body
+	RuntimeSecurityAPIToggleRulesWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	RuntimeSecurityAPIToggleRules(ctx context.Context, body RuntimeSecurityAPIToggleRulesJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// RuntimeSecurityAPIValidateWithBody request with any body
+	RuntimeSecurityAPIValidateWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	RuntimeSecurityAPIValidate(ctx context.Context, body RuntimeSecurityAPIValidateJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// RuntimeSecurityAPIGetRule request
+	RuntimeSecurityAPIGetRule(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// RuntimeSecurityAPIEditRuleWithBody request with any body
+	RuntimeSecurityAPIEditRuleWithBody(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	RuntimeSecurityAPIEditRule(ctx context.Context, id string, body RuntimeSecurityAPIEditRuleJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// RuntimeSecurityAPIGetClusterWorkloadsNetflow request
+	RuntimeSecurityAPIGetClusterWorkloadsNetflow(ctx context.Context, clusterId string, params *RuntimeSecurityAPIGetClusterWorkloadsNetflowParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// SSOAPIListSSOConnections request
 	SSOAPIListSSOConnections(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -2822,6 +2930,486 @@ func (c *Client) ExternalClusterAPIGetCleanupScriptTemplate(ctx context.Context,
 
 func (c *Client) ExternalClusterAPIGetCredentialsScriptTemplate(ctx context.Context, provider string, params *ExternalClusterAPIGetCredentialsScriptTemplateParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewExternalClusterAPIGetCredentialsScriptTemplateRequest(c.Server, provider, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) RuntimeSecurityAPIGetAnomalies(ctx context.Context, params *RuntimeSecurityAPIGetAnomaliesParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewRuntimeSecurityAPIGetAnomaliesRequest(c.Server, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) RuntimeSecurityAPIAckAnomaliesWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewRuntimeSecurityAPIAckAnomaliesRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) RuntimeSecurityAPIAckAnomalies(ctx context.Context, body RuntimeSecurityAPIAckAnomaliesJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewRuntimeSecurityAPIAckAnomaliesRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) RuntimeSecurityAPICloseAnomaliesWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewRuntimeSecurityAPICloseAnomaliesRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) RuntimeSecurityAPICloseAnomalies(ctx context.Context, body RuntimeSecurityAPICloseAnomaliesJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewRuntimeSecurityAPICloseAnomaliesRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) RuntimeSecurityAPIGetAnomaly(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewRuntimeSecurityAPIGetAnomalyRequest(c.Server, id)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) RuntimeSecurityAPIGetAnomalyEvents(ctx context.Context, id string, params *RuntimeSecurityAPIGetAnomalyEventsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewRuntimeSecurityAPIGetAnomalyEventsRequest(c.Server, id, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) RuntimeSecurityAPITriggerAnomalyWebhookWithBody(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewRuntimeSecurityAPITriggerAnomalyWebhookRequestWithBody(c.Server, id, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) RuntimeSecurityAPITriggerAnomalyWebhook(ctx context.Context, id string, body RuntimeSecurityAPITriggerAnomalyWebhookJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewRuntimeSecurityAPITriggerAnomalyWebhookRequest(c.Server, id, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) RuntimeSecurityAPIGetRuntimeEvents(ctx context.Context, params *RuntimeSecurityAPIGetRuntimeEventsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewRuntimeSecurityAPIGetRuntimeEventsRequest(c.Server, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) RuntimeSecurityAPIGetRuntimeEventGroups(ctx context.Context, params *RuntimeSecurityAPIGetRuntimeEventGroupsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewRuntimeSecurityAPIGetRuntimeEventGroupsRequest(c.Server, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) RuntimeSecurityAPIGetRuntimeEventsProcessTree(ctx context.Context, clusterId string, params *RuntimeSecurityAPIGetRuntimeEventsProcessTreeParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewRuntimeSecurityAPIGetRuntimeEventsProcessTreeRequest(c.Server, clusterId, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) RuntimeSecurityAPIGetLists(ctx context.Context, params *RuntimeSecurityAPIGetListsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewRuntimeSecurityAPIGetListsRequest(c.Server, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) RuntimeSecurityAPICreateListWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewRuntimeSecurityAPICreateListRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) RuntimeSecurityAPICreateList(ctx context.Context, body RuntimeSecurityAPICreateListJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewRuntimeSecurityAPICreateListRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) RuntimeSecurityAPIDeleteListsWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewRuntimeSecurityAPIDeleteListsRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) RuntimeSecurityAPIDeleteLists(ctx context.Context, body RuntimeSecurityAPIDeleteListsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewRuntimeSecurityAPIDeleteListsRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) RuntimeSecurityAPIGetList(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewRuntimeSecurityAPIGetListRequest(c.Server, id)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) RuntimeSecurityAPIAddListEntriesWithBody(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewRuntimeSecurityAPIAddListEntriesRequestWithBody(c.Server, id, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) RuntimeSecurityAPIAddListEntries(ctx context.Context, id string, body RuntimeSecurityAPIAddListEntriesJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewRuntimeSecurityAPIAddListEntriesRequest(c.Server, id, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) RuntimeSecurityAPIGetListEntries(ctx context.Context, id string, params *RuntimeSecurityAPIGetListEntriesParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewRuntimeSecurityAPIGetListEntriesRequest(c.Server, id, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) RuntimeSecurityAPIRemoveListEntriesWithBody(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewRuntimeSecurityAPIRemoveListEntriesRequestWithBody(c.Server, id, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) RuntimeSecurityAPIRemoveListEntries(ctx context.Context, id string, body RuntimeSecurityAPIRemoveListEntriesJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewRuntimeSecurityAPIRemoveListEntriesRequest(c.Server, id, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) RuntimeSecurityAPIGetNetflowGraph(ctx context.Context, clusterId string, params *RuntimeSecurityAPIGetNetflowGraphParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewRuntimeSecurityAPIGetNetflowGraphRequest(c.Server, clusterId, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) RuntimeSecurityAPIGetNetflowList(ctx context.Context, clusterId string, params *RuntimeSecurityAPIGetNetflowListParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewRuntimeSecurityAPIGetNetflowListRequest(c.Server, clusterId, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) RuntimeSecurityAPIGetNetflowTrend(ctx context.Context, clusterId string, params *RuntimeSecurityAPIGetNetflowTrendParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewRuntimeSecurityAPIGetNetflowTrendRequest(c.Server, clusterId, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) RuntimeSecurityAPIGetAnomaliesOverview(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewRuntimeSecurityAPIGetAnomaliesOverviewRequest(c.Server)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) RuntimeSecurityAPIGetRules(ctx context.Context, params *RuntimeSecurityAPIGetRulesParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewRuntimeSecurityAPIGetRulesRequest(c.Server, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) RuntimeSecurityAPICreateRuleWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewRuntimeSecurityAPICreateRuleRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) RuntimeSecurityAPICreateRule(ctx context.Context, body RuntimeSecurityAPICreateRuleJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewRuntimeSecurityAPICreateRuleRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) RuntimeSecurityAPIDeleteRulesWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewRuntimeSecurityAPIDeleteRulesRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) RuntimeSecurityAPIDeleteRules(ctx context.Context, body RuntimeSecurityAPIDeleteRulesJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewRuntimeSecurityAPIDeleteRulesRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) RuntimeSecurityAPIToggleRulesWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewRuntimeSecurityAPIToggleRulesRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) RuntimeSecurityAPIToggleRules(ctx context.Context, body RuntimeSecurityAPIToggleRulesJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewRuntimeSecurityAPIToggleRulesRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) RuntimeSecurityAPIValidateWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewRuntimeSecurityAPIValidateRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) RuntimeSecurityAPIValidate(ctx context.Context, body RuntimeSecurityAPIValidateJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewRuntimeSecurityAPIValidateRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) RuntimeSecurityAPIGetRule(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewRuntimeSecurityAPIGetRuleRequest(c.Server, id)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) RuntimeSecurityAPIEditRuleWithBody(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewRuntimeSecurityAPIEditRuleRequestWithBody(c.Server, id, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) RuntimeSecurityAPIEditRule(ctx context.Context, id string, body RuntimeSecurityAPIEditRuleJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewRuntimeSecurityAPIEditRuleRequest(c.Server, id, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) RuntimeSecurityAPIGetClusterWorkloadsNetflow(ctx context.Context, clusterId string, params *RuntimeSecurityAPIGetClusterWorkloadsNetflowParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewRuntimeSecurityAPIGetClusterWorkloadsNetflowRequest(c.Server, clusterId, params)
 	if err != nil {
 		return nil, err
 	}
@@ -9606,6 +10194,2400 @@ func NewExternalClusterAPIGetCredentialsScriptTemplateRequest(server string, pro
 	return req, nil
 }
 
+// NewRuntimeSecurityAPIGetAnomaliesRequest generates requests for RuntimeSecurityAPIGetAnomalies
+func NewRuntimeSecurityAPIGetAnomaliesRequest(server string, params *RuntimeSecurityAPIGetAnomaliesParams) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/security/runtime/anomalies")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.ClusterIds != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "clusterIds", runtime.ParamLocationQuery, *params.ClusterIds); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.Namespaces != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "namespaces", runtime.ParamLocationQuery, *params.Namespaces); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.Status != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "status", runtime.ParamLocationQuery, *params.Status); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.PageLimit != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "page.limit", runtime.ParamLocationQuery, *params.PageLimit); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.PageCursor != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "page.cursor", runtime.ParamLocationQuery, *params.PageCursor); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.SortField != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "sort.field", runtime.ParamLocationQuery, *params.SortField); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.SortOrder != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "sort.order", runtime.ParamLocationQuery, *params.SortOrder); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.ResourceId != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "resourceId", runtime.ParamLocationQuery, *params.ResourceId); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.Types != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "types", runtime.ParamLocationQuery, *params.Types); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.Search != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "search", runtime.ParamLocationQuery, *params.Search); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.StartTime != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "startTime", runtime.ParamLocationQuery, *params.StartTime); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.EndTime != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "endTime", runtime.ParamLocationQuery, *params.EndTime); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewRuntimeSecurityAPIAckAnomaliesRequest calls the generic RuntimeSecurityAPIAckAnomalies builder with application/json body
+func NewRuntimeSecurityAPIAckAnomaliesRequest(server string, body RuntimeSecurityAPIAckAnomaliesJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewRuntimeSecurityAPIAckAnomaliesRequestWithBody(server, "application/json", bodyReader)
+}
+
+// NewRuntimeSecurityAPIAckAnomaliesRequestWithBody generates requests for RuntimeSecurityAPIAckAnomalies with any type of body
+func NewRuntimeSecurityAPIAckAnomaliesRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/security/runtime/anomalies/ack")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewRuntimeSecurityAPICloseAnomaliesRequest calls the generic RuntimeSecurityAPICloseAnomalies builder with application/json body
+func NewRuntimeSecurityAPICloseAnomaliesRequest(server string, body RuntimeSecurityAPICloseAnomaliesJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewRuntimeSecurityAPICloseAnomaliesRequestWithBody(server, "application/json", bodyReader)
+}
+
+// NewRuntimeSecurityAPICloseAnomaliesRequestWithBody generates requests for RuntimeSecurityAPICloseAnomalies with any type of body
+func NewRuntimeSecurityAPICloseAnomaliesRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/security/runtime/anomalies/close")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewRuntimeSecurityAPIGetAnomalyRequest generates requests for RuntimeSecurityAPIGetAnomaly
+func NewRuntimeSecurityAPIGetAnomalyRequest(server string, id string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/security/runtime/anomalies/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewRuntimeSecurityAPIGetAnomalyEventsRequest generates requests for RuntimeSecurityAPIGetAnomalyEvents
+func NewRuntimeSecurityAPIGetAnomalyEventsRequest(server string, id string, params *RuntimeSecurityAPIGetAnomalyEventsParams) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/security/runtime/anomalies/%s/events", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.PageLimit != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "page.limit", runtime.ParamLocationQuery, *params.PageLimit); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.PageCursor != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "page.cursor", runtime.ParamLocationQuery, *params.PageCursor); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.SortField != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "sort.field", runtime.ParamLocationQuery, *params.SortField); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.SortOrder != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "sort.order", runtime.ParamLocationQuery, *params.SortOrder); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.Search != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "search", runtime.ParamLocationQuery, *params.Search); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewRuntimeSecurityAPITriggerAnomalyWebhookRequest calls the generic RuntimeSecurityAPITriggerAnomalyWebhook builder with application/json body
+func NewRuntimeSecurityAPITriggerAnomalyWebhookRequest(server string, id string, body RuntimeSecurityAPITriggerAnomalyWebhookJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewRuntimeSecurityAPITriggerAnomalyWebhookRequestWithBody(server, id, "application/json", bodyReader)
+}
+
+// NewRuntimeSecurityAPITriggerAnomalyWebhookRequestWithBody generates requests for RuntimeSecurityAPITriggerAnomalyWebhook with any type of body
+func NewRuntimeSecurityAPITriggerAnomalyWebhookRequestWithBody(server string, id string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/security/runtime/anomalies/%s/trigger-webhook", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewRuntimeSecurityAPIGetRuntimeEventsRequest generates requests for RuntimeSecurityAPIGetRuntimeEvents
+func NewRuntimeSecurityAPIGetRuntimeEventsRequest(server string, params *RuntimeSecurityAPIGetRuntimeEventsParams) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/security/runtime/events")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.ClusterIds != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "clusterIds", runtime.ParamLocationQuery, *params.ClusterIds); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.Types != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "types", runtime.ParamLocationQuery, *params.Types); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.GroupSelectors != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "groupSelectors", runtime.ParamLocationQuery, *params.GroupSelectors); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.Search != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "search", runtime.ParamLocationQuery, *params.Search); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.StartTime != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "startTime", runtime.ParamLocationQuery, *params.StartTime); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.EndTime != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "endTime", runtime.ParamLocationQuery, *params.EndTime); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.PageLimit != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "page.limit", runtime.ParamLocationQuery, *params.PageLimit); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.PageCursor != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "page.cursor", runtime.ParamLocationQuery, *params.PageCursor); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.SortField != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "sort.field", runtime.ParamLocationQuery, *params.SortField); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.SortOrder != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "sort.order", runtime.ParamLocationQuery, *params.SortOrder); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewRuntimeSecurityAPIGetRuntimeEventGroupsRequest generates requests for RuntimeSecurityAPIGetRuntimeEventGroups
+func NewRuntimeSecurityAPIGetRuntimeEventGroupsRequest(server string, params *RuntimeSecurityAPIGetRuntimeEventGroupsParams) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/security/runtime/events/groups")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.ClusterIds != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "clusterIds", runtime.ParamLocationQuery, *params.ClusterIds); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.Types != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "types", runtime.ParamLocationQuery, *params.Types); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.GroupBy != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "groupBy", runtime.ParamLocationQuery, *params.GroupBy); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.Search != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "search", runtime.ParamLocationQuery, *params.Search); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.StartTime != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "startTime", runtime.ParamLocationQuery, *params.StartTime); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.EndTime != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "endTime", runtime.ParamLocationQuery, *params.EndTime); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.PageLimit != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "page.limit", runtime.ParamLocationQuery, *params.PageLimit); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.PageCursor != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "page.cursor", runtime.ParamLocationQuery, *params.PageCursor); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.SortField != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "sort.field", runtime.ParamLocationQuery, *params.SortField); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.SortOrder != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "sort.order", runtime.ParamLocationQuery, *params.SortOrder); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewRuntimeSecurityAPIGetRuntimeEventsProcessTreeRequest generates requests for RuntimeSecurityAPIGetRuntimeEventsProcessTree
+func NewRuntimeSecurityAPIGetRuntimeEventsProcessTreeRequest(server string, clusterId string, params *RuntimeSecurityAPIGetRuntimeEventsProcessTreeParams) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "clusterId", runtime.ParamLocationPath, clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/security/runtime/events/process-tree/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.ContainerId != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "containerId", runtime.ParamLocationQuery, *params.ContainerId); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.ProcessPid != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "processPid", runtime.ParamLocationQuery, *params.ProcessPid); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.ProcessStartTime != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "processStartTime", runtime.ParamLocationQuery, *params.ProcessStartTime); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.EndTime != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "endTime", runtime.ParamLocationQuery, *params.EndTime); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewRuntimeSecurityAPIGetListsRequest generates requests for RuntimeSecurityAPIGetLists
+func NewRuntimeSecurityAPIGetListsRequest(server string, params *RuntimeSecurityAPIGetListsParams) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/security/runtime/list")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.Search != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "search", runtime.ParamLocationQuery, *params.Search); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.PageLimit != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "page.limit", runtime.ParamLocationQuery, *params.PageLimit); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.PageCursor != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "page.cursor", runtime.ParamLocationQuery, *params.PageCursor); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.SortField != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "sort.field", runtime.ParamLocationQuery, *params.SortField); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.SortOrder != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "sort.order", runtime.ParamLocationQuery, *params.SortOrder); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewRuntimeSecurityAPICreateListRequest calls the generic RuntimeSecurityAPICreateList builder with application/json body
+func NewRuntimeSecurityAPICreateListRequest(server string, body RuntimeSecurityAPICreateListJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewRuntimeSecurityAPICreateListRequestWithBody(server, "application/json", bodyReader)
+}
+
+// NewRuntimeSecurityAPICreateListRequestWithBody generates requests for RuntimeSecurityAPICreateList with any type of body
+func NewRuntimeSecurityAPICreateListRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/security/runtime/list")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewRuntimeSecurityAPIDeleteListsRequest calls the generic RuntimeSecurityAPIDeleteLists builder with application/json body
+func NewRuntimeSecurityAPIDeleteListsRequest(server string, body RuntimeSecurityAPIDeleteListsJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewRuntimeSecurityAPIDeleteListsRequestWithBody(server, "application/json", bodyReader)
+}
+
+// NewRuntimeSecurityAPIDeleteListsRequestWithBody generates requests for RuntimeSecurityAPIDeleteLists with any type of body
+func NewRuntimeSecurityAPIDeleteListsRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/security/runtime/list/delete")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewRuntimeSecurityAPIGetListRequest generates requests for RuntimeSecurityAPIGetList
+func NewRuntimeSecurityAPIGetListRequest(server string, id string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/security/runtime/list/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewRuntimeSecurityAPIAddListEntriesRequest calls the generic RuntimeSecurityAPIAddListEntries builder with application/json body
+func NewRuntimeSecurityAPIAddListEntriesRequest(server string, id string, body RuntimeSecurityAPIAddListEntriesJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewRuntimeSecurityAPIAddListEntriesRequestWithBody(server, id, "application/json", bodyReader)
+}
+
+// NewRuntimeSecurityAPIAddListEntriesRequestWithBody generates requests for RuntimeSecurityAPIAddListEntries with any type of body
+func NewRuntimeSecurityAPIAddListEntriesRequestWithBody(server string, id string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/security/runtime/list/%s/add", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewRuntimeSecurityAPIGetListEntriesRequest generates requests for RuntimeSecurityAPIGetListEntries
+func NewRuntimeSecurityAPIGetListEntriesRequest(server string, id string, params *RuntimeSecurityAPIGetListEntriesParams) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/security/runtime/list/%s/entries", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.Search != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "search", runtime.ParamLocationQuery, *params.Search); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.PageLimit != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "page.limit", runtime.ParamLocationQuery, *params.PageLimit); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.PageCursor != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "page.cursor", runtime.ParamLocationQuery, *params.PageCursor); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.SortField != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "sort.field", runtime.ParamLocationQuery, *params.SortField); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.SortOrder != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "sort.order", runtime.ParamLocationQuery, *params.SortOrder); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewRuntimeSecurityAPIRemoveListEntriesRequest calls the generic RuntimeSecurityAPIRemoveListEntries builder with application/json body
+func NewRuntimeSecurityAPIRemoveListEntriesRequest(server string, id string, body RuntimeSecurityAPIRemoveListEntriesJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewRuntimeSecurityAPIRemoveListEntriesRequestWithBody(server, id, "application/json", bodyReader)
+}
+
+// NewRuntimeSecurityAPIRemoveListEntriesRequestWithBody generates requests for RuntimeSecurityAPIRemoveListEntries with any type of body
+func NewRuntimeSecurityAPIRemoveListEntriesRequestWithBody(server string, id string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/security/runtime/list/%s/remove", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewRuntimeSecurityAPIGetNetflowGraphRequest generates requests for RuntimeSecurityAPIGetNetflowGraph
+func NewRuntimeSecurityAPIGetNetflowGraphRequest(server string, clusterId string, params *RuntimeSecurityAPIGetNetflowGraphParams) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "clusterId", runtime.ParamLocationPath, clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/security/runtime/netflow/%s/graph", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.Search != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "search", runtime.ParamLocationQuery, *params.Search); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.StartTime != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "startTime", runtime.ParamLocationQuery, *params.StartTime); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.EndTime != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "endTime", runtime.ParamLocationQuery, *params.EndTime); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.GroupSourceBy != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "groupSourceBy", runtime.ParamLocationQuery, *params.GroupSourceBy); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.GroupDestinationBy != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "groupDestinationBy", runtime.ParamLocationQuery, *params.GroupDestinationBy); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewRuntimeSecurityAPIGetNetflowListRequest generates requests for RuntimeSecurityAPIGetNetflowList
+func NewRuntimeSecurityAPIGetNetflowListRequest(server string, clusterId string, params *RuntimeSecurityAPIGetNetflowListParams) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "clusterId", runtime.ParamLocationPath, clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/security/runtime/netflow/%s/list", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.GroupSourceBy != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "groupSourceBy", runtime.ParamLocationQuery, *params.GroupSourceBy); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.GroupDestinationBy != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "groupDestinationBy", runtime.ParamLocationQuery, *params.GroupDestinationBy); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.Search != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "search", runtime.ParamLocationQuery, *params.Search); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.StartTime != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "startTime", runtime.ParamLocationQuery, *params.StartTime); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.EndTime != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "endTime", runtime.ParamLocationQuery, *params.EndTime); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.PageLimit != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "page.limit", runtime.ParamLocationQuery, *params.PageLimit); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.PageCursor != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "page.cursor", runtime.ParamLocationQuery, *params.PageCursor); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.SortField != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "sort.field", runtime.ParamLocationQuery, *params.SortField); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.SortOrder != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "sort.order", runtime.ParamLocationQuery, *params.SortOrder); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewRuntimeSecurityAPIGetNetflowTrendRequest generates requests for RuntimeSecurityAPIGetNetflowTrend
+func NewRuntimeSecurityAPIGetNetflowTrendRequest(server string, clusterId string, params *RuntimeSecurityAPIGetNetflowTrendParams) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "clusterId", runtime.ParamLocationPath, clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/security/runtime/netflow/%s/trend", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.StartTime != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "startTime", runtime.ParamLocationQuery, *params.StartTime); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.EndTime != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "endTime", runtime.ParamLocationQuery, *params.EndTime); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.StepSeconds != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "stepSeconds", runtime.ParamLocationQuery, *params.StepSeconds); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.Limit != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "limit", runtime.ParamLocationQuery, *params.Limit); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.GroupSourceBy != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "groupSourceBy", runtime.ParamLocationQuery, *params.GroupSourceBy); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.GroupDestinationBy != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "groupDestinationBy", runtime.ParamLocationQuery, *params.GroupDestinationBy); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.Search != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "search", runtime.ParamLocationQuery, *params.Search); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewRuntimeSecurityAPIGetAnomaliesOverviewRequest generates requests for RuntimeSecurityAPIGetAnomaliesOverview
+func NewRuntimeSecurityAPIGetAnomaliesOverviewRequest(server string) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/security/runtime/overview/anomalies")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewRuntimeSecurityAPIGetRulesRequest generates requests for RuntimeSecurityAPIGetRules
+func NewRuntimeSecurityAPIGetRulesRequest(server string, params *RuntimeSecurityAPIGetRulesParams) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/security/runtime/rules")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.Enabled != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "enabled", runtime.ParamLocationQuery, *params.Enabled); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.Category != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "category", runtime.ParamLocationQuery, *params.Category); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.Severity != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "severity", runtime.ParamLocationQuery, *params.Severity); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.Search != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "search", runtime.ParamLocationQuery, *params.Search); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.PageLimit != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "page.limit", runtime.ParamLocationQuery, *params.PageLimit); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.PageCursor != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "page.cursor", runtime.ParamLocationQuery, *params.PageCursor); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.SortField != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "sort.field", runtime.ParamLocationQuery, *params.SortField); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.SortOrder != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "sort.order", runtime.ParamLocationQuery, *params.SortOrder); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewRuntimeSecurityAPICreateRuleRequest calls the generic RuntimeSecurityAPICreateRule builder with application/json body
+func NewRuntimeSecurityAPICreateRuleRequest(server string, body RuntimeSecurityAPICreateRuleJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewRuntimeSecurityAPICreateRuleRequestWithBody(server, "application/json", bodyReader)
+}
+
+// NewRuntimeSecurityAPICreateRuleRequestWithBody generates requests for RuntimeSecurityAPICreateRule with any type of body
+func NewRuntimeSecurityAPICreateRuleRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/security/runtime/rules")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewRuntimeSecurityAPIDeleteRulesRequest calls the generic RuntimeSecurityAPIDeleteRules builder with application/json body
+func NewRuntimeSecurityAPIDeleteRulesRequest(server string, body RuntimeSecurityAPIDeleteRulesJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewRuntimeSecurityAPIDeleteRulesRequestWithBody(server, "application/json", bodyReader)
+}
+
+// NewRuntimeSecurityAPIDeleteRulesRequestWithBody generates requests for RuntimeSecurityAPIDeleteRules with any type of body
+func NewRuntimeSecurityAPIDeleteRulesRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/security/runtime/rules/delete")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewRuntimeSecurityAPIToggleRulesRequest calls the generic RuntimeSecurityAPIToggleRules builder with application/json body
+func NewRuntimeSecurityAPIToggleRulesRequest(server string, body RuntimeSecurityAPIToggleRulesJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewRuntimeSecurityAPIToggleRulesRequestWithBody(server, "application/json", bodyReader)
+}
+
+// NewRuntimeSecurityAPIToggleRulesRequestWithBody generates requests for RuntimeSecurityAPIToggleRules with any type of body
+func NewRuntimeSecurityAPIToggleRulesRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/security/runtime/rules/toggle")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewRuntimeSecurityAPIValidateRequest calls the generic RuntimeSecurityAPIValidate builder with application/json body
+func NewRuntimeSecurityAPIValidateRequest(server string, body RuntimeSecurityAPIValidateJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewRuntimeSecurityAPIValidateRequestWithBody(server, "application/json", bodyReader)
+}
+
+// NewRuntimeSecurityAPIValidateRequestWithBody generates requests for RuntimeSecurityAPIValidate with any type of body
+func NewRuntimeSecurityAPIValidateRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/security/runtime/rules/validate")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewRuntimeSecurityAPIGetRuleRequest generates requests for RuntimeSecurityAPIGetRule
+func NewRuntimeSecurityAPIGetRuleRequest(server string, id string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/security/runtime/rules/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewRuntimeSecurityAPIEditRuleRequest calls the generic RuntimeSecurityAPIEditRule builder with application/json body
+func NewRuntimeSecurityAPIEditRuleRequest(server string, id string, body RuntimeSecurityAPIEditRuleJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewRuntimeSecurityAPIEditRuleRequestWithBody(server, id, "application/json", bodyReader)
+}
+
+// NewRuntimeSecurityAPIEditRuleRequestWithBody generates requests for RuntimeSecurityAPIEditRule with any type of body
+func NewRuntimeSecurityAPIEditRuleRequestWithBody(server string, id string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/security/runtime/rules/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("PUT", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewRuntimeSecurityAPIGetClusterWorkloadsNetflowRequest generates requests for RuntimeSecurityAPIGetClusterWorkloadsNetflow
+func NewRuntimeSecurityAPIGetClusterWorkloadsNetflowRequest(server string, clusterId string, params *RuntimeSecurityAPIGetClusterWorkloadsNetflowParams) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "clusterId", runtime.ParamLocationPath, clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/security/runtime/workloads-netflow/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.StartTime != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "startTime", runtime.ParamLocationQuery, *params.StartTime); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.EndTime != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "endTime", runtime.ParamLocationQuery, *params.EndTime); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 // NewSSOAPIListSSOConnectionsRequest generates requests for SSOAPIListSSOConnections
 func NewSSOAPIListSSOConnectionsRequest(server string) (*http.Request, error) {
 	var err error
@@ -11389,6 +14371,114 @@ type ClientWithResponsesInterface interface {
 
 	// ExternalClusterAPIGetCredentialsScriptTemplate request
 	ExternalClusterAPIGetCredentialsScriptTemplateWithResponse(ctx context.Context, provider string, params *ExternalClusterAPIGetCredentialsScriptTemplateParams) (*ExternalClusterAPIGetCredentialsScriptTemplateResponse, error)
+
+	// RuntimeSecurityAPIGetAnomalies request
+	RuntimeSecurityAPIGetAnomaliesWithResponse(ctx context.Context, params *RuntimeSecurityAPIGetAnomaliesParams) (*RuntimeSecurityAPIGetAnomaliesResponse, error)
+
+	// RuntimeSecurityAPIAckAnomalies request  with any body
+	RuntimeSecurityAPIAckAnomaliesWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*RuntimeSecurityAPIAckAnomaliesResponse, error)
+
+	RuntimeSecurityAPIAckAnomaliesWithResponse(ctx context.Context, body RuntimeSecurityAPIAckAnomaliesJSONRequestBody) (*RuntimeSecurityAPIAckAnomaliesResponse, error)
+
+	// RuntimeSecurityAPICloseAnomalies request  with any body
+	RuntimeSecurityAPICloseAnomaliesWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*RuntimeSecurityAPICloseAnomaliesResponse, error)
+
+	RuntimeSecurityAPICloseAnomaliesWithResponse(ctx context.Context, body RuntimeSecurityAPICloseAnomaliesJSONRequestBody) (*RuntimeSecurityAPICloseAnomaliesResponse, error)
+
+	// RuntimeSecurityAPIGetAnomaly request
+	RuntimeSecurityAPIGetAnomalyWithResponse(ctx context.Context, id string) (*RuntimeSecurityAPIGetAnomalyResponse, error)
+
+	// RuntimeSecurityAPIGetAnomalyEvents request
+	RuntimeSecurityAPIGetAnomalyEventsWithResponse(ctx context.Context, id string, params *RuntimeSecurityAPIGetAnomalyEventsParams) (*RuntimeSecurityAPIGetAnomalyEventsResponse, error)
+
+	// RuntimeSecurityAPITriggerAnomalyWebhook request  with any body
+	RuntimeSecurityAPITriggerAnomalyWebhookWithBodyWithResponse(ctx context.Context, id string, contentType string, body io.Reader) (*RuntimeSecurityAPITriggerAnomalyWebhookResponse, error)
+
+	RuntimeSecurityAPITriggerAnomalyWebhookWithResponse(ctx context.Context, id string, body RuntimeSecurityAPITriggerAnomalyWebhookJSONRequestBody) (*RuntimeSecurityAPITriggerAnomalyWebhookResponse, error)
+
+	// RuntimeSecurityAPIGetRuntimeEvents request
+	RuntimeSecurityAPIGetRuntimeEventsWithResponse(ctx context.Context, params *RuntimeSecurityAPIGetRuntimeEventsParams) (*RuntimeSecurityAPIGetRuntimeEventsResponse, error)
+
+	// RuntimeSecurityAPIGetRuntimeEventGroups request
+	RuntimeSecurityAPIGetRuntimeEventGroupsWithResponse(ctx context.Context, params *RuntimeSecurityAPIGetRuntimeEventGroupsParams) (*RuntimeSecurityAPIGetRuntimeEventGroupsResponse, error)
+
+	// RuntimeSecurityAPIGetRuntimeEventsProcessTree request
+	RuntimeSecurityAPIGetRuntimeEventsProcessTreeWithResponse(ctx context.Context, clusterId string, params *RuntimeSecurityAPIGetRuntimeEventsProcessTreeParams) (*RuntimeSecurityAPIGetRuntimeEventsProcessTreeResponse, error)
+
+	// RuntimeSecurityAPIGetLists request
+	RuntimeSecurityAPIGetListsWithResponse(ctx context.Context, params *RuntimeSecurityAPIGetListsParams) (*RuntimeSecurityAPIGetListsResponse, error)
+
+	// RuntimeSecurityAPICreateList request  with any body
+	RuntimeSecurityAPICreateListWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*RuntimeSecurityAPICreateListResponse, error)
+
+	RuntimeSecurityAPICreateListWithResponse(ctx context.Context, body RuntimeSecurityAPICreateListJSONRequestBody) (*RuntimeSecurityAPICreateListResponse, error)
+
+	// RuntimeSecurityAPIDeleteLists request  with any body
+	RuntimeSecurityAPIDeleteListsWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*RuntimeSecurityAPIDeleteListsResponse, error)
+
+	RuntimeSecurityAPIDeleteListsWithResponse(ctx context.Context, body RuntimeSecurityAPIDeleteListsJSONRequestBody) (*RuntimeSecurityAPIDeleteListsResponse, error)
+
+	// RuntimeSecurityAPIGetList request
+	RuntimeSecurityAPIGetListWithResponse(ctx context.Context, id string) (*RuntimeSecurityAPIGetListResponse, error)
+
+	// RuntimeSecurityAPIAddListEntries request  with any body
+	RuntimeSecurityAPIAddListEntriesWithBodyWithResponse(ctx context.Context, id string, contentType string, body io.Reader) (*RuntimeSecurityAPIAddListEntriesResponse, error)
+
+	RuntimeSecurityAPIAddListEntriesWithResponse(ctx context.Context, id string, body RuntimeSecurityAPIAddListEntriesJSONRequestBody) (*RuntimeSecurityAPIAddListEntriesResponse, error)
+
+	// RuntimeSecurityAPIGetListEntries request
+	RuntimeSecurityAPIGetListEntriesWithResponse(ctx context.Context, id string, params *RuntimeSecurityAPIGetListEntriesParams) (*RuntimeSecurityAPIGetListEntriesResponse, error)
+
+	// RuntimeSecurityAPIRemoveListEntries request  with any body
+	RuntimeSecurityAPIRemoveListEntriesWithBodyWithResponse(ctx context.Context, id string, contentType string, body io.Reader) (*RuntimeSecurityAPIRemoveListEntriesResponse, error)
+
+	RuntimeSecurityAPIRemoveListEntriesWithResponse(ctx context.Context, id string, body RuntimeSecurityAPIRemoveListEntriesJSONRequestBody) (*RuntimeSecurityAPIRemoveListEntriesResponse, error)
+
+	// RuntimeSecurityAPIGetNetflowGraph request
+	RuntimeSecurityAPIGetNetflowGraphWithResponse(ctx context.Context, clusterId string, params *RuntimeSecurityAPIGetNetflowGraphParams) (*RuntimeSecurityAPIGetNetflowGraphResponse, error)
+
+	// RuntimeSecurityAPIGetNetflowList request
+	RuntimeSecurityAPIGetNetflowListWithResponse(ctx context.Context, clusterId string, params *RuntimeSecurityAPIGetNetflowListParams) (*RuntimeSecurityAPIGetNetflowListResponse, error)
+
+	// RuntimeSecurityAPIGetNetflowTrend request
+	RuntimeSecurityAPIGetNetflowTrendWithResponse(ctx context.Context, clusterId string, params *RuntimeSecurityAPIGetNetflowTrendParams) (*RuntimeSecurityAPIGetNetflowTrendResponse, error)
+
+	// RuntimeSecurityAPIGetAnomaliesOverview request
+	RuntimeSecurityAPIGetAnomaliesOverviewWithResponse(ctx context.Context) (*RuntimeSecurityAPIGetAnomaliesOverviewResponse, error)
+
+	// RuntimeSecurityAPIGetRules request
+	RuntimeSecurityAPIGetRulesWithResponse(ctx context.Context, params *RuntimeSecurityAPIGetRulesParams) (*RuntimeSecurityAPIGetRulesResponse, error)
+
+	// RuntimeSecurityAPICreateRule request  with any body
+	RuntimeSecurityAPICreateRuleWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*RuntimeSecurityAPICreateRuleResponse, error)
+
+	RuntimeSecurityAPICreateRuleWithResponse(ctx context.Context, body RuntimeSecurityAPICreateRuleJSONRequestBody) (*RuntimeSecurityAPICreateRuleResponse, error)
+
+	// RuntimeSecurityAPIDeleteRules request  with any body
+	RuntimeSecurityAPIDeleteRulesWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*RuntimeSecurityAPIDeleteRulesResponse, error)
+
+	RuntimeSecurityAPIDeleteRulesWithResponse(ctx context.Context, body RuntimeSecurityAPIDeleteRulesJSONRequestBody) (*RuntimeSecurityAPIDeleteRulesResponse, error)
+
+	// RuntimeSecurityAPIToggleRules request  with any body
+	RuntimeSecurityAPIToggleRulesWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*RuntimeSecurityAPIToggleRulesResponse, error)
+
+	RuntimeSecurityAPIToggleRulesWithResponse(ctx context.Context, body RuntimeSecurityAPIToggleRulesJSONRequestBody) (*RuntimeSecurityAPIToggleRulesResponse, error)
+
+	// RuntimeSecurityAPIValidate request  with any body
+	RuntimeSecurityAPIValidateWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*RuntimeSecurityAPIValidateResponse, error)
+
+	RuntimeSecurityAPIValidateWithResponse(ctx context.Context, body RuntimeSecurityAPIValidateJSONRequestBody) (*RuntimeSecurityAPIValidateResponse, error)
+
+	// RuntimeSecurityAPIGetRule request
+	RuntimeSecurityAPIGetRuleWithResponse(ctx context.Context, id string) (*RuntimeSecurityAPIGetRuleResponse, error)
+
+	// RuntimeSecurityAPIEditRule request  with any body
+	RuntimeSecurityAPIEditRuleWithBodyWithResponse(ctx context.Context, id string, contentType string, body io.Reader) (*RuntimeSecurityAPIEditRuleResponse, error)
+
+	RuntimeSecurityAPIEditRuleWithResponse(ctx context.Context, id string, body RuntimeSecurityAPIEditRuleJSONRequestBody) (*RuntimeSecurityAPIEditRuleResponse, error)
+
+	// RuntimeSecurityAPIGetClusterWorkloadsNetflow request
+	RuntimeSecurityAPIGetClusterWorkloadsNetflowWithResponse(ctx context.Context, clusterId string, params *RuntimeSecurityAPIGetClusterWorkloadsNetflowParams) (*RuntimeSecurityAPIGetClusterWorkloadsNetflowResponse, error)
 
 	// SSOAPIListSSOConnections request
 	SSOAPIListSSOConnectionsWithResponse(ctx context.Context) (*SSOAPIListSSOConnectionsResponse, error)
@@ -15447,6 +18537,846 @@ func (r ExternalClusterAPIGetCredentialsScriptTemplateResponse) GetBody() []byte
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
+type RuntimeSecurityAPIGetAnomaliesResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *RuntimeV1GetAnomaliesResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r RuntimeSecurityAPIGetAnomaliesResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r RuntimeSecurityAPIGetAnomaliesResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r RuntimeSecurityAPIGetAnomaliesResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type RuntimeSecurityAPIAckAnomaliesResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *RuntimeV1AckAnomaliesResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r RuntimeSecurityAPIAckAnomaliesResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r RuntimeSecurityAPIAckAnomaliesResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r RuntimeSecurityAPIAckAnomaliesResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type RuntimeSecurityAPICloseAnomaliesResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *RuntimeV1CloseAnomaliesResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r RuntimeSecurityAPICloseAnomaliesResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r RuntimeSecurityAPICloseAnomaliesResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r RuntimeSecurityAPICloseAnomaliesResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type RuntimeSecurityAPIGetAnomalyResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *RuntimeV1GetAnomalyResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r RuntimeSecurityAPIGetAnomalyResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r RuntimeSecurityAPIGetAnomalyResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r RuntimeSecurityAPIGetAnomalyResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type RuntimeSecurityAPIGetAnomalyEventsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *RuntimeV1GetAnomalyEventsResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r RuntimeSecurityAPIGetAnomalyEventsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r RuntimeSecurityAPIGetAnomalyEventsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r RuntimeSecurityAPIGetAnomalyEventsResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type RuntimeSecurityAPITriggerAnomalyWebhookResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *RuntimeV1TriggerAnomalyWebhookResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r RuntimeSecurityAPITriggerAnomalyWebhookResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r RuntimeSecurityAPITriggerAnomalyWebhookResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r RuntimeSecurityAPITriggerAnomalyWebhookResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type RuntimeSecurityAPIGetRuntimeEventsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *RuntimeV1GetRuntimeEventsResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r RuntimeSecurityAPIGetRuntimeEventsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r RuntimeSecurityAPIGetRuntimeEventsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r RuntimeSecurityAPIGetRuntimeEventsResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type RuntimeSecurityAPIGetRuntimeEventGroupsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *RuntimeV1GetRuntimeEventGroupsResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r RuntimeSecurityAPIGetRuntimeEventGroupsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r RuntimeSecurityAPIGetRuntimeEventGroupsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r RuntimeSecurityAPIGetRuntimeEventGroupsResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type RuntimeSecurityAPIGetRuntimeEventsProcessTreeResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *RuntimeV1GetRuntimeEventsProcessTreeResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r RuntimeSecurityAPIGetRuntimeEventsProcessTreeResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r RuntimeSecurityAPIGetRuntimeEventsProcessTreeResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r RuntimeSecurityAPIGetRuntimeEventsProcessTreeResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type RuntimeSecurityAPIGetListsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *RuntimeV1GetListsResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r RuntimeSecurityAPIGetListsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r RuntimeSecurityAPIGetListsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r RuntimeSecurityAPIGetListsResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type RuntimeSecurityAPICreateListResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *RuntimeV1ListHeader
+}
+
+// Status returns HTTPResponse.Status
+func (r RuntimeSecurityAPICreateListResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r RuntimeSecurityAPICreateListResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r RuntimeSecurityAPICreateListResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type RuntimeSecurityAPIDeleteListsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *RuntimeV1DeleteListsResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r RuntimeSecurityAPIDeleteListsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r RuntimeSecurityAPIDeleteListsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r RuntimeSecurityAPIDeleteListsResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type RuntimeSecurityAPIGetListResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *RuntimeV1ListHeaderWithRules
+}
+
+// Status returns HTTPResponse.Status
+func (r RuntimeSecurityAPIGetListResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r RuntimeSecurityAPIGetListResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r RuntimeSecurityAPIGetListResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type RuntimeSecurityAPIAddListEntriesResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *RuntimeV1AddListEntriesResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r RuntimeSecurityAPIAddListEntriesResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r RuntimeSecurityAPIAddListEntriesResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r RuntimeSecurityAPIAddListEntriesResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type RuntimeSecurityAPIGetListEntriesResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *RuntimeV1GetListEntriesResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r RuntimeSecurityAPIGetListEntriesResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r RuntimeSecurityAPIGetListEntriesResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r RuntimeSecurityAPIGetListEntriesResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type RuntimeSecurityAPIRemoveListEntriesResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *RuntimeV1RemoveListEntriesResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r RuntimeSecurityAPIRemoveListEntriesResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r RuntimeSecurityAPIRemoveListEntriesResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r RuntimeSecurityAPIRemoveListEntriesResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type RuntimeSecurityAPIGetNetflowGraphResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *RuntimeV1GetNetflowGraphResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r RuntimeSecurityAPIGetNetflowGraphResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r RuntimeSecurityAPIGetNetflowGraphResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r RuntimeSecurityAPIGetNetflowGraphResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type RuntimeSecurityAPIGetNetflowListResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *RuntimeV1GetNetflowListResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r RuntimeSecurityAPIGetNetflowListResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r RuntimeSecurityAPIGetNetflowListResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r RuntimeSecurityAPIGetNetflowListResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type RuntimeSecurityAPIGetNetflowTrendResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *RuntimeV1GetNetflowTrendResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r RuntimeSecurityAPIGetNetflowTrendResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r RuntimeSecurityAPIGetNetflowTrendResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r RuntimeSecurityAPIGetNetflowTrendResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type RuntimeSecurityAPIGetAnomaliesOverviewResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *RuntimeV1GetAnomaliesOverviewResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r RuntimeSecurityAPIGetAnomaliesOverviewResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r RuntimeSecurityAPIGetAnomaliesOverviewResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r RuntimeSecurityAPIGetAnomaliesOverviewResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type RuntimeSecurityAPIGetRulesResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *RuntimeV1GetRulesResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r RuntimeSecurityAPIGetRulesResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r RuntimeSecurityAPIGetRulesResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r RuntimeSecurityAPIGetRulesResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type RuntimeSecurityAPICreateRuleResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *RuntimeV1Rule
+}
+
+// Status returns HTTPResponse.Status
+func (r RuntimeSecurityAPICreateRuleResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r RuntimeSecurityAPICreateRuleResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r RuntimeSecurityAPICreateRuleResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type RuntimeSecurityAPIDeleteRulesResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *RuntimeV1DeleteRulesResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r RuntimeSecurityAPIDeleteRulesResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r RuntimeSecurityAPIDeleteRulesResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r RuntimeSecurityAPIDeleteRulesResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type RuntimeSecurityAPIToggleRulesResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *RuntimeV1ToggleRulesResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r RuntimeSecurityAPIToggleRulesResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r RuntimeSecurityAPIToggleRulesResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r RuntimeSecurityAPIToggleRulesResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type RuntimeSecurityAPIValidateResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *RuntimeV1ValidateResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r RuntimeSecurityAPIValidateResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r RuntimeSecurityAPIValidateResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r RuntimeSecurityAPIValidateResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type RuntimeSecurityAPIGetRuleResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *RuntimeV1GetRuleResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r RuntimeSecurityAPIGetRuleResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r RuntimeSecurityAPIGetRuleResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r RuntimeSecurityAPIGetRuleResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type RuntimeSecurityAPIEditRuleResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *RuntimeV1Rule
+}
+
+// Status returns HTTPResponse.Status
+func (r RuntimeSecurityAPIEditRuleResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r RuntimeSecurityAPIEditRuleResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r RuntimeSecurityAPIEditRuleResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type RuntimeSecurityAPIGetClusterWorkloadsNetflowResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *RuntimeV1GetClusterWorkloadsNetflowResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r RuntimeSecurityAPIGetClusterWorkloadsNetflowResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r RuntimeSecurityAPIGetClusterWorkloadsNetflowResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r RuntimeSecurityAPIGetClusterWorkloadsNetflowResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
 type SSOAPIListSSOConnectionsResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -17766,6 +21696,354 @@ func (c *ClientWithResponses) ExternalClusterAPIGetCredentialsScriptTemplateWith
 		return nil, err
 	}
 	return ParseExternalClusterAPIGetCredentialsScriptTemplateResponse(rsp)
+}
+
+// RuntimeSecurityAPIGetAnomaliesWithResponse request returning *RuntimeSecurityAPIGetAnomaliesResponse
+func (c *ClientWithResponses) RuntimeSecurityAPIGetAnomaliesWithResponse(ctx context.Context, params *RuntimeSecurityAPIGetAnomaliesParams) (*RuntimeSecurityAPIGetAnomaliesResponse, error) {
+	rsp, err := c.RuntimeSecurityAPIGetAnomalies(ctx, params)
+	if err != nil {
+		return nil, err
+	}
+	return ParseRuntimeSecurityAPIGetAnomaliesResponse(rsp)
+}
+
+// RuntimeSecurityAPIAckAnomaliesWithBodyWithResponse request with arbitrary body returning *RuntimeSecurityAPIAckAnomaliesResponse
+func (c *ClientWithResponses) RuntimeSecurityAPIAckAnomaliesWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*RuntimeSecurityAPIAckAnomaliesResponse, error) {
+	rsp, err := c.RuntimeSecurityAPIAckAnomaliesWithBody(ctx, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseRuntimeSecurityAPIAckAnomaliesResponse(rsp)
+}
+
+func (c *ClientWithResponses) RuntimeSecurityAPIAckAnomaliesWithResponse(ctx context.Context, body RuntimeSecurityAPIAckAnomaliesJSONRequestBody) (*RuntimeSecurityAPIAckAnomaliesResponse, error) {
+	rsp, err := c.RuntimeSecurityAPIAckAnomalies(ctx, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseRuntimeSecurityAPIAckAnomaliesResponse(rsp)
+}
+
+// RuntimeSecurityAPICloseAnomaliesWithBodyWithResponse request with arbitrary body returning *RuntimeSecurityAPICloseAnomaliesResponse
+func (c *ClientWithResponses) RuntimeSecurityAPICloseAnomaliesWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*RuntimeSecurityAPICloseAnomaliesResponse, error) {
+	rsp, err := c.RuntimeSecurityAPICloseAnomaliesWithBody(ctx, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseRuntimeSecurityAPICloseAnomaliesResponse(rsp)
+}
+
+func (c *ClientWithResponses) RuntimeSecurityAPICloseAnomaliesWithResponse(ctx context.Context, body RuntimeSecurityAPICloseAnomaliesJSONRequestBody) (*RuntimeSecurityAPICloseAnomaliesResponse, error) {
+	rsp, err := c.RuntimeSecurityAPICloseAnomalies(ctx, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseRuntimeSecurityAPICloseAnomaliesResponse(rsp)
+}
+
+// RuntimeSecurityAPIGetAnomalyWithResponse request returning *RuntimeSecurityAPIGetAnomalyResponse
+func (c *ClientWithResponses) RuntimeSecurityAPIGetAnomalyWithResponse(ctx context.Context, id string) (*RuntimeSecurityAPIGetAnomalyResponse, error) {
+	rsp, err := c.RuntimeSecurityAPIGetAnomaly(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	return ParseRuntimeSecurityAPIGetAnomalyResponse(rsp)
+}
+
+// RuntimeSecurityAPIGetAnomalyEventsWithResponse request returning *RuntimeSecurityAPIGetAnomalyEventsResponse
+func (c *ClientWithResponses) RuntimeSecurityAPIGetAnomalyEventsWithResponse(ctx context.Context, id string, params *RuntimeSecurityAPIGetAnomalyEventsParams) (*RuntimeSecurityAPIGetAnomalyEventsResponse, error) {
+	rsp, err := c.RuntimeSecurityAPIGetAnomalyEvents(ctx, id, params)
+	if err != nil {
+		return nil, err
+	}
+	return ParseRuntimeSecurityAPIGetAnomalyEventsResponse(rsp)
+}
+
+// RuntimeSecurityAPITriggerAnomalyWebhookWithBodyWithResponse request with arbitrary body returning *RuntimeSecurityAPITriggerAnomalyWebhookResponse
+func (c *ClientWithResponses) RuntimeSecurityAPITriggerAnomalyWebhookWithBodyWithResponse(ctx context.Context, id string, contentType string, body io.Reader) (*RuntimeSecurityAPITriggerAnomalyWebhookResponse, error) {
+	rsp, err := c.RuntimeSecurityAPITriggerAnomalyWebhookWithBody(ctx, id, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseRuntimeSecurityAPITriggerAnomalyWebhookResponse(rsp)
+}
+
+func (c *ClientWithResponses) RuntimeSecurityAPITriggerAnomalyWebhookWithResponse(ctx context.Context, id string, body RuntimeSecurityAPITriggerAnomalyWebhookJSONRequestBody) (*RuntimeSecurityAPITriggerAnomalyWebhookResponse, error) {
+	rsp, err := c.RuntimeSecurityAPITriggerAnomalyWebhook(ctx, id, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseRuntimeSecurityAPITriggerAnomalyWebhookResponse(rsp)
+}
+
+// RuntimeSecurityAPIGetRuntimeEventsWithResponse request returning *RuntimeSecurityAPIGetRuntimeEventsResponse
+func (c *ClientWithResponses) RuntimeSecurityAPIGetRuntimeEventsWithResponse(ctx context.Context, params *RuntimeSecurityAPIGetRuntimeEventsParams) (*RuntimeSecurityAPIGetRuntimeEventsResponse, error) {
+	rsp, err := c.RuntimeSecurityAPIGetRuntimeEvents(ctx, params)
+	if err != nil {
+		return nil, err
+	}
+	return ParseRuntimeSecurityAPIGetRuntimeEventsResponse(rsp)
+}
+
+// RuntimeSecurityAPIGetRuntimeEventGroupsWithResponse request returning *RuntimeSecurityAPIGetRuntimeEventGroupsResponse
+func (c *ClientWithResponses) RuntimeSecurityAPIGetRuntimeEventGroupsWithResponse(ctx context.Context, params *RuntimeSecurityAPIGetRuntimeEventGroupsParams) (*RuntimeSecurityAPIGetRuntimeEventGroupsResponse, error) {
+	rsp, err := c.RuntimeSecurityAPIGetRuntimeEventGroups(ctx, params)
+	if err != nil {
+		return nil, err
+	}
+	return ParseRuntimeSecurityAPIGetRuntimeEventGroupsResponse(rsp)
+}
+
+// RuntimeSecurityAPIGetRuntimeEventsProcessTreeWithResponse request returning *RuntimeSecurityAPIGetRuntimeEventsProcessTreeResponse
+func (c *ClientWithResponses) RuntimeSecurityAPIGetRuntimeEventsProcessTreeWithResponse(ctx context.Context, clusterId string, params *RuntimeSecurityAPIGetRuntimeEventsProcessTreeParams) (*RuntimeSecurityAPIGetRuntimeEventsProcessTreeResponse, error) {
+	rsp, err := c.RuntimeSecurityAPIGetRuntimeEventsProcessTree(ctx, clusterId, params)
+	if err != nil {
+		return nil, err
+	}
+	return ParseRuntimeSecurityAPIGetRuntimeEventsProcessTreeResponse(rsp)
+}
+
+// RuntimeSecurityAPIGetListsWithResponse request returning *RuntimeSecurityAPIGetListsResponse
+func (c *ClientWithResponses) RuntimeSecurityAPIGetListsWithResponse(ctx context.Context, params *RuntimeSecurityAPIGetListsParams) (*RuntimeSecurityAPIGetListsResponse, error) {
+	rsp, err := c.RuntimeSecurityAPIGetLists(ctx, params)
+	if err != nil {
+		return nil, err
+	}
+	return ParseRuntimeSecurityAPIGetListsResponse(rsp)
+}
+
+// RuntimeSecurityAPICreateListWithBodyWithResponse request with arbitrary body returning *RuntimeSecurityAPICreateListResponse
+func (c *ClientWithResponses) RuntimeSecurityAPICreateListWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*RuntimeSecurityAPICreateListResponse, error) {
+	rsp, err := c.RuntimeSecurityAPICreateListWithBody(ctx, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseRuntimeSecurityAPICreateListResponse(rsp)
+}
+
+func (c *ClientWithResponses) RuntimeSecurityAPICreateListWithResponse(ctx context.Context, body RuntimeSecurityAPICreateListJSONRequestBody) (*RuntimeSecurityAPICreateListResponse, error) {
+	rsp, err := c.RuntimeSecurityAPICreateList(ctx, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseRuntimeSecurityAPICreateListResponse(rsp)
+}
+
+// RuntimeSecurityAPIDeleteListsWithBodyWithResponse request with arbitrary body returning *RuntimeSecurityAPIDeleteListsResponse
+func (c *ClientWithResponses) RuntimeSecurityAPIDeleteListsWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*RuntimeSecurityAPIDeleteListsResponse, error) {
+	rsp, err := c.RuntimeSecurityAPIDeleteListsWithBody(ctx, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseRuntimeSecurityAPIDeleteListsResponse(rsp)
+}
+
+func (c *ClientWithResponses) RuntimeSecurityAPIDeleteListsWithResponse(ctx context.Context, body RuntimeSecurityAPIDeleteListsJSONRequestBody) (*RuntimeSecurityAPIDeleteListsResponse, error) {
+	rsp, err := c.RuntimeSecurityAPIDeleteLists(ctx, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseRuntimeSecurityAPIDeleteListsResponse(rsp)
+}
+
+// RuntimeSecurityAPIGetListWithResponse request returning *RuntimeSecurityAPIGetListResponse
+func (c *ClientWithResponses) RuntimeSecurityAPIGetListWithResponse(ctx context.Context, id string) (*RuntimeSecurityAPIGetListResponse, error) {
+	rsp, err := c.RuntimeSecurityAPIGetList(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	return ParseRuntimeSecurityAPIGetListResponse(rsp)
+}
+
+// RuntimeSecurityAPIAddListEntriesWithBodyWithResponse request with arbitrary body returning *RuntimeSecurityAPIAddListEntriesResponse
+func (c *ClientWithResponses) RuntimeSecurityAPIAddListEntriesWithBodyWithResponse(ctx context.Context, id string, contentType string, body io.Reader) (*RuntimeSecurityAPIAddListEntriesResponse, error) {
+	rsp, err := c.RuntimeSecurityAPIAddListEntriesWithBody(ctx, id, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseRuntimeSecurityAPIAddListEntriesResponse(rsp)
+}
+
+func (c *ClientWithResponses) RuntimeSecurityAPIAddListEntriesWithResponse(ctx context.Context, id string, body RuntimeSecurityAPIAddListEntriesJSONRequestBody) (*RuntimeSecurityAPIAddListEntriesResponse, error) {
+	rsp, err := c.RuntimeSecurityAPIAddListEntries(ctx, id, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseRuntimeSecurityAPIAddListEntriesResponse(rsp)
+}
+
+// RuntimeSecurityAPIGetListEntriesWithResponse request returning *RuntimeSecurityAPIGetListEntriesResponse
+func (c *ClientWithResponses) RuntimeSecurityAPIGetListEntriesWithResponse(ctx context.Context, id string, params *RuntimeSecurityAPIGetListEntriesParams) (*RuntimeSecurityAPIGetListEntriesResponse, error) {
+	rsp, err := c.RuntimeSecurityAPIGetListEntries(ctx, id, params)
+	if err != nil {
+		return nil, err
+	}
+	return ParseRuntimeSecurityAPIGetListEntriesResponse(rsp)
+}
+
+// RuntimeSecurityAPIRemoveListEntriesWithBodyWithResponse request with arbitrary body returning *RuntimeSecurityAPIRemoveListEntriesResponse
+func (c *ClientWithResponses) RuntimeSecurityAPIRemoveListEntriesWithBodyWithResponse(ctx context.Context, id string, contentType string, body io.Reader) (*RuntimeSecurityAPIRemoveListEntriesResponse, error) {
+	rsp, err := c.RuntimeSecurityAPIRemoveListEntriesWithBody(ctx, id, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseRuntimeSecurityAPIRemoveListEntriesResponse(rsp)
+}
+
+func (c *ClientWithResponses) RuntimeSecurityAPIRemoveListEntriesWithResponse(ctx context.Context, id string, body RuntimeSecurityAPIRemoveListEntriesJSONRequestBody) (*RuntimeSecurityAPIRemoveListEntriesResponse, error) {
+	rsp, err := c.RuntimeSecurityAPIRemoveListEntries(ctx, id, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseRuntimeSecurityAPIRemoveListEntriesResponse(rsp)
+}
+
+// RuntimeSecurityAPIGetNetflowGraphWithResponse request returning *RuntimeSecurityAPIGetNetflowGraphResponse
+func (c *ClientWithResponses) RuntimeSecurityAPIGetNetflowGraphWithResponse(ctx context.Context, clusterId string, params *RuntimeSecurityAPIGetNetflowGraphParams) (*RuntimeSecurityAPIGetNetflowGraphResponse, error) {
+	rsp, err := c.RuntimeSecurityAPIGetNetflowGraph(ctx, clusterId, params)
+	if err != nil {
+		return nil, err
+	}
+	return ParseRuntimeSecurityAPIGetNetflowGraphResponse(rsp)
+}
+
+// RuntimeSecurityAPIGetNetflowListWithResponse request returning *RuntimeSecurityAPIGetNetflowListResponse
+func (c *ClientWithResponses) RuntimeSecurityAPIGetNetflowListWithResponse(ctx context.Context, clusterId string, params *RuntimeSecurityAPIGetNetflowListParams) (*RuntimeSecurityAPIGetNetflowListResponse, error) {
+	rsp, err := c.RuntimeSecurityAPIGetNetflowList(ctx, clusterId, params)
+	if err != nil {
+		return nil, err
+	}
+	return ParseRuntimeSecurityAPIGetNetflowListResponse(rsp)
+}
+
+// RuntimeSecurityAPIGetNetflowTrendWithResponse request returning *RuntimeSecurityAPIGetNetflowTrendResponse
+func (c *ClientWithResponses) RuntimeSecurityAPIGetNetflowTrendWithResponse(ctx context.Context, clusterId string, params *RuntimeSecurityAPIGetNetflowTrendParams) (*RuntimeSecurityAPIGetNetflowTrendResponse, error) {
+	rsp, err := c.RuntimeSecurityAPIGetNetflowTrend(ctx, clusterId, params)
+	if err != nil {
+		return nil, err
+	}
+	return ParseRuntimeSecurityAPIGetNetflowTrendResponse(rsp)
+}
+
+// RuntimeSecurityAPIGetAnomaliesOverviewWithResponse request returning *RuntimeSecurityAPIGetAnomaliesOverviewResponse
+func (c *ClientWithResponses) RuntimeSecurityAPIGetAnomaliesOverviewWithResponse(ctx context.Context) (*RuntimeSecurityAPIGetAnomaliesOverviewResponse, error) {
+	rsp, err := c.RuntimeSecurityAPIGetAnomaliesOverview(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return ParseRuntimeSecurityAPIGetAnomaliesOverviewResponse(rsp)
+}
+
+// RuntimeSecurityAPIGetRulesWithResponse request returning *RuntimeSecurityAPIGetRulesResponse
+func (c *ClientWithResponses) RuntimeSecurityAPIGetRulesWithResponse(ctx context.Context, params *RuntimeSecurityAPIGetRulesParams) (*RuntimeSecurityAPIGetRulesResponse, error) {
+	rsp, err := c.RuntimeSecurityAPIGetRules(ctx, params)
+	if err != nil {
+		return nil, err
+	}
+	return ParseRuntimeSecurityAPIGetRulesResponse(rsp)
+}
+
+// RuntimeSecurityAPICreateRuleWithBodyWithResponse request with arbitrary body returning *RuntimeSecurityAPICreateRuleResponse
+func (c *ClientWithResponses) RuntimeSecurityAPICreateRuleWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*RuntimeSecurityAPICreateRuleResponse, error) {
+	rsp, err := c.RuntimeSecurityAPICreateRuleWithBody(ctx, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseRuntimeSecurityAPICreateRuleResponse(rsp)
+}
+
+func (c *ClientWithResponses) RuntimeSecurityAPICreateRuleWithResponse(ctx context.Context, body RuntimeSecurityAPICreateRuleJSONRequestBody) (*RuntimeSecurityAPICreateRuleResponse, error) {
+	rsp, err := c.RuntimeSecurityAPICreateRule(ctx, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseRuntimeSecurityAPICreateRuleResponse(rsp)
+}
+
+// RuntimeSecurityAPIDeleteRulesWithBodyWithResponse request with arbitrary body returning *RuntimeSecurityAPIDeleteRulesResponse
+func (c *ClientWithResponses) RuntimeSecurityAPIDeleteRulesWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*RuntimeSecurityAPIDeleteRulesResponse, error) {
+	rsp, err := c.RuntimeSecurityAPIDeleteRulesWithBody(ctx, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseRuntimeSecurityAPIDeleteRulesResponse(rsp)
+}
+
+func (c *ClientWithResponses) RuntimeSecurityAPIDeleteRulesWithResponse(ctx context.Context, body RuntimeSecurityAPIDeleteRulesJSONRequestBody) (*RuntimeSecurityAPIDeleteRulesResponse, error) {
+	rsp, err := c.RuntimeSecurityAPIDeleteRules(ctx, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseRuntimeSecurityAPIDeleteRulesResponse(rsp)
+}
+
+// RuntimeSecurityAPIToggleRulesWithBodyWithResponse request with arbitrary body returning *RuntimeSecurityAPIToggleRulesResponse
+func (c *ClientWithResponses) RuntimeSecurityAPIToggleRulesWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*RuntimeSecurityAPIToggleRulesResponse, error) {
+	rsp, err := c.RuntimeSecurityAPIToggleRulesWithBody(ctx, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseRuntimeSecurityAPIToggleRulesResponse(rsp)
+}
+
+func (c *ClientWithResponses) RuntimeSecurityAPIToggleRulesWithResponse(ctx context.Context, body RuntimeSecurityAPIToggleRulesJSONRequestBody) (*RuntimeSecurityAPIToggleRulesResponse, error) {
+	rsp, err := c.RuntimeSecurityAPIToggleRules(ctx, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseRuntimeSecurityAPIToggleRulesResponse(rsp)
+}
+
+// RuntimeSecurityAPIValidateWithBodyWithResponse request with arbitrary body returning *RuntimeSecurityAPIValidateResponse
+func (c *ClientWithResponses) RuntimeSecurityAPIValidateWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*RuntimeSecurityAPIValidateResponse, error) {
+	rsp, err := c.RuntimeSecurityAPIValidateWithBody(ctx, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseRuntimeSecurityAPIValidateResponse(rsp)
+}
+
+func (c *ClientWithResponses) RuntimeSecurityAPIValidateWithResponse(ctx context.Context, body RuntimeSecurityAPIValidateJSONRequestBody) (*RuntimeSecurityAPIValidateResponse, error) {
+	rsp, err := c.RuntimeSecurityAPIValidate(ctx, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseRuntimeSecurityAPIValidateResponse(rsp)
+}
+
+// RuntimeSecurityAPIGetRuleWithResponse request returning *RuntimeSecurityAPIGetRuleResponse
+func (c *ClientWithResponses) RuntimeSecurityAPIGetRuleWithResponse(ctx context.Context, id string) (*RuntimeSecurityAPIGetRuleResponse, error) {
+	rsp, err := c.RuntimeSecurityAPIGetRule(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	return ParseRuntimeSecurityAPIGetRuleResponse(rsp)
+}
+
+// RuntimeSecurityAPIEditRuleWithBodyWithResponse request with arbitrary body returning *RuntimeSecurityAPIEditRuleResponse
+func (c *ClientWithResponses) RuntimeSecurityAPIEditRuleWithBodyWithResponse(ctx context.Context, id string, contentType string, body io.Reader) (*RuntimeSecurityAPIEditRuleResponse, error) {
+	rsp, err := c.RuntimeSecurityAPIEditRuleWithBody(ctx, id, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseRuntimeSecurityAPIEditRuleResponse(rsp)
+}
+
+func (c *ClientWithResponses) RuntimeSecurityAPIEditRuleWithResponse(ctx context.Context, id string, body RuntimeSecurityAPIEditRuleJSONRequestBody) (*RuntimeSecurityAPIEditRuleResponse, error) {
+	rsp, err := c.RuntimeSecurityAPIEditRule(ctx, id, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseRuntimeSecurityAPIEditRuleResponse(rsp)
+}
+
+// RuntimeSecurityAPIGetClusterWorkloadsNetflowWithResponse request returning *RuntimeSecurityAPIGetClusterWorkloadsNetflowResponse
+func (c *ClientWithResponses) RuntimeSecurityAPIGetClusterWorkloadsNetflowWithResponse(ctx context.Context, clusterId string, params *RuntimeSecurityAPIGetClusterWorkloadsNetflowParams) (*RuntimeSecurityAPIGetClusterWorkloadsNetflowResponse, error) {
+	rsp, err := c.RuntimeSecurityAPIGetClusterWorkloadsNetflow(ctx, clusterId, params)
+	if err != nil {
+		return nil, err
+	}
+	return ParseRuntimeSecurityAPIGetClusterWorkloadsNetflowResponse(rsp)
 }
 
 // SSOAPIListSSOConnectionsWithResponse request returning *SSOAPIListSSOConnectionsResponse
@@ -21447,6 +25725,734 @@ func ParseExternalClusterAPIGetCredentialsScriptTemplateResponse(rsp *http.Respo
 	response := &ExternalClusterAPIGetCredentialsScriptTemplateResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
+	}
+
+	return response, nil
+}
+
+// ParseRuntimeSecurityAPIGetAnomaliesResponse parses an HTTP response from a RuntimeSecurityAPIGetAnomaliesWithResponse call
+func ParseRuntimeSecurityAPIGetAnomaliesResponse(rsp *http.Response) (*RuntimeSecurityAPIGetAnomaliesResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &RuntimeSecurityAPIGetAnomaliesResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest RuntimeV1GetAnomaliesResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseRuntimeSecurityAPIAckAnomaliesResponse parses an HTTP response from a RuntimeSecurityAPIAckAnomaliesWithResponse call
+func ParseRuntimeSecurityAPIAckAnomaliesResponse(rsp *http.Response) (*RuntimeSecurityAPIAckAnomaliesResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &RuntimeSecurityAPIAckAnomaliesResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest RuntimeV1AckAnomaliesResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseRuntimeSecurityAPICloseAnomaliesResponse parses an HTTP response from a RuntimeSecurityAPICloseAnomaliesWithResponse call
+func ParseRuntimeSecurityAPICloseAnomaliesResponse(rsp *http.Response) (*RuntimeSecurityAPICloseAnomaliesResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &RuntimeSecurityAPICloseAnomaliesResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest RuntimeV1CloseAnomaliesResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseRuntimeSecurityAPIGetAnomalyResponse parses an HTTP response from a RuntimeSecurityAPIGetAnomalyWithResponse call
+func ParseRuntimeSecurityAPIGetAnomalyResponse(rsp *http.Response) (*RuntimeSecurityAPIGetAnomalyResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &RuntimeSecurityAPIGetAnomalyResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest RuntimeV1GetAnomalyResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseRuntimeSecurityAPIGetAnomalyEventsResponse parses an HTTP response from a RuntimeSecurityAPIGetAnomalyEventsWithResponse call
+func ParseRuntimeSecurityAPIGetAnomalyEventsResponse(rsp *http.Response) (*RuntimeSecurityAPIGetAnomalyEventsResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &RuntimeSecurityAPIGetAnomalyEventsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest RuntimeV1GetAnomalyEventsResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseRuntimeSecurityAPITriggerAnomalyWebhookResponse parses an HTTP response from a RuntimeSecurityAPITriggerAnomalyWebhookWithResponse call
+func ParseRuntimeSecurityAPITriggerAnomalyWebhookResponse(rsp *http.Response) (*RuntimeSecurityAPITriggerAnomalyWebhookResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &RuntimeSecurityAPITriggerAnomalyWebhookResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest RuntimeV1TriggerAnomalyWebhookResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseRuntimeSecurityAPIGetRuntimeEventsResponse parses an HTTP response from a RuntimeSecurityAPIGetRuntimeEventsWithResponse call
+func ParseRuntimeSecurityAPIGetRuntimeEventsResponse(rsp *http.Response) (*RuntimeSecurityAPIGetRuntimeEventsResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &RuntimeSecurityAPIGetRuntimeEventsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest RuntimeV1GetRuntimeEventsResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseRuntimeSecurityAPIGetRuntimeEventGroupsResponse parses an HTTP response from a RuntimeSecurityAPIGetRuntimeEventGroupsWithResponse call
+func ParseRuntimeSecurityAPIGetRuntimeEventGroupsResponse(rsp *http.Response) (*RuntimeSecurityAPIGetRuntimeEventGroupsResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &RuntimeSecurityAPIGetRuntimeEventGroupsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest RuntimeV1GetRuntimeEventGroupsResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseRuntimeSecurityAPIGetRuntimeEventsProcessTreeResponse parses an HTTP response from a RuntimeSecurityAPIGetRuntimeEventsProcessTreeWithResponse call
+func ParseRuntimeSecurityAPIGetRuntimeEventsProcessTreeResponse(rsp *http.Response) (*RuntimeSecurityAPIGetRuntimeEventsProcessTreeResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &RuntimeSecurityAPIGetRuntimeEventsProcessTreeResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest RuntimeV1GetRuntimeEventsProcessTreeResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseRuntimeSecurityAPIGetListsResponse parses an HTTP response from a RuntimeSecurityAPIGetListsWithResponse call
+func ParseRuntimeSecurityAPIGetListsResponse(rsp *http.Response) (*RuntimeSecurityAPIGetListsResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &RuntimeSecurityAPIGetListsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest RuntimeV1GetListsResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseRuntimeSecurityAPICreateListResponse parses an HTTP response from a RuntimeSecurityAPICreateListWithResponse call
+func ParseRuntimeSecurityAPICreateListResponse(rsp *http.Response) (*RuntimeSecurityAPICreateListResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &RuntimeSecurityAPICreateListResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest RuntimeV1ListHeader
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseRuntimeSecurityAPIDeleteListsResponse parses an HTTP response from a RuntimeSecurityAPIDeleteListsWithResponse call
+func ParseRuntimeSecurityAPIDeleteListsResponse(rsp *http.Response) (*RuntimeSecurityAPIDeleteListsResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &RuntimeSecurityAPIDeleteListsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest RuntimeV1DeleteListsResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseRuntimeSecurityAPIGetListResponse parses an HTTP response from a RuntimeSecurityAPIGetListWithResponse call
+func ParseRuntimeSecurityAPIGetListResponse(rsp *http.Response) (*RuntimeSecurityAPIGetListResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &RuntimeSecurityAPIGetListResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest RuntimeV1ListHeaderWithRules
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseRuntimeSecurityAPIAddListEntriesResponse parses an HTTP response from a RuntimeSecurityAPIAddListEntriesWithResponse call
+func ParseRuntimeSecurityAPIAddListEntriesResponse(rsp *http.Response) (*RuntimeSecurityAPIAddListEntriesResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &RuntimeSecurityAPIAddListEntriesResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest RuntimeV1AddListEntriesResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseRuntimeSecurityAPIGetListEntriesResponse parses an HTTP response from a RuntimeSecurityAPIGetListEntriesWithResponse call
+func ParseRuntimeSecurityAPIGetListEntriesResponse(rsp *http.Response) (*RuntimeSecurityAPIGetListEntriesResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &RuntimeSecurityAPIGetListEntriesResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest RuntimeV1GetListEntriesResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseRuntimeSecurityAPIRemoveListEntriesResponse parses an HTTP response from a RuntimeSecurityAPIRemoveListEntriesWithResponse call
+func ParseRuntimeSecurityAPIRemoveListEntriesResponse(rsp *http.Response) (*RuntimeSecurityAPIRemoveListEntriesResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &RuntimeSecurityAPIRemoveListEntriesResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest RuntimeV1RemoveListEntriesResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseRuntimeSecurityAPIGetNetflowGraphResponse parses an HTTP response from a RuntimeSecurityAPIGetNetflowGraphWithResponse call
+func ParseRuntimeSecurityAPIGetNetflowGraphResponse(rsp *http.Response) (*RuntimeSecurityAPIGetNetflowGraphResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &RuntimeSecurityAPIGetNetflowGraphResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest RuntimeV1GetNetflowGraphResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseRuntimeSecurityAPIGetNetflowListResponse parses an HTTP response from a RuntimeSecurityAPIGetNetflowListWithResponse call
+func ParseRuntimeSecurityAPIGetNetflowListResponse(rsp *http.Response) (*RuntimeSecurityAPIGetNetflowListResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &RuntimeSecurityAPIGetNetflowListResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest RuntimeV1GetNetflowListResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseRuntimeSecurityAPIGetNetflowTrendResponse parses an HTTP response from a RuntimeSecurityAPIGetNetflowTrendWithResponse call
+func ParseRuntimeSecurityAPIGetNetflowTrendResponse(rsp *http.Response) (*RuntimeSecurityAPIGetNetflowTrendResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &RuntimeSecurityAPIGetNetflowTrendResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest RuntimeV1GetNetflowTrendResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseRuntimeSecurityAPIGetAnomaliesOverviewResponse parses an HTTP response from a RuntimeSecurityAPIGetAnomaliesOverviewWithResponse call
+func ParseRuntimeSecurityAPIGetAnomaliesOverviewResponse(rsp *http.Response) (*RuntimeSecurityAPIGetAnomaliesOverviewResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &RuntimeSecurityAPIGetAnomaliesOverviewResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest RuntimeV1GetAnomaliesOverviewResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseRuntimeSecurityAPIGetRulesResponse parses an HTTP response from a RuntimeSecurityAPIGetRulesWithResponse call
+func ParseRuntimeSecurityAPIGetRulesResponse(rsp *http.Response) (*RuntimeSecurityAPIGetRulesResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &RuntimeSecurityAPIGetRulesResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest RuntimeV1GetRulesResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseRuntimeSecurityAPICreateRuleResponse parses an HTTP response from a RuntimeSecurityAPICreateRuleWithResponse call
+func ParseRuntimeSecurityAPICreateRuleResponse(rsp *http.Response) (*RuntimeSecurityAPICreateRuleResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &RuntimeSecurityAPICreateRuleResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest RuntimeV1Rule
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseRuntimeSecurityAPIDeleteRulesResponse parses an HTTP response from a RuntimeSecurityAPIDeleteRulesWithResponse call
+func ParseRuntimeSecurityAPIDeleteRulesResponse(rsp *http.Response) (*RuntimeSecurityAPIDeleteRulesResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &RuntimeSecurityAPIDeleteRulesResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest RuntimeV1DeleteRulesResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseRuntimeSecurityAPIToggleRulesResponse parses an HTTP response from a RuntimeSecurityAPIToggleRulesWithResponse call
+func ParseRuntimeSecurityAPIToggleRulesResponse(rsp *http.Response) (*RuntimeSecurityAPIToggleRulesResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &RuntimeSecurityAPIToggleRulesResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest RuntimeV1ToggleRulesResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseRuntimeSecurityAPIValidateResponse parses an HTTP response from a RuntimeSecurityAPIValidateWithResponse call
+func ParseRuntimeSecurityAPIValidateResponse(rsp *http.Response) (*RuntimeSecurityAPIValidateResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &RuntimeSecurityAPIValidateResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest RuntimeV1ValidateResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseRuntimeSecurityAPIGetRuleResponse parses an HTTP response from a RuntimeSecurityAPIGetRuleWithResponse call
+func ParseRuntimeSecurityAPIGetRuleResponse(rsp *http.Response) (*RuntimeSecurityAPIGetRuleResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &RuntimeSecurityAPIGetRuleResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest RuntimeV1GetRuleResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseRuntimeSecurityAPIEditRuleResponse parses an HTTP response from a RuntimeSecurityAPIEditRuleWithResponse call
+func ParseRuntimeSecurityAPIEditRuleResponse(rsp *http.Response) (*RuntimeSecurityAPIEditRuleResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &RuntimeSecurityAPIEditRuleResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest RuntimeV1Rule
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseRuntimeSecurityAPIGetClusterWorkloadsNetflowResponse parses an HTTP response from a RuntimeSecurityAPIGetClusterWorkloadsNetflowWithResponse call
+func ParseRuntimeSecurityAPIGetClusterWorkloadsNetflowResponse(rsp *http.Response) (*RuntimeSecurityAPIGetClusterWorkloadsNetflowResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &RuntimeSecurityAPIGetClusterWorkloadsNetflowResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest RuntimeV1GetClusterWorkloadsNetflowResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
 	}
 
 	return response, nil
