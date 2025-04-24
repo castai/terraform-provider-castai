@@ -37,6 +37,12 @@ variable "kvisor_grpc_addr" {
   default     = "kvisor.prod-master.cast.ai:443" // If your cluster is in the EU region, update the grpcAddr to: https://kvisor.prod-eu.cast.ai:443
 }
 
+variable "runtime_security_rules_file" {
+  type        = string
+  description = "Path to the YAML file containing runtime security rules"
+  default = "../runtime_security_rules.yaml"
+}
+
 variable "service_accounts_unique_ids" {
   type        = list(string)
   description = "Service Accounts' unique IDs used by node pools in the cluster."
