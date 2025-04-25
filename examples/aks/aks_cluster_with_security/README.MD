@@ -6,7 +6,7 @@ See `install_security_agent` and `kvisor_values` variables in `castai.tf` file.\
 Example configuration should be analysed in the following order:
 1. Create Virtual network - `vnet.tf`
 2. Create AKS cluster - `aks.tf`
-3. Create CAST AI related resources to connect AKS cluster to CAST AI - `castai.tf`
+3. Create CAST AI related resources to connect AKS cluster to CAST AI with Kvisor enabled - `castai.tf`
 
 # Usage
 1. Rename `tf.vars.example` to `tf.vars`

@@ -6,7 +6,7 @@ See `install_security_agent` and `kvisor_values` variables in `castai.tf` file.\
 Example configuration should be analysed in the following order:
 1. Create VPC - `vpc.tf`
 2. Create EKS cluster - `eks.tf`
-3. Create CAST AI related resources to connect EKS cluster to CAST AI in read-only mode - `castai.tf`
+3. Create CAST AI related resources to connect EKS cluster to CAST AI with Kvisor enabled - `castai.tf`
 
 # Usage
 1. Rename `tf.vars.example` to `tf.vars`
