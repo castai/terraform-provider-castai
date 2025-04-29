@@ -43,6 +43,13 @@ const (
 	OperatorUnspecified CastaiFeaturesV1Operator = "operator_unspecified"
 )
 
+// Defines values for CastaiInventoryV1beta1AWSSavingsPlanCommitmentTermUnit.
+const (
+	COMMITMENTTERMUNITONEYEAR     CastaiInventoryV1beta1AWSSavingsPlanCommitmentTermUnit = "COMMITMENT_TERM_UNIT_ONE_YEAR"
+	COMMITMENTTERMUNITTHREEYEARS  CastaiInventoryV1beta1AWSSavingsPlanCommitmentTermUnit = "COMMITMENT_TERM_UNIT_THREE_YEARS"
+	COMMITMENTTERMUNITUNSPECIFIED CastaiInventoryV1beta1AWSSavingsPlanCommitmentTermUnit = "COMMITMENT_TERM_UNIT_UNSPECIFIED"
+)
+
 // Defines values for CastaiInventoryV1beta1AttachableGPUDeviceManufacturer.
 const (
 	CastaiInventoryV1beta1AttachableGPUDeviceManufacturerAMD     CastaiInventoryV1beta1AttachableGPUDeviceManufacturer = "AMD"
@@ -801,6 +808,21 @@ type CastaiInventoryV1beta1AWSReservedInstancesContext struct {
 	State                 *string                                       `json:"state,omitempty"`
 }
 
+// CastaiInventoryV1beta1AWSSavingsPlan defines model for castai.inventory.v1beta1.AWSSavingsPlan.
+type CastaiInventoryV1beta1AWSSavingsPlan struct {
+	CommitmentAmount   *float32                                                `json:"commitmentAmount,omitempty"`
+	CommitmentTerm     *CastaiInventoryV1beta1AWSSavingsPlanCommitmentTermUnit `json:"commitmentTerm,omitempty"`
+	Id                 *string                                                 `json:"id,omitempty"`
+	InstanceTypeFamily *string                                                 `json:"instanceTypeFamily,omitempty"`
+	OfferingId         *string                                                 `json:"offeringId,omitempty"`
+	Region             *string                                                 `json:"region,omitempty"`
+	State              *string                                                 `json:"state,omitempty"`
+	Type               *string                                                 `json:"type,omitempty"`
+}
+
+// CastaiInventoryV1beta1AWSSavingsPlanCommitmentTermUnit defines model for castai.inventory.v1beta1.AWSSavingsPlan.CommitmentTermUnit.
+type CastaiInventoryV1beta1AWSSavingsPlanCommitmentTermUnit string
+
 // CastaiInventoryV1beta1AddReservationResponse defines model for castai.inventory.v1beta1.AddReservationResponse.
 type CastaiInventoryV1beta1AddReservationResponse struct {
 	Reservation *CastaiInventoryV1beta1ReservationDetails `json:"reservation,omitempty"`
@@ -922,6 +944,7 @@ type CastaiInventoryV1beta1Commitment struct {
 	// AutoAssignment Assign commitment to all existing and future clusters that fall within the region of this commitment.
 	AutoAssignment              *bool                                              `json:"autoAssignment,omitempty"`
 	AwsReservedInstancesContext *CastaiInventoryV1beta1AWSReservedInstancesContext `json:"awsReservedInstancesContext,omitempty"`
+	AwsSavingsPlanContext       *CastaiInventoryV1beta1AWSSavingsPlan              `json:"awsSavingsPlanContext,omitempty"`
 	AzureReservationContext     *CastaiInventoryV1beta1AzureReservation            `json:"azureReservationContext,omitempty"`
 	EndDate                     *time.Time                                         `json:"endDate"`
 	GcpResourceCudContext       *CastaiInventoryV1beta1GCPResourceCUD              `json:"gcpResourceCudContext,omitempty"`
