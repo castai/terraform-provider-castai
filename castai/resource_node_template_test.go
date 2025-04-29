@@ -353,7 +353,7 @@ func TestNodeTemplateResourceReadContextEmptyList(t *testing.T) {
 		NodeTemplatesAPIListNodeTemplates(gomock.Any(), clusterId, &sdk.NodeTemplatesAPIListNodeTemplatesParams{IncludeDefault: lo.ToPtr(true)}).
 		Return(&http.Response{StatusCode: 200, Body: body, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
 
-	resource := resourceNodeTemplate()
+	nodeTemplate := resourceNodeTemplate()
 	val := cty.ObjectVal(map[string]cty.Value{
 		FieldClusterId:        cty.StringVal(clusterId),
 		FieldNodeTemplateName: cty.StringVal("gpu"),
@@ -361,11 +361,10 @@ func TestNodeTemplateResourceReadContextEmptyList(t *testing.T) {
 	state := terraform.NewInstanceStateShimmedFromValue(val, 0)
 	state.ID = "gpu"
 
-	data := resource.Data(state)
-	result := resource.ReadContext(ctx, data, provider)
-	r.NotNil(result)
-	r.True(result.HasError())
-	r.Equal(result[0].Summary, "failed to find node template with name: gpu")
+	data := nodeTemplate.Data(state)
+	result := nodeTemplate.ReadContext(ctx, data, provider)
+
+	r.Nil(result)
 }
 
 func TestNodeTemplateResourceCreate_defaultNodeTemplate(t *testing.T) {

@@ -2,6 +2,7 @@ package castai
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"reflect"
@@ -647,8 +648,16 @@ func resourceNodeTemplateRead(ctx context.Context, d *schema.ResourceData, meta 
 
 	nodeTemplate, err := getNodeTemplateByName(ctx, d, meta, clusterID)
 	if err != nil {
+		if errors.Is(err, ErrFailedToFindTemplateWithName) {
+			log.Printf("[WARN] Node template (%s) not found, removing from state", d.Id())
+			d.SetId("")
+
+			return nil
+		}
+
 		return diag.FromErr(err)
 	}
+
 	if !d.IsNewResource() && nodeTemplate == nil {
 		log.Printf("[WARN] Node template (%s) not found, removing from state", d.Id())
 		d.SetId("")
@@ -1127,26 +1136,24 @@ func updateDefaultNodeTemplate(ctx context.Context, d *schema.ResourceData, meta
 	return nil
 }
 
+var ErrFailedToFindTemplateWithName = errors.New("failed to find node template with name")
+
 func getNodeTemplateByName(ctx context.Context, data *schema.ResourceData, meta any, clusterID string) (*sdk.NodetemplatesV1NodeTemplate, error) {
 	client := meta.(*ProviderConfig).api
 	nodeTemplateName := data.Id()
 
-	log.Printf("[INFO] Getting current node templates")
+	log.Printf("[INFO] Getting current node templates.")
+
 	resp, err := client.NodeTemplatesAPIListNodeTemplatesWithResponse(ctx, clusterID, &sdk.NodeTemplatesAPIListNodeTemplatesParams{IncludeDefault: lo.ToPtr(true)})
-	notFound := fmt.Errorf("node templates for cluster %q not found at CAST AI", clusterID)
 	if err != nil {
-		return nil, err
+		log.Printf("[WARN] Failed to get current node template from API: %v.", err)
+		return nil, fmt.Errorf("failed to get current node template from API: %v", err)
 	}
 
 	templates := resp.JSON200
 
 	if templates == nil {
-		return nil, notFound
-	}
-
-	if err != nil {
-		log.Printf("[WARN] Getting current node template: %v", err)
-		return nil, fmt.Errorf("failed to get current node template from API: %v", err)
+		return nil, fmt.Errorf("node templates for cluster %q not found at CAST AI", clusterID)
 	}
 
 	t, ok := lo.Find[sdk.NodetemplatesV1NodeTemplateListItem](lo.FromPtr(templates.Items), func(t sdk.NodetemplatesV1NodeTemplateListItem) bool {
@@ -1154,12 +1161,7 @@ func getNodeTemplateByName(ctx context.Context, data *schema.ResourceData, meta 
 	})
 
 	if !ok {
-		return nil, fmt.Errorf("failed to find node template with name: %v", nodeTemplateName)
-	}
-
-	if err != nil {
-		log.Printf("[WARN] Failed merging node template changes: %v", err)
-		return nil, fmt.Errorf("failed to merge node template changes: %v", err)
+		return nil, fmt.Errorf("%w: %v", ErrFailedToFindTemplateWithName, nodeTemplateName)
 	}
 
 	return t.Template, nil
