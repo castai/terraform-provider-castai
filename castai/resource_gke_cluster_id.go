@@ -122,20 +122,8 @@ func resourceCastaiGKEClusterIdCreate(ctx context.Context, data *schema.Resource
 	data.SetId(clusterID)
 	// If client service account is set, create service account on cast side.
 	if len(data.Get(FieldGKEClientSA).(string)) > 0 {
-		resp, err := client.ExternalClusterAPIGKECreateSAWithResponse(ctx, data.Id(), sdk.ExternalClusterAPIGKECreateSARequest{
-			Gke: &sdk.ExternalclusterV1UpdateGKEClusterParams{
-				GkeSaImpersonate: toPtr(data.Get(FieldGKEClientSA).(string)),
-				ProjectId:        toPtr(data.Get(FieldGKEClusterProjectId).(string)),
-			},
-		})
-		if err != nil {
-			return diag.FromErr(err)
-		}
-		if resp.JSON200 == nil || resp.JSON200.ServiceAccount == nil {
-			return diag.FromErr(fmt.Errorf("service account not returned"))
-		}
-		if err := data.Set(FieldGKECastSA, toString(resp.JSON200.ServiceAccount)); err != nil {
-			return diag.FromErr(fmt.Errorf("service account id: %w", err))
+		if err := createCastServiceAccount(ctx, client, data); err != nil {
+			return diag.FromErr(fmt.Errorf("[ERROR] Creating Cast service account %w", err))
 		}
 	}
 	return nil
@@ -177,9 +165,37 @@ func resourceCastaiGKEClusterIdRead(ctx context.Context, data *schema.ResourceDa
 }
 
 func resourceCastaiGKEClusterIdUpdate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	client := meta.(*ProviderConfig).api
+
+	if v, ok := data.GetOk(FieldGKEClientSA); ok && len(v.(string)) > 0 {
+		if err := createCastServiceAccount(ctx, client, data); err != nil {
+			return diag.FromErr(fmt.Errorf("[ERROR] Creating Cast service account: %w", err))
+		}
+	}
+
 	return resourceCastaiGKEClusterIdRead(ctx, data, meta)
 }
 
 func resourceCastaiGKEClusterIdDelete(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	return resourceCastaiClusterDelete(ctx, data, meta)
+}
+
+func createCastServiceAccount(ctx context.Context, client sdk.ClientWithResponsesInterface, data *schema.ResourceData) diag.Diagnostics {
+	resp, err := client.ExternalClusterAPIGKECreateSAWithResponse(ctx, data.Id(), sdk.ExternalClusterAPIGKECreateSARequest{
+		Gke: &sdk.ExternalclusterV1UpdateGKEClusterParams{
+			GkeSaImpersonate: toPtr(data.Get(FieldGKEClientSA).(string)),
+			ProjectId:        toPtr(data.Get(FieldGKEClusterProjectId).(string)),
+		},
+	})
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	if resp.JSON200 == nil || resp.JSON200.ServiceAccount == nil {
+		return diag.FromErr(fmt.Errorf("service account not returned"))
+	}
+	if err := data.Set(FieldGKECastSA, toString(resp.JSON200.ServiceAccount)); err != nil {
+		return diag.FromErr(fmt.Errorf("service account id: %w", err))
+	}
+
+	return nil
 }
