@@ -344,7 +344,7 @@ func TestSecurityRuntimeRule_Importer(t *testing.T) {
 	})
 }
 
-func TestFindRuntimeRuleByName_ContinuesPagination(t *testing.T) {
+func TestFindRuntimeRuleByName_Pagination(t *testing.T) {
 	t.Parallel()
 
 	t.Run("when API returns empty rules with nextCursor, pagination stops", func(t *testing.T) {

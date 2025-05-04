@@ -156,8 +156,8 @@ func resourceSecurityRuntimeRuleImporter(ctx context.Context, d *schema.Resource
 		return nil, fmt.Errorf("import: runtime rule with name %q not found", name)
 	}
 
-	// Set ID to the rule name (keep name as ID)
-	d.SetId(*rule.Id) // save UUID (api: ID) as ID in tf state
+	// save UUID (api: ID) as ID in tf state
+	d.SetId(*rule.Id)
 
 	return []*schema.ResourceData{d}, nil
 }
@@ -317,7 +317,7 @@ func resourceSecurityRuntimeRuleRead(ctx context.Context, d *schema.ResourceData
 	return nil
 }
 
-// normalizeRuleText trims spaces and normalizes newlines.
+// normalizeRuleText trims spaces and normalizes newlines to prevent inconsistent TF value comparisons.
 func normalizeRuleText(s *string) string {
 	if s == nil {
 		return ""
@@ -338,27 +338,31 @@ func resourceSecurityRuntimeRuleDelete(ctx context.Context, d *schema.ResourceDa
 	isBuiltIn := ok && isBuiltInRaw.(bool)
 
 	if isBuiltIn {
-		// Built-in rule: disable instead of deleting
-		req := sdk.RuntimeV1ToggleRulesRequest{
-			Enabled: false,
-			Ids:     []string{ruleID},
-		}
-		resp, err := client.RuntimeSecurityAPIToggleRulesWithResponse(ctx, req)
-		if err := sdk.CheckOKResponse(resp, err); err != nil {
-			return diag.Errorf("disabling built-in runtime rule (instead of deleting, we can't delete built in rules): %v", err)
-		}
-
-		d.SetId("")
-		return nil
+		// Built-in rule: disable instead of deleting, we can't delete built in rules
+		return disableRule(ctx, d, ruleID, client)
 	}
 
-	// Normal rule: delete it
+	// not Build-in rule: delete it
 	delReq := sdk.RuntimeSecurityAPIDeleteRulesJSONRequestBody{
 		Ids: []string{ruleID},
 	}
 	resp, err := client.RuntimeSecurityAPIDeleteRulesWithResponse(ctx, delReq)
 	if err := sdk.CheckOKResponse(resp, err); err != nil {
 		return diag.Errorf("deleting security runtime rule: %v", err)
+	}
+
+	d.SetId("")
+	return nil
+}
+
+func disableRule(ctx context.Context, d *schema.ResourceData, ruleID string, client sdk.ClientWithResponsesInterface) diag.Diagnostics {
+	req := sdk.RuntimeV1ToggleRulesRequest{
+		Enabled: false,
+		Ids:     []string{ruleID},
+	}
+	resp, err := client.RuntimeSecurityAPIToggleRulesWithResponse(ctx, req)
+	if err := sdk.CheckOKResponse(resp, err); err != nil {
+		return diag.Errorf("disabling built-in runtime rule (instead of deleting, we can't delete built in rules): %v", err)
 	}
 
 	d.SetId("")
