@@ -1,18 +1,18 @@
-# Example of GKE cluster connected to CAST AI with enabled Kvisor security agent and customized runtime security rules
-Following example creates GKE cluster and its supporting resources using GKE community modules.
-After GKE cluster is created it is onboarded to CAST AI.
+# Example of EKS cluster connected to CAST AI with enabled Kvisor security agent and customized runtime security rules
+Following this example creates EKS cluster and its supporting resources using AWS community modules.\
+After EKS cluster is created it is onboarded to CAST AI.\
 [Kvisor security agent](https://docs.cast.ai/docs/kvisor) is deployed to the cluster and security policies are enabled.\
 See `install_security_agent` and `kvisor_values` variables in `castai.tf` file enabling Kvisor.\
 See `castai_security_runtime_rule` resource defining example [Runtime security rule](https://docs.cast.ai/docs/anomaly-rules-engine) in `castai_runtime_rules.tf` file.\
 Example configuration should be analysed in the following order:
 1. Create VPC - `vpc.tf`
-2. Create GKE cluster - `gke.tf`
+2. Create EKS cluster - `eks.tf`
 3. Create CAST AI related resources to connect GKE cluster to CAST AI with [Kvisor security agent](https://docs.cast.ai/docs/kvisor) enabled - `castai.tf`
 4. Create CAST AI Runtime security rules - `castai_runtime_rules.tf`
 5. If needed - import existing CAST AI runtime rules with `fetch_castai_runtime_rules.sh` script.\
    Script will generate terraform resources and will print terraform import commands to the console.\
-\
-   In order to import - set your API key and optionally the base URL: 
+   \
+   In order to import - set your API key and optionally the base URL:
    ```
    export CASTAI_API_KEY="your-api-key-here"
    export CASTAI_BASE_URL="https://api.cast.ai"  # Optional, default is https://api.cast.ai
