@@ -313,10 +313,11 @@ const (
 
 // Defines values for PoliciesV1EvictorStatus.
 const (
-	PoliciesV1EvictorStatusCompatible   PoliciesV1EvictorStatus = "Compatible"
-	PoliciesV1EvictorStatusIncompatible PoliciesV1EvictorStatus = "Incompatible"
-	PoliciesV1EvictorStatusMissing      PoliciesV1EvictorStatus = "Missing"
-	PoliciesV1EvictorStatusUnknown      PoliciesV1EvictorStatus = "Unknown"
+	PoliciesV1EvictorStatusCompatible    PoliciesV1EvictorStatus = "Compatible"
+	PoliciesV1EvictorStatusIncompatible  PoliciesV1EvictorStatus = "Incompatible"
+	PoliciesV1EvictorStatusInvalidConfig PoliciesV1EvictorStatus = "InvalidConfig"
+	PoliciesV1EvictorStatusMissing       PoliciesV1EvictorStatus = "Missing"
+	PoliciesV1EvictorStatusUnknown       PoliciesV1EvictorStatus = "Unknown"
 )
 
 // Defines values for PoliciesV1PodPinnerStatus.
@@ -432,6 +433,12 @@ const (
 const (
 	MAX      WorkloadoptimizationV1ResourcePoliciesFunction = "MAX"
 	QUANTILE WorkloadoptimizationV1ResourcePoliciesFunction = "QUANTILE"
+)
+
+// Defines values for WorkloadoptimizationV1RolloutBehaviorType.
+const (
+	NODISRUPTION WorkloadoptimizationV1RolloutBehaviorType = "NO_DISRUPTION"
+	UNSPECIFIED  WorkloadoptimizationV1RolloutBehaviorType = "UNSPECIFIED"
 )
 
 // Defines values for CommitmentsAPIGetCommitmentUsageHistoryParamsAggregationInterval.
@@ -4884,10 +4891,11 @@ type WorkloadoptimizationV1RecommendationPolicies struct {
 	// ManagementOption Defines possible options for workload management.
 	// READ_ONLY - workload watched (metrics collected), but no actions may be performed by CAST AI.
 	// MANAGED - workload watched (metrics collected), CAST AI may perform actions on the workload.
-	ManagementOption WorkloadoptimizationV1ManagementOption     `json:"managementOption"`
-	Memory           WorkloadoptimizationV1ResourcePolicies     `json:"memory"`
-	MemoryEvent      *WorkloadoptimizationV1MemoryEventSettings `json:"memoryEvent,omitempty"`
-	Startup          *WorkloadoptimizationV1StartupSettings     `json:"startup,omitempty"`
+	ManagementOption WorkloadoptimizationV1ManagementOption         `json:"managementOption"`
+	Memory           WorkloadoptimizationV1ResourcePolicies         `json:"memory"`
+	MemoryEvent      *WorkloadoptimizationV1MemoryEventSettings     `json:"memoryEvent,omitempty"`
+	RolloutBehavior  *WorkloadoptimizationV1RolloutBehaviorSettings `json:"rolloutBehavior,omitempty"`
+	Startup          *WorkloadoptimizationV1StartupSettings         `json:"startup,omitempty"`
 }
 
 // WorkloadoptimizationV1RecommendedPodCountChangedEvent defines model for workloadoptimization.v1.RecommendedPodCountChangedEvent.
@@ -5104,6 +5112,17 @@ type WorkloadoptimizationV1Resources struct {
 	Requests *WorkloadoptimizationV1ResourceQuantity `json:"requests,omitempty"`
 }
 
+// WorkloadoptimizationV1RolloutBehaviorSettings defines model for workloadoptimization.v1.RolloutBehaviorSettings.
+type WorkloadoptimizationV1RolloutBehaviorSettings struct {
+	// Type Defines workload recommendation rollout types.
+	// NO_DISRUPTION - rollout shouldn't cause service disruption.
+	Type *WorkloadoptimizationV1RolloutBehaviorType `json:"type,omitempty"`
+}
+
+// WorkloadoptimizationV1RolloutBehaviorType Defines workload recommendation rollout types.
+// NO_DISRUPTION - rollout shouldn't cause service disruption.
+type WorkloadoptimizationV1RolloutBehaviorType string
+
 // WorkloadoptimizationV1ScalingBehaviour defines model for workloadoptimization.v1.ScalingBehaviour.
 type WorkloadoptimizationV1ScalingBehaviour struct {
 	// StabilizationWindowSeconds Defines the minimum time to make a scaling decision after decision has been made.
@@ -5318,8 +5337,9 @@ type WorkloadoptimizationV1WorkloadConfigUpdateV2 struct {
 
 // WorkloadoptimizationV1WorkloadConfigV2 defines model for workloadoptimization.v1.WorkloadConfigV2.
 type WorkloadoptimizationV1WorkloadConfigV2 struct {
-	HpaConfig WorkloadoptimizationV1HPAConfig `json:"hpaConfig"`
-	VpaConfig WorkloadoptimizationV1VPAConfig `json:"vpaConfig"`
+	HpaConfig       WorkloadoptimizationV1HPAConfig                `json:"hpaConfig"`
+	RolloutBehavior *WorkloadoptimizationV1RolloutBehaviorSettings `json:"rolloutBehavior,omitempty"`
+	VpaConfig       WorkloadoptimizationV1VPAConfig                `json:"vpaConfig"`
 }
 
 // WorkloadoptimizationV1WorkloadEvent defines model for workloadoptimization.v1.WorkloadEvent.
@@ -5362,8 +5382,9 @@ type WorkloadoptimizationV1WorkloadMetrics struct {
 
 // WorkloadoptimizationV1WorkloadOverrides defines model for workloadoptimization.v1.WorkloadOverrides.
 type WorkloadoptimizationV1WorkloadOverrides struct {
-	Horizontal *WorkloadoptimizationV1HorizontalOverrides `json:"horizontal,omitempty"`
-	Vertical   *WorkloadoptimizationV1VerticalOverrides   `json:"vertical,omitempty"`
+	Horizontal      *WorkloadoptimizationV1HorizontalOverrides     `json:"horizontal,omitempty"`
+	RolloutBehavior *WorkloadoptimizationV1RolloutBehaviorSettings `json:"rolloutBehavior,omitempty"`
+	Vertical        *WorkloadoptimizationV1VerticalOverrides       `json:"vertical,omitempty"`
 }
 
 // WorkloadoptimizationV1WorkloadRecommendation defines model for workloadoptimization.v1.WorkloadRecommendation.
