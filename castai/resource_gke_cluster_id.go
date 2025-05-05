@@ -118,13 +118,13 @@ func resourceCastaiGKEClusterIdCreate(ctx context.Context, data *schema.Resource
 		return diag.FromErr(err)
 	}
 	if err := data.Set(FieldClusterToken, tkn); err != nil {
-		return diag.FromErr(fmt.Errorf("setting cluster token: %w", err))
+		return diag.FromErr(fmt.Errorf("setting cluster token: %v", err))
 	}
 	data.SetId(clusterID)
 	// If client service account is set, create service account on cast side.
 	if len(data.Get(FieldGKEClientSA).(string)) > 0 {
 		if err := createCastServiceAccount(ctx, client, data); err != nil {
-			return diag.FromErr(fmt.Errorf("[ERROR] Creating Cast service account %w", err))
+			return diag.FromErr(fmt.Errorf("[ERROR] Creating Cast service account %v", err))
 		}
 	}
 	return nil
@@ -134,12 +134,9 @@ func resourceCastaiGKEClusterIdRead(ctx context.Context, data *schema.ResourceDa
 	client := meta.(*ProviderConfig).api
 
 	if data.Id() == "" {
-		tflog.Info(ctx, ("[INFO] id is null not fetching anything."))
+		tflog.Info(ctx, "id is null, not fetching anything.")
 		return nil
 	}
-	oldValue, newValue := data.GetChange(FieldGKEClientSA)
-	tflog.Info(ctx, fmt.Sprintf("Value of FieldGKEClientSA in state: %v %v", data.Get(FieldGKEClientSA), data.Get(FieldGKEClusterIdLocation)))
-	tflog.Info(ctx, fmt.Sprintf("2 Value of FieldGKEClientSA in state: %v %v", oldValue, newValue))
 
 	log.Printf("[INFO] Getting cluster information.")
 	resp, err := fetchClusterData(ctx, client, data.Id())
@@ -176,7 +173,7 @@ func resourceCastaiGKEClusterIdUpdate(ctx context.Context, data *schema.Resource
 func resourceCastaiGKEClusterIdDelete(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	// Disable service account used for impersonation.
 	client := meta.(*ProviderConfig).api
-	tflog.Info(ctx, " Disabling service account.")
+	tflog.Info(ctx, "Disabling service account.")
 	_, err := client.ExternalClusterAPIDisableGKESA(ctx, data.Id())
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("disabling service account: %w", err))
