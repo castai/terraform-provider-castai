@@ -42,7 +42,6 @@ var supportedSeverities = []string{
 
 var supportedRuleEngineTypes = []string{
 	string(sdk.RULEENGINETYPECEL),
-	string(sdk.RULEENGINETYPEGO),
 }
 
 var rulesPageLimit = "50"
@@ -82,8 +81,9 @@ func resourceSecurityRuntimeRule() *schema.Resource {
 			},
 			FieldRuntimeRuleCategory: {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
 				Description: "Category of the rule.",
+				Default:     "event",
 				ForceNew:    true, // update is not supported
 			},
 			FieldRuntimeRuleSeverity: {
@@ -105,9 +105,10 @@ func resourceSecurityRuntimeRule() *schema.Resource {
 			},
 			FieldRuntimeRuleRuleEngineType: {
 				Type:             schema.TypeString,
-				Required:         true,
-				Description:      "The engine type used to evaluate the rule. One of RULE_ENGINE_TYPE_CEL, RULE_ENGINE_TYPE_GO.",
+				Optional:         true,
+				Description:      "The engine type used to evaluate the rule. Only RULE_ENGINE_TYPE_CEL is currently supported.",
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(supportedRuleEngineTypes, true)),
+				Default:          sdk.RULEENGINETYPECEL,
 				ForceNew:         true, // update is not supported
 			},
 			FieldRuntimeRuleResourceSelector: {

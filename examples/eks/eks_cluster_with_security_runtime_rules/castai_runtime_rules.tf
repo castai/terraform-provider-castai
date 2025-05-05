@@ -3,13 +3,11 @@
 
 resource "castai_security_runtime_rule" "example_rule__dns_to_crypto_mining_" {
   name              = "Example rule: DNS to crypto mining"
-  category          = "event"
   severity          = "SEVERITY_LOW"
   enabled           = false
   rule_text         = <<EOT
 event.type == event_dns && event.dns.network_details.category == category_crypto
 EOT
-  rule_engine_type  = "RULE_ENGINE_TYPE_CEL"
   resource_selector = <<EOT
 resource.namespace == "default"
 EOT
