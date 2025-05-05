@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/castai/terraform-provider-castai/castai/sdk"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
 const (
@@ -133,9 +134,12 @@ func resourceCastaiGKEClusterIdRead(ctx context.Context, data *schema.ResourceDa
 	client := meta.(*ProviderConfig).api
 
 	if data.Id() == "" {
-		log.Printf("[INFO] id is null not fetching anything.")
+		tflog.Info(ctx, ("[INFO] id is null not fetching anything."))
 		return nil
 	}
+	oldValue, newValue := data.GetChange(FieldGKEClientSA)
+	tflog.Info(ctx, fmt.Sprintf("Value of FieldGKEClientSA in state: %v %v", data.Get(FieldGKEClientSA), data.Get(FieldGKEClusterIdLocation)))
+	tflog.Info(ctx, fmt.Sprintf("2 Value of FieldGKEClientSA in state: %v %v", oldValue, newValue))
 
 	log.Printf("[INFO] Getting cluster information.")
 	resp, err := fetchClusterData(ctx, client, data.Id())
@@ -165,19 +169,19 @@ func resourceCastaiGKEClusterIdRead(ctx context.Context, data *schema.ResourceDa
 }
 
 func resourceCastaiGKEClusterIdUpdate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ProviderConfig).api
-
-	if v, ok := data.GetOk(FieldGKEClientSA); ok && len(v.(string)) > 0 {
-		if err := createCastServiceAccount(ctx, client, data); err != nil {
-			return diag.FromErr(fmt.Errorf("[ERROR] Creating Cast service account: %w", err))
-		}
-	}
-
+	// Re-read the resource to ensure the state is up-to-date
 	return resourceCastaiGKEClusterIdRead(ctx, data, meta)
 }
 
 func resourceCastaiGKEClusterIdDelete(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	return resourceCastaiClusterDelete(ctx, data, meta)
+	// Disable service account used for impersonation.
+	client := meta.(*ProviderConfig).api
+	tflog.Info(ctx, " Disabling service account.")
+	_, err := client.ExternalClusterAPIDisableGKESA(ctx, data.Id())
+	if err != nil {
+		return diag.FromErr(fmt.Errorf("disabling service account: %w", err))
+	}
+	return nil
 }
 
 func createCastServiceAccount(ctx context.Context, client sdk.ClientWithResponsesInterface, data *schema.ResourceData) diag.Diagnostics {
