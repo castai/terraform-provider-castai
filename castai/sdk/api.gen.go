@@ -313,10 +313,11 @@ const (
 
 // Defines values for PoliciesV1EvictorStatus.
 const (
-	PoliciesV1EvictorStatusCompatible   PoliciesV1EvictorStatus = "Compatible"
-	PoliciesV1EvictorStatusIncompatible PoliciesV1EvictorStatus = "Incompatible"
-	PoliciesV1EvictorStatusMissing      PoliciesV1EvictorStatus = "Missing"
-	PoliciesV1EvictorStatusUnknown      PoliciesV1EvictorStatus = "Unknown"
+	PoliciesV1EvictorStatusCompatible    PoliciesV1EvictorStatus = "Compatible"
+	PoliciesV1EvictorStatusIncompatible  PoliciesV1EvictorStatus = "Incompatible"
+	PoliciesV1EvictorStatusInvalidConfig PoliciesV1EvictorStatus = "InvalidConfig"
+	PoliciesV1EvictorStatusMissing       PoliciesV1EvictorStatus = "Missing"
+	PoliciesV1EvictorStatusUnknown       PoliciesV1EvictorStatus = "Unknown"
 )
 
 // Defines values for PoliciesV1PodPinnerStatus.
@@ -332,6 +333,55 @@ const (
 const (
 	AWSRebalanceRecommendations   PoliciesV1SpotInterruptionPredictionsType = "AWSRebalanceRecommendations"
 	CASTAIInterruptionPredictions PoliciesV1SpotInterruptionPredictionsType = "CASTAIInterruptionPredictions"
+)
+
+// Defines values for RuntimeV1AnomalyStatus.
+const (
+	ANOMALYSTATUSACKED       RuntimeV1AnomalyStatus = "ANOMALY_STATUS_ACKED"
+	ANOMALYSTATUSCLOSED      RuntimeV1AnomalyStatus = "ANOMALY_STATUS_CLOSED"
+	ANOMALYSTATUSOPEN        RuntimeV1AnomalyStatus = "ANOMALY_STATUS_OPEN"
+	ANOMALYSTATUSUNSPECIFIED RuntimeV1AnomalyStatus = "ANOMALY_STATUS_UNSPECIFIED"
+)
+
+// Defines values for RuntimeV1CloseReason.
+const (
+	CLOSEREASONFALSEPOSITIVE RuntimeV1CloseReason = "CLOSE_REASON_FALSE_POSITIVE"
+	CLOSEREASONOTHER         RuntimeV1CloseReason = "CLOSE_REASON_OTHER"
+	CLOSEREASONRESOLVED      RuntimeV1CloseReason = "CLOSE_REASON_RESOLVED"
+	CLOSEREASONUNSPECIFIED   RuntimeV1CloseReason = "CLOSE_REASON_UNSPECIFIED"
+)
+
+// Defines values for RuntimeV1ListEntryKind.
+const (
+	LISTENTRYKINDCIDR    RuntimeV1ListEntryKind = "LIST_ENTRY_KIND_CIDR"
+	LISTENTRYKINDIP      RuntimeV1ListEntryKind = "LIST_ENTRY_KIND_IP"
+	LISTENTRYKINDSHA256  RuntimeV1ListEntryKind = "LIST_ENTRY_KIND_SHA256"
+	LISTENTRYKINDSTRING  RuntimeV1ListEntryKind = "LIST_ENTRY_KIND_STRING"
+	LISTENTRYKINDUNKNOWN RuntimeV1ListEntryKind = "LIST_ENTRY_KIND_UNKNOWN"
+)
+
+// Defines values for RuntimeV1RuleEngineType.
+const (
+	RULEENGINETYPECEL     RuntimeV1RuleEngineType = "RULE_ENGINE_TYPE_CEL"
+	RULEENGINETYPEGO      RuntimeV1RuleEngineType = "RULE_ENGINE_TYPE_GO"
+	RULEENGINETYPEUNKNOWN RuntimeV1RuleEngineType = "RULE_ENGINE_TYPE_UNKNOWN"
+)
+
+// Defines values for RuntimeV1Severity.
+const (
+	RuntimeV1SeveritySEVERITYCRITICAL RuntimeV1Severity = "SEVERITY_CRITICAL"
+	RuntimeV1SeveritySEVERITYHIGH     RuntimeV1Severity = "SEVERITY_HIGH"
+	RuntimeV1SeveritySEVERITYLOW      RuntimeV1Severity = "SEVERITY_LOW"
+	RuntimeV1SeveritySEVERITYMEDIUM   RuntimeV1Severity = "SEVERITY_MEDIUM"
+	RuntimeV1SeveritySEVERITYNONE     RuntimeV1Severity = "SEVERITY_NONE"
+	RuntimeV1SeveritySEVERITYUNKNOWN  RuntimeV1Severity = "SEVERITY_UNKNOWN"
+)
+
+// Defines values for RuntimeV1ValidationType.
+const (
+	VALIDATECELRESOURCESELECTOR RuntimeV1ValidationType = "VALIDATE_CEL_RESOURCE_SELECTOR"
+	VALIDATECELRULE             RuntimeV1ValidationType = "VALIDATE_CEL_RULE"
+	VALIDATEUNKNOWN             RuntimeV1ValidationType = "VALIDATE_UNKNOWN"
 )
 
 // Defines values for ScheduledrebalancingV1JobStatus.
@@ -434,6 +484,12 @@ const (
 	QUANTILE WorkloadoptimizationV1ResourcePoliciesFunction = "QUANTILE"
 )
 
+// Defines values for WorkloadoptimizationV1RolloutBehaviorType.
+const (
+	NODISRUPTION WorkloadoptimizationV1RolloutBehaviorType = "NO_DISRUPTION"
+	UNSPECIFIED  WorkloadoptimizationV1RolloutBehaviorType = "UNSPECIFIED"
+)
+
 // Defines values for CommitmentsAPIGetCommitmentUsageHistoryParamsAggregationInterval.
 const (
 	AGGREGATIONINTERVALUNSPECIFIED CommitmentsAPIGetCommitmentUsageHistoryParamsAggregationInterval = "AGGREGATION_INTERVAL_UNSPECIFIED"
@@ -478,6 +534,88 @@ const (
 // Defines values for CommitmentsAPIImportGCPCommitmentsParamsBehaviour.
 const (
 	OVERWRITE CommitmentsAPIImportGCPCommitmentsParamsBehaviour = "OVERWRITE"
+)
+
+// Defines values for RuntimeSecurityAPIGetAnomaliesParamsStatus.
+const (
+	ANOMALYSTATUSFILTERCLOSED      RuntimeSecurityAPIGetAnomaliesParamsStatus = "ANOMALY_STATUS_FILTER_CLOSED"
+	ANOMALYSTATUSFILTEROPEN        RuntimeSecurityAPIGetAnomaliesParamsStatus = "ANOMALY_STATUS_FILTER_OPEN"
+	ANOMALYSTATUSFILTERUNACKED     RuntimeSecurityAPIGetAnomaliesParamsStatus = "ANOMALY_STATUS_FILTER_UNACKED"
+	ANOMALYSTATUSFILTERUNSPECIFIED RuntimeSecurityAPIGetAnomaliesParamsStatus = "ANOMALY_STATUS_FILTER_UNSPECIFIED"
+)
+
+// Defines values for RuntimeSecurityAPIGetAnomaliesParamsSortOrder.
+const (
+	RuntimeSecurityAPIGetAnomaliesParamsSortOrderASC  RuntimeSecurityAPIGetAnomaliesParamsSortOrder = "ASC"
+	RuntimeSecurityAPIGetAnomaliesParamsSortOrderAsc  RuntimeSecurityAPIGetAnomaliesParamsSortOrder = "asc"
+	RuntimeSecurityAPIGetAnomaliesParamsSortOrderDESC RuntimeSecurityAPIGetAnomaliesParamsSortOrder = "DESC"
+	RuntimeSecurityAPIGetAnomaliesParamsSortOrderDesc RuntimeSecurityAPIGetAnomaliesParamsSortOrder = "desc"
+)
+
+// Defines values for RuntimeSecurityAPIGetAnomalyEventsParamsSortOrder.
+const (
+	RuntimeSecurityAPIGetAnomalyEventsParamsSortOrderASC  RuntimeSecurityAPIGetAnomalyEventsParamsSortOrder = "ASC"
+	RuntimeSecurityAPIGetAnomalyEventsParamsSortOrderAsc  RuntimeSecurityAPIGetAnomalyEventsParamsSortOrder = "asc"
+	RuntimeSecurityAPIGetAnomalyEventsParamsSortOrderDESC RuntimeSecurityAPIGetAnomalyEventsParamsSortOrder = "DESC"
+	RuntimeSecurityAPIGetAnomalyEventsParamsSortOrderDesc RuntimeSecurityAPIGetAnomalyEventsParamsSortOrder = "desc"
+)
+
+// Defines values for RuntimeSecurityAPIGetRuntimeEventsParamsSortOrder.
+const (
+	RuntimeSecurityAPIGetRuntimeEventsParamsSortOrderASC  RuntimeSecurityAPIGetRuntimeEventsParamsSortOrder = "ASC"
+	RuntimeSecurityAPIGetRuntimeEventsParamsSortOrderAsc  RuntimeSecurityAPIGetRuntimeEventsParamsSortOrder = "asc"
+	RuntimeSecurityAPIGetRuntimeEventsParamsSortOrderDESC RuntimeSecurityAPIGetRuntimeEventsParamsSortOrder = "DESC"
+	RuntimeSecurityAPIGetRuntimeEventsParamsSortOrderDesc RuntimeSecurityAPIGetRuntimeEventsParamsSortOrder = "desc"
+)
+
+// Defines values for RuntimeSecurityAPIGetRuntimeEventGroupsParamsSortOrder.
+const (
+	RuntimeSecurityAPIGetRuntimeEventGroupsParamsSortOrderASC  RuntimeSecurityAPIGetRuntimeEventGroupsParamsSortOrder = "ASC"
+	RuntimeSecurityAPIGetRuntimeEventGroupsParamsSortOrderAsc  RuntimeSecurityAPIGetRuntimeEventGroupsParamsSortOrder = "asc"
+	RuntimeSecurityAPIGetRuntimeEventGroupsParamsSortOrderDESC RuntimeSecurityAPIGetRuntimeEventGroupsParamsSortOrder = "DESC"
+	RuntimeSecurityAPIGetRuntimeEventGroupsParamsSortOrderDesc RuntimeSecurityAPIGetRuntimeEventGroupsParamsSortOrder = "desc"
+)
+
+// Defines values for RuntimeSecurityAPIGetListsParamsSortOrder.
+const (
+	RuntimeSecurityAPIGetListsParamsSortOrderASC  RuntimeSecurityAPIGetListsParamsSortOrder = "ASC"
+	RuntimeSecurityAPIGetListsParamsSortOrderAsc  RuntimeSecurityAPIGetListsParamsSortOrder = "asc"
+	RuntimeSecurityAPIGetListsParamsSortOrderDESC RuntimeSecurityAPIGetListsParamsSortOrder = "DESC"
+	RuntimeSecurityAPIGetListsParamsSortOrderDesc RuntimeSecurityAPIGetListsParamsSortOrder = "desc"
+)
+
+// Defines values for RuntimeSecurityAPIGetListEntriesParamsSortOrder.
+const (
+	RuntimeSecurityAPIGetListEntriesParamsSortOrderASC  RuntimeSecurityAPIGetListEntriesParamsSortOrder = "ASC"
+	RuntimeSecurityAPIGetListEntriesParamsSortOrderAsc  RuntimeSecurityAPIGetListEntriesParamsSortOrder = "asc"
+	RuntimeSecurityAPIGetListEntriesParamsSortOrderDESC RuntimeSecurityAPIGetListEntriesParamsSortOrder = "DESC"
+	RuntimeSecurityAPIGetListEntriesParamsSortOrderDesc RuntimeSecurityAPIGetListEntriesParamsSortOrder = "desc"
+)
+
+// Defines values for RuntimeSecurityAPIGetNetflowListParamsSortOrder.
+const (
+	RuntimeSecurityAPIGetNetflowListParamsSortOrderASC  RuntimeSecurityAPIGetNetflowListParamsSortOrder = "ASC"
+	RuntimeSecurityAPIGetNetflowListParamsSortOrderAsc  RuntimeSecurityAPIGetNetflowListParamsSortOrder = "asc"
+	RuntimeSecurityAPIGetNetflowListParamsSortOrderDESC RuntimeSecurityAPIGetNetflowListParamsSortOrder = "DESC"
+	RuntimeSecurityAPIGetNetflowListParamsSortOrderDesc RuntimeSecurityAPIGetNetflowListParamsSortOrder = "desc"
+)
+
+// Defines values for RuntimeSecurityAPIGetRulesParamsSeverity.
+const (
+	RuntimeSecurityAPIGetRulesParamsSeveritySEVERITYCRITICAL RuntimeSecurityAPIGetRulesParamsSeverity = "SEVERITY_CRITICAL"
+	RuntimeSecurityAPIGetRulesParamsSeveritySEVERITYHIGH     RuntimeSecurityAPIGetRulesParamsSeverity = "SEVERITY_HIGH"
+	RuntimeSecurityAPIGetRulesParamsSeveritySEVERITYLOW      RuntimeSecurityAPIGetRulesParamsSeverity = "SEVERITY_LOW"
+	RuntimeSecurityAPIGetRulesParamsSeveritySEVERITYMEDIUM   RuntimeSecurityAPIGetRulesParamsSeverity = "SEVERITY_MEDIUM"
+	RuntimeSecurityAPIGetRulesParamsSeveritySEVERITYNONE     RuntimeSecurityAPIGetRulesParamsSeverity = "SEVERITY_NONE"
+	RuntimeSecurityAPIGetRulesParamsSeveritySEVERITYUNKNOWN  RuntimeSecurityAPIGetRulesParamsSeverity = "SEVERITY_UNKNOWN"
+)
+
+// Defines values for RuntimeSecurityAPIGetRulesParamsSortOrder.
+const (
+	RuntimeSecurityAPIGetRulesParamsSortOrderASC  RuntimeSecurityAPIGetRulesParamsSortOrder = "ASC"
+	RuntimeSecurityAPIGetRulesParamsSortOrderAsc  RuntimeSecurityAPIGetRulesParamsSortOrder = "asc"
+	RuntimeSecurityAPIGetRulesParamsSortOrderDESC RuntimeSecurityAPIGetRulesParamsSortOrder = "DESC"
+	RuntimeSecurityAPIGetRulesParamsSortOrderDesc RuntimeSecurityAPIGetRulesParamsSortOrder = "desc"
 )
 
 // Defines values for WorkloadOptimizationAPIListWorkloadEventsParamsType.
@@ -550,6 +688,20 @@ type RoleBindingIsTheRoleBindingToBeUpdated struct {
 
 	// Name Name is the name of the role binding.
 	Name string `json:"name"`
+}
+
+// RuntimeSecurityAPIAddListEntriesRequest defines model for RuntimeSecurityAPI_AddListEntries_request.
+type RuntimeSecurityAPIAddListEntriesRequest struct {
+	Entries *[]RuntimeV1ListEntry `json:"entries,omitempty"`
+}
+
+// RuntimeSecurityAPIEditRuleRequest defines model for RuntimeSecurityAPI_EditRule_request.
+type RuntimeSecurityAPIEditRuleRequest struct {
+	Enabled          bool               `json:"enabled"`
+	Labels           *map[string]string `json:"labels,omitempty"`
+	ResourceSelector *string            `json:"resourceSelector,omitempty"`
+	RuleText         *string            `json:"ruleText,omitempty"`
+	Severity         RuntimeV1Severity  `json:"severity"`
 }
 
 // ServiceAccountsAPICreateServiceAccountKeyRequest CreateServiceAccountKeyRequest is the request for creating a service account key.
@@ -4236,6 +4388,427 @@ type PoliciesV1UnschedulablePodsPolicy struct {
 	PodPinner *PoliciesV1PodPinner `json:"podPinner,omitempty"`
 }
 
+// RuntimeV1AckAnomaliesRequest defines model for runtime.v1.AckAnomaliesRequest.
+type RuntimeV1AckAnomaliesRequest struct {
+	Ids *[]string `json:"ids,omitempty"`
+}
+
+// RuntimeV1AckAnomaliesResponse defines model for runtime.v1.AckAnomaliesResponse.
+type RuntimeV1AckAnomaliesResponse = map[string]interface{}
+
+// RuntimeV1AddListEntriesResponse defines model for runtime.v1.AddListEntriesResponse.
+type RuntimeV1AddListEntriesResponse = map[string]interface{}
+
+// RuntimeV1Anomaly defines model for runtime.v1.Anomaly.
+type RuntimeV1Anomaly struct {
+	AckedAt                 *time.Time            `json:"ackedAt,omitempty"`
+	AssignedUser            *string               `json:"assignedUser,omitempty"`
+	ClosedAt                *time.Time            `json:"closedAt,omitempty"`
+	ClosedReason            *RuntimeV1CloseReason `json:"closedReason,omitempty"`
+	ClosedReasonDescription *string               `json:"closedReasonDescription,omitempty"`
+	ClusterId               *string               `json:"clusterId,omitempty"`
+	CreatedAt               *time.Time            `json:"createdAt,omitempty"`
+	Id                      *string               `json:"id,omitempty"`
+
+	// Name Human readable name of the anomaly.
+	Name      *string `json:"name,omitempty"`
+	Namespace *string `json:"namespace,omitempty"`
+
+	// RuleId Rule UUID.
+	RuleId       *string                 `json:"ruleId,omitempty"`
+	Status       *RuntimeV1AnomalyStatus `json:"status,omitempty"`
+	Type         *string                 `json:"type,omitempty"`
+	UpdatedAt    *time.Time              `json:"updatedAt,omitempty"`
+	Workload     *string                 `json:"workload,omitempty"`
+	WorkloadId   *string                 `json:"workloadId,omitempty"`
+	WorkloadKind *string                 `json:"workloadKind,omitempty"`
+}
+
+// RuntimeV1AnomalyEvent defines model for runtime.v1.AnomalyEvent.
+type RuntimeV1AnomalyEvent struct {
+	ContainerName *string `json:"containerName,omitempty"`
+
+	// EventName Human readable name of the event related to anomaly..
+	EventName *string `json:"eventName,omitempty"`
+	EventType *string `json:"eventType,omitempty"`
+	Id        *string `json:"id,omitempty"`
+
+	// Namespace Kubernetes Fields.
+	Namespace *string `json:"namespace,omitempty"`
+	PodName   *string `json:"podName,omitempty"`
+
+	// Process Process name.
+	Process  *string                 `json:"process,omitempty"`
+	RawEvent *map[string]interface{} `json:"rawEvent,omitempty"`
+
+	// Reason Reason why anomaly event was triggered.
+	Reason *string `json:"reason,omitempty"`
+
+	// RuleName Human readable rule name which triggered anomaly.
+	RuleName *string `json:"ruleName,omitempty"`
+
+	// Timestamp Time when anomaly was detected.
+	Timestamp *time.Time `json:"timestamp,omitempty"`
+}
+
+// RuntimeV1AnomalyStatus defines model for runtime.v1.AnomalyStatus.
+type RuntimeV1AnomalyStatus string
+
+// RuntimeV1CloseAnomaliesRequest defines model for runtime.v1.CloseAnomaliesRequest.
+type RuntimeV1CloseAnomaliesRequest struct {
+	Ids               *[]string             `json:"ids,omitempty"`
+	Reason            *RuntimeV1CloseReason `json:"reason,omitempty"`
+	ReasonDescription *string               `json:"reasonDescription,omitempty"`
+}
+
+// RuntimeV1CloseAnomaliesResponse defines model for runtime.v1.CloseAnomaliesResponse.
+type RuntimeV1CloseAnomaliesResponse = map[string]interface{}
+
+// RuntimeV1CloseReason defines model for runtime.v1.CloseReason.
+type RuntimeV1CloseReason string
+
+// RuntimeV1Column defines model for runtime.v1.Column.
+type RuntimeV1Column struct {
+	Name *string `json:"name,omitempty"`
+	Type *string `json:"type,omitempty"`
+}
+
+// RuntimeV1CreateListRequest defines model for runtime.v1.CreateListRequest.
+type RuntimeV1CreateListRequest struct {
+	Entries *[]RuntimeV1ListEntry `json:"entries,omitempty"`
+	Name    *string               `json:"name,omitempty"`
+}
+
+// RuntimeV1CreateRuleRequest defines model for runtime.v1.CreateRuleRequest.
+type RuntimeV1CreateRuleRequest struct {
+	Category         string                  `json:"category"`
+	Enabled          *bool                   `json:"enabled,omitempty"`
+	Labels           *map[string]string      `json:"labels,omitempty"`
+	Name             string                  `json:"name"`
+	ResourceSelector *string                 `json:"resourceSelector,omitempty"`
+	RuleEngineType   RuntimeV1RuleEngineType `json:"ruleEngineType"`
+	RuleText         string                  `json:"ruleText"`
+	Severity         RuntimeV1Severity       `json:"severity"`
+}
+
+// RuntimeV1DeleteListsRequest defines model for runtime.v1.DeleteListsRequest.
+type RuntimeV1DeleteListsRequest struct {
+	Ids []string `json:"ids"`
+}
+
+// RuntimeV1DeleteListsResponse defines model for runtime.v1.DeleteListsResponse.
+type RuntimeV1DeleteListsResponse = map[string]interface{}
+
+// RuntimeV1DeleteRulesRequest defines model for runtime.v1.DeleteRulesRequest.
+type RuntimeV1DeleteRulesRequest struct {
+	Ids []string `json:"ids"`
+}
+
+// RuntimeV1DeleteRulesResponse defines model for runtime.v1.DeleteRulesResponse.
+type RuntimeV1DeleteRulesResponse = map[string]interface{}
+
+// RuntimeV1GetAnomaliesOverviewResponse defines model for runtime.v1.GetAnomaliesOverviewResponse.
+type RuntimeV1GetAnomaliesOverviewResponse struct {
+	Acked  *int32 `json:"acked,omitempty"`
+	Closed *int32 `json:"closed,omitempty"`
+	Open   *int32 `json:"open,omitempty"`
+}
+
+// RuntimeV1GetAnomaliesResponse defines model for runtime.v1.GetAnomaliesResponse.
+type RuntimeV1GetAnomaliesResponse struct {
+	Anomalies      *[]RuntimeV1Anomaly `json:"anomalies,omitempty"`
+	Count          *int32              `json:"count,omitempty"`
+	NextCursor     *string             `json:"nextCursor,omitempty"`
+	PreviousCursor *string             `json:"previousCursor,omitempty"`
+}
+
+// RuntimeV1GetAnomalyEventsResponse defines model for runtime.v1.GetAnomalyEventsResponse.
+type RuntimeV1GetAnomalyEventsResponse struct {
+	Count          *int32                   `json:"count,omitempty"`
+	Events         *[]RuntimeV1AnomalyEvent `json:"events,omitempty"`
+	NextCursor     *string                  `json:"nextCursor,omitempty"`
+	PreviousCursor *string                  `json:"previousCursor,omitempty"`
+}
+
+// RuntimeV1GetAnomalyResponse defines model for runtime.v1.GetAnomalyResponse.
+type RuntimeV1GetAnomalyResponse struct {
+	Anomaly *RuntimeV1Anomaly        `json:"anomaly,omitempty"`
+	Events  *[]RuntimeV1AnomalyEvent `json:"events,omitempty"`
+	Ticket  *RuntimeV1Ticket         `json:"ticket,omitempty"`
+}
+
+// RuntimeV1GetClusterWorkloadsNetflowResponse defines model for runtime.v1.GetClusterWorkloadsNetflowResponse.
+type RuntimeV1GetClusterWorkloadsNetflowResponse struct {
+	Items *[]RuntimeV1WorkloadNetflow `json:"items,omitempty"`
+}
+
+// RuntimeV1GetListEntriesResponse defines model for runtime.v1.GetListEntriesResponse.
+type RuntimeV1GetListEntriesResponse struct {
+	Count          *int32                `json:"count,omitempty"`
+	Entries        *[]RuntimeV1ListEntry `json:"entries,omitempty"`
+	NextCursor     *string               `json:"nextCursor,omitempty"`
+	PreviousCursor *string               `json:"previousCursor,omitempty"`
+}
+
+// RuntimeV1GetListsResponse defines model for runtime.v1.GetListsResponse.
+type RuntimeV1GetListsResponse struct {
+	Count          *int32                          `json:"count,omitempty"`
+	Lists          *[]RuntimeV1ListHeaderWithRules `json:"lists,omitempty"`
+	NextCursor     *string                         `json:"nextCursor,omitempty"`
+	PreviousCursor *string                         `json:"previousCursor,omitempty"`
+}
+
+// RuntimeV1GetNetflowGraphResponse defines model for runtime.v1.GetNetflowGraphResponse.
+type RuntimeV1GetNetflowGraphResponse struct {
+	Edges    *[]RuntimeV1NetflowGraphEdge   `json:"edges,omitempty"`
+	Vertices *[]RuntimeV1NetflowGraphVertex `json:"vertices,omitempty"`
+}
+
+// RuntimeV1GetNetflowListResponse defines model for runtime.v1.GetNetflowListResponse.
+type RuntimeV1GetNetflowListResponse struct {
+	Columns    *[]RuntimeV1Column `json:"columns,omitempty"`
+	NextCursor *string            `json:"nextCursor,omitempty"`
+	Rows       *[]RuntimeV1Row    `json:"rows,omitempty"`
+}
+
+// RuntimeV1GetNetflowTrendResponse defines model for runtime.v1.GetNetflowTrendResponse.
+type RuntimeV1GetNetflowTrendResponse struct {
+	Timeseries *[]RuntimeV1GetNetflowTrendResponseItems `json:"timeseries,omitempty"`
+}
+
+// RuntimeV1GetNetflowTrendResponseItems defines model for runtime.v1.GetNetflowTrendResponse.Items.
+type RuntimeV1GetNetflowTrendResponseItems struct {
+	RxBytes *string    `json:"rxBytes,omitempty"`
+	Time    *time.Time `json:"time,omitempty"`
+	TxBytes *string    `json:"txBytes,omitempty"`
+}
+
+// RuntimeV1GetRuleResponse defines model for runtime.v1.GetRuleResponse.
+type RuntimeV1GetRuleResponse struct {
+	Rule *RuntimeV1Rule `json:"rule,omitempty"`
+}
+
+// RuntimeV1GetRulesResponse defines model for runtime.v1.GetRulesResponse.
+type RuntimeV1GetRulesResponse struct {
+	Count          *int32           `json:"count,omitempty"`
+	NextCursor     *string          `json:"nextCursor,omitempty"`
+	PreviousCursor *string          `json:"previousCursor,omitempty"`
+	Rules          *[]RuntimeV1Rule `json:"rules,omitempty"`
+}
+
+// RuntimeV1GetRuntimeEventGroupsResponse defines model for runtime.v1.GetRuntimeEventGroupsResponse.
+type RuntimeV1GetRuntimeEventGroupsResponse struct {
+	Columns        *[]RuntimeV1Column `json:"columns,omitempty"`
+	NextCursor     *string            `json:"nextCursor,omitempty"`
+	PreviousCursor *string            `json:"previousCursor,omitempty"`
+	Rows           *[]RuntimeV1Row    `json:"rows,omitempty"`
+}
+
+// RuntimeV1GetRuntimeEventsProcessTreeResponse defines model for runtime.v1.GetRuntimeEventsProcessTreeResponse.
+type RuntimeV1GetRuntimeEventsProcessTreeResponse struct {
+	Items *[]RuntimeV1GetRuntimeEventsProcessTreeResponseEventProcess `json:"items,omitempty"`
+}
+
+// RuntimeV1GetRuntimeEventsProcessTreeResponseEventProcess defines model for runtime.v1.GetRuntimeEventsProcessTreeResponse.EventProcess.
+type RuntimeV1GetRuntimeEventsProcessTreeResponseEventProcess struct {
+	Args            *[]string  `json:"args,omitempty"`
+	ExitTime        *time.Time `json:"exitTime,omitempty"`
+	Filepath        *string    `json:"filepath,omitempty"`
+	ParentStartTime *string    `json:"parentStartTime,omitempty"`
+	Pid             *int64     `json:"pid,omitempty"`
+	Ppid            *int64     `json:"ppid,omitempty"`
+	StartTime       *string    `json:"startTime,omitempty"`
+	Timestamp       *time.Time `json:"timestamp,omitempty"`
+}
+
+// RuntimeV1GetRuntimeEventsResponse defines model for runtime.v1.GetRuntimeEventsResponse.
+type RuntimeV1GetRuntimeEventsResponse struct {
+	Items          *[]RuntimeV1GetRuntimeEventsResponseRuntimeEvent `json:"items,omitempty"`
+	NextCursor     *string                                          `json:"nextCursor,omitempty"`
+	PreviousCursor *string                                          `json:"previousCursor,omitempty"`
+}
+
+// RuntimeV1GetRuntimeEventsResponseRuntimeEvent defines model for runtime.v1.GetRuntimeEventsResponse.RuntimeEvent.
+type RuntimeV1GetRuntimeEventsResponseRuntimeEvent struct {
+	EventName *string                 `json:"eventName,omitempty"`
+	RawEvent  *map[string]interface{} `json:"rawEvent,omitempty"`
+}
+
+// RuntimeV1ListEntry defines model for runtime.v1.ListEntry.
+type RuntimeV1ListEntry struct {
+	Kind  *RuntimeV1ListEntryKind `json:"kind,omitempty"`
+	Value *string                 `json:"value,omitempty"`
+}
+
+// RuntimeV1ListEntryKind defines model for runtime.v1.ListEntryKind.
+type RuntimeV1ListEntryKind string
+
+// RuntimeV1ListHeader defines model for runtime.v1.ListHeader.
+type RuntimeV1ListHeader struct {
+	Id   *string `json:"id,omitempty"`
+	Name *string `json:"name,omitempty"`
+}
+
+// RuntimeV1ListHeaderWithRules defines model for runtime.v1.ListHeaderWithRules.
+type RuntimeV1ListHeaderWithRules struct {
+	Header      *RuntimeV1ListHeader   `json:"header,omitempty"`
+	UsedByRules *[]RuntimeV1RuleHeader `json:"usedByRules,omitempty"`
+}
+
+// RuntimeV1NetflowGraphEdge defines model for runtime.v1.NetflowGraphEdge.
+type RuntimeV1NetflowGraphEdge struct {
+	Metrics *map[string]string `json:"metrics,omitempty"`
+	Source  *string            `json:"source,omitempty"`
+	Target  *string            `json:"target,omitempty"`
+}
+
+// RuntimeV1NetflowGraphVertex defines model for runtime.v1.NetflowGraphVertex.
+type RuntimeV1NetflowGraphVertex struct {
+	Id       *string            `json:"id,omitempty"`
+	Metadata *map[string]string `json:"metadata,omitempty"`
+}
+
+// RuntimeV1RemoveListEntriesResponse defines model for runtime.v1.RemoveListEntriesResponse.
+type RuntimeV1RemoveListEntriesResponse = map[string]interface{}
+
+// RuntimeV1Row defines model for runtime.v1.Row.
+type RuntimeV1Row struct {
+	Values *[]string `json:"values,omitempty"`
+}
+
+// RuntimeV1Rule defines model for runtime.v1.Rule.
+type RuntimeV1Rule struct {
+	// AnomaliesCount anomalies_count shows how many anomalies are detected
+	// via this rule.
+	//
+	// It is a read_only field.
+	AnomaliesCount *int32 `json:"anomaliesCount,omitempty"`
+
+	// Category category is the category of the rule.
+	Category *string `json:"category,omitempty"`
+
+	// Enabled enabled indicates whether the rule is enabled or not.
+	Enabled *bool `json:"enabled,omitempty"`
+
+	// Id id is the unique identifier of a rule.
+	//
+	// It is a UUID v4.
+	Id *string `json:"id,omitempty"`
+
+	// IsBuiltIn is_built_in shows whether the rule is a built-in one (defined by Cast AI)
+	// or defined by the user.
+	//
+	// It is a read_only field.
+	IsBuiltIn *bool `json:"isBuiltIn,omitempty"`
+
+	// Labels labels are a set of arbitrary key-value pairs
+	// which can be set by the user.
+	Labels *map[string]string `json:"labels,omitempty"`
+
+	// Name name is the name of the rule.
+	Name *string `json:"name,omitempty"`
+
+	// ResourceSelector resource_selector is an expression that is used to
+	// calculate the resources this rule is enforced on.
+	ResourceSelector *string                  `json:"resourceSelector,omitempty"`
+	RuleEngineType   *RuntimeV1RuleEngineType `json:"ruleEngineType,omitempty"`
+
+	// RuleText rule_text is the actual rule.
+	// This is what will be evaluated by the engine
+	// to determine whether a rule is violated or not.
+	RuleText *string            `json:"ruleText,omitempty"`
+	Severity *RuntimeV1Severity `json:"severity,omitempty"`
+
+	// Type type is the type of the rule.
+	Type            *string                `json:"type,omitempty"`
+	UsedCustomLists *[]RuntimeV1ListHeader `json:"usedCustomLists,omitempty"`
+}
+
+// RuntimeV1RuleEngineType defines model for runtime.v1.RuleEngineType.
+type RuntimeV1RuleEngineType string
+
+// RuntimeV1RuleHeader defines model for runtime.v1.RuleHeader.
+type RuntimeV1RuleHeader struct {
+	// Category category is the category of the rule.
+	Category *string `json:"category,omitempty"`
+
+	// Enabled enabled indicates whether the rule is enabled or not.
+	Enabled *bool `json:"enabled,omitempty"`
+
+	// Id It is a UUID v4.
+	Id *string `json:"id,omitempty"`
+
+	// Name name is the name of the rule.
+	Name *string `json:"name,omitempty"`
+
+	// Type type is the type of the rule.
+	Type *string `json:"type,omitempty"`
+}
+
+// RuntimeV1Severity defines model for runtime.v1.Severity.
+type RuntimeV1Severity string
+
+// RuntimeV1Ticket defines model for runtime.v1.Ticket.
+type RuntimeV1Ticket struct {
+	Name *string `json:"name,omitempty"`
+	Url  *string `json:"url,omitempty"`
+}
+
+// RuntimeV1ToggleRulesRequest defines model for runtime.v1.ToggleRulesRequest.
+type RuntimeV1ToggleRulesRequest struct {
+	Enabled bool     `json:"enabled"`
+	Ids     []string `json:"ids"`
+}
+
+// RuntimeV1ToggleRulesResponse defines model for runtime.v1.ToggleRulesResponse.
+type RuntimeV1ToggleRulesResponse = map[string]interface{}
+
+// RuntimeV1TriggerAnomalyWebhookResponse defines model for runtime.v1.TriggerAnomalyWebhookResponse.
+type RuntimeV1TriggerAnomalyWebhookResponse = map[string]interface{}
+
+// RuntimeV1ValidateRequest defines model for runtime.v1.ValidateRequest.
+type RuntimeV1ValidateRequest struct {
+	RuleText *string                  `json:"ruleText,omitempty"`
+	Type     *RuntimeV1ValidationType `json:"type,omitempty"`
+}
+
+// RuntimeV1ValidateResponse defines model for runtime.v1.ValidateResponse.
+type RuntimeV1ValidateResponse struct {
+	Error     *string                     `json:"error"`
+	Locations *[]RuntimeV1ValidationError `json:"locations,omitempty"`
+	Valid     *bool                       `json:"valid,omitempty"`
+}
+
+// RuntimeV1ValidationError defines model for runtime.v1.ValidationError.
+type RuntimeV1ValidationError struct {
+	Column  *int64  `json:"column,omitempty"`
+	Line    *int64  `json:"line,omitempty"`
+	Message *string `json:"message,omitempty"`
+}
+
+// RuntimeV1ValidationType defines model for runtime.v1.ValidationType.
+type RuntimeV1ValidationType string
+
+// RuntimeV1WorkloadNetflow defines model for runtime.v1.WorkloadNetflow.
+type RuntimeV1WorkloadNetflow struct {
+	Destinations *[]RuntimeV1WorkloadNetflowDestination `json:"destinations,omitempty"`
+	Namespace    *string                                `json:"namespace,omitempty"`
+	WorkloadKind *string                                `json:"workloadKind,omitempty"`
+	WorkloadName *string                                `json:"workloadName,omitempty"`
+	Zone         *string                                `json:"zone,omitempty"`
+}
+
+// RuntimeV1WorkloadNetflowDestination defines model for runtime.v1.WorkloadNetflowDestination.
+type RuntimeV1WorkloadNetflowDestination struct {
+	DnsQuestion  *string `json:"dnsQuestion,omitempty"`
+	Namespace    *string `json:"namespace,omitempty"`
+	RxBytes      *string `json:"rxBytes,omitempty"`
+	TxBytes      *string `json:"txBytes,omitempty"`
+	WorkloadKind *string `json:"workloadKind,omitempty"`
+	WorkloadName *string `json:"workloadName,omitempty"`
+	Zone         *string `json:"zone,omitempty"`
+}
+
 // ScheduledrebalancingV1AggressiveModeConfig defines model for scheduledrebalancing.v1.AggressiveModeConfig.
 type ScheduledrebalancingV1AggressiveModeConfig struct {
 	// IgnoreLocalPersistentVolumes Rebalance workloads that use local-path Persistent Volumes.
@@ -4884,10 +5457,11 @@ type WorkloadoptimizationV1RecommendationPolicies struct {
 	// ManagementOption Defines possible options for workload management.
 	// READ_ONLY - workload watched (metrics collected), but no actions may be performed by CAST AI.
 	// MANAGED - workload watched (metrics collected), CAST AI may perform actions on the workload.
-	ManagementOption WorkloadoptimizationV1ManagementOption     `json:"managementOption"`
-	Memory           WorkloadoptimizationV1ResourcePolicies     `json:"memory"`
-	MemoryEvent      *WorkloadoptimizationV1MemoryEventSettings `json:"memoryEvent,omitempty"`
-	Startup          *WorkloadoptimizationV1StartupSettings     `json:"startup,omitempty"`
+	ManagementOption WorkloadoptimizationV1ManagementOption         `json:"managementOption"`
+	Memory           WorkloadoptimizationV1ResourcePolicies         `json:"memory"`
+	MemoryEvent      *WorkloadoptimizationV1MemoryEventSettings     `json:"memoryEvent,omitempty"`
+	RolloutBehavior  *WorkloadoptimizationV1RolloutBehaviorSettings `json:"rolloutBehavior,omitempty"`
+	Startup          *WorkloadoptimizationV1StartupSettings         `json:"startup,omitempty"`
 }
 
 // WorkloadoptimizationV1RecommendedPodCountChangedEvent defines model for workloadoptimization.v1.RecommendedPodCountChangedEvent.
@@ -5104,6 +5678,17 @@ type WorkloadoptimizationV1Resources struct {
 	Requests *WorkloadoptimizationV1ResourceQuantity `json:"requests,omitempty"`
 }
 
+// WorkloadoptimizationV1RolloutBehaviorSettings defines model for workloadoptimization.v1.RolloutBehaviorSettings.
+type WorkloadoptimizationV1RolloutBehaviorSettings struct {
+	// Type Defines workload recommendation rollout types.
+	// NO_DISRUPTION - rollout shouldn't cause service disruption.
+	Type *WorkloadoptimizationV1RolloutBehaviorType `json:"type,omitempty"`
+}
+
+// WorkloadoptimizationV1RolloutBehaviorType Defines workload recommendation rollout types.
+// NO_DISRUPTION - rollout shouldn't cause service disruption.
+type WorkloadoptimizationV1RolloutBehaviorType string
+
 // WorkloadoptimizationV1ScalingBehaviour defines model for workloadoptimization.v1.ScalingBehaviour.
 type WorkloadoptimizationV1ScalingBehaviour struct {
 	// StabilizationWindowSeconds Defines the minimum time to make a scaling decision after decision has been made.
@@ -5318,8 +5903,9 @@ type WorkloadoptimizationV1WorkloadConfigUpdateV2 struct {
 
 // WorkloadoptimizationV1WorkloadConfigV2 defines model for workloadoptimization.v1.WorkloadConfigV2.
 type WorkloadoptimizationV1WorkloadConfigV2 struct {
-	HpaConfig WorkloadoptimizationV1HPAConfig `json:"hpaConfig"`
-	VpaConfig WorkloadoptimizationV1VPAConfig `json:"vpaConfig"`
+	HpaConfig       WorkloadoptimizationV1HPAConfig                `json:"hpaConfig"`
+	RolloutBehavior *WorkloadoptimizationV1RolloutBehaviorSettings `json:"rolloutBehavior,omitempty"`
+	VpaConfig       WorkloadoptimizationV1VPAConfig                `json:"vpaConfig"`
 }
 
 // WorkloadoptimizationV1WorkloadEvent defines model for workloadoptimization.v1.WorkloadEvent.
@@ -5362,8 +5948,9 @@ type WorkloadoptimizationV1WorkloadMetrics struct {
 
 // WorkloadoptimizationV1WorkloadOverrides defines model for workloadoptimization.v1.WorkloadOverrides.
 type WorkloadoptimizationV1WorkloadOverrides struct {
-	Horizontal *WorkloadoptimizationV1HorizontalOverrides `json:"horizontal,omitempty"`
-	Vertical   *WorkloadoptimizationV1VerticalOverrides   `json:"vertical,omitempty"`
+	Horizontal      *WorkloadoptimizationV1HorizontalOverrides     `json:"horizontal,omitempty"`
+	RolloutBehavior *WorkloadoptimizationV1RolloutBehaviorSettings `json:"rolloutBehavior,omitempty"`
+	Vertical        *WorkloadoptimizationV1VerticalOverrides       `json:"vertical,omitempty"`
 }
 
 // WorkloadoptimizationV1WorkloadRecommendation defines model for workloadoptimization.v1.WorkloadRecommendation.
@@ -5714,6 +6301,293 @@ type ExternalClusterAPIGetCredentialsScriptTemplateParams struct {
 	CrossRole *bool `form:"crossRole,omitempty" json:"crossRole,omitempty"`
 }
 
+// RuntimeSecurityAPIGetAnomaliesParams defines parameters for RuntimeSecurityAPIGetAnomalies.
+type RuntimeSecurityAPIGetAnomaliesParams struct {
+	ClusterIds *[]string                                   `form:"clusterIds,omitempty" json:"clusterIds,omitempty"`
+	Namespaces *[]string                                   `form:"namespaces,omitempty" json:"namespaces,omitempty"`
+	Status     *RuntimeSecurityAPIGetAnomaliesParamsStatus `form:"status,omitempty" json:"status,omitempty"`
+	PageLimit  *string                                     `form:"page.limit,omitempty" json:"page.limit,omitempty"`
+
+	// PageCursor Cursor that defines token indicating where to start the next page.
+	// Empty value indicates to start from beginning of the dataset.
+	PageCursor *string `form:"page.cursor,omitempty" json:"page.cursor,omitempty"`
+
+	// SortField Name of the field you want to sort
+	SortField *string `form:"sort.field,omitempty" json:"sort.field,omitempty"`
+
+	// SortOrder The sort order, possible values ASC or DESC, if not provided asc is the default
+	//
+	//  - ASC: ASC
+	//  - asc: desc
+	//  - DESC: ASC
+	//  - desc: desc
+	SortOrder  *RuntimeSecurityAPIGetAnomaliesParamsSortOrder `form:"sort.order,omitempty" json:"sort.order,omitempty"`
+	ResourceId *string                                        `form:"resourceId,omitempty" json:"resourceId,omitempty"`
+	Types      *[]string                                      `form:"types,omitempty" json:"types,omitempty"`
+
+	// Search search is a plain-text search over all fields of the anomaly
+	// (rule name, cluster name, namespace, workload name or rule type).
+	Search    *string    `form:"search,omitempty" json:"search,omitempty"`
+	StartTime *time.Time `form:"startTime,omitempty" json:"startTime,omitempty"`
+	EndTime   *time.Time `form:"endTime,omitempty" json:"endTime,omitempty"`
+}
+
+// RuntimeSecurityAPIGetAnomaliesParamsStatus defines parameters for RuntimeSecurityAPIGetAnomalies.
+type RuntimeSecurityAPIGetAnomaliesParamsStatus string
+
+// RuntimeSecurityAPIGetAnomaliesParamsSortOrder defines parameters for RuntimeSecurityAPIGetAnomalies.
+type RuntimeSecurityAPIGetAnomaliesParamsSortOrder string
+
+// RuntimeSecurityAPIGetAnomalyEventsParams defines parameters for RuntimeSecurityAPIGetAnomalyEvents.
+type RuntimeSecurityAPIGetAnomalyEventsParams struct {
+	PageLimit *string `form:"page.limit,omitempty" json:"page.limit,omitempty"`
+
+	// PageCursor Cursor that defines token indicating where to start the next page.
+	// Empty value indicates to start from beginning of the dataset.
+	PageCursor *string `form:"page.cursor,omitempty" json:"page.cursor,omitempty"`
+
+	// SortField Name of the field you want to sort
+	SortField *string `form:"sort.field,omitempty" json:"sort.field,omitempty"`
+
+	// SortOrder The sort order, possible values ASC or DESC, if not provided asc is the default
+	//
+	//  - ASC: ASC
+	//  - asc: desc
+	//  - DESC: ASC
+	//  - desc: desc
+	SortOrder *RuntimeSecurityAPIGetAnomalyEventsParamsSortOrder `form:"sort.order,omitempty" json:"sort.order,omitempty"`
+	Search    *string                                            `form:"search,omitempty" json:"search,omitempty"`
+}
+
+// RuntimeSecurityAPIGetAnomalyEventsParamsSortOrder defines parameters for RuntimeSecurityAPIGetAnomalyEvents.
+type RuntimeSecurityAPIGetAnomalyEventsParamsSortOrder string
+
+// RuntimeSecurityAPITriggerAnomalyWebhookJSONBody defines parameters for RuntimeSecurityAPITriggerAnomalyWebhook.
+type RuntimeSecurityAPITriggerAnomalyWebhookJSONBody = map[string]interface{}
+
+// RuntimeSecurityAPIGetRuntimeEventsParams defines parameters for RuntimeSecurityAPIGetRuntimeEvents.
+type RuntimeSecurityAPIGetRuntimeEventsParams struct {
+	ClusterIds     *[]string  `form:"clusterIds,omitempty" json:"clusterIds,omitempty"`
+	Types          *[]string  `form:"types,omitempty" json:"types,omitempty"`
+	GroupSelectors *[]string  `form:"groupSelectors,omitempty" json:"groupSelectors,omitempty"`
+	Search         *string    `form:"search,omitempty" json:"search,omitempty"`
+	StartTime      *time.Time `form:"startTime,omitempty" json:"startTime,omitempty"`
+	EndTime        *time.Time `form:"endTime,omitempty" json:"endTime,omitempty"`
+	PageLimit      *string    `form:"page.limit,omitempty" json:"page.limit,omitempty"`
+
+	// PageCursor Cursor that defines token indicating where to start the next page.
+	// Empty value indicates to start from beginning of the dataset.
+	PageCursor *string `form:"page.cursor,omitempty" json:"page.cursor,omitempty"`
+
+	// SortField Name of the field you want to sort
+	SortField *string `form:"sort.field,omitempty" json:"sort.field,omitempty"`
+
+	// SortOrder The sort order, possible values ASC or DESC, if not provided asc is the default
+	//
+	//  - ASC: ASC
+	//  - asc: desc
+	//  - DESC: ASC
+	//  - desc: desc
+	SortOrder *RuntimeSecurityAPIGetRuntimeEventsParamsSortOrder `form:"sort.order,omitempty" json:"sort.order,omitempty"`
+}
+
+// RuntimeSecurityAPIGetRuntimeEventsParamsSortOrder defines parameters for RuntimeSecurityAPIGetRuntimeEvents.
+type RuntimeSecurityAPIGetRuntimeEventsParamsSortOrder string
+
+// RuntimeSecurityAPIGetRuntimeEventGroupsParams defines parameters for RuntimeSecurityAPIGetRuntimeEventGroups.
+type RuntimeSecurityAPIGetRuntimeEventGroupsParams struct {
+	ClusterIds *[]string  `form:"clusterIds,omitempty" json:"clusterIds,omitempty"`
+	Types      *[]string  `form:"types,omitempty" json:"types,omitempty"`
+	GroupBy    *[]string  `form:"groupBy,omitempty" json:"groupBy,omitempty"`
+	Search     *string    `form:"search,omitempty" json:"search,omitempty"`
+	StartTime  *time.Time `form:"startTime,omitempty" json:"startTime,omitempty"`
+	EndTime    *time.Time `form:"endTime,omitempty" json:"endTime,omitempty"`
+	PageLimit  *string    `form:"page.limit,omitempty" json:"page.limit,omitempty"`
+
+	// PageCursor Cursor that defines token indicating where to start the next page.
+	// Empty value indicates to start from beginning of the dataset.
+	PageCursor *string `form:"page.cursor,omitempty" json:"page.cursor,omitempty"`
+
+	// SortField Name of the field you want to sort
+	SortField *string `form:"sort.field,omitempty" json:"sort.field,omitempty"`
+
+	// SortOrder The sort order, possible values ASC or DESC, if not provided asc is the default
+	//
+	//  - ASC: ASC
+	//  - asc: desc
+	//  - DESC: ASC
+	//  - desc: desc
+	SortOrder *RuntimeSecurityAPIGetRuntimeEventGroupsParamsSortOrder `form:"sort.order,omitempty" json:"sort.order,omitempty"`
+}
+
+// RuntimeSecurityAPIGetRuntimeEventGroupsParamsSortOrder defines parameters for RuntimeSecurityAPIGetRuntimeEventGroups.
+type RuntimeSecurityAPIGetRuntimeEventGroupsParamsSortOrder string
+
+// RuntimeSecurityAPIGetRuntimeEventsProcessTreeParams defines parameters for RuntimeSecurityAPIGetRuntimeEventsProcessTree.
+type RuntimeSecurityAPIGetRuntimeEventsProcessTreeParams struct {
+	ContainerId      *string    `form:"containerId,omitempty" json:"containerId,omitempty"`
+	ProcessPid       *int64     `form:"processPid,omitempty" json:"processPid,omitempty"`
+	ProcessStartTime *string    `form:"processStartTime,omitempty" json:"processStartTime,omitempty"`
+	EndTime          *time.Time `form:"endTime,omitempty" json:"endTime,omitempty"`
+}
+
+// RuntimeSecurityAPIGetListsParams defines parameters for RuntimeSecurityAPIGetLists.
+type RuntimeSecurityAPIGetListsParams struct {
+	Search    *string `form:"search,omitempty" json:"search,omitempty"`
+	PageLimit *string `form:"page.limit,omitempty" json:"page.limit,omitempty"`
+
+	// PageCursor Cursor that defines token indicating where to start the next page.
+	// Empty value indicates to start from beginning of the dataset.
+	PageCursor *string `form:"page.cursor,omitempty" json:"page.cursor,omitempty"`
+
+	// SortField Name of the field you want to sort
+	SortField *string `form:"sort.field,omitempty" json:"sort.field,omitempty"`
+
+	// SortOrder The sort order, possible values ASC or DESC, if not provided asc is the default
+	//
+	//  - ASC: ASC
+	//  - asc: desc
+	//  - DESC: ASC
+	//  - desc: desc
+	SortOrder *RuntimeSecurityAPIGetListsParamsSortOrder `form:"sort.order,omitempty" json:"sort.order,omitempty"`
+}
+
+// RuntimeSecurityAPIGetListsParamsSortOrder defines parameters for RuntimeSecurityAPIGetLists.
+type RuntimeSecurityAPIGetListsParamsSortOrder string
+
+// RuntimeSecurityAPIGetListEntriesParams defines parameters for RuntimeSecurityAPIGetListEntries.
+type RuntimeSecurityAPIGetListEntriesParams struct {
+	Search    *string `form:"search,omitempty" json:"search,omitempty"`
+	PageLimit *string `form:"page.limit,omitempty" json:"page.limit,omitempty"`
+
+	// PageCursor Cursor that defines token indicating where to start the next page.
+	// Empty value indicates to start from beginning of the dataset.
+	PageCursor *string `form:"page.cursor,omitempty" json:"page.cursor,omitempty"`
+
+	// SortField Name of the field you want to sort
+	SortField *string `form:"sort.field,omitempty" json:"sort.field,omitempty"`
+
+	// SortOrder The sort order, possible values ASC or DESC, if not provided asc is the default
+	//
+	//  - ASC: ASC
+	//  - asc: desc
+	//  - DESC: ASC
+	//  - desc: desc
+	SortOrder *RuntimeSecurityAPIGetListEntriesParamsSortOrder `form:"sort.order,omitempty" json:"sort.order,omitempty"`
+}
+
+// RuntimeSecurityAPIGetListEntriesParamsSortOrder defines parameters for RuntimeSecurityAPIGetListEntries.
+type RuntimeSecurityAPIGetListEntriesParamsSortOrder string
+
+// RuntimeSecurityAPIGetNetflowGraphParams defines parameters for RuntimeSecurityAPIGetNetflowGraph.
+type RuntimeSecurityAPIGetNetflowGraphParams struct {
+	// Search CEL based search.
+	Search             *string    `form:"search,omitempty" json:"search,omitempty"`
+	StartTime          *time.Time `form:"startTime,omitempty" json:"startTime,omitempty"`
+	EndTime            *time.Time `form:"endTime,omitempty" json:"endTime,omitempty"`
+	GroupSourceBy      *[]string  `form:"groupSourceBy,omitempty" json:"groupSourceBy,omitempty"`
+	GroupDestinationBy *[]string  `form:"groupDestinationBy,omitempty" json:"groupDestinationBy,omitempty"`
+}
+
+// RuntimeSecurityAPIGetNetflowListParams defines parameters for RuntimeSecurityAPIGetNetflowList.
+type RuntimeSecurityAPIGetNetflowListParams struct {
+	// GroupSourceBy Group source traffic by specified fields.
+	GroupSourceBy *[]string `form:"groupSourceBy,omitempty" json:"groupSourceBy,omitempty"`
+
+	// GroupDestinationBy Group destination traffic by specified fields.
+	GroupDestinationBy *[]string `form:"groupDestinationBy,omitempty" json:"groupDestinationBy,omitempty"`
+
+	// Search CEL based search.
+	Search *string `form:"search,omitempty" json:"search,omitempty"`
+
+	// StartTime Filter items to include from specified time.
+	StartTime *time.Time `form:"startTime,omitempty" json:"startTime,omitempty"`
+
+	// EndTime Filter items to include up to specified time.
+	EndTime   *time.Time `form:"endTime,omitempty" json:"endTime,omitempty"`
+	PageLimit *string    `form:"page.limit,omitempty" json:"page.limit,omitempty"`
+
+	// PageCursor Cursor that defines token indicating where to start the next page.
+	// Empty value indicates to start from beginning of the dataset.
+	PageCursor *string `form:"page.cursor,omitempty" json:"page.cursor,omitempty"`
+
+	// SortField Name of the field you want to sort
+	SortField *string `form:"sort.field,omitempty" json:"sort.field,omitempty"`
+
+	// SortOrder The sort order, possible values ASC or DESC, if not provided asc is the default
+	//
+	//  - ASC: ASC
+	//  - asc: desc
+	//  - DESC: ASC
+	//  - desc: desc
+	SortOrder *RuntimeSecurityAPIGetNetflowListParamsSortOrder `form:"sort.order,omitempty" json:"sort.order,omitempty"`
+}
+
+// RuntimeSecurityAPIGetNetflowListParamsSortOrder defines parameters for RuntimeSecurityAPIGetNetflowList.
+type RuntimeSecurityAPIGetNetflowListParamsSortOrder string
+
+// RuntimeSecurityAPIGetNetflowTrendParams defines parameters for RuntimeSecurityAPIGetNetflowTrend.
+type RuntimeSecurityAPIGetNetflowTrendParams struct {
+	// StartTime Filter items to include from specified time.
+	StartTime *time.Time `form:"startTime,omitempty" json:"startTime,omitempty"`
+
+	// EndTime Filter items to include up to specified time.
+	EndTime *time.Time `form:"endTime,omitempty" json:"endTime,omitempty"`
+
+	// StepSeconds Aggregate items in specified interval steps.
+	StepSeconds *int32 `form:"stepSeconds,omitempty" json:"stepSeconds,omitempty"`
+
+	// Limit Number of top items to return.
+	Limit *int32 `form:"limit,omitempty" json:"limit,omitempty"`
+
+	// GroupSourceBy Group source traffic by specified fields.
+	GroupSourceBy *[]string `form:"groupSourceBy,omitempty" json:"groupSourceBy,omitempty"`
+
+	// GroupDestinationBy Group destination traffic by specified fields.
+	GroupDestinationBy *[]string `form:"groupDestinationBy,omitempty" json:"groupDestinationBy,omitempty"`
+
+	// Search CEL based search.
+	Search *string `form:"search,omitempty" json:"search,omitempty"`
+}
+
+// RuntimeSecurityAPIGetRulesParams defines parameters for RuntimeSecurityAPIGetRules.
+type RuntimeSecurityAPIGetRulesParams struct {
+	Enabled  *bool                                       `form:"enabled,omitempty" json:"enabled,omitempty"`
+	Category *string                                     `form:"category,omitempty" json:"category,omitempty"`
+	Severity *[]RuntimeSecurityAPIGetRulesParamsSeverity `form:"severity,omitempty" json:"severity,omitempty"`
+
+	// Search search is a plain-text search over all fields of the rule (name, type, category).
+	Search    *string `form:"search,omitempty" json:"search,omitempty"`
+	PageLimit *string `form:"page.limit,omitempty" json:"page.limit,omitempty"`
+
+	// PageCursor Cursor that defines token indicating where to start the next page.
+	// Empty value indicates to start from beginning of the dataset.
+	PageCursor *string `form:"page.cursor,omitempty" json:"page.cursor,omitempty"`
+
+	// SortField Name of the field you want to sort
+	SortField *string `form:"sort.field,omitempty" json:"sort.field,omitempty"`
+
+	// SortOrder The sort order, possible values ASC or DESC, if not provided asc is the default
+	//
+	//  - ASC: ASC
+	//  - asc: desc
+	//  - DESC: ASC
+	//  - desc: desc
+	SortOrder *RuntimeSecurityAPIGetRulesParamsSortOrder `form:"sort.order,omitempty" json:"sort.order,omitempty"`
+}
+
+// RuntimeSecurityAPIGetRulesParamsSeverity defines parameters for RuntimeSecurityAPIGetRules.
+type RuntimeSecurityAPIGetRulesParamsSeverity string
+
+// RuntimeSecurityAPIGetRulesParamsSortOrder defines parameters for RuntimeSecurityAPIGetRules.
+type RuntimeSecurityAPIGetRulesParamsSortOrder string
+
+// RuntimeSecurityAPIGetClusterWorkloadsNetflowParams defines parameters for RuntimeSecurityAPIGetClusterWorkloadsNetflow.
+type RuntimeSecurityAPIGetClusterWorkloadsNetflowParams struct {
+	StartTime *time.Time `form:"startTime,omitempty" json:"startTime,omitempty"`
+	EndTime   *time.Time `form:"endTime,omitempty" json:"endTime,omitempty"`
+}
+
 // WorkloadOptimizationAPIListWorkloadEventsParams defines parameters for WorkloadOptimizationAPIListWorkloadEvents.
 type WorkloadOptimizationAPIListWorkloadEventsParams struct {
 	PageLimit *string `form:"page.limit,omitempty" json:"page.limit,omitempty"`
@@ -5905,6 +6779,42 @@ type CommitmentsAPIUpdateCommitmentJSONRequestBody = CastaiInventoryV1beta1Updat
 
 // CommitmentsAPIReplaceCommitmentAssignmentsJSONRequestBody defines body for CommitmentsAPIReplaceCommitmentAssignments for application/json ContentType.
 type CommitmentsAPIReplaceCommitmentAssignmentsJSONRequestBody = CommitmentsAPIReplaceCommitmentAssignmentsJSONBody
+
+// RuntimeSecurityAPIAckAnomaliesJSONRequestBody defines body for RuntimeSecurityAPIAckAnomalies for application/json ContentType.
+type RuntimeSecurityAPIAckAnomaliesJSONRequestBody = RuntimeV1AckAnomaliesRequest
+
+// RuntimeSecurityAPICloseAnomaliesJSONRequestBody defines body for RuntimeSecurityAPICloseAnomalies for application/json ContentType.
+type RuntimeSecurityAPICloseAnomaliesJSONRequestBody = RuntimeV1CloseAnomaliesRequest
+
+// RuntimeSecurityAPITriggerAnomalyWebhookJSONRequestBody defines body for RuntimeSecurityAPITriggerAnomalyWebhook for application/json ContentType.
+type RuntimeSecurityAPITriggerAnomalyWebhookJSONRequestBody = RuntimeSecurityAPITriggerAnomalyWebhookJSONBody
+
+// RuntimeSecurityAPICreateListJSONRequestBody defines body for RuntimeSecurityAPICreateList for application/json ContentType.
+type RuntimeSecurityAPICreateListJSONRequestBody = RuntimeV1CreateListRequest
+
+// RuntimeSecurityAPIDeleteListsJSONRequestBody defines body for RuntimeSecurityAPIDeleteLists for application/json ContentType.
+type RuntimeSecurityAPIDeleteListsJSONRequestBody = RuntimeV1DeleteListsRequest
+
+// RuntimeSecurityAPIAddListEntriesJSONRequestBody defines body for RuntimeSecurityAPIAddListEntries for application/json ContentType.
+type RuntimeSecurityAPIAddListEntriesJSONRequestBody = RuntimeSecurityAPIAddListEntriesRequest
+
+// RuntimeSecurityAPIRemoveListEntriesJSONRequestBody defines body for RuntimeSecurityAPIRemoveListEntries for application/json ContentType.
+type RuntimeSecurityAPIRemoveListEntriesJSONRequestBody = RuntimeSecurityAPIAddListEntriesRequest
+
+// RuntimeSecurityAPICreateRuleJSONRequestBody defines body for RuntimeSecurityAPICreateRule for application/json ContentType.
+type RuntimeSecurityAPICreateRuleJSONRequestBody = RuntimeV1CreateRuleRequest
+
+// RuntimeSecurityAPIDeleteRulesJSONRequestBody defines body for RuntimeSecurityAPIDeleteRules for application/json ContentType.
+type RuntimeSecurityAPIDeleteRulesJSONRequestBody = RuntimeV1DeleteRulesRequest
+
+// RuntimeSecurityAPIToggleRulesJSONRequestBody defines body for RuntimeSecurityAPIToggleRules for application/json ContentType.
+type RuntimeSecurityAPIToggleRulesJSONRequestBody = RuntimeV1ToggleRulesRequest
+
+// RuntimeSecurityAPIValidateJSONRequestBody defines body for RuntimeSecurityAPIValidate for application/json ContentType.
+type RuntimeSecurityAPIValidateJSONRequestBody = RuntimeV1ValidateRequest
+
+// RuntimeSecurityAPIEditRuleJSONRequestBody defines body for RuntimeSecurityAPIEditRule for application/json ContentType.
+type RuntimeSecurityAPIEditRuleJSONRequestBody = RuntimeSecurityAPIEditRuleRequest
 
 // SSOAPICreateSSOConnectionJSONRequestBody defines body for SSOAPICreateSSOConnection for application/json ContentType.
 type SSOAPICreateSSOConnectionJSONRequestBody = CastaiSsoV1beta1CreateSSOConnection
