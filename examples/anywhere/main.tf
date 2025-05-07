@@ -1,7 +1,7 @@
 # Start Minikube using the Docker driver
 resource "null_resource" "start_minikube" {
   provisioner "local-exec" {
-    command = "minikube start --driver=docker"
+    command = "minikube start --nodes=3 --driver=docker"
   }
 }
 
@@ -102,18 +102,29 @@ resource "helm_release" "castai_evictor" {
   create_namespace = false
   timeout          = 600
 
+  # other settings
   set {
     name  = "managedByCASTAI"
     value = var.managed_by_castai
   }
   set {
     name  = "replicaCount"
-    value = "1"
+    value = "0"
   }
-  set {
-    name  = "aggressive_mode"
-    value = "false" # change to true if needed but use with caution
-  }
+
+  # evictor-specific settings
+  values = [
+    yamlencode({
+      evictor = {
+        aggressive_mode           = false
+        cycle_interval            = "5m10s"
+        dry_run                   = false
+        enabled                   = true
+        node_grace_period_minutes = 5
+        scoped_mode               = false
+      }
+    })
+  ]
 }
 
 # Install CAST AI Pod Mutator
@@ -138,13 +149,11 @@ resource "helm_release" "castai_pod_mutator" {
     name  = "enableTopologySpreadConstraints"
     value = "true"
   }
-
   set {
     name  = "castai.organizationID"
     value = var.organization_id
   }
 }
-
 
 # Install CAST AI Workload Autoscaler
 resource "helm_release" "castai_workload_autoscaler" {
