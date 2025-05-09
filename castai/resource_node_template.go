@@ -1062,7 +1062,8 @@ func resourceNodeTemplateCreate(ctx context.Context, d *schema.ResourceData, met
 		ShouldTaint:     lo.ToPtr(d.Get(FieldNodeTemplateShouldTaint).(bool)),
 	}
 
-	if v, ok := d.GetOk(FieldNodeTemplateIsEnabled); ok {
+	//nolint:staticcheck // Currently no other way to reliably get the value and determine if it is set
+	if v, ok := d.GetOkExists(FieldNodeTemplateIsEnabled); ok {
 		req.IsEnabled = lo.ToPtr(v.(bool))
 	}
 

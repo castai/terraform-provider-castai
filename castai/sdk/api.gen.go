@@ -1987,9 +1987,6 @@ type CastaiRbacV1beta1RoleBindingDefinition struct {
 	// RoleId RoleID is the unique identifier of the role.
 	RoleId string `json:"roleId"`
 
-	// Scope Scope represents the scope of the role binding.
-	Scope *CastaiRbacV1beta1Scope `json:"scope,omitempty"`
-
 	// Scopes Scopes is a list of multiple scopes of the role binding.
 	Scopes *[]CastaiRbacV1beta1Scope `json:"scopes,omitempty"`
 
@@ -2560,9 +2557,6 @@ type CastaiUsersV1beta1Organization struct {
 	// ParentId ID of the parent organization. This is beta feature not available for all organizations.
 	ParentId *string `json:"parentId"`
 
-	// Rbacv2Enabled information whether the organization have rbacv2 enabled.
-	Rbacv2Enabled *bool `json:"rbacv2Enabled"`
-
 	// Type OrganizationType defines possible types of organization.
 	//
 	//  - ORGANIZATION_TYPE_DEFAULT: default organization type
@@ -2654,9 +2648,6 @@ type CastaiUsersV1beta1UserOrganization struct {
 
 	// ParentId ID of the parent organization. This is beta feature not available for all organizations.
 	ParentId *string `json:"parentId"`
-
-	// Rbacv2Enabled information whether the organization have rbacv2 enabled.
-	Rbacv2Enabled *bool `json:"rbacv2Enabled"`
 
 	// Role Deprecated: for RBACv2 user can be bound to multiple roles.
 	// Use https://docs.cast.ai/reference/rbacserviceapi instead.
@@ -3495,7 +3486,7 @@ type NodeconfigV1DeleteConfigurationResponse = map[string]interface{}
 
 // NodeconfigV1EKSConfig defines model for nodeconfig.v1.EKSConfig.
 type NodeconfigV1EKSConfig struct {
-	// DnsClusterIp IP address to use for DNS queries within the cluster. Defaults to 10.100.0.10 or 172.20.0.10 based on the IP address of the primary interface.
+	// DnsClusterIp Comma-separated IP addresses to use for DNS queries within the cluster. Defaults to 10.100.0.10 or 172.20.0.10 based on the primary interface's IP address.
 	DnsClusterIp *string `json:"dnsClusterIp"`
 
 	// ImageFamily List of supported image families (OSes) for EKS.
