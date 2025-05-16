@@ -251,7 +251,7 @@ func workloadScalingPolicyResourceSchema(resource, function string, overhead, mi
 				Type:             schema.TypeInt,
 				Optional:         true,
 				Description:      "The look back period in seconds for the recommendation.",
-				ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(24*60*60, 7*24*60*60)),
+				ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(3*60*60, 7*24*60*60)),
 			},
 			"min": {
 				Type:             schema.TypeFloat,

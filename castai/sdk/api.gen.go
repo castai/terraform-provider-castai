@@ -2663,6 +2663,9 @@ type CastaiUsersV1beta1UserOrganization struct {
 
 // ExternalclusterV1AKSClusterParams AKSClusterParams defines AKS-specific arguments.
 type ExternalclusterV1AKSClusterParams struct {
+	// ClusterResourceGroup Azure cluster resource group.
+	ClusterResourceGroup *string `json:"clusterResourceGroup,omitempty"`
+
 	// HttpProxyConfig HttpProxyConfig holds settings when HTTP/S communication is required.
 	HttpProxyConfig *ExternalclusterV1HttpProxyConfig `json:"httpProxyConfig,omitempty"`
 
@@ -2796,7 +2799,8 @@ type ExternalclusterV1Cluster struct {
 	ReconciledAt *time.Time `json:"reconciledAt"`
 
 	// Region Region represents cluster region.
-	Region *ExternalclusterV1Region `json:"region,omitempty"`
+	Region                 *ExternalclusterV1Region                       `json:"region,omitempty"`
+	SelfHostedWithEc2Nodes *ExternalclusterV1SelfHostedWithEC2NodesParams `json:"selfHostedWithEc2Nodes,omitempty"`
 
 	// SshPublicKey Deprecated. Node configuration equivalent should be used.
 	SshPublicKey *string `json:"sshPublicKey"`
@@ -2854,7 +2858,8 @@ type ExternalclusterV1ClusterUpdate struct {
 	Eks *ExternalclusterV1UpdateEKSClusterParams `json:"eks,omitempty"`
 
 	// Gke UpdateGKEClusterParams defines updatable GKE cluster configuration.
-	Gke *ExternalclusterV1UpdateGKEClusterParams `json:"gke,omitempty"`
+	Gke                    *ExternalclusterV1UpdateGKEClusterParams             `json:"gke,omitempty"`
+	SelfHostedWithEc2Nodes *ExternalclusterV1UpdateSelfHostedWithEC2NodesParams `json:"selfHostedWithEc2Nodes,omitempty"`
 }
 
 // ExternalclusterV1CreateAssumeRolePrincipalResponse defines model for externalcluster.v1.CreateAssumeRolePrincipalResponse.
@@ -3268,7 +3273,8 @@ type ExternalclusterV1RegisterClusterRequest struct {
 	Openshift *ExternalclusterV1OpenshiftClusterParams `json:"openshift,omitempty"`
 
 	// OrganizationId Organization of the cluster.
-	OrganizationId *string `json:"organizationId,omitempty"`
+	OrganizationId         *string                                        `json:"organizationId,omitempty"`
+	SelfHostedWithEc2Nodes *ExternalclusterV1SelfHostedWithEC2NodesParams `json:"selfHostedWithEc2Nodes,omitempty"`
 }
 
 // ExternalclusterV1Resources defines model for externalcluster.v1.Resources.
@@ -3280,6 +3286,19 @@ type ExternalclusterV1Resources struct {
 	MemAllocatableMib     *int32 `json:"memAllocatableMib,omitempty"`
 	MemCapacityMib        *int32 `json:"memCapacityMib,omitempty"`
 	MemRequestsMib        *int32 `json:"memRequestsMib,omitempty"`
+}
+
+// ExternalclusterV1SelfHostedWithEC2NodesParams defines model for externalcluster.v1.SelfHostedWithEC2NodesParams.
+type ExternalclusterV1SelfHostedWithEC2NodesParams struct {
+	// AccountId AWS Account ID where cluster runs.
+	AccountId     *string `json:"accountId,omitempty"`
+	AssumeRoleArn *string `json:"assumeRoleArn,omitempty"`
+
+	// ClusterName Name of the cluster.
+	ClusterName *string `json:"clusterName,omitempty"`
+
+	// Region Region of the cluster.
+	Region *string `json:"region,omitempty"`
 }
 
 // ExternalclusterV1Subnet Subnet represents cluster subnet.
@@ -3347,6 +3366,12 @@ type ExternalclusterV1UpdateGKEClusterParams struct {
 
 	// ProjectId GCP target project where cluster runs.
 	ProjectId *string `json:"projectId,omitempty"`
+}
+
+// ExternalclusterV1UpdateSelfHostedWithEC2NodesParams defines model for externalcluster.v1.UpdateSelfHostedWithEC2NodesParams.
+type ExternalclusterV1UpdateSelfHostedWithEC2NodesParams struct {
+	AssumeRoleArn      *string `json:"assumeRoleArn,omitempty"`
+	InstanceProfileArn *string `json:"instanceProfileArn"`
 }
 
 // ExternalclusterV1Zone Cluster zone.
@@ -3652,7 +3677,8 @@ type NodeconfigV1NewNodeConfiguration struct {
 	MinDiskSize *int32 `json:"minDiskSize"`
 
 	// Name The name of the node configuration.
-	Name string `json:"name"`
+	Name                   string                                    `json:"name"`
+	SelfHostedWithEc2Nodes *NodeconfigV1SelfHostedWithEC2NodesConfig `json:"selfHostedWithEc2Nodes,omitempty"`
 
 	// SshPublicKey Optional SSH public key to be used for provisioned nodes. Value should be base64 encoded.
 	SshPublicKey *string `json:"sshPublicKey"`
@@ -3707,7 +3733,8 @@ type NodeconfigV1NodeConfiguration struct {
 	MinDiskSize *int32 `json:"minDiskSize,omitempty"`
 
 	// Name The name of the node configuration.
-	Name *string `json:"name,omitempty"`
+	Name                   *string                                   `json:"name,omitempty"`
+	SelfHostedWithEc2Nodes *NodeconfigV1SelfHostedWithEC2NodesConfig `json:"selfHostedWithEc2Nodes,omitempty"`
 
 	// SshPublicKey Base64 encoded ssh public key to be used for provisioned nodes.
 	SshPublicKey *string `json:"sshPublicKey"`
@@ -3756,7 +3783,8 @@ type NodeconfigV1NodeConfigurationUpdate struct {
 	KubeletConfig *map[string]interface{} `json:"kubeletConfig,omitempty"`
 
 	// MinDiskSize Minimal disk size in GiB. Defaults to 100.
-	MinDiskSize *int32 `json:"minDiskSize"`
+	MinDiskSize            *int32                                    `json:"minDiskSize"`
+	SelfHostedWithEc2Nodes *NodeconfigV1SelfHostedWithEC2NodesConfig `json:"selfHostedWithEc2Nodes,omitempty"`
 
 	// SshPublicKey Optional SSH public key to be used for provisioned nodes. Value should be base64 encoded.
 	SshPublicKey *string `json:"sshPublicKey"`
@@ -3786,6 +3814,32 @@ type NodeconfigV1SecurityGroup struct {
 
 	// Tags Tags of the security group.
 	Tags *map[string]string `json:"tags,omitempty"`
+}
+
+// NodeconfigV1SelfHostedWithEC2NodesConfig defines model for nodeconfig.v1.SelfHostedWithEC2NodesConfig.
+type NodeconfigV1SelfHostedWithEC2NodesConfig struct {
+	// AmiId AMI ID to be used for provisioned nodes.
+	AmiId        *string `json:"amiId"`
+	ImdsHopLimit *int32  `json:"imdsHopLimit"`
+	ImdsV1       *bool   `json:"imdsV1"`
+
+	// InstanceProfileArn Cluster's instance profile ARN used for CAST provisioned nodes.
+	InstanceProfileArn string `json:"instanceProfileArn"`
+
+	// KeyPairId AWS key pair ID to be used for provisioned nodes. Has priority over sshPublicKey.
+	KeyPairId *string `json:"keyPairId"`
+
+	// SecurityGroups Node's security groups.
+	SecurityGroups *[]string `json:"securityGroups,omitempty"`
+
+	// VolumeIops EBS volume IOPS value to be used for provisioned nodes.
+	VolumeIops *int32 `json:"volumeIops"`
+
+	// VolumeThroughput EBS volume throughput in MiB/s to be used for provisioned nodes.
+	VolumeThroughput *int32 `json:"volumeThroughput"`
+
+	// VolumeType EBS volume type to be used for provisioned nodes. Defaults to gp3.
+	VolumeType *string `json:"volumeType"`
 }
 
 // NodeconfigV1SubnetDetails SubnetDetails contains all subnet attributes relevant for node configuration.
@@ -5877,13 +5931,16 @@ type WorkloadoptimizationV1Workload struct {
 	Recommendation *WorkloadoptimizationV1WorkloadRecommendation `json:"recommendation,omitempty"`
 
 	// Replicas The number of replicas the workload should have, as defined on the workload spec.
-	Replicas          int32                                    `json:"replicas"`
-	ScalingPolicyId   string                                   `json:"scalingPolicyId"`
-	ScalingPolicyName string                                   `json:"scalingPolicyName"`
-	UpdatedAt         time.Time                                `json:"updatedAt"`
-	Version           string                                   `json:"version"`
-	WorkloadConfigV2  WorkloadoptimizationV1WorkloadConfigV2   `json:"workloadConfigV2"`
-	WorkloadOverrides *WorkloadoptimizationV1WorkloadOverrides `json:"workloadOverrides,omitempty"`
+	Replicas          int32     `json:"replicas"`
+	ScalingPolicyId   string    `json:"scalingPolicyId"`
+	ScalingPolicyName string    `json:"scalingPolicyName"`
+	UpdatedAt         time.Time `json:"updatedAt"`
+	Version           string    `json:"version"`
+
+	// WoopHpaUnsupportedReason Reason for unsupported WOOP HPA.
+	WoopHpaUnsupportedReason *string                                  `json:"woopHpaUnsupportedReason"`
+	WorkloadConfigV2         WorkloadoptimizationV1WorkloadConfigV2   `json:"workloadConfigV2"`
+	WorkloadOverrides        *WorkloadoptimizationV1WorkloadOverrides `json:"workloadOverrides,omitempty"`
 }
 
 // WorkloadoptimizationV1WorkloadConfigUpdateV2 defines model for workloadoptimization.v1.WorkloadConfigUpdateV2.
@@ -6575,8 +6632,9 @@ type RuntimeSecurityAPIGetRulesParamsSortOrder string
 
 // RuntimeSecurityAPIGetClusterWorkloadsNetflowParams defines parameters for RuntimeSecurityAPIGetClusterWorkloadsNetflow.
 type RuntimeSecurityAPIGetClusterWorkloadsNetflowParams struct {
-	StartTime *time.Time `form:"startTime,omitempty" json:"startTime,omitempty"`
-	EndTime   *time.Time `form:"endTime,omitempty" json:"endTime,omitempty"`
+	StartTime     *time.Time `form:"startTime,omitempty" json:"startTime,omitempty"`
+	EndTime       *time.Time `form:"endTime,omitempty" json:"endTime,omitempty"`
+	UsePodDetails *bool      `form:"usePodDetails,omitempty" json:"usePodDetails,omitempty"`
 }
 
 // WorkloadOptimizationAPIListWorkloadEventsParams defines parameters for WorkloadOptimizationAPIListWorkloadEvents.
