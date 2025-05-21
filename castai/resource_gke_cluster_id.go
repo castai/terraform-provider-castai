@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/castai/terraform-provider-castai/castai/sdk"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
 const (
@@ -117,25 +118,13 @@ func resourceCastaiGKEClusterIdCreate(ctx context.Context, data *schema.Resource
 		return diag.FromErr(err)
 	}
 	if err := data.Set(FieldClusterToken, tkn); err != nil {
-		return diag.FromErr(fmt.Errorf("setting cluster token: %w", err))
+		return diag.FromErr(fmt.Errorf("setting cluster token: %v", err))
 	}
 	data.SetId(clusterID)
 	// If client service account is set, create service account on cast side.
 	if len(data.Get(FieldGKEClientSA).(string)) > 0 {
-		resp, err := client.ExternalClusterAPIGKECreateSAWithResponse(ctx, data.Id(), sdk.ExternalClusterAPIGKECreateSARequest{
-			Gke: &sdk.ExternalclusterV1UpdateGKEClusterParams{
-				GkeSaImpersonate: toPtr(data.Get(FieldGKEClientSA).(string)),
-				ProjectId:        toPtr(data.Get(FieldGKEClusterProjectId).(string)),
-			},
-		})
-		if err != nil {
-			return diag.FromErr(err)
-		}
-		if resp.JSON200 == nil || resp.JSON200.ServiceAccount == nil {
-			return diag.FromErr(fmt.Errorf("service account not returned"))
-		}
-		if err := data.Set(FieldGKECastSA, toString(resp.JSON200.ServiceAccount)); err != nil {
-			return diag.FromErr(fmt.Errorf("service account id: %w", err))
+		if err := createCastServiceAccount(ctx, client, data); err != nil {
+			return diag.FromErr(fmt.Errorf("[ERROR] Creating Cast service account %v", err))
 		}
 	}
 	return nil
@@ -145,7 +134,7 @@ func resourceCastaiGKEClusterIdRead(ctx context.Context, data *schema.ResourceDa
 	client := meta.(*ProviderConfig).api
 
 	if data.Id() == "" {
-		log.Printf("[INFO] id is null not fetching anything.")
+		tflog.Info(ctx, "id is null, not fetching anything.")
 		return nil
 	}
 
@@ -177,9 +166,37 @@ func resourceCastaiGKEClusterIdRead(ctx context.Context, data *schema.ResourceDa
 }
 
 func resourceCastaiGKEClusterIdUpdate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	// Re-read the resource to ensure the state is up-to-date
 	return resourceCastaiGKEClusterIdRead(ctx, data, meta)
 }
 
 func resourceCastaiGKEClusterIdDelete(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	return resourceCastaiClusterDelete(ctx, data, meta)
+	// Disable service account used for impersonation.
+	client := meta.(*ProviderConfig).api
+	tflog.Info(ctx, "Disabling service account.")
+	_, err := client.ExternalClusterAPIDisableGKESA(ctx, data.Id())
+	if err != nil {
+		return diag.FromErr(fmt.Errorf("disabling service account: %w", err))
+	}
+	return nil
+}
+
+func createCastServiceAccount(ctx context.Context, client sdk.ClientWithResponsesInterface, data *schema.ResourceData) diag.Diagnostics {
+	resp, err := client.ExternalClusterAPIGKECreateSAWithResponse(ctx, data.Id(), sdk.ExternalClusterAPIGKECreateSARequest{
+		Gke: &sdk.ExternalclusterV1UpdateGKEClusterParams{
+			GkeSaImpersonate: toPtr(data.Get(FieldGKEClientSA).(string)),
+			ProjectId:        toPtr(data.Get(FieldGKEClusterProjectId).(string)),
+		},
+	})
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	if resp.JSON200 == nil || resp.JSON200.ServiceAccount == nil {
+		return diag.FromErr(fmt.Errorf("service account not returned"))
+	}
+	if err := data.Set(FieldGKECastSA, toString(resp.JSON200.ServiceAccount)); err != nil {
+		return diag.FromErr(fmt.Errorf("service account id: %w", err))
+	}
+
+	return nil
 }
