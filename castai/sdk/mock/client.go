@@ -3335,6 +3335,46 @@ func (mr *MockClientInterfaceMockRecorder) RuntimeSecurityAPIToggleRulesWithBody
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIToggleRulesWithBody", reflect.TypeOf((*MockClientInterface)(nil).RuntimeSecurityAPIToggleRulesWithBody), varargs...)
 }
 
+// RuntimeSecurityAPITriggerAnomaliesWebhook mocks base method.
+func (m *MockClientInterface) RuntimeSecurityAPITriggerAnomaliesWebhook(ctx context.Context, body sdk.RuntimeSecurityAPITriggerAnomaliesWebhookJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPITriggerAnomaliesWebhook", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPITriggerAnomaliesWebhook indicates an expected call of RuntimeSecurityAPITriggerAnomaliesWebhook.
+func (mr *MockClientInterfaceMockRecorder) RuntimeSecurityAPITriggerAnomaliesWebhook(ctx, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPITriggerAnomaliesWebhook", reflect.TypeOf((*MockClientInterface)(nil).RuntimeSecurityAPITriggerAnomaliesWebhook), varargs...)
+}
+
+// RuntimeSecurityAPITriggerAnomaliesWebhookWithBody mocks base method.
+func (m *MockClientInterface) RuntimeSecurityAPITriggerAnomaliesWebhookWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPITriggerAnomaliesWebhookWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPITriggerAnomaliesWebhookWithBody indicates an expected call of RuntimeSecurityAPITriggerAnomaliesWebhookWithBody.
+func (mr *MockClientInterfaceMockRecorder) RuntimeSecurityAPITriggerAnomaliesWebhookWithBody(ctx, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPITriggerAnomaliesWebhookWithBody", reflect.TypeOf((*MockClientInterface)(nil).RuntimeSecurityAPITriggerAnomaliesWebhookWithBody), varargs...)
+}
+
 // RuntimeSecurityAPITriggerAnomalyWebhook mocks base method.
 func (m *MockClientInterface) RuntimeSecurityAPITriggerAnomalyWebhook(ctx context.Context, id string, body sdk.RuntimeSecurityAPITriggerAnomalyWebhookJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
@@ -10841,6 +10881,76 @@ func (m *MockClientWithResponsesInterface) RuntimeSecurityAPIToggleRulesWithResp
 func (mr *MockClientWithResponsesInterfaceMockRecorder) RuntimeSecurityAPIToggleRulesWithResponse(ctx, body interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIToggleRulesWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RuntimeSecurityAPIToggleRulesWithResponse), ctx, body)
+}
+
+// RuntimeSecurityAPITriggerAnomaliesWebhook mocks base method.
+func (m *MockClientWithResponsesInterface) RuntimeSecurityAPITriggerAnomaliesWebhook(ctx context.Context, body sdk.RuntimeSecurityAPITriggerAnomaliesWebhookJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPITriggerAnomaliesWebhook", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPITriggerAnomaliesWebhook indicates an expected call of RuntimeSecurityAPITriggerAnomaliesWebhook.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RuntimeSecurityAPITriggerAnomaliesWebhook(ctx, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPITriggerAnomaliesWebhook", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RuntimeSecurityAPITriggerAnomaliesWebhook), varargs...)
+}
+
+// RuntimeSecurityAPITriggerAnomaliesWebhookWithBody mocks base method.
+func (m *MockClientWithResponsesInterface) RuntimeSecurityAPITriggerAnomaliesWebhookWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPITriggerAnomaliesWebhookWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPITriggerAnomaliesWebhookWithBody indicates an expected call of RuntimeSecurityAPITriggerAnomaliesWebhookWithBody.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RuntimeSecurityAPITriggerAnomaliesWebhookWithBody(ctx, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPITriggerAnomaliesWebhookWithBody", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RuntimeSecurityAPITriggerAnomaliesWebhookWithBody), varargs...)
+}
+
+// RuntimeSecurityAPITriggerAnomaliesWebhookWithBodyWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) RuntimeSecurityAPITriggerAnomaliesWebhookWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*sdk.RuntimeSecurityAPITriggerAnomaliesWebhookResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPITriggerAnomaliesWebhookWithBodyWithResponse", ctx, contentType, body)
+	ret0, _ := ret[0].(*sdk.RuntimeSecurityAPITriggerAnomaliesWebhookResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPITriggerAnomaliesWebhookWithBodyWithResponse indicates an expected call of RuntimeSecurityAPITriggerAnomaliesWebhookWithBodyWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RuntimeSecurityAPITriggerAnomaliesWebhookWithBodyWithResponse(ctx, contentType, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPITriggerAnomaliesWebhookWithBodyWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RuntimeSecurityAPITriggerAnomaliesWebhookWithBodyWithResponse), ctx, contentType, body)
+}
+
+// RuntimeSecurityAPITriggerAnomaliesWebhookWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) RuntimeSecurityAPITriggerAnomaliesWebhookWithResponse(ctx context.Context, body sdk.RuntimeSecurityAPITriggerAnomaliesWebhookJSONRequestBody) (*sdk.RuntimeSecurityAPITriggerAnomaliesWebhookResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPITriggerAnomaliesWebhookWithResponse", ctx, body)
+	ret0, _ := ret[0].(*sdk.RuntimeSecurityAPITriggerAnomaliesWebhookResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPITriggerAnomaliesWebhookWithResponse indicates an expected call of RuntimeSecurityAPITriggerAnomaliesWebhookWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RuntimeSecurityAPITriggerAnomaliesWebhookWithResponse(ctx, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPITriggerAnomaliesWebhookWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RuntimeSecurityAPITriggerAnomaliesWebhookWithResponse), ctx, body)
 }
 
 // RuntimeSecurityAPITriggerAnomalyWebhook mocks base method.

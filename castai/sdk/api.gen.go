@@ -275,6 +275,19 @@ const (
 	NodeconfigV1EKSConfigImageFamilyFamilyBottlerocket NodeconfigV1EKSConfigImageFamily = "family_bottlerocket"
 )
 
+// Defines values for NodeconfigV1SelfHostedWithEC2NodesConfigImageFamily.
+const (
+	FAMILYAL2          NodeconfigV1SelfHostedWithEC2NodesConfigImageFamily = "FAMILY_AL2"
+	FAMILYAL2023       NodeconfigV1SelfHostedWithEC2NodesConfigImageFamily = "FAMILY_AL2023"
+	FAMILYBOTTLEROCKET NodeconfigV1SelfHostedWithEC2NodesConfigImageFamily = "FAMILY_BOTTLEROCKET"
+	FAMILYCUSTOM       NodeconfigV1SelfHostedWithEC2NodesConfigImageFamily = "FAMILY_CUSTOM"
+	FAMILYUNSPECIFIED  NodeconfigV1SelfHostedWithEC2NodesConfigImageFamily = "FAMILY_UNSPECIFIED"
+	FamilyAl2          NodeconfigV1SelfHostedWithEC2NodesConfigImageFamily = "family_al2"
+	FamilyAl2023       NodeconfigV1SelfHostedWithEC2NodesConfigImageFamily = "family_al2023"
+	FamilyBottlerocket NodeconfigV1SelfHostedWithEC2NodesConfigImageFamily = "family_bottlerocket"
+	FamilyCustom       NodeconfigV1SelfHostedWithEC2NodesConfigImageFamily = "family_custom"
+)
+
 // Defines values for NodetemplatesV1AvailableInstanceTypeOs.
 const (
 	NodetemplatesV1AvailableInstanceTypeOsLinux   NodetemplatesV1AvailableInstanceTypeOs = "linux"
@@ -966,6 +979,7 @@ type CastaiInventoryV1beta1AWSSavingsPlan struct {
 	CommitmentTerm     *CastaiInventoryV1beta1AWSSavingsPlanCommitmentTermUnit `json:"commitmentTerm,omitempty"`
 	Id                 *string                                                 `json:"id,omitempty"`
 	InstanceTypeFamily *string                                                 `json:"instanceTypeFamily,omitempty"`
+	InstanceTypesUsage *CastaiInventoryV1beta1InstanceTypeBasedUsage           `json:"instanceTypesUsage,omitempty"`
 	OfferingId         *string                                                 `json:"offeringId,omitempty"`
 	Region             *string                                                 `json:"region,omitempty"`
 	State              *string                                                 `json:"state,omitempty"`
@@ -988,6 +1002,7 @@ type CastaiInventoryV1beta1AppliedDiscount struct {
 
 // CastaiInventoryV1beta1AttachableDisk defines model for castai.inventory.v1beta1.AttachableDisk.
 type CastaiInventoryV1beta1AttachableDisk struct {
+	// Name For Azure, currently "premium" is supported which indicates that Premium SSD and Premium SSD v2 are available. Standard storage is supported for all Azure instance types.
 	Name *string `json:"name,omitempty"`
 }
 
@@ -1348,7 +1363,7 @@ type CastaiInventoryV1beta1InstanceType struct {
 	AppliedDiscounts *[]CastaiInventoryV1beta1AppliedDiscount `json:"appliedDiscounts,omitempty"`
 	Architecture     *string                                  `json:"architecture,omitempty"`
 
-	// AttachableDisks Contains a list of possible attachable disk types for the given instance types. Currently supported for GCP only.
+	// AttachableDisks Contains a list of possible attachable disk types for the given instance types. Currently supported for GCP and Azure.
 	AttachableDisks  *[]CastaiInventoryV1beta1AttachableDisk         `json:"attachableDisks,omitempty"`
 	Availability     *CastaiInventoryV1beta1InstanceTypeAvailability `json:"availability,omitempty"`
 	BareMetal        *bool                                           `json:"bareMetal,omitempty"`
@@ -1471,10 +1486,13 @@ type CastaiInventoryV1beta1InstanceTypeWithFamily struct {
 // CastaiInventoryV1beta1InstanceZone defines model for castai.inventory.v1beta1.InstanceZone.
 type CastaiInventoryV1beta1InstanceZone struct {
 	// AppliedDiscounts Specifies the applied discounts on the instance zone.
-	AppliedDiscounts     *[]CastaiInventoryV1beta1AppliedDiscount     `json:"appliedDiscounts,omitempty"`
-	AttachableGpuDevices *[]CastaiInventoryV1beta1AttachableGPUDevice `json:"attachableGpuDevices,omitempty"`
-	AttachedGpuDevices   *[]CastaiInventoryV1beta1GPUDevice           `json:"attachedGpuDevices,omitempty"`
-	AzId                 *string                                      `json:"azId,omitempty"`
+	AppliedDiscounts *[]CastaiInventoryV1beta1AppliedDiscount `json:"appliedDiscounts,omitempty"`
+
+	// AttachableDisks Contains a list of possible attachable disk types for the given instance type zone. Currently only supported for Azure.
+	AttachableDisks      *[]CastaiInventoryV1beta1InstanceZoneAttachableDisk `json:"attachableDisks,omitempty"`
+	AttachableGpuDevices *[]CastaiInventoryV1beta1AttachableGPUDevice        `json:"attachableGpuDevices,omitempty"`
+	AttachedGpuDevices   *[]CastaiInventoryV1beta1GPUDevice                  `json:"attachedGpuDevices,omitempty"`
+	AzId                 *string                                             `json:"azId,omitempty"`
 
 	// CpuPlatforms Describes the CPU platforms the instance type can be equipped with.
 	CpuPlatforms      *[]CastaiInventoryV1beta1CPUPlatform `json:"cpuPlatforms,omitempty"`
@@ -1483,7 +1501,14 @@ type CastaiInventoryV1beta1InstanceZone struct {
 	Price             *string                              `json:"price,omitempty"`
 	RamPrice          *string                              `json:"ramPrice,omitempty"`
 	Spot              *bool                                `json:"spot,omitempty"`
+	SpotReliability   *float32                             `json:"spotReliability"`
 	Unavailable       *bool                                `json:"unavailable,omitempty"`
+}
+
+// CastaiInventoryV1beta1InstanceZoneAttachableDisk defines model for castai.inventory.v1beta1.InstanceZone.AttachableDisk.
+type CastaiInventoryV1beta1InstanceZoneAttachableDisk struct {
+	// Name For Azure, currently only "ultra" is supported which indicates that Ultra Disk is available. See InstanceType.AttachableDisk for standard/premium disks support info.
+	Name *string `json:"name,omitempty"`
 }
 
 // CastaiInventoryV1beta1ListInstanceTypeNamesResponse defines model for castai.inventory.v1beta1.ListInstanceTypeNamesResponse.
@@ -2453,7 +2478,8 @@ type CastaiUsersV1beta1CurrentUserProfileResponse struct {
 	Id *string `json:"id,omitempty"`
 
 	// Name User name.
-	Name *string `json:"name,omitempty"`
+	Name        *string `json:"name,omitempty"`
+	ReadmeIoJwt *string `json:"readmeIoJwt,omitempty"`
 
 	// Username User username.
 	Username *string `json:"username,omitempty"`
@@ -2637,6 +2663,9 @@ type CastaiUsersV1beta1User struct {
 
 // CastaiUsersV1beta1UserOrganization UserOrganization describes organization user belongs to.
 type CastaiUsersV1beta1UserOrganization struct {
+	// ChildOrderId The order id of child org in enterprise by created_at - if the org is a child org.
+	ChildOrderId *int32 `json:"childOrderId"`
+
 	// CreatedAt organization creation date.
 	CreatedAt *time.Time `json:"createdAt,omitempty"`
 
@@ -2648,12 +2677,8 @@ type CastaiUsersV1beta1UserOrganization struct {
 
 	// ParentId ID of the parent organization. This is beta feature not available for all organizations.
 	ParentId *string `json:"parentId"`
-
-	// Role Deprecated: for RBACv2 user can be bound to multiple roles.
-	// Use https://docs.cast.ai/reference/rbacserviceapi instead.
-	// user role in the organization.
 	// Deprecated:
-	Role string `json:"role"`
+	Role *interface{} `json:"role,omitempty"`
 
 	// Type OrganizationType defines possible types of organization.
 	//
@@ -3503,11 +3528,39 @@ type NodeconfigV1AKSConfigPublicIPAKSPublicIPTags struct {
 	TagValue *string `json:"tagValue,omitempty"`
 }
 
+// NodeconfigV1AmiSelector defines model for nodeconfig.v1.AmiSelector.
+type NodeconfigV1AmiSelector struct {
+	// AmiId AMI ID to be used for provisioned nodes.
+	AmiId *string `json:"amiId,omitempty"`
+}
+
 // NodeconfigV1ContainerRuntime List of supported container runtimes kubelet should use.
 type NodeconfigV1ContainerRuntime string
 
 // NodeconfigV1DeleteConfigurationResponse defines model for nodeconfig.v1.DeleteConfigurationResponse.
 type NodeconfigV1DeleteConfigurationResponse = map[string]interface{}
+
+// NodeconfigV1EC2VolumesConfig defines model for nodeconfig.v1.EC2VolumesConfig.
+type NodeconfigV1EC2VolumesConfig struct {
+	// DeviceName Node's security groups.
+	DeviceName string `json:"deviceName"`
+
+	// Encrypted Whether device is encrypted.
+	Encrypted *bool `json:"encrypted,omitempty"`
+
+	// Iops EBS volume IOPS value to be used for provisioned nodes.
+	Iops      *int32  `json:"iops"`
+	KmsKeyArn *string `json:"kmsKeyArn"`
+
+	// Size EBS volume size in GiB to be used for provisioned nodes.
+	Size *int32 `json:"size,omitempty"`
+
+	// Throughput EBS volume throughput in MiB/s to be used for provisioned nodes.
+	Throughput *int32 `json:"throughput"`
+
+	// Type EBS volume type to be used for provisioned nodes. Defaults to gp3.
+	Type *string `json:"type,omitempty"`
+}
 
 // NodeconfigV1EKSConfig defines model for nodeconfig.v1.EKSConfig.
 type NodeconfigV1EKSConfig struct {
@@ -3818,10 +3871,18 @@ type NodeconfigV1SecurityGroup struct {
 
 // NodeconfigV1SelfHostedWithEC2NodesConfig defines model for nodeconfig.v1.SelfHostedWithEC2NodesConfig.
 type NodeconfigV1SelfHostedWithEC2NodesConfig struct {
-	// AmiId AMI ID to be used for provisioned nodes.
-	AmiId        *string `json:"amiId"`
-	ImdsHopLimit *int32  `json:"imdsHopLimit"`
-	ImdsV1       *bool   `json:"imdsV1"`
+	// AmiSelector Cluster's instance profile ARN used for CAST provisioned nodes.
+	AmiSelector *[]NodeconfigV1AmiSelector `json:"amiSelector,omitempty"`
+
+	// ImageFamily Enum of supported image families (OSes) for SelfHostedWithEC2Nodes.
+	//
+	//  - FAMILY_AL2: Amazon Linux 2 (https://aws.amazon.com/amazon-linux-2/).
+	//  - FAMILY_AL2023: Amazon Linux 2023 (https://aws.amazon.com/linux/amazon-linux-2023/).
+	//  - FAMILY_BOTTLEROCKET: Bottlerocket (https://aws.amazon.com/bottlerocket/).
+	//  - FAMILY_CUSTOM: Custom AMI family (https://docs.aws.amazon.com/opsworks/latest/userguide/workinginstances-custom-ami.html).
+	ImageFamily  *NodeconfigV1SelfHostedWithEC2NodesConfigImageFamily `json:"imageFamily,omitempty"`
+	ImdsHopLimit *int32                                               `json:"imdsHopLimit"`
+	ImdsV1       *bool                                                `json:"imdsV1"`
 
 	// InstanceProfileArn Cluster's instance profile ARN used for CAST provisioned nodes.
 	InstanceProfileArn string `json:"instanceProfileArn"`
@@ -3832,15 +3893,17 @@ type NodeconfigV1SelfHostedWithEC2NodesConfig struct {
 	// SecurityGroups Node's security groups.
 	SecurityGroups *[]string `json:"securityGroups,omitempty"`
 
-	// VolumeIops EBS volume IOPS value to be used for provisioned nodes.
-	VolumeIops *int32 `json:"volumeIops"`
-
-	// VolumeThroughput EBS volume throughput in MiB/s to be used for provisioned nodes.
-	VolumeThroughput *int32 `json:"volumeThroughput"`
-
-	// VolumeType EBS volume type to be used for provisioned nodes. Defaults to gp3.
-	VolumeType *string `json:"volumeType"`
+	// Volumes Cluster's instance profile ARN used for CAST provisioned nodes.
+	Volumes *[]NodeconfigV1EC2VolumesConfig `json:"volumes,omitempty"`
 }
+
+// NodeconfigV1SelfHostedWithEC2NodesConfigImageFamily Enum of supported image families (OSes) for SelfHostedWithEC2Nodes.
+//
+//   - FAMILY_AL2: Amazon Linux 2 (https://aws.amazon.com/amazon-linux-2/).
+//   - FAMILY_AL2023: Amazon Linux 2023 (https://aws.amazon.com/linux/amazon-linux-2023/).
+//   - FAMILY_BOTTLEROCKET: Bottlerocket (https://aws.amazon.com/bottlerocket/).
+//   - FAMILY_CUSTOM: Custom AMI family (https://docs.aws.amazon.com/opsworks/latest/userguide/workinginstances-custom-ami.html).
+type NodeconfigV1SelfHostedWithEC2NodesConfigImageFamily string
 
 // NodeconfigV1SubnetDetails SubnetDetails contains all subnet attributes relevant for node configuration.
 type NodeconfigV1SubnetDetails struct {
@@ -3908,6 +3971,13 @@ type NodetemplatesV1FilterInstanceTypesResponse struct {
 	AvailableInstanceTypes *[]NodetemplatesV1AvailableInstanceType `json:"availableInstanceTypes,omitempty"`
 }
 
+// NodetemplatesV1GPU defines model for nodetemplates.v1.GPU.
+type NodetemplatesV1GPU struct {
+	DefaultSharedClientsPerGpu *int32                               `json:"defaultSharedClientsPerGpu"`
+	EnableTimeSharing          *bool                                `json:"enableTimeSharing,omitempty"`
+	SharingConfiguration       *map[string]NodetemplatesV1SharedGPU `json:"sharingConfiguration,omitempty"`
+}
+
 // NodetemplatesV1GenerateNodeTemplatesResponse defines model for nodetemplates.v1.GenerateNodeTemplatesResponse.
 type NodetemplatesV1GenerateNodeTemplatesResponse struct {
 	Items *[]NodetemplatesV1NodeTemplateListItem `json:"items,omitempty"`
@@ -3938,6 +4008,7 @@ type NodetemplatesV1NewNodeTemplate struct {
 
 	// CustomTaints Custom taints for the template.
 	CustomTaints *[]NodetemplatesV1TaintWithOptionalEffect `json:"customTaints,omitempty"`
+	Gpu          *NodetemplatesV1GPU                       `json:"gpu,omitempty"`
 
 	// IsDefault Flag whether this template is the default template for the cluster.
 	IsDefault *bool `json:"isDefault,omitempty"`
@@ -3967,6 +4038,7 @@ type NodetemplatesV1NodeTemplate struct {
 
 	// CustomTaints Custom taints for the template.
 	CustomTaints *[]NodetemplatesV1Taint `json:"customTaints,omitempty"`
+	Gpu          *NodetemplatesV1GPU     `json:"gpu,omitempty"`
 
 	// IsDefault Flag whether this template is the default template for the cluster.
 	IsDefault *bool `json:"isDefault,omitempty"`
@@ -3999,6 +4071,11 @@ type NodetemplatesV1RebalancingConfiguration struct {
 	// MinNodes Minimum amount of nodes to create for template
 	// Note, this setting is only relevant for very small clusters, for larger clusters it's recommended to leave this at 0.
 	MinNodes *int32 `json:"minNodes"`
+}
+
+// NodetemplatesV1SharedGPU defines model for nodetemplates.v1.SharedGPU.
+type NodetemplatesV1SharedGPU struct {
+	SharedClientsPerGpu *int32 `json:"sharedClientsPerGpu"`
 }
 
 // NodetemplatesV1Taint Taint is used in responses.
@@ -4175,6 +4252,7 @@ type NodetemplatesV1UpdateNodeTemplate struct {
 
 	// CustomTaints Custom taints for the template.
 	CustomTaints *[]NodetemplatesV1TaintWithOptionalEffect `json:"customTaints,omitempty"`
+	Gpu          *NodetemplatesV1GPU                       `json:"gpu,omitempty"`
 
 	// IsDefault Flag whether this template is the default template for the cluster.
 	IsDefault *bool `json:"isDefault,omitempty"`
@@ -4808,6 +4886,14 @@ type RuntimeV1ToggleRulesRequest struct {
 // RuntimeV1ToggleRulesResponse defines model for runtime.v1.ToggleRulesResponse.
 type RuntimeV1ToggleRulesResponse = map[string]interface{}
 
+// RuntimeV1TriggerAnomaliesWebhookRequest defines model for runtime.v1.TriggerAnomaliesWebhookRequest.
+type RuntimeV1TriggerAnomaliesWebhookRequest struct {
+	Ids *[]string `json:"ids,omitempty"`
+}
+
+// RuntimeV1TriggerAnomaliesWebhookResponse defines model for runtime.v1.TriggerAnomaliesWebhookResponse.
+type RuntimeV1TriggerAnomaliesWebhookResponse = map[string]interface{}
+
 // RuntimeV1TriggerAnomalyWebhookResponse defines model for runtime.v1.TriggerAnomalyWebhookResponse.
 type RuntimeV1TriggerAnomalyWebhookResponse = map[string]interface{}
 
@@ -5112,9 +5198,10 @@ type WorkloadoptimizationV1Constraints struct {
 // WorkloadoptimizationV1Container defines model for workloadoptimization.v1.Container.
 type WorkloadoptimizationV1Container struct {
 	// Name Name of the container.
-	Name           string                           `json:"name"`
-	Recommendation *WorkloadoptimizationV1Resources `json:"recommendation,omitempty"`
-	Resources      *WorkloadoptimizationV1Resources `json:"resources,omitempty"`
+	Name              string                           `json:"name"`
+	OriginalResources *WorkloadoptimizationV1Resources `json:"originalResources,omitempty"`
+	Recommendation    *WorkloadoptimizationV1Resources `json:"recommendation,omitempty"`
+	Resources         *WorkloadoptimizationV1Resources `json:"resources,omitempty"`
 }
 
 // WorkloadoptimizationV1ContainerConfigUpdate defines model for workloadoptimization.v1.ContainerConfigUpdate.
@@ -6216,6 +6303,10 @@ type RbacServiceAPIListRoleBindingsParams struct {
 	// GroupId Filter by group ID. Multiple values can be passed as query parameters
 	// (e.g., &group_id=x&group_id=y)
 	GroupId *[]string `form:"groupId,omitempty" json:"groupId,omitempty"`
+
+	// ScopeId Filter by scope ID. Multiple values can be passed as query parameters
+	// (e.g., &scope_id=x&scope_id=y)
+	ScopeId *[]string `form:"scopeId,omitempty" json:"scopeId,omitempty"`
 }
 
 // RbacServiceAPICreateRoleBindingsJSONBody defines parameters for RbacServiceAPICreateRoleBindings.
@@ -6255,6 +6346,10 @@ type UsersAPIRemoveOrganizationUsersParams struct {
 type UsersAPIListOrganizationUsersParams struct {
 	// IncludeGroups IncludeGroups is the flag to include group membership in the response.
 	IncludeGroups *bool `form:"includeGroups,omitempty" json:"includeGroups,omitempty"`
+
+	// RoleId Filter by role ID. Multiple values can be passed as query parameters (e.g.,
+	// &role_id=x&role_id=y)
+	RoleId *[]string `form:"roleId,omitempty" json:"roleId,omitempty"`
 }
 
 // ScheduledRebalancingAPIUpdateRebalancingScheduleParams defines parameters for ScheduledRebalancingAPIUpdateRebalancingSchedule.
@@ -6834,6 +6929,9 @@ type RuntimeSecurityAPIAckAnomaliesJSONRequestBody = RuntimeV1AckAnomaliesReques
 
 // RuntimeSecurityAPICloseAnomaliesJSONRequestBody defines body for RuntimeSecurityAPICloseAnomalies for application/json ContentType.
 type RuntimeSecurityAPICloseAnomaliesJSONRequestBody = RuntimeV1CloseAnomaliesRequest
+
+// RuntimeSecurityAPITriggerAnomaliesWebhookJSONRequestBody defines body for RuntimeSecurityAPITriggerAnomaliesWebhook for application/json ContentType.
+type RuntimeSecurityAPITriggerAnomaliesWebhookJSONRequestBody = RuntimeV1TriggerAnomaliesWebhookRequest
 
 // RuntimeSecurityAPITriggerAnomalyWebhookJSONRequestBody defines body for RuntimeSecurityAPITriggerAnomalyWebhook for application/json ContentType.
 type RuntimeSecurityAPITriggerAnomalyWebhookJSONRequestBody = RuntimeSecurityAPITriggerAnomalyWebhookJSONBody
