@@ -595,6 +595,11 @@ type ClientInterface interface {
 
 	RuntimeSecurityAPICloseAnomalies(ctx context.Context, body RuntimeSecurityAPICloseAnomaliesJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// RuntimeSecurityAPITriggerAnomaliesWebhookWithBody request with any body
+	RuntimeSecurityAPITriggerAnomaliesWebhookWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	RuntimeSecurityAPITriggerAnomaliesWebhook(ctx context.Context, body RuntimeSecurityAPITriggerAnomaliesWebhookJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// RuntimeSecurityAPIGetAnomaly request
 	RuntimeSecurityAPIGetAnomaly(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -2990,6 +2995,30 @@ func (c *Client) RuntimeSecurityAPICloseAnomaliesWithBody(ctx context.Context, c
 
 func (c *Client) RuntimeSecurityAPICloseAnomalies(ctx context.Context, body RuntimeSecurityAPICloseAnomaliesJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewRuntimeSecurityAPICloseAnomaliesRequest(c.Server, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) RuntimeSecurityAPITriggerAnomaliesWebhookWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewRuntimeSecurityAPITriggerAnomaliesWebhookRequestWithBody(c.Server, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) RuntimeSecurityAPITriggerAnomaliesWebhook(ctx context.Context, body RuntimeSecurityAPITriggerAnomaliesWebhookJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewRuntimeSecurityAPITriggerAnomaliesWebhookRequest(c.Server, body)
 	if err != nil {
 		return nil, err
 	}
@@ -8086,6 +8115,22 @@ func NewRbacServiceAPIListRoleBindingsRequest(server string, organizationId stri
 
 		}
 
+		if params.ScopeId != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "scopeId", runtime.ParamLocationQuery, *params.ScopeId); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
 		queryURL.RawQuery = queryValues.Encode()
 	}
 
@@ -8954,6 +8999,22 @@ func NewUsersAPIListOrganizationUsersRequest(server string, organizationId strin
 		if params.IncludeGroups != nil {
 
 			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "includeGroups", runtime.ParamLocationQuery, *params.IncludeGroups); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.RoleId != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "roleId", runtime.ParamLocationQuery, *params.RoleId); err != nil {
 				return nil, err
 			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
 				return nil, err
@@ -10480,6 +10541,46 @@ func NewRuntimeSecurityAPICloseAnomaliesRequestWithBody(server string, contentTy
 	}
 
 	operationPath := fmt.Sprintf("/v1/security/runtime/anomalies/close")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewRuntimeSecurityAPITriggerAnomaliesWebhookRequest calls the generic RuntimeSecurityAPITriggerAnomaliesWebhook builder with application/json body
+func NewRuntimeSecurityAPITriggerAnomaliesWebhookRequest(server string, body RuntimeSecurityAPITriggerAnomaliesWebhookJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewRuntimeSecurityAPITriggerAnomaliesWebhookRequestWithBody(server, "application/json", bodyReader)
+}
+
+// NewRuntimeSecurityAPITriggerAnomaliesWebhookRequestWithBody generates requests for RuntimeSecurityAPITriggerAnomaliesWebhook with any type of body
+func NewRuntimeSecurityAPITriggerAnomaliesWebhookRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/security/runtime/anomalies/trigger-webhook")
 	if operationPath[0] == '/' {
 		operationPath = "." + operationPath
 	}
@@ -14400,6 +14501,11 @@ type ClientWithResponsesInterface interface {
 	RuntimeSecurityAPICloseAnomaliesWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*RuntimeSecurityAPICloseAnomaliesResponse, error)
 
 	RuntimeSecurityAPICloseAnomaliesWithResponse(ctx context.Context, body RuntimeSecurityAPICloseAnomaliesJSONRequestBody) (*RuntimeSecurityAPICloseAnomaliesResponse, error)
+
+	// RuntimeSecurityAPITriggerAnomaliesWebhook request  with any body
+	RuntimeSecurityAPITriggerAnomaliesWebhookWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*RuntimeSecurityAPITriggerAnomaliesWebhookResponse, error)
+
+	RuntimeSecurityAPITriggerAnomaliesWebhookWithResponse(ctx context.Context, body RuntimeSecurityAPITriggerAnomaliesWebhookJSONRequestBody) (*RuntimeSecurityAPITriggerAnomaliesWebhookResponse, error)
 
 	// RuntimeSecurityAPIGetAnomaly request
 	RuntimeSecurityAPIGetAnomalyWithResponse(ctx context.Context, id string) (*RuntimeSecurityAPIGetAnomalyResponse, error)
@@ -18643,6 +18749,36 @@ func (r RuntimeSecurityAPICloseAnomaliesResponse) GetBody() []byte {
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
+type RuntimeSecurityAPITriggerAnomaliesWebhookResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *RuntimeV1TriggerAnomaliesWebhookResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r RuntimeSecurityAPITriggerAnomaliesWebhookResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r RuntimeSecurityAPITriggerAnomaliesWebhookResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r RuntimeSecurityAPITriggerAnomaliesWebhookResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
 type RuntimeSecurityAPIGetAnomalyResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -21755,6 +21891,23 @@ func (c *ClientWithResponses) RuntimeSecurityAPICloseAnomaliesWithResponse(ctx c
 		return nil, err
 	}
 	return ParseRuntimeSecurityAPICloseAnomaliesResponse(rsp)
+}
+
+// RuntimeSecurityAPITriggerAnomaliesWebhookWithBodyWithResponse request with arbitrary body returning *RuntimeSecurityAPITriggerAnomaliesWebhookResponse
+func (c *ClientWithResponses) RuntimeSecurityAPITriggerAnomaliesWebhookWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*RuntimeSecurityAPITriggerAnomaliesWebhookResponse, error) {
+	rsp, err := c.RuntimeSecurityAPITriggerAnomaliesWebhookWithBody(ctx, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseRuntimeSecurityAPITriggerAnomaliesWebhookResponse(rsp)
+}
+
+func (c *ClientWithResponses) RuntimeSecurityAPITriggerAnomaliesWebhookWithResponse(ctx context.Context, body RuntimeSecurityAPITriggerAnomaliesWebhookJSONRequestBody) (*RuntimeSecurityAPITriggerAnomaliesWebhookResponse, error) {
+	rsp, err := c.RuntimeSecurityAPITriggerAnomaliesWebhook(ctx, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseRuntimeSecurityAPITriggerAnomaliesWebhookResponse(rsp)
 }
 
 // RuntimeSecurityAPIGetAnomalyWithResponse request returning *RuntimeSecurityAPIGetAnomalyResponse
@@ -25814,6 +25967,32 @@ func ParseRuntimeSecurityAPICloseAnomaliesResponse(rsp *http.Response) (*Runtime
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest RuntimeV1CloseAnomaliesResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseRuntimeSecurityAPITriggerAnomaliesWebhookResponse parses an HTTP response from a RuntimeSecurityAPITriggerAnomaliesWebhookWithResponse call
+func ParseRuntimeSecurityAPITriggerAnomaliesWebhookResponse(rsp *http.Response) (*RuntimeSecurityAPITriggerAnomaliesWebhookResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &RuntimeSecurityAPITriggerAnomaliesWebhookResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest RuntimeV1TriggerAnomaliesWebhookResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
