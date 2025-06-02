@@ -77,6 +77,10 @@ const (
 	FieldNodeTemplateCPULimitEnabled                          = "cpu_limit_enabled"
 	FieldNodeTemplateCPULimitMaxCores                         = "cpu_limit_max_cores"
 	FieldNodeTemplateBareMetal                                = "bare_metal"
+	FieldNodeTemplateEnableTimeSharing                        = "enable_time_sharing"
+	FieldNodeTemplateDefaultSharedClientsPerGpu               = "default_shared_clients_per_gpu"
+	FieldNodeTemplateSharingConfiguration                     = "sharing_configuration"
+	FieldNodeTemplateSharedClientsPerGpu                      = "shared_clients_per_gpu"
 )
 
 const (
@@ -631,6 +635,40 @@ func resourceNodeTemplate() *schema.Resource {
 				Default:  false,
 				Description: "Marks whether custom instances with extended memory should be used when deciding which parts of inventory are available. " +
 					"Custom instances are only supported in GCP.",
+			},
+			FieldNodeTemplateGpu: {
+				Type:     schema.TypeList,
+				MaxItems: 1,
+				Optional: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						FieldNodeTemplateEnableTimeSharing: {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Default:     false,
+							Description: "Enable/disable GPU time-sharing.",
+						},
+						FieldNodeTemplateDefaultSharedClientsPerGpu: {
+							Type:        schema.TypeInt,
+							Optional:    true,
+							Description: "Defines default shared client per GPU.",
+						},
+						FieldNodeTemplateSharingConfiguration: {
+							Type:        schema.TypeMap,
+							Optional:    true,
+							Description: "Defines GPU sharing configurations for GPU devices.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									FieldNodeTemplateSharedClientsPerGpu: {
+										Type:        schema.TypeInt,
+										Optional:    true,
+										Description: "Defines shared client per GPU.",
+									},
+								},
+							},
+						},
+					},
+				},
 			},
 		},
 	}

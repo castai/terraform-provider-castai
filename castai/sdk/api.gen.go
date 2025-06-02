@@ -861,6 +861,7 @@ type CastaiEvictorV1PodSelector struct {
 	// `match_expressions` are ANDed.
 	LabelSelector *CastaiEvictorV1LabelSelector `json:"labelSelector,omitempty"`
 	Namespace     *string                       `json:"namespace,omitempty"`
+	ReplicasMin   *int32                        `json:"replicasMin"`
 }
 
 // CastaiFeaturesV1Comparison Comparison represents a entity to entity ID comparison.
@@ -4146,6 +4147,9 @@ type NodetemplatesV1TemplateConstraints struct {
 	// EnableSpotDiversity Enable/disable spot diversity policy. When enabled, autoscaler will try to balance between diverse and cost optimal instance types.
 	EnableSpotDiversity *bool `json:"enableSpotDiversity"`
 
+	// EnableSpotReliability Enable/disable spot reliability policy. When enabled, autoscaler will create instances with highest reliability score within price increase threshold.
+	EnableSpotReliability *bool `json:"enableSpotReliability"`
+
 	// FallbackRestoreRateSeconds Fallback restore rate in seconds: defines how much time should pass before spot fallback should be attempted to be restored to real spot.
 	FallbackRestoreRateSeconds *int32                                                       `json:"fallbackRestoreRateSeconds"`
 	Gpu                        *NodetemplatesV1TemplateConstraintsGPUConstraints            `json:"gpu,omitempty"`
@@ -4185,7 +4189,11 @@ type NodetemplatesV1TemplateConstraints struct {
 
 	// SpotInterruptionPredictionsType Spot interruption predictions type. Can be either "aws-rebalance-recommendations" or "interruption-predictions".
 	SpotInterruptionPredictionsType *string `json:"spotInterruptionPredictionsType"`
-	StorageOptimized                *bool   `json:"storageOptimized"`
+
+	// SpotReliabilityPriceIncreaseLimitPercent Allowed node price increase when using spot reliability on ordering the instance types . E.g. if the value is 10%, then the overall price of instance types can be 10% higher than
+	// the price of the optimal configuration.
+	SpotReliabilityPriceIncreaseLimitPercent *int32 `json:"spotReliabilityPriceIncreaseLimitPercent"`
+	StorageOptimized                         *bool  `json:"storageOptimized"`
 
 	// UseSpotFallbacks Spot instance fallback constraint - when true, on-demand instances will be created, when spots are unavailable.
 	UseSpotFallbacks *bool `json:"useSpotFallbacks"`
