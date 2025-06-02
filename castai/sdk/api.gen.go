@@ -990,6 +990,11 @@ type CastaiInventoryV1beta1AWSSavingsPlan struct {
 // CastaiInventoryV1beta1AWSSavingsPlanCommitmentTermUnit defines model for castai.inventory.v1beta1.AWSSavingsPlan.CommitmentTermUnit.
 type CastaiInventoryV1beta1AWSSavingsPlanCommitmentTermUnit string
 
+// CastaiInventoryV1beta1AWSSavingsPlanDiscountedPrices defines model for castai.inventory.v1beta1.AWSSavingsPlanDiscountedPrices.
+type CastaiInventoryV1beta1AWSSavingsPlanDiscountedPrices struct {
+	OfferingsPrices *map[string]CastaiInventoryV1beta1PricesPerRegions `json:"offeringsPrices,omitempty"`
+}
+
 // CastaiInventoryV1beta1AddReservationResponse defines model for castai.inventory.v1beta1.AddReservationResponse.
 type CastaiInventoryV1beta1AddReservationResponse struct {
 	Reservation *CastaiInventoryV1beta1ReservationDetails `json:"reservation,omitempty"`
@@ -1157,6 +1162,11 @@ type CastaiInventoryV1beta1CommitmentAssignment struct {
 	Priority     *int32  `json:"priority,omitempty"`
 }
 
+// CastaiInventoryV1beta1CommitmentDiscountedPrice defines model for castai.inventory.v1beta1.CommitmentDiscountedPrice.
+type CastaiInventoryV1beta1CommitmentDiscountedPrice struct {
+	AwsSavingsPlanDiscountedPrices *CastaiInventoryV1beta1AWSSavingsPlanDiscountedPrices `json:"awsSavingsPlanDiscountedPrices,omitempty"`
+}
+
 // CastaiInventoryV1beta1CountableInstanceType defines model for castai.inventory.v1beta1.CountableInstanceType.
 type CastaiInventoryV1beta1CountableInstanceType struct {
 	ClusterId *string `json:"clusterId,omitempty"`
@@ -1320,6 +1330,12 @@ type CastaiInventoryV1beta1GetCommitmentUsageHistoryResponse struct {
 // CastaiInventoryV1beta1GetCommitmentsAssignmentsResponse defines model for castai.inventory.v1beta1.GetCommitmentsAssignmentsResponse.
 type CastaiInventoryV1beta1GetCommitmentsAssignmentsResponse struct {
 	CommitmentsAssignments *[]CastaiInventoryV1beta1CommitmentAssignment `json:"commitmentsAssignments,omitempty"`
+}
+
+// CastaiInventoryV1beta1GetCommitmentsDiscountedPricesResponse defines model for castai.inventory.v1beta1.GetCommitmentsDiscountedPricesResponse.
+type CastaiInventoryV1beta1GetCommitmentsDiscountedPricesResponse struct {
+	DiscountedPrices *[]CastaiInventoryV1beta1CommitmentDiscountedPrice `json:"discountedPrices,omitempty"`
+	NextPageToken    *string                                            `json:"nextPageToken,omitempty"`
 }
 
 // CastaiInventoryV1beta1GetCommitmentsResponse defines model for castai.inventory.v1beta1.GetCommitmentsResponse.
@@ -1557,6 +1573,16 @@ type CastaiInventoryV1beta1NodeUsage struct {
 // CastaiInventoryV1beta1OverwriteReservationsResponse defines model for castai.inventory.v1beta1.OverwriteReservationsResponse.
 type CastaiInventoryV1beta1OverwriteReservationsResponse struct {
 	Reservations *[]CastaiInventoryV1beta1ReservationDetails `json:"reservations,omitempty"`
+}
+
+// CastaiInventoryV1beta1PricesByInstanceTypes defines model for castai.inventory.v1beta1.PricesByInstanceTypes.
+type CastaiInventoryV1beta1PricesByInstanceTypes struct {
+	Prices *map[string]string `json:"prices,omitempty"`
+}
+
+// CastaiInventoryV1beta1PricesPerRegions defines model for castai.inventory.v1beta1.PricesPerRegions.
+type CastaiInventoryV1beta1PricesPerRegions struct {
+	RegionsInstanceTypePrices *map[string]CastaiInventoryV1beta1PricesByInstanceTypes `json:"regionsInstanceTypePrices,omitempty"`
 }
 
 // CastaiInventoryV1beta1Region defines model for castai.inventory.v1beta1.Region.
@@ -3006,13 +3032,21 @@ type ExternalclusterV1GKECreateSAResponse struct {
 
 // ExternalclusterV1GPUConfig GPUConfig describes instance GPU configuration.
 //
+// Use for:
+// * Creating GCP N1 with customer quantity and type of GPUs attached.
+// * Setting required labels for AKS GPU nodes.
+// * Configuring gpu sharing.
 // Required while provisioning GCP N1 instance types with GPU.
 // Eg.: n1-standard-2 with 8 x NVIDIA Tesla K80
 type ExternalclusterV1GPUConfig struct {
-	// Count Number of GPUs.
+	// Count Number of GPUs. N1 GCP machines allow attaching custom number of GPUs.
 	Count *int32 `json:"count,omitempty"`
 
-	// Type GPU type.
+	// TimeSharing GPUTimeSharing configures sharing strategy by splitting time of single GPU to several processes.
+	TimeSharing *ExternalclusterV1GPUTimeSharing `json:"timeSharing,omitempty"`
+
+	// Type GPU type.  N1 GCP machines allow attaching custom type of GPUs.
+	// Public documentation refers to this as "accelerator type" which you should read "name of specialized hardware".
 	Type *string `json:"type,omitempty"`
 }
 
@@ -3026,6 +3060,11 @@ type ExternalclusterV1GPUDevice struct {
 // ExternalclusterV1GPUInfo defines model for externalcluster.v1.GPUInfo.
 type ExternalclusterV1GPUInfo struct {
 	GpuDevices *[]ExternalclusterV1GPUDevice `json:"gpuDevices,omitempty"`
+}
+
+// ExternalclusterV1GPUTimeSharing GPUTimeSharing configures sharing strategy by splitting time of single GPU to several processes.
+type ExternalclusterV1GPUTimeSharing struct {
+	Replicas *int32 `json:"replicas,omitempty"`
 }
 
 // ExternalclusterV1GetAssumeRolePrincipalResponse defines model for externalcluster.v1.GetAssumeRolePrincipalResponse.
@@ -3159,6 +3198,10 @@ type ExternalclusterV1NodeConfig struct {
 
 	// GpuConfig GPUConfig describes instance GPU configuration.
 	//
+	// Use for:
+	// * Creating GCP N1 with customer quantity and type of GPUs attached.
+	// * Setting required labels for AKS GPU nodes.
+	// * Configuring gpu sharing.
 	// Required while provisioning GCP N1 instance types with GPU.
 	// Eg.: n1-standard-2 with 8 x NVIDIA Tesla K80
 	GpuConfig *ExternalclusterV1GPUConfig `json:"gpuConfig,omitempty"`
@@ -6393,6 +6436,15 @@ type CommitmentsAPIGetCommitmentsParams struct {
 
 	// IncludeUsagePerInstanceTypes indicates if usage per instance types should be included
 	IncludeUsagePerInstanceTypes *bool `form:"includeUsagePerInstanceTypes,omitempty" json:"includeUsagePerInstanceTypes,omitempty"`
+}
+
+// CommitmentsAPIGetCommitmentsDiscountedPricesParams defines parameters for CommitmentsAPIGetCommitmentsDiscountedPrices.
+type CommitmentsAPIGetCommitmentsDiscountedPricesParams struct {
+	PageLimit *string `form:"page.limit,omitempty" json:"page.limit,omitempty"`
+
+	// PageCursor Cursor that defines token indicating where to start the next page.
+	// Empty value indicates to start from beginning of the dataset.
+	PageCursor *string `form:"page.cursor,omitempty" json:"page.cursor,omitempty"`
 }
 
 // CommitmentsAPIImportAzureReservationsJSONBody defines parameters for CommitmentsAPIImportAzureReservations.

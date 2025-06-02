@@ -220,7 +220,16 @@ Optional:
 
 - `default_shared_clients_per_gpu` (Number) Defines default shared client per GPU.
 - `enable_time_sharing` (Boolean) Enable/disable GPU time-sharing.
-- `sharing_configuration` (Map of String) Defines GPU sharing configurations for GPU devices.
+- `sharing_configuration` (Block List) Defines GPU sharing configurations for GPU devices. (see [below for nested schema](#nestedblock--gpu--sharing_configuration))
+
+<a id="nestedblock--gpu--sharing_configuration"></a>
+### Nested Schema for `gpu.sharing_configuration`
+
+Required:
+
+- `gpu_name` (String) GPU name.
+- `shared_clients_per_gpu` (Number) Defines default shared clients per GPU.
+
 
 
 <a id="nestedblock--timeouts"></a>
