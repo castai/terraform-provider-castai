@@ -658,20 +658,37 @@ func resourceNodeTemplate() *schema.Resource {
 							Type:        schema.TypeList,
 							Optional:    true,
 							Description: "Defines GPU sharing configurations for GPU devices.",
-							Elem: &schema.Resource{
-								Schema: map[string]*schema.Schema{
-									FieldNodeTemplateSharedGpuName: {
-										Type:        schema.TypeString,
-										Required:    true,
-										Description: "GPU name.",
-									},
-									FieldNodeTemplateSharedClientsPerGpu: {
-										Type:        schema.TypeInt,
-										Required:    true,
-										Description: "Defines default shared clients per GPU.",
+							Elem: &schema.Schema{
+								Type: schema.TypeList,
+								Elem: &schema.Resource{
+									Schema: map[string]*schema.Schema{
+										FieldNodeTemplateSharedGpuName: {
+											Type:        schema.TypeString,
+											Required:    true,
+											Description: "GPU name.",
+										},
+										FieldNodeTemplateSharedClientsPerGpu: {
+											Type:        schema.TypeInt,
+											Required:    true,
+											Description: "Defines default shared clients per GPU.",
+										},
 									},
 								},
 							},
+							//Elem: &schema.Resource{
+							//	Schema: map[string]*schema.Schema{
+							//		FieldNodeTemplateSharedGpuName: {
+							//			Type:        schema.TypeString,
+							//			Required:    true,
+							//			Description: "GPU name.",
+							//		},
+							//		FieldNodeTemplateSharedClientsPerGpu: {
+							//			Type:        schema.TypeInt,
+							//			Required:    true,
+							//			Description: "Defines default shared clients per GPU.",
+							//		},
+							//	},
+							//},
 						},
 					},
 				},

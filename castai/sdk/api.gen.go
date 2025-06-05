@@ -156,6 +156,12 @@ const (
 	CastaiRbacV1beta1PoliciesStateUNKNOWN  CastaiRbacV1beta1PoliciesState = "UNKNOWN"
 )
 
+// Defines values for CastaiRbacV1beta1ScopeType.
+const (
+	CLUSTER      CastaiRbacV1beta1ScopeType = "CLUSTER"
+	ORGANIZATION CastaiRbacV1beta1ScopeType = "ORGANIZATION"
+)
+
 // Defines values for CastaiSsoV1beta1OIDCType.
 const (
 	CastaiSsoV1beta1OIDCTypeTYPEBACKCHANNEL  CastaiSsoV1beta1OIDCType = "TYPE_BACK_CHANNEL"
@@ -2085,6 +2091,13 @@ type CastaiRbacV1beta1Scope struct {
 	Resource *CastaiRbacV1beta1ResourceScope `json:"resource,omitempty"`
 }
 
+// CastaiRbacV1beta1ScopeType Scope represents the authentication tree for the system. Based on that we can build the
+// authentication and authorization tree.
+//
+//   - ORGANIZATION: Organization scope represents the organization level authentication (Organization -> ResourceID)
+//   - CLUSTER: Cluster scope represents the cluster level authentication (Organization -> Cluster -> ResourceID)
+type CastaiRbacV1beta1ScopeType string
+
 // CastaiRbacV1beta1ServiceAccountSubject ServiceAccountSubject represents the service account subject.
 type CastaiRbacV1beta1ServiceAccountSubject struct {
 	// Id ID is the unique identifier of the service account.
@@ -2524,6 +2537,29 @@ type CastaiUsersV1beta1GroupRef struct {
 	Name string `json:"name"`
 }
 
+// CastaiUsersV1beta1InvitationRoleBinding Represents the binding between a user or group and a role.
+type CastaiUsersV1beta1InvitationRoleBinding struct {
+	// RoleId Reference to the role that is being bound.
+	RoleId *string `json:"roleId,omitempty"`
+
+	// Scopes List of scopes to which this role binding applies.
+	Scopes *[]CastaiUsersV1beta1InvitationRoleBindingScope `json:"scopes,omitempty"`
+}
+
+// CastaiUsersV1beta1InvitationRoleBindingScope Defines a scope for a role binding, specifying which resources the role
+// applies to.
+type CastaiUsersV1beta1InvitationRoleBindingScope struct {
+	// Id Unique identifier for the scope.
+	Id *string `json:"id,omitempty"`
+
+	// Type Scope represents the authentication tree for the system. Based on that we can build the
+	// authentication and authorization tree.
+	//
+	//  - ORGANIZATION: Organization scope represents the organization level authentication (Organization -> ResourceID)
+	//  - CLUSTER: Cluster scope represents the cluster level authentication (Organization -> Cluster -> ResourceID)
+	Type *CastaiRbacV1beta1ScopeType `json:"type,omitempty"`
+}
+
 // CastaiUsersV1beta1ListInvitationsResponse Defines container for the organization's pending invitations.
 type CastaiUsersV1beta1ListInvitationsResponse struct {
 	// Invitations Array of organization's pending invitations.
@@ -2581,7 +2617,12 @@ type CastaiUsersV1beta1NewMembershipByEmail struct {
 	// Deprecated:
 	Role *string `json:"role,omitempty"`
 
-	// RoleId string roleID.
+	// RoleBindings The role bindings the user will be bound to after the invitation is claimed.
+	RoleBindings *[]CastaiUsersV1beta1InvitationRoleBinding `json:"roleBindings,omitempty"`
+
+	// RoleId Deprecated: Use role bindings instead.
+	// string roleID.
+	// Deprecated:
 	RoleId *string `json:"roleId,omitempty"`
 
 	// UserEmail email of the invited person.
@@ -2644,7 +2685,12 @@ type CastaiUsersV1beta1PendingInvitation struct {
 	// Deprecated:
 	Role string `json:"role"`
 
-	// RoleId role_id is the role ID of the invited person.
+	// RoleBindings The role bindings the user will be bound to after the invitation is claimed.
+	RoleBindings *[]CastaiUsersV1beta1InvitationRoleBinding `json:"roleBindings,omitempty"`
+
+	// RoleId Deprecated: Use role bindings instead.
+	// role_id is the role ID of the invited person.
+	// Deprecated:
 	RoleId *string `json:"roleId,omitempty"`
 
 	// ValidUntil invitation expiration date.
@@ -5773,8 +5819,15 @@ type WorkloadoptimizationV1ResourceLimitStrategy struct {
 //   - MULTIPLIER: Multiplier used to calculate the resource limit. The final value is determined by multiplying the resource request by the specified factor.
 type WorkloadoptimizationV1ResourceLimitStrategyType string
 
+// WorkloadoptimizationV1ResourceMetricPredictions defines model for workloadoptimization.v1.ResourceMetricPredictions.
+type WorkloadoptimizationV1ResourceMetricPredictions struct {
+	Recommended float64   `json:"recommended"`
+	Timestamp   time.Time `json:"timestamp"`
+}
+
 // WorkloadoptimizationV1ResourceMetrics defines model for workloadoptimization.v1.ResourceMetrics.
 type WorkloadoptimizationV1ResourceMetrics struct {
+	Avg       float64   `json:"avg"`
 	Max       float64   `json:"max"`
 	Min       float64   `json:"min"`
 	P25       float64   `json:"p25"`
@@ -6123,6 +6176,9 @@ type WorkloadoptimizationV1WorkloadMetricContainer struct {
 	MemoryGib           []WorkloadoptimizationV1ResourceMetrics `json:"memoryGib"`
 	MemoryGibAggregated WorkloadoptimizationV1AggregatedMetrics `json:"memoryGibAggregated"`
 	Name                string                                  `json:"name"`
+
+	// PredictedCpuCores Future and historic cpu recommendation predictions.
+	PredictedCpuCores *[]WorkloadoptimizationV1ResourceMetricPredictions `json:"predictedCpuCores,omitempty"`
 }
 
 // WorkloadoptimizationV1WorkloadMetrics defines model for workloadoptimization.v1.WorkloadMetrics.
