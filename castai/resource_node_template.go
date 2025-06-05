@@ -77,6 +77,11 @@ const (
 	FieldNodeTemplateCPULimitEnabled                          = "cpu_limit_enabled"
 	FieldNodeTemplateCPULimitMaxCores                         = "cpu_limit_max_cores"
 	FieldNodeTemplateBareMetal                                = "bare_metal"
+	FieldNodeTemplateEnableTimeSharing                        = "enable_time_sharing"
+	FieldNodeTemplateDefaultSharedClientsPerGpu               = "default_shared_clients_per_gpu"
+	FieldNodeTemplateSharingConfiguration                     = "sharing_configuration"
+	FieldNodeTemplateSharedClientsPerGpu                      = "shared_clients_per_gpu"
+	FieldNodeTemplateSharedGpuName                            = "gpu_name"
 )
 
 const (
@@ -632,6 +637,62 @@ func resourceNodeTemplate() *schema.Resource {
 				Description: "Marks whether custom instances with extended memory should be used when deciding which parts of inventory are available. " +
 					"Custom instances are only supported in GCP.",
 			},
+			FieldNodeTemplateGpu: {
+				Type:     schema.TypeList,
+				MaxItems: 1,
+				Optional: true,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						FieldNodeTemplateEnableTimeSharing: {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Default:     false,
+							Description: "Enable/disable GPU time-sharing.",
+						},
+						FieldNodeTemplateDefaultSharedClientsPerGpu: {
+							Type:        schema.TypeInt,
+							Optional:    true,
+							Description: "Defines default shared client per GPU.",
+						},
+						FieldNodeTemplateSharingConfiguration: {
+							Type:        schema.TypeList,
+							Optional:    true,
+							Description: "Defines GPU sharing configurations for GPU devices.",
+							Elem: &schema.Schema{
+								Type: schema.TypeList,
+								Elem: &schema.Resource{
+									Schema: map[string]*schema.Schema{
+										FieldNodeTemplateSharedGpuName: {
+											Type:        schema.TypeString,
+											Required:    true,
+											Description: "GPU name.",
+										},
+										FieldNodeTemplateSharedClientsPerGpu: {
+											Type:        schema.TypeInt,
+											Required:    true,
+											Description: "Defines default shared clients per GPU.",
+										},
+									},
+								},
+							},
+							//Elem: &schema.Resource{
+							//	Schema: map[string]*schema.Schema{
+							//		FieldNodeTemplateSharedGpuName: {
+							//			Type:        schema.TypeString,
+							//			Required:    true,
+							//			Description: "GPU name.",
+							//		},
+							//		FieldNodeTemplateSharedClientsPerGpu: {
+							//			Type:        schema.TypeInt,
+							//			Required:    true,
+							//			Description: "Defines default shared clients per GPU.",
+							//		},
+							//	},
+							//},
+						},
+					},
+				},
+			},
 		},
 	}
 }
@@ -706,7 +767,51 @@ func resourceNodeTemplateRead(ctx context.Context, d *schema.ResourceData, meta 
 		return diag.FromErr(fmt.Errorf("setting custom instances with extended memory enabled: %w", err))
 	}
 
+	if nodeTemplate.Gpu != nil {
+		gpu, err := flattenGpuSettings(nodeTemplate.Gpu)
+		if err != nil {
+			return diag.FromErr(fmt.Errorf("flattening gpu settings: %w", err))
+		}
+
+		if err := d.Set(FieldNodeTemplateGpu, gpu); err != nil {
+			return diag.FromErr(fmt.Errorf("setting gpu settings: %w", err))
+		}
+	}
+
 	return nil
+}
+
+func flattenGpuSettings(g *sdk.NodetemplatesV1GPU) ([]map[string]any, error) {
+	if g == nil {
+		return nil, nil
+	}
+
+	out := make(map[string]any)
+
+	if g.EnableTimeSharing != nil {
+		out[FieldNodeTemplateEnableTimeSharing] = g.EnableTimeSharing
+	}
+
+	if g.DefaultSharedClientsPerGpu != nil {
+		out[FieldNodeTemplateDefaultSharedClientsPerGpu] = g.DefaultSharedClientsPerGpu
+	}
+
+	if g.SharingConfiguration != nil {
+		sharingConfigurations := make([]map[string]any, 0)
+		for gpuName, sc := range *g.SharingConfiguration {
+			if sc.SharedClientsPerGpu != nil {
+				sharingConfig := make(map[string]any)
+				sharingConfig[FieldNodeTemplateSharedClientsPerGpu] = *sc.SharedClientsPerGpu
+				sharingConfig[FieldNodeTemplateSharedGpuName] = gpuName
+
+				sharingConfigurations = append(sharingConfigurations, sharingConfig)
+			}
+		}
+		if len(sharingConfigurations) > 0 {
+			out[FieldNodeTemplateSharingConfiguration] = sharingConfigurations
+		}
+	}
+	return []map[string]any{out}, nil
 }
 
 func flattenConstraints(c *sdk.NodetemplatesV1TemplateConstraints) ([]map[string]any, error) {
