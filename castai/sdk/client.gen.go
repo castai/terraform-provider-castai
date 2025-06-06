@@ -541,6 +541,9 @@ type ClientInterface interface {
 	// CommitmentsAPIGetCommitments request
 	CommitmentsAPIGetCommitments(ctx context.Context, params *CommitmentsAPIGetCommitmentsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// CommitmentsAPIGetCommitmentsDiscountedPrices request
+	CommitmentsAPIGetCommitmentsDiscountedPrices(ctx context.Context, params *CommitmentsAPIGetCommitmentsDiscountedPricesParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// CommitmentsAPIImportAzureReservationsWithBody request with any body
 	CommitmentsAPIImportAzureReservationsWithBody(ctx context.Context, params *CommitmentsAPIImportAzureReservationsParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -766,6 +769,9 @@ type ClientInterface interface {
 
 	// WorkloadOptimizationAPIGetWorkloadsSummary request
 	WorkloadOptimizationAPIGetWorkloadsSummary(ctx context.Context, clusterId string, params *WorkloadOptimizationAPIGetWorkloadsSummaryParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// WorkloadOptimizationAPIGetWorkloadsSummaryMetrics request
+	WorkloadOptimizationAPIGetWorkloadsSummaryMetrics(ctx context.Context, clusterId string, params *WorkloadOptimizationAPIGetWorkloadsSummaryMetricsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// WorkloadOptimizationAPIGetWorkload request
 	WorkloadOptimizationAPIGetWorkload(ctx context.Context, clusterId string, workloadId string, params *WorkloadOptimizationAPIGetWorkloadParams, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -2765,6 +2771,18 @@ func (c *Client) CommitmentsAPIGetCommitments(ctx context.Context, params *Commi
 	return c.Client.Do(req)
 }
 
+func (c *Client) CommitmentsAPIGetCommitmentsDiscountedPrices(ctx context.Context, params *CommitmentsAPIGetCommitmentsDiscountedPricesParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewCommitmentsAPIGetCommitmentsDiscountedPricesRequest(c.Server, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
 func (c *Client) CommitmentsAPIImportAzureReservationsWithBody(ctx context.Context, params *CommitmentsAPIImportAzureReservationsParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewCommitmentsAPIImportAzureReservationsRequestWithBody(c.Server, params, contentType, body)
 	if err != nil {
@@ -3751,6 +3769,18 @@ func (c *Client) WorkloadOptimizationAPIListWorkloads(ctx context.Context, clust
 
 func (c *Client) WorkloadOptimizationAPIGetWorkloadsSummary(ctx context.Context, clusterId string, params *WorkloadOptimizationAPIGetWorkloadsSummaryParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewWorkloadOptimizationAPIGetWorkloadsSummaryRequest(c.Server, clusterId, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) WorkloadOptimizationAPIGetWorkloadsSummaryMetrics(ctx context.Context, clusterId string, params *WorkloadOptimizationAPIGetWorkloadsSummaryMetricsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewWorkloadOptimizationAPIGetWorkloadsSummaryMetricsRequest(c.Server, clusterId, params)
 	if err != nil {
 		return nil, err
 	}
@@ -9699,6 +9729,71 @@ func NewCommitmentsAPIGetCommitmentsRequest(server string, params *CommitmentsAP
 	return req, nil
 }
 
+// NewCommitmentsAPIGetCommitmentsDiscountedPricesRequest generates requests for CommitmentsAPIGetCommitmentsDiscountedPrices
+func NewCommitmentsAPIGetCommitmentsDiscountedPricesRequest(server string, params *CommitmentsAPIGetCommitmentsDiscountedPricesParams) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/savings/commitments/discounted-prices")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.PageLimit != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "page.limit", runtime.ParamLocationQuery, *params.PageLimit); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.PageCursor != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "page.cursor", runtime.ParamLocationQuery, *params.PageCursor); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 // NewCommitmentsAPIImportAzureReservationsRequest calls the generic CommitmentsAPIImportAzureReservations builder with application/json body
 func NewCommitmentsAPIImportAzureReservationsRequest(server string, params *CommitmentsAPIImportAzureReservationsParams, body CommitmentsAPIImportAzureReservationsJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
@@ -13667,6 +13762,78 @@ func NewWorkloadOptimizationAPIGetWorkloadsSummaryRequest(server string, cluster
 	return req, nil
 }
 
+// NewWorkloadOptimizationAPIGetWorkloadsSummaryMetricsRequest generates requests for WorkloadOptimizationAPIGetWorkloadsSummaryMetrics
+func NewWorkloadOptimizationAPIGetWorkloadsSummaryMetricsRequest(server string, clusterId string, params *WorkloadOptimizationAPIGetWorkloadsSummaryMetricsParams) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "clusterId", runtime.ParamLocationPath, clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/workload-autoscaling/clusters/%s/workloads-summary-metrics", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.FromTime != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "fromTime", runtime.ParamLocationQuery, *params.FromTime); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.ToTime != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "toTime", runtime.ParamLocationQuery, *params.ToTime); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 // NewWorkloadOptimizationAPIGetWorkloadRequest generates requests for WorkloadOptimizationAPIGetWorkload
 func NewWorkloadOptimizationAPIGetWorkloadRequest(server string, clusterId string, workloadId string, params *WorkloadOptimizationAPIGetWorkloadParams) (*http.Request, error) {
 	var err error
@@ -14448,6 +14615,9 @@ type ClientWithResponsesInterface interface {
 	// CommitmentsAPIGetCommitments request
 	CommitmentsAPIGetCommitmentsWithResponse(ctx context.Context, params *CommitmentsAPIGetCommitmentsParams) (*CommitmentsAPIGetCommitmentsResponse, error)
 
+	// CommitmentsAPIGetCommitmentsDiscountedPrices request
+	CommitmentsAPIGetCommitmentsDiscountedPricesWithResponse(ctx context.Context, params *CommitmentsAPIGetCommitmentsDiscountedPricesParams) (*CommitmentsAPIGetCommitmentsDiscountedPricesResponse, error)
+
 	// CommitmentsAPIImportAzureReservations request  with any body
 	CommitmentsAPIImportAzureReservationsWithBodyWithResponse(ctx context.Context, params *CommitmentsAPIImportAzureReservationsParams, contentType string, body io.Reader) (*CommitmentsAPIImportAzureReservationsResponse, error)
 
@@ -14673,6 +14843,9 @@ type ClientWithResponsesInterface interface {
 
 	// WorkloadOptimizationAPIGetWorkloadsSummary request
 	WorkloadOptimizationAPIGetWorkloadsSummaryWithResponse(ctx context.Context, clusterId string, params *WorkloadOptimizationAPIGetWorkloadsSummaryParams) (*WorkloadOptimizationAPIGetWorkloadsSummaryResponse, error)
+
+	// WorkloadOptimizationAPIGetWorkloadsSummaryMetrics request
+	WorkloadOptimizationAPIGetWorkloadsSummaryMetricsWithResponse(ctx context.Context, clusterId string, params *WorkloadOptimizationAPIGetWorkloadsSummaryMetricsParams) (*WorkloadOptimizationAPIGetWorkloadsSummaryMetricsResponse, error)
 
 	// WorkloadOptimizationAPIGetWorkload request
 	WorkloadOptimizationAPIGetWorkloadWithResponse(ctx context.Context, clusterId string, workloadId string, params *WorkloadOptimizationAPIGetWorkloadParams) (*WorkloadOptimizationAPIGetWorkloadResponse, error)
@@ -18332,6 +18505,36 @@ func (r CommitmentsAPIGetCommitmentsResponse) GetBody() []byte {
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
+type CommitmentsAPIGetCommitmentsDiscountedPricesResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *CastaiInventoryV1beta1GetCommitmentsDiscountedPricesResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r CommitmentsAPIGetCommitmentsDiscountedPricesResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r CommitmentsAPIGetCommitmentsDiscountedPricesResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r CommitmentsAPIGetCommitmentsDiscountedPricesResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
 type CommitmentsAPIImportAzureReservationsResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -20129,6 +20332,36 @@ func (r WorkloadOptimizationAPIGetWorkloadsSummaryResponse) GetBody() []byte {
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
+type WorkloadOptimizationAPIGetWorkloadsSummaryMetricsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *WorkloadoptimizationV1GetWorkloadsSummaryMetricsResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r WorkloadOptimizationAPIGetWorkloadsSummaryMetricsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r WorkloadOptimizationAPIGetWorkloadsSummaryMetricsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r WorkloadOptimizationAPIGetWorkloadsSummaryMetricsResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
 type WorkloadOptimizationAPIGetWorkloadResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -21719,6 +21952,15 @@ func (c *ClientWithResponses) CommitmentsAPIGetCommitmentsWithResponse(ctx conte
 	return ParseCommitmentsAPIGetCommitmentsResponse(rsp)
 }
 
+// CommitmentsAPIGetCommitmentsDiscountedPricesWithResponse request returning *CommitmentsAPIGetCommitmentsDiscountedPricesResponse
+func (c *ClientWithResponses) CommitmentsAPIGetCommitmentsDiscountedPricesWithResponse(ctx context.Context, params *CommitmentsAPIGetCommitmentsDiscountedPricesParams) (*CommitmentsAPIGetCommitmentsDiscountedPricesResponse, error) {
+	rsp, err := c.CommitmentsAPIGetCommitmentsDiscountedPrices(ctx, params)
+	if err != nil {
+		return nil, err
+	}
+	return ParseCommitmentsAPIGetCommitmentsDiscountedPricesResponse(rsp)
+}
+
 // CommitmentsAPIImportAzureReservationsWithBodyWithResponse request with arbitrary body returning *CommitmentsAPIImportAzureReservationsResponse
 func (c *ClientWithResponses) CommitmentsAPIImportAzureReservationsWithBodyWithResponse(ctx context.Context, params *CommitmentsAPIImportAzureReservationsParams, contentType string, body io.Reader) (*CommitmentsAPIImportAzureReservationsResponse, error) {
 	rsp, err := c.CommitmentsAPIImportAzureReservationsWithBody(ctx, params, contentType, body)
@@ -22441,6 +22683,15 @@ func (c *ClientWithResponses) WorkloadOptimizationAPIGetWorkloadsSummaryWithResp
 		return nil, err
 	}
 	return ParseWorkloadOptimizationAPIGetWorkloadsSummaryResponse(rsp)
+}
+
+// WorkloadOptimizationAPIGetWorkloadsSummaryMetricsWithResponse request returning *WorkloadOptimizationAPIGetWorkloadsSummaryMetricsResponse
+func (c *ClientWithResponses) WorkloadOptimizationAPIGetWorkloadsSummaryMetricsWithResponse(ctx context.Context, clusterId string, params *WorkloadOptimizationAPIGetWorkloadsSummaryMetricsParams) (*WorkloadOptimizationAPIGetWorkloadsSummaryMetricsResponse, error) {
+	rsp, err := c.WorkloadOptimizationAPIGetWorkloadsSummaryMetrics(ctx, clusterId, params)
+	if err != nil {
+		return nil, err
+	}
+	return ParseWorkloadOptimizationAPIGetWorkloadsSummaryMetricsResponse(rsp)
 }
 
 // WorkloadOptimizationAPIGetWorkloadWithResponse request returning *WorkloadOptimizationAPIGetWorkloadResponse
@@ -25643,6 +25894,32 @@ func ParseCommitmentsAPIGetCommitmentsResponse(rsp *http.Response) (*Commitments
 	return response, nil
 }
 
+// ParseCommitmentsAPIGetCommitmentsDiscountedPricesResponse parses an HTTP response from a CommitmentsAPIGetCommitmentsDiscountedPricesWithResponse call
+func ParseCommitmentsAPIGetCommitmentsDiscountedPricesResponse(rsp *http.Response) (*CommitmentsAPIGetCommitmentsDiscountedPricesResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &CommitmentsAPIGetCommitmentsDiscountedPricesResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest CastaiInventoryV1beta1GetCommitmentsDiscountedPricesResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
 // ParseCommitmentsAPIImportAzureReservationsResponse parses an HTTP response from a CommitmentsAPIImportAzureReservationsWithResponse call
 func ParseCommitmentsAPIImportAzureReservationsResponse(rsp *http.Response) (*CommitmentsAPIImportAzureReservationsResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
@@ -27163,6 +27440,32 @@ func ParseWorkloadOptimizationAPIGetWorkloadsSummaryResponse(rsp *http.Response)
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest WorkloadoptimizationV1GetWorkloadsSummaryResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseWorkloadOptimizationAPIGetWorkloadsSummaryMetricsResponse parses an HTTP response from a WorkloadOptimizationAPIGetWorkloadsSummaryMetricsWithResponse call
+func ParseWorkloadOptimizationAPIGetWorkloadsSummaryMetricsResponse(rsp *http.Response) (*WorkloadOptimizationAPIGetWorkloadsSummaryMetricsResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &WorkloadOptimizationAPIGetWorkloadsSummaryMetricsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest WorkloadoptimizationV1GetWorkloadsSummaryMetricsResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}

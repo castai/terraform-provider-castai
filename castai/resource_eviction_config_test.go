@@ -160,7 +160,8 @@ func TestEvictionConfig_CreateContext(t *testing.T) {
           "matchLabels": {
             "key1": "value1"
           }
-        }
+        },
+		"replicasMin": null
       },
       "settings": {
         "aggressive": {
@@ -265,7 +266,8 @@ func TestEvictionConfig_UpdateContext(t *testing.T) {
           "matchLabels": {
             "key1": "value1"
           }
-        }
+        },
+        "replicasMin": null
       },
       "settings": {
         "aggressive": {

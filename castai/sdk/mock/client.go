@@ -495,6 +495,26 @@ func (mr *MockClientInterfaceMockRecorder) CommitmentsAPIGetCommitmentsAssignmen
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIGetCommitmentsAssignments", reflect.TypeOf((*MockClientInterface)(nil).CommitmentsAPIGetCommitmentsAssignments), varargs...)
 }
 
+// CommitmentsAPIGetCommitmentsDiscountedPrices mocks base method.
+func (m *MockClientInterface) CommitmentsAPIGetCommitmentsDiscountedPrices(ctx context.Context, params *sdk.CommitmentsAPIGetCommitmentsDiscountedPricesParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "CommitmentsAPIGetCommitmentsDiscountedPrices", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CommitmentsAPIGetCommitmentsDiscountedPrices indicates an expected call of CommitmentsAPIGetCommitmentsDiscountedPrices.
+func (mr *MockClientInterfaceMockRecorder) CommitmentsAPIGetCommitmentsDiscountedPrices(ctx, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIGetCommitmentsDiscountedPrices", reflect.TypeOf((*MockClientInterface)(nil).CommitmentsAPIGetCommitmentsDiscountedPrices), varargs...)
+}
+
 // CommitmentsAPIGetGCPCommitmentsImportScript mocks base method.
 func (m *MockClientInterface) CommitmentsAPIGetGCPCommitmentsImportScript(ctx context.Context, params *sdk.CommitmentsAPIGetGCPCommitmentsImportScriptParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
@@ -4935,6 +4955,26 @@ func (mr *MockClientInterfaceMockRecorder) WorkloadOptimizationAPIGetWorkloadsSu
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIGetWorkloadsSummary", reflect.TypeOf((*MockClientInterface)(nil).WorkloadOptimizationAPIGetWorkloadsSummary), varargs...)
 }
 
+// WorkloadOptimizationAPIGetWorkloadsSummaryMetrics mocks base method.
+func (m *MockClientInterface) WorkloadOptimizationAPIGetWorkloadsSummaryMetrics(ctx context.Context, clusterId string, params *sdk.WorkloadOptimizationAPIGetWorkloadsSummaryMetricsParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "WorkloadOptimizationAPIGetWorkloadsSummaryMetrics", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// WorkloadOptimizationAPIGetWorkloadsSummaryMetrics indicates an expected call of WorkloadOptimizationAPIGetWorkloadsSummaryMetrics.
+func (mr *MockClientInterfaceMockRecorder) WorkloadOptimizationAPIGetWorkloadsSummaryMetrics(ctx, clusterId, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIGetWorkloadsSummaryMetrics", reflect.TypeOf((*MockClientInterface)(nil).WorkloadOptimizationAPIGetWorkloadsSummaryMetrics), varargs...)
+}
+
 // WorkloadOptimizationAPIListLimitRanges mocks base method.
 func (m *MockClientInterface) WorkloadOptimizationAPIListLimitRanges(ctx context.Context, clusterId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
@@ -5896,6 +5936,41 @@ func (m *MockClientWithResponsesInterface) CommitmentsAPIGetCommitmentsAssignmen
 func (mr *MockClientWithResponsesInterfaceMockRecorder) CommitmentsAPIGetCommitmentsAssignmentsWithResponse(ctx interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIGetCommitmentsAssignmentsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).CommitmentsAPIGetCommitmentsAssignmentsWithResponse), ctx)
+}
+
+// CommitmentsAPIGetCommitmentsDiscountedPrices mocks base method.
+func (m *MockClientWithResponsesInterface) CommitmentsAPIGetCommitmentsDiscountedPrices(ctx context.Context, params *sdk.CommitmentsAPIGetCommitmentsDiscountedPricesParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "CommitmentsAPIGetCommitmentsDiscountedPrices", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CommitmentsAPIGetCommitmentsDiscountedPrices indicates an expected call of CommitmentsAPIGetCommitmentsDiscountedPrices.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) CommitmentsAPIGetCommitmentsDiscountedPrices(ctx, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIGetCommitmentsDiscountedPrices", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).CommitmentsAPIGetCommitmentsDiscountedPrices), varargs...)
+}
+
+// CommitmentsAPIGetCommitmentsDiscountedPricesWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) CommitmentsAPIGetCommitmentsDiscountedPricesWithResponse(ctx context.Context, params *sdk.CommitmentsAPIGetCommitmentsDiscountedPricesParams) (*sdk.CommitmentsAPIGetCommitmentsDiscountedPricesResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CommitmentsAPIGetCommitmentsDiscountedPricesWithResponse", ctx, params)
+	ret0, _ := ret[0].(*sdk.CommitmentsAPIGetCommitmentsDiscountedPricesResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// CommitmentsAPIGetCommitmentsDiscountedPricesWithResponse indicates an expected call of CommitmentsAPIGetCommitmentsDiscountedPricesWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) CommitmentsAPIGetCommitmentsDiscountedPricesWithResponse(ctx, params interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIGetCommitmentsDiscountedPricesWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).CommitmentsAPIGetCommitmentsDiscountedPricesWithResponse), ctx, params)
 }
 
 // CommitmentsAPIGetCommitmentsWithResponse mocks base method.
@@ -13666,6 +13741,41 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPIG
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{ctx, clusterId, params}, reqEditors...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIGetWorkloadsSummary", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPIGetWorkloadsSummary), varargs...)
+}
+
+// WorkloadOptimizationAPIGetWorkloadsSummaryMetrics mocks base method.
+func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPIGetWorkloadsSummaryMetrics(ctx context.Context, clusterId string, params *sdk.WorkloadOptimizationAPIGetWorkloadsSummaryMetricsParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "WorkloadOptimizationAPIGetWorkloadsSummaryMetrics", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// WorkloadOptimizationAPIGetWorkloadsSummaryMetrics indicates an expected call of WorkloadOptimizationAPIGetWorkloadsSummaryMetrics.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPIGetWorkloadsSummaryMetrics(ctx, clusterId, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIGetWorkloadsSummaryMetrics", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPIGetWorkloadsSummaryMetrics), varargs...)
+}
+
+// WorkloadOptimizationAPIGetWorkloadsSummaryMetricsWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPIGetWorkloadsSummaryMetricsWithResponse(ctx context.Context, clusterId string, params *sdk.WorkloadOptimizationAPIGetWorkloadsSummaryMetricsParams) (*sdk.WorkloadOptimizationAPIGetWorkloadsSummaryMetricsResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "WorkloadOptimizationAPIGetWorkloadsSummaryMetricsWithResponse", ctx, clusterId, params)
+	ret0, _ := ret[0].(*sdk.WorkloadOptimizationAPIGetWorkloadsSummaryMetricsResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// WorkloadOptimizationAPIGetWorkloadsSummaryMetricsWithResponse indicates an expected call of WorkloadOptimizationAPIGetWorkloadsSummaryMetricsWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPIGetWorkloadsSummaryMetricsWithResponse(ctx, clusterId, params interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIGetWorkloadsSummaryMetricsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPIGetWorkloadsSummaryMetricsWithResponse), ctx, clusterId, params)
 }
 
 // WorkloadOptimizationAPIGetWorkloadsSummaryWithResponse mocks base method.
