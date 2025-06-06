@@ -56,6 +56,8 @@ const (
 	FieldNodeTemplateShouldTaint                              = "should_taint"
 	FieldNodeTemplateSpot                                     = "spot"
 	FieldNodeTemplateSpotDiversityPriceIncreaseLimitPercent   = "spot_diversity_price_increase_limit_percent"
+	FieldNodeTemplateSpotReliabilityEnabled                   = "spot_reliability_enabled"
+	FieldNodeTemplateSpotReliabilityPriceIncreaseLimitPercent = "spot_reliability_price_increase_limit_percent"
 	FieldNodeTemplateSpotInterruptionPredictionsEnabled       = "spot_interruption_predictions_enabled"
 	FieldNodeTemplateSpotInterruptionPredictionsType          = "spot_interruption_predictions_type"
 	FieldNodeTemplateStorageOptimized                         = "storage_optimized"
@@ -234,6 +236,17 @@ func resourceNodeTemplate() *schema.Resource {
 							Type:        schema.TypeInt,
 							Optional:    true,
 							Description: "Allowed node configuration price increase when diversifying instance types. E.g. if the value is 10%, then the overall price of diversified instance types can be 10% higher than the price of the optimal configuration.",
+						},
+						FieldNodeTemplateSpotReliabilityEnabled: {
+							Type:        schema.TypeBool,
+							Default:     false,
+							Optional:    true,
+							Description: "Enable/disable spot reliability. When enabled, autoscaler will create instances with highest reliability score within price increase threshold.",
+						},
+						FieldNodeTemplateSpotReliabilityPriceIncreaseLimitPercent: {
+							Type:        schema.TypeInt,
+							Optional:    true,
+							Description: "Allowed node price increase when using spot reliability on ordering the instance types . E.g. if the value is 10%, then the overall price of instance types can be 10% higher than the price of the optimal configuration.",
 						},
 						FieldNodeTemplateSpotInterruptionPredictionsEnabled: {
 							Type:        schema.TypeBool,
@@ -765,6 +778,12 @@ func flattenConstraints(c *sdk.NodetemplatesV1TemplateConstraints) ([]map[string
 	}
 	if c.SpotDiversityPriceIncreaseLimitPercent != nil {
 		out[FieldNodeTemplateSpotDiversityPriceIncreaseLimitPercent] = c.SpotDiversityPriceIncreaseLimitPercent
+	}
+	if c.EnableSpotReliability != nil {
+		out[FieldNodeTemplateSpotReliabilityEnabled] = c.EnableSpotReliability
+	}
+	if c.SpotReliabilityPriceIncreaseLimitPercent != nil {
+		out[FieldNodeTemplateSpotReliabilityPriceIncreaseLimitPercent] = c.SpotReliabilityPriceIncreaseLimitPercent
 	}
 	if c.SpotInterruptionPredictionsEnabled != nil {
 		out[FieldNodeTemplateSpotInterruptionPredictionsEnabled] = c.SpotInterruptionPredictionsEnabled
@@ -1346,6 +1365,12 @@ func toTemplateConstraints(obj map[string]any) *sdk.NodetemplatesV1TemplateConst
 	}
 	if v, ok := obj[FieldNodeTemplateSpotDiversityPriceIncreaseLimitPercent].(int); ok {
 		out.SpotDiversityPriceIncreaseLimitPercent = toPtr(int32(v))
+	}
+	if v, ok := obj[FieldNodeTemplateSpotReliabilityEnabled].(bool); ok {
+		out.EnableSpotReliability = toPtr(v)
+	}
+	if v, ok := obj[FieldNodeTemplateSpotReliabilityPriceIncreaseLimitPercent].(int); ok {
+		out.SpotReliabilityPriceIncreaseLimitPercent = toPtr(int32(v))
 	}
 	if v, ok := obj[FieldNodeTemplateSpotInterruptionPredictionsEnabled].(bool); ok {
 		out.SpotInterruptionPredictionsEnabled = toPtr(v)
