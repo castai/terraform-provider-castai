@@ -54,6 +54,8 @@ func TestNodeTemplateResourceReadContext(t *testing.T) {
 				  "fallbackRestoreRateSeconds": 0,
 				  "enableSpotDiversity": false,
 				  "spotDiversityPriceIncreaseLimitPercent": 20,
+				  "enableSpotReliability": true,
+				  "spotReliabilityPriceIncreaseLimitPercent": 10,
 				  "spotInterruptionPredictionsEnabled": true,
 				  "spotInterruptionPredictionsType": "aws-rebalance-recommendations",
 				  "storageOptimized": true,
@@ -223,6 +225,8 @@ constraints.0.resource_limits.0.cpu_limit_enabled = true
 constraints.0.resource_limits.0.cpu_limit_max_cores = 20
 constraints.0.spot = false
 constraints.0.spot_diversity_price_increase_limit_percent = 20
+constraints.0.spot_reliability_enabled = true
+constraints.0.spot_reliability_price_increase_limit_percent = 10
 constraints.0.spot_interruption_predictions_enabled = true
 constraints.0.spot_interruption_predictions_type = aws-rebalance-recommendations
 constraints.0.storage_optimized = false
@@ -710,8 +714,10 @@ func TestAccResourceNodeTemplate_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.azs.1", "eu-central-1b"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.azs.2", "eu-central-1c"),
 					resource.TestCheckResourceAttr(resourceName, "is_default", "false"),
-					resource.TestCheckResourceAttr(resourceName, "constraints.0.enable_spot_diversity", "true"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.enable_spot_diversity", "false"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.spot_diversity_price_increase_limit_percent", "22"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.spot_reliability_enabled", "true"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.spot_reliability_price_increase_limit_percent", "15"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.spot_interruption_predictions_enabled", "true"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.spot_interruption_predictions_type", "interruption-predictions"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.custom_priority.#", "2"),
@@ -852,8 +858,10 @@ func testNodeTemplateUpdated(rName, clusterName string) string {
 				use_spot_fallbacks = true
 				spot = true
 				on_demand = true
-				enable_spot_diversity = true
+				enable_spot_diversity = false
 				spot_diversity_price_increase_limit_percent = 22
+				spot_reliability_enabled = true
+				spot_reliability_price_increase_limit_percent = 15
 				spot_interruption_predictions_enabled = true
 				spot_interruption_predictions_type = "interruption-predictions"
 				fallback_restore_rate_seconds = 1800
