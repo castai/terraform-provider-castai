@@ -57,6 +57,12 @@ const (
 	CastaiInventoryV1beta1AttachableGPUDeviceManufacturerUNKNOWN CastaiInventoryV1beta1AttachableGPUDeviceManufacturer = "UNKNOWN"
 )
 
+// Defines values for CastaiInventoryV1beta1AzureReservationInstanceFlexibility.
+const (
+	OFF CastaiInventoryV1beta1AzureReservationInstanceFlexibility = "OFF"
+	ON  CastaiInventoryV1beta1AzureReservationInstanceFlexibility = "ON"
+)
+
 // Defines values for CastaiInventoryV1beta1AzureReservationReservationPlan.
 const (
 	ONEYEAR   CastaiInventoryV1beta1AzureReservationReservationPlan = "ONE_YEAR"
@@ -1043,12 +1049,13 @@ type CastaiInventoryV1beta1AttachableGPUDeviceManufacturer string
 
 // CastaiInventoryV1beta1AzureReservation defines model for castai.inventory.v1beta1.AzureReservation.
 type CastaiInventoryV1beta1AzureReservation struct {
-	Count                 *int32                                        `json:"count,omitempty"`
-	Id                    *string                                       `json:"id,omitempty"`
-	InstanceType          *string                                       `json:"instanceType,omitempty"`
-	InstanceTypeCpu       *string                                       `json:"instanceTypeCpu,omitempty"`
-	InstanceTypeMemoryMib *string                                       `json:"instanceTypeMemoryMib,omitempty"`
-	InstanceTypesUsage    *CastaiInventoryV1beta1InstanceTypeBasedUsage `json:"instanceTypesUsage,omitempty"`
+	Count                 *int32                                                     `json:"count,omitempty"`
+	Id                    *string                                                    `json:"id,omitempty"`
+	InstanceFlexibility   *CastaiInventoryV1beta1AzureReservationInstanceFlexibility `json:"instanceFlexibility,omitempty"`
+	InstanceType          *string                                                    `json:"instanceType,omitempty"`
+	InstanceTypeCpu       *string                                                    `json:"instanceTypeCpu,omitempty"`
+	InstanceTypeMemoryMib *string                                                    `json:"instanceTypeMemoryMib,omitempty"`
+	InstanceTypesUsage    *CastaiInventoryV1beta1InstanceTypeBasedUsage              `json:"instanceTypesUsage,omitempty"`
 
 	// Plan - ONE_YEAR: 1 year commitment plan
 	//  - THREE_YEAR: 3 year commitment plan
@@ -1059,25 +1066,29 @@ type CastaiInventoryV1beta1AzureReservation struct {
 	Status             *string                                                `json:"status,omitempty"`
 }
 
+// CastaiInventoryV1beta1AzureReservationInstanceFlexibility defines model for castai.inventory.v1beta1.AzureReservation.InstanceFlexibility.
+type CastaiInventoryV1beta1AzureReservationInstanceFlexibility string
+
 // CastaiInventoryV1beta1AzureReservationReservationPlan - ONE_YEAR: 1 year commitment plan
 //   - THREE_YEAR: 3 year commitment plan
 type CastaiInventoryV1beta1AzureReservationReservationPlan string
 
 // CastaiInventoryV1beta1AzureReservationImport defines model for castai.inventory.v1beta1.AzureReservationImport.
 type CastaiInventoryV1beta1AzureReservationImport struct {
-	ExpirationDate     *string `json:"expirationDate,omitempty"`
-	Name               *string `json:"name,omitempty"`
-	ProductName        *string `json:"productName,omitempty"`
-	PurchaseDate       *string `json:"purchaseDate,omitempty"`
-	Quantity           *int32  `json:"quantity,omitempty"`
-	Region             *string `json:"region,omitempty"`
-	ReservationId      *string `json:"reservationId,omitempty"`
-	Scope              *string `json:"scope,omitempty"`
-	ScopeResourceGroup *string `json:"scopeResourceGroup,omitempty"`
-	ScopeSubscription  *string `json:"scopeSubscription,omitempty"`
-	Status             *string `json:"status,omitempty"`
-	Term               *string `json:"term,omitempty"`
-	Type               *string `json:"type,omitempty"`
+	ExpirationDate      *string `json:"expirationDate,omitempty"`
+	InstanceFlexibility *string `json:"instanceFlexibility,omitempty"`
+	Name                *string `json:"name,omitempty"`
+	ProductName         *string `json:"productName,omitempty"`
+	PurchaseDate        *string `json:"purchaseDate,omitempty"`
+	Quantity            *int32  `json:"quantity,omitempty"`
+	Region              *string `json:"region,omitempty"`
+	ReservationId       *string `json:"reservationId,omitempty"`
+	Scope               *string `json:"scope,omitempty"`
+	ScopeResourceGroup  *string `json:"scopeResourceGroup,omitempty"`
+	ScopeSubscription   *string `json:"scopeSubscription,omitempty"`
+	Status              *string `json:"status,omitempty"`
+	Term                *string `json:"term,omitempty"`
+	Type                *string `json:"type,omitempty"`
 }
 
 // CastaiInventoryV1beta1BatchUpdateCommitmentsResponse defines model for castai.inventory.v1beta1.BatchUpdateCommitmentsResponse.
