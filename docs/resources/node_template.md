@@ -83,6 +83,7 @@ resource "castai_node_template" "default_by_castai" {
 - `custom_instances_with_extended_memory_enabled` (Boolean) Marks whether custom instances with extended memory should be used when deciding which parts of inventory are available. Custom instances are only supported in GCP.
 - `custom_labels` (Map of String) Custom labels to be added to nodes created from this template.
 - `custom_taints` (Block List) Custom taints to be added to the nodes created from this template. `shouldTaint` has to be `true` in order to create/update the node template with custom taints. If `shouldTaint` is `true`, but no custom taints are provided, the nodes will be tainted with the default node template taint. (see [below for nested schema](#nestedblock--custom_taints))
+- `gpu` (Block List, Max: 1) GPU configuration. (see [below for nested schema](#nestedblock--gpu))
 - `is_default` (Boolean) Flag whether the node template is default.
 - `is_enabled` (Boolean) Flag whether the node template is enabled and considered for autoscaling.
 - `rebalancing_config_min_nodes` (Number) Minimum nodes that will be kept when rebalancing nodes using this node template.
@@ -212,6 +213,25 @@ Optional:
 
 - `effect` (String) Effect of a taint to be added to nodes created from this template, the default is NoSchedule. Allowed values: NoSchedule, NoExecute.
 - `value` (String) Value of a taint to be added to nodes created from this template.
+
+
+<a id="nestedblock--gpu"></a>
+### Nested Schema for `gpu`
+
+Optional:
+
+- `default_shared_clients_per_gpu` (Number) Defines default number of shared clients per GPU.
+- `enable_time_sharing` (Boolean) Enable/disable GPU time-sharing.
+- `sharing_configuration` (Block List) Defines GPU sharing configurations for GPU devices. (see [below for nested schema](#nestedblock--gpu--sharing_configuration))
+
+<a id="nestedblock--gpu--sharing_configuration"></a>
+### Nested Schema for `gpu.sharing_configuration`
+
+Required:
+
+- `gpu_name` (String) GPU name.
+- `shared_clients_per_gpu` (Number) Defines number of shared clients for specific GPU device.
+
 
 
 <a id="nestedblock--timeouts"></a>

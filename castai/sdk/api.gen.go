@@ -5448,6 +5448,12 @@ type WorkloadoptimizationV1GetWorkloadsSummaryResponse struct {
 	// OptimizedCount Number of all optimized workloads.
 	OptimizedCount int32 `json:"optimizedCount"`
 
+	// OriginalRequestedCpuCores Original requested CPU cores.
+	OriginalRequestedCpuCores float64 `json:"originalRequestedCpuCores"`
+
+	// OriginalRequestedMemoryGibs Original requested memory in Gi.
+	OriginalRequestedMemoryGibs float64 `json:"originalRequestedMemoryGibs"`
+
 	// RecommendedCpuCores Number of recommended CPU cores.
 	RecommendedCpuCores float64 `json:"recommendedCpuCores"`
 
@@ -5462,6 +5468,12 @@ type WorkloadoptimizationV1GetWorkloadsSummaryResponse struct {
 
 	// TotalCount Total number of workloads.
 	TotalCount int32 `json:"totalCount"`
+
+	// UsageCpuCores CPU usage in cores.
+	UsageCpuCores float64 `json:"usageCpuCores"`
+
+	// UsageMemoryGibs Memory usage in Gi.
+	UsageMemoryGibs float64 `json:"usageMemoryGibs"`
 
 	// VpaOptimizedCount Number of workloads with vertical optimization enabled.
 	VpaOptimizedCount int32 `json:"vpaOptimizedCount"`

@@ -46,6 +46,15 @@ func TestNodeTemplateResourceReadContext(t *testing.T) {
 				"configurationId": "7dc4f922-29c9-4377-889c-0c8c5fb8d497",
 				"configurationName": "default",
 				"isEnabled": true,
+			   "gpu": {
+				 "enableTimeSharing": true,
+				 "defaultSharedClientsPerGpu": 10,
+				 "sharingConfiguration": {
+					"A100": {
+					  "sharedClientsPerGpu": 5
+					}
+				 }
+				},
 				"name": "gpu",
 				"constraints": {
 				  "spot": false,
@@ -153,6 +162,7 @@ func TestNodeTemplateResourceReadContext(t *testing.T) {
 	state.ID = "gpu"
 
 	data := resource.Data(state)
+	//spew.Dump(data)
 	result := resource.ReadContext(ctx, data, provider)
 	r.Nil(result)
 	r.False(result.HasError())
@@ -251,6 +261,12 @@ name = gpu
 rebalancing_config_min_nodes = 0
 should_taint = true
 Tainted = false
+gpu.# = 1
+gpu.0.default_shared_clients_per_gpu = 10
+gpu.0.enable_time_sharing = true
+gpu.0.sharing_configuration.# = 1
+gpu.0.sharing_configuration.0.gpu_name = A100
+gpu.0.sharing_configuration.0.shared_clients_per_gpu = 5
 `, "\n"),
 		strings.Split(data.State().String(), "\n"),
 	)
@@ -666,6 +682,8 @@ func TestAccResourceNodeTemplate_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.resource_limits.#", "1"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.resource_limits.0.cpu_limit_enabled", "false"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.resource_limits.0.cpu_limit_max_cores", "0"),
+					resource.TestCheckResourceAttr(resourceName, "gpu.0.default_shared_clients_per_gpu", "1"),
+					resource.TestCheckResourceAttr(resourceName, "gpu.0.enable_time_sharing", "false"),
 				),
 			},
 			{
@@ -742,7 +760,8 @@ func TestAccResourceNodeTemplate_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.resource_limits.#", "1"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.resource_limits.0.cpu_limit_enabled", "true"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.resource_limits.0.cpu_limit_max_cores", "50"),
-					resource.TestCheckResourceAttr(resourceName, "constraints.0.bare_metal", "false"),
+					resource.TestCheckResourceAttr(resourceName, "gpu.0.default_shared_clients_per_gpu", "1"),
+					resource.TestCheckResourceAttr(resourceName, "gpu.0.enable_time_sharing", "false"),
 				),
 			},
 		},
@@ -787,6 +806,16 @@ func testAccNodeTemplateConfig(rName, clusterName string) string {
 
 			custom_taints {
 				key = "%[1]s-taint-key-4"
+			}
+
+			gpu {
+			  default_shared_clients_per_gpu = 1
+			  enable_time_sharing            = false
+		
+			  sharing_configuration {
+				gpu_name = "L4"
+				shared_clients_per_gpu = 8
+			  }
 			}
 
 			constraints {
@@ -852,6 +881,11 @@ func testNodeTemplateUpdated(rName, clusterName string) string {
 			custom_taints {
 				key = "%[1]s-taint-key-2"
 				effect = "NoSchedule"
+			}
+
+			gpu {
+			  default_shared_clients_per_gpu = 1
+			  enable_time_sharing            = false
 			}
 
 			constraints {
