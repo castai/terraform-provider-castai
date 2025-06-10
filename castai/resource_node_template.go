@@ -651,21 +651,23 @@ func resourceNodeTemplate() *schema.Resource {
 					"Custom instances are only supported in GCP.",
 			},
 			FieldNodeTemplateGpu: {
-				Type:     schema.TypeList,
-				MaxItems: 1,
-				Optional: true,
+				Type:        schema.TypeList,
+				MaxItems:    1,
+				Optional:    true,
+				Description: "GPU configuration.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						FieldNodeTemplateEnableTimeSharing: {
 							Type:        schema.TypeBool,
 							Optional:    true,
+							Default:     false,
 							Description: "Enable/disable GPU time-sharing.",
 						},
 						FieldNodeTemplateDefaultSharedClientsPerGpu: {
 							Type:        schema.TypeInt,
 							Optional:    true,
 							Default:     1,
-							Description: "Defines default shared client per GPU.",
+							Description: "Defines default number of shared clients per GPU.",
 						},
 						FieldNodeTemplateSharingConfiguration: {
 							Type:        schema.TypeList,
@@ -681,7 +683,7 @@ func resourceNodeTemplate() *schema.Resource {
 									FieldNodeTemplateSharedClientsPerGpu: {
 										Type:        schema.TypeInt,
 										Required:    true,
-										Description: "Defines default shared clients per GPU.",
+										Description: "Defines number of shared clients for specific GPU device.",
 									},
 								},
 							},
