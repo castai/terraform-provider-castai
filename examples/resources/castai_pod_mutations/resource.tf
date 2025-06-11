@@ -7,7 +7,7 @@
 resource "kubernetes_manifest" "test_pod_mutation" {
   manifest = {
     apiVersion = "pod-mutations.cast.ai/v1"
-    kind = "PodMutation"
+    kind       = "PodMutation"
     metadata = {
       name = "test-pod-mutation"
     }
@@ -16,8 +16,8 @@ resource "kubernetes_manifest" "test_pod_mutation" {
         # Filter values can be plain strings of regexes.
         workload = {
           namespaces = ["production", "staging"]
-          names = ["^frontend-.*$", "^backend-.*$"]
-          kinds = ["Pod", "Deployment", "ReplicaSet"]
+          names      = ["^frontend-.*$", "^backend-.*$"]
+          kinds      = ["Pod", "Deployment", "ReplicaSet"]
         }
         pod = {
           # labelsOperator can be "and" or "or"
@@ -28,7 +28,7 @@ resource "kubernetes_manifest" "test_pod_mutation" {
               value = "platform"
             },
             {
-              key = "tier"
+              key   = "tier"
               value = "frontend"
             }
           ]
@@ -37,8 +37,8 @@ resource "kubernetes_manifest" "test_pod_mutation" {
       restartPolicy = "deferred"
       patches = [
         {
-          op = "add"
-          path = "/metadata/annotations/mutated-by-pod-mutator"
+          op    = "add"
+          path  = "/metadata/annotations/mutated-by-pod-mutator"
           value = "true"
         }
       ]
