@@ -43,8 +43,8 @@ resource "kubernetes_manifest" "test_pod_mutation" {
         }
       ]
       spotConfig = {
-        # mode can be "optional-spot", "only-spot", or "preferred-spot"
-        mode                   = "optional-spot"
+        # mode can be "preferred-spot", "optional-spot", or "only-spot"
+        mode                   = "preferred-spot"
         distributionPercentage = 50
       }
     }
