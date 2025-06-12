@@ -1598,7 +1598,7 @@ func toTemplateGpu(obj map[string]any) *sdk.NodetemplatesV1GPU {
 	// this condition checks whether the whole gpu configuration is deleted
 	// and gpu configuration should be set to nil
 	if defaultSharedClientsPerGpu == 0 &&
-		enableTimeSharing == false &&
+		!enableTimeSharing &&
 		len(sharingConfig) == 0 {
 		return nil
 	}
