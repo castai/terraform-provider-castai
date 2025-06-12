@@ -1566,15 +1566,16 @@ func toTemplateGpu(obj map[string]any) *sdk.NodetemplatesV1GPU {
 		return nil
 	}
 
-	out := &sdk.NodetemplatesV1GPU{}
+	var defaultSharedClientsPerGpu int32
 	if v, ok := obj[FieldNodeTemplateDefaultSharedClientsPerGpu].(int); ok {
-		out.DefaultSharedClientsPerGpu = toPtr(int32(v))
+		defaultSharedClientsPerGpu = int32(v)
 	}
 
+	var enableTimeSharing bool
 	if v, ok := obj[FieldNodeTemplateEnableTimeSharing].(bool); ok {
-		out.EnableTimeSharing = toPtr(v)
+		enableTimeSharing = v
 	}
-
+	var sharingConfig map[string]sdk.NodetemplatesV1SharedGPU
 	if sharingConfiguration, ok := obj[FieldNodeTemplateSharingConfiguration].([]interface{}); ok {
 		outSharingConfiguration := make(map[string]sdk.NodetemplatesV1SharedGPU)
 		for _, configuration := range sharingConfiguration {
@@ -1582,17 +1583,30 @@ func toTemplateGpu(obj map[string]any) *sdk.NodetemplatesV1GPU {
 			sharedGPUConfig := configuration.(map[string]interface{})
 			gpuName, gpuNameOk := sharedGPUConfig[FieldNodeTemplateSharedGpuName].(string)
 			sharedClientsPerGpu, sharedClientsPerGpuOk := sharedGPUConfig[FieldNodeTemplateSharedClientsPerGpu].(int)
-			if gpuNameOk && sharedClientsPerGpuOk {
+			if gpuNameOk && gpuName != "" && sharedClientsPerGpuOk {
 				outSharingConfiguration[gpuName] = sdk.NodetemplatesV1SharedGPU{
 					SharedClientsPerGpu: toPtr(int32(sharedClientsPerGpu)),
 				}
 			}
 		}
 		if len(outSharingConfiguration) > 0 {
-			out.SharingConfiguration = &outSharingConfiguration
+			sharingConfig = outSharingConfiguration
 		}
 	}
-	return out
+
+	// terraform treats nil values as zero values
+	// this condition checks whether the whole gpu configuration is deleted
+	// and gpu configuration should be set to nil
+	if defaultSharedClientsPerGpu == 0 &&
+		enableTimeSharing == false &&
+		len(sharingConfig) == 0 {
+		return nil
+	}
+	return &sdk.NodetemplatesV1GPU{
+		DefaultSharedClientsPerGpu: &defaultSharedClientsPerGpu,
+		EnableTimeSharing:          &enableTimeSharing,
+		SharingConfiguration:       &sharingConfig,
+	}
 }
 
 func toTemplateConstraintsInstanceFamilies(o map[string]any) *sdk.NodetemplatesV1TemplateConstraintsInstanceFamilyConstraints {

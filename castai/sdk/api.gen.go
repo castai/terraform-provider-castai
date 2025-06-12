@@ -498,6 +498,7 @@ const (
 
 // Defines values for WorkloadoptimizationV1ResourceLimitStrategyType.
 const (
+	KEEPLIMITS WorkloadoptimizationV1ResourceLimitStrategyType = "KEEP_LIMITS"
 	MULTIPLIER WorkloadoptimizationV1ResourceLimitStrategyType = "MULTIPLIER"
 	NOLIMIT    WorkloadoptimizationV1ResourceLimitStrategyType = "NO_LIMIT"
 	UNKNOWN    WorkloadoptimizationV1ResourceLimitStrategyType = "UNKNOWN"
@@ -549,6 +550,13 @@ const (
 	ExternalClusterAPIListNodesParamsLifecycleTypeLifecycleTypeUnspecified ExternalClusterAPIListNodesParamsLifecycleType = "lifecycle_type_unspecified"
 	ExternalClusterAPIListNodesParamsLifecycleTypeOnDemand                 ExternalClusterAPIListNodesParamsLifecycleType = "on_demand"
 	ExternalClusterAPIListNodesParamsLifecycleTypeSpot                     ExternalClusterAPIListNodesParamsLifecycleType = "spot"
+)
+
+// Defines values for RbacServiceAPIListRolesParamsType.
+const (
+	ALL        RbacServiceAPIListRolesParamsType = "ALL"
+	DEFAULT    RbacServiceAPIListRolesParamsType = "DEFAULT"
+	ENTERPRISE RbacServiceAPIListRolesParamsType = "ENTERPRISE"
 )
 
 // Defines values for CommitmentsAPIImportAzureReservationsParamsBehaviour.
@@ -5847,6 +5855,7 @@ type WorkloadoptimizationV1ResourceLimitStrategy struct {
 	//
 	//  - NO_LIMIT: No limit removes the resource limit even if it was specified in the workload spec.
 	//  - MULTIPLIER: Multiplier used to calculate the resource limit. The final value is determined by multiplying the resource request by the specified factor.
+	//  - KEEP_LIMITS: Keep limits respects limits if they are present in the workload spec.
 	Type WorkloadoptimizationV1ResourceLimitStrategyType `json:"type"`
 }
 
@@ -5854,6 +5863,7 @@ type WorkloadoptimizationV1ResourceLimitStrategy struct {
 //
 //   - NO_LIMIT: No limit removes the resource limit even if it was specified in the workload spec.
 //   - MULTIPLIER: Multiplier used to calculate the resource limit. The final value is determined by multiplying the resource request by the specified factor.
+//   - KEEP_LIMITS: Keep limits respects limits if they are present in the workload spec.
 type WorkloadoptimizationV1ResourceLimitStrategyType string
 
 // WorkloadoptimizationV1ResourceMetrics defines model for workloadoptimization.v1.ResourceMetrics.
@@ -6470,7 +6480,15 @@ type RbacServiceAPIListRolesParams struct {
 	// PageCursor Cursor that defines token indicating where to start the next page.
 	// Empty value indicates to start from beginning of the dataset.
 	PageCursor *string `form:"page.cursor,omitempty" json:"page.cursor,omitempty"`
+
+	// Type  - ALL: Return all roles regardless of type
+	//  - ENTERPRISE: Return only enterprise roles
+	//  - DEFAULT: Return only default roles
+	Type *RbacServiceAPIListRolesParamsType `form:"type,omitempty" json:"type,omitempty"`
 }
+
+// RbacServiceAPIListRolesParamsType defines parameters for RbacServiceAPIListRoles.
+type RbacServiceAPIListRolesParamsType string
 
 // ServiceAccountsAPIDeleteServiceAccountsParams defines parameters for ServiceAccountsAPIDeleteServiceAccounts.
 type ServiceAccountsAPIDeleteServiceAccountsParams struct {
