@@ -5690,6 +5690,15 @@ type WorkloadoptimizationV1PodMetrics struct {
 	PodCountMin float64                                  `json:"podCountMin"`
 }
 
+// WorkloadoptimizationV1PredictiveInsights defines model for workloadoptimization.v1.PredictiveInsights.
+type WorkloadoptimizationV1PredictiveInsights struct {
+	// AvailableUntil Timestamp until which predictive data is available.
+	AvailableUntil *time.Time `json:"availableUntil,omitempty"`
+
+	// IsEligible Indicates if the workload is eligible for predictive analysis and has future resource forecasts.
+	IsEligible bool `json:"isEligible"`
+}
+
 // WorkloadoptimizationV1RecommendationEvent defines model for workloadoptimization.v1.RecommendationEvent.
 type WorkloadoptimizationV1RecommendationEvent struct {
 	// Type Defines possible options for recommendation events.
@@ -5847,23 +5856,19 @@ type WorkloadoptimizationV1ResourceLimitStrategy struct {
 //   - MULTIPLIER: Multiplier used to calculate the resource limit. The final value is determined by multiplying the resource request by the specified factor.
 type WorkloadoptimizationV1ResourceLimitStrategyType string
 
-// WorkloadoptimizationV1ResourceMetricPredictions defines model for workloadoptimization.v1.ResourceMetricPredictions.
-type WorkloadoptimizationV1ResourceMetricPredictions struct {
-	Recommended float64   `json:"recommended"`
-	Timestamp   time.Time `json:"timestamp"`
-}
-
 // WorkloadoptimizationV1ResourceMetrics defines model for workloadoptimization.v1.ResourceMetrics.
 type WorkloadoptimizationV1ResourceMetrics struct {
-	Avg       float64   `json:"avg"`
-	Max       float64   `json:"max"`
-	Min       float64   `json:"min"`
-	P25       float64   `json:"p25"`
-	P50       float64   `json:"p50"`
-	P75       float64   `json:"p75"`
-	Rec       float64   `json:"rec"`
-	Req       float64   `json:"req"`
-	Timestamp time.Time `json:"timestamp"`
+	Avg          float64   `json:"avg"`
+	AvgPredicted float64   `json:"avgPredicted"`
+	Max          float64   `json:"max"`
+	Min          float64   `json:"min"`
+	P25          float64   `json:"p25"`
+	P50          float64   `json:"p50"`
+	P75          float64   `json:"p75"`
+	Rec          float64   `json:"rec"`
+	RecPredicted float64   `json:"recPredicted"`
+	Req          float64   `json:"req"`
+	Timestamp    time.Time `json:"timestamp"`
 }
 
 // WorkloadoptimizationV1ResourcePolicies defines model for workloadoptimization.v1.ResourcePolicies.
@@ -6146,8 +6151,9 @@ type WorkloadoptimizationV1Workload struct {
 	OrganizationId string                          `json:"organizationId"`
 
 	// PodCount Pod count stores the *running* count of pods of the workload.
-	PodCount       int32                                         `json:"podCount"`
-	Recommendation *WorkloadoptimizationV1WorkloadRecommendation `json:"recommendation,omitempty"`
+	PodCount           int32                                         `json:"podCount"`
+	PredictionInsights WorkloadoptimizationV1PredictiveInsights      `json:"predictionInsights"`
+	Recommendation     *WorkloadoptimizationV1WorkloadRecommendation `json:"recommendation,omitempty"`
 
 	// Replicas The number of replicas the workload should have, as defined on the workload spec.
 	Replicas          int32     `json:"replicas"`
@@ -6204,9 +6210,6 @@ type WorkloadoptimizationV1WorkloadMetricContainer struct {
 	MemoryGib           []WorkloadoptimizationV1ResourceMetrics `json:"memoryGib"`
 	MemoryGibAggregated WorkloadoptimizationV1AggregatedMetrics `json:"memoryGibAggregated"`
 	Name                string                                  `json:"name"`
-
-	// PredictedCpuCores Future and historic cpu recommendation predictions.
-	PredictedCpuCores *[]WorkloadoptimizationV1ResourceMetricPredictions `json:"predictedCpuCores,omitempty"`
 }
 
 // WorkloadoptimizationV1WorkloadMetrics defines model for workloadoptimization.v1.WorkloadMetrics.

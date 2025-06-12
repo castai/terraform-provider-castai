@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"reflect"
+	"sort"
 	"strings"
 	"time"
 
@@ -651,28 +652,30 @@ func resourceNodeTemplate() *schema.Resource {
 					"Custom instances are only supported in GCP.",
 			},
 			FieldNodeTemplateGpu: {
-				Type:        schema.TypeList,
-				MaxItems:    1,
-				Optional:    true,
-				Description: "GPU configuration.",
+				Type:             schema.TypeList,
+				MaxItems:         1,
+				Optional:         true,
+				Description:      "GPU configuration.",
+				DiffSuppressFunc: compareLists,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						FieldNodeTemplateEnableTimeSharing: {
 							Type:        schema.TypeBool,
 							Optional:    true,
-							Default:     false,
+							Default:     nil,
 							Description: "Enable/disable GPU time-sharing.",
 						},
 						FieldNodeTemplateDefaultSharedClientsPerGpu: {
 							Type:        schema.TypeInt,
 							Optional:    true,
-							Default:     1,
+							Default:     nil,
 							Description: "Defines default number of shared clients per GPU.",
 						},
 						FieldNodeTemplateSharingConfiguration: {
-							Type:        schema.TypeList,
-							Optional:    true,
-							Description: "Defines GPU sharing configurations for GPU devices.",
+							Type:             schema.TypeList,
+							Optional:         true,
+							Description:      "Defines GPU sharing configurations for GPU devices.",
+							DiffSuppressFunc: compareLists,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									FieldNodeTemplateSharedGpuName: {
@@ -1704,4 +1707,38 @@ func toTemplateConstraintsNodeAffinity(o map[string]any) *sdk.NodetemplatesV1Tem
 	}
 
 	return &out
+}
+
+// compareLists compares state of two lists
+// inspired by https://github.com/hashicorp/terraform-plugin-sdk/issues/477#issuecomment-1238807249
+func compareLists(key, oldValue, newValue string, d *schema.ResourceData) bool {
+	// The key is a path not the list itself, e.g. "gpu.0"
+	lastDotIndex := strings.LastIndex(key, ".")
+	if lastDotIndex != -1 {
+		key = string(key[:lastDotIndex])
+	}
+	oldData, newData := d.GetChange(key)
+	if oldData == nil || newData == nil {
+		return false
+	}
+
+	oldArray, okOldArray := oldData.([]interface{})
+	newArray, okNewArray := newData.([]interface{})
+	if okOldArray && okNewArray {
+		if len(oldArray) != len(newArray) {
+			return false
+		}
+		oldItems := make([]string, len(oldArray))
+		newItems := make([]string, len(newArray))
+		for i, oldItem := range oldArray {
+			oldItems[i] = fmt.Sprint(oldItem)
+		}
+		for i, newItem := range newArray {
+			newItems[i] = fmt.Sprint(newItem)
+		}
+		sort.Strings(oldItems)
+		sort.Strings(newItems)
+		return reflect.DeepEqual(oldItems, newItems)
+	}
+	return false
 }
