@@ -141,6 +141,7 @@ func resourceAutoscaler() *schema.Resource {
 										Optional:    true,
 										MaxItems:    1,
 										Description: "additional headroom based on cluster's total available capacity for on-demand nodes.",
+										Deprecated:  "headroom is deprecated. Follow the FAQ here: https://docs.cast.ai/docs/autoscaler-1#can-you-please-share-some-guidance-on-cluster-headroom-i-would-like-to-add-some-buffer-room-so-that-pods-have-a-place-to-run-when-nodes-go-down",
 										Elem: &schema.Resource{
 											Schema: map[string]*schema.Schema{
 												FieldCPUPercentage: {
@@ -171,6 +172,7 @@ func resourceAutoscaler() *schema.Resource {
 										Optional:    true,
 										MaxItems:    1,
 										Description: "additional headroom based on cluster's total available capacity for spot nodes.",
+										Deprecated:  "headroom_spot is deprecated. Follow the FAQ here: https://docs.cast.ai/docs/autoscaler-1#can-you-please-share-some-guidance-on-cluster-headroom-i-would-like-to-add-some-buffer-room-so-that-pods-have-a-place-to-run-when-nodes-go-down",
 										Elem: &schema.Resource{
 											Schema: map[string]*schema.Schema{
 												FieldCPUPercentage: {
@@ -201,6 +203,7 @@ func resourceAutoscaler() *schema.Resource {
 										Optional:    true,
 										MaxItems:    1,
 										Description: "defines the node constraints that will be applied when autoscaling with Unschedulable Pods policy.",
+										Deprecated:  "nodeConstraints is deprecated. Use `constraints` field from the `castai_node_template` resource to configure `default-by-castai` node template.",
 										Elem: &schema.Resource{
 											Schema: map[string]*schema.Schema{
 												FieldMinCPUCores: {
@@ -256,7 +259,7 @@ func resourceAutoscaler() *schema.Resource {
 										Type:        schema.TypeBool,
 										Optional:    true,
 										Default:     false,
-										Deprecated:  "customInstancesEnabled is deprecated. Use custom_instances_enabled field the node template resource.",
+										Deprecated:  "customInstancesEnabled is deprecated. Use custom_instances_enabled field the `castai_node_template` resource.",
 										Description: "enable/disable custom instances policy.",
 									},
 								},
@@ -307,6 +310,7 @@ func resourceAutoscaler() *schema.Resource {
 							Optional:    true,
 							MaxItems:    1,
 							Description: "policy defining whether autoscaler can use spot instances for provisioning additional workloads.",
+							Deprecated:  "spotInstances is deprecated. Use `constraints` from the `castai_node_template` resource to configure `default-by-castai` node template.",
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									FieldEnabled: {
@@ -348,12 +352,14 @@ func resourceAutoscaler() *schema.Resource {
 										Type:        schema.TypeBool,
 										Optional:    true,
 										Default:     false,
+										Deprecated:  "spotDiversityEnabled is deprecated. Use spot_diversity_enabled field from the `castai_node_template` resource to configure `default-by-castai` node template.",
 										Description: "enable/disable spot diversity policy. When enabled, autoscaler will try to balance between diverse and cost optimal instance types.",
 									},
 									FieldSpotDiversityPriceIncreaseLimit: {
 										Type:             schema.TypeInt,
 										Optional:         true,
 										Default:          20,
+										Deprecated:       "spotDiversityPriceIncreaseLimit is deprecated. Use spot_diversity_price_increase_limit from the `castai_node_template` resource to configure `default-by-castai` node template.",
 										Description:      "allowed node configuration price increase when diversifying instance types. E.g. if the value is 10%, then the overall price of diversified instance types can be 10% higher than the price of the optimal configuration.",
 										ValidateDiagFunc: validation.ToDiagFunc(validation.IntAtLeast(1)),
 									},
@@ -362,6 +368,7 @@ func resourceAutoscaler() *schema.Resource {
 										Optional:    true,
 										MaxItems:    1,
 										Description: "configure the handling of SPOT interruption predictions.",
+										Deprecated:  "spotInterruptionPredictions is deprecated. Use spot_interruption_predictions_enabled and spot_interruption_predictions_type field from the `castai_node_template` resource to configure `default-by-castai` node template.",
 										Elem: &schema.Resource{
 											Schema: map[string]*schema.Schema{
 												FieldEnabled: {
