@@ -97,18 +97,13 @@ func resourceWorkloadScalingPolicy() *schema.Resource {
 										Description: "Allows assigning a scaling policy based on the workload's namespace.",
 										Elem: &schema.Resource{
 											Schema: map[string]*schema.Schema{
-												"all": { // TODO: sync with Sandra about that field.
-													Type:        schema.TypeBool,
-													Optional:    true,
-													Description: "Defines matching all namespaces. Cannot be set together with other matchers.",
-												},
 												"names": {
 													Type:        schema.TypeList,
 													Optional:    true,
 													Description: "Defines matching by namespace names.",
 													Elem:        &schema.Schema{Type: schema.TypeString},
 												},
-												// TODO(https://castai.atlassian.net/browse/WOOP-714): enable label expressions
+												// TODO(WOOP-714): enable label expressions
 												//"labels_expressions": k8sLabelExpressionsSchema(),
 											},
 										},
@@ -120,11 +115,6 @@ func resourceWorkloadScalingPolicy() *schema.Resource {
 										Description: "Allows assigning a scaling policy based on the workload's metadata.",
 										Elem: &schema.Resource{
 											Schema: map[string]*schema.Schema{
-												"all": { // TODO: sync with Sandra about that field.
-													Type:        schema.TypeBool,
-													Optional:    true,
-													Description: "Defines matching all workloads. Cannot be set together with other matchers.",
-												},
 												"gvk": {
 													Type:     schema.TypeList,
 													Optional: true,
@@ -1182,7 +1172,7 @@ func getWorkloadScalingPolicyByName(ctx context.Context, client sdk.ClientWithRe
 }
 
 func toAssignmentRules(in map[string]any) (*[]sdk.WorkloadoptimizationV1ScalingPolicyAssignmentRule, error) {
-	if in == nil || len(in) == 0 {
+	if len(in) == 0 {
 		return nil, nil
 	}
 
@@ -1223,10 +1213,6 @@ func toNamespaceAssignmentRule(ruleMap map[string]any) (*sdk.Workloadoptimizatio
 	}
 
 	namespaceMatcher := &sdk.WorkloadoptimizationV1KubernetesNamespaceMatcher{}
-
-	if all := readOptionalValue[bool](namespaceMap, "all"); all != nil && *all { //TODO: need to fix backend API to allow 'false'
-		namespaceMatcher.All = all
-	}
 
 	if names := readOptionalValue[[]any](namespaceMap, "names"); names != nil {
 		namespaceMatcher.Names = lo.ToPtr(toStringList(*names))
@@ -1280,10 +1266,6 @@ func toWorkloadAssignmentRule(ruleMap map[string]any) (*sdk.Workloadoptimization
 
 	workloadMatcher := &sdk.WorkloadoptimizationV1KubernetesWorkloadMatcher{}
 
-	if all := readOptionalValue[bool](workloadMap, "all"); all != nil && *all { //TODO: need to fix backend API to allow 'false'
-		workloadMatcher.All = all
-	}
-
 	if gvk := readOptionalValue[[]any](workloadMap, "gvk"); gvk != nil {
 		workloadMatcher.Gvk = lo.ToPtr(toStringList(*gvk))
 	}
@@ -1331,10 +1313,6 @@ func toAssignmentRulesMap(rules *[]sdk.WorkloadoptimizationV1ScalingPolicyAssign
 		if rule.Namespace != nil {
 			namespaceMap := make(map[string]any)
 
-			if rule.Namespace.All != nil {
-				namespaceMap["all"] = *rule.Namespace.All
-			}
-
 			if rule.Namespace.Names != nil {
 				namespaceMap["names"] = *rule.Namespace.Names
 			}
@@ -1348,10 +1326,6 @@ func toAssignmentRulesMap(rules *[]sdk.WorkloadoptimizationV1ScalingPolicyAssign
 
 		if rule.Workload != nil {
 			workloadMap := make(map[string]any)
-
-			if rule.Workload.All != nil {
-				workloadMap["all"] = *rule.Workload.All
-			}
 
 			if rule.Workload.Gvk != nil && len(*rule.Workload.Gvk) > 0 {
 				workloadMap["gvk"] = *rule.Workload.Gvk

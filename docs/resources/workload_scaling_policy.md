@@ -246,7 +246,6 @@ Optional:
 
 Optional:
 
-- `all` (Boolean) Defines matching all namespaces. Cannot be set together with other matchers.
 - `names` (List of String) Defines matching by namespace names.
 
 
@@ -255,7 +254,6 @@ Optional:
 
 Optional:
 
-- `all` (Boolean) Defines matching all workloads. Cannot be set together with other matchers.
 - `gvk` (List of String) Group, version, and kind for Kubernetes resources. Format: kind[.version][.group].
 It can be either:
  - only kind, e.g. "Deployment"
