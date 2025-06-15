@@ -49,6 +49,13 @@ const (
 	FieldApplyThresholdStrategyCustomAdaptiveType  = "CUSTOM_ADAPTIVE"
 )
 
+const (
+	K8sLabelInOperator           = "In"
+	K8sLabelNotInOperator        = "NotIn"
+	K8sLabelExistsOperator       = "Exists"
+	K8sLabelDoesNotExistOperator = "DoesNotExist"
+)
+
 var (
 	k8sNameRegex = regexp.MustCompile("^[a-z0-9A-Z][a-z0-9A-Z._-]{0,61}[a-z0-9A-Z]$")
 )
@@ -71,6 +78,73 @@ func resourceWorkloadScalingPolicy() *schema.Resource {
 				ForceNew:         true,
 				Description:      "CAST AI cluster id",
 				ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
+			},
+			"assignment_rules": {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: "Allows defining conditions for automatically assigning workloads to this scaling policy.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						"rules": {
+							Type:     schema.TypeList,
+							Optional: true,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									"namespace": {
+										Type:        schema.TypeList,
+										Optional:    true,
+										MaxItems:    1,
+										Description: "Allows assigning a scaling policy based on the workload's namespace.",
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"all": { // TODO: sync with Sandra about that field.
+													Type:        schema.TypeBool,
+													Optional:    true,
+													Description: "Defines matching all namespaces. Cannot be set together with other matchers.",
+												},
+												"names": {
+													Type:        schema.TypeList,
+													Optional:    true,
+													Description: "Defines matching by namespace names.",
+													Elem:        &schema.Schema{Type: schema.TypeString},
+												},
+												// TODO(https://castai.atlassian.net/browse/WOOP-714): enable label expressions
+												//"labels_expressions": k8sLabelExpressionsSchema(),
+											},
+										},
+									},
+									"workload": {
+										Type:        schema.TypeList,
+										Optional:    true,
+										MaxItems:    1,
+										Description: "Allows assigning a scaling policy based on the workload's metadata.",
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												"all": { // TODO: sync with Sandra about that field.
+													Type:        schema.TypeBool,
+													Optional:    true,
+													Description: "Defines matching all workloads. Cannot be set together with other matchers.",
+												},
+												"gvk": {
+													Type:     schema.TypeList,
+													Optional: true,
+													Description: `Group, version, and kind for Kubernetes resources. Format: kind[.version][.group].
+It can be either:
+ - only kind, e.g. "Deployment"
+ - group and kind: e.g."Deployment.apps"
+ - group, version and kind: e.g."Deployment.v1.apps"`,
+
+													Elem: &schema.Schema{Type: schema.TypeString},
+												},
+												"labels_expressions": k8sLabelExpressionsSchema(),
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
 			},
 			"name": {
 				Type:             schema.TypeString,
@@ -196,6 +270,37 @@ func resourceWorkloadScalingPolicy() *schema.Resource {
 			Read:   schema.DefaultTimeout(15 * time.Second),
 			Update: schema.DefaultTimeout(15 * time.Second),
 			Delete: schema.DefaultTimeout(15 * time.Second),
+		},
+	}
+}
+
+func k8sLabelExpressionsSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:        schema.TypeList,
+		Optional:    true,
+		Description: "Defines matching by label selector requirements.",
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"key": {
+					Type:        schema.TypeString,
+					Required:    true,
+					Description: "The label key to match.",
+				},
+				"operator": {
+					Type:        schema.TypeString,
+					Required:    true,
+					Description: "The operator to use for matching the label.",
+					ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{
+						K8sLabelInOperator, K8sLabelNotInOperator, K8sLabelExistsOperator, K8sLabelDoesNotExistOperator,
+					}, false)),
+				},
+				"values": {
+					Type:        schema.TypeList,
+					Optional:    true,
+					Description: "A list of values to match against the label key. Allowed for `In` and `NotIn` operators.",
+					Elem:        &schema.Schema{Type: schema.TypeString},
+				},
+			},
 		},
 	}
 }
@@ -414,6 +519,12 @@ func resourceWorkloadScalingPolicyCreate(ctx context.Context, d *schema.Resource
 
 	req.RecommendationPolicies.AntiAffinity = toAntiAffinity(toSection(d, "anti_affinity"))
 
+	ar, err := toAssignmentRules(toSection(d, "assignment_rules"))
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	req.AssignmentRules = ar
+
 	create, err := client.WorkloadOptimizationAPICreateWorkloadScalingPolicyWithResponse(ctx, clusterID, req)
 	if err != nil {
 		return diag.FromErr(err)
@@ -489,6 +600,10 @@ func resourceWorkloadScalingPolicyRead(ctx context.Context, d *schema.ResourceDa
 		return diag.FromErr(fmt.Errorf("setting anti-affinity: %w", err))
 	}
 
+	if err := d.Set("assignment_rules", toAssignmentRulesMap(sp.AssignmentRules)); err != nil {
+		return diag.FromErr(fmt.Errorf("setting assignment rules: %w", err))
+	}
+
 	return nil
 }
 
@@ -511,6 +626,7 @@ func resourceWorkloadScalingPolicyUpdate(ctx context.Context, d *schema.Resource
 		"memory_event",
 		"anti_affinity",
 		FieldConfidence,
+		"assignment_rules",
 	) {
 		tflog.Info(ctx, "scaling policy up to date")
 		return nil
@@ -526,9 +642,15 @@ func resourceWorkloadScalingPolicyUpdate(ctx context.Context, d *schema.Resource
 	if err != nil {
 		return diag.FromErr(err)
 	}
+	ar, err := toAssignmentRules(toSection(d, "assignment_rules"))
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
 	req := sdk.WorkloadOptimizationAPIUpdateWorkloadScalingPolicyJSONRequestBody{
-		Name:      d.Get("name").(string),
-		ApplyType: sdk.WorkloadoptimizationV1ApplyType(d.Get("apply_type").(string)),
+		Name:            d.Get("name").(string),
+		ApplyType:       sdk.WorkloadoptimizationV1ApplyType(d.Get("apply_type").(string)),
+		AssignmentRules: ar,
 		RecommendationPolicies: sdk.WorkloadoptimizationV1RecommendationPolicies{
 			ManagementOption: sdk.WorkloadoptimizationV1ManagementOption(d.Get("management_option").(string)),
 			Cpu:              cpu,
@@ -1057,4 +1179,223 @@ func getWorkloadScalingPolicyByName(ctx context.Context, client sdk.ClientWithRe
 		}
 	}
 	return nil, fmt.Errorf("policy with name %q not found", name)
+}
+
+func toAssignmentRules(in map[string]any) (*[]sdk.WorkloadoptimizationV1ScalingPolicyAssignmentRule, error) {
+	if in == nil || len(in) == 0 {
+		return nil, nil
+	}
+
+	rules := in["rules"].([]any)
+	if len(rules) == 0 {
+		return &[]sdk.WorkloadoptimizationV1ScalingPolicyAssignmentRule{}, nil
+	}
+
+	result := make([]sdk.WorkloadoptimizationV1ScalingPolicyAssignmentRule, len(rules))
+	for i, rule := range rules {
+		ruleMap := rule.(map[string]any)
+
+		nsRules, err := toNamespaceAssignmentRule(ruleMap)
+		if err != nil {
+			return nil, fmt.Errorf("field assignment_rules[%d].namespace: %w", i, err)
+		}
+
+		wRules, err := toWorkloadAssignmentRule(ruleMap)
+		if err != nil {
+			return nil, fmt.Errorf("field assignment_rules[%d].workload: %w", i, err)
+		}
+		if nsRules == nil && wRules == nil {
+			continue
+		}
+		result[i] = sdk.WorkloadoptimizationV1ScalingPolicyAssignmentRule{
+			Workload:  wRules,
+			Namespace: nsRules,
+		}
+	}
+
+	return &result, nil
+}
+
+func toNamespaceAssignmentRule(ruleMap map[string]any) (*sdk.WorkloadoptimizationV1KubernetesNamespaceMatcher, error) {
+	namespaceMap := getFirstElem(ruleMap, "namespace")
+	if namespaceMap == nil {
+		return nil, nil
+	}
+
+	namespaceMatcher := &sdk.WorkloadoptimizationV1KubernetesNamespaceMatcher{}
+
+	if all := readOptionalValue[bool](namespaceMap, "all"); all != nil && *all { //TODO: need to fix backend API to allow 'false'
+		namespaceMatcher.All = all
+	}
+
+	if names := readOptionalValue[[]any](namespaceMap, "names"); names != nil {
+		namespaceMatcher.Names = lo.ToPtr(toStringList(*names))
+	}
+
+	labels, err := toKubernetesLabelExpressionMatcher(namespaceMap)
+	if err != nil {
+		return nil, err
+	}
+	namespaceMatcher.LabelsExpressions = labels
+
+	return namespaceMatcher, nil
+}
+
+func toKubernetesLabelExpressionMatcher(namespaceMap map[string]any) (*[]sdk.WorkloadoptimizationV1KubernetesLabelExpressionMatcher, error) {
+	exprs := readOptionalValue[[]any](namespaceMap, "labels_expressions")
+	if exprs == nil {
+		return nil, nil
+	}
+	expressions := make([]sdk.WorkloadoptimizationV1KubernetesLabelExpressionMatcher, len(*exprs))
+	for j, expr := range *exprs {
+		exprMap := expr.(map[string]any)
+		key, err := mustGetValue[string](exprMap, "key")
+		if err != nil {
+			return nil, err
+		}
+
+		operator, err := mustGetValue[string](exprMap, "operator")
+		if err != nil {
+			return nil, err
+		}
+
+		expressions[j] = sdk.WorkloadoptimizationV1KubernetesLabelExpressionMatcher{
+			Key:      *key,
+			Operator: toLabelSelectorOperator(*operator),
+		}
+
+		values := readOptionalValue[[]any](exprMap, "values")
+		if values != nil {
+			expressions[j].Values = toStringList(*values)
+		}
+	}
+	return &expressions, nil
+}
+
+func toWorkloadAssignmentRule(ruleMap map[string]any) (*sdk.WorkloadoptimizationV1KubernetesWorkloadMatcher, error) {
+	workloadMap := getFirstElem(ruleMap, "workload")
+	if workloadMap == nil {
+		return nil, nil
+	}
+
+	workloadMatcher := &sdk.WorkloadoptimizationV1KubernetesWorkloadMatcher{}
+
+	if all := readOptionalValue[bool](workloadMap, "all"); all != nil && *all { //TODO: need to fix backend API to allow 'false'
+		workloadMatcher.All = all
+	}
+
+	if gvk := readOptionalValue[[]any](workloadMap, "gvk"); gvk != nil {
+		workloadMatcher.Gvk = lo.ToPtr(toStringList(*gvk))
+	}
+
+	labels, err := toKubernetesLabelExpressionMatcher(workloadMap)
+	if err != nil {
+		return nil, err
+	}
+	workloadMatcher.LabelsExpressions = labels
+
+	return workloadMatcher, nil
+}
+
+func getFirstElem(in map[string]any, key string) map[string]any {
+	val, ok := in[key]
+	if !ok || val == nil || len(val.([]any)) == 0 || val.([]any)[0] == nil {
+		return nil
+	}
+	return val.([]any)[0].(map[string]any)
+}
+
+func toLabelSelectorOperator(in string) sdk.WorkloadoptimizationV1KubernetesLabelSelectorOperator {
+	switch in {
+	case K8sLabelInOperator:
+		return sdk.KUBERNETESLABELSELECTOROPIN
+	case K8sLabelNotInOperator:
+		return sdk.KUBERNETESLABELSELECTOROPNOTIN
+	case K8sLabelExistsOperator:
+		return sdk.KUBERNETESLABELSELECTOROPEXISTS
+	case K8sLabelDoesNotExistOperator:
+		return sdk.KUBERNETESLABELSELECTOROPDOESNOTEXIST
+	}
+	return sdk.KUBERNETESLABELSELECTOROPUNSPECIFIED
+}
+
+func toAssignmentRulesMap(rules *[]sdk.WorkloadoptimizationV1ScalingPolicyAssignmentRule) []any {
+	if rules == nil {
+		return nil
+	}
+
+	result := make([]map[string]any, len(*rules))
+	for i, rule := range *rules {
+		ruleMap := make(map[string]any)
+
+		if rule.Namespace != nil {
+			namespaceMap := make(map[string]any)
+
+			if rule.Namespace.All != nil {
+				namespaceMap["all"] = *rule.Namespace.All
+			}
+
+			if rule.Namespace.Names != nil {
+				namespaceMap["names"] = *rule.Namespace.Names
+			}
+
+			if rule.Namespace.LabelsExpressions != nil && len(*rule.Namespace.LabelsExpressions) > 0 {
+				namespaceMap["labels_expressions"] = toK8sLabelsExpressionsMap(*rule.Namespace.LabelsExpressions)
+			}
+
+			ruleMap["namespace"] = []map[string]any{namespaceMap}
+		}
+
+		if rule.Workload != nil {
+			workloadMap := make(map[string]any)
+
+			if rule.Workload.All != nil {
+				workloadMap["all"] = *rule.Workload.All
+			}
+
+			if rule.Workload.Gvk != nil && len(*rule.Workload.Gvk) > 0 {
+				workloadMap["gvk"] = *rule.Workload.Gvk
+			}
+
+			if rule.Workload.LabelsExpressions != nil && len(*rule.Workload.LabelsExpressions) > 0 {
+				workloadMap["labels_expressions"] = toK8sLabelsExpressionsMap(*rule.Workload.LabelsExpressions)
+			}
+
+			ruleMap["workload"] = []map[string]any{workloadMap}
+		}
+
+		result[i] = ruleMap
+	}
+
+	return []any{
+		map[string]any{
+			"rules": result,
+		},
+	}
+}
+
+func toK8sLabelsExpressionsMap(in []sdk.WorkloadoptimizationV1KubernetesLabelExpressionMatcher) []map[string]any {
+	expressions := make([]map[string]any, len(in))
+	for j, expr := range in {
+		expressions[j] = map[string]any{
+			"key":      expr.Key,
+			"operator": labelSelectorOperatorMap(expr.Operator),
+			"values":   expr.Values,
+		}
+	}
+	return expressions
+}
+
+func labelSelectorOperatorMap(in sdk.WorkloadoptimizationV1KubernetesLabelSelectorOperator) string {
+	switch in {
+	case sdk.KUBERNETESLABELSELECTOROPIN:
+		return K8sLabelInOperator
+	case sdk.KUBERNETESLABELSELECTOROPNOTIN:
+		return K8sLabelNotInOperator
+	case sdk.KUBERNETESLABELSELECTOROPEXISTS:
+		return K8sLabelExistsOperator
+	case sdk.KUBERNETESLABELSELECTOROPDOESNOTEXIST:
+		return K8sLabelDoesNotExistOperator
+	}
+	return "unspecified"
 }
