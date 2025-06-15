@@ -104,7 +104,7 @@ func TestAccResourceWorkloadScalingPolicy(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "assignment_rules.0.rules.0.namespace.0.names.0", "team-a"),
 					resource.TestCheckResourceAttr(resourceName, "assignment_rules.0.rules.1.workload.0.gvk.0", "DaemonSet"),
 					resource.TestCheckResourceAttr(resourceName, "assignment_rules.0.rules.1.workload.0.labels_expressions.0.key", "helm.sh/chart"),
-					resource.TestCheckResourceAttr(resourceName, "assignment_rules.0.rules.1.workload.0.labels_expressions.0.operator", "NotExists"),
+					resource.TestCheckResourceAttr(resourceName, "assignment_rules.0.rules.1.workload.0.labels_expressions.0.operator", "DoesNotExist"),
 				),
 			},
 		},
@@ -131,27 +131,27 @@ func scalingPolicyConfig(clusterName, projectID, name string) string {
 		confidence {
 			threshold = 0.4
 		}
-    assignment_rules {
-      rules {
-        namespace {
-          names = ["default", "kube-system"]
-        }
-      }
-      rules {
-        workload {
-          gvk = ["Deployment", "StatefulSet"]
-          labels_expressions {
-            key      = "region"
-            operator = "NotIn"
-            values = ["eu-west-1", "eu-west-2"]
-          }
-          labels_expressions {
-            key      = "helm.sh/chart"
-            operator = "Exists"
-          }
-        }
-      }
-    }
+		assignment_rules {
+			rules {
+				namespace {
+					names = ["default", "kube-system"]
+				}
+			}
+			rules {
+				workload {
+					gvk = ["Deployment", "StatefulSet"]
+					labels_expressions {
+						key      = "region"
+						operator = "NotIn"
+						values = ["eu-west-1", "eu-west-2"]
+					}
+					labels_expressions {
+						key      = "helm.sh/chart"
+						operator = "Exists"
+					}
+				}
+			}
+		}
 		cpu {
 			function 		= "QUANTILE"
 			overhead 		= 0.05
@@ -197,22 +197,22 @@ func scalingPolicyConfigUpdated(clusterName, projectID, name string) string {
 		cluster_id			= castai_gke_cluster.test.id
 		apply_type			= "IMMEDIATE"
 		management_option	= "MANAGED"
-    assignment_rules {
-      rules {
-        namespace {
-          names = ["team-a"]
-        }
-      }
-      rules {
-        workload {
-          gvk = ["DaemonSet"]
-          labels_expressions {
-            key      = "helm.sh/chart"
-            operator = "NotExists"
-          }
-        }
-      }
-    }
+		assignment_rules {
+			rules {
+				namespace {
+					names = ["team-a"]
+				}
+			}
+			rules {
+				workload {
+					gvk = ["DaemonSet"]
+					labels_expressions {
+						key      = "helm.sh/chart"
+						operator = "DoesNotExist"
+					}
+				}
+			}
+		}
 		cpu {
 			function 		= "QUANTILE"
 			overhead 		= 0.15
