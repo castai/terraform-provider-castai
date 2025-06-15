@@ -15,7 +15,7 @@ resource "castai_workload_scaling_policy" "services" {
         labels_expressions {
           key      = "region"
           operator = "NotIn"
-          values = ["eu-west-1", "eu-west-2"]
+          values   = ["eu-west-1", "eu-west-2"]
         }
         labels_expressions {
           key      = "helm.sh/chart"
