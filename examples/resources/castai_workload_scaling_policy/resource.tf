@@ -3,6 +3,27 @@ resource "castai_workload_scaling_policy" "services" {
   cluster_id        = castai_gke_cluster.dev.id
   apply_type        = "IMMEDIATE"
   management_option = "MANAGED"
+  assignment_rules {
+    rules {
+      namespace {
+        names = ["default", "kube-system"]
+      }
+    }
+    rules {
+      workload {
+        gvk = ["Deployment", "StatefulSet"]
+        labels_expressions {
+          key      = "region"
+          operator = "NotIn"
+          values   = ["eu-west-1", "eu-west-2"]
+        }
+        labels_expressions {
+          key      = "helm.sh/chart"
+          operator = "Exists"
+        }
+      }
+    }
+  }
   cpu {
     function = "QUANTILE"
     overhead = 0.15
