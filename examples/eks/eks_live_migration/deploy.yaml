@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: dummy-live-enabled
+  name: dummy-live-enabled
+  namespace: default
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: dummy-live-enabled
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: dummy-live-enabled
+    spec:
+      nodeSelector:
+        scheduling.cast.ai/node-template: "live-enabled"
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                  - key: app
+                    operator: In
+                    values:
+                      - dummy-live-enabled
+              topologyKey: "kubernetes.io/hostname"
+      containers:
+      - command:
+        - /bin/sh
+        - -c
+        - 'trap "exit 0" SIGTERM; i=0; while true; do echo "Count: $i"; i=$((i+1)); sleep 10; done'
+        image: busybox:1.37.0
+        name: busybox
+        resources: {}
+      terminationGracePeriodSeconds: 0
