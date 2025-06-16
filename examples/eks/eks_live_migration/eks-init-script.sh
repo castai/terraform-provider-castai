@@ -14,7 +14,7 @@ case "$ARCH" in
     ;;
 esac
 
-CRI_URL=https://storage.googleapis.com/castai-node-components/castai-cri-proxy/releases/0.26.0
+CRI_URL=https://storage.googleapis.com/castai-node-components/castai-cri-proxy/releases/0.27.0
 
 wget ${CRI_URL}/castai-cri-proxy-linux-${ARCH}.tar.gz -O /var/tmp/castai-cri-proxy-linux-${ARCH}.tar.gz
 wget ${CRI_URL}/castai-cri-proxy_SHA256SUMS -O /var/tmp/proxy_SHA256SUMS
