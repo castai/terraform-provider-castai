@@ -1,0 +1,5 @@
+cluster_name     = "<place-holder>"
+cluster_region   = "<place-holder>"
+cluster_zones    =  ["<place-holder>", "<place-holder>"]
+castai_api_token = "<place-holder>"
+project_id       = "<place-holder>"

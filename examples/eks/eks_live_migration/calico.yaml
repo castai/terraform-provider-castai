@@ -1,0 +1,16 @@
+installation:
+  calicoNetwork:
+    linuxDataplane: BPF
+    ipPools:
+    - cidr: 10.244.0.0/16
+      blockSize: 26
+      encapsulation: VXLAN
+      natOutgoing: Enabled
+      nodeSelector: "all()"
+  kubernetesProvider: "EKS"
+  registry: quay.io/
+  cni:
+   type: Calico
+kubernetesServiceEndpoint:
+  host: ${api_endpoint}
+  port: 443
