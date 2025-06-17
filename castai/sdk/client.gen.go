@@ -717,6 +717,11 @@ type ClientInterface interface {
 
 	SSOAPIUpdateSSOConnection(ctx context.Context, id string, body SSOAPIUpdateSSOConnectionJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// SSOAPISetSyncForSSOConnectionWithBody request with any body
+	SSOAPISetSyncForSSOConnectionWithBody(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	SSOAPISetSyncForSSOConnection(ctx context.Context, id string, body SSOAPISetSyncForSSOConnectionJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// ScheduledRebalancingAPIListAvailableRebalancingTZ request
 	ScheduledRebalancingAPIListAvailableRebalancingTZ(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -784,6 +789,11 @@ type ClientInterface interface {
 
 	// InventoryAPIListZones request
 	InventoryAPIListZones(ctx context.Context, params *InventoryAPIListZonesParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// WorkloadOptimizationAPIPatchWorkloadV2WithBody request with any body
+	WorkloadOptimizationAPIPatchWorkloadV2WithBody(ctx context.Context, clusterId string, workloadId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	WorkloadOptimizationAPIPatchWorkloadV2(ctx context.Context, clusterId string, workloadId string, body WorkloadOptimizationAPIPatchWorkloadV2JSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// WorkloadOptimizationAPIUpdateWorkloadV2WithBody request with any body
 	WorkloadOptimizationAPIUpdateWorkloadV2WithBody(ctx context.Context, clusterId string, workloadId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -3551,6 +3561,30 @@ func (c *Client) SSOAPIUpdateSSOConnection(ctx context.Context, id string, body 
 	return c.Client.Do(req)
 }
 
+func (c *Client) SSOAPISetSyncForSSOConnectionWithBody(ctx context.Context, id string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewSSOAPISetSyncForSSOConnectionRequestWithBody(c.Server, id, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) SSOAPISetSyncForSSOConnection(ctx context.Context, id string, body SSOAPISetSyncForSSOConnectionJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewSSOAPISetSyncForSSOConnectionRequest(c.Server, id, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
 func (c *Client) ScheduledRebalancingAPIListAvailableRebalancingTZ(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewScheduledRebalancingAPIListAvailableRebalancingTZRequest(c.Server)
 	if err != nil {
@@ -3829,6 +3863,30 @@ func (c *Client) WorkloadOptimizationAPIGetInstallScript(ctx context.Context, re
 
 func (c *Client) InventoryAPIListZones(ctx context.Context, params *InventoryAPIListZonesParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewInventoryAPIListZonesRequest(c.Server, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) WorkloadOptimizationAPIPatchWorkloadV2WithBody(ctx context.Context, clusterId string, workloadId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewWorkloadOptimizationAPIPatchWorkloadV2RequestWithBody(c.Server, clusterId, workloadId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) WorkloadOptimizationAPIPatchWorkloadV2(ctx context.Context, clusterId string, workloadId string, body WorkloadOptimizationAPIPatchWorkloadV2JSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewWorkloadOptimizationAPIPatchWorkloadV2Request(c.Server, clusterId, workloadId, body)
 	if err != nil {
 		return nil, err
 	}
@@ -12998,6 +13056,53 @@ func NewSSOAPIUpdateSSOConnectionRequestWithBody(server string, id string, conte
 	return req, nil
 }
 
+// NewSSOAPISetSyncForSSOConnectionRequest calls the generic SSOAPISetSyncForSSOConnection builder with application/json body
+func NewSSOAPISetSyncForSSOConnectionRequest(server string, id string, body SSOAPISetSyncForSSOConnectionJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewSSOAPISetSyncForSSOConnectionRequestWithBody(server, id, "application/json", bodyReader)
+}
+
+// NewSSOAPISetSyncForSSOConnectionRequestWithBody generates requests for SSOAPISetSyncForSSOConnection with any type of body
+func NewSSOAPISetSyncForSSOConnectionRequestWithBody(server string, id string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/sso-connections/%s/sync", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
 // NewScheduledRebalancingAPIListAvailableRebalancingTZRequest generates requests for ScheduledRebalancingAPIListAvailableRebalancingTZ
 func NewScheduledRebalancingAPIListAvailableRebalancingTZRequest(server string) (*http.Request, error) {
 	var err error
@@ -14082,6 +14187,60 @@ func NewInventoryAPIListZonesRequest(server string, params *InventoryAPIListZone
 	return req, nil
 }
 
+// NewWorkloadOptimizationAPIPatchWorkloadV2Request calls the generic WorkloadOptimizationAPIPatchWorkloadV2 builder with application/json body
+func NewWorkloadOptimizationAPIPatchWorkloadV2Request(server string, clusterId string, workloadId string, body WorkloadOptimizationAPIPatchWorkloadV2JSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewWorkloadOptimizationAPIPatchWorkloadV2RequestWithBody(server, clusterId, workloadId, "application/json", bodyReader)
+}
+
+// NewWorkloadOptimizationAPIPatchWorkloadV2RequestWithBody generates requests for WorkloadOptimizationAPIPatchWorkloadV2 with any type of body
+func NewWorkloadOptimizationAPIPatchWorkloadV2RequestWithBody(server string, clusterId string, workloadId string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "clusterId", runtime.ParamLocationPath, clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "workloadId", runtime.ParamLocationPath, workloadId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v2/workload-autoscaling/clusters/%s/workloads/%s", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("PATCH", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
 // NewWorkloadOptimizationAPIUpdateWorkloadV2Request calls the generic WorkloadOptimizationAPIUpdateWorkloadV2 builder with application/json body
 func NewWorkloadOptimizationAPIUpdateWorkloadV2Request(server string, clusterId string, workloadId string, body WorkloadOptimizationAPIUpdateWorkloadV2JSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
@@ -14807,6 +14966,11 @@ type ClientWithResponsesInterface interface {
 
 	SSOAPIUpdateSSOConnectionWithResponse(ctx context.Context, id string, body SSOAPIUpdateSSOConnectionJSONRequestBody) (*SSOAPIUpdateSSOConnectionResponse, error)
 
+	// SSOAPISetSyncForSSOConnection request  with any body
+	SSOAPISetSyncForSSOConnectionWithBodyWithResponse(ctx context.Context, id string, contentType string, body io.Reader) (*SSOAPISetSyncForSSOConnectionResponse, error)
+
+	SSOAPISetSyncForSSOConnectionWithResponse(ctx context.Context, id string, body SSOAPISetSyncForSSOConnectionJSONRequestBody) (*SSOAPISetSyncForSSOConnectionResponse, error)
+
 	// ScheduledRebalancingAPIListAvailableRebalancingTZ request
 	ScheduledRebalancingAPIListAvailableRebalancingTZWithResponse(ctx context.Context) (*ScheduledRebalancingAPIListAvailableRebalancingTZResponse, error)
 
@@ -14874,6 +15038,11 @@ type ClientWithResponsesInterface interface {
 
 	// InventoryAPIListZones request
 	InventoryAPIListZonesWithResponse(ctx context.Context, params *InventoryAPIListZonesParams) (*InventoryAPIListZonesResponse, error)
+
+	// WorkloadOptimizationAPIPatchWorkloadV2 request  with any body
+	WorkloadOptimizationAPIPatchWorkloadV2WithBodyWithResponse(ctx context.Context, clusterId string, workloadId string, contentType string, body io.Reader) (*WorkloadOptimizationAPIPatchWorkloadV2Response, error)
+
+	WorkloadOptimizationAPIPatchWorkloadV2WithResponse(ctx context.Context, clusterId string, workloadId string, body WorkloadOptimizationAPIPatchWorkloadV2JSONRequestBody) (*WorkloadOptimizationAPIPatchWorkloadV2Response, error)
 
 	// WorkloadOptimizationAPIUpdateWorkloadV2 request  with any body
 	WorkloadOptimizationAPIUpdateWorkloadV2WithBodyWithResponse(ctx context.Context, clusterId string, workloadId string, contentType string, body io.Reader) (*WorkloadOptimizationAPIUpdateWorkloadV2Response, error)
@@ -19898,6 +20067,36 @@ func (r SSOAPIUpdateSSOConnectionResponse) GetBody() []byte {
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
+type SSOAPISetSyncForSSOConnectionResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *CastaiSsoV1beta1SetSyncForSSOConnectionResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r SSOAPISetSyncForSSOConnectionResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r SSOAPISetSyncForSSOConnectionResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r SSOAPISetSyncForSSOConnectionResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
 type ScheduledRebalancingAPIListAvailableRebalancingTZResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -20492,6 +20691,36 @@ func (r InventoryAPIListZonesResponse) StatusCode() int {
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
 func (r InventoryAPIListZonesResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type WorkloadOptimizationAPIPatchWorkloadV2Response struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *WorkloadoptimizationV1UpdateWorkloadResponseV2
+}
+
+// Status returns HTTPResponse.Status
+func (r WorkloadOptimizationAPIPatchWorkloadV2Response) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r WorkloadOptimizationAPIPatchWorkloadV2Response) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r WorkloadOptimizationAPIPatchWorkloadV2Response) GetBody() []byte {
 	return r.Body
 }
 
@@ -22534,6 +22763,23 @@ func (c *ClientWithResponses) SSOAPIUpdateSSOConnectionWithResponse(ctx context.
 	return ParseSSOAPIUpdateSSOConnectionResponse(rsp)
 }
 
+// SSOAPISetSyncForSSOConnectionWithBodyWithResponse request with arbitrary body returning *SSOAPISetSyncForSSOConnectionResponse
+func (c *ClientWithResponses) SSOAPISetSyncForSSOConnectionWithBodyWithResponse(ctx context.Context, id string, contentType string, body io.Reader) (*SSOAPISetSyncForSSOConnectionResponse, error) {
+	rsp, err := c.SSOAPISetSyncForSSOConnectionWithBody(ctx, id, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseSSOAPISetSyncForSSOConnectionResponse(rsp)
+}
+
+func (c *ClientWithResponses) SSOAPISetSyncForSSOConnectionWithResponse(ctx context.Context, id string, body SSOAPISetSyncForSSOConnectionJSONRequestBody) (*SSOAPISetSyncForSSOConnectionResponse, error) {
+	rsp, err := c.SSOAPISetSyncForSSOConnection(ctx, id, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseSSOAPISetSyncForSSOConnectionResponse(rsp)
+}
+
 // ScheduledRebalancingAPIListAvailableRebalancingTZWithResponse request returning *ScheduledRebalancingAPIListAvailableRebalancingTZResponse
 func (c *ClientWithResponses) ScheduledRebalancingAPIListAvailableRebalancingTZWithResponse(ctx context.Context) (*ScheduledRebalancingAPIListAvailableRebalancingTZResponse, error) {
 	rsp, err := c.ScheduledRebalancingAPIListAvailableRebalancingTZ(ctx)
@@ -22744,6 +22990,23 @@ func (c *ClientWithResponses) InventoryAPIListZonesWithResponse(ctx context.Cont
 		return nil, err
 	}
 	return ParseInventoryAPIListZonesResponse(rsp)
+}
+
+// WorkloadOptimizationAPIPatchWorkloadV2WithBodyWithResponse request with arbitrary body returning *WorkloadOptimizationAPIPatchWorkloadV2Response
+func (c *ClientWithResponses) WorkloadOptimizationAPIPatchWorkloadV2WithBodyWithResponse(ctx context.Context, clusterId string, workloadId string, contentType string, body io.Reader) (*WorkloadOptimizationAPIPatchWorkloadV2Response, error) {
+	rsp, err := c.WorkloadOptimizationAPIPatchWorkloadV2WithBody(ctx, clusterId, workloadId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseWorkloadOptimizationAPIPatchWorkloadV2Response(rsp)
+}
+
+func (c *ClientWithResponses) WorkloadOptimizationAPIPatchWorkloadV2WithResponse(ctx context.Context, clusterId string, workloadId string, body WorkloadOptimizationAPIPatchWorkloadV2JSONRequestBody) (*WorkloadOptimizationAPIPatchWorkloadV2Response, error) {
+	rsp, err := c.WorkloadOptimizationAPIPatchWorkloadV2(ctx, clusterId, workloadId, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseWorkloadOptimizationAPIPatchWorkloadV2Response(rsp)
 }
 
 // WorkloadOptimizationAPIUpdateWorkloadV2WithBodyWithResponse request with arbitrary body returning *WorkloadOptimizationAPIUpdateWorkloadV2Response
@@ -27076,6 +27339,32 @@ func ParseSSOAPIUpdateSSOConnectionResponse(rsp *http.Response) (*SSOAPIUpdateSS
 	return response, nil
 }
 
+// ParseSSOAPISetSyncForSSOConnectionResponse parses an HTTP response from a SSOAPISetSyncForSSOConnectionWithResponse call
+func ParseSSOAPISetSyncForSSOConnectionResponse(rsp *http.Response) (*SSOAPISetSyncForSSOConnectionResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &SSOAPISetSyncForSSOConnectionResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest CastaiSsoV1beta1SetSyncForSSOConnectionResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
 // ParseScheduledRebalancingAPIListAvailableRebalancingTZResponse parses an HTTP response from a ScheduledRebalancingAPIListAvailableRebalancingTZWithResponse call
 func ParseScheduledRebalancingAPIListAvailableRebalancingTZResponse(rsp *http.Response) (*ScheduledRebalancingAPIListAvailableRebalancingTZResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
@@ -27576,6 +27865,32 @@ func ParseInventoryAPIListZonesResponse(rsp *http.Response) (*InventoryAPIListZo
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest CastaiInventoryV1beta1ListZonesResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseWorkloadOptimizationAPIPatchWorkloadV2Response parses an HTTP response from a WorkloadOptimizationAPIPatchWorkloadV2WithResponse call
+func ParseWorkloadOptimizationAPIPatchWorkloadV2Response(rsp *http.Response) (*WorkloadOptimizationAPIPatchWorkloadV2Response, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &WorkloadOptimizationAPIPatchWorkloadV2Response{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest WorkloadoptimizationV1UpdateWorkloadResponseV2
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
