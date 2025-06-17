@@ -5,25 +5,25 @@ variable "cluster_name" {
 
 variable "region" {
   description = "AWS region where cluster will be created"
-  type    = string
+  type        = string
 }
 
 variable "castai_api_token" {
-  type = string
+  type        = string
   description = "CAST AI api token"
-  sensitive = true
+  sensitive   = true
 }
 
 variable "castai_api_url" {
-  type = string
+  type        = string
   description = "URL of alternative CAST AI API to be used during development or testing"
-  default = "https://api.cast.ai"
+  default     = "https://api.cast.ai"
 }
 
 variable "castai_grpc_url" {
-  type = string
+  type        = string
   description = "CAST AI gRPC URL"
-  default = "grpc.cast.ai:443"
+  default     = "grpc.cast.ai:443"
 }
 
 variable "delete_nodes_on_disconnect" {

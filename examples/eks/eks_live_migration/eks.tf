@@ -19,13 +19,13 @@ provider "aws" {
 }
 
 provider "kubernetes" {
-  host = module.eks.cluster_endpoint
+  host                   = module.eks.cluster_endpoint
   cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
 
   exec {
     api_version = "client.authentication.k8s.io/v1beta1"
     command     = "aws"
-    args = ["eks", "get-token", "--cluster-name", module.eks.cluster_name]
+    args        = ["eks", "get-token", "--cluster-name", module.eks.cluster_name]
   }
 }
 
@@ -44,8 +44,8 @@ locals {
 
   tags = {
     # repo_url = "http://gitlab.com/castai/IaC"
-    team     = "live"
-    persist  = "true"
+    team      = "live"
+    persist   = "true"
     terraform = "true"
   }
 
@@ -53,7 +53,7 @@ locals {
   all_endpoint_ips = flatten([
     for subset in data.kubernetes_endpoints_v1.kubernetes_service.subset : [
       for addresses in subset : [
-        for ip in addresses: ip
+        for ip in addresses : ip
       ]
     ]
   ])
@@ -62,13 +62,13 @@ locals {
 
 # Without that, pods on nodes with Calico don't have network access (internet, nor even node IPs)
 resource "aws_security_group_rule" "calico-vxlan" {
-  security_group_id        = module.eks.node_security_group_id
-  type                     = "ingress"
-  from_port                = 4789
-  to_port                  = 4789
-  protocol                 = "udp"
-  cidr_blocks              = [local.vpc_cidr]
-  description              = "VXLAN calico"
+  security_group_id = module.eks.node_security_group_id
+  type              = "ingress"
+  from_port         = 4789
+  to_port           = 4789
+  protocol          = "udp"
+  cidr_blocks       = [local.vpc_cidr]
+  description       = "VXLAN calico"
 }
 
 # trivy:ignore:aws-ec2-no-excessive-port-access
@@ -171,13 +171,13 @@ module "eks" {
 
   eks_managed_node_groups = {
     stock_ami = {
-      name = "stock-ami"
-      ami_family = "AmazonLinux2023"
-      instance_types = ["c5a.large"]
+      name              = "stock-ami"
+      ami_family        = "AmazonLinux2023"
+      instance_types    = ["c5a.large"]
       privateNetworking = true
-      min_size = 2
-      max_size = 4
-      desired_size = 2
+      min_size          = 2
+      max_size          = 4
+      desired_size      = 2
 
       iam_role_additional_policies = {
         AmazonSSMManagedInstanceCore = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"

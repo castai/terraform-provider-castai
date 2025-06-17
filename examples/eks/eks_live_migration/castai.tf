@@ -16,7 +16,7 @@ resource "castai_eks_clusterid" "cluster_id" {
   account_id   = data.aws_caller_identity.current.account_id
   region       = var.region
   cluster_name = var.cluster_name
-  depends_on = [module.eks, helm_release.calico, aws_eks_access_entry.access_entry]
+  depends_on   = [module.eks, helm_release.calico, aws_eks_access_entry.access_entry]
 }
 
 resource "castai_eks_user_arn" "castai_user_arn" {
@@ -56,14 +56,14 @@ module "castai-eks-cluster" {
 
   node_configurations = {
     default = {
-      subnets                   = module.vpc.private_subnets
+      subnets              = module.vpc.private_subnets
       instance_profile_arn = module.castai-eks-role-iam.instance_profile_arn
-      security_groups           = [
+      security_groups = [
         module.eks.node_security_group_id,
       ]
-      init_script   = base64encode(file("eks-init-script.sh"))
+      init_script       = base64encode(file("eks-init-script.sh"))
       container_runtime = "containerd"
-      eks_image_family = "al2023"
+      eks_image_family  = "al2023"
     }
   }
 
