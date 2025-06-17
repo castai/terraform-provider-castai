@@ -737,6 +737,12 @@ type RuntimeSecurityAPIEditRuleRequest struct {
 	Severity         RuntimeV1Severity  `json:"severity"`
 }
 
+// SSOAPISetSyncForSSOConnectionRequest defines model for SSOAPI_SetSyncForSSOConnection_request.
+type SSOAPISetSyncForSSOConnectionRequest struct {
+	// Sync Sync indicates if the sync should be turned on/off for that SSO connection.
+	Sync bool `json:"sync"`
+}
+
 // ServiceAccountsAPICreateServiceAccountKeyRequest CreateServiceAccountKeyRequest is the request for creating a service account key.
 type ServiceAccountsAPICreateServiceAccountKeyRequest struct {
 	// Key Key is the key to create.
@@ -761,6 +767,13 @@ type UsersAPIUpdateOrganizationUserRequest struct {
 // WorkloadOptimizationAPIAssignScalingPolicyWorkloadsRequest defines model for WorkloadOptimizationAPI_AssignScalingPolicyWorkloads_request.
 type WorkloadOptimizationAPIAssignScalingPolicyWorkloadsRequest struct {
 	WorkloadIds *[]string `json:"workloadIds,omitempty"`
+}
+
+// WorkloadOptimizationAPIPatchWorkloadV2Request defines model for WorkloadOptimizationAPI_PatchWorkloadV2_request.
+type WorkloadOptimizationAPIPatchWorkloadV2Request struct {
+	// UpdateMask The update mask specifying which fields to update.
+	UpdateMask *string                                `json:"updateMask,omitempty"`
+	Workload   *WorkloadoptimizationV1PatchWorkloadV2 `json:"workload,omitempty"`
 }
 
 // WorkloadOptimizationAPISetScalingPoliciesOrderRequest defines model for WorkloadOptimizationAPI_SetScalingPoliciesOrder_request.
@@ -2473,6 +2486,14 @@ type CastaiSsoV1beta1SSOConnection struct {
 //   - STATUS_INACTIVE: StatusInactive is the inactive status.
 //   - STATUS_FAILED: StatusFailed is the failed status.
 type CastaiSsoV1beta1SSOConnectionStatus string
+
+// CastaiSsoV1beta1SetSyncForSSOConnectionResponse defines model for castai.sso.v1beta1.SetSyncForSSOConnectionResponse.
+type CastaiSsoV1beta1SetSyncForSSOConnectionResponse struct {
+	EmptyResponse *map[string]interface{} `json:"emptyResponse,omitempty"`
+
+	// Token Auth token used to authenticate via api.
+	Token *CastaiAuthtokenV1beta1AuthToken `json:"token,omitempty"`
+}
 
 // CastaiSsoV1beta1UpdateSSOConnection SSOConnection represents a sso connection.
 type CastaiSsoV1beta1UpdateSSOConnection struct {
@@ -5691,6 +5712,13 @@ type WorkloadoptimizationV1OOMKillEvent struct {
 	Containers []WorkloadoptimizationV1EventContainer `json:"containers"`
 }
 
+// WorkloadoptimizationV1PatchWorkloadV2 defines model for workloadoptimization.v1.PatchWorkloadV2.
+type WorkloadoptimizationV1PatchWorkloadV2 struct {
+	// ScalingPolicyId Defines the scaling policy ID assigned to the workload.
+	ScalingPolicyId *string                                       `json:"scalingPolicyId"`
+	WorkloadConfig  *WorkloadoptimizationV1WorkloadConfigUpdateV2 `json:"workloadConfig,omitempty"`
+}
+
 // WorkloadoptimizationV1PodMetrics defines model for workloadoptimization.v1.PodMetrics.
 type WorkloadoptimizationV1PodMetrics struct {
 	PodCount    []WorkloadoptimizationV1TimeSeriesMetric `json:"podCount"`
@@ -7153,6 +7181,9 @@ type SSOAPICreateSSOConnectionJSONRequestBody = CastaiSsoV1beta1CreateSSOConnect
 // SSOAPIUpdateSSOConnectionJSONRequestBody defines body for SSOAPIUpdateSSOConnection for application/json ContentType.
 type SSOAPIUpdateSSOConnectionJSONRequestBody = CastaiSsoV1beta1UpdateSSOConnection
 
+// SSOAPISetSyncForSSOConnectionJSONRequestBody defines body for SSOAPISetSyncForSSOConnection for application/json ContentType.
+type SSOAPISetSyncForSSOConnectionJSONRequestBody = SSOAPISetSyncForSSOConnectionRequest
+
 // WorkloadOptimizationAPICreateWorkloadScalingPolicyJSONRequestBody defines body for WorkloadOptimizationAPICreateWorkloadScalingPolicy for application/json ContentType.
 type WorkloadOptimizationAPICreateWorkloadScalingPolicyJSONRequestBody = WorkloadoptimizationV1NewWorkloadScalingPolicy
 
@@ -7164,6 +7195,9 @@ type WorkloadOptimizationAPIUpdateWorkloadScalingPolicyJSONRequestBody = Workloa
 
 // WorkloadOptimizationAPIAssignScalingPolicyWorkloadsJSONRequestBody defines body for WorkloadOptimizationAPIAssignScalingPolicyWorkloads for application/json ContentType.
 type WorkloadOptimizationAPIAssignScalingPolicyWorkloadsJSONRequestBody = WorkloadOptimizationAPIAssignScalingPolicyWorkloadsRequest
+
+// WorkloadOptimizationAPIPatchWorkloadV2JSONRequestBody defines body for WorkloadOptimizationAPIPatchWorkloadV2 for application/json ContentType.
+type WorkloadOptimizationAPIPatchWorkloadV2JSONRequestBody = WorkloadOptimizationAPIPatchWorkloadV2Request
 
 // WorkloadOptimizationAPIUpdateWorkloadV2JSONRequestBody defines body for WorkloadOptimizationAPIUpdateWorkloadV2 for application/json ContentType.
 type WorkloadOptimizationAPIUpdateWorkloadV2JSONRequestBody = WorkloadoptimizationV1UpdateWorkloadV2
