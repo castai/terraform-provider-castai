@@ -20,6 +20,27 @@ resource "castai_workload_scaling_policy" "services" {
   cluster_id        = castai_gke_cluster.dev.id
   apply_type        = "IMMEDIATE"
   management_option = "MANAGED"
+  assignment_rules {
+    rules {
+      namespace {
+        names = ["default", "kube-system"]
+      }
+    }
+    rules {
+      workload {
+        gvk = ["Deployment", "StatefulSet"]
+        labels_expressions {
+          key      = "region"
+          operator = "NotIn"
+          values   = ["eu-west-1", "eu-west-2"]
+        }
+        labels_expressions {
+          key      = "helm.sh/chart"
+          operator = "Exists"
+        }
+      }
+    }
+  }
   cpu {
     function = "QUANTILE"
     overhead = 0.15
@@ -81,6 +102,7 @@ resource "castai_workload_scaling_policy" "services" {
 ### Optional
 
 - `anti_affinity` (Block List, Max: 1) (see [below for nested schema](#nestedblock--anti_affinity))
+- `assignment_rules` (Block List) Allows defining conditions for automatically assigning workloads to this scaling policy. (see [below for nested schema](#nestedblock--assignment_rules))
 - `confidence` (Block List, Max: 1) Defines the confidence settings for applying recommendations. (see [below for nested schema](#nestedblock--confidence))
 - `downscaling` (Block List, Max: 1) (see [below for nested schema](#nestedblock--downscaling))
 - `memory_event` (Block List, Max: 1) (see [below for nested schema](#nestedblock--memory_event))
@@ -202,6 +224,57 @@ Optional:
 
 - `consider_anti_affinity` (Boolean) Defines if anti-affinity should be considered when scaling the workload.
 	If enabled, requiring host ports, or having anti-affinity on hostname will force all recommendations to be deferred.
+
+
+<a id="nestedblock--assignment_rules"></a>
+### Nested Schema for `assignment_rules`
+
+Required:
+
+- `rules` (Block List, Min: 1) (see [below for nested schema](#nestedblock--assignment_rules--rules))
+
+<a id="nestedblock--assignment_rules--rules"></a>
+### Nested Schema for `assignment_rules.rules`
+
+Optional:
+
+- `namespace` (Block List, Max: 1) Allows assigning a scaling policy based on the workload's namespace. (see [below for nested schema](#nestedblock--assignment_rules--rules--namespace))
+- `workload` (Block List, Max: 1) Allows assigning a scaling policy based on the workload's metadata. (see [below for nested schema](#nestedblock--assignment_rules--rules--workload))
+
+<a id="nestedblock--assignment_rules--rules--namespace"></a>
+### Nested Schema for `assignment_rules.rules.namespace`
+
+Optional:
+
+- `names` (List of String) Defines matching by namespace names.
+
+
+<a id="nestedblock--assignment_rules--rules--workload"></a>
+### Nested Schema for `assignment_rules.rules.workload`
+
+Optional:
+
+- `gvk` (List of String) Group, version, and kind for Kubernetes resources. Format: kind[.version][.group].
+It can be either:
+ - only kind, e.g. "Deployment"
+ - group and kind: e.g."Deployment.apps"
+ - group, version and kind: e.g."Deployment.v1.apps"
+- `labels_expressions` (Block List) Defines matching by label selector requirements. (see [below for nested schema](#nestedblock--assignment_rules--rules--workload--labels_expressions))
+
+<a id="nestedblock--assignment_rules--rules--workload--labels_expressions"></a>
+### Nested Schema for `assignment_rules.rules.workload.labels_expressions`
+
+Required:
+
+- `key` (String) The label key to match.
+- `operator` (String) The operator to use for matching the label.
+
+Optional:
+
+- `values` (List of String) A list of values to match against the label key. Allowed for `In` and `NotIn` operators.
+
+
+
 
 
 <a id="nestedblock--confidence"></a>
