@@ -120,14 +120,14 @@ Migrating from 3.x.x to 4.x.x
 Version 4.x.x changed:
 * `castai_eks_clusterid` type from data source to resource
 
-Having old configuration: 
+Having old configuration:
 
 ```terraform
 data "castai_eks_clusterid" "cluster_id" {
   account_id   = data.aws_caller_identity.current.account_id
   region       = var.cluster_region
   cluster_name = var.cluster_name
-} 
+}
 ```
 and usage `data.castai_eks_clusterid.cluster_id.id`
 
@@ -144,7 +144,7 @@ and usage `castai_eks_clusterid.cluster_id.id`
 
 * removal of `castai_cluster_token` resource in favour of `cluster_token` in `castai_eks_cluster`
 
-Having old configuration: 
+Having old configuration:
 ```terraform
 resource "castai_cluster_token" "this" {
   cluster_id = castai_eks_cluster.this.id
@@ -154,7 +154,7 @@ resource "castai_eks_cluster" "this" {
   region     = var.cluster_region
   name       = var.cluster_name
 }
-    
+
 ```
 and usage `castai_cluster_token.this.cluster_token`
 
@@ -375,7 +375,7 @@ Old configuration:
 ```hcl
 resource "castai_autoscaler" "castai_autoscaler_policies" {
   cluster_id               = data.castai_eks_clusterid.cluster_id.id // or other reference
-  
+
   autoscaler_policies_json = <<-EOT
      {
         "enabled": true,
@@ -441,7 +441,7 @@ resource "castai_autoscaler" "castai_autoscaler_policies" {
 
     cluster_limits {
       enabled = true
-      
+
       cpu {
         max_cores = 20
         min_cores = 1
@@ -458,6 +458,33 @@ https://github.com/castai/terraform-castai-eks-cluster/blob/main/README.md#migra
 If you have used `castai-gke-cluster` or other modules follow:
 https://github.com/castai/terraform-castai-gke-cluster/blob/main/README.md#migrating-from-4xx-to-5xx
 
+Deprecations in `castai_autoscaler` (Introduced in v7.9.3)
+-------------------------------------------------------------------------------------------------
+
+Starting with version `v7.9.3`, several fields within the `castai_autoscaler` resource (specifically under the `autoscaler_settings` block) have been deprecated.
+
+These fields are planned for removal in a future major version. Users are encouraged to update their configurations to use the new recommended approaches to ensure compatibility and leverage the latest features. Most of these functionalities have been consolidated into the `castai_node_template` resource (default template) for a more unified approach to node configuration.
+
+**Summary of Deprecated Fields and New Locations:**
+
+1.  **Headroom Configuration:**
+    *   **Deprecated:** `autoscaler_settings.headroom`, `autoscaler_settings.headroom_spot`. These configurations are deprecated. For managing cluster headroom, please refer to the CAST AI Autoscaler FAQ for recommended strategies, such as using low-priority placeholder deployments.
+        *   FAQ Link: [https://docs.cast.ai/docs/autoscaler-1#can-you-please-share-some-guidance-on-cluster-headroom-i-would-like-to-add-some-buffer-room-so-that-pods-have-a-place-to-run-when-nodes-go-down](https://docs.cast.ai/docs/autoscaler-1#can-you-please-share-some-guidance-on-cluster-headroom-i-would-like-to-add-some-buffer-room-so-that-pods-have-a-place-to-run-when-nodes-go-down)
+
+2.  **Node Constraints for Unschedulable Pods:**
+    *   **Deprecated:** `autoscaler_settings.unschedulable_pods.node_constraints` (including its fields like `min_cpu_cores`, `max_cpu_cores`, `min_ram_mib`, `max_ram_mib`). Use the `constraints` block (with fields like `min_cpu`, `max_cpu`, `min_memory`, `max_memory`) within the default `castai_node_template` resource.
+    *   **Deprecated:** `autoscaler_settings.unschedulable_pods.node_constraints.custom_instances_enabled`. Use the top-level `custom_instances_enabled` field in the default `castai_node_template` resource.
+
+3.  **Spot Instance Configuration:**
+    *   **Deprecated:** The entire `autoscaler_settings.spot_instances` block.
+        *   `spot_instances.enabled`: **New Location:** Use `constraints.spot` in the default `castai_node_template`.
+        *   `spot_instances.max_reclaim_rate`: **Note:** This field is deprecated and has no direct replacement in the node template. Setting it will have no effect.
+        *   `spot_instances.spot_backups`: **New Location:** Use `constraints.use_spot_fallbacks` and `constraints.fallback_restore_rate_seconds` in the default `castai_node_template`.
+    *   **Deprecated:** `autoscaler_settings.spot_diversity_enabled`. Use `constraints.enable_spot_diversity` in the default `castai_node_template`.
+    *   **Deprecated:** `autoscaler_settings.spot_diversity_price_increase_limit`. Use `constraints.spot_diversity_price_increase_limit_percent` in the default `castai_node_template`.
+
+4.  **Spot Interruption Predictions:**
+    *   **Deprecated:** `autoscaler_settings.spot_interruption_predictions` block. Use the top-level `spot_interruption_predictions_enabled` and `spot_interruption_predictions_type` fields in the default `castai_node_template` resource.
 
 Developing the provider
 ---------------------------
