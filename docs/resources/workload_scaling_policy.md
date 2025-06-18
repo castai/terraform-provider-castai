@@ -229,9 +229,9 @@ Optional:
 <a id="nestedblock--assignment_rules"></a>
 ### Nested Schema for `assignment_rules`
 
-Optional:
+Required:
 
-- `rules` (Block List) (see [below for nested schema](#nestedblock--assignment_rules--rules))
+- `rules` (Block List, Min: 1) (see [below for nested schema](#nestedblock--assignment_rules--rules))
 
 <a id="nestedblock--assignment_rules--rules"></a>
 ### Nested Schema for `assignment_rules.rules`

@@ -47,6 +47,7 @@ const (
 	FieldApplyThresholdStrategyPercentageType      = "PERCENTAGE"
 	FieldApplyThresholdStrategyDefaultAdaptiveType = "DEFAULT_ADAPTIVE"
 	FieldApplyThresholdStrategyCustomAdaptiveType  = "CUSTOM_ADAPTIVE"
+	FieldAssignmentRules                           = "assignment_rules"
 )
 
 const (
@@ -79,7 +80,7 @@ func resourceWorkloadScalingPolicy() *schema.Resource {
 				Description:      "CAST AI cluster id",
 				ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
 			},
-			"assignment_rules": {
+			FieldAssignmentRules: {
 				Type:        schema.TypeList,
 				Optional:    true,
 				Description: "Allows defining conditions for automatically assigning workloads to this scaling policy.",
@@ -87,7 +88,7 @@ func resourceWorkloadScalingPolicy() *schema.Resource {
 					Schema: map[string]*schema.Schema{
 						"rules": {
 							Type:     schema.TypeList,
-							Optional: true,
+							Required: true,
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									"namespace": {
@@ -509,7 +510,7 @@ func resourceWorkloadScalingPolicyCreate(ctx context.Context, d *schema.Resource
 
 	req.RecommendationPolicies.AntiAffinity = toAntiAffinity(toSection(d, "anti_affinity"))
 
-	ar, err := toAssignmentRules(toSection(d, "assignment_rules"))
+	ar, err := toAssignmentRules(toSection(d, FieldAssignmentRules))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -590,7 +591,7 @@ func resourceWorkloadScalingPolicyRead(ctx context.Context, d *schema.ResourceDa
 		return diag.FromErr(fmt.Errorf("setting anti-affinity: %w", err))
 	}
 
-	if err := d.Set("assignment_rules", toAssignmentRulesMap(sp.AssignmentRules)); err != nil {
+	if err := d.Set(FieldAssignmentRules, toAssignmentRulesMap(getResourceFrom(d, FieldAssignmentRules), sp.AssignmentRules)); err != nil {
 		return diag.FromErr(fmt.Errorf("setting assignment rules: %w", err))
 	}
 
@@ -616,7 +617,7 @@ func resourceWorkloadScalingPolicyUpdate(ctx context.Context, d *schema.Resource
 		"memory_event",
 		"anti_affinity",
 		FieldConfidence,
-		"assignment_rules",
+		FieldAssignmentRules,
 	) {
 		tflog.Info(ctx, "scaling policy up to date")
 		return nil
@@ -632,7 +633,7 @@ func resourceWorkloadScalingPolicyUpdate(ctx context.Context, d *schema.Resource
 	if err != nil {
 		return diag.FromErr(err)
 	}
-	ar, err := toAssignmentRules(toSection(d, "assignment_rules"))
+	ar, err := toAssignmentRules(toSection(d, FieldAssignmentRules))
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -1176,8 +1177,8 @@ func toAssignmentRules(in map[string]any) (*[]sdk.WorkloadoptimizationV1ScalingP
 		return nil, nil
 	}
 
-	rules := in["rules"].([]any)
-	if len(rules) == 0 {
+	rules, ok := in["rules"].([]any)
+	if !ok || len(rules) == 0 {
 		return &[]sdk.WorkloadoptimizationV1ScalingPolicyAssignmentRule{}, nil
 	}
 
@@ -1280,11 +1281,15 @@ func toWorkloadAssignmentRule(ruleMap map[string]any) (*sdk.Workloadoptimization
 }
 
 func getFirstElem(in map[string]any, key string) map[string]any {
-	val, ok := in[key]
-	if !ok || val == nil || len(val.([]any)) == 0 || val.([]any)[0] == nil {
+	list, ok := in[key].([]any)
+	if !ok || len(list) == 0 {
 		return nil
 	}
-	return val.([]any)[0].(map[string]any)
+	elem, ok := list[0].(map[string]any)
+	if !ok {
+		return nil
+	}
+	return elem
 }
 
 func toLabelSelectorOperator(in string) sdk.WorkloadoptimizationV1KubernetesLabelSelectorOperator {
@@ -1301,8 +1306,12 @@ func toLabelSelectorOperator(in string) sdk.WorkloadoptimizationV1KubernetesLabe
 	return sdk.KUBERNETESLABELSELECTOROPUNSPECIFIED
 }
 
-func toAssignmentRulesMap(rules *[]sdk.WorkloadoptimizationV1ScalingPolicyAssignmentRule) []any {
+func toAssignmentRulesMap(previous map[string]any, rules *[]sdk.WorkloadoptimizationV1ScalingPolicyAssignmentRule) []any {
 	if rules == nil {
+		return nil
+	}
+
+	if len(*rules) == 0 && len(previous) == 0 {
 		return nil
 	}
 
