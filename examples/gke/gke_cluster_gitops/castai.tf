@@ -46,11 +46,11 @@ resource "castai_node_template" "default_by_castai" {
 resource "castai_node_template" "example_spot_template" {
   cluster_id = castai_gke_cluster.this.id
 
-  name                     = "example_spot_template"
-  is_default               = false
-  is_enabled               = true
-  configuration_id         = castai_node_configuration.default.id
-  should_taint             = true
+  name             = "example_spot_template"
+  is_default       = false
+  is_enabled       = true
+  configuration_id = castai_node_configuration.default.id
+  should_taint     = true
 
   custom_labels = {
     type = "spot"

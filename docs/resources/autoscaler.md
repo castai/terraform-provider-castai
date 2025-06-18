@@ -142,9 +142,9 @@ Optional:
 
 Optional:
 
-- `enabled` (Boolean) enable/disable spot instances policy.
-- `max_reclaim_rate` (Number) max allowed reclaim rate when choosing spot instance type. E.g. if the value is 10%, instance types having 10% or higher reclaim rate will not be considered. Set to zero to use all instance types regardless of reclaim rate.
-- `spot_backups` (Block List, Max: 1) policy defining whether autoscaler can use spot backups instead of spot instances when spot instances are not available. (see [below for nested schema](#nestedblock--autoscaler_settings--spot_instances--spot_backups))
+- `enabled` (Boolean, Deprecated) enable/disable spot instances policy.
+- `max_reclaim_rate` (Number, Deprecated) max allowed reclaim rate when choosing spot instance type. E.g. if the value is 10%, instance types having 10% or higher reclaim rate will not be considered. Set to zero to use all instance types regardless of reclaim rate.
+- `spot_backups` (Block List, Max: 1, Deprecated) policy defining whether autoscaler can use spot backups instead of spot instances when spot instances are not available. (see [below for nested schema](#nestedblock--autoscaler_settings--spot_instances--spot_backups))
 - `spot_diversity_enabled` (Boolean, Deprecated) enable/disable spot diversity policy. When enabled, autoscaler will try to balance between diverse and cost optimal instance types.
 - `spot_diversity_price_increase_limit` (Number, Deprecated) allowed node configuration price increase when diversifying instance types. E.g. if the value is 10%, then the overall price of diversified instance types can be 10% higher than the price of the optimal configuration.
 - `spot_interruption_predictions` (Block List, Max: 1, Deprecated) configure the handling of SPOT interruption predictions. (see [below for nested schema](#nestedblock--autoscaler_settings--spot_instances--spot_interruption_predictions))
