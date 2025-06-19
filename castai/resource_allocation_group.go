@@ -2,8 +2,10 @@ package castai
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 
+	"github.com/hashicorp/go-uuid"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -18,12 +20,14 @@ func resourceAllocationGroup() *schema.Resource {
 		ReadContext:   resourceAllocationGroupRead,
 		UpdateContext: resourceAllocationGroupUpdate,
 		DeleteContext: resourceAllocationGroupDelete,
-		Importer:      &schema.ResourceImporter{},
+		Importer: &schema.ResourceImporter{
+			StateContext: allocationGroupImporter,
+		},
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:             schema.TypeString,
 				Required:         true,
-				Description:      "Scaling policy name",
+				Description:      "Allocation group name",
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringMatch(k8sNameRegex, "name must adhere to the format guidelines of Kubernetes labels/annotations")),
 			},
 			"cluster_ids": {
@@ -66,6 +70,25 @@ func resourceAllocationGroup() *schema.Resource {
 	}
 }
 
+func allocationGroupImporter(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
+	client := meta.(*ProviderConfig).api
+	if _, err := uuid.ParseUUID(d.Id()); err != nil {
+		return nil, fmt.Errorf("error parsing uuid: %w", err)
+	}
+	resp, err := client.AllocationGroupAPIGetAllocationGroupWithResponse(ctx, d.Id())
+	if err != nil {
+		return nil, fmt.Errorf("error getting allocation group: %w", err)
+	}
+
+	err = sdk.CheckOKResponse(resp)
+	if err != nil {
+		return nil, fmt.Errorf("error checking response: %w", err)
+	}
+
+	d.SetId(resp.JSON200.Id)
+	return []*schema.ResourceData{d}, nil
+}
+
 func resourceAllocationGroupRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(*ProviderConfig).api
 
@@ -74,7 +97,7 @@ func resourceAllocationGroupRead(ctx context.Context, d *schema.ResourceData, me
 		return diag.FromErr(err)
 	}
 	if !d.IsNewResource() && resp.StatusCode() == http.StatusNotFound {
-		tflog.Warn(ctx, "Scaling policy not found, removing from state", map[string]any{"id": d.Id()})
+		tflog.Warn(ctx, "Allocation group not found, removing from state", map[string]any{"id": d.Id()})
 		d.SetId("")
 		return nil
 	}
@@ -84,8 +107,21 @@ func resourceAllocationGroupRead(ctx context.Context, d *schema.ResourceData, me
 
 	ag := resp.JSON200
 
-	// TODO (romank): set fields in d from the ag
-	//d.Set("name", ) etc.
+	if err := d.Set("name", ag.Name); err != nil {
+		return diag.FromErr(fmt.Errorf("setting name: %w", err))
+	}
+	if err := d.Set("cluster_ids", ag.Filter.ClusterIds); err != nil {
+		return diag.FromErr(fmt.Errorf("setting cluster_ids: %w", err))
+	}
+	if err := d.Set("namespaces", ag.Filter.Namespaces); err != nil {
+		return diag.FromErr(fmt.Errorf("setting namespaces: %w", err))
+	}
+	if err := d.Set("labels", ag.Filter.Labels); err != nil {
+		return diag.FromErr(fmt.Errorf("setting labels: %w", err))
+	}
+	if err := d.Set("labels_operator", ag.Filter.LabelsOperator); err != nil {
+		return diag.FromErr(fmt.Errorf("setting labels_operator: %w", err))
+	}
 	return nil
 }
 
@@ -94,13 +130,35 @@ func resourceAllocationGroupCreate(ctx context.Context, d *schema.ResourceData, 
 
 	clusterIds := toClusterIds(toSection(d, "clusterIds"))
 
+	listParams := &sdk.AllocationGroupAPIListAllocationGroupsParams{
+		ClusterIds: &clusterIds,
+	}
+
+	response, err := client.AllocationGroupAPIListAllocationGroupsWithResponse(ctx, listParams)
+
+	if err != nil {
+		return diag.FromErr(err)
+	}
+	if err := sdk.CheckOKResponse(response, err); err != nil {
+		return diag.FromErr(err)
+	}
+
+	allocationGroups := *response.JSON200.Items
+
+	allocationGroupName := d.Get("name").(*string)
+	if len(allocationGroups) > 0 {
+		for _, ag := range allocationGroups {
+			if *ag.Name == *allocationGroupName {
+				return diag.Errorf("allocation group already exists")
+			}
+		}
+	}
 	namespaces := toStringList(d.Get("namespaces").([]interface{}))
 
 	labels := toLabels(toSection(d, "labels"))
 
 	labelsOperator := toLabelsOperator(toSection(d, "labels_operator"))
 
-	// TODO (romank): check what happens if we have both labels and namespaces selectors, can we have both?
 	body := sdk.AllocationGroupAPICreateAllocationGroupJSONRequestBody{
 		Filter: &sdk.CostreportV1beta1AllocationGroupFilter{
 			ClusterIds:     &clusterIds,
@@ -114,13 +172,9 @@ func resourceAllocationGroupCreate(ctx context.Context, d *schema.ResourceData, 
 	if err != nil {
 		return nil
 	}
-	// TODO (romank): finish this status codes check, look into resource_workload_scaling_policy.go on how.
 	switch create.StatusCode() {
 	case http.StatusOK:
 		d.SetId(*create.JSON200.Id)
-		return resourceAllocationGroupRead(ctx, d, meta)
-	// TODO (romank): do we have a status conflict in our response from API?
-	case http.StatusConflict:
 		return resourceAllocationGroupRead(ctx, d, meta)
 	default:
 		return diag.Errorf("expected status code %d, received: status=%d body=%s", http.StatusOK, create.StatusCode(), string(create.GetBody()))
@@ -128,13 +182,14 @@ func resourceAllocationGroupCreate(ctx context.Context, d *schema.ResourceData, 
 }
 
 func toLabelsOperator(section map[string]interface{}) *sdk.CostreportV1beta1FilterOperator {
+	defaultLabelOperator := sdk.OR
 	if v, ok := section["labels_operator"]; ok {
 		if lv := v.(string); lv != "" {
 			labelOperator := sdk.CostreportV1beta1FilterOperator(lv)
 			return &labelOperator
 		}
 	}
-	return nil
+	return &defaultLabelOperator
 }
 
 func toClusterIds(i map[string]interface{}) []string {
@@ -151,15 +206,15 @@ func toLabels(i map[string]interface{}) []sdk.CostreportV1beta1AllocationGroupFi
 		if lv := v.(map[string]interface{}); len(lv) > 0 {
 			labelsStringMap := toStringMap(lv)
 
+			operator := sdk.CostreportV1beta1AllocationGroupFilterLabelValueOperatorEqual
+
 			if len(labelsStringMap) > 0 {
 				labels := make([]sdk.CostreportV1beta1AllocationGroupFilterLabelValue, 0, len(labelsStringMap))
 				for labelKey, labelValue := range labelsStringMap {
 					label := sdk.CostreportV1beta1AllocationGroupFilterLabelValue{
-						Label: &labelKey,
-						Value: &labelValue,
-						// TODO (romank): check if the operator can be nil from the backend side and can we just enable
-						// the equals one, check services/cost-report/internal/server/allocationgroup/allocationgroup.go
-						// for that.
+						Label:    &labelKey,
+						Value:    &labelValue,
+						Operator: &operator,
 					}
 					labels = append(labels, label)
 					return labels
@@ -178,7 +233,7 @@ func resourceAllocationGroupUpdate(ctx context.Context, d *schema.ResourceData, 
 		"labels",
 		"labels_operator",
 	) {
-		tflog.Info(ctx, "scaling policy up to date")
+		tflog.Info(ctx, "allocation group up to date")
 		return nil
 	}
 
