@@ -82,7 +82,7 @@ Optional:
 - `is_scoped_mode` (Boolean) run autoscaler in scoped mode. Only marked pods and nodes will be considered.
 - `node_downscaler` (Block List, Max: 1) node downscaler defines policies for removing nodes based on the configured conditions. (see [below for nested schema](#nestedblock--autoscaler_settings--node_downscaler))
 - `node_templates_partial_matching_enabled` (Boolean) marks whether partial matching should be used when deciding which custom node template to select.
-- `spot_instances` (Block List, Max: 1) policy defining whether autoscaler can use spot instances for provisioning additional workloads. (see [below for nested schema](#nestedblock--autoscaler_settings--spot_instances))
+- `spot_instances` (Block List, Max: 1, Deprecated) policy defining whether autoscaler can use spot instances for provisioning additional workloads. (see [below for nested schema](#nestedblock--autoscaler_settings--spot_instances))
 - `unschedulable_pods` (Block List, Max: 1) policy defining autoscaler's behavior when unschedulable pods were detected. (see [below for nested schema](#nestedblock--autoscaler_settings--unschedulable_pods))
 
 <a id="nestedblock--autoscaler_settings--cluster_limits"></a>
@@ -142,12 +142,12 @@ Optional:
 
 Optional:
 
-- `enabled` (Boolean) enable/disable spot instances policy.
-- `max_reclaim_rate` (Number) max allowed reclaim rate when choosing spot instance type. E.g. if the value is 10%, instance types having 10% or higher reclaim rate will not be considered. Set to zero to use all instance types regardless of reclaim rate.
-- `spot_backups` (Block List, Max: 1) policy defining whether autoscaler can use spot backups instead of spot instances when spot instances are not available. (see [below for nested schema](#nestedblock--autoscaler_settings--spot_instances--spot_backups))
-- `spot_diversity_enabled` (Boolean) enable/disable spot diversity policy. When enabled, autoscaler will try to balance between diverse and cost optimal instance types.
-- `spot_diversity_price_increase_limit` (Number) allowed node configuration price increase when diversifying instance types. E.g. if the value is 10%, then the overall price of diversified instance types can be 10% higher than the price of the optimal configuration.
-- `spot_interruption_predictions` (Block List, Max: 1) configure the handling of SPOT interruption predictions. (see [below for nested schema](#nestedblock--autoscaler_settings--spot_instances--spot_interruption_predictions))
+- `enabled` (Boolean, Deprecated) enable/disable spot instances policy.
+- `max_reclaim_rate` (Number, Deprecated) max allowed reclaim rate when choosing spot instance type. E.g. if the value is 10%, instance types having 10% or higher reclaim rate will not be considered. Set to zero to use all instance types regardless of reclaim rate.
+- `spot_backups` (Block List, Max: 1, Deprecated) policy defining whether autoscaler can use spot backups instead of spot instances when spot instances are not available. (see [below for nested schema](#nestedblock--autoscaler_settings--spot_instances--spot_backups))
+- `spot_diversity_enabled` (Boolean, Deprecated) enable/disable spot diversity policy. When enabled, autoscaler will try to balance between diverse and cost optimal instance types.
+- `spot_diversity_price_increase_limit` (Number, Deprecated) allowed node configuration price increase when diversifying instance types. E.g. if the value is 10%, then the overall price of diversified instance types can be 10% higher than the price of the optimal configuration.
+- `spot_interruption_predictions` (Block List, Max: 1, Deprecated) configure the handling of SPOT interruption predictions. (see [below for nested schema](#nestedblock--autoscaler_settings--spot_instances--spot_interruption_predictions))
 
 <a id="nestedblock--autoscaler_settings--spot_instances--spot_backups"></a>
 ### Nested Schema for `autoscaler_settings.spot_instances.spot_backups`
@@ -175,9 +175,9 @@ Optional:
 
 - `custom_instances_enabled` (Boolean, Deprecated) enable/disable custom instances policy.
 - `enabled` (Boolean) enable/disable unschedulable pods detection policy.
-- `headroom` (Block List, Max: 1) additional headroom based on cluster's total available capacity for on-demand nodes. (see [below for nested schema](#nestedblock--autoscaler_settings--unschedulable_pods--headroom))
-- `headroom_spot` (Block List, Max: 1) additional headroom based on cluster's total available capacity for spot nodes. (see [below for nested schema](#nestedblock--autoscaler_settings--unschedulable_pods--headroom_spot))
-- `node_constraints` (Block List, Max: 1) defines the node constraints that will be applied when autoscaling with Unschedulable Pods policy. (see [below for nested schema](#nestedblock--autoscaler_settings--unschedulable_pods--node_constraints))
+- `headroom` (Block List, Max: 1, Deprecated) additional headroom based on cluster's total available capacity for on-demand nodes. (see [below for nested schema](#nestedblock--autoscaler_settings--unschedulable_pods--headroom))
+- `headroom_spot` (Block List, Max: 1, Deprecated) additional headroom based on cluster's total available capacity for spot nodes. (see [below for nested schema](#nestedblock--autoscaler_settings--unschedulable_pods--headroom_spot))
+- `node_constraints` (Block List, Max: 1, Deprecated) defines the node constraints that will be applied when autoscaling with Unschedulable Pods policy. (see [below for nested schema](#nestedblock--autoscaler_settings--unschedulable_pods--node_constraints))
 - `pod_pinner` (Block List, Max: 1) defines the Cast AI Pod Pinner components settings. (see [below for nested schema](#nestedblock--autoscaler_settings--unschedulable_pods--pod_pinner))
 
 <a id="nestedblock--autoscaler_settings--unschedulable_pods--headroom"></a>

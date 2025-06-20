@@ -182,18 +182,6 @@ module "castai-eks-cluster" {
 
     unschedulable_pods = {
       enabled = true
-
-      headroom = {
-        enabled           = true
-        cpu_percentage    = 10
-        memory_percentage = 10
-      }
-
-      headroom_spot = {
-        enabled           = true
-        cpu_percentage    = 10
-        memory_percentage = 10
-      }
     }
 
     node_downscaler = {
