@@ -458,10 +458,12 @@ const (
 
 // Defines values for WorkloadoptimizationV1KubernetesLabelSelectorOperator.
 const (
+	KUBERNETESLABELSELECTOROPCONTAINS     WorkloadoptimizationV1KubernetesLabelSelectorOperator = "KUBERNETES_LABEL_SELECTOR_OP_CONTAINS"
 	KUBERNETESLABELSELECTOROPDOESNOTEXIST WorkloadoptimizationV1KubernetesLabelSelectorOperator = "KUBERNETES_LABEL_SELECTOR_OP_DOES_NOT_EXIST"
 	KUBERNETESLABELSELECTOROPEXISTS       WorkloadoptimizationV1KubernetesLabelSelectorOperator = "KUBERNETES_LABEL_SELECTOR_OP_EXISTS"
 	KUBERNETESLABELSELECTOROPIN           WorkloadoptimizationV1KubernetesLabelSelectorOperator = "KUBERNETES_LABEL_SELECTOR_OP_IN"
 	KUBERNETESLABELSELECTOROPNOTIN        WorkloadoptimizationV1KubernetesLabelSelectorOperator = "KUBERNETES_LABEL_SELECTOR_OP_NOT_IN"
+	KUBERNETESLABELSELECTOROPREGEX        WorkloadoptimizationV1KubernetesLabelSelectorOperator = "KUBERNETES_LABEL_SELECTOR_OP_REGEX"
 	KUBERNETESLABELSELECTOROPUNSPECIFIED  WorkloadoptimizationV1KubernetesLabelSelectorOperator = "KUBERNETES_LABEL_SELECTOR_OP_UNSPECIFIED"
 )
 
@@ -666,6 +668,26 @@ const (
 	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPESCALINGPOLICYORDERUPDATED  WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_SCALING_POLICY_ORDER_UPDATED"
 	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPESCALINGPOLICYUPDATED       WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_SCALING_POLICY_UPDATED"
 	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPESURGE                      WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_SURGE"
+)
+
+// Defines values for WorkloadOptimizationAPIGetInstallCmdParamsCmePresets.
+const (
+	WorkloadOptimizationAPIGetInstallCmdParamsCmePresetsCODAHALE      WorkloadOptimizationAPIGetInstallCmdParamsCmePresets = "CODAHALE"
+	WorkloadOptimizationAPIGetInstallCmdParamsCmePresetsDROPWIZARD    WorkloadOptimizationAPIGetInstallCmdParamsCmePresets = "DROPWIZARD"
+	WorkloadOptimizationAPIGetInstallCmdParamsCmePresetsINVALID       WorkloadOptimizationAPIGetInstallCmdParamsCmePresets = "INVALID"
+	WorkloadOptimizationAPIGetInstallCmdParamsCmePresetsMICROMETER    WorkloadOptimizationAPIGetInstallCmdParamsCmePresets = "MICROMETER"
+	WorkloadOptimizationAPIGetInstallCmdParamsCmePresetsOTELJAVAAGENT WorkloadOptimizationAPIGetInstallCmdParamsCmePresets = "OTEL_JAVA_AGENT"
+	WorkloadOptimizationAPIGetInstallCmdParamsCmePresetsSDKPROMETHEUS WorkloadOptimizationAPIGetInstallCmdParamsCmePresets = "SDK_PROMETHEUS"
+)
+
+// Defines values for WorkloadOptimizationAPIGetInstallScriptParamsCmePresets.
+const (
+	WorkloadOptimizationAPIGetInstallScriptParamsCmePresetsCODAHALE      WorkloadOptimizationAPIGetInstallScriptParamsCmePresets = "CODAHALE"
+	WorkloadOptimizationAPIGetInstallScriptParamsCmePresetsDROPWIZARD    WorkloadOptimizationAPIGetInstallScriptParamsCmePresets = "DROPWIZARD"
+	WorkloadOptimizationAPIGetInstallScriptParamsCmePresetsINVALID       WorkloadOptimizationAPIGetInstallScriptParamsCmePresets = "INVALID"
+	WorkloadOptimizationAPIGetInstallScriptParamsCmePresetsMICROMETER    WorkloadOptimizationAPIGetInstallScriptParamsCmePresets = "MICROMETER"
+	WorkloadOptimizationAPIGetInstallScriptParamsCmePresetsOTELJAVAAGENT WorkloadOptimizationAPIGetInstallScriptParamsCmePresets = "OTEL_JAVA_AGENT"
+	WorkloadOptimizationAPIGetInstallScriptParamsCmePresetsSDKPROMETHEUS WorkloadOptimizationAPIGetInstallScriptParamsCmePresets = "SDK_PROMETHEUS"
 )
 
 // CommitmentsAPIBatchDeleteCommitmentsRequest defines model for CommitmentsAPI_BatchDeleteCommitments_request.
@@ -5581,6 +5603,13 @@ type WorkloadoptimizationV1KubernetesLabelExpressionMatcher struct {
 	Key string `json:"key"`
 
 	// Operator KubernetesLabelSelectorOperator defines the set of operators for a selector requirement.
+	//
+	//  - KUBERNETES_LABEL_SELECTOR_OP_IN: Selects resources with label values in the provided set.
+	//  - KUBERNETES_LABEL_SELECTOR_OP_NOT_IN: Selects resources with label values not in the provided set.
+	//  - KUBERNETES_LABEL_SELECTOR_OP_EXISTS: Selects resources that have the specified label key, regardless of value.
+	//  - KUBERNETES_LABEL_SELECTOR_OP_DOES_NOT_EXIST: Selects resources that do not have the specified label key.
+	//  - KUBERNETES_LABEL_SELECTOR_OP_CONTAINS: Selects resources where the label value contains the specified substring.
+	//  - KUBERNETES_LABEL_SELECTOR_OP_REGEX: Selects resources where the label value matches the specified regular expression.
 	Operator WorkloadoptimizationV1KubernetesLabelSelectorOperator `json:"operator"`
 
 	// Values Values is an array of string values.
@@ -5588,16 +5617,17 @@ type WorkloadoptimizationV1KubernetesLabelExpressionMatcher struct {
 }
 
 // WorkloadoptimizationV1KubernetesLabelSelectorOperator KubernetesLabelSelectorOperator defines the set of operators for a selector requirement.
+//
+//   - KUBERNETES_LABEL_SELECTOR_OP_IN: Selects resources with label values in the provided set.
+//   - KUBERNETES_LABEL_SELECTOR_OP_NOT_IN: Selects resources with label values not in the provided set.
+//   - KUBERNETES_LABEL_SELECTOR_OP_EXISTS: Selects resources that have the specified label key, regardless of value.
+//   - KUBERNETES_LABEL_SELECTOR_OP_DOES_NOT_EXIST: Selects resources that do not have the specified label key.
+//   - KUBERNETES_LABEL_SELECTOR_OP_CONTAINS: Selects resources where the label value contains the specified substring.
+//   - KUBERNETES_LABEL_SELECTOR_OP_REGEX: Selects resources where the label value matches the specified regular expression.
 type WorkloadoptimizationV1KubernetesLabelSelectorOperator string
 
 // WorkloadoptimizationV1KubernetesNamespaceMatcher Represents a namespace matcher for a scaling policy. If multiple matchers are defined, the workload must match all of them.
 type WorkloadoptimizationV1KubernetesNamespaceMatcher struct {
-	// All Defines matching all namespaces. Cannot be set together with other matchers.
-	All *bool `json:"all"`
-
-	// Labels Defines matching by labels via map of {key,value} pairs.
-	Labels *map[string]string `json:"labels,omitempty"`
-
 	// LabelsExpressions Defines matching by a list of label selector requirements.
 	LabelsExpressions *[]WorkloadoptimizationV1KubernetesLabelExpressionMatcher `json:"labelsExpressions,omitempty"`
 
@@ -5607,12 +5637,7 @@ type WorkloadoptimizationV1KubernetesNamespaceMatcher struct {
 
 // WorkloadoptimizationV1KubernetesWorkloadMatcher defines model for workloadoptimization.v1.KubernetesWorkloadMatcher.
 type WorkloadoptimizationV1KubernetesWorkloadMatcher struct {
-	// All Defines matching all namespaces. Cannot be set together with other matchers.
-	All *bool     `json:"all"`
 	Gvk *[]string `json:"gvk,omitempty"`
-
-	// Labels Defines matching by labels via map of {key,value} pairs.
-	Labels *map[string]string `json:"labels,omitempty"`
 
 	// LabelsExpressions Defines matching by a list of label selector requirements.
 	LabelsExpressions *[]WorkloadoptimizationV1KubernetesLabelExpressionMatcher `json:"labelsExpressions,omitempty"`
@@ -6983,8 +7008,22 @@ type WorkloadOptimizationAPIGetWorkloadParams struct {
 
 // WorkloadOptimizationAPIGetInstallCmdParams defines parameters for WorkloadOptimizationAPIGetInstallCmd.
 type WorkloadOptimizationAPIGetInstallCmdParams struct {
-	ClusterId string `form:"clusterId" json:"clusterId"`
+	ClusterId  string                                                  `form:"clusterId" json:"clusterId"`
+	CmeDsUrl   *string                                                 `form:"cmeDsUrl,omitempty" json:"cmeDsUrl,omitempty"`
+	CmePresets *[]WorkloadOptimizationAPIGetInstallCmdParamsCmePresets `form:"cmePresets,omitempty" json:"cmePresets,omitempty"`
 }
+
+// WorkloadOptimizationAPIGetInstallCmdParamsCmePresets defines parameters for WorkloadOptimizationAPIGetInstallCmd.
+type WorkloadOptimizationAPIGetInstallCmdParamsCmePresets string
+
+// WorkloadOptimizationAPIGetInstallScriptParams defines parameters for WorkloadOptimizationAPIGetInstallScript.
+type WorkloadOptimizationAPIGetInstallScriptParams struct {
+	CmeDsUrl   *string                                                    `form:"cmeDsUrl,omitempty" json:"cmeDsUrl,omitempty"`
+	CmePresets *[]WorkloadOptimizationAPIGetInstallScriptParamsCmePresets `form:"cmePresets,omitempty" json:"cmePresets,omitempty"`
+}
+
+// WorkloadOptimizationAPIGetInstallScriptParamsCmePresets defines parameters for WorkloadOptimizationAPIGetInstallScript.
+type WorkloadOptimizationAPIGetInstallScriptParamsCmePresets string
 
 // InventoryAPIListZonesParams defines parameters for InventoryAPIListZones.
 type InventoryAPIListZonesParams struct {
