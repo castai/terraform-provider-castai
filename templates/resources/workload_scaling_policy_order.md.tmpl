@@ -30,12 +30,6 @@ gradually reassigned to the newly ordered matching policy.
 For each connected cluster, there is a list of default scaling policy. An existing scaling policy order can be imported into the
 Terraform state using the [`import`](https://developer.hashicorp.com/terraform/language/import#syntax) block (recommended for Terraform 1.5.0+).
 
-Using the `import` block is a simpler and more convenient way of importing resources.
-
-### Import using `import` block
-
-#### Import a single scaling policy
-
 1. Create an `import.tf` file with the following content:
 
    ```tf

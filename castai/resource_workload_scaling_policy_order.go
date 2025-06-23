@@ -44,7 +44,8 @@ func resourceWorkloadScalingPolicyOrder() *schema.Resource {
 				Required:    true,
 				Description: "List of scaling policy IDs in the order they should be applied.",
 				Elem: &schema.Schema{
-					Type: schema.TypeString,
+					ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
+					Type:             schema.TypeString,
 				},
 			},
 		},
@@ -102,8 +103,7 @@ func resourceWorkloadScalingPolicyOrderSet(ctx context.Context, d *schema.Resour
 
 func resourceWorkloadScalingPolicyOrderDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	// We don't need to do anything special for deletion.
-	// The scaling policies themselves are managed by the workload_scaling_policy resource.
-	// This resource just manages their order.
+	// We could try to restore the initial order before the TF was used, but we don't have that information.
 	return nil
 }
 
