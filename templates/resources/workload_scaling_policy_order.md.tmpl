@@ -1,0 +1,54 @@
+---
+page_title: "{{.Name}} {{.Type}} - {{.ProviderName}}"
+subcategory: ""
+description: |-
+{{ .Description | plainmarkdown | trimspace | prefixlines "  " }}
+---
+
+# {{.Name}} ({{.Type}})
+{{ .Description | trimspace }}
+
+Policy priority determines which policy a workload is assigned to when multiple policies have assignment rules that
+could match the same workload.
+
+Policies higher in the list have higher priority and will be evaluated first when determining
+workload assignments. This allows you to create a hierarchy where more specific policies take precedence over general
+ones.
+
+> [!NOTE]
+> This change is propagated asynchronously, so it may take some time to be reflected in the system. Workloads will be
+gradually reassigned to the newly ordered matching policy.
+
+## Example Usage
+
+{{ tffile .ExampleFile }}
+
+{{ .SchemaMarkdown | trimspace }}
+
+## Importing
+
+For each connected cluster, there is a list of default scaling policy. An existing scaling policy order can be imported into the
+Terraform state using the [`import`](https://developer.hashicorp.com/terraform/language/import#syntax) block (recommended for Terraform 1.5.0+).
+
+1. Create an `import.tf` file with the following content:
+
+   ```tf
+   import {
+    to = castai_workload_scaling_policy_order.custom
+    id = var.castai_gke_cluster_id
+   }
+   ```
+
+2. Run the `terraform import` command:
+
+   ```shell
+   terraform plan -out=import.plan -var-file=tf.vars -generate-config-out=generated.tf
+   ```
+
+3. Review the `generated.tf` file and ensure the order you are interested in.
+
+4. Apply the import plan:
+
+   ```shell
+   terraform apply "import.plan"
+   ```

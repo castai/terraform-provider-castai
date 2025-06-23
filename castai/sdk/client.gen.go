@@ -785,7 +785,7 @@ type ClientInterface interface {
 	WorkloadOptimizationAPIGetInstallCmd(ctx context.Context, params *WorkloadOptimizationAPIGetInstallCmdParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// WorkloadOptimizationAPIGetInstallScript request
-	WorkloadOptimizationAPIGetInstallScript(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
+	WorkloadOptimizationAPIGetInstallScript(ctx context.Context, params *WorkloadOptimizationAPIGetInstallScriptParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// InventoryAPIListZones request
 	InventoryAPIListZones(ctx context.Context, params *InventoryAPIListZonesParams, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -3849,8 +3849,8 @@ func (c *Client) WorkloadOptimizationAPIGetInstallCmd(ctx context.Context, param
 	return c.Client.Do(req)
 }
 
-func (c *Client) WorkloadOptimizationAPIGetInstallScript(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewWorkloadOptimizationAPIGetInstallScriptRequest(c.Server)
+func (c *Client) WorkloadOptimizationAPIGetInstallScript(ctx context.Context, params *WorkloadOptimizationAPIGetInstallScriptParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewWorkloadOptimizationAPIGetInstallScriptRequest(c.Server, params)
 	if err != nil {
 		return nil, err
 	}
@@ -14084,6 +14084,38 @@ func NewWorkloadOptimizationAPIGetInstallCmdRequest(server string, params *Workl
 			}
 		}
 
+		if params.CmeDsUrl != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "cmeDsUrl", runtime.ParamLocationQuery, *params.CmeDsUrl); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.CmePresets != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "cmePresets", runtime.ParamLocationQuery, *params.CmePresets); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
 		queryURL.RawQuery = queryValues.Encode()
 	}
 
@@ -14096,7 +14128,7 @@ func NewWorkloadOptimizationAPIGetInstallCmdRequest(server string, params *Workl
 }
 
 // NewWorkloadOptimizationAPIGetInstallScriptRequest generates requests for WorkloadOptimizationAPIGetInstallScript
-func NewWorkloadOptimizationAPIGetInstallScriptRequest(server string) (*http.Request, error) {
+func NewWorkloadOptimizationAPIGetInstallScriptRequest(server string, params *WorkloadOptimizationAPIGetInstallScriptParams) (*http.Request, error) {
 	var err error
 
 	serverURL, err := url.Parse(server)
@@ -14112,6 +14144,44 @@ func NewWorkloadOptimizationAPIGetInstallScriptRequest(server string) (*http.Req
 	queryURL, err := serverURL.Parse(operationPath)
 	if err != nil {
 		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.CmeDsUrl != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "cmeDsUrl", runtime.ParamLocationQuery, *params.CmeDsUrl); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.CmePresets != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "cmePresets", runtime.ParamLocationQuery, *params.CmePresets); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
 	}
 
 	req, err := http.NewRequest("GET", queryURL.String(), nil)
@@ -15034,7 +15104,7 @@ type ClientWithResponsesInterface interface {
 	WorkloadOptimizationAPIGetInstallCmdWithResponse(ctx context.Context, params *WorkloadOptimizationAPIGetInstallCmdParams) (*WorkloadOptimizationAPIGetInstallCmdResponse, error)
 
 	// WorkloadOptimizationAPIGetInstallScript request
-	WorkloadOptimizationAPIGetInstallScriptWithResponse(ctx context.Context) (*WorkloadOptimizationAPIGetInstallScriptResponse, error)
+	WorkloadOptimizationAPIGetInstallScriptWithResponse(ctx context.Context, params *WorkloadOptimizationAPIGetInstallScriptParams) (*WorkloadOptimizationAPIGetInstallScriptResponse, error)
 
 	// InventoryAPIListZones request
 	InventoryAPIListZonesWithResponse(ctx context.Context, params *InventoryAPIListZonesParams) (*InventoryAPIListZonesResponse, error)
@@ -22975,8 +23045,8 @@ func (c *ClientWithResponses) WorkloadOptimizationAPIGetInstallCmdWithResponse(c
 }
 
 // WorkloadOptimizationAPIGetInstallScriptWithResponse request returning *WorkloadOptimizationAPIGetInstallScriptResponse
-func (c *ClientWithResponses) WorkloadOptimizationAPIGetInstallScriptWithResponse(ctx context.Context) (*WorkloadOptimizationAPIGetInstallScriptResponse, error) {
-	rsp, err := c.WorkloadOptimizationAPIGetInstallScript(ctx)
+func (c *ClientWithResponses) WorkloadOptimizationAPIGetInstallScriptWithResponse(ctx context.Context, params *WorkloadOptimizationAPIGetInstallScriptParams) (*WorkloadOptimizationAPIGetInstallScriptResponse, error) {
+	rsp, err := c.WorkloadOptimizationAPIGetInstallScript(ctx, params)
 	if err != nil {
 		return nil, err
 	}

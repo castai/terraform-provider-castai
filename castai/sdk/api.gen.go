@@ -668,6 +668,26 @@ const (
 	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPESURGE                      WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_SURGE"
 )
 
+// Defines values for WorkloadOptimizationAPIGetInstallCmdParamsCmePresets.
+const (
+	WorkloadOptimizationAPIGetInstallCmdParamsCmePresetsCODAHALE      WorkloadOptimizationAPIGetInstallCmdParamsCmePresets = "CODAHALE"
+	WorkloadOptimizationAPIGetInstallCmdParamsCmePresetsDROPWIZARD    WorkloadOptimizationAPIGetInstallCmdParamsCmePresets = "DROPWIZARD"
+	WorkloadOptimizationAPIGetInstallCmdParamsCmePresetsINVALID       WorkloadOptimizationAPIGetInstallCmdParamsCmePresets = "INVALID"
+	WorkloadOptimizationAPIGetInstallCmdParamsCmePresetsMICROMETER    WorkloadOptimizationAPIGetInstallCmdParamsCmePresets = "MICROMETER"
+	WorkloadOptimizationAPIGetInstallCmdParamsCmePresetsOTELJAVAAGENT WorkloadOptimizationAPIGetInstallCmdParamsCmePresets = "OTEL_JAVA_AGENT"
+	WorkloadOptimizationAPIGetInstallCmdParamsCmePresetsSDKPROMETHEUS WorkloadOptimizationAPIGetInstallCmdParamsCmePresets = "SDK_PROMETHEUS"
+)
+
+// Defines values for WorkloadOptimizationAPIGetInstallScriptParamsCmePresets.
+const (
+	WorkloadOptimizationAPIGetInstallScriptParamsCmePresetsCODAHALE      WorkloadOptimizationAPIGetInstallScriptParamsCmePresets = "CODAHALE"
+	WorkloadOptimizationAPIGetInstallScriptParamsCmePresetsDROPWIZARD    WorkloadOptimizationAPIGetInstallScriptParamsCmePresets = "DROPWIZARD"
+	WorkloadOptimizationAPIGetInstallScriptParamsCmePresetsINVALID       WorkloadOptimizationAPIGetInstallScriptParamsCmePresets = "INVALID"
+	WorkloadOptimizationAPIGetInstallScriptParamsCmePresetsMICROMETER    WorkloadOptimizationAPIGetInstallScriptParamsCmePresets = "MICROMETER"
+	WorkloadOptimizationAPIGetInstallScriptParamsCmePresetsOTELJAVAAGENT WorkloadOptimizationAPIGetInstallScriptParamsCmePresets = "OTEL_JAVA_AGENT"
+	WorkloadOptimizationAPIGetInstallScriptParamsCmePresetsSDKPROMETHEUS WorkloadOptimizationAPIGetInstallScriptParamsCmePresets = "SDK_PROMETHEUS"
+)
+
 // CommitmentsAPIBatchDeleteCommitmentsRequest defines model for CommitmentsAPI_BatchDeleteCommitments_request.
 type CommitmentsAPIBatchDeleteCommitmentsRequest struct {
 	// CommitmentIds IDs of commitments to delete.  A maximum of 1000 commitments can be deleted in a batch.
@@ -6983,8 +7003,22 @@ type WorkloadOptimizationAPIGetWorkloadParams struct {
 
 // WorkloadOptimizationAPIGetInstallCmdParams defines parameters for WorkloadOptimizationAPIGetInstallCmd.
 type WorkloadOptimizationAPIGetInstallCmdParams struct {
-	ClusterId string `form:"clusterId" json:"clusterId"`
+	ClusterId  string                                                  `form:"clusterId" json:"clusterId"`
+	CmeDsUrl   *string                                                 `form:"cmeDsUrl,omitempty" json:"cmeDsUrl,omitempty"`
+	CmePresets *[]WorkloadOptimizationAPIGetInstallCmdParamsCmePresets `form:"cmePresets,omitempty" json:"cmePresets,omitempty"`
 }
+
+// WorkloadOptimizationAPIGetInstallCmdParamsCmePresets defines parameters for WorkloadOptimizationAPIGetInstallCmd.
+type WorkloadOptimizationAPIGetInstallCmdParamsCmePresets string
+
+// WorkloadOptimizationAPIGetInstallScriptParams defines parameters for WorkloadOptimizationAPIGetInstallScript.
+type WorkloadOptimizationAPIGetInstallScriptParams struct {
+	CmeDsUrl   *string                                                    `form:"cmeDsUrl,omitempty" json:"cmeDsUrl,omitempty"`
+	CmePresets *[]WorkloadOptimizationAPIGetInstallScriptParamsCmePresets `form:"cmePresets,omitempty" json:"cmePresets,omitempty"`
+}
+
+// WorkloadOptimizationAPIGetInstallScriptParamsCmePresets defines parameters for WorkloadOptimizationAPIGetInstallScript.
+type WorkloadOptimizationAPIGetInstallScriptParamsCmePresets string
 
 // InventoryAPIListZonesParams defines parameters for InventoryAPIListZones.
 type InventoryAPIListZonesParams struct {
