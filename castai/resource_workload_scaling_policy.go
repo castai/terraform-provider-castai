@@ -55,6 +55,8 @@ const (
 	K8sLabelNotInOperator        = "NotIn"
 	K8sLabelExistsOperator       = "Exists"
 	K8sLabelDoesNotExistOperator = "DoesNotExist"
+	K8sLabelContainsOperator     = "Contains"
+	K8sLabelRegexOperator        = "Regex"
 )
 
 var (
@@ -1302,6 +1304,10 @@ func toLabelSelectorOperator(in string) sdk.WorkloadoptimizationV1KubernetesLabe
 		return sdk.KUBERNETESLABELSELECTOROPEXISTS
 	case K8sLabelDoesNotExistOperator:
 		return sdk.KUBERNETESLABELSELECTOROPDOESNOTEXIST
+	case K8sLabelContainsOperator:
+		return sdk.KUBERNETESLABELSELECTOROPCONTAINS
+	case K8sLabelRegexOperator:
+		return sdk.KUBERNETESLABELSELECTOROPREGEX
 	}
 	return sdk.KUBERNETESLABELSELECTOROPUNSPECIFIED
 }
@@ -1379,6 +1385,10 @@ func labelSelectorOperatorMap(in sdk.WorkloadoptimizationV1KubernetesLabelSelect
 		return K8sLabelExistsOperator
 	case sdk.KUBERNETESLABELSELECTOROPDOESNOTEXIST:
 		return K8sLabelDoesNotExistOperator
+	case sdk.KUBERNETESLABELSELECTOROPCONTAINS:
+		return K8sLabelContainsOperator
+	case sdk.KUBERNETESLABELSELECTOROPREGEX:
+		return K8sLabelRegexOperator
 	}
 	return "unspecified"
 }
