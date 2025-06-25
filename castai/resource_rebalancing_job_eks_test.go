@@ -10,6 +10,7 @@ import (
 )
 
 func TestAccResourceRebalancingJob_eks(t *testing.T) {
+	// dummy change
 	rName := fmt.Sprintf("%v-rebalancing-job-%v", ResourcePrefix, acctest.RandString(8))
 	clusterName := "core-tf-acc"
 	resource.Test(t, resource.TestCase{
