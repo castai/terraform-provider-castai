@@ -535,3 +535,4 @@ to publish the provider in the Terraform Registry.
 
 Releases will appear as **drafts**. Once marked as published on the GitHub Releases page, they will become available via
 the Terraform Registry.
+
