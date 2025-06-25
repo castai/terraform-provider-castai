@@ -5,9 +5,9 @@ provider "castai" {
 }
 
 provider "helm" {
-  kubernetes {
-    host                   = "https://${google_container_cluster.my-k8s-cluster.endpoint}"
+  kubernetes = {
+    host                   = "https://${module.gke.endpoint}"
     token                  = data.google_client_config.default.access_token
-    cluster_ca_certificate = base64decode(google_container_cluster.my-k8s-cluster.master_auth[0].cluster_ca_certificate)
+    cluster_ca_certificate = base64decode(module.gke.ca_certificate)
   }
 }
