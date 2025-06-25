@@ -33,25 +33,25 @@ resource "castai_node_template" "default_by_castai" {
   }
 
   constraints {
-    on_demand                                   = true
-    spot                                        = false
-    use_spot_fallbacks                          = true
-    fallback_restore_rate_seconds               = 300
-    enable_spot_diversity                       = true
-    spot_diversity_price_increase_limit_percent = 20
-    spot_interruption_predictions_enabled       = true
-    spot_interruption_predictions_type          = "aws-rebalance-recommendations"
-    compute_optimized_state                     = "disabled"
-    storage_optimized_state                     = "disabled"
-    is_gpu_only                                 = false
-    min_cpu                                     = 2
-    max_cpu                                     = 8
-    min_memory                                  = 4096
-    max_memory                                  = 16384
-    architectures                               = ["amd64"]
-    azs                                         = ["us-east-2a", "us-east-2b"]
-    burstable_instances                         = "disabled"
-    customer_specific                           = "disabled"
+    on_demand                                    = true
+    spot                                         = false
+    use_spot_fallbacks                           = true
+    fallback_restore_rate_seconds                = 300
+    enable_spot_reliability                      = true
+    spot_reliabiliy_price_increase_limit_percent = 20
+    spot_interruption_predictions_enabled        = true
+    spot_interruption_predictions_type           = "aws-rebalance-recommendations"
+    compute_optimized_state                      = "disabled"
+    storage_optimized_state                      = "disabled"
+    is_gpu_only                                  = false
+    min_cpu                                      = 2
+    max_cpu                                      = 8
+    min_memory                                   = 4096
+    max_memory                                   = 16384
+    architectures                                = ["amd64"]
+    azs                                          = ["us-east-2a", "us-east-2b"]
+    burstable_instances                          = "disabled"
+    customer_specific                            = "disabled"
 
     instance_families {
       include = ["c5"]
@@ -83,6 +83,7 @@ resource "castai_node_template" "default_by_castai" {
 - `custom_instances_with_extended_memory_enabled` (Boolean) Marks whether custom instances with extended memory should be used when deciding which parts of inventory are available. Custom instances are only supported in GCP.
 - `custom_labels` (Map of String) Custom labels to be added to nodes created from this template.
 - `custom_taints` (Block List) Custom taints to be added to the nodes created from this template. `shouldTaint` has to be `true` in order to create/update the node template with custom taints. If `shouldTaint` is `true`, but no custom taints are provided, the nodes will be tainted with the default node template taint. (see [below for nested schema](#nestedblock--custom_taints))
+- `gpu` (Block List, Max: 1) GPU configuration. (see [below for nested schema](#nestedblock--gpu))
 - `is_default` (Boolean) Flag whether the node template is default.
 - `is_enabled` (Boolean) Flag whether the node template is enabled and considered for autoscaling.
 - `rebalancing_config_min_nodes` (Number) Minimum nodes that will be kept when rebalancing nodes using this node template.
@@ -130,6 +131,8 @@ Optional:
 - `spot_diversity_price_increase_limit_percent` (Number) Allowed node configuration price increase when diversifying instance types. E.g. if the value is 10%, then the overall price of diversified instance types can be 10% higher than the price of the optimal configuration.
 - `spot_interruption_predictions_enabled` (Boolean) Enable/disable spot interruption predictions.
 - `spot_interruption_predictions_type` (String) Spot interruption predictions type. Can be either "aws-rebalance-recommendations" or "interruption-predictions".
+- `spot_reliability_enabled` (Boolean) Enable/disable spot reliability. When enabled, autoscaler will create instances with highest reliability score within price increase threshold.
+- `spot_reliability_price_increase_limit_percent` (Number) Allowed node price increase when using spot reliability on ordering the instance types . E.g. if the value is 10%, then the overall price of instance types can be 10% higher than the price of the optimal configuration.
 - `storage_optimized` (Boolean) Storage optimized instance constraint (deprecated).
 - `storage_optimized_state` (String) Storage optimized instance constraint - will only pick storage optimized nodes if enabled and won't pick if disabled. Empty value will have no effect. Supported values: `enabled`, `disabled` or empty string.
 - `use_spot_fallbacks` (Boolean) Spot instance fallback constraint - when true, on-demand instances will be created, when spots are unavailable.
@@ -210,6 +213,25 @@ Optional:
 
 - `effect` (String) Effect of a taint to be added to nodes created from this template, the default is NoSchedule. Allowed values: NoSchedule, NoExecute.
 - `value` (String) Value of a taint to be added to nodes created from this template.
+
+
+<a id="nestedblock--gpu"></a>
+### Nested Schema for `gpu`
+
+Optional:
+
+- `default_shared_clients_per_gpu` (Number) Defines default number of shared clients per GPU.
+- `enable_time_sharing` (Boolean) Enable/disable GPU time-sharing.
+- `sharing_configuration` (Block List) Defines GPU sharing configurations for GPU devices. (see [below for nested schema](#nestedblock--gpu--sharing_configuration))
+
+<a id="nestedblock--gpu--sharing_configuration"></a>
+### Nested Schema for `gpu.sharing_configuration`
+
+Required:
+
+- `gpu_name` (String) GPU name.
+- `shared_clients_per_gpu` (Number) Defines number of shared clients for specific GPU device.
+
 
 
 <a id="nestedblock--timeouts"></a>

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"reflect"
+	"sort"
 	"strings"
 	"time"
 
@@ -56,6 +57,8 @@ const (
 	FieldNodeTemplateShouldTaint                              = "should_taint"
 	FieldNodeTemplateSpot                                     = "spot"
 	FieldNodeTemplateSpotDiversityPriceIncreaseLimitPercent   = "spot_diversity_price_increase_limit_percent"
+	FieldNodeTemplateSpotReliabilityEnabled                   = "spot_reliability_enabled"
+	FieldNodeTemplateSpotReliabilityPriceIncreaseLimitPercent = "spot_reliability_price_increase_limit_percent"
 	FieldNodeTemplateSpotInterruptionPredictionsEnabled       = "spot_interruption_predictions_enabled"
 	FieldNodeTemplateSpotInterruptionPredictionsType          = "spot_interruption_predictions_type"
 	FieldNodeTemplateStorageOptimized                         = "storage_optimized"
@@ -77,6 +80,11 @@ const (
 	FieldNodeTemplateCPULimitEnabled                          = "cpu_limit_enabled"
 	FieldNodeTemplateCPULimitMaxCores                         = "cpu_limit_max_cores"
 	FieldNodeTemplateBareMetal                                = "bare_metal"
+	FieldNodeTemplateEnableTimeSharing                        = "enable_time_sharing"
+	FieldNodeTemplateDefaultSharedClientsPerGpu               = "default_shared_clients_per_gpu"
+	FieldNodeTemplateSharingConfiguration                     = "sharing_configuration"
+	FieldNodeTemplateSharedClientsPerGpu                      = "shared_clients_per_gpu"
+	FieldNodeTemplateSharedGpuName                            = "gpu_name"
 )
 
 const (
@@ -234,6 +242,17 @@ func resourceNodeTemplate() *schema.Resource {
 							Type:        schema.TypeInt,
 							Optional:    true,
 							Description: "Allowed node configuration price increase when diversifying instance types. E.g. if the value is 10%, then the overall price of diversified instance types can be 10% higher than the price of the optimal configuration.",
+						},
+						FieldNodeTemplateSpotReliabilityEnabled: {
+							Type:        schema.TypeBool,
+							Default:     false,
+							Optional:    true,
+							Description: "Enable/disable spot reliability. When enabled, autoscaler will create instances with highest reliability score within price increase threshold.",
+						},
+						FieldNodeTemplateSpotReliabilityPriceIncreaseLimitPercent: {
+							Type:        schema.TypeInt,
+							Optional:    true,
+							Description: "Allowed node price increase when using spot reliability on ordering the instance types . E.g. if the value is 10%, then the overall price of instance types can be 10% higher than the price of the optimal configuration.",
 						},
 						FieldNodeTemplateSpotInterruptionPredictionsEnabled: {
 							Type:        schema.TypeBool,
@@ -632,6 +651,49 @@ func resourceNodeTemplate() *schema.Resource {
 				Description: "Marks whether custom instances with extended memory should be used when deciding which parts of inventory are available. " +
 					"Custom instances are only supported in GCP.",
 			},
+			FieldNodeTemplateGpu: {
+				Type:             schema.TypeList,
+				MaxItems:         1,
+				Optional:         true,
+				Description:      "GPU configuration.",
+				DiffSuppressFunc: compareLists,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						FieldNodeTemplateEnableTimeSharing: {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Default:     nil,
+							Description: "Enable/disable GPU time-sharing.",
+						},
+						FieldNodeTemplateDefaultSharedClientsPerGpu: {
+							Type:        schema.TypeInt,
+							Optional:    true,
+							Default:     nil,
+							Description: "Defines default number of shared clients per GPU.",
+						},
+						FieldNodeTemplateSharingConfiguration: {
+							Type:             schema.TypeList,
+							Optional:         true,
+							Description:      "Defines GPU sharing configurations for GPU devices.",
+							DiffSuppressFunc: compareLists,
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									FieldNodeTemplateSharedGpuName: {
+										Type:        schema.TypeString,
+										Required:    true,
+										Description: "GPU name.",
+									},
+									FieldNodeTemplateSharedClientsPerGpu: {
+										Type:        schema.TypeInt,
+										Required:    true,
+										Description: "Defines number of shared clients for specific GPU device.",
+									},
+								},
+							},
+						},
+					},
+				},
+			},
 		},
 	}
 }
@@ -706,7 +768,50 @@ func resourceNodeTemplateRead(ctx context.Context, d *schema.ResourceData, meta 
 		return diag.FromErr(fmt.Errorf("setting custom instances with extended memory enabled: %w", err))
 	}
 
+	if nodeTemplate.Gpu != nil {
+		gpu, err := flattenGpuSettings(nodeTemplate.Gpu)
+		if err != nil {
+			return diag.FromErr(fmt.Errorf("flattening gpu settings: %w", err))
+		}
+
+		if err := d.Set(FieldNodeTemplateGpu, gpu); err != nil {
+			return diag.FromErr(fmt.Errorf("setting gpu settings: %w", err))
+		}
+	}
 	return nil
+}
+
+func flattenGpuSettings(g *sdk.NodetemplatesV1GPU) ([]map[string]any, error) {
+	if g == nil {
+		return nil, nil
+	}
+
+	out := make(map[string]any)
+
+	if g.EnableTimeSharing != nil {
+		out[FieldNodeTemplateEnableTimeSharing] = g.EnableTimeSharing
+	}
+
+	if g.DefaultSharedClientsPerGpu != nil {
+		out[FieldNodeTemplateDefaultSharedClientsPerGpu] = g.DefaultSharedClientsPerGpu
+	}
+
+	if g.SharingConfiguration != nil {
+		sharingConfigurations := make([]map[string]any, 0)
+		for gpuName, sc := range *g.SharingConfiguration {
+			if sc.SharedClientsPerGpu != nil {
+				sharingConfig := make(map[string]any)
+				sharingConfig[FieldNodeTemplateSharedClientsPerGpu] = *sc.SharedClientsPerGpu
+				sharingConfig[FieldNodeTemplateSharedGpuName] = gpuName
+
+				sharingConfigurations = append(sharingConfigurations, sharingConfig)
+			}
+		}
+		if len(sharingConfigurations) > 0 {
+			out[FieldNodeTemplateSharingConfiguration] = sharingConfigurations
+		}
+	}
+	return []map[string]any{out}, nil
 }
 
 func flattenConstraints(c *sdk.NodetemplatesV1TemplateConstraints) ([]map[string]any, error) {
@@ -765,6 +870,12 @@ func flattenConstraints(c *sdk.NodetemplatesV1TemplateConstraints) ([]map[string
 	}
 	if c.SpotDiversityPriceIncreaseLimitPercent != nil {
 		out[FieldNodeTemplateSpotDiversityPriceIncreaseLimitPercent] = c.SpotDiversityPriceIncreaseLimitPercent
+	}
+	if c.EnableSpotReliability != nil {
+		out[FieldNodeTemplateSpotReliabilityEnabled] = c.EnableSpotReliability
+	}
+	if c.SpotReliabilityPriceIncreaseLimitPercent != nil {
+		out[FieldNodeTemplateSpotReliabilityPriceIncreaseLimitPercent] = c.SpotReliabilityPriceIncreaseLimitPercent
 	}
 	if c.SpotInterruptionPredictionsEnabled != nil {
 		out[FieldNodeTemplateSpotInterruptionPredictionsEnabled] = c.SpotInterruptionPredictionsEnabled
@@ -962,6 +1073,12 @@ func updateNodeTemplate(ctx context.Context, d *schema.ResourceData, meta any, s
 		FieldNodeTemplateCustomInstancesWithExtendedMemoryEnabled,
 		FieldNodeTemplateConstraints,
 		FieldNodeTemplateIsEnabled,
+		FieldNodeTemplateGpu,
+		FieldNodeTemplateDefaultSharedClientsPerGpu,
+		FieldNodeTemplateEnableTimeSharing,
+		FieldNodeTemplateSharingConfiguration,
+		FieldNodeTemplateSharedGpuName,
+		FieldNodeTemplateSharedClientsPerGpu,
 	) {
 		log.Printf("[INFO] Nothing to update in node template")
 		return nil
@@ -1029,6 +1146,10 @@ func updateNodeTemplate(ctx context.Context, d *schema.ResourceData, meta any, s
 
 	if v, _ := d.GetOk(FieldNodeTemplateCustomInstancesWithExtendedMemoryEnabled); v != nil {
 		req.CustomInstancesWithExtendedMemoryEnabled = lo.ToPtr(v.(bool))
+	}
+
+	if v, ok := d.Get(FieldNodeTemplateGpu).([]any); ok && len(v) > 0 {
+		req.Gpu = toTemplateGpu(v[0].(map[string]any))
 	}
 
 	resp, err := client.NodeTemplatesAPIUpdateNodeTemplateWithResponse(ctx, clusterID, name, req)
@@ -1102,6 +1223,10 @@ func resourceNodeTemplateCreate(ctx context.Context, d *schema.ResourceData, met
 
 	if v, _ := d.GetOk(FieldNodeTemplateCustomInstancesEnabled); v != nil {
 		req.CustomInstancesEnabled = lo.ToPtr(v.(bool))
+	}
+
+	if v, ok := d.Get(FieldNodeTemplateGpu).([]any); ok && len(v) > 0 {
+		req.Gpu = toTemplateGpu(v[0].(map[string]any))
 	}
 
 	resp, err := client.NodeTemplatesAPICreateNodeTemplateWithResponse(ctx, clusterID, req)
@@ -1347,6 +1472,12 @@ func toTemplateConstraints(obj map[string]any) *sdk.NodetemplatesV1TemplateConst
 	if v, ok := obj[FieldNodeTemplateSpotDiversityPriceIncreaseLimitPercent].(int); ok {
 		out.SpotDiversityPriceIncreaseLimitPercent = toPtr(int32(v))
 	}
+	if v, ok := obj[FieldNodeTemplateSpotReliabilityEnabled].(bool); ok {
+		out.EnableSpotReliability = toPtr(v)
+	}
+	if v, ok := obj[FieldNodeTemplateSpotReliabilityPriceIncreaseLimitPercent].(int); ok {
+		out.SpotReliabilityPriceIncreaseLimitPercent = toPtr(int32(v))
+	}
 	if v, ok := obj[FieldNodeTemplateSpotInterruptionPredictionsEnabled].(bool); ok {
 		out.SpotInterruptionPredictionsEnabled = toPtr(v)
 	}
@@ -1428,6 +1559,54 @@ func toTemplateConstraints(obj map[string]any) *sdk.NodetemplatesV1TemplateConst
 	}
 
 	return out
+}
+
+func toTemplateGpu(obj map[string]any) *sdk.NodetemplatesV1GPU {
+	if obj == nil {
+		return nil
+	}
+
+	var defaultSharedClientsPerGpu int32
+	if v, ok := obj[FieldNodeTemplateDefaultSharedClientsPerGpu].(int); ok {
+		defaultSharedClientsPerGpu = int32(v)
+	}
+
+	var enableTimeSharing bool
+	if v, ok := obj[FieldNodeTemplateEnableTimeSharing].(bool); ok {
+		enableTimeSharing = v
+	}
+	var sharingConfig map[string]sdk.NodetemplatesV1SharedGPU
+	if sharingConfiguration, ok := obj[FieldNodeTemplateSharingConfiguration].([]interface{}); ok {
+		outSharingConfiguration := make(map[string]sdk.NodetemplatesV1SharedGPU)
+		for _, configuration := range sharingConfiguration {
+
+			sharedGPUConfig := configuration.(map[string]interface{})
+			gpuName, gpuNameOk := sharedGPUConfig[FieldNodeTemplateSharedGpuName].(string)
+			sharedClientsPerGpu, sharedClientsPerGpuOk := sharedGPUConfig[FieldNodeTemplateSharedClientsPerGpu].(int)
+			if gpuNameOk && gpuName != "" && sharedClientsPerGpuOk {
+				outSharingConfiguration[gpuName] = sdk.NodetemplatesV1SharedGPU{
+					SharedClientsPerGpu: toPtr(int32(sharedClientsPerGpu)),
+				}
+			}
+		}
+		if len(outSharingConfiguration) > 0 {
+			sharingConfig = outSharingConfiguration
+		}
+	}
+
+	// terraform treats nil values as zero values
+	// this condition checks whether the whole gpu configuration is deleted
+	// and gpu configuration should be set to nil
+	if defaultSharedClientsPerGpu == 0 &&
+		!enableTimeSharing &&
+		len(sharingConfig) == 0 {
+		return nil
+	}
+	return &sdk.NodetemplatesV1GPU{
+		DefaultSharedClientsPerGpu: &defaultSharedClientsPerGpu,
+		EnableTimeSharing:          &enableTimeSharing,
+		SharingConfiguration:       &sharingConfig,
+	}
 }
 
 func toTemplateConstraintsInstanceFamilies(o map[string]any) *sdk.NodetemplatesV1TemplateConstraintsInstanceFamilyConstraints {
@@ -1542,4 +1721,38 @@ func toTemplateConstraintsNodeAffinity(o map[string]any) *sdk.NodetemplatesV1Tem
 	}
 
 	return &out
+}
+
+// compareLists compares state of two lists
+// inspired by https://github.com/hashicorp/terraform-plugin-sdk/issues/477#issuecomment-1238807249
+func compareLists(key, oldValue, newValue string, d *schema.ResourceData) bool {
+	// The key is a path not the list itself, e.g. "gpu.0"
+	lastDotIndex := strings.LastIndex(key, ".")
+	if lastDotIndex != -1 {
+		key = string(key[:lastDotIndex])
+	}
+	oldData, newData := d.GetChange(key)
+	if oldData == nil || newData == nil {
+		return false
+	}
+
+	oldArray, okOldArray := oldData.([]interface{})
+	newArray, okNewArray := newData.([]interface{})
+	if okOldArray && okNewArray {
+		if len(oldArray) != len(newArray) {
+			return false
+		}
+		oldItems := make([]string, len(oldArray))
+		newItems := make([]string, len(newArray))
+		for i, oldItem := range oldArray {
+			oldItems[i] = fmt.Sprint(oldItem)
+		}
+		for i, newItem := range newArray {
+			newItems[i] = fmt.Sprint(newItem)
+		}
+		sort.Strings(oldItems)
+		sort.Strings(newItems)
+		return reflect.DeepEqual(oldItems, newItems)
+	}
+	return false
 }

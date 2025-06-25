@@ -53,6 +53,16 @@ func TestAccResourceWorkloadScalingPolicy(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "memory.0.limit.0.multiplier", "1.8"),
 					resource.TestCheckResourceAttr(resourceName, "memory.0.management_option", "READ_ONLY"),
 					resource.TestCheckResourceAttr(resourceName, "confidence.0.threshold", "0.4"),
+					resource.TestCheckResourceAttr(resourceName, "assignment_rules.0.rules.0.namespace.0.names.0", "default"),
+					resource.TestCheckResourceAttr(resourceName, "assignment_rules.0.rules.0.namespace.0.names.1", "kube-system"),
+					resource.TestCheckResourceAttr(resourceName, "assignment_rules.0.rules.1.workload.0.gvk.0", "Deployment"),
+					resource.TestCheckResourceAttr(resourceName, "assignment_rules.0.rules.1.workload.0.gvk.1", "StatefulSet"),
+					resource.TestCheckResourceAttr(resourceName, "assignment_rules.0.rules.1.workload.0.labels_expressions.0.key", "region"),
+					resource.TestCheckResourceAttr(resourceName, "assignment_rules.0.rules.1.workload.0.labels_expressions.0.operator", "NotIn"),
+					resource.TestCheckResourceAttr(resourceName, "assignment_rules.0.rules.1.workload.0.labels_expressions.0.values.0", "eu-west-1"),
+					resource.TestCheckResourceAttr(resourceName, "assignment_rules.0.rules.1.workload.0.labels_expressions.0.values.1", "eu-west-2"),
+					resource.TestCheckResourceAttr(resourceName, "assignment_rules.0.rules.1.workload.0.labels_expressions.1.key", "helm.sh/chart"),
+					resource.TestCheckResourceAttr(resourceName, "assignment_rules.0.rules.1.workload.0.labels_expressions.1.operator", "Exists"),
 				),
 			},
 			{
@@ -91,6 +101,10 @@ func TestAccResourceWorkloadScalingPolicy(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "memory_event.0.apply_type", "DEFERRED"),
 					resource.TestCheckResourceAttr(resourceName, "confidence.0.threshold", "0.6"),
 					resource.TestCheckResourceAttr(resourceName, "anti_affinity.0.consider_anti_affinity", "true"),
+					resource.TestCheckResourceAttr(resourceName, "assignment_rules.0.rules.0.namespace.0.names.0", "team-a"),
+					resource.TestCheckResourceAttr(resourceName, "assignment_rules.0.rules.1.workload.0.gvk.0", "DaemonSet"),
+					resource.TestCheckResourceAttr(resourceName, "assignment_rules.0.rules.1.workload.0.labels_expressions.0.key", "helm.sh/chart"),
+					resource.TestCheckResourceAttr(resourceName, "assignment_rules.0.rules.1.workload.0.labels_expressions.0.operator", "DoesNotExist"),
 				),
 			},
 		},
@@ -116,6 +130,27 @@ func scalingPolicyConfig(clusterName, projectID, name string) string {
 		management_option	= "READ_ONLY"
 		confidence {
 			threshold = 0.4
+		}
+		assignment_rules {
+			rules {
+				namespace {
+					names = ["default", "kube-system"]
+				}
+			}
+			rules {
+				workload {
+					gvk = ["Deployment", "StatefulSet"]
+					labels_expressions {
+						key      = "region"
+						operator = "NotIn"
+						values = ["eu-west-1", "eu-west-2"]
+					}
+					labels_expressions {
+						key      = "helm.sh/chart"
+						operator = "Exists"
+					}
+				}
+			}
 		}
 		cpu {
 			function 		= "QUANTILE"
@@ -162,6 +197,22 @@ func scalingPolicyConfigUpdated(clusterName, projectID, name string) string {
 		cluster_id			= castai_gke_cluster.test.id
 		apply_type			= "IMMEDIATE"
 		management_option	= "MANAGED"
+		assignment_rules {
+			rules {
+				namespace {
+					names = ["team-a"]
+				}
+			}
+			rules {
+				workload {
+					gvk = ["DaemonSet"]
+					labels_expressions {
+						key      = "helm.sh/chart"
+						operator = "DoesNotExist"
+					}
+				}
+			}
+		}
 		cpu {
 			function 		= "QUANTILE"
 			overhead 		= 0.15

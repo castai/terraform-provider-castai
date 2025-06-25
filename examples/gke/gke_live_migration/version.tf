@@ -6,13 +6,11 @@ terraform {
     kubernetes = {
       source = "hashicorp/kubernetes"
     }
-    helm = {
-      source  = "hashicorp/helm"
-      version = "~> 2.0"
+    google = {
+      source = "hashicorp/google"
     }
-    aws = {
-      source  = "hashicorp/aws"
-      version = "~> 5.0"
+    google-beta = {
+      source = "hashicorp/google-beta"
     }
   }
   required_version = ">= 0.13"
