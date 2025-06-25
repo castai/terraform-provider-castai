@@ -11,11 +11,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-// TODO (romank): check how this test should be run
-
 func TestAccResourceAllocationGroup(t *testing.T) {
-	resourceName := "castai_resource_allocation_group.test"
-	//projectID := os.Getenv("GOOGLE_PROJECT_ID")
+	resourceName := "castai_allocation_group.test"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
@@ -25,16 +22,35 @@ func TestAccResourceAllocationGroup(t *testing.T) {
 			{
 				Config: allocationGroupConfig(),
 				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "name", "ag_example"),
-					resource.TestCheckResourceAttr(resourceName, "cluster_ids.0", "cluster-123"),
-					resource.TestCheckResourceAttr(resourceName, "cluster_ids.1", "cluster-456"),
+					resource.TestCheckResourceAttr(resourceName, "name", "Test terraform example"),
+					resource.TestCheckResourceAttr(resourceName, "cluster_ids.0", "7536e872-6b52-428e-8c0c-e4306e0849ce"),
 					resource.TestCheckResourceAttr(resourceName, "namespaces.0", "namespace-a"),
 					resource.TestCheckResourceAttr(resourceName, "namespaces.1", "namespace-b"),
-					resource.TestCheckResourceAttr(resourceName, "labels.environment", "prod-master"),
-					resource.TestCheckResourceAttr(resourceName, "labels.team", "cost-report"),
-					resource.TestCheckResourceAttr(resourceName, `labels["app.kubernetes.io/name"]`, "app"),
+					resource.TestCheckResourceAttr(resourceName, "labels.environment", "production"),
+					resource.TestCheckResourceAttr(resourceName, "labels.team", "my-team"),
+					resource.TestCheckResourceAttr(resourceName, "labels.app.kubernetes.io/name", "app-name"),
 					resource.TestCheckResourceAttr(resourceName, "labels_operator", "AND"),
 				),
+			},
+			{
+				Config: allocationGroupUpdatedConfig(),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "name", "Test terraform example updated"),
+					resource.TestCheckResourceAttr(resourceName, "cluster_ids.0", "7536e872-6b52-428e-8c0c-e4306e0849ce"),
+					resource.TestCheckResourceAttr(resourceName, "namespaces.0", "namespace-a"),
+					resource.TestCheckResourceAttr(resourceName, "namespaces.1", "namespace-b"),
+					resource.TestCheckResourceAttr(resourceName, "namespaces.2", "namespace-c"),
+					resource.TestCheckResourceAttr(resourceName, "labels.environment", "production"),
+					resource.TestCheckResourceAttr(resourceName, "labels.team", "my-team"),
+					resource.TestCheckResourceAttr(resourceName, "labels.app.kubernetes.io/name", "app-name-updated"),
+					resource.TestCheckResourceAttr(resourceName, "labels_operator", "AND"),
+				),
+			},
+			{
+				// Import state by ID
+				ImportState:       true,
+				ResourceName:      "castai_allocation_group.test",
+				ImportStateVerify: true,
 			},
 		},
 	})
@@ -51,7 +67,7 @@ func testAccCheckAllocationGroupDestroy(s *terraform.State) error {
 		}
 
 		id := rs.Primary.ID
-		resp, err := client.WorkloadOptimizationAPIGetAllocationGroupWithResponse(ctx, id)
+		resp, err := client.AllocationGroupAPIGetAllocationGroupWithResponse(ctx, id)
 		if err != nil {
 			return err
 		}
@@ -59,19 +75,18 @@ func testAccCheckAllocationGroupDestroy(s *terraform.State) error {
 			return nil
 		}
 
-		return fmt.Errorf("scaling policy %s still exists", rs.Primary.ID)
+		return fmt.Errorf("allocation group %s still exists", rs.Primary.ID)
 	}
 
 	return nil
 }
 
 func allocationGroupConfig() string {
-	// TODO (romank): put real cluster id when testing
 	cfg := fmt.Sprintf(`
-	resource "castai_allocation_group" "ag_example" {
+	resource "castai_allocation_group" "test" {
+      name = "Test terraform example"
 	  cluster_ids = [
-		"1a58d6b4-bc0e-4417-b9c7-31d15c313f3f",
-		"d204b988-5db5-472e-a258-bf763a0f4a93"
+		"7536e872-6b52-428e-8c0c-e4306e0849ce",
 	  ]
 	
 	  namespaces = [
@@ -90,5 +105,31 @@ func allocationGroupConfig() string {
 	`)
 
 	return ConfigCompose(cfg)
+}
 
+func allocationGroupUpdatedConfig() string {
+	cfg := fmt.Sprintf(`
+	resource "castai_allocation_group" "test" {
+      name = "Test terraform example updated"
+	  cluster_ids = [
+		"7536e872-6b52-428e-8c0c-e4306e0849ce",
+	  ]
+	
+	  namespaces = [
+		"namespace-a",
+		"namespace-b",
+		"namespace-c"
+	  ]
+	
+	  labels = {
+		environment = "production",
+		team = "my-team",
+		"app.kubernetes.io/name" = "app-name-updated"
+	  }
+	
+	  labels_operator = "AND"
+	}
+	`)
+
+	return ConfigCompose(cfg)
 }

@@ -479,10 +479,12 @@ const (
 
 // Defines values for WorkloadoptimizationV1KubernetesLabelSelectorOperator.
 const (
+	KUBERNETESLABELSELECTOROPCONTAINS     WorkloadoptimizationV1KubernetesLabelSelectorOperator = "KUBERNETES_LABEL_SELECTOR_OP_CONTAINS"
 	KUBERNETESLABELSELECTOROPDOESNOTEXIST WorkloadoptimizationV1KubernetesLabelSelectorOperator = "KUBERNETES_LABEL_SELECTOR_OP_DOES_NOT_EXIST"
 	KUBERNETESLABELSELECTOROPEXISTS       WorkloadoptimizationV1KubernetesLabelSelectorOperator = "KUBERNETES_LABEL_SELECTOR_OP_EXISTS"
 	KUBERNETESLABELSELECTOROPIN           WorkloadoptimizationV1KubernetesLabelSelectorOperator = "KUBERNETES_LABEL_SELECTOR_OP_IN"
 	KUBERNETESLABELSELECTOROPNOTIN        WorkloadoptimizationV1KubernetesLabelSelectorOperator = "KUBERNETES_LABEL_SELECTOR_OP_NOT_IN"
+	KUBERNETESLABELSELECTOROPREGEX        WorkloadoptimizationV1KubernetesLabelSelectorOperator = "KUBERNETES_LABEL_SELECTOR_OP_REGEX"
 	KUBERNETESLABELSELECTOROPUNSPECIFIED  WorkloadoptimizationV1KubernetesLabelSelectorOperator = "KUBERNETES_LABEL_SELECTOR_OP_UNSPECIFIED"
 )
 
@@ -519,6 +521,7 @@ const (
 
 // Defines values for WorkloadoptimizationV1ResourceLimitStrategyType.
 const (
+	KEEPLIMITS WorkloadoptimizationV1ResourceLimitStrategyType = "KEEP_LIMITS"
 	MULTIPLIER WorkloadoptimizationV1ResourceLimitStrategyType = "MULTIPLIER"
 	NOLIMIT    WorkloadoptimizationV1ResourceLimitStrategyType = "NO_LIMIT"
 	UNKNOWN    WorkloadoptimizationV1ResourceLimitStrategyType = "UNKNOWN"
@@ -586,6 +589,13 @@ const (
 	ExternalClusterAPIListNodesParamsLifecycleTypeLifecycleTypeUnspecified ExternalClusterAPIListNodesParamsLifecycleType = "lifecycle_type_unspecified"
 	ExternalClusterAPIListNodesParamsLifecycleTypeOnDemand                 ExternalClusterAPIListNodesParamsLifecycleType = "on_demand"
 	ExternalClusterAPIListNodesParamsLifecycleTypeSpot                     ExternalClusterAPIListNodesParamsLifecycleType = "spot"
+)
+
+// Defines values for RbacServiceAPIListRolesParamsType.
+const (
+	ALL        RbacServiceAPIListRolesParamsType = "ALL"
+	DEFAULT    RbacServiceAPIListRolesParamsType = "DEFAULT"
+	ENTERPRISE RbacServiceAPIListRolesParamsType = "ENTERPRISE"
 )
 
 // Defines values for CommitmentsAPIImportAzureReservationsParamsBehaviour.
@@ -697,6 +707,26 @@ const (
 	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPESURGE                      WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_SURGE"
 )
 
+// Defines values for WorkloadOptimizationAPIGetInstallCmdParamsCmePresets.
+const (
+	WorkloadOptimizationAPIGetInstallCmdParamsCmePresetsCODAHALE      WorkloadOptimizationAPIGetInstallCmdParamsCmePresets = "CODAHALE"
+	WorkloadOptimizationAPIGetInstallCmdParamsCmePresetsDROPWIZARD    WorkloadOptimizationAPIGetInstallCmdParamsCmePresets = "DROPWIZARD"
+	WorkloadOptimizationAPIGetInstallCmdParamsCmePresetsINVALID       WorkloadOptimizationAPIGetInstallCmdParamsCmePresets = "INVALID"
+	WorkloadOptimizationAPIGetInstallCmdParamsCmePresetsMICROMETER    WorkloadOptimizationAPIGetInstallCmdParamsCmePresets = "MICROMETER"
+	WorkloadOptimizationAPIGetInstallCmdParamsCmePresetsOTELJAVAAGENT WorkloadOptimizationAPIGetInstallCmdParamsCmePresets = "OTEL_JAVA_AGENT"
+	WorkloadOptimizationAPIGetInstallCmdParamsCmePresetsSDKPROMETHEUS WorkloadOptimizationAPIGetInstallCmdParamsCmePresets = "SDK_PROMETHEUS"
+)
+
+// Defines values for WorkloadOptimizationAPIGetInstallScriptParamsCmePresets.
+const (
+	WorkloadOptimizationAPIGetInstallScriptParamsCmePresetsCODAHALE      WorkloadOptimizationAPIGetInstallScriptParamsCmePresets = "CODAHALE"
+	WorkloadOptimizationAPIGetInstallScriptParamsCmePresetsDROPWIZARD    WorkloadOptimizationAPIGetInstallScriptParamsCmePresets = "DROPWIZARD"
+	WorkloadOptimizationAPIGetInstallScriptParamsCmePresetsINVALID       WorkloadOptimizationAPIGetInstallScriptParamsCmePresets = "INVALID"
+	WorkloadOptimizationAPIGetInstallScriptParamsCmePresetsMICROMETER    WorkloadOptimizationAPIGetInstallScriptParamsCmePresets = "MICROMETER"
+	WorkloadOptimizationAPIGetInstallScriptParamsCmePresetsOTELJAVAAGENT WorkloadOptimizationAPIGetInstallScriptParamsCmePresets = "OTEL_JAVA_AGENT"
+	WorkloadOptimizationAPIGetInstallScriptParamsCmePresetsSDKPROMETHEUS WorkloadOptimizationAPIGetInstallScriptParamsCmePresets = "SDK_PROMETHEUS"
+)
+
 // CommitmentsAPIBatchDeleteCommitmentsRequest defines model for CommitmentsAPI_BatchDeleteCommitments_request.
 type CommitmentsAPIBatchDeleteCommitmentsRequest struct {
 	// CommitmentIds IDs of commitments to delete.  A maximum of 1000 commitments can be deleted in a batch.
@@ -766,6 +796,12 @@ type RuntimeSecurityAPIEditRuleRequest struct {
 	Severity         RuntimeV1Severity  `json:"severity"`
 }
 
+// SSOAPISetSyncForSSOConnectionRequest defines model for SSOAPI_SetSyncForSSOConnection_request.
+type SSOAPISetSyncForSSOConnectionRequest struct {
+	// Sync Sync indicates if the sync should be turned on/off for that SSO connection.
+	Sync bool `json:"sync"`
+}
+
 // ServiceAccountsAPICreateServiceAccountKeyRequest CreateServiceAccountKeyRequest is the request for creating a service account key.
 type ServiceAccountsAPICreateServiceAccountKeyRequest struct {
 	// Key Key is the key to create.
@@ -790,6 +826,13 @@ type UsersAPIUpdateOrganizationUserRequest struct {
 // WorkloadOptimizationAPIAssignScalingPolicyWorkloadsRequest defines model for WorkloadOptimizationAPI_AssignScalingPolicyWorkloads_request.
 type WorkloadOptimizationAPIAssignScalingPolicyWorkloadsRequest struct {
 	WorkloadIds *[]string `json:"workloadIds,omitempty"`
+}
+
+// WorkloadOptimizationAPIPatchWorkloadV2Request defines model for WorkloadOptimizationAPI_PatchWorkloadV2_request.
+type WorkloadOptimizationAPIPatchWorkloadV2Request struct {
+	// UpdateMask The update mask specifying which fields to update.
+	UpdateMask *string                                `json:"updateMask,omitempty"`
+	Workload   *WorkloadoptimizationV1PatchWorkloadV2 `json:"workload,omitempty"`
 }
 
 // WorkloadOptimizationAPISetScalingPoliciesOrderRequest defines model for WorkloadOptimizationAPI_SetScalingPoliciesOrder_request.
@@ -2502,6 +2545,14 @@ type CastaiSsoV1beta1SSOConnection struct {
 //   - STATUS_INACTIVE: StatusInactive is the inactive status.
 //   - STATUS_FAILED: StatusFailed is the failed status.
 type CastaiSsoV1beta1SSOConnectionStatus string
+
+// CastaiSsoV1beta1SetSyncForSSOConnectionResponse defines model for castai.sso.v1beta1.SetSyncForSSOConnectionResponse.
+type CastaiSsoV1beta1SetSyncForSSOConnectionResponse struct {
+	EmptyResponse *map[string]interface{} `json:"emptyResponse,omitempty"`
+
+	// Token Auth token used to authenticate via api.
+	Token *CastaiAuthtokenV1beta1AuthToken `json:"token,omitempty"`
+}
 
 // CastaiSsoV1beta1UpdateSSOConnection SSOConnection represents a sso connection.
 type CastaiSsoV1beta1UpdateSSOConnection struct {
@@ -6269,6 +6320,13 @@ type WorkloadoptimizationV1KubernetesLabelExpressionMatcher struct {
 	Key string `json:"key"`
 
 	// Operator KubernetesLabelSelectorOperator defines the set of operators for a selector requirement.
+	//
+	//  - KUBERNETES_LABEL_SELECTOR_OP_IN: Selects resources with label values in the provided set.
+	//  - KUBERNETES_LABEL_SELECTOR_OP_NOT_IN: Selects resources with label values not in the provided set.
+	//  - KUBERNETES_LABEL_SELECTOR_OP_EXISTS: Selects resources that have the specified label key, regardless of value.
+	//  - KUBERNETES_LABEL_SELECTOR_OP_DOES_NOT_EXIST: Selects resources that do not have the specified label key.
+	//  - KUBERNETES_LABEL_SELECTOR_OP_CONTAINS: Selects resources where the label value contains the specified substring.
+	//  - KUBERNETES_LABEL_SELECTOR_OP_REGEX: Selects resources where the label value matches the specified regular expression.
 	Operator WorkloadoptimizationV1KubernetesLabelSelectorOperator `json:"operator"`
 
 	// Values Values is an array of string values.
@@ -6276,16 +6334,17 @@ type WorkloadoptimizationV1KubernetesLabelExpressionMatcher struct {
 }
 
 // WorkloadoptimizationV1KubernetesLabelSelectorOperator KubernetesLabelSelectorOperator defines the set of operators for a selector requirement.
+//
+//   - KUBERNETES_LABEL_SELECTOR_OP_IN: Selects resources with label values in the provided set.
+//   - KUBERNETES_LABEL_SELECTOR_OP_NOT_IN: Selects resources with label values not in the provided set.
+//   - KUBERNETES_LABEL_SELECTOR_OP_EXISTS: Selects resources that have the specified label key, regardless of value.
+//   - KUBERNETES_LABEL_SELECTOR_OP_DOES_NOT_EXIST: Selects resources that do not have the specified label key.
+//   - KUBERNETES_LABEL_SELECTOR_OP_CONTAINS: Selects resources where the label value contains the specified substring.
+//   - KUBERNETES_LABEL_SELECTOR_OP_REGEX: Selects resources where the label value matches the specified regular expression.
 type WorkloadoptimizationV1KubernetesLabelSelectorOperator string
 
 // WorkloadoptimizationV1KubernetesNamespaceMatcher Represents a namespace matcher for a scaling policy. If multiple matchers are defined, the workload must match all of them.
 type WorkloadoptimizationV1KubernetesNamespaceMatcher struct {
-	// All Defines matching all namespaces. Cannot be set together with other matchers.
-	All *bool `json:"all"`
-
-	// Labels Defines matching by labels via map of {key,value} pairs.
-	Labels *map[string]string `json:"labels,omitempty"`
-
 	// LabelsExpressions Defines matching by a list of label selector requirements.
 	LabelsExpressions *[]WorkloadoptimizationV1KubernetesLabelExpressionMatcher `json:"labelsExpressions,omitempty"`
 
@@ -6295,12 +6354,7 @@ type WorkloadoptimizationV1KubernetesNamespaceMatcher struct {
 
 // WorkloadoptimizationV1KubernetesWorkloadMatcher defines model for workloadoptimization.v1.KubernetesWorkloadMatcher.
 type WorkloadoptimizationV1KubernetesWorkloadMatcher struct {
-	// All Defines matching all namespaces. Cannot be set together with other matchers.
-	All *bool     `json:"all"`
 	Gvk *[]string `json:"gvk,omitempty"`
-
-	// Labels Defines matching by labels via map of {key,value} pairs.
-	Labels *map[string]string `json:"labels,omitempty"`
 
 	// LabelsExpressions Defines matching by a list of label selector requirements.
 	LabelsExpressions *[]WorkloadoptimizationV1KubernetesLabelExpressionMatcher `json:"labelsExpressions,omitempty"`
@@ -6398,6 +6452,13 @@ type WorkloadoptimizationV1NewWorkloadScalingPolicy struct {
 // WorkloadoptimizationV1OOMKillEvent defines model for workloadoptimization.v1.OOMKillEvent.
 type WorkloadoptimizationV1OOMKillEvent struct {
 	Containers []WorkloadoptimizationV1EventContainer `json:"containers"`
+}
+
+// WorkloadoptimizationV1PatchWorkloadV2 defines model for workloadoptimization.v1.PatchWorkloadV2.
+type WorkloadoptimizationV1PatchWorkloadV2 struct {
+	// ScalingPolicyId Defines the scaling policy ID assigned to the workload.
+	ScalingPolicyId *string                                       `json:"scalingPolicyId"`
+	WorkloadConfig  *WorkloadoptimizationV1WorkloadConfigUpdateV2 `json:"workloadConfig,omitempty"`
 }
 
 // WorkloadoptimizationV1PodMetrics defines model for workloadoptimization.v1.PodMetrics.
@@ -6564,6 +6625,7 @@ type WorkloadoptimizationV1ResourceLimitStrategy struct {
 	//
 	//  - NO_LIMIT: No limit removes the resource limit even if it was specified in the workload spec.
 	//  - MULTIPLIER: Multiplier used to calculate the resource limit. The final value is determined by multiplying the resource request by the specified factor.
+	//  - KEEP_LIMITS: Keep limits respects limits if they are present in the workload spec.
 	Type WorkloadoptimizationV1ResourceLimitStrategyType `json:"type"`
 }
 
@@ -6571,11 +6633,13 @@ type WorkloadoptimizationV1ResourceLimitStrategy struct {
 //
 //   - NO_LIMIT: No limit removes the resource limit even if it was specified in the workload spec.
 //   - MULTIPLIER: Multiplier used to calculate the resource limit. The final value is determined by multiplying the resource request by the specified factor.
+//   - KEEP_LIMITS: Keep limits respects limits if they are present in the workload spec.
 type WorkloadoptimizationV1ResourceLimitStrategyType string
 
 // WorkloadoptimizationV1ResourceMetrics defines model for workloadoptimization.v1.ResourceMetrics.
 type WorkloadoptimizationV1ResourceMetrics struct {
 	Avg          float64   `json:"avg"`
+	AvgPredicted float64   `json:"avgPredicted"`
 	Max          float64   `json:"max"`
 	Min          float64   `json:"min"`
 	P25          float64   `json:"p25"`
@@ -7358,7 +7422,15 @@ type RbacServiceAPIListRolesParams struct {
 	// PageCursor Cursor that defines token indicating where to start the next page.
 	// Empty value indicates to start from beginning of the dataset.
 	PageCursor *string `form:"page.cursor,omitempty" json:"page.cursor,omitempty"`
+
+	// Type  - ALL: Return all roles regardless of type
+	//  - ENTERPRISE: Return only enterprise roles
+	//  - DEFAULT: Return only default roles
+	Type *RbacServiceAPIListRolesParamsType `form:"type,omitempty" json:"type,omitempty"`
 }
+
+// RbacServiceAPIListRolesParamsType defines parameters for RbacServiceAPIListRoles.
+type RbacServiceAPIListRolesParamsType string
 
 // ServiceAccountsAPIDeleteServiceAccountsParams defines parameters for ServiceAccountsAPIDeleteServiceAccounts.
 type ServiceAccountsAPIDeleteServiceAccountsParams struct {
@@ -7825,8 +7897,22 @@ type WorkloadOptimizationAPIGetWorkloadParams struct {
 
 // WorkloadOptimizationAPIGetInstallCmdParams defines parameters for WorkloadOptimizationAPIGetInstallCmd.
 type WorkloadOptimizationAPIGetInstallCmdParams struct {
-	ClusterId string `form:"clusterId" json:"clusterId"`
+	ClusterId  string                                                  `form:"clusterId" json:"clusterId"`
+	CmeDsUrl   *string                                                 `form:"cmeDsUrl,omitempty" json:"cmeDsUrl,omitempty"`
+	CmePresets *[]WorkloadOptimizationAPIGetInstallCmdParamsCmePresets `form:"cmePresets,omitempty" json:"cmePresets,omitempty"`
 }
+
+// WorkloadOptimizationAPIGetInstallCmdParamsCmePresets defines parameters for WorkloadOptimizationAPIGetInstallCmd.
+type WorkloadOptimizationAPIGetInstallCmdParamsCmePresets string
+
+// WorkloadOptimizationAPIGetInstallScriptParams defines parameters for WorkloadOptimizationAPIGetInstallScript.
+type WorkloadOptimizationAPIGetInstallScriptParams struct {
+	CmeDsUrl   *string                                                    `form:"cmeDsUrl,omitempty" json:"cmeDsUrl,omitempty"`
+	CmePresets *[]WorkloadOptimizationAPIGetInstallScriptParamsCmePresets `form:"cmePresets,omitempty" json:"cmePresets,omitempty"`
+}
+
+// WorkloadOptimizationAPIGetInstallScriptParamsCmePresets defines parameters for WorkloadOptimizationAPIGetInstallScript.
+type WorkloadOptimizationAPIGetInstallScriptParamsCmePresets string
 
 // InventoryAPIListZonesParams defines parameters for InventoryAPIListZones.
 type InventoryAPIListZonesParams struct {
@@ -8029,6 +8115,9 @@ type SSOAPICreateSSOConnectionJSONRequestBody = CastaiSsoV1beta1CreateSSOConnect
 // SSOAPIUpdateSSOConnectionJSONRequestBody defines body for SSOAPIUpdateSSOConnection for application/json ContentType.
 type SSOAPIUpdateSSOConnectionJSONRequestBody = CastaiSsoV1beta1UpdateSSOConnection
 
+// SSOAPISetSyncForSSOConnectionJSONRequestBody defines body for SSOAPISetSyncForSSOConnection for application/json ContentType.
+type SSOAPISetSyncForSSOConnectionJSONRequestBody = SSOAPISetSyncForSSOConnectionRequest
+
 // WorkloadOptimizationAPICreateWorkloadScalingPolicyJSONRequestBody defines body for WorkloadOptimizationAPICreateWorkloadScalingPolicy for application/json ContentType.
 type WorkloadOptimizationAPICreateWorkloadScalingPolicyJSONRequestBody = WorkloadoptimizationV1NewWorkloadScalingPolicy
 
@@ -8040,6 +8129,9 @@ type WorkloadOptimizationAPIUpdateWorkloadScalingPolicyJSONRequestBody = Workloa
 
 // WorkloadOptimizationAPIAssignScalingPolicyWorkloadsJSONRequestBody defines body for WorkloadOptimizationAPIAssignScalingPolicyWorkloads for application/json ContentType.
 type WorkloadOptimizationAPIAssignScalingPolicyWorkloadsJSONRequestBody = WorkloadOptimizationAPIAssignScalingPolicyWorkloadsRequest
+
+// WorkloadOptimizationAPIPatchWorkloadV2JSONRequestBody defines body for WorkloadOptimizationAPIPatchWorkloadV2 for application/json ContentType.
+type WorkloadOptimizationAPIPatchWorkloadV2JSONRequestBody = WorkloadOptimizationAPIPatchWorkloadV2Request
 
 // WorkloadOptimizationAPIUpdateWorkloadV2JSONRequestBody defines body for WorkloadOptimizationAPIUpdateWorkloadV2 for application/json ContentType.
 type WorkloadOptimizationAPIUpdateWorkloadV2JSONRequestBody = WorkloadoptimizationV1UpdateWorkloadV2
