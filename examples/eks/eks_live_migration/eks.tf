@@ -15,7 +15,7 @@ data "kubernetes_endpoints_v1" "kubernetes_service" {
 }
 
 provider "aws" {
-  region = "eu-central-1" # Set the AWS region to EU Central (Frankfurt)
+  region = "eu-central-1" # AWS region: EU Central (Frankfurt)
 }
 
 provider "kubernetes" {
@@ -25,7 +25,11 @@ provider "kubernetes" {
   exec {
     api_version = "client.authentication.k8s.io/v1beta1"
     command     = "aws"
-    args        = ["eks", "get-token", "--cluster-name", module.eks.cluster_name]
+    args        = [
+      "eks", "get-token",
+      "--cluster-name", module.eks.cluster_name,
+      "--region", "eu-central-1"
+    ]
   }
 }
 
@@ -36,6 +40,7 @@ provider "helm" {
     token                  = data.aws_eks_cluster_auth.eks_onboarded.token
   }
 }
+
 
 
 locals {
