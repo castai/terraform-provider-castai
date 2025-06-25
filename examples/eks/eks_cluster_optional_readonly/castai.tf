@@ -1,8 +1,8 @@
 data "aws_caller_identity" "current" {}
 
 provider "castai" {
-  api_token = var.castai_api_token
   api_url   = var.castai_api_url
+  api_token = var.castai_api_token
 }
 
 provider "helm" {
@@ -12,10 +12,15 @@ provider "helm" {
     exec = {
       api_version = "client.authentication.k8s.io/v1beta1"
       command     = "aws"
-      args        = ["eks", "get-token", "--cluster-name", module.eks.cluster_name, "--region", var.cluster_region]
+      args = [
+        "eks", "get-token",
+        "--cluster-name", module.eks.cluster_name,
+        "--region", var.cluster_region
+      ]
     }
   }
 }
+
 
 
 resource "castai_eks_cluster" "this" {
