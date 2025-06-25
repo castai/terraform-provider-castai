@@ -285,6 +285,7 @@ func k8sLabelExpressionsSchema() *schema.Schema {
 					Description: "The operator to use for matching the label.",
 					ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{
 						K8sLabelInOperator, K8sLabelNotInOperator, K8sLabelExistsOperator, K8sLabelDoesNotExistOperator,
+						K8sLabelRegexOperator, K8sLabelContainsOperator,
 					}, false)),
 				},
 				"values": {
