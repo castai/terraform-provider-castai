@@ -11,8 +11,8 @@ resource "castai_allocation_group" "ag_example" {
   ]
 
   labels = {
-    environment = "production",
-    team = "my-team",
+    environment              = "production",
+    team                     = "my-team",
     "app.kubernetes.io/name" = "app-name"
   }
 

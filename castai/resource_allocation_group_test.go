@@ -82,7 +82,7 @@ func testAccCheckAllocationGroupDestroy(s *terraform.State) error {
 }
 
 func allocationGroupConfig() string {
-	cfg := fmt.Sprintf(`
+	cfg := `
 	resource "castai_allocation_group" "test" {
       name = "Test terraform example"
 	  cluster_ids = [
@@ -102,13 +102,13 @@ func allocationGroupConfig() string {
 	
 	  labels_operator = "AND"
 	}
-	`)
+	`
 
 	return ConfigCompose(cfg)
 }
 
 func allocationGroupUpdatedConfig() string {
-	cfg := fmt.Sprintf(`
+	cfg := `
 	resource "castai_allocation_group" "test" {
       name = "Test terraform example updated"
 	  cluster_ids = [
@@ -129,7 +129,7 @@ func allocationGroupUpdatedConfig() string {
 	
 	  labels_operator = "AND"
 	}
-	`)
+	`
 
 	return ConfigCompose(cfg)
 }
