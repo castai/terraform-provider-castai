@@ -3867,6 +3867,9 @@ type ExternalclusterV1GPUConfig struct {
 	// Count Number of GPUs. N1 GCP machines allow attaching custom number of GPUs.
 	Count *int32 `json:"count,omitempty"`
 
+	// MigConfig MIGConfig configures MIG slicing on NVIDIA GPUs.
+	MigConfig *ExternalclusterV1MIGConfig `json:"migConfig,omitempty"`
+
 	// TimeSharing GPUTimeSharing configures sharing strategy by splitting time of single GPU to several processes.
 	TimeSharing *ExternalclusterV1GPUTimeSharing `json:"timeSharing,omitempty"`
 
@@ -3951,6 +3954,12 @@ type ExternalclusterV1ListClustersResponse struct {
 type ExternalclusterV1ListNodesResponse struct {
 	Items      *[]ExternalclusterV1Node `json:"items,omitempty"`
 	NextCursor *string                  `json:"nextCursor,omitempty"`
+}
+
+// ExternalclusterV1MIGConfig MIGConfig configures MIG slicing on NVIDIA GPUs.
+type ExternalclusterV1MIGConfig struct {
+	GpuMemoryGb    *int32    `json:"gpuMemoryGb"`
+	PartitionSizes *[]string `json:"partitionSizes,omitempty"`
 }
 
 // ExternalclusterV1Node Node represents a single VM that run as Kubernetes master or worker.
