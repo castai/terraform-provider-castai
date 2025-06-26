@@ -8,10 +8,14 @@ terraform {
     }
     castai = {
       source  = "castai/castai"
-      version = "7.51.0"
+      version = "~> 7.55"
     }
     kubernetes = {
       source = "hashicorp/kubernetes"
+    }
+    helm = {
+      source  = "hashicorp/helm"
+      version = "~> 2.15.0" # Force v2.x instead of v3.x
     }
   }
 }
