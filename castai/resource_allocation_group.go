@@ -142,7 +142,7 @@ func resourceAllocationGroupCreate(ctx context.Context, d *schema.ResourceData, 
 	labelsOperator := toLabelsOperator(d)
 
 	if len(clusterIds) == 0 || (len(namespaces) == 0 && len(labels) == 0) {
-		diag.FromErr(errors.New("allocation group needs to have at least one cluster id and one namespace or label"))
+		return diag.FromErr(errors.New("allocation group needs to have at least one cluster id and one namespace or label"))
 	}
 
 	body := sdk.AllocationGroupAPICreateAllocationGroupJSONRequestBody{
@@ -187,7 +187,7 @@ func resourceAllocationGroupUpdate(ctx context.Context, d *schema.ResourceData, 
 	namespaces := toStringList(d.Get("namespaces").([]interface{}))
 
 	if len(clusterIds) == 0 || (len(namespaces) == 0 && len(labels) == 0) {
-		diag.FromErr(errors.New("allocation group needs to have at least one cluster id and one namespace or label"))
+		return diag.FromErr(errors.New("allocation group needs to have at least one cluster id and one namespace or label"))
 	}
 
 	req := sdk.AllocationGroupAPIUpdateAllocationGroupJSONRequestBody{
