@@ -34,12 +34,12 @@ locals {
     }
   }
 
-  node_configuration = merge(local.default_node_cfg,  {
+  node_configuration = merge(local.default_node_cfg, {
     live = {
       subnets              = var.subnets,
       instance_profile_arn = module.castai-eks-role-iam.instance_profile_arn
       security_groups      = var.security_groups
-      init_script       = base64encode(templatefile("${path.module}/eks-init-script.sh", {
+      init_script = base64encode(templatefile("${path.module}/eks-init-script.sh", {
         live_proxy_version = trimspace(var.live_proxy_version)
       }))
       container_runtime = "containerd"
@@ -153,23 +153,23 @@ resource "helm_release" "live-helm" {
   chart      = "castai-live"
   version    = var.live_helm_version
 
-  namespace        = "castai-live"
-  create_namespace = true
+  namespace         = "castai-live"
+  create_namespace  = true
   dependency_update = true
 
-  set { 
-    name = "castai-aws-vpc-cni.enabled" 
+  set {
+    name  = "castai-aws-vpc-cni.enabled"
     value = "true"
   }
 
   set {
-    name = "castai.clusterID"
+    name  = "castai.clusterID"
     value = castai_eks_clusterid.cluster_id.id
   }
 
   set {
-    name = "castai.apiKey"
-    value  = var.castai_api_token
+    name  = "castai.apiKey"
+    value = var.castai_api_token
   }
 
   wait = false

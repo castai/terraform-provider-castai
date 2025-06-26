@@ -8,12 +8,12 @@ variable "cluster_region" {
 }
 
 variable "live_proxy_version" {
-  type = string
+  type    = string
   default = "0.30.0"
 }
 
 variable "live_helm_version" {
-  type = string
+  type    = string
   default = "0.1.43"
 }
 
