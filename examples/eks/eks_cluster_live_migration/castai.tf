@@ -14,8 +14,4 @@ module "cluster" {
   subnets            = module.vpc.private_subnets
   live_proxy_version = var.live_proxy_version
   live_helm_version  = var.live_helm_version
-  depend_on = [
-    module.eks,
-    module.vpc,
-  ]
 }
