@@ -32,11 +32,12 @@ func resourceAllocationGroup() *schema.Resource {
 				Description: "Allocation group name",
 			},
 			"cluster_ids": {
-				Type:        schema.TypeList,
+				Type:        schema.TypeSet,
 				Required:    true,
 				Description: "List of CAST AI cluster ids",
 				Elem: &schema.Schema{
-					Type: schema.TypeString,
+					Type:             schema.TypeString,
+					ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
 				},
 			},
 			"namespaces": {
@@ -62,6 +63,7 @@ func resourceAllocationGroup() *schema.Resource {
 	OR (default) - workload needs to have at least one label to be included
 	AND - workload needs to have all the labels to be included`,
 				Optional: true,
+				Default:  sdk.OR,
 				Elem: &schema.Schema{
 					Type: schema.TypeString,
 				},
@@ -113,7 +115,7 @@ func resourceAllocationGroupRead(ctx context.Context, d *schema.ResourceData, me
 	if err := d.Set("name", ag.Name); err != nil {
 		return diag.FromErr(fmt.Errorf("setting name: %w", err))
 	}
-	if err := d.Set("cluster_ids", ag.Filter.ClusterIds); err != nil {
+	if err := d.Set("cluster_ids", *ag.Filter.ClusterIds); err != nil {
 		return diag.FromErr(fmt.Errorf("setting cluster_ids: %w", err))
 	}
 	if err := d.Set("namespaces", ag.Filter.Namespaces); err != nil {
@@ -156,7 +158,7 @@ func resourceAllocationGroupCreate(ctx context.Context, d *schema.ResourceData, 
 	}
 	create, err := client.AllocationGroupAPICreateAllocationGroupWithResponse(ctx, body)
 	if err != nil {
-		return nil
+		return diag.FromErr(fmt.Errorf("error calling create allocation group: %w", err))
 	}
 	switch create.StatusCode() {
 	case http.StatusOK:
@@ -210,19 +212,6 @@ func resourceAllocationGroupUpdate(ctx context.Context, d *schema.ResourceData, 
 func resourceAllocationGroupDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(*ProviderConfig).api
 
-	resp, err := client.AllocationGroupAPIGetAllocationGroupWithResponse(ctx, d.Id())
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	if resp.StatusCode() == http.StatusNotFound {
-		tflog.Debug(ctx, "Allocation group not found, skipping delete", map[string]any{"id": d.Id()})
-		return nil
-	}
-	if err := sdk.StatusOk(resp); err != nil {
-		return diag.FromErr(err)
-	}
-
 	response, err := client.AllocationGroupAPIDeleteAllocationGroupWithResponse(ctx, d.Id())
 	if err != nil {
 		return diag.FromErr(err)
@@ -247,7 +236,7 @@ func toLabelsOperator(d *schema.ResourceData) *sdk.CostreportV1beta1FilterOperat
 
 func toClusterIds(d *schema.ResourceData) []string {
 	if v, ok := d.GetOk("cluster_ids"); ok {
-		if lv := v.([]interface{}); len(lv) > 0 {
+		if lv := v.(*schema.Set).List(); len(lv) > 0 {
 			return toStringList(lv)
 		}
 	}

@@ -40,7 +40,7 @@ resource "castai_allocation_group" "ag_example" {
 
 ### Required
 
-- `cluster_ids` (List of String) List of CAST AI cluster ids
+- `cluster_ids` (Set of String) List of CAST AI cluster ids
 - `name` (String) Allocation group name
 
 ### Optional

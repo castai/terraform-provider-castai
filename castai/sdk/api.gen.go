@@ -6003,11 +6003,21 @@ type ScheduledrebalancingV1TriggerConditions struct {
 
 // WorkloadoptimizationV1AggregatedMetrics defines model for workloadoptimization.v1.AggregatedMetrics.
 type WorkloadoptimizationV1AggregatedMetrics struct {
+	Avg float64 `json:"avg"`
 	Max float64 `json:"max"`
 	Min float64 `json:"min"`
 	P25 float64 `json:"p25"`
 	P50 float64 `json:"p50"`
 	P75 float64 `json:"p75"`
+}
+
+// WorkloadoptimizationV1AggregatedPredictionMetrics defines model for workloadoptimization.v1.AggregatedPredictionMetrics.
+type WorkloadoptimizationV1AggregatedPredictionMetrics struct {
+	// Avg Average predicted usage.
+	Avg float64 `json:"avg"`
+
+	// AvgRec Average predicted recommendation.
+	AvgRec float64 `json:"avgRec"`
 }
 
 // WorkloadoptimizationV1AntiAffinitySettings defines model for workloadoptimization.v1.AntiAffinitySettings.
@@ -6994,11 +7004,12 @@ type WorkloadoptimizationV1WorkloadEventWorkload struct {
 
 // WorkloadoptimizationV1WorkloadMetricContainer defines model for workloadoptimization.v1.WorkloadMetricContainer.
 type WorkloadoptimizationV1WorkloadMetricContainer struct {
-	CpuCores            []WorkloadoptimizationV1ResourceMetrics `json:"cpuCores"`
-	CpuCoresAggregated  WorkloadoptimizationV1AggregatedMetrics `json:"cpuCoresAggregated"`
-	MemoryGib           []WorkloadoptimizationV1ResourceMetrics `json:"memoryGib"`
-	MemoryGibAggregated WorkloadoptimizationV1AggregatedMetrics `json:"memoryGibAggregated"`
-	Name                string                                  `json:"name"`
+	CpuCores                      []WorkloadoptimizationV1ResourceMetrics            `json:"cpuCores"`
+	CpuCoresAggregated            WorkloadoptimizationV1AggregatedMetrics            `json:"cpuCoresAggregated"`
+	CpuCoresPredictionsAggregated *WorkloadoptimizationV1AggregatedPredictionMetrics `json:"cpuCoresPredictionsAggregated,omitempty"`
+	MemoryGib                     []WorkloadoptimizationV1ResourceMetrics            `json:"memoryGib"`
+	MemoryGibAggregated           WorkloadoptimizationV1AggregatedMetrics            `json:"memoryGibAggregated"`
+	Name                          string                                             `json:"name"`
 }
 
 // WorkloadoptimizationV1WorkloadMetrics defines model for workloadoptimization.v1.WorkloadMetrics.
