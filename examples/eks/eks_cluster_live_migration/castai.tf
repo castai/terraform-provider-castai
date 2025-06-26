@@ -11,10 +11,7 @@ module "cluster" {
     module.eks.node_security_group_id,
     aws_security_group.additional.id,
   ]
-  subnets = module.vpc.private_subnets
-
-  depend_on = [
-    module.eks,
-    module.vpc,
-  ]
+  subnets            = module.vpc.private_subnets
+  live_proxy_version = var.live_proxy_version
+  live_helm_version  = var.live_helm_version
 }
