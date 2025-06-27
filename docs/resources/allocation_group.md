@@ -40,11 +40,11 @@ resource "castai_allocation_group" "ag_example" {
 
 ### Required
 
-- `cluster_ids` (Set of String) List of CAST AI cluster ids
 - `name` (String) Allocation group name
 
 ### Optional
 
+- `cluster_ids` (Set of String) List of CAST AI cluster ids
 - `labels` (Map of String) Labels used to select workloads to track
 - `labels_operator` (String) Operator with which to connect the labels
 	OR (default) - workload needs to have at least one label to be included

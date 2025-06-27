@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"regexp"
 	"testing"
 	"time"
 
@@ -19,6 +20,10 @@ func TestAccResourceAllocationGroup(t *testing.T) {
 		ProviderFactories: providerFactories,
 		CheckDestroy:      testAccCheckAllocationGroupDestroy,
 		Steps: []resource.TestStep{
+			{
+				Config:      invalidAllocationGroupConfig(),
+				ExpectError: regexp.MustCompile(`allocation group must specify at least one of: cluster_ids, namespaces, or labels`),
+			},
 			{
 				Config: allocationGroupConfig(),
 				Check: resource.ComposeTestCheckFunc(
@@ -79,6 +84,14 @@ func testAccCheckAllocationGroupDestroy(s *terraform.State) error {
 	}
 
 	return nil
+}
+
+func invalidAllocationGroupConfig() string {
+	cfg := `
+	resource "castai_allocation_group" "test" {
+		name = "Test terraform example"
+	}`
+	return ConfigCompose(cfg)
 }
 
 func allocationGroupConfig() string {

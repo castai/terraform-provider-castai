@@ -21,6 +21,7 @@ func resourceAllocationGroup() *schema.Resource {
 		ReadContext:   resourceAllocationGroupRead,
 		UpdateContext: resourceAllocationGroupUpdate,
 		DeleteContext: resourceAllocationGroupDelete,
+		CustomizeDiff: resourceAllocationGroupDiff,
 		Description:   "Manage allocation group. Allocation group [reference](https://docs.cast.ai/docs/allocation-groups)",
 		Importer: &schema.ResourceImporter{
 			StateContext: allocationGroupImporter,
@@ -33,7 +34,7 @@ func resourceAllocationGroup() *schema.Resource {
 			},
 			"cluster_ids": {
 				Type:        schema.TypeSet,
-				Required:    true,
+				Optional:    true,
 				Description: "List of CAST AI cluster ids",
 				Elem: &schema.Schema{
 					Type:             schema.TypeString,
@@ -73,6 +74,24 @@ func resourceAllocationGroup() *schema.Resource {
 			},
 		},
 	}
+}
+
+func resourceAllocationGroupDiff(_ context.Context, d *schema.ResourceDiff, _ any) error {
+	var clusterIds []string
+	if cids, ok := d.GetOk("cluster_ids"); ok {
+		clusterIds = toClusterIds(cids.(*schema.Set).List())
+	}
+	namespaces := toStringList(d.Get("namespaces").([]interface{}))
+
+	var labels []sdk.CostreportV1beta1AllocationGroupFilterLabelValue
+	if ls, ok := d.GetOk("labels"); ok {
+		labels = toLabels(ls.(map[string]interface{}))
+	}
+
+	if len(clusterIds) == 0 && len(namespaces) == 0 && len(labels) == 0 {
+		return errors.New("allocation group must specify at least one of: cluster_ids, namespaces, or labels")
+	}
+	return nil
 }
 
 func allocationGroupImporter(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
@@ -133,18 +152,24 @@ func resourceAllocationGroupRead(ctx context.Context, d *schema.ResourceData, me
 func resourceAllocationGroupCreate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(*ProviderConfig).api
 
-	clusterIds := toClusterIds(d)
+	var clusterIds []string
+	if cid, ok := d.GetOk("cluster_ids"); ok {
+		clusterIds = toClusterIds(cid.(*schema.Set).List())
+	}
 
 	allocationGroupName := d.Get("name").(string)
 
 	namespaces := toStringList(d.Get("namespaces").([]interface{}))
 
-	labels := toLabels(d)
+	var labels []sdk.CostreportV1beta1AllocationGroupFilterLabelValue
+	if ls, ok := d.GetOk("labels"); ok {
+		labels = toLabels(ls.(map[string]interface{}))
+	}
 
 	labelsOperator := toLabelsOperator(d)
 
-	if len(clusterIds) == 0 || (len(namespaces) == 0 && len(labels) == 0) {
-		return diag.FromErr(errors.New("allocation group needs to have at least one cluster id and one namespace or label"))
+	if len(clusterIds) == 0 && len(namespaces) == 0 && len(labels) == 0 {
+		return diag.FromErr(errors.New("allocation group must specify at least one of: cluster_ids, namespaces, or labels"))
 	}
 
 	body := sdk.AllocationGroupAPICreateAllocationGroupJSONRequestBody{
@@ -184,12 +209,21 @@ func resourceAllocationGroupUpdate(ctx context.Context, d *schema.ResourceData, 
 	client := meta.(*ProviderConfig).api
 
 	allocationGroupName := d.Get("name").(string)
-	clusterIds := toClusterIds(d)
-	labels := toLabels(d)
+
+	var clusterIds []string
+	if cids, ok := d.GetOk("cluster_ids"); ok {
+		clusterIds = toClusterIds(cids.(*schema.Set).List())
+	}
+
+	var labels []sdk.CostreportV1beta1AllocationGroupFilterLabelValue
+	if ls, ok := d.GetOk("labels"); ok {
+		labels = toLabels(ls.(map[string]interface{}))
+	}
+
 	namespaces := toStringList(d.Get("namespaces").([]interface{}))
 
-	if len(clusterIds) == 0 || (len(namespaces) == 0 && len(labels) == 0) {
-		return diag.FromErr(errors.New("allocation group needs to have at least one cluster id and one namespace or label"))
+	if len(clusterIds) == 0 && len(namespaces) == 0 && len(labels) == 0 {
+		return diag.FromErr(errors.New("allocation group must specify at least one of: cluster_ids, namespaces, or labels"))
 	}
 
 	req := sdk.AllocationGroupAPIUpdateAllocationGroupJSONRequestBody{
@@ -234,11 +268,9 @@ func toLabelsOperator(d *schema.ResourceData) *sdk.CostreportV1beta1FilterOperat
 	return &defaultLabelOperator
 }
 
-func toClusterIds(d *schema.ResourceData) []string {
-	if v, ok := d.GetOk("cluster_ids"); ok {
-		if lv := v.(*schema.Set).List(); len(lv) > 0 {
-			return toStringList(lv)
-		}
+func toClusterIds(lv []interface{}) []string {
+	if len(lv) > 0 {
+		return toStringList(lv)
 	}
 	return nil
 }
@@ -251,25 +283,23 @@ func fromLabels(labels []sdk.CostreportV1beta1AllocationGroupFilterLabelValue) m
 	return result
 }
 
-func toLabels(d *schema.ResourceData) []sdk.CostreportV1beta1AllocationGroupFilterLabelValue {
-	if v, ok := d.GetOk("labels"); ok {
-		if lv := v.(map[string]interface{}); len(lv) > 0 {
-			labelsStringMap := toStringMap(lv)
+func toLabels(lv map[string]interface{}) []sdk.CostreportV1beta1AllocationGroupFilterLabelValue {
+	if len(lv) > 0 {
+		labelsStringMap := toStringMap(lv)
 
-			operator := sdk.CostreportV1beta1AllocationGroupFilterLabelValueOperatorEqual
+		operator := sdk.CostreportV1beta1AllocationGroupFilterLabelValueOperatorEqual
 
-			if len(labelsStringMap) > 0 {
-				labels := make([]sdk.CostreportV1beta1AllocationGroupFilterLabelValue, 0, len(labelsStringMap))
-				for labelKey, labelValue := range labelsStringMap {
-					label := sdk.CostreportV1beta1AllocationGroupFilterLabelValue{
-						Label:    &labelKey,
-						Value:    &labelValue,
-						Operator: &operator,
-					}
-					labels = append(labels, label)
+		if len(labelsStringMap) > 0 {
+			labels := make([]sdk.CostreportV1beta1AllocationGroupFilterLabelValue, 0, len(labelsStringMap))
+			for labelKey, labelValue := range labelsStringMap {
+				label := sdk.CostreportV1beta1AllocationGroupFilterLabelValue{
+					Label:    &labelKey,
+					Value:    &labelValue,
+					Operator: &operator,
 				}
-				return labels
+				labels = append(labels, label)
 			}
+			return labels
 		}
 	}
 	return nil
