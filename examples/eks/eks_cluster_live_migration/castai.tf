@@ -3,9 +3,12 @@ module "cluster" {
   count  = var.enable_castai ? 1 : 0
 
   cluster_name     = var.cluster_name
-  castai_api_token = var.castai_api_token
   cluster_region   = var.cluster_region
-  vpc_id           = module.vpc.vpc_id
+  castai_api_token = var.castai_api_token
+  castai_api_url   = var.castai_api_url
+  castai_grpc_url  = var.castai_grpc_url
+
+  vpc_id = module.vpc.vpc_id
   security_groups = [
     module.eks.cluster_security_group_id,
     module.eks.node_security_group_id,
