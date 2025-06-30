@@ -28,7 +28,6 @@ func TestAccResourceAllocationGroup(t *testing.T) {
 				Config: allocationGroupConfig(),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "name", "Test terraform example"),
-					resource.TestCheckResourceAttr(resourceName, "cluster_ids.0", "7536e872-6b52-428e-8c0c-e4306e0849ce"),
 					resource.TestCheckResourceAttr(resourceName, "namespaces.0", "namespace-a"),
 					resource.TestCheckResourceAttr(resourceName, "namespaces.1", "namespace-b"),
 					resource.TestCheckResourceAttr(resourceName, "labels.environment", "production"),
@@ -41,7 +40,6 @@ func TestAccResourceAllocationGroup(t *testing.T) {
 				Config: allocationGroupUpdatedConfig(),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "name", "Test terraform example updated"),
-					resource.TestCheckResourceAttr(resourceName, "cluster_ids.0", "7536e872-6b52-428e-8c0c-e4306e0849ce"),
 					resource.TestCheckResourceAttr(resourceName, "namespaces.0", "namespace-a"),
 					resource.TestCheckResourceAttr(resourceName, "namespaces.1", "namespace-b"),
 					resource.TestCheckResourceAttr(resourceName, "namespaces.2", "namespace-c"),
@@ -98,9 +96,6 @@ func allocationGroupConfig() string {
 	cfg := `
 	resource "castai_allocation_group" "test" {
       name = "Test terraform example"
-	  cluster_ids = [
-		"c0595984-9da4-44f0-98ef-9014d51d8483",
-	  ]
 	
 	  namespaces = [
 		"namespace-a",
@@ -124,9 +119,6 @@ func allocationGroupUpdatedConfig() string {
 	cfg := `
 	resource "castai_allocation_group" "test" {
       name = "Test terraform example updated"
-	  cluster_ids = [
-		"c0595984-9da4-44f0-98ef-9014d51d8483",
-	  ]
 	
 	  namespaces = [
 		"namespace-a",

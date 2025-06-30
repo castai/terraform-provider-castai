@@ -6606,6 +6606,17 @@ type WorkloadoptimizationV1PredictiveInsights struct {
 	IsEligible bool `json:"isEligible"`
 }
 
+// WorkloadoptimizationV1PredictiveScaling defines model for workloadoptimization.v1.PredictiveScaling.
+type WorkloadoptimizationV1PredictiveScaling struct {
+	// Enabled Defines if predictive scaling is enabled for resource.
+	Enabled bool `json:"enabled"`
+}
+
+// WorkloadoptimizationV1PredictiveScalingSettings defines model for workloadoptimization.v1.PredictiveScalingSettings.
+type WorkloadoptimizationV1PredictiveScalingSettings struct {
+	Cpu WorkloadoptimizationV1PredictiveScaling `json:"cpu"`
+}
+
 // WorkloadoptimizationV1RecommendationEvent defines model for workloadoptimization.v1.RecommendationEvent.
 type WorkloadoptimizationV1RecommendationEvent struct {
 	// Type Defines possible options for recommendation events.
@@ -6630,11 +6641,12 @@ type WorkloadoptimizationV1RecommendationPolicies struct {
 	// ManagementOption Defines possible options for workload management.
 	// READ_ONLY - workload watched (metrics collected), but no actions may be performed by CAST AI.
 	// MANAGED - workload watched (metrics collected), CAST AI may perform actions on the workload.
-	ManagementOption WorkloadoptimizationV1ManagementOption         `json:"managementOption"`
-	Memory           WorkloadoptimizationV1ResourcePolicies         `json:"memory"`
-	MemoryEvent      *WorkloadoptimizationV1MemoryEventSettings     `json:"memoryEvent,omitempty"`
-	RolloutBehavior  *WorkloadoptimizationV1RolloutBehaviorSettings `json:"rolloutBehavior,omitempty"`
-	Startup          *WorkloadoptimizationV1StartupSettings         `json:"startup,omitempty"`
+	ManagementOption  WorkloadoptimizationV1ManagementOption           `json:"managementOption"`
+	Memory            WorkloadoptimizationV1ResourcePolicies           `json:"memory"`
+	MemoryEvent       *WorkloadoptimizationV1MemoryEventSettings       `json:"memoryEvent,omitempty"`
+	PredictiveScaling *WorkloadoptimizationV1PredictiveScalingSettings `json:"predictiveScaling,omitempty"`
+	RolloutBehavior   *WorkloadoptimizationV1RolloutBehaviorSettings   `json:"rolloutBehavior,omitempty"`
+	Startup           *WorkloadoptimizationV1StartupSettings           `json:"startup,omitempty"`
 }
 
 // WorkloadoptimizationV1RecommendedPodCountChangedEvent defines model for workloadoptimization.v1.RecommendedPodCountChangedEvent.
@@ -7003,9 +7015,10 @@ type WorkloadoptimizationV1VPAConfigUpdate struct {
 	// ManagementOption Defines possible options for workload management.
 	// READ_ONLY - workload watched (metrics collected), but no actions may be performed by CAST AI.
 	// MANAGED - workload watched (metrics collected), CAST AI may perform actions on the workload.
-	ManagementOption *WorkloadoptimizationV1ManagementOption             `json:"managementOption,omitempty"`
-	Memory           *WorkloadoptimizationV1WorkloadResourceConfigUpdate `json:"memory,omitempty"`
-	MemoryEvent      *WorkloadoptimizationV1MemoryEventSettings          `json:"memoryEvent,omitempty"`
+	ManagementOption  *WorkloadoptimizationV1ManagementOption             `json:"managementOption,omitempty"`
+	Memory            *WorkloadoptimizationV1WorkloadResourceConfigUpdate `json:"memory,omitempty"`
+	MemoryEvent       *WorkloadoptimizationV1MemoryEventSettings          `json:"memoryEvent,omitempty"`
+	PredictiveScaling *WorkloadoptimizationV1PredictiveScalingSettings    `json:"predictiveScaling,omitempty"`
 }
 
 // WorkloadoptimizationV1VerticalOverrides defines model for workloadoptimization.v1.VerticalOverrides.
