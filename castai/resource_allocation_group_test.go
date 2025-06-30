@@ -99,7 +99,7 @@ func allocationGroupConfig() string {
 	resource "castai_allocation_group" "test" {
       name = "Test terraform example"
 	  cluster_ids = [
-		"7536e872-6b52-428e-8c0c-e4306e0849ce",
+		"c0595984-9da4-44f0-98ef-9014d51d8483",
 	  ]
 	
 	  namespaces = [
@@ -125,7 +125,7 @@ func allocationGroupUpdatedConfig() string {
 	resource "castai_allocation_group" "test" {
       name = "Test terraform example updated"
 	  cluster_ids = [
-		"7536e872-6b52-428e-8c0c-e4306e0849ce",
+		"c0595984-9da4-44f0-98ef-9014d51d8483",
 	  ]
 	
 	  namespaces = [

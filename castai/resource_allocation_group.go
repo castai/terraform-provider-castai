@@ -65,9 +65,6 @@ func resourceAllocationGroup() *schema.Resource {
 	AND - workload needs to have all the labels to be included`,
 				Optional: true,
 				Default:  sdk.OR,
-				Elem: &schema.Schema{
-					Type: schema.TypeString,
-				},
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{
 					string(sdk.AND), string(sdk.OR),
 				}, false)),
