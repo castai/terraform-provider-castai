@@ -51,3 +51,9 @@ variable "delete_nodes_on_disconnect" {
   description = "Optional parameter, if set to true - CAST AI provisioned nodes will be deleted from cloud on cluster disconnection. For production use it is recommended to set it to false."
   default     = true
 }
+
+variable "install_helm_live" {
+  type        = bool
+  description = "Optional parameter, if set to true - the 'castai-live' Helm chart will be installed on the cluster. This is required for live migration feature."
+  default     = true
+}
