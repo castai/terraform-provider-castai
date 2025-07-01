@@ -48,6 +48,11 @@ resource "castai_workload_scaling_policy" "services" {
     }
     management_option = "READ_ONLY"
   }
+  predictive_scaling {
+    cpu {
+      enabled = true
+    }
+  }
   startup {
     period_seconds = 240
   }

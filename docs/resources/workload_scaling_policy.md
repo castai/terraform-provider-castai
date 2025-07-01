@@ -65,6 +65,11 @@ resource "castai_workload_scaling_policy" "services" {
     }
     management_option = "READ_ONLY"
   }
+  predictive_scaling {
+    cpu {
+      enabled = true
+    }
+  }
   startup {
     period_seconds = 240
   }
@@ -106,6 +111,7 @@ resource "castai_workload_scaling_policy" "services" {
 - `confidence` (Block List, Max: 1) Defines the confidence settings for applying recommendations. (see [below for nested schema](#nestedblock--confidence))
 - `downscaling` (Block List, Max: 1) (see [below for nested schema](#nestedblock--downscaling))
 - `memory_event` (Block List, Max: 1) (see [below for nested schema](#nestedblock--memory_event))
+- `predictive_scaling` (Block List, Max: 1) (see [below for nested schema](#nestedblock--predictive_scaling))
 - `startup` (Block List, Max: 1) (see [below for nested schema](#nestedblock--startup))
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
@@ -303,6 +309,22 @@ Optional:
 - `apply_type` (String) Defines the apply type to be used when applying recommendation for memory related event.
 	- IMMEDIATE - pods are restarted immediately when new recommendation is generated.
 	- DEFERRED - pods are not restarted and recommendation values are applied during natural restarts only (new deployment, etc.)
+
+
+<a id="nestedblock--predictive_scaling"></a>
+### Nested Schema for `predictive_scaling`
+
+Optional:
+
+- `cpu` (Block List, Max: 1) Defines predictive scaling resource configuration. (see [below for nested schema](#nestedblock--predictive_scaling--cpu))
+
+<a id="nestedblock--predictive_scaling--cpu"></a>
+### Nested Schema for `predictive_scaling.cpu`
+
+Required:
+
+- `enabled` (Boolean) Defines if predictive scaling is enabled for resource.
+
 
 
 <a id="nestedblock--startup"></a>

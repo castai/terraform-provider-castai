@@ -480,6 +480,24 @@ const (
 	WorkloadoptimizationV1ManagementOptionUNDEFINED WorkloadoptimizationV1ManagementOption = "UNDEFINED"
 )
 
+// Defines values for WorkloadoptimizationV1MetricSourceType.
+const (
+	CONTAINERRESOURCE           WorkloadoptimizationV1MetricSourceType = "CONTAINER_RESOURCE"
+	EXTERNAL                    WorkloadoptimizationV1MetricSourceType = "EXTERNAL"
+	METRICSOURCETYPEUNSPECIFIED WorkloadoptimizationV1MetricSourceType = "METRIC_SOURCE_TYPE_UNSPECIFIED"
+	OBJECT                      WorkloadoptimizationV1MetricSourceType = "OBJECT"
+	PODS                        WorkloadoptimizationV1MetricSourceType = "PODS"
+	RESOURCE                    WorkloadoptimizationV1MetricSourceType = "RESOURCE"
+)
+
+// Defines values for WorkloadoptimizationV1MetricTargetType.
+const (
+	AVERAGEVALUE                WorkloadoptimizationV1MetricTargetType = "AVERAGE_VALUE"
+	METRICTARGETTYPEUNSPECIFIED WorkloadoptimizationV1MetricTargetType = "METRIC_TARGET_TYPE_UNSPECIFIED"
+	UTILIZATION                 WorkloadoptimizationV1MetricTargetType = "UTILIZATION"
+	VALUE                       WorkloadoptimizationV1MetricTargetType = "VALUE"
+)
+
 // Defines values for WorkloadoptimizationV1RecommendationEventType.
 const (
 	RECOMMENDATIONEVENTTYPEINVALID WorkloadoptimizationV1RecommendationEventType = "RECOMMENDATION_EVENT_TYPE_INVALID"
@@ -1428,6 +1446,12 @@ type CastaiInventoryV1beta1GetReservationsResponse struct {
 	Reservations *[]CastaiInventoryV1beta1ReservationDetails `json:"reservations,omitempty"`
 }
 
+// CastaiInventoryV1beta1InstanceFlexibilityInfo defines model for castai.inventory.v1beta1.InstanceFlexibilityInfo.
+type CastaiInventoryV1beta1InstanceFlexibilityInfo struct {
+	// FlexibilityGroup The instance flexibility group.
+	FlexibilityGroup *string `json:"flexibilityGroup,omitempty"`
+}
+
 // CastaiInventoryV1beta1InstanceReliability defines model for castai.inventory.v1beta1.InstanceReliability.
 type CastaiInventoryV1beta1InstanceReliability struct {
 	SpotReclaimRateHigh *string `json:"spotReclaimRateHigh,omitempty"`
@@ -1455,9 +1479,10 @@ type CastaiInventoryV1beta1InstanceType struct {
 	CpuPrice *string `json:"cpuPrice,omitempty"`
 
 	// CreatedAt CreatedAt is the timestamp of the creation of this instance type object.
-	CreatedAt      *time.Time                     `json:"createdAt,omitempty"`
-	CustomInstance *bool                          `json:"customInstance,omitempty"`
-	GpuInfo        *CastaiInventoryV1beta1GPUInfo `json:"gpuInfo,omitempty"`
+	CreatedAt       *time.Time                                     `json:"createdAt,omitempty"`
+	CustomInstance  *bool                                          `json:"customInstance,omitempty"`
+	FlexibilityInfo *CastaiInventoryV1beta1InstanceFlexibilityInfo `json:"flexibilityInfo,omitempty"`
+	GpuInfo         *CastaiInventoryV1beta1GPUInfo                 `json:"gpuInfo,omitempty"`
 
 	// Id ID of the instance type.
 	Id *string `json:"id,omitempty"`
@@ -5286,11 +5311,21 @@ type ScheduledrebalancingV1TriggerConditions struct {
 
 // WorkloadoptimizationV1AggregatedMetrics defines model for workloadoptimization.v1.AggregatedMetrics.
 type WorkloadoptimizationV1AggregatedMetrics struct {
+	Avg float64 `json:"avg"`
 	Max float64 `json:"max"`
 	Min float64 `json:"min"`
 	P25 float64 `json:"p25"`
 	P50 float64 `json:"p50"`
 	P75 float64 `json:"p75"`
+}
+
+// WorkloadoptimizationV1AggregatedPredictionMetrics defines model for workloadoptimization.v1.AggregatedPredictionMetrics.
+type WorkloadoptimizationV1AggregatedPredictionMetrics struct {
+	// Avg Average predicted usage.
+	Avg float64 `json:"avg"`
+
+	// AvgRec Average predicted recommendation.
+	AvgRec float64 `json:"avgRec"`
 }
 
 // WorkloadoptimizationV1AntiAffinitySettings defines model for workloadoptimization.v1.AntiAffinitySettings.
@@ -5394,6 +5429,13 @@ type WorkloadoptimizationV1ContainerConstraintsV2 struct {
 	Memory        *WorkloadoptimizationV1Constraints `json:"memory,omitempty"`
 }
 
+// WorkloadoptimizationV1ContainerResourceMetricSource defines model for workloadoptimization.v1.ContainerResourceMetricSource.
+type WorkloadoptimizationV1ContainerResourceMetricSource struct {
+	Container *string                             `json:"container,omitempty"`
+	Name      *string                             `json:"name,omitempty"`
+	Target    *WorkloadoptimizationV1MetricTarget `json:"target,omitempty"`
+}
+
 // WorkloadoptimizationV1Costs defines model for workloadoptimization.v1.Costs.
 type WorkloadoptimizationV1Costs struct {
 	// Recommended Cost of recommended resources.
@@ -5408,6 +5450,13 @@ type WorkloadoptimizationV1CpuMetrics struct {
 	TotalCpuCores    []WorkloadoptimizationV1TimeSeriesMetric `json:"totalCpuCores"`
 	TotalCpuCoresMax float64                                  `json:"totalCpuCoresMax"`
 	TotalCpuCoresMin float64                                  `json:"totalCpuCoresMin"`
+}
+
+// WorkloadoptimizationV1CrossVersionObjectReference defines model for workloadoptimization.v1.CrossVersionObjectReference.
+type WorkloadoptimizationV1CrossVersionObjectReference struct {
+	ApiVersion *string `json:"apiVersion,omitempty"`
+	Kind       *string `json:"kind,omitempty"`
+	Name       *string `json:"name,omitempty"`
 }
 
 // WorkloadoptimizationV1DeleteWorkloadScalingPolicyResponse defines model for workloadoptimization.v1.DeleteWorkloadScalingPolicyResponse.
@@ -5442,6 +5491,12 @@ type WorkloadoptimizationV1EventContainer struct {
 
 // WorkloadoptimizationV1EventType EventType defines possible types for workload events.
 type WorkloadoptimizationV1EventType string
+
+// WorkloadoptimizationV1ExternalMetricSource defines model for workloadoptimization.v1.ExternalMetricSource.
+type WorkloadoptimizationV1ExternalMetricSource struct {
+	Metric *WorkloadoptimizationV1MetricIdentifier `json:"metric,omitempty"`
+	Target *WorkloadoptimizationV1MetricTarget     `json:"target,omitempty"`
+}
 
 // WorkloadoptimizationV1FailedHookEvent defines model for workloadoptimization.v1.FailedHookEvent.
 type WorkloadoptimizationV1FailedHookEvent struct {
@@ -5567,6 +5622,9 @@ type WorkloadoptimizationV1HPAConfigUpdate struct {
 type WorkloadoptimizationV1HPASpec struct {
 	// MaxReplicas Max replicas a workload can have.
 	MaxReplicas int32 `json:"maxReplicas"`
+
+	// Metrics Metrics list which is scaled on.
+	Metrics *[]WorkloadoptimizationV1MetricSpec `json:"metrics,omitempty"`
 
 	// MinReplicas Min replicas a workload can have.
 	MinReplicas *int32 `json:"minReplicas"`
@@ -5729,6 +5787,55 @@ type WorkloadoptimizationV1MemoryPressureEvictionEventContainer struct {
 	Name           *string  `json:"name,omitempty"`
 }
 
+// WorkloadoptimizationV1MetricIdentifier defines model for workloadoptimization.v1.MetricIdentifier.
+type WorkloadoptimizationV1MetricIdentifier struct {
+	Name     *string            `json:"name,omitempty"`
+	Selector *map[string]string `json:"selector,omitempty"`
+}
+
+// WorkloadoptimizationV1MetricSourceType MetricSourceType defines the source type of a metric used for autoscaling decisions.
+// RESOURCE - Resource metrics like CPU or memory usage collected from pods.
+// PODS - Custom metrics aggregated across pods (e.g., requests-per-second).
+// OBJECT - Metrics associated with a specific Kubernetes object (e.g., Ingress request rate).
+// EXTERNAL - Metrics not associated with any Kubernetes object (e.g., from a cloud provider).
+// CONTAINER_RESOURCE - Resource metrics scoped to a specific container within a pod.
+type WorkloadoptimizationV1MetricSourceType string
+
+// WorkloadoptimizationV1MetricSpec defines model for workloadoptimization.v1.MetricSpec.
+type WorkloadoptimizationV1MetricSpec struct {
+	ContainerResource *WorkloadoptimizationV1ContainerResourceMetricSource `json:"containerResource,omitempty"`
+	External          *WorkloadoptimizationV1ExternalMetricSource          `json:"external,omitempty"`
+	Object            *WorkloadoptimizationV1ObjectMetricSource            `json:"object,omitempty"`
+	Pods              *WorkloadoptimizationV1PodsMetricSource              `json:"pods,omitempty"`
+	Resource          *WorkloadoptimizationV1ResourceMetricSource          `json:"resource,omitempty"`
+
+	// Type MetricSourceType defines the source type of a metric used for autoscaling decisions.
+	// RESOURCE - Resource metrics like CPU or memory usage collected from pods.
+	// PODS - Custom metrics aggregated across pods (e.g., requests-per-second).
+	// OBJECT - Metrics associated with a specific Kubernetes object (e.g., Ingress request rate).
+	// EXTERNAL - Metrics not associated with any Kubernetes object (e.g., from a cloud provider).
+	// CONTAINER_RESOURCE - Resource metrics scoped to a specific container within a pod.
+	Type *WorkloadoptimizationV1MetricSourceType `json:"type,omitempty"`
+}
+
+// WorkloadoptimizationV1MetricTarget defines model for workloadoptimization.v1.MetricTarget.
+type WorkloadoptimizationV1MetricTarget struct {
+	// Type MetricTargetType defines how the target value for a metric should be interpreted
+	// when scaling decisions are made by the HPA controller.
+	// VALUE - A specific metric value to target (e.g., 500m).
+	// AVERAGE_VALUE - A metric value averaged across all pods (e.g., 200Mi).
+	// UTILIZATION - A percentage of the requested resource utilization (e.g., 80).
+	Type  *WorkloadoptimizationV1MetricTargetType `json:"type,omitempty"`
+	Value *string                                 `json:"value,omitempty"`
+}
+
+// WorkloadoptimizationV1MetricTargetType MetricTargetType defines how the target value for a metric should be interpreted
+// when scaling decisions are made by the HPA controller.
+// VALUE - A specific metric value to target (e.g., 500m).
+// AVERAGE_VALUE - A metric value averaged across all pods (e.g., 200Mi).
+// UTILIZATION - A percentage of the requested resource utilization (e.g., 80).
+type WorkloadoptimizationV1MetricTargetType string
+
 // WorkloadoptimizationV1NewWorkloadScalingPolicy defines model for workloadoptimization.v1.NewWorkloadScalingPolicy.
 type WorkloadoptimizationV1NewWorkloadScalingPolicy struct {
 	ApplyType WorkloadoptimizationV1ApplyType `json:"applyType"`
@@ -5746,6 +5853,13 @@ type WorkloadoptimizationV1OOMKillEvent struct {
 	Containers []WorkloadoptimizationV1EventContainer `json:"containers"`
 }
 
+// WorkloadoptimizationV1ObjectMetricSource defines model for workloadoptimization.v1.ObjectMetricSource.
+type WorkloadoptimizationV1ObjectMetricSource struct {
+	DescribedObject *WorkloadoptimizationV1CrossVersionObjectReference `json:"describedObject,omitempty"`
+	Metric          *WorkloadoptimizationV1MetricIdentifier            `json:"metric,omitempty"`
+	Target          *WorkloadoptimizationV1MetricTarget                `json:"target,omitempty"`
+}
+
 // WorkloadoptimizationV1PatchWorkloadV2 defines model for workloadoptimization.v1.PatchWorkloadV2.
 type WorkloadoptimizationV1PatchWorkloadV2 struct {
 	// ScalingPolicyId Defines the scaling policy ID assigned to the workload.
@@ -5760,6 +5874,12 @@ type WorkloadoptimizationV1PodMetrics struct {
 	PodCountMin float64                                  `json:"podCountMin"`
 }
 
+// WorkloadoptimizationV1PodsMetricSource defines model for workloadoptimization.v1.PodsMetricSource.
+type WorkloadoptimizationV1PodsMetricSource struct {
+	Metric *WorkloadoptimizationV1MetricIdentifier `json:"metric,omitempty"`
+	Target *WorkloadoptimizationV1MetricTarget     `json:"target,omitempty"`
+}
+
 // WorkloadoptimizationV1PredictiveInsights defines model for workloadoptimization.v1.PredictiveInsights.
 type WorkloadoptimizationV1PredictiveInsights struct {
 	// AvailableUntil Timestamp until which predictive data is available.
@@ -5767,6 +5887,17 @@ type WorkloadoptimizationV1PredictiveInsights struct {
 
 	// IsEligible Indicates if the workload is eligible for predictive analysis and has future resource forecasts.
 	IsEligible bool `json:"isEligible"`
+}
+
+// WorkloadoptimizationV1PredictiveScaling defines model for workloadoptimization.v1.PredictiveScaling.
+type WorkloadoptimizationV1PredictiveScaling struct {
+	// Enabled Defines if predictive scaling is enabled for resource.
+	Enabled bool `json:"enabled"`
+}
+
+// WorkloadoptimizationV1PredictiveScalingSettings defines model for workloadoptimization.v1.PredictiveScalingSettings.
+type WorkloadoptimizationV1PredictiveScalingSettings struct {
+	Cpu *WorkloadoptimizationV1PredictiveScaling `json:"cpu,omitempty"`
 }
 
 // WorkloadoptimizationV1RecommendationEvent defines model for workloadoptimization.v1.RecommendationEvent.
@@ -5793,11 +5924,12 @@ type WorkloadoptimizationV1RecommendationPolicies struct {
 	// ManagementOption Defines possible options for workload management.
 	// READ_ONLY - workload watched (metrics collected), but no actions may be performed by CAST AI.
 	// MANAGED - workload watched (metrics collected), CAST AI may perform actions on the workload.
-	ManagementOption WorkloadoptimizationV1ManagementOption         `json:"managementOption"`
-	Memory           WorkloadoptimizationV1ResourcePolicies         `json:"memory"`
-	MemoryEvent      *WorkloadoptimizationV1MemoryEventSettings     `json:"memoryEvent,omitempty"`
-	RolloutBehavior  *WorkloadoptimizationV1RolloutBehaviorSettings `json:"rolloutBehavior,omitempty"`
-	Startup          *WorkloadoptimizationV1StartupSettings         `json:"startup,omitempty"`
+	ManagementOption  WorkloadoptimizationV1ManagementOption           `json:"managementOption"`
+	Memory            WorkloadoptimizationV1ResourcePolicies           `json:"memory"`
+	MemoryEvent       *WorkloadoptimizationV1MemoryEventSettings       `json:"memoryEvent,omitempty"`
+	PredictiveScaling *WorkloadoptimizationV1PredictiveScalingSettings `json:"predictiveScaling,omitempty"`
+	RolloutBehavior   *WorkloadoptimizationV1RolloutBehaviorSettings   `json:"rolloutBehavior,omitempty"`
+	Startup           *WorkloadoptimizationV1StartupSettings           `json:"startup,omitempty"`
 }
 
 // WorkloadoptimizationV1RecommendedPodCountChangedEvent defines model for workloadoptimization.v1.RecommendedPodCountChangedEvent.
@@ -5927,6 +6059,12 @@ type WorkloadoptimizationV1ResourceLimitStrategy struct {
 //   - MULTIPLIER: Multiplier used to calculate the resource limit. The final value is determined by multiplying the resource request by the specified factor.
 //   - KEEP_LIMITS: Keep limits respects limits if they are present in the workload spec.
 type WorkloadoptimizationV1ResourceLimitStrategyType string
+
+// WorkloadoptimizationV1ResourceMetricSource defines model for workloadoptimization.v1.ResourceMetricSource.
+type WorkloadoptimizationV1ResourceMetricSource struct {
+	Name   *string                             `json:"name,omitempty"`
+	Target *WorkloadoptimizationV1MetricTarget `json:"target,omitempty"`
+}
 
 // WorkloadoptimizationV1ResourceMetrics defines model for workloadoptimization.v1.ResourceMetrics.
 type WorkloadoptimizationV1ResourceMetrics struct {
@@ -6160,9 +6298,10 @@ type WorkloadoptimizationV1VPAConfigUpdate struct {
 	// ManagementOption Defines possible options for workload management.
 	// READ_ONLY - workload watched (metrics collected), but no actions may be performed by CAST AI.
 	// MANAGED - workload watched (metrics collected), CAST AI may perform actions on the workload.
-	ManagementOption *WorkloadoptimizationV1ManagementOption             `json:"managementOption,omitempty"`
-	Memory           *WorkloadoptimizationV1WorkloadResourceConfigUpdate `json:"memory,omitempty"`
-	MemoryEvent      *WorkloadoptimizationV1MemoryEventSettings          `json:"memoryEvent,omitempty"`
+	ManagementOption  *WorkloadoptimizationV1ManagementOption             `json:"managementOption,omitempty"`
+	Memory            *WorkloadoptimizationV1WorkloadResourceConfigUpdate `json:"memory,omitempty"`
+	MemoryEvent       *WorkloadoptimizationV1MemoryEventSettings          `json:"memoryEvent,omitempty"`
+	PredictiveScaling *WorkloadoptimizationV1PredictiveScalingSettings    `json:"predictiveScaling,omitempty"`
 }
 
 // WorkloadoptimizationV1VerticalOverrides defines model for workloadoptimization.v1.VerticalOverrides.
@@ -6277,11 +6416,12 @@ type WorkloadoptimizationV1WorkloadEventWorkload struct {
 
 // WorkloadoptimizationV1WorkloadMetricContainer defines model for workloadoptimization.v1.WorkloadMetricContainer.
 type WorkloadoptimizationV1WorkloadMetricContainer struct {
-	CpuCores            []WorkloadoptimizationV1ResourceMetrics `json:"cpuCores"`
-	CpuCoresAggregated  WorkloadoptimizationV1AggregatedMetrics `json:"cpuCoresAggregated"`
-	MemoryGib           []WorkloadoptimizationV1ResourceMetrics `json:"memoryGib"`
-	MemoryGibAggregated WorkloadoptimizationV1AggregatedMetrics `json:"memoryGibAggregated"`
-	Name                string                                  `json:"name"`
+	CpuCores                      []WorkloadoptimizationV1ResourceMetrics            `json:"cpuCores"`
+	CpuCoresAggregated            WorkloadoptimizationV1AggregatedMetrics            `json:"cpuCoresAggregated"`
+	CpuCoresPredictionsAggregated *WorkloadoptimizationV1AggregatedPredictionMetrics `json:"cpuCoresPredictionsAggregated,omitempty"`
+	MemoryGib                     []WorkloadoptimizationV1ResourceMetrics            `json:"memoryGib"`
+	MemoryGibAggregated           WorkloadoptimizationV1AggregatedMetrics            `json:"memoryGibAggregated"`
+	Name                          string                                             `json:"name"`
 }
 
 // WorkloadoptimizationV1WorkloadMetrics defines model for workloadoptimization.v1.WorkloadMetrics.
