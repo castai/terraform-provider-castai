@@ -36,6 +36,7 @@ const (
 	FieldLimitStrategyType                         = "type"
 	FieldLimitStrategyMultiplier                   = "multiplier"
 	FieldConfidence                                = "confidence"
+	FieldPredictiveScaling                         = "predictive_scaling"
 	FieldConfidenceThreshold                       = "threshold"
 	DeprecatedFieldApplyThreshold                  = "apply_threshold"
 	FieldApplyThresholdStrategy                    = "apply_threshold_strategy"
@@ -257,12 +258,40 @@ It can be either:
 					},
 				},
 			},
+			FieldPredictiveScaling: {
+				Type:     schema.TypeList,
+				Optional: true,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						FieldCPU: getPredictiveScalingResourceSchema(),
+					},
+				},
+			},
 		},
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(15 * time.Second),
 			Read:   schema.DefaultTimeout(15 * time.Second),
 			Update: schema.DefaultTimeout(15 * time.Second),
 			Delete: schema.DefaultTimeout(15 * time.Second),
+		},
+	}
+}
+
+func getPredictiveScalingResourceSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:        schema.TypeList,
+		Optional:    true,
+		MaxItems:    1,
+		Description: "Defines predictive scaling resource configuration.",
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				FieldEnabled: {
+					Type:        schema.TypeBool,
+					Required:    true,
+					Description: "Defines if predictive scaling is enabled for resource.",
+				},
+			},
 		},
 	}
 }
@@ -285,6 +314,7 @@ func k8sLabelExpressionsSchema() *schema.Schema {
 					Description: "The operator to use for matching the label.",
 					ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{
 						K8sLabelInOperator, K8sLabelNotInOperator, K8sLabelExistsOperator, K8sLabelDoesNotExistOperator,
+						K8sLabelRegexOperator, K8sLabelContainsOperator,
 					}, false)),
 				},
 				"values": {
@@ -512,6 +542,8 @@ func resourceWorkloadScalingPolicyCreate(ctx context.Context, d *schema.Resource
 
 	req.RecommendationPolicies.AntiAffinity = toAntiAffinity(toSection(d, "anti_affinity"))
 
+	req.RecommendationPolicies.PredictiveScaling = toPredictiveScaling(toSection(d, FieldPredictiveScaling))
+
 	ar, err := toAssignmentRules(toSection(d, FieldAssignmentRules))
 	if err != nil {
 		return diag.FromErr(err)
@@ -592,6 +624,9 @@ func resourceWorkloadScalingPolicyRead(ctx context.Context, d *schema.ResourceDa
 	if err := d.Set("anti_affinity", toAntiAffinityMap(sp.RecommendationPolicies.AntiAffinity)); err != nil {
 		return diag.FromErr(fmt.Errorf("setting anti-affinity: %w", err))
 	}
+	if err := d.Set(FieldPredictiveScaling, toPredictiveScalingMap(sp.RecommendationPolicies.PredictiveScaling)); err != nil {
+		return diag.FromErr(fmt.Errorf("setting predictive scaling: %w", err))
+	}
 
 	if err := d.Set(FieldAssignmentRules, toAssignmentRulesMap(getResourceFrom(d, FieldAssignmentRules), sp.AssignmentRules)); err != nil {
 		return diag.FromErr(fmt.Errorf("setting assignment rules: %w", err))
@@ -620,6 +655,7 @@ func resourceWorkloadScalingPolicyUpdate(ctx context.Context, d *schema.Resource
 		"anti_affinity",
 		FieldConfidence,
 		FieldAssignmentRules,
+		FieldPredictiveScaling,
 	) {
 		tflog.Info(ctx, "scaling policy up to date")
 		return nil
@@ -645,14 +681,15 @@ func resourceWorkloadScalingPolicyUpdate(ctx context.Context, d *schema.Resource
 		ApplyType:       sdk.WorkloadoptimizationV1ApplyType(d.Get("apply_type").(string)),
 		AssignmentRules: ar,
 		RecommendationPolicies: sdk.WorkloadoptimizationV1RecommendationPolicies{
-			ManagementOption: sdk.WorkloadoptimizationV1ManagementOption(d.Get("management_option").(string)),
-			Cpu:              cpu,
-			Memory:           memory,
-			Startup:          toStartup(toSection(d, "startup")),
-			Downscaling:      toDownscaling(toSection(d, "downscaling")),
-			MemoryEvent:      toMemoryEvent(toSection(d, "memory_event")),
-			AntiAffinity:     toAntiAffinity(toSection(d, "anti_affinity")),
-			Confidence:       toConfidence(toSection(d, FieldConfidence)),
+			ManagementOption:  sdk.WorkloadoptimizationV1ManagementOption(d.Get("management_option").(string)),
+			Cpu:               cpu,
+			Memory:            memory,
+			Startup:           toStartup(toSection(d, "startup")),
+			Downscaling:       toDownscaling(toSection(d, "downscaling")),
+			MemoryEvent:       toMemoryEvent(toSection(d, "memory_event")),
+			AntiAffinity:      toAntiAffinity(toSection(d, "anti_affinity")),
+			Confidence:        toConfidence(toSection(d, FieldConfidence)),
+			PredictiveScaling: toPredictiveScaling(toSection(d, FieldPredictiveScaling)),
 		},
 	}
 
@@ -1158,6 +1195,59 @@ func toAntiAffinityMap(s *sdk.WorkloadoptimizationV1AntiAffinitySettings) []map[
 	}
 
 	return []map[string]any{m}
+}
+
+func toPredictiveScalingMap(s *sdk.WorkloadoptimizationV1PredictiveScalingSettings) []map[string]any {
+	if s == nil || s.Cpu == nil {
+		return nil
+	}
+
+	return []map[string]any{
+		{
+			FieldCPU: toPredictiveScalingResourceMap(s.Cpu),
+		},
+	}
+}
+
+func toPredictiveScaling(m map[string]any) *sdk.WorkloadoptimizationV1PredictiveScalingSettings {
+	if len(m) == 0 {
+		return nil
+	}
+
+	cpuResource := toPredictiveScalingResource(getFirstElem(m, FieldCPU))
+	if cpuResource == nil {
+		return nil
+	}
+
+	return &sdk.WorkloadoptimizationV1PredictiveScalingSettings{
+		Cpu: cpuResource,
+	}
+}
+
+func toPredictiveScalingResourceMap(s *sdk.WorkloadoptimizationV1PredictiveScaling) []map[string]any {
+	if s == nil {
+		return nil
+	}
+
+	return []map[string]any{
+		{
+			FieldEnabled: s.Enabled,
+		},
+	}
+}
+
+func toPredictiveScalingResource(m map[string]any) *sdk.WorkloadoptimizationV1PredictiveScaling {
+	if len(m) == 0 {
+		return nil
+	}
+
+	r := &sdk.WorkloadoptimizationV1PredictiveScaling{}
+
+	if v, ok := m[FieldEnabled].(bool); ok {
+		r.Enabled = v
+	}
+
+	return r
 }
 
 func getWorkloadScalingPolicyByName(ctx context.Context, client sdk.ClientWithResponsesInterface, clusterID, name string) (*sdk.WorkloadoptimizationV1WorkloadScalingPolicy, error) {

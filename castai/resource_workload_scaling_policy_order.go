@@ -92,9 +92,9 @@ func resourceWorkloadScalingPolicyOrderSet(ctx context.Context, d *schema.Resour
 		PolicyIds: &policyIds,
 	}
 
-	_, err := client.WorkloadOptimizationAPISetScalingPoliciesOrderWithResponse(ctx, clusterId, req)
-	if err != nil {
-		return diag.FromErr(fmt.Errorf("error setting scaling policy order: %w", err))
+	resp, err := client.WorkloadOptimizationAPISetScalingPoliciesOrderWithResponse(ctx, clusterId, req)
+	if err := sdk.CheckOKResponse(resp, err); err != nil {
+		return diag.FromErr(err)
 	}
 
 	d.SetId(clusterId)

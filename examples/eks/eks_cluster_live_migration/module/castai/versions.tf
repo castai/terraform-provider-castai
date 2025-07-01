@@ -4,14 +4,15 @@ terraform {
   required_providers {
     aws = {
       source  = "hashicorp/aws"
-      version = "~> 5.95.0"
+      version = ">= 2.49"
     }
     castai = {
       source  = "castai/castai"
-      version = "7.51.0"
+      version = ">= 6.0.0"
     }
-    kubernetes = {
-      source = "hashicorp/kubernetes"
+    helm = {
+      source  = "hashicorp/helm"
+      version = ">= 2.0.0"
     }
   }
 }
