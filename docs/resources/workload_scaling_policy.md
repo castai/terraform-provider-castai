@@ -272,12 +272,12 @@ It can be either:
 
 Required:
 
-- `key` (String) The label key to match.
 - `operator` (String) The operator to use for matching the label.
 
 Optional:
 
-- `values` (List of String) A list of values to match against the label key. Allowed for `In` and `NotIn` operators.
+- `key` (String) The label key to match. Required for all operators except `Regex` and `Contains`. If not specified, it will search through all labels.
+- `values` (List of String) A list of values to match against the label key. It is required for `In`, `NotIn`, `Regex`, and `Contains` operators.
 
 
 
