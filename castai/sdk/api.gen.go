@@ -6553,55 +6553,6 @@ type WorkloadoptimizationV1MetricTarget struct {
 // UTILIZATION - A percentage of the requested resource utilization (e.g., 80).
 type WorkloadoptimizationV1MetricTargetType string
 
-// WorkloadoptimizationV1MetricIdentifier defines model for workloadoptimization.v1.MetricIdentifier.
-type WorkloadoptimizationV1MetricIdentifier struct {
-	Name     *string            `json:"name,omitempty"`
-	Selector *map[string]string `json:"selector,omitempty"`
-}
-
-// WorkloadoptimizationV1MetricSourceType MetricSourceType defines the source type of a metric used for autoscaling decisions.
-// RESOURCE - Resource metrics like CPU or memory usage collected from pods.
-// PODS - Custom metrics aggregated across pods (e.g., requests-per-second).
-// OBJECT - Metrics associated with a specific Kubernetes object (e.g., Ingress request rate).
-// EXTERNAL - Metrics not associated with any Kubernetes object (e.g., from a cloud provider).
-// CONTAINER_RESOURCE - Resource metrics scoped to a specific container within a pod.
-type WorkloadoptimizationV1MetricSourceType string
-
-// WorkloadoptimizationV1MetricSpec defines model for workloadoptimization.v1.MetricSpec.
-type WorkloadoptimizationV1MetricSpec struct {
-	ContainerResource *WorkloadoptimizationV1ContainerResourceMetricSource `json:"containerResource,omitempty"`
-	External          *WorkloadoptimizationV1ExternalMetricSource          `json:"external,omitempty"`
-	Object            *WorkloadoptimizationV1ObjectMetricSource            `json:"object,omitempty"`
-	Pods              *WorkloadoptimizationV1PodsMetricSource              `json:"pods,omitempty"`
-	Resource          *WorkloadoptimizationV1ResourceMetricSource          `json:"resource,omitempty"`
-
-	// Type MetricSourceType defines the source type of a metric used for autoscaling decisions.
-	// RESOURCE - Resource metrics like CPU or memory usage collected from pods.
-	// PODS - Custom metrics aggregated across pods (e.g., requests-per-second).
-	// OBJECT - Metrics associated with a specific Kubernetes object (e.g., Ingress request rate).
-	// EXTERNAL - Metrics not associated with any Kubernetes object (e.g., from a cloud provider).
-	// CONTAINER_RESOURCE - Resource metrics scoped to a specific container within a pod.
-	Type *WorkloadoptimizationV1MetricSourceType `json:"type,omitempty"`
-}
-
-// WorkloadoptimizationV1MetricTarget defines model for workloadoptimization.v1.MetricTarget.
-type WorkloadoptimizationV1MetricTarget struct {
-	// Type MetricTargetType defines how the target value for a metric should be interpreted
-	// when scaling decisions are made by the HPA controller.
-	// VALUE - A specific metric value to target (e.g., 500m).
-	// AVERAGE_VALUE - A metric value averaged across all pods (e.g., 200Mi).
-	// UTILIZATION - A percentage of the requested resource utilization (e.g., 80).
-	Type  *WorkloadoptimizationV1MetricTargetType `json:"type,omitempty"`
-	Value *string                                 `json:"value,omitempty"`
-}
-
-// WorkloadoptimizationV1MetricTargetType MetricTargetType defines how the target value for a metric should be interpreted
-// when scaling decisions are made by the HPA controller.
-// VALUE - A specific metric value to target (e.g., 500m).
-// AVERAGE_VALUE - A metric value averaged across all pods (e.g., 200Mi).
-// UTILIZATION - A percentage of the requested resource utilization (e.g., 80).
-type WorkloadoptimizationV1MetricTargetType string
-
 // WorkloadoptimizationV1NewWorkloadScalingPolicy defines model for workloadoptimization.v1.NewWorkloadScalingPolicy.
 type WorkloadoptimizationV1NewWorkloadScalingPolicy struct {
 	ApplyType WorkloadoptimizationV1ApplyType `json:"applyType"`
@@ -7541,6 +7492,9 @@ type ExternalClusterAPIGetCredentialsScriptParams struct {
 
 	// InstallNetflowExporter Whether Netflow network exporter should be installed.
 	InstallNetflowExporter *bool `form:"installNetflowExporter,omitempty" json:"installNetflowExporter,omitempty"`
+
+	// InstallWorkloadAutoscaler Whether CAST AI Workload Autoscaler should be installed.
+	InstallWorkloadAutoscaler *bool `form:"installWorkloadAutoscaler,omitempty" json:"installWorkloadAutoscaler,omitempty"`
 }
 
 // ExternalClusterAPIListNodesParams defines parameters for ExternalClusterAPIListNodes.
