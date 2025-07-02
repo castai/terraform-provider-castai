@@ -6603,6 +6603,9 @@ type ExternalClusterAPIGetCredentialsScriptParams struct {
 
 	// InstallNetflowExporter Whether Netflow network exporter should be installed.
 	InstallNetflowExporter *bool `form:"installNetflowExporter,omitempty" json:"installNetflowExporter,omitempty"`
+
+	// InstallWorkloadAutoscaler Whether CAST AI Workload Autoscaler should be installed.
+	InstallWorkloadAutoscaler *bool `form:"installWorkloadAutoscaler,omitempty" json:"installWorkloadAutoscaler,omitempty"`
 }
 
 // ExternalClusterAPIListNodesParams defines parameters for ExternalClusterAPIListNodes.

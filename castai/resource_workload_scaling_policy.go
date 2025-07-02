@@ -305,8 +305,8 @@ func k8sLabelExpressionsSchema() *schema.Schema {
 			Schema: map[string]*schema.Schema{
 				"key": {
 					Type:        schema.TypeString,
-					Required:    true,
-					Description: "The label key to match.",
+					Optional:    true,
+					Description: "The label key to match. Required for all operators except `Regex` and `Contains`. If not specified, it will search through all labels.",
 				},
 				"operator": {
 					Type:        schema.TypeString,
@@ -320,7 +320,7 @@ func k8sLabelExpressionsSchema() *schema.Schema {
 				"values": {
 					Type:        schema.TypeList,
 					Optional:    true,
-					Description: "A list of values to match against the label key. Allowed for `In` and `NotIn` operators.",
+					Description: "A list of values to match against the label key. It is required for `In`, `NotIn`, `Regex`, and `Contains` operators.",
 					Elem:        &schema.Schema{Type: schema.TypeString},
 				},
 			},
