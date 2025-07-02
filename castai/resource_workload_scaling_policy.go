@@ -36,6 +36,9 @@ const (
 	FieldLimitStrategyType                         = "type"
 	FieldLimitStrategyMultiplier                   = "multiplier"
 	FieldConfidence                                = "confidence"
+	FieldRolloutBehavior                           = "rollout_behavior"
+	FieldRolloutBehaviorType                       = "type"
+	FieldRolloutBehaviorNoDisruptionType           = "NO_DISRUPTION"
 	FieldPredictiveScaling                         = "predictive_scaling"
 	FieldConfidenceThreshold                       = "threshold"
 	DeprecatedFieldApplyThreshold                  = "apply_threshold"
@@ -265,6 +268,28 @@ It can be either:
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
 						FieldCPU: getPredictiveScalingResourceSchema(),
+					},
+				},
+			},
+			FieldRolloutBehavior: {
+				Type:     schema.TypeList,
+				Optional: true,
+				MaxItems: 1,
+				Description: `Defines the rollout behavior used when applying recommendations. Prerequisites:
+	- Applicable to Deployment resources that support running as multi-replica.
+	- Deployment is running with single replica (replica count = 1).
+	- Deployment's rollout strategy allows for downtime.
+	- Recommendation apply type is "immediate".
+	- Cluster has workload-autoscaler component version v0.35.3 or higher.`,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						FieldRolloutBehaviorType: {
+							Type:     schema.TypeString,
+							Required: true,
+							Description: `Defines the rollout type to be used when applying recommendations.
+	- NO_DISRUPTION - pods are restarted without causing service disruption.`,
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{FieldRolloutBehaviorNoDisruptionType}, false)),
+						},
 					},
 				},
 			},
@@ -544,6 +569,8 @@ func resourceWorkloadScalingPolicyCreate(ctx context.Context, d *schema.Resource
 
 	req.RecommendationPolicies.PredictiveScaling = toPredictiveScaling(toSection(d, FieldPredictiveScaling))
 
+	req.RecommendationPolicies.RolloutBehavior = toRolloutBehavior(toSection(d, FieldRolloutBehavior))
+
 	ar, err := toAssignmentRules(toSection(d, FieldAssignmentRules))
 	if err != nil {
 		return diag.FromErr(err)
@@ -627,6 +654,9 @@ func resourceWorkloadScalingPolicyRead(ctx context.Context, d *schema.ResourceDa
 	if err := d.Set(FieldPredictiveScaling, toPredictiveScalingMap(sp.RecommendationPolicies.PredictiveScaling)); err != nil {
 		return diag.FromErr(fmt.Errorf("setting predictive scaling: %w", err))
 	}
+	if err := d.Set(FieldRolloutBehavior, toRolloutBehaviorMap(sp.RecommendationPolicies.RolloutBehavior)); err != nil {
+		return diag.FromErr(fmt.Errorf("setting rollout behavior: %w", err))
+	}
 
 	if err := d.Set(FieldAssignmentRules, toAssignmentRulesMap(getResourceFrom(d, FieldAssignmentRules), sp.AssignmentRules)); err != nil {
 		return diag.FromErr(fmt.Errorf("setting assignment rules: %w", err))
@@ -656,6 +686,7 @@ func resourceWorkloadScalingPolicyUpdate(ctx context.Context, d *schema.Resource
 		FieldConfidence,
 		FieldAssignmentRules,
 		FieldPredictiveScaling,
+		FieldRolloutBehavior,
 	) {
 		tflog.Info(ctx, "scaling policy up to date")
 		return nil
@@ -690,6 +721,7 @@ func resourceWorkloadScalingPolicyUpdate(ctx context.Context, d *schema.Resource
 			AntiAffinity:      toAntiAffinity(toSection(d, "anti_affinity")),
 			Confidence:        toConfidence(toSection(d, FieldConfidence)),
 			PredictiveScaling: toPredictiveScaling(toSection(d, FieldPredictiveScaling)),
+			RolloutBehavior:   toRolloutBehavior(toSection(d, FieldRolloutBehavior)),
 		},
 	}
 
@@ -1248,6 +1280,31 @@ func toPredictiveScalingResource(m map[string]any) *sdk.WorkloadoptimizationV1Pr
 	}
 
 	return r
+}
+
+func toRolloutBehavior(m map[string]any) *sdk.WorkloadoptimizationV1RolloutBehaviorSettings {
+	if len(m) == 0 {
+		return nil
+	}
+
+	r := &sdk.WorkloadoptimizationV1RolloutBehaviorSettings{}
+	if v, ok := m[FieldRolloutBehaviorType].(string); ok && v != "" {
+		r.Type = lo.ToPtr(sdk.WorkloadoptimizationV1RolloutBehaviorType(v))
+	}
+
+	return r
+}
+
+func toRolloutBehaviorMap(s *sdk.WorkloadoptimizationV1RolloutBehaviorSettings) []map[string]any {
+	if s == nil || s.Type == nil {
+		return nil
+	}
+
+	return []map[string]any{
+		{
+			FieldRolloutBehaviorType: string(*s.Type),
+		},
+	}
 }
 
 func getWorkloadScalingPolicyByName(ctx context.Context, client sdk.ClientWithResponsesInterface, clusterID, name string) (*sdk.WorkloadoptimizationV1WorkloadScalingPolicy, error) {

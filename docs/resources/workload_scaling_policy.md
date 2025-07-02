@@ -85,6 +85,9 @@ resource "castai_workload_scaling_policy" "services" {
   confidence {
     threshold = 0.9
   }
+  rollout_behavior {
+    type = "NO_DISRUPTION"
+  }
 }
 ```
 
@@ -112,6 +115,12 @@ resource "castai_workload_scaling_policy" "services" {
 - `downscaling` (Block List, Max: 1) (see [below for nested schema](#nestedblock--downscaling))
 - `memory_event` (Block List, Max: 1) (see [below for nested schema](#nestedblock--memory_event))
 - `predictive_scaling` (Block List, Max: 1) (see [below for nested schema](#nestedblock--predictive_scaling))
+- `rollout_behavior` (Block List, Max: 1) Defines the rollout behavior used when applying recommendations. Prerequisites:
+	- Applicable to Deployment resources that support running as multi-replica.
+	- Deployment is running with single replica (replica count = 1).
+	- Deployment's rollout strategy allows for downtime.
+	- Recommendation apply type is "immediate".
+	- Cluster has workload-autoscaler component version v0.35.3 or higher. (see [below for nested schema](#nestedblock--rollout_behavior))
 - `startup` (Block List, Max: 1) (see [below for nested schema](#nestedblock--startup))
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
@@ -325,6 +334,15 @@ Required:
 
 - `enabled` (Boolean) Defines if predictive scaling is enabled for resource.
 
+
+
+<a id="nestedblock--rollout_behavior"></a>
+### Nested Schema for `rollout_behavior`
+
+Required:
+
+- `type` (String) Defines the rollout type to be used when applying recommendations.
+	- NO_DISRUPTION - pods are restarted without causing service disruption.
 
 
 <a id="nestedblock--startup"></a>
