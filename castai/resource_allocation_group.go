@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/hashicorp/go-uuid"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -89,25 +88,6 @@ func resourceAllocationGroupDiff(_ context.Context, d *schema.ResourceDiff, _ an
 		return errors.New("allocation group must specify at least one of: cluster_ids, namespaces, or labels")
 	}
 	return nil
-}
-
-func allocationGroupImporter(ctx context.Context, d *schema.ResourceData, meta any) ([]*schema.ResourceData, error) {
-	client := meta.(*ProviderConfig).api
-	if _, err := uuid.ParseUUID(d.Id()); err != nil {
-		return nil, fmt.Errorf("error parsing uuid: %w", err)
-	}
-	resp, err := client.AllocationGroupAPIGetAllocationGroupWithResponse(ctx, d.Id())
-	if err != nil {
-		return nil, fmt.Errorf("error getting allocation group: %w", err)
-	}
-
-	err = sdk.CheckOKResponse(resp, err)
-	if err != nil {
-		return nil, fmt.Errorf("error checking response: %w", err)
-	}
-
-	d.SetId(*resp.JSON200.Id)
-	return []*schema.ResourceData{d}, nil
 }
 
 func resourceAllocationGroupRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
