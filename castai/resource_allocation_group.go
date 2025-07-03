@@ -24,7 +24,7 @@ func resourceAllocationGroup() *schema.Resource {
 		CustomizeDiff: resourceAllocationGroupDiff,
 		Description:   "Manage allocation group. Allocation group [reference](https://docs.cast.ai/docs/allocation-groups)",
 		Importer: &schema.ResourceImporter{
-			StateContext: allocationGroupImporter,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 		Schema: map[string]*schema.Schema{
 			"name": {
