@@ -190,6 +190,27 @@ const (
 	ORGANIZATIONTYPEENTERPRISE CastaiUsersV1beta1OrganizationType = "ORGANIZATION_TYPE_ENTERPRISE"
 )
 
+// Defines values for CostreportV1beta1AllocationGroupFilterLabelValueOperator.
+const (
+	CostreportV1beta1AllocationGroupFilterLabelValueOperatorDoesNotExist CostreportV1beta1AllocationGroupFilterLabelValueOperator = "DoesNotExist"
+	CostreportV1beta1AllocationGroupFilterLabelValueOperatorEqual        CostreportV1beta1AllocationGroupFilterLabelValueOperator = "Equal"
+	CostreportV1beta1AllocationGroupFilterLabelValueOperatorExists       CostreportV1beta1AllocationGroupFilterLabelValueOperator = "Exists"
+	CostreportV1beta1AllocationGroupFilterLabelValueOperatorNotEqual     CostreportV1beta1AllocationGroupFilterLabelValueOperator = "NotEqual"
+)
+
+// Defines values for CostreportV1beta1FilterOperator.
+const (
+	AND CostreportV1beta1FilterOperator = "AND"
+	OR  CostreportV1beta1FilterOperator = "OR"
+)
+
+// Defines values for CostreportV1beta1NoDataReason.
+const (
+	CostreportV1beta1NoDataReasonAgentOutdated   CostreportV1beta1NoDataReason = "AgentOutdated"
+	CostreportV1beta1NoDataReasonNoMetricsServer CostreportV1beta1NoDataReason = "NoMetricsServer"
+	CostreportV1beta1NoDataReasonUnknown         CostreportV1beta1NoDataReason = "Unknown"
+)
+
 // Defines values for ExternalclusterV1ClusterReconcileInfoReconcileMode.
 const (
 	ExternalclusterV1ClusterReconcileInfoReconcileModeDisabled    ExternalclusterV1ClusterReconcileInfoReconcileMode = "disabled"
@@ -217,18 +238,18 @@ const (
 
 // Defines values for K8sSelectorV1Operator.
 const (
-	DoesNotExist  K8sSelectorV1Operator = "DoesNotExist"
-	DoesNotExist1 K8sSelectorV1Operator = "doesNotExist"
-	Exists        K8sSelectorV1Operator = "Exists"
-	Exists1       K8sSelectorV1Operator = "exists"
-	Gt            K8sSelectorV1Operator = "Gt"
-	Gt1           K8sSelectorV1Operator = "gt"
-	IN            K8sSelectorV1Operator = "IN"
-	In            K8sSelectorV1Operator = "in"
-	Lt            K8sSelectorV1Operator = "Lt"
-	Lt1           K8sSelectorV1Operator = "lt"
-	NotIn         K8sSelectorV1Operator = "NotIn"
-	NotIn1        K8sSelectorV1Operator = "notIn"
+	K8sSelectorV1OperatorDoesNotExist  K8sSelectorV1Operator = "DoesNotExist"
+	K8sSelectorV1OperatorDoesNotExist1 K8sSelectorV1Operator = "doesNotExist"
+	K8sSelectorV1OperatorExists        K8sSelectorV1Operator = "Exists"
+	K8sSelectorV1OperatorExists1       K8sSelectorV1Operator = "exists"
+	K8sSelectorV1OperatorGt            K8sSelectorV1Operator = "Gt"
+	K8sSelectorV1OperatorGt1           K8sSelectorV1Operator = "gt"
+	K8sSelectorV1OperatorIN            K8sSelectorV1Operator = "IN"
+	K8sSelectorV1OperatorIn            K8sSelectorV1Operator = "in"
+	K8sSelectorV1OperatorLt            K8sSelectorV1Operator = "Lt"
+	K8sSelectorV1OperatorLt1           K8sSelectorV1Operator = "lt"
+	K8sSelectorV1OperatorNotIn         K8sSelectorV1Operator = "NotIn"
+	K8sSelectorV1OperatorNotIn1        K8sSelectorV1Operator = "notIn"
 )
 
 // Defines values for NodeconfigV1AKSConfigImageFamily.
@@ -549,19 +570,35 @@ const (
 	CommitmentsAPIImportAWSReservedInstancesParamsBehaviourOVERWRITE            CommitmentsAPIImportAWSReservedInstancesParamsBehaviour = "OVERWRITE"
 )
 
+// Defines values for AllocationGroupAPIGetAllocationGroupWorkloadCostsParamsSortOrder.
+const (
+	AllocationGroupAPIGetAllocationGroupWorkloadCostsParamsSortOrderASC  AllocationGroupAPIGetAllocationGroupWorkloadCostsParamsSortOrder = "ASC"
+	AllocationGroupAPIGetAllocationGroupWorkloadCostsParamsSortOrderAsc  AllocationGroupAPIGetAllocationGroupWorkloadCostsParamsSortOrder = "asc"
+	AllocationGroupAPIGetAllocationGroupWorkloadCostsParamsSortOrderDESC AllocationGroupAPIGetAllocationGroupWorkloadCostsParamsSortOrder = "DESC"
+	AllocationGroupAPIGetAllocationGroupWorkloadCostsParamsSortOrderDesc AllocationGroupAPIGetAllocationGroupWorkloadCostsParamsSortOrder = "desc"
+)
+
+// Defines values for AllocationGroupAPIGetAllocationGroupWorkloadsEfficiencyParamsSortOrder.
+const (
+	AllocationGroupAPIGetAllocationGroupWorkloadsEfficiencyParamsSortOrderASC  AllocationGroupAPIGetAllocationGroupWorkloadsEfficiencyParamsSortOrder = "ASC"
+	AllocationGroupAPIGetAllocationGroupWorkloadsEfficiencyParamsSortOrderAsc  AllocationGroupAPIGetAllocationGroupWorkloadsEfficiencyParamsSortOrder = "asc"
+	AllocationGroupAPIGetAllocationGroupWorkloadsEfficiencyParamsSortOrderDESC AllocationGroupAPIGetAllocationGroupWorkloadsEfficiencyParamsSortOrder = "DESC"
+	AllocationGroupAPIGetAllocationGroupWorkloadsEfficiencyParamsSortOrderDesc AllocationGroupAPIGetAllocationGroupWorkloadsEfficiencyParamsSortOrder = "desc"
+)
+
 // Defines values for ExternalClusterAPIListNodesParamsNodeStatus.
 const (
-	ExternalClusterAPIListNodesParamsNodeStatusCordoned              ExternalClusterAPIListNodesParamsNodeStatus = "cordoned"
-	ExternalClusterAPIListNodesParamsNodeStatusCreating              ExternalClusterAPIListNodesParamsNodeStatus = "creating"
-	ExternalClusterAPIListNodesParamsNodeStatusDeleted               ExternalClusterAPIListNodesParamsNodeStatus = "deleted"
-	ExternalClusterAPIListNodesParamsNodeStatusDeleting              ExternalClusterAPIListNodesParamsNodeStatus = "deleting"
-	ExternalClusterAPIListNodesParamsNodeStatusDraining              ExternalClusterAPIListNodesParamsNodeStatus = "draining"
-	ExternalClusterAPIListNodesParamsNodeStatusInterrupted           ExternalClusterAPIListNodesParamsNodeStatus = "interrupted"
-	ExternalClusterAPIListNodesParamsNodeStatusNodeStatusUnspecified ExternalClusterAPIListNodesParamsNodeStatus = "node_status_unspecified"
-	ExternalClusterAPIListNodesParamsNodeStatusNotReady              ExternalClusterAPIListNodesParamsNodeStatus = "not_ready"
-	ExternalClusterAPIListNodesParamsNodeStatusPending               ExternalClusterAPIListNodesParamsNodeStatus = "pending"
-	ExternalClusterAPIListNodesParamsNodeStatusReady                 ExternalClusterAPIListNodesParamsNodeStatus = "ready"
-	ExternalClusterAPIListNodesParamsNodeStatusUnknown               ExternalClusterAPIListNodesParamsNodeStatus = "unknown"
+	Cordoned              ExternalClusterAPIListNodesParamsNodeStatus = "cordoned"
+	Creating              ExternalClusterAPIListNodesParamsNodeStatus = "creating"
+	Deleted               ExternalClusterAPIListNodesParamsNodeStatus = "deleted"
+	Deleting              ExternalClusterAPIListNodesParamsNodeStatus = "deleting"
+	Draining              ExternalClusterAPIListNodesParamsNodeStatus = "draining"
+	Interrupted           ExternalClusterAPIListNodesParamsNodeStatus = "interrupted"
+	NodeStatusUnspecified ExternalClusterAPIListNodesParamsNodeStatus = "node_status_unspecified"
+	NotReady              ExternalClusterAPIListNodesParamsNodeStatus = "not_ready"
+	Pending               ExternalClusterAPIListNodesParamsNodeStatus = "pending"
+	Ready                 ExternalClusterAPIListNodesParamsNodeStatus = "ready"
+	Unknown               ExternalClusterAPIListNodesParamsNodeStatus = "unknown"
 )
 
 // Defines values for ExternalClusterAPIListNodesParamsLifecycleType.
@@ -2844,6 +2881,686 @@ type CastaiUsersV1beta1UserOrganization struct {
 	//
 	//  - ORGANIZATION_TYPE_DEFAULT: default organization type
 	Type *CastaiUsersV1beta1OrganizationType `json:"type,omitempty"`
+}
+
+// CostreportV1beta1AllocationGroup defines model for costreport.v1beta1.AllocationGroup.
+type CostreportV1beta1AllocationGroup struct {
+	Filter    *CostreportV1beta1AllocationGroupFilter `json:"filter,omitempty"`
+	Id        *string                                 `json:"id,omitempty"`
+	Name      *string                                 `json:"name,omitempty"`
+	UpdatedAt *time.Time                              `json:"updatedAt,omitempty"`
+}
+
+// CostreportV1beta1AllocationGroupDetails defines model for costreport.v1beta1.AllocationGroupDetails.
+type CostreportV1beta1AllocationGroupDetails struct {
+	Filter *CostreportV1beta1AllocationGroupFilter `json:"filter,omitempty"`
+	Name   *string                                 `json:"name,omitempty"`
+}
+
+// CostreportV1beta1AllocationGroupFilter defines model for costreport.v1beta1.AllocationGroupFilter.
+type CostreportV1beta1AllocationGroupFilter struct {
+	ClusterIds         *[]string                                           `json:"clusterIds,omitempty"`
+	Labels             *[]CostreportV1beta1AllocationGroupFilterLabelValue `json:"labels,omitempty"`
+	LabelsOperator     *CostreportV1beta1FilterOperator                    `json:"labelsOperator,omitempty"`
+	Namespaces         *[]string                                           `json:"namespaces,omitempty"`
+	NodeLabels         *[]CostreportV1beta1AllocationGroupFilterLabelValue `json:"nodeLabels,omitempty"`
+	NodeLabelsOperator *CostreportV1beta1FilterOperator                    `json:"nodeLabelsOperator,omitempty"`
+}
+
+// CostreportV1beta1AllocationGroupFilterLabelValue defines model for costreport.v1beta1.AllocationGroupFilter.LabelValue.
+type CostreportV1beta1AllocationGroupFilterLabelValue struct {
+	// Label Label name.
+	Label *string `json:"label,omitempty"`
+
+	// Operator A set of operators which can be used in the label filter.
+	Operator *CostreportV1beta1AllocationGroupFilterLabelValueOperator `json:"operator,omitempty"`
+
+	// Value Label value. Not used with operators: Exists and DoesNotExist.
+	Value *string `json:"value,omitempty"`
+}
+
+// CostreportV1beta1AllocationGroupFilterLabelValueOperator A set of operators which can be used in the label filter.
+type CostreportV1beta1AllocationGroupFilterLabelValueOperator string
+
+// CostreportV1beta1AllocationGroupVersionDetails defines model for costreport.v1beta1.AllocationGroupVersionDetails.
+type CostreportV1beta1AllocationGroupVersionDetails struct {
+	CreatedAt *time.Time `json:"createdAt,omitempty"`
+}
+
+// CostreportV1beta1CostImpact Defines cost impact of wasted resources per lifecycle.
+type CostreportV1beta1CostImpact struct {
+	// OnDemand Cost impact in $ for workload running on on-demand node.
+	OnDemand string `json:"onDemand"`
+
+	// Spot Cost impact in $ for workload running on spot node.
+	Spot string `json:"spot"`
+
+	// SpotFallback Cost impact in $ for workload running on spot-fallback node.
+	SpotFallback string `json:"spotFallback"`
+}
+
+// CostreportV1beta1DeleteAllocationGroupResponse defines model for costreport.v1beta1.DeleteAllocationGroupResponse.
+type CostreportV1beta1DeleteAllocationGroupResponse = map[string]interface{}
+
+// CostreportV1beta1FilterOperator defines model for costreport.v1beta1.FilterOperator.
+type CostreportV1beta1FilterOperator string
+
+// CostreportV1beta1GetAllocationGroupCostSummariesResponse defines model for costreport.v1beta1.GetAllocationGroupCostSummariesResponse.
+type CostreportV1beta1GetAllocationGroupCostSummariesResponse struct {
+	Items *[]CostreportV1beta1GetAllocationGroupCostSummariesResponseGroupItem `json:"items,omitempty"`
+}
+
+// CostreportV1beta1GetAllocationGroupCostSummariesResponseGroupItem defines model for costreport.v1beta1.GetAllocationGroupCostSummariesResponse.GroupItem.
+type CostreportV1beta1GetAllocationGroupCostSummariesResponseGroupItem struct {
+	// GroupId Allocation group ID.
+	GroupId *string `json:"groupId,omitempty"`
+
+	// GroupName Allocation group name.
+	GroupName *string `json:"groupName,omitempty"`
+
+	// Summary Defines cost details for a given time.
+	Summary *CostreportV1beta1GetAllocationGroupCostSummariesResponseSummary `json:"summary,omitempty"`
+
+	// Versions Allocation group version history.
+	Versions *[]CostreportV1beta1AllocationGroupVersionDetails `json:"versions,omitempty"`
+}
+
+// CostreportV1beta1GetAllocationGroupCostSummariesResponseSummary Defines cost details for a given time.
+type CostreportV1beta1GetAllocationGroupCostSummariesResponseSummary struct {
+	// CpuCost Total CPU cost of on-demand instances for the given time period.
+	CpuCost *string `json:"cpuCost,omitempty"`
+
+	// CpuCount Average number of CPUs used for the given time period.
+	CpuCount *string `json:"cpuCount,omitempty"`
+
+	// GpuCost Total GPU cost of on-demand instances for the given time period.
+	GpuCost *string `json:"gpuCost,omitempty"`
+
+	// GpuCount Average number of GPUs for the given time period.
+	GpuCount *string `json:"gpuCount,omitempty"`
+
+	// RamCost Total RAM cost of on-demand instances for the given time period.
+	RamCost *string `json:"ramCost,omitempty"`
+
+	// RamGib Average RAM GiB used for the given time period.
+	RamGib *string `json:"ramGib,omitempty"`
+
+	// TotalCostOnDemand Total cost of on-demand instances for the given time period.
+	TotalCostOnDemand *string `json:"totalCostOnDemand,omitempty"`
+
+	// TotalCostSpot Total cost of spot instances for the given time period.
+	TotalCostSpot *string `json:"totalCostSpot,omitempty"`
+
+	// TotalCostSpotFallback Total cost of spot-fallback instances for the given time period.
+	TotalCostSpotFallback *string `json:"totalCostSpotFallback,omitempty"`
+	WorkloadCount         *string `json:"workloadCount,omitempty"`
+}
+
+// CostreportV1beta1GetAllocationGroupCostTimedSummariesResponse defines model for costreport.v1beta1.GetAllocationGroupCostTimedSummariesResponse.
+type CostreportV1beta1GetAllocationGroupCostTimedSummariesResponse struct {
+	Items *[]CostreportV1beta1GetAllocationGroupCostTimedSummariesResponseGroupItem `json:"items,omitempty"`
+}
+
+// CostreportV1beta1GetAllocationGroupCostTimedSummariesResponseGroupItem defines model for costreport.v1beta1.GetAllocationGroupCostTimedSummariesResponse.GroupItem.
+type CostreportV1beta1GetAllocationGroupCostTimedSummariesResponseGroupItem struct {
+	// GroupId Allocation group ID.
+	GroupId *string `json:"groupId,omitempty"`
+
+	// GroupName Allocation group name.
+	GroupName *string `json:"groupName,omitempty"`
+
+	// Items Allocation group cost entries.
+	Items *[]CostreportV1beta1GetAllocationGroupCostTimedSummariesResponseSummary `json:"items,omitempty"`
+
+	// Versions Allocation group version history.
+	Versions *[]CostreportV1beta1AllocationGroupVersionDetails `json:"versions,omitempty"`
+}
+
+// CostreportV1beta1GetAllocationGroupCostTimedSummariesResponseSummary Defines cost details for a given time.
+type CostreportV1beta1GetAllocationGroupCostTimedSummariesResponseSummary struct {
+	// CpuCost Total CPU cost of on-demand instances for the given time period.
+	CpuCost *string `json:"cpuCost,omitempty"`
+
+	// CpuCount Average number of CPUs used for the given time period.
+	CpuCount *string `json:"cpuCount,omitempty"`
+
+	// GpuCost Total GPU cost of on-demand instances for the given time period.
+	GpuCost *string `json:"gpuCost,omitempty"`
+
+	// GpuCount Average number of GPUs for the given time period.
+	GpuCount *string `json:"gpuCount,omitempty"`
+
+	// RamCost Total RAM cost of on-demand instances for the given time period.
+	RamCost *string `json:"ramCost,omitempty"`
+
+	// RamGib Average RAM GiB used for the given time period.
+	RamGib *string `json:"ramGib,omitempty"`
+
+	// Timestamp Timestamp of entry.
+	Timestamp *time.Time `json:"timestamp,omitempty"`
+
+	// TotalCostOnDemand Total cost of on-demand instances for the given time period.
+	TotalCostOnDemand *string `json:"totalCostOnDemand,omitempty"`
+
+	// TotalCostSpot Total cost of spot instances for the given time period.
+	TotalCostSpot *string `json:"totalCostSpot,omitempty"`
+
+	// TotalCostSpotFallback Total cost of spot-fallback instances for the given time period.
+	TotalCostSpotFallback *string `json:"totalCostSpotFallback,omitempty"`
+	WorkloadCount         *string `json:"workloadCount,omitempty"`
+}
+
+// CostreportV1beta1GetAllocationGroupEfficiencySummaryResponse defines model for costreport.v1beta1.GetAllocationGroupEfficiencySummaryResponse.
+type CostreportV1beta1GetAllocationGroupEfficiencySummaryResponse struct {
+	Items *[]CostreportV1beta1GetAllocationGroupEfficiencySummaryResponseCostAllocationGroupItem `json:"items,omitempty"`
+
+	// TopItems Top N allocation groups with highest cost impact.
+	TopItems *[]CostreportV1beta1GetAllocationGroupEfficiencySummaryResponseTopItem `json:"topItems,omitempty"`
+}
+
+// CostreportV1beta1GetAllocationGroupEfficiencySummaryResponseCostAllocationGroupItem defines model for costreport.v1beta1.GetAllocationGroupEfficiencySummaryResponse.CostAllocationGroupItem.
+type CostreportV1beta1GetAllocationGroupEfficiencySummaryResponseCostAllocationGroupItem struct {
+	// CostImpact Defines cost impact of wasted resources per lifecycle.
+	CostImpact *CostreportV1beta1CostImpact `json:"costImpact,omitempty"`
+	GroupId    *string                      `json:"groupId,omitempty"`
+	GroupName  *string                      `json:"groupName,omitempty"`
+
+	// Requests Defines the resources.
+	Requests *CostreportV1beta1Resources `json:"requests,omitempty"`
+
+	// TotalCostImpact Total cost impact of the group. Sum of cost impacts by lifecycle.
+	TotalCostImpact *string `json:"totalCostImpact,omitempty"`
+
+	// Usage Defines the resources.
+	Usage *CostreportV1beta1Resources `json:"usage,omitempty"`
+
+	// Versions Allocation group version history.
+	Versions *[]CostreportV1beta1AllocationGroupVersionDetails `json:"versions,omitempty"`
+
+	// Waste Defines the resources.
+	Waste *CostreportV1beta1Resources `json:"waste,omitempty"`
+
+	// WorkloadCount Number of workloads for the given time period.
+	WorkloadCount *int32 `json:"workloadCount,omitempty"`
+}
+
+// CostreportV1beta1GetAllocationGroupEfficiencySummaryResponseCostImpactHistoryItem defines model for costreport.v1beta1.GetAllocationGroupEfficiencySummaryResponse.CostImpactHistoryItem.
+type CostreportV1beta1GetAllocationGroupEfficiencySummaryResponseCostImpactHistoryItem struct {
+	CostImpact *string `json:"costImpact,omitempty"`
+
+	// Timestamp Timestamp of the cost impact.
+	Timestamp *time.Time `json:"timestamp,omitempty"`
+}
+
+// CostreportV1beta1GetAllocationGroupEfficiencySummaryResponseTopItem defines model for costreport.v1beta1.GetAllocationGroupEfficiencySummaryResponse.TopItem.
+type CostreportV1beta1GetAllocationGroupEfficiencySummaryResponseTopItem struct {
+	// CostImpactHistory Cost impact of the group with daily breakdown.
+	CostImpactHistory *[]CostreportV1beta1GetAllocationGroupEfficiencySummaryResponseCostImpactHistoryItem `json:"costImpactHistory,omitempty"`
+
+	// GroupId Allocation group ID.
+	GroupId *string `json:"groupId,omitempty"`
+
+	// GroupName Allocation group name.
+	GroupName *string `json:"groupName,omitempty"`
+
+	// TotalCostImpact Total cost impact of the group.
+	TotalCostImpact *string `json:"totalCostImpact,omitempty"`
+
+	// Versions Allocation group version history.
+	Versions *[]CostreportV1beta1AllocationGroupVersionDetails `json:"versions,omitempty"`
+}
+
+// CostreportV1beta1GetAllocationGroupTotalCostTimedResponse defines model for costreport.v1beta1.GetAllocationGroupTotalCostTimedResponse.
+type CostreportV1beta1GetAllocationGroupTotalCostTimedResponse struct {
+	Count *string                                                               `json:"count,omitempty"`
+	Items *[]CostreportV1beta1GetAllocationGroupTotalCostTimedResponseGroupItem `json:"items,omitempty"`
+
+	// NextCursor next_cursor is a token to be used in future request to retrieve subsequent items. If empty - no more items present.
+	NextCursor *string `json:"nextCursor,omitempty"`
+}
+
+// CostreportV1beta1GetAllocationGroupTotalCostTimedResponseCostItem Defines cost details for a given time.
+type CostreportV1beta1GetAllocationGroupTotalCostTimedResponseCostItem struct {
+	// Timestamp Timestamp of entry.
+	Timestamp *time.Time `json:"timestamp,omitempty"`
+
+	// TotalCost Total cost for the given time period.
+	TotalCost *string `json:"totalCost,omitempty"`
+}
+
+// CostreportV1beta1GetAllocationGroupTotalCostTimedResponseGroupItem defines model for costreport.v1beta1.GetAllocationGroupTotalCostTimedResponse.GroupItem.
+type CostreportV1beta1GetAllocationGroupTotalCostTimedResponseGroupItem struct {
+	// GroupId Allocation group ID.
+	GroupId *string `json:"groupId,omitempty"`
+
+	// GroupName Allocation group name.
+	GroupName *string `json:"groupName,omitempty"`
+
+	// Items Allocation group cost entries.
+	Items *[]CostreportV1beta1GetAllocationGroupTotalCostTimedResponseCostItem `json:"items,omitempty"`
+
+	// Versions Allocation group version history.
+	Versions *[]CostreportV1beta1AllocationGroupVersionDetails `json:"versions,omitempty"`
+}
+
+// CostreportV1beta1GetAllocationGroupWorkloadCostsResponse Defines cluster workload cost response.
+type CostreportV1beta1GetAllocationGroupWorkloadCostsResponse struct {
+	Count     *string `json:"count,omitempty"`
+	GroupId   *string `json:"groupId,omitempty"`
+	GroupName *string `json:"groupName,omitempty"`
+
+	// Items Workload entries.
+	Items *[]CostreportV1beta1GetAllocationGroupWorkloadCostsResponseWorkloadItem `json:"items,omitempty"`
+
+	// NextCursor next_cursor is a token to be used in future request to retrieve subsequent items. If empty - no more items present.
+	NextCursor *string `json:"nextCursor,omitempty"`
+}
+
+// CostreportV1beta1GetAllocationGroupWorkloadCostsResponseWorkloadItem Defines a workload.
+type CostreportV1beta1GetAllocationGroupWorkloadCostsResponseWorkloadItem struct {
+	ClusterId *string `json:"clusterId,omitempty"`
+
+	// CpuCost Total CPU cost of on-demand instances for the given time period.
+	CpuCost *string `json:"cpuCost,omitempty"`
+
+	// CpuCount Average number of CPUs used for the given time period.
+	CpuCount *string `json:"cpuCount,omitempty"`
+
+	// GpuCost Total GPU cost of on-demand instances for the given time period.
+	GpuCost *string `json:"gpuCost,omitempty"`
+
+	// GpuCount Average number of GPUs for the given time period.
+	GpuCount *string `json:"gpuCount,omitempty"`
+
+	// Namespace Namespace the workload is in.
+	Namespace *string `json:"namespace,omitempty"`
+
+	// PodCount Average amount of pods included to allocation group based on filter criteria.
+	PodCount *string `json:"podCount,omitempty"`
+
+	// RamCost Total RAM cost of on-demand instances for the given time period.
+	RamCost *string `json:"ramCost,omitempty"`
+
+	// RamGib Average RAM GiB used for the given time period.
+	RamGib *string `json:"ramGib,omitempty"`
+
+	// TotalCostOnDemand Total cost of on-demand instances for the given time period.
+	TotalCostOnDemand *string `json:"totalCostOnDemand,omitempty"`
+
+	// TotalCostSpot Total cost of spot instances for the given time period.
+	TotalCostSpot *string `json:"totalCostSpot,omitempty"`
+
+	// TotalCostSpotFallback Total cost of spot-fallback instances for the given time period.
+	TotalCostSpotFallback *string `json:"totalCostSpotFallback,omitempty"`
+	TotalPodCount         *string `json:"totalPodCount,omitempty"`
+
+	// WorkloadName Name of the workload.
+	WorkloadName *string `json:"workloadName,omitempty"`
+
+	// WorkloadType Type of the workload.
+	WorkloadType *string `json:"workloadType,omitempty"`
+}
+
+// CostreportV1beta1GetAllocationGroupWorkloadsEfficiencyResponse Defines cluster workload cost response.
+type CostreportV1beta1GetAllocationGroupWorkloadsEfficiencyResponse struct {
+	Count     *string `json:"count,omitempty"`
+	GroupId   *string `json:"groupId,omitempty"`
+	GroupName *string `json:"groupName,omitempty"`
+
+	// NextCursor next_cursor is a token to be used in future request to retrieve subsequent items. If empty - no more items present.
+	NextCursor *string `json:"nextCursor,omitempty"`
+
+	// Workloads Workload entries.
+	Workloads *[]CostreportV1beta1GetAllocationGroupWorkloadsEfficiencyResponseWorkloadItem `json:"workloads,omitempty"`
+}
+
+// CostreportV1beta1GetAllocationGroupWorkloadsEfficiencyResponseWorkloadItem Defines a workload.
+type CostreportV1beta1GetAllocationGroupWorkloadsEfficiencyResponseWorkloadItem struct {
+	ClusterId *string `json:"clusterId,omitempty"`
+
+	// CostImpact Defines cost impact of wasted resources per lifecycle.
+	CostImpact *CostreportV1beta1CostImpact `json:"costImpact,omitempty"`
+
+	// Namespace Namespace the workload is in.
+	Namespace *string `json:"namespace,omitempty"`
+
+	// PodCount Average amount of pods included to allocation group based on filter criteria.
+	PodCount *string `json:"podCount,omitempty"`
+
+	// Requests Defines the resources.
+	Requests *CostreportV1beta1Resources `json:"requests,omitempty"`
+
+	// TotalCostImpact Total cost impact of the workload. Sum of cost impacts by lifecycle.
+	TotalCostImpact *string `json:"totalCostImpact,omitempty"`
+	TotalPodCount   *string `json:"totalPodCount,omitempty"`
+
+	// Usage Defines the resources.
+	Usage *CostreportV1beta1Resources `json:"usage,omitempty"`
+
+	// Waste Defines the resources.
+	Waste *CostreportV1beta1Resources `json:"waste,omitempty"`
+
+	// WorkloadName Name of the workload.
+	WorkloadName *string `json:"workloadName,omitempty"`
+
+	// WorkloadType Type of the workload.
+	WorkloadType *string `json:"workloadType,omitempty"`
+}
+
+// CostreportV1beta1GetCostAllocationGroupDataTransferSummaryResponse defines model for costreport.v1beta1.GetCostAllocationGroupDataTransferSummaryResponse.
+type CostreportV1beta1GetCostAllocationGroupDataTransferSummaryResponse struct {
+	Groups *[]CostreportV1beta1GetCostAllocationGroupDataTransferSummaryResponseCostAllocationGroupItem `json:"groups,omitempty"`
+}
+
+// CostreportV1beta1GetCostAllocationGroupDataTransferSummaryResponseCostAllocationGroupItem defines model for costreport.v1beta1.GetCostAllocationGroupDataTransferSummaryResponse.CostAllocationGroupItem.
+type CostreportV1beta1GetCostAllocationGroupDataTransferSummaryResponseCostAllocationGroupItem struct {
+	GroupId   *string `json:"groupId,omitempty"`
+	GroupName *string `json:"groupName,omitempty"`
+
+	// Items Group traffic entries.
+	Items         *[]CostreportV1beta1GetCostAllocationGroupDataTransferSummaryResponseCostItem `json:"items,omitempty"`
+	WorkloadCount *string                                                                       `json:"workloadCount,omitempty"`
+}
+
+// CostreportV1beta1GetCostAllocationGroupDataTransferSummaryResponseCostItem Defines a workload.
+type CostreportV1beta1GetCostAllocationGroupDataTransferSummaryResponseCostItem struct {
+	// EgressMetrics Defines a datatransfer costs item.
+	EgressMetrics *CostreportV1beta1GetCostAllocationGroupDataTransferSummaryResponseDataTransferCostItem `json:"egressMetrics,omitempty"`
+
+	// IngressMetrics Defines a datatransfer costs item.
+	IngressMetrics *CostreportV1beta1GetCostAllocationGroupDataTransferSummaryResponseDataTransferCostItem `json:"ingressMetrics,omitempty"`
+
+	// Timestamp Timestamp of entry.
+	Timestamp *time.Time `json:"timestamp,omitempty"`
+}
+
+// CostreportV1beta1GetCostAllocationGroupDataTransferSummaryResponseDataTransferCostItem Defines a datatransfer costs item.
+type CostreportV1beta1GetCostAllocationGroupDataTransferSummaryResponseDataTransferCostItem struct {
+	CloudApiBytes    *string `json:"cloudApiBytes,omitempty"`
+	CloudApiCost     *string `json:"cloudApiCost,omitempty"`
+	InterRegionBytes *string `json:"interRegionBytes,omitempty"`
+	InterRegionCost  *string `json:"interRegionCost,omitempty"`
+	InterZoneBytes   *string `json:"interZoneBytes,omitempty"`
+	InterZoneCost    *string `json:"interZoneCost,omitempty"`
+	InternetBytes    *string `json:"internetBytes,omitempty"`
+	InternetCost     *string `json:"internetCost,omitempty"`
+	IntraZoneBytes   *string `json:"intraZoneBytes,omitempty"`
+	IntraZoneCost    *string `json:"intraZoneCost,omitempty"`
+}
+
+// CostreportV1beta1GetCostAllocationGroupDataTransferWorkloadsResponse Defines cluster workloads datatransfer cost response aggregated over the requested period.
+type CostreportV1beta1GetCostAllocationGroupDataTransferWorkloadsResponse struct {
+	Clusters  *[]CostreportV1beta1GetCostAllocationGroupDataTransferWorkloadsResponseClusterDetails `json:"clusters,omitempty"`
+	GroupId   *string                                                                               `json:"groupId,omitempty"`
+	GroupName *string                                                                               `json:"groupName,omitempty"`
+
+	// NoDataReason Defines a list of possible reasons why report data is missing.
+	NoDataReason *CostreportV1beta1NoDataReason `json:"noDataReason,omitempty"`
+}
+
+// CostreportV1beta1GetCostAllocationGroupDataTransferWorkloadsResponseClusterDetails defines model for costreport.v1beta1.GetCostAllocationGroupDataTransferWorkloadsResponse.ClusterDetails.
+type CostreportV1beta1GetCostAllocationGroupDataTransferWorkloadsResponseClusterDetails struct {
+	ClusterId *string `json:"clusterId,omitempty"`
+
+	// Items Workload entries.
+	Items *[]CostreportV1beta1GetCostAllocationGroupDataTransferWorkloadsResponseWorkloadItem `json:"items,omitempty"`
+}
+
+// CostreportV1beta1GetCostAllocationGroupDataTransferWorkloadsResponseWorkloadDataTransferCostItem Defines an aggregated workloads datatransfer cost over requested period.
+type CostreportV1beta1GetCostAllocationGroupDataTransferWorkloadsResponseWorkloadDataTransferCostItem struct {
+	CloudApiBytes    *string `json:"cloudApiBytes,omitempty"`
+	CloudApiCost     *string `json:"cloudApiCost,omitempty"`
+	InterRegionBytes *string `json:"interRegionBytes,omitempty"`
+	InterRegionCost  *string `json:"interRegionCost,omitempty"`
+	InterZoneBytes   *string `json:"interZoneBytes,omitempty"`
+	InterZoneCost    *string `json:"interZoneCost,omitempty"`
+	InternetBytes    *string `json:"internetBytes,omitempty"`
+	InternetCost     *string `json:"internetCost,omitempty"`
+	IntraZoneBytes   *string `json:"intraZoneBytes,omitempty"`
+	IntraZoneCost    *string `json:"intraZoneCost,omitempty"`
+}
+
+// CostreportV1beta1GetCostAllocationGroupDataTransferWorkloadsResponseWorkloadItem Defines a workload.
+type CostreportV1beta1GetCostAllocationGroupDataTransferWorkloadsResponseWorkloadItem struct {
+	// EgressMetrics Defines an aggregated workloads datatransfer cost over requested period.
+	EgressMetrics *CostreportV1beta1GetCostAllocationGroupDataTransferWorkloadsResponseWorkloadDataTransferCostItem `json:"egressMetrics,omitempty"`
+
+	// IngressMetrics Defines an aggregated workloads datatransfer cost over requested period.
+	IngressMetrics *CostreportV1beta1GetCostAllocationGroupDataTransferWorkloadsResponseWorkloadDataTransferCostItem `json:"ingressMetrics,omitempty"`
+
+	// Namespace Namespace the workload is in.
+	Namespace *string `json:"namespace,omitempty"`
+
+	// PodCount Average pod count of the workload within requested period.
+	PodCount *string `json:"podCount,omitempty"`
+
+	// WorkloadName Name of the workload.
+	WorkloadName *string `json:"workloadName,omitempty"`
+
+	// WorkloadType Type of the workload.
+	WorkloadType *string `json:"workloadType,omitempty"`
+}
+
+// CostreportV1beta1GetCostAllocationGroupSummaryResponse defines model for costreport.v1beta1.GetCostAllocationGroupSummaryResponse.
+type CostreportV1beta1GetCostAllocationGroupSummaryResponse struct {
+	Items *[]CostreportV1beta1GetCostAllocationGroupSummaryResponseCostAllocationGroupItem `json:"items,omitempty"`
+}
+
+// CostreportV1beta1GetCostAllocationGroupSummaryResponseCostAllocationGroupItem defines model for costreport.v1beta1.GetCostAllocationGroupSummaryResponse.CostAllocationGroupItem.
+type CostreportV1beta1GetCostAllocationGroupSummaryResponseCostAllocationGroupItem struct {
+	GroupId   *string                                                           `json:"groupId,omitempty"`
+	GroupName *string                                                           `json:"groupName,omitempty"`
+	Items     *[]CostreportV1beta1GetCostAllocationGroupSummaryResponseCostItem `json:"items,omitempty"`
+
+	// WorkloadCount Count of workloads for the given time period.
+	WorkloadCount *string `json:"workloadCount,omitempty"`
+}
+
+// CostreportV1beta1GetCostAllocationGroupSummaryResponseCostItem Defines cost details for a given time.
+type CostreportV1beta1GetCostAllocationGroupSummaryResponseCostItem struct {
+	// CpuCostOnDemand Average CPU cost of on-demand instances for the given time period.
+	CpuCostOnDemand *string `json:"cpuCostOnDemand,omitempty"`
+
+	// CpuCostSpot Average CPU cost of spot instances for the given time period.
+	CpuCostSpot *string `json:"cpuCostSpot,omitempty"`
+
+	// CpuCostSpotFallback Average CPU cost of spot-fallback instances for the given time period.
+	CpuCostSpotFallback *string `json:"cpuCostSpotFallback,omitempty"`
+
+	// CpuCountOnDemand Average number of CPUs used on on-demand instances for the given time period.
+	CpuCountOnDemand *string `json:"cpuCountOnDemand,omitempty"`
+
+	// CpuCountSpot Average number of CPUs used on spot instances for the given time period.
+	CpuCountSpot *string `json:"cpuCountSpot,omitempty"`
+
+	// CpuCountSpotFallback Average number of CPUs used on spot-fallback instances for the given time period.
+	CpuCountSpotFallback *string `json:"cpuCountSpotFallback,omitempty"`
+
+	// GpuCostOnDemand Average GPU cost of on-demand instances for the given time period.
+	GpuCostOnDemand *string `json:"gpuCostOnDemand,omitempty"`
+
+	// GpuCostSpot Average GPU cost of spot instances for the given time period.
+	GpuCostSpot *string `json:"gpuCostSpot,omitempty"`
+
+	// GpuCostSpotFallback Average GPU cost of spot-fallback instances for the given time period.
+	GpuCostSpotFallback *string `json:"gpuCostSpotFallback,omitempty"`
+
+	// GpuCountOnDemand Average number of GPUs used on on-demand instances for the given time period.
+	GpuCountOnDemand *string `json:"gpuCountOnDemand,omitempty"`
+
+	// GpuCountSpot Average number of GPUs used on spot instances for the given time period.
+	GpuCountSpot *string `json:"gpuCountSpot,omitempty"`
+
+	// GpuCountSpotFallback Average number of GPUs used on spot-fallback instances for the given time period.
+	GpuCountSpotFallback *string `json:"gpuCountSpotFallback,omitempty"`
+
+	// PodCountOnDemand Average amount of pods on on-demand instances for the given time period.
+	PodCountOnDemand *string `json:"podCountOnDemand,omitempty"`
+
+	// PodCountSpot Average amount of pods on spot instances for the given time period.
+	PodCountSpot *string `json:"podCountSpot,omitempty"`
+
+	// PodCountSpotFallback Average amount of pods on spot-fallback instances for the given time period.
+	PodCountSpotFallback *string `json:"podCountSpotFallback,omitempty"`
+
+	// RamCostOnDemand Average RAM cost of on-demand instances for the given time period.
+	RamCostOnDemand *string `json:"ramCostOnDemand,omitempty"`
+
+	// RamCostSpot Average RAM cost of spot instances for the given time period.
+	RamCostSpot *string `json:"ramCostSpot,omitempty"`
+
+	// RamCostSpotFallback Average RAM cost of spot-fallback instances for the given time period.
+	RamCostSpotFallback *string `json:"ramCostSpotFallback,omitempty"`
+
+	// RamGibOnDemand Average RAM GiB used on on-demand instances for the given time period.
+	RamGibOnDemand *string `json:"ramGibOnDemand,omitempty"`
+
+	// RamGibSpot Average RAM GiB used on spot instances for the given time period.
+	RamGibSpot *string `json:"ramGibSpot,omitempty"`
+
+	// RamGibSpotFallback Average RAM GiB used on spot-fallback instances for the given time period.
+	RamGibSpotFallback *string `json:"ramGibSpotFallback,omitempty"`
+
+	// Timestamp Timestamp of entry.
+	Timestamp *time.Time `json:"timestamp,omitempty"`
+
+	// TotalCostOnDemand Total cost of on-demand instances for the given time period.
+	TotalCostOnDemand *string `json:"totalCostOnDemand,omitempty"`
+
+	// TotalCostSpot Total cost of spot instances for the given time period.
+	TotalCostSpot *string `json:"totalCostSpot,omitempty"`
+
+	// TotalCostSpotFallback Total cost of spot-fallback instances for the given time period.
+	TotalCostSpotFallback *string `json:"totalCostSpotFallback,omitempty"`
+
+	// WorkloadCount Number of workloads included in group.
+	WorkloadCount *string `json:"workloadCount,omitempty"`
+}
+
+// CostreportV1beta1GetCostAllocationGroupWorkloadsResponse Defines cluster workload cost response.
+type CostreportV1beta1GetCostAllocationGroupWorkloadsResponse struct {
+	GroupId   *string `json:"groupId,omitempty"`
+	GroupName *string `json:"groupName,omitempty"`
+
+	// Items Workload entries.
+	Items *[]CostreportV1beta1GetCostAllocationGroupWorkloadsResponseWorkloadItem `json:"items,omitempty"`
+}
+
+// CostreportV1beta1GetCostAllocationGroupWorkloadsResponseClusterInfo defines model for costreport.v1beta1.GetCostAllocationGroupWorkloadsResponse.ClusterInfo.
+type CostreportV1beta1GetCostAllocationGroupWorkloadsResponseClusterInfo struct {
+	Id *string `json:"id,omitempty"`
+}
+
+// CostreportV1beta1GetCostAllocationGroupWorkloadsResponseWorkloadCostItem Defines a workloads cost for a given time.
+type CostreportV1beta1GetCostAllocationGroupWorkloadsResponseWorkloadCostItem struct {
+	// CpuCostOnDemand Average CPU cost of the workload that are on-demand instances for the given time period.
+	CpuCostOnDemand *string `json:"cpuCostOnDemand,omitempty"`
+
+	// CpuCostSpot Average CPU cost of the workload that are spot instances for the given time period.
+	CpuCostSpot *string `json:"cpuCostSpot,omitempty"`
+
+	// CpuCostSpotFallback Average CPU cost of the workload that are spot-fallback instances for the given time period.
+	CpuCostSpotFallback *string `json:"cpuCostSpotFallback,omitempty"`
+
+	// CpuCountOnDemand Average number of CPUs of the workload that is on on-demand instances for the given time period.
+	CpuCountOnDemand *string `json:"cpuCountOnDemand,omitempty"`
+
+	// CpuCountSpot Average number of CPUs of the workload that is on spot instances for the given time period.
+	CpuCountSpot *string `json:"cpuCountSpot,omitempty"`
+
+	// CpuCountSpotFallback Average number of CPUs of the workload that is on spot-fallback instances for the given time period.
+	CpuCountSpotFallback *string `json:"cpuCountSpotFallback,omitempty"`
+
+	// GpuCostOnDemand Average GPU cost of the workload that is on on-demand instances for the given time period.
+	GpuCostOnDemand *string `json:"gpuCostOnDemand,omitempty"`
+
+	// GpuCostSpot Average GPU cost of the workload that is on spot instances for the given time period.
+	GpuCostSpot *string `json:"gpuCostSpot,omitempty"`
+
+	// GpuCostSpotFallback Average GPU cost of the workload that is on spot-fallback instances for the given time period.
+	GpuCostSpotFallback *string `json:"gpuCostSpotFallback,omitempty"`
+
+	// GpuCountOnDemand Average number of GPUs of the workload that is on on-demand instances for the given time period.
+	GpuCountOnDemand *string `json:"gpuCountOnDemand,omitempty"`
+
+	// GpuCountSpot Average number of GPUs of the workload that is on spot instances for the given time period.
+	GpuCountSpot *string `json:"gpuCountSpot,omitempty"`
+
+	// GpuCountSpotFallback Average number of GPUs of the workload that is on spot-fallback instances for the given time period.
+	GpuCountSpotFallback *string `json:"gpuCountSpotFallback,omitempty"`
+
+	// PodCountOnDemand Average amount of pods for the workload that are on on-demand instances for the given time period.
+	PodCountOnDemand *string `json:"podCountOnDemand,omitempty"`
+
+	// PodCountSpot Average amount of pods for the workload that are on spot instances for the given time period.
+	PodCountSpot *string `json:"podCountSpot,omitempty"`
+
+	// PodCountSpotFallback Average amount of pods for the workload that are on spot-fallback instances for the given time period.
+	PodCountSpotFallback *string `json:"podCountSpotFallback,omitempty"`
+
+	// RamCostOnDemand Average RAM cost of the workload that are on-demand instances for the given time period.
+	RamCostOnDemand *string `json:"ramCostOnDemand,omitempty"`
+
+	// RamCostSpot Average RAM cost of the workload that are spot instances for the given time period.
+	RamCostSpot *string `json:"ramCostSpot,omitempty"`
+
+	// RamCostSpotFallback Average RAM cost of the workload that are spot-fallback instances for the given time period.
+	RamCostSpotFallback *string `json:"ramCostSpotFallback,omitempty"`
+
+	// RamGibOnDemand Average RAM GiB used on on-demand instances for the given time period.
+	RamGibOnDemand *string `json:"ramGibOnDemand,omitempty"`
+
+	// RamGibSpot Average RAM GiB of the workload that are on spot instances for the given time period.
+	RamGibSpot *string `json:"ramGibSpot,omitempty"`
+
+	// RamGibSpotFallback Average RAM GiB of the workload that are on spot-fallback instances for the given time period.
+	RamGibSpotFallback *string `json:"ramGibSpotFallback,omitempty"`
+
+	// Timestamp Timestamp of entry creation.
+	Timestamp *time.Time `json:"timestamp,omitempty"`
+
+	// TotalCostOnDemand Total cost of the workload that is on on-demand instances for the given time period.
+	TotalCostOnDemand *string `json:"totalCostOnDemand,omitempty"`
+
+	// TotalCostSpot Total cost of the workload that is on spot instances for the given time period.
+	TotalCostSpot *string `json:"totalCostSpot,omitempty"`
+
+	// TotalCostSpotFallback Total cost of the workload that is on spot-fallback instances for the given time period.
+	TotalCostSpotFallback *string `json:"totalCostSpotFallback,omitempty"`
+}
+
+// CostreportV1beta1GetCostAllocationGroupWorkloadsResponseWorkloadItem Defines a workload.
+type CostreportV1beta1GetCostAllocationGroupWorkloadsResponseWorkloadItem struct {
+	Cluster *CostreportV1beta1GetCostAllocationGroupWorkloadsResponseClusterInfo `json:"cluster,omitempty"`
+
+	// Items Cost metrics of the workload.
+	Items *[]CostreportV1beta1GetCostAllocationGroupWorkloadsResponseWorkloadCostItem `json:"items,omitempty"`
+
+	// Namespace Namespace the workload is in.
+	Namespace *string `json:"namespace,omitempty"`
+
+	// WorkloadName Name of the workload.
+	WorkloadName *string `json:"workloadName,omitempty"`
+
+	// WorkloadType Type of the workload.
+	WorkloadType *string `json:"workloadType,omitempty"`
+}
+
+// CostreportV1beta1ListAllocationGroupsResponse defines model for costreport.v1beta1.ListAllocationGroupsResponse.
+type CostreportV1beta1ListAllocationGroupsResponse struct {
+	Items *[]CostreportV1beta1AllocationGroup `json:"items,omitempty"`
+}
+
+// CostreportV1beta1NoDataReason Defines a list of possible reasons why report data is missing.
+type CostreportV1beta1NoDataReason string
+
+// CostreportV1beta1Resources Defines the resources.
+type CostreportV1beta1Resources struct {
+	// Cpu Defines the cpu resource.
+	Cpu string `json:"cpu"`
+
+	// MemoryGib Defines the memory resource in GiB.
+	MemoryGib string `json:"memoryGib"`
 }
 
 // ExternalclusterV1AKSClusterParams AKSClusterParams defines AKS-specific arguments.
@@ -6544,6 +7261,178 @@ type AuthTokenAPIListAuthTokensParams struct {
 	UserId *string `form:"userId,omitempty" json:"userId,omitempty"`
 }
 
+// AllocationGroupAPIGetAllocationGroupCostTimedSummariesParams defines parameters for AllocationGroupAPIGetAllocationGroupCostTimedSummaries.
+type AllocationGroupAPIGetAllocationGroupCostTimedSummariesParams struct {
+	// StartTime Filter items to include from specified time.
+	StartTime time.Time `form:"startTime" json:"startTime"`
+
+	// EndTime Filter items to include up to specified time.
+	EndTime time.Time `form:"endTime" json:"endTime"`
+
+	// ClusterIds Cluster IDs for filtering. Leave empty for the full list.
+	ClusterIds *[]string `form:"clusterIds,omitempty" json:"clusterIds,omitempty"`
+
+	// GroupId Allocation group ID. Leave empty for the full list.
+	GroupId *string `form:"groupId,omitempty" json:"groupId,omitempty"`
+}
+
+// AllocationGroupAPIGetAllocationGroupCostSummariesParams defines parameters for AllocationGroupAPIGetAllocationGroupCostSummaries.
+type AllocationGroupAPIGetAllocationGroupCostSummariesParams struct {
+	// StartTime Filter items to include from specified time.
+	StartTime time.Time `form:"startTime" json:"startTime"`
+
+	// EndTime Filter items to include up to specified time.
+	EndTime time.Time `form:"endTime" json:"endTime"`
+
+	// ClusterIds Cluster IDs for filtering. Leave empty for the full list.
+	ClusterIds *[]string `form:"clusterIds,omitempty" json:"clusterIds,omitempty"`
+
+	// GroupId Allocation group ID. Leave empty for the full list.
+	GroupId *string `form:"groupId,omitempty" json:"groupId,omitempty"`
+}
+
+// AllocationGroupAPIGetAllocationGroupTotalCostTimedParams defines parameters for AllocationGroupAPIGetAllocationGroupTotalCostTimed.
+type AllocationGroupAPIGetAllocationGroupTotalCostTimedParams struct {
+	// StartTime Filter items to include from specified time.
+	StartTime time.Time `form:"startTime" json:"startTime"`
+
+	// EndTime Filter items to include up to specified time.
+	EndTime time.Time `form:"endTime" json:"endTime"`
+
+	// ClusterIds Cluster IDs for filtering. Leave empty for the full list.
+	ClusterIds *[]string `form:"clusterIds,omitempty" json:"clusterIds,omitempty"`
+	PageLimit  *string   `form:"page.limit,omitempty" json:"page.limit,omitempty"`
+
+	// PageCursor Cursor that defines token indicating where to start the next page.
+	// Empty value indicates to start from beginning of the dataset.
+	PageCursor *string `form:"page.cursor,omitempty" json:"page.cursor,omitempty"`
+}
+
+// AllocationGroupAPIListAllocationGroupsParams defines parameters for AllocationGroupAPIListAllocationGroups.
+type AllocationGroupAPIListAllocationGroupsParams struct {
+	// ClusterIds Cluster IDs for filtering. Leave empty for the full list.
+	ClusterIds *[]string `form:"clusterIds,omitempty" json:"clusterIds,omitempty"`
+}
+
+// AllocationGroupAPIGetCostAllocationGroupDataTransferSummaryParams defines parameters for AllocationGroupAPIGetCostAllocationGroupDataTransferSummary.
+type AllocationGroupAPIGetCostAllocationGroupDataTransferSummaryParams struct {
+	// StartTime Filter items to include from specified time.
+	StartTime time.Time `form:"startTime" json:"startTime"`
+
+	// EndTime Filter items to include up to specified time.
+	EndTime time.Time `form:"endTime" json:"endTime"`
+
+	// ClusterIds Cluster IDs for filtering. Leave empty for the full list.
+	ClusterIds *[]string `form:"clusterIds,omitempty" json:"clusterIds,omitempty"`
+}
+
+// AllocationGroupAPIGetAllocationGroupEfficiencySummaryParams defines parameters for AllocationGroupAPIGetAllocationGroupEfficiencySummary.
+type AllocationGroupAPIGetAllocationGroupEfficiencySummaryParams struct {
+	// StartTime Filter items to include from specified time.
+	StartTime time.Time `form:"startTime" json:"startTime"`
+
+	// EndTime Filter items to include up to specified time.
+	EndTime time.Time `form:"endTime" json:"endTime"`
+
+	// ClusterIds Cluster IDs for filtering. Leave empty for the full list.
+	ClusterIds *[]string `form:"clusterIds,omitempty" json:"clusterIds,omitempty"`
+}
+
+// AllocationGroupAPIGetCostAllocationGroupSummaryParams defines parameters for AllocationGroupAPIGetCostAllocationGroupSummary.
+type AllocationGroupAPIGetCostAllocationGroupSummaryParams struct {
+	// StartTime Filter items to include from specified time.
+	StartTime time.Time `form:"startTime" json:"startTime"`
+
+	// EndTime Filter items to include up to specified time.
+	EndTime time.Time `form:"endTime" json:"endTime"`
+
+	// ClusterIds Cluster IDs for filtering. Leave empty for the full list.
+	ClusterIds *[]string `form:"clusterIds,omitempty" json:"clusterIds,omitempty"`
+}
+
+// AllocationGroupAPIGetCostAllocationGroupDataTransferWorkloadsParams defines parameters for AllocationGroupAPIGetCostAllocationGroupDataTransferWorkloads.
+type AllocationGroupAPIGetCostAllocationGroupDataTransferWorkloadsParams struct {
+	// StartTime Filter items to include from specified time.
+	StartTime time.Time `form:"startTime" json:"startTime"`
+
+	// EndTime Filter items to include up to specified time.
+	EndTime time.Time `form:"endTime" json:"endTime"`
+}
+
+// AllocationGroupAPIGetAllocationGroupWorkloadCostsParams defines parameters for AllocationGroupAPIGetAllocationGroupWorkloadCosts.
+type AllocationGroupAPIGetAllocationGroupWorkloadCostsParams struct {
+	// StartTime Filter items to include from specified time.
+	StartTime time.Time `form:"startTime" json:"startTime"`
+
+	// EndTime Filter items to include up to specified time.
+	EndTime time.Time `form:"endTime" json:"endTime"`
+
+	// ClusterIds Cluster IDs for filtering. Leave empty for the full list.
+	ClusterIds *[]string `form:"clusterIds,omitempty" json:"clusterIds,omitempty"`
+	PageLimit  *string   `form:"page.limit,omitempty" json:"page.limit,omitempty"`
+
+	// PageCursor Cursor that defines token indicating where to start the next page.
+	// Empty value indicates to start from beginning of the dataset.
+	PageCursor *string `form:"page.cursor,omitempty" json:"page.cursor,omitempty"`
+
+	// SortField Name of the field you want to sort
+	SortField *string `form:"sort.field,omitempty" json:"sort.field,omitempty"`
+
+	// SortOrder The sort order, possible values ASC or DESC, if not provided asc is the default
+	//
+	//  - ASC: ASC
+	//  - asc: desc
+	//  - DESC: ASC
+	//  - desc: desc
+	SortOrder *AllocationGroupAPIGetAllocationGroupWorkloadCostsParamsSortOrder `form:"sort.order,omitempty" json:"sort.order,omitempty"`
+}
+
+// AllocationGroupAPIGetAllocationGroupWorkloadCostsParamsSortOrder defines parameters for AllocationGroupAPIGetAllocationGroupWorkloadCosts.
+type AllocationGroupAPIGetAllocationGroupWorkloadCostsParamsSortOrder string
+
+// AllocationGroupAPIGetAllocationGroupWorkloadsEfficiencyParams defines parameters for AllocationGroupAPIGetAllocationGroupWorkloadsEfficiency.
+type AllocationGroupAPIGetAllocationGroupWorkloadsEfficiencyParams struct {
+	// StartTime Filter items to include from specified time.
+	StartTime time.Time `form:"startTime" json:"startTime"`
+
+	// EndTime Filter items to include up to specified time.
+	EndTime time.Time `form:"endTime" json:"endTime"`
+
+	// ClusterIds Cluster IDs for filtering. Leave empty for the full list.
+	ClusterIds *[]string `form:"clusterIds,omitempty" json:"clusterIds,omitempty"`
+	PageLimit  *string   `form:"page.limit,omitempty" json:"page.limit,omitempty"`
+
+	// PageCursor Cursor that defines token indicating where to start the next page.
+	// Empty value indicates to start from beginning of the dataset.
+	PageCursor *string `form:"page.cursor,omitempty" json:"page.cursor,omitempty"`
+
+	// SortField Name of the field you want to sort
+	SortField *string `form:"sort.field,omitempty" json:"sort.field,omitempty"`
+
+	// SortOrder The sort order, possible values ASC or DESC, if not provided asc is the default
+	//
+	//  - ASC: ASC
+	//  - asc: desc
+	//  - DESC: ASC
+	//  - desc: desc
+	SortOrder *AllocationGroupAPIGetAllocationGroupWorkloadsEfficiencyParamsSortOrder `form:"sort.order,omitempty" json:"sort.order,omitempty"`
+}
+
+// AllocationGroupAPIGetAllocationGroupWorkloadsEfficiencyParamsSortOrder defines parameters for AllocationGroupAPIGetAllocationGroupWorkloadsEfficiency.
+type AllocationGroupAPIGetAllocationGroupWorkloadsEfficiencyParamsSortOrder string
+
+// AllocationGroupAPIGetCostAllocationGroupWorkloadsParams defines parameters for AllocationGroupAPIGetCostAllocationGroupWorkloads.
+type AllocationGroupAPIGetCostAllocationGroupWorkloadsParams struct {
+	// StartTime Filter items to include from specified time.
+	StartTime time.Time `form:"startTime" json:"startTime"`
+
+	// EndTime Filter items to include up to specified time.
+	EndTime time.Time `form:"endTime" json:"endTime"`
+
+	// ClusterIds Cluster IDs for filtering. Leave empty for the full list.
+	ClusterIds *[]string `form:"clusterIds,omitempty" json:"clusterIds,omitempty"`
+}
+
 // InventoryAPIListInstanceTypeNamesParams defines parameters for InventoryAPIListInstanceTypeNames.
 type InventoryAPIListInstanceTypeNamesParams struct {
 	CloudServiceProviders *[]string `form:"cloudServiceProviders,omitempty" json:"cloudServiceProviders,omitempty"`
@@ -7197,6 +8086,12 @@ type AuthTokenAPICreateAuthTokenJSONRequestBody = CastaiAuthtokenV1beta1AuthToke
 
 // AuthTokenAPIUpdateAuthTokenJSONRequestBody defines body for AuthTokenAPIUpdateAuthToken for application/json ContentType.
 type AuthTokenAPIUpdateAuthTokenJSONRequestBody = CastaiAuthtokenV1beta1AuthTokenUpdate
+
+// AllocationGroupAPICreateAllocationGroupJSONRequestBody defines body for AllocationGroupAPICreateAllocationGroup for application/json ContentType.
+type AllocationGroupAPICreateAllocationGroupJSONRequestBody = CostreportV1beta1AllocationGroupDetails
+
+// AllocationGroupAPIUpdateAllocationGroupJSONRequestBody defines body for AllocationGroupAPIUpdateAllocationGroup for application/json ContentType.
+type AllocationGroupAPIUpdateAllocationGroupJSONRequestBody = CostreportV1beta1AllocationGroupDetails
 
 // UsersAPICreateInvitationsJSONRequestBody defines body for UsersAPICreateInvitations for application/json ContentType.
 type UsersAPICreateInvitationsJSONRequestBody = CastaiUsersV1beta1CreateInvitationsRequest

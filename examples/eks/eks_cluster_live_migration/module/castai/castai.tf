@@ -147,7 +147,7 @@ module "castai-eks-cluster" {
 }
 
 resource "helm_release" "live-helm" {
-  name = "castai-live"
+  name  = "castai-live"
   count = var.install_helm_live ? 1 : 0
 
   repository = "https://castai.github.io/helm-charts"
