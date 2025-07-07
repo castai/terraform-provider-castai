@@ -1385,10 +1385,7 @@ func toKubernetesLabelExpressionMatcher(namespaceMap map[string]any) (*[]sdk.Wor
 	expressions := make([]sdk.WorkloadoptimizationV1KubernetesLabelExpressionMatcher, len(*exprs))
 	for j, expr := range *exprs {
 		exprMap := expr.(map[string]any)
-		key, err := mustGetValue[string](exprMap, "key")
-		if err != nil {
-			return nil, err
-		}
+		key := readOptionalValue[string](exprMap, "key")
 
 		operator, err := mustGetValue[string](exprMap, "operator")
 		if err != nil {
