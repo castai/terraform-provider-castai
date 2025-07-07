@@ -5667,7 +5667,7 @@ type WorkloadoptimizationV1KeyValuePair struct {
 // WorkloadoptimizationV1KubernetesLabelExpressionMatcher defines model for workloadoptimization.v1.KubernetesLabelExpressionMatcher.
 type WorkloadoptimizationV1KubernetesLabelExpressionMatcher struct {
 	// Key Key is the label key that the selector applies to.
-	Key string `json:"key"`
+	Key *string `json:"key"`
 
 	// Operator KubernetesLabelSelectorOperator defines the set of operators for a selector requirement.
 	//
