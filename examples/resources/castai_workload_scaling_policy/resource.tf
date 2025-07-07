@@ -68,4 +68,7 @@ resource "castai_workload_scaling_policy" "services" {
   confidence {
     threshold = 0.9
   }
+  rollout_behavior {
+    type = "NO_DISRUPTION"
+  }
 }
