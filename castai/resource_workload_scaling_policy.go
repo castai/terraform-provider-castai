@@ -1396,7 +1396,7 @@ func toKubernetesLabelExpressionMatcher(namespaceMap map[string]any) (*[]sdk.Wor
 		}
 
 		expressions[j] = sdk.WorkloadoptimizationV1KubernetesLabelExpressionMatcher{
-			Key:      *key,
+			Key:      key,
 			Operator: toLabelSelectorOperator(*operator),
 		}
 
