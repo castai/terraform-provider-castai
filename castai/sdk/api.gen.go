@@ -1147,13 +1147,15 @@ type CastaiInventoryV1beta1AttachableGPUDeviceManufacturer string
 
 // CastaiInventoryV1beta1AzureReservation defines model for castai.inventory.v1beta1.AzureReservation.
 type CastaiInventoryV1beta1AzureReservation struct {
-	Count                 *int32                                                     `json:"count,omitempty"`
-	Id                    *string                                                    `json:"id,omitempty"`
-	InstanceFlexibility   *CastaiInventoryV1beta1AzureReservationInstanceFlexibility `json:"instanceFlexibility,omitempty"`
-	InstanceType          *string                                                    `json:"instanceType,omitempty"`
-	InstanceTypeCpu       *string                                                    `json:"instanceTypeCpu,omitempty"`
-	InstanceTypeMemoryMib *string                                                    `json:"instanceTypeMemoryMib,omitempty"`
-	InstanceTypesUsage    *CastaiInventoryV1beta1InstanceTypeBasedUsage              `json:"instanceTypesUsage,omitempty"`
+	Count                    *int32                                                     `json:"count,omitempty"`
+	Id                       *string                                                    `json:"id,omitempty"`
+	InstanceFlexibility      *CastaiInventoryV1beta1AzureReservationInstanceFlexibility `json:"instanceFlexibility,omitempty"`
+	InstanceFlexibilityGroup *string                                                    `json:"instanceFlexibilityGroup"`
+	InstanceFlexibilityRatio *float32                                                   `json:"instanceFlexibilityRatio"`
+	InstanceType             *string                                                    `json:"instanceType,omitempty"`
+	InstanceTypeCpu          *string                                                    `json:"instanceTypeCpu,omitempty"`
+	InstanceTypeMemoryMib    *string                                                    `json:"instanceTypeMemoryMib,omitempty"`
+	InstanceTypesUsage       *CastaiInventoryV1beta1InstanceTypeBasedUsage              `json:"instanceTypesUsage,omitempty"`
 
 	// Plan - ONE_YEAR: 1 year commitment plan
 	//  - THREE_YEAR: 3 year commitment plan
@@ -4517,10 +4519,18 @@ type NodeconfigV1EKSConfig struct {
 //   - FAMILY_BOTTLEROCKET: Bottlerocket (https://aws.amazon.com/bottlerocket/).
 type NodeconfigV1EKSConfigImageFamily string
 
+// NodeconfigV1FallbackConfiguration Contains the configuration of fallback node pools.
+type NodeconfigV1FallbackConfiguration struct {
+	FallbackInstanceType *string `json:"fallbackInstanceType"`
+}
+
 // NodeconfigV1GKEConfig defines model for nodeconfig.v1.GKEConfig.
 type NodeconfigV1GKEConfig struct {
 	// DiskType Type of boot disk attached to the node. For available types please read official GCP docs(https://cloud.google.com/compute/docs/disks#pdspecs).
 	DiskType *string `json:"diskType"`
+
+	// FallbackConfiguration Contains the configuration of fallback node pools.
+	FallbackConfiguration *NodeconfigV1FallbackConfiguration `json:"fallbackConfiguration,omitempty"`
 
 	// LoadBalancers List of load balancers to be used for the cluster.
 	LoadBalancers *[]NodeconfigV1GKEConfigLoadBalancers `json:"loadBalancers,omitempty"`
