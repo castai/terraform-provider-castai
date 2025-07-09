@@ -108,6 +108,8 @@ func resourceAllocationGroupRead(ctx context.Context, d *schema.ResourceData, me
 
 	ag := resp.JSON200
 
+	d.SetId(*ag.Id)
+
 	if err := d.Set("name", ag.Name); err != nil {
 		return diag.FromErr(fmt.Errorf("setting name: %w", err))
 	}
