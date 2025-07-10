@@ -5,9 +5,11 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
@@ -107,6 +109,8 @@ func resourceAllocationGroupRead(ctx context.Context, d *schema.ResourceData, me
 	}
 
 	ag := resp.JSON200
+
+	d.SetId(*ag.Id)
 
 	if err := d.Set("name", ag.Name); err != nil {
 		return diag.FromErr(fmt.Errorf("setting name: %w", err))
@@ -229,6 +233,26 @@ func resourceAllocationGroupDelete(ctx context.Context, d *schema.ResourceData, 
 	}
 	if err := sdk.StatusOk(response); err != nil {
 		return diag.FromErr(err)
+	}
+
+	// Poll until the resource no longer exists
+	err = retry.RetryContext(ctx, 2*time.Second, func() *retry.RetryError {
+		readresp, err := client.AllocationGroupAPIGetAllocationGroupWithResponse(ctx, d.Id())
+		if err != nil {
+			// Retryable error
+			return retry.RetryableError(err)
+		}
+		if readresp.StatusCode() == http.StatusNotFound {
+			// Resource is gone
+			return nil
+		}
+
+		// Still exists, retry
+		return retry.RetryableError(fmt.Errorf("resource %s still exists", d.Id()))
+	})
+
+	if err != nil {
+		return diag.Errorf("Error waiting for resource %s to be deleted: %s", d.Id(), err)
 	}
 
 	return nil
