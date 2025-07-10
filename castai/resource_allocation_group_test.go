@@ -63,8 +63,6 @@ func testAccCheckAllocationGroupDestroy(s *terraform.State) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	time.Sleep(100 * time.Millisecond)
-
 	client := testAccProvider.Meta().(*ProviderConfig).api
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "castai_allocation_group" {
