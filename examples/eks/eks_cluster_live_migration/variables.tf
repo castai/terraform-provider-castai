@@ -49,6 +49,12 @@ variable "enable_castai" {
   default = true
 }
 
+variable "install_helm_live" {
+  type        = bool
+  description = "Optional parameter, if set to true - the 'castai-live' Helm chart will be installed on the cluster. This is required for live migration feature."
+  default     = true
+}
+
 variable "live_proxy_version" {
   type    = string
   default = "0.30.0"

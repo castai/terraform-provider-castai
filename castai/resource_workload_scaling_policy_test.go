@@ -11,7 +11,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/samber/lo"
 	"github.com/stretchr/testify/require"
+
+	"github.com/castai/terraform-provider-castai/castai/sdk"
 )
 
 func TestAccResourceWorkloadScalingPolicy(t *testing.T) {
@@ -105,6 +108,9 @@ func TestAccResourceWorkloadScalingPolicy(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "assignment_rules.0.rules.1.workload.0.gvk.0", "DaemonSet"),
 					resource.TestCheckResourceAttr(resourceName, "assignment_rules.0.rules.1.workload.0.labels_expressions.0.key", "helm.sh/chart"),
 					resource.TestCheckResourceAttr(resourceName, "assignment_rules.0.rules.1.workload.0.labels_expressions.0.operator", "DoesNotExist"),
+					resource.TestCheckResourceAttr(resourceName, "predictive_scaling.0.cpu.0.enabled", "true"),
+					// Requires workload-autoscaler from v0.35.3
+					resource.TestCheckResourceAttr(resourceName, "rollout_behavior.0.type", "NO_DISRUPTION"),
 				),
 			},
 		},
@@ -212,6 +218,14 @@ func scalingPolicyConfigUpdated(clusterName, projectID, name string) string {
 					}
 				}
 			}
+		}
+		predictive_scaling {
+			cpu {
+				enabled = true
+			}
+		}
+		rollout_behavior {
+			type = "NO_DISRUPTION"
 		}
 		cpu {
 			function 		= "QUANTILE"
@@ -389,6 +403,66 @@ func Test_validateResourcePolicy(t *testing.T) {
 			} else {
 				require.EqualError(t, err, tt.errMsg)
 			}
+		})
+	}
+}
+
+func Test_toPredictiveScaling(t *testing.T) {
+	tests := map[string]struct {
+		args map[string]any
+		exp  *sdk.WorkloadoptimizationV1PredictiveScalingSettings
+	}{
+		"should return predictive scaling settings": {
+			args: map[string]any{
+				FieldCPU: []any{
+					map[string]any{
+						FieldEnabled: true,
+					},
+				},
+			},
+			exp: &sdk.WorkloadoptimizationV1PredictiveScalingSettings{
+				Cpu: &sdk.WorkloadoptimizationV1PredictiveScaling{
+					Enabled: true,
+				},
+			},
+		},
+		"should return nil on empty map": {
+			args: map[string]any{},
+			exp:  nil,
+		},
+	}
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			r := require.New(t)
+			got := toPredictiveScaling(tt.args)
+			r.Equal(tt.exp, got)
+		})
+	}
+}
+
+func Test_toRolloutBehavior(t *testing.T) {
+	tests := map[string]struct {
+		args map[string]any
+		exp  *sdk.WorkloadoptimizationV1RolloutBehaviorSettings
+	}{
+		"should return rollout behavior settings": {
+			args: map[string]any{
+				FieldRolloutBehaviorType: FieldRolloutBehaviorNoDisruptionType,
+			},
+			exp: &sdk.WorkloadoptimizationV1RolloutBehaviorSettings{
+				Type: lo.ToPtr(sdk.NODISRUPTION),
+			},
+		},
+		"should return nil on empty map": {
+			args: map[string]any{},
+			exp:  nil,
+		},
+	}
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			r := require.New(t)
+			got := toRolloutBehavior(tt.args)
+			r.Equal(tt.exp, got)
 		})
 	}
 }

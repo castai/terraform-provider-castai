@@ -37,7 +37,7 @@ resource "castai_node_template" "default_by_castai" {
     spot                                         = false
     use_spot_fallbacks                           = true
     fallback_restore_rate_seconds                = 300
-    enable_spot_reliability                      = true
+    spot_reliability_enabled                     = true
     spot_reliabiliy_price_increase_limit_percent = 20
     spot_interruption_predictions_enabled        = true
     spot_interruption_predictions_type           = "aws-rebalance-recommendations"

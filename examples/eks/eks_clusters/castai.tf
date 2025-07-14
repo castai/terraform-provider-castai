@@ -12,9 +12,4 @@ module "cluster" {
     aws_security_group.additional.id,
   ]
   subnets = module.vpc.private_subnets
-
-  depend_on = [
-    module.eks,
-    module.vpc,
-  ]
 }

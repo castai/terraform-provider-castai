@@ -65,6 +65,11 @@ resource "castai_workload_scaling_policy" "services" {
     }
     management_option = "READ_ONLY"
   }
+  predictive_scaling {
+    cpu {
+      enabled = true
+    }
+  }
   startup {
     period_seconds = 240
   }
@@ -79,6 +84,9 @@ resource "castai_workload_scaling_policy" "services" {
   }
   confidence {
     threshold = 0.9
+  }
+  rollout_behavior {
+    type = "NO_DISRUPTION"
   }
 }
 ```
@@ -106,6 +114,13 @@ resource "castai_workload_scaling_policy" "services" {
 - `confidence` (Block List, Max: 1) Defines the confidence settings for applying recommendations. (see [below for nested schema](#nestedblock--confidence))
 - `downscaling` (Block List, Max: 1) (see [below for nested schema](#nestedblock--downscaling))
 - `memory_event` (Block List, Max: 1) (see [below for nested schema](#nestedblock--memory_event))
+- `predictive_scaling` (Block List, Max: 1) (see [below for nested schema](#nestedblock--predictive_scaling))
+- `rollout_behavior` (Block List, Max: 1) Defines the rollout behavior used when applying recommendations. Prerequisites:
+	- Applicable to Deployment resources that support running as multi-replica.
+	- Deployment is running with single replica (replica count = 1).
+	- Deployment's rollout strategy allows for downtime.
+	- Recommendation apply type is "immediate".
+	- Cluster has workload-autoscaler component version v0.35.3 or higher. (see [below for nested schema](#nestedblock--rollout_behavior))
 - `startup` (Block List, Max: 1) (see [below for nested schema](#nestedblock--startup))
 - `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
 
@@ -266,12 +281,12 @@ It can be either:
 
 Required:
 
-- `key` (String) The label key to match.
 - `operator` (String) The operator to use for matching the label.
 
 Optional:
 
-- `values` (List of String) A list of values to match against the label key. Allowed for `In` and `NotIn` operators.
+- `key` (String) The label key to match. Required for all operators except `Regex` and `Contains`. If not specified, it will search through all labels.
+- `values` (List of String) A list of values to match against the label key. It is required for `In`, `NotIn`, `Regex`, and `Contains` operators.
 
 
 
@@ -303,6 +318,31 @@ Optional:
 - `apply_type` (String) Defines the apply type to be used when applying recommendation for memory related event.
 	- IMMEDIATE - pods are restarted immediately when new recommendation is generated.
 	- DEFERRED - pods are not restarted and recommendation values are applied during natural restarts only (new deployment, etc.)
+
+
+<a id="nestedblock--predictive_scaling"></a>
+### Nested Schema for `predictive_scaling`
+
+Optional:
+
+- `cpu` (Block List, Max: 1) Defines predictive scaling resource configuration. (see [below for nested schema](#nestedblock--predictive_scaling--cpu))
+
+<a id="nestedblock--predictive_scaling--cpu"></a>
+### Nested Schema for `predictive_scaling.cpu`
+
+Required:
+
+- `enabled` (Boolean) Defines if predictive scaling is enabled for resource.
+
+
+
+<a id="nestedblock--rollout_behavior"></a>
+### Nested Schema for `rollout_behavior`
+
+Required:
+
+- `type` (String) Defines the rollout type to be used when applying recommendations.
+	- NO_DISRUPTION - pods are restarted without causing service disruption.
 
 
 <a id="nestedblock--startup"></a>

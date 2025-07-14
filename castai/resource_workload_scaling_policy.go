@@ -36,6 +36,10 @@ const (
 	FieldLimitStrategyType                         = "type"
 	FieldLimitStrategyMultiplier                   = "multiplier"
 	FieldConfidence                                = "confidence"
+	FieldRolloutBehavior                           = "rollout_behavior"
+	FieldRolloutBehaviorType                       = "type"
+	FieldRolloutBehaviorNoDisruptionType           = "NO_DISRUPTION"
+	FieldPredictiveScaling                         = "predictive_scaling"
 	FieldConfidenceThreshold                       = "threshold"
 	DeprecatedFieldApplyThreshold                  = "apply_threshold"
 	FieldApplyThresholdStrategy                    = "apply_threshold_strategy"
@@ -257,12 +261,62 @@ It can be either:
 					},
 				},
 			},
+			FieldPredictiveScaling: {
+				Type:     schema.TypeList,
+				Optional: true,
+				MaxItems: 1,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						FieldCPU: getPredictiveScalingResourceSchema(),
+					},
+				},
+			},
+			FieldRolloutBehavior: {
+				Type:     schema.TypeList,
+				Optional: true,
+				MaxItems: 1,
+				Description: `Defines the rollout behavior used when applying recommendations. Prerequisites:
+	- Applicable to Deployment resources that support running as multi-replica.
+	- Deployment is running with single replica (replica count = 1).
+	- Deployment's rollout strategy allows for downtime.
+	- Recommendation apply type is "immediate".
+	- Cluster has workload-autoscaler component version v0.35.3 or higher.`,
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						FieldRolloutBehaviorType: {
+							Type:     schema.TypeString,
+							Required: true,
+							Description: `Defines the rollout type to be used when applying recommendations.
+	- NO_DISRUPTION - pods are restarted without causing service disruption.`,
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{FieldRolloutBehaviorNoDisruptionType}, false)),
+						},
+					},
+				},
+			},
 		},
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(15 * time.Second),
 			Read:   schema.DefaultTimeout(15 * time.Second),
 			Update: schema.DefaultTimeout(15 * time.Second),
 			Delete: schema.DefaultTimeout(15 * time.Second),
+		},
+	}
+}
+
+func getPredictiveScalingResourceSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:        schema.TypeList,
+		Optional:    true,
+		MaxItems:    1,
+		Description: "Defines predictive scaling resource configuration.",
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				FieldEnabled: {
+					Type:        schema.TypeBool,
+					Required:    true,
+					Description: "Defines if predictive scaling is enabled for resource.",
+				},
+			},
 		},
 	}
 }
@@ -276,8 +330,8 @@ func k8sLabelExpressionsSchema() *schema.Schema {
 			Schema: map[string]*schema.Schema{
 				"key": {
 					Type:        schema.TypeString,
-					Required:    true,
-					Description: "The label key to match.",
+					Optional:    true,
+					Description: "The label key to match. Required for all operators except `Regex` and `Contains`. If not specified, it will search through all labels.",
 				},
 				"operator": {
 					Type:        schema.TypeString,
@@ -291,7 +345,7 @@ func k8sLabelExpressionsSchema() *schema.Schema {
 				"values": {
 					Type:        schema.TypeList,
 					Optional:    true,
-					Description: "A list of values to match against the label key. Allowed for `In` and `NotIn` operators.",
+					Description: "A list of values to match against the label key. It is required for `In`, `NotIn`, `Regex`, and `Contains` operators.",
 					Elem:        &schema.Schema{Type: schema.TypeString},
 				},
 			},
@@ -513,6 +567,10 @@ func resourceWorkloadScalingPolicyCreate(ctx context.Context, d *schema.Resource
 
 	req.RecommendationPolicies.AntiAffinity = toAntiAffinity(toSection(d, "anti_affinity"))
 
+	req.RecommendationPolicies.PredictiveScaling = toPredictiveScaling(toSection(d, FieldPredictiveScaling))
+
+	req.RecommendationPolicies.RolloutBehavior = toRolloutBehavior(toSection(d, FieldRolloutBehavior))
+
 	ar, err := toAssignmentRules(toSection(d, FieldAssignmentRules))
 	if err != nil {
 		return diag.FromErr(err)
@@ -593,6 +651,12 @@ func resourceWorkloadScalingPolicyRead(ctx context.Context, d *schema.ResourceDa
 	if err := d.Set("anti_affinity", toAntiAffinityMap(sp.RecommendationPolicies.AntiAffinity)); err != nil {
 		return diag.FromErr(fmt.Errorf("setting anti-affinity: %w", err))
 	}
+	if err := d.Set(FieldPredictiveScaling, toPredictiveScalingMap(sp.RecommendationPolicies.PredictiveScaling)); err != nil {
+		return diag.FromErr(fmt.Errorf("setting predictive scaling: %w", err))
+	}
+	if err := d.Set(FieldRolloutBehavior, toRolloutBehaviorMap(sp.RecommendationPolicies.RolloutBehavior)); err != nil {
+		return diag.FromErr(fmt.Errorf("setting rollout behavior: %w", err))
+	}
 
 	if err := d.Set(FieldAssignmentRules, toAssignmentRulesMap(getResourceFrom(d, FieldAssignmentRules), sp.AssignmentRules)); err != nil {
 		return diag.FromErr(fmt.Errorf("setting assignment rules: %w", err))
@@ -621,6 +685,8 @@ func resourceWorkloadScalingPolicyUpdate(ctx context.Context, d *schema.Resource
 		"anti_affinity",
 		FieldConfidence,
 		FieldAssignmentRules,
+		FieldPredictiveScaling,
+		FieldRolloutBehavior,
 	) {
 		tflog.Info(ctx, "scaling policy up to date")
 		return nil
@@ -646,14 +712,16 @@ func resourceWorkloadScalingPolicyUpdate(ctx context.Context, d *schema.Resource
 		ApplyType:       sdk.WorkloadoptimizationV1ApplyType(d.Get("apply_type").(string)),
 		AssignmentRules: ar,
 		RecommendationPolicies: sdk.WorkloadoptimizationV1RecommendationPolicies{
-			ManagementOption: sdk.WorkloadoptimizationV1ManagementOption(d.Get("management_option").(string)),
-			Cpu:              cpu,
-			Memory:           memory,
-			Startup:          toStartup(toSection(d, "startup")),
-			Downscaling:      toDownscaling(toSection(d, "downscaling")),
-			MemoryEvent:      toMemoryEvent(toSection(d, "memory_event")),
-			AntiAffinity:     toAntiAffinity(toSection(d, "anti_affinity")),
-			Confidence:       toConfidence(toSection(d, FieldConfidence)),
+			ManagementOption:  sdk.WorkloadoptimizationV1ManagementOption(d.Get("management_option").(string)),
+			Cpu:               cpu,
+			Memory:            memory,
+			Startup:           toStartup(toSection(d, "startup")),
+			Downscaling:       toDownscaling(toSection(d, "downscaling")),
+			MemoryEvent:       toMemoryEvent(toSection(d, "memory_event")),
+			AntiAffinity:      toAntiAffinity(toSection(d, "anti_affinity")),
+			Confidence:        toConfidence(toSection(d, FieldConfidence)),
+			PredictiveScaling: toPredictiveScaling(toSection(d, FieldPredictiveScaling)),
+			RolloutBehavior:   toRolloutBehavior(toSection(d, FieldRolloutBehavior)),
 		},
 	}
 
@@ -1161,6 +1229,84 @@ func toAntiAffinityMap(s *sdk.WorkloadoptimizationV1AntiAffinitySettings) []map[
 	return []map[string]any{m}
 }
 
+func toPredictiveScalingMap(s *sdk.WorkloadoptimizationV1PredictiveScalingSettings) []map[string]any {
+	if s == nil || s.Cpu == nil {
+		return nil
+	}
+
+	return []map[string]any{
+		{
+			FieldCPU: toPredictiveScalingResourceMap(s.Cpu),
+		},
+	}
+}
+
+func toPredictiveScaling(m map[string]any) *sdk.WorkloadoptimizationV1PredictiveScalingSettings {
+	if len(m) == 0 {
+		return nil
+	}
+
+	cpuResource := toPredictiveScalingResource(getFirstElem(m, FieldCPU))
+	if cpuResource == nil {
+		return nil
+	}
+
+	return &sdk.WorkloadoptimizationV1PredictiveScalingSettings{
+		Cpu: cpuResource,
+	}
+}
+
+func toPredictiveScalingResourceMap(s *sdk.WorkloadoptimizationV1PredictiveScaling) []map[string]any {
+	if s == nil {
+		return nil
+	}
+
+	return []map[string]any{
+		{
+			FieldEnabled: s.Enabled,
+		},
+	}
+}
+
+func toPredictiveScalingResource(m map[string]any) *sdk.WorkloadoptimizationV1PredictiveScaling {
+	if len(m) == 0 {
+		return nil
+	}
+
+	r := &sdk.WorkloadoptimizationV1PredictiveScaling{}
+
+	if v, ok := m[FieldEnabled].(bool); ok {
+		r.Enabled = v
+	}
+
+	return r
+}
+
+func toRolloutBehavior(m map[string]any) *sdk.WorkloadoptimizationV1RolloutBehaviorSettings {
+	if len(m) == 0 {
+		return nil
+	}
+
+	r := &sdk.WorkloadoptimizationV1RolloutBehaviorSettings{}
+	if v, ok := m[FieldRolloutBehaviorType].(string); ok && v != "" {
+		r.Type = lo.ToPtr(sdk.WorkloadoptimizationV1RolloutBehaviorType(v))
+	}
+
+	return r
+}
+
+func toRolloutBehaviorMap(s *sdk.WorkloadoptimizationV1RolloutBehaviorSettings) []map[string]any {
+	if s == nil || s.Type == nil {
+		return nil
+	}
+
+	return []map[string]any{
+		{
+			FieldRolloutBehaviorType: string(*s.Type),
+		},
+	}
+}
+
 func getWorkloadScalingPolicyByName(ctx context.Context, client sdk.ClientWithResponsesInterface, clusterID, name string) (*sdk.WorkloadoptimizationV1WorkloadScalingPolicy, error) {
 	list, err := client.WorkloadOptimizationAPIListWorkloadScalingPoliciesWithResponse(ctx, clusterID)
 	if checkErr := sdk.CheckOKResponse(list, err); checkErr != nil {
@@ -1239,10 +1385,7 @@ func toKubernetesLabelExpressionMatcher(namespaceMap map[string]any) (*[]sdk.Wor
 	expressions := make([]sdk.WorkloadoptimizationV1KubernetesLabelExpressionMatcher, len(*exprs))
 	for j, expr := range *exprs {
 		exprMap := expr.(map[string]any)
-		key, err := mustGetValue[string](exprMap, "key")
-		if err != nil {
-			return nil, err
-		}
+		key := readOptionalValue[string](exprMap, "key")
 
 		operator, err := mustGetValue[string](exprMap, "operator")
 		if err != nil {
@@ -1250,7 +1393,7 @@ func toKubernetesLabelExpressionMatcher(namespaceMap map[string]any) (*[]sdk.Wor
 		}
 
 		expressions[j] = sdk.WorkloadoptimizationV1KubernetesLabelExpressionMatcher{
-			Key:      *key,
+			Key:      key,
 			Operator: toLabelSelectorOperator(*operator),
 		}
 
