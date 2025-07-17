@@ -2,7 +2,6 @@ package castai
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"net/http"
 	"time"
@@ -22,7 +21,6 @@ func resourceAllocationGroup() *schema.Resource {
 		ReadContext:   resourceAllocationGroupRead,
 		UpdateContext: resourceAllocationGroupUpdate,
 		DeleteContext: resourceAllocationGroupDelete,
-		CustomizeDiff: resourceAllocationGroupDiff,
 		Description:   "Manage allocation group. Allocation group [reference](https://docs.cast.ai/docs/allocation-groups)",
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
@@ -72,24 +70,6 @@ func resourceAllocationGroup() *schema.Resource {
 			},
 		},
 	}
-}
-
-func resourceAllocationGroupDiff(_ context.Context, d *schema.ResourceDiff, _ any) error {
-	var clusterIds []string
-	if cids, ok := d.GetOk("cluster_ids"); ok {
-		clusterIds = toClusterIds(cids.(*schema.Set).List())
-	}
-	namespaces := toStringList(d.Get("namespaces").([]interface{}))
-
-	var labels []sdk.CostreportV1beta1AllocationGroupFilterLabelValue
-	if ls, ok := d.GetOk("labels"); ok {
-		labels = toLabels(ls.(map[string]interface{}))
-	}
-
-	if len(clusterIds) == 0 && len(namespaces) == 0 && len(labels) == 0 {
-		return errors.New("allocation group must specify at least one of: cluster_ids, namespaces, or labels")
-	}
-	return nil
 }
 
 func resourceAllocationGroupRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
@@ -149,10 +129,6 @@ func resourceAllocationGroupCreate(ctx context.Context, d *schema.ResourceData, 
 
 	labelsOperator := toLabelsOperator(d)
 
-	if len(clusterIds) == 0 && len(namespaces) == 0 && len(labels) == 0 {
-		return diag.FromErr(errors.New("allocation group must specify at least one of: cluster_ids, namespaces, or labels"))
-	}
-
 	body := sdk.AllocationGroupAPICreateAllocationGroupJSONRequestBody{
 		Filter: &sdk.CostreportV1beta1AllocationGroupFilter{
 			ClusterIds:     &clusterIds,
@@ -202,10 +178,6 @@ func resourceAllocationGroupUpdate(ctx context.Context, d *schema.ResourceData, 
 	}
 
 	namespaces := toStringList(d.Get("namespaces").([]interface{}))
-
-	if len(clusterIds) == 0 && len(namespaces) == 0 && len(labels) == 0 {
-		return diag.FromErr(errors.New("allocation group must specify at least one of: cluster_ids, namespaces, or labels"))
-	}
 
 	req := sdk.AllocationGroupAPIUpdateAllocationGroupJSONRequestBody{
 		Name: &allocationGroupName,
@@ -273,7 +245,7 @@ func toClusterIds(lv []interface{}) []string {
 	if len(lv) > 0 {
 		return toStringList(lv)
 	}
-	return nil
+	return []string{}
 }
 
 func fromLabels(labels []sdk.CostreportV1beta1AllocationGroupFilterLabelValue) map[string]string {
