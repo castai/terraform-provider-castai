@@ -29,6 +29,12 @@ func TestAccResourceWorkloadScalingPolicy(t *testing.T) {
 		CheckDestroy:      testAccCheckScalingPolicyDestroy,
 		Steps: []resource.TestStep{
 			{
+				Config: clusterConnectConfig(clusterName, projectID, rName),
+			},
+			{
+				Config: clusterComponentsConfig(clusterName, projectID, rName),
+			},
+			{
 				Config: scalingPolicyConfig(clusterName, projectID, rName),
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(resourceName, "name", rName),
@@ -123,8 +129,67 @@ func TestAccResourceWorkloadScalingPolicy(t *testing.T) {
 				Source:            "hashicorp/google-beta",
 				VersionConstraint: "> 4.75.0",
 			},
+			"helm": {
+				Source:            "hashicorp/helm",
+				VersionConstraint: "~> 2.17.0",
+			},
 		},
 	})
+}
+
+func clusterConnectConfig(clusterName, projectID, name string) string {
+	return testAccGKEClusterConfig(name, clusterName, projectID)
+}
+
+func clusterComponentsConfig(clusterName, projectID, name string) string {
+	cfg := fmt.Sprintf(`
+data "google_container_cluster" "castai_gke" {
+  name     = castai_gke_cluster.test.name
+  location = castai_gke_cluster.test.location
+  project  = castai_gke_cluster.test.project_id
+}
+
+data "google_client_config" "default" {}
+
+provider "helm" {
+  kubernetes {
+    host                   = data.google_container_cluster.castai_gke.endpoint
+    cluster_ca_certificate = base64decode(data.google_container_cluster.castai_gke.master_auth[0].cluster_ca_certificate)
+    token                  = data.google_client_config.default.access_token
+  }
+}
+
+resource "helm_release" "castai_agent" {
+  name             = "castai-agent"
+  repository       = "https://castai.github.io/helm-charts"
+  chart            = "castai-agent"
+  namespace        = "castai-agent"
+  create_namespace = true
+  cleanup_on_fail  = true
+  wait             = true
+
+  set {
+    name  = "provider"
+    value = "gke"
+  }
+
+  set_sensitive {
+    name  = "apiKey"
+    value = %[1]q
+  }
+
+  set {
+    name  = "apiURL"
+    value = %[2]q
+  }
+
+  set {
+    name  = "createNamespace"
+    value = "false"
+  }
+}
+`, os.Getenv("CASTAI_API_TOKEN"), "https://api.dev-master.cast.ai", clusterName, projectID)
+	return ConfigCompose(clusterConnectConfig(name, clusterName, projectID), cfg)
 }
 
 func scalingPolicyConfig(clusterName, projectID, name string) string {
@@ -192,7 +257,7 @@ func scalingPolicyConfig(clusterName, projectID, name string) string {
 		}
 	}`, name)
 
-	return ConfigCompose(testAccGKEClusterConfig(name, clusterName, projectID), cfg)
+	return ConfigCompose(clusterComponentsConfig(name, clusterName, projectID), cfg)
 }
 
 func scalingPolicyConfigUpdated(clusterName, projectID, name string) string {
@@ -270,7 +335,7 @@ func scalingPolicyConfigUpdated(clusterName, projectID, name string) string {
 		}
 	}`, updatedName)
 
-	return ConfigCompose(testAccGKEClusterConfig(name, clusterName, projectID), cfg)
+	return ConfigCompose(clusterComponentsConfig(name, clusterName, projectID), cfg)
 }
 
 func testAccCheckScalingPolicyDestroy(s *terraform.State) error {
