@@ -6158,9 +6158,9 @@ type WorkloadoptimizationV1ContainerConstraintsV2 struct {
 
 // WorkloadoptimizationV1ContainerResourceMetricSource defines model for workloadoptimization.v1.ContainerResourceMetricSource.
 type WorkloadoptimizationV1ContainerResourceMetricSource struct {
-	Container *string                             `json:"container,omitempty"`
-	Name      *string                             `json:"name,omitempty"`
-	Target    *WorkloadoptimizationV1MetricTarget `json:"target,omitempty"`
+	Container string                             `json:"container"`
+	Name      string                             `json:"name"`
+	Target    WorkloadoptimizationV1MetricTarget `json:"target"`
 }
 
 // WorkloadoptimizationV1Costs defines model for workloadoptimization.v1.Costs.
@@ -6221,8 +6221,8 @@ type WorkloadoptimizationV1EventType string
 
 // WorkloadoptimizationV1ExternalMetricSource defines model for workloadoptimization.v1.ExternalMetricSource.
 type WorkloadoptimizationV1ExternalMetricSource struct {
-	Metric *WorkloadoptimizationV1MetricIdentifier `json:"metric,omitempty"`
-	Target *WorkloadoptimizationV1MetricTarget     `json:"target,omitempty"`
+	Metric WorkloadoptimizationV1MetricIdentifier `json:"metric"`
+	Target WorkloadoptimizationV1MetricTarget     `json:"target"`
 }
 
 // WorkloadoptimizationV1FailedHookEvent defines model for workloadoptimization.v1.FailedHookEvent.
@@ -6331,8 +6331,14 @@ type WorkloadoptimizationV1HPAConfig struct {
 	// MaxReplicas Max replicas a workload can have.
 	MaxReplicas *int32 `json:"maxReplicas"`
 
+	// Metrics Metrics list which is scaled on. Matches Kubernetes HPA spec.
+	Metrics *[]WorkloadoptimizationV1MetricSpec `json:"metrics,omitempty"`
+
 	// MinReplicas Min replicas a workload can have.
 	MinReplicas *int32 `json:"minReplicas"`
+
+	// UseNative Defines whether to use native Kubernetes HPA instead of CAST AI HPA.
+	UseNative *bool `json:"useNative"`
 }
 
 // WorkloadoptimizationV1HPAConfigUpdate defines model for workloadoptimization.v1.HPAConfigUpdate.
@@ -6342,7 +6348,13 @@ type WorkloadoptimizationV1HPAConfigUpdate struct {
 	// MANAGED - workload watched (metrics collected), CAST AI may perform actions on the workload.
 	ManagementOption *WorkloadoptimizationV1ManagementOption `json:"managementOption,omitempty"`
 	MaxReplicas      *int32                                  `json:"maxReplicas"`
-	MinReplicas      *int32                                  `json:"minReplicas"`
+
+	// Metrics Metrics list which is scaled on. Matches Kubernetes HPA spec.
+	Metrics     *[]WorkloadoptimizationV1MetricSpec `json:"metrics,omitempty"`
+	MinReplicas *int32                              `json:"minReplicas"`
+
+	// UseNative Defines whether to use native Kubernetes HPA instead of CAST AI HPA.
+	UseNative *bool `json:"useNative"`
 }
 
 // WorkloadoptimizationV1HPASpec defines model for workloadoptimization.v1.HPASpec.
@@ -6516,8 +6528,8 @@ type WorkloadoptimizationV1MemoryPressureEvictionEventContainer struct {
 
 // WorkloadoptimizationV1MetricIdentifier defines model for workloadoptimization.v1.MetricIdentifier.
 type WorkloadoptimizationV1MetricIdentifier struct {
-	Name     *string            `json:"name,omitempty"`
-	Selector *map[string]string `json:"selector,omitempty"`
+	Name     string            `json:"name"`
+	Selector map[string]string `json:"selector"`
 }
 
 // WorkloadoptimizationV1MetricSourceType MetricSourceType defines the source type of a metric used for autoscaling decisions.
@@ -6552,8 +6564,8 @@ type WorkloadoptimizationV1MetricTarget struct {
 	// VALUE - A specific metric value to target (e.g., 500m).
 	// AVERAGE_VALUE - A metric value averaged across all pods (e.g., 200Mi).
 	// UTILIZATION - A percentage of the requested resource utilization (e.g., 80).
-	Type  *WorkloadoptimizationV1MetricTargetType `json:"type,omitempty"`
-	Value *string                                 `json:"value,omitempty"`
+	Type  WorkloadoptimizationV1MetricTargetType `json:"type"`
+	Value string                                 `json:"value"`
 }
 
 // WorkloadoptimizationV1MetricTargetType MetricTargetType defines how the target value for a metric should be interpreted
@@ -6582,9 +6594,9 @@ type WorkloadoptimizationV1OOMKillEvent struct {
 
 // WorkloadoptimizationV1ObjectMetricSource defines model for workloadoptimization.v1.ObjectMetricSource.
 type WorkloadoptimizationV1ObjectMetricSource struct {
-	DescribedObject *WorkloadoptimizationV1CrossVersionObjectReference `json:"describedObject,omitempty"`
-	Metric          *WorkloadoptimizationV1MetricIdentifier            `json:"metric,omitempty"`
-	Target          *WorkloadoptimizationV1MetricTarget                `json:"target,omitempty"`
+	DescribedObject WorkloadoptimizationV1CrossVersionObjectReference `json:"describedObject"`
+	Metric          WorkloadoptimizationV1MetricIdentifier            `json:"metric"`
+	Target          WorkloadoptimizationV1MetricTarget                `json:"target"`
 }
 
 // WorkloadoptimizationV1PatchWorkloadV2 defines model for workloadoptimization.v1.PatchWorkloadV2.
@@ -6603,8 +6615,8 @@ type WorkloadoptimizationV1PodMetrics struct {
 
 // WorkloadoptimizationV1PodsMetricSource defines model for workloadoptimization.v1.PodsMetricSource.
 type WorkloadoptimizationV1PodsMetricSource struct {
-	Metric *WorkloadoptimizationV1MetricIdentifier `json:"metric,omitempty"`
-	Target *WorkloadoptimizationV1MetricTarget     `json:"target,omitempty"`
+	Metric WorkloadoptimizationV1MetricIdentifier `json:"metric"`
+	Target WorkloadoptimizationV1MetricTarget     `json:"target"`
 }
 
 // WorkloadoptimizationV1PredictiveInsights defines model for workloadoptimization.v1.PredictiveInsights.
@@ -6789,8 +6801,8 @@ type WorkloadoptimizationV1ResourceLimitStrategyType string
 
 // WorkloadoptimizationV1ResourceMetricSource defines model for workloadoptimization.v1.ResourceMetricSource.
 type WorkloadoptimizationV1ResourceMetricSource struct {
-	Name   *string                             `json:"name,omitempty"`
-	Target *WorkloadoptimizationV1MetricTarget `json:"target,omitempty"`
+	Name   string                             `json:"name"`
+	Target WorkloadoptimizationV1MetricTarget `json:"target"`
 }
 
 // WorkloadoptimizationV1ResourceMetrics defines model for workloadoptimization.v1.ResourceMetrics.
@@ -7172,9 +7184,10 @@ type WorkloadoptimizationV1WorkloadRecommendation struct {
 	Confidence float64 `json:"confidence"`
 
 	// Events Recommendation events.
-	Events []WorkloadoptimizationV1RecommendationEvent `json:"events"`
+	Events  []WorkloadoptimizationV1RecommendationEvent `json:"events"`
+	HpaSpec *WorkloadoptimizationV1HPASpec              `json:"hpaSpec,omitempty"`
 
-	// Replicas Number of recommended replicas. Available only when workload horizontal scaling is enabled.
+	// Replicas Number of recommended replicas. Available only when workload horizontal scaling is enabled and native HPA is disabled.
 	Replicas *int32 `json:"replicas"`
 }
 

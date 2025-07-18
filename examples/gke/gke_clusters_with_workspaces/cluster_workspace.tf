@@ -6,6 +6,7 @@ data "castai_rebalancing_schedule" "data_rs" {
 module "castai-gke-iam" {
   count                       = terraform.workspace == var.org_workspace ? 0 : 1 # Create only in the cluster workspace
   source                      = "castai/gke-iam/castai"
+  version                     = "~> 0.5"
   project_id                  = var.gke_project_id
   gke_cluster_name            = var.gke_cluster_name
   service_accounts_unique_ids = length(var.service_accounts_unique_ids) == 0 ? [] : var.service_accounts_unique_ids
