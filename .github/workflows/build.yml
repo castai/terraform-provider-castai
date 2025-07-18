@@ -45,6 +45,18 @@ jobs:
           terraform_version: '1.2.*'
           terraform_wrapper: false
 
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GOOGLE_TF_ACCEPTANCE_TEST_CREDENTIALS }}
+
+      - name: Get GKE credentials
+        uses: google-github-actions/get-gke-credentials@v2
+        with:
+          cluster_name: tf-core-acc-20230723
+          location: us-central1-c
+          project_id: ${{ secrets.GOOGLE_TF_ACCEPTANCE_PROJECT_ID }}
+
       - name: Acceptance test
         env:
           CASTAI_API_TOKEN: ${{ secrets.CASTAI_DEV_MASTER_TOKEN }}
