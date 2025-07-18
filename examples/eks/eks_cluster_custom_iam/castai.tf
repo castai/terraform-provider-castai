@@ -34,7 +34,8 @@ resource "castai_eks_clusterid" "cluster_id" {
 }
 
 module "castai-eks-cluster" {
-  source = "castai/eks-cluster/castai"
+  source  = "castai/eks-cluster/castai"
+  version = "~> 12.0"
 
   api_url                = var.castai_api_url
   castai_api_token       = var.castai_api_token
