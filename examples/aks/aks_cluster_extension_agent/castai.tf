@@ -105,10 +105,10 @@ resource "helm_release" "castai_pod_pinner" {
   }
 
   dynamic "set" {
-    for_each = var.grpc_url != "" ? [var.grpc_url] : []
+    for_each = var.castai_grpc_url != "" ? [var.castai_grpc_url] : []
     content {
       name  = "castai.grpcURL"
-      value = var.grpc_url
+      value = var.castai_grpc_url
     }
   }
 
