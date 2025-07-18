@@ -15,4 +15,4 @@ while IFS='' read -r -d $'\0' TFPROJECT; do
   echo "creating symlink under $TF_PROJECT_PLUGIN_PATH"
   mkdir -p "${PWD}/$TF_PROJECT_PLUGIN_PATH"
   ln -sf "${PWD}/terraform-provider-castai" "$TF_PROJECT_PLUGIN_PATH"
-done < <(find examples/eks examples/gke examples/aks -type d -depth 1 -print0)
+done < <(find examples/eks examples/gke examples/aks -mindepth 1 -maxdepth 1 -type d -print0)
