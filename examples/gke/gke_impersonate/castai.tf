@@ -14,7 +14,8 @@ module "iam-impersonate" {
 }
 
 module "castai-gke-cluster" {
-  source = "castai/gke-cluster/castai"
+  source  = "castai/gke-cluster/castai"
+  version = "~> 8.0"
 
   api_url                = var.castai_api_url
   castai_api_token       = var.castai_api_token
