@@ -6359,6 +6359,9 @@ type WorkloadoptimizationV1HPAConfigUpdate struct {
 
 // WorkloadoptimizationV1HPASpec defines model for workloadoptimization.v1.HPASpec.
 type WorkloadoptimizationV1HPASpec struct {
+	// ManagedByCastai Whether the HPA is managed by CAST AI.
+	ManagedByCastai bool `json:"managedByCastai"`
+
 	// MaxReplicas Max replicas a workload can have.
 	MaxReplicas int32 `json:"maxReplicas"`
 
