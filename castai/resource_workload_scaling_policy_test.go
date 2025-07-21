@@ -123,13 +123,118 @@ func TestAccResourceWorkloadScalingPolicy(t *testing.T) {
 				Source:            "hashicorp/google-beta",
 				VersionConstraint: "> 4.75.0",
 			},
+			"helm": {
+				Source:            "hashicorp/helm",
+				VersionConstraint: "~> 2.17.0",
+			},
 		},
 	})
+}
+
+func clusterConnectConfig(clusterName, projectID, name string) string {
+	return testAccGKEClusterConfig(name, clusterName, projectID)
+}
+
+// clusterComponentsConfig returns agent, cluster-controller, workload-autoscaler helm release
+// installation configs. workload-autoscaler is installed since some features are checking WA version.
+func clusterComponentsConfig(clusterName, projectID, name string) string {
+	cfg := fmt.Sprintf(`
+	resource "helm_release" "castai_agent" {
+		name             = "castai-agent"
+		repository       = "https://castai.github.io/helm-charts"
+		chart            = "castai-agent"
+		namespace        = "castai-agent"
+		create_namespace = true
+		cleanup_on_fail  = true
+		wait             = true
+	
+		set {
+			name  = "provider"
+			value = "gke"
+		}
+	
+		set_sensitive {
+			name  = "apiKey"
+			value = %[1]q
+		}
+	
+		set {
+			name  = "apiURL"
+			value = %[2]q
+		}
+	
+		set {
+			name  = "createNamespace"
+			value = "false"
+		}
+	
+		depends_on = [castai_gke_cluster.test]
+	}
+	
+	resource "helm_release" "castai_cluster_controller" {
+		depends_on       = [helm_release.castai_agent]
+		name             = "castai-cluster-controller"
+		repository       = "https://castai.github.io/helm-charts"
+		chart            = "castai-cluster-controller"
+		namespace        = "castai-agent"
+		create_namespace = false
+		cleanup_on_fail  = true
+		wait             = true
+	
+		set_sensitive {
+			name  = "castai.apiKey"
+			value = %[1]q
+		}
+	
+		set {
+			name  = "castai.apiURL"
+			value = %[2]q
+		}
+	
+		set {
+			name  = "castai.clusterID"
+			value = castai_gke_cluster.test.id
+		}
+	
+		set {
+			name  = "autoscaling.enabled"
+			value = "false"
+		}
+	}
+	
+	resource "helm_release" "castai_workload_autoscaler" {
+		depends_on       = [helm_release.castai_agent, helm_release.castai_cluster_controller]
+		name             = "castai-workload-autoscaler"
+		repository       = "https://castai.github.io/helm-charts"
+		chart            = "castai-workload-autoscaler"
+		namespace        = "castai-agent"
+		create_namespace = false
+		cleanup_on_fail  = true
+		wait             = true
+	
+		set_sensitive {
+			name  = "castai.apiKey"
+			value = %[1]q
+		}
+	
+		set {
+			name  = "castai.apiURL"
+			value = %[2]q
+		}
+	
+		set {
+			name  = "castai.clusterID"
+			value = castai_gke_cluster.test.id
+		}
+	}`, getAPIToken(), getAPIUrl())
+	return ConfigCompose(clusterConnectConfig(clusterName, projectID, name), cfg)
 }
 
 func scalingPolicyConfig(clusterName, projectID, name string) string {
 	cfg := fmt.Sprintf(`
 	resource "castai_workload_scaling_policy" "test" {
+  		depends_on          = [helm_release.castai_workload_autoscaler]
+
 		name 				= %[1]q
 		cluster_id			= castai_gke_cluster.test.id
 		apply_type			= "IMMEDIATE"
@@ -192,13 +297,15 @@ func scalingPolicyConfig(clusterName, projectID, name string) string {
 		}
 	}`, name)
 
-	return ConfigCompose(testAccGKEClusterConfig(name, clusterName, projectID), cfg)
+	return ConfigCompose(clusterComponentsConfig(clusterName, projectID, name), cfg)
 }
 
 func scalingPolicyConfigUpdated(clusterName, projectID, name string) string {
 	updatedName := name + "-updated"
 	cfg := fmt.Sprintf(`
 	resource "castai_workload_scaling_policy" "test" {
+  		depends_on          = [helm_release.castai_workload_autoscaler]
+
 		name 				= %[1]q
 		cluster_id			= castai_gke_cluster.test.id
 		apply_type			= "IMMEDIATE"
@@ -270,7 +377,7 @@ func scalingPolicyConfigUpdated(clusterName, projectID, name string) string {
 		}
 	}`, updatedName)
 
-	return ConfigCompose(testAccGKEClusterConfig(name, clusterName, projectID), cfg)
+	return ConfigCompose(clusterComponentsConfig(clusterName, projectID, name), cfg)
 }
 
 func testAccCheckScalingPolicyDestroy(s *terraform.State) error {
@@ -297,6 +404,18 @@ func testAccCheckScalingPolicyDestroy(s *terraform.State) error {
 	}
 
 	return nil
+}
+
+func getAPIToken() string {
+	return os.Getenv("CASTAI_API_TOKEN")
+}
+
+func getAPIUrl() string {
+	apiUrl := os.Getenv("CASTAI_API_URL")
+	if apiUrl == "" {
+		return "https://api.dev-master.cast.ai"
+	}
+	return apiUrl
 }
 
 func Test_validateResourcePolicy(t *testing.T) {
