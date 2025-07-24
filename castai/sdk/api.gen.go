@@ -1082,6 +1082,10 @@ type CastaiInventoryV1beta1AWSReservedInstancesContext struct {
 	InstanceTypesUsage    *CastaiInventoryV1beta1InstanceTypeBasedUsage `json:"instanceTypesUsage,omitempty"`
 	Scope                 *string                                       `json:"scope,omitempty"`
 	State                 *string                                       `json:"state,omitempty"`
+
+	// TotalCost Total cost paid by the customer for the commitment. If the cost is empty
+	// it means commitment was inserted before the cost was tracked.
+	TotalCost *string `json:"totalCost"`
 }
 
 // CastaiInventoryV1beta1AWSSavingsPlan defines model for castai.inventory.v1beta1.AWSSavingsPlan.
