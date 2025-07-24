@@ -2,6 +2,7 @@ package castai
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"regexp"
@@ -9,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/retry"
 	"github.com/samber/lo"
 
 	"github.com/google/uuid"
@@ -755,11 +757,44 @@ func resourceWorkloadScalingPolicyDelete(ctx context.Context, d *schema.Resource
 		return nil
 	}
 
-	delResp, err := client.WorkloadOptimizationAPIDeleteWorkloadScalingPolicyWithResponse(ctx, clusterID, d.Id())
-	if err != nil {
-		return diag.FromErr(err)
+	policy := *resp.JSON200
+	if len(*policy.AssignmentRules) > 0 {
+		// if the policy has assignment rules attached, we need to delete in two steps
+		// first the assignment rules are dropped, so that any assigned workloads related to that are removed from the policy
+		// after that the policy can be deleted
+		req := sdk.WorkloadOptimizationAPIUpdateWorkloadScalingPolicyJSONRequestBody{
+			Name:                   policy.Name,
+			ApplyType:              policy.ApplyType,
+			AssignmentRules:        nil,
+			RecommendationPolicies: policy.RecommendationPolicies,
+		}
+		resp, err := client.WorkloadOptimizationAPIUpdateWorkloadScalingPolicyWithResponse(ctx, clusterID, d.Id(), req)
+		if checkErr := sdk.CheckOKResponse(resp, err); checkErr != nil {
+			return diag.FromErr(checkErr)
+		}
 	}
-	if err := sdk.StatusOk(delResp); err != nil {
+
+	timeout := d.Timeout(schema.TimeoutDelete) - 5*time.Second
+	if err := retry.RetryContext(ctx, timeout, func() *retry.RetryError {
+		// deletion may be retried a few times, especially when assignment rules were previously attached
+		// workloads assigned from rules are detached asynchronously
+		delResp, err := client.WorkloadOptimizationAPIDeleteWorkloadScalingPolicyWithResponse(ctx, clusterID, d.Id())
+		if err != nil {
+			return retry.RetryableError(err)
+		}
+		if delResp.StatusCode() == http.StatusBadRequest && isWorkloadsStillAssignedError(delResp) {
+			return retry.RetryableError(fmt.Errorf("scaling policy %s still has workloads assigned", d.Id()))
+		}
+		if delResp.StatusCode() == http.StatusNotFound {
+			// Resource is gone
+			return nil
+		}
+		if err := sdk.StatusOk(delResp); err != nil {
+			return retry.NonRetryableError(sdk.StatusOk(delResp))
+		}
+
+		return nil
+	}); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -1535,4 +1570,16 @@ func labelSelectorOperatorMap(in sdk.WorkloadoptimizationV1KubernetesLabelSelect
 		return K8sLabelRegexOperator
 	}
 	return "unspecified"
+}
+
+func isWorkloadsStillAssignedError(response sdk.Response) bool {
+	buf := response.GetBody()
+
+	var errResponse sdk.ErrorResponse
+	err := json.Unmarshal(buf, &errResponse)
+	if err != nil {
+		return false
+	}
+
+	return errResponse.Message == "cannot delete the policy as workloads are assigned to it."
 }
