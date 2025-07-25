@@ -19,7 +19,7 @@ const (
 func dataSourceWorkloadScalingPolicies() *schema.Resource {
 	return &schema.Resource{
 		ReadContext: dataSourceWorkloadScalingPoliciesRead,
-		Description: "Returns a list of all workload scaling policies attached to a CastAI cluster",
+		Description: "Returns a list of all workload scaling policies attached to a Cast AI cluster",
 		Schema: map[string]*schema.Schema{
 			FieldClusterID: {
 				Type:             schema.TypeString,
