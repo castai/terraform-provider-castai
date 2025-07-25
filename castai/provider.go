@@ -62,15 +62,16 @@ func Provider(version string) *schema.Provider {
 			"castai_role_bindings":                 resourceRoleBindings(),
 			"castai_hibernation_schedule":          resourceHibernationSchedule(),
 			"castai_security_runtime_rule":         resourceSecurityRuntimeRule(),
-			"castai_allocation_group":           resourceAllocationGroup(),
+			"castai_allocation_group":              resourceAllocationGroup(),
 		},
 
 		DataSourcesMap: map[string]*schema.Resource{
-			"castai_eks_settings":         dataSourceEKSSettings(),
-			"castai_gke_user_policies":    dataSourceGKEPolicies(),
-			"castai_organization":         dataSourceOrganization(),
-			"castai_rebalancing_schedule": dataSourceRebalancingSchedule(),
-			"castai_hibernation_schedule": dataSourceHibernationSchedule(),
+			"castai_eks_settings":                  dataSourceEKSSettings(),
+			"castai_gke_user_policies":             dataSourceGKEPolicies(),
+			"castai_organization":                  dataSourceOrganization(),
+			"castai_rebalancing_schedule":          dataSourceRebalancingSchedule(),
+			"castai_hibernation_schedule":          dataSourceHibernationSchedule(),
+			"castai_workload_scaling_policy_order": dataSourceWorkloadScalingPolicyOrder(),
 
 			// TODO: remove in next major release
 			"castai_eks_user_arn": dataSourceEKSClusterUserARN(),
