@@ -16,10 +16,10 @@ const (
 	FieldScalingPolicyIDs = "policy_ids"
 )
 
-func dataSourceWorkloadScalingPolicies() *schema.Resource {
+func dataSourceWorkloadScalingPolicyOrder() *schema.Resource {
 	return &schema.Resource{
-		ReadContext: dataSourceWorkloadScalingPoliciesRead,
-		Description: "Returns a list of all workload scaling policies attached to a Cast AI cluster",
+		ReadContext: dataSourceWorkloadScalingPolicyOrderRead,
+		Description: "Returns the ordered list of workload scaling policies attached to a Cast AI cluster",
 		Schema: map[string]*schema.Schema{
 			FieldClusterID: {
 				Type:             schema.TypeString,
@@ -40,7 +40,7 @@ func dataSourceWorkloadScalingPolicies() *schema.Resource {
 	}
 }
 
-func dataSourceWorkloadScalingPoliciesRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
+func dataSourceWorkloadScalingPolicyOrderRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(*ProviderConfig).api
 
 	clusterID := d.Get(FieldClusterID).(string)
@@ -54,7 +54,7 @@ func dataSourceWorkloadScalingPoliciesRead(ctx context.Context, d *schema.Resour
 		policyIDs = append(policyIDs, item.Id)
 	}
 
-	d.SetId(fmt.Sprintf("policies-%s", clusterID))
+	d.SetId(clusterID)
 	if err := d.Set(FieldScalingPolicyIDs, policyIDs); err != nil {
 		return diag.FromErr(fmt.Errorf("setting policy IDs: %w", err))
 	}
