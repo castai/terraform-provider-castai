@@ -1,7 +1,8 @@
 # 3. Connect GKE cluster to CAST AI with enabled Kvisor security agent.
 
 module "castai-gke-iam" {
-  source = "castai/gke-iam/castai"
+  source  = "castai/gke-iam/castai"
+  version = "~> 0.5"
 
   project_id                  = var.project_id
   gke_cluster_name            = var.cluster_name
@@ -11,7 +12,8 @@ module "castai-gke-iam" {
 
 # Configure GKE cluster connection to CAST AI with enabled Kvisor security agent.
 module "castai-gke-cluster" {
-  source = "castai/gke-cluster/castai"
+  source  = "castai/gke-cluster/castai"
+  version = "~> 8.0"
 
   wait_for_cluster_ready = true
   kvisor_grpc_addr       = var.kvisor_grpc_addr

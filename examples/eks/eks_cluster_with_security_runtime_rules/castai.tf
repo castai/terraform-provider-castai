@@ -16,7 +16,8 @@ resource "castai_eks_user_arn" "castai_user_arn" {
 
 # Create AWS IAM policies and a user to connect to CAST AI.
 module "castai-eks-role-iam" {
-  source = "castai/eks-role-iam/castai"
+  source  = "castai/eks-role-iam/castai"
+  version = "~> 1.0"
 
   aws_account_id     = data.aws_caller_identity.current.account_id
   aws_cluster_region = var.cluster_region
@@ -30,7 +31,8 @@ module "castai-eks-role-iam" {
 
 # Install CAST AI with enabled Kvisor security agent.
 module "castai-eks-cluster" {
-  source = "castai/eks-cluster/castai"
+  source  = "castai/eks-cluster/castai"
+  version = "~> 12.0"
 
   kvisor_grpc_addr = var.kvisor_grpc_addr
 
