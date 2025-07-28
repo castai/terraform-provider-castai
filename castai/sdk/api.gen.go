@@ -2548,6 +2548,9 @@ type CastaiSsoV1beta1SSOConnection struct {
 	// Id Id is the unique identifier of the connection.
 	Id *string `json:"id,omitempty"`
 
+	// IsSynced Indicates if the connection is SSO synced or not.
+	IsSynced *bool `json:"isSynced,omitempty"`
+
 	// Name Name is the name of the connection.
 	Name string `json:"name"`
 
