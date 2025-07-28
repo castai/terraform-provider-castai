@@ -54,6 +54,7 @@ func resourceOrganizationMembers() *schema.Resource {
 					Type: schema.TypeString,
 				},
 				Description: "A list of email addresses corresponding to users who should be given owner access to the organization.",
+				Deprecated:  "The 'owners' field is deprecated. Use 'castai_role_bindings' resource instead for more granular role management. This field will be removed in a future version.",
 			},
 			FieldOrganizationMembersViewers: {
 				Type:     schema.TypeList,
@@ -62,6 +63,7 @@ func resourceOrganizationMembers() *schema.Resource {
 					Type: schema.TypeString,
 				},
 				Description: "A list of email addresses corresponding to users who should be given viewer access to the organization.",
+				Deprecated:  "The 'viewers' field is deprecated. Use 'castai_role_bindings' resource instead for more granular role management. This field will be removed in a future version.",
 			},
 			FieldOrganizationMembersMembers: {
 				Type:     schema.TypeList,
@@ -70,6 +72,7 @@ func resourceOrganizationMembers() *schema.Resource {
 					Type: schema.TypeString,
 				},
 				Description: "A list of email addresses corresponding to users who should be given member access to the organization.",
+				Deprecated:  "The 'members' field is deprecated. Use 'castai_role_bindings' resource instead for more granular role management. This field will be removed in a future version.",
 			},
 		},
 	}
@@ -259,16 +262,6 @@ func resourceOrganizationMembersUpdate(ctx context.Context, data *schema.Resourc
 		return diag.FromErr(
 			fmt.Errorf("can't delete user that is currently managing this organization: %s", lo.FromPtr(currentUserResp.JSON200.Email)),
 		)
-	}
-
-	for userID, role := range manipulations.membersToUpdate {
-		role := role
-		resp, err := client.UsersAPIUpdateOrganizationUserWithResponse(ctx, organizationID, userID, sdk.UsersAPIUpdateOrganizationUserJSONRequestBody{
-			Role: &role,
-		})
-		if err := sdk.CheckOKResponse(resp, err); err != nil {
-			return diag.FromErr(fmt.Errorf("updating user: %w", err))
-		}
 	}
 
 	for _, userID := range manipulations.membersToDelete {
