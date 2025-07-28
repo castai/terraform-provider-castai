@@ -98,6 +98,23 @@ Tainted = false
 `, data.State().String())
 }
 
+func TestOrganizationResourceSchemaDeprecation(t *testing.T) {
+	t.Parallel()
+
+	r := require.New(t)
+	resource := resourceOrganizationMembers()
+	schema := resource.Schema
+
+	// Test that deprecated fields have deprecation warnings
+	r.NotEmpty(schema[FieldOrganizationMembersOwners].Deprecated)
+	r.NotEmpty(schema[FieldOrganizationMembersViewers].Deprecated)
+	r.NotEmpty(schema[FieldOrganizationMembersMembers].Deprecated)
+
+	// Test that deprecation messages mention role bindings
+	r.Contains(schema[FieldOrganizationMembersOwners].Deprecated, "castai_role_bindings")
+	r.Contains(schema[FieldOrganizationMembersViewers].Deprecated, "castai_role_bindings")
+	r.Contains(schema[FieldOrganizationMembersMembers].Deprecated, "castai_role_bindings")
+}
 func TestCompareRoleMembers(t *testing.T) {
 	t.Parallel()
 
