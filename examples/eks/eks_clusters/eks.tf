@@ -81,5 +81,4 @@ resource "aws_security_group" "additional" {
   }
 
   depends_on = [module.vpc]
-
 }
