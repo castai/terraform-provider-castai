@@ -62,6 +62,8 @@ module "eks" {
       }
     }
   }
+
+  depends_on = [module.vpc]
 }
 
 # Example additional security group.
@@ -77,4 +79,7 @@ resource "aws_security_group" "additional" {
       "10.0.0.0/8",
     ]
   }
+
+  depends_on = [module.vpc]
+
 }
