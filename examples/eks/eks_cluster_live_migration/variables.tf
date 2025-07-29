@@ -57,10 +57,10 @@ variable "install_helm_live" {
 
 variable "live_proxy_version" {
   type    = string
-  default = "0.30.0"
+  default = "0.33.0"
 }
 
 variable "live_helm_version" {
   type    = string
-  default = "0.1.43"
+  default = "0.1.47"
 }
