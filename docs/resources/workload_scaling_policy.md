@@ -172,6 +172,7 @@ Required:
 
 - `type` (String) Defines limit strategy type.
 	- NO_LIMIT - removes the resource limit even if it was specified in the workload spec.
+	- KEEP_LIMITS - keep existing resource limits. while limits provide stability predictability, they may restrict workloads that need to temporarily burst beyond their allocation.
 	- MULTIPLIER - used to calculate the resource limit. The final value is determined by multiplying the resource request by the specified factor.
 
 Optional:
@@ -224,6 +225,7 @@ Required:
 
 - `type` (String) Defines limit strategy type.
 	- NO_LIMIT - removes the resource limit even if it was specified in the workload spec.
+	- KEEP_LIMITS - keep existing resource limits. while limits provide stability predictability, they may restrict workloads that need to temporarily burst beyond their allocation.
 	- MULTIPLIER - used to calculate the resource limit. The final value is determined by multiplying the resource request by the specified factor.
 
 Optional:
