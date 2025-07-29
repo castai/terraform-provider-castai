@@ -977,10 +977,10 @@ func toWorkloadResourceLimit(obj map[string]any) (*sdk.WorkloadoptimizationV1Res
 	}
 	out.Type = sdk.WorkloadoptimizationV1ResourceLimitStrategyType(*strategy)
 	switch out.Type {
-	case sdk.NOLIMIT:
+	case sdk.NOLIMIT, sdk.KEEPLIMITS:
 		out.Multiplier, err = mustGetValue[float64](obj, FieldLimitStrategyMultiplier)
 		if err == nil {
-			return nil, fmt.Errorf(`%q limit type doesn't accept multiplier value`, sdk.NOLIMIT)
+			return nil, fmt.Errorf(`%q limit type doesn't accept multiplier value`, out.Type)
 		}
 		return out, nil
 	case sdk.MULTIPLIER:
