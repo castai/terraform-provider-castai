@@ -62,6 +62,8 @@ module "eks" {
       }
     }
   }
+
+  #depends_on = [module.vpc]
 }
 
 # Example additional security group.
