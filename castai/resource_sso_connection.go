@@ -197,13 +197,13 @@ func resourceCastaiSSOConnectionRead(ctx context.Context, data *schema.ResourceD
 
 	connection := resp.JSON200
 
-	if err := data.Set(FieldSSOConnectionName, connection.Name); err != nil {
+	if err := data.Set(FieldSSOConnectionName, connection.Connection.Name); err != nil {
 		return diag.Errorf("setting connection name: %v", err)
 	}
-	if err := data.Set(FieldSSOConnectionEmailDomain, connection.EmailDomain); err != nil {
+	if err := data.Set(FieldSSOConnectionEmailDomain, connection.Connection.EmailDomain); err != nil {
 		return diag.Errorf("setting email domain: %v", err)
 	}
-	if err := data.Set(FieldSSOConnectionAdditionalEmailDomains, connection.AdditionalEmailDomains); err != nil {
+	if err := data.Set(FieldSSOConnectionAdditionalEmailDomains, connection.Connection.AdditionalEmailDomains); err != nil {
 		return diag.Errorf("setting additional email domains: %v", err)
 	}
 

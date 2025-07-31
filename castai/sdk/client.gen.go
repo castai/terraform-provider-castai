@@ -548,11 +548,6 @@ type ClientInterface interface {
 	// UsersAPIRemoveUserFromOrganization request
 	UsersAPIRemoveUserFromOrganization(ctx context.Context, organizationId string, userId string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// UsersAPIUpdateOrganizationUserWithBody request with any body
-	UsersAPIUpdateOrganizationUserWithBody(ctx context.Context, organizationId string, userId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
-
-	UsersAPIUpdateOrganizationUser(ctx context.Context, organizationId string, userId string, body UsersAPIUpdateOrganizationUserJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
-
 	// UsersAPIListUserGroups request
 	UsersAPIListUserGroups(ctx context.Context, organizationId string, userId string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -2844,30 +2839,6 @@ func (c *Client) UsersAPIAddUserToOrganization(ctx context.Context, organization
 
 func (c *Client) UsersAPIRemoveUserFromOrganization(ctx context.Context, organizationId string, userId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewUsersAPIRemoveUserFromOrganizationRequest(c.Server, organizationId, userId)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
-func (c *Client) UsersAPIUpdateOrganizationUserWithBody(ctx context.Context, organizationId string, userId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewUsersAPIUpdateOrganizationUserRequestWithBody(c.Server, organizationId, userId, contentType, body)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
-func (c *Client) UsersAPIUpdateOrganizationUser(ctx context.Context, organizationId string, userId string, body UsersAPIUpdateOrganizationUserJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewUsersAPIUpdateOrganizationUserRequest(c.Server, organizationId, userId, body)
 	if err != nil {
 		return nil, err
 	}
@@ -10638,60 +10609,6 @@ func NewUsersAPIRemoveUserFromOrganizationRequest(server string, organizationId 
 	return req, nil
 }
 
-// NewUsersAPIUpdateOrganizationUserRequest calls the generic UsersAPIUpdateOrganizationUser builder with application/json body
-func NewUsersAPIUpdateOrganizationUserRequest(server string, organizationId string, userId string, body UsersAPIUpdateOrganizationUserJSONRequestBody) (*http.Request, error) {
-	var bodyReader io.Reader
-	buf, err := json.Marshal(body)
-	if err != nil {
-		return nil, err
-	}
-	bodyReader = bytes.NewReader(buf)
-	return NewUsersAPIUpdateOrganizationUserRequestWithBody(server, organizationId, userId, "application/json", bodyReader)
-}
-
-// NewUsersAPIUpdateOrganizationUserRequestWithBody generates requests for UsersAPIUpdateOrganizationUser with any type of body
-func NewUsersAPIUpdateOrganizationUserRequestWithBody(server string, organizationId string, userId string, contentType string, body io.Reader) (*http.Request, error) {
-	var err error
-
-	var pathParam0 string
-
-	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "organizationId", runtime.ParamLocationPath, organizationId)
-	if err != nil {
-		return nil, err
-	}
-
-	var pathParam1 string
-
-	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "userId", runtime.ParamLocationPath, userId)
-	if err != nil {
-		return nil, err
-	}
-
-	serverURL, err := url.Parse(server)
-	if err != nil {
-		return nil, err
-	}
-
-	operationPath := fmt.Sprintf("/v1/organizations/%s/users/%s", pathParam0, pathParam1)
-	if operationPath[0] == '/' {
-		operationPath = "." + operationPath
-	}
-
-	queryURL, err := serverURL.Parse(operationPath)
-	if err != nil {
-		return nil, err
-	}
-
-	req, err := http.NewRequest("PUT", queryURL.String(), body)
-	if err != nil {
-		return nil, err
-	}
-
-	req.Header.Add("Content-Type", contentType)
-
-	return req, nil
-}
-
 // NewUsersAPIListUserGroupsRequest generates requests for UsersAPIListUserGroups
 func NewUsersAPIListUserGroupsRequest(server string, organizationId string, userId string) (*http.Request, error) {
 	var err error
@@ -16274,11 +16191,6 @@ type ClientWithResponsesInterface interface {
 	// UsersAPIRemoveUserFromOrganization request
 	UsersAPIRemoveUserFromOrganizationWithResponse(ctx context.Context, organizationId string, userId string) (*UsersAPIRemoveUserFromOrganizationResponse, error)
 
-	// UsersAPIUpdateOrganizationUser request  with any body
-	UsersAPIUpdateOrganizationUserWithBodyWithResponse(ctx context.Context, organizationId string, userId string, contentType string, body io.Reader) (*UsersAPIUpdateOrganizationUserResponse, error)
-
-	UsersAPIUpdateOrganizationUserWithResponse(ctx context.Context, organizationId string, userId string, body UsersAPIUpdateOrganizationUserJSONRequestBody) (*UsersAPIUpdateOrganizationUserResponse, error)
-
 	// UsersAPIListUserGroups request
 	UsersAPIListUserGroupsWithResponse(ctx context.Context, organizationId string, userId string) (*UsersAPIListUserGroupsResponse, error)
 
@@ -20306,36 +20218,6 @@ func (r UsersAPIRemoveUserFromOrganizationResponse) GetBody() []byte {
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
-type UsersAPIUpdateOrganizationUserResponse struct {
-	Body         []byte
-	HTTPResponse *http.Response
-	JSON200      *CastaiUsersV1beta1Membership
-}
-
-// Status returns HTTPResponse.Status
-func (r UsersAPIUpdateOrganizationUserResponse) Status() string {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.Status
-	}
-	return http.StatusText(0)
-}
-
-// StatusCode returns HTTPResponse.StatusCode
-func (r UsersAPIUpdateOrganizationUserResponse) StatusCode() int {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.StatusCode
-	}
-	return 0
-}
-
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r UsersAPIUpdateOrganizationUserResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-
 type UsersAPIListUserGroupsResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -21986,7 +21868,7 @@ func (r SSOAPIDeleteSSOConnectionResponse) GetBody() []byte {
 type SSOAPIGetSSOConnectionResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *CastaiSsoV1beta1SSOConnection
+	JSON200      *CastaiSsoV1beta1GetSSOConnectionResponse
 }
 
 // Status returns HTTPResponse.Status
@@ -24190,23 +24072,6 @@ func (c *ClientWithResponses) UsersAPIRemoveUserFromOrganizationWithResponse(ctx
 		return nil, err
 	}
 	return ParseUsersAPIRemoveUserFromOrganizationResponse(rsp)
-}
-
-// UsersAPIUpdateOrganizationUserWithBodyWithResponse request with arbitrary body returning *UsersAPIUpdateOrganizationUserResponse
-func (c *ClientWithResponses) UsersAPIUpdateOrganizationUserWithBodyWithResponse(ctx context.Context, organizationId string, userId string, contentType string, body io.Reader) (*UsersAPIUpdateOrganizationUserResponse, error) {
-	rsp, err := c.UsersAPIUpdateOrganizationUserWithBody(ctx, organizationId, userId, contentType, body)
-	if err != nil {
-		return nil, err
-	}
-	return ParseUsersAPIUpdateOrganizationUserResponse(rsp)
-}
-
-func (c *ClientWithResponses) UsersAPIUpdateOrganizationUserWithResponse(ctx context.Context, organizationId string, userId string, body UsersAPIUpdateOrganizationUserJSONRequestBody) (*UsersAPIUpdateOrganizationUserResponse, error) {
-	rsp, err := c.UsersAPIUpdateOrganizationUser(ctx, organizationId, userId, body)
-	if err != nil {
-		return nil, err
-	}
-	return ParseUsersAPIUpdateOrganizationUserResponse(rsp)
 }
 
 // UsersAPIListUserGroupsWithResponse request returning *UsersAPIListUserGroupsResponse
@@ -28378,32 +28243,6 @@ func ParseUsersAPIRemoveUserFromOrganizationResponse(rsp *http.Response) (*Users
 	return response, nil
 }
 
-// ParseUsersAPIUpdateOrganizationUserResponse parses an HTTP response from a UsersAPIUpdateOrganizationUserWithResponse call
-func ParseUsersAPIUpdateOrganizationUserResponse(rsp *http.Response) (*UsersAPIUpdateOrganizationUserResponse, error) {
-	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
-	if err != nil {
-		return nil, err
-	}
-
-	response := &UsersAPIUpdateOrganizationUserResponse{
-		Body:         bodyBytes,
-		HTTPResponse: rsp,
-	}
-
-	switch {
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest CastaiUsersV1beta1Membership
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON200 = &dest
-
-	}
-
-	return response, nil
-}
-
 // ParseUsersAPIListUserGroupsResponse parses an HTTP response from a UsersAPIListUserGroupsWithResponse call
 func ParseUsersAPIListUserGroupsResponse(rsp *http.Response) (*UsersAPIListUserGroupsResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
@@ -29819,7 +29658,7 @@ func ParseSSOAPIGetSSOConnectionResponse(rsp *http.Response) (*SSOAPIGetSSOConne
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest CastaiSsoV1beta1SSOConnection
+		var dest CastaiSsoV1beta1GetSSOConnectionResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
