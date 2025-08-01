@@ -832,15 +832,6 @@ type ServiceAccountsAPIUpdateServiceAccountRequest struct {
 	ServiceAccount CastaiServiceaccountsV1beta1UpdateServiceAccountRequestServiceAccount `json:"serviceAccount"`
 }
 
-// UsersAPIUpdateOrganizationUserRequest defines model for UsersAPI_UpdateOrganizationUser_request.
-type UsersAPIUpdateOrganizationUserRequest struct {
-	// Role Deprecated: for RBACv2 user can be bound to multiple roles.
-	// Use https://docs.cast.ai/reference/rbacserviceapi instead.
-	// user role in the organization.
-	// Deprecated:
-	Role *string `json:"role,omitempty"`
-}
-
 // WorkloadOptimizationAPIAssignScalingPolicyWorkloadsRequest defines model for WorkloadOptimizationAPI_AssignScalingPolicyWorkloads_request.
 type WorkloadOptimizationAPIAssignScalingPolicyWorkloadsRequest struct {
 	WorkloadIds *[]string `json:"workloadIds,omitempty"`
@@ -2483,6 +2474,15 @@ type CastaiSsoV1beta1CreateSSOConnection struct {
 
 // CastaiSsoV1beta1DeleteSSOConnectionResponse Defines the container for the sso delete response.
 type CastaiSsoV1beta1DeleteSSOConnectionResponse = map[string]interface{}
+
+// CastaiSsoV1beta1GetSSOConnectionResponse Defines the container for the sso get response.
+type CastaiSsoV1beta1GetSSOConnectionResponse struct {
+	// Connection SSOConnection represents a sso connection.
+	Connection *CastaiSsoV1beta1SSOConnection `json:"connection,omitempty"`
+
+	// SsoServiceAccountId SSO syncer Service account will be returned only for synced connections or formerly synced connections.
+	SsoServiceAccountId *string `json:"ssoServiceAccountId"`
+}
 
 // CastaiSsoV1beta1ListSSOConnectionsResponse Defines the container for the sso list response.
 type CastaiSsoV1beta1ListSSOConnectionsResponse struct {
@@ -8233,9 +8233,6 @@ type ServiceAccountsAPIUpdateServiceAccountKeyJSONRequestBody = KeyIsTheServiceA
 
 // UsersAPIAddUserToOrganizationJSONRequestBody defines body for UsersAPIAddUserToOrganization for application/json ContentType.
 type UsersAPIAddUserToOrganizationJSONRequestBody = CastaiUsersV1beta1NewMembership
-
-// UsersAPIUpdateOrganizationUserJSONRequestBody defines body for UsersAPIUpdateOrganizationUser for application/json ContentType.
-type UsersAPIUpdateOrganizationUserJSONRequestBody = UsersAPIUpdateOrganizationUserRequest
 
 // ScheduledRebalancingAPICreateRebalancingScheduleJSONRequestBody defines body for ScheduledRebalancingAPICreateRebalancingSchedule for application/json ContentType.
 type ScheduledRebalancingAPICreateRebalancingScheduleJSONRequestBody = ScheduledrebalancingV1RebalancingSchedule

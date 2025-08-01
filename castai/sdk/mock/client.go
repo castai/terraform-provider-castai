@@ -5055,46 +5055,6 @@ func (mr *MockClientInterfaceMockRecorder) UsersAPIUpdateCurrentUserProfileWithB
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UsersAPIUpdateCurrentUserProfileWithBody", reflect.TypeOf((*MockClientInterface)(nil).UsersAPIUpdateCurrentUserProfileWithBody), varargs...)
 }
 
-// UsersAPIUpdateOrganizationUser mocks base method.
-func (m *MockClientInterface) UsersAPIUpdateOrganizationUser(ctx context.Context, organizationId, userId string, body sdk.UsersAPIUpdateOrganizationUserJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
-	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, organizationId, userId, body}
-	for _, a := range reqEditors {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "UsersAPIUpdateOrganizationUser", varargs...)
-	ret0, _ := ret[0].(*http.Response)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// UsersAPIUpdateOrganizationUser indicates an expected call of UsersAPIUpdateOrganizationUser.
-func (mr *MockClientInterfaceMockRecorder) UsersAPIUpdateOrganizationUser(ctx, organizationId, userId, body interface{}, reqEditors ...interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, organizationId, userId, body}, reqEditors...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UsersAPIUpdateOrganizationUser", reflect.TypeOf((*MockClientInterface)(nil).UsersAPIUpdateOrganizationUser), varargs...)
-}
-
-// UsersAPIUpdateOrganizationUserWithBody mocks base method.
-func (m *MockClientInterface) UsersAPIUpdateOrganizationUserWithBody(ctx context.Context, organizationId, userId, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
-	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, organizationId, userId, contentType, body}
-	for _, a := range reqEditors {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "UsersAPIUpdateOrganizationUserWithBody", varargs...)
-	ret0, _ := ret[0].(*http.Response)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// UsersAPIUpdateOrganizationUserWithBody indicates an expected call of UsersAPIUpdateOrganizationUserWithBody.
-func (mr *MockClientInterfaceMockRecorder) UsersAPIUpdateOrganizationUserWithBody(ctx, organizationId, userId, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, organizationId, userId, contentType, body}, reqEditors...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UsersAPIUpdateOrganizationUserWithBody", reflect.TypeOf((*MockClientInterface)(nil).UsersAPIUpdateOrganizationUserWithBody), varargs...)
-}
-
 // WorkloadOptimizationAPIAssignScalingPolicyWorkloads mocks base method.
 func (m *MockClientInterface) WorkloadOptimizationAPIAssignScalingPolicyWorkloads(ctx context.Context, clusterId, policyId string, body sdk.WorkloadOptimizationAPIAssignScalingPolicyWorkloadsJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
@@ -14351,76 +14311,6 @@ func (m *MockClientWithResponsesInterface) UsersAPIUpdateCurrentUserProfileWithR
 func (mr *MockClientWithResponsesInterfaceMockRecorder) UsersAPIUpdateCurrentUserProfileWithResponse(ctx, body interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UsersAPIUpdateCurrentUserProfileWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).UsersAPIUpdateCurrentUserProfileWithResponse), ctx, body)
-}
-
-// UsersAPIUpdateOrganizationUser mocks base method.
-func (m *MockClientWithResponsesInterface) UsersAPIUpdateOrganizationUser(ctx context.Context, organizationId, userId string, body sdk.UsersAPIUpdateOrganizationUserJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
-	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, organizationId, userId, body}
-	for _, a := range reqEditors {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "UsersAPIUpdateOrganizationUser", varargs...)
-	ret0, _ := ret[0].(*http.Response)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// UsersAPIUpdateOrganizationUser indicates an expected call of UsersAPIUpdateOrganizationUser.
-func (mr *MockClientWithResponsesInterfaceMockRecorder) UsersAPIUpdateOrganizationUser(ctx, organizationId, userId, body interface{}, reqEditors ...interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, organizationId, userId, body}, reqEditors...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UsersAPIUpdateOrganizationUser", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).UsersAPIUpdateOrganizationUser), varargs...)
-}
-
-// UsersAPIUpdateOrganizationUserWithBody mocks base method.
-func (m *MockClientWithResponsesInterface) UsersAPIUpdateOrganizationUserWithBody(ctx context.Context, organizationId, userId, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
-	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, organizationId, userId, contentType, body}
-	for _, a := range reqEditors {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "UsersAPIUpdateOrganizationUserWithBody", varargs...)
-	ret0, _ := ret[0].(*http.Response)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// UsersAPIUpdateOrganizationUserWithBody indicates an expected call of UsersAPIUpdateOrganizationUserWithBody.
-func (mr *MockClientWithResponsesInterfaceMockRecorder) UsersAPIUpdateOrganizationUserWithBody(ctx, organizationId, userId, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, organizationId, userId, contentType, body}, reqEditors...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UsersAPIUpdateOrganizationUserWithBody", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).UsersAPIUpdateOrganizationUserWithBody), varargs...)
-}
-
-// UsersAPIUpdateOrganizationUserWithBodyWithResponse mocks base method.
-func (m *MockClientWithResponsesInterface) UsersAPIUpdateOrganizationUserWithBodyWithResponse(ctx context.Context, organizationId, userId, contentType string, body io.Reader) (*sdk.UsersAPIUpdateOrganizationUserResponse, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UsersAPIUpdateOrganizationUserWithBodyWithResponse", ctx, organizationId, userId, contentType, body)
-	ret0, _ := ret[0].(*sdk.UsersAPIUpdateOrganizationUserResponse)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// UsersAPIUpdateOrganizationUserWithBodyWithResponse indicates an expected call of UsersAPIUpdateOrganizationUserWithBodyWithResponse.
-func (mr *MockClientWithResponsesInterfaceMockRecorder) UsersAPIUpdateOrganizationUserWithBodyWithResponse(ctx, organizationId, userId, contentType, body interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UsersAPIUpdateOrganizationUserWithBodyWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).UsersAPIUpdateOrganizationUserWithBodyWithResponse), ctx, organizationId, userId, contentType, body)
-}
-
-// UsersAPIUpdateOrganizationUserWithResponse mocks base method.
-func (m *MockClientWithResponsesInterface) UsersAPIUpdateOrganizationUserWithResponse(ctx context.Context, organizationId, userId string, body sdk.UsersAPIUpdateOrganizationUserJSONRequestBody) (*sdk.UsersAPIUpdateOrganizationUserResponse, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UsersAPIUpdateOrganizationUserWithResponse", ctx, organizationId, userId, body)
-	ret0, _ := ret[0].(*sdk.UsersAPIUpdateOrganizationUserResponse)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// UsersAPIUpdateOrganizationUserWithResponse indicates an expected call of UsersAPIUpdateOrganizationUserWithResponse.
-func (mr *MockClientWithResponsesInterfaceMockRecorder) UsersAPIUpdateOrganizationUserWithResponse(ctx, organizationId, userId, body interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UsersAPIUpdateOrganizationUserWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).UsersAPIUpdateOrganizationUserWithResponse), ctx, organizationId, userId, body)
 }
 
 // WorkloadOptimizationAPIAssignScalingPolicyWorkloads mocks base method.

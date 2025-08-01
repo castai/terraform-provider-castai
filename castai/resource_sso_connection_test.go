@@ -54,7 +54,7 @@ func TestSSOConnection_ReadContext(t *testing.T) {
 	t.Run("read azure ad connector", func(t *testing.T) {
 		t.Parallel()
 
-		readBody := `{"id":"fce35ba2-5c06-4078-8391-1ac8f7ba798b","name":"test_sso","createdAt":"2023-11-02T10:49:14.376757Z","updatedAt":"2023-11-02T10:49:14.450828Z","emailDomain":"test_email","additionalEmailDomains":[],"aad":{"adDomain":"test_connector","clientId":"test_client","clientSecret":"test_secret"}}`
+		readBody := `{"connection":{"id":"fce35ba2-5c06-4078-8391-1ac8f7ba798b","name":"test_sso","createdAt":"2023-11-02T10:49:14.376757Z","updatedAt":"2023-11-02T10:49:14.450828Z","emailDomain":"test_email","additionalEmailDomains":[],"aad":{"adDomain":"test_connector","clientId":"test_client","clientSecret":"test_secret"}}}`
 
 		mockClient := mock_sdk.NewMockClientInterface(gomock.NewController(t))
 
@@ -87,7 +87,7 @@ func TestSSOConnection_ReadContext(t *testing.T) {
 	t.Run("read azure ad connector with additional email domains", func(t *testing.T) {
 		t.Parallel()
 
-		readBody := `{"id":"fce35ba2-5c06-4078-8391-1ac8f7ba798b","name":"test_sso","createdAt":"2023-11-02T10:49:14.376757Z","updatedAt":"2023-11-02T10:49:14.450828Z","emailDomain":"test_email","additionalEmailDomains":["domain.com", "other.com"],"aad":{"adDomain":"test_connector","clientId":"test_client","clientSecret":"test_secret"}}`
+		readBody := `{"connection":{"id":"fce35ba2-5c06-4078-8391-1ac8f7ba798b","name":"test_sso","createdAt":"2023-11-02T10:49:14.376757Z","updatedAt":"2023-11-02T10:49:14.450828Z","emailDomain":"test_email","additionalEmailDomains":["domain.com", "other.com"],"aad":{"adDomain":"test_connector","clientId":"test_client","clientSecret":"test_secret"}}}`
 
 		mockClient := mock_sdk.NewMockClientInterface(gomock.NewController(t))
 
@@ -154,7 +154,7 @@ func TestSSOConnection_CreateADDConnector(t *testing.T) {
 			})
 
 		connectionID := "b6bfc074-a267-400f-b8f1-db0850c369b1"
-		readBody := io.NopCloser(bytes.NewReader([]byte(`{
+		readBody := io.NopCloser(bytes.NewReader([]byte(`{ "connection" :{
   "id": "b6bfc074-a267-400f-b8f1-db0850c369b1",
   "name": "test_sso",
   "createdAt": "2023-11-02T10:49:14.376757Z",
@@ -165,7 +165,7 @@ func TestSSOConnection_CreateADDConnector(t *testing.T) {
     "clientId": "test_client",
     "clientSecret": "test_secret"
   }
-}`)))
+}}`)))
 
 		mockClient.EXPECT().
 			SSOAPIGetSSOConnection(gomock.Any(), connectionID).
@@ -233,7 +233,7 @@ func TestSSOConnection_CreateADDConnector(t *testing.T) {
 			})
 
 		connectionID := "b6bfc074-a267-400f-b8f1-db0850c369b1"
-		readBody := io.NopCloser(bytes.NewReader([]byte(`{
+		readBody := io.NopCloser(bytes.NewReader([]byte(`{"connection":{
   "id": "b6bfc074-a267-400f-b8f1-db0850c369b1",
   "name": "test_sso",
   "createdAt": "2023-11-02T10:49:14.376757Z",
@@ -245,7 +245,7 @@ func TestSSOConnection_CreateADDConnector(t *testing.T) {
     "clientId": "test_client",
     "clientSecret": "test_secret"
   }
-}`)))
+}}`)))
 
 		mockClient.EXPECT().
 			SSOAPIGetSSOConnection(gomock.Any(), connectionID).
@@ -313,7 +313,7 @@ func TestSSOConnection_CreateOktaConnector(t *testing.T) {
 		})
 
 	connectionID := "b6bfc074-a267-400f-b8f1-db0850c369b1"
-	readBody := io.NopCloser(bytes.NewReader([]byte(`{
+	readBody := io.NopCloser(bytes.NewReader([]byte(`{"connection":{
   "id": "b6bfc074-a267-400f-b8f1-db0850c369b1",
   "name": "test_sso",
   "createdAt": "2023-11-02T10:49:14.376757Z",
@@ -324,7 +324,7 @@ func TestSSOConnection_CreateOktaConnector(t *testing.T) {
     "clientId": "test_client",
     "clientSecret": "test_secret"
   }
-}`)))
+}}`)))
 
 	mockClient.EXPECT().
 		SSOAPIGetSSOConnection(gomock.Any(), connectionID).
@@ -420,7 +420,7 @@ func TestSSOConnection_UpdateADDConnector(t *testing.T) {
 				}, nil
 			}).Times(1)
 
-		readBody := io.NopCloser(bytes.NewReader([]byte(`{
+		readBody := io.NopCloser(bytes.NewReader([]byte(`{"connection":{
   "id": "b6bfc074-a267-400f-b8f1-db0850c369b1",
   "name": "updated_name",
   "createdAt": "2023-11-02T10:49:14.376757Z",
@@ -431,7 +431,7 @@ func TestSSOConnection_UpdateADDConnector(t *testing.T) {
     "clientId": "updated_client_id",
     "clientSecret": "updated_client_secret"
   }
-}`)))
+}}`)))
 		mockClient.EXPECT().
 			SSOAPIGetSSOConnection(gomock.Any(), connectionID).
 			Return(&http.Response{StatusCode: 200, Body: readBody, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
@@ -510,7 +510,7 @@ func TestSSOConnection_UpdateADDConnector(t *testing.T) {
 				}, nil
 			}).Times(1)
 
-		readBody := io.NopCloser(bytes.NewReader([]byte(`{
+		readBody := io.NopCloser(bytes.NewReader([]byte(`{"connection":{
   "id": "b6bfc074-a267-400f-b8f1-db0850c369b1",
   "name": "updated_name",
   "createdAt": "2023-11-02T10:49:14.376757Z",
@@ -522,7 +522,7 @@ func TestSSOConnection_UpdateADDConnector(t *testing.T) {
     "clientId": "updated_client_id",
     "clientSecret": "updated_client_secret"
   }
-}`)))
+}}`)))
 		mockClient.EXPECT().
 			SSOAPIGetSSOConnection(gomock.Any(), connectionID).
 			Return(&http.Response{StatusCode: 200, Body: readBody, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
@@ -600,7 +600,7 @@ func TestSSOConnection_UpdateOktaConnector(t *testing.T) {
 			}, nil
 		}).Times(1)
 
-	readBody := io.NopCloser(bytes.NewReader([]byte(`{
+	readBody := io.NopCloser(bytes.NewReader([]byte(`{"connection":{
   "id": "b6bfc074-a267-400f-b8f1-db0850c369b1",
   "name": "updated_name",
   "createdAt": "2023-11-02T10:49:14.376757Z",
@@ -611,7 +611,7 @@ func TestSSOConnection_UpdateOktaConnector(t *testing.T) {
     "clientId": "updated_client_id",
     "clientSecret": "updated_client_secret"
   }
-}`)))
+}}`)))
 	mockClient.EXPECT().
 		SSOAPIGetSSOConnection(gomock.Any(), connectionID).
 		Return(&http.Response{StatusCode: 200, Body: readBody, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
