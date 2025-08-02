@@ -12,7 +12,7 @@ variable "cluster_region" {
 variable "cluster_version" {
   type        = string
   description = "AKS cluster version."
-  default     = "1.28"
+  default     = "1.31"
 }
 
 variable "castai_api_url" {
