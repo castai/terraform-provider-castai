@@ -1,3 +1,9 @@
+resource "time_sleep" "wait_for_nat_gateway" {
+  depends_on = [module.vpc]
+
+  create_duration = "30s"
+}
+
 module "cluster" {
   source = "./module/castai"
   count  = var.enable_castai ? 1 : 0
@@ -12,4 +18,7 @@ module "cluster" {
     aws_security_group.additional.id,
   ]
   subnets = module.vpc.private_subnets
+  depends_on = [
+    time_sleep.wait_for_nat_gateway
+  ]
 }
