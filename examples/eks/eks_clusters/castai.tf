@@ -2,7 +2,7 @@ module "cluster" {
   source = "./module/castai"
   count  = var.enable_castai ? 1 : 0
 
-  cluster_name     = var.cluster_name
+  cluster_name     = module.eks.cluster_name
   castai_api_token = var.castai_api_token
   cluster_region   = var.cluster_region
   vpc_id           = module.vpc.vpc_id
