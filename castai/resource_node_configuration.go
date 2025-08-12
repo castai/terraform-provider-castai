@@ -47,6 +47,7 @@ const (
 	FieldNodeConfigurationAKSNetworkSecurityGroup      = "network_security_group"
 	FieldNodeConfigurationAKSApplicationSecurityGroups = "application_security_groups"
 	FieldNodeConfigurationAKSPublicIP                  = "public_ip"
+	FieldNodeConfigurationAKSPodSubnetID               = "pod_subnet_id"
 )
 
 const (
@@ -474,6 +475,11 @@ func resourceNodeConfiguration() *schema.Resource {
 									},
 								},
 							},
+						},
+						FieldNodeConfigurationAKSPodSubnetID: {
+							Type:        schema.TypeString,
+							Optional:    true,
+							Description: "ID of pod subnet to be used for provisioned nodes.",
 						},
 					},
 				},
@@ -1114,6 +1120,10 @@ func toAKSSConfig(obj map[string]interface{}) *sdk.NodeconfigV1AKSConfig {
 		out.ApplicationSecurityGroupIds = toPtr(toStringList(v))
 	}
 
+	if v, ok := obj[FieldNodeConfigurationAKSPodSubnetID].(string); ok && v != "" {
+		out.PodSubnetId = toPtr(v)
+	}
+
 	return out
 }
 
@@ -1310,6 +1320,10 @@ func flattenAKSConfig(config *sdk.NodeconfigV1AKSConfig) []map[string]interface{
 
 	if v := config.ApplicationSecurityGroupIds; v != nil {
 		m[FieldNodeConfigurationAKSApplicationSecurityGroups] = *config.ApplicationSecurityGroupIds
+	}
+
+	if v := config.PodSubnetId; v != nil {
+		m[FieldNodeConfigurationAKSPodSubnetID] = *v
 	}
 
 	return []map[string]interface{}{m}
