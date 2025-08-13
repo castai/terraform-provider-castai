@@ -52,6 +52,7 @@ func TestAccResourceNodeConfiguration_aks(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "aks.0.public_ip.0.public_ip_prefix", "/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg/providers/Microsoft.Network/publicIPAddresses/test-ip"),
 					resource.TestCheckResourceAttr(resourceName, "aks.0.public_ip.0.tags.FirstPartyUsage", "something"),
 					resource.TestCheckResourceAttr(resourceName, "aks.0.public_ip.0.idle_timeout_in_minutes", "10"),
+					resource.TestCheckResourceAttrSet(resourceName, "aks.0.pod_subnet_id"),
 					resource.TestCheckResourceAttr(resourceName, "eks.#", "0"),
 					resource.TestCheckResourceAttr(resourceName, "kops.#", "0"),
 					resource.TestCheckResourceAttr(resourceName, "gke.#", "0"),
@@ -128,6 +129,7 @@ resource "castai_node_configuration" "test" {
 		}
 		idle_timeout_in_minutes = 10
     }
+   pod_subnet_id = data.azurerm_subnet.internal.id
   }
 }
 `, rgName, rName))

@@ -1063,8 +1063,11 @@ type CastaiInventoryV1beta1AWSReservedInstances struct {
 
 // CastaiInventoryV1beta1AWSReservedInstancesContext defines model for castai.inventory.v1beta1.AWSReservedInstancesContext.
 type CastaiInventoryV1beta1AWSReservedInstancesContext struct {
-	AvailabilityZoneId    *string                                       `json:"availabilityZoneId"`
-	AvailabilityZoneName  *string                                       `json:"availabilityZoneName"`
+	AvailabilityZoneId   *string `json:"availabilityZoneId"`
+	AvailabilityZoneName *string `json:"availabilityZoneName"`
+
+	// EffectiveCount Effective instance count is the adjusted original commitment count based only the portion remaining after out-of-cluster usage.
+	EffectiveCount        *string                                       `json:"effectiveCount,omitempty"`
 	Id                    *string                                       `json:"id,omitempty"`
 	InstanceCount         *string                                       `json:"instanceCount,omitempty"`
 	InstanceType          *string                                       `json:"instanceType,omitempty"`
@@ -1081,15 +1084,16 @@ type CastaiInventoryV1beta1AWSReservedInstancesContext struct {
 
 // CastaiInventoryV1beta1AWSSavingsPlan defines model for castai.inventory.v1beta1.AWSSavingsPlan.
 type CastaiInventoryV1beta1AWSSavingsPlan struct {
-	CommitmentAmount   *float32                                                `json:"commitmentAmount,omitempty"`
-	CommitmentTerm     *CastaiInventoryV1beta1AWSSavingsPlanCommitmentTermUnit `json:"commitmentTerm,omitempty"`
-	Id                 *string                                                 `json:"id,omitempty"`
-	InstanceTypeFamily *string                                                 `json:"instanceTypeFamily,omitempty"`
-	InstanceTypesUsage *CastaiInventoryV1beta1InstanceTypeBasedUsage           `json:"instanceTypesUsage,omitempty"`
-	OfferingId         *string                                                 `json:"offeringId,omitempty"`
-	Region             *string                                                 `json:"region,omitempty"`
-	State              *string                                                 `json:"state,omitempty"`
-	Type               *string                                                 `json:"type,omitempty"`
+	CommitmentAmount          *float32                                                `json:"commitmentAmount,omitempty"`
+	CommitmentTerm            *CastaiInventoryV1beta1AWSSavingsPlanCommitmentTermUnit `json:"commitmentTerm,omitempty"`
+	EffectiveCommitmentAmount *float64                                                `json:"effectiveCommitmentAmount,omitempty"`
+	Id                        *string                                                 `json:"id,omitempty"`
+	InstanceTypeFamily        *string                                                 `json:"instanceTypeFamily,omitempty"`
+	InstanceTypesUsage        *CastaiInventoryV1beta1InstanceTypeBasedUsage           `json:"instanceTypesUsage,omitempty"`
+	OfferingId                *string                                                 `json:"offeringId,omitempty"`
+	Region                    *string                                                 `json:"region,omitempty"`
+	State                     *string                                                 `json:"state,omitempty"`
+	Type                      *string                                                 `json:"type,omitempty"`
 }
 
 // CastaiInventoryV1beta1AWSSavingsPlanCommitmentTermUnit defines model for castai.inventory.v1beta1.AWSSavingsPlan.CommitmentTermUnit.
@@ -1123,6 +1127,9 @@ type CastaiInventoryV1beta1AttachableGPUDevice struct {
 
 	// Count Count of GPU to be attached.
 	Count *int32 `json:"count,omitempty"`
+
+	// Id ID of the attachable GPU device.
+	Id *string `json:"id,omitempty"`
 
 	// Manufacturer GPU manufacturer.
 	Manufacturer *CastaiInventoryV1beta1AttachableGPUDeviceManufacturer `json:"manufacturer,omitempty"`
@@ -1371,6 +1378,9 @@ type CastaiInventoryV1beta1GCPResourceCUDPrice struct {
 type CastaiInventoryV1beta1GPUDevice struct {
 	BlacklistedAt *time.Time `json:"blacklistedAt,omitempty"`
 	Count         *int32     `json:"count,omitempty"`
+
+	// Id ID of the GPU device.
+	Id *string `json:"id,omitempty"`
 
 	// Manufacturer - UNKNOWN: UNKNOWN is invalid.
 	//  - NVIDIA: NVIDIA.
@@ -1631,14 +1641,17 @@ type CastaiInventoryV1beta1InstanceZone struct {
 	AzId                 *string                                             `json:"azId,omitempty"`
 
 	// CpuPlatforms Describes the CPU platforms the instance type can be equipped with.
-	CpuPlatforms      *[]CastaiInventoryV1beta1CPUPlatform `json:"cpuPlatforms,omitempty"`
-	CpuPrice          *string                              `json:"cpuPrice,omitempty"`
-	LastUnavailableAt *time.Time                           `json:"lastUnavailableAt,omitempty"`
-	Price             *string                              `json:"price,omitempty"`
-	RamPrice          *string                              `json:"ramPrice,omitempty"`
-	Spot              *bool                                `json:"spot,omitempty"`
-	SpotReliability   *float32                             `json:"spotReliability"`
-	Unavailable       *bool                                `json:"unavailable,omitempty"`
+	CpuPlatforms *[]CastaiInventoryV1beta1CPUPlatform `json:"cpuPlatforms,omitempty"`
+	CpuPrice     *string                              `json:"cpuPrice,omitempty"`
+
+	// Id ID of the instance zone.
+	Id                *string    `json:"id,omitempty"`
+	LastUnavailableAt *time.Time `json:"lastUnavailableAt,omitempty"`
+	Price             *string    `json:"price,omitempty"`
+	RamPrice          *string    `json:"ramPrice,omitempty"`
+	Spot              *bool      `json:"spot,omitempty"`
+	SpotReliability   *float32   `json:"spotReliability"`
+	Unavailable       *bool      `json:"unavailable,omitempty"`
 }
 
 // CastaiInventoryV1beta1InstanceZoneAttachableDisk defines model for castai.inventory.v1beta1.InstanceZone.AttachableDisk.
@@ -3572,6 +3585,37 @@ type CostreportV1beta1Resources struct {
 	MemoryGib string `json:"memoryGib"`
 }
 
+// DboV1BlockStats defines model for dbo.v1.BlockStats.
+type DboV1BlockStats struct {
+	LocalDirtiedBlocks  string `json:"localDirtiedBlocks"`
+	LocalHitBlocks      string `json:"localHitBlocks"`
+	LocalReadBlocks     string `json:"localReadBlocks"`
+	LocalWrittenBlocks  string `json:"localWrittenBlocks"`
+	SharedDirtiedBlocks string `json:"sharedDirtiedBlocks"`
+	SharedHitBlocks     string `json:"sharedHitBlocks"`
+	SharedReadBlocks    string `json:"sharedReadBlocks"`
+	SharedWrittenBlocks string `json:"sharedWrittenBlocks"`
+	TempReadBlocks      string `json:"tempReadBlocks"`
+	TempWrittenBlocks   string `json:"tempWrittenBlocks"`
+}
+
+// DboV1Plan defines model for dbo.v1.Plan.
+type DboV1Plan struct {
+	Alias              *string         `json:"alias"`
+	BlockStats         DboV1BlockStats `json:"blockStats"`
+	NodeType           string          `json:"nodeType"`
+	Output             *[]string       `json:"output,omitempty"`
+	ParallelAware      bool            `json:"parallelAware"`
+	ParentRelationship *string         `json:"parentRelationship"`
+	PlanRows           string          `json:"planRows"`
+	PlanWidth          string          `json:"planWidth"`
+	Plans              *[]DboV1Plan    `json:"plans,omitempty"`
+	RelationName       *string         `json:"relationName"`
+	Schema             *string         `json:"schema"`
+	StartupCost        float64         `json:"startupCost"`
+	TotalCost          float64         `json:"totalCost"`
+}
+
 // ExternalclusterV1AKSClusterParams AKSClusterParams defines AKS-specific arguments.
 type ExternalclusterV1AKSClusterParams struct {
 	// ClusterResourceGroup Azure cluster resource group.
@@ -4364,7 +4408,10 @@ type NodeconfigV1AKSConfig struct {
 
 	// OsDiskType OsDiskType represent possible values for AKS node os disk type(this is subset of all available Azure disk types).
 	OsDiskType *NodeconfigV1AKSConfigOsDiskType `json:"osDiskType,omitempty"`
-	PublicIp   *NodeconfigV1AKSConfigPublicIP   `json:"publicIp,omitempty"`
+
+	// PodSubnetId ID of Subnet to use as a POD CIDR.
+	PodSubnetId *string                        `json:"podSubnetId"`
+	PublicIp    *NodeconfigV1AKSConfigPublicIP `json:"publicIp,omitempty"`
 }
 
 // NodeconfigV1AKSConfigImageFamily List of supported image families (OSes) for AKS.

@@ -94,6 +94,7 @@ Optional:
 - `max_pods_per_node` (Number) Maximum number of pods that can be run on a node, which affects how many IP addresses you will need for each node. Defaults to 30
 - `network_security_group` (String) Network security group to be used for provisioned nodes, if not provided default security group from `castpool` will be used
 - `os_disk_type` (String) Type of managed os disk attached to the node. (See [disk types](https://learn.microsoft.com/en-us/azure/virtual-machines/disks-types)). One of: standard, standard-ssd, premium-ssd (ultra and premium-ssd-v2 are not supported for os disk)
+- `pod_subnet_id` (String) ID of pod subnet to be used for provisioned nodes.
 - `public_ip` (Block List, Max: 1) Public IP configuration for CAST AI provisioned nodes (see [below for nested schema](#nestedblock--aks--public_ip))
 
 <a id="nestedblock--aks--ephemeral_os_disk"></a>
