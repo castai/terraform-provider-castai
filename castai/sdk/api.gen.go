@@ -1063,8 +1063,11 @@ type CastaiInventoryV1beta1AWSReservedInstances struct {
 
 // CastaiInventoryV1beta1AWSReservedInstancesContext defines model for castai.inventory.v1beta1.AWSReservedInstancesContext.
 type CastaiInventoryV1beta1AWSReservedInstancesContext struct {
-	AvailabilityZoneId    *string                                       `json:"availabilityZoneId"`
-	AvailabilityZoneName  *string                                       `json:"availabilityZoneName"`
+	AvailabilityZoneId   *string `json:"availabilityZoneId"`
+	AvailabilityZoneName *string `json:"availabilityZoneName"`
+
+	// EffectiveCount Effective instance count is the adjusted original commitment count based only the portion remaining after out-of-cluster usage.
+	EffectiveCount        *string                                       `json:"effectiveCount,omitempty"`
 	Id                    *string                                       `json:"id,omitempty"`
 	InstanceCount         *string                                       `json:"instanceCount,omitempty"`
 	InstanceType          *string                                       `json:"instanceType,omitempty"`
@@ -1081,15 +1084,16 @@ type CastaiInventoryV1beta1AWSReservedInstancesContext struct {
 
 // CastaiInventoryV1beta1AWSSavingsPlan defines model for castai.inventory.v1beta1.AWSSavingsPlan.
 type CastaiInventoryV1beta1AWSSavingsPlan struct {
-	CommitmentAmount   *float32                                                `json:"commitmentAmount,omitempty"`
-	CommitmentTerm     *CastaiInventoryV1beta1AWSSavingsPlanCommitmentTermUnit `json:"commitmentTerm,omitempty"`
-	Id                 *string                                                 `json:"id,omitempty"`
-	InstanceTypeFamily *string                                                 `json:"instanceTypeFamily,omitempty"`
-	InstanceTypesUsage *CastaiInventoryV1beta1InstanceTypeBasedUsage           `json:"instanceTypesUsage,omitempty"`
-	OfferingId         *string                                                 `json:"offeringId,omitempty"`
-	Region             *string                                                 `json:"region,omitempty"`
-	State              *string                                                 `json:"state,omitempty"`
-	Type               *string                                                 `json:"type,omitempty"`
+	CommitmentAmount          *float32                                                `json:"commitmentAmount,omitempty"`
+	CommitmentTerm            *CastaiInventoryV1beta1AWSSavingsPlanCommitmentTermUnit `json:"commitmentTerm,omitempty"`
+	EffectiveCommitmentAmount *float64                                                `json:"effectiveCommitmentAmount,omitempty"`
+	Id                        *string                                                 `json:"id,omitempty"`
+	InstanceTypeFamily        *string                                                 `json:"instanceTypeFamily,omitempty"`
+	InstanceTypesUsage        *CastaiInventoryV1beta1InstanceTypeBasedUsage           `json:"instanceTypesUsage,omitempty"`
+	OfferingId                *string                                                 `json:"offeringId,omitempty"`
+	Region                    *string                                                 `json:"region,omitempty"`
+	State                     *string                                                 `json:"state,omitempty"`
+	Type                      *string                                                 `json:"type,omitempty"`
 }
 
 // CastaiInventoryV1beta1AWSSavingsPlanCommitmentTermUnit defines model for castai.inventory.v1beta1.AWSSavingsPlan.CommitmentTermUnit.
