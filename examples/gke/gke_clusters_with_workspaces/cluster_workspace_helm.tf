@@ -11,46 +11,41 @@ resource "helm_release" "castai_agent" {
   version = var.agent_version
   values  = var.agent_values
 
-  set {
-    name  = "replicaCount"
-    value = "2"
-  }
-
-  set {
-    name  = "provider"
-    value = "gke"
-  }
-
-  set {
-    name  = "additionalEnv.STATIC_CLUSTER_ID"
-    value = castai_gke_cluster.castai_cluster[0].id
-  }
-
-  set {
-    name  = "createNamespace"
-    value = "false"
-  }
-
-  dynamic "set" {
-    for_each = var.castai_api_url != "" ? [var.castai_api_url] : []
-    content {
+  set = concat(
+    [
+      {
+        name  = "replicaCount"
+        value = "2"
+      },
+      {
+        name  = "provider"
+        value = "gke"
+      },
+      {
+        name  = "additionalEnv.STATIC_CLUSTER_ID"
+        value = castai_gke_cluster.castai_cluster[0].id
+      },
+      {
+        name  = "createNamespace"
+        value = "false"
+      },
+    ],
+    var.castai_api_url != "" ? [{
       name  = "apiURL"
       value = var.castai_api_url
-    }
-  }
+    }] : [],
+    [for k, v in var.castai_components_labels : {
+      name  = "podLabels.${k}"
+      value = v
+    }],
+  )
 
-  dynamic "set" {
-    for_each = var.castai_components_labels
-    content {
-      name  = "podLabels.${set.key}"
-      value = set.value
-    }
-  }
-
-  set_sensitive {
-    name  = "apiKey"
-    value = castai_gke_cluster.castai_cluster[0].cluster_token
-  }
+  set_sensitive = [
+    {
+      name  = "apiKey"
+      value = castai_gke_cluster.castai_cluster[0].cluster_token
+    },
+  ]
 }
 
 resource "helm_release" "castai_cluster_controller" {
@@ -67,31 +62,29 @@ resource "helm_release" "castai_cluster_controller" {
   version = var.cluster_controller_version
   values  = var.cluster_controller_values
 
-  set {
-    name  = "castai.clusterID"
-    value = castai_gke_cluster.castai_cluster[0].id
-  }
-
-  dynamic "set" {
-    for_each = var.castai_api_url != "" ? [var.castai_api_url] : []
-    content {
+  set = concat(
+    [
+      {
+        name  = "castai.clusterID"
+        value = castai_gke_cluster.castai_cluster[0].id
+      }
+    ],
+    var.castai_api_url != "" ? [{
       name  = "castai.apiURL"
       value = var.castai_api_url
-    }
-  }
+    }] : [],
+    [for k, v in var.castai_components_labels : {
+      name  = "podLabels.${k}"
+      value = v
+    }],
+  )
 
-  set_sensitive {
-    name  = "castai.apiKey"
-    value = castai_gke_cluster.castai_cluster[0].cluster_token
-  }
-
-  dynamic "set" {
-    for_each = var.castai_components_labels
-    content {
-      name  = "podLabels.${set.key}"
-      value = set.value
-    }
-  }
+  set_sensitive = [
+    {
+      name  = "castai.apiKey"
+      value = castai_gke_cluster.castai_cluster[0].cluster_token
+    },
+  ]
 
   depends_on = [helm_release.castai_agent]
 
@@ -114,23 +107,22 @@ resource "helm_release" "castai_evictor" {
   version = var.evictor_version
   values  = var.evictor_values
 
-  set {
-    name  = "replicaCount"
-    value = "0"
-  }
-
-  set {
-    name  = "castai-evictor-ext.enabled"
-    value = "false"
-  }
-
-  dynamic "set" {
-    for_each = var.castai_components_labels
-    content {
-      name  = "podLabels.${set.key}"
-      value = set.value
-    }
-  }
+  set = concat(
+    [
+      {
+        name  = "replicaCount"
+        value = "0"
+      },
+      {
+        name  = "castai-evictor-ext.enabled"
+        value = "false"
+      },
+    ],
+    [for k, v in var.castai_components_labels : {
+      name  = "podLabels.${k}"
+      value = v
+    }],
+  )
 
   depends_on = [helm_release.castai_agent]
 

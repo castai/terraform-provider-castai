@@ -7,7 +7,7 @@ provider "castai" {
 }
 
 provider "helm" {
-  kubernetes {
+  kubernetes = {
     host                   = "https://${module.gke.endpoint}"
     token                  = data.google_client_config.default.access_token
     cluster_ca_certificate = base64decode(module.gke.ca_certificate)
@@ -29,18 +29,28 @@ resource "helm_release" "castai_agent" {
   create_namespace = true
   cleanup_on_fail  = true
 
-  set {
-    name  = "provider"
-    value = "gke"
-  }
-  set_sensitive {
-    name  = "apiKey"
-    value = castai_gke_cluster.this.cluster_token
-  }
+  set = concat(
+    [
+      {
+        name  = "provider"
+        value = "gke"
+      },
+      {
+        # Required until https://github.com/castai/helm-charts/issues/135 is fixed.
+        name  = "createNamespace"
+        value = "false"
+      },
+    ],
+    var.castai_api_url != "" ? [{
+      name  = "apiURL"
+      value = var.castai_api_url
+    }] : [],
+  )
 
-  # Required until https://github.com/castai/helm-charts/issues/135 is fixed.
-  set {
-    name  = "createNamespace"
-    value = "false"
-  }
+  set_sensitive = [
+    {
+      name  = "apiKey"
+      value = castai_gke_cluster.this.cluster_token
+    },
+  ]
 }

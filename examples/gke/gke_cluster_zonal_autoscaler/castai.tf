@@ -10,7 +10,7 @@ provider "castai" {
 }
 
 provider "helm" {
-  kubernetes {
+  kubernetes = {
     host                   = "https://${module.gke.endpoint}"
     token                  = data.google_client_config.default.access_token
     cluster_ca_certificate = base64decode(module.gke.ca_certificate)
@@ -28,7 +28,7 @@ module "castai-gke-iam" {
 
 module "castai-gke-cluster" {
   source  = "castai/gke-cluster/castai"
-  version = "~> 8.0"
+  version = "~> 9.0"
 
   api_url                = var.castai_api_url
   castai_api_token       = var.castai_api_token
