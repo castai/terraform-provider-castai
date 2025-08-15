@@ -160,25 +160,24 @@ resource "helm_release" "live-helm" {
   create_namespace  = true
   dependency_update = true
 
-  set {
-    name  = "castai-aws-vpc-cni.enabled"
-    value = "true"
-  }
-
-  set {
-    name  = "castai.clusterID"
-    value = castai_eks_clusterid.cluster_id.id
-  }
-
-  set {
-    name  = "castai.apiKey"
-    value = var.castai_api_token
-  }
-
-  set {
-    name  = "castai.apiURL"
-    value = var.castai_api_url
-  }
+  set = [
+    {
+      name  = "castai-aws-vpc-cni.enabled"
+      value = "true"
+    },
+    {
+      name  = "castai.clusterID"
+      value = castai_eks_clusterid.cluster_id.id
+    },
+    {
+      name  = "castai.apiKey"
+      value = var.castai_api_token
+    },
+    {
+      name  = "castai.apiURL"
+      value = var.castai_api_url
+    },
+  ]
 
   wait = false
 
