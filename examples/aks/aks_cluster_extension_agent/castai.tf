@@ -38,28 +38,29 @@ resource "helm_release" "castai_cluster_controller" {
   cleanup_on_fail  = true
   wait             = true
 
-  set {
-    name  = "aks.enabled"
-    value = "true"
-  }
-
-  set {
-    name  = "castai.clusterID"
-    value = castai_aks_cluster.castai_cluster.id
-  }
-
-  dynamic "set" {
-    for_each = var.castai_api_url != "" ? [var.castai_api_url] : []
-    content {
+  set = concat(
+    [
+      {
+        name  = "aks.enabled"
+        value = "true"
+      },
+      {
+        name  = "castai.clusterID"
+        value = castai_aks_cluster.castai_cluster.id
+      },
+    ],
+    var.castai_api_url != "" ? [{
       name  = "castai.apiURL"
       value = var.castai_api_url
-    }
-  }
+    }] : [],
+  )
 
-  set_sensitive {
-    name  = "castai.apiKey"
-    value = castai_aks_cluster.castai_cluster.cluster_token
-  }
+  set_sensitive = [
+    {
+      name  = "castai.apiKey"
+      value = castai_aks_cluster.castai_cluster.cluster_token
+    },
+  ]
 
   depends_on = [azurerm_kubernetes_cluster_extension.castai]
 }
@@ -74,10 +75,12 @@ resource "helm_release" "castai_evictor" {
   cleanup_on_fail  = true
   wait             = true
 
-  set {
-    name  = "castai-evictor-ext.enabled"
-    value = "false"
-  }
+  set = [
+    {
+      name  = "castai-evictor-ext.enabled"
+      value = "false"
+    },
+  ]
 
   depends_on = [azurerm_kubernetes_cluster_extension.castai]
 }
@@ -91,36 +94,33 @@ resource "helm_release" "castai_pod_pinner" {
   cleanup_on_fail  = true
   wait             = true
 
-  set {
-    name  = "castai.clusterID"
-    value = castai_aks_cluster.castai_cluster.id
-  }
-
-  dynamic "set" {
-    for_each = var.castai_api_url != "" ? [var.castai_api_url] : []
-    content {
+  set = concat(
+    [
+      {
+        name  = "replicaCount"
+        value = "0"
+      },
+      {
+        name  = "castai.clusterID"
+        value = castai_aks_cluster.castai_cluster.id
+      },
+    ],
+    var.castai_api_url != "" ? [{
       name  = "castai.apiURL"
       value = var.castai_api_url
-    }
-  }
-
-  dynamic "set" {
-    for_each = var.castai_grpc_url != "" ? [var.castai_grpc_url] : []
-    content {
+    }] : [],
+    var.castai_grpc_url != "" ? [{
       name  = "castai.grpcURL"
       value = var.castai_grpc_url
+    }] : [],
+  )
+
+  set_sensitive = [
+    {
+      name  = "castai.apiKey"
+      value = castai_aks_cluster.castai_cluster.cluster_token
     }
-  }
-
-  set_sensitive {
-    name  = "castai.apiKey"
-    value = castai_aks_cluster.castai_cluster.cluster_token
-  }
-
-  set {
-    name  = "replicaCount"
-    value = "0"
-  }
+  ]
 
   depends_on = [azurerm_kubernetes_cluster_extension.castai]
 
@@ -138,28 +138,26 @@ resource "helm_release" "castai_spot_handler" {
   cleanup_on_fail  = true
   wait             = true
 
-  set {
-    name  = "castai.provider"
-    value = "azure"
-  }
-
-  set {
-    name  = "createNamespace"
-    value = "false"
-  }
-
-  dynamic "set" {
-    for_each = var.castai_api_url != "" ? [var.castai_api_url] : []
-    content {
+  set = concat(
+    [
+      {
+        name  = "castai.provider"
+        value = "azure"
+      },
+      {
+        name  = "createNamespace"
+        value = "false"
+      },
+      {
+        name  = "castai.clusterID"
+        value = castai_aks_cluster.castai_cluster.id
+      },
+    ],
+    var.castai_api_url != "" ? [{
       name  = "castai.apiURL"
       value = var.castai_api_url
-    }
-  }
-
-  set {
-    name  = "castai.clusterID"
-    value = castai_aks_cluster.castai_cluster.id
-  }
+    }] : [],
+  )
 
   depends_on = [azurerm_kubernetes_cluster_extension.castai]
 }
@@ -173,20 +171,19 @@ resource "helm_release" "castai_workload_autoscaler" {
   cleanup_on_fail  = true
   wait             = true
 
-  set {
-    name  = "castai.apiKeySecretRef"
-    value = "castai-cluster-controller"
-  }
-
-  set {
-    name  = "castai.configMapRef"
-    value = "castai-cluster-controller"
-  }
+  set = [
+    {
+      name  = "castai.apiKeySecretRef"
+      value = "castai-cluster-controller"
+    },
+    {
+      name  = "castai.configMapRef"
+      value = "castai-cluster-controller"
+    },
+  ]
 
   depends_on = [azurerm_kubernetes_cluster_extension.castai, helm_release.castai_cluster_controller]
-
 }
-
 
 resource "helm_release" "castai_kvisor" {
 
@@ -202,23 +199,26 @@ resource "helm_release" "castai_kvisor" {
     ignore_changes = [version]
   }
 
-  set {
-    name  = "castai.clusterID"
-    value = castai_aks_cluster.castai_cluster.id
-  }
+  set = [
+    {
+      name  = "castai.clusterID"
+      value = castai_aks_cluster.castai_cluster.id
+    },
+    {
+      name  = "castai.grpcAddr"
+      value = var.kvisor_grpc_url
+    },
+    {
+      name  = "controller.extraArgs.kube-bench-cloud-provider"
+      value = "aks"
+    },
+  ]
 
-  set_sensitive {
-    name  = "castai.apiKey"
-    value = castai_aks_cluster.castai_cluster.cluster_token
-  }
+  set_sensitive = [
+    {
+      name  = "castai.apiKey"
+      value = castai_aks_cluster.castai_cluster.cluster_token
+    },
+  ]
 
-  set {
-    name  = "castai.grpcAddr"
-    value = var.kvisor_grpc_url
-  }
-
-  set {
-    name  = "controller.extraArgs.kube-bench-cloud-provider"
-    value = "aks"
-  }
 }
