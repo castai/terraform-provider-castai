@@ -308,6 +308,14 @@ const (
 	NodeconfigV1EKSConfigImageFamilyFamilyBottlerocket NodeconfigV1EKSConfigImageFamily = "family_bottlerocket"
 )
 
+// Defines values for NodeconfigV1GKEConfigOnHostMaintenance.
+const (
+	MIGRATE   NodeconfigV1GKEConfigOnHostMaintenance = "MIGRATE"
+	Migrate   NodeconfigV1GKEConfigOnHostMaintenance = "migrate"
+	TERMINATE NodeconfigV1GKEConfigOnHostMaintenance = "TERMINATE"
+	Terminate NodeconfigV1GKEConfigOnHostMaintenance = "terminate"
+)
+
 // Defines values for NodeconfigV1SelfHostedWithEC2NodesConfigImageFamily.
 const (
 	FAMILYAL2          NodeconfigV1SelfHostedWithEC2NodesConfigImageFamily = "FAMILY_AL2"
@@ -3734,6 +3742,9 @@ type ExternalclusterV1Cluster struct {
 	// Name The name of the external cluster.
 	Name *string `json:"name,omitempty"`
 
+	// Oke OKEClusterParams defines OKE -specific arguments.
+	Oke *ExternalclusterV1OKEClusterParams `json:"oke,omitempty"`
+
 	// Openshift OpenShiftClusterParams defines OpenShift-specific arguments.
 	Openshift *ExternalclusterV1OpenshiftClusterParams `json:"openshift,omitempty"`
 
@@ -4194,6 +4205,15 @@ type ExternalclusterV1NodeVolume struct {
 	Size *int32 `json:"size,omitempty"`
 }
 
+// ExternalclusterV1OKEClusterParams OKEClusterParams defines OKE -specific arguments.
+type ExternalclusterV1OKEClusterParams struct {
+	// ClusterName Name of the cluster.
+	ClusterName *string `json:"clusterName,omitempty"`
+
+	// Region Region of the cluster.
+	Region *string `json:"region,omitempty"`
+}
+
 // ExternalclusterV1OpenshiftClusterParams OpenShiftClusterParams defines OpenShift-specific arguments.
 type ExternalclusterV1OpenshiftClusterParams struct {
 	// Cloud Cloud provider of the cluster.
@@ -4249,6 +4269,9 @@ type ExternalclusterV1RegisterClusterRequest struct {
 
 	// Name The name of the cluster.
 	Name string `json:"name"`
+
+	// Oke OKEClusterParams defines OKE -specific arguments.
+	Oke *ExternalclusterV1OKEClusterParams `json:"oke,omitempty"`
 
 	// Openshift OpenShiftClusterParams defines OpenShift-specific arguments.
 	Openshift *ExternalclusterV1OpenshiftClusterParams `json:"openshift,omitempty"`
@@ -4595,8 +4618,11 @@ type NodeconfigV1GKEConfig struct {
 	MaxPodsPerNode *int32 `json:"maxPodsPerNode,omitempty"`
 
 	// NetworkTags Network tags to be added on a VM. Each tag must be 1-63 characters long, start with a lowercase letter and end with either a number or a lowercase letter.
-	NetworkTags      *[]string                     `json:"networkTags,omitempty"`
-	SecondaryIpRange *NodeconfigV1SecondaryIPRange `json:"secondaryIpRange,omitempty"`
+	NetworkTags *[]string `json:"networkTags,omitempty"`
+
+	// OnHostMaintenance Maintenance behavior of the instances.
+	OnHostMaintenance *NodeconfigV1GKEConfigOnHostMaintenance `json:"onHostMaintenance,omitempty"`
+	SecondaryIpRange  *NodeconfigV1SecondaryIPRange           `json:"secondaryIpRange,omitempty"`
 
 	// UseEphemeralStorageLocalSsd Flag indicating whether to use local SSD storage for the node. Defaults to false.
 	UseEphemeralStorageLocalSsd *bool `json:"useEphemeralStorageLocalSsd,omitempty"`
@@ -4625,6 +4651,9 @@ type NodeconfigV1GKEConfigLoadBalancersUnmanagedInstanceGroups struct {
 	// Zone Zone of the unmanaged instance group.
 	Zone *string `json:"zone,omitempty"`
 }
+
+// NodeconfigV1GKEConfigOnHostMaintenance Maintenance behavior of the instances.
+type NodeconfigV1GKEConfigOnHostMaintenance string
 
 // NodeconfigV1GetSuggestedConfigurationResponse defines model for nodeconfig.v1.GetSuggestedConfigurationResponse.
 type NodeconfigV1GetSuggestedConfigurationResponse struct {
@@ -4993,6 +5022,7 @@ type NodetemplatesV1NewNodeTemplate struct {
 
 // NodetemplatesV1NodeTemplate defines model for nodetemplates.v1.NodeTemplate.
 type NodetemplatesV1NodeTemplate struct {
+	ClmEnabled                               *bool                               `json:"clmEnabled,omitempty"`
 	ConfigurationId                          *string                             `json:"configurationId,omitempty"`
 	ConfigurationName                        *string                             `json:"configurationName,omitempty"`
 	Constraints                              *NodetemplatesV1TemplateConstraints `json:"constraints,omitempty"`
@@ -5214,6 +5244,7 @@ type NodetemplatesV1TemplateConstraintsResourceLimits struct {
 
 // NodetemplatesV1UpdateNodeTemplate defines model for nodetemplates.v1.UpdateNodeTemplate.
 type NodetemplatesV1UpdateNodeTemplate struct {
+	ClmEnabled                               *bool                               `json:"clmEnabled"`
 	ConfigurationId                          *string                             `json:"configurationId,omitempty"`
 	Constraints                              *NodetemplatesV1TemplateConstraints `json:"constraints,omitempty"`
 	CustomInstancesEnabled                   *bool                               `json:"customInstancesEnabled"`
@@ -5637,6 +5668,15 @@ type RuntimeV1GetAnomalyResponse struct {
 // RuntimeV1GetClusterWorkloadsNetflowResponse defines model for runtime.v1.GetClusterWorkloadsNetflowResponse.
 type RuntimeV1GetClusterWorkloadsNetflowResponse struct {
 	Items *[]RuntimeV1WorkloadNetflow `json:"items,omitempty"`
+}
+
+// RuntimeV1GetContainerImageSbomResponse defines model for runtime.v1.GetContainerImageSbomResponse.
+type RuntimeV1GetContainerImageSbomResponse struct {
+	// ImageProfile Whether the image has a runtime profile available.
+	ImageProfile *bool `json:"imageProfile,omitempty"`
+
+	// ImageSbom The SBOM with the packages used by the image in the specified format.
+	ImageSbom *map[string]interface{} `json:"imageSbom,omitempty"`
 }
 
 // RuntimeV1GetListEntriesResponse defines model for runtime.v1.GetListEntriesResponse.
@@ -7240,6 +7280,9 @@ type WorkloadoptimizationV1WorkloadRecommendation struct {
 	// This value indicates how many metrics were collected versus expected for the workload, given the recommendation configuration.
 	Confidence float64 `json:"confidence"`
 
+	// EstimatedThresholdReachedAt Estimated time in seconds to reach confidence threshold.
+	EstimatedThresholdReachedAt *time.Time `json:"estimatedThresholdReachedAt"`
+
 	// Events Recommendation events.
 	Events  []WorkloadoptimizationV1RecommendationEvent `json:"events"`
 	HpaSpec *WorkloadoptimizationV1HPASpec              `json:"hpaSpec,omitempty"`
@@ -8076,6 +8119,19 @@ type RuntimeSecurityAPIGetRulesParamsSeverity string
 
 // RuntimeSecurityAPIGetRulesParamsSortOrder defines parameters for RuntimeSecurityAPIGetRules.
 type RuntimeSecurityAPIGetRulesParamsSortOrder string
+
+// RuntimeSecurityAPIGetContainerImageSbomParams defines parameters for RuntimeSecurityAPIGetContainerImageSbom.
+type RuntimeSecurityAPIGetContainerImageSbomParams struct {
+	// SbomFormat The format in which the SBOM should be returned. Supported formats are:
+	//   - application/vnd.cyclonedx+json;version=1.6
+	//   - text/spdx+json;version=2.3
+	// If not provided, the default is "application/vnd.cyclonedx+json;version=1.6".
+	SbomFormat *string `form:"sbomFormat,omitempty" json:"sbomFormat,omitempty"`
+
+	// OnlyRuntimePackages Whether to include only packages in-use in the SBOM.
+	// If not provided, the default is false.
+	OnlyRuntimePackages *bool `form:"onlyRuntimePackages,omitempty" json:"onlyRuntimePackages,omitempty"`
+}
 
 // RuntimeSecurityAPIGetClusterWorkloadsNetflowParams defines parameters for RuntimeSecurityAPIGetClusterWorkloadsNetflow.
 type RuntimeSecurityAPIGetClusterWorkloadsNetflowParams struct {
