@@ -3395,6 +3395,26 @@ func (mr *MockClientInterfaceMockRecorder) RuntimeSecurityAPIGetClusterWorkloads
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIGetClusterWorkloadsNetflow", reflect.TypeOf((*MockClientInterface)(nil).RuntimeSecurityAPIGetClusterWorkloadsNetflow), varargs...)
 }
 
+// RuntimeSecurityAPIGetContainerImageSbom mocks base method.
+func (m *MockClientInterface) RuntimeSecurityAPIGetContainerImageSbom(ctx context.Context, imageDigest string, params *sdk.RuntimeSecurityAPIGetContainerImageSbomParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, imageDigest, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIGetContainerImageSbom", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIGetContainerImageSbom indicates an expected call of RuntimeSecurityAPIGetContainerImageSbom.
+func (mr *MockClientInterfaceMockRecorder) RuntimeSecurityAPIGetContainerImageSbom(ctx, imageDigest, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, imageDigest, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIGetContainerImageSbom", reflect.TypeOf((*MockClientInterface)(nil).RuntimeSecurityAPIGetContainerImageSbom), varargs...)
+}
+
 // RuntimeSecurityAPIGetList mocks base method.
 func (m *MockClientInterface) RuntimeSecurityAPIGetList(ctx context.Context, id string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
@@ -11406,6 +11426,41 @@ func (m *MockClientWithResponsesInterface) RuntimeSecurityAPIGetClusterWorkloads
 func (mr *MockClientWithResponsesInterfaceMockRecorder) RuntimeSecurityAPIGetClusterWorkloadsNetflowWithResponse(ctx, clusterId, params interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIGetClusterWorkloadsNetflowWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RuntimeSecurityAPIGetClusterWorkloadsNetflowWithResponse), ctx, clusterId, params)
+}
+
+// RuntimeSecurityAPIGetContainerImageSbom mocks base method.
+func (m *MockClientWithResponsesInterface) RuntimeSecurityAPIGetContainerImageSbom(ctx context.Context, imageDigest string, params *sdk.RuntimeSecurityAPIGetContainerImageSbomParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, imageDigest, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIGetContainerImageSbom", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIGetContainerImageSbom indicates an expected call of RuntimeSecurityAPIGetContainerImageSbom.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RuntimeSecurityAPIGetContainerImageSbom(ctx, imageDigest, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, imageDigest, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIGetContainerImageSbom", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RuntimeSecurityAPIGetContainerImageSbom), varargs...)
+}
+
+// RuntimeSecurityAPIGetContainerImageSbomWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) RuntimeSecurityAPIGetContainerImageSbomWithResponse(ctx context.Context, imageDigest string, params *sdk.RuntimeSecurityAPIGetContainerImageSbomParams) (*sdk.RuntimeSecurityAPIGetContainerImageSbomResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIGetContainerImageSbomWithResponse", ctx, imageDigest, params)
+	ret0, _ := ret[0].(*sdk.RuntimeSecurityAPIGetContainerImageSbomResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIGetContainerImageSbomWithResponse indicates an expected call of RuntimeSecurityAPIGetContainerImageSbomWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RuntimeSecurityAPIGetContainerImageSbomWithResponse(ctx, imageDigest, params interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIGetContainerImageSbomWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RuntimeSecurityAPIGetContainerImageSbomWithResponse), ctx, imageDigest, params)
 }
 
 // RuntimeSecurityAPIGetList mocks base method.

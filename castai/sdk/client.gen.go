@@ -739,6 +739,9 @@ type ClientInterface interface {
 
 	RuntimeSecurityAPIEditRule(ctx context.Context, id string, body RuntimeSecurityAPIEditRuleJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// RuntimeSecurityAPIGetContainerImageSbom request
+	RuntimeSecurityAPIGetContainerImageSbom(ctx context.Context, imageDigest string, params *RuntimeSecurityAPIGetContainerImageSbomParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// RuntimeSecurityAPIGetClusterWorkloadsNetflow request
 	RuntimeSecurityAPIGetClusterWorkloadsNetflow(ctx context.Context, clusterId string, params *RuntimeSecurityAPIGetClusterWorkloadsNetflowParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -3679,6 +3682,18 @@ func (c *Client) RuntimeSecurityAPIEditRuleWithBody(ctx context.Context, id stri
 
 func (c *Client) RuntimeSecurityAPIEditRule(ctx context.Context, id string, body RuntimeSecurityAPIEditRuleJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewRuntimeSecurityAPIEditRuleRequest(c.Server, id, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) RuntimeSecurityAPIGetContainerImageSbom(ctx context.Context, imageDigest string, params *RuntimeSecurityAPIGetContainerImageSbomParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewRuntimeSecurityAPIGetContainerImageSbomRequest(c.Server, imageDigest, params)
 	if err != nil {
 		return nil, err
 	}
@@ -14110,6 +14125,78 @@ func NewRuntimeSecurityAPIEditRuleRequestWithBody(server string, id string, cont
 	return req, nil
 }
 
+// NewRuntimeSecurityAPIGetContainerImageSbomRequest generates requests for RuntimeSecurityAPIGetContainerImageSbom
+func NewRuntimeSecurityAPIGetContainerImageSbomRequest(server string, imageDigest string, params *RuntimeSecurityAPIGetContainerImageSbomParams) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "imageDigest", runtime.ParamLocationPath, imageDigest)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/security/runtime/sbom/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.SbomFormat != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "sbomFormat", runtime.ParamLocationQuery, *params.SbomFormat); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.OnlyRuntimePackages != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "onlyRuntimePackages", runtime.ParamLocationQuery, *params.OnlyRuntimePackages); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 // NewRuntimeSecurityAPIGetClusterWorkloadsNetflowRequest generates requests for RuntimeSecurityAPIGetClusterWorkloadsNetflow
 func NewRuntimeSecurityAPIGetClusterWorkloadsNetflowRequest(server string, clusterId string, params *RuntimeSecurityAPIGetClusterWorkloadsNetflowParams) (*http.Request, error) {
 	var err error
@@ -16381,6 +16468,9 @@ type ClientWithResponsesInterface interface {
 	RuntimeSecurityAPIEditRuleWithBodyWithResponse(ctx context.Context, id string, contentType string, body io.Reader) (*RuntimeSecurityAPIEditRuleResponse, error)
 
 	RuntimeSecurityAPIEditRuleWithResponse(ctx context.Context, id string, body RuntimeSecurityAPIEditRuleJSONRequestBody) (*RuntimeSecurityAPIEditRuleResponse, error)
+
+	// RuntimeSecurityAPIGetContainerImageSbom request
+	RuntimeSecurityAPIGetContainerImageSbomWithResponse(ctx context.Context, imageDigest string, params *RuntimeSecurityAPIGetContainerImageSbomParams) (*RuntimeSecurityAPIGetContainerImageSbomResponse, error)
 
 	// RuntimeSecurityAPIGetClusterWorkloadsNetflow request
 	RuntimeSecurityAPIGetClusterWorkloadsNetflowWithResponse(ctx context.Context, clusterId string, params *RuntimeSecurityAPIGetClusterWorkloadsNetflowParams) (*RuntimeSecurityAPIGetClusterWorkloadsNetflowResponse, error)
@@ -21745,6 +21835,36 @@ func (r RuntimeSecurityAPIEditRuleResponse) GetBody() []byte {
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
+type RuntimeSecurityAPIGetContainerImageSbomResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *RuntimeV1GetContainerImageSbomResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r RuntimeSecurityAPIGetContainerImageSbomResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r RuntimeSecurityAPIGetContainerImageSbomResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r RuntimeSecurityAPIGetContainerImageSbomResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
 type RuntimeSecurityAPIGetClusterWorkloadsNetflowResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -24683,6 +24803,15 @@ func (c *ClientWithResponses) RuntimeSecurityAPIEditRuleWithResponse(ctx context
 		return nil, err
 	}
 	return ParseRuntimeSecurityAPIEditRuleResponse(rsp)
+}
+
+// RuntimeSecurityAPIGetContainerImageSbomWithResponse request returning *RuntimeSecurityAPIGetContainerImageSbomResponse
+func (c *ClientWithResponses) RuntimeSecurityAPIGetContainerImageSbomWithResponse(ctx context.Context, imageDigest string, params *RuntimeSecurityAPIGetContainerImageSbomParams) (*RuntimeSecurityAPIGetContainerImageSbomResponse, error) {
+	rsp, err := c.RuntimeSecurityAPIGetContainerImageSbom(ctx, imageDigest, params)
+	if err != nil {
+		return nil, err
+	}
+	return ParseRuntimeSecurityAPIGetContainerImageSbomResponse(rsp)
 }
 
 // RuntimeSecurityAPIGetClusterWorkloadsNetflowWithResponse request returning *RuntimeSecurityAPIGetClusterWorkloadsNetflowResponse
@@ -29529,6 +29658,32 @@ func ParseRuntimeSecurityAPIEditRuleResponse(rsp *http.Response) (*RuntimeSecuri
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest RuntimeV1Rule
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseRuntimeSecurityAPIGetContainerImageSbomResponse parses an HTTP response from a RuntimeSecurityAPIGetContainerImageSbomWithResponse call
+func ParseRuntimeSecurityAPIGetContainerImageSbomResponse(rsp *http.Response) (*RuntimeSecurityAPIGetContainerImageSbomResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &RuntimeSecurityAPIGetContainerImageSbomResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest RuntimeV1GetContainerImageSbomResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
