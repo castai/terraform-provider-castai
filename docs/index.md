@@ -44,10 +44,10 @@ provider "castai" {
 }
 
 provider "helm" {
-  kubernetes {
+  kubernetes = {
     host                   = module.eks.cluster_endpoint
     cluster_ca_certificate = base64decode(module.eks.cluster_certificate_authority_data)
-    exec {
+    exec = {
       api_version = "client.authentication.k8s.io/v1beta1"
       command     = "aws"
       # This requires the awscli to be installed locally where Terraform is executed.
@@ -72,20 +72,30 @@ resource "helm_release" "castai_agent" {
   create_namespace = true
   cleanup_on_fail  = true
 
-  set {
-    name  = "provider"
-    value = "eks"
-  }
-  set_sensitive {
-    name  = "apiKey"
-    value = castai_eks_cluster.this.cluster_token
-  }
+  set = concat(
+    [
+      {
+        name  = "provider"
+        value = "eks"
+      },
+      {
+        # Required until https://github.com/castai/helm-charts/issues/135 is fixed.
+        name  = "createNamespace"
+        value = "false"
+      },
+    ],
+    var.castai_api_url != "" ? [{
+      name  = "apiURL"
+      value = var.castai_api_url
+    }] : [],
+  )
 
-  # Required until https://github.com/castai/helm-charts/issues/135 is fixed.
-  set {
-    name  = "createNamespace"
-    value = "false"
-  }
+  set_sensitive = [
+    {
+      name  = "apiKey"
+      value = castai_eks_cluster.this.cluster_token
+    },
+  ]
 }
 ```
 

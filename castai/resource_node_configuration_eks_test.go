@@ -15,7 +15,7 @@ import (
 func TestAccResourceNodeConfiguration_eks(t *testing.T) {
 	rName := fmt.Sprintf("%v-node-config-%v", ResourcePrefix, acctest.RandString(8))
 	resourceName := "castai_node_configuration.test"
-	clusterName := "core-tf-acc"
+	clusterName := "core-tf-acc-21-08-2025"
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
@@ -55,7 +55,7 @@ func TestAccResourceNodeConfiguration_eks(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "aks.#", "0"),
 					resource.TestCheckResourceAttr(resourceName, "kops.#", "0"),
 					resource.TestCheckResourceAttr(resourceName, "gke.#", "0"),
-          resource.TestCheckResourceAttr(resourceName, "eks.0.node_group_arn", "arn:aws:iam::000000000000:role/aws_node_group"),
+					resource.TestCheckResourceAttr(resourceName, "eks.0.node_group_arn", "arn:aws:iam::000000000000:role/aws_node_group"),
 				),
 			},
 			{
@@ -223,7 +223,7 @@ resource "aws_vpc" "test" {
 
 data "aws_subnets" "core" {
 	tags = {
-		Name = "*core-tf-acc-cluster/SubnetPublic*"
+		Name = "*core-tf-acc-21-08-2025-private*" # private subnet is the one with NAT gateway for internet access.
 	}
 }
 

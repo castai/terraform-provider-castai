@@ -3395,6 +3395,26 @@ func (mr *MockClientInterfaceMockRecorder) RuntimeSecurityAPIGetClusterWorkloads
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIGetClusterWorkloadsNetflow", reflect.TypeOf((*MockClientInterface)(nil).RuntimeSecurityAPIGetClusterWorkloadsNetflow), varargs...)
 }
 
+// RuntimeSecurityAPIGetContainerImageSbom mocks base method.
+func (m *MockClientInterface) RuntimeSecurityAPIGetContainerImageSbom(ctx context.Context, imageDigest string, params *sdk.RuntimeSecurityAPIGetContainerImageSbomParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, imageDigest, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIGetContainerImageSbom", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIGetContainerImageSbom indicates an expected call of RuntimeSecurityAPIGetContainerImageSbom.
+func (mr *MockClientInterfaceMockRecorder) RuntimeSecurityAPIGetContainerImageSbom(ctx, imageDigest, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, imageDigest, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIGetContainerImageSbom", reflect.TypeOf((*MockClientInterface)(nil).RuntimeSecurityAPIGetContainerImageSbom), varargs...)
+}
+
 // RuntimeSecurityAPIGetList mocks base method.
 func (m *MockClientInterface) RuntimeSecurityAPIGetList(ctx context.Context, id string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
@@ -5273,6 +5293,26 @@ func (mr *MockClientInterfaceMockRecorder) WorkloadOptimizationAPIGetWorkloadSca
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{ctx, clusterId, policyId}, reqEditors...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIGetWorkloadScalingPolicy", reflect.TypeOf((*MockClientInterface)(nil).WorkloadOptimizationAPIGetWorkloadScalingPolicy), varargs...)
+}
+
+// WorkloadOptimizationAPIGetWorkloadSpec mocks base method.
+func (m *MockClientInterface) WorkloadOptimizationAPIGetWorkloadSpec(ctx context.Context, clusterId, workloadId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, workloadId}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "WorkloadOptimizationAPIGetWorkloadSpec", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// WorkloadOptimizationAPIGetWorkloadSpec indicates an expected call of WorkloadOptimizationAPIGetWorkloadSpec.
+func (mr *MockClientInterfaceMockRecorder) WorkloadOptimizationAPIGetWorkloadSpec(ctx, clusterId, workloadId interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, workloadId}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIGetWorkloadSpec", reflect.TypeOf((*MockClientInterface)(nil).WorkloadOptimizationAPIGetWorkloadSpec), varargs...)
 }
 
 // WorkloadOptimizationAPIGetWorkloadsSummary mocks base method.
@@ -11408,6 +11448,41 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) RuntimeSecurityAPIGetClu
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIGetClusterWorkloadsNetflowWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RuntimeSecurityAPIGetClusterWorkloadsNetflowWithResponse), ctx, clusterId, params)
 }
 
+// RuntimeSecurityAPIGetContainerImageSbom mocks base method.
+func (m *MockClientWithResponsesInterface) RuntimeSecurityAPIGetContainerImageSbom(ctx context.Context, imageDigest string, params *sdk.RuntimeSecurityAPIGetContainerImageSbomParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, imageDigest, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIGetContainerImageSbom", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIGetContainerImageSbom indicates an expected call of RuntimeSecurityAPIGetContainerImageSbom.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RuntimeSecurityAPIGetContainerImageSbom(ctx, imageDigest, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, imageDigest, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIGetContainerImageSbom", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RuntimeSecurityAPIGetContainerImageSbom), varargs...)
+}
+
+// RuntimeSecurityAPIGetContainerImageSbomWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) RuntimeSecurityAPIGetContainerImageSbomWithResponse(ctx context.Context, imageDigest string, params *sdk.RuntimeSecurityAPIGetContainerImageSbomParams) (*sdk.RuntimeSecurityAPIGetContainerImageSbomResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RuntimeSecurityAPIGetContainerImageSbomWithResponse", ctx, imageDigest, params)
+	ret0, _ := ret[0].(*sdk.RuntimeSecurityAPIGetContainerImageSbomResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// RuntimeSecurityAPIGetContainerImageSbomWithResponse indicates an expected call of RuntimeSecurityAPIGetContainerImageSbomWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) RuntimeSecurityAPIGetContainerImageSbomWithResponse(ctx, imageDigest, params interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RuntimeSecurityAPIGetContainerImageSbomWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).RuntimeSecurityAPIGetContainerImageSbomWithResponse), ctx, imageDigest, params)
+}
+
 // RuntimeSecurityAPIGetList mocks base method.
 func (m *MockClientWithResponsesInterface) RuntimeSecurityAPIGetList(ctx context.Context, id string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
@@ -14681,6 +14756,41 @@ func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPIGetWorkloadSca
 func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPIGetWorkloadScalingPolicyWithResponse(ctx, clusterId, policyId interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIGetWorkloadScalingPolicyWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPIGetWorkloadScalingPolicyWithResponse), ctx, clusterId, policyId)
+}
+
+// WorkloadOptimizationAPIGetWorkloadSpec mocks base method.
+func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPIGetWorkloadSpec(ctx context.Context, clusterId, workloadId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, workloadId}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "WorkloadOptimizationAPIGetWorkloadSpec", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// WorkloadOptimizationAPIGetWorkloadSpec indicates an expected call of WorkloadOptimizationAPIGetWorkloadSpec.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPIGetWorkloadSpec(ctx, clusterId, workloadId interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, workloadId}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIGetWorkloadSpec", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPIGetWorkloadSpec), varargs...)
+}
+
+// WorkloadOptimizationAPIGetWorkloadSpecWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPIGetWorkloadSpecWithResponse(ctx context.Context, clusterId, workloadId string) (*sdk.WorkloadOptimizationAPIGetWorkloadSpecResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "WorkloadOptimizationAPIGetWorkloadSpecWithResponse", ctx, clusterId, workloadId)
+	ret0, _ := ret[0].(*sdk.WorkloadOptimizationAPIGetWorkloadSpecResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// WorkloadOptimizationAPIGetWorkloadSpecWithResponse indicates an expected call of WorkloadOptimizationAPIGetWorkloadSpecWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPIGetWorkloadSpecWithResponse(ctx, clusterId, workloadId interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIGetWorkloadSpecWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPIGetWorkloadSpecWithResponse), ctx, clusterId, workloadId)
 }
 
 // WorkloadOptimizationAPIGetWorkloadWithResponse mocks base method.
