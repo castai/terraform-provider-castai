@@ -739,6 +739,9 @@ type ClientInterface interface {
 
 	RuntimeSecurityAPIEditRule(ctx context.Context, id string, body RuntimeSecurityAPIEditRuleJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// RuntimeSecurityAPIGetContainerImageSbom request
+	RuntimeSecurityAPIGetContainerImageSbom(ctx context.Context, imageDigest string, params *RuntimeSecurityAPIGetContainerImageSbomParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// RuntimeSecurityAPIGetClusterWorkloadsNetflow request
 	RuntimeSecurityAPIGetClusterWorkloadsNetflow(ctx context.Context, clusterId string, params *RuntimeSecurityAPIGetClusterWorkloadsNetflowParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -824,6 +827,9 @@ type ClientInterface interface {
 
 	// WorkloadOptimizationAPIGetWorkload request
 	WorkloadOptimizationAPIGetWorkload(ctx context.Context, clusterId string, workloadId string, params *WorkloadOptimizationAPIGetWorkloadParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// WorkloadOptimizationAPIGetWorkloadSpec request
+	WorkloadOptimizationAPIGetWorkloadSpec(ctx context.Context, clusterId string, workloadId string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// WorkloadOptimizationAPIGetInstallCmd request
 	WorkloadOptimizationAPIGetInstallCmd(ctx context.Context, params *WorkloadOptimizationAPIGetInstallCmdParams, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -3689,6 +3695,18 @@ func (c *Client) RuntimeSecurityAPIEditRule(ctx context.Context, id string, body
 	return c.Client.Do(req)
 }
 
+func (c *Client) RuntimeSecurityAPIGetContainerImageSbom(ctx context.Context, imageDigest string, params *RuntimeSecurityAPIGetContainerImageSbomParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewRuntimeSecurityAPIGetContainerImageSbomRequest(c.Server, imageDigest, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
 func (c *Client) RuntimeSecurityAPIGetClusterWorkloadsNetflow(ctx context.Context, clusterId string, params *RuntimeSecurityAPIGetClusterWorkloadsNetflowParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewRuntimeSecurityAPIGetClusterWorkloadsNetflowRequest(c.Server, clusterId, params)
 	if err != nil {
@@ -4051,6 +4069,18 @@ func (c *Client) WorkloadOptimizationAPIGetWorkloadsSummaryMetrics(ctx context.C
 
 func (c *Client) WorkloadOptimizationAPIGetWorkload(ctx context.Context, clusterId string, workloadId string, params *WorkloadOptimizationAPIGetWorkloadParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewWorkloadOptimizationAPIGetWorkloadRequest(c.Server, clusterId, workloadId, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) WorkloadOptimizationAPIGetWorkloadSpec(ctx context.Context, clusterId string, workloadId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewWorkloadOptimizationAPIGetWorkloadSpecRequest(c.Server, clusterId, workloadId)
 	if err != nil {
 		return nil, err
 	}
@@ -7745,6 +7775,22 @@ func NewExternalClusterAPIGetCredentialsScriptRequest(server string, clusterId s
 
 		}
 
+		if params.InstallPodMutator != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "installPodMutator", runtime.ParamLocationQuery, *params.InstallPodMutator); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
 		queryURL.RawQuery = queryValues.Encode()
 	}
 
@@ -9584,6 +9630,38 @@ func NewRbacServiceAPIListRoleBindingsRequest(server string, organizationId stri
 		if params.ScopeId != nil {
 
 			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "scopeId", runtime.ParamLocationQuery, *params.ScopeId); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.ScopeType != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "scopeType", runtime.ParamLocationQuery, *params.ScopeType); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.SubjectType != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "subjectType", runtime.ParamLocationQuery, *params.SubjectType); err != nil {
 				return nil, err
 			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
 				return nil, err
@@ -14110,6 +14188,78 @@ func NewRuntimeSecurityAPIEditRuleRequestWithBody(server string, id string, cont
 	return req, nil
 }
 
+// NewRuntimeSecurityAPIGetContainerImageSbomRequest generates requests for RuntimeSecurityAPIGetContainerImageSbom
+func NewRuntimeSecurityAPIGetContainerImageSbomRequest(server string, imageDigest string, params *RuntimeSecurityAPIGetContainerImageSbomParams) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "imageDigest", runtime.ParamLocationPath, imageDigest)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/security/runtime/sbom/%s", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.SbomFormat != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "sbomFormat", runtime.ParamLocationQuery, *params.SbomFormat); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.OnlyRuntimePackages != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "onlyRuntimePackages", runtime.ParamLocationQuery, *params.OnlyRuntimePackages); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 // NewRuntimeSecurityAPIGetClusterWorkloadsNetflowRequest generates requests for RuntimeSecurityAPIGetClusterWorkloadsNetflow
 func NewRuntimeSecurityAPIGetClusterWorkloadsNetflowRequest(server string, clusterId string, params *RuntimeSecurityAPIGetClusterWorkloadsNetflowParams) (*http.Request, error) {
 	var err error
@@ -15374,6 +15524,47 @@ func NewWorkloadOptimizationAPIGetWorkloadRequest(server string, clusterId strin
 	return req, nil
 }
 
+// NewWorkloadOptimizationAPIGetWorkloadSpecRequest generates requests for WorkloadOptimizationAPIGetWorkloadSpec
+func NewWorkloadOptimizationAPIGetWorkloadSpecRequest(server string, clusterId string, workloadId string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "clusterId", runtime.ParamLocationPath, clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "workloadId", runtime.ParamLocationPath, workloadId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/workload-autoscaling/clusters/%s/workloads/%s/spec", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 // NewWorkloadOptimizationAPIGetInstallCmdRequest generates requests for WorkloadOptimizationAPIGetInstallCmd
 func NewWorkloadOptimizationAPIGetInstallCmdRequest(server string, params *WorkloadOptimizationAPIGetInstallCmdParams) (*http.Request, error) {
 	var err error
@@ -16382,6 +16573,9 @@ type ClientWithResponsesInterface interface {
 
 	RuntimeSecurityAPIEditRuleWithResponse(ctx context.Context, id string, body RuntimeSecurityAPIEditRuleJSONRequestBody) (*RuntimeSecurityAPIEditRuleResponse, error)
 
+	// RuntimeSecurityAPIGetContainerImageSbom request
+	RuntimeSecurityAPIGetContainerImageSbomWithResponse(ctx context.Context, imageDigest string, params *RuntimeSecurityAPIGetContainerImageSbomParams) (*RuntimeSecurityAPIGetContainerImageSbomResponse, error)
+
 	// RuntimeSecurityAPIGetClusterWorkloadsNetflow request
 	RuntimeSecurityAPIGetClusterWorkloadsNetflowWithResponse(ctx context.Context, clusterId string, params *RuntimeSecurityAPIGetClusterWorkloadsNetflowParams) (*RuntimeSecurityAPIGetClusterWorkloadsNetflowResponse, error)
 
@@ -16467,6 +16661,9 @@ type ClientWithResponsesInterface interface {
 
 	// WorkloadOptimizationAPIGetWorkload request
 	WorkloadOptimizationAPIGetWorkloadWithResponse(ctx context.Context, clusterId string, workloadId string, params *WorkloadOptimizationAPIGetWorkloadParams) (*WorkloadOptimizationAPIGetWorkloadResponse, error)
+
+	// WorkloadOptimizationAPIGetWorkloadSpec request
+	WorkloadOptimizationAPIGetWorkloadSpecWithResponse(ctx context.Context, clusterId string, workloadId string) (*WorkloadOptimizationAPIGetWorkloadSpecResponse, error)
 
 	// WorkloadOptimizationAPIGetInstallCmd request
 	WorkloadOptimizationAPIGetInstallCmdWithResponse(ctx context.Context, params *WorkloadOptimizationAPIGetInstallCmdParams) (*WorkloadOptimizationAPIGetInstallCmdResponse, error)
@@ -21745,6 +21942,36 @@ func (r RuntimeSecurityAPIEditRuleResponse) GetBody() []byte {
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
+type RuntimeSecurityAPIGetContainerImageSbomResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *RuntimeV1GetContainerImageSbomResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r RuntimeSecurityAPIGetContainerImageSbomResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r RuntimeSecurityAPIGetContainerImageSbomResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r RuntimeSecurityAPIGetContainerImageSbomResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
 type RuntimeSecurityAPIGetClusterWorkloadsNetflowResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -22460,6 +22687,36 @@ func (r WorkloadOptimizationAPIGetWorkloadResponse) StatusCode() int {
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
 func (r WorkloadOptimizationAPIGetWorkloadResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type WorkloadOptimizationAPIGetWorkloadSpecResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *WorkloadoptimizationV1GetWorkloadSpecResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r WorkloadOptimizationAPIGetWorkloadSpecResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r WorkloadOptimizationAPIGetWorkloadSpecResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r WorkloadOptimizationAPIGetWorkloadSpecResponse) GetBody() []byte {
 	return r.Body
 }
 
@@ -24685,6 +24942,15 @@ func (c *ClientWithResponses) RuntimeSecurityAPIEditRuleWithResponse(ctx context
 	return ParseRuntimeSecurityAPIEditRuleResponse(rsp)
 }
 
+// RuntimeSecurityAPIGetContainerImageSbomWithResponse request returning *RuntimeSecurityAPIGetContainerImageSbomResponse
+func (c *ClientWithResponses) RuntimeSecurityAPIGetContainerImageSbomWithResponse(ctx context.Context, imageDigest string, params *RuntimeSecurityAPIGetContainerImageSbomParams) (*RuntimeSecurityAPIGetContainerImageSbomResponse, error) {
+	rsp, err := c.RuntimeSecurityAPIGetContainerImageSbom(ctx, imageDigest, params)
+	if err != nil {
+		return nil, err
+	}
+	return ParseRuntimeSecurityAPIGetContainerImageSbomResponse(rsp)
+}
+
 // RuntimeSecurityAPIGetClusterWorkloadsNetflowWithResponse request returning *RuntimeSecurityAPIGetClusterWorkloadsNetflowResponse
 func (c *ClientWithResponses) RuntimeSecurityAPIGetClusterWorkloadsNetflowWithResponse(ctx context.Context, clusterId string, params *RuntimeSecurityAPIGetClusterWorkloadsNetflowParams) (*RuntimeSecurityAPIGetClusterWorkloadsNetflowResponse, error) {
 	rsp, err := c.RuntimeSecurityAPIGetClusterWorkloadsNetflow(ctx, clusterId, params)
@@ -24955,6 +25221,15 @@ func (c *ClientWithResponses) WorkloadOptimizationAPIGetWorkloadWithResponse(ctx
 		return nil, err
 	}
 	return ParseWorkloadOptimizationAPIGetWorkloadResponse(rsp)
+}
+
+// WorkloadOptimizationAPIGetWorkloadSpecWithResponse request returning *WorkloadOptimizationAPIGetWorkloadSpecResponse
+func (c *ClientWithResponses) WorkloadOptimizationAPIGetWorkloadSpecWithResponse(ctx context.Context, clusterId string, workloadId string) (*WorkloadOptimizationAPIGetWorkloadSpecResponse, error) {
+	rsp, err := c.WorkloadOptimizationAPIGetWorkloadSpec(ctx, clusterId, workloadId)
+	if err != nil {
+		return nil, err
+	}
+	return ParseWorkloadOptimizationAPIGetWorkloadSpecResponse(rsp)
 }
 
 // WorkloadOptimizationAPIGetInstallCmdWithResponse request returning *WorkloadOptimizationAPIGetInstallCmdResponse
@@ -29539,6 +29814,32 @@ func ParseRuntimeSecurityAPIEditRuleResponse(rsp *http.Response) (*RuntimeSecuri
 	return response, nil
 }
 
+// ParseRuntimeSecurityAPIGetContainerImageSbomResponse parses an HTTP response from a RuntimeSecurityAPIGetContainerImageSbomWithResponse call
+func ParseRuntimeSecurityAPIGetContainerImageSbomResponse(rsp *http.Response) (*RuntimeSecurityAPIGetContainerImageSbomResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &RuntimeSecurityAPIGetContainerImageSbomResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest RuntimeV1GetContainerImageSbomResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
 // ParseRuntimeSecurityAPIGetClusterWorkloadsNetflowResponse parses an HTTP response from a RuntimeSecurityAPIGetClusterWorkloadsNetflowWithResponse call
 func ParseRuntimeSecurityAPIGetClusterWorkloadsNetflowResponse(rsp *http.Response) (*RuntimeSecurityAPIGetClusterWorkloadsNetflowResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
@@ -30153,6 +30454,32 @@ func ParseWorkloadOptimizationAPIGetWorkloadResponse(rsp *http.Response) (*Workl
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest WorkloadoptimizationV1GetWorkloadResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseWorkloadOptimizationAPIGetWorkloadSpecResponse parses an HTTP response from a WorkloadOptimizationAPIGetWorkloadSpecWithResponse call
+func ParseWorkloadOptimizationAPIGetWorkloadSpecResponse(rsp *http.Response) (*WorkloadOptimizationAPIGetWorkloadSpecResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &WorkloadOptimizationAPIGetWorkloadSpecResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest WorkloadoptimizationV1GetWorkloadSpecResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}

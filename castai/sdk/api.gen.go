@@ -164,8 +164,8 @@ const (
 
 // Defines values for CastaiRbacV1beta1ScopeType.
 const (
-	CLUSTER      CastaiRbacV1beta1ScopeType = "CLUSTER"
-	ORGANIZATION CastaiRbacV1beta1ScopeType = "ORGANIZATION"
+	CastaiRbacV1beta1ScopeTypeCLUSTER      CastaiRbacV1beta1ScopeType = "CLUSTER"
+	CastaiRbacV1beta1ScopeTypeORGANIZATION CastaiRbacV1beta1ScopeType = "ORGANIZATION"
 )
 
 // Defines values for CastaiSsoV1beta1OIDCType.
@@ -306,6 +306,14 @@ const (
 	NodeconfigV1EKSConfigImageFamilyFamilyAl2          NodeconfigV1EKSConfigImageFamily = "family_al2"
 	NodeconfigV1EKSConfigImageFamilyFamilyAl2023       NodeconfigV1EKSConfigImageFamily = "family_al2023"
 	NodeconfigV1EKSConfigImageFamilyFamilyBottlerocket NodeconfigV1EKSConfigImageFamily = "family_bottlerocket"
+)
+
+// Defines values for NodeconfigV1GKEConfigOnHostMaintenance.
+const (
+	MIGRATE   NodeconfigV1GKEConfigOnHostMaintenance = "MIGRATE"
+	Migrate   NodeconfigV1GKEConfigOnHostMaintenance = "migrate"
+	TERMINATE NodeconfigV1GKEConfigOnHostMaintenance = "TERMINATE"
+	Terminate NodeconfigV1GKEConfigOnHostMaintenance = "terminate"
 )
 
 // Defines values for NodeconfigV1SelfHostedWithEC2NodesConfigImageFamily.
@@ -607,6 +615,19 @@ const (
 	ExternalClusterAPIListNodesParamsLifecycleTypeLifecycleTypeUnspecified ExternalClusterAPIListNodesParamsLifecycleType = "lifecycle_type_unspecified"
 	ExternalClusterAPIListNodesParamsLifecycleTypeOnDemand                 ExternalClusterAPIListNodesParamsLifecycleType = "on_demand"
 	ExternalClusterAPIListNodesParamsLifecycleTypeSpot                     ExternalClusterAPIListNodesParamsLifecycleType = "spot"
+)
+
+// Defines values for RbacServiceAPIListRoleBindingsParamsScopeType.
+const (
+	RbacServiceAPIListRoleBindingsParamsScopeTypeCLUSTER      RbacServiceAPIListRoleBindingsParamsScopeType = "CLUSTER"
+	RbacServiceAPIListRoleBindingsParamsScopeTypeORGANIZATION RbacServiceAPIListRoleBindingsParamsScopeType = "ORGANIZATION"
+)
+
+// Defines values for RbacServiceAPIListRoleBindingsParamsSubjectType.
+const (
+	SUBJECTGROUP          RbacServiceAPIListRoleBindingsParamsSubjectType = "SUBJECT_GROUP"
+	SUBJECTSERVICEACCOUNT RbacServiceAPIListRoleBindingsParamsSubjectType = "SUBJECT_SERVICE_ACCOUNT"
+	SUBJECTUSER           RbacServiceAPIListRoleBindingsParamsSubjectType = "SUBJECT_USER"
 )
 
 // Defines values for RbacServiceAPIListRolesParamsType.
@@ -1166,6 +1187,9 @@ type CastaiInventoryV1beta1AzureReservation struct {
 	ScopeResourceGroup *string                                                `json:"scopeResourceGroup,omitempty"`
 	ScopeSubscription  *string                                                `json:"scopeSubscription,omitempty"`
 	Status             *string                                                `json:"status,omitempty"`
+
+	// TotalCost Total cost paid by the customer for the commitment.
+	TotalCost *string `json:"totalCost"`
 }
 
 // CastaiInventoryV1beta1AzureReservationInstanceFlexibility defines model for castai.inventory.v1beta1.AzureReservation.InstanceFlexibility.
@@ -1892,8 +1916,9 @@ type CastaiInventoryV1beta1UsageAtTime struct {
 
 // CastaiInventoryV1beta1UsageDistribution defines model for castai.inventory.v1beta1.UsageDistribution.
 type CastaiInventoryV1beta1UsageDistribution struct {
-	Cpu    *float64 `json:"cpu,omitempty"`
-	Memory *float64 `json:"memory,omitempty"`
+	Cpu            *float64 `json:"cpu,omitempty"`
+	Memory         *float64 `json:"memory,omitempty"`
+	MonetaryAmount *float64 `json:"monetaryAmount,omitempty"`
 }
 
 // CastaiInventoryV1beta1Zone defines model for castai.inventory.v1beta1.Zone.
@@ -3734,6 +3759,9 @@ type ExternalclusterV1Cluster struct {
 	// Name The name of the external cluster.
 	Name *string `json:"name,omitempty"`
 
+	// Oke OKEClusterParams defines OKE -specific arguments.
+	Oke *ExternalclusterV1OKEClusterParams `json:"oke,omitempty"`
+
 	// Openshift OpenShiftClusterParams defines OpenShift-specific arguments.
 	Openshift *ExternalclusterV1OpenshiftClusterParams `json:"openshift,omitempty"`
 
@@ -4194,6 +4222,15 @@ type ExternalclusterV1NodeVolume struct {
 	Size *int32 `json:"size,omitempty"`
 }
 
+// ExternalclusterV1OKEClusterParams OKEClusterParams defines OKE -specific arguments.
+type ExternalclusterV1OKEClusterParams struct {
+	// ClusterName Name of the cluster.
+	ClusterName *string `json:"clusterName,omitempty"`
+
+	// Region Region of the cluster.
+	Region *string `json:"region,omitempty"`
+}
+
 // ExternalclusterV1OpenshiftClusterParams OpenShiftClusterParams defines OpenShift-specific arguments.
 type ExternalclusterV1OpenshiftClusterParams struct {
 	// Cloud Cloud provider of the cluster.
@@ -4249,6 +4286,9 @@ type ExternalclusterV1RegisterClusterRequest struct {
 
 	// Name The name of the cluster.
 	Name string `json:"name"`
+
+	// Oke OKEClusterParams defines OKE -specific arguments.
+	Oke *ExternalclusterV1OKEClusterParams `json:"oke,omitempty"`
 
 	// Openshift OpenShiftClusterParams defines OpenShift-specific arguments.
 	Openshift *ExternalclusterV1OpenshiftClusterParams `json:"openshift,omitempty"`
@@ -4595,8 +4635,11 @@ type NodeconfigV1GKEConfig struct {
 	MaxPodsPerNode *int32 `json:"maxPodsPerNode,omitempty"`
 
 	// NetworkTags Network tags to be added on a VM. Each tag must be 1-63 characters long, start with a lowercase letter and end with either a number or a lowercase letter.
-	NetworkTags      *[]string                     `json:"networkTags,omitempty"`
-	SecondaryIpRange *NodeconfigV1SecondaryIPRange `json:"secondaryIpRange,omitempty"`
+	NetworkTags *[]string `json:"networkTags,omitempty"`
+
+	// OnHostMaintenance Maintenance behavior of the instances.
+	OnHostMaintenance *NodeconfigV1GKEConfigOnHostMaintenance `json:"onHostMaintenance,omitempty"`
+	SecondaryIpRange  *NodeconfigV1SecondaryIPRange           `json:"secondaryIpRange,omitempty"`
 
 	// UseEphemeralStorageLocalSsd Flag indicating whether to use local SSD storage for the node. Defaults to false.
 	UseEphemeralStorageLocalSsd *bool `json:"useEphemeralStorageLocalSsd,omitempty"`
@@ -4625,6 +4668,9 @@ type NodeconfigV1GKEConfigLoadBalancersUnmanagedInstanceGroups struct {
 	// Zone Zone of the unmanaged instance group.
 	Zone *string `json:"zone,omitempty"`
 }
+
+// NodeconfigV1GKEConfigOnHostMaintenance Maintenance behavior of the instances.
+type NodeconfigV1GKEConfigOnHostMaintenance string
 
 // NodeconfigV1GetSuggestedConfigurationResponse defines model for nodeconfig.v1.GetSuggestedConfigurationResponse.
 type NodeconfigV1GetSuggestedConfigurationResponse struct {
@@ -4993,6 +5039,7 @@ type NodetemplatesV1NewNodeTemplate struct {
 
 // NodetemplatesV1NodeTemplate defines model for nodetemplates.v1.NodeTemplate.
 type NodetemplatesV1NodeTemplate struct {
+	ClmEnabled                               *bool                               `json:"clmEnabled,omitempty"`
 	ConfigurationId                          *string                             `json:"configurationId,omitempty"`
 	ConfigurationName                        *string                             `json:"configurationName,omitempty"`
 	Constraints                              *NodetemplatesV1TemplateConstraints `json:"constraints,omitempty"`
@@ -5214,6 +5261,7 @@ type NodetemplatesV1TemplateConstraintsResourceLimits struct {
 
 // NodetemplatesV1UpdateNodeTemplate defines model for nodetemplates.v1.UpdateNodeTemplate.
 type NodetemplatesV1UpdateNodeTemplate struct {
+	ClmEnabled                               *bool                               `json:"clmEnabled"`
 	ConfigurationId                          *string                             `json:"configurationId,omitempty"`
 	Constraints                              *NodetemplatesV1TemplateConstraints `json:"constraints,omitempty"`
 	CustomInstancesEnabled                   *bool                               `json:"customInstancesEnabled"`
@@ -5637,6 +5685,15 @@ type RuntimeV1GetAnomalyResponse struct {
 // RuntimeV1GetClusterWorkloadsNetflowResponse defines model for runtime.v1.GetClusterWorkloadsNetflowResponse.
 type RuntimeV1GetClusterWorkloadsNetflowResponse struct {
 	Items *[]RuntimeV1WorkloadNetflow `json:"items,omitempty"`
+}
+
+// RuntimeV1GetContainerImageSbomResponse defines model for runtime.v1.GetContainerImageSbomResponse.
+type RuntimeV1GetContainerImageSbomResponse struct {
+	// ImageProfile Whether the image has a runtime profile available.
+	ImageProfile *bool `json:"imageProfile,omitempty"`
+
+	// ImageSbom The SBOM with the packages used by the image in the specified format.
+	ImageSbom *map[string]interface{} `json:"imageSbom,omitempty"`
 }
 
 // RuntimeV1GetListEntriesResponse defines model for runtime.v1.GetListEntriesResponse.
@@ -6188,11 +6245,28 @@ type WorkloadoptimizationV1Container struct {
 	Resources         *WorkloadoptimizationV1Resources `json:"resources,omitempty"`
 }
 
+// WorkloadoptimizationV1ContainerConfig ContainerConfig defines configuration settings for a specific container within a workload.
+type WorkloadoptimizationV1ContainerConfig struct {
+	ContainerName string `json:"containerName"`
+
+	// Cpu ContainerConstraintsV3 defines min and max resource constraints for container recommendations.
+	Cpu *WorkloadoptimizationV1ContainerConstraintsV3 `json:"cpu,omitempty"`
+
+	// Jvm JVMRuntimeConfiguration defines set of settings that enables and configures for JVM optimization.
+	Jvm *WorkloadoptimizationV1JVMRuntimeConfiguration `json:"jvm,omitempty"`
+
+	// Memory ContainerConstraintsV3 defines min and max resource constraints for container recommendations.
+	Memory *WorkloadoptimizationV1ContainerConstraintsV3 `json:"memory,omitempty"`
+}
+
 // WorkloadoptimizationV1ContainerConfigUpdate defines model for workloadoptimization.v1.ContainerConfigUpdate.
 type WorkloadoptimizationV1ContainerConfigUpdate struct {
 	ContainerName string                                      `json:"containerName"`
 	Cpu           *WorkloadoptimizationV1ResourceConfigUpdate `json:"cpu,omitempty"`
-	Memory        *WorkloadoptimizationV1ResourceConfigUpdate `json:"memory,omitempty"`
+
+	// Jvm JVMRuntimeConfigurationUpdate defines set of settings that enables and configures for JVM optimization.
+	Jvm    *WorkloadoptimizationV1JVMRuntimeConfigurationUpdate `json:"jvm,omitempty"`
+	Memory *WorkloadoptimizationV1ResourceConfigUpdate          `json:"memory,omitempty"`
 }
 
 // WorkloadoptimizationV1ContainerConstraints defines model for workloadoptimization.v1.ContainerConstraints.
@@ -6208,6 +6282,15 @@ type WorkloadoptimizationV1ContainerConstraintsV2 struct {
 	ContainerName string                             `json:"containerName"`
 	Cpu           *WorkloadoptimizationV1Constraints `json:"cpu,omitempty"`
 	Memory        *WorkloadoptimizationV1Constraints `json:"memory,omitempty"`
+}
+
+// WorkloadoptimizationV1ContainerConstraintsV3 ContainerConstraintsV3 defines min and max resource constraints for container recommendations.
+type WorkloadoptimizationV1ContainerConstraintsV3 struct {
+	// Max Max values for the recommendation. For memory - this is in MiB, for CPU - this is in cores.
+	Max *float64 `json:"max"`
+
+	// Min Min values for the recommendation. For memory - this is in MiB, for CPU - this is in cores.
+	Min *float64 `json:"min"`
 }
 
 // WorkloadoptimizationV1ContainerResourceMetricSource defines model for workloadoptimization.v1.ContainerResourceMetricSource.
@@ -6313,6 +6396,20 @@ type WorkloadoptimizationV1GetWorkloadEventResponse struct {
 type WorkloadoptimizationV1GetWorkloadResponse struct {
 	Metrics  *WorkloadoptimizationV1WorkloadMetrics `json:"metrics,omitempty"`
 	Workload WorkloadoptimizationV1Workload         `json:"workload"`
+}
+
+// WorkloadoptimizationV1GetWorkloadSpecResponse defines model for workloadoptimization.v1.GetWorkloadSpecResponse.
+type WorkloadoptimizationV1GetWorkloadSpecResponse struct {
+	ClusterId      string                 `json:"clusterId"`
+	Group          string                 `json:"group"`
+	Id             string                 `json:"id"`
+	IsCustom       bool                   `json:"isCustom"`
+	Kind           string                 `json:"kind"`
+	Name           string                 `json:"name"`
+	Namespace      string                 `json:"namespace"`
+	Object         map[string]interface{} `json:"object"`
+	OrganizationId string                 `json:"organizationId"`
+	Version        string                 `json:"version"`
 }
 
 // WorkloadoptimizationV1GetWorkloadsSummaryMetricsResponse defines model for workloadoptimization.v1.GetWorkloadsSummaryMetricsResponse.
@@ -6452,6 +6549,24 @@ type WorkloadoptimizationV1InitiatedBy struct {
 	Email *string `json:"email"`
 	Id    string  `json:"id"`
 	Name  *string `json:"name"`
+}
+
+// WorkloadoptimizationV1JVMRuntimeConfiguration JVMRuntimeConfiguration defines set of settings that enables and configures for JVM optimization.
+type WorkloadoptimizationV1JVMRuntimeConfiguration struct {
+	// Enabled Flag to enable JVM optimization.
+	Enabled *bool `json:"enabled"`
+
+	// OptionsEnvVar Name of environment variable with JVM parameters that will be injected to container (defaults to JAVA_OPTS if not set).
+	OptionsEnvVar *string `json:"optionsEnvVar"`
+}
+
+// WorkloadoptimizationV1JVMRuntimeConfigurationUpdate JVMRuntimeConfigurationUpdate defines set of settings that enables and configures for JVM optimization.
+type WorkloadoptimizationV1JVMRuntimeConfigurationUpdate struct {
+	// Enabled Flag to enable JVM optimization.
+	Enabled *bool `json:"enabled"`
+
+	// OptionsEnvVar Name of environment variable with JVM parameters that will be injected to container (defaults to JAVA_OPTS if not set).
+	OptionsEnvVar *string `json:"optionsEnvVar"`
 }
 
 // WorkloadoptimizationV1KeyValuePair defines model for workloadoptimization.v1.KeyValuePair.
@@ -7073,8 +7188,14 @@ type WorkloadoptimizationV1VPAConfig struct {
 	AntiAffinity         WorkloadoptimizationV1AntiAffinitySettings   `json:"antiAffinity"`
 	ApplyType            WorkloadoptimizationV1ApplyType              `json:"applyType"`
 	ContainerConstraints []WorkloadoptimizationV1ContainerConstraints `json:"containerConstraints"`
-	Cpu                  WorkloadoptimizationV1ResourceConfig         `json:"cpu"`
-	Downscaling          *WorkloadoptimizationV1DownscalingSettings   `json:"downscaling,omitempty"`
+
+	// Containers The containers configuration for the workload.
+	Containers  []WorkloadoptimizationV1ContainerConfig    `json:"containers"`
+	Cpu         WorkloadoptimizationV1ResourceConfig       `json:"cpu"`
+	Downscaling *WorkloadoptimizationV1DownscalingSettings `json:"downscaling,omitempty"`
+
+	// Jvm JVMRuntimeConfiguration defines set of settings that enables and configures for JVM optimization.
+	Jvm *WorkloadoptimizationV1JVMRuntimeConfiguration `json:"jvm,omitempty"`
 
 	// ManagementOption Defines possible options for workload management.
 	// READ_ONLY - workload watched (metrics collected), but no actions may be performed by CAST AI.
@@ -7091,6 +7212,9 @@ type WorkloadoptimizationV1VPAConfigUpdate struct {
 	ContainerConfig *[]WorkloadoptimizationV1ContainerConfigUpdate      `json:"containerConfig,omitempty"`
 	Cpu             *WorkloadoptimizationV1WorkloadResourceConfigUpdate `json:"cpu,omitempty"`
 
+	// Jvm JVMRuntimeConfigurationUpdate defines set of settings that enables and configures for JVM optimization.
+	Jvm *WorkloadoptimizationV1JVMRuntimeConfigurationUpdate `json:"jvm,omitempty"`
+
 	// ManagementOption Defines possible options for workload management.
 	// READ_ONLY - workload watched (metrics collected), but no actions may be performed by CAST AI.
 	// MANAGED - workload watched (metrics collected), CAST AI may perform actions on the workload.
@@ -7106,10 +7230,16 @@ type WorkloadoptimizationV1VerticalOverrides struct {
 	ApplyType    *WorkloadoptimizationV1ApplyType            `json:"applyType,omitempty"`
 	Confidence   *WorkloadoptimizationV1ConfidenceSettings   `json:"confidence,omitempty"`
 
-	// ContainerConstraints Defines container specific overrides.
+	// ContainerConstraints Deprecated (use ContainerConfig containers instead), defines container specific overrides.
 	ContainerConstraints *[]WorkloadoptimizationV1ContainerConstraintsV2 `json:"containerConstraints,omitempty"`
-	Cpu                  *WorkloadoptimizationV1ResourceConfigOverrides  `json:"cpu,omitempty"`
-	Downscaling          *WorkloadoptimizationV1DownscalingSettings      `json:"downscaling,omitempty"`
+
+	// Containers The containers configuration for the workload.
+	Containers  *[]WorkloadoptimizationV1ContainerConfig       `json:"containers,omitempty"`
+	Cpu         *WorkloadoptimizationV1ResourceConfigOverrides `json:"cpu,omitempty"`
+	Downscaling *WorkloadoptimizationV1DownscalingSettings     `json:"downscaling,omitempty"`
+
+	// Jvm JVMRuntimeConfiguration defines set of settings that enables and configures for JVM optimization.
+	Jvm *WorkloadoptimizationV1JVMRuntimeConfiguration `json:"jvm,omitempty"`
 
 	// ManagementOption Defines possible options for workload management.
 	// READ_ONLY - workload watched (metrics collected), but no actions may be performed by CAST AI.
@@ -7239,6 +7369,9 @@ type WorkloadoptimizationV1WorkloadRecommendation struct {
 	// Confidence Defines the confidence of the recommendation. Value between 0 and 1. 1 means max confidence, 0 means no confidence.
 	// This value indicates how many metrics were collected versus expected for the workload, given the recommendation configuration.
 	Confidence float64 `json:"confidence"`
+
+	// EstimatedThresholdReachedAt Estimated time in seconds to reach confidence threshold.
+	EstimatedThresholdReachedAt *time.Time `json:"estimatedThresholdReachedAt"`
 
 	// Events Recommendation events.
 	Events  []WorkloadoptimizationV1RecommendationEvent `json:"events"`
@@ -7575,6 +7708,9 @@ type ExternalClusterAPIGetCredentialsScriptParams struct {
 
 	// InstallWorkloadAutoscaler Whether CAST AI Workload Autoscaler should be installed.
 	InstallWorkloadAutoscaler *bool `form:"installWorkloadAutoscaler,omitempty" json:"installWorkloadAutoscaler,omitempty"`
+
+	// InstallPodMutator Whether CAST AI Pod Mutator should be installed.
+	InstallPodMutator *bool `form:"installPodMutator,omitempty" json:"installPodMutator,omitempty"`
 }
 
 // ExternalClusterAPIListNodesParams defines parameters for ExternalClusterAPIListNodes.
@@ -7642,7 +7778,24 @@ type RbacServiceAPIListRoleBindingsParams struct {
 	// ScopeId Filter by scope ID. Multiple values can be passed as query parameters
 	// (e.g., &scope_id=x&scope_id=y)
 	ScopeId *[]string `form:"scopeId,omitempty" json:"scopeId,omitempty"`
+
+	// ScopeType Filter by scope type. Multiple values can be passed as query parameters
+	// (e.g., &scope_type=x&scope_type=y)
+	//
+	//  - ORGANIZATION: Organization scope represents the organization level authentication (Organization -> ResourceID)
+	//  - CLUSTER: Cluster scope represents the cluster level authentication (Organization -> Cluster -> ResourceID)
+	ScopeType *[]RbacServiceAPIListRoleBindingsParamsScopeType `form:"scopeType,omitempty" json:"scopeType,omitempty"`
+
+	// SubjectType Filter by subject type. Multiple values can be passed as query parameters
+	// (e.g., &subject_type=x&subject_type=y)
+	SubjectType *[]RbacServiceAPIListRoleBindingsParamsSubjectType `form:"subjectType,omitempty" json:"subjectType,omitempty"`
 }
+
+// RbacServiceAPIListRoleBindingsParamsScopeType defines parameters for RbacServiceAPIListRoleBindings.
+type RbacServiceAPIListRoleBindingsParamsScopeType string
+
+// RbacServiceAPIListRoleBindingsParamsSubjectType defines parameters for RbacServiceAPIListRoleBindings.
+type RbacServiceAPIListRoleBindingsParamsSubjectType string
 
 // RbacServiceAPICreateRoleBindingsJSONBody defines parameters for RbacServiceAPICreateRoleBindings.
 type RbacServiceAPICreateRoleBindingsJSONBody = []CastaiRbacV1beta1CreateRoleBindingsRequestRoleBinding
@@ -8076,6 +8229,19 @@ type RuntimeSecurityAPIGetRulesParamsSeverity string
 
 // RuntimeSecurityAPIGetRulesParamsSortOrder defines parameters for RuntimeSecurityAPIGetRules.
 type RuntimeSecurityAPIGetRulesParamsSortOrder string
+
+// RuntimeSecurityAPIGetContainerImageSbomParams defines parameters for RuntimeSecurityAPIGetContainerImageSbom.
+type RuntimeSecurityAPIGetContainerImageSbomParams struct {
+	// SbomFormat The format in which the SBOM should be returned. Supported formats are:
+	//   - application/vnd.cyclonedx+json;version=1.6
+	//   - text/spdx+json;version=2.3
+	// If not provided, the default is "application/vnd.cyclonedx+json;version=1.6".
+	SbomFormat *string `form:"sbomFormat,omitempty" json:"sbomFormat,omitempty"`
+
+	// OnlyRuntimePackages Whether to include only packages in-use in the SBOM.
+	// If not provided, the default is false.
+	OnlyRuntimePackages *bool `form:"onlyRuntimePackages,omitempty" json:"onlyRuntimePackages,omitempty"`
+}
 
 // RuntimeSecurityAPIGetClusterWorkloadsNetflowParams defines parameters for RuntimeSecurityAPIGetClusterWorkloadsNetflow.
 type RuntimeSecurityAPIGetClusterWorkloadsNetflowParams struct {
