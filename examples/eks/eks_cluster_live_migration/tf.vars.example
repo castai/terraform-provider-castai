@@ -1,3 +1,6 @@
 cluster_name     = "<place-holder>"
 cluster_region   = "<place-holder>"
 castai_api_token = "<place-holder>"
+
+live_proxy_version = "0.36.0"
+live_helm_version = "0.36.0"
