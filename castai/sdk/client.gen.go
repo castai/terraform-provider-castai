@@ -831,6 +831,9 @@ type ClientInterface interface {
 	// WorkloadOptimizationAPIGetWorkloadSpec request
 	WorkloadOptimizationAPIGetWorkloadSpec(ctx context.Context, clusterId string, workloadId string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// WorkloadOptimizationAPIGetOrganizationAgentStatuses request
+	WorkloadOptimizationAPIGetOrganizationAgentStatuses(ctx context.Context, organizationId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// WorkloadOptimizationAPIGetInstallCmd request
 	WorkloadOptimizationAPIGetInstallCmd(ctx context.Context, params *WorkloadOptimizationAPIGetInstallCmdParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -4081,6 +4084,18 @@ func (c *Client) WorkloadOptimizationAPIGetWorkload(ctx context.Context, cluster
 
 func (c *Client) WorkloadOptimizationAPIGetWorkloadSpec(ctx context.Context, clusterId string, workloadId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewWorkloadOptimizationAPIGetWorkloadSpecRequest(c.Server, clusterId, workloadId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) WorkloadOptimizationAPIGetOrganizationAgentStatuses(ctx context.Context, organizationId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewWorkloadOptimizationAPIGetOrganizationAgentStatusesRequest(c.Server, organizationId)
 	if err != nil {
 		return nil, err
 	}
@@ -7778,6 +7793,22 @@ func NewExternalClusterAPIGetCredentialsScriptRequest(server string, clusterId s
 		if params.InstallPodMutator != nil {
 
 			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "installPodMutator", runtime.ParamLocationQuery, *params.InstallPodMutator); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.InstallOmni != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "installOmni", runtime.ParamLocationQuery, *params.InstallOmni); err != nil {
 				return nil, err
 			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
 				return nil, err
@@ -15565,6 +15596,40 @@ func NewWorkloadOptimizationAPIGetWorkloadSpecRequest(server string, clusterId s
 	return req, nil
 }
 
+// NewWorkloadOptimizationAPIGetOrganizationAgentStatusesRequest generates requests for WorkloadOptimizationAPIGetOrganizationAgentStatuses
+func NewWorkloadOptimizationAPIGetOrganizationAgentStatusesRequest(server string, organizationId string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "organizationId", runtime.ParamLocationPath, organizationId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/workload-autoscaling/organizations/%s/components/workload-autoscaler", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 // NewWorkloadOptimizationAPIGetInstallCmdRequest generates requests for WorkloadOptimizationAPIGetInstallCmd
 func NewWorkloadOptimizationAPIGetInstallCmdRequest(server string, params *WorkloadOptimizationAPIGetInstallCmdParams) (*http.Request, error) {
 	var err error
@@ -16664,6 +16729,9 @@ type ClientWithResponsesInterface interface {
 
 	// WorkloadOptimizationAPIGetWorkloadSpec request
 	WorkloadOptimizationAPIGetWorkloadSpecWithResponse(ctx context.Context, clusterId string, workloadId string) (*WorkloadOptimizationAPIGetWorkloadSpecResponse, error)
+
+	// WorkloadOptimizationAPIGetOrganizationAgentStatuses request
+	WorkloadOptimizationAPIGetOrganizationAgentStatusesWithResponse(ctx context.Context, organizationId string) (*WorkloadOptimizationAPIGetOrganizationAgentStatusesResponse, error)
 
 	// WorkloadOptimizationAPIGetInstallCmd request
 	WorkloadOptimizationAPIGetInstallCmdWithResponse(ctx context.Context, params *WorkloadOptimizationAPIGetInstallCmdParams) (*WorkloadOptimizationAPIGetInstallCmdResponse, error)
@@ -22722,6 +22790,36 @@ func (r WorkloadOptimizationAPIGetWorkloadSpecResponse) GetBody() []byte {
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
+type WorkloadOptimizationAPIGetOrganizationAgentStatusesResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *WorkloadoptimizationV1GetOrganizationAgentStatusesResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r WorkloadOptimizationAPIGetOrganizationAgentStatusesResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r WorkloadOptimizationAPIGetOrganizationAgentStatusesResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r WorkloadOptimizationAPIGetOrganizationAgentStatusesResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
 type WorkloadOptimizationAPIGetInstallCmdResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -25230,6 +25328,15 @@ func (c *ClientWithResponses) WorkloadOptimizationAPIGetWorkloadSpecWithResponse
 		return nil, err
 	}
 	return ParseWorkloadOptimizationAPIGetWorkloadSpecResponse(rsp)
+}
+
+// WorkloadOptimizationAPIGetOrganizationAgentStatusesWithResponse request returning *WorkloadOptimizationAPIGetOrganizationAgentStatusesResponse
+func (c *ClientWithResponses) WorkloadOptimizationAPIGetOrganizationAgentStatusesWithResponse(ctx context.Context, organizationId string) (*WorkloadOptimizationAPIGetOrganizationAgentStatusesResponse, error) {
+	rsp, err := c.WorkloadOptimizationAPIGetOrganizationAgentStatuses(ctx, organizationId)
+	if err != nil {
+		return nil, err
+	}
+	return ParseWorkloadOptimizationAPIGetOrganizationAgentStatusesResponse(rsp)
 }
 
 // WorkloadOptimizationAPIGetInstallCmdWithResponse request returning *WorkloadOptimizationAPIGetInstallCmdResponse
@@ -30480,6 +30587,32 @@ func ParseWorkloadOptimizationAPIGetWorkloadSpecResponse(rsp *http.Response) (*W
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest WorkloadoptimizationV1GetWorkloadSpecResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseWorkloadOptimizationAPIGetOrganizationAgentStatusesResponse parses an HTTP response from a WorkloadOptimizationAPIGetOrganizationAgentStatusesWithResponse call
+func ParseWorkloadOptimizationAPIGetOrganizationAgentStatusesResponse(rsp *http.Response) (*WorkloadOptimizationAPIGetOrganizationAgentStatusesResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &WorkloadOptimizationAPIGetOrganizationAgentStatusesResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest WorkloadoptimizationV1GetOrganizationAgentStatusesResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
