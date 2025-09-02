@@ -1027,7 +1027,7 @@ func flattenEKSConfig(config *sdk.NodeconfigV1EKSConfig) []map[string]interface{
 		m["ips_per_prefix"] = *config.IpsPerPrefix
 	}
 
-	if v := config.ImdsV1; v != nil {
+	if v := config.ThreadsPerCpu; v != nil {
 		m["threads_per_cpu"] = *config.ThreadsPerCpu
 	}
 
