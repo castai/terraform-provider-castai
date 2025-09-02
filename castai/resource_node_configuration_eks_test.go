@@ -56,6 +56,7 @@ func TestAccResourceNodeConfiguration_eks(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "kops.#", "0"),
 					resource.TestCheckResourceAttr(resourceName, "gke.#", "0"),
 					resource.TestCheckResourceAttr(resourceName, "eks.0.node_group_arn", "arn:aws:iam::000000000000:role/aws_node_group"),
+					resource.TestCheckResourceAttr(resourceName, "eks.0.threads_per_cpu", "1"),
 				),
 			},
 			{
@@ -146,6 +147,7 @@ resource "castai_node_configuration" "test" {
 	  target_group {
 	    arn = "arn:aws:test"
     }
+		threads_per_cpu = 1
   }
 }
 

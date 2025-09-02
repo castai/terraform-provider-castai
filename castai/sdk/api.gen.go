@@ -1222,6 +1222,15 @@ type CastaiInventoryV1beta1BatchUpdateCommitmentsResponse struct {
 	Commitments *[]CastaiInventoryV1beta1Commitment `json:"commitments,omitempty"`
 }
 
+// CastaiInventoryV1beta1CPUInfo defines model for castai.inventory.v1beta1.CPUInfo.
+type CastaiInventoryV1beta1CPUInfo struct {
+	// DefaultCores Specifies the default number of physical cores for the instance type. Only for AWS.
+	DefaultCores *int32 `json:"defaultCores,omitempty"`
+
+	// ValidThreadsPerCore Specifies the valid threads per core for the instance type. Only for AWS.
+	ValidThreadsPerCore *[]int32 `json:"validThreadsPerCore,omitempty"`
+}
+
 // CastaiInventoryV1beta1CPUPlatform CPUPlatform describes the CPU platforms the instance type can be equipped with.
 type CastaiInventoryV1beta1CPUPlatform struct {
 	// AllCoreTurboFrequency All Core Turbo Frequency (GHz). Only available for GCP.
@@ -1539,6 +1548,7 @@ type CastaiInventoryV1beta1InstanceType struct {
 	Burstable        *bool                                           `json:"burstable,omitempty"`
 	CastChoice       *bool                                           `json:"castChoice,omitempty"`
 	ComputeOptimized *bool                                           `json:"computeOptimized,omitempty"`
+	CpuInfo          *CastaiInventoryV1beta1CPUInfo                  `json:"cpuInfo,omitempty"`
 
 	// CpuManufacturers Describes the manufacturers of the CPUs the instance type can be equipped with.
 	CpuManufacturers *[]CastaiInventoryV1beta1InstanceTypeCPUManufacturer `json:"cpuManufacturers,omitempty"`
@@ -2900,6 +2910,7 @@ type CastaiUsersV1beta1User struct {
 
 	// ReferVisit (optional) refer_visit is unique identifier of the visit in the referral partner system.
 	ReferVisit *int32 `json:"referVisit"`
+	ScimActive *bool  `json:"scimActive"`
 
 	// Username (required) username, corresponds to auth0 user id.
 	Username string `json:"username"`
@@ -3610,37 +3621,6 @@ type CostreportV1beta1Resources struct {
 	MemoryGib string `json:"memoryGib"`
 }
 
-// DboV1BlockStats defines model for dbo.v1.BlockStats.
-type DboV1BlockStats struct {
-	LocalDirtiedBlocks  string `json:"localDirtiedBlocks"`
-	LocalHitBlocks      string `json:"localHitBlocks"`
-	LocalReadBlocks     string `json:"localReadBlocks"`
-	LocalWrittenBlocks  string `json:"localWrittenBlocks"`
-	SharedDirtiedBlocks string `json:"sharedDirtiedBlocks"`
-	SharedHitBlocks     string `json:"sharedHitBlocks"`
-	SharedReadBlocks    string `json:"sharedReadBlocks"`
-	SharedWrittenBlocks string `json:"sharedWrittenBlocks"`
-	TempReadBlocks      string `json:"tempReadBlocks"`
-	TempWrittenBlocks   string `json:"tempWrittenBlocks"`
-}
-
-// DboV1Plan defines model for dbo.v1.Plan.
-type DboV1Plan struct {
-	Alias              *string         `json:"alias"`
-	BlockStats         DboV1BlockStats `json:"blockStats"`
-	NodeType           string          `json:"nodeType"`
-	Output             *[]string       `json:"output,omitempty"`
-	ParallelAware      bool            `json:"parallelAware"`
-	ParentRelationship *string         `json:"parentRelationship"`
-	PlanRows           string          `json:"planRows"`
-	PlanWidth          string          `json:"planWidth"`
-	Plans              *[]DboV1Plan    `json:"plans,omitempty"`
-	RelationName       *string         `json:"relationName"`
-	Schema             *string         `json:"schema"`
-	StartupCost        float64         `json:"startupCost"`
-	TotalCost          float64         `json:"totalCost"`
-}
-
 // ExternalclusterV1AKSClusterParams AKSClusterParams defines AKS-specific arguments.
 type ExternalclusterV1AKSClusterParams struct {
 	// ClusterResourceGroup Azure cluster resource group.
@@ -3920,6 +3900,15 @@ type ExternalclusterV1EKSClusterParams struct {
 	Tags *map[string]string `json:"tags,omitempty"`
 }
 
+// ExternalclusterV1EdgeConfig EdgeConfig holds Edge specific configuration.
+type ExternalclusterV1EdgeConfig struct {
+	// ConfigurationId ID of the Edge configuration.
+	ConfigurationId *string `json:"configurationId"`
+
+	// LocationId Edge location ID.
+	LocationId *string `json:"locationId,omitempty"`
+}
+
 // ExternalclusterV1GCPCreateSARequestAKSClusterParams AKSClusterParams is a placeholder for future use.
 type ExternalclusterV1GCPCreateSARequestAKSClusterParams = map[string]interface{}
 
@@ -4135,6 +4124,9 @@ type ExternalclusterV1NodeConfig struct {
 	// Superseded if Configuration ID reference is provided.
 	// Request will fail if several configurations with same name exists for a given cluster.
 	ConfigurationName *string `json:"configurationName"`
+
+	// EdgeConfig EdgeConfig holds Edge specific configuration.
+	EdgeConfig *ExternalclusterV1EdgeConfig `json:"edgeConfig,omitempty"`
 
 	// GpuConfig GPUConfig describes instance GPU configuration.
 	//
@@ -4595,6 +4587,9 @@ type NodeconfigV1EKSConfig struct {
 	// TargetGroups TargetGroups defines a list of load balancer target groups to register cluster instances into.
 	TargetGroups *[]NodeconfigV1TargetGroup `json:"targetGroups,omitempty"`
 
+	// ThreadsPerCpu Controls if cpu threading is enabled (default true).
+	ThreadsPerCpu *int32 `json:"threadsPerCpu"`
+
 	// VolumeIops EBS volume IOPS value to be used for provisioned nodes.
 	VolumeIops      *int32  `json:"volumeIops"`
 	VolumeKmsKeyArn *string `json:"volumeKmsKeyArn"`
@@ -5009,6 +5004,7 @@ type NodetemplatesV1ListNodeTemplatesResponse struct {
 
 // NodetemplatesV1NewNodeTemplate defines model for nodetemplates.v1.NewNodeTemplate.
 type NodetemplatesV1NewNodeTemplate struct {
+	ClmEnabled                               *bool                               `json:"clmEnabled"`
 	ConfigurationId                          *string                             `json:"configurationId,omitempty"`
 	Constraints                              *NodetemplatesV1TemplateConstraints `json:"constraints,omitempty"`
 	CustomInstancesEnabled                   *bool                               `json:"customInstancesEnabled"`
@@ -5021,7 +5017,10 @@ type NodetemplatesV1NewNodeTemplate struct {
 
 	// CustomTaints Custom taints for the template.
 	CustomTaints *[]NodetemplatesV1TaintWithOptionalEffect `json:"customTaints,omitempty"`
-	Gpu          *NodetemplatesV1GPU                       `json:"gpu,omitempty"`
+
+	// EdgeLocationIds List of associated edge location IDs.
+	EdgeLocationIds *[]string           `json:"edgeLocationIds,omitempty"`
+	Gpu             *NodetemplatesV1GPU `json:"gpu,omitempty"`
 
 	// IsDefault Flag whether this template is the default template for the cluster.
 	IsDefault *bool `json:"isDefault,omitempty"`
@@ -5052,7 +5051,10 @@ type NodetemplatesV1NodeTemplate struct {
 
 	// CustomTaints Custom taints for the template.
 	CustomTaints *[]NodetemplatesV1Taint `json:"customTaints,omitempty"`
-	Gpu          *NodetemplatesV1GPU     `json:"gpu,omitempty"`
+
+	// EdgeLocationIds List of associated edge location IDs.
+	EdgeLocationIds *[]string           `json:"edgeLocationIds,omitempty"`
+	Gpu             *NodetemplatesV1GPU `json:"gpu,omitempty"`
 
 	// IsDefault Flag whether this template is the default template for the cluster.
 	IsDefault *bool `json:"isDefault,omitempty"`
@@ -5274,7 +5276,10 @@ type NodetemplatesV1UpdateNodeTemplate struct {
 
 	// CustomTaints Custom taints for the template.
 	CustomTaints *[]NodetemplatesV1TaintWithOptionalEffect `json:"customTaints,omitempty"`
-	Gpu          *NodetemplatesV1GPU                       `json:"gpu,omitempty"`
+
+	// EdgeLocationIds List of associated edge location IDs.
+	EdgeLocationIds *[]string           `json:"edgeLocationIds,omitempty"`
+	Gpu             *NodetemplatesV1GPU `json:"gpu,omitempty"`
 
 	// IsDefault Flag whether this template is the default template for the cluster.
 	IsDefault *bool `json:"isDefault,omitempty"`
@@ -6371,6 +6376,7 @@ type WorkloadoptimizationV1FailedHookEvent struct {
 // WorkloadoptimizationV1GetAgentStatusResponse defines model for workloadoptimization.v1.GetAgentStatusResponse.
 type WorkloadoptimizationV1GetAgentStatusResponse struct {
 	CastAgentCurrentVersion          *string `json:"castAgentCurrentVersion"`
+	ClusterId                        string  `json:"clusterId"`
 	CurrentVersion                   *string `json:"currentVersion"`
 	HpaSupportedFromCastAgentVersion *string `json:"hpaSupportedFromCastAgentVersion"`
 	LatestVersion                    *string `json:"latestVersion"`
@@ -6385,6 +6391,11 @@ type WorkloadoptimizationV1GetAgentStatusResponseAgentStatus string
 // WorkloadoptimizationV1GetInstallCmdResponse defines model for workloadoptimization.v1.GetInstallCmdResponse.
 type WorkloadoptimizationV1GetInstallCmdResponse struct {
 	Script string `json:"script"`
+}
+
+// WorkloadoptimizationV1GetOrganizationAgentStatusesResponse defines model for workloadoptimization.v1.GetOrganizationAgentStatusesResponse.
+type WorkloadoptimizationV1GetOrganizationAgentStatusesResponse struct {
+	ClusterAgentStatuses []WorkloadoptimizationV1GetAgentStatusResponse `json:"clusterAgentStatuses"`
 }
 
 // WorkloadoptimizationV1GetWorkloadEventResponse defines model for workloadoptimization.v1.GetWorkloadEventResponse.
@@ -7293,11 +7304,14 @@ type WorkloadoptimizationV1Workload struct {
 	Recommendation     *WorkloadoptimizationV1WorkloadRecommendation `json:"recommendation,omitempty"`
 
 	// Replicas The number of replicas the workload should have, as defined on the workload spec.
-	Replicas          int32     `json:"replicas"`
-	ScalingPolicyId   string    `json:"scalingPolicyId"`
-	ScalingPolicyName string    `json:"scalingPolicyName"`
-	UpdatedAt         time.Time `json:"updatedAt"`
-	Version           string    `json:"version"`
+	Replicas                   int32     `json:"replicas"`
+	ScalingPolicyId            string    `json:"scalingPolicyId"`
+	ScalingPolicyName          string    `json:"scalingPolicyName"`
+	ScalingPolicyOrigin        string    `json:"scalingPolicyOrigin"`
+	SuggestedScalingPolicyId   *string   `json:"suggestedScalingPolicyId"`
+	SuggestedScalingPolicyName *string   `json:"suggestedScalingPolicyName"`
+	UpdatedAt                  time.Time `json:"updatedAt"`
+	Version                    string    `json:"version"`
 
 	// WoopHpaUnsupportedReason Reason for unsupported WOOP HPA.
 	WoopHpaUnsupportedReason *string                                  `json:"woopHpaUnsupportedReason"`
@@ -7487,6 +7501,9 @@ type AllocationGroupAPIGetAllocationGroupCostTimedSummariesParams struct {
 
 	// GroupId Allocation group ID. Leave empty for the full list.
 	GroupId *string `form:"groupId,omitempty" json:"groupId,omitempty"`
+
+	// UseListingPrices Whether to use listing prices instead of actual prices for cost calculations.
+	UseListingPrices *bool `form:"useListingPrices,omitempty" json:"useListingPrices,omitempty"`
 }
 
 // AllocationGroupAPIGetAllocationGroupCostSummariesParams defines parameters for AllocationGroupAPIGetAllocationGroupCostSummaries.
@@ -7502,6 +7519,9 @@ type AllocationGroupAPIGetAllocationGroupCostSummariesParams struct {
 
 	// GroupId Allocation group ID. Leave empty for the full list.
 	GroupId *string `form:"groupId,omitempty" json:"groupId,omitempty"`
+
+	// UseListingPrices Whether to use listing prices instead of actual prices for cost calculations.
+	UseListingPrices *bool `form:"useListingPrices,omitempty" json:"useListingPrices,omitempty"`
 }
 
 // AllocationGroupAPIGetAllocationGroupTotalCostTimedParams defines parameters for AllocationGroupAPIGetAllocationGroupTotalCostTimed.
@@ -7519,6 +7539,9 @@ type AllocationGroupAPIGetAllocationGroupTotalCostTimedParams struct {
 	// PageCursor Cursor that defines token indicating where to start the next page.
 	// Empty value indicates to start from beginning of the dataset.
 	PageCursor *string `form:"page.cursor,omitempty" json:"page.cursor,omitempty"`
+
+	// UseListingPrices Whether to use listing prices instead of actual prices for cost calculations.
+	UseListingPrices *bool `form:"useListingPrices,omitempty" json:"useListingPrices,omitempty"`
 }
 
 // AllocationGroupAPIListAllocationGroupsParams defines parameters for AllocationGroupAPIListAllocationGroups.
@@ -7549,6 +7572,9 @@ type AllocationGroupAPIGetAllocationGroupEfficiencySummaryParams struct {
 
 	// ClusterIds Cluster IDs for filtering. Leave empty for the full list.
 	ClusterIds *[]string `form:"clusterIds,omitempty" json:"clusterIds,omitempty"`
+
+	// UseListingPrices Whether to use listing prices instead of actual prices for cost calculations.
+	UseListingPrices *bool `form:"useListingPrices,omitempty" json:"useListingPrices,omitempty"`
 }
 
 // AllocationGroupAPIGetCostAllocationGroupSummaryParams defines parameters for AllocationGroupAPIGetCostAllocationGroupSummary.
@@ -7598,6 +7624,9 @@ type AllocationGroupAPIGetAllocationGroupWorkloadCostsParams struct {
 	//  - DESC: ASC
 	//  - desc: desc
 	SortOrder *AllocationGroupAPIGetAllocationGroupWorkloadCostsParamsSortOrder `form:"sort.order,omitempty" json:"sort.order,omitempty"`
+
+	// UseListingPrices Whether to use listing prices instead of actual prices for cost calculations.
+	UseListingPrices *bool `form:"useListingPrices,omitempty" json:"useListingPrices,omitempty"`
 }
 
 // AllocationGroupAPIGetAllocationGroupWorkloadCostsParamsSortOrder defines parameters for AllocationGroupAPIGetAllocationGroupWorkloadCosts.
@@ -7629,6 +7658,9 @@ type AllocationGroupAPIGetAllocationGroupWorkloadsEfficiencyParams struct {
 	//  - DESC: ASC
 	//  - desc: desc
 	SortOrder *AllocationGroupAPIGetAllocationGroupWorkloadsEfficiencyParamsSortOrder `form:"sort.order,omitempty" json:"sort.order,omitempty"`
+
+	// UseListingPrices Whether to use listing prices instead of actual prices for cost calculations.
+	UseListingPrices *bool `form:"useListingPrices,omitempty" json:"useListingPrices,omitempty"`
 }
 
 // AllocationGroupAPIGetAllocationGroupWorkloadsEfficiencyParamsSortOrder defines parameters for AllocationGroupAPIGetAllocationGroupWorkloadsEfficiency.
@@ -7711,6 +7743,9 @@ type ExternalClusterAPIGetCredentialsScriptParams struct {
 
 	// InstallPodMutator Whether CAST AI Pod Mutator should be installed.
 	InstallPodMutator *bool `form:"installPodMutator,omitempty" json:"installPodMutator,omitempty"`
+
+	// InstallOmni Whether cluster should be onboarded with CAST AI Omni.
+	InstallOmni *bool `form:"installOmni,omitempty" json:"installOmni,omitempty"`
 }
 
 // ExternalClusterAPIListNodesParams defines parameters for ExternalClusterAPIListNodes.

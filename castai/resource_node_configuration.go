@@ -273,6 +273,12 @@ func resourceNodeConfiguration() *schema.Resource {
 								return oldValue == newValue
 							},
 						},
+						"threads_per_cpu": {
+							Type:             schema.TypeInt,
+							Optional:         true,
+							Description:      "Number of threads per core.",
+							ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(0, 256)),
+						},
 						FieldNodeConfigurationEKSImageFamily: {
 							Type:     schema.TypeString,
 							Optional: true,
@@ -1155,7 +1161,6 @@ func toAKSNodePublicIP(obj any) *sdk.NodeconfigV1AKSConfigPublicIP {
 	}
 
 	return publicIP
-
 }
 
 func toAKSEphemeralOSDisk(obj any) *sdk.NodeconfigV1AKSConfigOsDiskEphemeral {
@@ -1352,7 +1357,6 @@ func fromAKSNodePublicIP(sdkPublicIp *sdk.NodeconfigV1AKSConfigPublicIP) []map[s
 	}
 
 	return []map[string]any{m}
-
 }
 
 func fromAKSEphemeralOSDisk(sdkEph *sdk.NodeconfigV1AKSConfigOsDiskEphemeral) []map[string]interface{} {
@@ -1567,7 +1571,6 @@ func toGkeUnmanagedInstanceGroups(obj []interface{}) *[]sdk.NodeconfigV1GKEConfi
 	}
 
 	return &out
-
 }
 
 func flattenGKEConfig(config *sdk.NodeconfigV1GKEConfig) []map[string]interface{} {
