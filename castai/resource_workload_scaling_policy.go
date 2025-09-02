@@ -2,6 +2,7 @@ package castai
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"net/http"
 	"regexp"
@@ -9,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cenkalti/backoff/v4"
 	"github.com/samber/lo"
 
 	"github.com/google/uuid"
@@ -18,6 +20,10 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/castai/terraform-provider-castai/castai/sdk"
+)
+
+const (
+	createTimeout = 120 * time.Second
 )
 
 const (
@@ -295,7 +301,7 @@ It can be either:
 			},
 		},
 		Timeouts: &schema.ResourceTimeout{
-			Create: schema.DefaultTimeout(15 * time.Second),
+			Create: schema.DefaultTimeout(createTimeout),
 			Read:   schema.DefaultTimeout(15 * time.Second),
 			Update: schema.DefaultTimeout(15 * time.Second),
 			Delete: schema.DefaultTimeout(15 * time.Second),
@@ -578,92 +584,141 @@ func resourceWorkloadScalingPolicyCreate(ctx context.Context, d *schema.Resource
 	}
 	req.AssignmentRules = ar
 
-	create, err := client.WorkloadOptimizationAPICreateWorkloadScalingPolicyWithResponse(ctx, clusterID, req)
-	if err != nil {
+	b := backoff.WithContext(backoff.NewExponentialBackOff(), ctx)
+	var lastErr error
+	if err := backoff.RetryNotify(func() error {
+		create, createErr := client.WorkloadOptimizationAPICreateWorkloadScalingPolicyWithResponse(ctx, clusterID, req)
+		if createErr != nil {
+			return createErr
+		}
+
+		switch create.StatusCode() {
+		case http.StatusOK:
+			d.SetId(create.JSON200.Id)
+			return checkIfRetryable(fetchScalingPolicy(ctx, d, meta))
+		case http.StatusConflict:
+			policy, err := getWorkloadScalingPolicyByName(ctx, client, clusterID, req.Name)
+			if err != nil {
+				return err
+			}
+
+			if policy.IsDefault {
+				d.SetId(policy.Id)
+				return checkIfRetryable(updateScalingPolicy(ctx, d, meta))
+			}
+			return backoff.Permanent(fmt.Errorf("scaling policy with name %q already exists", req.Name))
+		default:
+			return checkIfRetryable(create, createErr)
+		}
+	}, b, func(err error, _ time.Duration) {
+		if !isInterrupt(err) {
+			tflog.Warn(ctx, "Error creating workload scaling policy", map[string]any{
+				"error": err,
+			})
+			lastErr = err
+		}
+	}); err != nil {
+		if isInterrupt(err) {
+			return diag.FromErr(lastErr)
+		}
 		return diag.FromErr(err)
 	}
+	return nil
+}
 
-	switch create.StatusCode() {
-	case http.StatusOK:
-		d.SetId(create.JSON200.Id)
-		return resourceWorkloadScalingPolicyRead(ctx, d, meta)
-	case http.StatusConflict:
-		policy, err := getWorkloadScalingPolicyByName(ctx, client, clusterID, req.Name)
-		if err != nil {
-			return diag.FromErr(err)
-		}
-		if policy.IsDefault {
-			d.SetId(policy.Id)
-			return resourceWorkloadScalingPolicyUpdate(ctx, d, meta)
-		}
-		return diag.Errorf("scaling policy with name %q already exists", req.Name)
-	default:
-		return diag.Errorf("expected status code %d, received: status=%d body=%s", http.StatusOK, create.StatusCode(), string(create.GetBody()))
+func isInterrupt(err error) bool {
+	return errors.Is(err, context.DeadlineExceeded) || errors.Is(err, context.Canceled)
+}
+
+func checkIfRetryable(response sdk.Response, err error) error {
+	if err != nil {
+		return err
 	}
+
+	if response == nil || response.StatusCode() == http.StatusOK {
+		return nil
+	}
+
+	e := fmt.Errorf("expected status code 200, received: status=%d body=%s", response.StatusCode(), string(response.GetBody()))
+	if response.StatusCode() == http.StatusBadRequest ||
+		response.StatusCode() == http.StatusUnauthorized ||
+		response.StatusCode() == http.StatusForbidden {
+		return backoff.Permanent(e)
+	}
+
+	return e
 }
 
 func resourceWorkloadScalingPolicyRead(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
+	resp, err := fetchScalingPolicy(ctx, d, meta)
+	if err = sdk.CheckOKResponse(resp, err); err != nil {
+		return diag.FromErr(err)
+	}
+	return nil
+}
+
+func fetchScalingPolicy(ctx context.Context, d *schema.ResourceData, meta any) (sdk.Response, error) {
 	client := meta.(*ProviderConfig).api
 
 	clusterID := d.Get(FieldClusterID).(string)
 	resp, err := client.WorkloadOptimizationAPIGetWorkloadScalingPolicyWithResponse(ctx, clusterID, d.Id())
 	if err != nil {
-		return diag.FromErr(err)
+		return resp, err
 	}
 
 	if !d.IsNewResource() && resp.StatusCode() == http.StatusNotFound {
 		tflog.Warn(ctx, "Scaling policy not found, removing from state", map[string]any{"id": d.Id()})
 		d.SetId("")
-		return nil
+		return nil, nil
 	}
-	if err := sdk.CheckOKResponse(resp, err); err != nil {
-		return diag.FromErr(err)
+	if resp.StatusCode() != http.StatusOK {
+		return resp, nil
 	}
 
 	sp := resp.JSON200
 
 	if err := d.Set("name", sp.Name); err != nil {
-		return diag.FromErr(fmt.Errorf("setting name: %w", err))
+		return nil, fmt.Errorf("setting name: %w", err)
 	}
 	if err := d.Set("apply_type", sp.ApplyType); err != nil {
-		return diag.FromErr(fmt.Errorf("setting apply type: %w", err))
+		return nil, fmt.Errorf("setting apply type: %w", err)
 	}
 	if err := d.Set("management_option", sp.RecommendationPolicies.ManagementOption); err != nil {
-		return diag.FromErr(fmt.Errorf("setting management option: %w", err))
+		return nil, fmt.Errorf("setting management option: %w", err)
 	}
 	if err := d.Set("cpu", toWorkloadScalingPoliciesMap(getResourceFrom(d, "cpu"), sp.RecommendationPolicies.Cpu)); err != nil {
-		return diag.FromErr(fmt.Errorf("setting cpu: %w", err))
+		return nil, fmt.Errorf("setting cpu: %w", err)
 	}
 	if err := d.Set("memory", toWorkloadScalingPoliciesMap(getResourceFrom(d, "memory"), sp.RecommendationPolicies.Memory)); err != nil {
-		return diag.FromErr(fmt.Errorf("setting memory: %w", err))
+		return nil, fmt.Errorf("setting memory: %w", err)
 	}
 	if err := d.Set("startup", toStartupMap(sp.RecommendationPolicies.Startup)); err != nil {
-		return diag.FromErr(fmt.Errorf("setting startup: %w", err))
+		return nil, fmt.Errorf("setting startup: %w", err)
 	}
 	if err := d.Set(FieldConfidence, toConfidenceMap(sp.RecommendationPolicies.Confidence)); err != nil {
-		return diag.FromErr(fmt.Errorf("setting confidence: %w", err))
+		return nil, fmt.Errorf("setting confidence: %w", err)
 	}
 	if err := d.Set("downscaling", toDownscalingMap(sp.RecommendationPolicies.Downscaling)); err != nil {
-		return diag.FromErr(fmt.Errorf("setting downscaling: %w", err))
+		return nil, fmt.Errorf("setting downscaling: %w", err)
 	}
 	if err := d.Set("memory_event", toMemoryEventMap(sp.RecommendationPolicies.MemoryEvent)); err != nil {
-		return diag.FromErr(fmt.Errorf("setting memory event: %w", err))
+		return nil, fmt.Errorf("setting memory event: %w", err)
 	}
 	if err := d.Set("anti_affinity", toAntiAffinityMap(sp.RecommendationPolicies.AntiAffinity)); err != nil {
-		return diag.FromErr(fmt.Errorf("setting anti-affinity: %w", err))
+		return nil, fmt.Errorf("setting anti-affinity: %w", err)
 	}
 	if err := d.Set(FieldPredictiveScaling, toPredictiveScalingMap(sp.RecommendationPolicies.PredictiveScaling)); err != nil {
-		return diag.FromErr(fmt.Errorf("setting predictive scaling: %w", err))
+		return nil, fmt.Errorf("setting predictive scaling: %w", err)
 	}
 	if err := d.Set(FieldRolloutBehavior, toRolloutBehaviorMap(sp.RecommendationPolicies.RolloutBehavior)); err != nil {
-		return diag.FromErr(fmt.Errorf("setting rollout behavior: %w", err))
+		return nil, fmt.Errorf("setting rollout behavior: %w", err)
 	}
 
 	if err := d.Set(FieldAssignmentRules, toAssignmentRulesMap(getResourceFrom(d, FieldAssignmentRules), sp.AssignmentRules)); err != nil {
-		return diag.FromErr(fmt.Errorf("setting assignment rules: %w", err))
+		return nil, fmt.Errorf("setting assignment rules: %w", err)
 	}
 
-	return nil
+	return nil, nil
 }
 
 func getResourceFrom(d *schema.ResourceData, resource string) map[string]any {
@@ -674,6 +729,14 @@ func getResourceFrom(d *schema.ResourceData, resource string) map[string]any {
 }
 
 func resourceWorkloadScalingPolicyUpdate(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
+	resp, err := updateScalingPolicy(ctx, d, meta)
+	if err = sdk.CheckOKResponse(resp, err); err != nil {
+		return diag.FromErr(err)
+	}
+	return nil
+}
+
+func updateScalingPolicy(ctx context.Context, d *schema.ResourceData, meta any) (sdk.Response, error) {
 	if !d.HasChanges(
 		"name",
 		"apply_type",
@@ -690,22 +753,22 @@ func resourceWorkloadScalingPolicyUpdate(ctx context.Context, d *schema.Resource
 		FieldRolloutBehavior,
 	) {
 		tflog.Info(ctx, "scaling policy up to date")
-		return nil
+		return nil, nil
 	}
 
 	client := meta.(*ProviderConfig).api
 	clusterID := d.Get(FieldClusterID).(string)
 	cpu, err := toWorkloadScalingPolicies("cpu", d.Get("cpu").([]any)[0].(map[string]any))
 	if err != nil {
-		return diag.FromErr(err)
+		return nil, err
 	}
 	memory, err := toWorkloadScalingPolicies("memory", d.Get("memory").([]any)[0].(map[string]any))
 	if err != nil {
-		return diag.FromErr(err)
+		return nil, err
 	}
 	ar, err := toAssignmentRules(toSection(d, FieldAssignmentRules))
 	if err != nil {
-		return diag.FromErr(err)
+		return nil, err
 	}
 
 	req := sdk.WorkloadOptimizationAPIUpdateWorkloadScalingPolicyJSONRequestBody{
@@ -727,10 +790,13 @@ func resourceWorkloadScalingPolicyUpdate(ctx context.Context, d *schema.Resource
 	}
 
 	resp, err := client.WorkloadOptimizationAPIUpdateWorkloadScalingPolicyWithResponse(ctx, clusterID, d.Id(), req)
-	if checkErr := sdk.CheckOKResponse(resp, err); checkErr != nil {
-		return diag.FromErr(checkErr)
+	if err != nil {
+		return resp, err
 	}
-	return resourceWorkloadScalingPolicyRead(ctx, d, meta)
+	if resp.StatusCode() != http.StatusOK {
+		return resp, err
+	}
+	return fetchScalingPolicy(ctx, d, meta)
 }
 
 func resourceWorkloadScalingPolicyDelete(ctx context.Context, d *schema.ResourceData, meta any) diag.Diagnostics {
@@ -1310,8 +1376,8 @@ func toRolloutBehaviorMap(s *sdk.WorkloadoptimizationV1RolloutBehaviorSettings) 
 
 func getWorkloadScalingPolicyByName(ctx context.Context, client sdk.ClientWithResponsesInterface, clusterID, name string) (*sdk.WorkloadoptimizationV1WorkloadScalingPolicy, error) {
 	list, err := client.WorkloadOptimizationAPIListWorkloadScalingPoliciesWithResponse(ctx, clusterID)
-	if checkErr := sdk.CheckOKResponse(list, err); checkErr != nil {
-		return nil, checkErr
+	if e := checkIfRetryable(list, err); e != nil {
+		return nil, e
 	}
 
 	for _, sp := range list.JSON200.Items {
