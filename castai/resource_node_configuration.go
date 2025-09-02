@@ -934,6 +934,10 @@ func toEKSConfig(obj map[string]interface{}) *sdk.NodeconfigV1EKSConfig {
 		out.IpsPerPrefix = toPtr(int32(v))
 	}
 
+	if v, ok := obj["threads_per_cpu"].(int); ok && v != 0 {
+		out.ThreadsPerCpu = toPtr(int32(v))
+	}
+
 	if v, ok := obj[FieldNodeConfigurationEKSTargetGroup].([]any); ok && len(v) > 0 {
 		resultTGs := make([]sdk.NodeconfigV1TargetGroup, 0, len(v))
 		for _, tgRaw := range v {
@@ -1021,6 +1025,10 @@ func flattenEKSConfig(config *sdk.NodeconfigV1EKSConfig) []map[string]interface{
 
 	if v := config.IpsPerPrefix; v != nil {
 		m["ips_per_prefix"] = *config.IpsPerPrefix
+	}
+
+	if v := config.ImdsV1; v != nil {
+		m["threads_per_cpu"] = *config.ThreadsPerCpu
 	}
 
 	if v := config.TargetGroups; v != nil && len(*v) > 0 {
