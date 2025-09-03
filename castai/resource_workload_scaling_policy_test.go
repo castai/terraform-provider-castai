@@ -1,13 +1,19 @@
 package castai
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 	"testing"
 	"time"
 
+	"github.com/golang/mock/gomock"
+	"github.com/hashicorp/go-cty/cty"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
@@ -15,6 +21,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/castai/terraform-provider-castai/castai/sdk"
+	mock_sdk "github.com/castai/terraform-provider-castai/castai/sdk/mock"
 )
 
 func TestAccResourceWorkloadScalingPolicy(t *testing.T) {
@@ -584,4 +591,151 @@ func Test_toRolloutBehavior(t *testing.T) {
 			r.Equal(tt.exp, got)
 		})
 	}
+}
+
+func Test_resourceWorkloadScalingPolicyCreate(t *testing.T) {
+	organizationId := "63d2af53-9a42-4968-be1e-39316ebfd8d4"
+	clusterId := "4e4cd9eb-82eb-407e-a926-e5fef81cab50"
+	name := "test-sp"
+	policyId := "98173807-6568-4e2b-9fe1-bcece3301649"
+
+	tests := map[string]struct {
+		state         map[string]cty.Value
+		schemaVersion int
+		setup         func(r *require.Assertions, mockClient *mock_sdk.MockClientInterface)
+		expDiag       diag.Diagnostics
+	}{
+		"should create scaling policy": {
+			schemaVersion: 0,
+			state: map[string]cty.Value{
+				"cluster_id": cty.StringVal(clusterId),
+				"name":       cty.StringVal(name),
+				"apply_type": cty.StringVal("IMMEDIATE"),
+			},
+			setup: func(r *require.Assertions, mockClient *mock_sdk.MockClientInterface) {
+				applyType := sdk.WorkloadoptimizationV1ApplyType("IMMEDIATE")
+				policy := &sdk.WorkloadoptimizationV1WorkloadScalingPolicy{
+					OrganizationId: organizationId,
+					ClusterId:      clusterId,
+					Id:             policyId,
+					Name:           name,
+					ApplyType:      applyType,
+				}
+
+				mockClient.EXPECT().
+					WorkloadOptimizationAPICreateWorkloadScalingPolicy(gomock.Any(), clusterId, gomock.Any()).
+					DoAndReturn(func(_ context.Context, cID string, req sdk.WorkloadOptimizationAPICreateWorkloadScalingPolicyJSONRequestBody) (*http.Response, error) {
+						r.Equal(clusterId, cID)
+						return toResponse(r, policy, http.StatusOK)
+					})
+				mockClient.EXPECT().
+					WorkloadOptimizationAPIGetWorkloadScalingPolicy(gomock.Any(), clusterId, policyId).
+					DoAndReturn(func(_ context.Context, cID string, pID string) (*http.Response, error) {
+						r.Equal(clusterId, cID)
+						r.Equal(policyId, pID)
+						return toResponse(r, policy, http.StatusOK)
+					})
+			},
+		},
+		"should create scaling policy with retries": {
+			schemaVersion: 0,
+			state: map[string]cty.Value{
+				"cluster_id": cty.StringVal(clusterId),
+				"name":       cty.StringVal(name),
+				"apply_type": cty.StringVal("IMMEDIATE"),
+			},
+			setup: func(r *require.Assertions, mockClient *mock_sdk.MockClientInterface) {
+				applyType := sdk.WorkloadoptimizationV1ApplyType("IMMEDIATE")
+				policy := &sdk.WorkloadoptimizationV1WorkloadScalingPolicy{
+					OrganizationId: organizationId,
+					ClusterId:      clusterId,
+					Id:             policyId,
+					Name:           name,
+					ApplyType:      applyType,
+				}
+
+				cnt := 0
+				mockClient.EXPECT().
+					WorkloadOptimizationAPICreateWorkloadScalingPolicy(gomock.Any(), clusterId, gomock.Any()).
+					DoAndReturn(func(_ context.Context, cID string, req sdk.WorkloadOptimizationAPICreateWorkloadScalingPolicyJSONRequestBody) (*http.Response, error) {
+						r.Equal(clusterId, cID)
+						cnt++
+						if cnt < 2 {
+							return toResponse(r, nil, http.StatusServiceUnavailable)
+						}
+						return toResponse(r, policy, http.StatusOK)
+					}).Times(2)
+				mockClient.EXPECT().
+					WorkloadOptimizationAPIGetWorkloadScalingPolicy(gomock.Any(), clusterId, policyId).
+					DoAndReturn(func(_ context.Context, cID string, pID string) (*http.Response, error) {
+						r.Equal(clusterId, cID)
+						r.Equal(policyId, pID)
+						return toResponse(r, policy, http.StatusOK)
+					})
+			},
+		},
+		"should not retry 400 status code": {
+			schemaVersion: 0,
+			state: map[string]cty.Value{
+				"cluster_id": cty.StringVal(clusterId),
+				"name":       cty.StringVal(name),
+				"apply_type": cty.StringVal("IMMEDIATE"),
+			},
+			setup: func(r *require.Assertions, mockClient *mock_sdk.MockClientInterface) {
+				mockClient.EXPECT().
+					WorkloadOptimizationAPICreateWorkloadScalingPolicy(gomock.Any(), clusterId, gomock.Any()).
+					DoAndReturn(func(_ context.Context, cID string, req sdk.WorkloadOptimizationAPICreateWorkloadScalingPolicyJSONRequestBody) (*http.Response, error) {
+						r.Equal(clusterId, cID)
+						return toResponse(r, nil, http.StatusBadRequest)
+					})
+			},
+			expDiag: diag.Diagnostics{
+				diag.Diagnostic{
+					Summary: "expected status code 200, received: status=400 body=null\n",
+				},
+			},
+		},
+	}
+
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			r := require.New(t)
+			mockClient := mock_sdk.NewMockClientInterface(gomock.NewController(t))
+
+			provider := &ProviderConfig{
+				api: &sdk.ClientWithResponses{
+					ClientInterface: mockClient,
+				},
+			}
+
+			scalingPolicyResource := resourceWorkloadScalingPolicy()
+			stateValue := cty.ObjectVal(tt.state)
+
+			state := terraform.NewInstanceStateShimmedFromValue(stateValue, tt.schemaVersion)
+			data := scalingPolicyResource.Data(state)
+
+			tt.setup(r, mockClient)
+
+			result := scalingPolicyResource.CreateContext(t.Context(), data, provider)
+
+			if tt.expDiag != nil {
+				r.Equal(tt.expDiag, result)
+			} else {
+				r.Nil(result)
+				r.False(result.HasError())
+				r.Equal(policyId, data.Id())
+			}
+		})
+	}
+}
+
+func toJSON(r *require.Assertions, v any) *bytes.Buffer {
+	body := bytes.NewBuffer([]byte(""))
+	err := json.NewEncoder(body).Encode(v)
+	r.NoError(err)
+	return body
+}
+
+func toResponse(r *require.Assertions, v any, statusCode int) (*http.Response, error) {
+	return &http.Response{StatusCode: statusCode, Body: io.NopCloser(toJSON(r, v)), Header: map[string][]string{"Content-Type": {"json"}}}, nil
 }
