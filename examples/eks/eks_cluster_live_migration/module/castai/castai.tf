@@ -39,9 +39,7 @@ locals {
       subnets              = var.subnets,
       instance_profile_arn = module.castai-eks-role-iam.instance_profile_arn
       security_groups      = var.security_groups
-      init_script = base64encode(templatefile("${path.module}/eks-init-script.sh", {
-        live_proxy_version = trimspace(var.live_proxy_version)
-      }))
+
       container_runtime = "containerd"
       eks_image_family  = "al2023"
     }
@@ -52,6 +50,7 @@ locals {
       configuration_id = module.castai-eks-cluster.castai_node_configurations["live"]
       is_enabled       = true
       should_taint     = true
+      clm_enabled      = true
     }
   })
 }
@@ -143,43 +142,10 @@ module "castai-eks-cluster" {
     }
   }
 
+  install_live = var.install_helm_live
+  live_version = var.install_helm_live ? var.live_helm_version : null
+
   # depends_on helps Terraform with creating proper dependencies graph in case of resource creation and in this case destroy.
   # module "castai-eks-cluster" has to be destroyed before module "castai-eks-role-iam".
   depends_on = [module.castai-eks-role-iam]
-}
-
-resource "helm_release" "live-helm" {
-  name  = "castai-live"
-  count = var.install_helm_live ? 1 : 0
-
-  repository = "https://castai.github.io/helm-charts"
-  chart      = "castai-live"
-  version    = var.live_helm_version
-
-  namespace         = "castai-live"
-  create_namespace  = true
-  dependency_update = true
-
-  set = [
-    {
-      name  = "castai-aws-vpc-cni.enabled"
-      value = "true"
-    },
-    {
-      name  = "castai.clusterID"
-      value = castai_eks_clusterid.cluster_id.id
-    },
-    {
-      name  = "castai.apiKey"
-      value = var.castai_api_token
-    },
-    {
-      name  = "castai.apiURL"
-      value = var.castai_api_url
-    },
-  ]
-
-  wait = false
-
-  depends_on = [module.castai-eks-cluster]
 }

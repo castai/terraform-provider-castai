@@ -7,14 +7,8 @@ variable "cluster_region" {
   type = string
 }
 
-variable "live_proxy_version" {
-  type    = string
-  default = "0.36.0"
-}
-
 variable "live_helm_version" {
   type    = string
-  default = "0.36.0"
 }
 
 variable "tags" {

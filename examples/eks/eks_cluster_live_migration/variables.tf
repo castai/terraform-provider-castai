@@ -55,12 +55,7 @@ variable "install_helm_live" {
   default     = true
 }
 
-variable "live_proxy_version" {
-  type    = string
-  default = "0.36.0"
-}
-
 variable "live_helm_version" {
   type    = string
-  default = "0.36.0"
+  default = "0.38.0"
 }

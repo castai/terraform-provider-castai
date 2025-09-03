@@ -15,7 +15,6 @@ module "cluster" {
     aws_security_group.additional.id,
   ]
   subnets            = module.vpc.private_subnets
-  live_proxy_version = var.live_proxy_version
   live_helm_version  = var.live_helm_version
 
   install_helm_live = var.install_helm_live
