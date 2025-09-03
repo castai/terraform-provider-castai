@@ -14,8 +14,8 @@ module "cluster" {
     module.eks.node_security_group_id,
     aws_security_group.additional.id,
   ]
-  subnets            = module.vpc.private_subnets
-  live_helm_version  = var.live_helm_version
+  subnets           = module.vpc.private_subnets
+  live_helm_version = var.live_helm_version
 
   install_helm_live = var.install_helm_live
 
