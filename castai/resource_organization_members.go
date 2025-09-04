@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/samber/lo"
@@ -22,12 +23,6 @@ const (
 const OwnerRoleID = "3e1050c7-6593-4298-94bb-154637911d78"
 const MemberRoleID = "8c60bd8e-21de-402a-969f-add07fd22c1b"
 const ViewerRoleID = "6fc95bd7-6049-4735-80b0-ce5ccde71cb1"
-
-var (
-	ownerRole  = "owner"
-	viewerRole = "viewer"
-	memberRole = "member"
-)
 
 func resourceOrganizationMembers() *schema.Resource {
 	return &schema.Resource{
@@ -86,6 +81,7 @@ func resourceOrganizationMembersCreate(ctx context.Context, data *schema.Resourc
 	client := meta.(*ProviderConfig).api
 	organizationID := data.Get(FieldOrganizationMembersOrganizationID).(string)
 
+	tflog.Debug(ctx, "getting current user profile")
 	currentUserResp, err := client.UsersAPICurrentUserProfileWithResponse(ctx)
 	if err := sdk.CheckOKResponse(currentUserResp, err); err != nil {
 		return diag.FromErr(fmt.Errorf("retrieving current user profile: %w", err))
@@ -163,6 +159,7 @@ func resourceOrganizationMembersCreate(ctx context.Context, data *schema.Resourc
 		}
 	}
 
+	tflog.Debug(ctx, "creating invitations")
 	resp, err := client.UsersAPICreateInvitationsWithResponse(ctx, sdk.UsersAPICreateInvitationsJSONRequestBody{
 		Members: &newMemberships,
 	})
@@ -176,50 +173,46 @@ func resourceOrganizationMembersCreate(ctx context.Context, data *schema.Resourc
 }
 
 func resourceOrganizationMembersRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
+	tflog.Debug(ctx, "reading organization members")
 	var owners, viewers, members []string
 	var nextCursorBindings *string
 
 	client := meta.(*ProviderConfig).api
 	organizationID := data.Id()
 
-	for {
-		roleBindingsResp, err := client.RbacServiceAPIListRoleBindingsWithResponse(ctx, organizationID, &sdk.RbacServiceAPIListRoleBindingsParams{
-			SubjectType: &[]sdk.RbacServiceAPIListRoleBindingsParamsSubjectType{sdk.SUBJECTUSER},
-			ScopeType:   &[]sdk.RbacServiceAPIListRoleBindingsParamsScopeType{sdk.RbacServiceAPIListRoleBindingsParamsScopeTypeORGANIZATION},
-			PageCursor:  nextCursorBindings,
-		})
+	tflog.Debug(ctx, "listing role bindings")
+	roleBindingsResp, err := client.RbacServiceAPIListRoleBindingsWithResponse(ctx, organizationID, &sdk.RbacServiceAPIListRoleBindingsParams{
+		SubjectType: &[]sdk.RbacServiceAPIListRoleBindingsParamsSubjectType{sdk.SUBJECTUSER},
+		ScopeType:   &[]sdk.RbacServiceAPIListRoleBindingsParamsScopeType{sdk.RbacServiceAPIListRoleBindingsParamsScopeTypeORGANIZATION},
+		PageCursor:  nextCursorBindings,
+	})
 
-		if err := sdk.CheckOKResponse(roleBindingsResp, err); err != nil {
-			return diag.FromErr(fmt.Errorf("retrieving role bindings: %w", err))
-		}
+	if err := sdk.CheckOKResponse(roleBindingsResp, err); err != nil {
+		return diag.FromErr(fmt.Errorf("retrieving role bindings: %w", err))
+	}
 
-		for _, roleBinding := range *roleBindingsResp.JSON200.RoleBindings {
-			for _, subject := range *roleBinding.Definition.Subjects {
-				if subject.User == nil {
-					continue
-				}
-
-				switch roleBinding.Definition.RoleId {
-				case OwnerRoleID:
-					owners = append(owners, *subject.User.Email)
-				case ViewerRoleID:
-					viewers = append(viewers, *subject.User.Email)
-				case MemberRoleID:
-					members = append(members, *subject.User.Email)
-				}
-
+	for _, roleBinding := range *roleBindingsResp.JSON200.RoleBindings {
+		for _, subject := range *roleBinding.Definition.Subjects {
+			if subject.User == nil {
+				continue
 			}
-		}
 
-		nextCursorBindings = roleBindingsResp.JSON200.NextPage.Cursor
-		if nextCursorBindings == nil {
-			break
+			switch roleBinding.Definition.RoleId {
+			case OwnerRoleID:
+				owners = append(owners, *subject.User.Email)
+			case ViewerRoleID:
+				viewers = append(viewers, *subject.User.Email)
+			case MemberRoleID:
+				members = append(members, *subject.User.Email)
+			}
+
 		}
 	}
 
 	var nextCursorInvitations string
 
 	for {
+		tflog.Debug(ctx, "listing invitations")
 		invitationsResp, err := client.UsersAPIListInvitationsWithResponse(ctx, &sdk.UsersAPIListInvitationsParams{
 			PageCursor: &nextCursorInvitations,
 		})
@@ -247,6 +240,7 @@ func resourceOrganizationMembersRead(ctx context.Context, data *schema.ResourceD
 		}
 	}
 
+	tflog.Debug(ctx, "setting state")
 	if err := data.Set(FieldOrganizationMembersOwners, owners); err != nil {
 		return diag.FromErr(fmt.Errorf("setting owners: %w", err))
 	}
@@ -270,6 +264,7 @@ func resourceOrganizationMembersUpdate(ctx context.Context, data *schema.Resourc
 	client := meta.(*ProviderConfig).api
 	organizationID := data.Id()
 
+	tflog.Debug(ctx, "listing organization users")
 	usersResp, err := client.UsersAPIListOrganizationUsersWithResponse(ctx, organizationID, &sdk.UsersAPIListOrganizationUsersParams{})
 	if err := sdk.CheckOKResponse(usersResp, err); err != nil {
 		return diag.FromErr(fmt.Errorf("retrieving users: %w", err))
@@ -284,6 +279,7 @@ func resourceOrganizationMembersUpdate(ctx context.Context, data *schema.Resourc
 
 	var nextCursor string
 	for {
+		tflog.Debug(ctx, "listing invitations")
 		invitationsResp, err := client.UsersAPIListInvitationsWithResponse(ctx, &sdk.UsersAPIListInvitationsParams{
 			PageCursor: &nextCursor,
 		})
@@ -301,6 +297,7 @@ func resourceOrganizationMembersUpdate(ctx context.Context, data *schema.Resourc
 		}
 	}
 
+	tflog.Debug(ctx, "getting members diff")
 	diff := getMembersDiff(
 		getRoleChange(data.GetChange(FieldOrganizationMembersOwners)),
 		getRoleChange(data.GetChange(FieldOrganizationMembersViewers)),
@@ -309,16 +306,19 @@ func resourceOrganizationMembersUpdate(ctx context.Context, data *schema.Resourc
 
 	manipulations := getPendingManipulations(diff, userIDByEmail, invitationIDByEmail)
 
+	tflog.Debug(ctx, "getting current user profile")
 	currentUserResp, err := client.UsersAPICurrentUserProfileWithResponse(ctx)
 	if err := sdk.CheckOKResponse(currentUserResp, err); err != nil {
 		return diag.FromErr(fmt.Errorf("retrieving current user profile: %w", err))
 	}
+	tflog.Debug(ctx, "checking if current user is in members to delete")
 	if contains(manipulations.membersToDelete, *currentUserResp.JSON200.Id) {
 		return diag.FromErr(
 			fmt.Errorf("can't delete user that is currently managing this organization: %s", lo.FromPtr(currentUserResp.JSON200.Email)),
 		)
 	}
 
+	tflog.Debug(ctx, "deleting users from organization")
 	for _, userID := range manipulations.membersToDelete {
 		resp, err := client.UsersAPIRemoveUserFromOrganizationWithResponse(ctx, organizationID, userID)
 		if err := sdk.CheckOKResponse(resp, err); err != nil {
@@ -326,6 +326,7 @@ func resourceOrganizationMembersUpdate(ctx context.Context, data *schema.Resourc
 		}
 	}
 
+	tflog.Debug(ctx, "deleting invitations")
 	for _, invitationID := range manipulations.invitationsToDelete {
 		resp, err := client.UsersAPIDeleteInvitationWithResponse(ctx, invitationID)
 		if err := sdk.CheckOKResponse(resp, err); err != nil {
@@ -333,10 +334,21 @@ func resourceOrganizationMembersUpdate(ctx context.Context, data *schema.Resourc
 		}
 	}
 
+	tflog.Debug(ctx, "creating invitations")
 	newMemberships := make([]sdk.CastaiUsersV1beta1NewMembershipByEmail, 0, len(manipulations.membersToAdd))
 	for user, role := range manipulations.membersToAdd {
 		newMemberships = append(newMemberships, sdk.CastaiUsersV1beta1NewMembershipByEmail{
-			Role:      &role,
+			RoleBindings: &[]sdk.CastaiUsersV1beta1InvitationRoleBinding{
+				{
+					RoleId: lo.ToPtr(role),
+					Scopes: &[]sdk.CastaiUsersV1beta1InvitationRoleBindingScope{
+						{
+							Id:   lo.ToPtr(organizationID),
+							Type: lo.ToPtr(sdk.CastaiRbacV1beta1ScopeTypeORGANIZATION),
+						},
+					},
+				},
+			},
 			UserEmail: user,
 		})
 	}
@@ -355,11 +367,13 @@ func resourceOrganizationMembersDelete(ctx context.Context, data *schema.Resourc
 	client := meta.(*ProviderConfig).api
 	organizationID := data.Id()
 
+	tflog.Debug(ctx, "getting current user profile")
 	currentUserResp, err := client.UsersAPICurrentUserProfileWithResponse(ctx)
 	if err := sdk.CheckOKResponse(currentUserResp, err); err != nil {
 		return diag.FromErr(fmt.Errorf("retrieving current user profile: %w", err))
 	}
 
+	tflog.Debug(ctx, "listing organization users")
 	usersResp, err := client.UsersAPIListOrganizationUsersWithResponse(ctx, organizationID, &sdk.UsersAPIListOrganizationUsersParams{})
 	if err := sdk.CheckOKResponse(usersResp, err); err != nil {
 		return diag.FromErr(fmt.Errorf("retrieving users: %w", err))
@@ -381,6 +395,7 @@ func resourceOrganizationMembersDelete(ctx context.Context, data *schema.Resourc
 	var invitationIDsToDelete []string
 	var nextCursor string
 	for {
+		tflog.Debug(ctx, "listing invitations")
 		invitationsResp, err := client.UsersAPIListInvitationsWithResponse(ctx, &sdk.UsersAPIListInvitationsParams{
 			PageCursor: &nextCursor,
 		})
@@ -398,6 +413,7 @@ func resourceOrganizationMembersDelete(ctx context.Context, data *schema.Resourc
 		}
 	}
 
+	tflog.Debug(ctx, "deleting invitations")
 	for _, invitationID := range invitationIDsToDelete {
 		resp, err := client.UsersAPIDeleteInvitationWithResponse(ctx, invitationID)
 		if err := sdk.CheckOKResponse(resp, err); err != nil {
@@ -405,6 +421,7 @@ func resourceOrganizationMembersDelete(ctx context.Context, data *schema.Resourc
 		}
 	}
 
+	tflog.Debug(ctx, "deleting users from organization")
 	for _, userID := range usersIDsToDelete {
 		resp, err := client.UsersAPIRemoveUserFromOrganizationWithResponse(ctx, organizationID, userID)
 		if err := sdk.CheckOKResponse(resp, err); err != nil {
@@ -470,11 +487,11 @@ func getMembersDiff(owners, viewers, members roleChange) membersDiff {
 
 	for _, owner := range owners.deletedMembers {
 		if contains(members.addedMembers, owner) {
-			out.membersToMove[owner] = memberRole
+			out.membersToMove[owner] = MemberRoleID
 			continue
 		}
 		if contains(viewers.addedMembers, owner) {
-			out.membersToMove[owner] = viewerRole
+			out.membersToMove[owner] = ViewerRoleID
 			continue
 		}
 
@@ -483,11 +500,11 @@ func getMembersDiff(owners, viewers, members roleChange) membersDiff {
 
 	for _, viewer := range viewers.deletedMembers {
 		if contains(owners.addedMembers, viewer) {
-			out.membersToMove[viewer] = ownerRole
+			out.membersToMove[viewer] = OwnerRoleID
 			continue
 		}
 		if contains(members.addedMembers, viewer) {
-			out.membersToMove[viewer] = memberRole
+			out.membersToMove[viewer] = MemberRoleID
 			continue
 		}
 
@@ -496,11 +513,11 @@ func getMembersDiff(owners, viewers, members roleChange) membersDiff {
 
 	for _, member := range members.deletedMembers {
 		if contains(owners.addedMembers, member) {
-			out.membersToMove[member] = ownerRole
+			out.membersToMove[member] = OwnerRoleID
 			continue
 		}
 		if contains(viewers.addedMembers, member) {
-			out.membersToMove[member] = viewerRole
+			out.membersToMove[member] = MemberRoleID
 			continue
 		}
 
@@ -509,19 +526,19 @@ func getMembersDiff(owners, viewers, members roleChange) membersDiff {
 
 	for _, owner := range owners.addedMembers {
 		if _, ok := out.membersToMove[owner]; !ok {
-			out.membersToAdd[owner] = ownerRole
+			out.membersToAdd[owner] = OwnerRoleID
 		}
 	}
 
 	for _, viewer := range viewers.addedMembers {
 		if _, ok := out.membersToMove[viewer]; !ok {
-			out.membersToAdd[viewer] = viewerRole
+			out.membersToAdd[viewer] = ViewerRoleID
 		}
 	}
 
 	for _, member := range members.addedMembers {
 		if _, ok := out.membersToMove[member]; !ok {
-			out.membersToAdd[member] = memberRole
+			out.membersToAdd[member] = MemberRoleID
 		}
 	}
 
