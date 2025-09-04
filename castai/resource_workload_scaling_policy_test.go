@@ -154,6 +154,7 @@ func clusterComponentsConfig(clusterName, projectID, name string) string {
 		create_namespace = true
 		cleanup_on_fail  = true
 		wait             = true
+		replace          = true
 	
 		set {
 			name  = "provider"
@@ -187,7 +188,8 @@ func clusterComponentsConfig(clusterName, projectID, name string) string {
 		create_namespace = false
 		cleanup_on_fail  = true
 		wait             = true
-	
+		replace          = true
+
 		set_sensitive {
 			name  = "castai.apiKey"
 			value = %[1]q
@@ -218,7 +220,8 @@ func clusterComponentsConfig(clusterName, projectID, name string) string {
 		create_namespace = false
 		cleanup_on_fail  = true
 		wait             = true
-	
+		replace          = true
+
 		set_sensitive {
 			name  = "castai.apiKey"
 			value = %[1]q
