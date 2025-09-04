@@ -19,6 +19,10 @@ const (
 	FieldOrganizationMembersMembers        = "members"
 )
 
+const OwnerRoleID = "3e1050c7-6593-4298-94bb-154637911d78"
+const MemberRoleID = "8c60bd8e-21de-402a-969f-add07fd22c1b"
+const ViewerRoleID = "6fc95bd7-6049-4735-80b0-ce5ccde71cb1"
+
 var (
 	ownerRole  = "owner"
 	viewerRole = "viewer"
@@ -80,6 +84,7 @@ func resourceOrganizationMembers() *schema.Resource {
 
 func resourceOrganizationMembersCreate(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	client := meta.(*ProviderConfig).api
+	organizationID := data.Get(FieldOrganizationMembersOrganizationID).(string)
 
 	currentUserResp, err := client.UsersAPICurrentUserProfileWithResponse(ctx)
 	if err := sdk.CheckOKResponse(currentUserResp, err); err != nil {
@@ -100,7 +105,17 @@ func resourceOrganizationMembersCreate(ctx context.Context, data *schema.Resourc
 			}
 
 			newMemberships = append(newMemberships, sdk.CastaiUsersV1beta1NewMembershipByEmail{
-				Role:      &ownerRole,
+				RoleBindings: &[]sdk.CastaiUsersV1beta1InvitationRoleBinding{
+					{
+						RoleId: lo.ToPtr(OwnerRoleID),
+						Scopes: &[]sdk.CastaiUsersV1beta1InvitationRoleBindingScope{
+							{
+								Id:   lo.ToPtr(organizationID),
+								Type: lo.ToPtr(sdk.CastaiRbacV1beta1ScopeTypeORGANIZATION),
+							},
+						},
+					},
+				},
 				UserEmail: email,
 			})
 		}
@@ -111,7 +126,17 @@ func resourceOrganizationMembersCreate(ctx context.Context, data *schema.Resourc
 
 		for _, email := range emails {
 			newMemberships = append(newMemberships, sdk.CastaiUsersV1beta1NewMembershipByEmail{
-				Role:      &viewerRole,
+				RoleBindings: &[]sdk.CastaiUsersV1beta1InvitationRoleBinding{
+					{
+						RoleId: lo.ToPtr(ViewerRoleID),
+						Scopes: &[]sdk.CastaiUsersV1beta1InvitationRoleBindingScope{
+							{
+								Id:   lo.ToPtr(organizationID),
+								Type: lo.ToPtr(sdk.CastaiRbacV1beta1ScopeTypeORGANIZATION),
+							},
+						},
+					},
+				},
 				UserEmail: email,
 			})
 		}
@@ -122,13 +147,21 @@ func resourceOrganizationMembersCreate(ctx context.Context, data *schema.Resourc
 
 		for _, email := range emails {
 			newMemberships = append(newMemberships, sdk.CastaiUsersV1beta1NewMembershipByEmail{
-				Role:      &memberRole,
+				RoleBindings: &[]sdk.CastaiUsersV1beta1InvitationRoleBinding{
+					{
+						RoleId: lo.ToPtr(MemberRoleID),
+						Scopes: &[]sdk.CastaiUsersV1beta1InvitationRoleBindingScope{
+							{
+								Id:   lo.ToPtr(organizationID),
+								Type: lo.ToPtr(sdk.CastaiRbacV1beta1ScopeTypeORGANIZATION),
+							},
+						},
+					},
+				},
 				UserEmail: email,
 			})
 		}
 	}
-
-	organizationID := data.Get(FieldOrganizationMembersOrganizationID).(string)
 
 	resp, err := client.UsersAPICreateInvitationsWithResponse(ctx, sdk.UsersAPICreateInvitationsJSONRequestBody{
 		Members: &newMemberships,
@@ -143,31 +176,52 @@ func resourceOrganizationMembersCreate(ctx context.Context, data *schema.Resourc
 }
 
 func resourceOrganizationMembersRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ProviderConfig).api
-
-	organizationID := data.Id()
-	usersResp, err := client.UsersAPIListOrganizationUsersWithResponse(ctx, organizationID, &sdk.UsersAPIListOrganizationUsersParams{})
-	if err := sdk.CheckOKResponse(usersResp, err); err != nil {
-		return diag.FromErr(fmt.Errorf("retrieving users: %w", err))
-	}
-
 	var owners, viewers, members []string
-	for _, user := range *usersResp.JSON200.Users {
-		//nolint:staticcheck // SA1019 needs to be migrated
-		switch user.Role {
-		case ownerRole:
-			owners = append(owners, user.User.Email)
-		case viewerRole:
-			viewers = append(viewers, user.User.Email)
-		case memberRole:
-			members = append(members, user.User.Email)
+	var nextCursorBindings *string
+
+	client := meta.(*ProviderConfig).api
+	organizationID := data.Id()
+
+	for {
+		roleBindingsResp, err := client.RbacServiceAPIListRoleBindingsWithResponse(ctx, organizationID, &sdk.RbacServiceAPIListRoleBindingsParams{
+			SubjectType: &[]sdk.RbacServiceAPIListRoleBindingsParamsSubjectType{sdk.SUBJECTUSER},
+			ScopeType:   &[]sdk.RbacServiceAPIListRoleBindingsParamsScopeType{sdk.RbacServiceAPIListRoleBindingsParamsScopeTypeORGANIZATION},
+			PageCursor:  nextCursorBindings,
+		})
+
+		if err := sdk.CheckOKResponse(roleBindingsResp, err); err != nil {
+			return diag.FromErr(fmt.Errorf("retrieving role bindings: %w", err))
+		}
+
+		for _, roleBinding := range *roleBindingsResp.JSON200.RoleBindings {
+			for _, subject := range *roleBinding.Definition.Subjects {
+				if subject.User == nil {
+					continue
+				}
+
+				switch roleBinding.Definition.RoleId {
+				case OwnerRoleID:
+					owners = append(owners, *subject.User.Email)
+				case ViewerRoleID:
+					viewers = append(viewers, *subject.User.Email)
+				case MemberRoleID:
+					members = append(members, *subject.User.Email)
+				}
+
+			}
+		}
+
+		nextCursorBindings = roleBindingsResp.JSON200.NextPage.Cursor
+		if nextCursorBindings == nil {
+			break
 		}
 	}
 
-	var nextCursor string
+	var nextCursorInvitations string
+
 	for {
 		invitationsResp, err := client.UsersAPIListInvitationsWithResponse(ctx, &sdk.UsersAPIListInvitationsParams{
-			PageCursor: &nextCursor,
+			PageCursor: &nextCursorInvitations,
 		})
 
 		if err := sdk.CheckOKResponse(invitationsResp, err); err != nil {
@@ -175,19 +229,20 @@ func resourceOrganizationMembersRead(ctx context.Context, data *schema.ResourceD
 		}
 
 		for _, invitation := range invitationsResp.JSON200.Invitations {
-			//nolint:staticcheck // SA1019 needs to be migrated
-			switch invitation.Role {
-			case ownerRole:
-				owners = append(owners, invitation.InviteEmail)
-			case viewerRole:
-				viewers = append(viewers, invitation.InviteEmail)
-			case memberRole:
-				members = append(members, invitation.InviteEmail)
+			for _, roleBinding := range *invitation.RoleBindings {
+				switch *roleBinding.RoleId {
+				case OwnerRoleID:
+					owners = append(owners, invitation.InviteEmail)
+				case ViewerRoleID:
+					viewers = append(viewers, invitation.InviteEmail)
+				case MemberRoleID:
+					members = append(members, invitation.InviteEmail)
+				}
 			}
 		}
 
-		nextCursor = invitationsResp.JSON200.NextCursor
-		if nextCursor == "" {
+		nextCursorInvitations = invitationsResp.JSON200.NextCursor
+		if nextCursorInvitations == "" {
 			break
 		}
 	}
@@ -196,7 +251,7 @@ func resourceOrganizationMembersRead(ctx context.Context, data *schema.ResourceD
 		return diag.FromErr(fmt.Errorf("setting owners: %w", err))
 	}
 	if err := data.Set(FieldOrganizationMembersViewers, viewers); err != nil {
-		return diag.FromErr(fmt.Errorf("setting viewers);: %w", err))
+		return diag.FromErr(fmt.Errorf("setting viewers: %w", err))
 	}
 	if err := data.Set(FieldOrganizationMembersMembers, members); err != nil {
 		return diag.FromErr(fmt.Errorf("setting members: %w", err))
