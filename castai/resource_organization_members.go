@@ -179,7 +179,6 @@ func resourceOrganizationMembersCreate(ctx context.Context, data *schema.Resourc
 func resourceOrganizationMembersRead(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	tflog.Debug(ctx, "reading organization members")
 	var owners, viewers, members []string
-	var nextCursorBindings *string
 
 	client := meta.(*ProviderConfig).api
 	organizationID := data.Id()
@@ -188,7 +187,6 @@ func resourceOrganizationMembersRead(ctx context.Context, data *schema.ResourceD
 	roleBindingsResp, err := client.RbacServiceAPIListRoleBindingsWithResponse(ctx, organizationID, &sdk.RbacServiceAPIListRoleBindingsParams{
 		SubjectType: &[]sdk.RbacServiceAPIListRoleBindingsParamsSubjectType{sdk.SUBJECTUSER},
 		ScopeType:   &[]sdk.RbacServiceAPIListRoleBindingsParamsScopeType{sdk.RbacServiceAPIListRoleBindingsParamsScopeTypeORGANIZATION},
-		PageCursor:  nextCursorBindings,
 	})
 
 	if err := sdk.CheckOKResponse(roleBindingsResp, err); err != nil {
