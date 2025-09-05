@@ -164,8 +164,8 @@ const (
 
 // Defines values for CastaiRbacV1beta1ScopeType.
 const (
-	CLUSTER      CastaiRbacV1beta1ScopeType = "CLUSTER"
-	ORGANIZATION CastaiRbacV1beta1ScopeType = "ORGANIZATION"
+	CastaiRbacV1beta1ScopeTypeCLUSTER      CastaiRbacV1beta1ScopeType = "CLUSTER"
+	CastaiRbacV1beta1ScopeTypeORGANIZATION CastaiRbacV1beta1ScopeType = "ORGANIZATION"
 )
 
 // Defines values for CastaiSsoV1beta1OIDCType.
@@ -615,6 +615,19 @@ const (
 	ExternalClusterAPIListNodesParamsLifecycleTypeLifecycleTypeUnspecified ExternalClusterAPIListNodesParamsLifecycleType = "lifecycle_type_unspecified"
 	ExternalClusterAPIListNodesParamsLifecycleTypeOnDemand                 ExternalClusterAPIListNodesParamsLifecycleType = "on_demand"
 	ExternalClusterAPIListNodesParamsLifecycleTypeSpot                     ExternalClusterAPIListNodesParamsLifecycleType = "spot"
+)
+
+// Defines values for RbacServiceAPIListRoleBindingsParamsScopeType.
+const (
+	RbacServiceAPIListRoleBindingsParamsScopeTypeCLUSTER      RbacServiceAPIListRoleBindingsParamsScopeType = "CLUSTER"
+	RbacServiceAPIListRoleBindingsParamsScopeTypeORGANIZATION RbacServiceAPIListRoleBindingsParamsScopeType = "ORGANIZATION"
+)
+
+// Defines values for RbacServiceAPIListRoleBindingsParamsSubjectType.
+const (
+	SUBJECTGROUP          RbacServiceAPIListRoleBindingsParamsSubjectType = "SUBJECT_GROUP"
+	SUBJECTSERVICEACCOUNT RbacServiceAPIListRoleBindingsParamsSubjectType = "SUBJECT_SERVICE_ACCOUNT"
+	SUBJECTUSER           RbacServiceAPIListRoleBindingsParamsSubjectType = "SUBJECT_USER"
 )
 
 // Defines values for RbacServiceAPIListRolesParamsType.
@@ -1174,6 +1187,9 @@ type CastaiInventoryV1beta1AzureReservation struct {
 	ScopeResourceGroup *string                                                `json:"scopeResourceGroup,omitempty"`
 	ScopeSubscription  *string                                                `json:"scopeSubscription,omitempty"`
 	Status             *string                                                `json:"status,omitempty"`
+
+	// TotalCost Total cost paid by the customer for the commitment.
+	TotalCost *string `json:"totalCost"`
 }
 
 // CastaiInventoryV1beta1AzureReservationInstanceFlexibility defines model for castai.inventory.v1beta1.AzureReservation.InstanceFlexibility.
@@ -1204,6 +1220,15 @@ type CastaiInventoryV1beta1AzureReservationImport struct {
 // CastaiInventoryV1beta1BatchUpdateCommitmentsResponse defines model for castai.inventory.v1beta1.BatchUpdateCommitmentsResponse.
 type CastaiInventoryV1beta1BatchUpdateCommitmentsResponse struct {
 	Commitments *[]CastaiInventoryV1beta1Commitment `json:"commitments,omitempty"`
+}
+
+// CastaiInventoryV1beta1CPUInfo defines model for castai.inventory.v1beta1.CPUInfo.
+type CastaiInventoryV1beta1CPUInfo struct {
+	// DefaultCores Specifies the default number of physical cores for the instance type. Only for AWS.
+	DefaultCores *int32 `json:"defaultCores,omitempty"`
+
+	// ValidThreadsPerCore Specifies the valid threads per core for the instance type. Only for AWS.
+	ValidThreadsPerCore *[]int32 `json:"validThreadsPerCore,omitempty"`
 }
 
 // CastaiInventoryV1beta1CPUPlatform CPUPlatform describes the CPU platforms the instance type can be equipped with.
@@ -1523,6 +1548,7 @@ type CastaiInventoryV1beta1InstanceType struct {
 	Burstable        *bool                                           `json:"burstable,omitempty"`
 	CastChoice       *bool                                           `json:"castChoice,omitempty"`
 	ComputeOptimized *bool                                           `json:"computeOptimized,omitempty"`
+	CpuInfo          *CastaiInventoryV1beta1CPUInfo                  `json:"cpuInfo,omitempty"`
 
 	// CpuManufacturers Describes the manufacturers of the CPUs the instance type can be equipped with.
 	CpuManufacturers *[]CastaiInventoryV1beta1InstanceTypeCPUManufacturer `json:"cpuManufacturers,omitempty"`
@@ -1900,8 +1926,9 @@ type CastaiInventoryV1beta1UsageAtTime struct {
 
 // CastaiInventoryV1beta1UsageDistribution defines model for castai.inventory.v1beta1.UsageDistribution.
 type CastaiInventoryV1beta1UsageDistribution struct {
-	Cpu    *float64 `json:"cpu,omitempty"`
-	Memory *float64 `json:"memory,omitempty"`
+	Cpu            *float64 `json:"cpu,omitempty"`
+	Memory         *float64 `json:"memory,omitempty"`
+	MonetaryAmount *float64 `json:"monetaryAmount,omitempty"`
 }
 
 // CastaiInventoryV1beta1Zone defines model for castai.inventory.v1beta1.Zone.
@@ -2883,6 +2910,7 @@ type CastaiUsersV1beta1User struct {
 
 	// ReferVisit (optional) refer_visit is unique identifier of the visit in the referral partner system.
 	ReferVisit *int32 `json:"referVisit"`
+	ScimActive *bool  `json:"scimActive"`
 
 	// Username (required) username, corresponds to auth0 user id.
 	Username string `json:"username"`
@@ -3593,37 +3621,6 @@ type CostreportV1beta1Resources struct {
 	MemoryGib string `json:"memoryGib"`
 }
 
-// DboV1BlockStats defines model for dbo.v1.BlockStats.
-type DboV1BlockStats struct {
-	LocalDirtiedBlocks  string `json:"localDirtiedBlocks"`
-	LocalHitBlocks      string `json:"localHitBlocks"`
-	LocalReadBlocks     string `json:"localReadBlocks"`
-	LocalWrittenBlocks  string `json:"localWrittenBlocks"`
-	SharedDirtiedBlocks string `json:"sharedDirtiedBlocks"`
-	SharedHitBlocks     string `json:"sharedHitBlocks"`
-	SharedReadBlocks    string `json:"sharedReadBlocks"`
-	SharedWrittenBlocks string `json:"sharedWrittenBlocks"`
-	TempReadBlocks      string `json:"tempReadBlocks"`
-	TempWrittenBlocks   string `json:"tempWrittenBlocks"`
-}
-
-// DboV1Plan defines model for dbo.v1.Plan.
-type DboV1Plan struct {
-	Alias              *string         `json:"alias"`
-	BlockStats         DboV1BlockStats `json:"blockStats"`
-	NodeType           string          `json:"nodeType"`
-	Output             *[]string       `json:"output,omitempty"`
-	ParallelAware      bool            `json:"parallelAware"`
-	ParentRelationship *string         `json:"parentRelationship"`
-	PlanRows           string          `json:"planRows"`
-	PlanWidth          string          `json:"planWidth"`
-	Plans              *[]DboV1Plan    `json:"plans,omitempty"`
-	RelationName       *string         `json:"relationName"`
-	Schema             *string         `json:"schema"`
-	StartupCost        float64         `json:"startupCost"`
-	TotalCost          float64         `json:"totalCost"`
-}
-
 // ExternalclusterV1AKSClusterParams AKSClusterParams defines AKS-specific arguments.
 type ExternalclusterV1AKSClusterParams struct {
 	// ClusterResourceGroup Azure cluster resource group.
@@ -3903,6 +3900,15 @@ type ExternalclusterV1EKSClusterParams struct {
 	Tags *map[string]string `json:"tags,omitempty"`
 }
 
+// ExternalclusterV1EdgeConfig EdgeConfig holds Edge specific configuration.
+type ExternalclusterV1EdgeConfig struct {
+	// ConfigurationId ID of the Edge configuration.
+	ConfigurationId *string `json:"configurationId"`
+
+	// LocationId Edge location ID.
+	LocationId *string `json:"locationId,omitempty"`
+}
+
 // ExternalclusterV1GCPCreateSARequestAKSClusterParams AKSClusterParams is a placeholder for future use.
 type ExternalclusterV1GCPCreateSARequestAKSClusterParams = map[string]interface{}
 
@@ -4118,6 +4124,9 @@ type ExternalclusterV1NodeConfig struct {
 	// Superseded if Configuration ID reference is provided.
 	// Request will fail if several configurations with same name exists for a given cluster.
 	ConfigurationName *string `json:"configurationName"`
+
+	// EdgeConfig EdgeConfig holds Edge specific configuration.
+	EdgeConfig *ExternalclusterV1EdgeConfig `json:"edgeConfig,omitempty"`
 
 	// GpuConfig GPUConfig describes instance GPU configuration.
 	//
@@ -4578,6 +4587,9 @@ type NodeconfigV1EKSConfig struct {
 	// TargetGroups TargetGroups defines a list of load balancer target groups to register cluster instances into.
 	TargetGroups *[]NodeconfigV1TargetGroup `json:"targetGroups,omitempty"`
 
+	// ThreadsPerCpu Controls if cpu threading is enabled (default true).
+	ThreadsPerCpu *int32 `json:"threadsPerCpu"`
+
 	// VolumeIops EBS volume IOPS value to be used for provisioned nodes.
 	VolumeIops      *int32  `json:"volumeIops"`
 	VolumeKmsKeyArn *string `json:"volumeKmsKeyArn"`
@@ -4992,6 +5004,7 @@ type NodetemplatesV1ListNodeTemplatesResponse struct {
 
 // NodetemplatesV1NewNodeTemplate defines model for nodetemplates.v1.NewNodeTemplate.
 type NodetemplatesV1NewNodeTemplate struct {
+	ClmEnabled                               *bool                               `json:"clmEnabled"`
 	ConfigurationId                          *string                             `json:"configurationId,omitempty"`
 	Constraints                              *NodetemplatesV1TemplateConstraints `json:"constraints,omitempty"`
 	CustomInstancesEnabled                   *bool                               `json:"customInstancesEnabled"`
@@ -5004,7 +5017,10 @@ type NodetemplatesV1NewNodeTemplate struct {
 
 	// CustomTaints Custom taints for the template.
 	CustomTaints *[]NodetemplatesV1TaintWithOptionalEffect `json:"customTaints,omitempty"`
-	Gpu          *NodetemplatesV1GPU                       `json:"gpu,omitempty"`
+
+	// EdgeLocationIds List of associated edge location IDs.
+	EdgeLocationIds *[]string           `json:"edgeLocationIds,omitempty"`
+	Gpu             *NodetemplatesV1GPU `json:"gpu,omitempty"`
 
 	// IsDefault Flag whether this template is the default template for the cluster.
 	IsDefault *bool `json:"isDefault,omitempty"`
@@ -5035,7 +5051,10 @@ type NodetemplatesV1NodeTemplate struct {
 
 	// CustomTaints Custom taints for the template.
 	CustomTaints *[]NodetemplatesV1Taint `json:"customTaints,omitempty"`
-	Gpu          *NodetemplatesV1GPU     `json:"gpu,omitempty"`
+
+	// EdgeLocationIds List of associated edge location IDs.
+	EdgeLocationIds *[]string           `json:"edgeLocationIds,omitempty"`
+	Gpu             *NodetemplatesV1GPU `json:"gpu,omitempty"`
 
 	// IsDefault Flag whether this template is the default template for the cluster.
 	IsDefault *bool `json:"isDefault,omitempty"`
@@ -5257,7 +5276,10 @@ type NodetemplatesV1UpdateNodeTemplate struct {
 
 	// CustomTaints Custom taints for the template.
 	CustomTaints *[]NodetemplatesV1TaintWithOptionalEffect `json:"customTaints,omitempty"`
-	Gpu          *NodetemplatesV1GPU                       `json:"gpu,omitempty"`
+
+	// EdgeLocationIds List of associated edge location IDs.
+	EdgeLocationIds *[]string           `json:"edgeLocationIds,omitempty"`
+	Gpu             *NodetemplatesV1GPU `json:"gpu,omitempty"`
 
 	// IsDefault Flag whether this template is the default template for the cluster.
 	IsDefault *bool `json:"isDefault,omitempty"`
@@ -6228,11 +6250,28 @@ type WorkloadoptimizationV1Container struct {
 	Resources         *WorkloadoptimizationV1Resources `json:"resources,omitempty"`
 }
 
+// WorkloadoptimizationV1ContainerConfig ContainerConfig defines configuration settings for a specific container within a workload.
+type WorkloadoptimizationV1ContainerConfig struct {
+	ContainerName string `json:"containerName"`
+
+	// Cpu ContainerConstraintsV3 defines min and max resource constraints for container recommendations.
+	Cpu *WorkloadoptimizationV1ContainerConstraintsV3 `json:"cpu,omitempty"`
+
+	// Jvm JVMRuntimeConfiguration defines set of settings that enables and configures for JVM optimization.
+	Jvm *WorkloadoptimizationV1JVMRuntimeConfiguration `json:"jvm,omitempty"`
+
+	// Memory ContainerConstraintsV3 defines min and max resource constraints for container recommendations.
+	Memory *WorkloadoptimizationV1ContainerConstraintsV3 `json:"memory,omitempty"`
+}
+
 // WorkloadoptimizationV1ContainerConfigUpdate defines model for workloadoptimization.v1.ContainerConfigUpdate.
 type WorkloadoptimizationV1ContainerConfigUpdate struct {
 	ContainerName string                                      `json:"containerName"`
 	Cpu           *WorkloadoptimizationV1ResourceConfigUpdate `json:"cpu,omitempty"`
-	Memory        *WorkloadoptimizationV1ResourceConfigUpdate `json:"memory,omitempty"`
+
+	// Jvm JVMRuntimeConfigurationUpdate defines set of settings that enables and configures for JVM optimization.
+	Jvm    *WorkloadoptimizationV1JVMRuntimeConfigurationUpdate `json:"jvm,omitempty"`
+	Memory *WorkloadoptimizationV1ResourceConfigUpdate          `json:"memory,omitempty"`
 }
 
 // WorkloadoptimizationV1ContainerConstraints defines model for workloadoptimization.v1.ContainerConstraints.
@@ -6248,6 +6287,15 @@ type WorkloadoptimizationV1ContainerConstraintsV2 struct {
 	ContainerName string                             `json:"containerName"`
 	Cpu           *WorkloadoptimizationV1Constraints `json:"cpu,omitempty"`
 	Memory        *WorkloadoptimizationV1Constraints `json:"memory,omitempty"`
+}
+
+// WorkloadoptimizationV1ContainerConstraintsV3 ContainerConstraintsV3 defines min and max resource constraints for container recommendations.
+type WorkloadoptimizationV1ContainerConstraintsV3 struct {
+	// Max Max values for the recommendation. For memory - this is in MiB, for CPU - this is in cores.
+	Max *float64 `json:"max"`
+
+	// Min Min values for the recommendation. For memory - this is in MiB, for CPU - this is in cores.
+	Min *float64 `json:"min"`
 }
 
 // WorkloadoptimizationV1ContainerResourceMetricSource defines model for workloadoptimization.v1.ContainerResourceMetricSource.
@@ -6328,6 +6376,7 @@ type WorkloadoptimizationV1FailedHookEvent struct {
 // WorkloadoptimizationV1GetAgentStatusResponse defines model for workloadoptimization.v1.GetAgentStatusResponse.
 type WorkloadoptimizationV1GetAgentStatusResponse struct {
 	CastAgentCurrentVersion          *string `json:"castAgentCurrentVersion"`
+	ClusterId                        string  `json:"clusterId"`
 	CurrentVersion                   *string `json:"currentVersion"`
 	HpaSupportedFromCastAgentVersion *string `json:"hpaSupportedFromCastAgentVersion"`
 	LatestVersion                    *string `json:"latestVersion"`
@@ -6344,6 +6393,11 @@ type WorkloadoptimizationV1GetInstallCmdResponse struct {
 	Script string `json:"script"`
 }
 
+// WorkloadoptimizationV1GetOrganizationAgentStatusesResponse defines model for workloadoptimization.v1.GetOrganizationAgentStatusesResponse.
+type WorkloadoptimizationV1GetOrganizationAgentStatusesResponse struct {
+	ClusterAgentStatuses []WorkloadoptimizationV1GetAgentStatusResponse `json:"clusterAgentStatuses"`
+}
+
 // WorkloadoptimizationV1GetWorkloadEventResponse defines model for workloadoptimization.v1.GetWorkloadEventResponse.
 type WorkloadoptimizationV1GetWorkloadEventResponse struct {
 	Event WorkloadoptimizationV1WorkloadEvent `json:"event"`
@@ -6353,6 +6407,20 @@ type WorkloadoptimizationV1GetWorkloadEventResponse struct {
 type WorkloadoptimizationV1GetWorkloadResponse struct {
 	Metrics  *WorkloadoptimizationV1WorkloadMetrics `json:"metrics,omitempty"`
 	Workload WorkloadoptimizationV1Workload         `json:"workload"`
+}
+
+// WorkloadoptimizationV1GetWorkloadSpecResponse defines model for workloadoptimization.v1.GetWorkloadSpecResponse.
+type WorkloadoptimizationV1GetWorkloadSpecResponse struct {
+	ClusterId      string                 `json:"clusterId"`
+	Group          string                 `json:"group"`
+	Id             string                 `json:"id"`
+	IsCustom       bool                   `json:"isCustom"`
+	Kind           string                 `json:"kind"`
+	Name           string                 `json:"name"`
+	Namespace      string                 `json:"namespace"`
+	Object         map[string]interface{} `json:"object"`
+	OrganizationId string                 `json:"organizationId"`
+	Version        string                 `json:"version"`
 }
 
 // WorkloadoptimizationV1GetWorkloadsSummaryMetricsResponse defines model for workloadoptimization.v1.GetWorkloadsSummaryMetricsResponse.
@@ -6492,6 +6560,24 @@ type WorkloadoptimizationV1InitiatedBy struct {
 	Email *string `json:"email"`
 	Id    string  `json:"id"`
 	Name  *string `json:"name"`
+}
+
+// WorkloadoptimizationV1JVMRuntimeConfiguration JVMRuntimeConfiguration defines set of settings that enables and configures for JVM optimization.
+type WorkloadoptimizationV1JVMRuntimeConfiguration struct {
+	// Enabled Flag to enable JVM optimization.
+	Enabled *bool `json:"enabled"`
+
+	// OptionsEnvVar Name of environment variable with JVM parameters that will be injected to container (defaults to JAVA_OPTS if not set).
+	OptionsEnvVar *string `json:"optionsEnvVar"`
+}
+
+// WorkloadoptimizationV1JVMRuntimeConfigurationUpdate JVMRuntimeConfigurationUpdate defines set of settings that enables and configures for JVM optimization.
+type WorkloadoptimizationV1JVMRuntimeConfigurationUpdate struct {
+	// Enabled Flag to enable JVM optimization.
+	Enabled *bool `json:"enabled"`
+
+	// OptionsEnvVar Name of environment variable with JVM parameters that will be injected to container (defaults to JAVA_OPTS if not set).
+	OptionsEnvVar *string `json:"optionsEnvVar"`
 }
 
 // WorkloadoptimizationV1KeyValuePair defines model for workloadoptimization.v1.KeyValuePair.
@@ -7113,8 +7199,14 @@ type WorkloadoptimizationV1VPAConfig struct {
 	AntiAffinity         WorkloadoptimizationV1AntiAffinitySettings   `json:"antiAffinity"`
 	ApplyType            WorkloadoptimizationV1ApplyType              `json:"applyType"`
 	ContainerConstraints []WorkloadoptimizationV1ContainerConstraints `json:"containerConstraints"`
-	Cpu                  WorkloadoptimizationV1ResourceConfig         `json:"cpu"`
-	Downscaling          *WorkloadoptimizationV1DownscalingSettings   `json:"downscaling,omitempty"`
+
+	// Containers The containers configuration for the workload.
+	Containers  []WorkloadoptimizationV1ContainerConfig    `json:"containers"`
+	Cpu         WorkloadoptimizationV1ResourceConfig       `json:"cpu"`
+	Downscaling *WorkloadoptimizationV1DownscalingSettings `json:"downscaling,omitempty"`
+
+	// Jvm JVMRuntimeConfiguration defines set of settings that enables and configures for JVM optimization.
+	Jvm *WorkloadoptimizationV1JVMRuntimeConfiguration `json:"jvm,omitempty"`
 
 	// ManagementOption Defines possible options for workload management.
 	// READ_ONLY - workload watched (metrics collected), but no actions may be performed by CAST AI.
@@ -7131,6 +7223,9 @@ type WorkloadoptimizationV1VPAConfigUpdate struct {
 	ContainerConfig *[]WorkloadoptimizationV1ContainerConfigUpdate      `json:"containerConfig,omitempty"`
 	Cpu             *WorkloadoptimizationV1WorkloadResourceConfigUpdate `json:"cpu,omitempty"`
 
+	// Jvm JVMRuntimeConfigurationUpdate defines set of settings that enables and configures for JVM optimization.
+	Jvm *WorkloadoptimizationV1JVMRuntimeConfigurationUpdate `json:"jvm,omitempty"`
+
 	// ManagementOption Defines possible options for workload management.
 	// READ_ONLY - workload watched (metrics collected), but no actions may be performed by CAST AI.
 	// MANAGED - workload watched (metrics collected), CAST AI may perform actions on the workload.
@@ -7146,10 +7241,16 @@ type WorkloadoptimizationV1VerticalOverrides struct {
 	ApplyType    *WorkloadoptimizationV1ApplyType            `json:"applyType,omitempty"`
 	Confidence   *WorkloadoptimizationV1ConfidenceSettings   `json:"confidence,omitempty"`
 
-	// ContainerConstraints Defines container specific overrides.
+	// ContainerConstraints Deprecated (use ContainerConfig containers instead), defines container specific overrides.
 	ContainerConstraints *[]WorkloadoptimizationV1ContainerConstraintsV2 `json:"containerConstraints,omitempty"`
-	Cpu                  *WorkloadoptimizationV1ResourceConfigOverrides  `json:"cpu,omitempty"`
-	Downscaling          *WorkloadoptimizationV1DownscalingSettings      `json:"downscaling,omitempty"`
+
+	// Containers The containers configuration for the workload.
+	Containers  *[]WorkloadoptimizationV1ContainerConfig       `json:"containers,omitempty"`
+	Cpu         *WorkloadoptimizationV1ResourceConfigOverrides `json:"cpu,omitempty"`
+	Downscaling *WorkloadoptimizationV1DownscalingSettings     `json:"downscaling,omitempty"`
+
+	// Jvm JVMRuntimeConfiguration defines set of settings that enables and configures for JVM optimization.
+	Jvm *WorkloadoptimizationV1JVMRuntimeConfiguration `json:"jvm,omitempty"`
 
 	// ManagementOption Defines possible options for workload management.
 	// READ_ONLY - workload watched (metrics collected), but no actions may be performed by CAST AI.
@@ -7203,11 +7304,14 @@ type WorkloadoptimizationV1Workload struct {
 	Recommendation     *WorkloadoptimizationV1WorkloadRecommendation `json:"recommendation,omitempty"`
 
 	// Replicas The number of replicas the workload should have, as defined on the workload spec.
-	Replicas          int32     `json:"replicas"`
-	ScalingPolicyId   string    `json:"scalingPolicyId"`
-	ScalingPolicyName string    `json:"scalingPolicyName"`
-	UpdatedAt         time.Time `json:"updatedAt"`
-	Version           string    `json:"version"`
+	Replicas                   int32     `json:"replicas"`
+	ScalingPolicyId            string    `json:"scalingPolicyId"`
+	ScalingPolicyName          string    `json:"scalingPolicyName"`
+	ScalingPolicyOrigin        string    `json:"scalingPolicyOrigin"`
+	SuggestedScalingPolicyId   *string   `json:"suggestedScalingPolicyId"`
+	SuggestedScalingPolicyName *string   `json:"suggestedScalingPolicyName"`
+	UpdatedAt                  time.Time `json:"updatedAt"`
+	Version                    string    `json:"version"`
 
 	// WoopHpaUnsupportedReason Reason for unsupported WOOP HPA.
 	WoopHpaUnsupportedReason *string                                  `json:"woopHpaUnsupportedReason"`
@@ -7397,6 +7501,9 @@ type AllocationGroupAPIGetAllocationGroupCostTimedSummariesParams struct {
 
 	// GroupId Allocation group ID. Leave empty for the full list.
 	GroupId *string `form:"groupId,omitempty" json:"groupId,omitempty"`
+
+	// UseListingPrices Whether to use listing prices instead of actual prices for cost calculations.
+	UseListingPrices *bool `form:"useListingPrices,omitempty" json:"useListingPrices,omitempty"`
 }
 
 // AllocationGroupAPIGetAllocationGroupCostSummariesParams defines parameters for AllocationGroupAPIGetAllocationGroupCostSummaries.
@@ -7412,6 +7519,9 @@ type AllocationGroupAPIGetAllocationGroupCostSummariesParams struct {
 
 	// GroupId Allocation group ID. Leave empty for the full list.
 	GroupId *string `form:"groupId,omitempty" json:"groupId,omitempty"`
+
+	// UseListingPrices Whether to use listing prices instead of actual prices for cost calculations.
+	UseListingPrices *bool `form:"useListingPrices,omitempty" json:"useListingPrices,omitempty"`
 }
 
 // AllocationGroupAPIGetAllocationGroupTotalCostTimedParams defines parameters for AllocationGroupAPIGetAllocationGroupTotalCostTimed.
@@ -7429,6 +7539,9 @@ type AllocationGroupAPIGetAllocationGroupTotalCostTimedParams struct {
 	// PageCursor Cursor that defines token indicating where to start the next page.
 	// Empty value indicates to start from beginning of the dataset.
 	PageCursor *string `form:"page.cursor,omitempty" json:"page.cursor,omitempty"`
+
+	// UseListingPrices Whether to use listing prices instead of actual prices for cost calculations.
+	UseListingPrices *bool `form:"useListingPrices,omitempty" json:"useListingPrices,omitempty"`
 }
 
 // AllocationGroupAPIListAllocationGroupsParams defines parameters for AllocationGroupAPIListAllocationGroups.
@@ -7459,6 +7572,9 @@ type AllocationGroupAPIGetAllocationGroupEfficiencySummaryParams struct {
 
 	// ClusterIds Cluster IDs for filtering. Leave empty for the full list.
 	ClusterIds *[]string `form:"clusterIds,omitempty" json:"clusterIds,omitempty"`
+
+	// UseListingPrices Whether to use listing prices instead of actual prices for cost calculations.
+	UseListingPrices *bool `form:"useListingPrices,omitempty" json:"useListingPrices,omitempty"`
 }
 
 // AllocationGroupAPIGetCostAllocationGroupSummaryParams defines parameters for AllocationGroupAPIGetCostAllocationGroupSummary.
@@ -7508,6 +7624,9 @@ type AllocationGroupAPIGetAllocationGroupWorkloadCostsParams struct {
 	//  - DESC: ASC
 	//  - desc: desc
 	SortOrder *AllocationGroupAPIGetAllocationGroupWorkloadCostsParamsSortOrder `form:"sort.order,omitempty" json:"sort.order,omitempty"`
+
+	// UseListingPrices Whether to use listing prices instead of actual prices for cost calculations.
+	UseListingPrices *bool `form:"useListingPrices,omitempty" json:"useListingPrices,omitempty"`
 }
 
 // AllocationGroupAPIGetAllocationGroupWorkloadCostsParamsSortOrder defines parameters for AllocationGroupAPIGetAllocationGroupWorkloadCosts.
@@ -7539,6 +7658,9 @@ type AllocationGroupAPIGetAllocationGroupWorkloadsEfficiencyParams struct {
 	//  - DESC: ASC
 	//  - desc: desc
 	SortOrder *AllocationGroupAPIGetAllocationGroupWorkloadsEfficiencyParamsSortOrder `form:"sort.order,omitempty" json:"sort.order,omitempty"`
+
+	// UseListingPrices Whether to use listing prices instead of actual prices for cost calculations.
+	UseListingPrices *bool `form:"useListingPrices,omitempty" json:"useListingPrices,omitempty"`
 }
 
 // AllocationGroupAPIGetAllocationGroupWorkloadsEfficiencyParamsSortOrder defines parameters for AllocationGroupAPIGetAllocationGroupWorkloadsEfficiency.
@@ -7618,6 +7740,12 @@ type ExternalClusterAPIGetCredentialsScriptParams struct {
 
 	// InstallWorkloadAutoscaler Whether CAST AI Workload Autoscaler should be installed.
 	InstallWorkloadAutoscaler *bool `form:"installWorkloadAutoscaler,omitempty" json:"installWorkloadAutoscaler,omitempty"`
+
+	// InstallPodMutator Whether CAST AI Pod Mutator should be installed.
+	InstallPodMutator *bool `form:"installPodMutator,omitempty" json:"installPodMutator,omitempty"`
+
+	// InstallOmni Whether cluster should be onboarded with CAST AI Omni.
+	InstallOmni *bool `form:"installOmni,omitempty" json:"installOmni,omitempty"`
 }
 
 // ExternalClusterAPIListNodesParams defines parameters for ExternalClusterAPIListNodes.
@@ -7685,7 +7813,24 @@ type RbacServiceAPIListRoleBindingsParams struct {
 	// ScopeId Filter by scope ID. Multiple values can be passed as query parameters
 	// (e.g., &scope_id=x&scope_id=y)
 	ScopeId *[]string `form:"scopeId,omitempty" json:"scopeId,omitempty"`
+
+	// ScopeType Filter by scope type. Multiple values can be passed as query parameters
+	// (e.g., &scope_type=x&scope_type=y)
+	//
+	//  - ORGANIZATION: Organization scope represents the organization level authentication (Organization -> ResourceID)
+	//  - CLUSTER: Cluster scope represents the cluster level authentication (Organization -> Cluster -> ResourceID)
+	ScopeType *[]RbacServiceAPIListRoleBindingsParamsScopeType `form:"scopeType,omitempty" json:"scopeType,omitempty"`
+
+	// SubjectType Filter by subject type. Multiple values can be passed as query parameters
+	// (e.g., &subject_type=x&subject_type=y)
+	SubjectType *[]RbacServiceAPIListRoleBindingsParamsSubjectType `form:"subjectType,omitempty" json:"subjectType,omitempty"`
 }
+
+// RbacServiceAPIListRoleBindingsParamsScopeType defines parameters for RbacServiceAPIListRoleBindings.
+type RbacServiceAPIListRoleBindingsParamsScopeType string
+
+// RbacServiceAPIListRoleBindingsParamsSubjectType defines parameters for RbacServiceAPIListRoleBindings.
+type RbacServiceAPIListRoleBindingsParamsSubjectType string
 
 // RbacServiceAPICreateRoleBindingsJSONBody defines parameters for RbacServiceAPICreateRoleBindings.
 type RbacServiceAPICreateRoleBindingsJSONBody = []CastaiRbacV1beta1CreateRoleBindingsRequestRoleBinding

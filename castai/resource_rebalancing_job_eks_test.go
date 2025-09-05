@@ -11,7 +11,7 @@ import (
 
 func TestAccResourceRebalancingJob_eks(t *testing.T) {
 	rName := fmt.Sprintf("%v-rebalancing-job-%v", ResourcePrefix, acctest.RandString(8))
-	clusterName := "core-tf-acc"
+	clusterName := "core-tf-acc-21-08-2025"
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() { testAccPreCheck(t) },
 
@@ -85,7 +85,7 @@ func makeUpdatedRebalancingJobConfig(rName, clusterName string) string {
 
 func TestAccResourceRebalancingJobWithDataSource_eks(t *testing.T) {
 	rName := fmt.Sprintf("%v-rebalancing-job-with-data-source-%v", ResourcePrefix, acctest.RandString(8))
-	clusterName := "core-tf-acc"
+	clusterName := "core-tf-acc-21-08-2025"
 	resource.Test(t, resource.TestCase{
 		PreCheck: func() { testAccPreCheck(t) },
 
