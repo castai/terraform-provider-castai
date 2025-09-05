@@ -166,6 +166,7 @@ Optional:
 - `max_pods_per_node_formula` (String) Formula to calculate the maximum number of pods that can be run on a node. The following list of variables will be bound to a number before evaluating and can be used in the formula: NUM_MAX_NET_INTERFACES, NUM_IP_PER_INTERFACE, NUM_IP_PER_PREFIX, NUM_CPU, NUM_RAM_GB .
 - `node_group_arn` (String) Cluster's node group ARN used for CAST provisioned node pools. Required for hibernate/resume functionality
 - `target_group` (Block List) AWS target groups configuration for CAST provisioned nodes (see [below for nested schema](#nestedblock--eks--target_group))
+- `threads_per_cpu` (Number) Number of threads per core.
 - `volume_iops` (Number) AWS EBS volume IOPS to be used for CAST provisioned nodes
 - `volume_kms_key_arn` (String) AWS KMS key ARN for encrypting EBS volume attached to the node
 - `volume_throughput` (Number) AWS EBS volume throughput in MiB/s to be used for CAST provisioned nodes
