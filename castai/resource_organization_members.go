@@ -3,6 +3,8 @@ package castai
 import (
 	"context"
 	"fmt"
+	"maps"
+	"slices"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-log/tflog"
@@ -164,7 +166,7 @@ func resourceOrganizationMembersCreate(ctx context.Context, data *schema.Resourc
 		Members: &newMemberships,
 	})
 	if err := sdk.CheckOKResponse(resp, err); err != nil {
-		return diag.FromErr(fmt.Errorf("creating invitations: %w", err))
+		return diag.FromErr(fmt.Errorf("createMethod: creating invitations: %w, newMemberships: %+v", err, newMemberships))
 	}
 
 	data.SetId(organizationID)
@@ -304,7 +306,10 @@ func resourceOrganizationMembersUpdate(ctx context.Context, data *schema.Resourc
 		getRoleChange(data.GetChange(FieldOrganizationMembersMembers)),
 	)
 
+	tflog.Debug(ctx, fmt.Sprintf("update diff %+v", diff))
+
 	manipulations := getPendingManipulations(diff, userIDByEmail, invitationIDByEmail)
+	tflog.Debug(ctx, fmt.Sprintf("update manipulations %+v", manipulations))
 
 	tflog.Debug(ctx, "getting current user profile")
 	currentUserResp, err := client.UsersAPICurrentUserProfileWithResponse(ctx)
@@ -353,11 +358,52 @@ func resourceOrganizationMembersUpdate(ctx context.Context, data *schema.Resourc
 		})
 	}
 
-	resp, err := client.UsersAPICreateInvitationsWithResponse(ctx, sdk.UsersAPICreateInvitationsJSONRequestBody{
+	for userID, roleID := range manipulations.membersToUpdate {
+		rmUserResp, err := client.UsersAPIRemoveUserFromOrganizationWithResponse(ctx, organizationID, userID)
+		if err := sdk.CheckOKResponse(rmUserResp, err); err != nil {
+			return diag.FromErr(fmt.Errorf("deleting user: %w", err))
+		}
+		addUserResp, err := client.UsersAPIAddUserToOrganizationWithResponse(ctx, organizationID, sdk.CastaiUsersV1beta1NewMembership{
+			UserId: userID,
+		})
+		if err := sdk.CheckOKResponse(addUserResp, err); err != nil {
+			return diag.FromErr(fmt.Errorf("adding user to organization: %w", err))
+		}
+
+		createRoleBindingResp, err := client.RbacServiceAPICreateRoleBindingsWithResponse(ctx, organizationID, []sdk.CastaiRbacV1beta1CreateRoleBindingsRequestRoleBinding{
+			{
+				Name: fmt.Sprintf("organization-binding-%s-%s", roleID, userID),
+				Definition: sdk.CastaiRbacV1beta1RoleBindingDefinition{
+					RoleId: roleID,
+					Subjects: &[]sdk.CastaiRbacV1beta1Subject{
+						{
+							User: &sdk.CastaiRbacV1beta1UserSubject{
+								Id: userID,
+							},
+						},
+					},
+					Scopes: &[]sdk.CastaiRbacV1beta1Scope{
+						{
+							Organization: &sdk.CastaiRbacV1beta1OrganizationScope{
+								Id: organizationID,
+							},
+						},
+					},
+				},
+			},
+		})
+
+		if err := sdk.CheckOKResponse(createRoleBindingResp, err); err != nil {
+			return diag.FromErr(fmt.Errorf("updating role binding: %w", err))
+		}
+
+	}
+
+	rmUserResp, err := client.UsersAPICreateInvitationsWithResponse(ctx, sdk.UsersAPICreateInvitationsJSONRequestBody{
 		Members: &newMemberships,
 	})
-	if err := sdk.CheckOKResponse(resp, err); err != nil {
-		return diag.FromErr(fmt.Errorf("creating invitations: %w", err))
+	if err := sdk.CheckOKResponse(rmUserResp, err); err != nil {
+		return diag.FromErr(fmt.Errorf("updateMethod: creating invitations: %w, newMemberships: %+v", err, newMemberships))
 	}
 
 	return resourceOrganizationMembersRead(ctx, data, meta)
@@ -517,7 +563,7 @@ func getMembersDiff(owners, viewers, members roleChange) membersDiff {
 			continue
 		}
 		if contains(viewers.addedMembers, member) {
-			out.membersToMove[member] = MemberRoleID
+			out.membersToMove[member] = ViewerRoleID
 			continue
 		}
 
@@ -584,18 +630,11 @@ func getPendingManipulations(input membersDiff, existingUserIDByEmail, invitatio
 		out.membersToAdd[user] = role
 	}
 
-	for email, role := range input.membersToAdd {
-		out.membersToAdd[email] = role
-	}
+	maps.Copy(out.membersToAdd, input.membersToAdd)
 
 	return out
 }
 
 func contains(array []string, elem string) bool {
-	for _, v := range array {
-		if v == elem {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(array, elem)
 }
