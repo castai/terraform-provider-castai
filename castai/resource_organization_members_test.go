@@ -20,6 +20,8 @@ import (
 func TestOrganizationResourceReadContext(t *testing.T) {
 	t.Parallel()
 
+	organizationID := "b6bfc024-a267-400f-b8f1-db0850c369b1"
+
 	t.Run("when only role bindings present then populate the state with owners viewers and members based on role bindings", func(t *testing.T) {
 		t.Parallel()
 
@@ -32,8 +34,6 @@ func TestOrganizationResourceReadContext(t *testing.T) {
 				ClientInterface: mockClient,
 			},
 		}
-
-		organizationID := "b6bfc024-a267-400f-b8f1-db0850c369b1"
 
 		listInvitationsBody := io.NopCloser(bytes.NewReader([]byte(`{
   "nextCursor": "",
@@ -174,8 +174,6 @@ Tainted = false
 			},
 		}
 
-		organizationID := "b6bfc024-a267-400f-b8f1-db0850c369b1"
-
 		listRoleBindingsBody := io.NopCloser(bytes.NewReader([]byte(`{
   "roleBindings": [],
   "nextPage": {
@@ -231,7 +229,6 @@ Tainted = false
 			},
 		}
 
-		organizationID := "b6bfc024-a267-400f-b8f1-db0850c369b1"
 		listInvitationsBody := io.NopCloser(bytes.NewReader([]byte(`{
   "nextCursor": "",
   "invitations": [
@@ -338,7 +335,6 @@ Tainted = false
 			},
 		}
 
-		organizationID := "b6bfc024-a267-400f-b8f1-db0850c369b1"
 		listInvitationsBody := io.NopCloser(bytes.NewReader([]byte(`{
   "nextCursor": "",
   "invitations": [
