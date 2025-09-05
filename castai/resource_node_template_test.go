@@ -261,6 +261,7 @@ name = gpu
 rebalancing_config_min_nodes = 0
 should_taint = true
 Tainted = false
+clm_enabled = false
 gpu.# = 1
 gpu.0.default_shared_clients_per_gpu = 10
 gpu.0.enable_time_sharing = true
@@ -410,6 +411,7 @@ func TestNodeTemplateResourceCreate_defaultNodeTemplate(t *testing.T) {
 				"name": "default-by-castai",
 				"isEnabled": true,
 				"isDefault": true,
+				"clmEnabled": false,
 				"constraints": {
 				  "spot": false,
 				  "onDemand": true,
@@ -450,6 +452,7 @@ func TestNodeTemplateResourceCreate_defaultNodeTemplate(t *testing.T) {
 		FieldNodeTemplateIsDefault:                                cty.BoolVal(true),
 		FieldNodeTemplateCustomInstancesEnabled:                   cty.BoolVal(true),
 		FieldNodeTemplateCustomInstancesWithExtendedMemoryEnabled: cty.BoolVal(true),
+		FieldNodeTemplateClmEnabled:                               cty.BoolVal(false),
 	})
 	state := terraform.NewInstanceStateShimmedFromValue(val, 0)
 	state.ID = "default-by-castai"
@@ -480,6 +483,7 @@ func TestNodeTemplateResourceCreate_customNodeTemplate(t *testing.T) {
 		  "configurationName": "default",
 		  "name": "custom-template",
 		  "isEnabled": false,
+		  "clmEnabled": true,
 		  "constraints": {
 		    "spot": false,
 		    "onDemand": true,
@@ -529,6 +533,7 @@ func TestNodeTemplateResourceCreate_customNodeTemplate(t *testing.T) {
 		FieldNodeTemplateIsEnabled:                                cty.BoolVal(false),
 		FieldNodeTemplateCustomInstancesEnabled:                   cty.BoolVal(true),
 		FieldNodeTemplateCustomInstancesWithExtendedMemoryEnabled: cty.BoolVal(true),
+		FieldNodeTemplateClmEnabled:                               cty.BoolVal(true),
 	})
 	state := terraform.NewInstanceStateShimmedFromValue(val, 0)
 	state.ID = name
@@ -626,6 +631,7 @@ func TestAccResourceNodeTemplate_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "name", rName),
 					resource.TestCheckResourceAttr(resourceName, "is_enabled", "true"),
 					resource.TestCheckResourceAttr(resourceName, "should_taint", "true"),
+					resource.TestCheckResourceAttr(resourceName, "clm_enabled", "false"),
 					resource.TestCheckResourceAttr(resourceName, "custom_instances_enabled", "false"),
 					resource.TestCheckResourceAttr(resourceName, "custom_instances_with_extended_memory_enabled", "false"),
 					resource.TestCheckResourceAttr(resourceName, "custom_labels.%", "2"),
@@ -699,6 +705,7 @@ func TestAccResourceNodeTemplate_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "name", rName),
 					resource.TestCheckResourceAttr(resourceName, "is_enabled", "true"),
 					resource.TestCheckResourceAttr(resourceName, "should_taint", "true"),
+					resource.TestCheckResourceAttr(resourceName, "clm_enabled", "true"),
 					resource.TestCheckResourceAttr(resourceName, "custom_instances_enabled", "false"),
 					resource.TestCheckResourceAttr(resourceName, "custom_instances_with_extended_memory_enabled", "false"),
 					resource.TestCheckResourceAttr(resourceName, "custom_labels.%", "2"),
@@ -779,6 +786,7 @@ func testAccNodeTemplateConfig(rName, clusterName string) string {
 			name = %[1]q
 			configuration_id = castai_node_configuration.test.id
 			should_taint = true
+			clm_enabled = false
 
 			custom_labels = {
 				%[1]s-label-key-1 = "%[1]s-label-value-1"
@@ -854,6 +862,7 @@ func testNodeTemplateUpdated(rName, clusterName string) string {
 			name = %[1]q
 			configuration_id = castai_node_configuration.test.id
 			should_taint = true
+			clm_enabled = true
 			
 			custom_labels = {
 				%[1]s-label-key-1 = "%[1]s-label-value-1"
