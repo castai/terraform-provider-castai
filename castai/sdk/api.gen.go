@@ -6379,6 +6379,7 @@ type WorkloadoptimizationV1GetAgentStatusResponse struct {
 	ClusterId                        string  `json:"clusterId"`
 	CurrentVersion                   *string `json:"currentVersion"`
 	HpaSupportedFromCastAgentVersion *string `json:"hpaSupportedFromCastAgentVersion"`
+	InPlaceResizeEnabled             bool    `json:"inPlaceResizeEnabled"`
 	LatestVersion                    *string `json:"latestVersion"`
 
 	// Status AgentStatus defines the status of workload-autoscaler.
