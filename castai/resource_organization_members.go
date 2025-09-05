@@ -161,12 +161,14 @@ func resourceOrganizationMembersCreate(ctx context.Context, data *schema.Resourc
 		}
 	}
 
-	tflog.Debug(ctx, "creating invitations")
-	resp, err := client.UsersAPICreateInvitationsWithResponse(ctx, sdk.UsersAPICreateInvitationsJSONRequestBody{
-		Members: &newMemberships,
-	})
-	if err := sdk.CheckOKResponse(resp, err); err != nil {
-		return diag.FromErr(fmt.Errorf("createMethod: creating invitations: %w, newMemberships: %+v", err, newMemberships))
+	if len(newMemberships) > 0 {
+		tflog.Debug(ctx, "creating invitations")
+		resp, err := client.UsersAPICreateInvitationsWithResponse(ctx, sdk.UsersAPICreateInvitationsJSONRequestBody{
+			Members: &newMemberships,
+		})
+		if err := sdk.CheckOKResponse(resp, err); err != nil {
+			return diag.FromErr(fmt.Errorf("createMethod: creating invitations: %w, newMemberships: %+v", err, newMemberships))
+		}
 	}
 
 	data.SetId(organizationID)
@@ -299,17 +301,13 @@ func resourceOrganizationMembersUpdate(ctx context.Context, data *schema.Resourc
 		}
 	}
 
-	tflog.Debug(ctx, "getting members diff")
 	diff := getMembersDiff(
 		getRoleChange(data.GetChange(FieldOrganizationMembersOwners)),
 		getRoleChange(data.GetChange(FieldOrganizationMembersViewers)),
 		getRoleChange(data.GetChange(FieldOrganizationMembersMembers)),
 	)
 
-	tflog.Debug(ctx, fmt.Sprintf("update diff %+v", diff))
-
 	manipulations := getPendingManipulations(diff, userIDByEmail, invitationIDByEmail)
-	tflog.Debug(ctx, fmt.Sprintf("update manipulations %+v", manipulations))
 
 	tflog.Debug(ctx, "getting current user profile")
 	currentUserResp, err := client.UsersAPICurrentUserProfileWithResponse(ctx)
@@ -378,7 +376,8 @@ func resourceOrganizationMembersUpdate(ctx context.Context, data *schema.Resourc
 					Subjects: &[]sdk.CastaiRbacV1beta1Subject{
 						{
 							User: &sdk.CastaiRbacV1beta1UserSubject{
-								Id: userID,
+								Id:    userID,
+								Email: lo.ToPtr(userIDByEmail[userID]),
 							},
 						},
 					},
@@ -399,11 +398,13 @@ func resourceOrganizationMembersUpdate(ctx context.Context, data *schema.Resourc
 
 	}
 
-	rmUserResp, err := client.UsersAPICreateInvitationsWithResponse(ctx, sdk.UsersAPICreateInvitationsJSONRequestBody{
-		Members: &newMemberships,
-	})
-	if err := sdk.CheckOKResponse(rmUserResp, err); err != nil {
-		return diag.FromErr(fmt.Errorf("updateMethod: creating invitations: %w, newMemberships: %+v", err, newMemberships))
+	if len(newMemberships) > 0 {
+		rmUserResp, err := client.UsersAPICreateInvitationsWithResponse(ctx, sdk.UsersAPICreateInvitationsJSONRequestBody{
+			Members: &newMemberships,
+		})
+		if err := sdk.CheckOKResponse(rmUserResp, err); err != nil {
+			return diag.FromErr(fmt.Errorf("updateMethod: creating invitations: %w, newMemberships: %+v", err, newMemberships))
+		}
 	}
 
 	return resourceOrganizationMembersRead(ctx, data, meta)
