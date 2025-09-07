@@ -21,8 +21,6 @@ variable "subnets" {}
 
 variable "security_groups" {}
 
-variable "vpc_id" {}
-
 variable "castai_api_url" {
   type        = string
   description = "URL of alternative CAST AI API to be used during development or testing"
@@ -50,4 +48,12 @@ variable "install_helm_live" {
   type        = bool
   description = "Optional parameter, if set to true - the 'castai-live' Helm chart will be installed on the cluster. This is required for live migration feature."
   default     = true
+}
+
+variable "castai-eks-role-iam_role_arn" {
+  type = string
+}
+
+variable "castai-eks-role-iam_instance_profile_arn" {
+  type = string
 }

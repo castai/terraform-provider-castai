@@ -1,3 +1,14 @@
+module "iam" {
+  source = "./module/castai-eks-iam"
+  count  = var.enable_castai ? 1 : 0
+
+  cluster_name   = var.cluster_name
+  cluster_region = var.cluster_region
+  vpc_id         = module.vpc.vpc_id
+
+  depends_on = [module.vpc]
+}
+
 module "cluster" {
   source = "./module/castai"
   count  = var.enable_castai ? 1 : 0
@@ -8,7 +19,9 @@ module "cluster" {
   castai_api_url   = var.castai_api_url
   castai_grpc_url  = var.castai_grpc_url
 
-  vpc_id = module.vpc.vpc_id
+  castai-eks-role-iam_instance_profile_arn = module.iam[0].instance_profile_role_arn
+  castai-eks-role-iam_role_arn             = module.iam[0].role_arn
+
   security_groups = [
     module.eks.cluster_security_group_id,
     module.eks.node_security_group_id,
@@ -20,4 +33,6 @@ module "cluster" {
   install_helm_live = var.install_helm_live
 
   delete_nodes_on_disconnect = var.delete_nodes_on_disconnect
+
+  depends_on = [module.eks, module.iam]
 }

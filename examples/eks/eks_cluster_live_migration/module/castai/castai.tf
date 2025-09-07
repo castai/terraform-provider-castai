@@ -1,12 +1,10 @@
 locals {
-  role_name = "castai-eks-role"
-
   default_node_cfg = {
     default = {
       subnets              = var.subnets
       tags                 = var.tags
       security_groups      = var.security_groups
-      instance_profile_arn = module.castai-eks-role-iam.instance_profile_arn
+      instance_profile_arn = var.castai-eks-role-iam_instance_profile_arn
     }
   }
 
@@ -37,7 +35,7 @@ locals {
   node_configuration = merge(local.default_node_cfg, {
     live = {
       subnets              = var.subnets,
-      instance_profile_arn = module.castai-eks-role-iam.instance_profile_arn
+      instance_profile_arn = var.castai-eks-role-iam_instance_profile_arn
       security_groups      = var.security_groups
 
       container_runtime = "containerd"
@@ -58,35 +56,9 @@ locals {
 # Configure Data sources and providers required for CAST AI connection.
 data "aws_caller_identity" "current" {}
 
-resource "castai_eks_user_arn" "castai_user_arn" {
-  cluster_id = castai_eks_clusterid.cluster_id.id
-}
-
-# Create AWS IAM policies and a user to connect to CAST AI.
-module "castai-eks-role-iam" {
-  source  = "castai/eks-role-iam/castai"
-  version = "~> 1.0"
-
-  aws_account_id     = data.aws_caller_identity.current.account_id
-  aws_cluster_region = var.cluster_region
-  aws_cluster_name   = var.cluster_name
-  aws_cluster_vpc_id = var.vpc_id
-
-  castai_user_arn = castai_eks_user_arn.castai_user_arn.arn
-
-  create_iam_resources_per_cluster = true
-}
-
-# Configure EKS cluster connection using CAST AI eks-cluster module.
-resource "castai_eks_clusterid" "cluster_id" {
-  account_id   = data.aws_caller_identity.current.account_id
-  region       = var.cluster_region
-  cluster_name = var.cluster_name
-}
-
 module "castai-eks-cluster" {
   source  = "castai/eks-cluster/castai"
-  version = "~> 13.0"
+  version = "~> 13.1"
 
   api_url                = var.castai_api_url
   castai_api_token       = var.castai_api_token
@@ -97,7 +69,7 @@ module "castai-eks-cluster" {
   aws_cluster_region = var.cluster_region
   aws_cluster_name   = var.cluster_name
 
-  aws_assume_role_arn        = module.castai-eks-role-iam.role_arn
+  aws_assume_role_arn        = var.castai-eks-role-iam_role_arn
   delete_nodes_on_disconnect = var.delete_nodes_on_disconnect
 
   default_node_configuration = module.castai-eks-cluster.castai_node_configurations["default"]
@@ -144,8 +116,4 @@ module "castai-eks-cluster" {
 
   install_live = var.install_helm_live
   live_version = var.install_helm_live ? var.live_helm_version : null
-
-  # depends_on helps Terraform with creating proper dependencies graph in case of resource creation and in this case destroy.
-  # module "castai-eks-cluster" has to be destroyed before module "castai-eks-role-iam".
-  depends_on = [module.castai-eks-role-iam]
 }
