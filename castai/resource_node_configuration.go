@@ -558,6 +558,13 @@ func resourceNodeConfiguration() *schema.Resource {
 								},
 							},
 						},
+						"on_host_maintenance": {
+							Type:             schema.TypeString,
+							Optional:         true,
+							Default:          nil,
+							Description:      "Maintenance behavior of the instances. If not set, the default value for spot nodes is terminate, and for non-spot nodes, it is migrate.",
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"migrate", "terminate"}, true)),
+						},
 						FieldNodeConfigurationLoadbalancers: {
 							Type:        schema.TypeList,
 							Optional:    true,
@@ -1496,6 +1503,10 @@ func toGKEConfig(obj map[string]interface{}) *sdk.NodeconfigV1GKEConfig {
 		}
 	}
 
+	if v, ok := obj["on_host_maintenance"].(string); ok && v != "" {
+		out.OnHostMaintenance = toPtr(sdk.NodeconfigV1GKEConfigOnHostMaintenance(v))
+	}
+
 	if v, ok := obj[FieldNodeConfigurationLoadbalancers].([]interface{}); ok && len(v) > 0 {
 		out.LoadBalancers = toGkeLoadBalancers(v)
 	}
@@ -1598,6 +1609,9 @@ func flattenGKEConfig(config *sdk.NodeconfigV1GKEConfig) []map[string]interface{
 		}
 	}
 
+	if v := config.OnHostMaintenance; v != nil {
+		m["on_host_maintenance"] = *v
+	}
 	if v := config.LoadBalancers; v != nil && len(*v) > 0 {
 		m[FieldNodeConfigurationLoadbalancers] = fromGkeLoadBalancers(*v)
 	}

@@ -20,73 +20,136 @@ import (
 func TestOrganizationResourceReadContext(t *testing.T) {
 	t.Parallel()
 
-	r := require.New(t)
-	mockClient := mock_sdk.NewMockClientInterface(gomock.NewController(t))
-
-	ctx := context.Background()
-	provider := &ProviderConfig{
-		api: &sdk.ClientWithResponses{
-			ClientInterface: mockClient,
-		},
-	}
-
 	organizationID := "b6bfc024-a267-400f-b8f1-db0850c369b1"
 
-	body := io.NopCloser(bytes.NewReader([]byte(`{
-    "users": [
-        {
-            "user": {
-                "id": "1",
-                "username": "user-1",
-                "name": "User 1",
-                "email": "user-1@cast.ai"
-            },
-            "role": "owner"
-        },
-        {
-            "user": {
-                "id": "2",
-                "username": "user-2",
-                "name": "User 2",
-                "email": "user-2@cast.ai"
-            },
-            "role": "viewer"
+	t.Run("when only role bindings present then populate the state with owners viewers and members based on role bindings", func(t *testing.T) {
+		t.Parallel()
 
-        },
-        {
-            "user": {
-                "id": "3",
-                "username": "user-3",
-                "name": "User 3",
-                "email": "user-3@cast.ai"
-            },
-            "role": "member"
+		r := require.New(t)
+		mockClient := mock_sdk.NewMockClientInterface(gomock.NewController(t))
 
-        }
-    ]
-}`)))
+		ctx := context.Background()
+		provider := &ProviderConfig{
+			api: &sdk.ClientWithResponses{
+				ClientInterface: mockClient,
+			},
+		}
 
-	listInvitationsBody := io.NopCloser(bytes.NewReader([]byte(`{
+		listInvitationsBody := io.NopCloser(bytes.NewReader([]byte(`{
   "nextCursor": "",
   "invitations": []
 }`)))
-	mockClient.EXPECT().
-		UsersAPIListOrganizationUsers(gomock.Any(), organizationID, &sdk.UsersAPIListOrganizationUsersParams{}).
-		Return(&http.Response{StatusCode: 200, Body: body, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
 
-	mockClient.EXPECT().
-		UsersAPIListInvitations(gomock.Any(), gomock.Any()).Return(&http.Response{StatusCode: 200, Body: listInvitationsBody, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
+		listRoleBindingsBody := io.NopCloser(bytes.NewReader([]byte(`{
+  "roleBindings": [
+    {
+      "id": "1",
+      "organizationId": "` + organizationID + `",
+      "name": "owner-binding",
+      "description": "owner binding",
+      "createdAt": "2025-09-05T09:34:45.624Z",
+      "updatedAt": "2025-09-05T09:34:45.624Z",
+      "definition": {
+        "roleId": "` + OwnerRoleID + `",
+        "subjects": [
+          {
+            "user": {
+              "id": "1",
+              "name": "user-1",
+              "email": "user-1@cast.ai"
+            }
+          }
+        ],
+        "scopes": [
+          {
+            "organization": {
+              "id": "` + organizationID + `"
+            }
+          }
+        ]
+      }
+    },
+	{
+      "id": "2",
+      "organizationId": "` + organizationID + `",
+      "name": "viewer-binding",
+      "description": "viewer binding",
+      "createdAt": "2025-09-05T09:34:45.624Z",
+      "updatedAt": "2025-09-05T09:34:45.624Z",
+      "definition": {
+        "roleId": "` + ViewerRoleID + `",
+        "subjects": [
+          {
+            "user": {
+              "id": "2",
+              "name": "user-2",
+              "email": "user-2@cast.ai"
+            }
+          }
+        ],
+        "scopes": [
+          {
+            "organization": {
+              "id": "` + organizationID + `"
+            }
+          }
+        ]
+      }
+    },
+	{
+      "id": "3",
+      "organizationId": "` + organizationID + `",
+      "name": "member-binding",
+      "description": "member binding",
+      "createdAt": "2025-09-05T09:34:45.624Z",
+      "updatedAt": "2025-09-05T09:34:45.624Z",
+      "definition": {
+        "roleId": "` + MemberRoleID + `",
+        "subjects": [
+          {
+            "user": {
+              "id": "3",
+              "name": "user-3",
+              "email": "user-3@cast.ai"
+            }
+          }
+        ],
+        "scopes": [
+          {
+            "organization": {
+              "id": "` + organizationID + `"
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "nextPage": {
+    "limit": "100",
+    "cursor": ""
+  },
+  "totalCount": "3"
+	}`)))
+		mockClient.EXPECT().
+			RbacServiceAPIListRoleBindings(gomock.Any(), organizationID, &sdk.RbacServiceAPIListRoleBindingsParams{
+				SubjectType: &[]sdk.RbacServiceAPIListRoleBindingsParamsSubjectType{sdk.SUBJECTUSER},
+				ScopeType:   &[]sdk.RbacServiceAPIListRoleBindingsParamsScopeType{sdk.RbacServiceAPIListRoleBindingsParamsScopeTypeORGANIZATION},
+			}).
+			Return(&http.Response{StatusCode: 200, Body: listRoleBindingsBody, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
 
-	state := terraform.NewInstanceStateShimmedFromValue(cty.ObjectVal(map[string]cty.Value{}), 0)
-	state.ID = organizationID
+		mockClient.EXPECT().
+			UsersAPIListInvitations(gomock.Any(), gomock.Any()).Return(&http.Response{StatusCode: 200, Body: listInvitationsBody, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
 
-	resource := resourceOrganizationMembers()
-	data := resource.Data(state)
+		state := terraform.NewInstanceStateShimmedFromValue(cty.ObjectVal(map[string]cty.Value{}), 0)
+		state.ID = organizationID
 
-	result := resource.ReadContext(ctx, data, provider)
-	r.Nil(result)
-	r.False(result.HasError())
-	r.Equal(`ID = b6bfc024-a267-400f-b8f1-db0850c369b1
+		resource := resourceOrganizationMembers()
+		data := resource.Data(state)
+
+		result := resource.ReadContext(ctx, data, provider)
+		r.Nil(result)
+		r.False(result.HasError())
+		r.Equal(`ID = b6bfc024-a267-400f-b8f1-db0850c369b1
 members.# = 1
 members.0 = user-3@cast.ai
 organization_id = b6bfc024-a267-400f-b8f1-db0850c369b1
@@ -96,6 +159,269 @@ viewers.# = 1
 viewers.0 = user-2@cast.ai
 Tainted = false
 `, data.State().String())
+	})
+
+	t.Run("when no role bindings present then populate the state with empty lists", func(t *testing.T) {
+		t.Parallel()
+
+		r := require.New(t)
+		mockClient := mock_sdk.NewMockClientInterface(gomock.NewController(t))
+
+		ctx := context.Background()
+		provider := &ProviderConfig{
+			api: &sdk.ClientWithResponses{
+				ClientInterface: mockClient,
+			},
+		}
+
+		listRoleBindingsBody := io.NopCloser(bytes.NewReader([]byte(`{
+  "roleBindings": [],
+  "nextPage": {
+    "limit": "100",
+    "cursor": ""
+  },
+  "totalCount": "0"
+}`)))
+
+		listInvitationsBody := io.NopCloser(bytes.NewReader([]byte(`{
+			"nextCursor": "",
+			"invitations": []
+		}`)))
+
+		mockClient.EXPECT().
+			RbacServiceAPIListRoleBindings(gomock.Any(), organizationID, &sdk.RbacServiceAPIListRoleBindingsParams{
+				SubjectType: &[]sdk.RbacServiceAPIListRoleBindingsParamsSubjectType{sdk.SUBJECTUSER},
+				ScopeType:   &[]sdk.RbacServiceAPIListRoleBindingsParamsScopeType{sdk.RbacServiceAPIListRoleBindingsParamsScopeTypeORGANIZATION},
+			}).
+			Return(&http.Response{StatusCode: 200, Body: listRoleBindingsBody, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
+
+		mockClient.EXPECT().
+			UsersAPIListInvitations(gomock.Any(), gomock.Any()).Return(&http.Response{StatusCode: 200, Body: listInvitationsBody, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
+
+		state := terraform.NewInstanceStateShimmedFromValue(cty.ObjectVal(map[string]cty.Value{}), 0)
+		state.ID = organizationID
+
+		resource := resourceOrganizationMembers()
+		data := resource.Data(state)
+
+		result := resource.ReadContext(ctx, data, provider)
+		r.Nil(result)
+		r.False(result.HasError())
+		r.Equal(`ID = b6bfc024-a267-400f-b8f1-db0850c369b1
+members.# = 0
+organization_id = b6bfc024-a267-400f-b8f1-db0850c369b1
+owners.# = 0
+viewers.# = 0
+Tainted = false
+`, data.State().String())
+	})
+
+	t.Run("when pending invitations present then populate the state with pending invitations", func(t *testing.T) {
+		t.Parallel()
+
+		r := require.New(t)
+		mockClient := mock_sdk.NewMockClientInterface(gomock.NewController(t))
+
+		ctx := context.Background()
+		provider := &ProviderConfig{
+			api: &sdk.ClientWithResponses{
+				ClientInterface: mockClient,
+			},
+		}
+
+		listInvitationsBody := io.NopCloser(bytes.NewReader([]byte(`{
+  "nextCursor": "",
+  "invitations": [
+    {
+      "id": "1",
+      "inviteEmail": "user-1@cast.ai",
+      "roleBindings": [
+        {
+          "roleId": "` + OwnerRoleID + `",
+          "scopes": [
+            {
+              "id": "` + organizationID + `",
+              "type": "ORGANIZATION"
+            }
+          ]
+        }
+      ],
+      "validUntil": "2225-09-05T09:48:48.106Z"
+    },
+    {
+      "id": "2",
+      "inviteEmail": "user-2@cast.ai",
+      "roleBindings": [
+        {
+          "roleId": "` + ViewerRoleID + `",
+          "scopes": [
+            {
+              "id": "` + organizationID + `",
+              "type": "ORGANIZATION"
+            }
+          ]
+        }
+      ],
+      "validUntil": "2225-09-05T09:48:48.106Z"
+    },
+    {
+      "id": "3",
+      "inviteEmail": "user-3@cast.ai",
+      "roleBindings": [
+        {
+          "roleId": "` + MemberRoleID + `",
+          "scopes": [
+            {
+              "id": "` + organizationID + `",
+              "type": "ORGANIZATION"
+            }
+          ]
+        }
+      ],
+      "validUntil": "2225-09-05T09:48:48.106Z"
+    }
+  ]
+}`)))
+
+		listRoleBindingsBody := io.NopCloser(bytes.NewReader([]byte(`{
+			"roleBindings": [],
+			"nextPage": {
+				"limit": "100",
+				"cursor": ""
+			},
+			"totalCount": "0"
+		}`)))
+		mockClient.EXPECT().
+			RbacServiceAPIListRoleBindings(gomock.Any(), organizationID, &sdk.RbacServiceAPIListRoleBindingsParams{
+				SubjectType: &[]sdk.RbacServiceAPIListRoleBindingsParamsSubjectType{sdk.SUBJECTUSER},
+				ScopeType:   &[]sdk.RbacServiceAPIListRoleBindingsParamsScopeType{sdk.RbacServiceAPIListRoleBindingsParamsScopeTypeORGANIZATION},
+			}).
+			Return(&http.Response{StatusCode: 200, Body: listRoleBindingsBody, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
+
+		mockClient.EXPECT().
+			UsersAPIListInvitations(gomock.Any(), gomock.Any()).Return(&http.Response{StatusCode: 200, Body: listInvitationsBody, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
+
+		state := terraform.NewInstanceStateShimmedFromValue(cty.ObjectVal(map[string]cty.Value{}), 0)
+		state.ID = organizationID
+
+		resource := resourceOrganizationMembers()
+		data := resource.Data(state)
+
+		result := resource.ReadContext(ctx, data, provider)
+		r.Nil(result)
+		r.False(result.HasError())
+		r.Equal(`ID = b6bfc024-a267-400f-b8f1-db0850c369b1
+members.# = 1
+members.0 = user-3@cast.ai
+organization_id = b6bfc024-a267-400f-b8f1-db0850c369b1
+owners.# = 1
+owners.0 = user-1@cast.ai
+viewers.# = 1
+viewers.0 = user-2@cast.ai
+Tainted = false
+`, data.State().String())
+	})
+
+	t.Run("when both role bindings and pending invitations present then populate the state with both", func(t *testing.T) {
+		t.Parallel()
+
+		r := require.New(t)
+		mockClient := mock_sdk.NewMockClientInterface(gomock.NewController(t))
+
+		ctx := context.Background()
+		provider := &ProviderConfig{
+			api: &sdk.ClientWithResponses{
+				ClientInterface: mockClient,
+			},
+		}
+
+		listInvitationsBody := io.NopCloser(bytes.NewReader([]byte(`{
+  "nextCursor": "",
+  "invitations": [
+    {
+      "id": "1",
+      "inviteEmail": "user-1@cast.ai",
+      "roleBindings": [
+        {
+          "roleId": "` + OwnerRoleID + `",
+          "scopes": [
+            {
+              "id": "` + organizationID + `",
+              "type": "ORGANIZATION"
+            }
+          ]
+        }
+      ],
+      "validUntil": "2225-09-05T09:48:48.106Z"
+    }
+  ]
+}`)))
+
+		listRoleBindingsBody := io.NopCloser(bytes.NewReader([]byte(`{
+  "roleBindings": [
+    {
+      "id": "3",
+      "organizationId": "` + organizationID + `",
+      "name": "member-binding",
+      "description": "member binding",
+      "createdAt": "2025-09-05T09:34:45.624Z",
+      "updatedAt": "2025-09-05T09:34:45.624Z",
+      "definition": {
+        "roleId": "` + MemberRoleID + `",
+        "subjects": [
+          {
+            "user": {
+              "id": "3",
+              "name": "user-3",
+              "email": "user-3@cast.ai"
+            }
+          }
+        ],
+        "scopes": [
+          {
+            "organization": {
+              "id": "` + organizationID + `"
+            }
+          }
+        ]
+      }
+    }
+  ],
+  "nextPage": {
+    "limit": "100",
+    "cursor": ""
+  },
+  "totalCount": "0"
+}`)))
+		mockClient.EXPECT().
+			RbacServiceAPIListRoleBindings(gomock.Any(), organizationID, &sdk.RbacServiceAPIListRoleBindingsParams{
+				SubjectType: &[]sdk.RbacServiceAPIListRoleBindingsParamsSubjectType{sdk.SUBJECTUSER},
+				ScopeType:   &[]sdk.RbacServiceAPIListRoleBindingsParamsScopeType{sdk.RbacServiceAPIListRoleBindingsParamsScopeTypeORGANIZATION},
+			}).
+			Return(&http.Response{StatusCode: 200, Body: listRoleBindingsBody, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
+
+		mockClient.EXPECT().
+			UsersAPIListInvitations(gomock.Any(), gomock.Any()).Return(&http.Response{StatusCode: 200, Body: listInvitationsBody, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
+
+		state := terraform.NewInstanceStateShimmedFromValue(cty.ObjectVal(map[string]cty.Value{}), 0)
+		state.ID = organizationID
+
+		resource := resourceOrganizationMembers()
+		data := resource.Data(state)
+
+		result := resource.ReadContext(ctx, data, provider)
+		r.Nil(result)
+		r.False(result.HasError())
+		r.Equal(`ID = b6bfc024-a267-400f-b8f1-db0850c369b1
+members.# = 1
+members.0 = user-3@cast.ai
+organization_id = b6bfc024-a267-400f-b8f1-db0850c369b1
+owners.# = 1
+owners.0 = user-1@cast.ai
+viewers.# = 0
+Tainted = false
+`, data.State().String())
+	})
 }
 
 func TestOrganizationResourceSchemaDeprecation(t *testing.T) {
@@ -184,8 +510,8 @@ func TestGetMembersDiff(t *testing.T) {
 					deletedMembers: []string{"user-4"},
 				},
 			},
-			expectedMembersToAdd:    map[string]string{"user-1": "owner", "user-2": "viewer"},
-			expectedMembersToMove:   map[string]string{"user-3": "member"},
+			expectedMembersToAdd:    map[string]string{"user-1": OwnerRoleID, "user-2": ViewerRoleID},
+			expectedMembersToMove:   map[string]string{"user-3": MemberRoleID},
 			expectedMembersToDelete: map[string]struct{}{"user-4": {}},
 		},
 		{
@@ -194,7 +520,7 @@ func TestGetMembersDiff(t *testing.T) {
 				viewers: roleChange{addedMembers: []string{"user-2"}},
 				members: roleChange{addedMembers: []string{"user-3"}},
 			},
-			expectedMembersToAdd:    map[string]string{"user-1": "owner", "user-2": "viewer", "user-3": "member"},
+			expectedMembersToAdd:    map[string]string{"user-1": OwnerRoleID, "user-2": ViewerRoleID, "user-3": MemberRoleID},
 			expectedMembersToMove:   map[string]string{},
 			expectedMembersToDelete: map[string]struct{}{},
 		},
@@ -204,7 +530,7 @@ func TestGetMembersDiff(t *testing.T) {
 				viewers: roleChange{addedMembers: []string{"user-2"}},
 				members: roleChange{addedMembers: []string{"user-3"}},
 			},
-			expectedMembersToAdd:    map[string]string{"user-1": "owner", "user-2": "viewer", "user-3": "member"},
+			expectedMembersToAdd:    map[string]string{"user-1": OwnerRoleID, "user-2": ViewerRoleID, "user-3": MemberRoleID},
 			expectedMembersToMove:   map[string]string{},
 			expectedMembersToDelete: map[string]struct{}{},
 		},
@@ -214,7 +540,7 @@ func TestGetMembersDiff(t *testing.T) {
 				viewers: roleChange{addedMembers: []string{"user-3"}, deletedMembers: []string{"user-4"}},
 				members: roleChange{addedMembers: []string{"user-5"}, deletedMembers: []string{"user-6"}},
 			},
-			expectedMembersToAdd:    map[string]string{"user-1": "owner", "user-3": "viewer", "user-5": "member"},
+			expectedMembersToAdd:    map[string]string{"user-1": OwnerRoleID, "user-3": ViewerRoleID, "user-5": MemberRoleID},
 			expectedMembersToMove:   map[string]string{},
 			expectedMembersToDelete: map[string]struct{}{"user-2": {}, "user-4": {}, "user-6": {}},
 		},
@@ -225,7 +551,7 @@ func TestGetMembersDiff(t *testing.T) {
 				members: roleChange{addedMembers: []string{"user-3"}, deletedMembers: []string{"user-1"}},
 			},
 			expectedMembersToAdd:    map[string]string{},
-			expectedMembersToMove:   map[string]string{"user-1": "owner", "user-2": "viewer", "user-3": "member"},
+			expectedMembersToMove:   map[string]string{"user-1": OwnerRoleID, "user-2": ViewerRoleID, "user-3": MemberRoleID},
 			expectedMembersToDelete: map[string]struct{}{},
 		},
 		{
@@ -234,8 +560,8 @@ func TestGetMembersDiff(t *testing.T) {
 				viewers: roleChange{addedMembers: []string{"user-3", "user-5"}, deletedMembers: []string{"user-1", "user-6"}},
 				members: roleChange{addedMembers: []string{"user-6", "user-7"}, deletedMembers: []string{"user-8", "user-3"}},
 			},
-			expectedMembersToAdd:    map[string]string{"user-2": "owner", "user-5": "viewer", "user-7": "member"},
-			expectedMembersToMove:   map[string]string{"user-1": "owner", "user-3": "viewer", "user-6": "member"},
+			expectedMembersToAdd:    map[string]string{"user-2": OwnerRoleID, "user-5": ViewerRoleID, "user-7": MemberRoleID},
+			expectedMembersToMove:   map[string]string{"user-1": OwnerRoleID, "user-3": ViewerRoleID, "user-6": MemberRoleID},
 			expectedMembersToDelete: map[string]struct{}{"user-4": {}, "user-8": {}, "user-9": {}},
 		},
 	}
