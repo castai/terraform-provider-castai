@@ -400,6 +400,7 @@ Using the `import` block is a simpler and more convenient way of importing resou
    cpu {
      look_back_period_seconds = 0
    }
+   ```
 
 4. Apply the import plan:
 
