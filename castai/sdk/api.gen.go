@@ -894,6 +894,9 @@ type CastaiAuthtokenV1beta1AuthToken struct {
 	// Name (required) User provided name of the token.
 	Name string `json:"name"`
 
+	// OrganizationId organization_id is the id of the organization this token belongs to.
+	OrganizationId *string `json:"organizationId,omitempty"`
+
 	// Readonly TODO: we need to think how to migrate away from this flag.
 	// whether token has readonly permissions.
 	Readonly bool `json:"readonly"`
