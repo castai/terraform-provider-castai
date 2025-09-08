@@ -30,7 +30,7 @@ module "eks" {
   aws_auth_roles = [
     # Add the CAST AI IAM role which required for CAST AI nodes to join the cluster.
     {
-      rolearn  = module.iam[0].instance_profile_role_arn
+      rolearn  = module.castai-eks-role-iam[0].instance_profile_role_arn
       username = "system:node:{{EC2PrivateDNSName}}"
       groups = [
         "system:bootstrappers",
