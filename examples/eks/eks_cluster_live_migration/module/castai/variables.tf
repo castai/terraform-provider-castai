@@ -7,14 +7,8 @@ variable "cluster_region" {
   type = string
 }
 
-variable "live_proxy_version" {
-  type    = string
-  default = "0.36.0"
-}
-
 variable "live_helm_version" {
-  type    = string
-  default = "0.36.0"
+  type = string
 }
 
 variable "tags" {
@@ -26,8 +20,6 @@ variable "tags" {
 variable "subnets" {}
 
 variable "security_groups" {}
-
-variable "vpc_id" {}
 
 variable "castai_api_url" {
   type        = string
@@ -56,4 +48,12 @@ variable "install_helm_live" {
   type        = bool
   description = "Optional parameter, if set to true - the 'castai-live' Helm chart will be installed on the cluster. This is required for live migration feature."
   default     = true
+}
+
+variable "castai-eks-role-iam_role_arn" {
+  type = string
+}
+
+variable "castai-eks-role-iam_instance_profile_arn" {
+  type = string
 }
