@@ -38,7 +38,7 @@ module "cluster" {
   castai_api_url   = var.castai_api_url
   castai_grpc_url  = var.castai_grpc_url
 
-  castai-eks-role-iam_instance_profile_arn = module.castai-eks-role-iam[0].instance_profile_role_arn
+  castai-eks-role-iam_instance_profile_arn = module.castai-eks-role-iam[0].instance_profile_arn
   castai-eks-role-iam_role_arn             = module.castai-eks-role-iam[0].role_arn
 
   security_groups = [
