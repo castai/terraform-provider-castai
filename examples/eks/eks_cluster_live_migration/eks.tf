@@ -18,6 +18,10 @@ module "eks" {
     vpc-cni = {
       most_recent = true
     }
+    aws-ebs-csi-driver = {
+      service_account_role_arn = module.ebs_csi_irsa_role.iam_role_arn
+      resolve_conflicts        = "OVERWRITE"
+    }
   }
 
   tags = var.tags
@@ -65,6 +69,21 @@ module "eks" {
     }
   }
 
+}
+
+module "ebs_csi_irsa_role" {
+  source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
+  version = "~> 4.21.1"
+
+  role_name             = "ebs-csi-${var.cluster_name}"
+  attach_ebs_csi_policy = true
+
+  oidc_providers = {
+    ex = {
+      provider_arn               = module.eks.oidc_provider_arn
+      namespace_service_accounts = ["kube-system:ebs-csi-controller-sa"]
+    }
+  }
 }
 
 # Example additional security group.
