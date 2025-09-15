@@ -189,8 +189,8 @@ Optional:
 
 Optional:
 
-- `exclude` (List of String) Instance families to include when filtering (excludes all other families).
-- `include` (List of String) Instance families to exclude when filtering (includes all other families).
+- `exclude` (List of String) Instance families to exclude when filtering (includes all other families).
+- `include` (List of String) Instance families to include when filtering (excludes all other families).
 
 
 <a id="nestedblock--constraints--resource_limits"></a>
