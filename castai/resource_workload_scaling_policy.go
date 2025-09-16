@@ -45,6 +45,7 @@ const (
 	FieldRolloutBehavior                           = "rollout_behavior"
 	FieldRolloutBehaviorType                       = "type"
 	FieldRolloutBehaviorNoDisruptionType           = "NO_DISRUPTION"
+	FieldRolloutBehaviorPreferOneByOneType         = "prefer_one_by_one"
 	FieldPredictiveScaling                         = "predictive_scaling"
 	FieldConfidenceThreshold                       = "threshold"
 	DeprecatedFieldApplyThreshold                  = "apply_threshold"
@@ -291,10 +292,15 @@ It can be either:
 					Schema: map[string]*schema.Schema{
 						FieldRolloutBehaviorType: {
 							Type:     schema.TypeString,
-							Required: true,
+							Optional: true,
 							Description: `Defines the rollout type to be used when applying recommendations.
 	- NO_DISRUPTION - pods are restarted without causing service disruption.`,
 							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{FieldRolloutBehaviorNoDisruptionType}, false)),
+						},
+						FieldRolloutBehaviorPreferOneByOneType: {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Description: `Defines if pods should be restarted one by one to avoid service disruption.`,
 						},
 					},
 				},
@@ -1358,20 +1364,35 @@ func toRolloutBehavior(m map[string]any) *sdk.WorkloadoptimizationV1RolloutBehav
 	if v, ok := m[FieldRolloutBehaviorType].(string); ok && v != "" {
 		r.Type = lo.ToPtr(sdk.WorkloadoptimizationV1RolloutBehaviorType(v))
 	}
+	if v, ok := m[FieldRolloutBehaviorPreferOneByOneType].(bool); ok {
+		r.PreferOneByOne = lo.ToPtr(v)
+	}
+
+	if r.Type == nil && r.PreferOneByOne == nil {
+		return nil
+	}
 
 	return r
 }
 
 func toRolloutBehaviorMap(s *sdk.WorkloadoptimizationV1RolloutBehaviorSettings) []map[string]any {
-	if s == nil || s.Type == nil {
+	if s == nil {
 		return nil
 	}
 
-	return []map[string]any{
-		{
-			FieldRolloutBehaviorType: string(*s.Type),
-		},
+	if s.Type == nil && s.PreferOneByOne == nil {
+		return nil
 	}
+
+	m := map[string]any{}
+	if s.Type != nil {
+		m[FieldRolloutBehaviorType] = string(*s.Type)
+	}
+	if s.PreferOneByOne != nil {
+		m[FieldRolloutBehaviorPreferOneByOneType] = *s.PreferOneByOne
+	}
+
+	return []map[string]any{m}
 }
 
 func getWorkloadScalingPolicyByName(ctx context.Context, client sdk.ClientWithResponsesInterface, clusterID, name string) (*sdk.WorkloadoptimizationV1WorkloadScalingPolicy, error) {

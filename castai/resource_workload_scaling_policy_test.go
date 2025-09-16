@@ -582,6 +582,42 @@ func Test_toRolloutBehavior(t *testing.T) {
 				Type: lo.ToPtr(sdk.NODISRUPTION),
 			},
 		},
+		"should return rollout behavior settings with prefer_one_by_one": {
+			args: map[string]any{
+				FieldRolloutBehaviorType:               FieldRolloutBehaviorNoDisruptionType,
+				FieldRolloutBehaviorPreferOneByOneType: true,
+			},
+			exp: &sdk.WorkloadoptimizationV1RolloutBehaviorSettings{
+				Type:           lo.ToPtr(sdk.NODISRUPTION),
+				PreferOneByOne: lo.ToPtr(true),
+			},
+		},
+		"should return rollout behavior settings with prefer_one_by_one false": {
+			args: map[string]any{
+				FieldRolloutBehaviorType:               FieldRolloutBehaviorNoDisruptionType,
+				FieldRolloutBehaviorPreferOneByOneType: false,
+			},
+			exp: &sdk.WorkloadoptimizationV1RolloutBehaviorSettings{
+				Type:           lo.ToPtr(sdk.NODISRUPTION),
+				PreferOneByOne: lo.ToPtr(false),
+			},
+		},
+		"should return rollout behavior settings with only prefer_one_by_one": {
+			args: map[string]any{
+				FieldRolloutBehaviorPreferOneByOneType: true,
+			},
+			exp: &sdk.WorkloadoptimizationV1RolloutBehaviorSettings{
+				PreferOneByOne: lo.ToPtr(true),
+			},
+		},
+		"should return nil when only prefer_one_by_one is false": {
+			args: map[string]any{
+				FieldRolloutBehaviorPreferOneByOneType: false,
+			},
+			exp: &sdk.WorkloadoptimizationV1RolloutBehaviorSettings{
+				PreferOneByOne: lo.ToPtr(false),
+			},
+		},
 		"should return nil on empty map": {
 			args: map[string]any{},
 			exp:  nil,
@@ -591,6 +627,83 @@ func Test_toRolloutBehavior(t *testing.T) {
 		t.Run(name, func(t *testing.T) {
 			r := require.New(t)
 			got := toRolloutBehavior(tt.args)
+			r.Equal(tt.exp, got)
+		})
+	}
+}
+
+func Test_toRolloutBehaviorMap(t *testing.T) {
+	tests := map[string]struct {
+		args *sdk.WorkloadoptimizationV1RolloutBehaviorSettings
+		exp  []map[string]any
+	}{
+		"should return rollout behavior map": {
+			args: &sdk.WorkloadoptimizationV1RolloutBehaviorSettings{
+				Type: lo.ToPtr(sdk.NODISRUPTION),
+			},
+			exp: []map[string]any{
+				{
+					FieldRolloutBehaviorType: string(sdk.NODISRUPTION),
+				},
+			},
+		},
+		"should return rollout behavior map with prefer_one_by_one": {
+			args: &sdk.WorkloadoptimizationV1RolloutBehaviorSettings{
+				Type:           lo.ToPtr(sdk.NODISRUPTION),
+				PreferOneByOne: lo.ToPtr(true),
+			},
+			exp: []map[string]any{
+				{
+					FieldRolloutBehaviorType:               string(sdk.NODISRUPTION),
+					FieldRolloutBehaviorPreferOneByOneType: true,
+				},
+			},
+		},
+		"should return rollout behavior map with prefer_one_by_one false": {
+			args: &sdk.WorkloadoptimizationV1RolloutBehaviorSettings{
+				Type:           lo.ToPtr(sdk.NODISRUPTION),
+				PreferOneByOne: lo.ToPtr(false),
+			},
+			exp: []map[string]any{
+				{
+					FieldRolloutBehaviorType:               string(sdk.NODISRUPTION),
+					FieldRolloutBehaviorPreferOneByOneType: false,
+				},
+			},
+		},
+		"should return rollout behavior map with only prefer_one_by_one": {
+			args: &sdk.WorkloadoptimizationV1RolloutBehaviorSettings{
+				PreferOneByOne: lo.ToPtr(true),
+			},
+			exp: []map[string]any{
+				{
+					FieldRolloutBehaviorPreferOneByOneType: true,
+				},
+			},
+		},
+		"should return rollout behavior map with only prefer_one_by_one false": {
+			args: &sdk.WorkloadoptimizationV1RolloutBehaviorSettings{
+				PreferOneByOne: lo.ToPtr(false),
+			},
+			exp: []map[string]any{
+				{
+					FieldRolloutBehaviorPreferOneByOneType: false,
+				},
+			},
+		},
+		"should return nil for nil input": {
+			args: nil,
+			exp:  nil,
+		},
+		"should return nil for empty settings": {
+			args: &sdk.WorkloadoptimizationV1RolloutBehaviorSettings{},
+			exp:  nil,
+		},
+	}
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			r := require.New(t)
+			got := toRolloutBehaviorMap(tt.args)
 			r.Equal(tt.exp, got)
 		})
 	}

@@ -341,8 +341,9 @@ Required:
 <a id="nestedblock--rollout_behavior"></a>
 ### Nested Schema for `rollout_behavior`
 
-Required:
+Optional:
 
+- `prefer_one_by_one` (Boolean) Defines if pods should be restarted one by one to avoid service disruption.
 - `type` (String) Defines the rollout type to be used when applying recommendations.
 	- NO_DISRUPTION - pods are restarted without causing service disruption.
 
