@@ -4,10 +4,17 @@
 package organization_management
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
+	"fmt"
+	"io"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
+
+	"github.com/oapi-codegen/runtime"
 )
 
 // RequestEditorFn  is the function signature for the RequestEditor callback function
@@ -83,6 +90,1213 @@ func WithRequestEditorFn(fn RequestEditorFn) ClientOption {
 
 // The interface specification for the client above.
 type ClientInterface interface {
+	// EnterpriseAPIListGroups request
+	EnterpriseAPIListGroups(ctx context.Context, enterpriseId string, params *EnterpriseAPIListGroupsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// EnterpriseAPIBatchCreateEnterpriseGroupsWithBody request with any body
+	EnterpriseAPIBatchCreateEnterpriseGroupsWithBody(ctx context.Context, enterpriseId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	EnterpriseAPIBatchCreateEnterpriseGroups(ctx context.Context, enterpriseId string, body EnterpriseAPIBatchCreateEnterpriseGroupsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// EnterpriseAPIBatchDeleteEnterpriseGroupsWithBody request with any body
+	EnterpriseAPIBatchDeleteEnterpriseGroupsWithBody(ctx context.Context, enterpriseId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	EnterpriseAPIBatchDeleteEnterpriseGroups(ctx context.Context, enterpriseId string, body EnterpriseAPIBatchDeleteEnterpriseGroupsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// EnterpriseAPIBatchUpdateEnterpriseGroupsWithBody request with any body
+	EnterpriseAPIBatchUpdateEnterpriseGroupsWithBody(ctx context.Context, enterpriseId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	EnterpriseAPIBatchUpdateEnterpriseGroups(ctx context.Context, enterpriseId string, body EnterpriseAPIBatchUpdateEnterpriseGroupsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// EnterpriseAPIInviteUsersWithBody request with any body
+	EnterpriseAPIInviteUsersWithBody(ctx context.Context, enterpriseId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	EnterpriseAPIInviteUsers(ctx context.Context, enterpriseId string, body EnterpriseAPIInviteUsersJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// EnterpriseAPIListMembers request
+	EnterpriseAPIListMembers(ctx context.Context, enterpriseId string, params *EnterpriseAPIListMembersParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// EnterpriseAPIListChildrenOrganizations request
+	EnterpriseAPIListChildrenOrganizations(ctx context.Context, enterpriseId string, params *EnterpriseAPIListChildrenOrganizationsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// EnterpriseAPICreateChildOrganizationWithBody request with any body
+	EnterpriseAPICreateChildOrganizationWithBody(ctx context.Context, enterpriseId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	EnterpriseAPICreateChildOrganization(ctx context.Context, enterpriseId string, body EnterpriseAPICreateChildOrganizationJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// EnterpriseAPIDeleteChildOrganization request
+	EnterpriseAPIDeleteChildOrganization(ctx context.Context, enterpriseId string, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// EnterpriseAPIListRoleBindings request
+	EnterpriseAPIListRoleBindings(ctx context.Context, enterpriseId string, params *EnterpriseAPIListRoleBindingsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// EnterpriseAPIAddUserToChildOrganizationWithBody request with any body
+	EnterpriseAPIAddUserToChildOrganizationWithBody(ctx context.Context, enterpriseId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	EnterpriseAPIAddUserToChildOrganization(ctx context.Context, enterpriseId string, body EnterpriseAPIAddUserToChildOrganizationJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// EnterpriseAPIOverrideUserRoleBindingsWithBody request with any body
+	EnterpriseAPIOverrideUserRoleBindingsWithBody(ctx context.Context, enterpriseId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	EnterpriseAPIOverrideUserRoleBindings(ctx context.Context, enterpriseId string, body EnterpriseAPIOverrideUserRoleBindingsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+}
+
+func (c *Client) EnterpriseAPIListGroups(ctx context.Context, enterpriseId string, params *EnterpriseAPIListGroupsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewEnterpriseAPIListGroupsRequest(c.Server, enterpriseId, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) EnterpriseAPIBatchCreateEnterpriseGroupsWithBody(ctx context.Context, enterpriseId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewEnterpriseAPIBatchCreateEnterpriseGroupsRequestWithBody(c.Server, enterpriseId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) EnterpriseAPIBatchCreateEnterpriseGroups(ctx context.Context, enterpriseId string, body EnterpriseAPIBatchCreateEnterpriseGroupsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewEnterpriseAPIBatchCreateEnterpriseGroupsRequest(c.Server, enterpriseId, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) EnterpriseAPIBatchDeleteEnterpriseGroupsWithBody(ctx context.Context, enterpriseId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewEnterpriseAPIBatchDeleteEnterpriseGroupsRequestWithBody(c.Server, enterpriseId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) EnterpriseAPIBatchDeleteEnterpriseGroups(ctx context.Context, enterpriseId string, body EnterpriseAPIBatchDeleteEnterpriseGroupsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewEnterpriseAPIBatchDeleteEnterpriseGroupsRequest(c.Server, enterpriseId, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) EnterpriseAPIBatchUpdateEnterpriseGroupsWithBody(ctx context.Context, enterpriseId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewEnterpriseAPIBatchUpdateEnterpriseGroupsRequestWithBody(c.Server, enterpriseId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) EnterpriseAPIBatchUpdateEnterpriseGroups(ctx context.Context, enterpriseId string, body EnterpriseAPIBatchUpdateEnterpriseGroupsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewEnterpriseAPIBatchUpdateEnterpriseGroupsRequest(c.Server, enterpriseId, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) EnterpriseAPIInviteUsersWithBody(ctx context.Context, enterpriseId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewEnterpriseAPIInviteUsersRequestWithBody(c.Server, enterpriseId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) EnterpriseAPIInviteUsers(ctx context.Context, enterpriseId string, body EnterpriseAPIInviteUsersJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewEnterpriseAPIInviteUsersRequest(c.Server, enterpriseId, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) EnterpriseAPIListMembers(ctx context.Context, enterpriseId string, params *EnterpriseAPIListMembersParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewEnterpriseAPIListMembersRequest(c.Server, enterpriseId, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) EnterpriseAPIListChildrenOrganizations(ctx context.Context, enterpriseId string, params *EnterpriseAPIListChildrenOrganizationsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewEnterpriseAPIListChildrenOrganizationsRequest(c.Server, enterpriseId, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) EnterpriseAPICreateChildOrganizationWithBody(ctx context.Context, enterpriseId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewEnterpriseAPICreateChildOrganizationRequestWithBody(c.Server, enterpriseId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) EnterpriseAPICreateChildOrganization(ctx context.Context, enterpriseId string, body EnterpriseAPICreateChildOrganizationJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewEnterpriseAPICreateChildOrganizationRequest(c.Server, enterpriseId, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) EnterpriseAPIDeleteChildOrganization(ctx context.Context, enterpriseId string, id string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewEnterpriseAPIDeleteChildOrganizationRequest(c.Server, enterpriseId, id)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) EnterpriseAPIListRoleBindings(ctx context.Context, enterpriseId string, params *EnterpriseAPIListRoleBindingsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewEnterpriseAPIListRoleBindingsRequest(c.Server, enterpriseId, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) EnterpriseAPIAddUserToChildOrganizationWithBody(ctx context.Context, enterpriseId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewEnterpriseAPIAddUserToChildOrganizationRequestWithBody(c.Server, enterpriseId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) EnterpriseAPIAddUserToChildOrganization(ctx context.Context, enterpriseId string, body EnterpriseAPIAddUserToChildOrganizationJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewEnterpriseAPIAddUserToChildOrganizationRequest(c.Server, enterpriseId, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) EnterpriseAPIOverrideUserRoleBindingsWithBody(ctx context.Context, enterpriseId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewEnterpriseAPIOverrideUserRoleBindingsRequestWithBody(c.Server, enterpriseId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) EnterpriseAPIOverrideUserRoleBindings(ctx context.Context, enterpriseId string, body EnterpriseAPIOverrideUserRoleBindingsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewEnterpriseAPIOverrideUserRoleBindingsRequest(c.Server, enterpriseId, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+// NewEnterpriseAPIListGroupsRequest generates requests for EnterpriseAPIListGroups
+func NewEnterpriseAPIListGroupsRequest(server string, enterpriseId string, params *EnterpriseAPIListGroupsParams) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "enterpriseId", runtime.ParamLocationPath, enterpriseId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/organization-management/v1/enterprises/%s/groups", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.PageLimit != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "page.limit", runtime.ParamLocationQuery, *params.PageLimit); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.PageCursor != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "page.cursor", runtime.ParamLocationQuery, *params.PageCursor); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.OrganizationId != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "organizationId", runtime.ParamLocationQuery, *params.OrganizationId); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.GroupName != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "groupName", runtime.ParamLocationQuery, *params.GroupName); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.SortField != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "sort.field", runtime.ParamLocationQuery, *params.SortField); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.SortOrder != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "sort.order", runtime.ParamLocationQuery, *params.SortOrder); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewEnterpriseAPIBatchCreateEnterpriseGroupsRequest calls the generic EnterpriseAPIBatchCreateEnterpriseGroups builder with application/json body
+func NewEnterpriseAPIBatchCreateEnterpriseGroupsRequest(server string, enterpriseId string, body EnterpriseAPIBatchCreateEnterpriseGroupsJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewEnterpriseAPIBatchCreateEnterpriseGroupsRequestWithBody(server, enterpriseId, "application/json", bodyReader)
+}
+
+// NewEnterpriseAPIBatchCreateEnterpriseGroupsRequestWithBody generates requests for EnterpriseAPIBatchCreateEnterpriseGroups with any type of body
+func NewEnterpriseAPIBatchCreateEnterpriseGroupsRequestWithBody(server string, enterpriseId string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "enterpriseId", runtime.ParamLocationPath, enterpriseId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/organization-management/v1/enterprises/%s/groups:batchCreate", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewEnterpriseAPIBatchDeleteEnterpriseGroupsRequest calls the generic EnterpriseAPIBatchDeleteEnterpriseGroups builder with application/json body
+func NewEnterpriseAPIBatchDeleteEnterpriseGroupsRequest(server string, enterpriseId string, body EnterpriseAPIBatchDeleteEnterpriseGroupsJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewEnterpriseAPIBatchDeleteEnterpriseGroupsRequestWithBody(server, enterpriseId, "application/json", bodyReader)
+}
+
+// NewEnterpriseAPIBatchDeleteEnterpriseGroupsRequestWithBody generates requests for EnterpriseAPIBatchDeleteEnterpriseGroups with any type of body
+func NewEnterpriseAPIBatchDeleteEnterpriseGroupsRequestWithBody(server string, enterpriseId string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "enterpriseId", runtime.ParamLocationPath, enterpriseId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/organization-management/v1/enterprises/%s/groups:batchDelete", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewEnterpriseAPIBatchUpdateEnterpriseGroupsRequest calls the generic EnterpriseAPIBatchUpdateEnterpriseGroups builder with application/json body
+func NewEnterpriseAPIBatchUpdateEnterpriseGroupsRequest(server string, enterpriseId string, body EnterpriseAPIBatchUpdateEnterpriseGroupsJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewEnterpriseAPIBatchUpdateEnterpriseGroupsRequestWithBody(server, enterpriseId, "application/json", bodyReader)
+}
+
+// NewEnterpriseAPIBatchUpdateEnterpriseGroupsRequestWithBody generates requests for EnterpriseAPIBatchUpdateEnterpriseGroups with any type of body
+func NewEnterpriseAPIBatchUpdateEnterpriseGroupsRequestWithBody(server string, enterpriseId string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "enterpriseId", runtime.ParamLocationPath, enterpriseId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/organization-management/v1/enterprises/%s/groups:batchUpdate", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewEnterpriseAPIInviteUsersRequest calls the generic EnterpriseAPIInviteUsers builder with application/json body
+func NewEnterpriseAPIInviteUsersRequest(server string, enterpriseId string, body EnterpriseAPIInviteUsersJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewEnterpriseAPIInviteUsersRequestWithBody(server, enterpriseId, "application/json", bodyReader)
+}
+
+// NewEnterpriseAPIInviteUsersRequestWithBody generates requests for EnterpriseAPIInviteUsers with any type of body
+func NewEnterpriseAPIInviteUsersRequestWithBody(server string, enterpriseId string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "enterpriseId", runtime.ParamLocationPath, enterpriseId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/organization-management/v1/enterprises/%s/invitations", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewEnterpriseAPIListMembersRequest generates requests for EnterpriseAPIListMembers
+func NewEnterpriseAPIListMembersRequest(server string, enterpriseId string, params *EnterpriseAPIListMembersParams) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "enterpriseId", runtime.ParamLocationPath, enterpriseId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/organization-management/v1/enterprises/%s/members", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.OrganizationId != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "organizationId", runtime.ParamLocationQuery, *params.OrganizationId); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.RoleId != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "roleId", runtime.ParamLocationQuery, *params.RoleId); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.GroupId != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "groupId", runtime.ParamLocationQuery, *params.GroupId); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.PageLimit != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "page.limit", runtime.ParamLocationQuery, *params.PageLimit); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.PageCursor != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "page.cursor", runtime.ParamLocationQuery, *params.PageCursor); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.Name != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "name", runtime.ParamLocationQuery, *params.Name); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.SortField != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "sort.field", runtime.ParamLocationQuery, *params.SortField); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.SortOrder != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "sort.order", runtime.ParamLocationQuery, *params.SortOrder); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.Status != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "status", runtime.ParamLocationQuery, *params.Status); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewEnterpriseAPIListChildrenOrganizationsRequest generates requests for EnterpriseAPIListChildrenOrganizations
+func NewEnterpriseAPIListChildrenOrganizationsRequest(server string, enterpriseId string, params *EnterpriseAPIListChildrenOrganizationsParams) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "enterpriseId", runtime.ParamLocationPath, enterpriseId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/organization-management/v1/enterprises/%s/organizations", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.PageLimit != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "page.limit", runtime.ParamLocationQuery, *params.PageLimit); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.PageCursor != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "page.cursor", runtime.ParamLocationQuery, *params.PageCursor); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.OrganizationName != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "organizationName", runtime.ParamLocationQuery, *params.OrganizationName); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.SortField != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "sort.field", runtime.ParamLocationQuery, *params.SortField); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.SortOrder != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "sort.order", runtime.ParamLocationQuery, *params.SortOrder); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewEnterpriseAPICreateChildOrganizationRequest calls the generic EnterpriseAPICreateChildOrganization builder with application/json body
+func NewEnterpriseAPICreateChildOrganizationRequest(server string, enterpriseId string, body EnterpriseAPICreateChildOrganizationJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewEnterpriseAPICreateChildOrganizationRequestWithBody(server, enterpriseId, "application/json", bodyReader)
+}
+
+// NewEnterpriseAPICreateChildOrganizationRequestWithBody generates requests for EnterpriseAPICreateChildOrganization with any type of body
+func NewEnterpriseAPICreateChildOrganizationRequestWithBody(server string, enterpriseId string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "enterpriseId", runtime.ParamLocationPath, enterpriseId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/organization-management/v1/enterprises/%s/organizations", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewEnterpriseAPIDeleteChildOrganizationRequest generates requests for EnterpriseAPIDeleteChildOrganization
+func NewEnterpriseAPIDeleteChildOrganizationRequest(server string, enterpriseId string, id string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "enterpriseId", runtime.ParamLocationPath, enterpriseId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/organization-management/v1/enterprises/%s/organizations/%s", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("DELETE", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewEnterpriseAPIListRoleBindingsRequest generates requests for EnterpriseAPIListRoleBindings
+func NewEnterpriseAPIListRoleBindingsRequest(server string, enterpriseId string, params *EnterpriseAPIListRoleBindingsParams) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "enterpriseId", runtime.ParamLocationPath, enterpriseId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/organization-management/v1/enterprises/%s/role-bindings", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.PageLimit != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "page.limit", runtime.ParamLocationQuery, *params.PageLimit); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.PageCursor != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "page.cursor", runtime.ParamLocationQuery, *params.PageCursor); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.OrganizationId != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "organizationId", runtime.ParamLocationQuery, *params.OrganizationId); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.RoleId != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "roleId", runtime.ParamLocationQuery, *params.RoleId); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.SubjectId != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "subjectId", runtime.ParamLocationQuery, *params.SubjectId); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewEnterpriseAPIAddUserToChildOrganizationRequest calls the generic EnterpriseAPIAddUserToChildOrganization builder with application/json body
+func NewEnterpriseAPIAddUserToChildOrganizationRequest(server string, enterpriseId string, body EnterpriseAPIAddUserToChildOrganizationJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewEnterpriseAPIAddUserToChildOrganizationRequestWithBody(server, enterpriseId, "application/json", bodyReader)
+}
+
+// NewEnterpriseAPIAddUserToChildOrganizationRequestWithBody generates requests for EnterpriseAPIAddUserToChildOrganization with any type of body
+func NewEnterpriseAPIAddUserToChildOrganizationRequestWithBody(server string, enterpriseId string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "enterpriseId", runtime.ParamLocationPath, enterpriseId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/organization-management/v1/enterprises/%s/users", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
+// NewEnterpriseAPIOverrideUserRoleBindingsRequest calls the generic EnterpriseAPIOverrideUserRoleBindings builder with application/json body
+func NewEnterpriseAPIOverrideUserRoleBindingsRequest(server string, enterpriseId string, body EnterpriseAPIOverrideUserRoleBindingsJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewEnterpriseAPIOverrideUserRoleBindingsRequestWithBody(server, enterpriseId, "application/json", bodyReader)
+}
+
+// NewEnterpriseAPIOverrideUserRoleBindingsRequestWithBody generates requests for EnterpriseAPIOverrideUserRoleBindings with any type of body
+func NewEnterpriseAPIOverrideUserRoleBindingsRequestWithBody(server string, enterpriseId string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "enterpriseId", runtime.ParamLocationPath, enterpriseId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/organization-management/v1/enterprises/%s/users:overrideRoleBindings", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
 }
 
 func (c *Client) applyEditors(ctx context.Context, req *http.Request, additionalEditors []RequestEditorFn) error {
@@ -129,6 +1343,55 @@ func WithBaseURL(baseURL string) ClientOption {
 // ClientWithResponsesInterface is the interface specification for the client with responses above.
 type ClientWithResponsesInterface interface {
 	ClientInterface
+	// EnterpriseAPIListGroups request
+	EnterpriseAPIListGroupsWithResponse(ctx context.Context, enterpriseId string, params *EnterpriseAPIListGroupsParams) (*EnterpriseAPIListGroupsResponse, error)
+
+	// EnterpriseAPIBatchCreateEnterpriseGroups request  with any body
+	EnterpriseAPIBatchCreateEnterpriseGroupsWithBodyWithResponse(ctx context.Context, enterpriseId string, contentType string, body io.Reader) (*EnterpriseAPIBatchCreateEnterpriseGroupsResponse, error)
+
+	EnterpriseAPIBatchCreateEnterpriseGroupsWithResponse(ctx context.Context, enterpriseId string, body EnterpriseAPIBatchCreateEnterpriseGroupsJSONRequestBody) (*EnterpriseAPIBatchCreateEnterpriseGroupsResponse, error)
+
+	// EnterpriseAPIBatchDeleteEnterpriseGroups request  with any body
+	EnterpriseAPIBatchDeleteEnterpriseGroupsWithBodyWithResponse(ctx context.Context, enterpriseId string, contentType string, body io.Reader) (*EnterpriseAPIBatchDeleteEnterpriseGroupsResponse, error)
+
+	EnterpriseAPIBatchDeleteEnterpriseGroupsWithResponse(ctx context.Context, enterpriseId string, body EnterpriseAPIBatchDeleteEnterpriseGroupsJSONRequestBody) (*EnterpriseAPIBatchDeleteEnterpriseGroupsResponse, error)
+
+	// EnterpriseAPIBatchUpdateEnterpriseGroups request  with any body
+	EnterpriseAPIBatchUpdateEnterpriseGroupsWithBodyWithResponse(ctx context.Context, enterpriseId string, contentType string, body io.Reader) (*EnterpriseAPIBatchUpdateEnterpriseGroupsResponse, error)
+
+	EnterpriseAPIBatchUpdateEnterpriseGroupsWithResponse(ctx context.Context, enterpriseId string, body EnterpriseAPIBatchUpdateEnterpriseGroupsJSONRequestBody) (*EnterpriseAPIBatchUpdateEnterpriseGroupsResponse, error)
+
+	// EnterpriseAPIInviteUsers request  with any body
+	EnterpriseAPIInviteUsersWithBodyWithResponse(ctx context.Context, enterpriseId string, contentType string, body io.Reader) (*EnterpriseAPIInviteUsersResponse, error)
+
+	EnterpriseAPIInviteUsersWithResponse(ctx context.Context, enterpriseId string, body EnterpriseAPIInviteUsersJSONRequestBody) (*EnterpriseAPIInviteUsersResponse, error)
+
+	// EnterpriseAPIListMembers request
+	EnterpriseAPIListMembersWithResponse(ctx context.Context, enterpriseId string, params *EnterpriseAPIListMembersParams) (*EnterpriseAPIListMembersResponse, error)
+
+	// EnterpriseAPIListChildrenOrganizations request
+	EnterpriseAPIListChildrenOrganizationsWithResponse(ctx context.Context, enterpriseId string, params *EnterpriseAPIListChildrenOrganizationsParams) (*EnterpriseAPIListChildrenOrganizationsResponse, error)
+
+	// EnterpriseAPICreateChildOrganization request  with any body
+	EnterpriseAPICreateChildOrganizationWithBodyWithResponse(ctx context.Context, enterpriseId string, contentType string, body io.Reader) (*EnterpriseAPICreateChildOrganizationResponse, error)
+
+	EnterpriseAPICreateChildOrganizationWithResponse(ctx context.Context, enterpriseId string, body EnterpriseAPICreateChildOrganizationJSONRequestBody) (*EnterpriseAPICreateChildOrganizationResponse, error)
+
+	// EnterpriseAPIDeleteChildOrganization request
+	EnterpriseAPIDeleteChildOrganizationWithResponse(ctx context.Context, enterpriseId string, id string) (*EnterpriseAPIDeleteChildOrganizationResponse, error)
+
+	// EnterpriseAPIListRoleBindings request
+	EnterpriseAPIListRoleBindingsWithResponse(ctx context.Context, enterpriseId string, params *EnterpriseAPIListRoleBindingsParams) (*EnterpriseAPIListRoleBindingsResponse, error)
+
+	// EnterpriseAPIAddUserToChildOrganization request  with any body
+	EnterpriseAPIAddUserToChildOrganizationWithBodyWithResponse(ctx context.Context, enterpriseId string, contentType string, body io.Reader) (*EnterpriseAPIAddUserToChildOrganizationResponse, error)
+
+	EnterpriseAPIAddUserToChildOrganizationWithResponse(ctx context.Context, enterpriseId string, body EnterpriseAPIAddUserToChildOrganizationJSONRequestBody) (*EnterpriseAPIAddUserToChildOrganizationResponse, error)
+
+	// EnterpriseAPIOverrideUserRoleBindings request  with any body
+	EnterpriseAPIOverrideUserRoleBindingsWithBodyWithResponse(ctx context.Context, enterpriseId string, contentType string, body io.Reader) (*EnterpriseAPIOverrideUserRoleBindingsResponse, error)
+
+	EnterpriseAPIOverrideUserRoleBindingsWithResponse(ctx context.Context, enterpriseId string, body EnterpriseAPIOverrideUserRoleBindingsJSONRequestBody) (*EnterpriseAPIOverrideUserRoleBindingsResponse, error)
 }
 
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
@@ -139,3 +1402,919 @@ type Response interface {
 }
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type EnterpriseAPIListGroupsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *ListGroupsResponse
+	JSONDefault  *Status
+}
+
+// Status returns HTTPResponse.Status
+func (r EnterpriseAPIListGroupsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r EnterpriseAPIListGroupsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r EnterpriseAPIListGroupsResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type EnterpriseAPIBatchCreateEnterpriseGroupsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *BatchCreateEnterpriseGroupsResponse
+	JSONDefault  *Status
+}
+
+// Status returns HTTPResponse.Status
+func (r EnterpriseAPIBatchCreateEnterpriseGroupsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r EnterpriseAPIBatchCreateEnterpriseGroupsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r EnterpriseAPIBatchCreateEnterpriseGroupsResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type EnterpriseAPIBatchDeleteEnterpriseGroupsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSONDefault  *Status
+}
+
+// Status returns HTTPResponse.Status
+func (r EnterpriseAPIBatchDeleteEnterpriseGroupsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r EnterpriseAPIBatchDeleteEnterpriseGroupsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r EnterpriseAPIBatchDeleteEnterpriseGroupsResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type EnterpriseAPIBatchUpdateEnterpriseGroupsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *BatchUpdateEnterpriseGroupsResponse
+	JSONDefault  *Status
+}
+
+// Status returns HTTPResponse.Status
+func (r EnterpriseAPIBatchUpdateEnterpriseGroupsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r EnterpriseAPIBatchUpdateEnterpriseGroupsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r EnterpriseAPIBatchUpdateEnterpriseGroupsResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type EnterpriseAPIInviteUsersResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *InviteUsersResponse
+	JSONDefault  *Status
+}
+
+// Status returns HTTPResponse.Status
+func (r EnterpriseAPIInviteUsersResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r EnterpriseAPIInviteUsersResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r EnterpriseAPIInviteUsersResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type EnterpriseAPIListMembersResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *ListMembersResponse
+	JSONDefault  *Status
+}
+
+// Status returns HTTPResponse.Status
+func (r EnterpriseAPIListMembersResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r EnterpriseAPIListMembersResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r EnterpriseAPIListMembersResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type EnterpriseAPIListChildrenOrganizationsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *ListChildrenOrganizationsResponse
+	JSONDefault  *Status
+}
+
+// Status returns HTTPResponse.Status
+func (r EnterpriseAPIListChildrenOrganizationsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r EnterpriseAPIListChildrenOrganizationsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r EnterpriseAPIListChildrenOrganizationsResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type EnterpriseAPICreateChildOrganizationResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *CreateChildOrganizationResponse
+	JSONDefault  *Status
+}
+
+// Status returns HTTPResponse.Status
+func (r EnterpriseAPICreateChildOrganizationResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r EnterpriseAPICreateChildOrganizationResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r EnterpriseAPICreateChildOrganizationResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type EnterpriseAPIDeleteChildOrganizationResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSONDefault  *Status
+}
+
+// Status returns HTTPResponse.Status
+func (r EnterpriseAPIDeleteChildOrganizationResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r EnterpriseAPIDeleteChildOrganizationResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r EnterpriseAPIDeleteChildOrganizationResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type EnterpriseAPIListRoleBindingsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *ListRoleBindingsResponse
+	JSONDefault  *Status
+}
+
+// Status returns HTTPResponse.Status
+func (r EnterpriseAPIListRoleBindingsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r EnterpriseAPIListRoleBindingsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r EnterpriseAPIListRoleBindingsResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type EnterpriseAPIAddUserToChildOrganizationResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *AddUserToChildOrganizationResponse
+	JSONDefault  *Status
+}
+
+// Status returns HTTPResponse.Status
+func (r EnterpriseAPIAddUserToChildOrganizationResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r EnterpriseAPIAddUserToChildOrganizationResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r EnterpriseAPIAddUserToChildOrganizationResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type EnterpriseAPIOverrideUserRoleBindingsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *OverrideUserRoleBindingsResponse
+	JSONDefault  *Status
+}
+
+// Status returns HTTPResponse.Status
+func (r EnterpriseAPIOverrideUserRoleBindingsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r EnterpriseAPIOverrideUserRoleBindingsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r EnterpriseAPIOverrideUserRoleBindingsResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+// EnterpriseAPIListGroupsWithResponse request returning *EnterpriseAPIListGroupsResponse
+func (c *ClientWithResponses) EnterpriseAPIListGroupsWithResponse(ctx context.Context, enterpriseId string, params *EnterpriseAPIListGroupsParams) (*EnterpriseAPIListGroupsResponse, error) {
+	rsp, err := c.EnterpriseAPIListGroups(ctx, enterpriseId, params)
+	if err != nil {
+		return nil, err
+	}
+	return ParseEnterpriseAPIListGroupsResponse(rsp)
+}
+
+// EnterpriseAPIBatchCreateEnterpriseGroupsWithBodyWithResponse request with arbitrary body returning *EnterpriseAPIBatchCreateEnterpriseGroupsResponse
+func (c *ClientWithResponses) EnterpriseAPIBatchCreateEnterpriseGroupsWithBodyWithResponse(ctx context.Context, enterpriseId string, contentType string, body io.Reader) (*EnterpriseAPIBatchCreateEnterpriseGroupsResponse, error) {
+	rsp, err := c.EnterpriseAPIBatchCreateEnterpriseGroupsWithBody(ctx, enterpriseId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseEnterpriseAPIBatchCreateEnterpriseGroupsResponse(rsp)
+}
+
+func (c *ClientWithResponses) EnterpriseAPIBatchCreateEnterpriseGroupsWithResponse(ctx context.Context, enterpriseId string, body EnterpriseAPIBatchCreateEnterpriseGroupsJSONRequestBody) (*EnterpriseAPIBatchCreateEnterpriseGroupsResponse, error) {
+	rsp, err := c.EnterpriseAPIBatchCreateEnterpriseGroups(ctx, enterpriseId, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseEnterpriseAPIBatchCreateEnterpriseGroupsResponse(rsp)
+}
+
+// EnterpriseAPIBatchDeleteEnterpriseGroupsWithBodyWithResponse request with arbitrary body returning *EnterpriseAPIBatchDeleteEnterpriseGroupsResponse
+func (c *ClientWithResponses) EnterpriseAPIBatchDeleteEnterpriseGroupsWithBodyWithResponse(ctx context.Context, enterpriseId string, contentType string, body io.Reader) (*EnterpriseAPIBatchDeleteEnterpriseGroupsResponse, error) {
+	rsp, err := c.EnterpriseAPIBatchDeleteEnterpriseGroupsWithBody(ctx, enterpriseId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseEnterpriseAPIBatchDeleteEnterpriseGroupsResponse(rsp)
+}
+
+func (c *ClientWithResponses) EnterpriseAPIBatchDeleteEnterpriseGroupsWithResponse(ctx context.Context, enterpriseId string, body EnterpriseAPIBatchDeleteEnterpriseGroupsJSONRequestBody) (*EnterpriseAPIBatchDeleteEnterpriseGroupsResponse, error) {
+	rsp, err := c.EnterpriseAPIBatchDeleteEnterpriseGroups(ctx, enterpriseId, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseEnterpriseAPIBatchDeleteEnterpriseGroupsResponse(rsp)
+}
+
+// EnterpriseAPIBatchUpdateEnterpriseGroupsWithBodyWithResponse request with arbitrary body returning *EnterpriseAPIBatchUpdateEnterpriseGroupsResponse
+func (c *ClientWithResponses) EnterpriseAPIBatchUpdateEnterpriseGroupsWithBodyWithResponse(ctx context.Context, enterpriseId string, contentType string, body io.Reader) (*EnterpriseAPIBatchUpdateEnterpriseGroupsResponse, error) {
+	rsp, err := c.EnterpriseAPIBatchUpdateEnterpriseGroupsWithBody(ctx, enterpriseId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseEnterpriseAPIBatchUpdateEnterpriseGroupsResponse(rsp)
+}
+
+func (c *ClientWithResponses) EnterpriseAPIBatchUpdateEnterpriseGroupsWithResponse(ctx context.Context, enterpriseId string, body EnterpriseAPIBatchUpdateEnterpriseGroupsJSONRequestBody) (*EnterpriseAPIBatchUpdateEnterpriseGroupsResponse, error) {
+	rsp, err := c.EnterpriseAPIBatchUpdateEnterpriseGroups(ctx, enterpriseId, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseEnterpriseAPIBatchUpdateEnterpriseGroupsResponse(rsp)
+}
+
+// EnterpriseAPIInviteUsersWithBodyWithResponse request with arbitrary body returning *EnterpriseAPIInviteUsersResponse
+func (c *ClientWithResponses) EnterpriseAPIInviteUsersWithBodyWithResponse(ctx context.Context, enterpriseId string, contentType string, body io.Reader) (*EnterpriseAPIInviteUsersResponse, error) {
+	rsp, err := c.EnterpriseAPIInviteUsersWithBody(ctx, enterpriseId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseEnterpriseAPIInviteUsersResponse(rsp)
+}
+
+func (c *ClientWithResponses) EnterpriseAPIInviteUsersWithResponse(ctx context.Context, enterpriseId string, body EnterpriseAPIInviteUsersJSONRequestBody) (*EnterpriseAPIInviteUsersResponse, error) {
+	rsp, err := c.EnterpriseAPIInviteUsers(ctx, enterpriseId, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseEnterpriseAPIInviteUsersResponse(rsp)
+}
+
+// EnterpriseAPIListMembersWithResponse request returning *EnterpriseAPIListMembersResponse
+func (c *ClientWithResponses) EnterpriseAPIListMembersWithResponse(ctx context.Context, enterpriseId string, params *EnterpriseAPIListMembersParams) (*EnterpriseAPIListMembersResponse, error) {
+	rsp, err := c.EnterpriseAPIListMembers(ctx, enterpriseId, params)
+	if err != nil {
+		return nil, err
+	}
+	return ParseEnterpriseAPIListMembersResponse(rsp)
+}
+
+// EnterpriseAPIListChildrenOrganizationsWithResponse request returning *EnterpriseAPIListChildrenOrganizationsResponse
+func (c *ClientWithResponses) EnterpriseAPIListChildrenOrganizationsWithResponse(ctx context.Context, enterpriseId string, params *EnterpriseAPIListChildrenOrganizationsParams) (*EnterpriseAPIListChildrenOrganizationsResponse, error) {
+	rsp, err := c.EnterpriseAPIListChildrenOrganizations(ctx, enterpriseId, params)
+	if err != nil {
+		return nil, err
+	}
+	return ParseEnterpriseAPIListChildrenOrganizationsResponse(rsp)
+}
+
+// EnterpriseAPICreateChildOrganizationWithBodyWithResponse request with arbitrary body returning *EnterpriseAPICreateChildOrganizationResponse
+func (c *ClientWithResponses) EnterpriseAPICreateChildOrganizationWithBodyWithResponse(ctx context.Context, enterpriseId string, contentType string, body io.Reader) (*EnterpriseAPICreateChildOrganizationResponse, error) {
+	rsp, err := c.EnterpriseAPICreateChildOrganizationWithBody(ctx, enterpriseId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseEnterpriseAPICreateChildOrganizationResponse(rsp)
+}
+
+func (c *ClientWithResponses) EnterpriseAPICreateChildOrganizationWithResponse(ctx context.Context, enterpriseId string, body EnterpriseAPICreateChildOrganizationJSONRequestBody) (*EnterpriseAPICreateChildOrganizationResponse, error) {
+	rsp, err := c.EnterpriseAPICreateChildOrganization(ctx, enterpriseId, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseEnterpriseAPICreateChildOrganizationResponse(rsp)
+}
+
+// EnterpriseAPIDeleteChildOrganizationWithResponse request returning *EnterpriseAPIDeleteChildOrganizationResponse
+func (c *ClientWithResponses) EnterpriseAPIDeleteChildOrganizationWithResponse(ctx context.Context, enterpriseId string, id string) (*EnterpriseAPIDeleteChildOrganizationResponse, error) {
+	rsp, err := c.EnterpriseAPIDeleteChildOrganization(ctx, enterpriseId, id)
+	if err != nil {
+		return nil, err
+	}
+	return ParseEnterpriseAPIDeleteChildOrganizationResponse(rsp)
+}
+
+// EnterpriseAPIListRoleBindingsWithResponse request returning *EnterpriseAPIListRoleBindingsResponse
+func (c *ClientWithResponses) EnterpriseAPIListRoleBindingsWithResponse(ctx context.Context, enterpriseId string, params *EnterpriseAPIListRoleBindingsParams) (*EnterpriseAPIListRoleBindingsResponse, error) {
+	rsp, err := c.EnterpriseAPIListRoleBindings(ctx, enterpriseId, params)
+	if err != nil {
+		return nil, err
+	}
+	return ParseEnterpriseAPIListRoleBindingsResponse(rsp)
+}
+
+// EnterpriseAPIAddUserToChildOrganizationWithBodyWithResponse request with arbitrary body returning *EnterpriseAPIAddUserToChildOrganizationResponse
+func (c *ClientWithResponses) EnterpriseAPIAddUserToChildOrganizationWithBodyWithResponse(ctx context.Context, enterpriseId string, contentType string, body io.Reader) (*EnterpriseAPIAddUserToChildOrganizationResponse, error) {
+	rsp, err := c.EnterpriseAPIAddUserToChildOrganizationWithBody(ctx, enterpriseId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseEnterpriseAPIAddUserToChildOrganizationResponse(rsp)
+}
+
+func (c *ClientWithResponses) EnterpriseAPIAddUserToChildOrganizationWithResponse(ctx context.Context, enterpriseId string, body EnterpriseAPIAddUserToChildOrganizationJSONRequestBody) (*EnterpriseAPIAddUserToChildOrganizationResponse, error) {
+	rsp, err := c.EnterpriseAPIAddUserToChildOrganization(ctx, enterpriseId, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseEnterpriseAPIAddUserToChildOrganizationResponse(rsp)
+}
+
+// EnterpriseAPIOverrideUserRoleBindingsWithBodyWithResponse request with arbitrary body returning *EnterpriseAPIOverrideUserRoleBindingsResponse
+func (c *ClientWithResponses) EnterpriseAPIOverrideUserRoleBindingsWithBodyWithResponse(ctx context.Context, enterpriseId string, contentType string, body io.Reader) (*EnterpriseAPIOverrideUserRoleBindingsResponse, error) {
+	rsp, err := c.EnterpriseAPIOverrideUserRoleBindingsWithBody(ctx, enterpriseId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseEnterpriseAPIOverrideUserRoleBindingsResponse(rsp)
+}
+
+func (c *ClientWithResponses) EnterpriseAPIOverrideUserRoleBindingsWithResponse(ctx context.Context, enterpriseId string, body EnterpriseAPIOverrideUserRoleBindingsJSONRequestBody) (*EnterpriseAPIOverrideUserRoleBindingsResponse, error) {
+	rsp, err := c.EnterpriseAPIOverrideUserRoleBindings(ctx, enterpriseId, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseEnterpriseAPIOverrideUserRoleBindingsResponse(rsp)
+}
+
+// ParseEnterpriseAPIListGroupsResponse parses an HTTP response from a EnterpriseAPIListGroupsWithResponse call
+func ParseEnterpriseAPIListGroupsResponse(rsp *http.Response) (*EnterpriseAPIListGroupsResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &EnterpriseAPIListGroupsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ListGroupsResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
+		var dest Status
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSONDefault = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseEnterpriseAPIBatchCreateEnterpriseGroupsResponse parses an HTTP response from a EnterpriseAPIBatchCreateEnterpriseGroupsWithResponse call
+func ParseEnterpriseAPIBatchCreateEnterpriseGroupsResponse(rsp *http.Response) (*EnterpriseAPIBatchCreateEnterpriseGroupsResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &EnterpriseAPIBatchCreateEnterpriseGroupsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest BatchCreateEnterpriseGroupsResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
+		var dest Status
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSONDefault = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseEnterpriseAPIBatchDeleteEnterpriseGroupsResponse parses an HTTP response from a EnterpriseAPIBatchDeleteEnterpriseGroupsWithResponse call
+func ParseEnterpriseAPIBatchDeleteEnterpriseGroupsResponse(rsp *http.Response) (*EnterpriseAPIBatchDeleteEnterpriseGroupsResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &EnterpriseAPIBatchDeleteEnterpriseGroupsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
+		var dest Status
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSONDefault = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseEnterpriseAPIBatchUpdateEnterpriseGroupsResponse parses an HTTP response from a EnterpriseAPIBatchUpdateEnterpriseGroupsWithResponse call
+func ParseEnterpriseAPIBatchUpdateEnterpriseGroupsResponse(rsp *http.Response) (*EnterpriseAPIBatchUpdateEnterpriseGroupsResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &EnterpriseAPIBatchUpdateEnterpriseGroupsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest BatchUpdateEnterpriseGroupsResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
+		var dest Status
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSONDefault = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseEnterpriseAPIInviteUsersResponse parses an HTTP response from a EnterpriseAPIInviteUsersWithResponse call
+func ParseEnterpriseAPIInviteUsersResponse(rsp *http.Response) (*EnterpriseAPIInviteUsersResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &EnterpriseAPIInviteUsersResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest InviteUsersResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
+		var dest Status
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSONDefault = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseEnterpriseAPIListMembersResponse parses an HTTP response from a EnterpriseAPIListMembersWithResponse call
+func ParseEnterpriseAPIListMembersResponse(rsp *http.Response) (*EnterpriseAPIListMembersResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &EnterpriseAPIListMembersResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ListMembersResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
+		var dest Status
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSONDefault = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseEnterpriseAPIListChildrenOrganizationsResponse parses an HTTP response from a EnterpriseAPIListChildrenOrganizationsWithResponse call
+func ParseEnterpriseAPIListChildrenOrganizationsResponse(rsp *http.Response) (*EnterpriseAPIListChildrenOrganizationsResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &EnterpriseAPIListChildrenOrganizationsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ListChildrenOrganizationsResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
+		var dest Status
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSONDefault = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseEnterpriseAPICreateChildOrganizationResponse parses an HTTP response from a EnterpriseAPICreateChildOrganizationWithResponse call
+func ParseEnterpriseAPICreateChildOrganizationResponse(rsp *http.Response) (*EnterpriseAPICreateChildOrganizationResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &EnterpriseAPICreateChildOrganizationResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest CreateChildOrganizationResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
+		var dest Status
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSONDefault = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseEnterpriseAPIDeleteChildOrganizationResponse parses an HTTP response from a EnterpriseAPIDeleteChildOrganizationWithResponse call
+func ParseEnterpriseAPIDeleteChildOrganizationResponse(rsp *http.Response) (*EnterpriseAPIDeleteChildOrganizationResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &EnterpriseAPIDeleteChildOrganizationResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
+		var dest Status
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSONDefault = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseEnterpriseAPIListRoleBindingsResponse parses an HTTP response from a EnterpriseAPIListRoleBindingsWithResponse call
+func ParseEnterpriseAPIListRoleBindingsResponse(rsp *http.Response) (*EnterpriseAPIListRoleBindingsResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &EnterpriseAPIListRoleBindingsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ListRoleBindingsResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
+		var dest Status
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSONDefault = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseEnterpriseAPIAddUserToChildOrganizationResponse parses an HTTP response from a EnterpriseAPIAddUserToChildOrganizationWithResponse call
+func ParseEnterpriseAPIAddUserToChildOrganizationResponse(rsp *http.Response) (*EnterpriseAPIAddUserToChildOrganizationResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &EnterpriseAPIAddUserToChildOrganizationResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest AddUserToChildOrganizationResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
+		var dest Status
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSONDefault = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseEnterpriseAPIOverrideUserRoleBindingsResponse parses an HTTP response from a EnterpriseAPIOverrideUserRoleBindingsWithResponse call
+func ParseEnterpriseAPIOverrideUserRoleBindingsResponse(rsp *http.Response) (*EnterpriseAPIOverrideUserRoleBindingsResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &EnterpriseAPIOverrideUserRoleBindingsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest OverrideUserRoleBindingsResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
+		var dest Status
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSONDefault = &dest
+
+	}
+
+	return response, nil
+}
