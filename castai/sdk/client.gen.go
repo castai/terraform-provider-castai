@@ -156,9 +156,6 @@ type ClientInterface interface {
 	// AllocationGroupAPIGetAllocationGroupEfficiencySummary request
 	AllocationGroupAPIGetAllocationGroupEfficiencySummary(ctx context.Context, params *AllocationGroupAPIGetAllocationGroupEfficiencySummaryParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	// AllocationGroupAPIGetCostAllocationGroupSummary request
-	AllocationGroupAPIGetCostAllocationGroupSummary(ctx context.Context, params *AllocationGroupAPIGetCostAllocationGroupSummaryParams, reqEditors ...RequestEditorFn) (*http.Response, error)
-
 	// AllocationGroupAPIGetCostAllocationGroupDataTransferWorkloads request
 	AllocationGroupAPIGetCostAllocationGroupDataTransferWorkloads(ctx context.Context, groupId string, params *AllocationGroupAPIGetCostAllocationGroupDataTransferWorkloadsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -167,9 +164,6 @@ type ClientInterface interface {
 
 	// AllocationGroupAPIGetAllocationGroupWorkloadsEfficiency request
 	AllocationGroupAPIGetAllocationGroupWorkloadsEfficiency(ctx context.Context, groupId string, params *AllocationGroupAPIGetAllocationGroupWorkloadsEfficiencyParams, reqEditors ...RequestEditorFn) (*http.Response, error)
-
-	// AllocationGroupAPIGetCostAllocationGroupWorkloads request
-	AllocationGroupAPIGetCostAllocationGroupWorkloads(ctx context.Context, groupId string, params *AllocationGroupAPIGetCostAllocationGroupWorkloadsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// AllocationGroupAPIDeleteAllocationGroup request
 	AllocationGroupAPIDeleteAllocationGroup(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -1142,18 +1136,6 @@ func (c *Client) AllocationGroupAPIGetAllocationGroupEfficiencySummary(ctx conte
 	return c.Client.Do(req)
 }
 
-func (c *Client) AllocationGroupAPIGetCostAllocationGroupSummary(ctx context.Context, params *AllocationGroupAPIGetCostAllocationGroupSummaryParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewAllocationGroupAPIGetCostAllocationGroupSummaryRequest(c.Server, params)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
 func (c *Client) AllocationGroupAPIGetCostAllocationGroupDataTransferWorkloads(ctx context.Context, groupId string, params *AllocationGroupAPIGetCostAllocationGroupDataTransferWorkloadsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewAllocationGroupAPIGetCostAllocationGroupDataTransferWorkloadsRequest(c.Server, groupId, params)
 	if err != nil {
@@ -1180,18 +1162,6 @@ func (c *Client) AllocationGroupAPIGetAllocationGroupWorkloadCosts(ctx context.C
 
 func (c *Client) AllocationGroupAPIGetAllocationGroupWorkloadsEfficiency(ctx context.Context, groupId string, params *AllocationGroupAPIGetAllocationGroupWorkloadsEfficiencyParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewAllocationGroupAPIGetAllocationGroupWorkloadsEfficiencyRequest(c.Server, groupId, params)
-	if err != nil {
-		return nil, err
-	}
-	req = req.WithContext(ctx)
-	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
-		return nil, err
-	}
-	return c.Client.Do(req)
-}
-
-func (c *Client) AllocationGroupAPIGetCostAllocationGroupWorkloads(ctx context.Context, groupId string, params *AllocationGroupAPIGetCostAllocationGroupWorkloadsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewAllocationGroupAPIGetCostAllocationGroupWorkloadsRequest(c.Server, groupId, params)
 	if err != nil {
 		return nil, err
 	}
@@ -4564,6 +4534,22 @@ func NewAuthTokenAPIListAuthTokensRequest(server string, params *AuthTokenAPILis
 
 		}
 
+		if params.Organizations != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "organizations", runtime.ParamLocationQuery, *params.Organizations); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
 		queryURL.RawQuery = queryValues.Encode()
 	}
 
@@ -5312,79 +5298,6 @@ func NewAllocationGroupAPIGetAllocationGroupEfficiencySummaryRequest(server stri
 	return req, nil
 }
 
-// NewAllocationGroupAPIGetCostAllocationGroupSummaryRequest generates requests for AllocationGroupAPIGetCostAllocationGroupSummary
-func NewAllocationGroupAPIGetCostAllocationGroupSummaryRequest(server string, params *AllocationGroupAPIGetCostAllocationGroupSummaryParams) (*http.Request, error) {
-	var err error
-
-	serverURL, err := url.Parse(server)
-	if err != nil {
-		return nil, err
-	}
-
-	operationPath := fmt.Sprintf("/v1/cost-reports/allocation-groups/summary")
-	if operationPath[0] == '/' {
-		operationPath = "." + operationPath
-	}
-
-	queryURL, err := serverURL.Parse(operationPath)
-	if err != nil {
-		return nil, err
-	}
-
-	if params != nil {
-		queryValues := queryURL.Query()
-
-		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "startTime", runtime.ParamLocationQuery, params.StartTime); err != nil {
-			return nil, err
-		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
-			return nil, err
-		} else {
-			for k, v := range parsed {
-				for _, v2 := range v {
-					queryValues.Add(k, v2)
-				}
-			}
-		}
-
-		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "endTime", runtime.ParamLocationQuery, params.EndTime); err != nil {
-			return nil, err
-		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
-			return nil, err
-		} else {
-			for k, v := range parsed {
-				for _, v2 := range v {
-					queryValues.Add(k, v2)
-				}
-			}
-		}
-
-		if params.ClusterIds != nil {
-
-			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "clusterIds", runtime.ParamLocationQuery, *params.ClusterIds); err != nil {
-				return nil, err
-			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
-				return nil, err
-			} else {
-				for k, v := range parsed {
-					for _, v2 := range v {
-						queryValues.Add(k, v2)
-					}
-				}
-			}
-
-		}
-
-		queryURL.RawQuery = queryValues.Encode()
-	}
-
-	req, err := http.NewRequest("GET", queryURL.String(), nil)
-	if err != nil {
-		return nil, err
-	}
-
-	return req, nil
-}
-
 // NewAllocationGroupAPIGetCostAllocationGroupDataTransferWorkloadsRequest generates requests for AllocationGroupAPIGetCostAllocationGroupDataTransferWorkloads
 func NewAllocationGroupAPIGetCostAllocationGroupDataTransferWorkloadsRequest(server string, groupId string, params *AllocationGroupAPIGetCostAllocationGroupDataTransferWorkloadsParams) (*http.Request, error) {
 	var err error
@@ -5745,86 +5658,6 @@ func NewAllocationGroupAPIGetAllocationGroupWorkloadsEfficiencyRequest(server st
 		if params.UseListingPrices != nil {
 
 			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "useListingPrices", runtime.ParamLocationQuery, *params.UseListingPrices); err != nil {
-				return nil, err
-			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
-				return nil, err
-			} else {
-				for k, v := range parsed {
-					for _, v2 := range v {
-						queryValues.Add(k, v2)
-					}
-				}
-			}
-
-		}
-
-		queryURL.RawQuery = queryValues.Encode()
-	}
-
-	req, err := http.NewRequest("GET", queryURL.String(), nil)
-	if err != nil {
-		return nil, err
-	}
-
-	return req, nil
-}
-
-// NewAllocationGroupAPIGetCostAllocationGroupWorkloadsRequest generates requests for AllocationGroupAPIGetCostAllocationGroupWorkloads
-func NewAllocationGroupAPIGetCostAllocationGroupWorkloadsRequest(server string, groupId string, params *AllocationGroupAPIGetCostAllocationGroupWorkloadsParams) (*http.Request, error) {
-	var err error
-
-	var pathParam0 string
-
-	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "groupId", runtime.ParamLocationPath, groupId)
-	if err != nil {
-		return nil, err
-	}
-
-	serverURL, err := url.Parse(server)
-	if err != nil {
-		return nil, err
-	}
-
-	operationPath := fmt.Sprintf("/v1/cost-reports/allocation-groups/%s/workloads", pathParam0)
-	if operationPath[0] == '/' {
-		operationPath = "." + operationPath
-	}
-
-	queryURL, err := serverURL.Parse(operationPath)
-	if err != nil {
-		return nil, err
-	}
-
-	if params != nil {
-		queryValues := queryURL.Query()
-
-		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "startTime", runtime.ParamLocationQuery, params.StartTime); err != nil {
-			return nil, err
-		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
-			return nil, err
-		} else {
-			for k, v := range parsed {
-				for _, v2 := range v {
-					queryValues.Add(k, v2)
-				}
-			}
-		}
-
-		if queryFrag, err := runtime.StyleParamWithLocation("form", true, "endTime", runtime.ParamLocationQuery, params.EndTime); err != nil {
-			return nil, err
-		} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
-			return nil, err
-		} else {
-			for k, v := range parsed {
-				for _, v2 := range v {
-					queryValues.Add(k, v2)
-				}
-			}
-		}
-
-		if params.ClusterIds != nil {
-
-			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "clusterIds", runtime.ParamLocationQuery, *params.ClusterIds); err != nil {
 				return nil, err
 			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
 				return nil, err
@@ -15608,6 +15441,22 @@ func NewWorkloadOptimizationAPIGetWorkloadRequest(server string, clusterId strin
 
 		}
 
+		if params.IncludeCosts != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "includeCosts", runtime.ParamLocationQuery, *params.IncludeCosts); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
 		if params.FromTime != nil {
 
 			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "fromTime", runtime.ParamLocationQuery, *params.FromTime); err != nil {
@@ -16151,9 +16000,6 @@ type ClientWithResponsesInterface interface {
 	// AllocationGroupAPIGetAllocationGroupEfficiencySummary request
 	AllocationGroupAPIGetAllocationGroupEfficiencySummaryWithResponse(ctx context.Context, params *AllocationGroupAPIGetAllocationGroupEfficiencySummaryParams) (*AllocationGroupAPIGetAllocationGroupEfficiencySummaryResponse, error)
 
-	// AllocationGroupAPIGetCostAllocationGroupSummary request
-	AllocationGroupAPIGetCostAllocationGroupSummaryWithResponse(ctx context.Context, params *AllocationGroupAPIGetCostAllocationGroupSummaryParams) (*AllocationGroupAPIGetCostAllocationGroupSummaryResponse, error)
-
 	// AllocationGroupAPIGetCostAllocationGroupDataTransferWorkloads request
 	AllocationGroupAPIGetCostAllocationGroupDataTransferWorkloadsWithResponse(ctx context.Context, groupId string, params *AllocationGroupAPIGetCostAllocationGroupDataTransferWorkloadsParams) (*AllocationGroupAPIGetCostAllocationGroupDataTransferWorkloadsResponse, error)
 
@@ -16162,9 +16008,6 @@ type ClientWithResponsesInterface interface {
 
 	// AllocationGroupAPIGetAllocationGroupWorkloadsEfficiency request
 	AllocationGroupAPIGetAllocationGroupWorkloadsEfficiencyWithResponse(ctx context.Context, groupId string, params *AllocationGroupAPIGetAllocationGroupWorkloadsEfficiencyParams) (*AllocationGroupAPIGetAllocationGroupWorkloadsEfficiencyResponse, error)
-
-	// AllocationGroupAPIGetCostAllocationGroupWorkloads request
-	AllocationGroupAPIGetCostAllocationGroupWorkloadsWithResponse(ctx context.Context, groupId string, params *AllocationGroupAPIGetCostAllocationGroupWorkloadsParams) (*AllocationGroupAPIGetCostAllocationGroupWorkloadsResponse, error)
 
 	// AllocationGroupAPIDeleteAllocationGroup request
 	AllocationGroupAPIDeleteAllocationGroupWithResponse(ctx context.Context, id string) (*AllocationGroupAPIDeleteAllocationGroupResponse, error)
@@ -17397,36 +17240,6 @@ func (r AllocationGroupAPIGetAllocationGroupEfficiencySummaryResponse) GetBody()
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
-type AllocationGroupAPIGetCostAllocationGroupSummaryResponse struct {
-	Body         []byte
-	HTTPResponse *http.Response
-	JSON200      *CostreportV1beta1GetCostAllocationGroupSummaryResponse
-}
-
-// Status returns HTTPResponse.Status
-func (r AllocationGroupAPIGetCostAllocationGroupSummaryResponse) Status() string {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.Status
-	}
-	return http.StatusText(0)
-}
-
-// StatusCode returns HTTPResponse.StatusCode
-func (r AllocationGroupAPIGetCostAllocationGroupSummaryResponse) StatusCode() int {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.StatusCode
-	}
-	return 0
-}
-
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r AllocationGroupAPIGetCostAllocationGroupSummaryResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-
 type AllocationGroupAPIGetCostAllocationGroupDataTransferWorkloadsResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -17512,36 +17325,6 @@ func (r AllocationGroupAPIGetAllocationGroupWorkloadsEfficiencyResponse) StatusC
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
 func (r AllocationGroupAPIGetAllocationGroupWorkloadsEfficiencyResponse) GetBody() []byte {
-	return r.Body
-}
-
-// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-
-type AllocationGroupAPIGetCostAllocationGroupWorkloadsResponse struct {
-	Body         []byte
-	HTTPResponse *http.Response
-	JSON200      *CostreportV1beta1GetCostAllocationGroupWorkloadsResponse
-}
-
-// Status returns HTTPResponse.Status
-func (r AllocationGroupAPIGetCostAllocationGroupWorkloadsResponse) Status() string {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.Status
-	}
-	return http.StatusText(0)
-}
-
-// StatusCode returns HTTPResponse.StatusCode
-func (r AllocationGroupAPIGetCostAllocationGroupWorkloadsResponse) StatusCode() int {
-	if r.HTTPResponse != nil {
-		return r.HTTPResponse.StatusCode
-	}
-	return 0
-}
-
-// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
-// Body returns body of byte array
-func (r AllocationGroupAPIGetCostAllocationGroupWorkloadsResponse) GetBody() []byte {
 	return r.Body
 }
 
@@ -23275,15 +23058,6 @@ func (c *ClientWithResponses) AllocationGroupAPIGetAllocationGroupEfficiencySumm
 	return ParseAllocationGroupAPIGetAllocationGroupEfficiencySummaryResponse(rsp)
 }
 
-// AllocationGroupAPIGetCostAllocationGroupSummaryWithResponse request returning *AllocationGroupAPIGetCostAllocationGroupSummaryResponse
-func (c *ClientWithResponses) AllocationGroupAPIGetCostAllocationGroupSummaryWithResponse(ctx context.Context, params *AllocationGroupAPIGetCostAllocationGroupSummaryParams) (*AllocationGroupAPIGetCostAllocationGroupSummaryResponse, error) {
-	rsp, err := c.AllocationGroupAPIGetCostAllocationGroupSummary(ctx, params)
-	if err != nil {
-		return nil, err
-	}
-	return ParseAllocationGroupAPIGetCostAllocationGroupSummaryResponse(rsp)
-}
-
 // AllocationGroupAPIGetCostAllocationGroupDataTransferWorkloadsWithResponse request returning *AllocationGroupAPIGetCostAllocationGroupDataTransferWorkloadsResponse
 func (c *ClientWithResponses) AllocationGroupAPIGetCostAllocationGroupDataTransferWorkloadsWithResponse(ctx context.Context, groupId string, params *AllocationGroupAPIGetCostAllocationGroupDataTransferWorkloadsParams) (*AllocationGroupAPIGetCostAllocationGroupDataTransferWorkloadsResponse, error) {
 	rsp, err := c.AllocationGroupAPIGetCostAllocationGroupDataTransferWorkloads(ctx, groupId, params)
@@ -23309,15 +23083,6 @@ func (c *ClientWithResponses) AllocationGroupAPIGetAllocationGroupWorkloadsEffic
 		return nil, err
 	}
 	return ParseAllocationGroupAPIGetAllocationGroupWorkloadsEfficiencyResponse(rsp)
-}
-
-// AllocationGroupAPIGetCostAllocationGroupWorkloadsWithResponse request returning *AllocationGroupAPIGetCostAllocationGroupWorkloadsResponse
-func (c *ClientWithResponses) AllocationGroupAPIGetCostAllocationGroupWorkloadsWithResponse(ctx context.Context, groupId string, params *AllocationGroupAPIGetCostAllocationGroupWorkloadsParams) (*AllocationGroupAPIGetCostAllocationGroupWorkloadsResponse, error) {
-	rsp, err := c.AllocationGroupAPIGetCostAllocationGroupWorkloads(ctx, groupId, params)
-	if err != nil {
-		return nil, err
-	}
-	return ParseAllocationGroupAPIGetCostAllocationGroupWorkloadsResponse(rsp)
 }
 
 // AllocationGroupAPIDeleteAllocationGroupWithResponse request returning *AllocationGroupAPIDeleteAllocationGroupResponse
@@ -25954,32 +25719,6 @@ func ParseAllocationGroupAPIGetAllocationGroupEfficiencySummaryResponse(rsp *htt
 	return response, nil
 }
 
-// ParseAllocationGroupAPIGetCostAllocationGroupSummaryResponse parses an HTTP response from a AllocationGroupAPIGetCostAllocationGroupSummaryWithResponse call
-func ParseAllocationGroupAPIGetCostAllocationGroupSummaryResponse(rsp *http.Response) (*AllocationGroupAPIGetCostAllocationGroupSummaryResponse, error) {
-	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
-	if err != nil {
-		return nil, err
-	}
-
-	response := &AllocationGroupAPIGetCostAllocationGroupSummaryResponse{
-		Body:         bodyBytes,
-		HTTPResponse: rsp,
-	}
-
-	switch {
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest CostreportV1beta1GetCostAllocationGroupSummaryResponse
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON200 = &dest
-
-	}
-
-	return response, nil
-}
-
 // ParseAllocationGroupAPIGetCostAllocationGroupDataTransferWorkloadsResponse parses an HTTP response from a AllocationGroupAPIGetCostAllocationGroupDataTransferWorkloadsWithResponse call
 func ParseAllocationGroupAPIGetCostAllocationGroupDataTransferWorkloadsResponse(rsp *http.Response) (*AllocationGroupAPIGetCostAllocationGroupDataTransferWorkloadsResponse, error) {
 	bodyBytes, err := ioutil.ReadAll(rsp.Body)
@@ -26048,32 +25787,6 @@ func ParseAllocationGroupAPIGetAllocationGroupWorkloadsEfficiencyResponse(rsp *h
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest CostreportV1beta1GetAllocationGroupWorkloadsEfficiencyResponse
-		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
-			return nil, err
-		}
-		response.JSON200 = &dest
-
-	}
-
-	return response, nil
-}
-
-// ParseAllocationGroupAPIGetCostAllocationGroupWorkloadsResponse parses an HTTP response from a AllocationGroupAPIGetCostAllocationGroupWorkloadsWithResponse call
-func ParseAllocationGroupAPIGetCostAllocationGroupWorkloadsResponse(rsp *http.Response) (*AllocationGroupAPIGetCostAllocationGroupWorkloadsResponse, error) {
-	bodyBytes, err := ioutil.ReadAll(rsp.Body)
-	defer rsp.Body.Close()
-	if err != nil {
-		return nil, err
-	}
-
-	response := &AllocationGroupAPIGetCostAllocationGroupWorkloadsResponse{
-		Body:         bodyBytes,
-		HTTPResponse: rsp,
-	}
-
-	switch {
-	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest CostreportV1beta1GetCostAllocationGroupWorkloadsResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}

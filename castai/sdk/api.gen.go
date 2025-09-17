@@ -578,6 +578,12 @@ const (
 	CommitmentsAPIImportAWSReservedInstancesParamsBehaviourOVERWRITE            CommitmentsAPIImportAWSReservedInstancesParamsBehaviour = "OVERWRITE"
 )
 
+// Defines values for AuthTokenAPIListAuthTokensParamsOrganizations.
+const (
+	AuthTokenAPIListAuthTokensParamsOrganizationsALL                      AuthTokenAPIListAuthTokensParamsOrganizations = "ALL"
+	AuthTokenAPIListAuthTokensParamsOrganizationsORGANIZATIONSUNSPECIFIED AuthTokenAPIListAuthTokensParamsOrganizations = "ORGANIZATIONS_UNSPECIFIED"
+)
+
 // Defines values for AllocationGroupAPIGetAllocationGroupWorkloadCostsParamsSortOrder.
 const (
 	AllocationGroupAPIGetAllocationGroupWorkloadCostsParamsSortOrderASC  AllocationGroupAPIGetAllocationGroupWorkloadCostsParamsSortOrder = "ASC"
@@ -632,9 +638,9 @@ const (
 
 // Defines values for RbacServiceAPIListRolesParamsType.
 const (
-	ALL        RbacServiceAPIListRolesParamsType = "ALL"
-	DEFAULT    RbacServiceAPIListRolesParamsType = "DEFAULT"
-	ENTERPRISE RbacServiceAPIListRolesParamsType = "ENTERPRISE"
+	RbacServiceAPIListRolesParamsTypeALL        RbacServiceAPIListRolesParamsType = "ALL"
+	RbacServiceAPIListRolesParamsTypeDEFAULT    RbacServiceAPIListRolesParamsType = "DEFAULT"
+	RbacServiceAPIListRolesParamsTypeENTERPRISE RbacServiceAPIListRolesParamsType = "ENTERPRISE"
 )
 
 // Defines values for CommitmentsAPIImportAzureReservationsParamsBehaviour.
@@ -2055,6 +2061,7 @@ type CastaiRbacV1beta1Group struct {
 
 	// OrganizationId OrganizationID is the unique identifier of the organization.
 	OrganizationId *string `json:"organizationId,omitempty"`
+	SsoProvider    *string `json:"ssoProvider,omitempty"`
 
 	// UpdatedAt UpdatedAt is the timestamp when the group was last updated.
 	UpdatedAt *time.Time `json:"updatedAt,omitempty"`
@@ -2768,11 +2775,8 @@ type CastaiUsersV1beta1Membership struct {
 	CreatedAt *time.Time                    `json:"createdAt,omitempty"`
 	Groups    *[]CastaiUsersV1beta1GroupRef `json:"groups,omitempty"`
 	LoginAt   *time.Time                    `json:"loginAt,omitempty"`
-
-	// Role Deprecated: for RBACv2 user can be bound to multiple roles.
-	// Use https://docs.cast.ai/reference/rbacserviceapi instead.
 	// Deprecated:
-	Role string `json:"role"`
+	Role *interface{} `json:"role,omitempty"`
 
 	// User User represents a single system user.
 	User CastaiUsersV1beta1User `json:"user"`
@@ -2780,11 +2784,8 @@ type CastaiUsersV1beta1Membership struct {
 
 // CastaiUsersV1beta1NewMembership NewMembership contains data needed to create new membership in organization.
 type CastaiUsersV1beta1NewMembership struct {
-	// Role Deprecated: for RBACv2 user can be bound to multiple roles.
-	// Use https://docs.cast.ai/reference/rbacserviceapi instead.
-	// role of the new member.
 	// Deprecated:
-	Role string `json:"role"`
+	Role *interface{} `json:"role,omitempty"`
 
 	// UserId id of the user.
 	UserId string `json:"userId"`
@@ -2794,12 +2795,8 @@ type CastaiUsersV1beta1NewMembership struct {
 type CastaiUsersV1beta1NewMembershipByEmail struct {
 	// GroupIds list of the group IDs for which new user should be added.
 	GroupIds *[]string `json:"groupIds,omitempty"`
-
-	// Role Deprecated: for RBACv2 user can be bound to multiple roles.
-	// Use https://docs.cast.ai/reference/rbacserviceapi instead.
-	// role of the invited person.
 	// Deprecated:
-	Role *string `json:"role,omitempty"`
+	Role *interface{} `json:"role,omitempty"`
 
 	// RoleBindings The role bindings the user will be bound to after the invitation is claimed.
 	RoleBindings *[]CastaiUsersV1beta1InvitationRoleBinding `json:"roleBindings,omitempty"`
@@ -2862,12 +2859,8 @@ type CastaiUsersV1beta1PendingInvitation struct {
 
 	// InviteEmail email of the invited person.
 	InviteEmail string `json:"inviteEmail"`
-
-	// Role Deprecated: for RBACv2 user can be bound to multiple roles.
-	// Use https://docs.cast.ai/reference/rbacserviceapi instead.
-	// role of the invited person.
 	// Deprecated:
-	Role string `json:"role"`
+	Role *interface{} `json:"role,omitempty"`
 
 	// RoleBindings The role bindings the user will be bound to after the invitation is claimed.
 	RoleBindings *[]CastaiUsersV1beta1InvitationRoleBinding `json:"roleBindings,omitempty"`
@@ -3394,211 +3387,6 @@ type CostreportV1beta1GetCostAllocationGroupDataTransferWorkloadsResponseWorkloa
 
 	// PodCount Average pod count of the workload within requested period.
 	PodCount *string `json:"podCount,omitempty"`
-
-	// WorkloadName Name of the workload.
-	WorkloadName *string `json:"workloadName,omitempty"`
-
-	// WorkloadType Type of the workload.
-	WorkloadType *string `json:"workloadType,omitempty"`
-}
-
-// CostreportV1beta1GetCostAllocationGroupSummaryResponse defines model for costreport.v1beta1.GetCostAllocationGroupSummaryResponse.
-type CostreportV1beta1GetCostAllocationGroupSummaryResponse struct {
-	Items *[]CostreportV1beta1GetCostAllocationGroupSummaryResponseCostAllocationGroupItem `json:"items,omitempty"`
-}
-
-// CostreportV1beta1GetCostAllocationGroupSummaryResponseCostAllocationGroupItem defines model for costreport.v1beta1.GetCostAllocationGroupSummaryResponse.CostAllocationGroupItem.
-type CostreportV1beta1GetCostAllocationGroupSummaryResponseCostAllocationGroupItem struct {
-	GroupId   *string                                                           `json:"groupId,omitempty"`
-	GroupName *string                                                           `json:"groupName,omitempty"`
-	Items     *[]CostreportV1beta1GetCostAllocationGroupSummaryResponseCostItem `json:"items,omitempty"`
-
-	// WorkloadCount Count of workloads for the given time period.
-	WorkloadCount *string `json:"workloadCount,omitempty"`
-}
-
-// CostreportV1beta1GetCostAllocationGroupSummaryResponseCostItem Defines cost details for a given time.
-type CostreportV1beta1GetCostAllocationGroupSummaryResponseCostItem struct {
-	// CpuCostOnDemand Average CPU cost of on-demand instances for the given time period.
-	CpuCostOnDemand *string `json:"cpuCostOnDemand,omitempty"`
-
-	// CpuCostSpot Average CPU cost of spot instances for the given time period.
-	CpuCostSpot *string `json:"cpuCostSpot,omitempty"`
-
-	// CpuCostSpotFallback Average CPU cost of spot-fallback instances for the given time period.
-	CpuCostSpotFallback *string `json:"cpuCostSpotFallback,omitempty"`
-
-	// CpuCountOnDemand Average number of CPUs used on on-demand instances for the given time period.
-	CpuCountOnDemand *string `json:"cpuCountOnDemand,omitempty"`
-
-	// CpuCountSpot Average number of CPUs used on spot instances for the given time period.
-	CpuCountSpot *string `json:"cpuCountSpot,omitempty"`
-
-	// CpuCountSpotFallback Average number of CPUs used on spot-fallback instances for the given time period.
-	CpuCountSpotFallback *string `json:"cpuCountSpotFallback,omitempty"`
-
-	// GpuCostOnDemand Average GPU cost of on-demand instances for the given time period.
-	GpuCostOnDemand *string `json:"gpuCostOnDemand,omitempty"`
-
-	// GpuCostSpot Average GPU cost of spot instances for the given time period.
-	GpuCostSpot *string `json:"gpuCostSpot,omitempty"`
-
-	// GpuCostSpotFallback Average GPU cost of spot-fallback instances for the given time period.
-	GpuCostSpotFallback *string `json:"gpuCostSpotFallback,omitempty"`
-
-	// GpuCountOnDemand Average number of GPUs used on on-demand instances for the given time period.
-	GpuCountOnDemand *string `json:"gpuCountOnDemand,omitempty"`
-
-	// GpuCountSpot Average number of GPUs used on spot instances for the given time period.
-	GpuCountSpot *string `json:"gpuCountSpot,omitempty"`
-
-	// GpuCountSpotFallback Average number of GPUs used on spot-fallback instances for the given time period.
-	GpuCountSpotFallback *string `json:"gpuCountSpotFallback,omitempty"`
-
-	// PodCountOnDemand Average amount of pods on on-demand instances for the given time period.
-	PodCountOnDemand *string `json:"podCountOnDemand,omitempty"`
-
-	// PodCountSpot Average amount of pods on spot instances for the given time period.
-	PodCountSpot *string `json:"podCountSpot,omitempty"`
-
-	// PodCountSpotFallback Average amount of pods on spot-fallback instances for the given time period.
-	PodCountSpotFallback *string `json:"podCountSpotFallback,omitempty"`
-
-	// RamCostOnDemand Average RAM cost of on-demand instances for the given time period.
-	RamCostOnDemand *string `json:"ramCostOnDemand,omitempty"`
-
-	// RamCostSpot Average RAM cost of spot instances for the given time period.
-	RamCostSpot *string `json:"ramCostSpot,omitempty"`
-
-	// RamCostSpotFallback Average RAM cost of spot-fallback instances for the given time period.
-	RamCostSpotFallback *string `json:"ramCostSpotFallback,omitempty"`
-
-	// RamGibOnDemand Average RAM GiB used on on-demand instances for the given time period.
-	RamGibOnDemand *string `json:"ramGibOnDemand,omitempty"`
-
-	// RamGibSpot Average RAM GiB used on spot instances for the given time period.
-	RamGibSpot *string `json:"ramGibSpot,omitempty"`
-
-	// RamGibSpotFallback Average RAM GiB used on spot-fallback instances for the given time period.
-	RamGibSpotFallback *string `json:"ramGibSpotFallback,omitempty"`
-
-	// Timestamp Timestamp of entry.
-	Timestamp *time.Time `json:"timestamp,omitempty"`
-
-	// TotalCostOnDemand Total cost of on-demand instances for the given time period.
-	TotalCostOnDemand *string `json:"totalCostOnDemand,omitempty"`
-
-	// TotalCostSpot Total cost of spot instances for the given time period.
-	TotalCostSpot *string `json:"totalCostSpot,omitempty"`
-
-	// TotalCostSpotFallback Total cost of spot-fallback instances for the given time period.
-	TotalCostSpotFallback *string `json:"totalCostSpotFallback,omitempty"`
-
-	// WorkloadCount Number of workloads included in group.
-	WorkloadCount *string `json:"workloadCount,omitempty"`
-}
-
-// CostreportV1beta1GetCostAllocationGroupWorkloadsResponse Defines cluster workload cost response.
-type CostreportV1beta1GetCostAllocationGroupWorkloadsResponse struct {
-	GroupId   *string `json:"groupId,omitempty"`
-	GroupName *string `json:"groupName,omitempty"`
-
-	// Items Workload entries.
-	Items *[]CostreportV1beta1GetCostAllocationGroupWorkloadsResponseWorkloadItem `json:"items,omitempty"`
-}
-
-// CostreportV1beta1GetCostAllocationGroupWorkloadsResponseClusterInfo defines model for costreport.v1beta1.GetCostAllocationGroupWorkloadsResponse.ClusterInfo.
-type CostreportV1beta1GetCostAllocationGroupWorkloadsResponseClusterInfo struct {
-	Id *string `json:"id,omitempty"`
-}
-
-// CostreportV1beta1GetCostAllocationGroupWorkloadsResponseWorkloadCostItem Defines a workloads cost for a given time.
-type CostreportV1beta1GetCostAllocationGroupWorkloadsResponseWorkloadCostItem struct {
-	// CpuCostOnDemand Average CPU cost of the workload that are on-demand instances for the given time period.
-	CpuCostOnDemand *string `json:"cpuCostOnDemand,omitempty"`
-
-	// CpuCostSpot Average CPU cost of the workload that are spot instances for the given time period.
-	CpuCostSpot *string `json:"cpuCostSpot,omitempty"`
-
-	// CpuCostSpotFallback Average CPU cost of the workload that are spot-fallback instances for the given time period.
-	CpuCostSpotFallback *string `json:"cpuCostSpotFallback,omitempty"`
-
-	// CpuCountOnDemand Average number of CPUs of the workload that is on on-demand instances for the given time period.
-	CpuCountOnDemand *string `json:"cpuCountOnDemand,omitempty"`
-
-	// CpuCountSpot Average number of CPUs of the workload that is on spot instances for the given time period.
-	CpuCountSpot *string `json:"cpuCountSpot,omitempty"`
-
-	// CpuCountSpotFallback Average number of CPUs of the workload that is on spot-fallback instances for the given time period.
-	CpuCountSpotFallback *string `json:"cpuCountSpotFallback,omitempty"`
-
-	// GpuCostOnDemand Average GPU cost of the workload that is on on-demand instances for the given time period.
-	GpuCostOnDemand *string `json:"gpuCostOnDemand,omitempty"`
-
-	// GpuCostSpot Average GPU cost of the workload that is on spot instances for the given time period.
-	GpuCostSpot *string `json:"gpuCostSpot,omitempty"`
-
-	// GpuCostSpotFallback Average GPU cost of the workload that is on spot-fallback instances for the given time period.
-	GpuCostSpotFallback *string `json:"gpuCostSpotFallback,omitempty"`
-
-	// GpuCountOnDemand Average number of GPUs of the workload that is on on-demand instances for the given time period.
-	GpuCountOnDemand *string `json:"gpuCountOnDemand,omitempty"`
-
-	// GpuCountSpot Average number of GPUs of the workload that is on spot instances for the given time period.
-	GpuCountSpot *string `json:"gpuCountSpot,omitempty"`
-
-	// GpuCountSpotFallback Average number of GPUs of the workload that is on spot-fallback instances for the given time period.
-	GpuCountSpotFallback *string `json:"gpuCountSpotFallback,omitempty"`
-
-	// PodCountOnDemand Average amount of pods for the workload that are on on-demand instances for the given time period.
-	PodCountOnDemand *string `json:"podCountOnDemand,omitempty"`
-
-	// PodCountSpot Average amount of pods for the workload that are on spot instances for the given time period.
-	PodCountSpot *string `json:"podCountSpot,omitempty"`
-
-	// PodCountSpotFallback Average amount of pods for the workload that are on spot-fallback instances for the given time period.
-	PodCountSpotFallback *string `json:"podCountSpotFallback,omitempty"`
-
-	// RamCostOnDemand Average RAM cost of the workload that are on-demand instances for the given time period.
-	RamCostOnDemand *string `json:"ramCostOnDemand,omitempty"`
-
-	// RamCostSpot Average RAM cost of the workload that are spot instances for the given time period.
-	RamCostSpot *string `json:"ramCostSpot,omitempty"`
-
-	// RamCostSpotFallback Average RAM cost of the workload that are spot-fallback instances for the given time period.
-	RamCostSpotFallback *string `json:"ramCostSpotFallback,omitempty"`
-
-	// RamGibOnDemand Average RAM GiB used on on-demand instances for the given time period.
-	RamGibOnDemand *string `json:"ramGibOnDemand,omitempty"`
-
-	// RamGibSpot Average RAM GiB of the workload that are on spot instances for the given time period.
-	RamGibSpot *string `json:"ramGibSpot,omitempty"`
-
-	// RamGibSpotFallback Average RAM GiB of the workload that are on spot-fallback instances for the given time period.
-	RamGibSpotFallback *string `json:"ramGibSpotFallback,omitempty"`
-
-	// Timestamp Timestamp of entry creation.
-	Timestamp *time.Time `json:"timestamp,omitempty"`
-
-	// TotalCostOnDemand Total cost of the workload that is on on-demand instances for the given time period.
-	TotalCostOnDemand *string `json:"totalCostOnDemand,omitempty"`
-
-	// TotalCostSpot Total cost of the workload that is on spot instances for the given time period.
-	TotalCostSpot *string `json:"totalCostSpot,omitempty"`
-
-	// TotalCostSpotFallback Total cost of the workload that is on spot-fallback instances for the given time period.
-	TotalCostSpotFallback *string `json:"totalCostSpotFallback,omitempty"`
-}
-
-// CostreportV1beta1GetCostAllocationGroupWorkloadsResponseWorkloadItem Defines a workload.
-type CostreportV1beta1GetCostAllocationGroupWorkloadsResponseWorkloadItem struct {
-	Cluster *CostreportV1beta1GetCostAllocationGroupWorkloadsResponseClusterInfo `json:"cluster,omitempty"`
-
-	// Items Cost metrics of the workload.
-	Items *[]CostreportV1beta1GetCostAllocationGroupWorkloadsResponseWorkloadCostItem `json:"items,omitempty"`
-
-	// Namespace Namespace the workload is in.
-	Namespace *string `json:"namespace,omitempty"`
 
 	// WorkloadName Name of the workload.
 	WorkloadName *string `json:"workloadName,omitempty"`
@@ -7085,6 +6873,9 @@ type WorkloadoptimizationV1Resources struct {
 
 // WorkloadoptimizationV1RolloutBehaviorSettings defines model for workloadoptimization.v1.RolloutBehaviorSettings.
 type WorkloadoptimizationV1RolloutBehaviorSettings struct {
+	// PreferOneByOne If true, prefer rolling out recommendations one pod at a time.
+	PreferOneByOne *bool `json:"preferOneByOne"`
+
 	// Type Defines workload recommendation rollout types.
 	// NO_DISRUPTION - rollout shouldn't cause service disruption.
 	Type *WorkloadoptimizationV1RolloutBehaviorType `json:"type,omitempty"`
@@ -7215,10 +7006,11 @@ type WorkloadoptimizationV1VPAConfig struct {
 	// ManagementOption Defines possible options for workload management.
 	// READ_ONLY - workload watched (metrics collected), but no actions may be performed by CAST AI.
 	// MANAGED - workload watched (metrics collected), CAST AI may perform actions on the workload.
-	ManagementOption WorkloadoptimizationV1ManagementOption     `json:"managementOption"`
-	Memory           WorkloadoptimizationV1ResourceConfig       `json:"memory"`
-	MemoryEvent      *WorkloadoptimizationV1MemoryEventSettings `json:"memoryEvent,omitempty"`
-	Startup          *WorkloadoptimizationV1StartupSettings     `json:"startup,omitempty"`
+	ManagementOption  WorkloadoptimizationV1ManagementOption           `json:"managementOption"`
+	Memory            WorkloadoptimizationV1ResourceConfig             `json:"memory"`
+	MemoryEvent       *WorkloadoptimizationV1MemoryEventSettings       `json:"memoryEvent,omitempty"`
+	PredictiveScaling *WorkloadoptimizationV1PredictiveScalingSettings `json:"predictiveScaling,omitempty"`
+	Startup           *WorkloadoptimizationV1StartupSettings           `json:"startup,omitempty"`
 }
 
 // WorkloadoptimizationV1VPAConfigUpdate defines model for workloadoptimization.v1.VPAConfigUpdate.
@@ -7259,10 +7051,11 @@ type WorkloadoptimizationV1VerticalOverrides struct {
 	// ManagementOption Defines possible options for workload management.
 	// READ_ONLY - workload watched (metrics collected), but no actions may be performed by CAST AI.
 	// MANAGED - workload watched (metrics collected), CAST AI may perform actions on the workload.
-	ManagementOption *WorkloadoptimizationV1ManagementOption        `json:"managementOption,omitempty"`
-	Memory           *WorkloadoptimizationV1ResourceConfigOverrides `json:"memory,omitempty"`
-	MemoryEvent      *WorkloadoptimizationV1MemoryEventSettings     `json:"memoryEvent,omitempty"`
-	Startup          *WorkloadoptimizationV1StartupSettings         `json:"startup,omitempty"`
+	ManagementOption  *WorkloadoptimizationV1ManagementOption          `json:"managementOption,omitempty"`
+	Memory            *WorkloadoptimizationV1ResourceConfigOverrides   `json:"memory,omitempty"`
+	MemoryEvent       *WorkloadoptimizationV1MemoryEventSettings       `json:"memoryEvent,omitempty"`
+	PredictiveScaling *WorkloadoptimizationV1PredictiveScalingSettings `json:"predictiveScaling,omitempty"`
+	Startup           *WorkloadoptimizationV1StartupSettings           `json:"startup,omitempty"`
 }
 
 // WorkloadoptimizationV1Workload defines model for workloadoptimization.v1.Workload.
@@ -7490,7 +7283,16 @@ type CommitmentsAPIImportAWSReservedInstancesParamsBehaviour string
 type AuthTokenAPIListAuthTokensParams struct {
 	// UserId User id to filter by, if this is set we will only return tokens that have this user id.
 	UserId *string `form:"userId,omitempty" json:"userId,omitempty"`
+
+	// Organizations Organizations controls whether to return tokens for all organizations the user belongs to or only the current one.
+	//
+	//  - ORGANIZATIONS_UNSPECIFIED: ORGANIZATIONS_UNSPECIFIED is the default value and means only current organization.
+	//  - ALL: ALL means all organizations the user belongs to.
+	Organizations *AuthTokenAPIListAuthTokensParamsOrganizations `form:"organizations,omitempty" json:"organizations,omitempty"`
 }
+
+// AuthTokenAPIListAuthTokensParamsOrganizations defines parameters for AuthTokenAPIListAuthTokens.
+type AuthTokenAPIListAuthTokensParamsOrganizations string
 
 // AllocationGroupAPIGetAllocationGroupCostTimedSummariesParams defines parameters for AllocationGroupAPIGetAllocationGroupCostTimedSummaries.
 type AllocationGroupAPIGetAllocationGroupCostTimedSummariesParams struct {
@@ -7581,18 +7383,6 @@ type AllocationGroupAPIGetAllocationGroupEfficiencySummaryParams struct {
 	UseListingPrices *bool `form:"useListingPrices,omitempty" json:"useListingPrices,omitempty"`
 }
 
-// AllocationGroupAPIGetCostAllocationGroupSummaryParams defines parameters for AllocationGroupAPIGetCostAllocationGroupSummary.
-type AllocationGroupAPIGetCostAllocationGroupSummaryParams struct {
-	// StartTime Filter items to include from specified time.
-	StartTime time.Time `form:"startTime" json:"startTime"`
-
-	// EndTime Filter items to include up to specified time.
-	EndTime time.Time `form:"endTime" json:"endTime"`
-
-	// ClusterIds Cluster IDs for filtering. Leave empty for the full list.
-	ClusterIds *[]string `form:"clusterIds,omitempty" json:"clusterIds,omitempty"`
-}
-
 // AllocationGroupAPIGetCostAllocationGroupDataTransferWorkloadsParams defines parameters for AllocationGroupAPIGetCostAllocationGroupDataTransferWorkloads.
 type AllocationGroupAPIGetCostAllocationGroupDataTransferWorkloadsParams struct {
 	// StartTime Filter items to include from specified time.
@@ -7669,18 +7459,6 @@ type AllocationGroupAPIGetAllocationGroupWorkloadsEfficiencyParams struct {
 
 // AllocationGroupAPIGetAllocationGroupWorkloadsEfficiencyParamsSortOrder defines parameters for AllocationGroupAPIGetAllocationGroupWorkloadsEfficiency.
 type AllocationGroupAPIGetAllocationGroupWorkloadsEfficiencyParamsSortOrder string
-
-// AllocationGroupAPIGetCostAllocationGroupWorkloadsParams defines parameters for AllocationGroupAPIGetCostAllocationGroupWorkloads.
-type AllocationGroupAPIGetCostAllocationGroupWorkloadsParams struct {
-	// StartTime Filter items to include from specified time.
-	StartTime time.Time `form:"startTime" json:"startTime"`
-
-	// EndTime Filter items to include up to specified time.
-	EndTime time.Time `form:"endTime" json:"endTime"`
-
-	// ClusterIds Cluster IDs for filtering. Leave empty for the full list.
-	ClusterIds *[]string `form:"clusterIds,omitempty" json:"clusterIds,omitempty"`
-}
 
 // InventoryAPIListInstanceTypeNamesParams defines parameters for InventoryAPIListInstanceTypeNames.
 type InventoryAPIListInstanceTypeNamesParams struct {
@@ -8328,6 +8106,7 @@ type WorkloadOptimizationAPIGetWorkloadsSummaryMetricsParams struct {
 // WorkloadOptimizationAPIGetWorkloadParams defines parameters for WorkloadOptimizationAPIGetWorkload.
 type WorkloadOptimizationAPIGetWorkloadParams struct {
 	IncludeMetrics *bool      `form:"includeMetrics,omitempty" json:"includeMetrics,omitempty"`
+	IncludeCosts   *bool      `form:"includeCosts,omitempty" json:"includeCosts,omitempty"`
 	FromTime       *time.Time `form:"fromTime,omitempty" json:"fromTime,omitempty"`
 	ToTime         *time.Time `form:"toTime,omitempty" json:"toTime,omitempty"`
 }

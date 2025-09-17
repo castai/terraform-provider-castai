@@ -315,46 +315,6 @@ func (mr *MockClientInterfaceMockRecorder) AllocationGroupAPIGetCostAllocationGr
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AllocationGroupAPIGetCostAllocationGroupDataTransferWorkloads", reflect.TypeOf((*MockClientInterface)(nil).AllocationGroupAPIGetCostAllocationGroupDataTransferWorkloads), varargs...)
 }
 
-// AllocationGroupAPIGetCostAllocationGroupSummary mocks base method.
-func (m *MockClientInterface) AllocationGroupAPIGetCostAllocationGroupSummary(ctx context.Context, params *sdk.AllocationGroupAPIGetCostAllocationGroupSummaryParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
-	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, params}
-	for _, a := range reqEditors {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "AllocationGroupAPIGetCostAllocationGroupSummary", varargs...)
-	ret0, _ := ret[0].(*http.Response)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// AllocationGroupAPIGetCostAllocationGroupSummary indicates an expected call of AllocationGroupAPIGetCostAllocationGroupSummary.
-func (mr *MockClientInterfaceMockRecorder) AllocationGroupAPIGetCostAllocationGroupSummary(ctx, params interface{}, reqEditors ...interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, params}, reqEditors...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AllocationGroupAPIGetCostAllocationGroupSummary", reflect.TypeOf((*MockClientInterface)(nil).AllocationGroupAPIGetCostAllocationGroupSummary), varargs...)
-}
-
-// AllocationGroupAPIGetCostAllocationGroupWorkloads mocks base method.
-func (m *MockClientInterface) AllocationGroupAPIGetCostAllocationGroupWorkloads(ctx context.Context, groupId string, params *sdk.AllocationGroupAPIGetCostAllocationGroupWorkloadsParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
-	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, groupId, params}
-	for _, a := range reqEditors {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "AllocationGroupAPIGetCostAllocationGroupWorkloads", varargs...)
-	ret0, _ := ret[0].(*http.Response)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// AllocationGroupAPIGetCostAllocationGroupWorkloads indicates an expected call of AllocationGroupAPIGetCostAllocationGroupWorkloads.
-func (mr *MockClientInterfaceMockRecorder) AllocationGroupAPIGetCostAllocationGroupWorkloads(ctx, groupId, params interface{}, reqEditors ...interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, groupId, params}, reqEditors...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AllocationGroupAPIGetCostAllocationGroupWorkloads", reflect.TypeOf((*MockClientInterface)(nil).AllocationGroupAPIGetCostAllocationGroupWorkloads), varargs...)
-}
-
 // AllocationGroupAPIListAllocationGroups mocks base method.
 func (m *MockClientInterface) AllocationGroupAPIListAllocationGroups(ctx context.Context, params *sdk.AllocationGroupAPIListAllocationGroupsParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
@@ -6076,76 +6036,6 @@ func (m *MockClientWithResponsesInterface) AllocationGroupAPIGetCostAllocationGr
 func (mr *MockClientWithResponsesInterfaceMockRecorder) AllocationGroupAPIGetCostAllocationGroupDataTransferWorkloadsWithResponse(ctx, groupId, params interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AllocationGroupAPIGetCostAllocationGroupDataTransferWorkloadsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).AllocationGroupAPIGetCostAllocationGroupDataTransferWorkloadsWithResponse), ctx, groupId, params)
-}
-
-// AllocationGroupAPIGetCostAllocationGroupSummary mocks base method.
-func (m *MockClientWithResponsesInterface) AllocationGroupAPIGetCostAllocationGroupSummary(ctx context.Context, params *sdk.AllocationGroupAPIGetCostAllocationGroupSummaryParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
-	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, params}
-	for _, a := range reqEditors {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "AllocationGroupAPIGetCostAllocationGroupSummary", varargs...)
-	ret0, _ := ret[0].(*http.Response)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// AllocationGroupAPIGetCostAllocationGroupSummary indicates an expected call of AllocationGroupAPIGetCostAllocationGroupSummary.
-func (mr *MockClientWithResponsesInterfaceMockRecorder) AllocationGroupAPIGetCostAllocationGroupSummary(ctx, params interface{}, reqEditors ...interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, params}, reqEditors...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AllocationGroupAPIGetCostAllocationGroupSummary", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).AllocationGroupAPIGetCostAllocationGroupSummary), varargs...)
-}
-
-// AllocationGroupAPIGetCostAllocationGroupSummaryWithResponse mocks base method.
-func (m *MockClientWithResponsesInterface) AllocationGroupAPIGetCostAllocationGroupSummaryWithResponse(ctx context.Context, params *sdk.AllocationGroupAPIGetCostAllocationGroupSummaryParams) (*sdk.AllocationGroupAPIGetCostAllocationGroupSummaryResponse, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "AllocationGroupAPIGetCostAllocationGroupSummaryWithResponse", ctx, params)
-	ret0, _ := ret[0].(*sdk.AllocationGroupAPIGetCostAllocationGroupSummaryResponse)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// AllocationGroupAPIGetCostAllocationGroupSummaryWithResponse indicates an expected call of AllocationGroupAPIGetCostAllocationGroupSummaryWithResponse.
-func (mr *MockClientWithResponsesInterfaceMockRecorder) AllocationGroupAPIGetCostAllocationGroupSummaryWithResponse(ctx, params interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AllocationGroupAPIGetCostAllocationGroupSummaryWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).AllocationGroupAPIGetCostAllocationGroupSummaryWithResponse), ctx, params)
-}
-
-// AllocationGroupAPIGetCostAllocationGroupWorkloads mocks base method.
-func (m *MockClientWithResponsesInterface) AllocationGroupAPIGetCostAllocationGroupWorkloads(ctx context.Context, groupId string, params *sdk.AllocationGroupAPIGetCostAllocationGroupWorkloadsParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
-	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, groupId, params}
-	for _, a := range reqEditors {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "AllocationGroupAPIGetCostAllocationGroupWorkloads", varargs...)
-	ret0, _ := ret[0].(*http.Response)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// AllocationGroupAPIGetCostAllocationGroupWorkloads indicates an expected call of AllocationGroupAPIGetCostAllocationGroupWorkloads.
-func (mr *MockClientWithResponsesInterfaceMockRecorder) AllocationGroupAPIGetCostAllocationGroupWorkloads(ctx, groupId, params interface{}, reqEditors ...interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, groupId, params}, reqEditors...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AllocationGroupAPIGetCostAllocationGroupWorkloads", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).AllocationGroupAPIGetCostAllocationGroupWorkloads), varargs...)
-}
-
-// AllocationGroupAPIGetCostAllocationGroupWorkloadsWithResponse mocks base method.
-func (m *MockClientWithResponsesInterface) AllocationGroupAPIGetCostAllocationGroupWorkloadsWithResponse(ctx context.Context, groupId string, params *sdk.AllocationGroupAPIGetCostAllocationGroupWorkloadsParams) (*sdk.AllocationGroupAPIGetCostAllocationGroupWorkloadsResponse, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "AllocationGroupAPIGetCostAllocationGroupWorkloadsWithResponse", ctx, groupId, params)
-	ret0, _ := ret[0].(*sdk.AllocationGroupAPIGetCostAllocationGroupWorkloadsResponse)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// AllocationGroupAPIGetCostAllocationGroupWorkloadsWithResponse indicates an expected call of AllocationGroupAPIGetCostAllocationGroupWorkloadsWithResponse.
-func (mr *MockClientWithResponsesInterfaceMockRecorder) AllocationGroupAPIGetCostAllocationGroupWorkloadsWithResponse(ctx, groupId, params interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AllocationGroupAPIGetCostAllocationGroupWorkloadsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).AllocationGroupAPIGetCostAllocationGroupWorkloadsWithResponse), ctx, groupId, params)
 }
 
 // AllocationGroupAPIListAllocationGroups mocks base method.
