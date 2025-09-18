@@ -607,6 +607,79 @@ func sortGroupsByID(groupsData []map[string]any) {
 	})
 }
 
+func sortMembersByID(members []map[string]any) {
+	sort.Slice(members, func(i, j int) bool {
+		idI, okI := members[i][FieldEnterpriseGroupMemberID].(string)
+		idJ, okJ := members[j][FieldEnterpriseGroupMemberID].(string)
+		if !okI || !okJ {
+			return false
+		}
+		return idI < idJ
+	})
+}
+
+// convertMembersForBatchCreate converts members from batch create response
+func convertMembersForBatchCreate(members *[]organization_management.DefinitionMember) []map[string]any {
+	if members == nil {
+		return nil
+	}
+	var result []map[string]any
+	for _, member := range *members {
+		memberData := map[string]any{}
+		if member.Id != nil {
+			memberData[FieldEnterpriseGroupMemberID] = *member.Id
+		}
+		if member.Email != nil {
+			memberData[FieldEnterpriseGroupMemberEmail] = *member.Email
+		}
+		if member.AddedTime != nil {
+			memberData[FieldEnterpriseGroupMemberAddedTime] = member.AddedTime.Format(time.RFC3339)
+		}
+		if member.Kind != nil {
+			switch *member.Kind {
+			case organization_management.DefinitionMemberKindSUBJECTKINDUSER:
+				memberData[FieldEnterpriseGroupMemberKind] = EnterpriseGroupMemberKindUser
+			case organization_management.DefinitionMemberKindSUBJECTKINDSERVICEACCOUNT:
+				memberData[FieldEnterpriseGroupMemberKind] = EnterpriseGroupMemberKindServiceAccount
+			}
+		}
+		result = append(result, memberData)
+	}
+	sortMembersByID(result)
+	return result
+}
+
+// convertRoleBindingsForBatch converts role bindings from batch response
+func convertRoleBindingsForBatch(roleBindings *[]organization_management.GroupRoleBinding) []map[string]any {
+	if roleBindings == nil {
+		return nil
+	}
+	var result []map[string]any
+	for _, binding := range *roleBindings {
+		bindingData := map[string]any{
+			FieldEnterpriseGroupRoleBindingID:     binding.Id,
+			FieldEnterpriseGroupRoleBindingName:   binding.Name,
+			FieldEnterpriseGroupRoleBindingRoleID: binding.Definition.RoleId,
+		}
+		var scopes []map[string]any
+		if binding.Definition.Scopes != nil {
+			for _, scope := range *binding.Definition.Scopes {
+				scopeData := map[string]any{}
+				if scope.Organization != nil {
+					scopeData[FieldEnterpriseGroupScopeOrganization] = scope.Organization.Id
+				}
+				if scope.Cluster != nil {
+					scopeData[FieldEnterpriseGroupScopeCluster] = scope.Cluster.Id
+				}
+				scopes = append(scopes, scopeData)
+			}
+		}
+		bindingData[FieldEnterpriseGroupRoleBindingScopes] = scopes
+		result = append(result, bindingData)
+	}
+	return result
+}
+
 // setEnterpriseGroupsData sets the Terraform state from SDK response data
 func setEnterpriseGroupsData(data *schema.ResourceData, groups []organization_management.BatchCreateEnterpriseGroupsResponseGroup) error {
 	var groupsData []map[string]any
@@ -634,69 +707,10 @@ func setEnterpriseGroupsData(data *schema.ResourceData, groups []organization_ma
 		}
 
 		if group.Definition != nil {
-			if group.Definition.Members != nil {
-				var members []map[string]any
-				for _, member := range *group.Definition.Members {
-					memberData := map[string]any{}
-
-					if member.Id != nil {
-						memberData[FieldEnterpriseGroupMemberID] = *member.Id
-					}
-
-					if member.Email != nil {
-						memberData[FieldEnterpriseGroupMemberEmail] = *member.Email
-					}
-
-					if member.AddedTime != nil {
-						memberData[FieldEnterpriseGroupMemberAddedTime] = member.AddedTime.Format(time.RFC3339)
-					}
-
-					if member.Kind != nil {
-						switch *member.Kind {
-						case organization_management.DefinitionMemberKindSUBJECTKINDUSER:
-							memberData[FieldEnterpriseGroupMemberKind] = EnterpriseGroupMemberKindUser
-						case organization_management.DefinitionMemberKindSUBJECTKINDSERVICEACCOUNT:
-							memberData[FieldEnterpriseGroupMemberKind] = EnterpriseGroupMemberKindServiceAccount
-						}
-					}
-
-					members = append(members, memberData)
-				}
-				groupData[FieldEnterpriseGroupMembers] = members
-			}
+			groupData[FieldEnterpriseGroupMembers] = convertMembersForBatchCreate(group.Definition.Members)
 		}
 
-		if group.RoleBindings != nil {
-			var roleBindings []map[string]any
-			for _, binding := range *group.RoleBindings {
-				bindingData := map[string]any{
-					FieldEnterpriseGroupRoleBindingID:     binding.Id,
-					FieldEnterpriseGroupRoleBindingName:   binding.Name,
-					FieldEnterpriseGroupRoleBindingRoleID: binding.Definition.RoleId,
-				}
-
-				// Convert scopes if they exist
-				var scopes []map[string]any
-				if binding.Definition.Scopes != nil {
-					for _, scope := range *binding.Definition.Scopes {
-						scopeData := map[string]any{}
-
-						if scope.Organization != nil {
-							scopeData[FieldEnterpriseGroupScopeOrganization] = scope.Organization.Id
-						}
-						if scope.Cluster != nil {
-							scopeData[FieldEnterpriseGroupScopeCluster] = scope.Cluster.Id
-						}
-
-						scopes = append(scopes, scopeData)
-					}
-				}
-				bindingData[FieldEnterpriseGroupRoleBindingScopes] = scopes
-
-				roleBindings = append(roleBindings, bindingData)
-			}
-			groupData[FieldEnterpriseGroupRoleBindings] = roleBindings
-		}
+		groupData[FieldEnterpriseGroupRoleBindings] = convertRoleBindingsForBatch(group.RoleBindings)
 
 		groupsData = append(groupsData, groupData)
 	}
@@ -767,6 +781,7 @@ func setEnterpriseGroupsDataFromListResponse(data *schema.ResourceData, groups [
 
 				members = append(members, memberData)
 			}
+			sortMembersByID(members)
 			groupData[FieldEnterpriseGroupMembers] = members
 		}
 
@@ -837,6 +852,7 @@ func setEnterpriseGroupsDataFromUpdateResponse(data *schema.ResourceData, groups
 
 				members = append(members, memberData)
 			}
+			sortMembersByID(members)
 			groupData[FieldEnterpriseGroupMembers] = members
 		}
 
