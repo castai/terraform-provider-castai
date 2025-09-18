@@ -315,46 +315,6 @@ func (mr *MockClientInterfaceMockRecorder) AllocationGroupAPIGetCostAllocationGr
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AllocationGroupAPIGetCostAllocationGroupDataTransferWorkloads", reflect.TypeOf((*MockClientInterface)(nil).AllocationGroupAPIGetCostAllocationGroupDataTransferWorkloads), varargs...)
 }
 
-// AllocationGroupAPIGetCostAllocationGroupSummary mocks base method.
-func (m *MockClientInterface) AllocationGroupAPIGetCostAllocationGroupSummary(ctx context.Context, params *sdk.AllocationGroupAPIGetCostAllocationGroupSummaryParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
-	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, params}
-	for _, a := range reqEditors {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "AllocationGroupAPIGetCostAllocationGroupSummary", varargs...)
-	ret0, _ := ret[0].(*http.Response)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// AllocationGroupAPIGetCostAllocationGroupSummary indicates an expected call of AllocationGroupAPIGetCostAllocationGroupSummary.
-func (mr *MockClientInterfaceMockRecorder) AllocationGroupAPIGetCostAllocationGroupSummary(ctx, params interface{}, reqEditors ...interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, params}, reqEditors...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AllocationGroupAPIGetCostAllocationGroupSummary", reflect.TypeOf((*MockClientInterface)(nil).AllocationGroupAPIGetCostAllocationGroupSummary), varargs...)
-}
-
-// AllocationGroupAPIGetCostAllocationGroupWorkloads mocks base method.
-func (m *MockClientInterface) AllocationGroupAPIGetCostAllocationGroupWorkloads(ctx context.Context, groupId string, params *sdk.AllocationGroupAPIGetCostAllocationGroupWorkloadsParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
-	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, groupId, params}
-	for _, a := range reqEditors {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "AllocationGroupAPIGetCostAllocationGroupWorkloads", varargs...)
-	ret0, _ := ret[0].(*http.Response)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// AllocationGroupAPIGetCostAllocationGroupWorkloads indicates an expected call of AllocationGroupAPIGetCostAllocationGroupWorkloads.
-func (mr *MockClientInterfaceMockRecorder) AllocationGroupAPIGetCostAllocationGroupWorkloads(ctx, groupId, params interface{}, reqEditors ...interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, groupId, params}, reqEditors...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AllocationGroupAPIGetCostAllocationGroupWorkloads", reflect.TypeOf((*MockClientInterface)(nil).AllocationGroupAPIGetCostAllocationGroupWorkloads), varargs...)
-}
-
 // AllocationGroupAPIListAllocationGroups mocks base method.
 func (m *MockClientInterface) AllocationGroupAPIListAllocationGroups(ctx context.Context, params *sdk.AllocationGroupAPIListAllocationGroupsParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
@@ -1593,6 +1553,46 @@ func (mr *MockClientInterfaceMockRecorder) ExternalClusterAPIGetCluster(ctx, clu
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{ctx, clusterId}, reqEditors...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIGetCluster", reflect.TypeOf((*MockClientInterface)(nil).ExternalClusterAPIGetCluster), varargs...)
+}
+
+// ExternalClusterAPIGetConnectAndEnableCASTAICmd mocks base method.
+func (m *MockClientInterface) ExternalClusterAPIGetConnectAndEnableCASTAICmd(ctx context.Context, params *sdk.ExternalClusterAPIGetConnectAndEnableCASTAICmdParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ExternalClusterAPIGetConnectAndEnableCASTAICmd", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExternalClusterAPIGetConnectAndEnableCASTAICmd indicates an expected call of ExternalClusterAPIGetConnectAndEnableCASTAICmd.
+func (mr *MockClientInterfaceMockRecorder) ExternalClusterAPIGetConnectAndEnableCASTAICmd(ctx, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIGetConnectAndEnableCASTAICmd", reflect.TypeOf((*MockClientInterface)(nil).ExternalClusterAPIGetConnectAndEnableCASTAICmd), varargs...)
+}
+
+// ExternalClusterAPIGetConnectAndEnableCASTAIScript mocks base method.
+func (m *MockClientInterface) ExternalClusterAPIGetConnectAndEnableCASTAIScript(ctx context.Context, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ExternalClusterAPIGetConnectAndEnableCASTAIScript", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExternalClusterAPIGetConnectAndEnableCASTAIScript indicates an expected call of ExternalClusterAPIGetConnectAndEnableCASTAIScript.
+func (mr *MockClientInterfaceMockRecorder) ExternalClusterAPIGetConnectAndEnableCASTAIScript(ctx interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIGetConnectAndEnableCASTAIScript", reflect.TypeOf((*MockClientInterface)(nil).ExternalClusterAPIGetConnectAndEnableCASTAIScript), varargs...)
 }
 
 // ExternalClusterAPIGetCredentialsScript mocks base method.
@@ -6078,76 +6078,6 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) AllocationGroupAPIGetCos
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AllocationGroupAPIGetCostAllocationGroupDataTransferWorkloadsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).AllocationGroupAPIGetCostAllocationGroupDataTransferWorkloadsWithResponse), ctx, groupId, params)
 }
 
-// AllocationGroupAPIGetCostAllocationGroupSummary mocks base method.
-func (m *MockClientWithResponsesInterface) AllocationGroupAPIGetCostAllocationGroupSummary(ctx context.Context, params *sdk.AllocationGroupAPIGetCostAllocationGroupSummaryParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
-	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, params}
-	for _, a := range reqEditors {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "AllocationGroupAPIGetCostAllocationGroupSummary", varargs...)
-	ret0, _ := ret[0].(*http.Response)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// AllocationGroupAPIGetCostAllocationGroupSummary indicates an expected call of AllocationGroupAPIGetCostAllocationGroupSummary.
-func (mr *MockClientWithResponsesInterfaceMockRecorder) AllocationGroupAPIGetCostAllocationGroupSummary(ctx, params interface{}, reqEditors ...interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, params}, reqEditors...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AllocationGroupAPIGetCostAllocationGroupSummary", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).AllocationGroupAPIGetCostAllocationGroupSummary), varargs...)
-}
-
-// AllocationGroupAPIGetCostAllocationGroupSummaryWithResponse mocks base method.
-func (m *MockClientWithResponsesInterface) AllocationGroupAPIGetCostAllocationGroupSummaryWithResponse(ctx context.Context, params *sdk.AllocationGroupAPIGetCostAllocationGroupSummaryParams) (*sdk.AllocationGroupAPIGetCostAllocationGroupSummaryResponse, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "AllocationGroupAPIGetCostAllocationGroupSummaryWithResponse", ctx, params)
-	ret0, _ := ret[0].(*sdk.AllocationGroupAPIGetCostAllocationGroupSummaryResponse)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// AllocationGroupAPIGetCostAllocationGroupSummaryWithResponse indicates an expected call of AllocationGroupAPIGetCostAllocationGroupSummaryWithResponse.
-func (mr *MockClientWithResponsesInterfaceMockRecorder) AllocationGroupAPIGetCostAllocationGroupSummaryWithResponse(ctx, params interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AllocationGroupAPIGetCostAllocationGroupSummaryWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).AllocationGroupAPIGetCostAllocationGroupSummaryWithResponse), ctx, params)
-}
-
-// AllocationGroupAPIGetCostAllocationGroupWorkloads mocks base method.
-func (m *MockClientWithResponsesInterface) AllocationGroupAPIGetCostAllocationGroupWorkloads(ctx context.Context, groupId string, params *sdk.AllocationGroupAPIGetCostAllocationGroupWorkloadsParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
-	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, groupId, params}
-	for _, a := range reqEditors {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "AllocationGroupAPIGetCostAllocationGroupWorkloads", varargs...)
-	ret0, _ := ret[0].(*http.Response)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// AllocationGroupAPIGetCostAllocationGroupWorkloads indicates an expected call of AllocationGroupAPIGetCostAllocationGroupWorkloads.
-func (mr *MockClientWithResponsesInterfaceMockRecorder) AllocationGroupAPIGetCostAllocationGroupWorkloads(ctx, groupId, params interface{}, reqEditors ...interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, groupId, params}, reqEditors...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AllocationGroupAPIGetCostAllocationGroupWorkloads", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).AllocationGroupAPIGetCostAllocationGroupWorkloads), varargs...)
-}
-
-// AllocationGroupAPIGetCostAllocationGroupWorkloadsWithResponse mocks base method.
-func (m *MockClientWithResponsesInterface) AllocationGroupAPIGetCostAllocationGroupWorkloadsWithResponse(ctx context.Context, groupId string, params *sdk.AllocationGroupAPIGetCostAllocationGroupWorkloadsParams) (*sdk.AllocationGroupAPIGetCostAllocationGroupWorkloadsResponse, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "AllocationGroupAPIGetCostAllocationGroupWorkloadsWithResponse", ctx, groupId, params)
-	ret0, _ := ret[0].(*sdk.AllocationGroupAPIGetCostAllocationGroupWorkloadsResponse)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// AllocationGroupAPIGetCostAllocationGroupWorkloadsWithResponse indicates an expected call of AllocationGroupAPIGetCostAllocationGroupWorkloadsWithResponse.
-func (mr *MockClientWithResponsesInterfaceMockRecorder) AllocationGroupAPIGetCostAllocationGroupWorkloadsWithResponse(ctx, groupId, params interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AllocationGroupAPIGetCostAllocationGroupWorkloadsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).AllocationGroupAPIGetCostAllocationGroupWorkloadsWithResponse), ctx, groupId, params)
-}
-
 // AllocationGroupAPIListAllocationGroups mocks base method.
 func (m *MockClientWithResponsesInterface) AllocationGroupAPIListAllocationGroups(ctx context.Context, params *sdk.AllocationGroupAPIListAllocationGroupsParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
@@ -8316,6 +8246,76 @@ func (m *MockClientWithResponsesInterface) ExternalClusterAPIGetClusterWithRespo
 func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIGetClusterWithResponse(ctx, clusterId interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIGetClusterWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIGetClusterWithResponse), ctx, clusterId)
+}
+
+// ExternalClusterAPIGetConnectAndEnableCASTAICmd mocks base method.
+func (m *MockClientWithResponsesInterface) ExternalClusterAPIGetConnectAndEnableCASTAICmd(ctx context.Context, params *sdk.ExternalClusterAPIGetConnectAndEnableCASTAICmdParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ExternalClusterAPIGetConnectAndEnableCASTAICmd", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExternalClusterAPIGetConnectAndEnableCASTAICmd indicates an expected call of ExternalClusterAPIGetConnectAndEnableCASTAICmd.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIGetConnectAndEnableCASTAICmd(ctx, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIGetConnectAndEnableCASTAICmd", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIGetConnectAndEnableCASTAICmd), varargs...)
+}
+
+// ExternalClusterAPIGetConnectAndEnableCASTAICmdWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) ExternalClusterAPIGetConnectAndEnableCASTAICmdWithResponse(ctx context.Context, params *sdk.ExternalClusterAPIGetConnectAndEnableCASTAICmdParams) (*sdk.ExternalClusterAPIGetConnectAndEnableCASTAICmdResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ExternalClusterAPIGetConnectAndEnableCASTAICmdWithResponse", ctx, params)
+	ret0, _ := ret[0].(*sdk.ExternalClusterAPIGetConnectAndEnableCASTAICmdResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExternalClusterAPIGetConnectAndEnableCASTAICmdWithResponse indicates an expected call of ExternalClusterAPIGetConnectAndEnableCASTAICmdWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIGetConnectAndEnableCASTAICmdWithResponse(ctx, params interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIGetConnectAndEnableCASTAICmdWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIGetConnectAndEnableCASTAICmdWithResponse), ctx, params)
+}
+
+// ExternalClusterAPIGetConnectAndEnableCASTAIScript mocks base method.
+func (m *MockClientWithResponsesInterface) ExternalClusterAPIGetConnectAndEnableCASTAIScript(ctx context.Context, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ExternalClusterAPIGetConnectAndEnableCASTAIScript", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExternalClusterAPIGetConnectAndEnableCASTAIScript indicates an expected call of ExternalClusterAPIGetConnectAndEnableCASTAIScript.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIGetConnectAndEnableCASTAIScript(ctx interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIGetConnectAndEnableCASTAIScript", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIGetConnectAndEnableCASTAIScript), varargs...)
+}
+
+// ExternalClusterAPIGetConnectAndEnableCASTAIScriptWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) ExternalClusterAPIGetConnectAndEnableCASTAIScriptWithResponse(ctx context.Context) (*sdk.ExternalClusterAPIGetConnectAndEnableCASTAIScriptResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ExternalClusterAPIGetConnectAndEnableCASTAIScriptWithResponse", ctx)
+	ret0, _ := ret[0].(*sdk.ExternalClusterAPIGetConnectAndEnableCASTAIScriptResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExternalClusterAPIGetConnectAndEnableCASTAIScriptWithResponse indicates an expected call of ExternalClusterAPIGetConnectAndEnableCASTAIScriptWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIGetConnectAndEnableCASTAIScriptWithResponse(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIGetConnectAndEnableCASTAIScriptWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIGetConnectAndEnableCASTAIScriptWithResponse), ctx)
 }
 
 // ExternalClusterAPIGetCredentialsScript mocks base method.
