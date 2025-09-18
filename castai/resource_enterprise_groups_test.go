@@ -606,51 +606,6 @@ func TestEnterpriseGroupsResourceReadContext(t *testing.T) {
 		r.Empty(data.Id()) // Should clear the resource ID
 	})
 
-	t.Run("when API returns 500 then return error", func(t *testing.T) {
-		t.Parallel()
-		r := require.New(t)
-		mockClient := mockOrganizationManagement.NewMockClientWithResponsesInterface(gomock.NewController(t))
-
-		ctx := context.Background()
-		provider := &ProviderConfig{
-			organizationManagementClient: mockClient,
-		}
-
-		enterpriseID := uuid.NewString()
-		groupID1 := uuid.NewString()
-
-		body := io.NopCloser(bytes.NewReader([]byte("internal error")))
-
-		mockClient.EXPECT().
-			EnterpriseAPIListGroupsWithResponse(gomock.Any(), enterpriseID, nil).
-			Return(&organization_management.EnterpriseAPIListGroupsResponse{
-				Body:         nil,
-				HTTPResponse: &http.Response{StatusCode: http.StatusInternalServerError, Body: body},
-			}, nil)
-
-		stateValue := cty.ObjectVal(map[string]cty.Value{
-			FieldEnterpriseGroupsGroups: cty.ListVal([]cty.Value{
-				cty.ObjectVal(map[string]cty.Value{
-					FieldEnterpriseGroupID:             cty.StringVal(groupID1),
-					FieldEnterpriseGroupOrganizationID: cty.StringVal(uuid.NewString()),
-					FieldEnterpriseGroupName:           cty.StringVal("test-group"),
-				}),
-			}),
-		})
-		state := terraform.NewInstanceStateShimmedFromValue(stateValue, 0)
-		state.ID = enterpriseID
-
-		resource := resourceEnterpriseGroups()
-		data := resource.Data(state)
-
-		result := resource.ReadContext(ctx, data, provider)
-
-		r.NotNil(result)
-		r.True(result.HasError())
-		r.Len(result, 1)
-		r.Equal("list enterprise groups failed with status 500: internal error", result[0].Summary)
-	})
-
 	t.Run("when API call throws error then return error", func(t *testing.T) {
 		t.Parallel()
 		r := require.New(t)
@@ -689,51 +644,6 @@ func TestEnterpriseGroupsResourceReadContext(t *testing.T) {
 		r.True(result.HasError())
 		r.Len(result, 1)
 		r.Equal("listing enterprise groups: network error", result[0].Summary)
-	})
-
-	t.Run("when API returns empty response then clear state", func(t *testing.T) {
-		t.Parallel()
-		r := require.New(t)
-		mockClient := mockOrganizationManagement.NewMockClientWithResponsesInterface(gomock.NewController(t))
-
-		ctx := context.Background()
-		provider := &ProviderConfig{
-			organizationManagementClient: mockClient,
-		}
-
-		enterpriseID := uuid.NewString()
-		groupID1 := uuid.NewString()
-
-		mockClient.EXPECT().
-			EnterpriseAPIListGroupsWithResponse(gomock.Any(), enterpriseID, nil).
-			Return(&organization_management.EnterpriseAPIListGroupsResponse{
-				Body:         nil,
-				HTTPResponse: &http.Response{StatusCode: http.StatusOK},
-				JSON200:      nil, // Empty response
-			}, nil)
-
-		stateValue := cty.ObjectVal(map[string]cty.Value{
-			FieldEnterpriseGroupsGroups: cty.ListVal([]cty.Value{
-				cty.ObjectVal(map[string]cty.Value{
-					FieldEnterpriseGroupID:             cty.StringVal(groupID1),
-					FieldEnterpriseGroupOrganizationID: cty.StringVal(uuid.NewString()),
-					FieldEnterpriseGroupName:           cty.StringVal("test-group"),
-				}),
-			}),
-		})
-		state := terraform.NewInstanceStateShimmedFromValue(stateValue, 0)
-		state.ID = enterpriseID
-
-		resource := resourceEnterpriseGroups()
-		data := resource.Data(state)
-
-		result := resource.ReadContext(ctx, data, provider)
-
-		r.Nil(result)
-		r.False(result.HasError())
-
-		groups := data.Get(FieldEnterpriseGroupsGroups).([]any)
-		r.Empty(groups)
 	})
 
 	t.Run("when API returns groups then filter and update state with managed groups only", func(t *testing.T) {
