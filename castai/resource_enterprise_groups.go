@@ -359,7 +359,7 @@ func resourceEnterpriseGroupsDelete(ctx context.Context, data *schema.ResourceDa
 		return diag.FromErr(fmt.Errorf("calling batch delete enterprise groups: %w", err))
 	}
 
-	if resp.StatusCode() != http.StatusOK && resp.StatusCode() != http.StatusNotFound {
+	if resp.StatusCode() != http.StatusOK {
 		return diag.FromErr(fmt.Errorf("batch delete enterprise groups failed with status %d: %s", resp.StatusCode(), string(resp.Body)))
 	}
 
