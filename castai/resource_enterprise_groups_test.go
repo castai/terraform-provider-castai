@@ -126,8 +126,10 @@ func TestResourceEnterpriseGroupsCreate(t *testing.T) {
 		memberID3 := "c" + uuid.NewString()
 		roleBindingID1 := uuid.NewString()
 		roleBindingID2 := uuid.NewString()
+		roleBindingID3 := uuid.NewString() // Second role binding for first group
 		roleID1 := "b" + uuid.NewString()
 		roleID2 := "a" + uuid.NewString()
+		roleID3 := "c" + uuid.NewString() // Role for second role binding
 		clusterID1 := "b" + uuid.NewString()
 		clusterID2 := "a" + uuid.NewString()
 
@@ -188,6 +190,30 @@ func TestResourceEnterpriseGroupsCreate(t *testing.T) {
 									{
 										Cluster: &organization_management.ClusterScope{
 											Id: clusterID2,
+										},
+									},
+								},
+							},
+						},
+						{
+							Id:             roleBindingID3,
+							Name:           "engineering-editor",
+							Description:    "Engineering editor role binding",
+							ManagedBy:      "terraform",
+							CreateTime:     createTime,
+							OrganizationId: organizationID1,
+							Statuses:       []organization_management.RoleBindingRoleBindingStatus{},
+							Definition: organization_management.RoleBindingRoleBindingDefinition{
+								RoleId: roleID3,
+								Scopes: &[]organization_management.Scope{
+									{
+										Organization: &organization_management.OrganizationScope{
+											Id: organizationID1,
+										},
+									},
+									{
+										Organization: &organization_management.OrganizationScope{
+											Id: organizationID2,
 										},
 									},
 								},
@@ -291,6 +317,20 @@ func TestResourceEnterpriseGroupsCreate(t *testing.T) {
 								}),
 							}),
 						}),
+						cty.ObjectVal(map[string]cty.Value{
+							FieldEnterpriseGroupRoleBindingName:   cty.StringVal("engineering-editor"),
+							FieldEnterpriseGroupRoleBindingRoleID: cty.StringVal(roleID3),
+							FieldEnterpriseGroupRoleBindingScopes: cty.ListVal([]cty.Value{
+								cty.ObjectVal(map[string]cty.Value{
+									FieldEnterpriseGroupScopeCluster:      cty.StringVal(""),
+									FieldEnterpriseGroupScopeOrganization: cty.StringVal(organizationID1),
+								}),
+								cty.ObjectVal(map[string]cty.Value{
+									FieldEnterpriseGroupScopeCluster:      cty.StringVal(""),
+									FieldEnterpriseGroupScopeOrganization: cty.StringVal(organizationID2),
+								}),
+							}),
+						}),
 					}),
 				}),
 				cty.ObjectVal(map[string]cty.Value{
@@ -377,31 +417,54 @@ func TestResourceEnterpriseGroupsCreate(t *testing.T) {
 		r.Equal("service_account", member3[FieldEnterpriseGroupMemberKind])
 		r.Equal(createTime.Format(time.RFC3339), member3[FieldEnterpriseGroupMemberAddedTime])
 
-		// Verify first group role bindings
+		// Verify first group role bindings (should be 2 role bindings)
 		roleBindings1 := group1[FieldEnterpriseGroupRoleBindings].([]any)
-		r.Len(roleBindings1, 1)
-		roleBinding1 := roleBindings1[0].(map[string]any)
-		r.Equal(roleBindingID1, roleBinding1[FieldEnterpriseGroupRoleBindingID])
-		r.Equal("engineering-viewer", roleBinding1[FieldEnterpriseGroupRoleBindingName])
-		r.Equal(roleID1, roleBinding1[FieldEnterpriseGroupRoleBindingRoleID])
+		r.Len(roleBindings1, 2)
 
-		scopes1 := roleBinding1[FieldEnterpriseGroupRoleBindingScopes].([]any)
-		r.Len(scopes1, 3)
+		// First role binding (in API response order)
+		roleBinding1a := roleBindings1[0].(map[string]any)
+		r.Equal(roleBindingID1, roleBinding1a[FieldEnterpriseGroupRoleBindingID])
+		r.Equal("engineering-viewer", roleBinding1a[FieldEnterpriseGroupRoleBindingName])
+		r.Equal(roleID1, roleBinding1a[FieldEnterpriseGroupRoleBindingRoleID])
+
+		// Second role binding
+		roleBinding1b := roleBindings1[1].(map[string]any)
+		r.Equal(roleBindingID3, roleBinding1b[FieldEnterpriseGroupRoleBindingID])
+		r.Equal("engineering-editor", roleBinding1b[FieldEnterpriseGroupRoleBindingName])
+		r.Equal(roleID3, roleBinding1b[FieldEnterpriseGroupRoleBindingRoleID])
+
+		// Verify first role binding scopes (3 scopes: cluster, org, cluster)
+		scopes1a := roleBinding1a[FieldEnterpriseGroupRoleBindingScopes].([]any)
+		r.Len(scopes1a, 3)
 
 		// First scope (cluster scope with clusterID1)
-		scope1a := scopes1[0].(map[string]any)
-		r.Equal(clusterID1, scope1a[FieldEnterpriseGroupScopeCluster])
-		r.Empty(scope1a[FieldEnterpriseGroupScopeOrganization])
+		scope1a1 := scopes1a[0].(map[string]any)
+		r.Equal(clusterID1, scope1a1[FieldEnterpriseGroupScopeCluster])
+		r.Empty(scope1a1[FieldEnterpriseGroupScopeOrganization])
 
 		// Second scope (organization scope with organizationID1)
-		scope1b := scopes1[1].(map[string]any)
-		r.Equal(organizationID1, scope1b[FieldEnterpriseGroupScopeOrganization])
-		r.Empty(scope1b[FieldEnterpriseGroupScopeCluster])
+		scope1a2 := scopes1a[1].(map[string]any)
+		r.Equal(organizationID1, scope1a2[FieldEnterpriseGroupScopeOrganization])
+		r.Empty(scope1a2[FieldEnterpriseGroupScopeCluster])
 
 		// Third scope (cluster scope with clusterID2)
-		scope1c := scopes1[2].(map[string]any)
-		r.Equal(clusterID2, scope1c[FieldEnterpriseGroupScopeCluster])
-		r.Empty(scope1c[FieldEnterpriseGroupScopeOrganization])
+		scope1a3 := scopes1a[2].(map[string]any)
+		r.Equal(clusterID2, scope1a3[FieldEnterpriseGroupScopeCluster])
+		r.Empty(scope1a3[FieldEnterpriseGroupScopeOrganization])
+
+		// Verify second role binding scopes (2 organization scopes)
+		scopes1b := roleBinding1b[FieldEnterpriseGroupRoleBindingScopes].([]any)
+		r.Len(scopes1b, 2)
+
+		// First scope (organizationID1)
+		scope1b1 := scopes1b[0].(map[string]any)
+		r.Equal(organizationID1, scope1b1[FieldEnterpriseGroupScopeOrganization])
+		r.Empty(scope1b1[FieldEnterpriseGroupScopeCluster])
+
+		// Second scope (organizationID2)
+		scope1b2 := scopes1b[1].(map[string]any)
+		r.Equal(organizationID2, scope1b2[FieldEnterpriseGroupScopeOrganization])
+		r.Empty(scope1b2[FieldEnterpriseGroupScopeCluster])
 
 		// Verify second group
 		group2 := groups[1].(map[string]any)
