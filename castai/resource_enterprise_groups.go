@@ -13,8 +13,15 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 	"github.com/samber/lo"
 
+	"github.com/castai/terraform-provider-castai/castai/sdk"
 	"github.com/castai/terraform-provider-castai/castai/sdk/organization_management"
 )
+
+// EnterpriseGroupWithRoleBindings represents a group with its associated role bindings
+type EnterpriseGroupWithRoleBindings struct {
+	Group        organization_management.ListGroupsResponseGroup
+	RoleBindings []organization_management.RoleBinding
+}
 
 const (
 	// Field names for the enterprise groups resource
@@ -281,10 +288,15 @@ func resourceEnterpriseGroupsRead(ctx context.Context, data *schema.ResourceData
 		}
 	}
 
-	// TODO: Fetch role bindings for each of groups since they are not included in the list response
+	// Fetch role bindings for managed groups since they are not included in the list response
+	// We track ALL role bindings assigned to our groups since we own them
+	groupsWithRoleBindings, err := getGroupsRoleBindings(ctx, client, enterpriseID, managedGroups)
+	if err != nil {
+		return diag.FromErr(fmt.Errorf("fetching role bindings for groups: %w", err))
+	}
 
 	// Update state with only the groups we are managing
-	if err := setEnterpriseGroupsDataFromListResponse(data, managedGroups); err != nil {
+	if err := setEnterpriseGroupsDataFromListResponseWithRoleBindings(data, groupsWithRoleBindings); err != nil {
 		return diag.FromErr(fmt.Errorf("setting groups data from list response: %w", err))
 	}
 
@@ -595,6 +607,95 @@ func getManagedGroupIDsFromState(data *schema.ResourceData) map[string]bool {
 	return managedIDs
 }
 
+// getGroupsRoleBindings fetches role bindings for each group and merges them into group data
+func getGroupsRoleBindings(
+	ctx context.Context,
+	client organization_management.ClientWithResponsesInterface,
+	enterpriseID string,
+	groups []organization_management.ListGroupsResponseGroup,
+) ([]EnterpriseGroupWithRoleBindings, error) {
+	if len(groups) == 0 {
+		return nil, nil
+	}
+
+	// Collect all group IDs for batch fetching role bindings
+	var groupIDs []string
+	for _, group := range groups {
+		if group.Id != nil {
+			groupIDs = append(groupIDs, *group.Id)
+		}
+	}
+
+	if len(groupIDs) == 0 {
+		// Return groups without role bindings
+		groupsWithRoleBindings := make([]EnterpriseGroupWithRoleBindings, len(groups))
+		for i, group := range groups {
+			groupsWithRoleBindings[i] = EnterpriseGroupWithRoleBindings{
+				Group:        group,
+				RoleBindings: []organization_management.RoleBinding{},
+			}
+		}
+		return groupsWithRoleBindings, nil
+	}
+
+	// Fetch role bindings for all groups in one API call
+	params := &organization_management.EnterpriseAPIListRoleBindingsParams{
+		SubjectId: &groupIDs,
+	}
+
+	resp, err := client.EnterpriseAPIListRoleBindingsWithResponse(ctx, enterpriseID, params)
+	if err != nil {
+		return nil, fmt.Errorf("fetching role bindings: %w", err)
+	}
+
+	if err := sdk.CheckOKResponse(resp, err); err != nil {
+		return nil, fmt.Errorf("role bindings API response: %w", err)
+	}
+
+	if resp.JSON200 == nil || resp.JSON200.Items == nil {
+		// No role bindings found, return groups without role bindings
+		groupsWithRoleBindings := make([]EnterpriseGroupWithRoleBindings, len(groups))
+		for i, group := range groups {
+			groupsWithRoleBindings[i] = EnterpriseGroupWithRoleBindings{
+				Group:        group,
+				RoleBindings: []organization_management.RoleBinding{},
+			}
+		}
+		return groupsWithRoleBindings, nil
+	}
+
+	roleBindingsByGroupID := make(map[string][]organization_management.RoleBinding)
+	for _, roleBinding := range *resp.JSON200.Items {
+		// Role bindings in enterprise groups are associated with subjects (groups)
+		// We need to check the definition to find which group this role binding belongs to
+		if roleBinding.Definition != nil && roleBinding.Definition.Subjects != nil {
+			for _, subject := range *roleBinding.Definition.Subjects {
+				if subject.Group != nil {
+					roleBindingsByGroupID[subject.Group.Id] = append(roleBindingsByGroupID[subject.Group.Id], roleBinding)
+				}
+			}
+		}
+	}
+
+	// Create groups with role bindings
+	groupsWithRoleBindings := make([]EnterpriseGroupWithRoleBindings, len(groups))
+	for i, group := range groups {
+		roleBindings := []organization_management.RoleBinding{}
+		if group.Id != nil {
+			if bindings, exists := roleBindingsByGroupID[*group.Id]; exists {
+				roleBindings = bindings
+			}
+		}
+
+		groupsWithRoleBindings[i] = EnterpriseGroupWithRoleBindings{
+			Group:        group,
+			RoleBindings: roleBindings,
+		}
+	}
+
+	return groupsWithRoleBindings, nil
+}
+
 func sortByField(items []map[string]any, field string) {
 	sort.Slice(items, func(i, j int) bool {
 		idI, okI := items[i][field].(string)
@@ -807,6 +908,136 @@ func setEnterpriseGroupsDataFromListResponse(data *schema.ResourceData, groups [
 
 		// Note: ListGroupsResponseGroup doesn't include role bindings in the current API
 		// They would need to be fetched separately if needed
+
+		groupsData = append(groupsData, groupData)
+	}
+
+	// Sort groups by ID for consistent ordering
+	sortByField(groupsData, FieldEnterpriseGroupID)
+
+	return data.Set(FieldEnterpriseGroupsGroups, groupsData)
+}
+
+// convertRoleBindingsForState converts API role bindings to Terraform state format
+func convertRoleBindingsForState(roleBindings []organization_management.RoleBinding) []map[string]any {
+	var roleBindingsData []map[string]any
+
+	for _, roleBinding := range roleBindings {
+		roleBindingData := map[string]any{}
+
+		if roleBinding.Id != nil {
+			roleBindingData[FieldEnterpriseGroupRoleBindingID] = *roleBinding.Id
+		}
+
+		if roleBinding.Name != nil {
+			roleBindingData[FieldEnterpriseGroupRoleBindingName] = *roleBinding.Name
+		}
+
+		if roleBinding.Definition != nil {
+			if roleBinding.Definition.RoleId != nil {
+				roleBindingData[FieldEnterpriseGroupRoleBindingRoleID] = *roleBinding.Definition.RoleId
+			}
+
+			// Convert scopes
+			if roleBinding.Definition.Scopes != nil {
+				var scopesData []map[string]any
+				for _, scope := range *roleBinding.Definition.Scopes {
+					scopeData := map[string]any{}
+
+					if scope.Organization != nil {
+						scopeData[FieldEnterpriseGroupScopeOrganization] = scope.Organization.Id
+					}
+
+					if scope.Cluster != nil {
+						scopeData[FieldEnterpriseGroupScopeCluster] = scope.Cluster.Id
+					}
+
+					scopesData = append(scopesData, scopeData)
+				}
+				// Sort scopes for consistent ordering
+				sortScopesByType(scopesData)
+				roleBindingData[FieldEnterpriseGroupRoleBindingScopes] = scopesData
+			}
+		}
+
+		roleBindingsData = append(roleBindingsData, roleBindingData)
+	}
+
+	// Sort role bindings by ID for consistent ordering
+	sortByField(roleBindingsData, FieldEnterpriseGroupRoleBindingID)
+
+	return roleBindingsData
+}
+
+// setEnterpriseGroupsDataFromListResponseWithRoleBindings sets the Terraform state from list API response enriched with role bindings
+func setEnterpriseGroupsDataFromListResponseWithRoleBindings(data *schema.ResourceData, groupsWithRoleBindings []EnterpriseGroupWithRoleBindings) error {
+	var groupsData []map[string]any
+
+	for _, groupWithRoleBindings := range groupsWithRoleBindings {
+		group := groupWithRoleBindings.Group
+		groupData := map[string]any{}
+
+		if group.Id != nil {
+			groupData[FieldEnterpriseGroupID] = *group.Id
+		}
+
+		if group.Name != nil {
+			groupData[FieldEnterpriseGroupName] = *group.Name
+		}
+
+		if group.Description != nil {
+			groupData[FieldEnterpriseGroupDescription] = *group.Description
+		}
+
+		if group.OrganizationId != nil {
+			groupData[FieldEnterpriseGroupOrganizationID] = *group.OrganizationId
+		}
+
+		// Add computed fields
+		if group.CreateTime != nil {
+			groupData[FieldEnterpriseGroupCreateTime] = group.CreateTime.Format(time.RFC3339)
+		}
+
+		if group.ManagedBy != nil {
+			groupData[FieldEnterpriseGroupManagedBy] = *group.ManagedBy
+		}
+
+		// Convert members
+		var members []map[string]any
+		if group.Definition != nil && group.Definition.Members != nil {
+			for _, member := range *group.Definition.Members {
+				memberData := map[string]any{}
+
+				if member.Id != nil {
+					memberData[FieldEnterpriseGroupMemberID] = *member.Id
+				}
+
+				if member.Email != nil {
+					memberData[FieldEnterpriseGroupMemberEmail] = *member.Email
+				}
+
+				if member.AddedTime != nil {
+					memberData[FieldEnterpriseGroupMemberAddedTime] = member.AddedTime.Format(time.RFC3339)
+				}
+
+				if member.Kind != nil {
+					switch *member.Kind {
+					case organization_management.GroupDefinitionMemberKindKINDUSER:
+						memberData[FieldEnterpriseGroupMemberKind] = EnterpriseGroupMemberKindUser
+					case organization_management.GroupDefinitionMemberKindKINDSERVICEACCOUNT:
+						memberData[FieldEnterpriseGroupMemberKind] = EnterpriseGroupMemberKindServiceAccount
+					}
+				}
+
+				members = append(members, memberData)
+			}
+			sortByField(members, FieldEnterpriseGroupMemberID)
+			groupData[FieldEnterpriseGroupMembers] = members
+		}
+
+		// Convert role bindings
+		roleBindings := convertRoleBindingsForState(groupWithRoleBindings.RoleBindings)
+		groupData[FieldEnterpriseGroupRoleBindings] = roleBindings
 
 		groupsData = append(groupsData, groupData)
 	}

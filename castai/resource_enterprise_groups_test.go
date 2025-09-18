@@ -664,6 +664,7 @@ func TestEnterpriseGroupsResourceReadContext(t *testing.T) {
 		memberID1 := uuid.NewString()
 
 		addedTime := time.Now()
+		createTime := time.Now()
 
 		// API returns both groups, but we should only keep the one in our state
 		apiResponse := &organization_management.ListGroupsResponse{
@@ -673,14 +674,14 @@ func TestEnterpriseGroupsResourceReadContext(t *testing.T) {
 					Name:           lo.ToPtr("managed-group"),
 					OrganizationId: lo.ToPtr(organizationID1),
 					Description:    lo.ToPtr("A managed group"),
-					CreateTime:     lo.ToPtr(addedTime),
+					CreateTime:     lo.ToPtr(createTime),
 					ManagedBy:      lo.ToPtr("terraform"),
 					Definition: &organization_management.ListGroupsResponseGroupDefinition{
 						Members: &[]organization_management.GroupDefinitionMember{
 							{
 								Id:        lo.ToPtr(memberID1),
 								Email:     lo.ToPtr("test@example.com"),
-								AddedTime: lo.ToPtr(addedTime),
+								AddedTime: lo.ToPtr(createTime),
 								Kind:      lo.ToPtr(organization_management.GroupDefinitionMemberKindKINDUSER),
 							},
 						},
@@ -701,6 +702,17 @@ func TestEnterpriseGroupsResourceReadContext(t *testing.T) {
 				Body:         nil,
 				HTTPResponse: &http.Response{StatusCode: http.StatusOK},
 				JSON200:      apiResponse,
+			}, nil)
+
+		// Mock role bindings API call
+		mockClient.EXPECT().
+			EnterpriseAPIListRoleBindingsWithResponse(gomock.Any(), enterpriseID, gomock.Any()).
+			Return(&organization_management.EnterpriseAPIListRoleBindingsResponse{
+				Body:         nil,
+				HTTPResponse: &http.Response{StatusCode: http.StatusOK},
+				JSON200: &organization_management.ListRoleBindingsResponse{
+					Items: &[]organization_management.RoleBinding{}, // Empty role bindings for this test
+				},
 			}, nil)
 
 		stateValue := cty.ObjectVal(map[string]cty.Value{
@@ -742,5 +754,296 @@ func TestEnterpriseGroupsResourceReadContext(t *testing.T) {
 		r.Equal("test@example.com", member[FieldEnterpriseGroupMemberEmail])
 		r.Equal("user", member[FieldEnterpriseGroupMemberKind])
 		r.Equal(addedTime.Format(time.RFC3339), member[FieldEnterpriseGroupMemberAddedTime])
+	})
+
+	t.Run("when API returns groups with multiple role bindings then include all role bindings in state with proper sorting", func(t *testing.T) {
+		t.Parallel()
+		r := require.New(t)
+		mockClient := mockOrganizationManagement.NewMockClientWithResponsesInterface(gomock.NewController(t))
+
+		ctx := context.Background()
+		provider := &ProviderConfig{
+			organizationManagementClient: mockClient,
+		}
+
+		enterpriseID := uuid.NewString()
+		organizationID1 := "e" + uuid.NewString()
+		organizationID2 := "f" + uuid.NewString()
+		groupID1 := "bbbb1111-1111-1111-1111-111111111111"
+		groupID2 := "aaaa2222-2222-2222-2222-222222222222"
+		memberID1 := "b" + uuid.NewString()
+		memberID2 := "a" + uuid.NewString()
+		memberID3 := "c" + uuid.NewString()
+		roleBindingID1 := "c" + uuid.NewString()
+		roleBindingID2 := "a" + uuid.NewString()
+		roleBindingID3 := "b" + uuid.NewString()
+		roleID1 := "b" + uuid.NewString()
+		roleID2 := "a" + uuid.NewString()
+		roleID3 := "c" + uuid.NewString()
+		clusterID1 := "b" + uuid.NewString()
+		clusterID2 := "a" + uuid.NewString()
+
+		createTime := time.Now()
+
+		// API returns groups
+		apiGroupsResponse := &organization_management.ListGroupsResponse{
+			Items: &[]organization_management.ListGroupsResponseGroup{
+				{
+					Id:             lo.ToPtr(groupID1),
+					Name:           lo.ToPtr("engineering-team"),
+					OrganizationId: lo.ToPtr(organizationID1),
+					Description:    lo.ToPtr("Engineering team group"),
+					CreateTime:     lo.ToPtr(createTime),
+					ManagedBy:      lo.ToPtr("terraform"),
+					Definition: &organization_management.ListGroupsResponseGroupDefinition{
+						Members: &[]organization_management.GroupDefinitionMember{
+							{
+								Id:        lo.ToPtr(memberID1),
+								Email:     lo.ToPtr("engineer@example.com"),
+								AddedTime: lo.ToPtr(createTime),
+								Kind:      lo.ToPtr(organization_management.GroupDefinitionMemberKindKINDUSER),
+							},
+							{
+								Id:        lo.ToPtr(memberID2),
+								Email:     lo.ToPtr("security@example.com"),
+								AddedTime: lo.ToPtr(createTime),
+								Kind:      lo.ToPtr(organization_management.GroupDefinitionMemberKindKINDUSER),
+							},
+							{
+								Id:        lo.ToPtr(memberID3),
+								AddedTime: lo.ToPtr(createTime),
+								Kind:      lo.ToPtr(organization_management.GroupDefinitionMemberKindKINDSERVICEACCOUNT),
+							},
+						},
+					},
+				},
+				{
+					Id:             lo.ToPtr(groupID2),
+					Name:           lo.ToPtr("security-team"),
+					OrganizationId: lo.ToPtr(organizationID2),
+					Description:    lo.ToPtr("Security team group"),
+					CreateTime:     lo.ToPtr(createTime),
+					ManagedBy:      lo.ToPtr("terraform"),
+					Definition: &organization_management.ListGroupsResponseGroupDefinition{
+						Members: &[]organization_management.GroupDefinitionMember{
+							{
+								Id:        lo.ToPtr(memberID2),
+								Email:     lo.ToPtr("security@example.com"),
+								AddedTime: lo.ToPtr(createTime),
+								Kind:      lo.ToPtr(organization_management.GroupDefinitionMemberKindKINDUSER),
+							},
+						},
+					},
+				},
+			},
+		}
+
+		// API returns role bindings for both groups - we should track ALL of them
+		apiRoleBindingsResponse := &organization_management.ListRoleBindingsResponse{
+			Items: &[]organization_management.RoleBinding{
+				{
+					Id:         lo.ToPtr(roleBindingID1),
+					Name:       lo.ToPtr("engineering-viewer"),
+					CreateTime: lo.ToPtr(createTime),
+					ManagedBy:  lo.ToPtr("terraform"),
+					Definition: &organization_management.RoleBindingDefinition{
+						RoleId: lo.ToPtr(roleID1),
+						Subjects: &[]organization_management.Subject{
+							{
+								Group: &organization_management.GroupSubject{
+									Id:   groupID1,
+									Name: lo.ToPtr("engineering-team"),
+								},
+							},
+						},
+						Scopes: &[]organization_management.Scope{
+							{
+								Cluster: &organization_management.ClusterScope{
+									Id: clusterID1,
+								},
+							},
+							{
+								Organization: &organization_management.OrganizationScope{
+									Id: organizationID1,
+								},
+							},
+							{
+								Cluster: &organization_management.ClusterScope{
+									Id: clusterID2,
+								},
+							},
+						},
+					},
+				},
+				{
+					Id:         lo.ToPtr(roleBindingID2),
+					Name:       lo.ToPtr("security-auditor"),
+					CreateTime: lo.ToPtr(createTime),
+					ManagedBy:  lo.ToPtr("terraform"),
+					Definition: &organization_management.RoleBindingDefinition{
+						RoleId: lo.ToPtr(roleID2),
+						Subjects: &[]organization_management.Subject{
+							{
+								Group: &organization_management.GroupSubject{
+									Id:   groupID2,
+									Name: lo.ToPtr("security-team"),
+								},
+							},
+						},
+						Scopes: &[]organization_management.Scope{
+							{
+								Organization: &organization_management.OrganizationScope{
+									Id: organizationID1,
+								},
+							},
+							{
+								Organization: &organization_management.OrganizationScope{
+									Id: organizationID2,
+								},
+							},
+						},
+					},
+				},
+				{
+					Id:         lo.ToPtr(roleBindingID3),
+					Name:       lo.ToPtr("engineering-editor"),
+					CreateTime: lo.ToPtr(createTime),
+					ManagedBy:  lo.ToPtr("terraform"),
+					Definition: &organization_management.RoleBindingDefinition{
+						RoleId: lo.ToPtr(roleID3),
+						Subjects: &[]organization_management.Subject{
+							{
+								Group: &organization_management.GroupSubject{
+									Id:   groupID1,
+									Name: lo.ToPtr("engineering-team"),
+								},
+							},
+						},
+						Scopes: &[]organization_management.Scope{
+							{
+								Organization: &organization_management.OrganizationScope{
+									Id: organizationID1,
+								},
+							},
+							{
+								Organization: &organization_management.OrganizationScope{
+									Id: organizationID2,
+								},
+							},
+						},
+					},
+				},
+			},
+		}
+
+		mockClient.EXPECT().
+			EnterpriseAPIListGroupsWithResponse(gomock.Any(), enterpriseID, nil).
+			Return(&organization_management.EnterpriseAPIListGroupsResponse{
+				Body:         nil,
+				HTTPResponse: &http.Response{StatusCode: http.StatusOK},
+				JSON200:      apiGroupsResponse,
+			}, nil)
+
+		mockClient.EXPECT().
+			EnterpriseAPIListRoleBindingsWithResponse(gomock.Any(), enterpriseID, gomock.Any()).
+			Return(&organization_management.EnterpriseAPIListRoleBindingsResponse{
+				Body:         nil,
+				HTTPResponse: &http.Response{StatusCode: http.StatusOK},
+				JSON200:      apiRoleBindingsResponse,
+			}, nil)
+
+		// State includes minimal group data - role bindings will be discovered
+		stateValue := cty.ObjectVal(map[string]cty.Value{
+			FieldEnterpriseGroupsGroups: cty.ListVal([]cty.Value{
+				cty.ObjectVal(map[string]cty.Value{
+					FieldEnterpriseGroupID:             cty.StringVal(groupID1),
+					FieldEnterpriseGroupOrganizationID: cty.StringVal(organizationID1),
+					FieldEnterpriseGroupName:           cty.StringVal("engineering-team"),
+				}),
+				cty.ObjectVal(map[string]cty.Value{
+					FieldEnterpriseGroupID:             cty.StringVal(groupID2),
+					FieldEnterpriseGroupOrganizationID: cty.StringVal(organizationID2),
+					FieldEnterpriseGroupName:           cty.StringVal("security-team"),
+				}),
+			}),
+		})
+		state := terraform.NewInstanceStateShimmedFromValue(stateValue, 0)
+		state.ID = enterpriseID
+
+		resource := resourceEnterpriseGroups()
+		data := resource.Data(state)
+
+		result := resource.ReadContext(ctx, data, provider)
+
+		r.Nil(result)
+		r.False(result.HasError())
+
+		// Verify both groups are returned with proper sorting by ID (aaaa comes before bbbb)
+		groups := data.Get(FieldEnterpriseGroupsGroups).([]any)
+		r.Len(groups, 2)
+
+		// Groups should be sorted by ID: groupID2 (aaaa), groupID1 (bbbb)
+		group1 := groups[0].(map[string]any)
+		group2 := groups[1].(map[string]any)
+
+		// First group (groupID2 - security-team)
+		r.Equal(groupID2, group1[FieldEnterpriseGroupID])
+		r.Equal("security-team", group1[FieldEnterpriseGroupName])
+		r.Equal(organizationID2, group1[FieldEnterpriseGroupOrganizationID])
+
+		// First group should have 1 member and 1 role binding
+		members1 := group1[FieldEnterpriseGroupMembers].([]any)
+		r.Len(members1, 1)
+		member1 := members1[0].(map[string]any)
+		r.Equal(memberID2, member1[FieldEnterpriseGroupMemberID])
+		r.Equal("security@example.com", member1[FieldEnterpriseGroupMemberEmail])
+		r.Equal("user", member1[FieldEnterpriseGroupMemberKind])
+
+		roleBindings1 := group1[FieldEnterpriseGroupRoleBindings].([]any)
+		r.Len(roleBindings1, 1)
+		roleBinding1 := roleBindings1[0].(map[string]any)
+		r.Equal(roleBindingID2, roleBinding1[FieldEnterpriseGroupRoleBindingID])
+		r.Equal("security-auditor", roleBinding1[FieldEnterpriseGroupRoleBindingName])
+		r.Equal(roleID2, roleBinding1[FieldEnterpriseGroupRoleBindingRoleID])
+
+		// Second group (groupID1 - engineering-team)
+		r.Equal(groupID1, group2[FieldEnterpriseGroupID])
+		r.Equal("engineering-team", group2[FieldEnterpriseGroupName])
+		r.Equal(organizationID1, group2[FieldEnterpriseGroupOrganizationID])
+
+		// Second group should have 3 members and 2 role bindings
+		members2 := group2[FieldEnterpriseGroupMembers].([]any)
+		r.Len(members2, 3)
+
+		// Members should be sorted by ID: memberID2 (a), memberID1 (b), memberID3 (c)
+		member2A := members2[0].(map[string]any)
+		member2B := members2[1].(map[string]any)
+		member2C := members2[2].(map[string]any)
+
+		r.Equal(memberID2, member2A[FieldEnterpriseGroupMemberID])
+		r.Equal("security@example.com", member2A[FieldEnterpriseGroupMemberEmail])
+		r.Equal("user", member2A[FieldEnterpriseGroupMemberKind])
+
+		r.Equal(memberID1, member2B[FieldEnterpriseGroupMemberID])
+		r.Equal("engineer@example.com", member2B[FieldEnterpriseGroupMemberEmail])
+		r.Equal("user", member2B[FieldEnterpriseGroupMemberKind])
+
+		r.Equal(memberID3, member2C[FieldEnterpriseGroupMemberID])
+		r.Equal("service_account", member2C[FieldEnterpriseGroupMemberKind])
+
+		roleBindings2 := group2[FieldEnterpriseGroupRoleBindings].([]any)
+		r.Len(roleBindings2, 2)
+
+		// Role bindings should be sorted by ID: roleBindingID3 (b), roleBindingID1 (c)
+		roleBinding2A := roleBindings2[0].(map[string]any)
+		roleBinding2B := roleBindings2[1].(map[string]any)
+
+		r.Equal(roleBindingID3, roleBinding2A[FieldEnterpriseGroupRoleBindingID])
+		r.Equal("engineering-editor", roleBinding2A[FieldEnterpriseGroupRoleBindingName])
+		r.Equal(roleID3, roleBinding2A[FieldEnterpriseGroupRoleBindingRoleID])
+
+		r.Equal(roleBindingID1, roleBinding2B[FieldEnterpriseGroupRoleBindingID])
+		r.Equal("engineering-viewer", roleBinding2B[FieldEnterpriseGroupRoleBindingName])
+		r.Equal(roleID1, roleBinding2B[FieldEnterpriseGroupRoleBindingRoleID])
 	})
 }
