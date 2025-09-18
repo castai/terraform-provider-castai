@@ -262,12 +262,6 @@ func resourceEnterpriseGroupsRead(ctx context.Context, data *schema.ResourceData
 		return diag.FromErr(fmt.Errorf("listing enterprise groups: %w", err))
 	}
 
-	if resp.StatusCode() == http.StatusNotFound {
-		// Enterprise not found, remove from state
-		data.SetId("")
-		return nil
-	}
-
 	if resp.StatusCode() != http.StatusOK {
 		return diag.FromErr(fmt.Errorf("list enterprise groups failed with status %d: %s", resp.StatusCode(), string(resp.Body)))
 	}

@@ -563,50 +563,6 @@ func TestEnterpriseGroupsResourceReadContext(t *testing.T) {
 		r.Empty(groups)
 	})
 
-	t.Run("when API returns 404 then remove from state", func(t *testing.T) {
-		t.Parallel()
-		r := require.New(t)
-		mockClient := mockOrganizationManagement.NewMockClientWithResponsesInterface(gomock.NewController(t))
-
-		ctx := context.Background()
-		provider := &ProviderConfig{
-			organizationManagementClient: mockClient,
-		}
-
-		enterpriseID := uuid.NewString()
-		groupID1 := uuid.NewString()
-
-		body := io.NopCloser(bytes.NewReader([]byte("")))
-
-		mockClient.EXPECT().
-			EnterpriseAPIListGroupsWithResponse(gomock.Any(), enterpriseID, nil).
-			Return(&organization_management.EnterpriseAPIListGroupsResponse{
-				Body:         nil,
-				HTTPResponse: &http.Response{StatusCode: http.StatusNotFound, Body: body},
-			}, nil)
-
-		stateValue := cty.ObjectVal(map[string]cty.Value{
-			FieldEnterpriseGroupsGroups: cty.ListVal([]cty.Value{
-				cty.ObjectVal(map[string]cty.Value{
-					FieldEnterpriseGroupID:             cty.StringVal(groupID1),
-					FieldEnterpriseGroupOrganizationID: cty.StringVal(uuid.NewString()),
-					FieldEnterpriseGroupName:           cty.StringVal("test-group"),
-				}),
-			}),
-		})
-		state := terraform.NewInstanceStateShimmedFromValue(stateValue, 0)
-		state.ID = enterpriseID
-
-		resource := resourceEnterpriseGroups()
-		data := resource.Data(state)
-
-		result := resource.ReadContext(ctx, data, provider)
-
-		r.Nil(result)
-		r.False(result.HasError())
-		r.Empty(data.Id()) // Should clear the resource ID
-	})
-
 	t.Run("when API call throws error then return error", func(t *testing.T) {
 		t.Parallel()
 		r := require.New(t)
