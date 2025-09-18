@@ -576,13 +576,18 @@ func buildBatchDeleteRequest(enterpriseID string, data *schema.ResourceData) (*o
 		// Group ID is required for deletes
 		groupID, ok := group[FieldEnterpriseGroupID].(string)
 		if !ok || groupID == "" {
-			// Skip groups without IDs (may not have been created yet)
-			continue
+			return nil, fmt.Errorf("group in state is missing valid ID - this indicates state corruption")
+		}
+
+		// Organization ID is also required for deletes
+		organizationID, ok := group[FieldEnterpriseGroupOrganizationID].(string)
+		if !ok || organizationID == "" {
+			return nil, fmt.Errorf("group %s in state is missing valid organization_id - this indicates state corruption", groupID)
 		}
 
 		requests = append(requests, organization_management.BatchDeleteEnterpriseGroupsRequestDeleteGroupRequest{
 			Id:             groupID,
-			OrganizationId: group[FieldEnterpriseGroupOrganizationID].(string),
+			OrganizationId: organizationID,
 		})
 	}
 
