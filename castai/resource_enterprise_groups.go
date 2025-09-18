@@ -595,11 +595,10 @@ func getManagedGroupIDsFromState(data *schema.ResourceData) map[string]bool {
 	return managedIDs
 }
 
-// sortGroupsByID sorts a slice of group data by group ID for consistent ordering
-func sortGroupsByID(groupsData []map[string]any) {
-	sort.Slice(groupsData, func(i, j int) bool {
-		idI, okI := groupsData[i][FieldEnterpriseGroupID].(string)
-		idJ, okJ := groupsData[j][FieldEnterpriseGroupID].(string)
+func sortByField(items []map[string]any, field string) {
+	sort.Slice(items, func(i, j int) bool {
+		idI, okI := items[i][field].(string)
+		idJ, okJ := items[j][field].(string)
 		if !okI || !okJ {
 			return false
 		}
@@ -607,14 +606,33 @@ func sortGroupsByID(groupsData []map[string]any) {
 	})
 }
 
-func sortMembersByID(members []map[string]any) {
-	sort.Slice(members, func(i, j int) bool {
-		idI, okI := members[i][FieldEnterpriseGroupMemberID].(string)
-		idJ, okJ := members[j][FieldEnterpriseGroupMemberID].(string)
-		if !okI || !okJ {
+func sortScopesByType(scopes []map[string]any) {
+	sort.Slice(scopes, func(i, j int) bool {
+		// Sort by type first (cluster before organization), then by ID
+		orgI, hasOrgI := scopes[i][FieldEnterpriseGroupScopeOrganization].(string)
+		orgJ, hasOrgJ := scopes[j][FieldEnterpriseGroupScopeOrganization].(string)
+		clusterI, hasClusterI := scopes[i][FieldEnterpriseGroupScopeCluster].(string)
+		clusterJ, hasClusterJ := scopes[j][FieldEnterpriseGroupScopeCluster].(string)
+
+		// If both have cluster scopes, sort by cluster ID
+		if hasClusterI && clusterI != "" && hasClusterJ && clusterJ != "" {
+			return clusterI < clusterJ
+		}
+
+		// If both have org scopes, sort by org ID
+		if hasOrgI && orgI != "" && hasOrgJ && orgJ != "" {
+			return orgI < orgJ
+		}
+
+		// Cluster scopes come before organization scopes
+		if hasClusterI && clusterI != "" {
+			return true
+		}
+		if hasClusterJ && clusterJ != "" {
 			return false
 		}
-		return idI < idJ
+
+		return false
 	})
 }
 
@@ -645,7 +663,7 @@ func convertMembersForBatchCreate(members *[]organization_management.DefinitionM
 		}
 		result = append(result, memberData)
 	}
-	sortMembersByID(result)
+	sortByField(result, FieldEnterpriseGroupMemberID)
 	return result
 }
 
@@ -674,9 +692,11 @@ func convertRoleBindingsForBatch(roleBindings *[]organization_management.GroupRo
 				scopes = append(scopes, scopeData)
 			}
 		}
+		sortScopesByType(scopes)
 		bindingData[FieldEnterpriseGroupRoleBindingScopes] = scopes
 		result = append(result, bindingData)
 	}
+	sortByField(result, FieldEnterpriseGroupRoleBindingID)
 	return result
 }
 
@@ -716,7 +736,7 @@ func setEnterpriseGroupsData(data *schema.ResourceData, groups []organization_ma
 	}
 
 	// Sort groups by ID for consistent ordering
-	sortGroupsByID(groupsData)
+	sortByField(groupsData, FieldEnterpriseGroupID)
 
 	return data.Set(FieldEnterpriseGroupsGroups, groupsData)
 }
@@ -781,7 +801,7 @@ func setEnterpriseGroupsDataFromListResponse(data *schema.ResourceData, groups [
 
 				members = append(members, memberData)
 			}
-			sortMembersByID(members)
+			sortByField(members, FieldEnterpriseGroupMemberID)
 			groupData[FieldEnterpriseGroupMembers] = members
 		}
 
@@ -792,7 +812,7 @@ func setEnterpriseGroupsDataFromListResponse(data *schema.ResourceData, groups [
 	}
 
 	// Sort groups by ID for consistent ordering
-	sortGroupsByID(groupsData)
+	sortByField(groupsData, FieldEnterpriseGroupID)
 
 	return data.Set(FieldEnterpriseGroupsGroups, groupsData)
 }
@@ -852,7 +872,7 @@ func setEnterpriseGroupsDataFromUpdateResponse(data *schema.ResourceData, groups
 
 				members = append(members, memberData)
 			}
-			sortMembersByID(members)
+			sortByField(members, FieldEnterpriseGroupMemberID)
 			groupData[FieldEnterpriseGroupMembers] = members
 		}
 
@@ -882,10 +902,12 @@ func setEnterpriseGroupsDataFromUpdateResponse(data *schema.ResourceData, groups
 						scopes = append(scopes, scopeData)
 					}
 				}
+				sortScopesByType(scopes)
 				bindingData[FieldEnterpriseGroupRoleBindingScopes] = scopes
 
 				roleBindings = append(roleBindings, bindingData)
 			}
+			sortByField(roleBindings, FieldEnterpriseGroupRoleBindingID)
 			groupData[FieldEnterpriseGroupRoleBindings] = roleBindings
 		}
 
@@ -893,7 +915,7 @@ func setEnterpriseGroupsDataFromUpdateResponse(data *schema.ResourceData, groups
 	}
 
 	// Sort groups by ID for consistent ordering
-	sortGroupsByID(groupsData)
+	sortByField(groupsData, FieldEnterpriseGroupID)
 
 	return data.Set(FieldEnterpriseGroupsGroups, groupsData)
 }

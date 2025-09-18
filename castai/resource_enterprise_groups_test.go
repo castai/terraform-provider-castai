@@ -460,23 +460,50 @@ func TestResourceEnterpriseGroupsCreate(t *testing.T) {
 		roleBindings2 := group2[FieldEnterpriseGroupRoleBindings].([]any)
 		r.Len(roleBindings2, 2)
 
-		// First role binding (roleBindingID1 - engineering-viewer)
+		// First role binding after sorting (roleBindingID3 - starts with "b")
 		roleBinding2a := roleBindings2[0].(map[string]any)
-		r.Equal(roleBindingID1, roleBinding2a[FieldEnterpriseGroupRoleBindingID])
-		r.Equal("engineering-viewer", roleBinding2a[FieldEnterpriseGroupRoleBindingName])
-		r.Equal(roleID1, roleBinding2a[FieldEnterpriseGroupRoleBindingRoleID])
+		r.Equal(roleBindingID3, roleBinding2a[FieldEnterpriseGroupRoleBindingID])
+		r.Equal("engineering-editor", roleBinding2a[FieldEnterpriseGroupRoleBindingName])
+		r.Equal(roleID3, roleBinding2a[FieldEnterpriseGroupRoleBindingRoleID])
 
+		// Verify scopes are sorted correctly for first role binding (2 organization scopes)
 		scopes2a := roleBinding2a[FieldEnterpriseGroupRoleBindingScopes].([]any)
-		r.Len(scopes2a, 3)
+		r.Len(scopes2a, 2)
 
-		// Second role binding (roleBindingID3 - engineering-editor)
+		// First scope: organization with organizationID1 ("e"...)
+		scope2a1 := scopes2a[0].(map[string]any)
+		r.Equal(organizationID1, scope2a1[FieldEnterpriseGroupScopeOrganization])
+		r.Empty(scope2a1[FieldEnterpriseGroupScopeCluster])
+
+		// Second scope: organization with organizationID2 ("f"...)
+		scope2a2 := scopes2a[1].(map[string]any)
+		r.Equal(organizationID2, scope2a2[FieldEnterpriseGroupScopeOrganization])
+		r.Empty(scope2a2[FieldEnterpriseGroupScopeCluster])
+
+		// Second role binding after sorting (roleBindingID1 - starts with "c")
 		roleBinding2b := roleBindings2[1].(map[string]any)
-		r.Equal(roleBindingID3, roleBinding2b[FieldEnterpriseGroupRoleBindingID])
-		r.Equal("engineering-editor", roleBinding2b[FieldEnterpriseGroupRoleBindingName])
-		r.Equal(roleID3, roleBinding2b[FieldEnterpriseGroupRoleBindingRoleID])
+		r.Equal(roleBindingID1, roleBinding2b[FieldEnterpriseGroupRoleBindingID])
+		r.Equal("engineering-viewer", roleBinding2b[FieldEnterpriseGroupRoleBindingName])
+		r.Equal(roleID1, roleBinding2b[FieldEnterpriseGroupRoleBindingRoleID])
 
+		// Verify scopes are sorted correctly (cluster scopes first, then by ID)
 		scopes2b := roleBinding2b[FieldEnterpriseGroupRoleBindingScopes].([]any)
-		r.Len(scopes2b, 2)
+		r.Len(scopes2b, 3)
+
+		// First scope: cluster with clusterID2 ("a"...)
+		scope2b1 := scopes2b[0].(map[string]any)
+		r.Equal(clusterID2, scope2b1[FieldEnterpriseGroupScopeCluster])
+		r.Empty(scope2b1[FieldEnterpriseGroupScopeOrganization])
+
+		// Second scope: cluster with clusterID1 ("b"...)
+		scope2b2 := scopes2b[1].(map[string]any)
+		r.Equal(clusterID1, scope2b2[FieldEnterpriseGroupScopeCluster])
+		r.Empty(scope2b2[FieldEnterpriseGroupScopeOrganization])
+
+		// Third scope: organization with organizationID1
+		scope2b3 := scopes2b[2].(map[string]any)
+		r.Equal(organizationID1, scope2b3[FieldEnterpriseGroupScopeOrganization])
+		r.Empty(scope2b3[FieldEnterpriseGroupScopeCluster])
 	})
 }
 
