@@ -29,7 +29,8 @@ const (
 	FieldEnterpriseGroupsGroups       = "groups"
 
 	// Field names for nested objects
-	FieldEnterpriseGroupsGroup = "group"
+	FieldEnterpriseGroupsGroup  = "group"
+	FieldEnterpriseGroupsMember = "member"
 
 	// Field names for individual groups
 	FieldEnterpriseGroupID             = "id"
@@ -137,29 +138,38 @@ func resourceEnterpriseGroups() *schema.Resource {
 										Description: "List of group members.",
 										Elem: &schema.Resource{
 											Schema: map[string]*schema.Schema{
-												FieldEnterpriseGroupMemberKind: {
-													Type:             schema.TypeString,
-													Required:         true,
-													Description:      fmt.Sprintf("Kind of the member. Supported values: %s.", strings.Join(supportedEnterpriseGroupMemberKinds, ", ")),
-													ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(supportedEnterpriseGroupMemberKinds, true)),
-													DiffSuppressFunc: func(k, oldValue, newValue string, d *schema.ResourceData) bool {
-														return strings.EqualFold(oldValue, newValue)
-													},
-												},
-												FieldEnterpriseGroupMemberID: {
-													Type:        schema.TypeString,
+												FieldEnterpriseGroupsMember: {
+													Type:        schema.TypeList,
 													Required:    true,
-													Description: "Member UUID.",
-												},
-												FieldEnterpriseGroupMemberEmail: {
-													Type:        schema.TypeString,
-													Computed:    true,
-													Description: "Member email address.",
-												},
-												FieldEnterpriseGroupMemberAddedTime: {
-													Type:        schema.TypeString,
-													Computed:    true,
-													Description: "Timestamp when the member was added to the group.",
+													Description: "Group member configuration.",
+													Elem: &schema.Resource{
+														Schema: map[string]*schema.Schema{
+															FieldEnterpriseGroupMemberKind: {
+																Type:             schema.TypeString,
+																Required:         true,
+																Description:      fmt.Sprintf("Kind of the member. Supported values: %s.", strings.Join(supportedEnterpriseGroupMemberKinds, ", ")),
+																ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(supportedEnterpriseGroupMemberKinds, true)),
+																DiffSuppressFunc: func(k, oldValue, newValue string, d *schema.ResourceData) bool {
+																	return strings.EqualFold(oldValue, newValue)
+																},
+															},
+															FieldEnterpriseGroupMemberID: {
+																Type:        schema.TypeString,
+																Required:    true,
+																Description: "Member UUID.",
+															},
+															FieldEnterpriseGroupMemberEmail: {
+																Type:        schema.TypeString,
+																Computed:    true,
+																Description: "Member email address.",
+															},
+															FieldEnterpriseGroupMemberAddedTime: {
+																Type:        schema.TypeString,
+																Computed:    true,
+																Description: "Timestamp when the member was added to the group.",
+															},
+														},
+													},
 												},
 											},
 										},
@@ -427,8 +437,15 @@ func buildBatchCreateRequest(enterpriseID string, data *schema.ResourceData) (*o
 
 		var members []organization_management.BatchCreateEnterpriseGroupsRequestMember
 		if membersData, ok := group[FieldEnterpriseGroupMembers].([]any); ok {
-			for _, memberData := range membersData {
-				member := memberData.(map[string]any)
+			for _, memberWrapper := range membersData {
+				memberWrapperMap := memberWrapper.(map[string]any)
+
+				// Navigate to the nested member object
+				membersDataNested, ok := memberWrapperMap[FieldEnterpriseGroupsMember].([]any)
+				if !ok || len(membersDataNested) == 0 {
+					continue
+				}
+				member := membersDataNested[0].(map[string]any)
 
 				var kind organization_management.BatchCreateEnterpriseGroupsRequestMemberKind
 				switch member[FieldEnterpriseGroupMemberKind].(string) {
@@ -717,7 +734,13 @@ func convertMembersForBatchCreate(members *[]organization_management.DefinitionM
 				memberData[FieldEnterpriseGroupMemberKind] = EnterpriseGroupMemberKindServiceAccount
 			}
 		}
-		result = append(result, memberData)
+
+		// Wrap member in nested structure
+		memberWrapper := map[string]any{
+			FieldEnterpriseGroupsMember: []map[string]any{memberData},
+		}
+
+		result = append(result, memberWrapper)
 	}
 	return result
 }
@@ -882,7 +905,7 @@ func setEnterpriseGroupsDataFromListResponseWithRoleBindings(data *schema.Resour
 			groupData[FieldEnterpriseGroupManagedBy] = *group.ManagedBy
 		}
 
-		// Convert members
+		// Convert members with nested structure
 		var members []map[string]any
 		if group.Definition != nil && group.Definition.Members != nil {
 			for _, member := range *group.Definition.Members {
@@ -909,7 +932,12 @@ func setEnterpriseGroupsDataFromListResponseWithRoleBindings(data *schema.Resour
 					}
 				}
 
-				members = append(members, memberData)
+				// Wrap member in nested structure
+				memberWrapper := map[string]any{
+					FieldEnterpriseGroupsMember: []map[string]any{memberData},
+				}
+
+				members = append(members, memberWrapper)
 			}
 			groupData[FieldEnterpriseGroupMembers] = members
 		}
@@ -1025,11 +1053,18 @@ func getGroupChanges(data *schema.ResourceData) (*EnterpriseGroupsChanges, error
 
 // buildUpdateRequestForGroup creates an update request for a single group
 func buildUpdateRequestForGroup(groupID string, group map[string]any) (*organization_management.BatchUpdateEnterpriseGroupsRequestUpdateGroupRequest, error) {
-	// Convert members
+	// Convert members with nested structure
 	var members []organization_management.BatchUpdateEnterpriseGroupsRequestMember
 	if membersData, ok := group[FieldEnterpriseGroupMembers].([]any); ok {
-		for _, memberData := range membersData {
-			member := memberData.(map[string]any)
+		for _, memberWrapper := range membersData {
+			memberWrapperMap := memberWrapper.(map[string]any)
+
+			// Navigate to the nested member object
+			membersDataNested, ok := memberWrapperMap[FieldEnterpriseGroupsMember].([]any)
+			if !ok || len(membersDataNested) == 0 {
+				continue
+			}
+			member := membersDataNested[0].(map[string]any)
 
 			var kind organization_management.BatchUpdateEnterpriseGroupsRequestMemberKind
 			switch member[FieldEnterpriseGroupMemberKind].(string) {
@@ -1112,8 +1147,15 @@ func buildUpdateRequestForGroup(groupID string, group map[string]any) (*organiza
 func buildCreateRequestForGroup(group map[string]any) (*organization_management.BatchCreateEnterpriseGroupsRequestGroup, error) {
 	var members []organization_management.BatchCreateEnterpriseGroupsRequestMember
 	if membersData, ok := group[FieldEnterpriseGroupMembers].([]any); ok {
-		for _, memberData := range membersData {
-			member := memberData.(map[string]any)
+		for _, memberWrapper := range membersData {
+			memberWrapperMap := memberWrapper.(map[string]any)
+
+			// Navigate to the nested member object
+			membersDataNested, ok := memberWrapperMap[FieldEnterpriseGroupsMember].([]any)
+			if !ok || len(membersDataNested) == 0 {
+				continue
+			}
+			member := membersDataNested[0].(map[string]any)
 
 			var kind organization_management.BatchCreateEnterpriseGroupsRequestMemberKind
 			switch member[FieldEnterpriseGroupMemberKind].(string) {
