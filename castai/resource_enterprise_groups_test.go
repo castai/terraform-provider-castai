@@ -1609,7 +1609,7 @@ func TestResourceEnterpriseGroupsUpdate(t *testing.T) {
 
 		// Mock read calls at the end
 		mockClient.EXPECT().
-			EnterpriseAPIListGroupsWithResponse(gomock.Any(), enterpriseID, gomock.Any()).
+			EnterpriseAPIListGroupsWithResponse(gomock.Any(), enterpriseID, nil).
 			Return(&organization_management.EnterpriseAPIListGroupsResponse{
 				HTTPResponse: &http.Response{StatusCode: 200},
 				JSON200: &organization_management.ListGroupsResponse{
@@ -1625,7 +1625,9 @@ func TestResourceEnterpriseGroupsUpdate(t *testing.T) {
 			}, nil)
 
 		mockClient.EXPECT().
-			EnterpriseAPIListRoleBindingsWithResponse(gomock.Any(), enterpriseID, gomock.Any()).
+			EnterpriseAPIListRoleBindingsWithResponse(gomock.Any(), enterpriseID, &organization_management.EnterpriseAPIListRoleBindingsParams{
+				SubjectId: &[]string{existingGroupID1},
+			}).
 			Return(&organization_management.EnterpriseAPIListRoleBindingsResponse{
 				HTTPResponse: &http.Response{StatusCode: 200},
 				JSON200: &organization_management.ListRoleBindingsResponse{
@@ -1674,14 +1676,27 @@ func TestResourceEnterpriseGroupsUpdate(t *testing.T) {
 		oldState := &terraform.InstanceState{
 			ID: enterpriseID,
 			Attributes: map[string]string{
-				FieldEnterpriseGroupsEnterpriseID: enterpriseID,
-				"groups.#":                        "1",
-				"groups.0.id":                     existingGroupID1,
-				"groups.0.name":                   "old-name",
-				"groups.0.organization_id":        orgID1,
-				"groups.0.description":            "Old description",
-				"groups.0.members.#":              "0",
-				"groups.0.role_bindings.#":        "0",
+				FieldEnterpriseGroupsEnterpriseID:                enterpriseID,
+				"groups.#":                                       "1",
+				"groups.0.id":                                    existingGroupID1,
+				"groups.0.name":                                  "old-name",
+				"groups.0.organization_id":                       orgID1,
+				"groups.0.description":                           "Old description",
+				"groups.0.members.#":                             "2",
+				"groups.0.members.0.kind":                        "service_account",
+				"groups.0.members.0.id":                          "old-service-account-id",
+				"groups.0.members.1.kind":                        "user",
+				"groups.0.members.1.id":                          "old-user-id",
+				"groups.0.role_bindings.#":                       "2",
+				"groups.0.role_bindings.0.name":                  "first-role-binding",
+				"groups.0.role_bindings.0.role_id":               "first-role-id",
+				"groups.0.role_bindings.0.scopes.#":              "1",
+				"groups.0.role_bindings.0.scopes.0.organization": orgID1,
+				"groups.0.role_bindings.1.name":                  "second-role-binding",
+				"groups.0.role_bindings.1.role_id":               "second-role-id",
+				"groups.0.role_bindings.1.scopes.#":              "2",
+				"groups.0.role_bindings.1.scopes.0.cluster":      "cluster-id-1",
+				"groups.0.role_bindings.1.scopes.1.organization": orgID1,
 			},
 		}
 
@@ -1697,36 +1712,71 @@ func TestResourceEnterpriseGroupsUpdate(t *testing.T) {
 					New: "Updated description",
 				},
 				"groups.0.members.#": {
-					Old: "0",
+					Old: "2",
 					New: "1",
 				},
 				"groups.0.members.0.kind": {
-					Old: "",
+					Old: "service_account",
 					New: "user",
 				},
 				"groups.0.members.0.id": {
-					Old: "",
+					Old: "old-service-account-id",
 					New: memberID,
 				},
+				"groups.0.members.1.kind": {
+					Old:        "user",
+					New:        "",
+					NewRemoved: true,
+				},
+				"groups.0.members.1.id": {
+					Old:        "old-user-id",
+					New:        "",
+					NewRemoved: true,
+				},
 				"groups.0.role_bindings.#": {
-					Old: "0",
+					Old: "2",
 					New: "1",
 				},
 				"groups.0.role_bindings.0.name": {
-					Old: "",
+					Old: "first-role-binding",
 					New: "updated-role-binding",
 				},
 				"groups.0.role_bindings.0.role_id": {
-					Old: "",
+					Old: "first-role-id",
 					New: roleID,
 				},
 				"groups.0.role_bindings.0.scopes.#": {
-					Old: "",
+					Old: "1",
 					New: "1",
 				},
 				"groups.0.role_bindings.0.scopes.0.organization": {
-					Old: "",
+					Old: orgID1,
 					New: orgScopeID,
+				},
+				"groups.0.role_bindings.1.name": {
+					Old:        "second-role-binding",
+					New:        "",
+					NewRemoved: true,
+				},
+				"groups.0.role_bindings.1.role_id": {
+					Old:        "second-role-id",
+					New:        "",
+					NewRemoved: true,
+				},
+				"groups.0.role_bindings.1.scopes.#": {
+					Old:        "2",
+					New:        "",
+					NewRemoved: true,
+				},
+				"groups.0.role_bindings.1.scopes.0.cluster": {
+					Old:        "cluster-id-1",
+					New:        "",
+					NewRemoved: true,
+				},
+				"groups.0.role_bindings.1.scopes.1.organization": {
+					Old:        orgID1,
+					New:        "",
+					NewRemoved: true,
 				},
 			},
 		}
@@ -1780,7 +1830,7 @@ func TestResourceEnterpriseGroupsUpdate(t *testing.T) {
 
 		// Mock read calls at the end
 		mockClient.EXPECT().
-			EnterpriseAPIListGroupsWithResponse(gomock.Any(), enterpriseID, gomock.Any()).
+			EnterpriseAPIListGroupsWithResponse(gomock.Any(), enterpriseID, nil).
 			Return(&organization_management.EnterpriseAPIListGroupsResponse{
 				HTTPResponse: &http.Response{StatusCode: 200},
 				JSON200: &organization_management.ListGroupsResponse{
@@ -1796,10 +1846,29 @@ func TestResourceEnterpriseGroupsUpdate(t *testing.T) {
 			}, nil)
 
 		mockClient.EXPECT().
-			EnterpriseAPIListRoleBindingsWithResponse(gomock.Any(), enterpriseID, gomock.Any()).
+			EnterpriseAPIListRoleBindingsWithResponse(gomock.Any(), enterpriseID, &organization_management.EnterpriseAPIListRoleBindingsParams{
+				SubjectId: &[]string{existingGroupID1},
+			}).
 			Return(&organization_management.EnterpriseAPIListRoleBindingsResponse{
 				HTTPResponse: &http.Response{StatusCode: 200},
-				JSON200:      &organization_management.ListRoleBindingsResponse{Items: &[]organization_management.RoleBinding{}},
+				JSON200: &organization_management.ListRoleBindingsResponse{
+					Items: &[]organization_management.RoleBinding{
+						{
+							Id:   lo.ToPtr(existingGroupID1 + "-updated-role-binding"),
+							Name: lo.ToPtr("updated-role-binding"),
+							Definition: &organization_management.RoleBindingDefinition{
+								RoleId: lo.ToPtr(roleID),
+								Scopes: &[]organization_management.Scope{
+									{
+										Organization: &organization_management.OrganizationScope{
+											Id: orgScopeID,
+										},
+									},
+								},
+							},
+						},
+					},
+				},
 			}, nil)
 
 		// Execute update
@@ -1865,8 +1934,8 @@ func TestResourceEnterpriseGroupsUpdate(t *testing.T) {
 					Name:           "updated-name",
 					OrganizationId: orgID1,
 					Description:    "",
-					Members:        []organization_management.BatchUpdateEnterpriseGroupsRequestMember{},
-					RoleBindings:   []organization_management.BatchUpdateEnterpriseGroupsRequestRoleBinding{},
+					Members:        nil,
+					RoleBindings:   nil,
 				},
 			},
 		}
