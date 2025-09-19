@@ -46,9 +46,13 @@ func TestResourceEnterpriseGroupsCreate(t *testing.T) {
 			FieldEnterpriseGroupsEnterpriseID: cty.StringVal(enterpriseID),
 			FieldEnterpriseGroupsGroups: cty.ListVal([]cty.Value{
 				cty.ObjectVal(map[string]cty.Value{
-					FieldEnterpriseGroupOrganizationID: cty.StringVal(organizationID),
-					FieldEnterpriseGroupName:           cty.StringVal("test-group"),
-					FieldEnterpriseGroupDescription:    cty.StringVal("Test description"),
+					FieldEnterpriseGroupsGroup: cty.ListVal([]cty.Value{
+						cty.ObjectVal(map[string]cty.Value{
+							FieldEnterpriseGroupOrganizationID: cty.StringVal(organizationID),
+							FieldEnterpriseGroupName:           cty.StringVal("test-group"),
+							FieldEnterpriseGroupDescription:    cty.StringVal("Test description"),
+						}),
+					}),
 				}),
 			}),
 		})
@@ -90,8 +94,12 @@ func TestResourceEnterpriseGroupsCreate(t *testing.T) {
 			FieldEnterpriseGroupsEnterpriseID: cty.StringVal(enterpriseID),
 			FieldEnterpriseGroupsGroups: cty.ListVal([]cty.Value{
 				cty.ObjectVal(map[string]cty.Value{
-					FieldEnterpriseGroupOrganizationID: cty.StringVal(organizationID),
-					FieldEnterpriseGroupName:           cty.StringVal("test-group"),
+					FieldEnterpriseGroupsGroup: cty.ListVal([]cty.Value{
+						cty.ObjectVal(map[string]cty.Value{
+							FieldEnterpriseGroupOrganizationID: cty.StringVal(organizationID),
+							FieldEnterpriseGroupName:           cty.StringVal("test-group"),
+						}),
+					}),
 				}),
 			}),
 		})
@@ -283,80 +291,96 @@ func TestResourceEnterpriseGroupsCreate(t *testing.T) {
 			FieldEnterpriseGroupsEnterpriseID: cty.StringVal(enterpriseID),
 			FieldEnterpriseGroupsGroups: cty.ListVal([]cty.Value{
 				cty.ObjectVal(map[string]cty.Value{
-					FieldEnterpriseGroupOrganizationID: cty.StringVal(organizationID1),
-					FieldEnterpriseGroupName:           cty.StringVal("engineering-team"),
-					FieldEnterpriseGroupDescription:    cty.StringVal("Engineering team group"),
-					FieldEnterpriseGroupMembers: cty.ListVal([]cty.Value{
+					FieldEnterpriseGroupsGroup: cty.ListVal([]cty.Value{
 						cty.ObjectVal(map[string]cty.Value{
-							FieldEnterpriseGroupMemberKind: cty.StringVal("user"),
-							FieldEnterpriseGroupMemberID:   cty.StringVal(memberID1),
-						}),
-						cty.ObjectVal(map[string]cty.Value{
-							FieldEnterpriseGroupMemberKind: cty.StringVal("user"),
-							FieldEnterpriseGroupMemberID:   cty.StringVal(memberID2),
-						}),
-						cty.ObjectVal(map[string]cty.Value{
-							FieldEnterpriseGroupMemberKind: cty.StringVal("service_account"),
-							FieldEnterpriseGroupMemberID:   cty.StringVal(memberID3),
-						}),
-					}),
-					FieldEnterpriseGroupRoleBindings: cty.ListVal([]cty.Value{
-						cty.ObjectVal(map[string]cty.Value{
-							FieldEnterpriseGroupRoleBindingName:   cty.StringVal("engineering-viewer"),
-							FieldEnterpriseGroupRoleBindingRoleID: cty.StringVal(roleID1),
-							FieldEnterpriseGroupRoleBindingScopes: cty.ListVal([]cty.Value{
+							FieldEnterpriseGroupOrganizationID: cty.StringVal(organizationID1),
+							FieldEnterpriseGroupName:           cty.StringVal("engineering-team"),
+							FieldEnterpriseGroupDescription:    cty.StringVal("Engineering team group"),
+							FieldEnterpriseGroupMembers: cty.ListVal([]cty.Value{
 								cty.ObjectVal(map[string]cty.Value{
-									FieldEnterpriseGroupScopeCluster:      cty.StringVal(clusterID1),
-									FieldEnterpriseGroupScopeOrganization: cty.StringVal(""),
-								}),
-								cty.ObjectVal(map[string]cty.Value{
-									FieldEnterpriseGroupScopeCluster:      cty.StringVal(""),
-									FieldEnterpriseGroupScopeOrganization: cty.StringVal(organizationID1),
-								}),
-								cty.ObjectVal(map[string]cty.Value{
-									FieldEnterpriseGroupScopeCluster:      cty.StringVal(clusterID2),
-									FieldEnterpriseGroupScopeOrganization: cty.StringVal(""),
+									FieldEnterpriseGroupsMember: cty.ListVal([]cty.Value{
+										cty.ObjectVal(map[string]cty.Value{
+											FieldEnterpriseGroupMemberKind: cty.StringVal("user"),
+											FieldEnterpriseGroupMemberID:   cty.StringVal(memberID1),
+										}),
+										cty.ObjectVal(map[string]cty.Value{
+											FieldEnterpriseGroupMemberKind: cty.StringVal("user"),
+											FieldEnterpriseGroupMemberID:   cty.StringVal(memberID2),
+										}),
+										cty.ObjectVal(map[string]cty.Value{
+											FieldEnterpriseGroupMemberKind: cty.StringVal("service_account"),
+											FieldEnterpriseGroupMemberID:   cty.StringVal(memberID3),
+										}),
+									}),
 								}),
 							}),
-						}),
-						cty.ObjectVal(map[string]cty.Value{
-							FieldEnterpriseGroupRoleBindingName:   cty.StringVal("engineering-editor"),
-							FieldEnterpriseGroupRoleBindingRoleID: cty.StringVal(roleID3),
-							FieldEnterpriseGroupRoleBindingScopes: cty.ListVal([]cty.Value{
+							FieldEnterpriseGroupRoleBindings: cty.ListVal([]cty.Value{
 								cty.ObjectVal(map[string]cty.Value{
-									FieldEnterpriseGroupScopeCluster:      cty.StringVal(""),
-									FieldEnterpriseGroupScopeOrganization: cty.StringVal(organizationID1),
+									FieldEnterpriseGroupRoleBindingName:   cty.StringVal("engineering-viewer"),
+									FieldEnterpriseGroupRoleBindingRoleID: cty.StringVal(roleID1),
+									FieldEnterpriseGroupRoleBindingScopes: cty.ListVal([]cty.Value{
+										cty.ObjectVal(map[string]cty.Value{
+											FieldEnterpriseGroupScopeCluster:      cty.StringVal(clusterID1),
+											FieldEnterpriseGroupScopeOrganization: cty.StringVal(""),
+										}),
+										cty.ObjectVal(map[string]cty.Value{
+											FieldEnterpriseGroupScopeCluster:      cty.StringVal(""),
+											FieldEnterpriseGroupScopeOrganization: cty.StringVal(organizationID1),
+										}),
+										cty.ObjectVal(map[string]cty.Value{
+											FieldEnterpriseGroupScopeCluster:      cty.StringVal(clusterID2),
+											FieldEnterpriseGroupScopeOrganization: cty.StringVal(""),
+										}),
+									}),
 								}),
 								cty.ObjectVal(map[string]cty.Value{
-									FieldEnterpriseGroupScopeCluster:      cty.StringVal(""),
-									FieldEnterpriseGroupScopeOrganization: cty.StringVal(organizationID2),
+									FieldEnterpriseGroupRoleBindingName:   cty.StringVal("engineering-editor"),
+									FieldEnterpriseGroupRoleBindingRoleID: cty.StringVal(roleID3),
+									FieldEnterpriseGroupRoleBindingScopes: cty.ListVal([]cty.Value{
+										cty.ObjectVal(map[string]cty.Value{
+											FieldEnterpriseGroupScopeCluster:      cty.StringVal(""),
+											FieldEnterpriseGroupScopeOrganization: cty.StringVal(organizationID1),
+										}),
+										cty.ObjectVal(map[string]cty.Value{
+											FieldEnterpriseGroupScopeCluster:      cty.StringVal(""),
+											FieldEnterpriseGroupScopeOrganization: cty.StringVal(organizationID2),
+										}),
+									}),
 								}),
 							}),
 						}),
 					}),
 				}),
 				cty.ObjectVal(map[string]cty.Value{
-					FieldEnterpriseGroupOrganizationID: cty.StringVal(organizationID2),
-					FieldEnterpriseGroupName:           cty.StringVal("security-team"),
-					FieldEnterpriseGroupDescription:    cty.StringVal("Security team group"),
-					FieldEnterpriseGroupMembers: cty.ListVal([]cty.Value{
+					FieldEnterpriseGroupsGroup: cty.ListVal([]cty.Value{
 						cty.ObjectVal(map[string]cty.Value{
-							FieldEnterpriseGroupMemberKind: cty.StringVal("user"),
-							FieldEnterpriseGroupMemberID:   cty.StringVal(memberID2),
-						}),
-					}),
-					FieldEnterpriseGroupRoleBindings: cty.ListVal([]cty.Value{
-						cty.ObjectVal(map[string]cty.Value{
-							FieldEnterpriseGroupRoleBindingName:   cty.StringVal("security-auditor"),
-							FieldEnterpriseGroupRoleBindingRoleID: cty.StringVal(roleID2),
-							FieldEnterpriseGroupRoleBindingScopes: cty.ListVal([]cty.Value{
+							FieldEnterpriseGroupOrganizationID: cty.StringVal(organizationID2),
+							FieldEnterpriseGroupName:           cty.StringVal("security-team"),
+							FieldEnterpriseGroupDescription:    cty.StringVal("Security team group"),
+							FieldEnterpriseGroupMembers: cty.ListVal([]cty.Value{
 								cty.ObjectVal(map[string]cty.Value{
-									FieldEnterpriseGroupScopeCluster:      cty.StringVal(""),
-									FieldEnterpriseGroupScopeOrganization: cty.StringVal(organizationID1),
+									FieldEnterpriseGroupsMember: cty.ListVal([]cty.Value{
+										cty.ObjectVal(map[string]cty.Value{
+											FieldEnterpriseGroupMemberKind: cty.StringVal("user"),
+											FieldEnterpriseGroupMemberID:   cty.StringVal(memberID2),
+										}),
+									}),
 								}),
+							}),
+							FieldEnterpriseGroupRoleBindings: cty.ListVal([]cty.Value{
 								cty.ObjectVal(map[string]cty.Value{
-									FieldEnterpriseGroupScopeCluster:      cty.StringVal(""),
-									FieldEnterpriseGroupScopeOrganization: cty.StringVal(organizationID2),
+									FieldEnterpriseGroupRoleBindingName:   cty.StringVal("security-auditor"),
+									FieldEnterpriseGroupRoleBindingRoleID: cty.StringVal(roleID2),
+									FieldEnterpriseGroupRoleBindingScopes: cty.ListVal([]cty.Value{
+										cty.ObjectVal(map[string]cty.Value{
+											FieldEnterpriseGroupScopeCluster:      cty.StringVal(""),
+											FieldEnterpriseGroupScopeOrganization: cty.StringVal(organizationID1),
+										}),
+										cty.ObjectVal(map[string]cty.Value{
+											FieldEnterpriseGroupScopeCluster:      cty.StringVal(""),
+											FieldEnterpriseGroupScopeOrganization: cty.StringVal(organizationID2),
+										}),
+									}),
 								}),
 							}),
 						}),
@@ -383,7 +407,9 @@ func TestResourceEnterpriseGroupsCreate(t *testing.T) {
 		r.Len(groups, 2)
 
 		// Verify first group after sorting (groupID2 starts with "aaaa", comes first)
-		group1 := groups[0].(map[string]any)
+		groupWrapper1 := groups[0].(map[string]any)
+		groupList1 := groupWrapper1[FieldEnterpriseGroupsGroup].([]any)
+		group1 := groupList1[0].(map[string]any)
 		r.Equal(groupID2, group1[FieldEnterpriseGroupID])
 		r.Equal("security-team", group1[FieldEnterpriseGroupName])
 		r.Equal(organizationID2, group1[FieldEnterpriseGroupOrganizationID])
@@ -393,10 +419,13 @@ func TestResourceEnterpriseGroupsCreate(t *testing.T) {
 
 		// Verify first group members (group2/security-team has 1 member)
 		members1 := group1[FieldEnterpriseGroupMembers].([]any)
-		r.Len(members1, 1)
+		r.Len(members1, 1) // Single wrapper
 
 		// Single member (memberID2)
-		member1 := members1[0].(map[string]any)
+		memberWrapper1 := members1[0].(map[string]any)
+		memberList1 := memberWrapper1[FieldEnterpriseGroupsMember].([]any)
+		r.Len(memberList1, 1)
+		member1 := memberList1[0].(map[string]any)
 		r.Equal(memberID2, member1[FieldEnterpriseGroupMemberID])
 		r.Equal("security@example.com", member1[FieldEnterpriseGroupMemberEmail])
 		r.Equal("user", member1[FieldEnterpriseGroupMemberKind])
@@ -427,7 +456,9 @@ func TestResourceEnterpriseGroupsCreate(t *testing.T) {
 		r.Empty(scope1b[FieldEnterpriseGroupScopeCluster])
 
 		// Verify second group after sorting (groupID1 starts with "bbbb", comes second)
-		group2 := groups[1].(map[string]any)
+		groupWrapper2 := groups[1].(map[string]any)
+		groupList2 := groupWrapper2[FieldEnterpriseGroupsGroup].([]any)
+		group2 := groupList2[0].(map[string]any)
 		r.Equal(groupID1, group2[FieldEnterpriseGroupID])
 		r.Equal("engineering-team", group2[FieldEnterpriseGroupName])
 		r.Equal(organizationID1, group2[FieldEnterpriseGroupOrganizationID])
@@ -437,22 +468,27 @@ func TestResourceEnterpriseGroupsCreate(t *testing.T) {
 
 		// Verify second group members (engineering-team has 3 members)
 		members2 := group2[FieldEnterpriseGroupMembers].([]any)
-		r.Len(members2, 3)
+		r.Len(members2, 1) // Single wrapper containing all members
+
+		// All members are in the first (and only) member wrapper
+		memberWrapper2 := members2[0].(map[string]any)
+		memberList2 := memberWrapper2[FieldEnterpriseGroupsMember].([]any)
+		r.Len(memberList2, 3)
 
 		// Members should be sorted by ID: memberID2 ("a"...), memberID1 ("b"...), memberID3 ("c"...)
-		member2First := members2[0].(map[string]any)
+		member2First := memberList2[0].(map[string]any)
 		r.Equal(memberID1, member2First[FieldEnterpriseGroupMemberID])
 		r.Equal("engineer@example.com", member2First[FieldEnterpriseGroupMemberEmail])
 		r.Equal("user", member2First[FieldEnterpriseGroupMemberKind])
 		r.Equal(createTime.Format(time.RFC3339), member2First[FieldEnterpriseGroupMemberAddedTime])
 
-		member2Second := members2[1].(map[string]any)
+		member2Second := memberList2[1].(map[string]any)
 		r.Equal(memberID2, member2Second[FieldEnterpriseGroupMemberID])
 		r.Equal("security@example.com", member2Second[FieldEnterpriseGroupMemberEmail])
 		r.Equal("user", member2Second[FieldEnterpriseGroupMemberKind])
 		r.Equal(createTime.Format(time.RFC3339), member2Second[FieldEnterpriseGroupMemberAddedTime])
 
-		member2Third := members2[2].(map[string]any)
+		member2Third := memberList2[2].(map[string]any)
 		r.Equal(memberID3, member2Third[FieldEnterpriseGroupMemberID])
 		r.Empty(member2Third[FieldEnterpriseGroupMemberEmail]) // Service account has no email
 		r.Equal("service_account", member2Third[FieldEnterpriseGroupMemberKind])
@@ -581,9 +617,13 @@ func TestEnterpriseGroupsResourceReadContext(t *testing.T) {
 		stateValue := cty.ObjectVal(map[string]cty.Value{
 			FieldEnterpriseGroupsGroups: cty.ListVal([]cty.Value{
 				cty.ObjectVal(map[string]cty.Value{
-					FieldEnterpriseGroupID:             cty.StringVal(groupID1),
-					FieldEnterpriseGroupOrganizationID: cty.StringVal(uuid.NewString()),
-					FieldEnterpriseGroupName:           cty.StringVal("test-group"),
+					FieldEnterpriseGroupsGroup: cty.ListVal([]cty.Value{
+						cty.ObjectVal(map[string]cty.Value{
+							FieldEnterpriseGroupID:             cty.StringVal(groupID1),
+							FieldEnterpriseGroupOrganizationID: cty.StringVal(uuid.NewString()),
+							FieldEnterpriseGroupName:           cty.StringVal("test-group"),
+						}),
+					}),
 				}),
 			}),
 		})
@@ -673,9 +713,13 @@ func TestEnterpriseGroupsResourceReadContext(t *testing.T) {
 		stateValue := cty.ObjectVal(map[string]cty.Value{
 			FieldEnterpriseGroupsGroups: cty.ListVal([]cty.Value{
 				cty.ObjectVal(map[string]cty.Value{
-					FieldEnterpriseGroupID:             cty.StringVal(groupID1), // Only this group is managed by us
-					FieldEnterpriseGroupOrganizationID: cty.StringVal(organizationID1),
-					FieldEnterpriseGroupName:           cty.StringVal("managed-group"),
+					FieldEnterpriseGroupsGroup: cty.ListVal([]cty.Value{
+						cty.ObjectVal(map[string]cty.Value{
+							FieldEnterpriseGroupID:             cty.StringVal(groupID1), // Only this group is managed by us
+							FieldEnterpriseGroupOrganizationID: cty.StringVal(organizationID1),
+							FieldEnterpriseGroupName:           cty.StringVal("managed-group"),
+						}),
+					}),
 				}),
 			}),
 		})
@@ -694,7 +738,9 @@ func TestEnterpriseGroupsResourceReadContext(t *testing.T) {
 		groups := data.Get(FieldEnterpriseGroupsGroups).([]any)
 		r.Len(groups, 1)
 
-		group := groups[0].(map[string]any)
+		groupWrapper := groups[0].(map[string]any)
+		groupList := groupWrapper[FieldEnterpriseGroupsGroup].([]any)
+		group := groupList[0].(map[string]any)
 		r.Equal(groupID1, group[FieldEnterpriseGroupID])
 		r.Equal("managed-group", group[FieldEnterpriseGroupName])
 		r.Equal(organizationID1, group[FieldEnterpriseGroupOrganizationID])
@@ -703,8 +749,11 @@ func TestEnterpriseGroupsResourceReadContext(t *testing.T) {
 
 		// Verify members are included
 		members := group[FieldEnterpriseGroupMembers].([]any)
-		r.Len(members, 1)
-		member := members[0].(map[string]any)
+		r.Len(members, 1) // Single wrapper
+		memberWrapper := members[0].(map[string]any)
+		memberList := memberWrapper[FieldEnterpriseGroupsMember].([]any)
+		r.Len(memberList, 1)
+		member := memberList[0].(map[string]any)
 		r.Equal(memberID1, member[FieldEnterpriseGroupMemberID])
 		r.Equal("test@example.com", member[FieldEnterpriseGroupMemberEmail])
 		r.Equal("user", member[FieldEnterpriseGroupMemberKind])
@@ -911,14 +960,22 @@ func TestEnterpriseGroupsResourceReadContext(t *testing.T) {
 		stateValue := cty.ObjectVal(map[string]cty.Value{
 			FieldEnterpriseGroupsGroups: cty.ListVal([]cty.Value{
 				cty.ObjectVal(map[string]cty.Value{
-					FieldEnterpriseGroupID:             cty.StringVal(groupID1),
-					FieldEnterpriseGroupOrganizationID: cty.StringVal(organizationID1),
-					FieldEnterpriseGroupName:           cty.StringVal("engineering-team"),
+					FieldEnterpriseGroupsGroup: cty.ListVal([]cty.Value{
+						cty.ObjectVal(map[string]cty.Value{
+							FieldEnterpriseGroupID:             cty.StringVal(groupID1),
+							FieldEnterpriseGroupOrganizationID: cty.StringVal(organizationID1),
+							FieldEnterpriseGroupName:           cty.StringVal("engineering-team"),
+						}),
+					}),
 				}),
 				cty.ObjectVal(map[string]cty.Value{
-					FieldEnterpriseGroupID:             cty.StringVal(groupID2),
-					FieldEnterpriseGroupOrganizationID: cty.StringVal(organizationID2),
-					FieldEnterpriseGroupName:           cty.StringVal("security-team"),
+					FieldEnterpriseGroupsGroup: cty.ListVal([]cty.Value{
+						cty.ObjectVal(map[string]cty.Value{
+							FieldEnterpriseGroupID:             cty.StringVal(groupID2),
+							FieldEnterpriseGroupOrganizationID: cty.StringVal(organizationID2),
+							FieldEnterpriseGroupName:           cty.StringVal("security-team"),
+						}),
+					}),
 				}),
 			}),
 		})
@@ -938,8 +995,12 @@ func TestEnterpriseGroupsResourceReadContext(t *testing.T) {
 		r.Len(groups, 2)
 
 		// Groups should be sorted by ID: groupID2 (aaaa), groupID1 (bbbb)
-		group1 := groups[0].(map[string]any)
-		group2 := groups[1].(map[string]any)
+		groupWrapper1 := groups[0].(map[string]any)
+		groupList1 := groupWrapper1[FieldEnterpriseGroupsGroup].([]any)
+		group1 := groupList1[0].(map[string]any)
+		groupWrapper2 := groups[1].(map[string]any)
+		groupList2 := groupWrapper2[FieldEnterpriseGroupsGroup].([]any)
+		group2 := groupList2[0].(map[string]any)
 
 		// First group (groupID2 - security-team)
 		r.Equal(groupID2, group1[FieldEnterpriseGroupID])
@@ -948,8 +1009,11 @@ func TestEnterpriseGroupsResourceReadContext(t *testing.T) {
 
 		// First group should have 1 member and 1 role binding
 		members1 := group1[FieldEnterpriseGroupMembers].([]any)
-		r.Len(members1, 1)
-		member1 := members1[0].(map[string]any)
+		r.Len(members1, 1) // Single wrapper
+		memberWrapper1 := members1[0].(map[string]any)
+		memberList1 := memberWrapper1[FieldEnterpriseGroupsMember].([]any)
+		r.Len(memberList1, 1)
+		member1 := memberList1[0].(map[string]any)
 		r.Equal(memberID2, member1[FieldEnterpriseGroupMemberID])
 		r.Equal("security@example.com", member1[FieldEnterpriseGroupMemberEmail])
 		r.Equal("user", member1[FieldEnterpriseGroupMemberKind])
@@ -968,12 +1032,17 @@ func TestEnterpriseGroupsResourceReadContext(t *testing.T) {
 
 		// Second group should have 3 members and 2 role bindings
 		members2 := group2[FieldEnterpriseGroupMembers].([]any)
-		r.Len(members2, 3)
+		r.Len(members2, 1) // Single wrapper containing all members
+
+		// All members are in the first (and only) member wrapper
+		memberWrapper2 := members2[0].(map[string]any)
+		memberList2 := memberWrapper2[FieldEnterpriseGroupsMember].([]any)
+		r.Len(memberList2, 3)
 
 		// Members should be sorted by ID: memberID2 (a), memberID1 (b), memberID3 (c)
-		member2A := members2[0].(map[string]any)
-		member2B := members2[1].(map[string]any)
-		member2C := members2[2].(map[string]any)
+		member2A := memberList2[0].(map[string]any)
+		member2B := memberList2[1].(map[string]any)
+		member2C := memberList2[2].(map[string]any)
 
 		r.Equal(memberID1, member2A[FieldEnterpriseGroupMemberID])
 		r.Equal("engineer@example.com", member2A[FieldEnterpriseGroupMemberEmail])
@@ -1045,14 +1114,22 @@ func TestResourceEnterpriseGroupsDelete(t *testing.T) {
 		stateValue := cty.ObjectVal(map[string]cty.Value{
 			FieldEnterpriseGroupsGroups: cty.ListVal([]cty.Value{
 				cty.ObjectVal(map[string]cty.Value{
-					FieldEnterpriseGroupID:             cty.StringVal(groupID1),
-					FieldEnterpriseGroupOrganizationID: cty.StringVal(organizationID1),
-					FieldEnterpriseGroupName:           cty.StringVal("engineering-team"),
+					FieldEnterpriseGroupsGroup: cty.ListVal([]cty.Value{
+						cty.ObjectVal(map[string]cty.Value{
+							FieldEnterpriseGroupID:             cty.StringVal(groupID1),
+							FieldEnterpriseGroupOrganizationID: cty.StringVal(organizationID1),
+							FieldEnterpriseGroupName:           cty.StringVal("engineering-team"),
+						}),
+					}),
 				}),
 				cty.ObjectVal(map[string]cty.Value{
-					FieldEnterpriseGroupID:             cty.StringVal(groupID2),
-					FieldEnterpriseGroupOrganizationID: cty.StringVal(organizationID2),
-					FieldEnterpriseGroupName:           cty.StringVal("security-team"),
+					FieldEnterpriseGroupsGroup: cty.ListVal([]cty.Value{
+						cty.ObjectVal(map[string]cty.Value{
+							FieldEnterpriseGroupID:             cty.StringVal(groupID2),
+							FieldEnterpriseGroupOrganizationID: cty.StringVal(organizationID2),
+							FieldEnterpriseGroupName:           cty.StringVal("security-team"),
+						}),
+					}),
 				}),
 			}),
 		})
@@ -1112,9 +1189,13 @@ func TestResourceEnterpriseGroupsDelete(t *testing.T) {
 		stateValue := cty.ObjectVal(map[string]cty.Value{
 			FieldEnterpriseGroupsGroups: cty.ListVal([]cty.Value{
 				cty.ObjectVal(map[string]cty.Value{
-					FieldEnterpriseGroupID:             cty.StringVal(""), // Empty ID
-					FieldEnterpriseGroupOrganizationID: cty.StringVal(organizationID1),
-					FieldEnterpriseGroupName:           cty.StringVal("engineering-team"),
+					FieldEnterpriseGroupsGroup: cty.ListVal([]cty.Value{
+						cty.ObjectVal(map[string]cty.Value{
+							FieldEnterpriseGroupID:             cty.StringVal(""), // Empty ID
+							FieldEnterpriseGroupOrganizationID: cty.StringVal(organizationID1),
+							FieldEnterpriseGroupName:           cty.StringVal("engineering-team"),
+						}),
+					}),
 				}),
 			}),
 		})
@@ -1147,9 +1228,13 @@ func TestResourceEnterpriseGroupsDelete(t *testing.T) {
 		stateValue := cty.ObjectVal(map[string]cty.Value{
 			FieldEnterpriseGroupsGroups: cty.ListVal([]cty.Value{
 				cty.ObjectVal(map[string]cty.Value{
-					FieldEnterpriseGroupID:             cty.StringVal(groupID1),
-					FieldEnterpriseGroupOrganizationID: cty.StringVal(""), // Empty organization ID
-					FieldEnterpriseGroupName:           cty.StringVal("engineering-team"),
+					FieldEnterpriseGroupsGroup: cty.ListVal([]cty.Value{
+						cty.ObjectVal(map[string]cty.Value{
+							FieldEnterpriseGroupID:             cty.StringVal(groupID1),
+							FieldEnterpriseGroupOrganizationID: cty.StringVal(""), // Empty organization ID
+							FieldEnterpriseGroupName:           cty.StringVal("engineering-team"),
+						}),
+					}),
 				}),
 			}),
 		})
@@ -1187,9 +1272,13 @@ func TestResourceEnterpriseGroupsDelete(t *testing.T) {
 		stateValue := cty.ObjectVal(map[string]cty.Value{
 			FieldEnterpriseGroupsGroups: cty.ListVal([]cty.Value{
 				cty.ObjectVal(map[string]cty.Value{
-					FieldEnterpriseGroupID:             cty.StringVal(groupID1),
-					FieldEnterpriseGroupOrganizationID: cty.StringVal(organizationID1),
-					FieldEnterpriseGroupName:           cty.StringVal("engineering-team"),
+					FieldEnterpriseGroupsGroup: cty.ListVal([]cty.Value{
+						cty.ObjectVal(map[string]cty.Value{
+							FieldEnterpriseGroupID:             cty.StringVal(groupID1),
+							FieldEnterpriseGroupOrganizationID: cty.StringVal(organizationID1),
+							FieldEnterpriseGroupName:           cty.StringVal("engineering-team"),
+						}),
+					}),
 				}),
 			}),
 		})
@@ -1240,76 +1329,89 @@ func TestResourceEnterpriseGroupsUpdate(t *testing.T) {
 		oldState := &terraform.InstanceState{
 			ID: enterpriseID,
 			Attributes: map[string]string{
-				FieldEnterpriseGroupsEnterpriseID: enterpriseID,
-				"groups.#":                        "1",
-				"groups.0.id":                     existingGroupID1,
-				"groups.0.name":                   "existing-group",
-				"groups.0.organization_id":        orgID1,
-				"groups.0.members.#":              "0",
-				"groups.0.role_bindings.#":        "0",
+				FieldEnterpriseGroupsEnterpriseID:  enterpriseID,
+				"groups.#":                         "1",
+				"groups.0.group.#":                 "1",
+				"groups.0.group.0.id":              existingGroupID1,
+				"groups.0.group.0.name":            "existing-group",
+				"groups.0.group.0.organization_id": orgID1,
+				"groups.0.group.0.members.#":       "0",
+				"groups.0.group.0.role_bindings.#": "0",
 			},
 		}
 
-		// Create diff that adds a new group
+		// Create diff that adds a new group with nested structure
 		diff := &terraform.InstanceDiff{
 			Attributes: map[string]*terraform.ResourceAttrDiff{
 				"groups.#": {
 					Old: "1",
 					New: "2",
 				},
-				"groups.1.name": {
-					Old: "",
-					New: "new-engineering-team",
-				},
-				"groups.1.organization_id": {
-					Old: "",
-					New: orgID2,
-				},
-				"groups.1.description": {
-					Old: "",
-					New: "New engineering team",
-				},
-				"groups.1.members.#": {
-					Old: "",
-					New: "2",
-				},
-				"groups.1.members.0.kind": {
-					Old: "",
-					New: "user",
-				},
-				"groups.1.members.0.id": {
-					Old: "",
-					New: memberID1,
-				},
-				"groups.1.members.1.kind": {
-					Old: "",
-					New: "service_account",
-				},
-				"groups.1.members.1.id": {
-					Old: "",
-					New: memberID2,
-				},
-				"groups.1.role_bindings.#": {
+				"groups.1.group.#": {
 					Old: "",
 					New: "1",
 				},
-				"groups.1.role_bindings.0.name": {
+				"groups.1.group.0.name": {
 					Old: "",
-					New: "engineering-viewer",
+					New: "new-engineering-team",
 				},
-				"groups.1.role_bindings.0.role_id": {
+				"groups.1.group.0.organization_id": {
 					Old: "",
-					New: roleID,
+					New: orgID2,
 				},
-				"groups.1.role_bindings.0.scopes.#": {
+				"groups.1.group.0.description": {
+					Old: "",
+					New: "New engineering team",
+				},
+				"groups.1.group.0.members.#": {
 					Old: "",
 					New: "2",
 				},
-				"groups.1.role_bindings.0.scopes.0.cluster": {
+				"groups.1.group.0.members.0.member.#": {
+					Old: "",
+					New: "1",
+				},
+				"groups.1.group.0.members.0.member.0.kind": {
+					Old: "",
+					New: "user",
+				},
+				"groups.1.group.0.members.0.member.0.id": {
+					Old: "",
+					New: memberID1,
+				},
+				"groups.1.group.0.members.1.member.#": {
+					Old: "",
+					New: "1",
+				},
+				"groups.1.group.0.members.1.member.0.kind": {
+					Old: "",
+					New: "service_account",
+				},
+				"groups.1.group.0.members.1.member.0.id": {
+					Old: "",
+					New: memberID2,
+				},
+				"groups.1.group.0.role_bindings.#": {
+					Old: "",
+					New: "1",
+				},
+				"groups.1.group.0.role_bindings.0.name": {
+					Old: "",
+					New: "engineering-viewer",
+				},
+				"groups.1.group.0.role_bindings.0.role_id": {
+					Old: "",
+					New: roleID,
+				},
+				"groups.1.group.0.role_bindings.0.scopes.#": {
+					Old: "",
+					New: "2",
+				},
+				"groups.1.group.0.role_bindings.0.scopes.0.cluster": {
 					Old: "",
 					New: clusterID,
 				},
-				"groups.1.role_bindings.0.scopes.1.organization": {
+				"groups.1.group.0.role_bindings.0.scopes.1.organization": {
 					Old: "",
 					New: orgID2,
 				},
@@ -1463,27 +1565,30 @@ func TestResourceEnterpriseGroupsUpdate(t *testing.T) {
 		oldState := &terraform.InstanceState{
 			ID: enterpriseID,
 			Attributes: map[string]string{
-				FieldEnterpriseGroupsEnterpriseID:                enterpriseID,
-				"groups.#":                                       "2",
-				"groups.0.id":                                    existingGroupID1,
-				"groups.0.name":                                  "group-to-keep",
-				"groups.0.organization_id":                       orgID1,
-				"groups.0.description":                           "Old description",
-				"groups.0.members.#":                             "1",
-				"groups.0.members.0.kind":                        "user",
-				"groups.0.members.0.id":                          "old-member-id",
-				"groups.0.role_bindings.#":                       "1",
-				"groups.0.role_bindings.0.name":                  "old-role-binding",
-				"groups.0.role_bindings.0.role_id":               "old-role-id",
-				"groups.0.role_bindings.0.scopes.#":              "2",
-				"groups.0.role_bindings.0.scopes.0.cluster":      "old-cluster-id",
-				"groups.0.role_bindings.0.scopes.1.organization": orgID1,
-				"groups.1.id":                                    existingGroupID2,
-				"groups.1.name":                                  "group-to-delete",
-				"groups.1.organization_id":                       orgID2,
-				"groups.1.description":                           "Will be deleted",
-				"groups.1.members.#":                             "0",
-				"groups.1.role_bindings.#":                       "0",
+				FieldEnterpriseGroupsEnterpriseID:                        enterpriseID,
+				"groups.#":                                               "2",
+				"groups.0.group.#":                                       "1",
+				"groups.0.group.0.id":                                    existingGroupID1,
+				"groups.0.group.0.name":                                  "group-to-keep",
+				"groups.0.group.0.organization_id":                       orgID1,
+				"groups.0.group.0.description":                           "Old description",
+				"groups.0.group.0.members.#":                             "1",
+				"groups.0.group.0.members.0.member.#":                    "1",
+				"groups.0.group.0.members.0.member.0.kind":               "user",
+				"groups.0.group.0.members.0.member.0.id":                 "old-member-id",
+				"groups.0.group.0.role_bindings.#":                       "1",
+				"groups.0.group.0.role_bindings.0.name":                  "old-role-binding",
+				"groups.0.group.0.role_bindings.0.role_id":               "old-role-id",
+				"groups.0.group.0.role_bindings.0.scopes.#":              "2",
+				"groups.0.group.0.role_bindings.0.scopes.0.cluster":      "old-cluster-id",
+				"groups.0.group.0.role_bindings.0.scopes.1.organization": orgID1,
+				"groups.1.group.#":                                       "1",
+				"groups.1.group.0.id":                                    existingGroupID2,
+				"groups.1.group.0.name":                                  "group-to-delete",
+				"groups.1.group.0.organization_id":                       orgID2,
+				"groups.1.group.0.description":                           "Will be deleted",
+				"groups.1.group.0.members.#":                             "0",
+				"groups.1.group.0.role_bindings.#":                       "0",
 			},
 		}
 
@@ -1494,66 +1599,71 @@ func TestResourceEnterpriseGroupsUpdate(t *testing.T) {
 					Old: "2",
 					New: "1",
 				},
-				"groups.0.description": {
+				"groups.0.group.0.description": {
 					Old: "Old description",
 					New: "Updated description",
 				},
-				"groups.0.members.0.id": {
+				"groups.0.group.0.members.0.member.0.id": {
 					Old: "old-member-id",
 					New: "new-member-id",
 				},
-				"groups.0.role_bindings.0.name": {
+				"groups.0.group.0.role_bindings.0.name": {
 					Old: "old-role-binding",
 					New: "updated-role-binding",
 				},
-				"groups.0.role_bindings.0.role_id": {
+				"groups.0.group.0.role_bindings.0.role_id": {
 					Old: "old-role-id",
 					New: "new-role-id",
 				},
-				"groups.0.role_bindings.0.scopes.#": {
+				"groups.0.group.0.role_bindings.0.scopes.#": {
 					Old: "2",
 					New: "1",
 				},
-				"groups.0.role_bindings.0.scopes.0.cluster": {
+				"groups.0.group.0.role_bindings.0.scopes.0.cluster": {
 					Old:        "old-cluster-id",
 					New:        "",
 					NewRemoved: true,
 				},
-				"groups.0.role_bindings.0.scopes.0.organization": {
+				"groups.0.group.0.role_bindings.0.scopes.0.organization": {
 					Old: "",
 					New: orgID1,
 				},
-				"groups.0.role_bindings.0.scopes.1.organization": {
+				"groups.0.group.0.role_bindings.0.scopes.1.organization": {
 					Old:        orgID1,
 					New:        "",
 					NewRemoved: true,
 				},
-				"groups.1.id": {
+				"groups.1.group.#": {
+					Old:        "1",
+					New:        "",
+					NewRemoved: true,
+				},
+				"groups.1.group.0.id": {
 					Old:        existingGroupID2,
 					New:        "",
 					NewRemoved: true,
 				},
-				"groups.1.name": {
+				"groups.1.group.0.name": {
 					Old:        "group-to-delete",
 					New:        "",
 					NewRemoved: true,
 				},
-				"groups.1.organization_id": {
+				"groups.1.group.0.organization_id": {
 					Old:        orgID2,
 					New:        "",
 					NewRemoved: true,
 				},
-				"groups.1.description": {
+				"groups.1.group.0.description": {
 					Old:        "Will be deleted",
 					New:        "",
 					NewRemoved: true,
 				},
-				"groups.1.members.#": {
+				"groups.1.group.0.members.#": {
 					Old:        "0",
 					New:        "",
 					NewRemoved: true,
 				},
-				"groups.1.role_bindings.#": {
+				"groups.1.group.0.role_bindings.#": {
 					Old:        "0",
 					New:        "",
 					NewRemoved: true,
@@ -1695,104 +1805,112 @@ func TestResourceEnterpriseGroupsUpdate(t *testing.T) {
 		oldState := &terraform.InstanceState{
 			ID: enterpriseID,
 			Attributes: map[string]string{
-				FieldEnterpriseGroupsEnterpriseID:                enterpriseID,
-				"groups.#":                                       "1",
-				"groups.0.id":                                    existingGroupID1,
-				"groups.0.name":                                  "old-name",
-				"groups.0.organization_id":                       orgID1,
-				"groups.0.description":                           "Old description",
-				"groups.0.members.#":                             "2",
-				"groups.0.members.0.kind":                        "service_account",
-				"groups.0.members.0.id":                          "old-service-account-id",
-				"groups.0.members.1.kind":                        "user",
-				"groups.0.members.1.id":                          "old-user-id",
-				"groups.0.role_bindings.#":                       "2",
-				"groups.0.role_bindings.0.name":                  "first-role-binding",
-				"groups.0.role_bindings.0.role_id":               "first-role-id",
-				"groups.0.role_bindings.0.scopes.#":              "1",
-				"groups.0.role_bindings.0.scopes.0.organization": orgID1,
-				"groups.0.role_bindings.1.name":                  "second-role-binding",
-				"groups.0.role_bindings.1.role_id":               "second-role-id",
-				"groups.0.role_bindings.1.scopes.#":              "2",
-				"groups.0.role_bindings.1.scopes.0.cluster":      "cluster-id-1",
-				"groups.0.role_bindings.1.scopes.1.organization": orgID1,
+				FieldEnterpriseGroupsEnterpriseID:                        enterpriseID,
+				"groups.#":                                               "1",
+				"groups.0.group.#":                                       "1",
+				"groups.0.group.0.id":                                    existingGroupID1,
+				"groups.0.group.0.name":                                  "old-name",
+				"groups.0.group.0.organization_id":                       orgID1,
+				"groups.0.group.0.description":                           "Old description",
+				"groups.0.group.0.members.#":                             "2",
+				"groups.0.group.0.members.0.member.#":                    "1",
+				"groups.0.group.0.members.0.member.0.kind":               "service_account",
+				"groups.0.group.0.members.0.member.0.id":                 "old-service-account-id",
+				"groups.0.group.0.members.1.member.#":                    "1",
+				"groups.0.group.0.members.1.member.0.kind":               "user",
+				"groups.0.group.0.members.1.member.0.id":                 "old-user-id",
+				"groups.0.group.0.role_bindings.#":                       "2",
+				"groups.0.group.0.role_bindings.0.name":                  "first-role-binding",
+				"groups.0.group.0.role_bindings.0.role_id":               "first-role-id",
+				"groups.0.group.0.role_bindings.0.scopes.#":              "1",
+				"groups.0.group.0.role_bindings.0.scopes.0.organization": orgID1,
+				"groups.0.group.0.role_bindings.1.name":                  "second-role-binding",
+				"groups.0.group.0.role_bindings.1.role_id":               "second-role-id",
+				"groups.0.group.0.role_bindings.1.scopes.#":              "2",
+				"groups.0.group.0.role_bindings.1.scopes.0.cluster":      "cluster-id-1",
+				"groups.0.group.0.role_bindings.1.scopes.1.organization": orgID1,
 			},
 		}
 
 		// Create diff that updates the group
 		diff := &terraform.InstanceDiff{
 			Attributes: map[string]*terraform.ResourceAttrDiff{
-				"groups.0.name": {
+				"groups.0.group.0.name": {
 					Old: "old-name",
 					New: "updated-name",
 				},
-				"groups.0.description": {
+				"groups.0.group.0.description": {
 					Old: "Old description",
 					New: "Updated description",
 				},
-				"groups.0.members.#": {
+				"groups.0.group.0.members.#": {
 					Old: "2",
 					New: "1",
 				},
-				"groups.0.members.0.kind": {
+				"groups.0.group.0.members.0.member.0.kind": {
 					Old: "service_account",
 					New: "user",
 				},
-				"groups.0.members.0.id": {
+				"groups.0.group.0.members.0.member.0.id": {
 					Old: "old-service-account-id",
 					New: memberID,
 				},
-				"groups.0.members.1.kind": {
+				"groups.0.group.0.members.1.member.#": {
+					Old:        "1",
+					New:        "",
+					NewRemoved: true,
+				},
+				"groups.0.group.0.members.1.member.0.kind": {
 					Old:        "user",
 					New:        "",
 					NewRemoved: true,
 				},
-				"groups.0.members.1.id": {
+				"groups.0.group.0.members.1.member.0.id": {
 					Old:        "old-user-id",
 					New:        "",
 					NewRemoved: true,
 				},
-				"groups.0.role_bindings.#": {
+				"groups.0.group.0.role_bindings.#": {
 					Old: "2",
 					New: "1",
 				},
-				"groups.0.role_bindings.0.name": {
+				"groups.0.group.0.role_bindings.0.name": {
 					Old: "first-role-binding",
 					New: "updated-role-binding",
 				},
-				"groups.0.role_bindings.0.role_id": {
+				"groups.0.group.0.role_bindings.0.role_id": {
 					Old: "first-role-id",
 					New: roleID,
 				},
-				"groups.0.role_bindings.0.scopes.#": {
+				"groups.0.group.0.role_bindings.0.scopes.#": {
 					Old: "1",
 					New: "1",
 				},
-				"groups.0.role_bindings.0.scopes.0.organization": {
+				"groups.0.group.0.role_bindings.0.scopes.0.organization": {
 					Old: orgID1,
 					New: orgScopeID,
 				},
-				"groups.0.role_bindings.1.name": {
+				"groups.0.group.0.role_bindings.1.name": {
 					Old:        "second-role-binding",
 					New:        "",
 					NewRemoved: true,
 				},
-				"groups.0.role_bindings.1.role_id": {
+				"groups.0.group.0.role_bindings.1.role_id": {
 					Old:        "second-role-id",
 					New:        "",
 					NewRemoved: true,
 				},
-				"groups.0.role_bindings.1.scopes.#": {
+				"groups.0.group.0.role_bindings.1.scopes.#": {
 					Old:        "2",
 					New:        "",
 					NewRemoved: true,
 				},
-				"groups.0.role_bindings.1.scopes.0.cluster": {
+				"groups.0.group.0.role_bindings.1.scopes.0.cluster": {
 					Old:        "cluster-id-1",
 					New:        "",
 					NewRemoved: true,
 				},
-				"groups.0.role_bindings.1.scopes.1.organization": {
+				"groups.0.group.0.role_bindings.1.scopes.1.organization": {
 					Old:        orgID1,
 					New:        "",
 					NewRemoved: true,
@@ -1917,20 +2035,21 @@ func TestResourceEnterpriseGroupsUpdate(t *testing.T) {
 		oldState := &terraform.InstanceState{
 			ID: enterpriseID,
 			Attributes: map[string]string{
-				FieldEnterpriseGroupsEnterpriseID: enterpriseID,
-				"groups.#":                        "1",
-				"groups.0.id":                     existingGroupID1,
-				"groups.0.name":                   "old-name",
-				"groups.0.organization_id":        orgID1,
-				"groups.0.members.#":              "0",
-				"groups.0.role_bindings.#":        "0",
+				FieldEnterpriseGroupsEnterpriseID:  enterpriseID,
+				"groups.#":                         "1",
+				"groups.0.group.#":                 "1",
+				"groups.0.group.0.id":              existingGroupID1,
+				"groups.0.group.0.name":            "old-name",
+				"groups.0.group.0.organization_id": orgID1,
+				"groups.0.group.0.members.#":       "0",
+				"groups.0.group.0.role_bindings.#": "0",
 			},
 		}
 
 		// Create diff that updates the group name
 		diff := &terraform.InstanceDiff{
 			Attributes: map[string]*terraform.ResourceAttrDiff{
-				"groups.0.name": {
+				"groups.0.group.0.name": {
 					Old: "old-name",
 					New: "updated-name",
 				},
