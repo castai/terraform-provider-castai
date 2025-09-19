@@ -1257,6 +1257,7 @@ func getGroupChanges(data *schema.ResourceData) (*EnterpriseGroupsChanges, error
 		group := groupData.(map[string]any)
 		if groupID, ok := group[FieldEnterpriseGroupID].(string); ok && groupID != "" {
 			oldGroupIDs = append(oldGroupIDs, groupID)
+			oldGroupIDToGroup[groupID] = group
 		}
 	}
 
@@ -1264,6 +1265,7 @@ func getGroupChanges(data *schema.ResourceData) (*EnterpriseGroupsChanges, error
 		group := groupData.(map[string]any)
 		if groupID, ok := group[FieldEnterpriseGroupID].(string); ok && groupID != "" {
 			newGroupIDs = append(newGroupIDs, groupID)
+			newGroupIDToGroup[groupID] = group
 		} else {
 			// New group without ID - needs to be created
 			createRequest, err := buildCreateRequestForGroup(group)

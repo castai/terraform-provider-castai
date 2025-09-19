@@ -1,9 +1,11 @@
 package castai
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"testing"
 	"time"
@@ -11,6 +13,7 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/google/uuid"
 	"github.com/hashicorp/go-cty/cty"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/require"
@@ -18,6 +21,21 @@ import (
 	"github.com/castai/terraform-provider-castai/castai/sdk/organization_management"
 	mockOrganizationManagement "github.com/castai/terraform-provider-castai/castai/sdk/organization_management/mock"
 )
+
+// createRequestMatcher creates a custom matcher for BatchCreateEnterpriseGroupsRequest
+func createRequestMatcher(expected organization_management.BatchCreateEnterpriseGroupsRequest) gomock.Matcher {
+	return gomock.AssignableToTypeOf(expected)
+}
+
+// updateRequestMatcher creates a custom matcher for BatchUpdateEnterpriseGroupsRequest
+func updateRequestMatcher(expected organization_management.BatchUpdateEnterpriseGroupsRequest) gomock.Matcher {
+	return gomock.AssignableToTypeOf(expected)
+}
+
+// deleteRequestMatcher creates a custom matcher for BatchDeleteEnterpriseGroupsRequest
+func deleteRequestMatcher(expected organization_management.BatchDeleteEnterpriseGroupsRequest) gomock.Matcher {
+	return gomock.AssignableToTypeOf(expected)
+}
 
 func TestResourceEnterpriseGroupsCreate(t *testing.T) {
 	t.Parallel()
@@ -1205,5 +1223,623 @@ func TestResourceEnterpriseGroupsDelete(t *testing.T) {
 		r.Contains(result[0].Summary, "calling batch delete enterprise groups")
 		r.Contains(result[0].Summary, "network error")
 		r.NotEmpty(data.Id(), "Resource ID should not be cleared when delete fails")
+	})
+}
+
+func TestResourceEnterpriseGroupsUpdate(t *testing.T) {
+	t.Parallel()
+
+	enterpriseID := uuid.NewString()
+	orgID1 := uuid.NewString()
+	orgID2 := uuid.NewString()
+	existingGroupID1 := uuid.NewString()
+	existingGroupID2 := uuid.NewString()
+	ctx := context.Background()
+
+	t.Run("when groups are added then call create API with exact parameters", func(t *testing.T) {
+		r := require.New(t)
+		ctrl := gomock.NewController(t)
+		mockClient := mockOrganizationManagement.NewMockClientWithResponsesInterface(ctrl)
+
+		provider := &ProviderConfig{
+			organizationManagementClient: mockClient,
+		}
+
+		memberID1 := uuid.NewString()
+		memberID2 := uuid.NewString()
+		roleID := uuid.NewString()
+		clusterID := uuid.NewString()
+		newGroupID := uuid.NewString()
+		createTime := time.Now()
+
+		resource := resourceEnterpriseGroups()
+
+		// Create old state with one group
+		oldState := &terraform.InstanceState{
+			ID: enterpriseID,
+			Attributes: map[string]string{
+				FieldEnterpriseGroupsEnterpriseID: enterpriseID,
+				"groups.#":                        "1",
+				"groups.0.id":                     existingGroupID1,
+				"groups.0.name":                   "existing-group",
+				"groups.0.organization_id":        orgID1,
+				"groups.0.members.#":              "0",
+				"groups.0.role_bindings.#":        "0",
+			},
+		}
+
+		// Create diff that adds a new group
+		diff := &terraform.InstanceDiff{
+			Attributes: map[string]*terraform.ResourceAttrDiff{
+				"groups.#": {
+					Old: "1",
+					New: "2",
+				},
+				"groups.1.name": {
+					Old: "",
+					New: "new-engineering-team",
+				},
+				"groups.1.organization_id": {
+					Old: "",
+					New: orgID2,
+				},
+				"groups.1.description": {
+					Old: "",
+					New: "New engineering team",
+				},
+				"groups.1.members.#": {
+					Old: "",
+					New: "2",
+				},
+				"groups.1.members.0.kind": {
+					Old: "",
+					New: "user",
+				},
+				"groups.1.members.0.id": {
+					Old: "",
+					New: memberID1,
+				},
+				"groups.1.members.1.kind": {
+					Old: "",
+					New: "service_account",
+				},
+				"groups.1.members.1.id": {
+					Old: "",
+					New: memberID2,
+				},
+				"groups.1.role_bindings.#": {
+					Old: "",
+					New: "1",
+				},
+				"groups.1.role_bindings.0.name": {
+					Old: "",
+					New: "engineering-viewer",
+				},
+				"groups.1.role_bindings.0.role_id": {
+					Old: "",
+					New: roleID,
+				},
+				"groups.1.role_bindings.0.scopes.#": {
+					Old: "",
+					New: "2",
+				},
+				"groups.1.role_bindings.0.scopes.0.cluster": {
+					Old: "",
+					New: clusterID,
+				},
+				"groups.1.role_bindings.0.scopes.1.organization": {
+					Old: "",
+					New: orgID2,
+				},
+			},
+		}
+
+		// Use the schemaMap.Data method you suggested
+		schemaMap := make(map[string]*schema.Schema)
+		for k, v := range resource.Schema {
+			schemaMap[k] = v
+		}
+		data, err := schema.InternalMap(schemaMap).Data(oldState, diff)
+		r.NoError(err)
+
+		// Expected create request for new group
+		expectedCreateRequest := organization_management.BatchCreateEnterpriseGroupsRequest{
+			EnterpriseId: enterpriseID,
+			Requests: []organization_management.BatchCreateEnterpriseGroupsRequestGroup{
+				{
+					Name:           "new-engineering-team",
+					OrganizationId: orgID2,
+					Description:    lo.ToPtr("New engineering team"),
+					Members: []organization_management.BatchCreateEnterpriseGroupsRequestMember{
+						{
+							Kind: lo.ToPtr(organization_management.BatchCreateEnterpriseGroupsRequestMemberKindSUBJECTKINDUSER),
+							Id:   lo.ToPtr(memberID1),
+						},
+						{
+							Kind: lo.ToPtr(organization_management.BatchCreateEnterpriseGroupsRequestMemberKindSUBJECTKINDSERVICEACCOUNT),
+							Id:   lo.ToPtr(memberID2),
+						},
+					},
+					RoleBindings: &[]organization_management.BatchCreateEnterpriseGroupsRequestRoleBinding{
+						{
+							Name:   "engineering-viewer",
+							RoleId: roleID,
+							Scopes: []organization_management.Scope{
+								{
+									Cluster: &organization_management.ClusterScope{
+										Id: clusterID,
+									},
+								},
+								{
+									Organization: &organization_management.OrganizationScope{
+										Id: orgID2,
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		}
+
+		// Mock create API call with exact parameters
+		mockClient.EXPECT().
+			EnterpriseAPIBatchCreateEnterpriseGroupsWithResponse(gomock.Any(), enterpriseID, expectedCreateRequest).
+			Return(&organization_management.EnterpriseAPIBatchCreateEnterpriseGroupsResponse{
+				HTTPResponse: &http.Response{StatusCode: 200},
+				JSON200: &organization_management.BatchCreateEnterpriseGroupsResponse{
+					Groups: &[]organization_management.BatchCreateEnterpriseGroupsResponseGroup{
+						{
+							Id:             lo.ToPtr(newGroupID),
+							Name:           lo.ToPtr("new-engineering-team"),
+							OrganizationId: lo.ToPtr(orgID2),
+							Description:    lo.ToPtr("New engineering team"),
+							CreateTime:     lo.ToPtr(createTime),
+							ManagedBy:      lo.ToPtr("terraform"),
+						},
+					},
+				},
+			}, nil)
+
+		// Expected update request for existing group
+		expectedUpdateRequest := organization_management.BatchUpdateEnterpriseGroupsRequest{
+			EnterpriseId: enterpriseID,
+			Requests: []organization_management.BatchUpdateEnterpriseGroupsRequestUpdateGroupRequest{
+				{
+					Id:             existingGroupID1,
+					Name:           "existing-group",
+					OrganizationId: orgID1,
+					Description:    "",
+					Members:        nil,
+					RoleBindings:   nil,
+				},
+			},
+		}
+
+		// Mock update API call with exact parameters and capture actual request
+		mockClient.EXPECT().
+			EnterpriseAPIBatchUpdateEnterpriseGroupsWithResponse(gomock.Any(), gomock.Eq(enterpriseID), expectedUpdateRequest).
+			Return(&organization_management.EnterpriseAPIBatchUpdateEnterpriseGroupsResponse{
+				HTTPResponse: &http.Response{StatusCode: 200},
+			}, nil)
+
+		// Mock read calls at the end
+		mockClient.EXPECT().
+			EnterpriseAPIListGroupsWithResponse(gomock.Any(), enterpriseID, gomock.Any()).
+			Return(&organization_management.EnterpriseAPIListGroupsResponse{
+				HTTPResponse: &http.Response{StatusCode: 200},
+				JSON200: &organization_management.ListGroupsResponse{
+					Items: &[]organization_management.ListGroupsResponseGroup{
+						{
+							Id:             &existingGroupID1,
+							Name:           lo.ToPtr("existing-group"),
+							OrganizationId: &orgID1,
+						},
+						{
+							Id:             &newGroupID,
+							Name:           lo.ToPtr("new-engineering-team"),
+							OrganizationId: &orgID2,
+							Description:    lo.ToPtr("New engineering team"),
+							CreateTime:     lo.ToPtr(createTime),
+							ManagedBy:      lo.ToPtr("terraform"),
+						},
+					},
+				},
+			}, nil)
+
+		mockClient.EXPECT().
+			EnterpriseAPIListRoleBindingsWithResponse(gomock.Any(), enterpriseID, gomock.Any()).
+			Return(&organization_management.EnterpriseAPIListRoleBindingsResponse{
+				HTTPResponse: &http.Response{StatusCode: 200},
+				JSON200:      &organization_management.ListRoleBindingsResponse{Items: &[]organization_management.RoleBinding{}},
+			}, nil)
+
+		// Execute update
+		result := resource.UpdateContext(ctx, data, provider)
+
+		// Verify no errors
+		r.False(result.HasError(), "Update should succeed when adding groups")
+		if result.HasError() {
+			for _, diag := range result {
+				t.Logf("Error: %s - %s", diag.Summary, diag.Detail)
+			}
+		}
+	})
+
+	t.Run("when groups are deleted then call delete API with exact parameters", func(t *testing.T) {
+		r := require.New(t)
+		ctrl := gomock.NewController(t)
+		mockClient := mockOrganizationManagement.NewMockClientWithResponsesInterface(ctrl)
+
+		provider := &ProviderConfig{
+			organizationManagementClient: mockClient,
+		}
+
+		resource := resourceEnterpriseGroups()
+
+		// Create old state with two groups
+		oldState := &terraform.InstanceState{
+			ID: enterpriseID,
+			Attributes: map[string]string{
+				FieldEnterpriseGroupsEnterpriseID: enterpriseID,
+				"groups.#":                        "2",
+				"groups.0.id":                     existingGroupID1,
+				"groups.0.name":                   "group-to-keep",
+				"groups.0.organization_id":        orgID1,
+				"groups.0.members.#":              "0",
+				"groups.0.role_bindings.#":        "0",
+				"groups.1.id":                     existingGroupID2,
+				"groups.1.name":                   "group-to-delete",
+				"groups.1.organization_id":        orgID2,
+				"groups.1.members.#":              "0",
+				"groups.1.role_bindings.#":        "0",
+			},
+		}
+
+		// Create diff that removes the second group
+		diff := &terraform.InstanceDiff{
+			Attributes: map[string]*terraform.ResourceAttrDiff{
+				"groups.#": {
+					Old: "2",
+					New: "1",
+				},
+				"groups.1.id": {
+					Old:        existingGroupID2,
+					New:        "",
+					NewRemoved: true,
+				},
+				"groups.1.name": {
+					Old:        "group-to-delete",
+					New:        "",
+					NewRemoved: true,
+				},
+				"groups.1.organization_id": {
+					Old:        orgID2,
+					New:        "",
+					NewRemoved: true,
+				},
+				"groups.1.members.#": {
+					Old:        "0",
+					New:        "",
+					NewRemoved: true,
+				},
+				"groups.1.role_bindings.#": {
+					Old:        "0",
+					New:        "",
+					NewRemoved: true,
+				},
+			},
+		}
+
+		schemaMap := make(map[string]*schema.Schema)
+		for k, v := range resource.Schema {
+			schemaMap[k] = v
+		}
+		data, err := schema.InternalMap(schemaMap).Data(oldState, diff)
+		r.NoError(err)
+
+		// Expected delete request
+		expectedDeleteRequest := organization_management.BatchDeleteEnterpriseGroupsRequest{
+			EnterpriseId: enterpriseID,
+			Requests: []organization_management.BatchDeleteEnterpriseGroupsRequestDeleteGroupRequest{
+				{
+					Id:             existingGroupID2,
+					OrganizationId: orgID2,
+				},
+			},
+		}
+
+		// Expected update request for remaining group
+		expectedUpdateRequest := organization_management.BatchUpdateEnterpriseGroupsRequest{
+			EnterpriseId: enterpriseID,
+			Requests: []organization_management.BatchUpdateEnterpriseGroupsRequestUpdateGroupRequest{
+				{
+					Id:             existingGroupID1,
+					Name:           "group-to-keep",
+					OrganizationId: orgID1,
+					Description:    "",
+					Members:        nil,
+					RoleBindings:   nil,
+				},
+			},
+		}
+
+		// Mock delete API call with exact parameters
+		mockClient.EXPECT().
+			EnterpriseAPIBatchDeleteEnterpriseGroupsWithResponse(gomock.Any(), enterpriseID, expectedDeleteRequest).
+			Return(&organization_management.EnterpriseAPIBatchDeleteEnterpriseGroupsResponse{
+				HTTPResponse: &http.Response{StatusCode: 200},
+			}, nil)
+
+		// Mock update API call with exact parameters
+		mockClient.EXPECT().
+			EnterpriseAPIBatchUpdateEnterpriseGroupsWithResponse(gomock.Any(), enterpriseID, expectedUpdateRequest).
+			Return(&organization_management.EnterpriseAPIBatchUpdateEnterpriseGroupsResponse{
+				HTTPResponse: &http.Response{StatusCode: 200},
+			}, nil)
+
+		// Mock read calls at the end
+		mockClient.EXPECT().
+			EnterpriseAPIListGroupsWithResponse(gomock.Any(), enterpriseID, gomock.Any()).
+			Return(&organization_management.EnterpriseAPIListGroupsResponse{
+				HTTPResponse: &http.Response{StatusCode: 200},
+				JSON200: &organization_management.ListGroupsResponse{
+					Items: &[]organization_management.ListGroupsResponseGroup{
+						{
+							Id:             &existingGroupID1,
+							Name:           lo.ToPtr("group-to-keep"),
+							OrganizationId: &orgID1,
+						},
+					},
+				},
+			}, nil)
+
+		mockClient.EXPECT().
+			EnterpriseAPIListRoleBindingsWithResponse(gomock.Any(), enterpriseID, gomock.Any()).
+			Return(&organization_management.EnterpriseAPIListRoleBindingsResponse{
+				HTTPResponse: &http.Response{StatusCode: 200},
+				JSON200:      &organization_management.ListRoleBindingsResponse{Items: &[]organization_management.RoleBinding{}},
+			}, nil)
+
+		// Execute update
+		result := resource.UpdateContext(ctx, data, provider)
+
+		// Verify no errors
+		r.False(result.HasError(), "Update should succeed when deleting groups")
+		if result.HasError() {
+			for _, diag := range result {
+				t.Logf("Error: %s - %s", diag.Summary, diag.Detail)
+			}
+		}
+	})
+
+	t.Run("when groups are updated then call update API with exact parameters", func(t *testing.T) {
+		r := require.New(t)
+		ctrl := gomock.NewController(t)
+		mockClient := mockOrganizationManagement.NewMockClientWithResponsesInterface(ctrl)
+
+		provider := &ProviderConfig{
+			organizationManagementClient: mockClient,
+		}
+
+		memberID := uuid.NewString()
+		roleID := uuid.NewString()
+		orgScopeID := uuid.NewString()
+
+		resource := resourceEnterpriseGroups()
+
+		// Create old state with one group
+		oldState := &terraform.InstanceState{
+			ID: enterpriseID,
+			Attributes: map[string]string{
+				FieldEnterpriseGroupsEnterpriseID: enterpriseID,
+				"groups.#":                        "1",
+				"groups.0.id":                     existingGroupID1,
+				"groups.0.name":                   "old-name",
+				"groups.0.organization_id":        orgID1,
+				"groups.0.description":            "Old description",
+				"groups.0.members.#":              "0",
+				"groups.0.role_bindings.#":        "0",
+			},
+		}
+
+		// Create diff that updates the group
+		diff := &terraform.InstanceDiff{
+			Attributes: map[string]*terraform.ResourceAttrDiff{
+				"groups.0.name": {
+					Old: "old-name",
+					New: "updated-name",
+				},
+				"groups.0.description": {
+					Old: "Old description",
+					New: "Updated description",
+				},
+				"groups.0.members.#": {
+					Old: "0",
+					New: "1",
+				},
+				"groups.0.members.0.kind": {
+					Old: "",
+					New: "user",
+				},
+				"groups.0.members.0.id": {
+					Old: "",
+					New: memberID,
+				},
+				"groups.0.role_bindings.#": {
+					Old: "0",
+					New: "1",
+				},
+				"groups.0.role_bindings.0.name": {
+					Old: "",
+					New: "updated-role-binding",
+				},
+				"groups.0.role_bindings.0.role_id": {
+					Old: "",
+					New: roleID,
+				},
+				"groups.0.role_bindings.0.scopes.#": {
+					Old: "",
+					New: "1",
+				},
+				"groups.0.role_bindings.0.scopes.0.organization": {
+					Old: "",
+					New: orgScopeID,
+				},
+			},
+		}
+
+		schemaMap := make(map[string]*schema.Schema)
+		for k, v := range resource.Schema {
+			schemaMap[k] = v
+		}
+		data, err := schema.InternalMap(schemaMap).Data(oldState, diff)
+		r.NoError(err)
+
+		// Expected update request
+		expectedUpdateRequest := organization_management.BatchUpdateEnterpriseGroupsRequest{
+			EnterpriseId: enterpriseID,
+			Requests: []organization_management.BatchUpdateEnterpriseGroupsRequestUpdateGroupRequest{
+				{
+					Id:             existingGroupID1,
+					Name:           "updated-name",
+					OrganizationId: orgID1,
+					Description:    "Updated description",
+					Members: []organization_management.BatchUpdateEnterpriseGroupsRequestMember{
+						{
+							Kind: organization_management.BatchUpdateEnterpriseGroupsRequestMemberKindUSER,
+							Id:   memberID,
+						},
+					},
+					RoleBindings: []organization_management.BatchUpdateEnterpriseGroupsRequestRoleBinding{
+						{
+							Id:     existingGroupID1 + "-updated-role-binding",
+							Name:   "updated-role-binding",
+							RoleId: roleID,
+							Scopes: []organization_management.Scope{
+								{
+									Organization: &organization_management.OrganizationScope{
+										Id: orgScopeID,
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		}
+
+		// Mock update API call with exact parameters
+		mockClient.EXPECT().
+			EnterpriseAPIBatchUpdateEnterpriseGroupsWithResponse(gomock.Any(), enterpriseID, expectedUpdateRequest).
+			Return(&organization_management.EnterpriseAPIBatchUpdateEnterpriseGroupsResponse{
+				HTTPResponse: &http.Response{StatusCode: 200},
+			}, nil)
+
+		// Mock read calls at the end
+		mockClient.EXPECT().
+			EnterpriseAPIListGroupsWithResponse(gomock.Any(), enterpriseID, gomock.Any()).
+			Return(&organization_management.EnterpriseAPIListGroupsResponse{
+				HTTPResponse: &http.Response{StatusCode: 200},
+				JSON200: &organization_management.ListGroupsResponse{
+					Items: &[]organization_management.ListGroupsResponseGroup{
+						{
+							Id:             &existingGroupID1,
+							Name:           lo.ToPtr("updated-name"),
+							OrganizationId: &orgID1,
+							Description:    lo.ToPtr("Updated description"),
+						},
+					},
+				},
+			}, nil)
+
+		mockClient.EXPECT().
+			EnterpriseAPIListRoleBindingsWithResponse(gomock.Any(), enterpriseID, gomock.Any()).
+			Return(&organization_management.EnterpriseAPIListRoleBindingsResponse{
+				HTTPResponse: &http.Response{StatusCode: 200},
+				JSON200:      &organization_management.ListRoleBindingsResponse{Items: &[]organization_management.RoleBinding{}},
+			}, nil)
+
+		// Execute update
+		result := resource.UpdateContext(ctx, data, provider)
+
+		// Verify no errors
+		r.False(result.HasError(), "Update should succeed when updating groups")
+		if result.HasError() {
+			for _, diag := range result {
+				t.Logf("Error: %s - %s", diag.Summary, diag.Detail)
+			}
+		}
+	})
+
+	t.Run("resource update error generic propagated", func(t *testing.T) {
+		r := require.New(t)
+		ctrl := gomock.NewController(t)
+		mockClient := mockOrganizationManagement.NewMockClientWithResponsesInterface(ctrl)
+
+		provider := &ProviderConfig{
+			organizationManagementClient: mockClient,
+		}
+
+		resource := resourceEnterpriseGroups()
+
+		// Create old state with one group
+		oldState := &terraform.InstanceState{
+			ID: enterpriseID,
+			Attributes: map[string]string{
+				FieldEnterpriseGroupsEnterpriseID: enterpriseID,
+				"groups.#":                        "1",
+				"groups.0.id":                     existingGroupID1,
+				"groups.0.name":                   "old-name",
+				"groups.0.organization_id":        orgID1,
+				"groups.0.members.#":              "0",
+				"groups.0.role_bindings.#":        "0",
+			},
+		}
+
+		// Create diff that updates the group name
+		diff := &terraform.InstanceDiff{
+			Attributes: map[string]*terraform.ResourceAttrDiff{
+				"groups.0.name": {
+					Old: "old-name",
+					New: "updated-name",
+				},
+			},
+		}
+
+		schemaMap := make(map[string]*schema.Schema)
+		for k, v := range resource.Schema {
+			schemaMap[k] = v
+		}
+		data, err := schema.InternalMap(schemaMap).Data(oldState, diff)
+		r.NoError(err)
+
+		// Expected update request for error test
+		expectedUpdateRequest := organization_management.BatchUpdateEnterpriseGroupsRequest{
+			EnterpriseId: enterpriseID,
+			Requests: []organization_management.BatchUpdateEnterpriseGroupsRequestUpdateGroupRequest{
+				{
+					Id:             existingGroupID1,
+					Name:           "updated-name",
+					OrganizationId: orgID1,
+					Description:    "",
+					Members:        []organization_management.BatchUpdateEnterpriseGroupsRequestMember{},
+					RoleBindings:   []organization_management.BatchUpdateEnterpriseGroupsRequestRoleBinding{},
+				},
+			},
+		}
+
+		// Mock update API to return error with exact parameters
+		mockClient.EXPECT().
+			EnterpriseAPIBatchUpdateEnterpriseGroupsWithResponse(gomock.Any(), gomock.Eq(enterpriseID), gomock.Eq(expectedUpdateRequest)).
+			Return(&organization_management.EnterpriseAPIBatchUpdateEnterpriseGroupsResponse{
+				HTTPResponse: &http.Response{StatusCode: 400, Body: io.NopCloser(bytes.NewBufferString(`{"message":"Bad Request", "fieldViolations":[{"field":"name","description":"invalid name"}]}`))},
+			}, nil)
+
+		result := resource.UpdateContext(ctx, data, provider)
+
+		r.True(result.HasError(), "Should return error when API call fails")
+		r.Contains(result[0].Summary, "batch update modified groups failed")
+		r.Contains(result[0].Summary, "status 400")
 	})
 }
