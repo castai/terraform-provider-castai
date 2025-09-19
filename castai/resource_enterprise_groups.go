@@ -740,36 +740,6 @@ func sortByField(items []map[string]any, field string) {
 	})
 }
 
-func sortScopesByType(scopes []map[string]any) {
-	sort.Slice(scopes, func(i, j int) bool {
-		// Sort by type first (cluster before organization), then by ID
-		orgI, hasOrgI := scopes[i][FieldEnterpriseGroupScopeOrganization].(string)
-		orgJ, hasOrgJ := scopes[j][FieldEnterpriseGroupScopeOrganization].(string)
-		clusterI, hasClusterI := scopes[i][FieldEnterpriseGroupScopeCluster].(string)
-		clusterJ, hasClusterJ := scopes[j][FieldEnterpriseGroupScopeCluster].(string)
-
-		// If both have cluster scopes, sort by cluster ID
-		if hasClusterI && clusterI != "" && hasClusterJ && clusterJ != "" {
-			return clusterI < clusterJ
-		}
-
-		// If both have org scopes, sort by org ID
-		if hasOrgI && orgI != "" && hasOrgJ && orgJ != "" {
-			return orgI < orgJ
-		}
-
-		// Cluster scopes come before organization scopes
-		if hasClusterI && clusterI != "" {
-			return true
-		}
-		if hasClusterJ && clusterJ != "" {
-			return false
-		}
-
-		return false
-	})
-}
-
 // convertMembersForBatchCreate converts members from batch create response
 func convertMembersForBatchCreate(members *[]organization_management.DefinitionMember) []map[string]any {
 	if members == nil {
@@ -797,7 +767,6 @@ func convertMembersForBatchCreate(members *[]organization_management.DefinitionM
 		}
 		result = append(result, memberData)
 	}
-	sortByField(result, FieldEnterpriseGroupMemberID)
 	return result
 }
 
@@ -826,7 +795,6 @@ func convertRoleBindingsForBatch(roleBindings *[]organization_management.GroupRo
 				scopes = append(scopes, scopeData)
 			}
 		}
-		sortScopesByType(scopes)
 		bindingData[FieldEnterpriseGroupRoleBindingScopes] = scopes
 		result = append(result, bindingData)
 	}
@@ -976,7 +944,6 @@ func setEnterpriseGroupsDataFromListResponse(data *schema.ResourceData, groups [
 
 				members = append(members, memberData)
 			}
-			sortByField(members, FieldEnterpriseGroupMemberID)
 			groupData[FieldEnterpriseGroupMembers] = members
 		}
 
@@ -1028,8 +995,6 @@ func convertRoleBindingsForState(roleBindings []organization_management.RoleBind
 
 					scopesData = append(scopesData, scopeData)
 				}
-				// Sort scopes for consistent ordering
-				sortScopesByType(scopesData)
 				roleBindingData[FieldEnterpriseGroupRoleBindingScopes] = scopesData
 			}
 		}
@@ -1105,7 +1070,6 @@ func setEnterpriseGroupsDataFromListResponseWithRoleBindings(data *schema.Resour
 
 				members = append(members, memberData)
 			}
-			sortByField(members, FieldEnterpriseGroupMemberID)
 			groupData[FieldEnterpriseGroupMembers] = members
 		}
 
@@ -1177,7 +1141,6 @@ func setEnterpriseGroupsDataFromUpdateResponse(data *schema.ResourceData, groups
 
 				members = append(members, memberData)
 			}
-			sortByField(members, FieldEnterpriseGroupMemberID)
 			groupData[FieldEnterpriseGroupMembers] = members
 		}
 
@@ -1207,7 +1170,6 @@ func setEnterpriseGroupsDataFromUpdateResponse(data *schema.ResourceData, groups
 						scopes = append(scopes, scopeData)
 					}
 				}
-				sortScopesByType(scopes)
 				bindingData[FieldEnterpriseGroupRoleBindingScopes] = scopes
 
 				roleBindings = append(roleBindings, bindingData)

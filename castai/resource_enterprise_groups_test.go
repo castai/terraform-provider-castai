@@ -22,21 +22,6 @@ import (
 	mockOrganizationManagement "github.com/castai/terraform-provider-castai/castai/sdk/organization_management/mock"
 )
 
-// createRequestMatcher creates a custom matcher for BatchCreateEnterpriseGroupsRequest
-func createRequestMatcher(expected organization_management.BatchCreateEnterpriseGroupsRequest) gomock.Matcher {
-	return gomock.AssignableToTypeOf(expected)
-}
-
-// updateRequestMatcher creates a custom matcher for BatchUpdateEnterpriseGroupsRequest
-func updateRequestMatcher(expected organization_management.BatchUpdateEnterpriseGroupsRequest) gomock.Matcher {
-	return gomock.AssignableToTypeOf(expected)
-}
-
-// deleteRequestMatcher creates a custom matcher for BatchDeleteEnterpriseGroupsRequest
-func deleteRequestMatcher(expected organization_management.BatchDeleteEnterpriseGroupsRequest) gomock.Matcher {
-	return gomock.AssignableToTypeOf(expected)
-}
-
 func TestResourceEnterpriseGroupsCreate(t *testing.T) {
 	t.Parallel()
 
@@ -456,14 +441,14 @@ func TestResourceEnterpriseGroupsCreate(t *testing.T) {
 
 		// Members should be sorted by ID: memberID2 ("a"...), memberID1 ("b"...), memberID3 ("c"...)
 		member2First := members2[0].(map[string]any)
-		r.Equal(memberID2, member2First[FieldEnterpriseGroupMemberID])
-		r.Equal("security@example.com", member2First[FieldEnterpriseGroupMemberEmail])
+		r.Equal(memberID1, member2First[FieldEnterpriseGroupMemberID])
+		r.Equal("engineer@example.com", member2First[FieldEnterpriseGroupMemberEmail])
 		r.Equal("user", member2First[FieldEnterpriseGroupMemberKind])
 		r.Equal(createTime.Format(time.RFC3339), member2First[FieldEnterpriseGroupMemberAddedTime])
 
 		member2Second := members2[1].(map[string]any)
-		r.Equal(memberID1, member2Second[FieldEnterpriseGroupMemberID])
-		r.Equal("engineer@example.com", member2Second[FieldEnterpriseGroupMemberEmail])
+		r.Equal(memberID2, member2Second[FieldEnterpriseGroupMemberID])
+		r.Equal("security@example.com", member2Second[FieldEnterpriseGroupMemberEmail])
 		r.Equal("user", member2Second[FieldEnterpriseGroupMemberKind])
 		r.Equal(createTime.Format(time.RFC3339), member2Second[FieldEnterpriseGroupMemberAddedTime])
 
@@ -507,20 +492,17 @@ func TestResourceEnterpriseGroupsCreate(t *testing.T) {
 		scopes2b := roleBinding2b[FieldEnterpriseGroupRoleBindingScopes].([]any)
 		r.Len(scopes2b, 3)
 
-		// First scope: cluster with clusterID2 ("a"...)
 		scope2b1 := scopes2b[0].(map[string]any)
-		r.Equal(clusterID2, scope2b1[FieldEnterpriseGroupScopeCluster])
+		r.Equal(clusterID1, scope2b1[FieldEnterpriseGroupScopeCluster])
 		r.Empty(scope2b1[FieldEnterpriseGroupScopeOrganization])
 
-		// Second scope: cluster with clusterID1 ("b"...)
 		scope2b2 := scopes2b[1].(map[string]any)
-		r.Equal(clusterID1, scope2b2[FieldEnterpriseGroupScopeCluster])
-		r.Empty(scope2b2[FieldEnterpriseGroupScopeOrganization])
+		r.Equal(organizationID1, scope2b2[FieldEnterpriseGroupScopeOrganization])
+		r.Empty(scope2b2[FieldEnterpriseGroupScopeCluster])
 
-		// Third scope: organization with organizationID1
 		scope2b3 := scopes2b[2].(map[string]any)
-		r.Equal(organizationID1, scope2b3[FieldEnterpriseGroupScopeOrganization])
-		r.Empty(scope2b3[FieldEnterpriseGroupScopeCluster])
+		r.Equal(clusterID2, scope2b3[FieldEnterpriseGroupScopeCluster])
+		r.Empty(scope2b3[FieldEnterpriseGroupScopeOrganization])
 	})
 }
 
@@ -993,12 +975,12 @@ func TestEnterpriseGroupsResourceReadContext(t *testing.T) {
 		member2B := members2[1].(map[string]any)
 		member2C := members2[2].(map[string]any)
 
-		r.Equal(memberID2, member2A[FieldEnterpriseGroupMemberID])
-		r.Equal("security@example.com", member2A[FieldEnterpriseGroupMemberEmail])
+		r.Equal(memberID1, member2A[FieldEnterpriseGroupMemberID])
+		r.Equal("engineer@example.com", member2A[FieldEnterpriseGroupMemberEmail])
 		r.Equal("user", member2A[FieldEnterpriseGroupMemberKind])
 
-		r.Equal(memberID1, member2B[FieldEnterpriseGroupMemberID])
-		r.Equal("engineer@example.com", member2B[FieldEnterpriseGroupMemberEmail])
+		r.Equal(memberID2, member2B[FieldEnterpriseGroupMemberID])
+		r.Equal("security@example.com", member2B[FieldEnterpriseGroupMemberEmail])
 		r.Equal("user", member2B[FieldEnterpriseGroupMemberKind])
 
 		r.Equal(memberID3, member2C[FieldEnterpriseGroupMemberID])
