@@ -1398,9 +1398,9 @@ func TestResourceEnterpriseGroupsUpdate(t *testing.T) {
 			},
 		}
 
-		// Mock update API call with exact parameters and capture actual request
+		// Mock update API call with exact parameters
 		mockClient.EXPECT().
-			EnterpriseAPIBatchUpdateEnterpriseGroupsWithResponse(gomock.Any(), gomock.Eq(enterpriseID), expectedUpdateRequest).
+			EnterpriseAPIBatchUpdateEnterpriseGroupsWithResponse(gomock.Any(), enterpriseID, expectedUpdateRequest).
 			Return(&organization_management.EnterpriseAPIBatchUpdateEnterpriseGroupsResponse{
 				HTTPResponse: &http.Response{StatusCode: 200},
 			}, nil)
@@ -1463,27 +1463,51 @@ func TestResourceEnterpriseGroupsUpdate(t *testing.T) {
 		oldState := &terraform.InstanceState{
 			ID: enterpriseID,
 			Attributes: map[string]string{
-				FieldEnterpriseGroupsEnterpriseID: enterpriseID,
-				"groups.#":                        "2",
-				"groups.0.id":                     existingGroupID1,
-				"groups.0.name":                   "group-to-keep",
-				"groups.0.organization_id":        orgID1,
-				"groups.0.members.#":              "0",
-				"groups.0.role_bindings.#":        "0",
-				"groups.1.id":                     existingGroupID2,
-				"groups.1.name":                   "group-to-delete",
-				"groups.1.organization_id":        orgID2,
-				"groups.1.members.#":              "0",
-				"groups.1.role_bindings.#":        "0",
+				FieldEnterpriseGroupsEnterpriseID:                enterpriseID,
+				"groups.#":                                       "2",
+				"groups.0.id":                                    existingGroupID1,
+				"groups.0.name":                                  "group-to-keep",
+				"groups.0.organization_id":                       orgID1,
+				"groups.0.description":                           "Old description",
+				"groups.0.members.#":                             "1",
+				"groups.0.members.0.kind":                        "user",
+				"groups.0.members.0.id":                          "old-member-id",
+				"groups.0.role_bindings.#":                       "1",
+				"groups.0.role_bindings.0.name":                  "old-role-binding",
+				"groups.0.role_bindings.0.role_id":               "old-role-id",
+				"groups.0.role_bindings.0.scopes.#":              "1",
+				"groups.0.role_bindings.0.scopes.0.organization": orgID1,
+				"groups.1.id":                                    existingGroupID2,
+				"groups.1.name":                                  "group-to-delete",
+				"groups.1.organization_id":                       orgID2,
+				"groups.1.description":                           "Will be deleted",
+				"groups.1.members.#":                             "0",
+				"groups.1.role_bindings.#":                       "0",
 			},
 		}
 
-		// Create diff that removes the second group
+		// Create diff that removes the second group and updates the first
 		diff := &terraform.InstanceDiff{
 			Attributes: map[string]*terraform.ResourceAttrDiff{
 				"groups.#": {
 					Old: "2",
 					New: "1",
+				},
+				"groups.0.description": {
+					Old: "Old description",
+					New: "Updated description",
+				},
+				"groups.0.members.0.id": {
+					Old: "old-member-id",
+					New: "new-member-id",
+				},
+				"groups.0.role_bindings.0.name": {
+					Old: "old-role-binding",
+					New: "updated-role-binding",
+				},
+				"groups.0.role_bindings.0.role_id": {
+					Old: "old-role-id",
+					New: "new-role-id",
 				},
 				"groups.1.id": {
 					Old:        existingGroupID2,
@@ -1497,6 +1521,11 @@ func TestResourceEnterpriseGroupsUpdate(t *testing.T) {
 				},
 				"groups.1.organization_id": {
 					Old:        orgID2,
+					New:        "",
+					NewRemoved: true,
+				},
+				"groups.1.description": {
+					Old:        "Will be deleted",
 					New:        "",
 					NewRemoved: true,
 				},
@@ -1539,9 +1568,27 @@ func TestResourceEnterpriseGroupsUpdate(t *testing.T) {
 					Id:             existingGroupID1,
 					Name:           "group-to-keep",
 					OrganizationId: orgID1,
-					Description:    "",
-					Members:        nil,
-					RoleBindings:   nil,
+					Description:    "Updated description",
+					Members: []organization_management.BatchUpdateEnterpriseGroupsRequestMember{
+						{
+							Kind: organization_management.BatchUpdateEnterpriseGroupsRequestMemberKindUSER,
+							Id:   "new-member-id",
+						},
+					},
+					RoleBindings: []organization_management.BatchUpdateEnterpriseGroupsRequestRoleBinding{
+						{
+							Id:     existingGroupID1 + "-updated-role-binding",
+							Name:   "updated-role-binding",
+							RoleId: "new-role-id",
+							Scopes: []organization_management.Scope{
+								{
+									Organization: &organization_management.OrganizationScope{
+										Id: orgID1,
+									},
+								},
+							},
+						},
+					},
 				},
 			},
 		}
@@ -1571,6 +1618,7 @@ func TestResourceEnterpriseGroupsUpdate(t *testing.T) {
 							Id:             &existingGroupID1,
 							Name:           lo.ToPtr("group-to-keep"),
 							OrganizationId: &orgID1,
+							Description:    lo.ToPtr("Updated description"),
 						},
 					},
 				},
@@ -1580,7 +1628,24 @@ func TestResourceEnterpriseGroupsUpdate(t *testing.T) {
 			EnterpriseAPIListRoleBindingsWithResponse(gomock.Any(), enterpriseID, gomock.Any()).
 			Return(&organization_management.EnterpriseAPIListRoleBindingsResponse{
 				HTTPResponse: &http.Response{StatusCode: 200},
-				JSON200:      &organization_management.ListRoleBindingsResponse{Items: &[]organization_management.RoleBinding{}},
+				JSON200: &organization_management.ListRoleBindingsResponse{
+					Items: &[]organization_management.RoleBinding{
+						{
+							Id:   lo.ToPtr(existingGroupID1 + "-updated-role-binding"),
+							Name: lo.ToPtr("updated-role-binding"),
+							Definition: &organization_management.RoleBindingDefinition{
+								RoleId: lo.ToPtr("new-role-id"),
+								Scopes: &[]organization_management.Scope{
+									{
+										Organization: &organization_management.OrganizationScope{
+											Id: orgID1,
+										},
+									},
+								},
+							},
+						},
+					},
+				},
 			}, nil)
 
 		// Execute update
@@ -1588,11 +1653,6 @@ func TestResourceEnterpriseGroupsUpdate(t *testing.T) {
 
 		// Verify no errors
 		r.False(result.HasError(), "Update should succeed when deleting groups")
-		if result.HasError() {
-			for _, diag := range result {
-				t.Logf("Error: %s - %s", diag.Summary, diag.Detail)
-			}
-		}
 	})
 
 	t.Run("when groups are updated then call update API with exact parameters", func(t *testing.T) {
@@ -1813,7 +1873,7 @@ func TestResourceEnterpriseGroupsUpdate(t *testing.T) {
 
 		// Mock update API to return error with exact parameters
 		mockClient.EXPECT().
-			EnterpriseAPIBatchUpdateEnterpriseGroupsWithResponse(gomock.Any(), gomock.Eq(enterpriseID), gomock.Eq(expectedUpdateRequest)).
+			EnterpriseAPIBatchUpdateEnterpriseGroupsWithResponse(gomock.Any(), enterpriseID, expectedUpdateRequest).
 			Return(&organization_management.EnterpriseAPIBatchUpdateEnterpriseGroupsResponse{
 				HTTPResponse: &http.Response{StatusCode: 400, Body: io.NopCloser(bytes.NewBufferString(`{"message":"Bad Request", "fieldViolations":[{"field":"name","description":"invalid name"}]}`))},
 			}, nil)
