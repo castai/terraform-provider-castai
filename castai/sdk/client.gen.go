@@ -298,6 +298,9 @@ type ClientInterface interface {
 	// ExternalClusterAPIGetListNodesFilters request
 	ExternalClusterAPIGetListNodesFilters(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// ExternalClusterAPIGetConnectAndEnableCASTAICmd request
+	ExternalClusterAPIGetConnectAndEnableCASTAICmd(ctx context.Context, params *ExternalClusterAPIGetConnectAndEnableCASTAICmdParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// OperationsAPIGetOperation request
 	OperationsAPIGetOperation(ctx context.Context, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -616,6 +619,9 @@ type ClientInterface interface {
 
 	// CommitmentsAPIGetGCPCommitmentsScriptTemplate request
 	CommitmentsAPIGetGCPCommitmentsScriptTemplate(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	// ExternalClusterAPIGetConnectAndEnableCASTAIScript request
+	ExternalClusterAPIGetConnectAndEnableCASTAIScript(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// ExternalClusterAPIGetCleanupScriptTemplate request
 	ExternalClusterAPIGetCleanupScriptTemplate(ctx context.Context, provider string, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -1750,6 +1756,18 @@ func (c *Client) ExternalClusterAPIRegisterCluster(ctx context.Context, body Ext
 
 func (c *Client) ExternalClusterAPIGetListNodesFilters(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewExternalClusterAPIGetListNodesFiltersRequest(c.Server)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) ExternalClusterAPIGetConnectAndEnableCASTAICmd(ctx context.Context, params *ExternalClusterAPIGetConnectAndEnableCASTAICmdParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewExternalClusterAPIGetConnectAndEnableCASTAICmdRequest(c.Server, params)
 	if err != nil {
 		return nil, err
 	}
@@ -3142,6 +3160,18 @@ func (c *Client) CommitmentsAPIReplaceCommitmentAssignments(ctx context.Context,
 
 func (c *Client) CommitmentsAPIGetGCPCommitmentsScriptTemplate(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewCommitmentsAPIGetGCPCommitmentsScriptTemplateRequest(c.Server)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) ExternalClusterAPIGetConnectAndEnableCASTAIScript(ctx context.Context, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewExternalClusterAPIGetConnectAndEnableCASTAIScriptRequest(c.Server)
 	if err != nil {
 		return nil, err
 	}
@@ -7217,6 +7247,231 @@ func NewExternalClusterAPIGetListNodesFiltersRequest(server string) (*http.Reque
 	queryURL, err := serverURL.Parse(operationPath)
 	if err != nil {
 		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
+// NewExternalClusterAPIGetConnectAndEnableCASTAICmdRequest generates requests for ExternalClusterAPIGetConnectAndEnableCASTAICmd
+func NewExternalClusterAPIGetConnectAndEnableCASTAICmdRequest(server string, params *ExternalClusterAPIGetConnectAndEnableCASTAICmdParams) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/kubernetes/external-clusters/onboarding/connect-and-enable-castai-cmd")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.ClusterName != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "clusterName", runtime.ParamLocationQuery, *params.ClusterName); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.Provider != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "provider", runtime.ParamLocationQuery, *params.Provider); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.NvidiaDevicePlugin != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "nvidiaDevicePlugin", runtime.ParamLocationQuery, *params.NvidiaDevicePlugin); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.InstallSecurityAgent != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "installSecurityAgent", runtime.ParamLocationQuery, *params.InstallSecurityAgent); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.InstallAutoscalerAgent != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "installAutoscalerAgent", runtime.ParamLocationQuery, *params.InstallAutoscalerAgent); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.InstallGpuMetricsExporter != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "installGpuMetricsExporter", runtime.ParamLocationQuery, *params.InstallGpuMetricsExporter); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.InstallAiOptimizerProxy != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "installAiOptimizerProxy", runtime.ParamLocationQuery, *params.InstallAiOptimizerProxy); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.GcpSaImpersonate != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "gcpSaImpersonate", runtime.ParamLocationQuery, *params.GcpSaImpersonate); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.InstallNetflowExporter != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "installNetflowExporter", runtime.ParamLocationQuery, *params.InstallNetflowExporter); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.InstallWorkloadAutoscaler != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "installWorkloadAutoscaler", runtime.ParamLocationQuery, *params.InstallWorkloadAutoscaler); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.InstallPodMutator != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "installPodMutator", runtime.ParamLocationQuery, *params.InstallPodMutator); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.InstallOmni != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "installOmni", runtime.ParamLocationQuery, *params.InstallOmni); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
 	}
 
 	req, err := http.NewRequest("GET", queryURL.String(), nil)
@@ -11696,6 +11951,33 @@ func NewCommitmentsAPIGetGCPCommitmentsScriptTemplateRequest(server string) (*ht
 	return req, nil
 }
 
+// NewExternalClusterAPIGetConnectAndEnableCASTAIScriptRequest generates requests for ExternalClusterAPIGetConnectAndEnableCASTAIScript
+func NewExternalClusterAPIGetConnectAndEnableCASTAIScriptRequest(server string) (*http.Request, error) {
+	var err error
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/scripts/connect-and-enable-castai.sh")
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 // NewExternalClusterAPIGetCleanupScriptTemplateRequest generates requests for ExternalClusterAPIGetCleanupScriptTemplate
 func NewExternalClusterAPIGetCleanupScriptTemplateRequest(server string, provider string) (*http.Request, error) {
 	var err error
@@ -16142,6 +16424,9 @@ type ClientWithResponsesInterface interface {
 	// ExternalClusterAPIGetListNodesFilters request
 	ExternalClusterAPIGetListNodesFiltersWithResponse(ctx context.Context) (*ExternalClusterAPIGetListNodesFiltersResponse, error)
 
+	// ExternalClusterAPIGetConnectAndEnableCASTAICmd request
+	ExternalClusterAPIGetConnectAndEnableCASTAICmdWithResponse(ctx context.Context, params *ExternalClusterAPIGetConnectAndEnableCASTAICmdParams) (*ExternalClusterAPIGetConnectAndEnableCASTAICmdResponse, error)
+
 	// OperationsAPIGetOperation request
 	OperationsAPIGetOperationWithResponse(ctx context.Context, id string) (*OperationsAPIGetOperationResponse, error)
 
@@ -16460,6 +16745,9 @@ type ClientWithResponsesInterface interface {
 
 	// CommitmentsAPIGetGCPCommitmentsScriptTemplate request
 	CommitmentsAPIGetGCPCommitmentsScriptTemplateWithResponse(ctx context.Context) (*CommitmentsAPIGetGCPCommitmentsScriptTemplateResponse, error)
+
+	// ExternalClusterAPIGetConnectAndEnableCASTAIScript request
+	ExternalClusterAPIGetConnectAndEnableCASTAIScriptWithResponse(ctx context.Context) (*ExternalClusterAPIGetConnectAndEnableCASTAIScriptResponse, error)
 
 	// ExternalClusterAPIGetCleanupScriptTemplate request
 	ExternalClusterAPIGetCleanupScriptTemplateWithResponse(ctx context.Context, provider string) (*ExternalClusterAPIGetCleanupScriptTemplateResponse, error)
@@ -18375,6 +18663,36 @@ func (r ExternalClusterAPIGetListNodesFiltersResponse) StatusCode() int {
 // TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 // Body returns body of byte array
 func (r ExternalClusterAPIGetListNodesFiltersResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
+type ExternalClusterAPIGetConnectAndEnableCASTAICmdResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *ExternalclusterV1GetConnectAndEnableCASTAICmdResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r ExternalClusterAPIGetConnectAndEnableCASTAICmdResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r ExternalClusterAPIGetConnectAndEnableCASTAICmdResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r ExternalClusterAPIGetConnectAndEnableCASTAICmdResponse) GetBody() []byte {
 	return r.Body
 }
 
@@ -20991,6 +21309,36 @@ func (r CommitmentsAPIGetGCPCommitmentsScriptTemplateResponse) GetBody() []byte 
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
+type ExternalClusterAPIGetConnectAndEnableCASTAIScriptResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *GoogleApiHttpBody
+}
+
+// Status returns HTTPResponse.Status
+func (r ExternalClusterAPIGetConnectAndEnableCASTAIScriptResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r ExternalClusterAPIGetConnectAndEnableCASTAIScriptResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r ExternalClusterAPIGetConnectAndEnableCASTAIScriptResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
 type ExternalClusterAPIGetCleanupScriptTemplateResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -23512,6 +23860,15 @@ func (c *ClientWithResponses) ExternalClusterAPIGetListNodesFiltersWithResponse(
 	return ParseExternalClusterAPIGetListNodesFiltersResponse(rsp)
 }
 
+// ExternalClusterAPIGetConnectAndEnableCASTAICmdWithResponse request returning *ExternalClusterAPIGetConnectAndEnableCASTAICmdResponse
+func (c *ClientWithResponses) ExternalClusterAPIGetConnectAndEnableCASTAICmdWithResponse(ctx context.Context, params *ExternalClusterAPIGetConnectAndEnableCASTAICmdParams) (*ExternalClusterAPIGetConnectAndEnableCASTAICmdResponse, error) {
+	rsp, err := c.ExternalClusterAPIGetConnectAndEnableCASTAICmd(ctx, params)
+	if err != nil {
+		return nil, err
+	}
+	return ParseExternalClusterAPIGetConnectAndEnableCASTAICmdResponse(rsp)
+}
+
 // OperationsAPIGetOperationWithResponse request returning *OperationsAPIGetOperationResponse
 func (c *ClientWithResponses) OperationsAPIGetOperationWithResponse(ctx context.Context, id string) (*OperationsAPIGetOperationResponse, error) {
 	rsp, err := c.OperationsAPIGetOperation(ctx, id)
@@ -24525,6 +24882,15 @@ func (c *ClientWithResponses) CommitmentsAPIGetGCPCommitmentsScriptTemplateWithR
 		return nil, err
 	}
 	return ParseCommitmentsAPIGetGCPCommitmentsScriptTemplateResponse(rsp)
+}
+
+// ExternalClusterAPIGetConnectAndEnableCASTAIScriptWithResponse request returning *ExternalClusterAPIGetConnectAndEnableCASTAIScriptResponse
+func (c *ClientWithResponses) ExternalClusterAPIGetConnectAndEnableCASTAIScriptWithResponse(ctx context.Context) (*ExternalClusterAPIGetConnectAndEnableCASTAIScriptResponse, error) {
+	rsp, err := c.ExternalClusterAPIGetConnectAndEnableCASTAIScript(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return ParseExternalClusterAPIGetConnectAndEnableCASTAIScriptResponse(rsp)
 }
 
 // ExternalClusterAPIGetCleanupScriptTemplateWithResponse request returning *ExternalClusterAPIGetCleanupScriptTemplateResponse
@@ -26697,6 +27063,32 @@ func ParseExternalClusterAPIGetListNodesFiltersResponse(rsp *http.Response) (*Ex
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest ExternalclusterV1GetListNodesFiltersResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseExternalClusterAPIGetConnectAndEnableCASTAICmdResponse parses an HTTP response from a ExternalClusterAPIGetConnectAndEnableCASTAICmdWithResponse call
+func ParseExternalClusterAPIGetConnectAndEnableCASTAICmdResponse(rsp *http.Response) (*ExternalClusterAPIGetConnectAndEnableCASTAICmdResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &ExternalClusterAPIGetConnectAndEnableCASTAICmdResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest ExternalclusterV1GetConnectAndEnableCASTAICmdResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
@@ -28965,6 +29357,32 @@ func ParseCommitmentsAPIGetGCPCommitmentsScriptTemplateResponse(rsp *http.Respon
 	response := &CommitmentsAPIGetGCPCommitmentsScriptTemplateResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
+	}
+
+	return response, nil
+}
+
+// ParseExternalClusterAPIGetConnectAndEnableCASTAIScriptResponse parses an HTTP response from a ExternalClusterAPIGetConnectAndEnableCASTAIScriptWithResponse call
+func ParseExternalClusterAPIGetConnectAndEnableCASTAIScriptResponse(rsp *http.Response) (*ExternalClusterAPIGetConnectAndEnableCASTAIScriptResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &ExternalClusterAPIGetConnectAndEnableCASTAIScriptResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest GoogleApiHttpBody
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
 	}
 
 	return response, nil

@@ -4,6 +4,8 @@
 package sdk
 
 import (
+	"encoding/json"
+	"fmt"
 	"time"
 )
 
@@ -2528,6 +2530,9 @@ type CastaiSsoV1beta1CreateSSOConnection struct {
 
 	// Okta Okta represents a Okta connector.
 	Okta *CastaiSsoV1beta1Okta `json:"okta,omitempty"`
+
+	// Saml SAML represents a SAML connector.
+	Saml *CastaiSsoV1beta1SAML `json:"saml,omitempty"`
 }
 
 // CastaiSsoV1beta1DeleteSSOConnectionResponse Defines the container for the sso delete response.
@@ -2585,6 +2590,24 @@ type CastaiSsoV1beta1Okta struct {
 	OktaDomain string `json:"oktaDomain"`
 }
 
+// CastaiSsoV1beta1SAML SAML represents a SAML connector.
+type CastaiSsoV1beta1SAML struct {
+	// CallbackUrl CallbackUrl is the callback url (Assertion Consumer Service URL) of the SAML service provider (Auth0).
+	CallbackUrl *string `json:"callbackUrl"`
+
+	// EntityId EntityId is the entity id of the SAML service provider (Auth0).
+	EntityId *string `json:"entityId"`
+
+	// MetadataUrl MetadataUrl is the URL to the SAML metadata document of the SAML service provider (Auth0).
+	MetadataUrl *string `json:"metadataUrl"`
+
+	// SignInUrl SignInUrl is the URL where the SAML authentication request is sent.
+	SignInUrl string `json:"signInUrl"`
+
+	// X509Certificate X509Certificate is the x509 certificate used to sign the SAML authentication request.
+	X509Certificate string `json:"x509Certificate"`
+}
+
 // CastaiSsoV1beta1SSOConnection SSOConnection represents a sso connection.
 type CastaiSsoV1beta1SSOConnection struct {
 	// Aad AzureAAD represents a Azure AAD connector.
@@ -2617,6 +2640,9 @@ type CastaiSsoV1beta1SSOConnection struct {
 
 	// Okta Okta represents a Okta connector.
 	Okta *CastaiSsoV1beta1Okta `json:"okta,omitempty"`
+
+	// Saml SAML represents a SAML connector.
+	Saml *CastaiSsoV1beta1SAML `json:"saml,omitempty"`
 
 	// Status Status is the status of the connection.
 	//
@@ -2668,6 +2694,9 @@ type CastaiSsoV1beta1UpdateSSOConnection struct {
 
 	// Okta Okta represents a Okta connector.
 	Okta *CastaiSsoV1beta1Okta `json:"okta,omitempty"`
+
+	// Saml SAML represents a SAML connector.
+	Saml *CastaiSsoV1beta1SAML `json:"saml,omitempty"`
 }
 
 // CastaiUsersV1beta1AddUserToOrganizationResponse Defines the response for adding a user to an organization.
@@ -3796,6 +3825,11 @@ type ExternalclusterV1GetCleanupScriptResponse struct {
 	Script *string `json:"script,omitempty"`
 }
 
+// ExternalclusterV1GetConnectAndEnableCASTAICmdResponse GetConnectAndEnableCASTAICmdResponse is the result of GetConnectAndEnableCASTAICmdRequest.
+type ExternalclusterV1GetConnectAndEnableCASTAICmdResponse struct {
+	Script *string `json:"script,omitempty"`
+}
+
 // ExternalclusterV1GetCredentialsScriptResponse GetCredentialsScriptResponse is the result of GetCredentialsScriptRequest.
 type ExternalclusterV1GetCredentialsScriptResponse struct {
 	Script *string `json:"script,omitempty"`
@@ -4185,6 +4219,178 @@ type ExternalclusterV1Zone struct {
 
 	// Name Zone name.
 	Name *string `json:"name,omitempty"`
+}
+
+// GoogleApiHttpBody Message that represents an arbitrary HTTP body. It should only be used for
+// payload formats that can't be represented as JSON, such as raw binary or
+// an HTML page.
+//
+// This message can be used both in streaming and non-streaming API methods in
+// the request as well as the response.
+//
+// It can be used as a top-level request field, which is convenient if one
+// wants to extract parameters from either the URL or HTTP template into the
+// request fields and also want access to the raw HTTP body.
+//
+// Example:
+//
+//	message GetResourceRequest {
+//	  // A unique request id.
+//	  string request_id = 1;
+//
+//	  // The raw HTTP body is bound to this field.
+//	  google.api.HttpBody http_body = 2;
+//
+//	}
+//
+//	service ResourceService {
+//	  rpc GetResource(GetResourceRequest)
+//	    returns (google.api.HttpBody);
+//	  rpc UpdateResource(google.api.HttpBody)
+//	    returns (google.protobuf.Empty);
+//
+//	}
+//
+// Example with streaming methods:
+//
+//	service CaldavService {
+//	  rpc GetCalendar(stream google.api.HttpBody)
+//	    returns (stream google.api.HttpBody);
+//	  rpc UpdateCalendar(stream google.api.HttpBody)
+//	    returns (stream google.api.HttpBody);
+//
+//	}
+//
+// Use of this type only changes how the request and response bodies are
+// handled, all other features will continue to work unchanged.
+type GoogleApiHttpBody struct {
+	// ContentType The HTTP Content-Type header value specifying the content type of the body.
+	ContentType *string `json:"contentType,omitempty"`
+
+	// Data The HTTP request/response body as raw binary.
+	Data *[]byte `json:"data,omitempty"`
+
+	// Extensions Application specific response metadata. Must be set in the first response
+	// for streaming APIs.
+	Extensions *[]GoogleProtobufAny `json:"extensions,omitempty"`
+}
+
+// GoogleProtobufAny `Any` contains an arbitrary serialized protocol buffer message along with a
+// URL that describes the type of the serialized message.
+//
+// Protobuf library provides support to pack/unpack Any values in the form
+// of utility functions or additional generated methods of the Any type.
+//
+// Example 1: Pack and unpack a message in C++.
+//
+//	Foo foo = ...;
+//	Any any;
+//	any.PackFrom(foo);
+//	...
+//	if (any.UnpackTo(&foo)) {
+//	  ...
+//	}
+//
+// Example 2: Pack and unpack a message in Java.
+//
+//	   Foo foo = ...;
+//	   Any any = Any.pack(foo);
+//	   ...
+//	   if (any.is(Foo.class)) {
+//	     foo = any.unpack(Foo.class);
+//	   }
+//	   // or ...
+//	   if (any.isSameTypeAs(Foo.getDefaultInstance())) {
+//	     foo = any.unpack(Foo.getDefaultInstance());
+//	   }
+//
+//	Example 3: Pack and unpack a message in Python.
+//
+//	   foo = Foo(...)
+//	   any = Any()
+//	   any.Pack(foo)
+//	   ...
+//	   if any.Is(Foo.DESCRIPTOR):
+//	     any.Unpack(foo)
+//	     ...
+//
+//	Example 4: Pack and unpack a message in Go
+//
+//	    foo := &pb.Foo{...}
+//	    any, err := anypb.New(foo)
+//	    if err != nil {
+//	      ...
+//	    }
+//	    ...
+//	    foo := &pb.Foo{}
+//	    if err := any.UnmarshalTo(foo); err != nil {
+//	      ...
+//	    }
+//
+// The pack methods provided by protobuf library will by default use
+// 'type.googleapis.com/full.type.name' as the type URL and the unpack
+// methods only use the fully qualified type name after the last '/'
+// in the type URL, for example "foo.bar.com/x/y.z" will yield type
+// name "y.z".
+//
+// JSON
+// ====
+// The JSON representation of an `Any` value uses the regular
+// representation of the deserialized, embedded message, with an
+// additional field `@type` which contains the type URL. Example:
+//
+//	package google.profile;
+//	message Person {
+//	  string first_name = 1;
+//	  string last_name = 2;
+//	}
+//
+//	{
+//	  "@type": "type.googleapis.com/google.profile.Person",
+//	  "firstName": <string>,
+//	  "lastName": <string>
+//	}
+//
+// If the embedded message type is well-known and has a custom JSON
+// representation, that representation will be embedded adding a field
+// `value` which holds the custom JSON in addition to the `@type`
+// field. Example (for message [google.protobuf.Duration][]):
+//
+//	{
+//	  "@type": "type.googleapis.com/google.protobuf.Duration",
+//	  "value": "1.212s"
+//	}
+type GoogleProtobufAny struct {
+	// Type A URL/resource name that uniquely identifies the type of the serialized
+	// protocol buffer message. This string must contain at least
+	// one "/" character. The last segment of the URL's path must represent
+	// the fully qualified name of the type (as in
+	// `path/google.protobuf.Duration`). The name should be in a canonical form
+	// (e.g., leading "." is not accepted).
+	//
+	// In practice, teams usually precompile into the binary all types that they
+	// expect it to use in the context of Any. However, for URLs which use the
+	// scheme `http`, `https`, or no scheme, one can optionally set up a type
+	// server that maps type URLs to message definitions as follows:
+	//
+	// * If no scheme is provided, `https` is assumed.
+	// * An HTTP GET on the URL must yield a [google.protobuf.Type][]
+	//   value in binary format, or produce an error.
+	// * Applications are allowed to cache lookup results based on the
+	//   URL, or have them precompiled into a binary to avoid any
+	//   lookup. Therefore, binary compatibility needs to be preserved
+	//   on changes to types. (Use versioned type names to manage
+	//   breaking changes.)
+	//
+	// Note: this functionality is not currently available in the official
+	// protobuf release, and it is not used for type URLs beginning with
+	// type.googleapis.com. As of May 2023, there are no widely used type server
+	// implementations and no plans to implement one.
+	//
+	// Schemes other than `http`, `https` (or the empty scheme) might be
+	// used with implementation specific semantics.
+	Type                 *string                           `json:"@type,omitempty"`
+	AdditionalProperties map[string]map[string]interface{} `json:"-"`
 }
 
 // K8sSelectorV1KubernetesNodeAffinity defines model for k8s_selector.v1.KubernetesNodeAffinity.
@@ -4739,6 +4945,7 @@ type NodetemplatesV1AvailableInstanceType struct {
 	Cpu                    *string                                                     `json:"cpu,omitempty"`
 	CpuCost                *float64                                                    `json:"cpuCost,omitempty"`
 	CpuManufacturers       *[]string                                                   `json:"cpuManufacturers,omitempty"`
+	Csp                    *string                                                     `json:"csp,omitempty"`
 	CustomerSpecific       *bool                                                       `json:"customerSpecific,omitempty"`
 	Family                 *string                                                     `json:"family,omitempty"`
 	IsBareMetal            *bool                                                       `json:"isBareMetal,omitempty"`
@@ -4746,6 +4953,7 @@ type NodetemplatesV1AvailableInstanceType struct {
 	Memory                 *string                                                     `json:"memory,omitempty"`
 	Name                   *string                                                     `json:"name,omitempty"`
 	Os                     *NodetemplatesV1AvailableInstanceTypeOs                     `json:"os,omitempty"`
+	Region                 *string                                                     `json:"region,omitempty"`
 	StorageOptimizedOption *NodetemplatesV1AvailableInstanceTypeStorageOptimizedOption `json:"storageOptimizedOption,omitempty"`
 }
 
@@ -6098,6 +6306,9 @@ type WorkloadoptimizationV1ContainerResourceMetricSource struct {
 
 // WorkloadoptimizationV1Costs defines model for workloadoptimization.v1.Costs.
 type WorkloadoptimizationV1Costs struct {
+	// OriginalRequested Cost of resources configured in original workload template.
+	OriginalRequested *float64 `json:"originalRequested"`
+
 	// Recommended Cost of recommended resources.
 	Recommended *float64 `json:"recommended"`
 
@@ -7493,6 +7704,46 @@ type ScheduledRebalancingAPIListRebalancingJobsParams struct {
 	RebalancingScheduleId *string `form:"rebalancingScheduleId,omitempty" json:"rebalancingScheduleId,omitempty"`
 }
 
+// ExternalClusterAPIGetConnectAndEnableCASTAICmdParams defines parameters for ExternalClusterAPIGetConnectAndEnableCASTAICmd.
+type ExternalClusterAPIGetConnectAndEnableCASTAICmdParams struct {
+	// ClusterName Customer cluster name.
+	ClusterName *string `form:"clusterName,omitempty" json:"clusterName,omitempty"`
+
+	// Provider Provider: eks, gke, aks, etc.
+	Provider *string `form:"provider,omitempty" json:"provider,omitempty"`
+
+	// NvidiaDevicePlugin Whether NVIDIA device plugin DaemonSet should be installed during Phase 2 on-boarding.
+	NvidiaDevicePlugin *bool `form:"nvidiaDevicePlugin,omitempty" json:"nvidiaDevicePlugin,omitempty"`
+
+	// InstallSecurityAgent Whether CAST AI Security Insights agent should be installed.
+	InstallSecurityAgent *bool `form:"installSecurityAgent,omitempty" json:"installSecurityAgent,omitempty"`
+
+	// InstallAutoscalerAgent Whether CAST AI Autoscaler components should be installed.
+	// To enable backwards compatibility, when the field is omitted, it is defaulted to true.
+	InstallAutoscalerAgent *bool `form:"installAutoscalerAgent,omitempty" json:"installAutoscalerAgent,omitempty"`
+
+	// InstallGpuMetricsExporter Whether CAST AI GPU metrics exporter should be installed.
+	InstallGpuMetricsExporter *bool `form:"installGpuMetricsExporter,omitempty" json:"installGpuMetricsExporter,omitempty"`
+
+	// InstallAiOptimizerProxy Whether CAST AI AI-Optimizer Proxy should be installed.
+	InstallAiOptimizerProxy *bool `form:"installAiOptimizerProxy,omitempty" json:"installAiOptimizerProxy,omitempty"`
+
+	// GcpSaImpersonate Whether GCP SA Impersonate feature should be enabled.
+	GcpSaImpersonate *bool `form:"gcpSaImpersonate,omitempty" json:"gcpSaImpersonate,omitempty"`
+
+	// InstallNetflowExporter Whether Netflow network exporter should be installed.
+	InstallNetflowExporter *bool `form:"installNetflowExporter,omitempty" json:"installNetflowExporter,omitempty"`
+
+	// InstallWorkloadAutoscaler Whether CAST AI Workload Autoscaler should be installed.
+	InstallWorkloadAutoscaler *bool `form:"installWorkloadAutoscaler,omitempty" json:"installWorkloadAutoscaler,omitempty"`
+
+	// InstallPodMutator Whether CAST AI Pod Mutator should be installed.
+	InstallPodMutator *bool `form:"installPodMutator,omitempty" json:"installPodMutator,omitempty"`
+
+	// InstallOmni Whether cluster should be onboarded with CAST AI Omni.
+	InstallOmni *bool `form:"installOmni,omitempty" json:"installOmni,omitempty"`
+}
+
 // ExternalClusterAPIGetCredentialsScriptParams defines parameters for ExternalClusterAPIGetCredentialsScript.
 type ExternalClusterAPIGetCredentialsScriptParams struct {
 	// CrossRole Whether an AWS CrossRole should be used for authentication.
@@ -8348,3 +8599,71 @@ type WorkloadOptimizationAPIPatchWorkloadV2JSONRequestBody = WorkloadOptimizatio
 
 // WorkloadOptimizationAPIUpdateWorkloadV2JSONRequestBody defines body for WorkloadOptimizationAPIUpdateWorkloadV2 for application/json ContentType.
 type WorkloadOptimizationAPIUpdateWorkloadV2JSONRequestBody = WorkloadoptimizationV1UpdateWorkloadV2
+
+// Getter for additional properties for GoogleProtobufAny. Returns the specified
+// element and whether it was found
+func (a GoogleProtobufAny) Get(fieldName string) (value map[string]interface{}, found bool) {
+	if a.AdditionalProperties != nil {
+		value, found = a.AdditionalProperties[fieldName]
+	}
+	return
+}
+
+// Setter for additional properties for GoogleProtobufAny
+func (a *GoogleProtobufAny) Set(fieldName string, value map[string]interface{}) {
+	if a.AdditionalProperties == nil {
+		a.AdditionalProperties = make(map[string]map[string]interface{})
+	}
+	a.AdditionalProperties[fieldName] = value
+}
+
+// Override default JSON handling for GoogleProtobufAny to handle AdditionalProperties
+func (a *GoogleProtobufAny) UnmarshalJSON(b []byte) error {
+	object := make(map[string]json.RawMessage)
+	err := json.Unmarshal(b, &object)
+	if err != nil {
+		return err
+	}
+
+	if raw, found := object["@type"]; found {
+		err = json.Unmarshal(raw, &a.Type)
+		if err != nil {
+			return fmt.Errorf("error reading '@type': %w", err)
+		}
+		delete(object, "@type")
+	}
+
+	if len(object) != 0 {
+		a.AdditionalProperties = make(map[string]map[string]interface{})
+		for fieldName, fieldBuf := range object {
+			var fieldVal map[string]interface{}
+			err := json.Unmarshal(fieldBuf, &fieldVal)
+			if err != nil {
+				return fmt.Errorf("error unmarshaling field %s: %w", fieldName, err)
+			}
+			a.AdditionalProperties[fieldName] = fieldVal
+		}
+	}
+	return nil
+}
+
+// Override default JSON handling for GoogleProtobufAny to handle AdditionalProperties
+func (a GoogleProtobufAny) MarshalJSON() ([]byte, error) {
+	var err error
+	object := make(map[string]json.RawMessage)
+
+	if a.Type != nil {
+		object["@type"], err = json.Marshal(a.Type)
+		if err != nil {
+			return nil, fmt.Errorf("error marshaling '@type': %w", err)
+		}
+	}
+
+	for fieldName, field := range a.AdditionalProperties {
+		object[fieldName], err = json.Marshal(field)
+		if err != nil {
+			return nil, fmt.Errorf("error marshaling '%s': %w", fieldName, err)
+		}
+	}
+	return json.Marshal(object)
+}

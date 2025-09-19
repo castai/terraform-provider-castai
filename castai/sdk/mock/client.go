@@ -1555,6 +1555,46 @@ func (mr *MockClientInterfaceMockRecorder) ExternalClusterAPIGetCluster(ctx, clu
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIGetCluster", reflect.TypeOf((*MockClientInterface)(nil).ExternalClusterAPIGetCluster), varargs...)
 }
 
+// ExternalClusterAPIGetConnectAndEnableCASTAICmd mocks base method.
+func (m *MockClientInterface) ExternalClusterAPIGetConnectAndEnableCASTAICmd(ctx context.Context, params *sdk.ExternalClusterAPIGetConnectAndEnableCASTAICmdParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ExternalClusterAPIGetConnectAndEnableCASTAICmd", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExternalClusterAPIGetConnectAndEnableCASTAICmd indicates an expected call of ExternalClusterAPIGetConnectAndEnableCASTAICmd.
+func (mr *MockClientInterfaceMockRecorder) ExternalClusterAPIGetConnectAndEnableCASTAICmd(ctx, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIGetConnectAndEnableCASTAICmd", reflect.TypeOf((*MockClientInterface)(nil).ExternalClusterAPIGetConnectAndEnableCASTAICmd), varargs...)
+}
+
+// ExternalClusterAPIGetConnectAndEnableCASTAIScript mocks base method.
+func (m *MockClientInterface) ExternalClusterAPIGetConnectAndEnableCASTAIScript(ctx context.Context, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ExternalClusterAPIGetConnectAndEnableCASTAIScript", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExternalClusterAPIGetConnectAndEnableCASTAIScript indicates an expected call of ExternalClusterAPIGetConnectAndEnableCASTAIScript.
+func (mr *MockClientInterfaceMockRecorder) ExternalClusterAPIGetConnectAndEnableCASTAIScript(ctx interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIGetConnectAndEnableCASTAIScript", reflect.TypeOf((*MockClientInterface)(nil).ExternalClusterAPIGetConnectAndEnableCASTAIScript), varargs...)
+}
+
 // ExternalClusterAPIGetCredentialsScript mocks base method.
 func (m *MockClientInterface) ExternalClusterAPIGetCredentialsScript(ctx context.Context, clusterId string, params *sdk.ExternalClusterAPIGetCredentialsScriptParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
@@ -8206,6 +8246,76 @@ func (m *MockClientWithResponsesInterface) ExternalClusterAPIGetClusterWithRespo
 func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIGetClusterWithResponse(ctx, clusterId interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIGetClusterWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIGetClusterWithResponse), ctx, clusterId)
+}
+
+// ExternalClusterAPIGetConnectAndEnableCASTAICmd mocks base method.
+func (m *MockClientWithResponsesInterface) ExternalClusterAPIGetConnectAndEnableCASTAICmd(ctx context.Context, params *sdk.ExternalClusterAPIGetConnectAndEnableCASTAICmdParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ExternalClusterAPIGetConnectAndEnableCASTAICmd", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExternalClusterAPIGetConnectAndEnableCASTAICmd indicates an expected call of ExternalClusterAPIGetConnectAndEnableCASTAICmd.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIGetConnectAndEnableCASTAICmd(ctx, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIGetConnectAndEnableCASTAICmd", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIGetConnectAndEnableCASTAICmd), varargs...)
+}
+
+// ExternalClusterAPIGetConnectAndEnableCASTAICmdWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) ExternalClusterAPIGetConnectAndEnableCASTAICmdWithResponse(ctx context.Context, params *sdk.ExternalClusterAPIGetConnectAndEnableCASTAICmdParams) (*sdk.ExternalClusterAPIGetConnectAndEnableCASTAICmdResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ExternalClusterAPIGetConnectAndEnableCASTAICmdWithResponse", ctx, params)
+	ret0, _ := ret[0].(*sdk.ExternalClusterAPIGetConnectAndEnableCASTAICmdResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExternalClusterAPIGetConnectAndEnableCASTAICmdWithResponse indicates an expected call of ExternalClusterAPIGetConnectAndEnableCASTAICmdWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIGetConnectAndEnableCASTAICmdWithResponse(ctx, params interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIGetConnectAndEnableCASTAICmdWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIGetConnectAndEnableCASTAICmdWithResponse), ctx, params)
+}
+
+// ExternalClusterAPIGetConnectAndEnableCASTAIScript mocks base method.
+func (m *MockClientWithResponsesInterface) ExternalClusterAPIGetConnectAndEnableCASTAIScript(ctx context.Context, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ExternalClusterAPIGetConnectAndEnableCASTAIScript", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExternalClusterAPIGetConnectAndEnableCASTAIScript indicates an expected call of ExternalClusterAPIGetConnectAndEnableCASTAIScript.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIGetConnectAndEnableCASTAIScript(ctx interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIGetConnectAndEnableCASTAIScript", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIGetConnectAndEnableCASTAIScript), varargs...)
+}
+
+// ExternalClusterAPIGetConnectAndEnableCASTAIScriptWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) ExternalClusterAPIGetConnectAndEnableCASTAIScriptWithResponse(ctx context.Context) (*sdk.ExternalClusterAPIGetConnectAndEnableCASTAIScriptResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ExternalClusterAPIGetConnectAndEnableCASTAIScriptWithResponse", ctx)
+	ret0, _ := ret[0].(*sdk.ExternalClusterAPIGetConnectAndEnableCASTAIScriptResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ExternalClusterAPIGetConnectAndEnableCASTAIScriptWithResponse indicates an expected call of ExternalClusterAPIGetConnectAndEnableCASTAIScriptWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ExternalClusterAPIGetConnectAndEnableCASTAIScriptWithResponse(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExternalClusterAPIGetConnectAndEnableCASTAIScriptWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ExternalClusterAPIGetConnectAndEnableCASTAIScriptWithResponse), ctx)
 }
 
 // ExternalClusterAPIGetCredentialsScript mocks base method.
