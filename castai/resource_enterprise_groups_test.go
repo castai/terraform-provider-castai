@@ -1,11 +1,9 @@
 package castai
 
 import (
-	"bytes"
 	"context"
 	"errors"
 	"fmt"
-	"io"
 	"net/http"
 	"testing"
 	"time"
