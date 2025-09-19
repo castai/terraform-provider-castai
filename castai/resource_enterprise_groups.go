@@ -32,6 +32,7 @@ const (
 	FieldEnterpriseGroupsGroup      = "group"
 	FieldEnterpriseGroupsMember     = "member"
 	FieldEnterpriseGroupRoleBinding = "role_binding"
+	FieldEnterpriseGroupScope       = "scope"
 
 	// Field names for individual groups
 	FieldEnterpriseGroupID             = "id"
@@ -208,15 +209,24 @@ func resourceEnterpriseGroups() *schema.Resource {
 																Description: "List of scopes for the role binding.",
 																Elem: &schema.Resource{
 																	Schema: map[string]*schema.Schema{
-																		FieldEnterpriseGroupScopeOrganization: {
-																			Type:        schema.TypeString,
+																		FieldEnterpriseGroupScope: {
+																			Type:        schema.TypeList,
 																			Optional:    true,
-																			Description: "Organization ID scope.",
-																		},
-																		FieldEnterpriseGroupScopeCluster: {
-																			Type:        schema.TypeString,
-																			Optional:    true,
-																			Description: "Cluster ID scope.",
+																			Description: "Scope configuration.",
+																			Elem: &schema.Resource{
+																				Schema: map[string]*schema.Schema{
+																					FieldEnterpriseGroupScopeOrganization: {
+																						Type:        schema.TypeString,
+																						Optional:    true,
+																						Description: "Organization ID scope.",
+																					},
+																					FieldEnterpriseGroupScopeCluster: {
+																						Type:        schema.TypeString,
+																						Optional:    true,
+																						Description: "Cluster ID scope.",
+																					},
+																				},
+																			},
 																		},
 																	},
 																},
@@ -500,26 +510,37 @@ func buildBatchCreateRequest(enterpriseID string, data *schema.ResourceData) (*o
 
 						var scopes []organization_management.Scope
 						if scopesData, ok := binding[FieldEnterpriseGroupRoleBindingScopes].([]any); ok {
-							for _, scopeData := range scopesData {
-								scope := scopeData.(map[string]any)
+							for _, scopeWrapper := range scopesData {
+								scopeWrapperMap := scopeWrapper.(map[string]any)
 
-								orgID := scope[FieldEnterpriseGroupScopeOrganization].(string)
-								clusterID := scope[FieldEnterpriseGroupScopeCluster].(string)
-
-								if orgID != "" {
-									scopes = append(scopes, organization_management.Scope{
-										Organization: &organization_management.OrganizationScope{
-											Id: orgID,
-										},
-									})
+								// Navigate to the nested scope object
+								scopesDataNested, ok := scopeWrapperMap[FieldEnterpriseGroupScope].([]any)
+								if !ok || len(scopesDataNested) == 0 {
+									continue
 								}
 
-								if clusterID != "" {
-									scopes = append(scopes, organization_management.Scope{
-										Cluster: &organization_management.ClusterScope{
-											Id: clusterID,
-										},
-									})
+								// Process all scopes in the nested array
+								for _, scopeData := range scopesDataNested {
+									scope := scopeData.(map[string]any)
+
+									orgID := scope[FieldEnterpriseGroupScopeOrganization].(string)
+									clusterID := scope[FieldEnterpriseGroupScopeCluster].(string)
+
+									if orgID != "" {
+										scopes = append(scopes, organization_management.Scope{
+											Organization: &organization_management.OrganizationScope{
+												Id: orgID,
+											},
+										})
+									}
+
+									if clusterID != "" {
+										scopes = append(scopes, organization_management.Scope{
+											Cluster: &organization_management.ClusterScope{
+												Id: clusterID,
+											},
+										})
+									}
 								}
 							}
 						}
@@ -801,7 +822,8 @@ func convertRoleBindingsForBatch(roleBindings *[]organization_management.GroupRo
 			FieldEnterpriseGroupRoleBindingName:   binding.Name,
 			FieldEnterpriseGroupRoleBindingRoleID: binding.Definition.RoleId,
 		}
-		var scopes []map[string]any
+		// Collect all scope data
+		var allScopeData []map[string]any
 		if binding.Definition.Scopes != nil {
 			for _, scope := range *binding.Definition.Scopes {
 				scopeData := map[string]any{}
@@ -811,8 +833,17 @@ func convertRoleBindingsForBatch(roleBindings *[]organization_management.GroupRo
 				if scope.Cluster != nil {
 					scopeData[FieldEnterpriseGroupScopeCluster] = scope.Cluster.Id
 				}
-				scopes = append(scopes, scopeData)
+				allScopeData = append(allScopeData, scopeData)
 			}
+		}
+
+		// Create single scopes wrapper containing all scopes
+		var scopes []map[string]any
+		if len(allScopeData) > 0 {
+			scopeWrapper := map[string]any{
+				FieldEnterpriseGroupScope: allScopeData,
+			}
+			scopes = []map[string]any{scopeWrapper}
 		}
 		bindingData[FieldEnterpriseGroupRoleBindingScopes] = scopes
 		allRoleBindingData = append(allRoleBindingData, bindingData)
@@ -898,7 +929,7 @@ func convertRoleBindingsForState(roleBindings []organization_management.RoleBind
 
 			// Convert scopes
 			if roleBinding.Definition.Scopes != nil {
-				var scopesData []map[string]any
+				var allScopeData []map[string]any
 				for _, scope := range *roleBinding.Definition.Scopes {
 					scopeData := map[string]any{}
 
@@ -910,9 +941,16 @@ func convertRoleBindingsForState(roleBindings []organization_management.RoleBind
 						scopeData[FieldEnterpriseGroupScopeCluster] = scope.Cluster.Id
 					}
 
-					scopesData = append(scopesData, scopeData)
+					allScopeData = append(allScopeData, scopeData)
 				}
-				roleBindingData[FieldEnterpriseGroupRoleBindingScopes] = scopesData
+
+				// Create single scopes wrapper containing all scopes
+				if len(allScopeData) > 0 {
+					scopeWrapper := map[string]any{
+						FieldEnterpriseGroupScope: allScopeData,
+					}
+					roleBindingData[FieldEnterpriseGroupRoleBindingScopes] = []map[string]any{scopeWrapper}
+				}
 			}
 		}
 
@@ -1176,26 +1214,37 @@ func buildUpdateRequestForGroup(groupID string, group map[string]any) (*organiza
 
 				var scopes []organization_management.Scope
 				if scopesData, ok := binding[FieldEnterpriseGroupRoleBindingScopes].([]any); ok {
-					for _, scopeData := range scopesData {
-						scope := scopeData.(map[string]any)
+					for _, scopeWrapper := range scopesData {
+						scopeWrapperMap := scopeWrapper.(map[string]any)
 
-						orgID, _ := scope[FieldEnterpriseGroupScopeOrganization].(string)
-						clusterID, _ := scope[FieldEnterpriseGroupScopeCluster].(string)
-
-						if orgID != "" {
-							scopes = append(scopes, organization_management.Scope{
-								Organization: &organization_management.OrganizationScope{
-									Id: orgID,
-								},
-							})
+						// Navigate to the nested scope object
+						scopesDataNested, ok := scopeWrapperMap[FieldEnterpriseGroupScope].([]any)
+						if !ok || len(scopesDataNested) == 0 {
+							continue
 						}
 
-						if clusterID != "" {
-							scopes = append(scopes, organization_management.Scope{
-								Cluster: &organization_management.ClusterScope{
-									Id: clusterID,
-								},
-							})
+						// Process all scopes in the nested array
+						for _, scopeData := range scopesDataNested {
+							scope := scopeData.(map[string]any)
+
+							orgID, _ := scope[FieldEnterpriseGroupScopeOrganization].(string)
+							clusterID, _ := scope[FieldEnterpriseGroupScopeCluster].(string)
+
+							if orgID != "" {
+								scopes = append(scopes, organization_management.Scope{
+									Organization: &organization_management.OrganizationScope{
+										Id: orgID,
+									},
+								})
+							}
+
+							if clusterID != "" {
+								scopes = append(scopes, organization_management.Scope{
+									Cluster: &organization_management.ClusterScope{
+										Id: clusterID,
+									},
+								})
+							}
 						}
 					}
 				}
@@ -1283,26 +1332,37 @@ func buildCreateRequestForGroup(group map[string]any) (*organization_management.
 
 				var scopes []organization_management.Scope
 				if scopesData, ok := binding[FieldEnterpriseGroupRoleBindingScopes].([]any); ok {
-					for _, scopeData := range scopesData {
-						scope := scopeData.(map[string]any)
+					for _, scopeWrapper := range scopesData {
+						scopeWrapperMap := scopeWrapper.(map[string]any)
 
-						orgID, _ := scope[FieldEnterpriseGroupScopeOrganization].(string)
-						clusterID, _ := scope[FieldEnterpriseGroupScopeCluster].(string)
-
-						if orgID != "" {
-							scopes = append(scopes, organization_management.Scope{
-								Organization: &organization_management.OrganizationScope{
-									Id: orgID,
-								},
-							})
+						// Navigate to the nested scope object
+						scopesDataNested, ok := scopeWrapperMap[FieldEnterpriseGroupScope].([]any)
+						if !ok || len(scopesDataNested) == 0 {
+							continue
 						}
 
-						if clusterID != "" {
-							scopes = append(scopes, organization_management.Scope{
-								Cluster: &organization_management.ClusterScope{
-									Id: clusterID,
-								},
-							})
+						// Process all scopes in the nested array
+						for _, scopeData := range scopesDataNested {
+							scope := scopeData.(map[string]any)
+
+							orgID, _ := scope[FieldEnterpriseGroupScopeOrganization].(string)
+							clusterID, _ := scope[FieldEnterpriseGroupScopeCluster].(string)
+
+							if orgID != "" {
+								scopes = append(scopes, organization_management.Scope{
+									Organization: &organization_management.OrganizationScope{
+										Id: orgID,
+									},
+								})
+							}
+
+							if clusterID != "" {
+								scopes = append(scopes, organization_management.Scope{
+									Cluster: &organization_management.ClusterScope{
+										Id: clusterID,
+									},
+								})
+							}
 						}
 					}
 				}
