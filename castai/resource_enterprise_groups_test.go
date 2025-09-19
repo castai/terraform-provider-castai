@@ -1475,8 +1475,9 @@ func TestResourceEnterpriseGroupsUpdate(t *testing.T) {
 				"groups.0.role_bindings.#":                       "1",
 				"groups.0.role_bindings.0.name":                  "old-role-binding",
 				"groups.0.role_bindings.0.role_id":               "old-role-id",
-				"groups.0.role_bindings.0.scopes.#":              "1",
-				"groups.0.role_bindings.0.scopes.0.organization": orgID1,
+				"groups.0.role_bindings.0.scopes.#":              "2",
+				"groups.0.role_bindings.0.scopes.0.cluster":      "old-cluster-id",
+				"groups.0.role_bindings.0.scopes.1.organization": orgID1,
 				"groups.1.id":                                    existingGroupID2,
 				"groups.1.name":                                  "group-to-delete",
 				"groups.1.organization_id":                       orgID2,
@@ -1508,6 +1509,24 @@ func TestResourceEnterpriseGroupsUpdate(t *testing.T) {
 				"groups.0.role_bindings.0.role_id": {
 					Old: "old-role-id",
 					New: "new-role-id",
+				},
+				"groups.0.role_bindings.0.scopes.#": {
+					Old: "2",
+					New: "1",
+				},
+				"groups.0.role_bindings.0.scopes.0.cluster": {
+					Old:        "old-cluster-id",
+					New:        "",
+					NewRemoved: true,
+				},
+				"groups.0.role_bindings.0.scopes.0.organization": {
+					Old: "",
+					New: orgID1,
+				},
+				"groups.0.role_bindings.0.scopes.1.organization": {
+					Old:        orgID1,
+					New:        "",
+					NewRemoved: true,
 				},
 				"groups.1.id": {
 					Old:        existingGroupID2,
