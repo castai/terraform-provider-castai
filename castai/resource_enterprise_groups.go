@@ -445,22 +445,26 @@ func buildBatchCreateRequest(enterpriseID string, data *schema.ResourceData) (*o
 				if !ok || len(membersDataNested) == 0 {
 					continue
 				}
-				member := membersDataNested[0].(map[string]any)
 
-				var kind organization_management.BatchCreateEnterpriseGroupsRequestMemberKind
-				switch member[FieldEnterpriseGroupMemberKind].(string) {
-				case EnterpriseGroupMemberKindUser:
-					kind = organization_management.BatchCreateEnterpriseGroupsRequestMemberKindSUBJECTKINDUSER
-				case EnterpriseGroupMemberKindServiceAccount:
-					kind = organization_management.BatchCreateEnterpriseGroupsRequestMemberKindSUBJECTKINDSERVICEACCOUNT
-				default:
-					kind = organization_management.BatchCreateEnterpriseGroupsRequestMemberKindSUBJECTKINDUNSPECIFIED
+				// Process all members in the nested array
+				for _, memberData := range membersDataNested {
+					member := memberData.(map[string]any)
+
+					var kind organization_management.BatchCreateEnterpriseGroupsRequestMemberKind
+					switch member[FieldEnterpriseGroupMemberKind].(string) {
+					case EnterpriseGroupMemberKindUser:
+						kind = organization_management.BatchCreateEnterpriseGroupsRequestMemberKindSUBJECTKINDUSER
+					case EnterpriseGroupMemberKindServiceAccount:
+						kind = organization_management.BatchCreateEnterpriseGroupsRequestMemberKindSUBJECTKINDSERVICEACCOUNT
+					default:
+						kind = organization_management.BatchCreateEnterpriseGroupsRequestMemberKindSUBJECTKINDUNSPECIFIED
+					}
+
+					members = append(members, organization_management.BatchCreateEnterpriseGroupsRequestMember{
+						Kind: &kind,
+						Id:   lo.ToPtr(member[FieldEnterpriseGroupMemberID].(string)),
+					})
 				}
-
-				members = append(members, organization_management.BatchCreateEnterpriseGroupsRequestMember{
-					Kind: &kind,
-					Id:   lo.ToPtr(member[FieldEnterpriseGroupMemberID].(string)),
-				})
 			}
 		}
 
@@ -1064,22 +1068,26 @@ func buildUpdateRequestForGroup(groupID string, group map[string]any) (*organiza
 			if !ok || len(membersDataNested) == 0 {
 				continue
 			}
-			member := membersDataNested[0].(map[string]any)
 
-			var kind organization_management.BatchUpdateEnterpriseGroupsRequestMemberKind
-			switch member[FieldEnterpriseGroupMemberKind].(string) {
-			case EnterpriseGroupMemberKindUser:
-				kind = organization_management.BatchUpdateEnterpriseGroupsRequestMemberKindUSER
-			case EnterpriseGroupMemberKindServiceAccount:
-				kind = organization_management.BatchUpdateEnterpriseGroupsRequestMemberKindSERVICEACCOUNT
-			default:
-				kind = organization_management.BatchUpdateEnterpriseGroupsRequestMemberKindSUBJECTKINDUNSPECIFIED
+			// Process all members in the nested array
+			for _, memberData := range membersDataNested {
+				member := memberData.(map[string]any)
+
+				var kind organization_management.BatchUpdateEnterpriseGroupsRequestMemberKind
+				switch member[FieldEnterpriseGroupMemberKind].(string) {
+				case EnterpriseGroupMemberKindUser:
+					kind = organization_management.BatchUpdateEnterpriseGroupsRequestMemberKindUSER
+				case EnterpriseGroupMemberKindServiceAccount:
+					kind = organization_management.BatchUpdateEnterpriseGroupsRequestMemberKindSERVICEACCOUNT
+				default:
+					kind = organization_management.BatchUpdateEnterpriseGroupsRequestMemberKindSUBJECTKINDUNSPECIFIED
+				}
+
+				members = append(members, organization_management.BatchUpdateEnterpriseGroupsRequestMember{
+					Kind: kind,
+					Id:   member[FieldEnterpriseGroupMemberID].(string),
+				})
 			}
-
-			members = append(members, organization_management.BatchUpdateEnterpriseGroupsRequestMember{
-				Kind: kind,
-				Id:   member[FieldEnterpriseGroupMemberID].(string),
-			})
 		}
 	}
 
@@ -1155,22 +1163,26 @@ func buildCreateRequestForGroup(group map[string]any) (*organization_management.
 			if !ok || len(membersDataNested) == 0 {
 				continue
 			}
-			member := membersDataNested[0].(map[string]any)
 
-			var kind organization_management.BatchCreateEnterpriseGroupsRequestMemberKind
-			switch member[FieldEnterpriseGroupMemberKind].(string) {
-			case EnterpriseGroupMemberKindUser:
-				kind = organization_management.BatchCreateEnterpriseGroupsRequestMemberKindSUBJECTKINDUSER
-			case EnterpriseGroupMemberKindServiceAccount:
-				kind = organization_management.BatchCreateEnterpriseGroupsRequestMemberKindSUBJECTKINDSERVICEACCOUNT
-			default:
-				kind = organization_management.BatchCreateEnterpriseGroupsRequestMemberKindSUBJECTKINDUNSPECIFIED
+			// Process all members in the nested array
+			for _, memberData := range membersDataNested {
+				member := memberData.(map[string]any)
+
+				var kind organization_management.BatchCreateEnterpriseGroupsRequestMemberKind
+				switch member[FieldEnterpriseGroupMemberKind].(string) {
+				case EnterpriseGroupMemberKindUser:
+					kind = organization_management.BatchCreateEnterpriseGroupsRequestMemberKindSUBJECTKINDUSER
+				case EnterpriseGroupMemberKindServiceAccount:
+					kind = organization_management.BatchCreateEnterpriseGroupsRequestMemberKindSUBJECTKINDSERVICEACCOUNT
+				default:
+					kind = organization_management.BatchCreateEnterpriseGroupsRequestMemberKindSUBJECTKINDUNSPECIFIED
+				}
+
+				members = append(members, organization_management.BatchCreateEnterpriseGroupsRequestMember{
+					Kind: &kind,
+					Id:   lo.ToPtr(member[FieldEnterpriseGroupMemberID].(string)),
+				})
 			}
-
-			members = append(members, organization_management.BatchCreateEnterpriseGroupsRequestMember{
-				Kind: &kind,
-				Id:   lo.ToPtr(member[FieldEnterpriseGroupMemberID].(string)),
-			})
 		}
 	}
 
