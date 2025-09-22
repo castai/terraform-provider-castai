@@ -764,7 +764,7 @@ func getGroupsRoleBindings(
 		}
 
 		var roleBindings []RoleBinding
-		if resp.JSON200 == nil || resp.JSON200.Items == nil {
+		if resp.JSON200 != nil || resp.JSON200.Items != nil {
 			roleBindings = make([]RoleBinding, 0, len(*resp.JSON200.Items))
 
 			for _, rb := range *resp.JSON200.Items {
@@ -835,42 +835,88 @@ func convertMembers(members []Member) []map[string]any {
 	return nil
 }
 
+// convertRoleBindings converts the list of role bindings into the format expected by Terraform schema
+// Role bindings added to the group outside of Terraform are ignored, as we cannot track ordering for them.
 func convertRoleBindings(currentRoleBindings, newRoleBinding []RoleBinding) []map[string]any {
 	if len(newRoleBinding) == 0 {
 		return nil
 	}
 
 	var allRoleBindingData []map[string]any
-	for _, rb := range newRoleBinding {
-		bindingData := map[string]any{
-			FieldEnterpriseGroupRoleBindingID:     rb.ID,
-			FieldEnterpriseGroupRoleBindingName:   rb.Name,
-			FieldEnterpriseGroupRoleBindingRoleID: rb.RoleID,
-		}
-
-		var allScopeData []map[string]any
-		if rb.Scopes != nil {
-			for _, scope := range rb.Scopes {
-				scopeData := map[string]any{}
-				if scope.OrganizationID != nil {
-					scopeData[FieldEnterpriseGroupScopeOrganization] = *scope.OrganizationID
-				}
-				if scope.ClusterID != nil {
-					scopeData[FieldEnterpriseGroupScopeCluster] = *scope.ClusterID
-				}
-				allScopeData = append(allScopeData, scopeData)
+	if len(currentRoleBindings) == 0 {
+		for _, rb := range newRoleBinding {
+			bindingData := map[string]any{
+				FieldEnterpriseGroupRoleBindingID:     rb.ID,
+				FieldEnterpriseGroupRoleBindingName:   rb.Name,
+				FieldEnterpriseGroupRoleBindingRoleID: rb.RoleID,
 			}
-		}
 
-		var scopes []map[string]any
-		if len(allScopeData) > 0 {
-			scopeWrapper := map[string]any{
-				FieldEnterpriseGroupScope: allScopeData,
+			var allScopeData []map[string]any
+			if rb.Scopes != nil {
+				for _, scope := range rb.Scopes {
+					scopeData := map[string]any{}
+					if scope.OrganizationID != nil {
+						scopeData[FieldEnterpriseGroupScopeOrganization] = *scope.OrganizationID
+					}
+					if scope.ClusterID != nil {
+						scopeData[FieldEnterpriseGroupScopeCluster] = *scope.ClusterID
+					}
+					allScopeData = append(allScopeData, scopeData)
+				}
 			}
-			scopes = []map[string]any{scopeWrapper}
+
+			var scopes []map[string]any
+			if len(allScopeData) > 0 {
+				scopeWrapper := map[string]any{
+					FieldEnterpriseGroupScope: allScopeData,
+				}
+				scopes = []map[string]any{scopeWrapper}
+			}
+			bindingData[FieldEnterpriseGroupRoleBindingScopes] = scopes
+			allRoleBindingData = append(allRoleBindingData, bindingData)
 		}
-		bindingData[FieldEnterpriseGroupRoleBindingScopes] = scopes
-		allRoleBindingData = append(allRoleBindingData, bindingData)
+	} else {
+		newRoleBindingIDToRoleBinding := lo.SliceToMap(newRoleBinding, func(item RoleBinding) (string, RoleBinding) {
+			return item.ID, item
+		})
+
+		for _, rb := range currentRoleBindings {
+			newRb, ok := newRoleBindingIDToRoleBinding[rb.ID]
+			if !ok {
+				// Role binding was removed outside of Terraform, skip it
+				continue
+			}
+
+			rbData := map[string]any{
+				FieldEnterpriseGroupRoleBindingID:     rb.ID,
+				FieldEnterpriseGroupRoleBindingName:   newRb.Name,
+				FieldEnterpriseGroupRoleBindingRoleID: newRb.RoleID,
+			}
+
+			var allScopeData []map[string]any
+			if newRb.Scopes != nil {
+				for _, scope := range newRb.Scopes {
+					scopeData := map[string]any{}
+					if scope.OrganizationID != nil {
+						scopeData[FieldEnterpriseGroupScopeOrganization] = *scope.OrganizationID
+					}
+					if scope.ClusterID != nil {
+						scopeData[FieldEnterpriseGroupScopeCluster] = *scope.ClusterID
+					}
+					allScopeData = append(allScopeData, scopeData)
+				}
+			}
+
+			var scopes []map[string]any
+			if len(allScopeData) > 0 {
+				scopeWrapper := map[string]any{
+					FieldEnterpriseGroupScope: allScopeData,
+				}
+				scopes = []map[string]any{scopeWrapper}
+			}
+			rbData[FieldEnterpriseGroupRoleBindingScopes] = scopes
+			allRoleBindingData = append(allRoleBindingData, rbData)
+		}
 	}
 
 	if len(allRoleBindingData) > 0 {
