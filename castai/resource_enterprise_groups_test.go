@@ -527,7 +527,6 @@ func TestResourceEnterpriseGroupsCreateContext(t *testing.T) {
 		r.Equal("engineering-team", group1[FieldEnterpriseGroupName])
 		r.Equal(organizationID1, group1[FieldEnterpriseGroupOrganizationID])
 		r.Equal("Engineering team group", group1[FieldEnterpriseGroupDescription])
-		r.Equal(createTime.Format(time.RFC3339), group1[FieldEnterpriseGroupCreateTime])
 
 		// Verify second group members (engineering-team has 3 members)
 		members1 := group1[FieldEnterpriseGroupMembers].([]any)
@@ -614,7 +613,6 @@ func TestResourceEnterpriseGroupsCreateContext(t *testing.T) {
 		r.Equal("security-team", group2[FieldEnterpriseGroupName])
 		r.Equal(organizationID2, group2[FieldEnterpriseGroupOrganizationID])
 		r.Equal("Security team group", group2[FieldEnterpriseGroupDescription])
-		r.Equal(createTime.Format(time.RFC3339), group2[FieldEnterpriseGroupCreateTime])
 
 		// Verify first group members (group2/security-team has 1 member)
 		members2 := group2[FieldEnterpriseGroupMembers].([]any)
@@ -1591,6 +1589,8 @@ func TestResourceEnterpriseGroupsUpdateContext(t *testing.T) {
 				"groups.0.group.0.id":              existingGroupID1,
 				"groups.0.group.0.name":            "existing-group",
 				"groups.0.group.0.organization_id": orgID1,
+				"groups.0.group.0.description":     "An existing group",
+				"groups.0.group.0.create_time":     createTime.Format(time.RFC3339),
 				"groups.0.group.0.members.#":       "0",
 				"groups.0.group.0.role_bindings.#": "0",
 			},

@@ -69,7 +69,6 @@ const (
 	FieldEnterpriseGroupOrganizationID = "organization_id"
 	FieldEnterpriseGroupName           = "name"
 	FieldEnterpriseGroupDescription    = "description"
-	FieldEnterpriseGroupCreateTime     = "create_time"
 	FieldEnterpriseGroupMembers        = "members"
 	FieldEnterpriseGroupRoleBindings   = "role_bindings"
 
@@ -139,7 +138,6 @@ func resourceEnterpriseGroups() *schema.Resource {
 									FieldEnterpriseGroupOrganizationID: {
 										Type:        schema.TypeString,
 										Required:    true,
-										ForceNew:    true,
 										Description: "Target organization ID for the group.",
 									},
 									FieldEnterpriseGroupName: {
@@ -151,11 +149,6 @@ func resourceEnterpriseGroups() *schema.Resource {
 										Type:        schema.TypeString,
 										Optional:    true,
 										Description: "Description of the group.",
-									},
-									FieldEnterpriseGroupCreateTime: {
-										Type:        schema.TypeString,
-										Computed:    true,
-										Description: "Timestamp when the group was created.",
 									},
 									FieldEnterpriseGroupMembers: {
 										Type:        schema.TypeList,
@@ -282,15 +275,30 @@ func resourceEnterpriseGroupsCreate(ctx context.Context, data *schema.ResourceDa
 		return diag.FromErr(fmt.Errorf("unexpected empty response from batch create"))
 	}
 
-	groups := make([]EnterpriseGroupWithRoleBindings, len(*resp.JSON200.Groups))
-	for i, g := range *resp.JSON200.Groups {
+	groups, err := convertBatchCreateEnterpriseGroupsResponseGroup(*resp.JSON200.Groups...)
+	if err != nil {
+		return diag.FromErr(fmt.Errorf("converting created groups: %w", err))
+	}
+
+	if err = setEnterpriseGroupsData(data, groups); err != nil {
+		return diag.FromErr(fmt.Errorf("failed to set created groups data: %w", err))
+	}
+
+	data.SetId(enterpriseID)
+
+	return nil
+}
+
+func convertBatchCreateEnterpriseGroupsResponseGroup(groups ...organization_management.BatchCreateEnterpriseGroupsResponseGroup) ([]EnterpriseGroupWithRoleBindings, error) {
+	out := make([]EnterpriseGroupWithRoleBindings, len(groups))
+	for i, g := range groups {
 		var members []Member
 		if g.Definition != nil && g.Definition.Members != nil && len(*g.Definition.Members) > 0 {
 			members = make([]Member, 0, len(*g.Definition.Members))
 			for _, member := range *g.Definition.Members {
 				m := Member{}
 				if member.Kind == nil {
-					return diag.FromErr(fmt.Errorf("member kind is nil for member in group %s", lo.FromPtr(g.Name)))
+					return nil, fmt.Errorf("member kind is nil for member in group %s", lo.FromPtr(g.Name))
 				}
 
 				if *member.Kind == organization_management.DefinitionMemberKindSUBJECTKINDUSER {
@@ -298,7 +306,7 @@ func resourceEnterpriseGroupsCreate(ctx context.Context, data *schema.ResourceDa
 				} else if *member.Kind == organization_management.DefinitionMemberKindSUBJECTKINDSERVICEACCOUNT {
 					m.Kind = EnterpriseGroupMemberKindServiceAccount
 				} else {
-					return diag.FromErr(fmt.Errorf("unsupported member kind %s for member in group %s", *member.Kind, lo.FromPtr(g.Name)))
+					return nil, fmt.Errorf("unsupported member kind %s for member in group %s", *member.Kind, lo.FromPtr(g.Name))
 				}
 				m.ID = lo.FromPtr(member.Id)
 				m.Email = member.Email
@@ -338,7 +346,7 @@ func resourceEnterpriseGroupsCreate(ctx context.Context, data *schema.ResourceDa
 			}
 		}
 
-		groups[i] = EnterpriseGroupWithRoleBindings{
+		out[i] = EnterpriseGroupWithRoleBindings{
 			Group: Group{
 				ID:             lo.FromPtr(g.Id),
 				Name:           lo.FromPtr(g.Name),
@@ -352,13 +360,7 @@ func resourceEnterpriseGroupsCreate(ctx context.Context, data *schema.ResourceDa
 		}
 	}
 
-	if err = setEnterpriseGroupsData(data, groups); err != nil {
-		return diag.FromErr(fmt.Errorf("failed to set created groups data: %w", err))
-	}
-
-	data.SetId(enterpriseID)
-
-	return nil
+	return out, nil
 }
 
 func resourceEnterpriseGroupsRead(ctx context.Context, data *schema.ResourceData, meta any) diag.Diagnostics {
@@ -433,21 +435,23 @@ func resourceEnterpriseGroupsUpdate(ctx context.Context, data *schema.ResourceDa
 		return diag.FromErr(fmt.Errorf("analyzing group changes: %w", err))
 	}
 
-	if len(changes.toDelete) > 0 {
-		deleteRequest := &organization_management.BatchDeleteEnterpriseGroupsRequest{
-			EnterpriseId: enterpriseID,
-			Requests:     changes.toDelete,
-		}
-
-		resp, err := client.EnterpriseAPIBatchDeleteEnterpriseGroupsWithResponse(ctx, enterpriseID, *deleteRequest)
-		if err != nil {
-			return diag.FromErr(fmt.Errorf("deleting removed groups: %w", err))
-		}
-
-		if resp.StatusCode() != http.StatusOK && resp.StatusCode() != http.StatusNotFound {
-			return diag.FromErr(fmt.Errorf("batch delete removed groups failed with status %d: %s", resp.StatusCode(), string(resp.Body)))
-		}
-	}
+	//if len(changes.toDelete) > 0 {
+	//	log.Printf("[INFO] Deleting group changes for enterprise ID %s: %d groups to delete", enterpriseID, len(changes.toDelete))
+	//
+	//	deleteRequest := &organization_management.BatchDeleteEnterpriseGroupsRequest{
+	//		EnterpriseId: enterpriseID,
+	//		Requests:     changes.toDelete,
+	//	}
+	//
+	//	resp, err := client.EnterpriseAPIBatchDeleteEnterpriseGroupsWithResponse(ctx, enterpriseID, *deleteRequest)
+	//	if err != nil {
+	//		return diag.FromErr(fmt.Errorf("deleting removed groups: %w", err))
+	//	}
+	//
+	//	if resp.StatusCode() != http.StatusOK && resp.StatusCode() != http.StatusNotFound {
+	//		return diag.FromErr(fmt.Errorf("batch delete removed groups failed with status %d: %s", resp.StatusCode(), string(resp.Body)))
+	//	}
+	//}
 
 	if len(changes.toCreate) > 0 {
 		createRequest := &organization_management.BatchCreateEnterpriseGroupsRequest{
@@ -464,10 +468,17 @@ func resourceEnterpriseGroupsUpdate(ctx context.Context, data *schema.ResourceDa
 			return diag.FromErr(fmt.Errorf("batch create new groups failed with status %d: %s", resp.StatusCode(), string(resp.Body)))
 		}
 
-		if resp.JSON200 != nil && resp.JSON200.Groups != nil {
-			//if err = setEnterpriseGroupsData(data, *resp.JSON200.Groups); err != nil {
-			//	return diag.FromErr(fmt.Errorf("failed to set created groups data: %w", err))
-			//}
+		if resp.JSON200 == nil || resp.JSON200.Groups == nil {
+			return diag.FromErr(fmt.Errorf("unexpected empty response from batch create"))
+		}
+
+		groups, err := convertBatchCreateEnterpriseGroupsResponseGroup(*resp.JSON200.Groups...)
+		if err != nil {
+			return diag.FromErr(fmt.Errorf("converting created groups: %w", err))
+		}
+
+		if err = setEnterpriseGroupsData(data, groups); err != nil {
+			return diag.FromErr(fmt.Errorf("failed to set created groups data: %w", err))
 		}
 	}
 
@@ -894,19 +905,20 @@ func setEnterpriseGroupsData(
 	data *schema.ResourceData,
 	groups []EnterpriseGroupWithRoleBindings,
 ) error {
-	type groupID struct {
-		organizationID string
-		name           string
+	type groupKey struct {
+		orgID string
+		name  string
 	}
 
-	groupIDToGroup := lo.SliceToMap(groups,
-		func(item EnterpriseGroupWithRoleBindings) (groupID, EnterpriseGroupWithRoleBindings) {
-			g := groupID{
-				organizationID: item.Group.OrganizationID,
-				name:           item.Group.Name,
-			}
+	groupKeyToGroup := lo.SliceToMap(groups,
+		func(item EnterpriseGroupWithRoleBindings) (groupKey, EnterpriseGroupWithRoleBindings) {
+			return groupKey{orgID: item.Group.OrganizationID, name: item.Group.Name}, item
+		},
+	)
 
-			return g, item
+	groupIDToGroup := lo.SliceToMap(groups,
+		func(item EnterpriseGroupWithRoleBindings) (string, EnterpriseGroupWithRoleBindings) {
+			return item.Group.ID, item
 		},
 	)
 
@@ -920,17 +932,25 @@ func setEnterpriseGroupsData(
 		updatedGroups := make([]map[string]any, 0, len(configGroupsData))
 		for _, configGroupNested := range configGroupsData {
 			configGroupMap := configGroupNested.(map[string]any)
-			configGroupName := configGroupMap[FieldEnterpriseGroupName].(string)
 			configOrganizationID := configGroupMap[FieldEnterpriseGroupOrganizationID].(string)
+			configName := configGroupMap[FieldEnterpriseGroupName].(string)
+			configGroupID := configGroupMap[FieldEnterpriseGroupID].(string)
 
-			g := groupID{
-				organizationID: configOrganizationID,
-				name:           configGroupName,
-			}
-
-			matchedGroup, ok := groupIDToGroup[g]
-			if !ok {
-				return fmt.Errorf("created group not found in response: name=%s, organization_id=%s", configGroupName, configOrganizationID)
+			var matchedGroup EnterpriseGroupWithRoleBindings
+			var ok bool
+			if configGroupID == "" {
+				// New group, match by org ID and name
+				matchedGroup, ok = groupKeyToGroup[groupKey{orgID: configOrganizationID, name: configName}]
+				if !ok {
+					// Group not yet created, skip it
+					continue
+				}
+			} else {
+				// Existing group, match by ID
+				if _, ok = groupIDToGroup[configGroupID]; !ok {
+					// Group was removed outside of Terraform, skip it
+					continue
+				}
 			}
 
 			updatedGroup := map[string]any{
@@ -940,7 +960,6 @@ func setEnterpriseGroupsData(
 
 			updatedGroup[FieldEnterpriseGroupID] = matchedGroup.Group.ID
 			updatedGroup[FieldEnterpriseGroupDescription] = matchedGroup.Group.Description
-			updatedGroup[FieldEnterpriseGroupCreateTime] = matchedGroup.Group.CreateTime.Format(time.RFC3339)
 			updatedGroup[FieldEnterpriseGroupMembers] = convertMembers(matchedGroup.Group.Members)
 
 			currentRBs := []RoleBinding{}
@@ -989,68 +1008,6 @@ func setEnterpriseGroupsData(
 	}
 
 	return nil
-}
-
-// convertRoleBindingsForState converts API role bindings to Terraform state format
-func convertRoleBindingsForState(roleBindings []organization_management.RoleBinding) []map[string]any {
-	var allRoleBindingData []map[string]any
-
-	for _, roleBinding := range roleBindings {
-		roleBindingData := map[string]any{}
-
-		if roleBinding.Id != nil {
-			roleBindingData[FieldEnterpriseGroupRoleBindingID] = *roleBinding.Id
-		}
-
-		if roleBinding.Name != nil {
-			roleBindingData[FieldEnterpriseGroupRoleBindingName] = *roleBinding.Name
-		}
-
-		if roleBinding.Definition != nil {
-			if roleBinding.Definition.RoleId != nil {
-				roleBindingData[FieldEnterpriseGroupRoleBindingRoleID] = *roleBinding.Definition.RoleId
-			}
-
-			// Convert scopes
-			if roleBinding.Definition.Scopes != nil {
-				var allScopeData []map[string]any
-				for _, scope := range *roleBinding.Definition.Scopes {
-					scopeData := map[string]any{}
-
-					if scope.Organization != nil {
-						scopeData[FieldEnterpriseGroupScopeOrganization] = scope.Organization.Id
-					}
-
-					if scope.Cluster != nil {
-						scopeData[FieldEnterpriseGroupScopeCluster] = scope.Cluster.Id
-					}
-
-					allScopeData = append(allScopeData, scopeData)
-				}
-
-				// Create single scopes wrapper containing all scopes
-				if len(allScopeData) > 0 {
-					scopeWrapper := map[string]any{
-						FieldEnterpriseGroupScope: allScopeData,
-					}
-					roleBindingData[FieldEnterpriseGroupRoleBindingScopes] = []map[string]any{scopeWrapper}
-				}
-			}
-		}
-
-		allRoleBindingData = append(allRoleBindingData, roleBindingData)
-	}
-
-	// Create single role bindings wrapper containing all role bindings
-	if len(allRoleBindingData) > 0 {
-		// Sort role bindings by ID for consistent ordering
-		roleBindingWrapper := map[string]any{
-			FieldEnterpriseGroupRoleBinding: allRoleBindingData,
-		}
-		return []map[string]any{roleBindingWrapper}
-	}
-
-	return []map[string]any{}
 }
 
 // EnterpriseGroupsChanges represents the changes needed during an update operation
