@@ -70,15 +70,12 @@ const (
 	FieldEnterpriseGroupName           = "name"
 	FieldEnterpriseGroupDescription    = "description"
 	FieldEnterpriseGroupCreateTime     = "create_time"
-	FieldEnterpriseGroupManagedBy      = "managed_by"
 	FieldEnterpriseGroupMembers        = "members"
 	FieldEnterpriseGroupRoleBindings   = "role_bindings"
 
 	// Field names for members
-	FieldEnterpriseGroupMemberKind      = "kind"
-	FieldEnterpriseGroupMemberID        = "id"
-	FieldEnterpriseGroupMemberEmail     = "email"
-	FieldEnterpriseGroupMemberAddedTime = "added_time"
+	FieldEnterpriseGroupMemberKind = "kind"
+	FieldEnterpriseGroupMemberID   = "id"
 
 	// Field names for role bindings
 	FieldEnterpriseGroupRoleBindingID     = "id"
@@ -160,11 +157,6 @@ func resourceEnterpriseGroups() *schema.Resource {
 										Computed:    true,
 										Description: "Timestamp when the group was created.",
 									},
-									FieldEnterpriseGroupManagedBy: {
-										Type:        schema.TypeString,
-										Computed:    true,
-										Description: "Method used to create the group (e.g., terraform, console).",
-									},
 									FieldEnterpriseGroupMembers: {
 										Type:        schema.TypeList,
 										Optional:    true,
@@ -190,16 +182,6 @@ func resourceEnterpriseGroups() *schema.Resource {
 																Type:        schema.TypeString,
 																Required:    true,
 																Description: "Member UUID.",
-															},
-															FieldEnterpriseGroupMemberEmail: {
-																Type:        schema.TypeString,
-																Computed:    true,
-																Description: "Member email address.",
-															},
-															FieldEnterpriseGroupMemberAddedTime: {
-																Type:        schema.TypeString,
-																Computed:    true,
-																Description: "Timestamp when the member was added to the group.",
 															},
 														},
 													},
@@ -818,8 +800,6 @@ func convertMembers(members []Member) []map[string]any {
 	for _, member := range members {
 		memberData := map[string]any{}
 		memberData[FieldEnterpriseGroupMemberID] = member.ID
-		memberData[FieldEnterpriseGroupMemberEmail] = member.Email
-		memberData[FieldEnterpriseGroupMemberAddedTime] = member.AddedTime.Format(time.RFC3339)
 		memberData[FieldEnterpriseGroupMemberKind] = member.Kind
 		allMemberData = append(allMemberData, memberData)
 	}
@@ -961,7 +941,6 @@ func setEnterpriseGroupsData(
 			updatedGroup[FieldEnterpriseGroupID] = matchedGroup.Group.ID
 			updatedGroup[FieldEnterpriseGroupDescription] = matchedGroup.Group.Description
 			updatedGroup[FieldEnterpriseGroupCreateTime] = matchedGroup.Group.CreateTime.Format(time.RFC3339)
-			updatedGroup[FieldEnterpriseGroupManagedBy] = *matchedGroup.Group.ManagedBy
 			updatedGroup[FieldEnterpriseGroupMembers] = convertMembers(matchedGroup.Group.Members)
 
 			currentRBs := []RoleBinding{}

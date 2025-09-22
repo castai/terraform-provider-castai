@@ -528,7 +528,6 @@ func TestResourceEnterpriseGroupsCreateContext(t *testing.T) {
 		r.Equal(organizationID1, group1[FieldEnterpriseGroupOrganizationID])
 		r.Equal("Engineering team group", group1[FieldEnterpriseGroupDescription])
 		r.Equal(createTime.Format(time.RFC3339), group1[FieldEnterpriseGroupCreateTime])
-		r.Equal("terraform", group1[FieldEnterpriseGroupManagedBy])
 
 		// Verify second group members (engineering-team has 3 members)
 		members1 := group1[FieldEnterpriseGroupMembers].([]any)
@@ -542,21 +541,15 @@ func TestResourceEnterpriseGroupsCreateContext(t *testing.T) {
 		// Members should be sorted by ID: memberID2 ("a"...), memberID1 ("b"...), memberID3 ("c"...)
 		member2First := memberList1[0].(map[string]any)
 		r.Equal(memberID1, member2First[FieldEnterpriseGroupMemberID])
-		r.Equal("engineer@example.com", member2First[FieldEnterpriseGroupMemberEmail])
 		r.Equal("user", member2First[FieldEnterpriseGroupMemberKind])
-		r.Equal(createTime.Format(time.RFC3339), member2First[FieldEnterpriseGroupMemberAddedTime])
 
 		member2Second := memberList1[1].(map[string]any)
 		r.Equal(memberID2, member2Second[FieldEnterpriseGroupMemberID])
-		r.Equal("security@example.com", member2Second[FieldEnterpriseGroupMemberEmail])
 		r.Equal("user", member2Second[FieldEnterpriseGroupMemberKind])
-		r.Equal(createTime.Format(time.RFC3339), member2Second[FieldEnterpriseGroupMemberAddedTime])
 
 		member2Third := memberList1[2].(map[string]any)
 		r.Equal(memberID3, member2Third[FieldEnterpriseGroupMemberID])
-		r.Empty(member2Third[FieldEnterpriseGroupMemberEmail]) // Service account has no email
 		r.Equal("service_account", member2Third[FieldEnterpriseGroupMemberKind])
-		r.Equal(createTime.Format(time.RFC3339), member2Third[FieldEnterpriseGroupMemberAddedTime])
 
 		// Verify second group role bindings (engineering-team has 2 role bindings)
 		roleBindings1 := group1[FieldEnterpriseGroupRoleBindings].([]any)
@@ -622,7 +615,6 @@ func TestResourceEnterpriseGroupsCreateContext(t *testing.T) {
 		r.Equal(organizationID2, group2[FieldEnterpriseGroupOrganizationID])
 		r.Equal("Security team group", group2[FieldEnterpriseGroupDescription])
 		r.Equal(createTime.Format(time.RFC3339), group2[FieldEnterpriseGroupCreateTime])
-		r.Equal("terraform", group2[FieldEnterpriseGroupManagedBy])
 
 		// Verify first group members (group2/security-team has 1 member)
 		members2 := group2[FieldEnterpriseGroupMembers].([]any)
@@ -634,9 +626,7 @@ func TestResourceEnterpriseGroupsCreateContext(t *testing.T) {
 		r.Len(memberList2, 1)
 		member2 := memberList2[0].(map[string]any)
 		r.Equal(memberID2, member2[FieldEnterpriseGroupMemberID])
-		r.Equal("security@example.com", member2[FieldEnterpriseGroupMemberEmail])
 		r.Equal("user", member2[FieldEnterpriseGroupMemberKind])
-		r.Equal(createTime.Format(time.RFC3339), member2[FieldEnterpriseGroupMemberAddedTime])
 
 		// Verify first group role bindings (security-team has 1 role binding)
 		roleBindings2 := group2[FieldEnterpriseGroupRoleBindings].([]any)
@@ -672,7 +662,7 @@ func TestResourceEnterpriseGroupsCreateContext(t *testing.T) {
 	})
 }
 
-func TestResourceEnterpriseGroupsResourceReadContext(t *testing.T) {
+func TestResourceEnterpriseGroupsReadContext(t *testing.T) {
 	t.Parallel()
 
 	t.Run("when state is missing enterprise ID then return error", func(t *testing.T) {
@@ -757,7 +747,6 @@ func TestResourceEnterpriseGroupsResourceReadContext(t *testing.T) {
 		organizationID2 := uuid.NewString()
 		memberID1 := uuid.NewString()
 
-		addedTime := time.Now()
 		createTime := time.Now()
 
 		// API returns both groups, but we should only keep the one in our state
@@ -844,7 +833,6 @@ func TestResourceEnterpriseGroupsResourceReadContext(t *testing.T) {
 		r.Equal("managed-group", group[FieldEnterpriseGroupName])
 		r.Equal(organizationID1, group[FieldEnterpriseGroupOrganizationID])
 		r.Equal("A managed group", group[FieldEnterpriseGroupDescription])
-		r.Equal("terraform", group[FieldEnterpriseGroupManagedBy])
 
 		// Verify members are included
 		members := group[FieldEnterpriseGroupMembers].([]any)
@@ -854,9 +842,7 @@ func TestResourceEnterpriseGroupsResourceReadContext(t *testing.T) {
 		r.Len(memberList, 1)
 		member := memberList[0].(map[string]any)
 		r.Equal(memberID1, member[FieldEnterpriseGroupMemberID])
-		r.Equal("test@example.com", member[FieldEnterpriseGroupMemberEmail])
 		r.Equal("user", member[FieldEnterpriseGroupMemberKind])
-		r.Equal(addedTime.Format(time.RFC3339), member[FieldEnterpriseGroupMemberAddedTime])
 	})
 
 	t.Run("when API returns groups with multiple role bindings then include only tracked role bindings in state", func(t *testing.T) {
@@ -1251,11 +1237,9 @@ func TestResourceEnterpriseGroupsResourceReadContext(t *testing.T) {
 		r.Len(memberList1, 2)
 		member1 := memberList1[0].(map[string]any)
 		r.Equal(memberID1, member1[FieldEnterpriseGroupMemberID])
-		r.Equal("engineer@example.com", member1[FieldEnterpriseGroupMemberEmail])
 		r.Equal("user", member1[FieldEnterpriseGroupMemberKind])
 		member2 := memberList1[1].(map[string]any)
 		r.Equal(memberID3, member2[FieldEnterpriseGroupMemberID])
-		r.Empty(member2[FieldEnterpriseGroupMemberEmail]) // Service account has no email
 		r.Equal("service_account", member2[FieldEnterpriseGroupMemberKind])
 
 		roleBindings1 := group1[FieldEnterpriseGroupRoleBindings].([]any)
