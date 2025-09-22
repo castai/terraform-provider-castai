@@ -3,6 +3,7 @@ package castai
 import (
 	"context"
 	"fmt"
+	"log"
 	"net/http"
 	"sort"
 	"strings"
@@ -112,6 +113,7 @@ func resourceEnterpriseGroups() *schema.Resource {
 									FieldEnterpriseGroupOrganizationID: {
 										Type:        schema.TypeString,
 										Required:    true,
+										ForceNew:    true,
 										Description: "Target organization ID for the group.",
 									},
 									FieldEnterpriseGroupName: {
@@ -296,6 +298,8 @@ func resourceEnterpriseGroupsRead(ctx context.Context, data *schema.ResourceData
 		return nil
 	}
 
+	log.Printf("[INFO] Reading enterprise groups for enterprise ID %s, managing %d groups", enterpriseID, len(managedGroupIDs))
+
 	// Call list groups API to get current state
 	resp, err := client.EnterpriseAPIListGroupsWithResponse(ctx, enterpriseID, nil)
 	if err != nil {
@@ -321,6 +325,12 @@ func resourceEnterpriseGroupsRead(ctx context.Context, data *schema.ResourceData
 			managedGroups = append(managedGroups, group)
 		}
 	}
+
+	log.Printf("[INFO] Found %d managed groups in enterprise ID %s", len(managedGroups), enterpriseID)
+
+	// Sort groups to match the configuration order to prevent Terraform drift
+	// We need to match the order in configuration, not sort by ID or name
+	managedGroups = sortGroupsByConfigOrder(data, managedGroups)
 
 	// Fetch role bindings for managed groups since they are not included in the list response
 	// We track ALL role bindings assigned to our groups since we own them
@@ -441,133 +451,51 @@ func resourceEnterpriseGroupsDelete(ctx context.Context, data *schema.ResourceDa
 
 // buildBatchCreateRequest constructs the batch create request from Terraform schema data
 func buildBatchCreateRequest(enterpriseID string, data *schema.ResourceData) (*organization_management.BatchCreateEnterpriseGroupsRequest, error) {
-	groupsList := data.Get(FieldEnterpriseGroupsGroups).([]any)
+	groupsListAny := data.Get(FieldEnterpriseGroupsGroups)
+	groupsList, ok := groupsListAny.([]any)
+	if !ok {
+		return nil, fmt.Errorf("groups data is not in expected format")
+	}
 
 	var requests []organization_management.BatchCreateEnterpriseGroupsRequestGroup
 
-	for _, groupData := range groupsList {
-		groupWrapper := groupData.(map[string]any)
+	for i, groupData := range groupsList {
+		if groupData == nil {
+			continue // nil entries are acceptable in Terraform lists
+		}
+
+		groupWrapper, ok := groupData.(map[string]any)
+		if !ok {
+			return nil, fmt.Errorf("invalid group configuration at index %d: expected object, got %T", i, groupData)
+		}
 
 		// Navigate to the nested group objects
 		groupsData, ok := groupWrapper[FieldEnterpriseGroupsGroup].([]any)
-		if !ok || len(groupsData) == 0 {
-			continue // Skip if no group data
+		if !ok {
+			return nil, fmt.Errorf("group configuration missing required 'group' field at index %d", i)
+		}
+		if len(groupsData) == 0 {
+			continue // Empty group arrays are acceptable
 		}
 
 		// Process all groups in the nested array
-		for _, groupDataNested := range groupsData {
-			group := groupDataNested.(map[string]any)
-
-			var members []organization_management.BatchCreateEnterpriseGroupsRequestMember
-			if membersData, ok := group[FieldEnterpriseGroupMembers].([]any); ok {
-				for _, memberWrapper := range membersData {
-					memberWrapperMap := memberWrapper.(map[string]any)
-
-					// Navigate to the nested member object
-					membersDataNested, ok := memberWrapperMap[FieldEnterpriseGroupsMember].([]any)
-					if !ok || len(membersDataNested) == 0 {
-						continue
-					}
-
-					// Process all members in the nested array
-					for _, memberData := range membersDataNested {
-						member := memberData.(map[string]any)
-
-						var kind organization_management.BatchCreateEnterpriseGroupsRequestMemberKind
-						switch member[FieldEnterpriseGroupMemberKind].(string) {
-						case EnterpriseGroupMemberKindUser:
-							kind = organization_management.BatchCreateEnterpriseGroupsRequestMemberKindSUBJECTKINDUSER
-						case EnterpriseGroupMemberKindServiceAccount:
-							kind = organization_management.BatchCreateEnterpriseGroupsRequestMemberKindSUBJECTKINDSERVICEACCOUNT
-						default:
-							kind = organization_management.BatchCreateEnterpriseGroupsRequestMemberKindSUBJECTKINDUNSPECIFIED
-						}
-
-						members = append(members, organization_management.BatchCreateEnterpriseGroupsRequestMember{
-							Kind: &kind,
-							Id:   lo.ToPtr(member[FieldEnterpriseGroupMemberID].(string)),
-						})
-					}
-				}
+		for j, groupDataNested := range groupsData {
+			if groupDataNested == nil {
+				continue // nil entries are acceptable in nested arrays
 			}
 
-			var roleBindings *[]organization_management.BatchCreateEnterpriseGroupsRequestRoleBinding
-			if bindingsData, ok := group[FieldEnterpriseGroupRoleBindings].([]any); ok && len(bindingsData) > 0 {
-				var bindings []organization_management.BatchCreateEnterpriseGroupsRequestRoleBinding
-
-				for _, bindingWrapper := range bindingsData {
-					bindingWrapperMap := bindingWrapper.(map[string]any)
-
-					// Navigate to the nested role binding object
-					bindingsDataNested, ok := bindingWrapperMap[FieldEnterpriseGroupRoleBinding].([]any)
-					if !ok || len(bindingsDataNested) == 0 {
-						continue
-					}
-
-					// Process all role bindings in the nested array
-					for _, bindingData := range bindingsDataNested {
-						binding := bindingData.(map[string]any)
-
-						var scopes []organization_management.Scope
-						if scopesData, ok := binding[FieldEnterpriseGroupRoleBindingScopes].([]any); ok {
-							for _, scopeWrapper := range scopesData {
-								scopeWrapperMap := scopeWrapper.(map[string]any)
-
-								// Navigate to the nested scope object
-								scopesDataNested, ok := scopeWrapperMap[FieldEnterpriseGroupScope].([]any)
-								if !ok || len(scopesDataNested) == 0 {
-									continue
-								}
-
-								// Process all scopes in the nested array
-								for _, scopeData := range scopesDataNested {
-									scope := scopeData.(map[string]any)
-
-									orgID := scope[FieldEnterpriseGroupScopeOrganization].(string)
-									clusterID := scope[FieldEnterpriseGroupScopeCluster].(string)
-
-									if orgID != "" {
-										scopes = append(scopes, organization_management.Scope{
-											Organization: &organization_management.OrganizationScope{
-												Id: orgID,
-											},
-										})
-									}
-
-									if clusterID != "" {
-										scopes = append(scopes, organization_management.Scope{
-											Cluster: &organization_management.ClusterScope{
-												Id: clusterID,
-											},
-										})
-									}
-								}
-							}
-						}
-
-						bindings = append(bindings, organization_management.BatchCreateEnterpriseGroupsRequestRoleBinding{
-							Name:   binding[FieldEnterpriseGroupRoleBindingName].(string),
-							RoleId: binding[FieldEnterpriseGroupRoleBindingRoleID].(string),
-							Scopes: scopes,
-						})
-					}
-				}
-
-				roleBindings = &bindings
+			group, ok := groupDataNested.(map[string]any)
+			if !ok {
+				return nil, fmt.Errorf("invalid nested group configuration at index %d.%d: expected object, got %T", i, j, groupDataNested)
 			}
 
-			groupRequest := organization_management.BatchCreateEnterpriseGroupsRequestGroup{
-				Name:           group[FieldEnterpriseGroupName].(string),
-				OrganizationId: group[FieldEnterpriseGroupOrganizationID].(string),
-				Members:        members,
-				RoleBindings:   roleBindings,
+			// Use the already-fixed buildCreateRequestForGroup function
+			createRequest, err := buildCreateRequestForGroup(group)
+			if err != nil {
+				return nil, fmt.Errorf("building create request for group at index %d.%d: %w", i, j, err)
 			}
 
-			if desc, ok := group[FieldEnterpriseGroupDescription].(string); ok && desc != "" {
-				groupRequest.Description = &desc
-			}
-
-			requests = append(requests, groupRequest)
+			requests = append(requests, *createRequest)
 		}
 	}
 
@@ -579,12 +507,23 @@ func buildBatchCreateRequest(enterpriseID string, data *schema.ResourceData) (*o
 
 // buildBatchDeleteRequest constructs the batch delete request from Terraform schema data
 func buildBatchDeleteRequest(enterpriseID string, data *schema.ResourceData) (*organization_management.BatchDeleteEnterpriseGroupsRequest, error) {
-	groupsList := data.Get(FieldEnterpriseGroupsGroups).([]any)
+	groupsListAny := data.Get(FieldEnterpriseGroupsGroups)
+	groupsList, ok := groupsListAny.([]any)
+	if !ok {
+		return nil, fmt.Errorf("groups data is not in expected format")
+	}
 
 	var requests []organization_management.BatchDeleteEnterpriseGroupsRequestDeleteGroupRequest
 
 	for _, groupData := range groupsList {
-		groupWrapper := groupData.(map[string]any)
+		if groupData == nil {
+			continue
+		}
+
+		groupWrapper, ok := groupData.(map[string]any)
+		if !ok {
+			continue
+		}
 
 		// Navigate to the nested group objects
 		groupsData, ok := groupWrapper[FieldEnterpriseGroupsGroup].([]any)
@@ -594,7 +533,14 @@ func buildBatchDeleteRequest(enterpriseID string, data *schema.ResourceData) (*o
 
 		// Process all groups in the nested array
 		for _, groupDataNested := range groupsData {
-			group := groupDataNested.(map[string]any)
+			if groupDataNested == nil {
+				continue
+			}
+
+			group, ok := groupDataNested.(map[string]any)
+			if !ok {
+				continue
+			}
 
 			// Group ID is required for deletes
 			groupID, ok := group[FieldEnterpriseGroupID].(string)
@@ -625,9 +571,21 @@ func buildBatchDeleteRequest(enterpriseID string, data *schema.ResourceData) (*o
 func getManagedGroupIDsFromState(data *schema.ResourceData) map[string]bool {
 	managedIDs := make(map[string]bool)
 
-	groupsList := data.Get(FieldEnterpriseGroupsGroups).([]any)
+	groupsListAny := data.Get(FieldEnterpriseGroupsGroups)
+	groupsList, ok := groupsListAny.([]any)
+	if !ok {
+		return managedIDs
+	}
+
 	for _, groupData := range groupsList {
-		groupWrapper := groupData.(map[string]any)
+		if groupData == nil {
+			continue
+		}
+
+		groupWrapper, ok := groupData.(map[string]any)
+		if !ok {
+			continue
+		}
 
 		// Navigate to the nested group objects
 		groupsData, ok := groupWrapper[FieldEnterpriseGroupsGroup].([]any)
@@ -637,7 +595,14 @@ func getManagedGroupIDsFromState(data *schema.ResourceData) map[string]bool {
 
 		// Process all groups in the nested array
 		for _, groupDataNested := range groupsData {
-			group := groupDataNested.(map[string]any)
+			if groupDataNested == nil {
+				continue
+			}
+
+			group, ok := groupDataNested.(map[string]any)
+			if !ok {
+				continue
+			}
 
 			if groupID, ok := group[FieldEnterpriseGroupID].(string); ok && groupID != "" {
 				managedIDs[groupID] = true
@@ -735,6 +700,98 @@ func getGroupsRoleBindings(
 	}
 
 	return groupsWithRoleBindings, nil
+}
+
+// sortGroupsByConfigOrder sorts API groups to match the order they appear in Terraform configuration
+func sortGroupsByConfigOrder(data *schema.ResourceData, apiGroups []organization_management.ListGroupsResponseGroup) []organization_management.ListGroupsResponseGroup {
+	// Get the configuration order by extracting group names in order
+	configOrder := getGroupNamesFromConfig(data)
+	if len(configOrder) == 0 {
+		return apiGroups
+	}
+
+	// Create a map from group name to its position in config
+	nameToOrder := make(map[string]int)
+	for i, name := range configOrder {
+		nameToOrder[name] = i
+	}
+
+	// Sort API groups by their configuration order
+	sort.Slice(apiGroups, func(i, j int) bool {
+		nameI := ""
+		nameJ := ""
+		if apiGroups[i].Name != nil {
+			nameI = *apiGroups[i].Name
+		}
+		if apiGroups[j].Name != nil {
+			nameJ = *apiGroups[j].Name
+		}
+
+		orderI, foundI := nameToOrder[nameI]
+		orderJ, foundJ := nameToOrder[nameJ]
+
+		// If both found, sort by config order
+		if foundI && foundJ {
+			return orderI < orderJ
+		}
+		// If only one found, prioritize the one in config
+		if foundI {
+			return true
+		}
+		if foundJ {
+			return false
+		}
+		// If neither found, sort alphabetically as fallback
+		return nameI < nameJ
+	})
+
+	return apiGroups
+}
+
+// getGroupNamesFromConfig extracts group names in the order they appear in configuration
+func getGroupNamesFromConfig(data *schema.ResourceData) []string {
+	var names []string
+
+	groupsListAny := data.Get(FieldEnterpriseGroupsGroups)
+	groupsList, ok := groupsListAny.([]any)
+	if !ok {
+		return names
+	}
+
+	for _, groupData := range groupsList {
+		if groupData == nil {
+			continue
+		}
+
+		groupWrapper, ok := groupData.(map[string]any)
+		if !ok {
+			continue
+		}
+
+		// Navigate to the nested group objects
+		groupsData, ok := groupWrapper[FieldEnterpriseGroupsGroup].([]any)
+		if !ok || len(groupsData) == 0 {
+			continue
+		}
+
+		// Process all groups in the nested array
+		for _, groupDataNested := range groupsData {
+			if groupDataNested == nil {
+				continue
+			}
+
+			group, ok := groupDataNested.(map[string]any)
+			if !ok {
+				continue
+			}
+
+			if groupName, ok := group[FieldEnterpriseGroupName].(string); ok && groupName != "" {
+				names = append(names, groupName)
+			}
+		}
+	}
+
+	return names
 }
 
 func sortByField(items []map[string]any, field string) {
@@ -901,8 +958,8 @@ func setEnterpriseCreatedGroupsData(data *schema.ResourceData, groups []organiza
 		groupsData = append(groupsData, groupWrapper)
 	}
 
-	// Sort groups by ID for consistent ordering (need to access nested ID for sorting)
-	sortByFieldNested(groupsData, FieldEnterpriseGroupsGroup, FieldEnterpriseGroupID)
+	// Groups are already sorted by config order from the Read function
+	// No need to re-sort here to avoid disrupting the configuration order
 
 	return data.Set(FieldEnterpriseGroupsGroups, groupsData)
 }
@@ -1055,8 +1112,8 @@ func setEnterpriseGroupsDataFromListResponseWithRoleBindings(data *schema.Resour
 		groupsData = append(groupsData, groupWrapper)
 	}
 
-	// Sort groups by ID for consistent ordering (need to access nested ID for sorting)
-	sortByFieldNested(groupsData, FieldEnterpriseGroupsGroup, FieldEnterpriseGroupID)
+	// Groups are already sorted by config order from the Read function
+	// No need to re-sort here to avoid disrupting the configuration order
 
 	return data.Set(FieldEnterpriseGroupsGroups, groupsData)
 }
@@ -1081,8 +1138,16 @@ func getGroupChanges(data *schema.ResourceData) (*EnterpriseGroupsChanges, error
 	}
 
 	oldValue, newValue := data.GetChange(FieldEnterpriseGroupsGroups)
-	oldGroups := oldValue.([]any)
-	newGroups := newValue.([]any)
+
+	oldGroups, ok := oldValue.([]any)
+	if !ok {
+		oldGroups = []any{}
+	}
+
+	newGroups, ok := newValue.([]any)
+	if !ok {
+		newGroups = []any{}
+	}
 
 	oldGroupIDs := []string{}
 	oldGroupIDToGroup := make(map[string]map[string]any)
@@ -1090,7 +1155,14 @@ func getGroupChanges(data *schema.ResourceData) (*EnterpriseGroupsChanges, error
 	newGroupIDToGroup := make(map[string]map[string]any)
 
 	for _, groupData := range oldGroups {
-		groupWrapper := groupData.(map[string]any)
+		if groupData == nil {
+			continue
+		}
+
+		groupWrapper, ok := groupData.(map[string]any)
+		if !ok {
+			continue
+		}
 
 		// Navigate to the nested group objects
 		groupsData, ok := groupWrapper[FieldEnterpriseGroupsGroup].([]any)
@@ -1100,7 +1172,14 @@ func getGroupChanges(data *schema.ResourceData) (*EnterpriseGroupsChanges, error
 
 		// Process all groups in the nested array
 		for _, groupDataNested := range groupsData {
-			group := groupDataNested.(map[string]any)
+			if groupDataNested == nil {
+				continue
+			}
+
+			group, ok := groupDataNested.(map[string]any)
+			if !ok {
+				continue
+			}
 
 			if groupID, ok := group[FieldEnterpriseGroupID].(string); ok && groupID != "" {
 				oldGroupIDs = append(oldGroupIDs, groupID)
@@ -1110,7 +1189,14 @@ func getGroupChanges(data *schema.ResourceData) (*EnterpriseGroupsChanges, error
 	}
 
 	for _, groupData := range newGroups {
-		groupWrapper := groupData.(map[string]any)
+		if groupData == nil {
+			continue
+		}
+
+		groupWrapper, ok := groupData.(map[string]any)
+		if !ok {
+			continue
+		}
 
 		// Navigate to the nested group objects
 		groupsData, ok := groupWrapper[FieldEnterpriseGroupsGroup].([]any)
@@ -1120,7 +1206,14 @@ func getGroupChanges(data *schema.ResourceData) (*EnterpriseGroupsChanges, error
 
 		// Process all groups in the nested array
 		for _, groupDataNested := range groupsData {
-			group := groupDataNested.(map[string]any)
+			if groupDataNested == nil {
+				continue
+			}
+
+			group, ok := groupDataNested.(map[string]any)
+			if !ok {
+				continue
+			}
 
 			if groupID, ok := group[FieldEnterpriseGroupID].(string); ok && groupID != "" {
 				newGroupIDs = append(newGroupIDs, groupID)
@@ -1166,7 +1259,14 @@ func buildUpdateRequestForGroup(groupID string, group map[string]any) (*organiza
 	var members []organization_management.BatchUpdateEnterpriseGroupsRequestMember
 	if membersData, ok := group[FieldEnterpriseGroupMembers].([]any); ok {
 		for _, memberWrapper := range membersData {
-			memberWrapperMap := memberWrapper.(map[string]any)
+			if memberWrapper == nil {
+				continue
+			}
+
+			memberWrapperMap, ok := memberWrapper.(map[string]any)
+			if !ok {
+				continue
+			}
 
 			// Navigate to the nested member object
 			membersDataNested, ok := memberWrapperMap[FieldEnterpriseGroupsMember].([]any)
@@ -1176,10 +1276,27 @@ func buildUpdateRequestForGroup(groupID string, group map[string]any) (*organiza
 
 			// Process all members in the nested array
 			for _, memberData := range membersDataNested {
-				member := memberData.(map[string]any)
+				if memberData == nil {
+					continue
+				}
+
+				member, ok := memberData.(map[string]any)
+				if !ok {
+					continue
+				}
+
+				memberKind, ok := member[FieldEnterpriseGroupMemberKind].(string)
+				if !ok {
+					continue
+				}
+
+				memberID, ok := member[FieldEnterpriseGroupMemberID].(string)
+				if !ok {
+					continue
+				}
 
 				var kind organization_management.BatchUpdateEnterpriseGroupsRequestMemberKind
-				switch member[FieldEnterpriseGroupMemberKind].(string) {
+				switch memberKind {
 				case EnterpriseGroupMemberKindUser:
 					kind = organization_management.BatchUpdateEnterpriseGroupsRequestMemberKindUSER
 				case EnterpriseGroupMemberKindServiceAccount:
@@ -1190,7 +1307,7 @@ func buildUpdateRequestForGroup(groupID string, group map[string]any) (*organiza
 
 				members = append(members, organization_management.BatchUpdateEnterpriseGroupsRequestMember{
 					Kind: kind,
-					Id:   member[FieldEnterpriseGroupMemberID].(string),
+					Id:   memberID,
 				})
 			}
 		}
@@ -1200,7 +1317,14 @@ func buildUpdateRequestForGroup(groupID string, group map[string]any) (*organiza
 	var roleBindings []organization_management.BatchUpdateEnterpriseGroupsRequestRoleBinding
 	if bindingsData, ok := group[FieldEnterpriseGroupRoleBindings].([]any); ok {
 		for _, bindingWrapper := range bindingsData {
-			bindingWrapperMap := bindingWrapper.(map[string]any)
+			if bindingWrapper == nil {
+				continue
+			}
+
+			bindingWrapperMap, ok := bindingWrapper.(map[string]any)
+			if !ok {
+				continue
+			}
 
 			// Navigate to the nested role binding object
 			bindingsDataNested, ok := bindingWrapperMap[FieldEnterpriseGroupRoleBinding].([]any)
@@ -1210,12 +1334,36 @@ func buildUpdateRequestForGroup(groupID string, group map[string]any) (*organiza
 
 			// Process all role bindings in the nested array
 			for _, bindingData := range bindingsDataNested {
-				binding := bindingData.(map[string]any)
+				if bindingData == nil {
+					continue
+				}
+
+				binding, ok := bindingData.(map[string]any)
+				if !ok {
+					continue
+				}
+
+				bindingName, ok := binding[FieldEnterpriseGroupRoleBindingName].(string)
+				if !ok {
+					continue
+				}
+
+				bindingRoleID, ok := binding[FieldEnterpriseGroupRoleBindingRoleID].(string)
+				if !ok {
+					continue
+				}
 
 				var scopes []organization_management.Scope
 				if scopesData, ok := binding[FieldEnterpriseGroupRoleBindingScopes].([]any); ok {
 					for _, scopeWrapper := range scopesData {
-						scopeWrapperMap := scopeWrapper.(map[string]any)
+						if scopeWrapper == nil {
+							continue
+						}
+
+						scopeWrapperMap, ok := scopeWrapper.(map[string]any)
+						if !ok {
+							continue
+						}
 
 						// Navigate to the nested scope object
 						scopesDataNested, ok := scopeWrapperMap[FieldEnterpriseGroupScope].([]any)
@@ -1225,7 +1373,14 @@ func buildUpdateRequestForGroup(groupID string, group map[string]any) (*organiza
 
 						// Process all scopes in the nested array
 						for _, scopeData := range scopesDataNested {
-							scope := scopeData.(map[string]any)
+							if scopeData == nil {
+								continue
+							}
+
+							scope, ok := scopeData.(map[string]any)
+							if !ok {
+								continue
+							}
 
 							orgID, _ := scope[FieldEnterpriseGroupScopeOrganization].(string)
 							clusterID, _ := scope[FieldEnterpriseGroupScopeCluster].(string)
@@ -1249,30 +1404,39 @@ func buildUpdateRequestForGroup(groupID string, group map[string]any) (*organiza
 					}
 				}
 
-				// Use the role binding ID if available, otherwise generate one
 				bindingID := ""
 				if id, ok := binding[FieldEnterpriseGroupRoleBindingID].(string); ok && id != "" {
 					bindingID = id
-				} else {
-					// Generate synthetic ID for new role bindings
-					bindingID = fmt.Sprintf("%s-%s", groupID, binding[FieldEnterpriseGroupRoleBindingName].(string))
 				}
 
 				roleBindings = append(roleBindings, organization_management.BatchUpdateEnterpriseGroupsRequestRoleBinding{
 					Id:     bindingID,
-					Name:   binding[FieldEnterpriseGroupRoleBindingName].(string),
-					RoleId: binding[FieldEnterpriseGroupRoleBindingRoleID].(string),
+					Name:   bindingName,
+					RoleId: bindingRoleID,
 					Scopes: scopes,
 				})
 			}
 		}
 	}
 
+	// Safe extraction of required fields with error handling
+	groupName, ok := group[FieldEnterpriseGroupName].(string)
+	if !ok {
+		return nil, fmt.Errorf("group name is required for group %s", groupID)
+	}
+
+	orgID, ok := group[FieldEnterpriseGroupOrganizationID].(string)
+	if !ok {
+		return nil, fmt.Errorf("organization ID is required for group %s", groupID)
+	}
+
+	groupDesc, _ := group[FieldEnterpriseGroupDescription].(string)
+
 	return &organization_management.BatchUpdateEnterpriseGroupsRequestUpdateGroupRequest{
 		Id:             groupID,
-		Name:           group[FieldEnterpriseGroupName].(string),
-		OrganizationId: group[FieldEnterpriseGroupOrganizationID].(string),
-		Description:    group[FieldEnterpriseGroupDescription].(string),
+		Name:           groupName,
+		OrganizationId: orgID,
+		Description:    groupDesc,
 		Members:        members,
 		RoleBindings:   roleBindings,
 	}, nil
@@ -1283,7 +1447,14 @@ func buildCreateRequestForGroup(group map[string]any) (*organization_management.
 	var members []organization_management.BatchCreateEnterpriseGroupsRequestMember
 	if membersData, ok := group[FieldEnterpriseGroupMembers].([]any); ok {
 		for _, memberWrapper := range membersData {
-			memberWrapperMap := memberWrapper.(map[string]any)
+			if memberWrapper == nil {
+				continue
+			}
+
+			memberWrapperMap, ok := memberWrapper.(map[string]any)
+			if !ok {
+				continue
+			}
 
 			// Navigate to the nested member object
 			membersDataNested, ok := memberWrapperMap[FieldEnterpriseGroupsMember].([]any)
@@ -1293,10 +1464,27 @@ func buildCreateRequestForGroup(group map[string]any) (*organization_management.
 
 			// Process all members in the nested array
 			for _, memberData := range membersDataNested {
-				member := memberData.(map[string]any)
+				if memberData == nil {
+					continue
+				}
+
+				member, ok := memberData.(map[string]any)
+				if !ok {
+					continue
+				}
+
+				memberKind, ok := member[FieldEnterpriseGroupMemberKind].(string)
+				if !ok {
+					continue
+				}
+
+				memberID, ok := member[FieldEnterpriseGroupMemberID].(string)
+				if !ok {
+					continue
+				}
 
 				var kind organization_management.BatchCreateEnterpriseGroupsRequestMemberKind
-				switch member[FieldEnterpriseGroupMemberKind].(string) {
+				switch memberKind {
 				case EnterpriseGroupMemberKindUser:
 					kind = organization_management.BatchCreateEnterpriseGroupsRequestMemberKindSUBJECTKINDUSER
 				case EnterpriseGroupMemberKindServiceAccount:
@@ -1307,7 +1495,7 @@ func buildCreateRequestForGroup(group map[string]any) (*organization_management.
 
 				members = append(members, organization_management.BatchCreateEnterpriseGroupsRequestMember{
 					Kind: &kind,
-					Id:   lo.ToPtr(member[FieldEnterpriseGroupMemberID].(string)),
+					Id:   lo.ToPtr(memberID),
 				})
 			}
 		}
@@ -1318,7 +1506,14 @@ func buildCreateRequestForGroup(group map[string]any) (*organization_management.
 		var bindings []organization_management.BatchCreateEnterpriseGroupsRequestRoleBinding
 
 		for _, bindingWrapper := range bindingsData {
-			bindingWrapperMap := bindingWrapper.(map[string]any)
+			if bindingWrapper == nil {
+				continue
+			}
+
+			bindingWrapperMap, ok := bindingWrapper.(map[string]any)
+			if !ok {
+				continue
+			}
 
 			// Navigate to the nested role binding object
 			bindingsDataNested, ok := bindingWrapperMap[FieldEnterpriseGroupRoleBinding].([]any)
@@ -1328,12 +1523,36 @@ func buildCreateRequestForGroup(group map[string]any) (*organization_management.
 
 			// Process all role bindings in the nested array
 			for _, bindingData := range bindingsDataNested {
-				binding := bindingData.(map[string]any)
+				if bindingData == nil {
+					continue
+				}
+
+				binding, ok := bindingData.(map[string]any)
+				if !ok {
+					continue
+				}
+
+				bindingName, ok := binding[FieldEnterpriseGroupRoleBindingName].(string)
+				if !ok {
+					continue
+				}
+
+				bindingRoleID, ok := binding[FieldEnterpriseGroupRoleBindingRoleID].(string)
+				if !ok {
+					continue
+				}
 
 				var scopes []organization_management.Scope
 				if scopesData, ok := binding[FieldEnterpriseGroupRoleBindingScopes].([]any); ok {
 					for _, scopeWrapper := range scopesData {
-						scopeWrapperMap := scopeWrapper.(map[string]any)
+						if scopeWrapper == nil {
+							continue
+						}
+
+						scopeWrapperMap, ok := scopeWrapper.(map[string]any)
+						if !ok {
+							continue
+						}
 
 						// Navigate to the nested scope object
 						scopesDataNested, ok := scopeWrapperMap[FieldEnterpriseGroupScope].([]any)
@@ -1343,7 +1562,14 @@ func buildCreateRequestForGroup(group map[string]any) (*organization_management.
 
 						// Process all scopes in the nested array
 						for _, scopeData := range scopesDataNested {
-							scope := scopeData.(map[string]any)
+							if scopeData == nil {
+								continue
+							}
+
+							scope, ok := scopeData.(map[string]any)
+							if !ok {
+								continue
+							}
 
 							orgID, _ := scope[FieldEnterpriseGroupScopeOrganization].(string)
 							clusterID, _ := scope[FieldEnterpriseGroupScopeCluster].(string)
@@ -1368,8 +1594,8 @@ func buildCreateRequestForGroup(group map[string]any) (*organization_management.
 				}
 
 				bindings = append(bindings, organization_management.BatchCreateEnterpriseGroupsRequestRoleBinding{
-					Name:   binding[FieldEnterpriseGroupRoleBindingName].(string),
-					RoleId: binding[FieldEnterpriseGroupRoleBindingRoleID].(string),
+					Name:   bindingName,
+					RoleId: bindingRoleID,
 					Scopes: scopes,
 				})
 			}
@@ -1378,9 +1604,19 @@ func buildCreateRequestForGroup(group map[string]any) (*organization_management.
 		roleBindings = &bindings
 	}
 
+	groupName, ok := group[FieldEnterpriseGroupName].(string)
+	if !ok {
+		return nil, fmt.Errorf("group name is required")
+	}
+
+	orgID, ok := group[FieldEnterpriseGroupOrganizationID].(string)
+	if !ok {
+		return nil, fmt.Errorf("organization ID is required")
+	}
+
 	groupRequest := organization_management.BatchCreateEnterpriseGroupsRequestGroup{
-		Name:           group[FieldEnterpriseGroupName].(string),
-		OrganizationId: group[FieldEnterpriseGroupOrganizationID].(string),
+		Name:           groupName,
+		OrganizationId: orgID,
 		Members:        members,
 		RoleBindings:   roleBindings,
 	}
