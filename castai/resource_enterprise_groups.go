@@ -387,7 +387,6 @@ func resourceEnterpriseGroupsRead(ctx context.Context, data *schema.ResourceData
 		return diag.FromErr(fmt.Errorf("enterprise ID is not set"))
 	}
 
-	// Get the group IDs from current state to determine which groups we should be managing
 	managedGroupIDs, err := getManagedGroupIDsFromState(data)
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("extracting managed group IDs from state: %w", err))
@@ -407,7 +406,6 @@ func resourceEnterpriseGroupsRead(ctx context.Context, data *schema.ResourceData
 
 	managedGroupIDsMap := lo.Keyify[string](managedGroupIDs)
 
-	// Filter API response to only include groups we are managing
 	managedGroupIDToGroup := make(map[string]organization_management.ListGroupsResponseGroup, len(managedGroupIDs))
 	for _, group := range *resp.JSON200.Items {
 		if group.Id == nil {
@@ -433,11 +431,9 @@ func resourceEnterpriseGroupsRead(ctx context.Context, data *schema.ResourceData
 		return diag.FromErr(fmt.Errorf("fetching role bindings for groups: %w", err))
 	}
 
-	fmt.Println(groupsWithRoleBindings)
-
-	//if err = setEnterpriseGroupsDataFromListResponseWithRoleBindings(data, groupsWithRoleBindings); err != nil {
-	//	return diag.FromErr(fmt.Errorf("setting groups data from list response: %w", err))
-	//}
+	if err = setEnterpriseGroupsData(data, groupsWithRoleBindings); err != nil {
+		return diag.FromErr(fmt.Errorf("failed to set read groups data: %w", err))
+	}
 
 	return nil
 }
@@ -719,7 +715,6 @@ func getGroupsRoleBindings(
 	}
 
 	groupsWithRoleBindings := make([]EnterpriseGroupWithRoleBindings, 0, len(groups))
-
 	for _, group := range groups {
 		resp, err := client.EnterpriseAPIListRoleBindingsWithResponse(
 			ctx,
@@ -735,17 +730,80 @@ func getGroupsRoleBindings(
 			return nil, fmt.Errorf("list role bindings for group %s failed: %w", *group.Id, err)
 		}
 
-		//if resp.JSON200 == nil || resp.JSON200.Items == nil || len(*resp.JSON200.Items) == 0 {
-		//	groupsWithRoleBindings = append(groupsWithRoleBindings, EnterpriseGroupWithRoleBindings{
-		//		Group: group,
-		//	})
-		//	continue
-		//}
-		//
-		//groupsWithRoleBindings = append(groupsWithRoleBindings, EnterpriseGroupWithRoleBindings{
-		//	Group:        group,
-		//	RoleBindings: *resp.JSON200.Items,
-		//})
+		var members []Member
+		if group.Definition != nil && group.Definition.Members != nil && len(*group.Definition.Members) > 0 {
+			members = make([]Member, 0, len(*group.Definition.Members))
+			for _, member := range *group.Definition.Members {
+				m := Member{}
+				if member.Kind == nil {
+					return nil, fmt.Errorf("member kind is nil for member in group %s", lo.FromPtr(group.Name))
+				}
+
+				if *member.Kind == "KIND_USER" {
+					m.Kind = EnterpriseGroupMemberKindUser
+				} else if *member.Kind == "KIND_SERVICE_ACCOUNT" {
+					m.Kind = EnterpriseGroupMemberKindServiceAccount
+				} else {
+					return nil, fmt.Errorf("unsupported member kind %s for member in group %s", *member.Kind, lo.FromPtr(group.Name))
+				}
+				m.ID = lo.FromPtr(member.Id)
+				m.Email = member.Email
+				m.AddedTime = member.AddedTime
+				members = append(members, m)
+			}
+		}
+
+		g := Group{
+			ID:             lo.FromPtr(group.Id),
+			Name:           lo.FromPtr(group.Name),
+			OrganizationID: lo.FromPtr(group.OrganizationId),
+			Description:    group.Description,
+			CreateTime:     group.CreateTime,
+			ManagedBy:      group.ManagedBy,
+			Members:        members,
+		}
+
+		var roleBindings []RoleBinding
+		if resp.JSON200 == nil || resp.JSON200.Items == nil {
+			roleBindings = make([]RoleBinding, 0, len(*resp.JSON200.Items))
+
+			for _, rb := range *resp.JSON200.Items {
+				scopes := []Scope{}
+				var roleID string
+
+				if rb.Definition != nil {
+					if rb.Definition.Scopes != nil && len(*rb.Definition.Scopes) > 0 {
+						for _, scope := range *rb.Definition.Scopes {
+							s := Scope{}
+							if scope.Organization != nil {
+								s.OrganizationID = &scope.Organization.Id
+							}
+
+							if scope.Cluster != nil {
+								s.ClusterID = &scope.Cluster.Id
+							}
+							scopes = append(scopes, s)
+						}
+					}
+
+					roleID = lo.FromPtr(rb.Definition.RoleId)
+				}
+
+				r := RoleBinding{
+					ID:         lo.FromPtr(rb.Id),
+					Name:       lo.FromPtr(rb.Name),
+					RoleID:     roleID,
+					CreateTime: lo.FromPtr(rb.CreateTime),
+					Scopes:     scopes,
+				}
+				roleBindings = append(roleBindings, r)
+			}
+		}
+
+		groupsWithRoleBindings = append(groupsWithRoleBindings, EnterpriseGroupWithRoleBindings{
+			Group:        g,
+			RoleBindings: roleBindings,
+		})
 	}
 
 	return groupsWithRoleBindings, nil
@@ -756,7 +814,6 @@ func convertMembers(members []Member) []map[string]any {
 		return nil
 	}
 
-	// Collect all member data
 	var allMemberData []map[string]any
 	for _, member := range members {
 		memberData := map[string]any{}
