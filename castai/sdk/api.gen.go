@@ -7867,6 +7867,10 @@ type RbacServiceAPIListRoleBindingsParams struct {
 	// SubjectType Filter by subject type. Multiple values can be passed as query parameters
 	// (e.g., &subject_type=x&subject_type=y)
 	SubjectType *[]RbacServiceAPIListRoleBindingsParamsSubjectType `form:"subjectType,omitempty" json:"subjectType,omitempty"`
+
+	// SubjectId Filter by subject ID. Multiple values can be passed as query parameters
+	// (e.g., &subject_id=x&subject_id=y)
+	SubjectId *[]string `form:"subjectId,omitempty" json:"subjectId,omitempty"`
 }
 
 // RbacServiceAPIListRoleBindingsParamsScopeType defines parameters for RbacServiceAPIListRoleBindings.

@@ -3,11 +3,11 @@ package castai
 import (
 	"context"
 	"fmt"
-	"log"
 	"net/http"
 	"strings"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -257,6 +257,8 @@ func resourceEnterpriseGroupsCreate(ctx context.Context, data *schema.ResourceDa
 	client := meta.(*ProviderConfig).organizationManagementClient
 	enterpriseID := data.Get(FieldEnterpriseGroupsEnterpriseID).(string)
 
+	tflog.Debug(ctx, "Creating new enterprise groups", map[string]any{"data": data.State()})
+
 	createRequest, err := buildBatchCreateRequest(enterpriseID, data)
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("building create request: %w", err))
@@ -367,6 +369,8 @@ func resourceEnterpriseGroupsRead(ctx context.Context, data *schema.ResourceData
 	client := meta.(*ProviderConfig).organizationManagementClient
 	enterpriseID := data.Id()
 
+	tflog.Debug(ctx, "Reading enterprise groups", map[string]any{"data": data.State()})
+
 	if enterpriseID == "" {
 		return diag.FromErr(fmt.Errorf("enterprise ID is not set"))
 	}
@@ -375,8 +379,6 @@ func resourceEnterpriseGroupsRead(ctx context.Context, data *schema.ResourceData
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("extracting managed group IDs from state: %w", err))
 	}
-
-	log.Printf("[INFO] Reading enterprise groups for enterprise ID %s, managing %d groups", enterpriseID, len(managedGroupIDs))
 
 	// Call list groups API to get current state
 	resp, err := client.EnterpriseAPIListGroupsWithResponse(ctx, enterpriseID, nil)
@@ -408,8 +410,6 @@ func resourceEnterpriseGroupsRead(ctx context.Context, data *schema.ResourceData
 		}
 	}
 
-	log.Printf("[INFO] Found %d managed groups in enterprise ID %s", len(managedGroups), enterpriseID)
-
 	groupsWithRoleBindings, err := getGroupsRoleBindings(ctx, client, enterpriseID, managedGroups)
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("fetching role bindings for groups: %w", err))
@@ -426,11 +426,13 @@ func resourceEnterpriseGroupsUpdate(ctx context.Context, data *schema.ResourceDa
 	client := meta.(*ProviderConfig).organizationManagementClient
 	enterpriseID := data.Id()
 
+	tflog.Debug(ctx, "Updating enterprise groups", map[string]any{"data": data.State()})
+
 	if enterpriseID == "" {
 		return diag.FromErr(fmt.Errorf("enterprise ID is not set"))
 	}
 
-	changes, err := getGroupChanges(data)
+	changes, err := getGroupChanges(ctx, data)
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("analyzing group changes: %w", err))
 	}
@@ -506,6 +508,8 @@ func resourceEnterpriseGroupsUpdate(ctx context.Context, data *schema.ResourceDa
 func resourceEnterpriseGroupsDelete(ctx context.Context, data *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(*ProviderConfig).organizationManagementClient
 	enterpriseID := data.Id()
+
+	tflog.Debug(ctx, "Deleting enterprise groups", map[string]any{"data": data.State()})
 
 	if enterpriseID == "" {
 		return diag.FromErr(fmt.Errorf("enterprise ID is not set"))
@@ -757,7 +761,7 @@ func getGroupsRoleBindings(
 		}
 
 		var roleBindings []RoleBinding
-		if resp.JSON200 != nil || resp.JSON200.Items != nil {
+		if resp.JSON200 != nil && resp.JSON200.Items != nil {
 			roleBindings = make([]RoleBinding, 0, len(*resp.JSON200.Items))
 
 			for _, rb := range *resp.JSON200.Items {
@@ -947,7 +951,8 @@ func setEnterpriseGroupsData(
 				}
 			} else {
 				// Existing group, match by ID
-				if _, ok = groupIDToGroup[configGroupID]; !ok {
+				matchedGroup, ok = groupIDToGroup[configGroupID]
+				if !ok {
 					// Group was removed outside of Terraform, skip it
 					continue
 				}
@@ -1017,7 +1022,7 @@ type EnterpriseGroupsChanges struct {
 	toDelete []organization_management.BatchDeleteEnterpriseGroupsRequestDeleteGroupRequest
 }
 
-func getGroupChanges(data *schema.ResourceData) (*EnterpriseGroupsChanges, error) {
+func getGroupChanges(ctx context.Context, data *schema.ResourceData) (*EnterpriseGroupsChanges, error) {
 	changes := &EnterpriseGroupsChanges{
 		toCreate: []organization_management.BatchCreateEnterpriseGroupsRequestGroup{},
 		toUpdate: []organization_management.BatchUpdateEnterpriseGroupsRequestUpdateGroupRequest{},
@@ -1030,6 +1035,9 @@ func getGroupChanges(data *schema.ResourceData) (*EnterpriseGroupsChanges, error
 	}
 
 	oldValue, newValue := data.GetChange(FieldEnterpriseGroupsGroups)
+
+	tflog.Info(ctx, "Old groups data", map[string]any{"old": oldValue})
+	tflog.Info(ctx, "New groups data", map[string]any{"new": newValue})
 
 	oldGroups, ok := oldValue.([]any)
 	if !ok {
