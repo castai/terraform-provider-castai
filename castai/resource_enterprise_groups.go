@@ -19,8 +19,38 @@ import (
 
 // EnterpriseGroupWithRoleBindings represents a group with its associated role bindings
 type EnterpriseGroupWithRoleBindings struct {
-	Group        organization_management.ListGroupsResponseGroup
-	RoleBindings []organization_management.RoleBinding
+	Group        Group
+	RoleBindings []RoleBinding
+}
+
+type Group struct {
+	ID             string
+	Name           string
+	OrganizationID string
+	Description    *string
+	CreateTime     *time.Time
+	ManagedBy      *string
+	Members        []Member
+}
+
+type Member struct {
+	Kind      string
+	ID        string
+	Email     *string
+	AddedTime *time.Time
+}
+
+type RoleBinding struct {
+	ID         string
+	Name       string
+	RoleID     string
+	Scopes     []Scope
+	CreateTime time.Time
+}
+
+type Scope struct {
+	OrganizationID *string
+	ClusterID      *string
 }
 
 const (
@@ -270,7 +300,77 @@ func resourceEnterpriseGroupsCreate(ctx context.Context, data *schema.ResourceDa
 		return diag.FromErr(fmt.Errorf("unexpected empty response from batch create"))
 	}
 
-	if err = setEnterpriseCreatedGroupsData(data, *resp.JSON200.Groups); err != nil {
+	groups := make([]EnterpriseGroupWithRoleBindings, len(*resp.JSON200.Groups))
+	for i, g := range *resp.JSON200.Groups {
+		var members []Member
+		if g.Definition != nil && g.Definition.Members != nil && len(*g.Definition.Members) > 0 {
+			members = make([]Member, 0, len(*g.Definition.Members))
+			for _, member := range *g.Definition.Members {
+				m := Member{}
+				if member.Kind == nil {
+					return diag.FromErr(fmt.Errorf("member kind is nil for member in group %s", lo.FromPtr(g.Name)))
+				}
+
+				if *member.Kind == organization_management.DefinitionMemberKindSUBJECTKINDUSER {
+					m.Kind = EnterpriseGroupMemberKindUser
+				} else if *member.Kind == organization_management.DefinitionMemberKindSUBJECTKINDSERVICEACCOUNT {
+					m.Kind = EnterpriseGroupMemberKindServiceAccount
+				} else {
+					return diag.FromErr(fmt.Errorf("unsupported member kind %s for member in group %s", *member.Kind, lo.FromPtr(g.Name)))
+				}
+				m.ID = lo.FromPtr(member.Id)
+				m.Email = member.Email
+				m.AddedTime = member.AddedTime
+				members = append(members, m)
+			}
+		}
+
+		var roleBindings []RoleBinding
+		if g.RoleBindings != nil && len(*g.RoleBindings) > 0 {
+			roleBindings = make([]RoleBinding, 0, len(*g.RoleBindings))
+			for _, rb := range *g.RoleBindings {
+				scopes := []Scope{}
+
+				if rb.Definition.Scopes != nil && len(*rb.Definition.Scopes) > 0 {
+					for _, scope := range *rb.Definition.Scopes {
+						s := Scope{}
+						if scope.Organization != nil {
+							s.OrganizationID = &scope.Organization.Id
+						}
+
+						if scope.Cluster != nil {
+							s.ClusterID = &scope.Cluster.Id
+						}
+						scopes = append(scopes, s)
+					}
+				}
+
+				r := RoleBinding{
+					ID:         rb.Id,
+					Name:       rb.Name,
+					RoleID:     rb.Definition.RoleId,
+					CreateTime: rb.CreateTime,
+					Scopes:     scopes,
+				}
+				roleBindings = append(roleBindings, r)
+			}
+		}
+
+		groups[i] = EnterpriseGroupWithRoleBindings{
+			Group: Group{
+				ID:             lo.FromPtr(g.Id),
+				Name:           lo.FromPtr(g.Name),
+				OrganizationID: lo.FromPtr(g.OrganizationId),
+				Description:    g.Description,
+				CreateTime:     g.CreateTime,
+				ManagedBy:      g.ManagedBy,
+				Members:        members,
+			},
+			RoleBindings: roleBindings,
+		}
+	}
+
+	if err = setEnterpriseGroupsData(data, groups); err != nil {
 		return diag.FromErr(fmt.Errorf("failed to set created groups data: %w", err))
 	}
 
@@ -333,9 +433,11 @@ func resourceEnterpriseGroupsRead(ctx context.Context, data *schema.ResourceData
 		return diag.FromErr(fmt.Errorf("fetching role bindings for groups: %w", err))
 	}
 
-	if err = setEnterpriseGroupsDataFromListResponseWithRoleBindings(data, groupsWithRoleBindings); err != nil {
-		return diag.FromErr(fmt.Errorf("setting groups data from list response: %w", err))
-	}
+	fmt.Println(groupsWithRoleBindings)
+
+	//if err = setEnterpriseGroupsDataFromListResponseWithRoleBindings(data, groupsWithRoleBindings); err != nil {
+	//	return diag.FromErr(fmt.Errorf("setting groups data from list response: %w", err))
+	//}
 
 	return nil
 }
@@ -385,9 +487,9 @@ func resourceEnterpriseGroupsUpdate(ctx context.Context, data *schema.ResourceDa
 		}
 
 		if resp.JSON200 != nil && resp.JSON200.Groups != nil {
-			if err = setEnterpriseCreatedGroupsData(data, *resp.JSON200.Groups); err != nil {
-				return diag.FromErr(fmt.Errorf("failed to set created groups data: %w", err))
-			}
+			//if err = setEnterpriseGroupsData(data, *resp.JSON200.Groups); err != nil {
+			//	return diag.FromErr(fmt.Errorf("failed to set created groups data: %w", err))
+			//}
 		}
 	}
 
@@ -633,49 +735,35 @@ func getGroupsRoleBindings(
 			return nil, fmt.Errorf("list role bindings for group %s failed: %w", *group.Id, err)
 		}
 
-		if resp.JSON200 == nil || resp.JSON200.Items == nil || len(*resp.JSON200.Items) == 0 {
-			groupsWithRoleBindings = append(groupsWithRoleBindings, EnterpriseGroupWithRoleBindings{
-				Group: group,
-			})
-			continue
-		}
-
-		groupsWithRoleBindings = append(groupsWithRoleBindings, EnterpriseGroupWithRoleBindings{
-			Group:        group,
-			RoleBindings: *resp.JSON200.Items,
-		})
+		//if resp.JSON200 == nil || resp.JSON200.Items == nil || len(*resp.JSON200.Items) == 0 {
+		//	groupsWithRoleBindings = append(groupsWithRoleBindings, EnterpriseGroupWithRoleBindings{
+		//		Group: group,
+		//	})
+		//	continue
+		//}
+		//
+		//groupsWithRoleBindings = append(groupsWithRoleBindings, EnterpriseGroupWithRoleBindings{
+		//	Group:        group,
+		//	RoleBindings: *resp.JSON200.Items,
+		//})
 	}
 
 	return groupsWithRoleBindings, nil
 }
 
-// convertMembersForBatchCreate converts members from batch create response
-func convertMembersForBatchCreate(members *[]organization_management.DefinitionMember) []map[string]any {
+func convertMembers(members []Member) []map[string]any {
 	if members == nil {
 		return nil
 	}
 
 	// Collect all member data
 	var allMemberData []map[string]any
-	for _, member := range *members {
+	for _, member := range members {
 		memberData := map[string]any{}
-		if member.Id != nil {
-			memberData[FieldEnterpriseGroupMemberID] = *member.Id
-		}
-		if member.Email != nil {
-			memberData[FieldEnterpriseGroupMemberEmail] = *member.Email
-		}
-		if member.AddedTime != nil {
-			memberData[FieldEnterpriseGroupMemberAddedTime] = member.AddedTime.Format(time.RFC3339)
-		}
-		if member.Kind != nil {
-			switch *member.Kind {
-			case organization_management.DefinitionMemberKindSUBJECTKINDUSER:
-				memberData[FieldEnterpriseGroupMemberKind] = EnterpriseGroupMemberKindUser
-			case organization_management.DefinitionMemberKindSUBJECTKINDSERVICEACCOUNT:
-				memberData[FieldEnterpriseGroupMemberKind] = EnterpriseGroupMemberKindServiceAccount
-			}
-		}
+		memberData[FieldEnterpriseGroupMemberID] = member.ID
+		memberData[FieldEnterpriseGroupMemberEmail] = member.Email
+		memberData[FieldEnterpriseGroupMemberAddedTime] = member.AddedTime.Format(time.RFC3339)
+		memberData[FieldEnterpriseGroupMemberKind] = member.Kind
 		allMemberData = append(allMemberData, memberData)
 	}
 
@@ -690,36 +778,33 @@ func convertMembersForBatchCreate(members *[]organization_management.DefinitionM
 	return nil
 }
 
-// convertRoleBindingsForBatch converts role bindings from batch response
-func convertRoleBindingsForBatch(roleBindings *[]organization_management.GroupRoleBinding) []map[string]any {
-	if roleBindings == nil {
+func convertRoleBindings(currentRoleBindings, newRoleBinding []RoleBinding) []map[string]any {
+	if len(newRoleBinding) == 0 {
 		return nil
 	}
 
-	// Collect all role binding data
 	var allRoleBindingData []map[string]any
-	for _, binding := range *roleBindings {
+	for _, rb := range newRoleBinding {
 		bindingData := map[string]any{
-			FieldEnterpriseGroupRoleBindingID:     binding.Id,
-			FieldEnterpriseGroupRoleBindingName:   binding.Name,
-			FieldEnterpriseGroupRoleBindingRoleID: binding.Definition.RoleId,
+			FieldEnterpriseGroupRoleBindingID:     rb.ID,
+			FieldEnterpriseGroupRoleBindingName:   rb.Name,
+			FieldEnterpriseGroupRoleBindingRoleID: rb.RoleID,
 		}
-		// Collect all scope data
+
 		var allScopeData []map[string]any
-		if binding.Definition.Scopes != nil {
-			for _, scope := range *binding.Definition.Scopes {
+		if rb.Scopes != nil {
+			for _, scope := range rb.Scopes {
 				scopeData := map[string]any{}
-				if scope.Organization != nil {
-					scopeData[FieldEnterpriseGroupScopeOrganization] = scope.Organization.Id
+				if scope.OrganizationID != nil {
+					scopeData[FieldEnterpriseGroupScopeOrganization] = *scope.OrganizationID
 				}
-				if scope.Cluster != nil {
-					scopeData[FieldEnterpriseGroupScopeCluster] = scope.Cluster.Id
+				if scope.ClusterID != nil {
+					scopeData[FieldEnterpriseGroupScopeCluster] = *scope.ClusterID
 				}
 				allScopeData = append(allScopeData, scopeData)
 			}
 		}
 
-		// Create single scopes wrapper containing all scopes
 		var scopes []map[string]any
 		if len(allScopeData) > 0 {
 			scopeWrapper := map[string]any{
@@ -731,7 +816,6 @@ func convertRoleBindingsForBatch(roleBindings *[]organization_management.GroupRo
 		allRoleBindingData = append(allRoleBindingData, bindingData)
 	}
 
-	// Create single role bindings wrapper containing all role bindings
 	if len(allRoleBindingData) > 0 {
 		roleBindingWrapper := map[string]any{
 			FieldEnterpriseGroupRoleBinding: allRoleBindingData,
@@ -742,21 +826,21 @@ func convertRoleBindingsForBatch(roleBindings *[]organization_management.GroupRo
 	return nil
 }
 
-// setEnterpriseCreatedGroupsData sets the Terraform state from SDK response data
-func setEnterpriseCreatedGroupsData(
+// setEnterpriseGroupsData sets the Terraform state from SDK response data
+func setEnterpriseGroupsData(
 	data *schema.ResourceData,
-	groups []organization_management.BatchCreateEnterpriseGroupsResponseGroup,
+	groups []EnterpriseGroupWithRoleBindings,
 ) error {
-	type group struct {
+	type groupID struct {
 		organizationID string
 		name           string
 	}
 
 	groupIDToGroup := lo.SliceToMap(groups,
-		func(item organization_management.BatchCreateEnterpriseGroupsResponseGroup) (group, organization_management.BatchCreateEnterpriseGroupsResponseGroup) {
-			g := group{
-				organizationID: *item.OrganizationId,
-				name:           *item.Name,
+		func(item EnterpriseGroupWithRoleBindings) (groupID, EnterpriseGroupWithRoleBindings) {
+			g := groupID{
+				organizationID: item.Group.OrganizationID,
+				name:           item.Group.Name,
 			}
 
 			return g, item
@@ -776,7 +860,7 @@ func setEnterpriseCreatedGroupsData(
 			configGroupName := configGroupMap[FieldEnterpriseGroupName].(string)
 			configOrganizationID := configGroupMap[FieldEnterpriseGroupOrganizationID].(string)
 
-			g := group{
+			g := groupID{
 				organizationID: configOrganizationID,
 				name:           configGroupName,
 			}
@@ -787,31 +871,48 @@ func setEnterpriseCreatedGroupsData(
 			}
 
 			updatedGroup := map[string]any{
-				FieldEnterpriseGroupName:           matchedGroup.Name,
-				FieldEnterpriseGroupOrganizationID: matchedGroup.OrganizationId,
+				FieldEnterpriseGroupName:           matchedGroup.Group.Name,
+				FieldEnterpriseGroupOrganizationID: matchedGroup.Group.OrganizationID,
 			}
 
-			if matchedGroup.Id != nil {
-				updatedGroup[FieldEnterpriseGroupID] = *matchedGroup.Id
-			}
+			updatedGroup[FieldEnterpriseGroupID] = matchedGroup.Group.ID
+			updatedGroup[FieldEnterpriseGroupDescription] = matchedGroup.Group.Description
+			updatedGroup[FieldEnterpriseGroupCreateTime] = matchedGroup.Group.CreateTime.Format(time.RFC3339)
+			updatedGroup[FieldEnterpriseGroupManagedBy] = *matchedGroup.Group.ManagedBy
+			updatedGroup[FieldEnterpriseGroupMembers] = convertMembers(matchedGroup.Group.Members)
 
-			if matchedGroup.Description != nil {
-				updatedGroup[FieldEnterpriseGroupDescription] = *matchedGroup.Description
-			}
+			currentRBs := []RoleBinding{}
+			for _, rbs := range configGroupMap[FieldEnterpriseGroupRoleBindings].([]any) {
+				if rbs == nil {
+					continue
+				}
+				rbWrapper, ok := rbs.(map[string]any)
+				if !ok {
+					return fmt.Errorf("invalid role bindings configuration: expected object, got %T", rbs)
+				}
 
-			if matchedGroup.CreateTime != nil {
-				updatedGroup[FieldEnterpriseGroupCreateTime] = matchedGroup.CreateTime.Format(time.RFC3339)
-			}
+				if rbList, ok := rbWrapper[FieldEnterpriseGroupRoleBinding].([]any); ok && len(rbList) > 0 {
+					for _, rbItem := range rbList {
+						if rbItem == nil {
+							continue
+						}
+						rbItemMap, ok := rbItem.(map[string]any)
+						if !ok {
+							return fmt.Errorf("invalid role bindings configuration: expected object, got %T", rbItemMap)
+						}
 
-			if matchedGroup.ManagedBy != nil {
-				updatedGroup[FieldEnterpriseGroupManagedBy] = *matchedGroup.ManagedBy
-			}
+						rbID := rbItemMap[FieldEnterpriseGroupRoleBindingID].(string)
+						rbName := rbItemMap[FieldEnterpriseGroupRoleBindingName].(string)
 
-			if matchedGroup.Definition != nil {
-				updatedGroup[FieldEnterpriseGroupMembers] = convertMembersForBatchCreate(matchedGroup.Definition.Members)
+						// Writing only ID and Name as they will be used to force correct ordering
+						currentRBs = append(currentRBs, RoleBinding{
+							ID:   rbID,
+							Name: rbName,
+						})
+					}
+				}
 			}
-
-			updatedGroup[FieldEnterpriseGroupRoleBindings] = convertRoleBindingsForBatch(matchedGroup.RoleBindings)
+			updatedGroup[FieldEnterpriseGroupRoleBindings] = convertRoleBindings(currentRBs, matchedGroup.RoleBindings)
 			updatedGroups = append(updatedGroups, updatedGroup)
 		}
 
@@ -888,100 +989,6 @@ func convertRoleBindingsForState(roleBindings []organization_management.RoleBind
 	}
 
 	return []map[string]any{}
-}
-
-// setEnterpriseGroupsDataFromListResponseWithRoleBindings sets the Terraform state from list API response enriched with role bindings
-func setEnterpriseGroupsDataFromListResponseWithRoleBindings(
-	data *schema.ResourceData,
-	groupsWithRoleBindings []EnterpriseGroupWithRoleBindings,
-) error {
-	var groupsData []map[string]any
-
-	for _, groupWithRoleBindings := range groupsWithRoleBindings {
-		group := groupWithRoleBindings.Group
-		groupData := map[string]any{}
-
-		if group.Id != nil {
-			groupData[FieldEnterpriseGroupID] = *group.Id
-		}
-
-		if group.Name != nil {
-			groupData[FieldEnterpriseGroupName] = *group.Name
-		}
-
-		if group.Description != nil {
-			groupData[FieldEnterpriseGroupDescription] = *group.Description
-		}
-
-		if group.OrganizationId != nil {
-			groupData[FieldEnterpriseGroupOrganizationID] = *group.OrganizationId
-		}
-
-		// Add computed fields
-		if group.CreateTime != nil {
-			groupData[FieldEnterpriseGroupCreateTime] = group.CreateTime.Format(time.RFC3339)
-		}
-
-		if group.ManagedBy != nil {
-			groupData[FieldEnterpriseGroupManagedBy] = *group.ManagedBy
-		}
-
-		// Convert members with nested structure
-		if group.Definition != nil && group.Definition.Members != nil {
-			// Collect all member data
-			var allMemberData []map[string]any
-			for _, member := range *group.Definition.Members {
-				memberData := map[string]any{}
-
-				if member.Id != nil {
-					memberData[FieldEnterpriseGroupMemberID] = *member.Id
-				}
-
-				if member.Email != nil {
-					memberData[FieldEnterpriseGroupMemberEmail] = *member.Email
-				}
-
-				if member.AddedTime != nil {
-					memberData[FieldEnterpriseGroupMemberAddedTime] = member.AddedTime.Format(time.RFC3339)
-				}
-
-				if member.Kind != nil {
-					switch *member.Kind {
-					case organization_management.GroupDefinitionMemberKindKINDUSER:
-						memberData[FieldEnterpriseGroupMemberKind] = EnterpriseGroupMemberKindUser
-					case organization_management.GroupDefinitionMemberKindKINDSERVICEACCOUNT:
-						memberData[FieldEnterpriseGroupMemberKind] = EnterpriseGroupMemberKindServiceAccount
-					}
-				}
-
-				allMemberData = append(allMemberData, memberData)
-			}
-
-			// Create single members wrapper containing all members
-			if len(allMemberData) > 0 {
-				memberWrapper := map[string]any{
-					FieldEnterpriseGroupsMember: allMemberData,
-				}
-				groupData[FieldEnterpriseGroupMembers] = []map[string]any{memberWrapper}
-			}
-		}
-
-		// Convert role bindings
-		roleBindings := convertRoleBindingsForState(groupWithRoleBindings.RoleBindings)
-		groupData[FieldEnterpriseGroupRoleBindings] = roleBindings
-
-		// Wrap the group data in nested structure
-		groupWrapper := map[string]any{
-			FieldEnterpriseGroupsGroup: []map[string]any{groupData},
-		}
-
-		groupsData = append(groupsData, groupWrapper)
-	}
-
-	// Groups are already sorted by config order from the Read function
-	// No need to re-sort here to avoid disrupting the configuration order
-
-	return data.Set(FieldEnterpriseGroupsGroups, groupsData)
 }
 
 // EnterpriseGroupsChanges represents the changes needed during an update operation

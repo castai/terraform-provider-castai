@@ -567,57 +567,52 @@ func TestResourceEnterpriseGroupsCreate(t *testing.T) {
 		roleBindingList1 := roleBindingWrapper1[FieldEnterpriseGroupRoleBinding].([]any)
 		r.Len(roleBindingList1, 2)
 
-		// First role binding after sorting (roleBindingID3 - starts with "b")
 		roleBinding1a := roleBindingList1[0].(map[string]any)
-		r.Equal(roleBindingID3, roleBinding1a[FieldEnterpriseGroupRoleBindingID])
-		r.Equal("engineering-editor", roleBinding1a[FieldEnterpriseGroupRoleBindingName])
-		r.Equal(roleID3, roleBinding1a[FieldEnterpriseGroupRoleBindingRoleID])
+		r.Equal(roleBindingID1, roleBinding1a[FieldEnterpriseGroupRoleBindingID])
+		r.Equal("engineering-viewer", roleBinding1a[FieldEnterpriseGroupRoleBindingName])
+		r.Equal(roleID1, roleBinding1a[FieldEnterpriseGroupRoleBindingRoleID])
 
-		// Verify scopes are sorted correctly for first role binding (2 organization scopes)
 		scopes1a := roleBinding1a[FieldEnterpriseGroupRoleBindingScopes].([]any)
 		r.Len(scopes1a, 1) // Single wrapper
 
 		// Single scope wrapper containing all scopes
 		scopeWrapper1a := scopes1a[0].(map[string]any)
 		scopeList1a := scopeWrapper1a[FieldEnterpriseGroupScope].([]any)
-		r.Len(scopeList1a, 2)
+		r.Len(scopeList1a, 3)
 
-		// First scope: organization with organizationID1 ("e"...)
 		scope1a1 := scopeList1a[0].(map[string]any)
-		r.Equal(organizationID1, scope1a1[FieldEnterpriseGroupScopeOrganization])
-		r.Empty(scope1a1[FieldEnterpriseGroupScopeCluster])
+		r.Equal(clusterID1, scope1a1[FieldEnterpriseGroupScopeCluster])
+		r.Empty(scope1a1[FieldEnterpriseGroupScopeOrganization])
 
-		// Second scope: organization with organizationID2 ("f"...)
 		scope1a2 := scopeList1a[1].(map[string]any)
-		r.Equal(organizationID2, scope1a2[FieldEnterpriseGroupScopeOrganization])
+		r.Equal(organizationID1, scope1a2[FieldEnterpriseGroupScopeOrganization])
 		r.Empty(scope1a2[FieldEnterpriseGroupScopeCluster])
 
-		// Second role binding after sorting (roleBindingID1 - starts with "c")
-		roleBinding1b := roleBindingList1[1].(map[string]any)
-		r.Equal(roleBindingID1, roleBinding1b[FieldEnterpriseGroupRoleBindingID])
-		r.Equal("engineering-viewer", roleBinding1b[FieldEnterpriseGroupRoleBindingName])
-		r.Equal(roleID1, roleBinding1b[FieldEnterpriseGroupRoleBindingRoleID])
+		scope1a3 := scopeList1a[2].(map[string]any)
+		r.Equal(clusterID2, scope1a3[FieldEnterpriseGroupScopeCluster])
+		r.Empty(scope1a3[FieldEnterpriseGroupScopeOrganization])
 
-		// Verify scopes are sorted correctly (cluster scopes first, then by ID)
+		roleBinding1b := roleBindingList1[1].(map[string]any)
+		r.Equal(roleBindingID3, roleBinding1b[FieldEnterpriseGroupRoleBindingID])
+		r.Equal("engineering-editor", roleBinding1b[FieldEnterpriseGroupRoleBindingName])
+		r.Equal(roleID3, roleBinding1b[FieldEnterpriseGroupRoleBindingRoleID])
+
+		// Verify scopes are sorted correctly for first role binding (2 organization scopes)
 		scopes1b := roleBinding1b[FieldEnterpriseGroupRoleBindingScopes].([]any)
 		r.Len(scopes1b, 1) // Single wrapper
 
 		// Single scope wrapper containing all scopes
 		scopeWrapper1b := scopes1b[0].(map[string]any)
 		scopeList1b := scopeWrapper1b[FieldEnterpriseGroupScope].([]any)
-		r.Len(scopeList1b, 3)
+		r.Len(scopeList1b, 2)
 
 		scope1b1 := scopeList1b[0].(map[string]any)
-		r.Equal(clusterID1, scope1b1[FieldEnterpriseGroupScopeCluster])
-		r.Empty(scope1b1[FieldEnterpriseGroupScopeOrganization])
+		r.Equal(organizationID1, scope1b1[FieldEnterpriseGroupScopeOrganization])
+		r.Empty(scope1b1[FieldEnterpriseGroupScopeCluster])
 
 		scope1b2 := scopeList1b[1].(map[string]any)
-		r.Equal(organizationID1, scope1b2[FieldEnterpriseGroupScopeOrganization])
+		r.Equal(organizationID2, scope1b2[FieldEnterpriseGroupScopeOrganization])
 		r.Empty(scope1b2[FieldEnterpriseGroupScopeCluster])
-
-		scope1b3 := scopeList1b[2].(map[string]any)
-		r.Equal(clusterID2, scope1b3[FieldEnterpriseGroupScopeCluster])
-		r.Empty(scope1b3[FieldEnterpriseGroupScopeOrganization])
 
 		groupWrapper2 := groups[1].(map[string]any)
 		groupList2 := groupWrapper2[FieldEnterpriseGroupsGroup].([]any)
