@@ -919,47 +919,83 @@ func convertRoleBindingsForBatch(roleBindings *[]organization_management.GroupRo
 }
 
 // setEnterpriseCreatedGroupsData sets the Terraform state from SDK response data
-func setEnterpriseCreatedGroupsData(data *schema.ResourceData, groups []organization_management.BatchCreateEnterpriseGroupsResponseGroup) error {
-	var groupsData []map[string]any
-
-	for _, group := range groups {
-		groupData := map[string]any{
-			FieldEnterpriseGroupName:           group.Name,
-			FieldEnterpriseGroupOrganizationID: group.OrganizationId,
-		}
-
-		if group.Id != nil {
-			groupData[FieldEnterpriseGroupID] = *group.Id
-		}
-
-		if group.Description != nil {
-			groupData[FieldEnterpriseGroupDescription] = *group.Description
-		}
-
-		if group.CreateTime != nil {
-			groupData[FieldEnterpriseGroupCreateTime] = group.CreateTime.Format(time.RFC3339)
-		}
-
-		if group.ManagedBy != nil {
-			groupData[FieldEnterpriseGroupManagedBy] = *group.ManagedBy
-		}
-
-		if group.Definition != nil {
-			groupData[FieldEnterpriseGroupMembers] = convertMembersForBatchCreate(group.Definition.Members)
-		}
-
-		groupData[FieldEnterpriseGroupRoleBindings] = convertRoleBindingsForBatch(group.RoleBindings)
-
-		// Wrap the group data in nested structure
-		groupWrapper := map[string]any{
-			FieldEnterpriseGroupsGroup: []map[string]any{groupData},
-		}
-
-		groupsData = append(groupsData, groupWrapper)
+func setEnterpriseCreatedGroupsData(
+	data *schema.ResourceData,
+	groups []organization_management.BatchCreateEnterpriseGroupsResponseGroup,
+) error {
+	type group struct {
+		organizationID string
+		name           string
 	}
 
-	// Groups are already sorted by config order from the Read function
-	// No need to re-sort here to avoid disrupting the configuration order
+	groupIDToGroup := lo.SliceToMap(groups,
+		func(item organization_management.BatchCreateEnterpriseGroupsResponseGroup) (group, organization_management.BatchCreateEnterpriseGroupsResponseGroup) {
+			g := group{
+				organizationID: *item.OrganizationId,
+				name:           *item.Name,
+			}
+
+			return g, item
+		},
+	)
+
+	configGroups := data.Get(FieldEnterpriseGroupsGroups).([]any)
+	var groupsData []map[string]any
+
+	for _, configGroup := range configGroups {
+		configGroupWrapper := configGroup.(map[string]any)
+		configGroupsData := configGroupWrapper[FieldEnterpriseGroupsGroup].([]any)
+
+		for i, configGroupNested := range configGroupsData {
+			configGroupMap := configGroupNested.(map[string]any)
+			configGroupName := configGroupMap[FieldEnterpriseGroupName].(string)
+			configOrganizationID := configGroupMap[FieldEnterpriseGroupOrganizationID].(string)
+
+			g := group{
+				organizationID: configOrganizationID,
+				name:           configGroupName,
+			}
+
+			matchedGroup, ok := groupIDToGroup[g]
+			if !ok {
+				return fmt.Errorf("created group not found in response: name=%s, organization_id=%s", configGroupName, configOrganizationID)
+			}
+
+			groupData := map[string]any{
+				FieldEnterpriseGroupName:           matchedGroup.Name,
+				FieldEnterpriseGroupOrganizationID: matchedGroup.OrganizationId,
+			}
+
+			if matchedGroup.Id != nil {
+				groupData[FieldEnterpriseGroupID] = *matchedGroup.Id
+			}
+
+			if matchedGroup.Description != nil {
+				groupData[FieldEnterpriseGroupDescription] = *matchedGroup.Description
+			}
+
+			if matchedGroup.CreateTime != nil {
+				groupData[FieldEnterpriseGroupCreateTime] = matchedGroup.CreateTime.Format(time.RFC3339)
+			}
+
+			if matchedGroup.ManagedBy != nil {
+				groupData[FieldEnterpriseGroupManagedBy] = *matchedGroup.ManagedBy
+			}
+
+			if matchedGroup.Definition != nil {
+				groupData[FieldEnterpriseGroupMembers] = convertMembersForBatchCreate(matchedGroup.Definition.Members)
+			}
+
+			groupData[FieldEnterpriseGroupRoleBindings] = convertRoleBindingsForBatch(matchedGroup.RoleBindings)
+
+			// Wrap the group data in nested structure
+			groupWrapper := map[string]any{
+				FieldEnterpriseGroupsGroup: []map[string]any{groupData},
+			}
+
+			configGroupsData[i] = groupWrapper
+		}
+	}
 
 	return data.Set(FieldEnterpriseGroupsGroups, groupsData)
 }
