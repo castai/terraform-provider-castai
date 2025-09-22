@@ -1771,7 +1771,7 @@ func TestResourceEnterpriseGroupsUpdate(t *testing.T) {
 					},
 					RoleBindings: []organization_management.BatchUpdateEnterpriseGroupsRequestRoleBinding{
 						{
-							Id:     existingGroupID1 + "-updated-role-binding",
+							Id:     "",
 							Name:   "updated-role-binding",
 							RoleId: "new-role-id",
 							Scopes: []organization_management.Scope{
@@ -2023,7 +2023,7 @@ func TestResourceEnterpriseGroupsUpdate(t *testing.T) {
 					},
 					RoleBindings: []organization_management.BatchUpdateEnterpriseGroupsRequestRoleBinding{
 						{
-							Id:     existingGroupID1 + "-updated-role-binding",
+							Id:     "",
 							Name:   "updated-role-binding",
 							RoleId: roleID,
 							Scopes: []organization_management.Scope{
