@@ -522,7 +522,7 @@ func buildBatchDeleteRequest(enterpriseID string, data *schema.ResourceData) (*o
 
 		groupWrapper, ok := groupData.(map[string]any)
 		if !ok {
-			continue
+			return nil, fmt.Errorf("invalid group configuration: expected object, got %T", groupData)
 		}
 
 		// Navigate to the nested group objects
@@ -539,7 +539,7 @@ func buildBatchDeleteRequest(enterpriseID string, data *schema.ResourceData) (*o
 
 			group, ok := groupDataNested.(map[string]any)
 			if !ok {
-				continue
+				return nil, fmt.Errorf("invalid nested group configuration: expected object, got %T", groupDataNested)
 			}
 
 			// Group ID is required for deletes
