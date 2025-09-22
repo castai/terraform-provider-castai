@@ -754,6 +754,14 @@ const (
 	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPESURGE                      WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_SURGE"
 )
 
+// Defines values for WorkloadOptimizationAPIListWorkloadsParamsSortOrder.
+const (
+	ASC  WorkloadOptimizationAPIListWorkloadsParamsSortOrder = "ASC"
+	Asc  WorkloadOptimizationAPIListWorkloadsParamsSortOrder = "asc"
+	DESC WorkloadOptimizationAPIListWorkloadsParamsSortOrder = "DESC"
+	Desc WorkloadOptimizationAPIListWorkloadsParamsSortOrder = "desc"
+)
+
 // Defines values for WorkloadOptimizationAPIGetInstallCmdParamsCmePresets.
 const (
 	WorkloadOptimizationAPIGetInstallCmdParamsCmePresetsCODAHALE      WorkloadOptimizationAPIGetInstallCmdParamsCmePresets = "CODAHALE"
@@ -6683,7 +6691,9 @@ type WorkloadoptimizationV1ListWorkloadScalingPoliciesResponse struct {
 
 // WorkloadoptimizationV1ListWorkloadsResponse defines model for workloadoptimization.v1.ListWorkloadsResponse.
 type WorkloadoptimizationV1ListWorkloadsResponse struct {
-	Workloads []WorkloadoptimizationV1Workload `json:"workloads"`
+	// NextCursor The token to request the next page of results.
+	NextCursor *string                          `json:"nextCursor"`
+	Workloads  []WorkloadoptimizationV1Workload `json:"workloads"`
 }
 
 // WorkloadoptimizationV1ManagedBy Defines sources that can manage the workload.
@@ -8342,6 +8352,37 @@ type WorkloadOptimizationAPIGetWorkloadEventParams struct {
 	// CreatedAt The creation time of the event.
 	CreatedAt time.Time `form:"createdAt" json:"createdAt"`
 }
+
+// WorkloadOptimizationAPIListWorkloadsParams defines parameters for WorkloadOptimizationAPIListWorkloads.
+type WorkloadOptimizationAPIListWorkloadsParams struct {
+	WorkloadIds        *[]string `form:"workloadIds,omitempty" json:"workloadIds,omitempty"`
+	WorkloadNames      *[]string `form:"workloadNames,omitempty" json:"workloadNames,omitempty"`
+	Namespaces         *[]string `form:"namespaces,omitempty" json:"namespaces,omitempty"`
+	ScalingPolicyNames *[]string `form:"scalingPolicyNames,omitempty" json:"scalingPolicyNames,omitempty"`
+	Kinds              *[]string `form:"kinds,omitempty" json:"kinds,omitempty"`
+	ManagementOptions  *[]string `form:"managementOptions,omitempty" json:"managementOptions,omitempty"`
+	ConfiguredBy       *[]string `form:"configuredBy,omitempty" json:"configuredBy,omitempty"`
+	SearchQuery        *string   `form:"searchQuery,omitempty" json:"searchQuery,omitempty"`
+	PageLimit          *string   `form:"page.limit,omitempty" json:"page.limit,omitempty"`
+
+	// PageCursor Cursor that defines token indicating where to start the next page.
+	// Empty value indicates to start from beginning of the dataset.
+	PageCursor *string `form:"page.cursor,omitempty" json:"page.cursor,omitempty"`
+
+	// SortField Name of the field you want to sort
+	SortField *string `form:"sort.field,omitempty" json:"sort.field,omitempty"`
+
+	// SortOrder The sort order, possible values ASC or DESC, if not provided asc is the default
+	//
+	//  - ASC: ASC
+	//  - asc: desc
+	//  - DESC: ASC
+	//  - desc: desc
+	SortOrder *WorkloadOptimizationAPIListWorkloadsParamsSortOrder `form:"sort.order,omitempty" json:"sort.order,omitempty"`
+}
+
+// WorkloadOptimizationAPIListWorkloadsParamsSortOrder defines parameters for WorkloadOptimizationAPIListWorkloads.
+type WorkloadOptimizationAPIListWorkloadsParamsSortOrder string
 
 // WorkloadOptimizationAPIGetWorkloadsSummaryParams defines parameters for WorkloadOptimizationAPIGetWorkloadsSummary.
 type WorkloadOptimizationAPIGetWorkloadsSummaryParams struct {

@@ -940,13 +940,14 @@ func setEnterpriseCreatedGroupsData(
 	)
 
 	configGroups := data.Get(FieldEnterpriseGroupsGroups).([]any)
-	var groupsData []map[string]any
 
+	wrappedGroups := make([]map[string]any, 0, len(configGroups))
 	for _, configGroup := range configGroups {
 		configGroupWrapper := configGroup.(map[string]any)
 		configGroupsData := configGroupWrapper[FieldEnterpriseGroupsGroup].([]any)
 
-		for i, configGroupNested := range configGroupsData {
+		updatedGroups := make([]map[string]any, 0, len(configGroupsData))
+		for _, configGroupNested := range configGroupsData {
 			configGroupMap := configGroupNested.(map[string]any)
 			configGroupName := configGroupMap[FieldEnterpriseGroupName].(string)
 			configOrganizationID := configGroupMap[FieldEnterpriseGroupOrganizationID].(string)
@@ -961,43 +962,46 @@ func setEnterpriseCreatedGroupsData(
 				return fmt.Errorf("created group not found in response: name=%s, organization_id=%s", configGroupName, configOrganizationID)
 			}
 
-			groupData := map[string]any{
+			updatedGroup := map[string]any{
 				FieldEnterpriseGroupName:           matchedGroup.Name,
 				FieldEnterpriseGroupOrganizationID: matchedGroup.OrganizationId,
 			}
 
 			if matchedGroup.Id != nil {
-				groupData[FieldEnterpriseGroupID] = *matchedGroup.Id
+				updatedGroup[FieldEnterpriseGroupID] = *matchedGroup.Id
 			}
 
 			if matchedGroup.Description != nil {
-				groupData[FieldEnterpriseGroupDescription] = *matchedGroup.Description
+				updatedGroup[FieldEnterpriseGroupDescription] = *matchedGroup.Description
 			}
 
 			if matchedGroup.CreateTime != nil {
-				groupData[FieldEnterpriseGroupCreateTime] = matchedGroup.CreateTime.Format(time.RFC3339)
+				updatedGroup[FieldEnterpriseGroupCreateTime] = matchedGroup.CreateTime.Format(time.RFC3339)
 			}
 
 			if matchedGroup.ManagedBy != nil {
-				groupData[FieldEnterpriseGroupManagedBy] = *matchedGroup.ManagedBy
+				updatedGroup[FieldEnterpriseGroupManagedBy] = *matchedGroup.ManagedBy
 			}
 
 			if matchedGroup.Definition != nil {
-				groupData[FieldEnterpriseGroupMembers] = convertMembersForBatchCreate(matchedGroup.Definition.Members)
+				updatedGroup[FieldEnterpriseGroupMembers] = convertMembersForBatchCreate(matchedGroup.Definition.Members)
 			}
 
-			groupData[FieldEnterpriseGroupRoleBindings] = convertRoleBindingsForBatch(matchedGroup.RoleBindings)
-
-			// Wrap the group data in nested structure
-			groupWrapper := map[string]any{
-				FieldEnterpriseGroupsGroup: []map[string]any{groupData},
-			}
-
-			configGroupsData[i] = groupWrapper
+			updatedGroup[FieldEnterpriseGroupRoleBindings] = convertRoleBindingsForBatch(matchedGroup.RoleBindings)
+			updatedGroups = append(updatedGroups, updatedGroup)
 		}
+
+		wrappedGroup := map[string]any{
+			FieldEnterpriseGroupsGroup: updatedGroups,
+		}
+		wrappedGroups = append(wrappedGroups, wrappedGroup)
 	}
 
-	return data.Set(FieldEnterpriseGroupsGroups, groupsData)
+	if err := data.Set(FieldEnterpriseGroupsGroups, wrappedGroups); err != nil {
+		return fmt.Errorf("failed to set groups data: %w", err)
+	}
+
+	return nil
 }
 
 // convertRoleBindingsForState converts API role bindings to Terraform state format

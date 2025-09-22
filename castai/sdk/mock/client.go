@@ -5456,9 +5456,9 @@ func (mr *MockClientInterfaceMockRecorder) WorkloadOptimizationAPIListWorkloadSc
 }
 
 // WorkloadOptimizationAPIListWorkloads mocks base method.
-func (m *MockClientInterface) WorkloadOptimizationAPIListWorkloads(ctx context.Context, clusterId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+func (m *MockClientInterface) WorkloadOptimizationAPIListWorkloads(ctx context.Context, clusterId string, params *sdk.WorkloadOptimizationAPIListWorkloadsParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, clusterId}
+	varargs := []interface{}{ctx, clusterId, params}
 	for _, a := range reqEditors {
 		varargs = append(varargs, a)
 	}
@@ -5469,9 +5469,9 @@ func (m *MockClientInterface) WorkloadOptimizationAPIListWorkloads(ctx context.C
 }
 
 // WorkloadOptimizationAPIListWorkloads indicates an expected call of WorkloadOptimizationAPIListWorkloads.
-func (mr *MockClientInterfaceMockRecorder) WorkloadOptimizationAPIListWorkloads(ctx, clusterId interface{}, reqEditors ...interface{}) *gomock.Call {
+func (mr *MockClientInterfaceMockRecorder) WorkloadOptimizationAPIListWorkloads(ctx, clusterId, params interface{}, reqEditors ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, clusterId}, reqEditors...)
+	varargs := append([]interface{}{ctx, clusterId, params}, reqEditors...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIListWorkloads", reflect.TypeOf((*MockClientInterface)(nil).WorkloadOptimizationAPIListWorkloads), varargs...)
 }
 
@@ -15074,9 +15074,9 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPIL
 }
 
 // WorkloadOptimizationAPIListWorkloads mocks base method.
-func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPIListWorkloads(ctx context.Context, clusterId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPIListWorkloads(ctx context.Context, clusterId string, params *sdk.WorkloadOptimizationAPIListWorkloadsParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, clusterId}
+	varargs := []interface{}{ctx, clusterId, params}
 	for _, a := range reqEditors {
 		varargs = append(varargs, a)
 	}
@@ -15087,25 +15087,25 @@ func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPIListWorkloads(
 }
 
 // WorkloadOptimizationAPIListWorkloads indicates an expected call of WorkloadOptimizationAPIListWorkloads.
-func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPIListWorkloads(ctx, clusterId interface{}, reqEditors ...interface{}) *gomock.Call {
+func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPIListWorkloads(ctx, clusterId, params interface{}, reqEditors ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, clusterId}, reqEditors...)
+	varargs := append([]interface{}{ctx, clusterId, params}, reqEditors...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIListWorkloads", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPIListWorkloads), varargs...)
 }
 
 // WorkloadOptimizationAPIListWorkloadsWithResponse mocks base method.
-func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPIListWorkloadsWithResponse(ctx context.Context, clusterId string) (*sdk.WorkloadOptimizationAPIListWorkloadsResponse, error) {
+func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPIListWorkloadsWithResponse(ctx context.Context, clusterId string, params *sdk.WorkloadOptimizationAPIListWorkloadsParams) (*sdk.WorkloadOptimizationAPIListWorkloadsResponse, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "WorkloadOptimizationAPIListWorkloadsWithResponse", ctx, clusterId)
+	ret := m.ctrl.Call(m, "WorkloadOptimizationAPIListWorkloadsWithResponse", ctx, clusterId, params)
 	ret0, _ := ret[0].(*sdk.WorkloadOptimizationAPIListWorkloadsResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // WorkloadOptimizationAPIListWorkloadsWithResponse indicates an expected call of WorkloadOptimizationAPIListWorkloadsWithResponse.
-func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPIListWorkloadsWithResponse(ctx, clusterId interface{}) *gomock.Call {
+func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPIListWorkloadsWithResponse(ctx, clusterId, params interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIListWorkloadsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPIListWorkloadsWithResponse), ctx, clusterId)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIListWorkloadsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPIListWorkloadsWithResponse), ctx, clusterId, params)
 }
 
 // WorkloadOptimizationAPIPatchWorkloadV2 mocks base method.
