@@ -843,80 +843,60 @@ func convertRoleBindings(currentRoleBindings, newRoleBinding []RoleBinding) []ma
 	}
 
 	var allRoleBindingData []map[string]any
-	if len(currentRoleBindings) == 0 {
-		for _, rb := range newRoleBinding {
-			bindingData := map[string]any{
-				FieldEnterpriseGroupRoleBindingID:     rb.ID,
-				FieldEnterpriseGroupRoleBindingName:   rb.Name,
-				FieldEnterpriseGroupRoleBindingRoleID: rb.RoleID,
-			}
+	newRoleBindingIDToRoleBinding := lo.SliceToMap(newRoleBinding, func(item RoleBinding) (string, RoleBinding) {
+		return item.ID, item
+	})
+	// When role binding is not yet created, it won't have ID, so also index by Name
+	newRoleBindingNameToRoleBinding := lo.SliceToMap(newRoleBinding, func(item RoleBinding) (string, RoleBinding) {
+		return item.Name, item
+	})
 
-			var allScopeData []map[string]any
-			if rb.Scopes != nil {
-				for _, scope := range rb.Scopes {
-					scopeData := map[string]any{}
-					if scope.OrganizationID != nil {
-						scopeData[FieldEnterpriseGroupScopeOrganization] = *scope.OrganizationID
-					}
-					if scope.ClusterID != nil {
-						scopeData[FieldEnterpriseGroupScopeCluster] = *scope.ClusterID
-					}
-					allScopeData = append(allScopeData, scopeData)
-				}
+	for _, rb := range currentRoleBindings {
+		var newRb RoleBinding
+		var ok bool
+		if rb.ID == "" {
+			newRb, ok = newRoleBindingNameToRoleBinding[rb.Name]
+			if !ok {
+				// Something is wrong, role binding without ID should be found by Name
+				continue
 			}
-
-			var scopes []map[string]any
-			if len(allScopeData) > 0 {
-				scopeWrapper := map[string]any{
-					FieldEnterpriseGroupScope: allScopeData,
-				}
-				scopes = []map[string]any{scopeWrapper}
-			}
-			bindingData[FieldEnterpriseGroupRoleBindingScopes] = scopes
-			allRoleBindingData = append(allRoleBindingData, bindingData)
-		}
-	} else {
-		newRoleBindingIDToRoleBinding := lo.SliceToMap(newRoleBinding, func(item RoleBinding) (string, RoleBinding) {
-			return item.ID, item
-		})
-
-		for _, rb := range currentRoleBindings {
-			newRb, ok := newRoleBindingIDToRoleBinding[rb.ID]
+		} else {
+			newRb, ok = newRoleBindingIDToRoleBinding[rb.ID]
 			if !ok {
 				// Role binding was removed outside of Terraform, skip it
 				continue
 			}
-
-			rbData := map[string]any{
-				FieldEnterpriseGroupRoleBindingID:     rb.ID,
-				FieldEnterpriseGroupRoleBindingName:   newRb.Name,
-				FieldEnterpriseGroupRoleBindingRoleID: newRb.RoleID,
-			}
-
-			var allScopeData []map[string]any
-			if newRb.Scopes != nil {
-				for _, scope := range newRb.Scopes {
-					scopeData := map[string]any{}
-					if scope.OrganizationID != nil {
-						scopeData[FieldEnterpriseGroupScopeOrganization] = *scope.OrganizationID
-					}
-					if scope.ClusterID != nil {
-						scopeData[FieldEnterpriseGroupScopeCluster] = *scope.ClusterID
-					}
-					allScopeData = append(allScopeData, scopeData)
-				}
-			}
-
-			var scopes []map[string]any
-			if len(allScopeData) > 0 {
-				scopeWrapper := map[string]any{
-					FieldEnterpriseGroupScope: allScopeData,
-				}
-				scopes = []map[string]any{scopeWrapper}
-			}
-			rbData[FieldEnterpriseGroupRoleBindingScopes] = scopes
-			allRoleBindingData = append(allRoleBindingData, rbData)
 		}
+
+		rbData := map[string]any{
+			FieldEnterpriseGroupRoleBindingID:     newRb.ID,
+			FieldEnterpriseGroupRoleBindingName:   newRb.Name,
+			FieldEnterpriseGroupRoleBindingRoleID: newRb.RoleID,
+		}
+
+		var allScopeData []map[string]any
+		if newRb.Scopes != nil {
+			for _, scope := range newRb.Scopes {
+				scopeData := map[string]any{}
+				if scope.OrganizationID != nil {
+					scopeData[FieldEnterpriseGroupScopeOrganization] = *scope.OrganizationID
+				}
+				if scope.ClusterID != nil {
+					scopeData[FieldEnterpriseGroupScopeCluster] = *scope.ClusterID
+				}
+				allScopeData = append(allScopeData, scopeData)
+			}
+		}
+
+		var scopes []map[string]any
+		if len(allScopeData) > 0 {
+			scopeWrapper := map[string]any{
+				FieldEnterpriseGroupScope: allScopeData,
+			}
+			scopes = []map[string]any{scopeWrapper}
+		}
+		rbData[FieldEnterpriseGroupRoleBindingScopes] = scopes
+		allRoleBindingData = append(allRoleBindingData, rbData)
 	}
 
 	if len(allRoleBindingData) > 0 {
