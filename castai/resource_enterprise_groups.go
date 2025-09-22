@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"sort"
 	"strings"
 	"time"
 
@@ -289,13 +288,9 @@ func resourceEnterpriseGroupsRead(ctx context.Context, data *schema.ResourceData
 	}
 
 	// Get the group IDs from current state to determine which groups we should be managing
-	managedGroupIDs := getManagedGroupIDsFromState(data)
-	if len(managedGroupIDs) == 0 {
-		// No groups to manage, set empty state
-		if err := data.Set(FieldEnterpriseGroupsGroups, []any{}); err != nil {
-			return diag.FromErr(fmt.Errorf("setting empty groups: %w", err))
-		}
-		return nil
+	managedGroupIDs, err := getManagedGroupIDsFromState(data)
+	if err != nil {
+		return diag.FromErr(fmt.Errorf("extracting managed group IDs from state: %w", err))
 	}
 
 	log.Printf("[INFO] Reading enterprise groups for enterprise ID %s, managing %d groups", enterpriseID, len(managedGroupIDs))
@@ -310,37 +305,35 @@ func resourceEnterpriseGroupsRead(ctx context.Context, data *schema.ResourceData
 		return diag.FromErr(fmt.Errorf("list enterprise groups failed with status %d: %s", resp.StatusCode(), string(resp.Body)))
 	}
 
-	if resp.JSON200 == nil || resp.JSON200.Items == nil {
-		// No groups found in API, but we have groups in state - they might have been deleted
-		if err := data.Set(FieldEnterpriseGroupsGroups, []any{}); err != nil {
-			return diag.FromErr(fmt.Errorf("setting empty groups: %w", err))
-		}
-		return nil
-	}
+	managedGroupIDsMap := lo.Keyify[string](managedGroupIDs)
 
 	// Filter API response to only include groups we are managing
-	var managedGroups []organization_management.ListGroupsResponseGroup
+	managedGroupIDToGroup := make(map[string]organization_management.ListGroupsResponseGroup, len(managedGroupIDs))
 	for _, group := range *resp.JSON200.Items {
-		if group.Id != nil && managedGroupIDs[*group.Id] {
+		if group.Id == nil {
+			continue
+		}
+
+		if _, ok := managedGroupIDsMap[*group.Id]; ok {
+			managedGroupIDToGroup[*group.Id] = group
+		}
+	}
+
+	managedGroups := make([]organization_management.ListGroupsResponseGroup, 0, len(managedGroupIDToGroup))
+	for _, groupID := range managedGroupIDs {
+		if group, exists := managedGroupIDToGroup[groupID]; exists {
 			managedGroups = append(managedGroups, group)
 		}
 	}
 
 	log.Printf("[INFO] Found %d managed groups in enterprise ID %s", len(managedGroups), enterpriseID)
 
-	// Sort groups to match the configuration order to prevent Terraform drift
-	// We need to match the order in configuration, not sort by ID or name
-	managedGroups = sortGroupsByConfigOrder(data, managedGroups)
-
-	// Fetch role bindings for managed groups since they are not included in the list response
-	// We track ALL role bindings assigned to our groups since we own them
 	groupsWithRoleBindings, err := getGroupsRoleBindings(ctx, client, enterpriseID, managedGroups)
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("fetching role bindings for groups: %w", err))
 	}
 
-	// Update state with only the groups we are managing
-	if err := setEnterpriseGroupsDataFromListResponseWithRoleBindings(data, groupsWithRoleBindings); err != nil {
+	if err = setEnterpriseGroupsDataFromListResponseWithRoleBindings(data, groupsWithRoleBindings); err != nil {
 		return diag.FromErr(fmt.Errorf("setting groups data from list response: %w", err))
 	}
 
@@ -568,52 +561,51 @@ func buildBatchDeleteRequest(enterpriseID string, data *schema.ResourceData) (*o
 }
 
 // getManagedGroupIDsFromState extracts the group IDs from Terraform state that this resource should manage
-func getManagedGroupIDsFromState(data *schema.ResourceData) map[string]bool {
-	managedIDs := make(map[string]bool)
+func getManagedGroupIDsFromState(data *schema.ResourceData) ([]string, error) {
+	var managedIDs []string
 
 	groupsListAny := data.Get(FieldEnterpriseGroupsGroups)
 	groupsList, ok := groupsListAny.([]any)
 	if !ok {
-		return managedIDs
+		return nil, fmt.Errorf("groups data is not in expected format")
 	}
 
 	for _, groupData := range groupsList {
 		if groupData == nil {
-			continue
+			continue // nil entries are acceptable in Terraform lists
 		}
 
 		groupWrapper, ok := groupData.(map[string]any)
 		if !ok {
-			continue
+			return nil, fmt.Errorf("invalid group configuration: expected object, got %T", groupData)
 		}
 
 		// Navigate to the nested group objects
 		groupsData, ok := groupWrapper[FieldEnterpriseGroupsGroup].([]any)
 		if !ok || len(groupsData) == 0 {
-			continue
+			continue // Empty group arrays are acceptable
 		}
 
 		// Process all groups in the nested array
 		for _, groupDataNested := range groupsData {
 			if groupDataNested == nil {
-				continue
+				continue // nil entries are acceptable in nested arrays
 			}
 
 			group, ok := groupDataNested.(map[string]any)
 			if !ok {
-				continue
+				return nil, fmt.Errorf("invalid nested group configuration: expected object, got %T", groupDataNested)
 			}
 
 			if groupID, ok := group[FieldEnterpriseGroupID].(string); ok && groupID != "" {
-				managedIDs[groupID] = true
+				managedIDs = append(managedIDs, groupID)
 			}
 		}
 	}
 
-	return managedIDs
+	return managedIDs, nil
 }
 
-// getGroupsRoleBindings fetches role bindings for each group and merges them into group data
 func getGroupsRoleBindings(
 	ctx context.Context,
 	client organization_management.ClientWithResponsesInterface,
@@ -624,204 +616,37 @@ func getGroupsRoleBindings(
 		return nil, nil
 	}
 
-	// Collect all group IDs for batch fetching role bindings
-	var groupIDs []string
+	groupsWithRoleBindings := make([]EnterpriseGroupWithRoleBindings, 0, len(groups))
+
 	for _, group := range groups {
-		if group.Id != nil {
-			groupIDs = append(groupIDs, *group.Id)
-		}
-	}
-
-	if len(groupIDs) == 0 {
-		// Return groups without role bindings
-		groupsWithRoleBindings := make([]EnterpriseGroupWithRoleBindings, len(groups))
-		for i, group := range groups {
-			groupsWithRoleBindings[i] = EnterpriseGroupWithRoleBindings{
-				Group:        group,
-				RoleBindings: []organization_management.RoleBinding{},
-			}
-		}
-		return groupsWithRoleBindings, nil
-	}
-
-	// Fetch role bindings for all groups in one API call
-	params := &organization_management.EnterpriseAPIListRoleBindingsParams{
-		SubjectId: &groupIDs,
-	}
-
-	resp, err := client.EnterpriseAPIListRoleBindingsWithResponse(ctx, enterpriseID, params)
-	if err != nil {
-		return nil, fmt.Errorf("fetching role bindings: %w", err)
-	}
-
-	if err := sdk.CheckOKResponse(resp, err); err != nil {
-		return nil, fmt.Errorf("role bindings API response: %w", err)
-	}
-
-	if resp.JSON200 == nil || resp.JSON200.Items == nil {
-		// No role bindings found, return groups without role bindings
-		groupsWithRoleBindings := make([]EnterpriseGroupWithRoleBindings, len(groups))
-		for i, group := range groups {
-			groupsWithRoleBindings[i] = EnterpriseGroupWithRoleBindings{
-				Group:        group,
-				RoleBindings: []organization_management.RoleBinding{},
-			}
-		}
-		return groupsWithRoleBindings, nil
-	}
-
-	roleBindingsByGroupID := make(map[string][]organization_management.RoleBinding)
-	for _, roleBinding := range *resp.JSON200.Items {
-		// Role bindings in enterprise groups are associated with subjects (groups)
-		// We need to check the definition to find which group this role binding belongs to
-		if roleBinding.Definition != nil && roleBinding.Definition.Subjects != nil {
-			for _, subject := range *roleBinding.Definition.Subjects {
-				if subject.Group != nil {
-					roleBindingsByGroupID[subject.Group.Id] = append(roleBindingsByGroupID[subject.Group.Id], roleBinding)
-				}
-			}
-		}
-	}
-
-	// Create groups with role bindings
-	groupsWithRoleBindings := make([]EnterpriseGroupWithRoleBindings, len(groups))
-	for i, group := range groups {
-		roleBindings := []organization_management.RoleBinding{}
-		if group.Id != nil {
-			if bindings, exists := roleBindingsByGroupID[*group.Id]; exists {
-				roleBindings = bindings
-			}
+		resp, err := client.EnterpriseAPIListRoleBindingsWithResponse(
+			ctx,
+			enterpriseID,
+			&organization_management.EnterpriseAPIListRoleBindingsParams{
+				SubjectId: &[]string{*group.Id},
+			})
+		if err != nil {
+			return nil, fmt.Errorf("listing role bindings for group %s: %w", *group.Id, err)
 		}
 
-		groupsWithRoleBindings[i] = EnterpriseGroupWithRoleBindings{
+		if err = sdk.CheckOKResponse(resp, err); err != nil {
+			return nil, fmt.Errorf("list role bindings for group %s failed: %w", *group.Id, err)
+		}
+
+		if resp.JSON200 == nil || resp.JSON200.Items == nil || len(*resp.JSON200.Items) == 0 {
+			groupsWithRoleBindings = append(groupsWithRoleBindings, EnterpriseGroupWithRoleBindings{
+				Group: group,
+			})
+			continue
+		}
+
+		groupsWithRoleBindings = append(groupsWithRoleBindings, EnterpriseGroupWithRoleBindings{
 			Group:        group,
-			RoleBindings: roleBindings,
-		}
+			RoleBindings: *resp.JSON200.Items,
+		})
 	}
 
 	return groupsWithRoleBindings, nil
-}
-
-// sortGroupsByConfigOrder sorts API groups to match the order they appear in Terraform configuration
-func sortGroupsByConfigOrder(data *schema.ResourceData, apiGroups []organization_management.ListGroupsResponseGroup) []organization_management.ListGroupsResponseGroup {
-	// Get the configuration order by extracting group names in order
-	configOrder := getGroupNamesFromConfig(data)
-	if len(configOrder) == 0 {
-		return apiGroups
-	}
-
-	// Create a map from group name to its position in config
-	nameToOrder := make(map[string]int)
-	for i, name := range configOrder {
-		nameToOrder[name] = i
-	}
-
-	// Sort API groups by their configuration order
-	sort.Slice(apiGroups, func(i, j int) bool {
-		nameI := ""
-		nameJ := ""
-		if apiGroups[i].Name != nil {
-			nameI = *apiGroups[i].Name
-		}
-		if apiGroups[j].Name != nil {
-			nameJ = *apiGroups[j].Name
-		}
-
-		orderI, foundI := nameToOrder[nameI]
-		orderJ, foundJ := nameToOrder[nameJ]
-
-		// If both found, sort by config order
-		if foundI && foundJ {
-			return orderI < orderJ
-		}
-		// If only one found, prioritize the one in config
-		if foundI {
-			return true
-		}
-		if foundJ {
-			return false
-		}
-		// If neither found, sort alphabetically as fallback
-		return nameI < nameJ
-	})
-
-	return apiGroups
-}
-
-// getGroupNamesFromConfig extracts group names in the order they appear in configuration
-func getGroupNamesFromConfig(data *schema.ResourceData) []string {
-	var names []string
-
-	groupsListAny := data.Get(FieldEnterpriseGroupsGroups)
-	groupsList, ok := groupsListAny.([]any)
-	if !ok {
-		return names
-	}
-
-	for _, groupData := range groupsList {
-		if groupData == nil {
-			continue
-		}
-
-		groupWrapper, ok := groupData.(map[string]any)
-		if !ok {
-			continue
-		}
-
-		// Navigate to the nested group objects
-		groupsData, ok := groupWrapper[FieldEnterpriseGroupsGroup].([]any)
-		if !ok || len(groupsData) == 0 {
-			continue
-		}
-
-		// Process all groups in the nested array
-		for _, groupDataNested := range groupsData {
-			if groupDataNested == nil {
-				continue
-			}
-
-			group, ok := groupDataNested.(map[string]any)
-			if !ok {
-				continue
-			}
-
-			if groupName, ok := group[FieldEnterpriseGroupName].(string); ok && groupName != "" {
-				names = append(names, groupName)
-			}
-		}
-	}
-
-	return names
-}
-
-func sortByField(items []map[string]any, field string) {
-	sort.Slice(items, func(i, j int) bool {
-		idI, okI := items[i][field].(string)
-		idJ, okJ := items[j][field].(string)
-		if !okI || !okJ {
-			return false
-		}
-		return idI < idJ
-	})
-}
-
-// sortByFieldNested sorts items by a field that is nested one level deep
-func sortByFieldNested(items []map[string]any, wrapperField, field string) {
-	sort.Slice(items, func(i, j int) bool {
-		// Navigate to nested data
-		wrapperI, okI := items[i][wrapperField].([]map[string]any)
-		wrapperJ, okJ := items[j][wrapperField].([]map[string]any)
-		if !okI || !okJ || len(wrapperI) == 0 || len(wrapperJ) == 0 {
-			return false
-		}
-
-		idI, okI := wrapperI[0][field].(string)
-		idJ, okJ := wrapperJ[0][field].(string)
-		if !okI || !okJ {
-			return false
-		}
-		return idI < idJ
-	})
 }
 
 // convertMembersForBatchCreate converts members from batch create response
@@ -908,7 +733,6 @@ func convertRoleBindingsForBatch(roleBindings *[]organization_management.GroupRo
 
 	// Create single role bindings wrapper containing all role bindings
 	if len(allRoleBindingData) > 0 {
-		sortByField(allRoleBindingData, FieldEnterpriseGroupRoleBindingID)
 		roleBindingWrapper := map[string]any{
 			FieldEnterpriseGroupRoleBinding: allRoleBindingData,
 		}
@@ -1057,7 +881,6 @@ func convertRoleBindingsForState(roleBindings []organization_management.RoleBind
 	// Create single role bindings wrapper containing all role bindings
 	if len(allRoleBindingData) > 0 {
 		// Sort role bindings by ID for consistent ordering
-		sortByField(allRoleBindingData, FieldEnterpriseGroupRoleBindingID)
 		roleBindingWrapper := map[string]any{
 			FieldEnterpriseGroupRoleBinding: allRoleBindingData,
 		}
@@ -1068,7 +891,10 @@ func convertRoleBindingsForState(roleBindings []organization_management.RoleBind
 }
 
 // setEnterpriseGroupsDataFromListResponseWithRoleBindings sets the Terraform state from list API response enriched with role bindings
-func setEnterpriseGroupsDataFromListResponseWithRoleBindings(data *schema.ResourceData, groupsWithRoleBindings []EnterpriseGroupWithRoleBindings) error {
+func setEnterpriseGroupsDataFromListResponseWithRoleBindings(
+	data *schema.ResourceData,
+	groupsWithRoleBindings []EnterpriseGroupWithRoleBindings,
+) error {
 	var groupsData []map[string]any
 
 	for _, groupWithRoleBindings := range groupsWithRoleBindings {
