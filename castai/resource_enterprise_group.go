@@ -1079,10 +1079,98 @@ func resourceEnterpriseGroupUpdate(ctx context.Context, data *schema.ResourceDat
 			return diag.FromErr(fmt.Errorf("batch update enterprise groups failed: %w", err))
 		}
 
+		if resp.JSON200 == nil || resp.JSON200.Groups == nil {
+			return diag.FromErr(fmt.Errorf("unexpected empty response from batch update"))
+		}
+
+		g := (*resp.JSON200.Groups)[0]
+
+		group, err := convertBatchUpdateEnterpriseGroupsResponseGroup(g)
+		if err != nil {
+			return diag.FromErr(fmt.Errorf("converting updated group data: %w", err))
+		}
+
+		if err = setEnterpriseGroupsData(data, group); err != nil {
+			return diag.FromErr(fmt.Errorf("failed to set updated group data: %w", err))
+		}
+
 		tflog.Debug(ctx, "Enterprise group updated successfully", map[string]any{"group_id": groupID})
 	}
 
-	return resourceEnterpriseGroupRead(ctx, data, meta)
+	return nil
+}
+
+func convertBatchUpdateEnterpriseGroupsResponseGroup(
+	g organization_management.BatchUpdateEnterpriseGroupsResponseGroup,
+) (EnterpriseGroupWithRoleBindings, error) {
+	var members []Member
+	if g.Definition != nil && g.Definition.Members != nil && len(*g.Definition.Members) > 0 {
+		members = make([]Member, 0, len(*g.Definition.Members))
+		for _, member := range *g.Definition.Members {
+			m := Member{}
+			if member.Kind == nil {
+				return EnterpriseGroupWithRoleBindings{}, fmt.Errorf("member kind is nil for member in group %s", lo.FromPtr(g.Name))
+			}
+
+			switch *member.Kind {
+			case organization_management.DefinitionMemberKindSUBJECTKINDUSER:
+				m.Kind = EnterpriseGroupMemberKindUser
+			case organization_management.DefinitionMemberKindSUBJECTKINDSERVICEACCOUNT:
+				m.Kind = EnterpriseGroupMemberKindServiceAccount
+			default:
+				return EnterpriseGroupWithRoleBindings{},
+					fmt.Errorf("unsupported member kind %s for member in group %s", *member.Kind, lo.FromPtr(g.Name))
+			}
+			m.ID = lo.FromPtr(member.Id)
+			m.Email = member.Email
+			m.AddedTime = member.AddedTime
+			members = append(members, m)
+		}
+	}
+
+	var roleBindings []RoleBinding
+	if g.RoleBindings != nil && len(*g.RoleBindings) > 0 {
+		roleBindings = make([]RoleBinding, 0, len(*g.RoleBindings))
+		for _, rb := range *g.RoleBindings {
+			scopes := []Scope{}
+
+			if rb.Definition.Scopes != nil && len(*rb.Definition.Scopes) > 0 {
+				for _, scope := range *rb.Definition.Scopes {
+					s := Scope{}
+					if scope.Organization != nil {
+						s.OrganizationID = &scope.Organization.Id
+					}
+
+					if scope.Cluster != nil {
+						s.ClusterID = &scope.Cluster.Id
+					}
+					scopes = append(scopes, s)
+				}
+			}
+
+			r := RoleBinding{
+				ID:         rb.Id,
+				Name:       rb.Name,
+				RoleID:     rb.Definition.RoleId,
+				CreateTime: rb.CreateTime,
+				Scopes:     scopes,
+			}
+			roleBindings = append(roleBindings, r)
+		}
+	}
+
+	return EnterpriseGroupWithRoleBindings{
+		Group: Group{
+			ID:             lo.FromPtr(g.Id),
+			Name:           lo.FromPtr(g.Name),
+			OrganizationID: lo.FromPtr(g.OrganizationId),
+			Description:    g.Description,
+			CreateTime:     g.CreateTime,
+			ManagedBy:      g.ManagedBy,
+			Members:        members,
+		},
+		RoleBindings: roleBindings,
+	}, nil
 }
 
 func resourceEnterpriseGroupDelete(ctx context.Context, data *schema.ResourceData, meta any) diag.Diagnostics {
