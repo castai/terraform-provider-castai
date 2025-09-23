@@ -65,7 +65,7 @@ func Provider(version string) *schema.Provider {
 			"castai_hibernation_schedule":          resourceHibernationSchedule(),
 			"castai_security_runtime_rule":         resourceSecurityRuntimeRule(),
 			"castai_allocation_group":              resourceAllocationGroup(),
-			"castai_enterprise_groups":             resourceEnterpriseGroups(),
+			"castai_enterprise_group":              resourceEnterpriseGroup(),
 		},
 
 		DataSourcesMap: map[string]*schema.Resource{
