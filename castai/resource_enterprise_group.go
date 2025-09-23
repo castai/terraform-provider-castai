@@ -1115,9 +1115,9 @@ func convertBatchUpdateEnterpriseGroupsResponseGroup(
 			}
 
 			switch *member.Kind {
-			case organization_management.DefinitionMemberKindSUBJECTKINDUSER:
+			case "USER":
 				m.Kind = EnterpriseGroupMemberKindUser
-			case organization_management.DefinitionMemberKindSUBJECTKINDSERVICEACCOUNT:
+			case "SERVICE_ACCOUNT":
 				m.Kind = EnterpriseGroupMemberKindServiceAccount
 			default:
 				return EnterpriseGroupWithRoleBindings{},
