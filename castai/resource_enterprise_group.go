@@ -1006,15 +1006,17 @@ func resourceEnterpriseGroupUpdate(ctx context.Context, data *schema.ResourceDat
 								orgID, _ := scope[FieldEnterpriseGroupScopeOrganization].(string)
 								clusterID, _ := scope[FieldEnterpriseGroupScopeCluster].(string)
 
+								if orgID != "" && clusterID != "" {
+									return diag.FromErr(fmt.Errorf("scope cannot have both 'organization' and 'cluster' set simultaneously"))
+								}
+
 								if orgID != "" {
 									rbScopes = append(rbScopes, organization_management.Scope{
 										Organization: &organization_management.OrganizationScope{
 											Id: orgID,
 										},
 									})
-								}
-
-								if clusterID != "" {
+								} else if clusterID != "" {
 									rbScopes = append(rbScopes, organization_management.Scope{
 										Cluster: &organization_management.ClusterScope{
 											Id: clusterID,

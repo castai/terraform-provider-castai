@@ -836,230 +836,98 @@ func TestResourceEnterpriseGroupReadContext(t *testing.T) {
 	})
 }
 
-// func TestResourceEnterpriseGroupDeleteContext(t *testing.T) {
-// 	t.Run("when API successfully deletes groups then clear state", func(t *testing.T) {
-// 		t.Parallel()
-// 		r := require.New(t)
-// 		mockClient := mockOrganizationManagement.NewMockClientWithResponsesInterface(gomock.NewController(t))
+func TestResourceEnterpriseGroupDeleteContext(t *testing.T) {
+	t.Parallel()
 
-// 		ctx := context.Background()
-// 		provider := &ProviderConfig{
-// 			organizationManagementClient: mockClient,
-// 		}
+	t.Run("when API call fails then return error", func(t *testing.T) {
+		t.Parallel()
+		r := require.New(t)
+		mockClient := mockOrganizationManagement.NewMockClientWithResponsesInterface(gomock.NewController(t))
 
-// 		enterpriseID := uuid.NewString()
-// 		organizationID1 := "e" + uuid.NewString()
-// 		organizationID2 := "f" + uuid.NewString()
-// 		groupID1 := "bbbb1111-1111-1111-1111-111111111111"
-// 		groupID2 := "aaaa2222-2222-2222-2222-222222222222"
+		ctx := context.Background()
+		provider := &ProviderConfig{
+			organizationManagementClient: mockClient,
+		}
 
-// 		// Expected delete request
-// 		expectedRequest := organization_management.BatchDeleteEnterpriseGroupsRequest{
-// 			EnterpriseId: enterpriseID,
-// 			Requests: []organization_management.BatchDeleteEnterpriseGroupsRequestDeleteGroupRequest{
-// 				{
-// 					Id:             groupID1,
-// 					OrganizationId: organizationID1,
-// 				},
-// 				{
-// 					Id:             groupID2,
-// 					OrganizationId: organizationID2,
-// 				},
-// 			},
-// 		}
+		enterpriseID := uuid.NewString()
+		organizationID := uuid.NewString()
+		groupID := uuid.NewString()
 
-// 		mockClient.EXPECT().
-// 			EnterpriseAPIBatchDeleteEnterpriseGroupsWithResponse(gomock.Any(), enterpriseID, expectedRequest).
-// 			Return(&organization_management.EnterpriseAPIBatchDeleteEnterpriseGroupsResponse{
-// 				HTTPResponse: &http.Response{StatusCode: http.StatusOK},
-// 			}, nil)
+		mockClient.EXPECT().
+			EnterpriseAPIBatchDeleteEnterpriseGroupsWithResponse(gomock.Any(), enterpriseID, gomock.Any()).
+			Return(nil, errors.New("network error"))
 
-// 		// State with 2 groups
-// 		stateValue := cty.ObjectVal(map[string]cty.Value{
-// 			FieldEnterpriseGroupsGroups: cty.ListVal([]cty.Value{
-// 				cty.ObjectVal(map[string]cty.Value{
-// 					FieldEnterpriseGroupsGroup: cty.ListVal([]cty.Value{
-// 						cty.ObjectVal(map[string]cty.Value{
-// 							FieldEnterpriseGroupID:             cty.StringVal(groupID1),
-// 							FieldEnterpriseGroupOrganizationID: cty.StringVal(organizationID1),
-// 							FieldEnterpriseGroupName:           cty.StringVal("engineering-team"),
-// 						}),
-// 					}),
-// 				}),
-// 				cty.ObjectVal(map[string]cty.Value{
-// 					FieldEnterpriseGroupsGroup: cty.ListVal([]cty.Value{
-// 						cty.ObjectVal(map[string]cty.Value{
-// 							FieldEnterpriseGroupID:             cty.StringVal(groupID2),
-// 							FieldEnterpriseGroupOrganizationID: cty.StringVal(organizationID2),
-// 							FieldEnterpriseGroupName:           cty.StringVal("security-team"),
-// 						}),
-// 					}),
-// 				}),
-// 			}),
-// 		})
-// 		state := terraform.NewInstanceStateShimmedFromValue(stateValue, 0)
-// 		state.ID = enterpriseID
+		// State with 1 group
+		stateValue := cty.ObjectVal(map[string]cty.Value{
+			FieldEnterpriseGroupEnterpriseID:   cty.StringVal(enterpriseID),
+			FieldEnterpriseGroupID:             cty.StringVal(groupID),
+			FieldEnterpriseGroupOrganizationID: cty.StringVal(organizationID),
+			FieldEnterpriseGroupName:           cty.StringVal("engineering-team"),
+		})
+		state := terraform.NewInstanceStateShimmedFromValue(stateValue, 0)
+		state.ID = enterpriseID
 
-// 		resource := resourceEnterpriseGroup()
-// 		data := resource.Data(state)
+		resource := resourceEnterpriseGroup()
+		data := resource.Data(state)
 
-// 		result := resource.DeleteContext(ctx, data, provider)
+		result := resource.DeleteContext(ctx, data, provider)
 
-// 		r.Nil(result)
-// 		r.False(result.HasError())
-// 		r.Empty(data.Id(), "Resource ID should be cleared after successful delete")
-// 	})
+		r.True(result.HasError())
+		r.Equal("calling batch delete enterprise groups: network error", result[0].Summary)
+		r.NotEmpty(data.Id(), "Resource ID should not be cleared when delete fails")
+	})
 
-// 	t.Run("when enterprise ID is empty then return error", func(t *testing.T) {
-// 		t.Parallel()
-// 		r := require.New(t)
-// 		mockClient := mockOrganizationManagement.NewMockClientWithResponsesInterface(gomock.NewController(t))
+	t.Run("when API successfully deletes groups then clear state", func(t *testing.T) {
+		t.Parallel()
+		r := require.New(t)
+		mockClient := mockOrganizationManagement.NewMockClientWithResponsesInterface(gomock.NewController(t))
 
-// 		ctx := context.Background()
-// 		provider := &ProviderConfig{
-// 			organizationManagementClient: mockClient,
-// 		}
+		ctx := context.Background()
+		provider := &ProviderConfig{
+			organizationManagementClient: mockClient,
+		}
 
-// 		// State with no enterprise ID
-// 		stateValue := cty.ObjectVal(map[string]cty.Value{
-// 			FieldEnterpriseGroupsGroups: cty.ListValEmpty(cty.Object(map[string]cty.Type{})),
-// 		})
-// 		state := terraform.NewInstanceStateShimmedFromValue(stateValue, 0)
-// 		state.ID = "" // Empty enterprise ID
+		enterpriseID := uuid.NewString()
+		organizationID := uuid.NewString()
+		groupID := uuid.NewString()
 
-// 		resource := resourceEnterpriseGroup()
-// 		data := resource.Data(state)
+		// Expected delete request
+		expectedRequest := organization_management.BatchDeleteEnterpriseGroupsRequest{
+			EnterpriseId: enterpriseID,
+			Requests: []organization_management.BatchDeleteEnterpriseGroupsRequestDeleteGroupRequest{
+				{
+					Id:             groupID,
+					OrganizationId: organizationID,
+				},
+			},
+		}
 
-// 		result := resource.DeleteContext(ctx, data, provider)
+		mockClient.EXPECT().
+			EnterpriseAPIBatchDeleteEnterpriseGroupsWithResponse(gomock.Any(), enterpriseID, expectedRequest).
+			Return(&organization_management.EnterpriseAPIBatchDeleteEnterpriseGroupsResponse{
+				HTTPResponse: &http.Response{StatusCode: http.StatusOK},
+			}, nil)
 
-// 		r.True(result.HasError())
-// 		r.Contains(result[0].Summary, "enterprise ID is not set")
-// 	})
+		// State with 2 groups
+		stateValue := cty.ObjectVal(map[string]cty.Value{
+			FieldEnterpriseGroupEnterpriseID:   cty.StringVal(enterpriseID),
+			FieldEnterpriseGroupID:             cty.StringVal(groupID),
+			FieldEnterpriseGroupOrganizationID: cty.StringVal(organizationID),
+			FieldEnterpriseGroupName:           cty.StringVal("engineering-team"),
+		})
+		state := terraform.NewInstanceStateShimmedFromValue(stateValue, 0)
+		state.ID = enterpriseID
 
-// 	t.Run("when group missing ID then return state corruption error", func(t *testing.T) {
-// 		t.Parallel()
-// 		r := require.New(t)
-// 		mockClient := mockOrganizationManagement.NewMockClientWithResponsesInterface(gomock.NewController(t))
+		resource := resourceEnterpriseGroup()
+		data := resource.Data(state)
 
-// 		ctx := context.Background()
-// 		provider := &ProviderConfig{
-// 			organizationManagementClient: mockClient,
-// 		}
+		result := resource.DeleteContext(ctx, data, provider)
 
-// 		enterpriseID := uuid.NewString()
-// 		organizationID1 := "e" + uuid.NewString()
-
-// 		// State with group missing ID
-// 		stateValue := cty.ObjectVal(map[string]cty.Value{
-// 			FieldEnterpriseGroupsGroups: cty.ListVal([]cty.Value{
-// 				cty.ObjectVal(map[string]cty.Value{
-// 					FieldEnterpriseGroupsGroup: cty.ListVal([]cty.Value{
-// 						cty.ObjectVal(map[string]cty.Value{
-// 							FieldEnterpriseGroupID:             cty.StringVal(""), // Empty ID
-// 							FieldEnterpriseGroupOrganizationID: cty.StringVal(organizationID1),
-// 							FieldEnterpriseGroupName:           cty.StringVal("engineering-team"),
-// 						}),
-// 					}),
-// 				}),
-// 			}),
-// 		})
-// 		state := terraform.NewInstanceStateShimmedFromValue(stateValue, 0)
-// 		state.ID = enterpriseID
-
-// 		resource := resourceEnterpriseGroup()
-// 		data := resource.Data(state)
-
-// 		result := resource.DeleteContext(ctx, data, provider)
-
-// 		r.True(result.HasError())
-// 		r.Contains(result[0].Summary, "group in state is missing valid ID - this indicates state corruption")
-// 	})
-
-// 	t.Run("when group missing organization_id then return state corruption error", func(t *testing.T) {
-// 		t.Parallel()
-// 		r := require.New(t)
-// 		mockClient := mockOrganizationManagement.NewMockClientWithResponsesInterface(gomock.NewController(t))
-
-// 		ctx := context.Background()
-// 		provider := &ProviderConfig{
-// 			organizationManagementClient: mockClient,
-// 		}
-
-// 		enterpriseID := uuid.NewString()
-// 		groupID1 := "bbbb1111-1111-1111-1111-111111111111"
-
-// 		// State with group missing organization_id
-// 		stateValue := cty.ObjectVal(map[string]cty.Value{
-// 			FieldEnterpriseGroupsGroups: cty.ListVal([]cty.Value{
-// 				cty.ObjectVal(map[string]cty.Value{
-// 					FieldEnterpriseGroupsGroup: cty.ListVal([]cty.Value{
-// 						cty.ObjectVal(map[string]cty.Value{
-// 							FieldEnterpriseGroupID:             cty.StringVal(groupID1),
-// 							FieldEnterpriseGroupOrganizationID: cty.StringVal(""), // Empty organization ID
-// 							FieldEnterpriseGroupName:           cty.StringVal("engineering-team"),
-// 						}),
-// 					}),
-// 				}),
-// 			}),
-// 		})
-// 		state := terraform.NewInstanceStateShimmedFromValue(stateValue, 0)
-// 		state.ID = enterpriseID
-
-// 		resource := resourceEnterpriseGroup()
-// 		data := resource.Data(state)
-
-// 		result := resource.DeleteContext(ctx, data, provider)
-
-// 		r.True(result.HasError())
-// 		r.Contains(result[0].Summary, fmt.Sprintf("group %s in state is missing valid organization_id - this indicates state corruption", groupID1))
-// 	})
-
-// 	t.Run("when API call fails then return error", func(t *testing.T) {
-// 		t.Parallel()
-// 		r := require.New(t)
-// 		mockClient := mockOrganizationManagement.NewMockClientWithResponsesInterface(gomock.NewController(t))
-
-// 		ctx := context.Background()
-// 		provider := &ProviderConfig{
-// 			organizationManagementClient: mockClient,
-// 		}
-
-// 		enterpriseID := uuid.NewString()
-// 		organizationID1 := "e" + uuid.NewString()
-// 		groupID1 := "bbbb1111-1111-1111-1111-111111111111"
-
-// 		mockClient.EXPECT().
-// 			EnterpriseAPIBatchDeleteEnterpriseGroupsWithResponse(gomock.Any(), enterpriseID, gomock.Any()).
-// 			Return(nil, errors.New("network error"))
-
-// 		// State with 1 group
-// 		stateValue := cty.ObjectVal(map[string]cty.Value{
-// 			FieldEnterpriseGroupsGroups: cty.ListVal([]cty.Value{
-// 				cty.ObjectVal(map[string]cty.Value{
-// 					FieldEnterpriseGroupsGroup: cty.ListVal([]cty.Value{
-// 						cty.ObjectVal(map[string]cty.Value{
-// 							FieldEnterpriseGroupID:             cty.StringVal(groupID1),
-// 							FieldEnterpriseGroupOrganizationID: cty.StringVal(organizationID1),
-// 							FieldEnterpriseGroupName:           cty.StringVal("engineering-team"),
-// 						}),
-// 					}),
-// 				}),
-// 			}),
-// 		})
-// 		state := terraform.NewInstanceStateShimmedFromValue(stateValue, 0)
-// 		state.ID = enterpriseID
-
-// 		resource := resourceEnterpriseGroup()
-// 		data := resource.Data(state)
-
-// 		result := resource.DeleteContext(ctx, data, provider)
-
-// 		r.True(result.HasError())
-// 		r.Contains(result[0].Summary, "calling batch delete enterprise groups")
-// 		r.Contains(result[0].Summary, "network error")
-// 		r.NotEmpty(data.Id(), "Resource ID should not be cleared when delete fails")
-// 	})
-// }
+		r.Nil(result)
+		r.False(result.HasError())
+		r.Empty(data.Id(), "Resource ID should be cleared after successful delete")
+	})
+}
 
 func TestResourceEnterpriseGroupUpdateContext(t *testing.T) {
 	t.Parallel()
@@ -1069,7 +937,53 @@ func TestResourceEnterpriseGroupUpdateContext(t *testing.T) {
 	existingGroupID := uuid.NewString()
 	ctx := context.Background()
 
-	// TODO: test both scopes
+	t.Run("when scopes include both organization and cluster scopes, return error", func(t *testing.T) {
+		t.Parallel()
+		r := require.New(t)
+		mockClient := mockOrganizationManagement.NewMockClientWithResponsesInterface(gomock.NewController(t))
+
+		provider := &ProviderConfig{
+			organizationManagementClient: mockClient,
+		}
+
+		resource := resourceEnterpriseGroup()
+
+		diff := map[string]any{
+			FieldEnterpriseGroupEnterpriseID:   enterpriseID,
+			FieldEnterpriseGroupOrganizationID: organizationID,
+			FieldEnterpriseGroupName:           "engineering-team",
+			FieldEnterpriseGroupDescription:    "Engineering team group",
+
+			FieldEnterpriseGroupRoleBindings: []any{
+				map[string]any{
+					FieldEnterpriseGroupRoleBinding: []any{
+						map[string]any{
+							FieldEnterpriseGroupRoleBindingName:   "engineering-viewer",
+							FieldEnterpriseGroupRoleBindingRoleID: "role-1",
+							FieldEnterpriseGroupRoleBindingScopes: []any{
+								map[string]any{
+									FieldEnterpriseGroupScope: []any{
+										map[string]any{
+											FieldEnterpriseGroupScopeCluster:      uuid.NewString(),
+											FieldEnterpriseGroupScopeOrganization: uuid.NewString(),
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		}
+		data := schema.TestResourceDataRaw(t, resource.Schema, diff)
+		data.SetId(existingGroupID)
+
+		result := resource.UpdateContext(ctx, data, provider)
+		r.NotNil(result)
+		r.True(result.HasError())
+		r.Len(result, 1)
+		r.Equal("scope cannot have both 'organization' and 'cluster' set simultaneously", result[0].Summary)
+	})
 
 	t.Run("when there are changes then update resource", func(t *testing.T) {
 		t.Parallel()
