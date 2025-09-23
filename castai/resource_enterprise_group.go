@@ -488,30 +488,25 @@ func resourceEnterpriseGroupUpdate(ctx context.Context, data *schema.ResourceDat
 
 func resourceEnterpriseGroupDelete(ctx context.Context, data *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(*ProviderConfig).organizationManagementClient
-	enterpriseID := data.Id()
 
-	tflog.Debug(ctx, "Deleting enterprise groups", map[string]any{"data": data.State()})
+	tflog.Debug(ctx, "Deleting enterprise group", map[string]any{"data": data.State()})
 
-	if enterpriseID == "" {
-		return diag.FromErr(fmt.Errorf("enterprise ID is not set"))
-	}
-
-	// Build delete request from current state
-	deleteRequest, err := buildBatchDeleteRequest(enterpriseID, data)
+	deleteRequest, err := buildBatchDeleteRequest(data)
 	if err != nil {
 		return diag.FromErr(fmt.Errorf("building delete request: %w", err))
 	}
 
-	if deleteRequest != nil && len(deleteRequest.Requests) > 0 {
-		// Call batch delete API
-		resp, err := client.EnterpriseAPIBatchDeleteEnterpriseGroupsWithResponse(ctx, enterpriseID, *deleteRequest)
-		if err != nil {
-			return diag.FromErr(fmt.Errorf("calling batch delete enterprise groups: %w", err))
-		}
+	resp, err := client.EnterpriseAPIBatchDeleteEnterpriseGroupsWithResponse(
+		ctx,
+		deleteRequest.EnterpriseId,
+		deleteRequest,
+	)
+	if err != nil {
+		return diag.FromErr(fmt.Errorf("calling batch delete enterprise groups: %w", err))
+	}
 
-		if resp.StatusCode() != http.StatusOK {
-			return diag.FromErr(fmt.Errorf("batch delete enterprise groups failed with status %d: %s", resp.StatusCode(), string(resp.Body)))
-		}
+	if resp.StatusCode() != http.StatusOK {
+		return diag.FromErr(fmt.Errorf("batch delete enterprise groups failed with status %d: %s", resp.StatusCode(), string(resp.Body)))
 	}
 
 	// Clear the resource ID
@@ -714,68 +709,37 @@ func buildBatchCreateRequest(
 	}, nil
 }
 
-// buildBatchDeleteRequest constructs the batch delete request from Terraform schema data
-func buildBatchDeleteRequest(enterpriseID string, data *schema.ResourceData) (*organization_management.BatchDeleteEnterpriseGroupsRequest, error) {
-	//groupsListAny := data.Get(FieldEnterpriseGroupsGroups)
-	//groupsList, ok := groupsListAny.([]any)
-	//if !ok {
-	//	return nil, fmt.Errorf("groups data is not in expected format")
-	//}
-	//
-	//var requests []organization_management.BatchDeleteEnterpriseGroupsRequestDeleteGroupRequest
-	//
-	//for _, groupData := range groupsList {
-	//	if groupData == nil {
-	//		continue
-	//	}
-	//
-	//	groupWrapper, ok := groupData.(map[string]any)
-	//	if !ok {
-	//		return nil, fmt.Errorf("invalid group configuration: expected object, got %T", groupData)
-	//	}
-	//
-	//	// Navigate to the nested group objects
-	//	groupsData, ok := groupWrapper[FieldEnterpriseGroupsGroup].([]any)
-	//	if !ok || len(groupsData) == 0 {
-	//		continue // Skip if no group data
-	//	}
-	//
-	//	// Process all groups in the nested array
-	//	for _, groupDataNested := range groupsData {
-	//		if groupDataNested == nil {
-	//			continue
-	//		}
-	//
-	//		group, ok := groupDataNested.(map[string]any)
-	//		if !ok {
-	//			return nil, fmt.Errorf("invalid nested group configuration: expected object, got %T", groupDataNested)
-	//		}
-	//
-	//		// Group ID is required for deletes
-	//		groupID, ok := group[FieldEnterpriseGroupID].(string)
-	//		if !ok || groupID == "" {
-	//			return nil, fmt.Errorf("group in state is missing valid ID - this indicates state corruption")
-	//		}
-	//
-	//		// Organization ID is also required for deletes
-	//		organizationID, ok := group[FieldEnterpriseGroupOrganizationID].(string)
-	//		if !ok || organizationID == "" {
-	//			return nil, fmt.Errorf("group %s in state is missing valid organization_id - this indicates state corruption", groupID)
-	//		}
-	//
-	//		requests = append(requests, organization_management.BatchDeleteEnterpriseGroupsRequestDeleteGroupRequest{
-	//			Id:             groupID,
-	//			OrganizationId: organizationID,
-	//		})
-	//	}
-	//}
-	//
-	//return &organization_management.BatchDeleteEnterpriseGroupsRequest{
-	//	EnterpriseId: enterpriseID,
-	//	Requests:     requests,
-	//}, nil
+func buildBatchDeleteRequest(data *schema.ResourceData) (organization_management.BatchDeleteEnterpriseGroupsRequest, error) {
+	groupID, ok := data.GetOk(FieldEnterpriseGroupID)
+	if !ok {
+		return organization_management.BatchDeleteEnterpriseGroupsRequest{}, fmt.Errorf("group ID is not set")
+	}
 
-	return nil, nil
+	groupIDStr := groupID.(string)
+
+	enterpriseID, ok := data.GetOk(FieldEnterpriseGroupEnterpriseID)
+	if !ok {
+		return organization_management.BatchDeleteEnterpriseGroupsRequest{}, fmt.Errorf("enterprise ID is not set")
+	}
+
+	enterpriseIDStr := enterpriseID.(string)
+
+	organizationID, ok := data.GetOk(FieldEnterpriseGroupOrganizationID)
+	if !ok {
+		return organization_management.BatchDeleteEnterpriseGroupsRequest{}, fmt.Errorf("organization ID is not set")
+	}
+
+	organizationIDStr := organizationID.(string)
+
+	return organization_management.BatchDeleteEnterpriseGroupsRequest{
+		EnterpriseId: enterpriseIDStr,
+		Requests: []organization_management.BatchDeleteEnterpriseGroupsRequestDeleteGroupRequest{
+			{
+				Id:             groupIDStr,
+				OrganizationId: organizationIDStr,
+			},
+		},
+	}, nil
 }
 
 // getManagedGroupIDsFromState extracts the group IDs from Terraform state that this resource should manage
