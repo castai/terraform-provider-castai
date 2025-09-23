@@ -136,23 +136,20 @@ func TestResourceEnterpriseGroupCreateContext(t *testing.T) {
 		memberID2 := uuid.NewString()
 		memberID3 := uuid.NewString()
 		roleBindingID1 := uuid.NewString()
-		roleBindingID2 := uuid.NewString()
 		roleBindingID3 := uuid.NewString()
 		roleID1 := uuid.NewString()
-		roleID2 := uuid.NewString()
 		roleID3 := uuid.NewString()
 		clusterID1 := uuid.NewString()
 		clusterID2 := uuid.NewString()
 
 		createTime := time.Now()
 
-
 		// Expected create request for new group
 		expectedCreateRequest := organization_management.BatchCreateEnterpriseGroupsRequest{
 			EnterpriseId: enterpriseID,
 			Requests: []organization_management.BatchCreateEnterpriseGroupsRequestGroup{
 				{
-					OrganizationId: organizationID1,
+					OrganizationId: organizationID,
 					Name:           "engineering-team",
 					Description:    lo.ToPtr("Engineering team group"),
 					Members: []organization_management.BatchCreateEnterpriseGroupsRequestMember{
@@ -181,7 +178,7 @@ func TestResourceEnterpriseGroupCreateContext(t *testing.T) {
 								},
 								{
 									Organization: &organization_management.OrganizationScope{
-										Id: organizationID1,
+										Id: organizationID,
 									},
 								},
 								{
@@ -197,41 +194,7 @@ func TestResourceEnterpriseGroupCreateContext(t *testing.T) {
 							Scopes: []organization_management.Scope{
 								{
 									Organization: &organization_management.OrganizationScope{
-										Id: organizationID1,
-									},
-								},
-								{
-									Organization: &organization_management.OrganizationScope{
-										Id: organizationID2,
-									},
-								},
-							},
-						},
-					},
-				},
-				{
-					OrganizationId: organizationID2,
-					Name:           "security-team",
-					Description:    lo.ToPtr("Security team group"),
-					Members: []organization_management.BatchCreateEnterpriseGroupsRequestMember{
-						{
-							Kind: lo.ToPtr(organization_management.BatchCreateEnterpriseGroupsRequestMemberKindSUBJECTKINDUSER),
-							Id:   lo.ToPtr(memberID2),
-						},
-					},
-					RoleBindings: &[]organization_management.BatchCreateEnterpriseGroupsRequestRoleBinding{
-						{
-							Name:   "security-auditor",
-							RoleId: roleID2,
-							Scopes: []organization_management.Scope{
-								{
-									Organization: &organization_management.OrganizationScope{
-										Id: organizationID1,
-									},
-								},
-								{
-									Organization: &organization_management.OrganizationScope{
-										Id: organizationID2,
+										Id: organizationID,
 									},
 								},
 							},
@@ -245,53 +208,9 @@ func TestResourceEnterpriseGroupCreateContext(t *testing.T) {
 		apiResponse := &organization_management.BatchCreateEnterpriseGroupsResponse{
 			Groups: &[]organization_management.BatchCreateEnterpriseGroupsResponseGroup{
 				{
-					Id:             lo.ToPtr(groupID2),
-					Name:           lo.ToPtr("security-team"),
-					OrganizationId: lo.ToPtr(organizationID2),
-					Description:    lo.ToPtr("Security team group"),
-					CreateTime:     lo.ToPtr(createTime),
-					ManagedBy:      lo.ToPtr("terraform"),
-					Definition: &organization_management.GroupDefinition{
-						Members: &[]organization_management.DefinitionMember{
-							{
-								Id:        lo.ToPtr(memberID2),
-								Email:     lo.ToPtr("security@example.com"),
-								AddedTime: lo.ToPtr(createTime),
-								Kind:      lo.ToPtr(organization_management.DefinitionMemberKindSUBJECTKINDUSER),
-							},
-						},
-					},
-					RoleBindings: &[]organization_management.GroupRoleBinding{
-						{
-							Id:             roleBindingID2,
-							Name:           "security-auditor",
-							Description:    "Security auditor role binding",
-							ManagedBy:      "terraform",
-							CreateTime:     createTime,
-							OrganizationId: organizationID2,
-							Statuses:       []organization_management.RoleBindingRoleBindingStatus{},
-							Definition: organization_management.RoleBindingRoleBindingDefinition{
-								RoleId: roleID2,
-								Scopes: &[]organization_management.Scope{
-									{
-										Organization: &organization_management.OrganizationScope{
-											Id: organizationID1,
-										},
-									},
-									{
-										Organization: &organization_management.OrganizationScope{
-											Id: organizationID2,
-										},
-									},
-								},
-							},
-						},
-					},
-				},
-				{
-					Id:             lo.ToPtr(groupID1),
+					Id:             lo.ToPtr(groupID),
 					Name:           lo.ToPtr("engineering-team"),
-					OrganizationId: lo.ToPtr(organizationID1),
+					OrganizationId: lo.ToPtr(organizationID),
 					Description:    lo.ToPtr("Engineering team group"),
 					CreateTime:     lo.ToPtr(createTime),
 					ManagedBy:      lo.ToPtr("terraform"),
@@ -323,7 +242,7 @@ func TestResourceEnterpriseGroupCreateContext(t *testing.T) {
 							Description:    "Engineering viewer role binding",
 							ManagedBy:      "terraform",
 							CreateTime:     createTime,
-							OrganizationId: organizationID1,
+							OrganizationId: organizationID,
 							Definition: organization_management.RoleBindingRoleBindingDefinition{
 								RoleId: roleID1,
 								Scopes: &[]organization_management.Scope{
@@ -334,7 +253,7 @@ func TestResourceEnterpriseGroupCreateContext(t *testing.T) {
 									},
 									{
 										Organization: &organization_management.OrganizationScope{
-											Id: organizationID1,
+											Id: organizationID,
 										},
 									},
 									{
@@ -351,19 +270,14 @@ func TestResourceEnterpriseGroupCreateContext(t *testing.T) {
 							Description:    "Engineering editor role binding",
 							ManagedBy:      "terraform",
 							CreateTime:     createTime,
-							OrganizationId: organizationID1,
+							OrganizationId: organizationID,
 							Statuses:       []organization_management.RoleBindingRoleBindingStatus{},
 							Definition: organization_management.RoleBindingRoleBindingDefinition{
 								RoleId: roleID3,
 								Scopes: &[]organization_management.Scope{
 									{
 										Organization: &organization_management.OrganizationScope{
-											Id: organizationID1,
-										},
-									},
-									{
-										Organization: &organization_management.OrganizationScope{
-											Id: organizationID2,
+											Id: organizationID,
 										},
 									},
 								},
@@ -451,7 +365,7 @@ func TestResourceEnterpriseGroupCreateContext(t *testing.T) {
 		})
 		state := terraform.NewInstanceStateShimmedFromValue(stateValue, 0)
 
-		resource := resourceEnterpriseGroups()
+		resource := resourceEnterpriseGroup()
 		data := resource.Data(state)
 
 		result := resource.CreateContext(ctx, data, provider)
@@ -461,149 +375,68 @@ func TestResourceEnterpriseGroupCreateContext(t *testing.T) {
 		r.False(result.HasError())
 
 		// Verify resource ID is set to enterprise ID
-		r.Equal(enterpriseID, data.Id())
+		r.Equal(groupID, data.Id())
 
 		// Verify groups state
-		groups := data.Get(FieldEnterpriseGroupsGroups).([]any)
-		r.Len(groups, 2)
+		actualEnterpriseID := data.Get(FieldEnterpriseGroupEnterpriseID).(string)
+		r.Equal(enterpriseID, actualEnterpriseID)
 
-		groupWrapper1 := groups[0].(map[string]any)
-		groupList1 := groupWrapper1[FieldEnterpriseGroupsGroup].([]any)
-		group1 := groupList1[0].(map[string]any)
-		r.Equal(groupID1, group1[FieldEnterpriseGroupID])
-		r.Equal("engineering-team", group1[FieldEnterpriseGroupName])
-		r.Equal(organizationID1, group1[FieldEnterpriseGroupOrganizationID])
-		r.Equal("Engineering team group", group1[FieldEnterpriseGroupDescription])
+		actualOrganizationID := data.Get(FieldEnterpriseGroupOrganizationID).(string)
+		r.Equal(organizationID, actualOrganizationID)
 
-		// Verify second group members (engineering-team has 3 members)
-		members1 := group1[FieldEnterpriseGroupMembers].([]any)
-		r.Len(members1, 1) // Single wrapper containing all members
+		actualGroupName := data.Get(FieldEnterpriseGroupName).(string)
+		r.Equal("engineering-team", actualGroupName)
 
-		// All members are in the first (and only) member wrapper
-		memberWrapper1 := members1[0].(map[string]any)
-		memberList1 := memberWrapper1[FieldEnterpriseGroupsMember].([]any)
-		r.Len(memberList1, 3)
+		actualGroupDescription := data.Get(FieldEnterpriseGroupDescription).(string)
+		r.Equal("Engineering team group", actualGroupDescription)
 
-		// Members should be sorted by ID: memberID2 ("a"...), memberID1 ("b"...), memberID3 ("c"...)
-		member2First := memberList1[0].(map[string]any)
-		r.Equal(memberID1, member2First[FieldEnterpriseGroupMemberID])
-		r.Equal("user", member2First[FieldEnterpriseGroupMemberKind])
+		// Verify members
+		members := data.Get(FieldEnterpriseGroupMembers).([]any)
+		r.Len(members, 1) // Single wrapper
+		memberWrapper := members[0].(map[string]any)
+		memberList := memberWrapper[FieldEnterpriseGroupsMember].([]any)
+		r.Len(memberList, 3)
+		r.Equal(memberID1, memberList[0].(map[string]any)[FieldEnterpriseGroupMemberID])
+		r.Equal("user", memberList[0].(map[string]any)[FieldEnterpriseGroupMemberKind])
+		r.Equal(memberID2, memberList[1].(map[string]any)[FieldEnterpriseGroupMemberID])
+		r.Equal("user", memberList[1].(map[string]any)[FieldEnterpriseGroupMemberKind])
+		r.Equal(memberID3, memberList[2].(map[string]any)[FieldEnterpriseGroupMemberID])
+		r.Equal("service_account", memberList[2].(map[string]any)[FieldEnterpriseGroupMemberKind])
 
-		member2Second := memberList1[1].(map[string]any)
-		r.Equal(memberID2, member2Second[FieldEnterpriseGroupMemberID])
-		r.Equal("user", member2Second[FieldEnterpriseGroupMemberKind])
+		// Verify role bindings
+		roleBindings := data.Get(FieldEnterpriseGroupRoleBindings).([]any)
+		r.Len(roleBindings, 1) // Single wrapper
+		roleBindingWrapper := roleBindings[0].(map[string]any)
+		roleBindingList := roleBindingWrapper[FieldEnterpriseGroupRoleBinding].([]any)
+		r.Len(roleBindingList, 2)
+		r.Equal(roleBindingID1, roleBindingList[0].(map[string]any)[FieldEnterpriseGroupRoleBindingID])
+		r.Equal("engineering-viewer", roleBindingList[0].(map[string]any)[FieldEnterpriseGroupRoleBindingName])
+		r.Equal(roleID1, roleBindingList[0].(map[string]any)[FieldEnterpriseGroupRoleBindingRoleID])
+		// Check scopes of first role binding
+		scopes := roleBindingList[0].(map[string]any)[FieldEnterpriseGroupRoleBindingScopes].([]any)
+		r.Len(scopes, 1) // Single wrapper
+		scopeWrapper := scopes[0].(map[string]any)
+		scopeList := scopeWrapper[FieldEnterpriseGroupScope].([]any)
+		r.Len(scopeList, 3)
+		r.Equal(clusterID1, scopeList[0].(map[string]any)[FieldEnterpriseGroupScopeCluster])
+		r.Equal("", scopeList[0].(map[string]any)[FieldEnterpriseGroupScopeOrganization])
+		r.Equal("", scopeList[1].(map[string]any)[FieldEnterpriseGroupScopeCluster])
+		r.Equal(organizationID, scopeList[1].(map[string]any)[FieldEnterpriseGroupScopeOrganization])
+		r.Equal(clusterID2, scopeList[2].(map[string]any)[FieldEnterpriseGroupScopeCluster])
+		r.Equal("", scopeList[2].(map[string]any)[FieldEnterpriseGroupScopeOrganization])
 
-		member2Third := memberList1[2].(map[string]any)
-		r.Equal(memberID3, member2Third[FieldEnterpriseGroupMemberID])
-		r.Equal("service_account", member2Third[FieldEnterpriseGroupMemberKind])
+		r.Equal(roleBindingID3, roleBindingList[1].(map[string]any)[FieldEnterpriseGroupRoleBindingID])
+		r.Equal("engineering-editor", roleBindingList[1].(map[string]any)[FieldEnterpriseGroupRoleBindingName])
+		r.Equal(roleID3, roleBindingList[1].(map[string]any)[FieldEnterpriseGroupRoleBindingRoleID])
 
-		// Verify second group role bindings (engineering-team has 2 role bindings)
-		roleBindings1 := group1[FieldEnterpriseGroupRoleBindings].([]any)
-		r.Len(roleBindings1, 1) // Single wrapper containing all role bindings
-
-		// All role bindings are in the first (and only) role binding wrapper
-		roleBindingWrapper1 := roleBindings1[0].(map[string]any)
-		roleBindingList1 := roleBindingWrapper1[FieldEnterpriseGroupRoleBinding].([]any)
-		r.Len(roleBindingList1, 2)
-
-		roleBinding1a := roleBindingList1[0].(map[string]any)
-		r.Equal(roleBindingID1, roleBinding1a[FieldEnterpriseGroupRoleBindingID])
-		r.Equal("engineering-viewer", roleBinding1a[FieldEnterpriseGroupRoleBindingName])
-		r.Equal(roleID1, roleBinding1a[FieldEnterpriseGroupRoleBindingRoleID])
-
-		scopes1a := roleBinding1a[FieldEnterpriseGroupRoleBindingScopes].([]any)
-		r.Len(scopes1a, 1) // Single wrapper
-
-		// Single scope wrapper containing all scopes
-		scopeWrapper1a := scopes1a[0].(map[string]any)
-		scopeList1a := scopeWrapper1a[FieldEnterpriseGroupScope].([]any)
-		r.Len(scopeList1a, 3)
-
-		scope1a1 := scopeList1a[0].(map[string]any)
-		r.Equal(clusterID1, scope1a1[FieldEnterpriseGroupScopeCluster])
-		r.Empty(scope1a1[FieldEnterpriseGroupScopeOrganization])
-
-		scope1a2 := scopeList1a[1].(map[string]any)
-		r.Equal(organizationID1, scope1a2[FieldEnterpriseGroupScopeOrganization])
-		r.Empty(scope1a2[FieldEnterpriseGroupScopeCluster])
-
-		scope1a3 := scopeList1a[2].(map[string]any)
-		r.Equal(clusterID2, scope1a3[FieldEnterpriseGroupScopeCluster])
-		r.Empty(scope1a3[FieldEnterpriseGroupScopeOrganization])
-
-		roleBinding1b := roleBindingList1[1].(map[string]any)
-		r.Equal(roleBindingID3, roleBinding1b[FieldEnterpriseGroupRoleBindingID])
-		r.Equal("engineering-editor", roleBinding1b[FieldEnterpriseGroupRoleBindingName])
-		r.Equal(roleID3, roleBinding1b[FieldEnterpriseGroupRoleBindingRoleID])
-
-		// Verify scopes are sorted correctly for first role binding (2 organization scopes)
-		scopes1b := roleBinding1b[FieldEnterpriseGroupRoleBindingScopes].([]any)
-		r.Len(scopes1b, 1) // Single wrapper
-
-		// Single scope wrapper containing all scopes
-		scopeWrapper1b := scopes1b[0].(map[string]any)
-		scopeList1b := scopeWrapper1b[FieldEnterpriseGroupScope].([]any)
-		r.Len(scopeList1b, 2)
-
-		scope1b1 := scopeList1b[0].(map[string]any)
-		r.Equal(organizationID1, scope1b1[FieldEnterpriseGroupScopeOrganization])
-		r.Empty(scope1b1[FieldEnterpriseGroupScopeCluster])
-
-		scope1b2 := scopeList1b[1].(map[string]any)
-		r.Equal(organizationID2, scope1b2[FieldEnterpriseGroupScopeOrganization])
-		r.Empty(scope1b2[FieldEnterpriseGroupScopeCluster])
-
-		groupWrapper2 := groups[1].(map[string]any)
-		groupList2 := groupWrapper2[FieldEnterpriseGroupsGroup].([]any)
-		group2 := groupList2[0].(map[string]any)
-		r.Equal(groupID2, group2[FieldEnterpriseGroupID])
-		r.Equal("security-team", group2[FieldEnterpriseGroupName])
-		r.Equal(organizationID2, group2[FieldEnterpriseGroupOrganizationID])
-		r.Equal("Security team group", group2[FieldEnterpriseGroupDescription])
-
-		// Verify first group members (group2/security-team has 1 member)
-		members2 := group2[FieldEnterpriseGroupMembers].([]any)
-		r.Len(members2, 1) // Single wrapper
-
-		// Single member (memberID2)
-		memberWrapper2 := members2[0].(map[string]any)
-		memberList2 := memberWrapper2[FieldEnterpriseGroupsMember].([]any)
-		r.Len(memberList2, 1)
-		member2 := memberList2[0].(map[string]any)
-		r.Equal(memberID2, member2[FieldEnterpriseGroupMemberID])
-		r.Equal("user", member2[FieldEnterpriseGroupMemberKind])
-
-		// Verify first group role bindings (security-team has 1 role binding)
-		roleBindings2 := group2[FieldEnterpriseGroupRoleBindings].([]any)
-		r.Len(roleBindings2, 1) // Single wrapper
-
-		// Single role binding (security-auditor)
-		roleBindingWrapper2 := roleBindings2[0].(map[string]any)
-		roleBindingList2 := roleBindingWrapper2[FieldEnterpriseGroupRoleBinding].([]any)
-		r.Len(roleBindingList2, 1)
-		roleBinding2 := roleBindingList2[0].(map[string]any)
-		r.Equal(roleBindingID2, roleBinding2[FieldEnterpriseGroupRoleBindingID])
-		r.Equal("security-auditor", roleBinding2[FieldEnterpriseGroupRoleBindingName])
-		r.Equal(roleID2, roleBinding2[FieldEnterpriseGroupRoleBindingRoleID])
-
-		// Verify role binding scopes (2 organization scopes)
-		scopes2 := roleBinding2[FieldEnterpriseGroupRoleBindingScopes].([]any)
+		// Check scopes of second role binding
+		scopes2 := roleBindingList[1].(map[string]any)[FieldEnterpriseGroupRoleBindingScopes].([]any)
 		r.Len(scopes2, 1) // Single wrapper
-
-		// Single scope wrapper containing all scopes
 		scopeWrapper2 := scopes2[0].(map[string]any)
 		scopeList2 := scopeWrapper2[FieldEnterpriseGroupScope].([]any)
-		r.Len(scopeList2, 2)
-
-		// First scope (organizationID1)
-		scope2a := scopeList2[0].(map[string]any)
-		r.Equal(organizationID1, scope2a[FieldEnterpriseGroupScopeOrganization])
-		r.Empty(scope2a[FieldEnterpriseGroupScopeCluster])
-
-		// Second scope (organizationID2)
-		scope2b := scopeList2[1].(map[string]any)
-		r.Equal(organizationID2, scope2b[FieldEnterpriseGroupScopeOrganization])
-		r.Empty(scope2b[FieldEnterpriseGroupScopeCluster])
+		r.Len(scopeList2, 1)
+		r.Equal("", scopeList2[0].(map[string]any)[FieldEnterpriseGroupScopeCluster])
+		r.Equal(organizationID, scopeList2[0].(map[string]any)[FieldEnterpriseGroupScopeOrganization])
 	})
 }
 
