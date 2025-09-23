@@ -1050,6 +1050,50 @@ func getGroupChanges(ctx context.Context, data *schema.ResourceData) (*Enterpris
 		name  string
 	}
 
+	// Normalizes a group map for comparison by removing computed fields like 'id'.
+	normalizeGroupForComparison := func(group map[string]any) map[string]any {
+		// Deep copy to avoid modifying the state maps.
+		normalized := make(map[string]any)
+		for k, v := range group {
+			normalized[k] = v
+		}
+		delete(normalized, FieldEnterpriseGroupID)
+
+		if rbsList, ok := normalized[FieldEnterpriseGroupRoleBindings].([]any); ok {
+			newRbsList := make([]any, 0, len(rbsList))
+			for _, rbsItem := range rbsList {
+				rbsWrapper, ok := rbsItem.(map[string]any)
+				if !ok {
+					continue
+				}
+				rbList, ok := rbsWrapper[FieldEnterpriseGroupRoleBinding].([]any)
+				if !ok {
+					continue
+				}
+
+				newRbWrapper := make(map[string]any)
+				newRbListContents := make([]any, 0, len(rbList))
+				for _, rbItem := range rbList {
+					rbMap, ok := rbItem.(map[string]any)
+					if !ok {
+						continue
+					}
+					newRbMap := make(map[string]any)
+					for k, v := range rbMap {
+						newRbMap[k] = v
+					}
+					delete(newRbMap, FieldEnterpriseGroupRoleBindingID)
+					newRbListContents = append(newRbListContents, newRbMap)
+				}
+				newRbWrapper[FieldEnterpriseGroupRoleBinding] = newRbListContents
+				newRbsList = append(newRbsList, newRbWrapper)
+			}
+			normalized[FieldEnterpriseGroupRoleBindings] = newRbsList
+		}
+
+		return normalized
+	}
+
 	extractGroupsToCompositeKeyMap := func(list []any) (map[groupKey]map[string]any, error) {
 		groupsMap := make(map[groupKey]map[string]any)
 		for _, groupData := range list {
@@ -1098,7 +1142,10 @@ func getGroupChanges(ctx context.Context, data *schema.ResourceData) (*Enterpris
 
 	for key, newGroup := range newGroupsMap {
 		if oldGroup, exists := oldGroupsMap[key]; exists {
-			if !reflect.DeepEqual(oldGroup, newGroup) {
+			normalizedOld := normalizeGroupForComparison(oldGroup)
+			normalizedNew := normalizeGroupForComparison(newGroup)
+
+			if !reflect.DeepEqual(normalizedOld, normalizedNew) {
 				groupID, ok := oldGroup[FieldEnterpriseGroupID].(string)
 				if !ok || groupID == "" {
 					return nil, fmt.Errorf("group '%s' is present in old state but missing an ID", key.name)
