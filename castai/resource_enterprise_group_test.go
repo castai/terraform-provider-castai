@@ -1,11 +1,8 @@
 package castai
 
 import (
-	"bytes"
 	"context"
 	"errors"
-	"fmt"
-	"io"
 	"net/http"
 	"testing"
 	"time"
@@ -13,7 +10,6 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/google/uuid"
 	"github.com/hashicorp/go-cty/cty"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/require"
@@ -22,8 +18,70 @@ import (
 	mockOrganizationManagement "github.com/castai/terraform-provider-castai/castai/sdk/organization_management/mock"
 )
 
-func TestResourceEnterpriseGroupsCreateContext(t *testing.T) {
+func TestResourceEnterpriseGroupCreateContext(t *testing.T) {
 	t.Parallel()
+
+	t.Run("when cluster id and organization id provided for the same scope return error", func(t *testing.T) {
+		t.Parallel()
+		r := require.New(t)
+		mockClient := mockOrganizationManagement.NewMockClientWithResponsesInterface(gomock.NewController(t))
+
+		ctx := context.Background()
+		provider := &ProviderConfig{
+			organizationManagementClient: mockClient,
+		}
+
+		enterpriseID := uuid.NewString()
+		organizationID := uuid.NewString()
+
+		stateValue := cty.ObjectVal(map[string]cty.Value{
+			FieldEnterpriseGroupEnterpriseID:   cty.StringVal(enterpriseID),
+			FieldEnterpriseGroupOrganizationID: cty.StringVal(organizationID),
+			FieldEnterpriseGroupName:           cty.StringVal("test-group"),
+			FieldEnterpriseGroupDescription:    cty.StringVal("Test description"),
+			FieldEnterpriseGroupMembers: cty.ListVal([]cty.Value{
+				cty.ObjectVal(map[string]cty.Value{
+					FieldEnterpriseGroupsMember: cty.ListVal([]cty.Value{
+						cty.ObjectVal(map[string]cty.Value{
+							FieldEnterpriseGroupMemberKind: cty.StringVal("user"),
+							FieldEnterpriseGroupMemberID:   cty.StringVal("a" + uuid.NewString()),
+						}),
+					}),
+				}),
+			}),
+			FieldEnterpriseGroupRoleBindings: cty.ListVal([]cty.Value{
+				cty.ObjectVal(map[string]cty.Value{
+					FieldEnterpriseGroupRoleBinding: cty.ListVal([]cty.Value{
+						cty.ObjectVal(map[string]cty.Value{
+							FieldEnterpriseGroupRoleBindingName:   cty.StringVal("test-binding"),
+							FieldEnterpriseGroupRoleBindingRoleID: cty.StringVal(uuid.NewString()),
+							FieldEnterpriseGroupRoleBindingScopes: cty.ListVal([]cty.Value{
+								cty.ObjectVal(map[string]cty.Value{
+									FieldEnterpriseGroupScope: cty.ListVal([]cty.Value{
+										cty.ObjectVal(map[string]cty.Value{
+											FieldEnterpriseGroupScopeCluster:      cty.StringVal(uuid.NewString()),
+											FieldEnterpriseGroupScopeOrganization: cty.StringVal(organizationID),
+										}),
+									}),
+								}),
+							}),
+						}),
+					}),
+				}),
+			}),
+		})
+		state := terraform.NewInstanceStateShimmedFromValue(stateValue, 0)
+
+		resource := resourceEnterpriseGroup()
+		data := resource.Data(state)
+
+		result := resource.CreateContext(ctx, data, provider)
+
+		r.NotNil(result)
+		r.True(result.HasError())
+		r.Len(result, 1)
+		r.Equal("building create request: scope cannot have both 'organization' and 'cluster' set simultaneously", result[0].Summary)
+	})
 
 	t.Run("when API call fails then return error", func(t *testing.T) {
 		t.Parallel()
@@ -43,22 +101,14 @@ func TestResourceEnterpriseGroupsCreateContext(t *testing.T) {
 			Return(nil, errors.New("network error"))
 
 		stateValue := cty.ObjectVal(map[string]cty.Value{
-			FieldEnterpriseGroupsEnterpriseID: cty.StringVal(enterpriseID),
-			FieldEnterpriseGroupsGroups: cty.ListVal([]cty.Value{
-				cty.ObjectVal(map[string]cty.Value{
-					FieldEnterpriseGroupsGroup: cty.ListVal([]cty.Value{
-						cty.ObjectVal(map[string]cty.Value{
-							FieldEnterpriseGroupOrganizationID: cty.StringVal(organizationID),
-							FieldEnterpriseGroupName:           cty.StringVal("test-group"),
-							FieldEnterpriseGroupDescription:    cty.StringVal("Test description"),
-						}),
-					}),
-				}),
-			}),
+			FieldEnterpriseGroupEnterpriseID:   cty.StringVal(enterpriseID),
+			FieldEnterpriseGroupOrganizationID: cty.StringVal(organizationID),
+			FieldEnterpriseGroupName:           cty.StringVal("test-group"),
+			FieldEnterpriseGroupDescription:    cty.StringVal("Test description"),
 		})
 		state := terraform.NewInstanceStateShimmedFromValue(stateValue, 0)
 
-		resource := resourceEnterpriseGroups()
+		resource := resourceEnterpriseGroup()
 		data := resource.Data(state)
 
 		result := resource.CreateContext(ctx, data, provider)
@@ -69,7 +119,7 @@ func TestResourceEnterpriseGroupsCreateContext(t *testing.T) {
 		r.Equal("calling batch create enterprise groups: network error", result[0].Summary)
 	})
 
-	t.Run("when API returns empty response then return error", func(t *testing.T) {
+	t.Run("when API successfully creates group then set state correctly", func(t *testing.T) {
 		t.Parallel()
 		r := require.New(t)
 		mockClient := mockOrganizationManagement.NewMockClientWithResponsesInterface(gomock.NewController(t))
@@ -81,69 +131,115 @@ func TestResourceEnterpriseGroupsCreateContext(t *testing.T) {
 
 		enterpriseID := uuid.NewString()
 		organizationID := uuid.NewString()
-
-		mockClient.EXPECT().
-			EnterpriseAPIBatchCreateEnterpriseGroupsWithResponse(gomock.Any(), enterpriseID, gomock.Any()).
-			Return(&organization_management.EnterpriseAPIBatchCreateEnterpriseGroupsResponse{
-				Body:         nil,
-				HTTPResponse: &http.Response{StatusCode: http.StatusOK},
-				JSON200:      nil, // Empty response
-			}, nil)
-
-		stateValue := cty.ObjectVal(map[string]cty.Value{
-			FieldEnterpriseGroupsEnterpriseID: cty.StringVal(enterpriseID),
-			FieldEnterpriseGroupsGroups: cty.ListVal([]cty.Value{
-				cty.ObjectVal(map[string]cty.Value{
-					FieldEnterpriseGroupsGroup: cty.ListVal([]cty.Value{
-						cty.ObjectVal(map[string]cty.Value{
-							FieldEnterpriseGroupOrganizationID: cty.StringVal(organizationID),
-							FieldEnterpriseGroupName:           cty.StringVal("test-group"),
-						}),
-					}),
-				}),
-			}),
-		})
-		state := terraform.NewInstanceStateShimmedFromValue(stateValue, 0)
-
-		resource := resourceEnterpriseGroups()
-		data := resource.Data(state)
-
-		result := resource.CreateContext(ctx, data, provider)
-
-		r.NotNil(result)
-		r.True(result.HasError())
-		r.Len(result, 1)
-		r.Equal("unexpected empty response from batch create", result[0].Summary)
-	})
-
-	t.Run("when API successfully creates groups then set state correctly", func(t *testing.T) {
-		t.Parallel()
-		r := require.New(t)
-		mockClient := mockOrganizationManagement.NewMockClientWithResponsesInterface(gomock.NewController(t))
-
-		ctx := context.Background()
-		provider := &ProviderConfig{
-			organizationManagementClient: mockClient,
-		}
-
-		enterpriseID := uuid.NewString()
-		organizationID1 := "e" + uuid.NewString()
-		organizationID2 := "f" + uuid.NewString()
-		groupID1 := "bbbb1111-1111-1111-1111-111111111111"
-		groupID2 := "aaaa2222-2222-2222-2222-222222222222"
-		memberID1 := "b" + uuid.NewString()
-		memberID2 := "a" + uuid.NewString()
-		memberID3 := "c" + uuid.NewString()
-		roleBindingID1 := "c" + uuid.NewString()
-		roleBindingID2 := "a" + uuid.NewString()
-		roleBindingID3 := "b" + uuid.NewString()
-		roleID1 := "b" + uuid.NewString()
-		roleID2 := "a" + uuid.NewString()
-		roleID3 := "c" + uuid.NewString()
-		clusterID1 := "b" + uuid.NewString()
-		clusterID2 := "a" + uuid.NewString()
+		groupID := uuid.NewString()
+		memberID1 := uuid.NewString()
+		memberID2 := uuid.NewString()
+		memberID3 := uuid.NewString()
+		roleBindingID1 := uuid.NewString()
+		roleBindingID2 := uuid.NewString()
+		roleBindingID3 := uuid.NewString()
+		roleID1 := uuid.NewString()
+		roleID2 := uuid.NewString()
+		roleID3 := uuid.NewString()
+		clusterID1 := uuid.NewString()
+		clusterID2 := uuid.NewString()
 
 		createTime := time.Now()
+
+
+		// Expected create request for new group
+		expectedCreateRequest := organization_management.BatchCreateEnterpriseGroupsRequest{
+			EnterpriseId: enterpriseID,
+			Requests: []organization_management.BatchCreateEnterpriseGroupsRequestGroup{
+				{
+					OrganizationId: organizationID1,
+					Name:           "engineering-team",
+					Description:    lo.ToPtr("Engineering team group"),
+					Members: []organization_management.BatchCreateEnterpriseGroupsRequestMember{
+						{
+							Kind: lo.ToPtr(organization_management.BatchCreateEnterpriseGroupsRequestMemberKindSUBJECTKINDUSER),
+							Id:   lo.ToPtr(memberID1),
+						},
+						{
+							Kind: lo.ToPtr(organization_management.BatchCreateEnterpriseGroupsRequestMemberKindSUBJECTKINDUSER),
+							Id:   lo.ToPtr(memberID2),
+						},
+						{
+							Kind: lo.ToPtr(organization_management.BatchCreateEnterpriseGroupsRequestMemberKindSUBJECTKINDSERVICEACCOUNT),
+							Id:   lo.ToPtr(memberID3),
+						},
+					},
+					RoleBindings: &[]organization_management.BatchCreateEnterpriseGroupsRequestRoleBinding{
+						{
+							Name:   "engineering-viewer",
+							RoleId: roleID1,
+							Scopes: []organization_management.Scope{
+								{
+									Cluster: &organization_management.ClusterScope{
+										Id: clusterID1,
+									},
+								},
+								{
+									Organization: &organization_management.OrganizationScope{
+										Id: organizationID1,
+									},
+								},
+								{
+									Cluster: &organization_management.ClusterScope{
+										Id: clusterID2,
+									},
+								},
+							},
+						},
+						{
+							Name:   "engineering-editor",
+							RoleId: roleID3,
+							Scopes: []organization_management.Scope{
+								{
+									Organization: &organization_management.OrganizationScope{
+										Id: organizationID1,
+									},
+								},
+								{
+									Organization: &organization_management.OrganizationScope{
+										Id: organizationID2,
+									},
+								},
+							},
+						},
+					},
+				},
+				{
+					OrganizationId: organizationID2,
+					Name:           "security-team",
+					Description:    lo.ToPtr("Security team group"),
+					Members: []organization_management.BatchCreateEnterpriseGroupsRequestMember{
+						{
+							Kind: lo.ToPtr(organization_management.BatchCreateEnterpriseGroupsRequestMemberKindSUBJECTKINDUSER),
+							Id:   lo.ToPtr(memberID2),
+						},
+					},
+					RoleBindings: &[]organization_management.BatchCreateEnterpriseGroupsRequestRoleBinding{
+						{
+							Name:   "security-auditor",
+							RoleId: roleID2,
+							Scopes: []organization_management.Scope{
+								{
+									Organization: &organization_management.OrganizationScope{
+										Id: organizationID1,
+									},
+								},
+								{
+									Organization: &organization_management.OrganizationScope{
+										Id: organizationID2,
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		}
 
 		// Mock API response
 		apiResponse := &organization_management.BatchCreateEnterpriseGroupsResponse{
@@ -278,100 +374,6 @@ func TestResourceEnterpriseGroupsCreateContext(t *testing.T) {
 			},
 		}
 
-		// Expected create request for new group
-		expectedCreateRequest := organization_management.BatchCreateEnterpriseGroupsRequest{
-			EnterpriseId: enterpriseID,
-			Requests: []organization_management.BatchCreateEnterpriseGroupsRequestGroup{
-				{
-					OrganizationId: organizationID1,
-					Name:           "engineering-team",
-					Description:    lo.ToPtr("Engineering team group"),
-					Members: []organization_management.BatchCreateEnterpriseGroupsRequestMember{
-						{
-							Kind: lo.ToPtr(organization_management.BatchCreateEnterpriseGroupsRequestMemberKindSUBJECTKINDUSER),
-							Id:   lo.ToPtr(memberID1),
-						},
-						{
-							Kind: lo.ToPtr(organization_management.BatchCreateEnterpriseGroupsRequestMemberKindSUBJECTKINDUSER),
-							Id:   lo.ToPtr(memberID2),
-						},
-						{
-							Kind: lo.ToPtr(organization_management.BatchCreateEnterpriseGroupsRequestMemberKindSUBJECTKINDSERVICEACCOUNT),
-							Id:   lo.ToPtr(memberID3),
-						},
-					},
-					RoleBindings: &[]organization_management.BatchCreateEnterpriseGroupsRequestRoleBinding{
-						{
-							Name:   "engineering-viewer",
-							RoleId: roleID1,
-							Scopes: []organization_management.Scope{
-								{
-									Cluster: &organization_management.ClusterScope{
-										Id: clusterID1,
-									},
-								},
-								{
-									Organization: &organization_management.OrganizationScope{
-										Id: organizationID1,
-									},
-								},
-								{
-									Cluster: &organization_management.ClusterScope{
-										Id: clusterID2,
-									},
-								},
-							},
-						},
-						{
-							Name:   "engineering-editor",
-							RoleId: roleID3,
-							Scopes: []organization_management.Scope{
-								{
-									Organization: &organization_management.OrganizationScope{
-										Id: organizationID1,
-									},
-								},
-								{
-									Organization: &organization_management.OrganizationScope{
-										Id: organizationID2,
-									},
-								},
-							},
-						},
-					},
-				},
-				{
-					OrganizationId: organizationID2,
-					Name:           "security-team",
-					Description:    lo.ToPtr("Security team group"),
-					Members: []organization_management.BatchCreateEnterpriseGroupsRequestMember{
-						{
-							Kind: lo.ToPtr(organization_management.BatchCreateEnterpriseGroupsRequestMemberKindSUBJECTKINDUSER),
-							Id:   lo.ToPtr(memberID2),
-						},
-					},
-					RoleBindings: &[]organization_management.BatchCreateEnterpriseGroupsRequestRoleBinding{
-						{
-							Name:   "security-auditor",
-							RoleId: roleID2,
-							Scopes: []organization_management.Scope{
-								{
-									Organization: &organization_management.OrganizationScope{
-										Id: organizationID1,
-									},
-								},
-								{
-									Organization: &organization_management.OrganizationScope{
-										Id: organizationID2,
-									},
-								},
-							},
-						},
-					},
-				},
-			},
-		}
-
 		mockClient.EXPECT().
 			EnterpriseAPIBatchCreateEnterpriseGroupsWithResponse(gomock.Any(), enterpriseID, expectedCreateRequest).
 			Return(&organization_management.EnterpriseAPIBatchCreateEnterpriseGroupsResponse{
@@ -382,117 +384,62 @@ func TestResourceEnterpriseGroupsCreateContext(t *testing.T) {
 
 		// Input state - what user defined in Terraform
 		stateValue := cty.ObjectVal(map[string]cty.Value{
-			FieldEnterpriseGroupsEnterpriseID: cty.StringVal(enterpriseID),
-			FieldEnterpriseGroupsGroups: cty.ListVal([]cty.Value{
+			FieldEnterpriseGroupEnterpriseID:   cty.StringVal(enterpriseID),
+			FieldEnterpriseGroupOrganizationID: cty.StringVal(organizationID),
+			FieldEnterpriseGroupName:           cty.StringVal("engineering-team"),
+			FieldEnterpriseGroupDescription:    cty.StringVal("Engineering team group"),
+			FieldEnterpriseGroupMembers: cty.ListVal([]cty.Value{
 				cty.ObjectVal(map[string]cty.Value{
-					FieldEnterpriseGroupsGroup: cty.ListVal([]cty.Value{
+					FieldEnterpriseGroupsMember: cty.ListVal([]cty.Value{
 						cty.ObjectVal(map[string]cty.Value{
-							FieldEnterpriseGroupOrganizationID: cty.StringVal(organizationID1),
-							FieldEnterpriseGroupName:           cty.StringVal("engineering-team"),
-							FieldEnterpriseGroupDescription:    cty.StringVal("Engineering team group"),
-							FieldEnterpriseGroupMembers: cty.ListVal([]cty.Value{
+							FieldEnterpriseGroupMemberKind: cty.StringVal("user"),
+							FieldEnterpriseGroupMemberID:   cty.StringVal(memberID1),
+						}),
+						cty.ObjectVal(map[string]cty.Value{
+							FieldEnterpriseGroupMemberKind: cty.StringVal("user"),
+							FieldEnterpriseGroupMemberID:   cty.StringVal(memberID2),
+						}),
+						cty.ObjectVal(map[string]cty.Value{
+							FieldEnterpriseGroupMemberKind: cty.StringVal("service_account"),
+							FieldEnterpriseGroupMemberID:   cty.StringVal(memberID3),
+						}),
+					}),
+				}),
+			}),
+			FieldEnterpriseGroupRoleBindings: cty.ListVal([]cty.Value{
+				cty.ObjectVal(map[string]cty.Value{
+					FieldEnterpriseGroupRoleBinding: cty.ListVal([]cty.Value{
+						cty.ObjectVal(map[string]cty.Value{
+							FieldEnterpriseGroupRoleBindingName:   cty.StringVal("engineering-viewer"),
+							FieldEnterpriseGroupRoleBindingRoleID: cty.StringVal(roleID1),
+							FieldEnterpriseGroupRoleBindingScopes: cty.ListVal([]cty.Value{
 								cty.ObjectVal(map[string]cty.Value{
-									FieldEnterpriseGroupsMember: cty.ListVal([]cty.Value{
+									FieldEnterpriseGroupScope: cty.ListVal([]cty.Value{
 										cty.ObjectVal(map[string]cty.Value{
-											FieldEnterpriseGroupMemberKind: cty.StringVal("user"),
-											FieldEnterpriseGroupMemberID:   cty.StringVal(memberID1),
+											FieldEnterpriseGroupScopeCluster:      cty.StringVal(clusterID1),
+											FieldEnterpriseGroupScopeOrganization: cty.StringVal(""),
 										}),
 										cty.ObjectVal(map[string]cty.Value{
-											FieldEnterpriseGroupMemberKind: cty.StringVal("user"),
-											FieldEnterpriseGroupMemberID:   cty.StringVal(memberID2),
+											FieldEnterpriseGroupScopeCluster:      cty.StringVal(""),
+											FieldEnterpriseGroupScopeOrganization: cty.StringVal(organizationID),
 										}),
 										cty.ObjectVal(map[string]cty.Value{
-											FieldEnterpriseGroupMemberKind: cty.StringVal("service_account"),
-											FieldEnterpriseGroupMemberID:   cty.StringVal(memberID3),
-										}),
-									}),
-								}),
-							}),
-							FieldEnterpriseGroupRoleBindings: cty.ListVal([]cty.Value{
-								cty.ObjectVal(map[string]cty.Value{
-									FieldEnterpriseGroupRoleBinding: cty.ListVal([]cty.Value{
-										cty.ObjectVal(map[string]cty.Value{
-											FieldEnterpriseGroupRoleBindingName:   cty.StringVal("engineering-viewer"),
-											FieldEnterpriseGroupRoleBindingRoleID: cty.StringVal(roleID1),
-											FieldEnterpriseGroupRoleBindingScopes: cty.ListVal([]cty.Value{
-												cty.ObjectVal(map[string]cty.Value{
-													FieldEnterpriseGroupScope: cty.ListVal([]cty.Value{
-														cty.ObjectVal(map[string]cty.Value{
-															FieldEnterpriseGroupScopeCluster:      cty.StringVal(clusterID1),
-															FieldEnterpriseGroupScopeOrganization: cty.StringVal(""),
-														}),
-														cty.ObjectVal(map[string]cty.Value{
-															FieldEnterpriseGroupScopeCluster:      cty.StringVal(""),
-															FieldEnterpriseGroupScopeOrganization: cty.StringVal(organizationID1),
-														}),
-														cty.ObjectVal(map[string]cty.Value{
-															FieldEnterpriseGroupScopeCluster:      cty.StringVal(clusterID2),
-															FieldEnterpriseGroupScopeOrganization: cty.StringVal(""),
-														}),
-													}),
-												}),
-											}),
-										}),
-										cty.ObjectVal(map[string]cty.Value{
-											FieldEnterpriseGroupRoleBindingName:   cty.StringVal("engineering-editor"),
-											FieldEnterpriseGroupRoleBindingRoleID: cty.StringVal(roleID3),
-											FieldEnterpriseGroupRoleBindingScopes: cty.ListVal([]cty.Value{
-												cty.ObjectVal(map[string]cty.Value{
-													FieldEnterpriseGroupScope: cty.ListVal([]cty.Value{
-														cty.ObjectVal(map[string]cty.Value{
-															FieldEnterpriseGroupScopeCluster:      cty.StringVal(""),
-															FieldEnterpriseGroupScopeOrganization: cty.StringVal(organizationID1),
-														}),
-														cty.ObjectVal(map[string]cty.Value{
-															FieldEnterpriseGroupScopeCluster:      cty.StringVal(""),
-															FieldEnterpriseGroupScopeOrganization: cty.StringVal(organizationID2),
-														}),
-													}),
-												}),
-											}),
+											FieldEnterpriseGroupScopeCluster:      cty.StringVal(clusterID2),
+											FieldEnterpriseGroupScopeOrganization: cty.StringVal(""),
 										}),
 									}),
 								}),
 							}),
 						}),
-					}),
-				}),
-				cty.ObjectVal(map[string]cty.Value{
-					FieldEnterpriseGroupsGroup: cty.ListVal([]cty.Value{
 						cty.ObjectVal(map[string]cty.Value{
-							FieldEnterpriseGroupOrganizationID: cty.StringVal(organizationID2),
-							FieldEnterpriseGroupName:           cty.StringVal("security-team"),
-							FieldEnterpriseGroupDescription:    cty.StringVal("Security team group"),
-							FieldEnterpriseGroupMembers: cty.ListVal([]cty.Value{
+							FieldEnterpriseGroupRoleBindingName:   cty.StringVal("engineering-editor"),
+							FieldEnterpriseGroupRoleBindingRoleID: cty.StringVal(roleID3),
+							FieldEnterpriseGroupRoleBindingScopes: cty.ListVal([]cty.Value{
 								cty.ObjectVal(map[string]cty.Value{
-									FieldEnterpriseGroupsMember: cty.ListVal([]cty.Value{
+									FieldEnterpriseGroupScope: cty.ListVal([]cty.Value{
 										cty.ObjectVal(map[string]cty.Value{
-											FieldEnterpriseGroupMemberKind: cty.StringVal("user"),
-											FieldEnterpriseGroupMemberID:   cty.StringVal(memberID2),
-										}),
-									}),
-								}),
-							}),
-							FieldEnterpriseGroupRoleBindings: cty.ListVal([]cty.Value{
-								cty.ObjectVal(map[string]cty.Value{
-									FieldEnterpriseGroupRoleBinding: cty.ListVal([]cty.Value{
-										cty.ObjectVal(map[string]cty.Value{
-											FieldEnterpriseGroupRoleBindingName:   cty.StringVal("security-auditor"),
-											FieldEnterpriseGroupRoleBindingRoleID: cty.StringVal(roleID2),
-											FieldEnterpriseGroupRoleBindingScopes: cty.ListVal([]cty.Value{
-												cty.ObjectVal(map[string]cty.Value{
-													FieldEnterpriseGroupScope: cty.ListVal([]cty.Value{
-														cty.ObjectVal(map[string]cty.Value{
-															FieldEnterpriseGroupScopeCluster:      cty.StringVal(""),
-															FieldEnterpriseGroupScopeOrganization: cty.StringVal(organizationID1),
-														}),
-														cty.ObjectVal(map[string]cty.Value{
-															FieldEnterpriseGroupScopeCluster:      cty.StringVal(""),
-															FieldEnterpriseGroupScopeOrganization: cty.StringVal(organizationID2),
-														}),
-													}),
-												}),
-											}),
+											FieldEnterpriseGroupScopeCluster:      cty.StringVal(""),
+											FieldEnterpriseGroupScopeOrganization: cty.StringVal(organizationID),
 										}),
 									}),
 								}),
@@ -660,1721 +607,1721 @@ func TestResourceEnterpriseGroupsCreateContext(t *testing.T) {
 	})
 }
 
-func TestResourceEnterpriseGroupsReadContext(t *testing.T) {
-	t.Parallel()
-
-	t.Run("when state is missing enterprise ID then return error", func(t *testing.T) {
-		t.Parallel()
-		r := require.New(t)
-
-		ctx := context.Background()
-		provider := &ProviderConfig{}
-
-		stateValue := cty.ObjectVal(map[string]cty.Value{})
-		state := terraform.NewInstanceStateShimmedFromValue(stateValue, 0)
-
-		resource := resourceEnterpriseGroups()
-		data := resource.Data(state)
-
-		result := resource.ReadContext(ctx, data, provider)
-
-		r.NotNil(result)
-		r.True(result.HasError())
-		r.Len(result, 1)
-		r.Equal("enterprise ID is not set", result[0].Summary)
-	})
-
-	t.Run("when API call throws error then return error", func(t *testing.T) {
-		t.Parallel()
-		r := require.New(t)
-		mockClient := mockOrganizationManagement.NewMockClientWithResponsesInterface(gomock.NewController(t))
-
-		ctx := context.Background()
-		provider := &ProviderConfig{
-			organizationManagementClient: mockClient,
-		}
-
-		enterpriseID := uuid.NewString()
-		groupID1 := uuid.NewString()
-
-		mockClient.EXPECT().
-			EnterpriseAPIListGroupsWithResponse(gomock.Any(), enterpriseID, nil).
-			Return(nil, errors.New("network error"))
-
-		stateValue := cty.ObjectVal(map[string]cty.Value{
-			FieldEnterpriseGroupsGroups: cty.ListVal([]cty.Value{
-				cty.ObjectVal(map[string]cty.Value{
-					FieldEnterpriseGroupsGroup: cty.ListVal([]cty.Value{
-						cty.ObjectVal(map[string]cty.Value{
-							FieldEnterpriseGroupID:             cty.StringVal(groupID1),
-							FieldEnterpriseGroupOrganizationID: cty.StringVal(uuid.NewString()),
-							FieldEnterpriseGroupName:           cty.StringVal("test-group"),
-						}),
-					}),
-				}),
-			}),
-		})
-		state := terraform.NewInstanceStateShimmedFromValue(stateValue, 0)
-		state.ID = enterpriseID
-
-		resource := resourceEnterpriseGroups()
-		data := resource.Data(state)
-
-		result := resource.ReadContext(ctx, data, provider)
-
-		r.NotNil(result)
-		r.True(result.HasError())
-		r.Len(result, 1)
-		r.Equal("listing enterprise groups: network error", result[0].Summary)
-	})
-
-	t.Run("when API returns groups then filter and update state with managed groups only", func(t *testing.T) {
-		t.Parallel()
-		r := require.New(t)
-		mockClient := mockOrganizationManagement.NewMockClientWithResponsesInterface(gomock.NewController(t))
-
-		ctx := context.Background()
-		provider := &ProviderConfig{
-			organizationManagementClient: mockClient,
-		}
-
-		enterpriseID := uuid.NewString()
-		groupID1 := uuid.NewString()
-		groupID2 := uuid.NewString() // Group not in our state
-		organizationID1 := uuid.NewString()
-		organizationID2 := uuid.NewString()
-		memberID1 := uuid.NewString()
-
-		createTime := time.Now()
-
-		// API returns both groups, but we should only keep the one in our state
-		apiResponse := &organization_management.ListGroupsResponse{
-			Items: &[]organization_management.ListGroupsResponseGroup{
-				{
-					Id:             lo.ToPtr(groupID1),
-					Name:           lo.ToPtr("managed-group"),
-					OrganizationId: lo.ToPtr(organizationID1),
-					Description:    lo.ToPtr("A managed group"),
-					CreateTime:     lo.ToPtr(createTime),
-					ManagedBy:      lo.ToPtr("terraform"),
-					Definition: &organization_management.ListGroupsResponseGroupDefinition{
-						Members: &[]organization_management.GroupDefinitionMember{
-							{
-								Id:        lo.ToPtr(memberID1),
-								Email:     lo.ToPtr("test@example.com"),
-								AddedTime: lo.ToPtr(createTime),
-								Kind:      lo.ToPtr(organization_management.GroupDefinitionMemberKindKINDUSER),
-							},
-						},
-					},
-				},
-				{
-					Id:             lo.ToPtr(groupID2), // This group is NOT in our state
-					Name:           lo.ToPtr("other-group"),
-					OrganizationId: lo.ToPtr(organizationID2),
-					Description:    lo.ToPtr("Not our group"),
-				},
-			},
-		}
-
-		mockClient.EXPECT().
-			EnterpriseAPIListGroupsWithResponse(gomock.Any(), enterpriseID, nil).
-			Return(&organization_management.EnterpriseAPIListGroupsResponse{
-				Body:         nil,
-				HTTPResponse: &http.Response{StatusCode: http.StatusOK},
-				JSON200:      apiResponse,
-			}, nil)
-
-		// Mock role bindings API call
-		mockClient.EXPECT().
-			EnterpriseAPIListRoleBindingsWithResponse(gomock.Any(), enterpriseID, gomock.Any()).
-			Return(&organization_management.EnterpriseAPIListRoleBindingsResponse{
-				Body:         nil,
-				HTTPResponse: &http.Response{StatusCode: http.StatusOK},
-				JSON200: &organization_management.ListRoleBindingsResponse{
-					Items: &[]organization_management.RoleBinding{}, // Empty role bindings for this test
-				},
-			}, nil)
-
-		stateValue := cty.ObjectVal(map[string]cty.Value{
-			FieldEnterpriseGroupsGroups: cty.ListVal([]cty.Value{
-				cty.ObjectVal(map[string]cty.Value{
-					FieldEnterpriseGroupsGroup: cty.ListVal([]cty.Value{
-						cty.ObjectVal(map[string]cty.Value{
-							FieldEnterpriseGroupID:             cty.StringVal(groupID1), // Only this group is managed by us
-							FieldEnterpriseGroupOrganizationID: cty.StringVal(organizationID1),
-							FieldEnterpriseGroupName:           cty.StringVal("managed-group"),
-						}),
-					}),
-				}),
-			}),
-		})
-		state := terraform.NewInstanceStateShimmedFromValue(stateValue, 0)
-		state.ID = enterpriseID
-
-		resource := resourceEnterpriseGroups()
-		data := resource.Data(state)
-
-		result := resource.ReadContext(ctx, data, provider)
-
-		r.Nil(result)
-		r.False(result.HasError())
-
-		// Verify only the managed group is in state
-		groups := data.Get(FieldEnterpriseGroupsGroups).([]any)
-		r.Len(groups, 1)
-
-		groupWrapper := groups[0].(map[string]any)
-		groupList := groupWrapper[FieldEnterpriseGroupsGroup].([]any)
-		group := groupList[0].(map[string]any)
-		r.Equal(groupID1, group[FieldEnterpriseGroupID])
-		r.Equal("managed-group", group[FieldEnterpriseGroupName])
-		r.Equal(organizationID1, group[FieldEnterpriseGroupOrganizationID])
-		r.Equal("A managed group", group[FieldEnterpriseGroupDescription])
-
-		// Verify members are included
-		members := group[FieldEnterpriseGroupMembers].([]any)
-		r.Len(members, 1) // Single wrapper
-		memberWrapper := members[0].(map[string]any)
-		memberList := memberWrapper[FieldEnterpriseGroupsMember].([]any)
-		r.Len(memberList, 1)
-		member := memberList[0].(map[string]any)
-		r.Equal(memberID1, member[FieldEnterpriseGroupMemberID])
-		r.Equal("user", member[FieldEnterpriseGroupMemberKind])
-	})
-
-	t.Run("when API returns groups with multiple role bindings then include only tracked role bindings in state", func(t *testing.T) {
-		t.Parallel()
-		r := require.New(t)
-		mockClient := mockOrganizationManagement.NewMockClientWithResponsesInterface(gomock.NewController(t))
-
-		ctx := context.Background()
-		provider := &ProviderConfig{
-			organizationManagementClient: mockClient,
-		}
-
-		enterpriseID := uuid.NewString()
-		organizationID1 := "e" + uuid.NewString()
-		organizationID2 := "f" + uuid.NewString()
-		groupID1 := "bbbb1111-1111-1111-1111-111111111111"
-		groupID2 := "aaaa2222-2222-2222-2222-222222222222"
-		memberID1 := "b" + uuid.NewString()
-		memberID2 := "a" + uuid.NewString()
-		memberID3 := "c" + uuid.NewString()
-		roleBindingID1 := "c" + uuid.NewString()
-		roleBindingID2 := "a" + uuid.NewString()
-		roleBindingID3 := "b" + uuid.NewString()
-		roleBindingID4 := uuid.NewString()
-		roleBindingID5 := uuid.NewString()
-		roleID1 := "b" + uuid.NewString()
-		roleID2 := "a" + uuid.NewString()
-		roleID3 := "c" + uuid.NewString()
-		clusterID1 := "b" + uuid.NewString()
-		clusterID2 := "a" + uuid.NewString()
-
-		createTime := time.Now()
-
-		// API returns groups
-		apiGroupsResponse := &organization_management.ListGroupsResponse{
-			Items: &[]organization_management.ListGroupsResponseGroup{
-				{
-					Id:             lo.ToPtr(groupID1),
-					Name:           lo.ToPtr("engineering-team"),
-					OrganizationId: lo.ToPtr(organizationID1),
-					Description:    lo.ToPtr("Engineering team group"),
-					CreateTime:     lo.ToPtr(createTime),
-					ManagedBy:      lo.ToPtr("terraform"),
-					Definition: &organization_management.ListGroupsResponseGroupDefinition{
-						Members: &[]organization_management.GroupDefinitionMember{
-							{
-								Id:        lo.ToPtr(memberID1),
-								Email:     lo.ToPtr("engineer@example.com"),
-								AddedTime: lo.ToPtr(createTime),
-								Kind:      lo.ToPtr(organization_management.GroupDefinitionMemberKindKINDUSER),
-							},
-							{
-								Id:        lo.ToPtr(memberID3),
-								AddedTime: lo.ToPtr(createTime),
-								Kind:      lo.ToPtr(organization_management.GroupDefinitionMemberKindKINDSERVICEACCOUNT),
-							},
-						},
-					},
-				},
-				{
-					Id:             lo.ToPtr(groupID2),
-					Name:           lo.ToPtr("security-team"),
-					OrganizationId: lo.ToPtr(organizationID2),
-					Description:    lo.ToPtr("Security team group"),
-					CreateTime:     lo.ToPtr(createTime),
-					ManagedBy:      lo.ToPtr("terraform"),
-					Definition: &organization_management.ListGroupsResponseGroupDefinition{
-						Members: &[]organization_management.GroupDefinitionMember{
-							{
-								Id:        lo.ToPtr(memberID2),
-								Email:     lo.ToPtr("security@example.com"),
-								AddedTime: lo.ToPtr(createTime),
-								Kind:      lo.ToPtr(organization_management.GroupDefinitionMemberKindKINDUSER),
-							},
-						},
-					},
-				},
-			},
-		}
-
-		mockClient.EXPECT().
-			EnterpriseAPIListGroupsWithResponse(gomock.Any(), enterpriseID, nil).
-			Return(&organization_management.EnterpriseAPIListGroupsResponse{
-				Body:         nil,
-				HTTPResponse: &http.Response{StatusCode: http.StatusOK},
-				JSON200:      apiGroupsResponse,
-			}, nil)
-
-		apiRoleBindingsGroup1Response := &organization_management.ListRoleBindingsResponse{
-			Items: &[]organization_management.RoleBinding{
-				{
-					Id:         lo.ToPtr(roleBindingID1),
-					Name:       lo.ToPtr("engineering-viewer-1"),
-					CreateTime: lo.ToPtr(createTime),
-					ManagedBy:  lo.ToPtr("terraform-1"),
-					Definition: &organization_management.RoleBindingDefinition{
-						RoleId: lo.ToPtr(roleID1),
-						Subjects: &[]organization_management.Subject{
-							{
-								Group: &organization_management.GroupSubject{
-									Id:   groupID1,
-									Name: lo.ToPtr("engineering-team"),
-								},
-							},
-						},
-						Scopes: &[]organization_management.Scope{
-							{
-								Cluster: &organization_management.ClusterScope{
-									Id: clusterID1,
-								},
-							},
-							{
-								Organization: &organization_management.OrganizationScope{
-									Id: organizationID1,
-								},
-							},
-							{
-								Cluster: &organization_management.ClusterScope{
-									Id: clusterID2,
-								},
-							},
-						},
-					},
-				},
-				{
-					Id:         lo.ToPtr(roleBindingID3),
-					Name:       lo.ToPtr("engineering-editor"),
-					CreateTime: lo.ToPtr(createTime),
-					ManagedBy:  lo.ToPtr("terraform"),
-					Definition: &organization_management.RoleBindingDefinition{
-						RoleId: lo.ToPtr(roleID3),
-						Subjects: &[]organization_management.Subject{
-							{
-								Group: &organization_management.GroupSubject{
-									Id:   groupID1,
-									Name: lo.ToPtr("engineering-team"),
-								},
-							},
-						},
-						Scopes: &[]organization_management.Scope{
-							{
-								Organization: &organization_management.OrganizationScope{
-									Id: organizationID1,
-								},
-							},
-							{
-								Organization: &organization_management.OrganizationScope{
-									Id: organizationID2,
-								},
-							},
-						},
-					},
-				},
-			},
-		}
-
-		mockClient.EXPECT().
-			EnterpriseAPIListRoleBindingsWithResponse(
-				gomock.Any(),
-				enterpriseID,
-				&organization_management.EnterpriseAPIListRoleBindingsParams{
-					SubjectId: &[]string{groupID1},
-				},
-			).
-			Return(&organization_management.EnterpriseAPIListRoleBindingsResponse{
-				Body:         nil,
-				HTTPResponse: &http.Response{StatusCode: http.StatusOK},
-				JSON200:      apiRoleBindingsGroup1Response,
-			}, nil)
-
-		apiRoleBindingsGroup2Response := &organization_management.ListRoleBindingsResponse{
-			Items: &[]organization_management.RoleBinding{
-				{
-					Id:         lo.ToPtr(roleBindingID2),
-					Name:       lo.ToPtr("security-auditor"),
-					CreateTime: lo.ToPtr(createTime),
-					ManagedBy:  lo.ToPtr("terraform"),
-					Definition: &organization_management.RoleBindingDefinition{
-						RoleId: lo.ToPtr(roleID2),
-						Subjects: &[]organization_management.Subject{
-							{
-								Group: &organization_management.GroupSubject{
-									Id:   groupID2,
-									Name: lo.ToPtr("security-team"),
-								},
-							},
-						},
-						Scopes: &[]organization_management.Scope{
-							{
-								Organization: &organization_management.OrganizationScope{
-									Id: organizationID1,
-								},
-							},
-							{
-								Organization: &organization_management.OrganizationScope{
-									Id: organizationID2,
-								},
-							},
-						},
-					},
-				},
-				{
-					Id:         lo.ToPtr(roleBindingID5),
-					Name:       lo.ToPtr("new-to-be-ignored"),
-					CreateTime: lo.ToPtr(createTime),
-					ManagedBy:  lo.ToPtr("terraform"),
-					Definition: &organization_management.RoleBindingDefinition{
-						RoleId: lo.ToPtr(roleID2),
-						Subjects: &[]organization_management.Subject{
-							{
-								Group: &organization_management.GroupSubject{
-									Id:   groupID2,
-									Name: lo.ToPtr("security-team"),
-								},
-							},
-						},
-						Scopes: &[]organization_management.Scope{
-							{
-								Organization: &organization_management.OrganizationScope{
-									Id: organizationID1,
-								},
-							},
-						},
-					},
-				},
-			},
-		}
-
-		mockClient.EXPECT().
-			EnterpriseAPIListRoleBindingsWithResponse(
-				gomock.Any(),
-				enterpriseID,
-				&organization_management.EnterpriseAPIListRoleBindingsParams{
-					SubjectId: &[]string{groupID2},
-				},
-			).
-			Return(&organization_management.EnterpriseAPIListRoleBindingsResponse{
-				Body:         nil,
-				HTTPResponse: &http.Response{StatusCode: http.StatusOK},
-				JSON200:      apiRoleBindingsGroup2Response,
-			}, nil)
-
-		// State includes minimal group data - role bindings will be discovered
-		stateValue := cty.ObjectVal(map[string]cty.Value{
-			FieldEnterpriseGroupsGroups: cty.ListVal([]cty.Value{
-				cty.ObjectVal(map[string]cty.Value{
-					FieldEnterpriseGroupsGroup: cty.ListVal([]cty.Value{
-						cty.ObjectVal(map[string]cty.Value{
-							FieldEnterpriseGroupID:             cty.StringVal(groupID1),
-							FieldEnterpriseGroupOrganizationID: cty.StringVal(organizationID1),
-							FieldEnterpriseGroupName:           cty.StringVal("engineering-team"),
-							FieldEnterpriseGroupMembers: cty.ListVal([]cty.Value{
-								cty.ObjectVal(map[string]cty.Value{
-									FieldEnterpriseGroupsMember: cty.ListVal([]cty.Value{
-										cty.ObjectVal(map[string]cty.Value{
-											FieldEnterpriseGroupMemberKind: cty.StringVal("user"),
-											FieldEnterpriseGroupMemberID:   cty.StringVal(memberID1),
-										}),
-									}),
-								}),
-							}),
-							FieldEnterpriseGroupRoleBindings: cty.ListVal([]cty.Value{
-								cty.ObjectVal(map[string]cty.Value{
-									FieldEnterpriseGroupRoleBinding: cty.ListVal([]cty.Value{
-										cty.ObjectVal(map[string]cty.Value{
-											FieldEnterpriseGroupRoleBindingID:     cty.StringVal(roleBindingID3),
-											FieldEnterpriseGroupRoleBindingName:   cty.StringVal("engineering-editor"),
-											FieldEnterpriseGroupRoleBindingRoleID: cty.StringVal(roleID3),
-											FieldEnterpriseGroupRoleBindingScopes: cty.ListVal([]cty.Value{
-												cty.ObjectVal(map[string]cty.Value{
-													FieldEnterpriseGroupScope: cty.ListVal([]cty.Value{
-														cty.ObjectVal(map[string]cty.Value{
-															FieldEnterpriseGroupScopeOrganization: cty.StringVal(organizationID1),
-															FieldEnterpriseGroupScopeCluster:      cty.StringVal(""),
-														}),
-														cty.ObjectVal(map[string]cty.Value{
-															FieldEnterpriseGroupScopeOrganization: cty.StringVal(organizationID2),
-															FieldEnterpriseGroupScopeCluster:      cty.StringVal(""),
-														}),
-													}),
-												}),
-											}),
-										}),
-										cty.ObjectVal(map[string]cty.Value{
-											FieldEnterpriseGroupRoleBindingID:     cty.StringVal(roleBindingID1),
-											FieldEnterpriseGroupRoleBindingName:   cty.StringVal("engineering-viewer"),
-											FieldEnterpriseGroupRoleBindingRoleID: cty.StringVal(roleID1),
-											FieldEnterpriseGroupRoleBindingScopes: cty.ListVal([]cty.Value{
-												cty.ObjectVal(map[string]cty.Value{
-													FieldEnterpriseGroupScope: cty.ListVal([]cty.Value{
-														cty.ObjectVal(map[string]cty.Value{
-															FieldEnterpriseGroupScopeCluster:      cty.StringVal(clusterID1),
-															FieldEnterpriseGroupScopeOrganization: cty.StringVal(""),
-														}),
-													}),
-												}),
-											}),
-										}),
-									}),
-								}),
-							}),
-						}),
-					}),
-				}),
-				cty.ObjectVal(map[string]cty.Value{
-					FieldEnterpriseGroupsGroup: cty.ListVal([]cty.Value{
-						cty.ObjectVal(map[string]cty.Value{
-							FieldEnterpriseGroupID:             cty.StringVal(groupID2),
-							FieldEnterpriseGroupOrganizationID: cty.StringVal(organizationID2),
-							FieldEnterpriseGroupName:           cty.StringVal("security-team"),
-							FieldEnterpriseGroupMembers: cty.ListVal([]cty.Value{
-								cty.ObjectVal(map[string]cty.Value{
-									FieldEnterpriseGroupsMember: cty.ListVal([]cty.Value{
-										cty.ObjectVal(map[string]cty.Value{
-											FieldEnterpriseGroupMemberKind: cty.StringVal("user"),
-											FieldEnterpriseGroupMemberID:   cty.StringVal(memberID1),
-										}),
-									}),
-								}),
-							}),
-							FieldEnterpriseGroupRoleBindings: cty.ListVal([]cty.Value{
-								cty.ObjectVal(map[string]cty.Value{
-									FieldEnterpriseGroupRoleBinding: cty.ListVal([]cty.Value{
-										cty.ObjectVal(map[string]cty.Value{
-											FieldEnterpriseGroupRoleBindingID:     cty.StringVal(roleBindingID4),
-											FieldEnterpriseGroupRoleBindingName:   cty.StringVal("to-be-deleted"),
-											FieldEnterpriseGroupRoleBindingRoleID: cty.StringVal(roleID3),
-											FieldEnterpriseGroupRoleBindingScopes: cty.ListVal([]cty.Value{
-												cty.ObjectVal(map[string]cty.Value{
-													FieldEnterpriseGroupScope: cty.ListVal([]cty.Value{
-														cty.ObjectVal(map[string]cty.Value{
-															FieldEnterpriseGroupScopeOrganization: cty.StringVal(organizationID1),
-															FieldEnterpriseGroupScopeCluster:      cty.StringVal(""),
-														}),
-													}),
-												}),
-											}),
-										}),
-										cty.ObjectVal(map[string]cty.Value{
-											FieldEnterpriseGroupRoleBindingID:     cty.StringVal(roleBindingID2),
-											FieldEnterpriseGroupRoleBindingName:   cty.StringVal("security-auditor-0"),
-											FieldEnterpriseGroupRoleBindingRoleID: cty.StringVal(roleID3),
-											FieldEnterpriseGroupRoleBindingScopes: cty.ListVal([]cty.Value{
-												cty.ObjectVal(map[string]cty.Value{
-													FieldEnterpriseGroupScope: cty.ListVal([]cty.Value{
-														cty.ObjectVal(map[string]cty.Value{
-															FieldEnterpriseGroupScopeOrganization: cty.StringVal(organizationID2),
-															FieldEnterpriseGroupScopeCluster:      cty.StringVal(""),
-														}),
-													}),
-												}),
-											}),
-										}),
-									}),
-								}),
-							}),
-						}),
-					}),
-				}),
-			}),
-		})
-		state := terraform.NewInstanceStateShimmedFromValue(stateValue, 0)
-		state.ID = enterpriseID
-
-		resource := resourceEnterpriseGroups()
-		data := resource.Data(state)
-
-		result := resource.ReadContext(ctx, data, provider)
-
-		r.Nil(result)
-		r.False(result.HasError())
-
-		// Verify both groups are returned with proper sorting by ID (aaaa comes before bbbb)
-		groups := data.Get(FieldEnterpriseGroupsGroups).([]any)
-		r.Len(groups, 2)
-
-		groupWrapper1 := groups[0].(map[string]any)
-		groupList1 := groupWrapper1[FieldEnterpriseGroupsGroup].([]any)
-		group1 := groupList1[0].(map[string]any)
-		groupWrapper2 := groups[1].(map[string]any)
-		groupList2 := groupWrapper2[FieldEnterpriseGroupsGroup].([]any)
-		group2 := groupList2[0].(map[string]any)
-
-		r.Equal(groupID1, group1[FieldEnterpriseGroupID])
-		r.Equal("engineering-team", group1[FieldEnterpriseGroupName])
-		r.Equal(organizationID1, group1[FieldEnterpriseGroupOrganizationID])
-
-		members1 := group1[FieldEnterpriseGroupMembers].([]any)
-		r.Len(members1, 1) // Single wrapper
-		memberWrapper1 := members1[0].(map[string]any)
-		memberList1 := memberWrapper1[FieldEnterpriseGroupsMember].([]any)
-		r.Len(memberList1, 2)
-		member1 := memberList1[0].(map[string]any)
-		r.Equal(memberID1, member1[FieldEnterpriseGroupMemberID])
-		r.Equal("user", member1[FieldEnterpriseGroupMemberKind])
-		member2 := memberList1[1].(map[string]any)
-		r.Equal(memberID3, member2[FieldEnterpriseGroupMemberID])
-		r.Equal("service_account", member2[FieldEnterpriseGroupMemberKind])
-
-		roleBindings1 := group1[FieldEnterpriseGroupRoleBindings].([]any)
-		r.Len(roleBindings1, 1) // Single wrapper
-		roleBindingWrapper1 := roleBindings1[0].(map[string]any)
-		roleBindingList1 := roleBindingWrapper1[FieldEnterpriseGroupRoleBinding].([]any)
-		r.Len(roleBindingList1, 2)
-		roleBinding1 := roleBindingList1[0].(map[string]any)
-		r.Equal(roleBindingID3, roleBinding1[FieldEnterpriseGroupRoleBindingID])
-		r.Equal("engineering-editor", roleBinding1[FieldEnterpriseGroupRoleBindingName])
-		r.Equal(roleID3, roleBinding1[FieldEnterpriseGroupRoleBindingRoleID])
-		scopes1 := roleBinding1[FieldEnterpriseGroupRoleBindingScopes].([]any)
-		r.Len(scopes1, 1)
-		scope1a := scopes1[0].(map[string]any)
-		scopeList1a := scope1a[FieldEnterpriseGroupScope].([]any)
-		r.Len(scopeList1a, 2)
-		scope1a1 := scopeList1a[0].(map[string]any)
-		r.Equal(organizationID1, scope1a1[FieldEnterpriseGroupScopeOrganization])
-		r.Empty(scope1a1[FieldEnterpriseGroupScopeCluster])
-		scope1a2 := scopeList1a[1].(map[string]any)
-		r.Equal(organizationID2, scope1a2[FieldEnterpriseGroupScopeOrganization])
-		r.Empty(scope1a2[FieldEnterpriseGroupScopeCluster])
-		roleBinding2 := roleBindingList1[1].(map[string]any)
-		r.Equal(roleBindingID1, roleBinding2[FieldEnterpriseGroupRoleBindingID])
-		r.Equal("engineering-viewer-1", roleBinding2[FieldEnterpriseGroupRoleBindingName])
-		r.Equal(roleID1, roleBinding2[FieldEnterpriseGroupRoleBindingRoleID])
-		scopes2 := roleBinding2[FieldEnterpriseGroupRoleBindingScopes].([]any)
-		r.Len(scopes2, 1)
-		scope2a := scopes2[0].(map[string]any)
-		scopeList2a := scope2a[FieldEnterpriseGroupScope].([]any)
-		r.Len(scopeList2a, 3)
-		scope2a1 := scopeList2a[0].(map[string]any)
-		r.Equal(clusterID1, scope2a1[FieldEnterpriseGroupScopeCluster])
-		r.Empty(scope2a1[FieldEnterpriseGroupScopeOrganization])
-		scope2a2 := scopeList2a[1].(map[string]any)
-		r.Equal(organizationID1, scope2a2[FieldEnterpriseGroupScopeOrganization])
-		r.Empty(scope2a2[FieldEnterpriseGroupScopeCluster])
-		scope2a3 := scopeList2a[2].(map[string]any)
-		r.Equal(clusterID2, scope2a3[FieldEnterpriseGroupScopeCluster])
-		r.Empty(scope2a3[FieldEnterpriseGroupScopeOrganization])
-
-		r.Equal(groupID2, group2[FieldEnterpriseGroupID])
-		r.Equal("security-team", group2[FieldEnterpriseGroupName])
-		r.Equal(organizationID2, group2[FieldEnterpriseGroupOrganizationID])
-
-		members2 := group2[FieldEnterpriseGroupMembers].([]any)
-		r.Len(members2, 1) // Single wrapper containing all members
-
-		memberWrapper2 := members2[0].(map[string]any)
-		memberList2 := memberWrapper2[FieldEnterpriseGroupsMember].([]any)
-		r.Len(memberList2, 1)
-		member1 = memberList2[0].(map[string]any)
-		r.Equal(memberID2, member1[FieldEnterpriseGroupMemberID])
-		r.Equal("user", member1[FieldEnterpriseGroupMemberKind])
-
-		roleBindings2 := group2[FieldEnterpriseGroupRoleBindings].([]any)
-		r.Len(roleBindings2, 1) // Single wrapper containing all role bindings
-
-		roleBindingWrapper2 := roleBindings2[0].(map[string]any)
-		roleBindingList2 := roleBindingWrapper2[FieldEnterpriseGroupRoleBinding].([]any)
-		r.Len(roleBindingList2, 1)
-
-		roleBinding2 = roleBindingList2[0].(map[string]any)
-		r.Equal(roleBindingID2, roleBinding2[FieldEnterpriseGroupRoleBindingID])
-		r.Equal("security-auditor", roleBinding2[FieldEnterpriseGroupRoleBindingName])
-		r.Equal(roleID2, roleBinding2[FieldEnterpriseGroupRoleBindingRoleID])
-
-		// Verify role binding scopes (2 organization scopes)
-		scopes2 = roleBinding2[FieldEnterpriseGroupRoleBindingScopes].([]any)
-		r.Len(scopes2, 1) // Single wrapper
-
-		// Single scope wrapper containing all scopes
-		scopeWrapper2 := scopes2[0].(map[string]any)
-		scopeList2 := scopeWrapper2[FieldEnterpriseGroupScope].([]any)
-		r.Len(scopeList2, 2)
-
-		// First scope (organizationID1)
-		scope2a = scopeList2[0].(map[string]any)
-		r.Equal(organizationID1, scope2a[FieldEnterpriseGroupScopeOrganization])
-		r.Empty(scope2a[FieldEnterpriseGroupScopeCluster])
-
-		// Second scope (organizationID2)
-		scope2b := scopeList2[1].(map[string]any)
-		r.Equal(organizationID2, scope2b[FieldEnterpriseGroupScopeOrganization])
-		r.Empty(scope2b[FieldEnterpriseGroupScopeCluster])
-	})
-}
-
-func TestResourceEnterpriseGroupsDeleteContext(t *testing.T) {
-	t.Run("when API successfully deletes groups then clear state", func(t *testing.T) {
-		t.Parallel()
-		r := require.New(t)
-		mockClient := mockOrganizationManagement.NewMockClientWithResponsesInterface(gomock.NewController(t))
-
-		ctx := context.Background()
-		provider := &ProviderConfig{
-			organizationManagementClient: mockClient,
-		}
-
-		enterpriseID := uuid.NewString()
-		organizationID1 := "e" + uuid.NewString()
-		organizationID2 := "f" + uuid.NewString()
-		groupID1 := "bbbb1111-1111-1111-1111-111111111111"
-		groupID2 := "aaaa2222-2222-2222-2222-222222222222"
-
-		// Expected delete request
-		expectedRequest := organization_management.BatchDeleteEnterpriseGroupsRequest{
-			EnterpriseId: enterpriseID,
-			Requests: []organization_management.BatchDeleteEnterpriseGroupsRequestDeleteGroupRequest{
-				{
-					Id:             groupID1,
-					OrganizationId: organizationID1,
-				},
-				{
-					Id:             groupID2,
-					OrganizationId: organizationID2,
-				},
-			},
-		}
-
-		mockClient.EXPECT().
-			EnterpriseAPIBatchDeleteEnterpriseGroupsWithResponse(gomock.Any(), enterpriseID, expectedRequest).
-			Return(&organization_management.EnterpriseAPIBatchDeleteEnterpriseGroupsResponse{
-				HTTPResponse: &http.Response{StatusCode: http.StatusOK},
-			}, nil)
-
-		// State with 2 groups
-		stateValue := cty.ObjectVal(map[string]cty.Value{
-			FieldEnterpriseGroupsGroups: cty.ListVal([]cty.Value{
-				cty.ObjectVal(map[string]cty.Value{
-					FieldEnterpriseGroupsGroup: cty.ListVal([]cty.Value{
-						cty.ObjectVal(map[string]cty.Value{
-							FieldEnterpriseGroupID:             cty.StringVal(groupID1),
-							FieldEnterpriseGroupOrganizationID: cty.StringVal(organizationID1),
-							FieldEnterpriseGroupName:           cty.StringVal("engineering-team"),
-						}),
-					}),
-				}),
-				cty.ObjectVal(map[string]cty.Value{
-					FieldEnterpriseGroupsGroup: cty.ListVal([]cty.Value{
-						cty.ObjectVal(map[string]cty.Value{
-							FieldEnterpriseGroupID:             cty.StringVal(groupID2),
-							FieldEnterpriseGroupOrganizationID: cty.StringVal(organizationID2),
-							FieldEnterpriseGroupName:           cty.StringVal("security-team"),
-						}),
-					}),
-				}),
-			}),
-		})
-		state := terraform.NewInstanceStateShimmedFromValue(stateValue, 0)
-		state.ID = enterpriseID
-
-		resource := resourceEnterpriseGroups()
-		data := resource.Data(state)
-
-		result := resource.DeleteContext(ctx, data, provider)
-
-		r.Nil(result)
-		r.False(result.HasError())
-		r.Empty(data.Id(), "Resource ID should be cleared after successful delete")
-	})
-
-	t.Run("when enterprise ID is empty then return error", func(t *testing.T) {
-		t.Parallel()
-		r := require.New(t)
-		mockClient := mockOrganizationManagement.NewMockClientWithResponsesInterface(gomock.NewController(t))
-
-		ctx := context.Background()
-		provider := &ProviderConfig{
-			organizationManagementClient: mockClient,
-		}
-
-		// State with no enterprise ID
-		stateValue := cty.ObjectVal(map[string]cty.Value{
-			FieldEnterpriseGroupsGroups: cty.ListValEmpty(cty.Object(map[string]cty.Type{})),
-		})
-		state := terraform.NewInstanceStateShimmedFromValue(stateValue, 0)
-		state.ID = "" // Empty enterprise ID
-
-		resource := resourceEnterpriseGroups()
-		data := resource.Data(state)
-
-		result := resource.DeleteContext(ctx, data, provider)
-
-		r.True(result.HasError())
-		r.Contains(result[0].Summary, "enterprise ID is not set")
-	})
-
-	t.Run("when group missing ID then return state corruption error", func(t *testing.T) {
-		t.Parallel()
-		r := require.New(t)
-		mockClient := mockOrganizationManagement.NewMockClientWithResponsesInterface(gomock.NewController(t))
-
-		ctx := context.Background()
-		provider := &ProviderConfig{
-			organizationManagementClient: mockClient,
-		}
-
-		enterpriseID := uuid.NewString()
-		organizationID1 := "e" + uuid.NewString()
-
-		// State with group missing ID
-		stateValue := cty.ObjectVal(map[string]cty.Value{
-			FieldEnterpriseGroupsGroups: cty.ListVal([]cty.Value{
-				cty.ObjectVal(map[string]cty.Value{
-					FieldEnterpriseGroupsGroup: cty.ListVal([]cty.Value{
-						cty.ObjectVal(map[string]cty.Value{
-							FieldEnterpriseGroupID:             cty.StringVal(""), // Empty ID
-							FieldEnterpriseGroupOrganizationID: cty.StringVal(organizationID1),
-							FieldEnterpriseGroupName:           cty.StringVal("engineering-team"),
-						}),
-					}),
-				}),
-			}),
-		})
-		state := terraform.NewInstanceStateShimmedFromValue(stateValue, 0)
-		state.ID = enterpriseID
-
-		resource := resourceEnterpriseGroups()
-		data := resource.Data(state)
-
-		result := resource.DeleteContext(ctx, data, provider)
-
-		r.True(result.HasError())
-		r.Contains(result[0].Summary, "group in state is missing valid ID - this indicates state corruption")
-	})
-
-	t.Run("when group missing organization_id then return state corruption error", func(t *testing.T) {
-		t.Parallel()
-		r := require.New(t)
-		mockClient := mockOrganizationManagement.NewMockClientWithResponsesInterface(gomock.NewController(t))
-
-		ctx := context.Background()
-		provider := &ProviderConfig{
-			organizationManagementClient: mockClient,
-		}
-
-		enterpriseID := uuid.NewString()
-		groupID1 := "bbbb1111-1111-1111-1111-111111111111"
-
-		// State with group missing organization_id
-		stateValue := cty.ObjectVal(map[string]cty.Value{
-			FieldEnterpriseGroupsGroups: cty.ListVal([]cty.Value{
-				cty.ObjectVal(map[string]cty.Value{
-					FieldEnterpriseGroupsGroup: cty.ListVal([]cty.Value{
-						cty.ObjectVal(map[string]cty.Value{
-							FieldEnterpriseGroupID:             cty.StringVal(groupID1),
-							FieldEnterpriseGroupOrganizationID: cty.StringVal(""), // Empty organization ID
-							FieldEnterpriseGroupName:           cty.StringVal("engineering-team"),
-						}),
-					}),
-				}),
-			}),
-		})
-		state := terraform.NewInstanceStateShimmedFromValue(stateValue, 0)
-		state.ID = enterpriseID
-
-		resource := resourceEnterpriseGroups()
-		data := resource.Data(state)
-
-		result := resource.DeleteContext(ctx, data, provider)
-
-		r.True(result.HasError())
-		r.Contains(result[0].Summary, fmt.Sprintf("group %s in state is missing valid organization_id - this indicates state corruption", groupID1))
-	})
-
-	t.Run("when API call fails then return error", func(t *testing.T) {
-		t.Parallel()
-		r := require.New(t)
-		mockClient := mockOrganizationManagement.NewMockClientWithResponsesInterface(gomock.NewController(t))
-
-		ctx := context.Background()
-		provider := &ProviderConfig{
-			organizationManagementClient: mockClient,
-		}
-
-		enterpriseID := uuid.NewString()
-		organizationID1 := "e" + uuid.NewString()
-		groupID1 := "bbbb1111-1111-1111-1111-111111111111"
-
-		mockClient.EXPECT().
-			EnterpriseAPIBatchDeleteEnterpriseGroupsWithResponse(gomock.Any(), enterpriseID, gomock.Any()).
-			Return(nil, errors.New("network error"))
-
-		// State with 1 group
-		stateValue := cty.ObjectVal(map[string]cty.Value{
-			FieldEnterpriseGroupsGroups: cty.ListVal([]cty.Value{
-				cty.ObjectVal(map[string]cty.Value{
-					FieldEnterpriseGroupsGroup: cty.ListVal([]cty.Value{
-						cty.ObjectVal(map[string]cty.Value{
-							FieldEnterpriseGroupID:             cty.StringVal(groupID1),
-							FieldEnterpriseGroupOrganizationID: cty.StringVal(organizationID1),
-							FieldEnterpriseGroupName:           cty.StringVal("engineering-team"),
-						}),
-					}),
-				}),
-			}),
-		})
-		state := terraform.NewInstanceStateShimmedFromValue(stateValue, 0)
-		state.ID = enterpriseID
-
-		resource := resourceEnterpriseGroups()
-		data := resource.Data(state)
-
-		result := resource.DeleteContext(ctx, data, provider)
-
-		r.True(result.HasError())
-		r.Contains(result[0].Summary, "calling batch delete enterprise groups")
-		r.Contains(result[0].Summary, "network error")
-		r.NotEmpty(data.Id(), "Resource ID should not be cleared when delete fails")
-	})
-}
-
-func TestResourceEnterpriseGroupsUpdateContext(t *testing.T) {
-	t.Parallel()
-
-	enterpriseID := uuid.NewString()
-	orgID1 := uuid.NewString()
-	orgID2 := uuid.NewString()
-	existingGroupID1 := uuid.NewString()
-	existingGroupID2 := uuid.NewString()
-	ctx := context.Background()
-
-	t.Run("when groups are added then call create API with exact parameters", func(t *testing.T) {
-		r := require.New(t)
-		ctrl := gomock.NewController(t)
-		mockClient := mockOrganizationManagement.NewMockClientWithResponsesInterface(ctrl)
-
-		provider := &ProviderConfig{
-			organizationManagementClient: mockClient,
-		}
-
-		memberID1 := uuid.NewString()
-		memberID2 := uuid.NewString()
-		roleID := uuid.NewString()
-		clusterID := uuid.NewString()
-		newGroupID := uuid.NewString()
-		createTime := time.Now()
-
-		resource := resourceEnterpriseGroups()
-
-		// Create old state with one group
-		oldState := &terraform.InstanceState{
-			ID: enterpriseID,
-			Attributes: map[string]string{
-				FieldEnterpriseGroupsEnterpriseID:  enterpriseID,
-				"groups.#":                         "1",
-				"groups.0.group.#":                 "1",
-				"groups.0.group.0.id":              existingGroupID1,
-				"groups.0.group.0.name":            "existing-group",
-				"groups.0.group.0.organization_id": orgID1,
-				"groups.0.group.0.description":     "An existing group",
-				"groups.0.group.0.create_time":     createTime.Format(time.RFC3339),
-				"groups.0.group.0.members.#":       "0",
-				"groups.0.group.0.role_bindings.#": "0",
-			},
-		}
-
-		// Create diff that adds a new group with nested structure
-		diff := &terraform.InstanceDiff{
-			Attributes: map[string]*terraform.ResourceAttrDiff{
-				"groups.#": {
-					Old: "1",
-					New: "2",
-				},
-				"groups.1.group.#": {
-					Old: "",
-					New: "1",
-				},
-				"groups.1.group.0.name": {
-					Old: "",
-					New: "new-engineering-team",
-				},
-				"groups.1.group.0.organization_id": {
-					Old: "",
-					New: orgID2,
-				},
-				"groups.1.group.0.description": {
-					Old: "",
-					New: "New engineering team",
-				},
-				"groups.1.group.0.members.#": {
-					Old: "",
-					New: "2",
-				},
-				"groups.1.group.0.members.0.member.#": {
-					Old: "",
-					New: "1",
-				},
-				"groups.1.group.0.members.0.member.0.kind": {
-					Old: "",
-					New: "user",
-				},
-				"groups.1.group.0.members.0.member.0.id": {
-					Old: "",
-					New: memberID1,
-				},
-				"groups.1.group.0.members.1.member.#": {
-					Old: "",
-					New: "1",
-				},
-				"groups.1.group.0.members.1.member.0.kind": {
-					Old: "",
-					New: "service_account",
-				},
-				"groups.1.group.0.members.1.member.0.id": {
-					Old: "",
-					New: memberID2,
-				},
-				"groups.1.group.0.role_bindings.#": {
-					Old: "",
-					New: "1",
-				},
-				"groups.1.group.0.role_bindings.0.role_binding.#": {
-					Old: "",
-					New: "1",
-				},
-				"groups.1.group.0.role_bindings.0.role_binding.0.name": {
-					Old: "",
-					New: "engineering-viewer",
-				},
-				"groups.1.group.0.role_bindings.0.role_binding.0.role_id": {
-					Old: "",
-					New: roleID,
-				},
-				"groups.1.group.0.role_bindings.0.role_binding.0.scopes.#": {
-					Old: "",
-					New: "1",
-				},
-				"groups.1.group.0.role_bindings.0.role_binding.0.scopes.0.scope.#": {
-					Old: "",
-					New: "2",
-				},
-				"groups.1.group.0.role_bindings.0.role_binding.0.scopes.0.scope.0.cluster": {
-					Old: "",
-					New: clusterID,
-				},
-				"groups.1.group.0.role_bindings.0.role_binding.0.scopes.0.scope.1.organization": {
-					Old: "",
-					New: orgID2,
-				},
-			},
-		}
-
-		// Use the schemaMap.Data method you suggested
-		schemaMap := make(map[string]*schema.Schema)
-		for k, v := range resource.Schema {
-			schemaMap[k] = v
-		}
-		data, err := schema.InternalMap(schemaMap).Data(oldState, diff)
-		r.NoError(err)
-
-		// Expected create request for new group
-		expectedCreateRequest := organization_management.BatchCreateEnterpriseGroupsRequest{
-			EnterpriseId: enterpriseID,
-			Requests: []organization_management.BatchCreateEnterpriseGroupsRequestGroup{
-				{
-					Name:           "new-engineering-team",
-					OrganizationId: orgID2,
-					Description:    lo.ToPtr("New engineering team"),
-					Members: []organization_management.BatchCreateEnterpriseGroupsRequestMember{
-						{
-							Kind: lo.ToPtr(organization_management.BatchCreateEnterpriseGroupsRequestMemberKindSUBJECTKINDUSER),
-							Id:   lo.ToPtr(memberID1),
-						},
-						{
-							Kind: lo.ToPtr(organization_management.BatchCreateEnterpriseGroupsRequestMemberKindSUBJECTKINDSERVICEACCOUNT),
-							Id:   lo.ToPtr(memberID2),
-						},
-					},
-					RoleBindings: &[]organization_management.BatchCreateEnterpriseGroupsRequestRoleBinding{
-						{
-							Name:   "engineering-viewer",
-							RoleId: roleID,
-							Scopes: []organization_management.Scope{
-								{
-									Cluster: &organization_management.ClusterScope{
-										Id: clusterID,
-									},
-								},
-								{
-									Organization: &organization_management.OrganizationScope{
-										Id: orgID2,
-									},
-								},
-							},
-						},
-					},
-				},
-			},
-		}
-
-		// Mock create API call with exact parameters
-		mockClient.EXPECT().
-			EnterpriseAPIBatchCreateEnterpriseGroupsWithResponse(gomock.Any(), enterpriseID, expectedCreateRequest).
-			Return(&organization_management.EnterpriseAPIBatchCreateEnterpriseGroupsResponse{
-				HTTPResponse: &http.Response{StatusCode: 200},
-				JSON200: &organization_management.BatchCreateEnterpriseGroupsResponse{
-					Groups: &[]organization_management.BatchCreateEnterpriseGroupsResponseGroup{
-						{
-							Id:             lo.ToPtr(newGroupID),
-							Name:           lo.ToPtr("new-engineering-team"),
-							OrganizationId: lo.ToPtr(orgID2),
-							Description:    lo.ToPtr("New engineering team"),
-							CreateTime:     lo.ToPtr(createTime),
-							ManagedBy:      lo.ToPtr("terraform"),
-						},
-					},
-				},
-			}, nil)
-
-		// Expected update request for existing group
-		expectedUpdateRequest := organization_management.BatchUpdateEnterpriseGroupsRequest{
-			EnterpriseId: enterpriseID,
-			Requests: []organization_management.BatchUpdateEnterpriseGroupsRequestUpdateGroupRequest{
-				{
-					Id:             existingGroupID1,
-					Name:           "existing-group",
-					OrganizationId: orgID1,
-					Description:    "",
-					Members:        nil,
-					RoleBindings:   nil,
-				},
-			},
-		}
-
-		// Mock update API call with exact parameters
-		mockClient.EXPECT().
-			EnterpriseAPIBatchUpdateEnterpriseGroupsWithResponse(gomock.Any(), enterpriseID, expectedUpdateRequest).
-			Return(&organization_management.EnterpriseAPIBatchUpdateEnterpriseGroupsResponse{
-				HTTPResponse: &http.Response{StatusCode: 200},
-			}, nil)
-
-		// Mock read calls at the end
-		mockClient.EXPECT().
-			EnterpriseAPIListGroupsWithResponse(gomock.Any(), enterpriseID, gomock.Any()).
-			Return(&organization_management.EnterpriseAPIListGroupsResponse{
-				HTTPResponse: &http.Response{StatusCode: 200},
-				JSON200: &organization_management.ListGroupsResponse{
-					Items: &[]organization_management.ListGroupsResponseGroup{
-						{
-							Id:             &existingGroupID1,
-							Name:           lo.ToPtr("existing-group"),
-							OrganizationId: &orgID1,
-						},
-						{
-							Id:             &newGroupID,
-							Name:           lo.ToPtr("new-engineering-team"),
-							OrganizationId: &orgID2,
-							Description:    lo.ToPtr("New engineering team"),
-							CreateTime:     lo.ToPtr(createTime),
-							ManagedBy:      lo.ToPtr("terraform"),
-						},
-					},
-				},
-			}, nil)
-
-		mockClient.EXPECT().
-			EnterpriseAPIListRoleBindingsWithResponse(gomock.Any(), enterpriseID, gomock.Any()).
-			Return(&organization_management.EnterpriseAPIListRoleBindingsResponse{
-				HTTPResponse: &http.Response{StatusCode: 200},
-				JSON200:      &organization_management.ListRoleBindingsResponse{Items: &[]organization_management.RoleBinding{}},
-			}, nil)
-
-		// Execute update
-		result := resource.UpdateContext(ctx, data, provider)
-
-		// Verify no errors
-		r.False(result.HasError(), "Update should succeed when adding groups")
-		if result.HasError() {
-			for _, diag := range result {
-				t.Logf("Error: %s - %s", diag.Summary, diag.Detail)
-			}
-		}
-	})
-
-	t.Run("when groups are deleted then call delete API with exact parameters", func(t *testing.T) {
-		r := require.New(t)
-		ctrl := gomock.NewController(t)
-		mockClient := mockOrganizationManagement.NewMockClientWithResponsesInterface(ctrl)
-
-		provider := &ProviderConfig{
-			organizationManagementClient: mockClient,
-		}
-
-		resource := resourceEnterpriseGroups()
-
-		// Create old state with two groups
-		oldState := &terraform.InstanceState{
-			ID: enterpriseID,
-			Attributes: map[string]string{
-				FieldEnterpriseGroupsEnterpriseID:                                               enterpriseID,
-				"groups.#":                                                                      "2",
-				"groups.0.group.#":                                                              "1",
-				"groups.0.group.0.id":                                                           existingGroupID1,
-				"groups.0.group.0.name":                                                         "group-to-keep",
-				"groups.0.group.0.organization_id":                                              orgID1,
-				"groups.0.group.0.description":                                                  "Old description",
-				"groups.0.group.0.members.#":                                                    "1",
-				"groups.0.group.0.members.0.member.#":                                           "1",
-				"groups.0.group.0.members.0.member.0.kind":                                      "user",
-				"groups.0.group.0.members.0.member.0.id":                                        "old-member-id",
-				"groups.0.group.0.role_bindings.#":                                              "1",
-				"groups.0.group.0.role_bindings.0.role_binding.#":                               "1",
-				"groups.0.group.0.role_bindings.0.role_binding.0.name":                          "old-role-binding",
-				"groups.0.group.0.role_bindings.0.role_binding.0.role_id":                       "old-role-id",
-				"groups.0.group.0.role_bindings.0.role_binding.0.scopes.#":                      "1",
-				"groups.0.group.0.role_bindings.0.role_binding.0.scopes.0.scope.#":              "2",
-				"groups.0.group.0.role_bindings.0.role_binding.0.scopes.0.scope.0.cluster":      "old-cluster-id",
-				"groups.0.group.0.role_bindings.0.role_binding.0.scopes.0.scope.1.organization": orgID1,
-				"groups.1.group.#":                                                              "1",
-				"groups.1.group.0.id":                                                           existingGroupID2,
-				"groups.1.group.0.name":                                                         "group-to-delete",
-				"groups.1.group.0.organization_id":                                              orgID2,
-				"groups.1.group.0.description":                                                  "Will be deleted",
-				"groups.1.group.0.members.#":                                                    "0",
-				"groups.1.group.0.role_bindings.#":                                              "0",
-			},
-		}
-
-		// Create diff that removes the second group and updates the first
-		diff := &terraform.InstanceDiff{
-			Attributes: map[string]*terraform.ResourceAttrDiff{
-				"groups.#": {
-					Old: "2",
-					New: "1",
-				},
-				"groups.0.group.0.description": {
-					Old: "Old description",
-					New: "Updated description",
-				},
-				"groups.0.group.0.members.0.member.0.id": {
-					Old: "old-member-id",
-					New: "new-member-id",
-				},
-				"groups.0.group.0.role_bindings.0.role_binding.0.name": {
-					Old: "old-role-binding",
-					New: "updated-role-binding",
-				},
-				"groups.0.group.0.role_bindings.0.role_binding.0.role_id": {
-					Old: "old-role-id",
-					New: "new-role-id",
-				},
-				"groups.0.group.0.role_bindings.0.role_binding.0.scopes.#": {
-					Old: "1",
-					New: "1",
-				},
-				"groups.0.group.0.role_bindings.0.role_binding.0.scopes.0.scope.#": {
-					Old: "2",
-					New: "1",
-				},
-				"groups.0.group.0.role_bindings.0.role_binding.0.scopes.0.scope.0.cluster": {
-					Old:        "old-cluster-id",
-					New:        "",
-					NewRemoved: true,
-				},
-				"groups.0.group.0.role_bindings.0.role_binding.0.scopes.0.scope.0.organization": {
-					Old: "",
-					New: orgID1,
-				},
-				"groups.0.group.0.role_bindings.0.role_binding.0.scopes.0.scope.1.organization": {
-					Old:        orgID1,
-					New:        "",
-					NewRemoved: true,
-				},
-				"groups.1.group.#": {
-					Old:        "1",
-					New:        "",
-					NewRemoved: true,
-				},
-				"groups.1.group.0.id": {
-					Old:        existingGroupID2,
-					New:        "",
-					NewRemoved: true,
-				},
-				"groups.1.group.0.name": {
-					Old:        "group-to-delete",
-					New:        "",
-					NewRemoved: true,
-				},
-				"groups.1.group.0.organization_id": {
-					Old:        orgID2,
-					New:        "",
-					NewRemoved: true,
-				},
-				"groups.1.group.0.description": {
-					Old:        "Will be deleted",
-					New:        "",
-					NewRemoved: true,
-				},
-				"groups.1.group.0.members.#": {
-					Old:        "0",
-					New:        "",
-					NewRemoved: true,
-				},
-				"groups.1.group.0.role_bindings.#": {
-					Old:        "0",
-					New:        "",
-					NewRemoved: true,
-				},
-			},
-		}
-
-		schemaMap := make(map[string]*schema.Schema)
-		for k, v := range resource.Schema {
-			schemaMap[k] = v
-		}
-		data, err := schema.InternalMap(schemaMap).Data(oldState, diff)
-		r.NoError(err)
-
-		// Expected delete request
-		expectedDeleteRequest := organization_management.BatchDeleteEnterpriseGroupsRequest{
-			EnterpriseId: enterpriseID,
-			Requests: []organization_management.BatchDeleteEnterpriseGroupsRequestDeleteGroupRequest{
-				{
-					Id:             existingGroupID2,
-					OrganizationId: orgID2,
-				},
-			},
-		}
-
-		// Expected update request for remaining group
-		expectedUpdateRequest := organization_management.BatchUpdateEnterpriseGroupsRequest{
-			EnterpriseId: enterpriseID,
-			Requests: []organization_management.BatchUpdateEnterpriseGroupsRequestUpdateGroupRequest{
-				{
-					Id:             existingGroupID1,
-					Name:           "group-to-keep",
-					OrganizationId: orgID1,
-					Description:    "Updated description",
-					Members: []organization_management.BatchUpdateEnterpriseGroupsRequestMember{
-						{
-							Kind: organization_management.BatchUpdateEnterpriseGroupsRequestMemberKindUSER,
-							Id:   "new-member-id",
-						},
-					},
-					RoleBindings: []organization_management.BatchUpdateEnterpriseGroupsRequestRoleBinding{
-						{
-							Id:     "",
-							Name:   "updated-role-binding",
-							RoleId: "new-role-id",
-							Scopes: []organization_management.Scope{
-								{
-									Organization: &organization_management.OrganizationScope{
-										Id: orgID1,
-									},
-								},
-							},
-						},
-					},
-				},
-			},
-		}
-
-		// Mock delete API call with exact parameters
-		mockClient.EXPECT().
-			EnterpriseAPIBatchDeleteEnterpriseGroupsWithResponse(gomock.Any(), enterpriseID, expectedDeleteRequest).
-			Return(&organization_management.EnterpriseAPIBatchDeleteEnterpriseGroupsResponse{
-				HTTPResponse: &http.Response{StatusCode: 200},
-			}, nil)
-
-		// Mock update API call with exact parameters
-		mockClient.EXPECT().
-			EnterpriseAPIBatchUpdateEnterpriseGroupsWithResponse(gomock.Any(), enterpriseID, expectedUpdateRequest).
-			Return(&organization_management.EnterpriseAPIBatchUpdateEnterpriseGroupsResponse{
-				HTTPResponse: &http.Response{StatusCode: 200},
-			}, nil)
-
-		// Mock read calls at the end
-		mockClient.EXPECT().
-			EnterpriseAPIListGroupsWithResponse(gomock.Any(), enterpriseID, nil).
-			Return(&organization_management.EnterpriseAPIListGroupsResponse{
-				HTTPResponse: &http.Response{StatusCode: 200},
-				JSON200: &organization_management.ListGroupsResponse{
-					Items: &[]organization_management.ListGroupsResponseGroup{
-						{
-							Id:             &existingGroupID1,
-							Name:           lo.ToPtr("group-to-keep"),
-							OrganizationId: &orgID1,
-							Description:    lo.ToPtr("Updated description"),
-						},
-					},
-				},
-			}, nil)
-
-		mockClient.EXPECT().
-			EnterpriseAPIListRoleBindingsWithResponse(gomock.Any(), enterpriseID, &organization_management.EnterpriseAPIListRoleBindingsParams{
-				SubjectId: &[]string{existingGroupID1},
-			}).
-			Return(&organization_management.EnterpriseAPIListRoleBindingsResponse{
-				HTTPResponse: &http.Response{StatusCode: 200},
-				JSON200: &organization_management.ListRoleBindingsResponse{
-					Items: &[]organization_management.RoleBinding{
-						{
-							Id:   lo.ToPtr(existingGroupID1 + "-updated-role-binding"),
-							Name: lo.ToPtr("updated-role-binding"),
-							Definition: &organization_management.RoleBindingDefinition{
-								RoleId: lo.ToPtr("new-role-id"),
-								Scopes: &[]organization_management.Scope{
-									{
-										Organization: &organization_management.OrganizationScope{
-											Id: orgID1,
-										},
-									},
-								},
-							},
-						},
-					},
-				},
-			}, nil)
-
-		// Execute update
-		result := resource.UpdateContext(ctx, data, provider)
-
-		// Verify no errors
-		r.False(result.HasError(), "Update should succeed when deleting groups")
-	})
-
-	t.Run("when groups are updated then call update API with exact parameters", func(t *testing.T) {
-		r := require.New(t)
-		ctrl := gomock.NewController(t)
-		mockClient := mockOrganizationManagement.NewMockClientWithResponsesInterface(ctrl)
-
-		provider := &ProviderConfig{
-			organizationManagementClient: mockClient,
-		}
-
-		memberID := uuid.NewString()
-		roleID := uuid.NewString()
-		orgScopeID := uuid.NewString()
-
-		resource := resourceEnterpriseGroups()
-
-		// Create old state with one group
-		oldState := &terraform.InstanceState{
-			ID: enterpriseID,
-			Attributes: map[string]string{
-				FieldEnterpriseGroupsEnterpriseID:                                               enterpriseID,
-				"groups.#":                                                                      "1",
-				"groups.0.group.#":                                                              "1",
-				"groups.0.group.0.id":                                                           existingGroupID1,
-				"groups.0.group.0.name":                                                         "old-name",
-				"groups.0.group.0.organization_id":                                              orgID1,
-				"groups.0.group.0.description":                                                  "Old description",
-				"groups.0.group.0.members.#":                                                    "2",
-				"groups.0.group.0.members.0.member.#":                                           "1",
-				"groups.0.group.0.members.0.member.0.kind":                                      "service_account",
-				"groups.0.group.0.members.0.member.0.id":                                        "old-service-account-id",
-				"groups.0.group.0.members.1.member.#":                                           "1",
-				"groups.0.group.0.members.1.member.0.kind":                                      "user",
-				"groups.0.group.0.members.1.member.0.id":                                        "old-user-id",
-				"groups.0.group.0.role_bindings.#":                                              "1",
-				"groups.0.group.0.role_bindings.0.role_binding.#":                               "2",
-				"groups.0.group.0.role_bindings.0.role_binding.0.name":                          "first-role-binding",
-				"groups.0.group.0.role_bindings.0.role_binding.0.role_id":                       "first-role-id",
-				"groups.0.group.0.role_bindings.0.role_binding.0.scopes.#":                      "1",
-				"groups.0.group.0.role_bindings.0.role_binding.0.scopes.0.scope.#":              "1",
-				"groups.0.group.0.role_bindings.0.role_binding.0.scopes.0.scope.0.organization": orgID1,
-				"groups.0.group.0.role_bindings.0.role_binding.1.name":                          "second-role-binding",
-				"groups.0.group.0.role_bindings.0.role_binding.1.role_id":                       "second-role-id",
-				"groups.0.group.0.role_bindings.0.role_binding.1.scopes.#":                      "1",
-				"groups.0.group.0.role_bindings.0.role_binding.1.scopes.0.scope.#":              "2",
-				"groups.0.group.0.role_bindings.0.role_binding.1.scopes.0.scope.0.cluster":      "cluster-id-1",
-				"groups.0.group.0.role_bindings.0.role_binding.1.scopes.0.scope.1.organization": orgID1,
-			},
-		}
-
-		// Create diff that updates the group
-		diff := &terraform.InstanceDiff{
-			Attributes: map[string]*terraform.ResourceAttrDiff{
-				"groups.0.group.0.name": {
-					Old: "old-name",
-					New: "updated-name",
-				},
-				"groups.0.group.0.description": {
-					Old: "Old description",
-					New: "Updated description",
-				},
-				"groups.0.group.0.members.#": {
-					Old: "2",
-					New: "1",
-				},
-				"groups.0.group.0.members.0.member.0.kind": {
-					Old: "service_account",
-					New: "user",
-				},
-				"groups.0.group.0.members.0.member.0.id": {
-					Old: "old-service-account-id",
-					New: memberID,
-				},
-				"groups.0.group.0.members.1.member.#": {
-					Old:        "1",
-					New:        "",
-					NewRemoved: true,
-				},
-				"groups.0.group.0.members.1.member.0.kind": {
-					Old:        "user",
-					New:        "",
-					NewRemoved: true,
-				},
-				"groups.0.group.0.members.1.member.0.id": {
-					Old:        "old-user-id",
-					New:        "",
-					NewRemoved: true,
-				},
-				"groups.0.group.0.role_bindings.#": {
-					Old: "1",
-					New: "1",
-				},
-				"groups.0.group.0.role_bindings.0.role_binding.#": {
-					Old: "2",
-					New: "1",
-				},
-				"groups.0.group.0.role_bindings.0.role_binding.0.name": {
-					Old: "first-role-binding",
-					New: "updated-role-binding",
-				},
-				"groups.0.group.0.role_bindings.0.role_binding.0.role_id": {
-					Old: "first-role-id",
-					New: roleID,
-				},
-				"groups.0.group.0.role_bindings.0.role_binding.0.scopes.#": {
-					Old: "1",
-					New: "1",
-				},
-				"groups.0.group.0.role_bindings.0.role_binding.0.scopes.0.scope.#": {
-					Old: "1",
-					New: "1",
-				},
-				"groups.0.group.0.role_bindings.0.role_binding.0.scopes.0.scope.0.organization": {
-					Old: orgID1,
-					New: orgScopeID,
-				},
-				"groups.0.group.0.role_bindings.0.role_binding.1.name": {
-					Old:        "second-role-binding",
-					New:        "",
-					NewRemoved: true,
-				},
-				"groups.0.group.0.role_bindings.0.role_binding.1.role_id": {
-					Old:        "second-role-id",
-					New:        "",
-					NewRemoved: true,
-				},
-				"groups.0.group.0.role_bindings.0.role_binding.1.scopes.#": {
-					Old:        "1",
-					New:        "",
-					NewRemoved: true,
-				},
-				"groups.0.group.0.role_bindings.0.role_binding.1.scopes.0.scope.#": {
-					Old:        "2",
-					New:        "",
-					NewRemoved: true,
-				},
-				"groups.0.group.0.role_bindings.0.role_binding.1.scopes.0.scope.0.cluster": {
-					Old:        "cluster-id-1",
-					New:        "",
-					NewRemoved: true,
-				},
-				"groups.0.group.0.role_bindings.0.role_binding.1.scopes.0.scope.1.organization": {
-					Old:        orgID1,
-					New:        "",
-					NewRemoved: true,
-				},
-			},
-		}
-
-		schemaMap := make(map[string]*schema.Schema)
-		for k, v := range resource.Schema {
-			schemaMap[k] = v
-		}
-		data, err := schema.InternalMap(schemaMap).Data(oldState, diff)
-		r.NoError(err)
-
-		// Expected update request
-		expectedUpdateRequest := organization_management.BatchUpdateEnterpriseGroupsRequest{
-			EnterpriseId: enterpriseID,
-			Requests: []organization_management.BatchUpdateEnterpriseGroupsRequestUpdateGroupRequest{
-				{
-					Id:             existingGroupID1,
-					Name:           "updated-name",
-					OrganizationId: orgID1,
-					Description:    "Updated description",
-					Members: []organization_management.BatchUpdateEnterpriseGroupsRequestMember{
-						{
-							Kind: organization_management.BatchUpdateEnterpriseGroupsRequestMemberKindUSER,
-							Id:   memberID,
-						},
-					},
-					RoleBindings: []organization_management.BatchUpdateEnterpriseGroupsRequestRoleBinding{
-						{
-							Id:     "",
-							Name:   "updated-role-binding",
-							RoleId: roleID,
-							Scopes: []organization_management.Scope{
-								{
-									Organization: &organization_management.OrganizationScope{
-										Id: orgScopeID,
-									},
-								},
-							},
-						},
-					},
-				},
-			},
-		}
-
-		// Mock update API call with exact parameters
-		mockClient.EXPECT().
-			EnterpriseAPIBatchUpdateEnterpriseGroupsWithResponse(gomock.Any(), enterpriseID, expectedUpdateRequest).
-			Return(&organization_management.EnterpriseAPIBatchUpdateEnterpriseGroupsResponse{
-				HTTPResponse: &http.Response{StatusCode: 200},
-			}, nil)
-
-		// Mock read calls at the end
-		mockClient.EXPECT().
-			EnterpriseAPIListGroupsWithResponse(gomock.Any(), enterpriseID, nil).
-			Return(&organization_management.EnterpriseAPIListGroupsResponse{
-				HTTPResponse: &http.Response{StatusCode: 200},
-				JSON200: &organization_management.ListGroupsResponse{
-					Items: &[]organization_management.ListGroupsResponseGroup{
-						{
-							Id:             &existingGroupID1,
-							Name:           lo.ToPtr("updated-name"),
-							OrganizationId: &orgID1,
-							Description:    lo.ToPtr("Updated description"),
-						},
-					},
-				},
-			}, nil)
-
-		mockClient.EXPECT().
-			EnterpriseAPIListRoleBindingsWithResponse(gomock.Any(), enterpriseID, &organization_management.EnterpriseAPIListRoleBindingsParams{
-				SubjectId: &[]string{existingGroupID1},
-			}).
-			Return(&organization_management.EnterpriseAPIListRoleBindingsResponse{
-				HTTPResponse: &http.Response{StatusCode: 200},
-				JSON200: &organization_management.ListRoleBindingsResponse{
-					Items: &[]organization_management.RoleBinding{
-						{
-							Id:   lo.ToPtr(existingGroupID1 + "-updated-role-binding"),
-							Name: lo.ToPtr("updated-role-binding"),
-							Definition: &organization_management.RoleBindingDefinition{
-								RoleId: lo.ToPtr(roleID),
-								Scopes: &[]organization_management.Scope{
-									{
-										Organization: &organization_management.OrganizationScope{
-											Id: orgScopeID,
-										},
-									},
-								},
-							},
-						},
-					},
-				},
-			}, nil)
-
-		// Execute update
-		result := resource.UpdateContext(ctx, data, provider)
-
-		// Verify no errors
-		r.False(result.HasError(), "Update should succeed when updating groups")
-		if result.HasError() {
-			for _, diag := range result {
-				t.Logf("Error: %s - %s", diag.Summary, diag.Detail)
-			}
-		}
-	})
-
-	t.Run("resource update error generic propagated", func(t *testing.T) {
-		r := require.New(t)
-		ctrl := gomock.NewController(t)
-		mockClient := mockOrganizationManagement.NewMockClientWithResponsesInterface(ctrl)
-
-		provider := &ProviderConfig{
-			organizationManagementClient: mockClient,
-		}
-
-		resource := resourceEnterpriseGroups()
-
-		// Create old state with one group
-		oldState := &terraform.InstanceState{
-			ID: enterpriseID,
-			Attributes: map[string]string{
-				FieldEnterpriseGroupsEnterpriseID:  enterpriseID,
-				"groups.#":                         "1",
-				"groups.0.group.#":                 "1",
-				"groups.0.group.0.id":              existingGroupID1,
-				"groups.0.group.0.name":            "old-name",
-				"groups.0.group.0.organization_id": orgID1,
-				"groups.0.group.0.members.#":       "0",
-				"groups.0.group.0.role_bindings.#": "0",
-			},
-		}
-
-		// Create diff that updates the group name
-		diff := &terraform.InstanceDiff{
-			Attributes: map[string]*terraform.ResourceAttrDiff{
-				"groups.0.group.0.name": {
-					Old: "old-name",
-					New: "updated-name",
-				},
-			},
-		}
-
-		schemaMap := make(map[string]*schema.Schema)
-		for k, v := range resource.Schema {
-			schemaMap[k] = v
-		}
-		data, err := schema.InternalMap(schemaMap).Data(oldState, diff)
-		r.NoError(err)
-
-		// Expected update request for error test
-		expectedUpdateRequest := organization_management.BatchUpdateEnterpriseGroupsRequest{
-			EnterpriseId: enterpriseID,
-			Requests: []organization_management.BatchUpdateEnterpriseGroupsRequestUpdateGroupRequest{
-				{
-					Id:             existingGroupID1,
-					Name:           "updated-name",
-					OrganizationId: orgID1,
-					Description:    "",
-					Members:        nil,
-					RoleBindings:   nil,
-				},
-			},
-		}
-
-		// Mock update API to return error with exact parameters
-		mockClient.EXPECT().
-			EnterpriseAPIBatchUpdateEnterpriseGroupsWithResponse(gomock.Any(), enterpriseID, expectedUpdateRequest).
-			Return(&organization_management.EnterpriseAPIBatchUpdateEnterpriseGroupsResponse{
-				HTTPResponse: &http.Response{StatusCode: 400, Body: io.NopCloser(bytes.NewBufferString(`{"message":"Bad Request", "fieldViolations":[{"field":"name","description":"invalid name"}]}`))},
-			}, nil)
-
-		result := resource.UpdateContext(ctx, data, provider)
-
-		r.True(result.HasError(), "Should return error when API call fails")
-		r.Contains(result[0].Summary, "batch update modified groups failed")
-		r.Contains(result[0].Summary, "status 400")
-	})
-}
+// func TestResourceEnterpriseGroupReadContext(t *testing.T) {
+// 	t.Parallel()
+
+// 	t.Run("when state is missing enterprise ID then return error", func(t *testing.T) {
+// 		t.Parallel()
+// 		r := require.New(t)
+
+// 		ctx := context.Background()
+// 		provider := &ProviderConfig{}
+
+// 		stateValue := cty.ObjectVal(map[string]cty.Value{})
+// 		state := terraform.NewInstanceStateShimmedFromValue(stateValue, 0)
+
+// 		resource := resourceEnterpriseGroups()
+// 		data := resource.Data(state)
+
+// 		result := resource.ReadContext(ctx, data, provider)
+
+// 		r.NotNil(result)
+// 		r.True(result.HasError())
+// 		r.Len(result, 1)
+// 		r.Equal("enterprise ID is not set", result[0].Summary)
+// 	})
+
+// 	t.Run("when API call throws error then return error", func(t *testing.T) {
+// 		t.Parallel()
+// 		r := require.New(t)
+// 		mockClient := mockOrganizationManagement.NewMockClientWithResponsesInterface(gomock.NewController(t))
+
+// 		ctx := context.Background()
+// 		provider := &ProviderConfig{
+// 			organizationManagementClient: mockClient,
+// 		}
+
+// 		enterpriseID := uuid.NewString()
+// 		groupID1 := uuid.NewString()
+
+// 		mockClient.EXPECT().
+// 			EnterpriseAPIListGroupsWithResponse(gomock.Any(), enterpriseID, nil).
+// 			Return(nil, errors.New("network error"))
+
+// 		stateValue := cty.ObjectVal(map[string]cty.Value{
+// 			FieldEnterpriseGroupsGroups: cty.ListVal([]cty.Value{
+// 				cty.ObjectVal(map[string]cty.Value{
+// 					FieldEnterpriseGroupsGroup: cty.ListVal([]cty.Value{
+// 						cty.ObjectVal(map[string]cty.Value{
+// 							FieldEnterpriseGroupID:             cty.StringVal(groupID1),
+// 							FieldEnterpriseGroupOrganizationID: cty.StringVal(uuid.NewString()),
+// 							FieldEnterpriseGroupName:           cty.StringVal("test-group"),
+// 						}),
+// 					}),
+// 				}),
+// 			}),
+// 		})
+// 		state := terraform.NewInstanceStateShimmedFromValue(stateValue, 0)
+// 		state.ID = enterpriseID
+
+// 		resource := resourceEnterpriseGroups()
+// 		data := resource.Data(state)
+
+// 		result := resource.ReadContext(ctx, data, provider)
+
+// 		r.NotNil(result)
+// 		r.True(result.HasError())
+// 		r.Len(result, 1)
+// 		r.Equal("listing enterprise groups: network error", result[0].Summary)
+// 	})
+
+// 	t.Run("when API returns groups then filter and update state with managed groups only", func(t *testing.T) {
+// 		t.Parallel()
+// 		r := require.New(t)
+// 		mockClient := mockOrganizationManagement.NewMockClientWithResponsesInterface(gomock.NewController(t))
+
+// 		ctx := context.Background()
+// 		provider := &ProviderConfig{
+// 			organizationManagementClient: mockClient,
+// 		}
+
+// 		enterpriseID := uuid.NewString()
+// 		groupID1 := uuid.NewString()
+// 		groupID2 := uuid.NewString() // Group not in our state
+// 		organizationID1 := uuid.NewString()
+// 		organizationID2 := uuid.NewString()
+// 		memberID1 := uuid.NewString()
+
+// 		createTime := time.Now()
+
+// 		// API returns both groups, but we should only keep the one in our state
+// 		apiResponse := &organization_management.ListGroupsResponse{
+// 			Items: &[]organization_management.ListGroupsResponseGroup{
+// 				{
+// 					Id:             lo.ToPtr(groupID1),
+// 					Name:           lo.ToPtr("managed-group"),
+// 					OrganizationId: lo.ToPtr(organizationID1),
+// 					Description:    lo.ToPtr("A managed group"),
+// 					CreateTime:     lo.ToPtr(createTime),
+// 					ManagedBy:      lo.ToPtr("terraform"),
+// 					Definition: &organization_management.ListGroupsResponseGroupDefinition{
+// 						Members: &[]organization_management.GroupDefinitionMember{
+// 							{
+// 								Id:        lo.ToPtr(memberID1),
+// 								Email:     lo.ToPtr("test@example.com"),
+// 								AddedTime: lo.ToPtr(createTime),
+// 								Kind:      lo.ToPtr(organization_management.GroupDefinitionMemberKindKINDUSER),
+// 							},
+// 						},
+// 					},
+// 				},
+// 				{
+// 					Id:             lo.ToPtr(groupID2), // This group is NOT in our state
+// 					Name:           lo.ToPtr("other-group"),
+// 					OrganizationId: lo.ToPtr(organizationID2),
+// 					Description:    lo.ToPtr("Not our group"),
+// 				},
+// 			},
+// 		}
+
+// 		mockClient.EXPECT().
+// 			EnterpriseAPIListGroupsWithResponse(gomock.Any(), enterpriseID, nil).
+// 			Return(&organization_management.EnterpriseAPIListGroupsResponse{
+// 				Body:         nil,
+// 				HTTPResponse: &http.Response{StatusCode: http.StatusOK},
+// 				JSON200:      apiResponse,
+// 			}, nil)
+
+// 		// Mock role bindings API call
+// 		mockClient.EXPECT().
+// 			EnterpriseAPIListRoleBindingsWithResponse(gomock.Any(), enterpriseID, gomock.Any()).
+// 			Return(&organization_management.EnterpriseAPIListRoleBindingsResponse{
+// 				Body:         nil,
+// 				HTTPResponse: &http.Response{StatusCode: http.StatusOK},
+// 				JSON200: &organization_management.ListRoleBindingsResponse{
+// 					Items: &[]organization_management.RoleBinding{}, // Empty role bindings for this test
+// 				},
+// 			}, nil)
+
+// 		stateValue := cty.ObjectVal(map[string]cty.Value{
+// 			FieldEnterpriseGroupsGroups: cty.ListVal([]cty.Value{
+// 				cty.ObjectVal(map[string]cty.Value{
+// 					FieldEnterpriseGroupsGroup: cty.ListVal([]cty.Value{
+// 						cty.ObjectVal(map[string]cty.Value{
+// 							FieldEnterpriseGroupID:             cty.StringVal(groupID1), // Only this group is managed by us
+// 							FieldEnterpriseGroupOrganizationID: cty.StringVal(organizationID1),
+// 							FieldEnterpriseGroupName:           cty.StringVal("managed-group"),
+// 						}),
+// 					}),
+// 				}),
+// 			}),
+// 		})
+// 		state := terraform.NewInstanceStateShimmedFromValue(stateValue, 0)
+// 		state.ID = enterpriseID
+
+// 		resource := resourceEnterpriseGroups()
+// 		data := resource.Data(state)
+
+// 		result := resource.ReadContext(ctx, data, provider)
+
+// 		r.Nil(result)
+// 		r.False(result.HasError())
+
+// 		// Verify only the managed group is in state
+// 		groups := data.Get(FieldEnterpriseGroupsGroups).([]any)
+// 		r.Len(groups, 1)
+
+// 		groupWrapper := groups[0].(map[string]any)
+// 		groupList := groupWrapper[FieldEnterpriseGroupsGroup].([]any)
+// 		group := groupList[0].(map[string]any)
+// 		r.Equal(groupID1, group[FieldEnterpriseGroupID])
+// 		r.Equal("managed-group", group[FieldEnterpriseGroupName])
+// 		r.Equal(organizationID1, group[FieldEnterpriseGroupOrganizationID])
+// 		r.Equal("A managed group", group[FieldEnterpriseGroupDescription])
+
+// 		// Verify members are included
+// 		members := group[FieldEnterpriseGroupMembers].([]any)
+// 		r.Len(members, 1) // Single wrapper
+// 		memberWrapper := members[0].(map[string]any)
+// 		memberList := memberWrapper[FieldEnterpriseGroupsMember].([]any)
+// 		r.Len(memberList, 1)
+// 		member := memberList[0].(map[string]any)
+// 		r.Equal(memberID1, member[FieldEnterpriseGroupMemberID])
+// 		r.Equal("user", member[FieldEnterpriseGroupMemberKind])
+// 	})
+
+// 	t.Run("when API returns groups with multiple role bindings then include only tracked role bindings in state", func(t *testing.T) {
+// 		t.Parallel()
+// 		r := require.New(t)
+// 		mockClient := mockOrganizationManagement.NewMockClientWithResponsesInterface(gomock.NewController(t))
+
+// 		ctx := context.Background()
+// 		provider := &ProviderConfig{
+// 			organizationManagementClient: mockClient,
+// 		}
+
+// 		enterpriseID := uuid.NewString()
+// 		organizationID1 := "e" + uuid.NewString()
+// 		organizationID2 := "f" + uuid.NewString()
+// 		groupID1 := "bbbb1111-1111-1111-1111-111111111111"
+// 		groupID2 := "aaaa2222-2222-2222-2222-222222222222"
+// 		memberID1 := "b" + uuid.NewString()
+// 		memberID2 := "a" + uuid.NewString()
+// 		memberID3 := "c" + uuid.NewString()
+// 		roleBindingID1 := "c" + uuid.NewString()
+// 		roleBindingID2 := "a" + uuid.NewString()
+// 		roleBindingID3 := "b" + uuid.NewString()
+// 		roleBindingID4 := uuid.NewString()
+// 		roleBindingID5 := uuid.NewString()
+// 		roleID1 := "b" + uuid.NewString()
+// 		roleID2 := "a" + uuid.NewString()
+// 		roleID3 := "c" + uuid.NewString()
+// 		clusterID1 := "b" + uuid.NewString()
+// 		clusterID2 := "a" + uuid.NewString()
+
+// 		createTime := time.Now()
+
+// 		// API returns groups
+// 		apiGroupsResponse := &organization_management.ListGroupsResponse{
+// 			Items: &[]organization_management.ListGroupsResponseGroup{
+// 				{
+// 					Id:             lo.ToPtr(groupID1),
+// 					Name:           lo.ToPtr("engineering-team"),
+// 					OrganizationId: lo.ToPtr(organizationID1),
+// 					Description:    lo.ToPtr("Engineering team group"),
+// 					CreateTime:     lo.ToPtr(createTime),
+// 					ManagedBy:      lo.ToPtr("terraform"),
+// 					Definition: &organization_management.ListGroupsResponseGroupDefinition{
+// 						Members: &[]organization_management.GroupDefinitionMember{
+// 							{
+// 								Id:        lo.ToPtr(memberID1),
+// 								Email:     lo.ToPtr("engineer@example.com"),
+// 								AddedTime: lo.ToPtr(createTime),
+// 								Kind:      lo.ToPtr(organization_management.GroupDefinitionMemberKindKINDUSER),
+// 							},
+// 							{
+// 								Id:        lo.ToPtr(memberID3),
+// 								AddedTime: lo.ToPtr(createTime),
+// 								Kind:      lo.ToPtr(organization_management.GroupDefinitionMemberKindKINDSERVICEACCOUNT),
+// 							},
+// 						},
+// 					},
+// 				},
+// 				{
+// 					Id:             lo.ToPtr(groupID2),
+// 					Name:           lo.ToPtr("security-team"),
+// 					OrganizationId: lo.ToPtr(organizationID2),
+// 					Description:    lo.ToPtr("Security team group"),
+// 					CreateTime:     lo.ToPtr(createTime),
+// 					ManagedBy:      lo.ToPtr("terraform"),
+// 					Definition: &organization_management.ListGroupsResponseGroupDefinition{
+// 						Members: &[]organization_management.GroupDefinitionMember{
+// 							{
+// 								Id:        lo.ToPtr(memberID2),
+// 								Email:     lo.ToPtr("security@example.com"),
+// 								AddedTime: lo.ToPtr(createTime),
+// 								Kind:      lo.ToPtr(organization_management.GroupDefinitionMemberKindKINDUSER),
+// 							},
+// 						},
+// 					},
+// 				},
+// 			},
+// 		}
+
+// 		mockClient.EXPECT().
+// 			EnterpriseAPIListGroupsWithResponse(gomock.Any(), enterpriseID, nil).
+// 			Return(&organization_management.EnterpriseAPIListGroupsResponse{
+// 				Body:         nil,
+// 				HTTPResponse: &http.Response{StatusCode: http.StatusOK},
+// 				JSON200:      apiGroupsResponse,
+// 			}, nil)
+
+// 		apiRoleBindingsGroup1Response := &organization_management.ListRoleBindingsResponse{
+// 			Items: &[]organization_management.RoleBinding{
+// 				{
+// 					Id:         lo.ToPtr(roleBindingID1),
+// 					Name:       lo.ToPtr("engineering-viewer-1"),
+// 					CreateTime: lo.ToPtr(createTime),
+// 					ManagedBy:  lo.ToPtr("terraform-1"),
+// 					Definition: &organization_management.RoleBindingDefinition{
+// 						RoleId: lo.ToPtr(roleID1),
+// 						Subjects: &[]organization_management.Subject{
+// 							{
+// 								Group: &organization_management.GroupSubject{
+// 									Id:   groupID1,
+// 									Name: lo.ToPtr("engineering-team"),
+// 								},
+// 							},
+// 						},
+// 						Scopes: &[]organization_management.Scope{
+// 							{
+// 								Cluster: &organization_management.ClusterScope{
+// 									Id: clusterID1,
+// 								},
+// 							},
+// 							{
+// 								Organization: &organization_management.OrganizationScope{
+// 									Id: organizationID1,
+// 								},
+// 							},
+// 							{
+// 								Cluster: &organization_management.ClusterScope{
+// 									Id: clusterID2,
+// 								},
+// 							},
+// 						},
+// 					},
+// 				},
+// 				{
+// 					Id:         lo.ToPtr(roleBindingID3),
+// 					Name:       lo.ToPtr("engineering-editor"),
+// 					CreateTime: lo.ToPtr(createTime),
+// 					ManagedBy:  lo.ToPtr("terraform"),
+// 					Definition: &organization_management.RoleBindingDefinition{
+// 						RoleId: lo.ToPtr(roleID3),
+// 						Subjects: &[]organization_management.Subject{
+// 							{
+// 								Group: &organization_management.GroupSubject{
+// 									Id:   groupID1,
+// 									Name: lo.ToPtr("engineering-team"),
+// 								},
+// 							},
+// 						},
+// 						Scopes: &[]organization_management.Scope{
+// 							{
+// 								Organization: &organization_management.OrganizationScope{
+// 									Id: organizationID1,
+// 								},
+// 							},
+// 							{
+// 								Organization: &organization_management.OrganizationScope{
+// 									Id: organizationID2,
+// 								},
+// 							},
+// 						},
+// 					},
+// 				},
+// 			},
+// 		}
+
+// 		mockClient.EXPECT().
+// 			EnterpriseAPIListRoleBindingsWithResponse(
+// 				gomock.Any(),
+// 				enterpriseID,
+// 				&organization_management.EnterpriseAPIListRoleBindingsParams{
+// 					SubjectId: &[]string{groupID1},
+// 				},
+// 			).
+// 			Return(&organization_management.EnterpriseAPIListRoleBindingsResponse{
+// 				Body:         nil,
+// 				HTTPResponse: &http.Response{StatusCode: http.StatusOK},
+// 				JSON200:      apiRoleBindingsGroup1Response,
+// 			}, nil)
+
+// 		apiRoleBindingsGroup2Response := &organization_management.ListRoleBindingsResponse{
+// 			Items: &[]organization_management.RoleBinding{
+// 				{
+// 					Id:         lo.ToPtr(roleBindingID2),
+// 					Name:       lo.ToPtr("security-auditor"),
+// 					CreateTime: lo.ToPtr(createTime),
+// 					ManagedBy:  lo.ToPtr("terraform"),
+// 					Definition: &organization_management.RoleBindingDefinition{
+// 						RoleId: lo.ToPtr(roleID2),
+// 						Subjects: &[]organization_management.Subject{
+// 							{
+// 								Group: &organization_management.GroupSubject{
+// 									Id:   groupID2,
+// 									Name: lo.ToPtr("security-team"),
+// 								},
+// 							},
+// 						},
+// 						Scopes: &[]organization_management.Scope{
+// 							{
+// 								Organization: &organization_management.OrganizationScope{
+// 									Id: organizationID1,
+// 								},
+// 							},
+// 							{
+// 								Organization: &organization_management.OrganizationScope{
+// 									Id: organizationID2,
+// 								},
+// 							},
+// 						},
+// 					},
+// 				},
+// 				{
+// 					Id:         lo.ToPtr(roleBindingID5),
+// 					Name:       lo.ToPtr("new-to-be-ignored"),
+// 					CreateTime: lo.ToPtr(createTime),
+// 					ManagedBy:  lo.ToPtr("terraform"),
+// 					Definition: &organization_management.RoleBindingDefinition{
+// 						RoleId: lo.ToPtr(roleID2),
+// 						Subjects: &[]organization_management.Subject{
+// 							{
+// 								Group: &organization_management.GroupSubject{
+// 									Id:   groupID2,
+// 									Name: lo.ToPtr("security-team"),
+// 								},
+// 							},
+// 						},
+// 						Scopes: &[]organization_management.Scope{
+// 							{
+// 								Organization: &organization_management.OrganizationScope{
+// 									Id: organizationID1,
+// 								},
+// 							},
+// 						},
+// 					},
+// 				},
+// 			},
+// 		}
+
+// 		mockClient.EXPECT().
+// 			EnterpriseAPIListRoleBindingsWithResponse(
+// 				gomock.Any(),
+// 				enterpriseID,
+// 				&organization_management.EnterpriseAPIListRoleBindingsParams{
+// 					SubjectId: &[]string{groupID2},
+// 				},
+// 			).
+// 			Return(&organization_management.EnterpriseAPIListRoleBindingsResponse{
+// 				Body:         nil,
+// 				HTTPResponse: &http.Response{StatusCode: http.StatusOK},
+// 				JSON200:      apiRoleBindingsGroup2Response,
+// 			}, nil)
+
+// 		// State includes minimal group data - role bindings will be discovered
+// 		stateValue := cty.ObjectVal(map[string]cty.Value{
+// 			FieldEnterpriseGroupsGroups: cty.ListVal([]cty.Value{
+// 				cty.ObjectVal(map[string]cty.Value{
+// 					FieldEnterpriseGroupsGroup: cty.ListVal([]cty.Value{
+// 						cty.ObjectVal(map[string]cty.Value{
+// 							FieldEnterpriseGroupID:             cty.StringVal(groupID1),
+// 							FieldEnterpriseGroupOrganizationID: cty.StringVal(organizationID1),
+// 							FieldEnterpriseGroupName:           cty.StringVal("engineering-team"),
+// 							FieldEnterpriseGroupMembers: cty.ListVal([]cty.Value{
+// 								cty.ObjectVal(map[string]cty.Value{
+// 									FieldEnterpriseGroupsMember: cty.ListVal([]cty.Value{
+// 										cty.ObjectVal(map[string]cty.Value{
+// 											FieldEnterpriseGroupMemberKind: cty.StringVal("user"),
+// 											FieldEnterpriseGroupMemberID:   cty.StringVal(memberID1),
+// 										}),
+// 									}),
+// 								}),
+// 							}),
+// 							FieldEnterpriseGroupRoleBindings: cty.ListVal([]cty.Value{
+// 								cty.ObjectVal(map[string]cty.Value{
+// 									FieldEnterpriseGroupRoleBinding: cty.ListVal([]cty.Value{
+// 										cty.ObjectVal(map[string]cty.Value{
+// 											FieldEnterpriseGroupRoleBindingID:     cty.StringVal(roleBindingID3),
+// 											FieldEnterpriseGroupRoleBindingName:   cty.StringVal("engineering-editor"),
+// 											FieldEnterpriseGroupRoleBindingRoleID: cty.StringVal(roleID3),
+// 											FieldEnterpriseGroupRoleBindingScopes: cty.ListVal([]cty.Value{
+// 												cty.ObjectVal(map[string]cty.Value{
+// 													FieldEnterpriseGroupScope: cty.ListVal([]cty.Value{
+// 														cty.ObjectVal(map[string]cty.Value{
+// 															FieldEnterpriseGroupScopeOrganization: cty.StringVal(organizationID1),
+// 															FieldEnterpriseGroupScopeCluster:      cty.StringVal(""),
+// 														}),
+// 														cty.ObjectVal(map[string]cty.Value{
+// 															FieldEnterpriseGroupScopeOrganization: cty.StringVal(organizationID2),
+// 															FieldEnterpriseGroupScopeCluster:      cty.StringVal(""),
+// 														}),
+// 													}),
+// 												}),
+// 											}),
+// 										}),
+// 										cty.ObjectVal(map[string]cty.Value{
+// 											FieldEnterpriseGroupRoleBindingID:     cty.StringVal(roleBindingID1),
+// 											FieldEnterpriseGroupRoleBindingName:   cty.StringVal("engineering-viewer"),
+// 											FieldEnterpriseGroupRoleBindingRoleID: cty.StringVal(roleID1),
+// 											FieldEnterpriseGroupRoleBindingScopes: cty.ListVal([]cty.Value{
+// 												cty.ObjectVal(map[string]cty.Value{
+// 													FieldEnterpriseGroupScope: cty.ListVal([]cty.Value{
+// 														cty.ObjectVal(map[string]cty.Value{
+// 															FieldEnterpriseGroupScopeCluster:      cty.StringVal(clusterID1),
+// 															FieldEnterpriseGroupScopeOrganization: cty.StringVal(""),
+// 														}),
+// 													}),
+// 												}),
+// 											}),
+// 										}),
+// 									}),
+// 								}),
+// 							}),
+// 						}),
+// 					}),
+// 				}),
+// 				cty.ObjectVal(map[string]cty.Value{
+// 					FieldEnterpriseGroupsGroup: cty.ListVal([]cty.Value{
+// 						cty.ObjectVal(map[string]cty.Value{
+// 							FieldEnterpriseGroupID:             cty.StringVal(groupID2),
+// 							FieldEnterpriseGroupOrganizationID: cty.StringVal(organizationID2),
+// 							FieldEnterpriseGroupName:           cty.StringVal("security-team"),
+// 							FieldEnterpriseGroupMembers: cty.ListVal([]cty.Value{
+// 								cty.ObjectVal(map[string]cty.Value{
+// 									FieldEnterpriseGroupsMember: cty.ListVal([]cty.Value{
+// 										cty.ObjectVal(map[string]cty.Value{
+// 											FieldEnterpriseGroupMemberKind: cty.StringVal("user"),
+// 											FieldEnterpriseGroupMemberID:   cty.StringVal(memberID1),
+// 										}),
+// 									}),
+// 								}),
+// 							}),
+// 							FieldEnterpriseGroupRoleBindings: cty.ListVal([]cty.Value{
+// 								cty.ObjectVal(map[string]cty.Value{
+// 									FieldEnterpriseGroupRoleBinding: cty.ListVal([]cty.Value{
+// 										cty.ObjectVal(map[string]cty.Value{
+// 											FieldEnterpriseGroupRoleBindingID:     cty.StringVal(roleBindingID4),
+// 											FieldEnterpriseGroupRoleBindingName:   cty.StringVal("to-be-deleted"),
+// 											FieldEnterpriseGroupRoleBindingRoleID: cty.StringVal(roleID3),
+// 											FieldEnterpriseGroupRoleBindingScopes: cty.ListVal([]cty.Value{
+// 												cty.ObjectVal(map[string]cty.Value{
+// 													FieldEnterpriseGroupScope: cty.ListVal([]cty.Value{
+// 														cty.ObjectVal(map[string]cty.Value{
+// 															FieldEnterpriseGroupScopeOrganization: cty.StringVal(organizationID1),
+// 															FieldEnterpriseGroupScopeCluster:      cty.StringVal(""),
+// 														}),
+// 													}),
+// 												}),
+// 											}),
+// 										}),
+// 										cty.ObjectVal(map[string]cty.Value{
+// 											FieldEnterpriseGroupRoleBindingID:     cty.StringVal(roleBindingID2),
+// 											FieldEnterpriseGroupRoleBindingName:   cty.StringVal("security-auditor-0"),
+// 											FieldEnterpriseGroupRoleBindingRoleID: cty.StringVal(roleID3),
+// 											FieldEnterpriseGroupRoleBindingScopes: cty.ListVal([]cty.Value{
+// 												cty.ObjectVal(map[string]cty.Value{
+// 													FieldEnterpriseGroupScope: cty.ListVal([]cty.Value{
+// 														cty.ObjectVal(map[string]cty.Value{
+// 															FieldEnterpriseGroupScopeOrganization: cty.StringVal(organizationID2),
+// 															FieldEnterpriseGroupScopeCluster:      cty.StringVal(""),
+// 														}),
+// 													}),
+// 												}),
+// 											}),
+// 										}),
+// 									}),
+// 								}),
+// 							}),
+// 						}),
+// 					}),
+// 				}),
+// 			}),
+// 		})
+// 		state := terraform.NewInstanceStateShimmedFromValue(stateValue, 0)
+// 		state.ID = enterpriseID
+
+// 		resource := resourceEnterpriseGroups()
+// 		data := resource.Data(state)
+
+// 		result := resource.ReadContext(ctx, data, provider)
+
+// 		r.Nil(result)
+// 		r.False(result.HasError())
+
+// 		// Verify both groups are returned with proper sorting by ID (aaaa comes before bbbb)
+// 		groups := data.Get(FieldEnterpriseGroupsGroups).([]any)
+// 		r.Len(groups, 2)
+
+// 		groupWrapper1 := groups[0].(map[string]any)
+// 		groupList1 := groupWrapper1[FieldEnterpriseGroupsGroup].([]any)
+// 		group1 := groupList1[0].(map[string]any)
+// 		groupWrapper2 := groups[1].(map[string]any)
+// 		groupList2 := groupWrapper2[FieldEnterpriseGroupsGroup].([]any)
+// 		group2 := groupList2[0].(map[string]any)
+
+// 		r.Equal(groupID1, group1[FieldEnterpriseGroupID])
+// 		r.Equal("engineering-team", group1[FieldEnterpriseGroupName])
+// 		r.Equal(organizationID1, group1[FieldEnterpriseGroupOrganizationID])
+
+// 		members1 := group1[FieldEnterpriseGroupMembers].([]any)
+// 		r.Len(members1, 1) // Single wrapper
+// 		memberWrapper1 := members1[0].(map[string]any)
+// 		memberList1 := memberWrapper1[FieldEnterpriseGroupsMember].([]any)
+// 		r.Len(memberList1, 2)
+// 		member1 := memberList1[0].(map[string]any)
+// 		r.Equal(memberID1, member1[FieldEnterpriseGroupMemberID])
+// 		r.Equal("user", member1[FieldEnterpriseGroupMemberKind])
+// 		member2 := memberList1[1].(map[string]any)
+// 		r.Equal(memberID3, member2[FieldEnterpriseGroupMemberID])
+// 		r.Equal("service_account", member2[FieldEnterpriseGroupMemberKind])
+
+// 		roleBindings1 := group1[FieldEnterpriseGroupRoleBindings].([]any)
+// 		r.Len(roleBindings1, 1) // Single wrapper
+// 		roleBindingWrapper1 := roleBindings1[0].(map[string]any)
+// 		roleBindingList1 := roleBindingWrapper1[FieldEnterpriseGroupRoleBinding].([]any)
+// 		r.Len(roleBindingList1, 2)
+// 		roleBinding1 := roleBindingList1[0].(map[string]any)
+// 		r.Equal(roleBindingID3, roleBinding1[FieldEnterpriseGroupRoleBindingID])
+// 		r.Equal("engineering-editor", roleBinding1[FieldEnterpriseGroupRoleBindingName])
+// 		r.Equal(roleID3, roleBinding1[FieldEnterpriseGroupRoleBindingRoleID])
+// 		scopes1 := roleBinding1[FieldEnterpriseGroupRoleBindingScopes].([]any)
+// 		r.Len(scopes1, 1)
+// 		scope1a := scopes1[0].(map[string]any)
+// 		scopeList1a := scope1a[FieldEnterpriseGroupScope].([]any)
+// 		r.Len(scopeList1a, 2)
+// 		scope1a1 := scopeList1a[0].(map[string]any)
+// 		r.Equal(organizationID1, scope1a1[FieldEnterpriseGroupScopeOrganization])
+// 		r.Empty(scope1a1[FieldEnterpriseGroupScopeCluster])
+// 		scope1a2 := scopeList1a[1].(map[string]any)
+// 		r.Equal(organizationID2, scope1a2[FieldEnterpriseGroupScopeOrganization])
+// 		r.Empty(scope1a2[FieldEnterpriseGroupScopeCluster])
+// 		roleBinding2 := roleBindingList1[1].(map[string]any)
+// 		r.Equal(roleBindingID1, roleBinding2[FieldEnterpriseGroupRoleBindingID])
+// 		r.Equal("engineering-viewer-1", roleBinding2[FieldEnterpriseGroupRoleBindingName])
+// 		r.Equal(roleID1, roleBinding2[FieldEnterpriseGroupRoleBindingRoleID])
+// 		scopes2 := roleBinding2[FieldEnterpriseGroupRoleBindingScopes].([]any)
+// 		r.Len(scopes2, 1)
+// 		scope2a := scopes2[0].(map[string]any)
+// 		scopeList2a := scope2a[FieldEnterpriseGroupScope].([]any)
+// 		r.Len(scopeList2a, 3)
+// 		scope2a1 := scopeList2a[0].(map[string]any)
+// 		r.Equal(clusterID1, scope2a1[FieldEnterpriseGroupScopeCluster])
+// 		r.Empty(scope2a1[FieldEnterpriseGroupScopeOrganization])
+// 		scope2a2 := scopeList2a[1].(map[string]any)
+// 		r.Equal(organizationID1, scope2a2[FieldEnterpriseGroupScopeOrganization])
+// 		r.Empty(scope2a2[FieldEnterpriseGroupScopeCluster])
+// 		scope2a3 := scopeList2a[2].(map[string]any)
+// 		r.Equal(clusterID2, scope2a3[FieldEnterpriseGroupScopeCluster])
+// 		r.Empty(scope2a3[FieldEnterpriseGroupScopeOrganization])
+
+// 		r.Equal(groupID2, group2[FieldEnterpriseGroupID])
+// 		r.Equal("security-team", group2[FieldEnterpriseGroupName])
+// 		r.Equal(organizationID2, group2[FieldEnterpriseGroupOrganizationID])
+
+// 		members2 := group2[FieldEnterpriseGroupMembers].([]any)
+// 		r.Len(members2, 1) // Single wrapper containing all members
+
+// 		memberWrapper2 := members2[0].(map[string]any)
+// 		memberList2 := memberWrapper2[FieldEnterpriseGroupsMember].([]any)
+// 		r.Len(memberList2, 1)
+// 		member1 = memberList2[0].(map[string]any)
+// 		r.Equal(memberID2, member1[FieldEnterpriseGroupMemberID])
+// 		r.Equal("user", member1[FieldEnterpriseGroupMemberKind])
+
+// 		roleBindings2 := group2[FieldEnterpriseGroupRoleBindings].([]any)
+// 		r.Len(roleBindings2, 1) // Single wrapper containing all role bindings
+
+// 		roleBindingWrapper2 := roleBindings2[0].(map[string]any)
+// 		roleBindingList2 := roleBindingWrapper2[FieldEnterpriseGroupRoleBinding].([]any)
+// 		r.Len(roleBindingList2, 1)
+
+// 		roleBinding2 = roleBindingList2[0].(map[string]any)
+// 		r.Equal(roleBindingID2, roleBinding2[FieldEnterpriseGroupRoleBindingID])
+// 		r.Equal("security-auditor", roleBinding2[FieldEnterpriseGroupRoleBindingName])
+// 		r.Equal(roleID2, roleBinding2[FieldEnterpriseGroupRoleBindingRoleID])
+
+// 		// Verify role binding scopes (2 organization scopes)
+// 		scopes2 = roleBinding2[FieldEnterpriseGroupRoleBindingScopes].([]any)
+// 		r.Len(scopes2, 1) // Single wrapper
+
+// 		// Single scope wrapper containing all scopes
+// 		scopeWrapper2 := scopes2[0].(map[string]any)
+// 		scopeList2 := scopeWrapper2[FieldEnterpriseGroupScope].([]any)
+// 		r.Len(scopeList2, 2)
+
+// 		// First scope (organizationID1)
+// 		scope2a = scopeList2[0].(map[string]any)
+// 		r.Equal(organizationID1, scope2a[FieldEnterpriseGroupScopeOrganization])
+// 		r.Empty(scope2a[FieldEnterpriseGroupScopeCluster])
+
+// 		// Second scope (organizationID2)
+// 		scope2b := scopeList2[1].(map[string]any)
+// 		r.Equal(organizationID2, scope2b[FieldEnterpriseGroupScopeOrganization])
+// 		r.Empty(scope2b[FieldEnterpriseGroupScopeCluster])
+// 	})
+// }
+
+// func TestResourceEnterpriseGroupDeleteContext(t *testing.T) {
+// 	t.Run("when API successfully deletes groups then clear state", func(t *testing.T) {
+// 		t.Parallel()
+// 		r := require.New(t)
+// 		mockClient := mockOrganizationManagement.NewMockClientWithResponsesInterface(gomock.NewController(t))
+
+// 		ctx := context.Background()
+// 		provider := &ProviderConfig{
+// 			organizationManagementClient: mockClient,
+// 		}
+
+// 		enterpriseID := uuid.NewString()
+// 		organizationID1 := "e" + uuid.NewString()
+// 		organizationID2 := "f" + uuid.NewString()
+// 		groupID1 := "bbbb1111-1111-1111-1111-111111111111"
+// 		groupID2 := "aaaa2222-2222-2222-2222-222222222222"
+
+// 		// Expected delete request
+// 		expectedRequest := organization_management.BatchDeleteEnterpriseGroupsRequest{
+// 			EnterpriseId: enterpriseID,
+// 			Requests: []organization_management.BatchDeleteEnterpriseGroupsRequestDeleteGroupRequest{
+// 				{
+// 					Id:             groupID1,
+// 					OrganizationId: organizationID1,
+// 				},
+// 				{
+// 					Id:             groupID2,
+// 					OrganizationId: organizationID2,
+// 				},
+// 			},
+// 		}
+
+// 		mockClient.EXPECT().
+// 			EnterpriseAPIBatchDeleteEnterpriseGroupsWithResponse(gomock.Any(), enterpriseID, expectedRequest).
+// 			Return(&organization_management.EnterpriseAPIBatchDeleteEnterpriseGroupsResponse{
+// 				HTTPResponse: &http.Response{StatusCode: http.StatusOK},
+// 			}, nil)
+
+// 		// State with 2 groups
+// 		stateValue := cty.ObjectVal(map[string]cty.Value{
+// 			FieldEnterpriseGroupsGroups: cty.ListVal([]cty.Value{
+// 				cty.ObjectVal(map[string]cty.Value{
+// 					FieldEnterpriseGroupsGroup: cty.ListVal([]cty.Value{
+// 						cty.ObjectVal(map[string]cty.Value{
+// 							FieldEnterpriseGroupID:             cty.StringVal(groupID1),
+// 							FieldEnterpriseGroupOrganizationID: cty.StringVal(organizationID1),
+// 							FieldEnterpriseGroupName:           cty.StringVal("engineering-team"),
+// 						}),
+// 					}),
+// 				}),
+// 				cty.ObjectVal(map[string]cty.Value{
+// 					FieldEnterpriseGroupsGroup: cty.ListVal([]cty.Value{
+// 						cty.ObjectVal(map[string]cty.Value{
+// 							FieldEnterpriseGroupID:             cty.StringVal(groupID2),
+// 							FieldEnterpriseGroupOrganizationID: cty.StringVal(organizationID2),
+// 							FieldEnterpriseGroupName:           cty.StringVal("security-team"),
+// 						}),
+// 					}),
+// 				}),
+// 			}),
+// 		})
+// 		state := terraform.NewInstanceStateShimmedFromValue(stateValue, 0)
+// 		state.ID = enterpriseID
+
+// 		resource := resourceEnterpriseGroups()
+// 		data := resource.Data(state)
+
+// 		result := resource.DeleteContext(ctx, data, provider)
+
+// 		r.Nil(result)
+// 		r.False(result.HasError())
+// 		r.Empty(data.Id(), "Resource ID should be cleared after successful delete")
+// 	})
+
+// 	t.Run("when enterprise ID is empty then return error", func(t *testing.T) {
+// 		t.Parallel()
+// 		r := require.New(t)
+// 		mockClient := mockOrganizationManagement.NewMockClientWithResponsesInterface(gomock.NewController(t))
+
+// 		ctx := context.Background()
+// 		provider := &ProviderConfig{
+// 			organizationManagementClient: mockClient,
+// 		}
+
+// 		// State with no enterprise ID
+// 		stateValue := cty.ObjectVal(map[string]cty.Value{
+// 			FieldEnterpriseGroupsGroups: cty.ListValEmpty(cty.Object(map[string]cty.Type{})),
+// 		})
+// 		state := terraform.NewInstanceStateShimmedFromValue(stateValue, 0)
+// 		state.ID = "" // Empty enterprise ID
+
+// 		resource := resourceEnterpriseGroups()
+// 		data := resource.Data(state)
+
+// 		result := resource.DeleteContext(ctx, data, provider)
+
+// 		r.True(result.HasError())
+// 		r.Contains(result[0].Summary, "enterprise ID is not set")
+// 	})
+
+// 	t.Run("when group missing ID then return state corruption error", func(t *testing.T) {
+// 		t.Parallel()
+// 		r := require.New(t)
+// 		mockClient := mockOrganizationManagement.NewMockClientWithResponsesInterface(gomock.NewController(t))
+
+// 		ctx := context.Background()
+// 		provider := &ProviderConfig{
+// 			organizationManagementClient: mockClient,
+// 		}
+
+// 		enterpriseID := uuid.NewString()
+// 		organizationID1 := "e" + uuid.NewString()
+
+// 		// State with group missing ID
+// 		stateValue := cty.ObjectVal(map[string]cty.Value{
+// 			FieldEnterpriseGroupsGroups: cty.ListVal([]cty.Value{
+// 				cty.ObjectVal(map[string]cty.Value{
+// 					FieldEnterpriseGroupsGroup: cty.ListVal([]cty.Value{
+// 						cty.ObjectVal(map[string]cty.Value{
+// 							FieldEnterpriseGroupID:             cty.StringVal(""), // Empty ID
+// 							FieldEnterpriseGroupOrganizationID: cty.StringVal(organizationID1),
+// 							FieldEnterpriseGroupName:           cty.StringVal("engineering-team"),
+// 						}),
+// 					}),
+// 				}),
+// 			}),
+// 		})
+// 		state := terraform.NewInstanceStateShimmedFromValue(stateValue, 0)
+// 		state.ID = enterpriseID
+
+// 		resource := resourceEnterpriseGroups()
+// 		data := resource.Data(state)
+
+// 		result := resource.DeleteContext(ctx, data, provider)
+
+// 		r.True(result.HasError())
+// 		r.Contains(result[0].Summary, "group in state is missing valid ID - this indicates state corruption")
+// 	})
+
+// 	t.Run("when group missing organization_id then return state corruption error", func(t *testing.T) {
+// 		t.Parallel()
+// 		r := require.New(t)
+// 		mockClient := mockOrganizationManagement.NewMockClientWithResponsesInterface(gomock.NewController(t))
+
+// 		ctx := context.Background()
+// 		provider := &ProviderConfig{
+// 			organizationManagementClient: mockClient,
+// 		}
+
+// 		enterpriseID := uuid.NewString()
+// 		groupID1 := "bbbb1111-1111-1111-1111-111111111111"
+
+// 		// State with group missing organization_id
+// 		stateValue := cty.ObjectVal(map[string]cty.Value{
+// 			FieldEnterpriseGroupsGroups: cty.ListVal([]cty.Value{
+// 				cty.ObjectVal(map[string]cty.Value{
+// 					FieldEnterpriseGroupsGroup: cty.ListVal([]cty.Value{
+// 						cty.ObjectVal(map[string]cty.Value{
+// 							FieldEnterpriseGroupID:             cty.StringVal(groupID1),
+// 							FieldEnterpriseGroupOrganizationID: cty.StringVal(""), // Empty organization ID
+// 							FieldEnterpriseGroupName:           cty.StringVal("engineering-team"),
+// 						}),
+// 					}),
+// 				}),
+// 			}),
+// 		})
+// 		state := terraform.NewInstanceStateShimmedFromValue(stateValue, 0)
+// 		state.ID = enterpriseID
+
+// 		resource := resourceEnterpriseGroups()
+// 		data := resource.Data(state)
+
+// 		result := resource.DeleteContext(ctx, data, provider)
+
+// 		r.True(result.HasError())
+// 		r.Contains(result[0].Summary, fmt.Sprintf("group %s in state is missing valid organization_id - this indicates state corruption", groupID1))
+// 	})
+
+// 	t.Run("when API call fails then return error", func(t *testing.T) {
+// 		t.Parallel()
+// 		r := require.New(t)
+// 		mockClient := mockOrganizationManagement.NewMockClientWithResponsesInterface(gomock.NewController(t))
+
+// 		ctx := context.Background()
+// 		provider := &ProviderConfig{
+// 			organizationManagementClient: mockClient,
+// 		}
+
+// 		enterpriseID := uuid.NewString()
+// 		organizationID1 := "e" + uuid.NewString()
+// 		groupID1 := "bbbb1111-1111-1111-1111-111111111111"
+
+// 		mockClient.EXPECT().
+// 			EnterpriseAPIBatchDeleteEnterpriseGroupsWithResponse(gomock.Any(), enterpriseID, gomock.Any()).
+// 			Return(nil, errors.New("network error"))
+
+// 		// State with 1 group
+// 		stateValue := cty.ObjectVal(map[string]cty.Value{
+// 			FieldEnterpriseGroupsGroups: cty.ListVal([]cty.Value{
+// 				cty.ObjectVal(map[string]cty.Value{
+// 					FieldEnterpriseGroupsGroup: cty.ListVal([]cty.Value{
+// 						cty.ObjectVal(map[string]cty.Value{
+// 							FieldEnterpriseGroupID:             cty.StringVal(groupID1),
+// 							FieldEnterpriseGroupOrganizationID: cty.StringVal(organizationID1),
+// 							FieldEnterpriseGroupName:           cty.StringVal("engineering-team"),
+// 						}),
+// 					}),
+// 				}),
+// 			}),
+// 		})
+// 		state := terraform.NewInstanceStateShimmedFromValue(stateValue, 0)
+// 		state.ID = enterpriseID
+
+// 		resource := resourceEnterpriseGroups()
+// 		data := resource.Data(state)
+
+// 		result := resource.DeleteContext(ctx, data, provider)
+
+// 		r.True(result.HasError())
+// 		r.Contains(result[0].Summary, "calling batch delete enterprise groups")
+// 		r.Contains(result[0].Summary, "network error")
+// 		r.NotEmpty(data.Id(), "Resource ID should not be cleared when delete fails")
+// 	})
+// }
+
+// func TestResourceEnterpriseGroupUpdateContext(t *testing.T) {
+// 	t.Parallel()
+
+// 	enterpriseID := uuid.NewString()
+// 	orgID1 := uuid.NewString()
+// 	orgID2 := uuid.NewString()
+// 	existingGroupID1 := uuid.NewString()
+// 	existingGroupID2 := uuid.NewString()
+// 	ctx := context.Background()
+
+// 	t.Run("when groups are added then call create API with exact parameters", func(t *testing.T) {
+// 		r := require.New(t)
+// 		ctrl := gomock.NewController(t)
+// 		mockClient := mockOrganizationManagement.NewMockClientWithResponsesInterface(ctrl)
+
+// 		provider := &ProviderConfig{
+// 			organizationManagementClient: mockClient,
+// 		}
+
+// 		memberID1 := uuid.NewString()
+// 		memberID2 := uuid.NewString()
+// 		roleID := uuid.NewString()
+// 		clusterID := uuid.NewString()
+// 		newGroupID := uuid.NewString()
+// 		createTime := time.Now()
+
+// 		resource := resourceEnterpriseGroups()
+
+// 		// Create old state with one group
+// 		oldState := &terraform.InstanceState{
+// 			ID: enterpriseID,
+// 			Attributes: map[string]string{
+// 				FieldEnterpriseGroupsEnterpriseID:  enterpriseID,
+// 				"groups.#":                         "1",
+// 				"groups.0.group.#":                 "1",
+// 				"groups.0.group.0.id":              existingGroupID1,
+// 				"groups.0.group.0.name":            "existing-group",
+// 				"groups.0.group.0.organization_id": orgID1,
+// 				"groups.0.group.0.description":     "An existing group",
+// 				"groups.0.group.0.create_time":     createTime.Format(time.RFC3339),
+// 				"groups.0.group.0.members.#":       "0",
+// 				"groups.0.group.0.role_bindings.#": "0",
+// 			},
+// 		}
+
+// 		// Create diff that adds a new group with nested structure
+// 		diff := &terraform.InstanceDiff{
+// 			Attributes: map[string]*terraform.ResourceAttrDiff{
+// 				"groups.#": {
+// 					Old: "1",
+// 					New: "2",
+// 				},
+// 				"groups.1.group.#": {
+// 					Old: "",
+// 					New: "1",
+// 				},
+// 				"groups.1.group.0.name": {
+// 					Old: "",
+// 					New: "new-engineering-team",
+// 				},
+// 				"groups.1.group.0.organization_id": {
+// 					Old: "",
+// 					New: orgID2,
+// 				},
+// 				"groups.1.group.0.description": {
+// 					Old: "",
+// 					New: "New engineering team",
+// 				},
+// 				"groups.1.group.0.members.#": {
+// 					Old: "",
+// 					New: "2",
+// 				},
+// 				"groups.1.group.0.members.0.member.#": {
+// 					Old: "",
+// 					New: "1",
+// 				},
+// 				"groups.1.group.0.members.0.member.0.kind": {
+// 					Old: "",
+// 					New: "user",
+// 				},
+// 				"groups.1.group.0.members.0.member.0.id": {
+// 					Old: "",
+// 					New: memberID1,
+// 				},
+// 				"groups.1.group.0.members.1.member.#": {
+// 					Old: "",
+// 					New: "1",
+// 				},
+// 				"groups.1.group.0.members.1.member.0.kind": {
+// 					Old: "",
+// 					New: "service_account",
+// 				},
+// 				"groups.1.group.0.members.1.member.0.id": {
+// 					Old: "",
+// 					New: memberID2,
+// 				},
+// 				"groups.1.group.0.role_bindings.#": {
+// 					Old: "",
+// 					New: "1",
+// 				},
+// 				"groups.1.group.0.role_bindings.0.role_binding.#": {
+// 					Old: "",
+// 					New: "1",
+// 				},
+// 				"groups.1.group.0.role_bindings.0.role_binding.0.name": {
+// 					Old: "",
+// 					New: "engineering-viewer",
+// 				},
+// 				"groups.1.group.0.role_bindings.0.role_binding.0.role_id": {
+// 					Old: "",
+// 					New: roleID,
+// 				},
+// 				"groups.1.group.0.role_bindings.0.role_binding.0.scopes.#": {
+// 					Old: "",
+// 					New: "1",
+// 				},
+// 				"groups.1.group.0.role_bindings.0.role_binding.0.scopes.0.scope.#": {
+// 					Old: "",
+// 					New: "2",
+// 				},
+// 				"groups.1.group.0.role_bindings.0.role_binding.0.scopes.0.scope.0.cluster": {
+// 					Old: "",
+// 					New: clusterID,
+// 				},
+// 				"groups.1.group.0.role_bindings.0.role_binding.0.scopes.0.scope.1.organization": {
+// 					Old: "",
+// 					New: orgID2,
+// 				},
+// 			},
+// 		}
+
+// 		// Use the schemaMap.Data method you suggested
+// 		schemaMap := make(map[string]*schema.Schema)
+// 		for k, v := range resource.Schema {
+// 			schemaMap[k] = v
+// 		}
+// 		data, err := schema.InternalMap(schemaMap).Data(oldState, diff)
+// 		r.NoError(err)
+
+// 		// Expected create request for new group
+// 		expectedCreateRequest := organization_management.BatchCreateEnterpriseGroupsRequest{
+// 			EnterpriseId: enterpriseID,
+// 			Requests: []organization_management.BatchCreateEnterpriseGroupsRequestGroup{
+// 				{
+// 					Name:           "new-engineering-team",
+// 					OrganizationId: orgID2,
+// 					Description:    lo.ToPtr("New engineering team"),
+// 					Members: []organization_management.BatchCreateEnterpriseGroupsRequestMember{
+// 						{
+// 							Kind: lo.ToPtr(organization_management.BatchCreateEnterpriseGroupsRequestMemberKindSUBJECTKINDUSER),
+// 							Id:   lo.ToPtr(memberID1),
+// 						},
+// 						{
+// 							Kind: lo.ToPtr(organization_management.BatchCreateEnterpriseGroupsRequestMemberKindSUBJECTKINDSERVICEACCOUNT),
+// 							Id:   lo.ToPtr(memberID2),
+// 						},
+// 					},
+// 					RoleBindings: &[]organization_management.BatchCreateEnterpriseGroupsRequestRoleBinding{
+// 						{
+// 							Name:   "engineering-viewer",
+// 							RoleId: roleID,
+// 							Scopes: []organization_management.Scope{
+// 								{
+// 									Cluster: &organization_management.ClusterScope{
+// 										Id: clusterID,
+// 									},
+// 								},
+// 								{
+// 									Organization: &organization_management.OrganizationScope{
+// 										Id: orgID2,
+// 									},
+// 								},
+// 							},
+// 						},
+// 					},
+// 				},
+// 			},
+// 		}
+
+// 		// Mock create API call with exact parameters
+// 		mockClient.EXPECT().
+// 			EnterpriseAPIBatchCreateEnterpriseGroupsWithResponse(gomock.Any(), enterpriseID, expectedCreateRequest).
+// 			Return(&organization_management.EnterpriseAPIBatchCreateEnterpriseGroupsResponse{
+// 				HTTPResponse: &http.Response{StatusCode: 200},
+// 				JSON200: &organization_management.BatchCreateEnterpriseGroupsResponse{
+// 					Groups: &[]organization_management.BatchCreateEnterpriseGroupsResponseGroup{
+// 						{
+// 							Id:             lo.ToPtr(newGroupID),
+// 							Name:           lo.ToPtr("new-engineering-team"),
+// 							OrganizationId: lo.ToPtr(orgID2),
+// 							Description:    lo.ToPtr("New engineering team"),
+// 							CreateTime:     lo.ToPtr(createTime),
+// 							ManagedBy:      lo.ToPtr("terraform"),
+// 						},
+// 					},
+// 				},
+// 			}, nil)
+
+// 		// Expected update request for existing group
+// 		expectedUpdateRequest := organization_management.BatchUpdateEnterpriseGroupsRequest{
+// 			EnterpriseId: enterpriseID,
+// 			Requests: []organization_management.BatchUpdateEnterpriseGroupsRequestUpdateGroupRequest{
+// 				{
+// 					Id:             existingGroupID1,
+// 					Name:           "existing-group",
+// 					OrganizationId: orgID1,
+// 					Description:    "",
+// 					Members:        nil,
+// 					RoleBindings:   nil,
+// 				},
+// 			},
+// 		}
+
+// 		// Mock update API call with exact parameters
+// 		mockClient.EXPECT().
+// 			EnterpriseAPIBatchUpdateEnterpriseGroupsWithResponse(gomock.Any(), enterpriseID, expectedUpdateRequest).
+// 			Return(&organization_management.EnterpriseAPIBatchUpdateEnterpriseGroupsResponse{
+// 				HTTPResponse: &http.Response{StatusCode: 200},
+// 			}, nil)
+
+// 		// Mock read calls at the end
+// 		mockClient.EXPECT().
+// 			EnterpriseAPIListGroupsWithResponse(gomock.Any(), enterpriseID, gomock.Any()).
+// 			Return(&organization_management.EnterpriseAPIListGroupsResponse{
+// 				HTTPResponse: &http.Response{StatusCode: 200},
+// 				JSON200: &organization_management.ListGroupsResponse{
+// 					Items: &[]organization_management.ListGroupsResponseGroup{
+// 						{
+// 							Id:             &existingGroupID1,
+// 							Name:           lo.ToPtr("existing-group"),
+// 							OrganizationId: &orgID1,
+// 						},
+// 						{
+// 							Id:             &newGroupID,
+// 							Name:           lo.ToPtr("new-engineering-team"),
+// 							OrganizationId: &orgID2,
+// 							Description:    lo.ToPtr("New engineering team"),
+// 							CreateTime:     lo.ToPtr(createTime),
+// 							ManagedBy:      lo.ToPtr("terraform"),
+// 						},
+// 					},
+// 				},
+// 			}, nil)
+
+// 		mockClient.EXPECT().
+// 			EnterpriseAPIListRoleBindingsWithResponse(gomock.Any(), enterpriseID, gomock.Any()).
+// 			Return(&organization_management.EnterpriseAPIListRoleBindingsResponse{
+// 				HTTPResponse: &http.Response{StatusCode: 200},
+// 				JSON200:      &organization_management.ListRoleBindingsResponse{Items: &[]organization_management.RoleBinding{}},
+// 			}, nil)
+
+// 		// Execute update
+// 		result := resource.UpdateContext(ctx, data, provider)
+
+// 		// Verify no errors
+// 		r.False(result.HasError(), "Update should succeed when adding groups")
+// 		if result.HasError() {
+// 			for _, diag := range result {
+// 				t.Logf("Error: %s - %s", diag.Summary, diag.Detail)
+// 			}
+// 		}
+// 	})
+
+// 	t.Run("when groups are deleted then call delete API with exact parameters", func(t *testing.T) {
+// 		r := require.New(t)
+// 		ctrl := gomock.NewController(t)
+// 		mockClient := mockOrganizationManagement.NewMockClientWithResponsesInterface(ctrl)
+
+// 		provider := &ProviderConfig{
+// 			organizationManagementClient: mockClient,
+// 		}
+
+// 		resource := resourceEnterpriseGroups()
+
+// 		// Create old state with two groups
+// 		oldState := &terraform.InstanceState{
+// 			ID: enterpriseID,
+// 			Attributes: map[string]string{
+// 				FieldEnterpriseGroupsEnterpriseID:                                               enterpriseID,
+// 				"groups.#":                                                                      "2",
+// 				"groups.0.group.#":                                                              "1",
+// 				"groups.0.group.0.id":                                                           existingGroupID1,
+// 				"groups.0.group.0.name":                                                         "group-to-keep",
+// 				"groups.0.group.0.organization_id":                                              orgID1,
+// 				"groups.0.group.0.description":                                                  "Old description",
+// 				"groups.0.group.0.members.#":                                                    "1",
+// 				"groups.0.group.0.members.0.member.#":                                           "1",
+// 				"groups.0.group.0.members.0.member.0.kind":                                      "user",
+// 				"groups.0.group.0.members.0.member.0.id":                                        "old-member-id",
+// 				"groups.0.group.0.role_bindings.#":                                              "1",
+// 				"groups.0.group.0.role_bindings.0.role_binding.#":                               "1",
+// 				"groups.0.group.0.role_bindings.0.role_binding.0.name":                          "old-role-binding",
+// 				"groups.0.group.0.role_bindings.0.role_binding.0.role_id":                       "old-role-id",
+// 				"groups.0.group.0.role_bindings.0.role_binding.0.scopes.#":                      "1",
+// 				"groups.0.group.0.role_bindings.0.role_binding.0.scopes.0.scope.#":              "2",
+// 				"groups.0.group.0.role_bindings.0.role_binding.0.scopes.0.scope.0.cluster":      "old-cluster-id",
+// 				"groups.0.group.0.role_bindings.0.role_binding.0.scopes.0.scope.1.organization": orgID1,
+// 				"groups.1.group.#":                                                              "1",
+// 				"groups.1.group.0.id":                                                           existingGroupID2,
+// 				"groups.1.group.0.name":                                                         "group-to-delete",
+// 				"groups.1.group.0.organization_id":                                              orgID2,
+// 				"groups.1.group.0.description":                                                  "Will be deleted",
+// 				"groups.1.group.0.members.#":                                                    "0",
+// 				"groups.1.group.0.role_bindings.#":                                              "0",
+// 			},
+// 		}
+
+// 		// Create diff that removes the second group and updates the first
+// 		diff := &terraform.InstanceDiff{
+// 			Attributes: map[string]*terraform.ResourceAttrDiff{
+// 				"groups.#": {
+// 					Old: "2",
+// 					New: "1",
+// 				},
+// 				"groups.0.group.0.description": {
+// 					Old: "Old description",
+// 					New: "Updated description",
+// 				},
+// 				"groups.0.group.0.members.0.member.0.id": {
+// 					Old: "old-member-id",
+// 					New: "new-member-id",
+// 				},
+// 				"groups.0.group.0.role_bindings.0.role_binding.0.name": {
+// 					Old: "old-role-binding",
+// 					New: "updated-role-binding",
+// 				},
+// 				"groups.0.group.0.role_bindings.0.role_binding.0.role_id": {
+// 					Old: "old-role-id",
+// 					New: "new-role-id",
+// 				},
+// 				"groups.0.group.0.role_bindings.0.role_binding.0.scopes.#": {
+// 					Old: "1",
+// 					New: "1",
+// 				},
+// 				"groups.0.group.0.role_bindings.0.role_binding.0.scopes.0.scope.#": {
+// 					Old: "2",
+// 					New: "1",
+// 				},
+// 				"groups.0.group.0.role_bindings.0.role_binding.0.scopes.0.scope.0.cluster": {
+// 					Old:        "old-cluster-id",
+// 					New:        "",
+// 					NewRemoved: true,
+// 				},
+// 				"groups.0.group.0.role_bindings.0.role_binding.0.scopes.0.scope.0.organization": {
+// 					Old: "",
+// 					New: orgID1,
+// 				},
+// 				"groups.0.group.0.role_bindings.0.role_binding.0.scopes.0.scope.1.organization": {
+// 					Old:        orgID1,
+// 					New:        "",
+// 					NewRemoved: true,
+// 				},
+// 				"groups.1.group.#": {
+// 					Old:        "1",
+// 					New:        "",
+// 					NewRemoved: true,
+// 				},
+// 				"groups.1.group.0.id": {
+// 					Old:        existingGroupID2,
+// 					New:        "",
+// 					NewRemoved: true,
+// 				},
+// 				"groups.1.group.0.name": {
+// 					Old:        "group-to-delete",
+// 					New:        "",
+// 					NewRemoved: true,
+// 				},
+// 				"groups.1.group.0.organization_id": {
+// 					Old:        orgID2,
+// 					New:        "",
+// 					NewRemoved: true,
+// 				},
+// 				"groups.1.group.0.description": {
+// 					Old:        "Will be deleted",
+// 					New:        "",
+// 					NewRemoved: true,
+// 				},
+// 				"groups.1.group.0.members.#": {
+// 					Old:        "0",
+// 					New:        "",
+// 					NewRemoved: true,
+// 				},
+// 				"groups.1.group.0.role_bindings.#": {
+// 					Old:        "0",
+// 					New:        "",
+// 					NewRemoved: true,
+// 				},
+// 			},
+// 		}
+
+// 		schemaMap := make(map[string]*schema.Schema)
+// 		for k, v := range resource.Schema {
+// 			schemaMap[k] = v
+// 		}
+// 		data, err := schema.InternalMap(schemaMap).Data(oldState, diff)
+// 		r.NoError(err)
+
+// 		// Expected delete request
+// 		expectedDeleteRequest := organization_management.BatchDeleteEnterpriseGroupsRequest{
+// 			EnterpriseId: enterpriseID,
+// 			Requests: []organization_management.BatchDeleteEnterpriseGroupsRequestDeleteGroupRequest{
+// 				{
+// 					Id:             existingGroupID2,
+// 					OrganizationId: orgID2,
+// 				},
+// 			},
+// 		}
+
+// 		// Expected update request for remaining group
+// 		expectedUpdateRequest := organization_management.BatchUpdateEnterpriseGroupsRequest{
+// 			EnterpriseId: enterpriseID,
+// 			Requests: []organization_management.BatchUpdateEnterpriseGroupsRequestUpdateGroupRequest{
+// 				{
+// 					Id:             existingGroupID1,
+// 					Name:           "group-to-keep",
+// 					OrganizationId: orgID1,
+// 					Description:    "Updated description",
+// 					Members: []organization_management.BatchUpdateEnterpriseGroupsRequestMember{
+// 						{
+// 							Kind: organization_management.BatchUpdateEnterpriseGroupsRequestMemberKindUSER,
+// 							Id:   "new-member-id",
+// 						},
+// 					},
+// 					RoleBindings: []organization_management.BatchUpdateEnterpriseGroupsRequestRoleBinding{
+// 						{
+// 							Id:     "",
+// 							Name:   "updated-role-binding",
+// 							RoleId: "new-role-id",
+// 							Scopes: []organization_management.Scope{
+// 								{
+// 									Organization: &organization_management.OrganizationScope{
+// 										Id: orgID1,
+// 									},
+// 								},
+// 							},
+// 						},
+// 					},
+// 				},
+// 			},
+// 		}
+
+// 		// Mock delete API call with exact parameters
+// 		mockClient.EXPECT().
+// 			EnterpriseAPIBatchDeleteEnterpriseGroupsWithResponse(gomock.Any(), enterpriseID, expectedDeleteRequest).
+// 			Return(&organization_management.EnterpriseAPIBatchDeleteEnterpriseGroupsResponse{
+// 				HTTPResponse: &http.Response{StatusCode: 200},
+// 			}, nil)
+
+// 		// Mock update API call with exact parameters
+// 		mockClient.EXPECT().
+// 			EnterpriseAPIBatchUpdateEnterpriseGroupsWithResponse(gomock.Any(), enterpriseID, expectedUpdateRequest).
+// 			Return(&organization_management.EnterpriseAPIBatchUpdateEnterpriseGroupsResponse{
+// 				HTTPResponse: &http.Response{StatusCode: 200},
+// 			}, nil)
+
+// 		// Mock read calls at the end
+// 		mockClient.EXPECT().
+// 			EnterpriseAPIListGroupsWithResponse(gomock.Any(), enterpriseID, nil).
+// 			Return(&organization_management.EnterpriseAPIListGroupsResponse{
+// 				HTTPResponse: &http.Response{StatusCode: 200},
+// 				JSON200: &organization_management.ListGroupsResponse{
+// 					Items: &[]organization_management.ListGroupsResponseGroup{
+// 						{
+// 							Id:             &existingGroupID1,
+// 							Name:           lo.ToPtr("group-to-keep"),
+// 							OrganizationId: &orgID1,
+// 							Description:    lo.ToPtr("Updated description"),
+// 						},
+// 					},
+// 				},
+// 			}, nil)
+
+// 		mockClient.EXPECT().
+// 			EnterpriseAPIListRoleBindingsWithResponse(gomock.Any(), enterpriseID, &organization_management.EnterpriseAPIListRoleBindingsParams{
+// 				SubjectId: &[]string{existingGroupID1},
+// 			}).
+// 			Return(&organization_management.EnterpriseAPIListRoleBindingsResponse{
+// 				HTTPResponse: &http.Response{StatusCode: 200},
+// 				JSON200: &organization_management.ListRoleBindingsResponse{
+// 					Items: &[]organization_management.RoleBinding{
+// 						{
+// 							Id:   lo.ToPtr(existingGroupID1 + "-updated-role-binding"),
+// 							Name: lo.ToPtr("updated-role-binding"),
+// 							Definition: &organization_management.RoleBindingDefinition{
+// 								RoleId: lo.ToPtr("new-role-id"),
+// 								Scopes: &[]organization_management.Scope{
+// 									{
+// 										Organization: &organization_management.OrganizationScope{
+// 											Id: orgID1,
+// 										},
+// 									},
+// 								},
+// 							},
+// 						},
+// 					},
+// 				},
+// 			}, nil)
+
+// 		// Execute update
+// 		result := resource.UpdateContext(ctx, data, provider)
+
+// 		// Verify no errors
+// 		r.False(result.HasError(), "Update should succeed when deleting groups")
+// 	})
+
+// 	t.Run("when groups are updated then call update API with exact parameters", func(t *testing.T) {
+// 		r := require.New(t)
+// 		ctrl := gomock.NewController(t)
+// 		mockClient := mockOrganizationManagement.NewMockClientWithResponsesInterface(ctrl)
+
+// 		provider := &ProviderConfig{
+// 			organizationManagementClient: mockClient,
+// 		}
+
+// 		memberID := uuid.NewString()
+// 		roleID := uuid.NewString()
+// 		orgScopeID := uuid.NewString()
+
+// 		resource := resourceEnterpriseGroups()
+
+// 		// Create old state with one group
+// 		oldState := &terraform.InstanceState{
+// 			ID: enterpriseID,
+// 			Attributes: map[string]string{
+// 				FieldEnterpriseGroupsEnterpriseID:                                               enterpriseID,
+// 				"groups.#":                                                                      "1",
+// 				"groups.0.group.#":                                                              "1",
+// 				"groups.0.group.0.id":                                                           existingGroupID1,
+// 				"groups.0.group.0.name":                                                         "old-name",
+// 				"groups.0.group.0.organization_id":                                              orgID1,
+// 				"groups.0.group.0.description":                                                  "Old description",
+// 				"groups.0.group.0.members.#":                                                    "2",
+// 				"groups.0.group.0.members.0.member.#":                                           "1",
+// 				"groups.0.group.0.members.0.member.0.kind":                                      "service_account",
+// 				"groups.0.group.0.members.0.member.0.id":                                        "old-service-account-id",
+// 				"groups.0.group.0.members.1.member.#":                                           "1",
+// 				"groups.0.group.0.members.1.member.0.kind":                                      "user",
+// 				"groups.0.group.0.members.1.member.0.id":                                        "old-user-id",
+// 				"groups.0.group.0.role_bindings.#":                                              "1",
+// 				"groups.0.group.0.role_bindings.0.role_binding.#":                               "2",
+// 				"groups.0.group.0.role_bindings.0.role_binding.0.name":                          "first-role-binding",
+// 				"groups.0.group.0.role_bindings.0.role_binding.0.role_id":                       "first-role-id",
+// 				"groups.0.group.0.role_bindings.0.role_binding.0.scopes.#":                      "1",
+// 				"groups.0.group.0.role_bindings.0.role_binding.0.scopes.0.scope.#":              "1",
+// 				"groups.0.group.0.role_bindings.0.role_binding.0.scopes.0.scope.0.organization": orgID1,
+// 				"groups.0.group.0.role_bindings.0.role_binding.1.name":                          "second-role-binding",
+// 				"groups.0.group.0.role_bindings.0.role_binding.1.role_id":                       "second-role-id",
+// 				"groups.0.group.0.role_bindings.0.role_binding.1.scopes.#":                      "1",
+// 				"groups.0.group.0.role_bindings.0.role_binding.1.scopes.0.scope.#":              "2",
+// 				"groups.0.group.0.role_bindings.0.role_binding.1.scopes.0.scope.0.cluster":      "cluster-id-1",
+// 				"groups.0.group.0.role_bindings.0.role_binding.1.scopes.0.scope.1.organization": orgID1,
+// 			},
+// 		}
+
+// 		// Create diff that updates the group
+// 		diff := &terraform.InstanceDiff{
+// 			Attributes: map[string]*terraform.ResourceAttrDiff{
+// 				"groups.0.group.0.name": {
+// 					Old: "old-name",
+// 					New: "updated-name",
+// 				},
+// 				"groups.0.group.0.description": {
+// 					Old: "Old description",
+// 					New: "Updated description",
+// 				},
+// 				"groups.0.group.0.members.#": {
+// 					Old: "2",
+// 					New: "1",
+// 				},
+// 				"groups.0.group.0.members.0.member.0.kind": {
+// 					Old: "service_account",
+// 					New: "user",
+// 				},
+// 				"groups.0.group.0.members.0.member.0.id": {
+// 					Old: "old-service-account-id",
+// 					New: memberID,
+// 				},
+// 				"groups.0.group.0.members.1.member.#": {
+// 					Old:        "1",
+// 					New:        "",
+// 					NewRemoved: true,
+// 				},
+// 				"groups.0.group.0.members.1.member.0.kind": {
+// 					Old:        "user",
+// 					New:        "",
+// 					NewRemoved: true,
+// 				},
+// 				"groups.0.group.0.members.1.member.0.id": {
+// 					Old:        "old-user-id",
+// 					New:        "",
+// 					NewRemoved: true,
+// 				},
+// 				"groups.0.group.0.role_bindings.#": {
+// 					Old: "1",
+// 					New: "1",
+// 				},
+// 				"groups.0.group.0.role_bindings.0.role_binding.#": {
+// 					Old: "2",
+// 					New: "1",
+// 				},
+// 				"groups.0.group.0.role_bindings.0.role_binding.0.name": {
+// 					Old: "first-role-binding",
+// 					New: "updated-role-binding",
+// 				},
+// 				"groups.0.group.0.role_bindings.0.role_binding.0.role_id": {
+// 					Old: "first-role-id",
+// 					New: roleID,
+// 				},
+// 				"groups.0.group.0.role_bindings.0.role_binding.0.scopes.#": {
+// 					Old: "1",
+// 					New: "1",
+// 				},
+// 				"groups.0.group.0.role_bindings.0.role_binding.0.scopes.0.scope.#": {
+// 					Old: "1",
+// 					New: "1",
+// 				},
+// 				"groups.0.group.0.role_bindings.0.role_binding.0.scopes.0.scope.0.organization": {
+// 					Old: orgID1,
+// 					New: orgScopeID,
+// 				},
+// 				"groups.0.group.0.role_bindings.0.role_binding.1.name": {
+// 					Old:        "second-role-binding",
+// 					New:        "",
+// 					NewRemoved: true,
+// 				},
+// 				"groups.0.group.0.role_bindings.0.role_binding.1.role_id": {
+// 					Old:        "second-role-id",
+// 					New:        "",
+// 					NewRemoved: true,
+// 				},
+// 				"groups.0.group.0.role_bindings.0.role_binding.1.scopes.#": {
+// 					Old:        "1",
+// 					New:        "",
+// 					NewRemoved: true,
+// 				},
+// 				"groups.0.group.0.role_bindings.0.role_binding.1.scopes.0.scope.#": {
+// 					Old:        "2",
+// 					New:        "",
+// 					NewRemoved: true,
+// 				},
+// 				"groups.0.group.0.role_bindings.0.role_binding.1.scopes.0.scope.0.cluster": {
+// 					Old:        "cluster-id-1",
+// 					New:        "",
+// 					NewRemoved: true,
+// 				},
+// 				"groups.0.group.0.role_bindings.0.role_binding.1.scopes.0.scope.1.organization": {
+// 					Old:        orgID1,
+// 					New:        "",
+// 					NewRemoved: true,
+// 				},
+// 			},
+// 		}
+
+// 		schemaMap := make(map[string]*schema.Schema)
+// 		for k, v := range resource.Schema {
+// 			schemaMap[k] = v
+// 		}
+// 		data, err := schema.InternalMap(schemaMap).Data(oldState, diff)
+// 		r.NoError(err)
+
+// 		// Expected update request
+// 		expectedUpdateRequest := organization_management.BatchUpdateEnterpriseGroupsRequest{
+// 			EnterpriseId: enterpriseID,
+// 			Requests: []organization_management.BatchUpdateEnterpriseGroupsRequestUpdateGroupRequest{
+// 				{
+// 					Id:             existingGroupID1,
+// 					Name:           "updated-name",
+// 					OrganizationId: orgID1,
+// 					Description:    "Updated description",
+// 					Members: []organization_management.BatchUpdateEnterpriseGroupsRequestMember{
+// 						{
+// 							Kind: organization_management.BatchUpdateEnterpriseGroupsRequestMemberKindUSER,
+// 							Id:   memberID,
+// 						},
+// 					},
+// 					RoleBindings: []organization_management.BatchUpdateEnterpriseGroupsRequestRoleBinding{
+// 						{
+// 							Id:     "",
+// 							Name:   "updated-role-binding",
+// 							RoleId: roleID,
+// 							Scopes: []organization_management.Scope{
+// 								{
+// 									Organization: &organization_management.OrganizationScope{
+// 										Id: orgScopeID,
+// 									},
+// 								},
+// 							},
+// 						},
+// 					},
+// 				},
+// 			},
+// 		}
+
+// 		// Mock update API call with exact parameters
+// 		mockClient.EXPECT().
+// 			EnterpriseAPIBatchUpdateEnterpriseGroupsWithResponse(gomock.Any(), enterpriseID, expectedUpdateRequest).
+// 			Return(&organization_management.EnterpriseAPIBatchUpdateEnterpriseGroupsResponse{
+// 				HTTPResponse: &http.Response{StatusCode: 200},
+// 			}, nil)
+
+// 		// Mock read calls at the end
+// 		mockClient.EXPECT().
+// 			EnterpriseAPIListGroupsWithResponse(gomock.Any(), enterpriseID, nil).
+// 			Return(&organization_management.EnterpriseAPIListGroupsResponse{
+// 				HTTPResponse: &http.Response{StatusCode: 200},
+// 				JSON200: &organization_management.ListGroupsResponse{
+// 					Items: &[]organization_management.ListGroupsResponseGroup{
+// 						{
+// 							Id:             &existingGroupID1,
+// 							Name:           lo.ToPtr("updated-name"),
+// 							OrganizationId: &orgID1,
+// 							Description:    lo.ToPtr("Updated description"),
+// 						},
+// 					},
+// 				},
+// 			}, nil)
+
+// 		mockClient.EXPECT().
+// 			EnterpriseAPIListRoleBindingsWithResponse(gomock.Any(), enterpriseID, &organization_management.EnterpriseAPIListRoleBindingsParams{
+// 				SubjectId: &[]string{existingGroupID1},
+// 			}).
+// 			Return(&organization_management.EnterpriseAPIListRoleBindingsResponse{
+// 				HTTPResponse: &http.Response{StatusCode: 200},
+// 				JSON200: &organization_management.ListRoleBindingsResponse{
+// 					Items: &[]organization_management.RoleBinding{
+// 						{
+// 							Id:   lo.ToPtr(existingGroupID1 + "-updated-role-binding"),
+// 							Name: lo.ToPtr("updated-role-binding"),
+// 							Definition: &organization_management.RoleBindingDefinition{
+// 								RoleId: lo.ToPtr(roleID),
+// 								Scopes: &[]organization_management.Scope{
+// 									{
+// 										Organization: &organization_management.OrganizationScope{
+// 											Id: orgScopeID,
+// 										},
+// 									},
+// 								},
+// 							},
+// 						},
+// 					},
+// 				},
+// 			}, nil)
+
+// 		// Execute update
+// 		result := resource.UpdateContext(ctx, data, provider)
+
+// 		// Verify no errors
+// 		r.False(result.HasError(), "Update should succeed when updating groups")
+// 		if result.HasError() {
+// 			for _, diag := range result {
+// 				t.Logf("Error: %s - %s", diag.Summary, diag.Detail)
+// 			}
+// 		}
+// 	})
+
+// 	t.Run("resource update error generic propagated", func(t *testing.T) {
+// 		r := require.New(t)
+// 		ctrl := gomock.NewController(t)
+// 		mockClient := mockOrganizationManagement.NewMockClientWithResponsesInterface(ctrl)
+
+// 		provider := &ProviderConfig{
+// 			organizationManagementClient: mockClient,
+// 		}
+
+// 		resource := resourceEnterpriseGroups()
+
+// 		// Create old state with one group
+// 		oldState := &terraform.InstanceState{
+// 			ID: enterpriseID,
+// 			Attributes: map[string]string{
+// 				FieldEnterpriseGroupsEnterpriseID:  enterpriseID,
+// 				"groups.#":                         "1",
+// 				"groups.0.group.#":                 "1",
+// 				"groups.0.group.0.id":              existingGroupID1,
+// 				"groups.0.group.0.name":            "old-name",
+// 				"groups.0.group.0.organization_id": orgID1,
+// 				"groups.0.group.0.members.#":       "0",
+// 				"groups.0.group.0.role_bindings.#": "0",
+// 			},
+// 		}
+
+// 		// Create diff that updates the group name
+// 		diff := &terraform.InstanceDiff{
+// 			Attributes: map[string]*terraform.ResourceAttrDiff{
+// 				"groups.0.group.0.name": {
+// 					Old: "old-name",
+// 					New: "updated-name",
+// 				},
+// 			},
+// 		}
+
+// 		schemaMap := make(map[string]*schema.Schema)
+// 		for k, v := range resource.Schema {
+// 			schemaMap[k] = v
+// 		}
+// 		data, err := schema.InternalMap(schemaMap).Data(oldState, diff)
+// 		r.NoError(err)
+
+// 		// Expected update request for error test
+// 		expectedUpdateRequest := organization_management.BatchUpdateEnterpriseGroupsRequest{
+// 			EnterpriseId: enterpriseID,
+// 			Requests: []organization_management.BatchUpdateEnterpriseGroupsRequestUpdateGroupRequest{
+// 				{
+// 					Id:             existingGroupID1,
+// 					Name:           "updated-name",
+// 					OrganizationId: orgID1,
+// 					Description:    "",
+// 					Members:        nil,
+// 					RoleBindings:   nil,
+// 				},
+// 			},
+// 		}
+
+// 		// Mock update API to return error with exact parameters
+// 		mockClient.EXPECT().
+// 			EnterpriseAPIBatchUpdateEnterpriseGroupsWithResponse(gomock.Any(), enterpriseID, expectedUpdateRequest).
+// 			Return(&organization_management.EnterpriseAPIBatchUpdateEnterpriseGroupsResponse{
+// 				HTTPResponse: &http.Response{StatusCode: 400, Body: io.NopCloser(bytes.NewBufferString(`{"message":"Bad Request", "fieldViolations":[{"field":"name","description":"invalid name"}]}`))},
+// 			}, nil)
+
+// 		result := resource.UpdateContext(ctx, data, provider)
+
+// 		r.True(result.HasError(), "Should return error when API call fails")
+// 		r.Contains(result[0].Summary, "batch update modified groups failed")
+// 		r.Contains(result[0].Summary, "status 400")
+// 	})
+// }
