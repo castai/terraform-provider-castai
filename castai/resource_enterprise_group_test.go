@@ -117,7 +117,7 @@ func TestResourceEnterpriseGroupCreateContext(t *testing.T) {
 		r.NotNil(result)
 		r.True(result.HasError())
 		r.Len(result, 1)
-		r.Equal("calling batch create enterprise groups: network error", result[0].Summary)
+		r.Equal("batch create enterprise groups failed: network error", result[0].Summary)
 	})
 
 	t.Run("when API successfully creates group then set state correctly", func(t *testing.T) {
@@ -478,7 +478,7 @@ func TestResourceEnterpriseGroupReadContext(t *testing.T) {
 		r.NotNil(result)
 		r.True(result.HasError())
 		r.Len(result, 1)
-		r.Equal("listing enterprise groups: network error", result[0].Summary)
+		r.Equal("list enterprise groups failed: network error", result[0].Summary)
 	})
 
 	t.Run("when API returns groups then filter and update state with managed group only", func(t *testing.T) {
@@ -873,7 +873,7 @@ func TestResourceEnterpriseGroupDeleteContext(t *testing.T) {
 		result := resource.DeleteContext(ctx, data, provider)
 
 		r.True(result.HasError())
-		r.Equal("calling batch delete enterprise groups: network error", result[0].Summary)
+		r.Equal("batch delete enterprise groups failed: network error", result[0].Summary)
 		r.NotEmpty(data.Id(), "Resource ID should not be cleared when delete fails")
 	})
 

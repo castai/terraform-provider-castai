@@ -3,7 +3,6 @@ package castai
 import (
 	"context"
 	"fmt"
-	"net/http"
 	"reflect"
 	"strings"
 	"time"
@@ -248,12 +247,8 @@ func resourceEnterpriseGroupCreate(ctx context.Context, data *schema.ResourceDat
 	}
 
 	resp, err := client.EnterpriseAPIBatchCreateEnterpriseGroupsWithResponse(ctx, enterpriseID, *createRequest)
-	if err != nil {
-		return diag.FromErr(fmt.Errorf("calling batch create enterprise groups: %w", err))
-	}
-
-	if resp.StatusCode() != http.StatusOK {
-		return diag.FromErr(fmt.Errorf("batch create enterprise groups failed with status %d: %s", resp.StatusCode(), string(resp.Body)))
+	if err := sdk.CheckOKResponse(resp, err); err != nil {
+		return diag.FromErr(fmt.Errorf("batch create enterprise groups failed: %w", err))
 	}
 
 	if resp.JSON200 == nil || resp.JSON200.Groups == nil {
@@ -566,12 +561,8 @@ func resourceEnterpriseGroupRead(ctx context.Context, data *schema.ResourceData,
 	groupIDStr := groupID.(string)
 
 	resp, err := client.EnterpriseAPIListGroupsWithResponse(ctx, enterpriseIDStr, nil)
-	if err != nil {
-		return diag.FromErr(fmt.Errorf("listing enterprise groups: %w", err))
-	}
-
-	if resp.StatusCode() != http.StatusOK {
-		return diag.FromErr(fmt.Errorf("list enterprise groups failed with status %d: %s", resp.StatusCode(), string(resp.Body)))
+	if err := sdk.CheckOKResponse(resp, err); err != nil {
+		return diag.FromErr(fmt.Errorf("list enterprise groups failed: %w", err))
 	}
 
 	if resp.JSON200 == nil || resp.JSON200.Items == nil {
@@ -623,11 +614,8 @@ func convertListGroupsResponseGroup(
 		enterpriseID,
 		&organization_management.EnterpriseAPIListRoleBindingsParams{
 			SubjectId: &[]string{*group.Id},
-		})
-	if err != nil {
-		return EnterpriseGroupWithRoleBindings{}, fmt.Errorf("listing role bindings for group %s: %w", *group.Id, err)
-	}
-
+		},
+	)
 	if err = sdk.CheckOKResponse(resp, err); err != nil {
 		return EnterpriseGroupWithRoleBindings{}, fmt.Errorf("list role bindings for group %s failed: %w", *group.Id, err)
 	}
@@ -1190,12 +1178,8 @@ func resourceEnterpriseGroupDelete(ctx context.Context, data *schema.ResourceDat
 		deleteRequest.EnterpriseId,
 		deleteRequest,
 	)
-	if err != nil {
-		return diag.FromErr(fmt.Errorf("calling batch delete enterprise groups: %w", err))
-	}
-
-	if resp.StatusCode() != http.StatusOK {
-		return diag.FromErr(fmt.Errorf("batch delete enterprise groups failed with status %d: %s", resp.StatusCode(), string(resp.Body)))
+	if err := sdk.CheckOKResponse(resp, err); err != nil {
+		return diag.FromErr(fmt.Errorf("batch delete enterprise groups failed: %w", err))
 	}
 
 	// Clear the resource ID
