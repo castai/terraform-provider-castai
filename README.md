@@ -483,7 +483,7 @@ These fields are planned for removal in a future major version. Users are encour
     *   **Deprecated:** `autoscaler_settings.spot_diversity_enabled`. Use `constraints.enable_spot_diversity` in the default `castai_node_template`.
     *   **Deprecated:** `autoscaler_settings.spot_diversity_price_increase_limit`. Use `constraints.spot_diversity_price_increase_limit_percent` in the default `castai_node_template`.
 
-4.  **Spot Interruption Predictions:**
+4.  **Spot Interruption Predictions (Currently available only for AWS.):** 
     *   **Deprecated:** `autoscaler_settings.spot_interruption_predictions` block. Use the top-level `spot_interruption_predictions_enabled` and `spot_interruption_predictions_type` fields in the default `castai_node_template` resource.
 
 Developing the provider
