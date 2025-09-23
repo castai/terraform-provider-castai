@@ -56,11 +56,9 @@ type Scope struct {
 
 const (
 	// Field names for the enterprise groups resource
-	FieldEnterpriseGroupsEnterpriseID = "enterprise_id"
-	FieldEnterpriseGroupsGroups       = "groups"
+	FieldEnterpriseGroupEnterpriseID = "enterprise_id"
 
 	// Field names for nested objects
-	FieldEnterpriseGroupsGroup      = "group"
 	FieldEnterpriseGroupsMember     = "member"
 	FieldEnterpriseGroupRoleBinding = "role_binding"
 	FieldEnterpriseGroupScope       = "scope"
@@ -101,10 +99,10 @@ var (
 
 func resourceEnterpriseGroups() *schema.Resource {
 	return &schema.Resource{
-		CreateContext: resourceEnterpriseGroupsCreate,
-		ReadContext:   resourceEnterpriseGroupsRead,
-		UpdateContext: resourceEnterpriseGroupsUpdate,
-		DeleteContext: resourceEnterpriseGroupsDelete,
+		CreateContext: resourceEnterpriseGroupCreate,
+		ReadContext:   resourceEnterpriseGroupRead,
+		UpdateContext: resourceEnterpriseGroupUpdate,
+		DeleteContext: resourceEnterpriseGroupDelete,
 		Description:   "CAST AI enterprise groups resource to manage multiple organization groups via batch operations",
 		Timeouts: &schema.ResourceTimeout{
 			Create: schema.DefaultTimeout(2 * time.Minute),
@@ -113,130 +111,113 @@ func resourceEnterpriseGroups() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			FieldEnterpriseGroupsEnterpriseID: {
+			FieldEnterpriseGroupEnterpriseID: {
 				Type:        schema.TypeString,
 				Required:    true,
 				ForceNew:    true,
 				Description: "Enterprise organization ID.",
 			},
-			FieldEnterpriseGroupsGroups: {
-				Type:        schema.TypeList,
+			FieldEnterpriseGroupID: {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Group ID assigned by the API.",
+			},
+			FieldEnterpriseGroupOrganizationID: {
+				Type:        schema.TypeString,
 				Required:    true,
-				Description: "List of enterprise groups to manage.",
+				ForceNew:    true,
+				Description: "Target organization ID for the group.",
+			},
+			FieldEnterpriseGroupName: {
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "Name of the group.",
+			},
+			FieldEnterpriseGroupDescription: {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "Description of the group.",
+			},
+			FieldEnterpriseGroupMembers: {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: "List of group members.",
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						FieldEnterpriseGroupsGroup: {
+						FieldEnterpriseGroupsMember: {
 							Type:        schema.TypeList,
 							Optional:    true,
-							Description: "Enterprise group configuration.",
+							Description: "Group member configuration.",
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
-									FieldEnterpriseGroupID: {
-										Type:        schema.TypeString,
-										Computed:    true,
-										Description: "Group ID assigned by the API.",
-									},
-									FieldEnterpriseGroupOrganizationID: {
-										Type:        schema.TypeString,
-										Required:    true,
-										Description: "Target organization ID for the group.",
-									},
-									FieldEnterpriseGroupName: {
-										Type:        schema.TypeString,
-										Required:    true,
-										Description: "Name of the group.",
-									},
-									FieldEnterpriseGroupDescription: {
-										Type:        schema.TypeString,
-										Optional:    true,
-										Description: "Description of the group.",
-									},
-									FieldEnterpriseGroupMembers: {
-										Type:        schema.TypeList,
-										Optional:    true,
-										Description: "List of group members.",
-										Elem: &schema.Resource{
-											Schema: map[string]*schema.Schema{
-												FieldEnterpriseGroupsMember: {
-													Type:        schema.TypeList,
-													Optional:    true,
-													Description: "Group member configuration.",
-													Elem: &schema.Resource{
-														Schema: map[string]*schema.Schema{
-															FieldEnterpriseGroupMemberKind: {
-																Type:             schema.TypeString,
-																Required:         true,
-																Description:      fmt.Sprintf("Kind of the member. Supported values: %s.", strings.Join(supportedEnterpriseGroupMemberKinds, ", ")),
-																ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(supportedEnterpriseGroupMemberKinds, true)),
-																DiffSuppressFunc: func(k, oldValue, newValue string, d *schema.ResourceData) bool {
-																	return strings.EqualFold(oldValue, newValue)
-																},
-															},
-															FieldEnterpriseGroupMemberID: {
-																Type:        schema.TypeString,
-																Required:    true,
-																Description: "Member UUID.",
-															},
-														},
-													},
-												},
-											},
+									FieldEnterpriseGroupMemberKind: {
+										Type:             schema.TypeString,
+										Required:         true,
+										Description:      fmt.Sprintf("Kind of the member. Supported values: %s.", strings.Join(supportedEnterpriseGroupMemberKinds, ", ")),
+										ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice(supportedEnterpriseGroupMemberKinds, true)),
+										DiffSuppressFunc: func(k, oldValue, newValue string, d *schema.ResourceData) bool {
+											return strings.EqualFold(oldValue, newValue)
 										},
 									},
-									FieldEnterpriseGroupRoleBindings: {
+									FieldEnterpriseGroupMemberID: {
+										Type:        schema.TypeString,
+										Required:    true,
+										Description: "Member UUID.",
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			FieldEnterpriseGroupRoleBindings: {
+				Type:        schema.TypeList,
+				Optional:    true,
+				Description: "List of role bindings for the group.",
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						FieldEnterpriseGroupRoleBinding: {
+							Type:        schema.TypeList,
+							Optional:    true,
+							Description: "Role binding configuration.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									FieldEnterpriseGroupRoleBindingID: {
+										Type:        schema.TypeString,
+										Computed:    true,
+										Description: "Role binding ID assigned by the API.",
+									},
+									FieldEnterpriseGroupRoleBindingName: {
+										Type:        schema.TypeString,
+										Required:    true,
+										Description: "Role binding name.",
+									},
+									FieldEnterpriseGroupRoleBindingRoleID: {
+										Type:        schema.TypeString,
+										Required:    true,
+										Description: "Role UUID.",
+									},
+									FieldEnterpriseGroupRoleBindingScopes: {
 										Type:        schema.TypeList,
-										Optional:    true,
-										Description: "List of role bindings for the group.",
+										Required:    true,
+										Description: "List of scopes for the role binding.",
 										Elem: &schema.Resource{
 											Schema: map[string]*schema.Schema{
-												FieldEnterpriseGroupRoleBinding: {
+												FieldEnterpriseGroupScope: {
 													Type:        schema.TypeList,
 													Optional:    true,
-													Description: "Role binding configuration.",
+													Description: "Scope configuration.",
 													Elem: &schema.Resource{
 														Schema: map[string]*schema.Schema{
-															FieldEnterpriseGroupRoleBindingID: {
+															FieldEnterpriseGroupScopeOrganization: {
 																Type:        schema.TypeString,
-																Computed:    true,
-																Description: "Role binding ID assigned by the API.",
+																Optional:    true,
+																Description: "Organization ID scope.",
 															},
-															FieldEnterpriseGroupRoleBindingName: {
+															FieldEnterpriseGroupScopeCluster: {
 																Type:        schema.TypeString,
-																Required:    true,
-																Description: "Role binding name.",
-															},
-															FieldEnterpriseGroupRoleBindingRoleID: {
-																Type:        schema.TypeString,
-																Required:    true,
-																Description: "Role UUID.",
-															},
-															FieldEnterpriseGroupRoleBindingScopes: {
-																Type:        schema.TypeList,
-																Required:    true,
-																Description: "List of scopes for the role binding.",
-																Elem: &schema.Resource{
-																	Schema: map[string]*schema.Schema{
-																		FieldEnterpriseGroupScope: {
-																			Type:        schema.TypeList,
-																			Optional:    true,
-																			Description: "Scope configuration.",
-																			Elem: &schema.Resource{
-																				Schema: map[string]*schema.Schema{
-																					FieldEnterpriseGroupScopeOrganization: {
-																						Type:        schema.TypeString,
-																						Optional:    true,
-																						Description: "Organization ID scope.",
-																					},
-																					FieldEnterpriseGroupScopeCluster: {
-																						Type:        schema.TypeString,
-																						Optional:    true,
-																						Description: "Cluster ID scope.",
-																					},
-																				},
-																			},
-																		},
-																	},
-																},
+																Optional:    true,
+																Description: "Cluster ID scope.",
 															},
 														},
 													},
@@ -254,11 +235,9 @@ func resourceEnterpriseGroups() *schema.Resource {
 	}
 }
 
-func resourceEnterpriseGroupsCreate(ctx context.Context, data *schema.ResourceData, meta any) diag.Diagnostics {
+func resourceEnterpriseGroupCreate(ctx context.Context, data *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(*ProviderConfig).organizationManagementClient
-	enterpriseID := data.Get(FieldEnterpriseGroupsEnterpriseID).(string)
-
-	tflog.Debug(ctx, "Creating new enterprise groups", map[string]any{"data": data.State()})
+	enterpriseID := data.Get(FieldEnterpriseGroupEnterpriseID).(string)
 
 	createRequest, err := buildBatchCreateRequest(enterpriseID, data)
 	if err != nil {
@@ -366,7 +345,7 @@ func convertBatchCreateEnterpriseGroupsResponseGroup(groups ...organization_mana
 	return out, nil
 }
 
-func resourceEnterpriseGroupsRead(ctx context.Context, data *schema.ResourceData, meta any) diag.Diagnostics {
+func resourceEnterpriseGroupRead(ctx context.Context, data *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(*ProviderConfig).organizationManagementClient
 	enterpriseID := data.Id()
 
@@ -423,7 +402,7 @@ func resourceEnterpriseGroupsRead(ctx context.Context, data *schema.ResourceData
 	return nil
 }
 
-func resourceEnterpriseGroupsUpdate(ctx context.Context, data *schema.ResourceData, meta any) diag.Diagnostics {
+func resourceEnterpriseGroupUpdate(ctx context.Context, data *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(*ProviderConfig).organizationManagementClient
 	enterpriseID := data.Id()
 
@@ -496,10 +475,10 @@ func resourceEnterpriseGroupsUpdate(ctx context.Context, data *schema.ResourceDa
 	//	}
 	//}
 
-	return resourceEnterpriseGroupsRead(ctx, data, meta)
+	return resourceEnterpriseGroupRead(ctx, data, meta)
 }
 
-func resourceEnterpriseGroupsDelete(ctx context.Context, data *schema.ResourceData, meta any) diag.Diagnostics {
+func resourceEnterpriseGroupDelete(ctx context.Context, data *schema.ResourceData, meta any) diag.Diagnostics {
 	client := meta.(*ProviderConfig).organizationManagementClient
 	enterpriseID := data.Id()
 
