@@ -137,6 +137,7 @@ func resourceEnterpriseGroup() *schema.Resource {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "Description of the group.",
+				Default:     "",
 			},
 			FieldEnterpriseGroupMembers: {
 				Type:        schema.TypeList,
@@ -411,77 +412,219 @@ func resourceEnterpriseGroupRead(ctx context.Context, data *schema.ResourceData,
 }
 
 func resourceEnterpriseGroupUpdate(ctx context.Context, data *schema.ResourceData, meta any) diag.Diagnostics {
-	//client := meta.(*ProviderConfig).organizationManagementClient
-	//enterpriseID := data.Id()
-	//
-	//tflog.Debug(ctx, "Updating enterprise groups", map[string]any{"data": data.State()})
-	//
-	//if enterpriseID == "" {
-	//	return diag.FromErr(fmt.Errorf("enterprise ID is not set"))
-	//}
-	//
-	//changes, err := getGroupChanges(ctx, data)
-	//if err != nil {
-	//	return diag.FromErr(fmt.Errorf("analyzing group changes: %w", err))
-	//}
-	//
-	//tflog.Debug(ctx, "Updating enterprise groups", map[string]any{"changes": changes})
-	//
-	//if len(changes.toDelete) > 0 {
-	//	tflog.Debug(ctx, "Deleting groups", map[string]any{"count": len(changes.toDelete)})
-	//	deleteRequest := &organization_management.BatchDeleteEnterpriseGroupsRequest{
-	//		EnterpriseId: enterpriseID,
-	//		Requests:     changes.toDelete,
-	//	}
-	//
-	//	resp, err := client.EnterpriseAPIBatchDeleteEnterpriseGroupsWithResponse(ctx, enterpriseID, *deleteRequest)
-	//	if err != nil {
-	//		return diag.FromErr(fmt.Errorf("deleting removed groups: %w", err))
-	//	}
-	//
-	//	if resp.StatusCode() != http.StatusOK && resp.StatusCode() != http.StatusNotFound {
-	//		return diag.FromErr(fmt.Errorf("batch delete removed groups failed with status %d: %s", resp.StatusCode(), string(resp.Body)))
-	//	}
-	//}
-	//
-	//if len(changes.toCreate) > 0 {
-	//	tflog.Debug(ctx, "Creating groups", map[string]any{"count": len(changes.toCreate)})
-	//	createRequest := &organization_management.BatchCreateEnterpriseGroupsRequest{
-	//		EnterpriseId: enterpriseID,
-	//		Requests:     changes.toCreate,
-	//	}
-	//
-	//	resp, err := client.EnterpriseAPIBatchCreateEnterpriseGroupsWithResponse(ctx, enterpriseID, *createRequest)
-	//	if err != nil {
-	//		return diag.FromErr(fmt.Errorf("creating new groups: %w", err))
-	//	}
-	//
-	//	if resp.StatusCode() != http.StatusOK {
-	//		return diag.FromErr(fmt.Errorf("batch create new groups failed with status %d: %s", resp.StatusCode(), string(resp.Body)))
-	//	}
-	//
-	//	if resp.JSON200 == nil || resp.JSON200.Groups == nil {
-	//		return diag.FromErr(fmt.Errorf("unexpected empty response from batch create"))
-	//	}
-	//}
+	client := meta.(*ProviderConfig).organizationManagementClient
+	enterpriseID := data.Get(FieldEnterpriseGroupEnterpriseID).(string)
+	groupID := data.Id()
 
-	// Handle modifications
-	//if len(changes.toUpdate) > 0 {
-	//	tflog.Debug(ctx, "Updating groups", map[string]any{"count": len(changes.toUpdate)})
-	//	updateRequest := &organization_management.BatchUpdateEnterpriseGroupsRequest{
-	//		EnterpriseId: enterpriseID,
-	//		Requests:     changes.toUpdate,
-	//	}
-	//
-	//	resp, err := client.EnterpriseAPIBatchUpdateEnterpriseGroupsWithResponse(ctx, enterpriseID, *updateRequest)
-	//	if err != nil {
-	//		return diag.FromErr(fmt.Errorf("updating modified groups: %w", err))
-	//	}
-	//
-	//	if resp.StatusCode() != http.StatusOK {
-	//		return diag.FromErr(fmt.Errorf("batch update modified groups failed with status %d: %s", resp.StatusCode(), string(resp.Body)))
-	//	}
-	//}
+	if data.HasChanges(
+		FieldEnterpriseGroupName,
+		FieldEnterpriseGroupDescription,
+		FieldEnterpriseGroupMembers,
+		FieldEnterpriseGroupRoleBindings,
+	) {
+		tflog.Debug(ctx, "Updating enterprise group", map[string]any{"group_id": groupID})
+
+		var members []organization_management.BatchUpdateEnterpriseGroupsRequestMember
+		if membersData, ok := data.Get(FieldEnterpriseGroupMembers).([]any); ok {
+			for _, memberWrapper := range membersData {
+				if memberWrapper == nil {
+					continue
+				}
+
+				memberWrapperMap, ok := memberWrapper.(map[string]any)
+				if !ok {
+					return diag.FromErr(fmt.Errorf("invalid member configuration: expected object, got %T", memberWrapper))
+				}
+
+				membersDataNested, ok := memberWrapperMap[FieldEnterpriseGroupsMember].([]any)
+				if !ok || len(membersDataNested) == 0 {
+					continue
+				}
+
+				for _, memberData := range membersDataNested {
+					if memberData == nil {
+						continue
+					}
+
+					member, ok := memberData.(map[string]any)
+					if !ok {
+						return diag.FromErr(fmt.Errorf("invalid member data: expected object, got %T", memberData))
+					}
+
+					memberKind, ok := member[FieldEnterpriseGroupMemberKind].(string)
+					if !ok {
+						return diag.FromErr(fmt.Errorf("member missing required 'kind' field"))
+					}
+
+					memberID, ok := member[FieldEnterpriseGroupMemberID].(string)
+					if !ok {
+						return diag.FromErr(fmt.Errorf("member missing required 'id' field"))
+					}
+
+					var kind organization_management.BatchUpdateEnterpriseGroupsRequestMemberKind
+					switch memberKind {
+					case EnterpriseGroupMemberKindUser:
+						kind = organization_management.BatchUpdateEnterpriseGroupsRequestMemberKindUSER
+					case EnterpriseGroupMemberKindServiceAccount:
+						kind = organization_management.BatchUpdateEnterpriseGroupsRequestMemberKindSERVICEACCOUNT
+					default:
+						kind = organization_management.BatchUpdateEnterpriseGroupsRequestMemberKindSUBJECTKINDUNSPECIFIED
+					}
+
+					members = append(members, organization_management.BatchUpdateEnterpriseGroupsRequestMember{
+						Kind: kind,
+						Id:   memberID,
+					})
+				}
+			}
+		}
+
+		var roleBindings []organization_management.BatchUpdateEnterpriseGroupsRequestRoleBinding
+		if bindingsData, ok := data.Get(FieldEnterpriseGroupRoleBindings).([]any); ok {
+			for _, bindingWrapper := range bindingsData {
+				if bindingWrapper == nil {
+					continue
+				}
+
+				bindingWrapperMap, ok := bindingWrapper.(map[string]any)
+				if !ok {
+					return diag.FromErr(fmt.Errorf("invalid role binding configuration: expected object, got %T", bindingWrapper))
+				}
+
+				bindingsDataNested, ok := bindingWrapperMap[FieldEnterpriseGroupRoleBinding].([]any)
+				if !ok || len(bindingsDataNested) == 0 {
+					continue
+				}
+
+				for _, bindingData := range bindingsDataNested {
+					if bindingData == nil {
+						continue
+					}
+
+					binding, ok := bindingData.(map[string]any)
+					if !ok {
+						return diag.FromErr(fmt.Errorf("invalid role binding data: expected object, got %T", bindingData))
+					}
+
+					rbName, ok := binding[FieldEnterpriseGroupRoleBindingName].(string)
+					if !ok {
+						return diag.FromErr(fmt.Errorf("role binding missing required 'name' field"))
+					}
+
+					rbRoleID, ok := binding[FieldEnterpriseGroupRoleBindingRoleID].(string)
+					if !ok {
+						return diag.FromErr(fmt.Errorf("role binding missing required 'role_id' field"))
+					}
+
+					var rbScopes []organization_management.Scope
+					if scopesData, ok := binding[FieldEnterpriseGroupRoleBindingScopes].([]any); ok {
+						for _, scopeWrapper := range scopesData {
+							if scopeWrapper == nil {
+								continue
+							}
+
+							scopeWrapperMap, ok := scopeWrapper.(map[string]any)
+							if !ok {
+								return diag.FromErr(fmt.Errorf("invalid scope configuration: expected object, got %T", scopeWrapper))
+							}
+
+							scopesDataNested, ok := scopeWrapperMap[FieldEnterpriseGroupScope].([]any)
+							if !ok || len(scopesDataNested) == 0 {
+								continue
+							}
+
+							for _, scopeData := range scopesDataNested {
+								if scopeData == nil {
+									continue
+								}
+
+								scope, ok := scopeData.(map[string]any)
+								if !ok {
+									return diag.FromErr(fmt.Errorf("invalid scope data: expected object, got %T", scopeData))
+								}
+
+								orgID, _ := scope[FieldEnterpriseGroupScopeOrganization].(string)
+								clusterID, _ := scope[FieldEnterpriseGroupScopeCluster].(string)
+
+								if orgID != "" {
+									rbScopes = append(rbScopes, organization_management.Scope{
+										Organization: &organization_management.OrganizationScope{
+											Id: orgID,
+										},
+									})
+								}
+
+								if clusterID != "" {
+									rbScopes = append(rbScopes, organization_management.Scope{
+										Cluster: &organization_management.ClusterScope{
+											Id: clusterID,
+										},
+									})
+								}
+							}
+						}
+					}
+
+					rbID := ""
+					if id, ok := binding[FieldEnterpriseGroupRoleBindingID].(string); ok && id != "" {
+						rbID = id
+					}
+
+					roleBindings = append(roleBindings, organization_management.BatchUpdateEnterpriseGroupsRequestRoleBinding{
+						Id:     rbID,
+						Name:   rbName,
+						RoleId: rbRoleID,
+						Scopes: rbScopes,
+					})
+				}
+			}
+		}
+
+		groupName, ok := data.Get(FieldEnterpriseGroupName).(string)
+		if !ok {
+			return diag.FromErr(fmt.Errorf("group name is required for group %s", groupID))
+		}
+
+		orgID, ok := data.Get(FieldEnterpriseGroupOrganizationID).(string)
+		if !ok {
+			return diag.FromErr(fmt.Errorf("organization ID is required for group %s", groupID))
+		}
+
+		description, ok := data.GetOk(FieldEnterpriseGroupDescription)
+		if !ok {
+			description = ""
+		}
+		descriptionStr := description.(string)
+
+		updateRequest := organization_management.BatchUpdateEnterpriseGroupsRequest{
+			EnterpriseId: enterpriseID,
+			Requests: []organization_management.BatchUpdateEnterpriseGroupsRequestUpdateGroupRequest{
+				{
+					Id:             groupID,
+					Name:           groupName,
+					OrganizationId: orgID,
+					Description:    descriptionStr,
+					Members:        members,
+					RoleBindings:   roleBindings,
+				},
+			},
+		}
+
+		resp, err := client.EnterpriseAPIBatchUpdateEnterpriseGroupsWithResponse(
+			ctx,
+			enterpriseID,
+			updateRequest,
+		)
+		tflog.Info(ctx, "Batch update request", map[string]any{
+			"request": updateRequest,
+			"headers": resp.HTTPResponse.Header,
+		})
+		if err = sdk.CheckOKResponse(resp, err); err != nil {
+			return diag.FromErr(fmt.Errorf("batch update enterprise groups failed: %w", err))
+		}
+
+		tflog.Debug(ctx, "Enterprise group updated successfully", map[string]any{"group_id": groupID})
+	}
 
 	return resourceEnterpriseGroupRead(ctx, data, meta)
 }
@@ -1046,556 +1189,4 @@ func setEnterpriseGroupsData(
 	}
 
 	return nil
-}
-
-// EnterpriseGroupsChanges represents the changes needed during an update operation
-type EnterpriseGroupsChanges struct {
-	toCreate []organization_management.BatchCreateEnterpriseGroupsRequestGroup
-	toUpdate []organization_management.BatchUpdateEnterpriseGroupsRequestUpdateGroupRequest
-	toDelete []organization_management.BatchDeleteEnterpriseGroupsRequestDeleteGroupRequest
-}
-
-//func getGroupChanges(ctx context.Context, data *schema.ResourceData) (*EnterpriseGroupsChanges, error) {
-//	changes := &EnterpriseGroupsChanges{
-//		toCreate: []organization_management.BatchCreateEnterpriseGroupsRequestGroup{},
-//		toUpdate: []organization_management.BatchUpdateEnterpriseGroupsRequestUpdateGroupRequest{},
-//		toDelete: []organization_management.BatchDeleteEnterpriseGroupsRequestDeleteGroupRequest{},
-//	}
-//
-//	if !data.HasChange(FieldEnterpriseGroupsGroups) {
-//		tflog.Debug(ctx, "No changes detected in enterprise groups.")
-//		return changes, nil
-//	}
-//
-//	oldValue, newValue := data.GetChange(FieldEnterpriseGroupsGroups)
-//
-//	tflog.Info(ctx, "Old groups data", map[string]any{"old": oldValue})
-//	tflog.Info(ctx, "New groups data", map[string]any{"new": newValue})
-//
-//	oldGroupsList, ok := oldValue.([]any)
-//	if !ok {
-//		oldGroupsList = []any{}
-//	}
-//
-//	newGroupsList, ok := newValue.([]any)
-//	if !ok {
-//		newGroupsList = []any{}
-//	}
-//
-//	type groupKey struct {
-//		orgID string
-//		name  string
-//	}
-//
-//	// Normalizes a group map for comparison by removing computed fields like 'id'.
-//	normalizeGroupForComparison := func(group map[string]any) map[string]any {
-//		// Deep copy to avoid modifying the state maps.
-//		normalized := make(map[string]any)
-//		for k, v := range group {
-//			normalized[k] = v
-//		}
-//		delete(normalized, FieldEnterpriseGroupID)
-//
-//		if rbsList, ok := normalized[FieldEnterpriseGroupRoleBindings].([]any); ok {
-//			newRbsList := make([]any, 0, len(rbsList))
-//			for _, rbsItem := range rbsList {
-//				rbsWrapper, ok := rbsItem.(map[string]any)
-//				if !ok {
-//					continue
-//				}
-//				rbList, ok := rbsWrapper[FieldEnterpriseGroupRoleBinding].([]any)
-//				if !ok {
-//					continue
-//				}
-//
-//				newRbWrapper := make(map[string]any)
-//				newRbListContents := make([]any, 0, len(rbList))
-//				for _, rbItem := range rbList {
-//					rbMap, ok := rbItem.(map[string]any)
-//					if !ok {
-//						continue
-//					}
-//					newRbMap := make(map[string]any)
-//					for k, v := range rbMap {
-//						newRbMap[k] = v
-//					}
-//					delete(newRbMap, FieldEnterpriseGroupRoleBindingID)
-//					newRbListContents = append(newRbListContents, newRbMap)
-//				}
-//				newRbWrapper[FieldEnterpriseGroupRoleBinding] = newRbListContents
-//				newRbsList = append(newRbsList, newRbWrapper)
-//			}
-//			normalized[FieldEnterpriseGroupRoleBindings] = newRbsList
-//		}
-//
-//		return normalized
-//	}
-//
-//	extractGroupsToCompositeKeyMap := func(list []any) (map[groupKey]map[string]any, error) {
-//		groupsMap := make(map[groupKey]map[string]any)
-//		for _, groupData := range list {
-//			if groupData == nil {
-//				continue
-//			}
-//			groupWrapper, ok := groupData.(map[string]any)
-//			if !ok {
-//				continue
-//			}
-//			groupsData, ok := groupWrapper[FieldEnterpriseGroupsGroup].([]any)
-//			if !ok || len(groupsData) == 0 {
-//				continue
-//			}
-//			for _, groupDataNested := range groupsData {
-//				if groupDataNested == nil {
-//					continue
-//				}
-//				group, ok := groupDataNested.(map[string]any)
-//				if !ok {
-//					continue
-//				}
-//				name, ok := group[FieldEnterpriseGroupName].(string)
-//				if !ok || name == "" {
-//					return nil, fmt.Errorf("group found in state without a name")
-//				}
-//				orgID, ok := group[FieldEnterpriseGroupOrganizationID].(string)
-//				if !ok || orgID == "" {
-//					return nil, fmt.Errorf("group '%s' found in state without an organization_id", name)
-//				}
-//				key := groupKey{orgID: orgID, name: name}
-//				groupsMap[key] = group
-//			}
-//		}
-//		return groupsMap, nil
-//	}
-//
-//	oldGroupsMap, err := extractGroupsToCompositeKeyMap(oldGroupsList)
-//	if err != nil {
-//		return nil, err
-//	}
-//	newGroupsMap, err := extractGroupsToCompositeKeyMap(newGroupsList)
-//	if err != nil {
-//		return nil, err
-//	}
-//
-//	for key, newGroup := range newGroupsMap {
-//		if oldGroup, exists := oldGroupsMap[key]; exists {
-//			normalizedOld := normalizeGroupForComparison(oldGroup)
-//			normalizedNew := normalizeGroupForComparison(newGroup)
-//
-//			if !reflect.DeepEqual(normalizedOld, normalizedNew) {
-//				groupID, ok := oldGroup[FieldEnterpriseGroupID].(string)
-//				if !ok || groupID == "" {
-//					return nil, fmt.Errorf("group '%s' is present in old state but missing an ID", key.name)
-//				}
-//				updateRequest, err := buildUpdateRequestForGroup(groupID, newGroup)
-//				if err != nil {
-//					return nil, fmt.Errorf("building update request for group %s: %w", groupID, err)
-//				}
-//				changes.toUpdate = append(changes.toUpdate, *updateRequest)
-//			}
-//			delete(oldGroupsMap, key)
-//		} else {
-//			createRequest, err := buildCreateRequestForGroup(newGroup)
-//			if err != nil {
-//				return nil, fmt.Errorf("building create request for new group '%s': %w", key.name, err)
-//			}
-//			changes.toCreate = append(changes.toCreate, *createRequest)
-//		}
-//	}
-//
-//	for _, groupToDelete := range oldGroupsMap {
-//		groupID, ok := groupToDelete[FieldEnterpriseGroupID].(string)
-//		if !ok || groupID == "" {
-//			return nil, fmt.Errorf("group to be deleted is missing an ID from state")
-//		}
-//		orgID, ok := groupToDelete[FieldEnterpriseGroupOrganizationID].(string)
-//		if !ok || orgID == "" {
-//			return nil, fmt.Errorf("group to be deleted (%s) is missing an organization_id from state", groupID)
-//		}
-//		changes.toDelete = append(changes.toDelete, organization_management.BatchDeleteEnterpriseGroupsRequestDeleteGroupRequest{
-//			Id:             groupID,
-//			OrganizationId: orgID,
-//		})
-//	}
-//
-//	tflog.Info(ctx, "TO CREATE:", map[string]any{"to_create": changes.toCreate})
-//	tflog.Info(ctx, "TO UPDATE:", map[string]any{"to_update": changes.toUpdate})
-//	tflog.Info(ctx, "TO DELETE:", map[string]any{"to_delete": changes.toDelete})
-//
-//	return changes, nil
-//}
-
-// buildUpdateRequestForGroup creates an update request for a single group
-func buildUpdateRequestForGroup(groupID string, group map[string]any) (*organization_management.BatchUpdateEnterpriseGroupsRequestUpdateGroupRequest, error) {
-	// Convert members with nested structure
-	var members []organization_management.BatchUpdateEnterpriseGroupsRequestMember
-	if membersData, ok := group[FieldEnterpriseGroupMembers].([]any); ok {
-		for _, memberWrapper := range membersData {
-			if memberWrapper == nil {
-				continue
-			}
-
-			memberWrapperMap, ok := memberWrapper.(map[string]any)
-			if !ok {
-				continue
-			}
-
-			// Navigate to the nested member object
-			membersDataNested, ok := memberWrapperMap[FieldEnterpriseGroupsMember].([]any)
-			if !ok || len(membersDataNested) == 0 {
-				continue
-			}
-
-			// Process all members in the nested array
-			for _, memberData := range membersDataNested {
-				if memberData == nil {
-					continue
-				}
-
-				member, ok := memberData.(map[string]any)
-				if !ok {
-					continue
-				}
-
-				memberKind, ok := member[FieldEnterpriseGroupMemberKind].(string)
-				if !ok {
-					continue
-				}
-
-				memberID, ok := member[FieldEnterpriseGroupMemberID].(string)
-				if !ok {
-					continue
-				}
-
-				var kind organization_management.BatchUpdateEnterpriseGroupsRequestMemberKind
-				switch memberKind {
-				case EnterpriseGroupMemberKindUser:
-					kind = organization_management.BatchUpdateEnterpriseGroupsRequestMemberKindUSER
-				case EnterpriseGroupMemberKindServiceAccount:
-					kind = organization_management.BatchUpdateEnterpriseGroupsRequestMemberKindSERVICEACCOUNT
-				default:
-					kind = organization_management.BatchUpdateEnterpriseGroupsRequestMemberKindSUBJECTKINDUNSPECIFIED
-				}
-
-				members = append(members, organization_management.BatchUpdateEnterpriseGroupsRequestMember{
-					Kind: kind,
-					Id:   memberID,
-				})
-			}
-		}
-	}
-
-	// Convert role bindings
-	var roleBindings []organization_management.BatchUpdateEnterpriseGroupsRequestRoleBinding
-	if bindingsData, ok := group[FieldEnterpriseGroupRoleBindings].([]any); ok {
-		for _, bindingWrapper := range bindingsData {
-			if bindingWrapper == nil {
-				continue
-			}
-
-			bindingWrapperMap, ok := bindingWrapper.(map[string]any)
-			if !ok {
-				continue
-			}
-
-			// Navigate to the nested role binding object
-			bindingsDataNested, ok := bindingWrapperMap[FieldEnterpriseGroupRoleBinding].([]any)
-			if !ok || len(bindingsDataNested) == 0 {
-				continue
-			}
-
-			// Process all role bindings in the nested array
-			for _, bindingData := range bindingsDataNested {
-				if bindingData == nil {
-					continue
-				}
-
-				binding, ok := bindingData.(map[string]any)
-				if !ok {
-					continue
-				}
-
-				bindingName, ok := binding[FieldEnterpriseGroupRoleBindingName].(string)
-				if !ok {
-					continue
-				}
-
-				bindingRoleID, ok := binding[FieldEnterpriseGroupRoleBindingRoleID].(string)
-				if !ok {
-					continue
-				}
-
-				var scopes []organization_management.Scope
-				if scopesData, ok := binding[FieldEnterpriseGroupRoleBindingScopes].([]any); ok {
-					for _, scopeWrapper := range scopesData {
-						if scopeWrapper == nil {
-							continue
-						}
-
-						scopeWrapperMap, ok := scopeWrapper.(map[string]any)
-						if !ok {
-							continue
-						}
-
-						// Navigate to the nested scope object
-						scopesDataNested, ok := scopeWrapperMap[FieldEnterpriseGroupScope].([]any)
-						if !ok || len(scopesDataNested) == 0 {
-							continue
-						}
-
-						// Process all scopes in the nested array
-						for _, scopeData := range scopesDataNested {
-							if scopeData == nil {
-								continue
-							}
-
-							scope, ok := scopeData.(map[string]any)
-							if !ok {
-								continue
-							}
-
-							orgID, _ := scope[FieldEnterpriseGroupScopeOrganization].(string)
-							clusterID, _ := scope[FieldEnterpriseGroupScopeCluster].(string)
-
-							if orgID != "" {
-								scopes = append(scopes, organization_management.Scope{
-									Organization: &organization_management.OrganizationScope{
-										Id: orgID,
-									},
-								})
-							}
-
-							if clusterID != "" {
-								scopes = append(scopes, organization_management.Scope{
-									Cluster: &organization_management.ClusterScope{
-										Id: clusterID,
-									},
-								})
-							}
-						}
-					}
-				}
-
-				bindingID := ""
-				if id, ok := binding[FieldEnterpriseGroupRoleBindingID].(string); ok && id != "" {
-					bindingID = id
-				}
-
-				roleBindings = append(roleBindings, organization_management.BatchUpdateEnterpriseGroupsRequestRoleBinding{
-					Id:     bindingID,
-					Name:   bindingName,
-					RoleId: bindingRoleID,
-					Scopes: scopes,
-				})
-			}
-		}
-	}
-
-	// Safe extraction of required fields with error handling
-	groupName, ok := group[FieldEnterpriseGroupName].(string)
-	if !ok {
-		return nil, fmt.Errorf("group name is required for group %s", groupID)
-	}
-
-	orgID, ok := group[FieldEnterpriseGroupOrganizationID].(string)
-	if !ok {
-		return nil, fmt.Errorf("organization ID is required for group %s", groupID)
-	}
-
-	groupDesc, _ := group[FieldEnterpriseGroupDescription].(string)
-
-	return &organization_management.BatchUpdateEnterpriseGroupsRequestUpdateGroupRequest{
-		Id:             groupID,
-		Name:           groupName,
-		OrganizationId: orgID,
-		Description:    groupDesc,
-		Members:        members,
-		RoleBindings:   roleBindings,
-	}, nil
-}
-
-// buildCreateRequestForGroup creates a create request for a single new group
-func buildCreateRequestForGroup(group map[string]any) (*organization_management.BatchCreateEnterpriseGroupsRequestGroup, error) {
-	var members []organization_management.BatchCreateEnterpriseGroupsRequestMember
-	if membersData, ok := group[FieldEnterpriseGroupMembers].([]any); ok {
-		for _, memberWrapper := range membersData {
-			if memberWrapper == nil {
-				continue
-			}
-
-			memberWrapperMap, ok := memberWrapper.(map[string]any)
-			if !ok {
-				continue
-			}
-
-			// Navigate to the nested member object
-			membersDataNested, ok := memberWrapperMap[FieldEnterpriseGroupsMember].([]any)
-			if !ok || len(membersDataNested) == 0 {
-				continue
-			}
-
-			// Process all members in the nested array
-			for _, memberData := range membersDataNested {
-				if memberData == nil {
-					continue
-				}
-
-				member, ok := memberData.(map[string]any)
-				if !ok {
-					continue
-				}
-
-				memberKind, ok := member[FieldEnterpriseGroupMemberKind].(string)
-				if !ok {
-					continue
-				}
-
-				memberID, ok := member[FieldEnterpriseGroupMemberID].(string)
-				if !ok {
-					continue
-				}
-
-				var kind organization_management.BatchCreateEnterpriseGroupsRequestMemberKind
-				switch memberKind {
-				case EnterpriseGroupMemberKindUser:
-					kind = organization_management.BatchCreateEnterpriseGroupsRequestMemberKindSUBJECTKINDUSER
-				case EnterpriseGroupMemberKindServiceAccount:
-					kind = organization_management.BatchCreateEnterpriseGroupsRequestMemberKindSUBJECTKINDSERVICEACCOUNT
-				default:
-					kind = organization_management.BatchCreateEnterpriseGroupsRequestMemberKindSUBJECTKINDUNSPECIFIED
-				}
-
-				members = append(members, organization_management.BatchCreateEnterpriseGroupsRequestMember{
-					Kind: &kind,
-					Id:   lo.ToPtr(memberID),
-				})
-			}
-		}
-	}
-
-	var roleBindings *[]organization_management.BatchCreateEnterpriseGroupsRequestRoleBinding
-	if bindingsData, ok := group[FieldEnterpriseGroupRoleBindings].([]any); ok && len(bindingsData) > 0 {
-		var bindings []organization_management.BatchCreateEnterpriseGroupsRequestRoleBinding
-
-		for _, bindingWrapper := range bindingsData {
-			if bindingWrapper == nil {
-				continue
-			}
-
-			bindingWrapperMap, ok := bindingWrapper.(map[string]any)
-			if !ok {
-				continue
-			}
-
-			// Navigate to the nested role binding object
-			bindingsDataNested, ok := bindingWrapperMap[FieldEnterpriseGroupRoleBinding].([]any)
-			if !ok || len(bindingsDataNested) == 0 {
-				continue
-			}
-
-			// Process all role bindings in the nested array
-			for _, bindingData := range bindingsDataNested {
-				if bindingData == nil {
-					continue
-				}
-
-				binding, ok := bindingData.(map[string]any)
-				if !ok {
-					continue
-				}
-
-				bindingName, ok := binding[FieldEnterpriseGroupRoleBindingName].(string)
-				if !ok {
-					continue
-				}
-
-				bindingRoleID, ok := binding[FieldEnterpriseGroupRoleBindingRoleID].(string)
-				if !ok {
-					continue
-				}
-
-				var scopes []organization_management.Scope
-				if scopesData, ok := binding[FieldEnterpriseGroupRoleBindingScopes].([]any); ok {
-					for _, scopeWrapper := range scopesData {
-						if scopeWrapper == nil {
-							continue
-						}
-
-						scopeWrapperMap, ok := scopeWrapper.(map[string]any)
-						if !ok {
-							continue
-						}
-
-						// Navigate to the nested scope object
-						scopesDataNested, ok := scopeWrapperMap[FieldEnterpriseGroupScope].([]any)
-						if !ok || len(scopesDataNested) == 0 {
-							continue
-						}
-
-						// Process all scopes in the nested array
-						for _, scopeData := range scopesDataNested {
-							if scopeData == nil {
-								continue
-							}
-
-							scope, ok := scopeData.(map[string]any)
-							if !ok {
-								continue
-							}
-
-							orgID, _ := scope[FieldEnterpriseGroupScopeOrganization].(string)
-							clusterID, _ := scope[FieldEnterpriseGroupScopeCluster].(string)
-
-							if orgID != "" {
-								scopes = append(scopes, organization_management.Scope{
-									Organization: &organization_management.OrganizationScope{
-										Id: orgID,
-									},
-								})
-							}
-
-							if clusterID != "" {
-								scopes = append(scopes, organization_management.Scope{
-									Cluster: &organization_management.ClusterScope{
-										Id: clusterID,
-									},
-								})
-							}
-						}
-					}
-				}
-
-				bindings = append(bindings, organization_management.BatchCreateEnterpriseGroupsRequestRoleBinding{
-					Name:   bindingName,
-					RoleId: bindingRoleID,
-					Scopes: scopes,
-				})
-			}
-		}
-
-		roleBindings = &bindings
-	}
-
-	groupName, ok := group[FieldEnterpriseGroupName].(string)
-	if !ok {
-		return nil, fmt.Errorf("group name is required")
-	}
-
-	orgID, ok := group[FieldEnterpriseGroupOrganizationID].(string)
-	if !ok {
-		return nil, fmt.Errorf("organization ID is required")
-	}
-
-	groupRequest := organization_management.BatchCreateEnterpriseGroupsRequestGroup{
-		Name:           groupName,
-		OrganizationId: orgID,
-		Members:        members,
-		RoleBindings:   roleBindings,
-	}
-
-	if desc, ok := group[FieldEnterpriseGroupDescription].(string); ok && desc != "" {
-		groupRequest.Description = &desc
-	}
-
-	return &groupRequest, nil
 }
