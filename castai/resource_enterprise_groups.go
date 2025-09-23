@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"reflect"
 	"strings"
 	"time"
 
@@ -437,25 +438,27 @@ func resourceEnterpriseGroupsUpdate(ctx context.Context, data *schema.ResourceDa
 		return diag.FromErr(fmt.Errorf("analyzing group changes: %w", err))
 	}
 
-	//if len(changes.toDelete) > 0 {
-	//	log.Printf("[INFO] Deleting group changes for enterprise ID %s: %d groups to delete", enterpriseID, len(changes.toDelete))
-	//
-	//	deleteRequest := &organization_management.BatchDeleteEnterpriseGroupsRequest{
-	//		EnterpriseId: enterpriseID,
-	//		Requests:     changes.toDelete,
-	//	}
-	//
-	//	resp, err := client.EnterpriseAPIBatchDeleteEnterpriseGroupsWithResponse(ctx, enterpriseID, *deleteRequest)
-	//	if err != nil {
-	//		return diag.FromErr(fmt.Errorf("deleting removed groups: %w", err))
-	//	}
-	//
-	//	if resp.StatusCode() != http.StatusOK && resp.StatusCode() != http.StatusNotFound {
-	//		return diag.FromErr(fmt.Errorf("batch delete removed groups failed with status %d: %s", resp.StatusCode(), string(resp.Body)))
-	//	}
-	//}
+	tflog.Debug(ctx, "Updating enterprise groups", map[string]any{"changes": changes})
+
+	if len(changes.toDelete) > 0 {
+		tflog.Debug(ctx, "Deleting groups", map[string]any{"count": len(changes.toDelete)})
+		deleteRequest := &organization_management.BatchDeleteEnterpriseGroupsRequest{
+			EnterpriseId: enterpriseID,
+			Requests:     changes.toDelete,
+		}
+
+		resp, err := client.EnterpriseAPIBatchDeleteEnterpriseGroupsWithResponse(ctx, enterpriseID, *deleteRequest)
+		if err != nil {
+			return diag.FromErr(fmt.Errorf("deleting removed groups: %w", err))
+		}
+
+		if resp.StatusCode() != http.StatusOK && resp.StatusCode() != http.StatusNotFound {
+			return diag.FromErr(fmt.Errorf("batch delete removed groups failed with status %d: %s", resp.StatusCode(), string(resp.Body)))
+		}
+	}
 
 	if len(changes.toCreate) > 0 {
+		tflog.Debug(ctx, "Creating groups", map[string]any{"count": len(changes.toCreate)})
 		createRequest := &organization_management.BatchCreateEnterpriseGroupsRequest{
 			EnterpriseId: enterpriseID,
 			Requests:     changes.toCreate,
@@ -473,35 +476,26 @@ func resourceEnterpriseGroupsUpdate(ctx context.Context, data *schema.ResourceDa
 		if resp.JSON200 == nil || resp.JSON200.Groups == nil {
 			return diag.FromErr(fmt.Errorf("unexpected empty response from batch create"))
 		}
-
-		groups, err := convertBatchCreateEnterpriseGroupsResponseGroup(*resp.JSON200.Groups...)
-		if err != nil {
-			return diag.FromErr(fmt.Errorf("converting created groups: %w", err))
-		}
-
-		if err = setEnterpriseGroupsData(data, groups); err != nil {
-			return diag.FromErr(fmt.Errorf("failed to set created groups data: %w", err))
-		}
 	}
 
 	// Handle modifications
-	if len(changes.toUpdate) > 0 {
-		updateRequest := &organization_management.BatchUpdateEnterpriseGroupsRequest{
-			EnterpriseId: enterpriseID,
-			Requests:     changes.toUpdate,
-		}
+	//if len(changes.toUpdate) > 0 {
+	//	tflog.Debug(ctx, "Updating groups", map[string]any{"count": len(changes.toUpdate)})
+	//	updateRequest := &organization_management.BatchUpdateEnterpriseGroupsRequest{
+	//		EnterpriseId: enterpriseID,
+	//		Requests:     changes.toUpdate,
+	//	}
+	//
+	//	resp, err := client.EnterpriseAPIBatchUpdateEnterpriseGroupsWithResponse(ctx, enterpriseID, *updateRequest)
+	//	if err != nil {
+	//		return diag.FromErr(fmt.Errorf("updating modified groups: %w", err))
+	//	}
+	//
+	//	if resp.StatusCode() != http.StatusOK {
+	//		return diag.FromErr(fmt.Errorf("batch update modified groups failed with status %d: %s", resp.StatusCode(), string(resp.Body)))
+	//	}
+	//}
 
-		resp, err := client.EnterpriseAPIBatchUpdateEnterpriseGroupsWithResponse(ctx, enterpriseID, *updateRequest)
-		if err != nil {
-			return diag.FromErr(fmt.Errorf("updating modified groups: %w", err))
-		}
-
-		if resp.StatusCode() != http.StatusOK {
-			return diag.FromErr(fmt.Errorf("batch update modified groups failed with status %d: %s", resp.StatusCode(), string(resp.Body)))
-		}
-	}
-
-	// Refresh the entire state by reading current data
 	return resourceEnterpriseGroupsRead(ctx, data, meta)
 }
 
@@ -521,14 +515,16 @@ func resourceEnterpriseGroupsDelete(ctx context.Context, data *schema.ResourceDa
 		return diag.FromErr(fmt.Errorf("building delete request: %w", err))
 	}
 
-	// Call batch delete API
-	resp, err := client.EnterpriseAPIBatchDeleteEnterpriseGroupsWithResponse(ctx, enterpriseID, *deleteRequest)
-	if err != nil {
-		return diag.FromErr(fmt.Errorf("calling batch delete enterprise groups: %w", err))
-	}
+	if deleteRequest != nil && len(deleteRequest.Requests) > 0 {
+		// Call batch delete API
+		resp, err := client.EnterpriseAPIBatchDeleteEnterpriseGroupsWithResponse(ctx, enterpriseID, *deleteRequest)
+		if err != nil {
+			return diag.FromErr(fmt.Errorf("calling batch delete enterprise groups: %w", err))
+		}
 
-	if resp.StatusCode() != http.StatusOK {
-		return diag.FromErr(fmt.Errorf("batch delete enterprise groups failed with status %d: %s", resp.StatusCode(), string(resp.Body)))
+		if resp.StatusCode() != http.StatusOK {
+			return diag.FromErr(fmt.Errorf("batch delete enterprise groups failed with status %d: %s", resp.StatusCode(), string(resp.Body)))
+		}
 	}
 
 	// Clear the resource ID
@@ -1030,7 +1026,7 @@ func getGroupChanges(ctx context.Context, data *schema.ResourceData) (*Enterpris
 	}
 
 	if !data.HasChange(FieldEnterpriseGroupsGroups) {
-		// No changes to groups
+		tflog.Debug(ctx, "No changes detected in enterprise groups.")
 		return changes, nil
 	}
 
@@ -1039,116 +1035,108 @@ func getGroupChanges(ctx context.Context, data *schema.ResourceData) (*Enterpris
 	tflog.Info(ctx, "Old groups data", map[string]any{"old": oldValue})
 	tflog.Info(ctx, "New groups data", map[string]any{"new": newValue})
 
-	oldGroups, ok := oldValue.([]any)
+	oldGroupsList, ok := oldValue.([]any)
 	if !ok {
-		oldGroups = []any{}
+		oldGroupsList = []any{}
 	}
 
-	newGroups, ok := newValue.([]any)
+	newGroupsList, ok := newValue.([]any)
 	if !ok {
-		newGroups = []any{}
+		newGroupsList = []any{}
 	}
 
-	oldGroupIDs := []string{}
-	oldGroupIDToGroup := make(map[string]map[string]any)
-	newGroupIDs := []string{}
-	newGroupIDToGroup := make(map[string]map[string]any)
+	type groupKey struct {
+		orgID string
+		name  string
+	}
 
-	for _, groupData := range oldGroups {
-		if groupData == nil {
-			continue
-		}
-
-		groupWrapper, ok := groupData.(map[string]any)
-		if !ok {
-			continue
-		}
-
-		// Navigate to the nested group objects
-		groupsData, ok := groupWrapper[FieldEnterpriseGroupsGroup].([]any)
-		if !ok || len(groupsData) == 0 {
-			continue
-		}
-
-		// Process all groups in the nested array
-		for _, groupDataNested := range groupsData {
-			if groupDataNested == nil {
+	extractGroupsToCompositeKeyMap := func(list []any) (map[groupKey]map[string]any, error) {
+		groupsMap := make(map[groupKey]map[string]any)
+		for _, groupData := range list {
+			if groupData == nil {
 				continue
 			}
-
-			group, ok := groupDataNested.(map[string]any)
+			groupWrapper, ok := groupData.(map[string]any)
 			if !ok {
 				continue
 			}
-
-			if groupID, ok := group[FieldEnterpriseGroupID].(string); ok && groupID != "" {
-				oldGroupIDs = append(oldGroupIDs, groupID)
-				oldGroupIDToGroup[groupID] = group
-			}
-		}
-	}
-
-	for _, groupData := range newGroups {
-		if groupData == nil {
-			continue
-		}
-
-		groupWrapper, ok := groupData.(map[string]any)
-		if !ok {
-			continue
-		}
-
-		// Navigate to the nested group objects
-		groupsData, ok := groupWrapper[FieldEnterpriseGroupsGroup].([]any)
-		if !ok || len(groupsData) == 0 {
-			continue
-		}
-
-		// Process all groups in the nested array
-		for _, groupDataNested := range groupsData {
-			if groupDataNested == nil {
+			groupsData, ok := groupWrapper[FieldEnterpriseGroupsGroup].([]any)
+			if !ok || len(groupsData) == 0 {
 				continue
 			}
-
-			group, ok := groupDataNested.(map[string]any)
-			if !ok {
-				continue
-			}
-
-			if groupID, ok := group[FieldEnterpriseGroupID].(string); ok && groupID != "" {
-				newGroupIDs = append(newGroupIDs, groupID)
-				newGroupIDToGroup[groupID] = group
-			} else {
-				// New group without ID - needs to be created
-				createRequest, err := buildCreateRequestForGroup(group)
-				if err != nil {
-					return nil, fmt.Errorf("building create request for new group: %w", err)
+			for _, groupDataNested := range groupsData {
+				if groupDataNested == nil {
+					continue
 				}
-				changes.toCreate = append(changes.toCreate, *createRequest)
+				group, ok := groupDataNested.(map[string]any)
+				if !ok {
+					continue
+				}
+				name, ok := group[FieldEnterpriseGroupName].(string)
+				if !ok || name == "" {
+					return nil, fmt.Errorf("group found in state without a name")
+				}
+				orgID, ok := group[FieldEnterpriseGroupOrganizationID].(string)
+				if !ok || orgID == "" {
+					return nil, fmt.Errorf("group '%s' found in state without an organization_id", name)
+				}
+				key := groupKey{orgID: orgID, name: name}
+				groupsMap[key] = group
 			}
 		}
+		return groupsMap, nil
 	}
 
-	for _, groupID := range lo.Intersect(oldGroupIDs, newGroupIDs) {
-		updateRequest, err := buildUpdateRequestForGroup(groupID, newGroupIDToGroup[groupID])
-		if err != nil {
-			return nil, fmt.Errorf("building update request for group %s: %w", groupID, err)
+	oldGroupsMap, err := extractGroupsToCompositeKeyMap(oldGroupsList)
+	if err != nil {
+		return nil, err
+	}
+	newGroupsMap, err := extractGroupsToCompositeKeyMap(newGroupsList)
+	if err != nil {
+		return nil, err
+	}
+
+	for key, newGroup := range newGroupsMap {
+		if oldGroup, exists := oldGroupsMap[key]; exists {
+			if !reflect.DeepEqual(oldGroup, newGroup) {
+				groupID, ok := oldGroup[FieldEnterpriseGroupID].(string)
+				if !ok || groupID == "" {
+					return nil, fmt.Errorf("group '%s' is present in old state but missing an ID", key.name)
+				}
+				updateRequest, err := buildUpdateRequestForGroup(groupID, newGroup)
+				if err != nil {
+					return nil, fmt.Errorf("building update request for group %s: %w", groupID, err)
+				}
+				changes.toUpdate = append(changes.toUpdate, *updateRequest)
+			}
+			delete(oldGroupsMap, key)
+		} else {
+			createRequest, err := buildCreateRequestForGroup(newGroup)
+			if err != nil {
+				return nil, fmt.Errorf("building create request for new group '%s': %w", key.name, err)
+			}
+			changes.toCreate = append(changes.toCreate, *createRequest)
 		}
-		changes.toUpdate = append(changes.toUpdate, *updateRequest)
 	}
 
-	toDeleteGroupIDs, _ := lo.Difference(oldGroupIDs, newGroupIDs)
-	for _, groupID := range toDeleteGroupIDs {
-		orgID, ok := oldGroupIDToGroup[groupID][FieldEnterpriseGroupOrganizationID].(string)
+	for _, groupToDelete := range oldGroupsMap {
+		groupID, ok := groupToDelete[FieldEnterpriseGroupID].(string)
+		if !ok || groupID == "" {
+			return nil, fmt.Errorf("group to be deleted is missing an ID from state")
+		}
+		orgID, ok := groupToDelete[FieldEnterpriseGroupOrganizationID].(string)
 		if !ok || orgID == "" {
-			return nil, fmt.Errorf("group %s in old state is missing organization_id", groupID)
+			return nil, fmt.Errorf("group to be deleted (%s) is missing an organization_id from state", groupID)
 		}
-
 		changes.toDelete = append(changes.toDelete, organization_management.BatchDeleteEnterpriseGroupsRequestDeleteGroupRequest{
 			Id:             groupID,
 			OrganizationId: orgID,
 		})
 	}
+
+	tflog.Info(ctx, "TO CREATE:", map[string]any{"to_create": changes.toCreate})
+	tflog.Info(ctx, "TO UPDATE:", map[string]any{"to_update": changes.toUpdate})
+	tflog.Info(ctx, "TO DELETE:", map[string]any{"to_delete": changes.toDelete})
 
 	return changes, nil
 }
