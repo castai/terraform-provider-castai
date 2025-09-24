@@ -868,226 +868,229 @@ func resourceEnterpriseGroupUpdate(ctx context.Context, data *schema.ResourceDat
 
 	tflog.Debug(ctx, "Updating enterprise group", map[string]any{"group_id": groupID})
 
-	if data.HasChanges(
+	if !data.HasChanges(
 		FieldEnterpriseGroupName,
 		FieldEnterpriseGroupDescription,
 		FieldEnterpriseGroupMembers,
 		FieldEnterpriseGroupRoleBindings,
 	) {
-		var members []organization_management.BatchUpdateEnterpriseGroupsRequestMember
-		if membersData, ok := data.Get(FieldEnterpriseGroupMembers).([]any); ok {
-			for _, memberWrapper := range membersData {
-				if memberWrapper == nil {
+		tflog.Debug(ctx, "No changes detected, skipping update", map[string]any{"group_id": groupID})
+		return nil
+	}
+
+	var members []organization_management.BatchUpdateEnterpriseGroupsRequestMember
+	if membersData, ok := data.Get(FieldEnterpriseGroupMembers).([]any); ok {
+		for _, memberWrapper := range membersData {
+			if memberWrapper == nil {
+				continue
+			}
+
+			memberWrapperMap, ok := memberWrapper.(map[string]any)
+			if !ok {
+				return diag.FromErr(fmt.Errorf("invalid member configuration: expected object, got %T", memberWrapper))
+			}
+
+			membersDataNested, ok := memberWrapperMap[FieldEnterpriseGroupsMember].([]any)
+			if !ok || len(membersDataNested) == 0 {
+				continue
+			}
+
+			for _, memberData := range membersDataNested {
+				if memberData == nil {
 					continue
 				}
 
-				memberWrapperMap, ok := memberWrapper.(map[string]any)
+				member, ok := memberData.(map[string]any)
 				if !ok {
-					return diag.FromErr(fmt.Errorf("invalid member configuration: expected object, got %T", memberWrapper))
+					return diag.FromErr(fmt.Errorf("invalid member data: expected object, got %T", memberData))
 				}
 
-				membersDataNested, ok := memberWrapperMap[FieldEnterpriseGroupsMember].([]any)
-				if !ok || len(membersDataNested) == 0 {
-					continue
+				memberKind, ok := member[FieldEnterpriseGroupMemberKind].(string)
+				if !ok {
+					return diag.FromErr(fmt.Errorf("member missing required 'kind' field"))
 				}
 
-				for _, memberData := range membersDataNested {
-					if memberData == nil {
-						continue
-					}
-
-					member, ok := memberData.(map[string]any)
-					if !ok {
-						return diag.FromErr(fmt.Errorf("invalid member data: expected object, got %T", memberData))
-					}
-
-					memberKind, ok := member[FieldEnterpriseGroupMemberKind].(string)
-					if !ok {
-						return diag.FromErr(fmt.Errorf("member missing required 'kind' field"))
-					}
-
-					memberID, ok := member[FieldEnterpriseGroupMemberID].(string)
-					if !ok {
-						return diag.FromErr(fmt.Errorf("member missing required 'id' field"))
-					}
-
-					var kind organization_management.BatchUpdateEnterpriseGroupsRequestMemberKind
-					switch memberKind {
-					case EnterpriseGroupMemberKindUser:
-						kind = organization_management.BatchUpdateEnterpriseGroupsRequestMemberKindUSER
-					case EnterpriseGroupMemberKindServiceAccount:
-						kind = organization_management.BatchUpdateEnterpriseGroupsRequestMemberKindSERVICEACCOUNT
-					default:
-						kind = organization_management.BatchUpdateEnterpriseGroupsRequestMemberKindSUBJECTKINDUNSPECIFIED
-					}
-
-					members = append(members, organization_management.BatchUpdateEnterpriseGroupsRequestMember{
-						Kind: kind,
-						Id:   memberID,
-					})
+				memberID, ok := member[FieldEnterpriseGroupMemberID].(string)
+				if !ok {
+					return diag.FromErr(fmt.Errorf("member missing required 'id' field"))
 				}
+
+				var kind organization_management.BatchUpdateEnterpriseGroupsRequestMemberKind
+				switch memberKind {
+				case EnterpriseGroupMemberKindUser:
+					kind = organization_management.BatchUpdateEnterpriseGroupsRequestMemberKindUSER
+				case EnterpriseGroupMemberKindServiceAccount:
+					kind = organization_management.BatchUpdateEnterpriseGroupsRequestMemberKindSERVICEACCOUNT
+				default:
+					kind = organization_management.BatchUpdateEnterpriseGroupsRequestMemberKindSUBJECTKINDUNSPECIFIED
+				}
+
+				members = append(members, organization_management.BatchUpdateEnterpriseGroupsRequestMember{
+					Kind: kind,
+					Id:   memberID,
+				})
 			}
 		}
+	}
 
-		var roleBindings []organization_management.BatchUpdateEnterpriseGroupsRequestRoleBinding
-		if bindingsData, ok := data.Get(FieldEnterpriseGroupRoleBindings).([]any); ok {
-			for _, bindingWrapper := range bindingsData {
-				if bindingWrapper == nil {
+	var roleBindings []organization_management.BatchUpdateEnterpriseGroupsRequestRoleBinding
+	if bindingsData, ok := data.Get(FieldEnterpriseGroupRoleBindings).([]any); ok {
+		for _, bindingWrapper := range bindingsData {
+			if bindingWrapper == nil {
+				continue
+			}
+
+			bindingWrapperMap, ok := bindingWrapper.(map[string]any)
+			if !ok {
+				return diag.FromErr(fmt.Errorf("invalid role binding configuration: expected object, got %T", bindingWrapper))
+			}
+
+			bindingsDataNested, ok := bindingWrapperMap[FieldEnterpriseGroupRoleBinding].([]any)
+			if !ok || len(bindingsDataNested) == 0 {
+				continue
+			}
+
+			for _, bindingData := range bindingsDataNested {
+				if bindingData == nil {
 					continue
 				}
 
-				bindingWrapperMap, ok := bindingWrapper.(map[string]any)
+				binding, ok := bindingData.(map[string]any)
 				if !ok {
-					return diag.FromErr(fmt.Errorf("invalid role binding configuration: expected object, got %T", bindingWrapper))
+					return diag.FromErr(fmt.Errorf("invalid role binding data: expected object, got %T", bindingData))
 				}
 
-				bindingsDataNested, ok := bindingWrapperMap[FieldEnterpriseGroupRoleBinding].([]any)
-				if !ok || len(bindingsDataNested) == 0 {
-					continue
+				rbName, ok := binding[FieldEnterpriseGroupRoleBindingName].(string)
+				if !ok {
+					return diag.FromErr(fmt.Errorf("role binding missing required 'name' field"))
 				}
 
-				for _, bindingData := range bindingsDataNested {
-					if bindingData == nil {
-						continue
-					}
+				rbRoleID, ok := binding[FieldEnterpriseGroupRoleBindingRoleID].(string)
+				if !ok {
+					return diag.FromErr(fmt.Errorf("role binding missing required 'role_id' field"))
+				}
 
-					binding, ok := bindingData.(map[string]any)
-					if !ok {
-						return diag.FromErr(fmt.Errorf("invalid role binding data: expected object, got %T", bindingData))
-					}
+				var rbScopes []organization_management.Scope
+				if scopesData, ok := binding[FieldEnterpriseGroupRoleBindingScopes].([]any); ok {
+					for _, scopeWrapper := range scopesData {
+						if scopeWrapper == nil {
+							continue
+						}
 
-					rbName, ok := binding[FieldEnterpriseGroupRoleBindingName].(string)
-					if !ok {
-						return diag.FromErr(fmt.Errorf("role binding missing required 'name' field"))
-					}
+						scopeWrapperMap, ok := scopeWrapper.(map[string]any)
+						if !ok {
+							return diag.FromErr(fmt.Errorf("invalid scope configuration: expected object, got %T", scopeWrapper))
+						}
 
-					rbRoleID, ok := binding[FieldEnterpriseGroupRoleBindingRoleID].(string)
-					if !ok {
-						return diag.FromErr(fmt.Errorf("role binding missing required 'role_id' field"))
-					}
+						scopesDataNested, ok := scopeWrapperMap[FieldEnterpriseGroupScope].([]any)
+						if !ok || len(scopesDataNested) == 0 {
+							continue
+						}
 
-					var rbScopes []organization_management.Scope
-					if scopesData, ok := binding[FieldEnterpriseGroupRoleBindingScopes].([]any); ok {
-						for _, scopeWrapper := range scopesData {
-							if scopeWrapper == nil {
+						for _, scopeData := range scopesDataNested {
+							if scopeData == nil {
 								continue
 							}
 
-							scopeWrapperMap, ok := scopeWrapper.(map[string]any)
+							scope, ok := scopeData.(map[string]any)
 							if !ok {
-								return diag.FromErr(fmt.Errorf("invalid scope configuration: expected object, got %T", scopeWrapper))
+								return diag.FromErr(fmt.Errorf("invalid scope data: expected object, got %T", scopeData))
 							}
 
-							scopesDataNested, ok := scopeWrapperMap[FieldEnterpriseGroupScope].([]any)
-							if !ok || len(scopesDataNested) == 0 {
-								continue
+							orgID, _ := scope[FieldEnterpriseGroupScopeOrganization].(string)
+							clusterID, _ := scope[FieldEnterpriseGroupScopeCluster].(string)
+
+							if orgID != "" && clusterID != "" {
+								return diag.FromErr(fmt.Errorf("scope cannot have both 'organization' and 'cluster' set simultaneously"))
 							}
 
-							for _, scopeData := range scopesDataNested {
-								if scopeData == nil {
-									continue
-								}
-
-								scope, ok := scopeData.(map[string]any)
-								if !ok {
-									return diag.FromErr(fmt.Errorf("invalid scope data: expected object, got %T", scopeData))
-								}
-
-								orgID, _ := scope[FieldEnterpriseGroupScopeOrganization].(string)
-								clusterID, _ := scope[FieldEnterpriseGroupScopeCluster].(string)
-
-								if orgID != "" && clusterID != "" {
-									return diag.FromErr(fmt.Errorf("scope cannot have both 'organization' and 'cluster' set simultaneously"))
-								}
-
-								if orgID != "" {
-									rbScopes = append(rbScopes, organization_management.Scope{
-										Organization: &organization_management.OrganizationScope{
-											Id: orgID,
-										},
-									})
-								} else if clusterID != "" {
-									rbScopes = append(rbScopes, organization_management.Scope{
-										Cluster: &organization_management.ClusterScope{
-											Id: clusterID,
-										},
-									})
-								}
+							if orgID != "" {
+								rbScopes = append(rbScopes, organization_management.Scope{
+									Organization: &organization_management.OrganizationScope{
+										Id: orgID,
+									},
+								})
+							} else if clusterID != "" {
+								rbScopes = append(rbScopes, organization_management.Scope{
+									Cluster: &organization_management.ClusterScope{
+										Id: clusterID,
+									},
+								})
 							}
 						}
 					}
-
-					rbID := ""
-					if id, ok := binding[FieldEnterpriseGroupRoleBindingID].(string); ok && id != "" {
-						rbID = id
-					}
-
-					roleBindings = append(roleBindings, organization_management.BatchUpdateEnterpriseGroupsRequestRoleBinding{
-						Id:     rbID,
-						Name:   rbName,
-						RoleId: rbRoleID,
-						Scopes: rbScopes,
-					})
 				}
+
+				rbID := ""
+				if id, ok := binding[FieldEnterpriseGroupRoleBindingID].(string); ok && id != "" {
+					rbID = id
+				}
+
+				roleBindings = append(roleBindings, organization_management.BatchUpdateEnterpriseGroupsRequestRoleBinding{
+					Id:     rbID,
+					Name:   rbName,
+					RoleId: rbRoleID,
+					Scopes: rbScopes,
+				})
 			}
 		}
-
-		groupName, ok := data.Get(FieldEnterpriseGroupName).(string)
-		if !ok {
-			return diag.FromErr(fmt.Errorf("group name is required for group %s", groupID))
-		}
-
-		orgID, ok := data.Get(FieldEnterpriseGroupOrganizationID).(string)
-		if !ok {
-			return diag.FromErr(fmt.Errorf("organization ID is required for group %s", groupID))
-		}
-
-		description, ok := data.GetOk(FieldEnterpriseGroupDescription)
-		if !ok {
-			description = ""
-		}
-		descriptionStr := description.(string)
-
-		updateRequest := organization_management.BatchUpdateEnterpriseGroupsRequest{
-			EnterpriseId: enterpriseID,
-			Requests: []organization_management.BatchUpdateEnterpriseGroupsRequestUpdateGroupRequest{
-				{
-					Id:             groupID,
-					Name:           groupName,
-					OrganizationId: orgID,
-					Description:    descriptionStr,
-					Members:        members,
-					RoleBindings:   roleBindings,
-				},
-			},
-		}
-
-		resp, err := client.EnterpriseAPIBatchUpdateEnterpriseGroupsWithResponse(
-			ctx,
-			enterpriseID,
-			updateRequest,
-		)
-		if err = sdk.CheckOKResponse(resp, err); err != nil {
-			return diag.FromErr(fmt.Errorf("batch update enterprise groups failed: %w", err))
-		}
-
-		if resp.JSON200 == nil || resp.JSON200.Groups == nil {
-			return diag.FromErr(fmt.Errorf("unexpected empty response from batch update"))
-		}
-
-		g := (*resp.JSON200.Groups)[0]
-
-		group, err := convertBatchUpdateEnterpriseGroupsResponseGroup(g)
-		if err != nil {
-			return diag.FromErr(fmt.Errorf("converting updated group data: %w", err))
-		}
-
-		if err = setEnterpriseGroupsData(data, group); err != nil {
-			return diag.FromErr(fmt.Errorf("failed to set updated group data: %w", err))
-		}
-
-		tflog.Debug(ctx, "Enterprise group updated successfully", map[string]any{"group_id": groupID})
 	}
+
+	groupName, ok := data.Get(FieldEnterpriseGroupName).(string)
+	if !ok {
+		return diag.FromErr(fmt.Errorf("group name is required for group %s", groupID))
+	}
+
+	orgID, ok := data.Get(FieldEnterpriseGroupOrganizationID).(string)
+	if !ok {
+		return diag.FromErr(fmt.Errorf("organization ID is required for group %s", groupID))
+	}
+
+	description, ok := data.GetOk(FieldEnterpriseGroupDescription)
+	if !ok {
+		description = ""
+	}
+	descriptionStr := description.(string)
+
+	updateRequest := organization_management.BatchUpdateEnterpriseGroupsRequest{
+		EnterpriseId: enterpriseID,
+		Requests: []organization_management.BatchUpdateEnterpriseGroupsRequestUpdateGroupRequest{
+			{
+				Id:             groupID,
+				Name:           groupName,
+				OrganizationId: orgID,
+				Description:    descriptionStr,
+				Members:        members,
+				RoleBindings:   roleBindings,
+			},
+		},
+	}
+
+	resp, err := client.EnterpriseAPIBatchUpdateEnterpriseGroupsWithResponse(
+		ctx,
+		enterpriseID,
+		updateRequest,
+	)
+	if err = sdk.CheckOKResponse(resp, err); err != nil {
+		return diag.FromErr(fmt.Errorf("batch update enterprise groups failed: %w", err))
+	}
+
+	if resp.JSON200 == nil || resp.JSON200.Groups == nil {
+		return diag.FromErr(fmt.Errorf("unexpected empty response from batch update"))
+	}
+
+	g := (*resp.JSON200.Groups)[0]
+
+	group, err := convertBatchUpdateEnterpriseGroupsResponseGroup(g)
+	if err != nil {
+		return diag.FromErr(fmt.Errorf("converting updated group data: %w", err))
+	}
+
+	if err = setEnterpriseGroupsData(data, group); err != nil {
+		return diag.FromErr(fmt.Errorf("failed to set updated group data: %w", err))
+	}
+
+	tflog.Debug(ctx, "Enterprise group updated successfully", map[string]any{"group_id": groupID})
 
 	return nil
 }
