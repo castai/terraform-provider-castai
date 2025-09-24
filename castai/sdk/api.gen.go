@@ -754,6 +754,14 @@ const (
 	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPESURGE                      WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_SURGE"
 )
 
+// Defines values for WorkloadOptimizationAPIListWorkloadsParamsSortOrder.
+const (
+	ASC  WorkloadOptimizationAPIListWorkloadsParamsSortOrder = "ASC"
+	Asc  WorkloadOptimizationAPIListWorkloadsParamsSortOrder = "asc"
+	DESC WorkloadOptimizationAPIListWorkloadsParamsSortOrder = "DESC"
+	Desc WorkloadOptimizationAPIListWorkloadsParamsSortOrder = "desc"
+)
+
 // Defines values for WorkloadOptimizationAPIGetInstallCmdParamsCmePresets.
 const (
 	WorkloadOptimizationAPIGetInstallCmdParamsCmePresetsCODAHALE      WorkloadOptimizationAPIGetInstallCmdParamsCmePresets = "CODAHALE"
@@ -2530,6 +2538,9 @@ type CastaiSsoV1beta1CreateSSOConnection struct {
 
 	// Okta Okta represents a Okta connector.
 	Okta *CastaiSsoV1beta1Okta `json:"okta,omitempty"`
+
+	// Saml SAML represents a SAML connector.
+	Saml *CastaiSsoV1beta1SAML `json:"saml,omitempty"`
 }
 
 // CastaiSsoV1beta1DeleteSSOConnectionResponse Defines the container for the sso delete response.
@@ -2587,6 +2598,24 @@ type CastaiSsoV1beta1Okta struct {
 	OktaDomain string `json:"oktaDomain"`
 }
 
+// CastaiSsoV1beta1SAML SAML represents a SAML connector.
+type CastaiSsoV1beta1SAML struct {
+	// CallbackUrl CallbackUrl is the callback url (Assertion Consumer Service URL) of the SAML service provider (Auth0).
+	CallbackUrl *string `json:"callbackUrl"`
+
+	// EntityId EntityId is the entity id of the SAML service provider (Auth0).
+	EntityId *string `json:"entityId"`
+
+	// MetadataUrl MetadataUrl is the URL to the SAML metadata document of the SAML service provider (Auth0).
+	MetadataUrl *string `json:"metadataUrl"`
+
+	// SignInUrl SignInUrl is the URL where the SAML authentication request is sent.
+	SignInUrl string `json:"signInUrl"`
+
+	// X509Certificate X509Certificate is the x509 certificate used to sign the SAML authentication request.
+	X509Certificate string `json:"x509Certificate"`
+}
+
 // CastaiSsoV1beta1SSOConnection SSOConnection represents a sso connection.
 type CastaiSsoV1beta1SSOConnection struct {
 	// Aad AzureAAD represents a Azure AAD connector.
@@ -2619,6 +2648,9 @@ type CastaiSsoV1beta1SSOConnection struct {
 
 	// Okta Okta represents a Okta connector.
 	Okta *CastaiSsoV1beta1Okta `json:"okta,omitempty"`
+
+	// Saml SAML represents a SAML connector.
+	Saml *CastaiSsoV1beta1SAML `json:"saml,omitempty"`
 
 	// Status Status is the status of the connection.
 	//
@@ -2670,6 +2702,9 @@ type CastaiSsoV1beta1UpdateSSOConnection struct {
 
 	// Okta Okta represents a Okta connector.
 	Okta *CastaiSsoV1beta1Okta `json:"okta,omitempty"`
+
+	// Saml SAML represents a SAML connector.
+	Saml *CastaiSsoV1beta1SAML `json:"saml,omitempty"`
 }
 
 // CastaiUsersV1beta1AddUserToOrganizationResponse Defines the response for adding a user to an organization.
@@ -6279,6 +6314,9 @@ type WorkloadoptimizationV1ContainerResourceMetricSource struct {
 
 // WorkloadoptimizationV1Costs defines model for workloadoptimization.v1.Costs.
 type WorkloadoptimizationV1Costs struct {
+	// OriginalRequested Cost of resources configured in original workload template.
+	OriginalRequested *float64 `json:"originalRequested"`
+
 	// Recommended Cost of recommended resources.
 	Recommended *float64 `json:"recommended"`
 
@@ -6653,7 +6691,9 @@ type WorkloadoptimizationV1ListWorkloadScalingPoliciesResponse struct {
 
 // WorkloadoptimizationV1ListWorkloadsResponse defines model for workloadoptimization.v1.ListWorkloadsResponse.
 type WorkloadoptimizationV1ListWorkloadsResponse struct {
-	Workloads []WorkloadoptimizationV1Workload `json:"workloads"`
+	// NextCursor The token to request the next page of results.
+	NextCursor *string                          `json:"nextCursor"`
+	Workloads  []WorkloadoptimizationV1Workload `json:"workloads"`
 }
 
 // WorkloadoptimizationV1ManagedBy Defines sources that can manage the workload.
@@ -7827,6 +7867,10 @@ type RbacServiceAPIListRoleBindingsParams struct {
 	// SubjectType Filter by subject type. Multiple values can be passed as query parameters
 	// (e.g., &subject_type=x&subject_type=y)
 	SubjectType *[]RbacServiceAPIListRoleBindingsParamsSubjectType `form:"subjectType,omitempty" json:"subjectType,omitempty"`
+
+	// SubjectId Filter by subject ID. Multiple values can be passed as query parameters
+	// (e.g., &subject_id=x&subject_id=y)
+	SubjectId *[]string `form:"subjectId,omitempty" json:"subjectId,omitempty"`
 }
 
 // RbacServiceAPIListRoleBindingsParamsScopeType defines parameters for RbacServiceAPIListRoleBindings.
@@ -8312,6 +8356,37 @@ type WorkloadOptimizationAPIGetWorkloadEventParams struct {
 	// CreatedAt The creation time of the event.
 	CreatedAt time.Time `form:"createdAt" json:"createdAt"`
 }
+
+// WorkloadOptimizationAPIListWorkloadsParams defines parameters for WorkloadOptimizationAPIListWorkloads.
+type WorkloadOptimizationAPIListWorkloadsParams struct {
+	WorkloadIds        *[]string `form:"workloadIds,omitempty" json:"workloadIds,omitempty"`
+	WorkloadNames      *[]string `form:"workloadNames,omitempty" json:"workloadNames,omitempty"`
+	Namespaces         *[]string `form:"namespaces,omitempty" json:"namespaces,omitempty"`
+	ScalingPolicyNames *[]string `form:"scalingPolicyNames,omitempty" json:"scalingPolicyNames,omitempty"`
+	Kinds              *[]string `form:"kinds,omitempty" json:"kinds,omitempty"`
+	ManagementOptions  *[]string `form:"managementOptions,omitempty" json:"managementOptions,omitempty"`
+	ConfiguredBy       *[]string `form:"configuredBy,omitempty" json:"configuredBy,omitempty"`
+	SearchQuery        *string   `form:"searchQuery,omitempty" json:"searchQuery,omitempty"`
+	PageLimit          *string   `form:"page.limit,omitempty" json:"page.limit,omitempty"`
+
+	// PageCursor Cursor that defines token indicating where to start the next page.
+	// Empty value indicates to start from beginning of the dataset.
+	PageCursor *string `form:"page.cursor,omitempty" json:"page.cursor,omitempty"`
+
+	// SortField Name of the field you want to sort
+	SortField *string `form:"sort.field,omitempty" json:"sort.field,omitempty"`
+
+	// SortOrder The sort order, possible values ASC or DESC, if not provided asc is the default
+	//
+	//  - ASC: ASC
+	//  - asc: desc
+	//  - DESC: ASC
+	//  - desc: desc
+	SortOrder *WorkloadOptimizationAPIListWorkloadsParamsSortOrder `form:"sort.order,omitempty" json:"sort.order,omitempty"`
+}
+
+// WorkloadOptimizationAPIListWorkloadsParamsSortOrder defines parameters for WorkloadOptimizationAPIListWorkloads.
+type WorkloadOptimizationAPIListWorkloadsParamsSortOrder string
 
 // WorkloadOptimizationAPIGetWorkloadsSummaryParams defines parameters for WorkloadOptimizationAPIGetWorkloadsSummary.
 type WorkloadOptimizationAPIGetWorkloadsSummaryParams struct {
