@@ -4,6 +4,8 @@
 package sdk
 
 import (
+	"encoding/json"
+	"fmt"
 	"time"
 )
 
@@ -578,6 +580,12 @@ const (
 	CommitmentsAPIImportAWSReservedInstancesParamsBehaviourOVERWRITE            CommitmentsAPIImportAWSReservedInstancesParamsBehaviour = "OVERWRITE"
 )
 
+// Defines values for AuthTokenAPIListAuthTokensParamsOrganizations.
+const (
+	AuthTokenAPIListAuthTokensParamsOrganizationsALL                      AuthTokenAPIListAuthTokensParamsOrganizations = "ALL"
+	AuthTokenAPIListAuthTokensParamsOrganizationsORGANIZATIONSUNSPECIFIED AuthTokenAPIListAuthTokensParamsOrganizations = "ORGANIZATIONS_UNSPECIFIED"
+)
+
 // Defines values for AllocationGroupAPIGetAllocationGroupWorkloadCostsParamsSortOrder.
 const (
 	AllocationGroupAPIGetAllocationGroupWorkloadCostsParamsSortOrderASC  AllocationGroupAPIGetAllocationGroupWorkloadCostsParamsSortOrder = "ASC"
@@ -632,9 +640,9 @@ const (
 
 // Defines values for RbacServiceAPIListRolesParamsType.
 const (
-	ALL        RbacServiceAPIListRolesParamsType = "ALL"
-	DEFAULT    RbacServiceAPIListRolesParamsType = "DEFAULT"
-	ENTERPRISE RbacServiceAPIListRolesParamsType = "ENTERPRISE"
+	RbacServiceAPIListRolesParamsTypeALL        RbacServiceAPIListRolesParamsType = "ALL"
+	RbacServiceAPIListRolesParamsTypeDEFAULT    RbacServiceAPIListRolesParamsType = "DEFAULT"
+	RbacServiceAPIListRolesParamsTypeENTERPRISE RbacServiceAPIListRolesParamsType = "ENTERPRISE"
 )
 
 // Defines values for CommitmentsAPIImportAzureReservationsParamsBehaviour.
@@ -744,6 +752,14 @@ const (
 	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPESCALINGPOLICYORDERUPDATED  WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_SCALING_POLICY_ORDER_UPDATED"
 	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPESCALINGPOLICYUPDATED       WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_SCALING_POLICY_UPDATED"
 	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPESURGE                      WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_SURGE"
+)
+
+// Defines values for WorkloadOptimizationAPIListWorkloadsParamsSortOrder.
+const (
+	ASC  WorkloadOptimizationAPIListWorkloadsParamsSortOrder = "ASC"
+	Asc  WorkloadOptimizationAPIListWorkloadsParamsSortOrder = "asc"
+	DESC WorkloadOptimizationAPIListWorkloadsParamsSortOrder = "DESC"
+	Desc WorkloadOptimizationAPIListWorkloadsParamsSortOrder = "desc"
 )
 
 // Defines values for WorkloadOptimizationAPIGetInstallCmdParamsCmePresets.
@@ -893,6 +909,9 @@ type CastaiAuthtokenV1beta1AuthToken struct {
 
 	// Name (required) User provided name of the token.
 	Name string `json:"name"`
+
+	// OrganizationId organization_id is the id of the organization this token belongs to.
+	OrganizationId *string `json:"organizationId,omitempty"`
 
 	// Readonly TODO: we need to think how to migrate away from this flag.
 	// whether token has readonly permissions.
@@ -2052,6 +2071,7 @@ type CastaiRbacV1beta1Group struct {
 
 	// OrganizationId OrganizationID is the unique identifier of the organization.
 	OrganizationId *string `json:"organizationId,omitempty"`
+	SsoProvider    *string `json:"ssoProvider,omitempty"`
 
 	// UpdatedAt UpdatedAt is the timestamp when the group was last updated.
 	UpdatedAt *time.Time `json:"updatedAt,omitempty"`
@@ -2518,6 +2538,9 @@ type CastaiSsoV1beta1CreateSSOConnection struct {
 
 	// Okta Okta represents a Okta connector.
 	Okta *CastaiSsoV1beta1Okta `json:"okta,omitempty"`
+
+	// Saml SAML represents a SAML connector.
+	Saml *CastaiSsoV1beta1SAML `json:"saml,omitempty"`
 }
 
 // CastaiSsoV1beta1DeleteSSOConnectionResponse Defines the container for the sso delete response.
@@ -2575,6 +2598,24 @@ type CastaiSsoV1beta1Okta struct {
 	OktaDomain string `json:"oktaDomain"`
 }
 
+// CastaiSsoV1beta1SAML SAML represents a SAML connector.
+type CastaiSsoV1beta1SAML struct {
+	// CallbackUrl CallbackUrl is the callback url (Assertion Consumer Service URL) of the SAML service provider (Auth0).
+	CallbackUrl *string `json:"callbackUrl"`
+
+	// EntityId EntityId is the entity id of the SAML service provider (Auth0).
+	EntityId *string `json:"entityId"`
+
+	// MetadataUrl MetadataUrl is the URL to the SAML metadata document of the SAML service provider (Auth0).
+	MetadataUrl *string `json:"metadataUrl"`
+
+	// SignInUrl SignInUrl is the URL where the SAML authentication request is sent.
+	SignInUrl string `json:"signInUrl"`
+
+	// X509Certificate X509Certificate is the x509 certificate used to sign the SAML authentication request.
+	X509Certificate string `json:"x509Certificate"`
+}
+
 // CastaiSsoV1beta1SSOConnection SSOConnection represents a sso connection.
 type CastaiSsoV1beta1SSOConnection struct {
 	// Aad AzureAAD represents a Azure AAD connector.
@@ -2607,6 +2648,9 @@ type CastaiSsoV1beta1SSOConnection struct {
 
 	// Okta Okta represents a Okta connector.
 	Okta *CastaiSsoV1beta1Okta `json:"okta,omitempty"`
+
+	// Saml SAML represents a SAML connector.
+	Saml *CastaiSsoV1beta1SAML `json:"saml,omitempty"`
 
 	// Status Status is the status of the connection.
 	//
@@ -2658,6 +2702,9 @@ type CastaiSsoV1beta1UpdateSSOConnection struct {
 
 	// Okta Okta represents a Okta connector.
 	Okta *CastaiSsoV1beta1Okta `json:"okta,omitempty"`
+
+	// Saml SAML represents a SAML connector.
+	Saml *CastaiSsoV1beta1SAML `json:"saml,omitempty"`
 }
 
 // CastaiUsersV1beta1AddUserToOrganizationResponse Defines the response for adding a user to an organization.
@@ -2765,11 +2812,8 @@ type CastaiUsersV1beta1Membership struct {
 	CreatedAt *time.Time                    `json:"createdAt,omitempty"`
 	Groups    *[]CastaiUsersV1beta1GroupRef `json:"groups,omitempty"`
 	LoginAt   *time.Time                    `json:"loginAt,omitempty"`
-
-	// Role Deprecated: for RBACv2 user can be bound to multiple roles.
-	// Use https://docs.cast.ai/reference/rbacserviceapi instead.
 	// Deprecated:
-	Role string `json:"role"`
+	Role *interface{} `json:"role,omitempty"`
 
 	// User User represents a single system user.
 	User CastaiUsersV1beta1User `json:"user"`
@@ -2777,11 +2821,8 @@ type CastaiUsersV1beta1Membership struct {
 
 // CastaiUsersV1beta1NewMembership NewMembership contains data needed to create new membership in organization.
 type CastaiUsersV1beta1NewMembership struct {
-	// Role Deprecated: for RBACv2 user can be bound to multiple roles.
-	// Use https://docs.cast.ai/reference/rbacserviceapi instead.
-	// role of the new member.
 	// Deprecated:
-	Role string `json:"role"`
+	Role *interface{} `json:"role,omitempty"`
 
 	// UserId id of the user.
 	UserId string `json:"userId"`
@@ -2791,12 +2832,8 @@ type CastaiUsersV1beta1NewMembership struct {
 type CastaiUsersV1beta1NewMembershipByEmail struct {
 	// GroupIds list of the group IDs for which new user should be added.
 	GroupIds *[]string `json:"groupIds,omitempty"`
-
-	// Role Deprecated: for RBACv2 user can be bound to multiple roles.
-	// Use https://docs.cast.ai/reference/rbacserviceapi instead.
-	// role of the invited person.
 	// Deprecated:
-	Role *string `json:"role,omitempty"`
+	Role *interface{} `json:"role,omitempty"`
 
 	// RoleBindings The role bindings the user will be bound to after the invitation is claimed.
 	RoleBindings *[]CastaiUsersV1beta1InvitationRoleBinding `json:"roleBindings,omitempty"`
@@ -2859,12 +2896,8 @@ type CastaiUsersV1beta1PendingInvitation struct {
 
 	// InviteEmail email of the invited person.
 	InviteEmail string `json:"inviteEmail"`
-
-	// Role Deprecated: for RBACv2 user can be bound to multiple roles.
-	// Use https://docs.cast.ai/reference/rbacserviceapi instead.
-	// role of the invited person.
 	// Deprecated:
-	Role string `json:"role"`
+	Role *interface{} `json:"role,omitempty"`
 
 	// RoleBindings The role bindings the user will be bound to after the invitation is claimed.
 	RoleBindings *[]CastaiUsersV1beta1InvitationRoleBinding `json:"roleBindings,omitempty"`
@@ -3399,211 +3432,6 @@ type CostreportV1beta1GetCostAllocationGroupDataTransferWorkloadsResponseWorkloa
 	WorkloadType *string `json:"workloadType,omitempty"`
 }
 
-// CostreportV1beta1GetCostAllocationGroupSummaryResponse defines model for costreport.v1beta1.GetCostAllocationGroupSummaryResponse.
-type CostreportV1beta1GetCostAllocationGroupSummaryResponse struct {
-	Items *[]CostreportV1beta1GetCostAllocationGroupSummaryResponseCostAllocationGroupItem `json:"items,omitempty"`
-}
-
-// CostreportV1beta1GetCostAllocationGroupSummaryResponseCostAllocationGroupItem defines model for costreport.v1beta1.GetCostAllocationGroupSummaryResponse.CostAllocationGroupItem.
-type CostreportV1beta1GetCostAllocationGroupSummaryResponseCostAllocationGroupItem struct {
-	GroupId   *string                                                           `json:"groupId,omitempty"`
-	GroupName *string                                                           `json:"groupName,omitempty"`
-	Items     *[]CostreportV1beta1GetCostAllocationGroupSummaryResponseCostItem `json:"items,omitempty"`
-
-	// WorkloadCount Count of workloads for the given time period.
-	WorkloadCount *string `json:"workloadCount,omitempty"`
-}
-
-// CostreportV1beta1GetCostAllocationGroupSummaryResponseCostItem Defines cost details for a given time.
-type CostreportV1beta1GetCostAllocationGroupSummaryResponseCostItem struct {
-	// CpuCostOnDemand Average CPU cost of on-demand instances for the given time period.
-	CpuCostOnDemand *string `json:"cpuCostOnDemand,omitempty"`
-
-	// CpuCostSpot Average CPU cost of spot instances for the given time period.
-	CpuCostSpot *string `json:"cpuCostSpot,omitempty"`
-
-	// CpuCostSpotFallback Average CPU cost of spot-fallback instances for the given time period.
-	CpuCostSpotFallback *string `json:"cpuCostSpotFallback,omitempty"`
-
-	// CpuCountOnDemand Average number of CPUs used on on-demand instances for the given time period.
-	CpuCountOnDemand *string `json:"cpuCountOnDemand,omitempty"`
-
-	// CpuCountSpot Average number of CPUs used on spot instances for the given time period.
-	CpuCountSpot *string `json:"cpuCountSpot,omitempty"`
-
-	// CpuCountSpotFallback Average number of CPUs used on spot-fallback instances for the given time period.
-	CpuCountSpotFallback *string `json:"cpuCountSpotFallback,omitempty"`
-
-	// GpuCostOnDemand Average GPU cost of on-demand instances for the given time period.
-	GpuCostOnDemand *string `json:"gpuCostOnDemand,omitempty"`
-
-	// GpuCostSpot Average GPU cost of spot instances for the given time period.
-	GpuCostSpot *string `json:"gpuCostSpot,omitempty"`
-
-	// GpuCostSpotFallback Average GPU cost of spot-fallback instances for the given time period.
-	GpuCostSpotFallback *string `json:"gpuCostSpotFallback,omitempty"`
-
-	// GpuCountOnDemand Average number of GPUs used on on-demand instances for the given time period.
-	GpuCountOnDemand *string `json:"gpuCountOnDemand,omitempty"`
-
-	// GpuCountSpot Average number of GPUs used on spot instances for the given time period.
-	GpuCountSpot *string `json:"gpuCountSpot,omitempty"`
-
-	// GpuCountSpotFallback Average number of GPUs used on spot-fallback instances for the given time period.
-	GpuCountSpotFallback *string `json:"gpuCountSpotFallback,omitempty"`
-
-	// PodCountOnDemand Average amount of pods on on-demand instances for the given time period.
-	PodCountOnDemand *string `json:"podCountOnDemand,omitempty"`
-
-	// PodCountSpot Average amount of pods on spot instances for the given time period.
-	PodCountSpot *string `json:"podCountSpot,omitempty"`
-
-	// PodCountSpotFallback Average amount of pods on spot-fallback instances for the given time period.
-	PodCountSpotFallback *string `json:"podCountSpotFallback,omitempty"`
-
-	// RamCostOnDemand Average RAM cost of on-demand instances for the given time period.
-	RamCostOnDemand *string `json:"ramCostOnDemand,omitempty"`
-
-	// RamCostSpot Average RAM cost of spot instances for the given time period.
-	RamCostSpot *string `json:"ramCostSpot,omitempty"`
-
-	// RamCostSpotFallback Average RAM cost of spot-fallback instances for the given time period.
-	RamCostSpotFallback *string `json:"ramCostSpotFallback,omitempty"`
-
-	// RamGibOnDemand Average RAM GiB used on on-demand instances for the given time period.
-	RamGibOnDemand *string `json:"ramGibOnDemand,omitempty"`
-
-	// RamGibSpot Average RAM GiB used on spot instances for the given time period.
-	RamGibSpot *string `json:"ramGibSpot,omitempty"`
-
-	// RamGibSpotFallback Average RAM GiB used on spot-fallback instances for the given time period.
-	RamGibSpotFallback *string `json:"ramGibSpotFallback,omitempty"`
-
-	// Timestamp Timestamp of entry.
-	Timestamp *time.Time `json:"timestamp,omitempty"`
-
-	// TotalCostOnDemand Total cost of on-demand instances for the given time period.
-	TotalCostOnDemand *string `json:"totalCostOnDemand,omitempty"`
-
-	// TotalCostSpot Total cost of spot instances for the given time period.
-	TotalCostSpot *string `json:"totalCostSpot,omitempty"`
-
-	// TotalCostSpotFallback Total cost of spot-fallback instances for the given time period.
-	TotalCostSpotFallback *string `json:"totalCostSpotFallback,omitempty"`
-
-	// WorkloadCount Number of workloads included in group.
-	WorkloadCount *string `json:"workloadCount,omitempty"`
-}
-
-// CostreportV1beta1GetCostAllocationGroupWorkloadsResponse Defines cluster workload cost response.
-type CostreportV1beta1GetCostAllocationGroupWorkloadsResponse struct {
-	GroupId   *string `json:"groupId,omitempty"`
-	GroupName *string `json:"groupName,omitempty"`
-
-	// Items Workload entries.
-	Items *[]CostreportV1beta1GetCostAllocationGroupWorkloadsResponseWorkloadItem `json:"items,omitempty"`
-}
-
-// CostreportV1beta1GetCostAllocationGroupWorkloadsResponseClusterInfo defines model for costreport.v1beta1.GetCostAllocationGroupWorkloadsResponse.ClusterInfo.
-type CostreportV1beta1GetCostAllocationGroupWorkloadsResponseClusterInfo struct {
-	Id *string `json:"id,omitempty"`
-}
-
-// CostreportV1beta1GetCostAllocationGroupWorkloadsResponseWorkloadCostItem Defines a workloads cost for a given time.
-type CostreportV1beta1GetCostAllocationGroupWorkloadsResponseWorkloadCostItem struct {
-	// CpuCostOnDemand Average CPU cost of the workload that are on-demand instances for the given time period.
-	CpuCostOnDemand *string `json:"cpuCostOnDemand,omitempty"`
-
-	// CpuCostSpot Average CPU cost of the workload that are spot instances for the given time period.
-	CpuCostSpot *string `json:"cpuCostSpot,omitempty"`
-
-	// CpuCostSpotFallback Average CPU cost of the workload that are spot-fallback instances for the given time period.
-	CpuCostSpotFallback *string `json:"cpuCostSpotFallback,omitempty"`
-
-	// CpuCountOnDemand Average number of CPUs of the workload that is on on-demand instances for the given time period.
-	CpuCountOnDemand *string `json:"cpuCountOnDemand,omitempty"`
-
-	// CpuCountSpot Average number of CPUs of the workload that is on spot instances for the given time period.
-	CpuCountSpot *string `json:"cpuCountSpot,omitempty"`
-
-	// CpuCountSpotFallback Average number of CPUs of the workload that is on spot-fallback instances for the given time period.
-	CpuCountSpotFallback *string `json:"cpuCountSpotFallback,omitempty"`
-
-	// GpuCostOnDemand Average GPU cost of the workload that is on on-demand instances for the given time period.
-	GpuCostOnDemand *string `json:"gpuCostOnDemand,omitempty"`
-
-	// GpuCostSpot Average GPU cost of the workload that is on spot instances for the given time period.
-	GpuCostSpot *string `json:"gpuCostSpot,omitempty"`
-
-	// GpuCostSpotFallback Average GPU cost of the workload that is on spot-fallback instances for the given time period.
-	GpuCostSpotFallback *string `json:"gpuCostSpotFallback,omitempty"`
-
-	// GpuCountOnDemand Average number of GPUs of the workload that is on on-demand instances for the given time period.
-	GpuCountOnDemand *string `json:"gpuCountOnDemand,omitempty"`
-
-	// GpuCountSpot Average number of GPUs of the workload that is on spot instances for the given time period.
-	GpuCountSpot *string `json:"gpuCountSpot,omitempty"`
-
-	// GpuCountSpotFallback Average number of GPUs of the workload that is on spot-fallback instances for the given time period.
-	GpuCountSpotFallback *string `json:"gpuCountSpotFallback,omitempty"`
-
-	// PodCountOnDemand Average amount of pods for the workload that are on on-demand instances for the given time period.
-	PodCountOnDemand *string `json:"podCountOnDemand,omitempty"`
-
-	// PodCountSpot Average amount of pods for the workload that are on spot instances for the given time period.
-	PodCountSpot *string `json:"podCountSpot,omitempty"`
-
-	// PodCountSpotFallback Average amount of pods for the workload that are on spot-fallback instances for the given time period.
-	PodCountSpotFallback *string `json:"podCountSpotFallback,omitempty"`
-
-	// RamCostOnDemand Average RAM cost of the workload that are on-demand instances for the given time period.
-	RamCostOnDemand *string `json:"ramCostOnDemand,omitempty"`
-
-	// RamCostSpot Average RAM cost of the workload that are spot instances for the given time period.
-	RamCostSpot *string `json:"ramCostSpot,omitempty"`
-
-	// RamCostSpotFallback Average RAM cost of the workload that are spot-fallback instances for the given time period.
-	RamCostSpotFallback *string `json:"ramCostSpotFallback,omitempty"`
-
-	// RamGibOnDemand Average RAM GiB used on on-demand instances for the given time period.
-	RamGibOnDemand *string `json:"ramGibOnDemand,omitempty"`
-
-	// RamGibSpot Average RAM GiB of the workload that are on spot instances for the given time period.
-	RamGibSpot *string `json:"ramGibSpot,omitempty"`
-
-	// RamGibSpotFallback Average RAM GiB of the workload that are on spot-fallback instances for the given time period.
-	RamGibSpotFallback *string `json:"ramGibSpotFallback,omitempty"`
-
-	// Timestamp Timestamp of entry creation.
-	Timestamp *time.Time `json:"timestamp,omitempty"`
-
-	// TotalCostOnDemand Total cost of the workload that is on on-demand instances for the given time period.
-	TotalCostOnDemand *string `json:"totalCostOnDemand,omitempty"`
-
-	// TotalCostSpot Total cost of the workload that is on spot instances for the given time period.
-	TotalCostSpot *string `json:"totalCostSpot,omitempty"`
-
-	// TotalCostSpotFallback Total cost of the workload that is on spot-fallback instances for the given time period.
-	TotalCostSpotFallback *string `json:"totalCostSpotFallback,omitempty"`
-}
-
-// CostreportV1beta1GetCostAllocationGroupWorkloadsResponseWorkloadItem Defines a workload.
-type CostreportV1beta1GetCostAllocationGroupWorkloadsResponseWorkloadItem struct {
-	Cluster *CostreportV1beta1GetCostAllocationGroupWorkloadsResponseClusterInfo `json:"cluster,omitempty"`
-
-	// Items Cost metrics of the workload.
-	Items *[]CostreportV1beta1GetCostAllocationGroupWorkloadsResponseWorkloadCostItem `json:"items,omitempty"`
-
-	// Namespace Namespace the workload is in.
-	Namespace *string `json:"namespace,omitempty"`
-
-	// WorkloadName Name of the workload.
-	WorkloadName *string `json:"workloadName,omitempty"`
-
-	// WorkloadType Type of the workload.
-	WorkloadType *string `json:"workloadType,omitempty"`
-}
-
 // CostreportV1beta1ListAllocationGroupsResponse defines model for costreport.v1beta1.ListAllocationGroupsResponse.
 type CostreportV1beta1ListAllocationGroupsResponse struct {
 	Items *[]CostreportV1beta1AllocationGroup `json:"items,omitempty"`
@@ -3900,6 +3728,15 @@ type ExternalclusterV1EKSClusterParams struct {
 	Tags *map[string]string `json:"tags,omitempty"`
 }
 
+// ExternalclusterV1EdgeConfig EdgeConfig holds Edge specific configuration.
+type ExternalclusterV1EdgeConfig struct {
+	// ConfigurationId ID of the Edge configuration.
+	ConfigurationId *string `json:"configurationId"`
+
+	// LocationId Edge location ID.
+	LocationId *string `json:"locationId,omitempty"`
+}
+
 // ExternalclusterV1GCPCreateSARequestAKSClusterParams AKSClusterParams is a placeholder for future use.
 type ExternalclusterV1GCPCreateSARequestAKSClusterParams = map[string]interface{}
 
@@ -3993,6 +3830,11 @@ type ExternalclusterV1GetAssumeRoleUserResponse struct {
 
 // ExternalclusterV1GetCleanupScriptResponse GetCleanupScriptResponse is the result of GetCleanupScriptRequest.
 type ExternalclusterV1GetCleanupScriptResponse struct {
+	Script *string `json:"script,omitempty"`
+}
+
+// ExternalclusterV1GetConnectAndEnableCASTAICmdResponse GetConnectAndEnableCASTAICmdResponse is the result of GetConnectAndEnableCASTAICmdRequest.
+type ExternalclusterV1GetConnectAndEnableCASTAICmdResponse struct {
 	Script *string `json:"script,omitempty"`
 }
 
@@ -4115,6 +3957,9 @@ type ExternalclusterV1NodeConfig struct {
 	// Superseded if Configuration ID reference is provided.
 	// Request will fail if several configurations with same name exists for a given cluster.
 	ConfigurationName *string `json:"configurationName"`
+
+	// EdgeConfig EdgeConfig holds Edge specific configuration.
+	EdgeConfig *ExternalclusterV1EdgeConfig `json:"edgeConfig,omitempty"`
 
 	// GpuConfig GPUConfig describes instance GPU configuration.
 	//
@@ -4384,6 +4229,178 @@ type ExternalclusterV1Zone struct {
 	Name *string `json:"name,omitempty"`
 }
 
+// GoogleApiHttpBody Message that represents an arbitrary HTTP body. It should only be used for
+// payload formats that can't be represented as JSON, such as raw binary or
+// an HTML page.
+//
+// This message can be used both in streaming and non-streaming API methods in
+// the request as well as the response.
+//
+// It can be used as a top-level request field, which is convenient if one
+// wants to extract parameters from either the URL or HTTP template into the
+// request fields and also want access to the raw HTTP body.
+//
+// Example:
+//
+//	message GetResourceRequest {
+//	  // A unique request id.
+//	  string request_id = 1;
+//
+//	  // The raw HTTP body is bound to this field.
+//	  google.api.HttpBody http_body = 2;
+//
+//	}
+//
+//	service ResourceService {
+//	  rpc GetResource(GetResourceRequest)
+//	    returns (google.api.HttpBody);
+//	  rpc UpdateResource(google.api.HttpBody)
+//	    returns (google.protobuf.Empty);
+//
+//	}
+//
+// Example with streaming methods:
+//
+//	service CaldavService {
+//	  rpc GetCalendar(stream google.api.HttpBody)
+//	    returns (stream google.api.HttpBody);
+//	  rpc UpdateCalendar(stream google.api.HttpBody)
+//	    returns (stream google.api.HttpBody);
+//
+//	}
+//
+// Use of this type only changes how the request and response bodies are
+// handled, all other features will continue to work unchanged.
+type GoogleApiHttpBody struct {
+	// ContentType The HTTP Content-Type header value specifying the content type of the body.
+	ContentType *string `json:"contentType,omitempty"`
+
+	// Data The HTTP request/response body as raw binary.
+	Data *[]byte `json:"data,omitempty"`
+
+	// Extensions Application specific response metadata. Must be set in the first response
+	// for streaming APIs.
+	Extensions *[]GoogleProtobufAny `json:"extensions,omitempty"`
+}
+
+// GoogleProtobufAny `Any` contains an arbitrary serialized protocol buffer message along with a
+// URL that describes the type of the serialized message.
+//
+// Protobuf library provides support to pack/unpack Any values in the form
+// of utility functions or additional generated methods of the Any type.
+//
+// Example 1: Pack and unpack a message in C++.
+//
+//	Foo foo = ...;
+//	Any any;
+//	any.PackFrom(foo);
+//	...
+//	if (any.UnpackTo(&foo)) {
+//	  ...
+//	}
+//
+// Example 2: Pack and unpack a message in Java.
+//
+//	   Foo foo = ...;
+//	   Any any = Any.pack(foo);
+//	   ...
+//	   if (any.is(Foo.class)) {
+//	     foo = any.unpack(Foo.class);
+//	   }
+//	   // or ...
+//	   if (any.isSameTypeAs(Foo.getDefaultInstance())) {
+//	     foo = any.unpack(Foo.getDefaultInstance());
+//	   }
+//
+//	Example 3: Pack and unpack a message in Python.
+//
+//	   foo = Foo(...)
+//	   any = Any()
+//	   any.Pack(foo)
+//	   ...
+//	   if any.Is(Foo.DESCRIPTOR):
+//	     any.Unpack(foo)
+//	     ...
+//
+//	Example 4: Pack and unpack a message in Go
+//
+//	    foo := &pb.Foo{...}
+//	    any, err := anypb.New(foo)
+//	    if err != nil {
+//	      ...
+//	    }
+//	    ...
+//	    foo := &pb.Foo{}
+//	    if err := any.UnmarshalTo(foo); err != nil {
+//	      ...
+//	    }
+//
+// The pack methods provided by protobuf library will by default use
+// 'type.googleapis.com/full.type.name' as the type URL and the unpack
+// methods only use the fully qualified type name after the last '/'
+// in the type URL, for example "foo.bar.com/x/y.z" will yield type
+// name "y.z".
+//
+// JSON
+// ====
+// The JSON representation of an `Any` value uses the regular
+// representation of the deserialized, embedded message, with an
+// additional field `@type` which contains the type URL. Example:
+//
+//	package google.profile;
+//	message Person {
+//	  string first_name = 1;
+//	  string last_name = 2;
+//	}
+//
+//	{
+//	  "@type": "type.googleapis.com/google.profile.Person",
+//	  "firstName": <string>,
+//	  "lastName": <string>
+//	}
+//
+// If the embedded message type is well-known and has a custom JSON
+// representation, that representation will be embedded adding a field
+// `value` which holds the custom JSON in addition to the `@type`
+// field. Example (for message [google.protobuf.Duration][]):
+//
+//	{
+//	  "@type": "type.googleapis.com/google.protobuf.Duration",
+//	  "value": "1.212s"
+//	}
+type GoogleProtobufAny struct {
+	// Type A URL/resource name that uniquely identifies the type of the serialized
+	// protocol buffer message. This string must contain at least
+	// one "/" character. The last segment of the URL's path must represent
+	// the fully qualified name of the type (as in
+	// `path/google.protobuf.Duration`). The name should be in a canonical form
+	// (e.g., leading "." is not accepted).
+	//
+	// In practice, teams usually precompile into the binary all types that they
+	// expect it to use in the context of Any. However, for URLs which use the
+	// scheme `http`, `https`, or no scheme, one can optionally set up a type
+	// server that maps type URLs to message definitions as follows:
+	//
+	// * If no scheme is provided, `https` is assumed.
+	// * An HTTP GET on the URL must yield a [google.protobuf.Type][]
+	//   value in binary format, or produce an error.
+	// * Applications are allowed to cache lookup results based on the
+	//   URL, or have them precompiled into a binary to avoid any
+	//   lookup. Therefore, binary compatibility needs to be preserved
+	//   on changes to types. (Use versioned type names to manage
+	//   breaking changes.)
+	//
+	// Note: this functionality is not currently available in the official
+	// protobuf release, and it is not used for type URLs beginning with
+	// type.googleapis.com. As of May 2023, there are no widely used type server
+	// implementations and no plans to implement one.
+	//
+	// Schemes other than `http`, `https` (or the empty scheme) might be
+	// used with implementation specific semantics.
+	Type                 *string                           `json:"@type,omitempty"`
+	AdditionalProperties map[string]map[string]interface{} `json:"-"`
+}
+
 // K8sSelectorV1KubernetesNodeAffinity defines model for k8s_selector.v1.KubernetesNodeAffinity.
 type K8sSelectorV1KubernetesNodeAffinity struct {
 	Key string `json:"key"`
@@ -4574,6 +4591,9 @@ type NodeconfigV1EKSConfig struct {
 
 	// TargetGroups TargetGroups defines a list of load balancer target groups to register cluster instances into.
 	TargetGroups *[]NodeconfigV1TargetGroup `json:"targetGroups,omitempty"`
+
+	// ThreadsPerCpu Controls if cpu threading is enabled (default true).
+	ThreadsPerCpu *int32 `json:"threadsPerCpu"`
 
 	// VolumeIops EBS volume IOPS value to be used for provisioned nodes.
 	VolumeIops      *int32  `json:"volumeIops"`
@@ -4933,6 +4953,7 @@ type NodetemplatesV1AvailableInstanceType struct {
 	Cpu                    *string                                                     `json:"cpu,omitempty"`
 	CpuCost                *float64                                                    `json:"cpuCost,omitempty"`
 	CpuManufacturers       *[]string                                                   `json:"cpuManufacturers,omitempty"`
+	Csp                    *string                                                     `json:"csp,omitempty"`
 	CustomerSpecific       *bool                                                       `json:"customerSpecific,omitempty"`
 	Family                 *string                                                     `json:"family,omitempty"`
 	IsBareMetal            *bool                                                       `json:"isBareMetal,omitempty"`
@@ -4940,6 +4961,7 @@ type NodetemplatesV1AvailableInstanceType struct {
 	Memory                 *string                                                     `json:"memory,omitempty"`
 	Name                   *string                                                     `json:"name,omitempty"`
 	Os                     *NodetemplatesV1AvailableInstanceTypeOs                     `json:"os,omitempty"`
+	Region                 *string                                                     `json:"region,omitempty"`
 	StorageOptimizedOption *NodetemplatesV1AvailableInstanceTypeStorageOptimizedOption `json:"storageOptimizedOption,omitempty"`
 }
 
@@ -6292,6 +6314,9 @@ type WorkloadoptimizationV1ContainerResourceMetricSource struct {
 
 // WorkloadoptimizationV1Costs defines model for workloadoptimization.v1.Costs.
 type WorkloadoptimizationV1Costs struct {
+	// OriginalRequested Cost of resources configured in original workload template.
+	OriginalRequested *float64 `json:"originalRequested"`
+
 	// Recommended Cost of recommended resources.
 	Recommended *float64 `json:"recommended"`
 
@@ -6364,6 +6389,7 @@ type WorkloadoptimizationV1GetAgentStatusResponse struct {
 	ClusterId                        string  `json:"clusterId"`
 	CurrentVersion                   *string `json:"currentVersion"`
 	HpaSupportedFromCastAgentVersion *string `json:"hpaSupportedFromCastAgentVersion"`
+	InPlaceResizeEnabled             bool    `json:"inPlaceResizeEnabled"`
 	LatestVersion                    *string `json:"latestVersion"`
 
 	// Status AgentStatus defines the status of workload-autoscaler.
@@ -6665,7 +6691,9 @@ type WorkloadoptimizationV1ListWorkloadScalingPoliciesResponse struct {
 
 // WorkloadoptimizationV1ListWorkloadsResponse defines model for workloadoptimization.v1.ListWorkloadsResponse.
 type WorkloadoptimizationV1ListWorkloadsResponse struct {
-	Workloads []WorkloadoptimizationV1Workload `json:"workloads"`
+	// NextCursor The token to request the next page of results.
+	NextCursor *string                          `json:"nextCursor"`
+	Workloads  []WorkloadoptimizationV1Workload `json:"workloads"`
 }
 
 // WorkloadoptimizationV1ManagedBy Defines sources that can manage the workload.
@@ -7066,6 +7094,9 @@ type WorkloadoptimizationV1Resources struct {
 
 // WorkloadoptimizationV1RolloutBehaviorSettings defines model for workloadoptimization.v1.RolloutBehaviorSettings.
 type WorkloadoptimizationV1RolloutBehaviorSettings struct {
+	// PreferOneByOne If true, prefer rolling out recommendations one pod at a time.
+	PreferOneByOne *bool `json:"preferOneByOne"`
+
 	// Type Defines workload recommendation rollout types.
 	// NO_DISRUPTION - rollout shouldn't cause service disruption.
 	Type *WorkloadoptimizationV1RolloutBehaviorType `json:"type,omitempty"`
@@ -7196,10 +7227,11 @@ type WorkloadoptimizationV1VPAConfig struct {
 	// ManagementOption Defines possible options for workload management.
 	// READ_ONLY - workload watched (metrics collected), but no actions may be performed by CAST AI.
 	// MANAGED - workload watched (metrics collected), CAST AI may perform actions on the workload.
-	ManagementOption WorkloadoptimizationV1ManagementOption     `json:"managementOption"`
-	Memory           WorkloadoptimizationV1ResourceConfig       `json:"memory"`
-	MemoryEvent      *WorkloadoptimizationV1MemoryEventSettings `json:"memoryEvent,omitempty"`
-	Startup          *WorkloadoptimizationV1StartupSettings     `json:"startup,omitempty"`
+	ManagementOption  WorkloadoptimizationV1ManagementOption           `json:"managementOption"`
+	Memory            WorkloadoptimizationV1ResourceConfig             `json:"memory"`
+	MemoryEvent       *WorkloadoptimizationV1MemoryEventSettings       `json:"memoryEvent,omitempty"`
+	PredictiveScaling *WorkloadoptimizationV1PredictiveScalingSettings `json:"predictiveScaling,omitempty"`
+	Startup           *WorkloadoptimizationV1StartupSettings           `json:"startup,omitempty"`
 }
 
 // WorkloadoptimizationV1VPAConfigUpdate defines model for workloadoptimization.v1.VPAConfigUpdate.
@@ -7240,10 +7272,11 @@ type WorkloadoptimizationV1VerticalOverrides struct {
 	// ManagementOption Defines possible options for workload management.
 	// READ_ONLY - workload watched (metrics collected), but no actions may be performed by CAST AI.
 	// MANAGED - workload watched (metrics collected), CAST AI may perform actions on the workload.
-	ManagementOption *WorkloadoptimizationV1ManagementOption        `json:"managementOption,omitempty"`
-	Memory           *WorkloadoptimizationV1ResourceConfigOverrides `json:"memory,omitempty"`
-	MemoryEvent      *WorkloadoptimizationV1MemoryEventSettings     `json:"memoryEvent,omitempty"`
-	Startup          *WorkloadoptimizationV1StartupSettings         `json:"startup,omitempty"`
+	ManagementOption  *WorkloadoptimizationV1ManagementOption          `json:"managementOption,omitempty"`
+	Memory            *WorkloadoptimizationV1ResourceConfigOverrides   `json:"memory,omitempty"`
+	MemoryEvent       *WorkloadoptimizationV1MemoryEventSettings       `json:"memoryEvent,omitempty"`
+	PredictiveScaling *WorkloadoptimizationV1PredictiveScalingSettings `json:"predictiveScaling,omitempty"`
+	Startup           *WorkloadoptimizationV1StartupSettings           `json:"startup,omitempty"`
 }
 
 // WorkloadoptimizationV1Workload defines model for workloadoptimization.v1.Workload.
@@ -7289,11 +7322,14 @@ type WorkloadoptimizationV1Workload struct {
 	Recommendation     *WorkloadoptimizationV1WorkloadRecommendation `json:"recommendation,omitempty"`
 
 	// Replicas The number of replicas the workload should have, as defined on the workload spec.
-	Replicas          int32     `json:"replicas"`
-	ScalingPolicyId   string    `json:"scalingPolicyId"`
-	ScalingPolicyName string    `json:"scalingPolicyName"`
-	UpdatedAt         time.Time `json:"updatedAt"`
-	Version           string    `json:"version"`
+	Replicas                   int32     `json:"replicas"`
+	ScalingPolicyId            string    `json:"scalingPolicyId"`
+	ScalingPolicyName          string    `json:"scalingPolicyName"`
+	ScalingPolicyOrigin        string    `json:"scalingPolicyOrigin"`
+	SuggestedScalingPolicyId   *string   `json:"suggestedScalingPolicyId"`
+	SuggestedScalingPolicyName *string   `json:"suggestedScalingPolicyName"`
+	UpdatedAt                  time.Time `json:"updatedAt"`
+	Version                    string    `json:"version"`
 
 	// WoopHpaUnsupportedReason Reason for unsupported WOOP HPA.
 	WoopHpaUnsupportedReason *string                                  `json:"woopHpaUnsupportedReason"`
@@ -7468,7 +7504,16 @@ type CommitmentsAPIImportAWSReservedInstancesParamsBehaviour string
 type AuthTokenAPIListAuthTokensParams struct {
 	// UserId User id to filter by, if this is set we will only return tokens that have this user id.
 	UserId *string `form:"userId,omitempty" json:"userId,omitempty"`
+
+	// Organizations Organizations controls whether to return tokens for all organizations the user belongs to or only the current one.
+	//
+	//  - ORGANIZATIONS_UNSPECIFIED: ORGANIZATIONS_UNSPECIFIED is the default value and means only current organization.
+	//  - ALL: ALL means all organizations the user belongs to.
+	Organizations *AuthTokenAPIListAuthTokensParamsOrganizations `form:"organizations,omitempty" json:"organizations,omitempty"`
 }
+
+// AuthTokenAPIListAuthTokensParamsOrganizations defines parameters for AuthTokenAPIListAuthTokens.
+type AuthTokenAPIListAuthTokensParamsOrganizations string
 
 // AllocationGroupAPIGetAllocationGroupCostTimedSummariesParams defines parameters for AllocationGroupAPIGetAllocationGroupCostTimedSummaries.
 type AllocationGroupAPIGetAllocationGroupCostTimedSummariesParams struct {
@@ -7483,6 +7528,9 @@ type AllocationGroupAPIGetAllocationGroupCostTimedSummariesParams struct {
 
 	// GroupId Allocation group ID. Leave empty for the full list.
 	GroupId *string `form:"groupId,omitempty" json:"groupId,omitempty"`
+
+	// UseListingPrices Whether to use listing prices instead of actual prices for cost calculations.
+	UseListingPrices *bool `form:"useListingPrices,omitempty" json:"useListingPrices,omitempty"`
 }
 
 // AllocationGroupAPIGetAllocationGroupCostSummariesParams defines parameters for AllocationGroupAPIGetAllocationGroupCostSummaries.
@@ -7498,6 +7546,9 @@ type AllocationGroupAPIGetAllocationGroupCostSummariesParams struct {
 
 	// GroupId Allocation group ID. Leave empty for the full list.
 	GroupId *string `form:"groupId,omitempty" json:"groupId,omitempty"`
+
+	// UseListingPrices Whether to use listing prices instead of actual prices for cost calculations.
+	UseListingPrices *bool `form:"useListingPrices,omitempty" json:"useListingPrices,omitempty"`
 }
 
 // AllocationGroupAPIGetAllocationGroupTotalCostTimedParams defines parameters for AllocationGroupAPIGetAllocationGroupTotalCostTimed.
@@ -7515,6 +7566,9 @@ type AllocationGroupAPIGetAllocationGroupTotalCostTimedParams struct {
 	// PageCursor Cursor that defines token indicating where to start the next page.
 	// Empty value indicates to start from beginning of the dataset.
 	PageCursor *string `form:"page.cursor,omitempty" json:"page.cursor,omitempty"`
+
+	// UseListingPrices Whether to use listing prices instead of actual prices for cost calculations.
+	UseListingPrices *bool `form:"useListingPrices,omitempty" json:"useListingPrices,omitempty"`
 }
 
 // AllocationGroupAPIListAllocationGroupsParams defines parameters for AllocationGroupAPIListAllocationGroups.
@@ -7545,18 +7599,9 @@ type AllocationGroupAPIGetAllocationGroupEfficiencySummaryParams struct {
 
 	// ClusterIds Cluster IDs for filtering. Leave empty for the full list.
 	ClusterIds *[]string `form:"clusterIds,omitempty" json:"clusterIds,omitempty"`
-}
 
-// AllocationGroupAPIGetCostAllocationGroupSummaryParams defines parameters for AllocationGroupAPIGetCostAllocationGroupSummary.
-type AllocationGroupAPIGetCostAllocationGroupSummaryParams struct {
-	// StartTime Filter items to include from specified time.
-	StartTime time.Time `form:"startTime" json:"startTime"`
-
-	// EndTime Filter items to include up to specified time.
-	EndTime time.Time `form:"endTime" json:"endTime"`
-
-	// ClusterIds Cluster IDs for filtering. Leave empty for the full list.
-	ClusterIds *[]string `form:"clusterIds,omitempty" json:"clusterIds,omitempty"`
+	// UseListingPrices Whether to use listing prices instead of actual prices for cost calculations.
+	UseListingPrices *bool `form:"useListingPrices,omitempty" json:"useListingPrices,omitempty"`
 }
 
 // AllocationGroupAPIGetCostAllocationGroupDataTransferWorkloadsParams defines parameters for AllocationGroupAPIGetCostAllocationGroupDataTransferWorkloads.
@@ -7594,6 +7639,9 @@ type AllocationGroupAPIGetAllocationGroupWorkloadCostsParams struct {
 	//  - DESC: ASC
 	//  - desc: desc
 	SortOrder *AllocationGroupAPIGetAllocationGroupWorkloadCostsParamsSortOrder `form:"sort.order,omitempty" json:"sort.order,omitempty"`
+
+	// UseListingPrices Whether to use listing prices instead of actual prices for cost calculations.
+	UseListingPrices *bool `form:"useListingPrices,omitempty" json:"useListingPrices,omitempty"`
 }
 
 // AllocationGroupAPIGetAllocationGroupWorkloadCostsParamsSortOrder defines parameters for AllocationGroupAPIGetAllocationGroupWorkloadCosts.
@@ -7625,22 +7673,13 @@ type AllocationGroupAPIGetAllocationGroupWorkloadsEfficiencyParams struct {
 	//  - DESC: ASC
 	//  - desc: desc
 	SortOrder *AllocationGroupAPIGetAllocationGroupWorkloadsEfficiencyParamsSortOrder `form:"sort.order,omitempty" json:"sort.order,omitempty"`
+
+	// UseListingPrices Whether to use listing prices instead of actual prices for cost calculations.
+	UseListingPrices *bool `form:"useListingPrices,omitempty" json:"useListingPrices,omitempty"`
 }
 
 // AllocationGroupAPIGetAllocationGroupWorkloadsEfficiencyParamsSortOrder defines parameters for AllocationGroupAPIGetAllocationGroupWorkloadsEfficiency.
 type AllocationGroupAPIGetAllocationGroupWorkloadsEfficiencyParamsSortOrder string
-
-// AllocationGroupAPIGetCostAllocationGroupWorkloadsParams defines parameters for AllocationGroupAPIGetCostAllocationGroupWorkloads.
-type AllocationGroupAPIGetCostAllocationGroupWorkloadsParams struct {
-	// StartTime Filter items to include from specified time.
-	StartTime time.Time `form:"startTime" json:"startTime"`
-
-	// EndTime Filter items to include up to specified time.
-	EndTime time.Time `form:"endTime" json:"endTime"`
-
-	// ClusterIds Cluster IDs for filtering. Leave empty for the full list.
-	ClusterIds *[]string `form:"clusterIds,omitempty" json:"clusterIds,omitempty"`
-}
 
 // InventoryAPIListInstanceTypeNamesParams defines parameters for InventoryAPIListInstanceTypeNames.
 type InventoryAPIListInstanceTypeNamesParams struct {
@@ -7673,6 +7712,46 @@ type NodeTemplatesAPIListNodeTemplatesParams struct {
 // ScheduledRebalancingAPIListRebalancingJobsParams defines parameters for ScheduledRebalancingAPIListRebalancingJobs.
 type ScheduledRebalancingAPIListRebalancingJobsParams struct {
 	RebalancingScheduleId *string `form:"rebalancingScheduleId,omitempty" json:"rebalancingScheduleId,omitempty"`
+}
+
+// ExternalClusterAPIGetConnectAndEnableCASTAICmdParams defines parameters for ExternalClusterAPIGetConnectAndEnableCASTAICmd.
+type ExternalClusterAPIGetConnectAndEnableCASTAICmdParams struct {
+	// ClusterName Customer cluster name.
+	ClusterName *string `form:"clusterName,omitempty" json:"clusterName,omitempty"`
+
+	// Provider Provider: eks, gke, aks, etc.
+	Provider *string `form:"provider,omitempty" json:"provider,omitempty"`
+
+	// NvidiaDevicePlugin Whether NVIDIA device plugin DaemonSet should be installed during Phase 2 on-boarding.
+	NvidiaDevicePlugin *bool `form:"nvidiaDevicePlugin,omitempty" json:"nvidiaDevicePlugin,omitempty"`
+
+	// InstallSecurityAgent Whether CAST AI Security Insights agent should be installed.
+	InstallSecurityAgent *bool `form:"installSecurityAgent,omitempty" json:"installSecurityAgent,omitempty"`
+
+	// InstallAutoscalerAgent Whether CAST AI Autoscaler components should be installed.
+	// To enable backwards compatibility, when the field is omitted, it is defaulted to true.
+	InstallAutoscalerAgent *bool `form:"installAutoscalerAgent,omitempty" json:"installAutoscalerAgent,omitempty"`
+
+	// InstallGpuMetricsExporter Whether CAST AI GPU metrics exporter should be installed.
+	InstallGpuMetricsExporter *bool `form:"installGpuMetricsExporter,omitempty" json:"installGpuMetricsExporter,omitempty"`
+
+	// InstallAiOptimizerProxy Whether CAST AI AI-Optimizer Proxy should be installed.
+	InstallAiOptimizerProxy *bool `form:"installAiOptimizerProxy,omitempty" json:"installAiOptimizerProxy,omitempty"`
+
+	// GcpSaImpersonate Whether GCP SA Impersonate feature should be enabled.
+	GcpSaImpersonate *bool `form:"gcpSaImpersonate,omitempty" json:"gcpSaImpersonate,omitempty"`
+
+	// InstallNetflowExporter Whether Netflow network exporter should be installed.
+	InstallNetflowExporter *bool `form:"installNetflowExporter,omitempty" json:"installNetflowExporter,omitempty"`
+
+	// InstallWorkloadAutoscaler Whether CAST AI Workload Autoscaler should be installed.
+	InstallWorkloadAutoscaler *bool `form:"installWorkloadAutoscaler,omitempty" json:"installWorkloadAutoscaler,omitempty"`
+
+	// InstallPodMutator Whether CAST AI Pod Mutator should be installed.
+	InstallPodMutator *bool `form:"installPodMutator,omitempty" json:"installPodMutator,omitempty"`
+
+	// InstallOmni Whether cluster should be onboarded with CAST AI Omni.
+	InstallOmni *bool `form:"installOmni,omitempty" json:"installOmni,omitempty"`
 }
 
 // ExternalClusterAPIGetCredentialsScriptParams defines parameters for ExternalClusterAPIGetCredentialsScript.
@@ -7788,6 +7867,10 @@ type RbacServiceAPIListRoleBindingsParams struct {
 	// SubjectType Filter by subject type. Multiple values can be passed as query parameters
 	// (e.g., &subject_type=x&subject_type=y)
 	SubjectType *[]RbacServiceAPIListRoleBindingsParamsSubjectType `form:"subjectType,omitempty" json:"subjectType,omitempty"`
+
+	// SubjectId Filter by subject ID. Multiple values can be passed as query parameters
+	// (e.g., &subject_id=x&subject_id=y)
+	SubjectId *[]string `form:"subjectId,omitempty" json:"subjectId,omitempty"`
 }
 
 // RbacServiceAPIListRoleBindingsParamsScopeType defines parameters for RbacServiceAPIListRoleBindings.
@@ -8274,6 +8357,37 @@ type WorkloadOptimizationAPIGetWorkloadEventParams struct {
 	CreatedAt time.Time `form:"createdAt" json:"createdAt"`
 }
 
+// WorkloadOptimizationAPIListWorkloadsParams defines parameters for WorkloadOptimizationAPIListWorkloads.
+type WorkloadOptimizationAPIListWorkloadsParams struct {
+	WorkloadIds        *[]string `form:"workloadIds,omitempty" json:"workloadIds,omitempty"`
+	WorkloadNames      *[]string `form:"workloadNames,omitempty" json:"workloadNames,omitempty"`
+	Namespaces         *[]string `form:"namespaces,omitempty" json:"namespaces,omitempty"`
+	ScalingPolicyNames *[]string `form:"scalingPolicyNames,omitempty" json:"scalingPolicyNames,omitempty"`
+	Kinds              *[]string `form:"kinds,omitempty" json:"kinds,omitempty"`
+	ManagementOptions  *[]string `form:"managementOptions,omitempty" json:"managementOptions,omitempty"`
+	ConfiguredBy       *[]string `form:"configuredBy,omitempty" json:"configuredBy,omitempty"`
+	SearchQuery        *string   `form:"searchQuery,omitempty" json:"searchQuery,omitempty"`
+	PageLimit          *string   `form:"page.limit,omitempty" json:"page.limit,omitempty"`
+
+	// PageCursor Cursor that defines token indicating where to start the next page.
+	// Empty value indicates to start from beginning of the dataset.
+	PageCursor *string `form:"page.cursor,omitempty" json:"page.cursor,omitempty"`
+
+	// SortField Name of the field you want to sort
+	SortField *string `form:"sort.field,omitempty" json:"sort.field,omitempty"`
+
+	// SortOrder The sort order, possible values ASC or DESC, if not provided asc is the default
+	//
+	//  - ASC: ASC
+	//  - asc: desc
+	//  - DESC: ASC
+	//  - desc: desc
+	SortOrder *WorkloadOptimizationAPIListWorkloadsParamsSortOrder `form:"sort.order,omitempty" json:"sort.order,omitempty"`
+}
+
+// WorkloadOptimizationAPIListWorkloadsParamsSortOrder defines parameters for WorkloadOptimizationAPIListWorkloads.
+type WorkloadOptimizationAPIListWorkloadsParamsSortOrder string
+
 // WorkloadOptimizationAPIGetWorkloadsSummaryParams defines parameters for WorkloadOptimizationAPIGetWorkloadsSummary.
 type WorkloadOptimizationAPIGetWorkloadsSummaryParams struct {
 	IncludeCosts *bool `form:"includeCosts,omitempty" json:"includeCosts,omitempty"`
@@ -8288,6 +8402,7 @@ type WorkloadOptimizationAPIGetWorkloadsSummaryMetricsParams struct {
 // WorkloadOptimizationAPIGetWorkloadParams defines parameters for WorkloadOptimizationAPIGetWorkload.
 type WorkloadOptimizationAPIGetWorkloadParams struct {
 	IncludeMetrics *bool      `form:"includeMetrics,omitempty" json:"includeMetrics,omitempty"`
+	IncludeCosts   *bool      `form:"includeCosts,omitempty" json:"includeCosts,omitempty"`
 	FromTime       *time.Time `form:"fromTime,omitempty" json:"fromTime,omitempty"`
 	ToTime         *time.Time `form:"toTime,omitempty" json:"toTime,omitempty"`
 }
@@ -8529,3 +8644,71 @@ type WorkloadOptimizationAPIPatchWorkloadV2JSONRequestBody = WorkloadOptimizatio
 
 // WorkloadOptimizationAPIUpdateWorkloadV2JSONRequestBody defines body for WorkloadOptimizationAPIUpdateWorkloadV2 for application/json ContentType.
 type WorkloadOptimizationAPIUpdateWorkloadV2JSONRequestBody = WorkloadoptimizationV1UpdateWorkloadV2
+
+// Getter for additional properties for GoogleProtobufAny. Returns the specified
+// element and whether it was found
+func (a GoogleProtobufAny) Get(fieldName string) (value map[string]interface{}, found bool) {
+	if a.AdditionalProperties != nil {
+		value, found = a.AdditionalProperties[fieldName]
+	}
+	return
+}
+
+// Setter for additional properties for GoogleProtobufAny
+func (a *GoogleProtobufAny) Set(fieldName string, value map[string]interface{}) {
+	if a.AdditionalProperties == nil {
+		a.AdditionalProperties = make(map[string]map[string]interface{})
+	}
+	a.AdditionalProperties[fieldName] = value
+}
+
+// Override default JSON handling for GoogleProtobufAny to handle AdditionalProperties
+func (a *GoogleProtobufAny) UnmarshalJSON(b []byte) error {
+	object := make(map[string]json.RawMessage)
+	err := json.Unmarshal(b, &object)
+	if err != nil {
+		return err
+	}
+
+	if raw, found := object["@type"]; found {
+		err = json.Unmarshal(raw, &a.Type)
+		if err != nil {
+			return fmt.Errorf("error reading '@type': %w", err)
+		}
+		delete(object, "@type")
+	}
+
+	if len(object) != 0 {
+		a.AdditionalProperties = make(map[string]map[string]interface{})
+		for fieldName, fieldBuf := range object {
+			var fieldVal map[string]interface{}
+			err := json.Unmarshal(fieldBuf, &fieldVal)
+			if err != nil {
+				return fmt.Errorf("error unmarshaling field %s: %w", fieldName, err)
+			}
+			a.AdditionalProperties[fieldName] = fieldVal
+		}
+	}
+	return nil
+}
+
+// Override default JSON handling for GoogleProtobufAny to handle AdditionalProperties
+func (a GoogleProtobufAny) MarshalJSON() ([]byte, error) {
+	var err error
+	object := make(map[string]json.RawMessage)
+
+	if a.Type != nil {
+		object["@type"], err = json.Marshal(a.Type)
+		if err != nil {
+			return nil, fmt.Errorf("error marshaling '@type': %w", err)
+		}
+	}
+
+	for fieldName, field := range a.AdditionalProperties {
+		object[fieldName], err = json.Marshal(field)
+		if err != nil {
+			return nil, fmt.Errorf("error marshaling '%s': %w", fieldName, err)
+		}
+	}
+	return json.Marshal(object)
+}

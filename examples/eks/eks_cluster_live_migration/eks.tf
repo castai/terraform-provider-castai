@@ -18,6 +18,10 @@ module "eks" {
     vpc-cni = {
       most_recent = true
     }
+    aws-ebs-csi-driver = {
+      service_account_role_arn = module.ebs_csi_irsa_role.iam_role_arn
+      resolve_conflicts        = "OVERWRITE"
+    }
   }
 
   tags = var.tags
@@ -30,7 +34,7 @@ module "eks" {
   aws_auth_roles = [
     # Add the CAST AI IAM role which required for CAST AI nodes to join the cluster.
     {
-      rolearn  = module.cluster[0].instance_profile_role_arn
+      rolearn  = module.castai-eks-role-iam[0].instance_profile_role_arn
       username = "system:node:{{EC2PrivateDNSName}}"
       groups = [
         "system:bootstrappers",
@@ -65,6 +69,21 @@ module "eks" {
     }
   }
 
+}
+
+module "ebs_csi_irsa_role" {
+  source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
+  version = "~> 4.21.1"
+
+  role_name             = "ebs-csi-${var.cluster_name}"
+  attach_ebs_csi_policy = true
+
+  oidc_providers = {
+    ex = {
+      provider_arn               = module.eks.oidc_provider_arn
+      namespace_service_accounts = ["kube-system:ebs-csi-controller-sa"]
+    }
+  }
 }
 
 # Example additional security group.

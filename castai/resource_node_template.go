@@ -85,6 +85,7 @@ const (
 	FieldNodeTemplateSharingConfiguration                     = "sharing_configuration"
 	FieldNodeTemplateSharedClientsPerGpu                      = "shared_clients_per_gpu"
 	FieldNodeTemplateSharedGpuName                            = "gpu_name"
+	FieldNodeTemplateClmEnabled                               = "clm_enabled"
 )
 
 const (
@@ -694,6 +695,12 @@ func resourceNodeTemplate() *schema.Resource {
 					},
 				},
 			},
+			FieldNodeTemplateClmEnabled: {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Default:     false,
+				Description: "Marks whether CLM should be enabled for nodes created from this template.",
+			},
 		},
 	}
 }
@@ -778,6 +785,11 @@ func resourceNodeTemplateRead(ctx context.Context, d *schema.ResourceData, meta 
 			return diag.FromErr(fmt.Errorf("setting gpu settings: %w", err))
 		}
 	}
+
+	if err := d.Set(FieldNodeTemplateClmEnabled, nodeTemplate.ClmEnabled); err != nil {
+		return diag.FromErr(fmt.Errorf("setting clm enabled: %w", err))
+	}
+
 	return nil
 }
 
@@ -1079,6 +1091,7 @@ func updateNodeTemplate(ctx context.Context, d *schema.ResourceData, meta any, s
 		FieldNodeTemplateSharingConfiguration,
 		FieldNodeTemplateSharedGpuName,
 		FieldNodeTemplateSharedClientsPerGpu,
+		FieldNodeTemplateClmEnabled,
 	) {
 		log.Printf("[INFO] Nothing to update in node template")
 		return nil
@@ -1152,6 +1165,10 @@ func updateNodeTemplate(ctx context.Context, d *schema.ResourceData, meta any, s
 		req.Gpu = toTemplateGpu(v[0].(map[string]any))
 	}
 
+	if v, ok := d.GetOk(FieldNodeTemplateClmEnabled); ok {
+		req.ClmEnabled = lo.ToPtr(v.(bool))
+	}
+
 	resp, err := client.NodeTemplatesAPIUpdateNodeTemplateWithResponse(ctx, clusterID, name, req)
 	if checkErr := sdk.CheckOKResponse(resp, err); checkErr != nil {
 		return diag.FromErr(checkErr)
@@ -1181,6 +1198,7 @@ func resourceNodeTemplateCreate(ctx context.Context, d *schema.ResourceData, met
 		IsDefault:       lo.ToPtr(isDefault),
 		ConfigurationId: lo.ToPtr(d.Get(FieldNodeTemplateConfigurationId).(string)),
 		ShouldTaint:     lo.ToPtr(d.Get(FieldNodeTemplateShouldTaint).(bool)),
+		ClmEnabled:      lo.ToPtr(d.Get(FieldNodeTemplateClmEnabled).(bool)),
 	}
 
 	//nolint:staticcheck // Currently no other way to reliably get the value and determine if it is set

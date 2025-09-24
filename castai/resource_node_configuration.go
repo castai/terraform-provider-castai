@@ -273,6 +273,12 @@ func resourceNodeConfiguration() *schema.Resource {
 								return oldValue == newValue
 							},
 						},
+						"threads_per_cpu": {
+							Type:             schema.TypeInt,
+							Optional:         true,
+							Description:      "Number of threads per core.",
+							ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(0, 256)),
+						},
 						FieldNodeConfigurationEKSImageFamily: {
 							Type:     schema.TypeString,
 							Optional: true,
@@ -557,6 +563,13 @@ func resourceNodeConfiguration() *schema.Resource {
 									},
 								},
 							},
+						},
+						"on_host_maintenance": {
+							Type:             schema.TypeString,
+							Optional:         true,
+							Default:          nil,
+							Description:      "Maintenance behavior of the instances. If not set, the default value for spot nodes is terminate, and for non-spot nodes, it is migrate.",
+							ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"migrate", "terminate"}, true)),
 						},
 						FieldNodeConfigurationLoadbalancers: {
 							Type:        schema.TypeList,
@@ -928,6 +941,10 @@ func toEKSConfig(obj map[string]interface{}) *sdk.NodeconfigV1EKSConfig {
 		out.IpsPerPrefix = toPtr(int32(v))
 	}
 
+	if v, ok := obj["threads_per_cpu"].(int); ok && v != 0 {
+		out.ThreadsPerCpu = toPtr(int32(v))
+	}
+
 	if v, ok := obj[FieldNodeConfigurationEKSTargetGroup].([]any); ok && len(v) > 0 {
 		resultTGs := make([]sdk.NodeconfigV1TargetGroup, 0, len(v))
 		for _, tgRaw := range v {
@@ -1015,6 +1032,10 @@ func flattenEKSConfig(config *sdk.NodeconfigV1EKSConfig) []map[string]interface{
 
 	if v := config.IpsPerPrefix; v != nil {
 		m["ips_per_prefix"] = *config.IpsPerPrefix
+	}
+
+	if v := config.ThreadsPerCpu; v != nil {
+		m["threads_per_cpu"] = *config.ThreadsPerCpu
 	}
 
 	if v := config.TargetGroups; v != nil && len(*v) > 0 {
@@ -1155,7 +1176,6 @@ func toAKSNodePublicIP(obj any) *sdk.NodeconfigV1AKSConfigPublicIP {
 	}
 
 	return publicIP
-
 }
 
 func toAKSEphemeralOSDisk(obj any) *sdk.NodeconfigV1AKSConfigOsDiskEphemeral {
@@ -1352,7 +1372,6 @@ func fromAKSNodePublicIP(sdkPublicIp *sdk.NodeconfigV1AKSConfigPublicIP) []map[s
 	}
 
 	return []map[string]any{m}
-
 }
 
 func fromAKSEphemeralOSDisk(sdkEph *sdk.NodeconfigV1AKSConfigOsDiskEphemeral) []map[string]interface{} {
@@ -1496,6 +1515,10 @@ func toGKEConfig(obj map[string]interface{}) *sdk.NodeconfigV1GKEConfig {
 		}
 	}
 
+	if v, ok := obj["on_host_maintenance"].(string); ok && v != "" {
+		out.OnHostMaintenance = toPtr(sdk.NodeconfigV1GKEConfigOnHostMaintenance(v))
+	}
+
 	if v, ok := obj[FieldNodeConfigurationLoadbalancers].([]interface{}); ok && len(v) > 0 {
 		out.LoadBalancers = toGkeLoadBalancers(v)
 	}
@@ -1567,7 +1590,6 @@ func toGkeUnmanagedInstanceGroups(obj []interface{}) *[]sdk.NodeconfigV1GKEConfi
 	}
 
 	return &out
-
 }
 
 func flattenGKEConfig(config *sdk.NodeconfigV1GKEConfig) []map[string]interface{} {
@@ -1598,6 +1620,9 @@ func flattenGKEConfig(config *sdk.NodeconfigV1GKEConfig) []map[string]interface{
 		}
 	}
 
+	if v := config.OnHostMaintenance; v != nil {
+		m["on_host_maintenance"] = *v
+	}
 	if v := config.LoadBalancers; v != nil && len(*v) > 0 {
 		m[FieldNodeConfigurationLoadbalancers] = fromGkeLoadBalancers(*v)
 	}

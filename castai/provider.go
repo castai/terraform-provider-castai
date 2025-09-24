@@ -11,11 +11,13 @@ import (
 
 	"github.com/castai/terraform-provider-castai/castai/sdk"
 	"github.com/castai/terraform-provider-castai/castai/sdk/cluster_autoscaler"
+	"github.com/castai/terraform-provider-castai/castai/sdk/organization_management"
 )
 
 type ProviderConfig struct {
-	api                     sdk.ClientWithResponsesInterface
-	clusterAutoscalerClient cluster_autoscaler.ClientWithResponsesInterface
+	api                          sdk.ClientWithResponsesInterface
+	clusterAutoscalerClient      cluster_autoscaler.ClientWithResponsesInterface
+	organizationManagementClient organization_management.ClientWithResponsesInterface
 }
 
 func Provider(version string) *schema.Provider {
@@ -63,6 +65,7 @@ func Provider(version string) *schema.Provider {
 			"castai_hibernation_schedule":          resourceHibernationSchedule(),
 			"castai_security_runtime_rule":         resourceSecurityRuntimeRule(),
 			"castai_allocation_group":              resourceAllocationGroup(),
+			"castai_enterprise_group":              resourceEnterpriseGroup(),
 		},
 
 		DataSourcesMap: map[string]*schema.Resource{
@@ -103,9 +106,15 @@ func providerConfigure(version string) schema.ConfigureContextFunc {
 			return nil, diag.FromErr(err)
 		}
 
+		organizationManagementClient, err := organization_management.CreateClient(apiURL, apiToken, agent)
+		if err != nil {
+			return nil, diag.FromErr(err)
+		}
+
 		return &ProviderConfig{
-			api:                     client,
-			clusterAutoscalerClient: clusterAutoscalerClient,
+			api:                          client,
+			clusterAutoscalerClient:      clusterAutoscalerClient,
+			organizationManagementClient: organizationManagementClient,
 		}, nil
 	}
 }
