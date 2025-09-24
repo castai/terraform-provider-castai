@@ -455,7 +455,6 @@ func resourceEnterpriseGroupRead(ctx context.Context, data *schema.ResourceData,
 	}
 
 	if group == nil {
-		// Group not found, remove from state
 		tflog.Warn(
 			ctx,
 			"Group not found, removing from state",
@@ -465,15 +464,16 @@ func resourceEnterpriseGroupRead(ctx context.Context, data *schema.ResourceData,
 			},
 		)
 		data.SetId("")
-	} else {
-		groupWithRoleBindings, err := convertListGroupsResponseGroup(ctx, client, enterpriseIDStr, *group)
-		if err != nil {
-			return diag.FromErr(fmt.Errorf("fetching role bindings for groups: %w", err))
-		}
+		return nil
+	}
 
-		if err = setEnterpriseGroupsData(ctx, data, groupWithRoleBindings); err != nil {
-			return diag.FromErr(fmt.Errorf("failed to set read groups data: %w", err))
-		}
+	groupWithRoleBindings, err := convertListGroupsResponseGroup(ctx, client, enterpriseIDStr, *group)
+	if err != nil {
+		return diag.FromErr(fmt.Errorf("fetching role bindings for groups: %w", err))
+	}
+
+	if err = setEnterpriseGroupsData(ctx, data, groupWithRoleBindings); err != nil {
+		return diag.FromErr(fmt.Errorf("failed to set read groups data: %w", err))
 	}
 
 	tflog.Debug(ctx, "Finished reading enterprise group", map[string]any{"group_id": data.Id()})
