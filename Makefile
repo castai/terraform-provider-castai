@@ -6,6 +6,9 @@ export SWAGGER_LOCATION ?= https://api.cast.ai/v1/spec/openapi.json
 export CLUSTER_AUTOSCALER_API_TAGS ?= HibernationSchedulesAPI
 export CLUSTER_AUTOSCALER_SWAGGER_LOCATION ?= https://api.cast.ai/spec/cluster-autoscaler/openapi.yaml
 
+export ORGANIZATION_MANAGEMENT_API_TAGS ?= EnterpriseAPI
+export ORGANIZATION_MANAGEMENT_SWAGGER_LOCATION ?= https://api.cast.ai/spec/organization-management/openapi.yaml
+
 default: build
 
 .PHONY: format-tf
