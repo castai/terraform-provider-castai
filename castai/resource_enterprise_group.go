@@ -630,11 +630,12 @@ func convertListGroupsResponseGroup(
 				return EnterpriseGroupWithRoleBindings{}, fmt.Errorf("member kind is nil for member in group %s", lo.FromPtr(group.Name))
 			}
 
-			if *member.Kind == "KIND_USER" {
+			switch *member.Kind {
+			case "KIND_USER":
 				m.Kind = EnterpriseGroupMemberKindUser
-			} else if *member.Kind == "KIND_SERVICE_ACCOUNT" {
+			case "KIND_SERVICE_ACCOUNT":
 				m.Kind = EnterpriseGroupMemberKindServiceAccount
-			} else {
+			default:
 				return EnterpriseGroupWithRoleBindings{}, fmt.Errorf("unsupported member kind %s for member in group %s", *member.Kind, lo.FromPtr(group.Name))
 			}
 			m.ID = lo.FromPtr(member.Id)
