@@ -266,7 +266,7 @@ func resourceEnterpriseGroupCreate(ctx context.Context, data *schema.ResourceDat
 		return diag.FromErr(fmt.Errorf("converting created group data: %w", err))
 	}
 
-	if err = setEnterpriseGroupsData(data, group); err != nil {
+	if err = setEnterpriseGroupsData(ctx, data, group); err != nil {
 		return diag.FromErr(fmt.Errorf("failed to set created group data: %w", err))
 	}
 
@@ -471,7 +471,7 @@ func resourceEnterpriseGroupRead(ctx context.Context, data *schema.ResourceData,
 			return diag.FromErr(fmt.Errorf("fetching role bindings for groups: %w", err))
 		}
 
-		if err = setEnterpriseGroupsData(data, groupWithRoleBindings); err != nil {
+		if err = setEnterpriseGroupsData(ctx, data, groupWithRoleBindings); err != nil {
 			return diag.FromErr(fmt.Errorf("failed to set read groups data: %w", err))
 		}
 	}
@@ -576,6 +576,7 @@ func convertListGroupsResponseGroup(
 }
 
 func setEnterpriseGroupsData(
+	ctx context.Context,
 	data *schema.ResourceData,
 	group EnterpriseGroupWithRoleBindings,
 ) error {
@@ -595,7 +596,7 @@ func setEnterpriseGroupsData(
 		return fmt.Errorf("failed to set members: %w", err)
 	}
 
-	roleBindings, err := convertRoleBindings(data, group.RoleBindings)
+	roleBindings, err := convertRoleBindings(ctx, data, group.RoleBindings)
 	if err != nil {
 		return fmt.Errorf("failed to convert role bindings: %w", err)
 	}
@@ -631,6 +632,7 @@ func convertMembers(members []Member) []map[string]any {
 }
 
 func convertRoleBindings(
+	ctx context.Context,
 	data *schema.ResourceData,
 	newRoleBinding []RoleBinding,
 ) ([]map[string]any, error) {
@@ -684,13 +686,18 @@ func convertRoleBindings(
 		if rb.ID == "" {
 			newRb, ok = newRoleBindingNameToRoleBinding[rb.Name]
 			if !ok {
-				// Something is wrong, role binding without ID should be found by Name
+				tflog.Warn(ctx, "Role binding not found by Name, skipping", map[string]any{
+					"role_binding_name": rb.Name,
+				})
 				continue
 			}
 		} else {
 			newRb, ok = newRoleBindingIDToRoleBinding[rb.ID]
 			if !ok {
-				// Role binding was removed outside of Terraform, skip it
+				tflog.Warn(ctx, "Role binding not found by ID, trying to find by Name", map[string]any{
+					"role_binding_id":   rb.ID,
+					"role_binding_name": rb.Name,
+				})
 				continue
 			}
 		}
@@ -840,7 +847,7 @@ func resourceEnterpriseGroupUpdate(ctx context.Context, data *schema.ResourceDat
 		return diag.FromErr(fmt.Errorf("converting updated group data: %w", err))
 	}
 
-	if err = setEnterpriseGroupsData(data, group); err != nil {
+	if err = setEnterpriseGroupsData(ctx, data, group); err != nil {
 		return diag.FromErr(fmt.Errorf("failed to set updated group data: %w", err))
 	}
 
