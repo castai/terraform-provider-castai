@@ -817,7 +817,7 @@ type ClientInterface interface {
 	WorkloadOptimizationAPIGetWorkloadEvent(ctx context.Context, clusterId string, eventId string, params *WorkloadOptimizationAPIGetWorkloadEventParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// WorkloadOptimizationAPIListWorkloads request
-	WorkloadOptimizationAPIListWorkloads(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+	WorkloadOptimizationAPIListWorkloads(ctx context.Context, clusterId string, params *WorkloadOptimizationAPIListWorkloadsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// WorkloadOptimizationAPIGetWorkloadsSummary request
 	WorkloadOptimizationAPIGetWorkloadsSummary(ctx context.Context, clusterId string, params *WorkloadOptimizationAPIGetWorkloadsSummaryParams, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -4034,8 +4034,8 @@ func (c *Client) WorkloadOptimizationAPIGetWorkloadEvent(ctx context.Context, cl
 	return c.Client.Do(req)
 }
 
-func (c *Client) WorkloadOptimizationAPIListWorkloads(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewWorkloadOptimizationAPIListWorkloadsRequest(c.Server, clusterId)
+func (c *Client) WorkloadOptimizationAPIListWorkloads(ctx context.Context, clusterId string, params *WorkloadOptimizationAPIListWorkloadsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewWorkloadOptimizationAPIListWorkloadsRequest(c.Server, clusterId, params)
 	if err != nil {
 		return nil, err
 	}
@@ -9890,6 +9890,22 @@ func NewRbacServiceAPIListRoleBindingsRequest(server string, organizationId stri
 
 		}
 
+		if params.SubjectId != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "subjectId", runtime.ParamLocationQuery, *params.SubjectId); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
 		queryURL.RawQuery = queryValues.Encode()
 	}
 
@@ -15510,7 +15526,7 @@ func NewWorkloadOptimizationAPIGetWorkloadEventRequest(server string, clusterId 
 }
 
 // NewWorkloadOptimizationAPIListWorkloadsRequest generates requests for WorkloadOptimizationAPIListWorkloads
-func NewWorkloadOptimizationAPIListWorkloadsRequest(server string, clusterId string) (*http.Request, error) {
+func NewWorkloadOptimizationAPIListWorkloadsRequest(server string, clusterId string, params *WorkloadOptimizationAPIListWorkloadsParams) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -15533,6 +15549,204 @@ func NewWorkloadOptimizationAPIListWorkloadsRequest(server string, clusterId str
 	queryURL, err := serverURL.Parse(operationPath)
 	if err != nil {
 		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.WorkloadIds != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "workloadIds", runtime.ParamLocationQuery, *params.WorkloadIds); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.WorkloadNames != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "workloadNames", runtime.ParamLocationQuery, *params.WorkloadNames); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.Namespaces != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "namespaces", runtime.ParamLocationQuery, *params.Namespaces); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.ScalingPolicyNames != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "scalingPolicyNames", runtime.ParamLocationQuery, *params.ScalingPolicyNames); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.Kinds != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "kinds", runtime.ParamLocationQuery, *params.Kinds); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.ManagementOptions != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "managementOptions", runtime.ParamLocationQuery, *params.ManagementOptions); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.ConfiguredBy != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "configuredBy", runtime.ParamLocationQuery, *params.ConfiguredBy); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.SearchQuery != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "searchQuery", runtime.ParamLocationQuery, *params.SearchQuery); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.PageLimit != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "page.limit", runtime.ParamLocationQuery, *params.PageLimit); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.PageCursor != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "page.cursor", runtime.ParamLocationQuery, *params.PageCursor); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.SortField != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "sort.field", runtime.ParamLocationQuery, *params.SortField); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.SortOrder != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "sort.order", runtime.ParamLocationQuery, *params.SortOrder); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
 	}
 
 	req, err := http.NewRequest("GET", queryURL.String(), nil)
@@ -16943,7 +17157,7 @@ type ClientWithResponsesInterface interface {
 	WorkloadOptimizationAPIGetWorkloadEventWithResponse(ctx context.Context, clusterId string, eventId string, params *WorkloadOptimizationAPIGetWorkloadEventParams) (*WorkloadOptimizationAPIGetWorkloadEventResponse, error)
 
 	// WorkloadOptimizationAPIListWorkloads request
-	WorkloadOptimizationAPIListWorkloadsWithResponse(ctx context.Context, clusterId string) (*WorkloadOptimizationAPIListWorkloadsResponse, error)
+	WorkloadOptimizationAPIListWorkloadsWithResponse(ctx context.Context, clusterId string, params *WorkloadOptimizationAPIListWorkloadsParams) (*WorkloadOptimizationAPIListWorkloadsResponse, error)
 
 	// WorkloadOptimizationAPIGetWorkloadsSummary request
 	WorkloadOptimizationAPIGetWorkloadsSummaryWithResponse(ctx context.Context, clusterId string, params *WorkloadOptimizationAPIGetWorkloadsSummaryParams) (*WorkloadOptimizationAPIGetWorkloadsSummaryResponse, error)
@@ -25513,8 +25727,8 @@ func (c *ClientWithResponses) WorkloadOptimizationAPIGetWorkloadEventWithRespons
 }
 
 // WorkloadOptimizationAPIListWorkloadsWithResponse request returning *WorkloadOptimizationAPIListWorkloadsResponse
-func (c *ClientWithResponses) WorkloadOptimizationAPIListWorkloadsWithResponse(ctx context.Context, clusterId string) (*WorkloadOptimizationAPIListWorkloadsResponse, error) {
-	rsp, err := c.WorkloadOptimizationAPIListWorkloads(ctx, clusterId)
+func (c *ClientWithResponses) WorkloadOptimizationAPIListWorkloadsWithResponse(ctx context.Context, clusterId string, params *WorkloadOptimizationAPIListWorkloadsParams) (*WorkloadOptimizationAPIListWorkloadsResponse, error) {
+	rsp, err := c.WorkloadOptimizationAPIListWorkloads(ctx, clusterId, params)
 	if err != nil {
 		return nil, err
 	}
