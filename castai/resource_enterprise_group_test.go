@@ -81,7 +81,7 @@ func TestResourceEnterpriseGroupCreateContext(t *testing.T) {
 		r.NotNil(result)
 		r.True(result.HasError())
 		r.Len(result, 1)
-		r.Equal("building create request: scope cannot have both 'organization' and 'cluster' set simultaneously", result[0].Summary)
+		r.Equal("building create request: reading group data: scope cannot have both 'organization' and 'cluster' set simultaneously", result[0].Summary)
 	})
 
 	t.Run("when API call fails then return error", func(t *testing.T) {
@@ -982,7 +982,7 @@ func TestResourceEnterpriseGroupUpdateContext(t *testing.T) {
 		r.NotNil(result)
 		r.True(result.HasError())
 		r.Len(result, 1)
-		r.Equal("scope cannot have both 'organization' and 'cluster' set simultaneously", result[0].Summary)
+		r.Equal("reading group data: scope cannot have both 'organization' and 'cluster' set simultaneously", result[0].Summary)
 	})
 
 	t.Run("when there are changes then update resource", func(t *testing.T) {
