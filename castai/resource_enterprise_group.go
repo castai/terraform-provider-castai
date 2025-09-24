@@ -482,11 +482,12 @@ func convertBatchCreateEnterpriseGroupsResponseGroup(
 				return EnterpriseGroupWithRoleBindings{}, fmt.Errorf("member kind is nil for member in group %s", lo.FromPtr(g.Name))
 			}
 
-			if *member.Kind == organization_management.DefinitionMemberKindSUBJECTKINDUSER {
+			switch *member.Kind {
+			case organization_management.DefinitionMemberKindSUBJECTKINDUSER:
 				m.Kind = EnterpriseGroupMemberKindUser
-			} else if *member.Kind == organization_management.DefinitionMemberKindSUBJECTKINDSERVICEACCOUNT {
+			case organization_management.DefinitionMemberKindSUBJECTKINDSERVICEACCOUNT:
 				m.Kind = EnterpriseGroupMemberKindServiceAccount
-			} else {
+			default:
 				return EnterpriseGroupWithRoleBindings{}, fmt.Errorf("unsupported member kind %s for member in group %s", *member.Kind, lo.FromPtr(g.Name))
 			}
 			m.ID = lo.FromPtr(member.Id)
