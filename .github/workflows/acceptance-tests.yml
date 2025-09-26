@@ -1,10 +1,5 @@
 name: Acceptance tests
 
-# Only one instance of this job can be running
-concurrency:
-  group: build-and-test # TODO: revert this change
-  cancel-in-progress: true # TODO: revert this change
-
 on:
   pull_request:
     branches: [ '*' ]
@@ -14,7 +9,14 @@ on:
       - 'examples/**'
 jobs:
   testacc:
-    name: Acceptance tests
+    # Repeat this for all clouds and cloud-agnostic
+    strategy:
+      matrix:
+        cloud: [ "eks", "gke", "aks", "cloud-agnostic" ]
+    # Only one instance per cloud should run at the same time
+    concurrency:
+      group: testacc-${{ matrix.cloud }}
+    name: Acceptance tests (${{ matrix.cloud }})
     runs-on: ubuntu-latest
     steps:
       - name: Checkout source
@@ -66,5 +68,5 @@ jobs:
           SSO_CLIENT_SECRET: ${{ secrets.SSO_CLIENT_SECRET }}
           SSO_DOMAIN: ${{ secrets.SSO_DOMAIN }}
           ACCEPTANCE_TEST_ORGANIZATION_ID: ${{ vars.TF_ACCEPTANCE_TEST_ORGANIZATION_ID }}
-        run: make testacc
+        run: make testacc-${{ matrix.cloud }}
 

@@ -47,10 +47,25 @@ test: build
 	@echo "==> Running tests"
 	go test $$(go list ./... | grep -v vendor/ | grep -v e2e)  -timeout=1m -parallel=4
 
-.PHONY: testacc
-testacc: build
-	@echo "==> Running acceptance tests"
-	TF_ACC=1 go test ./castai/... '-run=^TestAcc' -v -timeout 50m
+.PHONY: testacc-eks
+testacc-eks: build
+	@echo "==> Running EKS acceptance tests"
+	TF_ACC=1 go test ./castai/... '-run=^TestAccEKS_' -v -timeout 50m
+
+.PHONY: testacc-gke
+testacc-gke: build
+	@echo "==> Running GKE acceptance tests"
+	TF_ACC=1 go test ./castai/... '-run=^TestAccGKE_' -v -timeout 50m
+
+.PHONY: testacc-aks
+testacc-aks: build
+	@echo "==> Running AKS acceptance tests"
+	TF_ACC=1 go test ./castai/... '-run=^TestAccAKS_' -v -timeout 50m
+
+.PHONY: testacc-cloud-agnostic
+testacc-cloud-agnostic: build
+	@echo "==> Running cloud agnostic acceptance tests"
+	TF_ACC=1 go test ./castai/... '-run=^TestAccCloudAgnostic_' -v -timeout 50m
 
 .PHONY: init-examples
 init-examples: build
