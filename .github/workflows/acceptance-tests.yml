@@ -3,10 +3,7 @@ name: Acceptance tests
 on:
   pull_request:
     branches: [ '*' ]
-    paths-ignore:
-      - '**.md'
-      - '**.md.tmpl'
-      - 'examples/**'
+
 jobs:
   testacc:
     # Repeat this for all clouds and cloud-agnostic
