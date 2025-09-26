@@ -13,10 +13,11 @@ jobs:
     strategy:
       matrix:
         cloud: [ "eks", "gke", "aks", "cloud-agnostic" ]
+      fail-fast: false # Don't cancel other jobs if one fails
     # Only one instance per cloud should run at the same time
     concurrency:
       group: testacc-${{ matrix.cloud }}
-    name: Acceptance tests (${{ matrix.cloud }})
+    name: ${{ matrix.cloud }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout source
