@@ -2,7 +2,8 @@ name: Acceptance tests
 
 # Only one instance of this job can be running
 concurrency:
-  group: acceptance-tests
+  group: build-and-test # TODO: revert this change
+  cancel-in-progress: true # TODO: revert this change
 
 on:
   pull_request:
