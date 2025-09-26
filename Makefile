@@ -43,12 +43,12 @@ lint:
 	golangci-lint run
 
 .PHONY: test
-test:
+test: build
 	@echo "==> Running tests"
 	go test $$(go list ./... | grep -v vendor/ | grep -v e2e)  -timeout=1m -parallel=4
 
 .PHONY: testacc
-testacc:
+testacc: build
 	@echo "==> Running acceptance tests"
 	TF_ACC=1 go test ./castai/... '-run=^TestAcc' -v -timeout 50m
 
