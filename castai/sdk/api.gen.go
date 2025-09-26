@@ -98,6 +98,13 @@ const (
 	TWELVEMONTH    CastaiInventoryV1beta1GCPResourceCUDCUDPlan = "TWELVE_MONTH"
 )
 
+// Defines values for CastaiInventoryV1beta1GPUCountUnit.
+const (
+	COUNT                   CastaiInventoryV1beta1GPUCountUnit = "COUNT"
+	GPUCOUNTUNITUNSPECIFIED CastaiInventoryV1beta1GPUCountUnit = "GPU_COUNT_UNIT_UNSPECIFIED"
+	MILLICOUNT              CastaiInventoryV1beta1GPUCountUnit = "MILLI_COUNT"
+)
+
 // Defines values for CastaiInventoryV1beta1GPUDeviceManufacturer.
 const (
 	CastaiInventoryV1beta1GPUDeviceManufacturerAMD     CastaiInventoryV1beta1GPUDeviceManufacturer = "AMD"
@@ -1426,10 +1433,24 @@ type CastaiInventoryV1beta1GCPResourceCUDPrice struct {
 	MemoryGb *string `json:"memoryGb,omitempty"`
 }
 
+// CastaiInventoryV1beta1GPUCountUnit GPU count unit.
+//
+//   - GPU_COUNT_UNIT_UNSPECIFIED: Unspecified unit.
+//   - COUNT: 1 unit = 1 GPU (for whole GPUs).
+//   - MILLI_COUNT: 1000 units = 1 GPU (for fractional GPUs like 0.25, 0.5).
+type CastaiInventoryV1beta1GPUCountUnit string
+
 // CastaiInventoryV1beta1GPUDevice defines model for castai.inventory.v1beta1.GPUDevice.
 type CastaiInventoryV1beta1GPUDevice struct {
 	BlacklistedAt *time.Time `json:"blacklistedAt,omitempty"`
 	Count         *int32     `json:"count,omitempty"`
+
+	// CountUnit GPU count unit.
+	//
+	//  - GPU_COUNT_UNIT_UNSPECIFIED: Unspecified unit.
+	//  - COUNT: 1 unit = 1 GPU (for whole GPUs).
+	//  - MILLI_COUNT: 1000 units = 1 GPU (for fractional GPUs like 0.25, 0.5).
+	CountUnit *CastaiInventoryV1beta1GPUCountUnit `json:"countUnit,omitempty"`
 
 	// Id ID of the GPU device.
 	Id *string `json:"id,omitempty"`

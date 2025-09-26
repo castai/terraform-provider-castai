@@ -272,7 +272,7 @@ func TestResourceEnterpriseGroupCreateContext(t *testing.T) {
 							ManagedBy:      "terraform",
 							CreateTime:     createTime,
 							OrganizationId: organizationID,
-							Statuses:       []organization_management.RoleBindingRoleBindingStatus{},
+							Status:       []organization_management.RoleBindingRoleBindingStatus{},
 							Definition: organization_management.RoleBindingRoleBindingDefinition{
 								RoleId: roleID3,
 								Scopes: &[]organization_management.Scope{

@@ -521,8 +521,8 @@ type GroupRoleBinding struct {
 	// OrganizationId OrganizationID is the unique identifier of the organization
 	OrganizationId string `json:"organizationId"`
 
-	// Statuses Status is the status of the role binding, reflecting the state of the related policies generation.
-	Statuses []RoleBindingRoleBindingStatus `json:"statuses"`
+	// Status Status is the status of the role binding, reflecting the state of the related policies generation.
+	Status []RoleBindingRoleBindingStatus `json:"status"`
 
 	// UpdateTime UpdateTime is the timestamp when the role binding was last updated.
 	UpdateTime time.Time `json:"updateTime"`
@@ -902,6 +902,9 @@ type RoleBinding struct {
 
 	// OrganizationId OrganizationID is the unique identifier of the organization.
 	OrganizationId *string `json:"organizationId,omitempty"`
+
+	// Status Status is the status of the role binding, reflecting the state of the related policies generation.
+	Status *[]RoleBindingRoleBindingStatus `json:"status,omitempty"`
 
 	// UpdateTime UpdatedTime is the timestamp when the role binding was last updated.
 	UpdateTime *time.Time `json:"updateTime,omitempty"`
