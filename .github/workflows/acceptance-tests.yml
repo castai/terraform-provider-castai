@@ -1,9 +1,8 @@
-name: Build
+name: Acceptance tests
 
 # Only one instance of this job can be running
 concurrency:
-  group: build-and-test
-  cancel-in-progress: true
+  group: acceptance-tests
 
 on:
   pull_request:
@@ -13,17 +12,17 @@ on:
       - '**.md.tmpl'
       - 'examples/**'
 jobs:
-  build:
-    name: Build
+  testacc:
+    name: Acceptance tests
     runs-on: ubuntu-latest
     steps:
       - name: Checkout source
         uses: actions/checkout@v3
 
-      - name: Setup Go 1.23.6
+      - name: Setup Go 1.24.0
         uses: actions/setup-go@v4
         with:
-          go-version: '1.23.6'
+          go-version: '1.24.0'
 
       - name: Cache Go modules
         uses: actions/cache@v3
@@ -32,12 +31,6 @@ jobs:
           key: ${{ runner.os }}-build-${{ hashFiles('**/go.sum') }}
           restore-keys: |
             ${{ runner.os }}-build-
-
-      - name: Build
-        run: make build
-
-      - name: Test
-        run: make test
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
