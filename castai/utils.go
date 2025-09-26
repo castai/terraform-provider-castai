@@ -160,6 +160,8 @@ func getDefaultOrganizationId(ctx context.Context, meta any) (string, error) {
 
 // checkFloatAttr is a helper function for Terraform acceptance tests to check float attributes with a precision of 3
 // decimal places. The attributes map is a map[string]string, so floats in there may be affected by the rounding errors.
+//
+//nolint:unused
 func checkFloatAttr(resource, path string, val float64) func(state *terraform.State) error {
 	return func(state *terraform.State) error {
 		res, ok := state.RootModule().Resources[resource]

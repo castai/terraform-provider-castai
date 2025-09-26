@@ -225,7 +225,7 @@ func TestHibernationSchedule_CreateContext(t *testing.T) {
 	})
 }
 
-func TestAccResourceHibernationSchedule_basic(t *testing.T) {
+func TestAccCloudAgnostic_ResourceHibernationSchedule_basic(t *testing.T) {
 	resourceName := fmt.Sprintf("%v-hibernation-schedule-%v", ResourcePrefix, acctest.RandString(8))
 	renamedResourceName := fmt.Sprintf("%s %s", resourceName, "renamed")
 	organizationID := os.Getenv("ACCEPTANCE_TEST_ORGANIZATION_ID")

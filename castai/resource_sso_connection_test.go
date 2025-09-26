@@ -23,7 +23,7 @@ import (
 	mock_sdk "github.com/castai/terraform-provider-castai/castai/sdk/mock"
 )
 
-func TestAccResourceSSOConnection(t *testing.T) {
+func TestAccCloudAgnostic_ResourceSSOConnection(t *testing.T) {
 	rName := fmt.Sprintf("%v-sso-connection-%v", ResourcePrefix, acctest.RandString(8))
 	resourceName := "castai_sso_connection.test"
 

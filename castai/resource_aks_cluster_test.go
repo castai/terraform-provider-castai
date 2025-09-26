@@ -412,7 +412,7 @@ func TestAKSClusterResourceUpdateContext(t *testing.T) {
 	})
 }
 
-func TestAccResourceAKSCluster(t *testing.T) {
+func TestAccAKS_ResourceAKSCluster(t *testing.T) {
 	rName := fmt.Sprintf("%v-aks-%v", ResourcePrefix, acctest.RandString(8))
 	resourceName := "castai_aks_cluster.test"
 	clusterName := "core-tf-acc"
