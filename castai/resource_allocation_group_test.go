@@ -11,7 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
-func TestAccResourceAllocationGroup(t *testing.T) {
+func TestAccCloudAgnostic_ResourceAllocationGroup(t *testing.T) {
 	resourceName := "castai_allocation_group.test"
 
 	resource.Test(t, resource.TestCase{

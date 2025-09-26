@@ -8,7 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 )
 
-func TestAccResourceNodeConfiguration_aks(t *testing.T) {
+func TestAccAKS_ResourceNodeConfiguration(t *testing.T) {
 	rName := fmt.Sprintf("%v-node-cfg-aks-%v", ResourcePrefix, acctest.RandString(8))
 	resourceName := "castai_node_configuration.test"
 	clusterName := "core-tf-acc"
