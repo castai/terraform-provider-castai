@@ -130,6 +130,11 @@ type ClientInterface interface {
 	// EnterpriseAPIListRoleBindings request
 	EnterpriseAPIListRoleBindings(ctx context.Context, enterpriseId string, params *EnterpriseAPIListRoleBindingsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// EnterpriseAPIBatchDeleteEnterpriseRoleBindingsWithBody request with any body
+	EnterpriseAPIBatchDeleteEnterpriseRoleBindingsWithBody(ctx context.Context, enterpriseId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	EnterpriseAPIBatchDeleteEnterpriseRoleBindings(ctx context.Context, enterpriseId string, body EnterpriseAPIBatchDeleteEnterpriseRoleBindingsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// EnterpriseAPIAddUserToChildOrganizationWithBody request with any body
 	EnterpriseAPIAddUserToChildOrganizationWithBody(ctx context.Context, enterpriseId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -311,6 +316,30 @@ func (c *Client) EnterpriseAPIDeleteChildOrganization(ctx context.Context, enter
 
 func (c *Client) EnterpriseAPIListRoleBindings(ctx context.Context, enterpriseId string, params *EnterpriseAPIListRoleBindingsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewEnterpriseAPIListRoleBindingsRequest(c.Server, enterpriseId, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) EnterpriseAPIBatchDeleteEnterpriseRoleBindingsWithBody(ctx context.Context, enterpriseId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewEnterpriseAPIBatchDeleteEnterpriseRoleBindingsRequestWithBody(c.Server, enterpriseId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) EnterpriseAPIBatchDeleteEnterpriseRoleBindings(ctx context.Context, enterpriseId string, body EnterpriseAPIBatchDeleteEnterpriseRoleBindingsJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewEnterpriseAPIBatchDeleteEnterpriseRoleBindingsRequest(c.Server, enterpriseId, body)
 	if err != nil {
 		return nil, err
 	}
@@ -1205,6 +1234,53 @@ func NewEnterpriseAPIListRoleBindingsRequest(server string, enterpriseId string,
 	return req, nil
 }
 
+// NewEnterpriseAPIBatchDeleteEnterpriseRoleBindingsRequest calls the generic EnterpriseAPIBatchDeleteEnterpriseRoleBindings builder with application/json body
+func NewEnterpriseAPIBatchDeleteEnterpriseRoleBindingsRequest(server string, enterpriseId string, body EnterpriseAPIBatchDeleteEnterpriseRoleBindingsJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewEnterpriseAPIBatchDeleteEnterpriseRoleBindingsRequestWithBody(server, enterpriseId, "application/json", bodyReader)
+}
+
+// NewEnterpriseAPIBatchDeleteEnterpriseRoleBindingsRequestWithBody generates requests for EnterpriseAPIBatchDeleteEnterpriseRoleBindings with any type of body
+func NewEnterpriseAPIBatchDeleteEnterpriseRoleBindingsRequestWithBody(server string, enterpriseId string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "enterpriseId", runtime.ParamLocationPath, enterpriseId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/organization-management/v1/enterprises/%s/role-bindings:batchDelete", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
 // NewEnterpriseAPIAddUserToChildOrganizationRequest calls the generic EnterpriseAPIAddUserToChildOrganization builder with application/json body
 func NewEnterpriseAPIAddUserToChildOrganizationRequest(server string, enterpriseId string, body EnterpriseAPIAddUserToChildOrganizationJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
@@ -1382,6 +1458,11 @@ type ClientWithResponsesInterface interface {
 
 	// EnterpriseAPIListRoleBindings request
 	EnterpriseAPIListRoleBindingsWithResponse(ctx context.Context, enterpriseId string, params *EnterpriseAPIListRoleBindingsParams) (*EnterpriseAPIListRoleBindingsResponse, error)
+
+	// EnterpriseAPIBatchDeleteEnterpriseRoleBindings request  with any body
+	EnterpriseAPIBatchDeleteEnterpriseRoleBindingsWithBodyWithResponse(ctx context.Context, enterpriseId string, contentType string, body io.Reader) (*EnterpriseAPIBatchDeleteEnterpriseRoleBindingsResponse, error)
+
+	EnterpriseAPIBatchDeleteEnterpriseRoleBindingsWithResponse(ctx context.Context, enterpriseId string, body EnterpriseAPIBatchDeleteEnterpriseRoleBindingsJSONRequestBody) (*EnterpriseAPIBatchDeleteEnterpriseRoleBindingsResponse, error)
 
 	// EnterpriseAPIAddUserToChildOrganization request  with any body
 	EnterpriseAPIAddUserToChildOrganizationWithBodyWithResponse(ctx context.Context, enterpriseId string, contentType string, body io.Reader) (*EnterpriseAPIAddUserToChildOrganizationResponse, error)
@@ -1711,6 +1792,36 @@ func (r EnterpriseAPIListRoleBindingsResponse) GetBody() []byte {
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
+type EnterpriseAPIBatchDeleteEnterpriseRoleBindingsResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSONDefault  *Status
+}
+
+// Status returns HTTPResponse.Status
+func (r EnterpriseAPIBatchDeleteEnterpriseRoleBindingsResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r EnterpriseAPIBatchDeleteEnterpriseRoleBindingsResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r EnterpriseAPIBatchDeleteEnterpriseRoleBindingsResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
 type EnterpriseAPIAddUserToChildOrganizationResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -1901,6 +2012,23 @@ func (c *ClientWithResponses) EnterpriseAPIListRoleBindingsWithResponse(ctx cont
 		return nil, err
 	}
 	return ParseEnterpriseAPIListRoleBindingsResponse(rsp)
+}
+
+// EnterpriseAPIBatchDeleteEnterpriseRoleBindingsWithBodyWithResponse request with arbitrary body returning *EnterpriseAPIBatchDeleteEnterpriseRoleBindingsResponse
+func (c *ClientWithResponses) EnterpriseAPIBatchDeleteEnterpriseRoleBindingsWithBodyWithResponse(ctx context.Context, enterpriseId string, contentType string, body io.Reader) (*EnterpriseAPIBatchDeleteEnterpriseRoleBindingsResponse, error) {
+	rsp, err := c.EnterpriseAPIBatchDeleteEnterpriseRoleBindingsWithBody(ctx, enterpriseId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseEnterpriseAPIBatchDeleteEnterpriseRoleBindingsResponse(rsp)
+}
+
+func (c *ClientWithResponses) EnterpriseAPIBatchDeleteEnterpriseRoleBindingsWithResponse(ctx context.Context, enterpriseId string, body EnterpriseAPIBatchDeleteEnterpriseRoleBindingsJSONRequestBody) (*EnterpriseAPIBatchDeleteEnterpriseRoleBindingsResponse, error) {
+	rsp, err := c.EnterpriseAPIBatchDeleteEnterpriseRoleBindings(ctx, enterpriseId, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseEnterpriseAPIBatchDeleteEnterpriseRoleBindingsResponse(rsp)
 }
 
 // EnterpriseAPIAddUserToChildOrganizationWithBodyWithResponse request with arbitrary body returning *EnterpriseAPIAddUserToChildOrganizationResponse
@@ -2241,6 +2369,32 @@ func ParseEnterpriseAPIListRoleBindingsResponse(rsp *http.Response) (*Enterprise
 		}
 		response.JSON200 = &dest
 
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
+		var dest Status
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSONDefault = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseEnterpriseAPIBatchDeleteEnterpriseRoleBindingsResponse parses an HTTP response from a EnterpriseAPIBatchDeleteEnterpriseRoleBindingsWithResponse call
+func ParseEnterpriseAPIBatchDeleteEnterpriseRoleBindingsResponse(rsp *http.Response) (*EnterpriseAPIBatchDeleteEnterpriseRoleBindingsResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &EnterpriseAPIBatchDeleteEnterpriseRoleBindingsResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
 		var dest Status
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {

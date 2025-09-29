@@ -485,6 +485,8 @@ const (
 	WorkloadoptimizationV1EventTypeEVENTTYPESCALINGPOLICYORDERUPDATED  WorkloadoptimizationV1EventType = "EVENT_TYPE_SCALING_POLICY_ORDER_UPDATED"
 	WorkloadoptimizationV1EventTypeEVENTTYPESCALINGPOLICYUPDATED       WorkloadoptimizationV1EventType = "EVENT_TYPE_SCALING_POLICY_UPDATED"
 	WorkloadoptimizationV1EventTypeEVENTTYPESURGE                      WorkloadoptimizationV1EventType = "EVENT_TYPE_SURGE"
+	WorkloadoptimizationV1EventTypeEVENTTYPESYSTEMOVERRIDERESET        WorkloadoptimizationV1EventType = "EVENT_TYPE_SYSTEM_OVERRIDE_RESET"
+	WorkloadoptimizationV1EventTypeEVENTTYPESYSTEMOVERRIDETRIGGERED    WorkloadoptimizationV1EventType = "EVENT_TYPE_SYSTEM_OVERRIDE_TRIGGERED"
 )
 
 // Defines values for WorkloadoptimizationV1GetAgentStatusResponseAgentStatus.
@@ -540,6 +542,25 @@ const (
 const (
 	RECOMMENDATIONEVENTTYPEINVALID WorkloadoptimizationV1RecommendationEventType = "RECOMMENDATION_EVENT_TYPE_INVALID"
 	RECOMMENDATIONEVENTTYPEREVERT  WorkloadoptimizationV1RecommendationEventType = "RECOMMENDATION_EVENT_TYPE_REVERT"
+)
+
+// Defines values for WorkloadoptimizationV1ResetSystemOverridesRequestTarget.
+const (
+	TARGETUNSPECIFIED    WorkloadoptimizationV1ResetSystemOverridesRequestTarget = "TARGET_UNSPECIFIED"
+	VERTICALOPTIMIZATION WorkloadoptimizationV1ResetSystemOverridesRequestTarget = "VERTICAL_OPTIMIZATION"
+)
+
+// Defines values for WorkloadoptimizationV1ResetSystemOverridesResponseReason.
+const (
+	REASONUNSPECIFIED      WorkloadoptimizationV1ResetSystemOverridesResponseReason = "REASON_UNSPECIFIED"
+	SYSTEMOVERRIDEINACTIVE WorkloadoptimizationV1ResetSystemOverridesResponseReason = "SYSTEM_OVERRIDE_INACTIVE"
+)
+
+// Defines values for WorkloadoptimizationV1ResetSystemOverridesResponseResult.
+const (
+	IGNORED           WorkloadoptimizationV1ResetSystemOverridesResponseResult = "IGNORED"
+	RESULTUNSPECIFIED WorkloadoptimizationV1ResetSystemOverridesResponseResult = "RESULT_UNSPECIFIED"
+	SUCCESS           WorkloadoptimizationV1ResetSystemOverridesResponseResult = "SUCCESS"
 )
 
 // Defines values for WorkloadoptimizationV1ResourceConfigFunction.
@@ -759,6 +780,8 @@ const (
 	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPESCALINGPOLICYORDERUPDATED  WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_SCALING_POLICY_ORDER_UPDATED"
 	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPESCALINGPOLICYUPDATED       WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_SCALING_POLICY_UPDATED"
 	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPESURGE                      WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_SURGE"
+	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPESYSTEMOVERRIDERESET        WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_SYSTEM_OVERRIDE_RESET"
+	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPESYSTEMOVERRIDETRIGGERED    WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_SYSTEM_OVERRIDE_TRIGGERED"
 )
 
 // Defines values for WorkloadOptimizationAPIListWorkloadsParamsSortOrder.
@@ -886,6 +909,12 @@ type WorkloadOptimizationAPIPatchWorkloadV2Request struct {
 	// UpdateMask The update mask specifying which fields to update.
 	UpdateMask *string                                `json:"updateMask,omitempty"`
 	Workload   *WorkloadoptimizationV1PatchWorkloadV2 `json:"workload,omitempty"`
+}
+
+// WorkloadOptimizationAPIResetSystemOverridesRequest defines model for WorkloadOptimizationAPI_ResetSystemOverrides_request.
+type WorkloadOptimizationAPIResetSystemOverridesRequest struct {
+	// Target Specifies which type of system override should be reset for the workload.
+	Target WorkloadoptimizationV1ResetSystemOverridesRequestTarget `json:"target"`
 }
 
 // WorkloadOptimizationAPISetScalingPoliciesOrderRequest defines model for WorkloadOptimizationAPI_SetScalingPoliciesOrder_request.
@@ -6908,6 +6937,28 @@ type WorkloadoptimizationV1RecommendedRequestsChangedEventChange struct {
 	Containers *[]WorkloadoptimizationV1EventContainer `json:"containers,omitempty"`
 }
 
+// WorkloadoptimizationV1ResetSystemOverridesRequestTarget Specifies which type of system override should be reset for the workload.
+type WorkloadoptimizationV1ResetSystemOverridesRequestTarget string
+
+// WorkloadoptimizationV1ResetSystemOverridesResponse defines model for workloadoptimization.v1.ResetSystemOverridesResponse.
+type WorkloadoptimizationV1ResetSystemOverridesResponse struct {
+	// Reason Defines the reason for non-successful outcomes.
+	//
+	//  - SYSTEM_OVERRIDE_INACTIVE: Indicates that the system overrides were inactive and therefore no action was taken.
+	Reason *WorkloadoptimizationV1ResetSystemOverridesResponseReason `json:"reason,omitempty"`
+
+	// Result Defines outcomes of system overrides reset action.
+	Result *WorkloadoptimizationV1ResetSystemOverridesResponseResult `json:"result,omitempty"`
+}
+
+// WorkloadoptimizationV1ResetSystemOverridesResponseReason Defines the reason for non-successful outcomes.
+//
+//   - SYSTEM_OVERRIDE_INACTIVE: Indicates that the system overrides were inactive and therefore no action was taken.
+type WorkloadoptimizationV1ResetSystemOverridesResponseReason string
+
+// WorkloadoptimizationV1ResetSystemOverridesResponseResult Defines outcomes of system overrides reset action.
+type WorkloadoptimizationV1ResetSystemOverridesResponseResult string
+
 // WorkloadoptimizationV1ResourceConfig defines model for workloadoptimization.v1.ResourceConfig.
 type WorkloadoptimizationV1ResourceConfig struct {
 	// ApplyThreshold The threshold of when to apply the recommendation - when diff of current requests and recommendation is greater than this, apply the recommendation.
@@ -7343,14 +7394,15 @@ type WorkloadoptimizationV1Workload struct {
 	Recommendation     *WorkloadoptimizationV1WorkloadRecommendation `json:"recommendation,omitempty"`
 
 	// Replicas The number of replicas the workload should have, as defined on the workload spec.
-	Replicas                   int32     `json:"replicas"`
-	ScalingPolicyId            string    `json:"scalingPolicyId"`
-	ScalingPolicyName          string    `json:"scalingPolicyName"`
-	ScalingPolicyOrigin        string    `json:"scalingPolicyOrigin"`
-	SuggestedScalingPolicyId   *string   `json:"suggestedScalingPolicyId"`
-	SuggestedScalingPolicyName *string   `json:"suggestedScalingPolicyName"`
-	UpdatedAt                  time.Time `json:"updatedAt"`
-	Version                    string    `json:"version"`
+	Replicas                   int32                                         `json:"replicas"`
+	ScalingPolicyId            string                                        `json:"scalingPolicyId"`
+	ScalingPolicyName          string                                        `json:"scalingPolicyName"`
+	ScalingPolicyOrigin        string                                        `json:"scalingPolicyOrigin"`
+	SuggestedScalingPolicyId   *string                                       `json:"suggestedScalingPolicyId"`
+	SuggestedScalingPolicyName *string                                       `json:"suggestedScalingPolicyName"`
+	SystemOverrides            WorkloadoptimizationV1WorkloadSystemOverrides `json:"systemOverrides"`
+	UpdatedAt                  time.Time                                     `json:"updatedAt"`
+	Version                    string                                        `json:"version"`
 
 	// WoopHpaUnsupportedReason Reason for unsupported WOOP HPA.
 	WoopHpaUnsupportedReason *string                                  `json:"woopHpaUnsupportedReason"`
@@ -7476,6 +7528,17 @@ type WorkloadoptimizationV1WorkloadScalingPolicy struct {
 	OrganizationId         string                                       `json:"organizationId"`
 	RecommendationPolicies WorkloadoptimizationV1RecommendationPolicies `json:"recommendationPolicies"`
 	UpdatedAt              time.Time                                    `json:"updatedAt"`
+}
+
+// WorkloadoptimizationV1WorkloadSystemOverrides defines model for workloadoptimization.v1.WorkloadSystemOverrides.
+type WorkloadoptimizationV1WorkloadSystemOverrides struct {
+	VerticalOptimization WorkloadoptimizationV1WorkloadSystemOverridesVerticalOptimization `json:"verticalOptimization"`
+}
+
+// WorkloadoptimizationV1WorkloadSystemOverridesVerticalOptimization defines model for workloadoptimization.v1.WorkloadSystemOverrides.VerticalOptimization.
+type WorkloadoptimizationV1WorkloadSystemOverridesVerticalOptimization struct {
+	// Active Indicates whether system overrides are enabled, for example, due to frequent OOM events.
+	Active bool `json:"active"`
 }
 
 // WorkloadoptimizationV1WorkloadsSummaryMetrics defines model for workloadoptimization.v1.WorkloadsSummaryMetrics.
@@ -8659,6 +8722,9 @@ type WorkloadOptimizationAPIUpdateWorkloadScalingPolicyJSONRequestBody = Workloa
 
 // WorkloadOptimizationAPIAssignScalingPolicyWorkloadsJSONRequestBody defines body for WorkloadOptimizationAPIAssignScalingPolicyWorkloads for application/json ContentType.
 type WorkloadOptimizationAPIAssignScalingPolicyWorkloadsJSONRequestBody = WorkloadOptimizationAPIAssignScalingPolicyWorkloadsRequest
+
+// WorkloadOptimizationAPIResetSystemOverridesJSONRequestBody defines body for WorkloadOptimizationAPIResetSystemOverrides for application/json ContentType.
+type WorkloadOptimizationAPIResetSystemOverridesJSONRequestBody = WorkloadOptimizationAPIResetSystemOverridesRequest
 
 // WorkloadOptimizationAPIPatchWorkloadV2JSONRequestBody defines body for WorkloadOptimizationAPIPatchWorkloadV2 for application/json ContentType.
 type WorkloadOptimizationAPIPatchWorkloadV2JSONRequestBody = WorkloadOptimizationAPIPatchWorkloadV2Request

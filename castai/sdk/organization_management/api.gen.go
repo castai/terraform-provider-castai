@@ -253,6 +253,25 @@ type BatchDeleteEnterpriseGroupsRequestDeleteGroupRequest struct {
 	OrganizationId string `json:"organizationId"`
 }
 
+// BatchDeleteEnterpriseRoleBindingsRequest Request message for batch deleting enterprise role bindings
+type BatchDeleteEnterpriseRoleBindingsRequest struct {
+	// EnterpriseId Required field that identifies the enterprise.
+	EnterpriseId string `json:"enterpriseId"`
+
+	// Requests The requests specifying the role bindings to delete.
+	//  A maximum of 1000 role bindings can be deleted in a batch.
+	Requests []BatchDeleteEnterpriseRoleBindingsRequestDeleteRoleBindingRequest `json:"requests"`
+}
+
+// BatchDeleteEnterpriseRoleBindingsRequestDeleteRoleBindingRequest Request message for deleting a single role binding
+type BatchDeleteEnterpriseRoleBindingsRequestDeleteRoleBindingRequest struct {
+	// Id The ID of the role binding to delete
+	Id string `json:"id"`
+
+	// OrganizationId The organization ID that contains the role binding
+	OrganizationId string `json:"organizationId"`
+}
+
 // BatchUpdateEnterpriseGroupsRequest Request message for batch updating groups in an enterprise
 type BatchUpdateEnterpriseGroupsRequest struct {
 	// EnterpriseId Required field that identifies the enterprise.
@@ -1191,6 +1210,9 @@ type EnterpriseAPIInviteUsersJSONRequestBody = InviteUsersRequest
 
 // EnterpriseAPICreateChildOrganizationJSONRequestBody defines body for EnterpriseAPICreateChildOrganization for application/json ContentType.
 type EnterpriseAPICreateChildOrganizationJSONRequestBody = CreateChildOrganizationRequestChildOrganization
+
+// EnterpriseAPIBatchDeleteEnterpriseRoleBindingsJSONRequestBody defines body for EnterpriseAPIBatchDeleteEnterpriseRoleBindings for application/json ContentType.
+type EnterpriseAPIBatchDeleteEnterpriseRoleBindingsJSONRequestBody = BatchDeleteEnterpriseRoleBindingsRequest
 
 // EnterpriseAPIAddUserToChildOrganizationJSONRequestBody defines body for EnterpriseAPIAddUserToChildOrganization for application/json ContentType.
 type EnterpriseAPIAddUserToChildOrganizationJSONRequestBody = AddUserToChildOrganizationRequest
