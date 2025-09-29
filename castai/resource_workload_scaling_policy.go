@@ -35,6 +35,7 @@ const (
 	minNumeratorValue               = 0.0
 	maxExponentValue                = 1.
 	minExponentValue                = 0.
+	defaultApplyType                = "IMMEDIATE"
 )
 
 const (
@@ -47,6 +48,8 @@ const (
 	FieldRolloutBehaviorNoDisruptionType           = "NO_DISRUPTION"
 	FieldRolloutBehaviorPreferOneByOneType         = "prefer_one_by_one"
 	FieldPredictiveScaling                         = "predictive_scaling"
+	FieldMemoryEvent                               = "memory_event"
+	FieldApplyType                                 = "apply_type"
 	FieldConfidenceThreshold                       = "threshold"
 	DeprecatedFieldApplyThreshold                  = "apply_threshold"
 	FieldApplyThresholdStrategy                    = "apply_threshold_strategy"
@@ -156,7 +159,7 @@ It can be either:
 				Description:      "Scaling policy name",
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringMatch(k8sNameRegex, "name must adhere to the format guidelines of Kubernetes labels/annotations")),
 			},
-			"apply_type": {
+			FieldApplyType: {
 				Type:     schema.TypeString,
 				Required: true,
 				Description: `Recommendation apply type.
@@ -225,7 +228,7 @@ It can be either:
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"apply_type": {
+						FieldApplyType: {
 							Type:     schema.TypeString,
 							Optional: true,
 							Description: `Defines the apply type to be used when downscaling.
@@ -236,13 +239,16 @@ It can be either:
 					},
 				},
 			},
-			"memory_event": {
+			FieldMemoryEvent: {
 				Type:     schema.TypeList,
 				Optional: true,
+				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
+					return suppressApplyTypeDefaultValueDiff(FieldMemoryEvent, old, new, d)
+				},
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
-						"apply_type": {
+						FieldApplyType: {
 							Type:     schema.TypeString,
 							Optional: true,
 							Description: `Defines the apply type to be used when applying recommendation for memory related event.
@@ -548,7 +554,7 @@ func resourceWorkloadScalingPolicyCreate(ctx context.Context, d *schema.Resource
 	clusterID := d.Get(FieldClusterID).(string)
 	req := sdk.WorkloadOptimizationAPICreateWorkloadScalingPolicyJSONRequestBody{
 		Name:      d.Get("name").(string),
-		ApplyType: sdk.WorkloadoptimizationV1ApplyType(d.Get("apply_type").(string)),
+		ApplyType: sdk.WorkloadoptimizationV1ApplyType(d.Get(FieldApplyType).(string)),
 		RecommendationPolicies: sdk.WorkloadoptimizationV1RecommendationPolicies{
 			ManagementOption: sdk.WorkloadoptimizationV1ManagementOption(d.Get("management_option").(string)),
 		},
@@ -686,7 +692,7 @@ func fetchScalingPolicy(ctx context.Context, d *schema.ResourceData, meta any) (
 	if err := d.Set("name", sp.Name); err != nil {
 		return nil, fmt.Errorf("setting name: %w", err)
 	}
-	if err := d.Set("apply_type", sp.ApplyType); err != nil {
+	if err := d.Set(FieldApplyType, sp.ApplyType); err != nil {
 		return nil, fmt.Errorf("setting apply type: %w", err)
 	}
 	if err := d.Set("management_option", sp.RecommendationPolicies.ManagementOption); err != nil {
@@ -745,7 +751,7 @@ func resourceWorkloadScalingPolicyUpdate(ctx context.Context, d *schema.Resource
 func updateScalingPolicy(ctx context.Context, d *schema.ResourceData, meta any) (sdk.Response, error) {
 	if !d.HasChanges(
 		"name",
-		"apply_type",
+		FieldApplyType,
 		"management_option",
 		"cpu",
 		"memory",
@@ -779,7 +785,7 @@ func updateScalingPolicy(ctx context.Context, d *schema.ResourceData, meta any) 
 
 	req := sdk.WorkloadOptimizationAPIUpdateWorkloadScalingPolicyJSONRequestBody{
 		Name:            d.Get("name").(string),
-		ApplyType:       sdk.WorkloadoptimizationV1ApplyType(d.Get("apply_type").(string)),
+		ApplyType:       sdk.WorkloadoptimizationV1ApplyType(d.Get(FieldApplyType).(string)),
 		AssignmentRules: ar,
 		RecommendationPolicies: sdk.WorkloadoptimizationV1RecommendationPolicies{
 			ManagementOption:  sdk.WorkloadoptimizationV1ManagementOption(d.Get("management_option").(string)),
@@ -1015,9 +1021,8 @@ func mapApplyStrategyBasedOnPreviousConfig(
 // we will supress diff.
 func suppressThresholdStrategyDefaultValueDiff(resource, oldValue, newValue string, d *schema.ResourceData) bool {
 	resourcePath := fmt.Sprintf("%s.0", resource)
-	isApplyThresholdStrategyUnset := newValue == "0" || newValue == ""
 	isApplyThresholdUnset := d.Get(fmt.Sprintf("%s.%s", resourcePath, DeprecatedFieldApplyThreshold)) == 0.
-	if isApplyThresholdStrategyUnset && isApplyThresholdUnset {
+	if isEmpty(newValue) && isApplyThresholdUnset {
 		applyThresholdFromStrategy := d.Get(fmt.Sprintf("%s.%s.0.%s", resourcePath, FieldApplyThresholdStrategy, FieldApplyThresholdStrategyPercentage))
 		// Suppress diff if configuration saved from API equals to default
 		return applyThresholdFromStrategy == defaultApplyThresholdPercentage
@@ -1027,14 +1032,27 @@ func suppressThresholdStrategyDefaultValueDiff(resource, oldValue, newValue stri
 }
 
 func suppressConfidenceThresholdDefaultValueDiff(resource, oldValue, newValue string, d *schema.ResourceData) bool {
-	isConfidenceUnset := newValue == "0" || newValue == ""
-	if isConfidenceUnset {
+	if isEmpty(newValue) {
 		confidenceThreshold := d.Get(fmt.Sprintf("%s.0.%s", resource, FieldConfidenceThreshold))
 		// Suppress diff if configuration saved from API equals to default
 		return confidenceThreshold == defaultConfidenceThreshold
 	}
 
 	return oldValue == newValue
+}
+
+func suppressApplyTypeDefaultValueDiff(resource, oldValue, newValue string, d *schema.ResourceData) bool {
+	if isEmpty(newValue) {
+		applyType := d.Get(fmt.Sprintf("%s.0.%s", resource, FieldApplyType))
+		// Suppress diff if apply type saved from API equals to default
+		return applyType == defaultApplyType
+	}
+
+	return oldValue == newValue
+}
+
+func isEmpty(value string) bool {
+	return value == "" || value == "0"
 }
 
 func toWorkloadResourceLimit(obj map[string]any) (*sdk.WorkloadoptimizationV1ResourceLimitStrategy, error) {
@@ -1213,7 +1231,7 @@ func toDownscaling(downscaling map[string]any) *sdk.WorkloadoptimizationV1Downsc
 
 	result := &sdk.WorkloadoptimizationV1DownscalingSettings{}
 
-	if v, ok := downscaling["apply_type"].(string); ok && v != "" {
+	if v, ok := downscaling[FieldApplyType].(string); ok && v != "" {
 		result.ApplyType = lo.ToPtr(sdk.WorkloadoptimizationV1ApplyType(v))
 	}
 
@@ -1228,7 +1246,7 @@ func toDownscalingMap(s *sdk.WorkloadoptimizationV1DownscalingSettings) []map[st
 	m := map[string]any{}
 
 	if s.ApplyType != nil {
-		m["apply_type"] = string(*s.ApplyType)
+		m[FieldApplyType] = string(*s.ApplyType)
 	}
 
 	if len(m) == 0 {
@@ -1245,7 +1263,7 @@ func toMemoryEvent(memoryEvent map[string]any) *sdk.WorkloadoptimizationV1Memory
 
 	result := &sdk.WorkloadoptimizationV1MemoryEventSettings{}
 
-	if v, ok := memoryEvent["apply_type"].(string); ok && v != "" {
+	if v, ok := memoryEvent[FieldApplyType].(string); ok && v != "" {
 		result.ApplyType = lo.ToPtr(sdk.WorkloadoptimizationV1ApplyType(v))
 	}
 
@@ -1260,7 +1278,7 @@ func toMemoryEventMap(s *sdk.WorkloadoptimizationV1MemoryEventSettings) []map[st
 	m := map[string]any{}
 
 	if s.ApplyType != nil {
-		m["apply_type"] = string(*s.ApplyType)
+		m[FieldApplyType] = string(*s.ApplyType)
 	}
 
 	if len(m) == 0 {
