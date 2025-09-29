@@ -615,7 +615,7 @@ func TestNodeTemplateResourceDelete_defaultNodeTemplate(t *testing.T) {
 		" false).", result[0].Detail)
 }
 
-func TestAccResourceNodeTemplate_basic(t *testing.T) {
+func TestAccEKS_ResourceNodeTemplate_basic(t *testing.T) {
 	rName := fmt.Sprintf("%v-node-template-%v", ResourcePrefix, acctest.RandString(8))
 	resourceName := "castai_node_template.test"
 	clusterName, _ := lo.Coalesce(os.Getenv("CLUSTER_NAME"), "cost-terraform")

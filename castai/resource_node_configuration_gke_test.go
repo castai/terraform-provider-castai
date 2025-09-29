@@ -15,7 +15,7 @@ const (
 	acceptanceTestClusterSubnetworkName = "ext-prov-e2e-shared-ip-range-nodes"
 )
 
-func TestAccResourceNodeConfiguration_gke(t *testing.T) {
+func TestAccGKE_ResourceNodeConfiguration(t *testing.T) {
 	rName := fmt.Sprintf("%v-node-cfg-%v", ResourcePrefix, acctest.RandString(8))
 	resourceName := "castai_node_configuration.test"
 	clusterName := "tf-core-acc-20230723"
