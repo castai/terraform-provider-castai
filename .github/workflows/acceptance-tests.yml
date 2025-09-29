@@ -1,29 +1,29 @@
-name: Build
-
-# Only one instance of this job can be running
-concurrency:
-  group: build-and-test
-  cancel-in-progress: true
+name: Acceptance tests
 
 on:
   pull_request:
     branches: [ '*' ]
-    paths-ignore:
-      - '**.md'
-      - '**.md.tmpl'
-      - 'examples/**'
+
 jobs:
-  build:
-    name: Build
+  testacc:
+    # Repeat this for all clouds and cloud-agnostic
+    strategy:
+      matrix:
+        cloud: [ "eks", "gke", "aks", "cloud-agnostic" ]
+      fail-fast: false # Don't cancel other jobs if one fails
+    # Only one instance per cloud should run at the same time
+    concurrency:
+      group: testacc-${{ matrix.cloud }}
+    name: ${{ matrix.cloud }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout source
         uses: actions/checkout@v3
 
-      - name: Setup Go 1.23.6
+      - name: Setup Go 1.24.0
         uses: actions/setup-go@v4
         with:
-          go-version: '1.23.6'
+          go-version: '1.24.0'
 
       - name: Cache Go modules
         uses: actions/cache@v3
@@ -32,12 +32,6 @@ jobs:
           key: ${{ runner.os }}-build-${{ hashFiles('**/go.sum') }}
           restore-keys: |
             ${{ runner.os }}-build-
-
-      - name: Build
-        run: make build
-
-      - name: Test
-        run: make test
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
@@ -72,5 +66,5 @@ jobs:
           SSO_CLIENT_SECRET: ${{ secrets.SSO_CLIENT_SECRET }}
           SSO_DOMAIN: ${{ secrets.SSO_DOMAIN }}
           ACCEPTANCE_TEST_ORGANIZATION_ID: ${{ vars.TF_ACCEPTANCE_TEST_ORGANIZATION_ID }}
-        run: make testacc
+        run: make testacc-${{ matrix.cloud }}
 

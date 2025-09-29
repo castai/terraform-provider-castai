@@ -2,12 +2,14 @@ package castai
 
 import (
 	"context"
-	"github.com/castai/terraform-provider-castai/castai/sdk"
+	"testing"
+
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"github.com/stretchr/testify/require"
-	"testing"
+
+	"github.com/castai/terraform-provider-castai/castai/sdk"
 )
 
 func Test_dataSourceGKEPoliciesRead(t *testing.T) {
@@ -72,7 +74,7 @@ func Test_dataSourceGKEPoliciesRead(t *testing.T) {
 	}
 }
 
-func TestAccDataSourceGKEPolicies_basic(t *testing.T) {
+func TestAccGKE_DataSourceGKEPolicies_basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:          func() { testAccPreCheck(t) },
 		ProviderFactories: providerFactories,
