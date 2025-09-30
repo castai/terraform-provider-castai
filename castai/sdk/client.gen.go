@@ -831,6 +831,11 @@ type ClientInterface interface {
 	// WorkloadOptimizationAPIGetWorkloadSpec request
 	WorkloadOptimizationAPIGetWorkloadSpec(ctx context.Context, clusterId string, workloadId string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// WorkloadOptimizationAPIResetSystemOverridesWithBody request with any body
+	WorkloadOptimizationAPIResetSystemOverridesWithBody(ctx context.Context, clusterId string, workloadId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+
+	WorkloadOptimizationAPIResetSystemOverrides(ctx context.Context, clusterId string, workloadId string, body WorkloadOptimizationAPIResetSystemOverridesJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// WorkloadOptimizationAPIGetOrganizationAgentStatuses request
 	WorkloadOptimizationAPIGetOrganizationAgentStatuses(ctx context.Context, organizationId string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -4084,6 +4089,30 @@ func (c *Client) WorkloadOptimizationAPIGetWorkload(ctx context.Context, cluster
 
 func (c *Client) WorkloadOptimizationAPIGetWorkloadSpec(ctx context.Context, clusterId string, workloadId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewWorkloadOptimizationAPIGetWorkloadSpecRequest(c.Server, clusterId, workloadId)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) WorkloadOptimizationAPIResetSystemOverridesWithBody(ctx context.Context, clusterId string, workloadId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewWorkloadOptimizationAPIResetSystemOverridesRequestWithBody(c.Server, clusterId, workloadId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) WorkloadOptimizationAPIResetSystemOverrides(ctx context.Context, clusterId string, workloadId string, body WorkloadOptimizationAPIResetSystemOverridesJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewWorkloadOptimizationAPIResetSystemOverridesRequest(c.Server, clusterId, workloadId, body)
 	if err != nil {
 		return nil, err
 	}
@@ -16037,6 +16066,60 @@ func NewWorkloadOptimizationAPIGetWorkloadSpecRequest(server string, clusterId s
 	return req, nil
 }
 
+// NewWorkloadOptimizationAPIResetSystemOverridesRequest calls the generic WorkloadOptimizationAPIResetSystemOverrides builder with application/json body
+func NewWorkloadOptimizationAPIResetSystemOverridesRequest(server string, clusterId string, workloadId string, body WorkloadOptimizationAPIResetSystemOverridesJSONRequestBody) (*http.Request, error) {
+	var bodyReader io.Reader
+	buf, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	bodyReader = bytes.NewReader(buf)
+	return NewWorkloadOptimizationAPIResetSystemOverridesRequestWithBody(server, clusterId, workloadId, "application/json", bodyReader)
+}
+
+// NewWorkloadOptimizationAPIResetSystemOverridesRequestWithBody generates requests for WorkloadOptimizationAPIResetSystemOverrides with any type of body
+func NewWorkloadOptimizationAPIResetSystemOverridesRequestWithBody(server string, clusterId string, workloadId string, contentType string, body io.Reader) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "clusterId", runtime.ParamLocationPath, clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "workloadId", runtime.ParamLocationPath, workloadId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/workload-autoscaling/clusters/%s/workloads/%s/system-overrides:reset", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", queryURL.String(), body)
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", contentType)
+
+	return req, nil
+}
+
 // NewWorkloadOptimizationAPIGetOrganizationAgentStatusesRequest generates requests for WorkloadOptimizationAPIGetOrganizationAgentStatuses
 func NewWorkloadOptimizationAPIGetOrganizationAgentStatusesRequest(server string, organizationId string) (*http.Request, error) {
 	var err error
@@ -17170,6 +17253,11 @@ type ClientWithResponsesInterface interface {
 
 	// WorkloadOptimizationAPIGetWorkloadSpec request
 	WorkloadOptimizationAPIGetWorkloadSpecWithResponse(ctx context.Context, clusterId string, workloadId string) (*WorkloadOptimizationAPIGetWorkloadSpecResponse, error)
+
+	// WorkloadOptimizationAPIResetSystemOverrides request  with any body
+	WorkloadOptimizationAPIResetSystemOverridesWithBodyWithResponse(ctx context.Context, clusterId string, workloadId string, contentType string, body io.Reader) (*WorkloadOptimizationAPIResetSystemOverridesResponse, error)
+
+	WorkloadOptimizationAPIResetSystemOverridesWithResponse(ctx context.Context, clusterId string, workloadId string, body WorkloadOptimizationAPIResetSystemOverridesJSONRequestBody) (*WorkloadOptimizationAPIResetSystemOverridesResponse, error)
 
 	// WorkloadOptimizationAPIGetOrganizationAgentStatuses request
 	WorkloadOptimizationAPIGetOrganizationAgentStatusesWithResponse(ctx context.Context, organizationId string) (*WorkloadOptimizationAPIGetOrganizationAgentStatusesResponse, error)
@@ -23231,6 +23319,36 @@ func (r WorkloadOptimizationAPIGetWorkloadSpecResponse) GetBody() []byte {
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
+type WorkloadOptimizationAPIResetSystemOverridesResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *WorkloadoptimizationV1ResetSystemOverridesResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r WorkloadOptimizationAPIResetSystemOverridesResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r WorkloadOptimizationAPIResetSystemOverridesResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r WorkloadOptimizationAPIResetSystemOverridesResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
 type WorkloadOptimizationAPIGetOrganizationAgentStatusesResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -25769,6 +25887,23 @@ func (c *ClientWithResponses) WorkloadOptimizationAPIGetWorkloadSpecWithResponse
 		return nil, err
 	}
 	return ParseWorkloadOptimizationAPIGetWorkloadSpecResponse(rsp)
+}
+
+// WorkloadOptimizationAPIResetSystemOverridesWithBodyWithResponse request with arbitrary body returning *WorkloadOptimizationAPIResetSystemOverridesResponse
+func (c *ClientWithResponses) WorkloadOptimizationAPIResetSystemOverridesWithBodyWithResponse(ctx context.Context, clusterId string, workloadId string, contentType string, body io.Reader) (*WorkloadOptimizationAPIResetSystemOverridesResponse, error) {
+	rsp, err := c.WorkloadOptimizationAPIResetSystemOverridesWithBody(ctx, clusterId, workloadId, contentType, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseWorkloadOptimizationAPIResetSystemOverridesResponse(rsp)
+}
+
+func (c *ClientWithResponses) WorkloadOptimizationAPIResetSystemOverridesWithResponse(ctx context.Context, clusterId string, workloadId string, body WorkloadOptimizationAPIResetSystemOverridesJSONRequestBody) (*WorkloadOptimizationAPIResetSystemOverridesResponse, error) {
+	rsp, err := c.WorkloadOptimizationAPIResetSystemOverrides(ctx, clusterId, workloadId, body)
+	if err != nil {
+		return nil, err
+	}
+	return ParseWorkloadOptimizationAPIResetSystemOverridesResponse(rsp)
 }
 
 // WorkloadOptimizationAPIGetOrganizationAgentStatusesWithResponse request returning *WorkloadOptimizationAPIGetOrganizationAgentStatusesResponse
@@ -31028,6 +31163,32 @@ func ParseWorkloadOptimizationAPIGetWorkloadSpecResponse(rsp *http.Response) (*W
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest WorkloadoptimizationV1GetWorkloadSpecResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseWorkloadOptimizationAPIResetSystemOverridesResponse parses an HTTP response from a WorkloadOptimizationAPIResetSystemOverridesWithResponse call
+func ParseWorkloadOptimizationAPIResetSystemOverridesResponse(rsp *http.Response) (*WorkloadOptimizationAPIResetSystemOverridesResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &WorkloadOptimizationAPIResetSystemOverridesResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest WorkloadoptimizationV1ResetSystemOverridesResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}

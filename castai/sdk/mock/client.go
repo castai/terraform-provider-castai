@@ -5515,6 +5515,46 @@ func (mr *MockClientInterfaceMockRecorder) WorkloadOptimizationAPIPatchWorkloadV
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIPatchWorkloadV2WithBody", reflect.TypeOf((*MockClientInterface)(nil).WorkloadOptimizationAPIPatchWorkloadV2WithBody), varargs...)
 }
 
+// WorkloadOptimizationAPIResetSystemOverrides mocks base method.
+func (m *MockClientInterface) WorkloadOptimizationAPIResetSystemOverrides(ctx context.Context, clusterId, workloadId string, body sdk.WorkloadOptimizationAPIResetSystemOverridesJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, workloadId, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "WorkloadOptimizationAPIResetSystemOverrides", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// WorkloadOptimizationAPIResetSystemOverrides indicates an expected call of WorkloadOptimizationAPIResetSystemOverrides.
+func (mr *MockClientInterfaceMockRecorder) WorkloadOptimizationAPIResetSystemOverrides(ctx, clusterId, workloadId, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, workloadId, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIResetSystemOverrides", reflect.TypeOf((*MockClientInterface)(nil).WorkloadOptimizationAPIResetSystemOverrides), varargs...)
+}
+
+// WorkloadOptimizationAPIResetSystemOverridesWithBody mocks base method.
+func (m *MockClientInterface) WorkloadOptimizationAPIResetSystemOverridesWithBody(ctx context.Context, clusterId, workloadId, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, workloadId, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "WorkloadOptimizationAPIResetSystemOverridesWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// WorkloadOptimizationAPIResetSystemOverridesWithBody indicates an expected call of WorkloadOptimizationAPIResetSystemOverridesWithBody.
+func (mr *MockClientInterfaceMockRecorder) WorkloadOptimizationAPIResetSystemOverridesWithBody(ctx, clusterId, workloadId, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, workloadId, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIResetSystemOverridesWithBody", reflect.TypeOf((*MockClientInterface)(nil).WorkloadOptimizationAPIResetSystemOverridesWithBody), varargs...)
+}
+
 // WorkloadOptimizationAPISetScalingPoliciesOrder mocks base method.
 func (m *MockClientInterface) WorkloadOptimizationAPISetScalingPoliciesOrder(ctx context.Context, clusterId string, body sdk.WorkloadOptimizationAPISetScalingPoliciesOrderJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
@@ -15176,6 +15216,76 @@ func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPIPatchWorkloadV
 func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPIPatchWorkloadV2WithResponse(ctx, clusterId, workloadId, body interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIPatchWorkloadV2WithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPIPatchWorkloadV2WithResponse), ctx, clusterId, workloadId, body)
+}
+
+// WorkloadOptimizationAPIResetSystemOverrides mocks base method.
+func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPIResetSystemOverrides(ctx context.Context, clusterId, workloadId string, body sdk.WorkloadOptimizationAPIResetSystemOverridesJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, workloadId, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "WorkloadOptimizationAPIResetSystemOverrides", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// WorkloadOptimizationAPIResetSystemOverrides indicates an expected call of WorkloadOptimizationAPIResetSystemOverrides.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPIResetSystemOverrides(ctx, clusterId, workloadId, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, workloadId, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIResetSystemOverrides", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPIResetSystemOverrides), varargs...)
+}
+
+// WorkloadOptimizationAPIResetSystemOverridesWithBody mocks base method.
+func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPIResetSystemOverridesWithBody(ctx context.Context, clusterId, workloadId, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, workloadId, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "WorkloadOptimizationAPIResetSystemOverridesWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// WorkloadOptimizationAPIResetSystemOverridesWithBody indicates an expected call of WorkloadOptimizationAPIResetSystemOverridesWithBody.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPIResetSystemOverridesWithBody(ctx, clusterId, workloadId, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, workloadId, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIResetSystemOverridesWithBody", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPIResetSystemOverridesWithBody), varargs...)
+}
+
+// WorkloadOptimizationAPIResetSystemOverridesWithBodyWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPIResetSystemOverridesWithBodyWithResponse(ctx context.Context, clusterId, workloadId, contentType string, body io.Reader) (*sdk.WorkloadOptimizationAPIResetSystemOverridesResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "WorkloadOptimizationAPIResetSystemOverridesWithBodyWithResponse", ctx, clusterId, workloadId, contentType, body)
+	ret0, _ := ret[0].(*sdk.WorkloadOptimizationAPIResetSystemOverridesResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// WorkloadOptimizationAPIResetSystemOverridesWithBodyWithResponse indicates an expected call of WorkloadOptimizationAPIResetSystemOverridesWithBodyWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPIResetSystemOverridesWithBodyWithResponse(ctx, clusterId, workloadId, contentType, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIResetSystemOverridesWithBodyWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPIResetSystemOverridesWithBodyWithResponse), ctx, clusterId, workloadId, contentType, body)
+}
+
+// WorkloadOptimizationAPIResetSystemOverridesWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPIResetSystemOverridesWithResponse(ctx context.Context, clusterId, workloadId string, body sdk.WorkloadOptimizationAPIResetSystemOverridesJSONRequestBody) (*sdk.WorkloadOptimizationAPIResetSystemOverridesResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "WorkloadOptimizationAPIResetSystemOverridesWithResponse", ctx, clusterId, workloadId, body)
+	ret0, _ := ret[0].(*sdk.WorkloadOptimizationAPIResetSystemOverridesResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// WorkloadOptimizationAPIResetSystemOverridesWithResponse indicates an expected call of WorkloadOptimizationAPIResetSystemOverridesWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPIResetSystemOverridesWithResponse(ctx, clusterId, workloadId, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIResetSystemOverridesWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPIResetSystemOverridesWithResponse), ctx, clusterId, workloadId, body)
 }
 
 // WorkloadOptimizationAPISetScalingPoliciesOrder mocks base method.
