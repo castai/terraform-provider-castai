@@ -44,3 +44,9 @@ variable "tags" {
   description = "Optional tags for new cluster nodes. This parameter applies only to new nodes - tags for old nodes are not reconciled."
   default     = {}
 }
+
+variable "additional_cluster_admin_arns" {
+  type        = map(string)
+  description = "Map of additional IAM user or role ARNs to be granted admin access to the EKS cluster."
+  default     = {}
+}
