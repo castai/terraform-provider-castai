@@ -243,7 +243,7 @@ It can be either:
 				Type:     schema.TypeList,
 				Optional: true,
 				DiffSuppressFunc: func(k, old, new string, d *schema.ResourceData) bool {
-					return suppressApplyTypeDefaultValueDiff(FieldMemoryEvent, old, new, d)
+					return suppressMemoryEventApplyTypeDefaultValueDiff(old, new, d)
 				},
 				MaxItems: 1,
 				Elem: &schema.Resource{
@@ -1041,9 +1041,9 @@ func suppressConfidenceThresholdDefaultValueDiff(resource, oldValue, newValue st
 	return oldValue == newValue
 }
 
-func suppressApplyTypeDefaultValueDiff(resource, oldValue, newValue string, d *schema.ResourceData) bool {
+func suppressMemoryEventApplyTypeDefaultValueDiff(oldValue, newValue string, d *schema.ResourceData) bool {
 	if isEmpty(newValue) {
-		applyType := d.Get(fmt.Sprintf("%s.0.%s", resource, FieldApplyType))
+		applyType := d.Get(fmt.Sprintf("%s.0.%s", FieldMemoryEvent, FieldApplyType))
 		// Suppress diff if apply type saved from API equals to default
 		return applyType == defaultApplyType
 	}
