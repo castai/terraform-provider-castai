@@ -51,6 +51,9 @@ module "eks" {
       update_config = {
         max_unavailable_percentage = 50 # or set `max_unavailable`
       }
+      metadata_options = {
+        http_put_response_hop_limit = 2
+      }
     }
   }
 }
