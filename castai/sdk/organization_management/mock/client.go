@@ -315,6 +315,46 @@ func (mr *MockClientInterfaceMockRecorder) EnterpriseAPIBatchUpdateEnterpriseGro
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EnterpriseAPIBatchUpdateEnterpriseGroupsWithBody", reflect.TypeOf((*MockClientInterface)(nil).EnterpriseAPIBatchUpdateEnterpriseGroupsWithBody), varargs...)
 }
 
+// EnterpriseAPIBatchUpdateEnterpriseRoleBindings mocks base method.
+func (m *MockClientInterface) EnterpriseAPIBatchUpdateEnterpriseRoleBindings(ctx context.Context, enterpriseId string, body organization_management.EnterpriseAPIBatchUpdateEnterpriseRoleBindingsJSONRequestBody, reqEditors ...organization_management.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, enterpriseId, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "EnterpriseAPIBatchUpdateEnterpriseRoleBindings", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// EnterpriseAPIBatchUpdateEnterpriseRoleBindings indicates an expected call of EnterpriseAPIBatchUpdateEnterpriseRoleBindings.
+func (mr *MockClientInterfaceMockRecorder) EnterpriseAPIBatchUpdateEnterpriseRoleBindings(ctx, enterpriseId, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, enterpriseId, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EnterpriseAPIBatchUpdateEnterpriseRoleBindings", reflect.TypeOf((*MockClientInterface)(nil).EnterpriseAPIBatchUpdateEnterpriseRoleBindings), varargs...)
+}
+
+// EnterpriseAPIBatchUpdateEnterpriseRoleBindingsWithBody mocks base method.
+func (m *MockClientInterface) EnterpriseAPIBatchUpdateEnterpriseRoleBindingsWithBody(ctx context.Context, enterpriseId, contentType string, body io.Reader, reqEditors ...organization_management.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, enterpriseId, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "EnterpriseAPIBatchUpdateEnterpriseRoleBindingsWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// EnterpriseAPIBatchUpdateEnterpriseRoleBindingsWithBody indicates an expected call of EnterpriseAPIBatchUpdateEnterpriseRoleBindingsWithBody.
+func (mr *MockClientInterfaceMockRecorder) EnterpriseAPIBatchUpdateEnterpriseRoleBindingsWithBody(ctx, enterpriseId, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, enterpriseId, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EnterpriseAPIBatchUpdateEnterpriseRoleBindingsWithBody", reflect.TypeOf((*MockClientInterface)(nil).EnterpriseAPIBatchUpdateEnterpriseRoleBindingsWithBody), varargs...)
+}
+
 // EnterpriseAPICreateChildOrganization mocks base method.
 func (m *MockClientInterface) EnterpriseAPICreateChildOrganization(ctx context.Context, enterpriseId string, body organization_management.EnterpriseAPICreateChildOrganizationJSONRequestBody, reqEditors ...organization_management.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
@@ -976,6 +1016,76 @@ func (m *MockClientWithResponsesInterface) EnterpriseAPIBatchUpdateEnterpriseGro
 func (mr *MockClientWithResponsesInterfaceMockRecorder) EnterpriseAPIBatchUpdateEnterpriseGroupsWithResponse(ctx, enterpriseId, body interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EnterpriseAPIBatchUpdateEnterpriseGroupsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).EnterpriseAPIBatchUpdateEnterpriseGroupsWithResponse), ctx, enterpriseId, body)
+}
+
+// EnterpriseAPIBatchUpdateEnterpriseRoleBindings mocks base method.
+func (m *MockClientWithResponsesInterface) EnterpriseAPIBatchUpdateEnterpriseRoleBindings(ctx context.Context, enterpriseId string, body organization_management.EnterpriseAPIBatchUpdateEnterpriseRoleBindingsJSONRequestBody, reqEditors ...organization_management.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, enterpriseId, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "EnterpriseAPIBatchUpdateEnterpriseRoleBindings", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// EnterpriseAPIBatchUpdateEnterpriseRoleBindings indicates an expected call of EnterpriseAPIBatchUpdateEnterpriseRoleBindings.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) EnterpriseAPIBatchUpdateEnterpriseRoleBindings(ctx, enterpriseId, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, enterpriseId, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EnterpriseAPIBatchUpdateEnterpriseRoleBindings", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).EnterpriseAPIBatchUpdateEnterpriseRoleBindings), varargs...)
+}
+
+// EnterpriseAPIBatchUpdateEnterpriseRoleBindingsWithBody mocks base method.
+func (m *MockClientWithResponsesInterface) EnterpriseAPIBatchUpdateEnterpriseRoleBindingsWithBody(ctx context.Context, enterpriseId, contentType string, body io.Reader, reqEditors ...organization_management.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, enterpriseId, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "EnterpriseAPIBatchUpdateEnterpriseRoleBindingsWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// EnterpriseAPIBatchUpdateEnterpriseRoleBindingsWithBody indicates an expected call of EnterpriseAPIBatchUpdateEnterpriseRoleBindingsWithBody.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) EnterpriseAPIBatchUpdateEnterpriseRoleBindingsWithBody(ctx, enterpriseId, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, enterpriseId, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EnterpriseAPIBatchUpdateEnterpriseRoleBindingsWithBody", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).EnterpriseAPIBatchUpdateEnterpriseRoleBindingsWithBody), varargs...)
+}
+
+// EnterpriseAPIBatchUpdateEnterpriseRoleBindingsWithBodyWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) EnterpriseAPIBatchUpdateEnterpriseRoleBindingsWithBodyWithResponse(ctx context.Context, enterpriseId, contentType string, body io.Reader) (*organization_management.EnterpriseAPIBatchUpdateEnterpriseRoleBindingsResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "EnterpriseAPIBatchUpdateEnterpriseRoleBindingsWithBodyWithResponse", ctx, enterpriseId, contentType, body)
+	ret0, _ := ret[0].(*organization_management.EnterpriseAPIBatchUpdateEnterpriseRoleBindingsResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// EnterpriseAPIBatchUpdateEnterpriseRoleBindingsWithBodyWithResponse indicates an expected call of EnterpriseAPIBatchUpdateEnterpriseRoleBindingsWithBodyWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) EnterpriseAPIBatchUpdateEnterpriseRoleBindingsWithBodyWithResponse(ctx, enterpriseId, contentType, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EnterpriseAPIBatchUpdateEnterpriseRoleBindingsWithBodyWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).EnterpriseAPIBatchUpdateEnterpriseRoleBindingsWithBodyWithResponse), ctx, enterpriseId, contentType, body)
+}
+
+// EnterpriseAPIBatchUpdateEnterpriseRoleBindingsWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) EnterpriseAPIBatchUpdateEnterpriseRoleBindingsWithResponse(ctx context.Context, enterpriseId string, body organization_management.EnterpriseAPIBatchUpdateEnterpriseRoleBindingsJSONRequestBody) (*organization_management.EnterpriseAPIBatchUpdateEnterpriseRoleBindingsResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "EnterpriseAPIBatchUpdateEnterpriseRoleBindingsWithResponse", ctx, enterpriseId, body)
+	ret0, _ := ret[0].(*organization_management.EnterpriseAPIBatchUpdateEnterpriseRoleBindingsResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// EnterpriseAPIBatchUpdateEnterpriseRoleBindingsWithResponse indicates an expected call of EnterpriseAPIBatchUpdateEnterpriseRoleBindingsWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) EnterpriseAPIBatchUpdateEnterpriseRoleBindingsWithResponse(ctx, enterpriseId, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EnterpriseAPIBatchUpdateEnterpriseRoleBindingsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).EnterpriseAPIBatchUpdateEnterpriseRoleBindingsWithResponse), ctx, enterpriseId, body)
 }
 
 // EnterpriseAPICreateChildOrganization mocks base method.

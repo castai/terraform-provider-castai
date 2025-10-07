@@ -405,6 +405,39 @@ type BatchUpdateEnterpriseGroupsResponseGroup struct {
 	UpdateTime *time.Time `json:"updateTime,omitempty"`
 }
 
+// BatchUpdateEnterpriseRoleBindingsRequest BatchUpdateEnterpriseRoleBindingsRequest updates a batch of enterprise role bindings.
+type BatchUpdateEnterpriseRoleBindingsRequest struct {
+	// EnterpriseId The ID of the enterprise.
+	EnterpriseId string `json:"enterpriseId"`
+
+	// Requests The list of update requests.
+	Requests []BatchUpdateEnterpriseRoleBindingsRequestUpdateEnterpriseRoleBindingRequest `json:"requests"`
+}
+
+// BatchUpdateEnterpriseRoleBindingsRequestUpdateEnterpriseRoleBindingRequest UpdateEnterpriseRoleBindingRequest represents the request to update a role binding.
+type BatchUpdateEnterpriseRoleBindingsRequestUpdateEnterpriseRoleBindingRequest struct {
+	// Definition The new definition for the role binding. This will be a full replacement.
+	Definition RoleBindingDefinition `json:"definition"`
+
+	// Description The description of the role binding.
+	Description *string `json:"description,omitempty"`
+
+	// Id The ID of the role binding to update.
+	Id string `json:"id"`
+
+	// Name The name of the role binding.
+	Name string `json:"name"`
+
+	// OrganizationId The ID of the organization.
+	OrganizationId string `json:"organizationId"`
+}
+
+// BatchUpdateEnterpriseRoleBindingsResponse BatchUpdateEnterpriseRoleBindingsResponse contains the list of updated role bindings.
+type BatchUpdateEnterpriseRoleBindingsResponse struct {
+	// RoleBindings List of updated role bindings.
+	RoleBindings *[]RoleBinding `json:"roleBindings,omitempty"`
+}
+
 // ChildOrganizationOrganizationCounters OrganizationCounters holds organization counters.
 type ChildOrganizationOrganizationCounters struct {
 	// Clusters Number of clusters in the organization.
@@ -1253,6 +1286,9 @@ type EnterpriseAPIBatchCreateEnterpriseRoleBindingsJSONRequestBody = BatchCreate
 
 // EnterpriseAPIBatchDeleteEnterpriseRoleBindingsJSONRequestBody defines body for EnterpriseAPIBatchDeleteEnterpriseRoleBindings for application/json ContentType.
 type EnterpriseAPIBatchDeleteEnterpriseRoleBindingsJSONRequestBody = BatchDeleteEnterpriseRoleBindingsRequest
+
+// EnterpriseAPIBatchUpdateEnterpriseRoleBindingsJSONRequestBody defines body for EnterpriseAPIBatchUpdateEnterpriseRoleBindings for application/json ContentType.
+type EnterpriseAPIBatchUpdateEnterpriseRoleBindingsJSONRequestBody = BatchUpdateEnterpriseRoleBindingsRequest
 
 // EnterpriseAPIAddUserToChildOrganizationJSONRequestBody defines body for EnterpriseAPIAddUserToChildOrganization for application/json ContentType.
 type EnterpriseAPIAddUserToChildOrganizationJSONRequestBody = AddUserToChildOrganizationRequest

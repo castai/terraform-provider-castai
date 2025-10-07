@@ -67,6 +67,10 @@ const (
 	aksDiskCacheReadWrite                 = "ReadWrite"
 )
 
+const (
+	nodeConfigurationGKEMaxPodsPerNodeDefault = 110
+)
+
 func resourceNodeConfiguration() *schema.Resource {
 	return &schema.Resource{
 		CreateContext: resourceNodeConfigurationCreate,
@@ -508,15 +512,29 @@ func resourceNodeConfiguration() *schema.Resource {
 			FieldNodeConfigurationGKE: {
 				Type:     schema.TypeList,
 				Optional: true,
+				Computed: true,
 				MaxItems: 1,
 				Elem: &schema.Resource{
 					Schema: map[string]*schema.Schema{
+						"max_pods_per_node_formula": {
+							Type:     schema.TypeString,
+							Optional: true,
+							Description: `This is an advanced configuration field. In general, we recommend using max_pods_per_node instead.
+This field accepts a formula to calculate the maximum number of pods that can run on a node. This will affect the pod CIDR range that the node reserves. The following variables are available for use in the formula and will be bound to numeric values before evaluation:
+
+* NUM_CPU - Number of CPUs available on the node
+* NUM_RAM_GB - Amount of RAM in gigabytes available on the node.
+
+If you want the smallest value between 5 times the CPUs, 5 times the RAM, or a cap of 110, your formula would be math.least(110, 5*NUM_CPU, 5*NUM_RAM_GB).
+For a node with 8 CPUs and 16 GB RAM, this calculates to 40 (5×8), 80 (5×16), and 110, then picks the smallest value: 40 pods.`,
+							ConflictsWith: []string{FieldNodeConfigurationGKE + ".0.max_pods_per_node"},
+						},
 						"max_pods_per_node": {
 							Type:             schema.TypeInt,
-							Default:          110,
 							Optional:         true,
 							ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(10, 256)),
 							Description:      "Maximum number of pods that can be run on a node, which affects how many IP addresses you will need for each node. Defaults to 110",
+							ConflictsWith:    []string{FieldNodeConfigurationGKE + ".0.max_pods_per_node_formula"},
 						},
 						"network_tags": {
 							Type: schema.TypeList,
@@ -617,10 +635,37 @@ func resourceNodeConfiguration() *schema.Resource {
 				},
 			},
 		},
-		CustomizeDiff: func(ctx context.Context, diff *schema.ResourceDiff, i interface{}) error {
-			return nil
-		},
+		CustomizeDiff: customizeGKEMaxPodsField,
 	}
+}
+
+func customizeGKEMaxPodsField(_ context.Context, d *schema.ResourceDiff, _ interface{}) error {
+	if v, ok := d.GetOk(FieldNodeConfigurationGKE); ok {
+		gkeList := v.([]interface{})
+		gke := gkeList[0].(map[string]interface{})
+
+		static, formula := gke["max_pods_per_node"], gke["max_pods_per_node_formula"]
+		staticNotSet := static == nil || static.(int) == 0
+		formulaNotSet := formula == nil || formula.(string) == ""
+		if staticNotSet && formulaNotSet {
+			gke["max_pods_per_node"] = nodeConfigurationGKEMaxPodsPerNodeDefault
+			gkeList = []interface{}{gke}
+			if err := d.SetNew(FieldNodeConfigurationGKE, gkeList); err != nil {
+				return err
+			}
+			return nil
+		}
+		if !formulaNotSet {
+			gke["max_pods_per_node"] = nil
+			gkeList = []interface{}{gke}
+			if err := d.SetNew(FieldNodeConfigurationGKE, gkeList); err != nil {
+				return err
+			}
+			return nil
+
+		}
+	}
+	return nil
 }
 
 func resourceNodeConfigurationCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
@@ -1491,7 +1536,10 @@ func toGKEConfig(obj map[string]interface{}) *sdk.NodeconfigV1GKEConfig {
 	}
 
 	out := &sdk.NodeconfigV1GKEConfig{}
-	if v, ok := obj["max_pods_per_node"].(int); ok {
+	if v, ok := obj["max_pods_per_node_formula"].(string); ok && len(v) > 0 {
+		out.MaxPodsPerNodeFormula = toPtr(v)
+	}
+	if v, ok := obj["max_pods_per_node"].(int); ok && v != 0 {
 		out.MaxPodsPerNode = toPtr(int32(v))
 	}
 	if v, ok := obj["network_tags"].([]interface{}); ok {
@@ -1597,6 +1645,9 @@ func flattenGKEConfig(config *sdk.NodeconfigV1GKEConfig) []map[string]interface{
 		return nil
 	}
 	m := map[string]interface{}{}
+	if v := config.MaxPodsPerNodeFormula; v != nil {
+		m["max_pods_per_node_formula"] = *config.MaxPodsPerNodeFormula
+	}
 	if v := config.MaxPodsPerNode; v != nil {
 		m["max_pods_per_node"] = *config.MaxPodsPerNode
 	}

@@ -193,6 +193,14 @@ Optional:
 - `disk_type` (String) Type of boot disk attached to the node. (See [disk types](https://cloud.google.com/compute/docs/disks#pdspecs)). One of: pd-standard, pd-balanced, pd-ssd, pd-extreme
 - `loadbalancers` (Block List) Loadboalancer configuration for CAST provisioned nodes (see [below for nested schema](#nestedblock--gke--loadbalancers))
 - `max_pods_per_node` (Number) Maximum number of pods that can be run on a node, which affects how many IP addresses you will need for each node. Defaults to 110
+- `max_pods_per_node_formula` (String) This is an advanced configuration field. In general, we recommend using max_pods_per_node instead.
+This field accepts a formula to calculate the maximum number of pods that can run on a node. This will affect the pod CIDR range that the node reserves. The following variables are available for use in the formula and will be bound to numeric values before evaluation:
+
+* NUM_CPU - Number of CPUs available on the node
+* NUM_RAM_GB - Amount of RAM in gigabytes available on the node.
+
+If you want the smallest value between 5 times the CPUs, 5 times the RAM, or a cap of 110, your formula would be math.least(110, 5*NUM_CPU, 5*NUM_RAM_GB).
+For a node with 8 CPUs and 16 GB RAM, this calculates to 40 (5×8), 80 (5×16), and 110, then picks the smallest value: 40 pods.
 - `network_tags` (List of String) Network tags to be added on a VM. (See [network tags](https://cloud.google.com/vpc/docs/add-remove-network-tags))
 - `on_host_maintenance` (String) Maintenance behavior of the instances. If not set, the default value for spot nodes is terminate, and for non-spot nodes, it is migrate.
 - `secondary_ip_range` (Block List, Max: 1) Secondary IP range configuration for pods in GKE nodes (see [below for nested schema](#nestedblock--gke--secondary_ip_range))
