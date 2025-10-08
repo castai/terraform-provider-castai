@@ -1,0 +1,82 @@
+# EKS module variables.
+variable "cluster_name" {
+  type        = string
+  description = "EKS cluster name in AWS account."
+}
+
+variable "cluster_region" {
+  type        = string
+  description = "AWS Region in which EKS cluster and supporting resources will be created."
+}
+
+variable "cluster_version" {
+  type        = string
+  description = "EKS cluster version."
+  default     = "1.32"
+}
+
+variable "castai_api_token" {
+  type        = string
+  description = "CAST AI API token created in console.cast.ai API Access keys section"
+}
+
+variable "castai_api_url" {
+  type        = string
+  description = "CAST AI url to API, default value is https://api.cast.ai"
+  default     = "https://api.cast.ai"
+}
+
+variable "castai_grpc_url" {
+  type        = string
+  description = "CAST AI gRPC URL used by pod pinner"
+  default     = "grpc.cast.ai:443"
+}
+
+variable "kvisor_grpc_addr" {
+  type        = string
+  description = "CAST AI Kvisor optimized GRPC API address"
+  default     = "kvisor.prod-master.cast.ai:443" // If your cluster is in the EU region, update the grpcAddr to: kvisor.prod-eu.cast.ai:443
+}
+
+# EKS module variables.
+variable "profile" {
+  type        = string
+  description = "Profile used with AWS CLI"
+  default     = "default"
+}
+
+variable "rest_api_service_name" {
+  type        = string
+  description = "Service name used to access REST API"
+}
+
+variable "grpc_service_name" {
+  type        = string
+  description = "Service name used to access gRPC pod pinning API"
+}
+
+variable "api_grpc_service_name" {
+  type        = string
+  description = "Service name used to access API via gRPC"
+}
+
+variable "files_service_name" {
+  type        = string
+  description = "Service name used to download artifacts"
+}
+
+variable "kvisor_service_name" {
+  type        = string
+  description = "Service name used to access kvisor via gRPC"
+}
+
+variable "telemetry_service_name" {
+  type        = string
+  description = "Service name used to access telemetry via gRPC"
+}
+
+variable "gcp_api_ip_ranges" {
+  description = "List of GCP IP ranges to allow outbound to (e.g. for Artifact Registry, Google APIs)"
+  type        = list(string)
+}
+
