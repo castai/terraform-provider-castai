@@ -496,6 +496,14 @@ const (
 	AGENTSTATUSUNKNOWN WorkloadoptimizationV1GetAgentStatusResponseAgentStatus = "AGENT_STATUS_UNKNOWN"
 )
 
+// Defines values for WorkloadoptimizationV1InPlaceResizeStatus.
+const (
+	ERROR                      WorkloadoptimizationV1InPlaceResizeStatus = "ERROR"
+	RESIZED                    WorkloadoptimizationV1InPlaceResizeStatus = "RESIZED"
+	RESIZING                   WorkloadoptimizationV1InPlaceResizeStatus = "RESIZING"
+	UNKNOWNINPLACERESIZESTATUS WorkloadoptimizationV1InPlaceResizeStatus = "UNKNOWN_INPLACE_RESIZE_STATUS"
+)
+
 // Defines values for WorkloadoptimizationV1KubernetesLabelSelectorOperator.
 const (
 	KUBERNETESLABELSELECTOROPCONTAINS     WorkloadoptimizationV1KubernetesLabelSelectorOperator = "KUBERNETES_LABEL_SELECTOR_OP_CONTAINS"
@@ -536,6 +544,15 @@ const (
 	METRICTARGETTYPEUNSPECIFIED WorkloadoptimizationV1MetricTargetType = "METRIC_TARGET_TYPE_UNSPECIFIED"
 	UTILIZATION                 WorkloadoptimizationV1MetricTargetType = "UTILIZATION"
 	VALUE                       WorkloadoptimizationV1MetricTargetType = "VALUE"
+)
+
+// Defines values for WorkloadoptimizationV1PodStatus.
+const (
+	FAILED           WorkloadoptimizationV1PodStatus = "FAILED"
+	PENDING          WorkloadoptimizationV1PodStatus = "PENDING"
+	RUNNING          WorkloadoptimizationV1PodStatus = "RUNNING"
+	SUCCEEDED        WorkloadoptimizationV1PodStatus = "SUCCEEDED"
+	UNKNOWNPODSTATUS WorkloadoptimizationV1PodStatus = "UNKNOWN_POD_STATUS"
 )
 
 // Defines values for WorkloadoptimizationV1RecommendationEventType.
@@ -782,6 +799,13 @@ const (
 	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPESURGE                      WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_SURGE"
 	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPESYSTEMOVERRIDERESET        WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_SYSTEM_OVERRIDE_RESET"
 	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPESYSTEMOVERRIDETRIGGERED    WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_SYSTEM_OVERRIDE_TRIGGERED"
+)
+
+// Defines values for WorkloadOptimizationAPIListWorkloadsParamsManagementOptions.
+const (
+	MANAGED   WorkloadOptimizationAPIListWorkloadsParamsManagementOptions = "MANAGED"
+	READONLY  WorkloadOptimizationAPIListWorkloadsParamsManagementOptions = "READ_ONLY"
+	UNDEFINED WorkloadOptimizationAPIListWorkloadsParamsManagementOptions = "UNDEFINED"
 )
 
 // Defines values for WorkloadOptimizationAPIListWorkloadsParamsSortOrder.
@@ -4642,7 +4666,7 @@ type NodeconfigV1EKSConfig struct {
 	// TargetGroups TargetGroups defines a list of load balancer target groups to register cluster instances into.
 	TargetGroups *[]NodeconfigV1TargetGroup `json:"targetGroups,omitempty"`
 
-	// ThreadsPerCpu Controls if cpu threading is enabled (default true).
+	// ThreadsPerCpu Specifies how many hardware threads are allocated per physical CPU core.
 	ThreadsPerCpu *int32 `json:"threadsPerCpu"`
 
 	// VolumeIops EBS volume IOPS value to be used for provisioned nodes.
@@ -4680,9 +4704,22 @@ type NodeconfigV1GKEConfig struct {
 	LoadBalancers *[]NodeconfigV1GKEConfigLoadBalancers `json:"loadBalancers,omitempty"`
 
 	// MaxPodsPerNode Maximum number of pods that can be run on a node, which affects how many IP addresses you will need for each node. Defaults to 110.
-	// For Standard GKE clusters, you can run a maximum of 256 Pods on a node with a /23 range, not 512 as you might expect. This provides a buffer so that Pods don't become unschedulable due to a
-	// transient lack of IP addresses in the Pod IP range for a given node. For all ranges, at most half as many Pods can be scheduled as IP addresses in the range.
+	// For Standard GKE clusters, you can run a maximum of 256 Pods on a node with a /23 range, not 512 as you might expect.
+	// This is done to provides a buffer so that Pods don't become unschedulable due to a
+	// transient lack of IP addresses in the Pod IP range for a given node.
+	// For all ranges, at most half as many Pods can be scheduled as IP addresses in the range.
 	MaxPodsPerNode *int32 `json:"maxPodsPerNode,omitempty"`
+
+	// MaxPodsPerNodeFormula Max Pods Per Node Formula to calculate the maximum number of pods that can be run on a node.
+	// This affects how many IP addresses a node will need.
+	// Available variables:
+	// - NUM_CPU -instance parameter
+	// - NUM_RAM_GB - instance parameter
+	// This formula reserves Pod CIDR space the same way GKE does. GKE doubles the max-pods-per-node value, then rounds up
+	// to the next power of 2 to determine the CIDR size. This reduces IP address reuse as Pods are created and deleted.
+	// For example: if max pods per node is 11, you need 22 IPs. The next power of 2 is 32, so the Pod CIDR will be /27.
+	// More info: https://cloud.google.com/kubernetes-engine/docs/how-to/flexible-pod-cidr#cidr_ranges_for_clusters .
+	MaxPodsPerNodeFormula *string `json:"maxPodsPerNodeFormula,omitempty"`
 
 	// NetworkTags Network tags to be added on a VM. Each tag must be 1-63 characters long, start with a lowercase letter and end with either a number or a lowercase letter.
 	NetworkTags *[]string `json:"networkTags,omitempty"`
@@ -6391,6 +6428,11 @@ type WorkloadoptimizationV1CrossVersionObjectReference struct {
 // WorkloadoptimizationV1DeleteWorkloadScalingPolicyResponse defines model for workloadoptimization.v1.DeleteWorkloadScalingPolicyResponse.
 type WorkloadoptimizationV1DeleteWorkloadScalingPolicyResponse = map[string]interface{}
 
+// WorkloadoptimizationV1DeployedRecommendation defines model for workloadoptimization.v1.DeployedRecommendation.
+type WorkloadoptimizationV1DeployedRecommendation struct {
+	ApplyType WorkloadoptimizationV1ApplyType `json:"applyType"`
+}
+
 // WorkloadoptimizationV1DownscalingSettings defines model for workloadoptimization.v1.DownscalingSettings.
 type WorkloadoptimizationV1DownscalingSettings struct {
 	ApplyType *WorkloadoptimizationV1ApplyType `json:"applyType,omitempty"`
@@ -6466,8 +6508,11 @@ type WorkloadoptimizationV1GetWorkloadEventResponse struct {
 
 // WorkloadoptimizationV1GetWorkloadResponse defines model for workloadoptimization.v1.GetWorkloadResponse.
 type WorkloadoptimizationV1GetWorkloadResponse struct {
-	Metrics  *WorkloadoptimizationV1WorkloadMetrics `json:"metrics,omitempty"`
-	Workload WorkloadoptimizationV1Workload         `json:"workload"`
+	Metrics *WorkloadoptimizationV1WorkloadMetrics `json:"metrics,omitempty"`
+
+	// Pods Stores information about the pods synchronisation status.
+	Pods     []WorkloadoptimizationV1PodMetadata `json:"pods"`
+	Workload WorkloadoptimizationV1Workload      `json:"workload"`
 }
 
 // WorkloadoptimizationV1GetWorkloadSpecResponse defines model for workloadoptimization.v1.GetWorkloadSpecResponse.
@@ -6615,6 +6660,9 @@ type WorkloadoptimizationV1HorizontalOverrides struct {
 	// ShortAverageSeconds Defines the window of time to make a horizontal scaling decision.
 	ShortAverageSeconds *int32 `json:"shortAverageSeconds"`
 }
+
+// WorkloadoptimizationV1InPlaceResizeStatus InPlaceResizeStatus explains the in-place resize status.
+type WorkloadoptimizationV1InPlaceResizeStatus string
 
 // WorkloadoptimizationV1InitiatedBy defines model for workloadoptimization.v1.InitiatedBy.
 type WorkloadoptimizationV1InitiatedBy struct {
@@ -6829,6 +6877,7 @@ type WorkloadoptimizationV1NewWorkloadScalingPolicy struct {
 	// The first matching rule is selected and assigned to workload.
 	// If none are matching then the default cluster policy is assigned.
 	AssignmentRules        *[]WorkloadoptimizationV1ScalingPolicyAssignmentRule `json:"assignmentRules,omitempty"`
+	HpaSettings            *WorkloadoptimizationV1ScalingPolicyHPASettings      `json:"hpaSettings,omitempty"`
 	Name                   string                                               `json:"name"`
 	RecommendationPolicies WorkloadoptimizationV1RecommendationPolicies         `json:"recommendationPolicies"`
 }
@@ -6852,12 +6901,49 @@ type WorkloadoptimizationV1PatchWorkloadV2 struct {
 	WorkloadConfig  *WorkloadoptimizationV1WorkloadConfigUpdateV2 `json:"workloadConfig,omitempty"`
 }
 
+// WorkloadoptimizationV1PodInPlaceResize defines model for workloadoptimization.v1.PodInPlaceResize.
+type WorkloadoptimizationV1PodInPlaceResize struct {
+	// Error Error of the in place resize.
+	Error *string `json:"error"`
+
+	// Status InPlaceResizeStatus explains the in-place resize status.
+	Status WorkloadoptimizationV1InPlaceResizeStatus `json:"status"`
+}
+
+// WorkloadoptimizationV1PodMetadata defines model for workloadoptimization.v1.PodMetadata.
+type WorkloadoptimizationV1PodMetadata struct {
+	InPlaceResize          *WorkloadoptimizationV1PodInPlaceResize `json:"inPlaceResize,omitempty"`
+	IsLatestRecommendation bool                                    `json:"isLatestRecommendation"`
+
+	// Name Name of the pod.
+	Name           string                                         `json:"name"`
+	Recommendation *WorkloadoptimizationV1PodRecommendationStatus `json:"recommendation,omitempty"`
+
+	// Status PodStatus defines short status information of the pod.
+	Status WorkloadoptimizationV1PodStatus `json:"status"`
+
+	// UpdatedAt When this information has been updated in our system.
+	UpdatedAt time.Time `json:"updatedAt"`
+}
+
 // WorkloadoptimizationV1PodMetrics defines model for workloadoptimization.v1.PodMetrics.
 type WorkloadoptimizationV1PodMetrics struct {
 	PodCount    []WorkloadoptimizationV1TimeSeriesMetric `json:"podCount"`
 	PodCountMax float64                                  `json:"podCountMax"`
 	PodCountMin float64                                  `json:"podCountMin"`
 }
+
+// WorkloadoptimizationV1PodRecommendationStatus defines model for workloadoptimization.v1.PodRecommendationStatus.
+type WorkloadoptimizationV1PodRecommendationStatus struct {
+	// AppliedAt The time the last recommendation has been applied.
+	AppliedAt time.Time `json:"appliedAt"`
+
+	// ResourcesMismatched Mismatch between recommended resources and actual resources.
+	ResourcesMismatched bool `json:"resourcesMismatched"`
+}
+
+// WorkloadoptimizationV1PodStatus PodStatus defines short status information of the pod.
+type WorkloadoptimizationV1PodStatus string
 
 // WorkloadoptimizationV1PodsMetricSource defines model for workloadoptimization.v1.PodsMetricSource.
 type WorkloadoptimizationV1PodsMetricSource struct {
@@ -7212,6 +7298,27 @@ type WorkloadoptimizationV1ScalingPolicyDeleted struct {
 	Policy WorkloadoptimizationV1WorkloadScalingPolicy `json:"policy"`
 }
 
+// WorkloadoptimizationV1ScalingPolicyHPASettings defines model for workloadoptimization.v1.ScalingPolicyHPASettings.
+type WorkloadoptimizationV1ScalingPolicyHPASettings struct {
+	// ManagementOption Defines possible options for workload management.
+	// READ_ONLY - workload watched (metrics collected), but no actions may be performed by CAST AI.
+	// MANAGED - workload watched (metrics collected), CAST AI may perform actions on the workload.
+	ManagementOption WorkloadoptimizationV1ManagementOption           `json:"managementOption"`
+	NativeHpaSpec    WorkloadoptimizationV1ScalingPolicyNativeHPASpec `json:"nativeHpaSpec"`
+}
+
+// WorkloadoptimizationV1ScalingPolicyNativeHPASpec defines model for workloadoptimization.v1.ScalingPolicyNativeHPASpec.
+type WorkloadoptimizationV1ScalingPolicyNativeHPASpec struct {
+	// MaxReplicas Max replicas a workload can have.
+	MaxReplicas int32 `json:"maxReplicas"`
+
+	// Metrics Metrics list which is scaled on. Matches Kubernetes HPA spec.
+	Metrics []WorkloadoptimizationV1MetricSpec `json:"metrics"`
+
+	// MinReplicas Min replicas a workload can have.
+	MinReplicas int32 `json:"minReplicas"`
+}
+
 // WorkloadoptimizationV1ScalingPolicyOrderUpdatedEvent defines model for workloadoptimization.v1.ScalingPolicyOrderUpdatedEvent.
 type WorkloadoptimizationV1ScalingPolicyOrderUpdatedEvent struct {
 	Current  []WorkloadoptimizationV1ScalingPolicyOrderUpdatedItem `json:"current"`
@@ -7271,6 +7378,7 @@ type WorkloadoptimizationV1UpdateWorkloadScalingPolicy struct {
 	// AssignmentRules AssignmentRules defines the ordered list of matching rules.
 	// BEWARE: If was defined on policy and not provided on update request, the assignment rules will be removed.
 	AssignmentRules        *[]WorkloadoptimizationV1ScalingPolicyAssignmentRule `json:"assignmentRules,omitempty"`
+	HpaSettings            *WorkloadoptimizationV1ScalingPolicyHPASettings      `json:"hpaSettings,omitempty"`
 	Name                   string                                               `json:"name"`
 	RecommendationPolicies WorkloadoptimizationV1RecommendationPolicies         `json:"recommendationPolicies"`
 }
@@ -7358,9 +7466,10 @@ type WorkloadoptimizationV1Workload struct {
 	ClusterId   string                               `json:"clusterId"`
 
 	// Containers Workload containers.
-	Containers   []WorkloadoptimizationV1Container `json:"containers"`
-	CostsPerHour *WorkloadoptimizationV1Costs      `json:"costsPerHour,omitempty"`
-	CreatedAt    time.Time                         `json:"createdAt"`
+	Containers             []WorkloadoptimizationV1Container             `json:"containers"`
+	CostsPerHour           *WorkloadoptimizationV1Costs                  `json:"costsPerHour,omitempty"`
+	CreatedAt              time.Time                                     `json:"createdAt"`
+	DeployedRecommendation *WorkloadoptimizationV1DeployedRecommendation `json:"deployedRecommendation,omitempty"`
 
 	// Error Workload error message (if any).
 	Error *string `json:"error"`
@@ -7383,10 +7492,13 @@ type WorkloadoptimizationV1Workload struct {
 	// ManagedBy Defines sources that can manage the workload.
 	// API - workload is managed by Cast API.
 	// Annotations - workload is managed by annotations.
-	ManagedBy      WorkloadoptimizationV1ManagedBy `json:"managedBy"`
-	Name           string                          `json:"name"`
-	Namespace      string                          `json:"namespace"`
-	OrganizationId string                          `json:"organizationId"`
+	ManagedBy WorkloadoptimizationV1ManagedBy `json:"managedBy"`
+
+	// MatchingPodCount Matching Pod count stores the number of pods that are already using the last deployed recommendation.
+	MatchingPodCount int32  `json:"matchingPodCount"`
+	Name             string `json:"name"`
+	Namespace        string `json:"namespace"`
+	OrganizationId   string `json:"organizationId"`
 
 	// PodCount Pod count stores the *running* count of pods of the workload.
 	PodCount           int32                                         `json:"podCount"`
@@ -7474,6 +7586,7 @@ type WorkloadoptimizationV1WorkloadRecommendation struct {
 	// Confidence Defines the confidence of the recommendation. Value between 0 and 1. 1 means max confidence, 0 means no confidence.
 	// This value indicates how many metrics were collected versus expected for the workload, given the recommendation configuration.
 	Confidence float64 `json:"confidence"`
+	Deployed   bool    `json:"deployed"`
 
 	// EstimatedThresholdReachedAt Estimated time in seconds to reach confidence threshold.
 	EstimatedThresholdReachedAt *time.Time `json:"estimatedThresholdReachedAt"`
@@ -7518,6 +7631,7 @@ type WorkloadoptimizationV1WorkloadScalingPolicy struct {
 	ClusterId                           string                                               `json:"clusterId"`
 	CreatedAt                           time.Time                                            `json:"createdAt"`
 	HasWorkloadsConfiguredByAnnotations bool                                                 `json:"hasWorkloadsConfiguredByAnnotations"`
+	HpaSettings                         *WorkloadoptimizationV1ScalingPolicyHPASettings      `json:"hpaSettings,omitempty"`
 	Id                                  string                                               `json:"id"`
 
 	// IsCastware Indicates if policy is only for castware workloads. Such policy cannot be updated or assigned to non cast workloads.
@@ -7615,6 +7729,9 @@ type AllocationGroupAPIGetAllocationGroupCostTimedSummariesParams struct {
 
 	// UseListingPrices Whether to use listing prices instead of actual prices for cost calculations.
 	UseListingPrices *bool `form:"useListingPrices,omitempty" json:"useListingPrices,omitempty"`
+
+	// IncludeIdleResourceCosts Whether the costs should include costs of the unallocated nodes resources, fairly distributed to workloads based on requested workload resources.
+	IncludeIdleResourceCosts *bool `form:"includeIdleResourceCosts,omitempty" json:"includeIdleResourceCosts,omitempty"`
 }
 
 // AllocationGroupAPIGetAllocationGroupCostSummariesParams defines parameters for AllocationGroupAPIGetAllocationGroupCostSummaries.
@@ -7633,6 +7750,9 @@ type AllocationGroupAPIGetAllocationGroupCostSummariesParams struct {
 
 	// UseListingPrices Whether to use listing prices instead of actual prices for cost calculations.
 	UseListingPrices *bool `form:"useListingPrices,omitempty" json:"useListingPrices,omitempty"`
+
+	// IncludeIdleResourceCosts Whether the costs should include costs of the unallocated nodes resources, fairly distributed to workloads based on requested workload resources.
+	IncludeIdleResourceCosts *bool `form:"includeIdleResourceCosts,omitempty" json:"includeIdleResourceCosts,omitempty"`
 }
 
 // AllocationGroupAPIGetAllocationGroupTotalCostTimedParams defines parameters for AllocationGroupAPIGetAllocationGroupTotalCostTimed.
@@ -7653,6 +7773,9 @@ type AllocationGroupAPIGetAllocationGroupTotalCostTimedParams struct {
 
 	// UseListingPrices Whether to use listing prices instead of actual prices for cost calculations.
 	UseListingPrices *bool `form:"useListingPrices,omitempty" json:"useListingPrices,omitempty"`
+
+	// IncludeIdleResourceCosts Whether the costs should include costs of the unallocated nodes resources, fairly distributed to workloads based on requested workload resources.
+	IncludeIdleResourceCosts *bool `form:"includeIdleResourceCosts,omitempty" json:"includeIdleResourceCosts,omitempty"`
 }
 
 // AllocationGroupAPIListAllocationGroupsParams defines parameters for AllocationGroupAPIListAllocationGroups.
@@ -7873,6 +7996,9 @@ type ExternalClusterAPIGetCredentialsScriptParams struct {
 
 	// InstallOmni Whether cluster should be onboarded with CAST AI Omni.
 	InstallOmni *bool `form:"installOmni,omitempty" json:"installOmni,omitempty"`
+
+	// GcpPsc Whether the cluster is connected via GCP Private Service Connect
+	GcpPsc *bool `form:"gcpPsc,omitempty" json:"gcpPsc,omitempty"`
 }
 
 // ExternalClusterAPIListNodesParams defines parameters for ExternalClusterAPIListNodes.
@@ -8443,15 +8569,15 @@ type WorkloadOptimizationAPIGetWorkloadEventParams struct {
 
 // WorkloadOptimizationAPIListWorkloadsParams defines parameters for WorkloadOptimizationAPIListWorkloads.
 type WorkloadOptimizationAPIListWorkloadsParams struct {
-	WorkloadIds        *[]string `form:"workloadIds,omitempty" json:"workloadIds,omitempty"`
-	WorkloadNames      *[]string `form:"workloadNames,omitempty" json:"workloadNames,omitempty"`
-	Namespaces         *[]string `form:"namespaces,omitempty" json:"namespaces,omitempty"`
-	ScalingPolicyNames *[]string `form:"scalingPolicyNames,omitempty" json:"scalingPolicyNames,omitempty"`
-	Kinds              *[]string `form:"kinds,omitempty" json:"kinds,omitempty"`
-	ManagementOptions  *[]string `form:"managementOptions,omitempty" json:"managementOptions,omitempty"`
-	ConfiguredBy       *[]string `form:"configuredBy,omitempty" json:"configuredBy,omitempty"`
-	SearchQuery        *string   `form:"searchQuery,omitempty" json:"searchQuery,omitempty"`
-	PageLimit          *string   `form:"page.limit,omitempty" json:"page.limit,omitempty"`
+	WorkloadIds        *[]string                                                      `form:"workloadIds,omitempty" json:"workloadIds,omitempty"`
+	WorkloadNames      *[]string                                                      `form:"workloadNames,omitempty" json:"workloadNames,omitempty"`
+	Namespaces         *[]string                                                      `form:"namespaces,omitempty" json:"namespaces,omitempty"`
+	ScalingPolicyNames *[]string                                                      `form:"scalingPolicyNames,omitempty" json:"scalingPolicyNames,omitempty"`
+	Kinds              *[]string                                                      `form:"kinds,omitempty" json:"kinds,omitempty"`
+	ManagementOptions  *[]WorkloadOptimizationAPIListWorkloadsParamsManagementOptions `form:"managementOptions,omitempty" json:"managementOptions,omitempty"`
+	ConfiguredBy       *[]string                                                      `form:"configuredBy,omitempty" json:"configuredBy,omitempty"`
+	SearchQuery        *string                                                        `form:"searchQuery,omitempty" json:"searchQuery,omitempty"`
+	PageLimit          *string                                                        `form:"page.limit,omitempty" json:"page.limit,omitempty"`
 
 	// PageCursor Cursor that defines token indicating where to start the next page.
 	// Empty value indicates to start from beginning of the dataset.
@@ -8468,6 +8594,9 @@ type WorkloadOptimizationAPIListWorkloadsParams struct {
 	//  - desc: desc
 	SortOrder *WorkloadOptimizationAPIListWorkloadsParamsSortOrder `form:"sort.order,omitempty" json:"sort.order,omitempty"`
 }
+
+// WorkloadOptimizationAPIListWorkloadsParamsManagementOptions defines parameters for WorkloadOptimizationAPIListWorkloads.
+type WorkloadOptimizationAPIListWorkloadsParamsManagementOptions string
 
 // WorkloadOptimizationAPIListWorkloadsParamsSortOrder defines parameters for WorkloadOptimizationAPIListWorkloads.
 type WorkloadOptimizationAPIListWorkloadsParamsSortOrder string

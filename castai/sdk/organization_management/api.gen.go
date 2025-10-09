@@ -234,6 +234,43 @@ type BatchCreateEnterpriseGroupsResponseGroup struct {
 	UpdateTime *time.Time `json:"updateTime,omitempty"`
 }
 
+// BatchCreateEnterpriseRoleBindingsRequest Request message for batch creating role bindings in an enterprise
+type BatchCreateEnterpriseRoleBindingsRequest struct {
+	// EnterpriseId Required field that identifies the enterprise.
+	EnterpriseId string `json:"enterpriseId"`
+
+	// Requests The request messages specifying the role bindings to create.
+	//  A maximum of 1000 role bindings can be created in a batch.
+	Requests []BatchCreateEnterpriseRoleBindingsRequestCreateRoleBindingRequest `json:"requests"`
+}
+
+// BatchCreateEnterpriseRoleBindingsRequestCreateRoleBindingRequest CreateRoleBindingRequest represents the request to create a role binding
+type BatchCreateEnterpriseRoleBindingsRequestCreateRoleBindingRequest struct {
+	// OrganizationId Required field that identifies the organization.
+	OrganizationId string `json:"organizationId"`
+
+	// RoleBinding Role binding to create.
+	RoleBinding BatchCreateEnterpriseRoleBindingsRequestRoleBinding `json:"roleBinding"`
+}
+
+// BatchCreateEnterpriseRoleBindingsRequestRoleBinding RoleBinding represents a role binding to be created (without ID)
+type BatchCreateEnterpriseRoleBindingsRequestRoleBinding struct {
+	// Definition Definition is the definition of the role binding.
+	Definition RoleBindingDefinition `json:"definition"`
+
+	// Description Description is the description of the role binding.
+	Description *string `json:"description,omitempty"`
+
+	// Name Name is the name of the role binding.
+	Name string `json:"name"`
+}
+
+// BatchCreateEnterpriseRoleBindingsResponse Response message for batch creating role bindings in an enterprise.
+type BatchCreateEnterpriseRoleBindingsResponse struct {
+	// RoleBindings List of role bindings created in the batch.
+	RoleBindings *[]RoleBinding `json:"roleBindings,omitempty"`
+}
+
 // BatchDeleteEnterpriseGroupsRequest Request message for batch deleting enterprise groups
 type BatchDeleteEnterpriseGroupsRequest struct {
 	// EnterpriseId Required field that identifies the enterprise.
@@ -366,6 +403,39 @@ type BatchUpdateEnterpriseGroupsResponseGroup struct {
 
 	// UpdateTime UpdatedTime is the timestamp when the group was last updated.
 	UpdateTime *time.Time `json:"updateTime,omitempty"`
+}
+
+// BatchUpdateEnterpriseRoleBindingsRequest BatchUpdateEnterpriseRoleBindingsRequest updates a batch of enterprise role bindings.
+type BatchUpdateEnterpriseRoleBindingsRequest struct {
+	// EnterpriseId The ID of the enterprise.
+	EnterpriseId string `json:"enterpriseId"`
+
+	// Requests The list of update requests.
+	Requests []BatchUpdateEnterpriseRoleBindingsRequestUpdateEnterpriseRoleBindingRequest `json:"requests"`
+}
+
+// BatchUpdateEnterpriseRoleBindingsRequestUpdateEnterpriseRoleBindingRequest UpdateEnterpriseRoleBindingRequest represents the request to update a role binding.
+type BatchUpdateEnterpriseRoleBindingsRequestUpdateEnterpriseRoleBindingRequest struct {
+	// Definition The new definition for the role binding. This will be a full replacement.
+	Definition RoleBindingDefinition `json:"definition"`
+
+	// Description The description of the role binding.
+	Description *string `json:"description,omitempty"`
+
+	// Id The ID of the role binding to update.
+	Id string `json:"id"`
+
+	// Name The name of the role binding.
+	Name string `json:"name"`
+
+	// OrganizationId The ID of the organization.
+	OrganizationId string `json:"organizationId"`
+}
+
+// BatchUpdateEnterpriseRoleBindingsResponse BatchUpdateEnterpriseRoleBindingsResponse contains the list of updated role bindings.
+type BatchUpdateEnterpriseRoleBindingsResponse struct {
+	// RoleBindings List of updated role bindings.
+	RoleBindings *[]RoleBinding `json:"roleBindings,omitempty"`
 }
 
 // ChildOrganizationOrganizationCounters OrganizationCounters holds organization counters.
@@ -1211,8 +1281,14 @@ type EnterpriseAPIInviteUsersJSONRequestBody = InviteUsersRequest
 // EnterpriseAPICreateChildOrganizationJSONRequestBody defines body for EnterpriseAPICreateChildOrganization for application/json ContentType.
 type EnterpriseAPICreateChildOrganizationJSONRequestBody = CreateChildOrganizationRequestChildOrganization
 
+// EnterpriseAPIBatchCreateEnterpriseRoleBindingsJSONRequestBody defines body for EnterpriseAPIBatchCreateEnterpriseRoleBindings for application/json ContentType.
+type EnterpriseAPIBatchCreateEnterpriseRoleBindingsJSONRequestBody = BatchCreateEnterpriseRoleBindingsRequest
+
 // EnterpriseAPIBatchDeleteEnterpriseRoleBindingsJSONRequestBody defines body for EnterpriseAPIBatchDeleteEnterpriseRoleBindings for application/json ContentType.
 type EnterpriseAPIBatchDeleteEnterpriseRoleBindingsJSONRequestBody = BatchDeleteEnterpriseRoleBindingsRequest
+
+// EnterpriseAPIBatchUpdateEnterpriseRoleBindingsJSONRequestBody defines body for EnterpriseAPIBatchUpdateEnterpriseRoleBindings for application/json ContentType.
+type EnterpriseAPIBatchUpdateEnterpriseRoleBindingsJSONRequestBody = BatchUpdateEnterpriseRoleBindingsRequest
 
 // EnterpriseAPIAddUserToChildOrganizationJSONRequestBody defines body for EnterpriseAPIAddUserToChildOrganization for application/json ContentType.
 type EnterpriseAPIAddUserToChildOrganizationJSONRequestBody = AddUserToChildOrganizationRequest

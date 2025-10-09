@@ -4869,6 +4869,22 @@ func NewAllocationGroupAPIGetAllocationGroupCostTimedSummariesRequest(server str
 
 		}
 
+		if params.IncludeIdleResourceCosts != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "includeIdleResourceCosts", runtime.ParamLocationQuery, *params.IncludeIdleResourceCosts); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
 		queryURL.RawQuery = queryValues.Encode()
 	}
 
@@ -4961,6 +4977,22 @@ func NewAllocationGroupAPIGetAllocationGroupCostSummariesRequest(server string, 
 		if params.UseListingPrices != nil {
 
 			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "useListingPrices", runtime.ParamLocationQuery, *params.UseListingPrices); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.IncludeIdleResourceCosts != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "includeIdleResourceCosts", runtime.ParamLocationQuery, *params.IncludeIdleResourceCosts); err != nil {
 				return nil, err
 			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
 				return nil, err
@@ -5082,6 +5114,22 @@ func NewAllocationGroupAPIGetAllocationGroupTotalCostTimedRequest(server string,
 		if params.UseListingPrices != nil {
 
 			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "useListingPrices", runtime.ParamLocationQuery, *params.UseListingPrices); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.IncludeIdleResourceCosts != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "includeIdleResourceCosts", runtime.ParamLocationQuery, *params.IncludeIdleResourceCosts); err != nil {
 				return nil, err
 			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
 				return nil, err
@@ -8022,6 +8070,22 @@ func NewExternalClusterAPIGetCredentialsScriptRequest(server string, clusterId s
 		if params.InstallOmni != nil {
 
 			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "installOmni", runtime.ParamLocationQuery, *params.InstallOmni); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.GcpPsc != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "gcpPsc", runtime.ParamLocationQuery, *params.GcpPsc); err != nil {
 				return nil, err
 			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
 				return nil, err
