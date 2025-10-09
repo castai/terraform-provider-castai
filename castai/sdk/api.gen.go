@@ -6492,12 +6492,13 @@ type WorkloadoptimizationV1FailedHookEvent struct {
 
 // WorkloadoptimizationV1GetAgentStatusResponse defines model for workloadoptimization.v1.GetAgentStatusResponse.
 type WorkloadoptimizationV1GetAgentStatusResponse struct {
-	CastAgentCurrentVersion          *string `json:"castAgentCurrentVersion"`
-	ClusterId                        string  `json:"clusterId"`
-	CurrentVersion                   *string `json:"currentVersion"`
-	HpaSupportedFromCastAgentVersion *string `json:"hpaSupportedFromCastAgentVersion"`
-	InPlaceResizeEnabled             bool    `json:"inPlaceResizeEnabled"`
-	LatestVersion                    *string `json:"latestVersion"`
+	CastAgentCurrentVersion          *string    `json:"castAgentCurrentVersion"`
+	ClusterId                        string     `json:"clusterId"`
+	CurrentVersion                   *string    `json:"currentVersion"`
+	HpaSupportedFromCastAgentVersion *string    `json:"hpaSupportedFromCastAgentVersion"`
+	InPlaceResizeEnabled             bool       `json:"inPlaceResizeEnabled"`
+	InstalledAt                      *time.Time `json:"installedAt"`
+	LatestVersion                    *string    `json:"latestVersion"`
 
 	// Status AgentStatus defines the status of workload-autoscaler.
 	Status WorkloadoptimizationV1GetAgentStatusResponseAgentStatus `json:"status"`
@@ -6994,8 +6995,10 @@ type WorkloadoptimizationV1PodInPlaceResize struct {
 
 // WorkloadoptimizationV1PodMetadata defines model for workloadoptimization.v1.PodMetadata.
 type WorkloadoptimizationV1PodMetadata struct {
-	InPlaceResize          *WorkloadoptimizationV1PodInPlaceResize `json:"inPlaceResize,omitempty"`
-	IsLatestRecommendation bool                                    `json:"isLatestRecommendation"`
+	// Containers Details about individual containers.
+	Containers             []WorkloadoptimizationV1PodMetadataContainer `json:"containers"`
+	InPlaceResize          *WorkloadoptimizationV1PodInPlaceResize      `json:"inPlaceResize,omitempty"`
+	IsLatestRecommendation bool                                         `json:"isLatestRecommendation"`
 
 	// Name Name of the pod.
 	Name           string                                         `json:"name"`
@@ -7006,6 +7009,13 @@ type WorkloadoptimizationV1PodMetadata struct {
 
 	// UpdatedAt When this information has been updated in our system.
 	UpdatedAt time.Time `json:"updatedAt"`
+}
+
+// WorkloadoptimizationV1PodMetadataContainer defines model for workloadoptimization.v1.PodMetadataContainer.
+type WorkloadoptimizationV1PodMetadataContainer struct {
+	// Name Container name.
+	Name      string                          `json:"name"`
+	Resources WorkloadoptimizationV1Resources `json:"resources"`
 }
 
 // WorkloadoptimizationV1PodMetrics defines model for workloadoptimization.v1.PodMetrics.

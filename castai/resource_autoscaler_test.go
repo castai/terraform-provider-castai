@@ -14,6 +14,7 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/samber/lo"
 	"github.com/stretchr/testify/require"
 
 	"github.com/castai/terraform-provider-castai/castai/sdk"
@@ -592,20 +593,17 @@ func TestAutoscalerResource_CustomizeDiff(t *testing.T) {
 }
 
 func TestAutoscalerResource_ToAutoscalerPolicy(t *testing.T) {
-	tt := []struct {
-		name        string
+	tt := map[string]struct {
 		data        cty.Value
 		expected    *types.AutoscalerPolicy
 		shouldFail  bool
 		expectedErr error
 	}{
-		{
-			name:     "should return nil when data is nil",
+		"should return nil when data is nil": {
 			data:     cty.NilVal,
 			expected: nil,
 		},
-		{
-			name: "should handle nested objects",
+		"should handle nested objects": {
 			data: cty.ObjectVal(
 				map[string]cty.Value{
 					FieldAutoscalerSettings: cty.ListVal(
@@ -640,7 +638,8 @@ func TestAutoscalerResource_ToAutoscalerPolicy(t *testing.T) {
 			expected: &types.AutoscalerPolicy{
 				Enabled: true,
 				UnschedulablePods: &types.UnschedulablePods{
-					Enabled: true,
+					Enabled:         true,
+					CustomInstances: lo.ToPtr(false),
 					PodPinner: &types.PodPinner{
 						Enabled: true,
 					},
@@ -649,10 +648,10 @@ func TestAutoscalerResource_ToAutoscalerPolicy(t *testing.T) {
 		},
 	}
 
-	for _, test := range tt {
+	for testName, test := range tt {
 		r := require.New(t)
 
-		t.Run(test.name, func(t *testing.T) {
+		t.Run(testName, func(t *testing.T) {
 			resource := resourceAutoscaler()
 			state := terraform.NewInstanceStateShimmedFromValue(test.data, 0)
 			actual, err := toAutoscalerPolicy(resource.Data(state))
@@ -855,6 +854,108 @@ func TestAutoscalerResource_GetChangePolicies_ComparePolicyJsonAndDef(t *testing
 			r.Equal(string(expectedPolicy), string(resultPolicyJson))
 		})
 	}
+}
+
+// Checks if the value of custom_instances_enabled is retained as received from the API
+// in case when it is not specified (null) in the resource configuration
+func TestAutoscalerResource_GetChangePolicies_AdjustPolicyForDrift(t *testing.T) {
+	r := require.New(t)
+	mockCtrl := gomock.NewController(t)
+	mockClient := mock_sdk.NewMockClientInterface(mockCtrl)
+	clusterID := "cluster_id"
+	provider := &ProviderConfig{
+		api: &sdk.ClientWithResponses{
+			ClientInterface: mockClient,
+		},
+	}
+	originalPolicyStr := `{
+		"enabled": true,
+		"isScopedMode": false,
+		"nodeTemplatesPartialMatchingEnabled": false,
+		"unschedulablePods": {
+			"enabled": true,
+			"custom_instances_enabled": true
+		}
+	}`
+	expectedPolicyStr := `{
+		"enabled": false,
+		"isScopedMode": false,
+		"nodeTemplatesPartialMatchingEnabled": false,
+		"unschedulablePods": {
+			"enabled": false,
+			"custom_instances_enabled": true
+		}
+	}`
+
+	policyJSON, err := normalizeJSON([]byte(originalPolicyStr))
+	r.NoError(err)
+
+	expectedPolicyJSON, err := normalizeJSON([]byte(expectedPolicyStr))
+	r.NoError(err)
+
+	mockClient.EXPECT().
+		PoliciesAPIGetClusterPolicies(gomock.Any(), gomock.Any(), gomock.Any()).
+		Times(1).
+		DoAndReturn(
+			func(_ context.Context, _ string) (*http.Response, error) {
+				return &http.Response{StatusCode: 200, Body: io.NopCloser(bytes.NewReader(policyJSON))}, nil
+			},
+		)
+
+	value := cty.ObjectVal(map[string]cty.Value{
+		FieldClusterId: cty.StringVal(clusterID),
+		FieldAutoscalerSettings: cty.ListVal(
+			[]cty.Value{
+				cty.ObjectVal(
+					map[string]cty.Value{
+						"enabled": cty.BoolVal(false),
+						"unschedulable_pods": cty.ListVal(
+							[]cty.Value{
+								cty.ObjectVal(
+									map[string]cty.Value{
+										"enabled": cty.BoolVal(false),
+									},
+								),
+							},
+						),
+					},
+				),
+			},
+		),
+	})
+	rawConfig := cty.ObjectVal(
+		map[string]cty.Value{
+			"autoscaler_settings": cty.ListVal(
+				[]cty.Value{
+					cty.ObjectVal(
+						map[string]cty.Value{
+							"enabled": cty.BoolVal(false),
+							"unschedulable_pods": cty.ListVal(
+								[]cty.Value{
+									cty.ObjectVal(
+										map[string]cty.Value{
+											"enabled":                  cty.BoolVal(false),
+											"custom_instances_enabled": cty.NullVal(cty.Bool),
+										},
+									),
+								},
+							),
+						},
+					),
+				},
+			),
+		},
+	)
+
+	stateWithPolicyDefinition := terraform.NewInstanceStateShimmedFromValue(value, 0)
+	stateWithPolicyDefinition.RawConfig = rawConfig
+
+	resource := resourceAutoscaler()
+	data := resource.Data(stateWithPolicyDefinition)
+	result, err := getChangedPolicies(context.Background(), data, provider, clusterID)
+
+	r.NoError(err)
+	r.Equal(string(expectedPolicyJSON), string(result))
 }
 
 func JSONBytesEqual(a, b []byte) (bool, error) {

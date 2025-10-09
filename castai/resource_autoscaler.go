@@ -11,6 +11,7 @@ import (
 	"time"
 
 	jsonpatch "github.com/evanphx/json-patch"
+	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
@@ -668,6 +669,8 @@ func getChangedPolicies(ctx context.Context, data types.ResourceProvider, meta i
 			return nil, fmt.Errorf("failed to deserialize policy definitions: %v", err)
 		}
 
+		adjustPolicyForDrift(data, policy)
+
 		data, err := json.Marshal(policy)
 		if err != nil {
 			return nil, fmt.Errorf("failed to serialize policy definition: %v", err)
@@ -738,6 +741,20 @@ func createValidationError(field, value string) error {
 		"The configuration was migrated to default node template.\n\n"+
 		"See: https://github.com/castai/terraform-provider-castai#migrating-from-4xx-to-5xx\n\n"+
 		"Policy:\n%v", field, value)
+}
+
+// adjustPolicyForDrift removes values of certain fields which, if retained, might result in constant plan changes.
+// Changes to legacy autoscaler policies and default node template sync to one another, and if values of certain fields
+// are not equal, then they'll keep producing plan changes. Originally, some of these fields had default values
+// and their values are now stored in pre-existing states, so we cannot use the policies stored in state as-is. We null
+// those fields in case they are not specified in the configuration.
+func adjustPolicyForDrift(data types.ResourceProvider, policy *types.AutoscalerPolicy) {
+	if policy != nil && policy.UnschedulablePods != nil {
+		val, d := data.GetRawConfigAt(cty.GetAttrPath(FieldAutoscalerSettings).IndexInt(0).GetAttr(FieldUnschedulablePods).IndexInt(0).GetAttr(FieldCustomInstancesEnabled))
+		if !d.HasError() && val.IsNull() {
+			policy.UnschedulablePods.CustomInstances = nil
+		}
+	}
 }
 
 // toAutoscalerPolicy converts FieldAutoscalerSettings to types.AutoscalerPolicy for given data.
