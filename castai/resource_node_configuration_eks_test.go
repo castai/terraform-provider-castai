@@ -249,6 +249,7 @@ resource "aws_security_group" "test" {
   }
 }
 
+
 resource "aws_iam_role" "test" {
   name               = %[1]q
   assume_role_policy = jsonencode({
