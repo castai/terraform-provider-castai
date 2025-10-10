@@ -17,18 +17,12 @@ Example configuration should be analysed in the following order:
 | cluster_name                = "" | Name of cluster |
 | cluster_region              = "" | Name of region of cluster |
 | castai_api_token            = "" | Cast api token |
+| rest_api_service_name   = "" | The name of the AWS PrivateLink service for the CAST AI endpoint. |
+| grpc_service_name       = "" | The name of the AWS PrivateLink service for the CAST AI endpoint |
+| api_grpc_service_name   = "" | The name of the AWS PrivateLink service for the CAST AI endpoint |
+| files_service_name      = "" | The name of the AWS PrivateLink service for the CAST AI endpoint |
+| kvisor_service_name     = "" | The name of the AWS PrivateLink service for the CAST AI endpoint |
+| telemetry_service_name  = "" | The name of the AWS PrivateLink service for the CAST AI endpoint |
 
-3. Initialize Terraform. Under example root folder run:
-```
-terraform init
-```
-4. Run Terraform apply:
-```
-terraform apply -var-file=tf.vars
-```
-5. To destroy resources created by this example:
-```
-terraform destroy -var-file=tf.vars
-```
+Actual PrivateLink endpoints you can find here: https://github.com/castai/privatelink-aws
 
-Please refer to this guide if you run into any issues https://docs.cast.ai/docs/terraform-troubleshooting

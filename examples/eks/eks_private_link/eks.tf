@@ -10,14 +10,13 @@ module "eks" {
   cluster_endpoint_public_access = true
 
   cluster_addons = {
-    coredns = {
-      most_recent = true
+    coredns = {}
+    eks-pod-identity-agent = {
+      before_compute = true
     }
-    kube-proxy = {
-      most_recent = true
-    }
+    kube-proxy = {}
     vpc-cni = {
-      most_recent = true
+      before_compute = true
     }
   }
 
@@ -25,11 +24,15 @@ module "eks" {
   subnet_ids = module.vpc.private_subnets
 
   eks_managed_node_groups = {
-    node_group_1 = {
+    default = {
       name           = "${var.cluster_name}-ng-1"
       instance_types = ["m5.large", "m5.xlarge", "t3.large"]
       desired_size   = 2
       subnets        = module.vpc.private_subnets
+
+      iam_role_additional_policies = {
+        ssm = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+      }
     }
   }
 
@@ -48,3 +51,4 @@ module "eks" {
   ]
 
 }
+
