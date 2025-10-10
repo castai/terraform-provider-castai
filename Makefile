@@ -68,6 +68,6 @@ testacc-cloud-agnostic: build
 	TF_ACC=1 go test ./castai/... '-run=^TestAccCloudAgnostic_' -v -timeout 50m
 
 .PHONY: validate-terraform-examples
-validate-terraform-examples: build
+validate-terraform-examples:
 validate-terraform-examples:
 	@.ci/scripts/validate-examples.sh
