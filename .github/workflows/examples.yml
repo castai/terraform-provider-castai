@@ -23,6 +23,15 @@ jobs:
       - name: Print tf version
         run: terraform version
 
+      - name: Setup Go 1.24.0
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24.0'
+          cache: true
+
+      - name: Build binary
+        run: go build .
+
       - name: Validate Terraform examples
         id: validate_examples
         run: make validate-terraform-examples

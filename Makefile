@@ -67,12 +67,6 @@ testacc-cloud-agnostic: build
 	@echo "==> Running cloud agnostic acceptance tests"
 	TF_ACC=1 go test ./castai/... '-run=^TestAccCloudAgnostic_' -v -timeout 50m
 
-.PHONY: init-examples
-init-examples: build
-init-examples:
-	@echo "==> Creating symlinks for example/ projects to terraform-provider-castai binary"
-	@.ci/scripts/init-examples.sh
-
 .PHONY: validate-terraform-examples
 validate-terraform-examples:
 validate-terraform-examples:
