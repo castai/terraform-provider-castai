@@ -75,8 +75,3 @@ variable "telemetry_service_name" {
   description = "Service name used to access telemetry via gRPC"
 }
 
-variable "gcp_api_ip_ranges" {
-  description = "List of GCP IP ranges to allow outbound to (e.g. for Artifact Registry, Google APIs)"
-  type        = list(string)
-}
-
