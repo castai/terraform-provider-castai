@@ -496,6 +496,13 @@ const (
 	AGENTSTATUSUNKNOWN WorkloadoptimizationV1GetAgentStatusResponseAgentStatus = "AGENT_STATUS_UNKNOWN"
 )
 
+// Defines values for WorkloadoptimizationV1HPAScalingPolicyType.
+const (
+	HPASCALINGPOLICYTYPEUNSPECIFIED WorkloadoptimizationV1HPAScalingPolicyType = "HPA_SCALING_POLICY_TYPE_UNSPECIFIED"
+	PERCENTSCALINGPOLICY            WorkloadoptimizationV1HPAScalingPolicyType = "PERCENT_SCALING_POLICY"
+	PODSSCALINGPOLICY               WorkloadoptimizationV1HPAScalingPolicyType = "PODS_SCALING_POLICY"
+)
+
 // Defines values for WorkloadoptimizationV1InPlaceResizeStatus.
 const (
 	ERROR                      WorkloadoptimizationV1InPlaceResizeStatus = "ERROR"
@@ -610,6 +617,14 @@ const (
 const (
 	NODISRUPTION WorkloadoptimizationV1RolloutBehaviorType = "NO_DISRUPTION"
 	UNSPECIFIED  WorkloadoptimizationV1RolloutBehaviorType = "UNSPECIFIED"
+)
+
+// Defines values for WorkloadoptimizationV1ScalingPolicySelect.
+const (
+	DISABLEDPOLICYSELECT           WorkloadoptimizationV1ScalingPolicySelect = "DISABLED_POLICY_SELECT"
+	MAXCHANGEPOLICYSELECT          WorkloadoptimizationV1ScalingPolicySelect = "MAX_CHANGE_POLICY_SELECT"
+	MINCHANGEPOLICYSELECT          WorkloadoptimizationV1ScalingPolicySelect = "MIN_CHANGE_POLICY_SELECT"
+	SCALINGPOLICYSELECTUNSPECIFIED WorkloadoptimizationV1ScalingPolicySelect = "SCALING_POLICY_SELECT_UNSPECIFIED"
 )
 
 // Defines values for CommitmentsAPIGetCommitmentUsageHistoryParamsAggregationInterval.
@@ -6591,6 +6606,10 @@ type WorkloadoptimizationV1GetWorkloadsSummaryResponse struct {
 
 // WorkloadoptimizationV1HPAConfig defines model for workloadoptimization.v1.HPAConfig.
 type WorkloadoptimizationV1HPAConfig struct {
+	// Behavior HorizontalPodAutoscalerBehavior configures the scaling behavior of the target
+	// in both Up and Down directions (scaleUp and scaleDown fields respectively).
+	Behavior *WorkloadoptimizationV1HorizontalPodAutoscalerBehavior `json:"behavior,omitempty"`
+
 	// ManagementOption Defines possible options for workload management.
 	// READ_ONLY - workload watched (metrics collected), but no actions may be performed by CAST AI.
 	// MANAGED - workload watched (metrics collected), CAST AI may perform actions on the workload.
@@ -6611,6 +6630,10 @@ type WorkloadoptimizationV1HPAConfig struct {
 
 // WorkloadoptimizationV1HPAConfigUpdate defines model for workloadoptimization.v1.HPAConfigUpdate.
 type WorkloadoptimizationV1HPAConfigUpdate struct {
+	// Behavior HorizontalPodAutoscalerBehavior configures the scaling behavior of the target
+	// in both Up and Down directions (scaleUp and scaleDown fields respectively).
+	Behavior *WorkloadoptimizationV1HorizontalPodAutoscalerBehavior `json:"behavior,omitempty"`
+
 	// ManagementOption Defines possible options for workload management.
 	// READ_ONLY - workload watched (metrics collected), but no actions may be performed by CAST AI.
 	// MANAGED - workload watched (metrics collected), CAST AI may perform actions on the workload.
@@ -6625,8 +6648,55 @@ type WorkloadoptimizationV1HPAConfigUpdate struct {
 	UseNative *bool `json:"useNative"`
 }
 
+// WorkloadoptimizationV1HPAScalingPolicy HPAScalingPolicy is a single policy which must hold true for a specified past interval.
+type WorkloadoptimizationV1HPAScalingPolicy struct {
+	// PeriodSeconds periodSeconds specifies the window of time for which the policy should hold true.
+	// PeriodSeconds must be greater than zero and less than or equal to 1800 (30 min).
+	PeriodSeconds int32 `json:"periodSeconds"`
+
+	// Type HPAScalingPolicyType is the type of the policy which could be used while making scaling decisions.
+	// PODS_SCALING_POLICY - A policy used to specify a change in absolute number of pods.
+	// PERCENT_SCALING_POLICY - A policy used to specify a relative amount of change with respect to the current number of pods.
+	Type  WorkloadoptimizationV1HPAScalingPolicyType `json:"type"`
+	Value int32                                      `json:"value"`
+}
+
+// WorkloadoptimizationV1HPAScalingPolicyType HPAScalingPolicyType is the type of the policy which could be used while making scaling decisions.
+// PODS_SCALING_POLICY - A policy used to specify a change in absolute number of pods.
+// PERCENT_SCALING_POLICY - A policy used to specify a relative amount of change with respect to the current number of pods.
+type WorkloadoptimizationV1HPAScalingPolicyType string
+
+// WorkloadoptimizationV1HPAScalingRules HPAScalingRules configures the scaling behavior for one direction via
+// scaling Policy Rules and a configurable metric tolerance.
+type WorkloadoptimizationV1HPAScalingRules struct {
+	// Policies policies is a list of potential scaling polices which can be used during scaling.
+	// If not set, use the default values:
+	// - For scale up: allow doubling the number of pods, or an absolute change of 4 pods in a 15s window.
+	// - For scale down: allow all pods to be removed in a 15s window.
+	Policies *[]WorkloadoptimizationV1HPAScalingPolicy `json:"policies,omitempty"`
+
+	// SelectPolicy ScalingPolicySelect is used to specify which policy should be used while scaling in a certain direction.
+	// MAX_CHANGE_POLICY_SELECT - Selects the policy with the highest possible change.
+	// MIN_CHANGE_POLICY_SELECT - Selects the policy with the lowest possible change.
+	// DISABLED_POLICY_SELECT - Disables the scaling in this direction.
+	SelectPolicy *WorkloadoptimizationV1ScalingPolicySelect `json:"selectPolicy,omitempty"`
+
+	// StabilizationWindowSeconds stabilizationWindowSeconds is the number of seconds for which past recommendations should be
+	// considered while scaling up or scaling down.
+	// StabilizationWindowSeconds must be greater than or equal to zero and less than or equal to 3600 (one hour).
+	// If not set, use the default values:
+	// - For scale up: 0 (i.e. no stabilization is done).
+	// - For scale down: 300 (i.e. the stabilization window is 300 seconds long).
+	StabilizationWindowSeconds *int32  `json:"stabilizationWindowSeconds"`
+	Tolerance                  *string `json:"tolerance"`
+}
+
 // WorkloadoptimizationV1HPASpec defines model for workloadoptimization.v1.HPASpec.
 type WorkloadoptimizationV1HPASpec struct {
+	// Behavior HorizontalPodAutoscalerBehavior configures the scaling behavior of the target
+	// in both Up and Down directions (scaleUp and scaleDown fields respectively).
+	Behavior *WorkloadoptimizationV1HorizontalPodAutoscalerBehavior `json:"behavior,omitempty"`
+
 	// ManagedByCastai Whether the HPA is managed by CAST AI.
 	ManagedByCastai bool `json:"managedByCastai"`
 
@@ -6659,6 +6729,18 @@ type WorkloadoptimizationV1HorizontalOverrides struct {
 
 	// ShortAverageSeconds Defines the window of time to make a horizontal scaling decision.
 	ShortAverageSeconds *int32 `json:"shortAverageSeconds"`
+}
+
+// WorkloadoptimizationV1HorizontalPodAutoscalerBehavior HorizontalPodAutoscalerBehavior configures the scaling behavior of the target
+// in both Up and Down directions (scaleUp and scaleDown fields respectively).
+type WorkloadoptimizationV1HorizontalPodAutoscalerBehavior struct {
+	// ScaleDown HPAScalingRules configures the scaling behavior for one direction via
+	// scaling Policy Rules and a configurable metric tolerance.
+	ScaleDown *WorkloadoptimizationV1HPAScalingRules `json:"scaleDown,omitempty"`
+
+	// ScaleUp HPAScalingRules configures the scaling behavior for one direction via
+	// scaling Policy Rules and a configurable metric tolerance.
+	ScaleUp *WorkloadoptimizationV1HPAScalingRules `json:"scaleUp,omitempty"`
 }
 
 // WorkloadoptimizationV1InPlaceResizeStatus InPlaceResizeStatus explains the in-place resize status.
@@ -7309,6 +7391,10 @@ type WorkloadoptimizationV1ScalingPolicyHPASettings struct {
 
 // WorkloadoptimizationV1ScalingPolicyNativeHPASpec defines model for workloadoptimization.v1.ScalingPolicyNativeHPASpec.
 type WorkloadoptimizationV1ScalingPolicyNativeHPASpec struct {
+	// Behavior HorizontalPodAutoscalerBehavior configures the scaling behavior of the target
+	// in both Up and Down directions (scaleUp and scaleDown fields respectively).
+	Behavior *WorkloadoptimizationV1HorizontalPodAutoscalerBehavior `json:"behavior,omitempty"`
+
 	// MaxReplicas Max replicas a workload can have.
 	MaxReplicas int32 `json:"maxReplicas"`
 
@@ -7330,6 +7416,12 @@ type WorkloadoptimizationV1ScalingPolicyOrderUpdatedItem struct {
 	Id   string `json:"id"`
 	Name string `json:"name"`
 }
+
+// WorkloadoptimizationV1ScalingPolicySelect ScalingPolicySelect is used to specify which policy should be used while scaling in a certain direction.
+// MAX_CHANGE_POLICY_SELECT - Selects the policy with the highest possible change.
+// MIN_CHANGE_POLICY_SELECT - Selects the policy with the lowest possible change.
+// DISABLED_POLICY_SELECT - Disables the scaling in this direction.
+type WorkloadoptimizationV1ScalingPolicySelect string
 
 // WorkloadoptimizationV1ScalingPolicyUpdated defines model for workloadoptimization.v1.ScalingPolicyUpdated.
 type WorkloadoptimizationV1ScalingPolicyUpdated struct {

@@ -263,6 +263,13 @@ resource "aws_iam_role" "test" {
       },
     ]
   })
+
+  # Ignoring because AWS changes the ARN to an internal ID whenever a role is recreated and it causes flakiness
+  # due to occasional drift
+  # https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_elements_principal.html#principal-roles
+  lifecycle {
+    ignore_changes = [assume_role_policy]
+  }
 }
 
 resource "aws_iam_role_policy_attachment" "test" {
