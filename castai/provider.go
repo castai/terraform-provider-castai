@@ -66,6 +66,7 @@ func Provider(version string) *schema.Provider {
 			"castai_security_runtime_rule":         resourceSecurityRuntimeRule(),
 			"castai_allocation_group":              resourceAllocationGroup(),
 			"castai_enterprise_group":              resourceEnterpriseGroup(),
+			"castai_enterprise_role_binding":       resourceEnterpriseRoleBinding(),
 		},
 
 		DataSourcesMap: map[string]*schema.Resource{
