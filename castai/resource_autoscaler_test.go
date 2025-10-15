@@ -5,6 +5,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/google/uuid"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"io"
 	"net/http"
 	"reflect"
@@ -654,7 +656,7 @@ func TestAutoscalerResource_ToAutoscalerPolicy(t *testing.T) {
 		t.Run(testName, func(t *testing.T) {
 			resource := resourceAutoscaler()
 			state := terraform.NewInstanceStateShimmedFromValue(test.data, 0)
-			actual, err := toAutoscalerPolicy(resource.Data(state))
+			actual, err := translateSettingsDataToPolicy(resource.Data(state))
 
 			if test.shouldFail {
 				r.Error(err)
@@ -967,4 +969,101 @@ func JSONBytesEqual(a, b []byte) (bool, error) {
 		return false, err
 	}
 	return reflect.DeepEqual(j2, j), nil
+}
+
+func TestAutoscalerResource_GetContext(t *testing.T) {
+	clusterId := uuid.NewString()
+
+	testCases := map[string]struct {
+		ClusterPolicyRaw string
+		State            cty.Value
+		VerifyResult     func(testing.TB, *schema.ResourceData)
+	}{
+		"autoscaler_policies to contain all values received from the API": {
+			State: cty.ObjectVal(map[string]cty.Value{
+				FieldClusterId: cty.StringVal(clusterId),
+			}),
+			ClusterPolicyRaw: `{
+				"some-unrecognised-value": true
+			}`,
+			VerifyResult: func(t testing.TB, data *schema.ResourceData) {
+				value, exists := data.GetOk(FieldAutoscalerPolicies)
+				require.True(t, exists)
+				require.Contains(t, value, "some-unrecognised-value")
+			},
+		},
+		"cluster_id falls back to id value": {
+			State: cty.ObjectVal(map[string]cty.Value{
+				FieldId: cty.StringVal(clusterId),
+			}),
+			ClusterPolicyRaw: `{}`,
+			VerifyResult: func(t testing.TB, data *schema.ResourceData) {
+				value, exists := data.GetOk(FieldClusterId)
+				require.True(t, exists)
+				require.Equal(t, clusterId, value)
+			},
+		},
+		"autoscaler_settings populated (basic sample)": {
+			State: cty.ObjectVal(map[string]cty.Value{
+				FieldClusterId: cty.StringVal(clusterId),
+			}),
+			ClusterPolicyRaw: `{
+				"enabled": true,
+				"unschedulablePods": {
+					"enabled": true
+				},
+				"clusterLimits": {
+					"cpu": {
+						"minCores": 4
+					}
+				}
+			}`,
+			VerifyResult: func(t testing.TB, data *schema.ResourceData) {
+				var value any
+				value = data.Get(FieldAutoscalerSettings + ".0." + FieldEnabled)
+				require.Equal(t, true, value)
+				value = data.Get(FieldAutoscalerSettings + ".0." + FieldUnschedulablePods + ".0." + FieldEnabled)
+				require.Equal(t, true, value)
+				value = data.Get(FieldAutoscalerSettings + ".0." + FieldClusterLimits + ".0." + FieldCPU + ".0." + FieldMinCores)
+				require.Equal(t, 4, value)
+			},
+		},
+	}
+
+	for name, tt := range testCases {
+		t.Run(name, func(t *testing.T) {
+			mockctrl := gomock.NewController(t)
+			ctx := t.Context()
+			resource := resourceAutoscaler()
+
+			mockClient := mock_sdk.NewMockClientInterface(mockctrl)
+			givenGetClusterPoliciesResponse(mockClient, clusterId, tt.ClusterPolicyRaw)
+
+			provider := &ProviderConfig{
+				api: &sdk.ClientWithResponses{
+					ClientInterface: mockClient,
+				},
+			}
+
+			state := terraform.NewInstanceStateShimmedFromValue(tt.State, 0)
+			data := resource.Data(state)
+			diagnostics := resource.ReadContext(ctx, data, provider)
+			require.Empty(t, diagnostics)
+
+			if tt.VerifyResult != nil {
+				tt.VerifyResult(t, data)
+			}
+		})
+	}
+}
+
+func givenGetClusterPoliciesResponse(m *mock_sdk.MockClientInterface, clusterId, data string) {
+	response := &http.Response{
+		StatusCode: 200,
+		Body:       io.NopCloser(strings.NewReader(data)),
+	}
+	m.EXPECT().
+		PoliciesAPIGetClusterPolicies(gomock.Any(), clusterId, gomock.Any()).
+		Return(response, nil).
+		AnyTimes()
 }
