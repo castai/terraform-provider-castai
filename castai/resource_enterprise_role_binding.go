@@ -727,98 +727,14 @@ func readRoleBindingData(data *schema.ResourceData) (EnterpriseRoleBinding, erro
 		rbDescription = description.(string)
 	}
 
-	subjects := []EnterpriseRoleBindingSubject{}
-	if subjectsData, ok := data.GetOk(FieldEnterpriseRoleBindingSubjects); ok {
-		if subjectBlocks, ok := subjectsData.([]any); ok && len(subjectBlocks) > 0 {
-			// Should only have one subjects block (MaxItems: 1)
-			if subjectBlock, ok := subjectBlocks[0].(map[string]any); ok {
-				// Parse all users
-				if userList, ok := subjectBlock[FieldEnterpriseRoleBindingSubjectUser].([]any); ok {
-					for _, userItem := range userList {
-						if userMap, ok := userItem.(map[string]any); ok {
-							if userID, ok := userMap[FieldEnterpriseRoleBindingSubjectID].(string); ok && userID != "" {
-								subjects = append(subjects, EnterpriseRoleBindingSubject{
-									Kind: SubjectKindUser,
-									ID:   userID,
-								})
-							}
-						}
-					}
-				}
-
-				// Parse all service accounts
-				if saList, ok := subjectBlock[FieldEnterpriseRoleBindingSubjectServiceAccount].([]any); ok {
-					for _, saItem := range saList {
-						if saMap, ok := saItem.(map[string]any); ok {
-							if saID, ok := saMap[FieldEnterpriseRoleBindingSubjectID].(string); ok && saID != "" {
-								subjects = append(subjects, EnterpriseRoleBindingSubject{
-									Kind: SubjectKindServiceAccount,
-									ID:   saID,
-								})
-							}
-						}
-					}
-				}
-
-				// Parse all groups
-				if groupList, ok := subjectBlock[FieldEnterpriseRoleBindingSubjectGroup].([]any); ok {
-					for _, groupItem := range groupList {
-						if groupMap, ok := groupItem.(map[string]any); ok {
-							if groupID, ok := groupMap[FieldEnterpriseRoleBindingSubjectID].(string); ok && groupID != "" {
-								subjects = append(subjects, EnterpriseRoleBindingSubject{
-									Kind: SubjectKindGroup,
-									ID:   groupID,
-								})
-							}
-						}
-					}
-				}
-			}
-		}
+	subjects, err := parseSubjectsFromTFData(data)
+	if err != nil {
+		return EnterpriseRoleBinding{}, err
 	}
 
-	if len(subjects) == 0 {
-		return EnterpriseRoleBinding{}, fmt.Errorf("at least one subject (user, service account, or group) must be defined")
-	}
-
-	scopes := []EnterpriseRoleBindingScope{}
-	if scopesData, ok := data.GetOk(FieldEnterpriseRoleBindingScopes); ok {
-		if scopeBlocks, ok := scopesData.([]any); ok && len(scopeBlocks) > 0 {
-			// Should only have one scopes block (MaxItems: 1)
-			if scopeBlock, ok := scopeBlocks[0].(map[string]any); ok {
-				// Parse all organization scopes
-				if orgList, ok := scopeBlock[FieldEnterpriseRoleBindingScopeOrganization].([]any); ok {
-					for _, orgItem := range orgList {
-						if orgMap, ok := orgItem.(map[string]any); ok {
-							if orgID, ok := orgMap[FieldEnterpriseRoleBindingScopeID].(string); ok && orgID != "" {
-								scopes = append(scopes, EnterpriseRoleBindingScope{
-									Kind: ScopeKindOrganization,
-									ID:   orgID,
-								})
-							}
-						}
-					}
-				}
-
-				// Parse all cluster scopes
-				if clusterList, ok := scopeBlock[FieldEnterpriseRoleBindingScopeCluster].([]any); ok {
-					for _, clusterItem := range clusterList {
-						if clusterMap, ok := clusterItem.(map[string]any); ok {
-							if clusterID, ok := clusterMap[FieldEnterpriseRoleBindingScopeID].(string); ok && clusterID != "" {
-								scopes = append(scopes, EnterpriseRoleBindingScope{
-									Kind: ScopeKindCluster,
-									ID:   clusterID,
-								})
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-
-	if len(scopes) == 0 {
-		return EnterpriseRoleBinding{}, fmt.Errorf("at least one scope (organization or cluster) must be defined")
+	scopes, err := parseScopesFromTFData(data)
+	if err != nil {
+		return EnterpriseRoleBinding{}, err
 	}
 
 	roleBinding := EnterpriseRoleBinding{
@@ -832,4 +748,75 @@ func readRoleBindingData(data *schema.ResourceData) (EnterpriseRoleBinding, erro
 	}
 
 	return roleBinding, nil
+}
+
+func parseSubjectsFromTFData(data *schema.ResourceData) ([]EnterpriseRoleBindingSubject, error) {
+	subjects := []EnterpriseRoleBindingSubject{}
+	if subjectsData, ok := data.GetOk(FieldEnterpriseRoleBindingSubjects); ok {
+		if subjectBlocks, ok := subjectsData.([]any); ok && len(subjectBlocks) > 0 {
+			if subjectBlock, ok := subjectBlocks[0].(map[string]any); ok {
+				subjects = append(subjects, parseSubjectItems(subjectBlock, FieldEnterpriseRoleBindingSubjectUser, SubjectKindUser)...)
+				subjects = append(subjects, parseSubjectItems(subjectBlock, FieldEnterpriseRoleBindingSubjectServiceAccount, SubjectKindServiceAccount)...)
+				subjects = append(subjects, parseSubjectItems(subjectBlock, FieldEnterpriseRoleBindingSubjectGroup, SubjectKindGroup)...)
+			}
+		}
+	}
+
+	if len(subjects) == 0 {
+		return nil, fmt.Errorf("at least one subject (user, service account, or group) must be defined")
+	}
+
+	return subjects, nil
+}
+
+func parseSubjectItems(block map[string]any, itemKey, kind string) []EnterpriseRoleBindingSubject {
+	var items []EnterpriseRoleBindingSubject
+	if itemList, ok := block[itemKey].([]any); ok {
+		for _, item := range itemList {
+			if itemMap, ok := item.(map[string]any); ok {
+				if id, ok := itemMap[FieldEnterpriseRoleBindingSubjectID].(string); ok && id != "" {
+					items = append(items, EnterpriseRoleBindingSubject{
+						Kind: kind,
+						ID:   id,
+					})
+				}
+			}
+		}
+	}
+	return items
+}
+
+func parseScopesFromTFData(data *schema.ResourceData) ([]EnterpriseRoleBindingScope, error) {
+	scopes := []EnterpriseRoleBindingScope{}
+	if scopesData, ok := data.GetOk(FieldEnterpriseRoleBindingScopes); ok {
+		if scopeBlocks, ok := scopesData.([]any); ok && len(scopeBlocks) > 0 {
+			if scopeBlock, ok := scopeBlocks[0].(map[string]any); ok {
+				scopes = append(scopes, parseScopeItems(scopeBlock, FieldEnterpriseRoleBindingScopeOrganization, ScopeKindOrganization)...)
+				scopes = append(scopes, parseScopeItems(scopeBlock, FieldEnterpriseRoleBindingScopeCluster, ScopeKindCluster)...)
+			}
+		}
+	}
+
+	if len(scopes) == 0 {
+		return nil, fmt.Errorf("at least one scope (organization or cluster) must be defined")
+	}
+
+	return scopes, nil
+}
+
+func parseScopeItems(block map[string]any, itemKey, kind string) []EnterpriseRoleBindingScope {
+	var items []EnterpriseRoleBindingScope
+	if itemList, ok := block[itemKey].([]any); ok {
+		for _, item := range itemList {
+			if itemMap, ok := item.(map[string]any); ok {
+				if id, ok := itemMap[FieldEnterpriseRoleBindingScopeID].(string); ok && id != "" {
+					items = append(items, EnterpriseRoleBindingScope{
+						Kind: kind,
+						ID:   id,
+					})
+				}
+			}
+		}
+	}
+	return items
 }
