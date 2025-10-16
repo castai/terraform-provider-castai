@@ -199,7 +199,7 @@ This field accepts a formula to calculate the maximum number of pods that can ru
 * NUM_CPU - Number of CPUs available on the node
 * NUM_RAM_GB - Amount of RAM in gigabytes available on the node.
 
-If you want the smallest value between 5 times the CPUs, 5 times the RAM, or a cap of 110, your formula would be math.least(110, 5*NUM_CPU, 5*NUM_RAM_GB).
+If you want the smallest value between 5 times the CPUs, 5 times the RAM, or a cap of 110, your formula would be math.least(110, 5 \* NUM_CPU, 5 \* NUM_RAM_GB).
 For a node with 8 CPUs and 16 GB RAM, this calculates to 40 (5×8), 80 (5×16), and 110, then picks the smallest value: 40 pods.
 - `network_tags` (List of String) Network tags to be added on a VM. (See [network tags](https://cloud.google.com/vpc/docs/add-remove-network-tags))
 - `on_host_maintenance` (String) Maintenance behavior of the instances. If not set, the default value for spot nodes is terminate, and for non-spot nodes, it is migrate.
