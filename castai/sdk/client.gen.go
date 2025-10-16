@@ -8099,6 +8099,38 @@ func NewExternalClusterAPIGetCredentialsScriptRequest(server string, clusterId s
 
 		}
 
+		if params.InstallKent != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "installKent", runtime.ParamLocationQuery, *params.InstallKent); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.KentParams != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "kentParams", runtime.ParamLocationQuery, *params.KentParams); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
 		queryURL.RawQuery = queryValues.Encode()
 	}
 
