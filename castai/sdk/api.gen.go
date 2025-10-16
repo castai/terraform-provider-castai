@@ -568,6 +568,17 @@ const (
 	RECOMMENDATIONEVENTTYPEREVERT  WorkloadoptimizationV1RecommendationEventType = "RECOMMENDATION_EVENT_TYPE_REVERT"
 )
 
+// Defines values for WorkloadoptimizationV1RecommendationOrigin.
+const (
+	ORIGINCONFIGCHANGED             WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_CONFIG_CHANGED"
+	ORIGINMEMORYEVENT               WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_MEMORY_EVENT"
+	ORIGINREADONLYRESOURCECHANGED   WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_READONLY_RESOURCE_CHANGED"
+	ORIGINSNAPSHOT                  WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_SNAPSHOT"
+	ORIGINSURGEEVENT                WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_SURGE_EVENT"
+	ORIGINUNKNOWN                   WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_UNKNOWN"
+	ORIGINVERTICALMANAGEMENTENABLED WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_VERTICAL_MANAGEMENT_ENABLED"
+)
+
 // Defines values for WorkloadoptimizationV1ResetSystemOverridesRequestTarget.
 const (
 	TARGETUNSPECIFIED    WorkloadoptimizationV1ResetSystemOverridesRequestTarget = "TARGET_UNSPECIFIED"
@@ -6499,6 +6510,7 @@ type WorkloadoptimizationV1GetAgentStatusResponse struct {
 	InPlaceResizeEnabled             bool       `json:"inPlaceResizeEnabled"`
 	InstalledAt                      *time.Time `json:"installedAt"`
 	LatestVersion                    *string    `json:"latestVersion"`
+	NativeHpaSupportedFromVersion    *string    `json:"nativeHpaSupportedFromVersion"`
 
 	// Status AgentStatus defines the status of workload-autoscaler.
 	Status WorkloadoptimizationV1GetAgentStatusResponseAgentStatus `json:"status"`
@@ -7075,6 +7087,9 @@ type WorkloadoptimizationV1RecommendationEvent struct {
 //
 //   - RECOMMENDATION_EVENT_TYPE_REVERT: RECOMMENDATION_EVENT_TYPE_REVERT - recommendation replicas were reverted.
 type WorkloadoptimizationV1RecommendationEventType string
+
+// WorkloadoptimizationV1RecommendationOrigin Defines possible options from where the recommendation has originated.
+type WorkloadoptimizationV1RecommendationOrigin string
 
 // WorkloadoptimizationV1RecommendationPolicies defines model for workloadoptimization.v1.RecommendationPolicies.
 type WorkloadoptimizationV1RecommendationPolicies struct {
@@ -7696,6 +7711,9 @@ type WorkloadoptimizationV1WorkloadRecommendation struct {
 	// Events Recommendation events.
 	Events  []WorkloadoptimizationV1RecommendationEvent `json:"events"`
 	HpaSpec *WorkloadoptimizationV1HPASpec              `json:"hpaSpec,omitempty"`
+
+	// Origins The origin of workload's recommendation.
+	Origins *[]WorkloadoptimizationV1RecommendationOrigin `json:"origins,omitempty"`
 
 	// Replicas Number of recommended replicas. Available only when workload horizontal scaling is enabled and native HPA is disabled.
 	Replicas *int32 `json:"replicas"`
