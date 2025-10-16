@@ -673,6 +673,13 @@ const (
 	AllocationGroupAPIGetAllocationGroupWorkloadsEfficiencyParamsSortOrderDesc AllocationGroupAPIGetAllocationGroupWorkloadsEfficiencyParamsSortOrder = "desc"
 )
 
+// Defines values for ExternalClusterAPIGetCredentialsScriptParamsKentParams.
+const (
+	EnableRebalancing                ExternalClusterAPIGetCredentialsScriptParamsKentParams = "enable_rebalancing"
+	EnableSpotInterruptionPrediction ExternalClusterAPIGetCredentialsScriptParamsKentParams = "enable_spot_interruption_prediction"
+	InstallEvictor                   ExternalClusterAPIGetCredentialsScriptParamsKentParams = "install_evictor"
+)
+
 // Defines values for ExternalClusterAPIListNodesParamsNodeStatus.
 const (
 	Cordoned              ExternalClusterAPIListNodesParamsNodeStatus = "cordoned"
@@ -8119,7 +8126,16 @@ type ExternalClusterAPIGetCredentialsScriptParams struct {
 
 	// GcpPsc Whether the cluster is connected via GCP Private Service Connect
 	GcpPsc *bool `form:"gcpPsc,omitempty" json:"gcpPsc,omitempty"`
+
+	// InstallKent Whether to install kent
+	InstallKent *bool `form:"installKent,omitempty" json:"installKent,omitempty"`
+
+	// KentParams Params for kent installation
+	KentParams *[]ExternalClusterAPIGetCredentialsScriptParamsKentParams `form:"kentParams,omitempty" json:"kentParams,omitempty"`
 }
+
+// ExternalClusterAPIGetCredentialsScriptParamsKentParams defines parameters for ExternalClusterAPIGetCredentialsScript.
+type ExternalClusterAPIGetCredentialsScriptParamsKentParams string
 
 // ExternalClusterAPIListNodesParams defines parameters for ExternalClusterAPIListNodes.
 type ExternalClusterAPIListNodesParams struct {
