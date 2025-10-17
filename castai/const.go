@@ -1,6 +1,7 @@
 package castai
 
 const (
+	FieldId        = "id"
 	FieldClusterId = "cluster_id"
 
 	FieldKey    = "key"
