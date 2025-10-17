@@ -397,8 +397,8 @@ func resourceEnterpriseRoleBindingDelete(ctx context.Context, data *schema.Resou
 	}
 
 	resp, err := client.EnterpriseAPIBatchDeleteEnterpriseRoleBindingsWithResponse(ctx, enterpriseID, deleteRequest)
-	if err := sdk.CheckOKResponse(resp, err); err != nil {
-		return diag.Errorf("batch delete enterprise role bindings failed: %w", err)
+	if err = sdk.CheckOKResponse(resp, err); err != nil {
+		return diag.Errorf("batch delete enterprise role bindings failed: %s", err.Error())
 	}
 
 	// Clear the resource ID
