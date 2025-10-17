@@ -25,7 +25,6 @@ const (
 	FieldServiceAccountAuthorID    = "id"
 	FieldServiceAccountAuthorEmail = "email"
 	FieldServiceAccountAuthorKind  = "kind"
-
 )
 
 func resourceServiceAccount() *schema.Resource {
