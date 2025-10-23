@@ -65,410 +65,426 @@ const (
 	FieldPodPinner                                = "pod_pinner"
 )
 
-var autoscalerResourceSchema = map[string]*schema.Schema{
-	FieldClusterId: {
-		Type:             schema.TypeString,
-		Optional:         true,
-		ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
-		Description:      "CAST AI cluster id",
-	},
-	FieldAutoscalerPoliciesJSON: {
-		Type:             schema.TypeString,
-		Description:      "autoscaler policies JSON string to override current autoscaler settings",
-		Optional:         true,
-		ValidateDiagFunc: validateAutoscalerPolicyJSON(),
-		Deprecated:       "use autoscaler_settings instead. See README for example: https://github.com/castai/terraform-provider-castai?tab=readme-ov-file#migrating-from-6xx-to-7xx",
-	},
-	FieldAutoscalerPolicies: {
-		Type:        schema.TypeString,
-		Computed:    true,
-		Description: "computed value to store full policies configuration",
-	},
-	FieldAutoscalerSettings: {
-		Type:          schema.TypeList,
-		Optional:      true,
-		MaxItems:      1,
-		Description:   "autoscaler policy definitions to override current autoscaler settings",
-		ConflictsWith: []string{FieldAutoscalerPoliciesJSON},
-		Elem: &schema.Resource{
-			Schema: map[string]*schema.Schema{
-				FieldEnabled: {
-					Type:        schema.TypeBool,
-					Optional:    true,
-					Default:     false,
-					Description: "enable/disable autoscaler policies",
-				},
-				FieldIsScopedMode: {
-					Type:        schema.TypeBool,
-					Optional:    true,
-					Default:     false,
-					Description: "run autoscaler in scoped mode. Only marked pods and nodes will be considered.",
-				},
-				FieldNodeTemplatesPartialMatchingEnabled: {
-					Type:        schema.TypeBool,
-					Optional:    true,
-					Default:     false,
-					Description: "marks whether partial matching should be used when deciding which custom node template to select.",
-				},
-				FieldUnschedulablePods: {
-					Type:        schema.TypeList,
-					Optional:    true,
-					MaxItems:    1,
-					Description: "policy defining autoscaler's behavior when unschedulable pods were detected.",
-					Elem: &schema.Resource{
-						Schema: map[string]*schema.Schema{
-							FieldEnabled: {
-								Type:        schema.TypeBool,
-								Optional:    true,
-								Default:     false,
-								Description: "enable/disable unschedulable pods detection policy.",
-							},
-							FieldHeadroom: {
-								Type:        schema.TypeList,
-								Optional:    true,
-								MaxItems:    1,
-								Description: "additional headroom based on cluster's total available capacity for on-demand nodes.",
-								Deprecated:  "`headroom` is deprecated. Please refer to the FAQ for guidance on cluster headroom: https://docs.cast.ai/docs/autoscaler-1#can-you-please-share-some-guidance-on-cluster-headroom-i-would-like-to-add-some-buffer-room-so-that-pods-have-a-place-to-run-when-nodes-go-down",
-								Elem: &schema.Resource{
-									Schema: map[string]*schema.Schema{
-										FieldCPUPercentage: {
-											Type:             schema.TypeInt,
-											Optional:         true,
-											Default:          10,
-											Description:      "defines percentage of additional CPU capacity to be added.",
-											ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(0, 100)),
-										},
-										FieldMemoryPercentage: {
-											Type:             schema.TypeInt,
-											Optional:         true,
-											Default:          10,
-											Description:      "defines percentage of additional memory capacity to be added.",
-											ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(0, 100)),
-										},
-										FieldEnabled: {
-											Type:        schema.TypeBool,
-											Optional:    true,
-											Default:     true,
-											Description: "enable/disable headroom policy.",
-										},
-									},
-								},
-							},
-							FieldHeadroomSpot: {
-								Type:        schema.TypeList,
-								Optional:    true,
-								MaxItems:    1,
-								Description: "additional headroom based on cluster's total available capacity for spot nodes.",
-								Deprecated:  "`headroom_spot` is deprecated. Please refer to the FAQ for guidance on cluster headroom: https://docs.cast.ai/docs/autoscaler-1#can-you-please-share-some-guidance-on-cluster-headroom-i-would-like-to-add-some-buffer-room-so-that-pods-have-a-place-to-run-when-nodes-go-down",
-								Elem: &schema.Resource{
-									Schema: map[string]*schema.Schema{
-										FieldCPUPercentage: {
-											Type:             schema.TypeInt,
-											Optional:         true,
-											Default:          10,
-											Description:      "defines percentage of additional CPU capacity to be added.",
-											ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(0, 100)),
-										},
-										FieldMemoryPercentage: {
-											Type:             schema.TypeInt,
-											Optional:         true,
-											Default:          10,
-											Description:      "defines percentage of additional memory capacity to be added.",
-											ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(0, 100)),
-										},
-										FieldEnabled: {
-											Type:        schema.TypeBool,
-											Optional:    true,
-											Default:     true,
-											Description: "enable/disable headroom_spot policy.",
-										},
-									},
-								},
-							},
-							FieldNodeConstraints: {
-								Type:        schema.TypeList,
-								Optional:    true,
-								MaxItems:    1,
-								Description: "defines the node constraints that will be applied when autoscaling with Unschedulable Pods policy.",
-								Deprecated:  "`node_constraints` under `unschedulable_pods` is deprecated. Use the `constraints` field in the default `castai_node_template` resource instead. The default node template has `is_default = true`.",
-								Elem: &schema.Resource{
-									Schema: map[string]*schema.Schema{
-										FieldMinCPUCores: {
-											Type:        schema.TypeInt,
-											Optional:    true,
-											Default:     0,
-											Description: "defines min CPU cores for the node to pick.",
-										},
-										FieldMaxCPUCores: {
-											Type:        schema.TypeInt,
-											Optional:    true,
-											Default:     32,
-											Description: "defines max CPU cores for the node to pick.",
-										},
-										FieldMinRAMMiB: {
-											Type:        schema.TypeInt,
-											Optional:    true,
-											Default:     2048,
-											Description: "defines min RAM in MiB for the node to pick.",
-										},
-										FieldMaxRAMMiB: {
-											Type:        schema.TypeInt,
-											Optional:    true,
-											Default:     262144,
-											Description: "defines max RAM in MiB for the node to pick.",
-										},
-										FieldEnabled: {
-											Type:        schema.TypeBool,
-											Optional:    true,
-											Default:     false,
-											Description: "enable/disable node constraints policy.",
-										},
-									},
-								},
-							},
-							FieldPodPinner: {
-								Type:        schema.TypeList,
-								Optional:    true,
-								MaxItems:    1,
-								Description: "defines the Cast AI Pod Pinner components settings.",
-								Elem: &schema.Resource{
-									Schema: map[string]*schema.Schema{
-										FieldEnabled: {
-											Type:        schema.TypeBool,
-											Default:     false,
-											Optional:    true,
-											Description: "enable/disable the Pod Pinner component's automatic management in your cluster. Default: enabled.",
-										},
-									},
-								},
-							},
-							FieldCustomInstancesEnabled: {
-								Type:        schema.TypeBool,
-								Optional:    true,
-								Default:     false,
-								Deprecated:  "`custom_instances_enabled` under `unschedulable_pods.node_constraints` is deprecated. Use the `custom_instances_enabled` field in the default `castai_node_template` resource instead. The default node template has `is_default = true`.",
-								Description: "enable/disable custom instances policy.",
-							},
+func resourceAutoscaler() *schema.Resource {
+	return &schema.Resource{
+		ReadContext:   resourceCastaiAutoscalerRead,
+		CreateContext: resourceCastaiAutoscalerCreate,
+		UpdateContext: resourceCastaiAutoscalerUpdate,
+		DeleteContext: resourceCastaiAutoscalerDelete,
+		CustomizeDiff: resourceCastaiAutoscalerDiff,
+		Description:   "CAST AI autoscaler resource to manage autoscaler settings",
+
+		Timeouts: &schema.ResourceTimeout{
+			Create: schema.DefaultTimeout(2 * time.Minute),
+			Update: schema.DefaultTimeout(2 * time.Minute),
+		},
+
+		Schema: map[string]*schema.Schema{
+			FieldClusterId: {
+				Type:             schema.TypeString,
+				Optional:         true,
+				ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
+				Description:      "CAST AI cluster id",
+			},
+			FieldAutoscalerPoliciesJSON: {
+				Type:             schema.TypeString,
+				Description:      "autoscaler policies JSON string to override current autoscaler settings",
+				Optional:         true,
+				ValidateDiagFunc: validateAutoscalerPolicyJSON(),
+				Deprecated:       "use autoscaler_settings instead. See README for example: https://github.com/castai/terraform-provider-castai?tab=readme-ov-file#migrating-from-6xx-to-7xx",
+			},
+			FieldAutoscalerPolicies: {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "computed value to store full policies configuration",
+			},
+			FieldAutoscalerSettings: {
+				Type:          schema.TypeList,
+				Optional:      true,
+				MaxItems:      1,
+				Description:   "autoscaler policy definitions to override current autoscaler settings",
+				ConflictsWith: []string{FieldAutoscalerPoliciesJSON},
+				Elem: &schema.Resource{
+					Schema: map[string]*schema.Schema{
+						FieldEnabled: {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Default:     false,
+							Description: "enable/disable autoscaler policies",
 						},
-					},
-				},
-				FieldClusterLimits: {
-					Type:        schema.TypeList,
-					Optional:    true,
-					MaxItems:    1,
-					Description: "defines minimum and maximum amount of CPU the cluster can have.",
-					Elem: &schema.Resource{
-						Schema: map[string]*schema.Schema{
-							FieldEnabled: {
-								Type:        schema.TypeBool,
-								Optional:    true,
-								Default:     true,
-								Description: "enable/disable cluster size limits policy.",
-							},
-							FieldCPU: {
-								Type:        schema.TypeList,
-								Optional:    true,
-								MaxItems:    1,
-								Description: "defines the minimum and maximum amount of CPUs for cluster's worker nodes.",
-								Elem: &schema.Resource{
-									Schema: map[string]*schema.Schema{
-										FieldMinCores: {
-											Type:             schema.TypeInt,
-											Optional:         true,
-											Default:          1,
-											Description:      "defines the minimum allowed amount of CPUs in the whole cluster.",
-											ValidateDiagFunc: validation.ToDiagFunc(validation.IntAtLeast(1)),
+						FieldIsScopedMode: {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Default:     false,
+							Description: "run autoscaler in scoped mode. Only marked pods and nodes will be considered.",
+						},
+						FieldNodeTemplatesPartialMatchingEnabled: {
+							Type:        schema.TypeBool,
+							Optional:    true,
+							Default:     false,
+							Description: "marks whether partial matching should be used when deciding which custom node template to select.",
+						},
+						FieldUnschedulablePods: {
+							Type:        schema.TypeList,
+							Optional:    true,
+							MaxItems:    1,
+							Description: "policy defining autoscaler's behavior when unschedulable pods were detected.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									FieldEnabled: {
+										Type:        schema.TypeBool,
+										Optional:    true,
+										Default:     false,
+										Description: "enable/disable unschedulable pods detection policy.",
+									},
+									FieldHeadroom: {
+										Type:        schema.TypeList,
+										Optional:    true,
+										MaxItems:    1,
+										Description: "additional headroom based on cluster's total available capacity for on-demand nodes.",
+										Deprecated:  "`headroom` is deprecated. Please refer to the FAQ for guidance on cluster headroom: https://docs.cast.ai/docs/autoscaler-1#can-you-please-share-some-guidance-on-cluster-headroom-i-would-like-to-add-some-buffer-room-so-that-pods-have-a-place-to-run-when-nodes-go-down",
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												FieldCPUPercentage: {
+													Type:             schema.TypeInt,
+													Optional:         true,
+													Default:          10,
+													Description:      "defines percentage of additional CPU capacity to be added.",
+													ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(0, 100)),
+												},
+												FieldMemoryPercentage: {
+													Type:             schema.TypeInt,
+													Optional:         true,
+													Default:          10,
+													Description:      "defines percentage of additional memory capacity to be added.",
+													ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(0, 100)),
+												},
+												FieldEnabled: {
+													Type:        schema.TypeBool,
+													Optional:    true,
+													Default:     true,
+													Description: "enable/disable headroom policy.",
+												},
+											},
 										},
-										FieldMaxCores: {
-											Type:             schema.TypeInt,
-											Optional:         true,
-											Default:          20,
-											Description:      "defines the maximum allowed amount of vCPUs in the whole cluster.",
-											ValidateDiagFunc: validation.ToDiagFunc(validation.IntAtLeast(2)),
+									},
+									FieldHeadroomSpot: {
+										Type:        schema.TypeList,
+										Optional:    true,
+										MaxItems:    1,
+										Description: "additional headroom based on cluster's total available capacity for spot nodes.",
+										Deprecated:  "`headroom_spot` is deprecated. Please refer to the FAQ for guidance on cluster headroom: https://docs.cast.ai/docs/autoscaler-1#can-you-please-share-some-guidance-on-cluster-headroom-i-would-like-to-add-some-buffer-room-so-that-pods-have-a-place-to-run-when-nodes-go-down",
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												FieldCPUPercentage: {
+													Type:             schema.TypeInt,
+													Optional:         true,
+													Default:          10,
+													Description:      "defines percentage of additional CPU capacity to be added.",
+													ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(0, 100)),
+												},
+												FieldMemoryPercentage: {
+													Type:             schema.TypeInt,
+													Optional:         true,
+													Default:          10,
+													Description:      "defines percentage of additional memory capacity to be added.",
+													ValidateDiagFunc: validation.ToDiagFunc(validation.IntBetween(0, 100)),
+												},
+												FieldEnabled: {
+													Type:        schema.TypeBool,
+													Optional:    true,
+													Default:     true,
+													Description: "enable/disable headroom_spot policy.",
+												},
+											},
 										},
+									},
+									FieldNodeConstraints: {
+										Type:        schema.TypeList,
+										Optional:    true,
+										MaxItems:    1,
+										Description: "defines the node constraints that will be applied when autoscaling with Unschedulable Pods policy.",
+										Deprecated:  "`node_constraints` under `unschedulable_pods` is deprecated. Use the `constraints` field in the default `castai_node_template` resource instead. The default node template has `is_default = true`.",
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												FieldMinCPUCores: {
+													Type:        schema.TypeInt,
+													Optional:    true,
+													Default:     0,
+													Description: "defines min CPU cores for the node to pick.",
+												},
+												FieldMaxCPUCores: {
+													Type:        schema.TypeInt,
+													Optional:    true,
+													Default:     32,
+													Description: "defines max CPU cores for the node to pick.",
+												},
+												FieldMinRAMMiB: {
+													Type:        schema.TypeInt,
+													Optional:    true,
+													Default:     2048,
+													Description: "defines min RAM in MiB for the node to pick.",
+												},
+												FieldMaxRAMMiB: {
+													Type:        schema.TypeInt,
+													Optional:    true,
+													Default:     262144,
+													Description: "defines max RAM in MiB for the node to pick.",
+												},
+												FieldEnabled: {
+													Type:        schema.TypeBool,
+													Optional:    true,
+													Default:     false,
+													Description: "enable/disable node constraints policy.",
+												},
+											},
+										},
+									},
+									FieldPodPinner: {
+										Type:        schema.TypeList,
+										Optional:    true,
+										MaxItems:    1,
+										Description: "defines the Cast AI Pod Pinner components settings.",
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												FieldEnabled: {
+													Type:        schema.TypeBool,
+													Default:     false,
+													Optional:    true,
+													Description: "enable/disable the Pod Pinner component's automatic management in your cluster. Default: enabled.",
+												},
+											},
+										},
+									},
+									FieldCustomInstancesEnabled: {
+										Type:        schema.TypeBool,
+										Optional:    true,
+										Default:     false,
+										Deprecated:  "`custom_instances_enabled` under `unschedulable_pods.node_constraints` is deprecated. Use the `custom_instances_enabled` field in the default `castai_node_template` resource instead. The default node template has `is_default = true`.",
+										Description: "enable/disable custom instances policy.",
 									},
 								},
 							},
 						},
-					},
-				},
-				FieldSpotInstances: {
-					Type:        schema.TypeList,
-					Optional:    true,
-					MaxItems:    1,
-					Description: "policy defining whether autoscaler can use spot instances for provisioning additional workloads.",
-					Deprecated:  "`spot_instances` is deprecated. Configure spot instance settings using the `constraints` field in the default `castai_node_template` resource. The default node template has `is_default = true`.",
-					Elem: &schema.Resource{
-						Schema: map[string]*schema.Schema{
-							FieldEnabled: {
-								Type:        schema.TypeBool,
-								Optional:    true,
-								Default:     false,
-								Deprecated:  "`enabled` under `spot_instances` is deprecated. To enable spot instances, set `constraints.spot = true` in the default `castai_node_template` resource. The default node template has `is_default = true`.",
-								Description: "enable/disable spot instances policy.",
-							},
-							FieldMaxReclaimRate: {
-								Type:        schema.TypeInt,
-								Optional:    true,
-								Default:     0,
-								Deprecated:  "`max_reclaim_rate` under `spot_instances` is deprecated. This field has no direct equivalent in the `castai_node_template` resource, and setting it will have no effect.",
-								Description: "max allowed reclaim rate when choosing spot instance type. E.g. if the value is 10%, instance types having 10% or higher reclaim rate will not be considered. Set to zero to use all instance types regardless of reclaim rate.",
-							},
-							FieldSpotBackups: {
-								Type:        schema.TypeList,
-								Optional:    true,
-								MaxItems:    1,
-								Deprecated:  "`spot_backups` under `spot_instances` is deprecated. Configure spot backup behavior using `constraints.use_spot_fallbacks` and `constraints.fallback_restore_rate_seconds` in the default `castai_node_template` resource. The default node template has `is_default = true`.",
-								Description: "policy defining whether autoscaler can use spot backups instead of spot instances when spot instances are not available.",
-								Elem: &schema.Resource{
-									Schema: map[string]*schema.Schema{
-										FieldEnabled: {
-											Type:        schema.TypeBool,
-											Optional:    true,
-											Default:     false,
-											Description: "enable/disable spot backups policy.",
-										},
-										FieldSpotBackupRestoreRateSeconds: {
-											Type:             schema.TypeInt,
-											Optional:         true,
-											Default:          1800,
-											Description:      "defines interval on how often spot backups restore to real spot should occur.",
-											ValidateDiagFunc: validation.ToDiagFunc(validation.IntAtLeast(60)),
-										},
+						FieldClusterLimits: {
+							Type:        schema.TypeList,
+							Optional:    true,
+							MaxItems:    1,
+							Description: "defines minimum and maximum amount of CPU the cluster can have.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									FieldEnabled: {
+										Type:        schema.TypeBool,
+										Optional:    true,
+										Default:     true,
+										Description: "enable/disable cluster size limits policy.",
 									},
-								},
-							},
-							FieldSpotDiversityEnabled: {
-								Type:        schema.TypeBool,
-								Optional:    true,
-								Default:     false,
-								Deprecated:  "`spot_diversity_enabled` is deprecated. Use the `enable_spot_diversity` field within `castai_node_template.constraints` in the default `castai_node_template` resource. The default node template has `is_default = true`.",
-								Description: "enable/disable spot diversity policy. When enabled, autoscaler will try to balance between diverse and cost optimal instance types.",
-							},
-							FieldSpotDiversityPriceIncreaseLimit: {
-								Type:             schema.TypeInt,
-								Optional:         true,
-								Default:          20,
-								Deprecated:       "`spot_diversity_price_increase_limit` is deprecated. Use `spot_diversity_price_increase_limit_percent` within `castai_node_template.constraints` in the default `castai_node_template` resource. The default node template has `is_default = true`.",
-								Description:      "allowed node configuration price increase when diversifying instance types. E.g. if the value is 10%, then the overall price of diversified instance types can be 10% higher than the price of the optimal configuration.",
-								ValidateDiagFunc: validation.ToDiagFunc(validation.IntAtLeast(1)),
-							},
-							FieldSpotInterruptionPredictions: {
-								Type:        schema.TypeList,
-								Optional:    true,
-								MaxItems:    1,
-								Description: "configure the handling of SPOT interruption predictions.",
-								Deprecated:  "`spot_interruption_predictions` is deprecated. Use the `spot_interruption_predictions_enabled` and `spot_interruption_predictions_type` fields in the default `castai_node_template` resource. The default node template has `is_default = true`.",
-								Elem: &schema.Resource{
-									Schema: map[string]*schema.Schema{
-										FieldEnabled: {
-											Type:        schema.TypeBool,
-											Optional:    true,
-											Default:     false,
-											Description: "enable/disable spot interruption predictions.",
-										},
-										FieldSpotInterruptionPredictionsType: {
-											Type:             schema.TypeString,
-											Optional:         true,
-											Default:          "AWSRebalanceRecommendations",
-											Description:      "define the type of the spot interruption prediction to handle. Allowed values are AWSRebalanceRecommendations, CASTAIInterruptionPredictions.",
-											ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"AWSRebalanceRecommendations", "CASTAIInterruptionPredictions"}, false)),
+									FieldCPU: {
+										Type:        schema.TypeList,
+										Optional:    true,
+										MaxItems:    1,
+										Description: "defines the minimum and maximum amount of CPUs for cluster's worker nodes.",
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												FieldMinCores: {
+													Type:             schema.TypeInt,
+													Optional:         true,
+													Default:          1,
+													Description:      "defines the minimum allowed amount of CPUs in the whole cluster.",
+													ValidateDiagFunc: validation.ToDiagFunc(validation.IntAtLeast(1)),
+												},
+												FieldMaxCores: {
+													Type:             schema.TypeInt,
+													Optional:         true,
+													Default:          20,
+													Description:      "defines the maximum allowed amount of vCPUs in the whole cluster.",
+													ValidateDiagFunc: validation.ToDiagFunc(validation.IntAtLeast(2)),
+												},
+											},
 										},
 									},
 								},
 							},
 						},
-					},
-				},
-				FieldNodeDownscaler: {
-					Type:        schema.TypeList,
-					Optional:    true,
-					MaxItems:    1,
-					Description: "node downscaler defines policies for removing nodes based on the configured conditions.",
-					Elem: &schema.Resource{
-						Schema: map[string]*schema.Schema{
-							FieldEnabled: {
-								Type:        schema.TypeBool,
-								Optional:    true,
-								Default:     true,
-								Description: "enable/disable node downscaler policy.",
-							},
-							FieldEmptyNodes: {
-								Type:        schema.TypeList,
-								Optional:    true,
-								MaxItems:    1,
-								Description: "defines whether Node Downscaler should opt in for removing empty worker nodes when possible.",
-								Elem: &schema.Resource{
-									Schema: map[string]*schema.Schema{
-										FieldEnabled: {
-											Type:        schema.TypeBool,
-											Optional:    true,
-											Default:     false,
-											Description: "enable/disable the empty worker nodes policy.",
+						FieldSpotInstances: {
+							Type:        schema.TypeList,
+							Optional:    true,
+							MaxItems:    1,
+							Description: "policy defining whether autoscaler can use spot instances for provisioning additional workloads.",
+							Deprecated:  "`spot_instances` is deprecated. Configure spot instance settings using the `constraints` field in the default `castai_node_template` resource. The default node template has `is_default = true`.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									FieldEnabled: {
+										Type:        schema.TypeBool,
+										Optional:    true,
+										Default:     false,
+										Deprecated:  "`enabled` under `spot_instances` is deprecated. To enable spot instances, set `constraints.spot = true` in the default `castai_node_template` resource. The default node template has `is_default = true`.",
+										Description: "enable/disable spot instances policy.",
+									},
+									FieldMaxReclaimRate: {
+										Type:        schema.TypeInt,
+										Optional:    true,
+										Default:     0,
+										Deprecated:  "`max_reclaim_rate` under `spot_instances` is deprecated. This field has no direct equivalent in the `castai_node_template` resource, and setting it will have no effect.",
+										Description: "max allowed reclaim rate when choosing spot instance type. E.g. if the value is 10%, instance types having 10% or higher reclaim rate will not be considered. Set to zero to use all instance types regardless of reclaim rate.",
+									},
+									FieldSpotBackups: {
+										Type:        schema.TypeList,
+										Optional:    true,
+										MaxItems:    1,
+										Deprecated:  "`spot_backups` under `spot_instances` is deprecated. Configure spot backup behavior using `constraints.use_spot_fallbacks` and `constraints.fallback_restore_rate_seconds` in the default `castai_node_template` resource. The default node template has `is_default = true`.",
+										Description: "policy defining whether autoscaler can use spot backups instead of spot instances when spot instances are not available.",
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												FieldEnabled: {
+													Type:        schema.TypeBool,
+													Optional:    true,
+													Default:     false,
+													Description: "enable/disable spot backups policy.",
+												},
+												FieldSpotBackupRestoreRateSeconds: {
+													Type:             schema.TypeInt,
+													Optional:         true,
+													Default:          1800,
+													Description:      "defines interval on how often spot backups restore to real spot should occur.",
+													ValidateDiagFunc: validation.ToDiagFunc(validation.IntAtLeast(60)),
+												},
+											},
 										},
-										FieldDelaySeconds: {
-											Type:        schema.TypeInt,
-											Optional:    true,
-											Default:     300,
-											Description: "period (in seconds) to wait before removing the node. Might be useful to control the aggressiveness of the downscaler.",
+									},
+									FieldSpotDiversityEnabled: {
+										Type:        schema.TypeBool,
+										Optional:    true,
+										Default:     false,
+										Deprecated:  "`spot_diversity_enabled` is deprecated. Use the `enable_spot_diversity` field within `castai_node_template.constraints` in the default `castai_node_template` resource. The default node template has `is_default = true`.",
+										Description: "enable/disable spot diversity policy. When enabled, autoscaler will try to balance between diverse and cost optimal instance types.",
+									},
+									FieldSpotDiversityPriceIncreaseLimit: {
+										Type:             schema.TypeInt,
+										Optional:         true,
+										Default:          20,
+										Deprecated:       "`spot_diversity_price_increase_limit` is deprecated. Use `spot_diversity_price_increase_limit_percent` within `castai_node_template.constraints` in the default `castai_node_template` resource. The default node template has `is_default = true`.",
+										Description:      "allowed node configuration price increase when diversifying instance types. E.g. if the value is 10%, then the overall price of diversified instance types can be 10% higher than the price of the optimal configuration.",
+										ValidateDiagFunc: validation.ToDiagFunc(validation.IntAtLeast(1)),
+									},
+									FieldSpotInterruptionPredictions: {
+										Type:        schema.TypeList,
+										Optional:    true,
+										MaxItems:    1,
+										Description: "configure the handling of SPOT interruption predictions.",
+										Deprecated:  "`spot_interruption_predictions` is deprecated. Use the `spot_interruption_predictions_enabled` and `spot_interruption_predictions_type` fields in the default `castai_node_template` resource. The default node template has `is_default = true`.",
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												FieldEnabled: {
+													Type:        schema.TypeBool,
+													Optional:    true,
+													Default:     false,
+													Description: "enable/disable spot interruption predictions.",
+												},
+												FieldSpotInterruptionPredictionsType: {
+													Type:             schema.TypeString,
+													Optional:         true,
+													Default:          "AWSRebalanceRecommendations",
+													Description:      "define the type of the spot interruption prediction to handle. Allowed values are AWSRebalanceRecommendations, CASTAIInterruptionPredictions.",
+													ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"AWSRebalanceRecommendations", "CASTAIInterruptionPredictions"}, false)),
+												},
+											},
 										},
 									},
 								},
 							},
-							FieldEvictor: {
-								Type:        schema.TypeList,
-								Optional:    true,
-								MaxItems:    1,
-								Description: "defines the CAST AI Evictor component settings. Evictor watches the pods running in your cluster and looks for ways to compact them into fewer nodes, making nodes empty, which will be removed by the empty worker nodes policy.",
-								Elem: &schema.Resource{
-									Schema: map[string]*schema.Schema{
-										FieldEnabled: {
-											Type:        schema.TypeBool,
-											Optional:    true,
-											Default:     false,
-											Description: "enable/disable the Evictor policy. This will either install or uninstall the Evictor component in your cluster.",
+						},
+						FieldNodeDownscaler: {
+							Type:        schema.TypeList,
+							Optional:    true,
+							MaxItems:    1,
+							Description: "node downscaler defines policies for removing nodes based on the configured conditions.",
+							Elem: &schema.Resource{
+								Schema: map[string]*schema.Schema{
+									FieldEnabled: {
+										Type:        schema.TypeBool,
+										Optional:    true,
+										Default:     true,
+										Description: "enable/disable node downscaler policy.",
+									},
+									FieldEmptyNodes: {
+										Type:        schema.TypeList,
+										Optional:    true,
+										MaxItems:    1,
+										Description: "defines whether Node Downscaler should opt in for removing empty worker nodes when possible.",
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												FieldEnabled: {
+													Type:        schema.TypeBool,
+													Optional:    true,
+													Default:     false,
+													Description: "enable/disable the empty worker nodes policy.",
+												},
+												FieldDelaySeconds: {
+													Type:        schema.TypeInt,
+													Optional:    true,
+													Default:     300,
+													Description: "period (in seconds) to wait before removing the node. Might be useful to control the aggressiveness of the downscaler.",
+												},
+											},
 										},
-										FieldEvictorDryRun: {
-											Type:        schema.TypeBool,
-											Optional:    true,
-											Default:     false,
-											Description: "enable/disable dry-run. This property allows you to prevent the Evictor from carrying any operations out and preview the actions it would take.",
-										},
-										FieldEvictorAggressiveMode: {
-											Type:        schema.TypeBool,
-											Optional:    true,
-											Default:     false,
-											Description: "enable/disable aggressive mode. By default, Evictor does not target nodes that are running unreplicated pods. This mode will make the Evictor start considering application with just a single replica.",
-										},
-										FieldEvictorScopedMode: {
-											Type:        schema.TypeBool,
-											Optional:    true,
-											Default:     false,
-											Description: "enable/disable scoped mode. By default, Evictor targets all nodes in the cluster. This mode will constrain it to just the nodes which were created by CAST AI.",
-										},
-										FieldEvictorCycleInterval: {
-											Type:        schema.TypeString,
-											Optional:    true,
-											Default:     "1m",
-											Description: "configure the interval duration between Evictor operations. This property can be used to lower or raise the frequency of the Evictor's find-and-drain operations.",
-										},
-										FieldEvictorNodeGracePeriodMinutes: {
-											Type:        schema.TypeInt,
-											Optional:    true,
-											Default:     5,
-											Description: "configure the node grace period which controls the duration which must pass after a node has been created before Evictor starts considering that node.",
-										},
-										FieldEvictorPodEvictionFailureBackOffInterval: {
-											Type:        schema.TypeString,
-											Optional:    true,
-											Default:     "5s",
-											Description: "configure the pod eviction failure back off interval. If pod eviction fails then Evictor will attempt to evict it again after the amount of time specified here.",
-										},
-										FieldEvictorIgnorePodDisruptionBudgets: {
-											Type:        schema.TypeBool,
-											Optional:    true,
-											Default:     false,
-											Description: "if enabled then Evictor will attempt to evict pods that have pod disruption budgets configured.",
+									},
+									FieldEvictor: {
+										Type:        schema.TypeList,
+										Optional:    true,
+										MaxItems:    1,
+										Description: "defines the CAST AI Evictor component settings. Evictor watches the pods running in your cluster and looks for ways to compact them into fewer nodes, making nodes empty, which will be removed by the empty worker nodes policy.",
+										Elem: &schema.Resource{
+											Schema: map[string]*schema.Schema{
+												FieldEnabled: {
+													Type:        schema.TypeBool,
+													Optional:    true,
+													Default:     false,
+													Description: "enable/disable the Evictor policy. This will either install or uninstall the Evictor component in your cluster.",
+												},
+												FieldEvictorDryRun: {
+													Type:        schema.TypeBool,
+													Optional:    true,
+													Default:     false,
+													Description: "enable/disable dry-run. This property allows you to prevent the Evictor from carrying any operations out and preview the actions it would take.",
+												},
+												FieldEvictorAggressiveMode: {
+													Type:        schema.TypeBool,
+													Optional:    true,
+													Default:     false,
+													Description: "enable/disable aggressive mode. By default, Evictor does not target nodes that are running unreplicated pods. This mode will make the Evictor start considering application with just a single replica.",
+												},
+												FieldEvictorScopedMode: {
+													Type:        schema.TypeBool,
+													Optional:    true,
+													Default:     false,
+													Description: "enable/disable scoped mode. By default, Evictor targets all nodes in the cluster. This mode will constrain it to just the nodes which were created by CAST AI.",
+												},
+												FieldEvictorCycleInterval: {
+													Type:        schema.TypeString,
+													Optional:    true,
+													Default:     "1m",
+													Description: "configure the interval duration between Evictor operations. This property can be used to lower or raise the frequency of the Evictor's find-and-drain operations.",
+												},
+												FieldEvictorNodeGracePeriodMinutes: {
+													Type:        schema.TypeInt,
+													Optional:    true,
+													Default:     5,
+													Description: "configure the node grace period which controls the duration which must pass after a node has been created before Evictor starts considering that node.",
+												},
+												FieldEvictorPodEvictionFailureBackOffInterval: {
+													Type:        schema.TypeString,
+													Optional:    true,
+													Default:     "5s",
+													Description: "configure the pod eviction failure back off interval. If pod eviction fails then Evictor will attempt to evict it again after the amount of time specified here.",
+												},
+												FieldEvictorIgnorePodDisruptionBudgets: {
+													Type:        schema.TypeBool,
+													Optional:    true,
+													Default:     false,
+													Description: "if enabled then Evictor will attempt to evict pods that have pod disruption budgets configured.",
+												},
+											},
 										},
 									},
 								},
@@ -478,27 +494,6 @@ var autoscalerResourceSchema = map[string]*schema.Schema{
 				},
 			},
 		},
-	},
-}
-
-func resourceAutoscaler() *schema.Resource {
-	return &schema.Resource{
-		ReadContext:   resourceCastaiAutoscalerRead,
-		CreateContext: resourceCastaiAutoscalerCreate,
-		UpdateContext: resourceCastaiAutoscalerUpdate,
-		DeleteContext: resourceCastaiAutoscalerDelete,
-		CustomizeDiff: resourceCastaiAutoscalerDiff,
-		Description:   "CAST AI autoscaler resource to manage autoscaler settings",
-		Importer: &schema.ResourceImporter{
-			StateContext: schema.ImportStatePassthroughContext,
-		},
-
-		Timeouts: &schema.ResourceTimeout{
-			Create: schema.DefaultTimeout(2 * time.Minute),
-			Update: schema.DefaultTimeout(2 * time.Minute),
-		},
-
-		Schema: autoscalerResourceSchema,
 	}
 }
 
@@ -540,6 +535,7 @@ func resourceCastaiAutoscalerRead(ctx context.Context, data *schema.ResourceData
 	if err != nil {
 		return diag.FromErr(err)
 	}
+
 	return nil
 }
 
@@ -569,37 +565,25 @@ func resourceCastaiAutoscalerUpdate(ctx context.Context, data *schema.ResourceDa
 	return nil
 }
 
-func getCurrentPolicies(ctx context.Context, client sdk.ClientWithResponsesInterface, clusterId string) (*types.AutoscalerPolicy, []byte, error) {
+func getCurrentPolicies(ctx context.Context, client sdk.ClientWithResponsesInterface, clusterId string) ([]byte, error) {
 	log.Printf("[INFO] Getting cluster autoscaler information.")
 
 	resp, err := client.PoliciesAPIGetClusterPolicies(ctx, clusterId)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	} else if resp.StatusCode == http.StatusNotFound {
-		return nil, nil, fmt.Errorf("cluster %s policies do not exist at CAST AI", clusterId)
+		return nil, fmt.Errorf("cluster %s policies do not exist at CAST AI", clusterId)
 	}
 
 	responseBytes, err := io.ReadAll(resp.Body)
 	defer resp.Body.Close()
 	if err != nil {
-		return nil, nil, fmt.Errorf("reading response body: %w", err)
+		return nil, fmt.Errorf("reading response body: %w", err)
 	}
 
 	log.Printf("[DEBUG] Read autoscaler policies for cluster %s:\n%v\n", clusterId, string(responseBytes))
 
-	var policy types.AutoscalerPolicy
-	err = json.Unmarshal(responseBytes, &policy)
-	if err != nil {
-		return nil, nil, fmt.Errorf("unmarshal response body: %w", err)
-	}
-
-	// Note: normalized JSON might still contain unrecognized fields.
-	policyRawNormalized, err := normalizeJSON(responseBytes)
-	if err != nil {
-		return nil, nil, fmt.Errorf("normalize JSON: %w", err)
-	}
-
-	return &policy, policyRawNormalized, nil
+	return normalizeJSON(responseBytes)
 }
 
 func updateAutoscalerPolicies(ctx context.Context, data *schema.ResourceData, meta interface{}) error {
@@ -645,42 +629,19 @@ func readAutoscalerPolicies(ctx context.Context, data *schema.ResourceData, meta
 
 	clusterId := getClusterId(data)
 	if clusterId == "" {
-		id := data.Id()
-		if id != "" {
-			// Normally cluster_id is expected to be present, but for import flow, we only have ID in the data.
-			log.Printf("[INFO] %q is missing; will use %q as a fallback.", FieldClusterId, FieldId)
-			clusterId = id
-			err := data.Set(FieldClusterId, clusterId)
-			if err != nil {
-				return fmt.Errorf("failed to set %q: %w", FieldClusterId, err)
-			}
-		}
-	}
-	if clusterId == "" {
 		log.Print("[INFO] ClusterId is missing. Will skip operation.")
 		return nil
 	}
 
 	client := meta.(*ProviderConfig).api
-	currentPolicy, currentPolicyRaw, err := getCurrentPolicies(ctx, client, clusterId)
+	currentPolicies, err := getCurrentPolicies(ctx, client, clusterId)
 	if err != nil {
 		return err
 	}
 
-	err = data.Set(FieldAutoscalerPolicies, string(currentPolicyRaw))
+	err = data.Set(FieldAutoscalerPolicies, string(currentPolicies))
 	if err != nil {
-		log.Printf("[ERROR] Failed to set field %q: %v", FieldAutoscalerPolicies, err)
-		return err
-	}
-
-	settingsValue, err := translatePolicyToSettingsMap(currentPolicy)
-	if err != nil {
-		return fmt.Errorf("convert current policy to settings: %w", err)
-	}
-	log.Printf("[DEBUG] Settings derived from current policy: %v", settingsValue)
-	err = data.Set(FieldAutoscalerSettings, settingsValue)
-	if err != nil {
-		log.Printf("[ERROR] Failed to set field %q: %v", FieldAutoscalerSettings, err)
+		log.Printf("[ERROR] Failed to set field: %v", err)
 		return err
 	}
 
@@ -703,7 +664,7 @@ func getChangedPolicies(ctx context.Context, data types.ResourceProvider, meta i
 	var policyChanges []byte
 
 	if isPoliciesSettingsExist {
-		policy, err := translateSettingsDataToPolicy(data)
+		policy, err := toAutoscalerPolicy(data)
 		if err != nil {
 			return nil, fmt.Errorf("failed to deserialize policy definitions: %v", err)
 		}
@@ -730,13 +691,13 @@ func getChangedPolicies(ctx context.Context, data types.ResourceProvider, meta i
 
 	client := meta.(*ProviderConfig).api
 
-	_, currentPolicyRaw, err := getCurrentPolicies(ctx, client, clusterId)
+	currentPolicies, err := getCurrentPolicies(ctx, client, clusterId)
 	if err != nil {
 		log.Printf("[WARN] Getting current policies: %v", err)
 		return nil, fmt.Errorf("failed to get policies from API: %v", err)
 	}
 
-	policies, err := jsonpatch.MergePatch(currentPolicyRaw, policyChanges)
+	policies, err := jsonpatch.MergePatch(currentPolicies, policyChanges)
 	if err != nil {
 		log.Printf("[WARN] Failed to merge policy changes: %v", err)
 		return nil, fmt.Errorf("failed to merge policies: %v", err)
@@ -796,8 +757,8 @@ func adjustPolicyForDrift(data types.ResourceProvider, policy *types.AutoscalerP
 	}
 }
 
-// translateSettingsDataToPolicy converts FieldAutoscalerSettings to types.AutoscalerPolicy for given data.
-func translateSettingsDataToPolicy(data types.ResourceProvider) (*types.AutoscalerPolicy, error) {
+// toAutoscalerPolicy converts FieldAutoscalerSettings to types.AutoscalerPolicy for given data.
+func toAutoscalerPolicy(data types.ResourceProvider) (*types.AutoscalerPolicy, error) {
 	out, ok := extractNestedValues(data, FieldAutoscalerSettings, true, true)
 	if !ok {
 		return nil, nil
@@ -813,30 +774,4 @@ func translateSettingsDataToPolicy(data types.ResourceProvider) (*types.Autoscal
 	}
 
 	return &policy, nil
-}
-
-func translatePolicyToSettingsMap(policy *types.AutoscalerPolicy) (any, error) {
-	var out map[string]interface{}
-	err := mapstructure.Decode(policy, &out)
-	if err != nil {
-		return nil, fmt.Errorf("encode to map structure: %w", err)
-	}
-	log.Printf("[DEBUG] translatePolicyToSettingsMap (before fixing): %v", out)
-	return confrontToSchema(out, autoscalerResourceSchema[FieldAutoscalerSettings]), nil
-}
-
-func confrontToSchema(value any, sc *schema.Schema) any {
-	valueMap, isValueMap := value.(map[string]interface{})
-	if isValueMap && sc.Type == schema.TypeList && sc.MaxItems == 1 {
-		sce := sc.Elem.(*schema.Resource)
-		for key := range valueMap {
-			scElem, existsInSchema := sce.Schema[key]
-			if !existsInSchema {
-				continue
-			}
-			valueMap[key] = confrontToSchema(valueMap[key], scElem)
-		}
-		return []interface{}{valueMap}
-	}
-	return value
 }
