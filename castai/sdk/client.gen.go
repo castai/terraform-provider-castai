@@ -813,6 +813,9 @@ type ClientInterface interface {
 	// WorkloadOptimizationAPIListWorkloadEvents request
 	WorkloadOptimizationAPIListWorkloadEvents(ctx context.Context, clusterId string, params *WorkloadOptimizationAPIListWorkloadEventsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// WorkloadOptimizationAPIGetWorkloadEventsSummary request
+	WorkloadOptimizationAPIGetWorkloadEventsSummary(ctx context.Context, clusterId string, params *WorkloadOptimizationAPIGetWorkloadEventsSummaryParams, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// WorkloadOptimizationAPIGetWorkloadEvent request
 	WorkloadOptimizationAPIGetWorkloadEvent(ctx context.Context, clusterId string, eventId string, params *WorkloadOptimizationAPIGetWorkloadEventParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -4027,6 +4030,18 @@ func (c *Client) WorkloadOptimizationAPIListWorkloadEvents(ctx context.Context, 
 	return c.Client.Do(req)
 }
 
+func (c *Client) WorkloadOptimizationAPIGetWorkloadEventsSummary(ctx context.Context, clusterId string, params *WorkloadOptimizationAPIGetWorkloadEventsSummaryParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewWorkloadOptimizationAPIGetWorkloadEventsSummaryRequest(c.Server, clusterId, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
 func (c *Client) WorkloadOptimizationAPIGetWorkloadEvent(ctx context.Context, clusterId string, eventId string, params *WorkloadOptimizationAPIGetWorkloadEventParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewWorkloadOptimizationAPIGetWorkloadEventRequest(c.Server, clusterId, eventId, params)
 	if err != nil {
@@ -5605,6 +5620,22 @@ func NewAllocationGroupAPIGetAllocationGroupWorkloadCostsRequest(server string, 
 		if params.UseListingPrices != nil {
 
 			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "useListingPrices", runtime.ParamLocationQuery, *params.UseListingPrices); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.IncludeIdleResourceCosts != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "includeIdleResourceCosts", runtime.ParamLocationQuery, *params.IncludeIdleResourceCosts); err != nil {
 				return nil, err
 			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
 				return nil, err
@@ -15591,6 +15622,158 @@ func NewWorkloadOptimizationAPIListWorkloadEventsRequest(server string, clusterI
 	return req, nil
 }
 
+// NewWorkloadOptimizationAPIGetWorkloadEventsSummaryRequest generates requests for WorkloadOptimizationAPIGetWorkloadEventsSummary
+func NewWorkloadOptimizationAPIGetWorkloadEventsSummaryRequest(server string, clusterId string, params *WorkloadOptimizationAPIGetWorkloadEventsSummaryParams) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "clusterId", runtime.ParamLocationPath, clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/workload-autoscaling/clusters/%s/workload-events-summary", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.FromDate != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "fromDate", runtime.ParamLocationQuery, *params.FromDate); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.ToDate != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "toDate", runtime.ParamLocationQuery, *params.ToDate); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.WorkloadId != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "workloadId", runtime.ParamLocationQuery, *params.WorkloadId); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.WorkloadName != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "workloadName", runtime.ParamLocationQuery, *params.WorkloadName); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.WorkloadNamespace != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "workloadNamespace", runtime.ParamLocationQuery, *params.WorkloadNamespace); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.WorkloadKind != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "workloadKind", runtime.ParamLocationQuery, *params.WorkloadKind); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.Type != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "type", runtime.ParamLocationQuery, *params.Type); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 // NewWorkloadOptimizationAPIGetWorkloadEventRequest generates requests for WorkloadOptimizationAPIGetWorkloadEvent
 func NewWorkloadOptimizationAPIGetWorkloadEventRequest(server string, clusterId string, eventId string, params *WorkloadOptimizationAPIGetWorkloadEventParams) (*http.Request, error) {
 	var err error
@@ -17331,6 +17514,9 @@ type ClientWithResponsesInterface interface {
 
 	// WorkloadOptimizationAPIListWorkloadEvents request
 	WorkloadOptimizationAPIListWorkloadEventsWithResponse(ctx context.Context, clusterId string, params *WorkloadOptimizationAPIListWorkloadEventsParams) (*WorkloadOptimizationAPIListWorkloadEventsResponse, error)
+
+	// WorkloadOptimizationAPIGetWorkloadEventsSummary request
+	WorkloadOptimizationAPIGetWorkloadEventsSummaryWithResponse(ctx context.Context, clusterId string, params *WorkloadOptimizationAPIGetWorkloadEventsSummaryParams) (*WorkloadOptimizationAPIGetWorkloadEventsSummaryResponse, error)
 
 	// WorkloadOptimizationAPIGetWorkloadEvent request
 	WorkloadOptimizationAPIGetWorkloadEventWithResponse(ctx context.Context, clusterId string, eventId string, params *WorkloadOptimizationAPIGetWorkloadEventParams) (*WorkloadOptimizationAPIGetWorkloadEventResponse, error)
@@ -23235,6 +23421,36 @@ func (r WorkloadOptimizationAPIListWorkloadEventsResponse) GetBody() []byte {
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
+type WorkloadOptimizationAPIGetWorkloadEventsSummaryResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *WorkloadoptimizationV1GetWorkloadEventsSummaryResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r WorkloadOptimizationAPIGetWorkloadEventsSummaryResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r WorkloadOptimizationAPIGetWorkloadEventsSummaryResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r WorkloadOptimizationAPIGetWorkloadEventsSummaryResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
 type WorkloadOptimizationAPIGetWorkloadEventResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -25929,6 +26145,15 @@ func (c *ClientWithResponses) WorkloadOptimizationAPIListWorkloadEventsWithRespo
 		return nil, err
 	}
 	return ParseWorkloadOptimizationAPIListWorkloadEventsResponse(rsp)
+}
+
+// WorkloadOptimizationAPIGetWorkloadEventsSummaryWithResponse request returning *WorkloadOptimizationAPIGetWorkloadEventsSummaryResponse
+func (c *ClientWithResponses) WorkloadOptimizationAPIGetWorkloadEventsSummaryWithResponse(ctx context.Context, clusterId string, params *WorkloadOptimizationAPIGetWorkloadEventsSummaryParams) (*WorkloadOptimizationAPIGetWorkloadEventsSummaryResponse, error) {
+	rsp, err := c.WorkloadOptimizationAPIGetWorkloadEventsSummary(ctx, clusterId, params)
+	if err != nil {
+		return nil, err
+	}
+	return ParseWorkloadOptimizationAPIGetWorkloadEventsSummaryResponse(rsp)
 }
 
 // WorkloadOptimizationAPIGetWorkloadEventWithResponse request returning *WorkloadOptimizationAPIGetWorkloadEventResponse
@@ -31103,6 +31328,32 @@ func ParseWorkloadOptimizationAPIListWorkloadEventsResponse(rsp *http.Response) 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest WorkloadoptimizationV1ListWorkloadEventsResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseWorkloadOptimizationAPIGetWorkloadEventsSummaryResponse parses an HTTP response from a WorkloadOptimizationAPIGetWorkloadEventsSummaryWithResponse call
+func ParseWorkloadOptimizationAPIGetWorkloadEventsSummaryResponse(rsp *http.Response) (*WorkloadOptimizationAPIGetWorkloadEventsSummaryResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &WorkloadOptimizationAPIGetWorkloadEventsSummaryResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest WorkloadoptimizationV1GetWorkloadEventsSummaryResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
