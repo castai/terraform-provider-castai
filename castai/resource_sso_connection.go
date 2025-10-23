@@ -275,7 +275,7 @@ func checkSSOStatus(input *sdk.CastaiSsoV1beta1SSOConnection) error {
 		return nil
 	}
 
-	if *input.Status == sdk.STATUSACTIVE {
+	if *input.Status == sdk.CastaiSsoV1beta1SSOConnectionStatusSTATUSACTIVE {
 		return nil
 	}
 

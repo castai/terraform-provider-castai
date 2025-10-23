@@ -186,10 +186,10 @@ const (
 
 // Defines values for CastaiSsoV1beta1SSOConnectionStatus.
 const (
-	STATUSACTIVE   CastaiSsoV1beta1SSOConnectionStatus = "STATUS_ACTIVE"
-	STATUSFAILED   CastaiSsoV1beta1SSOConnectionStatus = "STATUS_FAILED"
-	STATUSINACTIVE CastaiSsoV1beta1SSOConnectionStatus = "STATUS_INACTIVE"
-	STATUSUNKNOWN  CastaiSsoV1beta1SSOConnectionStatus = "STATUS_UNKNOWN"
+	CastaiSsoV1beta1SSOConnectionStatusSTATUSACTIVE   CastaiSsoV1beta1SSOConnectionStatus = "STATUS_ACTIVE"
+	CastaiSsoV1beta1SSOConnectionStatusSTATUSFAILED   CastaiSsoV1beta1SSOConnectionStatus = "STATUS_FAILED"
+	CastaiSsoV1beta1SSOConnectionStatusSTATUSINACTIVE CastaiSsoV1beta1SSOConnectionStatus = "STATUS_INACTIVE"
+	CastaiSsoV1beta1SSOConnectionStatusSTATUSUNKNOWN  CastaiSsoV1beta1SSOConnectionStatus = "STATUS_UNKNOWN"
 )
 
 // Defines values for CastaiUsersV1beta1OrganizationType.
@@ -484,6 +484,7 @@ const (
 	WorkloadoptimizationV1EventTypeEVENTTYPESCALINGPOLICYDELETED       WorkloadoptimizationV1EventType = "EVENT_TYPE_SCALING_POLICY_DELETED"
 	WorkloadoptimizationV1EventTypeEVENTTYPESCALINGPOLICYORDERUPDATED  WorkloadoptimizationV1EventType = "EVENT_TYPE_SCALING_POLICY_ORDER_UPDATED"
 	WorkloadoptimizationV1EventTypeEVENTTYPESCALINGPOLICYUPDATED       WorkloadoptimizationV1EventType = "EVENT_TYPE_SCALING_POLICY_UPDATED"
+	WorkloadoptimizationV1EventTypeEVENTTYPESTARTUPFAILURE             WorkloadoptimizationV1EventType = "EVENT_TYPE_STARTUP_FAILURE"
 	WorkloadoptimizationV1EventTypeEVENTTYPESURGE                      WorkloadoptimizationV1EventType = "EVENT_TYPE_SURGE"
 	WorkloadoptimizationV1EventTypeEVENTTYPESYSTEMOVERRIDERESET        WorkloadoptimizationV1EventType = "EVENT_TYPE_SYSTEM_OVERRIDE_RESET"
 	WorkloadoptimizationV1EventTypeEVENTTYPESYSTEMOVERRIDETRIGGERED    WorkloadoptimizationV1EventType = "EVENT_TYPE_SYSTEM_OVERRIDE_TRIGGERED"
@@ -562,6 +563,14 @@ const (
 	UNKNOWNPODSTATUS WorkloadoptimizationV1PodStatus = "UNKNOWN_POD_STATUS"
 )
 
+// Defines values for WorkloadoptimizationV1RecommendationErrorType.
+const (
+	ERRORCUSTOMWORKLOADCONTAINERSMISMATCH WorkloadoptimizationV1RecommendationErrorType = "ERROR_CUSTOM_WORKLOAD_CONTAINERS_MISMATCH"
+	ERRORCUSTOMWORKLOADINVALIDNAME        WorkloadoptimizationV1RecommendationErrorType = "ERROR_CUSTOM_WORKLOAD_INVALID_NAME"
+	ERRORDEPLOYFAILED                     WorkloadoptimizationV1RecommendationErrorType = "ERROR_DEPLOY_FAILED"
+	ERRORUNKNOWN                          WorkloadoptimizationV1RecommendationErrorType = "ERROR_UNKNOWN"
+)
+
 // Defines values for WorkloadoptimizationV1RecommendationEventType.
 const (
 	RECOMMENDATIONEVENTTYPEINVALID WorkloadoptimizationV1RecommendationEventType = "RECOMMENDATION_EVENT_TYPE_INVALID"
@@ -577,6 +586,20 @@ const (
 	ORIGINSURGEEVENT                WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_SURGE_EVENT"
 	ORIGINUNKNOWN                   WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_UNKNOWN"
 	ORIGINVERTICALMANAGEMENTENABLED WorkloadoptimizationV1RecommendationOrigin = "ORIGIN_VERTICAL_MANAGEMENT_ENABLED"
+)
+
+// Defines values for WorkloadoptimizationV1RecommendationStatusType.
+const (
+	WorkloadoptimizationV1RecommendationStatusTypeSTATUSAPPLIED WorkloadoptimizationV1RecommendationStatusType = "STATUS_APPLIED"
+	WorkloadoptimizationV1RecommendationStatusTypeSTATUSSTOPPED WorkloadoptimizationV1RecommendationStatusType = "STATUS_STOPPED"
+	WorkloadoptimizationV1RecommendationStatusTypeSTATUSUNKNOWN WorkloadoptimizationV1RecommendationStatusType = "STATUS_UNKNOWN"
+	WorkloadoptimizationV1RecommendationStatusTypeSTATUSWAITING WorkloadoptimizationV1RecommendationStatusType = "STATUS_WAITING"
+)
+
+// Defines values for WorkloadoptimizationV1RecommendationStopReasonType.
+const (
+	STOPREASONOOMKILL WorkloadoptimizationV1RecommendationStopReasonType = "STOP_REASON_OOMKILL"
+	STOPREASONUNKNOWN WorkloadoptimizationV1RecommendationStopReasonType = "STOP_REASON_UNKNOWN"
 )
 
 // Defines values for WorkloadoptimizationV1ResetSystemOverridesRequestTarget.
@@ -829,9 +852,30 @@ const (
 	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPESCALINGPOLICYDELETED       WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_SCALING_POLICY_DELETED"
 	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPESCALINGPOLICYORDERUPDATED  WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_SCALING_POLICY_ORDER_UPDATED"
 	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPESCALINGPOLICYUPDATED       WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_SCALING_POLICY_UPDATED"
+	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPESTARTUPFAILURE             WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_STARTUP_FAILURE"
 	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPESURGE                      WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_SURGE"
 	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPESYSTEMOVERRIDERESET        WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_SYSTEM_OVERRIDE_RESET"
 	WorkloadOptimizationAPIListWorkloadEventsParamsTypeEVENTTYPESYSTEMOVERRIDETRIGGERED    WorkloadOptimizationAPIListWorkloadEventsParamsType = "EVENT_TYPE_SYSTEM_OVERRIDE_TRIGGERED"
+)
+
+// Defines values for WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType.
+const (
+	EVENTTYPECONFIGURATIONCHANGEDV2     WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_CONFIGURATION_CHANGEDV2"
+	EVENTTYPEFAILEDHELMTESTHOOK         WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_FAILED_HELM_TEST_HOOK"
+	EVENTTYPEINVALID                    WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_INVALID"
+	EVENTTYPEMEMORYPRESSUREEVICTION     WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_MEMORY_PRESSURE_EVICTION"
+	EVENTTYPEOOMKILL                    WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_OOM_KILL"
+	EVENTTYPERECOMMENDEDPODCOUNTCHANGED WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_RECOMMENDED_POD_COUNT_CHANGED"
+	EVENTTYPERECOMMENDEDREQUESTSCHANGED WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_RECOMMENDED_REQUESTS_CHANGED"
+	EVENTTYPESCALINGPOLICYASSIGNED      WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_SCALING_POLICY_ASSIGNED"
+	EVENTTYPESCALINGPOLICYCREATED       WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_SCALING_POLICY_CREATED"
+	EVENTTYPESCALINGPOLICYDELETED       WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_SCALING_POLICY_DELETED"
+	EVENTTYPESCALINGPOLICYORDERUPDATED  WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_SCALING_POLICY_ORDER_UPDATED"
+	EVENTTYPESCALINGPOLICYUPDATED       WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_SCALING_POLICY_UPDATED"
+	EVENTTYPESTARTUPFAILURE             WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_STARTUP_FAILURE"
+	EVENTTYPESURGE                      WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_SURGE"
+	EVENTTYPESYSTEMOVERRIDERESET        WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_SYSTEM_OVERRIDE_RESET"
+	EVENTTYPESYSTEMOVERRIDETRIGGERED    WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType = "EVENT_TYPE_SYSTEM_OVERRIDE_TRIGGERED"
 )
 
 // Defines values for WorkloadOptimizationAPIListWorkloadsParamsManagementOptions.
@@ -6484,6 +6528,7 @@ type WorkloadoptimizationV1Event struct {
 	ScalingPolicyDeleted       *WorkloadoptimizationV1ScalingPolicyDeleted            `json:"scalingPolicyDeleted,omitempty"`
 	ScalingPolicyOrderUpdated  *WorkloadoptimizationV1ScalingPolicyOrderUpdatedEvent  `json:"scalingPolicyOrderUpdated,omitempty"`
 	ScalingPolicyUpdated       *WorkloadoptimizationV1ScalingPolicyUpdated            `json:"scalingPolicyUpdated,omitempty"`
+	StartupFailure             *WorkloadoptimizationV1StartupFailureEvent             `json:"startupFailure,omitempty"`
 	Surge                      *WorkloadoptimizationV1SurgeEvent                      `json:"surge,omitempty"`
 }
 
@@ -6495,6 +6540,15 @@ type WorkloadoptimizationV1EventContainer struct {
 
 // WorkloadoptimizationV1EventType EventType defines possible types for workload events.
 type WorkloadoptimizationV1EventType string
+
+// WorkloadoptimizationV1EventTypeSummary defines model for workloadoptimization.v1.EventTypeSummary.
+type WorkloadoptimizationV1EventTypeSummary struct {
+	Count   *int32   `json:"count,omitempty"`
+	Percent *float64 `json:"percent,omitempty"`
+
+	// Type EventType defines possible types for workload events.
+	Type *WorkloadoptimizationV1EventType `json:"type,omitempty"`
+}
 
 // WorkloadoptimizationV1ExternalMetricSource defines model for workloadoptimization.v1.ExternalMetricSource.
 type WorkloadoptimizationV1ExternalMetricSource struct {
@@ -6539,6 +6593,14 @@ type WorkloadoptimizationV1GetOrganizationAgentStatusesResponse struct {
 // WorkloadoptimizationV1GetWorkloadEventResponse defines model for workloadoptimization.v1.GetWorkloadEventResponse.
 type WorkloadoptimizationV1GetWorkloadEventResponse struct {
 	Event WorkloadoptimizationV1WorkloadEvent `json:"event"`
+}
+
+// WorkloadoptimizationV1GetWorkloadEventsSummaryResponse defines model for workloadoptimization.v1.GetWorkloadEventsSummaryResponse.
+type WorkloadoptimizationV1GetWorkloadEventsSummaryResponse struct {
+	Items []WorkloadoptimizationV1EventTypeSummary `json:"items"`
+
+	// TotalCount Total number of events.
+	TotalCount int32 `json:"totalCount"`
 }
 
 // WorkloadoptimizationV1GetWorkloadResponse defines model for workloadoptimization.v1.GetWorkloadResponse.
@@ -7082,6 +7144,18 @@ type WorkloadoptimizationV1PredictiveScalingSettings struct {
 	Cpu *WorkloadoptimizationV1PredictiveScaling `json:"cpu,omitempty"`
 }
 
+// WorkloadoptimizationV1RecommendationError defines model for workloadoptimization.v1.RecommendationError.
+type WorkloadoptimizationV1RecommendationError struct {
+	// Message Human-readable reason.
+	Message string `json:"message"`
+
+	// Type RecommendationErrorType explains why the recommendation has failed to apply.
+	Type WorkloadoptimizationV1RecommendationErrorType `json:"type"`
+}
+
+// WorkloadoptimizationV1RecommendationErrorType RecommendationErrorType explains why the recommendation has failed to apply.
+type WorkloadoptimizationV1RecommendationErrorType string
+
 // WorkloadoptimizationV1RecommendationEvent defines model for workloadoptimization.v1.RecommendationEvent.
 type WorkloadoptimizationV1RecommendationEvent struct {
 	// Type Defines possible options for recommendation events.
@@ -7116,6 +7190,41 @@ type WorkloadoptimizationV1RecommendationPolicies struct {
 	RolloutBehavior   *WorkloadoptimizationV1RolloutBehaviorSettings   `json:"rolloutBehavior,omitempty"`
 	Startup           *WorkloadoptimizationV1StartupSettings           `json:"startup,omitempty"`
 }
+
+// WorkloadoptimizationV1RecommendationStatus defines model for workloadoptimization.v1.RecommendationStatus.
+type WorkloadoptimizationV1RecommendationStatus struct {
+	// AppliedPods Number of pods that have the recommendation applied (deferred - any recommendation, immediate - latest).
+	AppliedPods int32 `json:"appliedPods"`
+
+	// EarliestActiveRecommendationAt When the oldest recommendation has been applied to active pods.
+	EarliestActiveRecommendationAt *time.Time                                 `json:"earliestActiveRecommendationAt"`
+	Error                          *WorkloadoptimizationV1RecommendationError `json:"error,omitempty"`
+
+	// LowConfidence Determine if it's a low confidence.
+	LowConfidence bool                                            `json:"lowConfidence"`
+	StopReason    *WorkloadoptimizationV1RecommendationStopReason `json:"stopReason,omitempty"`
+
+	// TotalPods Total number of pods for the recommendation.
+	TotalPods int32 `json:"totalPods"`
+
+	// Type RecommendationStatusType explains what is the current state of recommendations.
+	Type WorkloadoptimizationV1RecommendationStatusType `json:"type"`
+}
+
+// WorkloadoptimizationV1RecommendationStatusType RecommendationStatusType explains what is the current state of recommendations.
+type WorkloadoptimizationV1RecommendationStatusType string
+
+// WorkloadoptimizationV1RecommendationStopReason defines model for workloadoptimization.v1.RecommendationStopReason.
+type WorkloadoptimizationV1RecommendationStopReason struct {
+	// Message Human-readable reason.
+	Message string `json:"message"`
+
+	// Type RecommendationStopReasonType explains why the recommendation has been stopped for the workload.
+	Type WorkloadoptimizationV1RecommendationStopReasonType `json:"type"`
+}
+
+// WorkloadoptimizationV1RecommendationStopReasonType RecommendationStopReasonType explains why the recommendation has been stopped for the workload.
+type WorkloadoptimizationV1RecommendationStopReasonType string
 
 // WorkloadoptimizationV1RecommendedPodCountChangedEvent defines model for workloadoptimization.v1.RecommendedPodCountChangedEvent.
 type WorkloadoptimizationV1RecommendedPodCountChangedEvent struct {
@@ -7464,6 +7573,20 @@ type WorkloadoptimizationV1ScalingPolicyUpdated struct {
 // WorkloadoptimizationV1SetScalingPoliciesOrderResponse defines model for workloadoptimization.v1.SetScalingPoliciesOrderResponse.
 type WorkloadoptimizationV1SetScalingPoliciesOrderResponse = map[string]interface{}
 
+// WorkloadoptimizationV1StartupFailureContainer defines model for workloadoptimization.v1.StartupFailureContainer.
+type WorkloadoptimizationV1StartupFailureContainer struct {
+	Name string `json:"name"`
+
+	// ProbeFailureIncrease The number of times the readiness or startup probe has failed in last observation period - default last 5 minutes.
+	// For example, the value 10 means that the probe has failed 10 times in last 5 minutes.
+	ProbeFailureIncrease float64 `json:"probeFailureIncrease"`
+}
+
+// WorkloadoptimizationV1StartupFailureEvent defines model for workloadoptimization.v1.StartupFailureEvent.
+type WorkloadoptimizationV1StartupFailureEvent struct {
+	Containers []WorkloadoptimizationV1StartupFailureContainer `json:"containers"`
+}
+
 // WorkloadoptimizationV1StartupSettings defines model for workloadoptimization.v1.StartupSettings.
 type WorkloadoptimizationV1StartupSettings struct {
 	// PeriodSeconds Defines the duration (in seconds) during which elevated resource usage is expected at startup.
@@ -7625,12 +7748,16 @@ type WorkloadoptimizationV1Workload struct {
 	OrganizationId   string `json:"organizationId"`
 
 	// PodCount Pod count stores the *running* count of pods of the workload.
-	PodCount           int32                                         `json:"podCount"`
-	PredictionInsights WorkloadoptimizationV1PredictiveInsights      `json:"predictionInsights"`
-	Recommendation     *WorkloadoptimizationV1WorkloadRecommendation `json:"recommendation,omitempty"`
+	PodCount             int32                                         `json:"podCount"`
+	PredictionInsights   WorkloadoptimizationV1PredictiveInsights      `json:"predictionInsights"`
+	Recommendation       *WorkloadoptimizationV1WorkloadRecommendation `json:"recommendation,omitempty"`
+	RecommendationStatus WorkloadoptimizationV1RecommendationStatus    `json:"recommendationStatus"`
 
 	// Replicas The number of replicas the workload should have, as defined on the workload spec.
-	Replicas                   int32                                         `json:"replicas"`
+	Replicas int32 `json:"replicas"`
+
+	// ScaledPodCount Scaled Pod count stores the number of pods that have any recommendation applied, even outdated.
+	ScaledPodCount             int32                                         `json:"scaledPodCount"`
 	ScalingPolicyId            string                                        `json:"scalingPolicyId"`
 	ScalingPolicyName          string                                        `json:"scalingPolicyName"`
 	ScalingPolicyOrigin        string                                        `json:"scalingPolicyOrigin"`
@@ -7976,6 +8103,9 @@ type AllocationGroupAPIGetAllocationGroupWorkloadCostsParams struct {
 
 	// UseListingPrices Whether to use listing prices instead of actual prices for cost calculations.
 	UseListingPrices *bool `form:"useListingPrices,omitempty" json:"useListingPrices,omitempty"`
+
+	// IncludeIdleResourceCosts Whether the costs should include costs of the unallocated nodes resources, fairly distributed to workloads based on requested workload resources.
+	IncludeIdleResourceCosts *bool `form:"includeIdleResourceCosts,omitempty" json:"includeIdleResourceCosts,omitempty"`
 }
 
 // AllocationGroupAPIGetAllocationGroupWorkloadCostsParamsSortOrder defines parameters for AllocationGroupAPIGetAllocationGroupWorkloadCosts.
@@ -8696,6 +8826,20 @@ type WorkloadOptimizationAPIListWorkloadEventsParams struct {
 
 // WorkloadOptimizationAPIListWorkloadEventsParamsType defines parameters for WorkloadOptimizationAPIListWorkloadEvents.
 type WorkloadOptimizationAPIListWorkloadEventsParamsType string
+
+// WorkloadOptimizationAPIGetWorkloadEventsSummaryParams defines parameters for WorkloadOptimizationAPIGetWorkloadEventsSummary.
+type WorkloadOptimizationAPIGetWorkloadEventsSummaryParams struct {
+	FromDate          *time.Time                                                   `form:"fromDate,omitempty" json:"fromDate,omitempty"`
+	ToDate            *time.Time                                                   `form:"toDate,omitempty" json:"toDate,omitempty"`
+	WorkloadId        *string                                                      `form:"workloadId,omitempty" json:"workloadId,omitempty"`
+	WorkloadName      *string                                                      `form:"workloadName,omitempty" json:"workloadName,omitempty"`
+	WorkloadNamespace *string                                                      `form:"workloadNamespace,omitempty" json:"workloadNamespace,omitempty"`
+	WorkloadKind      *string                                                      `form:"workloadKind,omitempty" json:"workloadKind,omitempty"`
+	Type              *[]WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType `form:"type,omitempty" json:"type,omitempty"`
+}
+
+// WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType defines parameters for WorkloadOptimizationAPIGetWorkloadEventsSummary.
+type WorkloadOptimizationAPIGetWorkloadEventsSummaryParamsType string
 
 // WorkloadOptimizationAPIGetWorkloadEventParams defines parameters for WorkloadOptimizationAPIGetWorkloadEvent.
 type WorkloadOptimizationAPIGetWorkloadEventParams struct {
