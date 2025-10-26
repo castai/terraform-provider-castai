@@ -204,7 +204,7 @@ func resourceAutoscaler() *schema.Resource {
 										Optional:    true,
 										MaxItems:    1,
 										Description: "defines the node constraints that will be applied when autoscaling with Unschedulable Pods policy.",
-										Deprecated:  "`node_constraints` under `unschedulable_pods` is deprecated. Use the `constraints` field in the default `castai_node_template` resource instead. The default node template has `is_default = true`.",
+										Deprecated:  "`node_constraints` under `unschedulable_pods` is deprecated. Use the `constraints` field in the default castai_node_template resource instead. The default node template has `is_default = true`.",
 										Elem: &schema.Resource{
 											Schema: map[string]*schema.Schema{
 												FieldMinCPUCores: {
@@ -260,7 +260,7 @@ func resourceAutoscaler() *schema.Resource {
 										Type:        schema.TypeBool,
 										Optional:    true,
 										Default:     false,
-										Deprecated:  "`custom_instances_enabled` under `unschedulable_pods.node_constraints` is deprecated. Use the `custom_instances_enabled` field in the default `castai_node_template` resource instead. The default node template has `is_default = true`.",
+										Deprecated:  "`custom_instances_enabled` under `unschedulable_pods.node_constraints` is deprecated. Use the `custom_instances_enabled` field in the default castai_node_template resource instead. The default node template has `is_default = true`.",
 										Description: "enable/disable custom instances policy.",
 									},
 								},
@@ -311,28 +311,28 @@ func resourceAutoscaler() *schema.Resource {
 							Optional:    true,
 							MaxItems:    1,
 							Description: "policy defining whether autoscaler can use spot instances for provisioning additional workloads.",
-							Deprecated:  "`spot_instances` is deprecated. Configure spot instance settings using the `constraints` field in the default `castai_node_template` resource. The default node template has `is_default = true`.",
+							Deprecated:  "`spot_instances` is deprecated. Configure spot instance settings using the `constraints` field in the default castai_node_template resource. The default node template has `is_default = true`.",
 							Elem: &schema.Resource{
 								Schema: map[string]*schema.Schema{
 									FieldEnabled: {
 										Type:        schema.TypeBool,
 										Optional:    true,
 										Default:     false,
-										Deprecated:  "`enabled` under `spot_instances` is deprecated. To enable spot instances, set `constraints.spot = true` in the default `castai_node_template` resource. The default node template has `is_default = true`.",
+										Deprecated:  "`enabled` under `spot_instances` is deprecated. To enable spot instances, set `constraints.spot = true` in the default castai_node_template resource. The default node template has `is_default = true`.",
 										Description: "enable/disable spot instances policy.",
 									},
 									FieldMaxReclaimRate: {
 										Type:        schema.TypeInt,
 										Optional:    true,
 										Default:     0,
-										Deprecated:  "`max_reclaim_rate` under `spot_instances` is deprecated. This field has no direct equivalent in the `castai_node_template` resource, and setting it will have no effect.",
+										Deprecated:  "`max_reclaim_rate` under `spot_instances` is deprecated. This field has no direct equivalent in the castai_node_template resource, and setting it will have no effect.",
 										Description: "max allowed reclaim rate when choosing spot instance type. E.g. if the value is 10%, instance types having 10% or higher reclaim rate will not be considered. Set to zero to use all instance types regardless of reclaim rate.",
 									},
 									FieldSpotBackups: {
 										Type:        schema.TypeList,
 										Optional:    true,
 										MaxItems:    1,
-										Deprecated:  "`spot_backups` under `spot_instances` is deprecated. Configure spot backup behavior using `constraints.use_spot_fallbacks` and `constraints.fallback_restore_rate_seconds` in the default `castai_node_template` resource. The default node template has `is_default = true`.",
+										Deprecated:  "`spot_backups` under `spot_instances` is deprecated. Configure spot backup behavior using `constraints.use_spot_fallbacks` and `constraints.fallback_restore_rate_seconds` in the default castai_node_template resource. The default node template has `is_default = true`.",
 										Description: "policy defining whether autoscaler can use spot backups instead of spot instances when spot instances are not available.",
 										Elem: &schema.Resource{
 											Schema: map[string]*schema.Schema{
@@ -356,14 +356,14 @@ func resourceAutoscaler() *schema.Resource {
 										Type:        schema.TypeBool,
 										Optional:    true,
 										Default:     false,
-										Deprecated:  "`spot_diversity_enabled` is deprecated. Use the `enable_spot_diversity` field within `castai_node_template.constraints` in the default `castai_node_template` resource. The default node template has `is_default = true`.",
+										Deprecated:  "`spot_diversity_enabled` is deprecated. Use the `enable_spot_diversity` field within `castai_node_template.constraints` in the default castai_node_template resource. The default node template has `is_default = true`.",
 										Description: "enable/disable spot diversity policy. When enabled, autoscaler will try to balance between diverse and cost optimal instance types.",
 									},
 									FieldSpotDiversityPriceIncreaseLimit: {
 										Type:             schema.TypeInt,
 										Optional:         true,
 										Default:          20,
-										Deprecated:       "`spot_diversity_price_increase_limit` is deprecated. Use `spot_diversity_price_increase_limit_percent` within `castai_node_template.constraints` in the default `castai_node_template` resource. The default node template has `is_default = true`.",
+										Deprecated:       "`spot_diversity_price_increase_limit` is deprecated. Use `spot_diversity_price_increase_limit_percent` within `castai_node_template.constraints` in the default castai_node_template resource. The default node template has `is_default = true`.",
 										Description:      "allowed node configuration price increase when diversifying instance types. E.g. if the value is 10%, then the overall price of diversified instance types can be 10% higher than the price of the optimal configuration.",
 										ValidateDiagFunc: validation.ToDiagFunc(validation.IntAtLeast(1)),
 									},
@@ -372,7 +372,7 @@ func resourceAutoscaler() *schema.Resource {
 										Optional:    true,
 										MaxItems:    1,
 										Description: "configure the handling of SPOT interruption predictions.",
-										Deprecated:  "`spot_interruption_predictions` is deprecated. Use the `spot_interruption_predictions_enabled` and `spot_interruption_predictions_type` fields in the default `castai_node_template` resource. The default node template has `is_default = true`.",
+										Deprecated:  "`spot_interruption_predictions` is deprecated. Use the `spot_interruption_predictions_enabled` and `spot_interruption_predictions_type` fields in the default castai_node_template resource. The default node template has `is_default = true`.",
 										Elem: &schema.Resource{
 											Schema: map[string]*schema.Schema{
 												FieldEnabled: {
