@@ -828,6 +828,9 @@ type ClientInterface interface {
 	// WorkloadOptimizationAPIGetWorkloadsSummaryMetrics request
 	WorkloadOptimizationAPIGetWorkloadsSummaryMetrics(ctx context.Context, clusterId string, params *WorkloadOptimizationAPIGetWorkloadsSummaryMetricsParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// WorkloadOptimizationAPIGetWorkloadFilters request
+	WorkloadOptimizationAPIGetWorkloadFilters(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// WorkloadOptimizationAPIGetWorkload request
 	WorkloadOptimizationAPIGetWorkload(ctx context.Context, clusterId string, workloadId string, params *WorkloadOptimizationAPIGetWorkloadParams, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -4080,6 +4083,18 @@ func (c *Client) WorkloadOptimizationAPIGetWorkloadsSummary(ctx context.Context,
 
 func (c *Client) WorkloadOptimizationAPIGetWorkloadsSummaryMetrics(ctx context.Context, clusterId string, params *WorkloadOptimizationAPIGetWorkloadsSummaryMetricsParams, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewWorkloadOptimizationAPIGetWorkloadsSummaryMetricsRequest(c.Server, clusterId, params)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) WorkloadOptimizationAPIGetWorkloadFilters(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewWorkloadOptimizationAPIGetWorkloadFiltersRequest(c.Server, clusterId)
 	if err != nil {
 		return nil, err
 	}
@@ -16193,6 +16208,40 @@ func NewWorkloadOptimizationAPIGetWorkloadsSummaryMetricsRequest(server string, 
 	return req, nil
 }
 
+// NewWorkloadOptimizationAPIGetWorkloadFiltersRequest generates requests for WorkloadOptimizationAPIGetWorkloadFilters
+func NewWorkloadOptimizationAPIGetWorkloadFiltersRequest(server string, clusterId string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "clusterId", runtime.ParamLocationPath, clusterId)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/v1/workload-autoscaling/clusters/%s/workloads/filters", pathParam0)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("GET", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 // NewWorkloadOptimizationAPIGetWorkloadRequest generates requests for WorkloadOptimizationAPIGetWorkload
 func NewWorkloadOptimizationAPIGetWorkloadRequest(server string, clusterId string, workloadId string, params *WorkloadOptimizationAPIGetWorkloadParams) (*http.Request, error) {
 	var err error
@@ -17529,6 +17578,9 @@ type ClientWithResponsesInterface interface {
 
 	// WorkloadOptimizationAPIGetWorkloadsSummaryMetrics request
 	WorkloadOptimizationAPIGetWorkloadsSummaryMetricsWithResponse(ctx context.Context, clusterId string, params *WorkloadOptimizationAPIGetWorkloadsSummaryMetricsParams) (*WorkloadOptimizationAPIGetWorkloadsSummaryMetricsResponse, error)
+
+	// WorkloadOptimizationAPIGetWorkloadFilters request
+	WorkloadOptimizationAPIGetWorkloadFiltersWithResponse(ctx context.Context, clusterId string) (*WorkloadOptimizationAPIGetWorkloadFiltersResponse, error)
 
 	// WorkloadOptimizationAPIGetWorkload request
 	WorkloadOptimizationAPIGetWorkloadWithResponse(ctx context.Context, clusterId string, workloadId string, params *WorkloadOptimizationAPIGetWorkloadParams) (*WorkloadOptimizationAPIGetWorkloadResponse, error)
@@ -23571,6 +23623,36 @@ func (r WorkloadOptimizationAPIGetWorkloadsSummaryMetricsResponse) GetBody() []b
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
+type WorkloadOptimizationAPIGetWorkloadFiltersResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSON200      *WorkloadoptimizationV1GetWorkloadFiltersResponse
+}
+
+// Status returns HTTPResponse.Status
+func (r WorkloadOptimizationAPIGetWorkloadFiltersResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r WorkloadOptimizationAPIGetWorkloadFiltersResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r WorkloadOptimizationAPIGetWorkloadFiltersResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
 type WorkloadOptimizationAPIGetWorkloadResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -26190,6 +26272,15 @@ func (c *ClientWithResponses) WorkloadOptimizationAPIGetWorkloadsSummaryMetricsW
 		return nil, err
 	}
 	return ParseWorkloadOptimizationAPIGetWorkloadsSummaryMetricsResponse(rsp)
+}
+
+// WorkloadOptimizationAPIGetWorkloadFiltersWithResponse request returning *WorkloadOptimizationAPIGetWorkloadFiltersResponse
+func (c *ClientWithResponses) WorkloadOptimizationAPIGetWorkloadFiltersWithResponse(ctx context.Context, clusterId string) (*WorkloadOptimizationAPIGetWorkloadFiltersResponse, error) {
+	rsp, err := c.WorkloadOptimizationAPIGetWorkloadFilters(ctx, clusterId)
+	if err != nil {
+		return nil, err
+	}
+	return ParseWorkloadOptimizationAPIGetWorkloadFiltersResponse(rsp)
 }
 
 // WorkloadOptimizationAPIGetWorkloadWithResponse request returning *WorkloadOptimizationAPIGetWorkloadResponse
@@ -31458,6 +31549,32 @@ func ParseWorkloadOptimizationAPIGetWorkloadsSummaryMetricsResponse(rsp *http.Re
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest WorkloadoptimizationV1GetWorkloadsSummaryMetricsResponse
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSON200 = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseWorkloadOptimizationAPIGetWorkloadFiltersResponse parses an HTTP response from a WorkloadOptimizationAPIGetWorkloadFiltersWithResponse call
+func ParseWorkloadOptimizationAPIGetWorkloadFiltersResponse(rsp *http.Response) (*WorkloadOptimizationAPIGetWorkloadFiltersResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &WorkloadOptimizationAPIGetWorkloadFiltersResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
+		var dest WorkloadoptimizationV1GetWorkloadFiltersResponse
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
 			return nil, err
 		}
