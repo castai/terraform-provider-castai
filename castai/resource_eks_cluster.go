@@ -61,7 +61,7 @@ func resourceEKSCluster() *schema.Resource {
 				Type:     schema.TypeString,
 				Optional: true,
 				Description: "AWS IAM role ARN that will be assumed by CAST AI user. " +
-					"This role should allow `sts:AssumeRole` action for CAST AI user that can be retrieved using `castai_eks_user_arn` data source",
+					"This role should allow `sts:AssumeRole` action for CAST AI user.",
 			},
 			FieldClusterToken: {
 				Type:        schema.TypeString,
