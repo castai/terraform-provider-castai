@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/samber/lo"
-	"golang.org/x/exp/slices"
+	"slices"
 
 	"github.com/castai/terraform-provider-castai/castai/reservations"
 	"github.com/castai/terraform-provider-castai/castai/sdk"
@@ -588,20 +588,20 @@ func sortCommitmentResources[R commitmentResource](toSort, targetOrder []R) {
 		orderMap[value.getIDInCloud()] = index
 	}
 
-	slices.SortStableFunc(toSort, func(a, b R) bool {
+	slices.SortStableFunc(toSort, func(a, b R) int {
 		indexI, foundI := orderMap[a.getIDInCloud()]
 		indexJ, foundJ := orderMap[b.getIDInCloud()]
 
 		if !foundI && !foundJ {
-			return a.getIDInCloud() < b.getIDInCloud()
+			return strings.Compare(a.getIDInCloud(), b.getIDInCloud())
 		}
 		if !foundI {
-			return true
+			return -1
 		}
 		if !foundJ {
-			return false
+			return 1
 		}
-		return indexI < indexJ
+		return indexI - indexJ
 	})
 }
 
