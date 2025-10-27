@@ -5361,11 +5361,14 @@ type NodetemplatesV1TemplateConstraints struct {
 
 	// IsGpuOnly This template is gpu only. Setting this to true, will result in only instances with GPUs being considered.
 	// In addition, this ensures that all of the added instances for this template won't have any nvidia taints.
-	IsGpuOnly *bool  `json:"isGpuOnly"`
-	MaxCpu    *int32 `json:"maxCpu"`
-	MaxMemory *int32 `json:"maxMemory"`
-	MinCpu    *int32 `json:"minCpu"`
-	MinMemory *int32 `json:"minMemory"`
+	IsGpuOnly *bool `json:"isGpuOnly"`
+
+	// LifecycleTaintsDisabled Whether lifecycle taints should be applied.
+	LifecycleTaintsDisabled *bool  `json:"lifecycleTaintsDisabled"`
+	MaxCpu                  *int32 `json:"maxCpu"`
+	MaxMemory               *int32 `json:"maxMemory"`
+	MinCpu                  *int32 `json:"minCpu"`
+	MinMemory               *int32 `json:"minMemory"`
 
 	// OnDemand Should include on-demand instances in the considered pool.
 	OnDemand       *bool                                             `json:"onDemand"`
