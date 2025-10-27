@@ -1,6 +1,9 @@
 .idea/
 .vscode/
 
+# Claude Code context file
+CLAUDE.md
+
 # built binary
 terraform-provider-castai
 
