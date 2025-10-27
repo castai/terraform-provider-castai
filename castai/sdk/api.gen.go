@@ -1378,10 +1378,19 @@ type CastaiInventoryV1beta1BatchUpdateCommitmentsResponse struct {
 	Commitments *[]CastaiInventoryV1beta1Commitment `json:"commitments,omitempty"`
 }
 
+// CastaiInventoryV1beta1BlockStorageInfo BlockStorageInfo contains details about block storage capabilities of the instance type.
+type CastaiInventoryV1beta1BlockStorageInfo struct {
+	// MaxBandwidthMbps Specifies the maximum bandwidth for block storage. Currently only supported for AWS EBS-optimized instances.
+	MaxBandwidthMbps *int32 `json:"maxBandwidthMbps"`
+}
+
 // CastaiInventoryV1beta1CPUInfo defines model for castai.inventory.v1beta1.CPUInfo.
 type CastaiInventoryV1beta1CPUInfo struct {
 	// DefaultCores Specifies the default number of physical cores for the instance type. Only for AWS.
 	DefaultCores *int32 `json:"defaultCores,omitempty"`
+
+	// SustainedClockSpeedMhz Specifies the sustained CPU clock speed. Only supported for AWS.
+	SustainedClockSpeedMhz *int32 `json:"sustainedClockSpeedMhz"`
 
 	// ValidThreadsPerCore Specifies the valid threads per core for the instance type. Only for AWS.
 	ValidThreadsPerCore *[]int32 `json:"validThreadsPerCore,omitempty"`
@@ -1712,13 +1721,16 @@ type CastaiInventoryV1beta1InstanceType struct {
 	Architecture     *string                                  `json:"architecture,omitempty"`
 
 	// AttachableDisks Contains a list of possible attachable disk types for the given instance types. Currently supported for GCP and Azure.
-	AttachableDisks  *[]CastaiInventoryV1beta1AttachableDisk         `json:"attachableDisks,omitempty"`
-	Availability     *CastaiInventoryV1beta1InstanceTypeAvailability `json:"availability,omitempty"`
-	BareMetal        *bool                                           `json:"bareMetal,omitempty"`
-	Burstable        *bool                                           `json:"burstable,omitempty"`
-	CastChoice       *bool                                           `json:"castChoice,omitempty"`
-	ComputeOptimized *bool                                           `json:"computeOptimized,omitempty"`
-	CpuInfo          *CastaiInventoryV1beta1CPUInfo                  `json:"cpuInfo,omitempty"`
+	AttachableDisks *[]CastaiInventoryV1beta1AttachableDisk         `json:"attachableDisks,omitempty"`
+	Availability    *CastaiInventoryV1beta1InstanceTypeAvailability `json:"availability,omitempty"`
+	BareMetal       *bool                                           `json:"bareMetal,omitempty"`
+
+	// BlockStorageInfo BlockStorageInfo contains details about block storage capabilities of the instance type.
+	BlockStorageInfo *CastaiInventoryV1beta1BlockStorageInfo `json:"blockStorageInfo,omitempty"`
+	Burstable        *bool                                   `json:"burstable,omitempty"`
+	CastChoice       *bool                                   `json:"castChoice,omitempty"`
+	ComputeOptimized *bool                                   `json:"computeOptimized,omitempty"`
+	CpuInfo          *CastaiInventoryV1beta1CPUInfo          `json:"cpuInfo,omitempty"`
 
 	// CpuManufacturers Describes the manufacturers of the CPUs the instance type can be equipped with.
 	CpuManufacturers *[]CastaiInventoryV1beta1InstanceTypeCPUManufacturer `json:"cpuManufacturers,omitempty"`
@@ -1731,6 +1743,9 @@ type CastaiInventoryV1beta1InstanceType struct {
 	CustomInstance  *bool                                          `json:"customInstance,omitempty"`
 	FlexibilityInfo *CastaiInventoryV1beta1InstanceFlexibilityInfo `json:"flexibilityInfo,omitempty"`
 	GpuInfo         *CastaiInventoryV1beta1GPUInfo                 `json:"gpuInfo,omitempty"`
+
+	// Hypervisor Specifies the hypervisor used for the instance type. Currently supported only for AWS.
+	Hypervisor *string `json:"hypervisor"`
 
 	// Id ID of the instance type.
 	Id *string `json:"id,omitempty"`
@@ -1892,6 +1907,9 @@ type CastaiInventoryV1beta1NetworkInfo struct {
 
 	// EfaSupported Indicates if the AWS instance type supports EFA (Elastic Fabric Adapter).
 	EfaSupported *bool `json:"efaSupported,omitempty"`
+
+	// EncryptionInTransitSupported Indicates whether the instance type automatically encrypts in-transit traffic between instances. AWS only.
+	EncryptionInTransitSupported *bool `json:"encryptionInTransitSupported"`
 
 	// Ipv4AddressesPerInterface The maximum number of IPv4 addresses per network interface.
 	Ipv4AddressesPerInterface *int32 `json:"ipv4AddressesPerInterface,omitempty"`
@@ -6603,6 +6621,15 @@ type WorkloadoptimizationV1GetWorkloadEventsSummaryResponse struct {
 	TotalCount int32 `json:"totalCount"`
 }
 
+// WorkloadoptimizationV1GetWorkloadFiltersResponse defines model for workloadoptimization.v1.GetWorkloadFiltersResponse.
+type WorkloadoptimizationV1GetWorkloadFiltersResponse struct {
+	Kinds              []string `json:"kinds"`
+	Namespaces         []string `json:"namespaces"`
+	ScalingPolicyNames []string `json:"scalingPolicyNames"`
+	WorkloadIds        []string `json:"workloadIds"`
+	WorkloadNames      []string `json:"workloadNames"`
+}
+
 // WorkloadoptimizationV1GetWorkloadResponse defines model for workloadoptimization.v1.GetWorkloadResponse.
 type WorkloadoptimizationV1GetWorkloadResponse struct {
 	Metrics *WorkloadoptimizationV1WorkloadMetrics `json:"metrics,omitempty"`
@@ -6797,6 +6824,10 @@ type WorkloadoptimizationV1HPASpec struct {
 
 // WorkloadoptimizationV1HorizontalOverrides defines model for workloadoptimization.v1.HorizontalOverrides.
 type WorkloadoptimizationV1HorizontalOverrides struct {
+	// Behavior HorizontalPodAutoscalerBehavior configures the scaling behavior of the target
+	// in both Up and Down directions (scaleUp and scaleDown fields respectively).
+	Behavior *WorkloadoptimizationV1HorizontalPodAutoscalerBehavior `json:"behavior,omitempty"`
+
 	// ManagementOption Defines possible options for workload management.
 	// READ_ONLY - workload watched (metrics collected), but no actions may be performed by CAST AI.
 	// MANAGED - workload watched (metrics collected), CAST AI may perform actions on the workload.
@@ -6804,6 +6835,9 @@ type WorkloadoptimizationV1HorizontalOverrides struct {
 
 	// MaxReplicas Max replicas a workload can have.
 	MaxReplicas int32 `json:"maxReplicas"`
+
+	// Metrics Metrics list which is scaled on.
+	Metrics *[]WorkloadoptimizationV1MetricSpec `json:"metrics,omitempty"`
 
 	// MinReplicas Min replicas a workload can have.
 	MinReplicas int32                                   `json:"minReplicas"`
