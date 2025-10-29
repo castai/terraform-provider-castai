@@ -661,6 +661,27 @@ const (
 	SCALINGPOLICYSELECTUNSPECIFIED WorkloadoptimizationV1ScalingPolicySelect = "SCALING_POLICY_SELECT_UNSPECIFIED"
 )
 
+// Defines values for WorkloadoptimizationV1SystemOverrideOrigin.
+const (
+	SYSTEMOVERRIDEORIGINCONTINUOUSOOMKILLED WorkloadoptimizationV1SystemOverrideOrigin = "SYSTEM_OVERRIDE_ORIGIN_CONTINUOUS_OOM_KILLED"
+	SYSTEMOVERRIDEORIGINUNSPECIFIED         WorkloadoptimizationV1SystemOverrideOrigin = "SYSTEM_OVERRIDE_ORIGIN_UNSPECIFIED"
+)
+
+// Defines values for WorkloadoptimizationV1SystemOverrideResetOrigin.
+const (
+	SYSTEMOVERRIDERESETORIGINANNOTATIONSOFF WorkloadoptimizationV1SystemOverrideResetOrigin = "SYSTEM_OVERRIDE_RESET_ORIGIN_ANNOTATIONS_OFF"
+	SYSTEMOVERRIDERESETORIGINAPICALL        WorkloadoptimizationV1SystemOverrideResetOrigin = "SYSTEM_OVERRIDE_RESET_ORIGIN_API_CALL"
+	SYSTEMOVERRIDERESETORIGINEXPIRED        WorkloadoptimizationV1SystemOverrideResetOrigin = "SYSTEM_OVERRIDE_RESET_ORIGIN_EXPIRED"
+	SYSTEMOVERRIDERESETORIGINUNSPECIFIED    WorkloadoptimizationV1SystemOverrideResetOrigin = "SYSTEM_OVERRIDE_RESET_ORIGIN_UNSPECIFIED"
+)
+
+// Defines values for WorkloadoptimizationV1SystemOverrideTarget.
+const (
+	SYSTEMOVERRIDETARGETALL                  WorkloadoptimizationV1SystemOverrideTarget = "SYSTEM_OVERRIDE_TARGET_ALL"
+	SYSTEMOVERRIDETARGETUNSPECIFIED          WorkloadoptimizationV1SystemOverrideTarget = "SYSTEM_OVERRIDE_TARGET_UNSPECIFIED"
+	SYSTEMOVERRIDETARGETVERTICALOPTIMIZATION WorkloadoptimizationV1SystemOverrideTarget = "SYSTEM_OVERRIDE_TARGET_VERTICAL_OPTIMIZATION"
+)
+
 // Defines values for CommitmentsAPIGetCommitmentUsageHistoryParamsAggregationInterval.
 const (
 	AGGREGATIONINTERVALUNSPECIFIED CommitmentsAPIGetCommitmentUsageHistoryParamsAggregationInterval = "AGGREGATION_INTERVAL_UNSPECIFIED"
@@ -5145,6 +5166,9 @@ type NodetemplatesV1AvailableInstanceType struct {
 	Os                     *NodetemplatesV1AvailableInstanceTypeOs                     `json:"os,omitempty"`
 	Region                 *string                                                     `json:"region,omitempty"`
 	StorageOptimizedOption *NodetemplatesV1AvailableInstanceTypeStorageOptimizedOption `json:"storageOptimizedOption,omitempty"`
+
+	// Zone Zone identifier.
+	Zone *string `json:"zone,omitempty"`
 }
 
 // NodetemplatesV1AvailableInstanceTypeGPUDevice defines model for nodetemplates.v1.AvailableInstanceType.GPUDevice.
@@ -6551,6 +6575,12 @@ type WorkloadoptimizationV1Event struct {
 	ScalingPolicyUpdated       *WorkloadoptimizationV1ScalingPolicyUpdated            `json:"scalingPolicyUpdated,omitempty"`
 	StartupFailure             *WorkloadoptimizationV1StartupFailureEvent             `json:"startupFailure,omitempty"`
 	Surge                      *WorkloadoptimizationV1SurgeEvent                      `json:"surge,omitempty"`
+
+	// SystemOverrideReset SystemOverrideResetEvent is emitted when a system override on a workload is deactivated.
+	SystemOverrideReset *WorkloadoptimizationV1SystemOverrideResetEvent `json:"systemOverrideReset,omitempty"`
+
+	// SystemOverrideTriggered SystemOverrideTriggeredEvent is emitted when CAST AI activates a system override on a workload.
+	SystemOverrideTriggered *WorkloadoptimizationV1SystemOverrideTriggeredEvent `json:"systemOverrideTriggered,omitempty"`
 }
 
 // WorkloadoptimizationV1EventContainer defines model for workloadoptimization.v1.EventContainer.
@@ -7644,6 +7674,54 @@ type WorkloadoptimizationV1SurgeEvent struct {
 	Containers []WorkloadoptimizationV1SurgeContainer `json:"containers"`
 }
 
+// WorkloadoptimizationV1SystemOverrideOrigin SystemOverrideOrigin defines the reason why a system override was triggered.
+//
+//   - SYSTEM_OVERRIDE_ORIGIN_CONTINUOUS_OOM_KILLED: Override triggered due to continuous OOM kills after multiple scaling attempts.
+type WorkloadoptimizationV1SystemOverrideOrigin string
+
+// WorkloadoptimizationV1SystemOverrideResetEvent SystemOverrideResetEvent is emitted when a system override on a workload is deactivated.
+type WorkloadoptimizationV1SystemOverrideResetEvent struct {
+	// Origin SystemOverrideResetOrigin defines the reason why a system override was reset.
+	//
+	//  - SYSTEM_OVERRIDE_RESET_ORIGIN_API_CALL: Override reset via API call by user or system.
+	//  - SYSTEM_OVERRIDE_RESET_ORIGIN_EXPIRED: Override reset due to expiration after a configured time period.
+	//  - SYSTEM_OVERRIDE_RESET_ORIGIN_ANNOTATIONS_OFF: Override reset because workload is no longer managed by CAST AI annotations.
+	Origin WorkloadoptimizationV1SystemOverrideResetOrigin `json:"origin"`
+
+	// Target SystemOverrideTarget defines which workload optimization features are affected by the system override.
+	//
+	//  - SYSTEM_OVERRIDE_TARGET_ALL: Affects all system overrides properties.
+	//  - SYSTEM_OVERRIDE_TARGET_VERTICAL_OPTIMIZATION: Affects only vertical optimization (resource recommendations).
+	Target WorkloadoptimizationV1SystemOverrideTarget `json:"target"`
+}
+
+// WorkloadoptimizationV1SystemOverrideResetOrigin SystemOverrideResetOrigin defines the reason why a system override was reset.
+//
+//   - SYSTEM_OVERRIDE_RESET_ORIGIN_API_CALL: Override reset via API call by user or system.
+//   - SYSTEM_OVERRIDE_RESET_ORIGIN_EXPIRED: Override reset due to expiration after a configured time period.
+//   - SYSTEM_OVERRIDE_RESET_ORIGIN_ANNOTATIONS_OFF: Override reset because workload is no longer managed by CAST AI annotations.
+type WorkloadoptimizationV1SystemOverrideResetOrigin string
+
+// WorkloadoptimizationV1SystemOverrideTarget SystemOverrideTarget defines which workload optimization features are affected by the system override.
+//
+//   - SYSTEM_OVERRIDE_TARGET_ALL: Affects all system overrides properties.
+//   - SYSTEM_OVERRIDE_TARGET_VERTICAL_OPTIMIZATION: Affects only vertical optimization (resource recommendations).
+type WorkloadoptimizationV1SystemOverrideTarget string
+
+// WorkloadoptimizationV1SystemOverrideTriggeredEvent SystemOverrideTriggeredEvent is emitted when CAST AI activates a system override on a workload.
+type WorkloadoptimizationV1SystemOverrideTriggeredEvent struct {
+	// Origin SystemOverrideOrigin defines the reason why a system override was triggered.
+	//
+	//  - SYSTEM_OVERRIDE_ORIGIN_CONTINUOUS_OOM_KILLED: Override triggered due to continuous OOM kills after multiple scaling attempts.
+	Origin WorkloadoptimizationV1SystemOverrideOrigin `json:"origin"`
+
+	// Target SystemOverrideTarget defines which workload optimization features are affected by the system override.
+	//
+	//  - SYSTEM_OVERRIDE_TARGET_ALL: Affects all system overrides properties.
+	//  - SYSTEM_OVERRIDE_TARGET_VERTICAL_OPTIMIZATION: Affects only vertical optimization (resource recommendations).
+	Target WorkloadoptimizationV1SystemOverrideTarget `json:"target"`
+}
+
 // WorkloadoptimizationV1TimeSeriesMetric defines model for workloadoptimization.v1.TimeSeriesMetric.
 type WorkloadoptimizationV1TimeSeriesMetric struct {
 	Timestamp time.Time `json:"timestamp"`
@@ -8199,6 +8277,12 @@ type UsersAPIListInvitationsParams struct {
 	// PageCursor Cursor that defines token indicating where to start the next page.
 	// Empty value indicates to start from beginning of the dataset.
 	PageCursor *string `form:"page.cursor,omitempty" json:"page.cursor,omitempty"`
+}
+
+// NodeTemplatesAPIFilterInstanceTypesParams defines parameters for NodeTemplatesAPIFilterInstanceTypes.
+type NodeTemplatesAPIFilterInstanceTypesParams struct {
+	// DisableInstanceTypeDeduplication Disabled legacy behaviour of deduplicating instance types in the region.
+	DisableInstanceTypeDeduplication *bool `form:"disableInstanceTypeDeduplication,omitempty" json:"disableInstanceTypeDeduplication,omitempty"`
 }
 
 // NodeTemplatesAPIListNodeTemplatesParams defines parameters for NodeTemplatesAPIListNodeTemplates.
