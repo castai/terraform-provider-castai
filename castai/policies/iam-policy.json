@@ -13,6 +13,17 @@
       }
     },
     {
+      "Sid": "PassRoleEKS",
+      "Action": "iam:PassRole",
+      "Effect": "Allow",
+      "Resource": "arn:{{ .Partition }}:iam::*:role/*",
+      "Condition": {
+        "StringEquals": {
+          "iam:PassedToService": "eks.amazonaws.com"
+        }
+      }
+    },
+    {
       "Sid": "NonResourcePermissions",
       "Effect": "Allow",
       "Action": [

@@ -26,3 +26,4 @@ e2e/**/local.auto.tfvars
 .env
 terraform.tfstate
 .DS_Store
+.tofu.rc
