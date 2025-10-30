@@ -2476,9 +2476,9 @@ func (mr *MockClientInterfaceMockRecorder) NodeTemplatesAPIDeleteNodeTemplate(ct
 }
 
 // NodeTemplatesAPIFilterInstanceTypes mocks base method.
-func (m *MockClientInterface) NodeTemplatesAPIFilterInstanceTypes(ctx context.Context, clusterId string, body sdk.NodeTemplatesAPIFilterInstanceTypesJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+func (m *MockClientInterface) NodeTemplatesAPIFilterInstanceTypes(ctx context.Context, clusterId string, params *sdk.NodeTemplatesAPIFilterInstanceTypesParams, body sdk.NodeTemplatesAPIFilterInstanceTypesJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, clusterId, body}
+	varargs := []interface{}{ctx, clusterId, params, body}
 	for _, a := range reqEditors {
 		varargs = append(varargs, a)
 	}
@@ -2489,16 +2489,16 @@ func (m *MockClientInterface) NodeTemplatesAPIFilterInstanceTypes(ctx context.Co
 }
 
 // NodeTemplatesAPIFilterInstanceTypes indicates an expected call of NodeTemplatesAPIFilterInstanceTypes.
-func (mr *MockClientInterfaceMockRecorder) NodeTemplatesAPIFilterInstanceTypes(ctx, clusterId, body interface{}, reqEditors ...interface{}) *gomock.Call {
+func (mr *MockClientInterfaceMockRecorder) NodeTemplatesAPIFilterInstanceTypes(ctx, clusterId, params, body interface{}, reqEditors ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, clusterId, body}, reqEditors...)
+	varargs := append([]interface{}{ctx, clusterId, params, body}, reqEditors...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NodeTemplatesAPIFilterInstanceTypes", reflect.TypeOf((*MockClientInterface)(nil).NodeTemplatesAPIFilterInstanceTypes), varargs...)
 }
 
 // NodeTemplatesAPIFilterInstanceTypesWithBody mocks base method.
-func (m *MockClientInterface) NodeTemplatesAPIFilterInstanceTypesWithBody(ctx context.Context, clusterId, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+func (m *MockClientInterface) NodeTemplatesAPIFilterInstanceTypesWithBody(ctx context.Context, clusterId string, params *sdk.NodeTemplatesAPIFilterInstanceTypesParams, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, clusterId, contentType, body}
+	varargs := []interface{}{ctx, clusterId, params, contentType, body}
 	for _, a := range reqEditors {
 		varargs = append(varargs, a)
 	}
@@ -2509,9 +2509,9 @@ func (m *MockClientInterface) NodeTemplatesAPIFilterInstanceTypesWithBody(ctx co
 }
 
 // NodeTemplatesAPIFilterInstanceTypesWithBody indicates an expected call of NodeTemplatesAPIFilterInstanceTypesWithBody.
-func (mr *MockClientInterfaceMockRecorder) NodeTemplatesAPIFilterInstanceTypesWithBody(ctx, clusterId, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+func (mr *MockClientInterfaceMockRecorder) NodeTemplatesAPIFilterInstanceTypesWithBody(ctx, clusterId, params, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, clusterId, contentType, body}, reqEditors...)
+	varargs := append([]interface{}{ctx, clusterId, params, contentType, body}, reqEditors...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NodeTemplatesAPIFilterInstanceTypesWithBody", reflect.TypeOf((*MockClientInterface)(nil).NodeTemplatesAPIFilterInstanceTypesWithBody), varargs...)
 }
 
@@ -9939,9 +9939,9 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) NodeTemplatesAPIDeleteNo
 }
 
 // NodeTemplatesAPIFilterInstanceTypes mocks base method.
-func (m *MockClientWithResponsesInterface) NodeTemplatesAPIFilterInstanceTypes(ctx context.Context, clusterId string, body sdk.NodeTemplatesAPIFilterInstanceTypesJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+func (m *MockClientWithResponsesInterface) NodeTemplatesAPIFilterInstanceTypes(ctx context.Context, clusterId string, params *sdk.NodeTemplatesAPIFilterInstanceTypesParams, body sdk.NodeTemplatesAPIFilterInstanceTypesJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, clusterId, body}
+	varargs := []interface{}{ctx, clusterId, params, body}
 	for _, a := range reqEditors {
 		varargs = append(varargs, a)
 	}
@@ -9952,16 +9952,16 @@ func (m *MockClientWithResponsesInterface) NodeTemplatesAPIFilterInstanceTypes(c
 }
 
 // NodeTemplatesAPIFilterInstanceTypes indicates an expected call of NodeTemplatesAPIFilterInstanceTypes.
-func (mr *MockClientWithResponsesInterfaceMockRecorder) NodeTemplatesAPIFilterInstanceTypes(ctx, clusterId, body interface{}, reqEditors ...interface{}) *gomock.Call {
+func (mr *MockClientWithResponsesInterfaceMockRecorder) NodeTemplatesAPIFilterInstanceTypes(ctx, clusterId, params, body interface{}, reqEditors ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, clusterId, body}, reqEditors...)
+	varargs := append([]interface{}{ctx, clusterId, params, body}, reqEditors...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NodeTemplatesAPIFilterInstanceTypes", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).NodeTemplatesAPIFilterInstanceTypes), varargs...)
 }
 
 // NodeTemplatesAPIFilterInstanceTypesWithBody mocks base method.
-func (m *MockClientWithResponsesInterface) NodeTemplatesAPIFilterInstanceTypesWithBody(ctx context.Context, clusterId, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+func (m *MockClientWithResponsesInterface) NodeTemplatesAPIFilterInstanceTypesWithBody(ctx context.Context, clusterId string, params *sdk.NodeTemplatesAPIFilterInstanceTypesParams, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, clusterId, contentType, body}
+	varargs := []interface{}{ctx, clusterId, params, contentType, body}
 	for _, a := range reqEditors {
 		varargs = append(varargs, a)
 	}
@@ -9972,40 +9972,40 @@ func (m *MockClientWithResponsesInterface) NodeTemplatesAPIFilterInstanceTypesWi
 }
 
 // NodeTemplatesAPIFilterInstanceTypesWithBody indicates an expected call of NodeTemplatesAPIFilterInstanceTypesWithBody.
-func (mr *MockClientWithResponsesInterfaceMockRecorder) NodeTemplatesAPIFilterInstanceTypesWithBody(ctx, clusterId, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+func (mr *MockClientWithResponsesInterfaceMockRecorder) NodeTemplatesAPIFilterInstanceTypesWithBody(ctx, clusterId, params, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, clusterId, contentType, body}, reqEditors...)
+	varargs := append([]interface{}{ctx, clusterId, params, contentType, body}, reqEditors...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NodeTemplatesAPIFilterInstanceTypesWithBody", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).NodeTemplatesAPIFilterInstanceTypesWithBody), varargs...)
 }
 
 // NodeTemplatesAPIFilterInstanceTypesWithBodyWithResponse mocks base method.
-func (m *MockClientWithResponsesInterface) NodeTemplatesAPIFilterInstanceTypesWithBodyWithResponse(ctx context.Context, clusterId, contentType string, body io.Reader) (*sdk.NodeTemplatesAPIFilterInstanceTypesResponse, error) {
+func (m *MockClientWithResponsesInterface) NodeTemplatesAPIFilterInstanceTypesWithBodyWithResponse(ctx context.Context, clusterId string, params *sdk.NodeTemplatesAPIFilterInstanceTypesParams, contentType string, body io.Reader) (*sdk.NodeTemplatesAPIFilterInstanceTypesResponse, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "NodeTemplatesAPIFilterInstanceTypesWithBodyWithResponse", ctx, clusterId, contentType, body)
+	ret := m.ctrl.Call(m, "NodeTemplatesAPIFilterInstanceTypesWithBodyWithResponse", ctx, clusterId, params, contentType, body)
 	ret0, _ := ret[0].(*sdk.NodeTemplatesAPIFilterInstanceTypesResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // NodeTemplatesAPIFilterInstanceTypesWithBodyWithResponse indicates an expected call of NodeTemplatesAPIFilterInstanceTypesWithBodyWithResponse.
-func (mr *MockClientWithResponsesInterfaceMockRecorder) NodeTemplatesAPIFilterInstanceTypesWithBodyWithResponse(ctx, clusterId, contentType, body interface{}) *gomock.Call {
+func (mr *MockClientWithResponsesInterfaceMockRecorder) NodeTemplatesAPIFilterInstanceTypesWithBodyWithResponse(ctx, clusterId, params, contentType, body interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NodeTemplatesAPIFilterInstanceTypesWithBodyWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).NodeTemplatesAPIFilterInstanceTypesWithBodyWithResponse), ctx, clusterId, contentType, body)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NodeTemplatesAPIFilterInstanceTypesWithBodyWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).NodeTemplatesAPIFilterInstanceTypesWithBodyWithResponse), ctx, clusterId, params, contentType, body)
 }
 
 // NodeTemplatesAPIFilterInstanceTypesWithResponse mocks base method.
-func (m *MockClientWithResponsesInterface) NodeTemplatesAPIFilterInstanceTypesWithResponse(ctx context.Context, clusterId string, body sdk.NodeTemplatesAPIFilterInstanceTypesJSONRequestBody) (*sdk.NodeTemplatesAPIFilterInstanceTypesResponse, error) {
+func (m *MockClientWithResponsesInterface) NodeTemplatesAPIFilterInstanceTypesWithResponse(ctx context.Context, clusterId string, params *sdk.NodeTemplatesAPIFilterInstanceTypesParams, body sdk.NodeTemplatesAPIFilterInstanceTypesJSONRequestBody) (*sdk.NodeTemplatesAPIFilterInstanceTypesResponse, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "NodeTemplatesAPIFilterInstanceTypesWithResponse", ctx, clusterId, body)
+	ret := m.ctrl.Call(m, "NodeTemplatesAPIFilterInstanceTypesWithResponse", ctx, clusterId, params, body)
 	ret0, _ := ret[0].(*sdk.NodeTemplatesAPIFilterInstanceTypesResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // NodeTemplatesAPIFilterInstanceTypesWithResponse indicates an expected call of NodeTemplatesAPIFilterInstanceTypesWithResponse.
-func (mr *MockClientWithResponsesInterfaceMockRecorder) NodeTemplatesAPIFilterInstanceTypesWithResponse(ctx, clusterId, body interface{}) *gomock.Call {
+func (mr *MockClientWithResponsesInterfaceMockRecorder) NodeTemplatesAPIFilterInstanceTypesWithResponse(ctx, clusterId, params, body interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NodeTemplatesAPIFilterInstanceTypesWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).NodeTemplatesAPIFilterInstanceTypesWithResponse), ctx, clusterId, body)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NodeTemplatesAPIFilterInstanceTypesWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).NodeTemplatesAPIFilterInstanceTypesWithResponse), ctx, clusterId, params, body)
 }
 
 // NodeTemplatesAPIGenerateNodeTemplates mocks base method.

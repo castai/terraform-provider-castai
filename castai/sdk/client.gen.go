@@ -204,9 +204,9 @@ type ClientInterface interface {
 	EvictorAPIUpsertAdvancedConfig(ctx context.Context, clusterId string, body EvictorAPIUpsertAdvancedConfigJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// NodeTemplatesAPIFilterInstanceTypesWithBody request with any body
-	NodeTemplatesAPIFilterInstanceTypesWithBody(ctx context.Context, clusterId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
+	NodeTemplatesAPIFilterInstanceTypesWithBody(ctx context.Context, clusterId string, params *NodeTemplatesAPIFilterInstanceTypesParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error)
 
-	NodeTemplatesAPIFilterInstanceTypes(ctx context.Context, clusterId string, body NodeTemplatesAPIFilterInstanceTypesJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
+	NodeTemplatesAPIFilterInstanceTypes(ctx context.Context, clusterId string, params *NodeTemplatesAPIFilterInstanceTypesParams, body NodeTemplatesAPIFilterInstanceTypesJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error)
 
 	// NodeTemplatesAPIGenerateNodeTemplates request
 	NodeTemplatesAPIGenerateNodeTemplates(ctx context.Context, clusterId string, reqEditors ...RequestEditorFn) (*http.Response, error)
@@ -1357,8 +1357,8 @@ func (c *Client) EvictorAPIUpsertAdvancedConfig(ctx context.Context, clusterId s
 	return c.Client.Do(req)
 }
 
-func (c *Client) NodeTemplatesAPIFilterInstanceTypesWithBody(ctx context.Context, clusterId string, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewNodeTemplatesAPIFilterInstanceTypesRequestWithBody(c.Server, clusterId, contentType, body)
+func (c *Client) NodeTemplatesAPIFilterInstanceTypesWithBody(ctx context.Context, clusterId string, params *NodeTemplatesAPIFilterInstanceTypesParams, contentType string, body io.Reader, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewNodeTemplatesAPIFilterInstanceTypesRequestWithBody(c.Server, clusterId, params, contentType, body)
 	if err != nil {
 		return nil, err
 	}
@@ -1369,8 +1369,8 @@ func (c *Client) NodeTemplatesAPIFilterInstanceTypesWithBody(ctx context.Context
 	return c.Client.Do(req)
 }
 
-func (c *Client) NodeTemplatesAPIFilterInstanceTypes(ctx context.Context, clusterId string, body NodeTemplatesAPIFilterInstanceTypesJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
-	req, err := NewNodeTemplatesAPIFilterInstanceTypesRequest(c.Server, clusterId, body)
+func (c *Client) NodeTemplatesAPIFilterInstanceTypes(ctx context.Context, clusterId string, params *NodeTemplatesAPIFilterInstanceTypesParams, body NodeTemplatesAPIFilterInstanceTypesJSONRequestBody, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewNodeTemplatesAPIFilterInstanceTypesRequest(c.Server, clusterId, params, body)
 	if err != nil {
 		return nil, err
 	}
@@ -6299,18 +6299,18 @@ func NewEvictorAPIUpsertAdvancedConfigRequestWithBody(server string, clusterId s
 }
 
 // NewNodeTemplatesAPIFilterInstanceTypesRequest calls the generic NodeTemplatesAPIFilterInstanceTypes builder with application/json body
-func NewNodeTemplatesAPIFilterInstanceTypesRequest(server string, clusterId string, body NodeTemplatesAPIFilterInstanceTypesJSONRequestBody) (*http.Request, error) {
+func NewNodeTemplatesAPIFilterInstanceTypesRequest(server string, clusterId string, params *NodeTemplatesAPIFilterInstanceTypesParams, body NodeTemplatesAPIFilterInstanceTypesJSONRequestBody) (*http.Request, error) {
 	var bodyReader io.Reader
 	buf, err := json.Marshal(body)
 	if err != nil {
 		return nil, err
 	}
 	bodyReader = bytes.NewReader(buf)
-	return NewNodeTemplatesAPIFilterInstanceTypesRequestWithBody(server, clusterId, "application/json", bodyReader)
+	return NewNodeTemplatesAPIFilterInstanceTypesRequestWithBody(server, clusterId, params, "application/json", bodyReader)
 }
 
 // NewNodeTemplatesAPIFilterInstanceTypesRequestWithBody generates requests for NodeTemplatesAPIFilterInstanceTypes with any type of body
-func NewNodeTemplatesAPIFilterInstanceTypesRequestWithBody(server string, clusterId string, contentType string, body io.Reader) (*http.Request, error) {
+func NewNodeTemplatesAPIFilterInstanceTypesRequestWithBody(server string, clusterId string, params *NodeTemplatesAPIFilterInstanceTypesParams, contentType string, body io.Reader) (*http.Request, error) {
 	var err error
 
 	var pathParam0 string
@@ -6333,6 +6333,28 @@ func NewNodeTemplatesAPIFilterInstanceTypesRequestWithBody(server string, cluste
 	queryURL, err := serverURL.Parse(operationPath)
 	if err != nil {
 		return nil, err
+	}
+
+	if params != nil {
+		queryValues := queryURL.Query()
+
+		if params.DisableInstanceTypeDeduplication != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "disableInstanceTypeDeduplication", runtime.ParamLocationQuery, *params.DisableInstanceTypeDeduplication); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		queryURL.RawQuery = queryValues.Encode()
 	}
 
 	req, err := http.NewRequest("POST", queryURL.String(), body)
@@ -16955,9 +16977,9 @@ type ClientWithResponsesInterface interface {
 	EvictorAPIUpsertAdvancedConfigWithResponse(ctx context.Context, clusterId string, body EvictorAPIUpsertAdvancedConfigJSONRequestBody) (*EvictorAPIUpsertAdvancedConfigResponse, error)
 
 	// NodeTemplatesAPIFilterInstanceTypes request  with any body
-	NodeTemplatesAPIFilterInstanceTypesWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader) (*NodeTemplatesAPIFilterInstanceTypesResponse, error)
+	NodeTemplatesAPIFilterInstanceTypesWithBodyWithResponse(ctx context.Context, clusterId string, params *NodeTemplatesAPIFilterInstanceTypesParams, contentType string, body io.Reader) (*NodeTemplatesAPIFilterInstanceTypesResponse, error)
 
-	NodeTemplatesAPIFilterInstanceTypesWithResponse(ctx context.Context, clusterId string, body NodeTemplatesAPIFilterInstanceTypesJSONRequestBody) (*NodeTemplatesAPIFilterInstanceTypesResponse, error)
+	NodeTemplatesAPIFilterInstanceTypesWithResponse(ctx context.Context, clusterId string, params *NodeTemplatesAPIFilterInstanceTypesParams, body NodeTemplatesAPIFilterInstanceTypesJSONRequestBody) (*NodeTemplatesAPIFilterInstanceTypesResponse, error)
 
 	// NodeTemplatesAPIGenerateNodeTemplates request
 	NodeTemplatesAPIGenerateNodeTemplatesWithResponse(ctx context.Context, clusterId string) (*NodeTemplatesAPIGenerateNodeTemplatesResponse, error)
@@ -24282,16 +24304,16 @@ func (c *ClientWithResponses) EvictorAPIUpsertAdvancedConfigWithResponse(ctx con
 }
 
 // NodeTemplatesAPIFilterInstanceTypesWithBodyWithResponse request with arbitrary body returning *NodeTemplatesAPIFilterInstanceTypesResponse
-func (c *ClientWithResponses) NodeTemplatesAPIFilterInstanceTypesWithBodyWithResponse(ctx context.Context, clusterId string, contentType string, body io.Reader) (*NodeTemplatesAPIFilterInstanceTypesResponse, error) {
-	rsp, err := c.NodeTemplatesAPIFilterInstanceTypesWithBody(ctx, clusterId, contentType, body)
+func (c *ClientWithResponses) NodeTemplatesAPIFilterInstanceTypesWithBodyWithResponse(ctx context.Context, clusterId string, params *NodeTemplatesAPIFilterInstanceTypesParams, contentType string, body io.Reader) (*NodeTemplatesAPIFilterInstanceTypesResponse, error) {
+	rsp, err := c.NodeTemplatesAPIFilterInstanceTypesWithBody(ctx, clusterId, params, contentType, body)
 	if err != nil {
 		return nil, err
 	}
 	return ParseNodeTemplatesAPIFilterInstanceTypesResponse(rsp)
 }
 
-func (c *ClientWithResponses) NodeTemplatesAPIFilterInstanceTypesWithResponse(ctx context.Context, clusterId string, body NodeTemplatesAPIFilterInstanceTypesJSONRequestBody) (*NodeTemplatesAPIFilterInstanceTypesResponse, error) {
-	rsp, err := c.NodeTemplatesAPIFilterInstanceTypes(ctx, clusterId, body)
+func (c *ClientWithResponses) NodeTemplatesAPIFilterInstanceTypesWithResponse(ctx context.Context, clusterId string, params *NodeTemplatesAPIFilterInstanceTypesParams, body NodeTemplatesAPIFilterInstanceTypesJSONRequestBody) (*NodeTemplatesAPIFilterInstanceTypesResponse, error) {
+	rsp, err := c.NodeTemplatesAPIFilterInstanceTypes(ctx, clusterId, params, body)
 	if err != nil {
 		return nil, err
 	}
