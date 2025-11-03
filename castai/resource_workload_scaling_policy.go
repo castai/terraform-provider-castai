@@ -42,6 +42,8 @@ const (
 	FieldLimitStrategy                             = "limit"
 	FieldLimitStrategyType                         = "type"
 	FieldLimitStrategyMultiplier                   = "multiplier"
+	FieldLimitStrategyOnlyIfOriginalExist          = "only_if_original_exist"
+	FieldLimitStrategyOnlyIfOriginalLower          = "only_if_original_lower"
 	FieldConfidence                                = "confidence"
 	FieldRolloutBehavior                           = "rollout_behavior"
 	FieldRolloutBehaviorType                       = "type"
@@ -472,6 +474,16 @@ func workloadScalingPolicyResourceLimitSchema() *schema.Resource {
 				Optional:         true,
 				Description:      "Multiplier used to calculate the resource limit. It must be defined for the MULTIPLIER strategy.",
 				ValidateDiagFunc: validation.ToDiagFunc(validation.FloatAtLeast(minResourceMultiplierValue)),
+			},
+			FieldLimitStrategyOnlyIfOriginalExist: {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Apply the strategy only when the original resource has limits defined.",
+			},
+			FieldLimitStrategyOnlyIfOriginalLower: {
+				Type:        schema.TypeBool,
+				Optional:    true,
+				Description: "Use the original resource limits if they are higher than recommended values.",
 			},
 		},
 	}
@@ -1066,6 +1078,8 @@ func toWorkloadResourceLimit(obj map[string]any) (*sdk.WorkloadoptimizationV1Res
 		return nil, err
 	}
 	out.Type = sdk.WorkloadoptimizationV1ResourceLimitStrategyType(*strategy)
+	out.OnlyIfOriginalLower = lo.ToPtr(obj[FieldLimitStrategyOnlyIfOriginalLower].(bool))
+	out.OnlyIfOriginalExist = lo.ToPtr(obj[FieldLimitStrategyOnlyIfOriginalExist].(bool))
 	switch out.Type {
 	case sdk.NOLIMIT, sdk.KEEPLIMITS:
 		out.Multiplier, err = mustGetValue[float64](obj, FieldLimitStrategyMultiplier)
@@ -1127,6 +1141,12 @@ func toWorkloadScalingPoliciesMap(previousCfg map[string]any, p sdk.Workloadopti
 		limit[FieldLimitStrategyType] = p.Limit.Type
 		if p.Limit.Multiplier != nil {
 			limit[FieldLimitStrategyMultiplier] = *p.Limit.Multiplier
+		}
+		if p.Limit.OnlyIfOriginalLower != nil {
+			limit[FieldLimitStrategyOnlyIfOriginalLower] = *p.Limit.OnlyIfOriginalLower
+		}
+		if p.Limit.OnlyIfOriginalExist != nil {
+			limit[FieldLimitStrategyOnlyIfOriginalExist] = *p.Limit.OnlyIfOriginalExist
 		}
 		m[FieldLimitStrategy] = []map[string]any{limit}
 	}
