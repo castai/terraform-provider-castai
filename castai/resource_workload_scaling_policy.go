@@ -1078,8 +1078,12 @@ func toWorkloadResourceLimit(obj map[string]any) (*sdk.WorkloadoptimizationV1Res
 		return nil, err
 	}
 	out.Type = sdk.WorkloadoptimizationV1ResourceLimitStrategyType(*strategy)
-	out.OnlyIfOriginalLower = lo.ToPtr(obj[FieldLimitStrategyOnlyIfOriginalLower].(bool))
-	out.OnlyIfOriginalExist = lo.ToPtr(obj[FieldLimitStrategyOnlyIfOriginalExist].(bool))
+	if onlyIfOriginalLower, err := mustGetValue[bool](obj, FieldLimitStrategyOnlyIfOriginalLower); err == nil {
+		out.OnlyIfOriginalLower = onlyIfOriginalLower
+	}
+	if onlyIfOriginalExist, err := mustGetValue[bool](obj, FieldLimitStrategyOnlyIfOriginalExist); err == nil {
+		out.OnlyIfOriginalExist = onlyIfOriginalExist
+	}
 	switch out.Type {
 	case sdk.NOLIMIT, sdk.KEEPLIMITS:
 		out.Multiplier, err = mustGetValue[float64](obj, FieldLimitStrategyMultiplier)
