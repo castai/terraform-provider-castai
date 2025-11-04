@@ -68,3 +68,8 @@ func ConfigCompose(config ...string) string {
 	}
 	return str.String()
 }
+
+// testAccGetOrganizationID returns the organization ID from environment variable
+func testAccGetOrganizationID() string {
+	return os.Getenv("ACCEPTANCE_TEST_ORGANIZATION_ID")
+}
