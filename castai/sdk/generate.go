@@ -16,3 +16,8 @@ package sdk
 //go:generate go run github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen@v2.4.1 -o organization_management/api.gen.go --old-config-style -generate types -include-tags $ORGANIZATION_MANAGEMENT_API_TAGS -package organization_management $ORGANIZATION_MANAGEMENT_SWAGGER_LOCATION
 //go:generate go run github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen@v2.4.1 -o organization_management/client.gen.go --old-config-style -templates codegen/templates -generate client -include-tags $ORGANIZATION_MANAGEMENT_API_TAGS -package organization_management $ORGANIZATION_MANAGEMENT_SWAGGER_LOCATION
 //go:generate mockgen -source organization_management/client.gen.go -destination organization_management/mock/client.go . ClientInterface
+
+//go:generate echo "generating sdk for: ${AI_OPTIMIZER_API_TAGS} from ${AI_OPTIMIZER_SWAGGER_LOCATION}"
+//go:generate go run github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen@v2.4.1 -o ai_optimizer/api.gen.go --old-config-style -generate types -include-tags $AI_OPTIMIZER_API_TAGS -package ai_optimizer $AI_OPTIMIZER_SWAGGER_LOCATION
+//go:generate go run github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen@v2.4.1 -o ai_optimizer/client.gen.go --old-config-style -templates codegen/templates -generate client -include-tags $AI_OPTIMIZER_API_TAGS -package ai_optimizer $AI_OPTIMIZER_SWAGGER_LOCATION
+//go:generate mockgen -source ai_optimizer/client.gen.go -destination ai_optimizer/mock/client.go . ClientInterface

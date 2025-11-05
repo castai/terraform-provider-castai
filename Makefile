@@ -9,6 +9,9 @@ export CLUSTER_AUTOSCALER_SWAGGER_LOCATION ?= https://api.cast.ai/spec/cluster-a
 export ORGANIZATION_MANAGEMENT_API_TAGS ?= EnterpriseAPI
 export ORGANIZATION_MANAGEMENT_SWAGGER_LOCATION ?= https://api.cast.ai/spec/organization-management/openapi.yaml
 
+export AI_OPTIMIZER_API_TAGS ?= APIKeysAPI,AnalyticsAPI,SettingsAPI,HostedModelsAPI,ComponentsAPI
+export AI_OPTIMIZER_SWAGGER_LOCATION ?= https://api.cast.ai/spec/ai-optimizer/openapi.yaml
+
 default: build
 
 .PHONY: format-tf

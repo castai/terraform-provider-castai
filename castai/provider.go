@@ -10,6 +10,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 
 	"github.com/castai/terraform-provider-castai/castai/sdk"
+	"github.com/castai/terraform-provider-castai/castai/sdk/ai_optimizer"
 	"github.com/castai/terraform-provider-castai/castai/sdk/cluster_autoscaler"
 	"github.com/castai/terraform-provider-castai/castai/sdk/organization_management"
 )
@@ -18,6 +19,7 @@ type ProviderConfig struct {
 	api                          sdk.ClientWithResponsesInterface
 	clusterAutoscalerClient      cluster_autoscaler.ClientWithResponsesInterface
 	organizationManagementClient organization_management.ClientWithResponsesInterface
+	aiOptimizerClient            ai_optimizer.ClientWithResponsesInterface
 }
 
 func Provider(version string) *schema.Provider {
@@ -67,6 +69,7 @@ func Provider(version string) *schema.Provider {
 			"castai_allocation_group":              resourceAllocationGroup(),
 			"castai_enterprise_group":              resourceEnterpriseGroup(),
 			"castai_enterprise_role_binding":       resourceEnterpriseRoleBinding(),
+			"castai_ai_optimizer_api_key":          resourceAIOptimizerAPIKey(),
 		},
 
 		DataSourcesMap: map[string]*schema.Resource{
@@ -76,6 +79,7 @@ func Provider(version string) *schema.Provider {
 			"castai_rebalancing_schedule":          dataSourceRebalancingSchedule(),
 			"castai_hibernation_schedule":          dataSourceHibernationSchedule(),
 			"castai_workload_scaling_policy_order": dataSourceWorkloadScalingPolicyOrder(),
+			"castai_ai_optimizer_hosted_models":    dataSourceAIOptimizerHostedModels(),
 
 			// TODO: remove in next major release
 			"castai_eks_user_arn": dataSourceEKSClusterUserARN(),
@@ -112,10 +116,16 @@ func providerConfigure(version string) schema.ConfigureContextFunc {
 			return nil, diag.FromErr(err)
 		}
 
+		aiOptimizerClient, err := ai_optimizer.CreateClient(apiURL, apiToken, agent)
+		if err != nil {
+			return nil, diag.FromErr(err)
+		}
+
 		return &ProviderConfig{
 			api:                          client,
 			clusterAutoscalerClient:      clusterAutoscalerClient,
 			organizationManagementClient: organizationManagementClient,
+			aiOptimizerClient:            aiOptimizerClient,
 		}, nil
 	}
 }
