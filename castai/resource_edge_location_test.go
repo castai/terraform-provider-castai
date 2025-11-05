@@ -75,6 +75,87 @@ func TestAccCloudAgnostic_ResourceEdgeLocationAWS(t *testing.T) {
 	})
 }
 
+func TestAccCloudAgnostic_ResourceEdgeLocationGCP(t *testing.T) {
+	rName := fmt.Sprintf("%v-edge-loc-%v", ResourcePrefix, acctest.RandString(8))
+	resourceName := "castai_edge_location.test"
+	clusterName := "core-tf-acc-gcp-21-08-2025"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: providerFactories,
+		CheckDestroy:      testAccCheckEdgeLocationDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccEdgeLocationGCPConfig(rName, clusterName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "name", rName),
+					resource.TestCheckResourceAttr(resourceName, "description", "Test GCP edge location"),
+					resource.TestCheckResourceAttr(resourceName, "region", "us-central1"),
+					resource.TestCheckResourceAttr(resourceName, "zones.#", "2"),
+					resource.TestCheckResourceAttr(resourceName, "zones.0.id", "us-central1-a"),
+					resource.TestCheckResourceAttr(resourceName, "zones.0.name", "us-central1-a"),
+					resource.TestCheckResourceAttr(resourceName, "zones.1.id", "us-central1-b"),
+					resource.TestCheckResourceAttr(resourceName, "zones.1.name", "us-central1-b"),
+					resource.TestCheckResourceAttr(resourceName, "gcp.#", "1"),
+					resource.TestCheckResourceAttrSet(resourceName, "gcp.0.project_id"),
+					resource.TestCheckResourceAttr(resourceName, "aws.#", "0"),
+					resource.TestCheckResourceAttr(resourceName, "oci.#", "0"),
+					resource.TestCheckResourceAttrSet(resourceName, "id"),
+				),
+			},
+			{
+				Config: testAccEdgeLocationGCPUpdated(rName, clusterName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "description", "Updated GCP edge location"),
+					resource.TestCheckResourceAttr(resourceName, "zones.#", "2"),
+					resource.TestCheckResourceAttr(resourceName, "zones.0.id", "us-central1-a"),
+					resource.TestCheckResourceAttr(resourceName, "zones.0.name", "us-central1-a"),
+					resource.TestCheckResourceAttr(resourceName, "zones.1.id", "us-central1-b"),
+					resource.TestCheckResourceAttr(resourceName, "zones.1.name", "us-central1-b"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccCloudAgnostic_ResourceEdgeLocationOCI(t *testing.T) {
+	rName := fmt.Sprintf("%v-edge-loc-%v", ResourcePrefix, acctest.RandString(8))
+	resourceName := "castai_edge_location.test"
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:          func() { testAccPreCheck(t) },
+		ProviderFactories: providerFactories,
+		CheckDestroy:      testAccCheckEdgeLocationDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccEdgeLocationOCIConfig(rName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "name", rName),
+					resource.TestCheckResourceAttr(resourceName, "description", "Test OCI edge location"),
+					resource.TestCheckResourceAttr(resourceName, "region", "us-phoenix-1"),
+					resource.TestCheckResourceAttr(resourceName, "zones.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "zones.0.id", "1"),
+					resource.TestCheckResourceAttr(resourceName, "zones.0.name", "PHX-AD-1"),
+					resource.TestCheckResourceAttr(resourceName, "oci.#", "1"),
+					resource.TestCheckResourceAttrSet(resourceName, "oci.0.tenancy_id"),
+					resource.TestCheckResourceAttrSet(resourceName, "oci.0.compartment_id"),
+					resource.TestCheckResourceAttrSet(resourceName, "oci.0.vcn_id"),
+					resource.TestCheckResourceAttrSet(resourceName, "oci.0.subnet_id"),
+					resource.TestCheckResourceAttr(resourceName, "aws.#", "0"),
+					resource.TestCheckResourceAttr(resourceName, "gcp.#", "0"),
+					resource.TestCheckResourceAttrSet(resourceName, "id"),
+				),
+			},
+			{
+				Config: testAccEdgeLocationOCIUpdated(rName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "description", "Updated OCI edge location"),
+				),
+			},
+		},
+	})
+}
+
 func testAccEdgeLocationAWSConfig(rName, clusterName string) string {
 	return testAccEdgeLocationAWSConfigWithParams(rName, clusterName, "Test edge location", []string{"us-east-1a", "us-east-1b"})
 }
@@ -119,49 +200,6 @@ resource "castai_edge_location" "test" {
   }
 }
 `, rName, description, zonesConfig, subnetConfig, organizationID))
-}
-
-func TestAccCloudAgnostic_ResourceEdgeLocationGCP(t *testing.T) {
-	rName := fmt.Sprintf("%v-edge-loc-%v", ResourcePrefix, acctest.RandString(8))
-	resourceName := "castai_edge_location.test"
-	clusterName := "core-tf-acc-gcp-21-08-2025"
-
-	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { testAccPreCheck(t) },
-		ProviderFactories: providerFactories,
-		CheckDestroy:      testAccCheckEdgeLocationDestroy,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccEdgeLocationGCPConfig(rName, clusterName),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "name", rName),
-					resource.TestCheckResourceAttr(resourceName, "description", "Test GCP edge location"),
-					resource.TestCheckResourceAttr(resourceName, "region", "us-central1"),
-					resource.TestCheckResourceAttr(resourceName, "zones.#", "2"),
-					resource.TestCheckResourceAttr(resourceName, "zones.0.id", "us-central1-a"),
-					resource.TestCheckResourceAttr(resourceName, "zones.0.name", "us-central1-a"),
-					resource.TestCheckResourceAttr(resourceName, "zones.1.id", "us-central1-b"),
-					resource.TestCheckResourceAttr(resourceName, "zones.1.name", "us-central1-b"),
-					resource.TestCheckResourceAttr(resourceName, "gcp.#", "1"),
-					resource.TestCheckResourceAttrSet(resourceName, "gcp.0.project_id"),
-					resource.TestCheckResourceAttr(resourceName, "aws.#", "0"),
-					resource.TestCheckResourceAttr(resourceName, "oci.#", "0"),
-					resource.TestCheckResourceAttrSet(resourceName, "id"),
-				),
-			},
-			{
-				Config: testAccEdgeLocationGCPUpdated(rName, clusterName),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "description", "Updated GCP edge location"),
-					resource.TestCheckResourceAttr(resourceName, "zones.#", "2"),
-					resource.TestCheckResourceAttr(resourceName, "zones.0.id", "us-central1-a"),
-					resource.TestCheckResourceAttr(resourceName, "zones.0.name", "us-central1-a"),
-					resource.TestCheckResourceAttr(resourceName, "zones.1.id", "us-central1-b"),
-					resource.TestCheckResourceAttr(resourceName, "zones.1.name", "us-central1-b"),
-				),
-			},
-		},
-	})
 }
 
 func testAccEdgeLocationGCPConfig(rName, clusterName string) string {
@@ -220,44 +258,6 @@ resource "castai_edge_location" "test" {
   }
 }
 `, rName, description, zonesConfig, networkTagsConfig, organizationID, organizationID, projectID))
-}
-
-func TestAccCloudAgnostic_ResourceEdgeLocationOCI(t *testing.T) {
-	rName := fmt.Sprintf("%v-edge-loc-%v", ResourcePrefix, acctest.RandString(8))
-	resourceName := "castai_edge_location.test"
-
-	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { testAccPreCheck(t) },
-		ProviderFactories: providerFactories,
-		CheckDestroy:      testAccCheckEdgeLocationDestroy,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccEdgeLocationOCIConfig(rName),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "name", rName),
-					resource.TestCheckResourceAttr(resourceName, "description", "Test OCI edge location"),
-					resource.TestCheckResourceAttr(resourceName, "region", "us-phoenix-1"),
-					resource.TestCheckResourceAttr(resourceName, "zones.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "zones.0.id", "1"),
-					resource.TestCheckResourceAttr(resourceName, "zones.0.name", "PHX-AD-1"),
-					resource.TestCheckResourceAttr(resourceName, "oci.#", "1"),
-					resource.TestCheckResourceAttrSet(resourceName, "oci.0.tenancy_id"),
-					resource.TestCheckResourceAttrSet(resourceName, "oci.0.compartment_id"),
-					resource.TestCheckResourceAttrSet(resourceName, "oci.0.vcn_id"),
-					resource.TestCheckResourceAttrSet(resourceName, "oci.0.subnet_id"),
-					resource.TestCheckResourceAttr(resourceName, "aws.#", "0"),
-					resource.TestCheckResourceAttr(resourceName, "gcp.#", "0"),
-					resource.TestCheckResourceAttrSet(resourceName, "id"),
-				),
-			},
-			{
-				Config: testAccEdgeLocationOCIUpdated(rName),
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(resourceName, "description", "Updated OCI edge location"),
-				),
-			},
-		},
-	})
 }
 
 func testAccEdgeLocationOCIConfig(rName string) string {
