@@ -16,3 +16,8 @@ package sdk
 //go:generate go run github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen@v2.4.1 -o organization_management/api.gen.go --old-config-style -generate types -include-tags $ORGANIZATION_MANAGEMENT_API_TAGS -package organization_management $ORGANIZATION_MANAGEMENT_SWAGGER_LOCATION
 //go:generate go run github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen@v2.4.1 -o organization_management/client.gen.go --old-config-style -templates codegen/templates -generate client -include-tags $ORGANIZATION_MANAGEMENT_API_TAGS -package organization_management $ORGANIZATION_MANAGEMENT_SWAGGER_LOCATION
 //go:generate mockgen -source organization_management/client.gen.go -destination organization_management/mock/client.go . ClientInterface
+
+//go:generate echo "generating sdk for: ${OMNI_PROVISIONER_API_TAGS} from ${OMNI_PROVISIONER_SWAGGER_LOCATION}"
+//go:generate go run github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen@v2.4.1 -o omni_provisioner/api.gen.go --old-config-style -generate types -include-tags $OMNI_PROVISIONER_API_TAGS -package omni_provisioner $OMNI_PROVISIONER_SWAGGER_LOCATION
+//go:generate go run github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen@v2.4.1 -o omni_provisioner/client.gen.go --old-config-style -templates codegen/templates -generate client -include-tags $OMNI_PROVISIONER_API_TAGS -package omni_provisioner $OMNI_PROVISIONER_SWAGGER_LOCATION
+//go:generate mockgen -source omni_provisioner/client.gen.go -destination omni_provisioner/mock/client.go . ClientInterface

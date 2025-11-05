@@ -11,12 +11,14 @@ import (
 
 	"github.com/castai/terraform-provider-castai/castai/sdk"
 	"github.com/castai/terraform-provider-castai/castai/sdk/cluster_autoscaler"
+	"github.com/castai/terraform-provider-castai/castai/sdk/omni_provisioner"
 	"github.com/castai/terraform-provider-castai/castai/sdk/organization_management"
 )
 
 type ProviderConfig struct {
 	api                          sdk.ClientWithResponsesInterface
 	clusterAutoscalerClient      cluster_autoscaler.ClientWithResponsesInterface
+	omniProvisionerClient        omni_provisioner.ClientWithResponsesInterface
 	organizationManagementClient organization_management.ClientWithResponsesInterface
 }
 
@@ -67,6 +69,9 @@ func Provider(version string) *schema.Provider {
 			"castai_allocation_group":              resourceAllocationGroup(),
 			"castai_enterprise_group":              resourceEnterpriseGroup(),
 			"castai_enterprise_role_binding":       resourceEnterpriseRoleBinding(),
+			"castai_omni_cluster":                  resourceOmniCluster(),
+			"castai_omni_edge_location":            resourceOmniEdgeLocation(),
+			"castai_omni_edge":                     resourceOmniEdge(),
 		},
 
 		DataSourcesMap: map[string]*schema.Resource{
@@ -76,6 +81,7 @@ func Provider(version string) *schema.Provider {
 			"castai_rebalancing_schedule":          dataSourceRebalancingSchedule(),
 			"castai_hibernation_schedule":          dataSourceHibernationSchedule(),
 			"castai_workload_scaling_policy_order": dataSourceWorkloadScalingPolicyOrder(),
+			"castai_omni_edge_configuration":       dataSourceOmniEdgeConfiguration(),
 
 			// TODO: remove in next major release
 			"castai_eks_user_arn": dataSourceEKSClusterUserARN(),
@@ -107,6 +113,11 @@ func providerConfigure(version string) schema.ConfigureContextFunc {
 			return nil, diag.FromErr(err)
 		}
 
+		omniProvisionerClient, err := omni_provisioner.CreateClient(apiURL, apiToken, agent)
+		if err != nil {
+			return nil, diag.FromErr(err)
+		}
+
 		organizationManagementClient, err := organization_management.CreateClient(apiURL, apiToken, agent)
 		if err != nil {
 			return nil, diag.FromErr(err)
@@ -115,6 +126,7 @@ func providerConfigure(version string) schema.ConfigureContextFunc {
 		return &ProviderConfig{
 			api:                          client,
 			clusterAutoscalerClient:      clusterAutoscalerClient,
+			omniProvisionerClient:        omniProvisionerClient,
 			organizationManagementClient: organizationManagementClient,
 		}, nil
 	}

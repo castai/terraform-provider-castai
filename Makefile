@@ -9,6 +9,9 @@ export CLUSTER_AUTOSCALER_SWAGGER_LOCATION ?= https://api.cast.ai/spec/cluster-a
 export ORGANIZATION_MANAGEMENT_API_TAGS ?= EnterpriseAPI
 export ORGANIZATION_MANAGEMENT_SWAGGER_LOCATION ?= https://api.cast.ai/spec/organization-management/openapi.yaml
 
+export OMNI_PROVISIONER_API_TAGS ?= OmniProvisionerAPI
+export OMNI_PROVISIONER_SWAGGER_LOCATION ?= https://api.cast.ai/spec/omni/openapi.yaml
+
 default: build
 
 .PHONY: format-tf

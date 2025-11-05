@@ -914,6 +914,14 @@ const (
 	Desc WorkloadOptimizationAPIListWorkloadsParamsSortOrder = "desc"
 )
 
+// Defines values for WorkloadOptimizationAPIListWorkloadsParamsRecommendationStatusType.
+const (
+	STATUSAPPLIED WorkloadOptimizationAPIListWorkloadsParamsRecommendationStatusType = "STATUS_APPLIED"
+	STATUSSTOPPED WorkloadOptimizationAPIListWorkloadsParamsRecommendationStatusType = "STATUS_STOPPED"
+	STATUSUNKNOWN WorkloadOptimizationAPIListWorkloadsParamsRecommendationStatusType = "STATUS_UNKNOWN"
+	STATUSWAITING WorkloadOptimizationAPIListWorkloadsParamsRecommendationStatusType = "STATUS_WAITING"
+)
+
 // Defines values for WorkloadOptimizationAPIGetInstallCmdParamsCmePresets.
 const (
 	WorkloadOptimizationAPIGetInstallCmdParamsCmePresetsCODAHALE      WorkloadOptimizationAPIGetInstallCmdParamsCmePresets = "CODAHALE"
@@ -3693,14 +3701,14 @@ type ExternalclusterV1CloudEvent struct {
 	// EventType Event type.
 	EventType *string `json:"eventType,omitempty"`
 
-	// Node Node provider ID, eg.: aws instance-id.
-	Node *string `json:"node,omitempty"`
-
-	// NodeId Cast node ID.
+	// NodeId Cast-assigned node ID.
 	NodeId *string `json:"nodeId"`
 
 	// NodeState Node state.
 	NodeState *string `json:"nodeState,omitempty"`
+
+	// ProviderId ProviderID of the node as assigned by the cloud manager or other process.
+	ProviderId *string `json:"providerId"`
 }
 
 // ExternalclusterV1Cluster Cluster represents external kubernetes cluster.
@@ -5174,6 +5182,7 @@ type NodetemplatesV1AvailableInstanceType struct {
 // NodetemplatesV1AvailableInstanceTypeGPUDevice defines model for nodetemplates.v1.AvailableInstanceType.GPUDevice.
 type NodetemplatesV1AvailableInstanceTypeGPUDevice struct {
 	Count        *int32  `json:"count,omitempty"`
+	Fractional   *bool   `json:"fractional,omitempty"`
 	Manufacturer *string `json:"manufacturer,omitempty"`
 	Name         *string `json:"name,omitempty"`
 }
@@ -5455,11 +5464,15 @@ type NodetemplatesV1TemplateConstraintsDedicatedNodeAffinity struct {
 
 // NodetemplatesV1TemplateConstraintsGPUConstraints defines model for nodetemplates.v1.TemplateConstraints.GPUConstraints.
 type NodetemplatesV1TemplateConstraintsGPUConstraints struct {
-	ExcludeNames  *[]string `json:"excludeNames,omitempty"`
-	IncludeNames  *[]string `json:"includeNames,omitempty"`
-	Manufacturers *[]string `json:"manufacturers,omitempty"`
-	MaxCount      *int32    `json:"maxCount"`
-	MinCount      *int32    `json:"minCount"`
+	ExcludeNames *[]string `json:"excludeNames,omitempty"`
+
+	// FractionalGpus - DISABLED: The constraint is disabled
+	//  - ENABLED: The constraint is enabled
+	FractionalGpus *NodetemplatesV1TemplateConstraintsConstraintState `json:"fractionalGpus,omitempty"`
+	IncludeNames   *[]string                                          `json:"includeNames,omitempty"`
+	Manufacturers  *[]string                                          `json:"manufacturers,omitempty"`
+	MaxCount       *int32                                             `json:"maxCount"`
+	MinCount       *int32                                             `json:"minCount"`
 }
 
 // NodetemplatesV1TemplateConstraintsInstanceFamilyConstraints defines model for nodetemplates.v1.TemplateConstraints.InstanceFamilyConstraints.
@@ -6654,13 +6667,22 @@ type WorkloadoptimizationV1GetWorkloadEventsSummaryResponse struct {
 	TotalCount int32 `json:"totalCount"`
 }
 
+// WorkloadoptimizationV1GetWorkloadFiltersCounts defines model for workloadoptimization.v1.GetWorkloadFiltersCounts.
+type WorkloadoptimizationV1GetWorkloadFiltersCounts struct {
+	RecommendationApplied         int32 `json:"recommendationApplied"`
+	RecommendationIsLowConfidence int32 `json:"recommendationIsLowConfidence"`
+	Total                         int32 `json:"total"`
+	WorkloadHasError              int32 `json:"workloadHasError"`
+}
+
 // WorkloadoptimizationV1GetWorkloadFiltersResponse defines model for workloadoptimization.v1.GetWorkloadFiltersResponse.
 type WorkloadoptimizationV1GetWorkloadFiltersResponse struct {
-	Kinds              []string `json:"kinds"`
-	Namespaces         []string `json:"namespaces"`
-	ScalingPolicyNames []string `json:"scalingPolicyNames"`
-	WorkloadIds        []string `json:"workloadIds"`
-	WorkloadNames      []string `json:"workloadNames"`
+	Counts             WorkloadoptimizationV1GetWorkloadFiltersCounts `json:"counts"`
+	Kinds              []string                                       `json:"kinds"`
+	Namespaces         []string                                       `json:"namespaces"`
+	ScalingPolicyNames []string                                       `json:"scalingPolicyNames"`
+	WorkloadIds        []string                                       `json:"workloadIds"`
+	WorkloadNames      []string                                       `json:"workloadNames"`
 }
 
 // WorkloadoptimizationV1GetWorkloadResponse defines model for workloadoptimization.v1.GetWorkloadResponse.
@@ -7427,6 +7449,12 @@ type WorkloadoptimizationV1ResourceConfigUpdate struct {
 // WorkloadoptimizationV1ResourceLimitStrategy defines model for workloadoptimization.v1.ResourceLimitStrategy.
 type WorkloadoptimizationV1ResourceLimitStrategy struct {
 	Multiplier *float64 `json:"multiplier,omitempty"`
+
+	// OnlyIfOriginalExist Apply the strategy only when the resource limits exists originally.
+	OnlyIfOriginalExist *bool `json:"onlyIfOriginalExist"`
+
+	// OnlyIfOriginalLower Use the original resource limits if they are higher.
+	OnlyIfOriginalLower *bool `json:"onlyIfOriginalLower"`
 
 	// Type Type is the type of the limit strategy.
 	//
@@ -8993,7 +9021,10 @@ type WorkloadOptimizationAPIListWorkloadsParams struct {
 	//  - asc: desc
 	//  - DESC: ASC
 	//  - desc: desc
-	SortOrder *WorkloadOptimizationAPIListWorkloadsParamsSortOrder `form:"sort.order,omitempty" json:"sort.order,omitempty"`
+	SortOrder                     *WorkloadOptimizationAPIListWorkloadsParamsSortOrder                `form:"sort.order,omitempty" json:"sort.order,omitempty"`
+	RecommendationStatusType      *WorkloadOptimizationAPIListWorkloadsParamsRecommendationStatusType `form:"recommendationStatusType,omitempty" json:"recommendationStatusType,omitempty"`
+	RecommendationIsLowConfidence *bool                                                               `form:"recommendationIsLowConfidence,omitempty" json:"recommendationIsLowConfidence,omitempty"`
+	WorkloadHasError              *bool                                                               `form:"workloadHasError,omitempty" json:"workloadHasError,omitempty"`
 }
 
 // WorkloadOptimizationAPIListWorkloadsParamsManagementOptions defines parameters for WorkloadOptimizationAPIListWorkloads.
@@ -9001,6 +9032,9 @@ type WorkloadOptimizationAPIListWorkloadsParamsManagementOptions string
 
 // WorkloadOptimizationAPIListWorkloadsParamsSortOrder defines parameters for WorkloadOptimizationAPIListWorkloads.
 type WorkloadOptimizationAPIListWorkloadsParamsSortOrder string
+
+// WorkloadOptimizationAPIListWorkloadsParamsRecommendationStatusType defines parameters for WorkloadOptimizationAPIListWorkloads.
+type WorkloadOptimizationAPIListWorkloadsParamsRecommendationStatusType string
 
 // WorkloadOptimizationAPIGetWorkloadsSummaryParams defines parameters for WorkloadOptimizationAPIGetWorkloadsSummary.
 type WorkloadOptimizationAPIGetWorkloadsSummaryParams struct {
