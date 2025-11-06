@@ -1,0 +1,52 @@
+apiVersion: argoproj.io/v1alpha1
+kind: WorkflowTemplate
+metadata:
+  name: castai-node-template
+spec:
+  entrypoint: create-node-template
+  arguments:
+    parameters:
+      - name: api_key
+      - name: cluster_id
+      - name: min_cpu
+      - name: max_cpu
+      - name: spot
+      - name: on_demand
+      - name: use_spot_fallbacks
+      - name: fallback_restore_rate_seconds
+
+  templates:
+    - name: create-node-template
+      inputs:
+        parameters:
+          - name: api_key
+          - name: cluster_id
+          - name: min_cpu
+          - name: max_cpu
+          - name: spot
+          - name: on_demand
+          - name: use_spot_fallbacks
+          - name: fallback_restore_rate_seconds
+      container:
+        image: curlimages/curl:8.8.0
+        command: [sh, -c]
+        args:
+          - |
+            echo "🌀 Creating CAST.AI node template for cluster {{inputs.parameters.cluster_id}}"
+            curl --request POST \
+              --url https://api.cast.ai/v1/kubernetes/clusters/{{inputs.parameters.cluster_id}}/node-templates \
+              --header "X-API-Key: {{inputs.parameters.api_key}}" \
+              --header 'accept: application/json' \
+              --header 'content-type: application/json' \
+              --data "{
+                \"constraints\": {
+                  \"burstable\": \"NOT_SET\",
+                  \"customerSpecific\": \"NOT_SET\",
+                  \"minCpu\": {{inputs.parameters.min_cpu}},
+                  \"maxCpu\": {{inputs.parameters.max_cpu}},
+                  \"spot\": {{inputs.parameters.spot}},
+                  \"onDemand\": {{inputs.parameters.on_demand}},
+                  \"useSpotFallbacks\": {{inputs.parameters.use_spot_fallbacks}},
+                  \"fallbackRestoreRateSeconds\": {{inputs.parameters.fallback_restore_rate_seconds}}
+                }
+              }"

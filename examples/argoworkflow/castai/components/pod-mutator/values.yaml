@@ -1,0 +1,17 @@
+# Pod mutator webhook configuration
+
+clusterID: ""
+
+webhook:
+  enabled: true
+  port: 8443
+
+resources:
+  requests:
+    cpu: 10m
+    memory: 64Mi
+  limits:
+    cpu: 100m
+    memory: 128Mi
+
+replicaCount: 2

@@ -1,0 +1,17 @@
+# Spot interruption handler configuration
+
+clusterID: ""
+
+# Node selector for DaemonSet
+nodeSelector: {}
+
+tolerations:
+  - operator: Exists
+
+resources:
+  requests:
+    cpu: 10m
+    memory: 32Mi
+  limits:
+    cpu: 100m
+    memory: 128Mi

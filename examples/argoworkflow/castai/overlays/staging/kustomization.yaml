@@ -1,0 +1,16 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: castai-agent
+
+bases:
+  - ../../base
+
+configMapGenerator:
+  - name: castai-cluster-config
+    literals:
+      - ENVIRONMENT=staging
+      - CLUSTER_NAME=staging-eks-cluster
+
+patchesStrategicMerge:
+  - values/cluster-agent-values.yaml
