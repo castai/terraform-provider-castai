@@ -51,9 +51,6 @@ jobs:
           location: us-central1-c
           project_id: ${{ secrets.GOOGLE_TF_ACCEPTANCE_PROJECT_ID }}
 
-      - name: Install mockgen
-        run: go install go.uber.org/mock/mockgen@latest
-
       - name: Acceptance test
         env:
           CASTAI_API_TOKEN: ${{ secrets.CASTAI_DEV_MASTER_TOKEN }}
