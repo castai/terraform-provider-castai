@@ -11403,6 +11403,22 @@ func NewInventoryAPIListRegionsRequest(server string, params *InventoryAPIListRe
 
 		}
 
+		if params.IncludeUnavailable != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "includeUnavailable", runtime.ParamLocationQuery, *params.IncludeUnavailable); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
 		queryURL.RawQuery = queryValues.Encode()
 	}
 
@@ -16078,6 +16094,54 @@ func NewWorkloadOptimizationAPIListWorkloadsRequest(server string, clusterId str
 		if params.SortOrder != nil {
 
 			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "sort.order", runtime.ParamLocationQuery, *params.SortOrder); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.RecommendationStatusType != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "recommendationStatusType", runtime.ParamLocationQuery, *params.RecommendationStatusType); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.RecommendationIsLowConfidence != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "recommendationIsLowConfidence", runtime.ParamLocationQuery, *params.RecommendationIsLowConfidence); err != nil {
+				return nil, err
+			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+				return nil, err
+			} else {
+				for k, v := range parsed {
+					for _, v2 := range v {
+						queryValues.Add(k, v2)
+					}
+				}
+			}
+
+		}
+
+		if params.WorkloadHasError != nil {
+
+			if queryFrag, err := runtime.StyleParamWithLocation("form", true, "workloadHasError", runtime.ParamLocationQuery, *params.WorkloadHasError); err != nil {
 				return nil, err
 			} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
 				return nil, err
