@@ -24,7 +24,7 @@ generate-sdk: generate-sdk-new
 generate-sdk-new:
 	@echo "==> Generating api sdk clients"
 	@go install github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen@v2.4.1
-	@go install go.uber.org/mock/mockgen@latest
+	@go install github.com/golang/mock/mockgen
 	@cd castai/sdk && for spec in $(SDK_SPECS); do \
 		IFS=':' read -r pkg tag loc <<< "$$spec"; \
 		[ -z "$$pkg" ] && continue; \
