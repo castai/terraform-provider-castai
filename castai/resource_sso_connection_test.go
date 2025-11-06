@@ -14,9 +14,10 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	sdkterraform "github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/stretchr/testify/require"
 
 	"github.com/castai/terraform-provider-castai/castai/sdk"
@@ -66,7 +67,7 @@ func TestSSOConnection_ReadContext(t *testing.T) {
 
 		resource := resourceSSOConnection()
 		data := resource.Data(
-			terraform.NewInstanceStateShimmedFromValue(cty.ObjectVal(map[string]cty.Value{
+			sdkterraform.NewInstanceStateShimmedFromValue(cty.ObjectVal(map[string]cty.Value{
 				"id": cty.StringVal(connectionID),
 			}), 0))
 
@@ -99,7 +100,7 @@ func TestSSOConnection_ReadContext(t *testing.T) {
 
 		resource := resourceSSOConnection()
 		data := resource.Data(
-			terraform.NewInstanceStateShimmedFromValue(cty.ObjectVal(map[string]cty.Value{
+			sdkterraform.NewInstanceStateShimmedFromValue(cty.ObjectVal(map[string]cty.Value{
 				"id": cty.StringVal(connectionID),
 			}), 0))
 
@@ -172,7 +173,7 @@ func TestSSOConnection_CreateADDConnector(t *testing.T) {
 			Return(&http.Response{StatusCode: 200, Body: readBody, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
 
 		resource := resourceSSOConnection()
-		data := resource.Data(terraform.NewInstanceStateShimmedFromValue(cty.ObjectVal(map[string]cty.Value{
+		data := resource.Data(sdkterraform.NewInstanceStateShimmedFromValue(cty.ObjectVal(map[string]cty.Value{
 			FieldSSOConnectionName:        cty.StringVal("test_sso"),
 			FieldSSOConnectionEmailDomain: cty.StringVal("test_email"),
 			FieldSSOConnectionAAD: cty.ListVal([]cty.Value{
@@ -252,7 +253,7 @@ func TestSSOConnection_CreateADDConnector(t *testing.T) {
 			Return(&http.Response{StatusCode: 200, Body: readBody, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
 
 		resource := resourceSSOConnection()
-		data := resource.Data(terraform.NewInstanceStateShimmedFromValue(cty.ObjectVal(map[string]cty.Value{
+		data := resource.Data(sdkterraform.NewInstanceStateShimmedFromValue(cty.ObjectVal(map[string]cty.Value{
 			FieldSSOConnectionName:                   cty.StringVal("test_sso"),
 			FieldSSOConnectionEmailDomain:            cty.StringVal("test_email"),
 			FieldSSOConnectionAdditionalEmailDomains: cty.ListVal([]cty.Value{cty.StringVal("test_domain1.com"), cty.StringVal("test_domain2.com")}),
@@ -331,7 +332,7 @@ func TestSSOConnection_CreateOktaConnector(t *testing.T) {
 		Return(&http.Response{StatusCode: 200, Body: readBody, Header: map[string][]string{"Content-Type": {"json"}}}, nil)
 
 	resource := resourceSSOConnection()
-	data := resource.Data(terraform.NewInstanceStateShimmedFromValue(cty.ObjectVal(map[string]cty.Value{
+	data := resource.Data(sdkterraform.NewInstanceStateShimmedFromValue(cty.ObjectVal(map[string]cty.Value{
 		FieldSSOConnectionName:        cty.StringVal("test_sso"),
 		FieldSSOConnectionEmailDomain: cty.StringVal("test_email"),
 		FieldSSOConnectionOkta: cty.ListVal([]cty.Value{
@@ -637,7 +638,7 @@ func TestSSOConnection_DeleteContext(t *testing.T) {
 
 	resource := resourceSSOConnection()
 	data := resource.Data(
-		terraform.NewInstanceStateShimmedFromValue(
+		sdkterraform.NewInstanceStateShimmedFromValue(
 			cty.ObjectVal(map[string]cty.Value{
 				"id": cty.StringVal(connectionID),
 			}), 0),

@@ -49,7 +49,7 @@ func resourceOmniCluster() *schema.Resource {
 }
 
 func resourceOmniClusterCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ProviderConfig).omniClient
+	client := meta.(*ProviderConfig).OmniAPI
 
 	organizationID := d.Get(FieldOmniClusterOrganizationID).(string)
 	clusterID := d.Get(FieldOmniClusterID).(string)
@@ -69,7 +69,7 @@ func resourceOmniClusterCreate(ctx context.Context, d *schema.ResourceData, meta
 }
 
 func resourceOmniClusterRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	client := meta.(*ProviderConfig).omniClient
+	client := meta.(*ProviderConfig).OmniAPI
 
 	organizationID := d.Get(FieldOmniClusterOrganizationID).(string)
 	clusterID := d.Id()

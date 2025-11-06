@@ -19,11 +19,12 @@ type ProviderConfig struct {
 	api                          sdk.ClientWithResponsesInterface
 	clusterAutoscalerClient      cluster_autoscaler.ClientWithResponsesInterface
 	organizationManagementClient organization_management.ClientWithResponsesInterface
-	omniClient                   omni.ClientWithResponsesInterface
+	OmniAPI                      *omni.ClientWithResponses
 }
 
 func Provider(version string) *schema.Provider {
 	p := &schema.Provider{
+		TerraformVersion: "1.11",
 		Schema: map[string]*schema.Schema{
 			"api_url": {
 				Type:             schema.TypeString,
@@ -35,6 +36,7 @@ func Provider(version string) *schema.Provider {
 			"api_token": {
 				Type:        schema.TypeString,
 				Required:    true,
+				Sensitive:   true,
 				DefaultFunc: schema.EnvDefaultFunc("CASTAI_API_TOKEN", nil),
 				Description: "The token used to connect to CAST AI API.",
 			},
@@ -69,7 +71,6 @@ func Provider(version string) *schema.Provider {
 			"castai_allocation_group":              resourceAllocationGroup(),
 			"castai_enterprise_group":              resourceEnterpriseGroup(),
 			"castai_enterprise_role_binding":       resourceEnterpriseRoleBinding(),
-			"castai_edge_location":                 resourceEdgeLocation(),
 			"castai_omni_cluster":                  resourceOmniCluster(),
 		},
 
@@ -125,7 +126,7 @@ func providerConfigure(version string) schema.ConfigureContextFunc {
 			api:                          client,
 			clusterAutoscalerClient:      clusterAutoscalerClient,
 			organizationManagementClient: organizationManagementClient,
-			omniClient:                   omniClient,
+			OmniAPI:                      omniClient,
 		}, nil
 	}
 }

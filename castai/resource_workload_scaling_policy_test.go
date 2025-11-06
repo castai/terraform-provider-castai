@@ -15,8 +15,9 @@ import (
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	sdkterraform "github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/require"
 
@@ -827,7 +828,7 @@ func Test_resourceWorkloadScalingPolicyCreate(t *testing.T) {
 			scalingPolicyResource := resourceWorkloadScalingPolicy()
 			stateValue := cty.ObjectVal(tt.state)
 
-			state := terraform.NewInstanceStateShimmedFromValue(stateValue, tt.schemaVersion)
+			state := sdkterraform.NewInstanceStateShimmedFromValue(stateValue, tt.schemaVersion)
 			data := scalingPolicyResource.Data(state)
 
 			tt.setup(r, mockClient)

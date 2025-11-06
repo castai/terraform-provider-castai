@@ -7,20 +7,20 @@ import (
 	"testing"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
 func TestAccCloudAgnostic_ResourceEdgeLocationAWS(t *testing.T) {
 	rName := fmt.Sprintf("%v-edge-loc-%v", ResourcePrefix, acctest.RandString(8))
 	resourceName := "castai_edge_location.test"
-	clusterName := "core-tf-acc-21-08-2025"
+	clusterName := "omni-tf-acc-aws"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { testAccPreCheck(t) },
-		ProviderFactories: providerFactories,
-		CheckDestroy:      testAccCheckEdgeLocationDestroy,
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckEdgeLocationDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccEdgeLocationAWSConfig(rName, clusterName),
@@ -78,12 +78,12 @@ func TestAccCloudAgnostic_ResourceEdgeLocationAWS(t *testing.T) {
 func TestAccCloudAgnostic_ResourceEdgeLocationGCP(t *testing.T) {
 	rName := fmt.Sprintf("%v-edge-loc-%v", ResourcePrefix, acctest.RandString(8))
 	resourceName := "castai_edge_location.test"
-	clusterName := "core-tf-acc-gcp-21-08-2025"
+	clusterName := "omni-tf-acc-gcp"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { testAccPreCheck(t) },
-		ProviderFactories: providerFactories,
-		CheckDestroy:      testAccCheckEdgeLocationDestroy,
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckEdgeLocationDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccEdgeLocationGCPConfig(rName, clusterName),
@@ -123,9 +123,9 @@ func TestAccCloudAgnostic_ResourceEdgeLocationOCI(t *testing.T) {
 	resourceName := "castai_edge_location.test"
 
 	resource.Test(t, resource.TestCase{
-		PreCheck:          func() { testAccPreCheck(t) },
-		ProviderFactories: providerFactories,
-		CheckDestroy:      testAccCheckEdgeLocationDestroy,
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckEdgeLocationDestroy,
 		Steps: []resource.TestStep{
 			{
 				Config: testAccEdgeLocationOCIConfig(rName),
@@ -167,17 +167,20 @@ func testAccEdgeLocationAWSUpdated(rName, clusterName string) string {
 func testAccEdgeLocationAWSConfigWithParams(rName, clusterName, description string, zones []string) string {
 	organizationID := testAccGetOrganizationID()
 
-	zonesConfig := ""
+	zonesConfig := "zones = ["
 	subnetConfig := ""
 	for i, zone := range zones {
-		zonesConfig += fmt.Sprintf(`
-  zones {
+		if i > 0 {
+			zonesConfig += ", "
+		}
+		zonesConfig += fmt.Sprintf(`{
     id   = %q
     name = %q
   }`, zone, zone)
 		subnetConfig += fmt.Sprintf(`
       %q = "subnet-%08d"`, zone, 12345678+i)
 	}
+	zonesConfig += "]"
 
 	return ConfigCompose(testOmniClusterConfig(clusterName), fmt.Sprintf(`
 resource "castai_edge_location" "test" {
@@ -214,14 +217,17 @@ func testAccEdgeLocationGCPConfigWithParams(rName, clusterName, description stri
 	organizationID := testAccGetOrganizationID()
 	projectID := "test-project-123456"
 
-	zonesConfig := ""
-	for _, zone := range zones {
-		zonesConfig += fmt.Sprintf(`
-  zones {
+	zonesConfig := "zones = ["
+	for i, zone := range zones {
+		if i > 0 {
+			zonesConfig += ", "
+		}
+		zonesConfig += fmt.Sprintf(`{
     id   = %q
     name = %q
   }`, zone, zone)
 	}
+	zonesConfig += "]"
 
 	networkTagsConfig := ""
 	for i, tag := range networkTags {
@@ -279,11 +285,10 @@ resource "castai_edge_location" "test" {
   name            = %[1]q
   description     = %[2]q
   region          = "us-phoenix-1"
-
-  zones {
+  zones = [{
     id   = "PHX-AD-1"
     name = "PHX-AD-1"
-  }
+  }]
 
   oci {
     tenancy_id     = "ocid1.tenancy.oc1..example"
@@ -302,7 +307,7 @@ func testAccCheckEdgeLocationDestroy(s *terraform.State) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	client := testAccProvider.Meta().(*ProviderConfig).omniClient
+	client := testAccProvider.Meta().(*ProviderConfig).OmniAPI
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "castai_edge_location" {
 			continue
