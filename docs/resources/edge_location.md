@@ -33,12 +33,7 @@ Manage CAST AI Edge Location for edge computing deployments
 
 ### Read-Only
 
-- `cloud_resource_id` (String) Name used to create/tag cloud resources
-- `create_time` (String) The creation timestamp
 - `id` (String) The ID of this resource.
-- `state` (String) Current state of the edge location
-- `total_edge_count` (Number) Total amount of edges in the edge location
-- `update_time` (String) The last update timestamp
 
 <a id="nestedblock--aws"></a>
 ### Nested Schema for `aws`
@@ -47,6 +42,7 @@ Required:
 
 - `access_key_id` (String, Sensitive) AWS access key ID
 - `account_id` (String) AWS account ID
+- `name_tag` (String) The value of a 'Name' tag applied to VPC resources
 - `secret_access_key` (String, Sensitive) AWS secret access key
 - `security_group_id` (String) Security group ID to be used in the selected region
 - `subnet_ids` (Map of String) Map of zone names to subnet IDs to be used in the selected region
@@ -59,12 +55,9 @@ Required:
 Required:
 
 - `client_service_account_json` (String, Sensitive) Base64 encoded service account JSON for provisioning edge resources
-- `project_id` (String) GCP project ID where edges run
-
-Optional:
-
 - `network_name` (String) The name of the network to be used in the selected region
-- `network_tags` (List of String) Tags applied on the provisioned cloud resources and the firewall rule
+- `network_tags` (Set of String) Tags applied on the provisioned cloud resources and the firewall rule
+- `project_id` (String) GCP project ID where edges run
 - `subnet_name` (String) The name of the subnetwork to be used in the selected region
 
 
@@ -74,7 +67,7 @@ Optional:
 Required:
 
 - `compartment_id` (String) OCI compartment ID of edge location
-- `fingerprint` (String) API key fingerprint
+- `fingerprint` (String, Sensitive) API key fingerprint
 - `private_key` (String, Sensitive) Base64 encoded API private key
 - `subnet_id` (String) OCI subnet ID of edge location
 - `tenancy_id` (String) OCI tenancy ID of the account
@@ -98,10 +91,7 @@ Optional:
 
 Required:
 
-- `name` (String) The name of the zone
-
-Optional:
-
 - `id` (String) The ID of the zone
+- `name` (String) The name of the zone
 
 
