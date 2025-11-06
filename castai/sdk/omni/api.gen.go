@@ -42,54 +42,16 @@ const (
 	EdgeLocationStateSTATEUNSPECIFIED  EdgeLocationState = "STATE_UNSPECIFIED"
 )
 
-// Defines values for EdgeLocationUpdateState.
-const (
-	EdgeLocationUpdateStateDELETED           EdgeLocationUpdateState = "DELETED"
-	EdgeLocationUpdateStateFAILED            EdgeLocationUpdateState = "FAILED"
-	EdgeLocationUpdateStateINITIALIZING      EdgeLocationUpdateState = "INITIALIZING"
-	EdgeLocationUpdateStateOFFBOARDING       EdgeLocationUpdateState = "OFFBOARDING"
-	EdgeLocationUpdateStatePENDINGONBOARDING EdgeLocationUpdateState = "PENDING_ONBOARDING"
-	EdgeLocationUpdateStateREADY             EdgeLocationUpdateState = "READY"
-	EdgeLocationUpdateStateSTATEUNSPECIFIED  EdgeLocationUpdateState = "STATE_UNSPECIFIED"
-)
-
 // Defines values for ObjectStatusPhase.
 const (
-	ObjectStatusPhaseCREATING         ObjectStatusPhase = "CREATING"
-	ObjectStatusPhaseDELETED          ObjectStatusPhase = "DELETED"
-	ObjectStatusPhaseDELETING         ObjectStatusPhase = "DELETING"
-	ObjectStatusPhaseFAILED           ObjectStatusPhase = "FAILED"
-	ObjectStatusPhasePHASEUNSPECIFIED ObjectStatusPhase = "PHASE_UNSPECIFIED"
-	ObjectStatusPhaseREADY            ObjectStatusPhase = "READY"
-	ObjectStatusPhaseUNKNOWN          ObjectStatusPhase = "UNKNOWN"
+	CREATING         ObjectStatusPhase = "CREATING"
+	DELETED          ObjectStatusPhase = "DELETED"
+	DELETING         ObjectStatusPhase = "DELETING"
+	FAILED           ObjectStatusPhase = "FAILED"
+	PHASEUNSPECIFIED ObjectStatusPhase = "PHASE_UNSPECIFIED"
+	READY            ObjectStatusPhase = "READY"
+	UNKNOWN          ObjectStatusPhase = "UNKNOWN"
 )
-
-// AWSLocationUpdate Message to update AWS specific parameters.
-type AWSLocationUpdate struct {
-	// AccessKeyId Access key for the AWS account.
-	AccessKeyId string `json:"accessKeyId"`
-
-	// AccountId The ID of the AWS account.
-	AccountId string `json:"accountId"`
-
-	// Networking The networking parameters.
-	Networking AWSLocationUpdateNetworking `json:"networking"`
-
-	// SecretAccessKey Secret key for the AWS account.
-	SecretAccessKey string `json:"secretAccessKey"`
-}
-
-// AWSLocationUpdateNetworking The networking parameters.
-type AWSLocationUpdateNetworking struct {
-	// SecurityGroupId The ID of the created security group.
-	SecurityGroupId string `json:"securityGroupId"`
-
-	// SubnetIds A map of zone names to subnet IDs to be used in the selected region.
-	SubnetIds map[string]string `json:"subnetIds"`
-
-	// VpcId The ID of the created VPC.
-	VpcId string `json:"vpcId"`
-}
 
 // AWSParam Message to represents AWS specific parameters.
 type AWSParam struct {
@@ -242,31 +204,19 @@ type EdgeLocationState string
 // EdgeLocationUpdate Message to update an edge locations credentials and networking resources.
 type EdgeLocationUpdate struct {
 	// Aws AWS specific parameters.
-	Aws *AWSLocationUpdate `json:"aws,omitempty"`
+	Aws *AWSParam `json:"aws,omitempty"`
 
 	// Description The description of the edge location.
 	Description *string `json:"description,omitempty"`
 
 	// Gcp Google Cloud specific parameters.
-	Gcp *GCPLocationUpdate `json:"gcp,omitempty"`
+	Gcp *GCPParam `json:"gcp,omitempty"`
 
 	// Oci OCI specific parameters.
-	Oci *OCILocationUpdate `json:"oci,omitempty"`
-
-	// State state of the edge location.
-	State *EdgeLocationUpdateState `json:"state,omitempty"`
+	Oci *OCIParam `json:"oci,omitempty"`
 
 	// Zones The zones of edge location.
 	Zones *[]Zone `json:"zones,omitempty"`
-}
-
-// EdgeLocationUpdateState state of the edge location.
-type EdgeLocationUpdateState string
-
-// GCPLocationUpdate Message to update Google Cloud specific parameters.
-type GCPLocationUpdate struct {
-	// ClientServiceAccountJsonBase64 Client service account json to be used to provision edge resources.
-	ClientServiceAccountJsonBase64 string `json:"clientServiceAccountJsonBase64"`
 }
 
 // GCPParam Message to represents Google Cloud specific parameters.
@@ -330,42 +280,6 @@ type ListEdgeLocationsResponse struct {
 
 	// TotalCount The total number of items.
 	TotalCount *int32 `json:"totalCount,omitempty"`
-}
-
-// OCILocationUpdate Message to update OCI location parameters.
-type OCILocationUpdate struct {
-	// CompartmentId OCI compartment id of edge location.
-	CompartmentId string `json:"compartmentId"`
-
-	// Credentials Credentials used to authenticate OCI API.
-	Credentials OCILocationUpdateCredentials `json:"credentials"`
-
-	// Networking OCI network configuration.
-	Networking OCILocationUpdateNetworking `json:"networking"`
-
-	// TenancyId OCI tenancy id of the account.
-	TenancyId string `json:"tenancyId"`
-}
-
-// OCILocationUpdateCredentials OCI credentials.
-type OCILocationUpdateCredentials struct {
-	// Fingerprint API key fingerprint;
-	Fingerprint string `json:"fingerprint"`
-
-	// PrivateKeyBase64 API private key.
-	PrivateKeyBase64 string `json:"privateKeyBase64"`
-
-	// UserId User id used to authenticate OCI.
-	UserId string `json:"userId"`
-}
-
-// OCILocationUpdateNetworking Networking configuration of OCI edge location.
-type OCILocationUpdateNetworking struct {
-	// SubnetId OCI subnet id of edge location.
-	SubnetId string `json:"subnetId"`
-
-	// VcnId OCI virtual cloud network id.
-	VcnId string `json:"vcnId"`
 }
 
 // OCIParam Message that represents OCI location specific parameters.

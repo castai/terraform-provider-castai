@@ -392,17 +392,17 @@ func resourceEdgeLocationUpdate(ctx context.Context, d *schema.ResourceData, met
 	// Map cloud provider specific configurations for update
 	if d.HasChange(FieldEdgeLocationAWS) {
 		if v, ok := d.GetOk(FieldEdgeLocationAWS); ok && len(v.([]interface{})) > 0 {
-			req.Aws = toAWSLocationUpdate(v.([]interface{})[0].(map[string]interface{}))
+			req.Aws = toAWSConfig(v.([]interface{})[0].(map[string]interface{}))
 		}
 	}
 	if d.HasChange(FieldEdgeLocationGCP) {
 		if v, ok := d.GetOk(FieldEdgeLocationGCP); ok && len(v.([]interface{})) > 0 {
-			req.Gcp = toGCPLocationUpdate(v.([]interface{})[0].(map[string]interface{}))
+			req.Gcp = toGCPConfig(v.([]interface{})[0].(map[string]interface{}))
 		}
 	}
 	if d.HasChange(FieldEdgeLocationOCI) {
 		if v, ok := d.GetOk(FieldEdgeLocationOCI); ok && len(v.([]interface{})) > 0 {
-			req.Oci = toOCILocationUpdate(v.([]interface{})[0].(map[string]interface{}))
+			req.Oci = toOCIConfig(v.([]interface{})[0].(map[string]interface{}))
 		}
 	}
 
@@ -529,41 +529,6 @@ func toAWSConfig(obj map[string]interface{}) *omni.AWSParam {
 	return out
 }
 
-func toAWSLocationUpdate(obj map[string]interface{}) *omni.AWSLocationUpdate {
-	if obj == nil {
-		return nil
-	}
-
-	out := &omni.AWSLocationUpdate{}
-	if v, ok := obj["account_id"].(string); ok {
-		out.AccountId = v
-	}
-	if v, ok := obj["access_key_id"].(string); ok {
-		out.AccessKeyId = v
-	}
-	if v, ok := obj["secret_access_key"].(string); ok {
-		out.SecretAccessKey = v
-	}
-
-	networking := omni.AWSLocationUpdateNetworking{}
-	if v, ok := obj["vpc_id"].(string); ok {
-		networking.VpcId = v
-	}
-	if v, ok := obj["security_group_id"].(string); ok {
-		networking.SecurityGroupId = v
-	}
-	if v, ok := obj["subnet_ids"].(map[string]interface{}); ok {
-		subnetIds := make(map[string]string)
-		for k, val := range v {
-			subnetIds[k] = val.(string)
-		}
-		networking.SubnetIds = subnetIds
-	}
-	out.Networking = networking
-
-	return out
-}
-
 func flattenAWSConfig(config *omni.AWSParam) []map[string]interface{} {
 	if config == nil {
 		return nil
@@ -574,8 +539,6 @@ func flattenAWSConfig(config *omni.AWSParam) []map[string]interface{} {
 	if config.AccountId != nil {
 		m["account_id"] = *config.AccountId
 	}
-	// Note: access_key_id and secret_access_key are not returned by API
-	// They are preserved in state via DiffSuppressFunc
 	if config.Networking != nil {
 		m["vpc_id"] = config.Networking.VpcId
 		m["security_group_id"] = config.Networking.SecurityGroupId
@@ -625,19 +588,6 @@ func toGCPConfig(obj map[string]interface{}) *omni.GCPParam {
 	return out
 }
 
-func toGCPLocationUpdate(obj map[string]interface{}) *omni.GCPLocationUpdate {
-	if obj == nil {
-		return nil
-	}
-
-	out := &omni.GCPLocationUpdate{}
-	if v, ok := obj["client_service_account_json"].(string); ok {
-		out.ClientServiceAccountJsonBase64 = v
-	}
-
-	return out
-}
-
 func flattenGCPConfig(config *omni.GCPParam) []map[string]interface{} {
 	if config == nil {
 		return nil
@@ -646,8 +596,6 @@ func flattenGCPConfig(config *omni.GCPParam) []map[string]interface{} {
 	m := make(map[string]interface{})
 
 	m["project_id"] = config.ProjectId
-	// Note: client_service_account_json is not returned by API
-	// It is preserved in state via DiffSuppressFunc
 	if config.Networking != nil {
 		m["network_name"] = config.Networking.NetworkName
 		m["subnet_name"] = config.Networking.SubnetName
@@ -700,43 +648,6 @@ func toOCIConfig(obj map[string]interface{}) *omni.OCIParam {
 	return out
 }
 
-func toOCILocationUpdate(obj map[string]interface{}) *omni.OCILocationUpdate {
-	if obj == nil {
-		return nil
-	}
-
-	out := &omni.OCILocationUpdate{}
-	if v, ok := obj["tenancy_id"].(string); ok {
-		out.TenancyId = v
-	}
-	if v, ok := obj["compartment_id"].(string); ok {
-		out.CompartmentId = v
-	}
-
-	creds := omni.OCILocationUpdateCredentials{}
-	if v, ok := obj["user_id"].(string); ok {
-		creds.UserId = v
-	}
-	if v, ok := obj["fingerprint"].(string); ok {
-		creds.Fingerprint = v
-	}
-	if v, ok := obj["private_key"].(string); ok {
-		creds.PrivateKeyBase64 = v
-	}
-	out.Credentials = creds
-
-	networking := omni.OCILocationUpdateNetworking{}
-	if v, ok := obj["vcn_id"].(string); ok {
-		networking.VcnId = v
-	}
-	if v, ok := obj["subnet_id"].(string); ok {
-		networking.SubnetId = v
-	}
-	out.Networking = networking
-
-	return out
-}
-
 func flattenOCIConfig(config *omni.OCIParam) []map[string]interface{} {
 	if config == nil {
 		return nil
@@ -749,12 +660,6 @@ func flattenOCIConfig(config *omni.OCIParam) []map[string]interface{} {
 	}
 	if config.CompartmentId != nil {
 		m["compartment_id"] = *config.CompartmentId
-	}
-	if config.Credentials != nil {
-		m["user_id"] = config.Credentials.UserId
-		m["fingerprint"] = config.Credentials.Fingerprint
-		// Note: private_key is not returned by API
-		// It is preserved in state via DiffSuppressFunc
 	}
 	if config.Networking != nil {
 		m["vcn_id"] = config.Networking.VcnId
