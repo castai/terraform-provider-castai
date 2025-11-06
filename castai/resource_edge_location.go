@@ -2,6 +2,7 @@ package castai
 
 import (
 	"context"
+	"crypto/sha256"
 	"fmt"
 	"log"
 	"net/http"
@@ -72,6 +73,11 @@ func resourceEdgeLocation() *schema.Resource {
 				Optional:    true,
 				Description: "Description of the edge location",
 			},
+			"credentials_revision": {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "Hash of credentials used to detect credential changes",
+			},
 			FieldEdgeLocationRegion: {
 				Type:             schema.TypeString,
 				Required:         true,
@@ -112,6 +118,7 @@ func resourceEdgeLocation() *schema.Resource {
 						"access_key_id": {
 							Type:        schema.TypeString,
 							Required:    true,
+							WriteOnly:   true,
 							Sensitive:   true,
 							Description: "AWS access key ID",
 						},
@@ -119,6 +126,7 @@ func resourceEdgeLocation() *schema.Resource {
 							Type:        schema.TypeString,
 							Required:    true,
 							Sensitive:   true,
+							WriteOnly:   true,
 							Description: "AWS secret access key",
 						},
 						"vpc_id": {
@@ -163,6 +171,7 @@ func resourceEdgeLocation() *schema.Resource {
 							Type:        schema.TypeString,
 							Required:    true,
 							Sensitive:   true,
+							WriteOnly:   true,
 							Description: "Base64 encoded service account JSON for provisioning edge resources",
 						},
 						"network_name": {
@@ -207,6 +216,7 @@ func resourceEdgeLocation() *schema.Resource {
 							Type:        schema.TypeString,
 							Required:    true,
 							Description: "User ID used to authenticate OCI",
+							WriteOnly:   true,
 						},
 						"fingerprint": {
 							Type:        schema.TypeString,
@@ -215,6 +225,7 @@ func resourceEdgeLocation() *schema.Resource {
 							Description: "API key fingerprint",
 						},
 						"private_key": {
+							WriteOnly:   true,
 							Type:        schema.TypeString,
 							Required:    true,
 							Sensitive:   true,
@@ -223,6 +234,7 @@ func resourceEdgeLocation() *schema.Resource {
 						"vcn_id": {
 							Type:        schema.TypeString,
 							Required:    true,
+							WriteOnly:   true,
 							Description: "OCI virtual cloud network ID",
 						},
 						"subnet_id": {
@@ -331,14 +343,20 @@ func resourceEdgeLocationRead(ctx context.Context, d *schema.ResourceData, meta 
 
 	// Set cloud provider specific configurations
 	// Preserve write-only credentials from existing state
-	if err := d.Set(FieldEdgeLocationAWS, flattenAWSConfigPreservingCredentials(edgeLocation.Aws, d)); err != nil {
+	if err := d.Set(FieldEdgeLocationAWS, flattenAWSConfig(edgeLocation.Aws)); err != nil {
 		return diag.Errorf("error setting aws config: %v", err)
 	}
-	if err := d.Set(FieldEdgeLocationGCP, flattenGCPConfigPreservingCredentials(edgeLocation.Gcp, d)); err != nil {
+	if err := d.Set(FieldEdgeLocationGCP, flattenGCPConfig(edgeLocation.Gcp)); err != nil {
 		return diag.Errorf("error setting gcp config: %v", err)
 	}
-	if err := d.Set(FieldEdgeLocationOCI, flattenOCIConfigPreservingCredentials(edgeLocation.Oci, d)); err != nil {
+	if err := d.Set(FieldEdgeLocationOCI, flattenOCIConfig(edgeLocation.Oci)); err != nil {
 		return diag.Errorf("error setting oci config: %v", err)
+	}
+
+	// Compute credentials revision hash
+	credentialsHash := computeCredentialsHash(d)
+	if err := d.Set("credentials_revision", credentialsHash); err != nil {
+		return diag.Errorf("error setting credentials_revision: %v", err)
 	}
 
 	return nil
@@ -568,27 +586,6 @@ func flattenAWSConfig(config *omni.AWSParam) []map[string]interface{} {
 	return []map[string]interface{}{m}
 }
 
-func flattenAWSConfigPreservingCredentials(config *omni.AWSParam, d *schema.ResourceData) []map[string]interface{} {
-	result := flattenAWSConfig(config)
-	if len(result) == 0 {
-		return nil
-	}
-
-	// Preserve write-only credentials from existing state since API doesn't return them
-	if existingAWS, ok := d.Get(FieldEdgeLocationAWS).([]interface{}); ok && len(existingAWS) > 0 {
-		if existingMap, ok := existingAWS[0].(map[string]interface{}); ok {
-			if accessKey, ok := existingMap["access_key_id"].(string); ok && accessKey != "" {
-				result[0]["access_key_id"] = accessKey
-			}
-			if secretKey, ok := existingMap["secret_access_key"].(string); ok && secretKey != "" {
-				result[0]["secret_access_key"] = secretKey
-			}
-		}
-	}
-
-	return result
-}
-
 func toGCPConfig(obj map[string]interface{}) *omni.GCPParam {
 	if obj == nil {
 		return nil
@@ -658,24 +655,6 @@ func flattenGCPConfig(config *omni.GCPParam) []map[string]interface{} {
 	}
 
 	return []map[string]interface{}{m}
-}
-
-func flattenGCPConfigPreservingCredentials(config *omni.GCPParam, d *schema.ResourceData) []map[string]interface{} {
-	result := flattenGCPConfig(config)
-	if len(result) == 0 {
-		return nil
-	}
-
-	// Preserve write-only credentials from existing state since API doesn't return them
-	if existingGCP, ok := d.Get(FieldEdgeLocationGCP).([]interface{}); ok && len(existingGCP) > 0 {
-		if existingMap, ok := existingGCP[0].(map[string]interface{}); ok {
-			if serviceAccount, ok := existingMap["client_service_account_json"].(string); ok && serviceAccount != "" {
-				result[0]["client_service_account_json"] = serviceAccount
-			}
-		}
-	}
-
-	return result
 }
 
 func toOCIConfig(obj map[string]interface{}) *omni.OCIParam {
@@ -785,24 +764,6 @@ func flattenOCIConfig(config *omni.OCIParam) []map[string]interface{} {
 	return []map[string]interface{}{m}
 }
 
-func flattenOCIConfigPreservingCredentials(config *omni.OCIParam, d *schema.ResourceData) []map[string]interface{} {
-	result := flattenOCIConfig(config)
-	if len(result) == 0 {
-		return nil
-	}
-
-	// Preserve write-only credentials from existing state since API doesn't return them
-	if existingOCI, ok := d.Get(FieldEdgeLocationOCI).([]interface{}); ok && len(existingOCI) > 0 {
-		if existingMap, ok := existingOCI[0].(map[string]interface{}); ok {
-			if privateKey, ok := existingMap["private_key"].(string); ok && privateKey != "" {
-				result[0]["private_key"] = privateKey
-			}
-		}
-	}
-
-	return result
-}
-
 func resourceEdgeLocationImport(ctx context.Context, d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
 	// Import format: organization_id/cluster_id/edge_location_id
 	ids := strings.Split(d.Id(), "/")
@@ -829,4 +790,49 @@ func resourceEdgeLocationImport(ctx context.Context, d *schema.ResourceData, met
 	}
 
 	return []*schema.ResourceData{d}, nil
+}
+
+func computeCredentialsHash(d *schema.ResourceData) string {
+	hasher := sha256.New()
+
+	// Hash AWS credentials
+	if aws, ok := d.GetOk(FieldEdgeLocationAWS); ok && len(aws.([]interface{})) > 0 {
+		awsMap := aws.([]interface{})[0].(map[string]interface{})
+		if accessKey, ok := awsMap["access_key_id"].(string); ok {
+			hasher.Write([]byte("aws_access_key:"))
+			hasher.Write([]byte(accessKey))
+		}
+		if secretKey, ok := awsMap["secret_access_key"].(string); ok {
+			hasher.Write([]byte("aws_secret_key:"))
+			hasher.Write([]byte(secretKey))
+		}
+	}
+
+	// Hash GCP credentials
+	if gcp, ok := d.GetOk(FieldEdgeLocationGCP); ok && len(gcp.([]interface{})) > 0 {
+		gcpMap := gcp.([]interface{})[0].(map[string]interface{})
+		if serviceAccount, ok := gcpMap["client_service_account_json"].(string); ok {
+			hasher.Write([]byte("gcp_service_account:"))
+			hasher.Write([]byte(serviceAccount))
+		}
+	}
+
+	// Hash OCI credentials
+	if oci, ok := d.GetOk(FieldEdgeLocationOCI); ok && len(oci.([]interface{})) > 0 {
+		ociMap := oci.([]interface{})[0].(map[string]interface{})
+		if userId, ok := ociMap["user_id"].(string); ok {
+			hasher.Write([]byte("oci_user_id:"))
+			hasher.Write([]byte(userId))
+		}
+		if fingerprint, ok := ociMap["fingerprint"].(string); ok {
+			hasher.Write([]byte("oci_fingerprint:"))
+			hasher.Write([]byte(fingerprint))
+		}
+		if privateKey, ok := ociMap["private_key"].(string); ok {
+			hasher.Write([]byte("oci_private_key:"))
+			hasher.Write([]byte(privateKey))
+		}
+	}
+
+	return fmt.Sprintf("%x", hasher.Sum(nil))
 }
