@@ -1,0 +1,10 @@
+components:
+  castai-agent:
+    component: castai-agent
+    cluster: castai
+    enabled: true
+    overrides:
+      replicaCount: 3
+      additionalEnv:
+        AKS_CLUSTER_NAME: ${aks_cluster_name}
+        AKS_CLUSTER_REGION: ${aks_cluster_region}
