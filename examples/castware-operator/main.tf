@@ -5,10 +5,10 @@ resource "helm_release" "castware_operator" {
   repository = "https://castai.github.io/helm-charts"
   chart      = "castware-operator"
   version    = var.castware_operator_version
-  
-  wait            = true
-  atomic          = true
-  cleanup_on_fail = true
+
+  wait             = true
+  atomic           = true
+  cleanup_on_fail  = true
   create_namespace = false # true if you plan to deploy in a cluster without any cast components
 
   set_sensitive {
@@ -18,7 +18,7 @@ resource "helm_release" "castware_operator" {
 
   set {
     name  = "defaultCluster.provider"
-    value = "aks"  # Change to "gke" or "eks" as needed
+    value = "aks" # Change to "gke" or "eks" as needed
   }
 
   set {
@@ -53,16 +53,16 @@ resource "helm_release" "castware_components" {
   namespace  = "castai-agent"
   repository = "https://castai.github.io/helm-charts"
   chart      = "castware-components"
-  
-  wait            = true
-  atomic          = true
-  cleanup_on_fail = true
+
+  wait             = true
+  atomic           = true
+  cleanup_on_fail  = true
   create_namespace = false
 
   #overrides
   values = [
     templatefile("${path.module}/castware-values.yaml", {
-      aks_cluster_name = var.aks_cluster_name
+      aks_cluster_name   = var.aks_cluster_name
       aks_cluster_region = var.aks_cluster_region
     })
   ]
