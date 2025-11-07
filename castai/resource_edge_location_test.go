@@ -128,7 +128,7 @@ func TestAccCloudAgnostic_ResourceEdgeLocationOCI(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "description", "Test OCI edge location"),
 					resource.TestCheckResourceAttr(resourceName, "region", "us-phoenix-1"),
 					resource.TestCheckResourceAttr(resourceName, "zones.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "zones.0.id", "PHX-AD-1"),
+					resource.TestCheckResourceAttr(resourceName, "zones.0.id", "1"),
 					resource.TestCheckResourceAttr(resourceName, "zones.0.name", "PHX-AD-1"),
 					resource.TestCheckResourceAttrSet(resourceName, "oci.tenancy_id"),
 					resource.TestCheckResourceAttrSet(resourceName, "oci.compartment_id"),
@@ -276,7 +276,7 @@ resource "castai_edge_location" "test" {
   description     = %[2]q
   region          = "us-phoenix-1"
   zones = [{
-    id   = "PHX-AD-1"
+    id   = "1"
     name = "PHX-AD-1"
   }]
 

@@ -80,12 +80,43 @@ func (m awsModel) credentials() types.String {
 	return types.StringValue(m.SecretAccessKeyWO.String() + m.AccessKeyIDWO.String())
 }
 
+func (m awsModel) Equal(other *awsModel) bool {
+	if other == nil {
+		return false
+	}
+	return m.AccountID.Equal(other.AccountID) &&
+		m.VpcID.Equal(other.VpcID) &&
+		m.SecurityGroupID.Equal(other.SecurityGroupID) &&
+		m.SubnetIDs.Equal(other.SubnetIDs) &&
+		m.NameTag.Equal(other.NameTag)
+}
+
 func (m gcpModel) credentials() types.String {
 	return m.ClientServiceAccountJSONBase64WO
 }
 
+func (m gcpModel) Equal(other *gcpModel) bool {
+	if other == nil {
+		return false
+	}
+	return m.ProjectID.Equal(other.ProjectID) &&
+		m.NetworkName.Equal(other.NetworkName) &&
+		m.SubnetName.Equal(other.SubnetName) &&
+		m.NetworkTags.Equal(other.NetworkTags)
+}
+
 func (m ociModel) credentials() types.String {
 	return types.StringValue(m.FingerprintWO.String() + m.PrivateKeyWO.String() + m.FingerprintWO.String())
+}
+
+func (m ociModel) Equal(other *ociModel) bool {
+	if other == nil {
+		return false
+	}
+	return m.TenancyID.Equal(other.TenancyID) &&
+		m.CompartmentID.Equal(other.CompartmentID) &&
+		m.SubnetID.Equal(other.SubnetID) &&
+		m.VcnID.Equal(other.VcnID)
 }
 
 type ModelWithCredentials interface {
@@ -459,7 +490,7 @@ func (r *edgeLocationResource) Update(ctx context.Context, req resource.UpdateRe
 	if plan.AWS != nil {
 		credsEqual, diags := r.woCredentialsStore(resp.Private).Equal(ctx, config.AWS.credentials())
 		resp.Diagnostics.Append(diags...)
-		if !awsEqual(plan.AWS, state.AWS) || !credsEqual {
+		if !plan.AWS.Equal(state.AWS) || !credsEqual {
 			updateReq.Aws, diags = r.toAWS(ctx, plan.AWS, config.AWS)
 			resp.Diagnostics.Append(diags...)
 		}
@@ -467,7 +498,7 @@ func (r *edgeLocationResource) Update(ctx context.Context, req resource.UpdateRe
 	if plan.GCP != nil {
 		credsEqual, diags := r.woCredentialsStore(resp.Private).Equal(ctx, config.GCP.credentials())
 		resp.Diagnostics.Append(diags...)
-		if !gcpEqual(plan.GCP, state.GCP) || !credsEqual {
+		if !plan.GCP.Equal(state.GCP) || !credsEqual {
 			updateReq.Gcp, diags = r.toGCP(ctx, plan.GCP, config.GCP)
 			resp.Diagnostics.Append(diags...)
 		}
@@ -475,7 +506,7 @@ func (r *edgeLocationResource) Update(ctx context.Context, req resource.UpdateRe
 	if plan.OCI != nil {
 		credsEqual, diags := r.woCredentialsStore(resp.Private).Equal(ctx, config.OCI.credentials())
 		resp.Diagnostics.Append(diags...)
-		if !ociEqual(plan.OCI, state.OCI) || !credsEqual {
+		if !plan.OCI.Equal(state.OCI) || !credsEqual {
 			updateReq.Oci = r.toOCI(plan.OCI, config.OCI)
 		}
 	}
@@ -738,47 +769,4 @@ func (r *edgeLocationResource) toOCIModel(config *omni.OCIParam) *ociModel {
 
 func (r *edgeLocationResource) woCredentialsStore(private store.PrivateState) *store.WriteOnlyStore {
 	return store.NewWriteOnlyStore(private, "credentials")
-}
-
-func awsEqual(a, b *awsModel) bool {
-	if a == nil && b == nil {
-		return true
-	}
-	if a == nil || b == nil {
-		return false
-	}
-
-	return a.AccountID.Equal(b.AccountID) &&
-		a.VpcID.Equal(b.VpcID) &&
-		a.SecurityGroupID.Equal(b.SecurityGroupID) &&
-		a.SubnetIDs.Equal(b.SubnetIDs) &&
-		a.NameTag.Equal(b.NameTag)
-}
-
-func gcpEqual(a, b *gcpModel) bool {
-	if a == nil && b == nil {
-		return true
-	}
-	if a == nil || b == nil {
-		return false
-	}
-
-	return a.ProjectID.Equal(b.ProjectID) &&
-		a.NetworkName.Equal(b.NetworkName) &&
-		a.SubnetName.Equal(b.SubnetName) &&
-		a.NetworkTags.Equal(b.NetworkTags)
-}
-
-func ociEqual(a, b *ociModel) bool {
-	if a == nil && b == nil {
-		return true
-	}
-	if a == nil || b == nil {
-		return false
-	}
-
-	return a.TenancyID.Equal(b.TenancyID) &&
-		a.CompartmentID.Equal(b.CompartmentID) &&
-		a.SubnetID.Equal(b.SubnetID) &&
-		a.VcnID.Equal(b.VcnID)
 }

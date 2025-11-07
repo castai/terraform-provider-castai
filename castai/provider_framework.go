@@ -127,6 +127,7 @@ func (p *frameworkProvider) Configure(ctx context.Context, req tfprovider.Config
 func (p *frameworkProvider) Resources(_ context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
 		NewEdgeLocationResource,
+		NewOmniClusterResource,
 	}
 }
 
