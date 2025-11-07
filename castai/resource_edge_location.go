@@ -16,6 +16,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/samber/lo"
 
+	"github.com/castai/terraform-provider-castai/castai/helper/store"
 	"github.com/castai/terraform-provider-castai/castai/sdk/omni"
 )
 
@@ -58,11 +59,11 @@ type awsModel struct {
 }
 
 type gcpModel struct {
-	ProjectID                  types.String `tfsdk:"project_id"`
-	ClientServiceAccountJSONWO types.String `tfsdk:"client_service_account_json_wo"`
-	NetworkName                types.String `tfsdk:"network_name"`
-	SubnetName                 types.String `tfsdk:"subnet_name"`
-	NetworkTags                types.Set    `tfsdk:"network_tags"`
+	ProjectID                        types.String `tfsdk:"project_id"`
+	ClientServiceAccountJSONBase64WO types.String `tfsdk:"client_service_account_json_base64_wo"`
+	NetworkName                      types.String `tfsdk:"network_name"`
+	SubnetName                       types.String `tfsdk:"subnet_name"`
+	NetworkTags                      types.Set    `tfsdk:"network_tags"`
 }
 
 type ociModel struct {
@@ -73,6 +74,22 @@ type ociModel struct {
 	PrivateKeyWO  types.String `tfsdk:"private_key_wo"`
 	VcnID         types.String `tfsdk:"vcn_id"`
 	SubnetID      types.String `tfsdk:"subnet_id"`
+}
+
+func (m awsModel) credentials() types.String {
+	return types.StringValue(m.SecretAccessKeyWO.String() + m.AccessKeyIDWO.String())
+}
+
+func (m gcpModel) credentials() types.String {
+	return m.ClientServiceAccountJSONBase64WO
+}
+
+func (m ociModel) credentials() types.String {
+	return types.StringValue(m.FingerprintWO.String() + m.PrivateKeyWO.String() + m.FingerprintWO.String())
+}
+
+type ModelWithCredentials interface {
+	credentials() types.String
 }
 
 func NewEdgeLocationResource() resource.Resource {
@@ -199,7 +216,7 @@ func (r *edgeLocationResource) Schema(_ context.Context, _ resource.SchemaReques
 						Required:    true,
 						Description: "GCP project ID where edges run",
 					},
-					"client_service_account_json_wo": schema.StringAttribute{
+					"client_service_account_json_base64_wo": schema.StringAttribute{
 						Required:    true,
 						Sensitive:   true,
 						WriteOnly:   true,
@@ -282,15 +299,10 @@ func (r *edgeLocationResource) Configure(_ context.Context, req resource.Configu
 
 func (r *edgeLocationResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var (
-		plan   edgeLocationModel
-		config edgeLocationModel
+		plan, config edgeLocationModel
+		diags        diag.Diagnostics
 	)
-
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
 	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -311,26 +323,23 @@ func (r *edgeLocationResource) Create(ctx context.Context, req resource.CreateRe
 	}
 
 	// Map cloud provider specific configurations.
+	var mc ModelWithCredentials
 	if plan.AWS != nil {
-		awsConfig, diags := r.toAWS(ctx, plan.AWS, config.AWS)
+		createReq.Aws, diags = r.toAWS(ctx, plan.AWS, config.AWS)
 		resp.Diagnostics.Append(diags...)
-		if resp.Diagnostics.HasError() {
-			return
-		}
-		createReq.Aws = awsConfig
+		mc = plan.AWS
 	}
-
 	if plan.GCP != nil {
-		gcpConfig, diags := r.toGCP(ctx, plan.GCP, config.GCP)
+		createReq.Gcp, diags = r.toGCP(ctx, plan.GCP, config.GCP)
 		resp.Diagnostics.Append(diags...)
-		if resp.Diagnostics.HasError() {
-			return
-		}
-		createReq.Gcp = gcpConfig
+		mc = plan.GCP
 	}
-
 	if plan.OCI != nil {
 		createReq.Oci = r.toOCI(plan.OCI, config.OCI)
+		mc = plan.OCI
+	}
+	if resp.Diagnostics.HasError() {
+		return
 	}
 
 	apiResp, err := client.EdgeLocationsAPICreateEdgeLocationWithResponse(ctx, organizationID, clusterID, createReq)
@@ -348,7 +357,8 @@ func (r *edgeLocationResource) Create(ctx context.Context, req resource.CreateRe
 	}
 
 	plan.ID = types.StringValue(*apiResp.JSON200.Id)
-
+	// Store credential hash in private state
+	resp.Diagnostics.Append(r.woCredentialsStore(resp.Private).Set(ctx, mc.credentials())...)
 	resp.Diagnostics.Append(resp.State.Set(ctx, plan)...)
 }
 
@@ -423,22 +433,10 @@ func (r *edgeLocationResource) Read(ctx context.Context, req resource.ReadReques
 }
 
 func (r *edgeLocationResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var (
-		plan   edgeLocationModel
-		state  edgeLocationModel
-		config edgeLocationModel
-	)
+	var plan, state, config edgeLocationModel
 
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
 	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
-
 	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -457,27 +455,34 @@ func (r *edgeLocationResource) Update(ctx context.Context, req resource.UpdateRe
 		updateReq.Zones = toPtr(r.toZones(plan.Zones))
 	}
 
-	// Only include cloud provider config if it changed
-	if plan.AWS != nil && !awsEqual(plan.AWS, state.AWS) {
-		awsConfig, diags := r.toAWS(ctx, plan.AWS, config.AWS)
+	// Only include cloud provider config if it or credentials has changed
+	switch {
+	case plan.AWS != nil:
+		credsEqual, diags := r.woCredentialsStore(resp.Private).Equal(ctx, config.AWS.credentials())
 		resp.Diagnostics.Append(diags...)
-		if resp.Diagnostics.HasError() {
-			return
+		if awsEqual(plan.AWS, state.AWS) && credsEqual {
+			break
 		}
-		updateReq.Aws = awsConfig
-	}
-
-	if plan.GCP != nil && !gcpEqual(plan.GCP, state.GCP) {
-		gcpConfig, diags := r.toGCP(ctx, plan.GCP, config.GCP)
+		updateReq.Aws, diags = r.toAWS(ctx, plan.AWS, config.AWS)
 		resp.Diagnostics.Append(diags...)
-		if resp.Diagnostics.HasError() {
-			return
+	case plan.GCP != nil:
+		credsEqual, diags := r.woCredentialsStore(resp.Private).Equal(ctx, config.GCP.credentials())
+		resp.Diagnostics.Append(diags...)
+		if gcpEqual(plan.GCP, state.GCP) && credsEqual {
+			break
 		}
-		updateReq.Gcp = gcpConfig
-	}
-
-	if plan.OCI != nil && !ociEqual(plan.OCI, state.OCI) {
+		updateReq.Gcp, diags = r.toGCP(ctx, plan.GCP, config.GCP)
+		resp.Diagnostics.Append(diags...)
+	case plan.OCI != nil:
+		credsEqual, diags := r.woCredentialsStore(resp.Private).Equal(ctx, config.OCI.credentials())
+		resp.Diagnostics.Append(diags...)
+		if ociEqual(plan.OCI, state.OCI) && credsEqual {
+			break
+		}
 		updateReq.Oci = r.toOCI(plan.OCI, config.OCI)
+	}
+	if resp.Diagnostics.HasError() {
+		return
 	}
 
 	apiResp, err := client.EdgeLocationsAPIUpdateEdgeLocationWithResponse(ctx, organizationID, clusterID, plan.ID.ValueString(), nil, updateReq)
@@ -650,7 +655,7 @@ func (r *edgeLocationResource) toGCP(ctx context.Context, plan, config *gcpModel
 	out := &omni.GCPParam{
 		ProjectId: plan.ProjectID.ValueString(),
 		Credentials: &omni.GCPParamCredentials{
-			ClientServiceAccountJsonBase64: config.ClientServiceAccountJSONWO.ValueString(),
+			ClientServiceAccountJsonBase64: config.ClientServiceAccountJSONBase64WO.ValueString(),
 		},
 		Networking: &omni.GCPParamGCPNetworking{
 			NetworkName: plan.NetworkName.ValueString(),
@@ -669,11 +674,11 @@ func (r *edgeLocationResource) toGCPModel(ctx context.Context, config *omni.GCPP
 	}
 
 	gcp := &gcpModel{
-		ProjectID:                  types.StringValue(config.ProjectId),
-		ClientServiceAccountJSONWO: types.StringNull(),
-		NetworkName:                types.StringNull(),
-		SubnetName:                 types.StringNull(),
-		NetworkTags:                types.SetNull(types.StringType),
+		ProjectID:                        types.StringValue(config.ProjectId),
+		ClientServiceAccountJSONBase64WO: types.StringNull(),
+		NetworkName:                      types.StringNull(),
+		SubnetName:                       types.StringNull(),
+		NetworkTags:                      types.SetNull(types.StringType),
 	}
 
 	if config.Networking != nil {
@@ -731,6 +736,10 @@ func (r *edgeLocationResource) toOCIModel(config *omni.OCIParam) *ociModel {
 	}
 
 	return oci
+}
+
+func (r *edgeLocationResource) woCredentialsStore(private store.PrivateState) *store.WriteOnlyStore {
+	return store.NewWriteOnlyStore(private, "credentials")
 }
 
 func awsEqual(a, b *awsModel) bool {

@@ -6782,7 +6782,7 @@ type WorkloadoptimizationV1HPAConfig struct {
 	// MaxReplicas Max replicas a workload can have.
 	MaxReplicas *int32 `json:"maxReplicas"`
 
-	// Metrics Metrics list which is scaled on. Matches Kubernetes HPA spec.
+	// Metrics Metrics list which is scaled on. Equal Kubernetes HPA spec.
 	Metrics *[]WorkloadoptimizationV1MetricSpec `json:"metrics,omitempty"`
 
 	// MinReplicas Min replicas a workload can have.
@@ -6804,7 +6804,7 @@ type WorkloadoptimizationV1HPAConfigUpdate struct {
 	ManagementOption *WorkloadoptimizationV1ManagementOption `json:"managementOption,omitempty"`
 	MaxReplicas      *int32                                  `json:"maxReplicas"`
 
-	// Metrics Metrics list which is scaled on. Matches Kubernetes HPA spec.
+	// Metrics Metrics list which is scaled on. Equal Kubernetes HPA spec.
 	Metrics     *[]WorkloadoptimizationV1MetricSpec `json:"metrics,omitempty"`
 	MinReplicas *int32                              `json:"minReplicas"`
 
@@ -7634,7 +7634,7 @@ type WorkloadoptimizationV1ScalingPolicyNativeHPASpec struct {
 	// MaxReplicas Max replicas a workload can have.
 	MaxReplicas int32 `json:"maxReplicas"`
 
-	// Metrics Metrics list which is scaled on. Matches Kubernetes HPA spec.
+	// Metrics Metrics list which is scaled on. Equal Kubernetes HPA spec.
 	Metrics []WorkloadoptimizationV1MetricSpec `json:"metrics"`
 
 	// MinReplicas Min replicas a workload can have.

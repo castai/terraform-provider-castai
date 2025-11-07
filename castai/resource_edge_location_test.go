@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"strings"
 	"testing"
 	"time"
 
@@ -51,8 +52,8 @@ func TestAccCloudAgnostic_ResourceEdgeLocationAWS(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 				ImportStateVerifyIgnore: []string{
-					"aws.access_key_id",
-					"aws.secret_access_key",
+					"aws.access_key_id_wo",
+					"aws.secret_access_key_wo",
 				},
 			},
 			{
@@ -182,14 +183,14 @@ resource "castai_edge_location" "test" {
 %[3]s
 
   aws = {
-    account_id         = "123456789012"
-    access_key_id      = "AKIAIOSFODNN7EXAMPLE"
-    secret_access_key  = "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
-    vpc_id             = "vpc-12345678"
-    security_group_id  = "sg-12345678"
+    account_id           = "123456789012"
+    access_key_id_wo     = "AKIAIOSFODNN7EXAMPLE"
+    secret_access_key_wo = "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
+    vpc_id               = "vpc-12345678"
+    security_group_id    = "sg-12345678"
     subnet_ids = {%[4]s
     }
-    name_tag           = "test-edge-location"
+    name_tag             = "test-edge-location"
   }
 }
 `, rName, description, zonesConfig, subnetConfig, organizationID))
@@ -200,13 +201,13 @@ func testAccEdgeLocationGCPConfig(rName, clusterName string) string {
 }
 
 func testAccEdgeLocationGCPUpdated(rName, clusterName string) string {
-	return testAccEdgeLocationGCPConfigWithParams(rName, clusterName, "Updated GCP edge location", []string{"us-central1-a", "us-central1-b"}, []string{"edge-location"})
+	params := testAccEdgeLocationGCPConfigWithParams(rName, clusterName, "Updated GCP edge location", []string{"us-central1-a", "us-central1-b"}, []string{"edge-location", "castai"})
+	params = strings.Replace(params, "\"project_id\": \"test-project-123456\",", "\"project_id\": \"test-project-123457\",", -1)
+	return params
 }
 
 func testAccEdgeLocationGCPConfigWithParams(rName, clusterName, description string, zones []string, networkTags []string) string {
 	organizationID := testAccGetOrganizationID()
-	projectID := "test-project-123456"
-
 	zonesConfig := "zones = ["
 	for i, zone := range zones {
 		if i > 0 {
@@ -237,10 +238,10 @@ resource "castai_edge_location" "test" {
 %[3]s
 
   gcp = {
-    project_id                     = %[7]q
-    client_service_account_json    = base64encode(jsonencode({
+    project_id                     = "test-project-123456"
+    client_service_account_json_base64_wo = base64encode(jsonencode({
       "type": "service_account",
-      "project_id": %[7]q,
+      "project_id": "test-project-123456",
       "private_key_id": "key123",
       "private_key": "-----BEGIN PRIVATE KEY-----\nMIIE...EXAMPLE...==\n-----END PRIVATE KEY-----\n",
       "client_email": "test@test-project-123456.iam.gserviceaccount.com",
@@ -253,7 +254,7 @@ resource "castai_edge_location" "test" {
     network_tags                   = [%[4]s]
   }
 }
-`, rName, description, zonesConfig, networkTagsConfig, organizationID, organizationID, projectID))
+`, rName, description, zonesConfig, networkTagsConfig, organizationID, organizationID))
 }
 
 func testAccEdgeLocationOCIConfig(rName string) string {
@@ -281,13 +282,13 @@ resource "castai_edge_location" "test" {
   }]
 
   oci = {
-    tenancy_id     = "ocid1.tenancy.oc1..example"
-    compartment_id = "ocid1.compartment.oc1..example"
-    user_id        = "ocid1.user.oc1..example"
-    fingerprint    = "aa:bb:cc:dd:ee:ff:00:11:22:33:44:55:66:77:88:99"
-    private_key    = base64encode("-----BEGIN RSA PRIVATE KEY-----\nMIIE...EXAMPLE...==\n-----END RSA PRIVATE KEY-----\n")
-    vcn_id         = "ocid1.vcn.oc1.phx.example"
-    subnet_id      = "ocid1.subnet.oc1.phx.example"
+    tenancy_id      = "ocid1.tenancy.oc1..example"
+    compartment_id  = "ocid1.compartment.oc1..example"
+    user_id_wo      = "ocid1.user.oc1..example"
+    fingerprint_wo  = "aa:bb:cc:dd:ee:ff:00:11:22:33:44:55:66:77:88:99"
+    private_key_wo  = base64encode("-----BEGIN RSA PRIVATE KEY-----\nMIIE...EXAMPLE...==\n-----END RSA PRIVATE KEY-----\n")
+    vcn_id          = "ocid1.vcn.oc1.phx.example"
+    subnet_id       = "ocid1.subnet.oc1.phx.example"
   }
 }
 `, rName, description, organizationID))
