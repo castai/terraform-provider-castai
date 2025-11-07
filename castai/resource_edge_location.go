@@ -456,30 +456,28 @@ func (r *edgeLocationResource) Update(ctx context.Context, req resource.UpdateRe
 	}
 
 	// Only include cloud provider config if it or credentials has changed
-	switch {
-	case plan.AWS != nil:
+	if plan.AWS != nil {
 		credsEqual, diags := r.woCredentialsStore(resp.Private).Equal(ctx, config.AWS.credentials())
 		resp.Diagnostics.Append(diags...)
-		if awsEqual(plan.AWS, state.AWS) && credsEqual {
-			break
+		if !awsEqual(plan.AWS, state.AWS) || !credsEqual {
+			updateReq.Aws, diags = r.toAWS(ctx, plan.AWS, config.AWS)
+			resp.Diagnostics.Append(diags...)
 		}
-		updateReq.Aws, diags = r.toAWS(ctx, plan.AWS, config.AWS)
-		resp.Diagnostics.Append(diags...)
-	case plan.GCP != nil:
+	}
+	if plan.GCP != nil {
 		credsEqual, diags := r.woCredentialsStore(resp.Private).Equal(ctx, config.GCP.credentials())
 		resp.Diagnostics.Append(diags...)
-		if gcpEqual(plan.GCP, state.GCP) && credsEqual {
-			break
+		if !gcpEqual(plan.GCP, state.GCP) || !credsEqual {
+			updateReq.Gcp, diags = r.toGCP(ctx, plan.GCP, config.GCP)
+			resp.Diagnostics.Append(diags...)
 		}
-		updateReq.Gcp, diags = r.toGCP(ctx, plan.GCP, config.GCP)
-		resp.Diagnostics.Append(diags...)
-	case plan.OCI != nil:
+	}
+	if plan.OCI != nil {
 		credsEqual, diags := r.woCredentialsStore(resp.Private).Equal(ctx, config.OCI.credentials())
 		resp.Diagnostics.Append(diags...)
-		if ociEqual(plan.OCI, state.OCI) && credsEqual {
-			break
+		if !ociEqual(plan.OCI, state.OCI) || !credsEqual {
+			updateReq.Oci = r.toOCI(plan.OCI, config.OCI)
 		}
-		updateReq.Oci = r.toOCI(plan.OCI, config.OCI)
 	}
 	if resp.Diagnostics.HasError() {
 		return
