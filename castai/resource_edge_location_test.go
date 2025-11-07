@@ -33,13 +33,10 @@ func TestAccCloudAgnostic_ResourceEdgeLocationAWS(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "zones.0.name", "us-east-1a"),
 					resource.TestCheckResourceAttr(resourceName, "zones.1.id", "us-east-1b"),
 					resource.TestCheckResourceAttr(resourceName, "zones.1.name", "us-east-1b"),
-					resource.TestCheckResourceAttr(resourceName, "aws.#", "1"),
-					resource.TestCheckResourceAttrSet(resourceName, "aws.0.account_id"),
-					resource.TestCheckResourceAttrSet(resourceName, "aws.0.vpc_id"),
-					resource.TestCheckResourceAttrSet(resourceName, "aws.0.security_group_id"),
-					resource.TestCheckResourceAttr(resourceName, "aws.0.subnet_ids.%", "2"),
-					resource.TestCheckResourceAttr(resourceName, "gcp.#", "0"),
-					resource.TestCheckResourceAttr(resourceName, "oci.#", "0"),
+					resource.TestCheckResourceAttrSet(resourceName, "aws.account_id"),
+					resource.TestCheckResourceAttrSet(resourceName, "aws.vpc_id"),
+					resource.TestCheckResourceAttrSet(resourceName, "aws.security_group_id"),
+					resource.TestCheckResourceAttr(resourceName, "aws.subnet_ids.%", "2"),
 					resource.TestCheckResourceAttrSet(resourceName, "id"),
 				),
 			},
@@ -54,8 +51,8 @@ func TestAccCloudAgnostic_ResourceEdgeLocationAWS(t *testing.T) {
 				ImportState:       true,
 				ImportStateVerify: true,
 				ImportStateVerifyIgnore: []string{
-					"aws.0.access_key_id",
-					"aws.0.secret_access_key",
+					"aws.access_key_id",
+					"aws.secret_access_key",
 				},
 			},
 			{
@@ -96,10 +93,7 @@ func TestAccCloudAgnostic_ResourceEdgeLocationGCP(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "zones.0.name", "us-central1-a"),
 					resource.TestCheckResourceAttr(resourceName, "zones.1.id", "us-central1-b"),
 					resource.TestCheckResourceAttr(resourceName, "zones.1.name", "us-central1-b"),
-					resource.TestCheckResourceAttr(resourceName, "gcp.#", "1"),
-					resource.TestCheckResourceAttrSet(resourceName, "gcp.0.project_id"),
-					resource.TestCheckResourceAttr(resourceName, "aws.#", "0"),
-					resource.TestCheckResourceAttr(resourceName, "oci.#", "0"),
+					resource.TestCheckResourceAttrSet(resourceName, "gcp.project_id"),
 					resource.TestCheckResourceAttrSet(resourceName, "id"),
 				),
 			},
@@ -134,15 +128,11 @@ func TestAccCloudAgnostic_ResourceEdgeLocationOCI(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "description", "Test OCI edge location"),
 					resource.TestCheckResourceAttr(resourceName, "region", "us-phoenix-1"),
 					resource.TestCheckResourceAttr(resourceName, "zones.#", "1"),
-					resource.TestCheckResourceAttr(resourceName, "zones.0.id", "1"),
+					resource.TestCheckResourceAttr(resourceName, "zones.0.id", "PHX-AD-1"),
 					resource.TestCheckResourceAttr(resourceName, "zones.0.name", "PHX-AD-1"),
-					resource.TestCheckResourceAttr(resourceName, "oci.#", "1"),
-					resource.TestCheckResourceAttrSet(resourceName, "oci.0.tenancy_id"),
-					resource.TestCheckResourceAttrSet(resourceName, "oci.0.compartment_id"),
-					resource.TestCheckResourceAttrSet(resourceName, "oci.0.vcn_id"),
-					resource.TestCheckResourceAttrSet(resourceName, "oci.0.subnet_id"),
-					resource.TestCheckResourceAttr(resourceName, "aws.#", "0"),
-					resource.TestCheckResourceAttr(resourceName, "gcp.#", "0"),
+					resource.TestCheckResourceAttrSet(resourceName, "oci.tenancy_id"),
+					resource.TestCheckResourceAttrSet(resourceName, "oci.compartment_id"),
+					resource.TestCheckResourceAttrSet(resourceName, "oci.subnet_id"),
 					resource.TestCheckResourceAttrSet(resourceName, "id"),
 				),
 			},
@@ -191,7 +181,7 @@ resource "castai_edge_location" "test" {
   region          = "us-east-1"
 %[3]s
 
-  aws {
+  aws = {
     account_id         = "123456789012"
     access_key_id      = "AKIAIOSFODNN7EXAMPLE"
     secret_access_key  = "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
@@ -246,7 +236,7 @@ resource "castai_edge_location" "test" {
   region          = "us-central1"
 %[3]s
 
-  gcp {
+  gcp = {
     project_id                     = %[7]q
     client_service_account_json    = base64encode(jsonencode({
       "type": "service_account",
@@ -290,7 +280,7 @@ resource "castai_edge_location" "test" {
     name = "PHX-AD-1"
   }]
 
-  oci {
+  oci = {
     tenancy_id     = "ocid1.tenancy.oc1..example"
     compartment_id = "ocid1.compartment.oc1..example"
     user_id        = "ocid1.user.oc1..example"

@@ -2,20 +2,17 @@ package castai
 
 import (
 	"context"
-	"crypto/sha256"
 	"fmt"
 	"net/http"
 	"strings"
 
-	"github.com/hashicorp/terraform-plugin-framework-validators/listvalidator"
-	"github.com/hashicorp/terraform-plugin-framework/attr"
+	"github.com/hashicorp/terraform-plugin-framework-validators/resourcevalidator"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/samber/lo"
 
@@ -33,17 +30,16 @@ type edgeLocationResource struct {
 }
 
 type edgeLocationModel struct {
-	ID                  types.String `tfsdk:"id"`
-	OrganizationID      types.String `tfsdk:"organization_id"`
-	ClusterID           types.String `tfsdk:"cluster_id"`
-	Name                types.String `tfsdk:"name"`
-	Description         types.String `tfsdk:"description"`
-	CredentialsRevision types.String `tfsdk:"credentials_revision"`
-	Region              types.String `tfsdk:"region"`
-	Zones               []zoneModel  `tfsdk:"zones"`
-	AWS                 types.List   `tfsdk:"aws"`
-	GCP                 types.List   `tfsdk:"gcp"`
-	OCI                 types.List   `tfsdk:"oci"`
+	ID             types.String `tfsdk:"id"`
+	OrganizationID types.String `tfsdk:"organization_id"`
+	ClusterID      types.String `tfsdk:"cluster_id"`
+	Name           types.String `tfsdk:"name"`
+	Description    types.String `tfsdk:"description"`
+	Region         types.String `tfsdk:"region"`
+	Zones          []zoneModel  `tfsdk:"zones"`
+	AWS            *awsModel    `tfsdk:"aws"`
+	GCP            *gcpModel    `tfsdk:"gcp"`
+	OCI            *ociModel    `tfsdk:"oci"`
 }
 
 type zoneModel struct {
@@ -81,6 +77,16 @@ type ociModel struct {
 
 func NewEdgeLocationResource() resource.Resource {
 	return &edgeLocationResource{}
+}
+
+func (r *edgeLocationResource) ConfigValidators(_ context.Context) []resource.ConfigValidator {
+	return []resource.ConfigValidator{
+		resourcevalidator.ExactlyOneOf(
+			path.MatchRoot("aws"),
+			path.MatchRoot("gcp"),
+			path.MatchRoot("oci"),
+		),
+	}
 }
 
 func (r *edgeLocationResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
@@ -123,10 +129,6 @@ func (r *edgeLocationResource) Schema(_ context.Context, _ resource.SchemaReques
 				Optional:    true,
 				Description: "Description of the edge location",
 			},
-			"credentials_revision": schema.StringAttribute{
-				Computed:    true,
-				Description: "Hash of credentials used to detect credential changes",
-			},
 			"region": schema.StringAttribute{
 				Required:    true,
 				Description: "The region where the edge location is deployed",
@@ -150,136 +152,110 @@ func (r *edgeLocationResource) Schema(_ context.Context, _ resource.SchemaReques
 					},
 				},
 			},
-		},
-		Blocks: map[string]schema.Block{
-			"aws": schema.ListNestedBlock{
+			"aws": schema.SingleNestedAttribute{
+				Optional:    true,
 				Description: "AWS configuration for the edge location",
-				Validators: []validator.List{
-					listvalidator.SizeAtMost(1),
-					listvalidator.ExactlyOneOf(
-						path.MatchRoot("gcp"),
-						path.MatchRoot("oci"),
-					),
-				},
-				NestedObject: schema.NestedBlockObject{
-					Attributes: map[string]schema.Attribute{
-						"account_id": schema.StringAttribute{
-							Required:    true,
-							Description: "AWS account ID",
-						},
-						"access_key_id": schema.StringAttribute{
-							Required:    true,
-							WriteOnly:   true,
-							Sensitive:   true,
-							Description: "AWS access key ID",
-						},
-						"secret_access_key": schema.StringAttribute{
-							Required:    true,
-							Sensitive:   true,
-							WriteOnly:   true,
-							Description: "AWS secret access key",
-						},
-						"vpc_id": schema.StringAttribute{
-							Required:    true,
-							Description: "VPC ID to be used in the selected region",
-						},
-						"security_group_id": schema.StringAttribute{
-							Required:    true,
-							Description: "Security group ID to be used in the selected region",
-						},
-						"subnet_ids": schema.MapAttribute{
-							Required:    true,
-							ElementType: types.StringType,
-							Description: "Map of zone names to subnet IDs to be used in the selected region",
-						},
-						"name_tag": schema.StringAttribute{
-							Required:    true,
-							Description: "The value of a 'Name' tag applied to VPC resources",
-						},
+				Attributes: map[string]schema.Attribute{
+					"account_id": schema.StringAttribute{
+						Required:    true,
+						Description: "AWS account ID",
+					},
+					"access_key_id": schema.StringAttribute{
+						Required:    true,
+						WriteOnly:   true,
+						Sensitive:   true,
+						Description: "AWS access key ID",
+					},
+					"secret_access_key": schema.StringAttribute{
+						Required:    true,
+						Sensitive:   true,
+						WriteOnly:   true,
+						Description: "AWS secret access key",
+					},
+					"vpc_id": schema.StringAttribute{
+						Required:    true,
+						Description: "VPC ID to be used in the selected region",
+					},
+					"security_group_id": schema.StringAttribute{
+						Required:    true,
+						Description: "Security group ID to be used in the selected region",
+					},
+					"subnet_ids": schema.MapAttribute{
+						Required:    true,
+						ElementType: types.StringType,
+						Description: "Map of zone names to subnet IDs to be used in the selected region",
+					},
+					"name_tag": schema.StringAttribute{
+						Required:    true,
+						Description: "The value of a 'Name' tag applied to VPC resources",
 					},
 				},
 			},
-			"gcp": schema.ListNestedBlock{
+			"gcp": schema.SingleNestedAttribute{
+				Optional:    true,
 				Description: "GCP configuration for the edge location",
-				Validators: []validator.List{
-					listvalidator.SizeAtMost(1),
-					listvalidator.ExactlyOneOf(
-						path.MatchRoot("aws"),
-						path.MatchRoot("oci"),
-					),
-				},
-				NestedObject: schema.NestedBlockObject{
-					Attributes: map[string]schema.Attribute{
-						"project_id": schema.StringAttribute{
-							Required:    true,
-							Description: "GCP project ID where edges run",
-						},
-						"client_service_account_json": schema.StringAttribute{
-							Required:    true,
-							Sensitive:   true,
-							WriteOnly:   true,
-							Description: "Base64 encoded service account JSON for provisioning edge resources",
-						},
-						"network_name": schema.StringAttribute{
-							Required:    true,
-							Description: "The name of the network to be used in the selected region",
-						},
-						"subnet_name": schema.StringAttribute{
-							Required:    true,
-							Description: "The name of the subnetwork to be used in the selected region",
-						},
-						"network_tags": schema.SetAttribute{
-							Required:    true,
-							ElementType: types.StringType,
-							Description: "Tags applied on the provisioned cloud resources and the firewall rule",
-						},
+				Attributes: map[string]schema.Attribute{
+					"project_id": schema.StringAttribute{
+						Required:    true,
+						Description: "GCP project ID where edges run",
+					},
+					"client_service_account_json": schema.StringAttribute{
+						Required:    true,
+						Sensitive:   true,
+						WriteOnly:   true,
+						Description: "Base64 encoded service account JSON for provisioning edge resources",
+					},
+					"network_name": schema.StringAttribute{
+						Required:    true,
+						Description: "The name of the network to be used in the selected region",
+					},
+					"subnet_name": schema.StringAttribute{
+						Required:    true,
+						Description: "The name of the subnetwork to be used in the selected region",
+					},
+					"network_tags": schema.SetAttribute{
+						Required:    true,
+						ElementType: types.StringType,
+						Description: "Tags applied on the provisioned cloud resources and the firewall rule",
 					},
 				},
 			},
-			"oci": schema.ListNestedBlock{
+			"oci": schema.SingleNestedAttribute{
+				Optional:    true,
 				Description: "OCI configuration for the edge location",
-				Validators: []validator.List{
-					listvalidator.SizeAtMost(1),
-					listvalidator.ExactlyOneOf(
-						path.MatchRoot("aws"),
-						path.MatchRoot("gcp"),
-					),
-				},
-				NestedObject: schema.NestedBlockObject{
-					Attributes: map[string]schema.Attribute{
-						"tenancy_id": schema.StringAttribute{
-							Required:    true,
-							Description: "OCI tenancy ID of the account",
-						},
-						"compartment_id": schema.StringAttribute{
-							Required:    true,
-							Description: "OCI compartment ID of edge location",
-						},
-						"user_id": schema.StringAttribute{
-							Required:    true,
-							Description: "User ID used to authenticate OCI",
-							WriteOnly:   true,
-						},
-						"fingerprint": schema.StringAttribute{
-							Required:    true,
-							Sensitive:   true,
-							Description: "API key fingerprint",
-						},
-						"private_key": schema.StringAttribute{
-							WriteOnly:   true,
-							Required:    true,
-							Sensitive:   true,
-							Description: "Base64 encoded API private key",
-						},
-						"vcn_id": schema.StringAttribute{
-							Required:    true,
-							WriteOnly:   true,
-							Description: "OCI virtual cloud network ID",
-						},
-						"subnet_id": schema.StringAttribute{
-							Required:    true,
-							Description: "OCI subnet ID of edge location",
-						},
+				Attributes: map[string]schema.Attribute{
+					"tenancy_id": schema.StringAttribute{
+						Required:    true,
+						Description: "OCI tenancy ID of the account",
+					},
+					"compartment_id": schema.StringAttribute{
+						Required:    true,
+						Description: "OCI compartment ID of edge location",
+					},
+					"user_id": schema.StringAttribute{
+						Required:    true,
+						Description: "User ID used to authenticate OCI",
+						WriteOnly:   true,
+					},
+					"fingerprint": schema.StringAttribute{
+						Required:    true,
+						Sensitive:   true,
+						Description: "API key fingerprint",
+					},
+					"private_key": schema.StringAttribute{
+						WriteOnly:   true,
+						Required:    true,
+						Sensitive:   true,
+						Description: "Base64 encoded API private key",
+					},
+					"vcn_id": schema.StringAttribute{
+						Required:    true,
+						WriteOnly:   true,
+						Description: "OCI virtual cloud network ID",
+					},
+					"subnet_id": schema.StringAttribute{
+						Required:    true,
+						Description: "OCI subnet ID of edge location",
 					},
 				},
 			},
@@ -335,8 +311,8 @@ func (r *edgeLocationResource) Create(ctx context.Context, req resource.CreateRe
 	}
 
 	// Map cloud provider specific configurations.
-	if !plan.AWS.IsNull() && len(plan.AWS.Elements()) > 0 {
-		awsConfig, diags := r.expandAWSConfig(ctx, plan.AWS, config.AWS)
+	if plan.AWS != nil {
+		awsConfig, diags := r.toAWS(ctx, plan.AWS, config.AWS)
 		resp.Diagnostics.Append(diags...)
 		if resp.Diagnostics.HasError() {
 			return
@@ -344,8 +320,8 @@ func (r *edgeLocationResource) Create(ctx context.Context, req resource.CreateRe
 		createReq.Aws = awsConfig
 	}
 
-	if !plan.GCP.IsNull() && len(plan.GCP.Elements()) > 0 {
-		gcpConfig, diags := r.expandGCPConfig(ctx, plan.GCP, config.GCP)
+	if plan.GCP != nil {
+		gcpConfig, diags := r.toGCP(ctx, plan.GCP, config.GCP)
 		resp.Diagnostics.Append(diags...)
 		if resp.Diagnostics.HasError() {
 			return
@@ -353,13 +329,8 @@ func (r *edgeLocationResource) Create(ctx context.Context, req resource.CreateRe
 		createReq.Gcp = gcpConfig
 	}
 
-	if !plan.OCI.IsNull() && len(plan.OCI.Elements()) > 0 {
-		ociConfig, diags := r.expandOCIConfig(ctx, plan.OCI, config.OCI)
-		resp.Diagnostics.Append(diags...)
-		if resp.Diagnostics.HasError() {
-			return
-		}
-		createReq.Oci = ociConfig
+	if plan.OCI != nil {
+		createReq.Oci = r.toOCI(plan.OCI, config.OCI)
 	}
 
 	apiResp, err := client.EdgeLocationsAPICreateEdgeLocationWithResponse(ctx, organizationID, clusterID, createReq)
@@ -377,10 +348,6 @@ func (r *edgeLocationResource) Create(ctx context.Context, req resource.CreateRe
 	}
 
 	plan.ID = types.StringValue(*apiResp.JSON200.Id)
-
-	// Compute credentials revision hash
-	credentialsHash := r.computeCredentialsHash(ctx, &plan)
-	plan.CredentialsRevision = types.StringValue(credentialsHash)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, plan)...)
 }
@@ -426,14 +393,12 @@ func (r *edgeLocationResource) Read(ctx context.Context, req resource.ReadReques
 		state.Description = types.StringValue(*edgeLocation.Description)
 	}
 
-	state.Zones = nil
 	if edgeLocation.Zones != nil {
 		state.Zones = r.toZoneModel(edgeLocation.Zones)
 	}
 
-	// Flatten cloud provider configs (preserving write-only fields from state)
 	if edgeLocation.Aws != nil {
-		awsList, diags := r.flattenAWSConfig(ctx, edgeLocation.Aws, state.AWS)
+		awsList, diags := r.toAWSModel(ctx, edgeLocation.Aws)
 		resp.Diagnostics.Append(diags...)
 		if resp.Diagnostics.HasError() {
 			return
@@ -442,7 +407,7 @@ func (r *edgeLocationResource) Read(ctx context.Context, req resource.ReadReques
 	}
 
 	if edgeLocation.Gcp != nil {
-		gcpList, diags := r.flattenGCPConfig(ctx, edgeLocation.Gcp, state.GCP)
+		gcpList, diags := r.toGCPModel(ctx, edgeLocation.Gcp)
 		resp.Diagnostics.Append(diags...)
 		if resp.Diagnostics.HasError() {
 			return
@@ -451,17 +416,8 @@ func (r *edgeLocationResource) Read(ctx context.Context, req resource.ReadReques
 	}
 
 	if edgeLocation.Oci != nil {
-		ociList, diags := r.flattenOCIConfig(ctx, edgeLocation.Oci, state.OCI)
-		resp.Diagnostics.Append(diags...)
-		if resp.Diagnostics.HasError() {
-			return
-		}
-		state.OCI = ociList
+		state.OCI = r.toOCIModel(edgeLocation.Oci)
 	}
-
-	// Compute credentials revision hash
-	credentialsHash := r.computeCredentialsHash(ctx, &state)
-	state.CredentialsRevision = types.StringValue(credentialsHash)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 }
@@ -496,9 +452,9 @@ func (r *edgeLocationResource) Update(ctx context.Context, req resource.UpdateRe
 	}
 
 	// Map cloud provider specific configurations for update
-	// API requires complete objects with all fields including credentials
-	if !plan.AWS.IsNull() && len(plan.AWS.Elements()) > 0 {
-		awsConfig, diags := r.expandAWSConfig(ctx, plan.AWS, config.AWS)
+	// API requires complete cloud objects with all fields including credentials
+	if plan.AWS != nil {
+		awsConfig, diags := r.toAWS(ctx, plan.AWS, config.AWS)
 		resp.Diagnostics.Append(diags...)
 		if resp.Diagnostics.HasError() {
 			return
@@ -506,8 +462,8 @@ func (r *edgeLocationResource) Update(ctx context.Context, req resource.UpdateRe
 		updateReq.Aws = awsConfig
 	}
 
-	if !plan.GCP.IsNull() && len(plan.GCP.Elements()) > 0 {
-		gcpConfig, diags := r.expandGCPConfig(ctx, plan.GCP, config.GCP)
+	if plan.GCP != nil {
+		gcpConfig, diags := r.toGCP(ctx, plan.GCP, config.GCP)
 		resp.Diagnostics.Append(diags...)
 		if resp.Diagnostics.HasError() {
 			return
@@ -515,13 +471,8 @@ func (r *edgeLocationResource) Update(ctx context.Context, req resource.UpdateRe
 		updateReq.Gcp = gcpConfig
 	}
 
-	if !plan.OCI.IsNull() && len(plan.OCI.Elements()) > 0 {
-		ociConfig, diags := r.expandOCIConfig(ctx, plan.OCI, config.OCI)
-		resp.Diagnostics.Append(diags...)
-		if resp.Diagnostics.HasError() {
-			return
-		}
-		updateReq.Oci = ociConfig
+	if plan.OCI != nil {
+		updateReq.Oci = r.toOCI(plan.OCI, config.OCI)
 	}
 
 	apiResp, err := client.EdgeLocationsAPIUpdateEdgeLocationWithResponse(ctx, organizationID, clusterID, plan.ID.ValueString(), nil, updateReq)
@@ -537,10 +488,6 @@ func (r *edgeLocationResource) Update(ctx context.Context, req resource.UpdateRe
 		)
 		return
 	}
-
-	// Compute credentials revision hash
-	credentialsHash := r.computeCredentialsHash(ctx, &plan)
-	plan.CredentialsRevision = types.StringValue(credentialsHash)
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, plan)...)
 }
@@ -621,25 +568,12 @@ func (r *edgeLocationResource) toZoneModel(zones *[]omni.Zone) []zoneModel {
 	return out
 }
 
-func (r *edgeLocationResource) expandAWSConfig(ctx context.Context, planList, configList types.List) (*omni.AWSParam, diag.Diagnostics) {
-	var (
-		diags       diag.Diagnostics
-		configModel []awsModel
-		planModel   []awsModel
-	)
+func (r *edgeLocationResource) toAWS(ctx context.Context, plan, config *awsModel) (*omni.AWSParam, diag.Diagnostics) {
+	var diags diag.Diagnostics
 
-	diags.Append(planList.ElementsAs(ctx, &planModel, false)...)
-	if diags.HasError() {
+	if plan == nil || config == nil {
 		return nil, diags
 	}
-	diags.Append(configList.ElementsAs(ctx, &configModel, false)...)
-	if diags.HasError() {
-		return nil, diags
-	}
-	if len(planModel) == 0 || len(configModel) == 0 {
-		return nil, diags
-	}
-	plan, config := planModel[0], configModel[0]
 
 	var subnetMap map[string]string
 	diags.Append(plan.SubnetIDs.ElementsAs(ctx, &subnetMap, false)...)
@@ -664,42 +598,20 @@ func (r *edgeLocationResource) expandAWSConfig(ctx context.Context, planList, co
 	return out, diags
 }
 
-func (r *edgeLocationResource) flattenAWSConfig(ctx context.Context, config *omni.AWSParam, stateList types.List) (types.List, diag.Diagnostics) {
+func (r *edgeLocationResource) toAWSModel(ctx context.Context, config *omni.AWSParam) (*awsModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
-
 	if config == nil {
-		return types.ListNull(types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-				"account_id":        types.StringType,
-				"access_key_id":     types.StringType,
-				"secret_access_key": types.StringType,
-				"vpc_id":            types.StringType,
-				"security_group_id": types.StringType,
-				"subnet_ids":        types.MapType{ElemType: types.StringType},
-				"name_tag":          types.StringType,
-			},
-		}), diags
+		return nil, diags
 	}
 
-	aws := awsModel{}
-
-	if config.AccountId != nil {
-		aws.AccountID = types.StringValue(*config.AccountId)
-	} else {
-		aws.AccountID = types.StringNull()
-	}
-
-	// Preserve write-only credentials from state
-	if !stateList.IsNull() && len(stateList.Elements()) > 0 {
-		var stateConfigs []awsModel
-		diags.Append(stateList.ElementsAs(ctx, &stateConfigs, false)...)
-		if !diags.HasError() && len(stateConfigs) > 0 {
-			aws.AccessKeyID = stateConfigs[0].AccessKeyID
-			aws.SecretAccessKey = stateConfigs[0].SecretAccessKey
-		}
-	} else {
-		aws.AccessKeyID = types.StringNull()
-		aws.SecretAccessKey = types.StringNull()
+	aws := &awsModel{
+		AccountID:       types.StringValue(lo.FromPtr(config.AccountId)),
+		VpcID:           types.StringNull(),
+		SecurityGroupID: types.StringNull(),
+		SubnetIDs:       types.MapNull(types.StringType),
+		NameTag:         types.StringNull(),
+		AccessKeyID:     types.StringNull(),
+		SecretAccessKey: types.StringNull(),
 	}
 
 	if config.Networking != nil {
@@ -711,50 +623,18 @@ func (r *edgeLocationResource) flattenAWSConfig(ctx context.Context, config *omn
 			subnetMap, d := types.MapValueFrom(ctx, types.StringType, config.Networking.SubnetIds)
 			diags.Append(d...)
 			aws.SubnetIDs = subnetMap
-		} else {
-			aws.SubnetIDs = types.MapNull(types.StringType)
 		}
-	} else {
-		aws.VpcID = types.StringNull()
-		aws.SecurityGroupID = types.StringNull()
-		aws.SubnetIDs = types.MapNull(types.StringType)
-		aws.NameTag = types.StringNull()
 	}
 
-	listValue, d := types.ListValueFrom(ctx, types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			"account_id":        types.StringType,
-			"access_key_id":     types.StringType,
-			"secret_access_key": types.StringType,
-			"vpc_id":            types.StringType,
-			"security_group_id": types.StringType,
-			"subnet_ids":        types.MapType{ElemType: types.StringType},
-			"name_tag":          types.StringType,
-		},
-	}, []awsModel{aws})
-	diags.Append(d...)
-	return listValue, diags
+	return aws, diags
 }
 
-func (r *edgeLocationResource) expandGCPConfig(ctx context.Context, planList, configList types.List) (*omni.GCPParam, diag.Diagnostics) {
-	var (
-		diags       diag.Diagnostics
-		configModel []gcpModel
-		planModel   []gcpModel
-	)
+func (r *edgeLocationResource) toGCP(ctx context.Context, plan, config *gcpModel) (*omni.GCPParam, diag.Diagnostics) {
+	var diags diag.Diagnostics
 
-	diags.Append(planList.ElementsAs(ctx, &planModel, false)...)
-	if diags.HasError() {
+	if plan == nil || config == nil {
 		return nil, diags
 	}
-	diags.Append(configList.ElementsAs(ctx, &configModel, false)...)
-	if diags.HasError() {
-		return nil, diags
-	}
-	if len(planModel) == 0 || len(configModel) == 0 {
-		return nil, diags
-	}
-	plan, config := planModel[0], configModel[0]
 
 	var tags []string
 	diags.Append(plan.NetworkTags.ElementsAs(ctx, &tags, false)...)
@@ -777,85 +657,37 @@ func (r *edgeLocationResource) expandGCPConfig(ctx context.Context, planList, co
 	return out, diags
 }
 
-func (r *edgeLocationResource) flattenGCPConfig(ctx context.Context, config *omni.GCPParam, stateList types.List) (types.List, diag.Diagnostics) {
+func (r *edgeLocationResource) toGCPModel(ctx context.Context, config *omni.GCPParam) (*gcpModel, diag.Diagnostics) {
 	var diags diag.Diagnostics
-
 	if config == nil {
-		return types.ListNull(types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-				"project_id":                  types.StringType,
-				"client_service_account_json": types.StringType,
-				"network_name":                types.StringType,
-				"subnet_name":                 types.StringType,
-				"network_tags":                types.SetType{ElemType: types.StringType},
-			},
-		}), diags
+		return nil, diags
 	}
 
-	gcp := gcpModel{
-		ProjectID: types.StringValue(config.ProjectId),
-	}
-
-	// Preserve write-only credentials from state
-	if !stateList.IsNull() && len(stateList.Elements()) > 0 {
-		var stateConfigs []gcpModel
-		diags.Append(stateList.ElementsAs(ctx, &stateConfigs, false)...)
-		if !diags.HasError() && len(stateConfigs) > 0 {
-			gcp.ClientServiceAccountJSON = stateConfigs[0].ClientServiceAccountJSON
-		}
-	} else {
-		gcp.ClientServiceAccountJSON = types.StringNull()
+	gcp := &gcpModel{
+		ProjectID:                types.StringValue(config.ProjectId),
+		ClientServiceAccountJSON: types.StringNull(),
+		NetworkName:              types.StringNull(),
+		SubnetName:               types.StringNull(),
+		NetworkTags:              types.SetNull(types.StringType),
 	}
 
 	if config.Networking != nil {
 		gcp.NetworkName = types.StringValue(config.Networking.NetworkName)
 		gcp.SubnetName = types.StringValue(config.Networking.SubnetName)
-
 		if config.Networking.Tags != nil {
 			tagsSet, d := types.SetValueFrom(ctx, types.StringType, config.Networking.Tags)
 			diags.Append(d...)
 			gcp.NetworkTags = tagsSet
-		} else {
-			gcp.NetworkTags = types.SetNull(types.StringType)
 		}
-	} else {
-		gcp.NetworkName = types.StringNull()
-		gcp.SubnetName = types.StringNull()
-		gcp.NetworkTags = types.SetNull(types.StringType)
 	}
 
-	listValue, d := types.ListValueFrom(ctx, types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			"project_id":                  types.StringType,
-			"client_service_account_json": types.StringType,
-			"network_name":                types.StringType,
-			"subnet_name":                 types.StringType,
-			"network_tags":                types.SetType{ElemType: types.StringType},
-		},
-	}, []gcpModel{gcp})
-	diags.Append(d...)
-	return listValue, diags
+	return gcp, diags
 }
 
-func (r *edgeLocationResource) expandOCIConfig(ctx context.Context, planList, configList types.List) (*omni.OCIParam, diag.Diagnostics) {
-	var (
-		diags       diag.Diagnostics
-		configModel []ociModel
-		planModel   []ociModel
-	)
-
-	diags.Append(planList.ElementsAs(ctx, &planModel, false)...)
-	if diags.HasError() {
-		return nil, diags
+func (r *edgeLocationResource) toOCI(plan, config *ociModel) *omni.OCIParam {
+	if plan == nil || config == nil {
+		return nil
 	}
-	diags.Append(configList.ElementsAs(ctx, &configModel, false)...)
-	if diags.HasError() {
-		return nil, diags
-	}
-	if len(planModel) == 0 || len(configModel) == 0 {
-		return nil, diags
-	}
-	plan, config := planModel[0], configModel[0]
 
 	out := &omni.OCIParam{
 		TenancyId:     toPtr(plan.TenancyID.ValueString()),
@@ -871,131 +703,27 @@ func (r *edgeLocationResource) expandOCIConfig(ctx context.Context, planList, co
 		},
 	}
 
-	return out, diags
+	return out
 }
 
-func (r *edgeLocationResource) flattenOCIConfig(ctx context.Context, config *omni.OCIParam, stateList types.List) (types.List, diag.Diagnostics) {
-	var diags diag.Diagnostics
-
+func (r *edgeLocationResource) toOCIModel(config *omni.OCIParam) *ociModel {
 	if config == nil {
-		return types.ListNull(types.ObjectType{
-			AttrTypes: map[string]attr.Type{
-				"tenancy_id":     types.StringType,
-				"compartment_id": types.StringType,
-				"user_id":        types.StringType,
-				"fingerprint":    types.StringType,
-				"private_key":    types.StringType,
-				"vcn_id":         types.StringType,
-				"subnet_id":      types.StringType,
-			},
-		}), diags
+		return nil
 	}
 
-	oci := ociModel{}
-
-	if config.TenancyId != nil {
-		oci.TenancyID = types.StringValue(*config.TenancyId)
-	} else {
-		oci.TenancyID = types.StringNull()
+	oci := &ociModel{
+		TenancyID:     types.StringValue(lo.FromPtr(config.TenancyId)),
+		CompartmentID: types.StringValue(lo.FromPtr(config.CompartmentId)),
+		VcnID:         types.StringNull(),
+		SubnetID:      types.StringNull(),
+		UserID:        types.StringNull(),
+		Fingerprint:   types.StringNull(),
+		PrivateKey:    types.StringNull(),
 	}
-
-	if config.CompartmentId != nil {
-		oci.CompartmentID = types.StringValue(*config.CompartmentId)
-	} else {
-		oci.CompartmentID = types.StringNull()
-	}
-
-	// Preserve write-only credentials from state
-	if !stateList.IsNull() && len(stateList.Elements()) > 0 {
-		var stateConfigs []ociModel
-		diags.Append(stateList.ElementsAs(ctx, &stateConfigs, false)...)
-		if !diags.HasError() && len(stateConfigs) > 0 {
-			oci.UserID = stateConfigs[0].UserID
-			oci.Fingerprint = stateConfigs[0].Fingerprint
-			oci.PrivateKey = stateConfigs[0].PrivateKey
-			oci.VcnID = stateConfigs[0].VcnID
-		}
-	} else {
-		oci.UserID = types.StringNull()
-		oci.Fingerprint = types.StringNull()
-		oci.PrivateKey = types.StringNull()
-		oci.VcnID = types.StringNull()
-	}
-
 	if config.Networking != nil {
 		oci.SubnetID = types.StringValue(config.Networking.SubnetId)
-	} else {
-		oci.SubnetID = types.StringNull()
+		oci.VcnID = types.StringValue(config.Networking.VcnId)
 	}
 
-	listValue, d := types.ListValueFrom(ctx, types.ObjectType{
-		AttrTypes: map[string]attr.Type{
-			"tenancy_id":     types.StringType,
-			"compartment_id": types.StringType,
-			"user_id":        types.StringType,
-			"fingerprint":    types.StringType,
-			"private_key":    types.StringType,
-			"vcn_id":         types.StringType,
-			"subnet_id":      types.StringType,
-		},
-	}, []ociModel{oci})
-	diags.Append(d...)
-	return listValue, diags
-}
-
-func (r *edgeLocationResource) computeCredentialsHash(ctx context.Context, model *edgeLocationModel) string {
-	hasher := sha256.New()
-
-	// Hash AWS credentials
-	if !model.AWS.IsNull() && len(model.AWS.Elements()) > 0 {
-		var awsConfigs []awsModel
-		model.AWS.ElementsAs(ctx, &awsConfigs, false)
-		if len(awsConfigs) > 0 {
-			aws := awsConfigs[0]
-			if !aws.AccessKeyID.IsNull() {
-				hasher.Write([]byte("aws_access_key:"))
-				hasher.Write([]byte(aws.AccessKeyID.ValueString()))
-			}
-			if !aws.SecretAccessKey.IsNull() {
-				hasher.Write([]byte("aws_secret_key:"))
-				hasher.Write([]byte(aws.SecretAccessKey.ValueString()))
-			}
-		}
-	}
-
-	// Hash GCP credentials
-	if !model.GCP.IsNull() && len(model.GCP.Elements()) > 0 {
-		var gcpConfigs []gcpModel
-		model.GCP.ElementsAs(ctx, &gcpConfigs, false)
-		if len(gcpConfigs) > 0 {
-			gcp := gcpConfigs[0]
-			if !gcp.ClientServiceAccountJSON.IsNull() {
-				hasher.Write([]byte("gcp_service_account:"))
-				hasher.Write([]byte(gcp.ClientServiceAccountJSON.ValueString()))
-			}
-		}
-	}
-
-	// Hash OCI credentials
-	if !model.OCI.IsNull() && len(model.OCI.Elements()) > 0 {
-		var ociConfigs []ociModel
-		model.OCI.ElementsAs(ctx, &ociConfigs, false)
-		if len(ociConfigs) > 0 {
-			oci := ociConfigs[0]
-			if !oci.UserID.IsNull() {
-				hasher.Write([]byte("oci_user_id:"))
-				hasher.Write([]byte(oci.UserID.ValueString()))
-			}
-			if !oci.Fingerprint.IsNull() {
-				hasher.Write([]byte("oci_fingerprint:"))
-				hasher.Write([]byte(oci.Fingerprint.ValueString()))
-			}
-			if !oci.PrivateKey.IsNull() {
-				hasher.Write([]byte("oci_private_key:"))
-				hasher.Write([]byte(oci.PrivateKey.ValueString()))
-			}
-		}
-	}
-
-	return fmt.Sprintf("%x", hasher.Sum(nil))
+	return oci
 }
