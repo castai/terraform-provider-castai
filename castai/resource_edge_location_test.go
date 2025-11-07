@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-	"strings"
 	"testing"
 	"time"
 
@@ -197,13 +196,13 @@ resource "castai_edge_location" "test" {
 }
 
 func testAccEdgeLocationGCPConfig(rName, clusterName string) string {
-	return testAccEdgeLocationGCPConfigWithParams(rName, clusterName, "Test GCP edge location", []string{"us-central1-a", "us-central1-b"}, []string{"edge-location", "castai"})
+	return testAccEdgeLocationGCPConfigWithParams(rName, clusterName,
+		"Test GCP edge location", []string{"us-central1-a", "us-central1-b"}, []string{"edge-location", "castai"})
 }
 
 func testAccEdgeLocationGCPUpdated(rName, clusterName string) string {
-	params := testAccEdgeLocationGCPConfigWithParams(rName, clusterName, "Updated GCP edge location", []string{"us-central1-a", "us-central1-b"}, []string{"edge-location", "castai"})
-	params = strings.Replace(params, "\"project_id\": \"test-project-123456\",", "\"project_id\": \"test-project-123457\",", -1)
-	return params
+	return testAccEdgeLocationGCPConfigWithParams(rName, clusterName,
+		"Updated GCP edge location", []string{"us-central1-a", "us-central1-b"}, []string{"edge-location", "castai"})
 }
 
 func testAccEdgeLocationGCPConfigWithParams(rName, clusterName, description string, zones []string, networkTags []string) string {

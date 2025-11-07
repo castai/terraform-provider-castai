@@ -327,16 +327,16 @@ func (r *edgeLocationResource) Create(ctx context.Context, req resource.CreateRe
 	if plan.AWS != nil {
 		createReq.Aws, diags = r.toAWS(ctx, plan.AWS, config.AWS)
 		resp.Diagnostics.Append(diags...)
-		mc = plan.AWS
+		mc = config.AWS
 	}
 	if plan.GCP != nil {
 		createReq.Gcp, diags = r.toGCP(ctx, plan.GCP, config.GCP)
 		resp.Diagnostics.Append(diags...)
-		mc = plan.GCP
+		mc = config.GCP
 	}
 	if plan.OCI != nil {
 		createReq.Oci = r.toOCI(plan.OCI, config.OCI)
-		mc = plan.OCI
+		mc = config.OCI
 	}
 	if resp.Diagnostics.HasError() {
 		return

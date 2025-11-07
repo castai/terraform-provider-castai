@@ -31,7 +31,6 @@ type WriteOnlyStore struct {
 func (w *WriteOnlyStore) Equal(ctx context.Context, configValue types.String) (bool, diag.Diagnostics) {
 	val, diags := w.state.GetKey(ctx, w.key)
 	var v string
-	fmt.Println(val)
 	if err := json.Unmarshal(val, &v); err != nil {
 		diags.AddError(fmt.Sprintf("failed to unmarshal value for `%s`", w.key), err.Error())
 	}
