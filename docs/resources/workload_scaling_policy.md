@@ -178,6 +178,8 @@ Required:
 Optional:
 
 - `multiplier` (Number) Multiplier used to calculate the resource limit. It must be defined for the MULTIPLIER strategy.
+- `only_if_original_exist` (Boolean) Apply the strategy only when the original resource has limits defined.
+- `only_if_original_lower` (Boolean) Use the original resource limits if they are higher than recommended values.
 
 
 
@@ -231,6 +233,8 @@ Required:
 Optional:
 
 - `multiplier` (Number) Multiplier used to calculate the resource limit. It must be defined for the MULTIPLIER strategy.
+- `only_if_original_exist` (Boolean) Apply the strategy only when the original resource has limits defined.
+- `only_if_original_lower` (Boolean) Use the original resource limits if they are higher than recommended values.
 
 
 

@@ -8562,8 +8562,9 @@ type ScheduledRebalancingAPIUpdateRebalancingScheduleParams struct {
 
 // InventoryAPIListRegionsParams defines parameters for InventoryAPIListRegions.
 type InventoryAPIListRegionsParams struct {
-	PageSize  *int32  `form:"pageSize,omitempty" json:"pageSize,omitempty"`
-	PageToken *string `form:"pageToken,omitempty" json:"pageToken,omitempty"`
+	PageSize           *int32  `form:"pageSize,omitempty" json:"pageSize,omitempty"`
+	PageToken          *string `form:"pageToken,omitempty" json:"pageToken,omitempty"`
+	IncludeUnavailable *bool   `form:"includeUnavailable,omitempty" json:"includeUnavailable,omitempty"`
 }
 
 // CommitmentsAPICreateCommitmentAssignmentParams defines parameters for CommitmentsAPICreateCommitmentAssignment.
