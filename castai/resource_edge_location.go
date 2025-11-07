@@ -48,29 +48,29 @@ type zoneModel struct {
 }
 
 type awsModel struct {
-	AccountID       types.String `tfsdk:"account_id"`
-	AccessKeyID     types.String `tfsdk:"access_key_id"`
-	SecretAccessKey types.String `tfsdk:"secret_access_key"`
-	VpcID           types.String `tfsdk:"vpc_id"`
-	SecurityGroupID types.String `tfsdk:"security_group_id"`
-	SubnetIDs       types.Map    `tfsdk:"subnet_ids"`
-	NameTag         types.String `tfsdk:"name_tag"`
+	AccountID         types.String `tfsdk:"account_id"`
+	AccessKeyIDWO     types.String `tfsdk:"access_key_id_wo"`
+	SecretAccessKeyWO types.String `tfsdk:"secret_access_key_wo"`
+	VpcID             types.String `tfsdk:"vpc_id"`
+	SecurityGroupID   types.String `tfsdk:"security_group_id"`
+	SubnetIDs         types.Map    `tfsdk:"subnet_ids"`
+	NameTag           types.String `tfsdk:"name_tag"`
 }
 
 type gcpModel struct {
-	ProjectID                types.String `tfsdk:"project_id"`
-	ClientServiceAccountJSON types.String `tfsdk:"client_service_account_json"`
-	NetworkName              types.String `tfsdk:"network_name"`
-	SubnetName               types.String `tfsdk:"subnet_name"`
-	NetworkTags              types.Set    `tfsdk:"network_tags"`
+	ProjectID                  types.String `tfsdk:"project_id"`
+	ClientServiceAccountJSONWO types.String `tfsdk:"client_service_account_json_wo"`
+	NetworkName                types.String `tfsdk:"network_name"`
+	SubnetName                 types.String `tfsdk:"subnet_name"`
+	NetworkTags                types.Set    `tfsdk:"network_tags"`
 }
 
 type ociModel struct {
 	TenancyID     types.String `tfsdk:"tenancy_id"`
 	CompartmentID types.String `tfsdk:"compartment_id"`
-	UserID        types.String `tfsdk:"user_id"`
-	Fingerprint   types.String `tfsdk:"fingerprint"`
-	PrivateKey    types.String `tfsdk:"private_key"`
+	UserIDWO      types.String `tfsdk:"user_id_wo"`
+	FingerprintWO types.String `tfsdk:"fingerprint_wo"`
+	PrivateKeyWO  types.String `tfsdk:"private_key_wo"`
 	VcnID         types.String `tfsdk:"vcn_id"`
 	SubnetID      types.String `tfsdk:"subnet_id"`
 }
@@ -160,13 +160,13 @@ func (r *edgeLocationResource) Schema(_ context.Context, _ resource.SchemaReques
 						Required:    true,
 						Description: "AWS account ID",
 					},
-					"access_key_id": schema.StringAttribute{
+					"access_key_id_wo": schema.StringAttribute{
 						Required:    true,
 						WriteOnly:   true,
 						Sensitive:   true,
 						Description: "AWS access key ID",
 					},
-					"secret_access_key": schema.StringAttribute{
+					"secret_access_key_wo": schema.StringAttribute{
 						Required:    true,
 						Sensitive:   true,
 						WriteOnly:   true,
@@ -199,7 +199,7 @@ func (r *edgeLocationResource) Schema(_ context.Context, _ resource.SchemaReques
 						Required:    true,
 						Description: "GCP project ID where edges run",
 					},
-					"client_service_account_json": schema.StringAttribute{
+					"client_service_account_json_wo": schema.StringAttribute{
 						Required:    true,
 						Sensitive:   true,
 						WriteOnly:   true,
@@ -232,17 +232,18 @@ func (r *edgeLocationResource) Schema(_ context.Context, _ resource.SchemaReques
 						Required:    true,
 						Description: "OCI compartment ID of edge location",
 					},
-					"user_id": schema.StringAttribute{
+					"user_id_wo": schema.StringAttribute{
 						Required:    true,
 						Description: "User ID used to authenticate OCI",
 						WriteOnly:   true,
 					},
-					"fingerprint": schema.StringAttribute{
+					"fingerprint_wo": schema.StringAttribute{
 						Required:    true,
 						Sensitive:   true,
+						WriteOnly:   true,
 						Description: "API key fingerprint",
 					},
-					"private_key": schema.StringAttribute{
+					"private_key_wo": schema.StringAttribute{
 						WriteOnly:   true,
 						Required:    true,
 						Sensitive:   true,
@@ -250,7 +251,6 @@ func (r *edgeLocationResource) Schema(_ context.Context, _ resource.SchemaReques
 					},
 					"vcn_id": schema.StringAttribute{
 						Required:    true,
-						WriteOnly:   true,
 						Description: "OCI virtual cloud network ID",
 					},
 					"subnet_id": schema.StringAttribute{
@@ -425,10 +425,16 @@ func (r *edgeLocationResource) Read(ctx context.Context, req resource.ReadReques
 func (r *edgeLocationResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var (
 		plan   edgeLocationModel
+		state  edgeLocationModel
 		config edgeLocationModel
 	)
 
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -451,9 +457,8 @@ func (r *edgeLocationResource) Update(ctx context.Context, req resource.UpdateRe
 		updateReq.Zones = toPtr(r.toZones(plan.Zones))
 	}
 
-	// Map cloud provider specific configurations for update
-	// API requires complete cloud objects with all fields including credentials
-	if plan.AWS != nil {
+	// Only include cloud provider config if it changed
+	if plan.AWS != nil && !awsEqual(plan.AWS, state.AWS) {
 		awsConfig, diags := r.toAWS(ctx, plan.AWS, config.AWS)
 		resp.Diagnostics.Append(diags...)
 		if resp.Diagnostics.HasError() {
@@ -462,7 +467,7 @@ func (r *edgeLocationResource) Update(ctx context.Context, req resource.UpdateRe
 		updateReq.Aws = awsConfig
 	}
 
-	if plan.GCP != nil {
+	if plan.GCP != nil && !gcpEqual(plan.GCP, state.GCP) {
 		gcpConfig, diags := r.toGCP(ctx, plan.GCP, config.GCP)
 		resp.Diagnostics.Append(diags...)
 		if resp.Diagnostics.HasError() {
@@ -471,7 +476,7 @@ func (r *edgeLocationResource) Update(ctx context.Context, req resource.UpdateRe
 		updateReq.Gcp = gcpConfig
 	}
 
-	if plan.OCI != nil {
+	if plan.OCI != nil && !ociEqual(plan.OCI, state.OCI) {
 		updateReq.Oci = r.toOCI(plan.OCI, config.OCI)
 	}
 
@@ -584,8 +589,8 @@ func (r *edgeLocationResource) toAWS(ctx context.Context, plan, config *awsModel
 	out := &omni.AWSParam{
 		AccountId: toPtr(plan.AccountID.ValueString()),
 		Credentials: &omni.AWSParamCredentials{
-			AccessKeyId:     config.AccessKeyID.ValueString(),
-			SecretAccessKey: config.SecretAccessKey.ValueString(),
+			AccessKeyId:     config.AccessKeyIDWO.ValueString(),
+			SecretAccessKey: config.SecretAccessKeyWO.ValueString(),
 		},
 		Networking: &omni.AWSParamAWSNetworking{
 			VpcId:           plan.VpcID.ValueString(),
@@ -605,13 +610,13 @@ func (r *edgeLocationResource) toAWSModel(ctx context.Context, config *omni.AWSP
 	}
 
 	aws := &awsModel{
-		AccountID:       types.StringValue(lo.FromPtr(config.AccountId)),
-		VpcID:           types.StringNull(),
-		SecurityGroupID: types.StringNull(),
-		SubnetIDs:       types.MapNull(types.StringType),
-		NameTag:         types.StringNull(),
-		AccessKeyID:     types.StringNull(),
-		SecretAccessKey: types.StringNull(),
+		AccountID:         types.StringValue(lo.FromPtr(config.AccountId)),
+		VpcID:             types.StringNull(),
+		SecurityGroupID:   types.StringNull(),
+		SubnetIDs:         types.MapNull(types.StringType),
+		NameTag:           types.StringNull(),
+		AccessKeyIDWO:     types.StringNull(),
+		SecretAccessKeyWO: types.StringNull(),
 	}
 
 	if config.Networking != nil {
@@ -645,7 +650,7 @@ func (r *edgeLocationResource) toGCP(ctx context.Context, plan, config *gcpModel
 	out := &omni.GCPParam{
 		ProjectId: plan.ProjectID.ValueString(),
 		Credentials: &omni.GCPParamCredentials{
-			ClientServiceAccountJsonBase64: config.ClientServiceAccountJSON.ValueString(),
+			ClientServiceAccountJsonBase64: config.ClientServiceAccountJSONWO.ValueString(),
 		},
 		Networking: &omni.GCPParamGCPNetworking{
 			NetworkName: plan.NetworkName.ValueString(),
@@ -664,11 +669,11 @@ func (r *edgeLocationResource) toGCPModel(ctx context.Context, config *omni.GCPP
 	}
 
 	gcp := &gcpModel{
-		ProjectID:                types.StringValue(config.ProjectId),
-		ClientServiceAccountJSON: types.StringNull(),
-		NetworkName:              types.StringNull(),
-		SubnetName:               types.StringNull(),
-		NetworkTags:              types.SetNull(types.StringType),
+		ProjectID:                  types.StringValue(config.ProjectId),
+		ClientServiceAccountJSONWO: types.StringNull(),
+		NetworkName:                types.StringNull(),
+		SubnetName:                 types.StringNull(),
+		NetworkTags:                types.SetNull(types.StringType),
 	}
 
 	if config.Networking != nil {
@@ -693,12 +698,12 @@ func (r *edgeLocationResource) toOCI(plan, config *ociModel) *omni.OCIParam {
 		TenancyId:     toPtr(plan.TenancyID.ValueString()),
 		CompartmentId: toPtr(plan.CompartmentID.ValueString()),
 		Credentials: &omni.OCIParamCredentials{
-			UserId:           config.UserID.ValueString(),
-			Fingerprint:      config.Fingerprint.ValueString(),
-			PrivateKeyBase64: config.PrivateKey.ValueString(),
+			UserId:           config.UserIDWO.ValueString(),
+			Fingerprint:      config.FingerprintWO.ValueString(),
+			PrivateKeyBase64: config.PrivateKeyWO.ValueString(),
 		},
 		Networking: &omni.OCIParamNetworking{
-			VcnId:    config.VcnID.ValueString(),
+			VcnId:    plan.VcnID.ValueString(),
 			SubnetId: plan.SubnetID.ValueString(),
 		},
 	}
@@ -716,9 +721,9 @@ func (r *edgeLocationResource) toOCIModel(config *omni.OCIParam) *ociModel {
 		CompartmentID: types.StringValue(lo.FromPtr(config.CompartmentId)),
 		VcnID:         types.StringNull(),
 		SubnetID:      types.StringNull(),
-		UserID:        types.StringNull(),
-		Fingerprint:   types.StringNull(),
-		PrivateKey:    types.StringNull(),
+		UserIDWO:      types.StringNull(),
+		FingerprintWO: types.StringNull(),
+		PrivateKeyWO:  types.StringNull(),
 	}
 	if config.Networking != nil {
 		oci.SubnetID = types.StringValue(config.Networking.SubnetId)
@@ -726,4 +731,47 @@ func (r *edgeLocationResource) toOCIModel(config *omni.OCIParam) *ociModel {
 	}
 
 	return oci
+}
+
+func awsEqual(a, b *awsModel) bool {
+	if a == nil && b == nil {
+		return true
+	}
+	if a == nil || b == nil {
+		return false
+	}
+
+	return a.AccountID.Equal(b.AccountID) &&
+		a.VpcID.Equal(b.VpcID) &&
+		a.SecurityGroupID.Equal(b.SecurityGroupID) &&
+		a.SubnetIDs.Equal(b.SubnetIDs) &&
+		a.NameTag.Equal(b.NameTag)
+}
+
+func gcpEqual(a, b *gcpModel) bool {
+	if a == nil && b == nil {
+		return true
+	}
+	if a == nil || b == nil {
+		return false
+	}
+
+	return a.ProjectID.Equal(b.ProjectID) &&
+		a.NetworkName.Equal(b.NetworkName) &&
+		a.SubnetName.Equal(b.SubnetName) &&
+		a.NetworkTags.Equal(b.NetworkTags)
+}
+
+func ociEqual(a, b *ociModel) bool {
+	if a == nil && b == nil {
+		return true
+	}
+	if a == nil || b == nil {
+		return false
+	}
+
+	return a.TenancyID.Equal(b.TenancyID) &&
+		a.CompartmentID.Equal(b.CompartmentID) &&
+		a.SubnetID.Equal(b.SubnetID) &&
+		a.VcnID.Equal(b.VcnID)
 }
