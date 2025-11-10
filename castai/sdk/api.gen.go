@@ -220,6 +220,12 @@ const (
 	CostreportV1beta1NoDataReasonUnknown         CostreportV1beta1NoDataReason = "Unknown"
 )
 
+// Defines values for ExternalclusterV1ClusterCastwareInstallMethod.
+const (
+	CASTWAREINSTALLMETHODUNSPECIFIED ExternalclusterV1ClusterCastwareInstallMethod = "CASTWARE_INSTALL_METHOD_UNSPECIFIED"
+	OPERATOR                         ExternalclusterV1ClusterCastwareInstallMethod = "OPERATOR"
+)
+
 // Defines values for ExternalclusterV1ClusterReconcileInfoReconcileMode.
 const (
 	ExternalclusterV1ClusterReconcileInfoReconcileModeDisabled    ExternalclusterV1ClusterReconcileInfoReconcileMode = "disabled"
@@ -3728,6 +3734,12 @@ type ExternalclusterV1Cluster struct {
 	// Anywhere AnywhereClusterParams defines Anywhere-specific arguments.
 	Anywhere *ExternalclusterV1AnywhereClusterParams `json:"anywhere,omitempty"`
 
+	// CastwareInstallMethod Method used to install CASTware components.
+	//
+	//  - CASTWARE_INSTALL_METHOD_UNSPECIFIED: Default value.
+	//  - OPERATOR: CASTware installed via the operator.
+	CastwareInstallMethod *ExternalclusterV1ClusterCastwareInstallMethod `json:"castwareInstallMethod,omitempty"`
+
 	// ClusterNameId User friendly unique cluster identifier.
 	ClusterNameId *string `json:"clusterNameId,omitempty"`
 
@@ -3804,6 +3816,12 @@ type ExternalclusterV1Cluster struct {
 	// Zones Cluster zones.
 	Zones *[]ExternalclusterV1Zone `json:"zones,omitempty"`
 }
+
+// ExternalclusterV1ClusterCastwareInstallMethod Method used to install CASTware components.
+//
+//   - CASTWARE_INSTALL_METHOD_UNSPECIFIED: Default value.
+//   - OPERATOR: CASTware installed via the operator.
+type ExternalclusterV1ClusterCastwareInstallMethod string
 
 // ExternalclusterV1ClusterReconcileInfo defines model for externalcluster.v1.Cluster.ReconcileInfo.
 type ExternalclusterV1ClusterReconcileInfo struct {
@@ -4294,6 +4312,12 @@ type ExternalclusterV1RegisterClusterRequest struct {
 
 	// Anywhere AnywhereClusterParams defines Anywhere-specific arguments.
 	Anywhere *ExternalclusterV1AnywhereClusterParams `json:"anywhere,omitempty"`
+
+	// CastwareInstallMethod Method used to install CASTware components.
+	//
+	//  - CASTWARE_INSTALL_METHOD_UNSPECIFIED: Default value.
+	//  - OPERATOR: CASTware installed via the operator.
+	CastwareInstallMethod *ExternalclusterV1ClusterCastwareInstallMethod `json:"castwareInstallMethod,omitempty"`
 
 	// Eks EKSClusterParams defines EKS-specific arguments.
 	Eks *ExternalclusterV1EKSClusterParams `json:"eks,omitempty"`
@@ -6782,7 +6806,7 @@ type WorkloadoptimizationV1HPAConfig struct {
 	// MaxReplicas Max replicas a workload can have.
 	MaxReplicas *int32 `json:"maxReplicas"`
 
-	// Metrics Metrics list which is scaled on. Equal Kubernetes HPA spec.
+	// Metrics Metrics list which is scaled on. Matches Kubernetes HPA spec.
 	Metrics *[]WorkloadoptimizationV1MetricSpec `json:"metrics,omitempty"`
 
 	// MinReplicas Min replicas a workload can have.
@@ -6804,7 +6828,7 @@ type WorkloadoptimizationV1HPAConfigUpdate struct {
 	ManagementOption *WorkloadoptimizationV1ManagementOption `json:"managementOption,omitempty"`
 	MaxReplicas      *int32                                  `json:"maxReplicas"`
 
-	// Metrics Metrics list which is scaled on. Equal Kubernetes HPA spec.
+	// Metrics Metrics list which is scaled on. Matches Kubernetes HPA spec.
 	Metrics     *[]WorkloadoptimizationV1MetricSpec `json:"metrics,omitempty"`
 	MinReplicas *int32                              `json:"minReplicas"`
 
@@ -7634,7 +7658,7 @@ type WorkloadoptimizationV1ScalingPolicyNativeHPASpec struct {
 	// MaxReplicas Max replicas a workload can have.
 	MaxReplicas int32 `json:"maxReplicas"`
 
-	// Metrics Metrics list which is scaled on. Equal Kubernetes HPA spec.
+	// Metrics Metrics list which is scaled on. Matches Kubernetes HPA spec.
 	Metrics []WorkloadoptimizationV1MetricSpec `json:"metrics"`
 
 	// MinReplicas Min replicas a workload can have.
