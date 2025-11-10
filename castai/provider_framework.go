@@ -46,7 +46,7 @@ func (p *frameworkProvider) Schema(_ context.Context, _ tfprovider.SchemaRequest
 				Description: "CAST.AI API url.",
 			},
 			"api_token": schema.StringAttribute{
-				Required:    true,
+				Optional:    true,
 				Sensitive:   true,
 				Description: "The token used to connect to CAST AI API.",
 			},
