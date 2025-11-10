@@ -25,14 +25,15 @@ func Provider(version string) *schema.Provider {
 		Schema: map[string]*schema.Schema{
 			"api_url": {
 				Type:             schema.TypeString,
-				Required:         true,
+				Optional:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.IsURLWithHTTPS),
 				DefaultFunc:      schema.EnvDefaultFunc("CASTAI_API_URL", "https://api.cast.ai"),
 				Description:      "CAST.AI API url.",
 			},
 			"api_token": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
+				Sensitive:   true,
 				DefaultFunc: schema.EnvDefaultFunc("CASTAI_API_TOKEN", nil),
 				Description: "The token used to connect to CAST AI API.",
 			},
@@ -76,9 +77,6 @@ func Provider(version string) *schema.Provider {
 			"castai_rebalancing_schedule":          dataSourceRebalancingSchedule(),
 			"castai_hibernation_schedule":          dataSourceHibernationSchedule(),
 			"castai_workload_scaling_policy_order": dataSourceWorkloadScalingPolicyOrder(),
-
-			// TODO: remove in next major release
-			"castai_eks_user_arn": dataSourceEKSClusterUserARN(),
 		},
 
 		ConfigureContextFunc: providerConfigure(version),
@@ -91,6 +89,10 @@ func providerConfigure(version string) schema.ConfigureContextFunc {
 	return func(ctx context.Context, data *schema.ResourceData) (interface{}, diag.Diagnostics) {
 		apiURL := data.Get("api_url").(string)
 		apiToken := data.Get("api_token").(string)
+
+		if apiToken == "" {
+			return nil, diag.Errorf("api_token must be set either in provider configuration or via CASTAI_API_TOKEN environment variable")
+		}
 
 		agent := fmt.Sprintf("castai-terraform-provider/%v", version)
 		if addUA := os.Getenv("CASTAI_ADDITIONAL_USER_AGENT"); addUA != "" {
