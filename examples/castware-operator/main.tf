@@ -18,7 +18,7 @@ resource "helm_release" "castware_operator" {
 
   set {
     name  = "defaultCluster.provider"
-    value = "aks" # Change to "gke" or "eks" as needed
+    value = var.cluster_provider
   }
 
   set {

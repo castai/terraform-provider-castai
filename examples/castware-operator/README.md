@@ -1,18 +1,18 @@
-# CAST AI Castware Operator
+# Cast AI Operator
 
-Deploy the CAST AI Castware Operator to manage CAST AI components declaratively using Terraform.
+Deploy the Cast AI Operator to manage Cast AI components declaratively using Terraform.
 
 ## Overview
 
-The [Castware Operator](https://docs.cast.ai/docs/castai-operator) manages the lifecycle of CAST AI components in your Kubernetes cluster. This example shows how to deploy the operator and configure components using Terraform.
+The [Cast AI Operator](https://docs.cast.ai/docs/castai-operator) manages the lifecycle of Cast AI components in your Kubernetes cluster. This example shows how to deploy the Operator and configure components using Terraform.
 
 ## Prerequisites
-- CAST AI account and [API Access key](https://docs.cast.ai/docs/authentication#obtaining-api-access-key)
+- Cast AI account and [API Access key](https://docs.cast.ai/docs/authentication#obtaining-api-access-key)
 - Terraform >= 1.0
 
-## Operator Modes
+## Operator Migrations Modes
 
-The operator supports three primary modes but we will refer to only 2 of them as the `read` mode is not managing components only discover them:
+The Operator supports three primary migrations modes but we will refer to only 2 of them as the `read` mode is not managing components only discover them:
 
 #### Write Mode (Default)
 Manual version control - you specify component versions explicitly.
@@ -21,6 +21,7 @@ Manual version control - you specify component versions explicitly.
 - You want to pin specific component versions
 - You need approval before upgrades
 - Testing new versions before rollout
+- You don't want the agent version to be bumped at Operator onboarding
 
 ```hcl
   set {
@@ -30,12 +31,12 @@ Manual version control - you specify component versions explicitly.
 ```
 
 #### AutoUpgrade Mode
-Automatic version management - the operator handles upgrades.
+Automatic version management - the operator handles upgrades to latest version when onboarded.
+When Operator is onboarded with this migration mode, it will upgrade the component version to latest, regardless of what is already installed.
+This mode will not upgrade the Operator version to latest automatically.
 
 **Use when:**
 - You want automatic updates to latest versions when operator takes over
-- You trust CAST AI's release process
-- Running production workloads with auto-updates enabled
 
 ```hcl
   set {
@@ -50,18 +51,12 @@ Automatic version management - the operator handles upgrades.
 
 ### 1. Configure Variables
 
-Copy the example file and configure your values:
-
-```bash
-cp terraform.tfvars.example terraform.tfvars
-```
-
 Edit `terraform.tfvars`:
 
 ```hcl
 cluster_provider = "aks"  # aks, gke, or eks
 castai_api_token = "your-castai-api-token"
-operator_mode    = "write"  # or "autoUpgrade"
+...
 ```
 
 ### 2. Customize Component Configuration (Optional)
@@ -78,7 +73,7 @@ components:
 ```
 
 **Available components:**
-- `castai-agent` - Main CAST AI agent
+- `castai-agent` - Main Cast AI agent
 
 See [full configuration options](https://github.com/castai/helm-charts/tree/main/charts/castai-agent) in the agent chart.
 
@@ -103,14 +98,14 @@ kubectl get components -n castai-agent
 kubectl get pods -n castai-agent
 ```
 
-## Integration with CAST AI Cluster Modules
+## Integration with Cast AI Cluster Modules
 
-### When Using CAST AI Cluster Modules
+### When Using Cast AI Cluster Modules
 
-If you're using a CAST AI cluster module (e.g., `castai/aks/castai`, `castai/gke/castai`, `castai/eks/castai`), add the operator **after** the cluster module:
+If you're using a Cast AI cluster module (e.g., `castai/aks/castai`, `castai/gke/castai`, `castai/eks/castai`), add the operator **after** the cluster module:
 
 ```hcl
-# First: CAST AI cluster module
+# First: Cast AI cluster module
 module "castai-aks-cluster" {
   source  = "castai/aks/castai"
   version = "~> 4.0"
@@ -118,7 +113,7 @@ module "castai-aks-cluster" {
   # ... cluster configuration
 }
 
-# Then: Castware Operator with dependency
+# Then: `castware-operator` with dependency
 resource "helm_release" "castware_operator" {
   name       = "castware-operator"
   namespace  = "castai-agent"
@@ -141,7 +136,7 @@ resource "helm_release" "castware_components" {
 }
 ```
 
-### When NOT Using CAST AI Cluster Modules
+### When NOT Using Cast AI Cluster Modules
 
 If you're deploying the operator standalone (no cluster module), you don't need the `depends_on` for the module:
 
@@ -272,12 +267,10 @@ terraform destroy
 
 ## Documentation
 
-- [Castware Operator Documentation](https://docs.cast.ai/docs/castai-operator)
+- [Cast AI Operator Documentation](https://docs.cast.ai/docs/castai-operator)
 - [Troubleshooting Guide](https://docs.cast.ai/docs/castai-operator#troubleshooting)
 
 ## Support
 
 For issues or questions:
-- [CAST AI Documentation](https://docs.cast.ai/)
-- [CAST AI Support Portal](https://support.cast.ai/)
-- [Community Forum](https://community.cast.ai/)
+- [Cast AI Documentation](https://docs.cast.ai/docs/getting-started#/where-to-get-help)
