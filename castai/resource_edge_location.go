@@ -17,8 +17,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/samber/lo"
 
-	"github.com/castai/terraform-provider-castai/castai/helpers/store"
 	"github.com/castai/terraform-provider-castai/castai/sdk/omni"
+	"github.com/castai/terraform-provider-castai/castai/store"
 )
 
 var (

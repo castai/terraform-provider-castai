@@ -23,6 +23,8 @@ func NewWriteOnlyStore(s PrivateState, key string) *WriteOnlyStore {
 	}
 }
 
+// WriteOnlyStore is a wrapper for easier management and comparison of write-only values stored in private state.
+// Stored values are hashed by default.
 type WriteOnlyStore struct {
 	state PrivateState
 	key   string
