@@ -38,6 +38,7 @@ func TestAccCloudAgnostic_ResourceEdgeLocationAWS(t *testing.T) {
 					resource.TestCheckResourceAttrSet(resourceName, "aws.security_group_id"),
 					resource.TestCheckResourceAttr(resourceName, "aws.subnet_ids.%", "2"),
 					resource.TestCheckResourceAttrSet(resourceName, "id"),
+					resource.TestCheckResourceAttr(resourceName, "credentials_revision", "1"),
 				),
 			},
 			{
@@ -68,6 +69,12 @@ func TestAccCloudAgnostic_ResourceEdgeLocationAWS(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "zones.2.name", "us-east-1c"),
 				),
 			},
+			{
+				Config: testAccEdgeLocationAWSCredentialsUpdated(rName, clusterName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "credentials_revision", "2"),
+				),
+			},
 		},
 	})
 }
@@ -95,6 +102,7 @@ func TestAccCloudAgnostic_ResourceEdgeLocationGCP(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "zones.1.name", "us-central1-b"),
 					resource.TestCheckResourceAttrSet(resourceName, "gcp.project_id"),
 					resource.TestCheckResourceAttrSet(resourceName, "id"),
+					resource.TestCheckResourceAttr(resourceName, "credentials_revision", "1"),
 				),
 			},
 			{
@@ -106,6 +114,12 @@ func TestAccCloudAgnostic_ResourceEdgeLocationGCP(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "zones.0.name", "us-central1-a"),
 					resource.TestCheckResourceAttr(resourceName, "zones.1.id", "us-central1-b"),
 					resource.TestCheckResourceAttr(resourceName, "zones.1.name", "us-central1-b"),
+				),
+			},
+			{
+				Config: testAccEdgeLocationGCPCredentialsUpdated(rName, clusterName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "credentials_revision", "2"),
 				),
 			},
 		},
@@ -134,6 +148,7 @@ func TestAccCloudAgnostic_ResourceEdgeLocationOCI(t *testing.T) {
 					resource.TestCheckResourceAttrSet(resourceName, "oci.compartment_id"),
 					resource.TestCheckResourceAttrSet(resourceName, "oci.subnet_id"),
 					resource.TestCheckResourceAttrSet(resourceName, "id"),
+					resource.TestCheckResourceAttr(resourceName, "credentials_revision", "1"),
 				),
 			},
 			{
@@ -142,19 +157,35 @@ func TestAccCloudAgnostic_ResourceEdgeLocationOCI(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "description", "Updated OCI edge location"),
 				),
 			},
+			{
+				Config: testAccEdgeLocationOCICredentialsUpdated(rName),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "credentials_revision", "2"),
+				),
+			},
 		},
 	})
 }
 
 func testAccEdgeLocationAWSConfig(rName, clusterName string) string {
-	return testAccEdgeLocationAWSConfigWithParams(rName, clusterName, "Test edge location", []string{"us-east-1a", "us-east-1b"})
+	return testAccEdgeLocationAWSConfigWithParams(rName, clusterName, "Test edge location", []string{"us-east-1a", "us-east-1b"},
+		`access_key_id_wo     = "AKIAIOSFODNN7EXAMPLE"
+    secret_access_key_wo = "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"`)
 }
 
 func testAccEdgeLocationAWSUpdated(rName, clusterName string) string {
-	return testAccEdgeLocationAWSConfigWithParams(rName, clusterName, "Updated edge location description", []string{"us-east-1a", "us-east-1b", "us-east-1c"})
+	return testAccEdgeLocationAWSConfigWithParams(rName, clusterName, "Updated edge location description", []string{"us-east-1a", "us-east-1b", "us-east-1c"},
+		`access_key_id_wo     = "AKIAIOSFODNN7EXAMPLE"
+    secret_access_key_wo = "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"`)
 }
 
-func testAccEdgeLocationAWSConfigWithParams(rName, clusterName, description string, zones []string) string {
+func testAccEdgeLocationAWSCredentialsUpdated(rName, clusterName string) string {
+	return testAccEdgeLocationAWSConfigWithParams(rName, clusterName, "Updated edge location description", []string{"us-east-1a", "us-east-1b", "us-east-1c"},
+		`access_key_id_wo     = "AKIAIOSFODNN7NEWKEY1"
+    secret_access_key_wo = "wJalrXUtnFEMI/K7MDENG/bPxRfiCYNEWKEY12345"`)
+}
+
+func testAccEdgeLocationAWSConfigWithParams(rName, clusterName, description string, zones []string, awsCredentials string) string {
 	organizationID := testAccGetOrganizationID()
 
 	zonesConfig := "zones = ["
@@ -183,8 +214,7 @@ resource "castai_edge_location" "test" {
 
   aws = {
     account_id           = "123456789012"
-    access_key_id_wo     = "AKIAIOSFODNN7EXAMPLE"
-    secret_access_key_wo = "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
+    %[6]s
     vpc_id               = "vpc-12345678"
     security_group_id    = "sg-12345678"
     subnet_ids = {%[4]s
@@ -192,20 +222,55 @@ resource "castai_edge_location" "test" {
     name_tag             = "test-edge-location"
   }
 }
-`, rName, description, zonesConfig, subnetConfig, organizationID))
+`, rName, description, zonesConfig, subnetConfig, organizationID, awsCredentials))
 }
 
 func testAccEdgeLocationGCPConfig(rName, clusterName string) string {
 	return testAccEdgeLocationGCPConfigWithParams(rName, clusterName,
-		"Test GCP edge location", []string{"us-central1-a", "us-central1-b"}, []string{"edge-location", "castai"})
+		"Test GCP edge location", []string{"us-central1-a", "us-central1-b"}, []string{"edge-location", "castai"},
+		`client_service_account_json_base64_wo = base64encode(jsonencode({
+      "type": "service_account",
+      "project_id": "test-project-123456",
+      "private_key_id": "key123",
+      "private_key": "-----BEGIN PRIVATE KEY-----\nMIIE...EXAMPLE...==\n-----END PRIVATE KEY-----\n",
+      "client_email": "test@test-project-123456.iam.gserviceaccount.com",
+      "client_id": "123456789",
+      "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+      "token_uri": "https://oauth2.googleapis.com/token"
+    }))`)
 }
 
 func testAccEdgeLocationGCPUpdated(rName, clusterName string) string {
 	return testAccEdgeLocationGCPConfigWithParams(rName, clusterName,
-		"Updated GCP edge location", []string{"us-central1-a", "us-central1-b"}, []string{"edge-location", "castai"})
+		"Updated GCP edge location", []string{"us-central1-a", "us-central1-b"}, []string{"edge-location", "castai"},
+		`client_service_account_json_base64_wo = base64encode(jsonencode({
+      "type": "service_account",
+      "project_id": "test-project-123456",
+      "private_key_id": "key123",
+      "private_key": "-----BEGIN PRIVATE KEY-----\nMIIE...EXAMPLE...==\n-----END PRIVATE KEY-----\n",
+      "client_email": "test@test-project-123456.iam.gserviceaccount.com",
+      "client_id": "123456789",
+      "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+      "token_uri": "https://oauth2.googleapis.com/token"
+    }))`)
 }
 
-func testAccEdgeLocationGCPConfigWithParams(rName, clusterName, description string, zones []string, networkTags []string) string {
+func testAccEdgeLocationGCPCredentialsUpdated(rName, clusterName string) string {
+	return testAccEdgeLocationGCPConfigWithParams(rName, clusterName,
+		"Updated GCP edge location", []string{"us-central1-a", "us-central1-b"}, []string{"edge-location", "castai"},
+		`client_service_account_json_base64_wo = base64encode(jsonencode({
+      "type": "service_account",
+      "project_id": "test-project-123456",
+      "private_key_id": "key456-new",
+      "private_key": "-----BEGIN PRIVATE KEY-----\nMIIE...NEWKEY...==\n-----END PRIVATE KEY-----\n",
+      "client_email": "test@test-project-123456.iam.gserviceaccount.com",
+      "client_id": "123456789",
+      "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+      "token_uri": "https://oauth2.googleapis.com/token"
+    }))`)
+}
+
+func testAccEdgeLocationGCPConfigWithParams(rName, clusterName, description string, zones []string, networkTags []string, gcpCredentials string) string {
 	organizationID := testAccGetOrganizationID()
 	zonesConfig := "zones = ["
 	for i, zone := range zones {
@@ -237,34 +302,38 @@ resource "castai_edge_location" "test" {
 %[3]s
 
   gcp = {
-    project_id                     = "test-project-123456"
-    client_service_account_json_base64_wo = base64encode(jsonencode({
-      "type": "service_account",
-      "project_id": "test-project-123456",
-      "private_key_id": "key123",
-      "private_key": "-----BEGIN PRIVATE KEY-----\nMIIE...EXAMPLE...==\n-----END PRIVATE KEY-----\n",
-      "client_email": "test@test-project-123456.iam.gserviceaccount.com",
-      "client_id": "123456789",
-      "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-      "token_uri": "https://oauth2.googleapis.com/token"
-    }))
-    network_name                   = "test-network"
-    subnet_name                    = "test-subnet"
-    network_tags                   = [%[4]s]
+    project_id     = "test-project-123456"
+    %[5]s
+    network_name   = "test-network"
+    subnet_name    = "test-subnet"
+    network_tags   = [%[4]s]
   }
 }
-`, rName, description, zonesConfig, networkTagsConfig, organizationID, organizationID))
+`, rName, description, zonesConfig, networkTagsConfig, gcpCredentials, organizationID))
 }
 
 func testAccEdgeLocationOCIConfig(rName string) string {
-	return testAccEdgeLocationOCIConfigWithParams(rName, "Test OCI edge location")
+	return testAccEdgeLocationOCIConfigWithParams(rName, "Test OCI edge location",
+		`user_id_wo      = "ocid1.user.oc1..example"
+    fingerprint_wo  = "aa:bb:cc:dd:ee:ff:00:11:22:33:44:55:66:77:88:99"
+    private_key_wo  = base64encode("-----BEGIN RSA PRIVATE KEY-----\nMIIE...EXAMPLE...==\n-----END RSA PRIVATE KEY-----\n")`)
 }
 
 func testAccEdgeLocationOCIUpdated(rName string) string {
-	return testAccEdgeLocationOCIConfigWithParams(rName, "Updated OCI edge location")
+	return testAccEdgeLocationOCIConfigWithParams(rName, "Updated OCI edge location",
+		`user_id_wo      = "ocid1.user.oc1..example"
+    fingerprint_wo  = "aa:bb:cc:dd:ee:ff:00:11:22:33:44:55:66:77:88:99"
+    private_key_wo  = base64encode("-----BEGIN RSA PRIVATE KEY-----\nMIIE...EXAMPLE...==\n-----END RSA PRIVATE KEY-----\n")`)
 }
 
-func testAccEdgeLocationOCIConfigWithParams(rName, description string) string {
+func testAccEdgeLocationOCICredentialsUpdated(rName string) string {
+	return testAccEdgeLocationOCIConfigWithParams(rName, "Updated OCI edge location",
+		`user_id_wo      = "ocid1.user.oc1..example"
+    fingerprint_wo  = "11:22:33:44:55:66:77:88:99:aa:bb:cc:dd:ee:ff:00"
+    private_key_wo  = base64encode("-----BEGIN RSA PRIVATE KEY-----\nMIIE...NEWKEY...==\n-----END RSA PRIVATE KEY-----\n")`)
+}
+
+func testAccEdgeLocationOCIConfigWithParams(rName, description, ociCredentials string) string {
 	organizationID := testAccGetOrganizationID()
 	clusterName := "test-oci-cluster"
 
@@ -283,14 +352,12 @@ resource "castai_edge_location" "test" {
   oci = {
     tenancy_id      = "ocid1.tenancy.oc1..example"
     compartment_id  = "ocid1.compartment.oc1..example"
-    user_id_wo      = "ocid1.user.oc1..example"
-    fingerprint_wo  = "aa:bb:cc:dd:ee:ff:00:11:22:33:44:55:66:77:88:99"
-    private_key_wo  = base64encode("-----BEGIN RSA PRIVATE KEY-----\nMIIE...EXAMPLE...==\n-----END RSA PRIVATE KEY-----\n")
+    %[4]s
     vcn_id          = "ocid1.vcn.oc1.phx.example"
     subnet_id       = "ocid1.subnet.oc1.phx.example"
   }
 }
-`, rName, description, organizationID))
+`, rName, description, organizationID, ociCredentials))
 }
 
 func testAccCheckEdgeLocationDestroy(s *terraform.State) error {

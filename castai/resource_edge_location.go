@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -24,6 +25,7 @@ var (
 	_ resource.Resource                = (*edgeLocationResource)(nil)
 	_ resource.ResourceWithConfigure   = (*edgeLocationResource)(nil)
 	_ resource.ResourceWithImportState = (*edgeLocationResource)(nil)
+	_ resource.ResourceWithModifyPlan  = (*edgeLocationResource)(nil)
 )
 
 type edgeLocationResource struct {
@@ -41,6 +43,8 @@ type edgeLocationModel struct {
 	AWS            *awsModel    `tfsdk:"aws"`
 	GCP            *gcpModel    `tfsdk:"gcp"`
 	OCI            *ociModel    `tfsdk:"oci"`
+	// Computed revision number incremented each time credentials have changed.
+	CredentialsRevision types.Int64 `tfsdk:"credentials_revision"`
 }
 
 type zoneModel struct {
@@ -106,7 +110,7 @@ func (m gcpModel) Equal(other *gcpModel) bool {
 }
 
 func (m ociModel) credentials() types.String {
-	return types.StringValue(m.FingerprintWO.String() + m.PrivateKeyWO.String() + m.FingerprintWO.String())
+	return types.StringValue(m.UserIDWO.String() + m.PrivateKeyWO.String() + m.FingerprintWO.String())
 }
 
 func (m ociModel) Equal(other *ociModel) bool {
@@ -198,6 +202,13 @@ func (r *edgeLocationResource) Schema(_ context.Context, _ resource.SchemaReques
 							Description: "The name of the zone",
 						},
 					},
+				},
+			},
+			"credentials_revision": schema.Int64Attribute{
+				Computed:    true,
+				Description: "Revision number incremented each time credentials change",
+				PlanModifiers: []planmodifier.Int64{
+					int64planmodifier.UseStateForUnknown(),
 				},
 			},
 			"aws": schema.SingleNestedAttribute{
@@ -388,6 +399,7 @@ func (r *edgeLocationResource) Create(ctx context.Context, req resource.CreateRe
 	}
 
 	plan.ID = types.StringValue(*apiResp.JSON200.Id)
+	plan.CredentialsRevision = types.Int64Value(1)
 	// Store credential hash in private state
 	resp.Diagnostics.Append(r.woCredentialsStore(resp.Private).Set(ctx, mc.credentials())...)
 	resp.Diagnostics.Append(resp.State.Set(ctx, plan)...)
@@ -460,6 +472,11 @@ func (r *edgeLocationResource) Read(ctx context.Context, req resource.ReadReques
 		state.OCI = r.toOCIModel(edgeLocation.Oci)
 	}
 
+	// Initialize credentials_revision to 1 if not set (e.g., during import)
+	if state.CredentialsRevision.IsNull() {
+		state.CredentialsRevision = types.Int64Value(1)
+	}
+
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 }
 
@@ -486,30 +503,26 @@ func (r *edgeLocationResource) Update(ctx context.Context, req resource.UpdateRe
 		updateReq.Zones = toPtr(r.toZones(plan.Zones))
 	}
 
-	// Only include cloud provider config if it or credentials has changed
-	if plan.AWS != nil {
-		credsEqual, diags := r.woCredentialsStore(resp.Private).Equal(ctx, config.AWS.credentials())
-		resp.Diagnostics.Append(diags...)
-		if !plan.AWS.Equal(state.AWS) || !credsEqual {
-			updateReq.Aws, diags = r.toAWS(ctx, plan.AWS, config.AWS)
-			resp.Diagnostics.Append(diags...)
-		}
+	// Check if credentials have changed by comparing planned vs state revision
+	credentialsChanged := !plan.CredentialsRevision.Equal(state.CredentialsRevision)
+
+	// Include cloud provider config if it or credentials has changed.
+	var (
+		diags diag.Diagnostics
+		mc    ModelWithCredentials
+	)
+	switch {
+	case plan.AWS != nil && (!plan.AWS.Equal(state.AWS) || credentialsChanged):
+		updateReq.Aws, diags = r.toAWS(ctx, plan.AWS, config.AWS)
+		mc = config.AWS
+	case plan.GCP != nil && (!plan.GCP.Equal(state.GCP) || credentialsChanged):
+		updateReq.Gcp, diags = r.toGCP(ctx, plan.GCP, config.GCP)
+		mc = config.GCP
+	case plan.OCI != nil && (!plan.OCI.Equal(state.OCI) || credentialsChanged):
+		updateReq.Oci = r.toOCI(plan.OCI, config.OCI)
+		mc = config.OCI
 	}
-	if plan.GCP != nil {
-		credsEqual, diags := r.woCredentialsStore(resp.Private).Equal(ctx, config.GCP.credentials())
-		resp.Diagnostics.Append(diags...)
-		if !plan.GCP.Equal(state.GCP) || !credsEqual {
-			updateReq.Gcp, diags = r.toGCP(ctx, plan.GCP, config.GCP)
-			resp.Diagnostics.Append(diags...)
-		}
-	}
-	if plan.OCI != nil {
-		credsEqual, diags := r.woCredentialsStore(resp.Private).Equal(ctx, config.OCI.credentials())
-		resp.Diagnostics.Append(diags...)
-		if !plan.OCI.Equal(state.OCI) || !credsEqual {
-			updateReq.Oci = r.toOCI(plan.OCI, config.OCI)
-		}
-	}
+	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -526,6 +539,11 @@ func (r *edgeLocationResource) Update(ctx context.Context, req resource.UpdateRe
 			fmt.Sprintf("unexpected status code: %d, body: %s", apiResp.StatusCode(), string(apiResp.Body)),
 		)
 		return
+	}
+
+	// Update stored credentials hash if credentials changed
+	if credentialsChanged {
+		resp.Diagnostics.Append(r.woCredentialsStore(resp.Private).Set(ctx, mc.credentials())...)
 	}
 
 	resp.Diagnostics.Append(resp.State.Set(ctx, plan)...)
@@ -558,6 +576,44 @@ func (r *edgeLocationResource) Delete(ctx context.Context, req resource.DeleteRe
 			fmt.Sprintf("unexpected status code: %d, body: %s", apiResp.StatusCode(), string(apiResp.Body)),
 		)
 		return
+	}
+}
+
+func (r *edgeLocationResource) ModifyPlan(ctx context.Context, req resource.ModifyPlanRequest, resp *resource.ModifyPlanResponse) {
+	// Skip if resource is being created or deleted
+	if req.State.Raw.IsNull() || req.Plan.Raw.IsNull() {
+		return
+	}
+
+	var state, plan, config edgeLocationModel
+	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
+	resp.Diagnostics.Append(req.Config.Get(ctx, &config)...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	var (
+		credentialsEqual bool
+		diags            diag.Diagnostics
+	)
+	switch {
+	case config.AWS != nil:
+		credentialsEqual, diags = r.woCredentialsStore(req.Private).Equal(ctx, config.AWS.credentials())
+	case config.GCP != nil:
+		credentialsEqual, diags = r.woCredentialsStore(req.Private).Equal(ctx, config.GCP.credentials())
+	case config.OCI != nil:
+		credentialsEqual, diags = r.woCredentialsStore(req.Private).Equal(ctx, config.OCI.credentials())
+	}
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	// If credentials changed, update the planned credentials_revision
+	if !credentialsEqual {
+		plan.CredentialsRevision = types.Int64Value(state.CredentialsRevision.ValueInt64() + 1)
+		resp.Diagnostics.Append(resp.Plan.Set(ctx, plan)...)
 	}
 }
 

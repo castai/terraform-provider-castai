@@ -67,6 +67,7 @@ resource "castai_edge_location" "aws_example" {
 
 ### Read-Only
 
+- `credentials_revision` (Number) Revision number incremented each time credentials change
 - `id` (String) Edge location ID
 
 <a id="nestedatt--aws"></a>

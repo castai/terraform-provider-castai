@@ -6,6 +6,7 @@ require (
 	github.com/cenkalti/backoff/v4 v4.1.3
 	github.com/evanphx/json-patch v4.9.0+incompatible
 	github.com/golang/mock v1.5.0
+	github.com/google/martian v2.1.0+incompatible
 	github.com/google/uuid v1.6.0
 	github.com/gruntwork-io/terratest v0.40.18
 	github.com/hashicorp/go-cty v1.5.0

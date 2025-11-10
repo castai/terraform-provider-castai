@@ -6220,13 +6220,14 @@ type RuntimeV1WorkloadNetflow struct {
 
 // RuntimeV1WorkloadNetflowDestination defines model for runtime.v1.WorkloadNetflowDestination.
 type RuntimeV1WorkloadNetflowDestination struct {
-	DnsQuestion  *string `json:"dnsQuestion,omitempty"`
-	Namespace    *string `json:"namespace,omitempty"`
-	RxBytes      *string `json:"rxBytes,omitempty"`
-	TxBytes      *string `json:"txBytes,omitempty"`
-	WorkloadKind *string `json:"workloadKind,omitempty"`
-	WorkloadName *string `json:"workloadName,omitempty"`
-	Zone         *string `json:"zone,omitempty"`
+	Addrs        *[]string `json:"addrs,omitempty"`
+	DnsQuestion  *string   `json:"dnsQuestion,omitempty"`
+	Namespace    *string   `json:"namespace,omitempty"`
+	RxBytes      *string   `json:"rxBytes,omitempty"`
+	TxBytes      *string   `json:"txBytes,omitempty"`
+	WorkloadKind *string   `json:"workloadKind,omitempty"`
+	WorkloadName *string   `json:"workloadName,omitempty"`
+	Zone         *string   `json:"zone,omitempty"`
 }
 
 // ScheduledrebalancingV1AggressiveModeConfig defines model for scheduledrebalancing.v1.AggressiveModeConfig.
