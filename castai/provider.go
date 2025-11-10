@@ -35,7 +35,7 @@ func Provider(version string) *schema.Provider {
 			},
 			"api_token": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
 				Sensitive:   true,
 				DefaultFunc: schema.EnvDefaultFunc("CASTAI_API_TOKEN", nil),
 				Description: "The token used to connect to CAST AI API.",
