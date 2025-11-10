@@ -92,7 +92,8 @@ func TestNodeTemplateResourceReadContext(t *testing.T) {
 					  "NVIDIA"
 					],
 					"includeNames": [],
-					"excludeNames": []
+					"excludeNames": [],
+					"fractionalGPUs": "ENABLED"
 				  },
 				  "customPriority": [
 				    {
@@ -201,6 +202,7 @@ constraints.0.gpu.0.manufacturers.# = 1
 constraints.0.gpu.0.manufacturers.0 = NVIDIA
 constraints.0.gpu.0.max_count = 0
 constraints.0.gpu.0.min_count = 0
+constraints.0.gpu.0.fractional_gpus = enabled
 constraints.0.burstable_instances = 
 constraints.0.customer_specific = 
 constraints.0.instance_families.# = 1
@@ -655,6 +657,7 @@ func TestAccEKS_ResourceNodeTemplate_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.gpu.0.manufacturers.0", "NVIDIA"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.gpu.0.include_names.#", "0"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.gpu.0.exclude_names.#", "0"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.gpu.0.fractional_gpus", "enabled"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.min_cpu", "4"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.max_cpu", "100"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.use_spot_fallbacks", "true"),
@@ -724,6 +727,7 @@ func TestAccEKS_ResourceNodeTemplate_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.gpu.0.manufacturers.#", "0"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.gpu.0.include_names.#", "0"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.gpu.0.exclude_names.#", "0"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.gpu.0.fractional_gpus", "disabled"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.min_cpu", "0"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.max_cpu", "0"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.use_spot_fallbacks", "true"),
@@ -836,6 +840,7 @@ func testAccNodeTemplateConfig(rName, clusterName string) string {
 					include_names = []
 					exclude_names = []
 					manufacturers = ["NVIDIA"]
+					fractional_gpus = "enabled"
 				}
 
 				custom_priority {
@@ -917,6 +922,10 @@ func testNodeTemplateUpdated(rName, clusterName string) string {
 
 				cpu_manufacturers = ["INTEL", "AMD"]
 				architecture_priority = ["arm64"]
+
+				gpu {
+					fractional_gpus = "disabled"
+				}
 
 				resource_limits {
 					cpu_limit_enabled   = true

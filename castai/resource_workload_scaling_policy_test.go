@@ -524,6 +524,68 @@ func Test_validateResourcePolicy(t *testing.T) {
 			},
 			errMsg: `field "cpu": field "apply_threshold_strategy": field "exponent": value must be set`,
 		},
+		"should not return error when limit strategy has only_if_original_exist set to true": {
+			args: map[string]interface{}{
+				"limit": []interface{}{map[string]interface{}{
+					"type":                   "MULTIPLIER",
+					"multiplier":             2.0,
+					"only_if_original_exist": true,
+				}},
+			},
+		},
+		"should not return error when limit strategy has only_if_original_exist set to false": {
+			args: map[string]interface{}{
+				"limit": []interface{}{map[string]interface{}{
+					"type":                   "MULTIPLIER",
+					"multiplier":             2.0,
+					"only_if_original_exist": false,
+				}},
+			},
+		},
+		"should not return error when limit strategy has only_if_original_lower set to true": {
+			args: map[string]interface{}{
+				"limit": []interface{}{map[string]interface{}{
+					"type":                   "MULTIPLIER",
+					"multiplier":             1.5,
+					"only_if_original_lower": true,
+				}},
+			},
+		},
+		"should not return error when limit strategy has only_if_original_lower set to false": {
+			args: map[string]interface{}{
+				"limit": []interface{}{map[string]interface{}{
+					"type":                   "MULTIPLIER",
+					"multiplier":             1.5,
+					"only_if_original_lower": false,
+				}},
+			},
+		},
+		"should not return error when limit strategy has both only_if_original_exist and only_if_original_lower": {
+			args: map[string]interface{}{
+				"limit": []interface{}{map[string]interface{}{
+					"type":                   "MULTIPLIER",
+					"multiplier":             3.0,
+					"only_if_original_exist": true,
+					"only_if_original_lower": true,
+				}},
+			},
+		},
+		"should not return error when limit strategy NO_LIMIT has only_if_original_exist": {
+			args: map[string]interface{}{
+				"limit": []interface{}{map[string]interface{}{
+					"type":                   "NO_LIMIT",
+					"only_if_original_exist": true,
+				}},
+			},
+		},
+		"should not return error when limit strategy KEEP_LIMITS has only_if_original_lower": {
+			args: map[string]interface{}{
+				"limit": []interface{}{map[string]interface{}{
+					"type":                   "KEEP_LIMITS",
+					"only_if_original_lower": true,
+				}},
+			},
+		},
 	}
 	for name, tt := range tests {
 		t.Run(name, func(t *testing.T) {
@@ -855,4 +917,206 @@ func toJSON(r *require.Assertions, v any) *bytes.Buffer {
 
 func toResponse(r *require.Assertions, v any, statusCode int) (*http.Response, error) {
 	return &http.Response{StatusCode: statusCode, Body: io.NopCloser(toJSON(r, v)), Header: map[string][]string{"Content-Type": {"json"}}}, nil
+}
+
+func Test_toWorkloadScalingPoliciesMap(t *testing.T) {
+	tests := map[string]struct {
+		previousCfg map[string]any
+		policies    sdk.WorkloadoptimizationV1ResourcePolicies
+		expected    []map[string]any
+	}{
+		"should map limit strategy with only_if_original_exist true": {
+			previousCfg: map[string]any{},
+			policies: sdk.WorkloadoptimizationV1ResourcePolicies{
+				Function: sdk.QUANTILE,
+				Args:     []string{"0.9"},
+				Overhead: 0.1,
+				Limit: &sdk.WorkloadoptimizationV1ResourceLimitStrategy{
+					Type:                sdk.MULTIPLIER,
+					Multiplier:          lo.ToPtr(2.0),
+					OnlyIfOriginalExist: lo.ToPtr(true),
+				},
+			},
+			expected: []map[string]any{
+				{
+					"function": sdk.QUANTILE,
+					"args":     []string{"0.9"},
+					"overhead": 0.1,
+					"min":      (*float64)(nil),
+					"max":      (*float64)(nil),
+					"limit": []map[string]any{
+						{
+							FieldLimitStrategyType:                sdk.MULTIPLIER,
+							FieldLimitStrategyMultiplier:          2.0,
+							FieldLimitStrategyOnlyIfOriginalExist: true,
+						},
+					},
+				},
+			},
+		},
+		"should map limit strategy with only_if_original_exist false": {
+			previousCfg: map[string]any{},
+			policies: sdk.WorkloadoptimizationV1ResourcePolicies{
+				Function: sdk.MAX,
+				Overhead: 0.15,
+				Limit: &sdk.WorkloadoptimizationV1ResourceLimitStrategy{
+					Type:                sdk.NOLIMIT,
+					OnlyIfOriginalExist: lo.ToPtr(false),
+				},
+			},
+			expected: []map[string]any{
+				{
+					"function": sdk.MAX,
+					"args":     []string(nil),
+					"overhead": 0.15,
+					"min":      (*float64)(nil),
+					"max":      (*float64)(nil),
+					"limit": []map[string]any{
+						{
+							FieldLimitStrategyType:                sdk.NOLIMIT,
+							FieldLimitStrategyOnlyIfOriginalExist: false,
+						},
+					},
+				},
+			},
+		},
+		"should map limit strategy with only_if_original_lower true": {
+			previousCfg: map[string]any{},
+			policies: sdk.WorkloadoptimizationV1ResourcePolicies{
+				Function: sdk.QUANTILE,
+				Args:     []string{"0.95"},
+				Overhead: 0.2,
+				Limit: &sdk.WorkloadoptimizationV1ResourceLimitStrategy{
+					Type:                sdk.KEEPLIMITS,
+					OnlyIfOriginalLower: lo.ToPtr(true),
+				},
+			},
+			expected: []map[string]any{
+				{
+					"function": sdk.QUANTILE,
+					"args":     []string{"0.95"},
+					"overhead": 0.2,
+					"min":      (*float64)(nil),
+					"max":      (*float64)(nil),
+					"limit": []map[string]any{
+						{
+							FieldLimitStrategyType:                sdk.KEEPLIMITS,
+							FieldLimitStrategyOnlyIfOriginalLower: true,
+						},
+					},
+				},
+			},
+		},
+		"should map limit strategy with only_if_original_lower false": {
+			previousCfg: map[string]any{},
+			policies: sdk.WorkloadoptimizationV1ResourcePolicies{
+				Function: sdk.QUANTILE,
+				Args:     []string{"0.5"},
+				Overhead: 0.05,
+				Limit: &sdk.WorkloadoptimizationV1ResourceLimitStrategy{
+					Type:                sdk.MULTIPLIER,
+					Multiplier:          lo.ToPtr(1.5),
+					OnlyIfOriginalLower: lo.ToPtr(false),
+				},
+			},
+			expected: []map[string]any{
+				{
+					"function": sdk.QUANTILE,
+					"args":     []string{"0.5"},
+					"overhead": 0.05,
+					"min":      (*float64)(nil),
+					"max":      (*float64)(nil),
+					"limit": []map[string]any{
+						{
+							FieldLimitStrategyType:                sdk.MULTIPLIER,
+							FieldLimitStrategyMultiplier:          1.5,
+							FieldLimitStrategyOnlyIfOriginalLower: false,
+						},
+					},
+				},
+			},
+		},
+		"should map limit strategy with both only_if_original_exist and only_if_original_lower": {
+			previousCfg: map[string]any{},
+			policies: sdk.WorkloadoptimizationV1ResourcePolicies{
+				Function: sdk.MAX,
+				Overhead: 0.3,
+				Limit: &sdk.WorkloadoptimizationV1ResourceLimitStrategy{
+					Type:                sdk.MULTIPLIER,
+					Multiplier:          lo.ToPtr(2.5),
+					OnlyIfOriginalExist: lo.ToPtr(true),
+					OnlyIfOriginalLower: lo.ToPtr(true),
+				},
+			},
+			expected: []map[string]any{
+				{
+					"function": sdk.MAX,
+					"args":     []string(nil),
+					"overhead": 0.3,
+					"min":      (*float64)(nil),
+					"max":      (*float64)(nil),
+					"limit": []map[string]any{
+						{
+							FieldLimitStrategyType:                sdk.MULTIPLIER,
+							FieldLimitStrategyMultiplier:          2.5,
+							FieldLimitStrategyOnlyIfOriginalExist: true,
+							FieldLimitStrategyOnlyIfOriginalLower: true,
+						},
+					},
+				},
+			},
+		},
+		"should map limit strategy without only_if flags": {
+			previousCfg: map[string]any{},
+			policies: sdk.WorkloadoptimizationV1ResourcePolicies{
+				Function: sdk.QUANTILE,
+				Args:     []string{"0.8"},
+				Overhead: 0.12,
+				Limit: &sdk.WorkloadoptimizationV1ResourceLimitStrategy{
+					Type:       sdk.MULTIPLIER,
+					Multiplier: lo.ToPtr(1.8),
+				},
+			},
+			expected: []map[string]any{
+				{
+					"function": sdk.QUANTILE,
+					"args":     []string{"0.8"},
+					"overhead": 0.12,
+					"min":      (*float64)(nil),
+					"max":      (*float64)(nil),
+					"limit": []map[string]any{
+						{
+							FieldLimitStrategyType:       sdk.MULTIPLIER,
+							FieldLimitStrategyMultiplier: 1.8,
+						},
+					},
+				},
+			},
+		},
+		"should not include limit when nil": {
+			previousCfg: map[string]any{},
+			policies: sdk.WorkloadoptimizationV1ResourcePolicies{
+				Function: sdk.MAX,
+				Overhead: 0.1,
+				Limit:    nil,
+			},
+			expected: []map[string]any{
+				{
+					"function": sdk.MAX,
+					"args":     []string(nil),
+					"overhead": 0.1,
+					"min":      (*float64)(nil),
+					"max":      (*float64)(nil),
+				},
+			},
+		},
+	}
+
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			r := require.New(t)
+			result := toWorkloadScalingPoliciesMap(tt.previousCfg, tt.policies)
+			r.Equal(tt.expected, result)
+		})
+	}
 }
