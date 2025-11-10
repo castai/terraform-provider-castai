@@ -36,7 +36,7 @@ jobs:
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
         with:
-          terraform_version: '1.3.*'
+          terraform_version: '1.11.*'
           terraform_wrapper: false
 
       - name: Authenticate to GCP
