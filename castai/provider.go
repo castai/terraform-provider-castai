@@ -80,9 +80,6 @@ func Provider(version string) *schema.Provider {
 			"castai_rebalancing_schedule":          dataSourceRebalancingSchedule(),
 			"castai_hibernation_schedule":          dataSourceHibernationSchedule(),
 			"castai_workload_scaling_policy_order": dataSourceWorkloadScalingPolicyOrder(),
-
-			// TODO: remove in next major release
-			"castai_eks_user_arn": dataSourceEKSClusterUserARN(),
 		},
 
 		ConfigureContextFunc: providerConfigure(version),
