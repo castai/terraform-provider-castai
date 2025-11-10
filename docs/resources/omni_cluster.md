@@ -20,21 +20,8 @@ Omni cluster resource allows registering a cluster with CAST AI Omni provider.
 - `cluster_id` (String) CAST AI cluster ID to register
 - `organization_id` (String) CAST AI organization ID
 
-### Optional
-
-- `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
-
 ### Read-Only
 
-- `id` (String) The ID of this resource.
-
-<a id="nestedblock--timeouts"></a>
-### Nested Schema for `timeouts`
-
-Optional:
-
-- `create` (String)
-- `delete` (String)
-- `read` (String)
+- `id` (String) Resource ID (same as cluster_id)
 
 

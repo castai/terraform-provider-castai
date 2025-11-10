@@ -28,7 +28,7 @@ func Provider(version string) *schema.Provider {
 		Schema: map[string]*schema.Schema{
 			"api_url": {
 				Type:             schema.TypeString,
-				Required:         true,
+				Optional:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.IsURLWithHTTPS),
 				DefaultFunc:      schema.EnvDefaultFunc("CASTAI_API_URL", "https://api.cast.ai"),
 				Description:      "CAST.AI API url.",

@@ -6,9 +6,10 @@ import (
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
-	"github.com/hashicorp/terraform-plugin-go/tfprotov5"
-	"github.com/hashicorp/terraform-plugin-go/tfprotov5/tf5server"
-	"github.com/hashicorp/terraform-plugin-mux/tf5muxserver"
+	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
+	"github.com/hashicorp/terraform-plugin-go/tfprotov6/tf6server"
+	"github.com/hashicorp/terraform-plugin-mux/tf5to6server"
+	"github.com/hashicorp/terraform-plugin-mux/tf6muxserver"
 
 	"github.com/castai/terraform-provider-castai/castai"
 )
@@ -26,24 +27,33 @@ func main() {
 
 	ctx := context.Background()
 
-	// Create muxed provider combining SDKv2 and Framework providers
-	muxServer, err := tf5muxserver.NewMuxServer(
+	// Upgrade SDKv2 provider from protocol v5 to v6
+	upgradedSDKProvider, err := tf5to6server.UpgradeServer(
 		ctx,
-		providerserver.NewProtocol5(castai.NewFrameworkProvider(version)),
 		castai.Provider(version).GRPCProvider,
 	)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	var serveOpts []tf5server.ServeOpt
-	if debug {
-		serveOpts = append(serveOpts, tf5server.WithManagedDebug())
+	// Create muxed provider combining SDKv2 and Framework providers
+	muxServer, err := tf6muxserver.NewMuxServer(
+		ctx,
+		providerserver.NewProtocol6(castai.NewFrameworkProvider(version)),
+		func() tfprotov6.ProviderServer { return upgradedSDKProvider },
+	)
+	if err != nil {
+		log.Fatal(err)
 	}
 
-	err = tf5server.Serve(
+	var serveOpts []tf6server.ServeOpt
+	if debug {
+		serveOpts = append(serveOpts, tf6server.WithManagedDebug())
+	}
+
+	err = tf6server.Serve(
 		"registry.terraform.io/castai/castai",
-		func() tfprotov5.ProviderServer {
+		func() tfprotov6.ProviderServer {
 			return muxServer.ProviderServer()
 		},
 		serveOpts...,

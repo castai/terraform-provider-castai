@@ -104,7 +104,7 @@ resource "helm_release" "castai_agent" {
 
 ### Required
 
-- `api_token` (String) The token used to connect to CAST AI API.
+- `api_token` (String, Sensitive) The token used to connect to CAST AI API.
 
 ### Optional
 

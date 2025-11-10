@@ -24,69 +24,57 @@ Manage CAST AI Edge Location for edge computing deployments
 
 ### Optional
 
-- `aws` (Block List, Max: 1) (see [below for nested schema](#nestedblock--aws))
+- `aws` (Attributes) AWS configuration for the edge location (see [below for nested schema](#nestedatt--aws))
 - `description` (String) Description of the edge location
-- `gcp` (Block List, Max: 1) (see [below for nested schema](#nestedblock--gcp))
-- `oci` (Block List, Max: 1) (see [below for nested schema](#nestedblock--oci))
-- `timeouts` (Block, Optional) (see [below for nested schema](#nestedblock--timeouts))
-- `zones` (Block List) List of availability zones for the edge location (see [below for nested schema](#nestedblock--zones))
+- `gcp` (Attributes) GCP configuration for the edge location (see [below for nested schema](#nestedatt--gcp))
+- `oci` (Attributes) OCI configuration for the edge location (see [below for nested schema](#nestedatt--oci))
+- `zones` (Attributes List) List of availability zones for the edge location (see [below for nested schema](#nestedatt--zones))
 
 ### Read-Only
 
-- `id` (String) The ID of this resource.
+- `id` (String) Edge location ID
 
-<a id="nestedblock--aws"></a>
+<a id="nestedatt--aws"></a>
 ### Nested Schema for `aws`
 
 Required:
 
-- `access_key_id` (String, Sensitive) AWS access key ID
+- `access_key_id_wo` (String, Sensitive) AWS access key ID
 - `account_id` (String) AWS account ID
 - `name_tag` (String) The value of a 'Name' tag applied to VPC resources
-- `secret_access_key` (String, Sensitive) AWS secret access key
+- `secret_access_key_wo` (String, Sensitive) AWS secret access key
 - `security_group_id` (String) Security group ID to be used in the selected region
 - `subnet_ids` (Map of String) Map of zone names to subnet IDs to be used in the selected region
 - `vpc_id` (String) VPC ID to be used in the selected region
 
 
-<a id="nestedblock--gcp"></a>
+<a id="nestedatt--gcp"></a>
 ### Nested Schema for `gcp`
 
 Required:
 
-- `client_service_account_json` (String, Sensitive) Base64 encoded service account JSON for provisioning edge resources
+- `client_service_account_json_base64_wo` (String, Sensitive) Base64 encoded service account JSON for provisioning edge resources
 - `network_name` (String) The name of the network to be used in the selected region
 - `network_tags` (Set of String) Tags applied on the provisioned cloud resources and the firewall rule
 - `project_id` (String) GCP project ID where edges run
 - `subnet_name` (String) The name of the subnetwork to be used in the selected region
 
 
-<a id="nestedblock--oci"></a>
+<a id="nestedatt--oci"></a>
 ### Nested Schema for `oci`
 
 Required:
 
 - `compartment_id` (String) OCI compartment ID of edge location
-- `fingerprint` (String, Sensitive) API key fingerprint
-- `private_key` (String, Sensitive) Base64 encoded API private key
+- `fingerprint_wo` (String, Sensitive) API key fingerprint
+- `private_key_wo` (String, Sensitive) Base64 encoded API private key
 - `subnet_id` (String) OCI subnet ID of edge location
 - `tenancy_id` (String) OCI tenancy ID of the account
-- `user_id` (String) User ID used to authenticate OCI
+- `user_id_wo` (String) User ID used to authenticate OCI
 - `vcn_id` (String) OCI virtual cloud network ID
 
 
-<a id="nestedblock--timeouts"></a>
-### Nested Schema for `timeouts`
-
-Optional:
-
-- `create` (String)
-- `delete` (String)
-- `read` (String)
-- `update` (String)
-
-
-<a id="nestedblock--zones"></a>
+<a id="nestedatt--zones"></a>
 ### Nested Schema for `zones`
 
 Required:

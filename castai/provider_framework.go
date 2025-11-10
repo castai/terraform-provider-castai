@@ -42,7 +42,7 @@ func (p *frameworkProvider) Schema(_ context.Context, _ tfprovider.SchemaRequest
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"api_url": schema.StringAttribute{
-				Required:    true,
+				Optional:    true,
 				Description: "CAST.AI API url.",
 			},
 			"api_token": schema.StringAttribute{
