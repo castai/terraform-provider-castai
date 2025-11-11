@@ -89,6 +89,7 @@ http_proxy_config.0.https_proxy = https-proxy
 http_proxy_config.0.no_proxy.# = 2
 http_proxy_config.0.no_proxy.0 = domain1
 http_proxy_config.0.no_proxy.1 = domain2
+organization_id = 2836f775-aaaa-eeee-bbbb-3d3c29512692
 region = westeurope
 Tainted = false
 `, data.State().String())

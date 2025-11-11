@@ -41,6 +41,7 @@ resource "castai_gke_cluster" "this" {
 - `cluster_token` (String, Sensitive) CAST.AI agent cluster token
 - `credentials_id` (String) CAST AI credentials id for cluster
 - `id` (String) The ID of this resource.
+- `organization_id` (String) CAST AI organization ID
 
 <a id="nestedblock--timeouts"></a>
 ### Nested Schema for `timeouts`
