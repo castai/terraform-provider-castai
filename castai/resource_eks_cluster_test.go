@@ -80,7 +80,7 @@ func TestEKSClusterResourceReadContext(t *testing.T) {
 		r.False(result.HasError())
 		r.Equal(`ID = b6bfc074-a267-400f-b8f1-db0850c369b1
 account_id = 487609000000
-assume_role_arn =
+assume_role_arn = 
 credentials_id = 9b8d0456-177b-4a3d-b162-e68030d656aa
 name = eks-cluster
 organization_id = 2836f775-aaaa-eeee-bbbb-3d3c29512692
