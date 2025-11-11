@@ -368,18 +368,17 @@ func (r *edgeLocationResource) Create(ctx context.Context, req resource.CreateRe
 	var mc ModelWithCredentials
 	if plan.AWS != nil {
 		createReq.Aws, diags = r.toAWS(ctx, plan.AWS, config.AWS)
-		resp.Diagnostics.Append(diags...)
 		mc = config.AWS
 	}
 	if plan.GCP != nil {
 		createReq.Gcp, diags = r.toGCP(ctx, plan.GCP, config.GCP)
-		resp.Diagnostics.Append(diags...)
 		mc = config.GCP
 	}
 	if plan.OCI != nil {
 		createReq.Oci = r.toOCI(plan.OCI, config.OCI)
 		mc = config.OCI
 	}
+	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -406,9 +405,7 @@ func (r *edgeLocationResource) Create(ctx context.Context, req resource.CreateRe
 }
 
 func (r *edgeLocationResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var (
-		state edgeLocationModel
-	)
+	var state edgeLocationModel
 	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -450,26 +447,20 @@ func (r *edgeLocationResource) Read(ctx context.Context, req resource.ReadReques
 		state.Zones = r.toZoneModel(edgeLocation.Zones)
 	}
 
+	var diags diag.Diagnostics
 	if edgeLocation.Aws != nil {
-		awsList, diags := r.toAWSModel(ctx, edgeLocation.Aws)
-		resp.Diagnostics.Append(diags...)
-		if resp.Diagnostics.HasError() {
-			return
-		}
-		state.AWS = awsList
+		state.AWS, diags = r.toAWSModel(ctx, edgeLocation.Aws)
 	}
-
 	if edgeLocation.Gcp != nil {
-		gcpList, diags := r.toGCPModel(ctx, edgeLocation.Gcp)
-		resp.Diagnostics.Append(diags...)
-		if resp.Diagnostics.HasError() {
-			return
-		}
-		state.GCP = gcpList
+		state.GCP, diags = r.toGCPModel(ctx, edgeLocation.Gcp)
 	}
-
 	if edgeLocation.Oci != nil {
 		state.OCI = r.toOCIModel(edgeLocation.Oci)
+	}
+
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
 	}
 
 	// Initialize credentials_revision to 1 if not set (e.g., during import)
@@ -503,7 +494,7 @@ func (r *edgeLocationResource) Update(ctx context.Context, req resource.UpdateRe
 		updateReq.Zones = toPtr(r.toZones(plan.Zones))
 	}
 
-	// Check if credentials have changed by comparing planned vs state revision
+	// Check if credentials have changed by comparing credentials revision
 	credentialsChanged := !plan.CredentialsRevision.Equal(state.CredentialsRevision)
 
 	// Include cloud provider config if it or credentials has changed.
