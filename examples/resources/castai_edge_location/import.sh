@@ -1,0 +1,2 @@
+# Import edge location using organization_id/cluster_id/edge_location_id format
+terraform import castai_edge_location.example "8c02f119-993c-4cce-8bff-4df50798514a/a1b2c3d4-e5f6-7890-abcd-ef1234567890/b2c3d4e5-f6a7-8901-bcde-f12345678901"

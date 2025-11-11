@@ -13,6 +13,7 @@ import (
 
 	"github.com/castai/terraform-provider-castai/castai/sdk"
 	"github.com/castai/terraform-provider-castai/castai/sdk/cluster_autoscaler"
+	omnisdk "github.com/castai/terraform-provider-castai/castai/sdk/omni"
 	"github.com/castai/terraform-provider-castai/castai/sdk/organization_management"
 )
 
@@ -106,10 +107,17 @@ func (p *frameworkProvider) Configure(ctx context.Context, req tfprovider.Config
 		return
 	}
 
+	omniClient, err := omnisdk.CreateClient(apiURL, apiToken, agent)
+	if err != nil {
+		resp.Diagnostics.AddError("Failed to create omni client", err.Error())
+		return
+	}
+
 	providerConfig := &ProviderConfig{
 		api:                          client,
 		clusterAutoscalerClient:      clusterAutoscalerClient,
 		organizationManagementClient: organizationManagementClient,
+		omniAPI:                      omniClient,
 	}
 
 	resp.DataSourceData = providerConfig
@@ -117,7 +125,10 @@ func (p *frameworkProvider) Configure(ctx context.Context, req tfprovider.Config
 }
 
 func (p *frameworkProvider) Resources(_ context.Context) []func() resource.Resource {
-	return []func() resource.Resource{}
+	return []func() resource.Resource{
+		newEdgeLocationResource,
+		newOmniClusterResource,
+	}
 }
 
 func (p *frameworkProvider) DataSources(_ context.Context) []func() datasource.DataSource {

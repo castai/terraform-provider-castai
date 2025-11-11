@@ -17,8 +17,9 @@ import (
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	sdkterraform "github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/stretchr/testify/require"
 
 	"github.com/castai/terraform-provider-castai/castai/sdk"
@@ -159,7 +160,7 @@ func TestNodeTemplateResourceReadContext(t *testing.T) {
 		FieldClusterId:        cty.StringVal(clusterId),
 		FieldNodeTemplateName: cty.StringVal("gpu"),
 	})
-	state := terraform.NewInstanceStateShimmedFromValue(val, 0)
+	state := sdkterraform.NewInstanceStateShimmedFromValue(val, 0)
 	state.ID = "gpu"
 
 	data := resource.Data(state)
@@ -381,7 +382,7 @@ func TestNodeTemplateResourceReadContextEmptyList(t *testing.T) {
 		FieldClusterId:        cty.StringVal(clusterId),
 		FieldNodeTemplateName: cty.StringVal("gpu"),
 	})
-	state := terraform.NewInstanceStateShimmedFromValue(val, 0)
+	state := sdkterraform.NewInstanceStateShimmedFromValue(val, 0)
 	state.ID = "gpu"
 
 	data := nodeTemplate.Data(state)
@@ -456,7 +457,7 @@ func TestNodeTemplateResourceCreate_defaultNodeTemplate(t *testing.T) {
 		FieldNodeTemplateCustomInstancesWithExtendedMemoryEnabled: cty.BoolVal(true),
 		FieldNodeTemplateClmEnabled:                               cty.BoolVal(false),
 	})
-	state := terraform.NewInstanceStateShimmedFromValue(val, 0)
+	state := sdkterraform.NewInstanceStateShimmedFromValue(val, 0)
 	state.ID = "default-by-castai"
 
 	data := resource.Data(state)
@@ -537,7 +538,7 @@ func TestNodeTemplateResourceCreate_customNodeTemplate(t *testing.T) {
 		FieldNodeTemplateCustomInstancesWithExtendedMemoryEnabled: cty.BoolVal(true),
 		FieldNodeTemplateClmEnabled:                               cty.BoolVal(true),
 	})
-	state := terraform.NewInstanceStateShimmedFromValue(val, 0)
+	state := sdkterraform.NewInstanceStateShimmedFromValue(val, 0)
 	state.ID = name
 
 	data := resource.Data(state)
@@ -598,7 +599,7 @@ func TestNodeTemplateResourceDelete_defaultNodeTemplate(t *testing.T) {
 		FieldClusterId:        cty.StringVal(clusterId),
 		FieldNodeTemplateName: cty.StringVal("default-by-castai"),
 	})
-	state := terraform.NewInstanceStateShimmedFromValue(val, 0)
+	state := sdkterraform.NewInstanceStateShimmedFromValue(val, 0)
 	state.ID = "default-by-castai"
 
 	data := resource.Data(state)

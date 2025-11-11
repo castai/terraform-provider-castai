@@ -11,6 +11,7 @@ import (
 
 	"github.com/castai/terraform-provider-castai/castai/sdk"
 	"github.com/castai/terraform-provider-castai/castai/sdk/cluster_autoscaler"
+	"github.com/castai/terraform-provider-castai/castai/sdk/omni"
 	"github.com/castai/terraform-provider-castai/castai/sdk/organization_management"
 )
 
@@ -18,10 +19,12 @@ type ProviderConfig struct {
 	api                          sdk.ClientWithResponsesInterface
 	clusterAutoscalerClient      cluster_autoscaler.ClientWithResponsesInterface
 	organizationManagementClient organization_management.ClientWithResponsesInterface
+	omniAPI                      *omni.ClientWithResponses
 }
 
 func Provider(version string) *schema.Provider {
 	p := &schema.Provider{
+		TerraformVersion: "1.11",
 		Schema: map[string]*schema.Schema{
 			"api_url": {
 				Type:             schema.TypeString,
@@ -114,10 +117,16 @@ func providerConfigure(version string) schema.ConfigureContextFunc {
 			return nil, diag.FromErr(err)
 		}
 
+		omniClient, err := omni.CreateClient(apiURL, apiToken, agent)
+		if err != nil {
+			return nil, diag.FromErr(err)
+		}
+
 		return &ProviderConfig{
 			api:                          client,
 			clusterAutoscalerClient:      clusterAutoscalerClient,
 			organizationManagementClient: organizationManagementClient,
+			omniAPI:                      omniClient,
 		}, nil
 	}
 }
