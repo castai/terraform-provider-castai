@@ -22,6 +22,7 @@ const (
 	FieldClusterCredentialsId    = "credentials_id"
 	FieldClusterID               = "cluster_id"
 	FieldClusterToken            = "cluster_token"
+	FieldClusterOrganizationId   = "organization_id"
 )
 
 func resourceCastaiClusterDelete(ctx context.Context, data *schema.ResourceData, meta interface{}) diag.Diagnostics {
