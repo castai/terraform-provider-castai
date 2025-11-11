@@ -364,7 +364,7 @@ func testAccCheckEdgeLocationDestroy(s *terraform.State) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	client := testAccProvider.Meta().(*ProviderConfig).OmniAPI
+	client := testAccProvider.Meta().(*ProviderConfig).omniAPI
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "castai_edge_location" {
 			continue

@@ -127,7 +127,7 @@ type ModelWithCredentials interface {
 	credentials() types.String
 }
 
-func NewEdgeLocationResource() resource.Resource {
+func newEdgeLocationResource() resource.Resource {
 	return &edgeLocationResource{}
 }
 
@@ -350,7 +350,7 @@ func (r *edgeLocationResource) Create(ctx context.Context, req resource.CreateRe
 		return
 	}
 
-	client := r.client.OmniAPI
+	client := r.client.omniAPI
 	organizationID := plan.OrganizationID.ValueString()
 	clusterID := plan.ClusterID.ValueString()
 
@@ -411,7 +411,7 @@ func (r *edgeLocationResource) Read(ctx context.Context, req resource.ReadReques
 		return
 	}
 
-	client := r.client.OmniAPI
+	client := r.client.omniAPI
 	organizationID := state.OrganizationID.ValueString()
 	clusterID := state.ClusterID.ValueString()
 
@@ -481,7 +481,7 @@ func (r *edgeLocationResource) Update(ctx context.Context, req resource.UpdateRe
 		return
 	}
 
-	client := r.client.OmniAPI
+	client := r.client.omniAPI
 	organizationID := plan.OrganizationID.ValueString()
 	clusterID := plan.ClusterID.ValueString()
 
@@ -547,7 +547,7 @@ func (r *edgeLocationResource) Delete(ctx context.Context, req resource.DeleteRe
 		return
 	}
 
-	client := r.client.OmniAPI
+	client := r.client.omniAPI
 	organizationID := state.OrganizationID.ValueString()
 	clusterID := state.ClusterID.ValueString()
 

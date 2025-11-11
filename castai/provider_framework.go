@@ -117,7 +117,7 @@ func (p *frameworkProvider) Configure(ctx context.Context, req tfprovider.Config
 		api:                          client,
 		clusterAutoscalerClient:      clusterAutoscalerClient,
 		organizationManagementClient: organizationManagementClient,
-		OmniAPI:                      omniClient,
+		omniAPI:                      omniClient,
 	}
 
 	resp.DataSourceData = providerConfig
@@ -126,8 +126,8 @@ func (p *frameworkProvider) Configure(ctx context.Context, req tfprovider.Config
 
 func (p *frameworkProvider) Resources(_ context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
-		NewEdgeLocationResource,
-		NewOmniClusterResource,
+		newEdgeLocationResource,
+		newOmniClusterResource,
 	}
 }
 

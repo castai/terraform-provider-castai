@@ -19,7 +19,7 @@ type ProviderConfig struct {
 	api                          sdk.ClientWithResponsesInterface
 	clusterAutoscalerClient      cluster_autoscaler.ClientWithResponsesInterface
 	organizationManagementClient organization_management.ClientWithResponsesInterface
-	OmniAPI                      *omni.ClientWithResponses
+	omniAPI                      *omni.ClientWithResponses
 }
 
 func Provider(version string) *schema.Provider {
@@ -126,7 +126,7 @@ func providerConfigure(version string) schema.ConfigureContextFunc {
 			api:                          client,
 			clusterAutoscalerClient:      clusterAutoscalerClient,
 			organizationManagementClient: organizationManagementClient,
-			OmniAPI:                      omniClient,
+			omniAPI:                      omniClient,
 		}, nil
 	}
 }

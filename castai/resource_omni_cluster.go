@@ -27,7 +27,7 @@ type omniClusterModel struct {
 	ClusterID      types.String `tfsdk:"cluster_id"`
 }
 
-func NewOmniClusterResource() resource.Resource {
+func newOmniClusterResource() resource.Resource {
 	return &omniClusterResource{}
 }
 
@@ -89,7 +89,7 @@ func (r *omniClusterResource) Create(ctx context.Context, req resource.CreateReq
 		return
 	}
 
-	client := r.client.OmniAPI
+	client := r.client.omniAPI
 	organizationID := plan.OrganizationID.ValueString()
 	clusterID := plan.ClusterID.ValueString()
 
@@ -120,7 +120,7 @@ func (r *omniClusterResource) Read(ctx context.Context, req resource.ReadRequest
 		return
 	}
 
-	client := r.client.OmniAPI
+	client := r.client.omniAPI
 	organizationID := state.OrganizationID.ValueString()
 	clusterID := state.ID.ValueString()
 
