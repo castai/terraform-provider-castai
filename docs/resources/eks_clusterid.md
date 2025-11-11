@@ -32,5 +32,6 @@ resource "castai_eks_clusterid" "cluster_id" {
 ### Read-Only
 
 - `id` (String) The ID of this resource.
+- `organization_id` (String) CAST AI organization ID
 
 

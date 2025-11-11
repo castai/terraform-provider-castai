@@ -76,6 +76,11 @@ func resourceGKEClusterId() *schema.Resource {
 				Computed:    true,
 				Description: "Service account email in cast project",
 			},
+			FieldClusterOrganizationId: {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "CAST AI organization ID",
+			},
 		},
 	}
 }
@@ -158,6 +163,9 @@ func resourceCastaiGKEClusterIdRead(ctx context.Context, data *schema.ResourceDa
 	if resp == nil {
 		data.SetId("")
 		return nil
+	}
+	if err := data.Set(FieldClusterOrganizationId, toString(resp.JSON200.OrganizationId)); err != nil {
+		return diag.FromErr(fmt.Errorf("setting organization id: %w", err))
 	}
 	if GKE := resp.JSON200.Gke; GKE != nil {
 		if err := data.Set(FieldGKEClusterProjectId, toString(GKE.ProjectId)); err != nil {

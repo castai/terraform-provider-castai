@@ -36,6 +36,11 @@ func resourceEKSClusterID() *schema.Resource {
 				ForceNew:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.StringIsNotWhiteSpace),
 			},
+			FieldClusterOrganizationId: {
+				Type:        schema.TypeString,
+				Computed:    true,
+				Description: "CAST AI organization ID",
+			},
 		},
 	}
 }
@@ -79,6 +84,9 @@ func resourceEKSClusterIDRead(ctx context.Context, data *schema.ResourceData, me
 		return nil
 	}
 
+	if err := data.Set(FieldClusterOrganizationId, toString(resp.JSON200.OrganizationId)); err != nil {
+		return diag.FromErr(fmt.Errorf("setting organization id: %w", err))
+	}
 	if eks := resp.JSON200.Eks; eks != nil {
 		if err := data.Set("account_id", toString(eks.AccountId)); err != nil {
 			return diag.FromErr(fmt.Errorf("setting account id: %w", err))
