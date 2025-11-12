@@ -6811,7 +6811,8 @@ type WorkloadoptimizationV1HPAConfig struct {
 	Metrics *[]WorkloadoptimizationV1MetricSpec `json:"metrics,omitempty"`
 
 	// MinReplicas Min replicas a workload can have.
-	MinReplicas *int32 `json:"minReplicas"`
+	MinReplicas   *int32 `json:"minReplicas"`
+	TakeOwnership *bool  `json:"takeOwnership"`
 
 	// UseNative Defines whether to use native Kubernetes HPA instead of CAST AI HPA.
 	UseNative *bool `json:"useNative"`
@@ -7648,6 +7649,7 @@ type WorkloadoptimizationV1ScalingPolicyHPASettings struct {
 	// MANAGED - workload watched (metrics collected), CAST AI may perform actions on the workload.
 	ManagementOption WorkloadoptimizationV1ManagementOption           `json:"managementOption"`
 	NativeHpaSpec    WorkloadoptimizationV1ScalingPolicyNativeHPASpec `json:"nativeHpaSpec"`
+	TakeOwnership    bool                                             `json:"takeOwnership"`
 }
 
 // WorkloadoptimizationV1ScalingPolicyNativeHPASpec defines model for workloadoptimization.v1.ScalingPolicyNativeHPASpec.
@@ -8436,6 +8438,9 @@ type ExternalClusterAPIGetCredentialsScriptParams struct {
 
 	// KentParams Params for kent installation
 	KentParams *[]ExternalClusterAPIGetCredentialsScriptParamsKentParams `form:"kentParams,omitempty" json:"kentParams,omitempty"`
+
+	// InstallOperator Whether to install the Operator.
+	InstallOperator *bool `form:"installOperator,omitempty" json:"installOperator,omitempty"`
 }
 
 // ExternalClusterAPIGetCredentialsScriptParamsKentParams defines parameters for ExternalClusterAPIGetCredentialsScript.

@@ -84,5 +84,12 @@ testacc-cloud-agnostic: build
 
 .PHONY: validate-terraform-examples
 validate-terraform-examples:
-validate-terraform-examples:
 	@.ci/scripts/validate-examples.sh
+
+.PHONY: plan-terraform-example
+plan-terraform-example:
+	@if [ -z "$(EXAMPLE_DIR)" ]; then \
+		echo "Error: EXAMPLE_DIR is required. Usage: make plan-terraform-example EXAMPLE_DIR=examples/.../..."; \
+		exit 1; \
+	fi
+	@.ci/scripts/plan-example.sh "$(EXAMPLE_DIR)"
