@@ -316,21 +316,21 @@ func testAccEdgeLocationOCIConfig(rName string) string {
 	return testAccEdgeLocationOCIConfigWithParams(rName, "Test OCI edge location",
 		`user_id_wo      = "ocid1.user.oc1..example"
     fingerprint_wo  = "aa:bb:cc:dd:ee:ff:00:11:22:33:44:55:66:77:88:99"
-    private_key_wo  = base64encode("-----BEGIN RSA PRIVATE KEY-----\nMIIE...EXAMPLE...==\n-----END RSA PRIVATE KEY-----\n")`)
+    private_key_base64_wo  = base64encode("-----BEGIN RSA PRIVATE KEY-----\nMIIE...EXAMPLE...==\n-----END RSA PRIVATE KEY-----\n")`)
 }
 
 func testAccEdgeLocationOCIUpdated(rName string) string {
 	return testAccEdgeLocationOCIConfigWithParams(rName, "Updated OCI edge location",
 		`user_id_wo      = "ocid1.user.oc1..example"
     fingerprint_wo  = "aa:bb:cc:dd:ee:ff:00:11:22:33:44:55:66:77:88:99"
-    private_key_wo  = base64encode("-----BEGIN RSA PRIVATE KEY-----\nMIIE...EXAMPLE...==\n-----END RSA PRIVATE KEY-----\n")`)
+    private_key_base64_wo  = base64encode("-----BEGIN RSA PRIVATE KEY-----\nMIIE...EXAMPLE...==\n-----END RSA PRIVATE KEY-----\n")`)
 }
 
 func testAccEdgeLocationOCICredentialsUpdated(rName string) string {
 	return testAccEdgeLocationOCIConfigWithParams(rName, "Updated OCI edge location",
 		`user_id_wo      = "ocid1.user.oc1..example"
     fingerprint_wo  = "11:22:33:44:55:66:77:88:99:aa:bb:cc:dd:ee:ff:00"
-    private_key_wo  = base64encode("-----BEGIN RSA PRIVATE KEY-----\nMIIE...NEWKEY...==\n-----END RSA PRIVATE KEY-----\n")`)
+    private_key_base64_wo  = base64encode("-----BEGIN RSA PRIVATE KEY-----\nMIIE...NEWKEY...==\n-----END RSA PRIVATE KEY-----\n")`)
 }
 
 func testAccEdgeLocationOCIConfigWithParams(rName, description, ociCredentials string) string {
