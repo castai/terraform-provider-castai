@@ -103,7 +103,7 @@ Required:
 
 - `compartment_id` (String) OCI compartment ID of edge location
 - `fingerprint_wo` (String, Sensitive) API key fingerprint
-- `private_key_wo` (String, Sensitive) Base64 encoded API private key
+- `private_key_base64_wo` (String, Sensitive) Base64 encoded API private key
 - `subnet_id` (String) OCI subnet ID of edge location
 - `tenancy_id` (String) OCI tenancy ID of the account
 - `user_id_wo` (String) User ID used to authenticate OCI

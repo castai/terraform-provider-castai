@@ -6926,6 +6926,10 @@ type WorkloadoptimizationV1HorizontalOverrides struct {
 
 	// ShortAverageSeconds Defines the window of time to make a horizontal scaling decision.
 	ShortAverageSeconds *int32 `json:"shortAverageSeconds"`
+	TakeOwnership       *bool  `json:"takeOwnership"`
+
+	// UseNative Defines whether to use native Kubernetes HPA instead of CAST AI HPA.
+	UseNative *bool `json:"useNative"`
 }
 
 // WorkloadoptimizationV1HorizontalPodAutoscalerBehavior HorizontalPodAutoscalerBehavior configures the scaling behavior of the target
