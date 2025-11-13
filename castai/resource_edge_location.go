@@ -71,13 +71,13 @@ type gcpModel struct {
 }
 
 type ociModel struct {
-	TenancyID     types.String `tfsdk:"tenancy_id"`
-	CompartmentID types.String `tfsdk:"compartment_id"`
-	UserIDWO      types.String `tfsdk:"user_id_wo"`
-	FingerprintWO types.String `tfsdk:"fingerprint_wo"`
-	PrivateKeyWO  types.String `tfsdk:"private_key_wo"`
-	VcnID         types.String `tfsdk:"vcn_id"`
-	SubnetID      types.String `tfsdk:"subnet_id"`
+	TenancyID          types.String `tfsdk:"tenancy_id"`
+	CompartmentID      types.String `tfsdk:"compartment_id"`
+	UserIDWO           types.String `tfsdk:"user_id_wo"`
+	FingerprintWO      types.String `tfsdk:"fingerprint_wo"`
+	PrivateKeyBase64WO types.String `tfsdk:"private_key_base64_wo"`
+	VcnID              types.String `tfsdk:"vcn_id"`
+	SubnetID           types.String `tfsdk:"subnet_id"`
 }
 
 func (m awsModel) credentials() types.String {
@@ -110,7 +110,7 @@ func (m gcpModel) Equal(other *gcpModel) bool {
 }
 
 func (m ociModel) credentials() types.String {
-	return types.StringValue(m.UserIDWO.String() + m.PrivateKeyWO.String() + m.FingerprintWO.String())
+	return types.StringValue(m.UserIDWO.String() + m.PrivateKeyBase64WO.String() + m.FingerprintWO.String())
 }
 
 func (m ociModel) Equal(other *ociModel) bool {
@@ -302,7 +302,7 @@ func (r *edgeLocationResource) Schema(_ context.Context, _ resource.SchemaReques
 						WriteOnly:   true,
 						Description: "API key fingerprint",
 					},
-					"private_key_wo": schema.StringAttribute{
+					"private_key_base64_wo": schema.StringAttribute{
 						WriteOnly:   true,
 						Required:    true,
 						Sensitive:   true,
@@ -781,7 +781,7 @@ func (r *edgeLocationResource) toOCI(plan, config *ociModel) *omni.OCIParam {
 		Credentials: &omni.OCIParamCredentials{
 			UserId:           config.UserIDWO.ValueString(),
 			Fingerprint:      config.FingerprintWO.ValueString(),
-			PrivateKeyBase64: config.PrivateKeyWO.ValueString(),
+			PrivateKeyBase64: config.PrivateKeyBase64WO.ValueString(),
 		},
 		Networking: &omni.OCIParamNetworking{
 			VcnId:    plan.VcnID.ValueString(),
@@ -798,13 +798,13 @@ func (r *edgeLocationResource) toOCIModel(config *omni.OCIParam) *ociModel {
 	}
 
 	oci := &ociModel{
-		TenancyID:     types.StringValue(lo.FromPtr(config.TenancyId)),
-		CompartmentID: types.StringValue(lo.FromPtr(config.CompartmentId)),
-		VcnID:         types.StringNull(),
-		SubnetID:      types.StringNull(),
-		UserIDWO:      types.StringNull(),
-		FingerprintWO: types.StringNull(),
-		PrivateKeyWO:  types.StringNull(),
+		TenancyID:          types.StringValue(lo.FromPtr(config.TenancyId)),
+		CompartmentID:      types.StringValue(lo.FromPtr(config.CompartmentId)),
+		VcnID:              types.StringNull(),
+		SubnetID:           types.StringNull(),
+		UserIDWO:           types.StringNull(),
+		FingerprintWO:      types.StringNull(),
+		PrivateKeyBase64WO: types.StringNull(),
 	}
 	if config.Networking != nil {
 		oci.SubnetID = types.StringValue(config.Networking.SubnetId)
