@@ -1,0 +1,18 @@
+# Evictor configuration
+
+clusterID: ""
+
+dryRun: false
+
+resources:
+  requests:
+    cpu: 10m
+    memory: 64Mi
+  limits:
+    cpu: 100m
+    memory: 128Mi
+
+replicaCount: 1
+
+# Eviction policies
+aggressive: false

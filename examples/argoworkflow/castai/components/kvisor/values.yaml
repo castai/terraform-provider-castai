@@ -1,0 +1,30 @@
+# Kvisor security agent configuration
+
+clusterID: ""
+apiKey: ""
+
+castai:
+  apiURL: "https://api.cast.ai"
+  grpcURL: "grpc.cast.ai:443"
+
+controller:
+  enabled: true
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+agent:
+  enabled: true
+  tolerations:
+    - operator: Exists
+  resources:
+    requests:
+      cpu: 20m
+      memory: 64Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
