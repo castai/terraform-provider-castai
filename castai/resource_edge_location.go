@@ -14,11 +14,13 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/int64planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/schema/validator"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/samber/lo"
 
 	"github.com/castai/terraform-provider-castai/castai/sdk/omni"
 	"github.com/castai/terraform-provider-castai/castai/store"
+	"github.com/castai/terraform-provider-castai/castai/validators"
 )
 
 var (
@@ -263,6 +265,9 @@ func (r *edgeLocationResource) Schema(_ context.Context, _ resource.SchemaReques
 						Sensitive:   true,
 						WriteOnly:   true,
 						Description: "Base64 encoded service account JSON for provisioning edge resources",
+						Validators: []validator.String{
+							validators.ValidBase64(),
+						},
 					},
 					"network_name": schema.StringAttribute{
 						Required:    true,
@@ -307,6 +312,9 @@ func (r *edgeLocationResource) Schema(_ context.Context, _ resource.SchemaReques
 						Required:    true,
 						Sensitive:   true,
 						Description: "Base64 encoded API private key",
+						Validators: []validator.String{
+							validators.ValidBase64(),
+						},
 					},
 					"vcn_id": schema.StringAttribute{
 						Required:    true,
