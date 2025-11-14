@@ -213,6 +213,10 @@ func createClusterToken(ctx context.Context, client sdk.ClientWithResponsesInter
 		return "", fmt.Errorf("creating cluster token: %w", checkErr)
 	}
 
+	if resp == nil || resp.JSON200 == nil || resp.JSON200.Token == nil {
+		return "", fmt.Errorf("response was empty when trying to create cluster token")
+	}
+
 	return *resp.JSON200.Token, nil
 }
 
