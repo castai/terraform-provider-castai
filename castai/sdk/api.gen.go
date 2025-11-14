@@ -242,6 +242,12 @@ const (
 	ExternalclusterV1ClusterReconcileInfoReconcileStatusWarning ExternalclusterV1ClusterReconcileInfoReconcileStatus = "warning"
 )
 
+// Defines values for ExternalclusterV1KentEligibility.
+const (
+	ELIGIBLE     ExternalclusterV1KentEligibility = "ELIGIBLE"
+	NOTSUPPORTED ExternalclusterV1KentEligibility = "NOT_SUPPORTED"
+)
+
 // Defines values for ExternalclusterV1NodeType.
 const (
 	Master          ExternalclusterV1NodeType = "master"
@@ -3734,6 +3740,9 @@ type ExternalclusterV1Cluster struct {
 	// Anywhere AnywhereClusterParams defines Anywhere-specific arguments.
 	Anywhere *ExternalclusterV1AnywhereClusterParams `json:"anywhere,omitempty"`
 
+	// Attributes ClusterAttributes defines cluster attributes.
+	Attributes *ExternalclusterV1ClusterAttributes `json:"attributes,omitempty"`
+
 	// CastwareInstallMethod Method used to install CASTware components.
 	//
 	//  - CASTWARE_INSTALL_METHOD_UNSPECIFIED: Default value.
@@ -3852,6 +3861,12 @@ type ExternalclusterV1ClusterReconcileInfoReconcileMode string
 
 // ExternalclusterV1ClusterReconcileInfoReconcileStatus Reconcile status.
 type ExternalclusterV1ClusterReconcileInfoReconcileStatus string
+
+// ExternalclusterV1ClusterAttributes ClusterAttributes defines cluster attributes.
+type ExternalclusterV1ClusterAttributes struct {
+	// Karpenter KarpenterAttribute defines Karpenter-specific attributes.
+	Karpenter *ExternalclusterV1KarpenterAttribute `json:"karpenter,omitempty"`
+}
 
 // ExternalclusterV1ClusterUpdate defines model for externalcluster.v1.ClusterUpdate.
 type ExternalclusterV1ClusterUpdate struct {
@@ -4088,6 +4103,18 @@ type ExternalclusterV1KOPSClusterParams struct {
 	// StateStore KOPS state store url.
 	StateStore *string `json:"stateStore,omitempty"`
 }
+
+// ExternalclusterV1KarpenterAttribute KarpenterAttribute defines Karpenter-specific attributes.
+type ExternalclusterV1KarpenterAttribute struct {
+	// KentEligibility KentEligibility defines Karpenter KENT eligibility status.
+	KentEligibility *ExternalclusterV1KentEligibility `json:"kentEligibility,omitempty"`
+
+	// Version Karpenter version.
+	Version *string `json:"version"`
+}
+
+// ExternalclusterV1KentEligibility KentEligibility defines Karpenter KENT eligibility status.
+type ExternalclusterV1KentEligibility string
 
 // ExternalclusterV1ListClustersResponse ListClustersResponse is the result of ListClustersRequest.
 type ExternalclusterV1ListClustersResponse struct {
