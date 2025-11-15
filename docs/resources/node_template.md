@@ -178,6 +178,7 @@ Required:
 Optional:
 
 - `exclude_names` (List of String) Names of the GPUs to exclude.
+- `fractional_gpus` (String) Will include fractional GPU instances when enabled otherwise they will be excluded. Supported values: `enabled`, `disabled` or ``.
 - `include_names` (List of String) Instance families to include when filtering (excludes all other families).
 - `manufacturers` (List of String) Manufacturers of the gpus to select - NVIDIA, AMD.
 - `max_count` (Number) Max GPU count for the instance type to have.

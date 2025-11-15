@@ -6220,13 +6220,14 @@ type RuntimeV1WorkloadNetflow struct {
 
 // RuntimeV1WorkloadNetflowDestination defines model for runtime.v1.WorkloadNetflowDestination.
 type RuntimeV1WorkloadNetflowDestination struct {
-	DnsQuestion  *string `json:"dnsQuestion,omitempty"`
-	Namespace    *string `json:"namespace,omitempty"`
-	RxBytes      *string `json:"rxBytes,omitempty"`
-	TxBytes      *string `json:"txBytes,omitempty"`
-	WorkloadKind *string `json:"workloadKind,omitempty"`
-	WorkloadName *string `json:"workloadName,omitempty"`
-	Zone         *string `json:"zone,omitempty"`
+	Addrs        *[]string `json:"addrs,omitempty"`
+	DnsQuestion  *string   `json:"dnsQuestion,omitempty"`
+	Namespace    *string   `json:"namespace,omitempty"`
+	RxBytes      *string   `json:"rxBytes,omitempty"`
+	TxBytes      *string   `json:"txBytes,omitempty"`
+	WorkloadKind *string   `json:"workloadKind,omitempty"`
+	WorkloadName *string   `json:"workloadName,omitempty"`
+	Zone         *string   `json:"zone,omitempty"`
 }
 
 // ScheduledrebalancingV1AggressiveModeConfig defines model for scheduledrebalancing.v1.AggressiveModeConfig.
@@ -6810,7 +6811,8 @@ type WorkloadoptimizationV1HPAConfig struct {
 	Metrics *[]WorkloadoptimizationV1MetricSpec `json:"metrics,omitempty"`
 
 	// MinReplicas Min replicas a workload can have.
-	MinReplicas *int32 `json:"minReplicas"`
+	MinReplicas   *int32 `json:"minReplicas"`
+	TakeOwnership *bool  `json:"takeOwnership"`
 
 	// UseNative Defines whether to use native Kubernetes HPA instead of CAST AI HPA.
 	UseNative *bool `json:"useNative"`
@@ -6924,6 +6926,10 @@ type WorkloadoptimizationV1HorizontalOverrides struct {
 
 	// ShortAverageSeconds Defines the window of time to make a horizontal scaling decision.
 	ShortAverageSeconds *int32 `json:"shortAverageSeconds"`
+	TakeOwnership       *bool  `json:"takeOwnership"`
+
+	// UseNative Defines whether to use native Kubernetes HPA instead of CAST AI HPA.
+	UseNative *bool `json:"useNative"`
 }
 
 // WorkloadoptimizationV1HorizontalPodAutoscalerBehavior HorizontalPodAutoscalerBehavior configures the scaling behavior of the target
@@ -7647,6 +7653,7 @@ type WorkloadoptimizationV1ScalingPolicyHPASettings struct {
 	// MANAGED - workload watched (metrics collected), CAST AI may perform actions on the workload.
 	ManagementOption WorkloadoptimizationV1ManagementOption           `json:"managementOption"`
 	NativeHpaSpec    WorkloadoptimizationV1ScalingPolicyNativeHPASpec `json:"nativeHpaSpec"`
+	TakeOwnership    bool                                             `json:"takeOwnership"`
 }
 
 // WorkloadoptimizationV1ScalingPolicyNativeHPASpec defines model for workloadoptimization.v1.ScalingPolicyNativeHPASpec.
@@ -8435,6 +8442,9 @@ type ExternalClusterAPIGetCredentialsScriptParams struct {
 
 	// KentParams Params for kent installation
 	KentParams *[]ExternalClusterAPIGetCredentialsScriptParamsKentParams `form:"kentParams,omitempty" json:"kentParams,omitempty"`
+
+	// InstallOperator Whether to install the Operator.
+	InstallOperator *bool `form:"installOperator,omitempty" json:"installOperator,omitempty"`
 }
 
 // ExternalClusterAPIGetCredentialsScriptParamsKentParams defines parameters for ExternalClusterAPIGetCredentialsScript.

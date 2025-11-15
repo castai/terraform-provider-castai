@@ -36,6 +36,7 @@ const (
 	FieldNodeTemplateExclude                                  = "exclude"
 	FieldNodeTemplateExcludeNames                             = "exclude_names"
 	FieldNodeTemplateFallbackRestoreRateSeconds               = "fallback_restore_rate_seconds"
+	FieldNodeTemplateFractionalGPUs                           = "fractional_gpus"
 	FieldNodeTemplateGpu                                      = "gpu"
 	FieldNodeTemplateInclude                                  = "include"
 	FieldNodeTemplateIncludeNames                             = "include_names"
@@ -403,6 +404,13 @@ func resourceNodeTemplate() *schema.Resource {
 										Type:        schema.TypeInt,
 										Optional:    true,
 										Description: "Max GPU count for the instance type to have.",
+									},
+									FieldNodeTemplateFractionalGPUs: {
+										Type:             schema.TypeString,
+										Optional:         true,
+										Default:          "",
+										Description:      "Will include fractional GPU instances when enabled otherwise they will be excluded. Supported values: `enabled`, `disabled` or ``.",
+										ValidateDiagFunc: validation.ToDiagFunc(validation.StringInSlice([]string{"", Enabled, Disabled}, false)),
 									},
 								},
 							},
@@ -945,6 +953,10 @@ func setStateConstraintValue(value *sdk.NodetemplatesV1TemplateConstraintsConstr
 			values[key] = Enabled
 		case sdk.DISABLED:
 			values[key] = Disabled
+		case sdk.NOTSET:
+			values[key] = ""
+		default:
+			values[key] = ""
 		}
 	}
 	return values
@@ -998,6 +1010,8 @@ func flattenGpu(gpu *sdk.NodetemplatesV1TemplateConstraintsGPUConstraints) []map
 	if gpu.MaxCount != nil {
 		out[FieldNodeTemplateMaxCount] = gpu.MaxCount
 	}
+
+	setStateConstraintValue(gpu.FractionalGpus, FieldNodeTemplateFractionalGPUs, out)
 	return []map[string]any{out}
 }
 
@@ -1679,6 +1693,14 @@ func toTemplateConstraintsGpuConstraints(o map[string]any) *sdk.NodetemplatesV1T
 	}
 	if v, ok := o[FieldNodeTemplateMaxCount].(int); ok && v != 0 {
 		out.MaxCount = toPtr(int32(v))
+	}
+	if v, ok := o[FieldNodeTemplateFractionalGPUs].(string); ok {
+		switch v {
+		case Enabled:
+			out.FractionalGpus = toPtr(sdk.ENABLED)
+		case Disabled:
+			out.FractionalGpus = toPtr(sdk.DISABLED)
+		}
 	}
 
 	return out

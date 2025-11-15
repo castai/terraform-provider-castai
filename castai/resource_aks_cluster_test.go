@@ -12,9 +12,9 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	sdkterraform "github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/samber/lo"
 	"github.com/stretchr/testify/require"
 
@@ -71,7 +71,7 @@ func TestAKSClusterResourceReadContext(t *testing.T) {
 		aksResource := resourceAKSCluster()
 
 		val := cty.ObjectVal(map[string]cty.Value{})
-		state := terraform.NewInstanceStateShimmedFromValue(val, 0)
+		state := sdkterraform.NewInstanceStateShimmedFromValue(val, 0)
 		state.ID = clusterID
 		// If local credentials don't match remote, drift detection would trigger.
 		// If local state has no credentials but remote has them, then the drift does exist so - there is separate test for that.
@@ -89,6 +89,7 @@ http_proxy_config.0.https_proxy = https-proxy
 http_proxy_config.0.no_proxy.# = 2
 http_proxy_config.0.no_proxy.0 = domain1
 http_proxy_config.0.no_proxy.1 = domain2
+organization_id = 2836f775-aaaa-eeee-bbbb-3d3c29512692
 region = westeurope
 Tainted = false
 `, data.State().String())
@@ -137,7 +138,7 @@ Tainted = false
 				}),
 			}),
 		})
-		state := terraform.NewInstanceStateShimmedFromValue(val, 0)
+		state := sdkterraform.NewInstanceStateShimmedFromValue(val, 0)
 		state.ID = clusterID
 		// If local credentials don't match remote, drift detection would trigger.
 		// If local state has no credentials but remote has them, then the drift does exist so - there is separate test for that.
@@ -151,6 +152,7 @@ Tainted = false
 		r.Equal(`ID = b6bfc074-a267-400f-b8f1-db0850c369b1
 credentials_id = 9b8d0456-177b-4a3d-b162-e68030d656aa
 http_proxy_config.# = 0
+organization_id = 2836f775-aaaa-eeee-bbbb-3d3c29512692
 region = westeurope
 Tainted = false
 `, data.State().String())
@@ -199,7 +201,7 @@ Tainted = false
 				aksResource := resourceAKSCluster()
 
 				val := cty.ObjectVal(map[string]cty.Value{})
-				state := terraform.NewInstanceStateShimmedFromValue(val, 0)
+				state := sdkterraform.NewInstanceStateShimmedFromValue(val, 0)
 				state.ID = clusterID
 				state.Attributes[FieldClusterCredentialsId] = tc.stateValue
 				state.Attributes[FieldAKSClusterClientID] = clientIDBeforeRead
@@ -255,7 +257,7 @@ Tainted = false
 				aksResource := resourceAKSCluster()
 
 				val := cty.ObjectVal(map[string]cty.Value{})
-				state := terraform.NewInstanceStateShimmedFromValue(val, 0)
+				state := sdkterraform.NewInstanceStateShimmedFromValue(val, 0)
 				state.ID = clusterID
 				state.Attributes[FieldClusterCredentialsId] = tc.stateValue
 				state.Attributes[FieldAKSClusterClientID] = clientIDBeforeRead

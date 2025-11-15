@@ -52,6 +52,7 @@ resource "castai_aks_cluster" "this" {
 - `cluster_token` (String, Sensitive) CAST AI cluster token.
 - `credentials_id` (String) CAST AI internal credentials ID
 - `id` (String) The ID of this resource.
+- `organization_id` (String) CAST AI organization ID
 
 <a id="nestedblock--http_proxy_config"></a>
 ### Nested Schema for `http_proxy_config`

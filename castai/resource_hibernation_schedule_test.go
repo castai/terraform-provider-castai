@@ -14,8 +14,8 @@ import (
 	"github.com/google/uuid"
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	sdkterraform "github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/stretchr/testify/require"
 
 	"github.com/castai/terraform-provider-castai/castai/sdk"
@@ -213,7 +213,7 @@ func TestHibernationSchedule_CreateContext(t *testing.T) {
 			}),
 		})
 
-		state := terraform.NewInstanceStateShimmedFromValue(stateValue, 0)
+		state := sdkterraform.NewInstanceStateShimmedFromValue(stateValue, 0)
 		data := resource.Data(state)
 
 		result := resource.CreateContext(ctx, data, provider)

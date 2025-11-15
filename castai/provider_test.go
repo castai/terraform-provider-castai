@@ -7,6 +7,10 @@ import (
 	"sync"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-framework/providerserver"
+	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
+	"github.com/hashicorp/terraform-plugin-mux/tf5to6server"
+	"github.com/hashicorp/terraform-plugin-mux/tf6muxserver"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
@@ -19,8 +23,9 @@ const (
 var (
 	testAccProviderConfigure sync.Once
 
-	providerFactories map[string]func() (*schema.Provider, error)
-	testAccProvider   *schema.Provider
+	providerFactories               map[string]func() (*schema.Provider, error)
+	testAccProvider                 *schema.Provider
+	testAccProtoV6ProviderFactories map[string]func() (tfprotov6.ProviderServer, error)
 )
 
 func init() {
@@ -31,6 +36,29 @@ func init() {
 		},
 	}
 
+	testAccProtoV6ProviderFactories = map[string]func() (tfprotov6.ProviderServer, error){
+		ProviderName: func() (tfprotov6.ProviderServer, error) {
+			ctx := context.Background()
+			upgradedSdkProvider, err := tf5to6server.UpgradeServer(ctx, testAccProvider.GRPCProvider)
+			if err != nil {
+				return nil, err
+			}
+
+			providers := []func() tfprotov6.ProviderServer{
+				func() tfprotov6.ProviderServer {
+					return upgradedSdkProvider
+				},
+				providerserver.NewProtocol6(NewFrameworkProvider("v1.0.0")),
+			}
+
+			muxServer, err := tf6muxserver.NewMuxServer(ctx, providers...)
+			if err != nil {
+				return nil, err
+			}
+
+			return muxServer.ProviderServer(), nil
+		},
+	}
 }
 
 func TestProvider(t *testing.T) {
@@ -67,4 +95,9 @@ func ConfigCompose(config ...string) string {
 		str.WriteString(conf)
 	}
 	return str.String()
+}
+
+// testAccGetOrganizationID returns the organization ID from environment variable
+func testAccGetOrganizationID() string {
+	return os.Getenv("ACCEPTANCE_TEST_ORGANIZATION_ID")
 }

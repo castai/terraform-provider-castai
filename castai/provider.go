@@ -12,6 +12,7 @@ import (
 	"github.com/castai/terraform-provider-castai/castai/sdk"
 	"github.com/castai/terraform-provider-castai/castai/sdk/ai_optimizer"
 	"github.com/castai/terraform-provider-castai/castai/sdk/cluster_autoscaler"
+	"github.com/castai/terraform-provider-castai/castai/sdk/omni"
 	"github.com/castai/terraform-provider-castai/castai/sdk/organization_management"
 )
 
@@ -20,21 +21,24 @@ type ProviderConfig struct {
 	clusterAutoscalerClient      cluster_autoscaler.ClientWithResponsesInterface
 	organizationManagementClient organization_management.ClientWithResponsesInterface
 	aiOptimizerClient            ai_optimizer.ClientWithResponsesInterface
+	omniAPI                      *omni.ClientWithResponses
 }
 
 func Provider(version string) *schema.Provider {
 	p := &schema.Provider{
+		TerraformVersion: "1.11",
 		Schema: map[string]*schema.Schema{
 			"api_url": {
 				Type:             schema.TypeString,
-				Required:         true,
+				Optional:         true,
 				ValidateDiagFunc: validation.ToDiagFunc(validation.IsURLWithHTTPS),
 				DefaultFunc:      schema.EnvDefaultFunc("CASTAI_API_URL", "https://api.cast.ai"),
 				Description:      "CAST.AI API url.",
 			},
 			"api_token": {
 				Type:        schema.TypeString,
-				Required:    true,
+				Optional:    true,
+				Sensitive:   true,
 				DefaultFunc: schema.EnvDefaultFunc("CASTAI_API_TOKEN", nil),
 				Description: "The token used to connect to CAST AI API.",
 			},
@@ -96,6 +100,10 @@ func providerConfigure(version string) schema.ConfigureContextFunc {
 		apiURL := data.Get("api_url").(string)
 		apiToken := data.Get("api_token").(string)
 
+		if apiToken == "" {
+			return nil, diag.Errorf("api_token must be set either in provider configuration or via CASTAI_API_TOKEN environment variable")
+		}
+
 		agent := fmt.Sprintf("castai-terraform-provider/%v", version)
 		if addUA := os.Getenv("CASTAI_ADDITIONAL_USER_AGENT"); addUA != "" {
 			agent = fmt.Sprintf("%s %s", agent, addUA)
@@ -121,11 +129,17 @@ func providerConfigure(version string) schema.ConfigureContextFunc {
 			return nil, diag.FromErr(err)
 		}
 
+		omniClient, err := omni.CreateClient(apiURL, apiToken, agent)
+		if err != nil {
+			return nil, diag.FromErr(err)
+		}
+
 		return &ProviderConfig{
 			api:                          client,
 			clusterAutoscalerClient:      clusterAutoscalerClient,
 			organizationManagementClient: organizationManagementClient,
 			aiOptimizerClient:            aiOptimizerClient,
+			omniAPI:                      omniClient,
 		}, nil
 	}
 }

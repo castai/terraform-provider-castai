@@ -17,8 +17,9 @@ import (
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
+	sdkterraform "github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/stretchr/testify/require"
 
 	"github.com/castai/terraform-provider-castai/castai/sdk"
@@ -91,7 +92,8 @@ func TestNodeTemplateResourceReadContext(t *testing.T) {
 					  "NVIDIA"
 					],
 					"includeNames": [],
-					"excludeNames": []
+					"excludeNames": [],
+					"fractionalGPUs": "ENABLED"
 				  },
 				  "customPriority": [
 				    {
@@ -158,7 +160,7 @@ func TestNodeTemplateResourceReadContext(t *testing.T) {
 		FieldClusterId:        cty.StringVal(clusterId),
 		FieldNodeTemplateName: cty.StringVal("gpu"),
 	})
-	state := terraform.NewInstanceStateShimmedFromValue(val, 0)
+	state := sdkterraform.NewInstanceStateShimmedFromValue(val, 0)
 	state.ID = "gpu"
 
 	data := resource.Data(state)
@@ -200,6 +202,7 @@ constraints.0.gpu.0.manufacturers.# = 1
 constraints.0.gpu.0.manufacturers.0 = NVIDIA
 constraints.0.gpu.0.max_count = 0
 constraints.0.gpu.0.min_count = 0
+constraints.0.gpu.0.fractional_gpus = enabled
 constraints.0.burstable_instances = 
 constraints.0.customer_specific = 
 constraints.0.instance_families.# = 1
@@ -379,7 +382,7 @@ func TestNodeTemplateResourceReadContextEmptyList(t *testing.T) {
 		FieldClusterId:        cty.StringVal(clusterId),
 		FieldNodeTemplateName: cty.StringVal("gpu"),
 	})
-	state := terraform.NewInstanceStateShimmedFromValue(val, 0)
+	state := sdkterraform.NewInstanceStateShimmedFromValue(val, 0)
 	state.ID = "gpu"
 
 	data := nodeTemplate.Data(state)
@@ -454,7 +457,7 @@ func TestNodeTemplateResourceCreate_defaultNodeTemplate(t *testing.T) {
 		FieldNodeTemplateCustomInstancesWithExtendedMemoryEnabled: cty.BoolVal(true),
 		FieldNodeTemplateClmEnabled:                               cty.BoolVal(false),
 	})
-	state := terraform.NewInstanceStateShimmedFromValue(val, 0)
+	state := sdkterraform.NewInstanceStateShimmedFromValue(val, 0)
 	state.ID = "default-by-castai"
 
 	data := resource.Data(state)
@@ -535,7 +538,7 @@ func TestNodeTemplateResourceCreate_customNodeTemplate(t *testing.T) {
 		FieldNodeTemplateCustomInstancesWithExtendedMemoryEnabled: cty.BoolVal(true),
 		FieldNodeTemplateClmEnabled:                               cty.BoolVal(true),
 	})
-	state := terraform.NewInstanceStateShimmedFromValue(val, 0)
+	state := sdkterraform.NewInstanceStateShimmedFromValue(val, 0)
 	state.ID = name
 
 	data := resource.Data(state)
@@ -596,7 +599,7 @@ func TestNodeTemplateResourceDelete_defaultNodeTemplate(t *testing.T) {
 		FieldClusterId:        cty.StringVal(clusterId),
 		FieldNodeTemplateName: cty.StringVal("default-by-castai"),
 	})
-	state := terraform.NewInstanceStateShimmedFromValue(val, 0)
+	state := sdkterraform.NewInstanceStateShimmedFromValue(val, 0)
 	state.ID = "default-by-castai"
 
 	data := resource.Data(state)
@@ -654,6 +657,7 @@ func TestAccEKS_ResourceNodeTemplate_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.gpu.0.manufacturers.0", "NVIDIA"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.gpu.0.include_names.#", "0"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.gpu.0.exclude_names.#", "0"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.gpu.0.fractional_gpus", "enabled"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.min_cpu", "4"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.max_cpu", "100"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.use_spot_fallbacks", "true"),
@@ -723,6 +727,7 @@ func TestAccEKS_ResourceNodeTemplate_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.gpu.0.manufacturers.#", "0"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.gpu.0.include_names.#", "0"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.gpu.0.exclude_names.#", "0"),
+					resource.TestCheckResourceAttr(resourceName, "constraints.0.gpu.0.fractional_gpus", "disabled"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.min_cpu", "0"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.max_cpu", "0"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.use_spot_fallbacks", "true"),
@@ -835,6 +840,7 @@ func testAccNodeTemplateConfig(rName, clusterName string) string {
 					include_names = []
 					exclude_names = []
 					manufacturers = ["NVIDIA"]
+					fractional_gpus = "enabled"
 				}
 
 				custom_priority {
@@ -916,6 +922,10 @@ func testNodeTemplateUpdated(rName, clusterName string) string {
 
 				cpu_manufacturers = ["INTEL", "AMD"]
 				architecture_priority = ["arm64"]
+
+				gpu {
+					fractional_gpus = "disabled"
+				}
 
 				resource_limits {
 					cpu_limit_enabled   = true
