@@ -3,6 +3,7 @@
 
 # Claude Code context file
 CLAUDE.md
+.claude/
 
 # built binary
 terraform-provider-castai
