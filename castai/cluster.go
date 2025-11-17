@@ -209,8 +209,12 @@ func resourceCastaiClusterUpdate(
 
 func createClusterToken(ctx context.Context, client sdk.ClientWithResponsesInterface, clusterID string) (string, error) {
 	resp, err := client.ExternalClusterAPICreateClusterTokenWithResponse(ctx, clusterID)
-	if err != nil {
-		return "", fmt.Errorf("creating cluster token: %w", err)
+	if checkErr := sdk.CheckOKResponse(resp, err); checkErr != nil {
+		return "", fmt.Errorf("creating cluster token: %w", checkErr)
+	}
+
+	if resp == nil || resp.JSON200 == nil || resp.JSON200.Token == nil {
+		return "", fmt.Errorf("response was empty when trying to create cluster token")
 	}
 
 	return *resp.JSON200.Token, nil
