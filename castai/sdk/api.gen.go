@@ -71,6 +71,21 @@ const (
 	THREEYEAR CastaiInventoryV1beta1AzureReservationReservationPlan = "THREE_YEAR"
 )
 
+// Defines values for CastaiInventoryV1beta1BlockStorageInfoAttachmentLimitType.
+const (
+	ATTACHMENTLIMITTYPEDEDICATED CastaiInventoryV1beta1BlockStorageInfoAttachmentLimitType = "ATTACHMENT_LIMIT_TYPE_DEDICATED"
+	ATTACHMENTLIMITTYPESHARED    CastaiInventoryV1beta1BlockStorageInfoAttachmentLimitType = "ATTACHMENT_LIMIT_TYPE_SHARED"
+	ATTACHMENTLIMITTYPEUNKNOWN   CastaiInventoryV1beta1BlockStorageInfoAttachmentLimitType = "ATTACHMENT_LIMIT_TYPE_UNKNOWN"
+)
+
+// Defines values for CastaiInventoryV1beta1BlockStorageInfoEbsOptimizedSupport.
+const (
+	EBSOPTIMIZEDSUPPORTDEFAULT     CastaiInventoryV1beta1BlockStorageInfoEbsOptimizedSupport = "EBS_OPTIMIZED_SUPPORT_DEFAULT"
+	EBSOPTIMIZEDSUPPORTSUPPORTED   CastaiInventoryV1beta1BlockStorageInfoEbsOptimizedSupport = "EBS_OPTIMIZED_SUPPORT_SUPPORTED"
+	EBSOPTIMIZEDSUPPORTUNKNOWN     CastaiInventoryV1beta1BlockStorageInfoEbsOptimizedSupport = "EBS_OPTIMIZED_SUPPORT_UNKNOWN"
+	EBSOPTIMIZEDSUPPORTUNSUPPORTED CastaiInventoryV1beta1BlockStorageInfoEbsOptimizedSupport = "EBS_OPTIMIZED_SUPPORT_UNSUPPORTED"
+)
+
 // Defines values for CastaiInventoryV1beta1CommitmentScalingStrategy.
 const (
 	CPUBased CastaiInventoryV1beta1CommitmentScalingStrategy = "CPUBased"
@@ -80,8 +95,8 @@ const (
 
 // Defines values for CastaiInventoryV1beta1CommitmentStatus.
 const (
-	Active   CastaiInventoryV1beta1CommitmentStatus = "Active"
-	Inactive CastaiInventoryV1beta1CommitmentStatus = "Inactive"
+	CastaiInventoryV1beta1CommitmentStatusActive   CastaiInventoryV1beta1CommitmentStatus = "Active"
+	CastaiInventoryV1beta1CommitmentStatusInactive CastaiInventoryV1beta1CommitmentStatus = "Inactive"
 )
 
 // Defines values for CastaiInventoryV1beta1DiscountPricingType.
@@ -118,6 +133,7 @@ const (
 	CastaiInventoryV1beta1InstanceTypeCPUManufacturerAMPERE  CastaiInventoryV1beta1InstanceTypeCPUManufacturer = "AMPERE"
 	CastaiInventoryV1beta1InstanceTypeCPUManufacturerAPPLE   CastaiInventoryV1beta1InstanceTypeCPUManufacturer = "APPLE"
 	CastaiInventoryV1beta1InstanceTypeCPUManufacturerAWS     CastaiInventoryV1beta1InstanceTypeCPUManufacturer = "AWS"
+	CastaiInventoryV1beta1InstanceTypeCPUManufacturerGOOGLE  CastaiInventoryV1beta1InstanceTypeCPUManufacturer = "GOOGLE"
 	CastaiInventoryV1beta1InstanceTypeCPUManufacturerINTEL   CastaiInventoryV1beta1InstanceTypeCPUManufacturer = "INTEL"
 	CastaiInventoryV1beta1InstanceTypeCPUManufacturerUNKNOWN CastaiInventoryV1beta1InstanceTypeCPUManufacturer = "UNKNOWN"
 )
@@ -138,9 +154,9 @@ const (
 
 // Defines values for CastaiInventoryV1beta1StorageInfoDeviceType.
 const (
-	Hdd     CastaiInventoryV1beta1StorageInfoDeviceType = "hdd"
-	Invalid CastaiInventoryV1beta1StorageInfoDeviceType = "invalid"
-	Ssd     CastaiInventoryV1beta1StorageInfoDeviceType = "ssd"
+	CastaiInventoryV1beta1StorageInfoDeviceTypeHdd     CastaiInventoryV1beta1StorageInfoDeviceType = "hdd"
+	CastaiInventoryV1beta1StorageInfoDeviceTypeInvalid CastaiInventoryV1beta1StorageInfoDeviceType = "invalid"
+	CastaiInventoryV1beta1StorageInfoDeviceTypeSsd     CastaiInventoryV1beta1StorageInfoDeviceType = "ssd"
 )
 
 // Defines values for CastaiInventoryV1beta1StorageInfoEphemeralOSDisksInfoPlacement.
@@ -199,6 +215,20 @@ const (
 	ORGANIZATIONTYPEENTERPRISE CastaiUsersV1beta1OrganizationType = "ORGANIZATION_TYPE_ENTERPRISE"
 )
 
+// Defines values for CastaiV1Cloud.
+const (
+	CastaiV1CloudAWS     CastaiV1Cloud = "AWS"
+	CastaiV1CloudAZURE   CastaiV1Cloud = "AZURE"
+	CastaiV1CloudAws     CastaiV1Cloud = "aws"
+	CastaiV1CloudAzure   CastaiV1Cloud = "azure"
+	CastaiV1CloudGCP     CastaiV1Cloud = "GCP"
+	CastaiV1CloudGcp     CastaiV1Cloud = "gcp"
+	CastaiV1CloudINVALID CastaiV1Cloud = "INVALID"
+	CastaiV1CloudInvalid CastaiV1Cloud = "invalid"
+	CastaiV1CloudUNKNOWN CastaiV1Cloud = "UNKNOWN"
+	CastaiV1CloudUnknown CastaiV1Cloud = "unknown"
+)
+
 // Defines values for CostreportV1beta1AllocationGroupFilterLabelValueOperator.
 const (
 	CostreportV1beta1AllocationGroupFilterLabelValueOperatorDoesNotExist CostreportV1beta1AllocationGroupFilterLabelValueOperator = "DoesNotExist"
@@ -218,6 +248,78 @@ const (
 	CostreportV1beta1NoDataReasonAgentOutdated   CostreportV1beta1NoDataReason = "AgentOutdated"
 	CostreportV1beta1NoDataReasonNoMetricsServer CostreportV1beta1NoDataReason = "NoMetricsServer"
 	CostreportV1beta1NoDataReasonUnknown         CostreportV1beta1NoDataReason = "Unknown"
+)
+
+// Defines values for DboV1CacheGroupProtocolType.
+const (
+	DboV1CacheGroupProtocolTypeMySQL       DboV1CacheGroupProtocolType = "MySQL"
+	DboV1CacheGroupProtocolTypePostgreSQL  DboV1CacheGroupProtocolType = "PostgreSQL"
+	DboV1CacheGroupProtocolTypeUnspecified DboV1CacheGroupProtocolType = "Unspecified"
+)
+
+// Defines values for DboV1CacheStatus.
+const (
+	DboV1CacheStatusActive     DboV1CacheStatus = "Active"
+	DboV1CacheStatusError      DboV1CacheStatus = "Error"
+	DboV1CacheStatusPending    DboV1CacheStatus = "Pending"
+	DboV1CacheStatusReady      DboV1CacheStatus = "Ready"
+	DboV1CacheStatusUndeployed DboV1CacheStatus = "Undeployed"
+)
+
+// Defines values for DboV1DatabaseClusterType.
+const (
+	DboV1DatabaseClusterTypeAurora  DboV1DatabaseClusterType = "Aurora"
+	DboV1DatabaseClusterTypeUnknown DboV1DatabaseClusterType = "Unknown"
+)
+
+// Defines values for DboV1DatabaseType.
+const (
+	DboV1DatabaseTypeAuroraPostgreSQL DboV1DatabaseType = "AuroraPostgreSQL"
+	DboV1DatabaseTypeGraphQL          DboV1DatabaseType = "GraphQL"
+	DboV1DatabaseTypeMSSQL            DboV1DatabaseType = "MSSQL"
+	DboV1DatabaseTypeMariaDB          DboV1DatabaseType = "MariaDB"
+	DboV1DatabaseTypeMongoDB          DboV1DatabaseType = "MongoDB"
+	DboV1DatabaseTypeMySQL            DboV1DatabaseType = "MySQL"
+	DboV1DatabaseTypePostgreSQL       DboV1DatabaseType = "PostgreSQL"
+)
+
+// Defines values for DboV1ProxyStateDatabaseConnectionStatus.
+const (
+	DboV1ProxyStateDatabaseConnectionStatusConnectionFailure DboV1ProxyStateDatabaseConnectionStatus = "ConnectionFailure"
+	DboV1ProxyStateDatabaseConnectionStatusDNSFailure        DboV1ProxyStateDatabaseConnectionStatus = "DNSFailure"
+	DboV1ProxyStateDatabaseConnectionStatusSuccess           DboV1ProxyStateDatabaseConnectionStatus = "Success"
+	DboV1ProxyStateDatabaseConnectionStatusUnknown           DboV1ProxyStateDatabaseConnectionStatus = "Unknown"
+)
+
+// Defines values for DboV1RegistrationStatus.
+const (
+	DboV1RegistrationStatusFailure    DboV1RegistrationStatus = "Failure"
+	DboV1RegistrationStatusInProgress DboV1RegistrationStatus = "InProgress"
+	DboV1RegistrationStatusSuccess    DboV1RegistrationStatus = "Success"
+	DboV1RegistrationStatusUnknown    DboV1RegistrationStatus = "Unknown"
+)
+
+// Defines values for DboV1RegistrationType.
+const (
+	DeleteAccount      DboV1RegistrationType = "DeleteAccount"
+	DeployCache        DboV1RegistrationType = "DeployCache"
+	DeployDBAgent      DboV1RegistrationType = "DeployDBAgent"
+	PhaseOneOnboarding DboV1RegistrationType = "PhaseOneOnboarding"
+	UninstallCache     DboV1RegistrationType = "UninstallCache"
+	UninstallDBAgent   DboV1RegistrationType = "UninstallDBAgent"
+)
+
+// Defines values for DboV1RuleType.
+const (
+	Query DboV1RuleType = "Query"
+	Table DboV1RuleType = "Table"
+)
+
+// Defines values for DboV1TTLMode.
+const (
+	Auto      DboV1TTLMode = "Auto"
+	DontCache DboV1TTLMode = "DontCache"
+	Manual    DboV1TTLMode = "Manual"
 )
 
 // Defines values for ExternalclusterV1ClusterCastwareInstallMethod.
@@ -240,6 +342,12 @@ const (
 	ExternalclusterV1ClusterReconcileInfoReconcileStatusOk      ExternalclusterV1ClusterReconcileInfoReconcileStatus = "ok"
 	ExternalclusterV1ClusterReconcileInfoReconcileStatusUnknown ExternalclusterV1ClusterReconcileInfoReconcileStatus = "unknown"
 	ExternalclusterV1ClusterReconcileInfoReconcileStatusWarning ExternalclusterV1ClusterReconcileInfoReconcileStatus = "warning"
+)
+
+// Defines values for ExternalclusterV1KentEligibility.
+const (
+	ELIGIBLE     ExternalclusterV1KentEligibility = "ELIGIBLE"
+	NOTSUPPORTED ExternalclusterV1KentEligibility = "NOT_SUPPORTED"
 )
 
 // Defines values for ExternalclusterV1NodeType.
@@ -723,6 +831,14 @@ const (
 	AllocationGroupAPIGetAllocationGroupWorkloadsEfficiencyParamsSortOrderDesc AllocationGroupAPIGetAllocationGroupWorkloadsEfficiencyParamsSortOrder = "desc"
 )
 
+// Defines values for DboAPIGetCacheQueriesParamsSortOrder.
+const (
+	DboAPIGetCacheQueriesParamsSortOrderASC  DboAPIGetCacheQueriesParamsSortOrder = "ASC"
+	DboAPIGetCacheQueriesParamsSortOrderAsc  DboAPIGetCacheQueriesParamsSortOrder = "asc"
+	DboAPIGetCacheQueriesParamsSortOrderDESC DboAPIGetCacheQueriesParamsSortOrder = "DESC"
+	DboAPIGetCacheQueriesParamsSortOrderDesc DboAPIGetCacheQueriesParamsSortOrder = "desc"
+)
+
 // Defines values for ExternalClusterAPIGetCredentialsScriptParamsKentParams.
 const (
 	EnableRebalancing                ExternalClusterAPIGetCredentialsScriptParamsKentParams = "enable_rebalancing"
@@ -732,17 +848,17 @@ const (
 
 // Defines values for ExternalClusterAPIListNodesParamsNodeStatus.
 const (
-	Cordoned              ExternalClusterAPIListNodesParamsNodeStatus = "cordoned"
-	Creating              ExternalClusterAPIListNodesParamsNodeStatus = "creating"
-	Deleted               ExternalClusterAPIListNodesParamsNodeStatus = "deleted"
-	Deleting              ExternalClusterAPIListNodesParamsNodeStatus = "deleting"
-	Draining              ExternalClusterAPIListNodesParamsNodeStatus = "draining"
-	Interrupted           ExternalClusterAPIListNodesParamsNodeStatus = "interrupted"
-	NodeStatusUnspecified ExternalClusterAPIListNodesParamsNodeStatus = "node_status_unspecified"
-	NotReady              ExternalClusterAPIListNodesParamsNodeStatus = "not_ready"
-	Pending               ExternalClusterAPIListNodesParamsNodeStatus = "pending"
-	Ready                 ExternalClusterAPIListNodesParamsNodeStatus = "ready"
-	Unknown               ExternalClusterAPIListNodesParamsNodeStatus = "unknown"
+	ExternalClusterAPIListNodesParamsNodeStatusCordoned              ExternalClusterAPIListNodesParamsNodeStatus = "cordoned"
+	ExternalClusterAPIListNodesParamsNodeStatusCreating              ExternalClusterAPIListNodesParamsNodeStatus = "creating"
+	ExternalClusterAPIListNodesParamsNodeStatusDeleted               ExternalClusterAPIListNodesParamsNodeStatus = "deleted"
+	ExternalClusterAPIListNodesParamsNodeStatusDeleting              ExternalClusterAPIListNodesParamsNodeStatus = "deleting"
+	ExternalClusterAPIListNodesParamsNodeStatusDraining              ExternalClusterAPIListNodesParamsNodeStatus = "draining"
+	ExternalClusterAPIListNodesParamsNodeStatusInterrupted           ExternalClusterAPIListNodesParamsNodeStatus = "interrupted"
+	ExternalClusterAPIListNodesParamsNodeStatusNodeStatusUnspecified ExternalClusterAPIListNodesParamsNodeStatus = "node_status_unspecified"
+	ExternalClusterAPIListNodesParamsNodeStatusNotReady              ExternalClusterAPIListNodesParamsNodeStatus = "not_ready"
+	ExternalClusterAPIListNodesParamsNodeStatusPending               ExternalClusterAPIListNodesParamsNodeStatus = "pending"
+	ExternalClusterAPIListNodesParamsNodeStatusReady                 ExternalClusterAPIListNodesParamsNodeStatus = "ready"
+	ExternalClusterAPIListNodesParamsNodeStatusUnknown               ExternalClusterAPIListNodesParamsNodeStatus = "unknown"
 )
 
 // Defines values for ExternalClusterAPIListNodesParamsLifecycleType.
@@ -907,17 +1023,17 @@ const (
 
 // Defines values for WorkloadOptimizationAPIListWorkloadsParamsManagementOptions.
 const (
-	MANAGED   WorkloadOptimizationAPIListWorkloadsParamsManagementOptions = "MANAGED"
-	READONLY  WorkloadOptimizationAPIListWorkloadsParamsManagementOptions = "READ_ONLY"
-	UNDEFINED WorkloadOptimizationAPIListWorkloadsParamsManagementOptions = "UNDEFINED"
+	WorkloadOptimizationAPIListWorkloadsParamsManagementOptionsMANAGED   WorkloadOptimizationAPIListWorkloadsParamsManagementOptions = "MANAGED"
+	WorkloadOptimizationAPIListWorkloadsParamsManagementOptionsREADONLY  WorkloadOptimizationAPIListWorkloadsParamsManagementOptions = "READ_ONLY"
+	WorkloadOptimizationAPIListWorkloadsParamsManagementOptionsUNDEFINED WorkloadOptimizationAPIListWorkloadsParamsManagementOptions = "UNDEFINED"
 )
 
 // Defines values for WorkloadOptimizationAPIListWorkloadsParamsSortOrder.
 const (
-	ASC  WorkloadOptimizationAPIListWorkloadsParamsSortOrder = "ASC"
-	Asc  WorkloadOptimizationAPIListWorkloadsParamsSortOrder = "asc"
-	DESC WorkloadOptimizationAPIListWorkloadsParamsSortOrder = "DESC"
-	Desc WorkloadOptimizationAPIListWorkloadsParamsSortOrder = "desc"
+	WorkloadOptimizationAPIListWorkloadsParamsSortOrderASC  WorkloadOptimizationAPIListWorkloadsParamsSortOrder = "ASC"
+	WorkloadOptimizationAPIListWorkloadsParamsSortOrderAsc  WorkloadOptimizationAPIListWorkloadsParamsSortOrder = "asc"
+	WorkloadOptimizationAPIListWorkloadsParamsSortOrderDESC WorkloadOptimizationAPIListWorkloadsParamsSortOrder = "DESC"
+	WorkloadOptimizationAPIListWorkloadsParamsSortOrderDesc WorkloadOptimizationAPIListWorkloadsParamsSortOrder = "desc"
 )
 
 // Defines values for WorkloadOptimizationAPIListWorkloadsParamsRecommendationStatusType.
@@ -926,6 +1042,13 @@ const (
 	STATUSSTOPPED WorkloadOptimizationAPIListWorkloadsParamsRecommendationStatusType = "STATUS_STOPPED"
 	STATUSUNKNOWN WorkloadOptimizationAPIListWorkloadsParamsRecommendationStatusType = "STATUS_UNKNOWN"
 	STATUSWAITING WorkloadOptimizationAPIListWorkloadsParamsRecommendationStatusType = "STATUS_WAITING"
+)
+
+// Defines values for WorkloadOptimizationAPIGetWorkloadFiltersParamsManagementOptions.
+const (
+	WorkloadOptimizationAPIGetWorkloadFiltersParamsManagementOptionsMANAGED   WorkloadOptimizationAPIGetWorkloadFiltersParamsManagementOptions = "MANAGED"
+	WorkloadOptimizationAPIGetWorkloadFiltersParamsManagementOptionsREADONLY  WorkloadOptimizationAPIGetWorkloadFiltersParamsManagementOptions = "READ_ONLY"
+	WorkloadOptimizationAPIGetWorkloadFiltersParamsManagementOptionsUNDEFINED WorkloadOptimizationAPIGetWorkloadFiltersParamsManagementOptions = "UNDEFINED"
 )
 
 // Defines values for WorkloadOptimizationAPIGetInstallCmdParamsCmePresets.
@@ -1415,9 +1538,57 @@ type CastaiInventoryV1beta1BatchUpdateCommitmentsResponse struct {
 
 // CastaiInventoryV1beta1BlockStorageInfo BlockStorageInfo contains details about block storage capabilities of the instance type.
 type CastaiInventoryV1beta1BlockStorageInfo struct {
+	// AttachmentLimitType Type of EBS attachment limit.
+	//
+	//  - ATTACHMENT_LIMIT_TYPE_UNKNOWN: Unknown is invalid.
+	//  - ATTACHMENT_LIMIT_TYPE_SHARED: Shared with other device attachments.
+	//  - ATTACHMENT_LIMIT_TYPE_DEDICATED: Dedicated only for EBS volumes.
+	AttachmentLimitType *CastaiInventoryV1beta1BlockStorageInfoAttachmentLimitType `json:"attachmentLimitType,omitempty"`
+
+	// BaselineBandwidthMbps Specifies the baseline bandwidth for block storage in Mbps.
+	BaselineBandwidthMbps *int32 `json:"baselineBandwidthMbps"`
+
+	// BaselineIops Specifies the baseline IOPS for block storage.
+	BaselineIops *int32 `json:"baselineIops"`
+
+	// BaselineThroughputMbytesPerS Specifies the baseline throughput for block storage in MB/s.
+	BaselineThroughputMbytesPerS *float64 `json:"baselineThroughputMbytesPerS"`
+
+	// EbsOptimizedSupport EbsOptimizedSupport specifies whether instance type supports EBS optimization.
+	//
+	//  - EBS_OPTIMIZED_SUPPORT_UNKNOWN: Unknown is invalid.
+	//  - EBS_OPTIMIZED_SUPPORT_DEFAULT: Supported and enabled by default.
+	//  - EBS_OPTIMIZED_SUPPORT_SUPPORTED: Supported, has to be enabled additionally.
+	//  - EBS_OPTIMIZED_SUPPORT_UNSUPPORTED: Unsupported.
+	EbsOptimizedSupport *CastaiInventoryV1beta1BlockStorageInfoEbsOptimizedSupport `json:"ebsOptimizedSupport,omitempty"`
+
 	// MaxBandwidthMbps Specifies the maximum bandwidth for block storage. Currently only supported for AWS EBS-optimized instances.
 	MaxBandwidthMbps *int32 `json:"maxBandwidthMbps"`
+
+	// MaxEbsAttachments Specifies maximum number of EBS volume attachments.
+	MaxEbsAttachments *int32 `json:"maxEbsAttachments"`
+
+	// MaxIops Specifies the maximum IOPS for block storage.
+	MaxIops *int32 `json:"maxIops"`
+
+	// MaxThroughputMbytesPerS Specifies the maximum throughput for block storage in MB/s.
+	MaxThroughputMbytesPerS *float64 `json:"maxThroughputMbytesPerS"`
 }
+
+// CastaiInventoryV1beta1BlockStorageInfoAttachmentLimitType Type of EBS attachment limit.
+//
+//   - ATTACHMENT_LIMIT_TYPE_UNKNOWN: Unknown is invalid.
+//   - ATTACHMENT_LIMIT_TYPE_SHARED: Shared with other device attachments.
+//   - ATTACHMENT_LIMIT_TYPE_DEDICATED: Dedicated only for EBS volumes.
+type CastaiInventoryV1beta1BlockStorageInfoAttachmentLimitType string
+
+// CastaiInventoryV1beta1BlockStorageInfoEbsOptimizedSupport EbsOptimizedSupport specifies whether instance type supports EBS optimization.
+//
+//   - EBS_OPTIMIZED_SUPPORT_UNKNOWN: Unknown is invalid.
+//   - EBS_OPTIMIZED_SUPPORT_DEFAULT: Supported and enabled by default.
+//   - EBS_OPTIMIZED_SUPPORT_SUPPORTED: Supported, has to be enabled additionally.
+//   - EBS_OPTIMIZED_SUPPORT_UNSUPPORTED: Unsupported.
+type CastaiInventoryV1beta1BlockStorageInfoEbsOptimizedSupport string
 
 // CastaiInventoryV1beta1CPUInfo defines model for castai.inventory.v1beta1.CPUInfo.
 type CastaiInventoryV1beta1CPUInfo struct {
@@ -3178,6 +3349,15 @@ type CastaiUsersV1beta1UserOrganization struct {
 	Type *CastaiUsersV1beta1OrganizationType `json:"type,omitempty"`
 }
 
+// CastaiV1Cloud Types of cloud service providers CAST AI supports.
+//
+//   - invalid: Invalid.
+//   - aws: Amazon web services.
+//   - gcp: Google cloud provider.
+//   - azure: Microsoft Azure.
+//   - unknown: Unknown.
+type CastaiV1Cloud string
+
 // CostreportV1beta1AllocationGroup defines model for costreport.v1beta1.AllocationGroup.
 type CostreportV1beta1AllocationGroup struct {
 	Filter    *CostreportV1beta1AllocationGroupFilter `json:"filter,omitempty"`
@@ -3653,6 +3833,789 @@ type CostreportV1beta1Resources struct {
 	MemoryGib string `json:"memoryGib"`
 }
 
+// DboV1Account defines model for dbo.v1.Account.
+type DboV1Account struct {
+	// Csp Types of cloud service providers CAST AI supports.
+	//
+	//  - invalid: Invalid.
+	//  - aws: Amazon web services.
+	//  - gcp: Google cloud provider.
+	//  - azure: Microsoft Azure.
+	//  - unknown: Unknown.
+	Csp    CastaiV1Cloud `json:"csp"`
+	Id     string        `json:"id"`
+	RoleId string        `json:"roleId"`
+}
+
+// DboV1CacheConfiguration defines model for dbo.v1.CacheConfiguration.
+type DboV1CacheConfiguration struct {
+	CacheId *string       `json:"cacheId,omitempty"`
+	Caching *DboV1Caching `json:"caching,omitempty"`
+
+	// ConnectionString Deprecated: use connection_strings. Will contain first connection string if available.
+	// Deprecated:
+	ConnectionString  *string   `json:"connectionString"`
+	ConnectionStrings *[]string `json:"connectionStrings,omitempty"`
+
+	// DatabaseName Name of the logical database to which this configuration corresponds.
+	DatabaseName string             `json:"databaseName"`
+	Id           *string            `json:"id,omitempty"`
+	Metrics      *DboV1CacheMetrics `json:"metrics,omitempty"`
+
+	// Mode TTLMode defines a caching behaviour for TTL setting.
+	Mode    *DboV1TTLMode `json:"mode,omitempty"`
+	Version *int32        `json:"version,omitempty"`
+}
+
+// DboV1CacheEfficiency CacheEfficiency represents cache efficiency for a given cache configuration.
+type DboV1CacheEfficiency struct {
+	// CacheHitRate Cache efficiency.
+	CacheHitRate float64 `json:"cacheHitRate"`
+
+	// CacheHits Amount of cached queries by cache.
+	CacheHits string `json:"cacheHits"`
+
+	// CacheableQueries Deprecated: Amount of queries that potentially could be cached.
+	// Deprecated:
+	CacheableQueries string `json:"cacheableQueries"`
+
+	// DqlQueries Amount of dql queries.
+	DqlQueries string    `json:"dqlQueries"`
+	Timestamp  time.Time `json:"timestamp"`
+
+	// TotalQueries Amount of queries observed by cache.
+	TotalQueries string `json:"totalQueries"`
+}
+
+// DboV1CacheGroup defines model for dbo.v1.CacheGroup.
+type DboV1CacheGroup struct {
+	// CacheStatus CacheStatus specifies status of the cache deployment.
+	CacheStatus      *DboV1CacheStatus          `json:"cacheStatus,omitempty"`
+	ClusterId        *string                    `json:"clusterId"`
+	Configurations   *[]DboV1CacheConfiguration `json:"configurations,omitempty"`
+	DirectMode       *bool                      `json:"directMode"`
+	Endpoints        *[]DboV1Endpoint           `json:"endpoints,omitempty"`
+	HelmChartVersion *string                    `json:"helmChartVersion"`
+	Id               *string                    `json:"id,omitempty"`
+	InstanceId       *string                    `json:"instanceId"`
+	Metrics          *DboV1CacheMetrics         `json:"metrics,omitempty"`
+	Name             *string                    `json:"name"`
+
+	// ProtocolType ProtocolType specifies the protocol type used by the database.
+	ProtocolType     DboV1CacheGroupProtocolType      `json:"protocolType"`
+	StatusConditions *DboV1CacheGroupStatusConditions `json:"statusConditions,omitempty"`
+	Version          *int32                           `json:"version,omitempty"`
+}
+
+// DboV1CacheGroupProtocolType ProtocolType specifies the protocol type used by the database.
+type DboV1CacheGroupProtocolType string
+
+// DboV1CacheGroupStatusConditions defines model for dbo.v1.CacheGroup.StatusConditions.
+type DboV1CacheGroupStatusConditions struct {
+	// ChartUpToDate Indicates that DBO uses recommended helm chart version.
+	ChartUpToDate *bool `json:"chartUpToDate,omitempty"`
+
+	// ConnectionIssue Indicates that DBO is reporting connection issues to upstream services.
+	ConnectionIssue *bool `json:"connectionIssue,omitempty"`
+
+	// Descriptions Human-readable descriptions of any issues detected.
+	Descriptions *[]string `json:"descriptions,omitempty"`
+
+	// PullTimeout Indicates that DBO hasn't fetched configuration within expected time limit.
+	PullTimeout *bool `json:"pullTimeout,omitempty"`
+
+	// RedeploymentNeeded Indicates that redeployment is needed for this DBO.
+	RedeploymentNeeded *bool `json:"redeploymentNeeded,omitempty"`
+
+	// UsingLatestConfiguration Indicates that latest configuration has been retrieved by DBO.
+	UsingLatestConfiguration *bool `json:"usingLatestConfiguration,omitempty"`
+}
+
+// DboV1CacheInsightsItem defines model for dbo.v1.CacheInsightsItem.
+type DboV1CacheInsightsItem struct {
+	MaxMissExecutionTime float64   `json:"maxMissExecutionTime"`
+	MaxTtl               float64   `json:"maxTtl"`
+	MinMissExecutionTime float64   `json:"minMissExecutionTime"`
+	MinTtl               float64   `json:"minTtl"`
+	P50MissExecutionTime float64   `json:"p50MissExecutionTime"`
+	P95MissExecutionTime float64   `json:"p95MissExecutionTime"`
+	P99MissExecutionTime float64   `json:"p99MissExecutionTime"`
+	Timestamp            time.Time `json:"timestamp"`
+	UniqueQueries        string    `json:"uniqueQueries"`
+	UniqueResults        string    `json:"uniqueResults"`
+}
+
+// DboV1CacheInsightsSummary defines model for dbo.v1.CacheInsightsSummary.
+type DboV1CacheInsightsSummary struct {
+	MaxTtl               float64 `json:"maxTtl"`
+	MinTtl               float64 `json:"minTtl"`
+	P50MissExecutionTime float64 `json:"p50MissExecutionTime"`
+	P95MissExecutionTime float64 `json:"p95MissExecutionTime"`
+	P99MissExecutionTime float64 `json:"p99MissExecutionTime"`
+	UniqueQueries        string  `json:"uniqueQueries"`
+	UniqueResults        string  `json:"uniqueResults"`
+}
+
+// DboV1CacheMetrics defines model for dbo.v1.CacheMetrics.
+type DboV1CacheMetrics struct {
+	// AverageExecutionTime Average execution time in milliseconds.
+	AverageExecutionTime float64 `json:"averageExecutionTime"`
+
+	// AverageHitExecutionTime Average hit execution time in milliseconds.
+	AverageHitExecutionTime float64 `json:"averageHitExecutionTime"`
+
+	// AverageMissExecutionTime Average miss execution time in milliseconds.
+	AverageMissExecutionTime float64 `json:"averageMissExecutionTime"`
+
+	// CacheHitRate Cache efficiency.
+	CacheHitRate float64 `json:"cacheHitRate"`
+
+	// CacheHits Amount of cached queries by cache.
+	CacheHits string `json:"cacheHits"`
+
+	// CacheMisses Number of cache misses.
+	CacheMisses string `json:"cacheMisses"`
+
+	// CacheableQueries Deprecated: Amount of queries that potentially could be cached.
+	// Deprecated:
+	CacheableQueries string `json:"cacheableQueries"`
+
+	// DqlQueries Amount of dql queries.
+	DqlQueries string `json:"dqlQueries"`
+
+	// EnabledCaches Amount of cache configurations with enabled caching.
+	EnabledCaches             int64   `json:"enabledCaches"`
+	OptimalCacheHits          string  `json:"optimalCacheHits"`
+	OptimalHitRate            float64 `json:"optimalHitRate"`
+	OptimalTimeSavedPercent   float32 `json:"optimalTimeSavedPercent"`
+	ProjectedCacheHits        string  `json:"projectedCacheHits"`
+	ProjectedHitRate          float64 `json:"projectedHitRate"`
+	ProjectedTimeSavedPercent float64 `json:"projectedTimeSavedPercent"`
+
+	// TimeSaved Time saved by caching queries.
+	TimeSaved *string `json:"timeSaved"`
+
+	// TimeSavedPercent Amount of DB time saved %.
+	TimeSavedPercent float64 `json:"timeSavedPercent"`
+
+	// TotalCaches Amount of cache configurations.
+	TotalCaches int64 `json:"totalCaches"`
+
+	// TotalQueries Amount of queries observed by cache.
+	TotalQueries string `json:"totalQueries"`
+
+	// TotalTime Total execution time in milliseconds.
+	TotalTime string `json:"totalTime"`
+}
+
+// DboV1CachePerformanceTimeseries CachePerformance represents cache performance for a given database instance.
+type DboV1CachePerformanceTimeseries struct {
+	Metric *DboV1CachePerformanceTimeseriesTimeseries `json:"metric,omitempty"`
+}
+
+// DboV1CachePerformanceTimeseriesCachePerformance CachePerformance represents cache performance for a given cache configuration.
+type DboV1CachePerformanceTimeseriesCachePerformance struct {
+	// CacheHits Amount of cached queries by cache.
+	CacheHits string `json:"cacheHits"`
+
+	// Id ID of the cache configuration.
+	Id                 string `json:"id"`
+	ProjectedCacheHits string `json:"projectedCacheHits"`
+}
+
+// DboV1CachePerformanceTimeseriesTimeseries defines model for dbo.v1.CachePerformanceTimeseries.Timeseries.
+type DboV1CachePerformanceTimeseriesTimeseries struct {
+	// Databases Cache performance for a cache configuration.
+	Databases *[]DboV1CachePerformanceTimeseriesCachePerformance `json:"databases,omitempty"`
+	Timestamp time.Time                                          `json:"timestamp"`
+}
+
+// DboV1CacheQuery defines model for dbo.v1.CacheQuery.
+type DboV1CacheQuery struct {
+	// AverageExecutionTime Average execution time in milliseconds.
+	AverageExecutionTime *float64 `json:"averageExecutionTime"`
+
+	// AverageHitExecutionTime Average hit execution time in milliseconds.
+	AverageHitExecutionTime *float64 `json:"averageHitExecutionTime"`
+
+	// AverageMissExecutionTime Average miss execution time in milliseconds.
+	AverageMissExecutionTime *float64 `json:"averageMissExecutionTime"`
+
+	// CacheEnabled Indicates if cache is enabled.
+	CacheEnabled *bool `json:"cacheEnabled"`
+
+	// CacheHits How many times a given query was cached in summary period.
+	CacheHits *string `json:"cacheHits"`
+
+	// CacheMisses Cache misses.
+	CacheMisses *string `json:"cacheMisses"`
+
+	// CacheMode TTLMode defines a caching behaviour for TTL setting.
+	CacheMode *DboV1TTLMode `json:"cacheMode,omitempty"`
+
+	// DbTimeSavedPercent DB time saved %.
+	DbTimeSavedPercent *float64 `json:"dbTimeSavedPercent"`
+
+	// Efficiency Cache efficiency.
+	Efficiency *float64 `json:"efficiency"`
+
+	// MedianExecutionTime Median execution time in milliseconds.
+	MedianExecutionTime *float64 `json:"medianExecutionTime"`
+
+	// ProjectedCacheHits Projected number of cache hits.
+	ProjectedCacheHits *string `json:"projectedCacheHits"`
+
+	// ProjectedDbTimeSavedPercent Projected DB time saved %.
+	ProjectedDbTimeSavedPercent *float64 `json:"projectedDbTimeSavedPercent"`
+
+	// ProjectedHitRate Projected cache efficiency.
+	ProjectedHitRate *float64 `json:"projectedHitRate"`
+
+	// RuleId Rule ID.
+	RuleId *string `json:"ruleId"`
+
+	// RuleType RuleType defines custom rule type.
+	RuleType *DboV1RuleType `json:"ruleType,omitempty"`
+
+	// Template Raw template.
+	Template *string `json:"template,omitempty"`
+
+	// TemplateHash Hash of the raw template.
+	TemplateHash *string `json:"templateHash,omitempty"`
+
+	// TotalDbTime Total DB time.
+	TotalDbTime *string `json:"totalDbTime"`
+
+	// TotalExecutionTime Total execution time in milliseconds.
+	TotalExecutionTime *string `json:"totalExecutionTime"`
+
+	// TotalQueries How many times a given query was called in summary period.
+	TotalQueries *string `json:"totalQueries,omitempty"`
+
+	// Ttl TTL value in seconds.
+	Ttl *int64 `json:"ttl"`
+
+	// UniqueQueries Amount of unique queries.
+	UniqueQueries *string `json:"uniqueQueries,omitempty"`
+
+	// UniqueResults Amount of unique results.
+	UniqueResults *string `json:"uniqueResults,omitempty"`
+}
+
+// DboV1CacheStatus CacheStatus specifies status of the cache deployment.
+type DboV1CacheStatus string
+
+// DboV1Caching defines model for dbo.v1.Caching.
+type DboV1Caching struct {
+	// DefaultTtl TTLMode defines a caching behaviour for TTL setting.
+	DefaultTtl *DboV1TTLMode `json:"defaultTtl,omitempty"`
+	Enabled    *bool         `json:"enabled,omitempty"`
+}
+
+// DboV1CreateCacheDiagnosticUploadURLResponse defines model for dbo.v1.CreateCacheDiagnosticUploadURLResponse.
+type DboV1CreateCacheDiagnosticUploadURLResponse struct {
+	UploadUrl string `json:"uploadUrl"`
+}
+
+// DboV1CreateRegistrationStatusUpdateResponse defines model for dbo.v1.CreateRegistrationStatusUpdateResponse.
+type DboV1CreateRegistrationStatusUpdateResponse = map[string]interface{}
+
+// DboV1DatabaseCluster defines model for dbo.v1.DatabaseCluster.
+type DboV1DatabaseCluster struct {
+	// CacheGroupId ID of the cache group connected to the database cluster.
+	CacheGroupId *string `json:"cacheGroupId"`
+
+	// CurrentCost Current cost of the whole cluster.
+	CurrentCost string `json:"currentCost"`
+
+	// Databases Cluster databases.
+	Databases *[]DboV1DatabaseInstanceLogicalDatabase `json:"databases,omitempty"`
+	Endpoints *[]DboV1Endpoint                        `json:"endpoints,omitempty"`
+
+	// EstimatedCost Estimated cost of the whole cluster.
+	EstimatedCost string `json:"estimatedCost"`
+
+	// Id ID of the database cluster.
+	Id string `json:"id"`
+
+	// Instances Instances within the database cluster.
+	Instances       *[]DboV1DatabaseInstance `json:"instances,omitempty"`
+	MetricsOverview *DboV1DatabaseMetrics    `json:"metricsOverview,omitempty"`
+
+	// Name Name of the database cluster.
+	Name string `json:"name"`
+
+	// PotentialSavings Potential savings for the whole cluster.
+	PotentialSavings string `json:"potentialSavings"`
+
+	// PotentialSavingsFraction Potential savings in fraction (given 100$ old cost and 60$ new cost -> 0.4 savings).
+	PotentialSavingsFraction string `json:"potentialSavingsFraction"`
+
+	// Type The type of the database cluster.
+	Type DboV1DatabaseClusterType `json:"type"`
+}
+
+// DboV1DatabaseClusterType The type of the database cluster.
+type DboV1DatabaseClusterType string
+
+// DboV1DatabaseComponent defines model for dbo.v1.DatabaseComponent.
+type DboV1DatabaseComponent struct {
+	Cluster  *DboV1DatabaseCluster  `json:"cluster,omitempty"`
+	Instance *DboV1DatabaseInstance `json:"instance,omitempty"`
+}
+
+// DboV1DatabaseInstance defines model for dbo.v1.DatabaseInstance.
+type DboV1DatabaseInstance struct {
+	// CacheGroupId ID of the cache group connected to the database instance.
+	CacheGroupId *string `json:"cacheGroupId"`
+
+	// CacheStatus CacheStatus specifies status of the cache deployment.
+	CacheStatus *DboV1CacheStatus `json:"cacheStatus,omitempty"`
+
+	// CacheStatusConditions Deprecated: use cacheGroup.statusConditions. Status of the cache deployment.
+	// Deprecated:
+	CacheStatusConditions *[]string                          `json:"cacheStatusConditions,omitempty"`
+	Configuration         DboV1DatabaseInstanceConfiguration `json:"configuration"`
+
+	// Databases Logical databases within the database instance.
+	Databases *[]DboV1DatabaseInstanceLogicalDatabase `json:"databases,omitempty"`
+
+	// Id ID of the database instance.
+	Id              string                `json:"id"`
+	Metrics         *DboV1CacheMetrics    `json:"metrics,omitempty"`
+	MetricsOverview *DboV1DatabaseMetrics `json:"metricsOverview,omitempty"`
+
+	// Name Name of the database instance.
+	Name string    `json:"name"`
+	Rds  *DboV1RDS `json:"rds,omitempty"`
+}
+
+// DboV1DatabaseInstanceLogicalDatabase defines model for dbo.v1.DatabaseInstance.LogicalDatabase.
+type DboV1DatabaseInstanceLogicalDatabase struct {
+	// CacheDefaultTtl TTLMode defines a caching behaviour for TTL setting.
+	CacheDefaultTtl *DboV1TTLMode `json:"cacheDefaultTtl,omitempty"`
+	CacheEnabled    bool          `json:"cacheEnabled"`
+
+	// CacheId ID of the cache configuration connected to the logical database.
+	CacheId *string `json:"cacheId"`
+
+	// ConnectionString Deprecated: use connection_strings. Connection string to the database cache.
+	// Deprecated:
+	ConnectionString *string `json:"connectionString"`
+
+	// ConnectionStrings Connection string to the database cache.
+	ConnectionStrings *[]string `json:"connectionStrings,omitempty"`
+
+	// Id ID of the logical database.
+	Id      string                                       `json:"id"`
+	Metrics *DboV1DatabaseInstanceLogicalDatabaseMetrics `json:"metrics,omitempty"`
+
+	// Name Name of the logical database.
+	Name string `json:"name"`
+}
+
+// DboV1DatabaseInstanceLogicalDatabaseMetrics defines model for dbo.v1.DatabaseInstance.LogicalDatabase.Metrics.
+type DboV1DatabaseInstanceLogicalDatabaseMetrics struct {
+	// CacheableQueries Deprecated: Amount of queries that potentially could be cached.
+	// Deprecated:
+	CacheableQueries *string `json:"cacheableQueries"`
+
+	// DatabaseLoad Database load.
+	DatabaseLoad float64 `json:"databaseLoad"`
+
+	// PredictedCacheHits When the cache is not enabled we will provide predicted efficiency.
+	PredictedCacheHits *string `json:"predictedCacheHits"`
+
+	// ReadsCount Amount of read operations.
+	ReadsCount string `json:"readsCount"`
+
+	// RealCacheHits When cache is enabled we will have real cache efficiency.
+	RealCacheHits *string `json:"realCacheHits"`
+
+	// TotalQueriesCount Total amount of executed queries.
+	TotalQueriesCount string `json:"totalQueriesCount"`
+
+	// WritesCount Amount of write operations.
+	WritesCount string `json:"writesCount"`
+}
+
+// DboV1DatabaseInstanceConfiguration defines model for dbo.v1.DatabaseInstanceConfiguration.
+type DboV1DatabaseInstanceConfiguration struct {
+	// Cloud Types of cloud service providers CAST AI supports.
+	//
+	//  - invalid: Invalid.
+	//  - aws: Amazon web services.
+	//  - gcp: Google cloud provider.
+	//  - azure: Microsoft Azure.
+	//  - unknown: Unknown.
+	Cloud *CastaiV1Cloud `json:"cloud,omitempty"`
+
+	// Hostname Hostname of the database instance.
+	Hostname string `json:"hostname"`
+
+	// Port Port of the  instance.
+	Port int32 `json:"port"`
+
+	// Type DatabaseType specifies database type for cache configuration.
+	Type DboV1DatabaseType `json:"type"`
+}
+
+// DboV1DatabaseMetrics defines model for dbo.v1.DatabaseMetrics.
+type DboV1DatabaseMetrics struct {
+	// DatabaseLoad Current/Average database CPU load.
+	DatabaseLoad float64 `json:"databaseLoad"`
+
+	// PredictedCacheEfficiency When the cache is not enabled we will provide predicted efficiency.
+	PredictedCacheEfficiency *float64 `json:"predictedCacheEfficiency"`
+
+	// RealCacheEfficiency When cache is enabled we will have real cache efficiency.
+	RealCacheEfficiency *float64 `json:"realCacheEfficiency"`
+
+	// TotalQueries Total amount of executed queries.
+	TotalQueries     string `json:"totalQueries"`
+	TotalReadQueries string `json:"totalReadQueries"`
+}
+
+// DboV1DatabaseType DatabaseType specifies database type for cache configuration.
+type DboV1DatabaseType string
+
+// DboV1DeleteAccountParams defines model for dbo.v1.DeleteAccountParams.
+type DboV1DeleteAccountParams struct {
+	AccountId string `json:"accountId"`
+}
+
+// DboV1DeleteAccountResponse defines model for dbo.v1.DeleteAccountResponse.
+type DboV1DeleteAccountResponse = map[string]interface{}
+
+// DboV1DeleteCacheConfigurationResponse defines model for dbo.v1.DeleteCacheConfigurationResponse.
+type DboV1DeleteCacheConfigurationResponse = map[string]interface{}
+
+// DboV1DeleteCacheGroupResponse defines model for dbo.v1.DeleteCacheGroupResponse.
+type DboV1DeleteCacheGroupResponse = map[string]interface{}
+
+// DboV1DeleteCacheTTLResponse defines model for dbo.v1.DeleteCacheTTLResponse.
+type DboV1DeleteCacheTTLResponse = map[string]interface{}
+
+// DboV1DeleteLogicalDatabaseResponse defines model for dbo.v1.DeleteLogicalDatabaseResponse.
+type DboV1DeleteLogicalDatabaseResponse = map[string]interface{}
+
+// DboV1DeployCacheParams defines model for dbo.v1.DeployCacheParams.
+type DboV1DeployCacheParams struct {
+	CacheGroupId         string  `json:"cacheGroupId"`
+	HelmChartValues      *string `json:"helmChartValues,omitempty"`
+	ManualExecuteCommand *string `json:"manualExecuteCommand,omitempty"`
+}
+
+// DboV1DeployDBAgentParams defines model for dbo.v1.DeployDBAgentParams.
+type DboV1DeployDBAgentParams struct {
+	CacheGroupId         string  `json:"cacheGroupId"`
+	HelmChartValues      *string `json:"helmChartValues,omitempty"`
+	ManualExecuteCommand *string `json:"manualExecuteCommand,omitempty"`
+}
+
+// DboV1Endpoint defines model for dbo.v1.Endpoint.
+type DboV1Endpoint struct {
+	// ConnectionString Connection string for corresponding endpoint on DBO deployment.
+	ConnectionString *string `json:"connectionString"`
+
+	// Hostname Hostname of the database instance.
+	Hostname string `json:"hostname"`
+
+	// Port Port of the database instance.
+	Port int32 `json:"port"`
+
+	// Suffix Suffix for db-optimizer endpoint service name. Leave empty to not deploy separate k8s service for this endpoint.
+	Suffix *string `json:"suffix"`
+}
+
+// DboV1ExchangeCacheStateResponse defines model for dbo.v1.ExchangeCacheStateResponse.
+type DboV1ExchangeCacheStateResponse struct {
+	DirectMode        *bool                `json:"directMode,omitempty"`
+	TtlConfigurations *[]DboV1TTLByCacheId `json:"ttlConfigurations,omitempty"`
+}
+
+// DboV1GetCacheEfficiencyResponse defines model for dbo.v1.GetCacheEfficiencyResponse.
+type DboV1GetCacheEfficiencyResponse struct {
+	Items *[]DboV1CacheEfficiency `json:"items,omitempty"`
+}
+
+// DboV1GetCacheGroupPerformanceResponse defines model for dbo.v1.GetCacheGroupPerformanceResponse.
+type DboV1GetCacheGroupPerformanceResponse struct {
+	Items *[]DboV1CachePerformanceTimeseries `json:"items,omitempty"`
+}
+
+// DboV1GetCacheQueriesResponse defines model for dbo.v1.GetCacheQueriesResponse.
+type DboV1GetCacheQueriesResponse struct {
+	Items *[]DboV1CacheQuery `json:"items,omitempty"`
+
+	// NextPage Page defines how many and which fields should be returned.
+	NextPage   *CastaiPaginationV1beta1Page `json:"nextPage,omitempty"`
+	TotalCount *string                      `json:"totalCount,omitempty"`
+}
+
+// DboV1GetCacheQueryInsightsResponse defines model for dbo.v1.GetCacheQueryInsightsResponse.
+type DboV1GetCacheQueryInsightsResponse struct {
+	Items   *[]DboV1CacheInsightsItem  `json:"items,omitempty"`
+	Summary *DboV1CacheInsightsSummary `json:"summary,omitempty"`
+}
+
+// DboV1GetCacheQueryTemplateResponse defines model for dbo.v1.GetCacheQueryTemplateResponse.
+type DboV1GetCacheQueryTemplateResponse struct {
+	Template *string `json:"template,omitempty"`
+}
+
+// DboV1GetCacheSummaryResponse defines model for dbo.v1.GetCacheSummaryResponse.
+type DboV1GetCacheSummaryResponse struct {
+	Summary *DboV1CacheMetrics `json:"summary,omitempty"`
+}
+
+// DboV1InstanceMetrics defines model for dbo.v1.InstanceMetrics.
+type DboV1InstanceMetrics struct {
+	// ActiveMemory Average active memory in percentage.
+	ActiveMemory float64 `json:"activeMemory"`
+
+	// ActiveSessions Average number of active clients connected to database instance.
+	ActiveSessions float64 `json:"activeSessions"`
+
+	// CpuUtilization Average CPU usage in percentage.
+	CpuUtilization float64 `json:"cpuUtilization"`
+
+	// FreeMemory Average free memory in percentage.
+	FreeMemory float64 `json:"freeMemory"`
+
+	// IopsReads Average disk output operations performance per second.
+	IopsReads float64 `json:"iopsReads"`
+
+	// IopsWrites Average disk input operations performance per second.
+	IopsWrites float64   `json:"iopsWrites"`
+	Timestamp  time.Time `json:"timestamp"`
+}
+
+// DboV1ListCacheConfigurationsResponse defines model for dbo.v1.ListCacheConfigurationsResponse.
+type DboV1ListCacheConfigurationsResponse struct {
+	Items *[]DboV1CacheConfiguration `json:"items,omitempty"`
+}
+
+// DboV1ListCacheGroupsResponse defines model for dbo.v1.ListCacheGroupsResponse.
+type DboV1ListCacheGroupsResponse struct {
+	Items   *[]DboV1CacheGroup `json:"items,omitempty"`
+	Metrics *DboV1CacheMetrics `json:"metrics,omitempty"`
+}
+
+// DboV1ListCacheTTLsResponse defines model for dbo.v1.ListCacheTTLsResponse.
+type DboV1ListCacheTTLsResponse struct {
+	Items *[]DboV1TTLConfiguration `json:"items,omitempty"`
+}
+
+// DboV1ListDatabaseComponentsResponse defines model for dbo.v1.ListDatabaseComponentsResponse.
+type DboV1ListDatabaseComponentsResponse struct {
+	Components []DboV1DatabaseComponent `json:"components"`
+	Summary    DboV1OrganizationSummary `json:"summary"`
+}
+
+// DboV1ListDatabaseInstancesResponse defines model for dbo.v1.ListDatabaseInstancesResponse.
+type DboV1ListDatabaseInstancesResponse struct {
+	Instances []DboV1DatabaseInstance  `json:"instances"`
+	Summary   DboV1OrganizationSummary `json:"summary"`
+}
+
+// DboV1LogicalDatabase defines model for dbo.v1.LogicalDatabase.
+type DboV1LogicalDatabase struct {
+	Id *string `json:"id,omitempty"`
+
+	// Name Name of the logical database.
+	Name string `json:"name"`
+}
+
+// DboV1OrganizationSummary defines model for dbo.v1.OrganizationSummary.
+type DboV1OrganizationSummary struct {
+	// CacheHits Deprecated: use cache metrics. Amount of cached queries by cache.
+	// Deprecated:
+	CacheHits *string `json:"cacheHits"`
+
+	// CacheableQueries Deprecated: Amount of queries that potentially could be cached.
+	// Deprecated:
+	CacheableQueries string `json:"cacheableQueries"`
+
+	// CurrentCost Current cost of registered database instances.
+	CurrentCost string `json:"currentCost"`
+
+	// DqlQueries Amount of dql queries.
+	DqlQueries string `json:"dqlQueries"`
+
+	// EnabledCachedCount Deprecated: use cache metrics. Amount of cache configurations with enabled caching.
+	// Deprecated:
+	EnabledCachedCount int64 `json:"enabledCachedCount"`
+
+	// EstimatedCost Estimated cost of registered database instances after optimizations.
+	EstimatedCost string `json:"estimatedCost"`
+
+	// PotentialSavings Potential savings after applying optimizations as a fraction.
+	PotentialSavings string `json:"potentialSavings"`
+
+	// TimeSaved Deprecated: use cache metrics. Time saved by caching queries.
+	// Deprecated:
+	TimeSaved *string `json:"timeSaved"`
+
+	// TotalDatabaseCount Amount of logical databases.
+	TotalDatabaseCount int64 `json:"totalDatabaseCount"`
+
+	// TotalQueries Amount of queries observed by cache.
+	TotalQueries string `json:"totalQueries"`
+}
+
+// DboV1PhaseOneParams defines model for dbo.v1.PhaseOneParams.
+type DboV1PhaseOneParams struct {
+	// Csp Types of cloud service providers CAST AI supports.
+	//
+	//  - invalid: Invalid.
+	//  - aws: Amazon web services.
+	//  - gcp: Google cloud provider.
+	//  - azure: Microsoft Azure.
+	//  - unknown: Unknown.
+	Csp CastaiV1Cloud `json:"csp"`
+}
+
+// DboV1ProxyState defines model for dbo.v1.ProxyState.
+type DboV1ProxyState struct {
+	ConfigStates []DboV1ProxyStateCacheConfigState `json:"configStates"`
+	Deployment   DboV1ProxyStateCacheDeployment    `json:"deployment"`
+}
+
+// DboV1ProxyStateCacheConfigState defines model for dbo.v1.ProxyState.CacheConfigState.
+type DboV1ProxyStateCacheConfigState struct {
+	CacheId       string `json:"cacheId"`
+	ConfigVersion int32  `json:"configVersion"`
+
+	// DbStatus This one is equivalent to DB status that is reported from proxy.
+	DbStatus DboV1ProxyStateDatabaseConnectionStatus `json:"dbStatus"`
+}
+
+// DboV1ProxyStateCacheDeployment defines model for dbo.v1.ProxyState.CacheDeployment.
+type DboV1ProxyStateCacheDeployment struct {
+	ChartVersion        string           `json:"chartVersion"`
+	Endpoints           *[]DboV1Endpoint `json:"endpoints,omitempty"`
+	Namespace           string           `json:"namespace"`
+	ProxyImage          string           `json:"proxyImage"`
+	QueryProcessorImage string           `json:"queryProcessorImage"`
+	ServiceName         string           `json:"serviceName"`
+}
+
+// DboV1ProxyStateDatabaseConnectionStatus This one is equivalent to DB status that is reported from proxy.
+type DboV1ProxyStateDatabaseConnectionStatus string
+
+// DboV1RDS defines model for dbo.v1.RDS.
+type DboV1RDS struct {
+	// Account Account name owning the database instance.
+	Account string `json:"account"`
+
+	// ClusterName The name of the cluster the database instance belongs to.
+	ClusterName            *string                 `json:"clusterName"`
+	CurrentInstanceDetails DboV1RDSInstanceDetails `json:"currentInstanceDetails"`
+
+	// PerformanceInsightsEnabled Indicates if database instance has performance insights enabled.
+	PerformanceInsightsEnabled bool `json:"performanceInsightsEnabled"`
+
+	// PotentialSavings Potential savings by using proposed instance.
+	PotentialSavings *string `json:"potentialSavings"`
+
+	// PotentialSavingsFraction Potential savings in fraction (given 100$ old cost and 60$ new cost -> 0.4 savings).
+	PotentialSavingsFraction *string                  `json:"potentialSavingsFraction"`
+	ProposedInstanceDetails  *DboV1RDSInstanceDetails `json:"proposedInstanceDetails,omitempty"`
+
+	// Region Region in which RDS is deployed.
+	Region string `json:"region"`
+
+	// Writer The database instance is an aurora writer or is not a read replica for other type of clusters.
+	Writer *bool `json:"writer"`
+}
+
+// DboV1RDSInstanceDetails defines model for dbo.v1.RDS.InstanceDetails.
+type DboV1RDSInstanceDetails struct {
+	// Cpu Number of CPUs.
+	Cpu int64 `json:"cpu"`
+
+	// InstancePrice Monthly instance price.
+	InstancePrice string `json:"instancePrice"`
+
+	// InstanceType Instance type.
+	InstanceType string `json:"instanceType"`
+
+	// MemoryMib Amount of memory in MiB.
+	MemoryMib int64 `json:"memoryMib"`
+}
+
+// DboV1Registration defines model for dbo.v1.Registration.
+type DboV1Registration struct {
+	DeleteAccount    *DboV1DeleteAccountParams    `json:"deleteAccount,omitempty"`
+	DeployCache      *DboV1DeployCacheParams      `json:"deployCache,omitempty"`
+	DeployDbAgent    *DboV1DeployDBAgentParams    `json:"deployDbAgent,omitempty"`
+	ExecuteCommand   *string                      `json:"executeCommand,omitempty"`
+	Id               *string                      `json:"id,omitempty"`
+	PhaseOne         *DboV1PhaseOneParams         `json:"phaseOne,omitempty"`
+	Type             *DboV1RegistrationType       `json:"type,omitempty"`
+	UninstallCache   *DboV1UninstallCacheParams   `json:"uninstallCache,omitempty"`
+	UninstallDbAgent *DboV1UninstallDBAgentParams `json:"uninstallDbAgent,omitempty"`
+}
+
+// DboV1RegistrationStatus - InProgress: Arbitrary number of InProgress states can be emitted
+//   - Success: Terminal state indicating success (uniqueness not enforced)
+//   - Failure: Terminal state indicating failure (uniqueness not enforced)
+type DboV1RegistrationStatus string
+
+// DboV1RegistrationStatusUpdate defines model for dbo.v1.RegistrationStatusUpdate.
+type DboV1RegistrationStatusUpdate struct {
+	Message  *string            `json:"message,omitempty"`
+	Metadata *map[string]string `json:"metadata,omitempty"`
+
+	// Status - InProgress: Arbitrary number of InProgress states can be emitted
+	//  - Success: Terminal state indicating success (uniqueness not enforced)
+	//  - Failure: Terminal state indicating failure (uniqueness not enforced)
+	Status DboV1RegistrationStatus `json:"status"`
+}
+
+// DboV1RegistrationType defines model for dbo.v1.RegistrationType.
+type DboV1RegistrationType string
+
+// DboV1RuleType RuleType defines custom rule type.
+type DboV1RuleType string
+
+// DboV1TTLByCacheId defines model for dbo.v1.TTLByCacheId.
+type DboV1TTLByCacheId struct {
+	// CacheDefaultTtl TTLMode defines a caching behaviour for TTL setting.
+	CacheDefaultTtl *DboV1TTLMode            `json:"cacheDefaultTtl,omitempty"`
+	CacheId         *string                  `json:"cacheId,omitempty"`
+	DatabaseName    *string                  `json:"databaseName,omitempty"`
+	Entries         *[]DboV1TTLConfiguration `json:"entries,omitempty"`
+}
+
+// DboV1TTLConfiguration defines model for dbo.v1.TTLConfiguration.
+type DboV1TTLConfiguration struct {
+	Id *string `json:"id,omitempty"`
+
+	// ManualTtl TTL value in seconds. Only applicable if mode is set to Manual.
+	ManualTtl *int64 `json:"manualTtl"`
+
+	// Mode TTLMode defines a caching behaviour for TTL setting.
+	Mode         DboV1TTLMode `json:"mode"`
+	Table        *string      `json:"table"`
+	Template     *string      `json:"template"`
+	TemplateHash *string      `json:"templateHash"`
+}
+
+// DboV1TTLMode TTLMode defines a caching behaviour for TTL setting.
+type DboV1TTLMode string
+
+// DboV1UninstallCacheParams defines model for dbo.v1.UninstallCacheParams.
+type DboV1UninstallCacheParams struct {
+	CacheGroupId string `json:"cacheGroupId"`
+}
+
+// DboV1UninstallDBAgentParams defines model for dbo.v1.UninstallDBAgentParams.
+type DboV1UninstallDBAgentParams struct {
+	CacheGroupId string `json:"cacheGroupId"`
+}
+
 // ExternalclusterV1AKSClusterParams AKSClusterParams defines AKS-specific arguments.
 type ExternalclusterV1AKSClusterParams struct {
 	// ClusterResourceGroup Azure cluster resource group.
@@ -3733,6 +4696,9 @@ type ExternalclusterV1Cluster struct {
 
 	// Anywhere AnywhereClusterParams defines Anywhere-specific arguments.
 	Anywhere *ExternalclusterV1AnywhereClusterParams `json:"anywhere,omitempty"`
+
+	// Attributes ClusterAttributes defines cluster attributes.
+	Attributes *ExternalclusterV1ClusterAttributes `json:"attributes,omitempty"`
 
 	// CastwareInstallMethod Method used to install CASTware components.
 	//
@@ -3852,6 +4818,12 @@ type ExternalclusterV1ClusterReconcileInfoReconcileMode string
 
 // ExternalclusterV1ClusterReconcileInfoReconcileStatus Reconcile status.
 type ExternalclusterV1ClusterReconcileInfoReconcileStatus string
+
+// ExternalclusterV1ClusterAttributes ClusterAttributes defines cluster attributes.
+type ExternalclusterV1ClusterAttributes struct {
+	// Karpenter KarpenterAttribute defines Karpenter-specific attributes.
+	Karpenter *ExternalclusterV1KarpenterAttribute `json:"karpenter,omitempty"`
+}
 
 // ExternalclusterV1ClusterUpdate defines model for externalcluster.v1.ClusterUpdate.
 type ExternalclusterV1ClusterUpdate struct {
@@ -4088,6 +5060,18 @@ type ExternalclusterV1KOPSClusterParams struct {
 	// StateStore KOPS state store url.
 	StateStore *string `json:"stateStore,omitempty"`
 }
+
+// ExternalclusterV1KarpenterAttribute KarpenterAttribute defines Karpenter-specific attributes.
+type ExternalclusterV1KarpenterAttribute struct {
+	// KentEligibility KentEligibility defines Karpenter KENT eligibility status.
+	KentEligibility *ExternalclusterV1KentEligibility `json:"kentEligibility,omitempty"`
+
+	// Version Karpenter version.
+	Version *string `json:"version"`
+}
+
+// ExternalclusterV1KentEligibility KentEligibility defines Karpenter KENT eligibility status.
+type ExternalclusterV1KentEligibility string
 
 // ExternalclusterV1ListClustersResponse ListClustersResponse is the result of ListClustersRequest.
 type ExternalclusterV1ListClustersResponse struct {
@@ -5699,8 +6683,8 @@ type PoliciesV1Policies struct {
 	// Enabled Enable/disable all policies.
 	Enabled *bool `json:"enabled"`
 
-	// IsScopedMode Run autoscaler in scoped mode. Only specifically marked pods will be considered for autoscaling, and only nodes
-	// provisioned by autoscaler will be considered for downscaling.
+	// IsScopedMode Run the node autoscaler in scoped mode. Only pods with the appropriate toleration will trigger node scale-up decisions,
+	// and only nodes provisioned by the autoscaler will be eligible for downscaling.
 	IsScopedMode *bool `json:"isScopedMode"`
 
 	// NodeDownscaler Node Downscaler defines policies for removing nodes based on the configured conditions.
@@ -6831,8 +7815,9 @@ type WorkloadoptimizationV1HPAConfigUpdate struct {
 	MaxReplicas      *int32                                  `json:"maxReplicas"`
 
 	// Metrics Metrics list which is scaled on. Matches Kubernetes HPA spec.
-	Metrics     *[]WorkloadoptimizationV1MetricSpec `json:"metrics,omitempty"`
-	MinReplicas *int32                              `json:"minReplicas"`
+	Metrics       *[]WorkloadoptimizationV1MetricSpec `json:"metrics,omitempty"`
+	MinReplicas   *int32                              `json:"minReplicas"`
+	TakeOwnership *bool                               `json:"takeOwnership"`
 
 	// UseNative Defines whether to use native Kubernetes HPA instead of CAST AI HPA.
 	UseNative *bool `json:"useNative"`
@@ -7919,7 +8904,10 @@ type WorkloadoptimizationV1Workload struct {
 	MatchingPodCount int32  `json:"matchingPodCount"`
 	Name             string `json:"name"`
 	Namespace        string `json:"namespace"`
-	OrganizationId   string `json:"organizationId"`
+
+	// NativeHpaUnsupportedReason Reason for unsupported HPA V2.
+	NativeHpaUnsupportedReason *string `json:"nativeHpaUnsupportedReason"`
+	OrganizationId             string  `json:"organizationId"`
 
 	// PodCount Pod count stores the *running* count of pods of the workload.
 	PodCount             int32                                         `json:"podCount"`
@@ -8318,6 +9306,194 @@ type AllocationGroupAPIGetAllocationGroupWorkloadsEfficiencyParams struct {
 
 // AllocationGroupAPIGetAllocationGroupWorkloadsEfficiencyParamsSortOrder defines parameters for AllocationGroupAPIGetAllocationGroupWorkloadsEfficiency.
 type AllocationGroupAPIGetAllocationGroupWorkloadsEfficiencyParamsSortOrder string
+
+// DboAPIListCacheGroupsParams defines parameters for DboAPIListCacheGroups.
+type DboAPIListCacheGroupsParams struct {
+	InstanceId *string `form:"instanceId,omitempty" json:"instanceId,omitempty"`
+	ClusterId  *string `form:"clusterId,omitempty" json:"clusterId,omitempty"`
+
+	// MetricsRangeStart Start of period.
+	MetricsRangeStart *time.Time `form:"metricsRange.start,omitempty" json:"metricsRange.start,omitempty"`
+
+	// MetricsRangeEnd End of period.
+	MetricsRangeEnd *time.Time `form:"metricsRange.end,omitempty" json:"metricsRange.end,omitempty"`
+	Deployed        *bool      `form:"deployed,omitempty" json:"deployed,omitempty"`
+}
+
+// DboAPIListCacheConfigurationsParams defines parameters for DboAPIListCacheConfigurations.
+type DboAPIListCacheConfigurationsParams struct {
+	DatabaseName *string `form:"databaseName,omitempty" json:"databaseName,omitempty"`
+}
+
+// DboAPIGetCacheEfficiencyParams defines parameters for DboAPIGetCacheEfficiency.
+type DboAPIGetCacheEfficiencyParams struct {
+	// StartTime Start of period.
+	StartTime time.Time `form:"startTime" json:"startTime"`
+
+	// EndTime End of period.
+	EndTime time.Time `form:"endTime" json:"endTime"`
+
+	// StepSeconds Aggregate items in specified interval steps.
+	StepSeconds int64 `form:"stepSeconds" json:"stepSeconds"`
+
+	// TemplateHash Optionally filter the results by a specific template hash
+	TemplateHash *string `form:"templateHash,omitempty" json:"templateHash,omitempty"`
+}
+
+// DboAPIGetCacheQueriesParams defines parameters for DboAPIGetCacheQueries.
+type DboAPIGetCacheQueriesParams struct {
+	PageLimit *string `form:"page.limit,omitempty" json:"page.limit,omitempty"`
+
+	// PageCursor Cursor that defines token indicating where to start the next page.
+	// Empty value indicates to start from beginning of the dataset.
+	PageCursor *string `form:"page.cursor,omitempty" json:"page.cursor,omitempty"`
+
+	// SortField Name of the field you want to sort
+	SortField *string `form:"sort.field,omitempty" json:"sort.field,omitempty"`
+
+	// SortOrder The sort order, possible values ASC or DESC, if not provided asc is the default
+	//
+	//  - ASC: ASC
+	//  - asc: desc
+	//  - DESC: ASC
+	//  - desc: desc
+	SortOrder *DboAPIGetCacheQueriesParamsSortOrder `form:"sort.order,omitempty" json:"sort.order,omitempty"`
+
+	// StartTime Start of period.
+	StartTime *time.Time `form:"startTime,omitempty" json:"startTime,omitempty"`
+
+	// EndTime End of period.
+	EndTime *time.Time `form:"endTime,omitempty" json:"endTime,omitempty"`
+
+	// QueryContains An optional parameter for performing substring matching on the query template string.
+	QueryContains *string `form:"queryContains,omitempty" json:"queryContains,omitempty"`
+}
+
+// DboAPIGetCacheQueriesParamsSortOrder defines parameters for DboAPIGetCacheQueries.
+type DboAPIGetCacheQueriesParamsSortOrder string
+
+// DboAPIGetCacheQueryParams defines parameters for DboAPIGetCacheQuery.
+type DboAPIGetCacheQueryParams struct {
+	// MetricsRangeStart Start of period.
+	MetricsRangeStart *time.Time `form:"metricsRange.start,omitempty" json:"metricsRange.start,omitempty"`
+
+	// MetricsRangeEnd End of period.
+	MetricsRangeEnd *time.Time `form:"metricsRange.end,omitempty" json:"metricsRange.end,omitempty"`
+}
+
+// DboAPIGetCacheQueryInsightsParams defines parameters for DboAPIGetCacheQueryInsights.
+type DboAPIGetCacheQueryInsightsParams struct {
+	// MetricsRangeStart Start of period.
+	MetricsRangeStart *time.Time `form:"metricsRange.start,omitempty" json:"metricsRange.start,omitempty"`
+
+	// MetricsRangeEnd End of period.
+	MetricsRangeEnd *time.Time `form:"metricsRange.end,omitempty" json:"metricsRange.end,omitempty"`
+	StepSeconds     int64      `form:"stepSeconds" json:"stepSeconds"`
+}
+
+// DboAPIListCacheTTLsParams defines parameters for DboAPIListCacheTTLs.
+type DboAPIListCacheTTLsParams struct {
+	Table        *string `form:"table,omitempty" json:"table,omitempty"`
+	TemplateHash *string `form:"templateHash,omitempty" json:"templateHash,omitempty"`
+}
+
+// DboAPIGetCacheSummaryParams defines parameters for DboAPIGetCacheSummary.
+type DboAPIGetCacheSummaryParams struct {
+	// StartTime Start of period.
+	StartTime *time.Time `form:"startTime,omitempty" json:"startTime,omitempty"`
+
+	// EndTime End of period.
+	EndTime *time.Time `form:"endTime,omitempty" json:"endTime,omitempty"`
+}
+
+// DboAPIGetCacheGroupParams defines parameters for DboAPIGetCacheGroup.
+type DboAPIGetCacheGroupParams struct {
+	// MetricsRangeStart Start of period.
+	MetricsRangeStart *time.Time `form:"metricsRange.start,omitempty" json:"metricsRange.start,omitempty"`
+
+	// MetricsRangeEnd End of period.
+	MetricsRangeEnd *time.Time `form:"metricsRange.end,omitempty" json:"metricsRange.end,omitempty"`
+}
+
+// DboAPIGetCacheGroupPerformanceParams defines parameters for DboAPIGetCacheGroupPerformance.
+type DboAPIGetCacheGroupPerformanceParams struct {
+	// StartTime Start of period.
+	StartTime time.Time `form:"startTime" json:"startTime"`
+
+	// EndTime End of period.
+	EndTime time.Time `form:"endTime" json:"endTime"`
+
+	// StepSeconds Aggregate items in specified interval steps.
+	StepSeconds int64 `form:"stepSeconds" json:"stepSeconds"`
+}
+
+// DboAPIGetDatabaseClusterParams defines parameters for DboAPIGetDatabaseCluster.
+type DboAPIGetDatabaseClusterParams struct {
+	// StartTime Start of period.
+	StartTime *time.Time `form:"startTime,omitempty" json:"startTime,omitempty"`
+
+	// EndTime End of period.
+	EndTime *time.Time `form:"endTime,omitempty" json:"endTime,omitempty"`
+}
+
+// DboAPIListDatabaseComponentsParams defines parameters for DboAPIListDatabaseComponents.
+type DboAPIListDatabaseComponentsParams struct {
+	// StartTime Start of period.
+	StartTime *time.Time `form:"startTime,omitempty" json:"startTime,omitempty"`
+
+	// EndTime End of period.
+	EndTime *time.Time `form:"endTime,omitempty" json:"endTime,omitempty"`
+}
+
+// DboAPIListDatabaseInstancesParams defines parameters for DboAPIListDatabaseInstances.
+type DboAPIListDatabaseInstancesParams struct {
+	// StartTime Start of period.
+	StartTime *time.Time `form:"startTime,omitempty" json:"startTime,omitempty"`
+
+	// EndTime End of period.
+	EndTime *time.Time `form:"endTime,omitempty" json:"endTime,omitempty"`
+}
+
+// DboAPIGetDatabaseInstanceParams defines parameters for DboAPIGetDatabaseInstance.
+type DboAPIGetDatabaseInstanceParams struct {
+	// StartTime Start of period.
+	StartTime *time.Time `form:"startTime,omitempty" json:"startTime,omitempty"`
+
+	// EndTime End of period.
+	EndTime *time.Time `form:"endTime,omitempty" json:"endTime,omitempty"`
+}
+
+// DboAPIGetDatabaseInstanceCachePerformanceParams defines parameters for DboAPIGetDatabaseInstanceCachePerformance.
+type DboAPIGetDatabaseInstanceCachePerformanceParams struct {
+	// StartTime Start of period.
+	StartTime time.Time `form:"startTime" json:"startTime"`
+
+	// EndTime End of period.
+	EndTime time.Time `form:"endTime" json:"endTime"`
+
+	// StepSeconds Aggregate items in specified interval steps.
+	StepSeconds int64 `form:"stepSeconds" json:"stepSeconds"`
+}
+
+// DboAPIGetDatabaseInstanceInfrastructureMetricsParams defines parameters for DboAPIGetDatabaseInstanceInfrastructureMetrics.
+type DboAPIGetDatabaseInstanceInfrastructureMetricsParams struct {
+	// StartTime Start of period.
+	StartTime time.Time `form:"startTime" json:"startTime"`
+
+	// EndTime End of period.
+	EndTime time.Time `form:"endTime" json:"endTime"`
+
+	// StepSeconds Aggregate items in specified interval steps.
+	StepSeconds int64 `form:"stepSeconds" json:"stepSeconds"`
+}
+
+// DboAPICreateLogicalDatabasesJSONBody defines parameters for DboAPICreateLogicalDatabases.
+type DboAPICreateLogicalDatabasesJSONBody = []DboV1LogicalDatabase
+
+// DboAPICreateLogicalDatabasesParams defines parameters for DboAPICreateLogicalDatabases.
+type DboAPICreateLogicalDatabasesParams struct {
+	CreateCacheConfigurations *bool `form:"createCacheConfigurations,omitempty" json:"createCacheConfigurations,omitempty"`
+}
 
 // InventoryAPIListInstanceTypeNamesParams defines parameters for InventoryAPIListInstanceTypeNames.
 type InventoryAPIListInstanceTypeNamesParams struct {
@@ -9082,6 +10258,14 @@ type WorkloadOptimizationAPIGetWorkloadsSummaryMetricsParams struct {
 	ToTime   *time.Time `form:"toTime,omitempty" json:"toTime,omitempty"`
 }
 
+// WorkloadOptimizationAPIGetWorkloadFiltersParams defines parameters for WorkloadOptimizationAPIGetWorkloadFilters.
+type WorkloadOptimizationAPIGetWorkloadFiltersParams struct {
+	ManagementOptions *[]WorkloadOptimizationAPIGetWorkloadFiltersParamsManagementOptions `form:"managementOptions,omitempty" json:"managementOptions,omitempty"`
+}
+
+// WorkloadOptimizationAPIGetWorkloadFiltersParamsManagementOptions defines parameters for WorkloadOptimizationAPIGetWorkloadFilters.
+type WorkloadOptimizationAPIGetWorkloadFiltersParamsManagementOptions string
+
 // WorkloadOptimizationAPIGetWorkloadParams defines parameters for WorkloadOptimizationAPIGetWorkload.
 type WorkloadOptimizationAPIGetWorkloadParams struct {
 	IncludeMetrics *bool      `form:"includeMetrics,omitempty" json:"includeMetrics,omitempty"`
@@ -9135,6 +10319,36 @@ type AllocationGroupAPICreateAllocationGroupJSONRequestBody = CostreportV1beta1A
 
 // AllocationGroupAPIUpdateAllocationGroupJSONRequestBody defines body for AllocationGroupAPIUpdateAllocationGroup for application/json ContentType.
 type AllocationGroupAPIUpdateAllocationGroupJSONRequestBody = CostreportV1beta1AllocationGroupDetails
+
+// DboAPICreateCacheGroupJSONRequestBody defines body for DboAPICreateCacheGroup for application/json ContentType.
+type DboAPICreateCacheGroupJSONRequestBody = DboV1CacheGroup
+
+// DboAPICreateCacheConfigurationJSONRequestBody defines body for DboAPICreateCacheConfiguration for application/json ContentType.
+type DboAPICreateCacheConfigurationJSONRequestBody = DboV1CacheConfiguration
+
+// DboAPIUpdateCacheTTLJSONRequestBody defines body for DboAPIUpdateCacheTTL for application/json ContentType.
+type DboAPIUpdateCacheTTLJSONRequestBody = DboV1TTLConfiguration
+
+// DboAPIUpdateCacheConfigurationJSONRequestBody defines body for DboAPIUpdateCacheConfiguration for application/json ContentType.
+type DboAPIUpdateCacheConfigurationJSONRequestBody = DboV1CacheConfiguration
+
+// DboAPICreateCacheTTLJSONRequestBody defines body for DboAPICreateCacheTTL for application/json ContentType.
+type DboAPICreateCacheTTLJSONRequestBody = DboV1TTLConfiguration
+
+// DboAPIUpdateCacheGroupJSONRequestBody defines body for DboAPIUpdateCacheGroup for application/json ContentType.
+type DboAPIUpdateCacheGroupJSONRequestBody = DboV1CacheGroup
+
+// DboAPIExchangeCacheStateJSONRequestBody defines body for DboAPIExchangeCacheState for application/json ContentType.
+type DboAPIExchangeCacheStateJSONRequestBody = DboV1ProxyState
+
+// DboAPICreateLogicalDatabasesJSONRequestBody defines body for DboAPICreateLogicalDatabases for application/json ContentType.
+type DboAPICreateLogicalDatabasesJSONRequestBody = DboAPICreateLogicalDatabasesJSONBody
+
+// DboAPICreateRegistrationJSONRequestBody defines body for DboAPICreateRegistration for application/json ContentType.
+type DboAPICreateRegistrationJSONRequestBody = DboV1Registration
+
+// DboAPICreateRegistrationStatusUpdateJSONRequestBody defines body for DboAPICreateRegistrationStatusUpdate for application/json ContentType.
+type DboAPICreateRegistrationStatusUpdateJSONRequestBody = DboV1RegistrationStatusUpdate
 
 // UsersAPICreateInvitationsJSONRequestBody defines body for UsersAPICreateInvitations for application/json ContentType.
 type UsersAPICreateInvitationsJSONRequestBody = CastaiUsersV1beta1CreateInvitationsRequest

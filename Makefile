@@ -1,13 +1,13 @@
 SHELL := /bin/bash
 
-export API_TAGS ?= ExternalClusterAPI,PoliciesAPI,NodeConfigurationAPI,NodeTemplatesAPI,AuthTokenAPI,ScheduledRebalancingAPI,InventoryAPI,UsersAPI,OperationsAPI,EvictorAPI,SSOAPI,CommitmentsAPI,WorkloadOptimizationAPI,ServiceAccountsAPI,RbacServiceAPI,RuntimeSecurityAPI,AllocationGroupAPI
+export API_TAGS ?= ExternalClusterAPI,PoliciesAPI,NodeConfigurationAPI,NodeTemplatesAPI,AuthTokenAPI,ScheduledRebalancingAPI,InventoryAPI,UsersAPI,OperationsAPI,EvictorAPI,SSOAPI,CommitmentsAPI,WorkloadOptimizationAPI,ServiceAccountsAPI,RbacServiceAPI,RuntimeSecurityAPI,AllocationGroupAPI,DboAPI
 export SWAGGER_LOCATION ?= https://api.cast.ai/v1/spec/openapi.json
 
 #  To add a new SDK, add a line here in the format: package_name:ApiTagName:spec_location
 SDK_SPECS := \
 	cluster_autoscaler:HibernationSchedulesAPI:https://api.cast.ai/spec/cluster-autoscaler/openapi.yaml \
 	organization_management:EnterpriseAPI:https://api.cast.ai/spec/organization-management/openapi.yaml \
-	omni:EdgeLocationsAPI,ClustersAPI:https://api.cast.ai/spec/omni/openapi.yaml
+	omni:EdgeLocationsAPI,ClustersAPI:https://api.cast.ai/spec/omni/openapi.yaml 
 
 default: build
 

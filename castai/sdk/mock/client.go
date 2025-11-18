@@ -1055,6 +1055,926 @@ func (mr *MockClientInterfaceMockRecorder) CommitmentsAPIUpdateCommitmentWithBod
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIUpdateCommitmentWithBody", reflect.TypeOf((*MockClientInterface)(nil).CommitmentsAPIUpdateCommitmentWithBody), varargs...)
 }
 
+// DboAPICreateCacheConfiguration mocks base method.
+func (m *MockClientInterface) DboAPICreateCacheConfiguration(ctx context.Context, groupId string, body sdk.DboAPICreateCacheConfigurationJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, groupId, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DboAPICreateCacheConfiguration", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPICreateCacheConfiguration indicates an expected call of DboAPICreateCacheConfiguration.
+func (mr *MockClientInterfaceMockRecorder) DboAPICreateCacheConfiguration(ctx, groupId, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, groupId, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPICreateCacheConfiguration", reflect.TypeOf((*MockClientInterface)(nil).DboAPICreateCacheConfiguration), varargs...)
+}
+
+// DboAPICreateCacheConfigurationWithBody mocks base method.
+func (m *MockClientInterface) DboAPICreateCacheConfigurationWithBody(ctx context.Context, groupId, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, groupId, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DboAPICreateCacheConfigurationWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPICreateCacheConfigurationWithBody indicates an expected call of DboAPICreateCacheConfigurationWithBody.
+func (mr *MockClientInterfaceMockRecorder) DboAPICreateCacheConfigurationWithBody(ctx, groupId, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, groupId, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPICreateCacheConfigurationWithBody", reflect.TypeOf((*MockClientInterface)(nil).DboAPICreateCacheConfigurationWithBody), varargs...)
+}
+
+// DboAPICreateCacheDiagnosticUploadURL mocks base method.
+func (m *MockClientInterface) DboAPICreateCacheDiagnosticUploadURL(ctx context.Context, groupId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, groupId}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DboAPICreateCacheDiagnosticUploadURL", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPICreateCacheDiagnosticUploadURL indicates an expected call of DboAPICreateCacheDiagnosticUploadURL.
+func (mr *MockClientInterfaceMockRecorder) DboAPICreateCacheDiagnosticUploadURL(ctx, groupId interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, groupId}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPICreateCacheDiagnosticUploadURL", reflect.TypeOf((*MockClientInterface)(nil).DboAPICreateCacheDiagnosticUploadURL), varargs...)
+}
+
+// DboAPICreateCacheGroup mocks base method.
+func (m *MockClientInterface) DboAPICreateCacheGroup(ctx context.Context, body sdk.DboAPICreateCacheGroupJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DboAPICreateCacheGroup", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPICreateCacheGroup indicates an expected call of DboAPICreateCacheGroup.
+func (mr *MockClientInterfaceMockRecorder) DboAPICreateCacheGroup(ctx, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPICreateCacheGroup", reflect.TypeOf((*MockClientInterface)(nil).DboAPICreateCacheGroup), varargs...)
+}
+
+// DboAPICreateCacheGroupWithBody mocks base method.
+func (m *MockClientInterface) DboAPICreateCacheGroupWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DboAPICreateCacheGroupWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPICreateCacheGroupWithBody indicates an expected call of DboAPICreateCacheGroupWithBody.
+func (mr *MockClientInterfaceMockRecorder) DboAPICreateCacheGroupWithBody(ctx, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPICreateCacheGroupWithBody", reflect.TypeOf((*MockClientInterface)(nil).DboAPICreateCacheGroupWithBody), varargs...)
+}
+
+// DboAPICreateCacheTTL mocks base method.
+func (m *MockClientInterface) DboAPICreateCacheTTL(ctx context.Context, groupId, id string, body sdk.DboAPICreateCacheTTLJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, groupId, id, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DboAPICreateCacheTTL", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPICreateCacheTTL indicates an expected call of DboAPICreateCacheTTL.
+func (mr *MockClientInterfaceMockRecorder) DboAPICreateCacheTTL(ctx, groupId, id, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, groupId, id, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPICreateCacheTTL", reflect.TypeOf((*MockClientInterface)(nil).DboAPICreateCacheTTL), varargs...)
+}
+
+// DboAPICreateCacheTTLWithBody mocks base method.
+func (m *MockClientInterface) DboAPICreateCacheTTLWithBody(ctx context.Context, groupId, id, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, groupId, id, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DboAPICreateCacheTTLWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPICreateCacheTTLWithBody indicates an expected call of DboAPICreateCacheTTLWithBody.
+func (mr *MockClientInterfaceMockRecorder) DboAPICreateCacheTTLWithBody(ctx, groupId, id, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, groupId, id, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPICreateCacheTTLWithBody", reflect.TypeOf((*MockClientInterface)(nil).DboAPICreateCacheTTLWithBody), varargs...)
+}
+
+// DboAPICreateLogicalDatabases mocks base method.
+func (m *MockClientInterface) DboAPICreateLogicalDatabases(ctx context.Context, instanceId string, params *sdk.DboAPICreateLogicalDatabasesParams, body sdk.DboAPICreateLogicalDatabasesJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, instanceId, params, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DboAPICreateLogicalDatabases", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPICreateLogicalDatabases indicates an expected call of DboAPICreateLogicalDatabases.
+func (mr *MockClientInterfaceMockRecorder) DboAPICreateLogicalDatabases(ctx, instanceId, params, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, instanceId, params, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPICreateLogicalDatabases", reflect.TypeOf((*MockClientInterface)(nil).DboAPICreateLogicalDatabases), varargs...)
+}
+
+// DboAPICreateLogicalDatabasesWithBody mocks base method.
+func (m *MockClientInterface) DboAPICreateLogicalDatabasesWithBody(ctx context.Context, instanceId string, params *sdk.DboAPICreateLogicalDatabasesParams, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, instanceId, params, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DboAPICreateLogicalDatabasesWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPICreateLogicalDatabasesWithBody indicates an expected call of DboAPICreateLogicalDatabasesWithBody.
+func (mr *MockClientInterfaceMockRecorder) DboAPICreateLogicalDatabasesWithBody(ctx, instanceId, params, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, instanceId, params, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPICreateLogicalDatabasesWithBody", reflect.TypeOf((*MockClientInterface)(nil).DboAPICreateLogicalDatabasesWithBody), varargs...)
+}
+
+// DboAPICreateRegistration mocks base method.
+func (m *MockClientInterface) DboAPICreateRegistration(ctx context.Context, body sdk.DboAPICreateRegistrationJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DboAPICreateRegistration", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPICreateRegistration indicates an expected call of DboAPICreateRegistration.
+func (mr *MockClientInterfaceMockRecorder) DboAPICreateRegistration(ctx, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPICreateRegistration", reflect.TypeOf((*MockClientInterface)(nil).DboAPICreateRegistration), varargs...)
+}
+
+// DboAPICreateRegistrationStatusUpdate mocks base method.
+func (m *MockClientInterface) DboAPICreateRegistrationStatusUpdate(ctx context.Context, registrationId string, body sdk.DboAPICreateRegistrationStatusUpdateJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, registrationId, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DboAPICreateRegistrationStatusUpdate", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPICreateRegistrationStatusUpdate indicates an expected call of DboAPICreateRegistrationStatusUpdate.
+func (mr *MockClientInterfaceMockRecorder) DboAPICreateRegistrationStatusUpdate(ctx, registrationId, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, registrationId, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPICreateRegistrationStatusUpdate", reflect.TypeOf((*MockClientInterface)(nil).DboAPICreateRegistrationStatusUpdate), varargs...)
+}
+
+// DboAPICreateRegistrationStatusUpdateWithBody mocks base method.
+func (m *MockClientInterface) DboAPICreateRegistrationStatusUpdateWithBody(ctx context.Context, registrationId, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, registrationId, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DboAPICreateRegistrationStatusUpdateWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPICreateRegistrationStatusUpdateWithBody indicates an expected call of DboAPICreateRegistrationStatusUpdateWithBody.
+func (mr *MockClientInterfaceMockRecorder) DboAPICreateRegistrationStatusUpdateWithBody(ctx, registrationId, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, registrationId, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPICreateRegistrationStatusUpdateWithBody", reflect.TypeOf((*MockClientInterface)(nil).DboAPICreateRegistrationStatusUpdateWithBody), varargs...)
+}
+
+// DboAPICreateRegistrationWithBody mocks base method.
+func (m *MockClientInterface) DboAPICreateRegistrationWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DboAPICreateRegistrationWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPICreateRegistrationWithBody indicates an expected call of DboAPICreateRegistrationWithBody.
+func (mr *MockClientInterfaceMockRecorder) DboAPICreateRegistrationWithBody(ctx, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPICreateRegistrationWithBody", reflect.TypeOf((*MockClientInterface)(nil).DboAPICreateRegistrationWithBody), varargs...)
+}
+
+// DboAPIDeleteAccount mocks base method.
+func (m *MockClientInterface) DboAPIDeleteAccount(ctx context.Context, id string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, id}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DboAPIDeleteAccount", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIDeleteAccount indicates an expected call of DboAPIDeleteAccount.
+func (mr *MockClientInterfaceMockRecorder) DboAPIDeleteAccount(ctx, id interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, id}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIDeleteAccount", reflect.TypeOf((*MockClientInterface)(nil).DboAPIDeleteAccount), varargs...)
+}
+
+// DboAPIDeleteCacheConfiguration mocks base method.
+func (m *MockClientInterface) DboAPIDeleteCacheConfiguration(ctx context.Context, groupId, id string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, groupId, id}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DboAPIDeleteCacheConfiguration", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIDeleteCacheConfiguration indicates an expected call of DboAPIDeleteCacheConfiguration.
+func (mr *MockClientInterfaceMockRecorder) DboAPIDeleteCacheConfiguration(ctx, groupId, id interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, groupId, id}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIDeleteCacheConfiguration", reflect.TypeOf((*MockClientInterface)(nil).DboAPIDeleteCacheConfiguration), varargs...)
+}
+
+// DboAPIDeleteCacheGroup mocks base method.
+func (m *MockClientInterface) DboAPIDeleteCacheGroup(ctx context.Context, id string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, id}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DboAPIDeleteCacheGroup", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIDeleteCacheGroup indicates an expected call of DboAPIDeleteCacheGroup.
+func (mr *MockClientInterfaceMockRecorder) DboAPIDeleteCacheGroup(ctx, id interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, id}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIDeleteCacheGroup", reflect.TypeOf((*MockClientInterface)(nil).DboAPIDeleteCacheGroup), varargs...)
+}
+
+// DboAPIDeleteCacheTTL mocks base method.
+func (m *MockClientInterface) DboAPIDeleteCacheTTL(ctx context.Context, groupId, cacheId, id string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, groupId, cacheId, id}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DboAPIDeleteCacheTTL", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIDeleteCacheTTL indicates an expected call of DboAPIDeleteCacheTTL.
+func (mr *MockClientInterfaceMockRecorder) DboAPIDeleteCacheTTL(ctx, groupId, cacheId, id interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, groupId, cacheId, id}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIDeleteCacheTTL", reflect.TypeOf((*MockClientInterface)(nil).DboAPIDeleteCacheTTL), varargs...)
+}
+
+// DboAPIDeleteLogicalDatabase mocks base method.
+func (m *MockClientInterface) DboAPIDeleteLogicalDatabase(ctx context.Context, instanceId, name string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, instanceId, name}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DboAPIDeleteLogicalDatabase", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIDeleteLogicalDatabase indicates an expected call of DboAPIDeleteLogicalDatabase.
+func (mr *MockClientInterfaceMockRecorder) DboAPIDeleteLogicalDatabase(ctx, instanceId, name interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, instanceId, name}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIDeleteLogicalDatabase", reflect.TypeOf((*MockClientInterface)(nil).DboAPIDeleteLogicalDatabase), varargs...)
+}
+
+// DboAPIExchangeCacheState mocks base method.
+func (m *MockClientInterface) DboAPIExchangeCacheState(ctx context.Context, cacheGroupId string, body sdk.DboAPIExchangeCacheStateJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, cacheGroupId, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DboAPIExchangeCacheState", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIExchangeCacheState indicates an expected call of DboAPIExchangeCacheState.
+func (mr *MockClientInterfaceMockRecorder) DboAPIExchangeCacheState(ctx, cacheGroupId, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, cacheGroupId, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIExchangeCacheState", reflect.TypeOf((*MockClientInterface)(nil).DboAPIExchangeCacheState), varargs...)
+}
+
+// DboAPIExchangeCacheStateWithBody mocks base method.
+func (m *MockClientInterface) DboAPIExchangeCacheStateWithBody(ctx context.Context, cacheGroupId, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, cacheGroupId, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DboAPIExchangeCacheStateWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIExchangeCacheStateWithBody indicates an expected call of DboAPIExchangeCacheStateWithBody.
+func (mr *MockClientInterfaceMockRecorder) DboAPIExchangeCacheStateWithBody(ctx, cacheGroupId, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, cacheGroupId, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIExchangeCacheStateWithBody", reflect.TypeOf((*MockClientInterface)(nil).DboAPIExchangeCacheStateWithBody), varargs...)
+}
+
+// DboAPIGetCacheEfficiency mocks base method.
+func (m *MockClientInterface) DboAPIGetCacheEfficiency(ctx context.Context, groupId, cacheId string, params *sdk.DboAPIGetCacheEfficiencyParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, groupId, cacheId, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DboAPIGetCacheEfficiency", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIGetCacheEfficiency indicates an expected call of DboAPIGetCacheEfficiency.
+func (mr *MockClientInterfaceMockRecorder) DboAPIGetCacheEfficiency(ctx, groupId, cacheId, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, groupId, cacheId, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIGetCacheEfficiency", reflect.TypeOf((*MockClientInterface)(nil).DboAPIGetCacheEfficiency), varargs...)
+}
+
+// DboAPIGetCacheGroup mocks base method.
+func (m *MockClientInterface) DboAPIGetCacheGroup(ctx context.Context, id string, params *sdk.DboAPIGetCacheGroupParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, id, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DboAPIGetCacheGroup", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIGetCacheGroup indicates an expected call of DboAPIGetCacheGroup.
+func (mr *MockClientInterfaceMockRecorder) DboAPIGetCacheGroup(ctx, id, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, id, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIGetCacheGroup", reflect.TypeOf((*MockClientInterface)(nil).DboAPIGetCacheGroup), varargs...)
+}
+
+// DboAPIGetCacheGroupPerformance mocks base method.
+func (m *MockClientInterface) DboAPIGetCacheGroupPerformance(ctx context.Context, id string, params *sdk.DboAPIGetCacheGroupPerformanceParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, id, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DboAPIGetCacheGroupPerformance", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIGetCacheGroupPerformance indicates an expected call of DboAPIGetCacheGroupPerformance.
+func (mr *MockClientInterfaceMockRecorder) DboAPIGetCacheGroupPerformance(ctx, id, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, id, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIGetCacheGroupPerformance", reflect.TypeOf((*MockClientInterface)(nil).DboAPIGetCacheGroupPerformance), varargs...)
+}
+
+// DboAPIGetCacheQueries mocks base method.
+func (m *MockClientInterface) DboAPIGetCacheQueries(ctx context.Context, groupId, cacheId string, params *sdk.DboAPIGetCacheQueriesParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, groupId, cacheId, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DboAPIGetCacheQueries", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIGetCacheQueries indicates an expected call of DboAPIGetCacheQueries.
+func (mr *MockClientInterfaceMockRecorder) DboAPIGetCacheQueries(ctx, groupId, cacheId, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, groupId, cacheId, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIGetCacheQueries", reflect.TypeOf((*MockClientInterface)(nil).DboAPIGetCacheQueries), varargs...)
+}
+
+// DboAPIGetCacheQuery mocks base method.
+func (m *MockClientInterface) DboAPIGetCacheQuery(ctx context.Context, groupId, cacheId, templateHash string, params *sdk.DboAPIGetCacheQueryParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, groupId, cacheId, templateHash, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DboAPIGetCacheQuery", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIGetCacheQuery indicates an expected call of DboAPIGetCacheQuery.
+func (mr *MockClientInterfaceMockRecorder) DboAPIGetCacheQuery(ctx, groupId, cacheId, templateHash, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, groupId, cacheId, templateHash, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIGetCacheQuery", reflect.TypeOf((*MockClientInterface)(nil).DboAPIGetCacheQuery), varargs...)
+}
+
+// DboAPIGetCacheQueryInsights mocks base method.
+func (m *MockClientInterface) DboAPIGetCacheQueryInsights(ctx context.Context, groupId, cacheId, templateHash string, params *sdk.DboAPIGetCacheQueryInsightsParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, groupId, cacheId, templateHash, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DboAPIGetCacheQueryInsights", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIGetCacheQueryInsights indicates an expected call of DboAPIGetCacheQueryInsights.
+func (mr *MockClientInterfaceMockRecorder) DboAPIGetCacheQueryInsights(ctx, groupId, cacheId, templateHash, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, groupId, cacheId, templateHash, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIGetCacheQueryInsights", reflect.TypeOf((*MockClientInterface)(nil).DboAPIGetCacheQueryInsights), varargs...)
+}
+
+// DboAPIGetCacheQueryTemplate mocks base method.
+func (m *MockClientInterface) DboAPIGetCacheQueryTemplate(ctx context.Context, groupId, cacheId, templateHash string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, groupId, cacheId, templateHash}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DboAPIGetCacheQueryTemplate", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIGetCacheQueryTemplate indicates an expected call of DboAPIGetCacheQueryTemplate.
+func (mr *MockClientInterfaceMockRecorder) DboAPIGetCacheQueryTemplate(ctx, groupId, cacheId, templateHash interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, groupId, cacheId, templateHash}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIGetCacheQueryTemplate", reflect.TypeOf((*MockClientInterface)(nil).DboAPIGetCacheQueryTemplate), varargs...)
+}
+
+// DboAPIGetCacheSummary mocks base method.
+func (m *MockClientInterface) DboAPIGetCacheSummary(ctx context.Context, groupId, cacheId string, params *sdk.DboAPIGetCacheSummaryParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, groupId, cacheId, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DboAPIGetCacheSummary", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIGetCacheSummary indicates an expected call of DboAPIGetCacheSummary.
+func (mr *MockClientInterfaceMockRecorder) DboAPIGetCacheSummary(ctx, groupId, cacheId, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, groupId, cacheId, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIGetCacheSummary", reflect.TypeOf((*MockClientInterface)(nil).DboAPIGetCacheSummary), varargs...)
+}
+
+// DboAPIGetDatabaseCluster mocks base method.
+func (m *MockClientInterface) DboAPIGetDatabaseCluster(ctx context.Context, clusterId string, params *sdk.DboAPIGetDatabaseClusterParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DboAPIGetDatabaseCluster", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIGetDatabaseCluster indicates an expected call of DboAPIGetDatabaseCluster.
+func (mr *MockClientInterfaceMockRecorder) DboAPIGetDatabaseCluster(ctx, clusterId, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIGetDatabaseCluster", reflect.TypeOf((*MockClientInterface)(nil).DboAPIGetDatabaseCluster), varargs...)
+}
+
+// DboAPIGetDatabaseInstance mocks base method.
+func (m *MockClientInterface) DboAPIGetDatabaseInstance(ctx context.Context, instanceId string, params *sdk.DboAPIGetDatabaseInstanceParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, instanceId, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DboAPIGetDatabaseInstance", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIGetDatabaseInstance indicates an expected call of DboAPIGetDatabaseInstance.
+func (mr *MockClientInterfaceMockRecorder) DboAPIGetDatabaseInstance(ctx, instanceId, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, instanceId, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIGetDatabaseInstance", reflect.TypeOf((*MockClientInterface)(nil).DboAPIGetDatabaseInstance), varargs...)
+}
+
+// DboAPIGetDatabaseInstanceCachePerformance mocks base method.
+func (m *MockClientInterface) DboAPIGetDatabaseInstanceCachePerformance(ctx context.Context, instanceId string, params *sdk.DboAPIGetDatabaseInstanceCachePerformanceParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, instanceId, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DboAPIGetDatabaseInstanceCachePerformance", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIGetDatabaseInstanceCachePerformance indicates an expected call of DboAPIGetDatabaseInstanceCachePerformance.
+func (mr *MockClientInterfaceMockRecorder) DboAPIGetDatabaseInstanceCachePerformance(ctx, instanceId, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, instanceId, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIGetDatabaseInstanceCachePerformance", reflect.TypeOf((*MockClientInterface)(nil).DboAPIGetDatabaseInstanceCachePerformance), varargs...)
+}
+
+// DboAPIGetDatabaseInstanceInfrastructureMetrics mocks base method.
+func (m *MockClientInterface) DboAPIGetDatabaseInstanceInfrastructureMetrics(ctx context.Context, instanceId string, params *sdk.DboAPIGetDatabaseInstanceInfrastructureMetricsParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, instanceId, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DboAPIGetDatabaseInstanceInfrastructureMetrics", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIGetDatabaseInstanceInfrastructureMetrics indicates an expected call of DboAPIGetDatabaseInstanceInfrastructureMetrics.
+func (mr *MockClientInterfaceMockRecorder) DboAPIGetDatabaseInstanceInfrastructureMetrics(ctx, instanceId, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, instanceId, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIGetDatabaseInstanceInfrastructureMetrics", reflect.TypeOf((*MockClientInterface)(nil).DboAPIGetDatabaseInstanceInfrastructureMetrics), varargs...)
+}
+
+// DboAPIGetRegistrationScript mocks base method.
+func (m *MockClientInterface) DboAPIGetRegistrationScript(ctx context.Context, registrationId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, registrationId}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DboAPIGetRegistrationScript", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIGetRegistrationScript indicates an expected call of DboAPIGetRegistrationScript.
+func (mr *MockClientInterfaceMockRecorder) DboAPIGetRegistrationScript(ctx, registrationId interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, registrationId}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIGetRegistrationScript", reflect.TypeOf((*MockClientInterface)(nil).DboAPIGetRegistrationScript), varargs...)
+}
+
+// DboAPIGetRegistrationStatus mocks base method.
+func (m *MockClientInterface) DboAPIGetRegistrationStatus(ctx context.Context, registrationId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, registrationId}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DboAPIGetRegistrationStatus", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIGetRegistrationStatus indicates an expected call of DboAPIGetRegistrationStatus.
+func (mr *MockClientInterfaceMockRecorder) DboAPIGetRegistrationStatus(ctx, registrationId interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, registrationId}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIGetRegistrationStatus", reflect.TypeOf((*MockClientInterface)(nil).DboAPIGetRegistrationStatus), varargs...)
+}
+
+// DboAPIListAccounts mocks base method.
+func (m *MockClientInterface) DboAPIListAccounts(ctx context.Context, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DboAPIListAccounts", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIListAccounts indicates an expected call of DboAPIListAccounts.
+func (mr *MockClientInterfaceMockRecorder) DboAPIListAccounts(ctx interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIListAccounts", reflect.TypeOf((*MockClientInterface)(nil).DboAPIListAccounts), varargs...)
+}
+
+// DboAPIListCacheConfigurations mocks base method.
+func (m *MockClientInterface) DboAPIListCacheConfigurations(ctx context.Context, groupId string, params *sdk.DboAPIListCacheConfigurationsParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, groupId, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DboAPIListCacheConfigurations", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIListCacheConfigurations indicates an expected call of DboAPIListCacheConfigurations.
+func (mr *MockClientInterfaceMockRecorder) DboAPIListCacheConfigurations(ctx, groupId, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, groupId, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIListCacheConfigurations", reflect.TypeOf((*MockClientInterface)(nil).DboAPIListCacheConfigurations), varargs...)
+}
+
+// DboAPIListCacheGroups mocks base method.
+func (m *MockClientInterface) DboAPIListCacheGroups(ctx context.Context, params *sdk.DboAPIListCacheGroupsParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DboAPIListCacheGroups", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIListCacheGroups indicates an expected call of DboAPIListCacheGroups.
+func (mr *MockClientInterfaceMockRecorder) DboAPIListCacheGroups(ctx, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIListCacheGroups", reflect.TypeOf((*MockClientInterface)(nil).DboAPIListCacheGroups), varargs...)
+}
+
+// DboAPIListCacheTTLs mocks base method.
+func (m *MockClientInterface) DboAPIListCacheTTLs(ctx context.Context, groupId, cacheId string, params *sdk.DboAPIListCacheTTLsParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, groupId, cacheId, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DboAPIListCacheTTLs", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIListCacheTTLs indicates an expected call of DboAPIListCacheTTLs.
+func (mr *MockClientInterfaceMockRecorder) DboAPIListCacheTTLs(ctx, groupId, cacheId, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, groupId, cacheId, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIListCacheTTLs", reflect.TypeOf((*MockClientInterface)(nil).DboAPIListCacheTTLs), varargs...)
+}
+
+// DboAPIListDatabaseComponents mocks base method.
+func (m *MockClientInterface) DboAPIListDatabaseComponents(ctx context.Context, params *sdk.DboAPIListDatabaseComponentsParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DboAPIListDatabaseComponents", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIListDatabaseComponents indicates an expected call of DboAPIListDatabaseComponents.
+func (mr *MockClientInterfaceMockRecorder) DboAPIListDatabaseComponents(ctx, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIListDatabaseComponents", reflect.TypeOf((*MockClientInterface)(nil).DboAPIListDatabaseComponents), varargs...)
+}
+
+// DboAPIListDatabaseInstances mocks base method.
+func (m *MockClientInterface) DboAPIListDatabaseInstances(ctx context.Context, params *sdk.DboAPIListDatabaseInstancesParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DboAPIListDatabaseInstances", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIListDatabaseInstances indicates an expected call of DboAPIListDatabaseInstances.
+func (mr *MockClientInterfaceMockRecorder) DboAPIListDatabaseInstances(ctx, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIListDatabaseInstances", reflect.TypeOf((*MockClientInterface)(nil).DboAPIListDatabaseInstances), varargs...)
+}
+
+// DboAPIUpdateCacheConfiguration mocks base method.
+func (m *MockClientInterface) DboAPIUpdateCacheConfiguration(ctx context.Context, groupId, id string, body sdk.DboAPIUpdateCacheConfigurationJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, groupId, id, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DboAPIUpdateCacheConfiguration", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIUpdateCacheConfiguration indicates an expected call of DboAPIUpdateCacheConfiguration.
+func (mr *MockClientInterfaceMockRecorder) DboAPIUpdateCacheConfiguration(ctx, groupId, id, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, groupId, id, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIUpdateCacheConfiguration", reflect.TypeOf((*MockClientInterface)(nil).DboAPIUpdateCacheConfiguration), varargs...)
+}
+
+// DboAPIUpdateCacheConfigurationWithBody mocks base method.
+func (m *MockClientInterface) DboAPIUpdateCacheConfigurationWithBody(ctx context.Context, groupId, id, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, groupId, id, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DboAPIUpdateCacheConfigurationWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIUpdateCacheConfigurationWithBody indicates an expected call of DboAPIUpdateCacheConfigurationWithBody.
+func (mr *MockClientInterfaceMockRecorder) DboAPIUpdateCacheConfigurationWithBody(ctx, groupId, id, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, groupId, id, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIUpdateCacheConfigurationWithBody", reflect.TypeOf((*MockClientInterface)(nil).DboAPIUpdateCacheConfigurationWithBody), varargs...)
+}
+
+// DboAPIUpdateCacheGroup mocks base method.
+func (m *MockClientInterface) DboAPIUpdateCacheGroup(ctx context.Context, id string, body sdk.DboAPIUpdateCacheGroupJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, id, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DboAPIUpdateCacheGroup", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIUpdateCacheGroup indicates an expected call of DboAPIUpdateCacheGroup.
+func (mr *MockClientInterfaceMockRecorder) DboAPIUpdateCacheGroup(ctx, id, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, id, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIUpdateCacheGroup", reflect.TypeOf((*MockClientInterface)(nil).DboAPIUpdateCacheGroup), varargs...)
+}
+
+// DboAPIUpdateCacheGroupWithBody mocks base method.
+func (m *MockClientInterface) DboAPIUpdateCacheGroupWithBody(ctx context.Context, id, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, id, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DboAPIUpdateCacheGroupWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIUpdateCacheGroupWithBody indicates an expected call of DboAPIUpdateCacheGroupWithBody.
+func (mr *MockClientInterfaceMockRecorder) DboAPIUpdateCacheGroupWithBody(ctx, id, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, id, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIUpdateCacheGroupWithBody", reflect.TypeOf((*MockClientInterface)(nil).DboAPIUpdateCacheGroupWithBody), varargs...)
+}
+
+// DboAPIUpdateCacheTTL mocks base method.
+func (m *MockClientInterface) DboAPIUpdateCacheTTL(ctx context.Context, groupId, cacheId, id string, body sdk.DboAPIUpdateCacheTTLJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, groupId, cacheId, id, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DboAPIUpdateCacheTTL", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIUpdateCacheTTL indicates an expected call of DboAPIUpdateCacheTTL.
+func (mr *MockClientInterfaceMockRecorder) DboAPIUpdateCacheTTL(ctx, groupId, cacheId, id, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, groupId, cacheId, id, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIUpdateCacheTTL", reflect.TypeOf((*MockClientInterface)(nil).DboAPIUpdateCacheTTL), varargs...)
+}
+
+// DboAPIUpdateCacheTTLWithBody mocks base method.
+func (m *MockClientInterface) DboAPIUpdateCacheTTLWithBody(ctx context.Context, groupId, cacheId, id, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, groupId, cacheId, id, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DboAPIUpdateCacheTTLWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIUpdateCacheTTLWithBody indicates an expected call of DboAPIUpdateCacheTTLWithBody.
+func (mr *MockClientInterfaceMockRecorder) DboAPIUpdateCacheTTLWithBody(ctx, groupId, cacheId, id, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, groupId, cacheId, id, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIUpdateCacheTTLWithBody", reflect.TypeOf((*MockClientInterface)(nil).DboAPIUpdateCacheTTLWithBody), varargs...)
+}
+
 // EvictorAPIGetAdvancedConfig mocks base method.
 func (m *MockClientInterface) EvictorAPIGetAdvancedConfig(ctx context.Context, clusterId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
@@ -5316,9 +6236,9 @@ func (mr *MockClientInterfaceMockRecorder) WorkloadOptimizationAPIGetWorkloadEve
 }
 
 // WorkloadOptimizationAPIGetWorkloadFilters mocks base method.
-func (m *MockClientInterface) WorkloadOptimizationAPIGetWorkloadFilters(ctx context.Context, clusterId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+func (m *MockClientInterface) WorkloadOptimizationAPIGetWorkloadFilters(ctx context.Context, clusterId string, params *sdk.WorkloadOptimizationAPIGetWorkloadFiltersParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, clusterId}
+	varargs := []interface{}{ctx, clusterId, params}
 	for _, a := range reqEditors {
 		varargs = append(varargs, a)
 	}
@@ -5329,9 +6249,9 @@ func (m *MockClientInterface) WorkloadOptimizationAPIGetWorkloadFilters(ctx cont
 }
 
 // WorkloadOptimizationAPIGetWorkloadFilters indicates an expected call of WorkloadOptimizationAPIGetWorkloadFilters.
-func (mr *MockClientInterfaceMockRecorder) WorkloadOptimizationAPIGetWorkloadFilters(ctx, clusterId interface{}, reqEditors ...interface{}) *gomock.Call {
+func (mr *MockClientInterfaceMockRecorder) WorkloadOptimizationAPIGetWorkloadFilters(ctx, clusterId, params interface{}, reqEditors ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, clusterId}, reqEditors...)
+	varargs := append([]interface{}{ctx, clusterId, params}, reqEditors...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIGetWorkloadFilters", reflect.TypeOf((*MockClientInterface)(nil).WorkloadOptimizationAPIGetWorkloadFilters), varargs...)
 }
 
@@ -7451,6 +8371,1616 @@ func (m *MockClientWithResponsesInterface) CommitmentsAPIUpdateCommitmentWithRes
 func (mr *MockClientWithResponsesInterfaceMockRecorder) CommitmentsAPIUpdateCommitmentWithResponse(ctx, commitmentId, body interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CommitmentsAPIUpdateCommitmentWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).CommitmentsAPIUpdateCommitmentWithResponse), ctx, commitmentId, body)
+}
+
+// DboAPICreateCacheConfiguration mocks base method.
+func (m *MockClientWithResponsesInterface) DboAPICreateCacheConfiguration(ctx context.Context, groupId string, body sdk.DboAPICreateCacheConfigurationJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, groupId, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DboAPICreateCacheConfiguration", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPICreateCacheConfiguration indicates an expected call of DboAPICreateCacheConfiguration.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPICreateCacheConfiguration(ctx, groupId, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, groupId, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPICreateCacheConfiguration", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPICreateCacheConfiguration), varargs...)
+}
+
+// DboAPICreateCacheConfigurationWithBody mocks base method.
+func (m *MockClientWithResponsesInterface) DboAPICreateCacheConfigurationWithBody(ctx context.Context, groupId, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, groupId, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DboAPICreateCacheConfigurationWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPICreateCacheConfigurationWithBody indicates an expected call of DboAPICreateCacheConfigurationWithBody.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPICreateCacheConfigurationWithBody(ctx, groupId, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, groupId, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPICreateCacheConfigurationWithBody", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPICreateCacheConfigurationWithBody), varargs...)
+}
+
+// DboAPICreateCacheConfigurationWithBodyWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) DboAPICreateCacheConfigurationWithBodyWithResponse(ctx context.Context, groupId, contentType string, body io.Reader) (*sdk.DboAPICreateCacheConfigurationResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DboAPICreateCacheConfigurationWithBodyWithResponse", ctx, groupId, contentType, body)
+	ret0, _ := ret[0].(*sdk.DboAPICreateCacheConfigurationResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPICreateCacheConfigurationWithBodyWithResponse indicates an expected call of DboAPICreateCacheConfigurationWithBodyWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPICreateCacheConfigurationWithBodyWithResponse(ctx, groupId, contentType, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPICreateCacheConfigurationWithBodyWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPICreateCacheConfigurationWithBodyWithResponse), ctx, groupId, contentType, body)
+}
+
+// DboAPICreateCacheConfigurationWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) DboAPICreateCacheConfigurationWithResponse(ctx context.Context, groupId string, body sdk.DboAPICreateCacheConfigurationJSONRequestBody) (*sdk.DboAPICreateCacheConfigurationResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DboAPICreateCacheConfigurationWithResponse", ctx, groupId, body)
+	ret0, _ := ret[0].(*sdk.DboAPICreateCacheConfigurationResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPICreateCacheConfigurationWithResponse indicates an expected call of DboAPICreateCacheConfigurationWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPICreateCacheConfigurationWithResponse(ctx, groupId, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPICreateCacheConfigurationWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPICreateCacheConfigurationWithResponse), ctx, groupId, body)
+}
+
+// DboAPICreateCacheDiagnosticUploadURL mocks base method.
+func (m *MockClientWithResponsesInterface) DboAPICreateCacheDiagnosticUploadURL(ctx context.Context, groupId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, groupId}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DboAPICreateCacheDiagnosticUploadURL", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPICreateCacheDiagnosticUploadURL indicates an expected call of DboAPICreateCacheDiagnosticUploadURL.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPICreateCacheDiagnosticUploadURL(ctx, groupId interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, groupId}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPICreateCacheDiagnosticUploadURL", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPICreateCacheDiagnosticUploadURL), varargs...)
+}
+
+// DboAPICreateCacheDiagnosticUploadURLWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) DboAPICreateCacheDiagnosticUploadURLWithResponse(ctx context.Context, groupId string) (*sdk.DboAPICreateCacheDiagnosticUploadURLResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DboAPICreateCacheDiagnosticUploadURLWithResponse", ctx, groupId)
+	ret0, _ := ret[0].(*sdk.DboAPICreateCacheDiagnosticUploadURLResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPICreateCacheDiagnosticUploadURLWithResponse indicates an expected call of DboAPICreateCacheDiagnosticUploadURLWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPICreateCacheDiagnosticUploadURLWithResponse(ctx, groupId interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPICreateCacheDiagnosticUploadURLWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPICreateCacheDiagnosticUploadURLWithResponse), ctx, groupId)
+}
+
+// DboAPICreateCacheGroup mocks base method.
+func (m *MockClientWithResponsesInterface) DboAPICreateCacheGroup(ctx context.Context, body sdk.DboAPICreateCacheGroupJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DboAPICreateCacheGroup", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPICreateCacheGroup indicates an expected call of DboAPICreateCacheGroup.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPICreateCacheGroup(ctx, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPICreateCacheGroup", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPICreateCacheGroup), varargs...)
+}
+
+// DboAPICreateCacheGroupWithBody mocks base method.
+func (m *MockClientWithResponsesInterface) DboAPICreateCacheGroupWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DboAPICreateCacheGroupWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPICreateCacheGroupWithBody indicates an expected call of DboAPICreateCacheGroupWithBody.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPICreateCacheGroupWithBody(ctx, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPICreateCacheGroupWithBody", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPICreateCacheGroupWithBody), varargs...)
+}
+
+// DboAPICreateCacheGroupWithBodyWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) DboAPICreateCacheGroupWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*sdk.DboAPICreateCacheGroupResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DboAPICreateCacheGroupWithBodyWithResponse", ctx, contentType, body)
+	ret0, _ := ret[0].(*sdk.DboAPICreateCacheGroupResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPICreateCacheGroupWithBodyWithResponse indicates an expected call of DboAPICreateCacheGroupWithBodyWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPICreateCacheGroupWithBodyWithResponse(ctx, contentType, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPICreateCacheGroupWithBodyWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPICreateCacheGroupWithBodyWithResponse), ctx, contentType, body)
+}
+
+// DboAPICreateCacheGroupWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) DboAPICreateCacheGroupWithResponse(ctx context.Context, body sdk.DboAPICreateCacheGroupJSONRequestBody) (*sdk.DboAPICreateCacheGroupResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DboAPICreateCacheGroupWithResponse", ctx, body)
+	ret0, _ := ret[0].(*sdk.DboAPICreateCacheGroupResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPICreateCacheGroupWithResponse indicates an expected call of DboAPICreateCacheGroupWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPICreateCacheGroupWithResponse(ctx, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPICreateCacheGroupWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPICreateCacheGroupWithResponse), ctx, body)
+}
+
+// DboAPICreateCacheTTL mocks base method.
+func (m *MockClientWithResponsesInterface) DboAPICreateCacheTTL(ctx context.Context, groupId, id string, body sdk.DboAPICreateCacheTTLJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, groupId, id, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DboAPICreateCacheTTL", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPICreateCacheTTL indicates an expected call of DboAPICreateCacheTTL.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPICreateCacheTTL(ctx, groupId, id, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, groupId, id, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPICreateCacheTTL", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPICreateCacheTTL), varargs...)
+}
+
+// DboAPICreateCacheTTLWithBody mocks base method.
+func (m *MockClientWithResponsesInterface) DboAPICreateCacheTTLWithBody(ctx context.Context, groupId, id, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, groupId, id, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DboAPICreateCacheTTLWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPICreateCacheTTLWithBody indicates an expected call of DboAPICreateCacheTTLWithBody.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPICreateCacheTTLWithBody(ctx, groupId, id, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, groupId, id, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPICreateCacheTTLWithBody", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPICreateCacheTTLWithBody), varargs...)
+}
+
+// DboAPICreateCacheTTLWithBodyWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) DboAPICreateCacheTTLWithBodyWithResponse(ctx context.Context, groupId, id, contentType string, body io.Reader) (*sdk.DboAPICreateCacheTTLResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DboAPICreateCacheTTLWithBodyWithResponse", ctx, groupId, id, contentType, body)
+	ret0, _ := ret[0].(*sdk.DboAPICreateCacheTTLResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPICreateCacheTTLWithBodyWithResponse indicates an expected call of DboAPICreateCacheTTLWithBodyWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPICreateCacheTTLWithBodyWithResponse(ctx, groupId, id, contentType, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPICreateCacheTTLWithBodyWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPICreateCacheTTLWithBodyWithResponse), ctx, groupId, id, contentType, body)
+}
+
+// DboAPICreateCacheTTLWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) DboAPICreateCacheTTLWithResponse(ctx context.Context, groupId, id string, body sdk.DboAPICreateCacheTTLJSONRequestBody) (*sdk.DboAPICreateCacheTTLResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DboAPICreateCacheTTLWithResponse", ctx, groupId, id, body)
+	ret0, _ := ret[0].(*sdk.DboAPICreateCacheTTLResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPICreateCacheTTLWithResponse indicates an expected call of DboAPICreateCacheTTLWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPICreateCacheTTLWithResponse(ctx, groupId, id, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPICreateCacheTTLWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPICreateCacheTTLWithResponse), ctx, groupId, id, body)
+}
+
+// DboAPICreateLogicalDatabases mocks base method.
+func (m *MockClientWithResponsesInterface) DboAPICreateLogicalDatabases(ctx context.Context, instanceId string, params *sdk.DboAPICreateLogicalDatabasesParams, body sdk.DboAPICreateLogicalDatabasesJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, instanceId, params, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DboAPICreateLogicalDatabases", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPICreateLogicalDatabases indicates an expected call of DboAPICreateLogicalDatabases.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPICreateLogicalDatabases(ctx, instanceId, params, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, instanceId, params, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPICreateLogicalDatabases", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPICreateLogicalDatabases), varargs...)
+}
+
+// DboAPICreateLogicalDatabasesWithBody mocks base method.
+func (m *MockClientWithResponsesInterface) DboAPICreateLogicalDatabasesWithBody(ctx context.Context, instanceId string, params *sdk.DboAPICreateLogicalDatabasesParams, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, instanceId, params, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DboAPICreateLogicalDatabasesWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPICreateLogicalDatabasesWithBody indicates an expected call of DboAPICreateLogicalDatabasesWithBody.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPICreateLogicalDatabasesWithBody(ctx, instanceId, params, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, instanceId, params, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPICreateLogicalDatabasesWithBody", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPICreateLogicalDatabasesWithBody), varargs...)
+}
+
+// DboAPICreateLogicalDatabasesWithBodyWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) DboAPICreateLogicalDatabasesWithBodyWithResponse(ctx context.Context, instanceId string, params *sdk.DboAPICreateLogicalDatabasesParams, contentType string, body io.Reader) (*sdk.DboAPICreateLogicalDatabasesResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DboAPICreateLogicalDatabasesWithBodyWithResponse", ctx, instanceId, params, contentType, body)
+	ret0, _ := ret[0].(*sdk.DboAPICreateLogicalDatabasesResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPICreateLogicalDatabasesWithBodyWithResponse indicates an expected call of DboAPICreateLogicalDatabasesWithBodyWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPICreateLogicalDatabasesWithBodyWithResponse(ctx, instanceId, params, contentType, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPICreateLogicalDatabasesWithBodyWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPICreateLogicalDatabasesWithBodyWithResponse), ctx, instanceId, params, contentType, body)
+}
+
+// DboAPICreateLogicalDatabasesWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) DboAPICreateLogicalDatabasesWithResponse(ctx context.Context, instanceId string, params *sdk.DboAPICreateLogicalDatabasesParams, body sdk.DboAPICreateLogicalDatabasesJSONRequestBody) (*sdk.DboAPICreateLogicalDatabasesResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DboAPICreateLogicalDatabasesWithResponse", ctx, instanceId, params, body)
+	ret0, _ := ret[0].(*sdk.DboAPICreateLogicalDatabasesResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPICreateLogicalDatabasesWithResponse indicates an expected call of DboAPICreateLogicalDatabasesWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPICreateLogicalDatabasesWithResponse(ctx, instanceId, params, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPICreateLogicalDatabasesWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPICreateLogicalDatabasesWithResponse), ctx, instanceId, params, body)
+}
+
+// DboAPICreateRegistration mocks base method.
+func (m *MockClientWithResponsesInterface) DboAPICreateRegistration(ctx context.Context, body sdk.DboAPICreateRegistrationJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DboAPICreateRegistration", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPICreateRegistration indicates an expected call of DboAPICreateRegistration.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPICreateRegistration(ctx, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPICreateRegistration", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPICreateRegistration), varargs...)
+}
+
+// DboAPICreateRegistrationStatusUpdate mocks base method.
+func (m *MockClientWithResponsesInterface) DboAPICreateRegistrationStatusUpdate(ctx context.Context, registrationId string, body sdk.DboAPICreateRegistrationStatusUpdateJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, registrationId, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DboAPICreateRegistrationStatusUpdate", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPICreateRegistrationStatusUpdate indicates an expected call of DboAPICreateRegistrationStatusUpdate.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPICreateRegistrationStatusUpdate(ctx, registrationId, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, registrationId, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPICreateRegistrationStatusUpdate", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPICreateRegistrationStatusUpdate), varargs...)
+}
+
+// DboAPICreateRegistrationStatusUpdateWithBody mocks base method.
+func (m *MockClientWithResponsesInterface) DboAPICreateRegistrationStatusUpdateWithBody(ctx context.Context, registrationId, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, registrationId, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DboAPICreateRegistrationStatusUpdateWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPICreateRegistrationStatusUpdateWithBody indicates an expected call of DboAPICreateRegistrationStatusUpdateWithBody.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPICreateRegistrationStatusUpdateWithBody(ctx, registrationId, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, registrationId, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPICreateRegistrationStatusUpdateWithBody", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPICreateRegistrationStatusUpdateWithBody), varargs...)
+}
+
+// DboAPICreateRegistrationStatusUpdateWithBodyWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) DboAPICreateRegistrationStatusUpdateWithBodyWithResponse(ctx context.Context, registrationId, contentType string, body io.Reader) (*sdk.DboAPICreateRegistrationStatusUpdateResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DboAPICreateRegistrationStatusUpdateWithBodyWithResponse", ctx, registrationId, contentType, body)
+	ret0, _ := ret[0].(*sdk.DboAPICreateRegistrationStatusUpdateResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPICreateRegistrationStatusUpdateWithBodyWithResponse indicates an expected call of DboAPICreateRegistrationStatusUpdateWithBodyWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPICreateRegistrationStatusUpdateWithBodyWithResponse(ctx, registrationId, contentType, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPICreateRegistrationStatusUpdateWithBodyWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPICreateRegistrationStatusUpdateWithBodyWithResponse), ctx, registrationId, contentType, body)
+}
+
+// DboAPICreateRegistrationStatusUpdateWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) DboAPICreateRegistrationStatusUpdateWithResponse(ctx context.Context, registrationId string, body sdk.DboAPICreateRegistrationStatusUpdateJSONRequestBody) (*sdk.DboAPICreateRegistrationStatusUpdateResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DboAPICreateRegistrationStatusUpdateWithResponse", ctx, registrationId, body)
+	ret0, _ := ret[0].(*sdk.DboAPICreateRegistrationStatusUpdateResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPICreateRegistrationStatusUpdateWithResponse indicates an expected call of DboAPICreateRegistrationStatusUpdateWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPICreateRegistrationStatusUpdateWithResponse(ctx, registrationId, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPICreateRegistrationStatusUpdateWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPICreateRegistrationStatusUpdateWithResponse), ctx, registrationId, body)
+}
+
+// DboAPICreateRegistrationWithBody mocks base method.
+func (m *MockClientWithResponsesInterface) DboAPICreateRegistrationWithBody(ctx context.Context, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DboAPICreateRegistrationWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPICreateRegistrationWithBody indicates an expected call of DboAPICreateRegistrationWithBody.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPICreateRegistrationWithBody(ctx, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPICreateRegistrationWithBody", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPICreateRegistrationWithBody), varargs...)
+}
+
+// DboAPICreateRegistrationWithBodyWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) DboAPICreateRegistrationWithBodyWithResponse(ctx context.Context, contentType string, body io.Reader) (*sdk.DboAPICreateRegistrationResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DboAPICreateRegistrationWithBodyWithResponse", ctx, contentType, body)
+	ret0, _ := ret[0].(*sdk.DboAPICreateRegistrationResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPICreateRegistrationWithBodyWithResponse indicates an expected call of DboAPICreateRegistrationWithBodyWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPICreateRegistrationWithBodyWithResponse(ctx, contentType, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPICreateRegistrationWithBodyWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPICreateRegistrationWithBodyWithResponse), ctx, contentType, body)
+}
+
+// DboAPICreateRegistrationWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) DboAPICreateRegistrationWithResponse(ctx context.Context, body sdk.DboAPICreateRegistrationJSONRequestBody) (*sdk.DboAPICreateRegistrationResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DboAPICreateRegistrationWithResponse", ctx, body)
+	ret0, _ := ret[0].(*sdk.DboAPICreateRegistrationResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPICreateRegistrationWithResponse indicates an expected call of DboAPICreateRegistrationWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPICreateRegistrationWithResponse(ctx, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPICreateRegistrationWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPICreateRegistrationWithResponse), ctx, body)
+}
+
+// DboAPIDeleteAccount mocks base method.
+func (m *MockClientWithResponsesInterface) DboAPIDeleteAccount(ctx context.Context, id string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, id}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DboAPIDeleteAccount", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIDeleteAccount indicates an expected call of DboAPIDeleteAccount.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPIDeleteAccount(ctx, id interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, id}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIDeleteAccount", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPIDeleteAccount), varargs...)
+}
+
+// DboAPIDeleteAccountWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) DboAPIDeleteAccountWithResponse(ctx context.Context, id string) (*sdk.DboAPIDeleteAccountResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DboAPIDeleteAccountWithResponse", ctx, id)
+	ret0, _ := ret[0].(*sdk.DboAPIDeleteAccountResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIDeleteAccountWithResponse indicates an expected call of DboAPIDeleteAccountWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPIDeleteAccountWithResponse(ctx, id interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIDeleteAccountWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPIDeleteAccountWithResponse), ctx, id)
+}
+
+// DboAPIDeleteCacheConfiguration mocks base method.
+func (m *MockClientWithResponsesInterface) DboAPIDeleteCacheConfiguration(ctx context.Context, groupId, id string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, groupId, id}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DboAPIDeleteCacheConfiguration", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIDeleteCacheConfiguration indicates an expected call of DboAPIDeleteCacheConfiguration.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPIDeleteCacheConfiguration(ctx, groupId, id interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, groupId, id}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIDeleteCacheConfiguration", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPIDeleteCacheConfiguration), varargs...)
+}
+
+// DboAPIDeleteCacheConfigurationWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) DboAPIDeleteCacheConfigurationWithResponse(ctx context.Context, groupId, id string) (*sdk.DboAPIDeleteCacheConfigurationResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DboAPIDeleteCacheConfigurationWithResponse", ctx, groupId, id)
+	ret0, _ := ret[0].(*sdk.DboAPIDeleteCacheConfigurationResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIDeleteCacheConfigurationWithResponse indicates an expected call of DboAPIDeleteCacheConfigurationWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPIDeleteCacheConfigurationWithResponse(ctx, groupId, id interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIDeleteCacheConfigurationWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPIDeleteCacheConfigurationWithResponse), ctx, groupId, id)
+}
+
+// DboAPIDeleteCacheGroup mocks base method.
+func (m *MockClientWithResponsesInterface) DboAPIDeleteCacheGroup(ctx context.Context, id string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, id}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DboAPIDeleteCacheGroup", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIDeleteCacheGroup indicates an expected call of DboAPIDeleteCacheGroup.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPIDeleteCacheGroup(ctx, id interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, id}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIDeleteCacheGroup", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPIDeleteCacheGroup), varargs...)
+}
+
+// DboAPIDeleteCacheGroupWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) DboAPIDeleteCacheGroupWithResponse(ctx context.Context, id string) (*sdk.DboAPIDeleteCacheGroupResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DboAPIDeleteCacheGroupWithResponse", ctx, id)
+	ret0, _ := ret[0].(*sdk.DboAPIDeleteCacheGroupResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIDeleteCacheGroupWithResponse indicates an expected call of DboAPIDeleteCacheGroupWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPIDeleteCacheGroupWithResponse(ctx, id interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIDeleteCacheGroupWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPIDeleteCacheGroupWithResponse), ctx, id)
+}
+
+// DboAPIDeleteCacheTTL mocks base method.
+func (m *MockClientWithResponsesInterface) DboAPIDeleteCacheTTL(ctx context.Context, groupId, cacheId, id string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, groupId, cacheId, id}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DboAPIDeleteCacheTTL", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIDeleteCacheTTL indicates an expected call of DboAPIDeleteCacheTTL.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPIDeleteCacheTTL(ctx, groupId, cacheId, id interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, groupId, cacheId, id}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIDeleteCacheTTL", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPIDeleteCacheTTL), varargs...)
+}
+
+// DboAPIDeleteCacheTTLWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) DboAPIDeleteCacheTTLWithResponse(ctx context.Context, groupId, cacheId, id string) (*sdk.DboAPIDeleteCacheTTLResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DboAPIDeleteCacheTTLWithResponse", ctx, groupId, cacheId, id)
+	ret0, _ := ret[0].(*sdk.DboAPIDeleteCacheTTLResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIDeleteCacheTTLWithResponse indicates an expected call of DboAPIDeleteCacheTTLWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPIDeleteCacheTTLWithResponse(ctx, groupId, cacheId, id interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIDeleteCacheTTLWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPIDeleteCacheTTLWithResponse), ctx, groupId, cacheId, id)
+}
+
+// DboAPIDeleteLogicalDatabase mocks base method.
+func (m *MockClientWithResponsesInterface) DboAPIDeleteLogicalDatabase(ctx context.Context, instanceId, name string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, instanceId, name}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DboAPIDeleteLogicalDatabase", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIDeleteLogicalDatabase indicates an expected call of DboAPIDeleteLogicalDatabase.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPIDeleteLogicalDatabase(ctx, instanceId, name interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, instanceId, name}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIDeleteLogicalDatabase", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPIDeleteLogicalDatabase), varargs...)
+}
+
+// DboAPIDeleteLogicalDatabaseWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) DboAPIDeleteLogicalDatabaseWithResponse(ctx context.Context, instanceId, name string) (*sdk.DboAPIDeleteLogicalDatabaseResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DboAPIDeleteLogicalDatabaseWithResponse", ctx, instanceId, name)
+	ret0, _ := ret[0].(*sdk.DboAPIDeleteLogicalDatabaseResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIDeleteLogicalDatabaseWithResponse indicates an expected call of DboAPIDeleteLogicalDatabaseWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPIDeleteLogicalDatabaseWithResponse(ctx, instanceId, name interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIDeleteLogicalDatabaseWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPIDeleteLogicalDatabaseWithResponse), ctx, instanceId, name)
+}
+
+// DboAPIExchangeCacheState mocks base method.
+func (m *MockClientWithResponsesInterface) DboAPIExchangeCacheState(ctx context.Context, cacheGroupId string, body sdk.DboAPIExchangeCacheStateJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, cacheGroupId, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DboAPIExchangeCacheState", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIExchangeCacheState indicates an expected call of DboAPIExchangeCacheState.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPIExchangeCacheState(ctx, cacheGroupId, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, cacheGroupId, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIExchangeCacheState", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPIExchangeCacheState), varargs...)
+}
+
+// DboAPIExchangeCacheStateWithBody mocks base method.
+func (m *MockClientWithResponsesInterface) DboAPIExchangeCacheStateWithBody(ctx context.Context, cacheGroupId, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, cacheGroupId, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DboAPIExchangeCacheStateWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIExchangeCacheStateWithBody indicates an expected call of DboAPIExchangeCacheStateWithBody.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPIExchangeCacheStateWithBody(ctx, cacheGroupId, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, cacheGroupId, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIExchangeCacheStateWithBody", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPIExchangeCacheStateWithBody), varargs...)
+}
+
+// DboAPIExchangeCacheStateWithBodyWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) DboAPIExchangeCacheStateWithBodyWithResponse(ctx context.Context, cacheGroupId, contentType string, body io.Reader) (*sdk.DboAPIExchangeCacheStateResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DboAPIExchangeCacheStateWithBodyWithResponse", ctx, cacheGroupId, contentType, body)
+	ret0, _ := ret[0].(*sdk.DboAPIExchangeCacheStateResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIExchangeCacheStateWithBodyWithResponse indicates an expected call of DboAPIExchangeCacheStateWithBodyWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPIExchangeCacheStateWithBodyWithResponse(ctx, cacheGroupId, contentType, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIExchangeCacheStateWithBodyWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPIExchangeCacheStateWithBodyWithResponse), ctx, cacheGroupId, contentType, body)
+}
+
+// DboAPIExchangeCacheStateWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) DboAPIExchangeCacheStateWithResponse(ctx context.Context, cacheGroupId string, body sdk.DboAPIExchangeCacheStateJSONRequestBody) (*sdk.DboAPIExchangeCacheStateResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DboAPIExchangeCacheStateWithResponse", ctx, cacheGroupId, body)
+	ret0, _ := ret[0].(*sdk.DboAPIExchangeCacheStateResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIExchangeCacheStateWithResponse indicates an expected call of DboAPIExchangeCacheStateWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPIExchangeCacheStateWithResponse(ctx, cacheGroupId, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIExchangeCacheStateWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPIExchangeCacheStateWithResponse), ctx, cacheGroupId, body)
+}
+
+// DboAPIGetCacheEfficiency mocks base method.
+func (m *MockClientWithResponsesInterface) DboAPIGetCacheEfficiency(ctx context.Context, groupId, cacheId string, params *sdk.DboAPIGetCacheEfficiencyParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, groupId, cacheId, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DboAPIGetCacheEfficiency", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIGetCacheEfficiency indicates an expected call of DboAPIGetCacheEfficiency.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPIGetCacheEfficiency(ctx, groupId, cacheId, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, groupId, cacheId, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIGetCacheEfficiency", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPIGetCacheEfficiency), varargs...)
+}
+
+// DboAPIGetCacheEfficiencyWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) DboAPIGetCacheEfficiencyWithResponse(ctx context.Context, groupId, cacheId string, params *sdk.DboAPIGetCacheEfficiencyParams) (*sdk.DboAPIGetCacheEfficiencyResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DboAPIGetCacheEfficiencyWithResponse", ctx, groupId, cacheId, params)
+	ret0, _ := ret[0].(*sdk.DboAPIGetCacheEfficiencyResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIGetCacheEfficiencyWithResponse indicates an expected call of DboAPIGetCacheEfficiencyWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPIGetCacheEfficiencyWithResponse(ctx, groupId, cacheId, params interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIGetCacheEfficiencyWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPIGetCacheEfficiencyWithResponse), ctx, groupId, cacheId, params)
+}
+
+// DboAPIGetCacheGroup mocks base method.
+func (m *MockClientWithResponsesInterface) DboAPIGetCacheGroup(ctx context.Context, id string, params *sdk.DboAPIGetCacheGroupParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, id, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DboAPIGetCacheGroup", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIGetCacheGroup indicates an expected call of DboAPIGetCacheGroup.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPIGetCacheGroup(ctx, id, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, id, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIGetCacheGroup", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPIGetCacheGroup), varargs...)
+}
+
+// DboAPIGetCacheGroupPerformance mocks base method.
+func (m *MockClientWithResponsesInterface) DboAPIGetCacheGroupPerformance(ctx context.Context, id string, params *sdk.DboAPIGetCacheGroupPerformanceParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, id, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DboAPIGetCacheGroupPerformance", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIGetCacheGroupPerformance indicates an expected call of DboAPIGetCacheGroupPerformance.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPIGetCacheGroupPerformance(ctx, id, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, id, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIGetCacheGroupPerformance", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPIGetCacheGroupPerformance), varargs...)
+}
+
+// DboAPIGetCacheGroupPerformanceWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) DboAPIGetCacheGroupPerformanceWithResponse(ctx context.Context, id string, params *sdk.DboAPIGetCacheGroupPerformanceParams) (*sdk.DboAPIGetCacheGroupPerformanceResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DboAPIGetCacheGroupPerformanceWithResponse", ctx, id, params)
+	ret0, _ := ret[0].(*sdk.DboAPIGetCacheGroupPerformanceResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIGetCacheGroupPerformanceWithResponse indicates an expected call of DboAPIGetCacheGroupPerformanceWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPIGetCacheGroupPerformanceWithResponse(ctx, id, params interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIGetCacheGroupPerformanceWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPIGetCacheGroupPerformanceWithResponse), ctx, id, params)
+}
+
+// DboAPIGetCacheGroupWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) DboAPIGetCacheGroupWithResponse(ctx context.Context, id string, params *sdk.DboAPIGetCacheGroupParams) (*sdk.DboAPIGetCacheGroupResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DboAPIGetCacheGroupWithResponse", ctx, id, params)
+	ret0, _ := ret[0].(*sdk.DboAPIGetCacheGroupResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIGetCacheGroupWithResponse indicates an expected call of DboAPIGetCacheGroupWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPIGetCacheGroupWithResponse(ctx, id, params interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIGetCacheGroupWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPIGetCacheGroupWithResponse), ctx, id, params)
+}
+
+// DboAPIGetCacheQueries mocks base method.
+func (m *MockClientWithResponsesInterface) DboAPIGetCacheQueries(ctx context.Context, groupId, cacheId string, params *sdk.DboAPIGetCacheQueriesParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, groupId, cacheId, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DboAPIGetCacheQueries", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIGetCacheQueries indicates an expected call of DboAPIGetCacheQueries.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPIGetCacheQueries(ctx, groupId, cacheId, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, groupId, cacheId, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIGetCacheQueries", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPIGetCacheQueries), varargs...)
+}
+
+// DboAPIGetCacheQueriesWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) DboAPIGetCacheQueriesWithResponse(ctx context.Context, groupId, cacheId string, params *sdk.DboAPIGetCacheQueriesParams) (*sdk.DboAPIGetCacheQueriesResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DboAPIGetCacheQueriesWithResponse", ctx, groupId, cacheId, params)
+	ret0, _ := ret[0].(*sdk.DboAPIGetCacheQueriesResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIGetCacheQueriesWithResponse indicates an expected call of DboAPIGetCacheQueriesWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPIGetCacheQueriesWithResponse(ctx, groupId, cacheId, params interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIGetCacheQueriesWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPIGetCacheQueriesWithResponse), ctx, groupId, cacheId, params)
+}
+
+// DboAPIGetCacheQuery mocks base method.
+func (m *MockClientWithResponsesInterface) DboAPIGetCacheQuery(ctx context.Context, groupId, cacheId, templateHash string, params *sdk.DboAPIGetCacheQueryParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, groupId, cacheId, templateHash, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DboAPIGetCacheQuery", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIGetCacheQuery indicates an expected call of DboAPIGetCacheQuery.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPIGetCacheQuery(ctx, groupId, cacheId, templateHash, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, groupId, cacheId, templateHash, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIGetCacheQuery", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPIGetCacheQuery), varargs...)
+}
+
+// DboAPIGetCacheQueryInsights mocks base method.
+func (m *MockClientWithResponsesInterface) DboAPIGetCacheQueryInsights(ctx context.Context, groupId, cacheId, templateHash string, params *sdk.DboAPIGetCacheQueryInsightsParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, groupId, cacheId, templateHash, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DboAPIGetCacheQueryInsights", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIGetCacheQueryInsights indicates an expected call of DboAPIGetCacheQueryInsights.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPIGetCacheQueryInsights(ctx, groupId, cacheId, templateHash, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, groupId, cacheId, templateHash, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIGetCacheQueryInsights", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPIGetCacheQueryInsights), varargs...)
+}
+
+// DboAPIGetCacheQueryInsightsWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) DboAPIGetCacheQueryInsightsWithResponse(ctx context.Context, groupId, cacheId, templateHash string, params *sdk.DboAPIGetCacheQueryInsightsParams) (*sdk.DboAPIGetCacheQueryInsightsResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DboAPIGetCacheQueryInsightsWithResponse", ctx, groupId, cacheId, templateHash, params)
+	ret0, _ := ret[0].(*sdk.DboAPIGetCacheQueryInsightsResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIGetCacheQueryInsightsWithResponse indicates an expected call of DboAPIGetCacheQueryInsightsWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPIGetCacheQueryInsightsWithResponse(ctx, groupId, cacheId, templateHash, params interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIGetCacheQueryInsightsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPIGetCacheQueryInsightsWithResponse), ctx, groupId, cacheId, templateHash, params)
+}
+
+// DboAPIGetCacheQueryTemplate mocks base method.
+func (m *MockClientWithResponsesInterface) DboAPIGetCacheQueryTemplate(ctx context.Context, groupId, cacheId, templateHash string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, groupId, cacheId, templateHash}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DboAPIGetCacheQueryTemplate", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIGetCacheQueryTemplate indicates an expected call of DboAPIGetCacheQueryTemplate.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPIGetCacheQueryTemplate(ctx, groupId, cacheId, templateHash interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, groupId, cacheId, templateHash}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIGetCacheQueryTemplate", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPIGetCacheQueryTemplate), varargs...)
+}
+
+// DboAPIGetCacheQueryTemplateWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) DboAPIGetCacheQueryTemplateWithResponse(ctx context.Context, groupId, cacheId, templateHash string) (*sdk.DboAPIGetCacheQueryTemplateResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DboAPIGetCacheQueryTemplateWithResponse", ctx, groupId, cacheId, templateHash)
+	ret0, _ := ret[0].(*sdk.DboAPIGetCacheQueryTemplateResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIGetCacheQueryTemplateWithResponse indicates an expected call of DboAPIGetCacheQueryTemplateWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPIGetCacheQueryTemplateWithResponse(ctx, groupId, cacheId, templateHash interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIGetCacheQueryTemplateWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPIGetCacheQueryTemplateWithResponse), ctx, groupId, cacheId, templateHash)
+}
+
+// DboAPIGetCacheQueryWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) DboAPIGetCacheQueryWithResponse(ctx context.Context, groupId, cacheId, templateHash string, params *sdk.DboAPIGetCacheQueryParams) (*sdk.DboAPIGetCacheQueryResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DboAPIGetCacheQueryWithResponse", ctx, groupId, cacheId, templateHash, params)
+	ret0, _ := ret[0].(*sdk.DboAPIGetCacheQueryResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIGetCacheQueryWithResponse indicates an expected call of DboAPIGetCacheQueryWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPIGetCacheQueryWithResponse(ctx, groupId, cacheId, templateHash, params interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIGetCacheQueryWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPIGetCacheQueryWithResponse), ctx, groupId, cacheId, templateHash, params)
+}
+
+// DboAPIGetCacheSummary mocks base method.
+func (m *MockClientWithResponsesInterface) DboAPIGetCacheSummary(ctx context.Context, groupId, cacheId string, params *sdk.DboAPIGetCacheSummaryParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, groupId, cacheId, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DboAPIGetCacheSummary", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIGetCacheSummary indicates an expected call of DboAPIGetCacheSummary.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPIGetCacheSummary(ctx, groupId, cacheId, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, groupId, cacheId, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIGetCacheSummary", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPIGetCacheSummary), varargs...)
+}
+
+// DboAPIGetCacheSummaryWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) DboAPIGetCacheSummaryWithResponse(ctx context.Context, groupId, cacheId string, params *sdk.DboAPIGetCacheSummaryParams) (*sdk.DboAPIGetCacheSummaryResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DboAPIGetCacheSummaryWithResponse", ctx, groupId, cacheId, params)
+	ret0, _ := ret[0].(*sdk.DboAPIGetCacheSummaryResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIGetCacheSummaryWithResponse indicates an expected call of DboAPIGetCacheSummaryWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPIGetCacheSummaryWithResponse(ctx, groupId, cacheId, params interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIGetCacheSummaryWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPIGetCacheSummaryWithResponse), ctx, groupId, cacheId, params)
+}
+
+// DboAPIGetDatabaseCluster mocks base method.
+func (m *MockClientWithResponsesInterface) DboAPIGetDatabaseCluster(ctx context.Context, clusterId string, params *sdk.DboAPIGetDatabaseClusterParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, clusterId, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DboAPIGetDatabaseCluster", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIGetDatabaseCluster indicates an expected call of DboAPIGetDatabaseCluster.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPIGetDatabaseCluster(ctx, clusterId, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, clusterId, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIGetDatabaseCluster", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPIGetDatabaseCluster), varargs...)
+}
+
+// DboAPIGetDatabaseClusterWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) DboAPIGetDatabaseClusterWithResponse(ctx context.Context, clusterId string, params *sdk.DboAPIGetDatabaseClusterParams) (*sdk.DboAPIGetDatabaseClusterResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DboAPIGetDatabaseClusterWithResponse", ctx, clusterId, params)
+	ret0, _ := ret[0].(*sdk.DboAPIGetDatabaseClusterResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIGetDatabaseClusterWithResponse indicates an expected call of DboAPIGetDatabaseClusterWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPIGetDatabaseClusterWithResponse(ctx, clusterId, params interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIGetDatabaseClusterWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPIGetDatabaseClusterWithResponse), ctx, clusterId, params)
+}
+
+// DboAPIGetDatabaseInstance mocks base method.
+func (m *MockClientWithResponsesInterface) DboAPIGetDatabaseInstance(ctx context.Context, instanceId string, params *sdk.DboAPIGetDatabaseInstanceParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, instanceId, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DboAPIGetDatabaseInstance", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIGetDatabaseInstance indicates an expected call of DboAPIGetDatabaseInstance.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPIGetDatabaseInstance(ctx, instanceId, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, instanceId, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIGetDatabaseInstance", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPIGetDatabaseInstance), varargs...)
+}
+
+// DboAPIGetDatabaseInstanceCachePerformance mocks base method.
+func (m *MockClientWithResponsesInterface) DboAPIGetDatabaseInstanceCachePerformance(ctx context.Context, instanceId string, params *sdk.DboAPIGetDatabaseInstanceCachePerformanceParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, instanceId, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DboAPIGetDatabaseInstanceCachePerformance", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIGetDatabaseInstanceCachePerformance indicates an expected call of DboAPIGetDatabaseInstanceCachePerformance.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPIGetDatabaseInstanceCachePerformance(ctx, instanceId, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, instanceId, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIGetDatabaseInstanceCachePerformance", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPIGetDatabaseInstanceCachePerformance), varargs...)
+}
+
+// DboAPIGetDatabaseInstanceCachePerformanceWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) DboAPIGetDatabaseInstanceCachePerformanceWithResponse(ctx context.Context, instanceId string, params *sdk.DboAPIGetDatabaseInstanceCachePerformanceParams) (*sdk.DboAPIGetDatabaseInstanceCachePerformanceResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DboAPIGetDatabaseInstanceCachePerformanceWithResponse", ctx, instanceId, params)
+	ret0, _ := ret[0].(*sdk.DboAPIGetDatabaseInstanceCachePerformanceResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIGetDatabaseInstanceCachePerformanceWithResponse indicates an expected call of DboAPIGetDatabaseInstanceCachePerformanceWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPIGetDatabaseInstanceCachePerformanceWithResponse(ctx, instanceId, params interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIGetDatabaseInstanceCachePerformanceWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPIGetDatabaseInstanceCachePerformanceWithResponse), ctx, instanceId, params)
+}
+
+// DboAPIGetDatabaseInstanceInfrastructureMetrics mocks base method.
+func (m *MockClientWithResponsesInterface) DboAPIGetDatabaseInstanceInfrastructureMetrics(ctx context.Context, instanceId string, params *sdk.DboAPIGetDatabaseInstanceInfrastructureMetricsParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, instanceId, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DboAPIGetDatabaseInstanceInfrastructureMetrics", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIGetDatabaseInstanceInfrastructureMetrics indicates an expected call of DboAPIGetDatabaseInstanceInfrastructureMetrics.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPIGetDatabaseInstanceInfrastructureMetrics(ctx, instanceId, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, instanceId, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIGetDatabaseInstanceInfrastructureMetrics", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPIGetDatabaseInstanceInfrastructureMetrics), varargs...)
+}
+
+// DboAPIGetDatabaseInstanceInfrastructureMetricsWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) DboAPIGetDatabaseInstanceInfrastructureMetricsWithResponse(ctx context.Context, instanceId string, params *sdk.DboAPIGetDatabaseInstanceInfrastructureMetricsParams) (*sdk.DboAPIGetDatabaseInstanceInfrastructureMetricsResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DboAPIGetDatabaseInstanceInfrastructureMetricsWithResponse", ctx, instanceId, params)
+	ret0, _ := ret[0].(*sdk.DboAPIGetDatabaseInstanceInfrastructureMetricsResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIGetDatabaseInstanceInfrastructureMetricsWithResponse indicates an expected call of DboAPIGetDatabaseInstanceInfrastructureMetricsWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPIGetDatabaseInstanceInfrastructureMetricsWithResponse(ctx, instanceId, params interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIGetDatabaseInstanceInfrastructureMetricsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPIGetDatabaseInstanceInfrastructureMetricsWithResponse), ctx, instanceId, params)
+}
+
+// DboAPIGetDatabaseInstanceWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) DboAPIGetDatabaseInstanceWithResponse(ctx context.Context, instanceId string, params *sdk.DboAPIGetDatabaseInstanceParams) (*sdk.DboAPIGetDatabaseInstanceResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DboAPIGetDatabaseInstanceWithResponse", ctx, instanceId, params)
+	ret0, _ := ret[0].(*sdk.DboAPIGetDatabaseInstanceResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIGetDatabaseInstanceWithResponse indicates an expected call of DboAPIGetDatabaseInstanceWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPIGetDatabaseInstanceWithResponse(ctx, instanceId, params interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIGetDatabaseInstanceWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPIGetDatabaseInstanceWithResponse), ctx, instanceId, params)
+}
+
+// DboAPIGetRegistrationScript mocks base method.
+func (m *MockClientWithResponsesInterface) DboAPIGetRegistrationScript(ctx context.Context, registrationId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, registrationId}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DboAPIGetRegistrationScript", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIGetRegistrationScript indicates an expected call of DboAPIGetRegistrationScript.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPIGetRegistrationScript(ctx, registrationId interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, registrationId}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIGetRegistrationScript", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPIGetRegistrationScript), varargs...)
+}
+
+// DboAPIGetRegistrationScriptWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) DboAPIGetRegistrationScriptWithResponse(ctx context.Context, registrationId string) (*sdk.DboAPIGetRegistrationScriptResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DboAPIGetRegistrationScriptWithResponse", ctx, registrationId)
+	ret0, _ := ret[0].(*sdk.DboAPIGetRegistrationScriptResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIGetRegistrationScriptWithResponse indicates an expected call of DboAPIGetRegistrationScriptWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPIGetRegistrationScriptWithResponse(ctx, registrationId interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIGetRegistrationScriptWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPIGetRegistrationScriptWithResponse), ctx, registrationId)
+}
+
+// DboAPIGetRegistrationStatus mocks base method.
+func (m *MockClientWithResponsesInterface) DboAPIGetRegistrationStatus(ctx context.Context, registrationId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, registrationId}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DboAPIGetRegistrationStatus", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIGetRegistrationStatus indicates an expected call of DboAPIGetRegistrationStatus.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPIGetRegistrationStatus(ctx, registrationId interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, registrationId}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIGetRegistrationStatus", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPIGetRegistrationStatus), varargs...)
+}
+
+// DboAPIGetRegistrationStatusWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) DboAPIGetRegistrationStatusWithResponse(ctx context.Context, registrationId string) (*sdk.DboAPIGetRegistrationStatusResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DboAPIGetRegistrationStatusWithResponse", ctx, registrationId)
+	ret0, _ := ret[0].(*sdk.DboAPIGetRegistrationStatusResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIGetRegistrationStatusWithResponse indicates an expected call of DboAPIGetRegistrationStatusWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPIGetRegistrationStatusWithResponse(ctx, registrationId interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIGetRegistrationStatusWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPIGetRegistrationStatusWithResponse), ctx, registrationId)
+}
+
+// DboAPIListAccounts mocks base method.
+func (m *MockClientWithResponsesInterface) DboAPIListAccounts(ctx context.Context, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DboAPIListAccounts", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIListAccounts indicates an expected call of DboAPIListAccounts.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPIListAccounts(ctx interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIListAccounts", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPIListAccounts), varargs...)
+}
+
+// DboAPIListAccountsWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) DboAPIListAccountsWithResponse(ctx context.Context) (*sdk.DboAPIListAccountsResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DboAPIListAccountsWithResponse", ctx)
+	ret0, _ := ret[0].(*sdk.DboAPIListAccountsResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIListAccountsWithResponse indicates an expected call of DboAPIListAccountsWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPIListAccountsWithResponse(ctx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIListAccountsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPIListAccountsWithResponse), ctx)
+}
+
+// DboAPIListCacheConfigurations mocks base method.
+func (m *MockClientWithResponsesInterface) DboAPIListCacheConfigurations(ctx context.Context, groupId string, params *sdk.DboAPIListCacheConfigurationsParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, groupId, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DboAPIListCacheConfigurations", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIListCacheConfigurations indicates an expected call of DboAPIListCacheConfigurations.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPIListCacheConfigurations(ctx, groupId, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, groupId, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIListCacheConfigurations", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPIListCacheConfigurations), varargs...)
+}
+
+// DboAPIListCacheConfigurationsWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) DboAPIListCacheConfigurationsWithResponse(ctx context.Context, groupId string, params *sdk.DboAPIListCacheConfigurationsParams) (*sdk.DboAPIListCacheConfigurationsResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DboAPIListCacheConfigurationsWithResponse", ctx, groupId, params)
+	ret0, _ := ret[0].(*sdk.DboAPIListCacheConfigurationsResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIListCacheConfigurationsWithResponse indicates an expected call of DboAPIListCacheConfigurationsWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPIListCacheConfigurationsWithResponse(ctx, groupId, params interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIListCacheConfigurationsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPIListCacheConfigurationsWithResponse), ctx, groupId, params)
+}
+
+// DboAPIListCacheGroups mocks base method.
+func (m *MockClientWithResponsesInterface) DboAPIListCacheGroups(ctx context.Context, params *sdk.DboAPIListCacheGroupsParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DboAPIListCacheGroups", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIListCacheGroups indicates an expected call of DboAPIListCacheGroups.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPIListCacheGroups(ctx, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIListCacheGroups", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPIListCacheGroups), varargs...)
+}
+
+// DboAPIListCacheGroupsWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) DboAPIListCacheGroupsWithResponse(ctx context.Context, params *sdk.DboAPIListCacheGroupsParams) (*sdk.DboAPIListCacheGroupsResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DboAPIListCacheGroupsWithResponse", ctx, params)
+	ret0, _ := ret[0].(*sdk.DboAPIListCacheGroupsResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIListCacheGroupsWithResponse indicates an expected call of DboAPIListCacheGroupsWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPIListCacheGroupsWithResponse(ctx, params interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIListCacheGroupsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPIListCacheGroupsWithResponse), ctx, params)
+}
+
+// DboAPIListCacheTTLs mocks base method.
+func (m *MockClientWithResponsesInterface) DboAPIListCacheTTLs(ctx context.Context, groupId, cacheId string, params *sdk.DboAPIListCacheTTLsParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, groupId, cacheId, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DboAPIListCacheTTLs", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIListCacheTTLs indicates an expected call of DboAPIListCacheTTLs.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPIListCacheTTLs(ctx, groupId, cacheId, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, groupId, cacheId, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIListCacheTTLs", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPIListCacheTTLs), varargs...)
+}
+
+// DboAPIListCacheTTLsWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) DboAPIListCacheTTLsWithResponse(ctx context.Context, groupId, cacheId string, params *sdk.DboAPIListCacheTTLsParams) (*sdk.DboAPIListCacheTTLsResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DboAPIListCacheTTLsWithResponse", ctx, groupId, cacheId, params)
+	ret0, _ := ret[0].(*sdk.DboAPIListCacheTTLsResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIListCacheTTLsWithResponse indicates an expected call of DboAPIListCacheTTLsWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPIListCacheTTLsWithResponse(ctx, groupId, cacheId, params interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIListCacheTTLsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPIListCacheTTLsWithResponse), ctx, groupId, cacheId, params)
+}
+
+// DboAPIListDatabaseComponents mocks base method.
+func (m *MockClientWithResponsesInterface) DboAPIListDatabaseComponents(ctx context.Context, params *sdk.DboAPIListDatabaseComponentsParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DboAPIListDatabaseComponents", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIListDatabaseComponents indicates an expected call of DboAPIListDatabaseComponents.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPIListDatabaseComponents(ctx, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIListDatabaseComponents", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPIListDatabaseComponents), varargs...)
+}
+
+// DboAPIListDatabaseComponentsWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) DboAPIListDatabaseComponentsWithResponse(ctx context.Context, params *sdk.DboAPIListDatabaseComponentsParams) (*sdk.DboAPIListDatabaseComponentsResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DboAPIListDatabaseComponentsWithResponse", ctx, params)
+	ret0, _ := ret[0].(*sdk.DboAPIListDatabaseComponentsResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIListDatabaseComponentsWithResponse indicates an expected call of DboAPIListDatabaseComponentsWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPIListDatabaseComponentsWithResponse(ctx, params interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIListDatabaseComponentsWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPIListDatabaseComponentsWithResponse), ctx, params)
+}
+
+// DboAPIListDatabaseInstances mocks base method.
+func (m *MockClientWithResponsesInterface) DboAPIListDatabaseInstances(ctx context.Context, params *sdk.DboAPIListDatabaseInstancesParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, params}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DboAPIListDatabaseInstances", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIListDatabaseInstances indicates an expected call of DboAPIListDatabaseInstances.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPIListDatabaseInstances(ctx, params interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, params}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIListDatabaseInstances", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPIListDatabaseInstances), varargs...)
+}
+
+// DboAPIListDatabaseInstancesWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) DboAPIListDatabaseInstancesWithResponse(ctx context.Context, params *sdk.DboAPIListDatabaseInstancesParams) (*sdk.DboAPIListDatabaseInstancesResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DboAPIListDatabaseInstancesWithResponse", ctx, params)
+	ret0, _ := ret[0].(*sdk.DboAPIListDatabaseInstancesResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIListDatabaseInstancesWithResponse indicates an expected call of DboAPIListDatabaseInstancesWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPIListDatabaseInstancesWithResponse(ctx, params interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIListDatabaseInstancesWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPIListDatabaseInstancesWithResponse), ctx, params)
+}
+
+// DboAPIUpdateCacheConfiguration mocks base method.
+func (m *MockClientWithResponsesInterface) DboAPIUpdateCacheConfiguration(ctx context.Context, groupId, id string, body sdk.DboAPIUpdateCacheConfigurationJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, groupId, id, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DboAPIUpdateCacheConfiguration", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIUpdateCacheConfiguration indicates an expected call of DboAPIUpdateCacheConfiguration.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPIUpdateCacheConfiguration(ctx, groupId, id, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, groupId, id, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIUpdateCacheConfiguration", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPIUpdateCacheConfiguration), varargs...)
+}
+
+// DboAPIUpdateCacheConfigurationWithBody mocks base method.
+func (m *MockClientWithResponsesInterface) DboAPIUpdateCacheConfigurationWithBody(ctx context.Context, groupId, id, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, groupId, id, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DboAPIUpdateCacheConfigurationWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIUpdateCacheConfigurationWithBody indicates an expected call of DboAPIUpdateCacheConfigurationWithBody.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPIUpdateCacheConfigurationWithBody(ctx, groupId, id, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, groupId, id, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIUpdateCacheConfigurationWithBody", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPIUpdateCacheConfigurationWithBody), varargs...)
+}
+
+// DboAPIUpdateCacheConfigurationWithBodyWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) DboAPIUpdateCacheConfigurationWithBodyWithResponse(ctx context.Context, groupId, id, contentType string, body io.Reader) (*sdk.DboAPIUpdateCacheConfigurationResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DboAPIUpdateCacheConfigurationWithBodyWithResponse", ctx, groupId, id, contentType, body)
+	ret0, _ := ret[0].(*sdk.DboAPIUpdateCacheConfigurationResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIUpdateCacheConfigurationWithBodyWithResponse indicates an expected call of DboAPIUpdateCacheConfigurationWithBodyWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPIUpdateCacheConfigurationWithBodyWithResponse(ctx, groupId, id, contentType, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIUpdateCacheConfigurationWithBodyWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPIUpdateCacheConfigurationWithBodyWithResponse), ctx, groupId, id, contentType, body)
+}
+
+// DboAPIUpdateCacheConfigurationWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) DboAPIUpdateCacheConfigurationWithResponse(ctx context.Context, groupId, id string, body sdk.DboAPIUpdateCacheConfigurationJSONRequestBody) (*sdk.DboAPIUpdateCacheConfigurationResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DboAPIUpdateCacheConfigurationWithResponse", ctx, groupId, id, body)
+	ret0, _ := ret[0].(*sdk.DboAPIUpdateCacheConfigurationResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIUpdateCacheConfigurationWithResponse indicates an expected call of DboAPIUpdateCacheConfigurationWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPIUpdateCacheConfigurationWithResponse(ctx, groupId, id, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIUpdateCacheConfigurationWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPIUpdateCacheConfigurationWithResponse), ctx, groupId, id, body)
+}
+
+// DboAPIUpdateCacheGroup mocks base method.
+func (m *MockClientWithResponsesInterface) DboAPIUpdateCacheGroup(ctx context.Context, id string, body sdk.DboAPIUpdateCacheGroupJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, id, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DboAPIUpdateCacheGroup", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIUpdateCacheGroup indicates an expected call of DboAPIUpdateCacheGroup.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPIUpdateCacheGroup(ctx, id, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, id, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIUpdateCacheGroup", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPIUpdateCacheGroup), varargs...)
+}
+
+// DboAPIUpdateCacheGroupWithBody mocks base method.
+func (m *MockClientWithResponsesInterface) DboAPIUpdateCacheGroupWithBody(ctx context.Context, id, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, id, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DboAPIUpdateCacheGroupWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIUpdateCacheGroupWithBody indicates an expected call of DboAPIUpdateCacheGroupWithBody.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPIUpdateCacheGroupWithBody(ctx, id, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, id, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIUpdateCacheGroupWithBody", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPIUpdateCacheGroupWithBody), varargs...)
+}
+
+// DboAPIUpdateCacheGroupWithBodyWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) DboAPIUpdateCacheGroupWithBodyWithResponse(ctx context.Context, id, contentType string, body io.Reader) (*sdk.DboAPIUpdateCacheGroupResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DboAPIUpdateCacheGroupWithBodyWithResponse", ctx, id, contentType, body)
+	ret0, _ := ret[0].(*sdk.DboAPIUpdateCacheGroupResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIUpdateCacheGroupWithBodyWithResponse indicates an expected call of DboAPIUpdateCacheGroupWithBodyWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPIUpdateCacheGroupWithBodyWithResponse(ctx, id, contentType, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIUpdateCacheGroupWithBodyWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPIUpdateCacheGroupWithBodyWithResponse), ctx, id, contentType, body)
+}
+
+// DboAPIUpdateCacheGroupWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) DboAPIUpdateCacheGroupWithResponse(ctx context.Context, id string, body sdk.DboAPIUpdateCacheGroupJSONRequestBody) (*sdk.DboAPIUpdateCacheGroupResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DboAPIUpdateCacheGroupWithResponse", ctx, id, body)
+	ret0, _ := ret[0].(*sdk.DboAPIUpdateCacheGroupResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIUpdateCacheGroupWithResponse indicates an expected call of DboAPIUpdateCacheGroupWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPIUpdateCacheGroupWithResponse(ctx, id, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIUpdateCacheGroupWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPIUpdateCacheGroupWithResponse), ctx, id, body)
+}
+
+// DboAPIUpdateCacheTTL mocks base method.
+func (m *MockClientWithResponsesInterface) DboAPIUpdateCacheTTL(ctx context.Context, groupId, cacheId, id string, body sdk.DboAPIUpdateCacheTTLJSONRequestBody, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, groupId, cacheId, id, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DboAPIUpdateCacheTTL", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIUpdateCacheTTL indicates an expected call of DboAPIUpdateCacheTTL.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPIUpdateCacheTTL(ctx, groupId, cacheId, id, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, groupId, cacheId, id, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIUpdateCacheTTL", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPIUpdateCacheTTL), varargs...)
+}
+
+// DboAPIUpdateCacheTTLWithBody mocks base method.
+func (m *MockClientWithResponsesInterface) DboAPIUpdateCacheTTLWithBody(ctx context.Context, groupId, cacheId, id, contentType string, body io.Reader, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, groupId, cacheId, id, contentType, body}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DboAPIUpdateCacheTTLWithBody", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIUpdateCacheTTLWithBody indicates an expected call of DboAPIUpdateCacheTTLWithBody.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPIUpdateCacheTTLWithBody(ctx, groupId, cacheId, id, contentType, body interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, groupId, cacheId, id, contentType, body}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIUpdateCacheTTLWithBody", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPIUpdateCacheTTLWithBody), varargs...)
+}
+
+// DboAPIUpdateCacheTTLWithBodyWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) DboAPIUpdateCacheTTLWithBodyWithResponse(ctx context.Context, groupId, cacheId, id, contentType string, body io.Reader) (*sdk.DboAPIUpdateCacheTTLResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DboAPIUpdateCacheTTLWithBodyWithResponse", ctx, groupId, cacheId, id, contentType, body)
+	ret0, _ := ret[0].(*sdk.DboAPIUpdateCacheTTLResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIUpdateCacheTTLWithBodyWithResponse indicates an expected call of DboAPIUpdateCacheTTLWithBodyWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPIUpdateCacheTTLWithBodyWithResponse(ctx, groupId, cacheId, id, contentType, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIUpdateCacheTTLWithBodyWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPIUpdateCacheTTLWithBodyWithResponse), ctx, groupId, cacheId, id, contentType, body)
+}
+
+// DboAPIUpdateCacheTTLWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) DboAPIUpdateCacheTTLWithResponse(ctx context.Context, groupId, cacheId, id string, body sdk.DboAPIUpdateCacheTTLJSONRequestBody) (*sdk.DboAPIUpdateCacheTTLResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DboAPIUpdateCacheTTLWithResponse", ctx, groupId, cacheId, id, body)
+	ret0, _ := ret[0].(*sdk.DboAPIUpdateCacheTTLResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DboAPIUpdateCacheTTLWithResponse indicates an expected call of DboAPIUpdateCacheTTLWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) DboAPIUpdateCacheTTLWithResponse(ctx, groupId, cacheId, id, body interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DboAPIUpdateCacheTTLWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).DboAPIUpdateCacheTTLWithResponse), ctx, groupId, cacheId, id, body)
 }
 
 // EvictorAPIGetAdvancedConfig mocks base method.
@@ -14894,9 +17424,9 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPIG
 }
 
 // WorkloadOptimizationAPIGetWorkloadFilters mocks base method.
-func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPIGetWorkloadFilters(ctx context.Context, clusterId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPIGetWorkloadFilters(ctx context.Context, clusterId string, params *sdk.WorkloadOptimizationAPIGetWorkloadFiltersParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, clusterId}
+	varargs := []interface{}{ctx, clusterId, params}
 	for _, a := range reqEditors {
 		varargs = append(varargs, a)
 	}
@@ -14907,25 +17437,25 @@ func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPIGetWorkloadFil
 }
 
 // WorkloadOptimizationAPIGetWorkloadFilters indicates an expected call of WorkloadOptimizationAPIGetWorkloadFilters.
-func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPIGetWorkloadFilters(ctx, clusterId interface{}, reqEditors ...interface{}) *gomock.Call {
+func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPIGetWorkloadFilters(ctx, clusterId, params interface{}, reqEditors ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, clusterId}, reqEditors...)
+	varargs := append([]interface{}{ctx, clusterId, params}, reqEditors...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIGetWorkloadFilters", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPIGetWorkloadFilters), varargs...)
 }
 
 // WorkloadOptimizationAPIGetWorkloadFiltersWithResponse mocks base method.
-func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPIGetWorkloadFiltersWithResponse(ctx context.Context, clusterId string) (*sdk.WorkloadOptimizationAPIGetWorkloadFiltersResponse, error) {
+func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPIGetWorkloadFiltersWithResponse(ctx context.Context, clusterId string, params *sdk.WorkloadOptimizationAPIGetWorkloadFiltersParams) (*sdk.WorkloadOptimizationAPIGetWorkloadFiltersResponse, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "WorkloadOptimizationAPIGetWorkloadFiltersWithResponse", ctx, clusterId)
+	ret := m.ctrl.Call(m, "WorkloadOptimizationAPIGetWorkloadFiltersWithResponse", ctx, clusterId, params)
 	ret0, _ := ret[0].(*sdk.WorkloadOptimizationAPIGetWorkloadFiltersResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // WorkloadOptimizationAPIGetWorkloadFiltersWithResponse indicates an expected call of WorkloadOptimizationAPIGetWorkloadFiltersWithResponse.
-func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPIGetWorkloadFiltersWithResponse(ctx, clusterId interface{}) *gomock.Call {
+func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPIGetWorkloadFiltersWithResponse(ctx, clusterId, params interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIGetWorkloadFiltersWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPIGetWorkloadFiltersWithResponse), ctx, clusterId)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIGetWorkloadFiltersWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPIGetWorkloadFiltersWithResponse), ctx, clusterId, params)
 }
 
 // WorkloadOptimizationAPIGetWorkloadScalingPolicy mocks base method.

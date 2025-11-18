@@ -75,6 +75,26 @@ func (m *MockClientInterface) EXPECT() *MockClientInterfaceMockRecorder {
 	return m.recorder
 }
 
+// ClustersAPIDeleteCluster mocks base method.
+func (m *MockClientInterface) ClustersAPIDeleteCluster(ctx context.Context, organizationId, id string, reqEditors ...omni.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, id}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ClustersAPIDeleteCluster", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ClustersAPIDeleteCluster indicates an expected call of ClustersAPIDeleteCluster.
+func (mr *MockClientInterfaceMockRecorder) ClustersAPIDeleteCluster(ctx, organizationId, id interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, id}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ClustersAPIDeleteCluster", reflect.TypeOf((*MockClientInterface)(nil).ClustersAPIDeleteCluster), varargs...)
+}
+
 // ClustersAPIGetCluster mocks base method.
 func (m *MockClientInterface) ClustersAPIGetCluster(ctx context.Context, organizationId, id string, reqEditors ...omni.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
@@ -456,6 +476,41 @@ func NewMockClientWithResponsesInterface(ctrl *gomock.Controller) *MockClientWit
 // EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockClientWithResponsesInterface) EXPECT() *MockClientWithResponsesInterfaceMockRecorder {
 	return m.recorder
+}
+
+// ClustersAPIDeleteCluster mocks base method.
+func (m *MockClientWithResponsesInterface) ClustersAPIDeleteCluster(ctx context.Context, organizationId, id string, reqEditors ...omni.RequestEditorFn) (*http.Response, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, organizationId, id}
+	for _, a := range reqEditors {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ClustersAPIDeleteCluster", varargs...)
+	ret0, _ := ret[0].(*http.Response)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ClustersAPIDeleteCluster indicates an expected call of ClustersAPIDeleteCluster.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ClustersAPIDeleteCluster(ctx, organizationId, id interface{}, reqEditors ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, organizationId, id}, reqEditors...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ClustersAPIDeleteCluster", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ClustersAPIDeleteCluster), varargs...)
+}
+
+// ClustersAPIDeleteClusterWithResponse mocks base method.
+func (m *MockClientWithResponsesInterface) ClustersAPIDeleteClusterWithResponse(ctx context.Context, organizationId, id string) (*omni.ClustersAPIDeleteClusterResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ClustersAPIDeleteClusterWithResponse", ctx, organizationId, id)
+	ret0, _ := ret[0].(*omni.ClustersAPIDeleteClusterResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ClustersAPIDeleteClusterWithResponse indicates an expected call of ClustersAPIDeleteClusterWithResponse.
+func (mr *MockClientWithResponsesInterfaceMockRecorder) ClustersAPIDeleteClusterWithResponse(ctx, organizationId, id interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ClustersAPIDeleteClusterWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).ClustersAPIDeleteClusterWithResponse), ctx, organizationId, id)
 }
 
 // ClustersAPIGetCluster mocks base method.
