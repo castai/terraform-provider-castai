@@ -154,11 +154,7 @@ func (r *omniClusterResource) Update(ctx context.Context, req resource.UpdateReq
 
 func (r *omniClusterResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	var state omniClusterModel
-
 	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
-	if resp.Diagnostics.HasError() {
-		return
-	}
 
 	client := r.client.omniAPI
 	organizationID := state.OrganizationID.ValueString()
