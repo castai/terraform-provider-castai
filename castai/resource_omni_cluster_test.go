@@ -11,7 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 )
 
-func TestAccCloudAgnostic_OmniCluster(t *testing.T) {
+func TestAccCloudAgnostic_ResourceOmniCluster(t *testing.T) {
 	resourceName := "castai_omni_cluster.test"
 	clusterName := "omni-tf-acc-cluster"
 
