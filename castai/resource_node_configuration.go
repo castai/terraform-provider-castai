@@ -207,7 +207,7 @@ func resourceNodeConfiguration() *schema.Resource {
 							Type:             schema.TypeString,
 							Optional:         true,
 							Description:      "IP address to use for DNS queries within the cluster",
-							ValidateDiagFunc: validation.ToDiagFunc(validation.IsIPv4Address),
+							ValidateDiagFunc: validation.ToDiagFunc(validation.IsIPAddress),
 						},
 						"instance_profile_arn": {
 							Type:             schema.TypeString,
