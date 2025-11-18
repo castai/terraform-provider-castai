@@ -124,6 +124,9 @@ type ClientInterface interface {
 	// EdgeLocationsAPIOnboardEdgeLocationScript request
 	EdgeLocationsAPIOnboardEdgeLocationScript(ctx context.Context, organizationId string, clusterId string, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
+	// ClustersAPIDeleteCluster request
+	ClustersAPIDeleteCluster(ctx context.Context, organizationId string, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
+
 	// ClustersAPIGetCluster request
 	ClustersAPIGetCluster(ctx context.Context, organizationId string, id string, reqEditors ...RequestEditorFn) (*http.Response, error)
 
@@ -276,6 +279,18 @@ func (c *Client) EdgeLocationsAPIOnboardEdgeLocation(ctx context.Context, organi
 
 func (c *Client) EdgeLocationsAPIOnboardEdgeLocationScript(ctx context.Context, organizationId string, clusterId string, id string, reqEditors ...RequestEditorFn) (*http.Response, error) {
 	req, err := NewEdgeLocationsAPIOnboardEdgeLocationScriptRequest(c.Server, organizationId, clusterId, id)
+	if err != nil {
+		return nil, err
+	}
+	req = req.WithContext(ctx)
+	if err := c.applyEditors(ctx, req, reqEditors); err != nil {
+		return nil, err
+	}
+	return c.Client.Do(req)
+}
+
+func (c *Client) ClustersAPIDeleteCluster(ctx context.Context, organizationId string, id string, reqEditors ...RequestEditorFn) (*http.Response, error) {
+	req, err := NewClustersAPIDeleteClusterRequest(c.Server, organizationId, id)
 	if err != nil {
 		return nil, err
 	}
@@ -934,6 +949,47 @@ func NewEdgeLocationsAPIOnboardEdgeLocationScriptRequest(server string, organiza
 	return req, nil
 }
 
+// NewClustersAPIDeleteClusterRequest generates requests for ClustersAPIDeleteCluster
+func NewClustersAPIDeleteClusterRequest(server string, organizationId string, id string) (*http.Request, error) {
+	var err error
+
+	var pathParam0 string
+
+	pathParam0, err = runtime.StyleParamWithLocation("simple", false, "organizationId", runtime.ParamLocationPath, organizationId)
+	if err != nil {
+		return nil, err
+	}
+
+	var pathParam1 string
+
+	pathParam1, err = runtime.StyleParamWithLocation("simple", false, "id", runtime.ParamLocationPath, id)
+	if err != nil {
+		return nil, err
+	}
+
+	serverURL, err := url.Parse(server)
+	if err != nil {
+		return nil, err
+	}
+
+	operationPath := fmt.Sprintf("/omni-provisioner/v1beta/organizations/%s/clusters/%s", pathParam0, pathParam1)
+	if operationPath[0] == '/' {
+		operationPath = "." + operationPath
+	}
+
+	queryURL, err := serverURL.Parse(operationPath)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("DELETE", queryURL.String(), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return req, nil
+}
+
 // NewClustersAPIGetClusterRequest generates requests for ClustersAPIGetCluster
 func NewClustersAPIGetClusterRequest(server string, organizationId string, id string) (*http.Request, error) {
 	var err error
@@ -1229,6 +1285,9 @@ type ClientWithResponsesInterface interface {
 
 	// EdgeLocationsAPIOnboardEdgeLocationScript request
 	EdgeLocationsAPIOnboardEdgeLocationScriptWithResponse(ctx context.Context, organizationId string, clusterId string, id string) (*EdgeLocationsAPIOnboardEdgeLocationScriptResponse, error)
+
+	// ClustersAPIDeleteCluster request
+	ClustersAPIDeleteClusterWithResponse(ctx context.Context, organizationId string, id string) (*ClustersAPIDeleteClusterResponse, error)
 
 	// ClustersAPIGetCluster request
 	ClustersAPIGetClusterWithResponse(ctx context.Context, organizationId string, id string) (*ClustersAPIGetClusterResponse, error)
@@ -1564,6 +1623,36 @@ func (r EdgeLocationsAPIOnboardEdgeLocationScriptResponse) GetBody() []byte {
 
 // TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
 
+type ClustersAPIDeleteClusterResponse struct {
+	Body         []byte
+	HTTPResponse *http.Response
+	JSONDefault  *Status
+}
+
+// Status returns HTTPResponse.Status
+func (r ClustersAPIDeleteClusterResponse) Status() string {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.Status
+	}
+	return http.StatusText(0)
+}
+
+// StatusCode returns HTTPResponse.StatusCode
+func (r ClustersAPIDeleteClusterResponse) StatusCode() int {
+	if r.HTTPResponse != nil {
+		return r.HTTPResponse.StatusCode
+	}
+	return 0
+}
+
+// TODO: <castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+// Body returns body of byte array
+func (r ClustersAPIDeleteClusterResponse) GetBody() []byte {
+	return r.Body
+}
+
+// TODO: </castai customization> to have common interface. https://github.com/deepmap/oapi-codegen/issues/240
+
 type ClustersAPIGetClusterResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
@@ -1822,6 +1911,15 @@ func (c *ClientWithResponses) EdgeLocationsAPIOnboardEdgeLocationScriptWithRespo
 		return nil, err
 	}
 	return ParseEdgeLocationsAPIOnboardEdgeLocationScriptResponse(rsp)
+}
+
+// ClustersAPIDeleteClusterWithResponse request returning *ClustersAPIDeleteClusterResponse
+func (c *ClientWithResponses) ClustersAPIDeleteClusterWithResponse(ctx context.Context, organizationId string, id string) (*ClustersAPIDeleteClusterResponse, error) {
+	rsp, err := c.ClustersAPIDeleteCluster(ctx, organizationId, id)
+	if err != nil {
+		return nil, err
+	}
+	return ParseClustersAPIDeleteClusterResponse(rsp)
 }
 
 // ClustersAPIGetClusterWithResponse request returning *ClustersAPIGetClusterResponse
@@ -2169,6 +2267,32 @@ func ParseEdgeLocationsAPIOnboardEdgeLocationScriptResponse(rsp *http.Response) 
 	}
 
 	response := &EdgeLocationsAPIOnboardEdgeLocationScriptResponse{
+		Body:         bodyBytes,
+		HTTPResponse: rsp,
+	}
+
+	switch {
+	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && true:
+		var dest Status
+		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
+			return nil, err
+		}
+		response.JSONDefault = &dest
+
+	}
+
+	return response, nil
+}
+
+// ParseClustersAPIDeleteClusterResponse parses an HTTP response from a ClustersAPIDeleteClusterWithResponse call
+func ParseClustersAPIDeleteClusterResponse(rsp *http.Response) (*ClustersAPIDeleteClusterResponse, error) {
+	bodyBytes, err := ioutil.ReadAll(rsp.Body)
+	defer rsp.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	response := &ClustersAPIDeleteClusterResponse{
 		Body:         bodyBytes,
 		HTTPResponse: rsp,
 	}

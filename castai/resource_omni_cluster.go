@@ -153,5 +153,27 @@ func (r *omniClusterResource) Update(ctx context.Context, req resource.UpdateReq
 }
 
 func (r *omniClusterResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	// Registration cannot be undone, just remove from state
+	var state omniClusterModel
+	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
+
+	client := r.client.omniAPI
+	organizationID := state.OrganizationID.ValueString()
+	clusterID := state.ID.ValueString()
+
+	apiResp, err := client.ClustersAPIDeleteClusterWithResponse(ctx, organizationID, clusterID)
+	if err != nil {
+		resp.Diagnostics.AddError("Failed to delete omni cluster", err.Error())
+		return
+	}
+
+	if apiResp.StatusCode() == http.StatusNotFound {
+		return
+	}
+
+	if apiResp.StatusCode() != http.StatusOK {
+		resp.Diagnostics.AddError(
+			"Failed to delete omni cluster",
+			fmt.Sprintf("unexpected status code: %d, body: %s", apiResp.StatusCode(), string(apiResp.Body)),
+		)
+	}
 }

@@ -5316,9 +5316,9 @@ func (mr *MockClientInterfaceMockRecorder) WorkloadOptimizationAPIGetWorkloadEve
 }
 
 // WorkloadOptimizationAPIGetWorkloadFilters mocks base method.
-func (m *MockClientInterface) WorkloadOptimizationAPIGetWorkloadFilters(ctx context.Context, clusterId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+func (m *MockClientInterface) WorkloadOptimizationAPIGetWorkloadFilters(ctx context.Context, clusterId string, params *sdk.WorkloadOptimizationAPIGetWorkloadFiltersParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, clusterId}
+	varargs := []interface{}{ctx, clusterId, params}
 	for _, a := range reqEditors {
 		varargs = append(varargs, a)
 	}
@@ -5329,9 +5329,9 @@ func (m *MockClientInterface) WorkloadOptimizationAPIGetWorkloadFilters(ctx cont
 }
 
 // WorkloadOptimizationAPIGetWorkloadFilters indicates an expected call of WorkloadOptimizationAPIGetWorkloadFilters.
-func (mr *MockClientInterfaceMockRecorder) WorkloadOptimizationAPIGetWorkloadFilters(ctx, clusterId interface{}, reqEditors ...interface{}) *gomock.Call {
+func (mr *MockClientInterfaceMockRecorder) WorkloadOptimizationAPIGetWorkloadFilters(ctx, clusterId, params interface{}, reqEditors ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, clusterId}, reqEditors...)
+	varargs := append([]interface{}{ctx, clusterId, params}, reqEditors...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIGetWorkloadFilters", reflect.TypeOf((*MockClientInterface)(nil).WorkloadOptimizationAPIGetWorkloadFilters), varargs...)
 }
 
@@ -14894,9 +14894,9 @@ func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPIG
 }
 
 // WorkloadOptimizationAPIGetWorkloadFilters mocks base method.
-func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPIGetWorkloadFilters(ctx context.Context, clusterId string, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
+func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPIGetWorkloadFilters(ctx context.Context, clusterId string, params *sdk.WorkloadOptimizationAPIGetWorkloadFiltersParams, reqEditors ...sdk.RequestEditorFn) (*http.Response, error) {
 	m.ctrl.T.Helper()
-	varargs := []interface{}{ctx, clusterId}
+	varargs := []interface{}{ctx, clusterId, params}
 	for _, a := range reqEditors {
 		varargs = append(varargs, a)
 	}
@@ -14907,25 +14907,25 @@ func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPIGetWorkloadFil
 }
 
 // WorkloadOptimizationAPIGetWorkloadFilters indicates an expected call of WorkloadOptimizationAPIGetWorkloadFilters.
-func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPIGetWorkloadFilters(ctx, clusterId interface{}, reqEditors ...interface{}) *gomock.Call {
+func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPIGetWorkloadFilters(ctx, clusterId, params interface{}, reqEditors ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{ctx, clusterId}, reqEditors...)
+	varargs := append([]interface{}{ctx, clusterId, params}, reqEditors...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIGetWorkloadFilters", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPIGetWorkloadFilters), varargs...)
 }
 
 // WorkloadOptimizationAPIGetWorkloadFiltersWithResponse mocks base method.
-func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPIGetWorkloadFiltersWithResponse(ctx context.Context, clusterId string) (*sdk.WorkloadOptimizationAPIGetWorkloadFiltersResponse, error) {
+func (m *MockClientWithResponsesInterface) WorkloadOptimizationAPIGetWorkloadFiltersWithResponse(ctx context.Context, clusterId string, params *sdk.WorkloadOptimizationAPIGetWorkloadFiltersParams) (*sdk.WorkloadOptimizationAPIGetWorkloadFiltersResponse, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "WorkloadOptimizationAPIGetWorkloadFiltersWithResponse", ctx, clusterId)
+	ret := m.ctrl.Call(m, "WorkloadOptimizationAPIGetWorkloadFiltersWithResponse", ctx, clusterId, params)
 	ret0, _ := ret[0].(*sdk.WorkloadOptimizationAPIGetWorkloadFiltersResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // WorkloadOptimizationAPIGetWorkloadFiltersWithResponse indicates an expected call of WorkloadOptimizationAPIGetWorkloadFiltersWithResponse.
-func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPIGetWorkloadFiltersWithResponse(ctx, clusterId interface{}) *gomock.Call {
+func (mr *MockClientWithResponsesInterfaceMockRecorder) WorkloadOptimizationAPIGetWorkloadFiltersWithResponse(ctx, clusterId, params interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIGetWorkloadFiltersWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPIGetWorkloadFiltersWithResponse), ctx, clusterId)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WorkloadOptimizationAPIGetWorkloadFiltersWithResponse", reflect.TypeOf((*MockClientWithResponsesInterface)(nil).WorkloadOptimizationAPIGetWorkloadFiltersWithResponse), ctx, clusterId, params)
 }
 
 // WorkloadOptimizationAPIGetWorkloadScalingPolicy mocks base method.

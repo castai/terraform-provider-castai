@@ -118,6 +118,7 @@ const (
 	CastaiInventoryV1beta1InstanceTypeCPUManufacturerAMPERE  CastaiInventoryV1beta1InstanceTypeCPUManufacturer = "AMPERE"
 	CastaiInventoryV1beta1InstanceTypeCPUManufacturerAPPLE   CastaiInventoryV1beta1InstanceTypeCPUManufacturer = "APPLE"
 	CastaiInventoryV1beta1InstanceTypeCPUManufacturerAWS     CastaiInventoryV1beta1InstanceTypeCPUManufacturer = "AWS"
+	CastaiInventoryV1beta1InstanceTypeCPUManufacturerGOOGLE  CastaiInventoryV1beta1InstanceTypeCPUManufacturer = "GOOGLE"
 	CastaiInventoryV1beta1InstanceTypeCPUManufacturerINTEL   CastaiInventoryV1beta1InstanceTypeCPUManufacturer = "INTEL"
 	CastaiInventoryV1beta1InstanceTypeCPUManufacturerUNKNOWN CastaiInventoryV1beta1InstanceTypeCPUManufacturer = "UNKNOWN"
 )
@@ -913,9 +914,9 @@ const (
 
 // Defines values for WorkloadOptimizationAPIListWorkloadsParamsManagementOptions.
 const (
-	MANAGED   WorkloadOptimizationAPIListWorkloadsParamsManagementOptions = "MANAGED"
-	READONLY  WorkloadOptimizationAPIListWorkloadsParamsManagementOptions = "READ_ONLY"
-	UNDEFINED WorkloadOptimizationAPIListWorkloadsParamsManagementOptions = "UNDEFINED"
+	WorkloadOptimizationAPIListWorkloadsParamsManagementOptionsMANAGED   WorkloadOptimizationAPIListWorkloadsParamsManagementOptions = "MANAGED"
+	WorkloadOptimizationAPIListWorkloadsParamsManagementOptionsREADONLY  WorkloadOptimizationAPIListWorkloadsParamsManagementOptions = "READ_ONLY"
+	WorkloadOptimizationAPIListWorkloadsParamsManagementOptionsUNDEFINED WorkloadOptimizationAPIListWorkloadsParamsManagementOptions = "UNDEFINED"
 )
 
 // Defines values for WorkloadOptimizationAPIListWorkloadsParamsSortOrder.
@@ -932,6 +933,13 @@ const (
 	STATUSSTOPPED WorkloadOptimizationAPIListWorkloadsParamsRecommendationStatusType = "STATUS_STOPPED"
 	STATUSUNKNOWN WorkloadOptimizationAPIListWorkloadsParamsRecommendationStatusType = "STATUS_UNKNOWN"
 	STATUSWAITING WorkloadOptimizationAPIListWorkloadsParamsRecommendationStatusType = "STATUS_WAITING"
+)
+
+// Defines values for WorkloadOptimizationAPIGetWorkloadFiltersParamsManagementOptions.
+const (
+	WorkloadOptimizationAPIGetWorkloadFiltersParamsManagementOptionsMANAGED   WorkloadOptimizationAPIGetWorkloadFiltersParamsManagementOptions = "MANAGED"
+	WorkloadOptimizationAPIGetWorkloadFiltersParamsManagementOptionsREADONLY  WorkloadOptimizationAPIGetWorkloadFiltersParamsManagementOptions = "READ_ONLY"
+	WorkloadOptimizationAPIGetWorkloadFiltersParamsManagementOptionsUNDEFINED WorkloadOptimizationAPIGetWorkloadFiltersParamsManagementOptions = "UNDEFINED"
 )
 
 // Defines values for WorkloadOptimizationAPIGetInstallCmdParamsCmePresets.
@@ -5726,8 +5734,8 @@ type PoliciesV1Policies struct {
 	// Enabled Enable/disable all policies.
 	Enabled *bool `json:"enabled"`
 
-	// IsScopedMode Run autoscaler in scoped mode. Only specifically marked pods will be considered for autoscaling, and only nodes
-	// provisioned by autoscaler will be considered for downscaling.
+	// IsScopedMode Run the node autoscaler in scoped mode. Only pods with the appropriate toleration will trigger node scale-up decisions,
+	// and only nodes provisioned by the autoscaler will be eligible for downscaling.
 	IsScopedMode *bool `json:"isScopedMode"`
 
 	// NodeDownscaler Node Downscaler defines policies for removing nodes based on the configured conditions.
@@ -6858,8 +6866,9 @@ type WorkloadoptimizationV1HPAConfigUpdate struct {
 	MaxReplicas      *int32                                  `json:"maxReplicas"`
 
 	// Metrics Metrics list which is scaled on. Matches Kubernetes HPA spec.
-	Metrics     *[]WorkloadoptimizationV1MetricSpec `json:"metrics,omitempty"`
-	MinReplicas *int32                              `json:"minReplicas"`
+	Metrics       *[]WorkloadoptimizationV1MetricSpec `json:"metrics,omitempty"`
+	MinReplicas   *int32                              `json:"minReplicas"`
+	TakeOwnership *bool                               `json:"takeOwnership"`
 
 	// UseNative Defines whether to use native Kubernetes HPA instead of CAST AI HPA.
 	UseNative *bool `json:"useNative"`
@@ -9108,6 +9117,14 @@ type WorkloadOptimizationAPIGetWorkloadsSummaryMetricsParams struct {
 	FromTime *time.Time `form:"fromTime,omitempty" json:"fromTime,omitempty"`
 	ToTime   *time.Time `form:"toTime,omitempty" json:"toTime,omitempty"`
 }
+
+// WorkloadOptimizationAPIGetWorkloadFiltersParams defines parameters for WorkloadOptimizationAPIGetWorkloadFilters.
+type WorkloadOptimizationAPIGetWorkloadFiltersParams struct {
+	ManagementOptions *[]WorkloadOptimizationAPIGetWorkloadFiltersParamsManagementOptions `form:"managementOptions,omitempty" json:"managementOptions,omitempty"`
+}
+
+// WorkloadOptimizationAPIGetWorkloadFiltersParamsManagementOptions defines parameters for WorkloadOptimizationAPIGetWorkloadFilters.
+type WorkloadOptimizationAPIGetWorkloadFiltersParamsManagementOptions string
 
 // WorkloadOptimizationAPIGetWorkloadParams defines parameters for WorkloadOptimizationAPIGetWorkload.
 type WorkloadOptimizationAPIGetWorkloadParams struct {
