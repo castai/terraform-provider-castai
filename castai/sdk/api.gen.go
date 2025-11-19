@@ -71,6 +71,21 @@ const (
 	THREEYEAR CastaiInventoryV1beta1AzureReservationReservationPlan = "THREE_YEAR"
 )
 
+// Defines values for CastaiInventoryV1beta1BlockStorageInfoAttachmentLimitType.
+const (
+	ATTACHMENTLIMITTYPEDEDICATED CastaiInventoryV1beta1BlockStorageInfoAttachmentLimitType = "ATTACHMENT_LIMIT_TYPE_DEDICATED"
+	ATTACHMENTLIMITTYPESHARED    CastaiInventoryV1beta1BlockStorageInfoAttachmentLimitType = "ATTACHMENT_LIMIT_TYPE_SHARED"
+	ATTACHMENTLIMITTYPEUNKNOWN   CastaiInventoryV1beta1BlockStorageInfoAttachmentLimitType = "ATTACHMENT_LIMIT_TYPE_UNKNOWN"
+)
+
+// Defines values for CastaiInventoryV1beta1BlockStorageInfoEbsOptimizedSupport.
+const (
+	EBSOPTIMIZEDSUPPORTDEFAULT     CastaiInventoryV1beta1BlockStorageInfoEbsOptimizedSupport = "EBS_OPTIMIZED_SUPPORT_DEFAULT"
+	EBSOPTIMIZEDSUPPORTSUPPORTED   CastaiInventoryV1beta1BlockStorageInfoEbsOptimizedSupport = "EBS_OPTIMIZED_SUPPORT_SUPPORTED"
+	EBSOPTIMIZEDSUPPORTUNKNOWN     CastaiInventoryV1beta1BlockStorageInfoEbsOptimizedSupport = "EBS_OPTIMIZED_SUPPORT_UNKNOWN"
+	EBSOPTIMIZEDSUPPORTUNSUPPORTED CastaiInventoryV1beta1BlockStorageInfoEbsOptimizedSupport = "EBS_OPTIMIZED_SUPPORT_UNSUPPORTED"
+)
+
 // Defines values for CastaiInventoryV1beta1CommitmentScalingStrategy.
 const (
 	CPUBased CastaiInventoryV1beta1CommitmentScalingStrategy = "CPUBased"
@@ -1429,9 +1444,57 @@ type CastaiInventoryV1beta1BatchUpdateCommitmentsResponse struct {
 
 // CastaiInventoryV1beta1BlockStorageInfo BlockStorageInfo contains details about block storage capabilities of the instance type.
 type CastaiInventoryV1beta1BlockStorageInfo struct {
+	// AttachmentLimitType Type of EBS attachment limit.
+	//
+	//  - ATTACHMENT_LIMIT_TYPE_UNKNOWN: Unknown is invalid.
+	//  - ATTACHMENT_LIMIT_TYPE_SHARED: Shared with other device attachments.
+	//  - ATTACHMENT_LIMIT_TYPE_DEDICATED: Dedicated only for EBS volumes.
+	AttachmentLimitType *CastaiInventoryV1beta1BlockStorageInfoAttachmentLimitType `json:"attachmentLimitType,omitempty"`
+
+	// BaselineBandwidthMbps Specifies the baseline bandwidth for block storage in Mbps.
+	BaselineBandwidthMbps *int32 `json:"baselineBandwidthMbps"`
+
+	// BaselineIops Specifies the baseline IOPS for block storage.
+	BaselineIops *int32 `json:"baselineIops"`
+
+	// BaselineThroughputMbytesPerS Specifies the baseline throughput for block storage in MB/s.
+	BaselineThroughputMbytesPerS *float64 `json:"baselineThroughputMbytesPerS"`
+
+	// EbsOptimizedSupport EbsOptimizedSupport specifies whether instance type supports EBS optimization.
+	//
+	//  - EBS_OPTIMIZED_SUPPORT_UNKNOWN: Unknown is invalid.
+	//  - EBS_OPTIMIZED_SUPPORT_DEFAULT: Supported and enabled by default.
+	//  - EBS_OPTIMIZED_SUPPORT_SUPPORTED: Supported, has to be enabled additionally.
+	//  - EBS_OPTIMIZED_SUPPORT_UNSUPPORTED: Unsupported.
+	EbsOptimizedSupport *CastaiInventoryV1beta1BlockStorageInfoEbsOptimizedSupport `json:"ebsOptimizedSupport,omitempty"`
+
 	// MaxBandwidthMbps Specifies the maximum bandwidth for block storage. Currently only supported for AWS EBS-optimized instances.
 	MaxBandwidthMbps *int32 `json:"maxBandwidthMbps"`
+
+	// MaxEbsAttachments Specifies maximum number of EBS volume attachments.
+	MaxEbsAttachments *int32 `json:"maxEbsAttachments"`
+
+	// MaxIops Specifies the maximum IOPS for block storage.
+	MaxIops *int32 `json:"maxIops"`
+
+	// MaxThroughputMbytesPerS Specifies the maximum throughput for block storage in MB/s.
+	MaxThroughputMbytesPerS *float64 `json:"maxThroughputMbytesPerS"`
 }
+
+// CastaiInventoryV1beta1BlockStorageInfoAttachmentLimitType Type of EBS attachment limit.
+//
+//   - ATTACHMENT_LIMIT_TYPE_UNKNOWN: Unknown is invalid.
+//   - ATTACHMENT_LIMIT_TYPE_SHARED: Shared with other device attachments.
+//   - ATTACHMENT_LIMIT_TYPE_DEDICATED: Dedicated only for EBS volumes.
+type CastaiInventoryV1beta1BlockStorageInfoAttachmentLimitType string
+
+// CastaiInventoryV1beta1BlockStorageInfoEbsOptimizedSupport EbsOptimizedSupport specifies whether instance type supports EBS optimization.
+//
+//   - EBS_OPTIMIZED_SUPPORT_UNKNOWN: Unknown is invalid.
+//   - EBS_OPTIMIZED_SUPPORT_DEFAULT: Supported and enabled by default.
+//   - EBS_OPTIMIZED_SUPPORT_SUPPORTED: Supported, has to be enabled additionally.
+//   - EBS_OPTIMIZED_SUPPORT_UNSUPPORTED: Unsupported.
+type CastaiInventoryV1beta1BlockStorageInfoEbsOptimizedSupport string
 
 // CastaiInventoryV1beta1CPUInfo defines model for castai.inventory.v1beta1.CPUInfo.
 type CastaiInventoryV1beta1CPUInfo struct {

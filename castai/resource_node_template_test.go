@@ -17,8 +17,8 @@ import (
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	sdkterraform "github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/stretchr/testify/require"
 
@@ -145,7 +145,8 @@ func TestNodeTemplateResourceReadContext(t *testing.T) {
 				  "minNodes": 0
 				},
 				"customInstancesEnabled": true,
-				"customInstancesWithExtendedMemoryEnabled": true
+				"customInstancesWithExtendedMemoryEnabled": true,
+				"edgeLocationIds": ["a1b2c3d4-e5f6-7890-abcd-ef1234567890", "b2c3d4e5-f6a7-8901-bcde-f12345678901"]
 			  }
 			}
 		  ]
@@ -265,6 +266,9 @@ rebalancing_config_min_nodes = 0
 should_taint = true
 Tainted = false
 clm_enabled = false
+edge_location_ids.# = 2
+edge_location_ids.0 = a1b2c3d4-e5f6-7890-abcd-ef1234567890
+edge_location_ids.1 = b2c3d4e5-f6a7-8901-bcde-f12345678901
 gpu.# = 1
 gpu.0.default_shared_clients_per_gpu = 10
 gpu.0.enable_time_sharing = true
@@ -692,6 +696,9 @@ func TestAccEKS_ResourceNodeTemplate_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.resource_limits.#", "1"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.resource_limits.0.cpu_limit_enabled", "false"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.resource_limits.0.cpu_limit_max_cores", "0"),
+					resource.TestCheckResourceAttr(resourceName, "edge_location_ids.#", "2"),
+					resource.TestCheckResourceAttr(resourceName, "edge_location_ids.0", "a1b2c3d4-e5f6-7890-abcd-ef1234567890"),
+					resource.TestCheckResourceAttr(resourceName, "edge_location_ids.1", "b2c3d4e5-f6a7-8901-bcde-f12345678901"),
 				),
 			},
 			{
@@ -772,6 +779,8 @@ func TestAccEKS_ResourceNodeTemplate_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.resource_limits.0.cpu_limit_max_cores", "50"),
 					resource.TestCheckResourceAttr(resourceName, "gpu.0.default_shared_clients_per_gpu", "1"),
 					resource.TestCheckResourceAttr(resourceName, "gpu.0.enable_time_sharing", "false"),
+					resource.TestCheckResourceAttr(resourceName, "edge_location_ids.#", "1"),
+					resource.TestCheckResourceAttr(resourceName, "edge_location_ids.0", "b2c3d4e5-f6a7-8901-bcde-f12345678901"),
 				),
 			},
 		},
@@ -818,6 +827,8 @@ func testAccNodeTemplateConfig(rName, clusterName string) string {
 			custom_taints {
 				key = "%[1]s-taint-key-4"
 			}
+
+			edge_location_ids = ["a1b2c3d4-e5f6-7890-abcd-ef1234567890", "b2c3d4e5-f6a7-8901-bcde-f12345678901"]
 
 			constraints {
 				fallback_restore_rate_seconds = 1800
@@ -890,6 +901,8 @@ func testNodeTemplateUpdated(rName, clusterName string) string {
 			  default_shared_clients_per_gpu = 1
 			  enable_time_sharing            = false
 			}
+
+			edge_location_ids = ["b2c3d4e5-f6a7-8901-bcde-f12345678901"]
 
 			constraints {
 				use_spot_fallbacks = true

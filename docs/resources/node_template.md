@@ -84,6 +84,7 @@ resource "castai_node_template" "default_by_castai" {
 - `custom_instances_with_extended_memory_enabled` (Boolean) Marks whether custom instances with extended memory should be used when deciding which parts of inventory are available. Custom instances are only supported in GCP.
 - `custom_labels` (Map of String) Custom labels to be added to nodes created from this template.
 - `custom_taints` (Block List) Custom taints to be added to the nodes created from this template. `shouldTaint` has to be `true` in order to create/update the node template with custom taints. If `shouldTaint` is `true`, but no custom taints are provided, the nodes will be tainted with the default node template taint. (see [below for nested schema](#nestedblock--custom_taints))
+- `edge_location_ids` (List of String) List of edge location IDs to associate with this node template. Must be valid UUIDs referencing castai_edge_location resources.
 - `gpu` (Block List, Max: 1) GPU configuration. (see [below for nested schema](#nestedblock--gpu))
 - `is_default` (Boolean) Flag whether the node template is default.
 - `is_enabled` (Boolean) Flag whether the node template is enabled and considered for autoscaling.

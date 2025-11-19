@@ -87,6 +87,7 @@ const (
 	FieldNodeTemplateSharedClientsPerGpu                      = "shared_clients_per_gpu"
 	FieldNodeTemplateSharedGpuName                            = "gpu_name"
 	FieldNodeTemplateClmEnabled                               = "clm_enabled"
+	FieldNodeTemplateEdgeLocationIDs                          = "edge_location_ids"
 )
 
 const (
@@ -709,6 +710,15 @@ func resourceNodeTemplate() *schema.Resource {
 				Default:     false,
 				Description: "Marks whether CLM should be enabled for nodes created from this template.",
 			},
+			FieldNodeTemplateEdgeLocationIDs: {
+				Type:     schema.TypeList,
+				Optional: true,
+				Elem: &schema.Schema{
+					Type:             schema.TypeString,
+					ValidateDiagFunc: validation.ToDiagFunc(validation.IsUUID),
+				},
+				Description: "List of edge location IDs to associate with this node template. Must be valid UUIDs referencing castai_edge_location resources.",
+			},
 		},
 	}
 }
@@ -796,6 +806,12 @@ func resourceNodeTemplateRead(ctx context.Context, d *schema.ResourceData, meta 
 
 	if err := d.Set(FieldNodeTemplateClmEnabled, nodeTemplate.ClmEnabled); err != nil {
 		return diag.FromErr(fmt.Errorf("setting clm enabled: %w", err))
+	}
+
+	if nodeTemplate.EdgeLocationIds != nil {
+		if err := d.Set(FieldNodeTemplateEdgeLocationIDs, lo.FromPtr(nodeTemplate.EdgeLocationIds)); err != nil {
+			return diag.FromErr(fmt.Errorf("setting edge location ids: %w", err))
+		}
 	}
 
 	return nil
@@ -1106,6 +1122,7 @@ func updateNodeTemplate(ctx context.Context, d *schema.ResourceData, meta any, s
 		FieldNodeTemplateSharedGpuName,
 		FieldNodeTemplateSharedClientsPerGpu,
 		FieldNodeTemplateClmEnabled,
+		FieldNodeTemplateEdgeLocationIDs,
 	) {
 		log.Printf("[INFO] Nothing to update in node template")
 		return nil
@@ -1183,6 +1200,10 @@ func updateNodeTemplate(ctx context.Context, d *schema.ResourceData, meta any, s
 		req.ClmEnabled = lo.ToPtr(v.(bool))
 	}
 
+	if v, ok := d.Get(FieldNodeTemplateEdgeLocationIDs).([]any); ok && len(v) > 0 {
+		req.EdgeLocationIds = toPtr(toStringList(v))
+	}
+
 	resp, err := client.NodeTemplatesAPIUpdateNodeTemplateWithResponse(ctx, clusterID, name, req)
 	if checkErr := sdk.CheckOKResponse(resp, err); checkErr != nil {
 		return diag.FromErr(checkErr)
@@ -1213,6 +1234,10 @@ func resourceNodeTemplateCreate(ctx context.Context, d *schema.ResourceData, met
 		ConfigurationId: lo.ToPtr(d.Get(FieldNodeTemplateConfigurationId).(string)),
 		ShouldTaint:     lo.ToPtr(d.Get(FieldNodeTemplateShouldTaint).(bool)),
 		ClmEnabled:      lo.ToPtr(d.Get(FieldNodeTemplateClmEnabled).(bool)),
+	}
+
+	if v, ok := d.Get(FieldNodeTemplateEdgeLocationIDs).([]any); ok && len(v) > 0 {
+		req.EdgeLocationIds = toPtr(toStringList(v))
 	}
 
 	//nolint:staticcheck // Currently no other way to reliably get the value and determine if it is set
