@@ -1,0 +1,14 @@
+# If you haven’t registered the template yet, and just want to submit it once using local files in separate folders, run:
+#Command: argo submit path/to/castai-node-template.yaml --parameter-file values/node-template-values.yaml -n argo
+
+api_key: "83b21b352f564be3d37d14685cc46aa3489f421267f4d844fdd3f7a0134645dd"
+cluster_id: "e14faa43-d9cd-403b-84cb-5bf7b1234567"
+
+
+#Constraints
+min_cpu: "2"
+max_cpu: "4"
+spot: "true"
+on_demand: "false"
+use_spot_fallbacks: "true"
+fallback_restore_rate_seconds: "300"

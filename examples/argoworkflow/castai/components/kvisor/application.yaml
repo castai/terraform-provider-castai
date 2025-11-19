@@ -1,0 +1,23 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: castai-kvisor
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/castai/helm-charts.git
+    targetRevision: main
+    path: charts/castai-kvisor
+    helm:
+      valueFiles:
+        - values.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: castai-agent
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
