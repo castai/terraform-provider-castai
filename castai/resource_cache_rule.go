@@ -74,7 +74,6 @@ func resourceCacheRule() *schema.Resource {
 			FieldCacheRuleTemplateHash: {
 				Type:        schema.TypeString,
 				Optional:    true,
-				Computed:    true,
 				Description: "Hash of the query template. Either table or template_hash must be specified.",
 			},
 		},
