@@ -95,6 +95,10 @@ func resourceCacheRuleCustomizeDiff(ctx context.Context, d *schema.ResourceDiff,
 		return fmt.Errorf("either table or template_hash must be specified")
 	}
 
+	if table != "" && templateHash != "" {
+		return fmt.Errorf("only one of table or template_hash can be specified")
+	}
+
 	return nil
 }
 
