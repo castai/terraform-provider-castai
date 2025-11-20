@@ -17,8 +17,8 @@ import (
 	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/acctest"
-	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	sdkterraform "github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
 	"github.com/stretchr/testify/require"
 
@@ -145,7 +145,8 @@ func TestNodeTemplateResourceReadContext(t *testing.T) {
 				  "minNodes": 0
 				},
 				"customInstancesEnabled": true,
-				"customInstancesWithExtendedMemoryEnabled": true
+				"customInstancesWithExtendedMemoryEnabled": true,
+				"edgeLocationIds": ["a1b2c3d4-e5f6-7890-abcd-ef1234567890", "b2c3d4e5-f6a7-8901-bcde-f12345678901"]
 			  }
 			}
 		  ]
@@ -265,6 +266,9 @@ rebalancing_config_min_nodes = 0
 should_taint = true
 Tainted = false
 clm_enabled = false
+edge_location_ids.# = 2
+edge_location_ids.0 = a1b2c3d4-e5f6-7890-abcd-ef1234567890
+edge_location_ids.1 = b2c3d4e5-f6a7-8901-bcde-f12345678901
 gpu.# = 1
 gpu.0.default_shared_clients_per_gpu = 10
 gpu.0.enable_time_sharing = true
@@ -624,9 +628,9 @@ func TestAccEKS_ResourceNodeTemplate_basic(t *testing.T) {
 	clusterName, _ := lo.Coalesce(os.Getenv("CLUSTER_NAME"), "cost-terraform")
 
 	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:          func() { testAccPreCheck(t) },
-		ProviderFactories: providerFactories,
-		CheckDestroy:      testAccCheckNodeTemplateDestroy(rName),
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckNodeTemplateDestroy(rName),
 		Steps: []resource.TestStep{
 			{
 				Config: testAccNodeTemplateConfig(rName, clusterName),
@@ -692,6 +696,9 @@ func TestAccEKS_ResourceNodeTemplate_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.resource_limits.#", "1"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.resource_limits.0.cpu_limit_enabled", "false"),
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.resource_limits.0.cpu_limit_max_cores", "0"),
+					resource.TestCheckResourceAttr(resourceName, "edge_location_ids.#", "2"),
+					resource.TestCheckResourceAttrSet(resourceName, "edge_location_ids.0"),
+					resource.TestCheckResourceAttrSet(resourceName, "edge_location_ids.1"),
 				),
 			},
 			{
@@ -772,6 +779,8 @@ func TestAccEKS_ResourceNodeTemplate_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "constraints.0.resource_limits.0.cpu_limit_max_cores", "50"),
 					resource.TestCheckResourceAttr(resourceName, "gpu.0.default_shared_clients_per_gpu", "1"),
 					resource.TestCheckResourceAttr(resourceName, "gpu.0.enable_time_sharing", "false"),
+					resource.TestCheckResourceAttr(resourceName, "edge_location_ids.#", "1"),
+					resource.TestCheckResourceAttrSet(resourceName, "edge_location_ids.0"),
 				),
 			},
 		},
@@ -785,9 +794,9 @@ func TestAccEKS_ResourceNodeTemplate_basic(t *testing.T) {
 }
 
 func testAccNodeTemplateConfig(rName, clusterName string) string {
-	return ConfigCompose(testAccEKSClusterConfig(rName, clusterName), testAccNodeConfig(rName), fmt.Sprintf(`
+	return ConfigCompose(testAccEKSClusterConfig(rName, clusterName), testAccNodeConfig(rName), testAccEdgeLocationsConfig(rName, clusterName), fmt.Sprintf(`
 		resource "castai_node_template" "test" {
-			cluster_id        = castai_eks_clusterid.test.id
+			cluster_id        = castai_eks_cluster.test.id
 			name = %[1]q
 			configuration_id = castai_node_configuration.test.id
 			should_taint = true
@@ -818,6 +827,8 @@ func testAccNodeTemplateConfig(rName, clusterName string) string {
 			custom_taints {
 				key = "%[1]s-taint-key-4"
 			}
+
+			edge_location_ids = [castai_edge_location.test_1.id, castai_edge_location.test_2.id]
 
 			constraints {
 				fallback_restore_rate_seconds = 1800
@@ -861,10 +872,79 @@ func testAccNodeTemplateConfig(rName, clusterName string) string {
 	`, rName))
 }
 
+func testAccEdgeLocationsConfig(rName, clusterName string) string {
+	organizationID := testAccGetOrganizationID()
+	return fmt.Sprintf(`
+resource "castai_omni_cluster" "test_omni" {
+  organization_id = %[1]q
+  cluster_id      = castai_eks_cluster.test.id
+}
+
+resource "castai_edge_location" "test_1" {
+  organization_id = %[1]q
+  cluster_id      = castai_omni_cluster.test_omni.id
+  name            = "edge-loc-1"
+  description     = "Test edge location 1"
+  region          = "us-east-1"
+  zones = [
+    {
+      id   = "us-east-1a"
+      name = "us-east-1a"
+    },
+    {
+      id   = "us-east-1b"
+      name = "us-east-1b"
+    }
+  ]
+
+  aws = {
+	# fake credentials for testing purposes only
+    account_id           = "123456789012"
+    access_key_id_wo     = "AKIAIOSFODNN7EXAMPLE"
+    secret_access_key_wo = "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
+    vpc_id               = "vpc-12345678"
+    security_group_id    = "sg-12345678"
+    subnet_ids = {
+      "us-east-1a" = "subnet-12345678"
+      "us-east-1b" = "subnet-12345679"
+    }
+    name_tag = "test-edge-location-1"
+  }
+}
+
+resource "castai_edge_location" "test_2" {
+  organization_id = %[1]q
+  cluster_id      = castai_omni_cluster.test_omni.id
+  name            = "edge-loc-2"
+  description     = "Test edge location 2"
+  region          = "us-west-2"
+  zones = [
+    {
+      id   = "us-west-2a"
+      name = "us-west-2a"
+    }
+  ]
+
+  aws = {
+	# fake credentials for testing purposes only
+    account_id           = "123456789012"
+    access_key_id_wo     = "AKIAIOSFODNN7EXAMPLE"
+    secret_access_key_wo = "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
+    vpc_id               = "vpc-87654321"
+    security_group_id    = "sg-87654321"
+    subnet_ids = {
+      "us-west-2a" = "subnet-87654321"
+    }
+    name_tag = "test-edge-location-2"
+  }
+}
+`, organizationID)
+}
+
 func testNodeTemplateUpdated(rName, clusterName string) string {
-	return ConfigCompose(testAccEKSClusterConfig(rName, clusterName), testAccNodeConfig(rName), fmt.Sprintf(`
+	return ConfigCompose(testAccEKSClusterConfig(rName, clusterName), testAccNodeConfig(rName), testAccEdgeLocationsConfig(rName, clusterName), fmt.Sprintf(`
 		resource "castai_node_template" "test" {
-			cluster_id        = castai_eks_clusterid.test.id
+			cluster_id        = castai_eks_cluster.test.id
 			name = %[1]q
 			configuration_id = castai_node_configuration.test.id
 			should_taint = true
@@ -890,6 +970,8 @@ func testNodeTemplateUpdated(rName, clusterName string) string {
 			  default_shared_clients_per_gpu = 1
 			  enable_time_sharing            = false
 			}
+
+			edge_location_ids = [castai_edge_location.test_2.id]
 
 			constraints {
 				use_spot_fallbacks = true
